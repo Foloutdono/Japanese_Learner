@@ -22616,8 +22616,9 @@ form.stage__foot > .btn-primary {
 /* ── 番付 — the board's window and the whole of it (plan 262) ──
    Drawn as A1, the owner's pick of the canvas "Tsuji — the 番付
    redesign". A row's move since the day began sits between the name and
-   the XP, in the secondary ink: the arrow says which way, so no state
-   colour is spent on it. A name that opens its learner's card is a bare
+   the XP, in its state's colour (the owner's call, as the heads of the
+   whole board's groups: mixed toward the ink, since --danger alone
+   measured 2.5:1 on sumi). A name that opens its learner's card is a bare
    button that keeps the name's type. Where the board skips places a
    dashed hairline stands, not a row. Its foot is one line: the gap to
    the next place, short, and the door to the whole board. */
@@ -22629,6 +22630,8 @@ form.stage__foot > .btn-primary {
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
+.bz-move--up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bz-move--down { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
 .bz-pick {
   padding: 0;
   border: 0;

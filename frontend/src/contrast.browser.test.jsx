@@ -391,6 +391,12 @@ const Fixture = () => (
         <span className="leaderboard-row__name">Sora</span>
         <span className="leaderboard-row__xp">720 XP</span>
       </div>
+      <div className="leaderboard-row">
+        <span className="leaderboard-row__name">Ren</span>
+        <span className="bz-move bz-move--up"><span>▲5</span></span>
+        <span className="bz-move bz-move--down"><span>▼3</span></span>
+        <span className="leaderboard-row__xp">690 XP</span>
+      </div>
       <div className="bzp__group bzp__group--up"><span>▲ Montent lundi</span><span className="bzp__group-n">2</span></div>
       <div className="bzp__group bzp__group--down"><span>▼ Descendent lundi</span><span className="bzp__group-n">2</span></div>
       <div className="bz__foot"><p className="bz__gap-to"><span><b className="bz__gap-xp">+19 XP</b> → Mei</span></p></div>
@@ -1134,6 +1140,8 @@ const SITES = [
 
   // Settled by measurement rather than by reading a selector -- see the
   // comment beside their markup above.
+  ['.bz-move--up', 'board row move, up (success mixed toward the ink)'],
+  ['.bz-move--down', 'board row move, down (danger mixed toward the ink)'],
   ['.bzp__group--up', 'board group head, up (success mixed toward the ink)'],
   ['.bzp__group--down', 'board group head, down (danger mixed toward the ink)'],
   ['.bz__gap-to', 'board foot gap'],
