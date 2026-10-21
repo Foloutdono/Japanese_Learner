@@ -6,6 +6,7 @@ import { dialogOpen } from '../../lib/dialogOpen'
 import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
 import { GateButton } from '../ui/GateButton'
 import { SpeakerIcon } from '../ui/Icons'
+import { useTraceRun } from '../../hooks/useTraceRun'
 import { Said, Track } from './GrammarTour'
 import { FuriganaParts, Readings } from './Readings'
 import { CharDisplay } from './QuizComponents'
@@ -33,7 +34,6 @@ import { firstGloss, formatGlossLine } from './gloss'
 // stop with nothing to show (no strokes, no words) is not drawn. The
 // tour grades no card: `onBoard` hands the run how the trace went, and
 // the card's first exercise follows.
-const MISS_LIMIT = 3
 
 /** The stops a glyph's tour draws, in order. */
 function glyphStops(tour) {
@@ -176,13 +176,11 @@ function useGateKey(ref, on) {
   }, [ref, on])
 }
 
-const FRESH = { at: 0, misses: 0, tries: 0, last: null, given: [], shownFrom: null }
-
 export function GlyphTour({ tour, onBoard, desk = false }) {
   const { t } = useLang()
   const stops = glyphStops(tour)
   const [at, setAt] = useState(0)
-  const [trace, setTrace] = useState(FRESH)
+  const { trace, verdict, show } = useTraceRun()
   const bodyRef = useRef(null)
   const rootRef = useRef(null)
   useGateKey(rootRef, desk)
@@ -206,19 +204,14 @@ export function GlyphTour({ tour, onBoard, desk = false }) {
 
   useEffect(() => () => stopSpeaking(), [])
 
-  function onVerdict(verdict) {
-    if (verdict === 'ok') playClick()
-    setTrace(s => {
-      if (verdict === 'ok') return { ...s, at: s.at + 1, tries: 0, last: 'ok' }
-      const tries = s.tries + 1
-      if (tries < MISS_LIMIT) return { ...s, misses: s.misses + 1, tries, last: verdict }
-      return { ...s, at: s.at + 1, misses: s.misses + 1, tries: 0, last: 'given', given: [...s.given, s.at] }
-    })
+  function onVerdict(v) {
+    if (v === 'ok') playClick()
+    verdict(v)
   }
 
   function showMe() {
     playClick()
-    setTrace(s => ({ ...s, shownFrom: s.at, last: 'shown' }))
+    show()
   }
 
   function go() {

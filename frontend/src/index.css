@@ -16335,6 +16335,60 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
   color: var(--text-on-fill);
 }
+/* ── 辻 — the stroke order, big, and the calque (plan 268) ─────
+   The animation is a door: a button laid over it (so what it holds is
+   untouched), the whole box tappable, a lens in its corner in the ink
+   a light fill takes (the sheet is washi in either theme). It opens a
+   sheet: the animation at the width of the screen on washi, or the
+   trace board the glyph tour writes on (.gt-board, plan 263), square,
+   its hollow in the section's pigment, which the door hands over since
+   a sheet is a portal and inherits none. */
+.stroke-zoom { position: relative; }
+.stroke-zoom__open {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: var(--sp-2);
+  border-radius: inherit;
+  color: var(--text-on-fill);
+  cursor: zoom-in;
+}
+.stroke-zoom__open:hover { filter: none; }
+.stroke-zoom__mark { opacity: 0.55; transition: opacity 0.15s ease; }
+.stroke-zoom__open:hover .stroke-zoom__mark,
+.stroke-zoom__open:focus-visible .stroke-zoom__mark { opacity: 1; }
+.ss { display: flex; flex-direction: column; gap: var(--sp-4); }
+.ss-stage {
+  display: flex;
+  justify-content: center;
+}
+.ss-stage--wait { min-height: 200px; }
+.ss-paper {
+  width: min(100%, 560px, 56dvh);
+  aspect-ratio: 1;
+  padding: var(--sp-3);
+  background: var(--paper);
+  border-radius: var(--r-card);
+}
+.ss-paper__glyph { width: 100%; height: 100%; }
+.ss-trace { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.ss-trace .ss-stage { width: 100%; }
+.ss-said {
+  margin: 0;
+  min-height: 1.5em;
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.ss-fallback {
+  margin: 0;
+  padding: var(--sp-8) 0;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
 /* A record cell's figure and label, stacked, so the door variant can
    set them beside its chevron (the profile's door puts a line mark
    there instead). Generic to the records family. */
@@ -22616,8 +22670,9 @@ form.stage__foot > .btn-primary {
 /* ── 番付 — the board's window and the whole of it (plan 262) ──
    Drawn as A1, the owner's pick of the canvas "Tsuji — the 番付
    redesign". A row's move since the day began sits between the name and
-   the XP, in the secondary ink: the arrow says which way, so no state
-   colour is spent on it. A name that opens its learner's card is a bare
+   the XP, in its state's colour (the owner's call, as the heads of the
+   whole board's groups: mixed toward the ink, since --danger alone
+   measured 2.5:1 on sumi). A name that opens its learner's card is a bare
    button that keeps the name's type. Where the board skips places a
    dashed hairline stands, not a row. Its foot is one line: the gap to
    the next place, short, and the door to the whole board. */
@@ -22629,6 +22684,8 @@ form.stage__foot > .btn-primary {
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
+.bz-move--up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bz-move--down { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
 .bz-pick {
   padding: 0;
   border: 0;
@@ -27032,6 +27089,9 @@ button.brd-stn { cursor: pointer; }
 /* The pen takes the pointer; a finger on it never scrolls the page. */
 .gt-pen { touch-action: none; cursor: crosshair; }
 .gt-pen--off { cursor: default; }
+/* The same board in the stroke sheet (plan 268): the width of the sheet, as the
+   animation's paper, rather than the tour's card. */
+.ss-stage .gt-board { width: min(100%, 560px, 56dvh); }
 /* A missed line -- the finger's own, as it went -- a moment in the
    miss's ink, then gone. */
 .gt-missed polyline {
@@ -42505,5 +42565,14 @@ button.brd-stn { cursor: pointer; }
     min-height: 0;
     overflow: hidden;
   }
+}
+@media (min-width: 1100px) {
+  /* ── 辻 — the stroke sheet, big (plan 268) ──
+     The dialog is wider than a card and its board takes the height the
+     window leaves under the head, the modes and the line at its foot
+     (about 300px), never under 280px, where the sheet scrolls instead. */
+  .sheet.ss-sheet { width: min(760px, calc(100vw - 2 * var(--sp-8))); }
+  .ss-paper,
+  .ss-stage .gt-board { width: min(100%, 640px, max(280px, calc(100dvh - 300px))); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
