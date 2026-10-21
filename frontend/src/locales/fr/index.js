@@ -745,11 +745,8 @@ const stats = {
   newUnit:            'nouvelles',
   learningUnit:       'en cours',
   learnedLabel:       'Apprises',   // le chiffre d'une plateforme, lu à voix haute (plan 184)
-  sourceTiers:        n => `${n} palier${n > 1 ? 's' : ''}`,
-  sourceThemes:       n => `${n} thème${n > 1 ? 's' : ''}`,
-  // Les sources du vocabulaire sur le bureau (plan 183) : la bande de ce
-  // que l'apprenant a commencé, au-dessus des trois sources.
-  sourcesInProgress:  'En cours',
+  // Les sources sur le bureau (plan 267) : le portique au bout de la
+  // ligne du JLPT, et ce qu'il reste à voir du niveau qu'il reprend.
   sourcesResume:      'Reprendre',
   unseenNote:         n => `${n} jamais vue${n > 1 ? 's' : ''}`,
   tierWords:          range => `Mots ${range}`,
