@@ -54,6 +54,8 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const wait = ms => new Promise(r => setTimeout(r, ms))
 beforeEach(() => {
   slowDeck = null
+  apiFetch.mockReset()
+  apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ decks: [] }) }))
   apiJson.mockReset()
   apiJson.mockImplementation(async url => {
     const u = String(url)
@@ -69,6 +71,7 @@ beforeEach(() => {
 })
 
 const { default: LibraryScreen } = await import('./screens/LibraryScreen')
+const { default: DecksScreen } = await import('./screens/DecksScreen')
 const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
 
 const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
@@ -88,6 +91,7 @@ function mountLibrary(entry) {
         <div className="phone phone--desk">
           <div className="phone__content">
             <Routes>
+              <Route path="/learn/decks" element={<DecksScreen session={{}} />} />
               <Route path="/learn/decks/library" element={<LibraryScreen session={{}} />} />
               <Route path="/learn/decks/library/:deck_id" element={<LibraryScreen session={{}} />} />
             </Routes>
@@ -102,33 +106,58 @@ const shelfCalls = () => apiJson.mock.calls.filter(([u]) => String(u).startsWith
 const openName = () => $('.desk-split__list .lib-card[aria-current="page"] .platform-card__title')?.textContent
 
 describe('the library on the desk', () => {
-  it("stands the bare library's three sections beside the list (plan 132)", async () => {
+  it("is the Bibliothèque's page on the desk, beside the learner's shelf (plan 269)", async () => {
     await mountLibrary('/learn/decks/library')
     await settle(400)
-    // No deck opened for you: the page is the library's own.
-    expect(where.path).toBe('/learn/decks/library')
-    expect(openName()).toBeUndefined()
-    const list = $('.desk-split--shelf .desk-split__list').getBoundingClientRect()
-    const page = $('.desk-split--shelf .desk-split__page').getBoundingClientRect()
+    // The bare library is a page of the Bibliothèque now, and goes there.
+    expect(where.path).toBe('/learn/decks')
+    expect(where.type).toBe('REPLACE')
+    const list = $('.desk-split--library > .desk-split__list').getBoundingClientRect()
+    const page = $('.desk-split--library > .desk-split__page').getBoundingClientRect()
     expect(page.left).toBeGreaterThan(list.right)
+    // The console heads the page, then the two sections, then the shelf.
+    const catalogue = $('.lib-catalogue')
+    expect(catalogue.firstElementChild.classList.contains('console')).toBe(true)
     const heads = $$('.lib-home .gate-panel__head .plate__title').map(h => h.textContent)
-    expect(heads).toEqual(['À la une', 'Abonnements', 'Tes publications'])
+    // Abonnements is the shelf beside, so it is not drawn a second time.
+    expect(heads).toEqual(['À la une', 'Tes publications'])
     // À la une: the rule's deck at a glance, three of its cards as tiles.
     expect($('.lib-home__featured .deck-preview__name').textContent).toBe('Voyage au Japon')
     expect($('.lib-home__featured .deck-sample__jp').textContent).toBe('駅')
-    // Abonnements: what each followed deck's author added since.
-    const follows = $$('.lib-home__pair > :first-child .gate-row')
-    expect(follows.map(r => r.querySelector('.gate-row__news, .gate-row__fig').textContent)).toEqual(['+12 cartes', 'À jour'])
-    expect(follows[0].getAttribute('href')).toBe('/learn/decks/7')
-    // Tes publications: the followers, and a bar a week.
-    const mine = $('.lib-home__pair > :last-child .gate-row')
+    // Tes publications: the followers, and a bar a week, across the page.
+    const mine = $('.lib-home__pair > .gate-panel .gate-row')
     expect(mine.textContent).toContain('14 abonnés')
     expect(mine.querySelectorAll('.lib-weeks > i')).toHaveLength(8)
-    // Abonnements and publications stand side by side under À la une.
-    const [a, b] = $$('.lib-home__pair > .gate-panel').map(p => p.getBoundingClientRect())
-    expect(Math.abs(a.top - b.top)).toBeLessThanOrEqual(1)
-    expect(b.left).toBeGreaterThan(a.right)
-    expect(a.top).toBeGreaterThan($('.lib-home__featured').getBoundingClientRect().bottom)
+    // The library's decks, one to a row, each a link to its page.
+    const cards = $$('.lib-catalogue__grid > .lib-card')
+    expect(cards.map(c => c.getAttribute('href'))).toEqual(LISTED.map(d => `/learn/decks/library/${d.id}`))
+    const [a, b] = cards.map(c => c.getBoundingClientRect())
+    expect(b.top).toBeGreaterThanOrEqual(a.bottom)
+  })
+
+  it('draws no Tes publications beside the shelf while there are none', async () => {
+    apiJson.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/decks/library?')) return { results: LISTED, total: LISTED.length, has_more: false, types: ['vocab'] }
+      if (u === '/api/decks/library/home') return { ...HOME, published: [] }
+      return {}
+    })
+    await mountLibrary('/learn/decks')
+    await settle(400)
+    expect($$('.lib-home .gate-panel__head .plate__title').map(h => h.textContent)).toEqual(['À la une'])
+    expect($('.lib-home__pair')).toBeNull()
+  })
+
+  it('hides the two sections while the console narrows the shelf', async () => {
+    await mountLibrary('/learn/decks')
+    await settle(400)
+    expect($('.lib-home')).not.toBeNull()
+    const field = $('.lib-catalogue .console input')
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(field, 'kanji')
+    field.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle(500)
+    expect($('.lib-home')).toBeNull()
+    expect(apiJson.mock.calls.some(([u]) => String(u).includes('q=kanji'))).toBe(true)
   })
 
   it("opens a deck from the list in the sections' place, three cards as tiles over the list", async () => {
@@ -144,7 +173,9 @@ describe('the library on the desk', () => {
   it("opens already asked when the gate's search sends a term (plan 132)", async () => {
     await mountLibrary('/learn/decks/library?q=m%C3%A9tro')
     await settle(400)
-    expect($('.console input').value).toBe('métro')
+    // Carried to the Bibliothèque with the term (plan 269).
+    expect(where.path).toBe('/learn/decks')
+    expect($('.lib-catalogue .console input').value).toBe('métro')
     expect(apiJson.mock.calls.some(([u]) => String(u).includes('q=m%C3%A9tro'))).toBe(true)
   })
 

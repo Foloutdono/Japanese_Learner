@@ -1787,9 +1787,25 @@ line here says otherwise.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
-  辻 over TSUJI at its head, the five gates, and the learner's pass at its
-  foot. It is chrome, so it wears no line pigment — the one colour in the
-  rail's own ink is Today's due count, a state's.
+  辻 over TSUJI at its head, the five gates, the four places, and the
+  learner's pass at its foot. It is chrome, so it wears no line pigment —
+  the one colour in the rail's own ink is Today's due count, a state's.
+- **Four places stand under the gates, past a hairline** (plan 269, the
+  owner's pick A of the canvas "Tsuji — the desk's chrome and its four
+  new places"): the analyser, the Bibliothèque (the learner's decks and
+  the library, one screen), the statistics and the settings, each drawn
+  as a gate is — its pictogram and its word — and none of them a station
+  under 辞書, 学習 or 定期券 any more. Their paths are the phone's,
+  behind those gates (`config/tabs.js`, `getDeskPlaces`), but on the desk
+  the place is where you are: while one is lit, the gate behind it is
+  not, and Help, which plays a gate's guide, keeps its slot unseen.
+  Settings is a place, never a door in the card's holder (the owner's
+  call). Beside a lit gate's line of stations, and everywhere on the
+  short desk, the four stand as one row of pictograms, each its word as
+  its label and its title: their rows beside Practice's seven stations
+  needed a 960px window. A line of stations taller than the room the
+  gates, the places and the pass leave scrolls inside itself, so no gate
+  and no place is ever under the pass. The phone's chrome is untouched.
 - **The rail's foot is the learner's card in its holder** (定期入れ,
   plan 173; it replaced plan 127's pocket pass, which the owner found too
   big, and which drew the profile's card a second time beside it). The
@@ -1824,8 +1840,8 @@ line here says otherwise.
   column's width beside the record — the stamp book's three figures
   opening the records' lattice, its lines drawn with a rail per stop, both
   rankings at once on one board, the ranks down its middle, and no door to
-  Statistics or Settings, which hang under the lit gate on the rail (plan
-  143), the two columns ending together; Settings sets its column (the
+  Statistics or Settings, which are places on the rail (plans 143, 269),
+  the two columns ending together; Settings sets its column (the
   pass and the list, plan 139) beside the open page, neither printing a
   title.
 - **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
@@ -1926,16 +1942,24 @@ line here says otherwise.
   search that opens the library on its answer. A library row opens the
   deck's **preview** in the panel's place — who wrote it, three of its
   cards as tiles, its blurb, Follow and the way to all its cards — with
-  the way back at its head. The phone keeps its fifth plate. The rail
-  gains the library as a station under Learn.
-- **The library before a deck is opened** (plan 132) stands three
-  sections beside its list, where it used to open the first deck for
-  you: **À la une** (the deck with the most new followers this week,
-  drawn as the gate's preview), **Abonnements** (the decks you follow,
-  each with the cards its author added since you last opened it) and
-  **Tes publications** (your public decks, their followers and a bar a
-  week for eight weeks). A deck opened from the list shows three of its
-  cards as tiles over the full list.
+  the way back at its head. The phone keeps its fifth plate. The
+  library is a place of the rail's own (plan 269), the Bibliothèque.
+- **The Bibliothèque is your shelf beside the library** (plan 269, the
+  owner's pick L1; plan 132's library before a deck was opened, before
+  it). The bare shelf no longer opens its first deck for you: its list
+  (the index field, the types, a row per deck, the followed ones with
+  their authors, New deck at its foot) stands beside the library's
+  catalogue — the library's console at the page's head, then, while
+  nothing narrows the shelf, **À la une** (the deck with the most new
+  followers this week, drawn as the gate's preview) and **Tes
+  publications** (your public decks, their followers and a bar a week
+  for eight weeks; drawn only when there are some), then the library's
+  decks one to a row. **Abonnements** is not drawn there: the decks you
+  follow are on your shelf beside it. The page scrolls with the window,
+  the list sticky beside it. A deck of yours opens beside the same list;
+  a library deck opens in the library's own split, its shelf beside the
+  deck's page, three of its cards as tiles over the full list. The bare
+  library's path goes to the Bibliothèque, carrying its search.
 - **A station is two panes.** Levels, sets or grades stand upright on the
   left and the chosen stop's platforms on the right, each platform with its
   own figures (due now, and the composition bar the statistics draw); the

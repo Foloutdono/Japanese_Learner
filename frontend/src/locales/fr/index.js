@@ -71,6 +71,9 @@ const nav = {
   tabDictionary:     'Dictionnaire',
   tabProfile:        'Profil',
   tabBarLabel:       'Sections',
+  // La seconde liste du rail, sur ordinateur (plan 269) : l’analyseur,
+  // la bibliothèque, les statistiques et les réglages.
+  deskPlacesLabel:   'Lieux',
   hudStatusLabel:    'État de l’objectif',
   hudOffline:        'Hors ligne',
   hudDays:           (n) => `${n}j`,
