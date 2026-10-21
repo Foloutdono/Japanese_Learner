@@ -285,7 +285,7 @@ Every slide is drawn from the app's own data, written once into
 | `kana.json` | each kana: romaji, strokes, its twin, words written with it | the kana sets |
 | `comprehension.json` | the passages, their questions and the words worth learning first | `content/comprehension/*.json` |
 | `themes.json` | each theme's name, its word for itself, its words easiest first, each with its picture where it has one | `content/theme_data.py`, `frontend/carousel/content/emoji.json`, the app's theme names |
-| `pictures.json` | the words a vocabulary short turns over on a picture, each a word's key and its file (plan 257) | `frontend/carousel/content/pictures/pictures.json` |
+| `pictures.json` | the words a vocabulary short turns over on a picture, each a word's key and its file (plan 257); since plan 269 the 会話 scenes a reply short draws over pictures, each turn's two (`scenes`) | `frontend/carousel/content/pictures/pictures.json`, `frontend/carousel/content/pictures/scenes/scenes.json` |
 | `lookalikes.json` | each set's kanji: readings, meanings, what sets it apart, a deck word it writes | `frontend/carousel/content/lookalikes.json`, KANJIDIC2, the deck |
 | `dialogues.json` | each conversation's turns, every line split into words with its furigana and romaji (お and ご joined to their word); since plan 268 the 会話 station's scenes after the carousel's own at each level, marked `kaiwa` | `frontend/carousel/content/dialogues.json`, `backend/content/conversation/` |
 | `traps.json` | every tour twist of kind "trap": its sentence, question, three readings, why, the pair, the point's "careful" step | `content/grammar/*.json` |
@@ -786,6 +786,36 @@ the screen.
   call to action for the conversation station (`funnel.drawCta`).
   Speaker A is the app's woman's voice and B its man's, as the 会話
   station and the tours set them.
+
+- **A pictured scene** (plan 269, the owner's pick of four drawn: a
+  visual novel, over a comic strip, a film and a frosted story): a
+  scene can carry the owner's illustrations, two a turn, the one shown
+  while it is asked and the one shown once it is answered
+  (`content/pictures/scenes/`: the pictures, and `scenes.json`, a
+  scene's id and its turns' `ask` and `answer` files). Its short draws
+  each turn as a game's screen, on the dark ground: the question's
+  picture across the frame under the band (960 px tall, a square-ish
+  picture whole, its upper part kept where it is cut), its foot falling
+  into the ground; their line in a box at the bottom of the safe area,
+  named on a plate in the 会話 line's colour; while you choose, the
+  three replies a menu of dark bars over the picture, numbered, the
+  right one sent in green. The answer's picture comes over the asked
+  one only once your reply is said (`replyAt`: before, it would
+  answer), then your line takes the box, its plate yours in green, and
+  why stands over it. The next turn's picture comes up through the last
+  answer's. The scene's card, the score and the call to action are
+  drawn as before, and so is the 16:9 video, which was not drawn with
+  pictures. `carousel_bank.py` checks each id is a scene of the 会話 bank,
+  every turn pictured asked and answered and every file there, and
+  writes them into `bank/pictures.json` (`scenes`); the studio and
+  `render.mjs` load them before the first frame (`loadScenePictures`),
+  and a turn whose two pictures have not both come is drawn as the
+  thread. A test draws every frame of a pictured short in both
+  languages inside the safe area, the answer's picture never before
+  your reply. A picture made for it asks for a square (1024×1024), no
+  text in it, the faces in its upper half: the bottom is where the box
+  stands. After adding a scene's pictures, run
+  `python -m scripts.carousel_bank` (backend) and commit both.
 
 **No music.** `--music none` makes a long video or its short with no bed
 of music, its voices and the app's sounds alone, and drops the music from

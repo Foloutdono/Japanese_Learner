@@ -1014,7 +1014,11 @@ shown, over the run's three stops; since plan 267 the studio's Today's
 print is the season's too, the day's as the app's gate shows it unless
 one is chosen (`--season`); since plan 268 the 会話 station's scenes, the
 ones the reply videos ask, are answered as carousels too (返事, beside the
-carousel's own conversations). Since plan 248 every number a maker may set per
+carousel's own conversations); since plan 269 a reply short of a scene
+the owner pictured (two pictures a turn, asked and answered,
+`frontend/carousel/content/pictures/scenes/`) draws each turn as a
+game's screen: the picture large, the line in a box, the replies a menu
+over it, the answer's picture only once the reply is said. Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one

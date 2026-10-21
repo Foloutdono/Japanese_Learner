@@ -2,6 +2,7 @@
 scripts/carousel_bank.py): a word the page writes in kana is read as the
 word it spells, a number, でも and an honorific prefix stay whole, and a
 katakana word is romanised as it is written."""
+import json
 import pytest
 
 from scripts import carousel_bank as cb
@@ -100,6 +101,39 @@ def test_a_picture_names_a_word_and_a_file_there(tmp_path, monkeypatch):
         spec.write_text(bad, encoding="utf-8")
         with pytest.raises(SystemExit):
             cb.pictures(words, themes)
+
+
+def test_a_scenes_pictures_name_its_turns_and_files_there(tmp_path, monkeypatch):
+    """Plan 269: every turn of a pictured scene has its two pictures, asked
+    and answered; a scene the bank lacks, a turn short or a file missing
+    stops the build."""
+    scenes = {"scenes": [{"id": "first-class", "turns": [{}, {}]}]}
+    (tmp_path / "pictures" / "scenes").mkdir(parents=True)
+    for name in ("a1.webp", "b1.webp", "a2.webp", "b2.webp"):
+        (tmp_path / "pictures" / "scenes" / name).write_bytes(b"x")
+    monkeypatch.setattr(cb, "CONTENT", tmp_path)
+    spec = tmp_path / "pictures" / "scenes" / "scenes.json"
+    good = [{"ask": "a1.webp", "answer": "b1.webp"}, {"ask": "a2.webp", "answer": "b2.webp"}]
+    spec.write_text(json.dumps({"first-class": good}), encoding="utf-8")
+    assert cb.scene_pictures(scenes)["first-class"][1] == {
+        "ask": "content/pictures/scenes/a2.webp", "answer": "content/pictures/scenes/b2.webp"}
+    for bad in ({"no-scene": good}, {"first-class": good[:1]}, {"first-class": [good[0], {"ask": "a2.webp"}]},
+                {"first-class": [good[0], {"ask": "a2.webp", "answer": "c2.webp"}]}):
+        spec.write_text(json.dumps(bad), encoding="utf-8")
+        with pytest.raises(SystemExit):
+            cb.scene_pictures(scenes)
+
+
+def test_the_bank_pictures_its_scenes_whole():
+    """Plan 269: the bank's pictured scenes are the 会話 bank's, every turn pictured."""
+    bank = json.loads((cb.OUT / "pictures.json").read_text(encoding="utf-8"))
+    turns = {sc["id"]: len(sc["turns"]) for sc in json.loads((cb.OUT / "conversation.json").read_text(encoding="utf-8"))["scenes"]}
+    assert bank["scenes"], "no scene is pictured"
+    for sid, rows in bank["scenes"].items():
+        assert len(rows) == turns[sid], sid
+        for row in rows:
+            for src in row.values():
+                assert (cb.CONTENT.parent / src).is_file(), src
 
 
 def test_the_stations_scenes_join_the_carousels_conversations():

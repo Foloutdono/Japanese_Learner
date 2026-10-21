@@ -244,10 +244,10 @@ function planOf(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null
     // A short is one scene (plan 249b): its part is the scene's number.
     if (format === 'short' && !ids) {
       const d = all[part - 1]
-      return { ...base, title: d ? S.title.scene(level, weldIf(lang, d.place[lang] || d.place.en)) : S.title.reply(level, part), items: d ? replyItems(d, lang) : [] }
+      return { ...base, title: d ? S.title.scene(level, weldIf(lang, d.place[lang] || d.place.en)) : S.title.reply(level, part), items: d ? replyItems(d, lang, banks) : [] }
     }
     const ds = ids ? ids.map(id => all.find(d => d.id === id)).filter(Boolean) : replyParts(all)[part - 1] || []
-    return { ...base, title: S.title.reply(level, ids ? 0 : part), items: ds.flatMap(d => replyItems(d, lang)) }
+    return { ...base, title: S.title.reply(level, ids ? 0 : part), items: ds.flatMap(d => replyItems(d, lang, banks)) }
   }
   throw new Error(`no long video of kind ${kind}`)
 }
@@ -274,8 +274,10 @@ export function replyParts(all) {
 const scenesOf = banks => banks['conversation.json']?.scenes || []
 
 /** A scene as a video's items: its card, then a question a turn,
- *  the replies dealt in the carousel's own order (sources.dialoguePlan). */
-function replyItems(d, lang) {
+ *  the replies dealt in the carousel's own order (sources.dialoguePlan).
+ *  A pictured scene's turns carry their two pictures (plan 269). */
+function replyItems(d, lang, banks = {}) {
+  const pics = banks['pictures.json']?.scenes?.[d.id] || []
   const tr = o => weldIf(lang, o?.[lang] || o?.en || '')
   const place = { jp: d.place.jp, tr: tr(d.place) }
   const who = tr(d.them)
@@ -290,6 +292,7 @@ function replyItems(d, lang) {
         them: { rows: unpack(tu.them.rows), tr: tr(tu.them) },
         choices: dealt.choices.map(k => unpack(tu.choices[k])), right: dealt.right,
         reply: tr(tu.reply), why: tr(tu.why),
+        ...(pics[i] ? { pic: pics[i] } : {}),
       }
     }),
   ]
@@ -303,7 +306,7 @@ const QUIZ_SHARE = { sentence: 0.5, word: 0.3, kanji: 0.25 }
 const LIST_KIND = { vocab: '語彙', kanji: '漢字', quiz: '試験', grammar: '文法', theme: '主題', reply: '返事' }
 
 /** The bank files a level's list reads. */
-export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json', 'conversation.json']
+export const longListFiles = level => [`words-${level}.json`, `kanji-${level}.json`, `${level}.json`, `grammar-${level}.json`, 'themes.json', 'conversation.json', 'pictures.json']
 
 /** The videos a level can make: its vocabulary and kanji parts, its
  *  quiz's parts, each grammar point, each theme. As shorts, its words
@@ -364,7 +367,7 @@ export function longFiles(id, level) {
   if (kind === 'vocab') return [`words-${level}.json`, ...easier.map(lv => `${lv}.json`)]
   if (kind === 'kanji') return [`kanji-${level}.json`]
   if (kind === 'grammar') return [`grammar-${level}.json`, ...LEVELS.map(lv => `words-${lv}.json`)]
-  if (kind === 'reply') return ['conversation.json']
+  if (kind === 'reply') return ['conversation.json', 'pictures.json']
   return [`${level}.json`, `words-${level}.json`, `kanji-${level}.json`]
 }
 
@@ -1567,7 +1570,10 @@ function drawTall(ctx, plan, tl, t) {
   const from = tallBox('tiktok')
   const to = tallBox(plan.fit)
   const s = Math.min(to.w / from.w, to.h / from.h)
-  ctx.fillStyle = palette(plan.kind === 'reply' ? 'paper' : 'sumi').bg
+  // A reply short stands on paper, a pictured turn on its screen's dark (plan 269).
+  const sg = tl.segs.find(x => t < x.start + x.dur) || tl.segs.at(-1)
+  const paper = plan.kind === 'reply' && !(sg?.type === 'reply' && novelOf(sg.data))
+  ctx.fillStyle = palette(paper ? 'paper' : 'sumi').bg
   ctx.fillRect(0, 0, TW, TH)
   ctx.save()
   ctx.translate(to.x + (to.w - from.w * s) / 2, to.y + (to.h - from.h * s) / 2)
@@ -2141,6 +2147,195 @@ function peekOf(ctx, p, prev, g) {
   return { draw: () => b.draw(g.right - pw, g.band + PEEK - b.box, { dim: true }) }
 }
 
+// ── A pictured scene (plan 269): each turn as a game's screen ────
+// The owner's pick of four drawn ("visual novel"): the turn's picture
+// across the frame under the band, the line in a box at its foot named
+// on a plate, the replies a menu over the picture while you choose.
+// Once your reply is said the answer's picture comes over the asked
+// one (never sooner: it would answer), and your line takes the box,
+// why it is right over it. Standing only: the 16:9 thread was not
+// drawn with pictures, and stays as it was.
+const SCENE_PICS = new Map()
+const fetchImage = src => new Promise(done => {
+  const img = new Image()
+  img.onload = () => done(img)
+  img.onerror = () => done(null)
+  img.src = src
+})
+/** Loads a reply plan's pictures from `base` before the first frame (the
+ *  studio, render.mjs): a frame is drawn synchronously, and a turn whose
+ *  two pictures have not both come is drawn as the thread it was. */
+export async function loadScenePictures(plan, base = '', load = typeof Image === 'undefined' ? null : fetchImage) {
+  if (!load) return 0
+  const want = [...new Set(plan.items.flatMap(it => (it.pic ? [it.pic.ask, it.pic.answer] : [])))].filter(src => !SCENE_PICS.has(src))
+  const got = await Promise.all(want.map(src => load(base + src)))
+  want.forEach((src, i) => got[i] && SCENE_PICS.set(src, got[i]))
+  return plan.items.filter(it => novelOf(it)).length
+}
+/** A turn's two pictures, once both have come. */
+function novelOf(it) {
+  const q = it?.pic && SCENE_PICS.get(it.pic.ask)
+  const a = it?.pic && SCENE_PICS.get(it.pic.answer)
+  return q && a ? { q, a } : null
+}
+// The picture's height under the band (a square-ish picture whole, the
+// owner's are near 9:8), the fall of its foot into the ground, and the
+// most the line's box and yours may take before their sizes step down.
+const NOVEL = { pic: 960, foot: 260, line: 440, you: 330 }
+/** A picture across a box, cut to it, its upper part kept: faces stand there. */
+function coverAt(ctx, img, x, y, w, h) {
+  const s = Math.max(w / img.width, h / img.height)
+  const sw = w / s
+  const sh = h / s
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) * 0.4, sw, sh, x, y, w, h)
+}
+/** A line in a box at the largest size it fits under `maxH`, its romaji the first to go. */
+function boxOf(ctx, pal, rows, o, maxH) {
+  let b = null
+  for (const romaji of o.romaji ? [true, false] : [false]) {
+    for (const z of [FS.title, FS.lead, FS.body, READABLE + 2]) {
+      b = bubbleOf(ctx, pal, rows, { ...o, z, min: READABLE, romaji, tail: false, lines: 3 })
+      if (b.h <= maxH && !b.cut) return b
+    }
+  }
+  return b
+}
+/** The replies as a game's menu: whole bars over the picture, numbered;
+ *  then the right one sent, in green, the others fading. */
+function menuOf(ctx, pal, choices, { w, maxH, romaji }) {
+  const r = 28
+  const gap = SP[3]
+  const vp = SP[4]
+  let rows = null
+  const total = () => rows.reduce((a, x) => a + x.h, 0) + gap * (rows.length - 1)
+  for (const rom of romaji ? [true, false] : [false]) {
+    for (const z of [FS.lead, FS.body, READABLE + 2]) {
+      rows = choices.map(rs => {
+        const L = layoutSentence(ctx, rs, { max: z, min: Math.min(z, READABLE), maxW: w - SP[5] * 2 - r * 2 - SP[4], maxLines: 2, script: 'furigana', romaji: rom, rules: false, gap: rom ? 0.22 : 0.06, fam: 'jp', weight: 700 })
+        return { L, h: L.h + vp }
+      })
+      if (total() <= maxH) break
+    }
+    if (total() <= maxH) break
+  }
+  const paper = palette('paper')
+  return {
+    h: total(),
+    draw: (x, y, right, shown, sent) => {
+      let at = y
+      rows.forEach((row, j) => {
+        const v = shown(j)
+        const top = at
+        at += row.h + gap
+        if (v <= 0) return
+        const isSent = sent >= 0.5 && j === right
+        ctx.save()
+        ctx.globalAlpha *= v * (sent > 0 && j !== right ? 1 - 0.75 * sent : 1)
+        ctx.translate(0, (1 - v) * 16)
+        ctx.fillStyle = isSent ? mix(OK, pal.panel, 0.85) : alpha(pal.panel, 0.84)
+        rrect(ctx, x, top, w, row.h, R.card * 2)
+        ctx.fill()
+        ctx.strokeStyle = isSent ? mix(OK, pal.ink, 0.55) : alpha(pal.ink, 0.24)
+        ctx.lineWidth = isSent ? 4 : 2
+        rrect(ctx, x + 1, top + 1, w - 2, row.h - 2, R.card * 2)
+        ctx.stroke()
+        if (isSent) tick(ctx, paper, x + SP[5] + r, top + row.h / 2, r)
+        else {
+          ctx.fillStyle = pal.line.kaiwa
+          ctx.beginPath()
+          ctx.arc(x + SP[5] + r, top + row.h / 2, r, 0, Math.PI * 2)
+          ctx.fill()
+          text(ctx, String(j + 1), x + SP[5] + r, top + row.h / 2 + r * 0.38, { f: font(700, r * 1.07, 'latin'), color: pal.onLine, align: 'center' })
+        }
+        drawSentence(ctx, row.L, x + SP[5] + r * 2 + SP[4], top + vp / 2, 'left', () => ({ ink: pal.ink, ruby: pal.ink2, romaji: pal.ink2 }))
+        ctx.restore()
+      })
+    },
+  }
+}
+/** Who speaks, on a plate across the box's top edge: left theirs, right yours. */
+function plateAt(ctx, pal, label, fill, x, y, right = false) {
+  const f = font(700, FS.caption, 'latin')
+  const s = label.toLocaleUpperCase()
+  const w = measure(ctx, s, f, 0.16) + SP[5] * 2
+  const h = FS.caption * 1.9
+  const px = right ? x - w : x
+  ctx.fillStyle = fill
+  rrect(ctx, px, y - h * 0.6, w, h, h / 2)
+  ctx.fill()
+  text(ctx, s, px + SP[5], y - h * 0.6 + h * 0.66, { f, color: pal.onLine, tr: 0.16 })
+}
+/** A turn's parts laid out once: the line's box, yours, why, the menu between the band and the box. */
+const novelLayouts = new WeakMap()
+function novelLayout(ctx, S, it, g) {
+  const had = novelLayouts.get(it)
+  if (had) return had
+  const pal = palette('sumi')
+  const w = g.right - g.x
+  const glass = { ...pal, surface: alpha(pal.panel, 0.9) }
+  const them = boxOf(ctx, glass, it.them.rows, { tr: it.them.tr, w, romaji: it.romaji, script: 'furigana' }, NOVEL.line)
+  const you = boxOf(ctx, glass, it.choices[it.right], { tr: it.reply, w, romaji: it.romaji, script: 'furigana', me: true }, NOVEL.you)
+  const note = noteOf(ctx, pal, S.whyOne, it.why, { w, sizes: [FS.body, FS.sm] })
+  const room = g.bottom - them.box - SP[7] - (g.band + SP[6])
+  const menu = menuOf(ctx, pal, it.choices, { w, maxH: room, romaji: it.romaji })
+  const L = { pal, them, you, note, menu, menuY: g.band + SP[6] + Math.max(0, (room - menu.h) / 2) }
+  novelLayouts.set(it, L)
+  return L
+}
+/** The answer: your line in the box, why over it. */
+function novelAnswer(ctx, S, L, g) {
+  const y = g.bottom - L.you.box
+  L.note.draw(g.x, y - SP[7] - L.note.h)
+  L.you.draw(g.x, y)
+  plateAt(ctx, L.pal, S.you, OK, g.right - SP[5], y, true)
+}
+/** A frame of a pictured turn: the picture, then the box, the menu or the answer over it. */
+function drawNovel(ctx, S, it, prev, m, u, k, fade, g, im) {
+  const L = novelLayout(ctx, S, it, g)
+  const { pal } = L
+  // Past the frame's edge: scaled into Instagram's box, the paper under it would show at its rim.
+  ctx.fillStyle = pal.bg
+  ctx.fillRect(-4, -4, g.w + 8, g.h + 8)
+  const vP = k(m.replyAt, 0.6)
+  const vA = k(m.why, 0.45)
+  // The last turn's answer gives way to this one's question.
+  const was = prev && novelOf(prev)
+  const v0 = was ? k(0, 0.45) : 1
+  const layer = (img, v) => {
+    if (v <= 0) return
+    ctx.save()
+    ctx.globalAlpha *= v
+    coverAt(ctx, img, 0, g.band, g.w, NOVEL.pic)
+    ctx.restore()
+  }
+  layer(im.q, 1)
+  layer(was?.a, 1 - v0)
+  layer(im.a, vP)
+  const foot = g.band + NOVEL.pic
+  const fall = ctx.createLinearGradient(0, foot - NOVEL.foot, 0, foot)
+  fall.addColorStop(0, alpha(pal.bg, 0))
+  fall.addColorStop(1, pal.bg)
+  ctx.fillStyle = fall
+  ctx.fillRect(0, foot - NOVEL.foot, g.w, NOVEL.foot + 1)
+  if (v0 < 1) fade(1 - v0, () => novelAnswer(ctx, S, novelLayout(ctx, S, prev, g), g))
+  // Their line in the box, until yours takes it.
+  if (vA < 1) {
+    fade(k(m.lineAt, 0.35) * (1 - vA), () => {
+      const y = g.bottom - L.them.box
+      L.them.draw(g.x, y)
+      plateAt(ctx, pal, it.who, pal.line.kaiwa, g.x + SP[5], y)
+    })
+  }
+  if (vA < 1 && u >= m.choicesAt) {
+    ctx.save()
+    ctx.globalAlpha *= 1 - vA
+    L.menu.draw(g.x, L.menuY, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), u >= m.reveal ? k(m.reveal, 0.35) : 0)
+    ctx.restore()
+  }
+  if (vA > 0) fade(vA, () => novelAnswer(ctx, S, L, g))
+}
+
 /** A frame of a reply video, in either format. */
 function drawThread(ctx, plan, tl, t, g) {
   const { p, S, sg, u, state, k, fade, d, m } = begin(ctx, plan, tl, t, g.w, g.h, 'paper')
@@ -2166,39 +2361,44 @@ function drawThread(ctx, plan, tl, t, g) {
       const it = d
       const i = plan.items.indexOf(it)
       const prev = plan.items[i - 1]?.type === 'reply' ? plan.items[i - 1] : null
-      const Ly = threadLayout(ctx, p, S, it, g, !!prev)
       const revealed = u >= m.reveal
-      // The thread scrolls on: the last answer goes up under the band, the foot of your reply stays.
-      if (prev) {
-        const v = k(0, 0.45)
-        if (v < 1) {
+      // A pictured scene's turn is a game's screen (plan 269), standing only.
+      const im = g.stack ? novelOf(it) : null
+      if (im) drawNovel(ctx, S, it, prev, m, u, k, fade, g, im)
+      else {
+        const Ly = threadLayout(ctx, p, S, it, g, !!prev)
+        // The thread scrolls on: the last answer goes up under the band, the foot of your reply stays.
+        if (prev) {
+          const v = k(0, 0.45)
+          if (v < 1) {
+            ctx.save()
+            ctx.globalAlpha *= 1 - v
+            ctx.translate(0, -v * 700)
+            drawAnswer(ctx, g, threadLayout(ctx, p, S, prev, g, false))
+            ctx.restore()
+          }
+          // The answer takes the room from the top: the foot gives way to it.
+          const vA = k(m.why, 0.4)
+          if (Ly.foot) fade(v * (1 - vA), () => peekOf(ctx, p, prev, g).draw())
+        }
+        const vA = k(m.why, 0.4)
+        const y0 = g.band + Ly.top + Ly.gap
+        // Their line, until the answer takes its place.
+        if (vA < 1) fade(k(m.lineAt, 0.35) * (1 - vA), () => Ly.them.draw(g.x, g.stack ? y0 : g.band + SP[6]))
+        if (vA < 1 && u >= m.choicesAt) {
           ctx.save()
-          ctx.globalAlpha *= 1 - v
-          ctx.translate(0, -v * 700)
-          drawAnswer(ctx, g, threadLayout(ctx, p, S, prev, g, false))
+          ctx.globalAlpha *= 1 - vA
+          const dy = g.stack ? y0 + Ly.them.h + Ly.gap : y0 + Ly.askH
+          if (!g.stack) fade(k(m.choicesAt, 0.3), () => capsAt(ctx, S.replyAsk, g.right, y0, p.gold, 'right'))
+          Ly.drafts.draw(Ly.rx, dy, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), revealed ? k(m.reveal, 0.35) : 0)
           ctx.restore()
         }
-        // The answer takes the room from the top: the foot gives way to it.
-        const vA = k(m.why, 0.4)
-        if (Ly.foot) fade(v * (1 - vA), () => peekOf(ctx, p, prev, g).draw())
-      }
-      const vA = k(m.why, 0.4)
-      const y0 = g.band + Ly.top + Ly.gap
-      // Their line, until the answer takes its place.
-      if (vA < 1) fade(k(m.lineAt, 0.35) * (1 - vA), () => Ly.them.draw(g.x, g.stack ? y0 : g.band + SP[6]))
-      if (vA < 1 && u >= m.choicesAt) {
-        ctx.save()
-        ctx.globalAlpha *= 1 - vA
-        const dy = g.stack ? y0 + Ly.them.h + Ly.gap : y0 + Ly.askH
-        if (!g.stack) fade(k(m.choicesAt, 0.3), () => capsAt(ctx, S.replyAsk, g.right, y0, p.gold, 'right'))
-        Ly.drafts.draw(Ly.rx, dy, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), revealed ? k(m.reveal, 0.35) : 0)
-        ctx.restore()
-      }
-      if (vA > 0) {
-        ctx.save()
-        ctx.globalAlpha *= vA
-        drawAnswer(ctx, g, Ly)
-        ctx.restore()
+        if (vA > 0) {
+          ctx.save()
+          ctx.globalAlpha *= vA
+          drawAnswer(ctx, g, Ly)
+          ctx.restore()
+        }
       }
       // The band over the thread: the ring while you choose, a tick once it is out.
       const right = u < m.choicesAt ? null : (cx, cy) => {

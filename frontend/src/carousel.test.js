@@ -14,7 +14,7 @@ import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
-import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
+import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
@@ -2270,9 +2270,87 @@ describe('the reply videos (plan 249)', () => {
       }
       expect(seen.sort(), lv).toEqual(scenes.filter(d => d.lv === lv).map(d => d.id).sort())
     }
-    expect(longFiles('reply:1', 'N5')).toEqual(['conversation.json'])
+    expect(longFiles('reply:1', 'N5')).toEqual(['conversation.json', 'pictures.json'])
     expect(longListFiles('N5')).toContain('conversation.json')
     expect(longCommand('reply:2', 'N3', 'fr', 'short')).toContain('--kind reply --level N3 --part 2 --lang fr --format short')
+  })
+
+  it('draws a pictured scene’s turns over its pictures, the answer’s only once yours is said (plan 269)', { timeout: 120000 }, async () => {
+    const pics = bank('pictures.json').scenes
+    const withPics = { ...files, 'pictures.json': bank('pictures.json') }
+    expect(Object.keys(pics).length).toBeGreaterThan(0)
+    // Every text drawn and every picture, where and how seen.
+    const traced = () => {
+      const at = []
+      const images = []
+      const state = { font: '10px sans-serif', globalAlpha: 1 }
+      const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+      const widthOf = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
+      let dy = 0
+      const stack = []
+      const methods = {
+        measureText: t => ({ width: widthOf(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: widthOf(t) }),
+        fillText: (t, x, y) => at.push({ t: String(t), y: y + dy, z: size(), a: state.globalAlpha }),
+        drawImage: img => images.push({ src: img.src, a: state.globalAlpha }),
+        save: () => stack.push([dy, state.globalAlpha]),
+        restore: () => { [dy, state.globalAlpha] = stack.pop() ?? [0, 1] },
+        translate: (x, y) => { dy += y },
+        createLinearGradient: () => ({ addColorStop() {} }), createRadialGradient: () => ({ addColorStop() {} }),
+        getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+      }
+      const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+      return { ctx, at, images }
+    }
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      for (const [sid, rows] of Object.entries(pics)) {
+        const d = scenes.find(x => x.id === sid)
+        expect(d, sid).toBeTruthy()
+        expect(rows, sid).toHaveLength(d.turns.length)
+        for (const row of rows) for (const src of [row.ask, row.answer]) expect(existsSync(new URL(`../carousel/${src}`, import.meta.url)), src).toBe(true)
+        const part = scenes.filter(x => x.lv === d.lv).indexOf(d) + 1
+        for (const lang of ['en', 'fr']) {
+          const { kind, opts } = longPick(`reply:${part}`, d.lv, lang, 'short')
+          const pl = fitShort(longPlan(kind, withPics, opts))
+          expect(pl.items.filter(x => x.type === 'reply').map(x => x.pic), sid).toEqual(rows)
+          // Loaded as a page loads them, each picture its own image.
+          expect(await loadScenePictures(pl, '/carousel/', async src => ({ width: 375, height: 331, src }))).toBe(rows.length)
+          const tl = timeline(pl)
+          const turns = tl.segs.filter(x => x.type === 'reply')
+          turns.forEach((sg, ti) => {
+            const it = sg.data
+            const m = sg.marks
+            for (const u of [0.1, 0.3, m.lineAt + 0.5, m.choicesAt + 0.5, m.choicesAt + 2, m.reveal + 0.2, m.replyAt - 0.05, m.replyAt + 0.3, m.replyAt + 1, m.why + 0.3, m.why + 1.5, sg.dur - 0.05]) {
+              const { ctx, at, images } = traced()
+              drawLong(ctx, pl, tl, sg.start + u)
+              const where = `${sid} ${lang} turn ${ti + 1} at ${u.toFixed(2)}`
+              const seen = images.filter(x => x.a > 0).map(x => x.src)
+              // The question's picture throughout; the answer's never before your reply is said.
+              expect(seen, where).toContain(`/carousel/${rows[ti].ask}`)
+              if (u < m.replyAt) expect(seen, where).not.toContain(`/carousel/${rows[ti].answer}`)
+              if (u > m.replyAt + 0.7) expect(seen, where).toContain(`/carousel/${rows[ti].answer}`)
+              // Every text inside the feed's safe area.
+              for (const x of at.filter(x => x.a > 0)) {
+                expect(x.y - x.z * 0.85, `${where} ${x.t}`).toBeGreaterThanOrEqual(TALL.safe.t - 1)
+                expect(x.y + x.z * 0.25, `${where} ${x.t}`).toBeLessThanOrEqual(TALL.h - TALL.safe.b + 1)
+              }
+              const said = at.filter(x => x.a > 0.5).map(x => x.t).join('')
+              // Who speaks on the line's plate; yours on the answer's, with why.
+              if (u > m.lineAt + 0.4 && u < m.why) expect(said, where).toContain(it.who.toLocaleUpperCase())
+              if (u > m.why + 1) expect(said, where).toContain((lang === 'fr' ? 'Toi' : 'You').toLocaleUpperCase())
+            }
+          })
+          // The 16:9 video of the same scene stays the thread it was: no picture there.
+          const wide = longPlan('reply', withPics, { level: d.lv, lang, ids: [sid] })
+          const wtl = timeline(wide)
+          const sg = wtl.segs.find(x => x.type === 'reply')
+          const { ctx, images } = traced()
+          drawLong(ctx, wide, wtl, sg.start + sg.marks.why + 1)
+          expect(images, `${sid} ${lang} 16:9`).toHaveLength(0)
+        }
+      }
+    } finally { globalThis.Path2D = had }
   })
 
   it('makes a short of each scene, six questions a short (plans 249b, 250)', () => {

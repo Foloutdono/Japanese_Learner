@@ -18,7 +18,7 @@ import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
 import { STYLES as CHALLENGE_STYLES, TRACK, TRACKS, challengeCommand, challengePage, challengePlan, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
-import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
+import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
 import { FEEDS } from './feeds.js'
@@ -687,7 +687,8 @@ async function renderLong(mine) {
   const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit, tune: state.tune, music })) : longPlan(kind, banks, { ...opts, tune: state.tune, music })
   const tl = timeline(pl)
   const page = describeLong(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
-  await fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title)
+  // A pictured scene's pictures (plan 269), loaded before the first frame.
+  await Promise.all([fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title), loadScenePictures(pl)])
   if (mine !== token) return
   current = { plan: pl, fmt: size, decks: [], long: { id, page, tl } }
   // A reply video's stations are its questions (plan 249).

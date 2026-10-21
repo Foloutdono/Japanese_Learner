@@ -1056,10 +1056,10 @@ def files(deck: dict):
     yield "comprehension.json", comprehension
     theme_file = themes()
     yield "themes.json", theme_file
-    yield "pictures.json", pictures(word_files, theme_file)
     lookalike_file = lookalikes(deck)
     yield "lookalikes.json", lookalike_file
     scenes = conversation()
+    yield "pictures.json", {**pictures(word_files, theme_file), "scenes": scene_pictures(scenes)}
     dialogue_file = with_scenes(dialogues(), scenes)
     yield "dialogues.json", dialogue_file
     yield "conversation.json", scenes
@@ -1145,6 +1145,33 @@ def pictures(word_files: dict, theme_file: dict) -> dict:
             raise SystemExit(f"content/pictures/pictures.json: {name} is not in content/pictures/")
         out[key] = f"content/pictures/{name}"
     return {"rev": REV, "pictures": out}
+
+
+def scene_pictures(scenes_file: dict) -> dict:
+    """A 会話 scene's pictures (plan 269): content/pictures/scenes/scenes.json,
+    a scene's id and, for each of its turns, the picture shown while it
+    is asked and the one shown once it is answered. A reply short of a
+    pictured scene draws each turn over them. A scene the bank lacks, a
+    turn without both, or a file that is not there stops the build: a
+    video never shows one turn bare among pictured ones."""
+    spec = json.loads((CONTENT / "pictures" / "scenes" / "scenes.json").read_text(encoding="utf-8"))
+    turns = {sc["id"]: len(sc["turns"]) for sc in scenes_file["scenes"]}
+    out = {}
+    for sid, rows in spec.items():
+        where = f"content/pictures/scenes/scenes.json: {sid}"
+        if sid not in turns:
+            raise SystemExit(f"{where} is no scene of the 会話 bank")
+        if len(rows) != turns[sid]:
+            raise SystemExit(f"{where} has {len(rows)} turns pictured of {turns[sid]}")
+        out[sid] = []
+        for row in rows:
+            if set(row) != {"ask", "answer"}:
+                raise SystemExit(f"{where}: a turn is pictured asked and answered, never one alone")
+            for name in row.values():
+                if not (CONTENT / "pictures" / "scenes" / name).is_file():
+                    raise SystemExit(f"{where}: {name} is not in content/pictures/scenes/")
+            out[sid].append({k: f"content/pictures/scenes/{row[k]}" for k in ("ask", "answer")})
+    return out
 
 
 def lookalikes(deck: dict) -> dict:

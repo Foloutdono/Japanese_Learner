@@ -235,6 +235,8 @@ if (args.challenge) {
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
     const L = await import('/carousel/long.js')
+    // A pictured scene's pictures (plan 269), loaded before the first frame is drawn.
+    await L.loadScenePictures(plan, '/carousel/')
     window.__draw = t => L.drawLong(window.__ctx, plan, tl, t)
   }, { plan, tl })
   pageText = describe(plan, tl, site, banks['index.json']?.figures)
