@@ -15,7 +15,9 @@ import { TraceBoard } from './TraceBoard'
 // sheet: the same animation at the width of the screen, and, beside it,
 // the calque -- the glyph's strokes traced in their turn on the trace
 // board the glyph tour writes on (TraceBoard, plan 263), each a hollow
-// from its dot to its ring that the ink fills as the hand goes. The
+// from its dot to its ring that the ink fills as the hand goes, with the
+// app's help (the stroke asked picked out, its way walked) or without it
+// (the whole glyph faint under the hand, as on tracing paper). The
 // order and the shape are the file's own (KanjiVG, domain/kanjivg), so
 // any character the animation can draw can be traced; one with no file
 // has no tap.
@@ -57,7 +59,7 @@ export function StrokeZoom({ src, glyph, className = '', children }) {
 export function StrokeStudy({ open, src, glyph, line, onClose }) {
   const { t } = useLang()
   return (
-    <Sheet open={open} onClose={onClose} jp={glyph} cap={t.strokeOrder} label={t.strokeOrder} className="ss-sheet" over dismiss>
+    <Sheet open={open} onClose={onClose} cap={t.strokeOrder} label={t.strokeOrder} className="ss-sheet" over dismiss>
       <Study src={src} glyph={glyph} line={line} />
     </Sheet>
   )
@@ -84,12 +86,13 @@ function Study({ src, glyph, line }) {
   if (!svgText) return <div className="ss-stage ss-stage--wait" aria-busy="true" />
 
   const options = [{ key: 'watch', label: t.strokeWatch }]
-  if (strokes.length) options.push({ key: 'trace', label: t.strokeTrace })
+  if (strokes.length) options.push({ key: 'guided', label: t.strokeGuided }, { key: 'free', label: t.strokeFree })
   return (
     <div className="ss" style={line ? { '--line-color': line } : undefined}>
       {options.length > 1 && <Seg full label={t.strokeOrder} value={mode} onChange={setMode} options={options} />}
-      {mode === 'trace'
-        ? <Trace strokes={strokes} glyph={glyph} />
+      {mode !== 'watch'
+        // Keyed by the mode: a switch starts the trace over.
+        ? <Trace key={mode} strokes={strokes} glyph={glyph} help={mode === 'guided'} />
         : (
           <div className="ss-stage">
             <div className="ss-paper">
@@ -101,7 +104,7 @@ function Study({ src, glyph, line }) {
   )
 }
 
-function Trace({ strokes, glyph }) {
+function Trace({ strokes, glyph, help }) {
   const { t } = useLang()
   const { trace, verdict, show, reset } = useTraceRun()
   const total = strokes.length
@@ -125,6 +128,7 @@ function Trace({ strokes, glyph }) {
           at={trace.at}
           given={trace.given}
           shownFrom={trace.shownFrom}
+          help={help}
           label={t.glyphBoardAria(glyph ?? '', n, total)}
           onVerdict={onVerdict}
         />

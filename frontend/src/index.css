@@ -16366,7 +16366,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .ss-stage--wait { min-height: 200px; }
 .ss-paper {
-  width: min(100%, 420px, 50dvh);
+  width: min(100%, 560px, 56dvh);
   aspect-ratio: 1;
   padding: var(--sp-3);
   background: var(--paper);
@@ -27091,7 +27091,7 @@ button.brd-stn { cursor: pointer; }
 .gt-pen--off { cursor: default; }
 /* The same board in the stroke sheet (plan 267): the width of the sheet, as the
    animation's paper, rather than the tour's card. */
-.ss-stage .gt-board { width: min(100%, 420px, 50dvh); }
+.ss-stage .gt-board { width: min(100%, 560px, 56dvh); }
 /* A missed line -- the finger's own, as it went -- a moment in the
    miss's ink, then gone. */
 .gt-missed polyline {
@@ -42640,5 +42640,14 @@ button.brd-stn { cursor: pointer; }
     min-height: 0;
     overflow: hidden;
   }
+}
+@media (min-width: 1100px) {
+  /* ── 辻 — the stroke sheet, big (plan 267) ──
+     The dialog is wider than a card and its board takes the height the
+     window leaves under the head, the modes and the line at its foot
+     (about 300px), never under 280px, where the sheet scrolls instead. */
+  .sheet.ss-sheet { width: min(760px, calc(100vw - 2 * var(--sp-8))); }
+  .ss-paper,
+  .ss-stage .gt-board { width: min(100%, 640px, max(280px, calc(100dvh - 300px))); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

@@ -79,11 +79,13 @@ describe('the stroke order, enlarged', () => {
   it('opens the animation big on a tap, headed by the character', async () => {
     const screen = await mount()
     await open(screen)
-    expect(dialog().querySelector('.sheet__jp').textContent).toBe('一')
+    // Headed by what it is, not by the character it draws.
+    expect(dialog().querySelector('.sheet__jp')).toBe(null)
+    expect(dialog().querySelector('.sheet__cap').textContent).toBe('Stroke order')
     const glyph = dialog().querySelector('.ss-paper__glyph svg')
     expect(glyph).not.toBe(null)
     expect(glyph.getBoundingClientRect().width).toBeGreaterThan(200)
-    expect([...dialog().querySelectorAll('[role="radio"]')].map(b => b.textContent)).toEqual(['Watch', 'Trace'])
+    expect([...dialog().querySelectorAll('[role="radio"]')].map(b => b.textContent)).toEqual(['Watch', 'Guided', 'Free'])
   })
 
   it('closes on Escape', async () => {
@@ -97,7 +99,7 @@ describe('the stroke order, enlarged', () => {
   it('traces the strokes in the file\'s order, then offers to trace again', async () => {
     const screen = await mount()
     await open(screen)
-    option('Trace').click()
+    option('Guided').click()
     await settle()
     const board = dialog().querySelector('.gt-board')
     expect(board.getAttribute('aria-label')).toBe('Trace 一, stroke 1 of 2')
@@ -118,10 +120,34 @@ describe('the stroke order, enlarged', () => {
     expect(dialog().querySelector('.gt-board').getAttribute('aria-label')).toBe('Trace 一, stroke 1 of 2')
   })
 
+  it('points out the stroke asked only with the help on', async () => {
+    const screen = await mount()
+    await open(screen)
+    option('Guided').click()
+    await settle()
+    expect(dialog().querySelector('.gt-hollow')).not.toBe(null)
+    expect(dialog().querySelector('.gt-start')).not.toBe(null)
+    expect(dialog().querySelector('.gt-end')).not.toBe(null)
+
+    option('Free').click()
+    await settle()
+    const board = dialog().querySelector('.gt-board')
+    for (const sel of ['.gt-hollow', '.gt-start', '.gt-end', '.gt-chevron']) expect(board.querySelector(sel)).toBe(null)
+    // Both strokes stand faint under the hand, the first not picked out.
+    expect([...board.querySelectorAll('.gt-stroke')].map(p => p.dataset.state)).toEqual(['ahead', 'ahead'])
+    expect(board.getAttribute('aria-label')).toBe('Trace 一, stroke 1 of 2')
+
+    // The hand is still judged: the first stroke traced, the second asked.
+    draw(board, sampleStroke(strokesOf(KVG)[0], 24))
+    await settle()
+    expect(board.getAttribute('aria-label')).toBe('Trace 一, stroke 2 of 2')
+    expect([...board.querySelectorAll('.gt-stroke')].map(p => p.dataset.state).sort()).toEqual(['ahead', 'done'])
+  })
+
   it('draws the rest on « Show me »', async () => {
     const screen = await mount()
     await open(screen)
-    option('Trace').click()
+    option('Guided').click()
     await settle()
     dialog().querySelector('.ss-act').click()
     await settle()
