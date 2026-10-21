@@ -41,6 +41,10 @@ class TestQueryBounds:
         ("/api/grammar/cards?level=N5&mode=grammar.flashcard.f2b", "count", 10, 100000),
         ("/api/dictionary", "limit", 10, 100000),
         ("/api/leaderboard", "limit", 10, 100000),
+        # plan 262: the whole board is paged, never asked for at once.
+        ("/api/leaderboard", "offset", 0, 100001),
+        ("/api/leaderboard", "around", 2, 6),
+        ("/api/leaderboard", "division", 0, 6),
         # plan 211: a learner flicking a selector, or crafting a URL,
         # cannot ask for unbounded work.
         ("/api/dictionary", "page", 1, 100000),

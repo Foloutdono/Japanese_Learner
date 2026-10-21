@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
-import { lineState, tokFurigana } from './tokens'
+import { lineState, tokFurigana, tokRomaji } from './tokens'
 import { coversToken, numberedPointsOf } from './grammarSpans'
 import { tokenTimes, sungAt } from './wordTimes'
 
@@ -28,7 +28,11 @@ import { tokenTimes, sungAt } from './wordTimes'
 // paused clock moves only by a seek. `timing` is what the whole track
 // says about its words (wordTimes.js's passageTiming), for a line it
 // did not time word by word.
-export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhead = null, playing = false, timing = null }) {
+//
+// `romaji` (plan 263, the phone's Affichage sheet) writes each word's
+// sound under its rule, in Latin letters: never on the word, which
+// stays the thing being read.
+export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhead = null, playing = false, timing = null, romaji = false }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   const points = numberedPointsOf(analysis)
   const owner = tokens.map(w => points.findIndex(p => coversToken(p, w)))
@@ -50,6 +54,7 @@ export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhea
       >
         <span className="tok__furi" lang="ja">{tokFurigana(w)}</span>
         <span className="tok__word">{w.surface}</span>
+        {romaji && <span className="tok__ro" lang="ja-Latn">{tokRomaji(w)}</span>}
       </button>
     )
   }

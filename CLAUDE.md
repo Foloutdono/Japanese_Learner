@@ -67,7 +67,10 @@ runtime purpose.
   breakdown), the `phrase_analysis_cache` version (the deep tier),
   `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
-  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219).
+  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
+  `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
+  plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
+  session's lines are cut into).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
   retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
@@ -202,6 +205,17 @@ runtime purpose.
   or serves the ration does too. A tour can always be skipped for its
   card; a run the learner boards on purpose (a grammar run, a unit) is
   not capped.
+- **A place on the 番付 is read off one list (plan 262).** `study/banzuke.py`
+  ranks each board (all time, the calendar week from Monday 00:00 UTC, a
+  division) from one sum, `srs.xp_totals`, a minute old at most, a tie
+  broken by the user id: a page, the learner's own place, the rows around
+  it, the gap to the next and the move since the day began are all read
+  off it, never off a second count. The divisions (序ノ口 … 幕内) are
+  settled lazily by the week's first board, once (`banzuke_marks`). A
+  learner who keeps off the board (`board_hidden`) is in no list another
+  learner reads and still sees their own place; a row's card shows what
+  the board already does (XP, level, places, division) and published
+  decks, never the streak, the JLPT level or the card's name.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

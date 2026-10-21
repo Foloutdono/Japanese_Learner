@@ -250,6 +250,35 @@ describe('a deck on the desk', () => {
     expect($('.dk-scroll > .dk-cards')).not.toBeNull()
   })
 
+  it('holds an edit\'s form over the table as it scrolls, and deletes its card from it', async () => {
+    await mount('/learn/decks/1', deckAlone)
+    await settle()
+    $('.dk-all').click()
+    await settle(60)
+    const scroll = $('.dk-scroll')
+    scroll.style.maxHeight = '320px'
+    $$('.dk-cards > .dk-card').at(-1).click()
+    await settle(60)
+    const slot = $('.desk-deck__slot--edit')
+    expect(slot.querySelector('.deckdetail-form')).not.toBeNull()
+    // The rows pass under it: its top stays the scroller's.
+    scroll.scrollTop = scroll.scrollHeight
+    await settle(60)
+    expect(scroll.scrollTop).toBeGreaterThan(0)
+    expect(Math.round(slot.getBoundingClientRect().top)).toBe(Math.round(scroll.getBoundingClientRect().top))
+    // Delete, asked in the sheet, takes the open card and closes the form.
+    const del = slot.querySelector('.btn-secondary--danger')
+    expect(del.textContent.trim()).toBe('Supprimer')
+    del.click()
+    await settle(60)
+    expect($('.sheet__q')?.textContent).toMatch(/^Supprimer cette carte\s\?$/)
+    $$('.btn-primary--danger').find(b => b.closest('.sheet')).click()
+    await settle(60)
+    expect(api.apiFetch).toHaveBeenCalledWith('/api/decks/1/cards/17', {}, { method: 'DELETE' })
+    expect($('.desk-deck__slot')).toBeNull()
+    expect($$('.dk-cards > .dk-card').map(r => r.querySelector('.dk-card__jp').textContent)).not.toContain('降りる')
+  })
+
   it('rides its lanes of the day\'s queue from the gate, and comes back to it', async () => {
     today.lanes = [
       { id: 'p|1|vocab.flashcard.f2b', kind: 'personal', deck_id: 1, deck_name: 'Voyage', mode: 'vocab.flashcard.f2b', due: 2, new: 1 },

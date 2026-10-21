@@ -904,7 +904,8 @@ def test_a_session_built_by_an_older_analysis_is_read_again(client):
     # phrases, a line kept losing every particle past its first space,
     # however the detector improved. Opened under a newer LOCAL_REV, it
     # is analysed again -- cue times kept -- and stored that way.
-    srt = "1\n00:00:01,000 --> 00:00:04,000\nSHAKE 白々しく光る 街の灯りに 照らされ\n".encode("utf-8")
+    # Two rows of a phone at most, so it is one line (study/line_cut).
+    srt = "1\n00:00:01,000 --> 00:00:04,000\nSHAKE 白々しく光る 街の灯りに\n".encode("utf-8")
     session_id = client.post(
         "/api/video/session",
         files={"file": ("rev.srt", srt, "text/plain")},

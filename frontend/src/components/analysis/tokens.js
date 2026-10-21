@@ -1,4 +1,5 @@
 import { coversToken } from './grammarSpans'
+import { kanaToRomaji } from '../../lib/romaji'
 
 // The token's state and reading on a sentence line, shared by the
 // breakdown's layouts and the desk's subtitle line (plan 134). A module
@@ -52,6 +53,20 @@ export function tokState(tok) {
 export function tokFurigana(tok) {
   if (!tok.reading || !HAS_KANJI.test(tok.surface ?? '')) return ''
   return tok.reading
+}
+
+// The rōmaji printed under a token on the phone's stage (plan 263): the
+// word's sound in Hepburn, read off its reading where it has one and
+// its surface where it spells its own (a kana word, a katakana loan).
+// The particles keep the sound they are said with, not their letter
+// (は wa, へ e); a mark or a word in Latin letters has no rōmaji.
+const SPOKEN_PARTICLE = { は: 'wa', へ: 'e' }
+const HAS_KANA = /[ぁ-ゖァ-ヺー]/
+export function tokRomaji(tok) {
+  if (tok.pos === 'particle' && SPOKEN_PARTICLE[tok.surface]) return SPOKEN_PARTICLE[tok.surface]
+  const sound = tok.reading || tok.surface || ''
+  if (!HAS_KANA.test(sound)) return ''
+  return kanaToRomaji(sound)
 }
 
 // The state on a line that knows the sentence's grammar (plan 160): a

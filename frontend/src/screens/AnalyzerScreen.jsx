@@ -14,6 +14,9 @@ import { useAsk } from '../hooks/useAsk'
 import { askContext } from '../domain/ask'
 import { MineButton } from '../components/analysis/MineButton'
 import { SongDeckSheet } from '../components/analysis/SongDeckSheet'
+import { KeepSheet } from '../components/analysis/KeepSheet'
+import { DisplaySheet } from '../components/analysis/DisplaySheet'
+import { FURIGANA, readDisplay, saveDisplay } from '../components/analysis/displayPrefs'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
 import { PlayerBar, PlayerTrack } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
@@ -22,6 +25,7 @@ import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
 import { GrammarPoints } from '../components/analysis/GrammarPoints'
 import { coversToken, numberedPointsOf } from '../components/analysis/grammarSpans'
 import { useLight } from '../components/analysis/useLight'
+import { useLineFit } from '../components/analysis/useLineFit'
 import { useStageClaim } from '../stores/stage'
 import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
@@ -47,7 +51,7 @@ import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 import { heldTooSoon } from '../lib/keyRepeat'
-import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon } from '../components/ui/Icons'
+import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon, SlidersIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
@@ -95,9 +99,8 @@ const HOLD_LEAD_MS = 80
 // ...and a clock found past the end is set back this far inside it, so
 // the sentence held is the one the subtitle, the words and Rejouer show.
 const HOLD_INSET = 0.05
-// The furigana dial's three settings, in the order the desk's one
-// quiet button walks them.
-const FURIGANA = ['all', 'unknown', 'none']
+// The furigana dial's three settings (displayPrefs.FURIGANA), in the
+// order the desk's one quiet button walks them.
 const FURIGANA_LABEL = { all: 'furiganaAll', unknown: 'furiganaUnknown', none: 'furiganaNone' }
 
 // ── 解析駅 — one station, three platforms ─────────────────
@@ -261,7 +264,18 @@ export default function AnalyzerScreen({ session }) {
   // ふりがな -- which readings the phrase line shows. 'unknown' is the
   // default on purpose: readings exactly where the SRS says the
   // learner still needs them, bare everywhere they've earned it.
-  const [furigana, setFurigana] = useState('unknown')
+  // Since plan 263 one of the phone's three helps (the Affichage sheet:
+  // the readings, the rōmaji, the translation), remembered by this
+  // browser; the desk's dial walks the same setting.
+  // A change is merged into the latest settings, not the ones a sheet
+  // was drawn with: two taps in one frame each keep theirs.
+  const [display, setDisplay] = useState(readDisplay)
+  const changeDisplay = useCallback(patch => setDisplay(prev => ({ ...prev, ...patch })), [])
+  useEffect(() => { saveDisplay(display) }, [display])
+  const furigana = display.furigana
+  const setFurigana = walk => setDisplay(prev => ({ ...prev, furigana: walk(prev.furigana) }))
+  const [displayOpen, setDisplayOpen] = useState(false)
+  const closeDisplay = useCallback(() => setDisplayOpen(false), [])
 
   // ONE sheet over the stage (plan 096), whatever was pressed: a word
   // or a kanji opens its dictionary entry, a chip or a rule opens the
@@ -301,6 +315,10 @@ export default function AnalyzerScreen({ session }) {
   // proposes -- a video's title, read off the player as it opens.
   const [song, setSong] = useState(null)
   const closeSong = useCallback(() => setSong(null), [])
+  // 保存 on a phone (plan 263): the keep sheet, the line in hand and the
+  // deck it goes in, with the name the song's deck takes.
+  const [keeping, setKeeping] = useState(null)
+  const closeKeeping = useCallback(() => setKeeping(null), [])
   // The phone's dock opens the line's grammar or its words as a sheet
   // (plan 219).
   const [dock, setDock] = useState(null)
@@ -1646,13 +1664,16 @@ export default function AnalyzerScreen({ session }) {
   // ── 舞台 — the result on a phone (plan 219, the owner's pick D) ──
   // Drawn like a run, under the shell's two bars taken away (stores/
   // stage.js): at the head the way back, where the Passage is, and the
-  // door that makes it a deck -- what the head holds is about the whole
-  // video; the video edge to edge with its track along its foot; the
+  // door to what the stage prints around its line (the Affichage sheet,
+  // plan 263; the song's deck went to Garder); the video edge to edge
+  // with its track along its foot; the
   // line in the middle of the screen at display size, the sentence
   // before over it and the one after under it, quieter, each a tap
-  // away, the translation once Explain has bought it; and at the foot
+  // away (a tablet's only: a phone hides them, index.css), the
+  // translation once Explain has bought it; and at the foot
   // the thumb's dock, what it holds about the line alone -- its grammar
-  // and its words (each a sheet), Explain, keep -- over the transport.
+  // and its words (each a sheet), Explain, keep (into a deck since plan
+  // 263) -- over the transport.
   // A word tapped on the line opens its dictionary card, a point its
   // lesson, both in the dictionary's sheet.
   const nextText = sentences[focusIndex + 1]?.text
@@ -1671,6 +1692,10 @@ export default function AnalyzerScreen({ session }) {
     playerRef.current?.pause()
     setDock(which)
   }
+  function openKeep() {
+    playerRef.current?.pause()
+    setKeeping({ index: focusIndex, title: playerRef.current?.title?.() ?? '' })
+  }
   function openExplain() {
     playerRef.current?.pause()
     setExplainOpen(true)
@@ -1684,6 +1709,9 @@ export default function AnalyzerScreen({ session }) {
     )
     : <span className={`anl-m__line anl-m__line--${where} anl-m__line--none`} aria-hidden="true" />)
   const wordRows = readable ? wordTileRows(focused) : []
+  // The line and its translation, stepped down a rung where the stage
+  // would not hold them (useLineFit).
+  const subsRef = useRef(null)
   const mobileResult = focused && (
     <div
       ref={resultsRef}
@@ -1701,19 +1729,18 @@ export default function AnalyzerScreen({ session }) {
           </span>
           <span className="anl-m__count">{focusIndex + 1} / {sentences.length}</span>
         </span>
-        {songPassage && (
-          <button
-            type="button"
-            className="anl-m__song"
-            aria-haspopup="dialog"
-            aria-label={t.songDeckOpen}
-            title={t.songDeckOpen}
-            onClick={openSong}
-          >
-            <SongIcon size={16} />
-            <span aria-hidden="true">{t.songDeckShort}</span>
-          </button>
-        )}
+        {/* 表示 (plan 263, the owner's pick B): where 歌 stood, the door to
+            the line's three helps. The song's deck went down to Garder. */}
+        <button
+          type="button"
+          className={`anl-m__show${displayOpen ? ' anl-m__show--open' : ''}`}
+          aria-haspopup="dialog"
+          aria-expanded={displayOpen}
+          onClick={() => setDisplayOpen(true)}
+        >
+          <SlidersIcon size={16} />
+          <span>{t.displayOpen}</span>
+        </button>
       </div>
 
       {playerVideoId && (
@@ -1734,7 +1761,7 @@ export default function AnalyzerScreen({ session }) {
         </div>
       )}
 
-      <section className="anl-m__subs" data-furigana={furigana} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
+      <section ref={subsRef} className="anl-m__subs" data-furigana={furigana} data-romaji={display.romaji ? '' : undefined} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
         {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1), 'prev')}
         {focused.foreign ? (
           <p className="anl-m__note">
@@ -1753,9 +1780,10 @@ export default function AnalyzerScreen({ session }) {
             playhead={playerVideoId ? playhead : null}
             playing={playing}
             timing={timing}
+            romaji={display.romaji}
           />
         )}
-        {(translation || translationDue) && trLine('anl-m__tr')}
+        {display.translation && (translation || translationDue) && trLine('anl-m__tr')}
         {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1), 'next')}
       </section>
 
@@ -1779,16 +1807,17 @@ export default function AnalyzerScreen({ session }) {
               {explainingHere && !hasExplanation ? <span>{t.explaining}</span> : t.dockExplain}
             </button>
           )}
+          {/* 保存 (plan 263): the line into a deck, its words with it --
+              the sheet says where, and keeps the plain pin one press
+              inside it. */}
           <button
             type="button"
             className={`anl-m__tool anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
-            aria-pressed={isKept}
-            aria-label={isKept ? t.unkeepSentence : t.keepSentence}
-            title={isKept ? t.unkeepSentence : t.keepSentence}
-            onClick={() => analyzer.keepSentence(focusIndex)}
+            aria-haspopup="dialog"
+            onClick={openKeep}
           >
             {isKept ? <CheckIcon size={18} /> : <PlusIcon size={18} />}
-            <span aria-hidden="true">{isKept ? t.dockKept : t.dockKeep}</span>
+            <span>{isKept ? t.dockKept : t.dockKeep}</span>
           </button>
         </div>
         <PlayerBar
@@ -1837,6 +1866,10 @@ export default function AnalyzerScreen({ session }) {
 
   // The phone's result takes the stage: no HUD, no tab bar (plan 219).
   useStageClaim(Boolean(showResult && focused && !wide))
+  useLineFit(subsRef, [
+    showResult && !wide, focusIndex, focused?.text, translation, translationDue,
+    display.translation, display.romaji, furigana,
+  ].join('\u0000'))
 
   return (
     <main id="main-content" className="dictionary analyzer" style={{ '--line-color': KAISEKI }}>
@@ -1998,6 +2031,32 @@ export default function AnalyzerScreen({ session }) {
           askKey={focused.text}
           askContext={sentenceAsk}
           t={t}
+        />
+      )}
+
+      {showResult && focused && !wide && (
+        <DisplaySheet
+          open={displayOpen}
+          onClose={closeDisplay}
+          display={display}
+          onChange={changeDisplay}
+          translationBought={translationsPath != null || Boolean(translation)}
+          t={t}
+        />
+      )}
+
+      {keeping && showResult && !wide && (
+        <KeepSheet
+          session={session}
+          mining={mining}
+          sentences={sentences}
+          focusIndex={keeping.index}
+          kept={analyzer.kept}
+          title={keeping.title}
+          onPin={() => analyzer.keepSentence(keeping.index)}
+          onUnpin={() => analyzer.keepSentence(keeping.index)}
+          t={t}
+          onClose={closeKeeping}
         />
       )}
 

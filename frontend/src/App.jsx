@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from '
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
 import { TicketGate } from './components/station/TicketGate'
-import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
+import { UpdateToast, ReleaseNote, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
 import { ClaimSheet } from './components/credits/ClaimSheet'
@@ -27,7 +27,7 @@ import DayClearPreview from './screens/DayClearPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
-import { isGuest, startGuest } from './lib/guest'
+import { forgetParkedGuest, isGuest, parkGuest, startGuest } from './lib/guest'
 import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
@@ -52,6 +52,7 @@ import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
 import TicketsScreen from './screens/TicketsScreen'
+import BanzukeScreen from './screens/BanzukeScreen'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -387,6 +388,10 @@ export default function App({ front = NO_FRONT }) {
   // and signing out is what puts Welcome back on screen. `local`
   // scope, like Settings' own sign-out: this device only.
   function leaveBoarding(mode = null) {
+    // Backing out keeps the empty pass for the next Board (lib/guest.js);
+    // going to sign in to an account has no use for it.
+    if (mode == null) parkGuest(session)
+    else forgetParkedGuest()
     setAuthMode(mode)
     const out = supabase.auth.signOut({ scope: 'local' })
     const page = mode == null ? pageBehind.current : null
@@ -760,6 +765,7 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/profile/stats"        element={<StatsScreen session={session} />} />
             {/* 記念切符 — the tickets a streak has earned (plan 191). */}
             <Route path="/profile/tickets"      element={<TicketsScreen session={session} />} />
+            <Route path="/profile/banzuke"      element={<BanzukeScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
             {/* The settings pages (plan 074): display, sound, learning,
                 destination, data, account — each its own page under
@@ -848,11 +854,12 @@ export default function App({ front = NO_FRONT }) {
             the profile; nothing on the web. */}
         <NativeBridge />
 
-        {/* 掲示 — the docked notes (plan 065): a new build waiting, or
-            no network. Beside <Routes/> for the same reason as the gate
-            below: they must outlive the navigation that would unmount a
-            screen. */}
+        {/* 掲示 — the docked notes (plan 065): a new build waiting, a
+            release coming (plan 265), or no network. Beside <Routes/> for
+            the same reason as the gate below: they must outlive the
+            navigation that would unmount a screen. */}
         <UpdateToast />
+        <ReleaseNote />
         <OfflineNote />
 
         {/* 回数券 — the balance sheet off the HUD's pass, and the run-out

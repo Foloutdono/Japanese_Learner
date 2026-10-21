@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 
 // ── 歌 — the song sheet makes the song's deck (plan 215) ──
-// One mixed deck, through the endpoints the rest of the app already
+// One lyrics deck (a mixed one before plan 264), through the endpoints the rest of the app already
 // writes decks with: the deck made (or found) by name, the words as one
 // batch of app cards, the lines in the import dialog's slices. What a
 // second press for the same song writes is what the deck does not hold
@@ -66,7 +66,7 @@ function server({ heldLines = [], batch = () => ({ inserted: 1, errors: [] }) } 
     throw new Error(`unexpected ${url}`)
   })
 }
-const DECK = name => ({ id: 3, name, type: 'mixed' })
+const DECK = name => ({ id: 3, name, type: 'lyrics' })
 
 async function renderSheet(mining, { title = '夜' } = {}) {
   return render(
@@ -84,7 +84,7 @@ beforeEach(() => {
 })
 
 describe('the song sheet', () => {
-  it('makes one mixed deck of the words and the lines, and turns into the door to it', async () => {
+  it('makes one lyrics deck of the words and the lines, and turns into the door to it', async () => {
     server()
     const mining = miningWith(async (_kind, name) => DECK(name))
     const screen = await renderSheet(mining, { title: '夜に駆ける' })
@@ -101,7 +101,7 @@ describe('the song sheet', () => {
     await settle(120)
 
     expect(mining.ensureDeck).toHaveBeenCalledTimes(1)
-    expect(mining.ensureDeck).toHaveBeenCalledWith('mixed', '夜に駆ける', { remember: false })
+    expect(mining.ensureDeck).toHaveBeenCalledWith('lyrics', '夜に駆ける', { remember: false })
     const app = apiJson.mock.calls.find(([url]) => url === '/api/decks/3/cards/app')
     expect(JSON.parse(app[2].body).cards.map(c => c.raw_id)).toEqual([
       'vocab_N5_君_きみ', 'vocab_N5_名前_なまえ', 'vocab_N4_呼ぶ_よぶ', 'vocab_N5_夜_よる', 'vocab_N5_来る_くる',
@@ -114,11 +114,11 @@ describe('the song sheet', () => {
     ])
     expect(track).toHaveBeenCalledWith('song_deck', { words: 5, lines: 2 })
 
-    // Made: the form gives way to the door to the deck, 混 on its roundel
+    // Made: the form gives way to the door to the deck, 歌 on its roundel
     // and the seven cards the song gave it.
     const doors = [...document.querySelectorAll('a.anl-song__deck')]
     expect(doors.map(a => a.getAttribute('href'))).toEqual(['/learn/decks/3'])
-    expect(doors[0].querySelector('.picker-row__roundel').textContent).toBe('混')
+    expect(doors[0].querySelector('.picker-row__roundel').textContent).toBe('歌')
     expect(doors[0].querySelector('.picker-row__count').textContent).toBe(en.cardsUnit(7))
     expect(document.querySelector('form.anl-song')).toBeNull()
     screen.unmount()
@@ -147,7 +147,7 @@ describe('the song sheet', () => {
     await settle()
     dialog.querySelector('.btn-primary').click()
     await settle(120)
-    expect(mining.ensureDeck).toHaveBeenCalledWith('mixed', 'Yoru', { remember: false })
+    expect(mining.ensureDeck).toHaveBeenCalledWith('lyrics', 'Yoru', { remember: false })
     expect(apiJson.mock.calls.some(([url]) => url === '/api/decks/3/cards/app')).toBe(false)
     expect(track).toHaveBeenCalledWith('song_deck', { words: 0, lines: 2 })
     screen.unmount()

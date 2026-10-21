@@ -5,6 +5,10 @@
 # decides its modes -- so these hold that rule end to end: the modes the
 # deck offers, which cards a session in each serves, the counts, and the
 # states on the deck's page.
+#
+# A lyrics deck (plan 264), a song's deck, holds what a mixed deck holds
+# by the same rule until its own modes come, so every test here that
+# makes a mixed deck makes one of each.
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -42,6 +46,12 @@ def _wipe(user_id: str) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+@pytest.fixture(params=["mixed", "lyrics"])
+def card_led(request):
+    """A structure in which a card, not the deck, decides its modes."""
+    return request.param
 
 
 @pytest.fixture()
@@ -104,8 +114,8 @@ def _make_due(raw_id: str, mode: str) -> None:
         conn.close()
 
 
-def test_a_mixed_deck_takes_every_source_and_written_pairs(mclient):
-    deck_id = _deck(mclient)
+def test_a_mixed_deck_takes_every_source_and_written_pairs(mclient, card_led):
+    deck_id = _deck(mclient, card_led)
     assert _link(mclient, deck_id, ("vocab", WORD), ("kanji", GLYPH), ("grammar", POINT)) == 3
     card = _write(mclient, deck_id)
     # A mixed deck's written card is a plain front/back pair.
@@ -114,12 +124,12 @@ def test_a_mixed_deck_takes_every_source_and_written_pairs(mclient):
     assert sorted(c.get("source", c["origin"]) for c in listed) == ["custom", "grammar", "kanji", "vocab"]
 
 
-def test_an_empty_mixed_deck_offers_nothing(mclient):
-    assert _modes(mclient, _deck(mclient)) == []
+def test_an_empty_mixed_deck_offers_nothing(mclient, card_led):
+    assert _modes(mclient, _deck(mclient, card_led)) == []
 
 
-def test_its_modes_are_those_of_the_sources_it_holds_in_the_registry_s_order(mclient):
-    deck_id = _deck(mclient)
+def test_its_modes_are_those_of_the_sources_it_holds_in_the_registry_s_order(mclient, card_led):
+    deck_id = _deck(mclient, card_led)
     _write(mclient, deck_id)
     assert _modes(mclient, deck_id) == list(GRADED_ORDER_FOR_SOURCE["standard"])
 
@@ -134,8 +144,8 @@ def test_its_modes_are_those_of_the_sources_it_holds_in_the_registry_s_order(mcl
     ]
 
 
-def test_a_session_serves_only_the_cards_its_mode_belongs_to(mclient):
-    deck_id = _deck(mclient)
+def test_a_session_serves_only_the_cards_its_mode_belongs_to(mclient, card_led):
+    deck_id = _deck(mclient, card_led)
     _link(mclient, deck_id, ("vocab", WORD), ("kanji", GLYPH))
     written = f"custom_{deck_id}_{_write(mclient, deck_id)['id']}"
 
@@ -151,8 +161,8 @@ def test_a_session_serves_only_the_cards_its_mode_belongs_to(mclient):
     assert (stats["total"], stats["new"]) == (1, 1)
 
 
-def test_each_card_on_the_page_is_read_in_its_own_modes(mclient):
-    deck_id = _deck(mclient)
+def test_each_card_on_the_page_is_read_in_its_own_modes(mclient, card_led):
+    deck_id = _deck(mclient, card_led)
     _link(mclient, deck_id, ("vocab", WORD))
     _write(mclient, deck_id)
     _make_due(WORD, VOCAB_F2B)
@@ -169,15 +179,15 @@ def test_a_single_structure_deck_still_holds_its_one_source(mclient):
     assert _served(mclient, deck_id, STANDARD_F2B) == []
 
 
-def test_a_published_mixed_deck_is_found_under_its_kind_and_studied_by_a_follower(mclient, other_user):
-    deck_id = _deck(mclient)
+def test_a_published_mixed_deck_is_found_under_its_kind_and_studied_by_a_follower(mclient, card_led, other_user):
+    deck_id = _deck(mclient, card_led)
     _link(mclient, deck_id, ("vocab", WORD))
     written = f"custom_{deck_id}_{_write(mclient, deck_id)['id']}"
     r = mclient.post(f"/api/decks/{deck_id}/publish", json={"description": ""})
     assert r.status_code == 200, r.text
 
     with acting_as(other_user):
-        body = mclient.get("/api/decks/library", params={"type": "mixed"}).json()
+        body = mclient.get("/api/decks/library", params={"type": card_led}).json()
         assert deck_id in [d["id"] for d in body["results"]]
         assert mclient.post(f"/api/decks/{deck_id}/subscribe").status_code == 200
         assert _modes(mclient, deck_id) == [

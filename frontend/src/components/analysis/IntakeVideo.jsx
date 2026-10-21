@@ -187,7 +187,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
       <input
         ref={fileRef}
         type="file"
-        accept=".srt,.vtt,.ass,.ssa,text/vtt,text/plain,text/*,application/octet-stream"
+        accept=".srt,.vtt,.ass,.ssa,.lrc,.txt,text/vtt,text/plain,text/*,application/octet-stream"
         className="anl-drop__input"
         tabIndex={-1}
         aria-hidden="true"

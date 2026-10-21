@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { tokState, isUnknownToken, isPoolWord } from './tokens'
+import { tokState, isUnknownToken, isPoolWord, tokRomaji } from './tokens'
 
 // ── A word past the course (plan 148) ────────────────────────────
 // The breakdown's words the JLPT deck does not teach now carry the
@@ -52,5 +52,28 @@ describe('a pool word on the line', () => {
     expect(isPoolWord(deck('noun', 'new'))).toBe(false)
     expect(isPoolWord({ surface: 'は' })).toBe(false)
     expect(isPoolWord(null)).toBe(false)
+  })
+})
+
+// ── The rōmaji under a word on the phone's stage (plan 263) ──
+describe('a word in rōmaji', () => {
+  const w = (surface, reading, pos = 'noun') => ({ surface, reading, pos })
+  it('reads a word by its reading, a kana word by its spelling', () => {
+    expect(tokRomaji(w('学校', 'がっこう'))).toBe('gakkou')
+    expect(tokRomaji(w('ギター', ''))).toBe('gitaa')
+    expect(tokRomaji(w('きっと', '', 'adverb'))).toBe('kitto')
+  })
+
+  it('says a particle the way it is said', () => {
+    expect(tokRomaji(w('は', 'は', 'particle'))).toBe('wa')
+    expect(tokRomaji(w('へ', 'へ', 'particle'))).toBe('e')
+    expect(tokRomaji(w('を', 'を', 'particle'))).toBe('o')
+    // The letter, not the particle: は inside a word is ha.
+    expect(tokRomaji(w('はな', 'はな'))).toBe('hana')
+  })
+
+  it('writes nothing under a mark or a word in Latin letters', () => {
+    expect(tokRomaji(w('、', '', 'punctuation'))).toBe('')
+    expect(tokRomaji(w('love', '', 'noun'))).toBe('')
   })
 })

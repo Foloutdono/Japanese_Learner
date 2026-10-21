@@ -904,9 +904,16 @@ confirmation, then the terminus (`components/study/GrammarTour.jsx`,
 chosen by `GrammarGate`). It is the boarding's frame inside a run's
 stage, not a new idiom:
 
-- **A track of stops at the head**, drawn in the line's pigment: where
-  you are keeps the line's colour (the boarding's own track is the pass's
-  gold, because the boarding is the learner's).
+- **A track of stops at the head** (plan 264, the owner's pick C of the
+  canvas "Tour track"): a segment a stop, in the line's pigment, under
+  the stop's name (the caption register, in the line's ink) and where it
+  stands of how many (« 2 / 3 »). The stops passed are full; the one in
+  hand is the pigment sunk into the ground and fills with what is done
+  of it (a glyph's strokes traced, a quiz's questions checked); the ones
+  ahead are the hairline. **The track names the stop, so the card never
+  does**: its caption says only what is left inside it (« Trait 1 sur
+  3 »). The boarding's own track is the pass's gold, because the
+  boarding is the learner's.
 - **One card a stop** (一枚, plan 206, the owner's pick B of the canvas
   "Tsuji — the tour, fuller"). The stops used to hang from the head in
   boxes of one weight over an empty middle; each stop is now one card,
@@ -993,22 +1000,31 @@ drawn only where there is something to show:
   them (`Readings`, on'yomi and kun'yomi apart).
 - **Write.** The strokes traced in turn on **the writing board's slab**
   (the sumi square, sumi in both themes, the practice sheet's 田 over it)
-  with the brush's ink. The stroke asked is in the line's pigment lit
-  toward the ink, drawn in once along its way, **a full dot where it
-  starts and a ring where it ends**; the strokes ahead are faint, the
-  ones traced stand in the ink. A trace is judged in KanjiVG's units
-  (`domain/trace.js`): begun at the dot, ended at the ring, along the
-  stroke, a fingertip of slack. A miss is a line a moment in the miss's
-  ink and one line at the card's foot saying what to fix (« Pars du
-  point plein. », « Va jusqu'au rond. », « Suis le trait. »), the stroke
-  drawn in again; after three misses on one stroke the board draws it
-  and says so in the selection's ink (given, not found). « Montre-moi » is the quiet
-  way over the gate and draws the rest in order. As a writing run's
-  board is, **the board is the square the card leaves**: the middle
-  takes the card's free height and the board the smaller of its sides,
-  so a miss's word never lands under the gate (never under 200px, where
-  the screen scrolls instead). The gate is its outline until the glyph
-  is whole.
+  with the brush's ink, at a brush's weight. The stroke asked is **a
+  hollow the hand fills** (plan 263, the owner's pick A1 + A2): its
+  outline in the line's pigment lit toward the ink, drawn in from its
+  start as it is asked, so its way is seen before it is traced; **a full
+  dot with the stroke's number where it starts, a ring where it ends**,
+  filled once the ink reaches it; and three chevrons inside it, ahead of
+  the ink, walking its way while the hand waits (still, under reduced
+  motion). The strokes ahead are faint, the ones traced stand in the
+  ink, over the hollow where two cross. **The ink is the stroke's own**,
+  carried along it as far as the finger has come and only forward
+  (`domain/trace.js`, in KanjiVG's units, a fingertip of slack): a
+  wavering line leaves the stroke's shape, a finger off the stroke
+  carries nothing until it comes back to where the ink stopped, and the
+  ring reached makes the stroke whole without the finger lifting. A
+  stroke begun away from the dot calls the dot. Lifted short, the ink
+  drains back along the stroke, the finger's own line shows a moment in
+  the miss's ink, and one line at the card's foot says what to fix
+  (« Pars du point plein. », « Va jusqu'au rond. », « Suis le trait. »);
+  after three misses on one stroke the board draws it and says so in the
+  selection's ink (given, not found). « Montre-moi » is the quiet way
+  over the gate and draws the rest in order. As a writing run's board
+  is, **the board is the square the card leaves**: the middle takes the
+  card's free height and the board the smaller of its sides, so a miss's
+  word never lands under the gate (never under 200px, where the screen
+  scrolls instead). The gate is its outline until the glyph is whole.
 - **Use.** Up to three simple words, as the dictionary's ledger has
   them: the word at `--fs-heading` with the glyph picked out in the
   line's ink (a kana's word printed as it is read, a kanji's with its
@@ -2296,6 +2312,15 @@ line here says otherwise.
   thumb's dock at the foot about the line alone (grammar, words, Explain,
   keep) over the transport. A screen under the shell takes the stage
   through `stores/stage.js`; the desk's rail never leaves.
+  **The line and its translation fit between the video and the dock**
+  (2026-10-20): the server cuts a line wider than two rows there where it
+  cuts clean (`study/line_cut.TARGET_LINE_WIDTH`), and a line it could
+  not cut, or a screen too short for two rows, is stepped down the rungs
+  until the stage holds it -- `--fs-display-fluid`, `--fs-heading`, then
+  `--fs-title`, the size of every other breakdown's words, its readings
+  and its translation a rung down with it (`useLineFit`). Measured, never
+  guessed from the line's length; past the floor the page scrolls behind
+  the dock, as a tall card does.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its

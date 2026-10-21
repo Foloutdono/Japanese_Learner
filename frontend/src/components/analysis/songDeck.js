@@ -1,5 +1,5 @@
-import { wordRowsOf } from './rows'
-import { tokFurigana } from './tokens'
+import { rowName, wordRowsOf } from './rows'
+import { tokFurigana, tokState } from './tokens'
 
 // ── 歌 — a song made the learner's own (plan 215) ────────────────
 // A learner who likes a song wants two things of it: to understand it
@@ -17,7 +17,8 @@ import { tokFurigana } from './tokens'
 //          turned over, the line's translation in its notes where
 //          Explain has bought one.
 //
-// Pure, so the node lane can read it without a page.
+// Pure, so the node lane can read it without a page. The writes are
+// songDeckApi.js's.
 
 // A chorus comes back three times and is one card: the identity of a
 // line is its text, as the bank's is (useAnalyzerSession's `kept`).
@@ -58,6 +59,14 @@ export function lineReading(sentence) {
  *  sung: refs in the shape POST /api/decks/{id}/cards/app takes. A pool
  *  word carries no level (plan 148), and the server stores its marker. */
 export function songWords(sentences) {
+  return songWordRows(sentences).map(word => word.ref)
+}
+
+/** The words songWords takes, as the keep sheet shows them (plan 263):
+ *  each its card's ref, its dictionary spelling and reading (rowName),
+ *  and whether the learner has mastered it already -- a word they know
+ *  is offered unticked, a card they would only be shown again. */
+export function songWordRows(sentences) {
   const seen = new Set()
   const out = []
   for (const sentence of sentences ?? []) {
@@ -66,7 +75,11 @@ export function songWords(sentences) {
       const match = row.head.vocab_match
       if (!match?.raw_id || seen.has(match.raw_id)) continue
       seen.add(match.raw_id)
-      out.push({ source: 'vocab', level: match.level ?? null, raw_id: match.raw_id })
+      out.push({
+        ref: { source: 'vocab', level: match.level ?? null, raw_id: match.raw_id },
+        ...rowName(row),
+        known: tokState(row.head) === 'mastered',
+      })
     }
   }
   return out
@@ -88,6 +101,22 @@ export function songLines(sentences) {
     out.push({ front: text, back: reading, notes: translation })
   }
   return out
+}
+
+/** The lines the shelf's lyrics import shows (plan 264): the readable
+ *  ones, once each, in the order first sung, each with how often it
+ *  comes back and the sort's verdict on it (`kinds`, one per sentence,
+ *  study/lyrics_sort.py's KINDS). */
+export function lyricRows(sentences, kinds) {
+  const rows = new Map()
+  ;(sentences ?? []).forEach((sentence, i) => {
+    const text = (sentence?.text ?? '').trim()
+    if (!text || !readable(sentence)) return
+    const row = rows.get(text)
+    if (row) row.times += 1
+    else rows.set(text, { text, kind: kinds?.[i] ?? 'sung', times: 1 })
+  })
+  return [...rows.values()]
 }
 
 const NAME_MAX = 60
