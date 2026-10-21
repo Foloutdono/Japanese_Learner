@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { tokState, isUnknownToken, isPoolWord, tokRomaji } from './tokens'
+import { tokState, isUnknownToken, isPoolWord, tokRomaji, wordGloss } from './tokens'
 
 // ── A word past the course (plan 148) ────────────────────────────
 // The breakdown's words the JLPT deck does not teach now carry the
@@ -75,5 +75,31 @@ describe('a word in rōmaji', () => {
   it('writes nothing under a mark or a word in Latin letters', () => {
     expect(tokRomaji(w('、', '', 'punctuation'))).toBe('')
     expect(tokRomaji(w('love', '', 'noun'))).toBe('')
+  })
+})
+
+// ── A number or a name the course has no card for (plan 266) ──
+// The local tier glosses it itself, in both languages, as it does a
+// grammar point: 三十 had no card and its row said nothing, and 田中 read
+// as a word the course does not teach.
+describe('the gloss of a word with no card', () => {
+  const number = { surface: '三十', pos: 'noun', vocab_match: null, gloss: { en: '30', fr: '30' } }
+  const name = { surface: '田中', pos: 'noun', vocab_match: null, gloss: { en: 'family name', fr: 'nom de famille' } }
+
+  it('is the local tier\'s line, in the reader\'s language', () => {
+    expect(wordGloss(number, 'en')).toBe('30')
+    expect(wordGloss(name, 'en')).toBe('family name')
+    expect(wordGloss(name, 'fr')).toBe('nom de famille')
+  })
+
+  it('falls back to the English, and gives way to a card or a bought gloss', () => {
+    expect(wordGloss({ ...name, gloss: { en: 'family name' } }, 'fr')).toBe('family name')
+    expect(wordGloss({ ...name, meaning: 'Tanaka (a surname)' }, 'fr')).toBe('Tanaka (a surname)')
+    expect(wordGloss({ ...deck('noun', 'new'), gloss: { en: 'x' } }, 'en')).toBe('m')
+  })
+
+  it('is nothing for a word with neither', () => {
+    expect(wordGloss({ surface: 'は', pos: 'particle', vocab_match: null }, 'en')).toBe('')
+    expect(wordGloss(null, 'en')).toBe('')
   })
 })

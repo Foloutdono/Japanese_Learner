@@ -162,9 +162,11 @@ function wordItems(s, points, lang, t) {
       // in a word: the catalogue's general line is the lesson's, not a
       // breakdown's (plan 229l). One no point is written on says what the
       // sentence's shape settles, else nothing: never its part of speech
-      // (plan 234e).
-      const label = (!p || p === row.t) && particleLabel(s.rows, i, lang)
-      main = label || (pt ? tr(pt, lang) : clauseLabel(s.rows, i, lang) || '')
+      // (plan 234e) -- and so does a marker the shape settles, now that
+      // the app writes と's point on the と of 行きたくないと言う (plan 266):
+      // "that (quoting)", not the lesson's "and; with; what is said".
+      const label = (!p || p === row.t) && (particleLabel(s.rows, i, lang) || clauseLabel(s.rows, i, lang))
+      main = label || (pt ? tr(pt, lang) : '')
       sub = label ? '' : formOf(pt, lang)
     } else {
       [main, sub] = gloss(row, lang)

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **266**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **267**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -168,6 +168,19 @@ runtime purpose.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
   diffed over every sentence Construire asks.
+- **Every part of a breakdown says what it is (plan 266).** A word row
+  carries its card's meaning, a particle or an ending the point written
+  on it, a number its figure and a name the word "name" (the token's
+  `gloss`, `{en, fr}`); a part with none of these is a gap, and
+  `python -m scripts.breakdown_gaps` lists them over every sentence the
+  app teaches. A function word reaches the deck's kana card through
+  `card_lookup`'s breakdown-only resolvers ("the words that hold a
+  sentence together"), never through `resolve_morpheme`, so no card a
+  particle or a suffix gains grades a sentence's level; a set phrase is
+  folded only where it is a whole utterance and a part of it said
+  nothing, and a marker read inside a folded word is dropped. A missing
+  meaning still beats a guessed one: the copula's に after a noun and
+  〜らしい after one stay unlit (`test_grammar_precision.py` pins both).
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
@@ -861,6 +874,19 @@ Draft a scenario against it:
 cd backend
 python -m scripts.check_conversation            # every level; exit 1 on a problem
 python -m scripts.check_conversation --level N4
+```
+
+The breakdown has one too (plan 266): every part of the app's own
+sentences that says nothing -- a word row with no meaning, a particle no
+point is written on -- grouped by kind, each with a sentence that shows
+it. A reason to look; a gap is closed in the lookups or the detector by
+counter-case:
+
+```bash
+cd backend
+python -m scripts.breakdown_gaps                          # the gaps, by kind
+python -m scripts.breakdown_gaps --kind silent_particle   # one kind, longer
+python -m scripts.breakdown_gaps --json                   # every gap, as JSON
 ```
 
 One more read-only report measures the vocab deck itself (plan 103) —

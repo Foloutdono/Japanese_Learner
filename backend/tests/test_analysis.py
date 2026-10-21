@@ -358,6 +358,66 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual(r["text"], "何でもいい")
 
 
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class EveryPartTests(unittest.TestCase):
+    """Plan 266: a number and a name say what they are, and a set phrase
+    is one word whose letters lend no particle to a marker."""
+
+    def _token(self, sentence: str, surface: str) -> dict:
+        return next(t for t in analyze_local(sentence)["tokens"] if t["surface"] == surface)
+
+    def test_a_number_is_one_token_with_its_figure(self) -> None:
+        tok = self._token("九千三百五十円のおつりです。", "九千三百五十")
+        self.assertEqual(tok["number"], 9350)
+        self.assertEqual(tok["gloss"], {"en": "9,350", "fr": "9\u202f350"})
+        self.assertIsNone(tok["vocab_match"])
+        self.assertEqual(self._token("駅で三十分待ちました。", "三十")["gloss"]["en"], "30")
+        self.assertEqual(self._token("三万五千人が来た。", "三万五千")["number"], 35000)
+
+    def test_a_date_reads_its_number_whole(self) -> None:
+        # 十 + 八日 was "ten" and "the eighth day": the eighteenth is 18
+        # and the day.
+        r = analyze_local("十八日はいかがでしょうか。")
+        self.assertEqual([t["surface"] for t in r["tokens"][:2]], ["十八", "日"])
+        self.assertEqual(r["tokens"][0]["number"], 18)
+
+    def test_digits_read_one_by_one_keep_their_cards(self) -> None:
+        # A telephone's number is said digit by digit: no 3,456.
+        r = analyze_local("三四五六の七八一二番です。")
+        self.assertFalse(any("number" in t for t in r["tokens"]))
+        self.assertEqual(self._token("三四五六の七八一二番です。", "三")["vocab_match"]["raw_id"], "vocab_N5_三_さん")
+        # A lone numeral the deck teaches keeps its card.
+        self.assertEqual(self._token("十時に来ます。", "十")["vocab_match"]["raw_id"], "vocab_N5_十_じゅう/とお")
+
+    def test_a_name_says_it_is_one(self) -> None:
+        for sentence, surface, kind in (
+            ("田中さんは今日、元気そうですね。", "田中", "family name"),
+            ("マルタンと申します。", "マルタン", "a person's name"),
+            ("新宿です。", "新宿", "place name"),
+            ("ゆきさん、こんにちは。", "ゆき", "given name"),
+        ):
+            with self.subTest(surface=surface):
+                tok = self._token(sentence, surface)
+                self.assertIsNone(tok["vocab_match"])
+                self.assertEqual(tok["gloss"]["en"], kind)
+                self.assertTrue(tok["gloss"]["fr"])
+        # Written in hiragana with no honorific, a name is the tokenizer's
+        # guess: the ゆう of ゆうがた is 夕方 cut in two.
+        self.assertNotIn("gloss", self._token("ゆうがた、雨がふった。", "ゆう"))
+        # A card the name is read like is no gloss of a name.
+        self.assertNotIn("gloss", self._token("ゆきがふりました。", "ゆき"))
+
+    def test_a_set_phrase_lends_no_particle(self) -> None:
+        r = analyze_local("では、何時ごろがよろしいですか。")
+        patterns = {g["pattern"] for g in r["grammar"]}
+        self.assertFalse({"で", "は", "〜は〜が"} & patterns)
+        self.assertIn("が", patterns)
+        # A pattern written in one piece inside a set phrase is its make
+        # and stays: いらっしゃいませ is いらっしゃる told.
+        self.assertIn("いらっしゃる／おっしゃる／なさる",
+                      {g["pattern"] for g in analyze_local("いらっしゃいませ。")["grammar"]})
+
+
 class AttachUserStateTests(unittest.TestCase):
     """attach_user_state adds per-learner SRS stats and the
     unknown/off-deck counts. Built against a hand-written states dict,
