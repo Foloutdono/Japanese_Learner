@@ -26935,10 +26935,11 @@ button.brd-stn { cursor: pointer; }
 /* Write: the writing board's slab (sumi in both themes, the practice
    sheet's 田 over it, DrawingCanvas) in the card's middle. As a writing
    run's board is (DESIGN.md, "The study stage on a phone"), it is the
-   square the card's head, what the tour says back and the gate leave:
-   the middle takes the card's free height and the board the smaller of
-   its two sides, so a miss's word never lands under the gate. Never
-   under 200px, where the screen scrolls instead. The strokes are its
+   square what the tour says back and the gate leave, the card drawing
+   no head over it (the stroke's number is on its dot): the middle takes
+   the card's free height and the board the smaller of its two sides, so
+   what the tour says never lands under the gate. Never under 200px,
+   where the screen scrolls instead. The strokes are its
    brush, at a brush's weight: traced ones in the brush's ink, the ones
    ahead faint. The one asked is a hollow (plan 263) in the line's
    pigment lit toward the ink so it reads on the sumi, drawn in from its

@@ -102,15 +102,13 @@ function Write({ tour, trace, onVerdict }) {
   } else if (trace.last === 'given') {
     said = <Said kind="given" head={t.glyphGiven} />
   }
+  // No head: the card is the board's. The stop is named on the track
+  // (plan 264), the stroke asked numbered on its dot and the way from the
+  // dot to the ring drawn, so the instruction is said to a screen reader
+  // alone, and how far by the board's label.
   return (
     <div className="tour-leaf">
-      <header className="tour-leaf__head">
-        {/* The stop is named on the track (plan 264); the card says how far. */}
-        {total > 1 && !traced && (
-          <p className="tour__notion"><span className="tour__notion-head">{t.glyphStrokeCount(n, total)}</span></p>
-        )}
-        <h2 className="tour__q" tabIndex={-1}>{t.glyphTraceQ}</h2>
-      </header>
+      <h2 className="tour__q sr-only" tabIndex={-1}>{t.glyphTraceQ}</h2>
       <div className="tour-leaf__mid gt-write">
         <TraceBoard
           strokes={tour.strokes}

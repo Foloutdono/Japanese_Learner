@@ -95,11 +95,16 @@ describe('a kana met for the first time', () => {
     expect(t.gate().disabled).toBe(true)
     expect(t.board().dataset.stroke).toBe('1')
     // The track names the stop and how far it is (plan 264); the card
-    // says only which stroke, never the stop's name again.
+    // draws no head over the board, the stroke's number on its dot and
+    // the instruction and how far said to a screen reader alone.
     expect(t.root().querySelector('.tour__track-name').textContent).toBe('Write')
     expect(t.root().querySelector('.tour__track-count').textContent).toBe('2 / 3')
     expect(t.root().querySelector('.tour__stop-fill').style.width).toBe('0%')
-    expect(t.root().querySelector('.tour-leaf__head .tour__notion').textContent).toBe('Stroke 1 of 3')
+    expect(t.root().querySelector('.tour-leaf__head')).toBeNull()
+    expect(t.root().querySelector('.tour__notion')).toBeNull()
+    expect(t.root().querySelector('.tour__q').classList.contains('sr-only')).toBe(true)
+    expect(t.root().querySelector('.tour__q').textContent).toBe('Trace each stroke from the dot to the ring.')
+    expect(t.board().getAttribute('aria-label')).toBe('Trace あ, stroke 1 of 3')
     // The stroke asked: its hollow, its dot with its number, its ring,
     // the chevrons inside it and its ink, empty; the others faint.
     expect(t.board().querySelector('.gt-hollow')).not.toBeNull()
@@ -269,7 +274,7 @@ describe('a kanji met for the first time', () => {
     const t = await mount(tours.kanji)
     t.gate().click()
     await settle()
-    expect(t.root().querySelector('.tour-leaf__head .tour__notion').textContent).toBe('Stroke 1 of 4')
+    expect(t.board().getAttribute('aria-label')).toBe('Trace 日, stroke 1 of 4')
     t.root().querySelector('[data-action="show"]').click()
     await settle()
     t.gate().click()

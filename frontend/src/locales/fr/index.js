@@ -1654,7 +1654,6 @@ const dictionary = {
   glyphNew:          { kana: 'Nouveau kana', kanji: 'Nouveau kanji' },
   glyphTwin:         { hiragana: 'en hiragana', katakana: 'en katakana' },
   glyphStops:        { read: 'Lire', write: 'Écrire', use: 'Dans des mots' },
-  glyphStrokeCount:  (n, total) => `Trait ${n} sur ${total}`,
   glyphTraceQ:       'Trace chaque trait, du point jusqu\'au rond.',
   glyphGiven:        'Ce trait est tracé pour toi.',
   glyphTraced:       misses => (misses ? 'Tracé.' : 'Tracé du premier coup.'),
