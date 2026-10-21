@@ -472,7 +472,7 @@ function NamePlate({ value, onSave }) {
 // ── Compte — keeping the card (the account) ──────────────────────
 // The guest pass (lib/guest.js) made an account on the row it already
 // is, the same id and everything on it: Google put onto it (`link`), or
-// an address and a password, typed twice (plan 269). With the project's
+// an address and a password, typed twice (plan 270). With the project's
 // "Confirm email" off the account is the learner's at once, with no
 // mail to follow; were it on, the address waits on its link and the
 // sheet says so (`onSent`). « Plus tard » rides on as a guest; the line

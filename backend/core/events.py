@@ -88,7 +88,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # The card (plan 247): which of its fields a sheet changed (the
     # defaults are what most keep, or they are not), whether it carries
     # a name -- never the name -- and where it was left: kept with
-    # Google, by a password (plan 269) or a link, boarded on an account
+    # Google, by a password (plan 270) or a link, boarded on an account
     # already, or a guest's.
     # `motive` stays for a client from before the card, which asked why.
     "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",

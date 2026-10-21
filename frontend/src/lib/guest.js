@@ -164,7 +164,7 @@ export async function claimAccount({ email, password, lang }) {
   }
 }
 
-// ── Asked to keep the card (plan 269) ─────────────────────────────
+// ── Asked to keep the card (plan 270) ─────────────────────────────
 // A guest is asked to make the card an account before it is issued
 // (the boarding's gate), then on Today further and further apart: a
 // day after that, then two days, four, a week, two weeks and a month,

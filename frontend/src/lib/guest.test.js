@@ -197,7 +197,7 @@ describe('claiming the pass', () => {
   })
 })
 
-// Plan 269: a guest is asked for an account further and further apart --
+// Plan 270: a guest is asked for an account further and further apart --
 // a day, two, four, a week, two weeks, a month, then never -- and never
 // one whose address is on its way or who has an account.
 describe('asking a guest to keep the card', () => {

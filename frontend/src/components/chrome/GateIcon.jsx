@@ -84,15 +84,79 @@ function ProfileGlyph(props) {
   )
 }
 
+// The desk's four places (plan 269, config/tabs.js' DESK_PLACE_IDS),
+// drawn in the gates' own stroke so the rail's column reads as one set.
+
+// 解析 — the analyser: a passage's lines, and the loupe read over its
+// last (the owner's pick E of five shot in the rail). The dictionary's
+// lens looks up one word; this one stands on a text.
+function AnalyzerGlyph(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 7h18" />
+      <path d="M3 12h7" />
+      <path d="M3 17h5" />
+      <circle cx="16" cy="15" r="3.5" />
+      <path d="M18.6 17.6l2.4 2.4" />
+      <path d="M14.5 15h3" />
+    </svg>
+  )
+}
+
+// 書庫 — the library: two spines upright, and one leaning on them.
+function LibraryGlyph(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="4.5" width="4.5" height="15" rx="1" />
+      <rect x="10" y="4.5" width="4.5" height="15" rx="1" />
+      <path d="M16.4 6.3l2.5-.6 2.3 12.9-2.5.6z" />
+    </svg>
+  )
+}
+
+// 統計 — the statistics: three bars on their ground.
+function StatsGlyph(props) {
+  return (
+    <svg {...base} {...props}>
+      <line x1="4" y1="20" x2="20" y2="20" />
+      <line x1="7" y1="16.5" x2="7" y2="12" />
+      <line x1="12" y1="16.5" x2="12" y2="6" />
+      <line x1="17" y1="16.5" x2="17" y2="9.5" />
+    </svg>
+  )
+}
+
+// 設定 — the settings: three sliders, each at its own value. The knobs
+// are rings (no fill), so the track shows through them on any ground.
+function SettingsGlyph(props) {
+  return (
+    <svg {...base} {...props}>
+      <line x1="4" y1="7" x2="6.8" y2="7" />
+      <line x1="11.2" y1="7" x2="20" y2="7" />
+      <circle cx="9" cy="7" r="2.2" />
+      <line x1="4" y1="12" x2="13.3" y2="12" />
+      <line x1="17.7" y1="12" x2="20" y2="12" />
+      <circle cx="15.5" cy="12" r="2.2" />
+      <line x1="4" y1="17" x2="5.3" y2="17" />
+      <line x1="9.7" y1="17" x2="20" y2="17" />
+      <circle cx="7.5" cy="17" r="2.2" />
+    </svg>
+  )
+}
+
 const GLYPHS = {
   learn: LearnGlyph,
   practice: PracticeGlyph,
   today: TodayGlyph,
   dictionary: DictionaryGlyph,
   profile: ProfileGlyph,
+  analyzer: AnalyzerGlyph,
+  library: LibraryGlyph,
+  stats: StatsGlyph,
+  settings: SettingsGlyph,
 }
 
-/** One gate's pictogram, by the tab id in config/tabs.js. */
+/** One gate's (or one desk place's) pictogram, by its id in config/tabs.js. */
 export function GateIcon({ id, size = 21 }) {
   const Glyph = GLYPHS[id]
   return Glyph ? <Glyph width={size} height={size} /> : null

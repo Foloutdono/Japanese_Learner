@@ -46,7 +46,7 @@ vi.mock('../lib/api', () => ({
   },
 }))
 // The card kept by an address and a password: one updateUser call
-// (lib/guest.js claimAccount, plan 269), and what it REFUSES with is the
+// (lib/guest.js claimAccount, plan 270), and what it REFUSES with is the
 // point of one test below.
 const updateUser = vi.fn()
 vi.mock('../lib/supabase', () => ({
@@ -207,7 +207,7 @@ const printed = (screen, page) => q(screen, `[data-door="${page}"] .pcb__value`)
 const completes = () => apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/complete')
 const posted = () => JSON.parse(completes()[0][2].body)
 const done = () => tracked.mock.calls.filter(c => c[0] === 'boarding_done').map(c => c[1])
-// The account sheet's three fields (plan 269): the address, the password
+// The account sheet's three fields (plan 270): the address, the password
 // and the password again.
 function fillAccount(email, password = 'secret1', again = password) {
   type(inSheet('input[type="email"]'), email)
@@ -692,7 +692,7 @@ describe('BoardingFlow', () => {
     expect(done()[0]).toMatchObject({ kept: 'none' })
   })
 
-  // Plan 269: the gate asks a guest for an address before it issues,
+  // Plan 270: the gate asks a guest for an address before it issues,
   // once, and « Continuer en invité » issues the card as it stands.
   it('asks a guest for an address before issuing, and lets them go on as a guest', async () => {
     const { screen } = await renderFlow({ guest: true })

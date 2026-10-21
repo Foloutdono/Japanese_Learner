@@ -69,6 +69,9 @@ const nav = {
   tabDictionary:     'Dictionary',
   tabProfile:        'Profile',
   tabBarLabel:       'Sections',
+  // The desk rail's second list (plan 269): the analyser, the library,
+  // the statistics and the settings, as places beside the gates.
+  deskPlacesLabel:   'Places',
   hudStatusLabel:    'Goal status',
   hudOffline:        'Offline',
   hudDays:           (n) => `${n}d`,
@@ -2683,7 +2686,7 @@ const boarding = {
   cardNameTooLong: (n) => `${n} characters at most.`,
   brdAccountLede: 'Without an account, your card lives on this device alone.',
   brdLater: 'Later',
-  // Plan 269: the account sheet, raised to ask before the card issues and on
+  // Plan 270: the account sheet, raised to ask before the card issues and on
   // Today; an address and a password typed twice, no mail to follow.
   brdStayGuest: 'Continue as a guest',
   brdAccountAsk: 'Create your account to find your card and your progress on any device.',
@@ -3072,6 +3075,15 @@ const onboarding = {
   fbSentReply: 'Every message is read by a person. The answer will come by e-mail.',
   fbErrLimit: 'Five messages a day: more tomorrow.',
   fbErrSend: 'The message did not go. Try again.',
+  // Early access (plan 269): asked once, from 400 XP.
+  rateCap: 'Early access',
+  rateQ: 'How would you rate Tsuji?',
+  rateLead: 'The app is in early access. Is there something you would like us to change?',
+  rateLabel: 'Your rating',
+  rateStar: n => `${n} out of 5`,
+  ratePlaceholder: 'What you would change, if anything.',
+  rateTextLabel: 'What you would change',
+  rateLater: 'Not now',
   cardReport: 'Report this card',
   cardReportReasons: 'What is wrong',
   cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', other: 'Other' },

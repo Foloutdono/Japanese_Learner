@@ -56,9 +56,9 @@ import { noteAskedToKeep } from '../lib/guest'
 // The boarding runs on a guest pass -- a real Supabase user with no
 // credentials on it (lib/guest.js) -- and the card's account sheet
 // offers to keep it on the very row the learner is filling in: Google,
-// or an address and a password (plan 269). Nothing is migrated because
+// or an address and a password (plan 270). Nothing is migrated because
 // nothing moved; a learner who says « Plus tard » rides on as they were.
-// Since plan 269 the gate asks before it issues: a guest who has not
+// Since plan 270 the gate asks before it issues: a guest who has not
 // kept the card, pressing « Émettre ma carte », is shown that sheet
 // first, once, and « Continuer en invité » there issues the card as
 // it stands. Kept or sent from it, the card issues too.
@@ -191,14 +191,14 @@ export default function BoardingFlow({
   const [sheet, setSheet] = useState(() => (resumed?.sheet === 'account' && guest ? 'account' : null))
   const [edited, setEdited] = useState(() => ({ ...UNEDITED, ...(resumed?.edited ?? {}) }))
   // How the card was kept here: 'google' (the round trip, or the native
-  // sheet), 'password' (an address and a password, plan 269), 'link' (an
+  // sheet), 'password' (an address and a password, plan 270), 'link' (an
   // address waiting on its confirmation). null is not kept here.
   const [keptBy, setKeptBy] = useState(() => (!guest && resumed?.keeping === 'google' ? 'google' : null))
-  // The address an account was just made with here (plan 269), until the
+  // The address an account was just made with here (plan 270), until the
   // session that carries it arrives; and one waiting on its confirmation.
   const [keptEmail, setKeptEmail] = useState(null)
   const [linkSent, setLinkSent] = useState(null)
-  // Plan 269: whether the gate has asked for an address, and whether the
+  // Plan 270: whether the gate has asked for an address, and whether the
   // account sheet open now is that ask (its way past then issues).
   const [askedKeep, setAskedKeep] = useState(() => Boolean(resumed?.askedKeep))
   const [asking, setAsking] = useState(() => Boolean(resumed?.asking) && guest)
@@ -558,7 +558,7 @@ export default function BoardingFlow({
   // 'guest'), which this render's state does not hold yet.
   function complete(by = null) {
     if (busy) return
-    // The gate asks first, once (plan 269): Today's ask then waits a day.
+    // The gate asks first, once (plan 270): Today's ask then waits a day.
     if (guest && !askedKeep && !linkSent && !keptBy && by == null) {
       setAskedKeep(true)
       setAsking(true)
@@ -707,7 +707,7 @@ export default function BoardingFlow({
         // The last moment before the web navigates away for Google, when
         // the answers still only exist in memory.
         onLeaveForAuth={() => stash({ answers, step: 'card', sheet: 'account', keeping: 'google', edited, history, askedKeep, asking })}
-        // Raised by the gate, an answer issues the card (plan 269).
+        // Raised by the gate, an answer issues the card (plan 270).
         onGuest={asking ? () => { close(); complete('guest') } : null}
         onKept={(by, email = null) => { setKeptBy(by); setKeptEmail(email); close(); if (asking) complete(by) }}
         onSent={email => { setLinkSent(email); setKeptBy('link'); close(); if (asking) complete('link') }}
@@ -747,7 +747,7 @@ export default function BoardingFlow({
             onOpen={openDoor}
             onSign={() => setSheet('name')}
             // Opened by the learner, the sheet has been seen: the gate
-            // does not ask again (plan 269).
+            // does not ask again (plan 270).
             onKeep={() => { setAskedKeep(true); setSheet('account') }}
             onEnter={() => complete()}
             onSwitch={guest ? null : onSignIn}

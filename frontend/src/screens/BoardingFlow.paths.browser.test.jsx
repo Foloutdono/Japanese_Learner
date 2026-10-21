@@ -467,7 +467,7 @@ describe('issuing the card', () => {
 describe('keeping the card', () => {
   // With the project's "Confirm email" on, the address waits on its
   // link (lib/guest.js claimAccount): the card says where it went, and
-  // the line under it mends a wrong one (plans 247, 269).
+  // the line under it mends a wrong one (plans 247, 270).
   it('mends an address waiting on its link from the line under the card', async () => {
     updateUser.mockResolvedValue({ data: { user: {} }, error: null })
     const { screen } = await renderFlow({ guest: true })

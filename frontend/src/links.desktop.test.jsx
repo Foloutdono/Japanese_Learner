@@ -188,8 +188,8 @@ describe('Settings\' doors on the desk', () => {
   })
 })
 
-describe('the shelf\'s decks and its library door on the desk', () => {
-  it('are links, the library\'s looking like the button it was', async () => {
+describe('the shelf\'s decks on the desk', () => {
+  it('are links, and the library is no door at the list\'s foot (plan 269)', async () => {
     await render(<Page at="/learn/decks/1" path="/learn/decks/:deck_id"><DecksScreen session={{}} /></Page>)
     await settle(400)
     const list = $('.desk-split__list')
@@ -197,9 +197,10 @@ describe('the shelf\'s decks and its library door on the desk', () => {
     // with no phone button they stand in for.
     const rows = [...list.querySelectorAll('.shelf-rows > .shelf-row')]
     expect(rows.map(c => [c.tagName, c.getAttribute('href')])).toEqual([['A', '/learn/decks/1'], ['A', '/learn/decks/2']])
-    expect(list.querySelector('.decks-doors > a.chip').getAttribute('href')).toBe('/learn/decks/library')
-    // The library's door (the new deck's is a button: it opens a dialog).
-    await compare(list.querySelector('.decks-doors'), '.chip:last-child')
+    // The library is the Bibliothèque's page, the rail's place its door:
+    // the foot keeps the new deck's button (it opens a dialog) alone.
+    expect(list.querySelector('.decks-doors > a')).toBeNull()
+    expect(list.querySelectorAll('.decks-doors > *')).toHaveLength(1)
     // A deck opens beside the shelf, as a split's row does: the link
     // replaces, so Back leaves the shelf rather than walk it.
     await userEvent.click(rows[1])

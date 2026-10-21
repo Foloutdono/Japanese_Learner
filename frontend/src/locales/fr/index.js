@@ -71,6 +71,9 @@ const nav = {
   tabDictionary:     'Dictionnaire',
   tabProfile:        'Profil',
   tabBarLabel:       'Sections',
+  // La seconde liste du rail, sur ordinateur (plan 269) : l’analyseur,
+  // la bibliothèque, les statistiques et les réglages.
+  deskPlacesLabel:   'Lieux',
   hudStatusLabel:    'État de l’objectif',
   hudOffline:        'Hors ligne',
   hudDays:           (n) => `${n}j`,
@@ -2622,7 +2625,7 @@ const boarding = {
   cardNameTooLong: (n) => `${n} caractères au plus.`,
   brdAccountLede: 'Sans compte, ta carte ne vit que sur cet appareil.',
   brdLater: 'Plus tard',
-  // Plan 269: the account sheet, raised to ask before the card issues and on
+  // Plan 270: the account sheet, raised to ask before the card issues and on
   // Today; an address and a password typed twice, no mail to follow.
   brdStayGuest: 'Continuer en invité',
   brdAccountAsk: 'Crée ton compte pour retrouver ta carte et ta progression sur tous tes appareils.',
@@ -3011,6 +3014,15 @@ const onboarding = {
   fbSentReply: 'Chaque message est lu par une personne. La réponse arrive par e-mail.',
   fbErrLimit: 'Cinq messages par jour : la suite demain.',
   fbErrSend: 'Le message n’est pas parti. Réessaie.',
+  // Accès anticipé (plan 269) : demandé une fois, à partir de 400 XP.
+  rateCap: 'Accès anticipé',
+  rateQ: 'Quelle note pour Tsuji ?',
+  rateLead: 'L’app est en accès anticipé. Y a-t-il quelque chose que tu aimerais voir changer ?',
+  rateLabel: 'Ta note',
+  rateStar: n => `${n} sur 5`,
+  ratePlaceholder: 'Ce que tu changerais, s’il y a quelque chose.',
+  rateTextLabel: 'Ce que tu changerais',
+  rateLater: 'Plus tard',
   cardReport: 'Signaler cette carte',
   cardReportReasons: 'Ce qui ne va pas',
   cardReason: { reading: 'Lecture', meaning: 'Sens', audio: 'Audio', example: 'Exemple', other: 'Autre' },

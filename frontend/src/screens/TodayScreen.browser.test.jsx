@@ -400,9 +400,60 @@ describe('TodayScreen — the transfer sheet', () => {
   })
 })
 
-// 本乗車券 (plan 269): a guest is asked to make the card an account
-// further and further apart, after the guide and the transfer offer, and
-// may always go on as a guest.
+// Early access (plan 269): the sheet that asks a learner, once, from 400
+// XP, how they find the app -- on the transfer sheet's terms, and never
+// beside it.
+describe('TodayScreen — the early-access sheet', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const offered = extra => ({ username: 'Aiko', week: [], streak: 3, level: 5, guided: GUIDED, feedbackOffer: true, ...extra })
+  const sheet = () => document.querySelector('.fb-sheet')
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
+
+  beforeEach(() => {
+    apiJson.mockClear()
+    forgetShown()
+  })
+
+  it('asks, and "Plus tard" answers it once', async () => {
+    summaryRef.current = offered()
+    const screen = await mount()
+    await arrives(sheet)
+    expect(document.querySelector('.guide')).toBeNull()
+    expect(sheet().querySelectorAll('.fb-rate__star')).toHaveLength(5)
+    sheet().querySelector('[data-action="rating-later"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    expect(apiJson.mock.calls.filter(([u]) => u === '/api/feedback/offer')).toHaveLength(1)
+    await screen.unmount()
+  })
+
+  it('waits for the gate’s guide, and is not drawn when the profile does not offer', async () => {
+    summaryRef.current = offered({ guided: {} })
+    let screen = await mount()
+    await arrives(() => document.querySelector('.guide'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.removeItem('jp-guided')
+    summaryRef.current = offered({ feedbackOffer: false })
+    screen = await mount()
+    await settle(200)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+  })
+
+  it('gives way to the transfer offer, never drawn beside it', async () => {
+    summaryRef.current = offered({ transferOffer: true })
+    const screen = await mount()
+    await arrives(() => document.querySelector('.tr-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+  })
+})
+
+// 本乗車券 (plan 270): a guest is asked to make the card an account
+// further and further apart, after the guide, the transfer offer and the
+// early-access question, and may always go on as a guest.
 describe('TodayScreen — asking a guest to keep the card', () => {
   const GUIDED = { today: '2026-10-17T00:00:00Z' }
   const guest = { access_token: 'tok', user: { id: 'g1', is_anonymous: true } }
@@ -455,13 +506,18 @@ describe('TodayScreen — asking a guest to keep the card', () => {
     await screen.unmount()
   })
 
-  it('waits for the transfer offer, and never asks an account', async () => {
+  it('waits for the transfer offer and the early-access question, and never asks an account', async () => {
     summaryRef.current = { ...summaryRef.current, transferOffer: true }
     let screen = await mountAs(guest)
     await arrives(() => document.querySelector('.tr-sheet'))
     expect(sheet()).toBeNull()
     await screen.unmount()
-    summaryRef.current = { ...summaryRef.current, transferOffer: false }
+    summaryRef.current = { ...summaryRef.current, transferOffer: false, feedbackOffer: true }
+    screen = await mountAs(guest)
+    await arrives(() => document.querySelector('.fb-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { ...summaryRef.current, feedbackOffer: false }
     screen = await mountAs({ access_token: 'tok', user: { id: 'a1', is_anonymous: false, email: 'a@b.c' } })
     await settle(200)
     expect(sheet()).toBeNull()
