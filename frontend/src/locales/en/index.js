@@ -762,11 +762,8 @@ const stats = {
   newUnit:            'new',
   learningUnit:       'in progress',
   learnedLabel:       'Learned',   // a platform's figure, read out (plan 184)
-  sourceTiers:        n => `${n} tier${n === 1 ? '' : 's'}`,
-  sourceThemes:       n => `${n} theme${n === 1 ? '' : 's'}`,
-  // The vocabulary's sources on the desk (plan 183): the strip of what
-  // the learner has started, over the three sources.
-  sourcesInProgress:  'In progress',
+  // The sources on the desk (plan 267): the gate at the end of JLPT's
+  // line, and what is left to see of the level it resumes.
   sourcesResume:      'Resume',
   unseenNote:         n => `${n} never seen`,
   tierWords:          range => `Words ${range}`,

@@ -8,16 +8,14 @@ import '@fontsource/space-grotesk/latin-500.css'
 import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
-// ── 机 — the vocabulary's sources, what you started first (plan 183) ──
-// The owner's pick C of the canvas "Tsuji — the vocabulary's sources".
-// Plan 137 hung the three sources as three equal plates the window's
-// height; the page now opens on a strip of what the learner has started
-// -- their own level, wider, its gate in a column of its own beside its
-// words, then the stops with the most cards met -- over the three
-// sources: JLPT's line with each level's first words and bar, the tiers
-// as a grid of numbered cells, the themes in columns. Every door pushes.
-// This is the narrowest desk (1100×800): one stop beside the lead. The
-// phone keeps its three cards (deskfree.phone).
+// ── 机 — the vocabulary's sources, doors all the way down (plan 267) ──
+// The owner's pick C3 of the canvas "Tsuji — the sources and the line,
+// redrawn". JLPT heads the page as five doors, the gate that resumes the
+// learner's level the line's last; under it the tiers as doors in a
+// lattice beside their pool and size, and the themes as doors under
+// their filter. Every door pushes. This is the narrowest desk
+// (1100×800), where the gate takes a row of its own under the doors.
+// The phone keeps its three cards (deskfree.phone).
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -107,151 +105,112 @@ async function mount() {
   await settle()
 }
 const $ = s => document.querySelector(s)
-const strip = () => $('.desk-sources--resume > .desk-resume')
-const lead = () => strip().querySelector('.desk-resume__card--lead')
-const others = () => [...strip().querySelectorAll(':scope > a.desk-resume__card')]
-const plates = () => [...document.querySelectorAll('.desk-sources__lower > .desk-source')]
-const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
-const cells = () => [...plates()[1].querySelectorAll('.desk-source__cells > a')]
+const doors = () => [...document.querySelectorAll('.desk-linedoors__line .route-stop')]
+const gateCell = () => $('.desk-linedoors__gate')
+const tierBand = () => $('.desk-band--tiers')
+const themeBand = () => $('.desk-band--themes')
+const cells = () => [...tierBand().querySelectorAll('.desk-source__cells > a')]
+const themes = () => [...themeBand().querySelectorAll('.desk-source__rows > a')]
 const near = (a, b) => Math.abs(a - b) < 2
-// The gate stood in a breathing ring 9px out of its pill until plan 225
-// stilled it; the card keeps that air round it, so the drop it stands on
-// now (index.css, --gate-drop) falls on the card, not past it.
+const box = el => el.getBoundingClientRect()
+// The gate's reader ripples as far as 9px out of its pill: all of it
+// inside its door.
 const RING = 9
-const gateInside = card => {
-  const c = card.getBoundingClientRect()
-  const g = card.querySelector('button.btn-depart--gate').getBoundingClientRect()
+const gateInside = () => {
+  const c = box(gateCell())
+  const g = box(gateCell().querySelector('button.btn-depart--gate'))
   return g.left - RING >= c.left && g.right + RING <= c.right && g.top - RING >= c.top && g.bottom + RING <= c.bottom
 }
 
 afterEach(() => {
-  STATS.items.vocab.N4.started = 0
   SUMMARY.jlptLevel = 'N5'
 })
 
-describe('the vocabulary\'s sources on the desk (plan 183)', () => {
-  it('lays the strip over three plates side by side, down to the window\'s foot and no further', async () => {
+describe('the vocabulary\'s sources on the desk (plan 267)', () => {
+  it('heads the page with the doors over the two bands, down to the window\'s foot and no further', async () => {
     await mount()
-    const s = strip().getBoundingClientRect()
-    const ps = plates().map(p => p.getBoundingClientRect())
-    expect(ps).toHaveLength(3)
-    expect(ps[0].top).toBeGreaterThan(s.bottom)
-    expect(new Set(ps.map(p => Math.round(p.top))).size).toBe(1)
-    expect(ps[1].left).toBeGreaterThan(ps[0].right)
-    expect(ps[2].left).toBeGreaterThan(ps[1].right)
-    for (const p of ps) {
-      expect(p.bottom).toBeLessThanOrEqual(window.innerHeight)
-      expect(p.bottom).toBeGreaterThan(window.innerHeight - 60)
+    const d = box($('.desk-linedoors'))
+    const t = box(tierBand())
+    const th = box(themeBand())
+    expect(t.top).toBeGreaterThan(d.bottom)
+    expect(th.top).toBeGreaterThan(t.bottom)
+    for (const b of [t, th]) {
+      expect(near(b.left, d.left)).toBe(true)
+      expect(near(b.width, d.width)).toBe(true)
     }
+    expect(th.bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(th.bottom).toBeGreaterThan(window.innerHeight - 60)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-    // No plate under the strip prints its description: the strip and
-    // the figures say what each is.
-    expect(document.querySelector('.desk-sources__lower .desk-source__desc')).toBeNull()
-    expect(document.querySelector('.bar__sub')).toBeNull()
+    // The strip and the JLPT plate are gone: the doors say the level once.
+    expect($('.desk-resume, .desk-sources__lower')).toBeNull()
+    expect($('.bar__sub')).toBeNull()
   })
 
-  it('leads with the learner\'s own level, wider, its first words and the gate that resumes it', async () => {
+  it('draws JLPT as five doors on one row, the learner\'s own captioned, each a push to its stop', async () => {
     await mount()
-    const card = lead()
-    expect(card.getBoundingClientRect().width).toBeGreaterThan(others()[0].getBoundingClientRect().width * 1.4)
-    // The gate in a column of its own beside the words, the air round it
-    // in the card, the level's name whole.
-    expect(card.classList.contains('desk-resume__card--split')).toBe(true)
-    expect(gateInside(card)).toBe(true)
-    const words = card.querySelector('.desk-resume__name').getBoundingClientRect()
-    expect(card.querySelector('button.btn-depart--gate').getBoundingClientRect().left).toBeGreaterThan(words.right)
-    const label = card.querySelector('.desk-resume__label')
-    expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
-    expect(card.querySelector('.desk-resume__cap').textContent).toBe('JLPT · Tu es ici')
-    expect(card.querySelector('.desk-source__meter .desk-source__num').textContent).toBe('12/ 674')
-    const name = card.querySelector('a.desk-resume__name')
-    expect(name.getAttribute('href')).toBe('/learn/vocab/N5')
-    expect(name.textContent).toBe('N5Niveau débutant')
-    expect(card.querySelector('.desk-resume__sample').textContent).toBe('何 私 来る')
-    expect(card.querySelector('.desk-resume__go .desk-source__num').textContent).toBe('31 commencées · 643 jamais vues')
-    const met = card.querySelector('.desk-line__met')
-    expect(parseFloat(met.style.width)).toBeCloseTo((100 * 31) / 674, 1)
-    const gate = card.querySelector('button.btn-depart--gate')
-    expect(gate.textContent).toContain('Reprendre')
+    const ds = doors()
+    expect(ds.map(r => r.getAttribute('href'))).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'].map(l => `/learn/vocab/${l}`))
+    const bs = ds.map(box)
+    for (const [i, b] of bs.entries()) {
+      expect(near(b.top, bs[0].top)).toBe(true)
+      expect(near(b.height, bs[0].height)).toBe(true)
+      if (i) expect(b.left).toBeGreaterThanOrEqual(bs[i - 1].right - 1)
+    }
+    expect(ds[0].getAttribute('aria-current')).toBe('location')
+    expect(ds[0].querySelector('.route-stop__here').textContent).toBe('Tu es ici')
+    expect(ds.slice(1).every(d => !d.querySelector('.route-stop__here'))).toBe(true)
+    expect(ds[0].querySelector('.route-stop__fig').textContent).toMatch(/12\s*\/\s*674/)
+    expect(parseFloat(ds[0].querySelector('.desk-line__met').style.width)).toBeCloseTo((100 * 31) / 674, 1)
+    expect(parseFloat(ds[0].querySelector('.desk-line__learned').style.width)).toBeCloseTo((100 * 12) / 674, 1)
+    // Each name whole, on two lines where the door is narrow.
+    for (const d of ds) {
+      const name = d.querySelector('.route-stop__jp')
+      expect(name.scrollWidth).toBeLessThanOrEqual(name.clientWidth + 1)
+    }
+    // One tab stop, the learner's level, walked with ←/→; a door pushes.
+    expect(ds.filter(d => d.tabIndex === 0)).toEqual([ds[0]])
+    ds[0].focus()
+    ds[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    expect(document.activeElement).toBe(ds[1])
+    ds[1].click()
+    await settle(50)
+    expect(where.path).toBe('/learn/vocab/N4')
+    expect(where.type).toBe('PUSH')
+  })
+
+  it('stands the gate in a row of its own under the doors, at the line\'s far end, and boards the learner\'s level', async () => {
+    await mount()
+    const g = box(gateCell())
+    const line = box($('.desk-linedoors__line'))
+    expect(g.top).toBeGreaterThanOrEqual(line.bottom - 1)
+    const gate = gateCell().querySelector('button.btn-depart--gate')
+    expect(box(gate).right).toBeGreaterThan(line.right - 80)
+    expect(gateInside()).toBe(true)
+    expect(gate.textContent).toContain('Reprendre N5')
+    expect(gateCell().querySelector('.desk-source__num').textContent).toBe('643 jamais vues')
     // The gate boards the level's first platform, the main flashcards.
     gate.click()
     await settle(50)
     expect(where.path).toBe('/learn/vocab/N5/vocab.flashcard.f2b')
   })
 
-  it('follows with the stop the most cards are met in, a pushing door to its platforms', async () => {
-    await mount()
-    // One beside the lead on the narrowest desk (three on a wider one:
-    // vocabSources.wide), the rest of the row its.
-    expect($('.desk-sources--narrow')).not.toBeNull()
-    const os = others()
-    expect(os.map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/tier/1?size=200'])
-    expect(os[0].querySelector('.desk-resume__cap').textContent).toBe('Par fréquence')
-    expect(os[0].querySelector('.desk-resume__name').textContent).toBe('1Mots 1–200')
-    expect(os[0].querySelector('.desk-source__meter .desk-source__num').textContent).toBe('18/ 200')
-    expect(os[0].querySelector('.desk-resume__sample').textContent).toBe('語1 何')
-    // One row at one height, to the strip's end.
-    const [a, b] = [lead(), os[0]].map(c => c.getBoundingClientRect())
-    expect(near(a.top, b.top)).toBe(true)
-    expect(near(a.height, b.height)).toBe(true)
-    expect(near(b.right, strip().getBoundingClientRect().right)).toBe(true)
-    os[0].click()
-    await settle(50)
-    expect(where.path).toBe('/learn/vocab/tier/1')
-    expect(where.search).toBe('?size=200')
-    expect(where.type).toBe('PUSH')
-  })
-
-  it('ranks another level with more met before a tier', async () => {
-    STATS.items.vocab.N4.started = 40
-    await mount()
-    const os = others()
-    expect(os.map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/N4'])
-    expect(os[0].querySelector('.desk-resume__cap').textContent).toBe('JLPT')
-    expect(os[0].querySelector('.desk-resume__sample').textContent).toBe('彼 君')
-  })
-
   it('offers somewhere to go on with nothing met: the level the learner chose, to start', async () => {
     SUMMARY.jlptLevel = 'N4'
     await mount()
-    expect(lead().querySelector('a.desk-resume__name').getAttribute('href')).toBe('/learn/vocab/N4')
-    expect(lead().querySelector('button.btn-depart--gate').textContent).toContain('Commencer')
-    expect(lead().querySelector('.desk-resume__go .desk-source__num').textContent).toBe('642 jamais vues')
-    // N5's 31 met cards are a stop of the strip now.
-    expect(others()[0].getAttribute('href')).toBe('/learn/vocab/N5')
+    expect(gateCell().querySelector('button.btn-depart--gate').textContent).toContain('Commencer N4')
+    expect(gateCell().querySelector('.desk-source__num').textContent).toBe('642 jamais vues')
+    expect(doors()[1].querySelector('.route-stop__here').textContent).toBe('Tu es ici')
   })
 
-  it('draws JLPT as a line of five rows sharing the plate, each with its first words and its bar', async () => {
+  it('draws the tiers as doors in a lattice beside their pool and size, the met ones lit, named and filled', async () => {
     await mount()
-    const [jlpt] = plates()
-    const rs = rows(jlpt)
-    expect(rs.map(r => r.getAttribute('href'))).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'].map(l => `/learn/vocab/${l}`))
-    const hs = rs.map(r => r.getBoundingClientRect().height)
-    for (const h of hs) expect(near(h, hs[0])).toBe(true)
-    expect(rs[0].getAttribute('aria-current')).toBe('location')
-    expect(rs.every(r => r.querySelector('.desk-line__bar'))).toBe(true)
-    expect(rs[0].querySelector('.desk-source__sample').textContent).toBe('何 私 来る')
-    expect(rs[2].querySelector('.desk-source__sample')).toBeNull()
-    expect(parseFloat(rs[0].querySelector('.desk-line__learned').style.width)).toBeCloseTo((100 * 12) / 674, 1)
-    expect(jlpt.querySelector('.desk-source__cap')).toBeNull()
-    expect(jlpt.querySelector('.desk-source__fig').textContent).toMatch(/12\s*\/\s*8045/)
-    // One tab stop, walked with the arrows; a row pushes.
-    expect(rs.filter(r => r.tabIndex === 0)).toHaveLength(1)
-    rs[0].focus()
-    rs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
-    expect(document.activeElement).toBe(rs[1])
-    rs[1].click()
-    await settle(50)
-    expect(where.path).toBe('/learn/vocab/N4')
-    expect(where.type).toBe('PUSH')
-  })
-
-  it('draws the tiers as a grid of numbered cells, the met ones lit, named and filled', async () => {
-    await mount()
+    const head = box(tierBand().querySelector('.desk-band__head'))
     const cs = cells()
     expect(cs).toHaveLength(41)
-    const columns = getComputedStyle(cs[0].parentElement).gridTemplateColumns.split(' ').length
-    expect(columns).toBeGreaterThanOrEqual(4)
+    expect(box(cs[0]).left).toBeGreaterThan(head.right - 1)
+    const grid = cs[0].parentElement
+    const columns = getComputedStyle(grid).gridTemplateColumns.split(' ').length
+    expect(columns).toBeGreaterThanOrEqual(10)
     expect(cs[0].getAttribute('href')).toBe('/learn/vocab/tier/1?size=200')
     expect(cs[0].getAttribute('aria-label')).toBe('Palier 1 · Mots 1–200 · 18 commencées')
     expect(cs[0].classList.contains('desk-source__cell--met')).toBe(true)
@@ -259,15 +218,15 @@ describe('the vocabulary\'s sources on the desk (plan 183)', () => {
     expect(parseFloat(cs[0].querySelector('.desk-source__cell-fill').style.width)).toBeCloseTo(9, 1)
     expect(cs[1].getAttribute('aria-label')).toBe('Palier 2 · Mots 201–400')
     expect(cs[1].querySelector('.desk-source__cell-met')).toBeNull()
-    // Every cell a row's height and width at least: on the narrowest
-    // desk the grid scrolls in its plate rather than crushing them.
+    // Joined doors: no gap wider than a seam between two of a row.
+    expect(box(cs[1]).left - box(cs[0]).right).toBeLessThanOrEqual(1.5)
     for (const c of cs) {
-      const r = c.getBoundingClientRect()
+      const r = box(c)
       expect(r.height).toBeGreaterThanOrEqual(43)
       expect(r.width).toBeGreaterThanOrEqual(43)
     }
-    const grid = cs[0].parentElement
-    expect(grid.getBoundingClientRect().bottom).toBeLessThanOrEqual(plates()[1].getBoundingClientRect().bottom)
+    // Three rows at most: past them the lattice scrolls in its band.
+    expect(grid.clientHeight).toBeLessThanOrEqual(3 * box(cs[0]).height + 4)
     // One tab stop, walked in two dimensions.
     expect(cs.filter(c => c.tabIndex === 0)).toHaveLength(1)
     cs[0].focus()
@@ -277,10 +236,9 @@ describe('the vocabulary\'s sources on the desk (plan 183)', () => {
     expect(document.activeElement).toBe(cs[1 + columns])
   })
 
-  it('cuts the tiers by the pool and the size, in the URL and every door; the strip keeps the deck\'s', async () => {
+  it('cuts the tiers by the pool and the size, in the URL and every door', async () => {
     await mount()
-    const freq = plates()[1]
-    const pool = [...freq.querySelectorAll('.desk-source__tools > .seg [role="radio"]')]
+    const pool = [...tierBand().querySelectorAll('.desk-band__head > .seg [role="radio"]')]
     pool[1].click()
     await settle()
     expect(where.search).toBe('?domain=jmdict')
@@ -288,45 +246,45 @@ describe('the vocabulary\'s sources on the desk (plan 183)', () => {
     expect(cells()[0].getAttribute('href')).toBe('/learn/vocab/tier/1?size=200&domain=jmdict')
     const grid = cells()[0].parentElement
     expect(grid.scrollHeight).toBeGreaterThan(grid.clientHeight)
-    expect(others().map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/tier/1?size=200'])
     // The size under the pool, as wide as it, with no caption over it:
     // its name is the switch's label.
-    const sizeRow = plates()[1].querySelector('.desk-source__size')
+    const sizeRow = tierBand().querySelector('.desk-source__size')
     expect(sizeRow.querySelector('.cap')).toBeNull()
     expect(sizeRow.querySelector('.seg').getAttribute('aria-label')).toBeTruthy()
-    expect(Math.round(sizeRow.querySelector('.seg').getBoundingClientRect().width))
-      .toBe(Math.round(plates()[1].querySelector('.desk-source__tools > .seg').getBoundingClientRect().width))
+    expect(Math.round(box(sizeRow.querySelector('.seg')).width))
+      .toBe(Math.round(box(tierBand().querySelector('.desk-band__head > .seg')).width))
     const size = [...sizeRow.querySelectorAll('.seg [role="radio"]')].find(r => r.textContent === '500')
     size.click()
     await settle()
     expect(where.search).toBe('?size=500&domain=jmdict')
     expect(cells()[0].getAttribute('href')).toBe('/learn/vocab/tier/1?size=500&domain=jmdict')
-    expect(others()[0].getAttribute('href')).toBe('/learn/vocab/tier/1?size=500')
   })
 
-  it('lists the themes under their filter, each a link to its bands, in one column on the narrowest desk', async () => {
+  it('lists the themes as doors under their filter, several to a row, each a push to its bands', async () => {
     await mount()
-    const themes = plates()[2]
-    const rs = rows(themes)
+    const rs = themes()
     expect(rs).toHaveLength(12)
     expect(rs[0].getAttribute('href')).toBe('/learn/vocab/theme/animals')
-    const [a, b] = rs.map(r => r.getBoundingClientRect())
-    expect(b.top).toBeGreaterThan(a.bottom - 1)
-    expect(near(b.left, a.left)).toBe(true)
-    // Each name whole.
+    const [a, b] = rs.map(box)
+    expect(near(a.top, b.top)).toBe(true)
+    expect(b.left).toBeGreaterThan(a.right - 1)
     for (const r of rs) {
       const label = r.querySelector('.desk-source__label')
       expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
     }
-    const input = themes.querySelector('input')
+    const input = themeBand().querySelector('input')
     const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
     setValue.call(input, 'fam')
     input.dispatchEvent(new Event('input', { bubbles: true }))
     await settle(50)
-    expect(rows(themes).map(r => r.getAttribute('href'))).toEqual(['/learn/vocab/theme/family'])
+    expect(themes().map(r => r.getAttribute('href'))).toEqual(['/learn/vocab/theme/family'])
+    themes()[0].click()
+    await settle(50)
+    expect(where.path).toBe('/learn/vocab/theme/family')
+    expect(where.type).toBe('PUSH')
   })
 
-  it('shows the wait in the tiers\' plate until the ranking arrives, not an empty plate', async () => {
+  it('shows the wait in the tiers\' band until the ranking arrives, not an empty band', async () => {
     let release
     const held = new Promise(r => { release = r })
     apiFetch.mockImplementation(async path => {
@@ -334,12 +292,11 @@ describe('the vocabulary\'s sources on the desk (plan 183)', () => {
       return { ok: true, status: 200, json: async () => answer(path) }
     })
     await mount()
-    const plate = plates()[1]
-    expect(plate.querySelector('.loading')).not.toBeNull()
-    expect(plate.querySelector('.desk-source__cells')).toBeNull()
+    expect(tierBand().querySelector('.loading')).not.toBeNull()
+    expect(tierBand().querySelector('.desk-source__cells')).toBeNull()
     release()
     await settle(100)
-    expect(plates()[1].querySelector('.loading')).toBeNull()
+    expect(tierBand().querySelector('.loading')).toBeNull()
     expect(cells().length).toBeGreaterThan(0)
     apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => answer(path) }))
   })
