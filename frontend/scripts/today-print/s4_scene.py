@@ -17,13 +17,12 @@ import s1_scene
 import s2_air
 import s3_scene
 import s4_air
-import s4_birds
 import s4_flora
 
 
 def _flight(L, h, o, hour):
     if h['birds'] == 'gulls':
-        return s4_birds.gulls(L, h, o, hour)
+        return ''           # the day's gulls are no longer drawn (owner's call)
     return s3_scene.AIR.flight(L, h, o, hour)
 
 
