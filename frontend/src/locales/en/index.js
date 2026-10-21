@@ -709,6 +709,10 @@ const quiz = {
   toggleWriting:     'Toggle writing practice',
   yourDrawing:       'Your drawing',
   strokeOrder:       'Stroke order',
+  strokeZoom:        'Enlarge the stroke order',
+  strokeWatch:       'Watch',
+  strokeTrace:       'Trace',
+  strokeAgain:       'Trace again',
   continueBtn:       'Got it, continue',
   eraseBtn:          'Erase',
 

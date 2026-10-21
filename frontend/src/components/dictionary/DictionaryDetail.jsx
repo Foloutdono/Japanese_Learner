@@ -16,6 +16,7 @@ import { SentenceFrame } from './SentenceFrame'
 import { tokenLookup } from '../analysis/lookup'
 import { GrammarLesson } from '../study/GrammarLesson'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
+import { StrokeZoom } from '../study/StrokeStudy'
 import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
 import { GlossList, firstGloss, mergeSenses } from '../study/gloss'
@@ -375,20 +376,24 @@ function StrokeSheet({ src, notAvailableLabel }) {
   const [failed, setFailed] = useState(false)
   // Stable, or StrokeOrderAnimation's parse effect re-runs every render.
   const onError = useCallback(() => setFailed(true), [])
-  return (
-    <div className="dict-form__sheet">
-      {!failed && (
-        <StrokeOrderAnimation
-          src={src}
-          loop
-          className="dict-form__glyph"
-          onError={onError}
-        />
-      )}
-      {failed && (
+  // Tapped, the drawing opens big, with the calque to trace it on
+  // (plan 267). A failed one has nothing to open.
+  if (failed) {
+    return (
+      <div className="dict-form__sheet">
         <div className="dict-form__fallback">{notAvailableLabel}</div>
-      )}
-    </div>
+      </div>
+    )
+  }
+  return (
+    <StrokeZoom src={src} className="dict-form__sheet">
+      <StrokeOrderAnimation
+        src={src}
+        loop
+        className="dict-form__glyph"
+        onError={onError}
+      />
+    </StrokeZoom>
   )
 }
 

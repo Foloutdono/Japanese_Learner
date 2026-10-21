@@ -691,6 +691,10 @@ const quiz = {
   toggleWriting:     'Activer/désactiver l\'écriture',
   yourDrawing:       'Ton dessin',
   strokeOrder:       'Ordre des traits',
+  strokeZoom:        'Agrandir l\'ordre des traits',
+  strokeWatch:       'Regarder',
+  strokeTrace:       'Calquer',
+  strokeAgain:       'Calquer à nouveau',
   continueBtn:       "C'est bon, continuer",
   eraseBtn:          'Effacer',
 
