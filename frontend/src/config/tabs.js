@@ -65,42 +65,58 @@ export function getDeskTabs(t) {
   return DESK_TAB_IDS.map(id => byId[id])
 }
 
+// ── 所 — the four places beside the gates (plan 269) ──
+// On the desk the analyser, the library (the learner's decks and
+// everyone's, one screen), the statistics and the settings are places
+// of their own, listed under the gates past a hairline rather than
+// hung as stations under 辞書, 学習 and 定期券 (the owner's pick A of the
+// canvas "Tsuji — the desk's chrome and its four new places"). Their
+// paths stay the phone's, behind their gates, so a bookmark, the trail's
+// route patterns and the guides read them unchanged; on the desk a gate
+// is not lit while a place behind it is. `icon` names the pictogram
+// (components/chrome/GateIcon.jsx), `guide` the stop that points at the
+// row (the profile's guide, plan 143). The phone's chrome is untouched.
+export const DESK_PLACE_IDS = ['analyzer', 'library', 'stats', 'settings']
+
+/** The four places in the rail's order: a path, a title, a pictogram. */
+export function getDeskPlaces(t) {
+  return [
+    { id: 'analyzer', path: '/dictionary/analyzer', title: t.analyzerTitle },
+    { id: 'library',  path: '/learn/decks',         title: t.library },
+    { id: 'stats',    path: '/profile/stats',       title: t.statistics, guide: 'profile.stats' },
+    { id: 'settings', path: '/profile/settings',    title: identityFor('/profile/settings', t).title, guide: 'profile.settings' },
+  ]
+}
+
+/** The place `pathname` stands in on the desk, or null. */
+export function deskPlaceFor(pathname, t = {}) {
+  return getDeskPlaces(t).find(p => inSection(pathname ?? '', p.path)) ?? null
+}
+
 /**
  * What the rail lists under a lit gate: its sections, minus the one the
- * gate row already is (Today's queue, the dictionary itself), and for the
- * pass its settings — a hall of the pass rather than a place
- * (config/identity.js), but a door the rail has the room to print. Titles
- * only: the rail is chrome, and a section's pigment never goes on chrome
+ * gate row already is (Today's queue, the dictionary itself) and minus
+ * the places (above), which the rail lists on their own. Titles only:
+ * the rail is chrome, and a section's pigment never goes on chrome
  * (DESIGN.md, "Colour is an edge, a ring, or a numeral").
  */
 export function getDeskSections(tabId, t) {
   const root = `/${tabId}`
-  const rows = getSections(tabId, t)
-    .filter(s => s.path !== root)
-    // The profile's Statistics is the rail's station on the desk, as
-    // Settings is: the guide's stop points at it there.
-    .map(s => ({ path: s.path, title: s.title, ...(s.path === '/profile/stats' ? { guide: 'profile.stats' } : {}) }))
-  if (tabId === 'profile') {
-    const settings = identityFor('/profile/settings', t)
-    // The guide's Settings stop (plan 143): the profile draws no door to
-    // Settings on the desk, the rail being one, so the stop points here.
-    rows.push({ path: settings.path, title: settings.title, guide: 'profile.settings' })
-  }
-  // The library, a place under 教材 rather than a section of its own,
-  // gets a station of its own on the rail (plan 132): the gate's panel
-  // names it, and two screens down was too far for it.
-  if (tabId === 'learn') rows.push({ path: '/learn/decks/library', title: t.library })
-  return rows
+  const places = getDeskPlaces(t)
+  return getSections(tabId, t)
+    .filter(s => s.path !== root && !places.some(p => p.path === s.path))
+    .map(s => ({ path: s.path, title: s.title }))
 }
 
 /**
  * Whether the desk's rail already has a door to `path` (plan 114): a
- * gate, or one of any gate's stations. A screen's ‹ way out to one of
- * those is a second door to the same place on the desk, and the Bar
- * drops it (components/chrome/Bar.jsx).
+ * gate, one of any gate's stations, or a place. A screen's ‹ way out to
+ * one of those is a second door to the same place on the desk, and the
+ * Bar drops it (components/chrome/Bar.jsx).
  */
 export function onDeskRail(path) {
   return DESK_TAB_IDS.some(id => path === `/${id}` || getDeskSections(id, {}).some(s => s.path === path))
+    || getDeskPlaces({}).some(p => p.path === path)
 }
 
 /** Whether `pathname` is standing in the section at `path` (or behind it). */

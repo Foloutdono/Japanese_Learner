@@ -32844,7 +32844,9 @@ button.brd-stn { cursor: pointer; }
   /* The gates and their stations are what scrolls on a short window,
      the foot's instruments standing whole under them (plan 123). */
   .desk-rail__gates {
+    display: flex;
     flex: 0 1 auto;
+    flex-direction: column;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -32933,6 +32935,9 @@ button.brd-stn { cursor: pointer; }
     cursor: pointer;
     transition: color 0.14s ease, border-color 0.14s ease, background 0.14s ease;
   }
+  /* On a place (plan 269): the slot without the pill. Unseen is also
+     out of the tab order and the accessibility tree. */
+  .desk-rail__help--idle { visibility: hidden; }
   .desk-rail__help-mark {
     display: inline-flex;
     align-items: center;
@@ -32989,6 +32994,15 @@ button.brd-stn { cursor: pointer; }
     flex-direction: column;
     gap: var(--sp-1);
     padding: 0 var(--sp-3);
+  }
+  /* The gates over the places (plan 269): a hairline in the stations'
+     line ink (the rail is sumi in both themes, so the panel's ink and
+     not the page's), inset to the gates' words, a rung either side. It
+     says "a second list" and nothing else, so it carries no caption. */
+  .desk-rail__rule {
+    margin: var(--sp-4) var(--sp-6);
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, transparent);
   }
   /* A gate: the pictogram and its word, every one of them captioned —
      the tab bar's caption register (display, uppercase, tracked) at the
@@ -33064,8 +33078,12 @@ button.brd-stn { cursor: pointer; }
   .desk-rail__stations {
     position: relative;
     display: flex;
+    flex: 0 1 auto;
     flex-direction: column;
+    min-height: 0;
     padding: var(--sp-1) 0 var(--sp-2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   /* The line, drawn per station and capped at the first and the last
      stop's centre -- as .route-stop__rail is -- rather than one line
@@ -33128,6 +33146,36 @@ button.brd-stn { cursor: pointer; }
     background: var(--bg-panel);
   }
   .desk-sec--on::before { background: currentcolor; }
+  /* What the rail holds grew by the places (plan 269), and a lit gate's
+     stations are what gives way: the gates, the places and the pass
+     stand whole at any height, and a line of stations taller than the
+     room left scrolls inside itself (.desk-rail__stations, below; each
+     row's focus ring is drawn inside the row, so the clip cuts none). */
+  .desk-rail__gates > *,
+  .desk-rail__item { flex: none; }
+  .desk-rail__gates > .desk-rail__list:first-child,
+  .desk-rail__item--lined {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .desk-rail__item > .desk-gate { flex: none; }
+  /* The places as one row of four pictograms, each its word for the
+     pointer (title) and a screen reader (its label), beside a lit
+     gate's line of stations: their four rows and Practice's seven
+     stations needed a 960px window. The lit place is the lit gate's
+     lozenge with its rule along the foot. The short desk draws them so
+     everywhere (its block, below). */
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places { flex-direction: row; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__place { flex: 1 1 0; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places .desk-gate { justify-content: center; padding: 0; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places .desk-gate__label { display: none; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places .desk-gate--on::before {
+    inset: auto var(--sp-4) calc(-1 * var(--sp-1));
+    width: auto;
+    height: 2px;
+  }
   /* The foot: the learner's pass (plan 127, components/chrome/
      DeskPass.jsx). The HUD's three instruments as one card on the
      rail's floor -- the profile's pass (.pass) at pocket size: its
@@ -35364,6 +35412,24 @@ button.brd-stn { cursor: pointer; }
     border-inline-start: 1px solid var(--surface-line);
     padding-inline-start: var(--sp-7);
   }
+  /* The Bibliothèque (plan 269): the same shelf beside the library's
+     catalogue. The catalogue is a page of any length (its shelf pages
+     with More), so it scrolls with the window rather than in a box the
+     window's height; the list beside it stays sticky. */
+  .desk-split--library > .desk-split__page {
+    position: static;
+    height: auto;
+  }
+  .lib-catalogue {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* A library card is a whole card (its blurb, its author, its count)
+     and needs a row's width: one to a row, as in the library's list. */
+  .lib-catalogue__grid { grid-template-columns: minmax(0, 1fr); }
+  .lib-home__pair--one { grid-template-columns: minmax(0, 1fr); }
   /* A shelf with nothing to open -- empty, or failed -- stands its one
      card across, not beside a blank half (plan 123). */
   .desk-split--shelf:has(> .desk-split__list > .empty):not(:has(> .desk-split__page > *)) { grid-template-columns: minmax(0, 1fr); }
@@ -40563,6 +40629,17 @@ button.brd-stn { cursor: pointer; }
       padding-top: calc(var(--safe-top) + var(--sp-4));
     }
     .desk-sec { min-height: 28px; }
+    /* The places as the row of pictograms on every screen (plan 269):
+       as rows they were the 188px a 600px window no longer had. */
+    .desk-rail__places { flex-direction: row; }
+    .desk-rail__place { flex: 1 1 0; }
+    .desk-rail__places .desk-gate { justify-content: center; padding: 0; }
+    .desk-rail__places .desk-gate__label { display: none; }
+    .desk-rail__places .desk-gate--on::before {
+      inset: auto var(--sp-4) calc(-1 * var(--sp-1));
+      width: auto;
+      height: 2px;
+    }
     /* Seven stations (Practice's, since 会話, plan 217) were a row more
        than a 600px window holds: a gate of seven closes its rows to
        24px, still a pointer's target, and every other gate keeps 28. */

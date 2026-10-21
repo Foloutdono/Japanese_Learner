@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TAB_IDS, DESK_TAB_IDS, getDeskTabs, getDeskSections, inSection, dueBadge, gateBeside, tabFor } from './tabs'
+import { TAB_IDS, DESK_TAB_IDS, DESK_PLACE_IDS, getDeskTabs, getDeskSections, getDeskPlaces, deskPlaceFor, onDeskRail, inSection, dueBadge, gateBeside, tabFor } from './tabs'
 
 // ── Which gate is next along the bar ──────────────────────────
 // The arithmetic behind the sideways flick (hooks/useGateSwipe), on
@@ -58,28 +58,59 @@ describe('the rail', () => {
 
   it('lists a gate\'s sections without the gate itself', () => {
     expect(getDeskSections('learn', t).map(s => s.path)).toEqual([
-      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks', '/learn/decks/library',
+      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar',
     ])
     expect(getDeskSections('practice', t).map(s => s.path)).toEqual([
       '/practice/reading', '/practice/comprehension', '/practice/translation',
       '/practice/dictation', '/practice/composition', '/practice/exam', '/practice/conversation',
     ])
-    // The queue IS the gate, and the catalogue is the dictionary.
+    // The queue IS the gate, and the catalogue is the dictionary; the
+    // analyser, the shelf, the record and the settings are places
+    // (plan 269), listed on their own.
     expect(getDeskSections('today', t)).toEqual([])
-    expect(getDeskSections('dictionary', t).map(s => s.path)).toEqual(['/dictionary/analyzer'])
-    // The pass's halls: the record, and its settings.
-    expect(getDeskSections('profile', t).map(s => s.path)).toEqual(['/profile/stats', '/profile/settings'])
+    expect(getDeskSections('dictionary', t)).toEqual([])
+    expect(getDeskSections('profile', t)).toEqual([])
+  })
+
+  it('lists the four places, each behind the gate its phone route is (plan 269)', () => {
+    expect(getDeskPlaces(t).map(p => p.id)).toEqual(DESK_PLACE_IDS)
+    expect(getDeskPlaces(t).map(p => [p.path, tabFor(p.path)])).toEqual([
+      ['/dictionary/analyzer', 'dictionary'],
+      ['/learn/decks', 'learn'],
+      ['/profile/stats', 'profile'],
+      ['/profile/settings', 'profile'],
+    ])
+    // The profile's guide finds its two stops on the rail.
+    expect(getDeskPlaces(t).map(p => p.guide)).toEqual([undefined, undefined, 'profile.stats', 'profile.settings'])
+  })
+
+  it('says which place a path stands in, the library and the shelf being one', () => {
+    expect(deskPlaceFor('/learn/decks')?.id).toBe('library')
+    expect(deskPlaceFor('/learn/decks/12')?.id).toBe('library')
+    expect(deskPlaceFor('/learn/decks/library/12')?.id).toBe('library')
+    expect(deskPlaceFor('/profile/settings/sound')?.id).toBe('settings')
+    expect(deskPlaceFor('/dictionary/analyzer')?.id).toBe('analyzer')
+    expect(deskPlaceFor('/dictionary')).toBeNull()
+    expect(deskPlaceFor('/profile')).toBeNull()
+    expect(deskPlaceFor('/learn/vocab')).toBeNull()
+  })
+
+  it('counts a place as a door the rail already has', () => {
+    for (const p of getDeskPlaces(t)) expect(onDeskRail(p.path), p.path).toBe(true)
+    expect(onDeskRail('/learn/vocab')).toBe(true)
+    expect(onDeskRail('/learn/vocab/themes')).toBe(false)
   })
 
   it('carries no pigment: the rail is chrome', () => {
     for (const id of DESK_TAB_IDS) {
-      // A guide anchor is not a colour: the profile's Settings station
-      // carries the stop the page's door carried (plan 143).
       for (const row of getDeskSections(id, t)) {
-        expect(Object.keys(row).filter(k => k !== 'guide').sort()).toEqual(['path', 'title'])
+        expect(Object.keys(row).sort()).toEqual(['path', 'title'])
       }
     }
-    expect(getDeskSections('profile', t).map(s => s.guide)).toEqual(['profile.stats', 'profile.settings'])
+    // A place names a pictogram and a guide's stop, never a colour.
+    for (const p of getDeskPlaces(t)) {
+      expect(Object.keys(p).filter(k => k !== 'guide').sort()).toEqual(['id', 'path', 'title'])
+    }
   })
 
   it('lights a section from anywhere behind it, and only there', () => {

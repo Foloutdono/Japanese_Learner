@@ -4,7 +4,7 @@ import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import { DESK_QUERY } from './hooks/useDesk'
-import { DESK_TAB_IDS, getSections } from './config/tabs'
+import { DESK_TAB_IDS, DESK_PLACE_IDS, getSections } from './config/tabs'
 import './index.css'
 
 // ── 机 — the desk's chrome at its tightest (plan 113) ───────────
@@ -80,9 +80,13 @@ function mountShell(path = '/today', screen = <main id="main-content">here</main
             <Route path="/learn" element={screen} />
             <Route path="/learn/decks" element={screen} />
             <Route path="/learn/decks/:id" element={screen} />
+            <Route path="/learn/decks/library/:id" element={screen} />
+            <Route path="/learn/vocab/:level" element={screen} />
             <Route path="/practice" element={screen} />
             <Route path="/dictionary" element={screen} />
+            <Route path="/dictionary/analyzer" element={screen} />
             <Route path="/profile" element={screen} />
+            <Route path="/profile/stats" element={screen} />
             <Route path="/profile/settings/:page" element={screen} />
           </Route>
           <Route element={<StageFrame />}>
@@ -97,6 +101,7 @@ function mountShell(path = '/today', screen = <main id="main-content">here</main
 const rail = () => document.querySelector('.desk-rail')
 const gates = () => [...document.querySelectorAll('.desk-rail [data-tab]')]
 const stations = () => [...document.querySelectorAll('.desk-rail .desk-sec')]
+const places = () => [...document.querySelectorAll('.desk-rail [data-place]')]
 
 afterEach(() => {
   journeyRef.current = null
@@ -201,8 +206,9 @@ describe('the rail', () => {
     expect(learn.classList.contains('desk-gate--on')).toBe(true)
     expect(learn.getAttribute('aria-current')).toBe('page')
     expect(gates().filter(g => g.classList.contains('desk-gate--on'))).toHaveLength(1)
+    // The shelf is the Bibliothèque's now, a place of its own (plan 269).
     expect(stations().map(s => s.getAttribute('href'))).toEqual([
-      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks', '/learn/decks/library',
+      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar',
     ])
     // Standing on the gate, no station is lit.
     expect(stations().filter(s => s.getAttribute('aria-current'))).toHaveLength(0)
@@ -222,20 +228,13 @@ describe('the rail', () => {
   })
 
   it('lights the station a nested screen stands in, and says the gate is where it is', async () => {
-    await mountShell('/learn/decks/abc')
+    await mountShell('/learn/vocab/N5')
     await settle()
     const lit = stations().filter(s => s.getAttribute('aria-current') === 'page')
-    expect(lit.map(s => s.getAttribute('href'))).toEqual(['/learn/decks'])
+    expect(lit.map(s => s.getAttribute('href'))).toEqual(['/learn/vocab'])
     expect(lit[0].classList.contains('desk-sec--on')).toBe(true)
     const learn = gates().find(g => g.dataset.tab === 'learn')
     expect(learn.getAttribute('aria-current')).toBe('true')
-  })
-
-  it("lights the library's own station, not the shelf's, inside the library (plan 132)", async () => {
-    await mountShell('/learn/decks/library')
-    await settle()
-    const lit = stations().filter(s => s.getAttribute('aria-current') === 'page')
-    expect(lit.map(s => s.getAttribute('href'))).toEqual(['/learn/decks/library'])
   })
 
   it('lists no stations under a gate that is its own only place', async () => {
@@ -244,15 +243,69 @@ describe('the rail', () => {
     expect(stations()).toHaveLength(0)
   })
 
-  it('lists the pass\'s halls under Profile, settings included', async () => {
-    await mountShell('/profile/settings/sound')
+  it('lists the four places past a hairline, each a pictogram and its word (plan 269)', async () => {
+    await mountShell('/today')
     await settle()
-    expect(stations().map(s => s.getAttribute('href'))).toEqual(['/profile/stats', '/profile/settings'])
-    expect(stations()[1].getAttribute('aria-current')).toBe('page')
-    // The profile draws no Settings door on the desk (plan 143): the
-    // guide's Settings stop stands on this station instead, and its
-    // Statistics stop on the one beside it.
-    expect(stations().map(s => s.dataset.guide)).toEqual(['profile.stats', 'profile.settings'])
+    expect(places().map(p => p.dataset.place)).toEqual(DESK_PLACE_IDS)
+    expect(places().map(p => p.getAttribute('href'))).toEqual([
+      '/dictionary/analyzer', '/learn/decks', '/profile/stats', '/profile/settings',
+    ])
+    const rule = rail().querySelector('.desk-rail__rule')
+    expect(rule.getBoundingClientRect().top).toBeGreaterThan(gates().at(-1).getBoundingClientRect().bottom)
+    expect(rule.getBoundingClientRect().bottom).toBeLessThan(places()[0].getBoundingClientRect().top)
+    for (const p of places()) {
+      expect(p.querySelector('.desk-gate__ico svg'), p.dataset.place).not.toBeNull()
+      const label = p.querySelector('.desk-gate__label')
+      expect(label.textContent.trim().length).toBeGreaterThan(0)
+      expect(label.scrollWidth, label.textContent).toBeLessThanOrEqual(label.clientWidth)
+    }
+    // The profile's guide stops on the two places it used to find as
+    // stations (plan 143).
+    expect(places().map(p => p.dataset.guide)).toEqual([undefined, undefined, 'profile.stats', 'profile.settings'])
+  })
+
+  it('lights the place you stand in, and not the gate its path is behind', async () => {
+    for (const [path, id] of [
+      ['/dictionary/analyzer', 'analyzer'],
+      ['/learn/decks', 'library'],
+      ['/learn/decks/abc', 'library'],
+      ['/learn/decks/library/abc', 'library'],
+      ['/profile/stats', 'stats'],
+      ['/profile/settings/sound', 'settings'],
+    ]) {
+      const shell = await mountShell(path)
+      await settle()
+      const lit = places().filter(p => p.getAttribute('aria-current') === 'page')
+      expect(lit.map(p => p.dataset.place), path).toEqual([id])
+      expect(lit[0].classList.contains('desk-gate--on'), path).toBe(true)
+      expect(gates().filter(g => g.classList.contains('desk-gate--on') || g.getAttribute('aria-current')), path).toHaveLength(0)
+      expect(stations(), path).toHaveLength(0)
+      await shell.unmount()
+    }
+  })
+
+  it('lists no stations under Profile or the dictionary: their halls are places', async () => {
+    for (const path of ['/profile', '/dictionary']) {
+      const shell = await mountShell(path)
+      await settle()
+      expect(stations(), path).toHaveLength(0)
+      expect(places().filter(p => p.getAttribute('aria-current')), path).toHaveLength(0)
+      await shell.unmount()
+    }
+  })
+
+  it('keeps the head the same height on a place, with no guide to play there', async () => {
+    const shell = await mountShell('/learn')
+    await settle()
+    const top = gates()[0].getBoundingClientRect().top
+    expect(rail().querySelector('[data-action="guide"]')).not.toBeNull()
+    await shell.unmount()
+    await mountShell('/profile/stats')
+    await settle()
+    expect(gates()[0].getBoundingClientRect().top).toBe(top)
+    expect(rail().querySelector('[data-action="guide"]')).toBeNull()
+    const idle = rail().querySelector('.desk-rail__help--idle')
+    expect(getComputedStyle(idle).visibility).toBe('hidden')
   })
 
   it('prints a French station name whole', async () => {

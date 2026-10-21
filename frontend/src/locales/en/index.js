@@ -69,6 +69,9 @@ const nav = {
   tabDictionary:     'Dictionary',
   tabProfile:        'Profile',
   tabBarLabel:       'Sections',
+  // The desk rail's second list (plan 269): the analyser, the library,
+  // the statistics and the settings, as places beside the gates.
+  deskPlacesLabel:   'Places',
   hudStatusLabel:    'Goal status',
   hudOffline:        'Offline',
   hudDays:           (n) => `${n}d`,

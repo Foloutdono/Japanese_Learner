@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { SplitRow } from '../components/selection/SplitRow'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -20,6 +20,7 @@ import { useListWalk, useFollowFocus, WALK_KEYS } from '../hooks/useListWalk'
 import { StationSplit } from '../components/selection/StationSplit'
 import DeckDetailScreen from './DeckDetailScreen'
 import { LyricsImportSheet } from '../components/decks/LyricsImportSheet'
+import { LibraryCatalogue } from '../components/decks/LibraryCatalogue'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
 // /learn/decks on the canvas: the bar, the shelf's two doors under
@@ -379,22 +380,28 @@ function DecksShelf({ session, open }) {
   // beside it, drawn as the owner's pick B: the index field over the
   // types as glyph chips with their counts, a row per deck -- its glyph,
   // its name, its cards (and whose it is), what it is due -- and the
-  // two doors at the list's foot. The bare shelf opens on its first
-  // deck. A shelf still loading, or with no deck on it, keeps the
-  // one-column page below: there is nothing to stand beside it.
-  if (desk && !loading && decks.length > 0) {
-    if (!open) return <Navigate replace to={`/learn/decks/${decks[0].id}`} />
+  // new deck's door at the list's foot.
+  //
+  // The bare shelf is the desk's Bibliothèque (plan 269, the owner's
+  // pick L1): the same list beside the library's catalogue, where it
+  // used to open its first deck for you, and the library a page of it
+  // rather than a door at the list's foot (the rail's Bibliothèque is
+  // the way back to it from a deck). With no deck yet, the list says so
+  // over the door, the catalogue beside it. A shelf still loading keeps
+  // the one-column page below.
+  if (desk && !loading) {
     const listed = shown.some(d => String(d.id) === String(open))
     const typeCount = type => decks.filter(d => d.type === type).length
     return (
       <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
-        <Bar code="KZ" color="var(--line-decks)" title={t.decks} />
+        <Bar code="KZ" color="var(--line-decks)" title={open ? t.decks : t.library} />
         <StationSplit
-          className="desk-split--decks"
+          className={open ? 'desk-split--decks' : 'desk-split--decks desk-split--library'}
           label={t.decks}
           list={(
             <>
-              <Console className="shelf-console">
+              {decks.length === 0 && <Empty icon={<BooksIcon size={40} />} message={t.noDecks} hint={t.createFirstDeck} />}
+              {decks.length > 0 && <Console className="shelf-console">
                 <ConsoleIndex
                   inputRef={searchRef}
                   value={query}
@@ -419,8 +426,8 @@ function DecksShelf({ session, open }) {
                     ))}
                   </Chips>
                 </ConsoleTop>
-              </Console>
-              {shown.length === 0 && noMatch}
+              </Console>}
+              {decks.length > 0 && shown.length === 0 && noMatch}
               {shown.length > 0 && (
                 <div className="shelf-rows" ref={shelfRef} onKeyDown={onShelfWalk} aria-keyshortcuts={WALK_KEYS}>
                   {shown.map((deck, i) => {
@@ -452,19 +459,20 @@ function DecksShelf({ session, open }) {
                   })}
                 </div>
               )}
-              {/* The shelf's two doors at its foot: the page beside it
-                  holds the screen's one filled action, so a new deck is
-                  a ghost here. */}
+              {/* The shelf's door at its foot: the page beside it holds
+                  the screen's one filled action, so a new deck is a
+                  ghost here. */}
               <div className="decks-doors">
                 <Chip className="decks-doors__create" onClick={() => { playUi('click-mode-selection'); setCreating(true) }}>
                   <PlusIcon size={14} />{t.createDeck}
                 </Chip>
-                {browseDoor}
               </div>
             </>
           )}
         >
-          <DeckDetailScreen session={session} deckId={open} pane onCount={onCount} onGone={onGone} onChanged={onChanged} />
+          {open
+            ? <DeckDetailScreen session={session} deckId={open} pane onCount={onCount} onGone={onGone} onChanged={onChanged} />
+            : <LibraryCatalogue session={session} />}
         </StationSplit>
         {createSheet}
         {lyricsSheet}
