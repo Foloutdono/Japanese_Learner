@@ -176,7 +176,7 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
     cues = json.loads(cues_path.read_text(encoding="utf-8"))
     cache.mkdir(parents=True, exist_ok=True)
     rev = engine.VOICE_REV
-    durs, marks, failed = {}, {}, []
+    durs, marks, files, failed = {}, {}, {}, []
     unique = {cue_key(c): c for c in cues}
     todo = [c for c in unique.values() if not (cache / clip_name(c, rev)).exists()]
     print(f"{len(unique)} line(s), {len(todo)} to voice (voice {rev}).")
@@ -197,6 +197,8 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
             write_wav(path, pcm.frames, pcm.rate)
         with wave.open(str(path)) as w:
             durs[cue_key(cue)] = round(w.getnframes() / w.getframerate(), 3)
+        # Where it is: a feature's video plays it in the app it records (plan 270).
+        files[cue_key(cue)] = str(path)
         if cue.get("marks") and not kana:
             slot = SLOTS.get(cue["who"], 0)
             speed = engine.tempo_for_slot(slot) * (SLOW if cue.get("slow") else 1.0)
@@ -207,7 +209,7 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
                 print(f"  {cue['text']}: no syllables ({type(e).__name__}: {e})", file=sys.stderr)
         if i % 50 == 0:
             print(f"  {i}/{len(unique)}")
-    out.write_text(json.dumps({"rev": rev, "durs": durs, "marks": marks}, ensure_ascii=False, indent=0), encoding="utf-8")
+    out.write_text(json.dumps({"rev": rev, "durs": durs, "marks": marks, "files": files}, ensure_ascii=False, indent=0), encoding="utf-8")
     print(f"wrote {out}: {len(durs)} line(s); {len(failed)} failed.")
     return 1 if failed else 0
 

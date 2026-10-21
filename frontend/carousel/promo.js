@@ -394,6 +394,10 @@ export function promoDeck(plan, fmt, opts) {
   }
 
   switch (plan.story) {
+    // A feature's video ends here (plan 270): the stories' last frame, its ask the caller's.
+    case 'gate':
+      add('gate', ctx => board(ctx, 1, 1, plan.head, plan.note ?? P.start))
+      break
     case 'pitch': {
       add('today', ctx => today(ctx, P.hook))
       add('lines', ctx => {
@@ -714,6 +718,14 @@ export function promoDeck(plan, fmt, opts) {
   }
   out.clip = out.clips.cover
   return out
+}
+
+/** The stories' call to action in motion, its ask a caller's own (plan
+ *  270, a feature's video): the mark, the ask, its note, then the gate,
+ *  which waits; scored as the stories' is (the board's flap, the chime). */
+export function gateClip(fmt, { lang = 'en', head, note = null, handle = '', ground = 'paper' } = {}) {
+  const plan = { ...promoPlan('pitch', {}, null, { lang, handle }), story: 'gate', head: weldIf(lang === 'fr' ? 'fr' : 'en', head), note }
+  return promoDeck(plan, fmt, { ground }).clips.end
 }
 
 /** A cover clip's length and rate: seven seconds, at thirty frames. */

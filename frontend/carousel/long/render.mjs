@@ -32,6 +32,12 @@
 //                     a level's (N5:3) or a theme's (theme:animals:1)
 //   --style quiz      ... as a card on washi (card, the default) or a quiz on sumi (quiz)
 //   --unvoiced        ... a read-along made even when the voice engine fails (silent lines)
+//   --feature ID      a practice feature's video (plan 270, feature.js): the app
+//                     itself, recorded doing one exercise (record.mjs), 9:16:
+//                     reading, comprehension, translation, dictation, composition,
+//                     exam or conversation
+//   --app URL         ... record the app already running there (npm run dev),
+//                     rather than starting Vite here
 //   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the
 //                     command" writes the values changed, so the render is the preview
 //
@@ -79,6 +85,8 @@ const OUT = resolve(args.out || join(HERE, 'out'))
 const CACHE = join(HERE, 'cache')
 // A work folder of this run's own: two renders into one --out never share a mix (plan 248).
 const WORK = join(OUT, '.work', `${process.pid}-${Date.now()}`)
+// Anything else this run made to work with, removed with it (a feature's shots, plan 270).
+const CLEAN = []
 if (spawnSync('ffmpeg', ['-version']).status !== 0) throw new Error('ffmpeg is needed, and is not on the PATH')
 for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive: true })
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
@@ -112,8 +120,10 @@ function voiceAll(cues) {
   writeFileSync(join(WORK, 'cues.json'), JSON.stringify(cues))
   const voiced = spawnSync(python, ['-m', 'scripts.long_video_audio', 'voice', join(WORK, 'cues.json'), '--cache', CACHE, '--out', join(WORK, 'durs.json')], { cwd: BACKEND, stdio: 'inherit' })
   if (voiced.status !== 0) log('some lines could not be voiced: they are timed by a guess and left unsaid')
-  const { durs, marks = {} } = existsSync(join(WORK, 'durs.json')) ? JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8')) : { durs: {} }
+  const { durs, marks = {}, files = {} } = existsSync(join(WORK, 'durs.json')) ? JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8')) : { durs: {} }
   const dur = c => durs[cueKey(c)]
+  // Where a line's voice is: a feature's video plays it in the app it records (plan 270).
+  dur.file = c => files[cueKey(c)] || null
   dur.ok = voiced.status === 0
   // A line read along is also known syllable by syllable (plan 247).
   dur.marks = c => marks[cueKey(c)] || null
@@ -184,6 +194,36 @@ if (args.challenge) {
   pageText = wordsPage(plan, tl, site, banks['index.json']?.figures)
   thumbAt = wordsStillAt(plan, tl)
   log(`${pageText.title}: ${plan.items.length} words, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines`)
+} else if (args.feature) {
+  // ── A practice feature (plan 270): the app itself, recorded doing one exercise ──
+  const { featurePage, featurePlan, featureStillAt, featureSteps, featureTimeline } = await import('../feature.js')
+  const { appServer, record } = await import('./record.mjs')
+  const plan = featurePlan(banks, String(args.feature), { lang, fit: opts.fit, music: args.music !== 'none', handle: typeof args.handle === 'string' ? args.handle : '' })
+  const dur = plan.cue ? voiceAll([plan.cue]) : null
+  // The clip the app plays is the line voiced, so the player runs as long as the voice.
+  const said = plan.cue ? dur(plan.cue) : null
+  const app = await appServer(FRONT, typeof args.app === 'string' ? args.app : null)
+  // The shots under the front end, where this page can load them.
+  const shotDir = join(FRONT, 'carousel/long/out/.shots', `${process.pid}-${Date.now()}`)
+  CLEAN.push(shotDir)
+  log(`recording ${plan.name} (${lang}) in the app at ${app.url}`)
+  let shots
+  try {
+    shots = await record(browser, { url: app.url, steps: featureSteps(plan, said || 2.5), mocks: plan.data.mocks, lang, audio: plan.cue ? dur.file(plan.cue) : null, dir: shotDir, log })
+  } finally { await app.close() }
+  tl = featureTimeline(plan, shots, dur)
+  SIZE = TALL
+  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.music ? [] : ['nomusic'])].join('-')
+  await fontsFor(glyphs({ plan: { ...plan, data: null }, tl }))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl, srcs }) => {
+    const F = await import('/carousel/feature.js')
+    const imgs = await Promise.all(srcs.map(src => new Promise(done => { const i = new Image(); i.onload = () => done(i); i.onerror = () => done(null); i.src = src })))
+    window.__draw = t => F.drawFeature(window.__ctx, plan, tl, t, imgs)
+  }, { plan: { ...plan, data: null }, tl, srcs: shots.map(x => '/' + x.file.slice(FRONT.length + 1)) })
+  pageText = featurePage(plan, tl, site)
+  thumbAt = featureStillAt()
+  log(`${pageText.title}: ${shots.length} shots, ${tl.seconds.toFixed(1)} s`)
 } else if (recipe) {
   // ── A carousel of the studio, standing, its line voiced ──
   const made = await page.evaluate(async st => {
@@ -351,4 +391,5 @@ writeFileSync(join(OUT, `${slug}.txt`), pageFile(pageText))
 await browser.close()
 server.close()
 rmSync(WORK, { recursive: true, force: true })
+for (const d of CLEAN) rmSync(d, { recursive: true, force: true })
 log(`wrote ${mp4} (${(seconds / 60).toFixed(1)} min, ${drawn} of ${frames} frames drawn)`)

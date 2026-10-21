@@ -1064,6 +1064,7 @@ def files(deck: dict):
     yield "dialogues.json", dialogue_file
     yield "conversation.json", scenes
     yield "short.json", shorts()
+    yield "promo.json", promo()
     trap_file = traps()
     yield "traps.json", trap_file
     yield "index.json", figures(sentences, kana, comprehension, {
@@ -1628,6 +1629,218 @@ def _exam_n5() -> dict:
             "pass": PASS_THRESHOLDS["N5"]["total_min"], "max": PASS_THRESHOLDS["N5"]["total_max"]}
 
 
+# ── 宣伝 — the practice features' videos (plan 270) ─────────────────
+# Each feature's video is the app itself, run in a browser with its API
+# answered from here (frontend/carousel/long/record.mjs). The answers are
+# the backend's own, made by the functions its routes call, for the
+# banks' own content: what the screen shows is what the app would say.
+# A model's answer (a tutor's review) is the one part written by hand,
+# in the shape the tutor returns (frontend/carousel/content/promo.json).
+PROMO_AT = "2026-10-01T09:00:00+00:00"
+
+
+def _promo_analysis(text: str) -> dict:
+    """POST /api/phrase/analyze, save=false, deep=false, for one sentence:
+    the local tier, with no learner state (routes/phrase._analyze_passage)."""
+    from study.analysis import attach_user_state
+
+    only = attach_user_state(analyze_local(text), {}, "promo")
+    return {
+        "passage": text, "sentences": [only], "truncated": 0,
+        "explanation": only.get("explanation", ""), "translation": only.get("translation", ""),
+        "words": only["tokens"], "tokens": only["tokens"], "grammar": only["grammar"],
+        "level": only["level"], "grade": only.get("grade"), "available": only["available"],
+        "unknown_count": only.get("unknown_count"), "off_deck_count": only.get("off_deck_count"),
+        "id": None, "created_at": None,
+    }
+
+
+def _promo_fare(quality: int) -> dict:
+    """A practice answer's fare (SRSEngine.award_practice): the base rate
+    of its quality, no bonus."""
+    from srs.xp import BASE_XP_BY_QUALITY
+
+    return {"xp_earned": BASE_XP_BY_QUALITY.get(quality, 0), "leveled_up": False, "new_level": None, "correct": quality >= 3}
+
+
+def _promo_boot(level: str) -> dict:
+    """What the shell asks for before any screen: a learner who boarded,
+    rode the first ride and saw every gate's guide (else the boarding or
+    a guide would stand over the screen), on the free plan's credits."""
+    from datetime import datetime
+
+    from core import credits
+
+    clock = datetime.fromisoformat(PROMO_AT)
+    seen = "2026-09-01T09:06:00+00:00"
+    return {
+        "GET /api/profile": {
+            "username": "Tsuji", "cardName": None, "level": 4, "xp": 420, "xpPrevLevel": 300, "xpForNext": 600,
+            "jlptLevel": level, "dailyNewTarget": 10, "onboardedAt": "2026-09-01T09:00:00+00:00",
+            "ratingScale": "simple", "readingPace": "standard", "motive": None, "kanaKnown": None,
+            "reminderTime": None, "notifications": False, "lines": None, "tutorialAt": "2026-09-01T09:05:00+00:00",
+            "guided": {k: seen for k in ("learn", "practice", "today", "dictionary", "profile")},
+            "transferOffer": False, "analyticsOff": True, "boardHidden": False, "streak": 3, "streakLongest": 5,
+            "totalReviews": 120, "bestQualityStreak": 8, "retention": 0.88, "week": [], "calendar": [], "tickets": [],
+            "restHeld": 0, "nextMilestone": 7,
+        },
+        "GET /api/credits": credits._summary_of({"unlimited": False, "balance": 42, "pending": 0, "clock": clock, "plan": "free"}),
+        "GET /api/today": {"total": 0},
+    }
+
+
+def _promo_spec() -> dict:
+    """frontend/carousel/content/promo.json: each feature's sentence, the
+    answer typed and the tutor's raw replies (plan 270)."""
+    return json.loads((CONTENT / "promo.json").read_text(encoding="utf-8"))
+
+
+def _reading_clock():
+    """routes/reading._display_seconds, its four numbers read from the
+    route's source (the route opens the database on import)."""
+    import ast
+
+    names = {"BASE_SECONDS", "SECONDS_PER_CHAR", "MIN_DISPLAY_SECONDS", "MAX_DISPLAY_SECONDS"}
+    tree = ast.parse((BACKEND / "routes" / "reading.py").read_text(encoding="utf-8"))
+    v = {n.targets[0].id: ast.literal_eval(n.value) for n in tree.body
+         if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name) and n.targets[0].id in names}
+    if set(v) != names:
+        raise SystemExit("routes/reading.py: the reading clock's numbers moved")
+    return lambda jp: max(v["MIN_DISPLAY_SECONDS"], min(v["MAX_DISPLAY_SECONDS"], round(v["BASE_SECONDS"] + v["SECONDS_PER_CHAR"] * len(jp), 1)))
+
+
+def _promo_phrase(jp: str, level: str, lang: str) -> dict:
+    """A reading-bank row as the reading and translation batches serve it
+    (routes/reading._finish_phrase, a curated row's arguments)."""
+    from content import reading_sentences as rs
+    from content.grammar_points_data import id_for
+    from study.furigana import align_sentence
+    from study.romaji import sentence_romaji, sentence_words
+
+    row = next((r for r in rs.BY_LEVEL[level] if r["jp"] == jp), None)
+    if row is None:
+        raise SystemExit(f"content/promo.json: {jp} is no {level} row of the reading bank")
+    text, text_lang = rs.translation(row, lang)
+    return {
+        "phrase": jp, "romaji": sentence_romaji(jp), "furigana": align_sentence(jp), "words": sentence_words(jp),
+        "translation": text, "translation_lang": text_lang, "display_seconds": _reading_clock()(jp),
+        "key": rs.phrase_key(jp), "source_word": {"kanji": row["focus"], "kana": "", "level": level},
+        "grammar": row["grammar"], "grammar_id": id_for(row["grammar"]),
+    }
+
+
+def _promo_review(reply: dict, answer: str) -> dict:
+    """The tutor's raw reply as the route serves it (study/tutor_review):
+    parsed, its corrected sentence in parts with its romaji, as text."""
+    from study import tutor_review
+
+    review = tutor_review.parse_review(json.dumps(reply, ensure_ascii=False))
+    if review is None:
+        raise SystemExit("content/promo.json: a reply is not the tutor's shape")
+    review.pop("japanese", None)
+    if review["better"]:
+        review.update(tutor_review.corrected(review["better"], answer))
+    return {"review": review, "analysis": tutor_review.review_as_text(review)}
+
+
+def _promo_dictation(spec: dict, lang: str) -> dict:
+    """書取: a line of the bank heard twice, written with a slip, and
+    marked as /api/dictation/check marks it."""
+    from content.listening_clips import all_clips
+    from study import dictation
+
+    row = next((r for r in all_clips() if r["jp"] == spec["line"]), None)
+    if row is None:
+        raise SystemExit(f"content/promo.json: {spec['line']} is no line of the dictation bank")
+    cid = dictation.clip_id(row["jp"])
+    answer = spec["answer"]
+    return {
+        "level": row["level"], "line": row["jp"], "answer": answer,
+        "mocks": {
+            "GET /api/dictation/batch": {"level": row["level"], "max_plays": dictation.MAX_PLAYS, "clips": [{"id": cid, "level": row["level"], "audioSrc": dictation.clip_url(row["jp"])}]},
+            "POST /api/dictation/check": {"id": cid, "level": row["level"], **dictation.reveal(row, lang), **dictation.measure(answer, row)},
+            "POST /api/phrase/analyze": _promo_analysis(row["jp"]),
+            "POST /api/dictation/result": _promo_fare(3),
+        },
+    }
+
+
+def _promo_reading(spec: dict, lang: str) -> dict:
+    """読書: a sentence of the reading bank, read against the clock, its
+    reading typed, measured as /api/reading/check measures it."""
+    from study.dictation import measure_forms
+
+    phrase = _promo_phrase(spec["phrase"], spec["level"], lang)
+    return {
+        "level": spec["level"], "line": phrase["phrase"], "answer": spec["answer"],
+        "mocks": {
+            "GET /api/reading/batch": {"source": "level", "level": spec["level"], "domain": None, "tier": None, "phrases": [phrase]},
+            "POST /api/reading/check": measure_forms(spec["answer"], jp=phrase["phrase"], romaji=phrase["romaji"]),
+            "POST /api/phrase/analyze": _promo_analysis(phrase["phrase"]),
+            "POST /api/reading/result": _promo_fare(4),
+        },
+    }
+
+
+def _promo_translation(spec: dict, lang: str) -> dict:
+    """翻訳: a reading-bank sentence to put into Japanese, the learner's
+    attempt with a slip, and the tutor's read on it."""
+    phrase = _promo_phrase(spec["phrase"], spec["level"], lang)
+    return {
+        "level": spec["level"], "line": phrase["phrase"], "answer": spec["answer"],
+        "mocks": {
+            "GET /api/translation/batch": {"source": "level", "level": spec["level"], "domain": None, "tier": None, "phrases": [phrase]},
+            "POST /api/translation/analyze": _promo_review(spec["reply"][lang], spec["answer"]),
+            "POST /api/phrase/analyze": _promo_analysis(phrase["phrase"]),
+            "POST /api/translation/result": {**_promo_fare(3), "scheduled": None},
+        },
+    }
+
+
+def _promo_composition(spec: dict, lang: str) -> dict:
+    """作文: a point of the level, a sentence written with it, the
+    detector's word and the tutor's (routes/composition)."""
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_to_id
+    from study import grammar_detect
+    from study.grammar_examples import structure_text
+
+    level = spec["level"]
+    entry = next((e for e in GRAMMAR_POINTS_BY_LEVEL[level] if e["pattern"] == spec["point"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {spec['point']} is no {level} point")
+    raw_id = grammar_to_id(entry, level)
+    sentence = spec["answer"]
+    found = any((h["pattern"], h["level"]) == (entry["pattern"], level) for h in grammar_detect.hits(sentence)) if grammar_detect.can_find(entry["pattern"]) else None
+    review = _promo_review(spec["reply"][lang], sentence)
+    return {
+        "level": level, "line": sentence, "answer": sentence, "point": entry["pattern"],
+        "mocks": {
+            "GET /api/composition/batch": {"level": level, "points": [{"raw_id": raw_id, "level": level, "pattern": entry["pattern"], "structure": structure_text(entry, lang), "meaning": gloss(entry, lang), "register": entry.get("register"), "stage": "learning"}]},
+            "POST /api/composition/check": {"found": found, "japanese": None},
+            "POST /api/composition/review": {**review, "japanese": None, "found": found},
+            "POST /api/phrase/analyze": _promo_analysis(sentence),
+            "POST /api/composition/result": _promo_fare(3),
+        },
+    }
+
+
+PROMO_FEATURES = {"reading": _promo_reading, "translation": _promo_translation, "dictation": _promo_dictation, "composition": _promo_composition}
+
+
+def promo() -> dict:
+    """bank/promo.json: per practice feature and language, what the app's
+    API answers in its video, the shell's boot included."""
+    spec = _promo_spec()
+    out = {}
+    for name, make in PROMO_FEATURES.items():
+        out[name] = {}
+        for lang in ("en", "fr"):
+            f = make(spec[name], lang)
+            f["mocks"] = {**_promo_boot(f["level"]), **f["mocks"]}
+            out[name][lang] = f
+    return {"rev": REV, "features": out}
+
+
 def _count(data: dict) -> str:
     return ", ".join(f"{len(v)} {k}" for k, v in data.items() if isinstance(v, (list, dict)))
 
@@ -1635,8 +1848,14 @@ def _count(data: dict) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--check", action="store_true", help="exit 1 when a file is stale")
+    parser.add_argument("--only", help="write this file alone (promo.json: no tokenizer pass over the banks)")
     args = parser.parse_args()
 
+    if args.only == "promo.json":
+        text = dump(promo())
+        (OUT / "promo.json").write_text(text, encoding="utf-8")
+        print(f"wrote frontend/carousel/bank/promo.json: {len(text.encode()) // 1024} KB")
+        return 0
     deck = _deck_words()
     stale = []
     for filename, data in files(deck):
