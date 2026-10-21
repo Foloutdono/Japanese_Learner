@@ -9,63 +9,58 @@ import { useDesk } from '../../hooks/useDesk'
 import { composing } from '../../lib/keyGuards'
 import { SUBTITLE_ACCEPT, MEDIA_ACCEPT } from '../../lib/subtitleFiles'
 import { readFeed, feedAddress } from '../../lib/podcast'
+import { useCachedJson, invalidateCachedJson } from '../../lib/cachedJson'
+import { Seg, Chip } from '../chrome/Console'
 import { videoErrorMessage } from './videoErrors'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
-// Three ways in, in the order they should be tried:
+// Three doors, one at a time (plan 265, the owner's pick B of the
+// canvas "Tsuji analyser — new ways in"): Lien · Fichier · Podcast.
+// Plan 136 had drawn one column with every way in on it; once a
+// recording and a podcast could come in too, the column held five
+// actions and a field that meant two things, so each source has its
+// own door and the doors are one control at the top.
 //
-//   0. The link alone — the server fetches the Japanese track through
-//      a residential proxy (docs/adr/0003, 2026-09-10). CONDITIONAL:
-//      it appears only where /api/video/capabilities says the proxy
-//      is configured, because it is a paid credential that decides,
-//      not the code. Where it is on, it is the only thing the learner
-//      has to do, and it is the one route that also works inside the
-//      native shell, where a bookmarklet has no bookmarks bar to live
-//      in.
-//   1. 字幕取り — the bookmarklet the app mints (lib/captionGrab.js,
-//      where the measurements live). It runs ON the YouTube page —
-//      the one origin where captions are still fetchable — grabs the
-//      Japanese track and comes back here through the URL hash.
-//      Works on phones: a bookmark is the one programmable thing a
-//      mobile browser allows.
-//   2. A subtitle file, picked here or dropped anywhere on the desk's
-//      page (AnalyzerScreen). The accept list carries MIME types
-//      alongside extensions on purpose: Android's picker matches by
-//      MIME, and `.srt`/`.vtt` map to none, so the extension-only list
-//      greyed out every file on mobile — the "they don't let you use
-//      these types of files" report.
+//   Lien     the link, the video's still and ONE filled action, as plan
+//            136 drew it (the owner's pick C there):
+//              the server can fetch links      ->  Get the subtitles
+//              the bookmark has never been used ->  Set up the bookmark
+//              otherwise                        ->  Open on YouTube
+//            The server's fetch through a residential proxy
+//            (docs/adr/0003, 2026-09-10) is CONDITIONAL on
+//            /api/video/capabilities; the bookmark (lib/captionGrab.js)
+//            needs a browser with bookmarks, so not the native shell.
+//   Fichier  a subtitle file, or where the server can hear one a
+//            recording (sound or film): picked here or dropped anywhere
+//            on the desk's page. The accept list carries MIME types
+//            beside extensions on purpose: Android's picker matches by
+//            MIME, and `.srt`/`.vtt` map to none.
+//   Podcast  where the server can hear one: the podcasts the learner
+//            has heard before, a feed's address, its episodes, and what
+//            is left of the day's listening.
 //
-// 1 and 2 never move: they cost nothing, cannot be blocked, and are
-// what 0 degrades TO. Nothing here is gated behind the paid path.
+// The link field's video still plays beside lines from a file: the
+// link names the video for the player whichever door the lines came
+// in by. Nothing here is gated behind the paid path: Fichier is always
+// there, and leads in the native shell where no link can be fetched.
 //
-// The column (plan 136, the owner's pick C): the link, the video's
-// still once the link names one, ONE filled action, the file, and a
-// quiet line of the rest. The paragraph that explained the bookmark on
-// every visit is gone; which action is filled says it instead:
-//
-//   the server can fetch links      ->  Get the subtitles (waiting,
-//                                        disabled, for a video's link)
-//   the bookmark has never been used ->  Set up the bookmark (the
-//                                        walkthrough, where the copy is)
-//   otherwise                        ->  Open on YouTube, then the
-//                                        bookmark there
-//
-// `grabUsed` is the screen's (a passage has arrived by the bookmark).
-// `onTutorial` opens the walkthrough where the screen keeps it -- the
-// desk's column, or a dialog on a phone; without it (a bare mount) the
-// walkthrough is this panel's own dialog. `grab` is the copy state the
-// screen shares with that walkthrough, and `tutorialPopup` says what
-// the screen's opens ('dialog' on a phone, nothing in the desk's column).
-// `dropRef` is the screen's hold
-// on this panel's file ingest, for a file dropped anywhere on the desk's
-// page: it is cut to the window set here, as one chosen here is.
-//
-// `transcribe` (plan 265): the server can hear a recording, so the file
-// button takes a sound or a film too (the screen sends one to the
-// recogniser), and a web address that is no YouTube link can be read as
-// a podcast's feed, its episodes listed here to pick from
-// (`onStartFromEpisode`, cut to the same window).
-export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, onStartFromEpisode, session, transcribe = false, linkFetch, grab, onTutorial, tutorialPopup, grabUsed = false, dropRef }) {
+// `door`/`onDoorChange` and `feedInput`/`onFeedInputChange` are the
+// screen's when it holds them (a feed pasted in the phone's line opens
+// the Podcast door with it), the panel's own otherwise. `grabUsed` is
+// the screen's (a passage has arrived by the bookmark). `onTutorial`
+// opens the walkthrough where the screen keeps it -- the desk's column,
+// or a dialog on a phone; without it (a bare mount) the walkthrough is
+// this panel's own dialog. `grab` is the copy state the screen shares
+// with that walkthrough, and `tutorialPopup` says what the screen's
+// opens ('dialog' on a phone, nothing in the desk's column). `dropRef`
+// is the screen's hold on this panel's file ingest, for a file dropped
+// anywhere on the desk's page: it is cut to the window set here, as one
+// chosen here is. `minutesLeft` is the day's listening left.
+export function IntakeVideo({
+  t, url, onUrlChange, onStartFromFile, onStartFromLink, onStartFromEpisode, session,
+  transcribe = false, minutesLeft = null, linkFetch, grab, onTutorial, tutorialPopup, grabUsed = false, dropRef,
+  door: heldDoor, onDoorChange, feedInput: heldFeed, onFeedInputChange,
+}) {
   // The Window is OPTIONAL and blank by default -- the whole Track is
   // the sensible thing to study, and MAX_SENTENCES already bounds the
   // work. See docs/adr/0003's 2026-08-27 amendment.
@@ -76,7 +71,23 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   const { copied, copy: copyBookmarklet } = grab ?? own
   const [showTutorial, setShowTutorial] = useState(false)
   const fileRef = useRef(null)
-  // A podcast's feed, once read: { url, title, episodes } | { url,
+  const grabbable = !isNative()
+
+  // The doors (see the head): Podcast only where a recording can be
+  // heard, and Fichier first where no link can be fetched or grabbed.
+  const doors = [
+    { key: 'link', label: t.doorLink },
+    { key: 'file', label: t.doorFile },
+    ...(transcribe ? [{ key: 'podcast', label: t.doorPodcast }] : []),
+  ]
+  const [ownDoor, setOwnDoor] = useState(() => (!grabbable && !linkFetch ? 'file' : 'link'))
+  const wanted = heldDoor ?? ownDoor
+  const door = doors.some(d => d.key === wanted) ? wanted : 'link'
+  const setDoor = onDoorChange ?? setOwnDoor
+  const [ownFeed, setOwnFeed] = useState('')
+  const feedInput = heldFeed ?? ownFeed
+  const setFeedInput = onFeedInputChange ?? setOwnFeed
+  // A podcast's feed, once read: { url, title, image, episodes } | { url,
   // error } | { url, loading }. Kept for the address it was read for, so
   // a new address in the field puts the list away.
   const [feed, setFeed] = useState(null)
@@ -109,22 +120,9 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   const desk = useDesk()
   // Where the server can fetch, the fetch is the lead whether or not a
   // link has been pasted yet: the button waits, disabled, for a link
-  // that names a video, rather than the column leading with the
-  // bookmark and switching under the learner's paste.
+  // that names a video, rather than the door leading with the bookmark
+  // and switching under the learner's paste.
   const canFetch = Boolean(linkFetch && parsedVideoId)
-  const feedUrl = transcribe ? feedAddress(url, s => Boolean(parseVideoId(s))) : null
-  const shownFeed = feed && feed.url === feedUrl ? feed : null
-  async function openFeed() {
-    if (!feedUrl || shownFeed?.loading) return
-    setFeed({ url: feedUrl, loading: true })
-    try {
-      const read = await readFeed(session, feedUrl)
-      setFeed({ url: feedUrl, ...read })
-    } catch (e) {
-      setFeed({ url: feedUrl, error: videoErrorMessage(e, t) })
-    }
-  }
-  const grabbable = !isNative()
   const startLink = () => onStartFromLink(url, { start: startSec, end: endSec })
   const onUrlKey = desk && canFetch
     ? e => {
@@ -136,10 +134,38 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
   const openTutorial = () => (onTutorial ? onTutorial() : setShowTutorial(true))
   const popup = onTutorial ? tutorialPopup : 'dialog'
 
-  // Which of the three is the one filled action (see the head). An
-  // address read as a podcast's feed (plan 265) is the fourth: it names
-  // no video to fetch, open or grab, so its own button leads instead.
-  const lead = feedUrl ? 'feed' : linkFetch ? 'fetch' : !grabbable ? 'file' : grabUsed ? 'open' : 'install'
+  // Which is the Lien door's one filled action (see the head); none in
+  // the native shell, where the Fichier door leads instead.
+  const lead = linkFetch ? 'fetch' : !grabbable ? null : grabUsed ? 'open' : 'install'
+
+  // The Podcast door: the learner's own podcasts, asked only while the
+  // door is open, and the feed in the field.
+  const recent = useCachedJson(transcribe && door === 'podcast' ? '/api/video/podcasts' : null, session)
+  const feedUrl = feedAddress(feedInput, s => Boolean(parseVideoId(s)))
+  const shownFeed = feed && feed.url === feedUrl ? feed : null
+  async function openFeed(address = feedUrl) {
+    if (!address || (feed?.url === address && feed.loading)) return
+    setFeed({ url: address, loading: true })
+    try {
+      const read = await readFeed(session, address)
+      setFeed({ url: address, ...read })
+    } catch (e) {
+      setFeed({ url: address, error: videoErrorMessage(e, t) })
+    }
+  }
+  function reopen(podcast) {
+    setFeedInput(podcast.url)
+    openFeed(podcast.url)
+  }
+  function hear(episode) {
+    // The episode's podcast is the door's first next time.
+    invalidateCachedJson('/api/video/podcasts')
+    onStartFromEpisode?.(episode, {
+      start: startSec, end: endSec,
+      feed: { url: shownFeed.url, title: shownFeed.title ?? '', image: shownFeed.image ?? null },
+    })
+  }
+  const left = minutesLeft != null && <p className="anl-link__say">{t.podcastMinutesLeft(minutesLeft)}</p>
 
   const openLink = (className, children) => (
     <a className={className} href={watchUrl ?? 'https://www.youtube.com/'} target="_blank" rel="noopener noreferrer">
@@ -151,102 +177,158 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
       {children}
     </button>
   )
+  const downsub = (
+    <a className="anl-vlink anl-grab__downsub" href={downsubHref} target="_blank" rel="noopener noreferrer" title={t.downsubHint}>
+      DownSub
+    </a>
+  )
+  const windowToggle = (
+    <button type="button" className="anl-vlink anl-window-toggle" aria-expanded={windowOpen} onClick={() => setWindowOpen(o => !o)}>
+      {t.windowLabel}
+    </button>
+  )
 
   return (
     <>
-      {/* The link leads: it names the video for the player, opens the
-          right page for the bookmark, and pre-fills DownSub. Its
-          placeholder is a link, which is its label on screen; the name
-          is for a reader. */}
-      <label className="anl-field-row">
-        <input
-          type="text"
-          className="field field--page anl-field"
-          value={url}
-          onChange={e => onUrlChange(e.target.value)}
-          onKeyDown={onUrlKey}
-          placeholder={transcribe ? t.videoUrlOrFeed : 'https://youtu.be/…'}
-          aria-label={t.videoUrlOptional}
-        />
-      </label>
+      <Seg full options={doors} value={door} onChange={setDoor} label={t.doorsLabel} className="anl-doors" />
 
-      <VideoStill videoId={parsedVideoId} frame="anl-still" className="anl-still__img" />
+      {door === 'link' && (
+        <>
+          {/* The link leads: it names the video for the player, opens the
+              right page for the bookmark, and pre-fills DownSub. Its
+              placeholder is a link, which is its label on screen; the
+              name is for a reader. */}
+          <label className="anl-field-row">
+            <input
+              type="text"
+              className="field field--page anl-field"
+              value={url}
+              onChange={e => onUrlChange(e.target.value)}
+              onKeyDown={onUrlKey}
+              placeholder="https://youtu.be/…"
+              aria-label={t.videoUrlOptional}
+            />
+          </label>
 
-      {/* 聴 — a podcast's feed (plan 265): an address that names no
-          video is offered as one, and its episodes are listed under it,
-          each a press away from being heard. */}
-      {feedUrl && (
-        <div className="anl-pod">
-          {!shownFeed?.episodes && (
-            <button type="button" className="btn-primary" onClick={openFeed} disabled={Boolean(shownFeed?.loading)}>
-              {shownFeed?.loading ? t.podcastReading : t.podcastOpen}
+          <VideoStill videoId={parsedVideoId} frame="anl-still" className="anl-still__img" />
+
+          {lead === 'fetch' && (
+            <div className="anl-link">
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={startLink}
+                disabled={!canFetch}
+                aria-keyshortcuts={desk ? 'Enter' : undefined}
+              >
+                {t.analyzeThisLink}
+                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
+              </button>
+            </div>
+          )}
+          {lead === 'install' && (
+            <div className="anl-link">
+              {installDoor('btn-primary anl-grab__tutorial', t.grabInstall)}
+              <p className="anl-link__say">{t.grabInstallSay}</p>
+            </div>
+          )}
+          {lead === 'open' && (
+            <div className="anl-link">
+              {openLink('btn-primary anl-grab__open', t.openOnYoutube)}
+              <p className="anl-link__say">{t.grabThenSay}</p>
+            </div>
+          )}
+
+          {/* The rest, quiet, on one line. The bookmark's door stays here
+              once it is no longer the filled action: a second device
+              needs it again. */}
+          <p className="anl-vlinks">
+            {grabbable && lead !== 'install' && installDoor('anl-vlink anl-grab__tutorial', t.grabInstallLink)}
+            {grabbable && lead === 'install' && openLink('anl-vlink anl-grab__open', t.openOnYoutube)}
+            {downsub}
+            {windowToggle}
+          </p>
+        </>
+      )}
+
+      {door === 'file' && (
+        <>
+          {/* A real file input, clipped rather than display:none (which
+              would take it out of the accessibility tree), pressed by
+              the button: the one control that reads the same on a phone
+              and on a desk, where the page takes a dropped file too. */}
+          <div className="anl-link">
+            <button
+              type="button"
+              className="btn-primary anl-file"
+              onClick={() => fileRef.current?.click()}
+            >
+              {transcribe ? t.chooseSubtitlesOrRecording : t.chooseSubtitles}
             </button>
-          )}
-          {shownFeed?.error && <p className="anl-pod__error" role="alert">{shownFeed.error}</p>}
-          {shownFeed?.episodes && (
-            <>
-              <p className="anl-pod__show">{shownFeed.title || t.podcastUntitled}</p>
-              <ul className="anl-pod__list" aria-label={t.podcastEpisodes}>
-                {shownFeed.episodes.map(ep => (
-                  <li key={ep.audioUrl}>
-                    <button
-                      type="button"
-                      className="anl-pod__ep"
-                      onClick={() => onStartFromEpisode?.(ep, { start: startSec, end: endSec })}
-                    >
-                      <span className="anl-pod__title">{ep.title}</span>
-                      <span className="anl-pod__meta">
-                        {[ep.published, ep.duration ? formatTimecode(ep.duration) : null].filter(Boolean).join(' · ')}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <p className="anl-link__say">{t.podcastSay}</p>
-            </>
-          )}
-        </div>
+            <p className="anl-link__say">{transcribe ? t.recordingAccepted : t.subtitleAccepted}</p>
+          </div>
+          {transcribe && left}
+          <p className="anl-vlinks">
+            {downsub}
+            {windowToggle}
+          </p>
+        </>
       )}
 
-      {lead === 'fetch' && (
-        <div className="anl-link">
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={startLink}
-            disabled={!canFetch}
-            aria-keyshortcuts={desk ? 'Enter' : undefined}
-          >
-            {t.analyzeThisLink}
-            {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
-          </button>
-        </div>
-      )}
-      {lead === 'install' && (
-        <div className="anl-link">
-          {installDoor('btn-primary anl-grab__tutorial', t.grabInstall)}
-          <p className="anl-link__say">{t.grabInstallSay}</p>
-        </div>
-      )}
-      {lead === 'open' && (
-        <div className="anl-link">
-          {openLink('btn-primary anl-grab__open', t.openOnYoutube)}
-          <p className="anl-link__say">{t.grabThenSay}</p>
-        </div>
+      {door === 'podcast' && (
+        <>
+          {Array.isArray(recent) && recent.length > 0 && (
+            <div className="chip-row anl-pod__recent" role="group" aria-label={t.podcastRecent}>
+              {recent.map(p => (
+                <Chip key={p.url} aria-pressed={undefined} onClick={() => reopen(p)} lang={/[぀-ヿ一-鿿]/.test(p.title) ? 'ja' : undefined}>
+                  {p.title || p.url.replace(/^https?:\/\//, '')}
+                </Chip>
+              ))}
+            </div>
+          )}
+          <label className="anl-field-row">
+            <input
+              type="text"
+              className="field field--page anl-field"
+              value={feedInput}
+              onChange={e => setFeedInput(e.target.value)}
+              placeholder={t.feedPlaceholder}
+              aria-label={t.feedAddress}
+            />
+          </label>
+          <div className="anl-pod">
+            {!shownFeed?.episodes && (
+              <button type="button" className="btn-primary" onClick={() => openFeed()} disabled={!feedUrl || Boolean(shownFeed?.loading)}>
+                {shownFeed?.loading ? t.podcastReading : t.podcastOpen}
+              </button>
+            )}
+            {shownFeed?.error && <p className="anl-pod__error" role="alert">{shownFeed.error}</p>}
+            {shownFeed?.episodes && (
+              <>
+                <p className="anl-pod__show">{shownFeed.title || t.podcastUntitled}</p>
+                <ul className="anl-pod__list" aria-label={t.podcastEpisodes}>
+                  {shownFeed.episodes.map(ep => (
+                    <li key={ep.audioUrl}>
+                      <button type="button" className="anl-pod__ep" onClick={() => hear(ep)}>
+                        <span className="anl-pod__title">{ep.title}</span>
+                        <span className="anl-pod__meta">
+                          {[ep.published, ep.duration ? formatTimecode(ep.duration) : null].filter(Boolean).join(' · ')}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {left}
+          </div>
+          <p className="anl-vlinks">{windowToggle}</p>
+        </>
       )}
 
-      {/* A real file input, clipped rather than display:none (which
-          would take it out of the accessibility tree), pressed by the
-          button: the one control that reads the same on a phone and on
-          a desk, where the page takes a dropped file too. */}
-      <button
-        type="button"
-        className={`${lead === 'file' ? 'btn-primary' : 'btn-secondary'} anl-file`}
-        onClick={() => fileRef.current?.click()}
-        title={transcribe ? t.recordingAccepted : t.subtitleAccepted}
-      >
-        {transcribe ? t.chooseSubtitlesOrRecording : t.chooseSubtitles}
-      </button>
+      {/* The file input stays mounted whichever door is open: the desk's
+          page hands it a dropped file through `dropRef`, and the phone's
+          line opens it from its own button. */}
       <input
         ref={fileRef}
         type="file"
@@ -256,20 +338,6 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
         aria-hidden="true"
         onChange={e => onStartFromFile(e.target.files?.[0], windowOpts)}
       />
-
-      {/* The rest, quiet, on one line. The bookmark's door stays here
-          once it is no longer the filled action: a second device needs
-          it again. */}
-      <p className="anl-vlinks">
-        {grabbable && lead !== 'install' && installDoor('anl-vlink anl-grab__tutorial', t.grabInstallLink)}
-        {grabbable && lead === 'install' && openLink('anl-vlink anl-grab__open', t.openOnYoutube)}
-        <a className="anl-vlink anl-grab__downsub" href={downsubHref} target="_blank" rel="noopener noreferrer" title={t.downsubHint}>
-          DownSub
-        </a>
-        <button type="button" className="anl-vlink anl-window-toggle" aria-expanded={windowOpen} onClick={() => setWindowOpen(o => !o)}>
-          {t.windowLabel}
-        </button>
-      </p>
 
       {grabbable && showTutorial && (
         <GrabTutorial

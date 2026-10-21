@@ -584,7 +584,13 @@ CREATE TABLE video_sessions (
     -- device), its name, and the seconds the recogniser was paid for.
     media_url     TEXT,
     media_title   TEXT,
-    media_seconds DOUBLE PRECISION
+    media_seconds DOUBLE PRECISION,
+    -- An episode's podcast and picture: the feed it was picked from (the
+    -- Podcast door lists them again), the show's name, the picture the
+    -- player's frame shows for a sound-only recording.
+    feed_url      TEXT,
+    feed_title    TEXT,
+    media_image   TEXT
 );
 ALTER TABLE video_sessions ENABLE ROW LEVEL SECURITY;
 

@@ -232,9 +232,9 @@ export async function apiJsonWithTimeout(path, session, { timeoutMs = 10000, sig
  * happens when the header is left unset entirely). First real need:
  * routes/video.py's subtitle upload (plan 019).
  */
-export async function apiUpload(path, session, formData) {
+export async function apiUpload(path, session, formData, { signal } = {}) {
   const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {}
-  const response = await send(path, { method: 'POST', body: formData, headers })
+  const response = await send(path, { method: 'POST', body: formData, headers, signal })
   if (response.status === 401 && session) recoverAuth()
   const body = await readJson(response)
   if (!response.ok) throw new ApiError(response.status, body, path)

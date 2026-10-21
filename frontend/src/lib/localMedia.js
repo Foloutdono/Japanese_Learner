@@ -11,19 +11,20 @@ const urls = new Map()
 export function keepLocalMedia(sessionId, file) {
   if (sessionId == null || !file || typeof URL?.createObjectURL !== 'function') return null
   if (urls.has(sessionId)) {
-    URL.revokeObjectURL(urls.get(sessionId))
+    URL.revokeObjectURL(urls.get(sessionId).url)
     urls.delete(sessionId)
   }
   while (urls.size >= KEPT) {
-    const [oldest, url] = urls.entries().next().value
-    URL.revokeObjectURL(url)
+    const [oldest, kept] = urls.entries().next().value
+    URL.revokeObjectURL(kept.url)
     urls.delete(oldest)
   }
-  const url = URL.createObjectURL(file)
-  urls.set(sessionId, url)
-  return url
+  const kept = { url: URL.createObjectURL(file), sound: Boolean(file.type?.startsWith('audio/')) }
+  urls.set(sessionId, kept)
+  return kept
 }
 
+/** { url, sound } for a session heard from this device, or null. */
 export function localMediaFor(sessionId) {
   return urls.get(sessionId) ?? null
 }

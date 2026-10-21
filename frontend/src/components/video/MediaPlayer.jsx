@@ -1,4 +1,4 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 
 // The same 250ms the YouTube player is polled at (VideoPlayer.jsx).
 const POLL_MS = 250
@@ -15,9 +15,21 @@ const POLL_MS = 250
 // Unlike the iframe, the element tells of every change itself, so the
 // poll only carries the clock; the state, the sound and the length are
 // read from the element's own events.
+//
+// `cover` (the owner's pick C of the canvas "Tsuji analyser — new ways
+// in"): a recording with no picture -- a podcast's episode, a sound
+// file -- left the frame dark. Given { image, title, show, note }, the
+// frame shows the episode's picture (or the sound's mark where it has
+// none), its title, its podcast, and the note that it was heard by a
+// recogniser; the element still plays underneath, driven by the
+// analyser's own bar, and its controls go.
+const JAPANESE = /[\u3040-\u30ff\u4e00-\u9fff]/
+const ja = text => (JAPANESE.test(text ?? '') ? 'ja' : undefined)
+
 export const MediaPlayer = forwardRef(function MediaPlayer({
   src,
   title = '',
+  cover = null,
   volume = 100,
   muted = false,
   rate = 1,
@@ -119,17 +131,46 @@ export const MediaPlayer = forwardRef(function MediaPlayer({
     },
   }), [title])
 
+  // A picture that will not load is the sound's mark instead.
+  const [broken, setBroken] = useState(null)
+  const art = cover?.image && broken !== cover.image ? cover.image : null
+
   return (
-    <div className="video-player__frame">
+    <div className={`video-player__frame${cover ? ' video-player__frame--cover' : ''}`}>
       <video
         ref={mediaRef}
         className="video-player__media"
         src={src}
-        controls
+        controls={!cover}
         playsInline
         preload="metadata"
         aria-label={title || undefined}
       />
+      {cover && (
+        <div className="video-player__cover">
+          {art ? (
+            <img
+              className="video-player__art"
+              src={art}
+              alt=""
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={() => setBroken(art)}
+            />
+          ) : (
+            <span className="video-player__art video-player__art--mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="28" height="28">
+                <path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2" />
+              </svg>
+            </span>
+          )}
+          <span className="video-player__about">
+            {cover.title && <span className="video-player__title" lang={ja(cover.title)}>{cover.title}</span>}
+            {cover.show && <span className="video-player__show" lang={ja(cover.show)}>{cover.show}</span>}
+            {cover.note && <span className="video-player__note">{cover.note}</span>}
+          </span>
+        </div>
+      )}
     </div>
   )
 })

@@ -39,6 +39,12 @@ function mediaError(code, cause) {
 
 const pause = () => new Promise(resolve => setTimeout(resolve, 0))
 
+// Called off by the learner (the steps card's Cancel): stopped between
+// two pieces of work, as fetch stops, with the error fetch throws.
+function checkSignal(signal) {
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+}
+
 /** One channel from several: their mean, sample by sample. */
 export function mixDown(channels) {
   if (channels.length === 1) return channels[0]
@@ -100,11 +106,12 @@ export async function decodeSound(file, { onProgress } = {}) {
 }
 
 /** `samples` (mono, SAMPLE_RATE) as an MP3 Blob. */
-export async function encodeMp3(samples, { onProgress } = {}) {
+export async function encodeMp3(samples, { onProgress, signal } = {}) {
   const { Mp3Encoder } = await import('@breezystack/lamejs')
   const encoder = new Mp3Encoder(1, SAMPLE_RATE, KBPS)
   const parts = []
   for (let at = 0; at < samples.length; at += CHUNK) {
+    checkSignal(signal)
     const piece = encoder.encodeBuffer(toPcm16(samples.subarray(at, at + CHUNK)))
     if (piece.length) parts.push(new Uint8Array(piece))
     onProgress?.({ stage: 'encode', ratio: Math.min(1, (at + CHUNK) / samples.length) })
@@ -122,13 +129,16 @@ export async function encodeMp3(samples, { onProgress } = {}) {
  * the learner's day (`minutesLeft`), each an error with the `code` the
  * server would have refused it with, so the screen words both alike.
  */
-export async function recordingFor(file, { start = null, end = null, maxSeconds = null, minutesLeft = null, onProgress } = {}) {
+export async function recordingFor(file, { start = null, end = null, maxSeconds = null, minutesLeft = null, onProgress, signal } = {}) {
+  checkSignal(signal)
   const sound = await decodeSound(file, { onProgress })
+  checkSignal(signal)
   const { samples, offset } = cropWindow(sound, SAMPLE_RATE, start, end)
   const seconds = samples.length / SAMPLE_RATE
   if (seconds < 0.5) throw mediaError('no_speech')
   if (maxSeconds != null && seconds > maxSeconds + 1) throw mediaError('media_too_long')
   if (minutesLeft != null && Math.ceil(seconds / 60) > minutesLeft) throw mediaError('transcribe_allowance_mine')
-  const blob = await encodeMp3(samples, { onProgress })
+  onProgress?.({ stage: 'encode', ratio: 0, seconds })
+  const blob = await encodeMp3(samples, { onProgress, signal })
   return { blob, seconds, offset }
 }

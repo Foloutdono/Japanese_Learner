@@ -1215,7 +1215,7 @@ const video = {
   // Une seule action remplie : installer le favori tant qu'il n'a jamais
   // servi, puis ouvrir la vidéo sur YouTube, où on le touche.
   grabInstall:         'Installer le favori 字幕取り',
-  grabInstallSay:      'Une minute, une seule fois : ensuite, sur n’importe quelle vidéo YouTube, il rapporte les sous-titres ici.',
+  grabInstallSay:      'Une minute, une seule fois : ensuite, sur une vidéo YouTube ou un autre site, il rapporte les sous-titres ici.',
   grabThenSay:         'Puis touche ton favori 字幕取り : les sous-titres arrivent ici.',
   grabInstallLink:     'Installer le favori',
   chooseSubtitles:     'Choisir un fichier de sous-titres',
@@ -1294,6 +1294,26 @@ const video = {
   videoTranscriptFailed: 'La lecture de ces sous-titres a échoué. Réessaie.',
   videoStalled:        'La préparation s’est arrêtée en route. Réessaie.',
   // ── Enregistrements et podcasts (plan 265) ──
+  // Les trois portes de la vidéo (plan 265, le choix B du propriétaire)
+  doorsLabel:          'D’où vient la vidéo',
+  doorLink:            'Lien',
+  doorFile:            'Fichier',
+  doorPodcast:         'Podcast',
+  feedPlaceholder:     'Adresse du flux (RSS)',
+  feedAddress:         'Adresse du flux du podcast',
+  podcastRecent:       'Podcasts déjà écoutés',
+  podcastMinutesLeft:  n => `Encore ${n} min d’écoute aujourd’hui.`,
+  // Un enregistrement en route vers l’écoute (le choix B)
+  hearLabel:           'Écoute en cours',
+  hearMinutesLeft:     n => `encore ${n} min d’écoute aujourd’hui`,
+  hearPercent:         n => `${n} %`,
+  hearStepKeep:        'Garder le son',
+  hearStepPrepare:     'Préparer le son',
+  hearStepSend:        'Envoyer',
+  hearStepHear:        'Écouter la parole',
+  hearCancel:          'Annuler',
+  // Dans le cadre du lecteur d’un enregistrement sans image (le choix C)
+  heardBy:             'Entendu par une reconnaissance vocale',
   mediaNotHere:        'Ce serveur ne sait pas écouter un enregistrement : choisis plutôt un fichier de sous-titres.',
   chooseSubtitlesOrRecording: 'Choisir des sous-titres ou un enregistrement',
   recordingAccepted:   'Des sous-titres (SRT, VTT, ASS, TTML, SBV, LRC, TXT) ou un enregistrement, son ou vidéo, à écouter pour en tirer les lignes',
@@ -1306,12 +1326,10 @@ const video = {
     hear: 'Écoute de la parole…',
   }[stage] ?? 'Écoute de la parole…'),
   heardNotice:         'Ces lignes ont été entendues par une reconnaissance vocale : elle peut se tromper de mot.',
-  videoUrlOrFeed:      'https://youtu.be/… ou le flux d’un podcast',
   podcastOpen:         'Lire ce flux de podcast',
   podcastReading:      'Lecture du flux…',
   podcastUntitled:     'Podcast',
   podcastEpisodes:     'Épisodes',
-  podcastSay:          'Choisis un épisode : sa parole est écoutée et mise en lignes, coupée à l’intervalle si tu en as fixé un.',
   transcribeDisabled:  'Ce serveur ne sait pas écouter un enregistrement.',
   transcribeAllowanceMine: 'Cet enregistrement dépasse ce qu’il te reste d’écoute aujourd’hui. Choisis un intervalle plus court, ou reviens demain.',
   transcribeAllowanceApp: 'L’écoute du jour est épuisée pour toute l’appli. Reviens demain.',

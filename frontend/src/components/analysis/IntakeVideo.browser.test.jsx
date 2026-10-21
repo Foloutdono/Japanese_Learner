@@ -77,10 +77,13 @@ describe('IntakeVideo — the link ingest is gated on the server', () => {
     expect(onStartFromLink.mock.calls[0][0]).toBe(YT)
   })
 
-  it('keeps the two free ingests on screen even when the paid one is on', async () => {
+  it('keeps the two free ingests a door away even when the paid one is on', async () => {
+    // Since plan 265 (the owner's pick B) the file has its own door: the
+    // bookmark is on the Lien door, the file one press across.
     const { screen } = await setup({ linkFetch: true })
-    await expect.element(screen.getByRole('button', { name: en.chooseSubtitles })).toBeInTheDocument()
     await expect.element(screen.getByRole('button', { name: en.grabInstallLink })).toBeInTheDocument()
+    await screen.getByRole('radio', { name: en.doorFile }).click()
+    await expect.element(screen.getByRole('button', { name: en.chooseSubtitles })).toBeInTheDocument()
   })
 })
 
@@ -148,82 +151,117 @@ describe('IntakeVideo — one filled action', () => {
   })
 })
 
-// ── A recording and a podcast (plan 265) ───────────────────────
-// Where the server can hear a recording, the file button takes a sound
-// or a film too, and an address that names no YouTube video is offered
-// as a podcast's feed, its episodes listed to be picked. Where it
-// cannot, neither appears.
-describe('IntakeVideo — recordings and podcasts', () => {
+// ── Three doors (plan 265, the owner's pick B) ─────────────────
+// Lien · Fichier · Podcast. Where the server can hear a recording, the
+// file door takes a sound or a film too and a third door lists a
+// podcast's episodes to be picked; where it cannot, the file door takes
+// subtitles alone and there is no third door.
+describe('IntakeVideo — three doors', () => {
   const FEED = 'https://feeds.example/show.xml'
   const EPISODES = {
     title: 'ゆっくり日本語',
-    image: null,
+    image: 'https://cdn.example/show.jpg',
     episodes: [
       { title: '第2回 旅の話', published: '2026-10-13', duration: 754, audioUrl: 'https://cdn.example/ep2.mp3', image: null },
       { title: '第1回 自己紹介', published: null, duration: null, audioUrl: 'https://cdn.example/ep1.mp3', image: null },
     ],
   }
+  // Only the app's own requests are answered here: the test runner
+  // itself talks to its page over fetch.
+  const realFetch = globalThis.fetch
+  function answer(routes) {
+    const fetch = vi.fn((input, init) => {
+      const path = String(input)
+      for (const [prefix, reply] of routes) {
+        if (path.includes(prefix)) return Promise.resolve(reply())
+      }
+      return realFetch(input, init)
+    })
+    vi.stubGlobal('fetch', fetch)
+    return fetch
+  }
+  const json = (body, status = 200) => () => new Response(JSON.stringify(body), { status })
+  const doors = screen => [...screen.container.querySelectorAll('.anl-doors .seg__opt')].map(b => b.textContent)
 
-  it('takes no recording where the server cannot hear one', async () => {
+  it('has no Podcast door, and takes no recording, where nothing can be heard', async () => {
     const { screen } = await setup({ transcribe: false })
+    expect(doors(screen)).toEqual([en.doorLink, en.doorFile])
     expect(screen.container.querySelector('input[type="file"]').accept).not.toContain('audio/*')
   })
 
-  it('takes a recording where the server can hear one', async () => {
-    const { screen } = await setup({ transcribe: true })
+  it('takes a recording through the File door where the server can hear one', async () => {
+    const { screen } = await setup({ transcribe: true, minutesLeft: 52 })
+    expect(doors(screen)).toEqual([en.doorLink, en.doorFile, en.doorPodcast])
     expect(screen.container.querySelector('input[type="file"]').accept).toContain('audio/*')
-    await expect.element(screen.getByRole('button', { name: en.chooseSubtitlesOrRecording })).toBeInTheDocument()
+    await screen.getByRole('radio', { name: en.doorFile }).click()
+    const filled = [...screen.container.querySelectorAll('.btn-primary')]
+    expect(filled.map(b => b.textContent)).toEqual([en.chooseSubtitlesOrRecording])
+    expect(screen.container.textContent).toContain(en.podcastMinutesLeft(52))
   })
 
-  it('offers no feed for a YouTube link', async () => {
-    const { screen } = await setup({ transcribe: true, url: YT })
-    await expect.element(screen.getByRole('button', { name: en.podcastOpen })).not.toBeInTheDocument()
+  it('leads the Podcast door with its feed, waiting for an address', async () => {
+    answer([['/api/video/podcasts', json([])]])
+    try {
+      const { screen } = await setup({ transcribe: true, url: '' })
+      await screen.getByRole('radio', { name: en.doorPodcast }).click()
+      const filled = [...screen.container.querySelectorAll('.btn-primary')]
+      expect(filled.map(b => b.textContent)).toEqual([en.podcastOpen])
+      expect(filled[0].disabled).toBe(true)
+      await screen.getByPlaceholder(en.feedPlaceholder).fill(FEED)
+      await expect.element(screen.getByRole('button', { name: en.podcastOpen })).toBeEnabled()
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 
-  it('leads with the feed, and nothing else is filled', async () => {
-    const { screen } = await setup({ transcribe: true, linkFetch: true, url: FEED })
-    const filledNow = [...screen.container.querySelectorAll('.btn-primary')]
-    expect(filledNow).toHaveLength(1)
-    expect(filledNow[0].textContent).toContain(en.podcastOpen)
-  })
-
-  it('offers no feed where nothing can be heard', async () => {
-    const { screen } = await setup({ transcribe: false, url: FEED })
-    await expect.element(screen.getByRole('button', { name: en.podcastOpen })).not.toBeInTheDocument()
-  })
-
-  // Only the feed's request is answered here: the test runner itself
-  // talks to its page over fetch.
-  const realFetch = globalThis.fetch
-  const answerFeed = answer => vi.fn((input, init) => (String(input).includes('/api/video/podcast')
-    ? Promise.resolve(answer())
-    : realFetch(input, init)))
-
-  it('lists a feed’s episodes and hands the one picked up, cut to the window', async () => {
-    const fetch = answerFeed(() => new Response(JSON.stringify(EPISODES), { status: 200 }))
-    vi.stubGlobal('fetch', fetch)
+  it('lists a feed’s episodes and hands the one picked up with its podcast, cut to the window', async () => {
+    const fetch = answer([['/api/video/podcasts', json([])], ['/api/video/podcast?', json(EPISODES)]])
     try {
       const onStartFromEpisode = vi.fn()
-      const { screen } = await setup({ transcribe: true, url: FEED, onStartFromEpisode })
+      const { screen } = await setup({ transcribe: true, onStartFromEpisode, minutesLeft: 52 })
+      await screen.getByRole('radio', { name: en.doorPodcast }).click()
       await screen.getByRole('button', { name: en.windowLabel }).click()
       await screen.getByPlaceholder(en.windowWhole).first().fill('1:00')
+      await screen.getByPlaceholder(en.feedPlaceholder).fill(FEED)
       await screen.getByRole('button', { name: en.podcastOpen }).click()
       await expect.element(screen.getByText('ゆっくり日本語')).toBeInTheDocument()
       expect(fetch.mock.calls.map(c => String(c[0])).some(u => u.includes(`/api/video/podcast?url=${encodeURIComponent(FEED)}`))).toBe(true)
       await expect.element(screen.getByText('2026-10-13 · 12:34')).toBeInTheDocument()
+      expect(screen.container.textContent).toContain(en.podcastMinutesLeft(52))
       await screen.getByRole('button', { name: /第2回 旅の話/ }).click()
-      expect(onStartFromEpisode).toHaveBeenCalledWith(EPISODES.episodes[0], { start: 60, end: null })
+      expect(onStartFromEpisode).toHaveBeenCalledWith(EPISODES.episodes[0], {
+        start: 60, end: null, feed: { url: FEED, title: 'ゆっくり日本語', image: 'https://cdn.example/show.jpg' },
+      })
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('opens again a podcast heard before, from its name', async () => {
+    answer([
+      ['/api/video/podcasts', json([{ url: FEED, title: 'ゆっくり日本語', image: null }])],
+      ['/api/video/podcast?', json(EPISODES)],
+    ])
+    try {
+      const { screen } = await setup({ transcribe: true, session: { user: { id: 'u-recent' } } })
+      await screen.getByRole('radio', { name: en.doorPodcast }).click()
+      await screen.getByRole('button', { name: 'ゆっくり日本語' }).click()
+      await expect.element(screen.getByRole('button', { name: /第1回 自己紹介/ })).toBeInTheDocument()
+      expect(screen.getByPlaceholder(en.feedPlaceholder).element().value).toBe(FEED)
     } finally {
       vi.unstubAllGlobals()
     }
   })
 
   it('says why a feed would not read, in the learner’s words', async () => {
-    vi.stubGlobal('fetch', answerFeed(() => new Response(
-      JSON.stringify({ detail: { code: 'feed_unreadable', message: 'Not an RSS feed' } }), { status: 422 },
-    )))
+    answer([
+      ['/api/video/podcasts', json([])],
+      ['/api/video/podcast?', json({ detail: { code: 'feed_unreadable', message: 'Not an RSS feed' } }, 422)],
+    ])
     try {
-      const { screen } = await setup({ transcribe: true, url: FEED })
+      const { screen } = await setup({ transcribe: true })
+      await screen.getByRole('radio', { name: en.doorPodcast }).click()
+      await screen.getByPlaceholder(en.feedPlaceholder).fill(FEED)
       await screen.getByRole('button', { name: en.podcastOpen }).click()
       await expect.element(screen.getByRole('alert')).toHaveTextContent(en.feedUnreadable)
     } finally {

@@ -198,6 +198,14 @@ def _ensure_video_schema() -> None:
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS media_url TEXT")
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS media_title TEXT")
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS media_seconds DOUBLE PRECISION")
+            # An episode's podcast and picture (plan 265, the owner's picks
+            # B and C): the feed it was picked from, which the Podcast
+            # door lists again as the learner's own podcasts, the show's
+            # name the player prints, and the picture it shows in the
+            # frame a sound-only recording would leave dark. Additive.
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS feed_url TEXT")
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS feed_title TEXT")
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS media_image TEXT")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -595,6 +603,42 @@ def read_podcast(url: str = Query(..., min_length=1, max_length=podcast.MAX_URL)
         raise _podcast_refusal(e)
 
 
+# The podcasts the door lists, at most.
+_RECENT_PODCASTS = 5
+
+
+@router.get("/api/video/podcasts")
+def recent_podcasts(user_id: str = Depends(get_user_id)):
+    """The podcasts the learner has heard an episode of, newest first:
+    what the Podcast door offers to open again (the owner's pick B).
+    Read off their own podcast sessions on the shelf, so there is no
+    list to keep beside them: an episode taken off the shelf takes its
+    podcast with it once it was the last, and the account's erasure
+    erases both."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT feed_url, feed_title, media_image
+                  FROM (
+                    SELECT DISTINCT ON (feed_url) feed_url, feed_title, media_image, created_at
+                      FROM video_sessions
+                     WHERE user_id = %s AND source = 'podcast' AND feed_url IS NOT NULL
+                       AND deleted_at IS NULL
+                     ORDER BY feed_url, created_at DESC
+                  ) latest
+                 ORDER BY created_at DESC
+                 LIMIT %s
+                """,
+                (user_id, _RECENT_PODCASTS),
+            )
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+    return [{"url": url, "title": title or "", "image": image} for url, title, image in rows]
+
+
 @router.get("/api/video/podcast/audio")
 def relay_episode(url: str = Query(..., min_length=1, max_length=podcast.MAX_URL),
                   user_id: str = Depends(get_user_id)):
@@ -676,12 +720,13 @@ def _open_session(user_id, source, source_ref, window_start, window_end, window_
                 """
                 INSERT INTO video_sessions
                     (user_id, source, source_ref, window_start, window_end, window_capped, video_id,
-                     media_url, media_title, media_seconds)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     media_url, media_title, media_seconds, feed_url, feed_title, media_image)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (user_id, source, source_ref, window_start, window_end, window_capped, video_id,
-                 media.get("url"), media.get("title"), media.get("seconds")),
+                 media.get("url"), media.get("title"), media.get("seconds"),
+                 media.get("feed_url"), media.get("feed_title"), media.get("image")),
             )
             (session_id,) = cur.fetchone()
             cur.execute(
@@ -855,13 +900,20 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     )
 
 
+def _web_address(form, key: str) -> str | None:
+    """An optional web address a form names, bounded: never fetched
+    here, only handed back to the learner's own browser."""
+    url = (form.get(key) or "").strip()
+    if url and (len(url) > podcast.MAX_URL or not url.startswith(("https://", "http://"))):
+        raise _refusal(400, "bad_media_url", f"{key} must be a web address")
+    return url or None
+
+
 def _media_fields(form) -> dict | None:
     """Where a session's recording plays from and what it is called: a
     web address the analyser's player plays (never fetched here) and a
     title, both optional and bounded."""
-    url = (form.get("media_url") or "").strip()
-    if url and (len(url) > podcast.MAX_URL or not url.startswith(("https://", "http://"))):
-        raise _refusal(400, "bad_media_url", "media_url must be a web address")
+    url = _web_address(form, "media_url") or ""
     title = (form.get("media_title") or "").strip()[:200]
     if not url and not title:
         return None
@@ -909,6 +961,12 @@ async def create_recording_session(request: Request, user_id: str = Depends(get_
     media = _media_fields(form) or {}
     if source == "podcast" and not media.get("url"):
         raise _refusal(400, "bad_media_url", "A podcast session plays its episode's address")
+    # An episode's podcast and picture (the owner's picks B and C): the
+    # feed it came from, the show's name, the picture the frame shows.
+    if source == "podcast":
+        media["feed_url"] = _web_address(form, "feed_url")
+        media["feed_title"] = (form.get("feed_title") or "").strip()[:200] or None
+        media["image"] = _web_address(form, "media_image")
     name = (form.get("name") or "").strip()[:200] or ("podcast" if source == "podcast" else "recording")
     window_start = _optional_seconds(form.get("start"), "start")
     window_end = _optional_seconds(form.get("end"), "end")
@@ -946,7 +1004,7 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
                 """
                 SELECT source, source_ref, window_start, window_end, window_capped,
                        status, error, sentences, truncated, created_at, video_id,
-                       error_code, translations, media_url, media_title
+                       error_code, translations, media_url, media_title, feed_title, media_image
                   FROM video_sessions
                  WHERE id = %s AND user_id = %s AND deleted_at IS NULL
                 """,
@@ -959,7 +1017,7 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
         return None
     (source, source_ref, window_start, window_end, window_capped,
      status, error, sentences, truncated, created_at, video_id, error_code, translations,
-     media_url, media_title) = row
+     media_url, media_title, feed_title, media_image) = row
     return {
         "source": source, "source_ref": source_ref,
         "window_start": window_start, "window_end": window_end, "window_capped": window_capped,
@@ -968,6 +1026,7 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
         "created_at": created_at, "video_id": video_id,
         "translations": translations or {},
         "media_url": media_url, "media_title": media_title,
+        "feed_title": feed_title, "media_image": media_image,
     }
 
 
@@ -1128,6 +1187,10 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
         # name. None for a file on the learner's device.
         "mediaUrl": session["media_url"],
         "mediaTitle": session["media_title"],
+        # An episode's podcast and picture (plan 265), for the frame a
+        # sound-only recording shows: None for anything else.
+        "feedTitle": session["feed_title"],
+        "mediaImage": session["media_image"],
         "windowStart": session["window_start"],
         "windowEnd": session["window_end"],
         "windowCapped": session["window_capped"],

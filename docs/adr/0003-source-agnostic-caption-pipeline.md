@@ -646,8 +646,26 @@ reopened later being its lines alone.
 
 **Still out:** downloading YouTube's media (the third wall of 2026-10-16 stands,
 and so do its terms), a DRM service's player, and a self-hosted recogniser on
-Render. The intake gained a door, not a redesign: the file button takes a
-recording where the server can hear one, and an address that names no video
-offers to be read as a feed, its episodes listed under it. It was built into the
-column plan 136 drew rather than drawn on a canvas first; a different layout is
-the owner's to pick.
+Render.
+
+**Drawn, then picked (2026-10-21).** The first build put the new ways in on the
+column plan 136 drew; the canvas "Tsuji analyser — new ways in" drew three
+answers to each of three questions, and the owner picked B, C, B:
+
+- **The doors (B).** The video intake is three doors, one control at its head:
+  Lien (the link, the still, the one filled action of plan 136), Fichier (a
+  subtitle file, or a recording where the server can hear one) and, only there,
+  Podcast (the learner's own podcasts, a feed's address, its episodes, what is
+  left of the day's listening). The learner's podcasts are read off their own
+  podcast sessions (`video_sessions.feed_url`, `GET /api/video/podcasts`), so
+  there is no list to keep beside the shelf. A feed pasted into the empty line
+  where Japanese goes opens the Podcast door with it.
+- **The player (C).** A recording with no picture shows the episode's own (the
+  feed's, `media_image`), its title, its podcast and the note that it was heard,
+  in the frame a sound file left dark; the element plays underneath, driven by
+  the analyser's bar. A film keeps its frame, and the note stays a line.
+- **While it is heard (B).** A card names the recording, its length and what
+  will be left of the day, and walks four steps: keep the sound, prepare it (its
+  share as a bar), send it, hear the speech. Until it is sent it can be called
+  off and nothing is spent; once sent, the recogniser is paid and the card has
+  no Cancel.

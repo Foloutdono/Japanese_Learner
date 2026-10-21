@@ -38,6 +38,17 @@ vi.mock('../components/video/VideoPlayer', async () => {
 const { default: AnalyzerScreen } = await import('./AnalyzerScreen')
 
 const settle = async (ms = 60) => new Promise(r => setTimeout(r, ms))
+// What a step leads to, once it is there: the poll's answer lands when
+// it lands, and a fixed wait raced it.
+async function until(find, ms = 3000) {
+  const end = Date.now() + ms
+  let found = find()
+  while (!found && Date.now() < end) {
+    await settle(30)
+    found = find()
+  }
+  return found
+}
 
 async function renderScreen() {
   const screen = await render(
@@ -84,6 +95,12 @@ function answer(routes) {
   })
 }
 
+function setField(el, text) {
+  const proto = Object.getPrototypeOf(el)
+  Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, text)
+  el.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
 const sent = form => Object.fromEntries([...form.entries()].map(([k, v]) => [k, typeof v === 'string' ? v : v.name]))
 
 beforeEach(async () => {
@@ -113,7 +130,7 @@ describe('AnalyzerScreen — a recording, heard', () => {
     expect(path).toBe('/api/video/recording')
     expect(sent(form)).toMatchObject({ audio: 'audio.mp3', source: 'media', name: 'clip.mp4', start: '0' })
 
-    const video = screen.container.querySelector('video.video-player__media')
+    const video = await until(() => screen.container.querySelector('video.video-player__media'))
     expect(video).not.toBeNull()
     expect(video.src.startsWith('blob:')).toBe(true)
     const said = screen.container.textContent
@@ -130,6 +147,105 @@ describe('AnalyzerScreen — a recording, heard', () => {
     expect(apiUpload).not.toHaveBeenCalled()
     const said = screen.container.textContent
     expect(said.includes(en.mediaNotHere) || said.includes(fr.mediaNotHere)).toBe(true)
+  })
+})
+
+describe('AnalyzerScreen — a podcast, heard (the owner’s picks B and C)', () => {
+  const FEED_URL = 'https://feeds.example.jp/yukkuri.xml'
+  const FEED = {
+    title: 'ゆっくり日本語', image: 'https://cdn.example.jp/show.jpg',
+    episodes: [{ title: '第48回 京都の秋', published: '2026-10-14', duration: 1184, audioUrl: 'https://cdn.example.jp/48.mp3', image: null }],
+  }
+
+  it('picks an episode at the Podcast door and shows its picture, its podcast and how it was heard', async () => {
+    answer([
+      ['/api/video/capabilities', CAPS],
+      ['/api/video/podcasts', []],
+      ['/api/video/podcast?', FEED],
+      ['/api/video/session/11', ready({
+        source: 'podcast', sourceRef: '第48回 京都の秋', mediaUrl: 'https://cdn.example.jp/48.mp3',
+        mediaTitle: '第48回 京都の秋', feedTitle: 'ゆっくり日本語', mediaImage: 'https://cdn.example.jp/show.jpg',
+      })],
+    ])
+    const realFetch = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn((input, init) => (String(input).startsWith('https://cdn.example.jp/48.mp3')
+      ? Promise.resolve(new Response(new Blob(['ID3'], { type: 'audio/mpeg' })))
+      : realFetch(input, init))))
+    recordingFor.mockResolvedValue({ blob: new Blob(['mp3'], { type: 'audio/mpeg' }), seconds: 9, offset: 0 })
+    apiUpload.mockResolvedValue({ sessionId: 11, status: 'generating' })
+    try {
+      const screen = await renderScreen()
+      await goToVideo(screen)
+      const door = [...screen.container.querySelectorAll('.anl-doors .seg__opt')].at(-1)
+      door.click()
+      await settle(60)
+      const field = screen.container.querySelector('.anl-pod').previousElementSibling.querySelector('input')
+      setField(field, FEED_URL)
+      await settle(30)
+      screen.container.querySelector('.anl-pod .btn-primary').click()
+      await settle(120)
+      screen.container.querySelector('.anl-pod__ep').click()
+      const frame = await until(() => screen.container.querySelector('.video-player__frame--cover'))
+
+      const [path, , form] = apiUpload.mock.calls[0]
+      expect(path).toBe('/api/video/recording')
+      expect(sent(form)).toMatchObject({
+        source: 'podcast', media_url: 'https://cdn.example.jp/48.mp3', media_title: '第48回 京都の秋',
+        feed_url: FEED_URL, feed_title: 'ゆっくり日本語', media_image: 'https://cdn.example.jp/show.jpg',
+      })
+      expect(frame).not.toBeNull()
+      expect(frame.querySelector('img.video-player__art').getAttribute('src')).toBe('https://cdn.example.jp/show.jpg')
+      expect(frame.textContent).toContain('ゆっくり日本語')
+      expect(frame.textContent.includes(en.heardBy) || frame.textContent.includes(fr.heardBy)).toBe(true)
+      expect(frame.querySelector('video').hasAttribute('controls')).toBe(false)
+      // Said in the frame, not again on a line of its own.
+      const said = screen.container.textContent
+      expect(said.includes(en.heardNotice) || said.includes(fr.heardNotice)).toBe(false)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('opens the Podcast door with a feed pasted where Japanese goes', async () => {
+    answer([['/api/video/capabilities', CAPS], ['/api/video/podcasts', []]])
+    const screen = await renderScreen()
+    const line = screen.container.querySelector('textarea')
+    setField(line, FEED_URL)
+    await settle(80)
+    const on = screen.container.querySelector('.anl-doors .seg__opt--on')
+    expect(on?.textContent === en.doorPodcast || on?.textContent === fr.doorPodcast).toBe(true)
+    expect(screen.container.querySelector('.anl-pod').previousElementSibling.querySelector('input').value).toBe(FEED_URL)
+  })
+})
+
+describe('AnalyzerScreen — while a recording is heard (the owner’s pick B)', () => {
+  it('draws its steps, and calls it off before the sound is sent', async () => {
+    answer([['/api/video/capabilities', CAPS]])
+    recordingFor.mockImplementation((file, { onProgress, signal }) => {
+      onProgress({ stage: 'decode' })
+      onProgress({ stage: 'encode', ratio: 0.42, seconds: 1184 })
+      return new Promise((resolve, reject) => {
+        signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+      })
+    })
+    const screen = await renderScreen()
+    await goToVideo(screen)
+    chooseFile(screen, new File(['x'], '京都の秋.mp3', { type: 'audio/mpeg' }))
+    await settle(120)
+
+    const card = screen.container.querySelector('.anl-hear')
+    expect(card).not.toBeNull()
+    expect(card.querySelector('.anl-hear__title').textContent).toBe('京都の秋.mp3')
+    expect(card.querySelector('.anl-hear__meta').textContent).toMatch(/^19:44 · /)
+    const steps = [...card.querySelectorAll('.anl-hear__step')].map(li => li.className.split('--').pop())
+    expect(steps).toEqual(['done', 'now', 'next', 'next'])
+    expect(card.textContent.includes(en.hearPercent(42)) || card.textContent.includes(fr.hearPercent(42))).toBe(true)
+
+    card.querySelector('.anl-hear__cancel').click()
+    await settle(60)
+    expect(screen.container.querySelector('.anl-hear')).toBeNull()
+    expect(apiUpload).not.toHaveBeenCalled()
+    expect(screen.container.querySelector('.anl-notice-line--bad')).toBeNull()
   })
 })
 
@@ -151,7 +267,7 @@ describe('AnalyzerScreen — a page grab', () => {
       file: 'www.example.jp.ja.vtt', media_url: 'https://cdn.example.jp/news.mp4', media_title: 'ニュース',
     })
     expect(window.location.hash).toBe('')
-    const video = screen.container.querySelector('video.video-player__media')
+    const video = await until(() => screen.container.querySelector('video.video-player__media'))
     expect(video?.getAttribute('src')).toBe('https://cdn.example.jp/news.mp4')
     expect(screen.container.querySelector('[data-testid="youtube"]')).toBeNull()
   })

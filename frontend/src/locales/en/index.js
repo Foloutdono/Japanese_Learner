@@ -1254,7 +1254,7 @@ const video = {
   // One filled action: set up the bookmark until it has been used, then
   // open the video on YouTube, where it is tapped.
   grabInstall:         'Set up the 字幕取り bookmark',
-  grabInstallSay:      'One minute, once: after that it brings the subtitles of any YouTube video here.',
+  grabInstallSay:      'One minute, once: after that, on a YouTube video or another site, it brings the subtitles here.',
   grabThenSay:         'Then tap your 字幕取り bookmark: the subtitles arrive here.',
   grabInstallLink:     'Set up the bookmark',
   chooseSubtitles:     'Choose a subtitle file',
@@ -1335,6 +1335,26 @@ const video = {
   videoTranscriptFailed: 'Reading these subtitles went wrong. Try again.',
   videoStalled:        'Preparing the subtitles stalled on the way. Try again.',
   // ── Recordings and podcasts (plan 265) ──
+  // The video intake's three doors (plan 265, the owner's pick B)
+  doorsLabel:          'Where the video comes from',
+  doorLink:            'Link',
+  doorFile:            'File',
+  doorPodcast:         'Podcast',
+  feedPlaceholder:     'Feed address (RSS)',
+  feedAddress:         'Podcast feed address',
+  podcastRecent:       'Podcasts you have listened to',
+  podcastMinutesLeft:  n => `${n} min of listening left today.`,
+  // A recording on its way to being heard (the owner's pick B)
+  hearLabel:           'Listening in progress',
+  hearMinutesLeft:     n => `${n} min of listening left today`,
+  hearPercent:         n => `${n}%`,
+  hearStepKeep:        'Keep the sound',
+  hearStepPrepare:     'Prepare the sound',
+  hearStepSend:        'Send',
+  hearStepHear:        'Listen to the speech',
+  hearCancel:          'Cancel',
+  // In the player's frame of a recording with no picture (pick C)
+  heardBy:             'Heard by speech recognition',
   mediaNotHere:        'This server cannot hear recordings: choose a subtitle file instead.',
   chooseSubtitlesOrRecording: 'Choose subtitles or a recording',
   recordingAccepted:   'Subtitles (SRT, VTT, ASS, TTML, SBV, LRC, TXT) or a recording, sound or video, to be heard into lines',
@@ -1347,12 +1367,10 @@ const video = {
     hear: 'Listening to the speech…',
   }[stage] ?? 'Listening to the speech…'),
   heardNotice:         'These lines were heard by a speech recogniser: it can mishear a word.',
-  videoUrlOrFeed:      'https://youtu.be/… or a podcast feed',
   podcastOpen:         'Read this podcast feed',
   podcastReading:      'Reading the feed…',
   podcastUntitled:     'Podcast',
   podcastEpisodes:     'Episodes',
-  podcastSay:          'Pick an episode: its speech is heard into lines, cut to the window if you set one.',
   transcribeDisabled:  'This server cannot hear recordings.',
   transcribeAllowanceMine: 'This recording is longer than what is left of today\'s listening. Pick a shorter window, or come back tomorrow.',
   transcribeAllowanceApp: 'Today\'s listening for the whole app is used up. Come back tomorrow.',

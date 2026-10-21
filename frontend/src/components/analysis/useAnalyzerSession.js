@@ -386,38 +386,65 @@ export function useAnalyzerSession(session) {
   // server said it takes (/api/video/capabilities), checked before a
   // minute is spent encoding. A file's player plays the file itself,
   // this visit (lib/localMedia.js); an episode's plays its address.
-  async function startVideoFromRecording(file, { start, end, caps, url, name, podcast = null }) {
+  //
+  // `progress` is what the steps card draws while it goes (the owner's
+  // pick B, components/analysis/HearingSteps.jsx): the stage, the
+  // encoding's share, the recording's name and length, and what was
+  // left of the day before it. Until the sound is sent it can be
+  // called off (cancelRecording); once sent, the recogniser is paid
+  // and the session lands on the shelf whatever the screen does.
+  const abortRef = useRef(null)
+
+  async function startVideoFromRecording(file, { start, end, caps, url, name, podcast = null, feed = null, controller = null }) {
     if (!file) return
     countUse('analyzer', 'video')
     const run = beginRun()
-    const step = next => { if (run === runIdRef.current) setProgress(next) }
+    const abort = controller ?? new AbortController()
+    abortRef.current = abort
+    const title = (name ?? file.name ?? '').slice(0, 200)
+    const step = next => {
+      if (run === runIdRef.current) setProgress(prev => ({ ...prev, ...next }))
+    }
+    setProgress({
+      stage: 'read',
+      title,
+      seconds: podcast?.duration ?? null,
+      minutesLeft: caps?.transcribeMinutesLeft ?? null,
+    })
     try {
       const recording = await recordingFor(file, {
         start, end,
         maxSeconds: caps?.transcribeMaxSeconds ?? null,
         minutesLeft: caps?.transcribeMinutesLeft ?? null,
         onProgress: step,
+        signal: abort.signal,
       })
       if (run !== runIdRef.current) return
-      step({ stage: 'upload' })
+      step({ stage: 'upload', seconds: recording.seconds })
       const formData = new FormData()
       formData.append('audio', recording.blob, 'audio.mp3')
       formData.append('source', podcast ? 'podcast' : 'media')
-      formData.append('name', (name ?? file.name ?? '').slice(0, 200))
+      formData.append('name', title)
       // Where the recording starts in the video: the window's start, as
       // the cut made it. Its end only bounds the lines.
       formData.append('start', String(recording.offset))
       if (end != null) formData.append('end', String(end))
       if (podcast?.audioUrl) formData.append('media_url', podcast.audioUrl)
       if (podcast?.title) formData.append('media_title', podcast.title.slice(0, 200))
+      // The episode's podcast and picture (the owner's picks B and C):
+      // what the Podcast door lists again, and what the frame shows.
+      if (podcast && feed?.url) formData.append('feed_url', feed.url)
+      if (podcast && feed?.title) formData.append('feed_title', feed.title.slice(0, 200))
+      if (podcast && (podcast.image ?? feed?.image)) formData.append('media_image', podcast.image ?? feed.image)
       if (url?.trim()) formData.append('url', url.trim())
-      const data = await apiUpload('/api/video/recording', session, formData)
+      const data = await apiUpload('/api/video/recording', session, formData, { signal: abort.signal })
       if (run !== runIdRef.current) return
+      abortRef.current = null
       if (!podcast) keepLocalMedia(data.sessionId, file)
       step({ stage: 'hear' })
       setVideoSessionId(data.sessionId)
     } catch (e) {
-      if (run !== runIdRef.current) return
+      if (run !== runIdRef.current || e?.name === 'AbortError') return
       setProgress(null)
       setError({ video: e })
       setStatus('failed')
@@ -425,26 +452,43 @@ export function useAnalyzerSession(session) {
   }
 
   // A podcast's episode: its audio fetched (its own address, or the
-  // server's relay), then heard as a recording.
-  async function startVideoFromEpisode(episode, { start, end, caps }) {
+  // server's relay), then heard as a recording. `feed` is the podcast
+  // it was picked from ({url, title, image}).
+  async function startVideoFromEpisode(episode, { start, end, caps, feed = null }) {
     if (!episode?.audioUrl) return
     const run = beginRun()
-    setProgress({ stage: 'fetch' })
+    const name = episode.title || episode.audioUrl.split('/').pop()
+    const controller = new AbortController()
+    abortRef.current = controller
+    setProgress({
+      stage: 'fetch', title: name, seconds: episode.duration ?? null,
+      minutesLeft: caps?.transcribeMinutesLeft ?? null,
+    })
     let blob
     try {
-      blob = await episodeAudio(session, episode.audioUrl)
+      blob = await episodeAudio(session, episode.audioUrl, { signal: controller.signal })
     } catch (e) {
-      if (run !== runIdRef.current) return
+      if (run !== runIdRef.current || e?.name === 'AbortError') return
       setProgress(null)
       setError({ video: e?.code ? e : Object.assign(new Error('episode_unreachable'), { code: 'episode_unreachable' }) })
       setStatus('failed')
       return
     }
     if (run !== runIdRef.current) return
-    const name = episode.title || episode.audioUrl.split('/').pop()
     await startVideoFromRecording(new File([blob], name, { type: blob.type || 'audio/mpeg' }), {
-      start, end, caps, name, podcast: episode,
+      start, end, caps, name, podcast: episode, feed, controller,
     })
+  }
+
+  // Called off before the sound is sent: nothing reached the server, so
+  // nothing was spent, and the screen is back where it was.
+  function cancelRecording() {
+    abortRef.current?.abort()
+    abortRef.current = null
+    runIdRef.current += 1
+    setProgress(null)
+    setError(null)
+    setStatus('idle')
   }
 
   // ── The poll ──────────────────────────────────────────────
@@ -492,8 +536,15 @@ export function useAnalyzerSession(session) {
           videoId: data.videoId ?? null,
           // A recording's player (plan 265): its own address where the
           // server keeps one, else the file this device holds, this visit.
-          mediaUrl: data.mediaUrl ?? localMediaFor(videoSessionId),
+          mediaUrl: data.mediaUrl ?? localMediaFor(videoSessionId)?.url ?? null,
           mediaTitle: data.mediaTitle ?? '',
+          // What the player's frame shows for a recording with no
+          // picture (the owner's pick C): an episode's podcast and
+          // image, and whether it is sound alone (a podcast, or a sound
+          // file this device holds).
+          feedTitle: data.feedTitle ?? '',
+          mediaImage: data.mediaImage ?? null,
+          soundOnly: data.source === 'podcast' || Boolean(localMediaFor(videoSessionId)?.sound),
           windowCapped: !!data.windowCapped,
           truncated: data.truncated ?? 0,
           sentences: data.sentences,
@@ -718,6 +769,7 @@ export function useAnalyzerSession(session) {
     startVideoFromFile,
     startVideoFromRecording,
     startVideoFromEpisode,
+    cancelRecording,
     startVideoFromLink,
     startVideoFromTranscript,
     explain,

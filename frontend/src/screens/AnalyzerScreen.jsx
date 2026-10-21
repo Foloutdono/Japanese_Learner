@@ -42,6 +42,8 @@ import { useBookmarkletCopy, watchUrlFor } from '../components/analysis/useBookm
 import { useLabelsFit } from '../hooks/useLabelsFit'
 import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
+import { HearingSteps } from '../components/analysis/HearingSteps'
+import { feedAddress } from '../lib/podcast'
 import { PassageShelf } from '../components/analysis/PassageShelf'
 import { EntryLine } from '../components/analysis/EntryLine'
 import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
@@ -192,6 +194,11 @@ export default function AnalyzerScreen({ session }) {
   // link afterwards used to get no player at all, because the session
   // had already been created without a video_id and nothing re-read it.
   const [videoUrl, setVideoUrl] = useState('')
+  // The video intake's open door (Lien · Fichier · Podcast, plan 265,
+  // the owner's pick B) and the Podcast door's field, held here so a
+  // feed pasted in the phone's line opens that door with it.
+  const [videoDoor, setVideoDoor] = useState(undefined)
+  const [feedInput, setFeedInput] = useState('')
 
   // 机 (plan 120): the grab's walkthrough, open in the intake's column
   // on the desk rather than over the intake, and the copy state its
@@ -698,8 +705,23 @@ export default function AnalyzerScreen({ session }) {
   function editDraft(text) {
     const link = videoLinkIn(text)
     if (link) { takeLink(link); return }
+    // A podcast's feed pasted into the empty line (plan 265): the video
+    // intake's Podcast door, with it in its field. Pasted, not typed: a
+    // line typed a letter at a time is never one whole address before
+    // the learner has finished it.
+    const feed = transcribeOn && draft === '' ? feedAddress(text, s => Boolean(parseVideoId(s))) : null
+    if (feed) { takeFeed(feed); return }
     setDraft(text)
     setFromImage(false)
+  }
+
+  function takeFeed(feed) {
+    setDraft('')
+    setFromImage(false)
+    if (wide) boardPlatform('video')
+    else openSheet('video')
+    setVideoDoor('podcast')
+    setFeedInput(feed)
   }
 
   // A YouTube link pasted where Japanese goes (plan 136): the video
@@ -829,6 +851,8 @@ export default function AnalyzerScreen({ session }) {
       setDraft('')
       setFromImage(false)
       setVideoUrl('')
+      setVideoDoor(undefined)
+      setFeedInput('')
       playhead.reset()
     }
     lastBoardedRef.current = key
@@ -1148,12 +1172,16 @@ export default function AnalyzerScreen({ session }) {
   // encoding takes as long as the browser needs, and the hearing as long
   // as the recogniser does.
   const busyText = analyzer.progress ? t.recordingStage(analyzer.progress.stage, analyzer.progress.ratio) : t[platform.busy]
-  if (busy) notices.push({ id: 'busy', tone: 'info', text: busyText, wait: true })
+  // A recording's steps are their own card (HearingSteps, the owner's
+  // pick B); the line is for everything else that works a moment.
+  if (busy && !analyzer.progress) notices.push({ id: 'busy', tone: 'info', text: busyText, wait: true })
   if (status === 'failed' && error) notices.push({ id: 'failed', tone: 'bad', text: error })
   if (passage?.windowCapped) notices.push({ id: 'capped', tone: 'info', text: t.windowCapped })
   // Heard, not read (plan 265): a recogniser can mishear, and a learner
-  // memorises what they are shown, so the Passage says where it came from.
-  if (ready && (passage?.source === 'media' || passage?.source === 'podcast')) {
+  // memorises what they are shown, so the Passage says where it came from
+  // -- in the player's frame where it shows the recording's picture (the
+  // owner's pick C), here for a film, whose frame is the film.
+  if (ready && (passage?.source === 'media' || passage?.source === 'podcast') && !passage?.soundOnly) {
     notices.push({ id: 'heard', tone: 'info', text: t.heardNotice })
   }
   if (passage?.truncated > 0) notices.push({ id: 'truncated', tone: 'info', text: t.passageTruncated(sentences.length) })
@@ -1175,6 +1203,12 @@ export default function AnalyzerScreen({ session }) {
     : ready ? t.passageReady(sentences.length)
     : analyzer.lastDeleted ? t.entryDeleted
     : t[platform.lead]
+
+  // A recording on its way to being heard (the owner's pick B): its
+  // steps, under the intake on the desk and under the line on a phone.
+  const hearing = busy && analyzer.progress && (
+    <HearingSteps t={t} progress={analyzer.progress} onCancel={analyzer.cancelRecording} />
+  )
 
   const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
   const isKept = !!focused && analyzer.kept.has(focused.text)
@@ -1218,7 +1252,13 @@ export default function AnalyzerScreen({ session }) {
     }
     if (playerVideoId) return <VideoPlayer ref={playerRef} videoId={playerVideoId} {...common} />
     const title = passage?.mediaTitle || (passage?.sourceRef ?? '').replace(/\.[^.]+$/, '')
-    return <MediaPlayer ref={playerRef} src={playerMedia} title={title} {...common} />
+    const heard = passage?.source === 'media' || passage?.source === 'podcast'
+    // A recording with no picture shows the episode's own (the owner's
+    // pick C), its podcast, and the note that it was heard.
+    const cover = passage?.soundOnly
+      ? { image: passage.mediaImage, title, show: passage.feedTitle, note: heard ? t.heardBy : '' }
+      : null
+    return <MediaPlayer ref={playerRef} src={playerMedia} title={title} cover={cover} {...common} />
   }
 
   // The video intake, in the desk's column or a phone's sheet. The
@@ -1234,6 +1274,11 @@ export default function AnalyzerScreen({ session }) {
       onStartFromEpisode={startVideoFromEpisode}
       session={session}
       transcribe={transcribeOn}
+      minutesLeft={videoCaps?.transcribeMinutesLeft ?? null}
+      door={videoDoor}
+      onDoorChange={setVideoDoor}
+      feedInput={feedInput}
+      onFeedInputChange={setFeedInput}
       linkFetch={linkFetch}
       grab={grab}
       onTutorial={() => (wide ? setTutorial(true) : setSheet('tutorial'))}
@@ -1958,6 +2003,7 @@ export default function AnalyzerScreen({ session }) {
               {intake}
               {/* The notices stand under the intake they are about, in
                   view (plan 123). The live region stays below. */}
+              {hearing}
               <Notices notices={notices} region={false} />
             </div>
             {dragging && !showTutorial && <p className="desk-intake__drop" aria-hidden="true">{t.dropHere}</p>}
@@ -1981,6 +2027,7 @@ export default function AnalyzerScreen({ session }) {
         </>
       ))}
 
+      {!wide && hearing}
       <Notices notices={notices} announcement={announcement} t={t} lines={!(wide && !showResult)} />
 
       {/* The passages, under the line: a row reopens its Passage on the

@@ -317,3 +317,48 @@ def test_a_recording_refused_while_two_are_preparing_spends_nothing(client, can_
     assert response.status_code == 429
     assert response.json()["detail"]["code"] == "session_preparing"
     assert client.get("/api/video/capabilities").json()["transcribeMinutesLeft"] == transcribe.DAILY_MINUTES
+
+
+def _podcast_session(client, feed, show, episode, image=None):
+    data = {"name": episode, "source": "podcast", "media_url": f"https://cdn.example/{episode}.mp3",
+            "media_title": episode, "feed_url": feed, "feed_title": show}
+    if image:
+        data["media_image"] = image
+    response = client.post("/api/video/recording", files={"audio": ("a.mp3", _mp3(9.0), "audio/mpeg")}, data=data)
+    assert response.status_code == 202, response.text
+    return _poll(client, response.json()["sessionId"])
+
+
+def test_an_episode_keeps_its_podcast_and_picture(client, can_transcribe):
+    body = _podcast_session(client, "https://feeds.example/a.xml", "ゆっくり日本語", "ep1",
+                            "https://cdn.example/a.jpg").json()
+    assert body["feedTitle"] == "ゆっくり日本語"
+    assert body["mediaImage"] == "https://cdn.example/a.jpg"
+
+
+def test_the_podcast_door_lists_the_learners_podcasts_newest_first(client, can_transcribe):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE video_sessions SET deleted_at = NOW() WHERE source = 'podcast'")
+        conn.commit()
+    finally:
+        conn.close()
+    _podcast_session(client, "https://feeds.example/a.xml", "Show A", "a1")
+    _podcast_session(client, "https://feeds.example/b.xml", "Show B", "b1")
+    _podcast_session(client, "https://feeds.example/a.xml", "Show A", "a2", "https://cdn.example/a.jpg")
+    listed = client.get("/api/video/podcasts").json()
+    assert listed == [
+        {"url": "https://feeds.example/a.xml", "title": "Show A", "image": "https://cdn.example/a.jpg"},
+        {"url": "https://feeds.example/b.xml", "title": "Show B", "image": None},
+    ]
+
+
+def test_a_podcasts_picture_must_be_a_web_address(client, can_transcribe):
+    response = client.post(
+        "/api/video/recording",
+        files={"audio": ("a.mp3", _mp3(3.0), "audio/mpeg")},
+        data={"source": "podcast", "media_url": "https://cdn.example/e.mp3", "media_image": "javascript:x"},
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["code"] == "bad_media_url"
