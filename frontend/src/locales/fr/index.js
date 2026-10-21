@@ -1656,7 +1656,6 @@ const dictionary = {
   glyphStops:        { read: 'Lire', write: 'Écrire', use: 'Dans des mots' },
   glyphStrokeCount:  (n, total) => `Trait ${n} sur ${total}`,
   glyphTraceQ:       'Trace chaque trait, du point jusqu\'au rond.',
-  glyphMiss:         { start: 'Pars du point plein.', end: 'Va jusqu\'au rond.', path: 'Suis le trait.' },
   glyphGiven:        'Ce trait est tracé pour toi.',
   glyphTraced:       misses => (misses ? 'Tracé.' : 'Tracé du premier coup.'),
   glyphShowMe:       'Montre-moi',

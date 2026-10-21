@@ -1688,7 +1688,6 @@ const dictionary = {
   glyphStops:        { read: 'Read', write: 'Write', use: 'In words' },
   glyphStrokeCount:  (n, total) => `Stroke ${n} of ${total}`,
   glyphTraceQ:       'Trace each stroke from the dot to the ring.',
-  glyphMiss:         { start: 'Start on the full dot.', end: 'Go all the way to the ring.', path: 'Follow the stroke.' },
   glyphGiven:        'This stroke is drawn for you.',
   glyphTraced:       misses => (misses ? 'Traced.' : 'Traced first time.'),
   glyphShowMe:       'Show me',
