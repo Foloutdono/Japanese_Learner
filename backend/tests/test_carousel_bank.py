@@ -103,7 +103,7 @@ def test_a_picture_names_a_word_and_a_file_there(tmp_path, monkeypatch):
 
 
 def test_the_stations_scenes_join_the_carousels_conversations():
-    # Plan 265: the 会話 station's scenes, the ones the reply videos ask,
+    # Plan 268: the 会話 station's scenes, the ones the reply videos ask,
     # are answered as carousels too, beside the carousel's own.
     own = {"rev": 3, "dialogues": [
         {"id": "pharmacy", "lv": "N4", "turns": ["a"]},

@@ -988,7 +988,7 @@ export function itemsOf(sourceId, data, lang, filter) {
     case 'lookalike':
       return data.sets.map(x => ({ id: x.id, jp: x.chars.map(k => k.c).join(' '), sub: x.chars.map(k => (pick(k) || [])[0]).join(' · '), tag: x.lv }))
     case 'dialogue':
-      // The 会話 station's own scenes beside the carousel's (plan 265), named as the station's.
+      // The 会話 station's own scenes beside the carousel's (plan 268), named as the station's.
       return data.dialogues.map(d => ({ id: d.id, jp: d.place.jp, sub: tr(d.place, lang), tag: d.kaiwa ? `${d.lv} · 会話` : d.lv }))
     case 'trap':
       return data.traps.map(x => ({ id: x.id, jp: x.p, sub: tr(x.notion, lang), tag: x.lv }))

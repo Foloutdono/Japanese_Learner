@@ -360,7 +360,7 @@ export function passCard(ctx, x, y, w, { name, level, meta, cls, brand = 'Pass',
 // rules and its reduced-motion block ride into each layer, so nothing of
 // the print is copied here. The hour picks it in today's season, as the
 // app's gate does (domain/printHour's printName, plan 261), unless a
-// season is chosen (plan 264): the app's print of that season at the
+// season is chosen (plan 267): the app's print of that season at the
 // hour, `hanabi` the summer whose night is August's fireworks.
 export const PRINT_HOURS = ['dawn', 'day', 'dusk', 'night']
 export const PRINT_SEASONS = ['spring', 'summer', 'hanabi', 'autumn', 'winter']

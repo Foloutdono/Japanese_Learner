@@ -167,7 +167,7 @@ describe('the carousel studio', () => {
         expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan({ promo: 1, echo: 0 }[src.id] ?? 2)
         // A promo story ends on its own gate, not on a station (plan 231);
         // Read it on the app's call to action, in any look (plan 253).
-        // A 会話 scene asked in Classic is drawn in Clarté (plan 265), and ends as it does.
+        // A 会話 scene asked in Classic is drawn in Clarté (plan 268), and ends as it does.
         const last = p.kaiwa ? deck(type, p, FORMATS.post, { ground: 'paper', design: 'clarte' }).at(-1).key : null
         expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(last ?? (type === 'read' ? 'cta' : LAST[src.id]?.(id) ?? 'outro'))
         expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
@@ -1500,7 +1500,7 @@ describe('the conversion carousels (plan 234)', () => {
     }
   }))
 
-  it('answers the 会話 station’s own scenes beside the carousel’s conversations, every turn inside the frame (plan 265)', () => withPath2D(() => {
+  it('answers the 会話 station’s own scenes beside the carousel’s conversations, every turn inside the frame (plan 268)', () => withPath2D(() => {
     const D = bank('dialogues.json').dialogues
     const scenes = bank('conversation.json').scenes
     // Each scene the reply videos ask, whole, under an id of its own and marked as the station's.
@@ -1787,7 +1787,7 @@ describe('the reading challenges (plan 247)', () => {
       tl.segs.forEach((s, i) => { if (i) expect(s.start, P.id).toBeCloseTo(tl.segs[i - 1].start + tl.segs[i - 1].dur, 2) })
       expect(tl.seconds, P.id).toBeCloseTo(tl.segs.at(-1).start + tl.segs.at(-1).dur, 2)
       expect(tl.cues, P.id).toEqual([])
-      // The countdown's ticks, the answer, the chime, and the two taps on the reader's card (plan 263).
+      // The countdown's ticks, the answer, the chime, and the two taps on the reader's card (plan 266).
       expect(tl.sfx.map(x => x.key), P.id).toEqual(['board-flap', ...Array(CHALLENGE.count).fill('click'), 'correct', 'platform-chime', 'click', 'click'])
     }
   })
@@ -1959,7 +1959,7 @@ describe('the reading challenges (plan 247)', () => {
     expect(challengePage(challengePlan(data, 'n4-01', { lang: 'fr' }), challengeTimeline(challengePlan(data, 'n4-01', { lang: 'fr' })), 'x').title).toMatch(/^Tu arrives/)
   }))
 
-  it('ends on the app’s reader, the text rolling, slowed with −, its furigana shown with ふ, over the run’s three stops (plan 263)', () => withPath2D(() => {
+  it('ends on the app’s reader, the text rolling, slowed with −, its furigana shown with ふ, over the run’s three stops (plan 266)', () => withPath2D(() => {
     const had = globalThis.OffscreenCanvas
     const rolls = []
     globalThis.OffscreenCanvas = class {
@@ -2030,7 +2030,7 @@ describe('the reading challenges (plan 247)', () => {
     }
   }), 120000)
 
-  it('stands on the print of the season chosen, else the day’s, as the app’s gate does (plan 264)', () => {
+  it('stands on the print of the season chosen, else the day’s, as the app’s gate does (plan 267)', () => {
     const meta = JSON.parse(read('src/components/station/print/print.json'))
     // Every season the studio offers, at every hour, is a print the app ships.
     for (const season of PRINT_SEASONS) {

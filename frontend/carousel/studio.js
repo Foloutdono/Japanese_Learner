@@ -129,7 +129,7 @@ const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.lev
 // Where the app's own files are, as the page sees them: the print, the voices.
 const BASE = '../'
 // Today's print of the hour, for the promo stories and the challenges:
-// fetched once an hour and a season, the day's own unless one is chosen (plan 264).
+// fetched once an hour and a season, the day's own unless one is chosen (plan 267).
 const prints = new Map()
 const seasonOf = () => (PRINT_SEASONS.includes(state.season) ? state.season : null)
 function printFor(hour, season = seasonOf()) {

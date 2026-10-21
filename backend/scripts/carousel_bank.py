@@ -1295,7 +1295,7 @@ def dialogues() -> dict:
 
 def with_scenes(dialogue_file: dict, scenes: dict) -> dict:
     """The carousel's conversations and the 会話 station's scenes, the
-    ones its reply videos ask (plan 265), as one list a carousel answers:
+    ones its reply videos ask (plan 268), as one list a carousel answers:
     level by level, the hand-written ones first. A scene keeps its turns
     as the station has them, its id marked as the station's (kaiwa-…,
     clear of a hand-written id) and `kaiwa` set."""

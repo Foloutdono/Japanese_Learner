@@ -9,7 +9,7 @@
 // (Cool Vibes), one of the owner's, or nothing. Since plan 260 the
 // question is the maker's to choose (the first about what the text says
 // unless chosen), its four answers dealt in a seeded order, so the right
-// one stands at A, B, C or D alike across the bank. Since plan 263 the
+// one stands at A, B, C or D alike across the bank. Since plan 266 the
 // way to the app is the app's own reader, this text rolling up its card.
 //
 // Everything a viewer must read is set large, in ink on the washed print
@@ -90,7 +90,7 @@ const W = {
     chars: n => `${n} characters`,
     comments: 'Answer in the comments',
     gotIt: 'Did you get it?',
-    // The way to the app (plan 263): the reader's card, then the run's stops.
+    // The way to the app (plan 266): the reader's card, then the run's stops.
     reader: 'Read it at your pace in the app',
     station: 'Reading comprehension',
     speed: v => `${v} char/s`,
@@ -161,7 +161,7 @@ export function challengePlan(data, id, opts = {}) {
   const P = data.passages.find(x => x.id === id) ?? data.passages[0]
   const style = STYLES.includes(opts.style) ? opts.style : 'scroll'
   const hour = HOURS.includes(opts.hour) ? opts.hour : 'dusk'
-  // The print's season, if chosen (plan 264); else the date's, as the app's gate.
+  // The print's season, if chosen (plan 267); else the date's, as the app's gate.
   const season = PRINT_SEASONS.includes(opts.season) ? opts.season : null
   const sents = P.sents.map(unpack)
   const chosen = Number(opts.question)
@@ -238,7 +238,7 @@ export function challengeTimeline(plan, voiced = null) {
   sfx.push({ at: +t.toFixed(3), key: 'correct' })
   seg('answer', beat(plan, 'answer'))
   sfx.push({ at: +(t + 0.5).toFixed(3), key: 'platform-chime' })
-  // The two taps on the reader's card, heard as the app's buttons are (plan 263).
+  // The two taps on the reader's card, heard as the app's buttons are (plan 266).
   const pace = ctaPace(beat(plan, 'cta'))
   for (const key of ['minus', 'furi']) sfx.push({ at: +(t + CTA[key] * pace).toFixed(3), key: 'click', gain: 0.5 })
   seg('cta', beat(plan, 'cta'))
@@ -262,7 +262,7 @@ export function challengeCommand(plan) {
   const music = plan.music === TRACK ? '' : !plan.music ? ' --music none' : TRACKS[plan.music] ? ` --music ${plan.music}` : ` --music "${plan.music}"`
   // The question is named where it is not the one asked unless chosen (plan 260).
   const question = plan.chosen ? ` --question ${plan.q.n}` : ''
-  // The print's season where one is chosen, else the day's the render runs on (plan 264).
+  // The print's season where one is chosen, else the day's the render runs on (plan 267).
   const season = plan.season ? ` --season ${plan.season}` : ''
   return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${music}${tuneFlag(plan.tune, 'challenge')}`
 }
@@ -652,7 +652,7 @@ function question(ctx, plan, into, answered, P, T) {
   }
 }
 
-// ── The way to the app (plan 263) ──
+// ── The way to the app (plan 266) ──
 // The app's reader (RollingPassage, plan 258) with the text just read
 // rolling up its card: a tap on − slows it, a tap on ふ shows its
 // furigana; under it the run's three stops, the reader's dot going along

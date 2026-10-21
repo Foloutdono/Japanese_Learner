@@ -19,7 +19,7 @@
 //                     comprehension text, 9:16, over Today's print
 //   --style scroll    ... going up the screen as credits do (scroll), or read along by the voice (along)
 //   --hour night      ... the print's hour: dawn, day, dusk or night
-//   --season winter   ... the print's season (plan 264): spring, summer, hanabi
+//   --season winter   ... the print's season (plan 267): spring, summer, hanabi
 //                     (summer, its night August's fireworks), autumn or winter;
 //                     the day's own, as the app's gate shows it, when left out
 //   --question 4      ... the text's question asked (1-based, as the studio
