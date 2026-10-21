@@ -7740,7 +7740,7 @@
    "〜が上手です／下手です",
    "〜と思います"
   ],
-  "text": "わたしは四月から高校生です。学校にはテニスとすいえいのクラブがあります。きのう、あにに「テニスとすいえいとどちらがいいですか。」と聞きました。あにはテニスが上手です。高校のとき、テニスのクラブにいました。でも、あには「すいえいのほうがいいと思います。」と言いました。わたしはなつがすきで、水の中であそぶのもすきだからです。わたしはテニスが下手です。ボールがはやくて、こわいです。だから、すいえいのクラブに入ります。来週から、毎日学校のプールでおよぎます。",
+  "text": "わたしは四月から高校生です。学校にはテニスとすいえいのクラブがあります。きのう、あにに「テニスとすいえいとどちらがいいですか。」と聞きました。あにはテニスが上手です。高校のとき、テニスのクラブにいました。でも、あには「すいえいのほうがいいと思います。」と言いました。わたしはなつがすきで、水の中であそぶのもすきだからです。わたしはテニスが下手です。ボールがはやくて、こわいです。だから、すいえいのクラブに入ります。なつから、毎日学校のプールでおよぎます。",
   "questions": [
    {
     "type": "comprehension",
@@ -7905,15 +7905,15 @@
     "options": {
      "en": [
       "From tomorrow",
-      "From next week",
+      "From the summer",
       "From April",
-      "From the summer"
+      "From next week"
      ],
      "fr": [
       "Demain",
-      "La semaine prochaine",
+      "Cet été",
       "En avril",
-      "Cet été"
+      "La semaine prochaine"
      ]
     },
     "correct": 1
@@ -8667,21 +8667,21 @@
     ]
    },
    {
-    "jp": "来週から、毎日学校のプールでおよぎます。",
+    "jp": "なつから、毎日学校のプールでおよぎます。",
     "translation": {
-     "en": "From next week, I will swim in the school pool every day.",
-     "fr": "À partir de la semaine prochaine, je nagerai tous les jours dans la piscine du lycée."
+     "en": "From the summer, I will swim in the school pool every day.",
+     "fr": "À partir de l'été, je nagerai tous les jours dans la piscine du lycée."
     },
     "note": {
-     "en": "The non-past 「およぎます」 with 「来週から」 speaks of the future.",
-     "fr": "Le non-passé 「およぎます」 avec 「来週から」 parle du futur."
+     "en": "The non-past 「およぎます」 with 「なつから」 speaks of the future.",
+     "fr": "Le non-passé 「およぎます」 avec 「なつから」 parle du futur."
     },
     "words": [
      {
-      "surface": "来週",
+      "surface": "なつ",
       "meaning": {
-       "en": "next week",
-       "fr": "la semaine prochaine"
+       "en": "summer",
+       "fr": "l'été"
       }
      },
      {
