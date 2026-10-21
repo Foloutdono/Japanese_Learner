@@ -1987,14 +1987,16 @@ line here says otherwise.
 - **A line's station is the line over its cars** (plan 251, the owner's
   pick C of the canvas "Tsuji — the learning modes on the desk"). A kana
   set or a JLPT level of vocab, kanji or grammar takes the window. The
-  **line** runs across its top in one panel, as a line map hangs over a
-  platform: one rail through every stop's marker, each stop a column
-  under it, its code and name on one line (cut short, never wrapped,
-  where the page is narrow) and its figure; the open stop lit as a
-  selection is (the switch's wash and gold edge), the stops behind the
-  learner filled and their own marker in the lead rung, said in words to
-  a screen reader. Every stop is a link that replaces the page, the line
-  one tab stop walked with ←/→. Under it the stop's exercises stand as
+  **line** runs across its top as a row of **doors** (plan 267, the
+  owner's pick 2c of the canvas "Tsuji — the sources and the line,
+  redrawn"): joined cells under the line's 3px stripe, which is the
+  line, so no rail runs through them; each door its marker, code, name
+  (cut short, never wrapped, where the page is narrow, whole in its
+  tooltip) and figure on one line, its bar along its foot (learned in
+  the pigment, met in half of it); the open door lit as a selection is
+  (the switch's wash and gold edge), the learner's own the filled
+  marker, said in words to a screen reader. Every door is a link that
+  replaces the page, the line one tab stop walked with ←/→. Under it the stop's exercises stand as
   the **cars** of its train, two to four to a row by the page's measured
   width, the first (the line's main exercise: the ladder, a word to its
   meaning) spanning what the last row would leave empty, so the train
@@ -2024,28 +2026,32 @@ line here says otherwise.
   platforms, each platform a row holding its card small in a well; the
   basics' units and the practice stations keep that split, each stop a
   grid of its name, its first things, its bar and its figure.)
-- **Vocabulary's sources open on what you started** (plan 183, the
-  owner's pick C of the canvas "Tsuji — the vocabulary's sources"; plan
-  137 had hung the three sources as equal plates, and on a real window
-  the five levels shared 800px while the 41 tiers and the 36 themes
-  scrolled beside them). A strip comes first: the learner's own level,
-  wider, with its bar, its first words, what is met and never seen,
-  and the gate button that resumes it on its first platform — in a
-  column of its own beside the words once the card is wide enough
-  (measured on the card), so the strip is a row of words high and the
-  gate's ring and ripples stay inside the card; then the other stops
-  with the most cards met — another level or a tier of the deck's
-  ranking — each a door to its platforms, three, two or one by the
-  page's width and only as many as were started, the row shared by
-  what is there. Under it the three sources as plates (the gates'
-  plate, `--elev-hang`): JLPT's five levels as a line with each one's
-  first words and bar, the tiers under their pool and
-  size as a grid of numbered cells (a cell's border lit and its foot
-  filled where cards are met, its name and count in its label), the
-  themes under their filter in as many columns as hold a name. Every
-  door pushes; the grids scroll inside their plates, never the page.
-  The short desk drops the first words. The phone keeps its three
-  cards. The kanji's sources keep plan 137's plates.
+- **The sources open on the line's doors** (plan 267, the owner's
+  picks C1 for the kanji and C3 for the vocabulary of the canvas "Tsuji
+  — the sources and the line, redrawn"; plan 183's strip over three
+  plates said the learner's level twice, and the kanji's plan 137
+  plates held a page of six radicals under a rail cut at its eleventh
+  count). JLPT is the page's head, drawn as the line over a level's
+  station is: five doors, two lines high here (the name under the code,
+  on two lines where the door is narrow), the learner's own captioned
+  "you are here", and the **gate** that resumes their level on its
+  first platform as the line's last door, with how many of its cards
+  are never seen; where the page is too narrow for six (a 1,100px
+  window), the gate takes a row of its own under the doors, at the
+  line's far end. Every door pushes. Under it the **vocabulary**'s two
+  other sources are **bands** the page's width, under the same stripe,
+  their entries doors in a lattice of seams: the tiers beside their
+  pool and size, a door lit and its foot filled where cards are met
+  (its name and count in its label), three rows at most and scrolling
+  past them; the themes under their filter, as many to a row as hold a
+  name, taking the rest of the window. The **kanji**'s are two plates
+  (`--elev-hang`), the radicals' the wider: the tiers as rows under
+  the size in the plate's head, each its range, a bar of the kanji met
+  and how many; the radicals' stroke rail in the plate's head beside
+  its name, every count in view, the page's tiles packed from the top
+  left at a tile's own width. A window too short scrolls the page
+  rather than crush a band under its floor. The phone keeps its three
+  cards.
 - **A practice station takes the window** (plan 159, the owner's picks A
   and S1 of the canvas "Practice screens — layout options"). Reading and
   translation opened on three source cards across the top of an empty

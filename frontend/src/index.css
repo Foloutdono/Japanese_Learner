@@ -35465,12 +35465,9 @@ button.brd-stn { cursor: pointer; }
      a row holding its card in a small well: eleven rows of words and two
      narrow columns of air. The page still takes the window, and:
 
-     - the line runs across its top, as a line map hangs over a
-       platform: one rail through every stop's marker, each stop a column
-       under it, its code and name on one line and its figure under
-       them; the open stop lit as a selection is (the switch's wash and
-       gold edge), the stops behind the learner filled, their own marker
-       in the lead rung;
+     - the line runs across its top as a row of doors (plan 267, the
+       owner's pick 2c of the canvas "Tsuji — the sources and the line,
+       redrawn"), below;
      - the open stop's exercises stand under it as the cars of its
        train, sharing the rest of the window (the grid, above), each
        car's face the card it asks, drawn as the run draws it, in a well
@@ -35488,56 +35485,93 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-5);
     min-width: 0;
   }
-  .desk-station__line {
+  /* ── 扉 — a line's doors (plan 267) ──
+     The owner's pick 2c of the canvas "Tsuji — the sources and the
+     line, redrawn": the stops across (RouteStops `across`) are doors,
+     one row of joined cells under the line's stripe -- the stripe is the
+     line, so no rail runs through them. A door is its marker, its code,
+     its name and its figure on one line, its bar along its foot (learned
+     in the line's pigment, met in half of it, the Learn plate's bar);
+     the learner's own is the filled marker, the open one lit as a
+     selection is (the switch's wash and gold edge). The same doors head
+     the kanji's and the vocabulary's sources (.desk-linedoors, below), two
+     lines high there. */
+  .desk-station__line,
+  .desk-linedoors {
     flex: none;
-    padding: var(--sp-3) var(--sp-4);
+    min-width: 0;
+    overflow: hidden;
     background: var(--surface);
     border: 1px solid var(--surface-line);
+    border-top: 3px solid var(--line-color);
     border-radius: var(--r-panel);
   }
-  .desk-station > .desk-station__line > .route {
+  .route.route--across {
     display: grid;
     grid-auto-columns: minmax(0, 1fr);
     grid-auto-flow: column;
     gap: 0;
   }
-  /* A stop takes the band's ground, opaque, so its hollow marker -- the
-     route's, which takes its stop's ground -- hides the rail inside it;
-     and it does not lift on approach, the rail running through it. */
-  .desk-station__line > .route > .route-stop {
+  .route.route--across > .route-stop {
     display: grid;
-    grid-template-columns: auto minmax(0, auto);
-    grid-template-areas:
-      "code name"
-      "fig fig";
-    justify-content: center;
-    align-items: baseline;
-    gap: var(--sp-2) var(--sp-3);
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "mark code name fig";
+    align-items: center;
+    gap: var(--sp-3);
     min-height: 0;
-    padding: var(--sp-7) var(--sp-3) var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
     background: var(--surface);
     border: 0;
-    border-radius: var(--r-card);
-    text-align: center;
+    border-left: 1px solid var(--surface-line);
+    border-radius: 0;
+    color: var(--text-primary);
+    text-align: left;
+    font-weight: 600;
+    line-height: normal;
+    text-decoration: none;
   }
-  .desk-station__line .route-stop:hover,
-  .desk-station__line .route-stop:focus-visible { transform: none; }
-  .desk-station__line > .route > .route-stop > .route-stop__rail {
-    inset: calc(var(--sp-7) / 2) 0 auto;
-    width: auto;
-    height: 3px;
-    transform: translateY(-50%);
+  .route.route--across > .route-stop--first { border-left: 0; }
+  .route.route--across > .route-stop:where(:hover, :focus-visible) {
+    background: var(--bg-card-hover);
+    transform: none;
   }
-  .desk-station__line > .route > .route-stop > .route-stop__marker {
-    top: calc(var(--sp-7) / 2);
-    left: 50%;
+  .route.route--across > .route-stop:where(:focus-visible) {
+    outline: 2px solid var(--accent2);
+    outline-offset: -2px;
   }
-  .desk-station__line > .route > .route-stop > .route-stop__code {
+  .route.route--across > .route-stop > .route-stop__rail,
+  .route.route--across > .route-stop > .route-stop__go { display: none; }
+  .route.route--across > .route-stop > .route-stop__marker {
+    grid-area: mark;
+    position: static;
+    width: 10px;
+    height: 10px;
+    transform: none;
+    border-width: 2px;
+    border-color: color-mix(in srgb, var(--line-color) 35%, var(--surface-line));
+    background: transparent;
+    box-shadow: none;
+  }
+  .route.route--across > .route-stop--past > .route-stop__marker { border-color: color-mix(in srgb, var(--line-color) 70%, var(--surface-line)); }
+  .route.route--across > .route-stop--current > .route-stop__marker {
+    width: 10px;
+    height: 10px;
+    border-color: var(--line-color);
+    background: var(--line-color);
+    box-shadow: none;
+  }
+  .route.route--across > .route-stop > .route-stop__code {
     grid-area: code;
     min-width: 0;
+    font-size: var(--fs-body);
+    line-height: 1;
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
   }
-  .desk-station__line > .route > .route-stop > .route-stop__names { grid-area: name; }
-  .desk-station__line > .route > .route-stop > .route-stop__names > .route-stop__jp {
+  .route.route--across > .route-stop > .route-stop__names {
+    grid-area: name;
+    min-width: 0;
+  }
+  .route.route--across > .route-stop > .route-stop__names > .route-stop__jp {
     overflow: hidden;
     font-size: var(--fs-sm);
     font-weight: 600;
@@ -35545,30 +35579,26 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .desk-station__line > .route > .route-stop > .route-stop__fig {
+  .route.route--across > .route-stop > .route-stop__fig {
     grid-area: fig;
-    justify-self: center;
     font-size: var(--fs-caption);
   }
-  .desk-station__line > .route > .route-stop > .route-stop__go { display: none; }
-  .desk-station__line > .route > .route-stop--first > .route-stop__rail { left: 50%; }
-  .desk-station__line > .route > .route-stop--last > .route-stop__rail { right: 50%; }
-  .desk-station__line > .route > .desk-stop--open {
-    background: color-mix(in srgb, var(--accent2) 15%, var(--surface));
-    box-shadow: inset 0 -2px 0 var(--accent2);
+  .route.route--across > .route-stop > .desk-stop__bar {
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    border-radius: 0;
   }
-  .desk-station__line > .route > .desk-stop--open > .route-stop__code { color: var(--sel-ink); }
-  /* The stops are links (plan 117), as the split's were: they take back
-     the button's face the same way (.desk-split__list a.route-stop). */
-  .desk-station__line > .route > a.route-stop {
-    font-weight: 600;
-    line-height: normal;
-    text-decoration: none;
+  .route.route--across > .desk-stop--open { background: color-mix(in srgb, var(--accent2) 15%, var(--surface)); }
+  .route.route--across > .desk-stop--open:where(:hover, :focus-visible) { background: color-mix(in srgb, var(--accent2) 22%, var(--surface)); }
+  .route.route--across > .desk-stop--open::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--sel-line);
+    pointer-events: none;
   }
-  .desk-station__line > .route > a.route-stop:focus-visible {
-    outline: 2px solid var(--accent2);
-    outline-offset: -2px;
-  }
+  .route.route--across > .desk-stop--open > .route-stop__names > .route-stop__jp { color: var(--text-primary); }
 
   .desk-platforms {
     flex: 1;
@@ -35962,57 +35992,111 @@ button.brd-stn { cursor: pointer; }
     .desk-platforms > .platform-grid .platform-card__desc { display: none; }
   }
 
-  /* ── 机 — the vocabulary's sources as plates (plan 137) ──
-     The owner's pick S2: /learn/vocab was three cards across the top of
-     an empty window. Each source is now a plate hanging the window's
-     height (the gates' plate, --elev-hang and all) with its whole list
-     on it: JLPT's five levels share the plate as a line, the tiers and
-     the themes scroll inside theirs under their controls. The plates
-     take the room the page has and no more (a basis of nothing, then
-     all of what is left), so a list of fourteen hundred JMdict tiers
-     scrolls in its plate instead of stretching the page; a window too
-     short for them scrolls the page instead of squeezing a plate
-     below eight rows. */
+  /* ── 机 — the sources: the doors over the bands (plan 267) ──
+     The owner's picks C1 (kanji) and C3 (vocabulary) of the canvas
+     "Tsuji — the sources and the line, redrawn". JLPT is the page's
+     head, as its line heads a level's station: the five levels as doors
+     (above), the learner's own captioned, and the gate that resumes it
+     as the line's last door. Under it the vocabulary's two other
+     sources are bands the page's width, their own entries doors in a
+     lattice; the kanji's are two plates side by side. The doors take
+     their own height, the rest takes what the window has left, and a
+     window too short for it scrolls the page rather than crush a band
+     under its floor. */
   .desk-sources {
     flex: 1 1 0;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: minmax(0, 1fr);
-    gap: var(--sp-6);
-    min-height: calc(8 * var(--sp-8));
-  }
-  .desk-source { min-height: 0; }
-  /* The kanji's (the owner's pick B): the two lines in one column, JLPT
-     at its own height over the tiers, which take the rest; the radicals'
-     tiles on the wider plate beside them, scrolling in it. */
-  .desk-sources--kanji { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
-  .desk-sources__col {
     display: flex;
     flex-direction: column;
     gap: var(--sp-6);
-    min-height: 0;
   }
-  .desk-sources__col > .desk-source { flex: 1 1 0; }
-  .desk-sources__col > .desk-source--compact { flex: none; }
-  .desk-source__tiles {
-    flex: 1;
+  .desk-linedoors {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .desk-linedoors__line { display: grid; }
+  /* A door is taller here: its marker, code and figure, its name under
+     them whole (two lines where the door is narrow), and "you are here"
+     on the learner's own. */
+  .desk-linedoors .route--across > .route-stop {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "mark code fig"
+      "name name name"
+      "here here here";
+    align-content: center;
+    row-gap: var(--sp-2);
+    padding: var(--sp-5) var(--sp-6);
+  }
+  .desk-linedoors .route--across > .route-stop > .route-stop__code { font-size: var(--fs-title); }
+  .desk-linedoors .route--across > .route-stop > .route-stop__names { display: contents; }
+  .desk-linedoors .route--across > .route-stop > .route-stop__names > .route-stop__jp {
+    grid-area: name;
+    white-space: normal;
+    text-wrap: balance;
+  }
+  .desk-linedoors .route-stop__here {
+    grid-area: here;
+    overflow: hidden;
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  }
+  .desk-linedoors .route--across > .route-stop > .route-stop__fig {
+    justify-self: end;
+    font-size: var(--fs-sm);
+  }
+  /* The gate as the line's last door: the air round it is its halo's
+     (the reader's ripples, as far out of the pill), inside the door. */
+  .desk-linedoors__gate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    padding: var(--sp-5) var(--sp-6);
+    border-left: 1px solid var(--surface-line);
+  }
+  .desk-linedoors__gate > .btn-depart--gate { max-width: calc(6 * var(--sp-8)); }
+  /* A page too narrow for five doors and the gate on one row
+     (LineDoors' STACK, measured): the gate takes a row of its own under
+     the doors, at the line's far end, its count before it. */
+  .desk-linedoors--stacked { grid-template-columns: minmax(0, 1fr); }
+  .desk-linedoors--stacked > .desk-linedoors__gate {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    gap: var(--sp-5);
+    padding-block: var(--sp-4);
+    border-left: 0;
+    border-top: 1px solid var(--surface-line);
+  }
+
+  /* A plate under the doors: its name and its controls on one line, the
+     line's stripe, then its list, scrolling inside it. */
+  .desk-source {
+    display: flex;
+    flex-direction: column;
     min-height: 0;
-    overflow-y: auto;
-    padding: var(--sp-4) var(--sp-6);
   }
   .desk-source__head {
     display: flex;
-    align-items: baseline;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    gap: var(--sp-4);
-    padding: var(--sp-6) var(--sp-6) var(--sp-2);
+    gap: var(--sp-3) var(--sp-5);
+    padding: var(--sp-5) var(--sp-6);
   }
-  .desk-source__title {
+  .desk-source__title,
+  .desk-band__head > .desk-source__title {
     margin: 0;
     font-family: var(--font-display);
     font-size: var(--fs-title);
     font-weight: 700;
     line-height: 1.2;
+    white-space: nowrap;
   }
   .desk-source__fig,
   .desk-source__num {
@@ -36023,25 +36107,8 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
     color: var(--text-secondary);
   }
-  .desk-source__fig b,
   .desk-source__num b { color: var(--text-primary); }
-  .desk-source__desc {
-    margin: 0;
-    padding: 0 var(--sp-6) var(--sp-4);
-    font-size: var(--fs-sm);
-    line-height: 1.5;
-    color: var(--text-secondary);
-  }
-  .desk-source__tools {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    padding: 0 var(--sp-6) var(--sp-4);
-  }
-  .desk-source__size {
-    display: flex;
-    flex-direction: column;
-  }
+  .desk-source__head > .desk-source__size { flex: 1 0 calc(5 * var(--sp-8)); }
   .desk-source__stripe {
     flex: none;
     height: var(--sp-1);
@@ -36059,13 +36126,11 @@ button.brd-stn { cursor: pointer; }
     overscroll-behavior-y: auto;
   }
   .desk-source__row {
-    position: relative;
     display: grid;
-    grid-template-columns: var(--sp-8) var(--sp-8) minmax(0, 1fr) auto;
     align-items: center;
-    column-gap: var(--sp-3);
+    column-gap: var(--sp-4);
     min-height: var(--sp-8);
-    padding-inline-end: var(--sp-6);
+    padding-inline: var(--sp-6);
     border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 45%, transparent);
     color: var(--text-primary);
     text-decoration: none;
@@ -36078,52 +36143,15 @@ button.brd-stn { cursor: pointer; }
     outline: 2px solid var(--accent2);
     outline-offset: -2px;
   }
-  /* The line through the rings, drawn per row so its ends can be capped
-     (RouteStops' rail, on the plate's own paper). */
-  .desk-source__row::before {
-    content: '';
-    position: absolute;
-    inset-block: 0;
-    left: calc(var(--sp-8) / 2);
-    width: 3px;
-    transform: translateX(-50%);
-    background: color-mix(in srgb, var(--line-color) 35%, transparent);
-  }
-  .desk-source__row--first::before { top: 50%; }
-  .desk-source__row--last::before { bottom: 50%; }
-  .desk-source__row--plain {
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding-inline: var(--sp-6);
-  }
-  .desk-source__row--plain::before { content: none; }
-  .desk-source__rows--line > .desk-source__row { flex: 1; }
-  .desk-source__ring {
-    position: relative;
-    justify-self: center;
-    width: 18px;
-    height: 18px;
-    border: 2.5px solid color-mix(in srgb, var(--line-color) 55%, var(--bg-card));
-    border-radius: var(--r-pill);
-    background: var(--surface);
-  }
-  .desk-source__row--here > .desk-source__ring {
-    width: 22px;
-    height: 22px;
-    border-color: var(--line-color);
-    background: var(--line-color);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
-  }
   .desk-source__code {
     font-family: var(--font-display);
     font-size: var(--fs-body);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+    color: color-mix(in srgb, var(--line-color) 50%, var(--text-secondary));
   }
   .desk-source__name {
     display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
     min-width: 0;
   }
   .desk-source__label {
@@ -36134,227 +36162,136 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .desk-source__cap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--sp-2);
-    white-space: nowrap;
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
+  /* The kanji's tiers: number, range, a bar of the kanji met, how many
+     -- a tier nobody has opened in the secondary ink. */
+  .desk-source__row--tier { grid-template-columns: var(--sp-7) calc(2 * var(--sp-8)) minmax(0, 1fr) var(--sp-7); }
+  .desk-source__row--tier > .desk-source__label { color: var(--text-secondary); }
+  .desk-source__row--met > .desk-source__code { color: var(--text-primary); }
+  .desk-source__row--met > .desk-source__label { color: var(--text-primary); }
+  .desk-source__row--tier > .desk-line__bar { height: 4px; }
+  .desk-source__row--tier > .desk-source__num {
+    text-align: right;
+    color: var(--text-primary);
   }
-  .desk-source__cap > * + *::before {
-    content: '·';
-    margin-inline-end: var(--sp-2);
-  }
-  .desk-source__here { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
 
-  /* ── 机 — the vocabulary's sources, what you started first (plan 183) ──
-     The owner's pick C: the five levels had shared a plate the window's
-     height while the tiers and the themes scrolled beside them. A strip
-     of what the learner has started opens the page -- their own level
-     wider, with its first words and the gate that resumes it, then the
-     stops with the most cards met, as many as the page is wide for --
-     and the three sources stand under it: JLPT's line with a bar on
-     each level, the tiers as a grid of numbered cells, the themes in
-     columns. The strip takes its own height; the sources take the rest,
-     their grids scrolling inside their plates, never under eight rows'
-     height. */
-  .desk-sources--resume {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-6);
-  }
+  /* The kanji's two plates, the radicals' the wider. */
   .desk-sources__lower {
     flex: 1 1 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1.15fr);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
     grid-template-rows: minmax(0, 1fr);
     gap: var(--sp-6);
     min-height: calc(8 * var(--sp-8));
   }
-  /* The lead never narrower than its gate wants; the stops beside it,
-     no more than the page is wide for (VocabSources' stripRoom,
-     measured) and no more than the learner has started, share the rest
-     of the row -- the lead alone takes the whole of it. */
-  .desk-resume {
-    flex: none;
+  /* The radicals' plate: the stroke rail in its head beside the name,
+     every count in view on a window this wide, and the page's tiles
+     under the stripe, packed from the top left at a tile's own width --
+     not the short page's few large tiles centred (RadicalGrid's
+     `data-fill`), which left a plate of air round six. The index's own
+     wrappers stand aside (`display: contents`) so the rail and the page
+     are the plate's. */
+  .desk-source--radicals {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--sp-5);
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
   }
-  .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) minmax(0, 1fr); }
-  .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(2, minmax(0, 1fr)); }
-  .desk-resume--3 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(3, minmax(0, 1fr)); }
-  .desk-resume__card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
+  .desk-source--radicals > .desk-source__head { grid-area: 1 / 1; }
+  .desk-source--radicals > .desk-source__stripe { grid-area: 2 / 1 / 3 / -1; }
+  .desk-source--radicals > .desk-source__tiles,
+  .desk-source--radicals .dict-radical-index { display: contents; }
+  .desk-source--radicals .stroke-rail {
+    grid-area: 1 / 2;
+    justify-self: end;
+    max-width: 100%;
+    padding-inline-end: var(--sp-6);
+  }
+  .desk-source--radicals .stroke-rail__key,
+  .desk-source--radicals .stroke-rail__step {
+    min-width: var(--sp-7);
+    min-height: var(--sp-7);
+  }
+  .desk-source--radicals .stroke-rail__n { font-size: var(--fs-caption); }
+  .desk-source--radicals .radical-page,
+  .desk-source--radicals .loading {
+    grid-area: 3 / 1 / 4 / -1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--sp-5) var(--sp-6);
+  }
+  .desk-source--radicals .radical-page .radical-page__grid,
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-page__grid--labelled {
+    grid-template-columns: repeat(auto-fill, minmax(calc(2 * var(--sp-8)), 1fr));
+    justify-content: stretch;
+  }
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-tile { padding: var(--sp-3) var(--sp-2); }
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-tile__char { font-size: var(--fs-heading); }
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-tile__count { font-size: inherit; }
+
+  /* ── the vocabulary's bands (C3) ──
+     A band the page's width under the line's stripe, as the doors are:
+     the tiers' with their pool and size at its head, beside the tiers
+     as doors in a lattice of seams; the themes' with its filter over
+     the themes, as many to a row as hold a name. The tiers take three
+     rows at most and scroll past them (the JMdict pool is over a
+     thousand); the themes take the rest of the window. */
+  .desk-band {
+    display: grid;
     min-width: 0;
-    padding: var(--sp-5);
+    min-height: 0;
+    overflow: hidden;
     background: var(--surface);
     border: 1px solid var(--surface-line);
+    border-top: 3px solid var(--line-color);
     border-radius: var(--r-panel);
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  a.desk-resume__card:hover,
-  a.desk-resume__card:focus-visible {
-    border-color: var(--line-color);
-    transform: translateY(-1px);
-  }
-  a.desk-resume__card:focus-visible {
-    outline: 2px solid var(--accent2);
-    outline-offset: 2px;
-  }
-  .desk-resume__card--lead {
-    gap: var(--sp-4);
-    padding: var(--sp-6);
-  }
-  .desk-resume__cap {
-    overflow: hidden;
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: var(--text-secondary);
-  }
-  .desk-resume__name {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-3);
-    min-width: 0;
-    color: inherit;
-    text-decoration: none;
-  }
-  a.desk-resume__name { border-radius: var(--r-card); }
-  a.desk-resume__name:focus-visible {
-    outline: 2px solid var(--accent2);
-    outline-offset: 2px;
-  }
-  .desk-resume__code {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
-  }
-  .desk-resume__card--lead .desk-resume__code { font-size: var(--fs-heading); }
-  .desk-resume__label {
-    overflow: hidden;
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    transition: color 0.15s ease;
-  }
-  .desk-resume__card--lead .desk-resume__label { font-size: var(--fs-body); }
-  a.desk-resume__name:hover .desk-resume__label,
-  a.desk-resume__name:focus-visible .desk-resume__label { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
-  .desk-resume__sample {
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-sm);
-    word-spacing: var(--sp-1);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
-  }
-  /* The figures over the gate, the gate across the card up to its own
-     measure: a gate at its own width beside the words would not fit a
-     lead this narrow. The air round it is the halo's -- its ring (9px)
-     and the reader's ripples (as far out of the pill) stay inside the
-     card's padding and clear of the figures. */
-  .desk-resume__go {
+  .desk-band__head {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: var(--sp-5);
-    margin-top: auto;
-  }
-  .desk-resume__go > .desk-source__num {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .desk-resume__go > .btn-depart--gate { max-width: calc(8 * var(--sp-8)); }
-  /* A lead wide enough (VocabSources' SPLIT, measured on the card) gives
-     the gate a column of its own beside its words, as a deck's page
-     sets its count beside its gate (plan 179): the strip a row shorter,
-     the level's name whole, the halo in the card's own air. */
-  .desk-resume__card--split {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: repeat(4, auto);
-    align-content: center;
-    gap: var(--sp-3) var(--sp-7);
-  }
-  .desk-resume__card--split > .desk-resume__go {
-    grid-column: 2;
-    grid-row: 1 / span 4;
-    align-self: center;
-    margin-top: 0;
-    text-align: center;
-  }
-  /* The narrowest desk (VocabSources' NARROW, measured): the lead a
-     share narrower, so its two stops keep their names; the tiers' plate
-     the widest, the themes' the narrowest, in one column. */
-  .desk-sources--narrow > .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) repeat(2, minmax(0, 1fr)); }
-  .desk-sources--narrow > .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) minmax(0, 1fr); }
-  .desk-sources--narrow > .desk-sources__lower { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.15fr) minmax(0, 0.95fr); }
-  /* A plate's figure goes under its name when the two do not fit one
-     line, rather than breaking the name (which breaks only when it is
-     wider than the plate on its own); JLPT's codes at their own
-     width, so a level's name has the room. */
-  .desk-sources--resume .desk-source__head {
-    flex-wrap: wrap;
-    row-gap: 0;
-  }
-  .desk-sources--resume .desk-source__title {
-    flex: none;
-    max-width: 100%;
-  }
-  .desk-sources--resume .desk-source__rows--line > .desk-source__row { grid-template-columns: var(--sp-8) auto minmax(0, 1fr) auto; }
-  /* A level's bar under its name, its figure at the bar's end, in JLPT's
-     line under the strip ... */
-  .desk-source__meter {
-    display: flex;
-    align-items: center;
+    justify-content: center;
     gap: var(--sp-3);
-    margin-top: var(--sp-1);
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-5);
   }
-  .desk-source__meter > .desk-line__bar { flex: 1; }
-  /* ... and the level's first words between its name and its bar
-     (/api/station/vocab/samples, as the station's stops print them). */
-  .desk-source__sample {
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-sm);
-    word-spacing: var(--sp-1);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
+  .desk-band--tiers {
+    flex: none;
+    grid-template-columns: calc(6 * var(--sp-8)) minmax(0, 1fr);
   }
-  /* The tiers as a grid: a numbered cell each, a row's height and width
-     at least, as many to a row as the plate holds, the rows sharing what
-     the plate has and scrolling past it. */
-  .desk-source__cells {
-    flex: 1;
+  .desk-band--tiers > .desk-band__head { border-right: 1px solid var(--surface-line); }
+  .desk-band--tiers > .loading { align-self: center; }
+  .desk-band--themes {
+    flex: 1 1 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: calc(4 * var(--sp-8));
+  }
+  .desk-band--themes > .desk-band__head {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--sp-6);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-band--themes > .desk-band__head > .console {
+    flex: 0 1 calc(8 * var(--sp-8));
+    margin: 0;
+  }
+  /* A lattice: each door's hairline drawn round it into the 1px gap,
+     where its neighbour's meets it, so two doors share one seam, the
+     band's own edge clips the outer ones, and a short last row leaves
+     the band's ground rather than a block of seam. */
+  .desk-band .desk-source__cells,
+  .desk-band .desk-source__rows--cols {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--sp-8), 1fr));
-    grid-auto-rows: minmax(var(--sp-8), 1fr);
-    gap: var(--sp-2);
+    gap: 1px;
     min-height: 0;
-    padding: var(--sp-4) var(--sp-6) var(--sp-6);
+    padding: 0;
     overflow-y: auto;
+  }
+
+  .desk-band .desk-source__cells {
+    --door-h: calc(var(--sp-8) + var(--sp-5));
+    grid-template-columns: repeat(auto-fill, minmax(var(--sp-8), 1fr));
+    grid-auto-rows: var(--door-h);
+    max-height: calc(3 * var(--door-h) + 2px);
   }
   .desk-source__cell {
     position: relative;
@@ -36362,28 +36299,23 @@ button.brd-stn { cursor: pointer; }
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
-    overflow: hidden;
+    gap: var(--sp-1);
+    background: var(--surface);
     color: var(--text-secondary);
     text-decoration: none;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: background 0.15s ease;
   }
   .desk-source__cell:hover,
-  .desk-source__cell:focus-visible {
-    border-color: var(--line-color);
-    background: var(--bg-card-hover);
-  }
+  .desk-source__cell:focus-visible { background: var(--bg-card-hover); }
   .desk-source__cell:focus-visible {
     outline: 2px solid var(--accent2);
     outline-offset: -2px;
   }
-  .desk-source__cell--met { border-color: color-mix(in srgb, var(--line-color) 55%, var(--surface-line)); }
   .desk-source__cell-code {
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-body);
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
     color: color-mix(in srgb, var(--line-color) 50%, var(--text-secondary));
   }
@@ -36392,7 +36324,7 @@ button.brd-stn { cursor: pointer; }
     font-family: var(--font-display);
     font-size: var(--fs-caption-xs);
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
   }
   .desk-source__cell-fill {
@@ -36402,36 +36334,29 @@ button.brd-stn { cursor: pointer; }
     height: 3px;
     background: var(--line-color);
   }
-  /* The themes in as many columns as hold a name, two on a laptop, a
-     row's height each. */
-  .desk-source__rows--cols {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(calc(3 * var(--sp-8)), 1fr));
+  .desk-band .desk-source__rows--cols {
+    grid-template-columns: repeat(auto-fill, minmax(calc(4 * var(--sp-8)), 1fr));
     grid-auto-rows: var(--sp-8);
     align-content: start;
-    column-gap: var(--sp-5);
-    padding-inline: var(--sp-6);
   }
-  .desk-source__rows--cols > .desk-source__row--plain {
+  /* A theme's door: its name, its count at the far end. */
+  .desk-source__row--plain {
+    grid-template-columns: minmax(0, 1fr) auto;
     min-height: 0;
-    padding-inline: var(--sp-2);
+    padding-inline: var(--sp-5);
+    border-bottom: 0;
+    background: var(--surface);
   }
-  .desk-source__rows--cols > .desk-source__row:last-child { border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 45%, transparent); }
+  .desk-band .desk-source__cell,
+  .desk-band .desk-source__row--plain { box-shadow: 0 0 0 1px var(--surface-line); }
   @media (prefers-reduced-motion: reduce) {
-    .desk-resume__card,
-    .desk-resume__label,
+    .desk-source__row,
     .desk-source__cell { transition: none; }
-    a.desk-resume__card:hover,
-    a.desk-resume__card:focus-visible { transform: none; }
   }
-  /* The short desk (plan 169): the first words, the strip's and the
-     line's, and the lead's air give way first, and the sources under
-     it hold six rows' height rather than eight, so a 600px window
-     shows the page whole. */
+  /* The short desk (plan 169): the doors' air gives way first. */
   @media (max-height: 799px) {
-    .desk-resume__sample,
-    .desk-source__sample { display: none; }
-    .desk-resume__card--lead { padding: var(--sp-5); }
+    .desk-linedoors .route--across > .route-stop { padding-block: var(--sp-4); }
+    .desk-linedoors__gate { padding-block: var(--sp-4); }
     .desk-sources__lower { min-height: calc(6 * var(--sp-8)); }
   }
 
