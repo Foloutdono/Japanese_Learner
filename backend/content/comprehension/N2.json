@@ -2199,7 +2199,7 @@
    "〜をはじめ",
    "〜に伴って"
   ],
-  "text": "近年、都市部でカラスの数が増えているという報告が相次いでいる。ある研究によると、その原因は、家庭から出るごみの量が増えたことにあるらしい。カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。しかし、ごみを散らかす行動は、彼らの暮らしのごく一部にすぎない。実際には、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きている。人口の増加に伴って、カラスの食べ物も人間のごみへと変わっていったのである。カラスを追い払うのではなく、彼らがごみに近づく理由をなくすことが、もっとも確実な方法なのだ。",
+  "text": "近年、都市部でカラスの数が増えているという報告が相次いでいる。ある研究によると、その原因は、家庭から出るごみの量が増えたことにあるらしい。カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。しかし、もともと人間のごみは、彼らの食べ物のごく一部にすぎなかった。本来は、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きていたのだ。ところが、人口の増加に伴って、都市のカラスの食べ物は人間のごみへと変わっていったのである。カラスを追い払うのではなく、彼らがごみに近づく理由をなくすことが、もっとも確実な方法なのだ。",
   "questions": [
    {
     "type": "comprehension",
@@ -2292,21 +2292,21 @@
    {
     "type": "grammar",
     "question": {
-     "en": "What does 「ごく一部にすぎない」 mean?",
-     "fr": "Que signifie 「ごく一部にすぎない」 ?"
+     "en": "What does 「ごく一部にすぎなかった」 mean?",
+     "fr": "Que signifie 「ごく一部にすぎなかった」 ?"
     },
     "options": {
      "en": [
-      "It is only a tiny part of their life",
-      "It is the main part of their daily life",
-      "It is a part that grows every year",
-      "It is a part researchers cannot explain"
+      "It was only a tiny part of their diet",
+      "It was the main part of their diet",
+      "It was a part that grew every year",
+      "It was a part researchers could not explain"
      ],
      "fr": [
-      "Ce n'est qu'une infime partie de leur vie",
-      "C'est l'essentiel de leur vie quotidienne",
-      "C'est une partie qui grandit chaque année",
-      "C'est une partie que les chercheurs n'expliquent pas"
+      "Ce n'était qu'une infime partie de leur nourriture",
+      "C'était l'essentiel de leur nourriture",
+      "C'était une partie qui grandissait chaque année",
+      "C'était une partie que les chercheurs n'expliquaient pas"
      ]
     },
     "correct": 0
@@ -2835,21 +2835,42 @@
     ]
    },
    {
-    "jp": "しかし、ごみを散らかす行動は、彼らの暮らしのごく一部にすぎない。",
+    "jp": "しかし、もともと人間のごみは、彼らの食べ物のごく一部にすぎなかった。",
     "translation": {
-     "en": "However, scattering rubbish is only a very small part of how they live.",
-     "fr": "Cependant, éparpiller les déchets n'est qu'une infime partie de leur mode de vie."
+     "en": "Originally, however, human rubbish was only a very small part of what they ate.",
+     "fr": "Pourtant, à l'origine, les déchets humains n'étaient qu'une infime partie de leur nourriture."
     },
     "note": {
-     "en": "The pattern 「〜にすぎない」 means nothing more than, playing something down.",
-     "fr": "La structure 「〜にすぎない」 signifie rien de plus que, et minimise la chose."
+     "en": "The pattern 「〜にすぎない」 means nothing more than, playing something down; here in the past, 「〜にすぎなかった」.",
+     "fr": "La structure 「〜にすぎない」 signifie rien de plus que, et minimise la chose ; ici au passé, 「〜にすぎなかった」."
     },
     "words": [
      {
       "surface": "しかし",
       "meaning": {
        "en": "however",
-       "fr": "cependant"
+       "fr": "pourtant"
+      }
+     },
+     {
+      "surface": "もともと",
+      "meaning": {
+       "en": "originally",
+       "fr": "à l'origine"
+      }
+     },
+     {
+      "surface": "人間",
+      "meaning": {
+       "en": "humans",
+       "fr": "humains"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
       }
      },
      {
@@ -2857,27 +2878,6 @@
       "meaning": {
        "en": "rubbish",
        "fr": "déchets"
-      }
-     },
-     {
-      "surface": "を",
-      "meaning": {
-       "en": "marks the object",
-       "fr": "marque l'objet"
-      }
-     },
-     {
-      "surface": "散らかす",
-      "meaning": {
-       "en": "to scatter",
-       "fr": "éparpiller"
-      }
-     },
-     {
-      "surface": "行動",
-      "meaning": {
-       "en": "behaviour",
-       "fr": "comportement"
       }
      },
      {
@@ -2902,10 +2902,10 @@
       }
      },
      {
-      "surface": "暮らし",
+      "surface": "食べ物",
       "meaning": {
-       "en": "way of life",
-       "fr": "mode de vie"
+       "en": "food",
+       "fr": "nourriture"
       }
      },
      {
@@ -2930,19 +2930,19 @@
       }
      },
      {
-      "surface": "にすぎない",
+      "surface": "にすぎなかった",
       "meaning": {
-       "en": "is no more than",
-       "fr": "n'est que"
+       "en": "was no more than",
+       "fr": "n'était que"
       }
      }
     ]
    },
    {
-    "jp": "実際には、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きている。",
+    "jp": "本来は、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きていたのだ。",
     "translation": {
-     "en": "In reality they live on all sorts of things, starting with nuts and berries and including insects and small animals.",
-     "fr": "En réalité, ils se nourrissent de toutes sortes de choses, à commencer par les fruits des arbres, mais aussi d'insectes et de petits animaux."
+     "en": "By nature they lived on all sorts of things, starting with nuts and berries and including insects and small animals.",
+     "fr": "Par nature, ils se nourrissaient de toutes sortes de choses, à commencer par les fruits des arbres, mais aussi d'insectes et de petits animaux."
     },
     "note": {
      "en": "The pattern 「〜をはじめ」 puts forward the leading example of a list that continues with 「など」.",
@@ -2950,10 +2950,10 @@
     },
     "words": [
      {
-      "surface": "実際には",
+      "surface": "本来は",
       "meaning": {
-       "en": "in reality",
-       "fr": "en réalité"
+       "en": "by nature",
+       "fr": "par nature"
       }
      },
      {
@@ -3034,25 +3034,39 @@
       }
      },
      {
-      "surface": "生きている",
+      "surface": "生きていた",
       "meaning": {
-       "en": "live",
-       "fr": "vivent"
+       "en": "lived",
+       "fr": "vivaient"
+      }
+     },
+     {
+      "surface": "のだ",
+      "meaning": {
+       "en": "it is that",
+       "fr": "c'est que"
       }
      }
     ]
    },
    {
-    "jp": "人口の増加に伴って、カラスの食べ物も人間のごみへと変わっていったのである。",
+    "jp": "ところが、人口の増加に伴って、都市のカラスの食べ物は人間のごみへと変わっていったのである。",
     "translation": {
-     "en": "As the human population grew, crows' food too shifted towards human rubbish.",
-     "fr": "Avec la croissance de la population, la nourriture des corbeaux s'est elle aussi tournée vers les déchets humains."
+     "en": "But as the human population grew, the food of city crows shifted towards human rubbish.",
+     "fr": "Mais avec la croissance de la population, la nourriture des corbeaux des villes s'est tournée vers les déchets humains."
     },
     "note": {
      "en": "The pattern 「〜に伴って」 links one change to another that came with it; 「〜ていった」 shows gradual change away from the past.",
      "fr": "La structure 「〜に伴って」 lie un changement à celui qui l'a accompagné ; 「〜ていった」 montre une évolution progressive."
     },
     "words": [
+     {
+      "surface": "ところが",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
      {
       "surface": "人口",
       "meaning": {
@@ -3082,6 +3096,20 @@
       }
      },
      {
+      "surface": "都市",
+      "meaning": {
+       "en": "city",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
       "surface": "カラス",
       "meaning": {
        "en": "crows",
@@ -3103,10 +3131,10 @@
       }
      },
      {
-      "surface": "も",
+      "surface": "は",
       "meaning": {
-       "en": "too",
-       "fr": "aussi"
+       "en": "topic marker",
+       "fr": "marque le thème"
       }
      },
      {
@@ -9494,7 +9522,7 @@
    "〜に加えて",
    "〜ないことには"
   ],
-  "text": "来月から、市内で自転車に乗る人は全員、ヘルメットをかぶるよう求められる。これまでは子どもだけが対象だったが、昨年、大人の事故が増えたことを受けて、市が決めたものだ。頭を守らずに転ぶと、小さな事故でも大けがにつながりかねない。市はヘルメットの代金に加えて、自転車を直すのにかかる費用の半分も出すという。しかし、髪型がくずれる、夏はあついといった理由で、かぶりたがらない人は少なくない。決まりを作っても、一人一人が安全の大切さを理解しないことには、事故は減らないだろう。",
+  "text": "来月から、市内で自転車に乗る人は全員、ヘルメットをかぶるよう求められる。これまでは子どもだけが対象だったが、昨年、大人の事故が増えたことを受けて、市が決めたものだ。頭を守らずに転ぶと、小さな事故でも大けがにつながりかねない。市はヘルメットの代金に加えて、ブレーキやライトを直すのにかかる費用の半分も出すという。しかし、髪型がくずれる、夏はあついといった理由で、かぶりたがらない人は少なくない。決まりを作っても、一人一人が安全の大切さを理解しないことには、事故は減らないだろう。",
   "questions": [
    {
     "type": "comprehension",
@@ -9631,8 +9659,8 @@
    {
     "type": "comprehension",
     "question": {
-     "en": "How much will the city pay towards bicycle repairs?",
-     "fr": "Quelle part des réparations du vélo la ville paiera-t-elle ?"
+     "en": "How much will the city pay towards repairing brakes and lights?",
+     "fr": "Quelle part des réparations des freins et des feux la ville paiera-t-elle ?"
     },
     "options": {
      "en": [
@@ -9704,13 +9732,13 @@
      "en": [
       "Everyone grasping why safety matters",
       "Fines for anyone who rides without a helmet",
-      "More money from the city for bicycle repairs",
+      "More money from the city for brake repairs",
       "A rule that covers children as well as adults"
      ],
      "fr": [
       "Que chacun saisisse l'importance de la sécurité",
       "Des amendes pour qui roule sans casque",
-      "Plus d'argent de la ville pour les réparations",
+      "Plus d'argent de la ville pour les freins",
       "Une règle valable aussi pour les enfants"
      ]
     },
@@ -10102,10 +10130,10 @@
     ]
    },
    {
-    "jp": "市はヘルメットの代金に加えて、自転車を直すのにかかる費用の半分も出すという。",
+    "jp": "市はヘルメットの代金に加えて、ブレーキやライトを直すのにかかる費用の半分も出すという。",
     "translation": {
-     "en": "The city says it will pay for the helmet and, on top of that, half the cost of repairing a bicycle.",
-     "fr": "La ville prendrait en charge le prix du casque et, en plus, la moitié des frais de réparation du vélo."
+     "en": "The city says it will pay for the helmet and, on top of that, half the cost of repairing brakes and lights.",
+     "fr": "La ville prendrait en charge le prix du casque et, en plus, la moitié des frais de réparation des freins et des feux."
     },
     "note": {
      "en": "「〜に加えて」 means in addition to; 「という」 at the end reports what the city has said.",
@@ -10155,10 +10183,24 @@
       }
      },
      {
-      "surface": "自転車",
+      "surface": "ブレーキ",
       "meaning": {
-       "en": "bicycle",
-       "fr": "vélo"
+       "en": "brakes",
+       "fr": "freins"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "ライト",
+      "meaning": {
+       "en": "lights",
+       "fr": "feux"
       }
      },
      {

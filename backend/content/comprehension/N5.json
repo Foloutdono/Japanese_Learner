@@ -3927,7 +3927,7 @@
    "〜とき",
    "もう〜ました"
   ],
-  "text": "けさはいい天気でしたから、かさをもたないで、うちを出ました。でも、午後、学校を出たとき、雨がふっていました。わたしは駅まで、はしりました。駅の前で、おなじクラスのたなかさんに会いました。たなかさんには大きいかさがありました。「いっしょにかえりましょう。」とたなかさんが言いました。わたしたちは一本のかさで、ゆっくりあるきました。たなかさんのうちは、わたしのうちのちかくです。とてもうれしかったです。あした、たなかさんに「ありがとう。」と言います。わたしはもう新しいかさを買いました。",
+  "text": "けさはいい天気でしたから、かさをもたないで、うちを出ました。でも、午後、学校を出たとき、雨がふっていました。わたしは駅まで、はしりました。駅の前で、おなじクラスのたなかさんに会いました。たなかさんには大きいかさがありました。「いっしょにかえりましょう。」とたなかさんが言いました。わたしたちは一本のかさで、ゆっくりあるきました。たなかさんのうちは、わたしのうちのちかくです。とてもうれしかったです。あした、たなかさんに「ありがとう。」と言います。わたしはもう、かばんに入る小さいかさを買いました。",
   "questions": [
    {
     "type": "grammar",
@@ -4064,21 +4064,21 @@
    {
     "type": "grammar",
     "question": {
-     "en": "What does 「もう新しいかさを買いました」 mean?",
-     "fr": "Que signifie 「もう新しいかさを買いました」 ?"
+     "en": "What does 「もう、かばんに入る小さいかさを買いました」 mean?",
+     "fr": "Que signifie 「もう、かばんに入る小さいかさを買いました」 ?"
     },
     "options": {
      "en": [
-      "I have already bought a new umbrella",
-      "I will buy a new umbrella soon",
-      "I have not bought a new umbrella yet",
-      "I want to buy one more new umbrella"
+      "I have already bought a small umbrella for my bag",
+      "I will soon buy a small umbrella for my bag",
+      "I have not yet bought a small umbrella for my bag",
+      "I want to buy another small umbrella for my bag"
      ],
      "fr": [
-      "J'ai déjà acheté un nouveau parapluie",
-      "J'achèterai bientôt un nouveau parapluie",
-      "Je n'ai pas encore acheté de nouveau parapluie",
-      "Je veux acheter encore un nouveau parapluie"
+      "J'ai déjà acheté un petit parapluie pour mon sac",
+      "J'achèterai bientôt un petit parapluie pour mon sac",
+      "Je n'ai pas encore acheté de petit parapluie pour mon sac",
+      "Je veux acheter un autre petit parapluie pour mon sac"
      ]
     },
     "correct": 0
@@ -4798,14 +4798,14 @@
     ]
    },
    {
-    "jp": "わたしはもう新しいかさを買いました。",
+    "jp": "わたしはもう、かばんに入る小さいかさを買いました。",
     "translation": {
-     "en": "I have already bought a new umbrella.",
-     "fr": "J'ai déjà acheté un nouveau parapluie."
+     "en": "I have already bought a small umbrella that fits in my bag.",
+     "fr": "J'ai déjà acheté un petit parapluie qui tient dans mon sac."
     },
     "note": {
-     "en": "The pattern 「もう〜ました」 says the action is already done.",
-     "fr": "La structure 「もう〜ました」 dit que l'action est déjà faite."
+     "en": "The pattern 「もう〜ました」 says the action is already done: next time, the writer will have an umbrella.",
+     "fr": "La structure 「もう〜ました」 dit que l'action est déjà faite : la prochaine fois, l'auteur aura un parapluie."
     },
     "words": [
      {
@@ -4830,10 +4830,31 @@
       }
      },
      {
-      "surface": "新しい",
+      "surface": "かばん",
       "meaning": {
-       "en": "new",
-       "fr": "nouveau"
+       "en": "bag",
+       "fr": "sac"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "marks where it goes",
+       "fr": "marque où il va"
+      }
+     },
+     {
+      "surface": "入る",
+      "meaning": {
+       "en": "fits in",
+       "fr": "tient dans"
+      }
+     },
+     {
+      "surface": "小さい",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
       }
      },
      {
