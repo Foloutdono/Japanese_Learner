@@ -32774,6 +32774,28 @@ button.brd-stn { cursor: pointer; }
 .fb-link:hover,
 .fb-link:focus-visible { color: var(--text-primary); filter: none; }
 
+/* The early-access sheet over Today (plan 269; components/feedback/
+   RatingSheet.jsx): the question, a line, five stars lit in the
+   selection's gold up to the one chosen, a few words, the send. */
+.fb-rate__q { margin: 0; text-wrap: balance; }
+.fb-rate__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.fb-rate { display: flex; justify-content: center; gap: var(--sp-2); }
+.fb-rate__star {
+  display: grid;
+  place-items: center;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.fb-rate__star--on { color: var(--sel-ink); }
+.fb-rate__star:hover,
+.fb-rate__star:focus-visible { color: var(--sel-ink); filter: none; }
+
 /* Settings' page on the desk: the form at a card's width, the send at
    its own. */
 .fb-page { max-width: var(--card-w); }

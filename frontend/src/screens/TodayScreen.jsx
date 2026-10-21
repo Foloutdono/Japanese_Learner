@@ -15,6 +15,7 @@ import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
 import { TransferSheet } from '../components/station/TransferSheet'
+import { RatingSheet } from '../components/feedback/RatingSheet'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 import { startAmbiance, stopAmbiance } from '../lib/audio'
@@ -54,6 +55,12 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // first ride and the gate's guide and never over the rest-day notice,
 // whether they studied in another app (TransferSheet), while the
 // profile says the offer is open (`transferOffer`).
+//
+// Early access (plan 269): once the learner has earned 400 XP, they are
+// asked how they find the app (RatingSheet), on the same terms as the
+// offer above and never beside it, while the profile says it is open
+// (`feedbackOffer`). The finish comes first: the question follows a day
+// cleared, never interrupts it.
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
@@ -125,6 +132,10 @@ export default function TodayScreen({ session }) {
   const held = useGuideHeld()
   const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
     && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
+  const [rateLeft, setRateLeft] = useState(false)
+  const showRate = Boolean(summary?.feedbackOffer) && !rateLeft && Boolean(today)
+    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
+    && !showTransfer
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
@@ -168,6 +179,9 @@ export default function TodayScreen({ session }) {
       {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
       {showTransfer && (
         <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
+      )}
+      {showRate && (
+        <RatingSheet session={session} onClose={() => setRateLeft(true)} />
       )}
     </main>
   )
