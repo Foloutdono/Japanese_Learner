@@ -666,6 +666,62 @@ describe('BoardingFlow', () => {
     expect(done()[0]).toMatchObject({ kept: 'none' })
   })
 
+  // Plan 269: the gate asks a guest for an address before it issues,
+  // once, and « Continuer en invité » issues the card as it stands.
+  it('asks a guest for an address before issuing, and lets them go on as a guest', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(60)
+    expect(sheet()).not.toBeNull()
+    expect(completes()).toHaveLength(0)
+    expect(sheet().textContent).toContain(fr.brdAccountAsk)
+    expect(inSheet('[data-action="account-later"]')).toBeNull()
+    expect(inSheet('[data-action="account-guest"]').textContent).toBe(fr.brdStayGuest)
+    await clickSheet('[data-action="account-guest"]')
+    await settle(80)
+    expect(sheet()).toBeNull()
+    expect(completes()).toHaveLength(1)
+    expect(done()[0]).toMatchObject({ kept: 'none' })
+  })
+
+  it('issues the card once the address the gate asked for is sent', async () => {
+    updateUser.mockResolvedValue({ data: { user: { email: null, new_email: 'patou@gmail.com', is_anonymous: true } }, error: null })
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(60)
+    type(inSheet('input[type="email"]'), 'patou@gmail.com')
+    await settle(20)
+    await clickSheet('[data-action="account-link"]')
+    await settle(80)
+    expect(completes()).toHaveLength(1)
+    expect(done()[0]).toMatchObject({ kept: 'link' })
+  })
+
+  it('asks once: shut without an answer, the gate issues on the next press', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(60)
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle(60)
+    expect(sheet()).toBeNull()
+    expect(completes()).toHaveLength(0)
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(completes()).toHaveLength(1)
+  })
+
+  it('never asks an account boarded with', async () => {
+    const { screen } = await renderFlow({ user: { email: 'aiko@example.com' } })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(sheet()).toBeNull()
+    expect(completes()).toHaveLength(1)
+  })
+
   it('an account boarded with says where the card is kept, and offers nothing', async () => {
     const { screen } = await renderFlow({ user: { email: 'aiko@example.com' } })
     await toCardBeginner(screen)

@@ -2686,6 +2686,9 @@ const boarding = {
   brdLinkSentNote: (email) => `A link went to ${email}. Send it again, or fix the address.`,
   brdLinkSend: 'Send my link',
   brdLater: 'Later',
+  // Plan 269: the account sheet raised to ask, before the card issues and on Today.
+  brdAccountAsk: 'Connect your email to find your card and your progress on any device.',
+  brdStayGuest: 'Continue as a guest',
   brdRemindAt: (time) => `Remind me at **${time}**`,
   brdAgendaAdd: 'Add to my calendar',
   brdAgendaTitle: 'Tsuji · your Japanese train',

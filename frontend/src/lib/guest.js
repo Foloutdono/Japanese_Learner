@@ -184,3 +184,44 @@ export async function claimByLink({ email, lang }) {
     return { ok: false, message: err?.message }
   }
 }
+
+// ── Asked to keep the card (plan 269) ─────────────────────────────
+// A guest is asked for an address before the card is issued (the
+// boarding's gate) and again on Today, at most once a day, never told
+// they must: « Continuer en invité » is always the way past it. The
+// note is per user and per local day, on this device: cleared storage
+// costs one more ask, never a lost card.
+const ASKED_KEY = 'tsuji.keepAsked'
+const ASKED_KEEP = 8
+
+const localDay = (now = new Date()) =>
+  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+function readAsked() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ASKED_KEY) ?? '{}')
+    return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}
+  } catch {
+    return {}
+  }
+}
+
+/**
+ * Whether a session is one to ask: a guest whose address is not
+ * already on its way (a link sent and not yet followed sits in
+ * `new_email`), not yet asked today on this device.
+ */
+export function shouldAskToKeep(session, now = new Date()) {
+  const user = session?.user
+  if (!isGuest(session) || !user?.id || user.new_email) return false
+  return readAsked()[user.id] !== localDay(now)
+}
+
+/** Note that `userId` was asked today. */
+export function noteAskedToKeep(userId, now = new Date()) {
+  if (!userId) return
+  const kept = Object.entries(readAsked()).filter(([id]) => id !== userId).slice(-(ASKED_KEEP - 1))
+  try {
+    localStorage.setItem(ASKED_KEY, JSON.stringify(Object.fromEntries([...kept, [userId, localDay(now)]])))
+  } catch { /* not persisted: asked again on the next visit */ }
+}

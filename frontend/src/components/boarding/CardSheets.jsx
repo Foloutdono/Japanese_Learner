@@ -479,18 +479,23 @@ function NamePlate({ value, onSave }) {
 // comes back on the URL (lib/authRedirect.js) and is said here.
 // `sent`: the address a link already went to, if one did -- the field
 // opens on it, to send again or to mend (plan 247).
-export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, sent = null }) {
+// `onGuest` (plan 269): the sheet raised to ask rather than opened by
+// the learner -- the card's gate before it issues, Today once a day. It
+// says why in its lede, and its way past is « Continuer en invité »,
+// which goes on as a guest; the scrim and ✕ only shut it. Once a link
+// has gone, the way past is « C'est bon ».
+export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, onGuest = null, sent = null }) {
   const { t } = useLang()
   return (
     <CardSheet open={open} onClose={onClose} jp={t.brdSheetAccount} kind="account">
-      <KeepForm onClose={onClose} onLeaveForAuth={onLeaveForAuth} onKept={onKept} onSent={onSent} sent={sent} />
+      <KeepForm onClose={onClose} onLeaveForAuth={onLeaveForAuth} onKept={onKept} onSent={onSent} onGuest={onGuest} sent={sent} />
     </CardSheet>
   )
 }
 
 const ADDRESS = /.+@.+\..+/
 
-function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, sent }) {
+function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, onGuest, sent }) {
   const { t, lang } = useLang()
   const [email, setEmail] = useState(sent ?? '')
   const [busy, setBusy] = useState(false)
@@ -513,7 +518,7 @@ function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, sent }) {
 
   return (
     <>
-      <p className="brd-sheet__lede">{t.brdAccountLede}</p>
+      <p className="brd-sheet__lede">{onGuest ? t.brdAccountAsk : t.brdAccountLede}</p>
       <ProviderButton link className="auth-provider brd-provider" onBeforeRedirect={onLeaveForAuth} onDone={() => onKept('google')} onError={setError} />
       {refused && !error && (
         <p className="auth-message auth-message--error" role="alert" data-oauth="refused">{authRedirectMessage(refused, t)}</p>
@@ -538,7 +543,9 @@ function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, sent }) {
       </div>
       {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
       <div className="brd-sheet__ways">
-        <BoardLink onClick={onClose} data-action="account-later">{t.brdLater}</BoardLink>
+        {onGuest
+          ? <BoardLink onClick={onGuest} data-action="account-guest">{sent ? t.brdSheetDone : t.brdStayGuest}</BoardLink>
+          : <BoardLink onClick={onClose} data-action="account-later">{t.brdLater}</BoardLink>}
         <Continue label={t.brdLinkSend} onClick={send} disabled={!filled || busy} data-action="account-link" />
       </div>
     </>

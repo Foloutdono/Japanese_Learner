@@ -15,6 +15,9 @@ import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
 import { TransferSheet } from '../components/station/TransferSheet'
+import { AccountSheet } from '../components/boarding/CardSheets'
+import { noteAskedToKeep, shouldAskToKeep } from '../lib/guest'
+import { useClaimOffer, usePaywall } from '../stores/credits'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 import { startAmbiance, stopAmbiance } from '../lib/audio'
@@ -54,6 +57,11 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // first ride and the gate's guide and never over the rest-day notice,
 // whether they studied in another app (TransferSheet), while the
 // profile says the offer is open (`transferOffer`).
+//
+// 本乗車券 (plan 269): a guest is asked to keep the card with an address
+// -- Google, or a link -- at most once a day (lib/guest.js), after the
+// guide and the transfer offer have had their turn and never over
+// another sheet. « Continuer en invité » is always the way past it.
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
@@ -125,6 +133,20 @@ export default function TodayScreen({ session }) {
   const held = useGuideHeld()
   const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
     && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
+  // Read once, at mount: asked once a day, the visit that asks keeps it up.
+  const [keepAsk] = useState(() => shouldAskToKeep(session))
+  const [keepLeft, setKeepLeft] = useState(false)
+  const [keepSent, setKeepSent] = useState(null)
+  const claimOffer = useClaimOffer()
+  const paywall = usePaywall()
+  const showKeep = keepAsk && !keepLeft && Boolean(today)
+    && (summary?.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
+    && !showTransfer && !claimOffer && !paywall
+  const keepUserId = session?.user?.id
+  useEffect(() => {
+    if (showKeep) noteAskedToKeep(keepUserId)
+  }, [showKeep, keepUserId])
+  const leaveKeep = () => setKeepLeft(true)
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
@@ -168,6 +190,16 @@ export default function TodayScreen({ session }) {
       {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
       {showTransfer && (
         <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
+      )}
+      {showKeep && (
+        <AccountSheet
+          open
+          onClose={leaveKeep}
+          onGuest={leaveKeep}
+          onKept={leaveKeep}
+          onSent={setKeepSent}
+          sent={keepSent}
+        />
       )}
     </main>
   )

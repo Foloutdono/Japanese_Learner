@@ -2625,6 +2625,9 @@ const boarding = {
   brdLinkSentNote: (email) => `Un lien est parti vers ${email}. Renvoie-le, ou corrige l’adresse.`,
   brdLinkSend: 'Recevoir mon lien',
   brdLater: 'Plus tard',
+  // Plan 269: the account sheet raised to ask, before the card issues and on Today.
+  brdAccountAsk: 'Relie ton e-mail pour retrouver ta carte et ta progression sur tous tes appareils.',
+  brdStayGuest: 'Continuer en invité',
   brdRemindAt: (time) => `Me rappeler à **${time}**`,
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',

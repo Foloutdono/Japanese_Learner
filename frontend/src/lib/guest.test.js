@@ -19,7 +19,9 @@ vi.mock('./supabase', () => ({ supabase: { auth } }))
 // to pin); here it is only carried onto the call.
 vi.mock('./oauth', () => ({ emailRedirectTarget: () => 'https://app.test/' }))
 
-const { isGuest, startGuest, claimAccount, parkGuest, forgetParkedGuest } = await import('./guest')
+const {
+  isGuest, startGuest, claimAccount, parkGuest, forgetParkedGuest, shouldAskToKeep, noteAskedToKeep,
+} = await import('./guest')
 
 // The node lane has no localStorage: a Map stands in for it.
 const store = new Map()
@@ -192,5 +194,42 @@ describe('claiming the pass', () => {
     await claimAccount({ email: 'a@b.co', password: 'hunter22', lang: 'fr' })
     expect(auth.updateUser).toHaveBeenCalledWith(
       { email: 'a@b.co', password: 'hunter22', data: { lang: 'fr' } }, { emailRedirectTo: 'https://app.test/' })
+  })
+})
+
+// Plan 269: a guest is asked for an address at most once a day, and never
+// one whose link is already on its way or who has an account.
+describe('asking a guest to keep the card', () => {
+  const guest = { user: { id: 'g1', is_anonymous: true } }
+  const morning = new Date(2026, 9, 21, 8)
+  const evening = new Date(2026, 9, 21, 22)
+  const tomorrow = new Date(2026, 9, 22, 8)
+
+  it('asks a guest not yet asked today', () => {
+    expect(shouldAskToKeep(guest, morning)).toBe(true)
+  })
+
+  it('asks once a day', () => {
+    noteAskedToKeep('g1', morning)
+    expect(shouldAskToKeep(guest, evening)).toBe(false)
+    expect(shouldAskToKeep(guest, tomorrow)).toBe(true)
+  })
+
+  it('keeps each user apart', () => {
+    noteAskedToKeep('other', morning)
+    expect(shouldAskToKeep(guest, morning)).toBe(true)
+  })
+
+  it('never asks an account, or a guest whose link is on its way', () => {
+    expect(shouldAskToKeep({ user: { id: 'a1', is_anonymous: false, email: 'a@b.c' } }, morning)).toBe(false)
+    expect(shouldAskToKeep({ user: { ...guest.user, new_email: 'a@b.c' } }, morning)).toBe(false)
+    expect(shouldAskToKeep(null, morning)).toBe(false)
+  })
+
+  it('reads an unreadable note as none', () => {
+    store.set('tsuji.keepAsked', 'not json')
+    expect(shouldAskToKeep(guest, morning)).toBe(true)
+    noteAskedToKeep('g1', morning)
+    expect(shouldAskToKeep(guest, morning)).toBe(false)
   })
 })
