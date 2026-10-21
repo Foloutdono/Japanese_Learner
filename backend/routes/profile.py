@@ -21,6 +21,7 @@ from core import credits, events, review_plan
 from core.lines import clean_lines
 from srs.xp import level_progress, next_milestone
 from study import banzuke, level_fit, level_rule
+from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
 
 router = APIRouter()
@@ -167,6 +168,11 @@ def _init_db() -> None:
                 # an import made the question moot. NULL is not asked
                 # yet; routes/transfer.py writes and reads it.
                 ("transfer_offered_at", "TIMESTAMPTZ"),
+                # When Today asked how the learner finds the app, once
+                # the XP was earned (plan 268): answered with a rating
+                # or shut. NULL is not asked yet; routes/feedback.py
+                # writes and reads it.
+                ("feedback_asked_at", "TIMESTAMPTZ"),
                 # 署名 — the first name the card prints (plan 247), in
                 # any script: not the username, which stays the public
                 # handle. NULL = never asked (an account boarded before
@@ -792,6 +798,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # 乗換 (plan 243b): whether Today asks, once, if the learner
         # studied elsewhere (routes/transfer.offer_open).
         "transferOffer": transfer_routes.offer_open(user_id, tutorial_at),
+        # Early access (plan 268): whether Today asks, once, how the
+        # learner finds the app (routes/feedback.offer_open).
+        "feedbackOffer": feedback_routes.offer_open(user_id, xp),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.

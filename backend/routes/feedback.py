@@ -8,7 +8,9 @@ Settings' "Nous écrire" row, the flag on an answered card (or on a
 mock-exam question in the result's review) and the link under a
 failure. What each sends:
 
-  kind     problem | idea | fault, or card / question for their own sheets
+  kind     problem | idea | fault, or card / question / rating for their
+           own sheets
+  rating   a rating's: one to five, the early-access sheet's (below)
   text     the learner's words, at most TEXT_MAX characters
   reasons  a card's: what is wrong with it, from CARD_REASONS
   card_id  a card's: the unprefixed id, the content key the audit reads
@@ -38,6 +40,18 @@ moment the learner asks for one, never taken from the request: a body
 naming an address would let anyone have the app's owner write to a
 stranger. A guest has none, and the sheet offers no reply.
 
+── The early-access sheet (plan 268) ────────────────────────
+The app is young, so once a learner has earned OFFER_XP lifetime XP,
+Today asks them how they find it and what they would change
+(frontend/src/components/feedback/RatingSheet.jsx): a rating of one to
+five and, if they like, a few words. It is a message like any other --
+kind `rating`, the words in `body`, the number in `rating`, counted by
+the same dashboard and read by the same script -- so the rating is the
+one figure the table holds beside the words. `offer_open` decides who
+is asked: the XP earned and never asked before
+(user_profiles.feedback_asked_at), stamped by an answer, a rating sent
+or the sheet shut, so it is asked once and on one device only.
+
 Nothing is answered automatically and nothing is hidden: the rows are
 a queue for a person (scripts/read_feedback.py), counted in Metabase
 (docs/analytics/metabase/10-messages.sql) and in the weekly digest.
@@ -59,7 +73,11 @@ from core.rls import enable_rls
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-KINDS = ("problem", "idea", "fault", "card", "question")
+KINDS = ("problem", "idea", "fault", "card", "question", "rating")
+# The early-access sheet (plan 268): the lifetime XP from which Today
+# asks once how the learner finds the app, and the rating's bounds.
+OFFER_XP = 400
+RATING_MIN, RATING_MAX = 1, 5
 # What can be wrong with a card. Closed, as a deck's report is
 # (routes/decks.REPORT_REASONS): the words beside them are optional.
 CARD_REASONS = ("reading", "meaning", "audio", "example", "other")
@@ -113,6 +131,8 @@ def _ensure_schema() -> None:
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS exam_id TEXT")
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS revision INT")
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS question_id TEXT")
+            # The early-access sheet's rating (plan 268).
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS rating SMALLINT")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS feedback_user_at ON feedback (user_id, created_at)"
             )
@@ -135,6 +155,7 @@ class FeedbackPayload(BaseModel):
     exam_id: str | None = Field(default=None, max_length=40)
     revision: int | None = Field(default=None, ge=1, le=1_000_000)
     question_id: str | None = Field(default=None, max_length=64)
+    rating: int | None = Field(default=None, ge=RATING_MIN, le=RATING_MAX)
     route: str | None = Field(default=None, max_length=64)
     area: str | None = Field(default=None, max_length=40)
     status: int | None = Field(default=None, ge=0, le=599)
@@ -214,8 +235,13 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
         reasons = [r for r in CARD_REASONS if r in payload.reasons]
         if not reasons and not text:
             _refuse(400, "feedback_empty", "Say what is wrong with the card")
+    elif payload.kind == "rating":
+        # The number is the message: the words beside it are optional.
+        if payload.rating is None:
+            _refuse(400, "feedback_rating", "A rating is one to five")
     elif not text:
         _refuse(400, "feedback_empty", "The message is empty")
+    rating = payload.rating if payload.kind == "rating" else None
 
     conn = db_conn()
     try:
@@ -242,12 +268,13 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
             cur.execute(
                 """
                 INSERT INTO feedback (user_id, kind, body, reasons, card_id, exam_id, revision, question_id,
-                                      route, area, status, platform, vp, os, lang, reply, reply_to)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                      rating, route, area, status, platform, vp, os, lang, reply, reply_to)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING created_at
                 """,
                 (
                     user_id, payload.kind, text, reasons, card_id, exam_id, revision, question_id,
+                    rating,
                     _shape("route", payload.route),
                     area,
                     payload.status if area else None,
@@ -259,8 +286,49 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
                 ),
             )
             (at,) = cur.fetchone()
+            if payload.kind == "rating":
+                # Answered: the sheet is not asked again (same commit).
+                _stamp_offer(cur, user_id)
         conn.commit()
     finally:
         conn.close()
     logger.info("feedback kind=%s user=%s", payload.kind, user_id)
     return {"ok": True, "at": at.isoformat()}
+
+
+def _stamp_offer(cur, user_id: str) -> None:
+    """The early-access sheet is behind the learner. The first stamp stands."""
+    cur.execute(
+        "UPDATE user_profiles SET feedback_asked_at = COALESCE(feedback_asked_at, NOW()) WHERE user_id = %s",
+        (user_id,),
+    )
+
+
+def offer_open(user_id: str, xp: int) -> bool:
+    """Whether Today asks this learner, once, how they find the app (see
+    the module's note): GET /api/profile's `feedbackOffer`. `xp` is the
+    lifetime figure the profile already holds, so a learner short of it
+    costs no query."""
+    if xp < OFFER_XP:
+        return False
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT feedback_asked_at FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    return row is not None and row[0] is None
+
+
+@router.post("/api/feedback/offer")
+def post_feedback_offer(user_id: str = Depends(get_user_id)):
+    """The sheet was shut without a rating: asked, and not again."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            _stamp_offer(cur, user_id)
+        conn.commit()
+    finally:
+        conn.close()
+    return {"feedbackOffer": False}

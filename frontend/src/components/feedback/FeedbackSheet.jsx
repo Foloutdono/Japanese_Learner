@@ -31,7 +31,7 @@ function stampDate(at) {
   return `${two(d.getDate())}.${two(d.getMonth() + 1)}.${two(d.getFullYear() % 100)}`
 }
 
-function Sent({ at, reply, onClose }) {
+export function Sent({ at, reply, onClose }) {
   const { t } = useLang()
   return (
     <div className="fb-sent" role="status">

@@ -399,3 +399,54 @@ describe('TodayScreen — the transfer sheet', () => {
     summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
   })
 })
+
+// Early access (plan 268): the sheet that asks a learner, once, from 400
+// XP, how they find the app -- on the transfer sheet's terms, and never
+// beside it.
+describe('TodayScreen — the early-access sheet', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const offered = extra => ({ username: 'Aiko', week: [], streak: 3, level: 5, guided: GUIDED, feedbackOffer: true, ...extra })
+  const sheet = () => document.querySelector('.fb-sheet')
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
+
+  beforeEach(() => {
+    apiJson.mockClear()
+    forgetShown()
+  })
+
+  it('asks, and "Plus tard" answers it once', async () => {
+    summaryRef.current = offered()
+    const screen = await mount()
+    await arrives(sheet)
+    expect(document.querySelector('.guide')).toBeNull()
+    expect(sheet().querySelectorAll('.fb-rate__star')).toHaveLength(5)
+    sheet().querySelector('[data-action="rating-later"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    expect(apiJson.mock.calls.filter(([u]) => u === '/api/feedback/offer')).toHaveLength(1)
+    await screen.unmount()
+  })
+
+  it('waits for the gate’s guide, and is not drawn when the profile does not offer', async () => {
+    summaryRef.current = offered({ guided: {} })
+    let screen = await mount()
+    await arrives(() => document.querySelector('.guide'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.removeItem('jp-guided')
+    summaryRef.current = offered({ feedbackOffer: false })
+    screen = await mount()
+    await settle(200)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+  })
+
+  it('gives way to the transfer offer, never drawn beside it', async () => {
+    summaryRef.current = offered({ transferOffer: true })
+    const screen = await mount()
+    await arrives(() => document.querySelector('.tr-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+  })
+})
