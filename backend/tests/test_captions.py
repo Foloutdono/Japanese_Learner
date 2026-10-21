@@ -77,6 +77,61 @@ class ParseTrackTests(unittest.TestCase):
         self.assertEqual(result[0]["start"], 1.0)
         self.assertEqual(result[0]["end"], 4.0)
 
+    # ── A line said twice is two lines (2026-10-21) ──
+    # The owner's report: a line sung twice in a row came back once, its
+    # cue stretched over both, and the words were read out at half the
+    # pace they were sung. A line shown again is said again, unless it is
+    # the rolling window carrying it: shown too briefly to be said, or
+    # while the first still is, with no word of its own timed.
+    def test_a_line_sung_twice_in_a_row_stays_twice(self) -> None:
+        srt = (
+            "1\n00:00:10,000 --> 00:00:12,500\nルララ 宇宙の風に乗る\n\n"
+            "2\n00:00:12,500 --> 00:00:15,000\nルララ 宇宙の風に乗る\n\n"
+            "3\n00:00:15,000 --> 00:00:16,000\nルララ\n"
+        )
+        cues = parse_track(srt, "song.srt")
+        self.assertEqual([(c["start"], c["end"], c["text"]) for c in cues], [
+            (10.0, 12.5, "ルララ 宇宙の風に乗る"),
+            (12.5, 15.0, "ルララ 宇宙の風に乗る"),
+            # Inside the line before it, and sung on its own.
+            (15.0, 16.0, "ルララ"),
+        ])
+
+    def test_each_time_a_line_is_sung_keeps_its_own_words(self) -> None:
+        vtt = (
+            "WEBVTT\n\n"
+            "00:00:10.000 --> 00:00:12.000\nもう<00:00:11.000>一回\n\n"
+            "00:00:12.000 --> 00:00:14.000\nもう<00:00:13.000>一回\n"
+        )
+        cues = parse_track(vtt, "a.vtt")
+        self.assertEqual([c["words"] for c in cues], [[[0, 10.0], [2, 11.0]], [[0, 12.0], [2, 13.0]]])
+        srv3 = (
+            '<timedtext format="3"><body>'
+            '<p t="10000" d="2000">もう一回</p><p t="12000" d="2000">もう一回</p>'
+            '</body></timedtext>'
+        )
+        self.assertEqual([c["start"] for c in parse_track(srv3, "track.srv3")], [10.0, 12.0])
+
+    def test_the_rolling_window_s_carried_line_is_still_folded(self) -> None:
+        # yt-dlp's auto-captions: the finished line held for 10 ms, then
+        # the window grows from it, then the line rolled up is held again.
+        vtt = (
+            "WEBVTT\n\n"
+            "00:00:01.000 --> 00:00:03.000\n今日<00:00:01.500>は\n\n"
+            "00:00:03.000 --> 00:00:03.010\n今日は\n\n"
+            "00:00:03.010 --> 00:00:05.000\n今日は\nいい<00:00:03.500>天気\n\n"
+            "00:00:05.000 --> 00:00:05.010\nいい天気\n"
+        )
+        [cue] = parse_track(vtt, "auto.vtt")
+        self.assertEqual(cue["text"], "今日は いい天気")
+        self.assertEqual((cue["start"], cue["end"]), (1.0, 5.01))
+        # A copy shown while the first still is: the same line, once.
+        srt = (
+            "1\n00:00:01,000 --> 00:00:04,000\nはい、そうです\n\n"
+            "2\n00:00:02,000 --> 00:00:05,000\nはい、そうです\n"
+        )
+        self.assertEqual([(c["start"], c["end"]) for c in parse_track(srt, "t.srt")], [(1.0, 5.0)])
+
     def test_malformed_content_raises_caption_parse_error(self) -> None:
         with self.assertRaises(CaptionParseError) as caught:
             parse_track("this is not a subtitle file at all", "t.srt")
@@ -413,6 +468,13 @@ class FetchYouTubeTrackTests(unittest.TestCase):
         self.assertEqual(
             [c["text"] for c in cues], ["これはペンです", "ありがとう"]
         )
+
+    def test_a_line_sung_twice_in_a_fetched_track_stays_twice(self) -> None:
+        cues = self._fetch(manual=self._snippets(
+            ("ルララ", 10.0, 2.0),
+            ("ルララ", 12.0, 2.0),
+        ))
+        self.assertEqual([c["start"] for c in cues], [10.0, 12.0])
 
     def test_an_empty_track_is_an_error_rather_than_an_empty_session(self) -> None:
         with self.assertRaises(CaptionFetchError) as caught:

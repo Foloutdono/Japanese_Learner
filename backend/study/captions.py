@@ -188,6 +188,23 @@ def _cue(start: float, end: float, text: str, words: list[list] | None = None) -
     return cue
 
 
+# A copy of a line on screen for less than this, or this much before the
+# line it copies is off, is the window carrying it, not the line said
+# again: yt-dlp holds a finished auto-caption line 10 ms before the next
+# grows from it, and no line is sung in a quarter of a second.
+_CARRY_SECONDS = 0.25
+
+
+def _carried(prev: dict, cue: dict) -> bool:
+    """Whether `cue`, a repeat of `prev`'s text or of a piece of it, is
+    the rolling window carrying that line rather than the line said
+    again: no word of its own timed, and on screen too briefly to be
+    said or while the first still is."""
+    if cue.get("words"):
+        return False
+    return cue["end"] - cue["start"] < _CARRY_SECONDS or cue["start"] < prev["end"] - _CARRY_SECONDS
+
+
 def _merge_duplicate_consecutive(cues: list[dict]) -> list[dict]:
     """YouTube auto-captions render as a ROLLING WINDOW: consecutive
     Cues repeat most of each other's text, one or two words advancing
@@ -198,19 +215,25 @@ def _merge_duplicate_consecutive(cues: list[dict]) -> list[dict]:
     A Cue whose text is a prefix/suffix of its neighbour, or identical
     to it, is the signature of this. Kept deliberately simple (exact
     containment, not fuzzy matching) -- see the module docstring on
-    tuning this against real videos."""
+    tuning this against real videos.
+
+    But a line shown again is most often a line said again: a chorus
+    sung twice in a row, a ルララ after the line it ends. Folded, it came
+    back once, its cue stretched over both, and its words were read out
+    at half the pace they were sung (the owner, 2026-10-21). So a repeat
+    is folded only where it is the window carrying its line (_carried)."""
     if not cues:
         return cues
     merged = [dict(cues[0])]
     for cue in cues[1:]:
         prev = merged[-1]
-        if cue["text"] == prev["text"] or cue["text"] in prev["text"]:
+        if (cue["text"] == prev["text"] or cue["text"] in prev["text"]) and _carried(prev, cue):
             # Pure repeat (or a shrinking rolling window) -- the
             # earlier Cue already carries this text; only extend its
             # end time.
             prev["end"] = max(prev["end"], cue["end"])
             continue
-        if prev["text"] and prev["text"] in cue["text"]:
+        if prev["text"] and prev["text"] in cue["text"] and prev["text"] != cue["text"]:
             # The rolling window grew: this Cue's text is the previous
             # one PLUS new words. Replace rather than duplicate -- and
             # the word times with it: the previous Cue's, moved to where
