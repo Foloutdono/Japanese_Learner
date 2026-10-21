@@ -45,9 +45,9 @@ vi.mock('../lib/api', () => ({
     }
   },
 }))
-// The card kept by a link: one updateUser call with the address alone
-// (lib/guest.js claimByLink), and what it REFUSES with is the point of
-// one test below.
+// The card kept by an address and a password: one updateUser call
+// (lib/guest.js claimAccount, plan 270), and what it REFUSES with is the
+// point of one test below.
 const updateUser = vi.fn()
 vi.mock('../lib/supabase', () => ({
   supabase: {
@@ -207,6 +207,16 @@ const printed = (screen, page) => q(screen, `[data-door="${page}"] .pcb__value`)
 const completes = () => apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/complete')
 const posted = () => JSON.parse(completes()[0][2].body)
 const done = () => tracked.mock.calls.filter(c => c[0] === 'boarding_done').map(c => c[1])
+// The account sheet's three fields (plan 270): the address, the password
+// and the password again.
+function fillAccount(email, password = 'secret1', again = password) {
+  type(inSheet('input[type="email"]'), email)
+  type(inSheet('[data-field="password"]'), password)
+  type(inSheet('[data-field="password-again"]'), again)
+}
+// Supabase's answer with "Confirm email" off: the address is the
+// account's at once, and the user is no longer anonymous.
+const madeAccount = email => ({ data: { user: { email, is_anonymous: false } }, error: null })
 
 beforeEach(() => {
   apiJson.mockReset()
@@ -620,35 +630,51 @@ describe('BoardingFlow', () => {
   })
 
   // ── Where the card lives ─────────────────────────────────────────
-  it('a guest’s card says it lives on this device, and the account sheet keeps it by a link', async () => {
-    updateUser.mockResolvedValue({ data: { user: { email: null, new_email: 'patou@gmail.com', is_anonymous: true } }, error: null })
+  it('a guest’s card says it lives on this device, and the account sheet makes it an account', async () => {
+    updateUser.mockResolvedValue(madeAccount('patou@gmail.com'))
     const { screen } = await renderFlow({ guest: true })
     await toCardBeginner(screen)
     expect(q(screen, '.brd-keep-line').dataset.kept).toBe('device')
     await click(screen, '[data-action="keep"]')
     await settle(60)
     expect(sheet()).not.toBeNull()
-    // Google, or an address; no password anywhere.
+    // Google, or an address and a password typed twice.
     expect(sheet().querySelectorAll('.auth-provider')).toHaveLength(1)
-    expect(inSheet('input[type="password"]')).toBeNull()
-    expect(inSheet('[data-action="account-link"]').disabled).toBe(true)
-    type(inSheet('input[type="email"]'), 'patou@gmail.com')
+    expect(sheet().querySelectorAll('input[type="password"]')).toHaveLength(2)
+    expect(inSheet('[data-action="account-create"]').disabled).toBe(true)
+    fillAccount('patou@gmail.com')
     await settle(20)
-    expect(inSheet('[data-action="account-link"]').disabled).toBe(false)
-    await clickSheet('[data-action="account-link"]')
+    expect(inSheet('[data-action="account-create"]').disabled).toBe(false)
+    await clickSheet('[data-action="account-create"]')
     await settle(60)
-    // The address alone, the learner's language for the mail's template,
-    // and the link back to this origin.
+    // The address, the password, the learner's language for the mails.
     expect(updateUser).toHaveBeenCalledWith(
-      { email: 'patou@gmail.com', data: { lang: 'fr' } },
+      { email: 'patou@gmail.com', password: 'secret1', data: { lang: 'fr' } },
       { emailRedirectTo: `${window.location.origin}/` },
     )
     expect(sheet()).toBeNull()
-    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('sent')
+    expect(q(screen, '.brd-keep-line').dataset.kept).toBe('account')
     expect(q(screen, '.brd-keep-line').textContent).toContain('patou@gmail.com')
     await click(screen, '[data-action="issue"]')
     await settle(80)
-    expect(done()[0]).toMatchObject({ kept: 'link' })
+    expect(done()[0]).toMatchObject({ kept: 'password' })
+  })
+
+  it('says two passwords that differ before asking anyone', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="keep"]')
+    await settle(60)
+    fillAccount('patou@gmail.com', 'secret1', 'secret2')
+    await settle(20)
+    await clickSheet('[data-action="account-create"]')
+    await settle(40)
+    expect(updateUser).not.toHaveBeenCalled()
+    expect(inSheet('[role="alert"]').textContent).toBe(fr.brdPasswordMismatch)
+    // Too short a password leaves the action shut.
+    fillAccount('patou@gmail.com', 'abc')
+    await settle(20)
+    expect(inSheet('[data-action="account-create"]').disabled).toBe(true)
   })
 
   it('takes « Plus tard » for an answer: the guest rides on, the card says so', async () => {
@@ -664,6 +690,62 @@ describe('BoardingFlow', () => {
     // The same single POST, on the same account the guest filled in.
     expect(completes()).toHaveLength(1)
     expect(done()[0]).toMatchObject({ kept: 'none' })
+  })
+
+  // Plan 270: the gate asks a guest for an address before it issues,
+  // once, and « Continuer en invité » issues the card as it stands.
+  it('asks a guest for an address before issuing, and lets them go on as a guest', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(60)
+    expect(sheet()).not.toBeNull()
+    expect(completes()).toHaveLength(0)
+    expect(sheet().textContent).toContain(fr.brdAccountAsk)
+    expect(inSheet('[data-action="account-later"]')).toBeNull()
+    expect(inSheet('[data-action="account-guest"]').textContent).toBe(fr.brdStayGuest)
+    await clickSheet('[data-action="account-guest"]')
+    await settle(80)
+    expect(sheet()).toBeNull()
+    expect(completes()).toHaveLength(1)
+    expect(done()[0]).toMatchObject({ kept: 'none' })
+  })
+
+  it('issues the card once the account the gate asked for is made', async () => {
+    updateUser.mockResolvedValue(madeAccount('patou@gmail.com'))
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(60)
+    fillAccount('patou@gmail.com')
+    await settle(20)
+    await clickSheet('[data-action="account-create"]')
+    await settle(80)
+    expect(completes()).toHaveLength(1)
+    expect(done()[0]).toMatchObject({ kept: 'password' })
+  })
+
+  it('asks once: shut without an answer, the gate issues on the next press', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(60)
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle(60)
+    expect(sheet()).toBeNull()
+    expect(completes()).toHaveLength(0)
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(completes()).toHaveLength(1)
+  })
+
+  it('never asks an account boarded with', async () => {
+    const { screen } = await renderFlow({ user: { email: 'aiko@example.com' } })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(sheet()).toBeNull()
+    expect(completes()).toHaveLength(1)
   })
 
   it('an account boarded with says where the card is kept, and offers nothing', async () => {
@@ -754,7 +836,7 @@ describe('BoardingFlow', () => {
   // Supabase's refusal on the claim quotes the address it was about to
   // MAIL, which for a guest is empty: `Email address "" is invalid`, with
   // the learner's own address filled in one line above it.
-  it('answers the link road in its own words, and stands the Google line down', async () => {
+  it('answers the address road in its own words, and stands the Google line down', async () => {
     stashed()
     oauthRefusal.current = {
       error: 'server_error',
@@ -763,9 +845,9 @@ describe('BoardingFlow', () => {
     }
     updateUser.mockResolvedValue({ data: {}, error: { code: 'email_address_invalid', message: 'Email address "" is invalid' } })
     await renderFlow({ guest: true })
-    type(inSheet('input[type="email"]'), 'patou@gmail.com')
+    fillAccount('patou@gmail.com')
     await settle(20)
-    await clickSheet('[data-action="account-link"]')
+    await clickSheet('[data-action="account-create"]')
     await settle(60)
     const said = sheet().textContent
     expect(said).not.toContain('""')

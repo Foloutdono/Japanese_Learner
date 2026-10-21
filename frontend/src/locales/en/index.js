@@ -2685,10 +2685,15 @@ const boarding = {
   brdNameSave: 'Save',
   cardNameTooLong: (n) => `${n} characters at most.`,
   brdAccountLede: 'Without an account, your card lives on this device alone.',
-  brdLinkNote: 'We send you a link. No password to remember.',
-  brdLinkSentNote: (email) => `A link went to ${email}. Send it again, or fix the address.`,
-  brdLinkSend: 'Send my link',
   brdLater: 'Later',
+  // Plan 270: the account sheet, raised to ask before the card issues and on
+  // Today; an address and a password typed twice, no mail to follow.
+  brdStayGuest: 'Continue as a guest',
+  brdAccountAsk: 'Create your account to find your card and your progress on any device.',
+  brdPasswordNew: (min) => `Password (at least ${min} characters)`,
+  brdPasswordAgain: 'Confirm the password',
+  brdPasswordMismatch: 'The two passwords are not the same.',
+  brdAccountSentNote: (email) => `Almost: confirm ${email} from the link we just sent you.`,
   brdRemindAt: (time) => `Remind me at **${time}**`,
   brdAgendaAdd: 'Add to my calendar',
   brdAgendaTitle: 'Tsuji · your Japanese train',

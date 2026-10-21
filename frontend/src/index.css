@@ -30850,6 +30850,13 @@ button.brd-stn { cursor: pointer; }
 .brd-sheet__note { margin: 0; font-size: var(--fs-sm); line-height: 1.4; text-align: center; color: var(--text-secondary); }
 .brd-sheet__field,
 .brd-sheet__ways { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* The sheets portal out of the boarding's frame, so its short step
+   (`@container brd`, above) never reaches their gate: a window shorter
+   than 800px takes it to the boarding's own 56px here too, which keeps
+   the account's three fields (plan 270) whole on a short desk. */
+@media (max-height: 799px) {
+  .brd-sheet .btn-depart { min-height: 56px; }
+}
 /* On the sheet's surface the hours' cells stand on the paper, as they
    did on the page. */
 .brd-sheet .brd-hour { background: var(--bg-main); }

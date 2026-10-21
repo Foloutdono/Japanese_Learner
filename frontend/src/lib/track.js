@@ -150,7 +150,7 @@ export const VALUES = {
   boarding_done: {
     level_how: ['pick', 'test'],
     placed: ['N5', 'N4', 'N3', 'N2', 'N1'],
-    kept: ['google', 'link', 'already', 'none'],
+    kept: ['google', 'password', 'link', 'already', 'none'],
   },
   run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },

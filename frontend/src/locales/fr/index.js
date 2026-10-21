@@ -2624,10 +2624,15 @@ const boarding = {
   brdNameSave: 'Valider',
   cardNameTooLong: (n) => `${n} caractères au plus.`,
   brdAccountLede: 'Sans compte, ta carte ne vit que sur cet appareil.',
-  brdLinkNote: 'On t’envoie un lien. Pas de mot de passe à retenir.',
-  brdLinkSentNote: (email) => `Un lien est parti vers ${email}. Renvoie-le, ou corrige l’adresse.`,
-  brdLinkSend: 'Recevoir mon lien',
   brdLater: 'Plus tard',
+  // Plan 270: the account sheet, raised to ask before the card issues and on
+  // Today; an address and a password typed twice, no mail to follow.
+  brdStayGuest: 'Continuer en invité',
+  brdAccountAsk: 'Crée ton compte pour retrouver ta carte et ta progression sur tous tes appareils.',
+  brdPasswordNew: (min) => `Mot de passe (${min} caractères au moins)`,
+  brdPasswordAgain: 'Confirme le mot de passe',
+  brdPasswordMismatch: 'Les deux mots de passe ne sont pas les mêmes.',
+  brdAccountSentNote: (email) => `Presque : confirme ${email} depuis le lien que nous venons de t’envoyer.`,
   brdRemindAt: (time) => `Me rappeler à **${time}**`,
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',

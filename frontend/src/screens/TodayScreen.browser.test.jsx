@@ -450,3 +450,78 @@ describe('TodayScreen — the early-access sheet', () => {
     summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
   })
 })
+
+// 本乗車券 (plan 270): a guest is asked to make the card an account
+// further and further apart, after the guide, the transfer offer and the
+// early-access question, and may always go on as a guest.
+describe('TodayScreen — asking a guest to keep the card', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const guest = { access_token: 'tok', user: { id: 'g1', is_anonymous: true } }
+  const sheet = () => document.querySelector('.brd-sheet--account')
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
+
+  function mountAs(session) {
+    return render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <Routes>
+            <Route path="/today" element={<TodayScreen session={session} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  beforeEach(() => {
+    localStorage.removeItem('tsuji.keepAsked')
+    summaryRef.current = { username: 'Aiko', week: [], streak: 0, level: 1, guided: GUIDED }
+  })
+
+  it('waits out the gap since the last ask', async () => {
+    const day = d => { const at = new Date(); at.setDate(at.getDate() - d); return `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}` }
+    // Asked twice, the second time yesterday: the next gap is two days.
+    localStorage.setItem('tsuji.keepAsked', JSON.stringify({ g1: { n: 2, at: day(1) } }))
+    let screen = await mountAs(guest)
+    await settle(300)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.setItem('tsuji.keepAsked', JSON.stringify({ g1: { n: 2, at: day(2) } }))
+    screen = await mountAs(guest)
+    await arrives(sheet)
+    await screen.unmount()
+  })
+
+  it('asks a guest, and « Continuer en invité » goes on', async () => {
+    let screen = await mountAs(guest)
+    await arrives(sheet)
+    expect(sheet().querySelector('[data-action="account-guest"]').textContent).toBe('Continuer en invité')
+    sheet().querySelector('[data-action="account-guest"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    // The same day, the next visit is not asked again.
+    screen = await mountAs(guest)
+    await settle(200)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+  })
+
+  it('waits for the transfer offer and the early-access question, and never asks an account', async () => {
+    summaryRef.current = { ...summaryRef.current, transferOffer: true }
+    let screen = await mountAs(guest)
+    await arrives(() => document.querySelector('.tr-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { ...summaryRef.current, transferOffer: false, feedbackOffer: true }
+    screen = await mountAs(guest)
+    await arrives(() => document.querySelector('.fb-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { ...summaryRef.current, feedbackOffer: false }
+    screen = await mountAs({ access_token: 'tok', user: { id: 'a1', is_anonymous: false, email: 'a@b.c' } })
+    await settle(200)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+  })
+})
