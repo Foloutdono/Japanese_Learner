@@ -4,6 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import { sessionKey } from './hooks/useCardSession'
 import tours from './testing/glyphTour.json'
+import { page } from 'vitest/browser'
 import './index.css'
 
 // ── 初見 on a phone (plan 216) ────────────────────────────────────
@@ -104,9 +105,10 @@ beforeEach(() => {
   sessionStorage.clear()
   localStorage.setItem('lang', 'en')
 })
-afterEach(() => {
+afterEach(async () => {
   localStorage.removeItem('lang')
   delete document.documentElement.dataset.chrome
+  await page.viewport(390, 844)
 })
 
 describe('a kana never met, in the day’s queue, on a phone', () => {
@@ -146,6 +148,25 @@ describe('a kana never met, in the day’s queue, on a phone', () => {
     expect(show.bottom).toBeLessThanOrEqual(gate.top)
     expect(gate.bottom).toBeLessThanOrEqual(window.innerHeight)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+  }, 20000)
+
+  it('gives the board the card, no head over it, on a short phone', async () => {
+    // 360x640: under a head (the stroke's count, the instruction) the
+    // board was 184px, under its 200px floor, and the screen scrolled.
+    await page.viewport(360, 640)
+    const screen = await mountToday([kanaCard()])
+    await settle()
+    const tour = () => screen.container.querySelector('.tour--glyph')
+    tour().querySelector('.tour__foot .btn-depart').click()
+    await settle()
+    expect(tour().querySelector('.tour-leaf__head')).toBeNull()
+    const board = tour().querySelector('.gt-board').getBoundingClientRect()
+    const leaf = tour().querySelector('.tour-leaf').getBoundingClientRect()
+    expect(board.width).toBeGreaterThanOrEqual(240)
+    expect(board.top - leaf.top).toBeLessThanOrEqual(40)
+    const gate = tour().querySelector('.tour__foot .btn-depart').getBoundingClientRect()
+    expect(gate.bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight)
   }, 20000)
 
   it('records the tour at its terminus and boards the card', async () => {

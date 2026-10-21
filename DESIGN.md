@@ -1015,16 +1015,20 @@ drawn only where there is something to show:
   carries nothing until it comes back to where the ink stopped, and the
   ring reached makes the stroke whole without the finger lifting. A
   stroke begun away from the dot calls the dot. Lifted short, the ink
-  drains back along the stroke, the finger's own line shows a moment in
-  the miss's ink, and one line at the card's foot says what to fix
-  (« Pars du point plein. », « Va jusqu'au rond. », « Suis le trait. »);
-  after three misses on one stroke the board draws it and says so in the
-  selection's ink (given, not found). « Montre-moi » is the quiet way
-  over the gate and draws the rest in order. As a writing run's board
-  is, **the board is the square the card leaves**: the middle takes the
-  card's free height and the board the smaller of its sides, so a miss's
-  word never lands under the gate (never under 200px, where the screen
-  scrolls instead). The gate is its outline until the glyph is whole.
+  drains back along the stroke and the finger's own line shows a moment
+  in the miss's ink; **a miss is never put in words**, which would only
+  say again what the board shows. After three misses on one stroke the
+  board draws it and says so in the selection's ink (given, not found).
+  « Montre-moi » is the quiet way over the gate and draws the rest in
+  order. **The card draws no head over the board**: the track names the
+  stop, the stroke asked is numbered on its dot and its way drawn, so
+  the instruction (« Trace chaque trait, du point jusqu'au rond. ») and
+  how far (trait 5 sur 11) are said to a screen reader alone. As a
+  writing run's board is, **the board is the square the card leaves**:
+  the middle takes the card's free height and the board the smaller of
+  its sides, so what the tour says never lands under the gate (never
+  under 200px, where the screen scrolls instead). The gate is its
+  outline until the glyph is whole.
 - **Use.** Up to three simple words, as the dictionary's ledger has
   them: the word at `--fs-heading` with the glyph picked out in the
   line's ink (a kana's word printed as it is read, a kanji's with its
