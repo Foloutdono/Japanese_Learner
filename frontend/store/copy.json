@@ -1,0 +1,22 @@
+{
+  "fr": {
+    "today":      { "plate": "Aujourd’hui", "code": "TJ", "h": ["Ta journée,", "prête à embarquer"], "hi": "embarquer", "sub": "Les cartes que tu allais oublier, dans le bon ordre. Rien à régler." },
+    "grammar":    { "plate": "Grammaire", "code": "BP", "h": ["La grammaire qu’on", "comprend, pas qu’on devine"], "hi": "comprend", "sub": "Chaque règle se joue en situation. La bonne réponse, et le piège, expliqués." },
+    "dictionary": { "plate": "Dictionnaire", "code": "KS", "h": ["Un dictionnaire", "dans la poche"], "hi": "dictionnaire", "sub": "Plus de 200 000 mots et 13 000 kanji, avec exemples traduits et favoris." },
+    "practice":   { "plate": "Pratique", "code": "PR", "h": ["Sept façons", "de pratiquer"], "hi": "Sept", "sub": "Lecture, dictée, traduction, rédaction, conversation… ta note à chaque station." },
+    "exam":       { "plate": "Examen blanc", "code": "MS", "h": ["Des examens blancs", "au format JLPT"], "hi": "JLPT", "sub": "Du N5 au N1 : vocabulaire, grammaire, lecture, écoute. Chrono et correction." },
+    "kanji":      { "plate": "Kanji", "code": "KJ", "h": ["Trace chaque kanji,", "trait par trait"], "hi": "trait par trait", "sub": "Le trait attendu est dessiné pour toi : tu repasses, l’encre suit ton doigt." },
+    "goal":       { "plate": "Ton objectif", "code": "N3", "h": ["Fixe ton objectif.", "Suis ton train."], "hi": "train", "sub": "Un trajet jusqu’au N3, une date, et ton avance ou ton retard, en jours." },
+    "breakdown":  { "plate": "Analyseur", "code": "KS", "h": ["Chaque phrase,", "mot à mot"], "hi": "mot à mot", "sub": "Colle un texte, une photo ou un lien YouTube : lectures, sens, grammaire numérotée." }
+  },
+  "en": {
+    "today":      { "plate": "Today", "code": "TJ", "h": ["Your day,", "ready to board"], "hi": "board", "sub": "The cards you were about to forget, in the right order. Nothing to set up." },
+    "grammar":    { "plate": "Grammar", "code": "BP", "h": ["Grammar you", "understand, not guess"], "hi": "understand", "sub": "Every rule is played in a situation. The right answer, and the trap, explained." },
+    "dictionary": { "plate": "Dictionary", "code": "KS", "h": ["A dictionary", "in your pocket"], "hi": "dictionary", "sub": "Over 200,000 words and 13,000 kanji, with translated examples and favourites." },
+    "practice":   { "plate": "Practice", "code": "PR", "h": ["Seven ways", "to practise"], "hi": "Seven", "sub": "Reading, dictation, translation, writing, conversation… your grade at every stop." },
+    "exam":       { "plate": "Mock exam", "code": "MS", "h": ["JLPT mock exams,", "the real format"], "hi": "JLPT", "sub": "N5 to N1: vocabulary, grammar, reading, listening. Timed and marked." },
+    "kanji":      { "plate": "Kanji", "code": "KJ", "h": ["Write every kanji,", "stroke by stroke"], "hi": "stroke by stroke", "sub": "The next stroke is drawn for you: trace it and the ink follows your finger." },
+    "goal":       { "plate": "Your goal", "code": "N3", "h": ["Set your goal.", "Watch your train."], "hi": "train", "sub": "A ride to N3, a date, and how far ahead or behind you are, in days." },
+    "breakdown":  { "plate": "Analyzer", "code": "KS", "h": ["Every sentence,", "word by word"], "hi": "word by word", "sub": "Paste a text, a photo or a YouTube link: readings, meanings, numbered grammar." }
+  }
+}
