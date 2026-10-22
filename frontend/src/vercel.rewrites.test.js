@@ -112,7 +112,7 @@ describe('the dev server and preview, routed by the same table', () => {
     }
     return dir
   }
-  const LANDING = ['landing/index.html', 'landing/en/index.html', 'landing/landing.js', 'privacy.html', 'sw.js']
+  const LANDING = ['landing/index.html', 'landing/en/index.html', 'landing/landing.js', 'privacy.html', 'delete-account.html', 'sw.js']
   const publicDir = served(LANDING)
   const buildDir = served([...LANDING, APP_SHELL, 'assets/index-abc.js'])
 
@@ -134,6 +134,7 @@ describe('the dev server and preview, routed by the same table', () => {
       expect(route(dir, '/en')).toEqual({ url: '/landing/en/index.html' })
       expect(route(dir, '/en/')).toEqual({ url: '/landing/en/index.html' })
       expect(route(dir, '/privacy')).toEqual({ url: '/privacy.html' })
+      expect(route(dir, '/delete-account')).toEqual({ url: '/delete-account.html' })
     }
   })
 
