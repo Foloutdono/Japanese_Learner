@@ -377,7 +377,7 @@ runtime purpose.
 
 - **The interface language is the account's, and only the learner moves it.**
   A choice made in Réglages › Affichage is kept in `user_profiles.ui_lang`
-  (NULL = never chosen, the device's language applies) as well as in
+  (NULL = never chosen: French on a French device, English otherwise) as well as in
   localStorage `lang`, which stays because the first paint reads it
   synchronously. `lib/langChoice.js` writes both (`rememberLang`) and, at
   boot, copies the account's answer onto the device (`syncLang`, from
