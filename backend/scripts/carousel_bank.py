@@ -1689,6 +1689,15 @@ def _promo_boot(level: str) -> dict:
     }
 
 
+def _promo_ask(spec: dict, lang: str) -> dict:
+    """POST /api/ask, for the one question a feature's video asks (plan
+    273): answered as routes/ask.post_ask answers, its words written by
+    hand in content/promo.json (`ask`), as its model is told to write
+    them. A feature that asks nothing has no mock."""
+    ask = spec.get("ask")
+    return {"POST /api/ask": {"answer": ask[lang], "off_topic": False, "left": 39}} if ask else {}
+
+
 def _promo_spec() -> dict:
     """frontend/carousel/content/promo.json: each feature's sentence, the
     answer typed and the tutor's raw replies (plan 270)."""
@@ -1817,9 +1826,23 @@ def _promo_composition(spec: dict, lang: str) -> dict:
     sentence = spec["answer"]
     found = any((h["pattern"], h["level"]) == (entry["pattern"], level) for h in grammar_detect.hits(sentence)) if grammar_detect.can_find(entry["pattern"]) else None
     review = _promo_review(spec["reply"][lang], sentence)
+    # The lesson behind the point, as routes/grammar.get_grammar_point
+    # serves it (plan 273), at the stage the batch below serves the point.
+    from study.card_lookup import GRAMMAR_STATUS_MODES, card_stats
+    from study.grammar_lesson import lesson_payload
+    from study.grammar_tour import tour_payload
+
+    lesson = {
+        "raw_id": raw_id, "level": level, "pattern": entry["pattern"], "structure": structure_text(entry, lang), "meaning": gloss(entry, lang),
+        # The tour without its quiz, which the sheet never opens and which
+        # tour_payload deals differently from one process to the next.
+        **lesson_payload(level, entry, lang), "tour": {**tour_payload(level, entry, lang), "quiz": []}, "tour_record": None,
+        "status": {**card_stats({}, "promo", raw_id, GRAMMAR_STATUS_MODES), "status": "learning"},
+    }
     return {
         "level": level, "line": sentence, "answer": sentence, "point": entry["pattern"],
         "mocks": {
+            "GET /api/grammar/point": lesson,
             "GET /api/composition/batch": {"level": level, "points": [{"raw_id": raw_id, "level": level, "pattern": entry["pattern"], "structure": structure_text(entry, lang), "meaning": gloss(entry, lang), "register": entry.get("register"), "stage": "learning"}]},
             "POST /api/composition/check": {"found": found, "japanese": None},
             "POST /api/composition/review": {**review, "japanese": None, "found": found},
@@ -1855,8 +1878,12 @@ def _promo_comprehension(spec: dict, lang: str) -> dict:
     right = [a == q["correct"] for q, a in zip(qs, answers)]
     from srs.xp import BASE_XP_BY_QUALITY
 
+    # The sentence the missed question is about, its breakdown opened (plan 273).
+    sentence = spec.get("sentence", 0)
+    if not 0 <= sentence < len(data["breakdown"]):
+        raise SystemExit(f"content/promo.json: comprehension's sentence {sentence} is not one of the text's")
     return {
-        "level": level, "line": data["text"], "answers": answers, "wrong": spec["wrong"],
+        "level": level, "line": data["text"], "answers": answers, "wrong": spec["wrong"], "sentence": sentence,
         "mocks": {
             "GET /api/reading/comprehension": {
                 "level": level, "text": data["text"], "translation": data["translation"], "breakdown": data["breakdown"],
@@ -1958,6 +1985,8 @@ def _promo_conversation(spec: dict, lang: str) -> dict:
     return {
         "level": payload["level"], "line": turns[0]["them"]["jp"], "scenario": spec["scenario"],
         "picks": [next(i for i, c in enumerate(t["choices"]) if c.get("right")) for t in turns],
+        # A wrong reply a turn, for the one the video picks to show why (plan 273).
+        "slips": [next(i for i, c in enumerate(t["choices"]) if not c.get("right")) for t in turns],
         "said": [{"them": t["them"]["jp"], "me": t["me"]["jp"]} for t in turns],
         "mocks": {
             "GET /api/conversation/scenarios": {"scenarios": conversation.catalogue(bank), "record": {}},
@@ -1979,7 +2008,10 @@ def promo() -> dict:
         out[name] = {}
         for lang in ("en", "fr"):
             f = make(spec[name], lang)
-            f["mocks"] = {**_promo_boot(f["level"]), **f["mocks"]}
+            f["mocks"] = {**_promo_boot(f["level"]), **_promo_ask(spec[name], lang), **f["mocks"]}
+            # A question the video types rather than taps (plan 273).
+            if spec[name].get("asked"):
+                f["asked"] = spec[name]["asked"][lang]
             out[name][lang] = f
     return {"rev": REV, "features": out}
 

@@ -26,21 +26,22 @@ import { weldIf } from './strings.js'
 // The Practice tab's platforms, in its order (src/config/tabs.js).
 export const FEATURE_IDS = ['reading', 'comprehension', 'translation', 'dictation', 'composition', 'exam', 'conversation']
 export const FEATURE_FPS = 30
-// A shot: the 400 CSS px phone at 2.7 (record.mjs PHONE).
-export const SHOT = { w: 1080, h: 2322 }
+// A shot: the 400 CSS px phone at 4 (record.mjs PHONE), so the camera
+// can come in on a part of it and still draw it sharp (plan 273).
+export const SHOT = { w: 1600, h: 3440 }
 // The caption's slip: its padding, and the caption's sizes, two lines at most.
 const SLIP = { pad: SP[4], sizes: [FS.title, FS.lead], lh: 1.12 }
-// A beat's caption comes in, the screen moves to what it shows, a state
-// changes in a cross-fade; a finger shows before its tap and its ring after.
-const MOTION = { caption: 0.35, pan: 0.5, fade: 0.22, finger: 0.35, ring: 0.5 }
+// A beat's caption comes in; a state changes in a cross-fade, a new
+// screen slides in from the right as the app's pages do, and the app
+// dissolves into the gate at the end; a finger shows before its tap and
+// its ring after.
+const MOTION = { caption: 0.35, fade: 0.22, slide: 0.5, out: 0.5, finger: 0.35, ring: 0.5 }
 // Typed as a quick hand types, a few keys a shot (record.mjs `chunk`).
 const KEYS_PER_SECOND = 13
 // A line heard as its screen comes: a breath after the screen.
 const HEAR = 0.35
 // How long a line lasts: its voice's length once voiced, else a reading pace's guess.
 const lengthOf = (cue, voiceDur) => voiceDur ? voiceDur(cue) : 0.5 + 0.13 * [...cue.text].length
-// A tall screen's scroll: a moment on its head first, a moment on its foot after.
-const SCROLL = { wait: 0.9, rest: 0.9 }
 // The gate's share of the video: its ask, its note, then the gate, waiting.
 const END_SECONDS = 5.5
 
@@ -86,16 +87,33 @@ const SUBMIT = '.stage__foot .btn-primary'
 const PASSAGE = '.prompt-card--passage'
 const ASK = '.prompt-card--ask, .mcq-list'
 const option = i => `.mcq-row >> nth=${i}`
+// Its roll: the chip that turns the text into lines going by, and the roll's faster.
+const ROLL = '.timer .roll-chip'
+const FASTER = '.roll-ctl__speed .roll-ctl__btn >> nth=1'
+// Its results: Ask's second offer (where the text says it), and the whole text's breakdown.
+const WHERE = '.ask__offer >> nth=1'
+const BREAKDOWN = '.qrows + .btn-secondary'
 // A mock exam's parts: the question and its answers, the answer in slot i, the page's Next.
 const SHEET = '.exam-ask__big, .exam-tiles'
 const tile = i => `.exam-tile >> nth=${i}`
 const NEXT = '.exam-dock__go--next'
+const FLAG = '.exam-flag'
 // A conversation's parts: the first scene of the station, a line of the other person's, one of the learner's.
 const SCENE = '.platform-card >> nth=0'
 const THEM = '.tour-line--them'
 const ME = '.tour-line--me'
+const reply = i => `.kaiwa-reply >> nth=${i}`
 // What a card says, without the room around it.
 const BODY = '.prompt-card__body > *'
+// Once graded: the learner's rating, then the sentence's breakdown and Ask
+// (a question offered, picked by what it says), the answer it gets.
+const RATE = q => `.rating-bar__btn--q${q}`
+const BREAKDOWN_OPEN = '.prose__breakdown > .btn-secondary:not(.ask-launch)'
+const ASK_OPEN = '.prose__breakdown .ask-launch'
+const OFFER = has => `.ask__offer:has-text("${has}")`
+const ANSWER = '.ask__a:not(.ask__a--note)'
+// Composition's door to the point's lesson, on the card it is written from.
+const LESSON = '.prompt-card .prose__breakdown > .btn-secondary'
 
 // ── The features ──────────────────────────────────────────────
 // steps: what record.mjs does in the app (its shots named);
@@ -116,6 +134,41 @@ const gateBeats = (say, levels = { en: 'N5 to N1.', fr: 'Du N5 au N1.' }) => [
   { say, parts: [{ shot: 'gate', hold: 2.0, tap: 1.5 }] },
   { say: levels, parts: [{ shot: 'levels', hold: 1.4, tap: 0.9 }] },
 ]
+// The ending reading, translation and dictation share (plan 273): the
+// rating, which opens the sentence's breakdown, read down, then Ask: one
+// of the questions it offers tapped (`offer`, what it says), or the
+// learner's own typed (`typed`), and its answer.
+const lookSteps = (q, { offer, typed }) => [
+  { shot: 'rate', focus: '.rating-bar', tap: RATE(q) },
+  { click: RATE(q), settle: 800 },
+  { shot: 'rated', focus: '.prose__breakdown', tap: BREAKDOWN_OPEN },
+  { click: BREAKDOWN_OPEN, settle: 900 },
+  { scroll: '.prose__breakdown', block: 'start' },
+  { shot: 'breakdown', focus: '.prose__breakdown' },
+  { scroll: ASK_OPEN, block: 'center' },
+  { shot: 'bd-ask', focus: ASK_OPEN, tap: ASK_OPEN },
+  { click: ASK_OPEN, ready: '.ask-page', settle: 500 },
+  ...(typed ? [
+    { shot: 'ask', focus: ['.ask-echo', '.ask__offers'] },
+    { type: '.ask__field', text: typed, shot: 'asking', chunk: 2, focus: ['.ask__offers', '.ask__form'] },
+    { shot: 'asking-typed', focus: ['.ask__offers', '.ask__form'], tap: '.ask__send' },
+    { click: '.ask__send', ready: ANSWER, settle: 700 },
+  ] : [
+    { shot: 'ask', focus: ['.ask-echo', '.ask__offers'], tap: OFFER(offer) },
+    { click: OFFER(offer), ready: ANSWER, settle: 700 },
+  ]),
+  { shot: 'asked', focus: ANSWER },
+]
+const lookBeats = (breakdown, { typed = false, ask = { en: 'Ask about anything in it.', fr: 'Pose une question sur la phrase.' } } = {}) => [
+  { say: breakdown, parts: [{ shot: 'rated', hold: 0.9, tap: 0.5 }, { shot: 'breakdown', hold: 2.0, cam: 'read' }] },
+  { say: ask, parts: [
+    { shot: 'bd-ask', hold: 0.8, tap: 0.45 },
+    ...(typed
+      ? [{ shot: 'ask', hold: 1.1, enter: 'push' }, { seq: 'asking', by: 'chars', hold: 0.2 }, { shot: 'asking-typed', hold: 0.7, tap: 0.4 }]
+      : [{ shot: 'ask', hold: 1.4, tap: 1.0, enter: 'push' }]),
+    { shot: 'asked', hold: 3.4 },
+  ] },
+]
 
 export const FEATURES = {
   conversation: {
@@ -129,19 +182,35 @@ export const FEATURES = {
       { shot: 'ticket', focus: '.kaiwa-ticket' },
       // Start taps off camera: the scene's ticket, then its first line.
       { click: SUBMIT, ready: '.kaiwa-reply' },
-      ...d.picks.slice(0, 2).flatMap((k, i) => [
-        { shot: `t${i}`, focus: [`${THEM} >> nth=-1`, '.kaiwa-replies'], tap: `.kaiwa-reply >> nth=${k}` },
-        { click: `.kaiwa-reply >> nth=${k}`, settle: 800 },
-        { shot: `t${i}-said`, focus: [`${ME} >> nth=-1`, '.stage__foot'], tap: SUBMIT },
-        { click: SUBMIT, ready: '.kaiwa-reply', settle: 800 },
+      // The first line's translation shown, the right reply picked.
+      { shot: 't0', focus: [`${THEM} >> nth=-1`, '.kaiwa-replies'], tap: '.kaiwa-tr' },
+      { click: '.kaiwa-tr', settle: 500 },
+      { shot: 't0-tr', focus: [`${THEM} >> nth=-1`, '.kaiwa-replies'], tap: reply(d.picks[0]) },
+      { click: reply(d.picks[0]), settle: 800 },
+      { shot: 't0-said', focus: [`${ME} >> nth=-1`, '.stage__foot'], tap: SUBMIT },
+      { click: SUBMIT, ready: '.kaiwa-reply', settle: 800 },
+      // The second, a wrong reply: struck, why under it, the right one after.
+      { shot: 't1', focus: [`${THEM} >> nth=-1`, '.kaiwa-replies'], tap: reply(d.slips[1]) },
+      { click: reply(d.slips[1]), settle: 900 },
+      { shot: 't1-wrong', focus: ['.kaiwa-line--taken', '.kaiwa-line--right'] },
+      { click: SUBMIT, ready: '.kaiwa-reply', settle: 600 },
+      // The rest answered off camera, to the scene's end.
+      ...d.picks.slice(2).flatMap((k, i, rest) => [
+        { click: reply(k), settle: 600 },
+        { click: SUBMIT, ...(i < rest.length - 1 ? { ready: '.kaiwa-reply' } : {}), settle: 700 },
       ]),
+      { wait: 900 },
+      { shot: 'over', focus: '.kaiwa-over' },
     ],
     beats: [
       { say: { en: 'Someone speaks to you.', fr: 'On te parle.' }, parts: [{ shot: 'gate', hold: 2.0, tap: 1.5 }] },
       { say: { en: 'Scenes from daily life.', fr: 'Des scènes de tous les jours.' }, parts: [{ shot: 'scenes', hold: 2.0, tap: 1.5 }] },
-      { say: { en: 'Each with an errand to run.', fr: 'Chacune avec une course à faire.' }, parts: [{ shot: 'ticket', hold: 2.4 }] },
-      { say: { en: 'Hear them. Answer them.', fr: 'Écoute. Réponds.' }, parts: [{ shot: 't0', hold: 1.0, tap: 0.8, hear: 0, voice: 1 }, { shot: 't0-said', hold: 1.4, tap: 1.0 }] },
-      { say: { en: 'Every reply explained.', fr: 'Chaque réponse expliquée.' }, parts: [{ shot: 't1', hold: 1.0, tap: 0.8, hear: 2, voice: 3 }, { shot: 't1-said', hold: 2.6 }] },
+      { say: { en: 'Each with an errand to run.', fr: 'Chacune avec une course à faire.' }, parts: [{ shot: 'ticket', hold: 2.4, enter: 'push' }] },
+      { say: { en: 'Hear them. Answer them.', fr: 'Écoute. Réponds.' }, parts: [
+        { shot: 't0', hold: 1.0, tap: 0.8, hear: 0 }, { shot: 't0-tr', hold: 1.0, tap: 0.7, voice: 1 }, { shot: 't0-said', hold: 1.2, tap: 0.9 },
+      ] },
+      { say: { en: 'A wrong reply, and why.', fr: 'Une mauvaise réponse, et pourquoi.' }, parts: [{ shot: 't1', hold: 1.0, tap: 0.8, hear: 2, voice: 3 }, { shot: 't1-wrong', hold: 3.0, cam: 'read' }] },
+      { say: { en: 'Then your score for the scene.', fr: 'Puis ton score pour la scène.' }, parts: [{ shot: 'over', hold: 2.6, cam: 'auto' }] },
     ],
     end: { en: 'Hold a conversation on Tsuji.', fr: 'Tiens une conversation sur Tsuji.' },
     title: { en: 'Could you get through a konbini in Japanese?', fr: 'Saurais-tu t’en sortir au konbini en japonais ?' },
@@ -161,12 +230,14 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rating-bar' },
       { wait: 1200 },
       { shot: 'checked', focus: '.prompt-card' },
+      ...lookSteps(4, { offer: 'に' }),
     ],
     beats: [
       ...gateBeats({ en: 'Read real Japanese.', fr: 'Lis du vrai japonais.' }),
       { say: { en: 'A sentence at your level, on the clock.', fr: 'Une phrase à ton niveau, chronométrée.' }, parts: [{ shot: 'ready', hold: 0.8, tap: 0.55 }, { shot: 'shown', hold: 2.4 }] },
       { say: { en: 'Write how it reads, in rōmaji.', fr: 'Écris comment elle se lit, en rōmaji.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3 }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
-      { say: { en: 'Read first, check after.', fr: 'Lire d’abord, vérifier ensuite.' }, parts: [{ shot: 'checked', hold: 4.2 }] },
+      { say: { en: 'Read first, check after.', fr: 'Lire d’abord, vérifier ensuite.' }, parts: [{ shot: 'checked', hold: 2.4 }, { shot: 'rate', hold: 0.9, tap: 0.5 }] },
+      ...lookBeats({ en: 'Then every word, broken down.', fr: 'Puis chaque mot, décomposé.' }),
     ],
     end: { en: 'Read real Japanese on Tsuji.', fr: 'Lis du vrai japonais sur Tsuji.' },
     title: { en: 'Can you read this Japanese before the clock runs out?', fr: 'Sauras-tu lire ce japonais avant la fin du chrono ?' },
@@ -177,6 +248,15 @@ export const FEATURES = {
       ...gateSteps('rikai', '/practice/comprehension', d.level),
       { go: `/practice/comprehension/${d.level}`, ready: PASSAGE },
       { shot: 'passage', focus: '.timer, .prose__jp--passage' },
+      // The clock, and the roll: the text one line at a time, faster, then whole again.
+      { shot: 'clock', focus: '.timer', tap: ROLL },
+      { play: ROLL, shot: 'rolling', seconds: 2.6, skip: 1.3, focus: '.roll__line--now', step: true },
+      { shot: 'roll-ctl', focus: '.roll-ctl', tap: FASTER },
+      { click: FASTER, settle: 60 },
+      { click: FASTER, settle: 60 },
+      { play: FASTER, shot: 'rolling-fast', seconds: 2.0, focus: '.roll__line--now', step: true },
+      { shot: 'roll-off', focus: '.timer', tap: ROLL },
+      { click: ROLL, ready: PASSAGE, settle: 400 },
       { shot: 'read', focus: '.stage__foot', tap: SUBMIT },
       { click: SUBMIT, ready: '.mcq-row' },
       // The first two questions as they are answered (Next taps off camera: the
@@ -191,16 +271,43 @@ export const FEATURES = {
       { wait: 1200 },
       { shot: 'results', focus: '.result-lattice, .qrows', tap: `.qrow >> nth=${d.wrong}` },
       { click: `.qrow >> nth=${d.wrong}`, settle: 700 },
-      { shot: 'missed', focus: '.result-lattice, .qrow__detail' },
+      // The miss asked about: where the text says it.
+      { shot: 'missed', focus: '.qrow__detail', tap: '.qrow__detail .ask-launch' },
+      { click: '.qrow__detail .ask-launch', ready: '.ask-page', settle: 500 },
+      { shot: 'ask', focus: ['.ask-echo', '.ask__offer'], tap: WHERE },
+      { click: WHERE, ready: '.ask__a:not(.ask__a--note)', settle: 700 },
+      { shot: 'asked', focus: '.ask__a:not(.ask__a--note)' },
+      { click: '.ask-page .stage__leave', settle: 600 },
+      // The whole text broken down, on the sentence the miss was about.
+      { scroll: BREAKDOWN, block: 'center' },
+      { shot: 'bd-ask', focus: BREAKDOWN, tap: BREAKDOWN },
+      { click: BREAKDOWN, settle: 900 },
+      { scroll: '.qrows ~ .prompt-card', block: 'start' },
+      { shot: 'breakdown', focus: '.qrows ~ .prompt-card .analysis-grammar-chips, .bkd-passage__item--open' },
+      { scroll: `.bkd-passage__head >> nth=${d.sentence}`, block: 'center' },
+      { shot: 'bd-pick', focus: `.bkd-passage__head >> nth=${d.sentence}`, tap: `.bkd-passage__head >> nth=${d.sentence}` },
+      { click: `.bkd-passage__head >> nth=${d.sentence}`, settle: 900 },
+      { scroll: '.bkd-passage__item--open', block: 'start' },
+      { shot: 'bd-open', focus: '.bkd-passage__item--open' },
     ],
     beats: [
       ...gateBeats({ en: 'Read a whole text.', fr: 'Lis un texte entier.' }),
-      { say: { en: 'A text at your level, on a clock.', fr: 'Un texte à ton niveau, chronométré.' }, parts: [{ shot: 'passage', hold: 3.4 }, { shot: 'read', hold: 0.9, tap: 0.55 }] },
-      { say: { en: 'Then questions on what it says.', fr: 'Puis des questions sur ce qu’il dit.' }, parts: [
-        { shot: 'q0', hold: 1.6, tap: 1.2 }, { shot: 'q0-picked', hold: 0.6 },
-        { shot: 'q1', hold: 1.5, tap: 1.1 }, { shot: 'q1-picked', hold: 0.9 },
+      { say: { en: 'A text at your level, on a clock.', fr: 'Un texte à ton niveau, chronométré.' }, parts: [{ shot: 'passage', hold: 2.0, enter: 'push', cam: 'read' }, { shot: 'clock', hold: 1.2, tap: 0.8 }] },
+      { say: { en: 'Or let it roll, line by line.', fr: 'Ou laisse-le défiler, ligne par ligne.' }, parts: [
+        { seq: 'rolling', by: 'at', hold: 0.2 }, { shot: 'roll-ctl', hold: 0.9, tap: 0.55 }, { seq: 'rolling-fast', by: 'at', hold: 0.2 },
+        { shot: 'roll-off', hold: 0.8, tap: 0.5 },
       ] },
-      { say: { en: 'Your score, and every miss shown.', fr: 'Ton score, et chaque erreur montrée.' }, parts: [{ shot: 'results', hold: 2.0, tap: 1.6 }, { shot: 'missed', hold: 3.2 }] },
+      { say: { en: 'Then questions on what it says.', fr: 'Puis des questions sur ce qu’il dit.' }, parts: [
+        { shot: 'read', hold: 0.8, tap: 0.5 },
+        { shot: 'q0', hold: 1.4, tap: 1.0, enter: 'push' }, { shot: 'q0-picked', hold: 0.5 },
+        { shot: 'q1', hold: 1.4, tap: 1.0 }, { shot: 'q1-picked', hold: 0.7 },
+      ] },
+      { say: { en: 'Your score, and every miss shown.', fr: 'Ton score, et chaque erreur montrée.' }, parts: [{ shot: 'results', hold: 1.8, tap: 1.4, enter: 'push' }, { shot: 'missed', hold: 1.4, tap: 1.0 }] },
+      { say: { en: 'Ask where the text says it.', fr: 'Demande où le texte le dit.' }, parts: [{ shot: 'ask', hold: 1.4, tap: 1.0, enter: 'push' }, { shot: 'asked', hold: 3.6 }] },
+      { say: { en: 'Every sentence, broken down.', fr: 'Chaque phrase, décomposée.' }, parts: [
+        { shot: 'bd-ask', hold: 1.0, tap: 0.6, enter: 'back' }, { shot: 'breakdown', hold: 2.2, cam: 'read' },
+        { shot: 'bd-pick', hold: 0.9, tap: 0.5 }, { shot: 'bd-open', hold: 2.4, cam: 'read', anchor: true },
+      ] },
     ],
     end: { en: 'Read a whole text on Tsuji.', fr: 'Lis un texte entier sur Tsuji.' },
     title: { en: 'Can you read this Japanese text and answer?', fr: 'Sauras-tu lire ce texte japonais et répondre ?' },
@@ -211,34 +318,48 @@ export const FEATURES = {
       { go: '/practice', ready: '.plate--platform' },
       { shot: 'gate', focus: plate('exam'), tap: `${plate('exam')} .plate__head` },
       { go: '/practice/exam', ready: '.exam-st__go' },
-      { shot: 'station', focus: '.exam-st__hero', tap: '.exam-st__go' },
+      // The grade's papers, one of each kind, then the next one started.
+      { shot: 'station', focus: ['.exam-st__hero', '.exam-st__list'] },
+      { shot: 'station-go', focus: '.exam-st__hero', tap: '.exam-st__go' },
       { click: '.exam-st__go', ready: '.exam-cover__go' },
       { shot: 'cover', focus: '.exam-cover__figs, .exam-cover__parts' },
       { click: '.exam-cover__go', ready: '.exam-tile' },
-      // Three questions on camera, the rest answered off it; the last Next opens the answer sheet.
+      // Three questions on camera, the second flagged; the rest answered off
+      // it; the last Next opens the answer sheet.
       ...d.answers.slice(0, 3).flatMap((a, i) => [
         { shot: `q${i}`, focus: SHEET, tap: tile(a.slot) },
         { click: tile(a.slot), settle: 300 },
-        { shot: `q${i}-picked`, focus: SHEET },
+        ...(i === 1
+          ? [{ shot: 'q1-picked', focus: SHEET, tap: FLAG }, { click: FLAG, settle: 400 }, { shot: 'q1-flagged', focus: '.exam-run__head' }]
+          : [{ shot: `q${i}-picked`, focus: SHEET }]),
         { click: NEXT, settle: 400 },
       ]),
       ...d.answers.slice(3).flatMap(a => [{ click: tile(a.slot), settle: 100 }, { click: NEXT, settle: 200 }]),
       { wait: 700 },
-      { shot: 'sheet', focus: '.exam-parts__finish', tap: '.exam-parts__finish' },
+      { shot: 'sheet', focus: ['.exam-parts', '.exam-parts__finish'], tap: '.exam-parts__finish' },
       { click: '.exam-parts__finish', ready: '.exam-res' },
       { wait: 1200 },
-      { shot: 'result', focus: '.exam-res' },
+      { shot: 'result', focus: '.exam-res__parts, .exam-res' },
+      // A miss opened again, revealed: what was picked, what was right.
+      { scroll: '.exam-res__mhead', block: 'start' },
+      { shot: 'misses', focus: ['.exam-res__mhead', '.exam-res__misses'], tap: '.exam-miss >> nth=0' },
+      { click: '.exam-miss >> nth=0', settle: 800 },
+      { scroll: '.exam-review-row__detail', block: 'center' },
+      { shot: 'miss-open', focus: '.exam-review-row__detail' },
     ],
     beats: [
       { say: { en: 'Sit a mock JLPT.', fr: 'Passe un JLPT blanc.' }, parts: [{ shot: 'gate', hold: 2.0, tap: 1.5 }] },
-      { say: { en: 'Vocabulary, grammar, reading, listening.', fr: 'Vocabulaire, grammaire, lecture, écoute.' }, parts: [{ shot: 'station', hold: 2.0, tap: 1.5 }] },
+      { say: { en: 'Vocabulary, grammar, reading, listening.', fr: 'Vocabulaire, grammaire, lecture, écoute.' }, parts: [{ shot: 'station', hold: 2.0, cam: 'read', enter: 'push' }, { shot: 'station-go', hold: 1.0, tap: 0.6 }] },
       { say: { en: 'In the exam’s own format, on a clock.', fr: 'Au format de l’examen, chronométré.' }, parts: [
-        { shot: 'cover', hold: 1.6 },
-        { shot: 'q0', hold: 1.3, tap: 0.95 }, { shot: 'q0-picked', hold: 0.5 },
-        { shot: 'q1', hold: 1.1, tap: 0.75 }, { shot: 'q1-picked', hold: 0.5 },
+        { shot: 'cover', hold: 1.6, enter: 'push' },
+        { shot: 'q0', hold: 1.3, tap: 0.95, enter: 'push' }, { shot: 'q0-picked', hold: 0.5 },
+      ] },
+      { say: { en: 'Flag one to come back to.', fr: 'Marque-en une pour y revenir.' }, parts: [
+        { shot: 'q1', hold: 1.1, tap: 0.75 }, { shot: 'q1-picked', hold: 0.9, tap: 0.5 }, { shot: 'q1-flagged', hold: 0.9 },
         { shot: 'q2', hold: 1.1, tap: 0.75 }, { shot: 'q2-picked', hold: 0.6 },
       ] },
-      { say: { en: 'Hand it in for your score.', fr: 'Rends-le pour ton score.' }, parts: [{ shot: 'sheet', hold: 1.2, tap: 0.8 }, { shot: 'result', hold: 4.2 }] },
+      { say: { en: 'Hand it in for your score.', fr: 'Rends-le pour ton score.' }, parts: [{ shot: 'sheet', hold: 1.4, tap: 1.0, enter: 'rise' }, { shot: 'result', hold: 2.8, cam: 'read', enter: 'push' }] },
+      { say: { en: 'Then go back over every miss.', fr: 'Puis reviens sur chaque erreur.' }, parts: [{ shot: 'misses', hold: 1.2, tap: 0.8 }, { shot: 'miss-open', hold: 2.6, cam: 'read' }] },
     ],
     end: { en: 'Sit a mock JLPT on Tsuji.', fr: 'Passe un JLPT blanc sur Tsuji.' },
     title: { en: 'Could you pass a JLPT N5 vocabulary mock exam?', fr: 'Réussirais-tu un examen blanc de vocabulaire N5 ?' },
@@ -255,12 +376,14 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rvw__verdict' },
       { wait: 1200 },
       { shot: 'reviewed', focus: BODY },
+      ...lookSteps(3, { offer: 'てください' }),
     ],
     beats: [
       ...gateBeats({ en: 'Say it in Japanese.', fr: 'Dis-le en japonais.' }),
       { say: { en: 'The hard direction, on purpose.', fr: 'Dans le sens difficile, exprès.' }, parts: [{ shot: 'prompt', hold: 2.4 }] },
       { say: { en: 'Put it into Japanese yourself.', fr: 'À toi de le dire en japonais.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3 }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
-      { say: { en: 'A reference, and a read on yours.', fr: 'Une référence, et un avis sur la tienne.' }, parts: [{ shot: 'reviewed', hold: 5.6 }] },
+      { say: { en: 'A reference, and a read on yours.', fr: 'Une référence, et un avis sur la tienne.' }, parts: [{ shot: 'reviewed', hold: 3.0, cam: 'read' }, { shot: 'rate', hold: 0.9, tap: 0.5 }] },
+      ...lookBeats({ en: 'Then the reference, word by word.', fr: 'Puis la référence, mot à mot.' }),
     ],
     end: { en: 'Say it in Japanese on Tsuji.', fr: 'Dis-le en japonais sur Tsuji.' },
     title: { en: 'How would you say this in Japanese?', fr: 'Comment dirais-tu ça en japonais ?' },
@@ -271,7 +394,11 @@ export const FEATURES = {
       ...gateSteps('sakubun', '/practice/composition', d.level),
       { go: `/practice/composition/${d.level}`, ready: FIELD },
       { wait: 600 },
-      { shot: 'point', focus: '.prompt-card' },
+      // The point's lesson, opened from its card, then closed to write.
+      { shot: 'point', focus: '.prompt-card', tap: LESSON },
+      { click: LESSON, ready: '.gl-sheet .gl-body', settle: 900 },
+      { shot: 'lesson', focus: '.gl-sheet' },
+      { click: '.gl-sheet .dict-plate__actions .dict-plate__btn', settle: 700 },
       { type: FIELD, text: d.answer, shot: 'typing', chunk: 2, focus: '.stage__foot' },
       { shot: 'typed', focus: '.stage__foot', tap: SUBMIT },
       { click: SUBMIT, ready: '.rvw__verdict' },
@@ -280,9 +407,10 @@ export const FEATURES = {
     ],
     beats: [
       ...gateBeats({ en: 'Write your own Japanese.', fr: 'Écris ton propre japonais.' }),
-      { say: { en: 'You are shown a grammar point.', fr: 'On te donne un point de grammaire.' }, parts: [{ shot: 'point', hold: 2.4 }] },
-      { say: { en: 'Write a sentence that uses it.', fr: 'Écris une phrase qui l’utilise.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3 }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
-      { say: { en: 'A tutor reads it back to you.', fr: 'Un tuteur te la relit.' }, parts: [{ shot: 'reviewed', hold: 5.6 }] },
+      { say: { en: 'You are shown a grammar point.', fr: 'On te donne un point de grammaire.' }, parts: [{ shot: 'point', hold: 1.8, tap: 1.3 }] },
+      { say: { en: 'Its lesson, one tap away.', fr: 'Sa leçon, à portée de main.' }, parts: [{ shot: 'lesson', hold: 2.6, cam: 'read', enter: 'rise' }] },
+      { say: { en: 'Write a sentence that uses it.', fr: 'Écris une phrase qui l’utilise.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3, enter: 'sink' }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
+      { say: { en: 'A tutor reads it back to you.', fr: 'Un tuteur te la relit.' }, parts: [{ shot: 'reviewed', hold: 4.0, cam: 'read' }] },
     ],
     end: { en: 'Write your own Japanese on Tsuji.', fr: 'Écris ton propre japonais sur Tsuji.' },
     title: { en: 'Write one Japanese sentence with 〜たい', fr: 'Écris une phrase japonaise avec 〜たい' },
@@ -299,12 +427,14 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rating-bar' },
       { wait: 900 },
       { shot: 'checked', focus: '.prompt-card' },
+      ...lookSteps(3, { typed: d.asked }),
     ],
     beats: [
       ...gateBeats({ en: 'Train your ear.', fr: 'Entraîne ton oreille.' }),
       { say: { en: 'Hear a line. Twice, no more.', fr: 'Une phrase, deux écoutes. Pas plus.' }, parts: [{ shot: 'listen', hold: 0.8, tap: 0.6, voice: true }, { seq: 'playing', by: 'at', hold: 0.5 }] },
       { say: { en: 'Write what you hear, in rōmaji.', fr: 'Écris en rōmaji ce que tu entends.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3 }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
-      { say: { en: 'Every slip marked.', fr: 'Chaque erreur relevée.' }, parts: [{ shot: 'checked', hold: 4.2 }] },
+      { say: { en: 'Every slip marked.', fr: 'Chaque erreur relevée.' }, parts: [{ shot: 'checked', hold: 2.8 }, { shot: 'rate', hold: 0.9, tap: 0.5 }] },
+      ...lookBeats({ en: 'Then the line, word by word.', fr: 'Puis la phrase, mot à mot.' }, { typed: true, ask: { en: 'Ask what you missed.', fr: 'Demande ce qui t’a échappé.' } }),
     ],
     end: { en: 'Train your ear on Tsuji.', fr: 'Entraîne ton oreille sur Tsuji.' },
     title: { en: 'Japanese dictation: can you write what you hear?', fr: 'Dictée en japonais : sauras-tu écrire ce que tu entends ?' },
@@ -342,64 +472,123 @@ export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', handle = '
 export const featureSteps = (plan, seconds = 2.5) => FEATURES[plan.id].steps({ ...plan.data, seconds })
 
 // ── Where things stand ────────────────────────────────────────
-/** The video's frame: the screen full-bleed and its scale, the slip at the
- *  foot of the safe box at its tallest (two lines of its caption), and the
- *  rows of the screen the feed hides above the box (`headRows`) and the
- *  rows that show above the slip (`safeRows`), from the screen's head. */
+/** The video's frame: the screen full-bleed at its scale, the slip at
+ *  the foot of the safe box at its tallest (two lines of its caption),
+ *  and the view: where what a part is about stands, between the feed's
+ *  head (the safe box's top) and the slip, `yc` its middle. */
 export function layoutOf(fit = 'tiktok') {
   const fmt = formatOf('story', fit)
   const fr = frame(fmt)
   const s = fmt.w / SHOT.w
   const slipH = 2 * SLIP.pad + SLIP.sizes[0] * (0.82 + SLIP.lh + 0.3)
-  return { fmt, fr, x: 0, top: 0, w: fmt.w, h: fmt.h, s, rows: fmt.h / s, slipH, headRows: fr.y / s, safeRows: (fr.bottom - slipH - SP[4]) / s }
+  const view = { top: fr.y, bottom: fr.bottom - slipH - SP[4] }
+  return { fmt, fr, w: fmt.w, h: fmt.h, s, slipH, view, yc: (view.top + view.bottom) / 2 }
 }
 const union = boxes => {
   const bs = boxes.filter(Boolean)
   if (!bs.length) return null
+  const x = Math.min(...bs.map(b => b.x ?? 0))
   const y = Math.min(...bs.map(b => b.y))
-  return { y, h: Math.max(...bs.map(b => b.y + b.h)) - y }
+  return { x, y, w: Math.max(...bs.map(b => (b.x ?? 0) + (b.w ?? SHOT.w))) - x, h: Math.max(...bs.map(b => b.y + b.h)) - y }
 }
-/** How far down the shot the screen shows: the screen as the phone shows
- *  it where what the part is about (its focus, what it taps) stands
- *  between the feed's head and the slip; else moved the least that brings
- *  it there, its top where it is taller than that, and never so far that
- *  the finger taps out of sight. Moved down (below 0) the screen's head
- *  goes on up in its own colour; moved up past its foot (a button at the
- *  foot of the screen, above the slip) its foot goes on down. */
-export function cropFor(focus, L, tap = null) {
-  if (!focus) return 0
-  const fitIn = (off, box) => {
-    if (box.y + box.h + 48 > off + L.safeRows) off = box.y + box.h + 48 - L.safeRows
-    if (box.y - 24 < off + L.headRows) off = box.y - 24 - L.headRows
-    return off
+
+// ── The camera (plan 273) ─────────────────────────────────────
+// The app is filmed as a camera films a phone held still: it stays where
+// it is until a part gives it something else to look at, then goes there
+// in one eased move, and every move has a point: to frame what the part
+// is about (coming in on it where it is small, the whole screen where it
+// is not), to bring the finger's target in before the finger comes, to
+// read a text down to its last line at a reader's pace, or to step back
+// and show what a tap changed. A camera is the point of the shot at the
+// middle of the view (`cx`, `cy`, in the shot's pixels down the page: a
+// shot stands at its own scroll on it, so the app scrolling between two
+// shots is the camera going down the page) and its zoom (`z`, 1 the
+// screen's width across the video's).
+const CAM = { zMax: 1.6, side: 36, edge: 28, read: 520, readMax: 3.2, wait: 0.35, linger: 0.6 }
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x))
+/** Where the camera stands to show `box` (on the page, a shot scrolled
+ *  `sy` down it): `kind` 'auto' frames it whole, as close as it fits
+ *  (never past zMax, never under the screen's width), 'wide' at the
+ *  screen's width, 'read' as wide as it is and from its top, a number at
+ *  that zoom; `tap`, the finger's target, is always in view. */
+export function camFor(box, L, { kind = 'auto', tap = null, sy = 0 } = {}) {
+  const viewW = L.w - 2 * CAM.side
+  const viewH = L.view.bottom - L.view.top - 2 * CAM.edge
+  if (!box) return settleCam({ cx: SHOT.w / 2, cy: sy + L.yc / L.s, z: 1 }, L, sy)
+  // Across, the box and its finger's target both in view; down, the box (the target brought in after).
+  const across = tap ? union([box, tap]) : box
+  const fitZ = Math.min(viewW / (across.w * L.s), kind === 'read' ? Infinity : viewH / (box.h * L.s))
+  const z = clamp(typeof kind === 'number' ? kind : kind === 'wide' ? 1 : fitZ, 1, CAM.zMax)
+  const half = viewH / 2 / (L.s * z)
+  let cy = box.h <= 2 * half ? box.y + box.h / 2 : box.y + half
+  if (tap) {
+    if (tap.y + tap.h > cy + half) cy = tap.y + tap.h - half
+    if (tap.y < cy - half) cy = tap.y + half
   }
-  let off = fitIn(0, focus)
-  if (tap) off = fitIn(off, tap)
-  return Math.max(-L.headRows, Math.min(mostOf(L), off))
+  return settleCam({ cx: across.x + across.w / 2, cy, z }, L, sy)
 }
-// The furthest the screen moves up: its foot just above the slip.
-const mostOf = L => SHOT.h + 48 - L.safeRows
-/** Where a focus taller than the box is read to: its foot above the slip. */
-export function scrollFor(focus, L) {
-  if (!focus) return 0
-  return Math.max(-L.headRows, Math.min(mostOf(L), focus.y + focus.h + 48 - L.safeRows))
+/** A camera kept on the shot (scrolled `sy` down the page): the screen
+ *  across the video's width, its head and foot never inside the view (its
+ *  own colour goes on beyond them, above the view and under it). */
+function settleCam(c, L, sy = 0) {
+  const k = L.s * c.z
+  const halfW = L.w / 2 / k
+  const cx = clamp(c.cx, halfW, SHOT.w - halfW)
+  const cy = clamp(c.cy, sy + (L.yc - L.view.top) / k, sy + SHOT.h - (L.view.bottom - L.yc) / k)
+  return { cx: +cx.toFixed(2), cy: +cy.toFixed(2), z: +c.z.toFixed(4) }
 }
-// Where a part leaves the screen: the foot of its scroll, or its crop.
-const offAfter = pt => pt.scroll ? pt.scroll.to : pt.crop
+/** Where reading `box` from its top ends: its last line above the slip. */
+function readTo(box, cam, L, sy = 0) {
+  const half = (L.view.bottom - L.view.top - 2 * CAM.edge) / 2 / (L.s * cam.z)
+  return settleCam({ ...cam, cy: Math.max(cam.cy, box.y + box.h - half) }, L, sy).cy
+}
+// A box of a shot, on the page: down by the shot's scroll.
+const onPage = (b, sy) => b && { ...b, y: b.y + sy }
+// The same box: a new state of what the part before showed, where it showed it.
+const same = (a, b) => Boolean(a && b) && ['x', 'y', 'w', 'h'].every(k => Math.abs(a[k] - b[k]) < 12)
+/** Whether `box` (on the page) is in the view, whole, through camera `c`. */
+function inView(box, c, L) {
+  const k = L.s * c.z
+  const x = L.w / 2 + (box.x - c.cx) * k
+  const y = L.yc + (box.y - c.cy) * k
+  return x >= CAM.side / 2 && x + box.w * k <= L.w - CAM.side / 2 && y >= L.view.top + CAM.edge / 2 && y + box.h * k <= L.view.bottom - CAM.edge / 2
+}
+/** How long the eye takes to go from one camera to the next: the way the
+ *  view travels on the video, in pixels, and the zoom's change. */
+function moveTime(a, b, L) {
+  const k = L.s * Math.max(a.z, b.z)
+  const d = Math.hypot((a.cx - b.cx) * k, (a.cy - b.cy) * k) + Math.abs(Math.log(a.z / b.z)) * 1600
+  return d < 2 ? 0 : clamp(0.42 + d / 2400, 0.5, 1.1)
+}
+const lerpCam = (a, b, k) => ({ cx: a.cx + (b.cx - a.cx) * k, cy: a.cy + (b.cy - a.cy) * k, z: a.z * (b.z / a.z) ** k })
+// The ways a screen comes in over another, each on its own camera: a page
+// across, from the right (push) or away to it (back); a sheet up from
+// below (rise) or down again (sink). [across, coming in]
+const SLIDES = { push: [true, true], back: [true, false], rise: [false, true], sink: [false, false] }
 
 // ── The timeline ──────────────────────────────────────────────
 /** Each beat timed from the shots recorded: its frames (a shot from a
- *  moment), its taps, and its parts, each where the screen stands while
- *  it shows (a crop, and a scroll down a part taller than the box); then
- *  the gate. `shots` is record.mjs's list; `voiceDur(cue)` how long the
- *  line lasts once voiced. */
+ *  moment), its taps, and its parts, each with where the camera goes for
+ *  it, how long it takes to get there, and the text it reads down where
+ *  there is one taller than the view; then the gate. `shots` is
+ *  record.mjs's list; `voiceDur(cue)` how long the line lasts once voiced.
+ *  A part's `cam` asks for a framing (camFor's kinds), its `enter`
+ *  'push' for a new screen sliding in as the app's pages do, 'back' for
+ *  one left sliding away to show the screen under it, 'rise' for a sheet
+ *  coming up over the screen and 'sink' for it going;
+ *  its `anchor` puts what it shows where the part before it tapped (a
+ *  sentence opened in place, however the app scrolled to it). */
 export function featureTimeline(plan, shots, voiceDur = null) {
   const L = layoutOf(plan.fit)
   const byName = name => shots.map((s, i) => ({ ...s, idx: i })).filter(s => s.name === name).sort((a, b) => a.i - b.i)
+  const viewH = L.view.bottom - L.view.top - 2 * CAM.edge
   const segs = []
   const sfx = []
   const cues = []
   let at = 0
+  // Where the camera stands as the next part begins, and what it was on.
+  let cam = null
+  let was = null
   plan.beats.forEach((b, bi) => {
     const start = at
     const frames = []
@@ -408,15 +597,27 @@ export function featureTimeline(plan, shots, voiceDur = null) {
     let tapped = null
     // When the last line voiced in the beat ends: nothing taps or moves on over it.
     let carry = 0
-    for (const part of b.parts) {
+    b.parts.forEach(part => {
       const from = at
-      let focus = []
-      let tap = null
-      if (part.shot) {
-        const [s] = byName(part.shot)
-        if (!s) throw new Error(`no shot named ${part.shot}`)
-        frames.push({ t: at, shot: s.idx, change: true })
-        focus = [s.focus]
+      const shot = part.shot ? byName(part.shot)[0] : null
+      const seq = part.seq ? byName(part.seq) : null
+      if (part.shot && !shot) throw new Error(`no shot named ${part.shot}`)
+      if (part.seq && !seq.length) throw new Error(`no shots named ${part.seq}`)
+      const lastTap = taps.at(-1)
+      const sy = part.anchor && shot && lastTap ? lastTap.top - shot.focus.y : (shot || seq.at(-1)).scrollY || 0
+      const focus = onPage(shot ? shot.focus : union([seq[0].focus, seq.at(-1).focus]), sy)
+      const tapBox = shot && part.tap != null ? onPage(shot.tap, sy) : null
+      // The first part is cut to; a new screen slides in on its own camera;
+      // anything else is the camera moving from where it stands, and only
+      // where it has something new to show: what is in view stays put.
+      const enter = !cam ? 'cut' : part.enter || 'fade'
+      const keep = enter === 'fade' && !part.cam && focus && (inView(tapBox ? union([focus, tapBox]) : focus, cam, L) || (!tapBox && same(focus, was)))
+      const target = keep ? settleCam(cam, L, sy) : camFor(focus, L, { kind: part.cam || 'auto', tap: tapBox, sy })
+      const move = SLIDES[enter] ? MOTION.slide : enter === 'fade' ? moveTime(cam, target, L) : 0
+      const arrive = from + move
+      const pt = { start: +from.toFixed(3), enter, cam: target, move: +move.toFixed(3) }
+      if (shot) {
+        frames.push({ t: from, shot: shot.idx, sy, change: true })
         // A line heard as the screen comes (the other person's), then the tap once it is said.
         let heard = from
         if (part.hear != null) {
@@ -424,11 +625,11 @@ export function featureTimeline(plan, shots, voiceDur = null) {
           cues.push({ ...c, at: +(from + HEAR).toFixed(3) })
           heard = from + HEAR + lengthOf(c, voiceDur)
         }
-        let end = Math.max(from + part.hold, heard + 0.4, carry + 0.3)
-        if (part.tap != null && s.tap) {
-          tap = s.tap
-          tapped = Math.max(from + part.tap, part.hear != null ? heard + 0.35 : 0, carry + 0.2)
-          taps.push({ t: tapped, x: s.tap.x + s.tap.w / 2, y: s.tap.y + s.tap.h / 2 })
+        let end = Math.max(from + part.hold, arrive + CAM.linger, heard + 0.4, carry + 0.3)
+        if (tapBox) {
+          // The finger comes once the camera has brought its target in.
+          tapped = Math.max(from + part.tap, arrive + 0.25, part.hear != null ? heard + 0.35 : 0, carry + 0.2)
+          taps.push({ t: tapped, x: tapBox.x + tapBox.w / 2, y: tapBox.y + tapBox.h / 2, top: tapBox.y })
           sfx.push({ at: +tapped.toFixed(3), key: 'click', gain: 0.45 })
           end = Math.max(end, tapped + 0.35)
           // A line the tap says (the clip played, the reply picked): voiced from the tap,
@@ -440,37 +641,41 @@ export function featureTimeline(plan, shots, voiceDur = null) {
           }
         }
         at = end
-      } else if (part.seq) {
-        const seq = byName(part.seq)
-        if (!seq.length) throw new Error(`no shots named ${part.seq}`)
-        if (part.by === 'at') {
-          // As the clip played, from the tap that started it: each shot at the moment it was taken.
-          const t0 = tapped ?? at
-          seq.forEach(s => frames.push({ t: Math.max(at, t0 + s.at), shot: s.idx }))
-          at = Math.max(at, t0 + seq.at(-1).at, carry) + (part.hold ?? 0.4)
-        } else {
-          const t0 = at
-          // Typed: a key's press each, a shot every few keys.
-          let typed = 0
-          for (const s of seq) {
-            for (let c = typed; c < s.chars; c++) sfx.push({ at: +(t0 + c / KEYS_PER_SECOND).toFixed(3), key: 'click', gain: 0.16 })
-            typed = s.chars
-            frames.push({ t: t0 + s.chars / KEYS_PER_SECOND, shot: s.idx })
-          }
-          at = t0 + typed / KEYS_PER_SECOND + (part.hold ?? 0.3)
+      } else if (part.by === 'at') {
+        // As the clip played, from the tap that started it: each shot at the moment it was taken.
+        const t0 = tapped ?? at
+        seq.forEach(s => frames.push({ t: Math.max(at, t0 + s.at), shot: s.idx, sy: s.scrollY || 0 }))
+        at = Math.max(at, arrive, t0 + seq.at(-1).at, carry) + (part.hold ?? 0.4)
+      } else {
+        // Typed once the camera is on the field: a key's press each, a shot every few keys.
+        const t0 = arrive
+        frames.push({ t: from, shot: seq[0].idx, sy: seq[0].scrollY || 0, change: true })
+        let typed = 0
+        for (const s of seq) {
+          for (let c = typed; c < s.chars; c++) sfx.push({ at: +(t0 + c / KEYS_PER_SECOND).toFixed(3), key: 'click', gain: 0.16 })
+          typed = s.chars
+          frames.push({ t: t0 + s.chars / KEYS_PER_SECOND, shot: s.idx, sy: s.scrollY || 0 })
         }
-        focus = [seq[0].focus, seq.at(-1).focus]
+        at = t0 + typed / KEYS_PER_SECOND + (part.hold ?? 0.3)
       }
-      const box = union([...focus, tap])
-      const pt = { start: +from.toFixed(3), crop: cropFor(box, L, tap) }
-      // A screen taller than the box is read down to its foot, slowly, as a learner
-      // scrolls it, once the finger is done with it.
-      const to = scrollFor(box, L)
-      const go = from + MOTION.pan + SCROLL.wait
-      const until = at - SCROLL.rest
-      if (!tap && to - pt.crop > 24 && until - go > 0.8) pt.scroll = { to, at: +go.toFixed(3), until: +until.toFixed(3) }
+      // A text taller than the view is read down to its last line, at a
+      // skimming pace (the eye shown it goes on, not made to read it all),
+      // once the camera is on it and no finger waits; a clip playing (the
+      // roll) moves by itself and is not read over.
+      if (!tapBox && focus && (part.cam === 'read' || (shot && !keep && focus.h * L.s * target.z > viewH))) {
+        const to = readTo(focus, target, L, sy)
+        const dist = (to - target.cy) * L.s * target.z
+        if (dist > 12) {
+          const go = arrive + CAM.wait
+          const dur = clamp(dist / CAM.read, 0.8, CAM.readMax)
+          pt.read = { to: +to.toFixed(2), at: +go.toFixed(3), dur: +dur.toFixed(3) }
+          at = Math.max(at, go + dur + CAM.linger)
+        }
+      }
       parts.push(pt)
-    }
+      cam = pt.read ? { ...target, cy: pt.read.to } : target
+      was = focus
+    })
     // No line runs on into the next beat.
     at = Math.max(at, carry + 0.3)
     // A new state is laid down as the screen is: the card's own sound.
@@ -493,8 +698,19 @@ export function featurePreview(plan) {
 
 // ── A frame ───────────────────────────────────────────────────
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
-const smooth = x => { const c = Math.min(1, Math.max(0, x)); return c * c * (3 - 2 * c) }
-const step = (x, n = 15) => Math.round(x * n) / n
+// A camera's move eases in and out; a text is read at a pace that comes and goes as gently.
+const inOut = x => { const c = Math.min(1, Math.max(0, x)); return c < 0.5 ? 4 * c * c * c : 1 - (-2 * c + 2) ** 3 / 2 }
+const glide = x => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, x)))
+// Where a part leaves the camera: at the foot of the text it read, or where it framed.
+const endCam = q => (q.read ? { ...q.cam, cy: q.read.to } : q.cam)
+/** The camera at `t` in part `pt`: its move from where the part before it
+ *  left the camera, then down the text it reads. */
+function camOf(pt, before, t) {
+  let cam = pt.cam
+  if (pt.enter === 'fade' && pt.move > 0 && before) cam = lerpCam(endCam(before), pt.cam, inOut((t - pt.start) / pt.move))
+  if (pt.read && t > pt.read.at) cam = { ...cam, cy: pt.cam.cy + (pt.read.to - pt.cam.cy) * glide((t - pt.read.at) / pt.read.dur) }
+  return cam
+}
 
 /** The gate the video ends on, made once per plan, format and print. */
 const gates = new WeakMap()
@@ -517,52 +733,91 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
   if (sg.kind === 'end') {
     const u = t - sg.start
     gateOf(plan, print).draw(ctx, u)
+    // The app dissolves into the gate.
+    const k = inOut(u / MOTION.out)
+    if (k < 1 && si > 0) {
+      ctx.save()
+      ctx.globalAlpha = 1 - k
+      drawFeature(ctx, plan, tl, sg.start - 1e-3, imgs, print)
+      ctx.restore()
+    }
     return `end|${Math.round(u * FEATURE_FPS)}`
   }
   const u = t - sg.start
   const paper = palette('paper')
-  // The screen moves to what the part shows.
+  // Where the camera is.
   let pi = 0
   for (let i = 0; i < sg.parts.length; i++) if (sg.parts[i].start <= t + 1e-6) pi = i
   const pt = sg.parts[pi]
-  const before = pi > 0 ? sg.parts[pi - 1] : si > 0 && tl.segs[si - 1].kind === 'beat' ? tl.segs[si - 1].parts.at(-1) : pt
-  const prev = offAfter(before)
-  const kp = step(ease((t - pt.start) / MOTION.pan), 30)
-  let off = prev + (pt.crop - prev) * kp
-  if (pt.scroll && t > pt.scroll.at) off = pt.crop + (pt.scroll.to - pt.crop) * smooth((t - pt.scroll.at) / (pt.scroll.until - pt.scroll.at))
+  const before = pi > 0 ? sg.parts[pi - 1] : si > 0 && tl.segs[si - 1].kind === 'beat' ? tl.segs[si - 1].parts.at(-1) : null
+  const cam = camOf(pt, before, t)
+  const k = L.s * cam.z
   // The shot showing, and the one before it while a new state comes in.
   let fi = 0
   for (let i = 0; i < sg.frames.length; i++) if (sg.frames[i].t <= t + 1e-6) fi = i
   const cur = sg.frames[fi]
   const last = fi > 0 ? sg.frames[fi - 1] : si > 0 && tl.segs[si - 1].frames ? tl.segs[si - 1].frames.at(-1) : null
-  const kf = cur.change && last ? step(ease((t - cur.t) / MOTION.fade)) : 1
-  // The screen fills the frame, as a phone shows it.
   ctx.fillStyle = paper.bg
   ctx.fillRect(0, 0, L.w, L.h)
-  const shotAt = (img, a) => {
+  // A shot through a camera, standing at its own scroll on the page; its
+  // head goes on up in its own colour, its foot on down.
+  const view = (f, c, a = 1, dx = 0, dy = 0) => {
+    const img = imgs[f.shot]
     if (!img || a <= 0) return
+    const kk = L.s * c.z
+    const ox = L.w / 2 - c.cx * kk + dx
+    const oy = L.yc - (c.cy - (f.sy || 0)) * kk + dy
     ctx.save()
     ctx.globalAlpha *= a
-    // Moved down, the screen's head goes on up in its own colour; moved
-    // up past its foot, its foot goes on down.
-    if (off < 0) ctx.drawImage(img, 0, 0, SHOT.w, 1, L.x, L.top, L.w, -off * L.s)
-    const r0 = Math.max(0, off)
-    const r1 = Math.min(SHOT.h, off + L.rows)
-    ctx.drawImage(img, 0, r0, SHOT.w, r1 - r0, L.x, L.top + (r0 - off) * L.s, L.w, (r1 - r0) * L.s)
-    const foot = L.top + (r1 - off) * L.s
-    if (foot < L.top + L.h) ctx.drawImage(img, 0, SHOT.h - 1, SHOT.w, 1, L.x, foot, L.w, L.top + L.h - foot)
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    if (oy > 0) ctx.drawImage(img, 0, 0, SHOT.w, 1, ox, 0, SHOT.w * kk, oy)
+    ctx.drawImage(img, ox, oy, SHOT.w * kk, SHOT.h * kk)
+    const foot = oy + SHOT.h * kk
+    if (foot < L.h) ctx.drawImage(img, 0, SHOT.h - 1, SHOT.w, 1, ox, foot, SHOT.w * kk, L.h - foot)
     ctx.restore()
   }
-  if (kf < 1) shotAt(imgs[last.shot], 1)
-  shotAt(imgs[cur.shot], kf)
+  const into = t - pt.start
+  let kf = 1
+  let slid = 1
+  if (SLIDES[pt.enter] && last && into < MOTION.slide && cur.t <= pt.start + 1e-6) {
+    slid = inOut(into / MOTION.slide)
+    const was = before ? endCam(before) : cam
+    const [across, coming] = SLIDES[pt.enter]
+    const [under, underCam, over, overCam, k0] = coming ? [last, was, cur, cam, slid] : [cur, cam, last, was, 1 - slid]
+    if (across) {
+      // A new screen slides in from the right as the app's pages do, over
+      // the one it leaves, which goes a third of the way left and darkens;
+      // one left slides away to the right, the screen under it coming back.
+      view(under, underCam, 1, -0.3 * L.w * k0)
+      ctx.fillStyle = `rgba(20, 16, 12, ${(0.25 * k0).toFixed(3)})`
+      ctx.fillRect(0, 0, L.w, L.h)
+      ctx.save()
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.35)'
+      ctx.shadowBlur = 48
+      ctx.shadowOffsetX = -10
+      view(over, overCam, 1, L.w * (1 - k0))
+      ctx.restore()
+    } else {
+      // A sheet comes up over the screen it stands on, its own shade with
+      // it (the shot draws it), and goes down again.
+      view(under, underCam, 1)
+      view(over, overCam, k0, 0, 0.12 * L.h * (1 - k0))
+    }
+  } else {
+    // A state changes in a cross-fade, through the same camera.
+    kf = cur.change && last ? ease((t - cur.t) / MOTION.fade) : 1
+    if (kf < 1) view(last, cam, 1)
+    view(cur, cam, kf)
+  }
   // A finger: shown before the tap, pressed on it, its ring after.
   let tapKey = ''
   for (const tp of sg.taps) {
     const d = t - tp.t
     if (d < -MOTION.finger || d > MOTION.ring) continue
-    const cx = L.x + tp.x * L.s
-    const cy = L.top + (tp.y - off) * L.s
-    const show = d < 0 ? step(ease(1 + d / MOTION.finger)) : step(1 - d / MOTION.ring)
+    const cx = L.w / 2 + (tp.x - cam.cx) * k
+    const cy = L.yc + (tp.y - cam.cy) * k
+    const show = d < 0 ? ease(1 + d / MOTION.finger) : 1 - d / MOTION.ring
     const r = d < 0 ? 38 : 34
     ctx.fillStyle = `rgba(255,255,255,${(0.5 * show).toFixed(3)})`
     ctx.beginPath()
@@ -572,20 +827,20 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
     ctx.lineWidth = 3
     ctx.stroke()
     if (d >= 0) {
-      const k = step(d / MOTION.ring)
-      ctx.strokeStyle = `rgba(255,255,255,${(0.7 * (1 - k)).toFixed(3)})`
+      const kr = ease(d / MOTION.ring)
+      ctx.strokeStyle = `rgba(255,255,255,${(0.7 * (1 - kr)).toFixed(3)})`
       ctx.lineWidth = 6
       ctx.beginPath()
-      ctx.arc(cx, cy, 34 + 46 * k, 0, Math.PI * 2)
+      ctx.arc(cx, cy, 34 + 46 * kr, 0, Math.PI * 2)
       ctx.stroke()
     }
-    tapKey += `${show.toFixed(2)}|`
+    tapKey += `${show.toFixed(3)}|`
   }
   // The caption, on its slip: in with the first beat, its words new at each.
-  const ks = si === 0 ? step(ease(u / MOTION.caption)) : 1
-  const kc = step(ease(u / MOTION.caption))
+  const ks = si === 0 ? ease(u / MOTION.caption) : 1
+  const kc = ease(u / MOTION.caption)
   drawSlip(ctx, plan, L, sg.say, ks, kc)
-  return `${si}|${fi}|${kc}|${Math.round(off)}|${kf}|${tapKey}`
+  return `${si}|${fi}|${kc.toFixed(3)}|${cam.cx.toFixed(1)}|${cam.cy.toFixed(1)}|${cam.z.toFixed(4)}|${kf.toFixed(3)}|${slid.toFixed(3)}|${tapKey}`
 }
 
 /** Each caption set as its slip sets it, and the slip's height: as tall

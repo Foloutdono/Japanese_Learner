@@ -1,14 +1,23 @@
 {
-  "_": "Plan 270: what each practice feature's video does in the app. The sentences are the banks' own; an answer is what the learner types, a slip a beginner makes; a reply is the tutor's answer as its model returns it (routes/translation, routes/composition), run through study/tutor_review as the route runs it. scripts/carousel_bank.py builds bank/promo.json from this.",
+  "_": "Plan 270: what each practice feature's video does in the app. The sentences are the banks' own; an answer is what the learner types, a slip a beginner makes; a reply is the tutor's answer as its model returns it (routes/translation, routes/composition), run through study/tutor_review as the route runs it. scripts/carousel_bank.py builds bank/promo.json from this. Since plan 273 a feature's `ask` is the answer to the one question its video asks (POST /api/ask), offered by the app or, where `asked` is set, typed, written as routes/ask's prompt asks: three short sentences at most, the answer first, the Japanese in 「」 with the reading of a word in kanji after it, as in 「花（はな）」.",
   "reading": {
     "level": "N5",
     "phrase": "七時に学校へ行きます。",
-    "answer": "shichiji ni gakkou e ikimasu"
+    "answer": "shichiji ni gakkou e ikimasu",
+    "ask": {
+      "en": "Here 「に」 marks the time: 「七時に（しちじに）」 is \"at seven.\" A clock time or a date takes 「に」, as in 「三時に（さんじに）」. Words like 「今日（きょう）」 or 「毎日（まいにち）」 take none.",
+      "fr": "Ici, 「に」 marque l’heure : 「七時に（しちじに）」, « à sept heures ». Une heure ou une date prend 「に」, comme 「三時に（さんじに）」. Des mots comme 「今日（きょう）」 ou 「毎日（まいにち）」 n’en prennent pas."
+    }
   },
   "comprehension": {
     "level": "N5",
     "seed": "n5-01",
-    "wrong": 4
+    "wrong": 4,
+    "sentence": 6,
+    "ask": {
+      "en": "In the seventh sentence: the writer eats lunch with a friend in 「学校の食どう（がっこうのしょくどう）」, the school cafeteria. The library, 「としょかん」, comes in the next sentence, as where the writer studies in the afternoon.",
+      "fr": "Dans la septième phrase : l’auteur déjeune avec un ami à 「学校の食どう（がっこうのしょくどう）」, la cantine de l’école. La bibliothèque, 「としょかん」, vient dans la phrase suivante : c’est là qu’il étudie l’après-midi."
+    }
   },
   "translation": {
     "level": "N5",
@@ -47,12 +56,24 @@
         "grammar_used": true,
         "better": "この本を読んでください。"
       }
+    },
+    "ask": {
+      "en": "「〜てください」 politely asks someone to do something: the verb's て-form, then 「ください」. For 「読む（よむ）」 the て-form is 「読んで（よんで）」, so the sentence says \"Please read this book.\"",
+      "fr": "「〜てください」 demande poliment à quelqu’un de faire quelque chose : la forme en て du verbe, puis 「ください」. Pour 「読む（よむ）」, cette forme est 「読んで（よんで）」 : la phrase dit « Lisez ce livre, s’il vous plaît »."
     }
   },
   "dictation": {
     "level": "N5",
     "line": "駅の前で友だちに会います。",
-    "answer": "eki no mae de tomodachi ga aimasu"
+    "answer": "eki no mae de tomodachi ga aimasu",
+    "asked": {
+      "en": "Why に and not が?",
+      "fr": "Pourquoi に et pas が ?"
+    },
+    "ask": {
+      "en": "「に」 marks the person you meet: 「友だちに会います（ともだちにあいます）」 is \"I meet a friend.\" With 「が」, 「友だちが会います（ともだちがあいます）」 makes the friend the one who meets someone, without saying whom.",
+      "fr": "「に」 marque la personne qu’on retrouve : 「友だちに会います（ともだちにあいます）」, « je retrouve un ami ». Avec 「が」, 「友だちが会います（ともだちがあいます）」 fait de l’ami celui qui retrouve quelqu’un, sans dire qui."
+    }
   },
   "composition": {
     "level": "N5",

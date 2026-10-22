@@ -23,7 +23,7 @@ import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
-import { APP as FEATURE_APP, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, cropFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
+import { APP as FEATURE_APP, FEATURE_FPS, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, camFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
 
@@ -2919,7 +2919,7 @@ describe('the practice features, recorded in the app (plan 270)', () => {
       expect(tl.segs.at(-1).kind, at).toBe('end')
       // A short: long enough to show the exercise, never past a Short's minute.
       expect(tl.seconds, at).toBeGreaterThan(14)
-      expect(tl.seconds, at).toBeLessThan(45)
+      expect(tl.seconds, at).toBeLessThan(60)
       // Each line the video says is said once, and never two at once.
       const voiced = plan.beats.flatMap(b => b.parts.flatMap(p => [p.hear, p.voice].filter(v => v != null)))
       expect(tl.cues.length, at).toBe(voiced.length)
@@ -2934,28 +2934,93 @@ describe('the practice features, recorded in the app (plan 270)', () => {
     })
   })
 
-  it('keeps what a part shows, and where the finger taps, between the feed’s head and the slip (plan 272)', () => {
+  it('frames what a part shows, and where the finger taps, between the feed’s head and the slip (plans 272, 273)', () => {
     for (const fit of ['tiktok', 'instagram']) {
       const L = layoutOf(fit)
-      const fits = (box, off) => box.y >= off + L.headRows - 1 && box.y + box.h <= off + L.safeRows + 1
-      // The screen fills the frame; the slip stands at the foot of the safe box.
-      expect([L.x, L.top, L.w, L.h]).toEqual([0, 0, L.fmt.w, L.fmt.h])
-      expect(L.fr.bottom - L.slipH).toBeGreaterThan(L.fr.y + 600)
-      // What fits is shown whole, on the screen as the phone shows it where it can be.
-      expect(fits(FOCUS, cropFor(FOCUS, L))).toBe(true)
-      expect(cropFor({ x: 40, y: 600, w: 1000, h: 400 }, L)).toBe(0)
-      const low = { x: 40, y: 1950, w: 1000, h: 120 }
-      expect(fits(low, cropFor(low, L))).toBe(true)
-      // A button at the very foot of the screen is brought above the slip.
-      const foot = { x: 40, y: SHOT.h - 122, w: 1000, h: 110 }
-      expect(fits(foot, cropFor(foot, L))).toBe(true)
-      // A tap is never out of sight, however tall the rest; else the top of the tall.
-      const tall = { x: 40, y: 200, w: 1000, h: 1900 }
-      const tap = { x: 40, y: 2000, w: 300, h: 110 }
-      expect(fits(tap, cropFor(tall, L, tap))).toBe(true)
-      expect(cropFor(tall, L)).toBe(tall.y - 24 - L.headRows)
-      expect(cropFor(tall, L)).toBeGreaterThanOrEqual(-L.headRows)
+      // Where a box of the page stands on the video, through a camera.
+      const on = (box, c) => {
+        const k = L.s * c.z
+        return { x: L.w / 2 + (box.x - c.cx) * k, y: L.yc + (box.y - c.cy) * k, w: box.w * k, h: box.h * k }
+      }
+      const fits = (box, c) => {
+        const b = on(box, c)
+        return b.x >= -1 && b.x + b.w <= L.w + 1 && b.y >= L.view.top - 1 && b.y + b.h <= L.view.bottom + 1
+      }
+      // Never a hole beside or above the screen: its sides beyond the video's, its head and foot beyond the view.
+      const covers = (c, sy = 0) => {
+        const s = on({ x: 0, y: sy, w: SHOT.w, h: SHOT.h }, c)
+        return s.x <= 0.5 && s.x + s.w >= L.w - 0.5 && s.y <= L.view.top + 0.5 && s.y + s.h >= L.view.bottom - 0.5
+      }
+      // The screen fills the frame at its width; the view stands between the feed's head and the slip.
+      expect(L.w).toBe(L.fmt.w)
+      expect(L.s * SHOT.w).toBe(L.fmt.w)
+      expect(L.view.top).toBe(L.fr.y)
+      expect(L.view.bottom).toBeLessThan(L.fr.bottom - L.slipH)
+      expect(L.view.bottom - L.view.top).toBeGreaterThan(600)
+      // What a part is about is shown whole, and come in on where it is small.
+      const small = camFor(FOCUS, L)
+      expect(fits(FOCUS, small)).toBe(true)
+      expect(small.z).toBeGreaterThan(1)
+      expect(small.z).toBeLessThanOrEqual(1.6)
+      expect(covers(small)).toBe(true)
+      // 'wide' keeps the screen's width; a number is the zoom asked.
+      expect(camFor(FOCUS, L, { kind: 'wide' }).z).toBe(1)
+      expect(camFor(FOCUS, L, { kind: 1.2 }).z).toBe(1.2)
+      // At the screen's foot, a box is still above the slip, the screen's foot never inside the view.
+      const foot = { x: 40, y: SHOT.h - 122, w: 1520, h: 110 }
+      expect(fits(foot, camFor(foot, L))).toBe(true)
+      expect(covers(camFor(foot, L))).toBe(true)
+      // A shot scrolled down the page is framed where it stands on it.
+      const down = { ...FOCUS, y: FOCUS.y + 3000 }
+      expect(fits(down, camFor(down, L, { sy: 3000 }))).toBe(true)
+      expect(covers(camFor(down, L, { sy: 3000 }), 3000)).toBe(true)
+      // A tap is never out of sight, however tall the rest; else the tall is framed from its top.
+      const tall = { x: 40, y: 200, w: 1520, h: 3000 }
+      const tap = { x: 120, y: 3000, w: 300, h: 110 }
+      expect(fits(tap, camFor(tall, L, { tap }))).toBe(true)
+      const top = on(tall, camFor(tall, L))
+      expect(top.y).toBeGreaterThanOrEqual(L.view.top - 1)
+      expect(top.y).toBeLessThan(L.view.top + 60)
     }
+  })
+
+  it('moves the camera only in eased, unbroken moves, a new screen sliding in (plan 273)', () => {
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const L = layoutOf(plan.fit)
+      const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+      const beats = tl.segs.filter(x => x.kind === 'beat')
+      const parts = beats.flatMap(sg => sg.parts)
+      expect(parts[0].enter, at).toBe('cut')
+      for (const p of parts.slice(1)) expect(['fade', 'push', 'back', 'rise', 'sink'], at).toContain(p.enter)
+      // A move takes between half a second and a little over one; a read, no more than its cap.
+      for (const p of parts) {
+        if (p.enter === 'fade' && p.move > 0) {
+          expect(p.move, at).toBeGreaterThanOrEqual(0.5)
+          expect(p.move, at).toBeLessThanOrEqual(1.1)
+        }
+        if (p.read) expect(p.read.dur, at).toBeLessThanOrEqual(3.2)
+      }
+      // Frame to frame, the camera never jumps: a cut only where a new screen slides in over the last.
+      const camAt = t => {
+        const { ctx } = stubContext()
+        const [, , , cx, cy, z] = drawFeature(ctx, plan, tl, t, []).split('|').map(Number)
+        return { cx, cy, z }
+      }
+      const slides = parts.filter(p => p.enter !== 'fade').map(p => p.start)
+      const end = tl.segs.at(-1).start
+      let was = camAt(0)
+      for (let f = 1; f / FEATURE_FPS < end; f++) {
+        const t = f / FEATURE_FPS
+        const c = camAt(t)
+        if (!slides.some(s => s > t - 1 / FEATURE_FPS - 1e-6 && s <= t + 1e-6)) {
+          const k = L.s * Math.max(c.z, was.z)
+          expect(Math.hypot(c.cx - was.cx, c.cy - was.cy) * k, `${at} at ${t.toFixed(2)}`).toBeLessThan(90)
+          expect(Math.abs(Math.log(c.z / was.z)), `${at} at ${t.toFixed(2)}`).toBeLessThan(0.08)
+        }
+        was = c
+      }
+    })
   })
 
   it('ends on the stories’ gate, on the print of its hour (plan 271)', () => {

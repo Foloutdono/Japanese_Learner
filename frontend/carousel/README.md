@@ -682,12 +682,19 @@ drawn to look like the app. **The app is recorded as it runs**
 (`long/record.mjs`):
 
 - Vite serves `frontend/` in the render's own process.
-- A phone-sized browser (400 CSS px at 2.7, so a shot is 1080 × 2322)
-  signs in as a learner who has boarded, on the free plan.
+- A phone-sized browser (400 CSS px at 4 since plan 273, so a shot is
+  1600 × 3440, sharp under the camera's zoom) signs in as a learner who
+  has boarded, on the free plan.
 - Each step of the feature's script is done as a learner does it: the
   gate's plate tapped, the level, the run, the answer typed or picked.
-- A shot is taken where the video needs one. The box of what it shows
-  and the box of what a finger taps are read off the page.
+  A `scroll` step brings an element into view as a thumb would.
+- A shot is taken where the video needs one. The box of what it shows,
+  the box of what a finger taps and how far the page is scrolled are
+  read off the page.
+- A clip that moves by itself (comprehension's roll, plan 273) is filmed
+  frame by frame (`play` with `step`): the page's animations are held
+  once it is tapped and stepped 1/30 s at a time, a shot at each, so the
+  text glides at the shot's full size however long a shot takes.
 
 **Its API answers are the backend's own.** `bank/promo.json`, written by
 `python -m scripts.carousel_bank --only promo.json`, is what each route
@@ -702,17 +709,34 @@ content:
 | 書取 | a line of the dictation bank | `dictation.measure` |
 | 模試 | the catalogue's first seed paper per exam id | `score_attempt` |
 | 会話 | a 会話 scene | `conversation.scenario_payload` |
+| 作文's lesson | the point | `lesson_payload`, `tour_payload`, as `GET /api/grammar/point` serves them |
 
 The boot is the profile, the free plan's credits from
 `credits._summary_of`, and Today, so no boarding or guide stands over the
 screen. Only a model's words are written by hand: the tutor's raw replies
-for translation and composition (`content/promo.json`, with each
-feature's sentence, the answer typed and the slips the video makes).
+for translation and composition, and since plan 273 the answer Ask gives
+to the one question a video asks (`ask`), written as `routes/ask`'s
+prompt asks: three short sentences at most, the answer first, a word in
+kanji quoted with its reading after it, 「花（はな）」. They are in
+`content/promo.json`, with each feature's sentence, the answer typed,
+the slips the video makes and a question it types rather than taps
+(`asked`).
 `backend/tests/test_carousel_bank.py` holds the file to what `promo()`
 writes. It also checks that each exercise ends as its script says: the
 reading right, the dictation one slip short, the comprehension one
 question wrong, the exam's slips its own and the conversation's picks
 the right replies.
+
+**What each shows (plan 273).** Past the exercise, the parts of a
+feature a learner would not find on a first run:
+
+| Feature | After the answer |
+| --- | --- |
+| 読書, 翻訳, 書取 | the rating, the sentence's breakdown read down, then Ask: an offered question tapped (reading's point, translation's 〜てください), or dictation's own typed, "Why に and not が?", the slip it just made |
+| 理解 | before the questions, the clock and the roll, sped up and stopped; after, the score, the miss opened, Ask's "Where does the text say it?", then the whole text's breakdown on the missed sentence |
+| 作文 | before writing, the point's lesson, its sheet rising over the card and going |
+| 模試 | the station's four papers, a question flagged, the answer sheet, the score by part, a miss opened again |
+| 会話 | the line's translation shown, a wrong reply struck with why, the scene's score |
 
 **A video is beats** (`feature.js`, `FEATURES[id]`):
 
@@ -731,18 +755,35 @@ the right replies.
   to the locales). It carries no figure, no price and no promise.
 - **Parts.** Each beat is made of parts: a shot held, or a typed or
   played run of them.
-- **The screen's position.** The screen stands as the phone shows it
-  where what a part shows fits between the feed's head (the safe box's
-  top) and the slip, and otherwise moves the least that brings its focus
-  and its tap there (`cropFor`). Moved down, the screen's head goes on
-  up in its own colour; moved up past its foot (a button at the foot of
-  the screen, brought above the slip), its foot goes on down. A part
-  taller than the room keeps its top, and is scrolled slowly down to its
-  foot where the part is held long enough, the way a learner reads a
-  review: hold such a part long enough to be read (the comprehension
-  passage holds 3.4 s for it). What cannot fit beside its question (a
-  fourth choice under a tall question) goes under the slip for that
-  part; a tap never does.
+- **The camera (plan 273).** The app is filmed as a camera films a phone
+  held still: it stays where it is until a part gives it something new
+  to look at, then goes there in one eased move, and every move has a
+  point. A camera is a point of the page and a zoom (`camFor`): a shot
+  stands at its own scroll on the page, so the app scrolling between two
+  shots is the camera going down it. Its kinds:
+  - `auto` (the default) frames what the part shows whole, between the
+    feed's head and the slip, coming in on it where it is small (up to
+    ×1.6), the finger's target always in view;
+  - `wide` keeps the screen's width; a number is that zoom;
+  - `read` frames a text from its top and reads it down to its last
+    line at a skimming pace (520 px a second, 3.2 s at most), once the
+    camera is there; a part taller than the view is read without asking.
+
+  What is already in view keeps the camera still, and so does a new
+  state of the box the part before showed (a choice picked). A move takes
+  0.5 to 1.1 s by the way it goes (`moveTime`), eased in and out, and a
+  finger waits for the camera to arrive. The screen never leaves a hole:
+  its sides stay beyond the video's, its head and foot beyond the view,
+  where its own colour goes on. `src/carousel.test.js` holds every move
+  to a small step from frame to frame.
+- **Transitions.** A part's `enter`: by default the new state cross-fades
+  through the camera as it moves; `push` slides a new page in from the
+  right over the one it leaves, which goes a third of the way left and
+  darkens, and `back` slides it away again; `rise` brings a sheet up over
+  the screen and `sink` takes it down. `anchor` puts what a part shows
+  where the part before tapped, so a sentence opened in an accordion
+  stays under the finger however the page moved to it. The video's end
+  dissolves into the gate.
 - **Taps.** A finger shows before each tap and a ring follows it. A
   `click` sound plays, and a softer one on each typed key.
 - **Voices.** The engine's voices speak where the app speaks: the clip
@@ -770,7 +811,7 @@ The studio lists the seven under 実践 with each video's page, posts and
 command. Its preview is the gate the video ends on: the rest is recorded
 where the command runs. When a screen of the app changes, its script's
 selectors are what to check (`plate`, `stop`, `.stage__foot`, the run's
-own classes). A step that finds nothing to tap says so in the render's
+own classes, Ask's offers by their words). A step that finds nothing to tap says so in the render's
 log, and an API the app asks for and the bank does not answer gets `{}`,
 which is logged too.
 
@@ -1297,7 +1338,7 @@ what its video did before.
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
 | `challenge.js` | the reading challenges: a comprehension text in a credits scroll or read along, its timing on the voice, each frame, its page (plan 247) |
 | `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a feature video recorded and made (plan 270) |
-| `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing on the shots, each frame, their page (plan 270) |
+| `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing and camera on the shots (plan 273), each frame, their page (plan 270) |
 | `long/record.mjs` | the app served by Vite and run in a phone-sized browser, its API answered from `promo.json`, a feature's steps done and shot (plan 270) |
 | `tune.js` | what the Tune panel can set: each value's default, range, step and label, read by every module through `tuned()` (plan 248) |
 | `studio.js` | the page: the pickers, the previews, the export |
