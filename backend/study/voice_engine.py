@@ -63,7 +63,7 @@ logger = logging.getLogger(__name__)
 # replay a clip in the old voice. Bump it whenever DEFAULT_VOICES, the
 # engine or the synthesis settings change what a clip sounds like;
 # tests/test_kana_audio.py fails if the two sides disagree.
-VOICE_REV = "nemo2"
+VOICE_REV = "nemo3"
 
 # One name per slot, in slot order (study/exam_tts.py maps speaker
 # labels onto slots). The owner's choice, by ear, from the audition
@@ -465,8 +465,30 @@ def say(text: str, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGU
     query = _json(_request("POST", "/audio_query", params={"text": text, "speaker": style}), "/audio_query")
     if not isinstance(query, dict):
         raise TTSFailed("the voice engine returned an audio query that is not an object")
+    _read_leading_ha(text, query)
     query.update(speedScale=speed, outputSamplingRate=sample_rate, outputStereo=False, **extra)
     return _synthesize(query, style, sample_rate)
+
+
+# A word or a line cannot begin with the particle は / へ, but Open JTalk,
+# given no context, takes a leading は for one and says "wa" (はち ->
+# "wachi", 八) and へ for "e" (へや -> "eya"). The engine's own query has
+# the moras it will synthesize, so the first one is put back to ha / he.
+_LEADING_PARTICLE_MORAS = {"は": ("ワ", "ハ", "w"), "へ": ("エ", "ヘ", None)}
+
+
+def _read_leading_ha(text: str, query: dict) -> None:
+    first = text.strip()[:1]
+    if first not in _LEADING_PARTICLE_MORAS:
+        return
+    heard, spoken, consonant = _LEADING_PARTICLE_MORAS[first]
+    phrases = query.get("accent_phrases") or []
+    moras = phrases[0].get("moras") if phrases else None
+    if not moras or moras[0].get("text") != heard or moras[0].get("consonant") != consonant:
+        return
+    moras[0].update(text=spoken, consonant="h")
+    if not moras[0].get("consonant_length"):
+        moras[0]["consonant_length"] = 0.07
 
 
 def say_kana(notation: str, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGUE_RATE,
