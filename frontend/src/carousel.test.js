@@ -2251,16 +2251,21 @@ describe('the reply videos (plan 249)', () => {
   const files = { 'conversation.json': bank('conversation.json') }
   const parts = (lv, format = 'long') => longItems(files, lv, 'en', format).filter(x => x.kind === 'reply')
   const planFor = (lv, id, format = 'long', lang = 'en') => { const { kind, opts } = longPick(id, lv, lang, format); return longPlan(kind, files, opts) }
+  // A font's size and a text's width in ems, worked out once: a
+  // question's layout measures the same words at every size it tries.
+  const sizes = new Map()
+  const sizeOf = f => { if (!sizes.has(f)) sizes.set(f, parseFloat(/([\d.]+)px/.exec(f)?.[1] || '10')); return sizes.get(f) }
+  const ems = new Map()
+  const emsOf = t => { if (!ems.has(t)) ems.set(t, [...t].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0)); return ems.get(t) }
   // Every text drawn, where: its baseline and its size.
   const placed = () => {
     const at = []
     const state = { font: '10px sans-serif' }
-    const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
-    const widthOf = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
+    const size = () => sizeOf(state.font)
     let dy = 0
     const stack = []
     const methods = {
-      measureText: t => ({ width: widthOf(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: widthOf(t) }),
+      measureText: t => { const z = size(); const w = emsOf(String(t)) * z; return { width: w, actualBoundingBoxAscent: z * 0.72, actualBoundingBoxDescent: z * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: w } },
       fillText: (t, x, y) => at.push({ t: String(t), y: y + dy, z: size() }),
       save: () => stack.push(dy), restore: () => { dy = stack.pop() ?? 0 }, translate: (x, y) => { dy += y },
       createLinearGradient: () => ({ addColorStop() {} }), createRadialGradient: () => ({ addColorStop() {} }),
@@ -2426,6 +2431,9 @@ describe('the reply videos (plan 249)', () => {
                 for (const u of [sg.marks.show + 1, sg.marks.reveal + 0.8, sg.dur - 0.05]) {
                   const { ctx, at } = placed()
                   drawLong(ctx, pl, tl, sg.start + u)
+                  // The frame holds its own bubbles: their line while you choose, yours once said.
+                  const means = u < sg.marks.why ? sg.data.them.tr : sg.data.reply
+                  expect(at.some(x => x.t.length > 1 && means.startsWith(x.t)), `${lv} ${it.id} ${format} ${lang} ${sg.data.id}#${sg.data.k} ${u.toFixed(1)}`).toBe(true)
                   for (const x of at.filter(x => x.y > b.head && x.y < b.foot)) {
                     const where = `${lv} ${it.id} ${format} ${lang} ${sg.data.id}#${sg.data.k} ${u.toFixed(1)} ${x.t}`
                     expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(b.top - 1)

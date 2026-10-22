@@ -1941,7 +1941,7 @@ function bubbleOf(ctx, p, rows, { tr = null, who = null, w, z, min = Math.round(
   const lw = Math.max(...L.lines.map(l => L.lineW(l)))
   return {
     w, box, h: box + (tail ? RIM : 0), cut: !!T?.cut || L.lines.length > lines,
-    draw: (x, y, { dim = false } = {}) => {
+    draw: (ctx, x, y, { dim = false } = {}) => {
       ctx.save()
       if (dim) ctx.globalAlpha *= 0.45
       ctx.fillStyle = me ? mix(OK, p.card, 0.12) : p.surface
@@ -1988,7 +1988,7 @@ function draftsOf(ctx, p, choices, { w, z, min = Math.round(z * 0.7), romaji, ti
   return {
     h: rows.reduce((a, x) => a + x.h, 0) + gap * (rows.length - 1),
     cut: rows.some(x => x.cut),
-    draw: (x, y, right, shown, sent) => {
+    draw: (ctx, x, y, right, shown, sent) => {
       let at = y
       rows.forEach((row, j) => {
         const v = shown(j)
@@ -2044,7 +2044,7 @@ function noteOf(ctx, p, head, body, { w, sizes }) {
   const h = pad * 2 + kh + SP[2] + paragraphH(b, 1.22)
   return {
     h, cut: !!b.cut,
-    draw: (x, y) => {
+    draw: (ctx, x, y) => {
       sheet(ctx, p, x, y, w, h)
       ctx.fillStyle = mix(p.gold, p.card, 0.18)
       ctx.beginPath()
@@ -2077,6 +2077,15 @@ function threadLayout(ctx, p, S, it, g, peek) {
   if (!byKey) threadLayouts.set(it, (byKey = {}))
   const key = `${g.id}|${peek}`
   if (byKey[key]) return byKey[key]
+  // The search asks for the same part more than once (the foot under the
+  // band moves none of them), and a question's two layouts, under the
+  // last answer's foot or not, for most of the same: each is laid out once.
+  const parts = (byKey.parts ||= new Map())
+  const once = (part, o, make) => {
+    const k = `${g.id}|${part}|${JSON.stringify(o)}`
+    if (!parts.has(k)) parts.set(k, make(o))
+    return parts.get(k)
+  }
   const room = g.bottom - g.band
   const askH = g.stack ? 0 : FS.caption * 1.3 + SP[4]
   // Japanese is never set under READABLE: the furigana keep their least
@@ -2106,8 +2115,8 @@ function threadLayout(ctx, p, S, it, g, peek) {
     const gap = tall ? SP[3] : lean ? SP[4] : SP[5]
     // Lean, what it means takes a fourth line, a size down, before anything is cut.
     const trSizes = (lean ? [FS.body, FS.sm, FS.caption] : [FS.body, FS.sm]).map(z => z * Math.max(0.85, s))
-    const them = bubbleOf(ctx, p, it.them.rows, { tr: it.them.tr, who: lean ? null : it.who, w: tw, z: zThem * s, min: READABLE, romaji: it.romaji && plain < 2, script: plain >= 2 ? 'kanji' : 'furigana', pad, trSizes, trLines: tall ? 5 : lean ? 4 : 3, lines: plain ? 4 : 3 })
-    const drafts = draftsOf(ctx, p, it.choices, { w: dw, z: zMine * s, min: READABLE, romaji: it.romaji && !bare, tight: lean, script: plain ? 'kanji' : 'furigana', lines: plain ? 3 : 2 })
+    const them = once('them', { tr: it.them.tr, who: lean ? null : it.who, w: tw, z: zThem * s, min: READABLE, romaji: it.romaji && plain < 2, script: plain >= 2 ? 'kanji' : 'furigana', pad, trSizes, trLines: tall ? 5 : lean ? 4 : 3, lines: plain ? 4 : 3 }, o => bubbleOf(ctx, p, it.them.rows, o))
+    const drafts = once('drafts', { w: dw, z: zMine * s, min: READABLE, romaji: it.romaji && !bare, tight: lean, script: plain ? 'kanji' : 'furigana', lines: plain ? 3 : 2 }, o => draftsOf(ctx, p, it.choices, o))
     const total = g.stack ? top + gap + them.h + gap + drafts.h : Math.max(SP[6] + them.h, top + gap + askH + drafts.h)
     q = { s, foot, them, drafts, total, w, tw, rx, dw, top, gap, plain }
     if (total <= room && !them.cut && !drafts.cut) break
@@ -2126,11 +2135,11 @@ function threadLayout(ctx, p, S, it, g, peek) {
     const ns = [FS.body, FS.sm, FS.caption].map(z => z * Math.max(0.85, s))
     const pad = tall ? SP[2] : lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
     const trSizes = (lean ? [FS.body, FS.sm, FS.caption] : [FS.body, FS.sm]).map(z => z * Math.max(0.85, s))
-    const you = bubbleOf(ctx, p, it.choices[it.right], { tr: it.reply, who: S.you, w: lw * 0.9, z: zThem * s, min: READABLE, romaji: it.romaji && !plain, script: plain ? 'kanji' : 'furigana', me: true, pad, trSizes, trLines: tall ? 5 : lean ? 4 : 3, lines: plain ? 4 : 3 })
-    const note = noteOf(ctx, p, S.whyOne, it.why, { w: g.stack ? q.w : q.dw, sizes: ns })
+    const you = once('you', { tr: it.reply, who: S.you, w: lw * 0.9, z: zThem * s, min: READABLE, romaji: it.romaji && !plain, script: plain ? 'kanji' : 'furigana', me: true, pad, trSizes, trLines: tall ? 5 : lean ? 4 : 3, lines: plain ? 4 : 3 }, o => bubbleOf(ctx, p, it.choices[it.right], o))
+    const note = once('note', { w: g.stack ? q.w : q.dw, sizes: ns }, o => noteOf(ctx, p, S.whyOne, it.why, o))
     let fits = false
     for (const back of [true, false]) {
-      const b = back ? bubbleOf(ctx, p, it.them.rows, { w: lw * 0.8, z: FS.body * Math.max(0.85, s), min: READABLE, script: plain ? 'kanji' : 'furigana', pad: SP[4], lines: 2 }) : null
+      const b = back ? once('back', { w: lw * 0.8, z: FS.body * Math.max(0.85, s), min: READABLE, script: plain ? 'kanji' : 'furigana', pad: SP[4], lines: 2 }, o => bubbleOf(ctx, p, it.them.rows, o)) : null
       const thread = SP[5] + (b ? b.h + SP[4] : 0) + you.h
       const total = g.stack ? thread + SP[5] + note.h : Math.max(thread, SP[6] + note.h)
       a = { back: b, you, note, total }
@@ -2147,7 +2156,7 @@ function peekOf(ctx, p, prev, g) {
   const { w, dw } = columns(g)
   const pw = g.stack ? w * 0.6 : dw * 0.75
   const b = bubbleOf(ctx, p, prev.choices[prev.right], { w: pw, z: FS.body, script: 'kanji', me: true, tail: false, lines: 1, foot: true })
-  return { draw: () => b.draw(g.right - pw, g.band + PEEK - b.box, { dim: true }) }
+  return { draw: () => b.draw(ctx, g.right - pw, g.band + PEEK - b.box, { dim: true }) }
 }
 
 // ── A pictured scene (plan 269): each turn as a game's screen ────
@@ -2225,7 +2234,7 @@ function menuOf(ctx, pal, choices, { w, maxH, romaji }) {
   const paper = palette('paper')
   return {
     h: total(),
-    draw: (x, y, right, shown, sent) => {
+    draw: (ctx, x, y, right, shown, sent) => {
       let at = y
       rows.forEach((row, j) => {
         const v = shown(j)
@@ -2289,8 +2298,8 @@ function novelLayout(ctx, S, it, g) {
 /** The answer: your line in the box, why over it. */
 function novelAnswer(ctx, S, L, g) {
   const y = g.bottom - L.you.box
-  L.note.draw(g.x, y - SP[7] - L.note.h)
-  L.you.draw(g.x, y)
+  L.note.draw(ctx, g.x, y - SP[7] - L.note.h)
+  L.you.draw(ctx, g.x, y)
   plateAt(ctx, L.pal, S.you, OK, g.right - SP[5], y, true)
 }
 /** A frame of a pictured turn: the picture, then the box, the menu or the answer over it. */
@@ -2326,14 +2335,14 @@ function drawNovel(ctx, S, it, prev, m, u, k, fade, g, im) {
   if (vA < 1) {
     fade(k(m.lineAt, 0.35) * (1 - vA), () => {
       const y = g.bottom - L.them.box
-      L.them.draw(g.x, y)
+      L.them.draw(ctx, g.x, y)
       plateAt(ctx, pal, it.who, pal.line.kaiwa, g.x + SP[5], y)
     })
   }
   if (vA < 1 && u >= m.choicesAt) {
     ctx.save()
     ctx.globalAlpha *= 1 - vA
-    L.menu.draw(g.x, L.menuY, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), u >= m.reveal ? k(m.reveal, 0.35) : 0)
+    L.menu.draw(ctx, g.x, L.menuY, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), u >= m.reveal ? k(m.reveal, 0.35) : 0)
     ctx.restore()
   }
   if (vA > 0) fade(vA, () => novelAnswer(ctx, S, L, g))
@@ -2387,13 +2396,13 @@ function drawThread(ctx, plan, tl, t, g) {
         const vA = k(m.why, 0.4)
         const y0 = g.band + Ly.top + Ly.gap
         // Their line, until the answer takes its place.
-        if (vA < 1) fade(k(m.lineAt, 0.35) * (1 - vA), () => Ly.them.draw(g.x, g.stack ? y0 : g.band + SP[6]))
+        if (vA < 1) fade(k(m.lineAt, 0.35) * (1 - vA), () => Ly.them.draw(ctx, g.x, g.stack ? y0 : g.band + SP[6]))
         if (vA < 1 && u >= m.choicesAt) {
           ctx.save()
           ctx.globalAlpha *= 1 - vA
           const dy = g.stack ? y0 + Ly.them.h + Ly.gap : y0 + Ly.askH
           if (!g.stack) fade(k(m.choicesAt, 0.3), () => capsAt(ctx, S.replyAsk, g.right, y0, p.gold, 'right'))
-          Ly.drafts.draw(Ly.rx, dy, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), revealed ? k(m.reveal, 0.35) : 0)
+          Ly.drafts.draw(ctx, Ly.rx, dy, it.right, j => k(m.choicesAt + 0.1 + j * 0.12, 0.3), revealed ? k(m.reveal, 0.35) : 0)
           ctx.restore()
         }
         if (vA > 0) {
@@ -2437,13 +2446,13 @@ function drawAnswer(ctx, g, Ly) {
   const a = Ly.a
   let y = g.band + SP[5]
   if (a.back) {
-    a.back.draw(g.x, y, { dim: true })
+    a.back.draw(ctx, g.x, y, { dim: true })
     y += a.back.h + SP[4]
   }
   const lw = g.stack ? Ly.w : Ly.tw
-  a.you.draw(g.x + lw * 0.1, y)
-  if (g.stack) a.note.draw(g.x, y + a.you.h + SP[5])
-  else a.note.draw(Ly.rx, g.band + SP[6])
+  a.you.draw(ctx, g.x + lw * 0.1, y)
+  if (g.stack) a.note.draw(ctx, g.x, y + a.you.h + SP[5])
+  else a.note.draw(ctx, Ly.rx, g.band + SP[6])
 }
 /** A scene's card: the chat's head, the place and who speaks to you. A
  *  short's one scene opens on the question it asks. */
