@@ -1,17 +1,20 @@
 # Store screenshots
 
-The eight App Store / Play Store images (Today, a grammar question, the
-dictionary, the practice stations, a mock exam, the guided kanji trace, the
-goal card, the breakdown), in French and English. A static tool outside `src/`,
-like `../carousel/`: none of it ships with the app.
+The eight store images (Today, a grammar fiche over a grammar question, the
+dictionary, the practice stations, a mock exam, the guided kanji trace with its
+readings' shares, flashcards with the goal card, the rolling comprehension
+text), in French and English. A static tool outside `src/`, like
+`../carousel/`: none of it ships with the app.
 
-Every screen is the real app, captured from a running dev stack, never drawn:
-`capture.mjs` takes them at an iPhone 16 Pro's 393×852 @3x with the notch's
-safe area injected, `compose.mjs` sets each in a phone under its headline, on
-its line's colour (the pigments of `DESIGN.md`), as 1290×2796 PNGs. A callout
-is a crop of another real capture. Words are in `copy.json`; every figure in
-them is the app's (7,964 words · 2,383 kanji · 545 grammar points; JMdict's
-200,000+ entries and KANJIDIC2's 13,108 characters in the dictionary).
+Every screen is the real app, captured from a running dev stack, never drawn.
+`capture.mjs` takes each at an Android-sized 393×740 @3x with a notch's safe
+area injected, plus the pieces a slide lifts or floats (cut exactly to their
+element, with their place in `rects.json`, so nothing is clipped);
+`compose.mjs` sets each in a phone under a big headline (`copy.json`, titles
+only) on its line's colour (the pigments of `DESIGN.md`), the lifted piece
+standing out of a dimmed screen, as **1080×1920 PNGs**: Google Play's 9:16
+phone screenshot (2:1 at most, 320–3840 px a side). Every figure in a title
+is the app's (JMdict's 200,000+ entries, KANJIDIC2's 13,108 characters).
 
 ```bash
 # 0. a dev stack with a learner who has a history (local database only)
@@ -22,11 +25,13 @@ python ../frontend/store/seed_demo.py && psql "$DATABASE_URL" -f ../frontend/sto
 cd ../frontend && npm run dev -- --port 5173
 # 1. capture (the language is the account's: PATCH /api/profile/learning {"uiLang":"en"})
 node store/capture.mjs fr main
-node store/capture.mjs fr kanji   # needs 学 new and every other kanji card not due
+# 学 new (no card_modes row, none in glyph_tours) and every other kanji card not due, then:
+node store/capture.mjs fr kanji
 # 2. compose -> store/out/<lang>/NN-name.png
 node store/compose.mjs            # or: node store/compose.mjs fr --only today,goal
 ```
 
+The kanji step marks 学's first tour done: delete its `glyph_tours` row to take the other language.
 `raw/`, `out/` and `.tmp/` are not tracked. `session.mjs` is the fake
 session the dev backend ignores (`DEV_USER_ID`); it never reaches a deployed
 instance.
