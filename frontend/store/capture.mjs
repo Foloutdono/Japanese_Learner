@@ -107,6 +107,20 @@ if (stage === 'main') {
   await piece('fiche', [0, t2[1] - 14, 393, use[1] - 16 - (t2[1] - 14)])
 }
 
+if (stage === 'today') {
+  // Pieces of Today for the slide's variants: the day's forecast and the four lines' counts.
+  p = await page()
+  await p.clock.install({ time: new Date(2026, 9, 22, 17, 20) })
+  await go('/today', 5500); await shot('today')
+  const eta = await box(p.locator('.tdy-dial__line')), keys = await box(p.locator('.tdy-key--lines'))
+  await piece('today_eta', union([eta, keys]), 6)
+  await piece('today_counts', keys, 8)
+  await piece('today_sun', await box(p.locator('.tdy-dial')))
+  await piece('today_depart', await box(p.locator('.btn-depart')), 4)
+  const d = await box(p.locator('.tdy-dial'))
+  await piece('today_dial', [24, d[1] - 34, 300, d[3] + 96])
+}
+
 if (stage === 'kanji') {
   // 6: a kanji met for the first time, traced stroke by stroke (初見), then its card turned,
   // the readings' shares marked.

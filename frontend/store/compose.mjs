@@ -13,7 +13,9 @@ const here = dirname(fileURLToPath(import.meta.url))
 const args = process.argv.slice(2)
 const onlyAt = args.indexOf('--only')
 const only = onlyAt >= 0 ? args[onlyAt + 1].split(',') : null
+const variants = args.includes('--variants')
 const langs = args.filter((a, i) => !a.startsWith('--') && (onlyAt < 0 || i !== onlyAt + 1))
+const list = () => (variants ? VARIANTS : SLIDES)
 const COPY = JSON.parse(readFileSync(join(here, 'copy.json'), 'utf8'))
 
 const W = 1080, H = 1920
@@ -52,6 +54,19 @@ const SLIDES = [
     decor: chevrons(968, 880) + chevrons(22, 880) },
 ]
 
+// Today's design options (node store/compose.mjs --variants): A lifts the day's window,
+// B zooms the print so the sun is big on its own, C leaves the screen whole and enlarges its
+// forecast line.
+const TODAY = { shot: 'today', bg: ['#2a3a78', '#0e1330'], mark: '今', bar: 'light' }
+const VARIANTS = [
+  { ...TODAY, id: 'today', file: '01-today-A', dim: 0.55,
+    lift: [{ piece: 'today_dial', s: 1.2 }, { piece: 'today_depart', s: 1.16, shape: 'btn' }] },
+  { ...TODAY, id: 'today', file: '01-today-B', dim: 0, vignette: true, zoom: { x: 197, y: 360, z: 1.25 },
+    lift: [{ piece: 'today_depart', s: 0.94, shape: 'btn' }] },
+  { ...TODAY, id: 'today', file: '01-today-C', dim: 0,
+    lift: [{ piece: 'today_eta', s: 1.5 }, { piece: 'today_depart', s: 1.16, shape: 'btn' }] },
+]
+
 const font = p => `file://${join(here, '..', 'node_modules', '@fontsource', p)}`
 const css = `
 @import url('${font('noto-serif-jp/900.css')}');
@@ -69,6 +84,7 @@ h1 em{font-style:normal;color:#ffe08f}
 .screen{position:relative;width:${SCREEN_W}px;height:${Math.round(VH * K)}px;border-radius:100px;overflow:hidden;background:#000}
 .screen img.s{display:block;width:100%;height:100%}
 .dim{position:absolute;inset:0;background:#0b0914}
+.vig{position:absolute;inset:0;background:linear-gradient(to bottom,#0b0e26 0,#0b0e26 9%,rgba(11,14,38,.0) 24%),linear-gradient(to top,rgba(8,6,24,.92) 0,rgba(8,6,24,.55) 18%,transparent 34%),radial-gradient(ellipse 62% 48% at 50% 40%,transparent 55%,rgba(8,6,24,.5) 100%)}
 .island{position:absolute;left:50%;top:${11 * K}px;width:${112 * K}px;height:${32 * K}px;margin-left:${-56 * K}px;border-radius:${16 * K}px;background:#000}
 .sb{position:absolute;top:${14 * K}px;height:${28 * K}px;display:flex;align-items:center;font:700 ${16 * K}px 'Space Grotesk',system-ui}
 .sb.l{left:${36 * K}px;width:${60 * K}px;justify-content:center}
@@ -102,8 +118,11 @@ function slideHtml(slide, lang) {
   const rects = JSON.parse(readFileSync(join(rawDir, 'rects.json'), 'utf8'))
   const lifts = (slide.lift || []).map(k => {
     const [x, y, w, h] = rects[k.piece]
-    let cw = w * K * (k.s || 1), ch = h * K * (k.s || 1)
-    let left = SX + (x + w / 2) * K - cw / 2, top = SY + (y + h / 2 + (k.dy || 0)) * K - ch / 2
+    const zm = slide.zoom
+    const zx = zm ? zm.x + (x + w / 2 - zm.x) * zm.z : x + w / 2, zy = zm ? zm.y + (y + h / 2 - zm.y) * zm.z : y + h / 2
+    const sc = (k.s || 1) * (zm ? zm.z : 1)
+    let cw = w * K * sc, ch = h * K * sc
+    let left = SX + zx * K - cw / 2, top = SY + (zy + (k.dy || 0)) * K - ch / 2
     if (k.at) { cw = k.at.width; ch = cw * h / w; left = k.at.left; top = k.at.top }
     const ghosts = k.trail ? [[-34, .3], [-68, .16]].map(([dy, o]) => `<img class="ghost" style="top:${dy}px;opacity:${o}" src="${raw(k.piece)}">`).join('') : ''
     return `<div class="piece ${k.shape || ''}" style="left:${left}px;top:${top}px;width:${cw}px;height:${ch}px;${k.rot ? `transform:rotate(${k.rot}deg)` : ''}"><img src="${raw(k.piece)}">${ghosts}</div>`
@@ -117,7 +136,8 @@ function slideHtml(slide, lang) {
 <div class="slide" style="background:linear-gradient(170deg,${slide.bg[0]},${slide.bg[1]})">
   <div class="mark">${slide.mark}</div><div class="shade"></div>
   <h1>${heading(c.h, c.hi)}</h1>
-  <div class="phone"><div class="screen"><img class="s" src="${raw(slide.shot)}">
+  <div class="phone"><div class="screen"><img class="s" src="${raw(slide.shot)}"${slide.zoom ? ` style="transform-origin:${slide.zoom.x * K}px ${slide.zoom.y * K}px;transform:scale(${slide.zoom.z})"` : ''}>
+    ${slide.vignette ? '<div class="vig"></div>' : ''}
     <div class="dim" style="opacity:${slide.dim}"></div>
     <div class="island"></div>
     <div class="sb l ${slide.bar}">9:41</div><div class="sb r ${slide.bar}">${statusIcons(slide.bar)}</div></div></div>
@@ -141,14 +161,14 @@ const page = await browser.newPage({ viewport: { width: W, height: H }, deviceSc
 for (const lang of langs.length ? langs : ['fr', 'en']) {
   const out = join(here, 'out', lang); mkdirSync(out, { recursive: true })
   const tmp = join(here, '.tmp'); mkdirSync(tmp, { recursive: true })
-  for (const [i, s] of SLIDES.entries()) {
+  for (const [i, s] of list().entries()) {
     if (only && !only.includes(s.id)) continue
-    const file = join(tmp, `${lang}-${s.id}.html`)
+    const file = join(tmp, `${lang}-${s.file || s.id}.html`)
     writeFileSync(file, slideHtml(s, lang))
     await page.goto('file://' + file)
     await page.waitForSelector('body[data-ready]', { timeout: 20000 })
     await page.waitForTimeout(400)
-    await page.screenshot({ path: join(out, `${String(i + 1).padStart(2, '0')}-${s.id}.png`) })
+    await page.screenshot({ path: join(out, `${s.file || `${String(i + 1).padStart(2, '0')}-${s.id}`}.png`) })
     console.log(lang, s.id)
   }
 }
