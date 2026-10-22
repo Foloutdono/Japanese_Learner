@@ -53,6 +53,8 @@ if (stage === 'main') {
   await go('/today', 5500); await shot('today')
   const d = await box(p.locator('.tdy-dial'))
   await piece('today_dial', [24, d[1] - 34, 300, d[3] + 96])
+  await piece('today_sun', await box(p.locator('.tdy-dial')))
+  await piece('today_depart', await box(p.locator('.btn-depart')), 4)
   await p.locator('.hud').first().click({ position: { x: 40, y: 80 } }); await p.waitForTimeout(2000)
   await piece('goal_card', await box(p.locator('.jcard')), 3)
   // 2: a grammar question.
@@ -70,9 +72,11 @@ if (stage === 'main') {
   // 5: a mock exam, the ★ ordering item lifted, and the paper's cover.
   await go('/practice/exam/n5-grammar-01', 3500)
   await p.getByRole('button', { name: L.start }).first().click(); await p.waitForTimeout(2500)
-  for (let k = 1; k < 11; k++) { await p.getByRole('button', { name: L.next }).first().click(); await p.waitForTimeout(300) }
+  for (let k = 1; k < 9; k++) { await p.getByRole('button', { name: L.next }).first().click(); await p.waitForTimeout(300) }
   await p.waitForTimeout(600); await shot('exam')
-  await piece('exam_page', await box(p.locator('.exam-page')), 3)
+  const pg = await box(p.locator('.exam-page'))
+  const ch = union(await Promise.all([0, 1, 2, 3].map(i => box(p.locator('.exam-dock button').nth(i)))))
+  await piece('exam_page', [4, pg[1] - 4, 385, ch[1] + ch[3] + 10 - (pg[1] - 4)])
   await go('/practice/exam/n5-vocab-01', 3500)
   await piece('exam_cover', await box(p.locator('.exam-cover')), 3)
   // 7: a vocab flashcard, answered side shown; the rating bar lifted.
@@ -83,8 +87,9 @@ if (stage === 'main') {
   await go('/practice/comprehension/N5', 5500)
   await p.locator('.roll-chip').click(); await p.waitForTimeout(700)
   await p.getByRole('button', { name: L.furi }).first().click().catch(() => {}); await p.waitForTimeout(2500); await shot('comp')
-  await piece('comp_ctl', await box(p.locator('.roll-ctl')), 8)
-  await piece('comp_card', await box(p.locator('.prompt-card--roll')), 0)
+  const cc = await box(p.locator('.prompt-card--roll')), cl = await box(p.locator('.roll-ctl'))
+  await piece('comp_ctl', cl, 8)
+  await piece('comp_text', [cc[0], cc[1], cc[2], cl[1] - 8 - cc[1]], 0)
   // The pieces that stand on a sheet are cut where the sheet is not pushed down by the injected inset.
   p = await page(false)
   await go('/dictionary', 3000)
@@ -121,7 +126,7 @@ if (stage === 'kanji') {
     for (const q of pts.slice(1)) { await p.mouse.move(...q, { steps: 2 }); await p.waitForTimeout(12) }
     await p.mouse.up(); await p.waitForTimeout(700)
   }
-  for (let s = 0; s < 4; s++) await stroke()
+  for (let s = 0; s < 6; s++) await stroke()
   await p.waitForTimeout(900); await shot('kanji_trace')
   await piece('kanji_board', await box(p.locator('.gt-board')), 10)
   // on through the tour to the card's own exercise

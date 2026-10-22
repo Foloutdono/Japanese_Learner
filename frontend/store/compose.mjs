@@ -29,25 +29,27 @@ const SX = (W - PHONE.w) / 2 + PHONE.bezel, SY = PHONE.top + PHONE.bezel // the 
 // pieces cut from this very screen (see capture.mjs) that stand out of the dim
 // at their own place, grown by `s`; `float` the pieces of other screens set
 // over it: `at` is canvas px (left, top, width), `rot` degrees.
+const chevrons = (left, top) => `<svg style="position:absolute;left:${left}px;top:${top}px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))" width="90" height="300" viewBox="0 0 90 300"><g fill="none" stroke="#ffe08f" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"><path d="M12 80 L45 36 L78 80"/><path d="M12 170 L45 126 L78 170" opacity=".65"/><path d="M12 260 L45 216 L78 260" opacity=".32"/></g></svg>`
 const SLIDES = [
-  { id: 'today', shot: 'today', bg: ['#2a3a78', '#0e1330'], mark: '今', bar: 'light', dim: 0.45,
-    lift: [{ piece: 'today_dial', s: 1.1 }] },
+  { id: 'today', shot: 'today', bg: ['#2a3a78', '#0e1330'], mark: '今', bar: 'light', dim: 0.55,
+    lift: [{ piece: 'today_sun', s: 1.44, dy: -50, shape: 'sun' }, { piece: 'today_depart', s: 1.16, shape: 'btn' }] },
   { id: 'grammar', shot: 'grammar', bg: ['#5f9248', '#2a4a20'], mark: '文', bar: 'dark', dim: 0.3,
-    float: [{ piece: 'fiche', at: { left: 330, top: 1150, width: 650 }, rot: 3 }] },
+    float: [{ piece: 'fiche', at: { left: 455, top: 1210, width: 590 }, rot: 3 }] },
   { id: 'dictionary', shot: 'dictionary', bg: ['#c28a22', '#6a440a'], mark: '辞', bar: 'light', dim: 0.3,
     float: [{ piece: 'dict_entry', at: { left: 330, top: 1170, width: 650 }, rot: 3 }] },
   { id: 'practice', shot: 'practice', bg: ['#2f8a89', '#154543'], mark: '練', bar: 'light', dim: 0.45,
-    lift: [{ piece: 'practice_plates', s: 1.1 }] },
+    lift: [{ piece: 'practice_plates', s: 1.22 }] },
   { id: 'exam', shot: 'exam', bg: ['#bd4a36', '#621f17'], mark: '試', bar: 'dark', dim: 0.4,
-    lift: [{ piece: 'exam_page', s: 1.12 }] },
-  { id: 'kanji', shot: 'kanji_trace', bg: ['#8571bb', '#3b2f6c'], mark: '漢', bar: 'dark', dim: 0.3,
-    lift: [{ piece: 'kanji_board', s: 1.06 }],
-    float: [{ piece: 'kanji_readings', at: { left: 370, top: 1260, width: 630 }, rot: 3 }] },
+    lift: [{ piece: 'exam_page', s: 1.1 }] },
+  { id: 'kanji', shot: 'kanji_trace', bg: ['#8571bb', '#3b2f6c'], mark: '漢', bar: 'dark', dim: 0.5,
+    lift: [{ piece: 'kanji_board', at: { left: 8, top: 930, width: 520 }, rot: -2 }],
+    float: [{ piece: 'kanji_readings', at: { left: 540, top: 960, width: 510 }, rot: 2 }] },
   { id: 'goal', shot: 'flash', bg: ['#4283b6', '#173f63'], mark: '標', bar: 'dark', dim: 0.3,
     lift: [{ piece: 'flash_rating', s: 1.12 }],
-    float: [{ piece: 'goal_card', at: { left: 140, top: 640, width: 800 }, rot: -2 }] },
-  { id: 'comprehension', shot: 'comp', bg: ['#a8651f', '#5c3209'], mark: '読', bar: 'dark', dim: 0.4,
-    lift: [{ piece: 'comp_card', s: 1.05 }, { piece: 'comp_ctl', s: 1.18 }] },
+    float: [{ piece: 'goal_card', at: { left: 56, top: 630, width: 940 }, rot: -2 }] },
+  { id: 'comprehension', shot: 'comp', bg: ['#a8651f', '#5c3209'], mark: '読', bar: 'dark', dim: 0.5,
+    lift: [{ piece: 'comp_text', s: 1.04, trail: true }, { piece: 'comp_ctl', at: { left: 80, top: 1700, width: 920 } }],
+    decor: chevrons(968, 880) + chevrons(22, 880) },
 ]
 
 const font = p => `file://${join(here, '..', 'node_modules', '@fontsource', p)}`
@@ -74,6 +76,10 @@ h1 em{font-style:normal;color:#ffe08f}
 .sb.light{color:#fff}.sb.dark{color:#1c1811}
 .piece{position:absolute;border-radius:30px;overflow:hidden;box-shadow:0 0 0 7px #ffe08f,0 0 0 18px rgba(255,224,143,.28),0 34px 80px rgba(0,0,0,.6)}
 .piece img{display:block;width:100%;height:100%}
+.piece img.ghost{position:absolute;left:0;width:100%;height:100%;mix-blend-mode:multiply;filter:url(#vb)}
+.piece{position:absolute}
+.piece.sun{border-radius:50%;box-shadow:0 0 0 6px rgba(255,246,205,.95),0 0 70px 30px rgba(255,228,140,.9),0 0 220px 110px rgba(255,190,80,.45)}
+.piece.btn{border-radius:999px;box-shadow:0 0 0 5px rgba(255,224,143,.95),0 0 60px 22px rgba(255,208,70,.85),0 30px 70px rgba(0,0,0,.55);filter:saturate(1.9) brightness(1.1)}
 .float{position:absolute;border-radius:34px;overflow:hidden;border:7px solid #fff;box-shadow:0 0 0 14px rgba(255,255,255,.22),0 40px 90px rgba(0,0,0,.6)}
 .float img{display:block;width:100%}
 `
@@ -96,9 +102,11 @@ function slideHtml(slide, lang) {
   const rects = JSON.parse(readFileSync(join(rawDir, 'rects.json'), 'utf8'))
   const lifts = (slide.lift || []).map(k => {
     const [x, y, w, h] = rects[k.piece]
-    const cw = w * K * k.s, ch = h * K * k.s
-    const cx = SX + (x + w / 2) * K, cy = SY + (y + h / 2) * K
-    return `<div class="piece" style="left:${cx - cw / 2}px;top:${cy - ch / 2}px;width:${cw}px;height:${ch}px"><img src="${raw(k.piece)}"></div>`
+    let cw = w * K * (k.s || 1), ch = h * K * (k.s || 1)
+    let left = SX + (x + w / 2) * K - cw / 2, top = SY + (y + h / 2 + (k.dy || 0)) * K - ch / 2
+    if (k.at) { cw = k.at.width; ch = cw * h / w; left = k.at.left; top = k.at.top }
+    const ghosts = k.trail ? [[-34, .3], [-68, .16]].map(([dy, o]) => `<img class="ghost" style="top:${dy}px;opacity:${o}" src="${raw(k.piece)}">`).join('') : ''
+    return `<div class="piece ${k.shape || ''}" style="left:${left}px;top:${top}px;width:${cw}px;height:${ch}px;${k.rot ? `transform:rotate(${k.rot}deg)` : ''}"><img src="${raw(k.piece)}">${ghosts}</div>`
   }).join('')
   const floats = (slide.float || []).map(k => {
     const [pw, ph] = pngSize(join(rawDir, k.piece + '.png'))
@@ -113,7 +121,8 @@ function slideHtml(slide, lang) {
     <div class="dim" style="opacity:${slide.dim}"></div>
     <div class="island"></div>
     <div class="sb l ${slide.bar}">9:41</div><div class="sb r ${slide.bar}">${statusIcons(slide.bar)}</div></div></div>
-  ${lifts}${floats}
+  <svg width="0" height="0" style="position:absolute"><filter id="vb" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="0 5"/></filter></svg>
+  ${lifts}${floats}${slide.decor || ''}
 </div>
 <script>
   // The headline at the largest size that keeps every line inside the margins.
