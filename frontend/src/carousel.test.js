@@ -2992,7 +2992,7 @@ describe('the practice features, recorded in the app (plan 270)', () => {
       const beats = tl.segs.filter(x => x.kind === 'beat')
       const parts = beats.flatMap(sg => sg.parts)
       expect(parts[0].enter, at).toBe('cut')
-      for (const p of parts.slice(1)) expect(['fade', 'push', 'back', 'rise', 'sink'], at).toContain(p.enter)
+      for (const p of parts.slice(1)) expect(['fade', 'dissolve', 'push', 'back', 'rise', 'sink'], at).toContain(p.enter)
       // A move takes between half a second and a little over one; a read, no more than its cap.
       for (const p of parts) {
         if (p.enter === 'fade' && p.move > 0) {
@@ -3021,6 +3021,19 @@ describe('the practice features, recorded in the app (plan 270)', () => {
         was = c
       }
     })
+  })
+
+  it('pans only over what a shot shows, and dissolves across what none does (plan 273)', () => {
+    const plan = featurePlan(B, 'comprehension', { lang: 'en' })
+    // The breakdown read near its foot, then a sentence far below it.
+    const shots = shotsOf(featureSteps(plan)).map(s => ({ ...s, scrollY: { breakdown: 3248, 'bd-pick': 7768, 'bd-open': 7768 }[s.name] ?? 0 }))
+    const parts = Object.fromEntries(featureTimeline(plan, shots).segs.filter(x => x.kind === 'beat').flatMap(sg => sg.parts.map((p, i) => [`${sg.beat}:${i}`, p])))
+    const last = plan.beats.length - 1
+    expect(parts[`${last}:2`].enter).toBe('dissolve')
+    expect(parts[`${last}:3`].enter).not.toBe('dissolve')
+    // Without the gap, the same move is a pan.
+    const flat = featureTimeline(plan, shotsOf(featureSteps(plan))).segs.filter(x => x.kind === 'beat').at(-1).parts
+    expect(flat[2].enter).toBe('fade')
   })
 
   it('ends on the stories’ gate, on the print of its hour (plan 271)', () => {

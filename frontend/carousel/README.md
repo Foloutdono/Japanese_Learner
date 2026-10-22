@@ -780,7 +780,9 @@ feature a learner would not find on a first run:
   through the camera as it moves; `push` slides a new page in from the
   right over the one it leaves, which goes a third of the way left and
   darkens, and `back` slides it away again; `rise` brings a sheet up over
-  the screen and `sink` takes it down. A tap that opens something in
+  the screen and `sink` takes it down. The camera pans only over what the
+  shot it goes to shows: from a part of the page it does not (a sentence
+  far down a long breakdown), it dissolves there instead. A tap that opens something in
   place (`click` with `keep`) scrolls the page by what it moved, so a
   sentence opened in an accordion stays under the finger. The video's
   end dissolves into the gate.

@@ -35,7 +35,7 @@ const SLIP = { pad: SP[4], sizes: [FS.title, FS.lead], lh: 1.12 }
 // screen slides in from the right as the app's pages do, and the app
 // dissolves into the gate at the end; a finger shows before its tap and
 // its ring after.
-const MOTION = { caption: 0.35, fade: 0.22, slide: 0.5, out: 0.5, finger: 0.35, ring: 0.5 }
+const MOTION = { caption: 0.35, fade: 0.22, slide: 0.5, dissolve: 0.45, out: 0.5, finger: 0.35, ring: 0.5 }
 // Typed as a quick hand types, a few keys a shot (record.mjs `chunk`).
 const KEYS_PER_SECOND = 13
 // A line heard as its screen comes: a breath after the screen.
@@ -547,6 +547,12 @@ function readTo(box, cam, L, sy = 0) {
 const onPage = (b, sy) => b && { ...b, y: b.y + sy }
 // The same box: a new state of what the part before showed, where it showed it.
 const same = (a, b) => Boolean(a && b) && ['x', 'y', 'w', 'h'].every(k => Math.abs(a[k] - b[k]) < 12)
+/** Whether camera `c`'s view lies on a shot standing `sy` down the page:
+ *  a pan from it there never shows past the shot's head or foot. */
+function onShot(c, L, sy) {
+  const k = L.s * c.z
+  return c.cy - (L.yc - L.view.top) / k >= sy - 1 && c.cy + (L.view.bottom - L.yc) / k <= sy + SHOT.h + 1
+}
 /** Whether `box` (on the page) is in the view, whole, through camera `c`. */
 function inView(box, c, L) {
   const k = L.s * c.z
@@ -576,7 +582,8 @@ const SLIDES = { push: [true, true], back: [true, false], rise: [false, true], s
  *  A part's `cam` asks for a framing (camFor's kinds), its `enter`
  *  'push' for a new screen sliding in as the app's pages do, 'back' for
  *  one left sliding away to show the screen under it, 'rise' for a sheet
- *  coming up over the screen and 'sink' for it going. */
+ *  coming up over the screen and 'sink' for it going. A move from a part
+ *  of the page the new shot does not show is a 'dissolve'. */
 export function featureTimeline(plan, shots, voiceDur = null) {
   const L = layoutOf(plan.fit)
   const byName = name => shots.map((s, i) => ({ ...s, idx: i })).filter(s => s.name === name).sort((a, b) => a.i - b.i)
@@ -608,10 +615,14 @@ export function featureTimeline(plan, shots, voiceDur = null) {
       // The first part is cut to; a new screen slides in on its own camera;
       // anything else is the camera moving from where it stands, and only
       // where it has something new to show: what is in view stays put.
-      const enter = !cam ? 'cut' : part.enter || 'fade'
+      let enter = !cam ? 'cut' : part.enter || 'fade'
       const keep = enter === 'fade' && !part.cam && focus && (inView(tapBox ? union([focus, tapBox]) : focus, cam, L) || (!tapBox && same(focus, was)))
       const target = keep ? settleCam(cam, L, sy) : camFor(focus, L, { kind: part.cam || 'auto', tap: tapBox, sy })
-      const move = SLIDES[enter] ? MOTION.slide : enter === 'fade' ? moveTime(cam, target, L) : 0
+      // A pan only over what the new shot shows: from a part of the page it
+      // does not (a sentence far down a long breakdown), the camera
+      // dissolves to where it goes instead.
+      if (enter === 'fade' && !keep && !onShot(cam, L, sy)) enter = 'dissolve'
+      const move = SLIDES[enter] ? MOTION.slide : enter === 'dissolve' ? MOTION.dissolve : enter === 'fade' ? moveTime(cam, target, L) : 0
       const arrive = from + move
       const pt = { start: +from.toFixed(3), enter, cam: target, move: +move.toFixed(3) }
       if (shot) {
@@ -804,6 +815,11 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
       view(under, underCam, 1)
       view(over, overCam, k0, 0, 0.12 * L.h * (1 - k0))
     }
+  } else if (pt.enter === 'dissolve' && last && into < pt.move && cur.t <= pt.start + 1e-6) {
+    // Each through its own camera: the page left, and the part of it come to.
+    kf = inOut(into / pt.move)
+    view(last, before ? endCam(before) : cam, 1)
+    view(cur, cam, kf)
   } else {
     // A state changes in a cross-fade, through the same camera.
     kf = cur.change && last ? ease((t - cur.t) / MOTION.fade) : 1
