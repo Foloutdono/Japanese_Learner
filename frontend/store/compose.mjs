@@ -33,8 +33,8 @@ const SX = (W - PHONE.w) / 2 + PHONE.bezel, SY = PHONE.top + PHONE.bezel // the 
 // over it: `at` is canvas px (left, top, width), `rot` degrees.
 const chevrons = (left, top) => `<svg style="position:absolute;left:${left}px;top:${top}px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))" width="90" height="300" viewBox="0 0 90 300"><g fill="none" stroke="#ffe08f" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"><path d="M12 80 L45 36 L78 80"/><path d="M12 170 L45 126 L78 170" opacity=".65"/><path d="M12 260 L45 216 L78 260" opacity=".32"/></g></svg>`
 const SLIDES = [
-  { id: 'today', shot: 'today', bg: ['#2a3a78', '#0e1330'], mark: '今', bar: 'light', dim: 0.55,
-    lift: [{ piece: 'today_sun', s: 1.44, dy: -50, shape: 'sun' }, { piece: 'today_depart', s: 1.16, shape: 'btn' }] },
+  { id: 'today', shot: 'today_big', bg: ['#2a3a78', '#0e1330'], mark: '今', bar: 'light', dim: 0, vignette: true,
+    zoom: { x: 197, y: 400, z: 1.16 }, lift: [{ piece: 'today_depart', s: 1.0, shape: 'btn' }] },
   { id: 'grammar', shot: 'grammar', bg: ['#5f9248', '#2a4a20'], mark: '文', bar: 'dark', dim: 0.3,
     float: [{ piece: 'fiche', at: { left: 455, top: 1210, width: 590 }, rot: 3 }] },
   { id: 'dictionary', shot: 'dictionary', bg: ['#c28a22', '#6a440a'], mark: '辞', bar: 'light', dim: 0.3,
@@ -61,8 +61,8 @@ const TODAY = { shot: 'today', bg: ['#2a3a78', '#0e1330'], mark: '今', bar: 'li
 const VARIANTS = [
   { ...TODAY, id: 'today', file: '01-today-A', dim: 0.55,
     lift: [{ piece: 'today_dial', s: 1.2 }, { piece: 'today_depart', s: 1.16, shape: 'btn' }] },
-  { ...TODAY, id: 'today', file: '01-today-B', dim: 0, vignette: true, zoom: { x: 197, y: 360, z: 1.25 },
-    lift: [{ piece: 'today_depart', s: 0.94, shape: 'btn' }] },
+  { ...TODAY, id: 'today', file: '01-today-B', shot: 'today_big', dim: 0, vignette: true, zoom: { x: 197, y: 400, z: 1.16 },
+    lift: [{ piece: 'today_depart', s: 1.0, shape: 'btn' }] },
   { ...TODAY, id: 'today', file: '01-today-C', dim: 0,
     lift: [{ piece: 'today_eta', s: 1.5 }, { piece: 'today_depart', s: 1.16, shape: 'btn' }] },
 ]
@@ -84,7 +84,7 @@ h1 em{font-style:normal;color:#ffe08f}
 .screen{position:relative;width:${SCREEN_W}px;height:${Math.round(VH * K)}px;border-radius:100px;overflow:hidden;background:#000}
 .screen img.s{display:block;width:100%;height:100%}
 .dim{position:absolute;inset:0;background:#0b0914}
-.vig{position:absolute;inset:0;background:linear-gradient(to bottom,#0b0e26 0,#0b0e26 9%,rgba(11,14,38,.0) 24%),linear-gradient(to top,rgba(8,6,24,.92) 0,rgba(8,6,24,.55) 18%,transparent 34%),radial-gradient(ellipse 62% 48% at 50% 40%,transparent 55%,rgba(8,6,24,.5) 100%)}
+.vig{position:absolute;inset:0;background:linear-gradient(to bottom,#0b0e26 0,#0b0e26 6%,rgba(11,14,38,0) 15%),linear-gradient(to top,rgba(8,6,24,.92) 0,rgba(8,6,24,.55) 18%,transparent 34%),radial-gradient(ellipse 62% 48% at 50% 40%,transparent 55%,rgba(8,6,24,.5) 100%)}
 .island{position:absolute;left:50%;top:${11 * K}px;width:${112 * K}px;height:${32 * K}px;margin-left:${-56 * K}px;border-radius:${16 * K}px;background:#000}
 .sb{position:absolute;top:${14 * K}px;height:${28 * K}px;display:flex;align-items:center;font:700 ${16 * K}px 'Space Grotesk',system-ui}
 .sb.l{left:${36 * K}px;width:${60 * K}px;justify-content:center}

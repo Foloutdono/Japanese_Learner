@@ -121,6 +121,28 @@ if (stage === 'today') {
   await piece('today_dial', [24, d[1] - 34, 300, d[3] + 96])
 }
 
+if (stage === 'todaybig') {
+  // Today with the dial grown: a bigger disc, and what the count is (à réviser / due) set large.
+  for (const [name, hour] of [['today_big', 17], ['today_big_night', 22]]) {
+    p = await page()
+    await p.clock.install({ time: new Date(2026, 9, 22, hour, 20) })
+    await p.goto(BASE + '/today'); await p.waitForTimeout(1500)
+    await p.addStyleTag({ content: `
+      .tdy-dial--print{width:330px !important;margin:-66px 0 36px}
+      .tdy-dial--print .tdy-dial__count{font-size:112px !important}
+      .tdy-dial--print .tdy-dial__unit{font-size:${lang === 'fr' ? 27 : 38}px !important;font-weight:800 !important;letter-spacing:.06em !important;text-indent:.06em !important;margin-top:2px}
+      .tdy-dial--print .tdy-dial__disc{filter:drop-shadow(0 0 16px rgba(255,240,205,.75))}
+      .tpr-title{display:none !important}
+      .tdy-dial__disc g[clip-path]{opacity:.5 !important;fill:#b39a63 !important}
+      .tdy-dial--print .tdy-dial__glow{filter:drop-shadow(0 0 30px rgba(255,238,190,.8))}` })
+    await p.waitForTimeout(4500); await shot(name)
+    if (hour === 17) {
+      await piece('today_depart', await box(p.locator('.btn-depart')), 4)
+      await piece('today_sun_big', await box(p.locator('.tdy-dial')))
+    }
+  }
+}
+
 if (stage === 'kanji') {
   // 6: a kanji met for the first time, traced stroke by stroke (初見), then its card turned,
   // the readings' shares marked.
