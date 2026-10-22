@@ -495,7 +495,7 @@ _POINT = {".", ",", "．", "，"}
 # (2024/10/04), a sum or a code, not a quantity, and its cardinal reading
 # would be wrong: left bare, as before. A Latin letter beside it is a
 # unit or a name (100m, 5G, A4), also not read here.
-_NOT_A_QUANTITY = set("/／:：-－−ー~〜～+＋*×÷=＝・")
+_NOT_A_QUANTITY = set("/／:：-－−ー~〜～+＋*×÷・")
 
 
 def _is_number_token(surface: str) -> bool:

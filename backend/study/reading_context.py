@@ -647,6 +647,12 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = "なに"
             continue
 
+        # 四月一日: the first of a month is ついたち, never いちにち, "one
+        # day" (plan 272).
+        if s == "一日" and prev(i).endswith(("月", "がつ")):
+            out[i] = "ついたち"
+            continue
+
         # 日曜日: 日 after 曜 is び.
         if s == "日" and r == "ひ" and (prev(i).endswith("曜") or prev(i).endswith("よう")):
             out[i] = "び"
@@ -671,8 +677,10 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = "か" + r[2:]
             continue
 
-        # 実を結ぶ, 実がなる: the fruit, not じつ.
-        if s == "実" and r == "じつ" and nxt(i) in ("を", "が"):
+        # 実を結ぶ, 実がなる: the fruit, not じつ. Never 実を言うと, "to
+        # tell the truth", or 名を捨てて実を取る, "the substance".
+        if s == "実" and r == "じつ" and nxt(i) in ("を", "が") \
+                and not (i + 2 < n and tokens[i + 2].get("lemma") in ("言う", "云う", "申す", "取る")):
             out[i] = "み"
             continue
 
@@ -743,6 +751,8 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
     # where UniDic's reading does not even begin with the number's.
     for i in range(n):
         s = surf[i]
+        if s == "一日" and i > 0 and surf[i - 1].endswith(("月", "がつ")):
+            continue                     # 四月一日, ついたち (above)
         for split in range(len(s) - 1, 0, -1):
             num, ctr = s[:split], s[split:]
             if not all(c in _NUMERAL_CHARS - {"何"} for c in num):

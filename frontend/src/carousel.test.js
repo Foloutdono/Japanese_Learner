@@ -695,8 +695,11 @@ describe('explaining a point in its own sentence', () => {
     // A form of だ that makes an adverb of the word (真剣に), and one the tokenizer gave a particle: bare.
     expect(glossOf('経験が少ない人だって、真剣に練習を続ければ必ず上達する。', 'に')).toBe('makes an adverb')
     expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('')
-    // The copula で is the particle too often (この店で): always bare.
-    expect(glossOf('この店で、この本がいちばん高いです。', 'で')).toBe('')
+    // The copula で is never named a place: the tokenizer gave it to the
+    // particle too often. Since plan 272 the breakdown reads 店で、 as the
+    // particle it is, "where", and 大ざっぱで、 as 〜くて／〜で.
+    expect(glossOf('この店で、この本がいちばん高いです。', 'で')).toBe('place')
+    expect(glossOf('倹約を心掛ける几帳面な兄にひきかえ、弟は大ざっぱで、無駄遣いばかりしている。', 'で')).toMatch(/^joins/)
   })
 
   it('gives no stacked slide to a pair that is no two particles (plan 229l)', () => {

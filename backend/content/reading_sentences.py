@@ -419,7 +419,7 @@ N4 = [
     {"jp": "けがをした場合は、受付の人を呼んでください。", "en": "If you get injured, call the reception staff.", "fr": "En cas de blessure, appelez le personnel de l'accueil.", "grammar": "〜場合", "focus": "けが"},
     {"jp": "引っ越す前に、新しい住所を会社に知らせる必要がある。", "en": "Before moving, I need to let my company know my new address.", "fr": "Avant de déménager, je dois communiquer ma nouvelle adresse à mon entreprise.", "grammar": "〜必要がある", "focus": "住所"},
     {"jp": "熱が下がらなかったら、もう一度、病院に行く必要があります。", "en": "If your fever doesn't go down, you'll need to go to the hospital again.", "fr": "Si votre fièvre ne baisse pas, il faudra retourner à l'hôpital.", "grammar": "〜必要がある", "focus": "熱"},
-    {"jp": "だから、もっと早く出発しろと言ったじゃないか。", "en": "See? I told you to leave earlier, didn't I!", "fr": "Tu vois ? Je t'avais bien dit de partir plus tôt !", "grammar": "〜じゃないか", "focus": "出発"},
+    {"jp": "だから、もっと早く空港へ出発しろと言ったじゃないか。", "en": "See? I told you to leave for the airport earlier, didn't I!", "fr": "Tu vois ? Je t'avais bien dit de partir plus tôt pour l'aéroport !", "grammar": "〜じゃないか", "focus": "出発"},
     {"jp": "君が作ったこのケーキ、すごくうまいじゃないか。", "en": "Hey, this cake you made is really good!", "fr": "Mais il est vraiment bon, ce gâteau que tu as fait !", "grammar": "〜じゃないか", "focus": "ケーキ"},
     {"jp": "息子は注射を怖がるから、病院には行きたくないと言う。", "en": "My son is scared of injections, so he says he doesn't want to go to the hospital.", "fr": "Mon fils a peur des piqûres, alors il dit qu'il ne veut pas aller à l'hôpital.", "grammar": "〜がる", "focus": "注射"},
     {"jp": "夫が留守の日は、娘がいつも寂しがる。", "en": "On days my husband is away, my daughter always seems lonely.", "fr": "Les jours où mon mari est absent, ma fille a toujours l'air de se sentir seule.", "grammar": "〜がる", "focus": "留守"},
@@ -523,7 +523,7 @@ N3 = [
     {"jp": "今回の事件に関して、警察はまだ正式な発表をしていない。", "en": "Regarding this incident, the police have not yet made an official announcement.", "fr": "Concernant cette affaire, la police n'a encore fait aucune déclaration officielle.", "grammar": "〜に関して", "focus": "事件"},
     {"jp": "環境汚染に関して、さまざまな国の代表が意見を交換した。", "en": "Representatives of various countries exchanged views on environmental pollution.", "fr": "Des représentants de divers pays ont échangé leurs points de vue sur la pollution de l'environnement.", "grammar": "〜に関して", "focus": "汚染"},
     {"jp": "作業は計画した通りに進み、予定の日に無事完成した。", "en": "The work went exactly as planned and was completed without a hitch on the scheduled day.", "fr": "Le travail s'est déroulé exactement comme on l'avait planifié et a été achevé sans encombre à la date fixée.", "grammar": "〜通りに", "focus": "完成"},
-    {"jp": "祖母に習った通りに同じ材料で作ったのに、なぜか味が全く違う。", "en": "I made it with the same ingredients, just as my grandmother taught me, yet somehow it tastes completely different.", "fr": "Je l'ai préparé avec les mêmes ingrédients, exactement comme ma grand-mère me l'a appris, et pourtant le goût est complètement différent.", "grammar": "〜通りに", "focus": "材料"},
+    {"jp": "祖母に習った通りに同じ材料で作ったのに、味が全く違う。", "en": "I made it with the same ingredients, just as my grandmother taught me, yet it tastes completely different.", "fr": "Je l'ai préparé avec les mêmes ingrédients, exactement comme ma grand-mère me l'a appris, et pourtant le goût est complètement différent.", "grammar": "〜通りに", "focus": "材料"},
     {"jp": "故郷に帰るたびに、町の様子が少しずつ変わっている。", "en": "Every time I go back to my hometown, the town has changed a little.", "fr": "Chaque fois que je rentre dans ma ville natale, elle a un peu changé.", "grammar": "〜たびに", "focus": "故郷"},
     {"jp": "彼は会議のたびに不満を言うので、同僚たちは困っている。", "en": "He complains at every meeting, which is a real headache for his colleagues.", "fr": "Il se plaint à chaque réunion, ce qui ennuie beaucoup ses collègues.", "grammar": "〜たびに", "focus": "同僚"},
     {"jp": "都会は店も仕事も多い一方で、物価も家賃も高い。", "en": "Cities have plenty of shops and jobs, but on the other hand both prices and rents are high.", "fr": "En ville, il y a beaucoup de magasins et de travail, mais en revanche les prix comme les loyers sont élevés.", "grammar": "〜一方で", "focus": "物価"},
@@ -1169,7 +1169,7 @@ N1 = [
     {"jp": "上司が出張で不在なのをいいことに、彼は終日雑談に興じていた。", "en": "Taking advantage of his boss being away on a business trip, he spent the whole day chatting idly.", "fr": "Profitant de l'absence de son supérieur, parti en déplacement, il a passé toute la journée à bavarder.", "grammar": "〜をいいことに", "focus": "雑談"},
     {"jp": "相手が法律に無知なのをいいことに、業者は不当な契約を結ばせた。", "en": "Taking advantage of the other party's ignorance of the law, the trader made them sign an unfair contract.", "fr": "Profitant de l'ignorance juridique de son client, le commerçant lui a fait signer un contrat abusif.", "grammar": "〜をいいことに", "focus": "無知"},
     {"jp": "あの議員は一度演説を始めたが最後、いくら遮ろうとしても長々と話し続ける。", "en": "Once that politician starts a speech, he drones on and on, however hard anyone tries to cut in.", "fr": "Une fois que ce député a commencé un discours, il n'en finit plus de parler, même quand on tente de l'interrompre.", "grammar": "〜たが最後", "focus": "長々"},
-    {"jp": "取引先との約束を一度でも破ったが最後、失った信用は二度と取り戻せない。", "en": "Break a promise to a client even once, and the trust you lose can never be won back.", "fr": "Il suffit de manquer une seule fois à sa parole envers un client pour perdre à jamais sa confiance.", "grammar": "〜たが最後", "focus": "取り戻す"},
+    {"jp": "取引先との約束を一度でも破ったが最後、失った信用はもう取り戻せない。", "en": "Break a promise to a client even once, and the trust you lose can no longer be won back.", "fr": "Il suffit de manquer une seule fois à sa parole envers un client pour perdre à jamais sa confiance.", "grammar": "〜たが最後", "focus": "取り戻す"},
     {"jp": "部下に規律の大切さを説いた手前、自分が規定を破るわけにはいかない。", "en": "Having lectured my staff on the importance of discipline, I can hardly break the rules myself.", "fr": "Après avoir sermonné mes subordonnés sur l'importance de la discipline, je ne peux pas me permettre d'enfreindre moi-même le règlement.", "grammar": "〜手前", "focus": "規定"},
     {"jp": "親戚に勧められた縁談を一度は快く承諾した手前、今さら断るのはどうにも気が引ける。", "en": "Since I readily agreed at first to the marriage my relatives proposed for me, I feel very awkward about backing out now.", "fr": "Comme j'ai d'abord accepté de bon cœur le projet de mariage que me proposait ma famille, je suis bien gêné de me rétracter maintenant.", "grammar": "〜手前", "focus": "縁談"},
     {"jp": "家計に多少の余裕があるなら、万一に備えて貯蓄に回しておくに越したことはない。", "en": "If the household budget has a little leeway, it is best to put it into savings against emergencies.", "fr": "Si le budget du ménage dégage un peu de marge, le mieux est encore de la mettre de côté en prévision des imprévus.", "grammar": "〜に越したことはない", "focus": "貯蓄"},
@@ -1256,6 +1256,12 @@ def off_deck_words(jp: str) -> list[str]:
             continue
         match = tok.get("vocab_match")
         if match and not match.get("pool"):
+            continue
+        if tok.get("parts") and all(part["vocab_match"] or difficulty.word_level(part["lemma"])
+                                    for part in tok["parts"]):
+            # An idiom the pool reads whole and the deck's words make
+            # (手に入れる: 手, 入れる; 身につける's つける, which the deck
+            # has under more than one kanji), plan 272.
             continue
         surface = tok["surface"]
         if _is_numeral(surface) or difficulty.word_level(surface) or difficulty.word_level(tok.get("lemma", "")):

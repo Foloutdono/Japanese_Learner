@@ -191,16 +191,22 @@ def words_at_level(text: str, level: str, pattern: str = "") -> list[dict]:
     point = pattern.replace("〜", "")
     out: list[dict] = []
     seen: set[str] = set()
-    for tok in result["tokens"]:
+    # An idiom the pool holds is read whole (気になる, 手に入れる) and is
+    # still made of the deck's words, which count (plan 272).
+    tokens = [part for tok in result["tokens"] for part in (tok.get("parts") or [tok])]
+    for tok in tokens:
         # A particle or a conjunction the lookup files under a kanji
         # card (くらい under 位, または's また under 又) is the grammar's,
         # not a word the sentence brings, and a prefix or a suffix is a
         # piece of one. Not CONTENT_POS: a な-adjective (豊か, UniDic's
         # 形状詞) comes through as "other" and is exactly the vocabulary
-        # being counted.
-        if tok.get("pos") in _FUNCTION_POS:
-            continue
+        # being counted. A conjunction the deck teaches as the word it
+        # is (だから, ところが, a card in kana) is vocabulary all the same,
+        # and the breakdown chips it so (plan 272).
         match = tok.get("vocab_match") or {}
+        if tok.get("pos") in _FUNCTION_POS and not (
+                tok.get("pos") == "conjunction" and not (match.get("entry") or {}).get("kanji")):
+            continue
         if match.get("pool") or match.get("level") != level:
             continue
         raw_id = match.get("raw_id")

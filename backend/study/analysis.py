@@ -30,7 +30,9 @@ from study.card_lookup import (
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
-    resolve_te_noun, resolve_interjection, resolve_home, numeral_value,
+    resolve_te_noun, resolve_interjection, resolve_home, numeral_value, kana_card, resolve_pool_whole_word,
+    resolve_pool_idiom, resolve_pool_opening, a_points_own_verb,
+    compound_tail_readings,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -620,6 +622,9 @@ _SUFFIX_GLOSSES = {
           "fr": "(suffixe) pour, destiné à (子供用, pour enfants)"},
     "化": {"en": "(suffix) -ization, becoming (国際化, internationalization)",
           "fr": "(suffixe) -isation, devenir (国際化, internationalisation)"},
+    # (read せい after a noun, plan 272: never the card's "life, living")
+    "生": {"en": "(suffix) student, pupil (転校生, transfer student)",
+          "fr": "(suffixe) élève, étudiant (転校生, élève transféré)"},
 }
 
 
@@ -831,6 +836,12 @@ def _only_negative(morphemes: list, k: int, grammar: list[dict] | None) -> bool:
     return on == {"ない形 〜ない"}
 
 
+def _written_reading(run: list) -> str:
+    """A run's reading as the page writes it: a particle by its letter
+    (気をつけ, きをつけ), never its sound (きおつけ, plan 272)."""
+    return "".join(m.surface if m.pos == "particle" else m.reading for m in run)
+
+
 def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
     """The indices of the morphemes a grammar point is written on (its
     `segments`, as _attach_grammar reads them)."""
@@ -841,6 +852,96 @@ def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
 
 
 _COUNTERS = "助数詞 〜つ／〜人／〜枚"
+
+# The points that are a word's own forms, not a construction around it.
+_OWN_FORM_POINTS = frozenset({"い形容詞／な形容詞", "ない形 〜ない", "た形 〜た", "可能形 〜(ら)れる",
+                              "意向形 〜(よ)う", "命令形 〜ろ／〜え", "〜ます／〜ません", "〜ました／〜ませんでした"})
+
+_MONTHS_EN = ("January", "February", "March", "April", "May", "June", "July", "August", "September",
+              "October", "November", "December")
+_MONTHS_FR = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
+              "octobre", "novembre", "décembre")
+_SLASHES = ("/", "／")
+
+
+def _date_run(morphemes: list, i: int) -> tuple[int, int] | None:
+    """(month, day) where morphemes[i:i + 3] print a date as month/day,
+    10/24, or None: never a fraction or a longer date (2024/10/24), and
+    never a month or a day that is none."""
+    from study.furigana import _is_number_token
+
+    if i + 2 >= len(morphemes) or morphemes[i + 1].surface not in _SLASHES:
+        return None
+    a, b = morphemes[i], morphemes[i + 2]
+    if not (_is_number_token(a.surface) and _is_number_token(b.surface)):
+        return None
+    if (i > 0 and morphemes[i - 1].surface in _SLASHES) or (i + 3 < len(morphemes) and morphemes[i + 3].surface in _SLASHES):
+        return None
+    month, day = (int(x.surface.translate(_FULLWIDTH_DIGITS)) for x in (a, b))
+    if not (1 <= month <= 12 and 1 <= day <= _DAYS_IN[month - 1]):
+        return None
+    if month < day <= 10 and not _dated(morphemes, i + 3):
+        # 1/3, 2/3, 3/10 are fractions as often as days: 全体の1/3が水です.
+        # A date there says so, with its weekday (1/3（金）) or a range.
+        return None
+    return month, day
+
+
+# The days of each month, the 29th of February counted.
+_DAYS_IN = (31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+_WEEKDAYS = frozenset("月火水木金土日祝")
+
+
+def _dated(morphemes: list, k: int) -> bool:
+    """Whether what follows a month/day at morphemes[k] says it is one:
+    its weekday in brackets, （金）, or the start of a range, 〜1/5."""
+    from study.furigana import _is_number_token
+
+    if k + 1 < len(morphemes) and morphemes[k].surface in ("（", "(") and morphemes[k + 1].surface[:1] in _WEEKDAYS:
+        return True
+    return (k + 1 < len(morphemes) and morphemes[k].surface in ("〜", "～", "-", "－", "−")
+            and _is_number_token(morphemes[k + 1].surface))
+
+
+def _date_dict(run: list, month: int, day: int) -> dict:
+    """One token for a date printed 10/24, read as it is said --
+    じゅうがつにじゅうよっか -- and glossed with the date (plan 272)."""
+    from study.reading_context import numeral_furigana
+
+    month_reading = (numeral_furigana(str(month), "月", "がつ", "noun")[0] or "") + "がつ"
+    if day == 1:
+        day_reading = "ついたち"
+    else:
+        number, counter = numeral_furigana(str(day), "日", "にち", "suffix")
+        day_reading = (number or "") + (counter or "にち")
+    token = _token_dict(_merged_morpheme(run), None)
+    token["pos"] = "noun"
+    token["reading"] = month_reading + day_reading
+    token["furigana"] = [{"text": token["surface"], "reading": token["reading"]}]
+    token["gloss"] = {"en": f"{_MONTHS_EN[month - 1]} {day} (month/day)",
+                      "fr": f"{day} {_MONTHS_FR[month - 1]} (mois/jour)"}
+    return token
+
+# The catalogue's conjunctions, each a point written as the word itself.
+_CONJUNCTION_POINTS = frozenset({"そして", "それから", "しかし", "だから", "それで", "それに", "ところで",
+                                 "または", "ところが", "つまり"})
+
+
+def _conjunction_runs(morphemes: list, grammar: list[dict]) -> dict[int, int]:
+    """{start: n} for each conjunction point the tokenizer cut into `n`
+    morphemes (plan 272): それ + に is それに, "moreover", one word with
+    its card beside its point, never それ, "that one", and a particle;
+    ところ + が is no "place"."""
+    runs = {}
+    for g in grammar:
+        if g.get("pattern") not in _CONJUNCTION_POINTS or len(g["segments"]) != 1:
+            continue
+        s, e = g["segments"][0]
+        inside = [j for j, m in enumerate(morphemes) if s <= m.start and m.end <= e]
+        if len(inside) >= 2 and morphemes[inside[0]].start == s and morphemes[inside[-1]].end == e \
+                and "".join(morphemes[j].surface for j in inside) == g["pattern"]:
+            runs[inside[0]] = len(inside)
+    return runs
 
 
 def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
@@ -897,15 +998,42 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     deck_hits = [None if _named(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
     # The もん that closes a sentence on its reason is no "thing" (plan 272).
     deck_hits = [None if particle_glosses.gives_a_reason(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
+    # Nor is the verb a lit point is made of a word: 洗いなさい's なさい is
+    # 〜なさい, 団長である's ある the copula (plan 272).
+    deck_hits = [None if j in ruled and a_points_own_verb(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
+    # Two deck words read as the word they make: 腕 + 時計 is うでどけい,
+    # 時計 read どけい there (plan 272).
+    for j, reading in compound_tail_readings(morphemes, deck_hits).items():
+        morphemes[j] = replace(morphemes[j], reading=reading)
     # A pool run may not take in a morpheme a point is written on; a
     # deck hit stands in for "has a card" there, which is all
     # resolve_pool_compound asks of it.
     pool_hits = [hit or (j in ruled) for j, hit in enumerate(deck_hits)]
     # What explains each morpheme before any fold: its card or a point.
     explained = [bool(hit) or j in ruled for j, hit in enumerate(deck_hits)]
+    conjunctions = _conjunction_runs(morphemes, grammar or [])
+    # A word whose only points are its own forms -- エモくない, the
+    # adjective's -- is still the pool's word (plan 272); one inside a
+    # construction (かもしれない's しれ) is the construction's.
+    own_forms = {j for j in ruled if morphemes[j].pos in ("adjective", "verb")} - _in_grammar(
+        morphemes, [g for g in grammar or [] if g.get("pattern") not in _OWN_FORM_POINTS])
     tokens = []
     i = 0
     while i < len(morphemes):
+        if i in conjunctions:
+            n = conjunctions[i]
+            run = morphemes[i:i + n]
+            card = kana_card("".join(m.surface for m in run))
+            token = _compound_dict(run, *card) if card else _joined_dict(run, "conjunction")
+            token["pos"] = "conjunction"
+            tokens.append(token)
+            i += n
+            continue
+        date = _date_run(morphemes, i)
+        if date:
+            tokens.append(_date_dict(morphemes[i:i + 3], *date))
+            i += 3
+            continue
         ordinal = _ordinal_run(morphemes, i, numbers)
         if ordinal:
             tokens.append(_ordinal_dict(morphemes[i:i + ordinal], numbers, i))
@@ -945,6 +1073,15 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += n
             continue
+        pooled = resolve_pool_opening(morphemes, i)
+        if pooled:
+            # なのに、 and だったら、 opening a sentence (plan 272).
+            row, n = pooled
+            token = _pool_compound_dict(morphemes[i:i + n], row)
+            token["pos"] = "conjunction"
+            tokens.append(token)
+            i += n
+            continue
         hit = resolve_compound(morphemes, i)
         if hit:
             level, entry, raw_id, n = hit
@@ -966,9 +1103,38 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             # Read as the page writes it, 気をつけ and 知らせ: the entry's
             # dictionary reading is another form's. A verb's endings
             # follow it as a verb's do (frontend rows.js).
-            token["reading"] = "".join(m.reading for m in run)
+            token["reading"] = _written_reading(run)
             token["furigana"] = align_deck(token["surface"], token["reading"])
             token["pos"] = "adverb" if run[-1].lemma == "ず" else "verb"
+            tokens.append(token)
+            i += n
+            continue
+        pooled = resolve_pool_idiom(morphemes, i)
+        if pooled and not any(j in strict and j not in own_forms for j in range(i, i + pooled[1])):
+            # 気になる, "to weigh on one's mind" (plan 272), read as written;
+            # its verb's own form (本題に入ろう) is still the form's point.
+            row, n = pooled
+            run = morphemes[i:i + n]
+            token = _pool_compound_dict(run, row)
+            token["reading"] = _written_reading(run)
+            token["furigana"] = align_deck(token["surface"], token["reading"])
+            token["pos"] = "verb"
+            # The words it is made of, with their deck cards (手, 入れる),
+            # which a sentence written for a level still counts
+            # (level_mix.words_at_level, reading_sentences.off_deck_words).
+            token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
+                               "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                              for k in range(i, i + n) if morphemes[k].pos != "particle"]
+            tokens.append(token)
+            i += n
+            continue
+        pooled = resolve_pool_whole_word(morphemes, i)
+        if pooled and not any(j in strict for j in range(i, i + pooled[1])):
+            # A pool word UniDic cut into a word and its particles (plan
+            # 272): なぜか, "for some reason", never "why" and a question.
+            row, n = pooled
+            token = _pool_compound_dict(morphemes[i:i + n], row)
+            token["pos"] = "adverb"
             tokens.append(token)
             i += n
             continue
@@ -1069,7 +1235,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             deck = resolve_function_word(morphemes, i)
         if (morphemes[i].surface == "って" and i + 1 < len(morphemes) and morphemes[i + 1].surface == "ば"
                 and morphemes[i + 1].pos == "particle" and i + 1 not in ruled
-                and all(m.pos in ("particle", "symbol") for m in morphemes[i + 2:])):
+                and particle_glosses.closes_sentence(morphemes, i + 1)):
             # ってば, "I told you!": one particle, never って and a
             # conditional ば (plan 272).
             token = _joined_dict(morphemes[i:i + 2], "particle")
@@ -1092,12 +1258,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             # うち, "home", where the deck's うち is "inside, while" (plan 272).
             deck, said = None, ("pool", home)
         affix = (morphemes[i].pos == "suffix" and morphemes[i].surface in _SUFFIX_GLOSSES and i > 0
-                 and morphemes[i - 1].pos in ("noun", "other") and i not in ruled)
+                 and morphemes[i - 1].pos in ("noun", "other") and i not in ruled
+                 and (morphemes[i].surface != "生" or morphemes[i].reading == "せい"))
         if affix:
             deck, said = None, None
         named = _named(morphemes, i)
         span = deck is None and morphemes[i].surface in _SPAN_COUNTERS and _after_a_number(morphemes, i, numbers)
-        pool = None if deck or i in ruled or named or span or affix or particle_glosses.gives_a_reason(morphemes, i) \
+        pool = None if deck or (i in ruled and i not in own_forms) or named or span or affix \
+            or particle_glosses.gives_a_reason(morphemes, i) \
             else (said[1] if said else resolve_pool_morpheme(morphemes, i))
         token = _token_dict(morphemes[i], deck, pool, named)
         if span:

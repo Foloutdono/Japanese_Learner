@@ -244,6 +244,9 @@ class Morpheme:
     # stretch of kana it cut into marks and stray letters, read back as
     # the one word it is (_unknown_words: ぷらそにか, a choir's name, was
     # ぷ + ら + そ + に + か). Most often a name.
+    adjectival: bool = False  # UniDic's 形状詞可能 (pos3): a noun that is a
+    # な-adjective too -- 残酷, 楽, 元気 -- whose で before a comma is the
+    # adjective's て form (plan 272).
 
 
 def _name_kind(pos2: str, pos3: str, pos4: str) -> str:
@@ -588,6 +591,157 @@ def _not_a_passive(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, 
     return out_m, out_t
 
 
+# What a noun before a copula's て is, where the copula is what it says
+# (急なお願いで、すみません, "it is a sudden request, and"): a reason or a
+# plan is said of, a person or a role is someone (先輩で).
+_COPULA_NOUNS = frozenset({
+    "おかげ", "お陰", "もの", "物", "こと", "事", "ため", "為", "予定", "つもり", "はず", "わけ", "訳", "願い",
+    "そう", "よう", "様", "みたい", "ところ", "所", "次第", "ほど", "程", "まま", "儘",
+    "続き", "せい", "様子", "感じ", "状態", "具合", "調子", "最中", "途中", "一方", "以上", "通り",
+    "先輩", "後輩", "学生", "先生", "社員", "医者", "人", "方", "子", "友達", "友だち", "仲間", "同僚", "上司",
+    "部下", "家族", "兄", "姉", "弟", "妹", "父", "母", "息子", "娘", "夫", "妻", "彼", "彼女", "私", "僕", "俺",
+})
+_TOPICS = frozenset({"は", "が", "も", "って", "とは", "なら"})
+
+
+def _place_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
+    """で after a noun read back as the particle where UniDic took it for
+    the copula's て form (plan 272): うみで、かいがらをひろいました is "at
+    the sea", この一回のテイクで "in this one take" -- a noun that opens
+    its clause with no topic and no subject before it, and the clause
+    breaks after it. Never where the noun is what the copula says of
+    something (_COPULA_NOUNS): 急なお願いで、すみません, 先輩で -- nor after
+    one that is a な-adjective too (便利で、)."""
+    from dataclasses import replace
+
+    for i in range(1, len(morphemes)):
+        m, prev = morphemes[i], morphemes[i - 1]
+        if not (m.surface == "で" and m.pos == "auxiliary" and m.lemma == "だ" and m.cform.startswith("連用形")):
+            continue
+        if prev.pos not in ("noun", "pronoun") or prev.surface in _COPULA_NOUNS or prev.lemma in _COPULA_NOUNS \
+                or prev.adjectival:
+            # (A noun that is a な-adjective too takes the copula's て form:
+            # 便利で、安い, 残酷で、, the 〜くて／〜で of it.)
+            continue
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        if nxt is not None and not (nxt.pos == "symbol" and nxt.surface in "、，,"):
+            continue
+        start = 0
+        for k in range(i - 1, -1, -1):
+            if morphemes[k].pos == "symbol" and morphemes[k].surface in "。！？!?「『、，,":
+                start = k + 1
+                break
+        clause = morphemes[start:i - 1]
+        if any(t.pos == "particle" and t.surface in _TOPICS for t in clause) \
+                or any(t.pos == "auxiliary" and t.surface == "な" for t in clause[-1:]):
+            continue
+        morphemes[i] = replace(m, lemma="で", lemma_reading="で", pos="particle", ctype="", cform="")
+        tags[i] = ("助詞", "格助詞", "*")
+
+
+# An adjective's く form after の is the noun it makes: おおさかのちかく,
+# "near Osaka" -- no adjective follows の.
+_KU_NOUNS = {"近い": ("近く", "ちかく"), "遠い": ("遠く", "とおく")}
+_UTTERANCE_MARKS = frozenset("。！？!?「『（(…‥")
+
+
+def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """Kana UniDic read as another word where the sentence says which
+    (plan 272):
+
+    - ちかく after の is the noun 近く, "the vicinity", never the
+      adjective 近い (no adjective follows の);
+    - ま opening what is said, before its comma, is まあ, "well...", no
+      間, "space": ……ま、嫌いじゃねえけど;
+    - ねー after an adverb or an exclamation is ね drawn out, no ない:
+      またねー, "see you!" (金がねえ is ない, "there isn't");
+    - まじか opening what is said is まじ and か, "seriously?", no 間近,
+      "near"."""
+    from dataclasses import replace
+
+    out_m, out_t = [], []
+    for i, m in enumerate(morphemes):
+        prev = morphemes[i - 1] if i > 0 else None
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        opens = prev is None or (prev.pos == "symbol" and prev.surface in _UTTERANCE_MARKS)
+        if (m.pos == "adjective" and m.lemma in _KU_NOUNS and m.surface.endswith("く")
+                and prev is not None and prev.surface == "の" and prev.pos == "particle"):
+            lemma, reading = _KU_NOUNS[m.lemma]
+            m = replace(m, pos="noun", lemma=lemma, lemma_reading=reading, ctype="", cform="")
+            tags = tags[:i] + [("名詞", "普通名詞", "副詞可能")] + tags[i + 1:]
+        elif m.surface == "ま" and m.pos == "noun" and opens and nxt is not None and nxt.surface in ("、", "，", ","):
+            m = replace(m, pos="interjection", lemma="まあ", lemma_reading="まあ")
+            tags = tags[:i] + [("感動詞", "一般", "*")] + tags[i + 1:]
+        elif (m.surface in ("ねー", "ねえ", "ねぇ", "ねーー") and m.pos == "adjective" and m.lemma in ("無い", "ない")
+              and prev is not None and prev.pos in ("adverb", "interjection", "conjunction")):
+            m = replace(m, pos="particle", lemma="ね", lemma_reading="ね", ctype="", cform="")
+            tags = tags[:i] + [("助詞", "終助詞", "*")] + tags[i + 1:]
+        elif (m.surface in ("ねえ", "ねー", "ねぇ") and m.pos == "particle" and prev is not None
+              and prev.pos == "particle" and prev.surface in ("が", "は", "も", "しか", "なんか", "こそ")
+              and (nxt is None or nxt.surface in ("。", "！", "!", "？", "?", "よ", "ぞ", "な", "し", "から", "けど"))):
+            # 金がねえ, "there's no money": ない said roughly, which UniDic
+            # takes for ね drawn out (これはねえ、 is the filler).
+            m = replace(m, pos="adjective", lemma="無い", lemma_reading="ない", ctype="形容詞", cform="終止形-一般")
+            tags = tags[:i] + [("形容詞", "非自立可能", "*")] + tags[i + 1:]
+        elif (m.surface in ("ばいばい", "バイバイ") and m.lemma == "売買" and opens
+              and (nxt is None or nxt.pos in ("symbol", "particle"))):
+            # ばいばい said on its own is "bye-bye", no 売買, "trade".
+            m = replace(m, pos="interjection", lemma="バイバイ", lemma_reading="ばいばい")
+            tags = tags[:i] + [("感動詞", "一般", "*")] + tags[i + 1:]
+        elif m.surface in ("まじか", "マジか") and m.lemma == "間近" and opens:
+            head = m.surface[:-1]
+            out_m.append(replace(m, surface=head, end=m.start + len(head), lemma="まじ", reading="まじ",
+                                 lemma_reading="まじ", kana="マジ", pos="noun", ctype="", cform=""))
+            out_t.append(("名詞", "普通名詞", "形状詞可能"))
+            out_m.append(replace(m, surface="か", start=m.start + len(head), lemma="か", reading="か",
+                                 lemma_reading="か", kana="カ", pos="particle", ctype="", cform=""))
+            out_t.append(("助詞", "終助詞", "*"))
+            continue
+        out_m.append(m)
+        out_t.append(tags[i])
+    return out_m, out_t
+
+
+def _katakana_adjectives(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A slang adjective in katakana read back as one word where UniDic
+    cut it into letters (plan 272): エモくない was エ + モ + く, three
+    marks; エモい, "moving", is a word JMdict holds."""
+    from dataclasses import replace
+
+    import content.vocab_jmdict_data as jmdict_db
+
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        j = i
+        while j < len(morphemes) and morphemes[j].pos == "symbol" and len(morphemes[j].surface) == 1 \
+                and "\u30a1" <= morphemes[j].surface <= "\u30fa" and (j == i or morphemes[j].start == morphemes[j - 1].end):
+            j += 1
+        if j - i >= 2 and j < len(morphemes) and morphemes[j].start == morphemes[j - 1].end \
+                and morphemes[j].surface in ("く", "い", "かっ", "けれ"):
+            stem = "".join(m.surface for m in morphemes[i:j])
+            row = jmdict_db.get_by_key("", stem + "い")
+            tagged = row is not None and "adj-i" in {
+                t for sense in jmdict_db.get_senses("", stem + "い") or [] for t in sense.get("tags") or ()}
+            if tagged:
+                ending = morphemes[j].surface
+                surface = stem + ending
+                first = morphemes[i]
+                out_m.append(replace(
+                    first, surface=surface, end=morphemes[j].end, lemma=stem + "い",
+                    reading=kata_to_hira(stem) + ending, lemma_reading=kata_to_hira(stem) + "い",
+                    kana=stem + "".join(chr(ord(c) + 0x60) for c in ending), pos="adjective",
+                    ctype="形容詞", cform={"く": "連用形-一般", "い": "終止形-一般", "かっ": "連用形-促音便",
+                                          "けれ": "仮定形-一般"}[ending], goshu="外"))
+                out_t.append(("形容詞", "一般", "*"))
+                i = j + 1
+                continue
+        out_m.append(morphemes[i])
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
 def _is_kanji(c: str) -> bool:
     return "\u4e00" <= c <= "\u9fff" or c == "\u3005"  # 々
 
@@ -793,6 +947,7 @@ def _tag(text: str, offset: int = 0, tagger=None) -> tuple[list[Morpheme], list[
                                  getattr(feat, "pos4", None) or ""),
             counter=(getattr(feat, "pos3", None) or "") in ("助数詞", "助数詞可能"),
             unknown=bool(getattr(w, "is_unk", False)),
+            adjectival=(getattr(feat, "pos3", None) or "") == "形状詞可能",
         ))
     return morphemes, tags
 
@@ -1154,6 +1309,9 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes = _went(morphemes)
         morphemes, tags = _how_many_minutes(morphemes, tags)
         morphemes, tags = _not_a_passive(morphemes, tags)
+        _place_de(morphemes, tags)
+        morphemes, tags = _spoken_kana(morphemes, tags)
+        morphemes, tags = _katakana_adjectives(morphemes, tags)
         return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only
         logger.warning("morphology.tokenize failed on input; caller should fall back", exc_info=True)

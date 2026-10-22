@@ -188,16 +188,20 @@ class AnalyzeLocalTests(unittest.TestCase):
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_a_word_written_in_kana_is_never_matched_to_a_homophone(self) -> None:
         # The pool is JMdict less the deck: its one row read その is 苑,
-        # "garden", and its one row read あんな the Anna era. まじか is
-        # slang UniDic reads as 間近 (まぢか), "near".
-        for sentence, surface in (("その本をください。", "その"), ("あんな人はいない。", "あんな"),
-                                  ("まじかよ", None)):
+        # "garden", and its one row read あんな the Anna era.
+        for sentence, surface in (("その本をください。", "その"), ("あんな人はいない。", "あんな")):
             with self.subTest(sentence=sentence):
                 r = analyze_local(sentence)
                 pooled = [t["surface"] for t in r["tokens"] if (t["vocab_match"] or {}).get("pool")]
                 self.assertEqual(pooled, [])
-                if surface:
-                    self.assertIn(surface, [t["surface"] for t in r["tokens"]])
+                self.assertIn(surface, [t["surface"] for t in r["tokens"]])
+        # まじか is slang UniDic reads as 間近 (まぢか), "near": it is まじ,
+        # "serious", and か (plan 272), and never the archaic まじ,
+        # "cannot", JMdict files under the same row.
+        pooled = {t["surface"]: t["vocab_match"]["entry"] for t in analyze_local("まじかよ")["tokens"]
+                  if (t["vocab_match"] or {}).get("pool")}
+        self.assertEqual(list(pooled), ["まじ"])
+        self.assertEqual(pooled["まじ"]["meaning"], "serious")
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_deck_words_are_never_folded_into_a_pool_compound(self) -> None:
@@ -578,13 +582,14 @@ class LineContextTests(unittest.TestCase):
     read alone lost them."""
 
     def test_a_line_reads_its_last_word_by_what_follows(self) -> None:
-        line = "この一回のテイクで"
+        # やまの おく alone ends on the verb 置く, "to put"; the story's
+        # next line makes it 奥, "the depths" of the mountain.
+        line = "むかし むかし やまの おく"
         alone = analyze_local(line)["tokens"][-1]
-        within = analyze_local(line, after="気持ちを込めて歌いたいと思います。")["tokens"][-1]
-        self.assertEqual(alone["surface"], "で")
-        self.assertEqual(alone["pos"], "auxiliary")
-        self.assertEqual(within["pos"], "particle")
-        self.assertIn("で", [g["pattern"] for g in within["grammar"]])
+        within = analyze_local(line, after="に ちいさな きつねが すんでいました")["tokens"][-1]
+        self.assertEqual(alone["surface"], "おく")
+        self.assertEqual(alone["pos"], "verb")
+        self.assertEqual(within["pos"], "noun")
 
     def test_the_result_is_the_line_s_alone(self) -> None:
         line = "ぷらそにかの合唱のみなさんが"

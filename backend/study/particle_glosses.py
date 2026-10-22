@@ -44,6 +44,17 @@ def _closes(morphemes, i: int) -> bool:
     return all(m.pos in ("particle", "symbol") for m in _rest(morphemes, i))
 
 
+def closes_sentence(morphemes, i: int) -> bool:
+    """Whether nothing but particles follows morphemes[i] in its
+    sentence: 好きだったの。でも… closes the first one."""
+    for m in _rest(morphemes, i):
+        if m.pos == "symbol" and m.surface in "。！？!?」』…‥":
+            return True
+        if m.pos not in ("particle", "symbol"):
+            return False
+    return True
+
+
 def _opens(morphemes, i: int) -> bool:
     """Whether morphemes[i] opens its utterance."""
     return i == 0 or (morphemes[i - 1].pos == "symbol" and morphemes[i - 1].surface in _MARKS)
@@ -115,6 +126,16 @@ _GLOSSES = {
             "fr": "ne… pas : la négation du Kansai (= ない)"},
     "に_adverb": {"en": "makes an adverb of the word before it", "fr": "fait un adverbe du mot qui précède"},
     "まで_until": {"en": "until (it happens)", "fr": "jusqu'à ce que"},
+    "よ_call": {"en": "(after a noun) calls out to it: O …, you …",
+                "fr": "(après un nom) l'interpelle : ô …, toi …"},
+    "は_stress": {"en": "(between a verb's stem and しない) stresses the negative: never, not at all",
+                  "fr": "(entre le radical d'un verbe et しない) renforce la négation : jamais, pas du tout"},
+    "の_explain": {"en": "(at the end) explains, or asks for an explanation: the casual のです (〜んです)",
+                   "fr": "(en fin de phrase) explique, ou demande une explication : のです familier (〜んです)"},
+    "に_gozaru": {"en": "(with ござる) is: でございます as it was said of old, very polite",
+                 "fr": "(avec ござる) est : でございます à l'ancienne, très poli"},
+    "で_copula": {"en": "is ..., and: です／だ joined to what follows (its て form), often giving the reason",
+                  "fr": "est …, et : です／だ relié à la suite (sa forme en て), souvent pour donner la raison"},
     "は_after_te": {"en": "(after a て form) if, as long as: what follows is usually unwelcome",
                    "fr": "(après une forme en て) si, tant que : la suite est souvent fâcheuse"},
     "と_naru": {"en": "(with なる) becomes: the written form of 〜になる",
@@ -146,7 +167,7 @@ def gives_a_reason(morphemes, i: int) -> bool:
     reason (言わないもん, "I won't say, so there"), which UniDic reads as
     もの, "thing": the card is then no word of the sentence."""
     m = morphemes[i]
-    return m.surface == "もん" and _after_a_predicate(morphemes, i) and _closes(morphemes, i)
+    return m.surface == "もん" and _after_a_predicate(morphemes, i) and closes_sentence(morphemes, i)
 
 
 def gloss(morphemes, i: int) -> dict | None:
@@ -159,12 +180,25 @@ def gloss(morphemes, i: int) -> dict | None:
         key = m.surface
     elif m.pos == "auxiliary" and m.lemma == "へん" and m.surface == "へん":
         key = "へん"
+    elif m.pos == "auxiliary" and m.surface == "に" and i + 1 < len(morphemes) \
+            and morphemes[i + 1].surface.startswith("ござ"):
+        key = "に_gozaru"                   # 一大事にございます
+    elif m.pos == "auxiliary" and m.surface == "で" and m.lemma == "だ" and m.cform.startswith("連用形") \
+            and i > 0 and (i + 1 >= len(morphemes) or morphemes[i + 1].surface in ("、", "，", ",")):
+        key = "で_copula"                   # 残業続きで、, 48.6％で、
     elif m.pos in ("interjection", "particle") and base in ("ね", "ねえ") and m.surface != "ね" and (
             _opens(morphemes, i) or _base(morphemes[i - 1].surface) in ("ね", "ねえ")):
         key = "ねえ"
     elif m.surface == "もん" and m.pos in ("noun", "particle") and _after_a_predicate(morphemes, i) \
-            and _closes(morphemes, i):
+            and closes_sentence(morphemes, i):
         key = "もん"
+    elif m.pos == "particle" and m.surface == "よ" and i > 0 and morphemes[i - 1].pos == "noun" \
+            and (i + 1 >= len(morphemes) or morphemes[i + 1].surface in ("\u3000", " ", "、", "，", "！", "!")):
+        key = "よ_call"                     # 儚き夢よ　いずこへ
+    elif m.pos == "particle" and m.surface == "は" and i > 0 and i + 2 < len(morphemes) \
+            and morphemes[i - 1].pos in ("verb", "auxiliary") and morphemes[i - 1].cform.startswith("連用形") \
+            and morphemes[i + 1].lemma in ("為る", "する") and morphemes[i + 2].lemma in ("ない", "無い", "ぬ", "ず"):
+        key = "は_stress"                   # 止められはしない
     elif m.pos == "particle":
         if m.surface == "ってば":
             key = "ってば"
@@ -188,6 +222,8 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "ね_mid"
         elif m.surface == "って" and i > 0:
             key = _quoting(morphemes, i)
+        elif m.surface == "の" and _after_a_predicate(morphemes, i) and closes_sentence(morphemes, i):
+            key = "の_explain"              # 好きだったの。, どうしたの？
         elif m.surface == "は" and i > 0 and morphemes[i - 1].conjunctive and morphemes[i - 1].surface in ("て", "で") \
                 and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("、", "，"):
             key = "は_after_te"              # そんな運転をしていては、大けがをする
