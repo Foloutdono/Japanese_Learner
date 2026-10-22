@@ -771,7 +771,7 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
   ctx.fillStyle = paper.bg
   ctx.fillRect(0, 0, L.w, L.h)
   // A shot through a camera, standing at its own scroll on the page; its
-  // head goes on up in its own colour, its foot on down.
+  // head goes on up in the page's ground, its foot on down.
   const view = (f, c, a = 1, dx = 0, dy = 0) => {
     const img = imgs[f.shot]
     if (!img || a <= 0) return
@@ -782,7 +782,9 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
     ctx.globalAlpha *= a
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
-    if (oy > 0) ctx.drawImage(img, 0, 0, SHOT.w, 1, ox, 0, SHOT.w * kk, oy)
+    // Above the screen's head, the page's own ground: its top-left corner,
+    // the margin beside the cards, however far the shot is scrolled.
+    if (oy > 0) ctx.drawImage(img, 2, 0, 1, 1, ox, 0, SHOT.w * kk, oy)
     ctx.drawImage(img, ox, oy, SHOT.w * kk, SHOT.h * kk)
     const foot = oy + SHOT.h * kk
     if (foot < L.h) ctx.drawImage(img, 0, SHOT.h - 1, SHOT.w, 1, ox, foot, SHOT.w * kk, L.h - foot)
