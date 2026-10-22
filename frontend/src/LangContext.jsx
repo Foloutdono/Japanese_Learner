@@ -3,21 +3,24 @@ import { track } from './lib/track'
 import { translations } from './i18n'
 import { getTranslations } from './lib/translationCache'
 import { pickInitialLang } from './lib/locale'
+import { savedLang, rememberLang, subscribeLang } from './lib/langChoice'
 
 const LangContext = createContext()
-
-function readSavedLang() {
-    // localStorage throws in private-mode/blocked-cookie contexts — the
-    // same case index.html's theme script guards against.
-    try { return localStorage.getItem('lang') } catch { return null }
-}
 
 export function LangProvider({ children }) {
     // The device's language, never asked: a first launch reads
     // navigator.language and the saved choice (Settings) wins after
-    // that. See lib/locale.js for the rule.
-    const [lang, setLang]         = useState(() => pickInitialLang(readSavedLang(), navigator.language))
+    // that. The choice lives on the account too (lib/langChoice.js), so
+    // a cleared browser or a second device reads it back. See
+    // lib/locale.js for the rule.
+    const [lang, setLang]         = useState(() => pickInitialLang(savedLang(), navigator.language))
     const [contentMaps, setContentMaps] = useState({ kanji: {}, vocab: {} })
+
+    // The account's answer arrives after the first paint (App.jsx's
+    // boot calls syncLang): follow it.
+    useEffect(() => subscribeLang(() => {
+        setLang(pickInitialLang(savedLang(), navigator.language))
+    }), [])
 
     useEffect(() => {
         // Swallowed on failure, deliberately: the content maps are an
@@ -36,7 +39,8 @@ export function LangProvider({ children }) {
     function switchLang(code) {
         if (code !== lang) track('setting_change', { setting: 'lang', value: code })   // plan 218
         setLang(code)
-        localStorage.setItem('lang', code)
+        // Local at once, and up to the account when there is a session.
+        rememberLang(code, import('./lib/session').then(m => m.currentSession()).catch(() => null))
     }
 
     // <html lang> drives which voice a screen reader uses. It has to

@@ -291,7 +291,11 @@ CREATE TABLE user_profiles (
     card_name TEXT,
     -- 番付に載らない (plan 262): the learner keeps off the board, left out
     -- of every list another learner reads (study/banzuke.py).
-    board_hidden BOOLEAN NOT NULL DEFAULT FALSE
+    board_hidden BOOLEAN NOT NULL DEFAULT FALSE,
+    -- The interface language the learner chose ('fr' | 'en'); NULL = never
+    -- chosen, the device's language applies. Copied back onto the device
+    -- on boot (frontend/src/lib/langChoice.js).
+    ui_lang TEXT
 );
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 

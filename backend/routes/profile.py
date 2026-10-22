@@ -184,6 +184,14 @@ def _init_db() -> None:
                 # 262): left out of every list another learner reads,
                 # still shown their own place. study/banzuke.py reads it.
                 ("board_hidden", "BOOLEAN NOT NULL DEFAULT FALSE"),
+                # The interface language the learner chose in Réglages ›
+                # Affichage ('fr' | 'en'); NULL = never chosen, so the
+                # device's language applies. Kept here as well as in the
+                # browser, which forgets (cleared storage, a second
+                # device): the app copies it back on boot, and nothing
+                # but the learner's own choice writes it. See
+                # frontend/src/lib/langChoice.js.
+                ("ui_lang", "TEXT"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -441,6 +449,20 @@ def _profile_row(user_id: str) -> tuple:
     return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False, None)
 
 
+def _ui_lang(user_id: str) -> str | None:
+    """The interface language the learner chose, or None if never. Read
+    apart from _profile_row, whose tuple half the server unpacks."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT ui_lang FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    value = (row["ui_lang"] if isinstance(row, dict) else row[0]) if row else None
+    return value if value in UI_LANGS else None
+
+
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
     """
     The display name for each of these user ids, in one round trip.
@@ -503,6 +525,10 @@ READING_PACES = ("standard", "relaxed", "slow", "untimed")
 DEFAULT_READING_PACE = "standard"
 
 
+# The interface languages (frontend/src/lib/locale.js SUPPORTED_LANGS).
+UI_LANGS = ("fr", "en")
+
+
 class LearningPayload(BaseModel):
     """Settings' partial update of the onboarding fields. All optional;
     a PATCH sending none of them is a caller bug and 422s. Deliberately
@@ -530,6 +556,17 @@ class LearningPayload(BaseModel):
     # 番付に載らない (plan 262), from the board's own page: True keeps
     # the learner off every board another learner reads.
     boardHidden: bool | None = None
+    # The interface language the learner picked (UI_LANGS), from Réglages
+    # › Affichage; sent on a change and again at boot when the account
+    # has not heard it.
+    uiLang: str | None = None
+
+    @field_validator("uiLang")
+    @classmethod
+    def valid_ui_lang(cls, v: str | None) -> str | None:
+        if v is not None and v not in UI_LANGS:
+            raise ValueError(f"must be one of {', '.join(UI_LANGS)}")
+        return v
 
     @field_validator("lines")
     @classmethod
@@ -809,6 +846,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # board. Read through the board's own roster, a minute old at
         # most and dropped whenever the switch moves.
         "boardHidden": banzuke.roster().get(user_id, ("", None, False))[2],
+        # The interface language the learner chose, null if never: the
+        # app copies it onto the device on boot (lib/langChoice.js).
+        "uiLang": _ui_lang(user_id),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -999,6 +1039,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.boardHidden is not None:
         sets.append("board_hidden = %s")
         args.append(payload.boardHidden)
+    if payload.uiLang is not None:
+        sets.append("ui_lang = %s")
+        args.append(payload.uiLang)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -1036,6 +1079,7 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "notifications": payload.notifications,
         "analyticsOff": payload.analyticsOff,
         "boardHidden": payload.boardHidden,
+        "uiLang": payload.uiLang,
         "levelRule": level_rule_result,
     }
 

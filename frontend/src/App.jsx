@@ -39,6 +39,7 @@ import { watchClientErrors } from './lib/clientErrors'
 import { watchVitals } from './lib/vitals'
 import { enterScreen } from './lib/screenTrail'
 import { syncOptOut } from './stores/analyticsOptOut'
+import { syncLang } from './lib/langChoice'
 import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
@@ -463,6 +464,10 @@ export default function App({ front = NO_FRONT }) {
         // 足跡を残さない (plan 218): the account's switch onto this
         // device, or this device's older local switch up to the account.
         syncOptOut(p.analyticsOff, session)
+        // The language the learner chose, kept on the account: a browser
+        // that forgot it reads it back, a choice only this device
+        // holds goes up (lib/langChoice.js).
+        syncLang(p.uiLang ?? null, session)
         // A real answer: the device now knows this learner is past
         // the gate, and may wave them through on a day the server is
         // not answering (stores/onboarded.js).
