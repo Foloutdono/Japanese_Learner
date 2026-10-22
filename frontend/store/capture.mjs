@@ -128,11 +128,17 @@ if (stage === 'todaybig') {
     await p.clock.install({ time: new Date(2026, 9, 22, hour, 20) })
     await p.goto(BASE + '/today'); await p.waitForTimeout(1500)
     await p.addStyleTag({ content: `
-      .tdy-dial--print{width:330px !important;margin:-66px 0 36px}
-      .tdy-dial--print .tdy-dial__count{font-size:112px !important}
+      .tdy-dial--print{width:376px !important;margin:-62px 0 40px}
+      .tdy-dial--print .tdy-dial__count{font-size:104px !important}
       .tdy-dial--print .tdy-dial__unit{font-size:${lang === 'fr' ? 27 : 38}px !important;font-weight:800 !important;letter-spacing:.06em !important;text-indent:.06em !important;margin-top:2px}
       .tdy-dial--print .tdy-dial__disc{filter:drop-shadow(0 0 16px rgba(255,240,205,.75))}
       .tpr-title{display:none !important}
+      .tdy-dial--print .tdy-dial__line{background:rgba(10,14,40,.62);padding:7px 18px;border-radius:999px;white-space:nowrap;backdrop-filter:blur(8px);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+      .tdy-dial__time{font-size:24px !important;color:#fff !important}
+      .tdy-dial__end{font-size:15px !important;color:rgba(255,255,255,.82) !important}
+      .tdy-key--lines{margin-top:46px !important;background:rgba(10,14,40,.62);padding:6px 20px;border-radius:999px;backdrop-filter:blur(8px);box-shadow:0 0 0 1px rgba(255,255,255,.14);gap:18px !important}
+      .tdy-key--lines b{font-size:19px !important;color:#fff !important}
+      .tdy-key__ring{width:13px !important;height:13px !important}
       .tdy-dial__disc g[clip-path]{opacity:.5 !important;fill:#b39a63 !important}
       .tdy-dial--print .tdy-dial__glow{filter:drop-shadow(0 0 30px rgba(255,238,190,.8))}` })
     await p.waitForTimeout(4500); await shot(name)
