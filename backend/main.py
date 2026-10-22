@@ -29,6 +29,7 @@ from starlette.concurrency import run_in_threadpool               # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
 from core.concurrency import PerCallerConcurrency                # noqa: E402
+from core.release_notice import ReleaseNoticeHeader              # noqa: E402
 from study.exam_tts import audio_dir, is_stale                    # noqa: E402
 from study.exam_audio_repair import restore_clip                  # noqa: E402
 
@@ -51,6 +52,7 @@ from routes.conversation     import router as conversation_router
 from routes.ask              import router as ask_router
 from routes.practice         import router as practice_router
 from routes.profile          import router as profile_router
+from routes.banzuke          import router as banzuke_router
 from routes.frequency       import router as frequency_router
 from routes.theme_vocab      import router as theme_vocab_router
 from routes.translation import router as translation_router
@@ -68,6 +70,7 @@ from routes.events          import router as events_router
 from routes.tts             import router as tts_router
 from routes.station         import router as station_router
 from routes.feedback        import router as feedback_router
+from routes.release         import router as release_router
 from routes.transfer        import router as transfer_router
 from routes.events          import router as events_router
 from core.credits import OutOfCredits, PassRequired, LimitReached
@@ -171,11 +174,17 @@ CORS_ORIGINS = ["https://japanese-learner-seven.vercel.app", *NATIVE_ORIGINS] + 
 # still carries the CORS headers the native shell needs to read it.
 app.add_middleware(PerCallerConcurrency)
 
+# 工事 -- the release the workflow announced (plan 265,
+# core/release_notice.py), on every /api answer, a 429 included. Exposed
+# through CORS for the native shell, whose requests are cross-origin.
+app.add_middleware(ReleaseNoticeHeader)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Release-At"],
 )
 
 # The translation maps (/api/translations/*) are the whole kanji and
@@ -204,6 +213,7 @@ app.include_router(conversation_router)
 app.include_router(ask_router)
 app.include_router(practice_router)
 app.include_router(profile_router)
+app.include_router(banzuke_router)
 app.include_router(frequency_router)
 app.include_router(theme_vocab_router)
 app.include_router(today_router)
@@ -219,6 +229,7 @@ app.include_router(tts_router)
 app.include_router(station_router)
 app.include_router(feedback_router)
 app.include_router(transfer_router)
+app.include_router(release_router)
 
 
 # ── 402 — the fare gate's three refusals (plan 069) ──

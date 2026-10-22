@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **259**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **272**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -53,12 +53,24 @@ runtime purpose.
   through the renames module and its `migrate_*` script, never an edit in
   place. A card whose reading was wrong is retired (`RETIRED`) rather than
   moved, so its learners start the corrected card fresh.
+- **A card's level moves on two signals, and only down (plan 260).** The
+  community lists (`datas/vocab/sources/jlpt_tanos.json`, the deck's own
+  ancestor) must put the word lower, and the app must too: a lesson of
+  that level teaches it, or a sentence of that level has it, read by hand
+  (a breakdown's badge of a kana word as some kanji card is no evidence).
+  It goes to the level both support; a word the lists lack, to the lowest
+  level whose sentences use it, when its subtitle rank sits in that
+  level's range. One signal is the content audit's, not a move.
+  `docs/vocab-deck-review.md`, "260", has the rule and what it left.
 - **Bump the revision when the output changes.** Anything cached or stored
   per output carries a revision: `LOCAL_REV` in `study/analysis.py` (the
   breakdown), the `phrase_analysis_cache` version (the deep tier),
   `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
-  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219).
+  `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
+  `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
+  plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
+  session's lines are cut into).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
   retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
@@ -117,6 +129,10 @@ runtime purpose.
   of ordinary text (noun と, 持って来る, ならんで) are named in
   `_NOT_THE_POINT` and pinned in `tests/test_exam_levels.py` with the
   sentence that must still be found; a new exemption brings its counter-case.
+  Comprehension is held to the same gate since plan 261 (`level_mix`'s
+  `grammar_over`, a hard rule for the seeds), so a misreading is named once
+  for both, and no rule may hide its point's own lessons
+  (`test_every_rule_leaves_its_points_lessons_found`).
   A fill-in stem keeps its one ＿＿＿＿ and a paraphrase its underlined word
   (`item_shape_problems`): a stem edited by hand can lose either, and no
   other check notices.
@@ -152,6 +168,19 @@ runtime purpose.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
   diffed over every sentence Construire asks.
+- **Every part of a breakdown says what it is (plan 266).** A word row
+  carries its card's meaning, a particle or an ending the point written
+  on it, a number its figure and a name the word "name" (the token's
+  `gloss`, `{en, fr}`); a part with none of these is a gap, and
+  `python -m scripts.breakdown_gaps` lists them over every sentence the
+  app teaches. A function word reaches the deck's kana card through
+  `card_lookup`'s breakdown-only resolvers ("the words that hold a
+  sentence together"), never through `resolve_morpheme`, so no card a
+  particle or a suffix gains grades a sentence's level; a set phrase is
+  folded only where it is a whole utterance and a part of it said
+  nothing, and a marker read inside a folded word is dropped. A missing
+  meaning still beats a guessed one: the copula's に after a noun and
+  〜らしい after one stay unlit (`test_grammar_precision.py` pins both).
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
@@ -189,6 +218,17 @@ runtime purpose.
   or serves the ration does too. A tour can always be skipped for its
   card; a run the learner boards on purpose (a grammar run, a unit) is
   not capped.
+- **A place on the 番付 is read off one list (plan 262).** `study/banzuke.py`
+  ranks each board (all time, the calendar week from Monday 00:00 UTC, a
+  division) from one sum, `srs.xp_totals`, a minute old at most, a tie
+  broken by the user id: a page, the learner's own place, the rows around
+  it, the gap to the next and the move since the day began are all read
+  off it, never off a second count. The divisions (序ノ口 … 幕内) are
+  settled lazily by the week's first board, once (`banzuke_marks`). A
+  learner who keeps off the board (`board_hidden`) is in no list another
+  learner reads and still sees their own place; a row's card shows what
+  the board already does (XP, level, places, division) and published
+  decks, never the streak, the JLPT level or the card's name.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -506,7 +546,7 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-six hand-written exercises per level since plan 230, in both languages,
+thirty hand-written exercises per level since plan 259, in both languages,
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -834,6 +874,19 @@ Draft a scenario against it:
 cd backend
 python -m scripts.check_conversation            # every level; exit 1 on a problem
 python -m scripts.check_conversation --level N4
+```
+
+The breakdown has one too (plan 266): every part of the app's own
+sentences that says nothing -- a word row with no meaning, a particle no
+point is written on -- grouped by kind, each with a sentence that shows
+it. A reason to look; a gap is closed in the lookups or the detector by
+counter-case:
+
+```bash
+cd backend
+python -m scripts.breakdown_gaps                          # the gaps, by kind
+python -m scripts.breakdown_gaps --kind silent_particle   # one kind, longer
+python -m scripts.breakdown_gaps --json                   # every gap, as JSON
 ```
 
 One more read-only report measures the vocab deck itself (plan 103) —

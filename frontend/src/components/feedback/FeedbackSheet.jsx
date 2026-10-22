@@ -5,8 +5,8 @@ import { Sheet } from '../chrome/Sheet'
 import { Seg, Chip } from '../chrome/Console'
 import { FlagIcon } from '../ui/Icons'
 import {
-  KINDS, CARD_REASONS, TEXT_MAX,
-  feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback,
+  KINDS, CARD_REASONS, QUESTION_REASONS, TEXT_MAX, CONTACT,
+  feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback, questionReport,
 } from '../../lib/feedback'
 import { useFeedbackSheet, openFeedback, openCardReport, closeFeedback } from '../../stores/feedbackSheet'
 
@@ -21,8 +21,8 @@ import { useFeedbackSheet, openFeedback, openCardReport, closeFeedback } from '.
 // Nothing leaves the device unsaid: the classes joined to a message are
 // printed under their box before sending, and unticking it sends none.
 // The reply goes to the account's own address, read by the server
-// (routes/feedback.py); the sheet only names it, and offers none to a
-// guest, who has no address.
+// (routes/feedback.py); the sheet names the address it comes from,
+// Tsuji's, and offers none to a guest, who has no address.
 
 // The day a stamp prints, as a station's date stamp does: 16.10.26.
 function stampDate(at) {
@@ -31,7 +31,7 @@ function stampDate(at) {
   return `${two(d.getDate())}.${two(d.getMonth() + 1)}.${two(d.getFullYear() % 100)}`
 }
 
-function Sent({ at, reply, onClose }) {
+export function Sent({ at, reply, onClose }) {
   const { t } = useLang()
   return (
     <div className="fb-sent" role="status">
@@ -131,7 +131,7 @@ export function FeedbackForm({ session, failure = null, onClose = null }) {
           <input type="checkbox" className="fb-check__box" checked={reply} onChange={e => setReply(e.target.checked)} />
           <span className="fb-check__words">
             {t.fbReply}
-            <b className="fb-check__what">{email}</b>
+            <b className="fb-check__what">{CONTACT}</b>
           </span>
         </label>
       )}
@@ -176,6 +176,8 @@ function CardReport({ session, card, onClose }) {
   const [sent, setSent] = useState(null)
   const inFlight = useRef(false)
   const face = cardFace(card)
+  const exam = card.exam ?? null
+  const reasonKeys = exam ? QUESTION_REASONS : CARD_REASONS
 
   if (sent) return <Sent at={sent} reply={false} onClose={onClose} />
 
@@ -190,24 +192,35 @@ function CardReport({ session, card, onClose }) {
     setError(null)
     // The card is what is joined, and the strip above says so: its id,
     // nothing about the device.
-    sendFeedback(session, { kind: 'card', card_id: card.card_id, reasons, text })
+    sendFeedback(session, exam
+      ? { kind: 'question', exam_id: exam.examId, revision: exam.revision, question_id: exam.questionId, reasons, text }
+      : { kind: 'card', card_id: card.card_id, reasons, text })
       .then(res => setSent(res?.at ? new Date(res.at) : new Date()))
       .catch(err => { inFlight.current = false; setError(refusal(err)); setBusy(false) })
   }
 
   return (
     <form className="fb-form" onSubmit={submit}>
-      <div className="fb-card">
-        <span className="fb-card__face" lang="ja">{face.face}</span>
-        <span className="fb-card__names">
-          {face.reading && <span className="fb-card__reading" lang={card.kanji ? 'ja' : undefined}>{face.reading}</span>}
-          {face.meaning && <span className="fb-card__gloss">{face.meaning}</span>}
-        </span>
-        {face.level && <span className="fb-card__level">{face.level}</span>}
-      </div>
+      {exam ? (
+        <div className="fb-card">
+          <span className="fb-card__face">{t.examQuestionAbbrev}{exam.number}</span>
+          <span className="fb-card__names">
+            <span className="fb-card__gloss">{exam.examId}</span>
+          </span>
+        </div>
+      ) : (
+        <div className="fb-card">
+          <span className="fb-card__face" lang="ja">{face.face}</span>
+          <span className="fb-card__names">
+            {face.reading && <span className="fb-card__reading" lang={card.kanji ? 'ja' : undefined}>{face.reading}</span>}
+            {face.meaning && <span className="fb-card__gloss">{face.meaning}</span>}
+          </span>
+          {face.level && <span className="fb-card__level">{face.level}</span>}
+        </div>
+      )}
       <div className="fb-reasons" role="group" aria-label={t.cardReportReasons}>
-        {CARD_REASONS.map(r => (
-          <Chip key={r} on={reasons.includes(r)} onClick={() => toggle(r)}>{t.cardReason[r]}</Chip>
+        {reasonKeys.map(r => (
+          <Chip key={r} on={reasons.includes(r)} onClick={() => toggle(r)}>{(exam ? t.questionReason : t.cardReason)[r]}</Chip>
         ))}
       </div>
       <textarea
@@ -246,6 +259,22 @@ export function CardFlag({ card }) {
   )
 }
 
+/** "Signaler cette question" under a sat question in the result's review.
+ *  The sheet is FeedbackHost's, as the card flag's is. */
+export function QuestionReport({ examId, revision, question }) {
+  const { t } = useLang()
+  return (
+    <button
+      type="button"
+      className="fb-link"
+      aria-haspopup="dialog"
+      onClick={() => openCardReport(questionReport(examId, revision, question))}
+    >
+      {t.questionReport}
+    </button>
+  )
+}
+
 /** The sheets a run raises (stores/feedbackSheet), rendered once by App
  *  beside <Routes/> so that nothing on the screen can take them away
  *  mid-sentence. A navigation shuts them: they were about that screen. */
@@ -256,7 +285,7 @@ export function FeedbackHost({ session }) {
   useEffect(() => closeFeedback, [pathname])
   if (open?.card) {
     return (
-      <Sheet open onClose={closeFeedback} cap={t.cardReport} label={t.cardReport} className="fb-sheet" dismiss>
+      <Sheet open onClose={closeFeedback} cap={open.card.exam ? t.questionReport : t.cardReport} label={open.card.exam ? t.questionReport : t.cardReport} className="fb-sheet" dismiss>
         <CardReport session={session} card={open.card} onClose={closeFeedback} />
       </Sheet>
     )

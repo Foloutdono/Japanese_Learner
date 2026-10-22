@@ -202,6 +202,19 @@ class Morpheme:
     # place. JMdict, the pool, files almost none, so the commonest row of
     # a name's spelling is another word (plan 236: 博 read ひろし is no 博
     # read はく, "doctor").
+    name_kind: str = ""  # Which name a 固有名詞 is, read off UniDic's
+    # pos3 and pos4 (plan 266): "family" (人名-姓, 田中), "given"
+    # (人名-名, ゆき), "person" (人名-一般, マルタン), "place" (地名,
+    # 新宿) or "other" (ポチ); "" for any other word. What a breakdown
+    # says of a name the course has no card for.
+
+
+def _name_kind(pos2: str, pos3: str, pos4: str) -> str:
+    if pos2 != "固有名詞":
+        return ""
+    if pos3 == "人名":
+        return {"姓": "family", "名": "given"}.get(pos4, "person")
+    return "place" if pos3 == "地名" else "other"
 
 
 def _conjugation(raw) -> str:
@@ -336,6 +349,8 @@ def _tag(text: str, offset: int = 0) -> tuple[list[Morpheme], list[tuple]]:
             cform=_conjugation(getattr(feat, "cForm", None)),
             goshu=_conjugation(getattr(feat, "goshu", None)),
             proper=(pos2 == "固有名詞"),
+            name_kind=_name_kind(pos2 or "", getattr(feat, "pos3", None) or "",
+                                 getattr(feat, "pos4", None) or ""),
         ))
     return morphemes, tags
 

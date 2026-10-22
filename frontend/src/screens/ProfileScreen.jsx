@@ -113,14 +113,14 @@ export default function ProfileScreen({ session }) {
       .then(setProfile)
       .catch(() => { setProfile(buildMockProfile()); setStale(true) })
 
-    apiFetch(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}`, session)
+    apiFetch(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}&around=1`, session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setLeaderboard)
       .catch(() => { setLeaderboard(MOCK_LEADERBOARD); setWeekBoard(MOCK_WEEK_LEADERBOARD); setStale(true) })
 
     // The week side of the board is optional: without it the board
     // simply has no toggle, so its failure never marks the screen stale.
-    apiJson(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}&period=week`, session)
+    apiJson(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}&around=1&period=week`, session)
       .then(setWeekBoard)
       .catch(() => {})
 
@@ -184,7 +184,7 @@ export default function ProfileScreen({ session }) {
     // The tickets' and the agenda's doors as one lattice under the card:
     // the desk's (plan 248).
     holderDoors: <HolderDoors t={t} navigate={navigate} count={profile.tickets?.length ?? 0} blocks={agenda} />,
-    board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} />,
+    board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} session={session} />,
   }
 
   return (

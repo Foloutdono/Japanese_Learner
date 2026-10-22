@@ -17,6 +17,8 @@ import { cleanCardName } from '../domain/passCard'
 import { dateFormat, paceLabel, stopParts } from '../components/settings/contract'
 import { BoardHead } from '../components/boarding/BoardFrame'
 import { useBoardKeys } from '../hooks/useBoardKeys'
+import { useErrorStep } from '../hooks/useErrorStep'
+import { BOARDING_STEPS } from '../domain/flowSteps'
 import { useDesk } from '../hooks/useDesk'
 import { useBoxWidth } from '../hooks/useBoxWidth'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
@@ -28,6 +30,7 @@ import { DeskStrip } from '../components/boarding/DeskStrip'
 import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
 import { failureOf } from '../lib/feedback'
 import { BoardBack } from '../components/boarding/boardBack'
+import { noteAskedToKeep } from '../lib/guest'
 
 // ── 乗車 — the boarding (plan 075; the card is the form, plan 247) ──
 // The owner's pick C of the boarding's canvas ("Tsuji — the boarding,
@@ -53,8 +56,12 @@ import { BoardBack } from '../components/boarding/boardBack'
 // The boarding runs on a guest pass -- a real Supabase user with no
 // credentials on it (lib/guest.js) -- and the card's account sheet
 // offers to keep it on the very row the learner is filling in: Google,
-// or a link sent to an address. Nothing is migrated because nothing
-// moved; a learner who says « Plus tard » rides on as they were.
+// or an address and a password (plan 270). Nothing is migrated because
+// nothing moved; a learner who says « Plus tard » rides on as they were.
+// Since plan 270 the gate asks before it issues: a guest who has not
+// kept the card, pressing « Émettre ma carte », is shown that sheet
+// first, once, and « Continuer en invité » there issues the card as
+// it stands. Kept or sent from it, the card issues too.
 //
 // `onExit` is the way back OUT of the first question: back on the kana
 // has nowhere to go inside the flow, so it leaves for Welcome, where the
@@ -137,7 +144,6 @@ const PULL_MS = 260
 const DESK_PULL_MS = 820
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
-const STEPS = ['kana', 'reveal', 'level', 'test', 'card']
 
 // The track's stops: the kana, a reader's level, the card -- the reveal
 // is the kana's stop's second half and the test the level's own, never
@@ -177,16 +183,25 @@ export default function BoardingFlow({
     cardName: '',
     ...(resumed?.answers ?? {}),
   })
-  const [step, setStep] = useState(() => (STEPS.includes(resumed?.step) ? resumed.step : 'kana'))
+  const [step, setStep] = useState(() => (BOARDING_STEPS.includes(resumed?.step) ? resumed.step : 'kana'))
+  useErrorStep(step)
   // The card's open sheet. A Google round trip that came back refused
   // reopens the account's, where the refusal is said; one that worked
   // comes back to the card, kept.
   const [sheet, setSheet] = useState(() => (resumed?.sheet === 'account' && guest ? 'account' : null))
   const [edited, setEdited] = useState(() => ({ ...UNEDITED, ...(resumed?.edited ?? {}) }))
   // How the card was kept here: 'google' (the round trip, or the native
-  // sheet), 'link' (an address sent its link). null is not kept here.
+  // sheet), 'password' (an address and a password, plan 270), 'link' (an
+  // address waiting on its confirmation). null is not kept here.
   const [keptBy, setKeptBy] = useState(() => (!guest && resumed?.keeping === 'google' ? 'google' : null))
+  // The address an account was just made with here (plan 270), until the
+  // session that carries it arrives; and one waiting on its confirmation.
+  const [keptEmail, setKeptEmail] = useState(null)
   const [linkSent, setLinkSent] = useState(null)
+  // Plan 270: whether the gate has asked for an address, and whether the
+  // account sheet open now is that ask (its way past then issues).
+  const [askedKeep, setAskedKeep] = useState(() => Boolean(resumed?.askedKeep))
+  const [asking, setAsking] = useState(() => Boolean(resumed?.asking) && guest)
   const [history, setHistory] = useState(() => resumed?.history ?? [])
   const [leaving, setLeaving] = useState(null)   // { step, dir } during a pull
   const [volumes, setVolumes] = useState(null)
@@ -413,7 +428,7 @@ export default function BoardingFlow({
   }
 
   // ── The card's sheets ────────────────────────────────────────
-  const close = () => setSheet(null)
+  const close = () => { setSheet(null); setAsking(false) }
   const edit = field => setEdited(e => (e[field] ? e : { ...e, [field]: true }))
   // The origin goes back to the question that set it: a reader's level,
   // or the kana.
@@ -529,17 +544,28 @@ export default function BoardingFlow({
   }
 
   // Where the card lives: an account the learner boarded with, or one
-  // kept here; a link on its way; or this device alone.
+  // kept here; an address waiting on its link; or this device alone.
   const user = session?.user ?? null
   const viaGoogle = keptBy === 'google'
     || user?.app_metadata?.provider === 'google'
     || (user?.identities ?? []).some(i => i.provider === 'google')
   const kept = !guest
     ? { state: viaGoogle ? 'google' : 'account', email: user?.email ?? null }
+    : keptBy === 'password' ? { state: 'account', email: keptEmail }
     : linkSent ? { state: 'sent', email: linkSent } : { state: 'device' }
 
-  function complete() {
+  // `by` is how the ask was just answered ('google', 'password', 'link',
+  // 'guest'), which this render's state does not hold yet.
+  function complete(by = null) {
     if (busy) return
+    // The gate asks first, once (plan 270): Today's ask then waits a day.
+    if (guest && !askedKeep && !linkSent && !keptBy && by == null) {
+      setAskedKeep(true)
+      setAsking(true)
+      setSheet('account')
+      if (!dryRun) noteAskedToKeep(session?.user?.id)
+      return
+    }
     if (dryRun) { onComplete(); return }
     setBusy(true)
     setSaveError(null)
@@ -593,7 +619,7 @@ export default function BoardingFlow({
           edited_hour: edited.hour,
           edited_lines: edited.lines,
           named: answers.cardName.length > 0,
-          kept: keptBy ?? (guest ? (linkSent ? 'link' : 'none') : 'already'),
+          kept: (by === 'guest' ? null : by) ?? keptBy ?? (guest ? (linkSent ? 'link' : 'none') : 'already'),
           // The same measure across the whole line.
           ms: watches.current?.total.read() ?? 0,
         })
@@ -680,9 +706,11 @@ export default function BoardingFlow({
         sent={linkSent}
         // The last moment before the web navigates away for Google, when
         // the answers still only exist in memory.
-        onLeaveForAuth={() => stash({ answers, step: 'card', sheet: 'account', keeping: 'google', edited, history })}
-        onKept={by => { setKeptBy(by); close() }}
-        onSent={email => { setLinkSent(email); setKeptBy('link'); close() }}
+        onLeaveForAuth={() => stash({ answers, step: 'card', sheet: 'account', keeping: 'google', edited, history, askedKeep, asking })}
+        // Raised by the gate, an answer issues the card (plan 270).
+        onGuest={asking ? () => { close(); complete('guest') } : null}
+        onKept={(by, email = null) => { setKeptBy(by); setKeptEmail(email); close(); if (asking) complete(by) }}
+        onSent={email => { setLinkSent(email); setKeptBy('link'); close(); if (asking) complete('link') }}
       />
     </>
   )
@@ -718,8 +746,10 @@ export default function BoardingFlow({
             kept={kept}
             onOpen={openDoor}
             onSign={() => setSheet('name')}
-            onKeep={() => setSheet('account')}
-            onEnter={complete}
+            // Opened by the learner, the sheet has been seen: the gate
+            // does not ask again (plan 270).
+            onKeep={() => { setAskedKeep(true); setSheet('account') }}
+            onEnter={() => complete()}
             onSwitch={guest ? null : onSignIn}
             onReport={() => setReporting(true)}
             busy={busy}

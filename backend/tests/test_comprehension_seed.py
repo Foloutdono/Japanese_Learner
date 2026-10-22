@@ -40,13 +40,14 @@ def _squash_sentence(jp: str) -> str:
 @pytest.mark.parametrize("lang", seed.LANGS)
 def test_every_seed_passes_the_checks_a_model_answer_must(entry, lang):
     """Parsed and checked exactly as a model's reply would be, in each
-    language: the breakdown reproduces the text, the vocabulary and the
-    kanji sit inside the level, and every seed pattern is found. Length
-    is a hard rule here where the generator only feeds it back: a seed
-    is written by hand and has no excuse."""
+    language: the breakdown reproduces the text, the vocabulary, the
+    kanji and the grammar sit inside the level, and every seed pattern
+    is found. Length and grammar are hard rules here where the generator
+    only feeds them back (grammar since plan 261 read it as the mock
+    papers do): a seed is written by hand and has no excuse."""
     data = reading._parse_comprehension(json.dumps(seed.render(entry, lang), ensure_ascii=False))
     verdict = reading._check_comprehension(data, entry["level"], _seed_points(entry))
-    problems = verdict.repro + verdict.vocab + verdict.kanji + verdict.length
+    problems = verdict.repro + verdict.vocab + verdict.kanji + verdict.grammar_over + verdict.length
     problems += [f"seed missing {p['pattern']}" for p in verdict.seeds_missing]
     assert problems == [], "\n".join(problems)
 
@@ -118,6 +119,25 @@ def test_a_rendered_seed_has_the_generated_shape():
     for g in data["grammar_points"]:
         assert set(g) == {"pattern", "structure", "meaning", "level", "raw_id"}
         assert g["raw_id"].startswith(f"grammar_{g['level']}_")
+
+
+def test_a_request_reads_the_index_and_nothing_keeps_the_seeds():
+    """Parsed, the seeds weigh some 86 KB each (13 MB at 150), which a
+    process that kept them would carry for its whole life inside the
+    backend's 512 MB. So entries() reads the files at each call, and a
+    request reads index(): each seed's title, text and grammar, and the
+    questions of each level's first seed besides, 257 KB at 150 seeds.
+    index() parses the files on its own, cutting each seed as it is
+    read, so it is held to by_level(): the same seeds in the same order,
+    and nothing else."""
+    assert seed.entries() is not seed.entries(), "entries() reads the files at each call"
+    whole = seed.by_level()
+    index = seed.index()
+    assert list(index) == list(whole)
+    for level, rows in whole.items():
+        expected = [{"title": e["title"], "text": e["text"], "grammar": e["grammar"]} for e in rows]
+        expected[0]["questions"] = rows[0]["questions"]
+        assert list(index[level]) == expected, level
 
 
 # ── The pool ─────────────────────────────────────────────────

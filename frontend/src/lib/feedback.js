@@ -11,7 +11,21 @@ import { visitContext } from './visitContext'
 
 export const KINDS = ['problem', 'idea', 'fault']
 export const CARD_REASONS = ['reading', 'meaning', 'audio', 'example', 'other']
+// A mock-exam question's: `answer` is a wrong key.
+export const QUESTION_REASONS = ['answer', 'ambiguous', 'audio', 'other']
+
+/** What a mock-exam question's sheet is opened with: the paper (exam id
+ *  and revision) and the question, which is all its report carries. */
+export function questionReport(examId, revision, question) {
+  return { exam: { examId, revision, questionId: question.id, number: question.number } }
+}
 export const TEXT_MAX = 1000
+// The early-access sheet's rating, one to five (plan 269): the message of
+// kind `rating`, which has a sheet of its own and so is not in KINDS.
+export const RATINGS = [1, 2, 3, 4, 5]
+// The address an answer comes from, the one privacy.html gives. The
+// learner's own is read by the server (routes/feedback.py), never here.
+export const CONTACT = 'contact.tsujijapanese@gmail.com'
 
 const OS_NAMES = {
   ios: 'iOS', android: 'Android', windows: 'Windows', mac: 'macOS', linux: 'Linux', chromeos: 'ChromeOS',

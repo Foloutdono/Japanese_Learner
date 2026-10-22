@@ -949,11 +949,16 @@ function ExamCover({ exam, section, questions, last, onStart, onLeave }) {
   return (
     <div className="screen">
       <main id="main-content" className="container stage exam-run exam-run--cover" style={{ '--line-color': EXAM_COLOR }}>
+        {/* The run head's three slots (StageHead, 両端), with nothing to
+            press at the far end: the name stands on the middle. */}
         <div className="stage__head">
-          <Leave onClick={onLeave}>{t.examPapers}</Leave>
+          <span className="stage__end">
+            <Leave onClick={onLeave} bare title={t.examPapers}><span className="sr-only">{t.examPapers}</span></Leave>
+          </span>
           <span className="stage__where">
             <h1 className="stage__where-jp">{paperTitle(exam, t)}</h1>
           </span>
+          <span className="stage__end stage__end--end" />
         </div>
         <section className="exam-cover" aria-label={label}>
           <div className="exam-cover__names">

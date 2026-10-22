@@ -115,6 +115,7 @@ WITH routes(route) AS (VALUES
     ('/profile'),
     ('/profile/stats'),
     ('/profile/tickets'),
+    ('/profile/banzuke'),
     ('/profile/settings'),
     ('/profile/settings/:page')
 ), vues AS (

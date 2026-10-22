@@ -1703,6 +1703,10 @@
 .tok-line[data-sung] .tok__furi {
   mask-image: linear-gradient(to right, #000 var(--said, 0%), rgb(0 0 0 / 40%) var(--said, 0%));
 }
+/* The phone stage's readings, a rung down with its line where the line
+   steps down to fit the stage (useLineFit). */
+.anl-m__subs[data-fit="1"] .tok__furi { font-size: var(--fs-caption); }
+.anl-m__subs[data-fit="2"] .tok__furi { font-size: var(--fs-caption-xs); }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
 :is(.anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
@@ -1838,6 +1842,80 @@
 a.anl-song__deck { color: var(--text-primary); text-decoration: none; }
 a.anl-song__deck:hover .picker-row__name,
 a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── 歌 — a song's lyrics into a deck, from the shelf (plan 264) ──
+   The song sheet's form (.anl-song) on 教材's sheet: the source, the
+   wait, then the two piles the sort made -- the sung lines ticked, the
+   rest not -- a line a row, its tick at the lead, how often it comes
+   back and what the sort took it for at the end. A row keeps its place
+   when it is ticked: the pile is the sort's, the tick the learner's. */
+.lyr-source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.lyr-note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+/* The wait: the dots and the sentence on one line, in the middle. */
+.lyr-wait {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--sp-6);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.lyr-pile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lyr-pile > legend { margin-bottom: var(--sp-2); padding: 0; }
+.lyr-line {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px; /* a hit target, as .btn-secondary's */
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.lyr-line--on {
+  border-color: var(--line-kaiseki);
+  color: var(--text-primary);
+}
+.lyr-line:has(.lyr-line__check:focus-visible) { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+.lyr-line__check {
+  flex: none;
+  margin: 0;
+  accent-color: var(--line-kaiseki);
+}
+.lyr-line__text {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  overflow-wrap: anywhere;
+}
+.lyr-line__times,
+.lyr-line__kind {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
 
 /* There is no rule for the rail under 1100px because there is no rail
    under 1100px (2026-09-11). It used to stack above the stage as a
@@ -3191,6 +3269,7 @@ button:focus-visible {
 .stage,
 .profile,
 .stats,
+.bzp,
 .settings {
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
@@ -6807,6 +6886,20 @@ textarea:focus-visible {
   gap: var(--sp-4);
   min-height: 40px;
 }
+/* 両端 (2026-10-20, the owner's pick C of "Tsuji -- the run's head,
+   centred"): the way out at one end, what you press at the other, the
+   place between. The two ends grow alike from nothing, so the name
+   stands on the screen's middle whatever each end holds; neither gives
+   up its own width, so a crowded end pushes the name aside before it
+   clips a control. */
+.stage__end {
+  flex: 1 1 0;
+  min-width: max-content;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.stage__end--end { justify-content: flex-end; }
 
 /* ‹ and the name of where it goes. Bare since plan 174 (一戻, one way
    back): it was the one boxed control in a bar of plain words, and the
@@ -6829,13 +6922,22 @@ textarea:focus-visible {
 }
 .stage__leave:hover,
 .stage__leave:focus-visible { color: var(--text-primary); filter: none; }
+/* The run head's way out, its chevron alone: the 44px square is the
+   target, its word the .sr-only inside it and the tooltip. */
+.stage__leave--bare {
+  min-width: var(--sp-8);
+  padding: 0;
+}
 .stage__where {
   display: flex;
   flex-direction: column;
+  align-items: center;
   min-width: 0;
-  flex: 1;
+  flex: 0 1 auto;
+  text-align: center;
 }
 .stage__where-jp {
+  max-width: 100%;
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
@@ -6843,6 +6945,14 @@ textarea:focus-visible {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* Under the name, what counts: the sub, the remaining pill, the
+   streak's stamp (a rung smaller there, by the stamp's own rule). */
+.stage__where-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
 }
 .stage__where-latin {
   font-family: var(--font-display);
@@ -6945,6 +7055,24 @@ textarea:focus-visible {
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   color: var(--sheet-cap-ink);
+}
+/* 歌 — the lyrics import's head (plan 264; option A of three drawn,
+   the owner's pick of 2026-10-20): the song's icon in the analyser's
+   roundel, and the title in words at a card title's size, where every
+   other sheet prints a kanji over a caption. */
+.lyr-sheet .sheet__head { align-items: center; }
+.lyr-sheet .sheet__jp { display: inline-flex; line-height: 1; }
+/* Two classes: .wmap-roundel, later in the file, sets its own 30px. */
+.sheet__head .lyr-sheet__badge {
+  --line-color: var(--line-kaiseki);
+  width: 40px;
+  height: 40px;
+}
+.lyr-sheet .sheet__cap {
+  font-size: var(--fs-title);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-primary);
 }
 
 /* ── the console: chips over a field with a count ── */
@@ -8217,6 +8345,11 @@ textarea:focus-visible {
 .seg__opt:first-child { border-left: 0; }
 .seg__opt:hover,
 .seg__opt:focus-visible { color: var(--text-primary); filter: none; }
+/* The global ring, inset, as the analyser's pill's (.anl-seg__opt):
+   `.seg` clips, and the ring of the option a sheet focused on opening
+   showed as a gold edge on its neighbour's side, read as a border the
+   selected option does not have (plan 264). */
+.seg__opt:focus-visible { outline-offset: -2px; }
 .seg__opt--on { background: var(--sel-wash); color: var(--sel-ink); box-shadow: inset 0 -2px 0 var(--accent2); }
 /* The canvas's variants (plan 068): a plain-word option, the full-width
    form (the analyzer's Text / Photo / Video), the analyzer's pigment. */
@@ -9083,6 +9216,21 @@ textarea:focus-visible {
 .tpr-scull { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-scull; }
 .tpr-spark { animation-iteration-count: infinite; opacity: 0; animation-name: tpr-spark; animation-timing-function: ease-out; }
 .tpr-glitter { opacity: 0; animation-name: tpr-glitter; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+/* The seasons' own (plan 261): the snow's sway, the fireflies' wander
+   and blink, the fireworks opening. */
+.tpr-sway { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-sway; animation-direction: alternate; }
+.tpr-wander { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-wander; animation-direction: alternate; }
+.tpr-blink { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-blink; }
+.tpr-burst { transform-box: view-box; opacity: 0; animation-iteration-count: infinite; animation-name: tpr-burst; animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+/* The day's gulls (plan 261, round 4): a long glide, leaning into its
+   turns, then three slow beats. */
+.tpr-gwing, .tpr-ghand, .tpr-gbody { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--cyc, 15s); animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+.tpr-gwing--r { animation-name: tpr-gbeat-r; }
+.tpr-gwing--l { animation-name: tpr-gbeat-l; }
+.tpr-ghand--r { animation-name: tpr-gflex-r; }
+.tpr-ghand--l { animation-name: tpr-gflex-l; }
+.tpr-gbody { animation-name: tpr-gbob; }
+.tpr-groll { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-groll; animation-direction: alternate; }
 @keyframes tpr-bird-bend { 0%, 100% { rotate: 14deg; } 42% { rotate: -22deg; } }
 @keyframes tpr-bird-bend-glide { 0%, 40%, 100% { rotate: 12deg; } 18%, 58% { rotate: -20deg; } 80% { rotate: 4deg; } }
 @keyframes tpr-bird-fold { 0% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
@@ -9150,6 +9298,16 @@ textarea:focus-visible {
 @keyframes tpr-scull { 0%, 100% { rotate: -5deg; } 50% { rotate: 6deg; } }
 @keyframes tpr-spark { 0% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 100% { opacity: 0; translate: 1.6px -7px; } }
 @keyframes tpr-glitter { 0%, 50%, 100% { opacity: 0; } 68% { opacity: 1; } }
+@keyframes tpr-sway { from { translate: calc(var(--sx, 0%) * -1) 0; } to { translate: var(--sx, 0%) 0; } }
+@keyframes tpr-wander { 0% { translate: 0 0; } 50% { translate: var(--wx, 0%) var(--wy, 0%); } 100% { translate: calc(var(--wx, 0%) * -0.6) calc(var(--wy, 0%) * 0.4); } }
+@keyframes tpr-blink { 0%, 100% { opacity: 0.12; } 30% { opacity: 1; } 55% { opacity: 0.85; } 75% { opacity: 0.08; } }
+@keyframes tpr-burst { 0% { opacity: 0; scale: 0.15; } 6% { opacity: 1; } 34% { opacity: 0.85; scale: 1; translate: 0 2px; } 52% { opacity: 0; scale: 1.05; translate: 0 6px; } 100% { opacity: 0; scale: 1.05; } }
+@keyframes tpr-gbeat-r { 0%, 55%, 100% { rotate: 0deg; } 61% { rotate: -30deg; } 67% { rotate: 18deg; } 73% { rotate: -30deg; } 79% { rotate: 18deg; } 85% { rotate: -30deg; } 92% { rotate: 6deg; } }
+@keyframes tpr-gbeat-l { 0%, 55%, 100% { rotate: 0deg; } 61% { rotate: 30deg; } 67% { rotate: -18deg; } 73% { rotate: 30deg; } 79% { rotate: -18deg; } 85% { rotate: 30deg; } 92% { rotate: -6deg; } }
+@keyframes tpr-gflex-r { 0%, 55%, 100% { rotate: 0deg; } 62% { rotate: 16deg; } 68% { rotate: -14deg; } 74% { rotate: 16deg; } 80% { rotate: -14deg; } 86% { rotate: 16deg; } 93% { rotate: -4deg; } }
+@keyframes tpr-gflex-l { 0%, 55%, 100% { rotate: 0deg; } 62% { rotate: -16deg; } 68% { rotate: 14deg; } 74% { rotate: -16deg; } 80% { rotate: 14deg; } 86% { rotate: -16deg; } 93% { rotate: 4deg; } }
+@keyframes tpr-gbob { 0%, 55%, 100% { translate: 0 0; } 64%, 76%, 88% { translate: 0 -0.5px; } 70%, 82% { translate: 0 0.4px; } }
+@keyframes tpr-groll { from { rotate: -9deg; } to { rotate: 9deg; } }
 
 @media (prefers-reduced-motion: reduce) {
   /* The still print: the moving parts at rest, the train halfway
@@ -9167,6 +9325,11 @@ textarea:focus-visible {
   .tpr-glint { opacity: 0.4; }
   .tpr-glitter { opacity: 0.6; }
   .tpr-puff { opacity: 0.25; }
+  /* The fireflies lit, the fireworks open; and the evening snow (暮雪)
+     is the view itself: still, it stays (plan 261). */
+  .tpr-blink { opacity: 0.9; }
+  .tpr-burst { opacity: 0.85; }
+  .tpr-flake { opacity: 0.9; }
 }
 
 /* The screen's one filled action. Gold, because Today is gold — and
@@ -12374,16 +12537,24 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    bar's end and the gap, neither of which takes a press. */
 .timer--aside { position: relative; }
 .timer--aside > .timer__label { padding-inline: calc(var(--sp-9) + var(--sp-3)); }
-.timer--aside > .pace-chip {
+.timer--aside > .pace-chip,
+.timer--aside > .roll-chip {
   position: absolute;
-  inset-inline-end: 0;
   top: calc(var(--sp-1) + var(--sp-2));
   justify-content: center;
   min-width: var(--sp-9);
   height: var(--sp-7);
   font-size: var(--fs-sm);
 }
-.timer--aside > .pace-chip::after {
+.timer--aside > .pace-chip { inset-inline-end: 0; }
+/* The roll's chip (plan 258) stands at the clock's other end, a chip of
+   the same box and target; its icon is the only thing in it. */
+.timer--aside > .roll-chip {
+  inset-inline-start: 0;
+  padding-inline: 0;
+}
+.timer--aside > .pace-chip::after,
+.timer--aside > .roll-chip::after {
   content: '';
   position: absolute;
   inset: calc(-1 * var(--sp-3)) calc(-1 * var(--sp-2));
@@ -13615,6 +13786,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .run-streak--hot {
   background: var(--stamp-ink);
   color: var(--text-on-panel);
+}
+/* In the run head the stamp sits under the name (StageHead, 両端): a
+   rung smaller, the pill's height, so the head stays one row. */
+.stage__where-line > .run-streak {
+  min-width: var(--sp-6);
+  height: var(--sp-6);
 }
 .run-streak__count {
   font-family: var(--font-display);
@@ -16158,6 +16335,60 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
   color: var(--text-on-fill);
 }
+/* ── 辻 — the stroke order, big, and the calque (plan 268) ─────
+   The animation is a door: a button laid over it (so what it holds is
+   untouched), the whole box tappable, a lens in its corner in the ink
+   a light fill takes (the sheet is washi in either theme). It opens a
+   sheet: the animation at the width of the screen on washi, or the
+   trace board the glyph tour writes on (.gt-board, plan 263), square,
+   its hollow in the section's pigment, which the door hands over since
+   a sheet is a portal and inherits none. */
+.stroke-zoom { position: relative; }
+.stroke-zoom__open {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: var(--sp-2);
+  border-radius: inherit;
+  color: var(--text-on-fill);
+  cursor: zoom-in;
+}
+.stroke-zoom__open:hover { filter: none; }
+.stroke-zoom__mark { opacity: 0.55; transition: opacity 0.15s ease; }
+.stroke-zoom__open:hover .stroke-zoom__mark,
+.stroke-zoom__open:focus-visible .stroke-zoom__mark { opacity: 1; }
+.ss { display: flex; flex-direction: column; gap: var(--sp-4); }
+.ss-stage {
+  display: flex;
+  justify-content: center;
+}
+.ss-stage--wait { min-height: 200px; }
+.ss-paper {
+  width: min(100%, 560px, 56dvh);
+  aspect-ratio: 1;
+  padding: var(--sp-3);
+  background: var(--paper);
+  border-radius: var(--r-card);
+}
+.ss-paper__glyph { width: 100%; height: 100%; }
+.ss-trace { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.ss-trace .ss-stage { width: 100%; }
+.ss-said {
+  margin: 0;
+  min-height: 1.5em;
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.ss-fallback {
+  margin: 0;
+  padding: var(--sp-8) 0;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
 /* A record cell's figure and label, stacked, so the door variant can
    set them beside its chevron (the profile's door puts a line mark
    there instead). Generic to the records family. */
@@ -17338,7 +17569,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-primary);
 }
 
-.deckdetail-form { margin-bottom: 24px; }
+.deckdetail-form {
+  margin-bottom: 24px;
+  /* Scrolled to on a phone when a card's editor opens (DeckDetailScreen):
+     it lands under the sticky HUD, not behind it. */
+  scroll-margin-top: calc(var(--safe-top) + var(--hud-h) + var(--sp-4));
+}
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
 /* DeckDetail.dc.html's `.field`: 12/16 and a 44px floor. It was
    `10px 14px` with no floor, which put the inputs at ~40px — two rungs
@@ -18356,6 +18592,109 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+}
+
+/* ── The passage rolling (plan 258, RollingPassage) ──
+   The same bounded card, its body no longer a scroll: the lines pass
+   up a viewport that fades them out at its top and bottom, the one at
+   the middle lit, and a row of controls under it (pause, speed). The
+   column is moved by a transform from the frame loop, never by top. */
+.prompt-card--footed.prompt-card--roll > .prompt-card__body {
+  overflow: hidden;
+  padding: var(--sp-5);
+  gap: var(--sp-3);
+}
+.roll {
+  position: relative;
+  flex: 1 1 0;
+  min-height: calc(var(--sp-9) * 4);
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
+}
+.roll__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  /* Moved by a Web Animation on its transform (RollingPassage), which
+     the browser keeps on the compositor: promoted up front, so the
+     first frame of the roll is not a repaint. */
+  will-change: transform;
+}
+/* One rung up from the card's own title, fluid: the text is the only
+   thing on this card, and a roll is read at a distance. */
+.roll__line {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading-fluid);
+  font-weight: 500;
+  line-height: 1.7;
+  text-align: center;
+  overflow-wrap: anywhere;
+  /* A sentence that wraps wraps into lines of one length, never a
+     last line of a single kana and its full stop. */
+  text-wrap: balance;
+  color: var(--text-primary);
+  /* Stepped back by the line's distance from the middle (--d, 0 to 3
+     from RollingPassage): the line being read at full ink, its
+     neighbours at two thirds, then a third, then a ghost. The card's
+     mask takes the rest at its edges. */
+  opacity: max(0.12, calc(1 - var(--d, 3) * 0.35));
+  transition: opacity 0.45s var(--ease-out);
+}
+/* Furigana over the kanji (the option's chip, RollingPassage): leading
+   for the readings, which are drawn outside the line box, and a
+   reading that is a reading and never a second sentence. Ruby does not
+   break inside a word. */
+.roll--furigana .roll__line { line-height: 2; }
+.roll__line ruby {
+  ruby-position: over;
+  ruby-align: center;
+  white-space: nowrap;
+}
+.roll__line rt {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  user-select: none;
+}
+.roll-ctl {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+}
+/* The row's buttons are one round box each, the icon alone in it: a
+   chip pads its label, and the end of that padding is trimmed by the
+   label's tracking (.chip), which left an icon half a pixel off its
+   own centre. */
+.roll-ctl__btn {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+/* A triangle's weight is at its base, a third of the way in: it is
+   nudged to where the eye centres it, as a pause's two bars need none. */
+.roll-ctl__play { transform: translateX(1px); }
+.roll-ctl__furi {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.roll-ctl__speed {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.roll-ctl__value {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* The flashcard is the body's whole height, not just its face. The
@@ -22327,7 +22666,420 @@ form.stage__foot > .btn-primary {
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
-.leaderboard-row__gap { justify-content: center; color: var(--text-secondary); }
+
+/* ── 番付 — the board's window and the whole of it (plan 262) ──
+   Drawn as A1, the owner's pick of the canvas "Tsuji — the 番付
+   redesign". A row's move since the day began sits between the name and
+   the XP, in its state's colour (the owner's call, as the heads of the
+   whole board's groups: mixed toward the ink, since --danger alone
+   measured 2.5:1 on sumi). A name that opens its learner's card is a bare
+   button that keeps the name's type. Where the board skips places a
+   dashed hairline stands, not a row. Its foot is one line: the gap to
+   the next place, short, and the door to the whole board. */
+.bz-move {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.bz-move--up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bz-move--down { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
+.bz-pick {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bz-pick:hover,
+.bz-pick:focus-visible { text-decoration: underline; filter: none; }
+.bz__cut { margin: 0 var(--sp-5); border-top: 1px dashed var(--surface-line); }
+.leaderboard-row:has(+ .bz__cut) { border-bottom: 0; }
+.bz__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-5);
+}
+.bz__gap-to {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.bz__gap-xp { color: var(--sel-ink); }
+.bz__whole {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: 44px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.bz__whole svg { color: var(--text-secondary); }
+
+/* ── /profile/banzuke — the whole board (plan 262, A1) ──
+   One card heads the board: the tabs, then the level filter and the
+   week's end, or the division's name between its neighbours. Then the
+   list: on the week its first line is last week's podium; on a division
+   the rows Monday moves up and down ride a rail of their state's colour
+   (an edge, never a fill) under a head that names them and counts them,
+   in that colour mixed toward the ink. The phone's foot carries the learner's row
+   while it is off the list; the line under the list says what moving up
+   takes. The switch to keep off the board ends the page. */
+.bzp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: 0 var(--sp-5) var(--sp-6);
+}
+.bzp__sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+}
+.bzp__scope {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-primary);
+}
+.bzp__scope select {
+  appearance: none;
+  height: 32px;
+  padding: 0 var(--sp-7) 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  cursor: pointer;
+}
+.bzp__scope select:focus-visible { outline: 2px solid var(--sel-line); outline-offset: 2px; }
+.bzp__scope svg { position: absolute; right: var(--sp-4); pointer-events: none; color: var(--text-secondary); }
+.bzp__ends {
+  margin-left: auto;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.bzp__division {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+}
+.bzp__step {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.bzp__step:disabled { opacity: 0.35; cursor: default; }
+.bzp__division-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-2) 0;
+}
+.bzp__division-title { display: flex; align-items: baseline; gap: var(--sp-3); }
+.bzp__division-jp {
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.bzp__division-latin,
+.bzp__podium-cap,
+.bzp__group {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bzp__division-notes { font-size: var(--fs-caption); color: var(--text-secondary); text-align: center; }
+/* Last week's podium: the list's first line, the medals as numerals. */
+.bzp__podium {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+  background: var(--overlay-hover);
+}
+.bzp__podium-cap { flex: none; }
+.bzp__podium-names {
+  display: flex;
+  gap: var(--sp-4);
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.bzp__champ { display: inline-flex; align-items: baseline; gap: var(--sp-1); white-space: nowrap; }
+.bzp__champ .bz-pick { color: var(--text-primary); font-weight: 700; }
+.bzp__medal--gold { color: color-mix(in srgb, var(--medal-gold) 70%, var(--text-primary)); }
+.bzp__medal--silver { color: color-mix(in srgb, var(--medal-silver) 70%, var(--text-primary)); }
+.bzp__medal--bronze { color: color-mix(in srgb, var(--medal-bronze) 55%, var(--text-primary)); }
+/* The rows Monday moves, and their heads: the state's colour as a rail. */
+.bzp__group {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.bzp__group-n { font-variant-numeric: tabular-nums; }
+/* The heads speak in their state's colour (the owner's call, after A1
+   was built): the colour mixed toward the ink, as the medals' figures
+   are, since --danger alone measured 2.5:1 on sumi. */
+.bzp__group--up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bzp__group--down { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
+.bzp__group--up,
+.bzp__row--up { box-shadow: inset 3px 0 0 var(--success); }
+.bzp__group--down,
+.bzp__row--down { box-shadow: inset 3px 0 0 var(--danger); }
+.bzp__more {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-5);
+  border: 0;
+  border-bottom: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.bzp__more:last-child { border-bottom: 0; }
+.bzp__empty { margin: 0; padding: var(--sp-6) var(--sp-5); text-align: center; color: var(--text-secondary); }
+.bzp__me {
+  position: sticky;
+  bottom: var(--sp-3);
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  overflow: hidden;
+}
+.bzp__me-row { flex: 1; min-width: 0; border-bottom: 0; }
+/* The learner's own name keeps its width; the gap gives way to it. */
+.bzp__me-row .leaderboard-row__name { flex: 0 1 auto; }
+.bzp__me-gap {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--sel-ink);
+}
+.bzp__jump {
+  flex: none;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.bzp__line { margin: 0; text-align: center; font-size: var(--fs-caption); color: var(--text-secondary); }
+/* The foot as F2, the owner's pick of the canvas's "le pied du
+   classement". The learner's card: their place in large figures, on the
+   pass's rail, and what it takes -- under a division's list on the
+   phone, in the desk's side. Keeping off the board: a settings row, its
+   sentence under its label, a switch at its right. */
+.bzp__mine {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  box-shadow: inset 3px 0 0 var(--pass-ink);
+}
+.bzp__mine-rank {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.bzp__mine-ord { font-size: var(--fs-sm); color: var(--text-secondary); }
+.bzp__mine-lines { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.bzp__mine-lead { margin: 0; font-weight: 700; color: var(--text-primary); }
+.bzp__mine-fig { color: var(--sel-ink); font-variant-numeric: tabular-nums; }
+.bzp__mine-up { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bzp__mine-sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.bzp__seen {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+}
+.bzp__seen-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.bzp__seen-label { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.bzp__seen-hint { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* The switch: a pill track, the knob riding to the side that is true;
+   on, the selection's gold (a choice the learner made). */
+.bz-switch {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.bz-switch[aria-checked="true"] { background: var(--accent2); border-color: var(--accent2); }
+.bz-switch:focus-visible { outline: 2px solid var(--sel-line); outline-offset: 2px; filter: none; }
+.bz-switch:disabled { opacity: 0.6; cursor: default; }
+.bz-switch__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--text-secondary);
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+.bz-switch[aria-checked="true"] .bz-switch__knob { transform: translateX(18px); background: var(--bg-main); }
+@media (prefers-reduced-motion: reduce) {
+  .bz-switch,
+  .bz-switch__knob { transition: none; }
+}
+.bzp__rung {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--sp-5);
+  border: 0;
+  border-bottom: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.bzp__rung:last-child { border-bottom: 0; }
+.bzp__rung:hover,
+.bzp__rung:focus-visible { background: var(--overlay-hover); filter: none; }
+.bzp__rung-jp { width: 64px; font-family: var(--font-serif); font-weight: 700; }
+.bzp__rung--on { background: var(--sel-wash); }
+.bzp__rung--on .bzp__rung-jp { color: var(--sel-ink); }
+.bzp__rung--mine { box-shadow: inset 3px 0 0 var(--pass-ink); }
+.bzp__rung-latin {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bzp__rung-n { font-size: var(--fs-caption); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+/* ── A row's card (LearnerSheet, plan 262) ──
+   Three figures three across, the division's name, the decks published. */
+.bz-card__figs {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+.bz-card__fig {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.bz-card__fig dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bz-card__fig dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.bz-card__fig small { font-size: var(--fs-caption); color: var(--text-secondary); }
+.bz-card__division { margin: 0; display: flex; align-items: baseline; justify-content: center; gap: var(--sp-3); color: var(--text-secondary); }
+.bz-card__division-jp { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); }
+.bz-card__decks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--surface-line); }
+.bz-card__deck {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border-bottom: 1px solid var(--surface-line);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.bz-card__wait { margin: 0; text-align: center; color: var(--text-secondary); }
 
 /* ── The status sheet (進捗が主役 round) ──
    The pass's back as a sumi sheet: the distance travelled, the ghost
@@ -25445,22 +26197,65 @@ button.brd-stn { cursor: pointer; }
   min-height: 0;
   text-align: start;
 }
-.tour__track { position: relative; height: 44px; margin-inline: var(--sp-3); flex: none; }
-.tour__rail { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
-.tour__done { position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px; background: var(--line-color); transition: width 300ms ease-out; }
-.tour__stop {
-  position: absolute;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  box-sizing: border-box;
-  border-radius: var(--r-pill);
-  border: 2px solid var(--surface-line);
-  background: var(--bg-main);
-  transform: translate(-50%, -50%);
+/* The track (plan 264, the owner's pick C of the canvas "Tour track"):
+   a segment a stop under the stop's name and where it stands. The ones
+   passed are full in the line's pigment, the one in hand is the pigment
+   sunk into the ground and fills with what is done of it, the ones ahead
+   are the hairline's. The stop is named here, and the card under it
+   never names it again. */
+.tour__track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-inline: var(--sp-3);
+  padding-top: var(--sp-3);
+  flex: none;
 }
-.tour__stop--passed { border-color: var(--line-color); background: var(--line-color); }
-.tour__stop--here { width: 18px; height: 18px; border: 3px solid var(--line-color); }
+.tour__track-head {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+  line-height: 1;
+}
+.tour__track-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--tour-ink);
+}
+.tour__track-count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.tour__segs { display: flex; gap: var(--sp-1); }
+.tour__stop {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+}
+.tour__stop--passed { background: var(--line-color); }
+.tour__stop--here { background: color-mix(in srgb, var(--line-color) 40%, var(--bg-main)); }
+.tour__stop-fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  background: var(--line-color);
+  transition: width 300ms ease-out;
+}
 .tour__body {
   flex: 1;
   display: flex;
@@ -26159,7 +26954,7 @@ button.brd-stn { cursor: pointer; }
 .gl-replay .tour__foot { bottom: 0; }
 @media (prefers-reduced-motion: reduce) {
   .tour__body { animation: none; }
-  .tour__done, .tour-guess { transition: none; }
+  .tour__stop-fill, .tour-guess { transition: none; }
 }
 
 /* ══ 初見 — a kana or a kanji met before it is drilled (plan 216) ══════
@@ -26197,13 +26992,17 @@ button.brd-stn { cursor: pointer; }
 /* Write: the writing board's slab (sumi in both themes, the practice
    sheet's 田 over it, DrawingCanvas) in the card's middle. As a writing
    run's board is (DESIGN.md, "The study stage on a phone"), it is the
-   square the card's head, what the tour says back and the gate leave:
-   the middle takes the card's free height and the board the smaller of
-   its two sides, so a miss's word never lands under the gate. Never
-   under 200px, where the screen scrolls instead. The strokes are its
-   brush: traced ones in the brush's ink, the ones ahead faint, the one
-   asked in the line's pigment lit toward the ink so it reads on the
-   sumi, with a full dot where it starts and a ring where it ends. */
+   square what the tour says back and the gate leave, the card drawing
+   no head over it (the stroke's number is on its dot): the middle takes
+   the card's free height and the board the smaller of its two sides, so
+   what the tour says never lands under the gate. Never under 200px,
+   where the screen scrolls instead. The strokes are its
+   brush, at a brush's weight: traced ones in the brush's ink, the ones
+   ahead faint. The one asked is a hollow (plan 263) in the line's
+   pigment lit toward the ink so it reads on the sumi, drawn in from its
+   start, three chevrons walking its way inside it, a full dot with its
+   number where it starts and a ring where it ends; the ink fills it as
+   the hand goes (TraceBoard). */
 .gt-write {
   flex: 1 1 0;
   min-height: 200px;
@@ -26226,42 +27025,82 @@ button.brd-stn { cursor: pointer; }
 .gt-pen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .gt-glyph,
 .gt-missed { pointer-events: none; }
-.gt-stroke {
+.gt-stroke,
+.gt-ink {
   fill: none;
   stroke: var(--brush-ink);
-  stroke-width: 4;
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.gt-stroke--ahead,
-.gt-stroke--here { opacity: 0.2; }
-/* Drawn in along its way: the stroke asked (again after each miss),
-   a stroke the board traced for the learner, and « Montre-moi »'s,
-   one after the other. */
-.gt-stroke--now,
+.gt-stroke--ahead { opacity: 0.16; }
+/* A stroke the board traced for the learner, and « Montre-moi »'s, one
+   after the other, drawn in along their way. */
 .gt-stroke--given,
 .gt-stroke--shown { stroke-dasharray: 1; animation: gt-draw 600ms ease-in-out both; }
-.gt-stroke--now { stroke: var(--gt-now); }
 .gt-stroke--shown { animation-delay: calc(var(--i, 0) * 450ms); }
 @keyframes gt-draw {
   from { stroke-dashoffset: 1; }
   to   { stroke-dashoffset: 0; }
 }
+/* The hollow: an edge in the pigment, the slab inside it, drawn in from
+   the stroke's start (TraceBoard's INTRO_MS). The strokes already traced
+   stand over it, where two cross. */
+.gt-hollow path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  animation: gt-draw 520ms ease-out both;
+}
+.gt-hollow__edge { stroke: var(--gt-now); stroke-width: 10.4; }
+.gt-hollow__in { stroke: var(--bg-panel); stroke-width: 8; }
+/* The chevrons, placed and faded by the board as they walk. */
+.gt-chevron {
+  fill: none;
+  stroke: var(--gt-now);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+/* The ink, filled to where the hand has come; lifted short, it drains
+   back along the stroke, then goes. */
+.gt-ink--drain { transition: stroke-dasharray 300ms ease-out, opacity 120ms linear 260ms; }
 .gt-start { fill: var(--gt-now); }
-.gt-end { fill: none; stroke: var(--gt-now); stroke-width: 1.5; }
+.gt-start__n {
+  fill: var(--bg-panel);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+/* A stroke begun away from the dot calls the dot. */
+.gt-start--call circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gt-call 1.2s ease-in-out infinite;
+}
+@keyframes gt-call {
+  50% { transform: scale(1.5); }
+}
+.gt-end { fill: transparent; stroke: var(--gt-now); stroke-width: 1.4; transition: fill 0.15s ease; }
+.gt-end--reached { fill: var(--gt-now); }
 /* The pen takes the pointer; a finger on it never scrolls the page. */
 .gt-pen { touch-action: none; cursor: crosshair; }
 .gt-pen--off { cursor: default; }
-.gt-pen polyline,
+/* The same board in the stroke sheet (plan 268): the width of the sheet, as the
+   animation's paper, rather than the tour's card. */
+.ss-stage .gt-board { width: min(100%, 560px, 56dvh); }
+/* A missed line -- the finger's own, as it went -- a moment in the
+   miss's ink, then gone. */
 .gt-missed polyline {
   fill: none;
-  stroke: var(--brush-ink);
-  stroke-width: 5;
+  stroke: var(--rating-wrong);
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-/* A missed line, a moment in the miss's ink, then gone. */
-.gt-missed polyline { stroke: var(--rating-wrong); }
 .gt-missed { animation: gt-fade 700ms ease-out forwards; }
 @keyframes gt-fade {
   from { opacity: 0.9; }
@@ -26288,9 +27127,12 @@ button.brd-stn { cursor: pointer; }
 .gt-word__hit rt { color: var(--tour-ink); font-weight: 700; }
 .gt-word__gloss { font-size: var(--fs-body); line-height: 1.4; color: var(--text-secondary); text-align: end; text-wrap: pretty; }
 @media (prefers-reduced-motion: reduce) {
-  .gt-stroke--now,
   .gt-stroke--given,
-  .gt-stroke--shown { animation: none; stroke-dasharray: none; }
+  .gt-stroke--shown,
+  .gt-hollow path { animation: none; stroke-dasharray: none; }
+  .gt-start--call circle { animation: none; }
+  .gt-ink--drain,
+  .gt-end { transition: none; }
 }
 
 /* The register, in the plate's corner: a word in the caption register,
@@ -27431,10 +28273,10 @@ button.brd-stn { cursor: pointer; }
   letter-spacing: var(--tr-term);
   color: var(--text-secondary);
 }
-/* 歌 (plan 215) at the head: the Passage made a deck is about the
-   whole video, so it stands with the way back rather than in the dock,
-   and it is named, not a bare glyph -- the door a learner has to find. */
-.anl-m__song {
+/* 表示 (plan 263) at the head, where 歌 (plan 215) stood: the door to
+   what the stage prints around its line, named, not a bare glyph -- the
+   door a learner has to find. Open, it is lit as a choice is. */
+.anl-m__show {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -27449,8 +28291,9 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--text-primary);
 }
-.anl-m__song:hover,
-.anl-m__song:focus-visible { border-color: var(--text-secondary); }
+.anl-m__show:hover,
+.anl-m__show:focus-visible { border-color: var(--text-secondary); }
+.anl-m__show--open { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 /* The video edge to edge: out of the column's gutter. */
 .anl-m__player {
   display: flex;
@@ -27502,6 +28345,11 @@ button.brd-stn { cursor: pointer; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* On a phone they go: the line at display size and its translation take
+   the room, and the transport's two skips walk the stops. */
+@media (max-width: 560px) {
+  .anl-m__line { display: none; }
+}
 .anl-m__subs .anl-subs__line {
   justify-content: center;
   row-gap: var(--sp-5);
@@ -27546,6 +28394,19 @@ button.brd-stn { cursor: pointer; }
   text-wrap: balance;
   color: var(--text-secondary);
 }
+/* The line stepped down where the stage would not hold it between the
+   video and the dock (useLineFit, 2026-10-20): a rung down, then the
+   floor, every breakdown's own size, its readings with it and the rows
+   closer; at the floor the translation steps down too, under the line
+   it translates. A rung, never a size between two. */
+.anl-m__subs[data-fit="1"] .anl-subs__line { row-gap: var(--sp-4); }
+.anl-m__subs[data-fit="1"] .tok { font-size: var(--fs-heading); }
+.anl-m__subs[data-fit="2"] .anl-subs__line { row-gap: var(--sp-3); }
+.anl-m__subs[data-fit="2"] .tok {
+  border-bottom-width: 2px;
+  font-size: var(--fs-title);
+}
+.anl-m__subs[data-fit="2"] .anl-m__tr { font-size: var(--fs-body); }
 .anl-m__note {
   display: flex;
   flex-direction: column;
@@ -27780,6 +28641,422 @@ button.brd-stn { cursor: pointer; }
   align-self: stretch;
   margin-top: var(--sp-3);
 }
+
+/* ── 表示 and 保存 on a phone (plan 263) ──
+   The owner's picks of the canvas "Analyser stage — reading options":
+   B, the Affichage sheet, and K3·a redrawn, the keep sheet that puts
+   the line in a deck. */
+
+/* The rōmaji under each word, below the state's rule: the rule stays
+   the word's own, and the line's rows open to make room. */
+.anl-m__subs[data-romaji] .tok { position: relative; }
+.anl-m__subs[data-romaji] .anl-subs__line {
+  row-gap: var(--sp-8);
+  padding-bottom: var(--sp-6);
+}
+.tok__ro {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: var(--sp-1);
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: var(--tr-caption);
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+/* The Affichage sheet: a row a help, its name and its segment; low, so
+   the line it changes is seen changing over it. */
+.anl-show__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.anl-show__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.anl-show__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  font-size: var(--fs-body);
+  font-weight: 500;
+}
+.anl-show__note {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+.anl-show__seg { flex: none; }
+.anl-show__seg.seg .seg__opt {
+  align-items: center;
+  min-height: 44px;
+}
+.anl-show__done { min-height: 44px; }
+
+/* The keep sheet: three faces in one panel. */
+.anl-keepsheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-height: 0;
+}
+.anl-keepsheet__cap {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The deck it goes in: a row that is a door (Changer). */
+.anl-keepsheet__deck,
+.anl-keepsheet__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.anl-keepsheet__deck:hover,
+.anl-keepsheet__deck:focus-visible { border-color: var(--text-secondary); }
+.anl-keepsheet__deckname {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.anl-keepsheet__deckname b {
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-keepsheet__deckname small,
+.anl-keepsheet__title small {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__change {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+/* What goes in: the line and its words, each a card ticked as a whole,
+   lit in the selection's gold while it is in. */
+.anl-keepsheet__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.anl-keepsheet__item--on {
+  background: var(--sel-wash);
+  border-color: var(--sel-line);
+}
+.anl-keepsheet__tick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  margin-block: calc(-1 * var(--sp-3));
+  font-size: var(--fs-body);
+  font-weight: 700;
+  cursor: pointer;
+}
+.anl-keepsheet__check {
+  flex: none;
+  width: var(--sp-5);
+  height: var(--sp-5);
+  margin: 0;
+  accent-color: var(--accent2);
+}
+.anl-keepsheet__note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__line {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__reading {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__rest {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--sel-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+/* A word out is dashed and quiet; a word in stands in the line's ink. */
+.anl-keepsheet__chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--sp-1) var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-jp);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__chip b {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__chip small {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.anl-keepsheet__chip--on {
+  background: var(--bg-main);
+  border-style: solid;
+  border-color: var(--sel-line);
+  color: var(--text-primary);
+}
+.anl-keepsheet__chip--more {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__chip:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__go { width: 100%; }
+.anl-keepsheet__pin {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* A face past the first: the way back, its name, and what it acts on. */
+.anl-keepsheet__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+}
+.anl-keepsheet__back {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: calc(-1 * var(--sp-3));
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: var(--fs-body);
+}
+.anl-keepsheet__all { flex: none; min-height: 44px; }
+.anl-keepsheet__decks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.anl-keepsheet__opt--on {
+  background: var(--sel-wash);
+  border-color: var(--sel-line);
+}
+.anl-keepsheet__count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__tag {
+  flex: none;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--sel-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--sel-ink);
+}
+.anl-keepsheet__new {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.anl-keepsheet__namerow {
+  display: flex;
+  gap: var(--sp-3);
+}
+.anl-keepsheet__namerow .field { flex: 1; min-width: 0; }
+/* The song a line a row: the shortcuts over it, the list scrolling
+   between the head and the action, the line in hand on the rail. */
+.anl-keepsheet__quick {
+  display: flex;
+  gap: var(--sp-2);
+}
+.anl-keepsheet__pick {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__pick:hover,
+.anl-keepsheet__pick:focus-visible { border-color: var(--text-secondary); color: var(--text-primary); }
+.anl-keepsheet__pick:disabled { cursor: not-allowed; opacity: 0.45; }
+.anl-keepsheet__list {
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  max-height: 50dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  border-block: 1px solid var(--surface-line);
+}
+.anl-keepsheet__row {
+  display: grid;
+  flex: none;
+  grid-template-columns: var(--sp-5) var(--sp-7) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 48px;
+  padding: 0 var(--sp-3);
+  border-bottom: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.anl-keepsheet__row:last-child { border-bottom: 0; }
+.anl-keepsheet__row--on { color: var(--text-primary); }
+.anl-keepsheet__row--here {
+  background: var(--sel-wash);
+  box-shadow: inset 3px 0 0 var(--accent2);
+  font-weight: 700;
+}
+.anl-keepsheet__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-secondary);
+}
+.anl-keepsheet__text {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+}
+.anl-keepsheet__text small {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.anl-keepsheet__close { min-height: 44px; }
 
 /* ── 入門 — the introduction before the first card (plan 170) ──
    Six screens for a learner who answered « Pas encore » to the kana
@@ -29573,6 +30850,13 @@ button.brd-stn { cursor: pointer; }
 .brd-sheet__note { margin: 0; font-size: var(--fs-sm); line-height: 1.4; text-align: center; color: var(--text-secondary); }
 .brd-sheet__field,
 .brd-sheet__ways { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* The sheets portal out of the boarding's frame, so its short step
+   (`@container brd`, above) never reaches their gate: a window shorter
+   than 800px takes it to the boarding's own 56px here too, which keeps
+   the account's three fields (plan 270) whole on a short desk. */
+@media (max-height: 799px) {
+  .brd-sheet .btn-depart { min-height: 56px; }
+}
 /* On the sheet's surface the hours' cells stand on the paper, as they
    did on the page. */
 .brd-sheet .brd-hour { background: var(--bg-main); }
@@ -31497,6 +32781,28 @@ button.brd-stn { cursor: pointer; }
 .fb-link:hover,
 .fb-link:focus-visible { color: var(--text-primary); filter: none; }
 
+/* The early-access sheet over Today (plan 269; components/feedback/
+   RatingSheet.jsx): the question, a line, five stars lit in the
+   selection's gold up to the one chosen, a few words, the send. */
+.fb-rate__q { margin: 0; text-wrap: balance; }
+.fb-rate__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.fb-rate { display: flex; justify-content: center; gap: var(--sp-2); }
+.fb-rate__star {
+  display: grid;
+  place-items: center;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.fb-rate__star--on { color: var(--sel-ink); }
+.fb-rate__star:hover,
+.fb-rate__star:focus-visible { color: var(--sel-ink); filter: none; }
+
 /* Settings' page on the desk: the form at a card's width, the send at
    its own. */
 .fb-page { max-width: var(--card-w); }
@@ -31567,7 +32873,9 @@ button.brd-stn { cursor: pointer; }
   /* The gates and their stations are what scrolls on a short window,
      the foot's instruments standing whole under them (plan 123). */
   .desk-rail__gates {
+    display: flex;
     flex: 0 1 auto;
+    flex-direction: column;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -31656,6 +32964,9 @@ button.brd-stn { cursor: pointer; }
     cursor: pointer;
     transition: color 0.14s ease, border-color 0.14s ease, background 0.14s ease;
   }
+  /* On a place (plan 269): the slot without the pill. Unseen is also
+     out of the tab order and the accessibility tree. */
+  .desk-rail__help--idle { visibility: hidden; }
   .desk-rail__help-mark {
     display: inline-flex;
     align-items: center;
@@ -31712,6 +33023,15 @@ button.brd-stn { cursor: pointer; }
     flex-direction: column;
     gap: var(--sp-1);
     padding: 0 var(--sp-3);
+  }
+  /* The gates over the places (plan 269): a hairline in the stations'
+     line ink (the rail is sumi in both themes, so the panel's ink and
+     not the page's), inset to the gates' words, a rung either side. It
+     says "a second list" and nothing else, so it carries no caption. */
+  .desk-rail__rule {
+    margin: var(--sp-4) var(--sp-6);
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, transparent);
   }
   /* A gate: the pictogram and its word, every one of them captioned —
      the tab bar's caption register (display, uppercase, tracked) at the
@@ -31787,8 +33107,12 @@ button.brd-stn { cursor: pointer; }
   .desk-rail__stations {
     position: relative;
     display: flex;
+    flex: 0 1 auto;
     flex-direction: column;
+    min-height: 0;
     padding: var(--sp-1) 0 var(--sp-2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   /* The line, drawn per station and capped at the first and the last
      stop's centre -- as .route-stop__rail is -- rather than one line
@@ -31851,6 +33175,36 @@ button.brd-stn { cursor: pointer; }
     background: var(--bg-panel);
   }
   .desk-sec--on::before { background: currentcolor; }
+  /* What the rail holds grew by the places (plan 269), and a lit gate's
+     stations are what gives way: the gates, the places and the pass
+     stand whole at any height, and a line of stations taller than the
+     room left scrolls inside itself (.desk-rail__stations, below; each
+     row's focus ring is drawn inside the row, so the clip cuts none). */
+  .desk-rail__gates > *,
+  .desk-rail__item { flex: none; }
+  .desk-rail__gates > .desk-rail__list:first-child,
+  .desk-rail__item--lined {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .desk-rail__item > .desk-gate { flex: none; }
+  /* The places as one row of four pictograms, each its word for the
+     pointer (title) and a screen reader (its label), beside a lit
+     gate's line of stations: their four rows and Practice's seven
+     stations needed a 960px window. The lit place is the lit gate's
+     lozenge with its rule along the foot. The short desk draws them so
+     everywhere (its block, below). */
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places { flex-direction: row; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__place { flex: 1 1 0; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places .desk-gate { justify-content: center; padding: 0; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places .desk-gate__label { display: none; }
+  .desk-rail:has(.desk-rail__stations) .desk-rail__places .desk-gate--on::before {
+    inset: auto var(--sp-4) calc(-1 * var(--sp-1));
+    width: auto;
+    height: 2px;
+  }
   /* The foot: the learner's pass (plan 127, components/chrome/
      DeskPass.jsx). The HUD's three instruments as one card on the
      rail's floor -- the profile's pass (.pass) at pocket size: its
@@ -33187,19 +34541,15 @@ button.brd-stn { cursor: pointer; }
      at the board's edge. Every row is a subgrid of the board's three
      columns, so the ranks stand in one column and both heads over their
      sides; the rows share the board's height either side of the
-     elision (--bz-top, --bz-out, Banzuke's counts), the head and the ⋯
+     elision (--bz-rows, Banzuke's template), the head, the ⋯ and the foot
      keep their own. The learner's own place is washed on its side, the
      pass ink's rail at the board's edge. */
   .desk-bz {
     flex: 1 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    grid-template-rows: auto repeat(var(--bz-top, 5), minmax(min-content, 1fr));
-  }
-  .desk-bz--out {
-    grid-template-rows:
-      auto repeat(var(--bz-top, 5), minmax(min-content, 1fr))
-      auto repeat(var(--bz-out, 1), minmax(min-content, 1fr));
+    /* The head, a row per rank or ⋯, the foot (Banzuke's --bz-rows). */
+    grid-template-rows: var(--bz-rows, auto);
   }
   .desk-bz__head,
   .desk-bz__row {
@@ -33224,13 +34574,14 @@ button.brd-stn { cursor: pointer; }
     color: var(--sel-ink);
     box-shadow: inset 0 -2px 0 var(--accent2);
   }
+  /* Where the board skips places: a dashed hairline (plan 262's A1),
+     in place of the row's own. */
   .desk-bz__gap {
     grid-column: 1 / -1;
-    padding: var(--sp-2) 0;
-    text-align: center;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--surface-line);
+    margin: 0 var(--sp-5);
+    border-top: 1px dashed var(--surface-line);
   }
+  .desk-bz__row:has(+ .desk-bz__gap) { border-bottom: 0; }
   .desk-bz__rank {
     display: flex;
     align-items: center;
@@ -33248,6 +34599,40 @@ button.brd-stn { cursor: pointer; }
   .desk-bz__cell--west .leaderboard-row__name { text-align: right; }
   .desk-bz__cell--me { background: var(--overlay-hover); box-shadow: inset -3px 0 0 var(--pass-ink); }
   .desk-bz__cell--west.desk-bz__cell--me { box-shadow: inset 3px 0 0 var(--pass-ink); }
+  /* The foot (plan 262): the gap to the next place, the door to the
+     whole board, across the three columns. */
+  .desk-bz__foot {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-1) var(--sp-5);
+  }
+  .desk-bz__cell--west .bz-pick { text-align: right; }
+
+  /* ── /profile/banzuke on the desk (plan 262, A1) ──
+     The list in the entry's width from the top of the page; beside it,
+     in the side's, stacked: the board's head card, the learner's place
+     and what it takes, the six divisions (on a division), the switch.
+     The list spans the side's rows down to a last one that takes what
+     it leaves (1fr), so the side stays packed at the top. */
+  .phone__content > .bzp {
+    display: grid;
+    grid-template-columns: minmax(0, var(--desk-entry-w)) var(--desk-side-w);
+    grid-template-rows: auto auto auto auto auto 1fr;
+    place-content: start center;
+    align-items: start;
+    gap: var(--sp-5) var(--sp-9);
+    padding: 0 var(--sp-7) var(--sp-6);
+  }
+  .bzp > .bar { grid-column: 1 / -1; grid-row: 1; }
+  .bzp__list { grid-column: 1; grid-row: 2 / 7; }
+  .bzp__controls { grid-column: 2; grid-row: 2; }
+  .bzp__mine { grid-column: 2; grid-row: 3; }
+  .bzp__ladder { grid-column: 2; grid-row: 4; }
+  .bzp__seen { grid-column: 2; grid-row: 5; }
+  .bzp__division-name { padding: var(--sp-3) 0; }
+  .bzp__division-jp { font-size: var(--fs-heading); }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
      The owner's pick B of four layouts drawn on the canvas "Tsuji — the
@@ -33556,6 +34941,18 @@ button.brd-stn { cursor: pointer; }
   /* The phone's form spaces itself from the list under it; in the slot
      the page's own gap does. */
   .desk-deck__slot .deckdetail-form { margin-bottom: 0; }
+  /* An edit's form follows the table down: a card opened far down the
+     list has its form held at the scroller's top, the rows passing
+     under it on the page's ground. */
+  .desk-deck__slot--edit {
+    position: sticky;
+    /* Over the scroller's own gutter, so no row shows above it. */
+    top: calc(-1 * var(--sp-2));
+    z-index: 1;
+    margin-block: calc(-1 * var(--sp-2));
+    padding-block: var(--sp-2);
+    background: var(--bg-main);
+  }
   .dk-ways {
     display: flex;
     gap: var(--sp-3);
@@ -34044,6 +35441,24 @@ button.brd-stn { cursor: pointer; }
     border-inline-start: 1px solid var(--surface-line);
     padding-inline-start: var(--sp-7);
   }
+  /* The Bibliothèque (plan 269): the same shelf beside the library's
+     catalogue. The catalogue is a page of any length (its shelf pages
+     with More), so it scrolls with the window rather than in a box the
+     window's height; the list beside it stays sticky. */
+  .desk-split--library > .desk-split__page {
+    position: static;
+    height: auto;
+  }
+  .lib-catalogue {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* A library card is a whole card (its blurb, its author, its count)
+     and needs a row's width: one to a row, as in the library's list. */
+  .lib-catalogue__grid { grid-template-columns: minmax(0, 1fr); }
+  .lib-home__pair--one { grid-template-columns: minmax(0, 1fr); }
   /* A shelf with nothing to open -- empty, or failed -- stands its one
      card across, not beside a blank half (plan 123). */
   .desk-split--shelf:has(> .desk-split__list > .empty):not(:has(> .desk-split__page > *)) { grid-template-columns: minmax(0, 1fr); }
@@ -34205,12 +35620,9 @@ button.brd-stn { cursor: pointer; }
      a row holding its card in a small well: eleven rows of words and two
      narrow columns of air. The page still takes the window, and:
 
-     - the line runs across its top, as a line map hangs over a
-       platform: one rail through every stop's marker, each stop a column
-       under it, its code and name on one line and its figure under
-       them; the open stop lit as a selection is (the switch's wash and
-       gold edge), the stops behind the learner filled, their own marker
-       in the lead rung;
+     - the line runs across its top as a row of doors (plan 267, the
+       owner's pick 2c of the canvas "Tsuji — the sources and the line,
+       redrawn"), below;
      - the open stop's exercises stand under it as the cars of its
        train, sharing the rest of the window (the grid, above), each
        car's face the card it asks, drawn as the run draws it, in a well
@@ -34228,56 +35640,93 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-5);
     min-width: 0;
   }
-  .desk-station__line {
+  /* ── 扉 — a line's doors (plan 267) ──
+     The owner's pick 2c of the canvas "Tsuji — the sources and the
+     line, redrawn": the stops across (RouteStops `across`) are doors,
+     one row of joined cells under the line's stripe -- the stripe is the
+     line, so no rail runs through them. A door is its marker, its code,
+     its name and its figure on one line, its bar along its foot (learned
+     in the line's pigment, met in half of it, the Learn plate's bar);
+     the learner's own is the filled marker, the open one lit as a
+     selection is (the switch's wash and gold edge). The same doors head
+     the kanji's and the vocabulary's sources (.desk-linedoors, below), two
+     lines high there. */
+  .desk-station__line,
+  .desk-linedoors {
     flex: none;
-    padding: var(--sp-3) var(--sp-4);
+    min-width: 0;
+    overflow: hidden;
     background: var(--surface);
     border: 1px solid var(--surface-line);
+    border-top: 3px solid var(--line-color);
     border-radius: var(--r-panel);
   }
-  .desk-station > .desk-station__line > .route {
+  .route.route--across {
     display: grid;
     grid-auto-columns: minmax(0, 1fr);
     grid-auto-flow: column;
     gap: 0;
   }
-  /* A stop takes the band's ground, opaque, so its hollow marker -- the
-     route's, which takes its stop's ground -- hides the rail inside it;
-     and it does not lift on approach, the rail running through it. */
-  .desk-station__line > .route > .route-stop {
+  .route.route--across > .route-stop {
     display: grid;
-    grid-template-columns: auto minmax(0, auto);
-    grid-template-areas:
-      "code name"
-      "fig fig";
-    justify-content: center;
-    align-items: baseline;
-    gap: var(--sp-2) var(--sp-3);
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "mark code name fig";
+    align-items: center;
+    gap: var(--sp-3);
     min-height: 0;
-    padding: var(--sp-7) var(--sp-3) var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
     background: var(--surface);
     border: 0;
-    border-radius: var(--r-card);
-    text-align: center;
+    border-left: 1px solid var(--surface-line);
+    border-radius: 0;
+    color: var(--text-primary);
+    text-align: left;
+    font-weight: 600;
+    line-height: normal;
+    text-decoration: none;
   }
-  .desk-station__line .route-stop:hover,
-  .desk-station__line .route-stop:focus-visible { transform: none; }
-  .desk-station__line > .route > .route-stop > .route-stop__rail {
-    inset: calc(var(--sp-7) / 2) 0 auto;
-    width: auto;
-    height: 3px;
-    transform: translateY(-50%);
+  .route.route--across > .route-stop--first { border-left: 0; }
+  .route.route--across > .route-stop:where(:hover, :focus-visible) {
+    background: var(--bg-card-hover);
+    transform: none;
   }
-  .desk-station__line > .route > .route-stop > .route-stop__marker {
-    top: calc(var(--sp-7) / 2);
-    left: 50%;
+  .route.route--across > .route-stop:where(:focus-visible) {
+    outline: 2px solid var(--accent2);
+    outline-offset: -2px;
   }
-  .desk-station__line > .route > .route-stop > .route-stop__code {
+  .route.route--across > .route-stop > .route-stop__rail,
+  .route.route--across > .route-stop > .route-stop__go { display: none; }
+  .route.route--across > .route-stop > .route-stop__marker {
+    grid-area: mark;
+    position: static;
+    width: 10px;
+    height: 10px;
+    transform: none;
+    border-width: 2px;
+    border-color: color-mix(in srgb, var(--line-color) 35%, var(--surface-line));
+    background: transparent;
+    box-shadow: none;
+  }
+  .route.route--across > .route-stop--past > .route-stop__marker { border-color: color-mix(in srgb, var(--line-color) 70%, var(--surface-line)); }
+  .route.route--across > .route-stop--current > .route-stop__marker {
+    width: 10px;
+    height: 10px;
+    border-color: var(--line-color);
+    background: var(--line-color);
+    box-shadow: none;
+  }
+  .route.route--across > .route-stop > .route-stop__code {
     grid-area: code;
     min-width: 0;
+    font-size: var(--fs-body);
+    line-height: 1;
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
   }
-  .desk-station__line > .route > .route-stop > .route-stop__names { grid-area: name; }
-  .desk-station__line > .route > .route-stop > .route-stop__names > .route-stop__jp {
+  .route.route--across > .route-stop > .route-stop__names {
+    grid-area: name;
+    min-width: 0;
+  }
+  .route.route--across > .route-stop > .route-stop__names > .route-stop__jp {
     overflow: hidden;
     font-size: var(--fs-sm);
     font-weight: 600;
@@ -34285,30 +35734,26 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .desk-station__line > .route > .route-stop > .route-stop__fig {
+  .route.route--across > .route-stop > .route-stop__fig {
     grid-area: fig;
-    justify-self: center;
     font-size: var(--fs-caption);
   }
-  .desk-station__line > .route > .route-stop > .route-stop__go { display: none; }
-  .desk-station__line > .route > .route-stop--first > .route-stop__rail { left: 50%; }
-  .desk-station__line > .route > .route-stop--last > .route-stop__rail { right: 50%; }
-  .desk-station__line > .route > .desk-stop--open {
-    background: color-mix(in srgb, var(--accent2) 15%, var(--surface));
-    box-shadow: inset 0 -2px 0 var(--accent2);
+  .route.route--across > .route-stop > .desk-stop__bar {
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    border-radius: 0;
   }
-  .desk-station__line > .route > .desk-stop--open > .route-stop__code { color: var(--sel-ink); }
-  /* The stops are links (plan 117), as the split's were: they take back
-     the button's face the same way (.desk-split__list a.route-stop). */
-  .desk-station__line > .route > a.route-stop {
-    font-weight: 600;
-    line-height: normal;
-    text-decoration: none;
+  .route.route--across > .desk-stop--open { background: color-mix(in srgb, var(--accent2) 15%, var(--surface)); }
+  .route.route--across > .desk-stop--open:where(:hover, :focus-visible) { background: color-mix(in srgb, var(--accent2) 22%, var(--surface)); }
+  .route.route--across > .desk-stop--open::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--sel-line);
+    pointer-events: none;
   }
-  .desk-station__line > .route > a.route-stop:focus-visible {
-    outline: 2px solid var(--accent2);
-    outline-offset: -2px;
-  }
+  .route.route--across > .desk-stop--open > .route-stop__names > .route-stop__jp { color: var(--text-primary); }
 
   .desk-platforms {
     flex: 1;
@@ -34702,57 +36147,111 @@ button.brd-stn { cursor: pointer; }
     .desk-platforms > .platform-grid .platform-card__desc { display: none; }
   }
 
-  /* ── 机 — the vocabulary's sources as plates (plan 137) ──
-     The owner's pick S2: /learn/vocab was three cards across the top of
-     an empty window. Each source is now a plate hanging the window's
-     height (the gates' plate, --elev-hang and all) with its whole list
-     on it: JLPT's five levels share the plate as a line, the tiers and
-     the themes scroll inside theirs under their controls. The plates
-     take the room the page has and no more (a basis of nothing, then
-     all of what is left), so a list of fourteen hundred JMdict tiers
-     scrolls in its plate instead of stretching the page; a window too
-     short for them scrolls the page instead of squeezing a plate
-     below eight rows. */
+  /* ── 机 — the sources: the doors over the bands (plan 267) ──
+     The owner's picks C1 (kanji) and C3 (vocabulary) of the canvas
+     "Tsuji — the sources and the line, redrawn". JLPT is the page's
+     head, as its line heads a level's station: the five levels as doors
+     (above), the learner's own captioned, and the gate that resumes it
+     as the line's last door. Under it the vocabulary's two other
+     sources are bands the page's width, their own entries doors in a
+     lattice; the kanji's are two plates side by side. The doors take
+     their own height, the rest takes what the window has left, and a
+     window too short for it scrolls the page rather than crush a band
+     under its floor. */
   .desk-sources {
     flex: 1 1 0;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: minmax(0, 1fr);
-    gap: var(--sp-6);
-    min-height: calc(8 * var(--sp-8));
-  }
-  .desk-source { min-height: 0; }
-  /* The kanji's (the owner's pick B): the two lines in one column, JLPT
-     at its own height over the tiers, which take the rest; the radicals'
-     tiles on the wider plate beside them, scrolling in it. */
-  .desk-sources--kanji { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
-  .desk-sources__col {
     display: flex;
     flex-direction: column;
     gap: var(--sp-6);
-    min-height: 0;
   }
-  .desk-sources__col > .desk-source { flex: 1 1 0; }
-  .desk-sources__col > .desk-source--compact { flex: none; }
-  .desk-source__tiles {
-    flex: 1;
+  .desk-linedoors {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .desk-linedoors__line { display: grid; }
+  /* A door is taller here: its marker, code and figure, its name under
+     them whole (two lines where the door is narrow), and "you are here"
+     on the learner's own. */
+  .desk-linedoors .route--across > .route-stop {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "mark code fig"
+      "name name name"
+      "here here here";
+    align-content: center;
+    row-gap: var(--sp-2);
+    padding: var(--sp-5) var(--sp-6);
+  }
+  .desk-linedoors .route--across > .route-stop > .route-stop__code { font-size: var(--fs-title); }
+  .desk-linedoors .route--across > .route-stop > .route-stop__names { display: contents; }
+  .desk-linedoors .route--across > .route-stop > .route-stop__names > .route-stop__jp {
+    grid-area: name;
+    white-space: normal;
+    text-wrap: balance;
+  }
+  .desk-linedoors .route-stop__here {
+    grid-area: here;
+    overflow: hidden;
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  }
+  .desk-linedoors .route--across > .route-stop > .route-stop__fig {
+    justify-self: end;
+    font-size: var(--fs-sm);
+  }
+  /* The gate as the line's last door: the air round it is its halo's
+     (the reader's ripples, as far out of the pill), inside the door. */
+  .desk-linedoors__gate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    padding: var(--sp-5) var(--sp-6);
+    border-left: 1px solid var(--surface-line);
+  }
+  .desk-linedoors__gate > .btn-depart--gate { max-width: calc(6 * var(--sp-8)); }
+  /* A page too narrow for five doors and the gate on one row
+     (LineDoors' STACK, measured): the gate takes a row of its own under
+     the doors, at the line's far end, its count before it. */
+  .desk-linedoors--stacked { grid-template-columns: minmax(0, 1fr); }
+  .desk-linedoors--stacked > .desk-linedoors__gate {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    gap: var(--sp-5);
+    padding-block: var(--sp-4);
+    border-left: 0;
+    border-top: 1px solid var(--surface-line);
+  }
+
+  /* A plate under the doors: its name and its controls on one line, the
+     line's stripe, then its list, scrolling inside it. */
+  .desk-source {
+    display: flex;
+    flex-direction: column;
     min-height: 0;
-    overflow-y: auto;
-    padding: var(--sp-4) var(--sp-6);
   }
   .desk-source__head {
     display: flex;
-    align-items: baseline;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    gap: var(--sp-4);
-    padding: var(--sp-6) var(--sp-6) var(--sp-2);
+    gap: var(--sp-3) var(--sp-5);
+    padding: var(--sp-5) var(--sp-6);
   }
-  .desk-source__title {
+  .desk-source__title,
+  .desk-band__head > .desk-source__title {
     margin: 0;
     font-family: var(--font-display);
     font-size: var(--fs-title);
     font-weight: 700;
     line-height: 1.2;
+    white-space: nowrap;
   }
   .desk-source__fig,
   .desk-source__num {
@@ -34763,25 +36262,8 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
     color: var(--text-secondary);
   }
-  .desk-source__fig b,
   .desk-source__num b { color: var(--text-primary); }
-  .desk-source__desc {
-    margin: 0;
-    padding: 0 var(--sp-6) var(--sp-4);
-    font-size: var(--fs-sm);
-    line-height: 1.5;
-    color: var(--text-secondary);
-  }
-  .desk-source__tools {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    padding: 0 var(--sp-6) var(--sp-4);
-  }
-  .desk-source__size {
-    display: flex;
-    flex-direction: column;
-  }
+  .desk-source__head > .desk-source__size { flex: 1 0 calc(5 * var(--sp-8)); }
   .desk-source__stripe {
     flex: none;
     height: var(--sp-1);
@@ -34799,13 +36281,11 @@ button.brd-stn { cursor: pointer; }
     overscroll-behavior-y: auto;
   }
   .desk-source__row {
-    position: relative;
     display: grid;
-    grid-template-columns: var(--sp-8) var(--sp-8) minmax(0, 1fr) auto;
     align-items: center;
-    column-gap: var(--sp-3);
+    column-gap: var(--sp-4);
     min-height: var(--sp-8);
-    padding-inline-end: var(--sp-6);
+    padding-inline: var(--sp-6);
     border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 45%, transparent);
     color: var(--text-primary);
     text-decoration: none;
@@ -34818,52 +36298,15 @@ button.brd-stn { cursor: pointer; }
     outline: 2px solid var(--accent2);
     outline-offset: -2px;
   }
-  /* The line through the rings, drawn per row so its ends can be capped
-     (RouteStops' rail, on the plate's own paper). */
-  .desk-source__row::before {
-    content: '';
-    position: absolute;
-    inset-block: 0;
-    left: calc(var(--sp-8) / 2);
-    width: 3px;
-    transform: translateX(-50%);
-    background: color-mix(in srgb, var(--line-color) 35%, transparent);
-  }
-  .desk-source__row--first::before { top: 50%; }
-  .desk-source__row--last::before { bottom: 50%; }
-  .desk-source__row--plain {
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding-inline: var(--sp-6);
-  }
-  .desk-source__row--plain::before { content: none; }
-  .desk-source__rows--line > .desk-source__row { flex: 1; }
-  .desk-source__ring {
-    position: relative;
-    justify-self: center;
-    width: 18px;
-    height: 18px;
-    border: 2.5px solid color-mix(in srgb, var(--line-color) 55%, var(--bg-card));
-    border-radius: var(--r-pill);
-    background: var(--surface);
-  }
-  .desk-source__row--here > .desk-source__ring {
-    width: 22px;
-    height: 22px;
-    border-color: var(--line-color);
-    background: var(--line-color);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
-  }
   .desk-source__code {
     font-family: var(--font-display);
     font-size: var(--fs-body);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+    color: color-mix(in srgb, var(--line-color) 50%, var(--text-secondary));
   }
   .desk-source__name {
     display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
     min-width: 0;
   }
   .desk-source__label {
@@ -34874,227 +36317,136 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .desk-source__cap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--sp-2);
-    white-space: nowrap;
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
+  /* The kanji's tiers: number, range, a bar of the kanji met, how many
+     -- a tier nobody has opened in the secondary ink. */
+  .desk-source__row--tier { grid-template-columns: var(--sp-7) calc(2 * var(--sp-8)) minmax(0, 1fr) var(--sp-7); }
+  .desk-source__row--tier > .desk-source__label { color: var(--text-secondary); }
+  .desk-source__row--met > .desk-source__code { color: var(--text-primary); }
+  .desk-source__row--met > .desk-source__label { color: var(--text-primary); }
+  .desk-source__row--tier > .desk-line__bar { height: 4px; }
+  .desk-source__row--tier > .desk-source__num {
+    text-align: right;
+    color: var(--text-primary);
   }
-  .desk-source__cap > * + *::before {
-    content: '·';
-    margin-inline-end: var(--sp-2);
-  }
-  .desk-source__here { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
 
-  /* ── 机 — the vocabulary's sources, what you started first (plan 183) ──
-     The owner's pick C: the five levels had shared a plate the window's
-     height while the tiers and the themes scrolled beside them. A strip
-     of what the learner has started opens the page -- their own level
-     wider, with its first words and the gate that resumes it, then the
-     stops with the most cards met, as many as the page is wide for --
-     and the three sources stand under it: JLPT's line with a bar on
-     each level, the tiers as a grid of numbered cells, the themes in
-     columns. The strip takes its own height; the sources take the rest,
-     their grids scrolling inside their plates, never under eight rows'
-     height. */
-  .desk-sources--resume {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-6);
-  }
+  /* The kanji's two plates, the radicals' the wider. */
   .desk-sources__lower {
     flex: 1 1 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1.15fr);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
     grid-template-rows: minmax(0, 1fr);
     gap: var(--sp-6);
     min-height: calc(8 * var(--sp-8));
   }
-  /* The lead never narrower than its gate wants; the stops beside it,
-     no more than the page is wide for (VocabSources' stripRoom,
-     measured) and no more than the learner has started, share the rest
-     of the row -- the lead alone takes the whole of it. */
-  .desk-resume {
-    flex: none;
+  /* The radicals' plate: the stroke rail in its head beside the name,
+     every count in view on a window this wide, and the page's tiles
+     under the stripe, packed from the top left at a tile's own width --
+     not the short page's few large tiles centred (RadicalGrid's
+     `data-fill`), which left a plate of air round six. The index's own
+     wrappers stand aside (`display: contents`) so the rail and the page
+     are the plate's. */
+  .desk-source--radicals {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--sp-5);
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
   }
-  .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) minmax(0, 1fr); }
-  .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(2, minmax(0, 1fr)); }
-  .desk-resume--3 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(3, minmax(0, 1fr)); }
-  .desk-resume__card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
+  .desk-source--radicals > .desk-source__head { grid-area: 1 / 1; }
+  .desk-source--radicals > .desk-source__stripe { grid-area: 2 / 1 / 3 / -1; }
+  .desk-source--radicals > .desk-source__tiles,
+  .desk-source--radicals .dict-radical-index { display: contents; }
+  .desk-source--radicals .stroke-rail {
+    grid-area: 1 / 2;
+    justify-self: end;
+    max-width: 100%;
+    padding-inline-end: var(--sp-6);
+  }
+  .desk-source--radicals .stroke-rail__key,
+  .desk-source--radicals .stroke-rail__step {
+    min-width: var(--sp-7);
+    min-height: var(--sp-7);
+  }
+  .desk-source--radicals .stroke-rail__n { font-size: var(--fs-caption); }
+  .desk-source--radicals .radical-page,
+  .desk-source--radicals .loading {
+    grid-area: 3 / 1 / 4 / -1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--sp-5) var(--sp-6);
+  }
+  .desk-source--radicals .radical-page .radical-page__grid,
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-page__grid--labelled {
+    grid-template-columns: repeat(auto-fill, minmax(calc(2 * var(--sp-8)), 1fr));
+    justify-content: stretch;
+  }
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-tile { padding: var(--sp-3) var(--sp-2); }
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-tile__char { font-size: var(--fs-heading); }
+  .desk-source--radicals .radical-page[data-fill="short"] .radical-tile__count { font-size: inherit; }
+
+  /* ── the vocabulary's bands (C3) ──
+     A band the page's width under the line's stripe, as the doors are:
+     the tiers' with their pool and size at its head, beside the tiers
+     as doors in a lattice of seams; the themes' with its filter over
+     the themes, as many to a row as hold a name. The tiers take three
+     rows at most and scroll past them (the JMdict pool is over a
+     thousand); the themes take the rest of the window. */
+  .desk-band {
+    display: grid;
     min-width: 0;
-    padding: var(--sp-5);
+    min-height: 0;
+    overflow: hidden;
     background: var(--surface);
     border: 1px solid var(--surface-line);
+    border-top: 3px solid var(--line-color);
     border-radius: var(--r-panel);
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  a.desk-resume__card:hover,
-  a.desk-resume__card:focus-visible {
-    border-color: var(--line-color);
-    transform: translateY(-1px);
-  }
-  a.desk-resume__card:focus-visible {
-    outline: 2px solid var(--accent2);
-    outline-offset: 2px;
-  }
-  .desk-resume__card--lead {
-    gap: var(--sp-4);
-    padding: var(--sp-6);
-  }
-  .desk-resume__cap {
-    overflow: hidden;
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: var(--text-secondary);
-  }
-  .desk-resume__name {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-3);
-    min-width: 0;
-    color: inherit;
-    text-decoration: none;
-  }
-  a.desk-resume__name { border-radius: var(--r-card); }
-  a.desk-resume__name:focus-visible {
-    outline: 2px solid var(--accent2);
-    outline-offset: 2px;
-  }
-  .desk-resume__code {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
-  }
-  .desk-resume__card--lead .desk-resume__code { font-size: var(--fs-heading); }
-  .desk-resume__label {
-    overflow: hidden;
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    transition: color 0.15s ease;
-  }
-  .desk-resume__card--lead .desk-resume__label { font-size: var(--fs-body); }
-  a.desk-resume__name:hover .desk-resume__label,
-  a.desk-resume__name:focus-visible .desk-resume__label { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
-  .desk-resume__sample {
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-sm);
-    word-spacing: var(--sp-1);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
-  }
-  /* The figures over the gate, the gate across the card up to its own
-     measure: a gate at its own width beside the words would not fit a
-     lead this narrow. The air round it is the halo's -- its ring (9px)
-     and the reader's ripples (as far out of the pill) stay inside the
-     card's padding and clear of the figures. */
-  .desk-resume__go {
+  .desk-band__head {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: var(--sp-5);
-    margin-top: auto;
-  }
-  .desk-resume__go > .desk-source__num {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .desk-resume__go > .btn-depart--gate { max-width: calc(8 * var(--sp-8)); }
-  /* A lead wide enough (VocabSources' SPLIT, measured on the card) gives
-     the gate a column of its own beside its words, as a deck's page
-     sets its count beside its gate (plan 179): the strip a row shorter,
-     the level's name whole, the halo in the card's own air. */
-  .desk-resume__card--split {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: repeat(4, auto);
-    align-content: center;
-    gap: var(--sp-3) var(--sp-7);
-  }
-  .desk-resume__card--split > .desk-resume__go {
-    grid-column: 2;
-    grid-row: 1 / span 4;
-    align-self: center;
-    margin-top: 0;
-    text-align: center;
-  }
-  /* The narrowest desk (VocabSources' NARROW, measured): the lead a
-     share narrower, so its two stops keep their names; the tiers' plate
-     the widest, the themes' the narrowest, in one column. */
-  .desk-sources--narrow > .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) repeat(2, minmax(0, 1fr)); }
-  .desk-sources--narrow > .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) minmax(0, 1fr); }
-  .desk-sources--narrow > .desk-sources__lower { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.15fr) minmax(0, 0.95fr); }
-  /* A plate's figure goes under its name when the two do not fit one
-     line, rather than breaking the name (which breaks only when it is
-     wider than the plate on its own); JLPT's codes at their own
-     width, so a level's name has the room. */
-  .desk-sources--resume .desk-source__head {
-    flex-wrap: wrap;
-    row-gap: 0;
-  }
-  .desk-sources--resume .desk-source__title {
-    flex: none;
-    max-width: 100%;
-  }
-  .desk-sources--resume .desk-source__rows--line > .desk-source__row { grid-template-columns: var(--sp-8) auto minmax(0, 1fr) auto; }
-  /* A level's bar under its name, its figure at the bar's end, in JLPT's
-     line under the strip ... */
-  .desk-source__meter {
-    display: flex;
-    align-items: center;
+    justify-content: center;
     gap: var(--sp-3);
-    margin-top: var(--sp-1);
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-5);
   }
-  .desk-source__meter > .desk-line__bar { flex: 1; }
-  /* ... and the level's first words between its name and its bar
-     (/api/station/vocab/samples, as the station's stops print them). */
-  .desk-source__sample {
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-sm);
-    word-spacing: var(--sp-1);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
+  .desk-band--tiers {
+    flex: none;
+    grid-template-columns: calc(6 * var(--sp-8)) minmax(0, 1fr);
   }
-  /* The tiers as a grid: a numbered cell each, a row's height and width
-     at least, as many to a row as the plate holds, the rows sharing what
-     the plate has and scrolling past it. */
-  .desk-source__cells {
-    flex: 1;
+  .desk-band--tiers > .desk-band__head { border-right: 1px solid var(--surface-line); }
+  .desk-band--tiers > .loading { align-self: center; }
+  .desk-band--themes {
+    flex: 1 1 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: calc(4 * var(--sp-8));
+  }
+  .desk-band--themes > .desk-band__head {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--sp-6);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-band--themes > .desk-band__head > .console {
+    flex: 0 1 calc(8 * var(--sp-8));
+    margin: 0;
+  }
+  /* A lattice: each door's hairline drawn round it into the 1px gap,
+     where its neighbour's meets it, so two doors share one seam, the
+     band's own edge clips the outer ones, and a short last row leaves
+     the band's ground rather than a block of seam. */
+  .desk-band .desk-source__cells,
+  .desk-band .desk-source__rows--cols {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--sp-8), 1fr));
-    grid-auto-rows: minmax(var(--sp-8), 1fr);
-    gap: var(--sp-2);
+    gap: 1px;
     min-height: 0;
-    padding: var(--sp-4) var(--sp-6) var(--sp-6);
+    padding: 0;
     overflow-y: auto;
+  }
+
+  .desk-band .desk-source__cells {
+    --door-h: calc(var(--sp-8) + var(--sp-5));
+    grid-template-columns: repeat(auto-fill, minmax(var(--sp-8), 1fr));
+    grid-auto-rows: var(--door-h);
+    max-height: calc(3 * var(--door-h) + 2px);
   }
   .desk-source__cell {
     position: relative;
@@ -35102,28 +36454,23 @@ button.brd-stn { cursor: pointer; }
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
-    overflow: hidden;
+    gap: var(--sp-1);
+    background: var(--surface);
     color: var(--text-secondary);
     text-decoration: none;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: background 0.15s ease;
   }
   .desk-source__cell:hover,
-  .desk-source__cell:focus-visible {
-    border-color: var(--line-color);
-    background: var(--bg-card-hover);
-  }
+  .desk-source__cell:focus-visible { background: var(--bg-card-hover); }
   .desk-source__cell:focus-visible {
     outline: 2px solid var(--accent2);
     outline-offset: -2px;
   }
-  .desk-source__cell--met { border-color: color-mix(in srgb, var(--line-color) 55%, var(--surface-line)); }
   .desk-source__cell-code {
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-body);
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
     color: color-mix(in srgb, var(--line-color) 50%, var(--text-secondary));
   }
@@ -35132,7 +36479,7 @@ button.brd-stn { cursor: pointer; }
     font-family: var(--font-display);
     font-size: var(--fs-caption-xs);
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
   }
   .desk-source__cell-fill {
@@ -35142,36 +36489,29 @@ button.brd-stn { cursor: pointer; }
     height: 3px;
     background: var(--line-color);
   }
-  /* The themes in as many columns as hold a name, two on a laptop, a
-     row's height each. */
-  .desk-source__rows--cols {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(calc(3 * var(--sp-8)), 1fr));
+  .desk-band .desk-source__rows--cols {
+    grid-template-columns: repeat(auto-fill, minmax(calc(4 * var(--sp-8)), 1fr));
     grid-auto-rows: var(--sp-8);
     align-content: start;
-    column-gap: var(--sp-5);
-    padding-inline: var(--sp-6);
   }
-  .desk-source__rows--cols > .desk-source__row--plain {
+  /* A theme's door: its name, its count at the far end. */
+  .desk-source__row--plain {
+    grid-template-columns: minmax(0, 1fr) auto;
     min-height: 0;
-    padding-inline: var(--sp-2);
+    padding-inline: var(--sp-5);
+    border-bottom: 0;
+    background: var(--surface);
   }
-  .desk-source__rows--cols > .desk-source__row:last-child { border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 45%, transparent); }
+  .desk-band .desk-source__cell,
+  .desk-band .desk-source__row--plain { box-shadow: 0 0 0 1px var(--surface-line); }
   @media (prefers-reduced-motion: reduce) {
-    .desk-resume__card,
-    .desk-resume__label,
+    .desk-source__row,
     .desk-source__cell { transition: none; }
-    a.desk-resume__card:hover,
-    a.desk-resume__card:focus-visible { transform: none; }
   }
-  /* The short desk (plan 169): the first words, the strip's and the
-     line's, and the lead's air give way first, and the sources under
-     it hold six rows' height rather than eight, so a 600px window
-     shows the page whole. */
+  /* The short desk (plan 169): the doors' air gives way first. */
   @media (max-height: 799px) {
-    .desk-resume__sample,
-    .desk-source__sample { display: none; }
-    .desk-resume__card--lead { padding: var(--sp-5); }
+    .desk-linedoors .route--across > .route-stop { padding-block: var(--sp-4); }
+    .desk-linedoors__gate { padding-block: var(--sp-4); }
     .desk-sources__lower { min-height: calc(6 * var(--sp-8)); }
   }
 
@@ -39318,6 +40658,17 @@ button.brd-stn { cursor: pointer; }
       padding-top: calc(var(--safe-top) + var(--sp-4));
     }
     .desk-sec { min-height: 28px; }
+    /* The places as the row of pictograms on every screen (plan 269):
+       as rows they were the 188px a 600px window no longer had. */
+    .desk-rail__places { flex-direction: row; }
+    .desk-rail__place { flex: 1 1 0; }
+    .desk-rail__places .desk-gate { justify-content: center; padding: 0; }
+    .desk-rail__places .desk-gate__label { display: none; }
+    .desk-rail__places .desk-gate--on::before {
+      inset: auto var(--sp-4) calc(-1 * var(--sp-1));
+      width: auto;
+      height: 2px;
+    }
     /* Seven stations (Practice's, since 会話, plan 217) were a row more
        than a 600px window holds: a gate of seven closes its rows to
        24px, still a pointer's target, and every other gate keeps 28. */
@@ -41320,5 +42671,14 @@ button.brd-stn { cursor: pointer; }
     min-height: 0;
     overflow: hidden;
   }
+}
+@media (min-width: 1100px) {
+  /* ── 辻 — the stroke sheet, big (plan 268) ──
+     The dialog is wider than a card and its board takes the height the
+     window leaves under the head, the modes and the line at its foot
+     (about 300px), never under 280px, where the sheet scrolls instead. */
+  .sheet.ss-sheet { width: min(760px, calc(100vw - 2 * var(--sp-8))); }
+  .ss-paper,
+  .ss-stage .gt-board { width: min(100%, 640px, max(280px, calc(100dvh - 300px))); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

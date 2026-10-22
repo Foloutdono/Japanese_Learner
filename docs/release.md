@@ -40,6 +40,15 @@ running head) when that is ahead of it. So:
 - Every deploy restarts the one-worker backend, and a learner opening the
   app meanwhile waits on the boot gate (the `boot_timeout` events in the
   trail). One restart a day, in the small hours, keeps that off the day.
+- **Learners are warned first (plan 265).** Before it pushes, the
+  workflow tells the running backend the minute of the push
+  (`POST /api/release/notice`), waits that long (10 minutes; a manual
+  run's *notice_minutes*, 0 for none) and then pushes. Meanwhile every
+  `/api` answer carries `X-Release-At`, and the app docks a note: "Update
+  at 03:27: the app may stall for a few minutes", then "under way". The
+  restart clears it (the notice lives in the old process's memory), a
+  failed push takes it down, and an orphan expires 30 minutes after its
+  minute. So the daily push lands at about 03:27 UTC.
 - `production` never holds a commit `main` did not hold first, so there is
   nothing to merge back. Never push to it by hand: the workflow refuses to
   promote while it holds a commit `main` lacks.
@@ -68,6 +77,12 @@ Set up once, in the dashboards (the repository cannot do these):
    for that deployment to appear, and Save again. `main` and every pull
    request then get preview deployments, which is the place to try a
    frontend change.
+4. **The release warning** (plan 265): mint a random token
+   (`openssl rand -hex 32`) and set it twice, as `RELEASE_NOTICE_TOKEN`:
+   on Render (the backend service → Environment) and as a repository
+   secret (Settings → Secrets → Actions). Until both are set the workflow
+   skips the warning and ships at once, as before; with the variable
+   unset the backend's route answers 404.
 
 A preview's `/api` is rewritten to the **production** backend and database
 (`vercel.json`), running the code last promoted, so a frontend change that

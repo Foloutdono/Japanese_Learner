@@ -908,7 +908,7 @@
     "fr": "Notre chien est docile, alors on peut le laisser jouer avec les enfants sans s'inquiéter."
    },
    {
-    "jp": "いつもはおとなしい弟が、今日は珍しく大きな声で笑っていた。",
+    "jp": "いつもはおとなしい弟が、今日はめずらしく大きな声で笑っていた。",
     "en": "My little brother, who is usually quiet, was laughing out loud today, which is unusual for him.",
     "fr": "Mon petit frère, d'habitude si calme, riait aujourd'hui aux éclats, ce qui est rare chez lui."
    }
@@ -1383,14 +1383,14 @@
   ],
   "::ぐらい": [
    {
-    "jp": "一時間ぐらい待ったが、バスはとうとう来なかった。",
-    "en": "I waited about an hour, but the bus never came.",
-    "fr": "J'ai attendu environ une heure, mais le bus n'est jamais venu."
+    "jp": "駅まで、あるいて十五分ぐらいです。",
+    "en": "It's about fifteen minutes' walk to the station.",
+    "fr": "La gare est à environ quinze minutes à pied."
    },
    {
-    "jp": "自分の部屋ぐらい、自分で片付けなさい。",
-    "en": "At least tidy your own room yourself.",
-    "fr": "Range au moins ta chambre toi-même."
+    "jp": "きのうは、三時間ぐらいべんきょうしました。",
+    "en": "Yesterday I studied for about three hours.",
+    "fr": "Hier, j'ai étudié environ trois heures."
    }
   ],
   "::けが": [
@@ -3639,14 +3639,14 @@
   ],
   "::よろしく": [
    {
-    "jp": "来週から一緒に働く山田です。よろしくお願いします。",
-    "en": "I'm Yamada, and I'll be working with you from next week. I look forward to working with you.",
-    "fr": "Je suis Yamada et je travaillerai avec vous à partir de la semaine prochaine. Au plaisir de travailler ensemble."
+    "jp": "はじめまして。山下です。どうぞよろしく。",
+    "en": "How do you do? I'm Yamashita. Pleased to meet you.",
+    "fr": "Bonjour, je m'appelle Yamashita. Enchanté de faire votre connaissance."
    },
    {
-    "jp": "お母さんによろしく伝えてね。",
-    "en": "Say hello to your mother for me.",
-    "fr": "Dis bonjour à ta mère de ma part."
+    "jp": "お母さんによろしく言ってください。",
+    "en": "Please give my regards to your mother.",
+    "fr": "Transmettez mes amitiés à votre mère, s'il vous plaît."
    }
   ],
   "::りっぱ": [
@@ -5043,14 +5043,14 @@
   ],
   "人::じん": [
    {
-    "jp": "隣の席の留学生は、フランス人だそうだ。",
-    "en": "Apparently the exchange student who sits next to me is French.",
-    "fr": "Il paraît que l'étudiant étranger assis à côté de moi est français."
+    "jp": "マリアさんはブラジル人です。",
+    "en": "Maria is Brazilian.",
+    "fr": "Maria est brésilienne."
    },
    {
-    "jp": "社会人になってから、自由な時間が減った。",
-    "en": "Since I started working, I've had less free time.",
-    "fr": "Depuis que je suis entré dans la vie active, j'ai moins de temps libre."
+    "jp": "あの先生はイギリス人で、日本語がとても上手です。",
+    "en": "That teacher is British and speaks Japanese very well.",
+    "fr": "Ce professeur est britannique et parle très bien japonais."
    }
   ],
   "人工::じんこう": [
@@ -7707,14 +7707,14 @@
   ],
   "平仮名::ひらがな": [
    {
-    "jp": "子どもが、自分の名前を平仮名で書けるようになった。",
-    "en": "My child can now write their own name in hiragana.",
-    "fr": "Mon enfant sait maintenant écrire son prénom en hiragana."
+    "jp": "名前を平仮名で書いてください。",
+    "en": "Please write your name in hiragana.",
+    "fr": "Écrivez votre nom en hiragana, s'il vous plaît."
    },
    {
-    "jp": "この絵本は全部平仮名で書かれているので、小さい子でも読める。",
-    "en": "This picture book is written entirely in hiragana, so even small children can read it.",
-    "fr": "Ce livre d'images est entièrement écrit en hiragana, alors même les petits enfants peuvent le lire."
+    "jp": "平仮名はもうおぼえましたか。",
+    "en": "Have you learned hiragana yet?",
+    "fr": "Tu as déjà appris les hiragana ?"
    }
   ],
   "平常::へいじょう": [
@@ -8043,14 +8043,14 @@
   ],
   "御::ご": [
    {
-    "jp": "御来場の皆様にお知らせいたします。",
+    "jp": "御来場のみなさまにお知らせいたします。",
     "en": "We have an announcement for all our visitors.",
     "fr": "Nous avons une annonce à faire à tous nos visiteurs."
    },
    {
-    "jp": "皆様の御協力に、心より感謝申し上げます。",
-    "en": "We sincerely thank you all for your cooperation.",
-    "fr": "Nous vous remercions sincèrement, toutes et tous, de votre coopération."
+    "jp": "足もとに御注意ください。",
+    "en": "Please watch your step.",
+    "fr": "Attention à la marche, s'il vous plaît."
    }
   ],
   "御中::おんちゅう": [
@@ -10419,14 +10419,14 @@
   ],
   "片仮名::かたかな": [
    {
-    "jp": "外国の地名や人の名前は、ふつう片仮名で書きます。",
-    "en": "Foreign place names and people's names are usually written in katakana.",
-    "fr": "Les noms de lieux et de personnes étrangers s'écrivent généralement en katakana."
+    "jp": "外国の名前は、片仮名で書きます。",
+    "en": "Foreign names are written in katakana.",
+    "fr": "Les noms étrangers s'écrivent en katakana."
    },
    {
-    "jp": "日本に来たばかりのころは、片仮名を読むのにも時間がかかった。",
-    "en": "When I had just come to Japan, it took me a while even to read katakana.",
-    "fr": "Quand je venais d'arriver au Japon, il me fallait du temps même pour lire les katakana."
+    "jp": "片仮名は、ひらがなよりむずかしいですか。",
+    "en": "Is katakana harder than hiragana?",
+    "fr": "Les katakana sont-ils plus difficiles que les hiragana ?"
    }
   ],
   "版画::はんが": [

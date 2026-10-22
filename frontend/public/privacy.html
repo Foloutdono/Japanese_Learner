@@ -8,120 +8,393 @@
   <!-- A static page, on purpose: both app stores want a privacy policy at a
        URL that answers without signing in, and the app itself gates every
        route behind a session. Outside src/ so the design guards do not scan
-       it; the values below are the paper/sumi tokens copied as literals. -->
+       it; the values below are the paper/sumi tokens copied as literals.
+
+       One language at a time: the switch reads ?lang=, then #fr/#en, then
+       the app's own saved choice (localStorage 'lang', same origin), then
+       the browser's language. Without JavaScript both sections show, one
+       after the other, and the switch is two anchors. The choice stays on
+       this page: it never writes the app's 'lang'. -->
+  <script>
+    (function () {
+      try {
+        var s = localStorage.getItem('jp-theme')
+        if (s === 'light' || s === 'dark') document.documentElement.setAttribute('data-theme', s)
+      } catch (e) {}
+    })()
+  </script>
   <style>
-    :root { color-scheme: dark; --bg: #17151a; --ink: #ece5d8; --dim: #a79c8c; --gold: #c99a3e; --line: #35303a; }
-    @media (prefers-color-scheme: light) { :root { color-scheme: light; --bg: #f6f1e4; --ink: #221d15; --dim: #665c4a; --gold: #a97a25; --line: #c3af7c; } }
+    :root { color-scheme: dark; --bg: #17151a; --ink: #ece5d8; --dim: #a79c8c; --gold: #c99a3e; --line: #35303a; --card: #1f1c23; }
+    @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { color-scheme: light; --bg: #f6f1e4; --ink: #221d15; --dim: #665c4a; --gold: #a97a25; --line: #c3af7c; --card: #efe7d3; } }
+    :root[data-theme="light"] { color-scheme: light; --bg: #f6f1e4; --ink: #221d15; --dim: #665c4a; --gold: #a97a25; --line: #c3af7c; --card: #efe7d3; }
     body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 "Space Grotesk", "Segoe UI", system-ui, sans-serif; }
     main { max-width: 720px; margin: 0 auto; padding: 44px 22px 88px; }
-    h1 { font-family: "Noto Serif JP", serif; font-size: 1.7rem; margin: 0 0 6px; }
-    h2 { font-size: 1.12rem; margin: 44px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
-    .glyph { font-family: "Noto Serif JP", serif; font-size: 2.5rem; color: var(--gold); line-height: 1; margin-bottom: 22px; }
-    .cap { color: var(--dim); font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase; }
-    .lang { display: flex; gap: 12px; margin: 22px 0 0; }
-    .lang a { color: var(--gold); }
+    h1 { font-family: "Noto Serif JP", serif; font-size: 1.7rem; line-height: 1.3; margin: 0 0 6px; }
+    h2 { font-size: 1.12rem; margin: 44px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); scroll-margin-top: 16px; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    .glyph { font-family: "Noto Serif JP", serif; font-size: 2.5rem; color: var(--gold); line-height: 1; }
+    .cap { color: var(--dim); font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 6px; }
+    .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 3px; }
+    .lang a { display: block; padding: 6px 14px; border-radius: 999px; color: var(--dim); text-decoration: none; font-size: 0.88rem; }
+    .lang a:hover { color: var(--ink); }
+    .lang a[aria-current="true"] { background: var(--gold); color: var(--bg); font-weight: 600; }
+    .lang a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     a { color: var(--gold); }
-    ul { padding-left: 20px; }
+    ul, ol { padding-left: 20px; }
     li { margin: 6px 0; }
     .updated { color: var(--dim); font-size: 0.82rem; }
+    .short { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 6px 20px 8px; margin: 22px 0 0; }
+    .short h2 { border-top: 0; margin-top: 12px; padding-top: 0; }
+    .toc { columns: 2; column-gap: 28px; font-size: 0.92rem; margin: 22px 0 0; padding-left: 20px; }
+    .toc li { margin: 4px 0; break-inside: avoid; }
+    .tbl { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); }
+    th { color: var(--dim); font-weight: 500; }
+    @media (max-width: 520px) { .toc { columns: 1; } }
   </style>
 </head>
 <body>
 <main>
-  <div class="glyph" lang="ja">辻</div>
-  <nav class="lang"><a href="#fr">Français</a> · <a href="#en">English</a></nav>
+  <div class="top">
+    <div class="glyph" lang="ja" aria-hidden="true">辻</div>
+    <nav class="lang" aria-label="Langue · Language">
+      <a href="#fr" hreflang="fr" lang="fr" data-lang="fr">Français</a>
+      <a href="#en" hreflang="en" lang="en" data-lang="en">English</a>
+    </nav>
+  </div>
 
+  <!-- OWNER: relire, dater. -->
   <section id="fr" lang="fr">
     <p class="cap">Politique de confidentialité</p>
     <h1>Ce que l'application sait de vous, et pourquoi</h1>
-    <p class="updated">Dernière mise à jour&nbsp;: 17 octobre 2026. <!-- OWNER: relire, dater. --></p>
+    <p class="updated">Dernière mise à jour&nbsp;: 20 octobre 2026.</p>
 
-    <h2>Le compte</h2>
-    <p>La connexion est assurée par Supabase. Nous conservons votre adresse e-mail (l'identifiant du compte), un identifiant technique et la date de création. Le mot de passe n'est jamais lisible par nous.</p>
+    <div class="short">
+      <h2>En bref</h2>
+      <ul>
+        <li>Nous gardons ce qu'il faut pour vous faire apprendre&nbsp;: votre compte, vos révisions, vos réglages et ce que vous créez.</li>
+        <li>Aucune publicité, aucun traqueur, aucune revente de données. Les statistiques d'usage restent chez nous, ne contiennent rien de ce que vous écrivez, et vous pouvez les refuser.</li>
+        <li>Certains textes (analyse de phrases, corrections) et les photos que vous faites lire sont envoyés à un modèle d'IA, sans rien qui vous identifie.</li>
+        <li>Les autres apprenants ne voient que votre nom d'utilisateur (classement, paquets publiés) — jamais votre e-mail.</li>
+        <li>Vous pouvez tout télécharger, tout réinitialiser ou supprimer votre compte depuis l'application, à tout moment.</li>
+      </ul>
+    </div>
 
-    <h2>Votre apprentissage</h2>
-    <p>Chaque révision est enregistrée&nbsp;: la carte, le mode, la note que vous lui donnez, la date. C'est ce qui permet la répétition espacée, vos statistiques, votre niveau, votre série et le classement (où seul votre nom d'utilisateur apparaît). S'y ajoutent vos paquets et vos cartes personnelles, vos réglages (niveau JLPT, rythme, destination, heure de rappel), vos phrases analysées, vos tentatives d'examen blanc et vos exercices de lecture, de traduction et de rédaction.</p>
+    <ol class="toc" aria-label="Sommaire">
+      <li><a href="#fr-qui">Qui sommes-nous</a></li>
+      <li><a href="#fr-compte">Le compte</a></li>
+      <li><a href="#fr-public">Ce que les autres voient</a></li>
+      <li><a href="#fr-apprentissage">Votre apprentissage</a></li>
+      <li><a href="#fr-rappels">Rappels et agenda</a></li>
+      <li><a href="#fr-appareil">Sur votre appareil</a></li>
+      <li><a href="#fr-stats">Statistiques d'usage</a></li>
+      <li><a href="#fr-messages">Vos messages</a></li>
+      <li><a href="#fr-import">Votre progression ailleurs</a></li>
+      <li><a href="#fr-tiers">Hébergement et tiers</a></li>
+      <li><a href="#fr-bases">Pourquoi nous en avons le droit</a></li>
+      <li><a href="#fr-duree">Durées de conservation</a></li>
+      <li><a href="#fr-droits">Vos droits</a></li>
+      <li><a href="#fr-contact">Contact et modifications</a></li>
+    </ol>
 
-    <h2>Statistiques d’usage</h2>
-    <p>Pour savoir ce qui sert vraiment et ce qui ne sert pas, l’application mesure comment elle est utilisée. Elle note&nbsp;:</p>
+    <h2 id="fr-qui">Qui sommes-nous</h2>
+    <p>Tsuji (辻) est une application d'apprentissage du japonais, conçue et exploitée par Alexandre Bauwens, développeur indépendant — «&nbsp;nous&nbsp;» dans cette page. Il est le responsable du traitement de vos données au sens du RGPD. Pour toute question&nbsp;: <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>.</p>
+
+    <h2 id="fr-compte">Le compte</h2>
+    <p>La connexion est assurée par Supabase. Selon la façon dont vous entrez&nbsp;:</p>
     <ul>
-      <li><b>les écrans</b> que vous ouvrez, et combien de temps chacun reste devant vous (le temps où l’onglet est caché ne compte pas)&nbsp;: le nom de l’écran, jamais son contenu&nbsp;;</li>
-      <li><b>vos visites</b>&nbsp;: leur début, et quelques classes d’appareil — téléphone, tablette ou ordinateur, la famille du système (iOS, Android, Windows…), navigateur ou application installée, tactile ou souris, la langue et le thème de l’interface, si vous avez demandé moins d’animations. Jamais le modèle de l’appareil, sa résolution, votre adresse IP ou de quoi le reconnaître&nbsp;;</li>
-      <li><b>vos séances</b> de révision et d’exercice&nbsp;: leur type, le nombre de réponses, combien étaient justes, leur durée et le temps par carte&nbsp;;</li>
-      <li><b>les fonctions utilisées</b> — l’écoute, l’analyse de phrases, la lecture de photo, les questions au tuteur, la recherche dans le dictionnaire — sous forme de nombre d’utilisations par écran, et les <b>réglages</b> modifiés (thème, langue, rythme…)&nbsp;;</li>
-      <li>les étapes de l’inscription, du premier trajet et des guides, les offres affichées, les plafonds atteints, les erreurs de chargement et la vitesse des pages.</li>
+      <li><b>Sans compte (compte invité)</b>&nbsp;: un identifiant technique est créé, sans e-mail. Votre progression lui est rattachée&nbsp;; si vous créez un compte ensuite, elle vous suit.</li>
+      <li><b>Avec un e-mail</b>&nbsp;: nous gardons votre adresse e-mail (l'identifiant du compte), un identifiant technique et la date de création. Le mot de passe est chiffré par Supabase et n'est jamais lisible par nous.</li>
+      <li><b>Avec Google</b>&nbsp;: Google nous transmet votre adresse e-mail et les informations de profil que vous l'autorisez à partager (nom, photo). Nous ne recevons jamais votre mot de passe Google.</li>
     </ul>
-    <p><b>Rien de ce que vous écrivez n’y figure</b>&nbsp;: ni vos dictées, ni vos phrases analysées, ni vos recherches, ni vos questions, ni vos cartes, ni les noms de vos paquets ou de vos thèmes. Le serveur n’accepte que des valeurs prévues à l’avance et rejette tout le reste.</p>
-    <p>Ces mesures servent uniquement à améliorer l’application, restent sur notre propre serveur et ne sont transmises à personne&nbsp;; aucun outil tiers n’est utilisé et rien ne vous suit d’un site à l’autre. Elles sont rattachées à votre compte (elles sont donc pseudonymes, pas anonymes), sur la base de notre intérêt légitime à mesurer l’audience de l’application (RGPD, art.&nbsp;6.1.f), dans le cadre de mesure d’audience exempté de consentement décrit par la CNIL. Le détail est effacé au bout de 30 jours, sauf les quelques événements qui n’arrivent qu’une fois ou deux par compte (étapes de l’inscription, premier trajet, guides, offres, plafonds, cours de base, publication d’un paquet, import depuis une autre application), gardés 12 mois&nbsp;; les comptages par jour qui en restent sont effacés au bout de 25 mois.</p>
-    <p>Vous pouvez vous y opposer à tout moment&nbsp;: Réglages › Compte › Statistiques d’usage. Ce choix vaut pour votre compte, sur tous vos appareils. Au même endroit, «&nbsp;Télécharger les miennes&nbsp;» vous remet tout ce qui a été noté vous concernant.</p>
+    <p>S'y ajoutent votre <b>nom d'utilisateur</b> et, si vous en donnez un, le <b>prénom</b> imprimé sur votre carte.</p>
 
-    <h2>Vos messages</h2>
-    <p>Réglages › Nous écrire, le drapeau d’une carte répondue et le lien sous une erreur vous permettent de nous écrire&nbsp;: un problème, une idée, une faute dans ce qui est enseigné, une carte à corriger. Nous gardons ce que vous écrivez et la sorte de message. Si la case «&nbsp;Joindre l’écran et l’appareil&nbsp;» reste cochée, s’y ajoutent le nom de l’écran et les mêmes classes d’appareil que les statistiques d’usage (téléphone, tablette ou ordinateur, la famille du système, navigateur ou application), affichées avant l’envoi&nbsp;; sous une erreur, la zone et le code de l’échec&nbsp;; pour une carte, son identifiant et ce qui ne va pas. Si vous cochez «&nbsp;Me répondre&nbsp;», l’adresse e-mail de votre compte est relevée pour vous répondre. Ces messages sont lus par une personne, servent uniquement à corriger et améliorer l’application, ne sont transmis à personne, n’apparaissent dans aucune statistique autrement que comptés, et sont effacés avec votre compte. Cinq messages par jour au plus.</p>
-
-    <h2>Votre progression ailleurs (Anki, WaniKani, Renshuu)</h2>
-    <p>Réglages › Correspondance reprend votre progression depuis une autre application. Pour Anki, le fichier d’un paquet ou d’une collection est lu sur votre appareil et n’est jamais envoyé. Pour WaniKani et Renshuu, c’est votre appareil qui lit votre compte chez eux, avec la clé d’API que vous collez&nbsp;: cette clé ne part que vers WaniKani ou Renshuu, jamais vers notre serveur, et n’est pas gardée. Dans tous les cas, seuls partent vers notre serveur, pour ce que vous choisissez, les champs courts en japonais de chaque mot ou kanji appris (le mot et sa lecture) et son calendrier. Le serveur y cherche les cartes du cours et ne garde que le calendrier de celles qu’il a trouvées, comme si vous les aviez apprises ici&nbsp;; le reste n’est pas conservé, ni le nom de vos paquets, qui ne quitte pas votre appareil. À l’arrivée, l’application vous le propose une fois&nbsp;; nous gardons la date de votre réponse, pour ne pas vous le redemander.</p>
-
-    <h2>Ce qui est envoyé à des tiers</h2>
+    <h2 id="fr-public">Ce que les autres apprenants voient</h2>
     <ul>
-      <li><b>Analyse de phrases, correction de traductions et de rédactions, questions sur un exercice, génération d'examens et de textes</b>&nbsp;: le texte concerné est envoyé à un fournisseur de modèle de langage (Google Gemini d'abord, puis OpenAI, puis OpenRouter, selon la disponibilité) pour être analysé — y compris ce que vous avez écrit pour l'exercice, comme votre traduction, votre phrase ou votre question. Aucune donnée de compte ne l'accompagne.</li>
-      <li><b>Lecture d'une photo</b>&nbsp;: l'image que vous cadrez est envoyée à un modèle de vision (Google Gemini d'abord, puis OpenRouter, selon la disponibilité) pour en extraire le texte, puis n'est pas conservée par nous.</li>
-      <li><b>Vidéos</b>&nbsp;: le lecteur YouTube est celui de YouTube, avec sa propre politique, et l’image d’aperçu d’une vidéo que vous analysez est chargée par votre navigateur depuis YouTube.</li>
-      <li><b>Audio des examens</b>&nbsp;: les dialogues sont synthétisés à partir de texte généré, sans donnée personnelle.</li>
+      <li><b>Votre nom d'utilisateur</b>, au classement (番付) et comme auteur des paquets que vous publiez. Il est tiré au hasard, ou formé à partir du prénom que vous donnez à l'inscription (ses lettres latines), et vous pouvez le changer à tout moment.</li>
+      <li><b>Les paquets que vous publiez</b>&nbsp;: leur nom et leurs cartes. Un paquet privé n'est vu que par vous.</li>
+    </ul>
+    <p>Personne d'autre ne voit votre e-mail, le prénom de votre carte, vos révisions ni vos réglages.</p>
+
+    <h2 id="fr-apprentissage">Votre apprentissage</h2>
+    <p>Chaque révision est enregistrée&nbsp;: la carte, le mode, la note que vous lui donnez, la date. C'est ce qui permet la répétition espacée, vos statistiques, votre niveau, votre série et le classement. S'y ajoutent vos paquets et vos cartes personnelles, vos réglages (niveau JLPT, rythme, destination, heure de rappel), le test de placement, vos phrases analysées, vos tentatives d'examen blanc et vos exercices de lecture, de traduction, de dictée et de rédaction.</p>
+
+    <h2 id="fr-rappels">Rappels et agenda</h2>
+    <p>Dans les applications Android et iOS, les rappels (le train du jour, les créneaux de votre agenda) sont programmés <b>par votre téléphone lui-même</b>, après votre accord donné au système&nbsp;; aucun service de notification push n'est utilisé. Nous gardons seulement si les rappels sont activés, leur heure et les créneaux de votre agenda. Le widget affiche des chiffres que l'application lui passe sur l'appareil.</p>
+
+    <h2 id="fr-appareil">Sur votre appareil</h2>
+    <p>L'application garde sur votre appareil (stockage local du navigateur ou de l'application) votre session de connexion, la langue et le thème choisis, et des copies temporaires pour aller plus vite et fonctionner hors ligne. Il n'y a <b>aucun cookie publicitaire ni de mesure tierce</b>&nbsp;: ce stockage sert uniquement au fonctionnement de l'application. Se déconnecter efface la session de l'appareil.</p>
+
+    <h2 id="fr-stats">Statistiques d'usage</h2>
+    <p>Pour savoir ce qui sert vraiment et ce qui ne sert pas, l'application mesure comment elle est utilisée. Elle note&nbsp;:</p>
+    <ul>
+      <li><b>les écrans</b> que vous ouvrez, et combien de temps chacun reste devant vous (le temps où l'onglet est caché ne compte pas)&nbsp;: le nom de l'écran, jamais son contenu&nbsp;;</li>
+      <li><b>vos visites</b>&nbsp;: leur début, et quelques classes d'appareil — téléphone, tablette ou ordinateur, la famille du système (iOS, Android, Windows…), navigateur ou application installée, tactile ou souris, la langue et le thème de l'interface, si vous avez demandé moins d'animations. Jamais le modèle de l'appareil, sa résolution, votre adresse IP ou de quoi le reconnaître&nbsp;;</li>
+      <li><b>vos séances</b> de révision et d'exercice&nbsp;: leur type, le nombre de réponses, combien étaient justes, leur durée et le temps par carte&nbsp;;</li>
+      <li><b>les fonctions utilisées</b> — l'écoute, l'analyse de phrases, la lecture de photo, les questions au tuteur, la recherche dans le dictionnaire — sous forme de nombre d'utilisations par écran, et les <b>réglages</b> modifiés (thème, langue, rythme…)&nbsp;;</li>
+      <li>les étapes de l'inscription, du premier trajet et des guides, les offres affichées, les plafonds atteints, les erreurs de chargement et la vitesse des pages.</li>
+    </ul>
+    <p><b>Rien de ce que vous écrivez n'y figure</b>&nbsp;: ni vos dictées, ni vos phrases analysées, ni vos recherches, ni vos questions, ni vos cartes, ni les noms de vos paquets ou de vos thèmes. Le serveur n'accepte que des valeurs prévues à l'avance et rejette tout le reste.</p>
+    <p>Ces mesures servent uniquement à améliorer l'application, restent sur notre propre serveur et ne sont transmises à personne&nbsp;; aucun outil tiers n'est utilisé et rien ne vous suit d'un site à l'autre. Elles sont rattachées à votre compte (elles sont donc pseudonymes, pas anonymes), dans le cadre de mesure d'audience exempté de consentement décrit par la CNIL.</p>
+    <p><b>Vous pouvez vous y opposer à tout moment</b>&nbsp;: Réglages › Compte › Statistiques d'usage. Ce choix vaut pour votre compte, sur tous vos appareils. Au même endroit, «&nbsp;Télécharger les miennes&nbsp;» vous remet tout ce qui a été noté vous concernant.</p>
+
+    <h2 id="fr-messages">Vos messages</h2>
+    <p>Réglages › Nous écrire, le drapeau d'une carte répondue et le lien sous une erreur vous permettent de nous écrire&nbsp;: un problème, une idée, une faute dans ce qui est enseigné, une carte à corriger. Nous gardons ce que vous écrivez et la sorte de message. S'y ajoutent&nbsp;:</p>
+    <ul>
+      <li>si la case «&nbsp;Joindre l'écran et l'appareil&nbsp;» reste cochée, le nom de l'écran et les mêmes classes d'appareil que les statistiques d'usage, affichés avant l'envoi&nbsp;;</li>
+      <li>sous une erreur, la zone et le code de l'échec&nbsp;; pour une carte, son identifiant et ce qui ne va pas&nbsp;;</li>
+      <li>si vous cochez «&nbsp;Me répondre&nbsp;», l'adresse e-mail de votre compte, pour vous répondre.</li>
+    </ul>
+    <p>Ces messages sont lus par une personne, servent uniquement à corriger et améliorer l'application, ne sont transmis à personne, n'apparaissent dans aucune statistique autrement que comptés, et sont effacés avec votre compte. Cinq messages par jour au plus.</p>
+
+    <h2 id="fr-import">Votre progression ailleurs (Anki, WaniKani, Renshuu)</h2>
+    <p>Réglages › Correspondance reprend votre progression depuis une autre application.</p>
+    <ul>
+      <li><b>Anki</b>&nbsp;: le fichier d'un paquet ou d'une collection est lu sur votre appareil et n'est jamais envoyé.</li>
+      <li><b>WaniKani et Renshuu</b>&nbsp;: c'est votre appareil qui lit votre compte chez eux, avec la clé d'API que vous collez. Cette clé ne part que vers WaniKani ou Renshuu, jamais vers notre serveur, et n'est pas gardée.</li>
+    </ul>
+    <p>Dans tous les cas, seuls partent vers notre serveur, pour ce que vous choisissez, les champs courts en japonais de chaque mot ou kanji appris (le mot et sa lecture) et son calendrier. Le serveur y cherche les cartes du cours et ne garde que le calendrier de celles qu'il a trouvées, comme si vous les aviez apprises ici&nbsp;; le reste n'est pas conservé, ni le nom de vos paquets, qui ne quitte pas votre appareil. À l'arrivée, l'application vous le propose une fois&nbsp;; nous gardons la date de votre réponse, pour ne pas vous le redemander.</p>
+
+    <h2 id="fr-tiers">Hébergement et tiers</h2>
+    <p><b>Où sont vos données.</b> Votre compte et toutes vos données d'apprentissage sont stockés dans l'Union européenne&nbsp;:</p>
+    <ul>
+      <li><b>Supabase</b> — connexion et base de données, en Irlande&nbsp;;</li>
+      <li><b>Render</b> — notre serveur, à Francfort (Allemagne)&nbsp;;</li>
+      <li><b>Vercel</b> — sert le site et relaie vos requêtes vers notre serveur&nbsp;; comme tout hébergeur, il voit techniquement votre adresse IP pour vous répondre, mais ne garde aucune donnée d'apprentissage.</li>
+    </ul>
+    <p>Les voix (cartes, dictées, examens) sont synthétisées sur notre propre serveur&nbsp;: rien n'est envoyé à un service de synthèse vocale.</p>
+    <p><b>Ce qui est envoyé à d'autres services, et seulement quand vous utilisez la fonction&nbsp;:</b></p>
+    <ul>
+      <li><b>Analyse de phrases, correction de traductions et de rédactions, questions sur un exercice, génération d'examens et de textes</b>&nbsp;: le texte concerné est envoyé à un fournisseur de modèle de langage (Google Gemini d'abord, puis OpenAI, puis OpenRouter, selon la disponibilité) — y compris ce que vous avez écrit pour l'exercice, comme votre traduction, votre phrase ou votre question. Aucune donnée de compte ne l'accompagne. Ces fournisseurs peuvent traiter le texte hors de l'Union européenne (notamment aux États-Unis), selon leurs propres conditions&nbsp;: n'y écrivez rien de personnel.</li>
+      <li><b>Lecture d'une photo</b>&nbsp;: par défaut, l'image que vous cadrez est envoyée à un modèle de vision (Google Gemini d'abord, puis OpenRouter) pour en extraire le texte, puis n'est pas conservée par nous. Sur le web, «&nbsp;Lire sur mon appareil&nbsp;» lit l'image sans qu'elle quitte votre appareil (moins précis)&nbsp;; le moteur de lecture est alors téléchargé une fois depuis un réseau de diffusion public.</li>
+      <li><b>Connexion avec Google</b>&nbsp;: si vous la choisissez, Google sait que vous vous connectez à Tsuji, selon sa propre politique.</li>
+      <li><b>Vidéos</b>&nbsp;: le lecteur YouTube est celui de YouTube, avec sa propre politique, et l'image d'aperçu d'une vidéo que vous analysez est chargée par votre navigateur depuis YouTube.</li>
+      <li><b>WaniKani et Renshuu</b>&nbsp;: seulement si vous importez depuis eux, voir plus haut.</li>
     </ul>
     <p>Aucune publicité, aucun traqueur, aucune revente de données.</p>
 
-    <h2>Conservation et suppression</h2>
-    <p>Vos données restent tant que votre compte existe. Vous pouvez à tout moment exporter votre progression (Réglages › Compte), la réinitialiser, ou <b>supprimer votre compte</b>&nbsp;: dans l'application, Réglages › Compte › Supprimer ton compte efface toutes vos données et votre identifiant de connexion, immédiatement et sans retour possible. Le même chemin est accessible à l'adresse <a href="/profile/settings/account">/profile/settings/account</a> une fois connecté. Les étapes, ce qui est supprimé et la marche à suivre si vous ne pouvez plus ouvrir l'application sont sur la page <a href="/delete-account">Supprimer mon compte</a>.</p>
+    <h2 id="fr-bases">Pourquoi nous en avons le droit</h2>
+    <ul>
+      <li><b>Pour vous fournir le service</b> (compte, révisions, paquets, exercices, messages)&nbsp;: l'exécution du contrat que vous acceptez en utilisant l'application (RGPD, art.&nbsp;6.1.b).</li>
+      <li><b>Pour les statistiques d'usage et la sécurité</b> (plafonds, protection contre les abus)&nbsp;: notre intérêt légitime à mesurer et protéger l'application (art.&nbsp;6.1.f), avec votre droit de vous y opposer.</li>
+      <li><b>Pour les rappels</b>&nbsp;: votre accord, donné au système de votre téléphone et retirable à tout moment.</li>
+    </ul>
 
-    <h2>Contact</h2>
-    <p>Écrivez au développeur à l'adresse <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>, ou depuis l'application&nbsp;: Réglages › Nous écrire.</p>
+    <h2 id="fr-duree">Durées de conservation</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th scope="col">Donnée</th><th scope="col">Gardée</th></tr></thead>
+        <tbody>
+          <tr><td>Compte, apprentissage, paquets, réglages, messages</td><td>Tant que votre compte existe&nbsp;; effacés à sa suppression</td></tr>
+          <tr><td>Statistiques d'usage, détail</td><td>30 jours</td></tr>
+          <tr><td>Événements uniques par compte (étapes de l'inscription, premier trajet, guides, offres, plafonds, cours de base, publication d'un paquet, import)</td><td>12 mois</td></tr>
+          <tr><td>Comptages par jour issus des statistiques</td><td>25 mois</td></tr>
+          <tr><td>Paquet publié que vous supprimez alors que d'autres le suivent</td><td>Retiré de votre étagère tout de suite, gardé un temps limité pour que ses abonnés puissent en faire une copie, puis effacé</td></tr>
+          <tr><td>Photos et textes envoyés à un modèle d'IA</td><td>Pas gardés par nous au-delà de la réponse (sauf les phrases analysées, gardées dans votre compte)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="fr-droits">Vos droits</h2>
+    <p>Vous pouvez à tout moment&nbsp;:</p>
+    <ul>
+      <li><b>accéder à vos données et les emporter</b>&nbsp;: Réglages › Compte, pour télécharger votre progression et vos statistiques d'usage&nbsp;; pour le reste, écrivez-nous&nbsp;;</li>
+      <li><b>les corriger</b>&nbsp;: depuis les réglages, ou en nous écrivant&nbsp;;</li>
+      <li><b>les effacer</b>&nbsp;: réinitialiser votre progression, ou <b>supprimer votre compte</b> (Réglages › Compte › Supprimer ton compte), qui efface toutes vos données et votre identifiant de connexion, immédiatement et sans retour possible. Une fois connecté, le même chemin est à l'adresse <a href="/profile/settings/account">/profile/settings/account</a>. Les étapes, ce qui est supprimé et la marche à suivre si vous ne pouvez plus ouvrir l'application sont sur la page <a href="/delete-account">Supprimer mon compte</a>&nbsp;;</li>
+      <li><b>vous opposer</b> aux statistiques d'usage (Réglages › Compte › Statistiques d'usage), ou <b>demander la limitation</b> d'un traitement en nous écrivant.</li>
+    </ul>
+    <p>Nous répondons sous un mois au plus. Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" rel="noreferrer">cnil.fr</a>) ou l'autorité de protection des données de votre pays.</p>
+
+    <h2 id="fr-contact">Contact et modifications</h2>
+    <p>Écrivez à Alexandre Bauwens à l'adresse <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>, ou depuis l'application&nbsp;: Réglages › Nous écrire.</p>
+    <p>Si cette politique change, la date en haut de la page change avec elle.</p>
   </section>
 
+  <!-- OWNER: review, date it. -->
   <section id="en" lang="en">
     <p class="cap">Privacy policy</p>
     <h1>What the app knows about you, and why</h1>
-    <p class="updated">Last updated: 17 October 2026. <!-- OWNER: review, date it. --></p>
+    <p class="updated">Last updated: 20 October 2026.</p>
 
-    <h2>The account</h2>
-    <p>Sign-in is handled by Supabase. We keep your e-mail address (the account's identifier), a technical id and the creation date. Your password is never readable by us.</p>
+    <div class="short">
+      <h2>In short</h2>
+      <ul>
+        <li>We keep what it takes to teach you: your account, your reviews, your settings and what you create.</li>
+        <li>No advertising, no trackers, no sale of data. Usage statistics stay with us, contain nothing you write, and you can refuse them.</li>
+        <li>Some texts (sentence analysis, corrections) and the photos you have read are sent to an AI model, with nothing that identifies you.</li>
+        <li>Other learners see only your username (ranking, published decks) — never your e-mail.</li>
+        <li>You can download everything, reset everything or delete your account from the app, at any time.</li>
+      </ul>
+    </div>
 
-    <h2>Your learning</h2>
-    <p>Every review is recorded: the card, the mode, the grade you give it, the date. That is what makes spaced repetition, your statistics, your level, your streak and the ranking (where only your username appears) work. Alongside it: your decks and personal cards, your settings (JLPT level, pace, destination, reminder hour), the sentences you analyse, your mock-exam attempts and your reading, translation and composition practice.</p>
+    <ol class="toc" aria-label="Contents">
+      <li><a href="#en-who">Who we are</a></li>
+      <li><a href="#en-account">The account</a></li>
+      <li><a href="#en-public">What others see</a></li>
+      <li><a href="#en-learning">Your learning</a></li>
+      <li><a href="#en-reminders">Reminders and agenda</a></li>
+      <li><a href="#en-device">On your device</a></li>
+      <li><a href="#en-stats">Usage statistics</a></li>
+      <li><a href="#en-messages">Your messages</a></li>
+      <li><a href="#en-import">Your progress elsewhere</a></li>
+      <li><a href="#en-third">Hosting and third parties</a></li>
+      <li><a href="#en-bases">Why we are allowed to</a></li>
+      <li><a href="#en-retention">How long we keep it</a></li>
+      <li><a href="#en-rights">Your rights</a></li>
+      <li><a href="#en-contact">Contact and changes</a></li>
+    </ol>
 
-    <h2>Usage statistics</h2>
+    <h2 id="en-who">Who we are</h2>
+    <p>Tsuji (辻) is a Japanese-learning app, designed and run by Alexandre Bauwens, an independent developer — “we” on this page — who is the controller of your data under the GDPR. For any question: <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>.</p>
+
+    <h2 id="en-account">The account</h2>
+    <p>Sign-in is handled by Supabase. Depending on how you come in:</p>
+    <ul>
+      <li><b>Without an account (guest pass)</b>: a technical id is created, with no e-mail. Your progress is tied to it; if you create an account later, it comes with you.</li>
+      <li><b>With an e-mail</b>: we keep your e-mail address (the account's identifier), a technical id and the creation date. Your password is hashed by Supabase and is never readable by us.</li>
+      <li><b>With Google</b>: Google passes us your e-mail address and the profile details you allow it to share (name, picture). We never receive your Google password.</li>
+    </ul>
+    <p>Alongside these: your <b>username</b> and, if you give one, the <b>first name</b> printed on your card.</p>
+
+    <h2 id="en-public">What other learners see</h2>
+    <ul>
+      <li><b>Your username</b>, on the ranking (番付) and as the author of the decks you publish. It is drawn at random, or made from the first name you give when you sign up (its Latin letters), and you can change it at any time.</li>
+      <li><b>The decks you publish</b>: their name and their cards. A private deck is seen by you alone.</li>
+    </ul>
+    <p>Nobody else sees your e-mail, your card's first name, your reviews or your settings.</p>
+
+    <h2 id="en-learning">Your learning</h2>
+    <p>Every review is recorded: the card, the mode, the grade you give it, the date. That is what makes spaced repetition, your statistics, your level, your streak and the ranking work. Alongside it: your decks and personal cards, your settings (JLPT level, pace, destination, reminder hour), the placement test, the sentences you analyse, your mock-exam attempts and your reading, translation, dictation and composition practice.</p>
+
+    <h2 id="en-reminders">Reminders and agenda</h2>
+    <p>In the Android and iOS apps, reminders (the daily train, the blocks of your agenda) are scheduled <b>by your phone itself</b>, once you have allowed it in the system; no push-notification service is used. We keep only whether reminders are on, their hour and the blocks of your agenda. The widget shows figures the app hands it on the device.</p>
+
+    <h2 id="en-device">On your device</h2>
+    <p>The app keeps on your device (the browser's or the app's local storage) your sign-in session, the language and theme you chose, and temporary copies to go faster and work offline. There are <b>no advertising or third-party measurement cookies</b>: this storage is only there for the app to work. Signing out removes the session from the device.</p>
+
+    <h2 id="en-stats">Usage statistics</h2>
     <p>To know what is really used and what is not, the app measures how it is used. It notes:</p>
     <ul>
-      <li><b>the screens</b> you open, and how long each one is in front of you (time while the tab is hidden does not count): the screen’s name, never its contents;</li>
-      <li><b>your visits</b>: when they start, and a few device classes — phone, tablet or computer, the system’s family (iOS, Android, Windows…), browser or installed app, touch or mouse, the interface’s language and theme, whether you asked for less motion. Never the device model, its resolution, your IP address or anything to recognise it by;</li>
+      <li><b>the screens</b> you open, and how long each one is in front of you (time while the tab is hidden does not count): the screen's name, never its contents;</li>
+      <li><b>your visits</b>: when they start, and a few device classes — phone, tablet or computer, the system's family (iOS, Android, Windows…), browser or installed app, touch or mouse, the interface's language and theme, whether you asked for less motion. Never the device model, its resolution, your IP address or anything to recognise it by;</li>
       <li><b>your sessions</b> of review and practice: their type, the number of answers, how many were right, how long they took and the time per card;</li>
       <li><b>the features you use</b> — listening, sentence analysis, reading a photo, asking the tutor, searching the dictionary — as a count of uses per screen, and the <b>settings</b> you change (theme, language, pace…);</li>
       <li>the steps of sign-up, of the first ride and of the guides, the offers shown, the limits reached, loading errors and page speed.</li>
     </ul>
     <p><b>Nothing you have written appears in it</b>: not your dictation answers, not the sentences you analyse, not your searches, not your questions, not your cards, not the names of your decks or themes. The server only accepts values decided in advance and rejects everything else.</p>
-    <p>These measurements are used only to improve the app, stay on our own server and are passed to nobody; no third-party tool is used and nothing follows you from one site to another. They are linked to your account (so they are pseudonymous, not anonymous), on the basis of our legitimate interest in measuring the app’s audience (GDPR, art. 6(1)(f)), within the consent-exempt audience measurement framework described by the CNIL. The detail is erased after 30 days, except the few events that happen once or twice per account (sign-up steps, the first ride, the guides, offers, limits, the basics course, publishing a deck, an import from another app), kept 12 months; the per-day counts left from it are erased after 25 months.</p>
-    <p>You can object at any time: Settings › Account › Usage statistics. The choice holds for your account, on all your devices. In the same place, “Download mine” hands you everything that was noted about you.</p>
+    <p>These measurements are used only to improve the app, stay on our own server and are passed to nobody; no third-party tool is used and nothing follows you from one site to another. They are linked to your account (so they are pseudonymous, not anonymous), within the consent-exempt audience measurement framework described by the CNIL, the French data protection authority.</p>
+    <p><b>You can object at any time</b>: Settings › Account › Usage statistics. The choice holds for your account, on all your devices. In the same place, “Download mine” hands you everything that was noted about you.</p>
 
-    <h2>Your messages</h2>
-    <p>Settings › Write to us, the flag on an answered card and the link under an error let you write to us: a problem, an idea, a mistake in what is taught, a card to correct. We keep what you write and the kind of message. If the “Attach the screen and the device” box stays ticked, the screen’s name and the same device classes as the usage statistics (phone, tablet or computer, the system’s family, browser or installed app) are added, shown before sending; under an error, the failure’s area and code; for a card, its identifier and what is wrong with it. If you tick “Reply to me”, your account’s e-mail address is noted so we can answer. These messages are read by a person, are used only to fix and improve the app, are passed to nobody, appear in no statistics except as counts, and are erased with your account. Five messages a day at most.</p>
-
-    <h2>Your progress elsewhere (Anki, WaniKani, Renshuu)</h2>
-    <p>Settings › Transfer brings your progress across from another app. For Anki, the file of a deck or collection is read on your device and is never sent. For WaniKani and Renshuu, your device reads your account there itself, with the API key you paste: that key goes only to WaniKani or Renshuu, never to our server, and is not kept. Either way, all that reaches our server, for what you choose, is the short Japanese fields of each word or kanji you have learnt (the word and its reading) and its schedule. The server looks for the course’s cards in them and keeps only the schedule of those it found, as if you had learnt them here; the rest is not kept, nor are your decks’ names, which never leave your device. When you arrive, the app offers it once; we keep the date of your answer, so as not to ask again.</p>
-
-    <h2>What is sent to third parties</h2>
+    <h2 id="en-messages">Your messages</h2>
+    <p>Settings › Write to us, the flag on an answered card and the link under an error let you write to us: a problem, an idea, a mistake in what is taught, a card to correct. We keep what you write and the kind of message. Added to it:</p>
     <ul>
-      <li><b>Sentence analysis, translation and composition feedback, questions about an exercise, exam and text generation</b>: the text in question is sent to a language-model provider (Google Gemini first, then OpenAI, then OpenRouter, depending on availability) to be analysed — including what you wrote for the exercise, such as your translation, your sentence or your question. No account data travels with it.</li>
-      <li><b>Reading a photo</b>: the image you frame is sent to a vision model (Google Gemini first, then OpenRouter, depending on availability) to extract its text, and is not kept by us afterwards.</li>
+      <li>if the “Attach the screen and the device” box stays ticked, the screen's name and the same device classes as the usage statistics, shown before sending;</li>
+      <li>under an error, the failure's area and code; for a card, its identifier and what is wrong with it;</li>
+      <li>if you tick “Reply to me”, your account's e-mail address, so we can answer.</li>
+    </ul>
+    <p>These messages are read by a person, are used only to fix and improve the app, are passed to nobody, appear in no statistics except as counts, and are erased with your account. Five messages a day at most.</p>
+
+    <h2 id="en-import">Your progress elsewhere (Anki, WaniKani, Renshuu)</h2>
+    <p>Settings › Transfer brings your progress across from another app.</p>
+    <ul>
+      <li><b>Anki</b>: the file of a deck or collection is read on your device and is never sent.</li>
+      <li><b>WaniKani and Renshuu</b>: your device reads your account there itself, with the API key you paste. That key goes only to WaniKani or Renshuu, never to our server, and is not kept.</li>
+    </ul>
+    <p>Either way, all that reaches our server, for what you choose, is the short Japanese fields of each word or kanji you have learnt (the word and its reading) and its schedule. The server looks for the course's cards in them and keeps only the schedule of those it found, as if you had learnt them here; the rest is not kept, nor are your decks' names, which never leave your device. When you arrive, the app offers it once; we keep the date of your answer, so as not to ask again.</p>
+
+    <h2 id="en-third">Hosting and third parties</h2>
+    <p><b>Where your data lives.</b> Your account and all your learning data are stored in the European Union:</p>
+    <ul>
+      <li><b>Supabase</b> — sign-in and database, in Ireland;</li>
+      <li><b>Render</b> — our server, in Frankfurt (Germany);</li>
+      <li><b>Vercel</b> — serves the site and relays your requests to our server; like any host it technically sees your IP address in order to answer you, but keeps no learning data.</li>
+    </ul>
+    <p>Voices (cards, dictation, exams) are synthesised on our own server: nothing is sent to a text-to-speech service.</p>
+    <p><b>What is sent to other services, and only when you use the feature:</b></p>
+    <ul>
+      <li><b>Sentence analysis, translation and composition feedback, questions about an exercise, exam and text generation</b>: the text in question is sent to a language-model provider (Google Gemini first, then OpenAI, then OpenRouter, depending on availability) — including what you wrote for the exercise, such as your translation, your sentence or your question. No account data travels with it. These providers may process the text outside the European Union (in the United States in particular), under their own terms: write nothing personal there.</li>
+      <li><b>Reading a photo</b>: by default, the image you frame is sent to a vision model (Google Gemini first, then OpenRouter) to extract its text, and is not kept by us afterwards. On the web, “Read on my device instead” reads the image without it leaving your device (less accurate); the reading engine is then downloaded once from a public content-delivery network.</li>
+      <li><b>Sign in with Google</b>: if you choose it, Google knows you are signing in to Tsuji, under its own policy.</li>
       <li><b>Videos</b>: the YouTube player is YouTube's own, under its own policy, and the preview image of a video you analyse is loaded by your browser from YouTube.</li>
-      <li><b>Exam audio</b>: dialogues are synthesised from generated text, with no personal data.</li>
+      <li><b>WaniKani and Renshuu</b>: only if you import from them, see above.</li>
     </ul>
     <p>No advertising, no trackers, no sale of data.</p>
 
-    <h2>Retention and deletion</h2>
-    <p>Your data stays as long as your account exists. At any time you can export your progress (Settings › Account), reset it, or <b>delete your account</b>: in the app, Settings › Account › Delete your account erases all of your data and your sign-in, immediately and irreversibly. The same path is reachable at <a href="/profile/settings/account">/profile/settings/account</a> once signed in. The steps, what is deleted and what to do if you can no longer open the app are on the <a href="/delete-account">Delete my account</a> page.</p>
+    <h2 id="en-bases">Why we are allowed to</h2>
+    <ul>
+      <li><b>To provide the service</b> (account, reviews, decks, exercises, messages): performing the contract you accept by using the app (GDPR, art. 6(1)(b)).</li>
+      <li><b>For usage statistics and security</b> (limits, protection against abuse): our legitimate interest in measuring and protecting the app (art. 6(1)(f)), with your right to object.</li>
+      <li><b>For reminders</b>: your consent, given to your phone's system and withdrawable at any time.</li>
+    </ul>
 
-    <h2>Contact</h2>
-    <p>Write to the developer at <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>, or from the app: Settings › Write to us.</p>
+    <h2 id="en-retention">How long we keep it</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th scope="col">Data</th><th scope="col">Kept</th></tr></thead>
+        <tbody>
+          <tr><td>Account, learning, decks, settings, messages</td><td>As long as your account exists; erased when it is deleted</td></tr>
+          <tr><td>Usage statistics, detail</td><td>30 days</td></tr>
+          <tr><td>Once-per-account events (sign-up steps, first ride, guides, offers, limits, basics course, publishing a deck, an import)</td><td>12 months</td></tr>
+          <tr><td>Per-day counts left from the statistics</td><td>25 months</td></tr>
+          <tr><td>A published deck you delete while others follow it</td><td>Off your shelf at once, kept for a limited time so its followers can take a copy, then erased</td></tr>
+          <tr><td>Photos and texts sent to an AI model</td><td>Not kept by us beyond the answer (except the sentences you analyse, kept in your account)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="en-rights">Your rights</h2>
+    <p>At any time you can:</p>
+    <ul>
+      <li><b>access your data and take it with you</b>: Settings › Account, to download your progress and your usage statistics; for anything else, write to us;</li>
+      <li><b>correct it</b>: from the settings, or by writing to us;</li>
+      <li><b>erase it</b>: reset your progress, or <b>delete your account</b> (Settings › Account › Delete your account), which erases all of your data and your sign-in, immediately and irreversibly. Once signed in, the same path is at <a href="/profile/settings/account">/profile/settings/account</a>. The steps, what is deleted and what to do if you can no longer open the app are on the <a href="/delete-account">Delete my account</a> page;</li>
+      <li><b>object</b> to usage statistics (Settings › Account › Usage statistics), or <b>ask for a processing to be restricted</b> by writing to us.</li>
+    </ul>
+    <p>We answer within one month at most. If you believe your rights are not respected, you can complain to the CNIL (<a href="https://www.cnil.fr/en/complaints" rel="noreferrer">cnil.fr</a>) or to the data protection authority of your own country.</p>
+
+    <h2 id="en-contact">Contact and changes</h2>
+    <p>Write to Alexandre Bauwens at <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>, or from the app: Settings › Write to us.</p>
+    <p>If this policy changes, the date at the top of the page changes with it.</p>
   </section>
 </main>
+<script>
+  (function () {
+    var LANGS = ['fr', 'en']
+    var TITLES = { fr: 'Politique de confidentialité — 辻 Tsuji', en: 'Privacy policy — 辻 Tsuji' }
+    function pick() {
+      var q = (location.search.match(/[?&]lang=([a-z]{2})/) || [])[1]
+      if (LANGS.indexOf(q) >= 0) return q
+      var h = location.hash.slice(1, 3)
+      if (LANGS.indexOf(h) >= 0) return h
+      try { var s = localStorage.getItem('lang'); if (LANGS.indexOf(s) >= 0) return s } catch (e) {}
+      return /^fr\b/i.test(navigator.language || '') ? 'fr' : 'en'
+    }
+    function show(code, scroll) {
+      LANGS.forEach(function (l) {
+        document.getElementById(l).hidden = l !== code
+        var a = document.querySelector('.lang a[data-lang="' + l + '"]')
+        a.setAttribute('aria-current', l === code ? 'true' : 'false')
+      })
+      document.documentElement.lang = code
+      document.title = TITLES[code]
+      if (scroll) window.scrollTo(0, 0)
+    }
+    show(pick(), false)
+    document.querySelectorAll('.lang a').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault()
+        var code = a.getAttribute('data-lang')
+        show(code, true)
+        history.replaceState(null, '', location.pathname + location.search.replace(/([?&])lang=[a-z]{2}&?/, '$1').replace(/[?&]$/, '') + '#' + code)
+      })
+    })
+    // A link to a heading of the other language (#en-rights) switches to it.
+    window.addEventListener('hashchange', function () {
+      var h = location.hash.slice(1, 3)
+      if (LANGS.indexOf(h) >= 0 && document.getElementById(h).hidden) show(h, false)
+    })
+  })()
+</script>
 </body>
 </html>

@@ -42,7 +42,7 @@ import { APP_SHELL } from './appShell.js'
 export const navigation = {
   // The listed paths are not app routes: three are proxied to the
   // backend by vercel.json, three are static pages (the privacy policy,
-  // the account-deletion page Google Play asks for, plan 258, and the
+  // the account-deletion page Google Play asks for, plan 271, and the
   // landing page, plan 167). A top-level navigation to any
   // of them is the browser fetching that thing, not the app booting, so
   // they are left alone -- and must be, or an offline hit on one would
@@ -101,9 +101,11 @@ export const workbox = {
       handler: 'CacheFirst',
       options: { cacheName: 'media', expiration: { maxEntries: 200, maxAgeSeconds: 31536000 },
                  cacheableResponse: { statuses: [200] } } },
-    // The print behind Today's gate (plan 205): a file per hour and
-    // frame under a revision's folder (public/today/print/<rev>/), so a
-    // changed print is a new URL and the old one can be kept for good.
+    // The print behind Today's gate (plans 205, 261): a file per print
+    // (a season at an hour) and frame under a revision's folder
+    // (public/today/print/<rev>/), so a changed print is a new URL and
+    // the old one can be kept for good. A season shows four of them on a
+    // frame; the oldest give way as the year turns.
     { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/today/print/'),
       handler: 'CacheFirst',
       options: { cacheName: 'print', expiration: { maxEntries: 16, maxAgeSeconds: 31536000 },

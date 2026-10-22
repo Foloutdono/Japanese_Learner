@@ -15,6 +15,10 @@ import Empty from '../components/ui/Empty'
 import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
 import { TransferSheet } from '../components/station/TransferSheet'
+import { RatingSheet } from '../components/feedback/RatingSheet'
+import { AccountSheet } from '../components/boarding/CardSheets'
+import { noteAskedToKeep, shouldAskToKeep } from '../lib/guest'
+import { useClaimOffer, usePaywall } from '../stores/credits'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 import { startAmbiance, stopAmbiance } from '../lib/audio'
@@ -54,6 +58,19 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // first ride and the gate's guide and never over the rest-day notice,
 // whether they studied in another app (TransferSheet), while the
 // profile says the offer is open (`transferOffer`).
+//
+// Early access (plan 269): once the learner has earned 400 XP, they are
+// asked how they find the app (RatingSheet), on the same terms as the
+// offer above and never beside it, while the profile says it is open
+// (`feedbackOffer`). The finish comes first: the question follows a day
+// cleared, never interrupts it.
+//
+// 本乗車券 (plan 270): a guest is asked to make the card an account --
+// Google, or an address and a password -- further and further apart (a
+// day, two, four, a week, two weeks, a month, then never: lib/guest.js),
+// after the guide, the transfer offer and the early-access question have
+// had their turn, and never over another sheet. « Continuer en invité »
+// is always the way past it.
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
@@ -125,6 +142,24 @@ export default function TodayScreen({ session }) {
   const held = useGuideHeld()
   const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
     && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
+  const [rateLeft, setRateLeft] = useState(false)
+  const showRate = Boolean(summary?.feedbackOffer) && !rateLeft && Boolean(today)
+    && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
+    && !showTransfer
+  // Read once, at mount: the visit that asks keeps the sheet up.
+  const [keepAsk] = useState(() => shouldAskToKeep(session))
+  const [keepLeft, setKeepLeft] = useState(false)
+  const [keepSent, setKeepSent] = useState(null)
+  const claimOffer = useClaimOffer()
+  const paywall = usePaywall()
+  const showKeep = keepAsk && !keepLeft && Boolean(today)
+    && (summary?.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
+    && !showTransfer && !showRate && !claimOffer && !paywall
+  const keepUserId = session?.user?.id
+  useEffect(() => {
+    if (showKeep) noteAskedToKeep(keepUserId)
+  }, [showKeep, keepUserId])
+  const leaveKeep = () => setKeepLeft(true)
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
     : null
@@ -168,6 +203,19 @@ export default function TodayScreen({ session }) {
       {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
       {showTransfer && (
         <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
+      )}
+      {showRate && (
+        <RatingSheet session={session} onClose={() => setRateLeft(true)} />
+      )}
+      {showKeep && (
+        <AccountSheet
+          open
+          onClose={leaveKeep}
+          onGuest={leaveKeep}
+          onKept={leaveKeep}
+          onSent={setKeepSent}
+          sent={keepSent}
+        />
       )}
     </main>
   )

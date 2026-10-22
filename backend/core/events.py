@@ -88,7 +88,8 @@ EVENTS: dict[str, frozenset[str]] = {
     # The card (plan 247): which of its fields a sheet changed (the
     # defaults are what most keep, or they are not), whether it carries
     # a name -- never the name -- and where it was left: kept with
-    # Google or by a link, boarded on an account already, or a guest's.
+    # Google, by a password (plan 270) or a link, boarded on an account
+    # already, or a guest's.
     # `motive` stays for a client from before the card, which asked why.
     "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
                                  "level_how", "placed",
@@ -291,8 +292,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── Friction ─────────────────────────────────────────────────
     # An uncaught error or rejected promise, by screen. NO MESSAGE AND
     # NO STACK: either can quote what was on the screen or typed into
-    # it. `where` says which of the two it was.
-    "client_error":   frozenset({"route", "where"}),
+    # it. `where` says which of the two it was, and `step` which step of
+    # the boarding or the first ride was on screen, when one was: the
+    # name their boarding_step / ride_step give it.
+    "client_error":   frozenset({"route", "step", "where"}),
     # The page's own speed, once per page load, from the browser's
     # PerformanceObserver (lib/vitals.js, no library): largest paint,
     # the slowest interaction, layout shift (x1000, an integer) and
@@ -330,7 +333,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "boarding_done": {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
-        "kept":      frozenset({"google", "link", "already", "none"}),
+        "kept":      frozenset({"google", "password", "link", "already", "none"}),
     },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},
@@ -364,7 +367,17 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
                                          "deep_analysis", "exam_paper", "line_translation"})},
-    "client_error": {"where": frozenset({"error", "rejection"})},
+    "client_error": {
+        "where": frozenset({"error", "rejection"}),
+        # The boarding's and the rides' steps, frontend/src/domain/
+        # flowSteps.js; its test holds the flows to this list.
+        "step":  frozenset({"kana", "reveal", "level", "test", "card",
+                            "intro-scripts", "intro-sounds", "intro-table",
+                            "intro-katakana", "intro-sentence", "intro-route",
+                            "known", "known-dict", "known-back", "unknown",
+                            "unknown-back", "done",
+                            "read", "type", "measure", "graded", "pass"}),
+    },
 }
 
 # The two keys held to a shape on every name. A route is a pattern

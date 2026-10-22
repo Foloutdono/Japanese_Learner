@@ -6,7 +6,7 @@ import { Emphasized } from '../ui/Emphasized'
 import { ProviderButton } from '../account/ProviderButton'
 import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../lib/authRedirect'
 import { authErrorMessage } from '../../lib/authErrors'
-import { claimByLink } from '../../lib/guest'
+import { claimAccount } from '../../lib/guest'
 import { composing } from '../../lib/keyGuards'
 import { playUi } from '../../lib/audio'
 import { DEPARTURES, DEPART_JP, DEPART_TIMES } from '../onboarding/departures'
@@ -470,50 +470,63 @@ function NamePlate({ value, onSave }) {
 }
 
 // ── Compte — keeping the card (the account) ──────────────────────
-// The guest pass (lib/guest.js) kept on the row it already is, two ways
-// and no password: Google put onto it (`link`), or an address that is
-// sent a link -- followed, the address is the account's, the same id and
-// everything on it. « Plus tard » rides on as a guest; the line under
-// the card keeps saying where the card lives. On the web Google leaves
-// the page, so `onLeaveForAuth` writes the answers down first; a refusal
-// comes back on the URL (lib/authRedirect.js) and is said here.
-// `sent`: the address a link already went to, if one did -- the field
-// opens on it, to send again or to mend (plan 247).
-export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, sent = null }) {
+// The guest pass (lib/guest.js) made an account on the row it already
+// is, the same id and everything on it: Google put onto it (`link`), or
+// an address and a password, typed twice (plan 270). With the project's
+// "Confirm email" off the account is the learner's at once, with no
+// mail to follow; were it on, the address waits on its link and the
+// sheet says so (`onSent`). « Plus tard » rides on as a guest; the line
+// under the card keeps saying where the card lives. On the web Google
+// leaves the page, so `onLeaveForAuth` writes the answers down first; a
+// refusal comes back on the URL (lib/authRedirect.js) and is said here.
+// `onKept(by, email)`: 'google', or 'password' with the address.
+// `sent`: the address waiting on its confirmation, if one is.
+export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, onGuest = null, sent = null }) {
   const { t } = useLang()
   return (
     <CardSheet open={open} onClose={onClose} jp={t.brdSheetAccount} kind="account">
-      <KeepForm onClose={onClose} onLeaveForAuth={onLeaveForAuth} onKept={onKept} onSent={onSent} sent={sent} />
+      <KeepForm onClose={onClose} onLeaveForAuth={onLeaveForAuth} onKept={onKept} onSent={onSent} onGuest={onGuest} sent={sent} />
     </CardSheet>
   )
 }
 
 const ADDRESS = /.+@.+\..+/
+// Supabase's own floor for a password (Auth › Providers › Email).
+export const PASSWORD_MIN = 6
 
-function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, sent }) {
+function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, onGuest, sent }) {
   const { t, lang } = useLang()
   const [email, setEmail] = useState(sent ?? '')
+  const [password, setPassword] = useState('')
+  const [again, setAgain] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   // A plain read: a refusal on the URL is a fact about this page load.
   const refused = authRedirectError()
-  const filled = ADDRESS.test(email.trim())
+  const filled = ADDRESS.test(email.trim()) && password.length >= PASSWORD_MIN && again.length > 0
 
-  async function send() {
+  async function create() {
     if (!filled || busy) return
+    // Said before the round trip: a typo in a password nobody can see is
+    // the one mistake the second field is there to catch.
+    if (again !== password) { setError(t.brdPasswordMismatch); return }
     setBusy(true)
     setError(null)
-    const r = await claimByLink({ email: email.trim(), lang })
+    const address = email.trim()
+    const r = await claimAccount({ email: address, password, lang })
     setBusy(false)
     // Through the table every auth refusal goes through (lib/authErrors.js),
     // never Supabase's own English.
     if (!r.ok) { setError(authErrorMessage(r, t)); return }
-    onSent(email.trim())
+    if (r.needsConfirmation) { onSent(address); return }
+    onKept('password', address)
   }
+
+  const onEnter = e => { if (e.key === 'Enter' && !composing(e)) create() }
 
   return (
     <>
-      <p className="brd-sheet__lede">{t.brdAccountLede}</p>
+      <p className="brd-sheet__lede">{onGuest ? t.brdAccountAsk : t.brdAccountLede}</p>
       <ProviderButton link className="auth-provider brd-provider" onBeforeRedirect={onLeaveForAuth} onDone={() => onKept('google')} onError={setError} />
       {refused && !error && (
         <p className="auth-message auth-message--error" role="alert" data-oauth="refused">{authRedirectMessage(refused, t)}</p>
@@ -532,14 +545,40 @@ function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, sent }) {
           autoComplete="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && !composing(e)) send() }}
+          onKeyDown={onEnter}
         />
-        <p className="brd-sheet__note" data-note={sent ? 'sent' : undefined}>{sent ? t.brdLinkSentNote(sent) : t.brdLinkNote}</p>
+        <input
+          type="password"
+          className="field field--page brd-fld"
+          // The floor in the field itself: a note under the fields would
+          // push the sheet past a short window (the short lane).
+          placeholder={t.brdPasswordNew(PASSWORD_MIN)}
+          aria-label={t.brdPasswordNew(PASSWORD_MIN)}
+          autoComplete="new-password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          onKeyDown={onEnter}
+          data-field="password"
+        />
+        <input
+          type="password"
+          className="field field--page brd-fld"
+          placeholder={t.brdPasswordAgain}
+          aria-label={t.brdPasswordAgain}
+          autoComplete="new-password"
+          value={again}
+          onChange={e => setAgain(e.target.value)}
+          onKeyDown={onEnter}
+          data-field="password-again"
+        />
+        {sent && <p className="brd-sheet__note" data-note="sent">{t.brdAccountSentNote(sent)}</p>}
       </div>
       {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
       <div className="brd-sheet__ways">
-        <BoardLink onClick={onClose} data-action="account-later">{t.brdLater}</BoardLink>
-        <Continue label={t.brdLinkSend} onClick={send} disabled={!filled || busy} data-action="account-link" />
+        {onGuest
+          ? <BoardLink onClick={onGuest} data-action="account-guest">{sent ? t.brdSheetDone : t.brdStayGuest}</BoardLink>
+          : <BoardLink onClick={onClose} data-action="account-later">{t.brdLater}</BoardLink>}
+        <Continue label={t.brdAccountCreate} onClick={create} disabled={!filled || busy} data-action="account-create" />
       </div>
     </>
   )

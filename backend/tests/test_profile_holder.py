@@ -35,7 +35,7 @@ def test_leaderboard_has_a_weekly_side(client):
     week = client.get("/api/leaderboard?period=week&limit=6")
     assert week.status_code == 200
     body = week.json()
-    assert set(body) == {"entries", "me"}
+    assert {"entries", "me", "total", "champions", "week"} <= set(body)
     assert len(body["entries"]) <= 6
     # Weekly XP can never exceed lifetime XP for the same person.
     lifetime = client.get("/api/leaderboard?limit=200").json()

@@ -120,11 +120,18 @@ describe('the tour in the day’s queue, on a phone', () => {
     const gate = tour.querySelector('.tour__foot .btn-depart').getBoundingClientRect()
     expect(gate.bottom).toBeLessThanOrEqual(window.innerHeight)
     expect(gate.height).toBeGreaterThanOrEqual(56)
-    // The track is the line's: the stop in hand ringed in its pigment.
-    const here = getComputedStyle(tour.querySelector('.tour__stop--here'))
+    // The track is the line's (plan 264): a segment a stop, the one in
+    // hand tinted with its pigment, the stop named over it, on one line.
     const pine = getComputedStyle(tour).getPropertyValue('--line-color').trim()
     expect(pine).not.toBe('')
-    expect(here.borderTopWidth).toBe('3px')
+    const here = getComputedStyle(tour.querySelector('.tour__stop--here')).backgroundColor
+    const ahead = getComputedStyle(tour.querySelector('.tour__stop--ahead')).backgroundColor
+    expect(here).not.toBe(ahead)
+    expect(tour.querySelector('.tour__track-name').textContent).toBe('Look')
+    const name = tour.querySelector('.tour__track-name').getBoundingClientRect()
+    const count = tour.querySelector('.tour__track-count').getBoundingClientRect()
+    expect(Math.abs(name.top - count.top)).toBeLessThanOrEqual(4)
+    expect(count.right).toBeLessThanOrEqual(window.innerWidth)
   }, 20000)
 
   it('draws each stop as one card down to the gate, the sentence leading it (plan 206)', async () => {

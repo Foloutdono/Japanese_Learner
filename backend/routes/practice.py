@@ -247,9 +247,10 @@ def _bank_grammar() -> dict[str, str]:
 
 @lru_cache(maxsize=1)
 def _seeds_by_text() -> dict[str, dict]:
-    """A seed exercise by its text, at any level: a text the learner
-    read from the seed pool is named by the seed's title."""
-    return {seed["text"]: seed for seed in comprehension_seed.entries()}
+    """A seed by its text, at any level, as comprehension_seed.index
+    keeps it: a text the learner read from the seed pool is named by the
+    seed's title."""
+    return {seed["text"]: seed for seeds in comprehension_seed.index().values() for seed in seeds}
 
 
 def _text_line(text: str, logged_grammar, score: int, total: int, at) -> dict:

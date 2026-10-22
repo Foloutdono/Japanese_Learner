@@ -371,8 +371,9 @@ panels' list.
 
 **線** (same round): a line's edge is 3px wherever it is drawn (a plate's
 stripe, a row's rail), and a figure on a plate is printed, never boxed — the
-count due on a Learn plate lost its border. **一戻**: the way back (`‹ Gate`
-in the stage head) is bare, a word and its chevron, never a button's box.
+count due on a Learn plate lost its border. **一戻**: the way back is bare,
+a word and its chevron (a bar's `‹ Learn`), or in a run's head the chevron
+alone (**両端**, below), never a button's box.
 
 ### Elevation is rationed
 
@@ -903,9 +904,16 @@ confirmation, then the terminus (`components/study/GrammarTour.jsx`,
 chosen by `GrammarGate`). It is the boarding's frame inside a run's
 stage, not a new idiom:
 
-- **A track of stops at the head**, drawn in the line's pigment: where
-  you are keeps the line's colour (the boarding's own track is the pass's
-  gold, because the boarding is the learner's).
+- **A track of stops at the head** (plan 264, the owner's pick C of the
+  canvas "Tour track"): a segment a stop, in the line's pigment, under
+  the stop's name (the caption register, in the line's ink) and where it
+  stands of how many (« 2 / 3 »). The stops passed are full; the one in
+  hand is the pigment sunk into the ground and fills with what is done
+  of it (a glyph's strokes traced, a quiz's questions checked); the ones
+  ahead are the hairline. **The track names the stop, so the card never
+  does**: its caption says only what is left inside it (« Trait 1 sur
+  3 »). The boarding's own track is the pass's gold, because the
+  boarding is the learner's.
 - **One card a stop** (一枚, plan 206, the owner's pick B of the canvas
   "Tsuji — the tour, fuller"). The stops used to hang from the head in
   boxes of one weight over an empty middle; each stop is now one card,
@@ -992,22 +1000,35 @@ drawn only where there is something to show:
   them (`Readings`, on'yomi and kun'yomi apart).
 - **Write.** The strokes traced in turn on **the writing board's slab**
   (the sumi square, sumi in both themes, the practice sheet's 田 over it)
-  with the brush's ink. The stroke asked is in the line's pigment lit
-  toward the ink, drawn in once along its way, **a full dot where it
-  starts and a ring where it ends**; the strokes ahead are faint, the
-  ones traced stand in the ink. A trace is judged in KanjiVG's units
-  (`domain/trace.js`): begun at the dot, ended at the ring, along the
-  stroke, a fingertip of slack. A miss is a line a moment in the miss's
-  ink and one line at the card's foot saying what to fix (« Pars du
-  point plein. », « Va jusqu'au rond. », « Suis le trait. »), the stroke
-  drawn in again; after three misses on one stroke the board draws it
-  and says so in the selection's ink (given, not found). « Montre-moi » is the quiet
-  way over the gate and draws the rest in order. As a writing run's
-  board is, **the board is the square the card leaves**: the middle
-  takes the card's free height and the board the smaller of its sides,
-  so a miss's word never lands under the gate (never under 200px, where
-  the screen scrolls instead). The gate is its outline until the glyph
-  is whole.
+  with the brush's ink, at a brush's weight. The stroke asked is **a
+  hollow the hand fills** (plan 263, the owner's pick A1 + A2): its
+  outline in the line's pigment lit toward the ink, drawn in from its
+  start as it is asked, so its way is seen before it is traced; **a full
+  dot with the stroke's number where it starts, a ring where it ends**,
+  filled once the ink reaches it; and three chevrons inside it, ahead of
+  the ink, walking its way while the hand waits (still, under reduced
+  motion). The strokes ahead are faint, the ones traced stand in the
+  ink, over the hollow where two cross. **The ink is the stroke's own**,
+  carried along it as far as the finger has come and only forward
+  (`domain/trace.js`, in KanjiVG's units, a fingertip of slack): a
+  wavering line leaves the stroke's shape, a finger off the stroke
+  carries nothing until it comes back to where the ink stopped, and the
+  ring reached makes the stroke whole without the finger lifting. A
+  stroke begun away from the dot calls the dot. Lifted short, the ink
+  drains back along the stroke and the finger's own line shows a moment
+  in the miss's ink; **a miss is never put in words**, which would only
+  say again what the board shows. After three misses on one stroke the
+  board draws it and says so in the selection's ink (given, not found).
+  « Montre-moi » is the quiet way over the gate and draws the rest in
+  order. **The card draws no head over the board**: the track names the
+  stop, the stroke asked is numbered on its dot and its way drawn, so
+  the instruction (« Trace chaque trait, du point jusqu'au rond. ») and
+  how far (trait 5 sur 11) are said to a screen reader alone. As a
+  writing run's board is, **the board is the square the card leaves**:
+  the middle takes the card's free height and the board the smaller of
+  its sides, so what the tour says never lands under the gate (never
+  under 200px, where the screen scrolls instead). The gate is its
+  outline until the glyph is whole.
 - **Use.** Up to three simple words, as the dictionary's ledger has
   them: the word at `--fs-heading` with the glyph picked out in the
   line's ink (a kana's word printed as it is read, a kanji's with its
@@ -1709,6 +1730,18 @@ widths (`exam/ScoreReveal.jsx`, the `exam-score__*` rules).
   `‹ Gate` in the stage head is the way out. Everything docked reads
   `--dock-bottom` — the tab bar plus the safe-area inset under the shell, the
   level bar plus the inset on a stage — never a number of its own.
+- **The run's head is 両端, doors at the ends** (2026-10-20, the owner's
+  pick C of the canvas "Tsuji — the run's head, centred";
+  `components/chrome/StageHead.jsx`). Three slots: the way out at the
+  start, what the learner presses at the end (the screen's toggle, the
+  card's flag, the "?", the pass), and the place between them, on the
+  screen's middle — the two ends grow alike, so neither one's width moves
+  the name. Under the name sits everything that counts: the sub, the
+  remaining pill and the run's streak (`tally`, never `aside`). The way
+  out is its chevron alone, its place kept as its accessible name and its
+  tooltip (the desk's Esc cap stays beside it); a way out that is not a
+  way back keeps its word (the first ride's `Passer`, `leaveWord`). A
+  head drawn by hand (the exam's cover) uses the same three slots.
 - **One filled action per screen**, the metal, 52px, docked at the foot and
   rising with the keyboard; a selection is the selection's gold; disabled
   is the metal unlit (*The primary button*); loading is three gold dots, never a
@@ -1754,9 +1787,25 @@ line here says otherwise.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
-  辻 over TSUJI at its head, the five gates, and the learner's pass at its
-  foot. It is chrome, so it wears no line pigment — the one colour in the
-  rail's own ink is Today's due count, a state's.
+  辻 over TSUJI at its head, the five gates, the four places, and the
+  learner's pass at its foot. It is chrome, so it wears no line pigment —
+  the one colour in the rail's own ink is Today's due count, a state's.
+- **Four places stand under the gates, past a hairline** (plan 269, the
+  owner's pick A of the canvas "Tsuji — the desk's chrome and its four
+  new places"): the analyser, the Bibliothèque (the learner's decks and
+  the library, one screen), the statistics and the settings, each drawn
+  as a gate is — its pictogram and its word — and none of them a station
+  under 辞書, 学習 or 定期券 any more. Their paths are the phone's,
+  behind those gates (`config/tabs.js`, `getDeskPlaces`), but on the desk
+  the place is where you are: while one is lit, the gate behind it is
+  not, and Help, which plays a gate's guide, keeps its slot unseen.
+  Settings is a place, never a door in the card's holder (the owner's
+  call). Beside a lit gate's line of stations, and everywhere on the
+  short desk, the four stand as one row of pictograms, each its word as
+  its label and its title: their rows beside Practice's seven stations
+  needed a 960px window. A line of stations taller than the room the
+  gates, the places and the pass leave scrolls inside itself, so no gate
+  and no place is ever under the pass. The phone's chrome is untouched.
 - **The rail's foot is the learner's card in its holder** (定期入れ,
   plan 173; it replaced plan 127's pocket pass, which the owner found too
   big, and which drew the profile's card a second time beside it). The
@@ -1791,8 +1840,8 @@ line here says otherwise.
   column's width beside the record — the stamp book's three figures
   opening the records' lattice, its lines drawn with a rail per stop, both
   rankings at once on one board, the ranks down its middle, and no door to
-  Statistics or Settings, which hang under the lit gate on the rail (plan
-  143), the two columns ending together; Settings sets its column (the
+  Statistics or Settings, which are places on the rail (plans 143, 269),
+  the two columns ending together; Settings sets its column (the
   pass and the list, plan 139) beside the open page, neither printing a
   title.
 - **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
@@ -1893,16 +1942,24 @@ line here says otherwise.
   search that opens the library on its answer. A library row opens the
   deck's **preview** in the panel's place — who wrote it, three of its
   cards as tiles, its blurb, Follow and the way to all its cards — with
-  the way back at its head. The phone keeps its fifth plate. The rail
-  gains the library as a station under Learn.
-- **The library before a deck is opened** (plan 132) stands three
-  sections beside its list, where it used to open the first deck for
-  you: **À la une** (the deck with the most new followers this week,
-  drawn as the gate's preview), **Abonnements** (the decks you follow,
-  each with the cards its author added since you last opened it) and
-  **Tes publications** (your public decks, their followers and a bar a
-  week for eight weeks). A deck opened from the list shows three of its
-  cards as tiles over the full list.
+  the way back at its head. The phone keeps its fifth plate. The
+  library is a place of the rail's own (plan 269), the Bibliothèque.
+- **The Bibliothèque is your shelf beside the library** (plan 269, the
+  owner's pick L1; plan 132's library before a deck was opened, before
+  it). The bare shelf no longer opens its first deck for you: its list
+  (the index field, the types, a row per deck, the followed ones with
+  their authors, New deck at its foot) stands beside the library's
+  catalogue — the library's console at the page's head, then, while
+  nothing narrows the shelf, **À la une** (the deck with the most new
+  followers this week, drawn as the gate's preview) and **Tes
+  publications** (your public decks, their followers and a bar a week
+  for eight weeks; drawn only when there are some), then the library's
+  decks one to a row. **Abonnements** is not drawn there: the decks you
+  follow are on your shelf beside it. The page scrolls with the window,
+  the list sticky beside it. A deck of yours opens beside the same list;
+  a library deck opens in the library's own split, its shelf beside the
+  deck's page, three of its cards as tiles over the full list. The bare
+  library's path goes to the Bibliothèque, carrying its search.
 - **A station is two panes.** Levels, sets or grades stand upright on the
   left and the chosen stop's platforms on the right, each platform with its
   own figures (due now, and the composition bar the statistics draw); the
@@ -1954,14 +2011,16 @@ line here says otherwise.
 - **A line's station is the line over its cars** (plan 251, the owner's
   pick C of the canvas "Tsuji — the learning modes on the desk"). A kana
   set or a JLPT level of vocab, kanji or grammar takes the window. The
-  **line** runs across its top in one panel, as a line map hangs over a
-  platform: one rail through every stop's marker, each stop a column
-  under it, its code and name on one line (cut short, never wrapped,
-  where the page is narrow) and its figure; the open stop lit as a
-  selection is (the switch's wash and gold edge), the stops behind the
-  learner filled and their own marker in the lead rung, said in words to
-  a screen reader. Every stop is a link that replaces the page, the line
-  one tab stop walked with ←/→. Under it the stop's exercises stand as
+  **line** runs across its top as a row of **doors** (plan 267, the
+  owner's pick 2c of the canvas "Tsuji — the sources and the line,
+  redrawn"): joined cells under the line's 3px stripe, which is the
+  line, so no rail runs through them; each door its marker, code, name
+  (cut short, never wrapped, where the page is narrow, whole in its
+  tooltip) and figure on one line, its bar along its foot (learned in
+  the pigment, met in half of it); the open door lit as a selection is
+  (the switch's wash and gold edge), the learner's own the filled
+  marker, said in words to a screen reader. Every door is a link that
+  replaces the page, the line one tab stop walked with ←/→. Under it the stop's exercises stand as
   the **cars** of its train, two to four to a row by the page's measured
   width, the first (the line's main exercise: the ladder, a word to its
   meaning) spanning what the last row would leave empty, so the train
@@ -1991,28 +2050,32 @@ line here says otherwise.
   platforms, each platform a row holding its card small in a well; the
   basics' units and the practice stations keep that split, each stop a
   grid of its name, its first things, its bar and its figure.)
-- **Vocabulary's sources open on what you started** (plan 183, the
-  owner's pick C of the canvas "Tsuji — the vocabulary's sources"; plan
-  137 had hung the three sources as equal plates, and on a real window
-  the five levels shared 800px while the 41 tiers and the 36 themes
-  scrolled beside them). A strip comes first: the learner's own level,
-  wider, with its bar, its first words, what is met and never seen,
-  and the gate button that resumes it on its first platform — in a
-  column of its own beside the words once the card is wide enough
-  (measured on the card), so the strip is a row of words high and the
-  gate's ring and ripples stay inside the card; then the other stops
-  with the most cards met — another level or a tier of the deck's
-  ranking — each a door to its platforms, three, two or one by the
-  page's width and only as many as were started, the row shared by
-  what is there. Under it the three sources as plates (the gates'
-  plate, `--elev-hang`): JLPT's five levels as a line with each one's
-  first words and bar, the tiers under their pool and
-  size as a grid of numbered cells (a cell's border lit and its foot
-  filled where cards are met, its name and count in its label), the
-  themes under their filter in as many columns as hold a name. Every
-  door pushes; the grids scroll inside their plates, never the page.
-  The short desk drops the first words. The phone keeps its three
-  cards. The kanji's sources keep plan 137's plates.
+- **The sources open on the line's doors** (plan 267, the owner's
+  picks C1 for the kanji and C3 for the vocabulary of the canvas "Tsuji
+  — the sources and the line, redrawn"; plan 183's strip over three
+  plates said the learner's level twice, and the kanji's plan 137
+  plates held a page of six radicals under a rail cut at its eleventh
+  count). JLPT is the page's head, drawn as the line over a level's
+  station is: five doors, two lines high here (the name under the code,
+  on two lines where the door is narrow), the learner's own captioned
+  "you are here", and the **gate** that resumes their level on its
+  first platform as the line's last door, with how many of its cards
+  are never seen; where the page is too narrow for six (a 1,100px
+  window), the gate takes a row of its own under the doors, at the
+  line's far end. Every door pushes. Under it the **vocabulary**'s two
+  other sources are **bands** the page's width, under the same stripe,
+  their entries doors in a lattice of seams: the tiers beside their
+  pool and size, a door lit and its foot filled where cards are met
+  (its name and count in its label), three rows at most and scrolling
+  past them; the themes under their filter, as many to a row as hold a
+  name, taking the rest of the window. The **kanji**'s are two plates
+  (`--elev-hang`), the radicals' the wider: the tiers as rows under
+  the size in the plate's head, each its range, a bar of the kanji met
+  and how many; the radicals' stroke rail in the plate's head beside
+  its name, every count in view, the page's tiles packed from the top
+  left at a tile's own width. A window too short scrolls the page
+  rather than crush a band under its floor. The phone keeps its three
+  cards.
 - **A practice station takes the window** (plan 159, the owner's picks A
   and S1 of the canvas "Practice screens — layout options"). Reading and
   translation opened on three source cards across the top of an empty
@@ -2283,6 +2346,15 @@ line here says otherwise.
   thumb's dock at the foot about the line alone (grammar, words, Explain,
   keep) over the transport. A screen under the shell takes the stage
   through `stores/stage.js`; the desk's rail never leaves.
+  **The line and its translation fit between the video and the dock**
+  (2026-10-20): the server cuts a line wider than two rows there where it
+  cuts clean (`study/line_cut.TARGET_LINE_WIDTH`), and a line it could
+  not cut, or a screen too short for two rows, is stepped down the rungs
+  until the stage holds it -- `--fs-display-fluid`, `--fs-heading`, then
+  `--fs-title`, the size of every other breakdown's words, its readings
+  and its translation a rung down with it (`useLineFit`). Measured, never
+  guessed from the line's length; past the floor the page scrolls behind
+  the dock, as a tall card does.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its

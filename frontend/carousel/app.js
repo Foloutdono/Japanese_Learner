@@ -9,6 +9,7 @@
 // the few index.css inks tokens.mjs does not carry are APP_INKS, held
 // equal to index.css by src/carousel.test.js.
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
+import { printName } from '../src/domain/printHour.js'
 import { TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
 
 export const APP_INKS = {
@@ -353,11 +354,12 @@ export function passCard(ctx, x, y, w, { name, level, meta, cls, brand = 'Pass',
 
 // ── Today's print (TodayPrint, plan 205) ───────────────────────────
 // The gate stands on the print of the hour: its layers are the app's own
-// files (public/today/print/<rev>/<hour>-phone.json, its grain and its
+// files (public/today/print/<rev>/<print>-phone.json, its grain and its
 // paper), drawn here as the app draws them with motion reduced: the
 // moving parts at rest, the train halfway across. index.css's own .tpr-
 // rules and its reduced-motion block ride into each layer, so nothing of
-// the print is copied here.
+// the print is copied here. The hour picks it in today's season, as the
+// app's gate does (domain/printHour's printName, plan 261).
 export const PRINT_HOURS = ['dawn', 'day', 'dusk', 'night']
 
 function stillCss(css) {
@@ -399,16 +401,17 @@ function layerAt(markup, t) {
   return markup.replace(/animation-delay:\s*(-?[\d.]+)s/g, (_, d) => `animation-delay: ${(+d - t).toFixed(3)}s`)
 }
 
-/** The hour's print, its layers decoded: `base` is the frontend's root
- *  as the page sees it. */
-export async function loadPrint(hour, { base = '../', device = 'phone' } = {}) {
+/** The hour's print in today's season, its layers decoded: `base` is the
+ *  frontend's root as the page sees it. */
+export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date() } = {}) {
   const get = async (path, as = 'json') => {
     const r = await fetch(base + path)
     if (!r.ok) throw new Error(`print: ${path} ${r.status}`)
     return as === 'json' ? r.json() : r.text()
   }
   const meta = await get('src/components/station/print/print.json')
-  const scene = await get(`public/today/print/${meta.rev}/${hour}-${device}.json`)
+  const name = printName(now, hour)
+  const scene = await get(`public/today/print/${meta.rev}/${name}-${device}.json`)
   const cssText = await get('src/index.css', 'text')
   const css = stillCss(cssText)
   // On the page the four layers share one document, and a layer fills
@@ -430,7 +433,7 @@ export async function loadPrint(hour, { base = '../', device = 'phone' } = {}) {
     const [s2, b2, f2] = await Promise.all([at('sky', t), at('back', t), at('front', t)])
     return { sky: s2, back: b2, front: f2 }
   }
-  return { hour, scene, frame: meta.frames[device], look: meta.hours[hour], img: { sky, back, train, front, grain, paper }, moment }
+  return { hour, scene, frame: meta.frames[device], look: meta.prints[name], img: { sky, back, train, front, grain, paper }, moment }
 }
 
 /** The print with its top-left corner at (x, y), `u` pixels a unit; the

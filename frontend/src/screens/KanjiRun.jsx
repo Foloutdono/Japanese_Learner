@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { tierLabelFor } from '../domain/tiers'
 import { apiFetch, apiJson } from '../lib/api'
@@ -130,25 +130,30 @@ export default function KanjiRun({ session }) {
     mode,
     checkCached,
   })
+  const currentId = useRef(card?.card_id)
+  useEffect(() => { currentId.current = card?.card_id }, [card?.card_id])
 
   function translateCard(cardToTranslate, targetLang) {
     if (!cardToTranslate) return
     const words = [cardToTranslate.kanji, ...(cardToTranslate.hints?.indice_1 ?? []).map(c => c.kanji)]
     const unique = [...new Set(words.filter(Boolean))]
     Promise.all(unique.map(word =>
-      apiFetch(`/api/translation/kanji?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
-        .then(r => r.json())
+      apiJson(`/api/translation/kanji?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
         .then(data => [word, data.translation || ''])
     )).then(entries => {
+      // The learner may have moved on while this was out: the card in
+      // hand is then another one, and stamping it with targetLang would
+      // mark it translated when it is not.
+      if (currentId.current !== cardToTranslate.card_id) return
       const map = translatedMap(entries)
-      updateCurrent(cur => ({
+      updateCurrent(cur => cur.card_id !== cardToTranslate.card_id ? cur : ({
         ...applyTranslations(cur, entry => entry.kanji, map),
         lang: targetLang,
       }))
       setSelected(prev => retranslateSelection(
         prev, cardToTranslate.hints?.indice_1, entry => entry.kanji, map,
       ))
-    })
+    }).catch(() => {})  // the card keeps the language it has
   }
 
   // Re-translate the card in hand when the UI language changes, or

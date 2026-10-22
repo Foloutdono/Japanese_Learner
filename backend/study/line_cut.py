@@ -31,15 +31,34 @@
 # Without a tokenizer a line is cut only where it has a mark or a
 # space, which needs no word to be found; a line with neither stays
 # whole, as wide as it came.
+#
+# Three rows were still too many (the owner, 2026-10-20: "make sure
+# sentences aren't too big, if impossible to cut in two, make them
+# smaller"): under the video and over the dock, a phone of ordinary
+# height holds two rows at display size and the translation, and a
+# third put the translation under the dock. So a line wider than
+# TARGET_LINE_WIDTH, two rows there, is cut again -- but only where a
+# cut costs nothing: at a mark, a clause's end or a phrase's, never
+# inside a compound or after the の that joins two nouns, and never
+# through a point the grammar detector finds on the line, かもしれない and
+# 〜なければならない whole as much as 〜ている. A line with no such
+# place, or none that leaves every piece two rows, stays as it came, and
+# the stage sets it a size smaller instead (AnalyzerScreen's useLineFit).
 import unicodedata
 
-from study import morphology
+from study import grammar_detect, morphology
 from study.text_normalize import japanese_ratio
 
 # In full-width characters, a Latin letter or a space counting half.
 # A broadcast subtitle holds two rows of thirteen; the stage at display
-# size holds about seven a row on a phone, so 22 is three rows there.
+# size holds about eight a row on a phone, so 22 is three rows there,
+# the most any line is left at, and 16 two, where a clean cut takes it.
 MAX_LINE_WIDTH = 22
+TARGET_LINE_WIDTH = 16
+# A stored line cut by today's rule carries it (`cut_rev`), so a line
+# with nowhere clean to cut is not tried again at every opening
+# (routes/video._current). Bumped when what a line is cut into changes.
+CUT_REV = 2
 # A piece narrower than this is a scrap (a ね！ on its own), dearer
 # than a less even cut.
 MIN_PIECE_WIDTH = 4
@@ -56,6 +75,9 @@ _AT_GENITIVE = 12
 _BETWEEN_WORDS = 10
 _IN_COMPOUND = 30
 _IN_UNKNOWN = 40
+# The dearest cut that takes a line down to TARGET_LINE_WIDTH: a list's
+# と or a conjunction's end, and anything cheaper.
+_CLEAN = _AT_LIST
 
 # Cost of a line, of a width over the cap, of a scrap, and of a piece
 # away from the even width. Half a character over costs more than a
@@ -174,21 +196,40 @@ def _cuts(text: str, tokens) -> list[tuple[int, int, float]]:
     return cuts
 
 
-def _plan(text: str, cuts: list[tuple[int, int, float]]) -> list[tuple[int, int]]:
-    """The pieces, as (start, end) offsets: the cheapest way through the
-    line's cuts, the fewest lines first."""
-    total = line_width(text)
-    rows = -(-total // MAX_LINE_WIDTH)
+def _clean_cuts(text: str, tokens, cuts: list[tuple[int, int, float]]) -> list[tuple[int, int, float]]:
+    """The cuts that lose nothing: no dearer than _CLEAN, and through no
+    grammar point -- the whole stretch it reaches over where one line
+    could hold it (から〜まで keeps the clause between them), and only
+    the pieces it is written on where none could (a 〜は〜が from the
+    line's head to its foot was never going to stay on one line)."""
+    spans = []
+    for hit in grammar_detect.hits(text, tokens) if tokens else []:
+        if line_width(text[hit["start"]:hit["end"]]) <= TARGET_LINE_WIDTH:
+            spans.append((hit["start"], hit["end"]))
+        else:
+            spans += [tuple(segment) for segment in hit["segments"]]
+    return [(end, nxt, cost) for end, nxt, cost in cuts
+            if cost <= _CLEAN and not any(s < end and nxt < e for s, e in spans)]
+
+
+def _plan(text: str, cuts: list[tuple[int, int, float]], cap: float = MAX_LINE_WIDTH,
+          lo: int = 0, hi: int | None = None) -> list[tuple[int, int]]:
+    """The pieces of text[lo:hi], as (start, end) offsets: the cheapest
+    way through the cuts inside it, the fewest lines no wider than `cap`
+    first."""
+    hi = len(text) if hi is None else hi
+    total = line_width(text[lo:hi])
+    rows = -(-total // cap)
     even = total / rows
-    japanese = _has_japanese(text)
+    japanese = _has_japanese(text[lo:hi])
     # The places a piece may start, with the cost of the cut before it
     # and where the piece before it ends.
-    starts = [(0, 0, 0.0)] + [(nxt, end, cost) for end, nxt, cost in cuts]
+    starts = [(lo, lo, 0.0)] + [(nxt, end, cost) for end, nxt, cost in cuts if lo < end and nxt < hi]
 
     def piece_cost(a: int, b: int) -> float:
         piece = text[a:b]
         width = line_width(piece)
-        cost = _PIECE + _OVER * max(0.0, width - MAX_LINE_WIDTH)
+        cost = _PIECE + _OVER * max(0.0, width - cap)
         cost += _SCRAP * max(0.0, MIN_PIECE_WIDTH - width)
         cost += _UNEVEN * (width - even) ** 2
         if japanese and not _has_japanese(piece):
@@ -211,13 +252,13 @@ def _plan(text: str, cuts: list[tuple[int, int, float]]) -> list[tuple[int, int]
                 best[k], back[k] = cost, j
     final, last = float("inf"), 0
     for k, (a, _end, _cut) in enumerate(starts):
-        if best[k] == float("inf") or a >= len(text):
+        if best[k] == float("inf") or a >= hi:
             continue
-        cost = best[k] + piece_cost(a, len(text))
+        cost = best[k] + piece_cost(a, hi)
         if cost < final:
             final, last = cost, k
     pieces = []
-    k, b = last, len(text)
+    k, b = last, hi
     while k != -1:
         a = starts[k][0]
         pieces.append((a, b))
@@ -283,19 +324,37 @@ def _clock(text: str, tokens, start: float, end: float, words) -> callable:
     return at
 
 
+def _recut(text: str, clean: list[tuple[int, int, float]], a: int, b: int) -> list[tuple[int, int]]:
+    """text[a:b] in pieces no wider than TARGET_LINE_WIDTH, cut only at
+    `clean` places, or whole when they cannot all be: a piece left wider
+    is set smaller on the stage, not cut where it would lose something."""
+    if line_width(text[a:b]) <= TARGET_LINE_WIDTH:
+        return [(a, b)]
+    pieces = _plan(text, clean, TARGET_LINE_WIDTH, a, b)
+    widths = [line_width(text[x:y]) for x, y in pieces]
+    if (len(pieces) < 2 or max(widths) > TARGET_LINE_WIDTH or min(widths) < MIN_PIECE_WIDTH
+            or (_has_japanese(text[a:b]) and not all(_has_japanese(text[x:y]) for x, y in pieces))):
+        return [(a, b)]
+    return pieces
+
+
 def cut_line(text: str, start: float | None, end: float | None, words=None) -> list[dict]:
     """`text` as the lines it is studied in: itself when it fits
-    MAX_LINE_WIDTH, else the fewest pieces that do, each
-    {"text", "start", "end"} and its `words` where the cue had some
-    (offsets rebased onto the piece). A cue without times keeps None."""
+    TARGET_LINE_WIDTH; else the fewest pieces no wider than
+    MAX_LINE_WIDTH, each cut again to TARGET_LINE_WIDTH where it cuts
+    clean; each {"text", "start", "end"} and its `words` where the cue
+    had some (offsets rebased onto the piece). A cue without times
+    keeps None."""
     whole = {"text": text, "start": start, "end": end, **({"words": words} if words else {})}
-    if line_width(text) <= MAX_LINE_WIDTH:
+    if line_width(text) <= TARGET_LINE_WIDTH:
         return [whole]
     tokens = morphology.tokenize(text) or []
     cuts = _cuts(text, tokens)
     if not cuts:
         return [whole]
-    pieces = _plan(text, cuts)
+    pieces = _plan(text, cuts) if line_width(text) > MAX_LINE_WIDTH else [(0, len(text))]
+    clean = _clean_cuts(text, tokens, cuts)
+    pieces = [piece for a, b in pieces for piece in _recut(text, clean, a, b)]
     if len(pieces) < 2:
         return [whole]
     timed = start is not None and end is not None and end > start

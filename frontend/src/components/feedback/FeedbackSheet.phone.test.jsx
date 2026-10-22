@@ -18,7 +18,7 @@ vi.mock('../../LangContext', () => ({ useLang: () => ({ t: fr, lang: 'fr' }) }))
 const apiJson = vi.fn()
 vi.mock('../../lib/api', async (o) => ({ ...(await o()), apiJson: (...a) => apiJson(...a) }))
 
-const { FeedbackSheet, CardFlag, ReportProblem, FeedbackHost } = await import('./FeedbackSheet')
+const { FeedbackSheet, CardFlag, ReportProblem, FeedbackHost, QuestionReport } = await import('./FeedbackSheet')
 const { closeFeedback } = await import('../../stores/feedbackSheet')
 // A run's doors raise their sheet in App's host, beside <Routes/>.
 const inApp = node => <MemoryRouter>{node}<FeedbackHost session={LEARNER} /></MemoryRouter>
@@ -66,7 +66,8 @@ describe('the form, in its sheet', () => {
   it('sends no class once the box is unticked, and the reply when asked', async () => {
     await render(<FeedbackSheet open onClose={() => {}} session={LEARNER} />)
     const [join, reply] = document.querySelectorAll('.fb-check__box')
-    expect(reply.closest('label').textContent).toContain('aiko@example.com')
+    expect(reply.closest('label').textContent).toContain('contact.tsujijapanese@gmail.com')
+    expect(reply.closest('label').textContent).not.toContain('aiko@example.com')
     await userEvent.click(join)
     await userEvent.click(reply)
     await userEvent.type($('.fb-form__text'), 'Ça plante.')
@@ -196,5 +197,20 @@ describe('the flag on an answered card (door B)', () => {
     expect(box.height).toBeLessThanOrEqual(40)
     const hit = getComputedStyle($('.fb-flag'), '::after')
     expect(hit.position).toBe('absolute')
+  })
+})
+
+describe('the flag on a sat exam question', () => {
+  it('names the paper and the question, and offers a question\'s reasons', async () => {
+    await render(inApp(<QuestionReport examId="n5-listening-01" revision={2} question={{ id: 'm1_q9', number: 9 }} />))
+    await userEvent.click($('.fb-link'))
+    await settle()
+    // A question's reasons, not a card's: no reading or example.
+    expect([...document.querySelectorAll('.fb-reasons .chip')].map(c => c.textContent))
+      .toEqual([fr.questionReason.answer, fr.questionReason.ambiguous, fr.questionReason.audio, fr.questionReason.other])
+    await userEvent.click(document.querySelectorAll('.fb-reasons .chip')[1])
+    await userEvent.click($('.fb-form__send'))
+    await settle()
+    expect(sent()).toEqual({ kind: 'question', exam_id: 'n5-listening-01', revision: 2, question_id: 'm1_q9', reasons: ['ambiguous'], text: '' })
   })
 })

@@ -56,6 +56,24 @@ class SplitSentencesTests(unittest.TestCase):
             self.assertFalse(s["text"][0].isspace(), s["text"])
             self.assertFalse(s["text"][-1].isspace(), s["text"])
 
+    def test_windows_line_endings_and_line_end_spaces_stay_out(self) -> None:
+        result = split_sentences("こんにちは \r\nさようなら\r\n")
+        self.assertEqual([s["text"] for s in result], ["こんにちは", "さようなら"])
+        for s in result:
+            self.assertEqual(s["text"], "こんにちは \r\nさようなら\r\n"[s["start"]:s["end"]])
+
+    def test_a_bracket_never_closed_does_not_swallow_the_passage(self) -> None:
+        result = split_sentences("「こんにちは。\n元気？\nはい。")
+        self.assertEqual(
+            [s["text"] for s in result], ["「こんにちは。", "元気？", "はい。"],
+        )
+
+    def test_a_closed_quote_across_lines_stays_one_sentence(self) -> None:
+        result = split_sentences("「一行目。\n二行目。」と言った。次。")
+        self.assertEqual(
+            [s["text"] for s in result], ["「一行目。\n二行目。」と言った。", "次。"],
+        )
+
     def test_passage_over_max_sentences_can_be_capped_to_exactly_max_sentences(self) -> None:
         # split_sentences itself returns the FULL uncapped list (see the
         # module docstring for why); MAX_SENTENCES is the shared cap a
