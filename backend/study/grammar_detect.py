@@ -1067,6 +1067,22 @@ def _is_final_hit(start: int, tokens) -> bool:
     return after
 
 
+def _polite_noun(tokens, token, start: int) -> bool:
+    """Whether `token` is a verb's stem the polite お or ご makes a noun
+    of, before the particle a noun takes (plan 272): おすすめは, お知らせが
+    -- never the に of お待ちになる, which is お〜になる's."""
+    k = tokens.index(token)
+    at = next((t for t in tokens if t.start == start), None)
+    if at is None or at.pos != "particle" or at.surface not in ("は", "が", "を", "も", "の", "と", "や"):
+        return False
+    if token.conjunctive and k >= 1:
+        # ...or a noun in kana UniDic read as a て form: きってを, 切手.
+        from study.card_lookup import resolve_te_noun
+        return resolve_te_noun(tokens, k - 1) is not None
+    return (token.pos == "verb" and token.cform.startswith("連用形-一般") and k >= 1
+            and tokens[k - 1].pos == "prefix" and tokens[k - 1].surface in ("お", "ご", "御"))
+
+
 def _attaches(start: int, tokens, befores, heads, exact: bool = False) -> bool:
     """Whether the word a hit attaches to is one its lessons allow (see
     above). `heads` is what the point itself begins with.
@@ -1096,6 +1112,8 @@ def _attaches(start: int, tokens, befores, heads, exact: bool = False) -> bool:
                     and at is not None and "\u3041" <= at.surface[:1] <= "\u309f"
                     and not any(t.end <= start for t in tokens))
     if token.pos in befores:
+        return True
+    if "noun" in befores and _polite_noun(tokens, token, start):
         return True
     if token.pos == "adnominal" and token.surface in ("そんな", "こんな", "あんな", "その", "この", "あの"):
         # そんなはずがない, そんなわけがない, そのはずです: the reason and
@@ -1162,7 +1180,9 @@ def _attaches(start: int, tokens, befores, heads, exact: bool = False) -> bool:
         # whatever the tokenizer reads inside it (plan 188).
         return True
     if not shown:
-        return heads <= {"pronoun"}
+        # (Nor an adnominal: この, その are words wherever they stand --
+        # だれがこの本をかいたか, plan 272.)
+        return heads <= {"pronoun", "adnominal"}
     if token.pos in _NOMINAL:
         return bool(shown & _NOMINAL)
     if token.pos == "auxiliary":
@@ -2066,11 +2086,28 @@ def _purpose_spans(tokens):
     out = []
     for i in range(1, len(tokens) - 1):
         stem, ni, go = tokens[i - 1], tokens[i], tokens[i + 1]
-        if (stem.pos == "verb" and stem.cform.startswith("連用形") and not stem.auxiliary_use
+        # (A verb UniDic files as auxiliary-capable is the verb itself
+        # before に: 見に行く is "go to see", where its auxiliary use is
+        # the 〜てみる after a て -- plan 272.)
+        after_te = i >= 2 and tokens[i - 2].pos == "particle" and tokens[i - 2].conjunctive
+        if (stem.pos == "verb" and stem.cform.startswith("連用形") and not (stem.auxiliary_use and after_te)
                 and ni.pos == "particle" and ni.surface == "に"
                 and go.pos == "verb" and go.lemma_reading in _MOTION):
             out.append((ni.start, go.end))
     return out
+
+
+def _closes_a_set_phrase(tokens, i: int) -> bool:
+    """Whether the て at tokens[i] is the last letter of a set phrase the
+    deck teaches whole, said from its clause's start (plan 272): もし + か
+    + し + て is もしかして, "perhaps" (card_lookup.resolve_phrase)."""
+    from study.card_lookup import resolve_phrase
+    for start in range(max(0, i - 4), i):
+        if start == 0 or tokens[start - 1].pos == "symbol":
+            hit = resolve_phrase(tokens, start)
+            if hit and start + hit[3] - 1 == i:
+                return True
+    return False
 
 
 def _te_link_spans(tokens):
@@ -2085,6 +2122,8 @@ def _te_link_spans(tokens):
             continue
         if tokens[i - 1].pos not in ("verb", "auxiliary"):
             continue
+        if _closes_a_set_phrase(tokens, i):
+            continue                   # もしかして、…: "perhaps", no "and then"
         rest = []
         for u in tokens[i + 1:]:
             if u.pos == "symbol" and u.surface in _SENTENCE_ENDS:
@@ -2097,6 +2136,8 @@ def _te_link_spans(tokens):
         comma = bool(rest) and rest[0].pos == "symbol"
         if not words or words[0].pos == "particle" or (words[0].auxiliary_use and not comma):
             continue
+        if not comma and words[0].lemma == "参る":
+            continue                   # 持ってまいります: 〜ていく said humbly
         if comma and words[-1].pos == "particle" and words[-1].conjunctive and words[-1].surface in ("から", "ので", "し"):
             # 待って、すぐ行くから: a request and the reason given for
             # it, not two actions in a row -- and nothing in the letters
@@ -2107,6 +2148,51 @@ def _te_link_spans(tokens):
     return out
 
 
+def _na_adjective_te_spans(tokens):
+    """The で of a な-adjective's て form, 〜くて／〜で's second half, which
+    no lesson shows (all four are い-adjectives) and the structure line
+    names after its slash (plan 272): この部屋は静かで、きれいです, 元気で、
+    仕事も. Only the で that joins: never ではない, でもない, である, でござる."""
+    out = []
+    for i in range(1, len(tokens)):
+        t, prev = tokens[i], tokens[i - 1]
+        if not (t.surface == "で" and t.pos == "auxiliary" and t.lemma == "だ" and prev.pos == "other"):
+            continue
+        nxt = tokens[i + 1] if i + 1 < len(tokens) else None
+        if nxt is None or nxt.surface in ("は", "も") or nxt.lemma in ("有る", "ある", "無い", "ない", "御座る",
+                                                                 "ござる", "いらっしゃる"):
+            continue
+        out.append((t.start, t.end))
+    return out
+
+
+def _but_spans(tokens):
+    """が, "but", after a plain clause (plan 272): 怪我しているが、最後まで
+    走った, 高いが、おいしい. 〜が（逆接）'s lessons are all polite
+    (高いですが), and its structure line says any clause; UniDic files this
+    が a conjunctive particle, the subject's が a case particle (雨が降る,
+    小さいがゆえに)."""
+    return [(t.start, t.end) for i, t in enumerate(tokens)
+            if i > 0 and t.pos == "particle" and t.surface == "が" and t.conjunctive
+            and tokens[i - 1].pos in ("verb", "adjective", "auxiliary")]
+
+
+def _only_after_verb_spans(tokens):
+    """だけ, "only, just", after a verb or an ending (plan 272): 謝るだけ
+    ではすまない, 少し走っただけで. 〜だけ's lessons put it after a noun."""
+    return [(t.start, t.end) for i, t in enumerate(tokens)
+            if t.pos == "particle" and t.surface == "だけ" and _after_a_plain_form(tokens, i)]
+
+
+def _humble_go_come_spans(tokens):
+    """〜ていく／〜てくる said humbly (plan 272): 確認してまいります, "I
+    will go and check" -- the て and まいる, the humble いく and くる."""
+    return [(t.start, tokens[i + 1].end) for i, t in enumerate(tokens[:-1])
+            if i > 0 and t.conjunctive and t.surface in ("て", "で")
+            and tokens[i - 1].pos in ("verb", "auxiliary")
+            and tokens[i + 1].pos == "verb" and tokens[i + 1].lemma == "参る"]
+
+
 def _from_until_spans(tokens):
     """から〜まで with one of its two ends: から after a noun is "from"
     and まで after a noun "until", the two halves of the one lesson
@@ -2115,6 +2201,15 @@ def _from_until_spans(tokens):
     return [(t.start, t.end) for i, t in enumerate(tokens)
             if t.pos == "particle" and t.surface in ("から", "まで") and not t.conjunctive
             and _prev_kind(tokens, i) == "nominal"]
+
+
+def _after_a_plain_form(tokens, i: int) -> bool:
+    """Whether tokens[i] follows a verb or an ending in its plain form
+    (plan 272): 亡くなるまで, "until he died"; 走っただけ, "only ran"."""
+    if i < 1:
+        return False
+    prev = tokens[i - 1]
+    return prev.pos in ("verb", "auxiliary") and _form_head(prev.cform) in ("終止形", "連体形")
 
 
 def _adjective_spans(tokens):
@@ -2645,6 +2740,15 @@ def _any_refused(tokens, i: int, k: int) -> bool:
             and tokens[k + 1].surface in _COMMAS)
 
 
+def _filler_ano(tokens, start: int, end: int, _segments) -> bool:
+    """あのね, あのさ: "hey, you know", a filler that opens what is said,
+    no demonstrative "that" (plan 272)."""
+    i = _index_at(tokens, start)
+    if i is None or tokens[i].surface != "あの" or i + 1 >= len(tokens):
+        return False
+    return tokens[i + 1].surface.rstrip("ーぇえ") in ("ね", "さ", "な") and tokens[i + 1].pos == "particle"
+
+
 def _demo_refused(tokens, start: int, end: int, _segments) -> bool:
     """〜でも is a noun + でも: an example offered (お茶でも), or "even"
     (子どもでも). Not opening a sentence, where でも is "but"; not after
@@ -3139,7 +3243,7 @@ def _mo_refused(tokens, s, e, _g) -> bool:
     i, _t = _tok_at(tokens, s)
     if i is None:
         return False
-    if _in_set_phrase(tokens, s) or _many_mo(tokens, s):
+    if _in_set_phrase(tokens, s) or _many_mo(tokens, s) or _in_kamo(tokens, i):
         return True
     prev = tokens[i - 1] if i >= 1 else None
     if _counted_before(tokens, i) is not None:
@@ -3649,7 +3753,9 @@ def _pattern_refusals():
         "〜ませんか": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and p.lemma in ("有る", "ある"),
         # この／その／あの／どの stands before its noun: あの、すみません
         # is "um"
-        "この／その／あの／どの": lambda t, s, e, g: (n := _next_word(t, e)) is None or n.pos == "symbol",
+        # (あのね, あのさ: a filler that opens what is said, plan 272.)
+        "この／その／あの／どの": lambda t, s, e, g: (n := _next_word(t, e)) is None or n.pos == "symbol"
+            or _filler_ano(t, s, e, g),
         "これ／それ／あれ／どれ": lambda t, s, e, g: _konosoa_refused(t, s, e, g)
             or ((i := _index_at(t, s)) is not None and _soretomo(t, i)),
         "や": _ya_refused,
@@ -3810,10 +3916,41 @@ _REFUSALS = {
     "と": _to_marker_refused,
     "か": lambda tokens, s, e, _g: _in_set_phrase(tokens, s) or (
         (i := _index_at(tokens, s)) is not None and (_embedded_question_at(tokens, i) or _nandaka(tokens, i)
-                                                     or _in_kadouka(tokens, i))),
+                                                     or _in_kadouka(tokens, i) or _in_kamo(tokens, i))),
     "も": _mo_refused,
     "で": lambda tokens, s, e, _g: _in_set_phrase(tokens, s),
+    "に": lambda tokens, s, e, _g: (i := _index_at(tokens, s)) is not None and adverbial_ni(tokens, i),
 }
+
+
+# Nouns that make an adverb with に, which is then none of the times,
+# places and receivers に's lesson teaches (plan 272): 本当においしい,
+# 一緒に行こう, 特に好きだ.
+_ADVERB_NOUNS = frozenset({"本当", "ほんとう", "ほんと", "本と", "一緒", "いっしょ", "特", "とく", "主", "おも",
+                           "互い", "たがい", "お互い", "同時", "一斉", "交互", "一度", "いちど", "一気", "一遍",
+                           "順番", "次第", "ついで", "代わり"})
+
+
+def adverbial_ni(tokens, i: int) -> bool:
+    """Whether the に at tokens[i] makes an adverb of the noun before it
+    (_ADVERB_NOUNS), or of 先 that no の or この makes a place
+    (先に帰る, "to go home first", but 駅の先に, "past the station")."""
+    if i < 1 or tokens[i].surface != "に":
+        return False
+    prev = tokens[i - 1]
+    if prev.pos not in ("noun", "pronoun", "other"):
+        return False
+    if prev.surface in ("代わり", "次第"):
+        # その代わりに, 着き次第: "instead", "as soon as" -- after a noun of
+        # its own they are the noun's (父の代わりに is still "instead of").
+        return True
+    if prev.surface in _ADVERB_NOUNS:
+        return True
+    if prev.surface in ("先", "さき"):
+        before = tokens[i - 2] if i >= 2 else None
+        return before is None or not (before.surface in ("の", "この", "その", "あの", "どの")
+                                      or before.pos == "adnominal")
+    return False
 
 
 # A point written exactly on one part of a point in several parts, which
@@ -3897,7 +4034,32 @@ def _spoken_final_spans(tokens):
             out.append((t.surface[0], t.start, t.end))
         elif t.surface == "じゃん" and prev.pos in ("verb", "adjective", "auxiliary", "noun", "pronoun", "other"):
             out.append(("〜じゃないか", t.start, t.end))
+        elif _kamo_at(tokens, i) and prev.pos in ("verb", "adjective", "auxiliary", "noun", "pronoun", "other",
+                                                   "suffix"):
+            # かも, 〜かもしれない said short: 雨かも, 行くかもね.
+            out.append(("〜かもしれません", t.start, tokens[i + 1].end))
     return out
+
+
+def _kamo_at(tokens, i: int) -> bool:
+    """Whether tokens[i] is the か of かも closing its clause, 〜かもしれない
+    said short (plan 272): 雨かも。, そうかもね -- never the か of a
+    question known and its "even" も (本当かも分からない)."""
+    if i + 1 >= len(tokens) or tokens[i].surface != "か" or tokens[i].pos != "particle":
+        return False
+    if tokens[i + 1].surface != "も" or tokens[i + 1].pos != "particle":
+        return False
+    return all(u.pos in ("particle", "symbol") for u in tokens[i + 2:])
+
+
+def _in_kamo(tokens, i: int) -> bool:
+    """Whether the か or the も at tokens[i] is a letter of かもしれない
+    or of かも said short: no question's か and no "also"."""
+    k = i if tokens[i].surface == "か" else i - 1
+    if k < 0 or k + 1 >= len(tokens) or tokens[k].surface != "か" or tokens[k + 1].surface != "も":
+        return False
+    nxt = tokens[k + 2] if k + 2 < len(tokens) else None
+    return _kamo_at(tokens, k) or (nxt is not None and nxt.lemma in ("知れる", "しれる"))
 
 
 def _humble_progressive_spans(tokens):
@@ -4626,6 +4788,11 @@ _EXTRA_RULES = (
     ("と", _quotative_to_spans),
     ("〜ます／〜ません", _polite_spans),
     ("は", _topic_after_compound_spans),
+    # plan 272
+    ("〜くて／〜で", _na_adjective_te_spans),
+    ("〜が（逆接）", _but_spans),
+    ("〜だけ", _only_after_verb_spans),
+    ("〜ていく／〜てくる", _humble_go_come_spans),
 )
 
 
@@ -4634,9 +4801,15 @@ _EXTRA_RULES = (
 # spelled with (plan 193): いたす after ご + a noun or お + a stem, a
 # っぽい adjective the tokenizer made one word, 手前 after ている.
 _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans,
+                           # (plan 272: the lessons show one form of each;
+                           # the word before is the evidence)
+                           _but_spans, _only_after_verb_spans, _humble_go_come_spans,
                            # (plan 266: は's lessons put it after nouns, and
                            # the compound particle before it is its evidence)
-                           _topic_after_compound_spans})
+                           _topic_after_compound_spans,
+                           # (plan 272: 〜くて／〜で's lessons are all い-
+                           # adjectives; its structure line names the な one)
+                           _na_adjective_te_spans})
 
 
 # The form points, by the pattern the catalogue files them under. A

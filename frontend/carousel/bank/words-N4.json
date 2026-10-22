@@ -597,7 +597,7 @@
 {"t":"足りる","r":"たりる","ro":"tariru","en":["to be enough"],"fr":["suffire"],"fu":[["足","た"],["りる",""]],"hy":["多りる","他りる","太りる"],"ex":["N3.6","N3.71"]},
 {"t":"講堂","r":"こうどう","ro":"koudou","en":["auditorium"],"fr":["auditorium"],"fu":[["講","こう"],["堂","どう"]],"hy":["口堂","講道","後堂"]},
 {"t":"タイプ","r":"タイプ","ro":"taipu","en":["type, style"],"fr":["type, style"]},
-{"t":"できるだけ","r":"できるだけ","ro":"dekirudake","en":["as much as possible"],"fr":["autant que possible"]},
+{"t":"できるだけ","r":"できるだけ","ro":"dekirudake","en":["as much as possible"],"fr":["autant que possible"],"ex":["N3.47"]},
 {"t":"中々","r":"なかなか","ro":"nakanaka","en":["considerably, quite (more than expected), not easily (+ negative)"],"fr":["considérablement, assez (plus que prévu), pas facilement (+ négation)"],"fu":[["中","なか"],["々","なか"]],"ex":["N3.207","N3.208"]},
 {"t":"丁寧","r":"ていねい","ro":"teinei","en":["polite, careful (thorough)"],"fr":["poli, soigneux"],"fu":[["丁","てい"],["寧","ねい"]],"hy":["体寧","弟寧","定寧"],"ex":["N4.83","N4.102"]},
 {"t":"複雑","r":"ふくざつ","ro":"fukuzatsu","en":["complex, complicated"],"fr":["complexe, compliqué"],"fu":[["複","ふく"],["雑","ざつ"]],"hy":["服雑","福雑","腹雑"]},

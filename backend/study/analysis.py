@@ -29,7 +29,8 @@ from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
-    resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_interjection, resolve_home, numeral_value,
+    resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
+    resolve_te_noun, resolve_interjection, resolve_home, numeral_value,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -1011,6 +1012,24 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += n
             continue
+        te_noun = resolve_te_noun(morphemes, i)
+        if te_noun and not any(j in ruled for j in range(i, i + 2)):
+            # A noun in kana read as a て form (plan 272): きってを, 切手.
+            token = _compound_dict(morphemes[i:i + 2], *te_noun[:3])
+            token["pos"] = "noun"
+            tokens.append(token)
+            i += 2
+            continue
+        polite = resolve_polite_noun(morphemes, i)
+        if polite and not any(j in ruled for j in range(i, i + 2)):
+            # お + a verb's stem, a noun (plan 272): おすすめ, "a recommendation".
+            (kind, hit), n = polite
+            token = _compound_dict(morphemes[i:i + n], *hit) if kind == "deck" \
+                else _pool_compound_dict(morphemes[i:i + n], hit)
+            token["pos"] = "noun"
+            tokens.append(token)
+            i += n
+            continue
         whole = resolve_whole_word(morphemes, i)
         if whole and not any(j in strict for j in range(i, i + whole[3])):
             # A deck word the tokenizer wrote as a word and its particles
@@ -1040,9 +1059,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += 2
             continue
-        if deck is None and (i not in ruled or morphemes[i].pos == "conjunction"):
+        if deck is None and (i not in ruled or morphemes[i].pos in ("conjunction", "adnominal")):
             # (A conjunction is a word with its card beside the point that
-            # is it, as しかし is: そして, its card and its point, plan 272.)
+            # is it, as しかし is: そして, its card and its point, plan 272;
+            # an adnominal too, as この is: その.)
             deck = resolve_function_word(morphemes, i)
         if (morphemes[i].surface == "って" and i + 1 < len(morphemes) and morphemes[i + 1].surface == "ば"
                 and morphemes[i + 1].pos == "particle" and i + 1 not in ruled

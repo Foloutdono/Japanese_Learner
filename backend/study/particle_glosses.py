@@ -113,6 +113,29 @@ _GLOSSES = {
           "fr": "ne… pas, sans : la négation, écrite (= ない, ないで)"},
     "へん": {"en": "not: the negative in the Kansai (= ない)",
             "fr": "ne… pas : la négation du Kansai (= ない)"},
+    "に_adverb": {"en": "makes an adverb of the word before it", "fr": "fait un adverbe du mot qui précède"},
+    "まで_until": {"en": "until (it happens)", "fr": "jusqu'à ce que"},
+    "と_naru": {"en": "(with なる) becomes: the written form of 〜になる",
+               "fr": "(avec なる) devient : la forme écrite de 〜になる"},
+    "て_trailing": {"en": "(at the end) leaves the sentence open on what happened or why: …, you see",
+                   "fr": "(en fin de phrase) laisse la phrase en suspens sur ce qui s'est passé ou pourquoi : …, tu vois"},
+}
+
+# What the adverb each noun makes with に says (plan 272), for the gloss.
+_ADVERBS = {
+    "本当": ("really, truly", "vraiment"), "ほんとう": ("really, truly", "vraiment"),
+    "ほんと": ("really", "vraiment"), "本と": ("really", "vraiment"),
+    "一緒": ("together", "ensemble"), "いっしょ": ("together", "ensemble"),
+    "特": ("especially", "surtout"), "とく": ("especially", "surtout"),
+    "主": ("mainly", "principalement"), "おも": ("mainly", "principalement"),
+    "互い": ("each other", "l'un l'autre"), "お互い": ("each other", "l'un l'autre"),
+    "たがい": ("each other", "l'un l'autre"), "同時": ("at the same time", "en même temps"),
+    "一斉": ("all at once", "tous en même temps"), "交互": ("in turns", "en alternance"),
+    "一度": ("at one time", "en une seule fois"), "いちど": ("at one time", "en une seule fois"),
+    "一気": ("in one go", "d'un seul coup"), "一遍": ("all at once", "d'un coup"),
+    "順番": ("in turn", "à tour de rôle"), "次第": ("gradually", "peu à peu"),
+    "ついで": ("while at it", "au passage"), "代わり": ("instead", "à la place"),
+    "先": ("first, ahead", "d'abord, en avance"), "さき": ("first, ahead", "d'abord, en avance"),
 }
 
 
@@ -163,6 +186,26 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "ね_mid"
         elif m.surface == "って" and i > 0:
             key = _quoting(morphemes, i)
+        elif m.surface == "まで" and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary") \
+                and morphemes[i - 1].cform.startswith(("終止形", "連体形")):
+            key = "まで_until"               # 亡くなるまで, "until he died"
+        elif m.surface == "と" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix") \
+                and i + 1 < len(morphemes) and morphemes[i + 1].pos == "verb" \
+                and morphemes[i + 1].lemma in ("成る", "なる"):
+            key = "と_naru"
+        elif m.surface in ("て", "で") and m.conjunctive and i > 0 \
+                and morphemes[i - 1].pos in ("verb", "auxiliary", "adjective") and _closes(morphemes, i) \
+                and all(u.pos == "symbol" for u in _rest(morphemes, i)):
+            key = "て_trailing"
+        elif m.surface == "に":
+            from study.grammar_detect import adverbial_ni
+            if adverbial_ni(morphemes, i):
+                noun = morphemes[i - 1].surface
+                if noun in _ADVERBS:
+                    en, fr = _ADVERBS[noun]
+                    return {"en": f"makes an adverb of {noun}: {noun}に, {en}",
+                            "fr": f"fait un adverbe de {noun} : {noun}に, {fr}"}
+                key = "に_adverb"
     return dict(_GLOSSES[key]) if key else None
 
 

@@ -859,7 +859,7 @@
 {"t":"弱まる","r":"よわまる","ro":"yowamaru","en":["to weaken, to abate, to die down"],"fr":["s'affaiblir, s'atténuer, faiblir"],"fu":[["弱","よわ"],["まる",""]]},
 {"t":"熱湯","r":"ねっとう","ro":"nettou","en":["boiling water"],"fr":["eau bouillante"],"fu":[["熱","ねっ"],["湯","とう"]],"hy":["熱東","熱読","熱道"]},
 {"t":"補給","r":"ほきゅう","ro":"hokyuu","en":["supply, supplying, replenishment"],"fr":["approvisionnement, ravitaillement"],"fu":[["補","ほ"],["給","きゅう"]],"hy":["歩給","補九","反給"]},
-{"t":"澄ます","r":"すます","ro":"sumasu","en":["to clear (liquid)","to put on airs, to look unconcerned","to strain (one's ears)"],"fr":["clarifier (un liquide)","prendre des airs, feindre l'indifférence","tendre (l'oreille)"],"fu":[["澄","す"],["ます",""]],"hy":["子ます","西ます","主ます"]},
+{"t":"澄ます","r":"すます","ro":"sumasu","en":["to clear (liquid)","to put on airs, to look unconcerned","to strain (one's ears)"],"fr":["clarifier (un liquide)","prendre des airs, feindre l'indifférence","tendre (l'oreille)"],"fu":[["澄","す"],["ます",""]],"hy":["子ます","西ます","主ます"],"ex":["N5.55"]},
 {"t":"成り立つ","r":"なりたつ","ro":"naritatsu","en":["to consist of, to be made up of","to be concluded","to hold true"],"fr":["se composer de","être conclu","être valable"],"fu":[["成","な"],["り",""],["立","た"],["つ",""]],"hy":["南り立つ","成り多つ","奈り立つ"]},
 {"t":"お世辞","r":"おせじ","ro":"oseji","en":["flattery, compliment"],"fr":["flatterie, compliment"],"fu":[["お",""],["世","せ"],["辞","じ"]],"hy":["お施辞","お世二","お世時"]},
 {"t":"軍","r":"いくさ","ro":"ikusa","en":["war, battle, campaign, fight"],"fr":["guerre, bataille"],"fu":[["軍","いくさ"]]},

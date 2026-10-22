@@ -286,6 +286,21 @@ def _demonstratives(morphemes: list[Morpheme]) -> None:
             m.pos = "adnominal"
 
 
+def _picture(morphemes: list[Morpheme]) -> None:
+    """え read as the interjection "eh?" where it is a noun (plan 272):
+    だれがこのえをかいたか is 絵, "picture" -- after この, or before the を
+    or が a noun takes. Never the え that opens an utterance or a reply
+    (え、本当？)."""
+    for k, m in enumerate(morphemes):
+        if m.pos != "interjection" or m.surface != "え":
+            continue
+        before = morphemes[k - 1] if k > 0 else None
+        nxt = morphemes[k + 1] if k + 1 < len(morphemes) else None
+        if (before is not None and before.pos == "adnominal") or (
+                nxt is not None and nxt.pos == "particle" and nxt.surface in ("を", "が")):
+            m.pos, m.lemma, m.reading, m.lemma_reading, m.goshu = "noun", "絵", "え", "え", "漢"
+
+
 def _went(morphemes: list[Morpheme]) -> list[Morpheme]:
     """行っ read as 行う, "to carry out", where nothing is carried out
     (plan 272). 行った and 行って are 行く's forms and 行う's alike, and
@@ -896,6 +911,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _quotative_to(text, *_tag(text, 0, tagger), tagger)
         morphemes, tags = _unknown_words(text, morphemes, tags)
         _demonstratives(morphemes)
+        _picture(morphemes)
         morphemes = _went(morphemes)
         morphemes, tags = _how_many_minutes(morphemes, tags)
         morphemes, tags = _not_a_passive(morphemes, tags)

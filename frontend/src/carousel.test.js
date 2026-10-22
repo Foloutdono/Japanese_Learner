@@ -682,14 +682,16 @@ describe('explaining a point in its own sentence', () => {
     expect(glossOf('息子は注射を怖がるから、病院には行きたくないと言う。', 'と', 'fr')).toBe('que (citation)')
     expect(glossOf('発車のベルが鳴ると、乗客が次々と列車に乗りこむ。', 'と')).not.toBe('that (quoting)')
     // が before a comma after a clause is “but”; after a noun, the subject.
-    expect(glossOf('都会に引っ越してだいぶ経つが、夜の騒音にはなかなか慣れない。', 'が')).toBe('but')
-    expect(glossOf('この机は一人で持ち上げられないことはないが、腰を悪くしそうで心配だ。', 'が')).toBe('but')
+    // (Since plan 272 the point 〜が（逆接） is written on it, and says so.)
+    expect(glossOf('都会に引っ越してだいぶ経つが、夜の騒音にはなかなか慣れない。', 'が')).toMatch(/^but/)
+    expect(glossOf('この机は一人で持ち上げられないことはないが、腰を悪くしそうで心配だ。', 'が')).toMatch(/^but/)
     expect(glossOf('規模が小さいがゆえに、その企業は景気の変動に柔軟に対応できた。', 'が')).not.toBe('but')
     // ほど after これ, それ, あれ is “so”, after a number “about”.
     expect(glossOf('あれほど努力したのだから、彼女は試験に合格するに違いない。', 'ほど')).toBe('so (much)')
     expect(glossOf('医師の説明によると、手術の後は二週間ほど入院が必要らしい。', 'ほど')).toBe('about')
-    // できるだけ is “as … as possible”, never “only”.
-    expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBe('as … as possible')
+    // できるだけ is “as … as possible”, never “only”: one word since plan 272.
+    expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'できるだけ')).toMatch(/as much as possible/)
+    expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBeUndefined()
     // A form of だ that makes an adverb of the word (真剣に), and one the tokenizer gave a particle: bare.
     expect(glossOf('経験が少ない人だって、真剣に練習を続ければ必ず上達する。', 'に')).toBe('makes an adverb')
     expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('')
