@@ -8,7 +8,7 @@
 // (index.json), never written here. What a story promises is what the
 // app does today: start free, the kana line free for good, no ads and no
 // trackers; no frame prices a mode. The plan is pure; the frames draw.
-import { EDGE, FS, SP, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, text } from './draw.js'
+import { EDGE, FS, SP, alpha, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, shadow, text } from './draw.js'
 import * as A from './app.js'
 import { STRINGS, count, weldIf } from './strings.js'
 import { gloss } from './common.js'
@@ -294,15 +294,71 @@ export function promoDeck(plan, fmt, opts) {
   }
   const LINE = [{ color: p.line.kana, n: 4 }, { color: p.line.vocab, n: 20 }, { color: p.line.kanji, n: 10 }, { color: p.line.grammar, n: 8 }]
 
-  // A block set in the middle of what the masthead and the foot leave:
-  // drawn once off the page to measure it, then where it belongs.
-  // One too tall for the room is set smaller, whole, never cut.
+  // ── On the print (plan 271, the owner's pick B of four drawn) ──
+  // Every frame stands on Today's print of the hour, as the gate does,
+  // its sky washed toward the ground's paper down to where the words end,
+  // so the landscape shows under them and a part is lifted off it on its
+  // own shadow. Without the print (node's tests) a frame stands on the
+  // ground alone, its block centred as before.
+  const PR = opts.print || null
+  const PU = PR ? fmt.w / PR.scene.w : 1
+  const WASH = 160
+  const view = ctx => {
+    if (!PR) return ground(ctx, p, fr)
+    A.drawPrint(ctx, PR, 0, 0, PU, { W: fmt.w, H: fmt.h, moving: clock?.moving, t: clock?.t })
+  }
+  // The paper over the sky from `from` to `to`, fading out over WASH either side (none above the top).
+  const wash = (ctx, from, to) => {
+    if (!PR) return
+    const a = Math.max(0, from - WASH)
+    const b = to + WASH
+    const g = ctx.createLinearGradient(0, a, 0, b)
+    const at = y => Math.min(1, Math.max(0, (y - a) / (b - a)))
+    g.addColorStop(0, alpha(p.bg, from <= 0 ? 0.9 : 0))
+    g.addColorStop(at(from), alpha(p.bg, 0.9))
+    g.addColorStop(at(to), alpha(p.bg, 0.86))
+    g.addColorStop(1, alpha(p.bg, 0))
+    ctx.fillStyle = g
+    ctx.fillRect(0, a, fmt.w, b - a)
+  }
+  // A part's shadow on the print: a box the part then covers.
+  const lift = (c, x, y, w, h, r = 6 * U) => {
+    if (!PR) return
+    c.save()
+    shadow(c, '0px 4px 12px rgba(30, 20, 10, 0.3)')
+    c.fillStyle = A.faceOf(p).bg
+    rrect(c, x, y, w, h, r)
+    c.fill()
+    c.restore()
+  }
+  const chrome = (ctx, i, of) => {
+    masthead(ctx, p, fr, p.ink, p.ink)
+    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: PR ? p.ink : p.ink2, align: 'right' })
+  }
+  // A page's ground and chrome wait for its block (centred, below), which
+  // knows how far down the words go.
+  let pending = null
+  const page = (ctx, i, of) => {
+    pending = { i, of }
+  }
+  // A block under the masthead: drawn once off the page to measure it,
+  // then where it belongs, at the head of the sky on the print, in the
+  // middle of the room without it. One too tall for the room is set
+  // smaller, whole, never cut.
   const centred = (ctx, body, foot = 0) => {
     const top = fr.y + 64 + SP[7]
     const room = fr.bottom - foot - top
     const h = body(scratch(ctx), top) - top
-    if (h <= room) return body(ctx, top + (room - h) / 2)
-    const s = room / h
+    const s = h <= room ? 1 : room / h
+    const y0 = PR || s < 1 ? top : top + (room - h) / 2
+    if (pending) {
+      const { i, of } = pending
+      pending = null
+      view(ctx)
+      wash(ctx, 0, y0 + h * s)
+      chrome(ctx, i, of)
+    }
+    if (s === 1) return body(ctx, y0)
     ctx.save()
     ctx.translate(fr.cx, top)
     ctx.scale(s, s)
@@ -311,16 +367,16 @@ export function promoDeck(plan, fmt, opts) {
     ctx.restore()
     return top + room
   }
-  const lead = (ctx, str, y, color, sizes, { align = 'left', maxLines = 3, weight = 700 } = {}) => {
-    const b = fit(ctx, say(str), { weight, sizes, maxW: fr.w, maxLines })
+  // A middle dot stays at the end of its line, never opens the next.
+  const lead = (ctx, str, y, color, sizes, { align = 'left', maxLines = 3, weight = 700, fam = 'latin' } = {}) => {
+    const b = fit(ctx, say(str).replace(/ · /g, '\u00a0· '), { weight, sizes, maxW: fr.w, maxLines, fam })
     b.lines.forEach((l, i) => text(ctx, l, align === 'center' ? fr.cx : fr.x, y + b.size * (0.8 + i * 1.18), { f: b.f, color, align }))
     return y + paragraphH(b)
   }
-  const page = (ctx, i, of) => {
-    ground(ctx, p, fr)
-    masthead(ctx, p, fr)
-    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: p.ink2, align: 'right' })
-  }
+  // A frame's title, in the sky: serif, centred (plan 271).
+  const title = (ctx, str, y, sizes, maxLines = 3) => lead(ctx, str, y, p.ink, sizes, { align: 'center', maxLines, weight: 900, fam: 'serif' })
+  // A frame's body under it, centred.
+  const body = (ctx, str, y, sizes = [FS.lead, FS.body], maxLines = 3) => lead(ctx, str, y, p.ink2, sizes, { align: 'center', maxLines, weight: 500 })
   // Its rings reach past the pill: the whole of them inside the frame.
   // In a clip, given the moment it comes in (`at`), it rises in and then
   // waits as the app's gate waits (app.js's departButton).
@@ -339,14 +395,61 @@ export function promoDeck(plan, fmt, opts) {
   // In a clip the mark, the ask and its note come in one after another,
   // then the gate, which waits (END below).
   const board = (ctx, i, of, head, note) => {
+    if (PR) return sunBoard(ctx, i, of, 1, (c, y) => {
+      y = part(c, k(END.head, 0.8), () => title(c, head, y, [FS.display * 0.62, FS.heading]))
+      y = part(c, k(END.note, 0.8), () => body(c, note, y + SP[5]))
+      return part(c, k(END.note + 0.3, 0.8), () => handle(c, y))
+    })
     page(ctx, i, of)
     centred(ctx, (c, y) => {
-      part(c, k(END.mark, 0.9), () => mark(c, fr.cx - 130, y, 260, p.ink, p.gold))
+      part(c, k(END.sun, 0.9), () => mark(c, fr.cx - 130, y, 260, p.ink, p.gold))
       y += 260 + SP[7]
       y = part(c, k(END.head, 0.8), () => lead(c, head, y, p.ink, [FS.display * 0.62, FS.heading], { align: 'center' }))
       y = part(c, k(END.note, 0.8), () => lead(c, note, y + SP[5], p.ink2, [FS.lead, FS.body], { align: 'center', weight: 500 }))
       return part(c, k(END.note + 0.3, 0.8), () => handle(c, y))
     }, FOOT)
+    depart(ctx, P.board, END.gate)
+  }
+  // On the print the last frame is the hour's sun, ringed by the four
+  // lines as Today rings it, the mark in it (B2, the owner's pick), the
+  // words under it in the washed sky, the gate at the foot. `size`: the
+  // sun's share of Today's dial. In a clip the sun rises in, the ring is
+  // drawn round from the top, the mark settles into the disc, then the
+  // words and the gate (END).
+  const sunBoard = (ctx, i, of, size, words) => {
+    // The words start under the ring, measured off the page to wash the
+    // sky behind them; a long ask takes its room from the sun, never
+    // from the gate.
+    const room = fr.bottom - DEP - 8 * U - SP[6]
+    let u, halo, cy, top, end
+    for (let s = size; ; s -= 0.04) {
+      u = PU * s
+      halo = PR.frame.halo * u
+      cy = fr.y + halo + SP[5]
+      top = cy + halo + SP[7]
+      end = words(scratch(ctx), top)
+      if (end <= room || s <= 0.5) break
+    }
+    const r = PR.frame.disc * u
+    view(ctx)
+    // In a clip the sky pales behind the words as the mark settles.
+    ctx.save()
+    ctx.globalAlpha *= k(END.mark, 0.9)
+    wash(ctx, top, end)
+    ctx.restore()
+    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: p.ink, align: 'right' })
+    const breath = clock ? 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, clock.t / 7)) : null
+    const sweep = clock ? A.cssEase(0.45, 0, 0.2, 1)(Math.min(1, Math.max(0, (clock.t - END.ring[0]) / (END.ring[1] - END.ring[0])))) : 1
+    part(ctx, k(END.sun, 0.9), () => A.printDial(ctx, p, PR, fr.cx, cy, u, { parts: LINE, count: '', unit: '', time: null, breath, sweep }))
+    const m = k(END.mark, 0.9)
+    if (m > 0) {
+      const ms = r * 1.15 * (1.15 - 0.15 * m)
+      ctx.save()
+      ctx.globalAlpha *= m
+      mark(ctx, fr.cx - ms / 2, cy - ms / 2, ms, p.ink, p.gold)
+      ctx.restore()
+    }
+    words(ctx, top)
     depart(ctx, P.board, END.gate)
   }
   // Today on its print, full-bleed: the hour's sun as the dial, its time
@@ -384,6 +487,7 @@ export function promoDeck(plan, fmt, opts) {
   }
   const F = A.faceOf(p)
   const panel = (ctx, x, y, w, h, r = 6 * U) => {
+    lift(ctx, x, y, w, h, r)
     ctx.fillStyle = F.bg
     rrect(ctx, x, y, w, h, r)
     ctx.fill()
@@ -404,7 +508,7 @@ export function promoDeck(plan, fmt, opts) {
         page(ctx, 2, 4)
         const rows = [['kana', '仮', fig.kanaDeck], ['vocab', '語', fig.words], ['kanji', '漢', fig.kanji], ['grammar', '文', fig.points]]
         centred(ctx, (c, y) => {
-          y = lead(c, P.linesTitle, y, p.ink, [FS.heading, FS.title], { maxLines: 1 })
+          y = title(c, P.linesTitle, y, [FS.heading, FS.title], 2)
           y += SP[7]
           const h = 84 * U
           for (const [key, jp, num] of rows) {
@@ -427,7 +531,7 @@ export function promoDeck(plan, fmt, opts) {
             text(c, figure, fr.right - 18 * U, y + h / 2 + 12 * U, { f: font(700, 34 * U, 'latin'), color: F.ink, align: 'right' })
             y += h + 8 * U
           }
-          return lead(c, P.levels, y + SP[5], p.ink2, [FS.lead, FS.body], { align: 'center', maxLines: 2, weight: 500 })
+          return body(c, P.levels, y + SP[5], [FS.lead, FS.body], 2)
         })
       })
       if (fig.levels && fig.kanaDeck) {
@@ -435,8 +539,8 @@ export function promoDeck(plan, fmt, opts) {
           page(ctx, 3, 4)
           const stops = arrivals(fig, 10).map(a => [a.level, P.span(spanOf(a.days))])
           centred(ctx, (c, y) => {
-            y = lead(c, P.paceTitle, y, p.ink, [FS.heading, FS.title], { maxLines: 2 })
-            y = lead(c, P.paceAt, y + SP[3], p.ink2, [FS.lead, FS.body], { maxLines: 2, weight: 500 })
+            y = title(c, P.paceTitle, y, [FS.heading, FS.title], 2)
+            y = body(c, P.paceAt, y + SP[3], [FS.lead, FS.body], 2)
             y += SP[8]
             const rx = fr.x + 60
             const step = 140
@@ -453,7 +557,7 @@ export function promoDeck(plan, fmt, opts) {
               text(c, say(span), rx + 110, cy + z * 0.36, { f: font(700, z, 'latin'), color: i === 0 ? p.ink : p.ink2 })
             })
             y += step * (stops.length - 1) + 56 + SP[8]
-            return lead(c, P.paceNote, y, p.ink2, [FS.body, FS.sm], { maxLines: 3, weight: 500 })
+            return body(c, P.paceNote, y, [FS.body, FS.sm], 3)
           })
         })
       }
@@ -463,7 +567,10 @@ export function promoDeck(plan, fmt, opts) {
     case 'card': {
       const pr = plan.promo
       const cardH = 290 * U
-      const card = (c, y, body, hint) => A.reviewCard(c, p, fr.x, y, fr.w, cardH, U, { stage: 'mastered', stageLabel: P.mastered, foot: ['N5', P.mode], band: 1, hint, body })
+      const card = (c, y, face, hint) => {
+        lift(c, fr.x, y, fr.w, cardH)
+        return A.reviewCard(c, p, fr.x, y, fr.w, cardH, U, { stage: 'mastered', stageLabel: P.mastered, foot: ['N5', P.mode], band: 1, hint, body: face })
+      }
       const back = c => (x, yy, w, h) => {
         const mb = fit(c, pr.sense, { weight: 800, sizes: [27.2 * U, 22 * U, 18 * U], maxW: w, maxLines: 2, fam: 'latin' })
         const mh = paragraphH(mb)
@@ -478,7 +585,7 @@ export function promoDeck(plan, fmt, opts) {
       add('front', ctx => {
         page(ctx, 1, 4)
         centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.stillKnow, y, p.ink, [FS.display * 0.66, FS.heading]))
+          y = part(c, k(0, 0.8), () => title(c, P.stillKnow, y, [FS.display * 0.66, FS.heading]))
           y += SP[7]
           const turned = clock && clock.t >= TURN
           part(c, k(0.4, 1.0), () => card(c, y, turned
@@ -501,7 +608,7 @@ export function promoDeck(plan, fmt, opts) {
         centred(ctx, (c, y) => {
           card(c, y, back(c))
           y += cardH + SP[7]
-          y = lead(c, P.how, y, p.ink, [FS.title], { maxLines: 1 })
+          y = title(c, P.how, y, [FS.title], 1)
           y += SP[4]
           const bar = A.ratingBar(c, p, fr.x, y + 34 * U, fr.w, U, P.ratings, { pressed: 3 })
           bar.centres.forEach((cx, i) => {
@@ -524,7 +631,7 @@ export function promoDeck(plan, fmt, opts) {
       const pasteFrame = ctx => {
         page(ctx, 1, 3)
         centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.paste, y, p.ink, [FS.display * 0.62, FS.heading]))
+          y = part(c, k(0, 0.8), () => title(c, P.paste, y, [FS.display * 0.62, FS.heading]))
           y += SP[8]
           const h = 146 * U
           panel(c, fr.x, y, fr.w, h, 8 * U)
@@ -561,7 +668,7 @@ export function promoDeck(plan, fmt, opts) {
           }
           text(c, P.analyze, bx + bw / 2, by + bh / 2 + 6 * U, { f: font(700, 15 * U, 'latin'), color: '#1c1811', align: 'center' })
           y += h + SP[8]
-          return part(c, k(0.5, 0.8), () => lead(c, P.cuts, y, p.ink2, [FS.lead, FS.body], { maxLines: 5, weight: 500 }))
+          return part(c, k(0.5, 0.8), () => body(c, P.cuts, y, [FS.lead, FS.body], 5))
         })
       }
       add('paste', ctx => {
@@ -589,7 +696,7 @@ export function promoDeck(plan, fmt, opts) {
           panel(c, fr.x, y, fr.w, lineH, 8 * U)
           A.analyserLine(c, p, fr.x + 13 * U, y + 22 * U, inner, U, pr.toks)
           y += lineH + SP[4]
-          y = lead(c, pr.tr, y, p.ink2, [FS.lead, FS.body], { align: 'center', maxLines: 3, weight: 500 })
+          y = body(c, pr.tr, y, [FS.lead, FS.body], 3)
           y += SP[6]
           // As many of its points as the room holds, in the sentence's order.
           const room = fr.bottom - (fr.y + 64 + SP[7])
@@ -597,7 +704,10 @@ export function promoDeck(plan, fmt, opts) {
           pr.points.forEach((pt, i) => {
             if (y - y0 + 102 * U > room) return
             shown += 1
-            y = part(c, pointIn(i), () => y + A.pointCard(c, p, fr.x, y, fr.w, U, pt) + 8 * U)
+            y = part(c, pointIn(i), () => {
+              lift(c, fr.x, y, fr.w, 102 * U)
+              return y + A.pointCard(c, p, fr.x, y, fr.w, U, pt) + 8 * U
+            })
           })
           pointsShown = shown
           return y
@@ -611,6 +721,7 @@ export function promoDeck(plan, fmt, opts) {
       const pr = plan.promo
       const question = (c, y) => {
         const h = 124 * U
+        lift(c, fr.x, y, fr.w, h)
         A.reviewCard(c, p, fr.x, y, fr.w, h, U, { stage: 'new', foot: ['N5', P.examMode], band: 0, body: (x, yy, w, hh) => {
           const s = pr.before + pr.word + pr.after
           let z = 24 * U
@@ -627,33 +738,38 @@ export function promoDeck(plan, fmt, opts) {
       add('question', ctx => {
         page(ctx, 1, 3)
         centred(ctx, (c, y) => {
-          part(c, k(0, 0.8), () => text(c, P.examKind.toLocaleUpperCase(), fr.x, y + FS.caption, { f: font(700, FS.caption, 'latin'), color: p.line.exam, tr: 0.18 }))
+          part(c, k(0, 0.8), () => text(c, P.examKind.toLocaleUpperCase(), fr.cx, y + FS.caption, { f: font(700, FS.caption, 'latin'), color: p.line.exam, align: 'center', tr: 0.18 }))
           y += FS.caption * 1.6 + SP[3]
-          y = part(c, k(0.1, 0.8), () => lead(c, P.examAsk, y, p.ink, [FS.heading, FS.title]))
+          y = part(c, k(0.1, 0.8), () => title(c, P.examAsk, y, [FS.heading, FS.title]))
           y += SP[6]
           y += part(c, k(0.6, 0.9), () => question(c, y)) + SP[4]
           // The four readings in one after another.
+          pr.choices.forEach((_, i) => part(c, k(1.5 + 0.3 * i, 0.7), () => lift(c, fr.x, y + i * 56 * U, fr.w, 48 * U)))
           y += A.choiceRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: p.line.exam, rowH: 48, reveal: pr.choices.map((_, i) => k(1.5 + 0.3 * i, 0.7)) })
-          return part(c, k(3.2, 0.8), () => lead(c, P.comment, y + SP[5], p.ink2, [FS.body], { maxLines: 2, weight: 500 }))
+          return part(c, k(3.2, 0.8), () => body(c, P.comment, y + SP[5], [FS.body], 2))
         })
       })
       add('answer', ctx => {
         page(ctx, 2, 3)
         centred(ctx, (c, y) => {
           y += question(c, y) + SP[5]
+          // Answered, the run folds the other rows away: the right one stays.
+          lift(c, fr.x, y, fr.w, 54 * U)
           y += A.choiceRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: p.line.exam, right: pr.right, answered: true }) + SP[6]
-          y = lead(c, pr.explain, y, p.ink, [FS.title, FS.lead], { maxLines: 3 })
+          y = lead(c, pr.explain, y, p.ink, [FS.title, FS.lead], { align: 'center', maxLines: 3 })
           if (!pr.exam) return y
           y += SP[6]
           const figs = P.examFigs(pr.exam)
           const fz = FS.heading
           const nw = Math.max(...figs.map(([v]) => measure(c, v, font(700, fz, 'latin'))))
-          for (const [v, l] of figs) {
-            text(c, v, fr.x, y + fz * 0.8, { f: font(700, fz, 'latin'), color: p.line.exam })
-            const lb = fit(c, say(l), { weight: 500, sizes: [FS.lead, FS.body], maxW: fr.w - nw - SP[5], maxLines: 1, fam: 'latin' })
-            text(c, lb.lines[0], fr.x + nw + SP[5], y + fz * 0.8, { f: lb.f, color: p.ink })
+          const labels = figs.map(([, l]) => fit(c, say(l), { weight: 500, sizes: [FS.lead, FS.body], maxW: fr.w - nw - SP[5], maxLines: 1, fam: 'latin' }))
+          // The figures and their words as one block, centred under the rest.
+          const x0 = fr.cx - (nw + SP[5] + Math.max(...labels.map(lb => measure(c, lb.lines[0], lb.f)))) / 2
+          figs.forEach(([v], i) => {
+            text(c, v, x0, y + fz * 0.8, { f: font(700, fz, 'latin'), color: p.line.exam })
+            text(c, labels[i].lines[0], x0 + nw + SP[5], y + fz * 0.8, { f: labels[i].f, color: p.ink })
             y += fz * 1.15
-          }
+          })
           return y
         })
       })
@@ -664,7 +780,7 @@ export function promoDeck(plan, fmt, opts) {
       add('pass', ctx => {
         page(ctx, 1, 2)
         centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.passWaits, y, p.ink, [FS.display * 0.72, FS.heading], { maxLines: 2 }))
+          y = part(c, k(0, 0.8), () => title(c, P.passWaits, y, [FS.display * 0.72, FS.heading], 2))
           y += SP[7]
           // In a clip 辶 fills on the level-up's own clock (recipes.js's
           // LEVEL_CLOCK, which its sounds are scored against), then the
@@ -672,15 +788,12 @@ export function promoDeck(plan, fmt, opts) {
           const up = clock && clock.t >= LEVEL_UP
           const xp = !clock ? 0.12 : up ? 0.06 : fillShare(clock.t - FILL_START)
           y += part(c, k(0.4, 1.2), () => A.passCard(c, fr.x, y, fr.w, { name: P.yourName, nameInk: 'rgba(34, 36, 40, 0.45)', level: up ? 2 : 1, cls: P.free, xp })) + SP[7]
-          return part(c, k(1.0, 0.8), () => lead(c, P.passBody, y, p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 }))
+          return part(c, k(1.0, 0.8), () => body(c, P.passBody, y, [FS.lead, FS.body], 4))
         })
       })
       add('free', ctx => {
-        page(ctx, 2, 2)
-        centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.startFree, y, p.ink, [FS.heading, FS.title], { maxLines: 1 }))
-          y += SP[6]
-          // In a clip the promises come in one at a time (END.promise).
+        // The promises, one panel each; in a clip they come in one at a time (END.promise).
+        const promises = (c, y) => {
           P.promises.forEach(([h1, b1], i) => {
             const h = 74 * U
             part(c, k(END.promise(i), 0.7), () => {
@@ -694,6 +807,16 @@ export function promoDeck(plan, fmt, opts) {
             y += h + 8 * U
           })
           return part(c, k(END.promise(P.promises.length), 0.8), () => handle(c, y))
+        }
+        // On the print, the sun's ending, smaller, for the three panels under it.
+        if (PR) return sunBoard(ctx, 2, 2, 0.62, (c, y) => {
+          y = part(c, k(END.head, 0.8), () => title(c, P.startFree, y, [FS.heading, FS.title], 1))
+          return promises(c, y + SP[6])
+        })
+        page(ctx, 2, 2)
+        centred(ctx, (c, y) => {
+          y = part(c, k(0, 0.8), () => lead(c, P.startFree, y, p.ink, [FS.heading, FS.title], { maxLines: 1 }))
+          return promises(c, y + SP[6])
         }, FOOT)
         depart(ctx, P.board, END.gate)
       })
@@ -713,8 +836,8 @@ export function promoDeck(plan, fmt, opts) {
     },
   })
   out.clips = {
-    cover: inMotion(out[0], plan.story === 'pitch', () => scoreOf(plan, shownPoints())),
-    end: inMotion(out[out.length - 1], false, () => endScoreOf(plan)),
+    cover: inMotion(out[0], !!PR, () => scoreOf(plan, shownPoints())),
+    end: inMotion(out[out.length - 1], !!PR, () => endScoreOf(plan)),
   }
   out.clip = out.clips.cover
   return out
@@ -723,9 +846,9 @@ export function promoDeck(plan, fmt, opts) {
 /** The stories' call to action in motion, its ask a caller's own (plan
  *  270, a feature's video): the mark, the ask, its note, then the gate,
  *  which waits; scored as the stories' is (the board's flap, the chime). */
-export function gateClip(fmt, { lang = 'en', head, note = null, handle = '', ground = 'paper' } = {}) {
+export function gateClip(fmt, { lang = 'en', head, note = null, handle = '', ground = 'paper', print = null } = {}) {
   const plan = { ...promoPlan('pitch', {}, null, { lang, handle }), story: 'gate', head: weldIf(lang === 'fr' ? 'fr' : 'en', head), note }
-  return promoDeck(plan, fmt, { ground }).clips.end
+  return promoDeck(plan, fmt, { ground, print }).clips.end
 }
 
 /** A cover clip's length and rate: seven seconds, at thirty frames. */
@@ -735,8 +858,10 @@ export const CLIP = { seconds: 7, fps: 30 }
 // gate at GATE, risen GATE_RISE later and waiting from then on, so its
 // idle nudge (four seconds untaken) falls inside the clip. On the pass
 // story's last frame the three promises come in where the ask's note would.
+// On the print (plan 271) the sun rises in first and its ring is drawn
+// round from the top over RING, then the mark settles into the disc.
 const GATE_RISE = 0.6
-export const END = { mark: 0, head: 0.5, note: 0.9, gate: 1.6, promise: i => 0.5 + 0.3 * i }
+export const END = { sun: 0, ring: [0.3, 1.1], mark: 0.8, head: 1.0, note: 1.3, gate: 1.7, promise: i => 1.1 + 0.2 * i }
 
 // The level-up's clock (src/lib/audio/recipes.js, LEVEL_CLOCK, held equal
 // by carousel.test.js): the road fills for FILL_SPAN along FILL_CURVE,

@@ -17,7 +17,8 @@
 // lines, held equal by a test): no figure, no price, no promise the
 // screen does not make.
 import { FS, SP, fit, formatOf, frame, palette, paragraph, rrect, text } from './draw.js'
-import { gateClip } from './promo.js'
+import { PRINT_HOURS } from './app.js'
+import { END, gateClip } from './promo.js'
 import { feedPosts } from './feeds.js'
 import { weldIf } from './strings.js'
 
@@ -318,7 +319,7 @@ export function featureItems(lang = 'en') {
 }
 
 /** A feature's video, planned: what to record and what to say over it. */
-export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', music = true, handle = '' } = {}) {
+export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', music = true, handle = '', hour = 'day' } = {}) {
   const F = FEATURES[id]
   if (!F) throw new Error(`no feature video for ${id}`)
   const L = lang === 'fr' ? 'fr' : 'en'
@@ -327,6 +328,8 @@ export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', music = tr
   const A = APP[L]
   return {
     kind: 'feature', id, lang: L, fit: ['instagram', 'normal'].includes(fit) ? fit : 'tiktok', music: music !== false, handle,
+    // The print of the hour the gate at the end stands on (plan 271).
+    hour: PRINT_HOURS.includes(hour) ? hour : 'day',
     jp: F.jp, line: F.line, name: weldIf(L, A.title[id]), tab: A.tab, data: d,
     // The lines the video says, in the app's voices: the clip a feature plays (its first), the people who speak.
     cues: F.voice ? [].concat(F.voice(d)) : [],
@@ -473,7 +476,7 @@ export function featureTimeline(plan, shots, voiceDur = null) {
   const endAt = at
   segs.push({ kind: 'end', start: +endAt.toFixed(3), dur: END_SECONDS })
   // The gate's own score (promo.js endScoreOf): the ask on the board's flap, the gate on the chime.
-  sfx.push({ at: +(endAt + 0.6).toFixed(3), key: 'board-flap' }, { at: +(endAt + 1.7).toFixed(3), key: 'platform-chime' })
+  sfx.push({ at: +(endAt + END.head + 0.1).toFixed(3), key: 'board-flap' }, { at: +(endAt + END.gate + 0.1).toFixed(3), key: 'platform-chime' })
   const seconds = +(endAt + END_SECONDS).toFixed(3)
   return { kind: 'feature', seconds, fps: FEATURE_FPS, segs, sfx: sfx.sort((a, b) => a.at - b.at), cues, chapters: [], of: plan.beats.length }
 }
@@ -489,23 +492,27 @@ const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
 const smooth = x => { const c = Math.min(1, Math.max(0, x)); return c * c * (3 - 2 * c) }
 const step = (x, n = 15) => Math.round(x * n) / n
 
-/** The gate the video ends on, made once per plan and format. */
+/** The gate the video ends on, made once per plan, format and print. */
 const gates = new WeakMap()
-function gateOf(plan) {
-  if (!gates.has(plan)) gates.set(plan, gateClip(formatOf('story', plan.fit), { lang: plan.lang, head: plan.end, handle: plan.handle }))
-  return gates.get(plan)
+function gateOf(plan, print) {
+  const made = gates.get(plan)
+  if (made?.print === print) return made.clip
+  const clip = gateClip(formatOf('story', plan.fit), { lang: plan.lang, head: plan.end, handle: plan.handle, print })
+  gates.set(plan, { print, clip })
+  return clip
 }
 
-/** The frame at `t`; `imgs[i]` is shot i, loaded. Returns a key the same
- *  for two frames that look the same. */
-export function drawFeature(ctx, plan, tl, t, imgs) {
+/** The frame at `t`; `imgs[i]` is shot i, loaded, `print` Today's print
+ *  of the plan's hour, which the gate stands on (none: the paper alone).
+ *  Returns a key the same for two frames that look the same. */
+export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
   const L = layoutOf(plan.fit)
   let si = tl.segs.findIndex(s => t < s.start + s.dur)
   if (si < 0) si = tl.segs.length - 1
   const sg = tl.segs[si]
   if (sg.kind === 'end') {
     const u = t - sg.start
-    gateOf(plan).draw(ctx, u)
+    gateOf(plan, print).draw(ctx, u)
     return `end|${Math.round(u * FEATURE_FPS)}`
   }
   const u = t - sg.start
@@ -635,6 +642,6 @@ export function featurePage(plan, tl, site) {
 }
 
 /** The command that makes the video, from frontend/. */
-export function featureCommand(id, lang = 'en', fit = 'tiktok', music = true) {
-  return ['VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs', `--feature ${id}`, `--lang ${lang}`, fit !== 'tiktok' ? `--fit ${fit}` : '', music ? '' : '--music none'].filter(Boolean).join(' ')
+export function featureCommand(id, lang = 'en', fit = 'tiktok', music = true, hour = 'day') {
+  return ['VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs', `--feature ${id}`, `--lang ${lang}`, fit !== 'tiktok' ? `--fit ${fit}` : '', hour !== 'day' ? `--hour ${hour}` : '', music ? '' : '--music none'].filter(Boolean).join(' ')
 }

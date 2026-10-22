@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **271**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **272**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -1027,7 +1027,11 @@ signed in, its API answered from `bank/promo.json`, which
 banks' own content, only a tutor's reply written by hand), a caption a
 beat over it saying what the screen and the app's own description say,
 and the stories' gate at its end; when a screen it records changes, its
-script's selectors are what to check. Since plan 248 every number a maker may set per
+script's selectors are what to check; since plan 271 every promo
+story's frame stands on Today's print of the hour, its sky washed
+behind the words, its title in the serif, its parts lifted on shadows,
+and each story and feature video ends on the print's sun ringed by the
+four lines, the mark in it, drawn round as the clip begins. Since plan 248 every number a maker may set per
 post (a video's timing and pace, the music's level, the export's
 quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one

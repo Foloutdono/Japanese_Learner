@@ -824,8 +824,10 @@ async function renderFeature(mine) {
   const banks = { 'promo.json': await fetchJson('promo.json') }
   if (mine !== token) return
   const music = state.bed !== 'off'
-  const pl = featurePlan(banks, id, { lang: state.lang, fit: state.fit, music })
+  const pl = featurePlan(banks, id, { lang: state.lang, fit: state.fit, music, hour: state.hour })
   const tl = featurePreview(pl)
+  const print = await printFor(pl.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
+  if (mine !== token) return
   const page = featurePage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE)
   await fonts(`${pl.end}${pl.title}${page.title}${pl.beats.map(b => b.say).join('')}実践`)
   if (mine !== token) return
@@ -833,11 +835,11 @@ async function renderFeature(mine) {
   mountVideo({
     id, jp: pl.jp, title: pl.title, label: 'Feature video', size: TALL, tl, start: 1.6,
     count: `${pl.beats.length} beats, recorded in the app when made · its gate here · 9:16`,
-    draw: (ctx, t) => drawFeature(ctx, pl, tl, t, []),
+    draw: (ctx, t) => drawFeature(ctx, pl, tl, t, [], print),
   })
   const key = `feature|${id}|${state.lang}|${state.fit}|${state.feed}|${state.bed}`
   if (key !== captionFor) fillPost(page, key)
-  $('#command').textContent = featureCommand(id, state.lang, state.fit, music)
+  $('#command').textContent = featureCommand(id, state.lang, state.fit, music, pl.hour)
 }
 // ── The reading challenges (plan 247) ─────────────────────────
 // A comprehension text as a 9:16 video over Today's print: going slowly

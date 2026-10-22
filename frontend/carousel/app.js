@@ -496,8 +496,10 @@ const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -
 /** Today's dial as the hour's sun or moon on its print (PrintDial): its
  *  glow, the halo of its lines at dusk and night, the disc, an arc per
  *  line round it, the count in the disc's inks; then the time under it.
- *  (cx, cy) the disc's centre, `u` the print's unit. */
-export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end, breath = null }) {
+ *  (cx, cy) the disc's centre, `u` the print's unit. `sweep` (0 to 1,
+ *  plan 271): the share of the ring drawn so far, clockwise from the top,
+ *  as a story's last frame draws it in. */
+export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end, breath = null, sweep = 1 }) {
   const { frame, look } = P
   const disc = look.disc
   const r = frame.disc * u
@@ -531,15 +533,19 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end,
         return { color: q.color, a0, a1: a0 + Math.max(0, span - 2 * cap) / halo }
       })
     })()
+  // How far round the ring is drawn: an arc stops there, one not reached is not drawn.
+  const upTo = -Math.PI / 2 + Math.min(1, Math.max(0, sweep)) * Math.PI * 2
   const stroke = (lw, filter) => {
     ctx.save()
     ctx.lineCap = parts.length === 1 ? 'butt' : 'round'
     ctx.lineWidth = lw
     if (filter) ctx.filter = filter
     for (const a of arcs) {
+      const a1 = Math.min(a.a1, upTo)
+      if (a1 <= a.a0) continue
       ctx.strokeStyle = a.color
       ctx.beginPath()
-      ctx.arc(cx, cy, halo, a.a0, a.a1)
+      ctx.arc(cx, cy, halo, a.a0, a1)
       ctx.stroke()
     }
     ctx.restore()

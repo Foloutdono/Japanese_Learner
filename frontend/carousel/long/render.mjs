@@ -198,7 +198,7 @@ if (args.challenge) {
   // ── A practice feature (plan 270): the app itself, recorded doing one exercise ──
   const { featurePage, featurePlan, featureStillAt, featureSteps, featureTimeline } = await import('../feature.js')
   const { appServer, record } = await import('./record.mjs')
-  const plan = featurePlan(banks, String(args.feature), { lang, fit: opts.fit, music: args.music !== 'none', handle: typeof args.handle === 'string' ? args.handle : '' })
+  const plan = featurePlan(banks, String(args.feature), { lang, fit: opts.fit, music: args.music !== 'none', handle: typeof args.handle === 'string' ? args.handle : '', hour: typeof args.hour === 'string' ? args.hour : 'day' })
   const dur = plan.cues.length ? voiceAll(plan.cues) : null
   // The clip the app plays is the first line voiced, so the player runs as long as the voice.
   const said = plan.cues.length ? dur(plan.cues[0]) : null
@@ -213,13 +213,16 @@ if (args.challenge) {
   } finally { await app.close() }
   tl = featureTimeline(plan, shots, dur)
   SIZE = TALL
-  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.music ? [] : ['nomusic'])].join('-')
+  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.hour !== 'day' ? [plan.hour] : []), ...(plan.music ? [] : ['nomusic'])].join('-')
   await fontsFor(glyphs({ plan: { ...plan, data: null }, tl }))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl, srcs }) => {
     const F = await import('/carousel/feature.js')
+    const A = await import('/carousel/app.js')
     const imgs = await Promise.all(srcs.map(src => new Promise(done => { const i = new Image(); i.onload = () => done(i); i.onerror = () => done(null); i.src = src })))
-    window.__draw = t => F.drawFeature(window.__ctx, plan, tl, t, imgs)
+    // The gate at the end stands on Today's print of the plan's hour (plan 271).
+    const P = await A.loadPrint(plan.hour, { base: '/' })
+    window.__draw = t => F.drawFeature(window.__ctx, plan, tl, t, imgs, P)
   }, { plan: { ...plan, data: null }, tl, srcs: shots.map(x => '/' + x.file.slice(FRONT.length + 1)) })
   pageText = featurePage(plan, tl, site)
   thumbAt = featureStillAt()

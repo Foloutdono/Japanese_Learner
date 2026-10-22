@@ -564,6 +564,28 @@ and its point cards, and Today on the print of the hour.
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
 
+**Every frame stands on the print (plan 271, the owner's pick B of four
+directions drawn).** Not only Today: each frame is drawn over Today's
+print of the studio's hour, its sky washed toward the paper down to
+where the frame's words end (`wash`, fading out over 160px under them),
+so the landscape shows below the words. A frame's title is set in the
+serif, centred (`title`), its body centred under it (`body`), and each
+part (a card, a question, a choice row, a panel, a point card) is lifted
+off the print on its own shadow (`lift`). A middle dot keeps to the end of
+its line, never opens the next. Without a print (node's tests, or a print
+that did not load) a frame stands on the ground alone, its block centred
+as before.
+
+**The ending is the print's sun (B2, the owner's pick of two drawn).**
+Every story's last frame is the hour's sun (or moon) as Today draws it,
+ringed by the four lines' arcs (`app.printDial` with no count), the
+mark 辻 in the disc, the ask in the washed sky under it, its note, the
+gate at the foot; no masthead, the page's count at the top right. The
+pass story's last frame draws the sun smaller (0.62 of Today's dial) for
+its three promises. A long ask takes its room from the sun, never from
+the gate: the sun is drawn smaller until the words end above the gate's
+band. The cover and inside frames have no sun.
+
 **The parts are measured, not imagined.** Every figure in `app.js` is a
 CSS pixel of the running app on a 400px phone (the review card, the
 rating keys, the choice rows, the pass, the Depart button, the
@@ -597,7 +619,8 @@ print's `print.json` beside it when it is served or published.
 **The cover moves (a clip).** Each story's first frame is also a
 seven-second clip at thirty frames (`promo.CLIP`), drawn by the same
 code as the still at each moment: its parts come in as the app brings
-its own in (`tpr-rise`), the print moves as the print moves (its layers
+its own in (`tpr-rise`), the print moves as the print moves, every
+story's since plan 271 (`clip.print`; its layers
 held at the clip's moment with index.css's own keyframes, the train on
 its run, the sun's glow breathing), the card turns as a tap turns it,
 the sentence is typed and comes back cut, the four readings come in one
@@ -607,9 +630,12 @@ mp4-muxer from jsDelivr): Chrome, Edge and Safari can, Firefox cannot
 yet, and the studio says so.
 
 **So does the call to action.** Each story's last frame is a clip too
-(`promo.clips.end`; `clips.cover` is the cover's, also `clip`): the mark,
-the ask and its note come in one after another (on the pass story the
-three promises, one at a time), then the Depart button rises in and
+(`promo.clips.end`; `clips.cover` is the cover's, also `clip`): on the
+print (plan 271) the sun rises in, its ring is drawn round from the top
+(`printDial`'s `sweep`, over `END.ring`), the mark settles into the disc
+as the sky pales behind the words, its glow breathing over the seven
+seconds; then the ask and its note come in one after another (on the
+pass story the three promises, one at a time), then the Depart button rises in and
 waits as the app's gate waits (`app.departButton` given `ready`): four
 seconds untaken, the reader steps toward the way on twice
 (`btn-gate-nudge`), inside the seven seconds (`promo.END`). The button is
@@ -708,7 +734,10 @@ the right replies.
   appears) and the reply picked (`voice`, from the tap). Nothing taps or
   moves on over a line still being said.
 - **The ending.** The video ends on the promo stories' gate
-  (`promo.gateClip`), its ask in the feature's words.
+  (`promo.gateClip`), its ask in the feature's words, on the print's
+  sun since plan 271: Today's print of the day (`--hour` for another;
+  the studio's hour, written into its command), scored on the
+  stories' clock (`promo.END`).
 
 Its page and its posts for Shorts, Reels and TikTok name the feature and
 quote the app's three lines about it. They credit VOICEVOX Nemo only

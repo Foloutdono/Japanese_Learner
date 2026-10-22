@@ -9,7 +9,7 @@ import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explai
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS, PRINT_HOURS, PRINT_SEASONS, printOf } from '../carousel/app.js'
 import { printName } from './domain/printHour.js'
-import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { CLIP, END, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { TUNABLES, tuned } from '../carousel/tune.js'
@@ -114,6 +114,14 @@ function stubContext() {
     set: (o, k, v) => { o[k] = v; return true },
   })
   return { ctx, texts }
+}
+
+// Today's print as loadPrint makes it, its pictures left blank (the stub
+// draws none): the scene, the frame and the look a deck reads (plan 271).
+function stillPrint(name = 'autumn-day') {
+  const meta = JSON.parse(read('src/components/station/print/print.json'))
+  const scene = JSON.parse(read(`public/today/print/${meta.rev}/${name}-phone.json`))
+  return { hour: name.split('-')[1], name, scene, frame: meta.frames.phone, look: meta.prints[name], img: { sky: {}, back: {}, train: {}, front: {}, grain: {}, paper: {} } }
 }
 
 describe('the carousel studio', () => {
@@ -831,13 +839,14 @@ describe('explaining a point in its own sentence', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
     try {
-      for (const story of STORIES) {
+      // On Today's print (plan 271), every frame, and so every clip, stands on it and moves with it.
+      for (const [story, print] of STORIES.flatMap(s => [[s, null], [s, stillPrint()]])) {
         const data = bank(STORY_FILES[story])
         const [{ id }] = promoItems(story, data, 'en')
         const pl = promoPlan(story, data, id, { ...OPTS, story })
-        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi', print })
         expect(frames.clip, story).toBeTruthy()
-        expect(frames.clip.print, story).toBe(story === 'pitch')
+        expect(frames.clip.print, story).toBe(!!print)
         for (const t of [0, 1, 3.5, 4.3, 6.99]) {
           const { ctx } = stubContext()
           expect(() => frames.clip.draw(ctx, t), `${story} at ${t}s`).not.toThrow()
@@ -851,7 +860,7 @@ describe('explaining a point in its own sentence', () => {
         for (const w of still.texts.filter(x => /[A-Za-z]{4}/.test(x) && !/Tap to/i.test(x))) expect(end.texts, `${story}: ${w}`).toContain(w)
         // The call to action too, its gate waiting to the end.
         const { end: cta } = frames.clips
-        expect(cta.print, story).toBe(false)
+        expect(cta.print, story).toBe(!!print)
         for (const t of [0, 0.5, 2, 4, 6.4]) expect(() => cta.draw(stubContext().ctx, t), `${story} end at ${t}s`).not.toThrow()
         const last = stubContext()
         frames[frames.length - 1].draw(last.ctx)
@@ -2944,6 +2953,30 @@ describe('the practice features, recorded in the app (plan 270)', () => {
       // The screen's foot stays on the frame, under the safe box by no more than its border.
       expect(L.bottom).toBeLessThanOrEqual(L.fmt.h - 40)
     }
+  })
+
+  it('ends on the stories’ gate, on the print of its hour (plan 271)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      each((id, lang, plan) => {
+        const at = `${id} ${lang}`
+        expect(plan.hour, at).toBe('day')
+        const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+        const end = tl.segs.at(-1)
+        // The ask lands on the board's flap and the gate opens on the chime, as the stories' do.
+        expect(tl.sfx.filter(x => x.at >= end.start).map(x => [x.key, +(x.at - end.start).toFixed(3)]), at).toEqual([['board-flap', +(END.head + 0.1).toFixed(3)], ['platform-chime', +(END.gate + 0.1).toFixed(3)]])
+        for (const print of [null, stillPrint()]) {
+          const { ctx, texts } = stubContext()
+          drawFeature(ctx, plan, tl, end.start + end.dur - 0.01, [], print)
+          for (const w of plan.end.split(/\s+/)) expect(texts.join(' '), `${at}: ${w}`).toContain(w)
+        }
+      })
+    } finally {
+      globalThis.Path2D = had
+    }
+    expect(featureCommand('dictation', 'en', 'tiktok', true, 'night')).toContain('--hour night')
+    expect(featureCommand('dictation', 'en')).not.toContain('--hour')
   })
 
   it('says every caption whole, and nothing the app does not', () => {
