@@ -418,6 +418,24 @@ def test_an_enum_value_outside_its_list_is_dropped(client):
     ]
 
 
+def test_why_a_boot_ended_and_what_class_an_error_was_are_closed_sets(client):
+    # The two keys added to explain a failure: a boot's reason and an
+    # error's class. A sentence a learner wrote is dropped under either,
+    # and the error's message never has a key to land in at all.
+    client.post("/api/events", json={"events": [
+        {"name": "boot_timeout", "props": {"waited_ms": 412, "reason": "network"}},
+        {"name": "boot_timeout", "props": {"waited_ms": 45000, "reason": "a sentence the learner wrote"}},
+        {"name": "client_error", "props": {"route": "/today", "where": "error", "kind": "TypeError"}},
+        {"name": "client_error", "props": {"route": "/today", "where": "error", "kind": "ma phrase perso"}},
+    ]})
+    assert [props for _, props, _ in rows()] == [
+        {"waited_ms": 412, "reason": "network"},
+        {"waited_ms": 45000},
+        {"route": "/today", "where": "error", "kind": "TypeError"},
+        {"route": "/today", "where": "error"},
+    ]
+
+
 def test_a_visit_carries_its_coarse_context(client):
     sid = str(uuid.uuid4())
     client.post("/api/events", json={"events": [

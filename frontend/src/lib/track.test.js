@@ -92,6 +92,18 @@ describe('what a property may carry', () => {
     expect(peek()[0].props).toEqual({})
   })
 
+  it('keeps the reason a boot ended only when it is one the trail lists', () => {
+    track('boot_timeout', { waited_ms: 412, reason: 'network' })
+    track('boot_timeout', { waited_ms: 412, reason: 'a sentence a learner wrote' })
+    expect(peek()[0].props).toEqual({ waited_ms: 412, reason: 'network' })
+    expect(peek()[1].props).toEqual({ waited_ms: 412 })
+  })
+
+  it('keeps the class of a client error, and nothing else of its message', () => {
+    track('client_error', { route: '/today', where: 'error', kind: 'TypeError', message: 'typed by a learner' })
+    expect(peek()[0].props).toEqual({ route: '/today', where: 'error', kind: 'TypeError' })
+  })
+
   it('replaces a non-finite number rather than sending NaN', () => {
     // JSON.stringify turns NaN into null anyway; doing it here means
     // the localStorage mirror and the request agree.

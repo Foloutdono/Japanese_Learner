@@ -1,9 +1,29 @@
 import { describe, it, expect } from 'vitest'
-import { clsOf, inpOf } from './vitals'
+import { clsOf, inpOf, lcpOf } from './vitals'
 
 // ── 速度 — the two figures as their thresholds define them ──────────
 // The trail of 2026-10-18 read CLS 1.32 for a first ride and its Today:
 // six small windows summed over three minutes on one page.
+
+describe('lcpOf', () => {
+  it('is the last largest paint before the page was first hidden', () => {
+    expect(lcpOf([800, 1500, 4200], 3000)).toBe(1500)
+  })
+
+  it('is the last paint of a page the learner never hid', () => {
+    expect(lcpOf([800, 1500, 4200], Infinity)).toBe(4200)
+  })
+
+  it('is nothing for a page hidden from the start: its paint is its restore, not its load', () => {
+    // The trail of 2026-10-22: 2,763,078 ms on /learn, a tab restored
+    // long after it had loaded in the background.
+    expect(lcpOf([2763078], 0)).toBeUndefined()
+  })
+
+  it('is nothing with no paint at all', () => {
+    expect(lcpOf([], Infinity)).toBeUndefined()
+  })
+})
 
 describe('clsOf', () => {
   it('takes the worst session window, not the sum', () => {

@@ -42,7 +42,9 @@ EVENTS: dict[str, frozenset[str]] = {
     # boot_ms is why render.yaml carries `plan: starter`; it is the
     # before/after of that line.
     "app_open":       frozenset({"boot_ms", "cold", "platform", "standalone"}),
-    "boot_timeout":   frozenset({"waited_ms"}),
+    # `reason` says what ended the wait: the 45 s ceiling (`timeout`), an
+    # answer that was an error (`server`), or no answer at all (`network`).
+    "boot_timeout":   frozenset({"waited_ms", "reason"}),
 
     # ── Where people go ──────────────────────────────────────────
     "screen_view":    frozenset({"route", "tab"}),
@@ -294,8 +296,9 @@ EVENTS: dict[str, frozenset[str]] = {
     # NO STACK: either can quote what was on the screen or typed into
     # it. `where` says which of the two it was, and `step` which step of
     # the boarding or the first ride was on screen, when one was: the
-    # name their boarding_step / ride_step give it.
-    "client_error":   frozenset({"route", "step", "where"}),
+    # name their boarding_step / ride_step give it. `kind` is the error's
+    # class (TypeError and so on), never its message.
+    "client_error":   frozenset({"route", "step", "where", "kind"}),
     # The page's own speed, once per page load, from the browser's
     # PerformanceObserver (lib/vitals.js, no library): largest paint,
     # the slowest interaction, layout shift (x1000, an integer) and
@@ -367,8 +370,13 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
                                          "deep_analysis", "exam_paper", "line_translation"})},
+    "boot_timeout": {
+        "reason": frozenset({"timeout", "server", "network"}),
+    },
     "client_error": {
         "where": frozenset({"error", "rejection"}),
+        "kind":  frozenset({"TypeError", "ReferenceError", "RangeError", "SyntaxError",
+                            "URIError", "EvalError", "Error", "other"}),
         # The boarding's and the rides' steps, frontend/src/domain/
         # flowSteps.js; its test holds the flows to this list.
         "step":  frozenset({"kana", "reveal", "level", "test", "card",

@@ -148,6 +148,7 @@ describe('apiJsonWithTimeout', () => {
 describe('onApiFailure', () => {
   afterEach(() => {
     onApiFailure(null)
+    vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
@@ -160,10 +161,14 @@ describe('onApiFailure', () => {
   })
 
   it('hears of a request that got no answer at all, as status 0', async () => {
+    vi.useFakeTimers()
     const seen = vi.fn()
     onApiFailure(seen)
     globalThis.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'))
-    await expect(apiFetch('/api/profile', null)).rejects.toThrow('Failed to fetch')
+    const pending = apiFetch('/api/profile', null).catch(e => e)
+    await vi.advanceTimersByTimeAsync(1000)
+    expect((await pending).message).toBe('Failed to fetch')
+    expect(seen).toHaveBeenCalledTimes(1)
     expect(seen).toHaveBeenCalledWith({ path: '/api/profile', status: 0 })
   })
 
@@ -184,6 +189,69 @@ describe('onApiFailure', () => {
     mockFetchOnce(500, {})
     const response = await apiFetch('/api/x', null)
     expect(response.status).toBe(500)
+  })
+})
+
+// ── A read that got no answer: a dropped connection is asked once more ──
+describe('a read that got no answer', () => {
+  const answered = body => ({ ok: true, status: 200, headers: new Headers(), json: async () => body })
+
+  afterEach(() => {
+    onApiFailure(null)
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it('is asked once more after a second, and a retry that answers is not a failure', async () => {
+    vi.useFakeTimers()
+    const seen = vi.fn()
+    onApiFailure(seen)
+    globalThis.fetch = vi.fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(answered({ fine: true }))
+    const pending = apiJson('/api/today', null)
+    await vi.advanceTimersByTimeAsync(999)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(1)
+    await expect(pending).resolves.toEqual({ fine: true })
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(seen).not.toHaveBeenCalled()
+  })
+
+  it('is reported once, when the retry gets no answer either', async () => {
+    vi.useFakeTimers()
+    const seen = vi.fn()
+    onApiFailure(seen)
+    globalThis.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'))
+    const pending = apiFetch('/api/today', null).catch(e => e)
+    await vi.advanceTimersByTimeAsync(1000)
+    expect((await pending).message).toBe('Failed to fetch')
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(seen).toHaveBeenCalledTimes(1)
+    expect(seen).toHaveBeenCalledWith({ path: '/api/today', status: 0 })
+  })
+
+  it('is never sent twice for a write, and is reported at once', async () => {
+    const seen = vi.fn()
+    onApiFailure(seen)
+    globalThis.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'))
+    await expect(apiFetch('/api/decks', null, { method: 'POST', body: '{}' })).rejects.toThrow('Failed to fetch')
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(seen).toHaveBeenCalledWith({ path: '/api/decks', status: 0 })
+  })
+
+  it('stops when the caller aborts during the wait, and is not reported', async () => {
+    vi.useFakeTimers()
+    const seen = vi.fn()
+    onApiFailure(seen)
+    globalThis.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'))
+    const controller = new AbortController()
+    const pending = apiFetch('/api/profile', null, { signal: controller.signal }).catch(e => e)
+    await vi.advanceTimersByTimeAsync(10)
+    controller.abort()
+    expect((await pending).name).toBe('AbortError')
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(seen).not.toHaveBeenCalled()
   })
 })
 

@@ -28,9 +28,27 @@ import { beforeHide } from './pageHide'
 let started = false
 let sent = false
 let route = null
-const m = { lcp: undefined, ttfb: undefined }
+const m = { ttfb: undefined }
 const shifts = []
 const interactions = new Map()
+// Every largest-paint candidate's time, in order, and when the page was
+// first hidden (Infinity while it has not been). See lcpOf.
+const paints = []
+let hiddenAt = Infinity
+
+/**
+ * The page's LCP as the learner saw it: the last largest-paint candidate
+ * before the page was first hidden. A page loaded in a background tab is
+ * hidden from the start (`hiddenAt` 0), so it has no LCP of its own; a
+ * candidate after the page was hidden is a paint from its restore, not its
+ * load. Without this, the dashboards read LCP in tens of minutes (the
+ * trail of 2026-10-22: 2,763,078 ms on /learn).
+ */
+export function lcpOf(candidates, until) {
+  let best
+  for (const at of candidates) if (at <= until) best = Math.round(at)
+  return best
+}
 
 /** The worst session window of `shifts` ({t, value}), in order. */
 export function clsOf(list) {
@@ -70,7 +88,11 @@ export function watchVitals() {
     const [nav] = performance.getEntriesByType('navigation')
     if (nav) m.ttfb = Math.round(nav.responseStart)
   } catch { /* no navigation timing */ }
-  observe('largest-contentful-paint', e => { m.lcp = Math.round(e.startTime) })
+  if (document.visibilityState === 'hidden') hiddenAt = 0
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') hiddenAt = Math.min(hiddenAt, performance.now())
+  })
+  observe('largest-contentful-paint', e => { paints.push(e.startTime) })
   observe('layout-shift', e => { if (!e.hadRecentInput) shifts.push({ t: e.startTime, value: e.value }) })
   observe('event', e => {
     if (!e.interactionId) return
@@ -84,7 +106,7 @@ function sendVitals() {
   sent = true
   track('vitals', {
     route,
-    lcp: m.lcp,
+    lcp: lcpOf(paints, hiddenAt),
     inp: inpOf([...interactions.values()]),
     cls: Math.round(clsOf(shifts) * 1000),
     ttfb: m.ttfb,

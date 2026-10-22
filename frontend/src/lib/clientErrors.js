@@ -28,14 +28,25 @@ export function noteStep(name) {
   step = name ?? null
 }
 
-export function recordClientError(where, pathname = window.location.pathname) {
+// The classes an error may be recorded as: the closed list
+// VALUES.client_error.kind (lib/track.js). A thrown string or a plain
+// object has no class, and is 'other'.
+const KINDS = ['TypeError', 'ReferenceError', 'RangeError', 'SyntaxError', 'URIError', 'EvalError', 'Error']
+
+/** The class name of a thrown value, from KINDS, or 'other'. Never the message. */
+export function errorKind(thrown) {
+  const name = thrown && typeof thrown === 'object' ? thrown.name : undefined
+  return KINDS.includes(name) ? name : 'other'
+}
+
+export function recordClientError(where, pathname = window.location.pathname, kind = 'other') {
   const route = routePattern(pathname)
   if (!route) return
   const key = `${route}:${step ?? ''}:${where}`
   const now = Date.now()
   if (now - (last.get(key) ?? -Infinity) < GAP_MS) return
   last.set(key, now)
-  track('client_error', step ? { route, step, where } : { route, where })
+  track('client_error', step ? { route, step, where, kind } : { route, where, kind })
 }
 
 let watching = false
@@ -49,9 +60,9 @@ export function watchClientErrors() {
     // `error` on its element, not as a script error; that is the
     // network's story, which lib/apiTrail.js already tells for the API.
     if (event?.target && event.target !== window) return
-    recordClientError('error')
+    recordClientError('error', undefined, errorKind(event.error))
   })
-  window.addEventListener('unhandledrejection', () => recordClientError('rejection'))
+  window.addEventListener('unhandledrejection', event => recordClientError('rejection', undefined, errorKind(event.reason)))
 }
 
 export function _reset() { last.clear(); step = null }

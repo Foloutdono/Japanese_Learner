@@ -469,12 +469,17 @@ export default function App({ front = NO_FRONT }) {
         if (p.onboardedAt) rememberOnboarded(userId)
         setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })
       })
-      .catch(() => {
-        // The 45 s ceiling reached, or the network gave out. Either way
-        // the learner watched a loading screen and got nothing, which
-        // is the worst first impression the app can make -- and until
-        // now, the one it could not count.
-        track('boot_timeout', { waited_ms: Date.now() - startedAt })
+      .catch(err => {
+        // The 45 s ceiling reached, or the network gave out, or the server
+        // answered with an error. Either way the learner watched a loading
+        // screen and got nothing, which is the worst first impression the
+        // app can make -- and until now, the one it could not count. `reason`
+        // says which of the three it was, so a dropped connection after two
+        // seconds is not counted as a 45-second wait.
+        track('boot_timeout', {
+          waited_ms: Date.now() - startedAt,
+          reason: err?.name === 'AbortError' ? 'timeout' : err?.status ? 'server' : 'network',
+        })
         if (cancelled) return
         // FAIL OPEN — but only for a learner this device has already
         // seen through the gate. A flaky network must never lock

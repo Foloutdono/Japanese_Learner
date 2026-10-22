@@ -85,13 +85,34 @@ function isAbort(err) {
   return err?.name === 'AbortError'
 }
 
+// A read that got no answer at all is asked once more after a moment. A
+// dropped connection (a train, a tunnel, a phone changing networks) is the
+// commonest reason a screen came up empty, and a read is safe to repeat. A
+// write is never sent twice, and an abort is the caller's own doing. The
+// failure is reported only when the retry fails too, so one blip is not a row.
+const NETWORK_RETRY_MS = 1000
+
+function isRead(init) {
+  return ['GET', 'HEAD'].includes((init.method ?? 'GET').toUpperCase())
+}
+
 async function send(path, init) {
   let response
   try {
     response = await fetch(api(path), init)
   } catch (err) {
-    if (!isAbort(err)) reportApiFailure(path, 0)
-    throw err
+    if (isAbort(err)) throw err
+    if (!isRead(init)) {
+      reportApiFailure(path, 0)
+      throw err
+    }
+    await wait(NETWORK_RETRY_MS, init.signal)
+    try {
+      response = await fetch(api(path), init)
+    } catch (again) {
+      if (!isAbort(again)) reportApiFailure(path, 0)
+      throw again
+    }
   }
   if (response.status >= 500) reportApiFailure(path, response.status)
   // 工事 — whether a release is announced rides on every answer (plan 265).
