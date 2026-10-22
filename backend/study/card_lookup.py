@@ -2355,6 +2355,28 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         keys = ["".join(m.surface for m in run), "".join(m.lemma for m in run)]
         if polite:
             keys.append("お" + run[1].surface)          # 御中元, filed as お中元
+        joined = "".join(m.surface for m in run)
+        if polite and _hiragana(joined) and len(joined) >= 3:
+            # (The polite prefix and a noun in kana, plan 272: お + ばけ is
+            # おばけ, "ghost" -- the pool's row read so, where the noun
+            # alone is no card the deck holds for it.)
+            rows = [row for row in jmdict_db.by_kana(joined) if row["kana"] == joined]
+            common = [row for row in rows if any("⭐" in (sense.get("term_tags") or ())
+                                                 for sense in jmdict_db.get_senses(row.get("kanji", ""), joined) or [])]
+            own = [deck_hits[i + 1][1]] if deck_hits[i + 1] else [e for _lv, e in _kana_cards(run[1].surface)]
+            # (Where the noun alone is a card, only a common word folds it:
+            # おつもり's one row is お積り, "the last cup of sake", and the
+            # page's おつもり is つもり, "intention", said politely.)
+            if own and (i == 0 or morphemes[i - 1].pos == "symbol"):
+                # (...or an exclamation opening the sentence: お + やおや is
+                # おやおや, "oh dear", no greengrocer.)
+                common = common or [row for row in rows if "int" in {
+                    t for sense in jmdict_db.get_senses(row.get("kanji", ""), joined) or []
+                    for t in sense.get("tags") or ()}]
+            picked = common if own else (rows if len(rows) == 1 else common)
+            if len(picked) == 1 and not any(_glosses_meet(_row_gloss_words(picked[0]), _gloss_words(e))
+                                            for e in own):
+                return picked[0], n
         for key in dict.fromkeys(keys):
             if not _has_kanji(key):
                 continue

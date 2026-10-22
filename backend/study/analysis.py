@@ -1027,6 +1027,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             token = _compound_dict(morphemes[i:i + n], *hit) if kind == "deck" \
                 else _pool_compound_dict(morphemes[i:i + n], hit)
             token["pos"] = "noun"
+            # (Read as the page says it, おむかえ, never the verb's むかえる.)
+            token["reading"] = morphology.kata_to_hira("".join(m.reading for m in morphemes[i:i + n]))
+            token["furigana"] = align_deck(token["surface"], token["reading"])
             tokens.append(token)
             i += n
             continue

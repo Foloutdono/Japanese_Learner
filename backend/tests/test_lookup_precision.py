@@ -1308,8 +1308,22 @@ class SpokenWordTests(unittest.TestCase):
                                          ("またのお越しをお待ちしております。", "お越し", "お越し")):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # ...read as the page says it, never the verb's dictionary form.
+        token = token_of("あしたの朝、駅前までお迎えにまいります。", "お迎え")
+        self.assertEqual(token["reading"], "おむかえ")
+        self.assertEqual(token["furigana"][1], {"text": "迎", "reading": "むか"})
         # おすすめします is お〜する, the point's.
         self.assertNotIn("おすすめ", matches("このワインをおすすめします。"))
+
+    def test_the_polite_prefix_and_a_kana_noun(self) -> None:
+        for sentence, surface, kanji in (("おばけきのこがあらわれた！", "おばけ", "お化け"),
+                                         ("おうちではどんな様子ですか。", "おうち", "お家"),
+                                         ("おやおや困ったものだ。", "おやおや", "")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # おつもり's one row is お積り, "the last cup": the page's is つもり.
+        self.assertEqual(matches("どういう対策を取るおつもりですか。")["つもり"]["raw_id"], "vocab_N4__つもり")
+        self.assertEqual(matches("お店に行く。")["店"]["raw_id"], "vocab_N5_店_みせ")
 
     def test_a_greeting_cut_into_pieces_is_one_word(self) -> None:
         for sentence, surface, meaning in (("ようこそいらっしゃいました。", "ようこそ", "welcome"),

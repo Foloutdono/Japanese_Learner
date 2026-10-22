@@ -115,6 +115,8 @@ _GLOSSES = {
             "fr": "ne… pas : la négation du Kansai (= ない)"},
     "に_adverb": {"en": "makes an adverb of the word before it", "fr": "fait un adverbe du mot qui précède"},
     "まで_until": {"en": "until (it happens)", "fr": "jusqu'à ce que"},
+    "は_after_te": {"en": "(after a て form) if, as long as: what follows is usually unwelcome",
+                   "fr": "(après une forme en て) si, tant que : la suite est souvent fâcheuse"},
     "と_naru": {"en": "(with なる) becomes: the written form of 〜になる",
                "fr": "(avec なる) devient : la forme écrite de 〜になる"},
     "て_trailing": {"en": "(at the end) leaves the sentence open on what happened or why: …, you see",
@@ -186,6 +188,9 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "ね_mid"
         elif m.surface == "って" and i > 0:
             key = _quoting(morphemes, i)
+        elif m.surface == "は" and i > 0 and morphemes[i - 1].conjunctive and morphemes[i - 1].surface in ("て", "で") \
+                and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("、", "，"):
+            key = "は_after_te"              # そんな運転をしていては、大けがをする
         elif m.surface == "まで" and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary") \
                 and morphemes[i - 1].cform.startswith(("終止形", "連体形")):
             key = "まで_until"               # 亡くなるまで, "until he died"

@@ -1506,6 +1506,11 @@ class FormsTheLessonsDoNotShowTests(unittest.TestCase):
             ("その選手は足を怪我しているが、最後まで走った。", "〜が（逆接）", "が"),
             ("少し走っただけで息が切れる。", "〜だけ", "だけ"),
             ("在庫を確認してまいります。", "〜ていく／〜てくる", "てまいり"),
+            # の standing for "one", as わたしのです does, and joining a modifier
+            # to its noun; は after an adverb, the contrast は's.
+            ("大きいのをお願いします。", "の", "の"),
+            ("初めての土地だ。", "の", "の"),
+            ("たまには贅沢な旅をしたい。", "は", "は"),
         ):
             with self.subTest(sentence=sentence):
                 self.assertEqual(found_in(sentence).get(pattern), written)
@@ -1518,6 +1523,9 @@ class FormsTheLessonsDoNotShowTests(unittest.TestCase):
             # まで after a verb is "until", glossed: から〜まで is "from ... to".
             ("祖父は亡くなるまで、日記を書いた。", "から〜まで"),
             ("東京へまいります。", "〜ていく／〜てくる"),        # まいる alone is "to go"
+            ("大きいので、持てない。", "の"),                   # 〜ので's
+            ("いちばん楽しいのは音楽です。", "の"),             # 〜のは〜だ's
+            ("そうは思わない。", "は"),
         ):
             with self.subTest(sentence=sentence):
                 self.assertNotIn(pattern, found_in(sentence))

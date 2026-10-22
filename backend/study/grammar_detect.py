@@ -2184,6 +2184,38 @@ def _only_after_verb_spans(tokens):
             if t.pos == "particle" and t.surface == "だけ" and _after_a_plain_form(tokens, i)]
 
 
+def _one_no_spans(tokens):
+    """の after a word that is no noun, where の's lesson (そのかさはわたしの
+    です, "mine") is at work (plan 272): 大きいのをください, "the big one";
+    初めての土地, せっかくの休み, またのお越し -- a modifier joined to its
+    noun. Never the の of 〜ので, 〜のに, 〜のです or 〜のは〜だ, their own
+    points."""
+    out = []
+    copula_later = lambda k: any(_is_copula(u) for u in tokens[k:])
+    for i in range(1, len(tokens) - 1):
+        t, prev, nxt = tokens[i], tokens[i - 1], tokens[i + 1]
+        if t.surface != "の" or t.pos != "particle":
+            continue
+        if prev.pos == "adjective" and _form_head(prev.cform) in ("終止形", "連体形") \
+                and nxt.pos == "particle" and nxt.surface in ("を", "が", "と", "も", "は") \
+                and not (nxt.surface == "は" and copula_later(i + 2)):
+            out.append((t.start, t.end))
+        elif prev.pos == "adverb" and prev.surface in ("初めて", "はじめて", "せっかく", "また", "多く", "おおく",
+                                                       "少し", "すこし", "ちょっと", "かなり", "最近"):
+            if nxt.pos in ("noun", "prefix", "pronoun"):
+                out.append((t.start, t.end))
+    return out
+
+
+def _adverb_wa_spans(tokens):
+    """は after an adverb, the contrast は's lesson shows (魚は食べますが、
+    にくは食べません) said of when or how (plan 272): たまには, "once in a
+    while at least"; まずは, ついには."""
+    return [(t.start, t.end) for i, t in enumerate(tokens)
+            if i > 0 and t.pos == "particle" and t.surface == "は" and not t.conjunctive
+            and tokens[i - 1].pos == "adverb" and tokens[i - 1].surface not in ("そう", "こう", "ああ", "どう")]
+
+
 def _humble_go_come_spans(tokens):
     """〜ていく／〜てくる said humbly (plan 272): 確認してまいります, "I
     will go and check" -- the て and まいる, the humble いく and くる."""
@@ -4789,6 +4821,8 @@ _EXTRA_RULES = (
     ("〜ます／〜ません", _polite_spans),
     ("は", _topic_after_compound_spans),
     # plan 272
+    ("の", _one_no_spans),
+    ("は", _adverb_wa_spans),
     ("〜くて／〜で", _na_adjective_te_spans),
     ("〜が（逆接）", _but_spans),
     ("〜だけ", _only_after_verb_spans),
@@ -4803,7 +4837,8 @@ _EXTRA_RULES = (
 _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans,
                            # (plan 272: the lessons show one form of each;
                            # the word before is the evidence)
-                           _but_spans, _only_after_verb_spans, _humble_go_come_spans,
+                           _but_spans, _only_after_verb_spans, _humble_go_come_spans, _one_no_spans,
+                           _adverb_wa_spans,
                            # (plan 266: は's lessons put it after nouns, and
                            # the compound particle before it is its evidence)
                            _topic_after_compound_spans,
