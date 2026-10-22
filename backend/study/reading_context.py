@@ -329,6 +329,12 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         native = _TSU.get(_numeral_value(num_surface))
         return (native, c_read) if native else None
 
+    if ctr_surface == "日間" and _to_hira(c_read).endswith("かん"):
+        # 七日間 is the days, then かん: なのかかん (plan 272).
+        fixed = _counter_readings(num_surface, num_reading, "日", _to_hira(c_read)[:-2], ctr_pos,
+                                  whole=whole, after=("間", *after))
+        return (fixed[0], "かかん") if fixed and fixed[1] == "か" else None
+
     if ctr_surface == "日" and ctr_pos in ("suffix", "noun"):
         # The days of the month (and N days) are words of their own from
         # 2 to 10, and 14, 20, 24; the rest are にち. 一日 is a token of
@@ -351,7 +357,9 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
 
     if ctr_surface in ("時", "時間"):
         if cls == 4:
-            return _swap_tail(n_read, "よん", "よ"), c_read
+            # (UniDic reads 午後四時's 四 し, as in 四時 "the four seasons":
+            # plan 272.)
+            return _swap_tail(_swap_tail(n_read, "よん", "よ"), "し", "よ"), c_read
         if cls == 9:
             return _swap_tail(n_read, "きゅう", "く"), c_read
         if cls == 7 and ctr_surface == "時":
@@ -605,6 +613,35 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = right
             continue
 
+        # 一国, 一種, 一般: 一 read いっ before a voiceless k-, s-, t- or
+        # h- the tables do not count (h then p: 一方 いっぽう) (plan 272).
+        if s == "一" and r == "いち" and i + 1 < n and prev(i) != "第" and (
+                tokens[i + 1]["pos"] == "suffix" or (tokens[i + 1]["pos"] == "noun" and len(nxt(i)) == 1)) \
+                and _is_kanji(nxt(i)[:1]) and out[i + 1] and out[i + 1][0] in "かきくけこさしすせそたちつてとはひふへほ" \
+                and nxt(i) not in _H_COUNTERS and nxt(i) not in _KST_COUNTERS and nxt(i) not in _COUNTER_BASE \
+                and nxt(i) not in _NATIVE_COUNTERS and not _is_numeral(nxt(i)):
+            out[i] = "いっ"
+            if out[i + 1][:1] in "はひふへほ":
+                out[i + 1] = "ぱぴぷぺぽ"["はひふへほ".index(out[i + 1][0])] + out[i + 1][1:]
+            continue
+
+        # 第2子, 第一子: the second child, し (plan 272).
+        if s == "子" and r == "こ" and i >= 2 and surf[i - 2] == "第" and _numeral_value(prev(i)) is not None:
+            out[i] = "し"
+            continue
+
+        # 気に入る: 入 is い there, never the はい of 入る alone (plan 272).
+        if s.startswith("入") and r.startswith("はい") and prev(i) == "に" and i >= 2 and surf[i - 2] == "気":
+            out[i] = r[1:]
+            continue
+
+        # お暇する, "to take one's leave": おいとま, never the ひま of 暇
+        # ("free time") that お暇ですか asks about (plan 272).
+        if s == "暇" and r == "ひま" and prev(i) == "お" and (
+                nxt(i).startswith(("し", "す", "いた", "さ")) or nxt(i) in ("を", "する")):
+            out[i] = "いとま"
+            continue
+
         # 言う read ゆう: every form of 言 is い-. 込む is never ごむ on
         # its own (and 〜込む compounds are one token, こむ).
         head = next(((w, ok) for c, w, ok in _HEADS if s.startswith(c) and r.startswith(w)), None)
@@ -625,6 +662,12 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             after = nxt(i)
             if after in _NANI_BEFORE or after == "" or after in _PUNCT:
                 out[i] = "なに"
+            continue
+
+        # 四月一日: the first of a month is ついたち, never いちにち, "one
+        # day" (plan 272).
+        if s == "一日" and prev(i).endswith(("月", "がつ")):
+            out[i] = "ついたち"
             continue
 
         # 日曜日: 日 after 曜 is び.
@@ -651,8 +694,10 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = "か" + r[2:]
             continue
 
-        # 実を結ぶ, 実がなる: the fruit, not じつ.
-        if s == "実" and r == "じつ" and nxt(i) in ("を", "が"):
+        # 実を結ぶ, 実がなる: the fruit, not じつ. Never 実を言うと, "to
+        # tell the truth", or 名を捨てて実を取る, "the substance".
+        if s == "実" and r == "じつ" and nxt(i) in ("を", "が") \
+                and not (i + 2 < n and tokens[i + 2].get("lemma") in ("言う", "云う", "申す", "取る")):
             out[i] = "み"
             continue
 
@@ -723,6 +768,8 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
     # where UniDic's reading does not even begin with the number's.
     for i in range(n):
         s = surf[i]
+        if s == "一日" and i > 0 and surf[i - 1].endswith(("月", "がつ")):
+            continue                     # 四月一日, ついたち (above)
         for split in range(len(s) - 1, 0, -1):
             num, ctr = s[:split], s[split:]
             if not all(c in _NUMERAL_CHARS - {"何"} for c in num):

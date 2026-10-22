@@ -24892,11 +24892,11 @@
           "choices": [
             "とうきょうへえいがを見に行きます。",
             "とうきょうへえいがを見て行きます。",
-            "とうきょうへえいがを見に来ます。"
+            "とうきょうへえいがを見ます。"
           ],
           "why": {
-            "en": "The purpose takes the verb's stem: 見に行きます. 見て行きます is « watch, then go »; 来ます is coming here, not going there.",
-            "fr": "Le but prend le radical du verbe : 見に行きます. 見て行きます, c'est « regarder, puis partir » ; 来ます, c'est venir ici, pas aller là-bas."
+            "en": "The purpose takes the verb's stem: 見に行きます. 見て行きます is « watch, then go »; 見ます alone says nothing of going there.",
+            "fr": "Le but prend le radical du verbe : 見に行きます. 見て行きます, c'est « regarder, puis partir » ; 見ます seul ne dit pas qu'on y va."
           }
         }
       },

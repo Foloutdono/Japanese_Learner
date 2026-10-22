@@ -1100,8 +1100,9 @@ GOLD = {
     "彼は外交官でもあった。": {("は", "は"), ("です／だ", "でもあっ"), ("た形 〜た", "た")},
     "雨が降りそうだ。": {("が", "が"), ("〜そうです", "そうだ"), ("です／だ", "だ")},
     "雨が降るそうだ。": {("が", "が"), ("〜そうだ（伝聞）", "そうだ"), ("です／だ", "だ")},
-    "電車にまにあわないかもしれない。": {("に", "に"), ("ない形 〜ない", "ない"), ("か", "か"),
-                                         ("〜かもしれません", "かもしれない"), ("も", "も")},
+    # (かもしれない's か and も are its letters, no question and no "also": plan 272.)
+    "電車にまにあわないかもしれない。": {("に", "に"), ("ない形 〜ない", "ない"),
+                                         ("〜かもしれません", "かもしれない")},
     "ここで撮ってはいけない。": {("で", "で"), ("〜てはいけません", "てはいけない")},
     "行かなければならない。": {("〜なければなりません", "なければならない")},
     "もう食べました。もう寝ました。": {("もう〜ました", "もう食べました"), ("〜ました／〜ませんでした", "ました"),
@@ -1372,3 +1373,529 @@ class WithoutMorphologyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ConjunctionPointTests(unittest.TestCase):
+    """Plan 272: それで ("and so") is not the それで of それでは ("well
+    then") or それでも ("even so"), and not それ + で before an evaluation
+    (それでいい, "that's fine"); a one-word conjunction opens its clause
+    after a particle too, in a line written without its commas."""
+
+    def test_sorede_is_and_so_only_where_it_says_so(self) -> None:
+        self.assertIn("それで", found_in("それで、彼は帰った。"))
+        for sentence in ("それでは行きますか。", "それでいいよ。", "それで大丈夫です。",
+                         "じゃあ、それでお願いします。", "それでもいいよ。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("それで", found_in(sentence))
+
+    def test_a_conjunction_after_a_particle(self) -> None:
+        self.assertIn("そして", found_in("バンドメンバーとそして"))
+        self.assertIn("しかし", found_in("雨が降ったしかし試合は続いた"))
+        self.assertIn("そして", found_in("朝ごはんを食べた。そして学校へ行った。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SpokenFinalTests(unittest.TestCase):
+    """Plan 272: speech writes its sentence-final particles its own way --
+    ね and よ drawn out, じゃん for 〜じゃないか -- and its contractions:
+    置いてっちゃう's てっ is 〜ていく said short."""
+
+    def test_a_final_particle_drawn_out_is_the_particle(self) -> None:
+        for sentence, pattern, written in (("雨だねー", "ね", "ねー"), ("すごいねぇ", "ね", "ねぇ"),
+                                           ("そうだよー", "よ", "よー"), ("行こうよー", "よ", "よー")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(pattern), written)
+        # ...never the ねえ that opens a sentence, "hey".
+        for sentence in ("ねえ、聞いて", "ねー、聞いて"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("ね", found_in(sentence))
+
+    def test_jan_is_isnt_it(self) -> None:
+        self.assertEqual(found_in("それしか言ってないじゃん").get("〜じゃないか"), "じゃん")
+        self.assertEqual(found_in("雨じゃん").get("〜じゃないか"), "じゃん")
+        # The じゃ of a plain negative is the copula's, not じゃん.
+        self.assertNotIn("〜じゃないか", found_in("学生じゃない。"))
+
+    def test_teku_is_te_iku_said_short(self) -> None:
+        self.assertEqual(found_in("置いてっちゃう").get("〜ていく／〜てくる"), "てっ")
+        self.assertEqual(found_in("飲んでく？").get("〜ていく／〜てくる"), "でく")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WholeWordTests(unittest.TestCase):
+    """Plan 272: a deck word the tokenizer writes as a word and its
+    particles (card_lookup.resolve_whole_word) is a word: the も of いつも
+    is no "also", the は of 実は no topic, the まで of いつまでも no
+    から〜まで."""
+
+    def test_a_particle_inside_a_whole_word_is_its_letter(self) -> None:
+        for sentence, pattern in (("いつも人が多いです。", "も"), ("実は、田中さんが来た。", "は"),
+                                  ("実は、田中さんが来た。", "〜は〜が"), ("今にも雨がふりそうです。", "に"),
+                                  ("今にも雨がふりそうです。", "も"), ("いつまでも待っています。", "から〜まで"),
+                                  ("常に学び続けるべきだ。", "に"), ("とっくに知ってた。", "に")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+
+    def test_the_same_particles_elsewhere_keep_their_points(self) -> None:
+        for sentence, pattern, written in (("いつも私も行きます。", "も", "も"), ("実をいうと、彼は来た。", "は", "は"),
+                                           ("友達とともに行く。", "〜とともに", "とともに"),
+                                           ("行くかどうか分からない。", "〜かどうか", "かどうか"),
+                                           ("今に見ていろ。", "に", "に"), ("非常に賢い鳥だ。", "〜く／〜に（副詞形）", "に")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertEqual(found_in(sentence).get(pattern), written)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SpokenAndAdverbTests(unittest.TestCase):
+    """Plan 272: かも is 〜かもしれません said short, the に of 本当に makes
+    an adverb, 見に行く is the purpose, この stands anywhere, あのね is a
+    filler."""
+
+    def test_kamo_is_kamoshirenai_said_short(self) -> None:
+        for sentence in ("雨かも。", "行くかもね。", "ちょっと興味あるかも。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("〜かもしれません"), "かも")
+                self.assertFalse({"か", "も"} & found_in(sentence).keys())
+        # The か and も of かもしれない are its letters, no question and no "also".
+        self.assertFalse({"か", "も"} & found_in("明日は雨かもしれない。").keys())
+        # A question known, and its "even": no かも.
+        found = found_in("それが本当かも分からない。")
+        self.assertNotIn("〜かもしれません", found)
+        self.assertEqual(found.get("か"), "か")
+
+    def test_the_ni_that_makes_an_adverb_is_no_time_or_place(self) -> None:
+        for sentence in ("本当においしい。", "一緒に行こう。", "先に帰ります。", "特に好きです。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("に", found_in(sentence))
+        for sentence in ("駅の先に公園がある。", "七時に起きる。", "友だちに会う。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("に"), "に")
+
+    def test_a_purpose_with_any_verb(self) -> None:
+        # 見る is auxiliary-capable to UniDic: before に it is the verb.
+        for sentence in ("映画を見に行く。", "父と母が見に来ました。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜に行きます", found_in(sentence))
+        self.assertNotIn("〜に行きます", found_in("食べてみる。"))
+
+    def test_a_demonstrative_anywhere_and_a_filler_never(self) -> None:
+        self.assertEqual(found_in("だれがこの本をかいたか分かりますか。").get("この／その／あの／どの"), "この")
+        self.assertNotIn("この／その／あの／どの", found_in("あのね、植木の枝を切って。"))
+
+    def test_a_set_phrase_and_a_misread_noun_are_read_whole(self) -> None:
+        # もしかして's て is no "and then"; おすすめ and きって are nouns
+        # the particle after them is a noun's.
+        self.assertNotIn("〜て、〜て", found_in("もしかして、田中さんですか。"))
+        self.assertEqual(found_in("おすすめは何ですか。").get("は"), "は")
+        self.assertEqual(found_in("ここできってを買うことができますか。").get("を"), "を")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FormsTheLessonsDoNotShowTests(unittest.TestCase):
+    """Plan 272: a point lit in a form its four lessons never show, where
+    the word before it is the evidence -- the な-adjective's で of
+    〜くて／〜で, が "but" after a plain clause, だけ after a verb, the
+    humble てまいる. (Never 〜の after an adjective: 大きいのを is the N5
+    の of "one" as often as a clause made a noun.)"""
+
+    def test_each_form_and_its_counter_case(self) -> None:
+        for sentence, pattern, written in (
+            ("この部屋は静かで、きれいです。", "〜くて／〜で", "で"),
+            ("高いが、おいしい。", "〜が（逆接）", "が"),
+            ("その選手は足を怪我しているが、最後まで走った。", "〜が（逆接）", "が"),
+            ("少し走っただけで息が切れる。", "〜だけ", "だけ"),
+            ("在庫を確認してまいります。", "〜ていく／〜てくる", "てまいり"),
+            # の standing for "one", as わたしのです does, and joining a modifier
+            # to its noun; は after an adverb, the contrast は's.
+            ("大きいのをお願いします。", "の", "の"),
+            ("初めての土地だ。", "の", "の"),
+            ("たまには贅沢な旅をしたい。", "は", "は"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(pattern), written)
+        for sentence, pattern in (
+            ("この部屋は静かではない。", "〜くて／〜で"),     # the copula's negative
+            ("雨が降る。", "〜が（逆接）"),                    # the subject's が
+            ("規模が小さいがゆえに、対応できた。", "〜が（逆接）"),
+            ("休暇の予定をできるだけ早く伝えた。", "〜だけ"),   # できるだけ, one word
+            ("大きいのと小さいの、どちらにしますか。", "〜の"),
+            # まで after a verb is "until", glossed: から〜まで is "from ... to".
+            ("祖父は亡くなるまで、日記を書いた。", "から〜まで"),
+            ("東京へまいります。", "〜ていく／〜てくる"),        # まいる alone is "to go"
+            ("大きいので、持てない。", "の"),                   # 〜ので's
+            ("いちばん楽しいのは音楽です。", "の"),             # 〜のは〜だ's
+            ("そうは思わない。", "は"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(pattern, found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ConjunctionAndOldCopulaTests(unittest.TestCase):
+    """What a reviewer's pass over real lines found lit wrong (plan 272)."""
+
+    def test_soreni_is_moreover_before_a_clause(self) -> None:
+        self.assertEqual(found_in("この店は安い。それに、おいしい。").get("それに"), "それに")
+        self.assertEqual(found_in("この部屋は駅から近いし、それに家賃も安い。").get("それに"), "それに")
+        # The word after it takes それ: "that one", and the particle.
+        for sentence in ("では、それにします。", "それに比べ最近彼女のお天気は良好。",
+                         "それに関する私の記憶は今も鮮やかだ。", "アメリカ人はそれに挑戦したがる。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("それに", found_in(sentence))
+
+    def test_tokoroga_is_no_side_of_someone(self) -> None:
+        self.assertEqual(found_in("早く着いた。ところが、店はまだ開いていなかった。").get("ところが"), "ところが")
+        self.assertNotIn("ところが", found_in("ところがある。"))
+
+    def test_the_copula_said_of_old(self) -> None:
+        # 一大事にございます is でございます: no adverb of 大事.
+        self.assertNotIn("〜く／〜に（副詞形）", found_in("殿、一大事にございます！"))
+        self.assertIn("〜く／〜に（副詞形）", found_in("彼は静かに歩く。"))
+        # お呼び is a noun said politely: its でございます is the point's.
+        self.assertEqual(found_in("旦那様が書斎でお呼びでございます。").get("〜でございます"), "でございます")
+
+    def test_the_letters_of_a_whole_word_are_no_particles(self) -> None:
+        # なんで, "why": no で of place or means.
+        self.assertNotIn("で", found_in("なんで私ばっかりこんな目に遭うの。"))
+        self.assertIn("で", found_in("何で行きますか。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ClauseAndFormTests(unittest.TestCase):
+    """Points a reviewer's pass over real lines found unlit, or lit on a
+    word another point owns (plan 272)."""
+
+    def test_an_adjectival_suffix_ends_a_clause(self) -> None:
+        self.assertEqual(found_in("雨で道が滑りやすいから、気をつけて。").get("〜から"), "から")
+        self.assertEqual(found_in("この本は読みにくいので、やめた。").get("〜ので"), "ので")
+        self.assertNotIn("の", found_in("この本は読みにくいので、やめた。"))
+
+    def test_a_request_after_a_reason(self) -> None:
+        self.assertIn("〜て／〜ないで（依頼）", found_in("雨で道が滑りやすいから、帰り気をつけてね。"))
+        self.assertNotIn("〜て／〜ないで（依頼）", found_in("電車が遅れて。"))      # why, not a request
+
+    def test_a_compound_particle_in_its_other_forms(self) -> None:
+        for sentence, pattern, written in (
+            ("環境に関する本を読んだ。", "〜に関して", "に関する"),
+            ("この件に関し、説明する。", "〜に関して", "に関し"),
+            ("先生に対する態度", "〜に対して", "に対する"),
+            ("調べに対し、容疑を認めた。", "〜に対して", "に対し"),
+            ("天気予報によれば、雨だ。", "〜によると", "によれば"),
+            ("警察によりますと、逮捕されたのは男だ。", "〜によると", "によりますと"),
+            ("地震による被害が出た。", "〜によって", "による"),
+            ("地震により、多くの家が壊れた。", "〜によって", "により"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(pattern), written)
+        # によりますと's と is the point's, no "whenever".
+        self.assertNotIn("〜と", found_in("警察によりますと、逮捕されたのは男だ。"))
+
+    def test_the_no_that_ends_what_is_said_explains(self) -> None:
+        for sentence in ("私、ずっと前から好きだったの。", "何回言えば気が済むの？", "こんな目に遭わなきゃいけないのよ。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜の", found_in(sentence))
+        self.assertIn("〜の", found_in("本を読むのは楽しい。"))
+        self.assertIn("〜の", found_in("行くのを忘れた。"))
+
+    def test_wa_ga_never_across_a_clause_of_its_own(self) -> None:
+        for sentence in ("ふたりは ゆうひが しずむまで がんばりました", "私は雨が降ると思う。",
+                         "警視庁は、詐欺の被害が相次いでいるとして、注意を呼びかけています。",
+                         "休みとはいえ、やることが山ほどある。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜は〜が", found_in(sentence))
+        # The topic said of inside a quotation keeps it; so does a clause
+        # that says how far (年齢を問わず、).
+        for sentence in ("象は鼻が長い。", "御社は残業が多いと伺いました。", "この店は年齢を問わず、多くの人に人気がある。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜は〜が", found_in(sentence))
+
+    def test_te_te_never_on_a_te_another_point_owns(self) -> None:
+        self.assertNotIn("〜て、〜て", found_in("2024年から2025年にかけて製造された車です。"))
+        self.assertEqual(found_in("では、一人ずつ前に出て、自己紹介をしてください。").get("〜て、〜て"), "て")
+        self.assertNotIn("〜て、〜て", found_in("被害が相次いでいるとして、注意を呼びかけています。"))
+        self.assertEqual(found_in("朝起きて、顔を洗って、学校へ行きます。").get("〜て、〜て"), "て、顔を洗って")
+
+    def test_to_quotes_what_is_announced(self) -> None:
+        for sentence in ("来年から導入すると発表しました。", "彼は来ると答えた。", "被害が相次いでいるとして、注意を呼びかけています。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("と"), "と")
+        self.assertNotIn("と", found_in("春になると暖かくなる。"))       # 〜と, "whenever"
+        self.assertNotIn("と", found_in("彼を代表とする。"))             # a noun taken as
+
+    def test_a_na_adjective_unidic_files_as_a_noun(self) -> None:
+        self.assertEqual(found_in("この映画は残酷で、見るにたえない。").get("〜くて／〜で"), "で")
+        self.assertNotIn("〜くて／〜で", found_in("あには大学生で、おおさかにすんでいる。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SentenceEndAndRoughSpeechTests(unittest.TestCase):
+    """A reviewer's pass over real lines, the second round (plan 272)."""
+
+    def test_a_final_particle_closes_its_own_sentence(self) -> None:
+        # Another sentence after it is no word after it.
+        self.assertIn(("ね", "ね"), keys("山田君、ちょっといいかね。例の件で話があるんだが。"))
+        self.assertIn(("よ", "よ"), keys("今さら何言ってんのよ。もう遅いわ。"))
+        self.assertNotIn("よ", found_in("よく分からない。"))
+
+    def test_a_negative_said_roughly(self) -> None:
+        self.assertIn("〜しか〜ない", found_in("いいか、よく聞け。一度しか言わねえぞ。"))
+        self.assertIn("〜わけにはいかない", found_in("ここで負けるわけにはいかねえんだよ！"))
+
+    def test_an_idiom_is_no_point_of_its_letters(self) -> None:
+        found = found_in("彼に言われたことがずっと気になって、仕事に集中できない。")
+        self.assertNotIn("〜くなる／〜になる", found)
+        self.assertIn("〜くなる／〜になる", found_in("春になって、暖かくなった。"))
+
+    def test_no_reason_in_isnt_it_that(self) -> None:
+        # のではないか is の and the copula's ではない: the written
+        # 降るんじゃないか, never ので, "because".
+        for sentence in ("雨が降るのではないか。", "それは違うのではありませんか。",
+                         "学び方を問い直すときが来ているのではないだろうか。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertNotIn("〜ので", found)
+                self.assertIn("〜んです／〜のです", found)
+        self.assertIn("〜ので", found_in("疲れたので、帰ります。"))
+        # The clause の makes is a noun 〜ではなく comes after.
+        self.assertIn("〜ではなく", found_in("方言は消えるのではなく、形を変えて生き続ける。"))
+        self.assertNotIn("〜ではなく", found_in("行くのではない。"))
+
+    def test_isnt_it_in_every_spelling_its_lesson_gives(self) -> None:
+        for sentence in ("言ったではないか。", "いいじゃないですか。", "おいしいじゃありませんか。",
+                         "雨が降るのではないか。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜じゃないか", found_in(sentence))
+        self.assertNotIn("〜じゃないか", found_in("これは本ではないかもしれない。"))
+
+    def test_a_na_adjective_noun_and_its_te_form(self) -> None:
+        # 便利 is a noun that is a な-adjective too: its で before a comma is
+        # the copula's て form, no particle of place.
+        for sentence in ("便利で、安い。", "元気で、よかった。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertIn("〜くて／〜で", found)
+                self.assertNotIn("で", found)
+        self.assertIn("で", found_in("うみで、かいがらをひろいました。"))
+
+    def test_a_topic_closed_with_its_verb_before_a_comma(self) -> None:
+        self.assertNotIn("〜は〜が", found_in(
+            "機械が担える部分は任せ、人間にしかできない理解を深めるべく、学び方を問い直すときが来ている。"))
+        # A compound particle's verb closes nothing.
+        for sentence in ("この店は年齢を問わず、多くの人に人気がある。", "象は鼻が長く、耳が大きい。",
+                         "この店は味といい値段といい、文句がない。", "東京は大阪に比べ、物価が高い。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜は〜が", found_in(sentence))
+
+    def test_an_idiom_keeps_its_verbs_form_and_a_point_of_its_shape(self) -> None:
+        # The volitional and the potential are the verb's own forms.
+        self.assertIn("意向形 〜(よ)う", found_in("それはともかく、そろそろ本題に入ろう。"))
+        self.assertIn("可能形 〜(ら)れる", found_in("お力になれず、申し訳ございません。"))
+        # 味がする is 〜がする's own example, and stays the point's.
+        self.assertIn("〜がする", found_in("このスープはへんな味がする。"))
+        self.assertIn("〜がする", found_in("この料理は水っぽくて味がしない。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ChatAndStreamPointTests(unittest.TestCase):
+    """Points a reviewer's pass over chats and streams found wrong, the
+    third round (plan 272)."""
+
+    def test_isnt_it_said_roughly(self) -> None:
+        self.assertIn("〜じゃないか", found_in("なんでだよ！昨日はいいって言ったじゃねえか！"))
+        self.assertNotIn("〜じゃないか", found_in("冗談じゃねえ！"))
+
+    def test_an_emphatic_ga_is_no_but(self) -> None:
+        self.assertNotIn("〜が（逆接）", found_in("見りゃ分かるだろうが！いちいち聞いてくんじゃねえよ。"))
+        self.assertIn("〜が（逆接）", found_in("怪我しているが、最後まで走った。"))
+
+    def test_no_question_in_i_mean(self) -> None:
+        self.assertNotIn("か", found_in("てか、それって結局お前のせいじゃね？"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SilentPartTests(unittest.TestCase):
+    """Parts the gap report (scripts/breakdown_gaps) found saying nothing
+    in the app's own sentences (plan 272)."""
+
+    def test_an_ending_inside_an_adjective_whatever_comes_before(self) -> None:
+        # The lessons only show a particle before the adjective; an adverb
+        # there changes nothing.
+        for sentence in ("とても痛くて、水を飲めない。", "風邪で喉がひどく痛くて、水を飲むことさえ苦しかった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜くて／〜で", found_in(sentence))
+        self.assertNotIn("〜がる", found_in("物価が上がる。"))
+
+    def test_a_noun_that_is_a_na_adjective_too(self) -> None:
+        # Its に is "safely" or "to peace": no point is lit (see
+        # test_a_copula_ni_after_a_noun_is_left_unlit), and the gloss
+        # names both.
+        from study import analysis
+
+        r = analysis.analyze_local("この島の海は浅いので、子どもでも安全に泳げます。")
+        ni = next(t for t in r["tokens"] if t["surface"] == "に")
+        self.assertFalse(ni.get("grammar"))
+        self.assertTrue(ni["gloss"]["en"].startswith("makes an adverb") and "goal" in ni["gloss"]["en"])
+        # に応じて is the compound particle's.
+        self.assertNotIn("〜く／〜に（副詞形）", found_in("必要に応じて変える。"))
+
+    def test_the_ku_of_a_te_form_is_no_adverb(self) -> None:
+        for sentence in ("いくら忙しくても行く。", "値段が高くても買う。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertNotIn("〜く／〜に（副詞形）", found)
+                self.assertNotIn("〜くて／〜で", found)
+        self.assertIn("〜く／〜に（副詞形）", found_in("早く寝なさい。"))
+
+    def test_an_adjectives_ku_form_as_a_noun(self) -> None:
+        self.assertIn("から〜まで", found_in("夜おそくまで起きている。"))
+        self.assertIn("から〜まで", found_in("朝はやくから並んだ。"))
+
+    def test_the_na_after_a_particle_of_amount(self) -> None:
+        from study import analysis
+
+        r = analysis.analyze_local("このパソコンは買ったばかりなのに、もう故障した。")
+        na = next(t for t in r["tokens"] if t["surface"] == "な")
+        self.assertIn("〜のに", [g["pattern"] for g in na["grammar"]])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ThirdReviewPointTests(unittest.TestCase):
+    """Points a third review of 150 fresh lines and the gap report found
+    unlit, lit wrong or said another way than their lessons write them
+    (plan 272)."""
+
+    def test_the_te_that_gives_the_reason_for_an_apology(self) -> None:
+        for sentence in ("遅れてすみません。", "お待たせしてすみません。", "来てくれてありがとう。",
+                         "食べすぎて、お腹が痛い。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertIn("〜て（理由）", found)
+                self.assertNotIn("〜て、〜て", found)
+        # 墨 (すみ, "ink") is no apology; two actions in turn are 〜て、〜て.
+        self.assertNotIn("〜て（理由）", found_in("手がふるえて、すみがつくえについた。"))
+        self.assertIn("〜て、〜て", found_in("手をあらって、ごはんを食べました。"))
+        self.assertNotIn("〜て（理由）", found_in("手をあらって、ごはんを食べました。"))
+
+    def test_the_te_that_gives_the_reason_for_a_feeling(self) -> None:
+        # A feeling after the て, or the feeling the て closes before what
+        # it makes one do.
+        for sentence in ("天気がよくて、うれしいです。", "会えてうれしい。", "おそくなって困りました。",
+                         "会えて、本当にうれしかった。", "嬉しくて泣いた。", "怖くて動けない。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertIn("〜て（理由）", found)
+                self.assertNotIn("〜て、〜て", found)
+                self.assertNotIn("〜くて／〜で", found)
+        # A feeling that describes the next action is "and then"; two
+        # adjectives side by side are a list.
+        self.assertIn("〜て、〜て", found_in("家に帰って、楽しく遊んだ。"))
+        self.assertNotIn("〜て（理由）", found_in("家に帰って、楽しく遊んだ。"))
+        for sentence in ("嬉しくて楽しい。", "このパンは安くておいしいです。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜くて／〜で", found_in(sentence))
+                self.assertNotIn("〜て（理由）", found_in(sentence))
+
+    def test_a_point_said_short(self) -> None:
+        for sentence, pattern in (("今日は残業しなくていい。", "〜なくてもいいです"),
+                                  ("いつも任せていいわけじゃない。", "〜てもいいです"),
+                                  ("この賞を賜ってよいのだろうか。", "〜てもいいです"),
+                                  ("八時までに出せばよい。", "〜といい／〜たらいい／〜ばいい"),
+                                  ("高ければいいというものではない。", "〜といい／〜たらいい／〜ばいい"),
+                                  ("黙っていればいいものを。", "〜といい／〜たらいい／〜ばいい"),
+                                  ("やれるもんならやってみな。", "〜ものなら")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
+        # いい describing a noun is no advice.
+        self.assertNotIn("〜といい／〜たらいい／〜ばいい", found_in("今思えばよいきっかけだった。"))
+
+    def test_after_doing_so_in_business_writing(self) -> None:
+        for sentence in ("ご確認のうえ、ご連絡ください。", "よく考えた上で決めます。",
+                         "漢字をおぼえる上で、毎日の練習が大切です。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜上で", found_in(sentence))
+        self.assertNotIn("〜上で", found_in("机の上で寝る。"))
+        # A plain verb and うえ without its で is "besides" (〜上に).
+        self.assertNotIn("〜上で", found_in("古い家ほど直すのにお金がかかるうえ、持ち主と連絡が取れない。"))
+
+    def test_so_that_and_asking_to(self) -> None:
+        self.assertIn("〜ように", found_in("お忘れ物のないよう、お気をつけください。"))
+        found = found_in("ご査収くださいますようお願い申し上げます。")
+        self.assertIn("〜ように言う", found)
+        self.assertNotIn("〜ますように", found)
+        self.assertIn("〜ますように", found_in("試験にうかりますように。"))
+
+    def test_so_much_that(self) -> None:
+        for sentence in ("便利さを追い求めるあまり、大切なものを失った。", "心配のあまり、眠れなかった。",
+                         "悲しさのあまり、何も言えなかった。", "あまりの痛さに、思わず声を出してしまった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜あまり", found_in(sentence))
+        # あまりの痛さに: 痛さ keeps its own 〜さ.
+        self.assertIn("〜さ", found_in("あまりの痛さに、思わず声を出してしまった。"))
+        for sentence in ("残ったあまりを食べた。", "この駅は、あまり人がいません。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜あまり", found_in(sentence))
+
+    def test_a_te_iru_with_a_particle_inside(self) -> None:
+        for sentence in ("大切な何かを見失ってはいないだろうか。", "まだ何も決まってはおりません。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ています", found_in(sentence))
+
+    def test_the_written_negative(self) -> None:
+        for sentence, written in (("誰にも頼らず、結論を出した。", "ず"), ("決して許さぬ。", "ぬ"),
+                                  ("働かざる者、食うべからず。", "ざる"), ("器を作らねばという焦り。", "ね")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(("ない形 〜ない", written), keys(sentence))
+        # 〜ずして keeps its ず, whatever word the two would spell.
+        self.assertIn("〜ずして", found_in("意図せずして、友人の秘密をもらしてしまった。"))
+        # A word of its own ends in it: 思わず, 絶えず (and 至らぬ, a card of
+        # the pool).
+        for sentence in ("思わず叫んだ。", "彼らは絶えずけんかしていた。", "顔といわず手といわず、泥だらけだった。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("ない形 〜ない", found_in(sentence))
+
+    def test_polite_endings_the_lessons_never_show(self) -> None:
+        for sentence in ("確認しましたら、ご連絡します。", "ちょっとトイレ休憩挟みまーす。", "二十六キロあります。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ます／〜ません", found_in(sentence))
+        self.assertIn("です／だ", found_in("誠に恐縮ではございますが、お願いします。"))
+
+    def test_a_na_adjective_where_its_lessons_never_put_it(self) -> None:
+        self.assertIn("〜さ", found_in("家事の大変さに気付いた。"))
+        for sentence in ("本日は貴重なお時間をいただきました。", "自然が豊かなばかりでなく、交通も便利だ。",
+                         "意外なほど少ない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("い形容詞／な形容詞", found_in(sentence))
+        self.assertIn(("〜ので", "なので"), keys("はじめてなので、緊張しています。"))
+
+    def test_no_point_where_the_words_are_something_else(self) -> None:
+        self.assertNotIn("〜が（逆接）", found_in("ふん、せいぜい足掻くがいい。"))
+        self.assertNotIn("〜が（逆接）", found_in("私ごときが、このような賞をいただくとは。"))
+        self.assertNotIn("〜も〜も", found_in("言うまでもなく、健康は何物にも代えがたい。"))
+        self.assertNotIn("〜かける", found_in("今思えばよいきっかけだった。"))
+        self.assertNotIn("と", found_in("意外と優しいとこあるよね。"))
+        self.assertIn("と", found_in("意外と言えば、それは意外だった。"))
+        # A greeting said on someone's behalf is quoted.
+        self.assertIn(("と", "と"), keys("部長がよろしくと申しておりました。"))
+
+    def test_the_passive_or_the_potential_where_the_sentence_says(self) -> None:
+        for sentence, passive, potential in (("誰かのために生きられたなら", False, True),
+                                             ("何事も成し遂げられまい。", False, True),
+                                             ("朝起きられず、遅刻した。", False, True),
+                                             ("力が求められている。", True, False),
+                                             ("弟にケーキを食べられてしまいました。", True, False),
+                                             ("この魚は食べられますか。", True, True)):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertEqual("受身形 〜られる" in found, passive)
+                self.assertEqual("可能形 〜(ら)れる" in found, potential)
+        # なられる is the honorific's, its れ the point's.
+        found = keys("お嬢様はもうお休みになられました。")
+        self.assertNotIn("受身形 〜られる", {p for p, _ in found})
+        self.assertIn("お〜になる／お〜する", {p for p, _ in found})
+
+    def test_a_request_said_twice_or_drawn_out(self) -> None:
+        found = keys("あ、待って待って、ラグい！")
+        self.assertEqual({w for p, w in found if p == REQUEST}, {"て"})
+        self.assertNotIn("〜て、〜て", {p for p, _ in found})
+        self.assertIn(REQUEST, found_in("鬼リピしてる曲教えて〜"))

@@ -223,6 +223,18 @@ describe('SentenceBreakdown', () => {
     expect(readings).toEqual(['がくせい', 'あいました'])
   })
 
+  // Plan 272: a word in kana spells its own sound. Read in hiragana, a
+  // katakana name the course has no card for printed ぱあてぃー.
+  it('the row prints no reading under a word written in kana', async () => {
+    const party = tokenFixture({
+      surface: 'パーティー', start: 0, end: 5, reading: 'ぱあてぃー', furigana: [], vocab_match: null,
+    })
+    const analysis = { available: true, tokens: [party], grammar: [] }
+    await render(withLang(<SentenceBreakdown analysis={analysis} t={T} layout="rows" onTokenClick={() => {}} />))
+    const [row] = document.querySelectorAll('.bkd-row')
+    expect(row.querySelector('.bkd-row__reading')).toBeNull()
+  })
+
   // Plan 160: the dictionary's name for the word and the card's reading
   // -- 話す はなす where the sentence wrote 話し, which the row printed
   // beside はなす -- and its meaning in the learner's language (the
@@ -762,5 +774,23 @@ describe('SentenceBreakdown', () => {
     const rows = wordRowsOf({ tokens: runFixture({ spanEnd: false, glossed: false }), grammar: [PAST, MASHITA] })
     expect(rows).toHaveLength(1)
     expect(rows[0].endings.map(p => p.pattern)).toEqual(['た形 〜た', '〜ました／〜ませんでした'])
+  })
+
+  // Plan 272: a word of speech the course has no rule for -- 行くぞ's ぞ
+  // -- carries the server's own line, and its row is where it is read.
+  // A particle with neither a card nor a line stays off the list.
+  it('a particle the server glossed is a row with its gloss', async () => {
+    const zo = particleFixture({
+      surface: 'ぞ', start: 2, end: 3, reading: 'ぞ',
+      gloss: { en: '(sentence end) a strong assertion', fr: '(fin de phrase) affirmation appuyée' },
+    })
+    expect(wordRowsOf({ tokens: [tokenFixture(), zo], grammar: [] }).map(r => r.surface)).toEqual(['学生', 'ぞ'])
+    expect(wordRowsOf({ tokens: [tokenFixture(), particleFixture()], grammar: [] }).map(r => r.surface)).toEqual(['学生'])
+    await render(withLang(
+      <SentenceBreakdown analysis={{ available: true, tokens: [tokenFixture(), zo], grammar: [] }} t={T} layout="rows" onTokenClick={() => {}} />
+    ))
+    const rows = document.querySelectorAll('.bkd-row')
+    expect(rows).toHaveLength(2)
+    expect(rows[1].querySelector('.bkd-row__meaning').textContent).toBe('(fin de phrase) affirmation appuyée')
   })
 })

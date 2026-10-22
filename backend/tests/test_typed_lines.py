@@ -195,3 +195,16 @@ def test_explain_s_index_is_the_reopened_passage_s(client):
     saved = _analyze(client, "猫が好き。犬も好き。", lines=True)
     assert client.post(f"/api/phrase/history/{saved['id']}/sentence/2/explain",
                        json={"lang": "fr"}).status_code == 404
+
+
+# ── Each piece in its sentence (plan 272) ────────────────────────
+@needs_tokenizer
+def test_each_piece_of_a_cut_sentence_is_read_inside_it():
+    lines = phrase.passage_sentences(LONG + "猫が好き。", lines=True)
+    assert [line["text"] for line in lines] == [
+        "私は毎朝早く起きて公園を散歩してから", "朝ご飯を食べて会社に行きます。", "猫が好き。",
+    ]
+    assert lines[0]["before"] == "" and lines[0]["after"] == "朝ご飯を食べて会社に行きます。"
+    assert lines[1]["before"] == "私は毎朝早く起きて公園を散歩してから" and lines[1]["after"] == ""
+    # A sentence that fits the line is read alone, as it always was.
+    assert "before" not in lines[2]

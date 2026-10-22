@@ -62,9 +62,15 @@ export function tokFurigana(tok) {
 // (は wa, へ e); a mark or a word in Latin letters has no rōmaji.
 const SPOKEN_PARTICLE = { は: 'wa', へ: 'e' }
 const HAS_KANA = /[ぁ-ゖァ-ヺー]/
+const HAS_KATAKANA = /[ァ-ヺ]/
 export function tokRomaji(tok) {
   if (tok.pos === 'particle' && SPOKEN_PARTICLE[tok.surface]) return SPOKEN_PARTICLE[tok.surface]
-  const sound = tok.reading || tok.surface || ''
+  // A katakana word spells its own long vowels (コーヒー koohii); its
+  // reading, the sound in hiragana, draws them as the row's usual vowel
+  // (こうひい kouhii).
+  const surface = tok.surface ?? ''
+  const spelled = HAS_KATAKANA.test(surface) && !HAS_KANJI.test(surface)
+  const sound = (spelled ? surface : tok.reading) || surface
   if (!HAS_KANA.test(sound)) return ''
   return kanaToRomaji(sound)
 }

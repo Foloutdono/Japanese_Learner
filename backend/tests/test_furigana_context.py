@@ -162,6 +162,11 @@ class ContextRuleTests(unittest.TestCase):
         # 実の母, 実は: じつ.
         self.assertEqual(_read(_tok("実", "じつ"), _particle("の"))[0], "じつ")
         self.assertEqual(_read(_tok("実", "じつ"), _particle("は"))[0], "じつ")
+        # 実を言うと, "to tell the truth", and 実を取る, "the substance".
+        self.assertEqual(_read(_tok("実", "じつ"), _particle("を"), _tok("言う", "いう", "動詞"))[0], "じつ")
+        self.assertEqual(_read(_tok("実", "じつ"), _particle("を"), _tok("取る", "とる", "動詞"))[0], "じつ")
+        # By the verb, not its first letter: 実がいっぱいなった is the fruit.
+        self.assertEqual(_read(_tok("実", "じつ"), _particle("が"), _tok("いっぱい", "いっぱい"))[0], "み")
 
     def test_gimi_a_touch_of(self) -> None:
         """〜気味 after a noun or a verb's stem is ぎみ; 気味 alone is きみ

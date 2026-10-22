@@ -74,13 +74,16 @@ export function rowsOf(tokens) {
 // with no card of its own (〜てはいけません's いけません, which read
 // "to go"): those are the rule's, and its numbered card says what they
 // do. Each carries the endings written on it (isEnding: 作ります is 作る
-// + ます), which ride it as tags rather than taking a number.
+// + ます), which ride it as tags rather than taking a number. A word of
+// speech the course has no rule for -- ぞ, かしら, the negative ん --
+// carries the line the server wrote for it (`gloss`, plan 272), and a
+// row is the one place that line is read.
 export function wordRowsOf(analysis) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   const grammar = analysis?.grammar ?? []
   const endings = grammar.filter(isEnding)
   return rowsOf(tokens)
-    .filter(row => row.head.vocab_match || lineState(row.head, grammar) !== 'particle')
+    .filter(row => row.head.vocab_match || row.head.gloss || lineState(row.head, grammar) !== 'particle')
     .map(row => ({
       ...row,
       endings: endings.filter(p => row.tokens.some(tok => coversToken(p, tok))),

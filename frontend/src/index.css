@@ -12966,6 +12966,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   border-radius: var(--r-card);
   box-shadow: inset 0 0 0 2px var(--line-grammar);
 }
+/* A point's words with no gap between them (plan 272), as the
+   subtitle's frame holds them (.anl-subs__words). */
+.bkd-frame__words {
+  display: inline-flex;
+  align-items: baseline;
+}
 .bkd-frame__n {
   display: inline-flex;
   flex: none;
@@ -28059,6 +28065,23 @@ button.brd-stn { cursor: pointer; }
   padding: var(--sp-1);
   border-radius: var(--r-card);
   box-shadow: inset 0 0 0 2px var(--line-grammar);
+}
+/* The words a point is written on read as the one word they make (plan
+   272): て + くれる is てくれる, の + で is ので -- each a word to press
+   still, with no gap and no padding where two of them meet. */
+.anl-subs__words {
+  display: inline-flex;
+  align-items: flex-start;
+}
+.anl-subs__words > .tok:not(:first-child) {
+  padding-left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.anl-subs__words > .tok:not(:last-child) {
+  padding-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 .anl-subs__n {
   position: absolute;

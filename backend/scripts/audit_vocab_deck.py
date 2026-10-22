@@ -414,8 +414,10 @@ def _resolve_tokens(sentence: str):
     study/analysis._tokens folds it. The same three resolvers, in the
     same order, so a word this reports as unmatched is one the screen
     shows without a badge."""
+    from dataclasses import replace
+
     from study import morphology
-    from study.card_lookup import resolve_compound, resolve_morpheme
+    from study.card_lookup import resolve_compound, resolve_morpheme, resolve_name_fragments
 
     morphemes = morphology.tokenize(sentence) or []
     out = []
@@ -424,6 +426,18 @@ def _resolve_tokens(sentence: str):
         compound = resolve_compound(morphemes, i)
         if compound:
             *_, n = compound
+            i += n
+            continue
+        fragments = resolve_name_fragments(morphemes, i)
+        if fragments:
+            # A word in kana the tokenizer cut into names (plan 272): the
+            # breakdown reads しゅうまつ whole, and a pool word is a word the
+            # deck lacks, measured as the word it is.
+            (kind, hit), n = fragments
+            if kind == "pool":
+                out.append((replace(morphemes[i], surface="".join(m.surface for m in morphemes[i:i + n]),
+                                    lemma=hit["kanji"] or hit["kana"], lemma_reading=hit["kana"],
+                                    reading=hit["kana"], proper=False, name_kind=""), None))
             i += n
             continue
         m = morphemes[i]
