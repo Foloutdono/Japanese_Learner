@@ -375,6 +375,17 @@ runtime purpose.
   published deck. Accounts that boarded before it are brought in line by
   `scripts/migrate_handles.py`, once, by hand.
 
+- **The interface language is the account's, and only the learner moves it.**
+  A choice made in Réglages › Affichage is kept in `user_profiles.ui_lang`
+  (NULL = never chosen: French on a French device, English otherwise) as well as in
+  localStorage `lang`, which stays because the first paint reads it
+  synchronously. `lib/langChoice.js` writes both (`rememberLang`) and, at
+  boot, copies the account's answer onto the device (`syncLang`, from
+  App.jsx) or carries a choice only the device holds up. A browser forgets
+  (Safari's storage cap, a WebView purge, a second device) and English
+  learners were switched back to French; nothing may write `lang` but the
+  learner's click, and no default may be saved as if it were a choice.
+
 ## Commands
 
 ### Backend (`backend/`)

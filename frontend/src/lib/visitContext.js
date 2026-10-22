@@ -57,7 +57,7 @@ function langCode() {
     if (saved === 'fr' || saved === 'en') return saved
   } catch { /* the document's own language below */ }
   const doc = typeof document !== 'undefined' ? document.documentElement.lang : ''
-  return doc?.startsWith('en') ? 'en' : 'fr'
+  return doc?.startsWith('fr') ? 'fr' : 'en'
 }
 
 /** The visit's context, as session_start carries it. */
