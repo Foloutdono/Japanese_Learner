@@ -722,11 +722,11 @@ the right replies.
   (the 1080-wide shot at 1:1), as a screen recording does in the feed.
 - **The caption, on a slip.** Each beat's caption stands on a slip of
   the print's washi (`--tpr-washi`) at the foot of the feed's safe box,
-  the feature's line its edge, lifted off the screen on its shadow: a
-  kicker in caps (where it is in the app, its tab dropped where the line
-  has no room) and the serif sentence, two lines at most. The slip comes
-  in with the first beat and stays; its words change at each. It is as
-  tall as the plan's tallest caption, so it never moves. A caption says
+  the feature's line its edge, lifted off the screen on its shadow: the
+  caption alone, the serif sentence, two lines at most (the owner took
+  the kicker off it). The slip comes in with the first beat and stays;
+  its words change at each. It is as tall as the plan's tallest caption,
+  so it never moves, a shorter one standing in its middle. A caption says
   what the screen shows and the app's own description says (`APP`, held
   to the locales). It carries no figure, no price and no promise.
 - **Parts.** Each beat is made of parts: a shot held, or a typed or

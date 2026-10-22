@@ -17,7 +17,7 @@
 // description of the feature says (locales: its title and its three
 // lines, held equal by a test): no figure, no price, no promise the
 // screen does not make.
-import { EDGE, FS, R, SP, TR, fit, font, formatOf, frame, measure, palette, rrect, shadow, text } from './draw.js'
+import { EDGE, FS, R, SP, fit, formatOf, frame, palette, rrect, shadow, text } from './draw.js'
 import { APP_INKS, PRINT_HOURS } from './app.js'
 import { END, gateClip } from './promo.js'
 import { feedPosts } from './feeds.js'
@@ -29,7 +29,7 @@ export const FEATURE_FPS = 30
 // A shot: the 400 CSS px phone at 2.7 (record.mjs PHONE).
 export const SHOT = { w: 1080, h: 2322 }
 // The caption's slip: its padding, and the caption's sizes, two lines at most.
-const SLIP = { pad: SP[4], gap: SP[2], sizes: [FS.title, FS.lead], lh: 1.12 }
+const SLIP = { pad: SP[4], sizes: [FS.title, FS.lead], lh: 1.12 }
 // A beat's caption comes in, the screen moves to what it shows, a state
 // changes in a cross-fade; a finger shows before its tap and its ring after.
 const MOTION = { caption: 0.35, pan: 0.5, fade: 0.22, finger: 0.35, ring: 0.5 }
@@ -343,14 +343,14 @@ export const featureSteps = (plan, seconds = 2.5) => FEATURES[plan.id].steps({ .
 
 // ── Where things stand ────────────────────────────────────────
 /** The video's frame: the screen full-bleed and its scale, the slip at the
- *  foot of the safe box at its tallest (its kicker and two lines), and the
+ *  foot of the safe box at its tallest (two lines of its caption), and the
  *  rows of the screen the feed hides above the box (`headRows`) and the
  *  rows that show above the slip (`safeRows`), from the screen's head. */
 export function layoutOf(fit = 'tiktok') {
   const fmt = formatOf('story', fit)
   const fr = frame(fmt)
   const s = fmt.w / SHOT.w
-  const slipH = 2 * SLIP.pad + FS.caption + SLIP.gap + SLIP.sizes[0] * (0.82 + SLIP.lh + 0.3)
+  const slipH = 2 * SLIP.pad + SLIP.sizes[0] * (0.82 + SLIP.lh + 0.3)
   return { fmt, fr, x: 0, top: 0, w: fmt.w, h: fmt.h, s, rows: fmt.h / s, slipH, headRows: fr.y / s, safeRows: (fr.bottom - slipH - SP[4]) / s }
 }
 const union = boxes => {
@@ -597,16 +597,10 @@ function slipOf(ctx, plan, L) {
   if (made?.key === key) return made
   const w = L.fr.w
   const room = w - 2 * SLIP.pad - EDGE
-  // The kicker in caps, as tracked as the app's captions: where it is in the
-  // app, its tab dropped where the line has no room for it.
-  const tracked = (str, size) => measure(ctx, str, font(700, size, 'latin'), TR.caption)
-  const labels = [`${plan.tab} · ${plan.jp} ${plan.name}`, `${plan.jp} ${plan.name}`].map(x => x.toLocaleUpperCase())
-  const kick = labels.flatMap(str => [FS.caption, FS.xs].map(size => ({ str, size }))).find(k => tracked(k.str, k.size) <= room) || { str: labels[1], size: FS.xs }
-  kick.f = font(700, kick.size, 'latin')
   const says = new Map(plan.beats.map(b => [b.say, fit(ctx, b.say, { weight: 900, fam: 'serif', sizes: SLIP.sizes, maxW: room, maxLines: 2, lh: SLIP.lh })]))
   const tallest = Math.max(...[...says.values()].map(b => b.size * (0.82 + (b.lines.length - 1) * SLIP.lh + 0.3)))
-  const h = 2 * SLIP.pad + FS.caption + SLIP.gap + tallest
-  const out = { key, kick, says, x: L.fr.x, y: L.fr.bottom - h, w, h }
+  const h = 2 * SLIP.pad + tallest
+  const out = { key, says, x: L.fr.x, y: L.fr.bottom - h, w, h }
   slips.set(plan, out)
   return out
 }
@@ -631,11 +625,11 @@ function drawSlip(ctx, plan, L, say, ks, kc) {
   ctx.fillRect(S.x, S.y, EDGE, S.h)
   ctx.restore()
   const x = S.x + EDGE + SLIP.pad
-  text(ctx, S.kick.str, x, S.y + SLIP.pad + FS.caption * 0.8, { f: S.kick.f, color: paper.ink2, tr: TR.caption })
   const b = S.says.get(say) || fit(ctx, say, { weight: 900, fam: 'serif', sizes: SLIP.sizes, maxW: S.w - 2 * SLIP.pad - EDGE, maxLines: 2, lh: SLIP.lh })
   ctx.globalAlpha *= kc
   ctx.translate(0, (1 - kc) * 12)
-  const y0 = S.y + SLIP.pad + FS.caption + SLIP.gap
+  // A caption shorter than the slip's tallest stands in its middle.
+  const y0 = S.y + (S.h - b.size * (0.82 + (b.lines.length - 1) * SLIP.lh + 0.3)) / 2
   b.lines.forEach((l, i) => text(ctx, l, x, y0 + b.size * (0.82 + i * SLIP.lh), { f: b.f, color: APP_INKS['--tpr-sumi'] }))
   ctx.restore()
 }
