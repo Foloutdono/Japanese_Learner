@@ -93,6 +93,11 @@ const FASTER = '.roll-ctl__speed .roll-ctl__btn >> nth=1'
 // Its results: Ask's second offer (where the text says it), and the whole text's breakdown.
 const WHERE = '.ask__offer >> nth=1'
 const BREAKDOWN = '.qrows + .btn-secondary'
+// In the sentence opened, a word's row (by its reading) and a point's card
+// (by its pattern), each a door to the dictionary's sheet (plan 274).
+const WORD_ROW = kana => `.bkd-passage__item--open .bkd-row:has-text("${kana}")`
+const POINT_CARD = pattern => `.bkd-passage__item--open .bkd-point:has-text("${pattern.replace(/^〜/, '')}")`
+const SHEET_CLOSE = '.dict-sheet .dict-plate__actions .dict-plate__btn >> nth=-1'
 // A mock exam's parts: the question and its answers, the answer in slot i, the page's Next.
 const QUESTION = '.exam-ask__big'
 const TILES = '.exam-tiles'
@@ -289,6 +294,16 @@ export const FEATURES = {
       { shot: 'bd-pick', focus: `.bkd-passage__head >> nth=${d.sentence}`, tap: `.bkd-passage__head >> nth=${d.sentence}` },
       { click: `.bkd-passage__head >> nth=${d.sentence}`, settle: 900, keep: true },
       { shot: 'bd-open', focus: '.bkd-passage__item--open' },
+      // Its word, then its point, each opened in the dictionary (plan 274).
+      { scroll: WORD_ROW(d.word), block: 'center' },
+      { shot: 'bd-word', focus: WORD_ROW(d.word), tap: `${WORD_ROW(d.word)} .bkd-tok--door` },
+      { click: `${WORD_ROW(d.word)} .bkd-tok--door`, ready: '.dict-sheet', settle: 900 },
+      { shot: 'dict-word', focus: '.dict-sheet' },
+      { click: SHEET_CLOSE, settle: 700 },
+      { scroll: POINT_CARD(d.point), block: 'center' },
+      { shot: 'bd-point', focus: POINT_CARD(d.point), tap: POINT_CARD(d.point) },
+      { click: POINT_CARD(d.point), ready: '.dict-sheet', settle: 900 },
+      { shot: 'dict-point', focus: '.dict-sheet' },
     ],
     beats: [
       ...gateBeats({ en: 'Read a whole text.', fr: 'Lis un texte entier.' }),
@@ -307,6 +322,10 @@ export const FEATURES = {
       { say: { en: 'Every sentence, broken down.', fr: 'Chaque phrase, décomposée.' }, parts: [
         { shot: 'bd-ask', hold: 1.0, tap: 0.6, enter: 'back' }, { shot: 'breakdown', hold: 2.2, cam: 'read' },
         { shot: 'bd-pick', hold: 0.9, tap: 0.5 }, { shot: 'bd-open', hold: 2.4, cam: 'read' },
+      ] },
+      { say: { en: 'Every word and rule, in the dictionary.', fr: 'Chaque mot, chaque règle, au dictionnaire.' }, parts: [
+        { shot: 'bd-word', hold: 0.9, tap: 0.5 }, { shot: 'dict-word', hold: 2.2, cam: 'read', enter: 'rise' },
+        { shot: 'bd-point', hold: 0.9, tap: 0.5, enter: 'sink' }, { shot: 'dict-point', hold: 2.6, cam: 'read', enter: 'rise' },
       ] },
     ],
     end: { en: 'Read a whole text on Tsuji.', fr: 'Lis un texte entier sur Tsuji.' },

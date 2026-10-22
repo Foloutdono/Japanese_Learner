@@ -1,5 +1,5 @@
 {
-  "_": "Plan 270: what each practice feature's video does in the app. The sentences are the banks' own; an answer is what the learner types, a slip a beginner makes; a reply is the tutor's answer as its model returns it (routes/translation, routes/composition), run through study/tutor_review as the route runs it. scripts/carousel_bank.py builds bank/promo.json from this. Since plan 273 a feature's `ask` is the answer to the one question its video asks (POST /api/ask), offered by the app or, where `asked` is set, typed, written as routes/ask's prompt asks: three short sentences at most, the answer first, the Japanese in 「」 with the reading of a word in kanji after it, as in 「花（はな）」.",
+  "_": "Plan 270: what each practice feature's video does in the app. The sentences are the banks' own; an answer is what the learner types, a slip a beginner makes; a reply is the tutor's answer as its model returns it (routes/translation, routes/composition), run through study/tutor_review as the route runs it. scripts/carousel_bank.py builds bank/promo.json from this. Since plan 273 a feature's `ask` is the answer to the one question its video asks (POST /api/ask), offered by the app or, where `asked` is set, typed, written as routes/ask's prompt asks: three short sentences at most, the answer first, the Japanese in 「」 with the reading of a word in kanji after it, as in 「花（はな）」. Since plan 274 comprehension's `dictionary` names a word (written, reading) and a point of the opened sentence whose dictionary entries the video opens.",
   "reading": {
     "level": "N5",
     "phrase": "七時に学校へ行きます。",
@@ -17,6 +17,13 @@
     "ask": {
       "en": "In the seventh sentence: the writer eats lunch with a friend in 「学校の食どう（がっこうのしょくどう）」, the school cafeteria. The library, 「としょかん」, comes in the next sentence, as where the writer studies in the afternoon.",
       "fr": "Dans la septième phrase : l’auteur déjeune avec un ami à 「学校の食どう（がっこうのしょくどう）」, la cantine de l’école. La bibliothèque, 「としょかん」, vient dans la phrase suivante : c’est là qu’il étudie l’après-midi."
+    },
+    "dictionary": {
+      "word": [
+        "食べる",
+        "たべる"
+      ],
+      "point": "〜てから"
     }
   },
   "translation": {

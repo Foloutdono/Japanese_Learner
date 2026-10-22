@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **274**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **275**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -1036,7 +1036,8 @@ since plan 273 it is filmed through a camera that moves only to show
 something (`feature.js`, `camFor`: what a part shows framed, a text read
 down, a page pushed in, a sheet risen), and shows past the exercise what
 a first run would not find (the roll, the breakdown, Ask answered from
-`content/promo.json`'s `ask`, a lesson, a flag, a wrong reply's why). Since plan 248 every number a maker may set per
+`content/promo.json`'s `ask`, a lesson, a flag, a wrong reply's why;
+since plan 274 comprehension's word and point in the dictionary). Since plan 248 every number a maker may set per
 post (a video's timing and pace, the export's quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one
 previewed. Since plan

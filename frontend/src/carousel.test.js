@@ -3028,11 +3028,11 @@ describe('the practice features, recorded in the app (plan 270)', () => {
     // The breakdown read near its foot, then a sentence far below it.
     const shots = shotsOf(featureSteps(plan)).map(s => ({ ...s, scrollY: { breakdown: 3248, 'bd-pick': 7768, 'bd-open': 7768 }[s.name] ?? 0 }))
     const parts = Object.fromEntries(featureTimeline(plan, shots).segs.filter(x => x.kind === 'beat').flatMap(sg => sg.parts.map((p, i) => [`${sg.beat}:${i}`, p])))
-    const last = plan.beats.length - 1
-    expect(parts[`${last}:2`].enter).toBe('dissolve')
-    expect(parts[`${last}:3`].enter).not.toBe('dissolve')
+    const bi = plan.beats.findIndex(b => b.parts.some(p => p.shot === 'bd-pick'))
+    expect(parts[`${bi}:2`].enter).toBe('dissolve')
+    expect(parts[`${bi}:3`].enter).not.toBe('dissolve')
     // Without the gap, the same move is a pan.
-    const flat = featureTimeline(plan, shotsOf(featureSteps(plan))).segs.filter(x => x.kind === 'beat').at(-1).parts
+    const flat = featureTimeline(plan, shotsOf(featureSteps(plan))).segs.filter(x => x.kind === 'beat')[bi].parts
     expect(flat[2].enter).toBe('fade')
   })
 

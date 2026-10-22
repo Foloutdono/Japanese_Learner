@@ -733,7 +733,7 @@ feature a learner would not find on a first run:
 | Feature | After the answer |
 | --- | --- |
 | 読書, 翻訳, 書取 | the rating, the sentence's breakdown read down, then Ask: an offered question tapped (reading's point, translation's 〜てください), or dictation's own typed, "Why に and not が?", the slip it just made |
-| 理解 | before the questions, the clock and the roll, sped up and stopped; after, the score, the miss opened, Ask's "Where does the text say it?", then the whole text's breakdown on the missed sentence |
+| 理解 | before the questions, the clock and the roll, sped up and stopped; after, the score, the miss opened, Ask's "Where does the text say it?", then the whole text's breakdown on the missed sentence, and since plan 274 a word of it and a point of it opened in the dictionary (`content/promo.json`'s `dictionary`, answered by `routes/dictionary.get_dictionary`; a mock key may name query parameters, `GET /api/dictionary?category=vocab`) |
 | 作文 | before writing, the point's lesson, its sheet rising over the card and going |
 | 模試 | the station's four papers, a question flagged, the answer sheet, the score by part, a miss opened again |
 | 会話 | the line's translation shown, a wrong reply struck with why, the scene's score |

@@ -73,12 +73,19 @@ export async function record(browser, { url, steps, mocks, lang, audio = null, d
   }, [JSON.stringify(session), lang])
   await ctx.route(/placeholder\.supabase\.co/, r => r.fulfill({ json: user }))
   const missed = new Set()
+  // A key may name query parameters too ("GET /api/dictionary?category=vocab",
+  // plan 274): it answers a request carrying them all, before the path's own.
+  const keyed = Object.keys(mocks).filter(k => k.includes('?')).map(k => {
+    const [path, query] = k.split('?')
+    return { k, path, params: [...new URLSearchParams(query)] }
+  })
   await ctx.route(/\/api\//, r => {
     const u = new URL(r.request().url())
     const key = `${r.request().method()} ${u.pathname}`
-    if (!(key in mocks)) missed.add(key)
+    const hit = keyed.find(m => m.path === key && m.params.every(([n, v]) => u.searchParams.get(n) === v))
+    if (!hit && !(key in mocks)) missed.add(key)
     // Never a 401 (the app would sign out), never a release header.
-    return r.fulfill({ json: mocks[key] ?? {} })
+    return r.fulfill({ json: (hit ? mocks[hit.k] : mocks[key]) ?? {} })
   })
   const clip = audio ? readFileSync(audio) : silence(2.5)
   await ctx.route(/\/exam-audio\//, r => r.fulfill({ status: 200, contentType: audio?.endsWith('.mp3') ? 'audio/mpeg' : 'audio/wav', body: clip }))
@@ -134,6 +141,8 @@ export async function record(browser, { url, steps, mocks, lang, audio = null, d
       const was = st.keep ? await box(st.click) : null
       const s0 = was ? (await scrolled()) * S : 0
       await page.locator(st.click).first().click({ timeout: 10000 })
+      // The finger lifts: no hover left on what the tap opened (a tag's tooltip, plan 274).
+      await page.mouse.move(PHONE.width - 1, PHONE.height / 2)
       if (st.ready) await page.locator(st.ready).first().waitFor({ timeout: 15000 })
       await page.waitForTimeout(st.settle ?? 500)
       // `keep`: what was tapped stays where it stood (plan 273), the page

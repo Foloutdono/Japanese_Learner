@@ -1698,6 +1698,41 @@ def _promo_ask(spec: dict, lang: str) -> dict:
     return {"POST /api/ask": {"answer": ask[lang], "off_topic": False, "left": 39}} if ask else {}
 
 
+def _promo_dictionary(spec: dict, lang: str, level: str) -> dict:
+    """GET /api/dictionary for the entries a video opens (plan 274): the
+    word and the grammar point, each as routes/dictionary.get_dictionary
+    answers a learner who has studied neither, keyed by the category the
+    client asks for (record.mjs matches a key's query parameters)."""
+    want = spec.get("dictionary")
+    if not want:
+        return {}
+    import sys
+    import types
+    from unittest import mock
+
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+
+    # The route reads a learner's card states; a learner who has none, so
+    # no database is opened for them.
+    nobody = types.SimpleNamespace(get_user_states=lambda _u: {}, get_states_for=lambda _ids, _modes: {})
+    with mock.patch.dict(sys.modules, {"core.srs_instance": sys.modules.get("core.srs_instance") or types.SimpleNamespace(srs=nobody)}):
+        import routes.dictionary as dictionary
+    entry = next((e for e in GRAMMAR_POINTS_BY_LEVEL[level] if e["pattern"] == want["point"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {want['point']} is no {level} point")
+    raw_id = grammar_to_id(entry, level)
+    term, kana = want["word"]
+    common = {"page": 0, "limit": 50, "lang": lang, "radical": None, "level": None, "match": "word", "field": "all", "user_id": "promo"}
+    with mock.patch.object(dictionary, "srs", nobody):
+        word = dictionary.get_dictionary(q=term, category="vocab", kana=kana, id="", one=True, **common)
+        point = dictionary.get_dictionary(q="", category="grammar", kana="", id=raw_id, one=False, **common)
+    if not word["results"] or (word["results"][0]["kanji"], word["results"][0]["kana"]) != (term, kana):
+        raise SystemExit(f"content/promo.json: {term} ({kana}) is no dictionary word")
+    if not point["results"] or point["results"][0].get("id", point["results"][0].get("raw_id")) != raw_id:
+        raise SystemExit(f"content/promo.json: {want['point']} did not come first in the grammar dictionary")
+    return {"GET /api/dictionary?category=vocab": word, "GET /api/dictionary?category=grammar": point}
+
+
 def _promo_spec() -> dict:
     """frontend/carousel/content/promo.json: each feature's sentence, the
     answer typed and the tutor's raw replies (plan 270)."""
@@ -1884,7 +1919,10 @@ def _promo_comprehension(spec: dict, lang: str) -> dict:
         raise SystemExit(f"content/promo.json: comprehension's sentence {sentence} is not one of the text's")
     return {
         "level": level, "line": data["text"], "answers": answers, "wrong": spec["wrong"], "sentence": sentence,
+        # The word (by its reading) and the point the video opens in the dictionary (plan 274).
+        "word": spec["dictionary"]["word"][1], "point": spec["dictionary"]["point"],
         "mocks": {
+            **_promo_dictionary(spec, lang, level),
             "GET /api/reading/comprehension": {
                 "level": level, "text": data["text"], "translation": data["translation"], "breakdown": data["breakdown"],
                 "questions": qs, "grammar_points": data["grammar_points"], "read_seconds": v["READ_SECONDS_BY_LEVEL"][level],
