@@ -298,7 +298,7 @@ export const FEATURES = {
       { scroll: WORD_ROW(d.word), block: 'center' },
       { shot: 'bd-word', focus: WORD_ROW(d.word), tap: `${WORD_ROW(d.word)} .bkd-tok--door` },
       { click: `${WORD_ROW(d.word)} .bkd-tok--door`, ready: '.dict-sheet', settle: 900 },
-      { shot: 'dict-word', focus: '.dict-sheet' },
+      { shot: 'dict-word', focus: ['.dict-sheet .dict-plate', '.dict-sheet .dict-sense'] },
       { click: SHEET_CLOSE, settle: 700 },
       { scroll: POINT_CARD(d.point), block: 'center' },
       { shot: 'bd-point', focus: POINT_CARD(d.point), tap: POINT_CARD(d.point) },
@@ -790,7 +790,8 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
   ctx.fillStyle = paper.bg
   ctx.fillRect(0, 0, L.w, L.h)
   // A shot through a camera, standing at its own scroll on the page; its
-  // head goes on up in the page's ground, its foot on down.
+  // head goes on up in the page's ground, its foot on down in its own
+  // (each its corner pixel, never a row of text stretched).
   const view = (f, c, a = 1, dx = 0, dy = 0) => {
     const img = imgs[f.shot]
     if (!img || a <= 0) return
@@ -806,7 +807,7 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
     if (oy > 0) ctx.drawImage(img, 2, 0, 1, 1, ox, 0, SHOT.w * kk, oy)
     ctx.drawImage(img, ox, oy, SHOT.w * kk, SHOT.h * kk)
     const foot = oy + SHOT.h * kk
-    if (foot < L.h) ctx.drawImage(img, 0, SHOT.h - 1, SHOT.w, 1, ox, foot, SHOT.w * kk, L.h - foot)
+    if (foot < L.h) ctx.drawImage(img, 2, SHOT.h - 1, 1, 1, ox, foot, SHOT.w * kk, L.h - foot)
     ctx.restore()
   }
   const into = t - pt.start
