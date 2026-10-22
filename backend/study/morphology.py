@@ -301,6 +301,172 @@ def _picture(morphemes: list[Morpheme]) -> None:
             m.pos, m.lemma, m.reading, m.lemma_reading, m.goshu = "noun", "絵", "え", "え", "漢"
 
 
+# A noun of one kana a first-year page writes in kana (plan 272), read as
+# a mark, a particle or a rarer word by UniDic: はがいたい (歯), てをあらう
+# (手), きのした (木), ひがくれる (日), めがいたい (目). The commonest noun
+# spelled so, and where another is as plain, the one the words beside it
+# name: (kanji, reading, the words that name it).
+_ONE_KANA_NOUNS = {
+    "は": (("葉", frozenset({"木", "き", "緑", "みどり", "落ちる", "おちる", "秋", "あき", "赤い", "あかい", "黄色い",
+                            "きいろい", "枯れる", "かれる", "散る", "ちる"})), ("歯", None)),
+    "め": (("目", None),),
+    "て": (("手", None),),
+    "き": (("気", frozenset({"つける", "付ける", "つけ", "する", "し", "なる", "なっ", "なり", "つく", "付く", "つい",
+                            "使う", "つかう", "入る", "いる", "合う", "あう", "楽", "らく", "短い", "長い", "強い", "弱い",
+                            "小さい", "大きい"})), ("木", None)),
+    "ひ": (("火", frozenset({"つける", "つけ", "消す", "けす", "けし", "けして", "燃える", "もえる", "もえ", "あつい",
+                            "熱い", "ストーブ", "たばこ", "ガス", "マッチ"})), ("日", None)),
+    "ち": (("血", None),),
+    "け": (("毛", None),),
+    "せ": (("背", None),),
+}
+_ONE_KANA_AFTER = frozenset({"が", "を", "に", "で", "の", "は", "も", "と", "へ", "から", "まで"})
+
+# Nouns in kana UniDic reads as a form of a verb before a case particle,
+# which no such form takes (plan 272): いえにきた is 家, never 言える.
+_KANA_NOUN_NOT_VERB = {"いえ": "家"}
+
+
+def _one_kana_nouns(morphemes: list[Morpheme]) -> None:
+    """A noun of one kana UniDic read as something else, read back as the
+    noun (_ONE_KANA_NOUNS) where only a noun can stand: before a case
+    particle, and after the start, a mark, この or a noun's の -- a
+    particle stacks on neither (は + が, て + を)."""
+    for k, m in enumerate(morphemes):
+        if m.surface in _KANA_NOUN_NOT_VERB and m.pos == "verb" and k + 1 < len(morphemes) \
+                and morphemes[k + 1].pos == "particle" and morphemes[k + 1].surface in _ONE_KANA_AFTER \
+                and _glued(m, morphemes[k + 1]):
+            m.pos, m.lemma, m.reading, m.lemma_reading = "noun", _KANA_NOUN_NOT_VERB[m.surface], m.surface, m.surface
+            m.ctype, m.cform, m.goshu, m.auxiliary_use = "", "", "和", False
+            continue
+        if m.surface not in _ONE_KANA_NOUNS or k + 1 >= len(morphemes):
+            continue
+        nxt = morphemes[k + 1]
+        if nxt.pos != "particle" or nxt.surface not in _ONE_KANA_AFTER or not _glued(m, nxt):
+            continue
+        before = morphemes[k - 1] if k > 0 else None
+        if not (before is None or before.pos in ("symbol", "adnominal")
+                or (before.surface == "の" and before.pos == "particle")
+                # (After an adjective, a noun it describes: あかいはが. Never
+                # て, the particle after a predicate wherever MeCab cut it.)
+                or (before.pos in ("verb", "adjective") and before.cform.startswith(("連体形", "終止形"))
+                    and m.surface != "て")):
+            continue
+        words = {w for u in morphemes for w in (u.surface, u.lemma) if u is not m}
+        kanji = next(kj for kj, partners in _ONE_KANA_NOUNS[m.surface] if partners is None or partners & words)
+        if m.pos == "noun" and m.lemma == kanji:
+            continue
+        m.pos, m.lemma, m.reading, m.lemma_reading, m.goshu = "noun", kanji, m.surface, m.surface, "和"
+        m.kana = chr(ord(m.surface) + 0x60)
+
+
+def _notice(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """きがつく, "to notice", read as 飢餓, "starvation", and the verb
+    (plan 272): the idiom 気がつく written in kana, き and が."""
+    from dataclasses import replace
+
+    out, out_t = [], []
+    for k, m in enumerate(morphemes):
+        nxt = morphemes[k + 1] if k + 1 < len(morphemes) else None
+        if (m.surface == "きが" and m.lemma == "飢餓" and nxt is not None and nxt.pos == "verb"
+                and nxt.lemma_reading == "つく"):
+            out.append(replace(m, surface="き", end=m.start + 1, lemma="気", reading="き", lemma_reading="き",
+                               kana="キ", goshu="漢"))
+            out.append(replace(m, surface="が", start=m.start + 1, lemma="が", reading="が", lemma_reading="が",
+                               kana="ガ", pos="particle", goshu="和", ctype="", cform=""))
+            out_t += [("名詞", "普通名詞", "一般"), ("助詞", "格助詞", "")]
+            continue
+        if (m.surface == "けして" and m.pos == "adverb" and k > 0 and morphemes[k - 1].surface == "を"):
+            # 火をけして is 消して, never 決して, "never": an adverb takes no を.
+            out.append(replace(m, surface="けし", end=m.start + 2, pos="verb", lemma="消す", reading="けし",
+                               lemma_reading="けす", kana="ケシ", ctype="五段-サ行", cform="連用形-一般", goshu="和"))
+            out.append(replace(m, surface="て", start=m.start + 2, pos="particle", lemma="て", reading="て",
+                               lemma_reading="て", kana="テ", ctype="", cform="", goshu="和", conjunctive=True))
+            out_t += [("動詞", "一般", ""), ("助詞", "接続助詞", "")]
+            continue
+        out.append(m)
+        out_t.append(tags[k])
+    return out, out_t
+
+
+# Where it hurts: a part of the body, which 痛い says of it.
+_BODY = frozenset({"あたま", "頭", "おなか", "お腹", "はら", "腹", "は", "歯", "のど", "喉", "あし", "足", "め", "目",
+                   "みみ", "耳", "て", "手", "こし", "腰", "せなか", "背中", "むね", "胸", "かた", "肩", "うで", "腕",
+                   "ひざ", "膝", "からだ", "体", "きず", "傷", "ゆび", "指", "くび", "首", "かお", "顔"})
+_PAIN_FORMS = {"たい": ("いたい", "終止形-一般"), "たく": ("いたく", "連用形-一般"),
+               "たかっ": ("いたかっ", "連用形-促音便"), "たけれ": ("いたけれ", "仮定形-一般")}
+
+
+def _pain(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """痛い in kana read as 居る + たい, "to want to be" (plan 272):
+    あたまがいたかった is "my head hurt", never "the head wanted to be".
+    Only after a part of the body and its が, は or も."""
+    from dataclasses import replace
+
+    out, out_t = [], []
+    k = 0
+    while k < len(morphemes):
+        m = morphemes[k]
+        nxt = morphemes[k + 1] if k + 1 < len(morphemes) else None
+        if (m.surface == "い" and m.pos == "verb" and m.lemma == "居る" and nxt is not None
+                and nxt.pos == "auxiliary" and nxt.surface in _PAIN_FORMS and k >= 2
+                and morphemes[k - 1].surface in ("が", "は", "も") and morphemes[k - 2].surface in _BODY):
+            surface, cform = _PAIN_FORMS[nxt.surface]
+            out.append(replace(m, surface=surface, end=nxt.end, pos="adjective", lemma="痛い", reading=surface,
+                               lemma_reading="いたい", kana="".join(chr(ord(c) + 0x60) for c in surface),
+                               ctype="形容詞", cform=cform, auxiliary_use=False, goshu="和"))
+            out_t.append(("形容詞", "一般", ""))
+            k += 2
+            continue
+        out.append(m)
+        out_t.append(tags[k])
+        k += 1
+    return out, out_t
+
+
+# The endings a verb's stem takes, which never follow the particle ね
+# (plan 272), and the form of 寝る each asks.
+_SLEEP_ENDINGS = {"ます": "連用形-一般", "まし": "連用形-一般", "ませ": "連用形-一般", "ましょう": "連用形-一般",
+                  "た": "連用形-一般", "たら": "連用形-一般", "たり": "連用形-一般", "たい": "連用形-一般",
+                  "たく": "連用形-一般", "たかっ": "連用形-一般", "なさい": "連用形-一般"}
+
+
+def _sleep(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """寝る written in kana after an adverb, read as the particle ね and an
+    ending (plan 272): 早くねます is ね + ます to UniDic, 早くねよう ね + よ +
+    う, はやくねなさい ね + なさる -- and a particle takes no verb's ending.
+    The ね is 寝る, "to go to bed", in the form its ending asks; よう after
+    it is the volitional (寝よう, "let's sleep")."""
+    from dataclasses import replace
+
+    out, out_t = list(morphemes), list(tags)
+    for i, m in enumerate(out[:-1]):
+        nxt = out[i + 1]
+        if (m is not None and m.surface == "ない" and m.pos == "adjective" and m.lemma == "無い"
+                and m.cform.startswith("終止形") and nxt is not None and _glued(m, nxt)
+                and ((nxt.surface == "て" and nxt.pos == "particle") or (nxt.surface == "た" and nxt.pos == "auxiliary"))):
+            # 泣いて, 泣いた written in kana: ない + て to UniDic, and ない's
+            # own forms are なくて and なかった (plan 272).
+            out[i] = replace(m, pos="verb", lemma="泣く", reading="ない", lemma_reading="なく", ctype="五段-カ行",
+                             cform="連用形-イ音便", goshu="和")
+            out_t[i] = ("動詞", "一般", "")
+            continue
+        if m is None or m.surface != "ね" or m.pos != "particle" or out[i + 1] is None or not _glued(m, out[i + 1]):
+            continue
+        nxt = out[i + 1]
+        if nxt.surface in _SLEEP_ENDINGS and nxt.pos in ("auxiliary", "verb"):
+            out[i] = replace(m, pos="verb", lemma="寝る", reading="ね", lemma_reading="ねる", kana="ネ",
+                             ctype="下一段-ナ行", cform=_SLEEP_ENDINGS[nxt.surface], goshu="和")
+            out_t[i] = ("動詞", "一般", "")
+        elif nxt.surface == "よう" and nxt.pos == "particle" and (i + 2 >= len(out) or out[i + 2].pos == "symbol"):
+            out[i] = replace(m, surface="ねよう", end=nxt.end, pos="verb", lemma="寝る", reading="ねよう",
+                             lemma_reading="ねる", kana="ネヨウ", ctype="下一段-ナ行", cform="意志推量形", goshu="和")
+            out_t[i] = ("動詞", "一般", "")
+            out[i + 1] = None
+    keep = [k for k, m in enumerate(out) if m is not None]
+    return [out[k] for k in keep], [out_t[k] for k in keep]
+
+
 def _went(morphemes: list[Morpheme]) -> list[Morpheme]:
     """行っ read as 行う, "to carry out", where nothing is carried out
     (plan 272). 行った and 行って are 行く's forms and 行う's alike, and
@@ -870,6 +1036,74 @@ def _unknown_words(text: str, morphemes: list[Morpheme], tags: list[tuple]) -> t
     return out_m, out_t
 
 
+_HONORIFIC_ENDS = ("くん", "ちゃん", "さん", "さま", "ちゃま")
+
+
+def _kana_names(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A name in hiragana MeCab cut into words it is not (plan 272):
+
+    - こんた + くん read as こん + たくん, 巧む's sound change -- a verb that
+      ends in an honorific's letters, before no て or た, is the name and
+      the honorific;
+    - そうた read as そう + the past た, which no adverb takes: one word;
+    - たろう after a mark read as an ending, which opens nothing: a word.
+
+    Each is read back as one word the dictionary does not know (`unknown`,
+    most often a name), and an honorific after it as the honorific."""
+    from dataclasses import replace
+
+    ms, ts = list(morphemes), list(tags)
+    out, out_t = [], []
+    k = 0
+    while k < len(ms):
+        m = ms[k]
+        nxt = ms[k + 1] if k + 1 < len(ms) else None
+        honorific = next((h for h in _HONORIFIC_ENDS if m.surface.endswith(h) and len(m.surface) > len(h)), None)
+        if (honorific and m.pos == "verb" and _kana_letters(m.surface)
+                and not (nxt is not None and nxt.surface[:1] in "てでただ")):
+            # Take back the kana words glued before it, as far as the
+            # name goes (こん of こんたくん), never across a particle.
+            j = k
+            while j - 1 >= 0 and len(out) > 0 and _kana_letters(ms[j - 1].surface) and _glued(ms[j - 1], ms[j]) \
+                    and ms[j - 1].pos not in ("particle", "auxiliary", "symbol") and k - j < 2:
+                j -= 1
+            head = ms[j:k] + [replace(m, surface=m.surface[:-len(honorific)], end=m.end - len(honorific))]
+            del out[len(out) - (k - j):]
+            del out_t[len(out_t) - (k - j):]
+            out.append(replace(_merged(head, unknown=True), proper=True, name_kind="person"))
+            out_t.append(("名詞", "固有名詞", "人名"))
+            out.append(replace(m, surface=honorific, start=m.end - len(honorific),
+                               lemma={"くん": "君", "さま": "様"}.get(honorific, honorific),
+                               reading=honorific, lemma_reading=honorific,
+                               kana="".join(chr(ord(c) + 0x60) for c in honorific),
+                               pos="suffix", ctype="", cform="", auxiliary_use=False, goshu="和"))
+            out_t.append(("接尾辞", "名詞的", "一般"))
+            if nxt is not None and nxt.pos == "particle" and nxt.conjunctive:
+                # (The が after the verb it was read as joined clauses; after
+                # a name it marks the subject.)
+                ms[k + 1] = replace(nxt, conjunctive=False)
+                ts[k + 1] = ("助詞", "格助詞", "")
+            k += 1
+            continue
+        if (m.pos == "auxiliary" and m.surface == "た" and out and out[-1].pos in ("adverb", "noun", "pronoun")
+                and _kana_letters(out[-1].surface) and _kana_letters(m.surface) and _glued(out[-1], m)
+                and nxt is not None and nxt.pos == "particle"):
+            out[-1] = _merged([out[-1], m], unknown=True)
+            out_t[-1] = ("名詞", "固有名詞", "人名")
+            k += 1
+            continue
+        if (m.pos == "auxiliary" and len(m.surface) >= 3 and _kana_letters(m.surface)
+                and (not out or out[-1].pos == "symbol") and nxt is not None and nxt.pos == "particle"):
+            out.append(_merged([m], unknown=True))
+            out_t.append(("名詞", "固有名詞", "人名"))
+            k += 1
+            continue
+        out.append(m)
+        out_t.append(ts[k])
+        k += 1
+    return out, out_t
+
+
 def _merged(run: list[Morpheme], unknown: bool, lemma: str | None = None) -> Morpheme:
     """One word of kana letters, read as written, and filed under the
     word the dictionary spells it as (`lemma`), where it knows one."""
@@ -910,8 +1144,13 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
     try:
         morphemes, tags = _quotative_to(text, *_tag(text, 0, tagger), tagger)
         morphemes, tags = _unknown_words(text, morphemes, tags)
+        morphemes, tags = _kana_names(morphemes, tags)
         _demonstratives(morphemes)
         _picture(morphemes)
+        morphemes, tags = _notice(morphemes, tags)
+        _one_kana_nouns(morphemes)
+        morphemes, tags = _sleep(morphemes, tags)
+        morphemes, tags = _pain(morphemes, tags)
         morphemes = _went(morphemes)
         morphemes, tags = _how_many_minutes(morphemes, tags)
         morphemes, tags = _not_a_passive(morphemes, tags)

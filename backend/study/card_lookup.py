@@ -1418,7 +1418,8 @@ _WHEN_WORDS = frozenset({"去年", "きょねん", "昨日", "きのう", "今�
                          "昨夜", "ゆうべ", "今年", "ことし", "朝", "あさ", "夜", "よる", "最近", "さいきん"})
 
 # The living, that いる says is there and 亡くなる says has died.
-_LIVING = frozenset({"人", "ひと", "子", "こ", "子ども", "子供", "こども", "犬", "いぬ", "猫", "ねこ", "鳥", "とり",
+_LIVING = frozenset({"人", "ひと", "子", "こ", "子ども", "子供", "こども", "女の子", "おんなのこ", "男の子",
+                     "おとこのこ", "女", "おんな", "男", "おとこ", "弟", "妹", "生徒", "せいと", "犬", "いぬ", "猫", "ねこ", "鳥", "とり",
                      "魚", "さかな", "動物", "どうぶつ", "虫", "むし", "友だち", "友達", "ともだち", "家族", "かぞく",
                      "兄弟", "きょうだい", "学生", "がくせい", "先生", "せんせい", "誰", "だれ", "彼", "かれ", "彼女",
                      "かのじょ", "父", "ちち", "母", "はは", "祖父", "そふ", "祖母", "そぼ", "兄", "あに", "姉",
@@ -1426,6 +1427,10 @@ _LIVING = frozenset({"人", "ひと", "子", "こ", "子ども", "子供", "こ�
                      "むすめ", "両親", "りょうしん", "客", "きゃく", "医者", "いしゃ", "店員", "てんいん", "犯人",
                      "はんにん", "おじいさん", "おばあさん", "お父さん", "おとうさん", "お母さん", "おかあさん",
                      "赤ちゃん", "あかちゃん", "社長", "しゃちょう", "みんな", "皆", "私", "わたし", "僕", "ぼく"})
+
+
+_ANIMALS = frozenset({"犬", "いぬ", "猫", "ねこ", "鳥", "とり", "虫", "むし", "動物", "どうぶつ", "せみ", "蝉", "からす",
+                      "カラス", "かえる", "カエル", "牛", "うし", "羊", "ひつじ", "犬たち", "小鳥", "ことり"})
 
 
 def _alive(word: str) -> bool:
@@ -1450,6 +1455,10 @@ _HOMES = frozenset({"アパート", "マンション", "寮", "りょう", "近�
 _PARTNERS = (
     ("住む", ("に",), _placelike),                                  # 東京にすんでいる
     ("居る", ("が", "も", "は"), _alive),                            # 若い人もいる
+    ("来る", ("が", "も", "は"), _alive),                            # 田中さんがきた
+    ("泣く", ("が", "も", "は"), lambda word: _alive(word) and word not in _ANIMALS),  # こどもがないている
+    ("鳴く", ("が", "も", "は"), _ANIMALS),                          # とりがないている
+    ("来る", ("に", "へ"), None),                                   # いえにきた (着る takes を)
     ("居る", ("に",), None),                                       # へやにいる
     ("要る", ("が", "も", "は"), frozenset({"お金", "おかね", "金", "かね", "時間", "じかん", "許可", "きょか",
                                          "パスポート", "ビザ", "勇気", "ゆうき", "助け", "たすけ", "力", "ちから",
@@ -1521,7 +1530,7 @@ _PARTNERS = (
     ("咲く", ("が", "も", "は"), frozenset({"花", "はな", "さくら", "桜", "ばら", "梅", "うめ", "ひまわり"})),
     ("閉める", ("を",), frozenset({"窓", "まど", "ドア", "戸", "と", "門", "もん", "店", "みせ", "ふた", "カーテン"})),
     ("締める", ("を",), frozenset({"ネクタイ", "ベルト", "ひも"})),
-    ("寝る", ("",), frozenset({"はやく", "早く", "おそく", "遅く", "もう"})),        # 早くねる
+    ("寝る", ("",), frozenset({"はやく", "早く", "おそく", "遅く", "もう", "よく", "ぐっすり", "すぐ"})),  # 早くねる
     ("起きる", ("に",), frozenset({"時", "じ", "朝", "あさ"})),      # 七時におきる
     ("起きる", ("",), frozenset({"はやく", "早く", "おそく", "遅く", "もう", "まだ"})),  # はやくおきなさい
     ("済む", ("",), frozenset({"もう"})),                           # もうすんだ
@@ -1596,13 +1605,45 @@ def _by_sentence(morphemes, i: int, spelled):
 _SPELLED_FORMS = ("連用形-一般", "連用形-イ音便", "連用形-促音便", "連用形-撥音便", "未然形-一般", "終止形-一般")
 
 
-def _spells(entry: dict, stem: str) -> bool:
+def _spells(entry: dict, stem: str, nxt=None) -> bool:
     """Whether a form of the deck verb `entry` is written `stem`: ねこを
-    かいたがって is 飼う's かい, which UniDic read as 掻く's sound change."""
+    かいたがって is 飼う's かい, which UniDic read as 掻く's sound change.
+    Before て or た a godan verb takes its sound-changed form, and before
+    で or だ the voiced one (嗅いだ, 読んだ): かいだ is no 飼う."""
     written = re.split(r"[/／;、,・]", entry.get("kanji") or "")[0].strip()
     ctype = _verb_class(written) if written else ""
-    return bool(ctype) and any(_conjugated(kana, ctype, form) == stem
-                               for kana in _reading_variants(entry.get("kana") or "") for form in _SPELLED_FORMS)
+    if not ctype:
+        return False
+    forms = _SPELLED_FORMS
+    past_or_te = nxt is not None and ((nxt.pos == "auxiliary" and nxt.lemma in ("た", "だ"))
+                                      or (nxt.pos == "particle" and nxt.conjunctive and nxt.surface in ("て", "で")))
+    if past_or_te:
+        voiced = nxt.surface[:1] in "でだ"
+        if ctype.startswith("五段"):
+            forms = ("連用形-撥音便",) if voiced and not ctype.endswith("ガ行") else \
+                ("連用形-イ音便",) if voiced else ("連用形-イ音便", "連用形-促音便")
+            if ctype.endswith("サ行"):
+                forms = ("連用形-一般",)
+        else:
+            forms = ("連用形-一般",)
+    return any(_conjugated(kana, ctype, form) == stem
+               for kana in _reading_variants(entry.get("kana") or "") for form in forms)
+
+
+def _subject_of(morphemes, i: int):
+    """(particle, noun) for the subject of morphemes[i]'s clause, where a
+    word stands between them (plan 272): 女の子が一人でないていた. The
+    nearest が, は or も after a noun, back to the clause's start."""
+    for k in range(i - 1, 0, -1):
+        t = morphemes[k]
+        if t.pos == "symbol" or (t.pos == "particle" and t.conjunctive):
+            return None
+        if t.pos == "particle" and t.surface in ("が", "は", "も"):
+            word = morphemes[k - 1]
+            if word.pos == "suffix" and k >= 2:
+                return t.surface, morphemes[k - 2].surface + word.surface
+            return (t.surface, word.surface) if word.pos in ("noun", "pronoun") else None
+    return None
 
 
 def _by_partner(morphemes, i: int, spelled):
@@ -1612,9 +1653,14 @@ def _by_partner(morphemes, i: int, spelled):
     no partner names one."""
     m = morphemes[i]
     stem = morphology.kata_to_hira(m.surface)
-    for particle, word in _partners(morphemes, i):
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    pairs = [(p, w, False) for p, w in _partners(morphemes, i)]
+    subject = _subject_of(morphemes, i)
+    if subject is not None and subject not in [(p, w) for p, w, _ in pairs]:
+        pairs.append((*subject, True))
+    for particle, word, far in pairs:
         for kanji, particles, words in _PARTNERS:
-            if particle not in particles:
+            if particle not in particles or (far and kanji not in _SUBJECT_VERBS):
                 continue
             if words is not None and not (words(word) if callable(words) else word in words):
                 continue
@@ -1623,9 +1669,16 @@ def _by_partner(morphemes, i: int, spelled):
                     return level, entry, raw_id
             if kanji and m.pos == "verb" and _hiragana(stem):
                 for level, entry in _VOCAB_BY_LEMMA.get(kanji, ()):
-                    if (entry.get("kanji") or "") == kanji and _spells(entry, stem):
+                    if (entry.get("kanji") or "") == kanji and _spells(entry, stem, nxt):
                         return level, entry, vocab_to_id(entry, level)
     return None
+
+
+# The verbs whose partner is the one who does it, which may stand further
+# back in the clause (_subject_of): 女の子が一人でないていた. Never a verb
+# whose が marks what it takes: 犬は匂いをかいだ is no 飼う.
+_SUBJECT_VERBS = frozenset({"泣く", "鳴く", "来る", "居る", "要る", "亡くなる", "無くなる", "降る", "晴れる",
+                            "吹く", "咲く", "点く", "経つ", "済む", "空く", "開く", "効く"})
 
 
 def _kana_verb(m, hit, spelled=None):
@@ -2140,6 +2193,11 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
         return jmdict_db.get_by_key("手前", "てめえ")
     if m.pos not in _POOL_POS or not _japanese(m.surface) or _numeral(m.surface):
         # A number is the deck's to read (its numeral compounds).
+        return None
+    if m.unknown and _hiragana(m.surface):
+        # Letters the tokenizer could make no word of, read back as one
+        # (morphology._unknown_words, _kana_names): most often a name, and
+        # a pool row spelled so is another word (たろう, "ought to have been").
         return None
     previous = morphemes[i - 1] if i > 0 else None
     if m.auxiliary_use and previous is not None and previous.pos == "particle" and previous.conjunctive:
@@ -2991,6 +3049,10 @@ def resolve_idiom(morphemes, i: int, max_len: int = 4):
         written = "".join(m.surface for m in run[:-1])
         reading = morphology.kata_to_hira("".join(m.reading for m in run[:-1])) + verb.lemma_reading
         hit = resolve_lemma(written + verb.lemma, reading)
+        if hit is None and all(_hiragana(m.surface) for m in head):
+            # (Or as the deck writes it, the page in kana: きをつけて is
+            # 気をつける, plan 272.)
+            hit = resolve_lemma("".join(m.lemma for m in head) + particle.surface + verb.lemma, reading)
         if hit is not None:
             level, entry, raw_id = hit
             return level, entry, raw_id, n

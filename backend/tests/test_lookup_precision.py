@@ -748,8 +748,9 @@ class EveryPartTests(unittest.TestCase):
         # ある研究's ある is 或る, "a certain": no ある "to be".
         self.assertEqual(matches("ある研究によると、その原因は分からない。")["ある"]["raw_id"], "vocab_N3_或る_ある")
         # A marker is its point's, even where the point was refused: the
-        # ね of ゆっくりねます is 寝る misread, no "isn't it?".
-        self.assertNotIn("ね", matches("あしたは休みだから、ゆっくりねます。"))
+        # ね of ゆっくりねます is 寝る misread, no "isn't it?" -- and since
+        # plan 272 read as 寝る (morphology._sleep).
+        self.assertEqual(matches("あしたは休みだから、ゆっくりねます。")["ね"]["raw_id"], "vocab_N5_寝る_ねる")
         # A conjunction opens its clause: no さて "well, now" in a café.
         self.assertNotIn("さて", matches("あのきっさてんでコーヒーを飲みましょう。"))
 
@@ -1348,3 +1349,67 @@ class SpokenWordTests(unittest.TestCase):
             with self.subTest(surface=surface):
                 self.assertEqual(token_of(sentence, surface)["reading"], surface)
         self.assertEqual(token_of("こんにちは。", "こんにちは")["reading"], "こんにちわ")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class KanaPageTests(unittest.TestCase):
+    """Plan 272: a first-year page in kana, where UniDic cuts what it does
+    not know into what cannot stand there -- a particle that takes a
+    verb's ending, a mark before が, a verb that ends in an honorific."""
+
+    def test_neru_written_in_kana(self) -> None:
+        for sentence, surface in (("早くねます。", "ね"), ("それで、早くねた。", "ね"), ("今日は早くねよう。", "ねよう"),
+                                  ("はやくねなさい。", "ね"), ("あの子はよくねる。", "ねる")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["raw_id"], "vocab_N5_寝る_ねる")
+        # The particle stays the particle.
+        self.assertIsNone(token_of("そうだね。", "ね")["vocab_match"])
+
+    def test_naku_written_in_kana(self) -> None:
+        # ない's own forms are なくて and なかった: ないて is 泣いて, or 鳴いて,
+        # by who cries.
+        for sentence, kanji in (("こどもがないている。", "泣く"), ("あかちゃんがないた。", "泣く"),
+                                ("とりがないている。", "鳴く")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "ない")["vocab_match"]["entry"]["kanji"], kanji)
+        self.assertEqual(token_of("お金がない。", "ない")["pos"], "adjective")
+        # The one who cries may stand further back in the clause...
+        self.assertEqual(token_of("女の子が一人でないていた。", "ない")["vocab_match"]["entry"]["kanji"], "泣く")
+        self.assertEqual(token_of("子供が三人いるので、お弁当を作る。", "いる")["vocab_match"]["entry"]["kanji"], "居る")
+        # ...but never what is taken: 犬は匂いをかいだ is 嗅いだ, and かい
+        # before だ is no form of 飼う.
+        self.assertIsNone(token_of("犬は人の匂いをかいだ。", "かい")["vocab_match"])
+
+    def test_itai_after_a_part_of_the_body(self) -> None:
+        self.assertEqual(token_of("きのうはあたまがいたかった。", "いたかっ")["vocab_match"]["entry"]["kanji"], "痛い")
+        self.assertEqual(token_of("ここにいたい。", "い")["vocab_match"]["entry"]["kanji"], "居る")
+
+    def test_a_noun_of_one_kana(self) -> None:
+        for sentence, surface, kanji in (
+            ("はがいたいです。", "は", "歯"), ("めがいたい。", "め", "目"), ("てをあらう。", "て", "手"),
+            ("きのしたで休む。", "き", "木"), ("ひがくれる。", "ひ", "日"), ("ひをけしてください。", "ひ", "火"),
+            ("あかいはがおちた。", "は", "葉"), ("ともだちがいえにきた。", "いえ", "家"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        self.assertEqual(token_of("ひをけしてください。", "けし")["vocab_match"]["entry"]["kanji"], "消す")
+        self.assertEqual(token_of("ともだちがいえにきた。", "き")["vocab_match"]["entry"]["kanji"], "来る")
+        self.assertEqual(token_of("きをつけてください。", "きをつけ")["vocab_match"]["entry"]["kanji"], "気を付ける")
+        self.assertEqual(token_of("きがつかなかった。", "き")["vocab_match"]["entry"]["kanji"], "気")   # never 飢餓
+        # A particle where a particle stands; いえ, "no", that opens a reply.
+        for sentence, surface in (("行くのはたのしい。", "の"), ("食べてはいけない。", "て"), ("いえ、ちがいます。", "いえ")):
+            with self.subTest(sentence=sentence):
+                self.assertNotEqual(token_of(sentence, surface)["pos"], "noun")
+
+    def test_a_name_in_kana_is_no_word_it_was_cut_into(self) -> None:
+        token = token_of("こんたくんがきた。", "こんた")                 # never こん + たくん, 巧む
+        self.assertIsNone(token["vocab_match"])
+        self.assertEqual(token["gloss"]["en"], "a person's name")
+        self.assertEqual(token_of("こんたくんがきた。", "くん")["vocab_match"]["raw_id"], "vocab_N4_君_くん")
+        self.assertEqual(token_of("こんたくんがきた。", "き")["vocab_match"]["entry"]["kanji"], "来る")
+        self.assertIsNone(token_of("そうたはげんきです。", "そうた")["vocab_match"])   # never そう + た
+        self.assertIsNone(token_of("ゆうしゃ　たろうは　もりに　いった", "たろう")["vocab_match"])  # no ending
+        for sentence, surface in (("たくさんある。", "たくさん"), ("おかあさんがきた。", "おかあさん"),
+                                  ("みなさん、こんにちは。", "みなさん")):
+            with self.subTest(sentence=sentence):
+                self.assertIsNotNone(token_of(sentence, surface)["vocab_match"])
