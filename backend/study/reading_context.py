@@ -613,6 +613,18 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = right
             continue
 
+        # 気に入る: 入 is い there, never the はい of 入る alone (plan 272).
+        if s.startswith("入") and r.startswith("はい") and prev(i) == "に" and i >= 2 and surf[i - 2] == "気":
+            out[i] = r[1:]
+            continue
+
+        # お暇する, "to take one's leave": おいとま, never the ひま of 暇
+        # ("free time") that お暇ですか asks about (plan 272).
+        if s == "暇" and r == "ひま" and prev(i) == "お" and (
+                nxt(i).startswith(("し", "す", "いた", "さ")) or nxt(i) in ("を", "する")):
+            out[i] = "いとま"
+            continue
+
         # 言う read ゆう: every form of 言 is い-. 込む is never ごむ on
         # its own (and 〜込む compounds are one token, こむ).
         head = next(((w, ok) for c, w, ok in _HEADS if s.startswith(c) and r.startswith(w)), None)

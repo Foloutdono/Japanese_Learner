@@ -1419,3 +1419,27 @@ class SpokenFinalTests(unittest.TestCase):
     def test_teku_is_te_iku_said_short(self) -> None:
         self.assertEqual(found_in("置いてっちゃう").get("〜ていく／〜てくる"), "てっ")
         self.assertEqual(found_in("飲んでく？").get("〜ていく／〜てくる"), "でく")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WholeWordTests(unittest.TestCase):
+    """Plan 272: a deck word the tokenizer writes as a word and its
+    particles (card_lookup.resolve_whole_word) is a word: the も of いつも
+    is no "also", the は of 実は no topic, the まで of いつまでも no
+    から〜まで."""
+
+    def test_a_particle_inside_a_whole_word_is_its_letter(self) -> None:
+        for sentence, pattern in (("いつも人が多いです。", "も"), ("実は、田中さんが来た。", "は"),
+                                  ("実は、田中さんが来た。", "〜は〜が"), ("今にも雨がふりそうです。", "に"),
+                                  ("今にも雨がふりそうです。", "も"), ("いつまでも待っています。", "から〜まで"),
+                                  ("常に学び続けるべきだ。", "に"), ("とっくに知ってた。", "に")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+
+    def test_the_same_particles_elsewhere_keep_their_points(self) -> None:
+        for sentence, pattern, written in (("いつも私も行きます。", "も", "も"), ("実をいうと、彼は来た。", "は", "は"),
+                                           ("友達とともに行く。", "〜とともに", "とともに"),
+                                           ("行くかどうか分からない。", "〜かどうか", "かどうか"),
+                                           ("今に見ていろ。", "に", "に"), ("非常に賢い鳥だ。", "〜く／〜に（副詞形）", "に")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertEqual(found_in(sentence).get(pattern), written)

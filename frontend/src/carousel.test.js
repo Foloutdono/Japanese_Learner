@@ -690,8 +690,8 @@ describe('explaining a point in its own sentence', () => {
     expect(glossOf('医師の説明によると、手術の後は二週間ほど入院が必要らしい。', 'ほど')).toBe('about')
     // できるだけ is “as … as possible”, never “only”.
     expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBe('as … as possible')
-    // A form of だ that makes an adverb of the word (急に), and one the tokenizer gave a particle: bare.
-    expect(glossOf('急に寒くなると、体の具合が悪くなります。', 'に')).toBe('makes an adverb')
+    // A form of だ that makes an adverb of the word (真剣に), and one the tokenizer gave a particle: bare.
+    expect(glossOf('経験が少ない人だって、真剣に練習を続ければ必ず上達する。', 'に')).toBe('makes an adverb')
     expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('')
     // The copula で is the particle too often (この店で): always bare.
     expect(glossOf('この店で、この本がいちばん高いです。', 'で')).toBe('')
@@ -699,7 +699,7 @@ describe('explaining a point in its own sentence', () => {
 
   it('gives no stacked slide to a pair that is no two particles (plan 229l)', () => {
     const keys = jp => stacksIn(sentence(jp).rows, 'en', glossEn).map(x => x.key)
-    expect(keys('この棚は古くて、今にも壊れそうです。')).not.toContain('にも')
+    expect(keys('判定に不服な監督は、今にも怒鳴らんばかりに審判に抗議した。')).not.toContain('にも')
     expect(keys('定期券を家に忘れたばかりに、往復とも切符を買わなければならなかった。')).not.toContain('とも')
     expect(keys('専門家とは言わないまでも、彼の考古学の知識はかなりのものだ。')).not.toContain('とは')
     expect(keys('住民への事前の説明なしに、会社は工場の建設に着工した。')).not.toContain('への')
@@ -1058,9 +1058,11 @@ describe('the long videos (plan 233)', () => {
     expect(of('飲みたい')).toBe('to drink')
     expect(of('行きたい')).toBe('to go')
     expect(of('したい')).toMatch(/^to do/)
-    // しゅうまつ cut in two by the tokenizer: neither half is a word of its own.
-    expect(of('しゅう')).toBe('')
-    expect(of('まつ')).toBe('')
+    // しゅうまつ, which the tokenizer cuts into two names, is one word
+    // (plan 272), and no half of it a chip of its own.
+    expect(chips.find(c => c.t === 'しゅうまつ')).toBeDefined()
+    expect(of('しゅう')).toBeUndefined()
+    expect(of('まつ')).toBeUndefined()
     // Every chip is said, a particle as it sounds: the topic は is "wa".
     const wa = longPlan('grammar', files, { level: 'N5', point: 'は' }).items.filter(x => x.type === 'gex').flatMap(x => x.chips)
     expect(wa.find(c => c.t === 'は').voice).toBe('わ')

@@ -823,7 +823,7 @@
 {"t":"研修","r":"けんしゅう","ro":"kenshuu","en":["training"],"fr":["formation"],"fu":[["研","けん"],["修","しゅう"]],"hy":["見修","研週","間修"],"ex":["N2.3"]},
 {"t":"引っ込む","r":"ひっこむ","ro":"hikkomu","en":["to draw back, to withdraw, to stay indoors","to sink in, to cave in"],"fr":["se retirer, reculer, rester chez soi","s'enfoncer, se creuser"],"fu":[["引","ひ"],["っ",""],["込","こ"],["む",""]],"hy":["否っ込む","引っ古む","彼っ込む"]},
 {"t":"燃やす","r":"もやす","ro":"moyasu","en":["to burn"],"fr":["brûler"],"fu":[["燃","も"],["やす",""]],"hy":["模やす","畝やす","茂やす"]},
-{"t":"あちらこちら","r":"あちらこちら","ro":"achirakochira","en":["here and there"],"fr":["ici et là"],"ex":["N1.147"]},
+{"t":"あちらこちら","r":"あちらこちら","ro":"achirakochira","en":["here and there"],"fr":["ici et là"]},
 {"t":"茶碗","r":"ちゃわん","ro":"chawan","en":["rice bowl, teacup"],"fr":["bol à riz, tasse à thé"],"fu":[["茶","ちゃ"],["碗","わん"]],"ex":["N2.217"]},
 {"t":"原稿","r":"げんこう","ro":"genkou","en":["manuscript, copy"],"fr":["manuscrit, copie"],"fu":[["原","げん"],["稿","こう"]],"hy":["言稿","原後","元稿"],"ex":["N2.2","N2.81"]},
 {"t":"評論","r":"ひょうろん","ro":"hyouron","en":["criticism, critique"],"fr":["critique"],"fu":[["評","ひょう"],["論","ろん"]],"hy":["平論","評乱","表論"]},

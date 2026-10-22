@@ -2999,6 +2999,9 @@ def _wa_ga_refused(tokens, start: int, end: int, segments) -> bool:
         return False
     if tokens[last].conjunctive:
         return True
+    from study.card_lookup import whole_word_spans
+    if any(tail <= tokens[first].start and tokens[first].end <= e for _s, tail, e in whole_word_spans(tokens)):
+        return True                    # 実は's は is no topic (plan 272)
     return any(u.pos == "particle" and u.conjunctive and u.surface not in ("て", "で")
                for u in tokens[first + 1:last])
 
@@ -3786,6 +3789,9 @@ def tokens_after(tokens, t, surfaces) -> bool:
     rest = [x.surface for x in tokens[k + 1:k + 1 + len(surfaces)]]
     return tuple(rest) == tuple(surfaces)
 
+
+# The な-adjective's adverbial form: 静かに, 非常に.
+_ADVERBIAL = "〜く／〜に（副詞形）"
 
 _NEGATIVE_PAIRS = ("もう〜ない", "あまり〜ない", "ぜんぜん〜ない", "ちっとも〜ない", "なかなか〜ない",
                    "何も／誰も〜ない", "別に〜ない")
@@ -4845,7 +4851,9 @@ def compound_particles() -> frozenset[str]:
 # "no good", not 行く "to go" unable; ならない is "must", not 成る "to
 # become" (plan 160). UniDic files the いけ of いけません under 行く, and
 # a fuller dictionary under 行ける; both are here.
-NO_GOOD_VERBS = frozenset({"行く", "行ける", "成る"})
+NO_GOOD_VERBS = frozenset({"行く", "行ける", "成る",
+                           # (plan 272: 〜てたまらない's たまら is no 溜まる, "to collect")
+                           "溜まる", "堪る"})
 _NEGATIONS = frozenset({"ない", "ず", "ぬ"})
 
 
@@ -5062,6 +5070,18 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[
     words = [(s, e) for p, _l, s, e, _k, whole, _segs in deduped if whole and "〜" not in p]
     words += [(s, e) for p, _l, s, e, k, whole, _segs in deduped
               if whole and k != "marker" and _all_particles(tokens, s, e)]
+    # And inside a word the deck teaches whole that the tokenizer writes
+    # as a word and its particles (plan 272): the も of いつも is no
+    # "also", the は of 実は no topic (card_lookup.resolve_whole_word).
+    # A construction written on those letters alone is no more there: the
+    # まで of いつまでも is no から〜まで. The adverbial form is: 非常に is
+    # 非常 + に, the card's word and the lesson's (plan 272).
+    if tokens:
+        from study.card_lookup import whole_word_spans
+        wholes = whole_word_spans(tokens)
+        words += [(s, e) for s, _tail, e in wholes]
+        deduped = [h for h in deduped if h[0] == _ADVERBIAL or not any(
+            tail <= a and b <= e for a, b in h[6] for _s, tail, e in wholes)]
     deduped = [h for h in deduped if not (h[0] == "か" and _indefinite_ka(tokens, h[2]))]
     return [
         _with_attributive_na(tokens, (pattern, level, start, end, kind, segments))

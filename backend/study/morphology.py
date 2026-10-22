@@ -175,6 +175,9 @@ _POS_MAP = {
     "連体詞": "adnominal", "接続詞": "conjunction", "感動詞": "interjection",
     "接頭辞": "prefix", "接尾辞": "suffix", "代名詞": "pronoun",
     "補助記号": "symbol", "記号": "symbol", "フィラー": "filler",
+    # A space (空白): the full-width one a lyric or a subtitle writes
+    # between its phrases is a mark, never a word (plan 272).
+    "空白": "symbol",
 }
 
 
@@ -357,6 +360,47 @@ def _how_many_minutes(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[lis
             out_t.append(("副詞", "", ""))
             i += 2
             continue
+        out_m.append(m)
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
+@lru_cache(maxsize=2048)
+def _one_verb(kana: str):
+    """The ichidan verb `kana` (a dictionary form) is when UniDic reads it
+    alone as one -- つかれる is 疲れる -- as (lemma, cType), or None."""
+    words = list(_plain_tagger(kana)) if MORPHOLOGY_AVAILABLE else []
+    if len(words) != 1 or words[0].feature.pos1 != "動詞" or "一段" not in (words[0].feature.cType or ""):
+        return None
+    return words[0].feature.lemma, words[0].feature.cType
+
+
+def _not_a_passive(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A verb in kana and the passive れる that spell one verb of their own
+    read back as that verb (plan 272): UniDic cuts つかれた, "tired", into
+    つか (突く, "to stab") and the passive -- "was stabbed" -- wherever it
+    stands. Only where the letters with れる are a verb UniDic itself reads
+    whole (つかれる); いぬにかまれた stays 噛む in the passive, "bitten"."""
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        if (nxt is not None and m.pos == "verb" and m.cform.startswith("未然形") and m.ctype.startswith("五段")
+                and all("\u3041" <= c <= "\u309f" for c in m.surface) and nxt.pos == "auxiliary"
+                and nxt.lemma == "れる" and nxt.start == m.end and nxt.surface.startswith("れ")):
+            verb = _one_verb(m.surface + "れる")
+            if verb is not None:
+                surface = m.surface + nxt.surface
+                out_m.append(Morpheme(
+                    surface=surface, start=m.start, end=nxt.end, lemma=verb[0],
+                    reading=surface, lemma_reading=m.surface + "れる",
+                    kana="".join(chr(ord(c) + 0x60) for c in surface), pos="verb",
+                    auxiliary_use=False, conjunctive=False, ctype=_conjugation(verb[1]), cform=nxt.cform))
+                out_t.append(("動詞", "一般", ""))
+                i += 2
+                continue
         out_m.append(m)
         out_t.append(tags[i])
         i += 1
@@ -854,6 +898,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _demonstratives(morphemes)
         morphemes = _went(morphemes)
         morphemes, tags = _how_many_minutes(morphemes, tags)
+        morphemes, tags = _not_a_passive(morphemes, tags)
         return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only
         logger.warning("morphology.tokenize failed on input; caller should fall back", exc_info=True)

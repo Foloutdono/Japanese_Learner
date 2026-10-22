@@ -283,7 +283,7 @@ N4 = [
     {"jp": "約束したのに、彼女からまだ返事が来ません。", "en": "She promised, and yet I still haven't had a reply from her.", "fr": "Elle avait promis, et pourtant je n'ai toujours pas de réponse.", "grammar": "〜のに", "focus": "返事"},
     {"jp": "先輩が会社の近所を案内してくれました。", "en": "My senior colleague kindly showed me around the neighbourhood of the office.", "fr": "Un collègue plus ancien m'a fait visiter le quartier autour de l'entreprise.", "grammar": "〜てあげる／てくれる／てもらう", "focus": "案内"},
     {"jp": "祖母の重いにもつを部屋まで運んであげました。", "en": "I carried my grandmother's heavy luggage to her room for her.", "fr": "J'ai porté les lourds bagages de ma grand-mère jusqu'à sa chambre.", "grammar": "〜てあげる／てくれる／てもらう", "focus": "運ぶ"},
-    {"jp": "この棚は古くて、今にも壊れそうです。", "en": "This shelf is old and looks like it could break at any moment.", "fr": "Cette étagère est vieille, on dirait qu'elle va se casser d'un moment à l'autre.", "grammar": "〜そうです", "focus": "壊れる"},
+    {"jp": "この棚は古くて、もうすぐ壊れそうです。", "en": "This shelf is old and looks like it will break soon.", "fr": "Cette étagère est vieille, on dirait qu'elle va bientôt se casser.", "grammar": "〜そうです", "focus": "壊れる"},
     {"jp": "となりの席の学生は、さっきからとても眠そうです。", "en": "The student in the next seat has been looking very sleepy for a while now.", "fr": "L'étudiant assis à côté de moi a l'air d'avoir très sommeil depuis tout à l'heure.", "grammar": "〜そうです", "focus": "眠い"},
     {"jp": "警察が来ているので、近所に泥棒が入ったようです。", "en": "The police are here, so it seems a thief broke into a house in the neighbourhood.", "fr": "La police est là, il semble qu'un cambrioleur soit entré chez quelqu'un du quartier.", "grammar": "〜ようです", "focus": "泥棒"},
     {"jp": "パソコンがさっきから動かないので、故障したようです。", "en": "My computer hasn't been working for a while now, so it seems to have broken down.", "fr": "Mon ordinateur ne répond plus depuis tout à l'heure, il semble être en panne.", "grammar": "〜ようです", "focus": "故障"},
@@ -318,7 +318,7 @@ N4 = [
     {"jp": "来年は、外国の文化を研究しようと思っています。", "en": "Next year, I'm thinking of studying foreign cultures.", "fr": "L'année prochaine, je pense faire des recherches sur les cultures étrangères.", "grammar": "〜ようと思う", "focus": "文化"},
     {"jp": "お世話になった先生に、手紙でお礼を伝えようと思います。", "en": "I'm thinking of writing a letter to thank the teacher who did so much for me.", "fr": "Je pense remercier par lettre le professeur qui m'a tant aidé.", "grammar": "〜ようと思う", "focus": "お礼"},
     {"jp": "この階段を下りると、左に港が見えます。", "en": "When you go down these stairs, you can see the harbour on the left.", "fr": "Quand on descend cet escalier, on voit le port sur la gauche.", "grammar": "〜と", "focus": "港"},
-    {"jp": "急に寒くなると、体の具合が悪くなります。", "en": "Whenever it suddenly turns cold, I start to feel unwell.", "fr": "Quand il fait brusquement froid, je ne me sens pas bien.", "grammar": "〜と", "focus": "具合"},
+    {"jp": "季節が変わって寒くなると、体の具合が悪くなります。", "en": "When the season changes and it turns cold, I start to feel unwell.", "fr": "Quand la saison change et qu'il fait froid, je ne me sens pas bien.", "grammar": "〜と", "focus": "具合"},
     {"jp": "運転しながら、スマホを使ってはいけません。", "en": "You must not use your smartphone while driving.", "fr": "Il ne faut pas utiliser son smartphone en conduisant.", "grammar": "〜ながら", "focus": "スマホ"},
     {"jp": "景色を楽しみながら、森の中をゆっくり歩きました。", "en": "I walked slowly through the forest, enjoying the scenery.", "fr": "J'ai marché lentement dans la forêt en profitant du paysage.", "grammar": "〜ながら", "focus": "景色"},
     {"jp": "休みの日は、漫画を読んだり、テニスをしたりします。", "en": "On my days off, I do things like reading manga and playing tennis.", "fr": "Les jours de repos, je lis des mangas, je joue au tennis, ce genre de choses.", "grammar": "〜たり〜たり", "focus": "漫画"},
@@ -327,7 +327,7 @@ N4 = [
     {"jp": "先生の説明は細かすぎて、よく分かりませんでした。", "en": "The teacher's explanation was too detailed, and I didn't really understand it.", "fr": "L'explication du professeur était trop détaillée, je n'ai pas bien compris.", "grammar": "〜すぎる", "focus": "説明"},
     {"jp": "この布団は柔らかくて、とても寝やすいです。", "en": "This futon is soft and very easy to sleep on.", "fr": "Ce futon est moelleux, on y dort très bien.", "grammar": "〜やすい／〜にくい", "focus": "布団"},
     {"jp": "この手袋は固くて、指が使いにくいです。", "en": "These gloves are stiff, so it's hard to use my fingers.", "fr": "Ces gants sont rigides, j'ai du mal à me servir de mes doigts.", "grammar": "〜やすい／〜にくい", "focus": "手袋"},
-    {"jp": "急に風が強くなって、木が揺れはじめました。", "en": "Suddenly the wind picked up and the trees began to sway.", "fr": "Le vent s'est soudain levé et les arbres ont commencé à se balancer.", "grammar": "〜はじめる／〜おわる／〜つづける", "focus": "揺れる"},
+    {"jp": "台風で風が強くなって、木が揺れはじめました。", "en": "The wind picked up with the typhoon and the trees began to sway.", "fr": "Avec le typhon, le vent s'est levé et les arbres ont commencé à se balancer.", "grammar": "〜はじめる／〜おわる／〜つづける", "focus": "揺れる"},
     {"jp": "祖父は亡くなるまで、日記を書きつづけました。", "en": "My grandfather kept writing his diary until he died.", "fr": "Mon grand-père a tenu son journal jusqu'à sa mort.", "grammar": "〜はじめる／〜おわる／〜つづける", "focus": "日記"},
     {"jp": "この町の人口は、これからも増えていくでしょう。", "en": "This town's population will probably keep growing from now on.", "fr": "La population de cette ville va sans doute continuer à augmenter.", "grammar": "〜ていく／〜てくる", "focus": "人口"},
     {"jp": "駅前の店でサンドイッチを買ってくるから、ここで待っていて。", "en": "I'll go and get some sandwiches at the shop in front of the station, so wait here.", "fr": "Je vais acheter des sandwichs au magasin devant la gare, attends-moi ici.", "grammar": "〜ていく／〜てくる", "focus": "サンドイッチ"},
@@ -1259,6 +1259,10 @@ def off_deck_words(jp: str) -> list[str]:
             continue
         surface = tok["surface"]
         if _is_numeral(surface) or difficulty.word_level(surface) or difficulty.word_level(tok.get("lemma", "")):
+            continue
+        if tok.get("number") is not None:
+            # A number with its counter read as one word -- the ordinal
+            # 三度目, the age １０代 (plan 272) -- is its figure's.
             continue
         out.append(surface)
     return out

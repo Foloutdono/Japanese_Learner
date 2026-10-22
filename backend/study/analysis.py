@@ -29,7 +29,7 @@ from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
-    resolve_split_word, resolve_adverb_tail, resolve_interjection, numeral_value,
+    resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_interjection, resolve_home, numeral_value,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -265,11 +265,12 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
     # Furigana goes over the surface AS WRITTEN, so it uses `reading`
     # (the inflected reading) -- not `lemma_reading`, which is the
     # dictionary form's reading and can differ from what's on the page.
-    furigana = align_deck(m.surface, m.reading)
+    reading = _card_reading(m, hit[1] if hit else pool)
+    furigana = align_deck(m.surface, reading)
 
     token = {
         "surface": m.surface, "start": m.start, "end": m.end,
-        "lemma": m.lemma, "reading": m.reading, "pos": m.pos,
+        "lemma": m.lemma, "reading": reading, "pos": m.pos,
         "furigana": furigana,
         "vocab_match": vocab_match,
         "kanji_matches": kanji_matches,
@@ -287,6 +288,36 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
         # and what they most often are.
         token["gloss"] = dict(_UNKNOWN_GLOSS)
     return token
+
+
+# A kana and the ones it is said as beside another: つ ち く き geminate
+# (鉄製 てっせい), and an unvoiced one voices (衝動買い しょうどうがい).
+_GEMINATES = frozenset("つちくき")
+_VOICED_OF = dict(zip("かきくけこさしすせそたちつてとはひふへほはひふへほ",
+                      "がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ"))
+
+
+def _sound_changed(said: str, card: str) -> bool:
+    """Whether `card` is `said` with a sound change a compound makes: a
+    letter doubled (てつせい てっせい) or voiced (かい がい) -- the same
+    word, read as the dictionary reads it."""
+    if len(said) != len(card) or said == card:
+        return False
+    return all(a == b or (b == "っ" and a in _GEMINATES) or _VOICED_OF.get(a) == b
+               for a, b in zip(said, card))
+
+
+def _card_reading(m: morphology.Morpheme, entry: dict | None) -> str:
+    """The reading a token is printed with: the card's own where the card
+    is the token, spelled alike, and the tokenizer read it without the
+    sound change the dictionary writes (鉄製 is てっせい, plan 272); the
+    token's otherwise."""
+    if entry is None or m.pos not in ("noun", "suffix", "prefix") or (entry.get("kanji") or "") != m.surface:
+        return m.reading
+    readings = [r.strip() for r in (entry.get("kana") or "").replace(";", "/").split("/") if r.strip()]
+    if len(readings) == 1 and _sound_changed(m.reading, readings[0]):
+        return readings[0]
+    return m.reading
 
 
 # What a word no dictionary knows is, most often (plan 272).
@@ -571,6 +602,26 @@ _SPAN_COUNTERS = {
 }
 
 
+# A prefix the deck has no card for in that use (plan 272): 本 in 本研究
+# is "this, the present", where its card is 本, "book".
+_PREFIX_GLOSSES = {
+    "本": {"en": "(prefix) this, the present: 本研究, this study", "fr": "(préfixe) ce, le présent : 本研究, cette étude"},
+}
+# A suffix whose card is the word it is on its own, another sense (plan
+# 272): 可能性's 性 is no "sex, gender", 補助金's 金 no "gold". The word
+# before it keeps its card.
+_SUFFIX_GLOSSES = {
+    "性": {"en": "(suffix) -ness, -ity: the nature of (可能性, possibility)",
+          "fr": "(suffixe) -ité, caractère de (可能性, possibilité)"},
+    "金": {"en": "(suffix) money, fund, fee (補助金, subsidy)",
+          "fr": "(suffixe) argent, fonds, frais (補助金, subvention)"},
+    "用": {"en": "(suffix) for, meant for (子供用, for children)",
+          "fr": "(suffixe) pour, destiné à (子供用, pour enfants)"},
+    "化": {"en": "(suffix) -ization, becoming (国際化, internationalization)",
+          "fr": "(suffixe) -isation, devenir (国際化, internationalisation)"},
+}
+
+
 def _after_a_number(morphemes: list, i: int, numbers: dict) -> bool:
     """Whether morphemes[i] follows a number, in digits or in kanji."""
     if i == 0:
@@ -771,6 +822,14 @@ def _pool_compound_dict(run: list, entry: dict) -> dict:
     }
 
 
+def _only_negative(morphemes: list, k: int, grammar: list[dict] | None) -> bool:
+    """Whether the one point written on morphemes[k] is the plain negative
+    (ない形): たまらない, a word of the deck's, is that and nothing else."""
+    on = {g.get("pattern") for g in grammar or []
+          if g.get("start", 0) <= morphemes[k].start and morphemes[k].end <= g.get("end", 0)}
+    return on == {"ない形 〜ない"}
+
+
 def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
     """The indices of the morphemes a grammar point is written on (its
     `segments`, as _attach_grammar reads them)."""
@@ -808,6 +867,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     morphemes, numbers = _printed_numbers(morphemes)
     deck_hits = [resolve_morpheme(morphemes, j) for j in range(len(morphemes))]
     ruled = _in_grammar(morphemes, grammar or [])
+    # Every point but the adverbial form, which a deck word may carry
+    # whole (非常に, plan 272).
+    strict = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") != "〜く／〜に（副詞形）"])
     # A counter the counters' point lights is that point's to explain:
     # 三本's 本 is no "book" (plan 151). A card that is itself the
     # counter (冊, 匹) stays, and so does a word (二人, "two people").
@@ -894,7 +956,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             continue
         # (Never a word cut from an ending a point is written on: そう
         # 思わずにはいられない is 思う and 〜ずにはいられない, no 思わず.)
-        hit = resolve_idiom(morphemes, i) or (None if i + 1 in ruled else resolve_split_word(morphemes, i))
+        hit = resolve_idiom(morphemes, i) or (None if i + 1 in ruled and not _only_negative(morphemes, i + 1, grammar)
+                                              else resolve_split_word(morphemes, i))
         if hit:
             level, entry, raw_id, n = hit
             run = morphemes[i:i + n]
@@ -938,9 +1001,41 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(_pool_compound_dict(morphemes[i:i + n], entry))
             i += n
             continue
+        fragments = resolve_name_fragments(morphemes, i)
+        if fragments and not any(j in ruled for j in range(i, i + fragments[1])):
+            # A word in kana UniDic cut into names (plan 272): しゅうまつ.
+            (kind, hit), n = fragments
+            token = _compound_dict(morphemes[i:i + n], *hit) if kind == "deck" \
+                else _pool_compound_dict(morphemes[i:i + n], hit)
+            token["pos"] = "noun"
+            tokens.append(token)
+            i += n
+            continue
+        whole = resolve_whole_word(morphemes, i)
+        if whole and not any(j in strict for j in range(i, i + whole[3])):
+            # A deck word the tokenizer wrote as a word and its particles
+            # (plan 272): いつも is no "when" and "also", 実は no "truth" and
+            # a topic. (The adverbial form's に stays lit on 非常に: the
+            # card's word and the lesson's.)
+            level, entry, raw_id, n = whole
+            token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
+            token["pos"] = "adverb"
+            tokens.append(token)
+            i += n
+            continue
         deck = deck_hits[i]
         if i + 1 not in ruled and resolve_adverb_tail(morphemes, i, deck):
             token = _compound_dict(morphemes[i:i + 2], *deck)
+            token["pos"] = "adverb"
+            tokens.append(token)
+            i += 2
+            continue
+        whole = None if (i in ruled or i + 1 in ruled) else resolve_adverb_whole(morphemes, i)
+        if whole:
+            # A sound word and its と, one word (plan 272): さっと, ガシッと.
+            kind, hit = whole
+            token = _compound_dict(morphemes[i:i + 2], *hit) if kind == "deck" \
+                else _pool_compound_dict(morphemes[i:i + 2], hit)
             token["pos"] = "adverb"
             tokens.append(token)
             i += 2
@@ -969,13 +1064,25 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             # over the card UniDic's lemma reaches: えーっ, "eh?!", is no
             # ええ, "yes".
             deck = None
+        home = resolve_home(morphemes, i) if i not in ruled else None
+        if home is not None:
+            # うち, "home", where the deck's うち is "inside, while" (plan 272).
+            deck, said = None, ("pool", home)
+        affix = (morphemes[i].pos == "suffix" and morphemes[i].surface in _SUFFIX_GLOSSES and i > 0
+                 and morphemes[i - 1].pos in ("noun", "other") and i not in ruled)
+        if affix:
+            deck, said = None, None
         named = _named(morphemes, i)
         span = deck is None and morphemes[i].surface in _SPAN_COUNTERS and _after_a_number(morphemes, i, numbers)
-        pool = None if deck or i in ruled or named or span or particle_glosses.gives_a_reason(morphemes, i) \
+        pool = None if deck or i in ruled or named or span or affix or particle_glosses.gives_a_reason(morphemes, i) \
             else (said[1] if said else resolve_pool_morpheme(morphemes, i))
         token = _token_dict(morphemes[i], deck, pool, named)
         if span:
             token["gloss"] = dict(_SPAN_COUNTERS[morphemes[i].surface])
+        elif affix:
+            token["gloss"] = dict(_SUFFIX_GLOSSES[morphemes[i].surface])
+        elif deck is None and pool is None and morphemes[i].pos == "prefix" and morphemes[i].surface in _PREFIX_GLOSSES:
+            token["gloss"] = dict(_PREFIX_GLOSSES[morphemes[i].surface])
         elif deck is None and pool is None and i not in ruled and not named and "gloss" not in token:
             # A word of speech the course has no lesson for (plan 272):
             # ぞ, かしら, the negative ん, the って that quotes.
@@ -1075,7 +1182,15 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # one word (ぷらそにか, a name: no ぷ, ら, そ and two particles' points),
 # それでは and それでも one conjunction each and そして its card after a
 # particle, １つ the deck's 一つ, and a line read inside the lines either
-# side of it (この一回のテイクで's で the particle "with").
+# side of it (この一回のテイクで's で the particle "with"); a figure read
+# in Japanese (３日 みっか, ２０歳 はたち, 3曲目 an ordinal), 何分 by what
+# follows it; the words of speech said (ぞ, かしら, the three って, ん, ぬ,
+# へん) and an exclamation as the word it draws out (あのー, ただいまー);
+# a kana verb's card by the word it takes (雨がふる 降る, 東京にすむ 住む,
+# 風がふく 吹く, 二十分たつ 経つ); a deck word the tokenizer writes as a
+# word and its particles one word (いつも, 実は, 急に, 今にも), a sound
+# word and its と one (さっと, ガシッと), and すみませんでした and
+# すいません the set phrase.
 LOCAL_REV = 20
 
 
