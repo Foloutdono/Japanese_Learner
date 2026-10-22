@@ -2945,21 +2945,27 @@ describe('the practice features, recorded in the app (plan 270)', () => {
     })
   })
 
-  it('keeps what a part shows, and where the finger taps, inside the feed’s safe box', () => {
+  it('keeps what a part shows, and where the finger taps, between the feed’s head and the slip (plan 272)', () => {
     for (const fit of ['tiktok', 'instagram']) {
       const L = layoutOf(fit)
-      const fits = (box, off) => box.y >= off - 1 && box.y + box.h <= off + L.safeRows + 1
-      // What fits is shown whole; a tap is never off the screen, however tall the rest.
+      const fits = (box, off) => box.y >= off + L.headRows - 1 && box.y + box.h <= off + L.safeRows + 1
+      // The screen fills the frame; the slip stands at the foot of the safe box.
+      expect([L.x, L.top, L.w, L.h]).toEqual([0, 0, L.fmt.w, L.fmt.h])
+      expect(L.fr.bottom - L.slipH).toBeGreaterThan(L.fr.y + 600)
+      // What fits is shown whole, on the screen as the phone shows it where it can be.
       expect(fits(FOCUS, cropFor(FOCUS, L))).toBe(true)
+      expect(cropFor({ x: 40, y: 600, w: 1000, h: 400 }, L)).toBe(0)
       const low = { x: 40, y: 1950, w: 1000, h: 120 }
       expect(fits(low, cropFor(low, L))).toBe(true)
+      // A button at the very foot of the screen is brought above the slip.
+      const foot = { x: 40, y: SHOT.h - 122, w: 1000, h: 110 }
+      expect(fits(foot, cropFor(foot, L))).toBe(true)
+      // A tap is never out of sight, however tall the rest; else the top of the tall.
       const tall = { x: 40, y: 200, w: 1000, h: 1900 }
       const tap = { x: 40, y: 2000, w: 300, h: 110 }
       expect(fits(tap, cropFor(tall, L, tap))).toBe(true)
-      expect(cropFor(tall, L) ).toBe(176)
-      expect(cropFor(tall, L) + L.rows).toBeLessThanOrEqual(SHOT.h)
-      // The screen's foot stays on the frame, under the safe box by no more than its border.
-      expect(L.bottom).toBeLessThanOrEqual(L.fmt.h - 40)
+      expect(cropFor(tall, L)).toBe(tall.y - 24 - L.headRows)
+      expect(cropFor(tall, L)).toBeGreaterThanOrEqual(-L.headRows)
     }
   })
 

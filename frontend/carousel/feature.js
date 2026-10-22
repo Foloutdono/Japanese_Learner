@@ -5,10 +5,11 @@
 // recorded as it runs (long/record.mjs: its pages in a phone-sized
 // browser, its API answered from bank/promo.json, the backend's own
 // answers for the banks' own content); this module plans the recording,
-// times it and draws each frame: a short caption over the screen, the
-// screen in a rounded frame on the dark ground, a finger's tap where the
-// learner taps, the screen moving to what each part shows (scrolling down
-// one taller than the frame), and the promo
+// times it and draws each frame: since plan 272 (the owner's pick B of
+// three drawn) the screen fills the video as a phone shows it, the
+// caption on a slip of the print's washi at the foot of the feed's safe
+// box, a finger's tap where the learner taps, the screen moving to what
+// each part shows (scrolling down one taller than the box), and the promo
 // stories' gate at the end (promo.gateClip). Scored with the app's own
 // sounds and its engine's voices where the app speaks.
 //
@@ -16,8 +17,8 @@
 // description of the feature says (locales: its title and its three
 // lines, held equal by a test): no figure, no price, no promise the
 // screen does not make.
-import { FS, SP, fit, formatOf, frame, palette, paragraph, rrect, text } from './draw.js'
-import { PRINT_HOURS } from './app.js'
+import { EDGE, FS, R, SP, TR, fit, font, formatOf, frame, measure, palette, rrect, shadow, text } from './draw.js'
+import { APP_INKS, PRINT_HOURS } from './app.js'
 import { END, gateClip } from './promo.js'
 import { feedPosts } from './feeds.js'
 import { weldIf } from './strings.js'
@@ -27,9 +28,8 @@ export const FEATURE_IDS = ['reading', 'comprehension', 'translation', 'dictatio
 export const FEATURE_FPS = 30
 // A shot: the 400 CSS px phone at 2.7 (record.mjs PHONE).
 export const SHOT = { w: 1080, h: 2322 }
-// The screen's frame on the video: its width, and how far under the
-// feed's safe box it may reach (its foot is the screen's, never a word).
-const SCREEN = { w: 880, below: 70, radius: 44 }
+// The caption's slip: its padding, and the caption's sizes, two lines at most.
+const SLIP = { pad: SP[4], gap: SP[2], sizes: [FS.title, FS.lead], lh: 1.12 }
 // A beat's caption comes in, the screen moves to what it shows, a state
 // changes in a cross-fade; a finger shows before its tap and its ring after.
 const MOTION = { caption: 0.35, pan: 0.5, fade: 0.22, finger: 0.35, ring: 0.5 }
@@ -195,7 +195,7 @@ export const FEATURES = {
     ],
     beats: [
       ...gateBeats({ en: 'Read a whole text.', fr: 'Lis un texte entier.' }),
-      { say: { en: 'A text at your level, on a clock.', fr: 'Un texte à ton niveau, chronométré.' }, parts: [{ shot: 'passage', hold: 2.6 }, { shot: 'read', hold: 0.9, tap: 0.55 }] },
+      { say: { en: 'A text at your level, on a clock.', fr: 'Un texte à ton niveau, chronométré.' }, parts: [{ shot: 'passage', hold: 3.4 }, { shot: 'read', hold: 0.9, tap: 0.55 }] },
       { say: { en: 'Then questions on what it says.', fr: 'Puis des questions sur ce qu’il dit.' }, parts: [
         { shot: 'q0', hold: 1.6, tap: 1.2 }, { shot: 'q0-picked', hold: 0.6 },
         { shot: 'q1', hold: 1.5, tap: 1.1 }, { shot: 'q1-picked', hold: 0.9 },
@@ -342,19 +342,16 @@ export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', music = tr
 export const featureSteps = (plan, seconds = 2.5) => FEATURES[plan.id].steps({ ...plan.data, seconds })
 
 // ── Where things stand ────────────────────────────────────────
-/** The video's frame: the caption's box, the screen's, the screen's scale. */
+/** The video's frame: the screen full-bleed and its scale, the slip at the
+ *  foot of the safe box at its tallest (its kicker and two lines), and the
+ *  rows of the screen the feed hides above the box (`headRows`) and the
+ *  rows that show above the slip (`safeRows`), from the screen's head. */
 export function layoutOf(fit = 'tiktok') {
   const fmt = formatOf('story', fit)
   const fr = frame(fmt)
-  const labelZ = FS.caption
-  const sayZ = FS.display * 0.62
-  // Room for a caption of two lines, so the screen never moves under a short one.
-  const capH = labelZ * 1.3 + SP[3] + sayZ * 1.08 * 2
-  const top = fr.y + capH + SP[6]
-  const w = Math.min(SCREEN.w, fmt.w - 2 * 90)
-  const bottom = Math.min(fmt.h - 40, fr.bottom + SCREEN.below)
-  const s = w / SHOT.w
-  return { fmt, fr, labelZ, sayZ, top, bottom, x: (fmt.w - w) / 2, w, h: bottom - top, s, rows: (bottom - top) / s, safeRows: (fr.bottom - top) / s }
+  const s = fmt.w / SHOT.w
+  const slipH = 2 * SLIP.pad + FS.caption + SLIP.gap + SLIP.sizes[0] * (0.82 + SLIP.lh + 0.3)
+  return { fmt, fr, x: 0, top: 0, w: fmt.w, h: fmt.h, s, rows: fmt.h / s, slipH, headRows: fr.y / s, safeRows: (fr.bottom - slipH - SP[4]) / s }
 }
 const union = boxes => {
   const bs = boxes.filter(Boolean)
@@ -362,23 +359,30 @@ const union = boxes => {
   const y = Math.min(...bs.map(b => b.y))
   return { y, h: Math.max(...bs.map(b => b.y + b.h)) - y }
 }
-/** How far down the shot the screen shows: the least that keeps what
- *  the part is about (its focus, what it taps) inside the safe box; the
- *  top of it where it is taller than that, and never so low or so high
- *  that the finger taps off the screen. */
+/** How far down the shot the screen shows: the screen as the phone shows
+ *  it where what the part is about (its focus, what it taps) stands
+ *  between the feed's head and the slip; else moved the least that brings
+ *  it there, its top where it is taller than that, and never so far that
+ *  the finger taps out of sight. Moved down (below 0) the screen's head
+ *  goes on up in its own colour; moved up past its foot (a button at the
+ *  foot of the screen, above the slip) its foot goes on down. */
 export function cropFor(focus, L, tap = null) {
-  const most = SHOT.h - L.rows
   if (!focus) return 0
-  let off = Math.max(0, focus.y + focus.h + 48 - L.safeRows)
-  if (focus.y - 24 < off) off = Math.max(0, focus.y - 24)
-  if (tap && tap.y + tap.h + 48 > off + L.safeRows) off = tap.y + tap.h + 48 - L.safeRows
-  if (tap && tap.y - 24 < off) off = Math.max(0, tap.y - 24)
-  return Math.min(most, off)
+  const fitIn = (off, box) => {
+    if (box.y + box.h + 48 > off + L.safeRows) off = box.y + box.h + 48 - L.safeRows
+    if (box.y - 24 < off + L.headRows) off = box.y - 24 - L.headRows
+    return off
+  }
+  let off = fitIn(0, focus)
+  if (tap) off = fitIn(off, tap)
+  return Math.max(-L.headRows, Math.min(mostOf(L), off))
 }
-/** Where a focus taller than the safe box is read to: its foot in the box. */
+// The furthest the screen moves up: its foot just above the slip.
+const mostOf = L => SHOT.h + 48 - L.safeRows
+/** Where a focus taller than the box is read to: its foot above the slip. */
 export function scrollFor(focus, L) {
   if (!focus) return 0
-  return Math.max(0, Math.min(SHOT.h - L.rows, focus.y + focus.h + 48 - L.safeRows))
+  return Math.max(-L.headRows, Math.min(mostOf(L), focus.y + focus.h + 48 - L.safeRows))
 }
 // Where a part leaves the screen: the foot of its scroll, or its crop.
 const offAfter = pt => pt.scroll ? pt.scroll.to : pt.crop
@@ -516,21 +520,7 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
     return `end|${Math.round(u * FEATURE_FPS)}`
   }
   const u = t - sg.start
-  const p = palette('sumi')
-  const ink = palette('paper').line[plan.line]
-  ctx.fillStyle = p.bg
-  ctx.fillRect(0, 0, L.fmt.w, L.fmt.h)
-  // The caption: where it is in the app, and what the beat shows.
-  const kc = step(ease(u / MOTION.caption))
-  ctx.save()
-  ctx.globalAlpha *= kc
-  ctx.translate(0, (1 - kc) * 16)
-  const label = `${plan.tab} · ${plan.jp} ${plan.name}`.toLocaleUpperCase()
-  const lb = fit(ctx, label, { weight: 700, sizes: [L.labelZ, FS.xs], maxW: L.fr.w, maxLines: 1 })
-  text(ctx, lb.lines[0], L.fr.x, L.fr.y + L.labelZ, { f: lb.f, color: lightOf(ink), tr: 0.16 })
-  const say = fit(ctx, sg.say, { weight: 900, fam: 'serif', sizes: [L.sayZ, FS.heading, FS.title], maxW: L.fr.w, maxLines: 2, lh: 1.08 })
-  paragraph(ctx, say, L.fr.x, L.fr.y + L.labelZ * 1.3 + SP[3], p.ink, 'left', 1.08)
-  ctx.restore()
+  const paper = palette('paper')
   // The screen moves to what the part shows.
   let pi = 0
   for (let i = 0; i < sg.parts.length; i++) if (sg.parts[i].start <= t + 1e-6) pi = i
@@ -546,22 +536,21 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
   const cur = sg.frames[fi]
   const last = fi > 0 ? sg.frames[fi - 1] : si > 0 && tl.segs[si - 1].frames ? tl.segs[si - 1].frames.at(-1) : null
   const kf = cur.change && last ? step(ease((t - cur.t) / MOTION.fade)) : 1
-  // Its frame, on the ground.
-  ctx.save()
-  ctx.shadowColor = 'rgba(0,0,0,0.5)'
-  ctx.shadowBlur = 60
-  ctx.fillStyle = '#000'
-  rrect(ctx, L.x, L.top, L.w, L.h, SCREEN.radius)
-  ctx.fill()
-  ctx.restore()
-  ctx.save()
-  rrect(ctx, L.x, L.top, L.w, L.h, SCREEN.radius)
-  ctx.clip()
+  // The screen fills the frame, as a phone shows it.
+  ctx.fillStyle = paper.bg
+  ctx.fillRect(0, 0, L.w, L.h)
   const shotAt = (img, a) => {
     if (!img || a <= 0) return
     ctx.save()
     ctx.globalAlpha *= a
-    ctx.drawImage(img, 0, off, SHOT.w, L.rows, L.x, L.top, L.w, L.h)
+    // Moved down, the screen's head goes on up in its own colour; moved
+    // up past its foot, its foot goes on down.
+    if (off < 0) ctx.drawImage(img, 0, 0, SHOT.w, 1, L.x, L.top, L.w, -off * L.s)
+    const r0 = Math.max(0, off)
+    const r1 = Math.min(SHOT.h, off + L.rows)
+    ctx.drawImage(img, 0, r0, SHOT.w, r1 - r0, L.x, L.top + (r0 - off) * L.s, L.w, (r1 - r0) * L.s)
+    const foot = L.top + (r1 - off) * L.s
+    if (foot < L.top + L.h) ctx.drawImage(img, 0, SHOT.h - 1, SHOT.w, 1, L.x, foot, L.w, L.top + L.h - foot)
     ctx.restore()
   }
   if (kf < 1) shotAt(imgs[last.shot], 1)
@@ -592,19 +581,63 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
     }
     tapKey += `${show.toFixed(2)}|`
   }
-  ctx.restore()
-  // Its rim, in the feature's line.
-  ctx.strokeStyle = ink
-  ctx.lineWidth = 4
-  rrect(ctx, L.x + 2, L.top + 2, L.w - 4, L.h - 4, SCREEN.radius - 2)
-  ctx.stroke()
+  // The caption, on its slip: in with the first beat, its words new at each.
+  const ks = si === 0 ? step(ease(u / MOTION.caption)) : 1
+  const kc = step(ease(u / MOTION.caption))
+  drawSlip(ctx, plan, L, sg.say, ks, kc)
   return `${si}|${fi}|${kc}|${Math.round(off)}|${kf}|${tapKey}`
 }
-// A line's pigment lifted for the dark ground: a caption in it reads.
-function lightOf(hex) {
-  const n = parseInt(hex.slice(1), 16)
-  const c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(v + (255 - v) * 0.45))
-  return `#${c.map(v => v.toString(16).padStart(2, '0')).join('')}`
+
+/** Each caption set as its slip sets it, and the slip's height: as tall
+ *  as the plan's tallest caption, so it never moves between two beats. */
+const slips = new WeakMap()
+function slipOf(ctx, plan, L) {
+  const key = `${plan.fit}|${plan.lang}`
+  const made = slips.get(plan)
+  if (made?.key === key) return made
+  const w = L.fr.w
+  const room = w - 2 * SLIP.pad - EDGE
+  // The kicker in caps, as tracked as the app's captions: where it is in the
+  // app, its tab dropped where the line has no room for it.
+  const tracked = (str, size) => measure(ctx, str, font(700, size, 'latin'), TR.caption)
+  const labels = [`${plan.tab} · ${plan.jp} ${plan.name}`, `${plan.jp} ${plan.name}`].map(x => x.toLocaleUpperCase())
+  const kick = labels.flatMap(str => [FS.caption, FS.xs].map(size => ({ str, size }))).find(k => tracked(k.str, k.size) <= room) || { str: labels[1], size: FS.xs }
+  kick.f = font(700, kick.size, 'latin')
+  const says = new Map(plan.beats.map(b => [b.say, fit(ctx, b.say, { weight: 900, fam: 'serif', sizes: SLIP.sizes, maxW: room, maxLines: 2, lh: SLIP.lh })]))
+  const tallest = Math.max(...[...says.values()].map(b => b.size * (0.82 + (b.lines.length - 1) * SLIP.lh + 0.3)))
+  const h = 2 * SLIP.pad + FS.caption + SLIP.gap + tallest
+  const out = { key, kick, says, x: L.fr.x, y: L.fr.bottom - h, w, h }
+  slips.set(plan, out)
+  return out
+}
+// The slip, of the print's washi, the feature's line its edge, lifted off the
+// screen; `ks` brings it in, `kc` its caption.
+function drawSlip(ctx, plan, L, say, ks, kc) {
+  const S = slipOf(ctx, plan, L)
+  const paper = palette('paper')
+  ctx.save()
+  ctx.globalAlpha *= ks
+  ctx.translate(0, (1 - ks) * 16)
+  ctx.save()
+  shadow(ctx, '0px 10px 30px rgba(20, 14, 8, 0.4)')
+  ctx.fillStyle = APP_INKS['--tpr-washi']
+  rrect(ctx, S.x, S.y, S.w, S.h, R.card)
+  ctx.fill()
+  ctx.restore()
+  ctx.save()
+  rrect(ctx, S.x, S.y, S.w, S.h, R.card)
+  ctx.clip()
+  ctx.fillStyle = paper.line[plan.line]
+  ctx.fillRect(S.x, S.y, EDGE, S.h)
+  ctx.restore()
+  const x = S.x + EDGE + SLIP.pad
+  text(ctx, S.kick.str, x, S.y + SLIP.pad + FS.caption * 0.8, { f: S.kick.f, color: paper.ink2, tr: TR.caption })
+  const b = S.says.get(say) || fit(ctx, say, { weight: 900, fam: 'serif', sizes: SLIP.sizes, maxW: S.w - 2 * SLIP.pad - EDGE, maxLines: 2, lh: SLIP.lh })
+  ctx.globalAlpha *= kc
+  ctx.translate(0, (1 - kc) * 12)
+  const y0 = S.y + SLIP.pad + FS.caption + SLIP.gap
+  b.lines.forEach((l, i) => text(ctx, l, x, y0 + b.size * (0.82 + i * SLIP.lh), { f: b.f, color: APP_INKS['--tpr-sumi'] }))
+  ctx.restore()
 }
 
 /** Where the video's still is taken: its first beat, its caption in. */

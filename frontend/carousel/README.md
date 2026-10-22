@@ -716,17 +716,33 @@ the right replies.
 
 **A video is beats** (`feature.js`, `FEATURES[id]`):
 
-- **The caption.** Each beat has a caption in the line's lightened ink
-  and a serif sentence, over the screen in a rounded frame on the sumi
-  ground. A caption says what the screen shows and the app's own
-  description says (`APP`, held to the locales). It carries no figure,
-  no price and no promise.
+- **The screen, full.** Since plan 272 (the owner's pick B of three
+  drawn: a phone on the print, the app full screen, cards on the print)
+  the screen fills the video as a phone shows it, at its own pixels
+  (the 1080-wide shot at 1:1), as a screen recording does in the feed.
+- **The caption, on a slip.** Each beat's caption stands on a slip of
+  the print's washi (`--tpr-washi`) at the foot of the feed's safe box,
+  the feature's line its edge, lifted off the screen on its shadow: a
+  kicker in caps (where it is in the app, its tab dropped where the line
+  has no room) and the serif sentence, two lines at most. The slip comes
+  in with the first beat and stays; its words change at each. It is as
+  tall as the plan's tallest caption, so it never moves. A caption says
+  what the screen shows and the app's own description says (`APP`, held
+  to the locales). It carries no figure, no price and no promise.
 - **Parts.** Each beat is made of parts: a shot held, or a typed or
   played run of them.
-- **The screen's position.** The screen moves to what each part shows,
-  by the least that keeps its focus and its tap inside the feed's safe
-  box. A part taller than the box is scrolled slowly down to its foot,
-  the way a learner reads a review.
+- **The screen's position.** The screen stands as the phone shows it
+  where what a part shows fits between the feed's head (the safe box's
+  top) and the slip, and otherwise moves the least that brings its focus
+  and its tap there (`cropFor`). Moved down, the screen's head goes on
+  up in its own colour; moved up past its foot (a button at the foot of
+  the screen, brought above the slip), its foot goes on down. A part
+  taller than the room keeps its top, and is scrolled slowly down to its
+  foot where the part is held long enough, the way a learner reads a
+  review: hold such a part long enough to be read (the comprehension
+  passage holds 3.4 s for it). What cannot fit beside its question (a
+  fourth choice under a tall question) goes under the slip for that
+  part; a tap never does.
 - **Taps.** A finger shows before each tap and a ring follows it. A
   `click` sound plays, and a softer one on each typed key.
 - **Voices.** The engine's voices speak where the app speaks: the clip
