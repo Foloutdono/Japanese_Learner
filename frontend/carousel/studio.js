@@ -16,7 +16,7 @@ import { PRINT_HOURS, PRINT_SEASONS, loadPrint } from './app.js'
 import { printSeason } from '../src/domain/printHour.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
-import { STYLES as CHALLENGE_STYLES, TRACK, TRACKS, challengeCommand, challengePage, challengePlan, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
+import { STYLES as CHALLENGE_STYLES, challengeCommand, challengePage, challengePlan, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
 import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
@@ -57,8 +57,8 @@ const DEFAULTS = {
   tune: {},
   // Plan 251: the feed whose post a 9:16 video's fields hold.
   feed: 'shorts',
-  // Plan 252: a vocabulary short's look, and whether a video plays its bed of music.
-  wordsStyle: 'card', bed: 'on',
+  // Plan 252: a vocabulary short's look.
+  wordsStyle: 'card',
 }
 const state = load()
 // The type drawn: the one chosen (state.type) where the item can be drawn
@@ -82,7 +82,8 @@ function load() {
     if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
     if (saved.feed && !FEEDS.includes(saved.feed)) delete saved.feed
     if (saved.wordsStyle && !WORDS_STYLES.includes(saved.wordsStyle)) delete saved.wordsStyle
-    if (saved.bed && !['on', 'off'].includes(saved.bed)) delete saved.bed
+    // No video carries music since plan 273: a visit saved before it forgets its switch.
+    delete saved.bed
     // A source, a format or a view saved before a rename is forgotten, not drawn as a blank stage.
     if (saved.source && !SOURCES.some(x => x.id === saved.source)) delete saved.source
     if (saved.format && !(saved.format in FORMATS)) delete saved.format
@@ -684,9 +685,7 @@ async function renderLong(mine) {
   const { kind, opts } = longPick(id, state.level, state.lang, short ? 'short' : 'long')
   // A short at the margins chosen (plan 239): TikTok's, Instagram's or none.
   for (const el of document.querySelectorAll('[data-short]')) el.hidden = !short
-  // Its bed of music, or none (plan 252): the command and the credits follow.
-  const music = state.bed !== 'off'
-  const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit, tune: state.tune, music })) : longPlan(kind, banks, { ...opts, tune: state.tune, music })
+  const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit, tune: state.tune })) : longPlan(kind, banks, { ...opts, tune: state.tune })
   const tl = timeline(pl)
   const page = describeLong(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
   // A pictured scene's pictures (plan 269), loaded before the first frame.
@@ -700,9 +699,9 @@ async function renderLong(mine) {
     draw: (ctx, t) => drawLong(ctx, pl, tl, t),
   })
   // The video's page: written when the video or its language changes.
-  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}|${state.feed}|${state.bed}`
+  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}|${state.feed}`
   if (key !== captionFor) fillPost(page, key)
-  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit) + (music ? '' : ' --music none') + tuneFlag(state.tune, 'long')
+  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit) + tuneFlag(state.tune, 'long')
 }
 /** A video in the stage (plans 233, 252): its head, its frames played in
  *  place, a scrub bar, its chapters. The preview is silent: the voices
@@ -799,7 +798,7 @@ async function renderWords(mine) {
   const id = currentId()
   const banks = await banksOf(wordsFiles(state.level))
   if (mine !== token) return
-  const pl = wordsPlan(banks, id, { lang: state.lang, style: state.wordsStyle, music: state.bed !== 'off', tune: state.tune, fit: state.fit })
+  const pl = wordsPlan(banks, id, { lang: state.lang, style: state.wordsStyle, tune: state.tune, fit: state.fit })
   const tl = wordsTimeline(pl)
   const page = wordsPage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
   await Promise.all([fonts(`${JSON.stringify(pl.items)}${pl.title}${page.title}語彙主題`), loadPictures(pl)])
@@ -810,7 +809,7 @@ async function renderWords(mine) {
     count: `about ${clock(tl.seconds)} · ${pl.items.length} words · ${pl.style === 'quiz' ? 'quiz' : 'card'} · 9:16`,
     draw: (ctx, t) => drawWords(ctx, pl, tl, t),
   })
-  const key = `words|${id}|${state.level}|${state.lang}|${state.wordsStyle}|${state.fit}|${state.feed}|${state.bed}`
+  const key = `words|${id}|${state.level}|${state.lang}|${state.wordsStyle}|${state.fit}|${state.feed}`
   if (key !== captionFor) fillPost(page, key)
   $('#command').textContent = wordsCommand(pl, tuneFlag(state.tune, 'words'))
 }
@@ -823,8 +822,7 @@ async function renderFeature(mine) {
   const id = currentId()
   const banks = { 'promo.json': await fetchJson('promo.json') }
   if (mine !== token) return
-  const music = state.bed !== 'off'
-  const pl = featurePlan(banks, id, { lang: state.lang, fit: state.fit, music, hour: state.hour })
+  const pl = featurePlan(banks, id, { lang: state.lang, fit: state.fit, hour: state.hour })
   const tl = featurePreview(pl)
   const print = await printFor(pl.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
   if (mine !== token) return
@@ -837,30 +835,23 @@ async function renderFeature(mine) {
     count: `${pl.beats.length} beats, recorded in the app when made · its gate here · 9:16`,
     draw: (ctx, t) => drawFeature(ctx, pl, tl, t, [], print),
   })
-  const key = `feature|${id}|${state.lang}|${state.fit}|${state.feed}|${state.bed}`
+  const key = `feature|${id}|${state.lang}|${state.fit}|${state.feed}`
   if (key !== captionFor) fillPost(page, key)
-  $('#command').textContent = featureCommand(id, state.lang, state.fit, music, pl.hour)
+  $('#command').textContent = featureCommand(id, state.lang, state.fit, pl.hour)
 }
 // ── The reading challenges (plan 247) ─────────────────────────
 // A comprehension text as a 9:16 video over Today's print: going slowly
 // up the screen as a film's credits do, or read along by the app's
 // reader. Drawn here as it is made; the scroll is encoded here too, with
-// the app's sounds and its music (the studio's track, or the owner's), and
-// the voice of the one read along is made where it is rendered (the
-// command below), every word timed on it.
+// the app's sounds, and the voice of the one read along is made where it
+// is rendered (the command below), every word timed on it.
 const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
-// The music laid under it: the studio's own track ({ track }), one picked
-// from this computer, kept for the visit only and never stored ({ name,
-// url }), or none (null).
-let music = { track: TRACK }
-const musicOf = () => (music?.track ?? music?.name ?? null)
-const musicName = () => (music?.track ? `${TRACKS[music.track].title} · ${TRACKS[music.track].by}` : music?.name ?? 'No music')
 const QUESTION_KINDS = { comprehension: 'about the text', inference: 'reading between the lines', grammar: 'grammar', vocabulary: 'a word' }
 async function renderChallenge(mine) {
   const data = await fetchJson('comprehension.json')
   if (mine !== token) return
   const id = currentId()
-  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), question: state.challengeQ[id], music: musicOf(), tune: state.tune })
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), question: state.challengeQ[id], tune: state.tune })
   // The text's questions to choose from, the one asked selected (plan 260).
   const pick = $('#challenge-q')
   pick.replaceChildren(...challengeQuestions(data, id, state.lang).map(q => {
@@ -870,9 +861,6 @@ async function renderChallenge(mine) {
     return o
   }))
   pick.value = String(pl.q.n)
-  $('#music-name').textContent = musicName()
-  $('#music-clear').hidden = !music
-  $('#music-track').hidden = Boolean(music?.track)
   const tl = challengeTimeline(pl)
   const P = await printFor(state.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
   await fonts(JSON.stringify(pl))
@@ -925,13 +913,13 @@ async function renderChallenge(mine) {
   const note = document.createElement('p')
   note.className = 'player__note'
   note.textContent = pl.style === 'scroll'
-    ? `A silent preview: the app’s sounds${music ? ' and the music' : ''} are laid under it when it is downloaded or rendered.`
+    ? 'A silent preview: the app’s sounds are laid under it when it is downloaded or rendered.'
     : 'A silent preview, timed on a guess: the voice is made, and every word lit on it, when the video is rendered (the command below).'
   const chapters = document.createElement('ol')
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.season}|${state.hour}|${pl.q.n}|${musicOf() || ''}`
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.season}|${state.hour}|${pl.q.n}`
   const reading = tl.segs.find(sg => sg.key === 'reading')
   player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
   const draw = () => {
@@ -972,7 +960,7 @@ async function renderChallenge(mine) {
   $('#command').textContent = challengeCommand(pl)
   // The scroll is made here, whole; the one read along needs the voice engine.
   $('#export-video').disabled = pl.style !== 'scroll'
-  $('#export-video').textContent = pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)}${music ? `, with ${music.track ? TRACKS[music.track].title : 'your track'}` : ''})` : 'Read along is made by the command (the voice)'
+  $('#export-video').textContent = pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)})` : 'Read along is made by the command (the voice)'
 }
 async function exportChallenge() {
   const ch = current.challenge
@@ -983,8 +971,7 @@ async function exportChallenge() {
   await encodeClip({
     btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${plan.season ? `${plan.season}-` : ''}${plan.hour}-${state.lang}`, said: 'reading challenge',
     fmt: FORMATS.story, fps: tl.fps, seconds: tl.seconds,
-    // The track under it all, looped if it is shorter, coming in and going out.
-    sounds: [...(music ? [{ at: 0, src: music.track ? TRACKS[music.track].file : music.url, gain: 0.7 * tuned(state.tune, 'music.volume'), loop: true, fade: tuned(state.tune, 'music.fade') }] : []), ...tl.sfx],
+    sounds: tl.sfx,
     frame: (ctx, t) => { drawChallenge(ctx, plan, tl, t, P) },
   })
 }
@@ -1224,8 +1211,8 @@ async function exportClip(which = 'cover') {
 
 // ── A carousel as a short video (plan 233) ────────────────────
 // Its slides standing, each held as long as it reads, swiped to the
-// next, with the app's sounds (short.js). The voice and the music are
-// the render command's: long/render.mjs --carousel.
+// next, with the app's sounds (short.js). The voice is the render
+// command's: long/render.mjs --carousel.
 function shortRecipe() {
   // What the carousel is drawn from, without the studio's memory of every other one.
   const rest = Object.fromEntries(Object.entries(state).filter(([key]) => !['ids', 'picks', 'kanaSet', 'story'].includes(key)))
@@ -1287,7 +1274,7 @@ async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, fra
       ...(sound ? { audio: { codec: sound.muxed, numberOfChannels: 2, sampleRate: RATE } } : {}),
     })
     // The sound is scored first, while every clip it names is still there:
-    // a track picked again during a long export is a revoked address.
+    // a clip let go during a long export is a revoked address.
     let mix = null
     if (sound) {
       status(`Scoring the ${said}…`)
@@ -1508,30 +1495,11 @@ function wire() {
   })
   $('#export-thumb').addEventListener('click', exportThumb)
   $('#export-video').addEventListener('click', exportChallenge)
-  $('#music-add').addEventListener('click', () => $('#music-file').click())
-  $('#music-file').addEventListener('change', e => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (music?.url) URL.revokeObjectURL(music.url)
-    music = { name: file.name, url: URL.createObjectURL(file) }
-    e.target.value = ''
-    render()
-  })
-  $('#music-clear').addEventListener('click', () => {
-    if (music?.url) URL.revokeObjectURL(music.url)
-    music = null
-    render()
-  })
-  $('#music-track').addEventListener('click', () => {
-    if (music?.url) URL.revokeObjectURL(music.url)
-    music = { track: TRACK }
-    render()
-  })
   $('#export-short').addEventListener('click', exportShort)
   $('#tune-reset').addEventListener('click', () => setTune({}))
   $('#copy-short').addEventListener('click', async () => {
     const cmd = `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --carousel ${recipeOf(shortRecipe())}`
-    try { await navigator.clipboard.writeText(cmd); status('Command copied: run it from frontend/ for the short with its voice and music.') } catch { status(cmd) }
+    try { await navigator.clipboard.writeText(cmd); status('Command copied: run it from frontend/ for the short with its voice.') } catch { status(cmd) }
   })
   $('#copy-title').addEventListener('click', () => copyField('#title', 'Title'))
   $('#title').addEventListener('input', countTitle)

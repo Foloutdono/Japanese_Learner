@@ -24,10 +24,6 @@
 //                     the day's own, as the app's gate shows it, when left out
 //   --question 4      ... the text's question asked (1-based, as the studio
 //                     lists them; the first about what it says by default)
-//   --music FILE      ... a track of your own under it (any audio ffmpeg reads), looped if
-//                     short; `none` for none; the studio's own (Cool Vibes) when left out
-//   --music none      a long video or its short with no bed of music: its voices
-//                     and the app's sounds alone, and no music in its credits
 //   --words ID        a vocabulary short (plan 252, words.js): nine words, 9:16,
 //                     a level's (N5:3) or a theme's (theme:animals:1)
 //   --style quiz      ... as a card on washi (card, the default) or a quiz on sumi (quiz)
@@ -40,6 +36,9 @@
 //                     rather than starting Vite here
 //   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the
 //                     command" writes the values changed, so the render is the preview
+//
+// No video carries music (plan 273): its voices and the app's sounds are
+// the whole of its sound.
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
 // its chapters and the voice's credit; for a 9:16 video, its post for
@@ -58,7 +57,7 @@ import { chromium } from 'playwright'
 import { SITE_ORIGIN } from '../../landing/config.mjs'
 import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, stillAt, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
-import { TRACKS, challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
+import { challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
 import { pageFile } from '../feeds.js'
 import { wordsCues, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from '../words.js'
 import { parseTune } from '../tune.js'
@@ -150,19 +149,18 @@ const canvasOf = size => page.evaluate(size => {
 }, size)
 
 let tl, slug, SIZE, pageText, thumbAt
+// An older command's --music is said to be gone, not taken for something else.
+if (args.music !== undefined) log('no video carries music since plan 273: --music is ignored')
 if (args.challenge) {
   // ── A reading challenge: the text over the hour's print, read along voiced ──
-  const named = typeof args.music === 'string' ? args.music : undefined
-  const music = named === undefined ? undefined : named === 'none' ? null : TRACKS[named] ? named : resolve(named)
-  if (music && !TRACKS[music] && !existsSync(music)) throw new Error(`no track at ${music}`)
-  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, question: args.question, music, tune })
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, question: args.question, tune })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null
   // A read-along whose voice did not come is no read-along: stop, unless asked for it anyway.
   if (dur && !dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
   tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
   SIZE = TALL
-  slug = ['challenge', plan.id, plan.style, ...(plan.season ? [plan.season] : []), plan.hour, lang, ...(plan.chosen ? [`q${plan.q.n}`] : []), ...(plan.music ? [] : ['nomusic'])].join('-')
+  slug = ['challenge', plan.id, plan.style, ...(plan.season ? [plan.season] : []), plan.hour, lang, ...(plan.chosen ? [`q${plan.q.n}`] : [])].join('-')
   await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
@@ -178,11 +176,11 @@ if (args.challenge) {
 } else if (args.words) {
   // ── A vocabulary short (plan 252): nine words, as a card or a quiz ──
   const id = String(args.words)
-  const plan = wordsPlan(banks, id, { lang, style: args.style, music: args.music !== 'none', tune, fit: opts.fit })
+  const plan = wordsPlan(banks, id, { lang, style: args.style, tune, fit: opts.fit })
   const dur = voiceAll(wordsCues(plan))
   tl = wordsTimeline(plan, dur)
   SIZE = TALL
-  slug = ['words', id.replace(/:/g, '-'), plan.style, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.music ? [] : ['nomusic'])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  slug = ['words', id.replace(/:/g, '-'), plan.style, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
@@ -198,7 +196,7 @@ if (args.challenge) {
   // ── A practice feature (plan 270): the app itself, recorded doing one exercise ──
   const { featurePage, featurePlan, featureStillAt, featureSteps, featureTimeline } = await import('../feature.js')
   const { appServer, record } = await import('./record.mjs')
-  const plan = featurePlan(banks, String(args.feature), { lang, fit: opts.fit, music: args.music !== 'none', handle: typeof args.handle === 'string' ? args.handle : '', hour: typeof args.hour === 'string' ? args.hour : 'day' })
+  const plan = featurePlan(banks, String(args.feature), { lang, fit: opts.fit, handle: typeof args.handle === 'string' ? args.handle : '', hour: typeof args.hour === 'string' ? args.hour : 'day' })
   const dur = plan.cues.length ? voiceAll(plan.cues) : null
   // The clip the app plays is the first line voiced, so the player runs as long as the voice.
   const said = plan.cues.length ? dur(plan.cues[0]) : null
@@ -213,7 +211,7 @@ if (args.challenge) {
   } finally { await app.close() }
   tl = featureTimeline(plan, shots, dur)
   SIZE = TALL
-  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.hour !== 'day' ? [plan.hour] : []), ...(plan.music ? [] : ['nomusic'])].join('-')
+  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.hour !== 'day' ? [plan.hour] : [])].join('-')
   await fontsFor(glyphs({ plan: { ...plan, data: null }, tl }))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl, srcs }) => {
@@ -266,8 +264,8 @@ if (args.challenge) {
   log(`${pageText.title}: ${made.keys.length} slides, ${tl.seconds.toFixed(1)} s${made.spoken ? `, says ${made.spoken}` : ''}`)
 } else {
   // ── A long video, or its short: the plan, its lines voiced, the timeline ──
-  let plan = longPlan(kind, banks, { ...opts, tune, music: args.music !== 'none' })
-  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang, ...(opts.format === 'short' && opts.fit !== 'tiktok' ? [opts.fit] : []), ...(args.music === 'none' ? ['nomusic'] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  let plan = longPlan(kind, banks, { ...opts, tune })
+  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang, ...(opts.format === 'short' && opts.fit !== 'tiktok' ? [opts.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   log(`${plan.title}: ${plan.items.length} items`)
   const dur = voiceAll(timeline(plan).cues)
   // A short holds under its minute on the lines as they are said.
@@ -318,23 +316,11 @@ for (const key of keys) {
   else log(`no app sound named ${key}`)
 }
 writeFileSync(join(WORK, 'timeline.json'), JSON.stringify({ ...tl, seconds }))
-// A recorded bed (a challenge's track of music), as a WAV at the mix's rate.
-const bedArgs = []
-if (tl.bed?.src) {
-  const bedWav = join(WORK, 'bed.wav')
-  const src = isAbsolute(tl.bed.src) ? tl.bed.src : join(FRONT, tl.bed.src)
-  const conv = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', src, '-ar', '48000', '-ac', '2', bedWav])
-  if (conv.status === 0) bedArgs.push('--bed', bedWav, '--bed-gain', String(tl.bed.gain ?? 1), '--bed-fade', String(tl.bed.fade ?? 2.5))
-  else throw new Error(`the track ${src} could not be read`)
-} else if (tl.bed === null || (!args.challenge && args.music === 'none')) {
-  // A challenge with no track, or a video asked for none: its sounds and its voice alone, no music made up.
-  bedArgs.push('--no-bed')
-}
-const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav'), ...bedArgs], { cwd: BACKEND, stdio: 'inherit' })
+const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav')], { cwd: BACKEND, stdio: 'inherit' })
 if (mixed.status !== 0) throw new Error('the mix failed')
 
 // ── YouTube's loudness, by one gain for the whole: a dynamic leveller would
-// lift the bed of music back up to the voice between two lines ──
+// lift the app's quiet sounds up to the voice between two lines ──
 const probe = spawnSync('ffmpeg', ['-hide_banner', '-i', join(WORK, 'mix.wav'), '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' })
 const loud = JSON.parse(probe.stderr.slice(probe.stderr.lastIndexOf('{')))
 // A challenge read in silence is kept calmer (its timeline says how loud).

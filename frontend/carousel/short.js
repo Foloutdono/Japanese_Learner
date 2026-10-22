@@ -4,8 +4,8 @@
 // as it takes to read (a question longer, its seconds ticked), swiped to
 // the next as a carousel is, the item's Japanese said once everything is
 // revealed. The studio encodes it at once with the app's sounds
-// (studio.js); long/render.mjs --carousel makes it with the voice and
-// the music bed, as it makes the long videos.
+// (studio.js); long/render.mjs --carousel makes it with the voice, as
+// it makes the long videos.
 //
 // Pure but for the canvas it draws on: `chars` counts what a slide
 // writes, `shortTimeline` times the slides, `drawShortFrame` draws any

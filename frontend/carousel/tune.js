@@ -47,10 +47,6 @@ group('Reading challenge', ['challenge'], [
   { key: 'challenge.cta', label: 'The app, last', unit: 's', def: 6.5, min: 3, max: 10, step: 0.1 },
   { key: 'challenge.wash', label: 'Picture wash', unit: '×', def: 1, min: 0.6, max: 1.2, step: 0.05, hint: 'how much paper lies over the print (scroll)' },
 ])
-group('Music', ['challenge'], [
-  { key: 'music.volume', label: 'Music volume', unit: '×', def: 1, min: 0, max: 2, step: 0.05, hint: 'the track’s level, in the studio and the render alike' },
-  { key: 'music.fade', label: 'Music fades', unit: 's', def: 2.5, min: 0, max: 6, step: 0.5, hint: 'in at the start, out at the end' },
-])
 group('Word echo', ['echo'], [
   { key: 'echo.seconds', label: 'Saying for', unit: 's', def: 10, min: 5, max: 20, step: 0.5, hint: 'how long the word is said over and over' },
   { key: 'echo.gap', label: 'Silence between two', unit: 's', def: 0.3, min: 0.1, max: 1.2, step: 0.05 },

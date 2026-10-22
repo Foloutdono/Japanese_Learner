@@ -5,8 +5,8 @@
 // owner's own reference); `along`, the text standing while the app's
 // reader says it, each word lit as it is said (the owner's pick D of four
 // drawn). Before it the hook; after it one of its questions, asked and
-// answered, and the way to the app. Under it, the studio's own track
-// (Cool Vibes), one of the owner's, or nothing. Since plan 260 the
+// answered, and the way to the app. No music under it (plan 273): the
+// reader's voice where it reads, the app's sounds. Since plan 260 the
 // question is the maker's to choose (the first about what the text says
 // unless chosen), its four answers dealt in a seeded order, so the right
 // one stands at A, B, C or D alike across the bank. Since plan 266 the
@@ -27,20 +27,6 @@ import { tuneFlag, tuned } from './tune.js'
 import { feedPosts } from './feeds.js'
 
 export const STYLES = ['scroll', 'along']
-// The tracks the studio carries (carousel/music/, its README): the first
-// is laid under a challenge unless another or none is asked for. Each
-// is used under its licence, whose credit goes with every video that
-// plays it (`challengePage`).
-export const TRACKS = {
-  'cool-vibes': {
-    title: 'Cool Vibes', by: 'Kevin MacLeod', file: 'music/cool-vibes.mp3',
-    credit: {
-      en: 'Music: "Cool Vibes" Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By Attribution 4.0 License, http://creativecommons.org/licenses/by/4.0/',
-      fr: 'Musique : « Cool Vibes » Kevin MacLeod (incompetech.com). Sous licence Creative Commons Attribution 4.0 : http://creativecommons.org/licenses/by/4.0/',
-    },
-  },
-}
-export const TRACK = 'cool-vibes'
 export const HOURS = ['dawn', 'day', 'dusk', 'night']
 // A learner's pace at each level, in characters a minute: the scroll
 // carries the text past the reading line at this pace (two notches under
@@ -153,9 +139,7 @@ export function challengeQuestions(data, id, lang = 'en') {
 
 /** A text's challenge: its sentences and one of its questions.
  *  `opts.question`: the question asked (1-based), the first about what
- *  the text says when left out or out of range.
- *  `opts.music`: the track laid under it, one of `TRACKS` (the first if
- *  left out) or a file of the owner's (its path or name); null for none. */
+ *  the text says when left out or out of range. */
 export function challengePlan(data, id, opts = {}) {
   const lang = opts.lang === 'fr' ? 'fr' : 'en'
   const P = data.passages.find(x => x.id === id) ?? data.passages[0]
@@ -174,7 +158,7 @@ export function challengePlan(data, id, opts = {}) {
   const options = Q.options[lang] || Q.options.en
   const q = { n: qn, ask: Q.question[lang] || Q.question.en, choices: order.map(i => options[i]), right: order.indexOf(Q.correct) }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P), music: opts.music === undefined ? TRACK : opts.music || null,
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P),
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), nq: P.questions.length, cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -248,9 +232,8 @@ export function challengeTimeline(plan, voiced = null) {
     seconds: +t.toFixed(3), segs, lines, cues, sfx, reading,
     // The scroll at sixty frames a second, so its slow climb glides; the one read along at thirty.
     fps: plan.style === 'scroll' ? 60 : 30,
-    // The music under it, if any (the studio's, from frontend/): a video read in silence is kept calm.
-    // Its level and fades as tuned, the same in the studio and the render.
-    bed: plan.music ? { src: TRACKS[plan.music] ? `carousel/${TRACKS[plan.music].file}` : plan.music, gain: tuned(plan.tune, 'music.volume'), fade: tuned(plan.tune, 'music.fade') } : null, loudness: plan.music || plan.style === 'along' ? -16 : -20,
+    // A video read in silence (the scroll) is kept calmer than one read aloud.
+    loudness: plan.style === 'along' ? -16 : -20,
     chapters: segs.map(s => ({ at: s.start, title: s.key })),
   }
 }
@@ -258,20 +241,18 @@ export function challengeTimeline(plan, voiced = null) {
 /** The command that makes it, from frontend/ (the voice engine running for `along`). */
 export function challengeCommand(plan) {
   const voice = plan.style === 'along' ? 'VOICEVOX_URL=http://localhost:50121 ' : ''
-  // The studio's track is the command's own; another is named, none is said.
-  const music = plan.music === TRACK ? '' : !plan.music ? ' --music none' : TRACKS[plan.music] ? ` --music ${plan.music}` : ` --music "${plan.music}"`
   // The question is named where it is not the one asked unless chosen (plan 260).
   const question = plan.chosen ? ` --question ${plan.q.n}` : ''
   // The print's season where one is chosen, else the day's the render runs on (plan 267).
   const season = plan.season ? ` --season ${plan.season}` : ''
-  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${music}${tuneFlag(plan.tune, 'challenge')}`
+  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${tuneFlag(plan.tune, 'challenge')}`
 }
 
 /** The video's page: its title, its description, its tags. */
 export function challengePage(plan, tl, site) {
   const S = W[plan.lang]
   const tags = [...S.tags, `jlpt${plan.lv.toLowerCase()}`, '日本語', '読解']
-  const credits = [plan.style === 'along' ? S.credit : null, TRACKS[plan.music]?.credit[plan.lang]].filter(Boolean)
+  const credits = plan.style === 'along' ? [S.credit] : []
   const lines = [
     `${plan.title} · JLPT ${plan.lv} · ${S.sentences(plan.sents.length)} · ${clock(tl.reading)}`,
     S.body[plan.style],

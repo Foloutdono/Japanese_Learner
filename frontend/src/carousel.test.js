@@ -16,7 +16,7 @@ import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
-import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, TRACK, TRACKS, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
 import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, loadPictures, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
@@ -55,7 +55,7 @@ const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo' && !s.
 function expectFeeds(page, site, label) {
   expect(Object.keys(page.feeds), label).toEqual(FEEDS)
   expect(page.feeds.shorts, label).toEqual({ title: page.title, description: page.description, tags: page.tags })
-  const credits = page.description.split('\n').filter(l => /VOICEVOX|MacLeod|Music|Musique/.test(l))
+  const credits = page.description.split('\n').filter(l => /VOICEVOX|波音リツ/.test(l))
   for (const f of ['reels', 'tiktok']) {
     const c = page.feeds[f].caption
     const at = `${label} ${f}`
@@ -1738,31 +1738,21 @@ describe('the reading challenges (plan 247)', () => {
   const jp = t => /[\u3040-\u30ff\u3400-\u9fff]/.test(t)
   const each = data.passages
 
-  it('lays the studio’s track under it, credited, unless another or none is asked for', () => {
-    const { file } = TRACKS[TRACK]
-    expect(() => read(`carousel/${file}`)).not.toThrow()
+  it('lays no music under it, its one credit the voice where it reads aloud (plan 273)', () => {
+    expect(() => read('carousel/music/cool-vibes.mp3')).toThrow()
     for (const style of CHALLENGE_STYLES) {
-      const pl = challengePlan(data, 'n5-01', { style })
+      const pl = challengePlan(data, 'n5-01', { style, music: 'cool-vibes' })
       const tl = challengeTimeline(pl)
-      expect(pl.music, style).toBe(TRACK)
-      expect(tl.bed, style).toEqual({ src: `carousel/${file}`, gain: 1, fade: 2.5 })
-      expect(tl.loudness, style).toBe(-16)
+      expect('music' in pl, style).toBe(false)
+      expect('bed' in tl, style).toBe(false)
+      // Read in silence it is kept calmer than read aloud.
+      expect(tl.loudness, style).toBe(style === 'along' ? -16 : -20)
       expect(challengeCommand(pl), style).not.toMatch(/--music/)
-      // Its licence's credit (CC BY 4.0) in the description of every video it plays under.
       for (const lang of ['en', 'fr']) {
         const page = challengePage({ ...pl, lang }, tl, 'x').description
-        expect(page, `${style} ${lang}`).toContain('Kevin MacLeod (incompetech.com)')
-        expect(page, `${style} ${lang}`).toContain('http://creativecommons.org/licenses/by/4.0/')
+        expect(page, `${style} ${lang}`).not.toMatch(/MacLeod|Music|Musique/)
+        expect(/VOICEVOX Nemo/.test(page), `${style} ${lang}`).toBe(style === 'along')
       }
-      const none = challengePlan(data, 'n5-01', { style, music: null })
-      expect(challengeTimeline(none).bed, style).toBeNull()
-      expect(challengeCommand(none), style).toMatch(/ --music none$/)
-      expect(challengePage(none, challengeTimeline(none), 'x').description, style).not.toMatch(/MacLeod/)
-      const jazz = challengePlan(data, 'n5-01', { style, music: 'music/late train.mp3' })
-      expect(challengeTimeline(jazz).bed, style).toMatchObject({ src: 'music/late train.mp3' })
-      expect(challengeTimeline(jazz).loudness, style).toBe(-16)
-      expect(challengeCommand(jazz), style).toMatch(/ --music "music\/late train\.mp3"$/)
-      expect(challengePage(jazz, challengeTimeline(jazz), 'x').description, style).not.toMatch(/MacLeod/)
     }
     expect(challengePlan(data, 'n5-01').style).toBe('scroll')
     expect(Object.keys(CPM).sort()).toEqual([...LEVELS].sort())
@@ -2461,13 +2451,14 @@ describe('the reply videos (plan 249)', () => {
     } finally { globalThis.Path2D = had }
   }, 120000)
 
-  it('credits no music where the video is asked for none', () => {
+  it('credits no music: no video carries any (plan 273)', () => {
     for (const format of ['long', 'short']) {
-      const { kind, opts } = longPick('reply:1', 'N5', 'en', format)
-      const withBed = longPlan(kind, files, opts)
-      const without = longPlan(kind, files, { ...opts, music: false })
-      expect(describeVideo(withBed, timeline(withBed), LONG_SITE).description, format).toContain('Music: made for Tsuji.')
-      expect(describeVideo(without, timeline(without), LONG_SITE).description, format).not.toContain('Music')
+      for (const lang of ['en', 'fr']) {
+        const { kind, opts } = longPick('reply:1', 'N5', lang, format)
+        const pl = longPlan(kind, files, { ...opts, music: true })
+        expect('music' in pl, format).toBe(false)
+        expect(describeVideo(pl, timeline(pl), LONG_SITE).description, `${format} ${lang}`).not.toMatch(/Music|Musique/)
+      }
     }
   })
 
@@ -2487,15 +2478,13 @@ describe('the reply videos (plan 249)', () => {
 
 describe('a post for each feed (plan 251)', () => {
   const data = bank('comprehension.json')
-  it('writes a reading challenge’s three posts, with its track or none, read or read along', () => {
+  it('writes a reading challenge’s three posts, read or read along', () => {
     for (const style of CHALLENGE_STYLES) {
       for (const lang of ['en', 'fr']) {
-        for (const music of [undefined, null]) {
-          const pl = challengePlan(data, 'n5-02', { style, lang, music })
-          const page = challengePage(pl, challengeTimeline(pl), 'https://tsuji.app')
-          expectFeeds(page, 'https://tsuji.app', `${style} ${lang} ${music}`)
-          expect(page.feeds.tiktok.caption.includes('MacLeod'), `${style} ${lang} ${music}`).toBe(music === undefined)
-        }
+        const pl = challengePlan(data, 'n5-02', { style, lang })
+        const page = challengePage(pl, challengeTimeline(pl), 'https://tsuji.app')
+        expectFeeds(page, 'https://tsuji.app', `${style} ${lang}`)
+        expect(page.feeds.tiktok.caption, `${style} ${lang}`).not.toMatch(/MacLeod|Music|Musique/)
       }
     }
   })
@@ -2620,21 +2609,21 @@ describe('the vocabulary shorts (plan 252)', () => {
     } finally { globalThis.Path2D = had }
   }, 240000)
 
-  it('writes its page for three feeds, crediting music only where it plays, and its command', () => {
+  it('writes its page for three feeds, crediting no music, and its command', () => {
     const pl = wordsPlan(B.N5, 'N5:2', { style: 'quiz' })
     const tl = wordsTimeline(pl)
     const page = wordsPage(pl, tl, 'https://tsuji.app/en', FIGURES)
     expect(Object.keys(page.feeds)).toEqual(FEEDS)
     expect(page.title).toMatch(/^JLPT N5 word quiz: .* 9 .*#shorts$/)
-    expect(page.description).toContain('Music: made for Tsuji.')
+    expect(page.description).not.toMatch(/Music|Musique/)
     expect(page.feeds.tiktok.caption).not.toContain('tsuji.app')
     expect(wordsCommand(pl)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words N5:2 --style quiz --lang en')
-    const quiet = wordsPlan(B.N5, 'theme:animals:1', { style: 'card', music: false, lang: 'fr', fit: 'instagram' })
+    const quiet = wordsPlan(B.N5, 'theme:animals:1', { style: 'card', lang: 'fr', fit: 'instagram' })
     const qp = wordsPage(quiet, wordsTimeline(quiet), 'https://tsuji.app', FIGURES)
     expect(qp.description).not.toMatch(/Musique/)
     expect(qp.title).toMatch(/^9 mots de japonais : Animaux #shorts$/)
     expect(qp.description).not.toMatch(/JLPT/)
-    expect(wordsCommand(quiet)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --fit instagram --music none')
+    expect(wordsCommand(quiet)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --fit instagram')
     // A long video's own short no longer lists words or themes: they are the word shorts'.
     expect(longItems({ ...B.N5, 'kanji-N5.json': bank('kanji-N5.json'), 'grammar-N5.json': bank('grammar-N5.json') }, 'N5', 'en', 'short').some(x => x.kind === 'vocab' || x.kind === 'theme')).toBe(false)
   })
@@ -2989,7 +2978,7 @@ describe('the practice features, recorded in the app (plan 270)', () => {
     } finally {
       globalThis.Path2D = had
     }
-    expect(featureCommand('dictation', 'en', 'tiktok', true, 'night')).toContain('--hour night')
+    expect(featureCommand('dictation', 'en', 'tiktok', 'night')).toContain('--hour night')
     expect(featureCommand('dictation', 'en')).not.toContain('--hour')
   })
 

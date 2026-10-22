@@ -1,7 +1,7 @@
 """The long videos' mix (plan 233, scripts/long_video_audio.py): a line
-lands where the timeline says, the bed of music stays well under it, and
-the file is as long as the video. No voice engine: the cache is written
-here by hand."""
+lands where the timeline says, nothing plays under it (no video carries
+music since plan 273), and the file is as long as the video. No voice
+engine: the cache is written here by hand."""
 import json
 import wave
 
@@ -76,7 +76,7 @@ def test_a_sung_syllable_is_said():
     assert lva.TUNE in f"kana|{lva.TUNE}|"
 
 
-def test_a_line_lands_on_its_time_over_a_quiet_bed(tmp_path):
+def test_a_line_lands_on_its_time_over_silence(tmp_path):
     cache, sfx = tmp_path / "cache", tmp_path / "sfx"
     cache.mkdir()
     sfx.mkdir()
@@ -92,10 +92,9 @@ def test_a_line_lands_on_its_time_over_a_quiet_bed(tmp_path):
         data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
     left = data[0::2]
     rate = lva.RATE
-    voice = left[int(4.2 * rate):int(4.8 * rate)]
-    bed = left[int(6.5 * rate):int(9.5 * rate)]
-    assert _rms_db(voice) - _rms_db(bed) > 12
-    assert _rms_db(bed) > -60  # the bed is there, under it
+    assert _rms_db(left[int(4.2 * rate):int(4.8 * rate)]) > -40
+    # No music: between the sounds and the lines, silence.
+    assert np.abs(left[int(6.5 * rate):int(9.5 * rate)]).max() == 0
 
 
 def test_a_lines_syllables_start_where_the_engine_lays_them():
@@ -115,78 +114,25 @@ def test_a_lines_syllables_start_where_the_engine_lays_them():
     assert [m["t"] for m in lva.mora_marks(query, 0.5)] == [0.2, 0.5, 0.7, 1.3]
 
 
-def test_a_recorded_bed_loops_under_the_voice(tmp_path):
-    # A reading challenge's own track of music (plan 247).
+def test_the_mix_closes_on_a_fade(tmp_path):
+    # A sound still ringing as the video ends is faded out, never cut.
     cache, sfx = tmp_path / "cache", tmp_path / "sfx"
     cache.mkdir()
     sfx.mkdir()
-    cue = {"at": 4.0, "text": "テスト", "who": "reader"}
-    _tone(cache / lva.clip_name(cue, voice_engine.VOICE_REV), 1.0, lva.VOICE_RATE)
-    # Three seconds of a low tone, at the engine's rate, looped to the
-    # video's length and brought to its level.
-    track = tmp_path / "track.wav"
-    _tone(track, 3.0, lva.VOICE_RATE, hz=110.0, amp=0.9)
-    timeline = {"seconds": 12.0, "cues": [cue], "sfx": []}
-    (tmp_path / "tl.json").write_text(json.dumps(timeline), encoding="utf-8")
+    _tone(sfx / "chime.wav", 8.0, lva.RATE, hz=440.0, amp=0.9)
+    (tmp_path / "tl.json").write_text(json.dumps({"seconds": 8.0, "cues": [], "sfx": [{"at": 0.0, "key": "chime"}]}), encoding="utf-8")
     out = tmp_path / "mix.wav"
-    assert lva.mix(tmp_path / "tl.json", cache, sfx, out, track) == 0
-    with wave.open(str(out)) as w:
-        assert abs(w.getnframes() / w.getframerate() - 12.0) < 0.01
-        data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
-    left, rate = data[0::2], lva.RATE
-    voice = left[int(4.2 * rate):int(4.8 * rate)]
-    early, late = left[int(6.5 * rate):int(8.0 * rate)], left[int(8.5 * rate):int(9.5 * rate)]
-    assert _rms_db(voice) - _rms_db(late) > 8
-    # Past its three seconds it plays on, looped, at the same level.
-    assert _rms_db(late) > -60
-    assert abs(_rms_db(early) - _rms_db(late)) < 2
-
-
-def test_no_bed_is_silence_under_the_voice(tmp_path):
-    # A reading challenge with no track (plan 247): its voice and sounds alone.
-    cache, sfx = tmp_path / "cache", tmp_path / "sfx"
-    cache.mkdir()
-    sfx.mkdir()
-    cue = {"at": 4.0, "text": "テスト", "who": "reader"}
-    _tone(cache / lva.clip_name(cue, voice_engine.VOICE_REV), 1.0, lva.VOICE_RATE)
-    (tmp_path / "tl.json").write_text(json.dumps({"seconds": 12.0, "cues": [cue], "sfx": []}), encoding="utf-8")
-    out = tmp_path / "mix.wav"
-    assert lva.mix(tmp_path / "tl.json", cache, sfx, out, None, True) == 0
-    with wave.open(str(out)) as w:
-        data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
-    left, rate = data[0::2], lva.RATE
-    assert np.abs(left[int(6.5 * rate):int(9.5 * rate)]).max() == 0
-    assert _rms_db(left[int(4.2 * rate):int(4.8 * rate)]) > -40
-
-
-def test_a_beds_level_and_fades_are_the_studios(tmp_path):
-    # Plan 248: the Tune panel's music volume and fade reach the mix, the
-    # music fades out where the video ends (never cut at a fraction of its
-    # level a second past it), and the mix's last moment is faded too.
-    track = tmp_path / "track.wav"
-    _tone(track, 2.0, lva.RATE, hz=110.0, amp=0.9)
-    n = 10 * lva.RATE
-    plain = lva.recorded_bed(track, n)
-    loud = lva.recorded_bed(track, n, gain=2.0)
-    mid = slice(4 * lva.RATE, 6 * lva.RATE)
-    assert _rms_db(loud[mid, 0]) - _rms_db(plain[mid, 0]) == pytest.approx(6.02, abs=0.1)
-    slow = lva.recorded_bed(track, n, fade_s=4.0)
-    at = int(2.0 * lva.RATE)
-    assert abs(slow[at - 200:at + 200, 0]).max() < abs(plain[at - 200:at + 200, 0]).max()
-    assert abs(plain[-50:, 0]).max() < 0.01
-    flat = lva.recorded_bed(track, n, fade_s=0)
-    assert abs(flat[:200, 0]).max() > 0.01
-
-    cache, sfx = tmp_path / "cache", tmp_path / "sfx"
-    cache.mkdir()
-    sfx.mkdir()
-    (tmp_path / "tl.json").write_text(json.dumps({"seconds": 8.0, "cues": [], "sfx": []}), encoding="utf-8")
-    out = tmp_path / "mix.wav"
-    assert lva.mix(tmp_path / "tl.json", cache, sfx, out, track, bed_fade=0) == 0
+    assert lva.mix(tmp_path / "tl.json", cache, sfx, out) == 0
     with wave.open(str(out)) as w:
         assert abs(w.getnframes() / w.getframerate() - 8.0) < 0.01
         data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
     left = data[0::2]
-    # Unfaded, the music plays to the end, and the last few frames close on silence.
     assert _rms_db(left[int(7.0 * lva.RATE):int(7.5 * lva.RATE)]) > -40
     assert abs(left[-20:]).max() < 0.01
+
+
+def test_no_video_carries_music():
+    # Plan 273: no bed made up, no track laid under, no flag for either.
+    assert not hasattr(lva, "bed") and not hasattr(lva, "recorded_bed")
+    import inspect
+    assert list(inspect.signature(lva.mix).parameters) == ["tl_path", "cache", "sfx", "out"]

@@ -14,9 +14,8 @@
 // sheet draws a word: the picture across the card's top, the word and
 // its reading under it, what it means; it gives its sentence room.
 //
-// Pure but for the canvas: render.mjs --words makes it with the voice,
-// the app's sounds and the music bed (none with --music none); the
-// studio previews it, silent, frame for frame.
+// Pure but for the canvas: render.mjs --words makes it with the voice
+// and the app's sounds; the studio previews it, silent, frame for frame.
 import { FS, SP, R, alpha, drawSentence, fit, font, formatOf, layoutSentence, measure, mix, palette, paragraph, paragraphH, rrect, text } from './draw.js'
 import { drawCta } from './funnel.js'
 import { deal, furiganaOf, gloss, seeded, shuffle } from './common.js'
@@ -185,7 +184,7 @@ function kinOf(banks) {
 }
 
 /** A short's plan, from a list id (`N5:3`, `theme:animals:1`). */
-export function wordsPlan(banks, id, { lang = 'en', style = 'card', music = true, tune = {}, fit = 'tiktok' } = {}) {
+export function wordsPlan(banks, id, { lang = 'en', style = 'card', tune = {}, fit = 'tiktok' } = {}) {
   const [a, b, c] = String(id).split(':')
   const theme = a === 'theme' ? b : null
   const part = Math.max(1, Number(theme ? c : b) || 1)
@@ -213,7 +212,7 @@ export function wordsPlan(banks, id, { lang = 'en', style = 'card', music = true
     return { ...out, ...deal(right, wrong, `${id}|${w.t}|deal`) }
   }).filter(it => st !== 'quiz' || it.choices.length === 4)
   return {
-    source: 'words', id: String(id), lang, level, theme: themeName, part, style: st, music: music !== false, tune, fit,
+    source: 'words', id: String(id), lang, level, theme: themeName, part, style: st, tune, fit,
     head: themeName || S.words(level), title: themeName ? `${themeName} · ${S.part(part)}` : `${S.words(level)} · ${S.part(part)}`, items,
   }
 }
@@ -294,7 +293,7 @@ export function wordsPage(plan, tl, site, figures = null) {
   const n = plan.items.length
   const style = plan.style
   const title = plan.theme ? P.title[style === 'quiz' ? 'themeQuiz' : 'themeCard'](n, plan.theme) : P.title[style](n, plan.level)
-  const { app, credits, tags } = pageParts(tl, plan.lang, { figures, music: plan.music, level: plan.level, kind: 'vocab' })
+  const { app, credits, tags } = pageParts(tl, plan.lang, { figures, level: plan.level, kind: 'vocab' })
   const fr = plan.lang === 'fr'
   const hashtags = [fr ? 'ApprendreLeJaponais' : 'LearnJapanese', fr ? 'Japonais' : 'Japanese', ...(plan.theme ? [] : [`JLPT${plan.level}`]), '日本語', fr ? 'VocabulaireJaponais' : 'JapaneseVocabulary', 'nihongo']
   const description = [P.lead[style], `${app}\n${site}`, credits, ['Shorts', ...hashtags.slice(0, 4)].map(x => `#${x}`).join(' ')].join('\n\n')
@@ -309,7 +308,6 @@ export function wordsPage(plan, tl, site, figures = null) {
 export function wordsCommand(plan, flags = '') {
   const args = [`--words ${plan.id}`, `--style ${plan.style}`, `--lang ${plan.lang}`]
   if (plan.fit && plan.fit !== 'tiktok') args.push(`--fit ${plan.fit}`)
-  if (!plan.music) args.push('--music none')
   return `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs ${args.join(' ')}${flags}`
 }
 

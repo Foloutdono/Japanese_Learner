@@ -319,7 +319,7 @@ export function featureItems(lang = 'en') {
 }
 
 /** A feature's video, planned: what to record and what to say over it. */
-export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', music = true, handle = '', hour = 'day' } = {}) {
+export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', handle = '', hour = 'day' } = {}) {
   const F = FEATURES[id]
   if (!F) throw new Error(`no feature video for ${id}`)
   const L = lang === 'fr' ? 'fr' : 'en'
@@ -327,7 +327,7 @@ export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', music = tr
   if (!d) throw new Error(`bank/promo.json has no ${id} (${L}): run python -m scripts.carousel_bank --only promo.json`)
   const A = APP[L]
   return {
-    kind: 'feature', id, lang: L, fit: ['instagram', 'normal'].includes(fit) ? fit : 'tiktok', music: music !== false, handle,
+    kind: 'feature', id, lang: L, fit: ['instagram', 'normal'].includes(fit) ? fit : 'tiktok', handle,
     // The print of the hour the gate at the end stands on (plan 271).
     hour: PRINT_HOURS.includes(hour) ? hour : 'day',
     jp: F.jp, line: F.line, name: weldIf(L, A.title[id]), tab: A.tab, data: d,
@@ -641,12 +641,12 @@ export const featureStillAt = () => 1.2
 const PAGE = {
   en: {
     app: 'Keep going on Tsuji', start: 'Start free on Tsuji', more: 'Start free on Tsuji.',
-    credits: (voiced, music) => [voiced && 'Voices: VOICEVOX Nemo.', music && 'Music: made for Tsuji.'].filter(Boolean).join(' '),
+    credits: 'Voices: VOICEVOX Nemo.',
     tags: ['LearnJapanese', 'Japanese', 'JLPT', '日本語', 'JapaneseApp'],
   },
   fr: {
     app: 'Continue sur Tsuji', start: 'Commence gratuitement sur Tsuji', more: 'Commence gratuitement sur Tsuji.',
-    credits: (voiced, music) => [voiced && 'Voix : VOICEVOX Nemo.', music && 'Musique : faite pour Tsuji.'].filter(Boolean).join(' '),
+    credits: 'Voix : VOICEVOX Nemo.',
     tags: ['ApprendreLeJaponais', 'Japonais', 'JLPT', '日本語', 'Tsuji'],
   },
 }
@@ -656,19 +656,19 @@ export function featurePage(plan, tl, site) {
   const A = APP[plan.lang]
   const desc = weldIf(plan.lang, A.desc[plan.id] || '').split('\n').filter(Boolean)
   const voiced = tl.cues.length > 0
-  const credits = P.credits(voiced, plan.music)
+  const credits = voiced ? P.credits : ''
   const tags = P.tags
   const title = `${plan.title} #shorts`
   const lines = [`${plan.jp} ${plan.name}`, ...desc.map(x => `· ${x}`)].join('\n')
   const page = {
     title,
-    description: [lines, `${P.start}: ${site}`, voiced || plan.music ? credits : '', [...tags, 'Shorts'].map(x => `#${x}`).join(' ')].filter(Boolean).join('\n\n'),
+    description: [lines, `${P.start}: ${site}`, credits, [...tags, 'Shorts'].map(x => `#${x}`).join(' ')].filter(Boolean).join('\n\n'),
     tags: [...tags, plan.name, 'Tsuji', 'shorts'].join(', '),
   }
-  return { ...page, feeds: feedPosts(page, { hook: plan.title, lines: [lines], app: P.more.replace(/\.$/, ''), credits: voiced || plan.music ? [credits] : [], hashtags: tags }, plan.lang) }
+  return { ...page, feeds: feedPosts(page, { hook: plan.title, lines: [lines], app: P.more.replace(/\.$/, ''), credits: credits ? [credits] : [], hashtags: tags }, plan.lang) }
 }
 
 /** The command that makes the video, from frontend/. */
-export function featureCommand(id, lang = 'en', fit = 'tiktok', music = true, hour = 'day') {
-  return ['VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs', `--feature ${id}`, `--lang ${lang}`, fit !== 'tiktok' ? `--fit ${fit}` : '', hour !== 'day' ? `--hour ${hour}` : '', music ? '' : '--music none'].filter(Boolean).join(' ')
+export function featureCommand(id, lang = 'en', fit = 'tiktok', hour = 'day') {
+  return ['VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs', `--feature ${id}`, `--lang ${lang}`, fit !== 'tiktok' ? `--fit ${fit}` : '', hour !== 'day' ? `--hour ${hour}` : ''].filter(Boolean).join(' ')
 }

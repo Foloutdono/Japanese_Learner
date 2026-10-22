@@ -1,7 +1,8 @@
 """
 The long videos' sound (plan 233, frontend/carousel/long.js): every
 Japanese line a video says, voiced by the app's own voices, and the mix
-of those lines with the app's sounds and a quiet bed of music.
+of those lines with the app's sounds. No video carries music (plan 273,
+the owner's call): its voices and its sounds are the whole of it.
 
 Two steps, both called by frontend/carousel/long/render.mjs:
 
@@ -24,12 +25,7 @@ level, as the app's playKana does: a lone kana is what the deck was
 recorded for.
 
 `mix` lays the lines and the app's sounds (rendered from the app's own
-recipes by the page, one WAV a sound) on the timeline, under a bed of
-music this script plays itself: soft chords and a slow pluck, nothing
-recorded, so the video owes no one for it. The music steps back while a
-line is said. A reading challenge (plan 247, frontend/carousel/challenge.js)
-lies on a track of the owner's own music instead (`--bed`), or on nothing
-but its sounds and its voice (`--no-bed`).
+recipes by the page, one WAV a sound) on the timeline.
 
 A line marked `marks` (a challenge read along) is also written down
 syllable by syllable: when each of the engine's morae starts in its
@@ -214,53 +210,6 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
     return 1 if failed else 0
 
 
-# ── The bed ───────────────────────────────────────────────────────
-# Four chords, eight seconds each, in D major's quiet corner: Gmaj7,
-# F#m7, Em7, Dmaj9 -- a pad of soft sines and a pluck walking the chord.
-CHORDS = [[55, 59, 62, 66], [54, 57, 61, 64], [52, 55, 59, 62], [50, 57, 61, 64]]
-BAR = 8.0
-# The bed's level against the voice: some 15dB under a line said, as a
-# soft bed should sit (5dB under, the first take's, fought the voice).
-MUSIC = 0.3
-
-
-def bed(seconds: float):
-    import numpy as np
-    n = int(seconds * RATE)
-    out = np.zeros(n, dtype=np.float32)
-    hz = lambda m: 440 * 2 ** ((m - 69) / 12)
-    span = int(BAR * RATE)
-    tail = int(2.0 * RATE)
-    t = np.arange(span + tail, dtype=np.float32) / RATE
-    # A chord swells in and lets go into the next one.
-    env = np.minimum(1, t / 2.0) * np.clip((BAR + 2.0 - t) / 2.0, 0, 1)
-    plucks = [0, 1.5, 3, 4, 5.5, 7]
-    for b in range(int(np.ceil(seconds / BAR))):
-        chord = CHORDS[b % len(CHORDS)]
-        pad = np.zeros_like(t)
-        for j, m in enumerate(chord):
-            f = hz(m - 12 if j == 0 else m)
-            for detune in (-0.7, 0.7):
-                pad += np.sin(2 * np.pi * (f + detune) * t + j) * (0.5 if j else 0.8)
-            pad += 0.08 * np.sin(2 * np.pi * 2 * f * t)
-        pad *= env * 0.05
-        for k, at in enumerate(plucks):
-            m = chord[(k * 2 + b) % len(chord)] + 12
-            dt = np.clip(t - at, 0, None)
-            on = (t >= at).astype(np.float32)
-            pad += on * np.sin(2 * np.pi * hz(m) * dt) * np.exp(-dt * 2.2) * 0.035 * np.minimum(1, dt / 0.01)
-        a = b * span
-        z = min(n, a + span + tail) - a
-        if z <= 0:
-            break
-        out[a:a + z] += pad[:z]
-    # The video opens and closes on it.
-    fade = int(2.5 * RATE)
-    out[:fade] *= np.linspace(0, 1, fade, dtype=np.float32)
-    out[-fade:] *= np.linspace(1, 0, fade, dtype=np.float32)
-    return out
-
-
 LOUD = -14.0      # dBFS, the voice's level where it speaks
 CEILING = 0.84    # the limiter's ceiling, about -1.5dBFS
 
@@ -288,40 +237,11 @@ def limited(x, block: int = 120, release: float = 0.08):
     return np.clip(out[:n], -CEILING, CEILING)
 
 
-# A recorded bed (a track of music, plan 247) at this level, some 12dB
-# under the voice where it speaks; where nothing is said it carries the video.
-BED_RMS = 0.05
-
-
-def recorded_bed(path: Path, n: int, gain: float = 1.0, fade_s: float = 2.5):
-    """A WAV at RATE looped to `n` frames, stereo, levelled to BED_RMS
-    times `gain`, opening and closing on a fade of `fade_s` seconds as the
-    music does (plan 248: both as the studio's Tune panel sets them)."""
-    import numpy as np
-    data, rate = read_wav(path)
-    if rate != RATE:
-        idx = np.arange(int(len(data) * RATE / rate)) * rate / RATE
-        data = np.stack([np.interp(idx, np.arange(len(data)), data[:, c]) for c in range(data.shape[1])], axis=1).astype(np.float32)
-    if data.shape[1] == 1:
-        data = np.repeat(data, 2, axis=1)
-    reps = -(-n // max(1, len(data)))
-    loop = np.tile(data, (reps, 1))[:n].astype(np.float32)
-    rms = float(np.sqrt(np.mean(loop ** 2))) or 1.0
-    loop *= BED_RMS * gain / rms
-    fade = min(int(fade_s * RATE), n // 2)
-    if fade > 0:
-        ramp = np.linspace(0, 1, fade, dtype=np.float32)[:, None]
-        loop[:fade] *= ramp
-        loop[n - fade:] *= ramp[::-1]
-    return loop
-
-
-# The whole mix's last moment, faded: a chime's tail or the music never stops on a cut.
+# The whole mix's last moment, faded: a chime's tail never stops on a cut.
 END_FADE_S = 0.3
 
 
-def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None = None, no_bed: bool = False,
-        bed_gain: float = 1.0, bed_fade: float = 2.5) -> int:
+def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
     import numpy as np
 
     from study import voice_engine as engine
@@ -358,40 +278,11 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path, bed_path: Path | None 
         z = min(len(clip), n - a)
         if z > 0:
             fx[a:a + z] += clip[:z] * s.get("gain", 1)
-    # The voice at the front, the app's sounds under it, the bed under both,
-    # stepping back while a line is said (a quarter-second follower).
+    # The voice at the front, the app's sounds under it.
     peak = float(np.abs(voice_track).max()) or 1
     voice_track *= 0.7 / peak
-    # Where little is said (a carousel's short says one line), the bed
-    # carries the video: it rises, up to twice its level, still stepping
-    # back under the voice.
-    spoken = float(np.mean(np.abs(voice_track) > 0.02)) if n else 0.0
-    # The bed is as long as the video, not the second of room after it, so
-    # its fade-out ends where the video does (plan 248: it was cut at 40%).
-    m = int(seconds * RATE)
-    if bed_path:
-        music = recorded_bed(bed_path, m, bed_gain, bed_fade)
-    elif no_bed:
-        music = np.zeros(m, dtype=np.float32)
-    else:
-        music = bed(m / RATE)[:m] * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
-    pad = [(0, n - len(music))] + [(0, 0)] * (music.ndim - 1)
-    music = np.pad(music, pad).astype(np.float32)
-    level = np.abs(voice_track)
-    win = int(0.25 * RATE)
-    run = np.concatenate([[0], np.cumsum(level, dtype=np.float64)])
-    idx = np.arange(n)
-    lo, hi = np.clip(idx - win // 2, 0, n), np.clip(idx + win // 2, 0, n)
-    follow = ((run[hi] - run[lo]) / win).astype(np.float32)
-    duck = 1 - 0.55 * np.clip(follow / 0.05, 0, 1)
-    if music.ndim == 2:
-        music = music * duck[:, None]
-        left = voice_track + music[:, 0] + fx[:, 0] * 0.5
-        right = voice_track + music[:, 1] + fx[:, 1] * 0.5
-    else:
-        music *= duck
-        left = voice_track + music + fx[:, 0] * 0.5
-        right = voice_track + music + fx[:, 1] * 0.5
+    left = voice_track + fx[:, 0] * 0.5
+    right = voice_track + fx[:, 1] * 0.5
     stereo = np.stack([left, right], axis=1)
     # As loud as a video on YouTube: the voice where it speaks at LOUD, its
     # few peaks above the ceiling held down by a limiter rather than the
@@ -417,19 +308,15 @@ def main() -> int:
     v.add_argument("cues", type=Path)
     v.add_argument("--cache", type=Path, required=True)
     v.add_argument("--out", type=Path, required=True)
-    m = sub.add_parser("mix", help="lay the lines, the sounds and the bed on the timeline")
+    m = sub.add_parser("mix", help="lay the lines and the sounds on the timeline")
     m.add_argument("timeline", type=Path)
     m.add_argument("--cache", type=Path, required=True)
     m.add_argument("--sfx", type=Path, required=True)
     m.add_argument("--out", type=Path, required=True)
-    m.add_argument("--bed", type=Path, help="a recorded bed (WAV) in place of the music: a reading challenge's own track")
-    m.add_argument("--no-bed", action="store_true", help="no bed at all: a reading challenge with no track")
-    m.add_argument("--bed-gain", type=float, default=1.0, help="the recorded bed's level, times BED_RMS (the studio's music volume)")
-    m.add_argument("--bed-fade", type=float, default=2.5, help="the recorded bed's fade in and out, in seconds")
     args = ap.parse_args()
     if args.step == "voice":
         return voice(args.cues, args.cache, args.out)
-    return mix(args.timeline, args.cache, args.sfx, args.out, args.bed, args.no_bed, args.bed_gain, args.bed_fade)
+    return mix(args.timeline, args.cache, args.sfx, args.out)
 
 
 if __name__ == "__main__":

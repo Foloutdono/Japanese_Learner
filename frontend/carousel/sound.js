@@ -35,9 +35,9 @@ const PEAK = 0.5
 
 /** The score rendered: [left, right] Float32Arrays, `seconds` long at RATE.
  *  A sound is an app event (`key`) or a recorded clip (`src`); a clip
- *  marked `loop` plays again until the score ends (a track of music under
- *  a reading challenge, plan 247), and one given a `fade` comes in and
- *  goes out over that many seconds rather than stopping mid-note. */
+ *  marked `loop` plays again until the score ends, and one given a `fade`
+ *  comes in and goes out over that many seconds rather than stopping
+ *  mid-note. */
 export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices) {
   const { VOICE_EVENTS, voiceOut, voiceLevel } = voices
   const n = Math.round(seconds * RATE)

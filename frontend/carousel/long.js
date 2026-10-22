@@ -156,10 +156,8 @@ const silent = row => row.k === 'punct' || /^[＿_]+$/.test(row.t)
  *  a quiz's part is a seeded deal), or a `theme`, or exact `ids`; a
  *  grammar video takes a `point`. */
 export function longPlan(kind, banks, opts0 = {}) {
-  // The values tuned in the studio go with it (plan 248, tune.js `long.*`),
-  // and whether its bed of music is played (`music: false`, none: its
-  // voices and the app's sounds alone, and no music credited).
-  const pl = { ...planOf(kind, banks, opts0), tune: opts0.tune || {}, ...(opts0.music === false ? { music: false } : {}) }
+  // The values tuned in the studio go with it (plan 248, tune.js `long.*`).
+  const pl = { ...planOf(kind, banks, opts0), tune: opts0.tune || {} }
   // A short stands in a feed: TikTok's, Instagram's or none (plan 239).
   return opts0.format === 'short' ? { ...shorten(pl), fit: opts0.fit || 'tiktok' } : pl
 }
@@ -846,7 +844,7 @@ const PAGE = {
     grammarParts: n => [`What it does and how to build it`, `How it is used`, `${n.ex} example sentences, each said twice and cut word by word`, n.careful && 'The mistake to avoid', n.compare && `Not to be confused with ${n.compare}`, n.twists && `${n.twists} twist${n.twists > 1 ? 's' : ''}: test your understanding`, n.scene && 'A short conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} to check yourself`, 'A recap'].filter(Boolean),
     use: { vocab: 'Say every word out loud before you hear it. Come back in two or three days: what you still know then is what you have learned.', kanji: 'Trace each kanji with your finger as it is drawn. Come back in two or three days and pause on each one before it is revealed.', quiz: 'Pause if you need more time. Tell us your score in the comments!', grammar: 'Pause on each example and say it aloud before the voice does. Then try the questions without looking back.', reply: 'Say your reply out loud before the voice does. Pause if you need more time, and tell us your score in the comments!' },
     app: (f, site) => `Tsuji is a Japanese app built on spaced repetition: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points, from N5 to N1, each brought back just before you would forget it. The kana line is free for good, with no ads and no trackers.\n${site}`,
-    credits: (kana, music = true) => [`Voices: VOICEVOX Nemo.`, kana && 'Kana voice: 波音リツ (Canon).', music && 'Music: made for Tsuji.'].filter(Boolean).join(' '),
+    credits: kana => [`Voices: VOICEVOX Nemo.`, kana && 'Kana voice: 波音リツ (Canon).'].filter(Boolean).join(' '),
     tags: (lv, kind) => ['learn Japanese', 'Japanese', `JLPT ${lv}`, 'JLPT', `${lv} ${({ vocab: 'vocabulary', kanji: 'kanji', quiz: 'quiz', grammar: 'grammar', reply: 'conversation' })[kind]}`, ({ vocab: 'Japanese vocabulary', kanji: 'kanji stroke order', quiz: 'Japanese quiz', grammar: 'Japanese grammar', reply: 'Japanese conversation' })[kind], 'Japanese for beginners', 'nihongo', '日本語'],
     hashtags: lv => lv ? `#LearnJapanese #Japanese #JLPT #JLPT${lv} #日本語` : '#LearnJapanese #Japanese #JapaneseVocabulary #日本語',
   },
@@ -875,7 +873,7 @@ const PAGE = {
     grammarParts: n => [`Ce qu’il fait et comment le former`, `Comment l’employer`, `${n.ex} phrases d’exemple, dites deux fois et découpées mot à mot`, n.careful && 'L’erreur à éviter', n.compare && `À ne pas confondre avec ${n.compare}`, n.twists && `${n.twists} variante${n.twists > 1 ? 's' : ''} pour tester ta compréhension`, n.scene && 'Une courte conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} pour vérifier`, 'Un récap'].filter(Boolean),
     use: { vocab: 'Dis chaque mot à voix haute avant de l’entendre. Reviens dans deux ou trois jours : ce que tu sais encore, tu l’as appris.', kanji: 'Trace chaque kanji du doigt pendant qu’il se dessine. Reviens dans deux ou trois jours et mets pause avant chaque révélation.', quiz: 'Mets pause s’il te faut plus de temps. Donne ton score en commentaire !', grammar: 'Mets pause sur chaque exemple et dis-le avant la voix. Puis réponds aux questions sans revenir en arrière.', reply: 'Dis ta réponse à voix haute avant la voix. Mets pause s’il te faut plus de temps, et donne ton score en commentaire !' },
     app: (f, site) => `Tsuji est une appli de japonais fondée sur la répétition espacée : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire, du N5 au N1, chacun ramené juste avant que tu l’oublies. La ligne des kana est gratuite pour de bon, sans pub et sans traqueur.\n${site}`,
-    credits: (kana, music = true) => [`Voix : VOICEVOX Nemo.`, kana && 'Voix des kana : 波音リツ (Canon).', music && 'Musique : faite pour Tsuji.'].filter(Boolean).join(' '),
+    credits: kana => [`Voix : VOICEVOX Nemo.`, kana && 'Voix des kana : 波音リツ (Canon).'].filter(Boolean).join(' '),
     tags: (lv, kind) => ['apprendre le japonais', 'japonais', `JLPT ${lv}`, 'JLPT', `${({ vocab: 'vocabulaire', kanji: 'kanji', quiz: 'quiz', grammar: 'grammaire', reply: 'conversation' })[kind]} ${lv}`, ({ vocab: 'vocabulaire japonais', kanji: 'ordre des traits kanji', quiz: 'quiz japonais', grammar: 'grammaire japonaise', reply: 'conversation japonaise' })[kind], 'japonais débutant', 'nihongo', '日本語'],
     hashtags: lv => lv ? `#ApprendreLeJaponais #Japonais #JLPT #JLPT${lv} #日本語` : '#ApprendreLeJaponais #Japonais #VocabulaireJaponais #日本語',
   },
@@ -917,12 +915,12 @@ const SHORT_PAGE = {
 
 /** What a short's page says of the app, its credits and its tags, for
  *  another 9:16 video that writes its own page (words.js, plan 252). */
-export function pageParts(tl, lang, { figures = null, music = true, level = 'N5', kind = 'vocab' } = {}) {
+export function pageParts(tl, lang, { figures = null, level = 'N5', kind = 'vocab' } = {}) {
   const P = SHORT_PAGE[lang] || SHORT_PAGE.en
   const fmt = x => Number(x).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US')
   return {
     app: figures ? P.app({ words: fmt(figures.words), kanji: fmt(figures.kanji), points: fmt(figures.points) }) : P.more,
-    credits: (PAGE[lang] || PAGE.en).credits(tl.cues.some(c => LONE.test(c.text)), music),
+    credits: (PAGE[lang] || PAGE.en).credits(tl.cues.some(c => LONE.test(c.text))),
     tags: (PAGE[lang] || PAGE.en).tags(level, kind),
   }
 }
@@ -959,7 +957,7 @@ export function describe(plan, tl, site, figures = null) {
     `▸ ${P.useHead}`, P.use[plan.kind], '',
     `▸ ${P.chapHead}`, chapterText(tl), '',
     ...(deck ? [`▸ ${P.appHead}`, P.app(deck, site), ''] : [site, '']),
-    `▸ ${P.creditHead}`, P.credits(kana, plan.music !== false), '',
+    `▸ ${P.creditHead}`, P.credits(kana), '',
     theme ? P.hashtags(null) : P.hashtags(lv),
   ]
   // A theme's words span the levels: no level is named for it.
@@ -976,7 +974,7 @@ function describeShort(plan, tl, site, figures) {
   const fmt = x => Number(x).toLocaleString(plan.lang === 'fr' ? 'fr-FR' : 'en-US')
   const kana = tl.cues.some(c => LONE.test(c.text))
   const app = figures ? P.app({ words: fmt(figures.words), kanji: fmt(figures.kanji), points: fmt(figures.points) }) : null
-  const credits = (PAGE[plan.lang] || PAGE.en).credits(kana, plan.music !== false)
+  const credits = (PAGE[plan.lang] || PAGE.en).credits(kana)
   const hashtags = P.hashtags(plan.theme ? null : lv)
   const body = [
     P.lead[plan.kind], '',

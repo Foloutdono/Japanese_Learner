@@ -762,7 +762,7 @@ where a voice speaks.
 ```bash
 cd frontend
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --feature dictation --lang fr
-node carousel/long/render.mjs --feature exam --lang en --music none --fit instagram
+node carousel/long/render.mjs --feature exam --lang en --fit instagram
 node carousel/long/render.mjs --feature reading --stills 1,5,9   # frames, no video
 ```
 
@@ -952,11 +952,12 @@ the screen.
   stands. After adding a scene's pictures, run
   `python -m scripts.carousel_bank` (backend) and commit both.
 
-**No music.** `--music none` makes a long video or its short with no bed
-of music, its voices and the app's sounds alone, and drops the music from
-its credits; the file is named `…-nomusic`. In the studio it is the
-"Music" switch (plan 252, "With music" / "No music"), for the long
-videos and the vocabulary shorts alike: the command and the page follow it.
+**No music (plan 273).** No video carries music, the owner's call: a
+long video, a short, a reading challenge, a word short and a feature
+video are their voices and the app's sounds, and nothing is credited
+for music. The studio has no music switch, track or level, the render
+no `--music` (an old command's is noted and ignored), and the mix no bed
+(`long_video_audio mix`).
 
 **Pick per video.** A level's `--part` walks the deck in its order (a
 quiz's part is a seeded deal), and two parts never share an item;
@@ -996,8 +997,7 @@ is tuned to be said (`long_video_audio.spoken`, `TUNE`): let go after
 level decaying, then brought to the engine's level; the timeline is laid on
 those lengths, so a reveal lands on its voice. It then mixes the lines
 with the app's sounds (`sound.eventAudio`, the shipped recipes at the
-app's level) and a bed of music it plays itself, soft chords and a slow
-pluck, nothing recorded, stepping back while a line is said. The voice's
+app's level), and nothing else: no video carries music (plan 273). The voice's
 credit "VOICEVOX Nemo" ends every description; never publish the clips
 or a video's sound as a dataset.
 
@@ -1051,7 +1051,7 @@ The studio encodes it at once, with the app's sounds and no voice
 ("Download as a short video", Chrome, Edge or Safari); "Copy the
 command: the short, voiced" gives the render command with the carousel
 as a recipe (`--carousel`, `short.recipeOf`), which makes it with the
-voice and the music bed and writes its page (the carousel's own title,
+voice and writes its page (the carousel's own title,
 its caption, `#shorts`).
 
 ```bash
@@ -1068,7 +1068,7 @@ caption each. A caption opens on the hook, what a feed shows before its
 "more"; a reply short names its scene under it. It asks for what the
 feed rewards (a save on Instagram, a comment on TikTok), says the app
 with "Link in bio." since a link in a caption is not one, keeps every
-credit the description has (VOICEVOX Nemo, the music's licence), and
+credit the description has (VOICEVOX Nemo, the kana's voice), and
 ends on five hashtags at most, never `#shorts`: Instagram has kept five
 since December 2025, and TikTok's reach falls past about as many. The
 render's text file holds the three, one under the other; the studio
@@ -1114,7 +1114,7 @@ these.
 ```bash
 cd frontend
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words N5:3 --style quiz
-node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --music none
+node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr
 ```
 
 ### A word's picture (plan 257)
@@ -1213,24 +1213,13 @@ at the title's size (the scroll) or a little over it (read along), with
 its readings at N5 to N3. The tests hold every text whole inside the frame, at every
 level, in both languages.
 
-**The sound** is the studio's own track unless another or none is
-asked for: "Cool Vibes" by Kevin MacLeod (`TRACKS`, in `carousel/music/`,
-given by the owner), under Creative Commons Attribution 4.0, so its
-credit is written into the description of every video it plays under
-(`challengePage`; keep it there when posting). The owner can put a
-track of their own in its place in the studio, under "Music", or give
-it to the command (`--music FILE`, any format ffmpeg reads), or take
-the music away (`Remove`, `--music none`, the file named `…-nomusic`). The track is looped to the
-video's length if it is shorter, faded in and out over 2.5 s and, under
-the voice, held some 12 dB below it (`long_video_audio mix --bed`).
-Without one the video has only the board's flap on the hook, the clicks
-of the countdown, the answer's chime and the platform's on the way out
-(`--no-bed`), kept calm (-20 LUFS) when nobody speaks either. The
+**The sound** carries no music (plan 273): the board's flap on the hook,
+the clicks of the countdown, the answer's chime and the platform's on
+the way out, and the reader's voice where it reads along, kept calm
+(-20 LUFS) when nobody speaks. The
 scroll, which nobody says, can be downloaded from the studio as it is,
-the track mixed in the browser; the one read along is made by the
-command, which voices each sentence. An owner's own track is not kept
-anywhere: the studio reads it from the file chosen, the command from
-its path.
+its sounds mixed in the browser; the one read along is made by the
+command, which voices each sentence.
 
 The question asked after the text is the maker's to choose (plan 260):
 the studio's "Question" lists the text's eight to twelve, each with its
@@ -1257,7 +1246,6 @@ cd frontend
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en
 node carousel/long/render.mjs --challenge n5-03 --style scroll --hour dawn --lang en --question 7
 node carousel/long/render.mjs --challenge n5-04 --style scroll --hour night --season hanabi --lang en
-node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en --music ~/music/late-train.mp3
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```
 
@@ -1272,7 +1260,6 @@ as sliders, grouped:
 | Group | Sources | What |
 | --- | --- | --- |
 | Reading challenge | challenge | the reading pace (× each level's characters a minute), the hook, the text's coming in, the last line held, the pause between sentences, the question alone, the countdown, the answer, the app last, the picture's wash |
-| Music | challenge | the track's level and its fades |
 | Word echo | echo | how long the word is said, the silence between two sayings, the word kept |
 | Short video | every carousel | each slide's hold (×), the time to answer a question, the longest a short may run |
 | Long video | long | the pauses (×) and the quiz's countdown |

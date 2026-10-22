@@ -976,16 +976,15 @@ engine: rerun it after a change of voice or of the themes); since plan 233
 ten-minute 16:9 videos for YouTube (`long.js`, made by
 `node carousel/long/render.mjs`: a vocabulary or kanji drill, one grammar
 point whole, a quiz), voiced line by line by the app's voices and mixed
-with the app's sounds and a bed of music it plays itself
-(`scripts/long_video_audio.py`), each also a source in the studio
+with the app's sounds (`scripts/long_video_audio.py`; no video carries
+music since plan 273, the owner's call), each also a source in the studio
 that previews it and gives its page and the command that makes it, and
 each also a 9:16 short under a minute, as any carousel can be too
 (`short.js`: its slides held and swiped, its line voiced); since plan
 247 reading challenges (`challenge.js`): a comprehension text read as a
 9:16 video over Today's print, going slowly up the screen as a film's
 credits do, in ink on the print washed pale, or read along by the app's
-reader, each word lit on the voice's own syllables, over the owner's
-own music or none; since plan 249 reply videos: the conversations
+reader, each word lit on the voice's own syllables; since plan 249 reply videos: the conversations
 answered against a timer, six questions a video at least, every line
 said, drawn since plan 249b as a chat thread in the Fiche look, a
 short one scene whole and ending on the carousel's call to action,
@@ -995,8 +994,7 @@ YouTube Shorts', Instagram Reels' and TikTok's (`feeds.js`: a caption
 opens on the hook, links "in bio", keeps every credit, five hashtags at
 most). Since plan 252 vocabulary shorts have their own source
 (`words.js`: nine words, as a card on washi or a quiz on sumi, every
-wrong meaning one that shares no word with the word's), and every long
-video and short a "Music" switch; since plan 253 a sentence can be
+wrong meaning one that shares no word with the word's); since plan 253 a sentence can be
 posted as "Read it" (`funnel.js`: the sentence, its words a card each,
 the answer with a bonus, the app), since plan 254 set large, its bonus
 the sentence said the other way (`plain_polite.other_register`'s, never
@@ -1034,8 +1032,7 @@ and each story and feature video ends on the print's sun ringed by the
 four lines, the mark in it, drawn round as the clip begins; since plan 272
 a feature video's screen fills the frame as a phone shows it, its
 caption on a slip of the print's washi at the foot of the safe box. Since plan 248 every number a maker may set per
-post (a video's timing and pace, the music's level, the export's
-quality) is one line of `tune.js`, set in the studio's Tune panel and
+post (a video's timing and pace, the export's quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one
 previewed. Since plan
 234 a carousel is drawn by default on one path that converts

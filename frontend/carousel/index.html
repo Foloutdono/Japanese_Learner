@@ -189,8 +189,6 @@ body[data-video="feature"] [data-feature="hide"] { display: none !important; }
 body:not([data-feeds="on"]) [data-feeds="only"] { display: none !important; }
 body[data-post="caption"] [data-caption="hide"] { display: none !important; }
 body:not([data-post="caption"]) [data-caption="only"] { display: none !important; }
-.music { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.music__name { color: var(--ink2); font-size: 13px; overflow-wrap: anywhere; }
 .player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .player__bar { display: flex; align-items: center; gap: 12px; }
 .player__bar input { flex: 1; min-width: 0; accent-color: var(--gold); }
@@ -237,17 +235,6 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
     <div class="field" data-challenge="only">
       <label class="label" for="challenge-q">Question <span>asked after the text, its answers in a shuffled order</span></label>
       <select id="challenge-q" class="text-input"></select>
-    </div>
-
-    <div class="field" data-challenge="only">
-      <div class="label">Music <span>the studio’s track, one of yours, or none</span></div>
-      <div class="music">
-        <input id="music-file" type="file" accept="audio/*" hidden>
-        <button id="music-add" type="button" class="btn btn--quiet">Add a track</button>
-        <button id="music-track" type="button" class="btn btn--quiet" hidden>Cool Vibes</button>
-        <span id="music-name" class="music__name">Cool Vibes · Kevin MacLeod</span>
-        <button id="music-clear" type="button" class="btn btn--quiet">Remove</button>
-      </div>
     </div>
 
     <div class="field" id="hour-field" hidden>
@@ -336,14 +323,6 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <button type="button" data-set="fit:tiktok">For TikTok</button>
         <button type="button" data-set="fit:instagram">For Instagram</button>
         <button type="button" data-set="fit:normal">Normal</button>
-      </div>
-    </div>
-
-    <div class="field" data-long="only" data-challenge="hide">
-      <div class="label">Music <span>the bed of music under the voices, or none</span></div>
-      <div class="seg" role="group" aria-label="Music">
-        <button type="button" data-set="bed:on">With music</button>
-        <button type="button" data-set="bed:off">No music</button>
       </div>
     </div>
 
