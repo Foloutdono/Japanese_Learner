@@ -17,6 +17,8 @@
 # once and shared across every learner who asks about it -- attach_user_state
 # is the separate, per-user half.
 import logging
+import re
+from dataclasses import replace
 
 from content.grammar_points_data import find, grammar_to_id
 from study import morphology
@@ -24,10 +26,10 @@ from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_poin
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content import jmdict_fr
 from study.card_lookup import (
-    resolve_morpheme, resolve_compound, resolve_phrase, compound_reading,
+    resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
-    resolve_split_word, resolve_adverb_tail, numeral_value,
+    resolve_split_word, resolve_adverb_tail, resolve_interjection, numeral_value,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -36,6 +38,7 @@ from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
 from study import difficulty
 from study import grammar_detect
+from study import particle_glosses
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +149,8 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
 # The tokens a set phrase or a sentence-opening conjunction was folded
 # into (_tokens): one word each, whatever letters the detector read in it.
 _ONE_WORD_POS = frozenset({"interjection", "conjunction"})
+# The conjunctions a pronoun opens (card_lookup.resolve_opening).
+_PRONOUN_OPENED = ("それ",)
 
 
 def _outside_set_phrases(tokens: list[dict], grammar: list[dict]) -> list[dict]:
@@ -161,8 +166,18 @@ def _outside_set_phrases(tokens: list[dict], grammar: list[dict]) -> list[dict]:
     words = [(t["start"], t["end"]) for t in tokens if t.get("pos") in _ONE_WORD_POS]
     if not words:
         return grammar
+    # A conjunction それ opens is no phrase made of its letters' points:
+    # それでは is "well then", not the point それで and a topic's は;
+    # それでも "even so", not それ and 〜でも "or something" (plan 272).
+    # Every point written wholly inside it, and shorter, is its letters'.
+    # (だが keeps its 〜が（逆接）: that IS its make.)
+    conjunctions = [(t["start"], t["end"]) for t in tokens
+                    if t.get("pos") == "conjunction" and t["surface"].startswith(_PRONOUN_OPENED)]
 
     def borrowed(g) -> bool:
+        if any(all(s <= a and b <= e for a, b in g["segments"]) and (g["start"], g["end"]) != (s, e)
+               for s, e in conjunctions):
+            return True
         if g.get("kind") == "marker":
             return any(all(s <= a and b <= e for a, b in g["segments"]) and (g["start"], g["end"]) != (s, e)
                        for s, e in words)
@@ -266,7 +281,17 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
         # says so (`named`): the ゆう of ゆうがた is 夕方 cut in two, no
         # Yū. A place it knows (とうきょう, おおさか) it reads as one.
         token["gloss"] = dict(_NAME_GLOSS[m.name_kind])
+    elif vocab_match is None and m.unknown and _JAPANESE_LETTERS.search(m.surface):
+        # Letters no dictionary has a word for (plan 272), read back as
+        # one word -- ぷらそにか, a choir; ゆるりんず, a channel -- say so,
+        # and what they most often are.
+        token["gloss"] = dict(_UNKNOWN_GLOSS)
     return token
+
+
+# What a word no dictionary knows is, most often (plan 272).
+_UNKNOWN_GLOSS = {"en": "not in the dictionary (a name?)", "fr": "absent du dictionnaire (un nom ?)"}
+_JAPANESE_LETTERS = re.compile(r"[ぁ-ヿ一-鿿]")
 
 
 def _hiragana(text: str) -> bool:
@@ -317,6 +342,367 @@ def _numeral_run(morphemes: list, i: int, deck_hits: list) -> int:
 _NUMERAL_CHARS = frozenset("〇一二三四五六七八九十百千万億兆0123456789０１２３４５６７８９")
 _NUMERAL_UNITS = frozenset("十百千万億兆")
 
+# What counts after a number though UniDic files it as a plain noun or
+# suffix rather than a counter (助数詞): 三人's 人, 3曲目's 曲 (plan 272).
+_COUNTING = frozenset("人曲名番着足羽頭首話部問点球通票件品色社校店便号位")
+_FULLWIDTH_DIGITS = str.maketrans("０１２３４５６７８９", "0123456789")
+_KANJI_DIGITS = ("一", "二", "三", "四", "五", "六", "七", "八", "九", "十")
+
+
+def _number_of(text: str) -> int | None:
+    """The number a numeral says, in kanji (三十, 4万2310) or in digits."""
+    value = numeral_value(text)
+    if value is None:
+        digits = text.translate(_FULLWIDTH_DIGITS)
+        value = int(digits) if digits.isdigit() else None
+    return value
+
+
+def _counted_run(morphemes: list, i: int) -> tuple[int, int]:
+    """(numerals, length) where morphemes[i:] are a number and what it
+    counts -- 1 + つ, ２ + 人, 3 + 曲目 -- or (0, 0). Digits said one by
+    one count nothing (七八一二番, a telephone's)."""
+    def numeral(k: int) -> bool:
+        return morphemes[k].pos == "noun" and all(c in _NUMERAL_CHARS for c in morphemes[k].surface)
+
+    if i > 0 and numeral(i - 1):
+        return 0, 0
+    n = 0
+    while i + n < len(morphemes) and numeral(i + n):
+        n += 1
+    if n == 0 or i + n >= len(morphemes):
+        return 0, 0
+    written = "".join(m.surface for m in morphemes[i:i + n])
+    if (n > 1 and not any(c in _NUMERAL_UNITS for c in written)) or _number_of(written) is None:
+        return 0, 0
+    counter = morphemes[i + n]
+    if counter.pos not in ("noun", "suffix") or not (counter.counter or counter.surface in _COUNTING
+                                                      or _glued_ordinal(counter)):
+        return 0, 0
+    return n, n + 1
+
+
+def _glued_ordinal(m) -> bool:
+    """曲目 as UniDic reads it in 3曲目は: one word, the noun きょくもく,
+    "programme" -- where the page writes the counter 曲 and the ordinal
+    目 (plan 272)."""
+    return len(m.surface) == 2 and m.surface[1] == "目" and m.surface[0] in _COUNTING
+
+
+def _ordinal(value: int, lang: str) -> str:
+    if lang == "fr":
+        return "1er" if value == 1 else f"{value:,}".replace(",", " ") + "e"
+    suffix = "th" if 10 <= value % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(value % 10, "th")
+    return f"{value:,}{suffix}"
+
+
+def _counted_dict(run: list, numerals: int, printed=None) -> dict | None:
+    """One token for a number and its counter where the two are one word
+    on the page (plan 272), or None -- a number and its counter are two
+    words otherwise, each with its card (三 + 杯, 七 + 時; plans 151 and
+    266):
+
+    - a small number written in digits, where the deck writes the word
+      in kanji: １つ is 一つ, "one (thing)", ２人 二人, ３日 三日;
+    - an ordinal UniDic read as another word: 3曲目's 曲目 is the counter
+      曲 and the ordinal め, the third song, never きょくもく "programme"."""
+    surface = "".join(m.surface for m in run)
+    # (A number in digits is read as it is said, _printed_numbers.)
+    reading = (printed[2] if printed else "".join(m.reading for m in run[:numerals])) \
+        + "".join(m.reading for m in run[numerals:])
+    value = _number_of("".join(m.surface for m in run[:numerals]))
+    counted = run[numerals]
+    token = {
+        "surface": surface, "start": run[0].start, "end": run[-1].end,
+        "lemma": surface, "reading": reading, "pos": "noun",
+        "furigana": None, "vocab_match": None,
+        "kanji_matches": [
+            {"kanji": char, "level": lvl, "raw_id": rid, "entry": serializable_entry(e)}
+            for char, lvl, e, rid in find_kanji_matches(surface)
+        ],
+        "number": value,
+    }
+    if _glued_ordinal(counted):
+        if counted.reading.endswith("もく"):
+            token["reading"] = (printed[2] if printed else "".join(m.reading for m in run[:numerals])) \
+                + counted.reading[:-2] + "め"
+        english, french = _counted_sense(counted.surface[0], counted.reading[:-2])
+        if counted.surface[0] not in _ORDINAL_SENSE:
+            english, french = english or counted.surface[0], french or english or counted.surface[0]
+        token["gloss"] = {"en": " · ".join(filter(None, (_ordinal(value, "en"), english))),
+                          "fr": " · ".join(filter(None, (_ordinal(value, "fr"), french)))}
+    elif value is not None and 1 <= value <= 10 and not any(c in _KANJI_DIGITS for c in surface):
+        written = _KANJI_DIGITS[value - 1] + "".join(m.surface for m in run[numerals:])
+        hit = resolve_lemma(written, reading, written)
+        if hit is None or (hit[1].get("kanji") or "") != written:
+            return None
+        token["vocab_match"] = _deck_match(*hit)
+    else:
+        return None
+    token["furigana"] = _printed_furigana(run, numerals, printed, token["reading"])
+    return token
+
+
+def _printed_furigana(run: list, numerals: int, printed, reading: str) -> list[dict]:
+    """The furigana of a number and what follows it, `reading` whole:
+    the number's reading over its digits, which align_deck leaves bare
+    (it aligns a reading over kanji), and the rest aligned."""
+    surface = "".join(m.surface for m in run)
+    if not printed:
+        return align_deck(surface, reading)
+    said = printed[2]
+    digits = "".join(m.surface for m in run[:numerals])
+    if not reading.startswith(said):
+        return [{"text": surface, "reading": reading}]
+    rest = "".join(m.surface for m in run[numerals:])
+    return [{"text": digits, "reading": said}] + (align_deck(rest, reading[len(said):]) if rest else [])
+
+
+# A counter written in kana after a number in digits (plan 272): あと5ふん
+# is five minutes, which UniDic read 糞, "feces". The counter's kanji and
+# its reading as a card files it.
+_KANA_COUNTERS = {
+    "ふん": ("分", "ふん"), "ぷん": ("分", "ふん"), "じ": ("時", "じ"),
+    "じかん": ("時間", "じかん"), "にん": ("人", "にん"), "かい": ("回", "かい"),
+    "ほん": ("本", "ほん"), "ぼん": ("本", "ほん"), "ぽん": ("本", "ほん"),
+    "まい": ("枚", "まい"), "さい": ("歳", "さい"), "えん": ("円", "えん"),
+    "ひき": ("匹", "ひき"), "びき": ("匹", "ひき"), "ぴき": ("匹", "ひき"),
+    "びょう": ("秒", "びょう"), "ねん": ("年", "ねん"), "がつ": ("月", "がつ"),
+}
+
+
+def _printed_numbers(morphemes: list) -> tuple[list, dict[int, tuple[int, str, str]]]:
+    """The numbers a sentence prints in digits, read as they are said
+    (plan 272): {index of the number's first morpheme: (index after it,
+    the number as printed, its reading)}, and the morphemes with the
+    counter after each read as it is said there.
+
+    UniDic reads a figure as itself, so 30 had no reading at all and
+    the row said nothing, and it reads a few in full width as English:
+    １０ was てん, ４０ ふぉーてぃ. A number is read here as furigana
+    reads it (study/furigana.py, plan 177) -- 1,500 and 3.5 one number
+    each, 30分 さんじゅっ + ぷん -- and its counter takes the card it is
+    there: 30分's 分 is the N5 ふん, "minute", where UniDic filed it under
+    ぶん, "portion"; 5ふん is 分, never 糞."""
+    from study import furigana
+
+    out = list(morphemes)
+    numbers = {}
+    for i, span in furigana._number_spans(morphemes).items():
+        j, printed = span
+        if j < len(out) and out[j].pos in ("noun", "suffix") and out[j].surface in _KANA_COUNTERS:
+            kanji, base = _KANA_COUNTERS[out[j].surface]
+            out[j] = replace(out[j], lemma=kanji, lemma_reading=base, counter=True)
+        found = furigana._numeral_parts(out, i, span)
+        if found is None:
+            continue
+        parts, after = found
+        if j < len(out) and out[j].surface in _MYRIADS:
+            # １００万 is one number, ひゃくまん: the digits, then the unit.
+            from study.reading_context import read_number
+            said = read_number(printed)
+            if said:
+                numbers[i] = (j + 1, printed + out[j].surface, said + _MYRIADS[out[j].surface])
+            continue
+        numbers[i] = (j, printed, parts[0]["reading"])
+        if j == i + 1:
+            out[i] = replace(out[i], reading=parts[0]["reading"])
+        if after != j + 1:
+            continue
+        counter = out[j]
+        said = "".join(p.get("reading") or p["text"] for p in parts[1:])
+        if said and said != counter.reading and any(morphology._is_kanji(c) for c in counter.surface):
+            counter = replace(counter, reading=said)
+        if counter.surface in ("分", "分間") and said[:1] in ("ふ", "ぷ"):
+            counter = replace(counter, lemma_reading="ふん" + said[2:])
+        out[j] = counter
+    return out, numbers
+
+
+_MYRIADS = {"万": "まん", "億": "おく", "兆": "ちょう"}
+_MYRIAD_VALUE = {"万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12}
+
+
+def _figure(printed: str) -> dict:
+    """A number's gloss, its figure as each language writes it: 1,500
+    and 1 500, 3.5 and 3,5, １００万 1,000,000."""
+    text = printed.translate(_FULLWIDTH_DIGITS).replace("，", ",").replace("．", ".")
+    unit = _MYRIAD_VALUE.get(text[-1:], 1)
+    if unit > 1:
+        text = text[:-1]
+    whole, dot, fraction = text.replace(",", "").partition(".")
+    if unit > 1:
+        value = int(float(f"{whole}.{fraction or 0}") * unit)
+        return {"en": f"{value:,}", "fr": f"{value:,}".replace(",", "\u202f")}
+    en, fr = f"{int(whole):,}", f"{int(whole):,}".replace(",", "\u202f")
+    if dot:
+        en, fr = f"{en}.{fraction}", f"{fr},{fraction}"
+    return {"en": en, "fr": fr}
+
+
+def _digits_dict(run: list, printed: str, reading: str) -> dict:
+    """One token for a number printed in digits (plan 272), read and
+    glossed as a number written in kanji is (_number_dict)."""
+    whole = printed.translate(_FULLWIDTH_DIGITS).replace("，", ",").replace("．", ".")
+    unit = _MYRIAD_VALUE.get(whole[-1:], 1)
+    head, _, fraction = (whole[:-1] if unit > 1 else whole).replace(",", "").partition(".")
+    value = float(f"{head}.{fraction}") if fraction else int(head)
+    return {
+        "surface": "".join(m.surface for m in run), "start": run[0].start, "end": run[-1].end,
+        "lemma": printed, "reading": reading, "pos": "noun",
+        "furigana": [{"text": "".join(m.surface for m in run), "reading": reading}],
+        "vocab_match": None, "kanji_matches": [],
+        "number": int(value * unit) if unit > 1 else value,
+        "gloss": _figure(printed),
+    }
+
+
+# A counter of a span of time the deck has no card for, after a number
+# (plan 272): ７日間 is seven days, which the pool's 日間 read にっかん,
+# "daytime", glossed.
+_SPAN_COUNTERS = {
+    "日間": {"en": "days (how long)", "fr": "jours (durée)"},
+    "分間": {"en": "minutes (how long)", "fr": "minutes (durée)"},
+    "秒間": {"en": "seconds (how long)", "fr": "secondes (durée)"},
+    "か月": {"en": "months", "fr": "mois"},
+    "カ月": {"en": "months", "fr": "mois"},
+    "ヵ月": {"en": "months", "fr": "mois"},
+    "箇月": {"en": "months", "fr": "mois"},
+}
+
+
+def _after_a_number(morphemes: list, i: int, numbers: dict) -> bool:
+    """Whether morphemes[i] follows a number, in digits or in kanji."""
+    if i == 0:
+        return False
+    before = morphemes[i - 1]
+    return any(end == i for end, _, _ in numbers.values()) or (
+        before.pos == "noun" and before.surface != "何" and numeral_value(before.surface) is not None)
+
+
+def _age_run(morphemes: list, i: int, numbers: dict) -> int:
+    """How many morphemes from `i` write an age bracket -- a round
+    number and 代, ２０代 "in one's twenties" -- or 0. 代 alone is the
+    card "charge, cost" (plan 272)."""
+    if i in numbers:
+        end, printed, _ = numbers[i]
+        value = _number_of(printed)
+    else:
+        end = i
+        while end < len(morphemes) and morphemes[end].pos == "noun" \
+                and all(c in _NUMERAL_CHARS for c in morphemes[end].surface):
+            end += 1
+        value = numeral_value("".join(m.surface for m in morphemes[i:end])) if end > i else None
+    if value is None or not 10 <= value <= 90 or value % 10 or end >= len(morphemes):
+        return 0
+    if morphemes[end].surface != "代" or (end + 1 < len(morphemes) and morphemes[end + 1].surface == "目"):
+        return 0
+    return end + 1 - i
+
+
+def _age_dict(run: list, numbers: dict, start: int) -> dict:
+    head = run[:-1]
+    value = _number_of(numbers[start][1]) if start in numbers else numeral_value("".join(m.surface for m in head))
+    said = numbers[start][2] if start in numbers else "".join(m.reading for m in head)
+    surface = "".join(m.surface for m in run)
+    reading = said + "だい"
+    return {
+        "surface": surface, "start": run[0].start, "end": run[-1].end,
+        "lemma": surface, "reading": reading, "pos": "noun",
+        "furigana": _printed_furigana(run, len(head), numbers.get(start), reading),
+        "vocab_match": None,
+        "kanji_matches": [
+            {"kanji": char, "level": lvl, "raw_id": rid, "entry": serializable_entry(e)}
+            for char, lvl, e, rid in find_kanji_matches(surface)
+        ],
+        "number": value,
+        "gloss": {"en": f"in one's {value}s ({value}-{value + 9})" if value > 10 else "teens (10-19)",
+                  "fr": f"de {value} à {value + 9} ans"},
+    }
+
+
+# 3つ目, 何年目, 2回目: a number, what it counts and 目, the ordinal
+# suffix, which read alone is the N5 目, "eye" (plan 272).
+_WHICH = {"en": "which (in order)", "fr": "combientième"}
+# What an ordinal counts, where the counter's card leads with another
+# sense (度 "degree (temperature)", 代 "charge, cost"); any other counter
+# is glossed with its card.
+_ORDINAL_SENSE = {
+    "度": ("time", "fois"), "回": ("time", "fois"), "代": ("generation", "génération"),
+    "番": ("", ""), "年": ("year", "année"), "日": ("day", "jour"),
+    "人": ("person", "personne"), "曲": ("song", "morceau"), "杯": ("cup, glass", "verre, tasse"),
+    "週": ("week", "semaine"), "階": ("floor", "étage"), "期": ("term", "période"),
+    "試合": ("match", "match"), "巻": ("volume", "tome"), "話": ("episode", "épisode"),
+    "時間": ("period (of school)", "heure de cours"),
+}
+
+
+def _counted_sense(counter: str, reading: str) -> tuple[str, str]:
+    """(English, French) for what an ordinal counts (_ORDINAL_SENSE),
+    else its card's meaning, or ("", "")."""
+    if counter in _ORDINAL_SENSE:
+        return _ORDINAL_SENSE[counter]
+    hit = resolve_lemma(counter, reading) if counter != "つ" else None
+    if not hit:
+        return "", ""
+    english = hit[1].get("meaning") or ""
+    return english, fr_gloss(hit[1], VOCAB_FR) or english
+
+
+def _ordinal_run(morphemes: list, i: int, numbers: dict) -> int:
+    """How many morphemes from `i` write an ordinal -- a number or 何, a
+    counter, then 目 -- or 0."""
+    if i in numbers:
+        k = numbers[i][0]
+    elif morphemes[i].surface == "何" or (morphemes[i].pos == "noun" and numeral_value(morphemes[i].surface)):
+        k = i + 1
+        while k < len(morphemes) and morphemes[k].pos == "noun" and numeral_value(morphemes[k].surface) \
+                and morphemes[i].surface != "何":
+            k += 1
+    else:
+        return 0
+    if k + 1 >= len(morphemes):
+        return 0
+    counter, tail = morphemes[k], morphemes[k + 1]
+    if counter.pos not in ("noun", "suffix") or not (counter.counter or counter.surface in _COUNTING
+                                                      or counter.surface in ("つ", "代")):
+        return 0
+    if tail.surface != "目" or tail.pos not in ("suffix", "noun"):
+        return 0
+    return k + 2 - i
+
+
+def _ordinal_dict(run: list, numbers: dict, start: int) -> dict:
+    """The token for an ordinal (_ordinal_run): 3つ目 "3rd", 何年目
+    "which (in order) · year", read whole, みっつめ and なんねんめ."""
+    counter = run[-2]
+    head = run[:-2]
+    if start in numbers:
+        reading = numbers[start][2] + counter.reading
+        value = _number_of(numbers[start][1].replace(",", "").replace("，", ""))
+    else:
+        reading = "".join(m.reading for m in head) + counter.reading
+        value = None if head[0].surface == "何" else numeral_value("".join(m.surface for m in head))
+    surface = "".join(m.surface for m in run)
+    token = {
+        "surface": surface, "start": run[0].start, "end": run[-1].end,
+        "lemma": surface, "reading": reading + "め", "pos": "noun",
+        "furigana": None, "vocab_match": None,
+        "kanji_matches": [
+            {"kanji": char, "level": lvl, "raw_id": rid, "entry": serializable_entry(e)}
+            for char, lvl, e, rid in find_kanji_matches(surface)
+        ],
+    }
+    english, french = _counted_sense(counter.surface, counter.lemma_reading)
+    if value is None:
+        en, fr = _WHICH["en"], _WHICH["fr"]
+    else:
+        token["number"] = value
+        en, fr = _ordinal(value, "en"), _ordinal(value, "fr")
+    token["gloss"] = {"en": f"{en} · {english}" if english else en, "fr": f"{fr} · {french or english}" if english else fr}
+    token["furigana"] = _printed_furigana(run, len(head), numbers.get(start), token["reading"])
+    return token
+
 
 # The suffixes a person's name takes: a token UniDic calls a name before
 # one of them is that name, whatever card its letters spell (ゆきさん is
@@ -328,6 +714,21 @@ def _named(morphemes: list, i: int) -> bool:
     m = morphemes[i]
     return (m.name_kind in ("family", "given", "person") and i + 1 < len(morphemes)
             and morphemes[i + 1].surface in _HONORIFICS)
+
+
+def _merged_morpheme(run: list) -> morphology.Morpheme:
+    """One morpheme for a run of particles read as one (ってば)."""
+    return replace(run[0], surface="".join(m.surface for m in run), end=run[-1].end,
+                   lemma="".join(m.surface for m in run), reading="".join(m.reading for m in run),
+                   lemma_reading="".join(m.reading for m in run), kana="".join(m.kana for m in run))
+
+
+def _joined_dict(run: list, pos: str) -> dict:
+    """One token for a run of function words read as one word, with no
+    card: ってば."""
+    token = _token_dict(_merged_morpheme(run), None)
+    token["pos"] = pos
+    return token
 
 
 def _compound_dict(run: list, level: str, entry: dict, raw_id: str) -> dict:
@@ -404,6 +805,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     in it opens its point (frontend rows) -- a pool gloss there would
     trade the lesson for a dictionary line about one of its letters.
     """
+    morphemes, numbers = _printed_numbers(morphemes)
     deck_hits = [resolve_morpheme(morphemes, j) for j in range(len(morphemes))]
     ruled = _in_grammar(morphemes, grammar or [])
     # A counter the counters' point lights is that point's to explain:
@@ -430,6 +832,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     # A name before an honorific is the name, never the card its letters
     # spell (plan 266): ゆきさん is no "snow".
     deck_hits = [None if _named(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
+    # The もん that closes a sentence on its reason is no "thing" (plan 272).
+    deck_hits = [None if particle_glosses.gives_a_reason(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
     # A pool run may not take in a morpheme a point is written on; a
     # deck hit stands in for "has a card" there, which is all
     # resolve_pool_compound asks of it.
@@ -439,6 +843,16 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     tokens = []
     i = 0
     while i < len(morphemes):
+        ordinal = _ordinal_run(morphemes, i, numbers)
+        if ordinal:
+            tokens.append(_ordinal_dict(morphemes[i:i + ordinal], numbers, i))
+            i += ordinal
+            continue
+        aged = _age_run(morphemes, i, numbers)
+        if aged:
+            tokens.append(_age_dict(morphemes[i:i + aged], numbers, i))
+            i += aged
+            continue
         phrase = resolve_phrase(morphemes, i)
         if phrase:
             level, entry, raw_id, n = phrase
@@ -471,7 +885,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         hit = resolve_compound(morphemes, i)
         if hit:
             level, entry, raw_id, n = hit
-            tokens.append(_compound_dict(morphemes[i:i + n], level, entry, raw_id))
+            token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
+            if i in numbers and numbers[i][0] == i + 1:
+                # ３つ, 2人: the deck's word, its reading over its digits.
+                token["furigana"] = _printed_furigana(morphemes[i:i + n], 1, numbers[i], token["reading"])
+            tokens.append(token)
             i += n
             continue
         # (Never a word cut from an ending a point is written on: そう
@@ -489,6 +907,24 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             token["pos"] = "adverb" if run[-1].lemma == "ず" else "verb"
             tokens.append(token)
             i += n
+            continue
+        numerals, counted = _counted_run(morphemes, i)
+        token = _counted_dict(morphemes[i:i + counted], numerals, numbers.get(i)) if counted else None
+        if token is not None:
+            tokens.append(token)
+            i += counted
+            continue
+        if i in numbers:
+            end, printed, reading = numbers[i]
+            if end == i + 1 and deck_hits[i]:
+                # A figure the deck has a card for keeps it: 5 is 五.
+                token = _token_dict(morphemes[i], deck_hits[i])
+                token["reading"] = reading
+                token["furigana"] = [{"text": morphemes[i].surface, "reading": reading}]
+            else:
+                token = _digits_dict(morphemes[i:end], printed, reading)
+            tokens.append(token)
+            i = end
             continue
         counted_run = _numeral_run(morphemes, i, deck_hits)
         if counted_run:
@@ -509,11 +945,44 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += 2
             continue
-        if deck is None and i not in ruled:
+        if deck is None and (i not in ruled or morphemes[i].pos == "conjunction"):
+            # (A conjunction is a word with its card beside the point that
+            # is it, as しかし is: そして, its card and its point, plan 272.)
             deck = resolve_function_word(morphemes, i)
+        if (morphemes[i].surface == "って" and i + 1 < len(morphemes) and morphemes[i + 1].surface == "ば"
+                and morphemes[i + 1].pos == "particle" and i + 1 not in ruled
+                and all(m.pos in ("particle", "symbol") for m in morphemes[i + 2:])):
+            # ってば, "I told you!": one particle, never って and a
+            # conditional ば (plan 272).
+            token = _joined_dict(morphemes[i:i + 2], "particle")
+            token["gloss"] = particle_glosses.gloss([_merged_morpheme(morphemes[i:i + 2])], 0)
+            tokens.append(token)
+            i += 2
+            continue
+        said = resolve_interjection(morphemes[i]) if i not in ruled else None
+        if said and said[0] == "deck":
+            # An exclamation by the spelling it is said as (plan 272):
+            # あのー is the filler あのう, never あの, "that over there".
+            deck = said[1]
+        elif said and morphemes[i].surface[-1:] in "ーっッぁぃぅぇぉ〜～":
+            # ...and drawn out or cut short, by the pool's row for it
+            # over the card UniDic's lemma reaches: えーっ, "eh?!", is no
+            # ええ, "yes".
+            deck = None
         named = _named(morphemes, i)
-        pool = None if deck or i in ruled or named else resolve_pool_morpheme(morphemes, i)
-        tokens.append(_token_dict(morphemes[i], deck, pool, named))
+        span = deck is None and morphemes[i].surface in _SPAN_COUNTERS and _after_a_number(morphemes, i, numbers)
+        pool = None if deck or i in ruled or named or span or particle_glosses.gives_a_reason(morphemes, i) \
+            else (said[1] if said else resolve_pool_morpheme(morphemes, i))
+        token = _token_dict(morphemes[i], deck, pool, named)
+        if span:
+            token["gloss"] = dict(_SPAN_COUNTERS[morphemes[i].surface])
+        elif deck is None and pool is None and i not in ruled and not named and "gloss" not in token:
+            # A word of speech the course has no lesson for (plan 272):
+            # ぞ, かしら, the negative ん, the って that quotes.
+            said = particle_glosses.gloss(morphemes, i)
+            if said:
+                token["gloss"] = said
+        tokens.append(token)
         i += 1
     return tokens
 
@@ -601,10 +1070,16 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # a number carries its figure and a name says it is one; and the
 # detector reads 〜ております, the な of 休みなので, a quotation without
 # brackets, につきまして and the ません of ありませんが.
-LOCAL_REV = 19
+# 20: plan 272 -- the deck's words written in kana read whole (としょかん,
+# きっさてん: study/kana_lexicon.py), a stretch of kana no dictionary has
+# one word (ぷらそにか, a name: no ぷ, ら, そ and two particles' points),
+# それでは and それでも one conjunction each and そして its card after a
+# particle, １つ the deck's 一つ, and a line read inside the lines either
+# side of it (この一回のテイクで's で the particle "with").
+LOCAL_REV = 20
 
 
-def analyze_local(text: str, level: str | None = None) -> dict:
+def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
     """Everything about a Sentence that needs no language model. Pure and
     user-independent, therefore cacheable and shareable across learners.
 
@@ -612,8 +1087,14 @@ def analyze_local(text: str, level: str | None = None) -> dict:
     sentence's own estimated level (falling back to N5 if the sentence
     fits no level at all -- report() needs *some* level to grade against
     even for a sentence that fits nothing).
+
+    `before` and `after` are the text either side where `text` is one
+    line of a longer text -- a subtitle's line, a piece of a cut cue or
+    of a typed sentence (plan 272): it is read in its context
+    (morphology.tokenize), and the result is still the line's alone.
     """
-    morphemes = morphology.tokenize(text)
+    morphemes = (morphology.tokenize(text, before=before, after=after) if before or after
+                 else morphology.tokenize(text))
     if morphemes is None:
         # No fallback to a worse analysis here -- see the module
         # docstring. A caller renders "analysis unavailable", not a

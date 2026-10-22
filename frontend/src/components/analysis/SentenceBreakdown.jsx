@@ -10,7 +10,7 @@ import { SpeakButton } from './SpeakButton'
 import { wordRowsOf } from './rows'
 import { grammarGloss } from './grammarGloss'
 import { coversToken, numberedPointsOf } from './grammarSpans'
-import { isUnknownToken, lineState, tokState, wordGloss } from './tokens'
+import { isUnknownToken, lineState, tokFurigana, tokState, wordGloss } from './tokens'
 import { useLight } from './useLight'
 
 export function Legend({ t }) {
@@ -101,10 +101,12 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numb
       .filter(Boolean)
     const run = []
     for (let k = i; k <= j; k += 1) run.push(word(tokens[k], k))
+    // The point's words with no gap between them, the one word they make
+    // (plan 272): てくれる, ので.
     out.push(
       <span key={`pt-${i}`} className="bkd-frame">
         {numbers.length > 0 && <span className="bkd-frame__n" aria-hidden="true">{numbers.join('·')}</span>}
-        {run}
+        <span className="bkd-frame__words">{run}</span>
       </span>,
     )
     i = j + 1
@@ -151,10 +153,12 @@ export function WordRows({ analysis, t, onTokenClick }) {
         const entry = head.vocab_match?.entry
         const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
         // The card's reading beside the card's name; the sentence's own
-        // where the card names none (a name the course has no card for).
+        // where the card names none (a name the course has no card for),
+        // over a kanji only: a kana word spells its own sound, and パーティー
+        // read in hiragana is ぱあてぃー, a word nobody writes.
         const reading = entry?.kana
           ? (entry.kana !== name ? entry.kana : '')
-          : (row.reading !== row.surface ? row.reading : '')
+          : (row.reading !== row.surface ? tokFurigana(row) : '')
         const meaning = wordGloss(head, lang)
         const level = head.vocab_match?.level ?? null
         // The ending as the sentence wrote it (ます, ませんでした), its

@@ -329,6 +329,12 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         native = _TSU.get(_numeral_value(num_surface))
         return (native, c_read) if native else None
 
+    if ctr_surface == "日間" and _to_hira(c_read).endswith("かん"):
+        # 七日間 is the days, then かん: なのかかん (plan 272).
+        fixed = _counter_readings(num_surface, num_reading, "日", _to_hira(c_read)[:-2], ctr_pos,
+                                  whole=whole, after=("間", *after))
+        return (fixed[0], "かかん") if fixed and fixed[1] == "か" else None
+
     if ctr_surface == "日" and ctr_pos in ("suffix", "noun"):
         # The days of the month (and N days) are words of their own from
         # 2 to 10, and 14, 20, 24; the rest are にち. 一日 is a token of
@@ -351,7 +357,9 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
 
     if ctr_surface in ("時", "時間"):
         if cls == 4:
-            return _swap_tail(n_read, "よん", "よ"), c_read
+            # (UniDic reads 午後四時's 四 し, as in 四時 "the four seasons":
+            # plan 272.)
+            return _swap_tail(_swap_tail(n_read, "よん", "よ"), "し", "よ"), c_read
         if cls == 9:
             return _swap_tail(n_read, "きゅう", "く"), c_read
         if cls == 7 and ctr_surface == "時":

@@ -1372,3 +1372,50 @@ class WithoutMorphologyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ConjunctionPointTests(unittest.TestCase):
+    """Plan 272: それで ("and so") is not the それで of それでは ("well
+    then") or それでも ("even so"), and not それ + で before an evaluation
+    (それでいい, "that's fine"); a one-word conjunction opens its clause
+    after a particle too, in a line written without its commas."""
+
+    def test_sorede_is_and_so_only_where_it_says_so(self) -> None:
+        self.assertIn("それで", found_in("それで、彼は帰った。"))
+        for sentence in ("それでは行きますか。", "それでいいよ。", "それで大丈夫です。",
+                         "じゃあ、それでお願いします。", "それでもいいよ。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("それで", found_in(sentence))
+
+    def test_a_conjunction_after_a_particle(self) -> None:
+        self.assertIn("そして", found_in("バンドメンバーとそして"))
+        self.assertIn("しかし", found_in("雨が降ったしかし試合は続いた"))
+        self.assertIn("そして", found_in("朝ごはんを食べた。そして学校へ行った。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SpokenFinalTests(unittest.TestCase):
+    """Plan 272: speech writes its sentence-final particles its own way --
+    ね and よ drawn out, じゃん for 〜じゃないか -- and its contractions:
+    置いてっちゃう's てっ is 〜ていく said short."""
+
+    def test_a_final_particle_drawn_out_is_the_particle(self) -> None:
+        for sentence, pattern, written in (("雨だねー", "ね", "ねー"), ("すごいねぇ", "ね", "ねぇ"),
+                                           ("そうだよー", "よ", "よー"), ("行こうよー", "よ", "よー")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(pattern), written)
+        # ...never the ねえ that opens a sentence, "hey".
+        for sentence in ("ねえ、聞いて", "ねー、聞いて"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("ね", found_in(sentence))
+
+    def test_jan_is_isnt_it(self) -> None:
+        self.assertEqual(found_in("それしか言ってないじゃん").get("〜じゃないか"), "じゃん")
+        self.assertEqual(found_in("雨じゃん").get("〜じゃないか"), "じゃん")
+        # The じゃ of a plain negative is the copula's, not じゃん.
+        self.assertNotIn("〜じゃないか", found_in("学生じゃない。"))
+
+    def test_teku_is_te_iku_said_short(self) -> None:
+        self.assertEqual(found_in("置いてっちゃう").get("〜ていく／〜てくる"), "てっ")
+        self.assertEqual(found_in("飲んでく？").get("〜ていく／〜てくる"), "でく")

@@ -1135,6 +1135,14 @@ def _attaches(start: int, tokens, befores, heads, exact: bool = False) -> bool:
         # 待っているが、なかなか来ない (plan 188).
         return particle_headed or "" in befores or bool(heads) and heads <= {"adverb"}
     shown = set(befores) - {""}
+    if (heads == {"conjunction"} and shown <= {"symbol"}
+            and token.pos in ("particle", "auxiliary", "verb", "adjective", "interjection")):
+        # A conjunction the tokenizer reads as one word (そして, しかし),
+        # which its lessons show opening a sentence or a clause, opens one
+        # after a particle or a predicate too in a line written without
+        # its commas, as a subtitle writes speech: バンドメンバーとそして…
+        # (plan 272).
+        return True
     if token.pos == "adverb" and token.surface in ("そう", "こう", "ああ", "どう") and shown & _PREDICATE:
         # そう stands for a clause: そうとは限らない, そうかもしれない (plan 188)
         return True
@@ -2827,12 +2835,20 @@ def _in_set_phrase(tokens, start: int) -> bool:
 
 
 def _sorede_refused(tokens, start: int, end: int, _segments) -> bool:
-    """それで ("and so") is not the それで of それでも ("even so")."""
+    """それで ("and so") is not the それで of それでも ("even so") nor of
+    それでは ("well then"), and not それ + で before an evaluation:
+    それでいい is "that's fine", それでお願いします "that one, please"
+    (plan 272)."""
+    from study.card_lookup import evaluates
+
     i = _index_at(tokens, start)
     if i is None:
         return False
     k = next((n for n in range(i, len(tokens)) if tokens[n].end == end), None)
-    return k is not None and k + 1 < len(tokens) and tokens[k + 1].surface == "も"
+    if k is None or k + 1 >= len(tokens):
+        return False
+    return tokens[k + 1].surface in ("も", "は") or evaluates(tokens, k + 1)
+
 
 
 def _kadouka_spans(tokens):
@@ -3838,7 +3854,9 @@ def _through_negative(tokens, hit):
     return (pattern, level, start, after.end, kind, contiguous, ((start, after.end),))
 
 
-_CONTRACTED = {"てる": "〜ています", "ちゃう": "〜てしまう", "とく": "〜ておく"}
+_CONTRACTED = {"てる": "〜ています", "ちゃう": "〜てしまう", "とく": "〜ておく",
+               # (plan 272: 置いてっちゃう, 飲んでく -- ていく said short)
+               "てく": "〜ていく／〜てくる"}
 
 
 def _contraction_spans(tokens):
@@ -3850,6 +3868,30 @@ def _contraction_spans(tokens):
     return [(_CONTRACTED[t.lemma], t.start, t.end) for i, t in enumerate(tokens)
             if i > 0 and t.pos == "auxiliary" and t.lemma in _CONTRACTED
             and tokens[i - 1].pos in ("verb", "auxiliary")]
+
+
+# A sentence-final particle drawn out in speech (plan 272): ねー, よぉ.
+_DRAWN_FINAL = frozenset("ーぇェぉォえお〜～")
+
+
+def _spoken_final_spans(tokens):
+    """(pattern, start, end) for the sentence-final particles speech
+    writes its own way (plan 272): ね and よ drawn out (雨だねー, そうだよー),
+    which no lesson spells and the plain needle does not reach, and
+    じゃん, the casual 〜じゃないか (言ってないじゃん, 雨じゃん). Each closes
+    its sentence, after what the plain particle comes after; a ねえ that
+    opens one is "hey" (an interjection), and stays the tokenizer's."""
+    out = []
+    for i, t in enumerate(tokens):
+        if i == 0 or t.pos != "particle" or not all(u.pos in ("particle", "symbol") for u in tokens[i + 1:]):
+            continue
+        prev = tokens[i - 1]
+        drawn = len(t.surface) > 1 and t.surface[0] in "ねよ" and all(c in _DRAWN_FINAL for c in t.surface[1:])
+        if drawn and prev.pos in ("verb", "adjective", "auxiliary", "particle"):
+            out.append((t.surface[0], t.start, t.end))
+        elif t.surface == "じゃん" and prev.pos in ("verb", "adjective", "auxiliary", "noun", "pronoun", "other"):
+            out.append(("〜じゃないか", t.start, t.end))
+    return out
 
 
 def _humble_progressive_spans(tokens):
@@ -4681,6 +4723,13 @@ def _form_hits(tokens, confirm: bool = True, sentence: str = "") -> list[tuple[s
             for span in spans:
                 pieces = _pieces(span)
                 out.append((pattern, level, pieces[0][0], pieces[-1][1], pieces))
+    for pattern, s, e in _spoken_final_spans(tokens):
+        # (No lesson spells ねー or じゃん, so none confirms them: the rule
+        # reads the particle's own letters and nothing else, as
+        # _SELF_EVIDENT's do.)
+        found = find(pattern)
+        if found is not None:
+            out.append((pattern, found[0], s, e, ((s, e),)))
     for pattern, s, e in (*_contraction_spans(tokens), *_humble_progressive_spans(tokens)):
         found = find(pattern)
         if found is not None and (not confirm or _confirmed(found[0], pattern)):

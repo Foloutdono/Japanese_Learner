@@ -64,6 +64,14 @@ describe('a word in rōmaji', () => {
     expect(tokRomaji(w('きっと', '', 'adverb'))).toBe('kitto')
   })
 
+  // Plan 272: the reading of a katakana word is its sound in hiragana,
+  // which draws a long vowel as the row's usual one (こうひい).
+  it('reads a katakana word by its own long vowels', () => {
+    expect(tokRomaji(w('コーヒー', 'こうひい'))).toBe('koohii')
+    expect(tokRomaji(w('パーティー', 'ぱあてぃー'))).toBe('paatii')
+    expect(tokRomaji(w('こんにちは', 'こんにちわ', 'interjection'))).toBe('konnichiwa')
+  })
+
   it('says a particle the way it is said', () => {
     expect(tokRomaji(w('は', 'は', 'particle'))).toBe('wa')
     expect(tokRomaji(w('へ', 'へ', 'particle'))).toBe('e')

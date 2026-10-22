@@ -402,8 +402,11 @@ class EveryPartTests(unittest.TestCase):
                 self.assertEqual(tok["gloss"]["en"], kind)
                 self.assertTrue(tok["gloss"]["fr"])
         # Written in hiragana with no honorific, a name is the tokenizer's
-        # guess: the ゆう of ゆうがた is 夕方 cut in two.
-        self.assertNotIn("gloss", self._token("ゆうがた、雨がふった。", "ゆう"))
+        # guess: the ゆう of ゆうがた was 夕方 cut in two -- and since plan
+        # 272 ゆうがた is read whole, 夕方, no name at all.
+        evening = self._token("ゆうがた、雨がふった。", "ゆうがた")
+        self.assertNotIn("gloss", evening)
+        self.assertEqual(evening["vocab_match"]["entry"]["kanji"], "夕方")
         # A card the name is read like is no gloss of a name.
         self.assertNotIn("gloss", self._token("ゆきがふりました。", "ゆき"))
 
@@ -566,3 +569,32 @@ class MergeDeepTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class LineContextTests(unittest.TestCase):
+    """A line of a longer text read inside the lines either side (plan
+    272): MeCab chooses a word by its neighbours, and a subtitle's line
+    read alone lost them."""
+
+    def test_a_line_reads_its_last_word_by_what_follows(self) -> None:
+        line = "この一回のテイクで"
+        alone = analyze_local(line)["tokens"][-1]
+        within = analyze_local(line, after="気持ちを込めて歌いたいと思います。")["tokens"][-1]
+        self.assertEqual(alone["surface"], "で")
+        self.assertEqual(alone["pos"], "auxiliary")
+        self.assertEqual(within["pos"], "particle")
+        self.assertIn("で", [g["pattern"] for g in within["grammar"]])
+
+    def test_the_result_is_the_line_s_alone(self) -> None:
+        line = "ぷらそにかの合唱のみなさんが"
+        result = analyze_local(line, before="バンドメンバーとそして", after="いてくれるので、")
+        self.assertEqual(result["text"], line)
+        self.assertEqual("".join(t["surface"] for t in result["tokens"]), line)
+        self.assertTrue(all(0 <= t["start"] < t["end"] <= len(line) for t in result["tokens"]))
+        self.assertTrue(all(0 <= s and e <= len(line) for g in result["grammar"] for s, e in g["segments"]))
+
+    def test_a_word_across_the_edge_reads_the_line_alone(self) -> None:
+        # ありがとう straddles the cut: the line is read as it was alone.
+        line = "うございます"
+        self.assertEqual(analyze_local(line, before="ありがと")["tokens"], analyze_local(line)["tokens"])

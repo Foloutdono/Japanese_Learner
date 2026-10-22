@@ -170,7 +170,14 @@ def passage_sentences(passage: str, whole: bool = False, lines: bool = False) ->
         if not is_japanese(s["text"]):
             out.append(s)
             continue
-        out += [{"text": piece["text"]} for piece in cut_line(s["text"], None, None)]
+        pieces = [piece["text"] for piece in cut_line(s["text"], None, None)]
+        # Each piece is read inside the sentence it was cut from (plan
+        # 272): the rest of the sentence either side of it.
+        for k, piece in enumerate(pieces):
+            line = {"text": piece}
+            if len(pieces) > 1:
+                line["before"], line["after"] = "".join(pieces[:k]), "".join(pieces[k + 1:])
+            out.append(line)
     return out
 
 
@@ -561,7 +568,8 @@ DEEP_DAILY_LIMIT = int(os.environ.get("DEEP_DAILY_LIMIT", "150"))
 
 def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: str,
                        allow_llm_call: bool = True, context: str = "",
-                       cached: dict[str, dict] | None = None) -> dict:
+                       cached: dict[str, dict] | None = None,
+                       local_context: dict | None = None) -> dict:
     """One Sentence through the full local (+ optional deep) pipeline,
     with per-user SRS state attached. Shared by the live analyze path
     and the history re-derive path (Step 3) so the two can never drift.
@@ -580,8 +588,11 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
     `cached`, when a caller already read the cache for a whole Passage
     (_analyze_passage, _cached_analyses), is that read: looked up here
     instead of a query per sentence.
+
+    `local_context` is the text either side of a line of a longer text
+    ({"before", "after"}, plan 272), which the local tier reads it in.
     """
-    analysis = analyze_local(text)
+    analysis = analyze_local(text, **(local_context or {}))
     lang = known_lang(lang)
 
     def lookup(ctx: str) -> dict | None:
@@ -646,6 +657,7 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
     truncated = max(0, len(all_sentences) - MAX_SENTENCES)
     kept = all_sentences[:MAX_SENTENCES]
     texts = [s["text"] for s in kept]
+    local = [{"before": s["before"], "after": s["after"]} if "before" in s else None for s in kept]
 
     states = srs.get_user_states(user_id)
     contexts = [passage_context(texts, i, source) if deep and lines else "" for i in range(len(texts))]
@@ -661,7 +673,7 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
     sentences = [
         _analyze_sentence(text, deep, lang, states, user_id,
                           allow_llm_call and i < MAX_DEEP_SENTENCES,
-                          context=contexts[i], cached=cached)
+                          context=contexts[i], cached=cached, local_context=local[i])
         for i, text in enumerate(texts)
     ]
 
@@ -824,12 +836,15 @@ def explain_history_sentence(entry_id: int, index: int, payload: HistoryExplainP
     entry = _load_entry(entry_id, user_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Not found")
-    texts = _entry_sentences(entry)
+    lines = passage_sentences(entry["phrase"], lines=True)[:MAX_SENTENCES]
+    texts = [s["text"] for s in lines]
     if index < 0 or index >= len(texts):
         raise HTTPException(status_code=404, detail="No such sentence in this Passage")
     states = srs.get_user_states(user_id)
+    line = lines[index]
     return _analyze_sentence(texts[index], deep=True, lang=payload.lang, states=states, user_id=user_id,
-                             context=passage_context(texts, index, entry["source"]))
+                             context=passage_context(texts, index, entry["source"]),
+                             local_context={"before": line["before"], "after": line["after"]} if "before" in line else None)
 
 
 # ── 訳 — a translation under every sentence (plan 235) ──────────

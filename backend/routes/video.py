@@ -384,9 +384,9 @@ def _materialize(session_id: int, cues: list[dict], translated: dict, timing: st
             translations.setdefault(lang, {}).setdefault(s["text"], text)
 
     analyzed = []
-    for s in kept:
+    for k, s in enumerate(kept):
         if s["japanese"]:
-            analysis = analyze_local(s["text"])
+            analysis = analyze_local(s["text"], **_neighbours(kept, k))
         else:
             # Kept, not dropped. A Korean verse or an English ad-lib is
             # part of the track the learner is reading along with, so it
@@ -705,6 +705,19 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     }
 
 
+def _neighbours(lines: list[dict], k: int) -> dict:
+    """The lines either side of line `k`, as the context it is read in
+    (plan 272, analysis.analyze_local): a cue's line is a piece of what
+    is said, and the tokenizer reads a word by its neighbours. Only a
+    Japanese neighbour: an English ad-lib is no context."""
+    def text(j: int) -> str:
+        if 0 <= j < len(lines) and lines[j].get("japanese", not lines[j].get("foreign")):
+            return lines[j].get("text") or ""
+        return ""
+
+    return {"before": text(k - 1), "after": text(k + 1)}
+
+
 def _current(session_id: int, sentences: list[dict]) -> list[dict]:
     """The session's lines, each analysed by the local tier as it reads
     today -- a line stored under another LOCAL_REV is analysed again,
@@ -736,12 +749,14 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
 
     if all(s.get("local_rev") == LOCAL_REV and not wide(s) for s in sentences):
         return sentences
-    fresh = []
+    # The lines first, cut where they are cut, so that each is read with
+    # the lines either side of it as they will stand (_neighbours).
+    lines = []
     changed = False
     for s in sentences:
         if s.get("foreign"):
             changed |= s.get("local_rev") != LOCAL_REV
-            fresh.append({**s, "local_rev": LOCAL_REV})
+            lines.append(({**s, "local_rev": LOCAL_REV}, None))
             continue
         pieces = cut_line(s["text"], s.get("cue_start"), s.get("cue_end"), s.get("word_times")) if wide(s) else None
         if s.get("local_rev") == LOCAL_REV and (pieces is None or len(pieces) == 1):
@@ -749,18 +764,27 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
             if pieces is not None:
                 changed = True
                 s = {**s, "cut_rev": CUT_REV}
-            fresh.append(s)
+            lines.append((s, None))
             continue
         changed = True
         for piece in pieces or [{"text": s["text"], "start": s.get("cue_start"), "end": s.get("cue_end"),
                                   **({"words": s["word_times"]} if s.get("word_times") else {})}]:
-            fresh.append({
-                **analyze_local(piece["text"]), "cue_start": piece["start"], "cue_end": piece["end"],
-                **({"word_times": piece["words"]} if piece.get("words") else {}),
-                "local_rev": LOCAL_REV, "cut_rev": CUT_REV,
-            })
+            lines.append((None, piece))
     if not changed:
         return sentences
+    texts = [{"text": kept["text"] if kept else piece["text"], "foreign": bool(kept and kept.get("foreign"))}
+             for kept, piece in lines]
+    fresh = []
+    for k, (kept, piece) in enumerate(lines):
+        if kept is not None:
+            fresh.append(kept)
+            continue
+        fresh.append({
+            **analyze_local(piece["text"], **_neighbours(texts, k)), "cue_start": piece["start"],
+            "cue_end": piece["end"],
+            **({"word_times": piece["words"]} if piece.get("words") else {}),
+            "local_rev": LOCAL_REV, "cut_rev": CUT_REV,
+        })
     # Best effort: a failed save costs the next opening the same few
     # milliseconds a line, never the answer.
     try:
@@ -1046,7 +1070,7 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     states = srs.get_user_states(user_id)
     context = _line_context(session, sentences, index, payload.title, payload.channel)
     explained = _analyze_sentence(text, deep=True, lang=payload.lang, states=states, user_id=user_id,
-                                  context=context)
+                                  context=context, local_context=_neighbours(sentences, index))
 
     # A Cue is a Sentence, and a Sentence's cue times are part of it.
     # _analyze_sentence builds from TEXT alone -- analyze_local is pure
