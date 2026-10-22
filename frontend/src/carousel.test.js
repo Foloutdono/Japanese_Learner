@@ -3039,6 +3039,8 @@ describe('the practice features, recorded in the app (plan 270)', () => {
           drawFeature(ctx, plan, tl, end.start + end.dur - 0.01, [], print)
           for (const w of plan.end.split(/\s+/)) expect(texts.join(' '), `${at}: ${w}`).toContain(w)
         }
+        // The app dissolves into the gate, frame by frame, from the gate's first.
+        for (let f = 0; f <= 18; f++) drawFeature(stubContext().ctx, plan, tl, end.start + f / 30, [], null)
       })
     } finally {
       globalThis.Path2D = had

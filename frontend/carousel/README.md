@@ -780,10 +780,10 @@ feature a learner would not find on a first run:
   through the camera as it moves; `push` slides a new page in from the
   right over the one it leaves, which goes a third of the way left and
   darkens, and `back` slides it away again; `rise` brings a sheet up over
-  the screen and `sink` takes it down. `anchor` puts what a part shows
-  where the part before tapped, so a sentence opened in an accordion
-  stays under the finger however the page moved to it. The video's end
-  dissolves into the gate.
+  the screen and `sink` takes it down. A tap that opens something in
+  place (`click` with `keep`) scrolls the page by what it moved, so a
+  sentence opened in an accordion stays under the finger. The video's
+  end dissolves into the gate.
 - **Taps.** A finger shows before each tap and a ring follows it. A
   `click` sound plays, and a softer one on each typed key.
 - **Voices.** The engine's voices speak where the app speaks: the clip

@@ -14,6 +14,7 @@
 //   { go: '/practice/dictation/N5', ready: SEL }   open a page, wait for SEL
 //   { shot: NAME, focus: SEL, tap: SEL }           a shot, and where SEL stands (all it matches; SEL or [SEL])
 //   { click: SEL, ready: SEL }                     a tap, then wait for SEL
+//                                                  (`keep`: SEL kept where it stood, as it opens in place)
 //   { type: SEL, text, shot: NAME, chunk: 3 }      typed a few keys at a time, a shot after each
 //   { play: SEL, shot: NAME, seconds: 2.5 }        tapped, then a shot every so often while it plays
 //                                                  (`fast`: as JPEGs; `step`: its animations held and
@@ -107,11 +108,15 @@ export async function record(browser, { url, steps, mocks, lang, audio = null, d
     return y
   }).catch(() => 0)
   const shots = []
+  // What the page's layout moved above a kept tap (plan 273): added to
+  // every later shot's scroll, so what stayed under the finger keeps its
+  // place on the page and the camera does not travel for a collapse.
+  let drift = 0
   // A clip shot as it plays is a JPEG, quick enough to keep up with it; any other shot a PNG.
   const shoot = async (name, i, extra = {}, fast = false) => {
     const file = join(dir, `${String(shots.length).padStart(3, '0')}-${name}.${fast ? 'jpg' : 'png'}`)
     await page.screenshot(fast ? { path: file, type: 'jpeg', quality: 92 } : { path: file })
-    const shot = { name, i, file, scrollY: Math.round((await scrolled()) * S), ...extra }
+    const shot = { name, i, file, scrollY: Math.round((await scrolled()) * S + drift), ...extra }
     shots.push(shot)
     return shot
   }
@@ -126,9 +131,21 @@ export async function record(browser, { url, steps, mocks, lang, audio = null, d
       await page.locator(st.scroll).first().evaluate((el, block) => el.scrollIntoView({ block, behavior: 'instant' }), st.block || 'start')
       await page.waitForTimeout(st.settle ?? 400)
     } else if (st.click) {
+      const was = st.keep ? await box(st.click) : null
+      const s0 = was ? (await scrolled()) * S : 0
       await page.locator(st.click).first().click({ timeout: 10000 })
       if (st.ready) await page.locator(st.ready).first().waitFor({ timeout: 15000 })
       await page.waitForTimeout(st.settle ?? 500)
+      // `keep`: what was tapped stays where it stood (plan 273), the page
+      // scrolled by what opening it moved, as a phone's scroll anchoring
+      // keeps an accordion's head under the finger.
+      const now = was && await box(st.click)
+      if (now && Math.abs(now.y - was.y) > 2) {
+        await page.mouse.move(PHONE.width / 2, PHONE.height / 2)
+        await page.mouse.wheel(0, (now.y - was.y) / S)
+        await page.waitForTimeout(500)
+      }
+      if (was) drift += was.y + s0 - ((await box(st.click)).y + (await scrolled()) * S)
     } else if (st.type) {
       const field = page.locator(st.type).first()
       await field.click()

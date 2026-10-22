@@ -94,7 +94,8 @@ const FASTER = '.roll-ctl__speed .roll-ctl__btn >> nth=1'
 const WHERE = '.ask__offer >> nth=1'
 const BREAKDOWN = '.qrows + .btn-secondary'
 // A mock exam's parts: the question and its answers, the answer in slot i, the page's Next.
-const SHEET = '.exam-ask__big, .exam-tiles'
+const QUESTION = '.exam-ask__big'
+const TILES = '.exam-tiles'
 const tile = i => `.exam-tile >> nth=${i}`
 const NEXT = '.exam-dock__go--next'
 const FLAG = '.exam-flag'
@@ -132,7 +133,7 @@ const gateSteps = (line, levels, level) => [
 ]
 const gateBeats = (say, levels = { en: 'N5 to N1.', fr: 'Du N5 au N1.' }) => [
   { say, parts: [{ shot: 'gate', hold: 2.0, tap: 1.5 }] },
-  { say: levels, parts: [{ shot: 'levels', hold: 1.4, tap: 0.9 }] },
+  { say: levels, parts: [{ shot: 'levels', hold: 1.4, tap: 0.9, enter: 'push' }] },
 ]
 // The ending reading, translation and dictation share (plan 273): the
 // rating, which opens the sentence's breakdown, read down, then Ask: one
@@ -149,12 +150,12 @@ const lookSteps = (q, { offer, typed }) => [
   { shot: 'bd-ask', focus: ASK_OPEN, tap: ASK_OPEN },
   { click: ASK_OPEN, ready: '.ask-page', settle: 500 },
   ...(typed ? [
-    { shot: 'ask', focus: ['.ask-echo', '.ask__offers'] },
+    { shot: 'ask', focus: ['.ask__offers', '.ask__form'] },
     { type: '.ask__field', text: typed, shot: 'asking', chunk: 2, focus: ['.ask__offers', '.ask__form'] },
     { shot: 'asking-typed', focus: ['.ask__offers', '.ask__form'], tap: '.ask__send' },
     { click: '.ask__send', ready: ANSWER, settle: 700 },
   ] : [
-    { shot: 'ask', focus: ['.ask-echo', '.ask__offers'], tap: OFFER(offer) },
+    { shot: 'ask', focus: '.ask__offers', tap: OFFER(offer) },
     { click: OFFER(offer), ready: ANSWER, settle: 700 },
   ]),
   { shot: 'asked', focus: ANSWER },
@@ -204,7 +205,7 @@ export const FEATURES = {
     ],
     beats: [
       { say: { en: 'Someone speaks to you.', fr: 'On te parle.' }, parts: [{ shot: 'gate', hold: 2.0, tap: 1.5 }] },
-      { say: { en: 'Scenes from daily life.', fr: 'Des scènes de tous les jours.' }, parts: [{ shot: 'scenes', hold: 2.0, tap: 1.5 }] },
+      { say: { en: 'Scenes from daily life.', fr: 'Des scènes de tous les jours.' }, parts: [{ shot: 'scenes', hold: 2.0, tap: 1.5, enter: 'push' }] },
       { say: { en: 'Each with an errand to run.', fr: 'Chacune avec une course à faire.' }, parts: [{ shot: 'ticket', hold: 2.4, enter: 'push' }] },
       { say: { en: 'Hear them. Answer them.', fr: 'Écoute. Réponds.' }, parts: [
         { shot: 't0', hold: 1.0, tap: 0.8, hear: 0 }, { shot: 't0-tr', hold: 1.0, tap: 0.7, voice: 1 }, { shot: 't0-said', hold: 1.2, tap: 0.9 },
@@ -234,7 +235,7 @@ export const FEATURES = {
     ],
     beats: [
       ...gateBeats({ en: 'Read real Japanese.', fr: 'Lis du vrai japonais.' }),
-      { say: { en: 'A sentence at your level, on the clock.', fr: 'Une phrase à ton niveau, chronométrée.' }, parts: [{ shot: 'ready', hold: 0.8, tap: 0.55 }, { shot: 'shown', hold: 2.4 }] },
+      { say: { en: 'A sentence at your level, on the clock.', fr: 'Une phrase à ton niveau, chronométrée.' }, parts: [{ shot: 'ready', hold: 0.8, tap: 0.55, enter: 'push' }, { shot: 'shown', hold: 2.4 }] },
       { say: { en: 'Write how it reads, in rōmaji.', fr: 'Écris comment elle se lit, en rōmaji.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3 }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
       { say: { en: 'Read first, check after.', fr: 'Lire d’abord, vérifier ensuite.' }, parts: [{ shot: 'checked', hold: 2.4 }, { shot: 'rate', hold: 0.9, tap: 0.5 }] },
       ...lookBeats({ en: 'Then every word, broken down.', fr: 'Puis chaque mot, décomposé.' }),
@@ -274,7 +275,7 @@ export const FEATURES = {
       // The miss asked about: where the text says it.
       { shot: 'missed', focus: '.qrow__detail', tap: '.qrow__detail .ask-launch' },
       { click: '.qrow__detail .ask-launch', ready: '.ask-page', settle: 500 },
-      { shot: 'ask', focus: ['.ask-echo', '.ask__offer'], tap: WHERE },
+      { shot: 'ask', focus: '.ask__offers', tap: WHERE },
       { click: WHERE, ready: '.ask__a:not(.ask__a--note)', settle: 700 },
       { shot: 'asked', focus: '.ask__a:not(.ask__a--note)' },
       { click: '.ask-page .stage__leave', settle: 600 },
@@ -286,8 +287,7 @@ export const FEATURES = {
       { shot: 'breakdown', focus: '.qrows ~ .prompt-card .analysis-grammar-chips, .bkd-passage__item--open' },
       { scroll: `.bkd-passage__head >> nth=${d.sentence}`, block: 'center' },
       { shot: 'bd-pick', focus: `.bkd-passage__head >> nth=${d.sentence}`, tap: `.bkd-passage__head >> nth=${d.sentence}` },
-      { click: `.bkd-passage__head >> nth=${d.sentence}`, settle: 900 },
-      { scroll: '.bkd-passage__item--open', block: 'start' },
+      { click: `.bkd-passage__head >> nth=${d.sentence}`, settle: 900, keep: true },
       { shot: 'bd-open', focus: '.bkd-passage__item--open' },
     ],
     beats: [
@@ -306,7 +306,7 @@ export const FEATURES = {
       { say: { en: 'Ask where the text says it.', fr: 'Demande où le texte le dit.' }, parts: [{ shot: 'ask', hold: 1.4, tap: 1.0, enter: 'push' }, { shot: 'asked', hold: 3.6 }] },
       { say: { en: 'Every sentence, broken down.', fr: 'Chaque phrase, décomposée.' }, parts: [
         { shot: 'bd-ask', hold: 1.0, tap: 0.6, enter: 'back' }, { shot: 'breakdown', hold: 2.2, cam: 'read' },
-        { shot: 'bd-pick', hold: 0.9, tap: 0.5 }, { shot: 'bd-open', hold: 2.4, cam: 'read', anchor: true },
+        { shot: 'bd-pick', hold: 0.9, tap: 0.5 }, { shot: 'bd-open', hold: 2.4, cam: 'read' },
       ] },
     ],
     end: { en: 'Read a whole text on Tsuji.', fr: 'Lis un texte entier sur Tsuji.' },
@@ -324,17 +324,19 @@ export const FEATURES = {
       { click: '.exam-st__go', ready: '.exam-cover__go' },
       { shot: 'cover', focus: '.exam-cover__figs, .exam-cover__parts' },
       { click: '.exam-cover__go', ready: '.exam-tile' },
-      // Three questions on camera, the second flagged; the rest answered off
-      // it; the last Next opens the answer sheet.
-      ...d.answers.slice(0, 3).flatMap((a, i) => [
-        { shot: `q${i}`, focus: SHEET, tap: tile(a.slot) },
+      // Two questions on camera, the first read and then answered, the
+      // second answered and flagged; the rest answered off it; the last Next
+      // opens the answer sheet.
+      ...d.answers.slice(0, 2).flatMap((a, i) => [
+        ...(i === 0 ? [{ shot: 'q0-ask', focus: QUESTION }] : []),
+        { shot: `q${i}`, focus: TILES, tap: tile(a.slot) },
         { click: tile(a.slot), settle: 300 },
         ...(i === 1
-          ? [{ shot: 'q1-picked', focus: SHEET, tap: FLAG }, { click: FLAG, settle: 400 }, { shot: 'q1-flagged', focus: '.exam-run__head' }]
-          : [{ shot: `q${i}-picked`, focus: SHEET }]),
+          ? [{ shot: 'q1-flag', focus: '.exam-run__head', tap: FLAG }, { click: FLAG, settle: 400 }, { shot: 'q1-flagged', focus: '.exam-run__head' }]
+          : [{ shot: 'q0-picked', focus: TILES }]),
         { click: NEXT, settle: 400 },
       ]),
-      ...d.answers.slice(3).flatMap(a => [{ click: tile(a.slot), settle: 100 }, { click: NEXT, settle: 200 }]),
+      ...d.answers.slice(2).flatMap(a => [{ click: tile(a.slot), settle: 100 }, { click: NEXT, settle: 200 }]),
       { wait: 700 },
       { shot: 'sheet', focus: ['.exam-parts', '.exam-parts__finish'], tap: '.exam-parts__finish' },
       { click: '.exam-parts__finish', ready: '.exam-res' },
@@ -352,11 +354,10 @@ export const FEATURES = {
       { say: { en: 'Vocabulary, grammar, reading, listening.', fr: 'Vocabulaire, grammaire, lecture, écoute.' }, parts: [{ shot: 'station', hold: 2.0, cam: 'read', enter: 'push' }, { shot: 'station-go', hold: 1.0, tap: 0.6 }] },
       { say: { en: 'In the exam’s own format, on a clock.', fr: 'Au format de l’examen, chronométré.' }, parts: [
         { shot: 'cover', hold: 1.6, enter: 'push' },
-        { shot: 'q0', hold: 1.3, tap: 0.95, enter: 'push' }, { shot: 'q0-picked', hold: 0.5 },
+        { shot: 'q0-ask', hold: 1.0, enter: 'push' }, { shot: 'q0', hold: 0.9, tap: 0.6 }, { shot: 'q0-picked', hold: 0.5 },
       ] },
       { say: { en: 'Flag one to come back to.', fr: 'Marque-en une pour y revenir.' }, parts: [
-        { shot: 'q1', hold: 1.1, tap: 0.75 }, { shot: 'q1-picked', hold: 0.9, tap: 0.5 }, { shot: 'q1-flagged', hold: 0.9 },
-        { shot: 'q2', hold: 1.1, tap: 0.75 }, { shot: 'q2-picked', hold: 0.6 },
+        { shot: 'q1', hold: 1.0, tap: 0.7 }, { shot: 'q1-flag', hold: 0.9, tap: 0.5 }, { shot: 'q1-flagged', hold: 0.9 },
       ] },
       { say: { en: 'Hand it in for your score.', fr: 'Rends-le pour ton score.' }, parts: [{ shot: 'sheet', hold: 1.4, tap: 1.0, enter: 'rise' }, { shot: 'result', hold: 2.8, cam: 'read', enter: 'push' }] },
       { say: { en: 'Then go back over every miss.', fr: 'Puis reviens sur chaque erreur.' }, parts: [{ shot: 'misses', hold: 1.2, tap: 0.8 }, { shot: 'miss-open', hold: 2.6, cam: 'read' }] },
@@ -380,7 +381,7 @@ export const FEATURES = {
     ],
     beats: [
       ...gateBeats({ en: 'Say it in Japanese.', fr: 'Dis-le en japonais.' }),
-      { say: { en: 'The hard direction, on purpose.', fr: 'Dans le sens difficile, exprès.' }, parts: [{ shot: 'prompt', hold: 2.4 }] },
+      { say: { en: 'The hard direction, on purpose.', fr: 'Dans le sens difficile, exprès.' }, parts: [{ shot: 'prompt', hold: 2.4, enter: 'push' }] },
       { say: { en: 'Put it into Japanese yourself.', fr: 'À toi de le dire en japonais.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3 }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
       { say: { en: 'A reference, and a read on yours.', fr: 'Une référence, et un avis sur la tienne.' }, parts: [{ shot: 'reviewed', hold: 3.0, cam: 'read' }, { shot: 'rate', hold: 0.9, tap: 0.5 }] },
       ...lookBeats({ en: 'Then the reference, word by word.', fr: 'Puis la référence, mot à mot.' }),
@@ -407,7 +408,7 @@ export const FEATURES = {
     ],
     beats: [
       ...gateBeats({ en: 'Write your own Japanese.', fr: 'Écris ton propre japonais.' }),
-      { say: { en: 'You are shown a grammar point.', fr: 'On te donne un point de grammaire.' }, parts: [{ shot: 'point', hold: 1.8, tap: 1.3 }] },
+      { say: { en: 'You are shown a grammar point.', fr: 'On te donne un point de grammaire.' }, parts: [{ shot: 'point', hold: 1.8, tap: 1.3, enter: 'push' }] },
       { say: { en: 'Its lesson, one tap away.', fr: 'Sa leçon, à portée de main.' }, parts: [{ shot: 'lesson', hold: 2.6, cam: 'read', enter: 'rise' }] },
       { say: { en: 'Write a sentence that uses it.', fr: 'Écris une phrase qui l’utilise.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3, enter: 'sink' }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
       { say: { en: 'A tutor reads it back to you.', fr: 'Un tuteur te la relit.' }, parts: [{ shot: 'reviewed', hold: 4.0, cam: 'read' }] },
@@ -431,7 +432,7 @@ export const FEATURES = {
     ],
     beats: [
       ...gateBeats({ en: 'Train your ear.', fr: 'Entraîne ton oreille.' }),
-      { say: { en: 'Hear a line. Twice, no more.', fr: 'Une phrase, deux écoutes. Pas plus.' }, parts: [{ shot: 'listen', hold: 0.8, tap: 0.6, voice: true }, { seq: 'playing', by: 'at', hold: 0.5 }] },
+      { say: { en: 'Hear a line. Twice, no more.', fr: 'Une phrase, deux écoutes. Pas plus.' }, parts: [{ shot: 'listen', hold: 0.8, tap: 0.6, voice: true, enter: 'push' }, { seq: 'playing', by: 'at', hold: 0.5 }] },
       { say: { en: 'Write what you hear, in rōmaji.', fr: 'Écris en rōmaji ce que tu entends.' }, parts: [{ seq: 'typing', by: 'chars', hold: 0.3 }, { shot: 'typed', hold: 0.9, tap: 0.55 }] },
       { say: { en: 'Every slip marked.', fr: 'Chaque erreur relevée.' }, parts: [{ shot: 'checked', hold: 2.8 }, { shot: 'rate', hold: 0.9, tap: 0.5 }] },
       ...lookBeats({ en: 'Then the line, word by word.', fr: 'Puis la phrase, mot à mot.' }, { typed: true, ask: { en: 'Ask what you missed.', fr: 'Demande ce qui t’a échappé.' } }),
@@ -575,9 +576,7 @@ const SLIDES = { push: [true, true], back: [true, false], rise: [false, true], s
  *  A part's `cam` asks for a framing (camFor's kinds), its `enter`
  *  'push' for a new screen sliding in as the app's pages do, 'back' for
  *  one left sliding away to show the screen under it, 'rise' for a sheet
- *  coming up over the screen and 'sink' for it going;
- *  its `anchor` puts what it shows where the part before it tapped (a
- *  sentence opened in place, however the app scrolled to it). */
+ *  coming up over the screen and 'sink' for it going. */
 export function featureTimeline(plan, shots, voiceDur = null) {
   const L = layoutOf(plan.fit)
   const byName = name => shots.map((s, i) => ({ ...s, idx: i })).filter(s => s.name === name).sort((a, b) => a.i - b.i)
@@ -603,8 +602,7 @@ export function featureTimeline(plan, shots, voiceDur = null) {
       const seq = part.seq ? byName(part.seq) : null
       if (part.shot && !shot) throw new Error(`no shot named ${part.shot}`)
       if (part.seq && !seq.length) throw new Error(`no shots named ${part.seq}`)
-      const lastTap = taps.at(-1)
-      const sy = part.anchor && shot && lastTap ? lastTap.top - shot.focus.y : (shot || seq.at(-1)).scrollY || 0
+      const sy = (shot || seq.at(-1)).scrollY || 0
       const focus = onPage(shot ? shot.focus : union([seq[0].focus, seq.at(-1).focus]), sy)
       const tapBox = shot && part.tap != null ? onPage(shot.tap, sy) : null
       // The first part is cut to; a new screen slides in on its own camera;
@@ -629,7 +627,7 @@ export function featureTimeline(plan, shots, voiceDur = null) {
         if (tapBox) {
           // The finger comes once the camera has brought its target in.
           tapped = Math.max(from + part.tap, arrive + 0.25, part.hear != null ? heard + 0.35 : 0, carry + 0.2)
-          taps.push({ t: tapped, x: tapBox.x + tapBox.w / 2, y: tapBox.y + tapBox.h / 2, top: tapBox.y })
+          taps.push({ t: tapped, x: tapBox.x + tapBox.w / 2, y: tapBox.y + tapBox.h / 2 })
           sfx.push({ at: +tapped.toFixed(3), key: 'click', gain: 0.45 })
           end = Math.max(end, tapped + 0.35)
           // A line the tap says (the clip played, the reply picked): voiced from the tap,
@@ -733,12 +731,14 @@ export function drawFeature(ctx, plan, tl, t, imgs, print = null) {
   if (sg.kind === 'end') {
     const u = t - sg.start
     gateOf(plan, print).draw(ctx, u)
-    // The app dissolves into the gate.
+    // The app dissolves into the gate: the last beat's last moment, inside
+    // it whatever the rounding of the two segments' edges.
     const k = inOut(u / MOTION.out)
-    if (k < 1 && si > 0) {
+    const prev = tl.segs[si - 1]
+    if (k < 1 && prev) {
       ctx.save()
       ctx.globalAlpha = 1 - k
-      drawFeature(ctx, plan, tl, sg.start - 1e-3, imgs, print)
+      drawFeature(ctx, plan, tl, Math.min(prev.start + prev.dur, sg.start) - 2e-3, imgs, print)
       ctx.restore()
     }
     return `end|${Math.round(u * FEATURE_FPS)}`
