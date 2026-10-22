@@ -158,7 +158,7 @@
 {"t":"つける","r":"つける","ro":"tsukeru","en":["to turn on (light, TV)"],"fr":["allumer (lumière, télé)"],"ex":["N5.25","N1.115"]},
 {"t":"英語","r":"えいご","ro":"eigo","en":["English language"],"fr":["langue anglaise"],"fu":[["英","えい"],["語","ご"]],"hy":["映語","英五","泳語"],"ex":["N5.60","N5.146"]},
 {"t":"暑い","r":"あつい","ro":"atsui","en":["hot (weather)"],"fr":["chaud (temps, climat)"],"fu":[["暑","あつ"],["い",""]],"hy":["圧い"],"ex":["N4.210","N2.54"]},
-{"t":"いい","r":"いい","ro":"ii","en":["good, nice, pleasant, ok"],"fr":["bon, bien, agréable, d'accord"],"ex":["N4.100","N4.177"]},
+{"t":"いい","r":"いい","ro":"ii","en":["good, nice, pleasant, ok"],"fr":["bon, bien, agréable, d'accord"],"ex":["N1.145","N1.146"]},
 {"t":"少ない","r":"すくない","ro":"sukunai","en":["few, little (in number or amount)"],"fr":["peu nombreux, peu"],"fu":[["少","すく"],["ない",""]],"hy":["粛ない"],"ex":["N3.44","N3.60"]},
 {"t":"葉書","r":"はがき","ro":"hagaki","en":["postcard"],"fr":["carte postale"],"fu":[["葉","は"],["書","がき"]],"hy":["破書","波書","巴書"]},
 {"t":"ギター","r":"ギター","ro":"gitaa","en":["guitar"],"fr":["guitare"]},

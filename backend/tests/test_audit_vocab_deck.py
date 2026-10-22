@@ -208,6 +208,12 @@ class CorpusMeasurementTests(unittest.TestCase):
         # its rows must show came in (働き甲斐 for 〜がい, 書き掛け and
         # 忘れ掛ける for 〜かける, 押し通す for 〜通す, 支え合う and 教え合う
         # for 〜あう) (absent -2, unmatched -2).
+        #
+        # Raised by plan 272, as the first time: 相次ぐ, "to follow one
+        # after another", had been cut into 相 (the N1 card "together,
+        # mutually") and 次ぐ (the N2 "to rank next to"), two cards of other
+        # senses; read as the one word it is, it is the gap it always was
+        # (absent +1, unmatched +1).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 158)
-        self.assertLessEqual(c["unmatched_lemmas"], 172)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 159)
+        self.assertLessEqual(c["unmatched_lemmas"], 173)

@@ -613,6 +613,23 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = right
             continue
 
+        # 一国, 一種, 一般: 一 read いっ before a voiceless k-, s-, t- or
+        # h- the tables do not count (h then p: 一方 いっぽう) (plan 272).
+        if s == "一" and r == "いち" and i + 1 < n and prev(i) != "第" and (
+                tokens[i + 1]["pos"] == "suffix" or (tokens[i + 1]["pos"] == "noun" and len(nxt(i)) == 1)) \
+                and _is_kanji(nxt(i)[:1]) and out[i + 1] and out[i + 1][0] in "かきくけこさしすせそたちつてとはひふへほ" \
+                and nxt(i) not in _H_COUNTERS and nxt(i) not in _KST_COUNTERS and nxt(i) not in _COUNTER_BASE \
+                and nxt(i) not in _NATIVE_COUNTERS and not _is_numeral(nxt(i)):
+            out[i] = "いっ"
+            if out[i + 1][:1] in "はひふへほ":
+                out[i + 1] = "ぱぴぷぺぽ"["はひふへほ".index(out[i + 1][0])] + out[i + 1][1:]
+            continue
+
+        # 第2子, 第一子: the second child, し (plan 272).
+        if s == "子" and r == "こ" and i >= 2 and surf[i - 2] == "第" and _numeral_value(prev(i)) is not None:
+            out[i] = "し"
+            continue
+
         # 気に入る: 入 is い there, never the はい of 入る alone (plan 272).
         if s.startswith("入") and r.startswith("はい") and prev(i) == "に" and i >= 2 and surf[i - 2] == "気":
             out[i] = r[1:]
