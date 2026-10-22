@@ -142,7 +142,38 @@ _GLOSSES = {
                "fr": "(avec なる) devient : la forme écrite de 〜になる"},
     "て_trailing": {"en": "(at the end) leaves the sentence open on what happened or why: …, you see",
                    "fr": "(en fin de phrase) laisse la phrase en suspens sur ce qui s'est passé ou pourquoi : …, tu vois"},
+    "まじで": {"en": "(casual) seriously, really",
+             "fr": "(familier) sérieusement, vraiment"},
+    "てか": {"en": "(casual) I mean, or rather (= というか)",
+            "fr": "(familier) enfin, ou plutôt (= というか)"},
+    "が_insist": {"en": "(after だろう, at the end) insists: …, isn't it obvious!",
+                 "fr": "(après だろう, en fin de phrase) insiste : …, c'est évident !"},
+    "じゃ_copula": {"en": "(spoken) では said short: as for, with …; じゃない is not",
+                   "fr": "(oral) では dit court : quant à, avec … ; じゃない, n'est pas"},
+    "www": {"en": "(net slang) laughter, lol: one w a laugh",
+            "fr": "(argot du web) rires, mdr : un w par rire"},
+    "草_lol": {"en": "(net slang) lol: laughter, whose ｗｗｗ look like grass",
+              "fr": "(argot du web) mdr : le rire, dont les ｗｗｗ ressemblent à de l'herbe"},
 }
+
+# The letters a laugh is typed with: www, ｗｗｗ.
+_LAUGH = frozenset("wｗWＷ")
+
+
+def _a_laugh(surface: str) -> bool:
+    return len(surface) >= 2 and all(c in _LAUGH for c in surface)
+
+
+def net_laughter(morphemes, i: int) -> bool:
+    """Whether morphemes[i] is the 草 of net slang, "lol" (plan 272): one
+    a typed laugh follows (それはさすがに草www), or 生える or 不可避 (草生える,
+    草不可避) -- never the grass of 庭の草. The card is then no word of
+    the sentence."""
+    if morphemes[i].surface not in ("草", "くさ"):
+        return False
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    return nxt is not None and (_a_laugh(nxt.surface) or nxt.lemma in ("生える", "はえる")
+                                or nxt.surface.startswith("不可避"))
 
 # What the adverb each noun makes with に says (plan 272), for the gloss.
 _ADVERBS = {
@@ -178,6 +209,21 @@ def gloss(morphemes, i: int) -> dict | None:
     key = None
     if m.pos == "auxiliary" and m.lemma == "ず" and m.surface in ("ん", "ぬ", "ず"):
         key = m.surface
+    elif m.pos == "adverb" and m.surface in ("マジで", "まじで"):
+        key = "まじで"
+    elif m.pos == "conjunction" and m.surface in ("てか", "ってか"):
+        key = "てか"
+    elif _a_laugh(m.surface):
+        key = "www"
+    elif net_laughter(morphemes, i):
+        key = "草_lol"
+    elif m.pos == "particle" and m.surface == "が" and i > 0 \
+            and morphemes[i - 1].surface in ("だろう", "だろ", "でしょう", "でしょ") \
+            and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("！", "!"):
+        key = "が_insist"                  # 見りゃ分かるだろうが！
+    elif m.pos == "particle" and m.surface in ("じゃ", "じゃあ") and not _opens(morphemes, i) \
+            and not (i > 0 and morphemes[i - 1].surface in ("それ", "そう", "これ") and _opens(morphemes, i - 1)):
+        key = "じゃ_copula"                # お前のせいじゃね？
     elif m.pos == "auxiliary" and m.lemma == "へん" and m.surface == "へん":
         key = "へん"
     elif m.pos == "auxiliary" and m.surface == "に" and i + 1 < len(morphemes) \

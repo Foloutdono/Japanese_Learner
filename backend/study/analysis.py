@@ -31,7 +31,7 @@ from study.card_lookup import (
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
     resolve_te_noun, resolve_interjection, resolve_home, numeral_value, kana_card, resolve_pool_whole_word,
-    resolve_pool_idiom, resolve_pool_opening, a_points_own_verb,
+    resolve_pool_idiom, resolve_pool_opening, a_points_own_verb, split_unknown_compound,
     compound_tail_readings,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
@@ -944,6 +944,50 @@ def _conjunction_runs(morphemes: list, grammar: list[dict]) -> dict[int, int]:
     return runs
 
 
+def _name_or_word(token: dict, m, row: dict) -> None:
+    """A word in katakana UniDic tags as a person's name and JMdict holds
+    as a common word is either one (plan 272): ジャック、よく来てくれたね is
+    Jack, ヒューズが飛んだ a fuse, and nothing on the page says which. Its
+    line names both -- never a guess -- unless JMdict's row is the person
+    itself (Mozart, Napoleon)."""
+    import re
+
+    import content.vocab_jmdict_data as jmdict_db
+
+    if not (m.proper and m.name_kind in ("person", "given", "family") and not m.unknown
+            and m.surface and all("\u30a0" <= c <= "\u30ff" for c in m.surface)):
+        return
+    senses = jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []
+    if any(re.sub(r"^\([^)]*\)\s*", "", g)[:1].isupper() for sense in senses for g in sense.get("glossary") or ()):
+        return
+    entry = token["vocab_match"]["entry"]
+    entry["meaning"] = "a person's name, or: " + entry.get("meaning", "")
+    if entry.get("meaning_fr"):
+        entry["meaning_fr"] = "un nom de personne, ou : " + entry["meaning_fr"]
+
+
+def _compounds_apart(morphemes: list) -> list:
+    """The morphemes with a compound no dictionary holds cut into the two
+    deck words it is (card_lookup.split_unknown_compound, plan 272): 右ひざ
+    as 右 and ひざ, each with its card, where it said nothing."""
+    out = []
+    for j, m in enumerate(morphemes):
+        parts = None
+        if m.pos == "noun" and len(m.surface) >= 2 and resolve_morpheme(morphemes, j) is None \
+                and resolve_pool_morpheme(morphemes, j) is None:
+            parts = split_unknown_compound(m)
+        if not parts:
+            out.append(m)
+            continue
+        start = m.start
+        for surface, reading, (_level, entry, _raw) in parts:
+            out.append(replace(m, surface=surface, start=start, end=start + len(surface),
+                               lemma=entry.get("kanji") or surface, reading=reading, lemma_reading=reading,
+                               kana="".join(chr(ord(c) + 0x60) if "ぁ" <= c <= "ゖ" else c for c in reading)))
+            start += len(surface)
+    return out
+
+
 def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     """The morphemes as tokens, a deck compound folded into one.
 
@@ -967,6 +1011,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     trade the lesson for a dictionary line about one of its letters.
     """
     morphemes, numbers = _printed_numbers(morphemes)
+    morphemes = _compounds_apart(morphemes)
     deck_hits = [resolve_morpheme(morphemes, j) for j in range(len(morphemes))]
     ruled = _in_grammar(morphemes, grammar or [])
     # Every point but the adverbial form, which a deck word may carry
@@ -996,8 +1041,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     # A name before an honorific is the name, never the card its letters
     # spell (plan 266): ゆきさん is no "snow".
     deck_hits = [None if _named(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
-    # The もん that closes a sentence on its reason is no "thing" (plan 272).
-    deck_hits = [None if particle_glosses.gives_a_reason(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
+    # The もん that closes a sentence on its reason is no "thing", the 草
+    # of 草www no "grass" (plan 272).
+    deck_hits = [None if particle_glosses.gives_a_reason(morphemes, j) or particle_glosses.net_laughter(morphemes, j)
+                 else hit for j, hit in enumerate(deck_hits)]
     # Nor is the verb a lit point is made of a word: 洗いなさい's なさい is
     # 〜なさい, 団長である's ある the copula (plan 272).
     deck_hits = [None if j in ruled and a_points_own_verb(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
@@ -1265,9 +1312,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         named = _named(morphemes, i)
         span = deck is None and morphemes[i].surface in _SPAN_COUNTERS and _after_a_number(morphemes, i, numbers)
         pool = None if deck or (i in ruled and i not in own_forms) or named or span or affix \
-            or particle_glosses.gives_a_reason(morphemes, i) \
+            or particle_glosses.gives_a_reason(morphemes, i) or particle_glosses.net_laughter(morphemes, i) \
             else (said[1] if said else resolve_pool_morpheme(morphemes, i))
         token = _token_dict(morphemes[i], deck, pool, named)
+        if pool and not deck:
+            _name_or_word(token, morphemes[i], pool)
         if span:
             token["gloss"] = dict(_SPAN_COUNTERS[morphemes[i].surface])
         elif affix:

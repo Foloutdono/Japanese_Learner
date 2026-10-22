@@ -2222,7 +2222,17 @@ def _but_spans(tokens):
     小さいがゆえに)."""
     return [(t.start, t.end) for i, t in enumerate(tokens)
             if i > 0 and t.pos == "particle" and t.surface == "が" and t.conjunctive
-            and tokens[i - 1].pos in ("verb", "adjective", "auxiliary")]
+            and tokens[i - 1].pos in ("verb", "adjective", "auxiliary")
+            and not _insists(tokens, i)]
+
+
+def _insists(tokens, i: int) -> bool:
+    """Whether the が at tokens[i] closes its sentence after だろう on an
+    exclamation, which insists rather than turns (plan 272): 見りゃ分かる
+    だろうが！, "anyone can see that!". Before a full stop it is "though":
+    普通は言わないだろうが。"""
+    return (tokens[i - 1].surface in ("だろう", "だろ", "でしょう", "でしょ")
+            and i + 1 < len(tokens) and tokens[i + 1].surface in ("！", "!"))
 
 
 def _only_after_verb_spans(tokens):
@@ -4121,6 +4131,8 @@ def _pattern_refusals():
         "〜な（禁止）": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
             p.lemma in ("居る", "いる", "た") or p.surface in ("てる", "でる")),
         "〜のに": lambda t, s, e, g: (n := _next_word(t, e)) is not None and (n.surface.startswith("気") or n.pos == "verb"),
+        # だろうが！ insists, no "but" (plan 272).
+        "〜が（逆接）": lambda t, s, e, g: (i := _index_at(t, s)) is not None and i > 0 and _insists(t, i),
         # のではないか is の and the copula's では, "isn't it that ...";
         # the ので of a reason never takes は (plan 272).
         "〜ので": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.surface == "は" and n.pos == "particle",
@@ -4381,7 +4393,8 @@ def _formal_janai_at(tokens, i: int) -> int | None:
     needle's."""
     for head, tail in ((("で", "は"), ("ない",)), (("で", "は"), ("あり", "ませ", "ん")),
                        (("で", "は"), ("ない", "です")), (("じゃ",), ("ない", "です")),
-                       (("じゃ",), ("あり", "ませ", "ん"))):
+                       (("じゃ",), ("あり", "ませ", "ん")), (("じゃ",), ("ねえ",)), (("じゃ",), ("ねー",)),
+                       (("じゃ",), ("ねぇ",))):
         k = i - len(tail) - len(head)
         if k < 1 or tuple(u.surface for u in tokens[k:i]) != head + tail:
             continue

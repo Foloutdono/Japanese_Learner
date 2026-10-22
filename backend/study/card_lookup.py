@@ -984,6 +984,35 @@ def a_points_own_verb(morphemes, i: int) -> bool:
                 and previous.pos == "auxiliary" and previous.lemma == "だ"))
 
 
+def split_unknown_compound(m) -> list[tuple[str, str, tuple]] | None:
+    """[(surface, reading, hit)] for the two deck words a noun is that the
+    tokenizer reads as one word no card and no pool row is (plan 272):
+    右ひざ, UniDic's 右膝, is 右 "right" and ひざ "knee". Each part's card
+    reads as the page reads that part, and the second is spelled as
+    UniDic's lemma spells it (膝). The caller has asked the deck and the
+    pool first."""
+    if m.pos != "noun" or m.proper or m.name_kind or len(m.surface) < 2 or _numeral(m.surface):
+        return None
+    lemma, reading = m.lemma or m.surface, morphology.kata_to_hira(m.reading)
+    if lemma == m.surface and len(m.surface) < 3:
+        # (Two kanji the dictionary has no word for are as often a name:
+        # みどり町の中山, no "inside" and "mountain".)
+        return None
+    for k in range(1, len(m.surface)):
+        left, right = m.surface[:k], m.surface[k:]
+        if not (_has_kanji(left) and lemma.startswith(left) and len(lemma) > len(left)):
+            continue
+        tail = lemma[len(left):]
+        for p in range(1, len(reading)):
+            first = _card(left, reading[:p])
+            if first is None:
+                continue
+            second = _card(tail, reading[p:]) or (None if _has_kanji(right) else _card("", reading[p:]))
+            if second is not None and (right == tail or morphology.kata_to_hira(right) == reading[p:]):
+                return [(left, reading[:p], first), (right, reading[p:], second)]
+    return None
+
+
 def _card(kanji: str, kana: str):
     """(level, entry, raw_id) for the deck card spelled `kanji` read `kana`."""
     for level, entry in _VOCAB_BY_KANA.get(kana, ()):
@@ -2258,6 +2287,12 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
         # (morphology._unknown_words, _kana_names): most often a name, and
         # a pool row spelled so is another word (たろう, "ought to have been").
         return None
+    if m.unknown and m.proper and not _has_kanji(m.surface):
+        # A name the sentence's context gives (morphology._introduced,
+        # _names_kept) is the name: カイト introducing himself is no
+        # "kite" (plan 272). One UniDic only tags so keeps its row, which
+        # the breakdown names both ways (analysis._name_or_word).
+        return None
     previous = morphemes[i - 1] if i > 0 else None
     if m.auxiliary_use and previous is not None and previous.pos == "particle" and previous.conjunctive:
         # ている, てしまう: the grammar point's, as resolve_morpheme says.
@@ -2729,6 +2764,13 @@ def resolve_function_word(morphemes, i: int):
                                        or _after_a_clause(morphemes, i)):
         # A conjunction opens its clause: the さて of きっさてん is three
         # letters of a café the tokenizer cut wrong, not "well, now".
+        return None
+    if m.pos == "particle" and m.surface in ("じゃ", "じゃあ") and not _clause_start(morphemes, i) \
+            and not (i > 0 and morphemes[i - 1].surface in ("それ", "そう", "これ")
+                     and (i == 1 or morphemes[i - 2].pos == "symbol")):
+        # では said short after a word (お前のせいじゃね, "isn't it your
+        # fault?"), never the じゃあ, "well then", that opens a clause, as
+        # それじゃあ does (plan 272).
         return None
     cards = _kana_cards(m.surface)
     if m.pos == "adnominal":

@@ -1694,3 +1694,20 @@ class SentenceEndAndRoughSpeechTests(unittest.TestCase):
         # 味がする is 〜がする's own example, and stays the point's.
         self.assertIn("〜がする", found_in("このスープはへんな味がする。"))
         self.assertIn("〜がする", found_in("この料理は水っぽくて味がしない。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ChatAndStreamPointTests(unittest.TestCase):
+    """Points a reviewer's pass over chats and streams found wrong, the
+    third round (plan 272)."""
+
+    def test_isnt_it_said_roughly(self) -> None:
+        self.assertIn("〜じゃないか", found_in("なんでだよ！昨日はいいって言ったじゃねえか！"))
+        self.assertNotIn("〜じゃないか", found_in("冗談じゃねえ！"))
+
+    def test_an_emphatic_ga_is_no_but(self) -> None:
+        self.assertNotIn("〜が（逆接）", found_in("見りゃ分かるだろうが！いちいち聞いてくんじゃねえよ。"))
+        self.assertIn("〜が（逆接）", found_in("怪我しているが、最後まで走った。"))
+
+    def test_no_question_in_i_mean(self) -> None:
+        self.assertNotIn("か", found_in("てか、それって結局お前のせいじゃね？"))

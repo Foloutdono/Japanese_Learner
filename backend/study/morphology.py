@@ -656,11 +656,20 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
     - ねー after an adverb or an exclamation is ね drawn out, no ない:
       またねー, "see you!" (金がねえ is ない, "there isn't");
     - まじか opening what is said is まじ and か, "seriously?", no 間近,
-      "near"."""
+      "near"; マジで is one word, "seriously", no まじ and the copula's
+      て form;
+    - てか opening what is said, before its comma, is one word, "I mean"
+      (というか said short), no て and a question's か;
+    - a verb's stem and せ standing alone is the imperative of the verb
+      in す the deck or JMdict holds: 鳴らせ　鳴らせ, "ring it!", no
+      鳴る's causative, "let it ring"."""
     from dataclasses import replace
 
     out_m, out_t = [], []
+    skip = set()
     for i, m in enumerate(morphemes):
+        if i in skip:
+            continue
         prev = morphemes[i - 1] if i > 0 else None
         nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
         opens = prev is None or (prev.pos == "symbol" and prev.surface in _UTTERANCE_MARKS)
@@ -688,6 +697,33 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
             # ばいばい said on its own is "bye-bye", no 売買, "trade".
             m = replace(m, pos="interjection", lemma="バイバイ", lemma_reading="ばいばい")
             tags = tags[:i] + [("感動詞", "一般", "*")] + tags[i + 1:]
+        elif (m.surface in ("マジ", "まじ") and nxt is not None and nxt.surface == "で"
+              and (i + 2 >= len(morphemes) or morphemes[i + 2].surface != "す")):
+            out_m.append(replace(m, surface=m.surface + "で", end=nxt.end, lemma="まじで", reading="まじで",
+                                 lemma_reading="まじで", kana=m.kana + "デ", pos="adverb", ctype="", cform="",
+                                 conjunctive=False, adjectival=False))
+            out_t.append(("副詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        elif (m.surface in ("て", "って") and opens and nxt is not None and nxt.surface == "か"
+              and i + 2 < len(morphemes) and morphemes[i + 2].surface in ("、", "，", ",", "\u3000", " ")):
+            out_m.append(replace(m, surface=m.surface + "か", end=nxt.end, lemma="てか", reading="てか",
+                                 lemma_reading="てか", kana=m.kana + "カ", pos="conjunction", ctype="", cform="",
+                                 conjunctive=False, auxiliary_use=False))
+            out_t.append(("接続詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        elif (m.pos == "verb" and m.cform.startswith("未然形") and nxt is not None and nxt.surface == "せ"
+              and nxt.pos == "auxiliary" and nxt.lemma == "せる"
+              and (i + 2 >= len(morphemes) or morphemes[i + 2].pos == "symbol"
+                   or morphemes[i + 2].surface in ("よ", "や", "ぞ"))
+              and (lemma := _imperative_in_su(m)) is not None):
+            out_m.append(replace(m, surface=m.surface + "せ", end=nxt.end, lemma=lemma,
+                                 reading=m.reading + "せ", lemma_reading=kata_to_hira(m.reading) + "す",
+                                 kana=m.kana + "セ", ctype="五段-サ行", cform="命令形"))
+            out_t.append(("動詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
         elif m.surface in ("まじか", "マジか") and m.lemma == "間近" and opens:
             head = m.surface[:-1]
             out_m.append(replace(m, surface=head, end=m.start + len(head), lemma="まじ", reading="まじ",
@@ -700,6 +736,136 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
         out_m.append(m)
         out_t.append(tags[i])
     return out_m, out_t
+
+
+@lru_cache(maxsize=1)
+def _deck_forms() -> frozenset:
+    """Every (kanji, kana) the deck spells a card as, and each kana alone
+    as ("", kana): read off the deck itself, never through card_lookup,
+    whose indexes are built by this module's tokenize."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    out = set()
+    for entries in VOCAB_BY_LEVEL.values():
+        for entry in entries:
+            for kana in (entry.get("kana") or "").split("/"):
+                out.add((entry.get("kanji") or "", kana))
+                out.add(("", kana))
+    return frozenset(out)
+
+
+# What opens a speaker's own introduction: どうも、…です, はいどうも、….
+_GREETINGS = frozenset({"どうも", "ども", "どーも", "はいどうも", "こんにちは", "こんちは", "こんばんは",
+                        "はじめまして", "初めまして", "おはようございます", "どうもこんにちは"})
+_INTRO_ENDS = frozenset("。！？!?…　 ")
+
+
+def _kana_word(text: str) -> bool:
+    """Whether `text` is two kana or more, hiragana or katakana (ー too)."""
+    return len(text) >= 2 and all("\u3041" <= c <= "\u30ff" for c in text)
+
+
+def _introduced(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """The name a speaker gives themselves (plan 272): after a greeting,
+    どうもー、ゲーム実況のカイトです is Kaito, no "kite"; and before と申し
+    ます anywhere. Only a word in kana the deck has no card for: どうも、
+    学生です is a student."""
+    from dataclasses import replace
+
+    out_m, out_t = list(morphemes), list(tags)
+    for i, m in enumerate(morphemes):
+        if m.pos != "noun" or m.proper or not _kana_word(m.surface) or i + 1 >= len(morphemes):
+            continue
+        nxt, after = morphemes[i + 1], morphemes[i + 2:]
+        humble = (nxt.surface == "と" and len(after) >= 2 and after[0].lemma == "申す" and after[1].lemma == "ます")
+        closes = nxt.surface == "です" and (not after or after[0].surface in _INTRO_ENDS
+                                           or after[0].surface in ("ね", "よ", "ー"))
+        if not (humble or closes):
+            continue
+        if closes and not humble:
+            # Back over what the speaker is of (ゲーム実況の) and a comma, to
+            # the greeting that opens the line.
+            k = i - 1
+            if k >= 0 and morphemes[k].surface == "の" and morphemes[k].pos == "particle":
+                k -= 1
+                while k >= 0 and morphemes[k].pos in ("noun", "suffix", "prefix"):
+                    k -= 1
+            while k >= 0 and morphemes[k].pos == "symbol":
+                k -= 1
+            start = k
+            while start >= 0 and not (morphemes[start].pos == "symbol" and morphemes[start].surface in _INTRO_ENDS):
+                start -= 1
+            said = "".join(u.surface for u in morphemes[start + 1:k + 1] if u.pos != "symbol").replace("ー", "")
+            if k < 0 or said not in _GREETINGS:
+                continue
+        if ("", kata_to_hira(m.surface)) in _deck_forms() or ("", m.surface) in _deck_forms():
+            continue
+        out_m[i] = replace(m, proper=True, name_kind="given", unknown=True)
+        out_t[i] = ("名詞", "固有名詞", "人名")
+    return out_m, out_t
+
+
+def _names_kept(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A name in hiragana the window reads as a name once is the name
+    wherever it stands in it (plan 272): ゆうしゃ　たろうは…, then たろうの
+    こうげき！ -- the hero's attack, never "first son"'s. (One in katakana
+    UniDic tags as it meets it.)"""
+    from dataclasses import replace
+
+    names = {m.surface for m, t in zip(morphemes, tags)
+             if _kana_letters(m.surface) and len(m.surface) >= 2 and (tuple(t[1:3]) == ("固有名詞", "人名")
+                                                                    or m.name_kind in ("person", "given", "family"))}
+    if not names:
+        return morphemes, tags
+    out_m, out_t = [], []
+    for m, t in zip(morphemes, tags):
+        if m.surface in names and m.pos == "noun" and tuple(t[1:3]) != ("固有名詞", "人名"):
+            m = replace(m, proper=True, name_kind="given", unknown=True)
+            t = ("名詞", "固有名詞", "人名")
+        out_m.append(m)
+        out_t.append(t)
+    return out_m, out_t
+
+
+def _no_names(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A name written with a katakana ノ between its kanji, read as one
+    (plan 272): 大関・霧ノ海 is the wrestler Kirinoumi, no "fog", の and
+    "sea". The particle is written の; a ノ between kanji is a name's
+    (一ノ瀬, which UniDic knows)."""
+    from dataclasses import replace
+
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+        run = morphemes[i:i + 3]
+        if (len(run) == 3 and run[1].surface == "ノ" and m.pos in ("noun", "prefix") and run[2].pos in ("noun", "suffix")
+                and all(_is_kanji(c) for c in m.surface + run[2].surface)
+                and m.end == run[1].start and run[1].end == run[2].start):
+            surface = "".join(u.surface for u in run)
+            reading = kata_to_hira(m.reading) + "の" + kata_to_hira(run[2].reading)
+            out_m.append(replace(m, surface=surface, end=run[2].end, lemma=surface, reading=reading,
+                                 lemma_reading=reading, pos="noun", ctype="", cform="", proper=True,
+                                 name_kind="other", unknown=False, auxiliary_use=False, conjunctive=False))
+            out_t.append(("名詞", "固有名詞", "一般"))
+            i += 3
+            continue
+        out_m.append(m)
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
+def _imperative_in_su(m: Morpheme) -> str | None:
+    """The verb in す whose imperative a stem and せ spell -- 鳴ら + せ is
+    鳴らす's 鳴らせ -- where the deck or JMdict holds it, or None."""
+    if not m.surface or kata_to_hira(m.reading)[-1:] not in "あかさたなはまやらわがざだばぱ":
+        return None
+    lemma, reading = m.surface + "す", kata_to_hira(m.reading) + "す"
+    import content.vocab_jmdict_data as jmdict_db
+    if (lemma, reading) in _deck_forms() or jmdict_db.get_by_key(lemma, reading):
+        return lemma
+    return None
 
 
 def _katakana_adjectives(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
@@ -1312,6 +1478,9 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _place_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)
+        morphemes, tags = _introduced(morphemes, tags)
+        morphemes, tags = _no_names(morphemes, tags)
+        morphemes, tags = _names_kept(morphemes, tags)
         return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only
         logger.warning("morphology.tokenize failed on input; caller should fall back", exc_info=True)

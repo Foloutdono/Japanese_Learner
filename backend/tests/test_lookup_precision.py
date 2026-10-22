@@ -1658,3 +1658,74 @@ class RealLineWordTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 gloss = token_of(sentence, surface)["gloss"]
                 self.assertTrue(gloss["en"].startswith(start) and gloss["fr"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ChatAndStreamWordTests(unittest.TestCase):
+    """Spoken words a reviewer's pass over chats and streams found
+    silent or misread, the third round (plan 272)."""
+
+    def test_a_spoken_word_jmdict_lacks(self) -> None:
+        for sentence, surface, start in (
+            ("今日の練習、マジできつかったっすね。", "マジで", "(casual) seriously"),
+            ("てか、それって結局お前のせいじゃね？", "てか", "(casual) I mean"),
+            ("それはさすがに草www", "www", "(net slang) laughter"),
+            ("それはさすがに草www", "草", "(net slang) lol"),
+            ("見りゃ分かるだろうが！", "が", "(after だろう, at the end) insists"),
+            ("てか、それって結局お前のせいじゃね？", "じゃ", "(spoken) では said short"),
+        ):
+            with self.subTest(sentence=sentence, surface=surface):
+                token = token_of(sentence, surface)
+                self.assertIsNone(token["vocab_match"])
+                self.assertTrue(token["gloss"]["en"].startswith(start) and token["gloss"]["fr"])
+        # The grass of a garden is grass; なんでマジでやばい's まじ is one word.
+        self.assertEqual(token_of("庭の草を取る。", "草")["vocab_match"]["entry"]["kanji"], "草")
+        self.assertNotIn("〜くて／〜で", {g["pattern"] for g in analysis.analyze_local("マジできつかった。")["grammar"]})
+        # じゃあ opening a clause is "well then", after それ too.
+        self.assertIsNotNone(token_of("じゃあ、行こうか。", "じゃあ")["vocab_match"])
+        self.assertIsNotNone(token_of("それじゃあこのメモを渡してください。", "じゃあ")["vocab_match"])
+        # だろうが before a full stop is "though", no insisting.
+        self.assertNotIn("gloss", token_of("おおっぴらには普通言わないだろうが。", "が"))
+
+    def test_an_imperative_read_as_a_causative(self) -> None:
+        token = token_of("Yeah　鳴らせ　鳴らせ　そのギターを", "鳴らせ")
+        self.assertEqual(token["vocab_match"]["entry"]["kanji"], "鳴らす")
+        self.assertIn("命令形 〜ろ／〜え", {g["pattern"] for g in token["grammar"]})
+        # Before an ending it is the causative still: 鳴らせない.
+        self.assertNotIn("鳴らせ", matches("ここではベルを鳴らせない。"))
+
+    def test_a_name_a_speaker_gives(self) -> None:
+        token = token_of("どうもーゲーム実況のカイトです", "カイト")
+        self.assertIsNone(token["vocab_match"])                       # no "kite"
+        self.assertEqual(token_of("カイトと申します。", "カイト")["vocab_match"], None)
+        # A word the deck teaches is the word: a student, an engineer.
+        self.assertIsNotNone(token_of("どうも、エンジニアです。", "エンジニア")["vocab_match"])
+        self.assertIsNotNone(token_of("このおもちゃはカイトです。", "カイト")["vocab_match"])
+
+    def test_a_katakana_word_tagged_a_name_says_both(self) -> None:
+        # ジャック is Jack or "jack", ヒューズ Hughes or "fuse": nothing on the
+        # page says which, so the line names both. JMdict's own row for a
+        # person (Mozart) is the person.
+        for sentence, surface in (("ジャック、よく来てくれたね。", "ジャック"), ("ヒューズが飛んだ。", "ヒューズ")):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(token_of(sentence, surface)["vocab_match"]["entry"]["meaning"]
+                                .startswith("a person's name, or: "))
+        self.assertEqual(token_of("モーツァルトがこの世を去った。", "モーツァルト")["vocab_match"]["entry"]["meaning"],
+                         "Mozart")
+
+    def test_a_compound_no_dictionary_holds(self) -> None:
+        r = analysis.analyze_local("サッカーの選手が、右ひざのけがのため欠場する。")
+        parts = {t["surface"]: t["vocab_match"]["raw_id"] for t in r["tokens"] if t["vocab_match"]}
+        self.assertEqual((parts["右"], parts["ひざ"]), ("vocab_N5_右_みぎ", "vocab_N3_膝_ひざ"))
+        # Two kanji the dictionary lacks are as often a name: 中山 stays whole.
+        self.assertIn("中山", [t["surface"] for t in analysis.analyze_local("みどり町の中山まで電話をください。")["tokens"]])
+        # A ノ between kanji is a name's: the wrestler 霧ノ海.
+        token = token_of("大関・霧ノ海が初優勝を果たしました。", "霧ノ海")
+        self.assertEqual(token["reading"], "きりのうみ")
+        self.assertEqual(token["gloss"]["en"], "a name")
+
+    def test_a_name_is_the_name_wherever_its_window_names_it(self) -> None:
+        r = analysis.analyze_local("たろうの　こうげき！　おばけきのこを　やっつけた！",
+                                   before="ゆうしゃ　たろうは　もりの　どうくつに　はいった")
+        taro = next(t for t in r["tokens"] if t["surface"] == "たろう")
+        self.assertIsNone(taro["vocab_match"])                        # no "first son"
