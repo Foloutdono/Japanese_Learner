@@ -156,8 +156,69 @@ function slideHtml(slide, lang) {
 </script>`
 }
 
+// Google Play's feature graphic, 1024×500: the headline, the app's name, and Today cropped in a phone.
+function featureHtml(lang) {
+  const c0 = COPY[lang].today
+  // three short lines read bigger on a banner than two long ones
+  const c = { hi: c0.hi, h: c0.h.join(' ').replace(/ (prête à|ready to) /, '\n$1\n').split('\n') }
+  const rawDir = join(here, 'raw', lang)
+  const raw = name => `file://${join(rawDir, name + '.png')}`
+  const FW = 1024, FH = 500, PW = 330, PB = 12, PL = 612, PT = 34
+  const SW = PW - 2 * PB, fk = SW / 393
+  const z = { x: 197, y: 330, z: 1.0 }
+  const depart = { w: 336, h: 336 * 74 / 369 }
+  return `<!doctype html><meta charset="utf-8"><style>
+@import url('${font('noto-serif-jp/900.css')}');
+@import url('${font('space-grotesk/700.css')}');
+*{box-sizing:border-box;margin:0}
+html,body{width:${FW}px;height:${FH}px;overflow:hidden}
+.f{position:relative;width:${FW}px;height:${FH}px;overflow:hidden;background:linear-gradient(160deg,#2a3a78,#0e1330);color:#fff;font-family:'Space Grotesk',sans-serif}
+.mark{position:absolute;left:-40px;top:-110px;font:900 620px/1 'Noto Serif JP',serif;opacity:.07}
+.shade{position:absolute;inset:0;background:radial-gradient(700px 500px at 18% 10%,rgba(255,255,255,.16),transparent 70%)}
+.name{position:absolute;left:52px;top:56px;font:700 27px 'Space Grotesk';letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.name b{font:900 34px 'Noto Serif JP';letter-spacing:0;margin-right:12px;color:#ffe08f}
+h1{position:absolute;left:52px;top:122px;font:900 96px/1.08 'Noto Serif JP',serif;text-shadow:0 5px 0 rgba(0,0,0,.22),0 12px 30px rgba(0,0,0,.25)}
+h1 span.l{display:block;width:max-content;white-space:nowrap}
+h1 em{font-style:normal;color:#ffe08f}
+.phone{position:absolute;left:${PL}px;top:${PT}px;width:${PW}px;padding:${PB}px;border-radius:${PB + 50}px;background:linear-gradient(145deg,#4a4650,#15131a 30%,#0c0b10 70%,#3a363f);box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 0 0 2px rgba(255,255,255,.18)}
+.screen{position:relative;width:${SW}px;height:${Math.round(740 * fk)}px;border-radius:50px;overflow:hidden;background:#000}
+.screen img.s{display:block;width:100%;height:100%}
+.vig{position:absolute;inset:0;background:linear-gradient(to bottom,#0b0e26 0,#0b0e26 7%,rgba(11,14,38,0) 17%)}
+.island{position:absolute;left:50%;top:${11 * fk}px;width:${112 * fk}px;height:${32 * fk}px;margin-left:${-56 * fk}px;border-radius:${16 * fk}px;background:#000}
+.btn{position:absolute;left:${PL + (PW - depart.w) / 2}px;top:${FH - depart.h + 4}px;width:${depart.w}px;height:${depart.h}px;border-radius:999px;overflow:hidden;box-shadow:0 0 0 4px rgba(255,224,143,.95),0 0 40px 14px rgba(255,208,70,.8),0 20px 50px rgba(0,0,0,.55);filter:saturate(1.9) brightness(1.1)}
+.btn img{display:block;width:100%;height:100%}
+</style>
+<div class="f"><div class="mark">今</div><div class="shade"></div>
+  <div class="name"><b>辻</b>Tsuji</div>
+  <h1>${heading(c.h, c.hi)}</h1>
+  <div class="phone"><div class="screen"><img class="s" src="${raw('today_big')}"><div class="vig"></div><div class="island"></div></div></div>
+  <div class="btn"><img src="${raw('today_depart')}"></div>
+</div>
+<script>document.fonts.ready.then(() => {
+  const h = document.querySelector('h1'); let fs = 96
+  h.style.fontSize = fs + 'px'
+  const over = () => [...h.querySelectorAll('.l')].some(l => l.getBoundingClientRect().width > 530)
+  while (over() && fs > 36) { fs -= 2; h.style.fontSize = fs + 'px' }
+  document.body.dataset.ready = '1' })</script>`
+}
+
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox', '--allow-file-access-from-files'] })
 const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 })
+if (args.includes('--feature')) {
+  const fp = await browser.newPage({ viewport: { width: 1024, height: 500 }, deviceScaleFactor: 1 })
+  for (const lang of langs.length ? langs : ['fr', 'en']) {
+    const out = join(here, 'out', lang); mkdirSync(out, { recursive: true })
+    const tmp = join(here, '.tmp'); mkdirSync(tmp, { recursive: true })
+    const file = join(tmp, `${lang}-feature.html`)
+    writeFileSync(file, featureHtml(lang))
+    await fp.goto('file://' + file)
+    await fp.waitForSelector('body[data-ready]', { timeout: 20000 })
+    await fp.waitForTimeout(400)
+    await fp.screenshot({ path: join(out, 'feature-graphic-1024x500.png') })
+    console.log(lang, 'feature graphic')
+  }
+  await browser.close(); process.exit(0)
+}
 for (const lang of langs.length ? langs : ['fr', 'en']) {
   const out = join(here, 'out', lang); mkdirSync(out, { recursive: true })
   const tmp = join(here, '.tmp'); mkdirSync(tmp, { recursive: true })

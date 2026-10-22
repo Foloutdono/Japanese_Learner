@@ -141,6 +141,12 @@ if (stage === 'todaybig') {
       .tdy-key__ring{width:13px !important;height:13px !important}
       .tdy-dial__disc g[clip-path]{opacity:.5 !important;fill:#b39a63 !important}
       .tdy-dial--print .tdy-dial__glow{filter:drop-shadow(0 0 30px rgba(255,238,190,.8))}` })
+    await p.evaluate(([lang]) => {
+      // the gate button says what the headline says, and says it bigger
+      const b = document.querySelector('.btn-depart')
+      const label = [...b.querySelectorAll('*')].filter(e => !e.children.length && e.textContent.trim()).pop()
+      if (label) { if (lang === 'en') label.textContent = 'Board'; label.style.fontSize = '30px'; label.style.fontWeight = '800'; label.style.letterSpacing = '.01em' }
+    }, [lang])
     await p.waitForTimeout(4500); await shot(name)
     if (hour === 17) {
       await piece('today_depart', await box(p.locator('.btn-depart')), 4)
