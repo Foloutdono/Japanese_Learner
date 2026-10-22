@@ -874,8 +874,9 @@ the screen.
   and the studio's list holds a short a scene when the 9:16 format is
   picked. A short past Shorts' three minutes (N1's six long turns) gives
   each question a second less on its timer, four at the least
-  (`fitShort`), and a line long in both languages takes a last layout,
-  what it means on a fifth line, the bubbles drawn closer. Drawn as the thread the owner picked from three
+  (`fitShort`), and a line long in both languages, theirs or your
+  reply, takes a last layout, what it means on a fifth line, the
+  bubbles drawn closer. Drawn as the thread the owner picked from three
   (plan 249b): the carousel's Fiche look on washi, the 会話 line's band
   carrying the scene's title and the question's number. A scene's card
   is the chat's head (a disc, the place, said, the scene's title, who

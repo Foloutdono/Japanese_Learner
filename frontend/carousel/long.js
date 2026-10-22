@@ -2118,12 +2118,15 @@ function threadLayout(ctx, p, S, it, g, peek) {
   // can, at a size that reads, as the question's did.
   let a = null
   const answers = [false, true].flatMap(plain => STEPS.filter(s => zThem * s >= READABLE - 0.5).flatMap(s => [false, true].map(lean => ({ s, lean, plain }))))
+  // A reply long in both languages (N1's two sentences): what it means
+  // a fifth line, the bubble drawn closer, as their line's.
+  for (const s of STEPS.filter(s => zThem * s >= READABLE - 0.5)) answers.push({ s, lean: true, plain: true, tall: true })
   const lw = g.stack ? q.w : q.tw
-  for (const { s, lean, plain } of answers) {
+  for (const { s, lean, plain, tall = false } of answers) {
     const ns = [FS.body, FS.sm, FS.caption].map(z => z * Math.max(0.85, s))
-    const pad = lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
+    const pad = tall ? SP[2] : lean ? SP[3] : s >= 0.84 ? SP[5] : SP[4]
     const trSizes = (lean ? [FS.body, FS.sm, FS.caption] : [FS.body, FS.sm]).map(z => z * Math.max(0.85, s))
-    const you = bubbleOf(ctx, p, it.choices[it.right], { tr: it.reply, who: S.you, w: lw * 0.9, z: zThem * s, min: READABLE, romaji: it.romaji && !plain, script: plain ? 'kanji' : 'furigana', me: true, pad, trSizes, trLines: lean ? 4 : 3, lines: plain ? 4 : 3 })
+    const you = bubbleOf(ctx, p, it.choices[it.right], { tr: it.reply, who: S.you, w: lw * 0.9, z: zThem * s, min: READABLE, romaji: it.romaji && !plain, script: plain ? 'kanji' : 'furigana', me: true, pad, trSizes, trLines: tall ? 5 : lean ? 4 : 3, lines: plain ? 4 : 3 })
     const note = noteOf(ctx, p, S.whyOne, it.why, { w: g.stack ? q.w : q.dw, sizes: ns })
     let fits = false
     for (const back of [true, false]) {
