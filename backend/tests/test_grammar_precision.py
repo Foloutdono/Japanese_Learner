@@ -1711,3 +1711,49 @@ class ChatAndStreamPointTests(unittest.TestCase):
 
     def test_no_question_in_i_mean(self) -> None:
         self.assertNotIn("か", found_in("てか、それって結局お前のせいじゃね？"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SilentPartTests(unittest.TestCase):
+    """Parts the gap report (scripts/breakdown_gaps) found saying nothing
+    in the app's own sentences (plan 272)."""
+
+    def test_an_ending_inside_an_adjective_whatever_comes_before(self) -> None:
+        # The lessons only show a particle before the adjective; an adverb
+        # there changes nothing.
+        for sentence in ("とても痛くて、水を飲めない。", "風邪で喉がひどく痛くて、水を飲むことさえ苦しかった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜くて／〜で", found_in(sentence))
+        self.assertNotIn("〜がる", found_in("物価が上がる。"))
+
+    def test_a_noun_that_is_a_na_adjective_too(self) -> None:
+        # Its に is "safely" or "to peace": no point is lit (see
+        # test_a_copula_ni_after_a_noun_is_left_unlit), and the gloss
+        # names both.
+        from study import analysis
+
+        r = analysis.analyze_local("この島の海は浅いので、子どもでも安全に泳げます。")
+        ni = next(t for t in r["tokens"] if t["surface"] == "に")
+        self.assertFalse(ni.get("grammar"))
+        self.assertTrue(ni["gloss"]["en"].startswith("makes an adverb") and "goal" in ni["gloss"]["en"])
+        # に応じて is the compound particle's.
+        self.assertNotIn("〜く／〜に（副詞形）", found_in("必要に応じて変える。"))
+
+    def test_the_ku_of_a_te_form_is_no_adverb(self) -> None:
+        for sentence in ("いくら忙しくても行く。", "値段が高くても買う。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertNotIn("〜く／〜に（副詞形）", found)
+                self.assertNotIn("〜くて／〜で", found)
+        self.assertIn("〜く／〜に（副詞形）", found_in("早く寝なさい。"))
+
+    def test_an_adjectives_ku_form_as_a_noun(self) -> None:
+        self.assertIn("から〜まで", found_in("夜おそくまで起きている。"))
+        self.assertIn("から〜まで", found_in("朝はやくから並んだ。"))
+
+    def test_the_na_after_a_particle_of_amount(self) -> None:
+        from study import analysis
+
+        r = analysis.analyze_local("このパソコンは買ったばかりなのに、もう故障した。")
+        na = next(t for t in r["tokens"] if t["surface"] == "な")
+        self.assertIn("〜のに", [g["pattern"] for g in na["grammar"]])

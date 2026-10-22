@@ -1729,3 +1729,36 @@ class ChatAndStreamWordTests(unittest.TestCase):
                                    before="ゆうしゃ　たろうは　もりの　どうくつに　はいった")
         taro = next(t for t in r["tokens"] if t["surface"] == "たろう")
         self.assertIsNone(taro["vocab_match"])                        # no "first son"
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SilentWordTests(unittest.TestCase):
+    """Words the gap report (scripts/breakdown_gaps) found cut or saying
+    nothing in the app's own sentences (plan 272)."""
+
+    def test_a_kana_word_cut_into_a_particle(self) -> None:
+        # No か opens what is said: かおいろ is 顔色, never か + お + いろ.
+        token = token_of("どうしたんですか。かおいろが悪いですよ。", "かおいろ")
+        self.assertEqual(token["vocab_match"]["entry"]["kanji"], "顔色")
+
+    def test_an_adverb_said_with_its_to(self) -> None:
+        for sentence, surface, kana in (("しっかりと勉強しなさい。", "しっかりと", "しっかり"),
+                                        ("乗客が次々と列車に乗りこむ。", "次々と", "つぎつぎ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kana"], kana)
+        # One no dictionary has keeps its と, which says what it is.
+        self.assertTrue(token_of("雨がざあざあと降っている。", "と")["gloss"]["en"].startswith("(after an adverb)"))
+        # そう's と quotes, as one before a verb of saying or thinking does.
+        self.assertIn("そう", [t["surface"] for t in analysis.analyze_local("そうとは限らない。")["tokens"]])
+        self.assertIn("当然", [t["surface"] for t in analysis.analyze_local("それを当然と感じられることが証しだ。")["tokens"]])
+        # A kanji adverb's する is its own: 堂々とした, 依然として; a word
+        # said twice that the tokenizer cut is one: もうもうと.
+        for sentence, surface in (("堂々とした既存のビル", "堂々とした"), ("価格は依然として高い。", "依然として"),
+                                  ("車は砂ぼこりをもうもうとあげて走っていた。", "もうもうと")):
+            with self.subTest(sentence=sentence):
+                self.assertIsNotNone(token_of(sentence, surface)["vocab_match"])
+
+    def test_kana_the_tokenizer_misread_in_a_page_of_kana(self) -> None:
+        # 豈 is classical: あに is 兄. ねよう is 寝る's volitional, no よう "well".
+        self.assertEqual(token_of("父と母と、あにといもうとがいます。", "あに")["vocab_match"]["entry"]["kanji"], "兄")
+        self.assertEqual(token_of("早くねようという運動も始めた。", "ねよう")["vocab_match"]["entry"]["kanji"], "寝る")

@@ -944,6 +944,42 @@ def _conjunction_runs(morphemes: list, grammar: list[dict]) -> dict[int, int]:
     return runs
 
 
+def _adverbs_to(morphemes: list, i: int) -> bool:
+    """Whether morphemes[i] is an adverb said with its と (plan 272):
+    しっかりと, はっきりと, 次々と, 黙々と -- the と is the adverb's own and
+    says nothing apart from it. Not そう, こう, ああ, どう, whose と quotes
+    (そうとは限らない)."""
+    m = morphemes[i]
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+    return (nxt is not None and nxt.surface == "と" and nxt.pos == "particle"
+            and (m.pos == "adverb" or (m.pos == "other" and m.surface.endswith("々")))
+            and m.surface not in ("そう", "こう", "ああ", "どう")
+            # (A と before a verb of saying or thinking quotes: 当然と感じる,
+            # いよいよという時, 社よりという名前; one before なる names what
+            # it becomes.)
+            and not (after is not None and after.pos == "verb" and after.lemma not in ("為る", "する")
+                     and (after.lemma in grammar_detect._SAYING_VERBS
+                          or after.lemma in ("感ずる", "成る", "なる", "見なす", "見做す"))))
+
+
+def _adverb_to_length(morphemes: list, i: int) -> int:
+    """How many morphemes from i an adverb said with its と spans: 2, or
+    4 with the する a kanji adverb is said with (堂々とした, 依然として,
+    plan 272) -- never the ている it may go on to."""
+    m = morphemes[i]
+    if (i + 3 < len(morphemes) and all(_is_kanji_char(c) for c in m.surface.replace("々", ""))
+            and morphemes[i + 2].lemma in ("為る", "する") and morphemes[i + 2].cform.startswith("連用形")
+            and morphemes[i + 3].surface in ("た", "て")
+            and not (i + 4 < len(morphemes) and morphemes[i + 4].lemma in ("居る", "いる", "おる", "居る"))):
+        return 4
+    return 2
+
+
+def _is_kanji_char(c: str) -> bool:
+    return "\u4e00" <= c <= "\u9fff"
+
+
 def _name_or_word(token: dict, m, row: dict) -> None:
     """A word in katakana UniDic tags as a person's name and JMdict holds
     as a common word is either one (plan 272): ジャック、よく来てくれたね is
@@ -1275,6 +1311,20 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += 2
             continue
+        if i not in ruled and i + 1 not in ruled and _adverbs_to(morphemes, i):
+            # しっかりと, 次々と: the adverb's card, its と read with it
+            # (plan 272).
+            n = _adverb_to_length(morphemes, i)
+            run = morphemes[i:i + n]
+            row = None if deck else resolve_pool_morpheme(morphemes, i)
+            if deck or row:
+                token = _compound_dict(run, *deck) if deck else _pool_compound_dict(run, row)
+                token["pos"] = "adverb"
+                token["reading"] = "".join(morphology.kata_to_hira(m.reading) for m in run)
+                token["furigana"] = align_deck(token["surface"], token["reading"])
+                tokens.append(token)
+                i += n
+                continue
         if deck is None and (i not in ruled or morphemes[i].pos in ("conjunction", "adnominal")):
             # (A conjunction is a word with its card beside the point that
             # is it, as しかし is: そして, its card and its point, plan 272;

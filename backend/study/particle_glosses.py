@@ -142,6 +142,10 @@ _GLOSSES = {
                "fr": "(avec なる) devient : la forme écrite de 〜になる"},
     "て_trailing": {"en": "(at the end) leaves the sentence open on what happened or why: …, you see",
                    "fr": "(en fin de phrase) laisse la phrase en suspens sur ce qui s'est passé ou pourquoi : …, tu vois"},
+    "に_adjectival": {"en": "makes an adverb of the word before it (安全に, safely), or marks a goal (平和に役立つ, to peace)",
+                     "fr": "fait un adverbe du mot qui précède (安全に, en sécurité), ou marque un but (平和に役立つ, à la paix)"},
+    "と_adverb": {"en": "(after an adverb) the と the adverb is said with",
+                 "fr": "(après un adverbe) le と qui l'accompagne"},
     "まじで": {"en": "(casual) seriously, really",
              "fr": "(familier) sérieusement, vraiment"},
     "てか": {"en": "(casual) I mean, or rather (= というか)",
@@ -221,6 +225,11 @@ def gloss(morphemes, i: int) -> dict | None:
             and morphemes[i - 1].surface in ("だろう", "だろ", "でしょう", "でしょ") \
             and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("！", "!"):
         key = "が_insist"                  # 見りゃ分かるだろうが！
+    elif m.pos == "auxiliary" and m.surface == "に" and m.lemma == "だ" and i > 0 \
+            and morphemes[i - 1].pos == "noun" and morphemes[i - 1].adjectival:
+        # 安全に泳げます, 平和に役立つ: the letters do not say which; the
+        # gloss names both, and no point is lit (plan 150, 272).
+        key = "に_adjectival"
     elif m.pos == "particle" and m.surface in ("じゃ", "じゃあ") and not _opens(morphemes, i) \
             and not (i > 0 and morphemes[i - 1].surface in ("それ", "そう", "これ") and _opens(morphemes, i - 1)):
         key = "じゃ_copula"                # お前のせいじゃね？
@@ -276,6 +285,10 @@ def gloss(morphemes, i: int) -> dict | None:
         elif m.surface == "まで" and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary") \
                 and morphemes[i - 1].cform.startswith(("終止形", "連体形")):
             key = "まで_until"               # 亡くなるまで, "until he died"
+        elif m.surface == "と" and i > 0 and (morphemes[i - 1].pos == "adverb" or (
+                morphemes[i - 1].pos == "other" and morphemes[i - 1].surface.endswith("々"))) \
+                and morphemes[i - 1].surface not in ("そう", "こう", "ああ", "どう"):
+            key = "と_adverb"                # ざあざあと, an adverb no dictionary has
         elif m.surface == "と" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix") \
                 and i + 1 < len(morphemes) and morphemes[i + 1].pos == "verb" \
                 and morphemes[i + 1].lemma in ("成る", "なる"):

@@ -724,6 +724,36 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
             out_t.append(("動詞", "一般", "*"))
             skip.add(i + 1)
             continue
+        elif (m.pos == "adverb" and nxt is not None and nxt.surface == m.surface and nxt.pos == "adverb"
+              and _kana_letters(m.surface) and len(m.surface) >= 2 and _glued(m, nxt)
+              and _known(m.surface * 2) and i + 2 < len(morphemes) and morphemes[i + 2].surface == "と"):
+            # もう + もう + と is もうもうと, "thickly (of smoke)", no もう
+            # "already" twice (plan 272).
+            out_m.append(replace(m, surface=m.surface * 2, end=nxt.end, lemma=_known(m.surface * 2),
+                                 reading=m.reading * 2, lemma_reading=m.lemma_reading * 2, kana=m.kana * 2))
+            out_t.append(tags[i])
+            skip.add(i + 1)
+            continue
+        elif (m.surface == "よう" and m.pos == "adverb" and out_m and len(out_m[-1].surface) == 1
+              and _kana_letters(out_m[-1].surface) and _glued(out_m[-1], m)
+              and kata_to_hira(out_m[-1].surface) + "る" in _deck_kana()
+              and (nxt is None or nxt.surface in ("と", "か", "。", "！", "!", "よ", "ね"))):
+            # 早くねようという: 寝る's volitional, which UniDic cut into the
+            # particle ね and よう, "well" (plan 272).
+            head = out_m.pop()
+            out_t.pop()
+            verb = kata_to_hira(head.surface) + "る"
+            out_m.append(replace(head, surface=head.surface + "よう", end=m.end, lemma=_first_spelling(verb),
+                                 reading=kata_to_hira(head.surface) + "よう", lemma_reading=verb,
+                                 kana=head.kana + "ヨウ", pos="verb", ctype="下一段-ナ行", cform="意志推量形",
+                                 conjunctive=False, auxiliary_use=False))
+            out_t.append(("動詞", "一般", "*"))
+            continue
+        elif m.surface == "あに" and m.pos == "adverb":
+            # 豈, "how could…", is classical; a page's あに is 兄, "older
+            # brother": あにといもうと (plan 272).
+            m = replace(m, pos="noun", lemma="兄", lemma_reading="あに")
+            tags = tags[:i] + [("名詞", "普通名詞", "一般")] + tags[i + 1:]
         elif m.surface in ("まじか", "マジか") and m.lemma == "間近" and opens:
             head = m.surface[:-1]
             out_m.append(replace(m, surface=head, end=m.start + len(head), lemma="まじ", reading="まじ",
@@ -1207,6 +1237,19 @@ def _deck_kana() -> dict[str, frozenset[str]]:
     return {k: frozenset(v) for k, v in out.items()}
 
 
+@lru_cache(maxsize=4096)
+def _first_spelling(reading: str) -> str:
+    """The spelling of the deck's lowest-level card read `reading`: ねる is
+    寝る (N5) before 練る (N1)."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    for level in ("N5", "N4", "N3", "N2", "N1"):
+        for entry in VOCAB_BY_LEVEL.get(level, []):
+            if reading in (kata_to_hira(k.strip()) for k in (entry.get("kana") or "").replace(";", "/").split("/")):
+                return entry.get("kanji") or reading
+    return reading
+
+
 def _known(text: str) -> str | None:
     """The spelling of the word of the deck or of JMdict read `text`, or
     None: the deck's where one card is read so (あに, 兄), the commonest
@@ -1221,6 +1264,51 @@ def _known(text: str) -> str | None:
 
     rows = vocab_jmdict_data.by_kana(text, limit=1)
     return (rows[0].get("kanji") or rows[0].get("kana") or text) if rows else None
+
+
+# One-letter particles nothing said opens on: a か, が or を there is the
+# first letter of a word UniDic cut.
+_NO_OPENER = frozenset("かがをにのへもや")
+_PHRASE_OPENS = frozenset("。！？!?「『（(…‥、，,\u3000 ")
+
+
+def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A kana word MeCab cut into a particle and the letters after it,
+    where what is said opens and no particle can stand (plan 272): かお
+    いろが悪い is 顔色, "complexion", which UniDic reads か + お + いろ.
+    The longest run of three kana or more from the particle that spells a
+    word of the deck or of JMdict (_known) and ends before a particle or
+    a mark is read as that word."""
+    from dataclasses import replace
+
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+        opens = i == 0 or (morphemes[i - 1].pos == "symbol" and morphemes[i - 1].surface in _PHRASE_OPENS)
+        best = None
+        if opens and m.pos == "particle" and m.surface in _NO_OPENER:
+            j = i + 1
+            while j < len(morphemes) and j - i < 5 and _kana_letters(morphemes[j].surface) \
+                    and _glued(morphemes[j - 1], morphemes[j]):
+                j += 1
+                joined = "".join(u.surface for u in morphemes[i:j])
+                after = morphemes[j] if j < len(morphemes) else None
+                spelled = _known(joined) if len(joined) >= 3 else None
+                if spelled and (after is None or after.pos in ("particle", "symbol")):
+                    best = (j, joined, spelled)
+        if best:
+            j, joined, spelled = best
+            out_m.append(replace(m, surface=joined, end=morphemes[j - 1].end, lemma=spelled, reading=joined,
+                                 lemma_reading=joined, kana="".join(chr(ord(c) + 0x60) for c in joined),
+                                 pos="noun", ctype="", cform="", conjunctive=False, auxiliary_use=False))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            i = j
+            continue
+        out_m.append(m)
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
 
 
 def _unknown_words(text: str, morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
@@ -1465,6 +1553,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
     try:
         morphemes, tags = _quotative_to(text, *_tag(text, 0, tagger), tagger)
         morphemes, tags = _unknown_words(text, morphemes, tags)
+        morphemes, tags = _opened_on_a_particle(morphemes, tags)
         morphemes, tags = _kana_names(morphemes, tags)
         _demonstratives(morphemes)
         _picture(morphemes)

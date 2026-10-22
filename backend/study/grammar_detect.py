@@ -1129,6 +1129,13 @@ def _attaches(start: int, tokens, befores, heads, exact: bool = False) -> bool:
         return "adjective" in befores
     if token.pos in befores:
         return True
+    if "noun" in befores and token.pos == "adjective" and token.cform.startswith("連用形") \
+            and token.surface.endswith("く"):
+        # An adjective's く form is a noun before まで, から and に: 夜遅く
+        # まで, 朝早くから, 遠くに (plan 272).
+        at = next((t for t in tokens if t.start == start), None)
+        if at is not None and at.pos == "particle" and at.surface in ("まで", "から", "に", "までに"):
+            return True
     if "noun" in befores and _polite_noun(tokens, token, start):
         return True
     if "noun" in befores and token.pos == "particle" and token.surface in ("の", "ん"):
@@ -1572,7 +1579,8 @@ def _shaped(sentence, tokens, level, pattern, parts):
                 # (plan 193)
                 or (start in starts and (pos == "prefix" or (pos == "verb" and "〜" not in pattern)))
                 or (not exact and _admits(_before_token(start, tokens), _admitted(pattern, befores, heads)))
-                or _closes_on_a_noun(start, end, tokens, befores, heads)):
+                or _closes_on_a_noun(start, end, tokens, befores, heads)
+                or _inside_an_adjective(start, tokens, heads)):
             continue
         if _wrong_form(start, tokens, pattern):
             continue
@@ -1580,6 +1588,16 @@ def _shaped(sentence, tokens, level, pattern, parts):
             continue
         out.append(hit)
     return out
+
+
+def _inside_an_adjective(start: int, tokens, heads) -> bool:
+    """Whether the hit opens inside an い-adjective its lessons write the
+    point on -- the く of 痛くて, the か of 高かった -- where the word before
+    the adjective says nothing of it (plan 272): とても痛くて and ひどく痛
+    くて are 〜くて as 喉が痛くて is, though the lessons only ever show a
+    particle there."""
+    held = next((t for t in tokens if t.start < start < t.end), None)
+    return held is not None and held.pos == "adjective" and "adjective" in heads
 
 
 @lru_cache(maxsize=None)
@@ -2381,10 +2399,13 @@ def _from_until_spans(tokens):
     """から〜まで with one of its two ends: から after a noun is "from"
     and まで after a noun "until", the two halves of the one lesson
     (から after a clause is 〜から, "because"). With both present the
-    two-part hit is the one reported (_detect's dedupe)."""
+    two-part hit is the one reported (_detect's dedupe). An adjective's
+    く form is a noun there: 夜遅くまで, 朝早くから (plan 272)."""
     return [(t.start, t.end) for i, t in enumerate(tokens)
             if t.pos == "particle" and t.surface in ("から", "まで") and not t.conjunctive
-            and _prev_kind(tokens, i) == "nominal"]
+            and (_prev_kind(tokens, i) == "nominal"
+                 or (tokens[i - 1].pos == "adjective" and tokens[i - 1].cform.startswith("連用形")
+                     and tokens[i - 1].surface.endswith("く")))]
 
 
 def _after_a_plain_form(tokens, i: int) -> bool:
@@ -4034,6 +4055,9 @@ def _pattern_refusals():
         # own point) are adverbs, no な-adjective's adverbial form
         "〜く／〜に（副詞形）": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None
             and p.surface in ("どんな", "こんな", "そんな", "あんな"))
+            # (The く of 高くても or 高くない is the adjective's て form or
+            # negative, no adverb, plan 272.)
+            or _followed_by(t, e, "て", "ない", "なかっ", "なけれ", "なく", "なかろ")
             # (一大事にございます is でございます said of old, plan 272.)
             or _followed_by(t, e, "ござい", "ござる", "ござり", "御座い", "御座る"),
         # そう after a plain form is hearsay, whatever the tagger calls
@@ -4131,6 +4155,8 @@ def _pattern_refusals():
         "〜な（禁止）": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
             p.lemma in ("居る", "いる", "た") or p.surface in ("てる", "でる")),
         "〜のに": lambda t, s, e, g: (n := _next_word(t, e)) is not None and (n.surface.startswith("気") or n.pos == "verb"),
+        # 高くても, 高くては: the て of 〜ても and 〜ては, no "and" (plan 272).
+        "〜くて／〜で": lambda t, s, e, g: _followed_by(t, e, "も", "は"),
         # だろうが！ insists, no "but" (plan 272).
         "〜が（逆接）": lambda t, s, e, g: (i := _index_at(t, s)) is not None and i > 0 and _insists(t, i),
         # のではないか is の and the copula's では, "isn't it that ...";
@@ -5671,6 +5697,11 @@ def _opens_on_no(pattern: str) -> bool:
     return "〜" in pattern and any(alt.lstrip("〜").startswith(("の", "ん")) for alt in alternatives(pattern))
 
 
+# The particles a noun phrase ends in, which the copula's な follows as
+# it follows a noun: 買ったばかりなのに, 少しだけなので (plan 272).
+_NOMINAL_PARTICLES = frozenset({"ばかり", "だけ", "ほど", "くらい", "ぐらい", "のみ", "きり", "っきり"})
+
+
 def _with_attributive_na(tokens, hit):
     """A point opening on の, its start moved back over the な a noun or a
     な-adjective takes before it (plan 266): 休みなので, 春なのに, 大切なのは
@@ -5685,7 +5716,7 @@ def _with_attributive_na(tokens, hit):
         return hit
     na = tokens[i - 1]
     if not (_is_copula(na) and na.surface == "な" and _form_head(na.cform) == "連体形"
-            and tokens[i - 2].pos in _NOMINAL):
+            and (tokens[i - 2].pos in _NOMINAL or tokens[i - 2].surface in _NOMINAL_PARTICLES)):
         return hit
     first = (na.start, segments[0][1]) if segments else (na.start, end)
     return pattern, level, na.start, end, kind, (first, *segments[1:])
