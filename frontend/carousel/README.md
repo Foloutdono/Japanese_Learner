@@ -1284,8 +1284,15 @@ and the ask for the comments left to the post's caption. A test draws
 every question of the bank, in both languages, at its countdown and
 its answer.
 
+With `--hide` (plan 275) the answer is never given: where the right
+answer would light, "A, B, C or D? / Write your answer in the comments"
+stands under the four answers, all as bright as each other, the chime
+that says right is a plain card's sound, and the post's caption asks
+for the comments too. The file's name ends in `-comment`.
+
 ```bash
 cd frontend
+node carousel/long/render.mjs --challenge n5-06 --style scroll --hour night --season winter --lang en --question 2 --hide
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en
 node carousel/long/render.mjs --challenge n5-03 --style scroll --hour dawn --lang en --question 7
 node carousel/long/render.mjs --challenge n5-04 --style scroll --hour night --season hanabi --lang en

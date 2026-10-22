@@ -76,6 +76,9 @@ const W = {
     chars: n => `${n} characters`,
     comments: 'Answer in the comments',
     gotIt: 'Did you get it?',
+    // Hidden (plan 275): the answer left to the comments.
+    yours: ['A, B, C or D?', 'Write your answer in the comments'],
+    askHidden: 'A, B, C or D? Write your answer in the comments.',
     // The way to the app (plan 266): the reader's card, then the run's stops.
     reader: 'Read it at your pace in the app',
     station: 'Reading comprehension',
@@ -96,6 +99,8 @@ const W = {
     chars: n => `${n} caractères`,
     comments: 'Réponds en commentaire',
     gotIt: 'Tu avais trouvé ?',
+    yours: ['A, B, C ou D ?', 'Écris ta réponse en commentaire'],
+    askHidden: 'A, B, C ou D ? Écris ta réponse en commentaire.',
     reader: 'Lis-le à ton rythme dans l’app',
     station: 'Compréhension écrite',
     speed: v => `${v} car./s`,
@@ -139,7 +144,8 @@ export function challengeQuestions(data, id, lang = 'en') {
 
 /** A text's challenge: its sentences and one of its questions.
  *  `opts.question`: the question asked (1-based), the first about what
- *  the text says when left out or out of range. */
+ *  the text says when left out or out of range. `opts.hide` (plan 275):
+ *  the answer is never shown, the viewer asked for theirs in the comments. */
 export function challengePlan(data, id, opts = {}) {
   const lang = opts.lang === 'fr' ? 'fr' : 'en'
   const P = data.passages.find(x => x.id === id) ?? data.passages[0]
@@ -158,7 +164,7 @@ export function challengePlan(data, id, opts = {}) {
   const options = Q.options[lang] || Q.options.en
   const q = { n: qn, ask: Q.question[lang] || Q.question.en, choices: order.map(i => options[i]), right: order.indexOf(Q.correct) }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P),
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P), hidden: Boolean(opts.hide),
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), nq: P.questions.length, cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -219,7 +225,8 @@ export function challengeTimeline(plan, voiced = null) {
   const qAt = t
   seg('question', beat(plan, 'ask') + beat(plan, 'count'))
   for (let k = 0; k < beat(plan, 'count'); k++) sfx.push({ at: +(qAt + beat(plan, 'ask') + k).toFixed(3), key: 'click', gain: 0.35 })
-  sfx.push({ at: +t.toFixed(3), key: 'correct' })
+  // Hidden, nothing says which was right: the card's turn, not the right answer's chime.
+  sfx.push({ at: +t.toFixed(3), key: plan.hidden ? 'card-transition' : 'correct' })
   seg('answer', beat(plan, 'answer'))
   sfx.push({ at: +(t + 0.5).toFixed(3), key: 'platform-chime' })
   // The two taps on the reader's card, heard as the app's buttons are (plan 266).
@@ -245,7 +252,8 @@ export function challengeCommand(plan) {
   const question = plan.chosen ? ` --question ${plan.q.n}` : ''
   // The print's season where one is chosen, else the day's the render runs on (plan 267).
   const season = plan.season ? ` --season ${plan.season}` : ''
-  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${tuneFlag(plan.tune, 'challenge')}`
+  const hide = plan.hidden ? ' --hide' : ''
+  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${hide}${tuneFlag(plan.tune, 'challenge')}`
 }
 
 /** The video's page: its title, its description, its tags. */
@@ -256,6 +264,7 @@ export function challengePage(plan, tl, site) {
   const lines = [
     `${plan.title} · JLPT ${plan.lv} · ${S.sentences(plan.sents.length)} · ${clock(tl.reading)}`,
     S.body[plan.style],
+    ...(plan.hidden ? [S.askHidden] : []),
     S.site(site),
     ...credits,
     tags.map(x => `#${x}`).join(' '),
@@ -263,7 +272,9 @@ export function challengePage(plan, tl, site) {
   const page = { title: S.title(plan.lv, plan.title), description: lines.join('\n\n'), tags: tags.join(', ') }
   // The same video in Reels and on TikTok (plan 251), the comments asked for the answer.
   const feed = {
-    hook: page.title, lines: [S.body[plan.style]], app: S.app, ask: S.ask, credits,
+    hook: page.title, lines: [S.body[plan.style]], app: S.app, ask: plan.hidden ? S.askHidden : S.ask, credits,
+    // Hidden, the answer is only in the comments: Instagram asks there too.
+    ...(plan.hidden ? { reels: `👇 ${S.askHidden}` } : {}),
     hashtags: [S.tags[1], S.tags[0], S.tags[2], `jlpt${plan.lv.toLowerCase()}`, '日本語'],
   }
   return { ...page, feeds: feedPosts(page, feed, plan.lang) }
@@ -595,12 +606,12 @@ function question(ctx, plan, into, answered, P, T) {
   const L = questionLayout(ctx, plan)
   let y = lines(ctx, T, plan.q.ask, TOP + 30, [L.ask.size], { maxLines: L.askLines }) + SP[6]
   plan.q.choices.forEach((c, i) => {
-    const right = answered && i === plan.q.right
+    const right = answered && !plan.hidden && i === plan.q.right
     const b = L.answers[i]
     const h = L.hs[i]
     const k = answered ? 1 : ease((into - 0.4 - i * 0.18) / 0.4)
     ctx.save()
-    ctx.globalAlpha *= k * (answered && !right ? 0.45 : 1)
+    ctx.globalAlpha *= k * (answered && !plan.hidden && !right ? 0.45 : 1)
     panel(ctx, T, fr.x, y, fr.w, h, right ? CORRECT : T.panel)
     ctx.fillStyle = right ? '#10201f' : T.dot
     ctx.beginPath()
@@ -628,6 +639,11 @@ function question(ctx, plan, into, answered, P, T) {
     ctx.stroke()
     text(ctx, String(Math.ceil(left) || ''), fr.cx, y + r + 18 * (r / RING), { f: font(800, FS.heading * (r / RING), 'latin'), color: T.ink, align: 'center' })
     if (!L.quiet) lines(ctx, T, S.comments, y + r * 2 + SP[4], [FS.body], { weight: 600, maxLines: 1 })
+  } else if (plan.hidden) {
+    // The answer left to the viewer: the four letters asked, then the comments.
+    const k = ease((into - 0.3) / 0.5)
+    const end = lines(ctx, T, S.yours[0], y, [FS.title, FS.lead], { weight: 800, maxLines: 1, k })
+    lines(ctx, T, S.yours[1], end + SP[2], [FS.lead, FS.body], { weight: 600, maxLines: 2, k: ease((into - 0.7) / 0.5) })
   } else {
     lines(ctx, T, S.gotIt, y, [FS.title, FS.lead], { weight: 700, maxLines: 1, k: ease((into - 0.4) / 0.5) })
   }

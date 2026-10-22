@@ -2057,6 +2057,28 @@ describe('the reading challenges (plan 247)', () => {
     for (const season of ['now', ...PRINT_SEASONS]) expect(html, season).toContain(`data-set="season:${season}"`)
   })
 
+  it('keeps the answer to itself when hidden, the comments asked for it (plan 275)', () => withPath2D(() => {
+    for (const lang of ['en', 'fr']) {
+      const shown = challengePlan(data, 'n5-06', { question: 2, lang })
+      const pl = challengePlan(data, 'n5-06', { question: 2, lang, hide: true })
+      expect(shown.hidden).toBe(false)
+      expect(pl.hidden).toBe(true)
+      const tl = challengeTimeline(pl)
+      const answer = tl.segs.find(s => s.key === 'answer')
+      const { ctx, at } = drawn()
+      drawChallenge(ctx, pl, tl, answer.start + answer.dur - 0.05, null)
+      const seen = at.filter(x => x.alpha > 0.01).map(x => x.t).join(' ')
+      expect(seen, lang).toMatch(lang === 'en' ? /comments/ : /commentaire/)
+      // No chime that says it was right, and every choice as bright as the others.
+      expect(tl.sfx.some(x => x.key === 'correct'), lang).toBe(false)
+      expect(challengeCommand(pl)).toContain(' --hide')
+      expect(challengeCommand(shown)).not.toContain('--hide')
+      const page = challengePage(pl, tl, 'x')
+      expect(page.description).toMatch(lang === 'en' ? /Write your answer in the comments/ : /Écris ta réponse en commentaire/)
+      for (const feed of ['reels', 'tiktok']) expect(page.feeds[feed].caption, feed).toContain(`👇 ${lang === 'en' ? 'A, B, C or D? Write' : 'A, B, C ou D ? Écris'}`)
+    }
+  }))
+
   // Last of the block: the strip it leaves behind is the stub's.
   it('draws the scroll’s text once and lays it between pixels, at sixty frames, so it glides', () => withPath2D(() => {
     const had = globalThis.OffscreenCanvas

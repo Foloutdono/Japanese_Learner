@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **275**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **276**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -1006,7 +1006,8 @@ plan 257 a vocabulary short's card turns over at the reveal onto the
 word's own picture where `frontend/carousel/content/pictures/` has one
 (the owner's illustrations, keyed by `written::kana`); since plan 260 a
 reading challenge asks the question chosen (`--question`), its answers
-dealt so the right one stands at A, B, C or D alike, and since plan 266
+dealt so the right one stands at A, B, C or D alike (or, since plan
+275, `--hide`, never answered: the comments are asked), and since plan 266
 ends on the app's own reader, the text rolling, slowed and its furigana
 shown, over the run's three stops; since plan 267 the studio's Today's
 print is the season's too, the day's as the app's gate shows it unless

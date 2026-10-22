@@ -29,7 +29,8 @@ const SAY = {
 /** A video's posts for the three feeds: YouTube's `page` as it is, and a
  *  caption for each of the other two from `parts`: its `hook`, its
  *  `lines`, the app said without its link (`app`), an `ask` of its own
- *  for the comments, its `credits` and its `hashtags` in the order they
+ *  for the comments (`reels`, one for Instagram's too, in place of its
+ *  save), its `credits` and its `hashtags` in the order they
  *  matter (#shorts is YouTube's alone). */
 export function feedPosts(page, parts, lang = 'en') {
   const S = SAY[lang] || SAY.en
@@ -52,7 +53,7 @@ export function feedPosts(page, parts, lang = 'en') {
   ].filter(Boolean).join('\n\n')
   return {
     shorts: { title: page.title, description: page.description, tags: page.tags },
-    reels: { caption: caption(S.reels) },
+    reels: { caption: caption(parts.reels || S.reels) },
     tiktok: { caption: caption(parts.ask ? `👇 ${parts.ask}` : S.tiktok) },
   }
 }
