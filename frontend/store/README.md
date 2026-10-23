@@ -16,6 +16,10 @@ standing out of a dimmed screen, as **1080×1920 PNGs**: Google Play's 9:16
 phone screenshot (2:1 at most, 320–3840 px a side). Every figure in a title
 is the app's (JMdict's 200,000+ entries, KANJIDIC2's 13,108 characters).
 
+The 7-inch tablet set (portrait, 540×960 screens at 2x, drawn into a tablet frame, 1080×1920 too) uses the same
+steps with a `tablet` argument and `--tablet`: `node store/capture.mjs fr main tablet`, `node store/compose.mjs --tablet`
+(into `out/<lang>-tablet/`). `node store/compose.mjs --feature` makes Google Play's 1024×500 feature graphic.
+
 ```bash
 # 0. a dev stack with a learner who has a history (local database only)
 cd backend && cp .env.example .env     # DEV_USER_ID=local-dev-user
