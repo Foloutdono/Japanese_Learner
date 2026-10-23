@@ -323,12 +323,35 @@ if (mixed.status !== 0) throw new Error('the mix failed')
 
 // ── YouTube's loudness, by one gain for the whole: a dynamic leveller would
 // lift the app's quiet sounds up to the voice between two lines ──
-const probe = spawnSync('ffmpeg', ['-hide_banner', '-i', join(WORK, 'mix.wav'), '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' })
-const loud = JSON.parse(probe.stderr.slice(probe.stderr.lastIndexOf('{')))
+const probe = spawnSync(
+  'ffmpeg',
+  [
+    '-hide_banner',
+    '-i', join(WORK, 'mix.wav'),
+    '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json',
+    '-f', 'null', '-'
+  ],
+  { encoding: 'utf8' }
+)
+
+// FFmpeg writes its JSON and diagnostic messages to stderr.
+// Extract the loudnorm JSON object rather than parsing all trailing output.
+const loudMatch = probe.stderr.match(/\{\s*"input_i"\s*:[\s\S]*?\n\}/)
+
+if (probe.error) throw probe.error
+if (!loudMatch) {
+  throw new Error(`Could not find loudnorm JSON in FFmpeg output:\n${probe.stderr}`)
+}
+
+const loud = JSON.parse(loudMatch[0])
+
 // A challenge read in silence is kept calmer (its timeline says how loud).
 // A silent draft measures -inf: it is left as it is rather than turned up by NaN.
 const measured = Number(loud.input_i)
-const gain = Number.isFinite(measured) ? Math.min((tl.loudness ?? -16) - measured, -1.5 - Number(loud.input_tp)) : 0
+const gain = Number.isFinite(measured)
+  ? Math.min((tl.loudness ?? -16) - measured, -1.5 - Number(loud.input_tp))
+  : 0
+
 log(`loudness ${loud.input_i} LUFS, peak ${loud.input_tp} dBTP: ${gain.toFixed(1)} dB`)
 
 // ── The frames, each still drawn once, into ffmpeg ──
