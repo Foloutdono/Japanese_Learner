@@ -1028,7 +1028,7 @@ def _ending(end: int, tokens, by_mase: bool = False) -> str:
         if t.start < end <= t.end:
             # (the copula's だろう is a guess, no one's volition: 低いのは、
             # 関心がないからだろう, plan 272)
-            head = "" if t.lemma in ("だ", "です") else _form_head(t.cform)
+            head = "" if t.lemma in ("だ", "です", "じゃ", "や") else _form_head(t.cform)
             nxt = tokens[k + 1] if k + 1 < len(tokens) else None
             if by_mase and nxt is not None and nxt.lemma == "ます" and nxt.cform.startswith("命令形"):
                 head = _form_head(nxt.cform)
