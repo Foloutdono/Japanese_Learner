@@ -38,8 +38,11 @@ android {
     buildTypes {
         release {
             // R8 shrinks, optimises and renames the release's code
-            // (proguard-rules.pro); a debug build stays as written.
+            // (proguard-rules.pro), then drops the resources nothing
+            // reaches (res/raw/keep.xml names those reached by name); a
+            // debug build stays as written.
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (keystorePath != null && file(keystorePath).exists()) {
                 signingConfig signingConfigs.release
