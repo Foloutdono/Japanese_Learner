@@ -2609,12 +2609,18 @@ def _same_word_as_lemma(m, lemma: set, row: dict) -> bool:
 # is 人 said of several, and folding it would take 人's N5 card away.
 _PRODUCTIVE_SUFFIXES = frozenset("達等共方様君殿氏")
 
+# A word-forming suffix a first-year page writes in kana (plan 274): the
+# shop's 屋 in パンや and くつや, read so by morphology._shops.
+_KANA_WORD_FORMING = frozenset({"屋"})
+
 
 def _word_forming(m) -> bool:
     """A suffix in kanji that makes a word of the noun before it (者,
-    家, 所, 書), as opposed to one that goes on any noun (達, 様)."""
-    return (m.pos == "suffix" and _has_kanji(m.surface)
-            and not any(c in _PRODUCTIVE_SUFFIXES for c in m.surface))
+    家, 所, 書), as opposed to one that goes on any noun (達, 様); or
+    one of them written in kana (_KANA_WORD_FORMING)."""
+    return m.pos == "suffix" and (
+        (_has_kanji(m.surface) and not any(c in _PRODUCTIVE_SUFFIXES for c in m.surface))
+        or m.lemma in _KANA_WORD_FORMING)
 
 
 # The sound changes a compound makes of its second word, undone: 時計 in
