@@ -43,10 +43,12 @@ function save(patch, session, setting) {
   })
 }
 
-/** Ride `line` in `mode` from now on. Resolves to the server's answer,
- *  whose `mainSwitch` says what was marked known in the new mode. */
-export function setMainMode(line, mode, session) {
-  return save({ mainModes: { [line]: mode } }, session, 'main_mode')
+/** Ride `line` in `mode` from now on: carrying what the old mode
+ *  mastered across (`carry`, the default) or starting from zero.
+ *  Resolves to the server's answer, whose `mainSwitch` says what was
+ *  marked known in the new mode. */
+export function setMainMode(line, mode, session, carry = true) {
+  return save({ mainModes: { [line]: mode }, carryKnown: carry }, session, 'main_mode')
 }
 
 /** The modes added to `line` in Today, the whole list for that line. */

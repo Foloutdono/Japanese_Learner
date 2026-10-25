@@ -227,7 +227,10 @@ runtime purpose.
   an added mode deals only cards its line's main mode has taught, and
   its first answers spend the pace (`srs.get_mode_firsts_today`). A new
   main mode marks what the old one mastered known in it, the level
-  rule's way, and deletes nothing. Grammar rides its ladder.
+  rule's way, unless the learner starts it from zero (`carryKnown`), and
+  deletes nothing either way; a chosen main mode deals its new cards
+  from the lowest stop that has any, the default one from the level.
+  Grammar rides its ladder.
 - **A place on the 番付 is read off one list (plan 262).** `study/banzuke.py`
   ranks each board (all time, the calendar week from Monday 00:00 UTC, a
   division) from one sum, `srs.xp_totals`, a minute old at most, a tie

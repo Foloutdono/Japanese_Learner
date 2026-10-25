@@ -175,6 +175,38 @@ def test_a_new_main_mode_takes_what_the_old_one_mastered_and_deals_the_line_in_i
     assert srs.count_rows([f"{MODES_USER}:{raw}" for raw in n5], DRAW) == len(n5)
 
 
+def test_a_new_main_mode_can_start_from_zero_and_is_dealt_from_the_lowest_stop(client):
+    _board(client)  # N4: the N5 kanji are marked known in their meaning
+    n5 = card_index.raw_ids("kanji", "N5", DRAW)
+    r = client.patch("/api/profile/learning", json={"mainModes": {"kanji": DRAW}, "carryKnown": False})
+    assert r.status_code == 200, r.text
+    assert r.json()["mainSwitch"] == [{"line": "kanji", "from": MEANING, "to": DRAW, "carried": False,
+                                       "markedKnown": 0, "spreadWeeks": 6}]
+    assert srs.count_rows([f"{MODES_USER}:{raw}" for raw in n5], DRAW) == 0
+    # Nothing carried, so the stops behind the level are new in the
+    # mode: Today starts on them, in teaching order.
+    lanes = _lanes(client)
+    assert ("kanji", "N5", DRAW) in lanes and ("kanji", "N4", DRAW) not in lanes
+    cards = client.get(f"/api/today/cards?count=10&lanes={lanes[('kanji', 'N5', DRAW)]['id']}").json()["cards"]
+    assert [c["card_id"] for c in cards] == teaching_order.raw_ids("kanji", "N5", DRAW)[:len(cards)]
+    # The meaning rows are untouched.
+    assert srs.count_rows([f"{MODES_USER}:{raw}" for raw in card_index.raw_ids("kanji", "N5", MEANING)], MEANING) > 0
+
+
+def test_the_default_main_mode_keeps_to_the_level(client):
+    # A learner who never chose: new cards at their own level only, as
+    # before plan 273, whatever is unmet below it.
+    _board(client)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM card_modes WHERE card_id LIKE %s", (f"{MODES_USER}:kanji_N5_%",))
+        conn.commit()
+    finally:
+        conn.close()
+    assert set(_lanes(client)) == {("kanji", "N4", MEANING)}
+
+
 # ── Modes added to Today ──────────────────────────────────────────
 
 def test_an_added_mode_takes_its_turn_beside_the_rest_of_the_ration():

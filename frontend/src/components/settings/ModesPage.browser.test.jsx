@@ -96,10 +96,37 @@ describe('Settings › Main modes', () => {
     await userEvent.click($('[data-action="mode-confirm"]'))
     await settle()
     expect(apiJson).toHaveBeenLastCalledWith('/api/profile/learning', expect.anything(),
-      expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ mainModes: { kanji: 'kanji.write_kanji' } }) }))
+      expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ mainModes: { kanji: 'kanji.write_kanji' }, carryKnown: true }) }))
     expect(refreshToday).toHaveBeenCalled()
     const radios = [...slip('kanji').querySelectorAll('[role="radio"]')]
     expect(radios.find(r => r.getAttribute('aria-checked') === 'true').dataset.mode).toBe('kanji.write_kanji')
+  })
+
+  it('can start the new main mode from zero, and offers one way in when there is nothing to carry', async () => {
+    await mount()
+    const answer = marked => apiJson.mockImplementation(async (path) => {
+      if (path.startsWith('/api/profile/modes/preview')) {
+        return { line: 'kanji', from: 'kanji.flashcard.f2b', to: 'kanji.write_kanji', carried: true, markedKnown: marked, spreadWeeks: 6 }
+      }
+      return { modes: MODES, mainSwitch: [] }
+    })
+    answer(84)
+    await userEvent.click(slip('kanji').querySelector('[data-mode="kanji.write_kanji"]'))
+    await settle()
+    expect($('[data-action="mode-confirm"]').textContent).toContain(fr.modeSwitchKeep)
+    await userEvent.click($('[data-action="mode-fresh"]'))
+    await settle()
+    expect(apiJson).toHaveBeenLastCalledWith('/api/profile/learning', expect.anything(),
+      expect.objectContaining({ body: JSON.stringify({ mainModes: { kanji: 'kanji.write_kanji' }, carryKnown: false }) }))
+
+    // Nothing mastered in the old mode: keeping and starting from zero
+    // are the same, so the sheet asks once and prints no figures.
+    answer(0)
+    await userEvent.click(slip('kanji').querySelector('[data-mode="kanji.readings"]'))
+    await settle()
+    expect($('[data-action="mode-fresh"]')).toBeNull()
+    expect($('.lvl-sheet__figs')).toBeNull()
+    expect($('[data-action="mode-confirm"]').textContent).toContain(fr.modeSwitchGo(fr.mode_kanji_readings))
   })
 
   it('adds a mode to Today, and takes one off, on the spot', async () => {

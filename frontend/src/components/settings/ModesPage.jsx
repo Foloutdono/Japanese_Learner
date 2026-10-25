@@ -22,10 +22,11 @@ const LINE_TITLE = { kana: t => t.kanaTitle, vocab: t => t.brdLine.vocab, kanji:
 // line's services make on Today. Grammar is not here: its ladder climbs
 // through its exercises on its own.
 //
-// A new main mode confirms on a sheet first, as a level does: the
-// cards mastered in the old one are marked known in the new one, and
-// the sheet says how many (GET /api/profile/modes/preview, the same
-// arithmetic the write runs).
+// A new main mode confirms on a sheet first, as a level does, and the
+// learner chooses what it starts from: the cards mastered in the old
+// one marked known in the new one, the sheet saying how many (GET
+// /api/profile/modes/preview, the same arithmetic the write runs), or
+// nothing carried, every card new. Nothing is deleted either way.
 export function ModesPage({ session }) {
   const { t, lang } = useLang()
   const { data, failed: loadFailed } = useLearnerModes()
@@ -58,13 +59,13 @@ export function ModesPage({ session }) {
       .finally(() => setSaving(false))
   }
 
-  function confirmMain() {
+  function confirmMain(carry) {
     const { line, mode } = pending
     setPending(null)
     // What a switch would mark is measured from the mode left behind.
     invalidateCachedJson('/api/profile/modes/preview')
     playUi('click')
-    run(() => setMainMode(line, mode, session))
+    run(() => setMainMode(line, mode, session, carry))
   }
 
   function toggleExtra(line, mode) {
@@ -144,23 +145,32 @@ export function ModesPage({ session }) {
 }
 
 // ── The confirm sheet: the level's (LevelPage's LevelSheet), for a mode ──
+// Two ways in when the old mode has something to carry: keep it (the
+// gold action, and the figures say what it marks) or start from zero.
+// With nothing to carry the two are one, and the sheet offers one.
 function ModeSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
   const weeks = preview.spreadWeeks ?? 6
+  const marked = preview.markedKnown ?? 0
   const title = t.modeSwitchTitle(to)
   return (
-    <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet" initialFocus=".btn-secondary">
+    <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet" initialFocus='[data-action="mode-cancel"]'>
       <p className="lvl-sheet__body">
-        <Emphasized text={t.modeSwitchBody(from, to, weeks)} strongClassName="lvl-sheet__strong" />
+        <Emphasized text={marked > 0 ? t.modeSwitchBody(from, to, weeks) : t.modeSwitchBodyNone(to)} strongClassName="lvl-sheet__strong" />
       </p>
-      <div className="lvl-sheet__figs">
-        <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{(preview.markedKnown ?? 0).toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelMarkedKnown}</span></div>
-        <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{t.levelWeeks(weeks)}</b><span className="lvl-sheet__fig-l">{t.levelSpreadOver}</span></div>
-      </div>
-      <button type="button" className="btn-depart btn-depart--sheet" data-action="mode-confirm" onClick={onConfirm}>
-        <span className="btn-depart__jp">{t.modeSwitchGo(to)}</span>
+      {marked > 0 && (
+        <div className="lvl-sheet__figs">
+          <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{marked.toLocaleString(lang)}</b><span className="lvl-sheet__fig-l">{t.levelMarkedKnown}</span></div>
+          <div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v">{t.levelWeeks(weeks)}</b><span className="lvl-sheet__fig-l">{t.levelSpreadOver}</span></div>
+        </div>
+      )}
+      <button type="button" className="btn-depart btn-depart--sheet" data-action="mode-confirm" onClick={() => onConfirm(true)}>
+        <span className="btn-depart__jp">{marked > 0 ? t.modeSwitchKeep : t.modeSwitchGo(to)}</span>
         <span className="btn-depart__go" aria-hidden="true">▶</span>
       </button>
-      <button type="button" className="btn-secondary" onClick={onClose}>{t.cancel}</button>
+      {marked > 0 && (
+        <button type="button" className="btn-secondary" data-action="mode-fresh" onClick={() => onConfirm(false)}>{t.modeSwitchFresh}</button>
+      )}
+      <button type="button" className="btn-secondary" data-action="mode-cancel" onClick={onClose}>{t.cancel}</button>
     </Sheet>
   )
 }

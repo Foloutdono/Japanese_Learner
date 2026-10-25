@@ -572,6 +572,10 @@ class LearningPayload(BaseModel):
     # that line alone; the lines not sent keep theirs.
     mainModes: dict[str, str] | None = None
     extraModes: dict[str, list[str]] | None = None
+    # With a main mode changed: False starts the new mode from zero
+    # rather than marking what the old one mastered known in it.
+    # Unsent is True, the carry the confirm sheet leads with.
+    carryKnown: bool | None = None
 
     @field_validator("mainModes")
     @classmethod
@@ -710,15 +714,22 @@ def apply_kana_rule(user_id: str, known: str | None) -> dict:
 
 
 # ── 主 — a line's main mode changed (plan 273) ──────────────────
-# A line ridden in a new mode would otherwise start from nothing in it:
-# Today deals the new mode from the learner's own level, and the stops
-# behind it would never be dealt at all. So what the learner has
-# mastered in the old mode is marked known in the new one, the level
-# rule's way (SRSEngine.seed_known): an assumption whose first check is
-# spread over the coming six weeks, a miss starting the card fresh
-# (plan 224). Rows that exist are left alone, and nothing is deleted:
-# going back finds the old mode as it was.
-def main_switch(user_id: str, source: str, old: str, new: str, dry_run: bool) -> dict:
+# The learner chooses what the new mode starts from. By default, what
+# they have mastered in the old mode is marked known in the new one,
+# the level rule's way (SRSEngine.seed_known): an assumption whose first
+# check is spread over the coming six weeks, a miss starting the card
+# fresh (plan 224). Or nothing is carried (`carry` False) and every card
+# is new in the new mode. Either way rows that exist are left alone and
+# nothing is deleted: going back finds the old mode as it was, and Today
+# deals a chosen mode's new cards from the lowest stop that has any
+# (routes/today._new_pools), so the stops behind the level are learnt
+# too.
+def main_switch(user_id: str, source: str, old: str, new: str, dry_run: bool, carry: bool = True) -> dict:
+    out = {"line": source, "from": old, "to": new, "carried": carry, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    if not carry:
+        if not dry_run:
+            logger.info("main mode user_id=%s %s: %s -> %s from zero", user_id, source, old, new)
+        return {**out, "markedKnown": 0}
     ids = prefixed(level_rule.line_ids(source, new), user_id)
     known = srs.mastered_among(ids, old)
     if dry_run:
@@ -726,7 +737,7 @@ def main_switch(user_id: str, source: str, old: str, new: str, dry_run: bool) ->
     else:
         marked = srs.seed_known(known, new, spread_days=level_rule.SPREAD_DAYS)
         logger.info("main mode user_id=%s %s: %s -> %s marked_known=%d", user_id, source, old, new, marked)
-    return {"line": source, "from": old, "to": new, "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    return {**out, "markedKnown": marked}
 
 
 # ── Records ───────────────────────────────────────────────────
@@ -1121,7 +1132,8 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         if payload.jlptLevel is not None else None
     )
     switched = [
-        main_switch(user_id, source, modes_before.main_of(source), mode, dry_run=False)
+        main_switch(user_id, source, modes_before.main_of(source), mode, dry_run=False,
+                    carry=payload.carryKnown is not False)
         for source, mode in (payload.mainModes or {}).items()
         if mode != modes_before.main_of(source)
     ] if modes_before is not None else []
@@ -1182,7 +1194,8 @@ def preview_modes(line: str = Query(..., max_length=8), mode: str = Query(..., m
         raise HTTPException(status_code=422, detail="not a main mode of that line")
     current = learner_modes.read(user_id).main_of(line)
     if current == mode:
-        return {"line": line, "from": current, "to": mode, "markedKnown": 0, "spreadWeeks": level_rule.SPREAD_WEEKS}
+        return {"line": line, "from": current, "to": mode, "carried": True, "markedKnown": 0,
+                "spreadWeeks": level_rule.SPREAD_WEEKS}
     return main_switch(user_id, line, current, mode, dry_run=True)
 
 

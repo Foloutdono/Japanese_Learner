@@ -513,11 +513,21 @@ def _new_pools(user_id: str, level: str, budget: int):
             kana_lanes[(daily_queue.SECTION, KANA, set_name, kana_mode)] = ids
 
     line_lanes = OrderedDict()
+    stops = LEVELS[:LEVELS.index(level) + 1]
     for source in lines:
         mode = primary_mode(source, modes)
-        ids = fresh(source, level, mode)
-        if ids:
-            line_lanes[(daily_queue.SECTION, source, level, mode)] = ids
+        # A main mode the learner chose (plan 273) starts below their
+        # level too: the stops behind it are known in the default mode
+        # (the level rule), not in this one, unless the switch carried
+        # them across. So its new cards come from the lowest stop that
+        # still has any, as an added mode's do. The default mode keeps
+        # to the level, as it always has.
+        decks = stops if mode != main_modes.default_main(source) else [level]
+        for deck_key in decks:
+            ids = fresh(source, deck_key, mode)
+            if ids:
+                line_lanes[(daily_queue.SECTION, source, deck_key, mode)] = ids
+                break
 
     # 主 — the modes the learner added to a line (plan 273). Each deals
     # the cards its line's main mode has taught (graduated there), in
@@ -529,7 +539,7 @@ def _new_pools(user_id: str, level: str, budget: int):
     extra_lanes = OrderedDict()
     for source in (KANA, *lines):
         taught = modes.main_of(source)
-        decks = card_index.deck_keys(KANA) if source == KANA else LEVELS[:LEVELS.index(level) + 1]
+        decks = card_index.deck_keys(KANA) if source == KANA else stops
         for extra in modes.extras_of(source):
             for deck_key in decks:
                 ids = teaching_order.raw_ids(source, deck_key, extra)
