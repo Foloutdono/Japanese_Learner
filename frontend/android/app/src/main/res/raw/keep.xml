@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The resource shrinker (shrinkResources, app/build.gradle) drops what
+     no code or resource names through R. These are found by their name
+     at run time instead: the splash Capacitor's SplashScreen looks up as
+     "splash", and the launcher icons a plugin may fall back to. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/splash,@mipmap/ic_launcher*" />

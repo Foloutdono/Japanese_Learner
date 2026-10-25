@@ -1428,6 +1428,24 @@ class KanaPageTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertNotEqual(token_of(sentence, surface)["pos"], "noun")
 
+    def test_a_shop_in_kana(self) -> None:
+        # パンや and くつや are the shops パン屋 and 靴屋 read in kanji, where
+        # a particle, さん or the copula follows (plan 274)...
+        for sentence, surface, kanji in (
+            ("小さいパンやがあります。", "パンや", "パン屋"), ("駅の前のくつやへ行きました。", "くつや", "靴屋"),
+            ("大きい本やがあります。", "本や", "本屋"), ("パンやさんで買いました。", "パンや", "パン屋"),
+            ("あそこはパンやです。", "パンや", "パン屋"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # ...and the list's や, "and", before the next noun or a comma.
+        for sentence in ("パンやケーキを買いました。", "店には花や、かばんや、とけいがありました。",
+                         "ふゆのふくやくつなどが入っています。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "や")["pos"], "particle")
+        # No shop where noun + 屋 is no word: さくやの is 昨夜, "last night".
+        self.assertNotEqual(token_of("さくやのおさらは、まだあらっておりませんでした。", "や")["pos"], "suffix")
+
     def test_a_name_in_kana_is_no_word_it_was_cut_into(self) -> None:
         token = token_of("こんたくんがきた。", "こんた")                 # never こん + たくん, 巧む
         self.assertIsNone(token["vocab_match"])

@@ -1767,7 +1767,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # word and its particles one word (いつも, 実は, 急に, 今にも), a sound
 # word and its と one (さっと, ガシッと), and すみませんでした and
 # すいません the set phrase.
-# 21: plan 272, the last silent parts -- a verb after て that is 〜ている's
+# 21: plan 274 -- a shop written in kana is the shop (パンや パン屋, くつや
+# 靴屋, 本や 本屋), no noun and the particle や, where a particle, さん or
+# the copula follows it rather than a second noun.
+# 22: plan 272, the last silent parts -- a verb after て that is 〜ている's
 # or 〜てしまう's no card of its own, a word the pool spells otherwise
 # (気合い 気合, ごみ袋 ゴミ袋), お探し, 習わせる and 断ち切れる by the verb
 # they are made of, a surname read alone, the senses of 入り, 屋, たち and
@@ -1786,7 +1789,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # two loanwords JMdict holds as one (ツーアウト); old speech, net slang and
 # dialect glossed (ござる, それがし, 笑, けえ, がね, っぺ); short forms lit
 # (により, に限り, まだ…ていない, ことはある) and lookalikes refused.
-LOCAL_REV = 21
+LOCAL_REV = 22
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

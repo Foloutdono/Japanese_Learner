@@ -393,6 +393,43 @@ def _one_kana_nouns(morphemes: list[Morpheme]) -> None:
         m.kana = chr(ord(m.surface) + 0x60)
 
 
+# What may follow a shop's 屋 written や, and never the や of a list, which
+# a second noun follows (パンやケーキ): a case or topic particle, さん, the
+# copula.
+_SHOP_PARTICLES = frozenset({"格助詞", "係助詞"})
+
+
+@lru_cache(maxsize=1024)
+def _a_shop(noun: str) -> bool:
+    """Whether noun + 屋 is a word the deck or the dictionary holds:
+    パン屋, 靴屋, 本屋."""
+    import content.vocab_jmdict_data as jmdict_db
+
+    word = noun + "屋"
+    return jmdict_db.has_form(word) or any(kanji == word for kanji, _kana in _deck_forms())
+
+
+def _shops(morphemes: list[Morpheme], tags: list[tuple]) -> None:
+    """A shop written in kana, パンや, くつや, read as a noun and the
+    particle や, "and", where nothing follows for it to join (plan 274):
+    パンやがあります, くつやへ行きました. UniDic reads パン屋 and 本やさん
+    as a noun and the suffix 屋; so is や here, after a common noun and
+    before a particle, さん or the copula, where noun + 屋 is a word the
+    deck or the dictionary holds (_a_shop: さくやの is 昨夜, read apart).
+    Before a noun (ふくやくつ) or a comma (花や、かばんや) it stays the
+    list's."""
+    for k in range(1, len(morphemes) - 1):
+        m, before, nxt = morphemes[k], morphemes[k - 1], morphemes[k + 1]
+        if m.surface != "や" or tags[k][:2] != ("助詞", "副助詞") or tags[k - 1][:2] != ("名詞", "普通名詞") \
+                or before.counter or not (_glued(before, m) and _glued(m, nxt)) or not _a_shop(before.lemma):
+            continue
+        if not ((tags[k + 1][0] == "助詞" and tags[k + 1][1] in _SHOP_PARTICLES) or nxt.lemma == "さん"
+                or (nxt.pos == "auxiliary" and nxt.lemma in ("です", "だ"))):
+            continue
+        m.pos, m.lemma, m.reading, m.lemma_reading, m.kana, m.goshu = "suffix", "屋", "や", "や", "ヤ", "和"
+        tags[k] = ("接尾辞", "名詞的", "一般")
+
+
 def _notice(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """きがつく, "to notice", read as 飢餓, "starvation", and the verb
     (plan 272): the idiom 気がつく written in kana, き and が."""
@@ -2668,6 +2705,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _picture(morphemes)
         morphemes, tags = _notice(morphemes, tags)
         _one_kana_nouns(morphemes)
+        _shops(morphemes, tags)
         morphemes, tags = _sleep(morphemes, tags)
         morphemes, tags = _pain(morphemes, tags)
         morphemes = _went(morphemes)

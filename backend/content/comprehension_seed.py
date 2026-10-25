@@ -1,8 +1,9 @@
 """
 The seed pool: hand-written reading-comprehension exercises, one file
 per JLPT level, in both of the app's languages (plan 111; six per level
-since plan 230, ten since plan 258, thirty since plan 259, drafted and
-reviewed with scripts/comprehension_seed_report).
+since plan 230, ten since plan 258, thirty since plan 259, and sixty at
+N5 since plan 274, drafted and reviewed with
+scripts/comprehension_seed_report).
 
 ── Why this exists ───────────────────────────────────────────
 理解 (reading comprehension, routes/reading.py) is the most expensive
@@ -99,7 +100,7 @@ def _load(level: str, object_hook=None) -> list[dict]:
 def entries() -> tuple[dict, ...]:
     """Every seed exercise, every level, in file order, read from the
     files at each call. Never cache it: parsed, the seeds weigh some
-    86 KB each in dicts and strings (13 MB at 150 seeds), which a
+    86 KB each in dicts and strings (15 MB at 180 seeds), which a
     process that kept them would carry for its whole life inside the
     backend's 512 MB. Only the pool's upsert at import (rows) needs
     them whole; what a request reads of them is index()."""
@@ -125,10 +126,10 @@ def index() -> dict[str, tuple[dict, ...]]:
     and grammar, and the questions of each level's first seed besides,
     which the station's card asks the first of. The breakdowns and the
     other questions, most of a seed's weight, stay in the files: at
-    150 seeds this keeps 257 KB of the 13 MB entries() reads.
+    180 seeds this keeps 311 KB of the 15 MB entries() reads.
 
     Cut as the files are parsed, never out of by_level(): read whole,
-    the seeds grow the process by their 13 MB, and the strings kept,
+    the seeds grow the process by their 15 MB, and the strings kept,
     spread through all of it, hold that memory from going back, so the
     process stays as large as if it had kept everything."""
     out: dict[str, list[dict]] = {level: [] for level in LEVELS}
