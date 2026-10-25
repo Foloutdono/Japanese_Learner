@@ -34,7 +34,7 @@ import { runHideHooks } from './pageHide'
 
 // The closed set: name -> the keys it may carry. Kept in the same order
 // as backend/core/events.py's EVENTS, which tests/test_events.py checks
-// this against name-for-name.
+// this against name-for-name and key-for-key.
 export const EVENTS = {
   app_open: ['boot_ms', 'cold', 'platform', 'standalone'],
   boot_timeout: ['waited_ms'],
