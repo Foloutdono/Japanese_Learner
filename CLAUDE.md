@@ -306,6 +306,17 @@ runtime purpose.
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
   phone test.
+- **The store shells ask for what they use and name what they call.**
+  The Android manifest asks for the network and notifications alone: a
+  photo comes from the system photo picker (`PhotoChromeClient`), a shot
+  from the camera app, a reminder is an inexact alarm
+  (`isExactNotification: false`), and a permission a plugin brings that
+  the app does not need is taken out (`tools:node="remove"`). The release
+  is shrunk and renamed by R8 (`android/app/proguard-rules.pro`): a class
+  reached by its name needs a keep rule, and CI runs R8 on every pull
+  request. An iOS target that calls one of Apple's required-reason APIs
+  (UserDefaults, file dates) names it in its `PrivacyInfo.xcprivacy`.
+  `src/native.shells.test.js` holds all of it.
 - **An assumption is not history (plan 224).** A card the level rule
   marked known and nobody has asked about (`SRSEngine.is_assumed`) is
   the app's guess about a self-declared level. Its first answer is a
