@@ -378,7 +378,7 @@ def _rules_last(lanes_out) -> "OrderedDict[tuple, list[str]]":
 
 
 def ration(kana_lanes, line_lanes, budget: int, course=None,
-           grammar: int | None = None) -> "OrderedDict[tuple, list[str]]":
+           grammar: int | None = None, extra=None) -> "OrderedDict[tuple, list[str]]":
     """
     kana lane -> new ids (set order), line lane -> new ids -> the lanes
     of new cards the run may introduce today, at most `budget` cards.
@@ -395,7 +395,20 @@ def ration(kana_lanes, line_lanes, budget: int, course=None,
     (grammar_allowance; None for no cap). A rule past it is not dealt
     and its place goes to the next card; the rules dealt come in the
     lanes after every other (plan 222).
+
+    `extra` is the lanes of the modes the learner added to Today (plan
+    273), each the cards its line's main mode has taught. Each takes a
+    turn beside the rest of the ration, as one more lane of a round
+    robin (share_extras), so a course or a script being learned does not
+    keep them off the day.
     """
+    if extra:
+        full = ration(kana_lanes, line_lanes, budget, course, grammar)
+        main, extras = share_extras(sum(len(ids) for ids in full.values()), extra, budget)
+        out = ration(kana_lanes, line_lanes, main, course, grammar)
+        for key, ids in extras.items():
+            out.setdefault(key, []).extend(ids)
+        return _rules_last(out)
     if course is not None:
         return _rules_last(_ration_course(kana_lanes, line_lanes, budget, course, grammar))
     out: "OrderedDict[tuple, list[str]]" = OrderedDict()
@@ -412,6 +425,25 @@ def ration(kana_lanes, line_lanes, budget: int, course=None,
         for key, raw_id in interleave(line_lanes, left):
             out.setdefault(key, []).append(raw_id)
     return _rules_last(out)
+
+
+def share_extras(main: int, extra_lanes, budget: int) -> tuple[int, "OrderedDict[tuple, list[str]]"]:
+    """`budget` dealt round-robin between the rest of the ration, as one
+    lane of `main` cards, and the added modes' lanes (plan 273). Returns
+    how many the rest keeps and the added lanes' cards. What the rest
+    deals is a prefix of what it would deal alone (kana in order, the
+    lines in their round robin, the course in its order), so a smaller
+    budget keeps its first cards."""
+    lanes = OrderedDict([(None, [None] * max(0, main))])
+    lanes.update(extra_lanes)
+    out: "OrderedDict[tuple, list[str]]" = OrderedDict()
+    kept = 0
+    for key, raw_id in interleave(lanes, max(0, budget)):
+        if key is None:
+            kept += 1
+        else:
+            out.setdefault(key, []).append(raw_id)
+    return kept, out
 
 
 def _ration_course(kana_lanes, line_lanes, budget: int, course,

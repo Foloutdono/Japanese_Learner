@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **273**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **274**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -218,6 +218,19 @@ runtime purpose.
   or serves the ration does too. A tour can always be skipped for its
   card; a run the learner boards on purpose (a grammar run, a unit) is
   not capped.
+- **A line's main mode is the learner's (plan 273).** Réglages › Modes
+  principaux chooses the mode kana, words and kanji are ridden in
+  (`user_profiles.main_modes`, `study/main_modes.py`), and Today's
+  services add a line's other modes beside it (`extra_modes`). Whatever
+  deals a new card or marks one known reads `level_rule.primary_mode(source,
+  modes)` with `core/learner_modes.read(user_id)`, never the bare default;
+  an added mode deals only cards its line's main mode has taught, and
+  its first answers spend the pace (`srs.get_mode_firsts_today`). A new
+  main mode marks what the old one mastered known in it, the level
+  rule's way, unless the learner starts it from zero (`carryKnown`), and
+  deletes nothing either way; a chosen main mode deals its new cards
+  from the lowest stop that has any, the default one from the level.
+  Grammar rides its ladder.
 - **A place on the 番付 is read off one list (plan 262).** `study/banzuke.py`
   ranks each board (all time, the calendar week from Monday 00:00 UTC, a
   division) from one sum, `srs.xp_totals`, a minute old at most, a tie

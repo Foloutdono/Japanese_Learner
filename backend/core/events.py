@@ -359,7 +359,8 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "transfer_offer":  {"choice": frozenset({"go", "later"})},
     "setting_change": {
         "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",
-                              "notifications", "level", "lines", "daily_target"}),
+                              "notifications", "level", "lines", "daily_target",
+                              "main_mode", "today_mode"}),
         "value":   frozenset({"light", "dark", "auto", "fr", "en",
                               "binary", "simple", "full",
                               "standard", "relaxed", "slow", "untimed",

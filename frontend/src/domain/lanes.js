@@ -19,13 +19,14 @@ export function laneWhere(lane, t, kanaSetLabel) {
   return lane.source === 'kana' ? kanaSetLabel(t, lane.deck) : lane.deck
 }
 
-/** A line's main flashcard: the recognition card (kana → romaji, word
- *  → sense, kanji → sense, structure → sense), `<source>.flashcard.f2b`.
- *  The desk's gate can board these alone (domain/studyModes' RAPID
- *  service), leaving the recall, typing, drawing and fill modes. */
+/** A lane ridden in one of the learner's own modes: its line's main
+ *  mode, or a mode added to Today beside it (plan 273). The gate's 主
+ *  filter boards these alone. The server says which (`main`, from the
+ *  learner's choice); a lane without the flag falls back to the modes
+ *  the app always rode -- the recognition card, `<source>.flashcard.f2b`,
+ *  and grammar's ladder (plan 187e). */
 export function isMainLane(lane) {
-  // Grammar's main track is the ladder (plan 187e), every other source's
-  // the recognition flashcard.
+  if (typeof lane?.main === 'boolean') return lane.main
   return typeof lane?.mode === 'string' && (lane.mode.endsWith('.flashcard.f2b') || lane.mode === 'grammar.ladder')
 }
 

@@ -8769,8 +8769,13 @@ textarea:focus-visible {
 .tdy-line__more:hover,
 .tdy-line__more:focus-visible { color: var(--text-primary); filter: none; }
 .tdy-line__sub,
+.tdy-line__add,
 /* Under the line's name: the tick's width and the head's gap in. */
 .tdy-line__lanes { grid-column: 1 / -1; padding-bottom: var(--sp-3); padding-left: calc(var(--sp-5) + var(--sp-4)); }
+/* 主 (plan 273): the line's other modes, as chips under its own, each
+   lit while Today deals it too. */
+.tdy-line__add { display: flex; flex-direction: column; gap: var(--sp-2); }
+.tdy-line__add-name { font-size: var(--fs-caption); color: var(--text-secondary); }
 .tdy-line__sub {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -24592,6 +24597,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .pace__desc { font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
 .pace__timer { display: block; pointer-events: none; }
 .pace__timer .timer__fill { transition: none; }
+/* 主 — a line's main mode (plan 273, ModesPage): the reading pace's
+   cards, each the mode's name over what it asks, and under them the
+   line's other modes as chips, lit when Today deals them too. */
+.mmode__desc { text-align: left; }
+.mmodes__also { align-items: center; }
+.mmodes__also-name { flex: 1 1 100%; font-size: var(--fs-caption); color: var(--text-secondary); }
 .rating-bar.rating-bar--specimen { display: block; pointer-events: none; }
 .rating-bar--specimen .rating-bar__buttons,
 .rating-bar--specimen .rating-bar__misses,
