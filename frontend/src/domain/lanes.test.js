@@ -59,4 +59,10 @@ describe('isMainLane', () => {
     expect(isMainLane({})).toBe(false)
     expect(isMainLane(null)).toBe(false)
   })
+  // Plan 273: the learner chooses a line's main mode and adds others
+  // beside it, and the server says which lanes ride in them.
+  it('is what the server says when it says it', () => {
+    expect(isMainLane({ mode: 'kanji.write_kanji', main: true })).toBe(true)
+    expect(isMainLane({ mode: 'kanji.flashcard.f2b', main: false })).toBe(false)
+  })
 })

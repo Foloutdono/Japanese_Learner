@@ -12,6 +12,7 @@ import { forgetPracticeStops } from './practiceStop'
 import { forgetSummary } from './profileSummary'
 import { forgetStats } from './stats'
 import { forgetToday } from './today'
+import { forgetModes } from './learnerModes'
 
 // ── 改札を出る — what the leaving learner takes with them ─────────
 // Signing out does NOT reload the page. Welcome, the sign-in and the
@@ -52,6 +53,7 @@ export function forgetAccount() {
   forgetSummary()
   forgetCredits()
   forgetToday()
+  forgetModes()
   forgetBasics()
   forgetStats()
   forgetJourney()

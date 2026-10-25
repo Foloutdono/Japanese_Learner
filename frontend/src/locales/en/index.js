@@ -152,6 +152,10 @@ const nav = {
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Modes: ${name}`,
   gateLineNone:      'No service today',
+  // 主 (plan 273): the modes of a line, added to Today or taken off.
+  gateLineAdd:       'Also in Today',
+  gateModeAdd:       mode => `Add “${mode}” to Today`,
+  gateModeRemove:    mode => `Take “${mode}” off Today`,
   gateOpensAt:       at => `Opens at ${at}`,
   gateOpensIn:       when => `Opens ${when}`,
   todayDayLabel:     'Your day',
@@ -909,6 +913,15 @@ const stats = {
   levelUpGo:          l => `Move up to ${l}`,
   levelDownGo:        l => `Move down to ${l}`,
   levelStay:          l => `Stay at ${l}`,
+  // 主 — the mode each line is ridden in (plan 273), Settings › Main
+  // modes and its confirm sheet.
+  settingsModes:      'Main modes',
+  settingsModesValue: 'One per line',
+  settingsModesHint:  'Today teaches each line in its main mode. Add more of its modes beside it, here or from Today.',
+  settingsModesAlso:  'Also in Today',
+  modeSwitchTitle:    mode => `Learn in “${mode}”?`,
+  modeSwitchBody:     (from, to, weeks) => `The cards you have mastered in **${from}** are marked known in **${to}**, with a first check spread over the next ${weeks} weeks. The others start fresh in the new mode. **Nothing is deleted.**`,
+  modeSwitchGo:       mode => `Switch to “${mode}”`,
   fitDown: (to, passed, answered) => `${to} · ${passed} of ${answered} checks known`,
   fitUp: (level, known, met) => `${level} · ${known} of ${met} new words already known`,
   fitDownGo: to => `Board at ${to}`,

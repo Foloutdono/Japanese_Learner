@@ -17,10 +17,10 @@ from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits, events, review_plan
+from core import credits, events, learner_modes, review_plan
 from core.lines import clean_lines
 from srs.xp import level_progress, next_milestone
-from study import banzuke, level_fit, level_rule
+from study import banzuke, level_fit, level_rule, main_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
 
@@ -173,6 +173,12 @@ def _init_db() -> None:
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
+                # 主 — the mode each line is ridden in, {line: mode},
+                # and the modes added to Today beside it, {line: [mode]}
+                # (plan 273, study/main_modes.py). NULL is never chosen:
+                # every line in its default, nothing added.
+                ("main_modes", "JSONB"),
+                ("extra_modes", "JSONB"),
                 # 署名 — the first name the card prints (plan 247), in
                 # any script: not the username, which stays the public
                 # handle. NULL = never asked (an account boarded before
@@ -560,6 +566,22 @@ class LearningPayload(BaseModel):
     # › Affichage; sent on a change and again at boot when the account
     # has not heard it.
     uiLang: str | None = None
+    # 主 (plan 273): the mode a line is ridden in, {line: mode}, from
+    # Réglages › Modes principaux, and the modes added to Today beside
+    # it, {line: [mode]}, from Today's services. Each line sent replaces
+    # that line alone; the lines not sent keep theirs.
+    mainModes: dict[str, str] | None = None
+    extraModes: dict[str, list[str]] | None = None
+
+    @field_validator("mainModes")
+    @classmethod
+    def valid_main_modes(cls, v):
+        return main_modes.clean_main(v)
+
+    @field_validator("extraModes")
+    @classmethod
+    def valid_extra_modes(cls, v):
+        return main_modes.clean_extra(v)
 
     @field_validator("uiLang")
     @classmethod
@@ -633,7 +655,7 @@ def level_rule_preview(user_id: str, current: str | None, target: str) -> dict:
         return {"direction": "same"}
     if direction == "up":
         marked = 0
-        for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target), learner_modes.read(user_id)):
             full = prefixed(ids, user_id)
             marked += len(full) - srs.count_rows(full, mode)
         return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
@@ -647,7 +669,7 @@ def _level_down(user_id: str, current: str, target: str, dry_run: bool) -> dict:
     card in its line's primary mode, the unit seed_known wrote them in."""
     returned = sum(
         srs.forget_assumed(prefixed(ids, user_id), mode, dry_run=dry_run)
-        for _source, mode, ids in level_rule.known_batches(level_rule.stops_from(target))
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_from(target), learner_modes.read(user_id))
     )
     set_aside = sum(
         srs.count_cards_with_history(prefixed(ids, user_id))
@@ -670,7 +692,7 @@ def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
     if direction == "down":
         return _level_down(user_id, current, target, dry_run=False)
     marked = 0
-    for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+    for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target), learner_modes.read(user_id)):
         marked += srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS)
     logger.info("level rule user_id=%s %s -> %s marked_known=%d", user_id, current, target, marked)
     return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
@@ -681,10 +703,30 @@ def apply_kana_rule(user_id: str, known: str | None) -> dict:
     reads known -- one row per sign in the kana line's primary mode,
     spread like the level rule's. Idempotent for the same reason; a
     replay that names MORE scripts adds only the new ones."""
-    mode, ids = level_rule.kana_batch(known)
+    mode, ids = level_rule.kana_batch(known, learner_modes.read(user_id))
     marked = srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS) if ids else 0
     logger.info("kana rule user_id=%s known=%s marked_known=%d", user_id, known, marked)
     return {"kanaKnown": known, "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+
+
+# ── 主 — a line's main mode changed (plan 273) ──────────────────
+# A line ridden in a new mode would otherwise start from nothing in it:
+# Today deals the new mode from the learner's own level, and the stops
+# behind it would never be dealt at all. So what the learner has
+# mastered in the old mode is marked known in the new one, the level
+# rule's way (SRSEngine.seed_known): an assumption whose first check is
+# spread over the coming six weeks, a miss starting the card fresh
+# (plan 224). Rows that exist are left alone, and nothing is deleted:
+# going back finds the old mode as it was.
+def main_switch(user_id: str, source: str, old: str, new: str, dry_run: bool) -> dict:
+    ids = prefixed(level_rule.line_ids(source, new), user_id)
+    known = srs.mastered_among(ids, old)
+    if dry_run:
+        marked = len(known) - srs.count_rows(known, new)
+    else:
+        marked = srs.seed_known(known, new, spread_days=level_rule.SPREAD_DAYS)
+        logger.info("main mode user_id=%s %s: %s -> %s marked_known=%d", user_id, source, old, new, marked)
+    return {"line": source, "from": old, "to": new, "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
 
 
 # ── Records ───────────────────────────────────────────────────
@@ -1011,6 +1053,8 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     # The level the rule moves FROM, read before the write: a move up
     # seeds the stops crossed, a move down seeds nothing.
     previous_level = _profile_row(user_id)[1] if payload.jlptLevel is not None else None
+    # The modes a main-mode change moves FROM, read before the write too.
+    modes_before = learner_modes.read(user_id) if payload.mainModes else None
     sets, args = [], []
     if payload.jlptLevel is not None:
         sets.append("jlpt_level = %s")
@@ -1042,6 +1086,13 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.uiLang is not None:
         sets.append("ui_lang = %s")
         args.append(payload.uiLang)
+    # Merged line by line: the lines sent replace theirs, the rest stay.
+    if payload.mainModes is not None:
+        sets.append("main_modes = COALESCE(main_modes, '{}'::jsonb) || %s::jsonb")
+        args.append(json.dumps(payload.mainModes))
+    if payload.extraModes is not None:
+        sets.append("extra_modes = COALESCE(extra_modes, '{}'::jsonb) || %s::jsonb")
+        args.append(json.dumps(payload.extraModes))
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -1069,6 +1120,15 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         apply_level_rule(user_id, previous_level, payload.jlptLevel)
         if payload.jlptLevel is not None else None
     )
+    switched = [
+        main_switch(user_id, source, modes_before.main_of(source), mode, dry_run=False)
+        for source, mode in (payload.mainModes or {}).items()
+        if mode != modes_before.main_of(source)
+    ] if modes_before is not None else []
+    modes_after = (
+        learner_modes.read(user_id).payload()
+        if payload.mainModes is not None or payload.extraModes is not None else None
+    )
     return {
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
@@ -1081,6 +1141,10 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "boardHidden": payload.boardHidden,
         "uiLang": payload.uiLang,
         "levelRule": level_rule_result,
+        # 主 (plan 273): the learner's modes as they now stand, and what
+        # each main-mode change marked known.
+        "modes": modes_after,
+        "mainSwitch": switched,
     }
 
 
@@ -1095,6 +1159,33 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
     return level_rule_preview(user_id, current, jlptLevel)
 
 
+@router.get("/api/profile/modes")
+def get_modes(user_id: str = Depends(get_user_id)):
+    """主 (plan 273): the learner's modes, every line answered, and what
+    each line offers -- as the main mode, and beside it in Today."""
+    return {
+        **learner_modes.read(user_id).payload(),
+        "choices": {
+            "main": {s: list(m) for s, m in main_modes.MAIN_CHOICES.items()},
+            "extra": {s: list(m) for s, m in main_modes.EXTRA_CHOICES.items()},
+        },
+    }
+
+
+@router.get("/api/profile/modes/preview")
+def preview_modes(line: str = Query(..., max_length=8), mode: str = Query(..., max_length=40),
+                  user_id: str = Depends(get_user_id)):
+    """What riding `line` in `mode` would do, for the confirm sheet: how
+    many cards mastered in the line's current mode are marked known in
+    the new one, and over how many weeks. Nothing is written."""
+    if mode not in main_modes.MAIN_CHOICES.get(line, ()):
+        raise HTTPException(status_code=422, detail="not a main mode of that line")
+    current = learner_modes.read(user_id).main_of(line)
+    if current == mode:
+        return {"line": line, "from": current, "to": mode, "markedKnown": 0, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    return main_switch(user_id, line, current, mode, dry_run=True)
+
+
 @router.get("/api/profile/level-fit")
 def get_level_fit(user_id: str = Depends(get_user_id)):
     """Whether the stored level fits what the learner answers (plan 224,
@@ -1102,7 +1193,7 @@ def get_level_fit(user_id: str = Depends(get_user_id)):
     the level mostly fail, the next one when the level's new words are
     known the first time they are asked, or nothing -- with the figures
     it read. A suggestion only: nothing is written."""
-    return level_fit.level_fit(srs, user_id, _profile_row(user_id)[1])
+    return level_fit.level_fit(srs, user_id, _profile_row(user_id)[1], learner_modes.read(user_id))
 
 
 # The 番付 is routes/banzuke.py since plan 262.

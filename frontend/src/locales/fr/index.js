@@ -152,6 +152,10 @@ const nav = {
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Les modes : ${name}`,
   gateLineNone:      'Aucun service aujourd’hui',
+  // 主 (plan 273) : les modes d'une ligne, ajoutés à Aujourd'hui ou retirés.
+  gateLineAdd:       'Aussi dans Aujourd’hui',
+  gateModeAdd:       mode => `Ajouter « ${mode} » à Aujourd’hui`,
+  gateModeRemove:    mode => `Retirer « ${mode} » d’Aujourd’hui`,
   gateOpensAt:       at => `Ouvre à ${at}`,
   gateOpensIn:       when => `Ouvre ${when}`,
   todayDayLabel:     'Ta journée',
@@ -872,6 +876,15 @@ const stats = {
   levelUpGo:          l => `Monter à ${l}`,
   levelDownGo:        l => `Descendre à ${l}`,
   levelStay:          l => `Rester à ${l}`,
+  // 主 — le mode de chaque ligne (plan 273), Réglages › Modes
+  // principaux et sa feuille de confirmation.
+  settingsModes:      'Modes principaux',
+  settingsModesValue: 'Un par ligne',
+  settingsModesHint:  'Aujourd’hui t’apprend chaque ligne dans son mode principal. Ajoute d’autres modes à côté, ici ou depuis Aujourd’hui.',
+  settingsModesAlso:  'Aussi dans Aujourd’hui',
+  modeSwitchTitle:    mode => `Apprendre en « ${mode} » ?`,
+  modeSwitchBody:     (from, to, weeks) => `Les cartes que tu maîtrises en **${from}** sont marquées connues en **${to}**, avec un premier contrôle réparti sur les ${weeks} prochaines semaines. Les autres démarrent à neuf dans le nouveau mode. **Rien n'est effacé.**`,
+  modeSwitchGo:       mode => `Passer à « ${mode} »`,
   fitDown: (to, passed, answered) => `${to} · ${passed} contrôle${passed > 1 ? 's' : ''} réussi${passed > 1 ? 's' : ''} sur ${answered}`,
   fitUp: (level, known, met) => `${level} · ${known} mots sur ${met} déjà connus`,
   fitDownGo: to => `Embarquer à ${to}`,

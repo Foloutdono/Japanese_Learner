@@ -283,6 +283,11 @@ CREATE TABLE user_profiles (
     -- Early access (plan 269): when Today asked how the learner finds the
     -- app, once 400 XP were earned. routes/feedback.py.
     feedback_asked_at TIMESTAMPTZ,
+    -- 主 (plan 273): the mode each line is ridden in, {line: mode}, and
+    -- the modes added to Today beside it, {line: [mode]}. NULL = never
+    -- chosen (study/main_modes.py).
+    main_modes JSONB,
+    extra_modes JSONB,
     -- 署名 (plan 247): the first name the card prints, in any script, up
     -- to 24 characters -- not the username, which stays the public
     -- handle (番付, the library). NULL = never asked (an account boarded
