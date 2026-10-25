@@ -1589,7 +1589,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # word and its particles one word (いつも, 実は, 急に, 今にも), a sound
 # word and its と one (さっと, ガシッと), and すみませんでした and
 # すいません the set phrase.
-LOCAL_REV = 20
+# 21: plan 274 -- a shop written in kana is the shop (パンや パン屋, くつや
+# 靴屋, 本や 本屋), no noun and the particle や, where a particle, さん or
+# the copula follows it rather than a second noun.
+LOCAL_REV = 21
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

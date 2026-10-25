@@ -5868,7 +5868,7 @@
    "〜まえに",
    "〜ずつ"
   ],
-  "text": "わたしのうちのちかくに、小さいパンの店があります。日よう日のあさ、母とパンを買いに行きました。店の前には人がたくさんいました。店に入るまえに、十分ぐらいまちました。店の中はあたたかくて、いいにおいでした。わたしはメロンパンとチーズパンを二つずつ買いました。母は大きいしょくパンを買いました。ぜんぶで千二百円でした。うちへかえって、父と三人であさごはんを食べました。メロンパンはあまくて、とてもおいしかったです。父は「この店のパンはいちばんおいしいね。」と言いました。来週の日よう日も行きたいです。",
+  "text": "わたしのうちのちかくに、小さいパンやがあります。日よう日のあさ、母とパンを買いに行きました。店の前には人がたくさんいました。店に入るまえに、十分ぐらいまちました。店の中はあたたかくて、いいにおいでした。わたしはメロンパンとチーズパンを二つずつ買いました。母は大きいしょくパンを買いました。ぜんぶで千二百円でした。うちへかえって、父と三人であさごはんを食べました。メロンパンはあまくて、とてもおいしかったです。父は「この店のパンはいちばんおいしいね。」と言いました。来週の日よう日も行きたいです。",
   "questions": [
    {
     "type": "comprehension",
@@ -5939,21 +5939,21 @@
    {
     "type": "vocabulary",
     "question": {
-     "en": "What does 「におい」 mean in this text?",
-     "fr": "Que signifie 「におい」 dans ce texte ?"
+     "en": "What is a 「パンや」?",
+     "fr": "Qu'est-ce qu'une 「パンや」 ?"
     },
     "options": {
      "en": [
-      "A taste",
-      "A sound",
-      "A colour",
-      "A smell"
+      "A café",
+      "A cake shop",
+      "A supermarket",
+      "A bakery"
      ],
      "fr": [
-      "Un goût",
-      "Un bruit",
-      "Une couleur",
-      "Une odeur"
+      "Un café",
+      "Une pâtisserie",
+      "Un supermarché",
+      "Une boulangerie"
      ]
     },
     "correct": 3
@@ -6049,7 +6049,7 @@
   ],
   "breakdown": [
    {
-    "jp": "わたしのうちのちかくに、小さいパンの店があります。",
+    "jp": "わたしのうちのちかくに、小さいパンやがあります。",
     "translation": {
      "en": "There is a small bakery near my house.",
      "fr": "Il y a une petite boulangerie près de chez moi."
@@ -6109,24 +6109,10 @@
       }
      },
      {
-      "surface": "パン",
+      "surface": "パンや",
       "meaning": {
-       "en": "bread",
-       "fr": "pain"
-      }
-     },
-     {
-      "surface": "の",
-      "meaning": {
-       "en": "of (what it sells)",
-       "fr": "de (ce qu'on y vend)"
-      }
-     },
-     {
-      "surface": "店",
-      "meaning": {
-       "en": "shop",
-       "fr": "magasin"
+       "en": "bakery",
+       "fr": "boulangerie"
       }
      },
      {
@@ -20098,7 +20084,7 @@
    "これ／それ／あれ／どれ",
    "あまり〜ない"
   ],
-  "text": "来月、学校のりょこうで、たくさんあるきます。だから、新しいくつがほしいです。日よう日、母と駅の前のくつの店へ行きました。その店には白いくつがあって、とてもかるかったです。でも、八千円でした。わたしのお金は六千円だけでした。それから、となりのデパートへ行きました。そこのあおいくつは五千円でしたが、わたしの足には小さかったです。店の人がくろいくつを出して、「これは二十四センチですよ。」と言いました。五千五百円で、足にちょうどよかったです。でも、わたしはくろがあまりすきじゃありません。母は「くろもいいですよ。」と言いました。わたしはそのくろいくつを買いました。",
+  "text": "来月、学校のりょこうで、たくさんあるきます。だから、新しいくつがほしいです。日よう日に、母と駅の前のくつやへ行きました。その店には白いくつがあって、とてもかるかったです。でも、八千円でした。わたしのお金は六千円だけでした。それから、となりのデパートへ行きました。そこのあおいくつは五千円でしたが、わたしの足には小さかったです。店の人がくろいくつを出して、「これは二十四センチですよ。」と言いました。五千五百円で、足にちょうどよかったです。でも、わたしはくろがあまりすきじゃありません。母は「くろもいいですよ。」と言いました。わたしはそのくろいくつを買いました。",
   "questions": [
    {
     "type": "comprehension",
@@ -20389,21 +20375,28 @@
     ]
    },
    {
-    "jp": "日よう日、母と駅の前のくつの店へ行きました。",
+    "jp": "日よう日に、母と駅の前のくつやへ行きました。",
     "translation": {
      "en": "On Sunday, I went with my mother to the shoe shop in front of the station.",
      "fr": "Dimanche, je suis allé avec ma mère au magasin de chaussures devant la gare."
     },
     "note": {
-     "en": "「の」 chains the nouns: the shop of shoes, in front of the station.",
-     "fr": "「の」 enchaîne les noms : le magasin de chaussures, devant la gare."
+     "en": "The word 「くつや」 is 「くつ」 plus 「や」, a shop: a shoe shop.",
+     "fr": "Le mot 「くつや」 est 「くつ」 plus 「や」, la boutique : un magasin de chaussures."
     },
     "words": [
      {
       "surface": "日よう日",
       "meaning": {
-       "en": "on Sunday",
+       "en": "Sunday",
        "fr": "dimanche"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on (a day)",
+       "fr": "marque le jour"
       }
      },
      {
@@ -20449,24 +20442,10 @@
       }
      },
      {
-      "surface": "くつ",
+      "surface": "くつや",
       "meaning": {
-       "en": "shoes",
-       "fr": "chaussures"
-      }
-     },
-     {
-      "surface": "の",
-      "meaning": {
-       "en": "of (what it sells)",
-       "fr": "de (ce qu'on y vend)"
-      }
-     },
-     {
-      "surface": "店",
-      "meaning": {
-       "en": "shop",
-       "fr": "magasin"
+       "en": "shoe shop",
+       "fr": "magasin de chaussures"
       }
      },
      {
