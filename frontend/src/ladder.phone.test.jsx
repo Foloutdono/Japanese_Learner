@@ -36,7 +36,7 @@ vi.mock('./lib/audio', async (o) => ({
   speakLine: vi.fn(async () => true), stopSpeaking: vi.fn(),
 }))
 const postReview = vi.fn(async () => ({}))
-vi.mock('./lib/reviews', () => ({ postReview: (...a) => postReview(...a), staleCards: vi.fn(async () => []) }))
+vi.mock('./lib/reviews', () => ({ postReview: (...a) => postReview(...a), staleCards: vi.fn(async () => []), reviewsSettled: vi.fn(async () => {}) }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: TodayRun } = await import('./screens/TodayRun')
