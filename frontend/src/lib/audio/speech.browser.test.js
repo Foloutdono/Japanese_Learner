@@ -14,7 +14,10 @@ const mocks = vi.hoisted(() => ({
   getBuffer: vi.fn(() => Promise.resolve('decoded')),
   playBuffer: vi.fn(),
   fadeOutAndStop: vi.fn(),
-  whenUnlocked: vi.fn(fn => fn()),
+  // Never unlocked: speech.js primes the device with a silent speak() on
+  // the unlocking gesture, which would land on each test's stub as it
+  // loads its own instance and read as the device having been asked.
+  whenUnlocked: vi.fn(),
 }))
 
 vi.mock('./context', () => ({ getBuffer: mocks.getBuffer, whenUnlocked: mocks.whenUnlocked }))
@@ -53,10 +56,13 @@ function stubSynth({ voices = [], onSpeak } = {}) {
 
 /** speech.js keeps a sticky "the device cannot speak" flag, so every
  *  test gets its own module instance rather than the previous test's
- *  verdict. */
+ *  verdict. A query string, not vi.resetModules(): in the browser lane
+ *  an import after a reset is the instance before it (probed
+ *  2026-10-25, a === b), so the flag rode on in run order. A new URL is
+ *  a new module, and the vi.mock()s above still reach its imports. */
+let fresh = 0
 async function loadSpeech() {
-  vi.resetModules()
-  return import('./speech')
+  return import(/* @vite-ignore */ `./speech.js?test=${++fresh}`)
 }
 
 const realSynth = Object.getOwnPropertyDescriptor(window, 'speechSynthesis')
@@ -111,10 +117,8 @@ describe('spokenForm', () => {
 // A grammar, reading or translation card says its sentence once it is
 // revealed. The device first, as for a word; the server's fallback is
 // the grammar catalogue's reader, since /api/tts declines a sentence.
-// Ahead of speakJapanese's tests: its silent device sets speech.js's
-// sticky flag, which the browser lane carries into the tests after it.
 // The silence watchdog is one path for both (startUtterance), pinned
-// there.
+// in speakJapanese's tests.
 
 const lineFor = text => `/api/grammar/audio?text=${text}&who=reader&v=${VOICE_REV}`
 
