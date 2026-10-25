@@ -200,6 +200,7 @@ const nav = {
   ofrCardFareMax:     'Pratique · sans crédit',
   // ── 定期券 — la carte, face et dos (plan 173) ──
   cardFree:           'Gratuit',
+  cardPaid:           'Pass',
   cardFareFree:       'Pratique · verrouillée',
   cardTurn:           'Retourner la carte',
   cardLevelTo:        (a, b) => `Niveau ${a} → ${b}`,

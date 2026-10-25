@@ -12,6 +12,13 @@ import '../index.css'
 // station" as the lesson's one stamp. Skip is the same stamp.
 
 const apiJson = vi.fn()
+// The paywall is switched off (domain/paywall.js's HAS_PAYWALL) while the
+// plans are reworked; this test covers the offer's doors, which stay.
+vi.mock('../domain/paywall', async o => ({
+  ...(await o()),
+  offerable: credits => !(credits?.unlimited || credits?.plan === 'pass'),
+}))
+
 vi.mock('../lib/api', () => ({
   api: p => p,
   apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),

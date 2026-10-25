@@ -9,7 +9,10 @@ import { PASS_DECKS, PASS_CARDS } from './credits'
 //                 gates (the pass tags on Practice and the analyzer,
 //                 the "Go unlimited" controls that would charge) stays
 //                 out of the tree exactly as before.
-//   HAS_PAYWALL — the offer may be SHOWN, and interest recorded. True.
+//   HAS_PAYWALL — the offer may be SHOWN, and interest recorded. False
+//                 while the plans are being reworked: no door opens an
+//                 offer, and the screens, plan table and tier styling
+//                 wait in the tree for the new system.
 //
 // The reason the two are not one flag: the codebase's standing rule is
 // that a control leading nowhere is worse than none (domain/credits.js,
@@ -22,7 +25,7 @@ import { PASS_DECKS, PASS_CARDS } from './credits'
 //
 // When the store lands: flip HAS_STORE, and the offer's foot buys the
 // pick instead of recording an interest in it. Nothing else here moves.
-export const HAS_PAYWALL = true
+export const HAS_PAYWALL = false
 
 // Where an offer can be opened from. The backend's note beside
 // offer_view (backend/core/events.py) must name exactly these — every
