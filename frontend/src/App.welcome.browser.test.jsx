@@ -76,7 +76,11 @@ describe('App signed out', () => {
   // state, so Back used to leave Tsuji. It returns to Welcome now, and
   // the ‹ leaves no entry behind it.
   it('returns to Welcome on the browser\'s Back, and ‹ leaves no entry behind', async () => {
-    window.history.replaceState(null, '', '/')
+    // history.length counts the entries ahead of the page too, and the
+    // lane's files share one history: a test that went back, here or in
+    // a file before, leaves one there for the sign-in's push to replace
+    // rather than add to. A push drops it.
+    window.history.pushState(null, '', '/')
     const start = window.history.length
     const screen = await render(<App />)
     await settle()
