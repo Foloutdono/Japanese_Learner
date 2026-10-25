@@ -38,9 +38,10 @@ describe('the Android shell', () => {
     expect(read('android/app/src/main/res/xml/file_paths.xml')).not.toMatch(/<external-path\b/)
   })
 
-  it('shrinks and renames the release code', () => {
+  it('shrinks and renames the release code and drops its unused resources', () => {
     const release = read('android/app/build.gradle').match(/buildTypes \{\s*release \{[\s\S]*?\n {8}\}/)[0]
     expect(release).toContain('minifyEnabled true')
+    expect(release).toContain('shrinkResources true')
   })
 })
 
