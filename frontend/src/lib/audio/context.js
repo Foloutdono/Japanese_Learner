@@ -150,6 +150,15 @@ async function fetchAndDecode(path) {
   return context.decodeAudioData(await response.arrayBuffer())
 }
 
+// How many decoded clips are kept: every kana (127) and the words and
+// lines heard last. It used to be all of them, for the whole session,
+// and a server clip is a new entry per word: a few hundred cards on a
+// phone that speaks through the server held tens of megabytes of
+// decoded audio nobody would replay, on the devices with the least of
+// it. One past the limit drops the clip least recently asked for, which
+// is fetched again (from the worker's cache) if it ever is.
+const KEEP = 200
+
 export function getBuffer(path) {
   // No context means nothing to decode into. Answer empty *without*
   // caching: caching now would pin `null` to this path for the rest
@@ -158,17 +167,22 @@ export function getBuffer(path) {
   if (!getAudioContext()) return Promise.resolve(null)
 
   let pending = bufferCache.get(path)
-  if (!pending) {
+  if (pending) {
+    // To the back of the line: asked for again, it is kept the longest.
+    bufferCache.delete(path)
+  } else {
     pending = fetchAndDecode(path).catch(err => {
       // A failed decode must not be cached: the previous version
       // stored the rejected result as a permanent `null`, so one
       // dropped request meant that sound stayed silent for the rest
-      // of the session. Evicting lets the next attempt retry.
-      bufferCache.delete(path)
+      // of the session. Evicting lets the next attempt retry -- this
+      // attempt only, never a newer one already in its place.
+      if (bufferCache.get(path) === pending) bufferCache.delete(path)
       throw err
     })
-    bufferCache.set(path, pending)
   }
+  bufferCache.set(path, pending)
+  if (bufferCache.size > KEEP) bufferCache.delete(bufferCache.keys().next().value)
   return pending
 }
 

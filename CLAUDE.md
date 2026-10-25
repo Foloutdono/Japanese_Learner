@@ -360,7 +360,10 @@ runtime purpose.
   that waits on `resume()` can wait for good (the lake's did): schedule
   it on the audio clock instead. On iOS the session is `playback`, the
   owner's choice: sound plays through the silent switch, and pauses
-  another app's music while it does.
+  another app's music while it does. A word or line is said through
+  `lib/audio/speech.js`, whose turn is what lets a stop reach a clip
+  still on its way and keeps the app's own cancels from reading as a
+  device that failed.
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So

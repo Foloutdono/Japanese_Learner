@@ -145,3 +145,31 @@ describe('a context put to sleep', () => {
     expect(ctx.resume).not.toHaveBeenCalled()
   })
 })
+
+describe('the decoded clips', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  // Every word heard through the server is a clip of its own, and a
+  // session's worth used to be kept to the end of it.
+  it('keeps the ones asked for last and lets the oldest go', async () => {
+    const fetched = []
+    vi.stubGlobal('fetch', vi.fn(async url => {
+      fetched.push(url)
+      return { ok: true, arrayBuffer: async () => new ArrayBuffer(8) }
+    }))
+    press('click')
+    audio.getAudioContext().decodeAudioData = vi.fn(async () => ({}))
+    const times = url => fetched.filter(u => u === url).length
+
+    for (let i = 0; i < 200; i++) await audio.getBuffer(`/clip/${i}`)
+    // Asked for again, the oldest goes to the back of the line...
+    await audio.getBuffer('/clip/0')
+    expect(times('/clip/0')).toBe(1)
+    // ...so the one past the limit lets the next oldest go instead.
+    await audio.getBuffer('/clip/200')
+    await audio.getBuffer('/clip/0')
+    expect(times('/clip/0')).toBe(1)
+    await audio.getBuffer('/clip/1')
+    expect(times('/clip/1')).toBe(2)
+  })
+})

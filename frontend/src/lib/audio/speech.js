@@ -110,14 +110,23 @@ function japaneseVoice() {
   return ja.find(v => v.localService) ?? ja[0] ?? null
 }
 
-// Sticky. Once the device has failed to speak once, this session stops
-// asking it: the alternative is paying the watchdog's wait on every
-// single card, and a device that refused once refuses for a reason
-// that does not change (no gesture credit, no working voice, a WebView
-// that only pretends to have the API). The server clip is cached in
-// the buffer map after its first fetch, so the fallback is instant
-// from the second play of a word onwards anyway.
+// Sticky. Once the device has failed to speak twice in a row, this
+// session stops asking it: the alternative is paying the watchdog's
+// wait on every single card, and a device that keeps refusing refuses
+// for a reason that does not change (no gesture credit, no working
+// voice, a WebView that only pretends to have the API). The server
+// clip is cached in the buffer map after its first fetch, so the
+// fallback is instant from the second play of a word onwards anyway.
 let deviceSpeechBroken = false
+
+// Twice, not once: the first utterance of a session can take longer
+// than SILENCE_MS while the engine wakes (an Android TTS engine being
+// bound, iOS loading its voice), and giving up on that one cost the
+// session every sentence the server cannot say -- the reading and
+// translation runs' and the analyser's, which only the device speaks.
+// A device that starts resets the count.
+const STRIKES = 2
+let strikes = 0
 
 // How long to wait for `start` before deciding nothing is coming. Long
 // enough not to trip a slow device that is genuinely about to speak,
@@ -134,6 +143,16 @@ const SILENCE_MS = 400
  * this synchronously inside the listener, which is exactly the credit
  * iOS is looking for.
  */
+// The prime's silent utterance, while the device still holds it. The
+// tap that primes can be the tap that asks for the page's first word (a
+// speaker as the first thing touched), and cancelling the prime to say
+// it would be cancel() then speak() in one tick, which Safari answers
+// with silence (startUtterance): the word waits behind it instead.
+// Forgotten once anything has been heard or cancelled, so a prime that
+// never reports its end cannot keep every later word from replacing
+// the one before.
+let warming = null
+
 function primeDeviceSpeech() {
   const synth = synthOf()
   if (!synth) return
@@ -143,6 +162,8 @@ function primeDeviceSpeech() {
     synth.getVoices?.()
     const warmup = new SpeechSynthesisUtterance(' ')
     warmup.volume = 0
+    warmup.onend = warmup.onerror = () => { if (warming === warmup) warming = null }
+    warming = warmup
     synth.speak(warmup)
   } catch { /* nothing to prime */ }
 }
@@ -152,6 +173,28 @@ if (typeof window !== 'undefined') whenUnlocked(primeDeviceSpeech)
 // The last server clip, so stopSpeaking() can stop one mid-word the
 // way it stops an utterance.
 let playing = null
+
+// Every word, sentence or line asked for, and every stop, is a new
+// turn. A server clip arrives when the network and the engine have
+// made it -- seconds, for a line the engine says for the first time --
+// and one whose turn has passed is dropped rather than played over
+// whatever came after it. The tour stops its talk when it moves on or
+// closes, and that stop used to reach only a clip already playing: a
+// line still on its way was heard on the next step, or after the tour.
+let turn = 0
+// Calls off the watchdog of the utterance on its way (startUtterance).
+let callOff = null
+
+function nextTurn() {
+  turn += 1
+  callOff?.()
+  callOff = null
+  if (playing) {
+    fadeOutAndStop(playing, 0.05)
+    playing = null
+  }
+  return turn
+}
 
 // A word's clip, from /api/tts.
 function wordClipPath(text) {
@@ -165,13 +208,13 @@ function sentenceClipPath(text) {
   return `/api/grammar/audio?text=${encodeURIComponent(text)}&who=reader`
 }
 
-function playServerClip(text, path = wordClipPath(text)) {
+function playServerClip(text, path = wordClipPath(text), mine = turn) {
   // Same-origin on the web, the Vercel origin in the native shell --
   // api() is the one place that knows (lib/origin.js, ADR 0008).
   const url = api(voicedUrl(path))
   getBuffer(url)
     .then(buffer => {
-      if (buffer) playing = playBuffer(buffer, 'tts', text)
+      if (buffer && mine === turn) playing = playBuffer(buffer, 'tts', text)
     })
     .catch(() => {
       // A word the server has no clip for is silence, not an error:
@@ -180,29 +223,37 @@ function playServerClip(text, path = wordClipPath(text)) {
     })
 }
 
-function speakOnDevice(text, fallbackPath) {
+function speakOnDevice(text, fallbackPath, mine) {
   const synth = synthOf()
   if (!synth) return false
   const voice = japaneseVoice()
   if (!voice) return false
 
   try {
-    return startUtterance(synth, voice, text, fallbackPath)
+    return startUtterance(synth, voice, text, fallbackPath, mine)
   } catch {
     // A speech API that throws while being set up is one to stop
     // asking: a WebView can expose `speechSynthesis` with nothing
     // usable behind it, and a click handler is no place for that to
-    // surface as an unhandled error.
+    // surface as an unhandled error. A watchdog it got as far as
+    // starting is called off: the caller plays the clip itself.
+    callOff?.()
+    callOff = null
     deviceSpeechBroken = true
     return false
   }
 }
 
-function startUtterance(synth, voice, text, fallbackPath) {
+function startUtterance(synth, voice, text, fallbackPath, mine) {
   // Cancel only when there is something to cancel. cancel() followed
   // by speak() in the same tick is a documented way to get silence out
   // of Safari, and this used to do it before every single utterance.
-  if (synth.speaking || synth.pending) synth.cancel()
+  // Never the prime's silent utterance (`warming`): the word queues
+  // behind it.
+  if ((synth.speaking || synth.pending) && !warming) synth.cancel()
+  // A synthesiser left paused queues the utterance and never starts
+  // it, which the watchdog would count against a device that works.
+  if (synth.paused) synth.resume()
 
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.voice = voice
@@ -214,20 +265,33 @@ function startUtterance(synth, voice, text, fallbackPath) {
   utterance.volume = getVolume('master') * getVolume('tts') * trimFor('tts', text)
 
   let settled = false
+  const settle = () => { settled = true; clearTimeout(timer) }
   const fallBack = () => {
     if (settled) return
-    settled = true
-    deviceSpeechBroken = true
+    settle()
+    if (++strikes >= STRIKES) deviceSpeechBroken = true
+    warming = null
     try { synth.cancel() } catch { /* nothing to stop */ }
-    playServerClip(text, fallbackPath)
+    playServerClip(text, fallbackPath, mine)
   }
   // Neither `start` nor `error` inside the window: the browser took the
   // utterance and did nothing with it, which is how iOS says no. Take
   // the refusal as an answer rather than waiting for a word that is
   // never coming.
   const timer = setTimeout(fallBack, SILENCE_MS)
-  utterance.onstart = () => { settled = true; clearTimeout(timer) }
-  utterance.onerror = () => { clearTimeout(timer); fallBack() }
+  // An utterance cancelled by us -- for the next word, or a stop -- is
+  // not a device that failed. It used to be read as one: a stop, or a
+  // second word asked for before the first had started, set the
+  // session to the server for good and played the old word's clip over
+  // the new one (and its watchdog, still running, cancelled the new
+  // one). nextTurn() calls this one off; Chrome also reports the
+  // cancel itself as an error, `canceled` or `interrupted`.
+  callOff = settle
+  utterance.onstart = () => { settle(); strikes = 0; warming = null }
+  utterance.onerror = e => {
+    if (e?.error === 'canceled' || e?.error === 'interrupted') settle()
+    else fallBack()
+  }
 
   // Synchronously, in the caller's tick: deferring this by even a
   // setTimeout(0) spends the user-gesture credit iOS granted.
@@ -241,8 +305,9 @@ export function speakJapanese(text) {
   // 足跡 (plan 218): a reading spoken, counted on the screen it was
   // spoken on -- never the text.
   countUse('speech', 'play')
-  if (!isLoneKana(spoken) && !deviceSpeechBroken && speakOnDevice(spoken)) return
-  playServerClip(spoken)
+  const mine = nextTurn()
+  if (!isLoneKana(spoken) && !deviceSpeechBroken && speakOnDevice(spoken, undefined, mine)) return
+  playServerClip(spoken, undefined, mine)
 }
 
 // ── A sentence (on a grammar, reading or translation card) ──────
@@ -255,16 +320,16 @@ export function speakJapanese(text) {
 export function speakSentence(text) {
   const spoken = typeof text === 'string' ? text.trim() : ''
   if (!spoken || isMuted()) return
-  if (!deviceSpeechBroken && speakOnDevice(spoken, sentenceClipPath(spoken))) return
-  playServerClip(spoken, sentenceClipPath(spoken))
+  const mine = nextTurn()
+  if (!deviceSpeechBroken && speakOnDevice(spoken, sentenceClipPath(spoken), mine)) return
+  playServerClip(spoken, sentenceClipPath(spoken), mine)
 }
 
 export function stopSpeaking() {
+  // The turn first: it calls off the watchdog the cancel would trip.
+  nextTurn()
+  warming = null
   if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
-  if (playing) {
-    fadeOutAndStop(playing, 0.05)
-    playing = null
-  }
 }
 
 // ── A tour's lines (plan 187d) ───────────────────────────────────
@@ -273,20 +338,20 @@ export function stopSpeaking() {
 // learner, backend/study/grammar_audio.py), which the device cannot
 // give, and the examples are the catalogue's, which the server holds.
 // `who` is reader, them or me. Resolves once the line has been said
-// (or at once, silent, when it cannot be: no context yet, muted, no
-// engine on the server) so a scene can be played line after line.
+// (or silent, when it cannot be: no context yet, muted, no engine on
+// the server, a stop while it was on its way) so a scene can be played
+// line after line.
 export function speakLine(text, who = 'reader') {
   if (!text || isMuted()) return Promise.resolve(false)
   countUse('speech', 'play')
+  const mine = nextTurn()
   if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
-  if (playing) {
-    fadeOutAndStop(playing, 0.05)
-    playing = null
-  }
   const url = api(voicedUrl(`/api/grammar/audio?text=${encodeURIComponent(text)}&who=${who}`))
   return getBuffer(url)
     .then(buffer => {
-      if (!buffer) return false
+      // A turn gone by (a stop, another line) while this one was on its
+      // way resolves as a line that could not be said.
+      if (!buffer || mine !== turn) return false
       const handle = playBuffer(buffer, 'tts', text)
       if (!handle) return false
       playing = handle
