@@ -344,6 +344,12 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
             return None
         spelled = any(c in _NUMERAL_CHARS for c in num_surface) or kana_digits
         if not (2 <= value <= 10 or value in (14, 20, 24)):
+            # 17日 じゅうしちにち, 19日 じゅうくにち: a date's seven and nine
+            # (plan 272)
+            if value % 10 == 7:
+                n_read = _swap_tail(n_read, "なな", "しち")
+            elif value % 10 == 9:
+                n_read = _swap_tail(n_read, "きゅう", "く")
             return n_read, "にち"
         if not spelled:
             return n_read, "か"
@@ -581,6 +587,10 @@ def deck_word_reading(char: str) -> list[str]:
     return _WORD_READINGS.get(char, [])
 
 
+# The weekdays a date writes in brackets, 10月15日（木）.
+_WEEKDAY_READINGS = {"月": "げつ", "火": "か", "水": "すい", "木": "もく", "金": "きん", "土": "ど", "日": "にち"}
+
+
 def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list[str]:
     """The readings of `tokens`, each put right where its context says.
 
@@ -623,6 +633,22 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "いっ"
             if out[i + 1][:1] in "はひふへほ":
                 out[i + 1] = "ぱぴぷぺぽ"["はひふへほ".index(out[i + 1][0])] + out[i + 1][1:]
+            continue
+
+        # （木）, a date's weekday: もく, Thursday -- never the tree (plan 272).
+        if s in _WEEKDAY_READINGS and prev(i) in ("（", "(") and nxt(i) in ("）", ")"):
+            out[i] = _WEEKDAY_READINGS[s]
+            continue
+
+        # 4球目, the fourth pitch: きゅう, after a number (plan 272).
+        if s == "球" and r == "たま" and i > 0 and _numeral_value(prev(i)) is not None:
+            out[i] = "きゅう"
+            continue
+
+        # 何しやがる, 何しに来た: なに before する (plan 272).
+        if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1]["lemma"] in ("為る", "する") \
+                and nxt(i)[:1] in ("し", "す"):
+            out[i] = "なに"
             continue
 
         # 再来月, the month after next: げつ, as in 来月 (plan 272).

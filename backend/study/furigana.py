@@ -519,6 +519,8 @@ def _number_spans(morphemes) -> dict[int, tuple[int, str]]:
             j += 2
         before = morphemes[i - 1].surface[-1:] if i else ""
         after = morphemes[j].surface[:1] if j < n else ""
+        if before == "ー" and len(morphemes[i - 1].surface) > 1:
+            before = ""                    # フォロワー1000人: a long vowel, no dash (plan 272)
         if not any(c and (c in _NOT_A_QUANTITY or (c.isascii() and c.isalpha()))
                    for c in (before, after)):
             spans[i] = (j, "".join(m.surface for m in morphemes[i:j]))

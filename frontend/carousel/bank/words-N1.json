@@ -1833,7 +1833,7 @@
 {"t":"聴覚","r":"ちょうかく","ro":"choukaku","en":["the sense of hearing"],"fr":["ouïe"],"fu":[["聴","ちょう"],["覚","かく"]],"hy":["長覚","聴画","場覚"]},
 {"t":"売り出す","r":"うりだす","ro":"uridasu","en":["to put on sale, to market, to become popular"],"fr":["mettre en vente, commercialiser, devenir populaire"],"fu":[["売","う"],["り",""],["出","だ"],["す",""]],"hy":["右り出す","売り打す","雨り出す"]},
 {"t":"藻掻く","r":"もがく","ro":"mogaku","en":["to struggle, to writhe, to wriggle","to make desperate efforts"],"fr":["se débattre, se tortiller, gigoter","faire des efforts désespérés"],"fu":[["藻","も"],["掻","が"],["く",""]],"hy":["模掻く","畝掻く","茂掻く"]},
-{"t":"共","r":"とも","ro":"tomo","en":["together with, same, both, all, neither (with a negative), including"],"fr":["avec, ensemble, même, les deux, tous, ni l'un ni l'autre (nég.), y compris"],"fu":[["共","とも"]],"ex":["N3.49","N3.50"]},
+{"t":"共","r":"とも","ro":"tomo","en":["together with, same, both, all, neither (with a negative), including"],"fr":["avec, ensemble, même, les deux, tous, ni l'un ni l'autre (nég.), y compris"],"fu":[["共","とも"]],"ex":["N2.42","N3.49"]},
 {"t":"設定","r":"せってい","ro":"settei","en":["setting (up), establishment","settings, configuration","setting (of a story)"],"fr":["mise en place, établissement","paramètres, configuration","cadre (d'un récit)"],"fu":[["設","せっ"],["定","てい"]],"hy":["設体","設弟","設庭"],"ex":["N1.82"]},
 {"t":"愚痴","r":"ぐち","ro":"guchi","en":["idle complaint, grumble"],"fr":["plainte futile, jérémiades, ronchonnements"],"fu":[["愚","ぐ"],["痴","ち"]],"hy":["工痴","愚地","供痴"],"ex":["N1.169"]},
 {"t":"主演","r":"しゅえん","ro":"shuen","en":["starring, playing the leading part"],"fr":["jouer le rôle principal"],"fu":[["主","しゅ"],["演","えん"]],"hy":["手演","主円","取演"]},

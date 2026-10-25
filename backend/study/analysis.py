@@ -692,6 +692,10 @@ _AFFIX_SENSES = {
     "たち": {"en": "(suffix) plural, … and the others: 作業員たち, the workers",
            "fr": "(suffixe) pluriel, … et les autres : 作業員たち, les ouvriers"},
     "ごと_whole": {"en": "(suffix) … and all, whole: 皮ごと, skin and all", "fr": "(suffixe) avec, en entier : 皮ごと, avec la peau"},
+    "超": {"en": "(after a number) over, more than: 500円超, over 500 yen",
+          "fr": "(après un nombre) plus de : 500円超, plus de 500 yens"},
+    "先": {"en": "(suffix) where or to whom one …: 連絡先, contact details; 勤務先, workplace; 行き先, destination",
+          "fr": "(suffixe) le lieu ou la personne où l'on … : 連絡先, coordonnées ; 勤務先, lieu de travail ; 行き先, destination"},
 }
 _RANGED = frozenset({"円", "ドル", "ユーロ", "度", "歳", "才", "点", "パーセント", "％", "%"})
 
@@ -708,6 +712,16 @@ def _affix_sense(morphemes: list, i: int, numbers: dict) -> dict | None:
         return None
     prev = morphemes[i - 1]
     counted = _after_a_number(morphemes, i, numbers) or prev.surface == "何"
+    if m.surface == "超" and _glued_to(prev, m) and (counted or prev.counter or prev.surface in _RANGED
+                                                  or prev.surface in ("円", "人", "件", "台", "年", "倍", "万", "億")):
+        return _AFFIX_SENSES["超"]
+    if m.surface == "先" and m.reading == "さき" and prev.pos == "noun" and _glued_to(prev, m) and not counted \
+            and numeral_value(prev.surface) is None and not prev.proper and not prev.counter \
+            and not _after_a_number(morphemes, i - 1, numbers) \
+            and prev.surface not in ("この", "その", "目", "指", "鼻", "口", "旅", "庭", "春", "一歩"):
+        # (連絡先, 勤務先, 取引先: the place or person a deed goes to,
+        # never the tip or the way ahead, plan 272)
+        return _AFFIX_SENSES["先"]
     if m.surface in _SUFFIX_GLOSSES and m.pos == "suffix" and prev.pos in ("noun", "other") \
             and (m.surface != "生" or m.reading == "せい"):
         return _SUFFIX_GLOSSES[m.surface]
@@ -1201,6 +1215,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     # The もん that closes a sentence on its reason is no "thing", the 草
     # of 草www no "grass" (plan 272).
     deck_hits = [None if particle_glosses.gives_a_reason(morphemes, j) or particle_glosses.net_laughter(morphemes, j)
+                 or particle_glosses.busy_tokoro(morphemes, j)
                  else hit for j, hit in enumerate(deck_hits)]
     # Nor is the verb a lit point is made of a word: 洗いなさい's なさい is
     # 〜なさい, 団長である's ある the copula (plan 272). Nor 〜あまり's
@@ -1493,6 +1508,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         span = deck is None and morphemes[i].surface in _SPAN_COUNTERS and _after_a_number(morphemes, i, numbers)
         pool = None if deck or (i in ruled and i not in own_forms) or named or span or affix \
             or particle_glosses.gives_a_reason(morphemes, i) or particle_glosses.net_laughter(morphemes, i) \
+            or particle_glosses.busy_tokoro(morphemes, i) \
             else (said[1] if said else resolve_pool_morpheme(morphemes, i))
         token = _token_dict(morphemes[i], deck, pool, named)
         if pool and not deck:
@@ -1618,7 +1634,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # they are made of, a surname read alone, the senses of 入り, 屋, たち and
 # ごと, こんな／そんな before a noun, words cut or joined (お知らせ, 嫌がる,
 # しろ 白, どうして); and the detector's 〜て（理由）, 〜上で, そんなに,
-# 〜たらどうですか, 〜ぶりに and the と of what is known or vowed.
+# 〜たらどうですか, 〜ぶりに and the と of what is known or vowed. And what
+# a fourth review found: a date's weekday （木）, 17日 じゅうしちにち, 4球目,
+# set words and Kansai speech one word (それとも, そのもの, 父上, 通行止め,
+# あかん, ありえん, やん), the formal より "from", にて, 〜先, 〜超, お忙しい
+# ところ; short forms (に伴い, もんじゃ, はずがなかろう, ご注意ください) lit,
+# and lookalikes refused (割に合わない, 今か今か, ので's で).
 LOCAL_REV = 21
 
 

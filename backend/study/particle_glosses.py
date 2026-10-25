@@ -166,6 +166,28 @@ _GLOSSES = {
            "fr": "(ancien) …n'est-ce pas !, …tu sais : なあ d'autrefois"},
     "まじで": {"en": "(casual) seriously, really",
              "fr": "(familier) sérieusement, vraiment"},
+    "より_from": {"en": "(formal) from (= から): 口座より引き落とされます, it is debited from the account",
+                  "fr": "(formel) de, à partir de (= から) : 口座より引き落とされます, c'est prélevé sur le compte"},
+    "にて": {"en": "(formal) at, in, by (= で): 体育館にて, in the gym",
+            "fr": "(formel) à, dans, par (= で) : 体育館にて, au gymnase"},
+    "ながら_though": {"en": "(after a quality) though…, while: 勝手ながら, though it is selfish of us",
+                     "fr": "(après une qualité) bien que…, tout en : 勝手ながら, bien que ce soit cavalier de notre part"},
+    "と_as": {"en": "(before する, formal) as, to be: 休業とさせていただきます, we will close; …ものとする, shall …",
+             "fr": "(devant する, formel) comme, en tant que : 休業とさせていただきます, nous fermerons ; …ものとする, doit …"},
+    "やがる": {"en": "(rude) has the nerve to…, dares to: 何しやがる！, what do you think you're doing!",
+             "fr": "(grossier) ose…, a le culot de : 何しやがる！, qu'est-ce qui te prend !"},
+    "で_almost": {"en": "(after もう少し) almost, all but: もう少しで勝てた, I almost won",
+                 "fr": "(après もう少し) presque : もう少しで勝てた, j'ai failli gagner"},
+    "ところ_while": {"en": "(set phrase) at a time when: お忙しいところ, though you are busy",
+                    "fr": "(formule) au moment où : お忙しいところ, alors que vous êtes occupé"},
+    "や_da": {"en": "(Kansai) is (= だ): なんでやねん, why on earth?",
+             "fr": "(Kansai) est (= だ) : なんでやねん, mais enfin pourquoi ?"},
+    "ねん": {"en": "(Kansai) explains or insists (= のだ, んだ)", "fr": "(Kansai) explique ou insiste (= のだ, んだ)"},
+    "やん": {"en": "(Kansai) isn't it!, you know (= じゃない)", "fr": "(Kansai) n'est-ce pas !, tu sais (= じゃない)"},
+    "ん_no": {"en": "(spoken) の said short: explains or asks (なんぼするん？, how much is it?)",
+             "fr": "(oral) の abrégé : explique ou demande (なんぼするん？, combien ça coûte ?)"},
+    "が_even_if": {"en": "(after the volitional) no matter whether…: 雨が降ろうが, rain or not",
+                   "fr": "(après la forme volitive) que … ou non : 雨が降ろうが, qu'il pleuve ou non"},
     "てか": {"en": "(casual) I mean, or rather (= というか)",
             "fr": "(familier) enfin, ou plutôt (= というか)"},
     "で_then": {"en": "(spoken, opening a sentence) so, and then (= それで)",
@@ -192,6 +214,27 @@ def _a_laugh(surface: str) -> bool:
 _TO_MANNER = frozenset({"意外", "案外", "平然", "漠然", "毅然", "呆然", "唖然", "悠然", "颯爽", "歴然", "断然",
                           "公然", "決然", "整然", "雑然", "騒然", "愕然", "泰然", "超然", "敢然", "漫然", "黙然",
                           "茫然", "憤然", "釈然", "厳然", "粛然", "猛然", "忽然"})
+
+
+def _from_not_than(morphemes, i: int) -> bool:
+    from study.card_lookup import _from_not_than as from_not_than
+
+    return from_not_than(morphemes, i)
+
+
+# The states お忙しいところ, お疲れのところ say a request is made in.
+_BUSY = frozenset({"忙しい", "お忙しい", "疲れ", "お疲れ", "急ぎ", "お急ぎ", "休み", "お休み", "取り込み", "お取り込み"})
+
+
+def busy_tokoro(morphemes, i: int) -> bool:
+    """Whether morphemes[i] is the ところ of お忙しいところ, "at a time
+    when you are busy" (plan 272), no "place"."""
+    if morphemes[i].surface not in ("ところ", "所") or i == 0:
+        return False
+    k = i - 1
+    if morphemes[k].surface == "の" and k > 0:
+        k -= 1
+    return morphemes[k].lemma in _BUSY or morphemes[k].surface in _BUSY
 
 
 def _a_sound_word(surface: str, pos: str = "adverb") -> bool:
@@ -263,12 +306,44 @@ def gloss(morphemes, i: int) -> dict | None:
     m = morphemes[i]
     base = _base(m.surface)
     key = None
-    if m.pos == "auxiliary" and m.lemma == "ず" and m.surface in ("ん", "ぬ", "ず"):
+    if m.pos == "auxiliary" and m.lemma == "ず" and m.surface == "ん" and i > 0 \
+            and morphemes[i - 1].pos in ("verb", "auxiliary") and morphemes[i - 1].cform.startswith(("終止形", "連体形")):
+        key = "ん_no"                       # なんぼするん？ (plan 272)
+    elif m.pos == "auxiliary" and m.lemma == "ず" and m.surface in ("ん", "ぬ", "ず"):
         key = m.surface
     elif m.pos == "adverb" and m.surface in ("マジで", "まじで"):
         key = "まじで"
     elif m.pos == "conjunction" and m.surface in ("てか", "ってか"):
         key = "てか"
+    elif m.surface == "やん" and m.pos == "particle":
+        key = "やん"                        # (Kansai, plan 272)
+    elif busy_tokoro(morphemes, i):
+        key = "ところ_while"
+    elif m.pos == "particle" and m.surface == "より" and _from_not_than(morphemes, i):
+        key = "より_from"
+    elif m.pos == "particle" and m.surface == "にて":
+        key = "にて"
+    elif m.pos == "particle" and m.surface == "ながら" and i > 0 and morphemes[i - 1].pos in ("noun", "other", "adjective") \
+            and not morphemes[i - 1].cform.startswith("連用形"):
+        key = "ながら_though"               # 誠に勝手ながら (plan 272)
+    elif m.pos == "particle" and m.surface == "と" and i > 0 and i + 1 < len(morphemes) \
+            and morphemes[i - 1].pos == "noun" and morphemes[i + 1].lemma in ("為る", "する"):
+        key = "と_as"                       # 休業とさせていただきます, ものとする (plan 272)
+    elif m.lemma == "やがる" and m.pos == "auxiliary":
+        key = "やがる"
+    elif m.pos == "particle" and m.surface == "で" and i >= 2 and morphemes[i - 1].surface in ("少し", "ちょっと") \
+            and morphemes[i - 2].surface in ("もう", "あと"):
+        key = "で_almost"                   # もう少しで勝てた (plan 272)
+    elif m.pos == "auxiliary" and m.surface == "や" and m.lemma == "や" and (
+            i + 1 >= len(morphemes) or morphemes[i + 1].pos == "symbol"
+            or morphemes[i + 1].surface in ("ねん", "ん", "で", "な", "なあ", "ねえ", "から", "けど", "し", "のに", "ろ", "わ")):
+        key = "や_da"                       # なんでやねん, 下手やねん -- never 何やかや (plan 272)
+    elif m.pos == "particle" and m.surface == "ねん":
+        key = "ねん"
+    elif m.pos == "particle" and m.surface == "が" and i > 0 and morphemes[i - 1].cform.startswith("意志推量形") \
+            and morphemes[i - 1].pos in ("verb", "auxiliary") and morphemes[i - 1].lemma not in ("だ", "です", "ます") \
+            and i + 1 < len(morphemes) and not (morphemes[i + 1].pos == "symbol" and morphemes[i + 1].surface in "。！？!?"):
+        key = "が_even_if"                  # 雨が降ろうが槍が降ろうが, never 分かるだろうが！ (plan 272)
     elif m.pos == "conjunction" and m.surface == "で" and _opens(morphemes, i):
         key = "で_then"                     # で、その日の仕事はどうする？ (plan 272)
     elif _a_laugh(m.surface) or (m.pos == "interjection" and m.surface in _LAUGH):

@@ -1944,3 +1944,69 @@ class LastGapsPointTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertNotIn("と", found_in(sentence))
                 self.assertIn("〜と", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FourthReviewPointTests(unittest.TestCase):
+    """Points a fourth review of 160 fresh lines found unlit or lit
+    wrongly (plan 272), each with the sentence it must leave alone."""
+
+    def test_short_forms(self) -> None:
+        for sentence, pattern in (("社会の発展に伴い、生活も変わった。", "〜に伴って"),
+                                  ("昔はよく川で水を汲んだもんじゃ。", "〜ものだ"),
+                                  ("あいつが負けるはずがなかろう。", "〜はずがない"),
+                                  ("もっと優しくなれるよ。", "〜くなる／〜になる"),
+                                  ("足元にご注意ください。", "お〜ください"),
+                                  ("ご連絡ください。", "お〜ください"),
+                                  ("お気をつけください。", "お〜ください"),
+                                  ("バーン！という音がした。", "〜という"),
+                                  ("マナーモードに設定のうえ、ご利用ください。", "〜上で"),
+                                  ("お乗り遅れのないようご注意ください。", "〜ように"),
+                                  ("残念なことに、彼は来なかった。", "〜ことに"),
+                                  ("行くか行かないか決めて。", "〜か〜か"),
+                                  ("急に泣き出した。", "〜出す"),
+                                  ("象は鼻が長い。", "〜は〜が")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
+
+    def test_what_they_must_leave_alone(self) -> None:
+        for sentence, pattern in (("汲んだもんじゃない。", "〜ものだ"),
+                                  ("お茶ください。", "お〜ください"),
+                                  ("ご飯ください。", "お〜ください"),
+                                  ("お気をつけて。", "お〜ください"),
+                                  ("全力を尽くしたことに意味がある。", "〜ことに"),
+                                  ("雨が降ろうが槍が降ろうが行く。", "〜が（逆接）"),
+                                  ("雨が降っていました。", "〜があります／います"),
+                                  ("なんぼするん？", "ない形 〜ない"),
+                                  ("入るか、入るか、迷った。", "〜か〜か"),
+                                  ("この店は持ちが悪く、すぐ壊れる。", "〜く／〜に（副詞形）"),
+                                  ("本規約は、当社が提供するすべてのサービスの利用条件を定めるものです。", "〜は〜が"),
+                                  ("聞いてへん。", "〜て、〜て")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(pattern, found_in(sentence))
+        # 割に合わない is the idiom; 今か今か one question twice; ので's で
+        # closes nothing; 朝早く、 and 危なく、 are adverbs.
+        self.assertNotIn("〜わりに", found_in("正直にやっていると割に合わない。"))
+        self.assertNotIn("〜か〜か", found_in("私は彼が来るのを今か今かと待っている。"))
+        for sentence in ("ただ、その費用を病院が払うのか、患者が払うのかは、まだ決まっていない。",
+                         "いったい賛成なのか、反対なのか、曖昧な意見だ。", "可算名詞か不可算名詞かどちらかを従えている。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜か〜か", found_in(sentence))
+        for sentence in ("この湖は、深さが百メートルもあるそうだ。", "日曜日は天気が悪くなるそうです。",
+                         "彼は経験が少ないわりに、仕事が早い。", "今夜は冷えるので、雪が降るかもしれません。",
+                         "この子は今歯が生えかけているところです。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜は〜が", found_in(sentence))
+        for sentence in ("仕事は楽で、暇がたくさんあります。", "ジェーンは奥さんが作ったおせち料理を食べました。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜は〜が", found_in(sentence))
+        for sentence in ("あしたは朝早く、空港まで迎えに行く。", "危なく、大事な約束を忘れるところだった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜く／〜に（副詞形）", found_in(sentence))
+        self.assertNotIn("〜く／〜に（副詞形）", found_in("家賃が安く、駅にも近い。"))
+        self.assertIn("〜ことに", found_in("彼は親切で優しく、なおよいことに正直である。"))
+        self.assertIn("お〜ください", found_in("火曜日においでください。"))
+        # ...where each still reads its own: 猫がいます, 行かん, 早く起きた.
+        self.assertIn("〜があります／います", found_in("猫がいます。"))
+        self.assertIn("ない形 〜ない", found_in("そんなこと知らん。"))
+        self.assertIn("〜く／〜に（副詞形）", found_in("早く起きた。"))

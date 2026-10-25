@@ -2062,3 +2062,105 @@ class LastGapsWordTests(unittest.TestCase):
         self.assertEqual(card_of("じゃあ、赤をはいてもいいですか。", "はい"), "vocab_N3_履く_はく")
         # テレビをつけない is つける.
         self.assertNotEqual(card_of("テレビをつけない。", "つけ"), "vocab_N1_吐く_つく")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FourthReviewWordTests(unittest.TestCase):
+    """What a fourth review of 160 fresh lines -- notices, chats, Kansai
+    speech, sport, news, stories -- found read wrong, cut or silent (plan
+    272), each with the sentence it must leave alone."""
+
+    def test_a_dates_weekday_and_figures(self) -> None:
+        token = token_of("10月15日（木）は休みです。", "木")
+        self.assertEqual((token["reading"], card_of("10月15日（木）は休みです。", "木")),
+                         ("もく", "vocab_N5_木曜日_もくようび"))
+        self.assertEqual(card_of("木の下で休む。", "木"), "vocab_N5_木_き")
+        for sentence, surface, reading in (("17日に会おう。", "17", "じゅうしち"),
+                                           ("19日です。", "19", "じゅうく"),
+                                           ("27日は雨です。", "27", "にじゅうしち"),
+                                           ("11日です。", "11", "じゅういち"),
+                                           ("4球目を打った。", "4球目", "よんきゅうめ"),
+                                           ("何しやがる！", "何", "なに"),
+                                           ("フォロワー1000人を超えた。", "1000", "せん")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+
+    def test_words_the_tokenizer_cuts(self) -> None:
+        for sentence, surface, kanji in (("父上、お元気ですか。", "父上", "父上"),
+                                         ("機会そのものがない。", "そのもの", "その物"),
+                                         ("こっちにおいで。", "おいで", "お出で"),
+                                         ("はっぱが落ちた。", "はっぱ", "葉っぱ"),
+                                         ("通行止めです。", "通行止め", "通行止め"),
+                                         ("はよ帰りたい。", "はよ", "早よ"),
+                                         ("そんなのありえん。", "ありえん", "あり得ない"),
+                                         ("ありえへん！", "ありえへん", "あり得ない")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        self.assertEqual(token_of("いいプレーだった。", "プレー")["vocab_match"]["entry"]["kana"], "プレイ")
+        self.assertEqual(token_of("それとも行かない？", "それとも")["pos"], "conjunction")
+        self.assertEqual(card_of("上下線とも運転を見合わせています。", "とも"), "vocab_N1_共_とも")
+        self.assertEqual(token_of("ｗｗｗ草生える", "草")["reading"], "くさ")
+        # A verb before て is the verb (外出して, 勇気づけて); おいでください
+        # keeps お〜ください's お; a name's long vowel and a clipped word are
+        # no other loanword (グレース, ホラゲー's ゲー).
+        self.assertEqual(card_of("外出してもさしつかえありません。", "外出"), "vocab_N3_外出_がいしゅつ")
+        self.assertIsNone(next((t for t in analysis.analyze_local("勇気づけてやれば話すでしょう。")["tokens"]
+                                if t["surface"] == "勇気づけ"), None))
+        self.assertEqual(token_of("火曜日においでください。", "お")["pos"], "prefix")
+        self.assertEqual(gloss_of("グレースは電話のところへ行く。", "グレース"), "a person's name")
+        self.assertIsNone(token_of("今日はホラゲーやってくんですけど", "ゲー").get("vocab_match"))
+        self.assertEqual(token_of("正直にやっていると割に合わない。", "割に合わ")["vocab_match"]["entry"]["kanji"], "割に合う")
+        # 両親とも話した is と and も, "with my parents too".
+        self.assertIn("と", {t["surface"] for t in analysis.analyze_local("両親とも話した。")["tokens"]})
+
+    def test_kansai_speech(self) -> None:
+        for sentence, surface in (("それはあかん。", "あかん"), ("あかんで。", "あかん"), ("まじつらたん。", "つらたん")):
+            with self.subTest(sentence=sentence):
+                self.assertIsNotNone(token_of(sentence, surface).get("vocab_match"))
+        self.assertTrue(gloss_of("美味しいやん。", "やん").startswith("(Kansai) isn't it"))
+        self.assertTrue(gloss_of("なんでやねん。", "や").startswith("(Kansai) is"))
+        self.assertTrue(gloss_of("なんでやねん。", "ねん").startswith("(Kansai) explains"))
+        self.assertEqual(gloss_of("祖父はいつも何やかやぶつぶつ不平を言っていた。", "や"), "")
+        self.assertEqual(token_of("聞いてへん。", "へん")["pos"], "auxiliary")
+        # A door that will not open takes が; the rain that stopped is 止む.
+        self.assertEqual(card_of("ドアがあかん。", "あか"), "vocab_N5_開く_あく")
+        self.assertEqual(card_of("雨がやんだ。", "やん"), "vocab_N4_止む_やむ")
+
+    def test_names_and_notices(self) -> None:
+        self.assertEqual(gloss_of("高尾行きの電車です。", "高尾"), "place name")
+        self.assertTrue(gloss_of("料金は口座より引き落とされます。", "より").startswith("(formal) from"))
+        self.assertTrue(gloss_of("本日より、営業時間が変わります。", "より").startswith("(formal) from"))
+        self.assertEqual(gloss_of("東京より大阪のほうが好きだ。", "より"), "")
+        self.assertTrue(gloss_of("田中より折り返しお電話をさしあげます。", "より").startswith("(formal) from"))
+        self.assertTrue(gloss_of("心よりおわび申し上げます。", "より").startswith("(formal) from"))
+        # ...and "than" after a year or a verb, whatever follows.
+        for sentence in ("ボーナスは去年より増えるだろう。", "運転するより作るほうがおもしろい。", "機会が前より増えた。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(gloss_of(sentence, "より"), "")
+        self.assertTrue(gloss_of("体育館にて行います。", "にて").startswith("(formal) at"))
+        self.assertTrue(gloss_of("誠に勝手ながら、休業とさせていただきます。", "ながら").startswith("(after a quality)"))
+        self.assertTrue(gloss_of("誠に勝手ながら、休業とさせていただきます。", "と").startswith("(before する"))
+        self.assertTrue(gloss_of("何しやがる！", "やがる").startswith("(rude)"))
+        self.assertTrue(gloss_of("もう少しで勝てた。", "で").startswith("(after もう少し)"))
+        self.assertTrue(gloss_of("お忙しいところすみません。", "ところ").startswith("(set phrase)"))
+        self.assertIsNone(card_of("お忙しいところすみません。", "ところ"))
+        self.assertEqual(card_of("静かなところに住みたい。", "ところ"), "vocab_N5_所_ところ")
+
+    def test_affixes(self) -> None:
+        self.assertTrue(gloss_of("500円超の商品は送料無料です。", "超").startswith("(after a number) over"))
+        self.assertTrue(gloss_of("連絡先を教えてください。", "先").startswith("(suffix) where or to whom"))
+        self.assertEqual(card_of("この先は危ない。", "先"), "vocab_N5_先_さき")
+        # 十年先, 一ヶ月先: ahead in time, the card's.
+        self.assertEqual(card_of("十年先は見通せない。", "先"), "vocab_N5_先_さき")
+        self.assertEqual(card_of("１ヶ月先まで満席です。", "先"), "vocab_N5_先_さき")
+
+    def test_a_kana_verb_by_who_or_what(self) -> None:
+        self.assertEqual(card_of("昔、おばあさんがすんでいました。", "すん"), "vocab_N5_住む_すむ")
+        self.assertEqual(card_of("油をひいて焼きます。", "ひい"), "vocab_N5_引く_ひく")
+        self.assertNotEqual(card_of("ピアノをひいて歌う。", "ひい"), "vocab_N5_引く_ひく")
+
+    def test_spoken_endings(self) -> None:
+        self.assertTrue(gloss_of("なんぼするん？", "ん").startswith("(spoken) の said short"))
+        self.assertTrue(gloss_of("行かん。", "ん").startswith("not"))
+        self.assertTrue(gloss_of("何と言われようが、私は行く。", "が").startswith("(after the volitional)"))
+        self.assertFalse(gloss_of("見りゃ分かるだろうが！", "が").startswith("(after the volitional)"))

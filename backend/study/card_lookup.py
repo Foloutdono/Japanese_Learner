@@ -1215,8 +1215,27 @@ def resolve_home(morphemes, i: int) -> dict | None:
 _TE_AUXILIARIES = morphology.TE_AUXILIARIES
 
 
+_WEEKDAYS = {"月": ("月曜日", "げつようび"), "火": ("火曜日", "かようび"), "水": ("水曜日", "すいようび"),
+             "木": ("木曜日", "もくようび"), "金": ("金曜日", "きんようび"), "土": ("土曜日", "どようび"),
+             "日": ("日曜日", "にちようび")}
+
+
+def _weekday_in_brackets(morphemes, i: int):
+    """The deck's card for the weekday a date writes in brackets, 10月15日
+    （木）, or None (plan 272): 木 there is Thursday, never "tree"."""
+    m = morphemes[i]
+    if m.surface not in _WEEKDAYS or i == 0 or i + 1 >= len(morphemes):
+        return None
+    if morphemes[i - 1].surface not in ("（", "(") or morphemes[i + 1].surface not in ("）", ")"):
+        return None
+    return resolve_lemma(*_WEEKDAYS[m.surface])
+
+
 def _resolve_morpheme(morphemes, i: int):
     m = morphemes[i]
+    weekday = _weekday_in_brackets(morphemes, i)
+    if weekday is not None:
+        return weekday
     previous = morphemes[i - 1] if i > 0 else None
     after_conjunctive = previous is not None and previous.pos == "particle" and previous.conjunctive
     # (Only the て/で: 足掻くがいい's いい, after the conjunctive が, is
@@ -1561,6 +1580,7 @@ _HOMES = frozenset({"アパート", "マンション", "寮", "りょう", "近�
                     "とかい", "海外", "かいがい", "隣", "となり", "大阪", "おおさか", "京都", "きょうと", "北海道"})
 _PARTNERS = (
     ("住む", ("に",), _placelike),                                  # 東京にすんでいる
+    ("住む", ("が", "は", "も"), _alive),                            # おばあさんがすんでいました (plan 272)
     ("居る", ("が", "も", "は"), _alive),                            # 若い人もいる
     ("来る", ("が", "も", "は"), _alive),                            # 田中さんがきた
     ("泣く", ("が", "も", "は"), lambda word: _alive(word) and word not in _ANIMALS),  # こどもがないている
@@ -1622,6 +1642,7 @@ _PARTNERS = (
     ("点く", ("が",), _LIGHTS),                                    # 電気がつく
     ("", ("を",), _LIGHTS),                                        # テレビをつける, "to turn on"
     ("引く", ("を", ""), frozenset({"風邪", "かぜ", "線", "せん", "辞書", "じしょ", "くじ", "人目", "ひとめ",
+                                  "油", "あぶら",                    # 油をひく, a pan (plan 272)
                                   "注意", "ちゅうい", "関心", "かんしん", "興味", "きょうみ", "気", "き"})),  # かぜをひく
     ("弾く", ("を",), frozenset({"ピアノ", "ギター", "バイオリン", "曲", "きょく", "楽器", "がっき"})),
     ("開く", ("が",), frozenset({"ドア", "窓", "まど", "戸", "と", "門", "もん", "ふた", "口", "くち"})),
@@ -1919,7 +1940,7 @@ def _by_partner(morphemes, i: int, spelled):
 # The verbs whose partner is the one who does it, which may stand further
 # back in the clause (_subject_of): 女の子が一人でないていた. Never a verb
 # whose が marks what it takes: 犬は匂いをかいだ is no 飼う.
-_SUBJECT_VERBS = frozenset({"泣く", "鳴く", "来る", "居る", "要る", "亡くなる", "無くなる", "降る", "晴れる",
+_SUBJECT_VERBS = frozenset({"泣く", "鳴く", "来る", "居る", "要る", "亡くなる", "無くなる", "降る", "晴れる", "住む",
                             "吹く", "咲く", "点く", "経つ", "済む", "空く", "開く", "効く",
                             # (plan 272; 付ける by what its は puts first: お箸は
                             # おつけしますか)
@@ -2399,7 +2420,28 @@ def _pool_by_form(written: str, readings: tuple[str, ...], seen_kanji: bool = Tr
         hit = jmdict_db.get_by_key("", kana)
         if hit is not None:
             return hit
+    if len(written) >= 3 and written.endswith("ー") and "ー" not in written[:-1] and _katakana_written(written):
+        # (A loanword's last long vowel the pool writes as a vowel: プレー
+        # is its プレイ, エッセー its エッセイ, plan 272 -- never one inside a
+        # name, グレース, nor a clipped word, ホラゲー's ゲー.)
+        voweled = _long_e_o(written)
+        if voweled != written:
+            return jmdict_db.get_by_key("", voweled)
     return None
+
+
+_E_ROW_KATAKANA = set("エケゲセゼテデネヘベペメレ")
+_O_ROW_KATAKANA = set("オコゴソゾトドノホボポモヨロョ")
+
+
+def _long_e_o(word: str) -> str:
+    """プレー → プレイ, ボーイ stays: ー after an e-row letter as イ, after an
+    o-row one as ウ."""
+    out = []
+    for k, c in enumerate(word):
+        prev = word[k - 1] if k else ""
+        out.append("イ" if c == "ー" and prev in _E_ROW_KATAKANA else "ウ" if c == "ー" and prev in _O_ROW_KATAKANA else c)
+    return "".join(out)
 
 
 # The senses an affix is used in, by the part of speech UniDic gives it.
@@ -3041,6 +3083,36 @@ def kana_card(written: str):
     return level, entry, vocab_to_id(entry, level)
 
 
+# The days より starts from in a notice: 本日より, 来月より (never 今日 or
+# 去年, which より compares: 去年より増えた).
+_FROM_DAYS = frozenset({"本日", "明日", "翌日", "翌月", "来月", "来週", "来年度", "当日", "次回", "今後", "明朝"})
+# What follows the より of "from": a departure, a sending, a start
+# (口座より引き落とされます, 窓より飛び去る, 東京駅より発車します).
+_FROM_DEEDS = frozenset({"引き落とす", "発車", "出発", "発つ", "送る", "届く", "始まる", "始める", "開始", "開催",
+                         "実施", "施行", "適用", "発売", "販売", "受付", "受け付ける", "配信", "放送", "去る",
+                         "飛び去る", "出る", "逃げる", "離れる", "降りる", "移る", "移動", "差し引く", "支払う",
+                         "振り込む", "抜粋", "引用", "転載", "折り返し", "営業"})
+
+
+def _from_not_than(morphemes, i: int) -> bool:
+    """Whether the より at morphemes[i] is the formal "from" (= から), not
+    the comparison's "than" (plan 272): before a departure, a sending or
+    a start (口座より引き落とされます, 田中より折り返し), before the polite
+    prefix (心よりおわび, 当社よりご連絡), or after a day a notice starts
+    on (本日より、, 本日よりお世話に). 去年より増える, 運転するより作るほう
+    が are "than"."""
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    prev = morphemes[i - 1] if i > 0 else None
+    if nxt is None or prev is None:
+        return False
+    if nxt.lemma in _FROM_DEEDS or nxt.surface in _FROM_DEEDS:
+        return True
+    if nxt.pos == "prefix" and nxt.surface in ("お", "ご", "御") and i + 2 < len(morphemes) \
+            and morphemes[i + 2].pos in ("noun", "verb"):
+        return True
+    return prev.surface in _FROM_DAYS and nxt.pos not in ("adjective", "other", "adverb")
+
+
 def resolve_function_word(morphemes, i: int):
     """(level, entry, raw_id) for the deck card written in kana that a
     function word is, or None (plan 266).
@@ -3077,6 +3149,8 @@ def resolve_function_word(morphemes, i: int):
         # fault?"), never the じゃあ, "well then", that opens a clause, as
         # それじゃあ does (plan 272).
         return None
+    if m.pos == "particle" and m.surface == "より" and _from_not_than(morphemes, i):
+        return None                    # 口座より引き落とされます: "from", glossed (plan 272)
     cards = _kana_cards(m.surface)
     if m.pos == "adnominal":
         cards = [c for c in cards if not _a_verbs_card(c[1])]
