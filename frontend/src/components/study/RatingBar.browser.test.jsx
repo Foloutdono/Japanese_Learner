@@ -56,14 +56,14 @@ function press(key) {
 }
 
 describe('RatingBar keyboard contract — six buttons', () => {
-  it('"1" rates 5 (Perfect)', async () => {
+  it('"1" rates 5 (Easy)', async () => {
     const onRate = vi.fn()
     await renderBar({ active: true, onRate })
     press('1')
     expect(onRate).toHaveBeenCalledWith(5)
   })
 
-  it('"6" rates 0 (Blackout)', async () => {
+  it('"6" rates 0 (Forgot)', async () => {
     const onRate = vi.fn()
     await renderBar({ active: true, onRate })
     press('6')
@@ -94,16 +94,23 @@ describe('RatingBar keyboard contract — six buttons', () => {
 })
 
 describe('RatingBar keyboard contract — four buttons', () => {
-  // Wrong / Almost / Difficult / Correct, i.e. qualities 1..4. Same
-  // scale, same words, same digits-from-the-best rule.
-  it('"1" rates 4 (Correct) — the best answer this bar can give', async () => {
+  // Missed / Difficult / Correct / Easy, i.e. qualities 1, 3, 4, 5.
+  // Same scale, same words, same digits-from-the-best rule.
+  it('"1" rates 5 (Easy) — the best answer this bar can give', async () => {
     const onRate = vi.fn()
     await renderBar({ active: true, onRate, scale: 'simple' })
     press('1')
+    expect(onRate).toHaveBeenCalledWith(5)
+  })
+
+  it('"2" rates 4 (Correct)', async () => {
+    const onRate = vi.fn()
+    await renderBar({ active: true, onRate, scale: 'simple' })
+    press('2')
     expect(onRate).toHaveBeenCalledWith(4)
   })
 
-  it('"4" rates 1 (Wrong)', async () => {
+  it('"4" rates 1 (Missed)', async () => {
     const onRate = vi.fn()
     await renderBar({ active: true, onRate, scale: 'simple' })
     press('4')
@@ -122,10 +129,10 @@ describe('RatingBar keyboard contract — four buttons', () => {
     expect(onRate).not.toHaveBeenCalled()
   })
 
-  it('draws neither blackout nor perfect', async () => {
+  it('draws neither forgot nor almost', async () => {
     const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'simple' })
     expect(screen.container.querySelector('.rating-bar__btn--q0')).toBeNull()
-    expect(screen.container.querySelector('.rating-bar__btn--q5')).toBeNull()
+    expect(screen.container.querySelector('.rating-bar__btn--q2')).toBeNull()
   })
 
   it('tells the stylesheet how many segments to wrap', async () => {
@@ -139,10 +146,10 @@ describe('RatingBar keyboard contract — four buttons', () => {
 })
 
 describe('RatingBar keyboard contract — two buttons', () => {
-  // Wrong / Correct, i.e. qualities 1 and 4 — the same two the other
+  // Missed / Correct, i.e. qualities 1 and 4 — the same two the other
   // bars carry under the same words, with the judgements between them
   // left off.
-  it('"1" rates 4 (Correct) and "2" rates 1 (Wrong)', async () => {
+  it('"1" rates 4 (Correct) and "2" rates 1 (Missed)', async () => {
     const onRate = vi.fn()
     await renderBar({ active: true, onRate, scale: 'binary' })
     press('1')
@@ -180,24 +187,25 @@ describe('RatingBar below the desk', () => {
   })
 })
 
-// 正解 (plan 180): the misses and the passes -- Correct, and Perfect on
-// the six -- are two groups, in DOM order worst to best, so tab and
+// 正解 (plan 180): the misses and the passes -- Correct, and Easy on
+// the four and the six -- are two groups, in DOM order worst to best, so tab and
 // screen-reader order match the screen. Since plan 203 (券売機) both are
 // keys of the one make; a pass carries a check where a miss has a lamp.
 describe('RatingBar — the passes as keys', () => {
   const qs = nodes => [...nodes].map(b => [...b.classList].find(c => /--q\d$/.test(c)).slice(-1))
 
-  it('puts Correct alone in the keys on the four', async () => {
+  it('keys Correct and Easy on the four, beside Missed and Difficult', async () => {
     const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'simple' })
     const c = screen.container
-    expect(qs(c.querySelectorAll('.rating-bar__misses .rating-bar__btn'))).toEqual(['1', '2', '3'])
-    expect(qs(c.querySelectorAll('.rating-bar__keys .rating-bar__btn'))).toEqual(['4'])
+    expect(qs(c.querySelectorAll('.rating-bar__misses .rating-bar__btn'))).toEqual(['1', '3'])
+    expect(qs(c.querySelectorAll('.rating-bar__keys .rating-bar__btn'))).toEqual(['4', '5'])
+    expect(c.querySelector('.rating-bar__btn--best').classList.contains('rating-bar__btn--q5')).toBe(true)
     expect(c.querySelector('.rating-bar__btn--q4').classList.contains('rating-bar__btn--key')).toBe(true)
     expect(c.querySelector('.rating-bar__btn--q4 .rating-bar__btn-check')).not.toBeNull()
     expect(c.querySelector('.rating-bar__btn--q4 .rating-bar__btn-lamp')).toBeNull()
   })
 
-  it('keys Correct and Perfect on the six, worst to best', async () => {
+  it('keys Correct and Easy on the six, worst to best', async () => {
     const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'full' })
     const c = screen.container
     expect(qs(c.querySelectorAll('.rating-bar__btn'))).toEqual(['0', '1', '2', '3', '4', '5'])

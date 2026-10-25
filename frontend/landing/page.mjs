@@ -6,6 +6,7 @@
 // the script only turns the demos and the footage on.
 import { readFileSync } from 'node:fs'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
+import { RATING_SCALES } from '../src/domain/ratingScales.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
   SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, SIGNIN_ENTRY, STORES, CONTACT,
@@ -34,6 +35,9 @@ const holdJa = s => String(s).replace(/〜(?=[\u3040-\u30ff\u4e00-\u9fff])/g, '�
 
 // ── Pieces ──
 
+// The four-button bar's qualities, worst first: each key wears its
+// quality's ink (.q1, .q3 …), as the app's bar does.
+const BAR_QUALITIES = [...RATING_SCALES.simple.qualities].reverse()
 const pigment = line => `var(--line-${line === 'today' ? 'jisho' : line})`
 
 function mark(size, cls = '') {
@@ -286,7 +290,7 @@ function method(t) {
     ? `<span class="stamp stamp--miss" lang="ja">${d}</span>`
     : `<span class="stamp" style="--turn:${rotations[k]}deg" lang="ja">${d}</span>`).join('')
   const ratings = M.ratings.map((word, k) =>
-    `<button type="button" class="q${k + 1}" data-rate="${k}" disabled><span class="rbar__dot"></span><span class="rbar__w">${esc(word)}</span><span class="rbar__t">${esc(M.due(card.due[k]))}</span></button>`).join('')
+    `<button type="button" class="q${BAR_QUALITIES[k]}" data-rate="${k}" disabled><span class="rbar__dot"></span><span class="rbar__w">${esc(word)}</span><span class="rbar__t">${esc(M.due(card.due[k]))}</span></button>`).join('')
   // The day as one ticket: its count and length, each line's share, and
   // the week's stamps at its foot.
   return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h">${stop(t, 'method')}<div class="wrap split split--method cols">`
@@ -345,7 +349,7 @@ function mockScreen(t, clip, on) {
   const bar = count => `<div class="mock__bar">${ring(clip.glyph, clip.line, 'mock__ring')}<span class="mock__title">${ty(f.name)}</span>`
     + `${count ? `<span class="mock__count fig">${count}</span>` : ''}</div>`
   const rate = (due, pressed = -1) => `<div class="mock__rate">${t.method.ratings.map((w, k) =>
-    `<span class="q${k + 1}${k === pressed ? ' is-pressed' : ''}"><i class="rbar__dot"></i><b>${esc(w)}</b>${due ? `<small>${esc(t.method.due(due[k]))}</small>` : ''}</span>`).join('')}</div>`
+    `<span class="q${BAR_QUALITIES[k]}${k === pressed ? ' is-pressed' : ''}"><i class="rbar__dot"></i><b>${esc(w)}</b>${due ? `<small>${esc(t.method.due(due[k]))}</small>` : ''}</span>`).join('')}</div>`
   const button = label => `<span class="mock__btn">${esc(label)}</span>`
   const card = (inner, stage, progress) => `<div class="mk-card"><span class="qcard__stage st-${stage}">${esc(t.method.stages[stage])}</span>${inner}`
     + `<span class="qcard__band"><i style="width:${progress * 100}%"></i></span></div>`
@@ -365,7 +369,7 @@ function mockScreen(t, clip, on) {
     vocabulaire: () => [bar('3 / 18'),
       card(`<span class="qcard__reading" lang="ja">でんしゃ</span><span class="mk-card__word" lang="ja">電車</span><span class="qcard__meaning">${ty(t.method.cards[1].meaning)}</span>`
         + `<span class="mk-card__ex" lang="ja">電車で行きます。</span>`, 'learning', CARDS[1].progress),
-      rate(CARDS[1].due, 3)],
+      rate(CARDS[1].due, 2)],
     kanji: () => [bar('5 / 10'),
       `<div class="mk-kanji"><span class="mk-strokes" aria-hidden="true"><svg viewBox="0 0 109 109">${STATION_STROKES.map((d, k) =>
         `<path pathLength="1" d="${d}" style="--s:${k}"/>`).join('')}</svg></span>`

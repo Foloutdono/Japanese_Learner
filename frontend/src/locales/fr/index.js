@@ -571,19 +571,19 @@ const quiz = {
   // (plan 045's rebuilt bar) are `ratingJp` below -- the term itself,
   // identical in every language.
   to:                'à',
-  perfect:           'Parfait',
+  easy:              'Facile',
   correctHesit:      'Correct',
   difficult:         'Difficile',
   wrongSeen:         'Presque',
   wrongRated:        'Raté',
-  blackout:          'Trou noir',
+  forgot:            'Oublié',
   ratingJp: {
-    perfect:         '完璧',
+    easy:            '簡単',
     correctHesit:    '正解',
     difficult:       '難しい',
     wrongSeen:       '惜しい',
     wrongRated:      '不正解',
-    blackout:        '白紙',
+    forgot:          '忘れた',
   },
 
   // Mode labels
@@ -3224,7 +3224,7 @@ const clrPrimitives = {
 // The piles' names and a pile's sheet (PileSheet): the À revoir row of
 // the finish opens the run's wrong pile there (plan 250).
 const clrDay = {
-  clrPiles: ['À revoir', 'Justes', 'Parfaites'],
+  clrPiles: ['À revoir', 'Justes', 'Faciles'],
   clrPileCount: n => `${n}\u00a0carte${n === 1 ? '' : 's'}`,
   clrPileEmpty: 'Aucune carte',
   clrPileOpen: term => `Ouvrir ${term} dans le dictionnaire`,

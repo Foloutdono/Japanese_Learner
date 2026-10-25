@@ -11,8 +11,8 @@ import {
 // tell which bar an old row came from.
 
 const t = {
-  perfect: 'Perfect', correctHesit: 'Correct', difficult: 'Difficult',
-  wrongSeen: 'Almost', wrongRated: 'Wrong', blackout: 'Blackout',
+  easy: 'Easy', correctHesit: 'Correct', difficult: 'Difficult',
+  wrongSeen: 'Almost', wrongRated: 'Missed', forgot: 'Forgot',
 }
 
 describe('rating scales', () => {
@@ -35,17 +35,17 @@ describe('rating scales', () => {
     // middle bar cannot quietly move what a stored quality means.
     const added = (a, b) => RATING_SCALES[b].qualities
       .filter(q => !RATING_SCALES[a].qualities.includes(q)).sort()
-    expect(added('binary', 'simple')).toEqual([2, 3])
-    expect(added('simple', 'full')).toEqual([0, 5])
+    expect(added('binary', 'simple')).toEqual([3, 5])
+    expect(added('simple', 'full')).toEqual([0, 2])
   })
 
   it('gives the same quality the same word on every bar', () => {
     expect(ratingButtons('binary', t).map(b => b.label))
-      .toEqual(['Correct', 'Wrong'])
+      .toEqual(['Correct', 'Missed'])
     expect(ratingButtons('simple', t).map(b => b.label))
-      .toEqual(['Correct', 'Difficult', 'Almost', 'Wrong'])
+      .toEqual(['Easy', 'Correct', 'Difficult', 'Missed'])
     expect(ratingButtons('full', t).map(b => b.label))
-      .toEqual(['Perfect', 'Correct', 'Difficult', 'Almost', 'Wrong', 'Blackout'])
+      .toEqual(['Easy', 'Correct', 'Difficult', 'Almost', 'Missed', 'Forgot'])
     // The shared buttons are the same word AND the same number, which
     // is what keeps the stats mix comparable across a switch.
     for (const q of RATING_SCALES.binary.qualities) {

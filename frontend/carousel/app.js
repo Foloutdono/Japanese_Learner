@@ -10,7 +10,7 @@
 // equal to index.css by src/carousel.test.js.
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
-import { TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
+import { RATING_INKS, TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
 
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
@@ -108,20 +108,24 @@ export function cardWord(ctx, p, str, cx, cy, maxW, u, size = 72) {
 
 // ── The rating bar (.rating-bar, the simple scale) ─────────────────
 /** The bar a review is rated on: four keys, each lifted on its 3px foot,
- *  the three misses on the panel's ink with their lamp, Correct filled
- *  with its verdict ink and its check. `labels` worst first; `pressed`
- *  the index pressed, if any (it sinks onto its foot). Returns its height
- *  and each key's centre. */
+ *  the two misses (Missed, Difficult) on the panel's ink with their lamp,
+ *  the two passes (Correct, Easy) filled with their verdict ink and a
+ *  check, each a fifth wider than a miss (index.css's 2 : 2.4). `labels`
+ *  worst first; `pressed` the index pressed, if any (it sinks onto its
+ *  foot). Returns its height and each key's centre. */
 export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
   const c = inks(p)
   const foot = 3 * u // --key-foot
   const h = 61 * u
   const gap = 8 * u // --sp-3 between the keys
-  const missW = (w - gap) * 3 / 4.5
-  const keyW = (missW - 2 * gap) / 3
+  const missW = (w - gap) * 2 / 4.4
+  const keyW = (missW - gap) / 2
+  const passW = (w - missW - 2 * gap) / 2
   const r = 8 * u
   const sole = mix(c.panel, '#000000', 0.4)
   const ls = 13.12 * u
+  const missInks = [p.rating[0], p.rating[2]]
+  const passInks = [RATING_INKS['--rating-correct'], RATING_INKS['--rating-perfect']]
   const key = (kx, kw, face, footInk, light, isPressed) => {
     const ky = y + (isPressed ? foot : 0)
     if (!isPressed) {
@@ -141,7 +145,7 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
     return ky
   }
   const centres = []
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     const kx = x + i * (keyW + gap)
     const isP = pressed === i
     const ky = key(kx, keyW, ky0 => {
@@ -150,7 +154,7 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
       g.addColorStop(1, mix(c.onPanel, c.panel, isP ? 0.09 : 0.06))
       return g
     }, sole, alpha(c.onPanel, 0.08), isP)
-    const ink = p.rating[i]
+    const ink = missInks[i]
     const cx = kx + keyW / 2
     ctx.fillStyle = mix(ink, c.panel, isP ? 1 : 0.55)
     ctx.beginPath()
@@ -164,36 +168,38 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
     text(ctx, labels[i], cx, ky + 32 * u + ls * 0.8, { f: font(700, ls, 'latin'), color: c.onPanel, align: 'center' })
     centres.push(cx)
   }
-  // The pass: the verdict's ink, lit from the top, on a foot of its own ink.
-  const correct = p.rating[3]
-  const kx = x + missW + gap
-  const kw = w - missW - gap
-  const isP = pressed === 3
-  const ky = key(kx, kw, ky0 => {
-    const g = ctx.createLinearGradient(0, ky0, 0, ky0 + h)
-    g.addColorStop(0, mix(correct, c.onPanel, 0.85))
-    g.addColorStop(1, correct)
-    return g
-  }, mix(correct, sole, 0.4), alpha(c.onPanel, 0.35), isP)
-  const ccx = kx + kw / 2
-  ctx.save()
-  ctx.strokeStyle = c.onFill
-  ctx.lineWidth = 2 * u
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
-  ctx.beginPath()
-  ctx.moveTo(ccx - 6 * u, ky + 22 * u)
-  ctx.lineTo(ccx - 2 * u, ky + 26 * u)
-  ctx.lineTo(ccx + 6 * u, ky + 18 * u)
-  ctx.stroke()
-  ctx.restore()
-  text(ctx, labels[3], ccx, ky + 35 * u + ls * 0.8, { f: font(700, ls, 'latin'), color: c.onFill, align: 'center' })
-  centres.push(ccx)
-  if (isP) {
-    ctx.strokeStyle = c.onPanel
+  // The passes: each its verdict's ink, lit from the top, on a foot of its own ink.
+  for (let i = 0; i < 2; i++) {
+    const ink = passInks[i]
+    const kx = x + missW + gap + i * (passW + gap)
+    const kw = passW
+    const isP = pressed === 2 + i
+    const ky = key(kx, kw, ky0 => {
+      const g = ctx.createLinearGradient(0, ky0, 0, ky0 + h)
+      g.addColorStop(0, mix(ink, c.onPanel, 0.85))
+      g.addColorStop(1, ink)
+      return g
+    }, mix(ink, sole, 0.4), alpha(c.onPanel, 0.35), isP)
+    const ccx = kx + kw / 2
+    ctx.save()
+    ctx.strokeStyle = c.onFill
     ctx.lineWidth = 2 * u
-    rrect(ctx, kx + u, ky + u, kw - 2 * u, h - 2 * u, r)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    ctx.moveTo(ccx - 6 * u, ky + 22 * u)
+    ctx.lineTo(ccx - 2 * u, ky + 26 * u)
+    ctx.lineTo(ccx + 6 * u, ky + 18 * u)
     ctx.stroke()
+    ctx.restore()
+    text(ctx, labels[2 + i], ccx, ky + 35 * u + ls * 0.8, { f: font(700, ls, 'latin'), color: c.onFill, align: 'center' })
+    centres.push(ccx)
+    if (isP) {
+      ctx.strokeStyle = c.onPanel
+      ctx.lineWidth = 2 * u
+      rrect(ctx, kx + u, ky + u, kw - 2 * u, h - 2 * u, r)
+      ctx.stroke()
+    }
   }
   return { h: h + foot, centres }
 }

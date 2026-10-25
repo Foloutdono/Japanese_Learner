@@ -372,7 +372,7 @@ describe('SettingsScreen — the level, the bar and the service', () => {
     // — spelled out rather than rebuilt from the locale table, because a
     // caption assembled from the same source it is being checked against
     // would pass however wrong the assembly was.
-    expect(cards[1].getAttribute('aria-label')).toContain('Raté · Presque · Difficile · Correct')
+    expect(cards[1].getAttribute('aria-label')).toContain('Raté · Difficile · Correct · Facile')
     expect(cards[0].getAttribute('aria-label')).toContain('Raté · Correct')
 
     cards[2].click()
