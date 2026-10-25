@@ -140,6 +140,14 @@ describe('the source registry', () => {
     await settle(60)
     expect(document.querySelector('[role="dialog"]')).toBeNull()
 
+    // The video has its own door too, not only a pasted link.
+    screen.container.querySelector('.anl-entry__tool[aria-label="Vidéo"], .anl-entry__tool[aria-label="Video"]').click()
+    await settle(60)
+    expect(document.querySelector('[role="dialog"] #anl-panel-video .anl-field')).not.toBeNull()
+    document.querySelector('.scrim').click()
+    await settle(60)
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+
     const line = screen.container.querySelector('.anl-entry textarea')
     Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set.call(line, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
     line.dispatchEvent(new Event('input', { bubbles: true }))

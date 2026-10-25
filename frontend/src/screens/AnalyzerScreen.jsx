@@ -1926,6 +1926,7 @@ export default function AnalyzerScreen({ session }) {
             onAnalyze={analyzeDraft}
             busy={busy}
             onPhoto={() => openSheet('photo')}
+            onVideo={() => openSheet('video')}
             onFile={file => startVideoFromFile(file, { url: videoUrl })}
           />
         </>
