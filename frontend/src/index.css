@@ -14915,11 +14915,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-3);
   min-width: 0;
 }
-.rating-bar__misses { flex: 3 1 0; }
-/* Each count says its share: the four's Correct half again as wide as
-   a miss, the two's pair equal (a binary rating wants the biggest,
-   least ambiguous targets), the six's two keys beside four misses. */
-.rating-bar__keys { flex: 1.5 1 0; }
+.rating-bar__misses { flex: 2 1 0; }
+/* Each count says its share: the four's Correct and Easy each a fifth
+   wider than a miss, the two's pair equal (a binary rating wants the
+   biggest, least ambiguous targets), the six's two keys beside four
+   misses. */
+.rating-bar__keys { flex: 2.4 1 0; }
 .rating-bar__buttons--2 > .rating-bar__misses,
 .rating-bar__buttons--2 > .rating-bar__keys { flex: 1 1 0; }
 .rating-bar__buttons--6 > .rating-bar__misses { flex: 4 1 0; }

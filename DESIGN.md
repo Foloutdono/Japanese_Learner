@@ -127,7 +127,7 @@ all thirteen in both themes — and the native widgets' copies follow.
 琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength
 (lightness .62 to .72), so no verdict shouts over another. The two pass
 verdicts step off it: Correct (新橋) and
-Perfect (若葉) are the rating bar's filled keys and wear their own brighter inks,
+Easy (若葉) are the rating bar's filled keys and wear their own brighter inks,
 `--rating-correct` and `--rating-perfect`, wherever a verdict's ink is
 drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
 `--success` keep their place on the ramp for everything else.
@@ -1131,7 +1131,7 @@ keys (the digit's cap, the verdict's dot and word), a glyph for where it
 sends the point (↻ asked again, ↓ down the line, ↑ back up it to the
 relapse, which a word names beside its wait), and the wait as the figure the
 tiles had. Two verdicts that do the same and wait the same are one row --
-Raté and Presque, Difficile and Correct, as the learner's own scale (four,
+Oublié and Raté, Difficile and Correct, as the learner's own scale (four,
 six or two) has them, and a mastered point's passes split where their weeks
 differ -- the pass in the pass key's ink, the miss in the miss's. Where the
 words do not fit beside their keys they stand bare, measured
@@ -1419,20 +1419,20 @@ So:
   as on a ticket machine's panel: a gap apart, each raised off the sumi on a
   foot of its own material (`--key-foot`, 3px, an edge and not a shadow: no
   blur), and a press travels down the foot (under reduced motion it does
-  not, and the lamp alone answers). The misses (Wrong, Almost, Difficult;
-  Blackout on the six) are dark keys, each word under a **lamp** in its
+  not, and the lamp alone answers). The misses (Missed, Difficult; Almost
+  and Forgot on the six) are dark keys, each word under a **lamp** in its
   verdict's ink, dimmed into the sumi at rest and lit when pressed, and that
   is the bar's whole acknowledgement. The passes are the same keys
   **moulded in their own verdict ink** (`--rating-correct` 新橋,
   `--rating-perfect` 若葉), lit from the top, the sumi type and a check
-  where the lamp would be, and no glow. Correct is the widest target on the
-  bar. Each key carries its own sumi, so the bar reads on paper as well as
+  where the lamp would be, and no glow. Correct and Easy are the widest targets
+  on the bar. Each key carries its own sumi, so the bar reads on paper as well as
   on the dock. **No key is gold**: gold is the action's metal, and a verdict
   is not an action. On a phone the bar docks on the run's floor, edge to
   edge; four keys stay on one row, and the six puts its misses on one row
   and its two passes under them. On the desk's panels the keys are unlit
   until the reveal (a pass drawn as a miss), and the card panel's Correct
-  and Perfect tiles wear the same inks.
+  and Easy tiles wear the same inks.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a

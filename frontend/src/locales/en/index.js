@@ -588,21 +588,23 @@ const quiz = {
   // that pair with them (plan 045's rebuilt bar) are `ratingJp` below —
   // the term itself, identical in every language. Plan 045's
   // mockup restates wrongSeen as ALMOST (clearer against 惜しい than the
-  // original "Wrong (seen)"); wrongRated's WRONG already matched "Wrong".
+  // original "Wrong (seen)"). Easy (5), Missed (1) and Forgot (0) replaced
+  // Perfect, Wrong and Blackout when the four-button bar became
+  // Missed / Difficult / Correct / Easy.
   to:                'to',
-  perfect:           'Perfect',
+  easy:              'Easy',
   correctHesit:      'Correct',
   difficult:         'Difficult',
   wrongSeen:         'Almost',
-  wrongRated:        'Wrong',
-  blackout:          'Blackout',
+  wrongRated:        'Missed',
+  forgot:            'Forgot',
   ratingJp: {
-    perfect:         '完璧',
+    easy:            '簡単',
     correctHesit:    '正解',
     difficult:       '難しい',
     wrongSeen:       '惜しい',
     wrongRated:      '不正解',
-    blackout:        '白紙',
+    forgot:          '忘れた',
   },
 
   // Mode labels
@@ -3276,7 +3278,7 @@ const clrPrimitives = {
 // ── 191:piles ──
 // See the French table.
 const clrDay = {
-  clrPiles: ['To review', 'Correct', 'Perfect'],
+  clrPiles: ['To review', 'Correct', 'Easy'],
   clrPileCount: n => `${n} card${n === 1 ? '' : 's'}`,
   clrPileEmpty: 'No cards',
   clrPileOpen: term => `Open ${term} in the dictionary`,

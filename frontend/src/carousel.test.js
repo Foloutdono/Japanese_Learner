@@ -738,7 +738,7 @@ describe('explaining a point in its own sentence', () => {
   it('says the app’s own words on its own parts, in both languages', () => {
     for (const [lang, t] of [['en', EN], ['fr', FR]]) {
       const P = PROMO[lang]
-      expect(P.ratings, lang).toEqual([t.wrongRated, t.wrongSeen, t.difficult, t.correctHesit])
+      expect(P.ratings, lang).toEqual([t.wrongRated, t.difficult, t.correctHesit, t.easy])
       expect(P.mastered, lang).toBe(t.mastered)
       expect(P.tap, lang).toBe(t.tapToReveal)
       expect(P.mode, lang).toBe(t.mode_vocab_flashcard_f2b)

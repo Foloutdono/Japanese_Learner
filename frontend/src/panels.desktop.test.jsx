@@ -251,13 +251,13 @@ describe('the card panel', () => {
     const tiles = $$('.desk-verdict')
     expect(tiles).toHaveLength(4)
     expect(tiles.map(t => t.querySelector('.desk-kbd').textContent)).toEqual(['4', '3', '2', '1'])
-    // The four-button bar's best is quality 4 (domain/ratingScales).
+    // The four-button bar is qualities 1, 3, 4 and 5 (domain/ratingScales).
     // Each tile is a figure: the wait as a numeral and its unit over the
     // verdict's word, and in words to a screen reader.
-    expect(tiles.map(t => t.querySelector('.desk-verdict__value').textContent)).toEqual(['3', '10', '3', '3'])
-    expect(tiles.map(t => t.querySelector('.desk-verdict__unit').textContent)).toEqual(['min', 'min', 'jours', 'sem.'])
-    expect(tiles.map(t => t.querySelector('.desk-verdict__word').textContent)).toEqual(['Raté', 'Presque', 'Difficile', 'Correct'])
-    expect(tiles.map(t => t.querySelector('.sr-only').textContent)).toEqual(['dans 3 min', 'dans 10 min', 'dans 3 j', 'dans 3 sem.'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__value').textContent)).toEqual(['3', '3', '3', '6'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__unit').textContent)).toEqual(['min', 'jours', 'sem.', 'sem.'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__word').textContent)).toEqual(['Raté', 'Difficile', 'Correct', 'Facile'])
+    expect(tiles.map(t => t.querySelector('.sr-only').textContent)).toEqual(['dans 3 min', 'dans 3 j', 'dans 3 sem.', 'dans 6 sem.'])
     const value = tiles[0].querySelector('.desk-verdict__value')
     expect(getComputedStyle(value).fontSize).toBe(probe('fontSize', 'var(--fs-display)'))
     // The numeral is the tile's largest thing, its word beneath it.
@@ -333,15 +333,15 @@ describe('the card panel of a ladder card', () => {
     expect(left.querySelector('.desk-verdicts, .desk-verdict')).toBeNull()
     const stop = $('.gl-map__stop--now')
     // A miss asks Choisir 2 again, a pass climbs to Choisir 3: two outcomes.
-    expect(digits()).toEqual([['4', '3'], ['2', '1']])
-    expect($$('.gl-out__key b').map(b => b.textContent)).toEqual(['Raté', 'Presque', 'Difficile', 'Correct'])
+    expect(digits()).toEqual([['4'], ['3', '2', '1']])
+    expect($$('.gl-out__key b').map(b => b.textContent)).toEqual(['Raté', 'Difficile', 'Correct', 'Facile'])
     expect(rows().map(wait)).toEqual(['10min', '1h'])
     // The pass wears the pass key's ink; the miss, the miss's.
     expect(rows().map(r => r.className.includes('gl-out--pass'))).toEqual([false, true])
     expect(getComputedStyle(rows()[0].querySelector('.gl-out__go')).color).toBe(probe('color', 'var(--rating-wrong)'))
     // A screen reader hears each row whole.
     const said = rows().map(r => r.querySelector(':scope > .sr-only').textContent.replace(/\u00a0/g, ' '))
-    expect(said).toEqual(['Raté, Presque : à refaire, dans 10 min', 'Difficile, Correct : étape suivante, dans 1 h'])
+    expect(said).toEqual(['Raté : à refaire, dans 10 min', 'Difficile, Correct, Facile : étape suivante, dans 1 h'])
     // Under the stop's own name, inside its band, the walk's rail kept.
     const name = rect('.gl-map__stop--now .gl-map__name')
     rows().forEach(r => {
@@ -360,7 +360,7 @@ describe('the card panel of a ladder card', () => {
     await render(<Stage panel={panel(cards.mastered)}><Card />{bar}</Stage>)
     await settle()
     // Mastered: a miss is the relapse, Difficile and Correct wait different weeks.
-    expect(digits()).toEqual([['4', '3'], ['2'], ['1']])
+    expect(digits()).toEqual([['4'], ['3'], ['2', '1']])
     expect(rows().map(r => r.className)).toEqual(['gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass', 'gl-out gl-out--stay gl-out--pass'])
     expect($$('.gl-out__note').map(el => el.textContent)).toEqual(['Rechute'])
     expect(rows().map(wait)).toEqual(['10min', '4sem.', '5sem.'])
@@ -425,7 +425,7 @@ describe('the card panel of a ladder card', () => {
     const words = () => $$('.gl-out__key b')
     expect(words().every(w => w.classList.contains('sr-only')), 'bare on a laptop').toBe(true)
     // Still the keys and their ink, and the row says it whole to a screen reader.
-    expect(digits()).toEqual([['4', '3'], ['2', '1']])
+    expect(digits()).toEqual([['4'], ['3', '2', '1']])
     const keys = $$('.gl-out__keys')
     expect(keys.every(k => k.scrollWidth <= k.clientWidth + 1)).toBe(true)
     const left = $('.desk-run__left > .desk-card')

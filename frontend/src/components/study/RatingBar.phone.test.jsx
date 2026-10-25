@@ -11,7 +11,7 @@ import '../../index.css'
 // a gap apart, a miss dark with its lamp in its ink, a pass moulded in
 // its own. The gaps are width the words had when the misses were one
 // instrument, so the French words -- the app's longest, Difficile and
-// Trou noir -- are measured whole at a phone's widths, in the real face.
+// Oublié -- are measured whole at a phone's widths, in the real face.
 
 vi.mock('../../lib/audio', async importOriginal => ({
   ...(await importOriginal()),
@@ -36,7 +36,7 @@ async function dock(width, scale) {
       </div>
     </LangProvider>
   )
-  await document.fonts.load('700 13px "Space Grotesk"', 'DifficileTrou noir')
+  await document.fonts.load('700 13px "Space Grotesk"', 'DifficileOublié')
   await document.fonts.ready
   await settle()
   return screen.container
@@ -56,7 +56,7 @@ describe('the rating bar\'s keys on a phone', () => {
     for (const width of ['390px', '360px', '320px']) {
       const c = await dock(width, 'simple')
       expect([...c.querySelectorAll('.rating-bar__btn-label')].map(l => l.textContent))
-        .toEqual(['Raté', 'Presque', 'Difficile', 'Correct'])
+        .toEqual(['Raté', 'Difficile', 'Correct', 'Facile'])
       expect(clipped(c), width).toEqual([])
       document.body.innerHTML = ''
     }
@@ -70,7 +70,7 @@ describe('the rating bar\'s keys on a phone', () => {
   it('draws every verdict as a key of one make: a gap apart, a foot under each, 64px with it', async () => {
     const c = await dock('390px', 'simple')
     const keys = [...c.querySelectorAll('.rating-bar__btn')]
-    const [miss, , , pass] = keys
+    const [miss, , pass] = keys
     expect(getComputedStyle(c.querySelector('.rating-bar__misses')).columnGap).toBe('8px')
     expect(getComputedStyle(c.querySelector('.rating-bar__misses')).outlineStyle).toBe('none')
     for (const k of keys) {
@@ -88,11 +88,11 @@ describe('the rating bar\'s keys on a phone', () => {
     expect(lamp.width).toBe('8px')
     expect(lamp.height).toBe('8px')
     expect(lamp.borderRadius).toBe('999px')
-    // The pass: moulded in its ink (新橋), the sumi type, no glow, half again as wide.
+    // The pass: moulded in its ink (新橋), the sumi type, no glow, wider than a miss.
     expect(getComputedStyle(pass).backgroundImage).toContain('rgb(89, 185, 198)')
     expect(getComputedStyle(pass).color).toBe('rgb(28, 24, 17)')
     expect(blurs(getComputedStyle(pass).boxShadow)).toEqual(['0', '0'])
-    expect(pass.getBoundingClientRect().width).toBeGreaterThan(miss.getBoundingClientRect().width * 1.3)
+    expect(pass.getBoundingClientRect().width).toBeGreaterThan(miss.getBoundingClientRect().width * 1.15)
   })
 
   it('sends a pressed key down its foot', async () => {
