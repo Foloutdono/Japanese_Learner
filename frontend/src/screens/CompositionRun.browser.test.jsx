@@ -239,11 +239,11 @@ describe('CompositionRun', () => {
 
   it('rates on the bar, posts the grade beside the two other opinions, and moves on', async () => {
     // The best tile is drawn last (RatingBar renders best-first tiles
-    // reversed); on the default four-tile scale it is "correct", q4.
+    // reversed); on the default four-tile scale it is "easy", q5.
     const root = await graded(await answered(await run()))
     const [result] = jsonCalls('/api/composition/result')
     expect(body(result)).toEqual({
-      raw_id: POINTS[0].raw_id, sentence: SENTENCE, quality: 4,
+      raw_id: POINTS[0].raw_id, sentence: SENTENCE, quality: 5,
       found: true, verdict: 'acceptable', grammar_used: true,
     })
     // (The fare rides the response onto the level bar through

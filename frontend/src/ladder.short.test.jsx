@@ -24,7 +24,7 @@ vi.mock('./stores/credits', async o => ({
   ...(await o()),
   useCredits: () => ({ balance: 24, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
-vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []) }))
+vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []), reviewsSettled: vi.fn(async () => {}) }))
 const apiJson = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -96,7 +96,7 @@ describe('the ladder’s Choisir on the desk', () => {
     const stop = panel.querySelector('.gl-map__stop[aria-current="step"]')
     // Choose 2: a miss asks it again, a pass climbs to Choose 3.
     const rows = [...stop.querySelectorAll('.gl-out')]
-    expect(rows.map(r => [...r.querySelectorAll('.desk-kbd')].map(k => k.textContent))).toEqual([['4', '3'], ['2', '1']])
+    expect(rows.map(r => [...r.querySelectorAll('.desk-kbd')].map(k => k.textContent))).toEqual([['4'], ['3', '2', '1']])
     const box = panel.getBoundingClientRect()
     rows.forEach(r => expect(r.getBoundingClientRect().bottom).toBeLessThanOrEqual(stop.getBoundingClientRect().bottom + 1))
     ;[...panel.querySelectorAll('.gl-map__stop')].forEach(s => {

@@ -357,9 +357,9 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .rbar button:disabled { cursor: default; opacity: .45; }
 .rbar__dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--dot); transition: box-shadow .2s ease; }
 .q1 { --dot: var(--rating-wrong); }
-.q2 { --dot: var(--rust); }
 .q3 { --dot: var(--warning); }
 .q4 { --dot: var(--teal); }
+.q5 { --dot: var(--success); }
 /* The press is the bar's whole acknowledgement (DESIGN.md, the rating bar). */
 .is-pressed .rbar__dot { box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot) 35%, transparent); }
 .rbar button.is-pressed { background: color-mix(in srgb, var(--text-on-panel) 8%, transparent); }

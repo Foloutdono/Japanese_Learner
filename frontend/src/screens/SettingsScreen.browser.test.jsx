@@ -25,6 +25,13 @@ const apiJson = vi.fn()
 const signOut = vi.fn(async () => {})
 const apiFetch = vi.fn()
 
+// The paywall is switched off (domain/paywall.js's HAS_PAYWALL) while the
+// plans are reworked; this test covers the offer's doors, which stay.
+vi.mock('../domain/paywall', async o => ({
+  ...(await o()),
+  offerable: credits => !(credits?.unlimited || credits?.plan === 'pass'),
+}))
+
 vi.mock('../lib/api', () => ({
   api: p => p,
   apiFetch: (...a) => apiFetch(...a),
@@ -372,7 +379,7 @@ describe('SettingsScreen — the level, the bar and the service', () => {
     // — spelled out rather than rebuilt from the locale table, because a
     // caption assembled from the same source it is being checked against
     // would pass however wrong the assembly was.
-    expect(cards[1].getAttribute('aria-label')).toContain('Raté · Presque · Difficile · Correct')
+    expect(cards[1].getAttribute('aria-label')).toContain('Raté · Difficile · Correct · Facile')
     expect(cards[0].getAttribute('aria-label')).toContain('Raté · Correct')
 
     cards[2].click()

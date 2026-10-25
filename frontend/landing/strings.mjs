@@ -13,14 +13,14 @@ const FR_NUM = new Intl.NumberFormat('fr-FR')
 const EN_NUM = new Intl.NumberFormat('en-GB')
 
 // The demo cards (the method's trial). Each carries the forecast the
-// app's scheduler gives it, in seconds, for Wrong, Almost, Difficult and
-// Correct, and its progress band: backend/srs/scheduler.py and
+// app's scheduler gives it, in seconds, for Missed, Difficult, Correct
+// and Easy (qualities 1, 3, 4, 5: the app's four-button bar), and its progress band: backend/srs/scheduler.py and
 // srs.py's _progress, run on the state each card stands in (new; the
 // third and fourth learning steps; graduated at 30 days).
-const NEW = [180, 180, 390, 600]
-const STEP_3 = [180, 600, 45000, 86400]
-const STEP_4 = [180, 3600, 86400, 172800]
-const KNOWN = [180, 600, 74 * 86400, 80 * 86400]
+const NEW = [90, 360, 600, 3600]
+const STEP_3 = [90, 45000, 86400, 172800]
+const STEP_4 = [90, 86400, 172800, 259200]
+const KNOWN = [90, 74 * 86400, 80 * 86400, 90 * 86400]
 
 export const CARDS = [
   { glyph: '駅', serif: true, reading: 'えき', example: '駅はどこですか。', stage: 'new', progress: 0, due: NEW, kind: 'kanji' },
@@ -173,7 +173,7 @@ const fr = facts => {
       flip: 'Touche pour retourner',
       flipAria: 'Retourner la carte',
       rateLabel: "Comment ça s'est passé ?",
-      ratings: ['Raté', 'Presque', 'Difficile', 'Correct'],
+      ratings: ['Raté', 'Difficile', 'Correct', 'Facile'],
       level: 'Niv. 3',
       xp: x => `+${x} XP`,
       kinds: { kanji: 'Kanji', vocab: 'Vocabulaire', kana: 'Kana', grammar: 'Grammaire' },
@@ -420,7 +420,7 @@ const en = facts => {
       flip: 'Tap to flip',
       flipAria: 'Flip the card',
       rateLabel: 'How did it go?',
-      ratings: ['Wrong', 'Almost', 'Difficult', 'Correct'],
+      ratings: ['Missed', 'Difficult', 'Correct', 'Easy'],
       level: 'Lv. 3',
       xp: x => `+${x} XP`,
       kinds: { kanji: 'Kanji', vocab: 'Vocabulary', kana: 'Kana', grammar: 'Grammar' },

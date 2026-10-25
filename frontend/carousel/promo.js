@@ -39,10 +39,10 @@ export const PROMO = {
     board: 'Board at tsuji.app',
     stillKnow: 'Do you still know this word?',
     how: 'How did it go?',
-    ratings: ['Wrong', 'Almost', 'Difficult', 'Correct'],
+    ratings: ['Missed', 'Difficult', 'Correct', 'Easy'],
     // The scheduler's forecast for a card mastered a month ago
     // (landing/strings.mjs, KNOWN): backend/srs/scheduler.py's own.
-    due: ['in 3 min', 'in 10 min', 'in 2 months', 'in 3 months'],
+    due: ['in 2 min', 'in 74 days', 'in 80 days', 'in 90 days'],
     mastered: 'Mastered',
     mode: 'Word → meaning',
     tap: 'Tap to reveal',
@@ -100,8 +100,8 @@ export const PROMO = {
     board: 'Embarquer sur tsuji.app',
     stillKnow: 'Tu connais encore ce mot ?',
     how: 'Comment ça s’est passé ?',
-    ratings: ['Raté', 'Presque', 'Difficile', 'Correct'],
-    due: ['dans 3 min', 'dans 10 min', 'dans 2 mois', 'dans 3 mois'],
+    ratings: ['Raté', 'Difficile', 'Correct', 'Facile'],
+    due: ['dans 2 min', 'dans 74 jours', 'dans 80 jours', 'dans 90 jours'],
     mastered: 'Maîtrisé',
     mode: 'Mot → sens',
     tap: 'Touche pour révéler',
@@ -499,10 +499,10 @@ export function promoDeck(plan, fmt, opts) {
           y += cardH + SP[7]
           y = lead(c, P.how, y, p.ink, [FS.title], { maxLines: 1 })
           y += SP[4]
-          const bar = A.ratingBar(c, p, fr.x, y + 34 * U, fr.w, U, P.ratings, { pressed: 3 })
+          const bar = A.ratingBar(c, p, fr.x, y + 34 * U, fr.w, U, P.ratings, { pressed: 2 })
           bar.centres.forEach((cx, i) => {
             const f = fit(c, P.due[i], { weight: 700, sizes: [12 * U, 10.5 * U], maxW: (fr.w / 4.6), maxLines: 1, fam: 'latin' })
-            text(c, f.lines[0], cx, y + 20 * U, { f: f.f, color: i === 3 ? p.ink : p.ink2, align: 'center' })
+            text(c, f.lines[0], cx, y + 20 * U, { f: f.f, color: i === 2 ? p.ink : p.ink2, align: 'center' })
           })
           return y + 34 * U + bar.h
         })
