@@ -281,7 +281,7 @@ describe('the reading ride on the desk\'s panels (P12)', () => {
     expect($('.desk-run__side .desk-sealed')).toBeNull()
     expect($('.desk-run__side').textContent).toContain('station')
     expect($('.desk-sentence__text').textContent).toBe(SENTENCE.phrase)
-    expect($('.desk-sentence__dot--q4')).not.toBeNull()  // '1' is the best tile: q4 on the default scale
+    expect($('.desk-sentence__dot--q5')).not.toBeNull()  // '1' is the best tile: q5 on the default scale
     expect(figure()).toBe('1')
     // The lesson is over at its grade (2026-10-18): stamped now, not on
     // the plate's Enter, so a ride left at the plate is not begun again.
