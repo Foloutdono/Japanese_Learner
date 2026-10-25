@@ -167,9 +167,10 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          MARKETING_VERSION: ${GITHUB_REF_NAME#v}
           BUILD_NUMBER: ${{ github.run_number }}
-        run: bundle exec fastlane beta
+        # The version is the tag without its v. An env: value is not run
+        # through the shell, so the strip happens here, in the step's run.
+        run: MARKETING_VERSION="${GITHUB_REF_NAME#v}" bundle exec fastlane beta
       - name: Upload the archive
         uses: actions/upload-artifact@v6
         with:
