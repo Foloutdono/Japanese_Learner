@@ -137,6 +137,30 @@ export function ServicePage({ session }) {
       .finally(() => setBusy(false))
   }
 
+  // The charter's number, dialled a day at a time: in its own row on
+  // the chart, under the four cards without a destination.
+  const dial = (
+    <div className="svc-own">
+      <button type="button" className="svc-own__step" aria-label={t.settingsPaceLess}
+        disabled={busy || saving || ownPace <= 1} data-action="pace-less" onClick={() => stepOwn(-1)}>
+        <MinusIcon size={16} />
+      </button>
+      <span className="svc-own__value" aria-live="polite">
+        <b className="svc-own__n">{ownPace}</b> {t.settingsPerDay}
+      </span>
+      <button type="button" className="svc-own__step" aria-label={t.settingsPaceMore}
+        disabled={busy || saving || ownPace >= MAX_PACE} data-action="pace-more" onClick={() => stepOwn(1)}>
+        <PlusIcon size={16} />
+      </button>
+      {!withDest && (
+        <button type="button" className="btn-secondary svc-own__save" disabled={!ownDirty || saving}
+          data-action="pace-save" onClick={saveOwn}>
+          {t.save}
+        </button>
+      )}
+    </div>
+  )
+
   return (
     <SettingsPage title={t.destService}>
       <Slip>
@@ -170,6 +194,10 @@ export function ServicePage({ session }) {
                 <Line axis={axis} at={p.at} code={code} fmt={fmt} />
               </button>
             ))}
+            {/* The charter's row holds its dial (plan 273, the owner's
+                pick A): the radio and the stepper under it, side by side
+                in one ring, since a button may hold no other button. */}
+            <div className={`svc-own-row${ownOn ? ' svc-own-row--on' : ''}`}>
             <button
               type="button"
               role="radio"
@@ -187,6 +215,8 @@ export function ServicePage({ session }) {
               </span>
               <Line axis={axis} at={ownAt} code={code} fmt={fmt} />
             </button>
+            {ownOn && dial}
+            </div>
             {yours && (
               <div className="svc-row svc-row--yours">
                 <span className="svc-row__names">
@@ -235,29 +265,7 @@ export function ServicePage({ session }) {
             </button>
           </div>
         )}
-        {/* The charter's number, outside the group: a stepper is not a
-            radio, and nothing interactive may sit inside one. */}
-        {ownOn && (
-          <div className="svc-own">
-            <button type="button" className="svc-own__step" aria-label={t.settingsPaceLess}
-              disabled={busy || saving || ownPace <= 1} data-action="pace-less" onClick={() => stepOwn(-1)}>
-              <MinusIcon size={16} />
-            </button>
-            <span className="svc-own__value" aria-live="polite">
-              <b className="svc-own__n">{ownPace}</b> {t.settingsPerDay}
-            </span>
-            <button type="button" className="svc-own__step" aria-label={t.settingsPaceMore}
-              disabled={busy || saving || ownPace >= MAX_PACE} data-action="pace-more" onClick={() => stepOwn(1)}>
-              <PlusIcon size={16} />
-            </button>
-            {!withDest && (
-              <button type="button" className="btn-secondary svc-own__save" disabled={!ownDirty || saving}
-                data-action="pace-save" onClick={saveOwn}>
-                {t.save}
-              </button>
-            )}
-          </div>
-        )}
+        {!axis && ownOn && dial}
         {/* A pace set outside the three services (the column is a free
             integer) still shows honestly instead of nowhere. */}
         {custom && !ownOn && <span className="slip__hint">{t.settingsPaceCustom(printedPace)}</span>}

@@ -139,6 +139,8 @@ describe('Settings at phone width', () => {
     expect(own.left).toBeGreaterThanOrEqual(page.left - 1)
     expect(own.right).toBeLessThanOrEqual(page.right + 1)
     for (const step of document.querySelectorAll('.svc-own__step')) expect(box(step).height).toBeGreaterThanOrEqual(44)
+    // The dial is the row's own, inside its ring, not under the chart.
+    expect(document.querySelector('.svc-own-row--on .svc-own')).not.toBeNull()
   })
 
   it('draws the three themes three across', async () => {
