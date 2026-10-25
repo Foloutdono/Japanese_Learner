@@ -122,11 +122,11 @@ def test_a_rendered_seed_has_the_generated_shape():
 
 
 def test_a_request_reads_the_index_and_nothing_keeps_the_seeds():
-    """Parsed, the seeds weigh some 86 KB each (13 MB at 150), which a
+    """Parsed, the seeds weigh some 86 KB each (15 MB at 180), which a
     process that kept them would carry for its whole life inside the
     backend's 512 MB. So entries() reads the files at each call, and a
     request reads index(): each seed's title, text and grammar, and the
-    questions of each level's first seed besides, 257 KB at 150 seeds.
+    questions of each level's first seed besides, 311 KB at 180 seeds.
     index() parses the files on its own, cutting each seed as it is
     read, so it is held to by_level(): the same seeds in the same order,
     and nothing else."""
