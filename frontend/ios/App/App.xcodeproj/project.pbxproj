@@ -11,6 +11,7 @@
 		23880A5AF1E061B968837BC6 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B62DF1466C67B48441D61D97 /* WidgetKit.framework */; };
 		26EF206A980FC477E6AA24D8 /* TsujiBridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556312820C808DE4EA168AD6 /* TsujiBridgeViewController.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		3E0486A65E150498E5BD33B0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6161ED4292B35552A4FE858E /* PrivacyInfo.xcprivacy */; };
 		437D42C75C5C95B1EBB30F19 /* TsujiWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DE07936D8A3094165F8E49D5 /* TsujiWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		491B20EBFE8D05CC08B64CEC /* TsujiWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E09C7113B03A09D6776CB18 /* TsujiWidget.swift */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
@@ -20,6 +21,7 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		8BC990B4760D831BD99C8A1F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 94F0E8AAE3D3BBE3FAFC3507 /* PrivacyInfo.xcprivacy */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		D73D5B85225D8F37C6A493DE /* TsujiWidgetPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4FA5EA118E6B3F0669BB21 /* TsujiWidgetPlugin.swift */; };
 		FDDF6A72093B146DEE32AB8A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C42B4C28BA55A97934F37111 /* InfoPlist.strings */; };
@@ -65,7 +67,9 @@
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		556312820C808DE4EA168AD6 /* TsujiBridgeViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TsujiBridgeViewController.swift; sourceTree = "<group>"; };
 		55AFA200437BDE6E93C508F5 /* TsujiWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = TsujiWidget.entitlements; sourceTree = "<group>"; };
+		6161ED4292B35552A4FE858E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8A9A2A97F9BB2AD032D0208D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		94F0E8AAE3D3BBE3FAFC3507 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		A8B1C8031BB0480185AE9A0E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 				2E09C7113B03A09D6776CB18 /* TsujiWidget.swift */,
 				8A9A2A97F9BB2AD032D0208D /* Info.plist */,
 				55AFA200437BDE6E93C508F5 /* TsujiWidget.entitlements */,
+				6161ED4292B35552A4FE858E /* PrivacyInfo.xcprivacy */,
 			);
 			name = TsujiWidget;
 			path = TsujiWidget;
@@ -150,6 +155,7 @@
 				DB4FA5EA118E6B3F0669BB21 /* TsujiWidgetPlugin.swift */,
 				556312820C808DE4EA168AD6 /* TsujiBridgeViewController.swift */,
 				455874A384B830EC329E9954 /* App.entitlements */,
+				94F0E8AAE3D3BBE3FAFC3507 /* PrivacyInfo.xcprivacy */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -256,6 +262,7 @@
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 				FDDF6A72093B146DEE32AB8A /* InfoPlist.strings in Resources */,
+				8BC990B4760D831BD99C8A1F /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,6 +270,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E0486A65E150498E5BD33B0 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

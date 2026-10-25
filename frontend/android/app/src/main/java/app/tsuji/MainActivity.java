@@ -18,6 +18,10 @@ public class MainActivity extends BridgeActivity {
         // starts so the web app finds it on its first call.
         registerPlugin(TsujiWidgetPlugin.class);
         super.onCreate(savedInstanceState);
+        // A photo is chosen in the system photo picker, not among every
+        // file on the device (PhotoChromeClient). Set before the activity
+        // starts, which its result launcher has to be registered by.
+        bridge.getWebView().setWebChromeClient(new PhotoChromeClient(bridge));
         closeKeyboardGap();
     }
 
