@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- What the app's FileProvider may hand another app: the shot the camera
+     app writes for the analyzer (Capacitor's BridgeWebChromeClient, in
+     getExternalFilesDir(Pictures)) and the exports @capacitor/share sends
+     from the cache (src/lib/native.js). Never the whole shared storage. -->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="." />
+    <external-files-path name="my_images" path="Pictures/" />
     <cache-path name="my_cache_images" path="." />
 </paths>

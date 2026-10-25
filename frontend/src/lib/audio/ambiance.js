@@ -1,6 +1,5 @@
 import { getAudioContext, whenUnlocked } from './context'
 import { playBuffer, fadeOutAndStop, ramp } from './mixer'
-import { isMuted } from './settings'
 import { stopSpeaking } from './speech'
 import { printHour } from '../../domain/printHour'
 import AMBIANCE from './ambiance.json'
@@ -130,8 +129,10 @@ function play(hour, fadeIn) {
     if (!handle) { current = null; return }
     current = { hour, handle }
     // Started while the tab was in the background (a route change in
-    // a hidden tab): keep it silent until we're looked at again.
-    if (hidden || isMuted()) ramp(handle.gain.gain, 0, 0.01)
+    // a hidden tab): keep it silent until we're looked at again. Not
+    // while muted: the master bus is at zero then, and a lake turned
+    // down here too stayed down once the sound was turned back on.
+    if (hidden) ramp(handle.gain.gain, 0, 0.01)
   }).catch(() => { if (loading === hour) loading = null })
 }
 
@@ -227,9 +228,15 @@ function onShow() {
   hidden = false
   const ctx = getAudioContext()
   if (!ctx) return
-  ctx.resume()
-    .then(() => { if (current && !isMuted()) ramp(current.handle.gain.gain, current.handle.level, FADE_IN) })
-    .catch(() => {})
+  // Faded back in whether or not this resume() is allowed. The ramp is
+  // on the audio clock, which stands still while the context sleeps,
+  // so it plays from whenever the context wakes: now, or at the next
+  // tap on a browser that wants one (context.js). It used to wait for
+  // the promise, and when Safari refused a resume without a gesture the
+  // tap that later woke the context found the lake still at zero, for
+  // as long as the screen stayed open. Muted, the master bus holds it.
+  if (current) ramp(current.handle.gain.gain, current.handle.level, FADE_IN)
+  ctx.resume().catch(() => {})
 }
 
 if (typeof document !== 'undefined') {

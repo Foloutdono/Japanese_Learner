@@ -319,6 +319,17 @@ runtime purpose.
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
   phone test.
+- **The store shells ask for what they use and name what they call.**
+  The Android manifest asks for the network and notifications alone: a
+  photo comes from the system photo picker (`PhotoChromeClient`), a shot
+  from the camera app, a reminder is an inexact alarm
+  (`isExactNotification: false`), and a permission a plugin brings that
+  the app does not need is taken out (`tools:node="remove"`). The release
+  is shrunk and renamed by R8 (`android/app/proguard-rules.pro`): a class
+  reached by its name needs a keep rule, and CI runs R8 on every pull
+  request. An iOS target that calls one of Apple's required-reason APIs
+  (UserDefaults, file dates) names it in its `PrivacyInfo.xcprivacy`.
+  `src/native.shells.test.js` holds all of it.
 - **An assumption is not history (plan 224).** A card the level rule
   marked known and nobody has asked about (`SRSEngine.is_assumed`) is
   the app's guess about a self-declared level. Its first answer is a
@@ -363,6 +374,20 @@ runtime purpose.
   ride read CLS 1.3 from the ride's own notes. A tap that changes the
   screen renders it as a transition (`BoardingFlow`'s `go()`), so the tap
   paints before the screen does.
+- **Sound wakes on a lift, and on every one (2026-10-25).** A browser
+  lets a page play on a key, a mouse button going down or a finger
+  lifting (touchend, click), never on a finger landing:
+  `lib/audio/context.js` makes the AudioContext on the first of those
+  and wakes it on every later one, `interrupted` (Safari's, after a call
+  or a locked screen) as well as `suspended`. A sound asked for from a
+  finger's pointerdown is silent on a phone until it lifts, and a fade
+  that waits on `resume()` can wait for good (the lake's did): schedule
+  it on the audio clock instead. On iOS the session is `playback`, the
+  owner's choice: sound plays through the silent switch, and pauses
+  another app's music while it does. A word or line is said through
+  `lib/audio/speech.js`, whose turn is what lets a stop reach a clip
+  still on its way and keeps the app's own cancels from reading as a
+  device that failed.
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So

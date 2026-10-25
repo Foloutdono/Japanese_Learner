@@ -183,6 +183,12 @@ export async function scheduleNudges(nudges, channel) {
       ...(n.lines.length ? { inboxList: n.lines } : {}),
       ...onChannel,
       schedule: { at: n.at, allowWhileIdle: true },
+      // Inexact. The plugin's default is an exact alarm, and where Android
+      // has not granted one (it grants none to a new install from Android
+      // 14) it opened the "Alarms & reminders" settings at every schedule.
+      // A reminder a few minutes late is no harm, and Google Play keeps
+      // exact alarms for alarm clocks: the manifest drops the permission.
+      isExactNotification: false,
       extra: n.extra,
     })),
   })
@@ -207,6 +213,7 @@ export async function scheduleAgenda(items, channel) {
       body: n.body,
       ...onChannel,
       schedule: { at: n.at, allowWhileIdle: true },
+      isExactNotification: false,   // as scheduleNudges's
       extra: n.extra,
     })),
   })
