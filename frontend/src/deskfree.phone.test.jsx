@@ -1805,7 +1805,7 @@ describe('the run\'s lines (plan 129)', () => {
     // one sentence rated, in its verdict's ink.
     expect(document.querySelector('.stage__head .today-remaining')).toBeNull()
     expect(document.querySelector('.run-meter__n').textContent).toBe('1 / 1')
-    expect(document.querySelector('.run-meter__s--done.run-meter__s--q4')).not.toBeNull()
+    expect(document.querySelector('.run-meter__s--done.run-meter__s--q5')).not.toBeNull()
     expect(document.querySelector('.screen > .run-floor')).not.toBeNull()
     expect(document.querySelector('.stage .prose__breakdown button')).not.toBeNull()
     expect(document.querySelector('kbd')).toBeNull()
