@@ -422,11 +422,24 @@ export default function App({ front = NO_FRONT }) {
   // asks once more, while AppLoading keeps drawing the wait.
   const [gateAttempt, setGateAttempt] = useState(0)
 
+  // The gate asks once per USER, not once per session object. A guest
+  // who keeps the card at the boarding's gate (lib/guest.js
+  // claimAccount) gets a new session from USER_UPDATED a second before
+  // the boarding is signed: asked again then, the profile left before
+  // onboarded_at was stamped, landed after the boarding closed, and put
+  // the learner back at its first question (3 of the 7 guests who kept
+  // a card there by 2026-10-25). A token refresh asked again too, and
+  // counted a second app_open. The request reads its session from here.
+  const gateUser = session?.user?.id ?? null
+  const gateSession = useRef(session)
+  useEffect(() => { gateSession.current = session }, [session])
+
   useEffect(() => {
+    const session = gateSession.current
     if (!session) return
     let cancelled = false
     let retry = null
-    const userId = session.user?.id ?? null
+    const userId = gateUser
     // 45 s, not the 10 s default: the backend sleeps on Render's free
     // tier and a cold start takes 30–60 s. On a phone, where every visit
     // is short and the first request of the day is exactly this one, an
@@ -503,7 +516,7 @@ export default function App({ front = NO_FRONT }) {
         retry = setTimeout(() => setGateAttempt(a => a + 1), GATE_RETRY_MS)
       })
     return () => { cancelled = true; clearTimeout(retry) }
-  }, [session, gateAttempt])
+  }, [gateUser, gateAttempt])
 
   const onboarding = gate && gate.userId === (session?.user?.id ?? null) ? gate.state : undefined
   const onboardingProfile = gate?.profile ?? null
