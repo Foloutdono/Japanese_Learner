@@ -28,6 +28,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { forgetParkedGuest, isGuest, parkGuest, startGuest } from './lib/guest'
+import { inAppBrowser } from './lib/inAppBrowser'
 import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
@@ -44,6 +45,7 @@ import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
 import Welcome from './components/boarding/Welcome'
+import { OutsideSheet } from './components/boarding/OutsideSheet'
 import BoardingFlow from './screens/BoardingFlow'
 import RideRun from './screens/RideRun'
 import RideReading from './screens/RideReading'
@@ -313,6 +315,17 @@ export default function App({ front = NO_FRONT }) {
   // flag is only the button's own "working on it" — the session
   // arrives through the auth listener like any other.
   const [boarding, setBoarding] = useState(false)
+  // 外 (lib/inAppBrowser.js): the app whose browser this page is open
+  // in, or null. There, Board first offers the phone's own browser
+  // (`askOutside`), since a pass minted here stays here -- and Board
+  // pressed on the landing page waits for that answer too, on the
+  // Welcome, rather than minting at once.
+  const [inApp] = useState(() => inAppBrowser())
+  const [askOutside, setAskOutside] = useState(() => front.entry === 'board' && inApp != null)
+  // Asked once a load: a learner who chose to stay is not asked again by
+  // the next Board (backing out of the first question, say).
+  const stayedInApp = useRef(false)
+  const boardsAtOnce = front.entry === 'board' && inApp == null
   // 机 (plans 155, 163): the learner who pressed Board on this load is
   // on the way into the boarding, so the wait before its first question
   // stays on the paper the Welcome and the boarding both stand on
@@ -322,14 +335,14 @@ export default function App({ front = NO_FRONT }) {
   // When Board was pressed (a performance.now() reading), or null: the
   // wait's dots are drawn a beat after the press, whichever screen is up.
   // Board pressed on the landing page counts from this load.
-  const [boardedHere, setBoardedHere] = useState(() => (front.entry === 'board' ? performance.now() : null))
+  const [boardedHere, setBoardedHere] = useState(() => (boardsAtOnce ? performance.now() : null))
   // 正面口 (lib/frontEntry.js): Board pressed on the landing page is
   // honoured before any screen is drawn -- the pass is minted at once and
   // the boarding opens on its first question, with no Welcome asking a
   // second time.
   // On until a session arrives, or until the pass could not be minted (the
   // Welcome then opens on the sign-up, as its own Board does).
-  const [pageBoard, setPageBoard] = useState(front.entry === 'board')
+  const [pageBoard, setPageBoard] = useState(boardsAtOnce)
   const pageBoarded = useRef(false)
   useEffect(() => {
     if (session !== null || !pageBoard || pageBoarded.current) return
@@ -369,7 +382,13 @@ export default function App({ front = NO_FRONT }) {
   // auth listener, which may land after this resolves -- turning the
   // flag off first put the Welcome back for a frame. Signing out is
   // what turns it off again (the listener below).
-  async function board() {
+  function board() {
+    if (boarding) return
+    if (inApp && !stayedInApp.current) { setAskOutside(true); return }
+    boardNow()
+  }
+
+  async function boardNow() {
     if (boarding) return
     const pressedAt = performance.now()
     setBoarding(true)
@@ -422,11 +441,24 @@ export default function App({ front = NO_FRONT }) {
   // asks once more, while AppLoading keeps drawing the wait.
   const [gateAttempt, setGateAttempt] = useState(0)
 
+  // The gate asks once per USER, not once per session object. A guest
+  // who keeps the card at the boarding's gate (lib/guest.js
+  // claimAccount) gets a new session from USER_UPDATED a second before
+  // the boarding is signed: asked again then, the profile left before
+  // onboarded_at was stamped, landed after the boarding closed, and put
+  // the learner back at its first question (3 of the 7 guests who kept
+  // a card there by 2026-10-25). A token refresh asked again too, and
+  // counted a second app_open. The request reads its session from here.
+  const gateUser = session?.user?.id ?? null
+  const gateSession = useRef(session)
+  useEffect(() => { gateSession.current = session }, [session])
+
   useEffect(() => {
+    const session = gateSession.current
     if (!session) return
     let cancelled = false
     let retry = null
-    const userId = session.user?.id ?? null
+    const userId = gateUser
     // 45 s, not the 10 s default: the backend sleeps on Render's free
     // tier and a cold start takes 30–60 s. On a phone, where every visit
     // is short and the first request of the day is exactly this one, an
@@ -503,7 +535,7 @@ export default function App({ front = NO_FRONT }) {
         retry = setTimeout(() => setGateAttempt(a => a + 1), GATE_RETRY_MS)
       })
     return () => { cancelled = true; clearTimeout(retry) }
-  }, [session, gateAttempt])
+  }, [gateUser, gateAttempt])
 
   const onboarding = gate && gate.userId === (session?.user?.id ?? null) ? gate.state : undefined
   const onboardingProfile = gate?.profile ?? null
@@ -625,6 +657,12 @@ export default function App({ front = NO_FRONT }) {
     return (
       <LangProvider>
         <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={closeSignIn} authMode={authMode} />
+        <OutsideSheet
+          open={askOutside}
+          app={inApp}
+          onClose={() => setAskOutside(false)}
+          onStay={() => { stayedInApp.current = true; setAskOutside(false); boardNow() }}
+        />
       </LangProvider>
     )
   }

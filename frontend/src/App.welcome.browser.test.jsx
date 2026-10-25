@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 
 // ── Signed out: Welcome, then the sign-in on the matching side ──
@@ -23,9 +23,12 @@ vi.mock('./lib/supabase', () => ({
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
       signInWithPassword: vi.fn(async () => ({ error: null })),
       signUp: vi.fn(async () => ({ error: null })),
+      // No guest passes in this project: Board falls back to the sign-up.
+      signInAnonymously: (...a) => signInAnonymously(...a),
     },
   },
 }))
+const signInAnonymously = vi.fn(async () => ({ data: { session: null }, error: { code: 'anonymous_provider_disabled' } }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: App } = await import('./App')
@@ -115,3 +118,53 @@ describe('App signed out', () => {
   })
 })
 
+
+// ── 外 — Board inside another app's browser (lib/inAppBrowser.js) ──
+// A pass minted in Instagram's browser stays there, and the phone's own
+// browser, where most go next, boards a second learner. So Board asks
+// first, and mints nothing until the learner stays.
+const INSTAGRAM = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/22G100 Instagram 452.0.1.39.54 (iPhone15,3; iOS 18_6_2;'
+
+describe('App signed out, in another app\'s browser', () => {
+  const outside = () => document.body.querySelector('.brd-sheet--outside')
+  beforeEach(() => {
+    Object.defineProperty(window.navigator, 'userAgent', { value: INSTAGRAM, configurable: true })
+    signInAnonymously.mockClear()
+  })
+  afterEach(() => { delete window.navigator.userAgent })
+
+  it('offers the phone\'s browser before any pass is minted, and boards here on Stay', async () => {
+    window.history.replaceState(null, '', '/')
+    const screen = await render(<App />)
+    await settle()
+
+    screen.container.querySelector('[data-action="board"]').click()
+    await settle(60)
+    expect(outside()).not.toBeNull()
+    expect(outside().textContent).toContain('Instagram')
+    expect(outside().querySelector('[data-action="outside-open"]')).not.toBeNull()
+    expect(signInAnonymously).not.toHaveBeenCalled()
+
+    outside().querySelector('[data-action="outside-stay"]').click()
+    await settle(60)
+    expect(outside()).toBeNull()
+    expect(signInAnonymously).toHaveBeenCalledTimes(1)
+
+    // No pass here (the project allows none), so the sign-up opened;
+    // its corner Board, once the learner chose to stay, asks no more.
+    screen.container.querySelector('[data-action="board-corner"]').click()
+    await settle(60)
+    expect(outside()).toBeNull()
+    expect(signInAnonymously).toHaveBeenCalledTimes(2)
+  })
+
+  it('holds Board pressed on the landing page to the same question, on the Welcome', async () => {
+    window.history.replaceState(null, '', '/app')
+    const screen = await render(<App front={{ entry: 'board', back: '/' }} />)
+    await settle()
+
+    expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
+    expect(outside()).not.toBeNull()
+    expect(signInAnonymously).not.toHaveBeenCalled()
+  })
+})
