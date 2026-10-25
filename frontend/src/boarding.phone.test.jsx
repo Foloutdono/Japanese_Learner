@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -563,6 +563,11 @@ describe('the boarding at 390×844', () => {
 // always has.
 describe('the browser\'s Back in the boarding', () => {
   const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
+  // history.length counts the entries ahead of the page too: a test that
+  // went back leaves the guard's entry there, which the flow's next push
+  // replaces rather than adds to. A push drops it, so each test counts
+  // from the top of the page's history.
+  beforeEach(() => { window.history.pushState(null, '') })
 
   it('steps back one question at a time, keeping every answer', async () => {
     const start = window.history.length

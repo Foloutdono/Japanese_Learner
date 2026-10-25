@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { render } from 'vitest-browser-react'
 
 // ── The reading pace's store (stores/readingPace.js) ─────────────
@@ -17,8 +17,17 @@ vi.mock('../lib/api', () => ({
   ApiError: class ApiError extends Error {},
 }))
 
-window.localStorage.removeItem('jl.readingPace')
-const { useReadingPace, setReadingPace } = await import('./readingPace')
+// The store keeps the last pace chosen (its mirror) and the save in
+// flight as module state, so each test loads its own over an empty
+// mirror rather than the previous test's choice. A query string, not
+// vi.resetModules(), which the browser lane does not honour
+// (lib/audio/speech.browser.test.js).
+let fresh = 0
+async function loadStore() {
+  window.localStorage.removeItem('jl.readingPace')
+  return import(/* @vite-ignore */ `./readingPace.js?test=${++fresh}`)
+}
+beforeEach(() => { apiJson.mockReset() })
 // The mirror is this browser's, shared with every later file in the lane.
 afterAll(() => { window.localStorage.removeItem('jl.readingPace') })
 
@@ -31,17 +40,18 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function Probe() {
-  return <span data-pace={useReadingPace()} />
+function Probe({ usePace }) {
+  return <span data-pace={usePace()} />
 }
 const shown = root => root.querySelector('[data-pace]').dataset.pace
 const sent = () => apiJson.mock.calls.map(c => JSON.parse(c[2].body).readingPace)
 
 describe('stores/readingPace', () => {
   it('shows a choice at once, and saves the presses one at a time, in order', async () => {
+    const { useReadingPace, setReadingPace } = await loadStore()
     const saves = [deferred(), deferred()]
     apiJson.mockImplementation(() => saves[apiJson.mock.calls.length - 1].promise)
-    const { container } = await render(<Probe />)
+    const { container } = await render(<Probe usePace={useReadingPace} />)
     expect(shown(container)).toBe('standard')
 
     const first = setReadingPace('relaxed', null)
@@ -66,7 +76,7 @@ describe('stores/readingPace', () => {
   })
 
   it('lets the next save go after one fails', async () => {
-    apiJson.mockReset()
+    const { setReadingPace } = await loadStore()
     apiJson.mockImplementationOnce(() => Promise.reject(new Error('503')))
     apiJson.mockImplementationOnce(async () => ({}))
     await expect(setReadingPace('untimed', null)).rejects.toThrow('503')
