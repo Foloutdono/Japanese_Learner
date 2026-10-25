@@ -2698,6 +2698,14 @@ const boarding = {
   brdAgendaAdd: 'Add to my calendar',
   brdAgendaTitle: 'Tsuji · your Japanese train',
   brdAgendaBody: (min) => `${min} min of Japanese, every day.`,
+  // Boarding inside another app's browser (lib/inAppBrowser.js): a card
+  // made there stays there.
+  brdSheetOutside: 'Browser',
+  brdOutsideLede: (app) => `A card made inside ${app} stays inside ${app}: your browser won’t see it.`,
+  brdOutsideMenu: 'Or use the ⋯ menu at the top of the screen to open this page in your browser.',
+  brdOutsideSafari: 'Open in Safari',
+  brdOutsideChrome: 'Open in Chrome',
+  brdOutsideStay: (app) => `Stay in ${app}`,
 }
 
 const ride = {

@@ -2637,6 +2637,14 @@ const boarding = {
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',
   brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
+  // Embarquer dans le navigateur d'une autre appli (lib/inAppBrowser.js) :
+  // une carte prise là y reste.
+  brdSheetOutside: 'Navigateur',
+  brdOutsideLede: (app) => `Une carte prise dans ${app} reste dans ${app} : ton navigateur ne la verra pas.`,
+  brdOutsideMenu: 'Sinon, le menu ⋯ en haut de l’écran ouvre cette page dans ton navigateur.',
+  brdOutsideSafari: 'Ouvrir dans Safari',
+  brdOutsideChrome: 'Ouvrir dans Chrome',
+  brdOutsideStay: (app) => `Rester dans ${app}`,
 }
 
 const ride = {
