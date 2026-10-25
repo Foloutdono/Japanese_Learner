@@ -5868,7 +5868,7 @@
    "〜まえに",
    "〜ずつ"
   ],
-  "text": "わたしのうちのちかくに、小さいパンやがあります。日よう日のあさ、母とパンを買いに行きました。店の前には人がたくさんいました。店に入るまえに、十分ぐらいまちました。店の中はあたたかくて、いいにおいでした。わたしはメロンパンとチーズパンを二つずつ買いました。母は大きいしょくパンを買いました。ぜんぶで千二百円でした。うちへかえって、父と三人であさごはんを食べました。メロンパンはあまくて、とてもおいしかったです。父は「この店のパンはいちばんおいしいね。」と言いました。来週の日よう日も行きたいです。",
+  "text": "わたしのうちのちかくに、小さいパンの店があります。日よう日のあさ、母とパンを買いに行きました。店の前には人がたくさんいました。店に入るまえに、十分ぐらいまちました。店の中はあたたかくて、いいにおいでした。わたしはメロンパンとチーズパンを二つずつ買いました。母は大きいしょくパンを買いました。ぜんぶで千二百円でした。うちへかえって、父と三人であさごはんを食べました。メロンパンはあまくて、とてもおいしかったです。父は「この店のパンはいちばんおいしいね。」と言いました。来週の日よう日も行きたいです。",
   "questions": [
    {
     "type": "comprehension",
@@ -5939,21 +5939,21 @@
    {
     "type": "vocabulary",
     "question": {
-     "en": "What is a 「パンや」?",
-     "fr": "Qu'est-ce qu'une 「パンや」 ?"
+     "en": "What does 「におい」 mean in this text?",
+     "fr": "Que signifie 「におい」 dans ce texte ?"
     },
     "options": {
      "en": [
-      "A café",
-      "A cake shop",
-      "A supermarket",
-      "A bakery"
+      "A taste",
+      "A sound",
+      "A colour",
+      "A smell"
      ],
      "fr": [
-      "Un café",
-      "Une pâtisserie",
-      "Un supermarché",
-      "Une boulangerie"
+      "Un goût",
+      "Un bruit",
+      "Une couleur",
+      "Une odeur"
      ]
     },
     "correct": 3
@@ -6049,7 +6049,7 @@
   ],
   "breakdown": [
    {
-    "jp": "わたしのうちのちかくに、小さいパンやがあります。",
+    "jp": "わたしのうちのちかくに、小さいパンの店があります。",
     "translation": {
      "en": "There is a small bakery near my house.",
      "fr": "Il y a une petite boulangerie près de chez moi."
@@ -6109,10 +6109,24 @@
       }
      },
      {
-      "surface": "パンや",
+      "surface": "パン",
       "meaning": {
-       "en": "bakery",
-       "fr": "boulangerie"
+       "en": "bread",
+       "fr": "pain"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of (what it sells)",
+       "fr": "de (ce qu'on y vend)"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "magasin"
       }
      },
      {
@@ -11818,7 +11832,7 @@
    "〜て、〜て",
    "〜てください"
   ],
-  "text": "リンさん、こんにちは。となりの山口です。ゆうびんきょくとぎんこうへの道を書きます。駅の北口を出て、まっすぐ行って、二つ目のかどを右にまがってください。そのかどには、大きい本やがあります。右にまがって、三分ぐらいあるいてください。ゆうびんきょくは左にあります。白いカフェのとなりです。ぎんこうは、ゆうびんきょくの前にあります。駅からあるいて十分ぐらいです。ゆうびんきょくは九時から五時まで、ぎんこうは九時から三時までです。土よう日と日よう日は、どちらも休みです。わからないときは、わたしに電話してください。",
+  "text": "リンさん、こんにちは。となりの山口です。ゆうびんきょくとぎんこうへの道を書きます。駅の北口を出て、まっすぐ行って、二つ目のかどを右にまがってください。そのかどには、大きい本やさんがあります。右にまがって、三分ぐらいあるいてください。ゆうびんきょくは左にあります。白いカフェのとなりです。ぎんこうは、ゆうびんきょくの前にあります。駅からあるいて十分ぐらいです。ゆうびんきょくは九時から五時まで、ぎんこうは九時から三時までです。土よう日と日よう日は、どちらも休みです。わからないときは、わたしに電話してください。",
   "questions": [
    {
     "type": "comprehension",
@@ -12254,14 +12268,14 @@
     ]
    },
    {
-    "jp": "そのかどには、大きい本やがあります。",
+    "jp": "そのかどには、大きい本やさんがあります。",
     "translation": {
      "en": "On that corner there is a big bookshop.",
      "fr": "À ce coin, il y a une grande librairie."
     },
     "note": {
-     "en": "「本や」 is a bookshop: 「や」 after a thing names the shop that sells it.",
-     "fr": "「本や」 est une librairie : 「や」 après un objet désigne la boutique qui le vend."
+     "en": "「本やさん」 is a bookshop: 「や」 after a thing names the shop that sells it, and 「さん」 makes it friendly.",
+     "fr": "「本やさん」 est une librairie : 「や」 après un objet désigne la boutique qui le vend, et 「さん」 le dit avec familiarité."
     },
     "words": [
      {
@@ -12300,7 +12314,7 @@
       }
      },
      {
-      "surface": "本や",
+      "surface": "本やさん",
       "meaning": {
        "en": "bookshop",
        "fr": "librairie"
@@ -15952,7 +15966,7 @@
    "〜など",
    "〜がほしいです"
   ],
-  "text": "わたしのへやは、古いアパートの二かいにあります。へやはせまいですが、あかるくてしずかです。南に大きいまどがあります。まどの前に、つくえといすがあります。つくえの上には、パソコンと小さいでんきがあります。わたしは毎ばんここで日本語のしゅくだいをします。つくえの左はベッドです。ベッドの下に、はこが二つあります。はこの中には、ふゆのふくやくつなどが入っています。ドアのよこに、本だながあります。でも、このへやにはテーブルがありません。友だちが来たときは、ベッドにすわって、おちゃを飲みます。だから、小さいテーブルがほしいです。",
+  "text": "わたしのへやは、古いアパートの二かいにあります。へやはせまいですが、あかるくてしずかです。南に大きいまどがあります。つくえといすは、まどの前にあります。つくえの上には、パソコンと小さいでんきがあります。わたしは毎ばんここで日本語のしゅくだいをします。つくえの左はベッドです。ベッドの下に、はこが二つあります。はこには、ふゆのふくやくつなどが入っています。ドアのよこに、本だながあります。でも、このへやにはテーブルがありません。友だちが来たときは、ベッドにすわって、おちゃを飲みます。だから、小さいテーブルがほしいです。",
   "questions": [
    {
     "type": "comprehension",
@@ -16340,16 +16354,44 @@
     ]
    },
    {
-    "jp": "まどの前に、つくえといすがあります。",
+    "jp": "つくえといすは、まどの前にあります。",
     "translation": {
-     "en": "In front of the window, there are a desk and a chair.",
-     "fr": "Devant la fenêtre, il y a un bureau et une chaise."
+     "en": "The desk and the chair are in front of the window.",
+     "fr": "Le bureau et la chaise sont devant la fenêtre."
     },
     "note": {
      "en": "「と」 between two nouns means and, for a complete list: a desk and a chair.",
      "fr": "「と」 entre deux noms veut dire et, pour une liste complète : un bureau et une chaise."
     },
     "words": [
+     {
+      "surface": "つくえ",
+      "meaning": {
+       "en": "desk",
+       "fr": "bureau"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "いす",
+      "meaning": {
+       "en": "chair",
+       "fr": "chaise"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
      {
       "surface": "まど",
       "meaning": {
@@ -16379,38 +16421,10 @@
       }
      },
      {
-      "surface": "つくえ",
-      "meaning": {
-       "en": "desk",
-       "fr": "bureau"
-      }
-     },
-     {
-      "surface": "と",
-      "meaning": {
-       "en": "and",
-       "fr": "et"
-      }
-     },
-     {
-      "surface": "いす",
-      "meaning": {
-       "en": "chair",
-       "fr": "chaise"
-      }
-     },
-     {
-      "surface": "が",
-      "meaning": {
-       "en": "marks the subject",
-       "fr": "marque le sujet"
-      }
-     },
-     {
       "surface": "あります",
       "meaning": {
-       "en": "there are",
-       "fr": "il y a"
+       "en": "are (located)",
+       "fr": "se trouvent"
       }
      }
     ]
@@ -16713,7 +16727,7 @@
     ]
    },
    {
-    "jp": "はこの中には、ふゆのふくやくつなどが入っています。",
+    "jp": "はこには、ふゆのふくやくつなどが入っています。",
     "translation": {
      "en": "In the boxes, there are winter clothes, shoes and other things.",
      "fr": "Dans les boîtes, il y a des habits d'hiver, des chaussures et d'autres choses."
@@ -16728,20 +16742,6 @@
       "meaning": {
        "en": "box",
        "fr": "boîte"
-      }
-     },
-     {
-      "surface": "の",
-      "meaning": {
-       "en": "of",
-       "fr": "de"
-      }
-     },
-     {
-      "surface": "中",
-      "meaning": {
-       "en": "inside",
-       "fr": "intérieur"
       }
      },
      {
@@ -17103,7 +17103,7 @@
    "だから",
    "〜てください"
   ],
-  "text": "トムさんへ。午後二時ごろ、日本語学校の川口先生から電話がありました。来週のテストは木よう日でしたね。でも、先生は木よう日に学校にいません。だから、先生は「テストは金よう日の午前十時にします。」と言いました。金よう日は、えんぴつとノートがいります。じしょはいりません。それから、先生は「トムさんと少し話がしたいです。」と言いました。先生はよる八時まで学校にいます。八時前に、先生に電話をしてください。わたしは買いものに出かけます。六時半ごろかえります。ばんごはんはカレーですよ。まち子",
+  "text": "トムさんへ。午後二時ごろ、日本語学校の川口先生から電話がありました。来週のテストは木よう日でしたね。でも、先生は木よう日に学校にいません。だから、先生は「テストは金よう日の午前十時にします。」と言いました。金よう日は、えんぴつとノートがいります。じしょは、いりません。それから、先生は「トムさんと少し話がしたいです。」と言いました。先生はよる八時まで学校にいます。八時前に、先生に電話をしてください。わたしは買いものに出かけます。六時半ごろかえります。ばんごはんはカレーですよ。まち子",
   "questions": [
    {
     "type": "comprehension",
@@ -17218,8 +17218,8 @@
    {
     "type": "vocabulary",
     "question": {
-     "en": "What does 「いりません」 mean in 「じしょはいりません」?",
-     "fr": "Que signifie 「いりません」 dans 「じしょはいりません」 ?"
+     "en": "What does 「いりません」 mean in 「じしょは、いりません」?",
+     "fr": "Que signifie 「いりません」 dans 「じしょは、いりません」 ?"
     },
     "options": {
      "en": [
@@ -17705,7 +17705,7 @@
     ]
    },
    {
-    "jp": "じしょはいりません。",
+    "jp": "じしょは、いりません。",
     "translation": {
      "en": "You won't need a dictionary.",
      "fr": "Tu n'auras pas besoin de dictionnaire."
@@ -20098,7 +20098,7 @@
    "これ／それ／あれ／どれ",
    "あまり〜ない"
   ],
-  "text": "来月、学校のりょこうで、たくさんあるきます。だから、新しいくつがほしいです。日よう日に、母と駅の前のくつやへ行きました。その店には白いくつがあって、とてもかるかったです。でも、八千円でした。わたしのお金は六千円だけでした。それから、となりのデパートへ行きました。そこのあおいくつは五千円でしたが、わたしの足には小さかったです。店の人がくろいくつを出して、「これは二十四センチですよ。」と言いました。五千五百円で、足にちょうどよかったです。でも、わたしはくろがあまりすきじゃありません。母は「くろもいいですよ。」と言いました。わたしはそのくろいくつを買いました。",
+  "text": "来月、学校のりょこうで、たくさんあるきます。だから、新しいくつがほしいです。日よう日、母と駅の前のくつの店へ行きました。その店には白いくつがあって、とてもかるかったです。でも、八千円でした。わたしのお金は六千円だけでした。それから、となりのデパートへ行きました。そこのあおいくつは五千円でしたが、わたしの足には小さかったです。店の人がくろいくつを出して、「これは二十四センチですよ。」と言いました。五千五百円で、足にちょうどよかったです。でも、わたしはくろがあまりすきじゃありません。母は「くろもいいですよ。」と言いました。わたしはそのくろいくつを買いました。",
   "questions": [
    {
     "type": "comprehension",
@@ -20389,28 +20389,21 @@
     ]
    },
    {
-    "jp": "日よう日に、母と駅の前のくつやへ行きました。",
+    "jp": "日よう日、母と駅の前のくつの店へ行きました。",
     "translation": {
      "en": "On Sunday, I went with my mother to the shoe shop in front of the station.",
      "fr": "Dimanche, je suis allé avec ma mère au magasin de chaussures devant la gare."
     },
     "note": {
-     "en": "The word 「くつや」 is 「くつ」 plus 「や」, a shop: a shoe shop.",
-     "fr": "Le mot 「くつや」 est 「くつ」 plus 「や」, la boutique : un magasin de chaussures."
+     "en": "「の」 chains the nouns: the shop of shoes, in front of the station.",
+     "fr": "「の」 enchaîne les noms : le magasin de chaussures, devant la gare."
     },
     "words": [
      {
       "surface": "日よう日",
       "meaning": {
-       "en": "Sunday",
+       "en": "on Sunday",
        "fr": "dimanche"
-      }
-     },
-     {
-      "surface": "に",
-      "meaning": {
-       "en": "on (a day)",
-       "fr": "marque le jour"
       }
      },
      {
@@ -20456,10 +20449,24 @@
       }
      },
      {
-      "surface": "くつや",
+      "surface": "くつ",
       "meaning": {
-       "en": "shoe shop",
-       "fr": "magasin de chaussures"
+       "en": "shoes",
+       "fr": "chaussures"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of (what it sells)",
+       "fr": "de (ce qu'on y vend)"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "magasin"
       }
      },
      {
@@ -28166,7 +28173,7 @@
    "〜たくないです",
    "〜から"
   ],
-  "text": "日よう日に、日本語のじしょを買いに、駅の前の本やへ行きました。じしょは二かいにありました。大きいじしょは三千八百円で、ことばがたくさんあります。でも、とてもおもいです。小さいじしょは千九百円で、ことばは少ないですが、かるいです。わたしは店の人に「どのじしょがいいですか。」と聞きました。店の人は「学生さんには、この小さいじしょがいいですよ。」と言いました。わたしは毎日学校でじしょをつかいます。おもいじしょはもちたくないです。だから、その小さいじしょを買いました。大きいじしょは学校のとしょかんにもありますから、そこで見ます。",
+  "text": "日よう日に、日本語のじしょを買いに、駅の前の本やさんへ行きました。じしょは二かいにありました。大きいじしょは三千八百円で、ことばがたくさんあります。でも、とてもおもいです。小さいじしょは千九百円で、ことばは少ないですが、かるいです。わたしは店の人に「どのじしょがいいですか。」と聞きました。店の人は「学生さんには、この小さいじしょがいいですよ。」と言いました。わたしは毎日学校でじしょをつかいます。おもいじしょはもちたくないです。だから、その小さいじしょを買いました。大きいじしょは学校のとしょかんにもありますから、そこで見ます。",
   "questions": [
    {
     "type": "comprehension",
@@ -28347,7 +28354,7 @@
   ],
   "breakdown": [
    {
-    "jp": "日よう日に、日本語のじしょを買いに、駅の前の本やへ行きました。",
+    "jp": "日よう日に、日本語のじしょを買いに、駅の前の本やさんへ行きました。",
     "translation": {
      "en": "On Sunday, I went to the bookshop in front of the station to buy a Japanese dictionary.",
      "fr": "Dimanche, je suis allé à la librairie devant la gare pour acheter un dictionnaire de japonais."
@@ -28435,7 +28442,7 @@
       }
      },
      {
-      "surface": "本や",
+      "surface": "本やさん",
       "meaning": {
        "en": "bookshop",
        "fr": "librairie"
