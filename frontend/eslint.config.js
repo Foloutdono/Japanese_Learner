@@ -20,4 +20,17 @@ export default defineConfig([globalIgnores(['dist', 'dist-native', 'android', 'i
     globals: globals.browser,
     parserOptions: { ecmaFeatures: { jsx: true } },
   },
+}, {
+  // vitest-browser-react's unmount() and rerender() are async, each a
+  // React act(): one left un-awaited is still open when the next test
+  // renders, and that render never commits -- a failure in whichever
+  // test runs next, never in the one that caused it (Guide and
+  // GrammarWork, 2026-10-25).
+  files: ['src/**/*.{browser,phone,tablet,touch,desktop,wide,short}.test.{js,jsx}'],
+  rules: {
+    'no-restricted-syntax': ['error', {
+      selector: 'ExpressionStatement > CallExpression[callee.property.name=/^(unmount|rerender)$/]',
+      message: 'unmount() and rerender() are async in vitest-browser-react: await them, or the next test renders into an open act().',
+    }],
+  },
 }])

@@ -130,7 +130,7 @@ describe('ClaimSheet — on arrival', () => {
     const screen = await mount({ hold: true })
     await settle()
     expect(document.querySelector('.sheet')).toBeNull()
-    screen.rerender(
+    await screen.rerender(
       <LangProvider>
         <MemoryRouter initialEntries={['/today']}>
           <ClaimSheet hold={false} />
