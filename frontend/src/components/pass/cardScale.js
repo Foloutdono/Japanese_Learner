@@ -37,6 +37,6 @@ export function scaleVars(width) {
   return width ? { '--pcard-kf': width / FACE_W, '--pcard-kb': width / BACK_W } : undefined
 }
 
-const CLASS = { free: 'cardFree', pro: 'ofrCardPro', max: 'ofrCardMax' }
+const CLASS = { free: 'cardFree', pro: 'cardPaid', max: 'cardPaid' }
 /** The class printed on the card, in the learner's language. */
 export const classLabel = (t, tier) => t[CLASS[tier]]

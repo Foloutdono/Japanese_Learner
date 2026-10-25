@@ -15,6 +15,13 @@ import './index.css'
 // prints a title (plan 139): the rail's station and the lit door name
 // them, and both headings are clipped for a screen reader.
 
+// The paywall is switched off (domain/paywall.js's HAS_PAYWALL) while the
+// plans are reworked; this test covers the offer's doors, which stay.
+vi.mock('./domain/paywall', async o => ({
+  ...(await o()),
+  offerable: credits => !(credits?.unlimited || credits?.plan === 'pass'),
+}))
+
 vi.mock('./lib/api', () => ({
   api: p => p,
   // A learner at N4, so the destination has a stop to stand at.
