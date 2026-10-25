@@ -1965,3 +1965,100 @@ class ThirdReviewWordTests(unittest.TestCase):
         self.assertTrue(gloss_of("誠にありがとうございます。", "に").startswith("makes an adverb of 誠"))
         # 真に受ける is an idiom's に, not an adverb's.
         self.assertFalse(gloss_of("真に受けちゃだめだよ。", "に").startswith("makes an adverb"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class LastGapsWordTests(unittest.TestCase):
+    """What the gap report still found saying nothing or wrong after the
+    third review (plan 272), each with the sentence it must leave alone."""
+
+    def test_a_verb_after_te_that_is_no_te_grammar(self) -> None:
+        # UniDic files 出す, 切れる, 渡る as possible auxiliaries; after a て
+        # they are the verbs themselves.
+        for sentence, surface, raw_id in (("じゃあ、来週までにまとめて出しとくね。", "出し", "vocab_N5_出す_だす"),
+                                          ("音を立てて切れた。", "切れ", "vocab_N3_切れる_きれる"),
+                                          ("石橋をたたいて渡れ。", "渡れ", "vocab_N5_渡る_わたる")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, surface), raw_id)
+        # ...where 〜てしまう's しまう and 〜てみる's みる stay the points'.
+        self.assertIsNone(card_of("食べてしまった。", "しまっ"))
+        self.assertIsNone(card_of("見てみる。", "みる"))
+
+    def test_went_and_came_back(self) -> None:
+        self.assertEqual(card_of("いってきました。", "いっ"), "vocab_N5_行く_いく")
+        self.assertEqual(token_of("いってきます！", "いってきます")["pos"], "interjection")
+
+    def test_such_before_an_adjective(self) -> None:
+        self.assertEqual(card_of("あんなひどいことを言った。", "あんな"), "vocab_N4__あんな")
+
+    def test_a_word_the_pool_spells_otherwise(self) -> None:
+        for sentence, surface, kanji in (("気合いを入れて頑張れ。", "気合い", "気合"),
+                                         ("カラスは、ごみ袋の色を覚える。", "ごみ袋", "ゴミ袋"),
+                                         ("私はなまけ者だ。", "なまけ者", "怠け者"),
+                                         ("多めに並べる。", "多め", "多目"),
+                                         ("膝に青痣ができた。", "青痣", "青あざ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # Other kanji are another word as far as the letters can tell.
+        self.assertIsNone(token_of("髪型がくずれる。", "髪型").get("vocab_match"))
+
+    def test_the_senses_of_a_suffix_with_no_row(self) -> None:
+        self.assertTrue(gloss_of("十二個入りと二十個入りがございます。", "入り").startswith("(suffix) holding"))
+        self.assertTrue(gloss_of("自転車屋なら、この先にありますよ。", "屋").startswith("(suffix) the shop"))
+        self.assertTrue(gloss_of("作業員たちは泥まみれになった。", "たち").startswith("(suffix) plural"))
+        self.assertTrue(gloss_of("胆のうごと取る。", "ごと").startswith("(suffix) … and all"))
+        self.assertTrue(gloss_of("長時間の話し合い。", "長").startswith("(prefix) long"))
+        # ...where a card answers already: 子どもたち's 達, 地域ごと's 毎.
+        self.assertEqual(token_of("子どもたちは外であそんでいます。", "たち")["vocab_match"]["entry"]["kanji"], "達")
+        self.assertEqual(card_of("地域ごとの言葉の違い。", "ごと"), "vocab_N2_毎_ごと")
+
+    def test_so_opening_a_sentence(self) -> None:
+        self.assertTrue(gloss_of("一日ならいいよ。で、その日の仕事はどうする？", "で").startswith("(spoken, opening"))
+
+    def test_words_cut_or_joined_against_the_sentence(self) -> None:
+        self.assertEqual(card_of("再来月の頭に発売します。", "再来月"), "vocab_N4_さ来月_さらいげつ")
+        self.assertEqual(token_of("今週のおしらせです。", "おしらせ")["vocab_match"]["entry"]["kanji"], "お知らせ")
+        self.assertIn("お", {t["surface"] for t in analysis.analyze_local("おしらせします。")["tokens"]})
+        self.assertEqual(card_of("るすばんをするのをいやがる。", "いやがる"), "vocab_N2_嫌がる_いやがる")
+        self.assertEqual(card_of("思いがけない路地に出会った。", "思いがけない"), "vocab_N2_思い掛けない_おもいがけない")
+        self.assertEqual(card_of("貧しい家の子が行く所。", "家"), "vocab_N5_家_いえ")
+        self.assertEqual(card_of("来月の初めごろに引っ越したい。", "初め"), "vocab_N5_初め_はじめ")
+        self.assertEqual(card_of("何線の電車ですか。", "線"), "vocab_N4_線_せん")
+        self.assertEqual(card_of("きのうは三時間しかねられなかった。", "ね"), "vocab_N5_寝る_ねる")
+        self.assertEqual(card_of("どうしてですか。", "どうして"), "vocab_N5__どうして")
+        # A word of ごろ the dictionary holds stays one (見頃, 今頃), and
+        # どうしていいか is どう + して.
+        self.assertEqual(token_of("桜が見ごろだ。", "見ごろ")["vocab_match"]["entry"]["kanji"], "見頃")
+        self.assertEqual(token_of("どうしていいか分からない。", "どう")["pos"], "adverb")
+        # A word of ず before its noun after a particle (至らぬ点), never a
+        # point's (してはならぬ, 年齢に拘わらず).
+        self.assertEqual(token_of("運営に至らぬ点もあった。", "至らぬ")["vocab_match"]["entry"]["kanji"], "至らぬ")
+        self.assertNotIn("ならぬ", {t["surface"] for t in analysis.analyze_local("信用してはならぬ。")["tokens"]})
+
+    def test_a_verb_made_a_noun_or_a_form(self) -> None:
+        self.assertEqual(card_of("何かお探しですか。", "お探し"), "vocab_N4_探す_さがす")
+        self.assertEqual(card_of("葉が川に浮きつ沈みつ流れていった。", "沈み"), "vocab_N3_沈む_しずむ")
+        self.assertEqual(card_of("毎日ピアノを習わせられた。", "習わ"), "vocab_N5_習う_ならう")
+        self.assertEqual(token_of("この悪循環を断ち切れないものか。", "断ち切れ")["vocab_match"]["entry"]["kanji"], "断ち切る")
+        # お休み is the deck's noun.
+        self.assertEqual(token_of("お休みですか。", "お休み")["vocab_match"]["entry"]["kanji"], "お休み")
+
+    def test_white_written_in_kana(self) -> None:
+        # しろ opening a phrase before a particle is 白; 早くしろ the order.
+        for sentence in ("はい。しろとあおがあります。", "すみません。Lは、あおはありません。しろだけです。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "しろ"), "vocab_N5_白_しろ")
+        self.assertEqual(token_of("早くしろ。", "しろ")["pos"], "verb")
+
+    def test_never_again_before_a_written_negative(self) -> None:
+        for sentence in ("もう二度と、あの店には行くまい。", "あんな店に、二度と行くものか。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "二度と")["vocab_match"]["entry"]["kanji"], "二度と")
+
+    def test_names_and_partners(self) -> None:
+        self.assertEqual(gloss_of("大家の山田に言ってください。", "山田"), "family name")
+        self.assertEqual(card_of("車にひかれるところだった。", "ひか"), "vocab_N3_轢く_ひく")
+        self.assertEqual(card_of("親としてうそはつけない。", "つけ"), "vocab_N1_吐く_つく")
+        self.assertEqual(card_of("じゃあ、赤をはいてもいいですか。", "はい"), "vocab_N3_履く_はく")
+        # テレビをつけない is つける.
+        self.assertNotEqual(card_of("テレビをつけない。", "つけ"), "vocab_N1_吐く_つく")

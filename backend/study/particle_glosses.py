@@ -168,6 +168,8 @@ _GLOSSES = {
              "fr": "(familier) sérieusement, vraiment"},
     "てか": {"en": "(casual) I mean, or rather (= というか)",
             "fr": "(familier) enfin, ou plutôt (= というか)"},
+    "で_then": {"en": "(spoken, opening a sentence) so, and then (= それで)",
+               "fr": "(oral, en tête de phrase) alors, et donc (= それで)"},
     "が_insist": {"en": "(after だろう, at the end) insists: …, isn't it obvious!",
                  "fr": "(après だろう, en fin de phrase) insiste : …, c'est évident !"},
     "じゃ_copula": {"en": "(spoken) では said short: as for, with …; じゃない is not",
@@ -267,6 +269,8 @@ def gloss(morphemes, i: int) -> dict | None:
         key = "まじで"
     elif m.pos == "conjunction" and m.surface in ("てか", "ってか"):
         key = "てか"
+    elif m.pos == "conjunction" and m.surface == "で" and _opens(morphemes, i):
+        key = "で_then"                     # で、その日の仕事はどうする？ (plan 272)
     elif _a_laugh(m.surface) or (m.pos == "interjection" and m.surface in _LAUGH):
         key = "www"
     elif m.surface in ("ガチ", "ガチで", "あざす", "あざっす", "あざーす", "どういった"):

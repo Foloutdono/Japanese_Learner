@@ -223,7 +223,7 @@
 {"t":"静か","r":"しずか","ro":"shizuka","en":["quiet"],"fr":["calme"],"fu":[["静","しず"],["か",""]],"ex":["N5.137","N3.151"]},
 {"t":"泳ぐ","r":"およぐ","ro":"oyogu","en":["to swim"],"fr":["nager"],"fu":[["泳","およ"],["ぐ",""]],"ex":["N5.140","N4.42"]},
 {"t":"ちゃわん","r":"ちゃわん","ro":"chawan","en":["rice bowl, tea cup"],"fr":["bol à riz, tasse à thé"]},
-{"t":"どうして","r":"どうして","ro":"doushite","en":["why, for what reason (everyday speech)"],"fr":["pourquoi (langue courante)"]},
+{"t":"どうして","r":"どうして","ro":"doushite","en":["why, for what reason (everyday speech)"],"fr":["pourquoi (langue courante)"],"ex":["N4.82"]},
 {"t":"辛い","r":"からい","ro":"karai","en":["spicy"],"fr":["épicé, piquant"],"fu":[["辛","から"],["い",""]]},
 {"t":"練習","r":"れんしゅう","ro":"renshuu","en":["practice"],"fr":["entraînement, exercice"],"fu":[["練","れん"],["習","しゅう"]],"hy":["連習","練週","恋習"],"ex":["N4.9","N3.10"]},
 {"t":"牛乳","r":"ぎゅうにゅう","ro":"gyuunyuu","en":["milk"],"fr":["lait"],"fu":[["牛","ぎゅう"],["乳","にゅう"]],"hy":["牛入","牛柔"]},

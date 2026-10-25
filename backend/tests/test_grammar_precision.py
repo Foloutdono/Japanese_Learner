@@ -1899,3 +1899,48 @@ class ThirdReviewPointTests(unittest.TestCase):
         self.assertEqual({w for p, w in found if p == REQUEST}, {"て"})
         self.assertNotIn("〜て、〜て", {p for p, _ in found})
         self.assertIn(REQUEST, found_in("鬼リピしてる曲教えて〜"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class LastGapsPointTests(unittest.TestCase):
+    """Points the gap report found unlit after the third review (plan
+    272), each with the sentence it must leave alone."""
+
+    def test_points_in_shapes_their_lessons_never_write(self) -> None:
+        for sentence, pattern in (("この料理は水っぽくて味がしない。", "〜っぽい"),
+                                  ("彼女は何か言いたげに、こちらを見た。", "〜げ"),
+                                  ("知らない大人が話しかけたら、こわがらせるかもしれない。", "使役形 〜させる"),
+                                  ("教室で「なぜだろう」とつぶやいた。", "〜だろう"),
+                                  ("急に上がるのは、どうしてでしょうか。", "〜でしょうか"),
+                                  ("せっかくですので、ゆっくりさせていただきます。", "です／だ"),
+                                  ("それでも、ゆっくりなら話せないことはない。", "〜なら"),
+                                  ("少し気分を変えたら。", "〜たらどうですか"),
+                                  ("行ってみたらどう？", "〜たらどうですか"),
+                                  ("人気劇団の三年ぶりの公演。", "〜ぶりに"),
+                                  ("毎日ピアノを習わせられた。", "使役受身形 〜させられる"),
+                                  ("石橋をたたいて渡れ。", "命令形 〜ろ／〜え"),
+                                  ("信用してはならぬ。", "〜てはならない")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
+        # A lyric's line left on たら is an "if"; 話しぶり is a manner.
+        self.assertNotIn("〜たらどうですか", found_in("きみのとなりで ぴょんと跳ねたら"))
+        self.assertNotIn("〜たらどうですか", found_in("雨が降ったら、行かない。"))
+        self.assertNotIn("〜ぶりに", found_in("彼の話しぶりの変化。"))
+        # 〜にしろ〜にしろ's しろ is no order; なぜなのか's の no nominaliser.
+        self.assertNotIn("命令形 〜ろ／〜え", found_in("和服にしろ洋服にしろ、地味な服装で出席してください。"))
+        self.assertIn("命令形 〜ろ／〜え", found_in("まさかのときに備えて貯蓄せよ。"))
+        self.assertNotIn("〜の", found_in("なぜなのか、分からない。"))
+        self.assertIn("〜の", found_in("見るのは楽しい。"))
+
+    def test_what_is_known_decided_or_vowed(self) -> None:
+        for sentence in ("環境に悪いと分かりつつも、使い続けている。", "教養があるとは言えない。",
+                         "同じ過失は二度と繰り返すまいと心に誓った。", "消えるとは思えない。",
+                         "毎日勉強すると決めた。", "雨が降らないと知っていた。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("と", found_in(sentence))
+        # A deed before と is a "whenever" as often, and a place before a
+        # verb of saying no quotation.
+        for sentence in ("勉強すると分かる。", "家に帰ると母に話した。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("と", found_in(sentence))
+                self.assertIn("〜と", found_in(sentence))

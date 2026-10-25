@@ -653,6 +653,8 @@ _SPAN_COUNTERS = {
 # is "this, the present", where its card is 本, "book".
 _PREFIX_GLOSSES = {
     "本": {"en": "(prefix) this, the present: 本研究, this study", "fr": "(préfixe) ce, le présent : 本研究, cette étude"},
+    "長": {"en": "(prefix) long: 長時間, a long time; 長距離, a long distance",
+          "fr": "(préfixe) long : 長時間, longtemps ; 長距離, longue distance"},
 }
 # A suffix whose card is the word it is on its own, another sense (plan
 # 272): 可能性's 性 is no "sex, gender", 補助金's 金 no "gold". The word
@@ -683,6 +685,13 @@ _AFFIX_SENSES = {
            "fr": "(suffixe) coupé en … : みじん切り, haché fin"},
     "連": {"en": "(counter) in a row: 10連, ten in a row", "fr": "(compteur) d'affilée : 10連, dix d'affilée"},
     "膳": {"en": "(counter) pairs of chopsticks, bowls of rice", "fr": "(compteur) paires de baguettes, bols de riz"},
+    "入り": {"en": "(suffix) holding, with … in it: 十二個入り, a pack of twelve; ミルク入り, with milk",
+           "fr": "(suffixe) contenant, avec … dedans : 十二個入り, un paquet de douze ; ミルク入り, au lait"},
+    "屋": {"en": "(suffix) the shop or trade of …, or one given to it: 自転車屋, a bicycle shop; 照れ屋, a shy person",
+          "fr": "(suffixe) la boutique ou le métier de …, ou qui y est enclin : 自転車屋, un marchand de vélos ; 照れ屋, un timide"},
+    "たち": {"en": "(suffix) plural, … and the others: 作業員たち, the workers",
+           "fr": "(suffixe) pluriel, … et les autres : 作業員たち, les ouvriers"},
+    "ごと_whole": {"en": "(suffix) … and all, whole: 皮ごと, skin and all", "fr": "(suffixe) avec, en entier : 皮ごと, avec la peau"},
 }
 _RANGED = frozenset({"円", "ドル", "ユーロ", "度", "歳", "才", "点", "パーセント", "％", "%"})
 
@@ -691,8 +700,9 @@ def _affix_sense(morphemes: list, i: int, numbers: dict) -> dict | None:
     """The sense of a suffix or a counter its card does not say, or None
     (plan 272): 混雑時's 時 "at the time of" (no "o'clock" after a noun),
     160円台's 台 "the range" (2台 counts machines), みじん切り's 切り "cut
-    into", 10連's 連 "in a row", 何膳's 膳 "pairs of chopsticks"; and the
-    suffixes _SUFFIX_GLOSSES names."""
+    into", 10連's 連 "in a row", 何膳's 膳 "pairs of chopsticks", 十二個入り's
+    入り "holding", 自転車屋's 屋, 作業員たち's たち, 胆のうごと's ごと "and
+    all"; and the suffixes _SUFFIX_GLOSSES names."""
     m = morphemes[i]
     if i == 0:
         return None
@@ -710,6 +720,18 @@ def _affix_sense(morphemes: list, i: int, numbers: dict) -> dict | None:
         return _AFFIX_SENSES["切り"]
     if m.surface in ("連", "膳") and counted:
         return _AFFIX_SENSES[m.surface]
+    if m.pos == "suffix" and m.surface == "入り" and prev.pos in ("noun", "suffix") and _glued_to(prev, m):
+        return _AFFIX_SENSES["入り"]
+    if m.pos == "suffix" and m.surface in ("屋", "たち", "達") and prev.pos in ("noun", "pronoun", "other", "suffix") \
+            and _glued_to(prev, m) and resolve_pool_morpheme(morphemes, i) is None:
+        # (Where the pool's row for the suffix does not answer: after a
+        # suffix of its own, 作業員たち, or a compound folded, 自転車屋.)
+        return _AFFIX_SENSES["屋" if m.surface == "屋" else "たち"]
+    if m.pos == "suffix" and m.surface == "ごと" and prev.pos in ("noun", "suffix") and _glued_to(prev, m) \
+            and not counted:
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        if nxt is not None and (nxt.pos == "verb" or nxt.surface in ("を", "は", "も")):
+            return _AFFIX_SENSES["ごと_whole"]           # 胆のうごと取る: and all (地域ごとの is 毎's card)
     return None
 
 
@@ -1479,7 +1501,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             token["gloss"] = dict(_SPAN_COUNTERS[morphemes[i].surface])
         elif affix:
             token["gloss"] = dict(sense)
-        elif deck is None and pool is None and morphemes[i].pos == "prefix" and morphemes[i].surface in _PREFIX_GLOSSES:
+        elif deck is None and pool is None and morphemes[i].pos == "prefix" and morphemes[i].surface in _PREFIX_GLOSSES \
+                and (morphemes[i].surface != "長" or morphemes[i].reading == "ちょう"):
             token["gloss"] = dict(_PREFIX_GLOSSES[morphemes[i].surface])
         elif deck is None and pool is None and i not in ruled and not named and "gloss" not in token:
             # A word of speech the course has no lesson for (plan 272):
@@ -1589,7 +1612,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # word and its particles one word (いつも, 実は, 急に, 今にも), a sound
 # word and its と one (さっと, ガシッと), and すみませんでした and
 # すいません the set phrase.
-LOCAL_REV = 20
+# 21: plan 272, the last silent parts -- a verb after て that is 〜ている's
+# or 〜てしまう's no card of its own, a word the pool spells otherwise
+# (気合い 気合, ごみ袋 ゴミ袋), お探し, 習わせる and 断ち切れる by the verb
+# they are made of, a surname read alone, the senses of 入り, 屋, たち and
+# ごと, こんな／そんな before a noun, words cut or joined (お知らせ, 嫌がる,
+# しろ 白, どうして); and the detector's 〜て（理由）, 〜上で, そんなに,
+# 〜たらどうですか, 〜ぶりに and the と of what is known or vowed.
+LOCAL_REV = 21
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

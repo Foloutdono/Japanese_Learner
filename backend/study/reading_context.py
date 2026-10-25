@@ -625,6 +625,11 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i + 1] = "ぱぴぷぺぽ"["はひふへほ".index(out[i + 1][0])] + out[i + 1][1:]
             continue
 
+        # 再来月, the month after next: げつ, as in 来月 (plan 272).
+        if s == "月" and r == "がつ" and prev(i) in ("再来", "さ来"):
+            out[i] = "げつ"
+            continue
+
         # 第2子, 第一子: the second child, し (plan 272).
         if s == "子" and r == "こ" and i >= 2 and surf[i - 2] == "第" and _numeral_value(prev(i)) is not None:
             out[i] = "し"
