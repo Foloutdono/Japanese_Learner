@@ -45,7 +45,7 @@ import { api } from '../origin'
 // /api/tts answers "immutable, one year", and the service worker keeps
 // clips thirty days. Must equal backend/study/voice_engine.VOICE_REV
 // (backend/tests/test_kana_audio.py holds the two together).
-export const VOICE_REV = 'nemo2'
+export const VOICE_REV = 'nemo3'
 
 /**
  * `url` with the voice revision on it. The exam and dictation players
