@@ -157,7 +157,7 @@ describe('the lyrics import', () => {
     const door = document.querySelector('a.anl-song__deck')
     expect(door.getAttribute('href')).toBe('/learn/decks/5')
     expect(door.querySelector('.picker-row__roundel').textContent).toBe('歌')
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('takes a line the learner ticks from the other pile', async () => {
@@ -184,7 +184,7 @@ describe('the lyrics import', () => {
     await settle(150)
     const batch = apiJson.mock.calls.find(([url]) => url === '/api/decks/5/cards/batch')
     expect(JSON.parse(batch[2].body).cards.map(c => c.front)).toEqual(['皆さん今日は', '君の名前を呼ぶよ'])
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('says when this server cannot fetch a link', async () => {
@@ -194,7 +194,7 @@ describe('the lyrics import', () => {
     await settle()
     expect(dialog().querySelector('input[type="url"]').disabled).toBe(true)
     expect(dialog().textContent).toContain(en.lyricsLinkOff)
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('fetches a link through the analyser', async () => {
@@ -209,7 +209,7 @@ describe('the lyrics import', () => {
     const opened = apiJson.mock.calls.find(([url]) => url === '/api/video/session')
     expect(JSON.parse(opened[2].body)).toEqual({ url: 'https://youtu.be/dQw4w9WgXcQ' })
     expect(apiUpload).not.toHaveBeenCalled()
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('keeps every line and says so when the sort had no model behind it', async () => {
@@ -221,7 +221,7 @@ describe('the lyrics import', () => {
     expect(dialog().textContent).toContain(en.lyricsSortSpent)
     expect([...dialog().querySelectorAll('.lyr-line input')].every(i => i.checked)).toBe(true)
     expect(dialog().querySelectorAll('.lyr-pile')).toHaveLength(1)
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('words a refused file in the learner language and stays on the source', async () => {
@@ -233,6 +233,6 @@ describe('the lyrics import', () => {
     await settle(120)
     expect(dialog().querySelector('[role="alert"]').textContent).toBe(en.subtitleNotUtf8)
     expect(dialog().querySelector('.seg')).not.toBeNull()
-    screen.unmount()
+    await screen.unmount()
   })
 })

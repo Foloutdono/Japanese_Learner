@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
@@ -26,7 +26,6 @@ vi.mock('./lib/api', () => ({
   apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
-apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [ENTRY] }) }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { StudyStage } = await import('./components/study/StudyStage')
@@ -34,6 +33,16 @@ const { SessionPanel } = await import('./components/study/SessionPanel')
 const { Flashcard } = await import('./components/study/QuizComponents')
 const { BreakdownSide } = await import('./components/analysis/BreakdownSide')
 const { useReviewGates } = await import('./hooks/useReviewGates')
+const { clearLookupCache } = await import('./lib/dictionaryLookup')
+
+// Every case from no lookup at all: the docked entry is cached by term
+// (lib/dictionaryLookup) and the mock keeps its calls, so a reveal in
+// one case would be read as "fetched before the reveal" in the next.
+beforeEach(() => {
+  clearLookupCache()
+  apiFetch.mockReset()
+  apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [ENTRY] }) }))
+})
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
@@ -174,7 +183,6 @@ describe('the docked entry of a card with no dictionary word (plan 115)', () => 
     expect($('.desk-entry').textContent).not.toContain('river')
     expect($('.desk-entry .dict-sheet__empty')).not.toBeNull()
     expect($('.desk-entry .dict-sheet__empty button')).toBeNull()
-    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [ENTRY] }) }))
   })
 })
 

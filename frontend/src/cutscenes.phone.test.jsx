@@ -28,6 +28,12 @@ const { board } = await import('./stores/boarding')
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 let under
 afterEach(() => { if (under) window.removeEventListener('keydown', under); under = null })
+// The clock a test holds: every timer the scenes run on, and not the
+// idle ones. The page's first key or tap unlocks the audio, and
+// voices.js warms its hall in idle time from then on, a slice at a
+// time; a fake requestIdleCallback hands its callback no deadline, so
+// whichever test held the clock while a slice was due failed on it.
+const HELD = { toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'Date'] }
 
 // What the screen under the scene would do with the key: a window
 // listener in the bubble phase, as a run's Space and a desk's Esc are.
@@ -216,7 +222,7 @@ describe('the gate stands up close and parts like the door (plan 253)', () => {
   // a delay from the mount: a waiting opacity animation on the scene had
   // the browser draw the whole scene twice a frame (plan 210).
   it('holds a beat on the full light, then fades off it and keeps its end', async () => {
-    vi.useFakeTimers()
+    vi.useFakeTimers(HELD)
     try {
       await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={() => {}} /></LangProvider>)
       const parted = Math.max(...[...all('door-part-l'), ...all('door-part-r')].map(end))
@@ -268,7 +274,7 @@ describe('the gate stands up close and parts like the door (plan 253)', () => {
   })
 
   it('lends the window\'s gutter the light while it has the screen, and takes it back', async () => {
-    vi.useFakeTimers()
+    vi.useFakeTimers(HELD)
     try {
       const onDone = vi.fn()
       await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={onDone} /></LangProvider>)
@@ -288,7 +294,7 @@ describe('the gate stands up close and parts like the door (plan 253)', () => {
   })
 
   it('gives the gutter back when it is skipped', async () => {
-    vi.useFakeTimers()
+    vi.useFakeTimers(HELD)
     try {
       await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={() => {}} /></LangProvider>)
       await vi.advanceTimersByTimeAsync(700 * X)
@@ -311,7 +317,7 @@ describe('the gate stands up close and parts like the door (plan 253)', () => {
 describe('a cutscene spends the key that skips it', () => {
   for (const [name, mount] of Object.entries(SCENES)) {
     it(`the ${name}: Space skips it and never reaches the screen under it`, async () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers(HELD)
       try {
         const heard = screenUnder()
         const done = await mount()
@@ -327,7 +333,7 @@ describe('a cutscene spends the key that skips it', () => {
     })
 
     it(`the ${name}: a browser chord skips it but is left to the browser`, async () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers(HELD)
       try {
         const heard = screenUnder()
         const done = await mount()

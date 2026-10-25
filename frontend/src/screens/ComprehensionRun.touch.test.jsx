@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
@@ -53,6 +53,16 @@ vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false
 
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
 const { setRollMode, setRollFurigana } = await import('../stores/readingRoll')
+
+// The roll's choices are module state and this browser's localStorage
+// (stores/readingRoll), shared with every later file in the lane: each
+// test starts on the whole text, whatever the last one left, and the
+// file leaves no roll behind it.
+beforeEach(() => {
+  setRollMode('whole')
+  setRollFurigana(false)
+})
+afterAll(() => { window.localStorage.removeItem('jl.readingRoll') })
 
 // A real mix — kanji, kana and punctuation. The marks matter: 。and 、
 // each take a full em, so a text measured without them measures short.
@@ -182,8 +192,6 @@ describe('the rolling text at 390×667', () => {
     const pb = play.getBoundingClientRect()
     const ib = play.querySelector('svg').getBoundingClientRect()
     expect(Math.abs((ib.left + ib.width / 2) - (pb.left + pb.width / 2))).toBeLessThan(2)
-    setRollMode('whole')
-    setRollFurigana(false)
   })
 })
 

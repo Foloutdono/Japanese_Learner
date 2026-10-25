@@ -51,6 +51,8 @@ globalThis.fetch = vi.fn(async url => ({
 const { DictionaryDetail, DictionaryLookupSheet } = await import('./DictionaryDetail')
 const { speakJapanese, playKana } = await import('../../lib/audio')
 const { apiFetch, apiJson } = await import('../../lib/api')
+const { forgetCachedJson } = await import('../../lib/cachedJson')
+const { clearLookupCache } = await import('../../lib/dictionaryLookup')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
@@ -188,6 +190,12 @@ async function renderEntry(entry, handlers = NAV(), { width = 400 } = {}) {
 
 beforeEach(async () => {
   holdStill()
+  // Both caches are module state and keep an answer for the file: a
+  // kanji's share of JMdict (cachedJson, kept forever) and a looked-up
+  // entry (dictionaryLookup). Without this, a test that asks the backend
+  // for 木 is answered by whichever test asked first.
+  forgetCachedJson()
+  clearLookupCache()
   localStorage.setItem('lang', 'en')
   document.documentElement.setAttribute('data-theme', 'dark')
   await page.viewport(1300, 900)

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
@@ -51,6 +51,9 @@ vi.mock('../stores/readingPace', async () => {
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
+// The roll's copy is this browser's, shared with every later file in
+// the lane (RideRun's reading among them).
+afterAll(() => { window.localStorage.removeItem('jl.readingRoll') })
 const { default: SentenceStation } = await import('./SentenceStation')
 
 // The first sentence's analysis, as reading.py serves it (plan 084):
@@ -134,6 +137,13 @@ async function through() {
 
 beforeEach(() => {
   paced.pace = 'standard'
+  // The roll's choices are module state and this browser's
+  // localStorage (stores/readingRoll): the rolling text's tests turn
+  // the roll on, and without this every test after one of them, in
+  // any block, read a rolling text against a whole text's clock.
+  setRollMode('whole')
+  setRollSpeed(3)
+  setRollFurigana(false)
   apiFetch.mockReset()
   apiFetch.mockImplementation(async url => {
     if (String(url).startsWith('/api/reading/comprehension/result')) return ok(RESULT)
@@ -505,13 +515,6 @@ describe('ComprehensionRun — the rolling text (plan 258)', () => {
   const label = root => root.querySelector('.timer__label').textContent
   const total = (exercise, speed) => ROLL_LEAD + rollSeconds(rollLines(exercise), speed) + ROLL_TAIL
   const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`
-
-  beforeEach(() => {
-    paced.pace = 'standard'
-    setRollMode('whole')
-    setRollSpeed(3)
-    setRollFurigana(false)
-  })
 
   it('shows the whole text until the learner asks for the roll', async () => {
     const root = await reading()
