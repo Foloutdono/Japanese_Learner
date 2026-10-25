@@ -350,6 +350,17 @@ runtime purpose.
   ride read CLS 1.3 from the ride's own notes. A tap that changes the
   screen renders it as a transition (`BoardingFlow`'s `go()`), so the tap
   paints before the screen does.
+- **Sound wakes on a lift, and on every one (2026-10-25).** A browser
+  lets a page play on a key, a mouse button going down or a finger
+  lifting (touchend, click), never on a finger landing:
+  `lib/audio/context.js` makes the AudioContext on the first of those
+  and wakes it on every later one, `interrupted` (Safari's, after a call
+  or a locked screen) as well as `suspended`. A sound asked for from a
+  finger's pointerdown is silent on a phone until it lifts, and a fade
+  that waits on `resume()` can wait for good (the lake's did): schedule
+  it on the audio clock instead. On iOS the session is `playback`, the
+  owner's choice: sound plays through the silent switch, and pauses
+  another app's music while it does.
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So

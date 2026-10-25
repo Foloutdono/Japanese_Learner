@@ -40,15 +40,45 @@ export function getAudioContext() {
     if (!hasActivation()) return null
     const AC = window.AudioContext || window.webkitAudioContext
     if (!AC) return null
+    playThroughSilentSwitch()
     ctx = new AC()
   }
   // Only auto-resume when someone is actually looking. Without this
   // guard, any sound attempted while the tab is hidden would undo the
   // suspend that hiding the tab just performed — see ambiance.js.
-  if (ctx.state === 'suspended' && !document.hidden) {
-    ctx.resume().catch(() => {})
-  }
+  wake()
   return ctx
+}
+
+// Asleep is two states, not one. `suspended` is ours (ambiance.js
+// suspends a hidden tab) or a browser's that never let the context
+// start. `interrupted` is Safari's own: a phone call, Siri, another
+// app's audio or a locked screen puts the context there, and it stays
+// there after the page is looked at again. Only `suspended` used to be
+// woken, so on an iPhone one locked screen silenced the app until it
+// was reloaded.
+function asleep() {
+  return ctx?.state === 'suspended' || ctx?.state === 'interrupted'
+}
+
+function wake() {
+  if (asleep() && !document.hidden) ctx.resume().catch(() => {})
+}
+
+// ── Through the silent switch ─────────────────────────────
+// iOS gives a page's Web Audio the session a game's sounds get: with
+// the ringer switch on silent all of it is muted, with no error and
+// nothing to detect, and a learner who keeps the phone on silent (many
+// do) heard nothing at all. 'playback' is the session a video gets,
+// which plays through the switch, as a word asked for out loud should.
+// Its cost was chosen knowingly (2026-10-25): another app's music
+// pauses while the app plays, the lake included, as it would for a
+// video, and the app is muted from Réglages › Son instead. Safari 17
+// and later; elsewhere there is nothing to set.
+function playThroughSilentSwitch() {
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = 'playback'
+  } catch { /* an older shape of the API: nothing to set */ }
 }
 
 /**
@@ -66,9 +96,33 @@ export function whenUnlocked(fn) {
   return () => waiting.delete(fn)
 }
 
+// ── The gesture ───────────────────────────────────────────
+// Only some events give a page the right to play (HTML's "activation
+// triggering input events"): a key, a mouse button going down, and a
+// finger only once it LIFTS. A finger's pointerdown is not one of
+// them. It was the only event listened for, once, so on a phone the
+// context was made and asked to resume a moment before the browser
+// would allow either, the listener was gone by the time the finger
+// lifted, and iOS's speech was primed (speech.js) outside the gesture
+// that speech needs. touchend and click are the lifts listened for:
+// the two every phone browser honours, touchend the one iOS audio has
+// been unlocked on since iOS 9. A pen's tap is its click.
+//
+// And it keeps listening. A context the browser puts to sleep after it
+// has played (Safari's `interrupted`, above; a resume() refused
+// outside a gesture when the tab comes back) is woken by the next tap,
+// inside that tap, which is the one place every browser lets it. The
+// cost is a state check per tap. Capture, so a handler that stops
+// propagation cannot keep the tap from us, and so the context is
+// already waking when the tap's own handler asks for a sound.
+function isGesture(e) {
+  if (e.type === 'pointerdown') return e.pointerType === 'mouse'
+  if (e.type === 'keydown') return e.key !== 'Escape'
+  return true
+}
+
 if (typeof window !== 'undefined') {
   const unlock = () => {
-    if (unlocked) return
     unlocked = true
     getAudioContext()
     const pending = [...waiting]
@@ -76,8 +130,14 @@ if (typeof window !== 'undefined') {
     // One bad listener must not swallow the rest of the queue.
     pending.forEach(fn => { try { fn() } catch { /* keep going */ } })
   }
-  window.addEventListener('pointerdown', unlock, { once: true })
-  window.addEventListener('keydown', unlock, { once: true })
+  const onGesture = e => {
+    if (!isGesture(e)) return
+    if (!unlocked) unlock()
+    else wake()
+  }
+  for (const type of ['pointerdown', 'touchend', 'click', 'keydown']) {
+    window.addEventListener(type, onGesture, { capture: true, passive: true })
+  }
 }
 
 const bufferCache = new Map()
