@@ -27,7 +27,7 @@ from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content import jmdict_fr
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
-    resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
+    resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
     resolve_te_noun, resolve_interjection, resolve_home, numeral_value, kana_card, resolve_pool_whole_word,
@@ -286,7 +286,9 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
         # says so (`named`): the ゆう of ゆうがた is 夕方 cut in two, no
         # Yū. A place it knows (とうきょう, おおさか) it reads as one.
         token["gloss"] = dict(_NAME_GLOSS[m.name_kind])
-    elif vocab_match is None and m.unknown and _JAPANESE_LETTERS.search(m.surface):
+    elif vocab_match is None and m.unknown and _JAPANESE_LETTERS.search(m.surface) \
+            and m.pos not in ("auxiliary", "particle"):
+        # (Never an ending said short, なってんの's てん: no name, plan 272.)
         # Letters no dictionary has a word for (plan 272), read back as
         # one word -- ぷらそにか, a choir; ゆるりんず, a channel -- say so,
         # and what they most often are; a sound shaped as one (ゴゴゴ) is
@@ -325,8 +327,10 @@ def _card_reading(m: morphology.Morpheme, entry: dict | None) -> str:
     is the token, spelled alike, and the tokenizer read it without the
     sound change the dictionary writes (鉄製 is てっせい, plan 272); the
     token's otherwise."""
-    if entry is not None and (entry.get("kanji") or "") == card_lookup._full_width(m.surface) != m.surface:
-        return _latin_reading(entry)       # SNS えすえぬえす (plan 272)
+    if entry is not None and (entry.get("kanji") or "") in (card_lookup._full_width(m.surface),
+                                                         card_lookup._full_width(m.surface).replace("－", "-")) \
+            and entry.get("kanji") != m.surface:
+        return _latin_reading(entry)       # SNS えすえぬえす, Wi-Fi わいふぁい (plan 272)
     if entry is None or m.pos not in ("noun", "suffix", "prefix") or (entry.get("kanji") or "") != m.surface:
         return m.reading
     readings = [r.strip() for r in (entry.get("kana") or "").replace(";", "/").split("/") if r.strip()]
@@ -432,7 +436,8 @@ def _glued_ordinal(m) -> bool:
     """曲目 as UniDic reads it in 3曲目は: one word, the noun きょくもく,
     "programme" -- where the page writes the counter 曲 and the ordinal
     目 (plan 272)."""
-    return len(m.surface) == 2 and m.surface[1] == "目" and m.surface[0] in _COUNTING
+    # (never 品目, "items": 約200品目, plan 272)
+    return len(m.surface) == 2 and m.surface[1] == "目" and m.surface[0] in _COUNTING and m.surface != "品目"
 
 
 def _ordinal(value: int, lang: str) -> str:
@@ -689,6 +694,13 @@ _SIZES = {
 _SIZE_WORDS = ("サイズ", "服", "シャツ", "着", "身長", "靴", "ズボン", "スカート", "パンツ", "ワンピース", "上着")
 
 
+# Latin words a page writes that JMdict holds no row for (plan 272).
+_LATIN_WORDS = {"MV": ("えむぶい", "a music video (MV)", "un clip musical (MV)"),
+                "PV": ("ぴーぶい", "a promotional video (PV), a music video", "une vidéo promotionnelle (PV), un clip"),
+                "ver": ("ばー", "version (ver.)", "version (ver.)"),
+                "Ver": ("ばー", "version (Ver.)", "version (Ver.)")}
+
+
 def _latin_sense(morphemes: list, i: int) -> tuple[str, dict] | None:
     """(reading, gloss) for Latin letters no row answers (plan 272): a
     unit after a figure (600W, 400ml), a size where a size is spoken of,
@@ -703,6 +715,9 @@ def _latin_sense(morphemes: list, i: int) -> tuple[str, dict] | None:
     text = "".join(u.surface for u in morphemes)
     if m.surface in _SIZES and any(w in text for w in _SIZE_WORDS):
         said, en, fr = _SIZES[m.surface]
+        return said, {"en": en, "fr": fr}
+    if m.surface in _LATIN_WORDS:
+        said, en, fr = _LATIN_WORDS[m.surface]
         return said, {"en": en, "fr": fr}
     level = re.fullmatch(r"[NＮ]([1-5１-５])", m.surface)
     if level:
@@ -980,6 +995,8 @@ def _ordinal_run(morphemes: list, i: int, numbers: dict) -> int:
         return 0
     if tail.surface != "目" or tail.pos not in ("suffix", "noun"):
         return 0
+    if counter.surface == "品":
+        return 0                            # 200品目: items, ひんもく, no 200th (plan 272)
     return k + 2 - i
 
 
@@ -1023,8 +1040,9 @@ _HONORIFICS = frozenset({"さん", "ちゃん", "くん", "君", "様", "さま"
 
 def _named(morphemes: list, i: int) -> bool:
     m = morphemes[i]
-    return (m.name_kind in ("family", "given", "person") and i + 1 < len(morphemes)
-            and morphemes[i + 1].surface in _HONORIFICS)
+    # (...or the animal it is the name of says so: いぬの ぽち, plan 272)
+    return m.name_kind in ("family", "given", "person") and (
+        (i + 1 < len(morphemes) and morphemes[i + 1].surface in _HONORIFICS) or morphology.named_animal(morphemes, i))
 
 
 def _merged_morpheme(run: list) -> morphology.Morpheme:
@@ -1053,6 +1071,10 @@ def _compound_dict(run: list, level: str, entry: dict, raw_id: str) -> dict:
     resolve_compound admits is."""
     surface = "".join(m.surface for m in run)
     reading = compound_reading(entry, run)
+    if _hiragana(surface) and not any(m.pos == "particle" for m in run):
+        # (Written in kana, the page says how it is said: すいません is
+        # read すいません, whatever its card's すみません, plan 272.)
+        reading = surface
     return {
         "surface": surface, "start": run[0].start, "end": run[-1].end,
         "lemma": entry.get("kanji") or surface, "reading": reading, "pos": "noun",
@@ -1268,16 +1290,27 @@ def _name_or_word(token: dict, m, row: dict) -> None:
         entry["meaning_fr"] = ("un nom de lieu, ou : " if place else "un nom de personne, ou : ") + entry["meaning_fr"]
 
 
+def _numeral_kanji(surface: str) -> bool:
+    return bool(surface) and all(c in "一二三四五六七八九十百千万" for c in surface)
+
+
 def _compounds_apart(morphemes: list) -> list:
     """The morphemes with a compound no dictionary holds cut into the two
     deck words it is (card_lookup.split_unknown_compound, plan 272): 右ひざ
     as 右 and ひざ, each with its card, where it said nothing."""
     out = []
+    hits = None
     for j, m in enumerate(morphemes):
         parts = None
         if m.pos == "noun" and len(m.surface) >= 2 and resolve_morpheme(morphemes, j) is None \
                 and resolve_pool_morpheme(morphemes, j) is None:
             parts = split_unknown_compound(m)
+        if parts:
+            # (Not where it opens a word the pool holds whole: 小中学 + 生
+            # is 小中学生, "pupils", plan 272.)
+            hits = hits or [resolve_morpheme(morphemes, k) for k in range(len(morphemes))]
+            if resolve_pool_compound(morphemes, j, hits):
+                parts = None
         if not parts:
             out.append(m)
             continue
@@ -1312,8 +1345,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     in it opens its point (frontend rows) -- a pool gloss there would
     trade the lesson for a dictionary line about one of its letters.
     """
-    morphemes, numbers = _printed_numbers(morphemes)
+    # (Cut first: a number's indices are read off the list it is in, and
+    # a cut after them moved 35万's reading onto 約, plan 272.)
     morphemes = _compounds_apart(morphemes)
+    morphemes, numbers = _printed_numbers(morphemes)
     deck_hits = [resolve_morpheme(morphemes, j) for j in range(len(morphemes))]
     ruled = _in_grammar(morphemes, grammar or [])
     # Every point but the adverbial form, which a deck word may carry
@@ -1382,6 +1417,15 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             token = _compound_dict(run, *card) if card else _joined_dict(run, "conjunction")
             token["pos"] = "conjunction"
             tokens.append(token)
+            i += n
+            continue
+        saying = resolve_saying(morphemes, i, pool_hits) if i not in ruled and morphemes[i].pos == "noun" \
+            and _numeral_kanji(morphemes[i].surface) else None
+        if saying:
+            # (A saying with a number in it is the saying, never a date or
+            # a count: 三日坊主, "a quitter"; 一石二鳥, plan 272.)
+            entry, n = saying
+            tokens.append(_pool_compound_dict(morphemes[i:i + n], entry))
             i += n
             continue
         date = _date_run(morphemes, i)
@@ -1788,7 +1832,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # おごる, はれる) and a katakana word only its own lemma's (ワン no 湾);
 # two loanwords JMdict holds as one (ツーアウト); old speech, net slang and
 # dialect glossed (ござる, それがし, 笑, けえ, がね, っぺ); short forms lit
-# (により, に限り, まだ…ていない, ことはある) and lookalikes refused.
+# (により, に限り, まだ…ていない, ことはある) and lookalikes refused. And
+# what a sixth review found: the request on a call or 〜とく, short forms
+# (だろ, はずな, とこ, ちゃだめ), a point across a picture book's spaces,
+# sayings whole (三日坊主), a picture book's animal named, a number's
+# reading kept on its own token, and cards by the sentence (ほん 本, せい).
 LOCAL_REV = 22
 
 

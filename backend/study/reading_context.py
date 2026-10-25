@@ -657,7 +657,9 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             continue
 
         # （木）, a date's weekday: もく, Thursday -- never the tree (plan 272).
-        if s in _WEEKDAY_READINGS and prev(i) in ("（", "(") and nxt(i) in ("）", ")"):
+        if s in _WEEKDAY_READINGS and (prev(i) in ("（", "(") or (prev(i) == "・" and i >= 2 and surf[i - 2] in _WEEKDAY_READINGS)) \
+                and (nxt(i) in ("）", ")") or (nxt(i) == "・" and prev(i) in ("（", "("))):
+            # (and beside the holiday it is: （火・祝）, plan 272)
             out[i] = _WEEKDAY_READINGS[s]
             continue
 
@@ -666,9 +668,43 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "きゅう"
             continue
 
+        # 七回忌, the seventh-year memorial: しち (plan 272).
+        if s == "七" and r == "なな" and nxt(i) in ("回忌", "五三"):
+            out[i] = "しち"
+            continue
+        # いつの間に, "before one knew it": ま, no あいだ (plan 272).
+        if s == "間" and r == "あいだ" and prev(i) == "の" and i >= 2 and surf[i - 2] == "いつ":
+            out[i] = "ま"
+            continue
+        # 候補日, 発売日: a day named by the noun before it is び (plan 272)
+        # -- never after の (雨の日) or a word like その.
+        if s == "日" and r == "ひ" and i > 0 and tokens[i - 1].get("pos") == "noun" and len(prev(i)) >= 2 \
+                and all("\u4e00" <= c <= "\u9fff" for c in prev(i)) and not _is_numeral(prev(i)):
+            out[i] = "び"
+            continue
+        # 窓に額をつけて, 額に汗: ひたい, the forehead, where something
+        # touches it -- 額 alone is がく, a sum or a frame (plan 272).
+        if s == "額" and r == "がく" and nxt(i) in ("に", "を", "の") and i + 2 < n \
+                and (surf[i + 2] in ("汗", "手", "しわ", "皺", "傷") or tokens[i + 2]["lemma"] in (
+                    "付ける", "つける", "当てる", "押し当てる", "押し付ける", "くっつける", "触れる", "冷やす")):
+            out[i] = "ひたい"
+            continue
+        # 見かけた方は, 参加される方は: かた, a person said politely, after
+        # what they did -- 食べた方がいい is ほう (plan 272).
+        if s == "方" and r == "ほう" and i > 0 and tokens[i - 1].get("pos") in ("verb", "auxiliary") \
+                and nxt(i) in ("は", "には", "へ", "も", "に", "を", "の"):
+            out[i] = "かた"
+            continue
         # 何しやがる, 何しに来た: なに before する (plan 272).
         if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1]["lemma"] in ("為る", "する") \
                 and nxt(i)[:1] in ("し", "す"):
+            out[i] = "なに"
+            continue
+        # 何言っても, 何食べる: なに before the verb it asks the object of,
+        # its を left out (plan 272) -- never 何だ, 何で, 何と.
+        if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1].get("pos") == "verb" \
+                and tokens[i + 1]["lemma"] in ("言う", "食べる", "飲む", "見る", "聞く", "買う", "読む", "作る",
+                                               "書く", "考える", "思う", "持つ", "探す", "知る", "やる", "遣る"):
             out[i] = "なに"
             continue
 

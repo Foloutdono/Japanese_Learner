@@ -55,7 +55,8 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 10  # 10: 〜をおいて's use question, its wrong line written with the point (plan 272)
+TOUR_REV = 10  # 10: 〜をおいて's use question, its wrong line written with the point; 〜の's form question on a
+#   frame 〜のが好きです does not take (plan 272)
 # 9: 〜に行きます's scene no longer offers 見に来ます, a use of the point, as wrong (plan 272)
 LOOK_COUNT = 3
 MIN_LIT = 2

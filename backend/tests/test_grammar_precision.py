@@ -285,13 +285,16 @@ class FormTests(unittest.TestCase):
         self.assertIn("何も／誰も〜ない", found_in("何も食べない。"))
 
     def test_the_request_and_what_is_not_one(self) -> None:
+        # (待って opening what is said is "wait" before a comma too, and a
+        # request may end on whoever is asked, plan 272.)
         for sentence, written in (("行かないで！", "ないで"), ("ちょっと待って。", "て"), ("忘れないでね。", "ないで"),
-                                  ("見てよ。", "て"), ("足跡を辿って会いにきて", "て")):
+                                  ("見てよ。", "て"), ("足跡を辿って会いにきて", "て"), ("待って、すぐ行くから。", "て"),
+                                  ("よく聞いて、ソラ。", "て")):
             with self.subTest(sentence=sentence):
                 self.assertEqual(found_in(sentence).get(REQUEST), written)
         # "without doing" needs a clause after it.
         self.assertNotIn("〜ないで", found_in("行かないで！"))
-        for sentence in ("電車が遅れて。", "お腹が空いて…", "待って、すぐ行くから。", "食べて、寝た。"):
+        for sentence in ("電車が遅れて。", "お腹が空いて…", "食べて、寝た。", "食べて、すぐ寝た。"):
             with self.subTest(sentence=sentence):
                 self.assertNotIn(REQUEST, found_in(sentence))
         # A link and a request in one line: only the last て asks.
@@ -540,6 +543,8 @@ EMBEDDED = [
 # same letters where they are another word: を持って is "holding", に渡って
 # "crossing to", 時 read じ, 駅に止まらず a train not stopping.
 SPELLED = [
+    # (plan 272: in kana, as a picture book writes it)
+    ("ほんをよむのがすきです。", "〜のが好きです", True),
     ("係員の指示に従って、外へ出てください。", "〜にしたがって", True),
     ("会議は三日間に渡って開かれた。", "〜にわたって", True),
     ("工事は長期に亘って続いた。", "〜にわたって", True),
@@ -2075,3 +2080,90 @@ class FifthReviewPointTests(unittest.TestCase):
         self.assertIn("〜ことはない", found_in("心配することはない。"))
         self.assertIn("命令形 〜ろ／〜え", found_in("先に行け！"))
         self.assertNotIn("命令形 〜ろ／〜え", found_in("早く書いてくれ。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SixthReviewPointTests(unittest.TestCase):
+    """Points a sixth review of 160 mainstream lines -- chats, games,
+    news, notices, business mail, essays, songs and picture books -- found
+    unlit or lit wrongly (plan 272), each with the sentence it must leave
+    alone."""
+
+    def test_points_found(self) -> None:
+        for sentence, pattern in (("よく聞いて、ソラ。", "〜て／〜ないで（依頼）"),
+                                  ("来週の日曜、空けといてね。", "〜て／〜ないで（依頼）"),
+                                  ("待って、この猫ちゃんの寝相どうなってんの", "〜て／〜ないで（依頼）"),
+                                  ("あたしのノート勝手に見ないでよ、バカ！", "〜て／〜ないで（依頼）"),
+                                  ("もうちょっとおってや。", "〜て／〜ないで（依頼）"),
+                                  ("嘘だろ…あの人が。", "〜だろう"),
+                                  ("いつの間に変わったんだろう。", "〜だろう"),
+                                  ("明日は雨が降るんでしょう。", "〜でしょう"),
+                                  ("ちょっと言いにくいんだけどさ。", "〜んです／〜のです"),
+                                  ("地下二階に停めたはずなんだけどなあ。", "〜はずです"),
+                                  ("ねこは まどの そばで ひなたぼっこを するのが すきです。", "〜のが好きです"),
+                                  ("もりの なかに、ちいさな おうちが ありました。", "〜があります／います"),
+                                  ("よるに なると、ふくろうが めを さまします。", "〜くなる／〜になる"),
+                                  ("昨日のラーメンのせいってことにしとく笑", "〜ことにする"),
+                                  ("昨日のラーメンのせいってことにしとく笑", "〜という"),
+                                  ("それって、つまり行かないってこと？", "〜という"),
+                                  ("試合は中止ということになった。", "〜ことになる"),
+                                  ("社長がぜひ一度お目にかかりたいと申しております。", "まいる／もうす／いたす"),
+                                  ("田中ともうします。", "まいる／もうす／いたす"),
+                                  ("詳細をメールにてお送りいたします。", "お〜になる／お〜する"),
+                                  ("遠慮なくお申し付けくださいませ。", "お〜ください"),
+                                  ("ご来社の際は、受付にお申し出ください。", "〜際に"),
+                                  ("新たな仕事を生む側面も見逃してはなるまい。", "〜てはならない"),
+                                  ("君が笑うたび 世界が少しだけ 優しくなる", "〜たびに"),
+                                  ("そのたびに笑った。", "〜たびに"),
+                                  ("何があっても渡しちゃだめよ。", "〜ちゃいけない／〜じゃいけない"),
+                                  ("うん、今着いたとこ。", "〜ところだ"),
+                                  ("ちょうど食べたところ。", "〜ところだ"),
+                                  ("お電話が少々遠いようなのですが。", "〜ようです"),
+                                  ("スクリーンタイムを1日3時間以内にする", "〜くする／〜にする"),
+                                  ("部屋を子供部屋にする。", "〜くする／〜にする"),
+                                  ("11月3日は休まず営業いたします。", "〜ずに"),
+                                  ("計画は十分な説明もないまま進められた。", "〜まま"),
+                                  ("関心がないからというより、声が届かないからだ。", "〜というより"),
+                                  ("ネットからでも頼める。", "〜でも"),
+                                  ("お会計、別々でもいいですか？", "〜でも"),
+                                  ("お帰りなさいませ、お嬢様。", "いらっしゃる／おっしゃる／なさる"),
+                                  ("ゲームばっかしてないで宿題やりなよ。", "〜ばかり"),
+                                  ("疲れているからだろう。", "〜だろう"),
+                                  ("疲れているからでしょう。", "〜でしょう"),
+                                  ("低いのは、関心がないからだろう。", "〜のは〜だ")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertIn(pattern, found_in(sentence))
+
+    def test_lookalikes_refused(self) -> None:
+        for sentence, pattern in (("うん、今着いたとこ。", "〜たところ"),
+                                  ("この鍵だけは、何があっても渡しちゃだめよ。", "〜は〜が"),
+                                  ("気象庁は21日、関東甲信地方が梅雨明けしたとみられると発表しました。", "〜は〜が"),
+                                  ("実際の商品とは異なる場合があります。", "〜は〜が"),
+                                  ("制度は整ったものの、それを使いこなす人材が育っていない。", "〜は〜が"),
+                                  ("投票率が低いのは、政治への関心がないからというより、声が届かないからだ。", "〜は〜が"),
+                                  ("私はコーヒーにします。", "〜くする／〜にする"),
+                                  ("成果をまとめたデータが一瞬にして消えた。", "〜くする／〜にする"),
+                                  ("この映画は実際の事件をもとにしている。", "〜くする／〜にする"),
+                                  ("雨にも負けず、風にも負けず。", "〜ずに"),
+                                  ("思わず笑った。", "〜ずに"),
+                                  ("ある ひ うさぎが やってきて いいました", "〜てもいいです"),
+                                  ("お帰りなさいませ、お嬢様。", "〜なさい"),
+                                  ("朝起きて、顔を洗った。", "〜て／〜ないで（依頼）"),
+                                  ("雨が降って、田中さん。", "〜て／〜ないで（依頼）"),
+                                  ("寝るとこがない。", "〜ところだ"),
+                                  ("長いたびに出る。", "〜たびに"),
+                                  ("このたびは、誠に申し訳ございませんでした。", "〜たびに"),
+                                  ("我々は豊かな報酬を手にするだろう。", "〜くする／〜にする"),
+                                  ("あたしのノート勝手に見ないでよ、バカ！", "〜ないで"),
+                                  ("待って、この猫ちゃんの寝相どうなってんの", "〜て、〜て")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+        # ...where each still reads its own.
+        self.assertIn("〜たところ", found_in("駅に着いたところ、雨が降り出した。"))
+        self.assertIn("〜て、〜て", found_in("朝起きて、顔を洗った。"))
+        for sentence in ("象は鼻が長い。", "夜、湖の周りを散歩するのは気持ちがいい。", "私は日本語が分かっても、話せない。",
+                         "私は猫が好きです。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜は〜が", found_in(sentence))
+        self.assertIn("〜にします", found_in("私はコーヒーにします。"))
+        self.assertIn("お〜ください", found_in("遠慮なくお申し付けください。"))
