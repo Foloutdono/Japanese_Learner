@@ -49,6 +49,7 @@ class FakeEngine:
         self.refuse_notation = False
         self.synthesis = None           # override the WAV /synthesis answers with
         self.failures: list = []        # exceptions or status codes to answer with first
+        self.audio_phrases: list = []   # the accent phrases /audio_query answers with
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
         params = {k: v[0] for k, v in parse_qs(request.url.query.decode()).items()}
@@ -65,7 +66,7 @@ class FakeEngine:
         if path == "/speakers":
             return httpx.Response(200, json=SPEAKERS)
         if path == "/audio_query":
-            return httpx.Response(200, json={**engine._QUERY_DEFAULTS, "accent_phrases": [],
+            return httpx.Response(200, json={**engine._QUERY_DEFAULTS, "accent_phrases": self.audio_phrases,
                                              "kana": params["text"]})
         if path == "/accent_phrases":
             if self.refuse_notation:
@@ -207,6 +208,28 @@ def test_a_word_is_read_as_text_at_the_asked_speed(fake):
     assert query["speedScale"] == pytest.approx(0.9)
     assert query["outputSamplingRate"] == engine.DIALOGUE_RATE
     assert query["outputStereo"] is False
+
+
+@pytest.mark.parametrize("text, heard, consonant", [("はち", "ワ", "w"), ("へや", "エ", None)])
+def test_a_word_beginning_with_ha_or_he_is_not_read_as_the_particle(fake, text, heard, consonant):
+    phrase = {"moras": [{"text": heard, "consonant": consonant, "consonant_length": 0.05 if consonant else None,
+                         "vowel": "a", "vowel_length": 0.1, "pitch": 5.0},
+                        {"text": "チ", "consonant": "ch", "consonant_length": 0.05, "vowel": "i",
+                         "vowel_length": 0.1, "pitch": 5.2}], "accent": 1}
+    fake.audio_phrases = [phrase]
+    engine.say(text, 10005)
+    first = fake.calls[-1][2]["accent_phrases"][0]["moras"][0]
+    assert (first["text"], first["consonant"]) == (text[0].translate(str.maketrans("はへ", "ハヘ")), "h")
+    assert first["consonant_length"] > 0
+
+
+def test_a_particle_read_inside_a_word_is_left_alone(fake):
+    phrase = {"moras": [{"text": "コ", "consonant": "k", "vowel": "o", "vowel_length": 0.1, "pitch": 5.0},
+                        {"text": "ワ", "consonant": "w", "vowel": "a", "vowel_length": 0.1, "pitch": 5.0}],
+              "accent": 1}
+    fake.audio_phrases = [phrase]
+    engine.say("こんにちは", 10005)
+    assert fake.calls[-1][2]["accent_phrases"][0]["moras"][1]["text"] == "ワ"
 
 
 def test_a_voice_as_it_is_takes_no_tone(fake):

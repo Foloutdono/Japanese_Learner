@@ -429,7 +429,12 @@ SID_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 # a number, and 64 is comfortably past the longest route pattern the app
 # has while being far short of anything a learner could have typed.
 MAX_STR = 64
-MAX_PROPS = 12
+# A second bound behind the allowlist: no event keeps more keys than the
+# largest set EVENTS allows. Derived, never a literal -- a 12 sat here
+# while boarding_done allowed 15, and as clean() keeps keys in the order
+# they were sent, a learner who took the placement test lost `named` and
+# `kept`, the last two, without a word.
+MAX_PROPS = max(len(keys) for keys in EVENTS.values())
 # A batch bound, so one client cannot post a megabyte. The frontend
 # flushes at 20 (lib/track.js); 50 leaves room for a backlog that built
 # up offline without letting it arrive all at once.
