@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -60,17 +61,34 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- 写真 — the photo picker on Android 7 to 10, which have none of
+             their own: this asks Play services to install its backport,
+             which PhotoChromeClient's picker then opens. Never enabled;
+             the class is Play services', not the app's. -->
+        <service
+            android:name="com.google.android.gms.metadata.ModuleDependencies"
+            android:enabled="false"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+            </intent-filter>
+            <meta-data android:name="photopicker_activity:0:required" android:value="" />
+        </service>
     </application>
 
-    <!-- Permissions. INTERNET is the app; CAMERA and READ_MEDIA_IMAGES are
-         the analyzer's photo intake through the WebView's file chooser
-         (<input type=file capture>), POST_NOTIFICATIONS the daily nudge
-         (@capacitor/local-notifications, plan 075). The camera is optional
-         hardware: a phone without one still installs. -->
+    <!-- Permissions. INTERNET is the app; CAMERA the analyzer's camera
+         through the WebView's file chooser (<input type=file capture>),
+         POST_NOTIFICATIONS the daily nudge (@capacitor/local-notifications,
+         plan 075). The camera is optional hardware: a phone without one
+         still installs. No media permission: a photo is chosen in the
+         system photo picker (PhotoChromeClient), which hands the app the
+         one picture and needs none. Never add READ_MEDIA_IMAGES back:
+         Google Play refuses it to an app that reads a photo now and then. -->
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>
