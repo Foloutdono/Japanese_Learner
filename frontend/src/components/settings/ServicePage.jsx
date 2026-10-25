@@ -8,7 +8,8 @@ import { refreshSummary, useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus, useVolumes, refreshJourney } from '../../stores/journey'
 import { journeyModel, minutesFor } from '../../domain/goalMath'
 import { goalDerived } from '../onboarding/goalDerived'
-import { DEFAULT_PER_DAY, PACES } from '../onboarding/paces'
+import { DEFAULT_PER_DAY, MAX_PACE, PACES } from '../onboarding/paces'
+import { MinusIcon, PlusIcon } from '../ui/Icons'
 import { SettingsPage, Slip } from './SettingsPage'
 import { useLearningSave } from './learningSave'
 import { dateFormat, stopParts, timeAxis } from './contract'
@@ -33,6 +34,15 @@ const iso = d => d.toISOString().slice(0, 10)
 // date and the pace on the contract that exists, from a fresh clock).
 // Without one there is no date to print: a service is saved on the
 // spot through the learning PATCH, as Learning's cards were.
+//
+// 貸切 — the charter, a pace of the learner's own (plan 273; paces.js):
+// a fourth choice beside the three services, whose number is dialled
+// one at a time between 1 and the ladder's MAX_PACE (no service runs
+// faster, so the office sells no ticket above it). Being a number
+// rather than a tap, it is never saved on the spot: Reprint prints it
+// with a destination, Save writes it without one.
+const OWN_START = 15
+
 export function ServicePage({ session }) {
   const { t, lang } = useLang()
   const navigate = useNavigate()
@@ -44,14 +54,21 @@ export function ServicePage({ session }) {
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
   const [done, setDone] = useState(false)
+  const [own, setOwn] = useState(null)
   const desk = useDesk()
 
   const startLevel = summary?.jlptLevel ?? null
   const dest = status?.goalLevel ?? null
   const withDest = dest != null
   const printedPace = status?.plannedPerDay ?? summary?.dailyNewTarget ?? null
-  const chosen = pick ?? printedPace ?? DEFAULT_PER_DAY
+  const custom = printedPace != null && !PACES.some(p => p.perDay === printedPace)
+  const ownPace = own ?? (custom ? printedPace : OWN_START)
+  // `pick` is a service's number, or 'own' for the charter, which stays
+  // checked while its number is dialled, even across 5, 10 or 20.
+  const ownOn = pick === 'own' || (pick === undefined && custom)
+  const chosen = pick === 'own' ? ownPace : (pick ?? printedPace ?? DEFAULT_PER_DAY)
   const dirty = withDest && chosen !== printedPace
+  const ownDirty = !withDest && pick === 'own' && chosen !== printedPace
   // One tab stop (plan 123). Dialled services are checked by the arrows;
   // a service that saves on the spot is walked, and Space chooses.
   const onWalk = useRadioWalk(desk, { check: withDest })
@@ -64,8 +81,11 @@ export function ServicePage({ session }) {
   const actual = model?.actualPerDay > 0 ? model.actualPerDay : null
   const rows = PACES.map(p => ({ ...p, at: arrive(p.perDay) }))
   const yours = actual ? arrive(actual) : null
-  const drawn = rows.every(r => r.at)
-  const axis = drawn ? timeAxis(now, [...rows.map(r => r.at), ...(yours ? [yours] : [])], lang) : null
+  const ownAt = arrive(ownPace)
+  const drawn = rows.every(r => r.at) && ownAt
+  const axis = drawn ? timeAxis(now, [...rows.map(r => r.at), ownAt, ...(yours ? [yours] : [])], lang) : null
+  const checkedAt = ownOn ? PACES.length : PACES.findIndex(q => q.perDay === chosen)
+  const isOn = perDay => !ownOn && chosen === perDay
   const code = stopParts(t, dest).code
   const fmt = dateFormat(lang)
   const printedDate = status?.goalTargetDate ? new Date(status.goalTargetDate) : null
@@ -73,10 +93,33 @@ export function ServicePage({ session }) {
   const fraction = new Intl.NumberFormat(lang === 'fr' ? 'fr' : 'en', { maximumFractionDigits: 1 })
 
   function choose(perDay) {
-    if (perDay === chosen && !withDest) return
+    if (isOn(perDay) && !withDest) return
     playClick()
     if (withDest) { setDone(false); setPick(perDay) }
-    else save({ dailyNewTarget: perDay })
+    else { setPick(undefined); save({ dailyNewTarget: perDay }) }
+  }
+
+  // The charter is checked with its own number; without a destination
+  // it waits for Save, as a number dialled one step at a time must.
+  function chooseOwn() {
+    if (ownOn) return
+    playClick()
+    setDone(false)
+    setPick('own')
+  }
+
+  // From the state, not the render: two quick taps are two steps.
+  function stepOwn(by) {
+    playClick()
+    setDone(false)
+    setOwn(n => Math.min(MAX_PACE, Math.max(1, (n ?? ownPace) + by)))
+    setPick('own')
+  }
+
+  function saveOwn() {
+    if (!ownDirty || saving) return
+    playUi('click')
+    save({ dailyNewTarget: chosen }).then(() => setPick(undefined))
   }
 
   function reprint() {
@@ -94,8 +137,6 @@ export function ServicePage({ session }) {
       .finally(() => setBusy(false))
   }
 
-  const custom = printedPace != null && !PACES.some(p => p.perDay === printedPace)
-
   return (
     <SettingsPage title={t.destService}>
       <Slip>
@@ -111,10 +152,10 @@ export function ServicePage({ session }) {
                 key={p.id}
                 type="button"
                 role="radio"
-                aria-checked={chosen === p.perDay}
-                tabIndex={radioTab(desk, i, PACES.findIndex(q => q.perDay === chosen))}
+                aria-checked={isOn(p.perDay)}
+                tabIndex={radioTab(desk, i, checkedAt)}
                 disabled={busy}
-                className={`svc-row${chosen === p.perDay ? ' svc-row--on' : ''}`}
+                className={`svc-row${isOn(p.perDay) ? ' svc-row--on' : ''}`}
                 data-pace={p.perDay}
                 onClick={() => choose(p.perDay)}
               >
@@ -129,6 +170,23 @@ export function ServicePage({ session }) {
                 <Line axis={axis} at={p.at} code={code} fmt={fmt} />
               </button>
             ))}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={ownOn}
+              tabIndex={radioTab(desk, PACES.length, checkedAt)}
+              disabled={busy}
+              className={`svc-row${ownOn ? ' svc-row--on' : ''}`}
+              data-pace="own"
+              onClick={chooseOwn}
+            >
+              <span className="svc-row__names">
+                <span className="svc-row__name">{t.settingsPaceOwn}</span>
+                <span className="svc-row__pace">{ownPace} {t.settingsPerDay} · {t.settingsPaceMinutes(minutesFor(ownPace))}</span>
+                {ownPace === printedPace && custom && <span className="svc-row__tag">{t.destOnPass}</span>}
+              </span>
+              <Line axis={axis} at={ownAt} code={code} fmt={fmt} />
+            </button>
             {yours && (
               <div className="svc-row svc-row--yours">
                 <span className="svc-row__names">
@@ -146,10 +204,10 @@ export function ServicePage({ session }) {
                 key={p.id}
                 type="button"
                 role="radio"
-                aria-checked={chosen === p.perDay}
-                tabIndex={radioTab(desk, i, PACES.findIndex(q => q.perDay === chosen))}
+                aria-checked={isOn(p.perDay)}
+                tabIndex={radioTab(desk, i, checkedAt)}
                 disabled={saving || busy}
-                className={`svc${chosen === p.perDay ? ' svc--on' : ''}`}
+                className={`svc${isOn(p.perDay) ? ' svc--on' : ''}`}
                 data-pace={p.perDay}
                 onClick={() => choose(p.perDay)}
               >
@@ -161,11 +219,48 @@ export function ServicePage({ session }) {
                 <span className="svc__words">{t.settingsPaceMinutes(minutesFor(p.perDay))}</span>
               </button>
             ))}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={ownOn}
+              tabIndex={radioTab(desk, PACES.length, checkedAt)}
+              disabled={saving || busy}
+              className={`svc svc--own${ownOn ? ' svc--on' : ''}`}
+              data-pace="own"
+              onClick={chooseOwn}
+            >
+              <span className="svc__jp">{t.settingsPaceOwn}</span>
+              <span className="svc__pace">{ownPace} {t.settingsPerDay}</span>
+              <span className="svc__words">{t.settingsPaceMinutes(minutesFor(ownPace))}</span>
+            </button>
+          </div>
+        )}
+        {/* The charter's number, outside the group: a stepper is not a
+            radio, and nothing interactive may sit inside one. */}
+        {ownOn && (
+          <div className="svc-own">
+            <button type="button" className="svc-own__step" aria-label={t.settingsPaceLess}
+              disabled={busy || saving || ownPace <= 1} data-action="pace-less" onClick={() => stepOwn(-1)}>
+              <MinusIcon size={16} />
+            </button>
+            <span className="svc-own__value" aria-live="polite">
+              <b className="svc-own__n">{ownPace}</b> {t.settingsPerDay}
+            </span>
+            <button type="button" className="svc-own__step" aria-label={t.settingsPaceMore}
+              disabled={busy || saving || ownPace >= MAX_PACE} data-action="pace-more" onClick={() => stepOwn(1)}>
+              <PlusIcon size={16} />
+            </button>
+            {!withDest && (
+              <button type="button" className="btn-secondary svc-own__save" disabled={!ownDirty || saving}
+                data-action="pace-save" onClick={saveOwn}>
+                {t.save}
+              </button>
+            )}
           </div>
         )}
         {/* A pace set outside the three services (the column is a free
             integer) still shows honestly instead of nowhere. */}
-        {custom && <span className="slip__hint">{t.settingsPaceCustom(printedPace)}</span>}
+        {custom && !ownOn && <span className="slip__hint">{t.settingsPaceCustom(printedPace)}</span>}
       </Slip>
 
       {withDest ? (

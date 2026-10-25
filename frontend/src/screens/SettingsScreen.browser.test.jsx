@@ -426,11 +426,31 @@ describe('SettingsScreen — the level, the bar and the service', () => {
     expect(root.querySelector('.svc-chart')).toBeNull()
     expect(root.querySelector('[data-action="goal-set"]')).not.toBeNull()
     const cards = [...root.querySelectorAll('.svc-grid .svc')]
-    expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false'])
+    expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false', 'false'])
     cards[2].click()
     await settle(30)
     const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
     expect(JSON.parse(call[2].body)).toEqual({ dailyNewTarget: 20 })
+  })
+
+  it('without a destination, a pace of one\'s own is dialled, then saved', async () => {
+    const screen = await mount('/profile/settings/service')
+    await settle()
+    const root = screen.container
+    expect(root.querySelector('.svc-own')).toBeNull()
+    root.querySelector('.svc-grid [data-pace="own"]').click()
+    await settle(30)
+    expect(root.querySelector('.svc-grid [data-pace="own"]').getAttribute('aria-checked')).toBe('true')
+    // A number dialled a step at a time is never saved on the spot.
+    root.querySelector('[data-action="pace-more"]').click()
+    root.querySelector('[data-action="pace-more"]').click()
+    await settle(30)
+    expect(root.querySelector('.svc-own__n').textContent).toBe('17')
+    expect(apiJson.mock.calls.some(c => c[0] === '/api/profile/learning')).toBe(false)
+    root.querySelector('[data-action="pace-save"]').click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
+    expect(JSON.parse(call[2].body)).toEqual({ dailyNewTarget: 17 })
   })
 })
 
@@ -667,7 +687,7 @@ describe('SettingsScreen — Service', () => {
     await settle()
     const root = screen.container
     const rows = [...root.querySelectorAll('.svc-row[data-pace]')]
-    expect(rows.map(r => r.dataset.pace)).toEqual(['5', '10', '20'])
+    expect(rows.map(r => r.dataset.pace)).toEqual(['5', '10', '20', 'own'])
     // The faster the service, the shorter its line to the stop.
     const reach = rows.map(r => parseFloat(r.querySelector('.svc-row__rail').style.width))
     expect(reach[0]).toBeGreaterThan(reach[1])
@@ -701,6 +721,28 @@ describe('SettingsScreen — Service', () => {
     expect(body.dailyNewTarget).toBe(20)
     expect(body.goalLevel).toBeUndefined()
     expect(new Date(body.goalTargetDate).getTime()).toBeGreaterThan(Date.now())
+  })
+
+  it('a pace of one\'s own draws its line and is reprinted, held under the ladder\'s ceiling', async () => {
+    journey = WITH_GOAL
+    seedJourneyStatus(WITH_GOAL)
+    await refreshJourney()
+    const screen = await mount('/profile/settings/service')
+    await settle()
+    const root = screen.container
+    const own = () => root.querySelector('.svc-row[data-pace="own"]')
+    own().click()
+    await settle(30)
+    expect(own().getAttribute('aria-checked')).toBe('true')
+    expect(own().querySelector('.svc-row__when').textContent).toMatch(/\d{4}/)
+    for (let i = 0; i < 20; i++) root.querySelector('[data-action="pace-more"]').click()
+    await settle(30)
+    expect(root.querySelector('.svc-own__n').textContent).toBe('25')
+    expect(root.querySelector('[data-action="pace-more"]').disabled).toBe(true)
+    root.querySelector('[data-action="pace-reprint"]').click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/reprint')
+    expect(JSON.parse(call[2].body).dailyNewTarget).toBe(25)
   })
 })
 
