@@ -2010,3 +2010,62 @@ class FourthReviewPointTests(unittest.TestCase):
         self.assertIn("〜があります／います", found_in("猫がいます。"))
         self.assertIn("ない形 〜ない", found_in("そんなこと知らん。"))
         self.assertIn("〜く／〜に（副詞形）", found_in("早く起きた。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FifthReviewPointTests(unittest.TestCase):
+    """Points a fifth review of 160 fresh lines found unlit or lit wrongly
+    (plan 272), each with the sentence it must leave alone."""
+
+    def test_points_found(self) -> None:
+        for sentence, pattern in (("行政の怠慢と断じざるを得ない。", "〜ざるを得ない"),
+                                  ("弊社の不手際によりご迷惑をおかけし。", "〜によって"),
+                                  ("未開封のものに限り受け付ける。", "〜に限って"),
+                                  ("大会は予定どおり行われた。", "〜通りに"),
+                                  ("上様のご命令とあらば、命は惜しくない。", "〜とあれば"),
+                                  ("腹が減っては戦はできぬと申すではないか。", "〜じゃないか"),
+                                  ("おやめくだされ。", "お〜ください"),
+                                  ("以前、お薬で発疹が出たことはありますか。", "〜ことがある"),
+                                  ("まだ食べていない。", "まだ〜ていません"),
+                                  ("バケツをひっくり返したような雨になる。", "〜ような"),
+                                  ("このような場合、謝るべきだ。", "〜ような"),
+                                  ("布団、今のうちに取り込もう。", "〜うちに"),
+                                  ("誕プレなにがいいか悩む。", "〜か（間接疑問）"),
+                                  ("約束どおり昼メシおごれよな。", "命令形 〜ろ／〜え"),
+                                  ("明朝、城へ参れ。", "命令形 〜ろ／〜え"),
+                                  ("燃やしてしまえ", "命令形 〜ろ／〜え"),
+                                  ("お出かけには折りたたみ傘があると安心です。", "〜と"),
+                                  ("口コミを見てLにして正解でした。", "〜て（理由）"),
+                                  ("家老殿に叱られまするぞ。", "〜ます／〜ません"),
+                                  ("言うたじゃろうが。", "〜だろう"),
+                                  ("先生に怒られてまう。", "〜てしまう"),
+                                  ("拙者の刀は斬るためにあるのではござらぬ。", "です／だ"),
+                                  ("待ってるよー！", "よ")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
+
+    def test_lookalikes_refused(self) -> None:
+        for sentence, pattern in (("汲んだもんじゃない。", "〜ものだ"),
+                                  ("心配することはない。", "〜ことがある"),
+                                  ("「だれか いませんか」と声がした。", "〜ませんか"),
+                                  ("ことのほか美しゅうござるな。", "〜な（禁止）"),
+                                  ("しばらく時間をおいてから再度ログインしてください。", "〜をおいて"),
+                                  ("人を傷つける刃ともなり得る。", "可能形 〜(ら)れる"),
+                                  ("沈黙を選ぶこともまた意見だと言えなくもない。", "〜も〜も"),
+                                  ("熱があるようなので、早く帰ります。", "〜ような"),
+                                  ("いらっしゃい！どうぞ、入って。", "命令形 〜ろ／〜え"),
+                                  ("家のうちに入る。", "〜うちに"),
+                                  ("正直にやっていると割に合わない。", "〜わりに"),
+                                  ("先生にどえりゃあ怒られてまうがね。", "〜が（逆接）"),
+                                  ("聞いてへん。", "〜て、〜て"),
+                                  ("そっち持ってちょう。", "〜て、〜て"),
+                                  ("行くと言った。", "〜と")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(pattern, found_in(sentence))
+        # ...where each still reads its own.
+        self.assertIn("〜ませんか", found_in("一緒に映画を見ませんか。"))
+        self.assertIn("〜をおいて", found_in("この町をおいて、これほど静かな場所はない。"))
+        self.assertIn("〜をおいて", found_in("彼をおいてほかに適任者はいない。"))
+        self.assertIn("〜ことはない", found_in("心配することはない。"))
+        self.assertIn("命令形 〜ろ／〜え", found_in("先に行け！"))
+        self.assertNotIn("命令形 〜ろ／〜え", found_in("早く書いてくれ。"))

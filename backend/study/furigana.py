@@ -498,6 +498,12 @@ _POINT = {".", ",", "．", "，"}
 _NOT_A_QUANTITY = set("/／:：-－−ー~〜～+＋*×÷・")
 
 
+def _a_unit(surface: str) -> bool:
+    from study.reading_context import LATIN_UNITS
+
+    return surface in LATIN_UNITS
+
+
 def _is_number_token(surface: str) -> bool:
     return bool(surface) and all(c in _DIGITS for c in surface)
 
@@ -521,6 +527,14 @@ def _number_spans(morphemes) -> dict[int, tuple[int, str]]:
         after = morphemes[j].surface[:1] if j < n else ""
         if before == "ー" and len(morphemes[i - 1].surface) > 1:
             before = ""                    # フォロワー1000人: a long vowel, no dash (plan 272)
+        if j < n and _a_unit(morphemes[j].surface):
+            after = ""                     # 600W, 400ml, 25MB: a figure and its unit (plan 272)
+        if before in (":", "：") and (i < 2 or not _is_number_token(morphemes[i - 2].surface)):
+            before = ""                    # 提出期限：12月: a label's colon, no clock's
+        if before == "・" and i >= 2 and not _is_number_token(morphemes[i - 2].surface):
+            before = ""                    # (第2・第4: a list of figures each with its own word)
+        if after == "・" and j + 1 < n and not _is_number_token(morphemes[j + 1].surface):
+            after = ""
         if not any(c and (c in _NOT_A_QUANTITY or (c.isascii() and c.isalpha()))
                    for c in (before, after)):
             spans[i] = (j, "".join(m.surface for m in morphemes[i:j]))

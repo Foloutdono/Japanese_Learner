@@ -565,11 +565,16 @@ class NumberFuriganaTests(unittest.TestCase):
         self.assertEqual(_ruby("りんごを1つください。"), "1[ひと]")
 
     def test_what_is_not_a_quantity_stays_bare(self) -> None:
-        for sentence in ("2024/10/04", "10:30", "3-5人", "5G", "100m走", "A4", "電話は0312345678"):
+        for sentence in ("2024/10/04", "10:30", "3-5人", "5G", "MP3", "A4", "電話は0312345678"):
             with self.subTest(sentence):
                 digits = [p for p in align_sentence(sentence)
                           if p.get("reading") and any(c.isdigit() for c in p["text"])]
                 self.assertEqual(digits, [])
+        # ...where a unit after a figure makes it one (plan 272): 100m走 is
+        # ひゃくメートル走, 600W ろっぴゃくワット.
+        for sentence, reading in (("100m走", "ひゃく"), ("600Wで加熱", "ろっぴゃく")):
+            with self.subTest(sentence):
+                self.assertIn(reading, [p.get("reading") for p in align_sentence(sentence)])
 
     def test_the_parts_still_spell_the_sentence(self) -> None:
         for sentence in self.CASES:

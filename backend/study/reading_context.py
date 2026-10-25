@@ -116,6 +116,8 @@ _KST_COUNTERS = {
     "点": None, "週間": None, "周": None, "件": None, "課": None, "か月": None,
     "ヶ月": None, "ケ月": None, "箇月": None, "カ月": None, "キロ": None,
     "センチ": None, "回目": None, "種類": None,
+    # (plan 272: 1滴 いってき, 10勝 じゅっしょう, 3投 さんとう)
+    "滴": None, "勝": None, "投": None,
 }
 # Gemination happens before a voiceless consonant only.
 _VOICELESS = set("かきくけこさしすせそたちつてとぱぴぷぺぽ")
@@ -385,6 +387,25 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         return _swap_tail(n_read, "よん", "よ"), c_read
 
     return None
+
+
+# The units a figure is printed with in Latin letters (plan 272): their
+# reading and what they measure. One letter alone is a unit only after
+# a figure (600W, 2L); read without one it is a size or a letter.
+LATIN_UNITS = {
+    "W": ("わっと", "watt(s)", "watt(s)"), "kW": ("きろわっと", "kilowatt(s)", "kilowatt(s)"),
+    "ml": ("みりりっとる", "millilitre(s)", "millilitre(s)"), "mL": ("みりりっとる", "millilitre(s)", "millilitre(s)"),
+    "L": ("りっとる", "litre(s)", "litre(s)"), "l": ("りっとる", "litre(s)", "litre(s)"),
+    "cc": ("しーしー", "cc, cubic centimetre(s)", "cm³, centimètre(s) cube(s)"),
+    "mm": ("みり", "millimetre(s)", "millimètre(s)"), "cm": ("せんち", "centimetre(s)", "centimètre(s)"),
+    "m": ("めーとる", "metre(s)", "mètre(s)"), "km": ("きろ", "kilometre(s)", "kilomètre(s)"),
+    "mg": ("みりぐらむ", "milligram(s)", "milligramme(s)"), "g": ("ぐらむ", "gram(s)", "gramme(s)"),
+    "kg": ("きろ", "kilogram(s)", "kilogramme(s)"), "kcal": ("きろかろりー", "kilocalorie(s)", "kilocalorie(s)"),
+    "KB": ("きろばいと", "kilobyte(s)", "kilo-octet(s)"), "MB": ("めがばいと", "megabyte(s)", "mégaoctet(s)"),
+    "GB": ("ぎがばいと", "gigabyte(s)", "gigaoctet(s)"), "TB": ("てらばいと", "terabyte(s)", "téraoctet(s)"),
+    "Hz": ("へるつ", "hertz", "hertz"), "GHz": ("ぎがへるつ", "gigahertz", "gigahertz"),
+    "mAh": ("みりあんぺああわー", "milliampere-hour(s)", "milliampère-heure(s)"),
+}
 
 
 # The counters a numeral and its counter are set as one word over
