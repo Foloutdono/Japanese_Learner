@@ -2841,10 +2841,17 @@ def _at_the_stage_spans(tokens):
         nth = i >= 2 and tokens[i - 1].surface == "の" and tokens[i - 2].surface.endswith("目")
         stage = (t.surface in ("歳", "才") or t.surface.endswith(("歳", "目")) or t.lemma in _IN_A_MOMENT
                  or t.surface in _IN_A_MOMENT or nth)
+        # (...in the same sentence: a passage's later でもある says nothing of
+        # this one's にして, plan 272)
+        end = _sentence_end(tokens, i)
         both = not stage and any(
-            u.pos in ("auxiliary", "particle") and u.surface == "で" and k + 2 < len(tokens)
+            u.pos in ("auxiliary", "particle") and u.surface == "で" and k + 2 < end
             and tokens[k + 1].surface == "も" and tokens[k + 2].lemma in ("有る", "ある")
-            for k, u in enumerate(tokens) if k > i + 3)
+            for k, u in enumerate(tokens[:end]) if k > i + 3)
+        after = tokens[i + 4] if i + 4 < len(tokens) else None
+        if after is not None and after.pos == "verb" and (after.lemma in _AUX_AFTER_TE | {"置く", "おく"}
+                                                          or after.surface in _AUX_AFTER_TE):
+            continue                    # (ままにしておく: にする and 〜ておく)
         if stage or (both and t.pos == "noun"):
             out.append((tokens[i + 1].start, tokens[i + 3].end))
     return out
