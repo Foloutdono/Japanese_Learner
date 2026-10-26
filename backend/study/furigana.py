@@ -498,6 +498,13 @@ _POINT = {".", ",", "．", "，"}
 _NOT_A_QUANTITY = set("/／:：-－−ー~〜～+＋*×÷・")
 
 
+def _counted_by(surface: str) -> bool:
+    """Whether `surface` is a counter a figure before it is counted by."""
+    from study.reading_context import COUNTER_SURFACES
+
+    return surface in COUNTER_SURFACES
+
+
 def _a_unit(surface: str) -> bool:
     from study.reading_context import LATIN_UNITS
 
@@ -535,6 +542,18 @@ def _number_spans(morphemes) -> dict[int, tuple[int, str]]:
             before = ""                    # (第2・第4: a list of figures each with its own word)
         if after == "・" and j + 1 < n and not _is_number_token(morphemes[j + 1].surface):
             after = ""
+        # (plan 272: 9時～12時, a range between counted figures; ダイヤ×300,
+        # how many of a thing; TOEIC800点, a counted score after a name --
+        # never 3×4, A-12 or iPhone15.)
+        counted_after = j < n and _counted_by(morphemes[j].surface)
+        if before in ("〜", "～", "~") and i >= 2 and (morphemes[i - 2].counter or _counted_by(morphemes[i - 2].surface)):
+            before = ""
+        if before in ("×", "✕") and i >= 2 and not _is_number_token(morphemes[i - 2].surface) \
+                and morphemes[i - 2].surface[-1:] not in "0123456789０１２３４５６７８９" \
+                and not (j < n and _is_number_token(morphemes[j].surface)):
+            before = ""
+        if before.isascii() and before.isalpha() and counted_after:
+            before = ""
         if not any(c and (c in _NOT_A_QUANTITY or (c.isascii() and c.isalpha()))
                    for c in (before, after)):
             spans[i] = (j, "".join(m.surface for m in morphemes[i:j]))

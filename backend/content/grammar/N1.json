@@ -17512,31 +17512,31 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What is the speaker suggesting?",
-            "fr": "Que propose la personne qui parle ?"
+            "en": "How long did it take for the town to be buried?",
+            "fr": "Combien de temps a-t-il fallu pour que la ville soit ensevelie ?"
           },
-          "jp": "会議は来週にして、今日はもう帰ろう。",
+          "jp": "その小さな町は、一夜にして雪にうもれた。",
           "tr": {
-            "en": "Let's make the meeting next week and go home now.",
-            "fr": "Fixons la réunion à la semaine prochaine et rentrons maintenant."
+            "en": "The little town was buried under snow in a single night.",
+            "fr": "La petite ville a été ensevelie sous la neige en une seule nuit."
           },
           "choices": [
             {
-              "en": "To fix the meeting for next week, and go home now.",
-              "fr": "Fixer la réunion à la semaine prochaine, et rentrer maintenant."
+              "en": "One night: that is how fast it came.",
+              "fr": "Une nuit : c'est aussi vite que c'est venu."
             },
             {
-              "en": "That the meeting will take place only next week, at last, though they go home today.",
-              "fr": "Que la réunion n'aura lieu que la semaine prochaine, enfin, même s'ils rentrent aujourd'hui."
+              "en": "Night after night, over a long winter.",
+              "fr": "Nuit après nuit, au long d'un hiver."
             },
             {
-              "en": "That the meeting is both next week's and today's, one long meeting.",
-              "fr": "Que la réunion est à la fois celle de la semaine prochaine et celle d'aujourd'hui, une longue réunion."
+              "en": "Only at night; by day the snow melted.",
+              "fr": "Seulement la nuit ; le jour, la neige fondait."
             }
           ],
           "why": {
-            "en": "Here にして is the て-form of にする, « make it next week »: a decision, with no stage or double role. The point's にして names a stage (三度目にして) or a double identity (学者にして詩人).",
-            "fr": "Ici にして est la forme en て de にする, « fixons-la à la semaine prochaine » : une décision, sans étape ni double rôle. Le にして du point nomme une étape (三度目にして) ou une double identité (学者にして詩人)."
+            "en": "After 一夜 or 一瞬, にして says how fast: 一夜にして is « in a single night ». It counts no nights one by one and says nothing of the days, and it is not the にして of にする, « make it ».",
+            "fr": "Après 一夜 ou 一瞬, にして dit la rapidité : 一夜にして, c'est « en une seule nuit ». Il ne compte pas les nuits une à une, ne dit rien des journées, et ce n'est pas le にして de にする, « en faire »."
           }
         },
         {

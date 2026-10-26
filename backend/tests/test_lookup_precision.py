@@ -1244,7 +1244,9 @@ class SpokenWordTests(unittest.TestCase):
                 self.assertIn(meaning, token_of(sentence, surface)["vocab_match"]["entry"]["meaning"])
         # ...where the plain words keep their cards.
         self.assertIn("yes", matches("ええ、そうです")["ええ"]["entry"]["meaning"])
-        self.assertIn("like that", matches("ああいう人")["ああ"]["entry"]["meaning"])
+        self.assertIn("like that", matches("ああすればいい")["ああ"]["entry"]["meaning"])
+        # (ああいう before a noun is one word, "that sort of", plan 272)
+        self.assertNotIn("ああ", matches("ああいう人"))
 
     def test_a_sound_word_and_its_to_are_one_word(self) -> None:
         for sentence, surface, meaning in (
@@ -2545,3 +2547,158 @@ class SeventhReviewLeftWordTests(unittest.TestCase):
         # ああ exclaimed keeps its card; ところ of a place, its own.
         self.assertIsNotNone(token_of("ああ、美しい。", "ああ").get("vocab_match"))
         self.assertIsNotNone(token_of("静かなところに住みたい。", "ところ").get("vocab_match"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class KanaVerbByItsObjectTests(unittest.TestCase):
+    """A graded text writes a verb in kana that several deck verbs spell;
+    whether it takes を, or what its subject is, says which (plan 272) --
+    and where nothing does, it stays without a card."""
+
+    def test_the_object_or_the_subject_names_it(self) -> None:
+        for sentence, surface, kanji in (("かばんを上のたなにおきました。", "おき", "置く"),
+                                         ("あさ六時におきました。", "おき", "起きる"),
+                                         ("日よう日のあさ、母にたまごやきをならいました。", "ならい", "習う"),
+                                         ("先生のクラスでならったことばを、毎日つかっています。", "ならっ", "習う"),
+                                         ("あさがおの花は、あさだけさきます。", "さき", "咲く"),
+                                         ("月よう日に、スマホはなおりました。", "なおり", "直る"),
+                                         ("かぜがなおりました。", "なおり", "治る")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # (put down, or got up? nothing says)
+        self.assertIsNone(token_of("ここにおきます。", "おき").get("vocab_match"))
+
+    def test_every_written_in_kana(self) -> None:
+        # 毎 + the kana a graded text writes for the kanji above its level
+        for sentence, surface, kanji in (("「毎ばんうるさくて、すみません。」", "毎ばん", "毎晩"),
+                                         ("毎しゅう、テニスをします。", "毎しゅう", "毎週"),
+                                         ("毎とし、日本へ行きます。", "毎とし", "毎年"),
+                                         ("毎あさ、さんぽします。", "毎あさ", "毎朝")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class EighthReviewWordTests(unittest.TestCase):
+    """What an eighth review of 160 lines found read wrong or silent
+    (plan 272), each with the sentence it must leave alone."""
+
+    def test_figures_read(self) -> None:
+        for sentence, surface, reading in (("9時～12時は使えません。", "12", "じゅうに"),
+                                           ("ダイヤ×300を受け取った。", "300", "さんびゃく"),
+                                           ("TOEIC800点とる。", "800", "はっぴゃく")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+        # (a sum, a seat code and a model number stay as printed)
+        self.assertEqual(token_of("3×4は12です。", "4")["reading"], "4")
+        self.assertEqual(token_of("iPhone15を買った。", "15")["reading"], "15")
+
+    def test_glosses(self) -> None:
+        for sentence, surface, gloss in (("花粉の飛ぶ量は、非常に多いでしょう。", "の", "(in a clause before a noun)"),
+                                         ("ついには親の預金にまで手をつけるしまつだ。", "まで", "(after に, or before も) even"),
+                                         ("人の都合に合わせて育ってはくれない。", "は",
+                                          "(between a て form and a negative)"),
+                                         ("一円たりともむだにはできない。", "は", "(after a particle)"),
+                                         ("この料理は水っぽくて味がしない。", "て", "the て form")):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
+
+    def test_beginner_words(self) -> None:
+        for sentence, surface, kanji in (("はいしゃの先生は、とてもやさしい女の人でした。", "はいしゃ", "歯医者"),
+                                         ("日よう日には、四人でちかくのこうえんへ行きます。", "ちかく", "近く"),
+                                         ("母にたまごやきをならいました。", "たまごやき", "卵焼き"),
+                                         ("やきそばとかきごおりを食べました。", "かきごおり", "かき氷")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+
+    def test_cards_by_the_sentence(self) -> None:
+        for sentence, surface, kanji in (("ひと息つく時間を持つ。", "つく", "吐く"),
+                                         ("ため息ついた", "つい", "吐く"),
+                                         ("草いきれが鼻をついた。", "つい", "突く"),
+                                         ("いらっしゃい！今日は何を探す？", "いらっしゃい", ""),
+                                         ("ひゃくねんも まえから", "ねん", "年"),
+                                         ("一駅ぐらい歩いて帰る。", "ぐらい", ""),
+                                         ("お手すきの際にご確認ください。", "手すき", "手透き"),
+                                         ("そういう人", "そういう", "そう言う"),
+                                         ("こいぬは ちょうちょを おいかけて", "ちょうちょ", "蝶々"),
+                                         ("名神高速上り、京都東インターを先頭に", "上り", "上り"),
+                                         ("本日付で手配が完了いたしました。", "付", "付け"),
+                                         ("借りた本、週末に返しに行くね。", "返し", "返す"),
+                                         ("私が彼の死を知らされたのは", "知らさ", "知らせる"),
+                                         ("ペットの連れ込みはご遠慮ください", "連れ込み", "連れ込む"),
+                                         ("ママー、みてみて！ダンゴムシ", "ダンゴムシ", "ダンゴ虫"),
+                                         ("しょうぼうしさんになるんだ！", "しょうぼうし", "消防士"),
+                                         ("範囲わかる人いる？？", "いる", "居る"),
+                                         ("じゃん！ｗｗ もっかいやるわ。", "もっかい", "")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # ...where the same letters stay the word they are elsewhere
+        for sentence, surface, kanji in (("駅についた。", "つい", "着く"),
+                                         ("電気がついた", "つい", "点く"),
+                                         ("うそをついた", "つい", "吐く"),
+                                         ("時間がたった。", "たっ", "経つ"),
+                                         ("大通りに行く", "大通り", "大通り"),
+                                         ("山に上りました", "上り", "上る"),
+                                         ("電車におくれた。", "おくれ", "遅れる"),
+                                         ("お金要る？", "要る", "要る")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # a compound verb no dictionary holds, as the two verbs it is --
+        # and the first alone where a point is the second (消えかけた)
+        self.assertEqual(token_of("消えかけた街灯", "消え")["vocab_match"]["entry"]["kanji"], "消える")
+        self.assertIsNone(token_of("消えかけた街灯", "かけ").get("vocab_match"))
+        self.assertEqual(token_of("30分も待たされた", "待たさ")["vocab_match"]["entry"]["kanji"], "待つ")
+        self.assertEqual(token_of("公人としてあるまじき行為だ。", "ある")["vocab_match"]["entry"]["kanji"], "")
+        self.assertEqual(token_of("外はもうくらいみたいだ。", "くらい")["vocab_match"]["entry"]["kanji"], "暗い")
+        self.assertEqual(token_of("駅まで十分くらいです。", "くらい")["vocab_match"]["entry"]["kana"], "ぐらい")
+        self.assertEqual(token_of("グラウンドがぬかるんどる", "ぬかるん")["vocab_match"]["entry"]["kana"], "ぬかるむ")
+        self.assertEqual(token_of("調味料を回し入れたら", "回し")["vocab_match"]["entry"]["kanji"], "回す")
+        self.assertEqual(token_of("調味料を回し入れたら", "入れ")["vocab_match"]["entry"]["kanji"], "入れる")
+
+    def test_readings_by_the_sentence(self) -> None:
+        for sentence, surface, reading in (("生姜1かけ", "1", "ひと"),
+                                           ("三日三晩降り続いた雨", "三", "み"),
+                                           ("本日付で手配が完了", "付", "づけ"),
+                                           ("私事で恐縮ですが", "私事", "わたくしごと"),
+                                           ("消えかけた街灯の下で", "下", "した"),
+                                           ("はよ来んと、バスが出る。", "来ん", "こん"),
+                                           ("うわ、からっ！これ普通に辛いんだけど", "辛い", "からい")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+        self.assertEqual(token_of("先生の下で学んだ", "下")["reading"], "もと")
+        self.assertEqual(token_of("一晩中", "一")["reading"], "ひと")
+
+    def test_speech_glossed(self) -> None:
+        for sentence, surface, gloss in (("風よ 運んでおくれ", "よ", "(after a noun) calls out"),
+                                         ("風よ 運んでおくれ", "おくれ", "(after 〜て, old or gentle)"),
+                                         ("おや、旅の方かね。", "おや", "oh?"),
+                                         ("ちっ、しゃあねえな。", "ちっ", "tch!"),
+                                         ("むっとするような暑さ", "むっと", "(of heat or a smell)"),
+                                         ("値段を考えれば十分アリだと思う。", "アリ", "(slang) acceptable"),
+                                         ("生姜1かけ", "かけ", "(counter) a piece"),
+                                         ("切り離しとなります。", "と", "(with なる) becomes"),
+                                         ("うわ、からっ！", "からっ", "(辛い cut short"),
+                                         ("何をお探しだい？", "い", "(after だ, with a question word)"),
+                                         ("何度も確かめては ため息ついた", "は", "(after 〜て, then another doing)"),
+                                         ("そんな運転をしていては、大けがをする。", "は", "(after a て form) if"),
+                                         ("てめえ、今なんつった？", "つっ", "(rough) って言った"),
+                                         ("老舗の鮮魚店までもが店を閉めた。", "まで", "(after に, or before も) even"),
+                                         ("なんぼやと思う？", "や", "(Kansai) is"),
+                                         ("千円やで、千円！", "で", "(Kansai, at the end)"),
+                                         ("言うたかて、しゃあないやんか。", "かて", "(Kansai) even if"),
+                                         ("言うたかて、しゃあないやんか。", "やんか", "(Kansai) isn't it!"),
+                                         ("決まってもうたんやし。", "もうた", "(Kansai) = しまった"),
+                                         ("ちゃうちゃう、犬ちゃうねん。", "ちゃう", "(Kansai) = 違う"),
+                                         ("なにしよるん？", "よる", "(western Japan) is …ing"),
+                                         ("んだんだ、おらもそう思うべ。", "んだんだ", "(Tōhoku) that's right"),
+                                         ("んだんだ、おらもそう思うべ。", "べ", "(eastern and northern speech)"),
+                                         ("なして黙ってたのっしゃ。", "なして", "(north, Hokkaido) why?"),
+                                         ("なして黙ってたのっしゃ。", "っしゃ", "(Tōhoku)"),
+                                         ("めんこい孫さ会えるの", "さ", "(Tōhoku) to, toward"),
+                                         ("飲み物いらんレベル", "ん", "not"),
+                                         ("くるりんと まわりました。", "くるりん", "a sound or manner word")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
+        # ...and never where the letters are the plain word
+        self.assertEqual(token_of("電話をかけた", "かけ")["vocab_match"]["entry"]["kanji"], "掛ける")
+        self.assertEqual(gloss_of("りんごやみかんを買った。", "や"), "")

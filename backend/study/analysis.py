@@ -31,7 +31,7 @@ from study.card_lookup import (
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
     resolve_te_noun, resolve_interjection, resolve_home, resolve_humble_errand, numeral_value, kana_card, resolve_pool_whole_word,
-    resolve_pool_idiom, resolve_pool_opening, a_points_own_verb, split_unknown_compound,
+    resolve_pool_idiom, resolve_pool_opening, a_points_own_verb, split_unknown_compound, split_unknown_verb,
     compound_tail_readings,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
@@ -556,6 +556,9 @@ def _printed_numbers(morphemes: list) -> tuple[list, dict[int, tuple[int, str, s
             if said:
                 numbers[i] = (j + 1, printed + out[j].surface, said + _MYRIADS[out[j].surface])
             continue
+        if j < len(out) and out[j].surface in ("％", "%") and parts[0]["reading"].endswith("じゅう"):
+            # 10％ じゅっパーセント, the ten cut short before its p (plan 272)
+            parts[0]["reading"] = parts[0]["reading"][:-1] + "っ"
         numbers[i] = (j, printed, parts[0]["reading"])
         if j == i + 1:
             out[i] = replace(out[i], reading=parts[0]["reading"])
@@ -1312,17 +1315,29 @@ def _numeral_kanji(surface: str) -> bool:
     return bool(surface) and all(c in "一二三四五六七八九十百千万" for c in surface)
 
 
-def _compounds_apart(morphemes: list) -> list:
+def _point_on_second_half(m, parts, grammar: list[dict]) -> bool:
+    """Whether no point is written on a compound verb's first verb (plan
+    272): 消えかけた is 消える and 〜かける, the point's own half; 走り出す's
+    出す is 〜出す's, and 走る keeps its card."""
+    cut = m.start + len(parts[0][0])
+    return not any(s < cut and m.start < e for g in grammar for s, e in g["segments"])
+
+
+def _compounds_apart(morphemes: list, grammar: list[dict] | None = None) -> list:
     """The morphemes with a compound no dictionary holds cut into the two
     deck words it is (card_lookup.split_unknown_compound, plan 272): 右ひざ
-    as 右 and ひざ, each with its card, where it said nothing."""
+    as 右 and ひざ, each with its card, where it said nothing; a compound
+    verb too (回し入れる, split_unknown_verb), never where a point is
+    written on it (走り出す's 〜出す)."""
     out = []
     hits = None
     for j, m in enumerate(morphemes):
         parts = None
-        if m.pos == "noun" and len(m.surface) >= 2 and resolve_morpheme(morphemes, j) is None \
+        if m.pos in ("noun", "verb") and len(m.surface) >= 2 and resolve_morpheme(morphemes, j) is None \
                 and resolve_pool_morpheme(morphemes, j) is None:
-            parts = split_unknown_compound(m)
+            parts = split_unknown_compound(m) if m.pos == "noun" else split_unknown_verb(m)
+            if parts and m.pos == "verb" and not _point_on_second_half(m, parts, grammar or []):
+                parts = None
         if parts:
             # (Not where it opens a word the pool holds whole: 小中学 + 生
             # is 小中学生, "pupils", plan 272.)
@@ -1365,7 +1380,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     """
     # (Cut first: a number's indices are read off the list it is in, and
     # a cut after them moved 35万's reading onto 約, plan 272.)
-    morphemes = _compounds_apart(morphemes)
+    morphemes = _compounds_apart(morphemes, grammar)
     morphemes, numbers = _printed_numbers(morphemes)
     deck_hits = [resolve_morpheme(morphemes, j) for j in range(len(morphemes))]
     ruled = _in_grammar(morphemes, grammar or [])
@@ -1867,7 +1882,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # (だろ, はずな, とこ, ちゃだめ), a point across a picture book's spaces,
 # sayings whole (三日坊主), a picture book's animal named, a number's
 # reading kept on its own token, and cards by the sentence (ほん 本, せい).
-LOCAL_REV = 22
+# 23: what an eighth review found -- forms the lessons do not write
+# (とたん without に, おそれあり, こととなる, ありながら, ひとつせず), a fused
+# particle left to its construction (が早いか's か), cards by what the verb
+# takes (ひと息つく 吐く, 鼻をつく 突く, 返しに行く 返す), a compound verb as
+# its two verbs, and the west's and the north's speech glossed (やで, かて,
+# ちゃう, しよる, べ, なして).
+LOCAL_REV = 23
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

@@ -159,6 +159,23 @@ _GLOSSES = {
                  "fr": "(avec ござる) est : でございます à l'ancienne, très poli"},
     "で_copula": {"en": "is ..., and: です／だ joined to what follows (its て form), often giving the reason",
                   "fr": "est …, et : です／だ relié à la suite (sa forme en て), souvent pour donner la raison"},
+    "は_after_particle": {"en": "(after a particle) makes that part the topic, or sets it against others: 仕事では, "
+                                "at work at least; 簡単には, not easily",
+                          "fr": "(après une particule) en fait le thème, ou l'oppose au reste : 仕事では, au travail "
+                                "du moins ; 簡単には, pas facilement"},
+    "は_te_negative": {"en": "(between a て form and a negative) stresses the negative: 育ってはくれない, won't grow "
+                             "(for you), however much you want",
+                       "fr": "(entre une forme en て et une négation) renforce la négation : 育ってはくれない, ne "
+                             "pousse pas (pour toi), quoi qu'on veuille"},
+    "の_subject": {"en": "(in a clause before a noun) marks who or what does it, = が: 花粉の飛ぶ量, the amount "
+                         "of pollen that flies",
+                   "fr": "(dans une proposition devant un nom) marque qui fait l'action, = が : 花粉の飛ぶ量, la "
+                         "quantité de pollen qui vole"},
+    "まで_even": {"en": "(after に, or before も) even, as far as: 預金にまで手をつける, even touches the savings",
+                 "fr": "(après に, ou devant も) jusqu'à, même : 預金にまで手をつける, toucher même à l'épargne"},
+    "まで_upto": {"en": "up to, as far as, until: 最後まで, to the end", "fr": "jusqu'à : 最後まで, jusqu'au bout"},
+    "て_form": {"en": "the て form: joins what comes before to what follows (and, so, by doing)",
+               "fr": "la forme en て : relie ce qui précède à ce qui suit (et, donc, en faisant)"},
     "は_after_te": {"en": "(after a て form) if, as long as: what follows is usually unwelcome",
                    "fr": "(après une forme en て) si, tant que : la suite est souvent fâcheuse"},
     "と_naru": {"en": "(with なる) becomes: the written form of 〜になる",
@@ -287,6 +304,44 @@ _GLOSSES = {
                    "fr": "(oral) では dit court : quant à, avec … ; じゃない, n'est pas"},
     "www": {"en": "(net slang) laughter, lol: one w a laugh",
             "fr": "(argot du web) rires, mdr : un w par rire"},
+    "よる_progressive": {"en": "(western Japan) is …ing (= ている): なにしよるん, what are you doing?",
+                        "fr": "(ouest du Japon) est en train de (= ている) : なにしよるん, qu'est-ce que tu fais ?"},
+    "で_yo": {"en": "(Kansai, at the end) you know, I tell you (= よ): 千円やで, it's a thousand yen, you know",
+             "fr": "(Kansai, en fin de phrase) tu sais, je te dis (= よ) : 千円やで, c'est mille yens, tu sais"},
+    "かて": {"en": "(Kansai) even if (= たって, ても): 言うたかて, even if you say so",
+            "fr": "(Kansai) même si (= たって, ても) : 言うたかて, tu as beau dire"},
+    "もうた": {"en": "(Kansai) = しまった: 〜てもうた, it's gone and happened, it's done",
+              "fr": "(Kansai) = しまった : 〜てもうた, c'est arrivé, c'est fait"},
+    "ちゃう": {"en": "(Kansai) = 違う: no!, it isn't (犬ちゃう, it's not a dog)",
+              "fr": "(Kansai) = 違う : non !, ce n'est pas (犬ちゃう, ce n'est pas un chien)"},
+    "あかん": {"en": "(Kansai) no good, mustn't (= だめ): しとったらあかん, you mustn't be doing that",
+              "fr": "(Kansai) pas bien, il ne faut pas (= だめ) : しとったらあかん, tu ne dois pas faire ça"},
+    "べ": {"en": "(eastern and northern speech) surely, I think, let's (= だろう, よう)",
+          "fr": "(parlers de l'Est et du Nord) sûrement, je pense, allons (= だろう, よう)"},
+    "なして": {"en": "(north, Hokkaido) why? (= どうして)", "fr": "(Nord, Hokkaidō) pourquoi ? (= どうして)"},
+    "っしゃ": {"en": "(Tōhoku) closes a question or a remark softly (≈ ね, よ)",
+              "fr": "(Tōhoku) clôt doucement une question ou une remarque (≈ ね, よ)"},
+    "んだんだ": {"en": "(Tōhoku) that's right, yes yes (= そうだそうだ)", "fr": "(Tōhoku) c'est ça, oui oui (= そうだそうだ)"},
+    "さ_ni": {"en": "(Tōhoku) to, toward (= に, へ): 孫さ会える, to meet the grandchild",
+             "fr": "(Tōhoku) à, vers (= に, へ) : 孫さ会える, voir son petit-enfant"},
+    "けろ": {"en": "(Tōhoku) = くれ: 言ってけろ, tell me", "fr": "(Tōhoku) = くれ : 言ってけろ, dis-le-moi"},
+    "からっ": {"en": "(辛い cut short, a cry) so spicy!", "fr": "(辛い écourté, une exclamation) que c'est épicé !"},
+    "い_dai": {"en": "(after だ, with a question word) asks warmly or gruffly: 何をお探しだい？, what are you after?",
+              "fr": "(après だ, avec un mot interrogatif) demande avec chaleur ou rudesse : 何をお探しだい？, que cherchez-vous ?"},
+    "は_te": {"en": "(after 〜て, then another doing) each time …: 確かめてはため息をつく, checks it again and again, sighing",
+             "fr": "(après 〜て, puis une autre action) chaque fois que … : 確かめてはため息をつく, vérifier encore et encore en soupirant"},
+    "つった": {"en": "(rough) って言った said short: なんつった, what did you say?",
+              "fr": "(familier, rude) って言った abrégé : なんつった, qu'est-ce que t'as dit ?"},
+    "かけ_piece": {"en": "(counter) a piece, a knob: 生姜1かけ, a knob of ginger; にんにく1かけ, a clove of garlic",
+                  "fr": "(compteur) un morceau : 生姜1かけ, un morceau de gingembre ; にんにく1かけ, une gousse d'ail"},
+    "おや": {"en": "oh?, well!: mild surprise", "fr": "tiens !, oh ? : une légère surprise"},
+    "ちっ": {"en": "tch!: a click of the tongue, annoyance", "fr": "tss ! : un claquement de langue, l'agacement"},
+    "むっと": {"en": "(of heat or a smell) stifling, stuffy; (of a person) offended, sulky",
+              "fr": "(chaleur, odeur) étouffant, lourd ; (personne) vexé, renfrogné"},
+    "アリ_ok": {"en": "(slang) acceptable, a fair option: 十分アリだ, it's quite OK",
+               "fr": "(argot) acceptable, envisageable : 十分アリだ, ça se tient tout à fait"},
+    "おくれ": {"en": "(after 〜て, old or gentle) please … for me (= 〜てくれ): 運んでおくれ, carry it for me",
+              "fr": "(après 〜て, ancien ou tendre) … pour moi, s'il te plaît (= 〜てくれ) : 運んでおくれ, porte-le pour moi"},
     "草_lol": {"en": "(net slang) lol: laughter, whose ｗｗｗ look like grass",
               "fr": "(argot du web) mdr : le rire, dont les ｗｗｗ ressemblent à de l'herbe"},
 }
@@ -381,6 +436,8 @@ def _a_sound_word(surface: str, pos: str = "adverb") -> bool:
         return pos in ("adverb", "interjection")
     if len(set(surface)) == 1:
         return True
+    if len(surface) == 4 and surface.endswith(("りん", "リン", "るん", "ルン")) and pos == "adverb":
+        return True                     # くるりん, ころりん, ぷるるん (plan 272)
     return len(surface) == 3 and surface[-1] == "リ" and all("\u30a1" <= c <= "\u30fc" for c in surface)
 
 
@@ -475,8 +532,32 @@ def gloss(morphemes, i: int) -> dict | None:
         key = "まじで"
     elif m.pos == "conjunction" and m.surface in ("てか", "ってか"):
         key = "てか"
-    elif m.surface == "やん" and m.pos == "particle":
+    elif m.surface in ("やん", "やんか") and m.pos == "particle":
         key = "やん"                        # (Kansai, plan 272)
+    elif m.pos == "auxiliary" and m.lemma == "よる":
+        key = "よる_progressive"            # なにしよるん (plan 272)
+    elif m.surface == "かて" and m.pos == "particle":
+        key = "かて"
+    elif m.surface == "もうた":
+        key = "もうた"                       # 決まってもうた
+    elif m.surface == "ん" and m.pos == "particle" and i + 1 < len(morphemes) and morphemes[i + 1].surface == "や" \
+            and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary", "adjective", "noun"):
+        key = "ん_no"                        # もうたんやし: んだ (plan 272)
+    elif m.surface == "ちゃう" and _kansai_chau(morphemes, i):
+        key = "ちゃう"                       # ちゃうちゃう, 犬ちゃうねん
+    elif m.surface == "あかん":
+        key = "あかん"
+    elif m.surface == "べ" and m.pos == "particle" and closes_sentence(morphemes, i):
+        key = "べ"                           # そう思うべ, 楽しみだべ
+    elif m.surface in ("なして", "っしゃ", "んだんだ"):
+        key = m.surface
+    elif m.surface == "さ" and m.pos == "particle" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun") \
+            and i + 1 < len(morphemes) and morphemes[i + 1].pos == "verb":
+        key = "さ_ni"                        # 孫さ会える
+    elif m.surface == "てけろ":
+        key = "けろ"
+    elif m.surface == "で" and m.pos == "particle" and i > 0 and _kansai_yo(morphemes, i):
+        key = "で_yo"                        # 千円やで, あかんで
     elif busy_tokoro(morphemes, i):
         key = "ところ_while"
     elif truth_tokoro(morphemes, i):
@@ -515,6 +596,33 @@ def gloss(morphemes, i: int) -> dict | None:
             and morphemes[i - 1].surface == "し" and morphemes[i - 2].surface == "と" and morphemes[i - 2].pos == "particle" \
             and morphemes[i - 3].pos in ("verb", "auxiliary") and morphemes[i - 3].cform.startswith(("終止形", "連体形")):
         key = "て_toshite"                   # だまし取ったとして、逮捕 (plan 272)
+    elif m.surface in ("からっ", "辛っ") and i + 1 < len(morphemes) and morphemes[i + 1].pos == "symbol":
+        key = "からっ"                       # うわ、からっ！ (plan 272)
+    elif m.surface == "い" and m.pos == "particle" and i > 0 and morphemes[i - 1].surface == "だ" \
+            and closes_sentence(morphemes, i):
+        key = "い_dai"                       # 何をお探しだい？ (plan 272)
+    elif m.surface == "は" and m.pos == "particle" and i > 0 and morphemes[i - 1].conjunctive \
+            and morphemes[i - 1].surface in ("て", "で") and not _negative_ahead(morphemes, i) \
+            and i + 1 < len(morphemes) and morphemes[i + 1].pos in ("noun", "verb") \
+            and morphemes[i + 1].surface not in ("だめ", "駄目", "ダメ", "いや", "嫌"):
+        key = "は_te"                        # 確かめては ため息ついた (plan 272)
+    elif m.surface.startswith("つっ") and m.lemma == "つう":
+        key = "つった"                       # なんつった (plan 272)
+    elif m.surface == "かけ" and i > 0 and _numeral_like(morphemes[i - 1].surface):
+        key = "かけ_piece"                   # 生姜1かけ (plan 272)
+    elif m.surface == "と" and m.pos == "particle" and i > 0 and morphemes[i - 1].pos == "verb" \
+            and morphemes[i - 1].cform.startswith("連用形") \
+            and i + 1 < len(morphemes) and morphemes[i + 1].lemma in ("成る", "なる"):
+        key = "と_naru"                      # 切り離しとなります: a verb's stem as a noun (plan 272)
+    elif m.surface in ("おや", "おやおや", "ちっ") and _opens(morphemes, i):
+        key = "おや" if m.surface.startswith("おや") else "ちっ"   # (plan 272)
+    elif m.surface == "むっと" and m.pos == "adverb":
+        key = "むっと"
+    elif m.surface == "アリ" and i + 1 < len(morphemes) and _is_copula_token(morphemes[i + 1]):
+        key = "アリ_ok"                      # 十分アリだと思う (plan 272)
+    elif m.surface == "おくれ" and m.pos == "verb" and i > 0 and morphemes[i - 1].surface in ("て", "で") \
+            and morphemes[i - 1].conjunctive:
+        key = "おくれ"                       # 運んでおくれ (plan 272)
     elif m.surface.startswith("ウケ") and m.pos == "verb":
         key = "ウケる"
     elif m.surface == "ワン" and i + 1 < len(morphemes) and morphemes[i + 1].start == m.end \
@@ -562,9 +670,13 @@ def gloss(morphemes, i: int) -> dict | None:
     elif m.surface in ("て", "で") and m.pos == "particle" and i + 1 < len(morphemes) \
             and morphemes[i + 1].surface == "へん":
         key = "て_hen"                      # 聞いてへん (plan 272)
-    elif m.pos == "auxiliary" and m.surface == "や" and m.lemma == "や" and (
+    elif m.surface == "や" and (m.pos == "auxiliary" and m.lemma == "や" or (
+            m.pos in ("particle", "suffix") and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix")
+            and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("と", "で") and _ends_or_breaks(morphemes, i + 1)
+            or m.pos in ("particle", "suffix") and i > 0 and morphemes[i - 1].surface in ("なんぼ", "何ぼ"))) and (
             i + 1 >= len(morphemes) or morphemes[i + 1].pos == "symbol"
-            or morphemes[i + 1].surface in ("ねん", "ん", "で", "な", "なあ", "ねえ", "から", "けど", "し", "のに", "ろ", "わ")):
+            or morphemes[i + 1].surface in ("ねん", "ん", "で", "な", "なあ", "ねえ", "から", "けど", "し", "のに", "ろ", "わ",
+                                            "と")):
         key = "や_da"                       # なんでやねん, 下手やねん -- never 何やかや (plan 272)
     elif m.pos == "particle" and m.surface == "ねん":
         key = "ねん"
@@ -681,8 +793,9 @@ def gloss(morphemes, i: int) -> dict | None:
             and closes_sentence(morphemes, i):
         key = "もん"
     elif m.pos == "particle" and m.surface == "よ" and i > 0 and morphemes[i - 1].pos == "noun" \
-            and (i + 1 >= len(morphemes) or morphemes[i + 1].surface in ("\u3000", " ", "、", "，", "！", "!")):
-        key = "よ_call"                     # 儚き夢よ　いずこへ
+            and (i + 1 >= len(morphemes) or morphemes[i + 1].surface in ("\u3000", " ", "、", "，", "！", "!")
+                 or morphemes[i + 1].start > m.end):
+        key = "よ_call"                     # 儚き夢よ　いずこへ, 風よ 運んでおくれ (plan 272)
     elif m.pos == "particle" and m.surface == "は" and i > 0 and i + 2 < len(morphemes) \
             and morphemes[i - 1].pos in ("verb", "auxiliary") and morphemes[i - 1].cform.startswith("連用形") \
             and morphemes[i + 1].lemma in ("為る", "する") and morphemes[i + 2].lemma in ("ない", "無い", "ぬ", "ず"):
@@ -749,7 +862,71 @@ def gloss(morphemes, i: int) -> dict | None:
                     return {"en": f"makes an adverb of {noun}: {noun}に, {en}",
                             "fr": f"fait un adverbe de {noun} : {noun}に, {fr}"}
                 key = "に_adverb"
+        # (plan 272: what the gap report left silent, each by the word
+        # before it)
+        elif m.surface == "は" and i > 0 and (
+                (morphemes[i - 1].pos == "particle" and morphemes[i - 1].surface in ("で", "に", "と", "から", "まで",
+                                                                                   "へ", "より"))
+                or (morphemes[i - 1].pos == "auxiliary" and morphemes[i - 1].surface == "に")):
+            key = "は_after_particle"         # 仕事では, 簡単には, 課長の話では
+        elif m.surface == "は" and i > 0 and morphemes[i - 1].conjunctive and morphemes[i - 1].surface in ("て", "で") \
+                and _negative_ahead(morphemes, i):
+            key = "は_te_negative"            # 育ってはくれない, まだ決まってはおりません
+        elif m.surface == "の" and _subject_no(morphemes, i):
+            key = "の_subject"                # 花粉の飛ぶ量, 持ち主のわからない荷物
+        elif m.surface == "まで" and i > 0 and ((morphemes[i - 1].surface == "に" and morphemes[i - 1].pos == "particle")
+                                              or (i + 1 < len(morphemes) and morphemes[i + 1].surface == "も"
+                                                  and morphemes[i + 1].pos == "particle")):
+            key = "まで_even"                 # 親の預金にまで手をつける, 老舗までもが
+        elif m.surface == "まで" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix", "adverb"):
+            key = "まで_upto"                 # 最後まで残れますか, どのくらいまで
+        elif m.surface in ("て", "で") and m.conjunctive and i > 0 \
+                and (morphemes[i - 1].pos in ("verb", "auxiliary", "adjective")
+                     or (morphemes[i - 1].pos == "suffix" and morphemes[i - 1].surface.endswith("く"))):
+            key = "て_form"                   # 借りてまでして, 水っぽくて
     return dict(_GLOSSES[key]) if key else None
+
+
+def _kansai_chau(morphemes, i: int) -> bool:
+    """Whether ちゃう is the west's 違う, "no!" -- opening what is said or
+    after a noun -- never 〜てしまう said short after a verb (plan 272)."""
+    prev = morphemes[i - 1] if i > 0 else None
+    return prev is None or prev.pos in ("symbol", "noun", "pronoun") or prev.surface == "ちゃう"
+
+
+def _kansai_yo(morphemes, i: int) -> bool:
+    """Whether で closes what is said after the west's や or あかん, its
+    よ (plan 272): 千円やで, あかんで."""
+    return morphemes[i - 1].surface in ("や", "あかん") and _ends_or_breaks(morphemes, i)
+
+
+def _ends_or_breaks(morphemes, i: int) -> bool:
+    """Whether a mark follows morphemes[i], or nothing but particles to
+    its sentence's end: 千円やで、千円！"""
+    return (i + 1 < len(morphemes) and morphemes[i + 1].pos == "symbol") or closes_sentence(morphemes, i)
+
+
+def _numeral_like(surface: str) -> bool:
+    return bool(surface) and all(c in "0123456789０１２３４５６７８９一二三四五六七八九十" for c in surface)
+
+
+def _is_copula_token(m) -> bool:
+    return m.pos == "auxiliary" and m.lemma in ("だ", "です")
+
+
+def _subject_no(morphemes, i: int) -> bool:
+    from study.grammar_detect import subject_no
+    return subject_no(morphemes, morphemes[i].start)
+
+
+def _negative_ahead(morphemes, i: int) -> bool:
+    """Whether a negative closes the clause after morphemes[i]."""
+    for u in morphemes[i + 1:]:
+        if u.pos == "symbol" or (u.pos == "particle" and u.conjunctive and u.surface not in ("て", "で")):
+            return False
+        if u.lemma in ("ない", "無い", "ず", "ぬ") and u.pos in ("auxiliary", "adjective"):
+            return True
+    return False
 
 
 def _quoting(morphemes, i: int) -> str:

@@ -109,6 +109,8 @@ _H_COUNTERS = {
     "匹": ("ひき", "びき"),
     # (plan 272: 一歩 いっぽ, 三歩 さんぽ, 200歩 にひゃっぽ)
     "歩": ("ほ", "ぽ"),
+    # (plan 272: 1包 いっぽう, a packet of medicine)
+    "包": ("ほう", "ぽう"),
 }
 # k/s/t-initial counters: the numeral geminates (いっかい, はっさい).
 # The value is the reading after 3/何 where it voices, else None.
@@ -132,7 +134,8 @@ _GEMINATING = {1, 8, 10}          # before any k/s/t/p counter
 _GEMINATING_K = {6, 100}          # before a k- or p- counter only
 
 # Counters that take the native ひと / ふた: 一切れ, 一口, 一言.
-_NATIVE_COUNTERS = {"切れ", "口", "言", "息", "晩", "組", "箱", "皿", "袋"}
+_NATIVE_COUNTERS = {"切れ", "口", "言", "息", "晩", "組", "箱", "皿", "袋", "駅",   # (駅: 一駅 ひとえき, plan 272)
+                    "かけ"}                                                     # (生姜1かけ ひとかけ, plan 272)
 
 # 一つ ... 九つ.
 _TSU = {1: "ひと", 2: "ふた", 3: "みっ", 4: "よっ", 5: "いつ",
@@ -323,9 +326,11 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
             return n_read, voiced
         return n_read, c_read
 
-    if ctr_surface in _NATIVE_COUNTERS and whole and num_surface in ("一", "二"):
-        # 一切れ ひときれ, 二口 ふたくち: the native number.
-        return ("ひと" if num_surface == "一" else "ふた"), c_read
+    if ctr_surface in _NATIVE_COUNTERS and whole and num_surface in ("一", "二", "1", "2", "１", "２"):
+        # 一切れ ひときれ, 二口 ふたくち: the native number (生姜1かけ, plan 272).
+        return ("ひと" if num_surface in ("一", "1", "１") else "ふた"), c_read
+    if ctr_surface == "晩" and whole and num_surface == "三":
+        return "み", c_read                    # 三日三晩 みっかみばん (plan 272)
 
     if ctr_surface == "つ" and whole and len(num_surface) == 1 and (
             num_surface in _KANJI_DIGIT or kana_digits):
