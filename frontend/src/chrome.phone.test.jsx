@@ -76,6 +76,8 @@ function mountShell(path = '/today', screen = <main id="main-content">here</main
             <Route path="/learn" element={screen} />
             <Route path="/learn/decks" element={screen} />
             <Route path="/profile" element={screen} />
+            <Route path="/profile/settings" element={screen} />
+            <Route path="/profile/settings/:page" element={screen} />
           </Route>
           <Route element={<StageFrame />}>
             <Route path="/learn/kana" element={screen} />
@@ -253,6 +255,66 @@ describe('the HUD', () => {
     expect(panel).toBeTruthy()
     expect(panel.classList.contains('hud__status--ring')).toBe(false)
     expect(panel.querySelector('.hud__status-word').textContent.length).toBeGreaterThan(0)
+  })
+})
+
+// 設定 — the gear (plan 275, the owner's pick C of the canvas "Tsuji —
+// settings in the HUD"): Réglages at the HUD's start, a link, in the
+// soft ink and lit while a settings page is open; a hairline parts it
+// from the panel and goes when there is no panel.
+describe('the HUD\'s gear', () => {
+  const RING = {
+    goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
+    plannedPerDay: 10, itemsTotal: 1000, itemsDone: 160, actual14: 14, days14: 14,
+  }
+
+  it('opens Réglages from the start of the HUD, before the panel', async () => {
+    journeyRef.current = RING
+    await mountShell()
+    await settle()
+    const inner = document.querySelector('.hud__inner')
+    const gear = inner.querySelector('[data-guide="hud.settings"]')
+    expect(gear.tagName).toBe('A')
+    expect(gear.getAttribute('href')).toBe('/profile/settings')
+    expect(gear.getAttribute('aria-label')).toBe('Réglages')
+    expect(gear.hasAttribute('aria-current')).toBe(false)
+    expect(inner.firstElementChild.firstElementChild).toBe(gear)
+    // The glyph on the HUD's gutter, inside the HUD, before the panel.
+    const gb = gear.getBoundingClientRect()
+    const ib = inner.getBoundingClientRect()
+    const pb = inner.querySelector('.hud__status').getBoundingClientRect()
+    expect(gb.top).toBeGreaterThanOrEqual(ib.top)
+    expect(gb.bottom).toBeLessThanOrEqual(ib.bottom)
+    expect(gb.left).toBeGreaterThanOrEqual(ib.left)
+    expect(gb.right).toBeLessThanOrEqual(pb.left)
+    // Unlit: the soft ink, no ground.
+    const panelInk = getComputedStyle(document.documentElement).getPropertyValue('--text-on-panel-soft').trim()
+    const probe = document.createElement('i')
+    probe.style.color = panelInk
+    document.body.appendChild(probe)
+    expect(getComputedStyle(gear).color).toBe(getComputedStyle(probe).color)
+    probe.remove()
+    expect(getComputedStyle(gear).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    // The hairline between it and the panel.
+    expect(getComputedStyle(gear, '::after').borderRightWidth).toBe('1px')
+  })
+
+  it('is lit on every settings page, and loses its hairline with the panel', async () => {
+    await mountShell('/profile/settings/display')
+    await settle()
+    const gear = document.querySelector('[data-guide="hud.settings"]')
+    expect(gear.getAttribute('aria-current')).toBe('page')
+    expect(gear.classList.contains('hud__gear--on')).toBe(true)
+    expect(getComputedStyle(gear).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    // No contract: no panel, so nothing to part it from.
+    expect(document.querySelector('.hud__status')).toBeNull()
+    expect(getComputedStyle(gear, '::after').content).toBe('none')
+  })
+
+  it('is not lit on the profile it used to sit behind', async () => {
+    await mountShell('/profile')
+    await settle()
+    expect(document.querySelector('[data-guide="hud.settings"]').hasAttribute('aria-current')).toBe(false)
   })
 })
 
