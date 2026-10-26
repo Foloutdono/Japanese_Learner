@@ -2447,4 +2447,18 @@ class EighthReviewPointTests(unittest.TestCase):
             with self.subTest(sentence=sentence, pattern=pattern):
                 self.assertIn(pattern, found_in(sentence))
         self.assertIn("〜として", found_in("公人としてあるまじき行為だ。"))
+        # (what the second look at the eighth review found made wrong)
+        self.assertIn("〜ものだ", found_in("世の中そういうもんだよね"))
+        self.assertNotIn("〜は〜が", found_in("今日では、SNSの普及により、誰かの失言が拡散される。"))
+        self.assertIn("〜は〜が", found_in("象は鼻が長い。"))
+        self.assertIn("〜にかかわらず", found_in("経済状況いかんにかかわらず、等しく保障されるべきだ。"))
+        # 〜のは〜だ closes on the sentence's own copula, never one inside a
+        # reason or a quote before it -- and keeps one a quote follows alone
+        for sentence, closing in (("休んだのは、病気だったからです。", "です"),
+                                  ("思い出すのは、人は学ぶのだという先生の言葉です。", "です"),
+                                  ("うそをつくのは悪いことだと思う。", "だ"),
+                                  ("知らされたのは、一週間後のことだった。", "だっ")):
+            with self.subTest(sentence=sentence):
+                hit = next(h for h in grammar_detect.detect(sentence) if h[0] == "〜のは〜だ")
+                self.assertTrue(sentence[:hit[3]].endswith(closing), sentence[hit[2]:hit[3]])
         self.assertIn("〜まい", found_in("みんなが信じようが信じまいが、これは事実だ。"))

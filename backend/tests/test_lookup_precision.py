@@ -2667,6 +2667,8 @@ class EighthReviewWordTests(unittest.TestCase):
                 self.assertEqual(token_of(sentence, surface)["reading"], reading)
         self.assertEqual(token_of("先生の下で学んだ", "下")["reading"], "もと")
         self.assertEqual(token_of("一晩中", "一")["reading"], "ひと")
+        self.assertEqual(token_of("3年2組は明日から学級閉鎖とします。", "2")["reading"], "に")   # a class, no pair
+        self.assertEqual(token_of("二組の夫婦", "二")["reading"], "ふた")
 
     def test_speech_glossed(self) -> None:
         for sentence, surface, gloss in (("風よ 運んでおくれ", "よ", "(after a noun) calls out"),

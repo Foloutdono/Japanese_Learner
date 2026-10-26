@@ -1836,6 +1836,10 @@ def _shaped(sentence, tokens, level, pattern, parts):
                 or (pattern == "〜くなる／〜になる" and _inflects_as_adjective(tokens, start))
                 # (冷静ではいられない: a な-adjective's で, plan 272)
                 or (pattern == "〜てはいられない" and _copula_de_at(tokens, start))
+                # (世の中そういうもんだ: そういう ends on its いう, plan 272)
+                or ((b := _before_token(start, tokens)) is not None and b.pos == "adnominal"
+                    and b.surface in ("そういう", "こういう", "ああいう", "どういう")
+                    and "verb" in (befores | _admitted(pattern, befores, heads)))
                 # (what is settled on said as a quote: ラーメンのせいってことに
                 # しとく, 中止ということになった, plan 272)
                 or (pattern in _SETTLED_AS_SAID and (b := _before_token(start, tokens)) is not None
@@ -2963,7 +2967,9 @@ def _regardless_spans(tokens):
         t, ni, verb, neg = tokens[i:i + 4]
         if (t.surface in ("いかん", "如何") and ni.surface == "に" and verb.lemma in ("関わる", "拘わる", "依る", "因る", "寄る")
                 and verb.cform.startswith("未然形") and neg.lemma in ("ず", "ない")):
-            out.append((t.start, neg.end))
+            # (in two pieces, so 〜にかかわらず, which the sentence says too,
+            # is read beside it)
+            out.append(((t.start, t.end), (ni.start, neg.end)))
     return out
 
 
@@ -4438,6 +4444,10 @@ def _wa_ga_refused(tokens, start: int, end: int, segments) -> bool:
         # (The は of とは stresses what is compared, no topic: 実際の商品
         # とは異なる場合があります, plan 272.)
         return True
+    if first >= 2 and tokens[first - 1].surface == "で" and tokens[first - 2].surface in _ERAS:
+        # (Nor the では of a time: 今日では、…失言が拡散される, "these days",
+        # plan 272.)
+        return True
     if first >= 2 and tokens[first - 1].surface == "で" and tokens[first - 2].surface in _SOURCES:
         # (Nor the では of what one was told: 課長の話では、…規則が変わる
         # そうです, "according to the manager", plan 272.)
@@ -4456,6 +4466,10 @@ def _wa_ga_refused(tokens, start: int, end: int, segments) -> bool:
                 and k + 1 < len(tokens) and tokens[k + 1].surface in _COMMAS:
             return True
     return _ga_in_a_clause_of_its_own(tokens, first, last)
+
+
+# The times a では sets what follows in (plan 272).
+_ERAS = frozenset({"今日", "現在", "最近", "現代", "近年", "今", "昔", "当時", "以前", "戦後", "戦前", "江戸時代", "時代"})
 
 
 # What closes a clause the topic is no part of: ゆうひがしずむまで, 雨が
@@ -5142,8 +5156,10 @@ def _noha_da_refused(tokens, s, e, segments) -> bool:
         j = k + 1
         while j < len(tokens) and tokens[j].pos == "auxiliary" and tokens[j].lemma == "た":
             j += 1
-        if j < len(tokens) and tokens[j].pos == "particle" and tokens[j].surface in ("から", "ので") and any(
-                _is_copula(u) for u in tokens[j + 1:_sentence_end(tokens, j)]):
+        # (...nor the だ of a quote inside the focus: 思い出すのは、…学ぶのだ
+        # という先生の言葉です)
+        if j < len(tokens) and tokens[j].pos == "particle" and tokens[j].surface in ("から", "ので", "と", "って") \
+                and any(_is_copula(u) for u in tokens[j + 1:_sentence_end(tokens, j)]):
             return True
     i = _index_at(tokens, segments[-1][0])
     if i is None or i == 0:

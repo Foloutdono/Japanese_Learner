@@ -326,7 +326,8 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
             return n_read, voiced
         return n_read, c_read
 
-    if ctr_surface in _NATIVE_COUNTERS and whole and num_surface in ("一", "二", "1", "2", "１", "２"):
+    if ctr_surface in _NATIVE_COUNTERS and whole and (num_surface in ("一", "二") or (
+            num_surface in ("1", "2", "１", "２") and ctr_surface != "組")):   # (3年2組 にくみ, a class)
         # 一切れ ひときれ, 二口 ふたくち: the native number (生姜1かけ, plan 272).
         return ("ひと" if num_surface in ("一", "1", "１") else "ふた"), c_read
     if ctr_surface == "晩" and whole and num_surface == "三":
