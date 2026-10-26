@@ -107,6 +107,8 @@ _H_COUNTERS = {
     "本": ("ほん", "ぼん"),
     "杯": ("はい", "ばい"),
     "匹": ("ひき", "びき"),
+    # (plan 272: 一歩 いっぽ, 三歩 さんぽ, 200歩 にひゃっぽ)
+    "歩": ("ほ", "ぽ"),
 }
 # k/s/t-initial counters: the numeral geminates (いっかい, はっさい).
 # The value is the reading after 3/何 where it voices, else None.
@@ -116,11 +118,13 @@ _KST_COUNTERS = {
     "点": None, "週間": None, "周": None, "件": None, "課": None, "か月": None,
     "ヶ月": None, "ケ月": None, "箇月": None, "カ月": None, "キロ": None,
     "センチ": None, "回目": None, "種類": None,
+    # (plan 272: 1滴 いってき, 10勝 じゅっしょう, 3投 さんとう)
+    "滴": None, "勝": None, "投": None,
 }
 # Gemination happens before a voiceless consonant only.
 _VOICELESS = set("かきくけこさしすせそたちつてとぱぴぷぺぽ")
 # A counter's own reading, for a token UniDic did not read as one.
-_COUNTER_BASE = {"本": "ほん", "杯": "はい", "匹": "ひき", "分": "ふん", "回": "かい",
+_COUNTER_BASE = {"本": "ほん", "杯": "はい", "匹": "ひき", "分": "ふん", "回": "かい", "歩": "ほ",
                  "個": "こ", "階": "かい", "冊": "さつ", "歳": "さい", "才": "さい",
                  "足": "そく", "軒": "けん", "時": "じ", "時間": "じかん", "月": "がつ",
                  "人": "にん", "年": "ねん", "円": "えん", "日": "にち"}
@@ -344,6 +348,12 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
             return None
         spelled = any(c in _NUMERAL_CHARS for c in num_surface) or kana_digits
         if not (2 <= value <= 10 or value in (14, 20, 24)):
+            # 17日 じゅうしちにち, 19日 じゅうくにち: a date's seven and nine
+            # (plan 272)
+            if value % 10 == 7:
+                n_read = _swap_tail(n_read, "なな", "しち")
+            elif value % 10 == 9:
+                n_read = _swap_tail(n_read, "きゅう", "く")
             return n_read, "にち"
         if not spelled:
             return n_read, "か"
@@ -379,6 +389,25 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         return _swap_tail(n_read, "よん", "よ"), c_read
 
     return None
+
+
+# The units a figure is printed with in Latin letters (plan 272): their
+# reading and what they measure. One letter alone is a unit only after
+# a figure (600W, 2L); read without one it is a size or a letter.
+LATIN_UNITS = {
+    "W": ("わっと", "watt(s)", "watt(s)"), "kW": ("きろわっと", "kilowatt(s)", "kilowatt(s)"),
+    "ml": ("みりりっとる", "millilitre(s)", "millilitre(s)"), "mL": ("みりりっとる", "millilitre(s)", "millilitre(s)"),
+    "L": ("りっとる", "litre(s)", "litre(s)"), "l": ("りっとる", "litre(s)", "litre(s)"),
+    "cc": ("しーしー", "cc, cubic centimetre(s)", "cm³, centimètre(s) cube(s)"),
+    "mm": ("みり", "millimetre(s)", "millimètre(s)"), "cm": ("せんち", "centimetre(s)", "centimètre(s)"),
+    "m": ("めーとる", "metre(s)", "mètre(s)"), "km": ("きろ", "kilometre(s)", "kilomètre(s)"),
+    "mg": ("みりぐらむ", "milligram(s)", "milligramme(s)"), "g": ("ぐらむ", "gram(s)", "gramme(s)"),
+    "kg": ("きろ", "kilogram(s)", "kilogramme(s)"), "kcal": ("きろかろりー", "kilocalorie(s)", "kilocalorie(s)"),
+    "KB": ("きろばいと", "kilobyte(s)", "kilo-octet(s)"), "MB": ("めがばいと", "megabyte(s)", "mégaoctet(s)"),
+    "GB": ("ぎがばいと", "gigabyte(s)", "gigaoctet(s)"), "TB": ("てらばいと", "terabyte(s)", "téraoctet(s)"),
+    "Hz": ("へるつ", "hertz", "hertz"), "GHz": ("ぎがへるつ", "gigahertz", "gigahertz"),
+    "mAh": ("みりあんぺああわー", "milliampere-hour(s)", "milliampère-heure(s)"),
+}
 
 
 # The counters a numeral and its counter are set as one word over
@@ -581,6 +610,10 @@ def deck_word_reading(char: str) -> list[str]:
     return _WORD_READINGS.get(char, [])
 
 
+# The weekdays a date writes in brackets, 10月15日（木）.
+_WEEKDAY_READINGS = {"月": "げつ", "火": "か", "水": "すい", "木": "もく", "金": "きん", "土": "ど", "日": "にち"}
+
+
 def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list[str]:
     """The readings of `tokens`, each put right where its context says.
 
@@ -623,6 +656,63 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "いっ"
             if out[i + 1][:1] in "はひふへほ":
                 out[i + 1] = "ぱぴぷぺぽ"["はひふへほ".index(out[i + 1][0])] + out[i + 1][1:]
+            continue
+
+        # （木）, a date's weekday: もく, Thursday -- never the tree (plan 272).
+        if s in _WEEKDAY_READINGS and (prev(i) in ("（", "(") or (prev(i) == "・" and i >= 2 and surf[i - 2] in _WEEKDAY_READINGS)) \
+                and (nxt(i) in ("）", ")") or (nxt(i) == "・" and prev(i) in ("（", "("))):
+            # (and beside the holiday it is: （火・祝）, plan 272)
+            out[i] = _WEEKDAY_READINGS[s]
+            continue
+
+        # 4球目, the fourth pitch: きゅう, after a number (plan 272).
+        if s == "球" and r == "たま" and i > 0 and _numeral_value(prev(i)) is not None:
+            out[i] = "きゅう"
+            continue
+
+        # 七回忌, the seventh-year memorial: しち (plan 272).
+        if s == "七" and r == "なな" and nxt(i) in ("回忌", "五三"):
+            out[i] = "しち"
+            continue
+        # いつの間に, "before one knew it": ま, no あいだ (plan 272).
+        if s == "間" and r == "あいだ" and prev(i) == "の" and i >= 2 and surf[i - 2] == "いつ":
+            out[i] = "ま"
+            continue
+        # 候補日, 発売日: a day named by the noun before it is び (plan 272)
+        # -- never after の (雨の日) or a word like その.
+        if s == "日" and r == "ひ" and i > 0 and tokens[i - 1].get("pos") == "noun" and len(prev(i)) >= 2 \
+                and all("\u4e00" <= c <= "\u9fff" for c in prev(i)) and not _is_numeral(prev(i)):
+            out[i] = "び"
+            continue
+        # 窓に額をつけて, 額に汗: ひたい, the forehead, where something
+        # touches it -- 額 alone is がく, a sum or a frame (plan 272).
+        if s == "額" and r == "がく" and nxt(i) in ("に", "を", "の") and i + 2 < n \
+                and (surf[i + 2] in ("汗", "手", "しわ", "皺", "傷") or tokens[i + 2]["lemma"] in (
+                    "付ける", "つける", "当てる", "押し当てる", "押し付ける", "くっつける", "触れる", "冷やす")):
+            out[i] = "ひたい"
+            continue
+        # 見かけた方は, 参加される方は: かた, a person said politely, after
+        # what they did -- 食べた方がいい is ほう (plan 272).
+        if s == "方" and r == "ほう" and i > 0 and tokens[i - 1].get("pos") in ("verb", "auxiliary") \
+                and nxt(i) in ("は", "には", "へ", "も", "に", "を", "の"):
+            out[i] = "かた"
+            continue
+        # 何しやがる, 何しに来た: なに before する (plan 272).
+        if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1]["lemma"] in ("為る", "する") \
+                and nxt(i)[:1] in ("し", "す"):
+            out[i] = "なに"
+            continue
+        # 何言っても, 何食べる: なに before the verb it asks the object of,
+        # its を left out (plan 272) -- never 何だ, 何で, 何と.
+        if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1].get("pos") == "verb" \
+                and tokens[i + 1]["lemma"] in ("言う", "食べる", "飲む", "見る", "聞く", "買う", "読む", "作る",
+                                               "書く", "考える", "思う", "持つ", "探す", "知る", "やる", "遣る"):
+            out[i] = "なに"
+            continue
+
+        # 再来月, the month after next: げつ, as in 来月 (plan 272).
+        if s == "月" and r == "がつ" and prev(i) in ("再来", "さ来"):
+            out[i] = "げつ"
             continue
 
         # 第2子, 第一子: the second child, し (plan 272).

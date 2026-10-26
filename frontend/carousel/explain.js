@@ -570,8 +570,10 @@ export function stacksIn(rows, lang, glossOfRow) {
     const text = STACKS[key]?.[lang]
     if (!text) continue
     // A pair the catalogue teaches as one point (のは, でも ...) is that point's.
+    // 何も／誰も〜ない is the question word's frame around the pair, not the
+    // pair: 誰にも keeps its slide, which says "nobody" (plan 272).
     const own = new Set([a.t, b.t])
-    const shared = (a.g || []).filter(p => (b.g || []).includes(p) && !own.has(p))
+    const shared = (a.g || []).filter(p => (b.g || []).includes(p) && !own.has(p) && p !== '何も／誰も〜ない')
     if (shared.length) continue
     const host = prevWord(rows, i)
     if (host < 0 || !isNoun(rows[host])) continue

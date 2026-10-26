@@ -1070,7 +1070,7 @@
 {"t":"しびれる","r":"しびれる","ro":"shibireru","en":["to become numb, to go to sleep (of a limb)","to be thrilled"],"fr":["s'engourdir, avoir des fourmis (membre)","être électrisé"]},
 {"t":"生意気","r":"なまいき","ro":"namaiki","en":["impertinent, cheeky, impudent, cocky"],"fr":["impertinent, effronté, insolent, prétentieux"],"fu":[["生","なま"],["意","い"],["気","き"]],"hy":["生以気","生意帰","生医気"]},
 {"t":"例える","r":"たとえる","ro":"tatoeru","en":["to compare, to liken, to speak figuratively, to illustrate, to use a simile"],"fr":["comparer, assimiler, parler au sens figuré, illustrer, utiliser une comparaison"],"fu":[["例","たと"],["える",""]]},
-{"t":"感ずる","r":"かんずる","ro":"kanzuru","en":["to feel, to sense"],"fr":["ressentir, percevoir"],"fu":[["感","かん"],["ずる",""]],"hy":["間ずる","漢ずる","館ずる"],"ex":["N2.183","N2.189"]},
+{"t":"感ずる","r":"かんずる","ro":"kanzuru","en":["to feel, to sense"],"fr":["ressentir, percevoir"],"fu":[["感","かん"],["ずる",""]],"hy":["間ずる","漢ずる","館ずる"]},
 {"t":"シーズン","r":"シーズン","ro":"shiizun","en":["season (sports, tourism, produce, TV, etc.)"],"fr":["saison (sport, tourisme, produits, série, etc.)"]},
 {"t":"気体","r":"きたい","ro":"kitai","en":["gas, gaseous body, vapor"],"fr":["gaz, corps gazeux, vapeur"],"fu":[["気","き"],["体","たい"]],"hy":["帰体","気大","起体"]},
 {"t":"噴水","r":"ふんすい","ro":"funsui","en":["water fountain"],"fr":["fontaine"],"fu":[["噴","ふん"],["水","すい"]],"hy":["分水","噴吹","粉水"]},

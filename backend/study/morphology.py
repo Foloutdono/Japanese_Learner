@@ -244,6 +244,9 @@ class Morpheme:
     # stretch of kana it cut into marks and stray letters, read back as
     # the one word it is (_unknown_words: ぷらそにか, a choir's name, was
     # ぷ + ら + そ + に + か). Most often a name.
+    verbal: bool = False  # UniDic's サ変可能 (pos3): a noun that takes する
+    # -- 勉強, 散歩, スキー -- the "noun alone" 〜に行きます's lesson names
+    # (スキーに行く, plan 272).
     adjectival: bool = False  # UniDic's 形状詞可能 (pos3): a noun that is a
     # な-adjective too -- 残酷, 楽, 元気 -- whose で before a comma is the
     # adjective's て form (plan 272).
@@ -306,10 +309,16 @@ def _demonstratives(morphemes: list[Morpheme]) -> None:
     even before a noun: あの店に行った, あの人はだれですか, あの高い山.
     Before a noun, or an adjective on one, it is the demonstrative,
     whatever opens the sentence -- the "um" is set off (あの、すみません)
-    or goes before a verb (あのすみません) (plan 151)."""
+    or goes before a verb (あのすみません) (plan 151). And こんな, そんな,
+    あんな, どんな before an adjective, which UniDic reads as its 形状詞."""
     for m, nxt in zip(morphemes, morphemes[1:]):
         if (m.pos == "interjection" and m.surface in _DEMONSTRATIVES
                 and nxt.pos in ("noun", "pronoun", "prefix", "suffix", "other", "adjective", "adnominal")):
+            m.pos = "adnominal"
+        elif (m.pos == "other" and m.surface in ("こんな", "そんな", "あんな", "どんな")
+              and nxt.pos in ("noun", "pronoun", "prefix", "adjective", "adnominal")):
+            # あんなひどいこと: UniDic's 形状詞 before an adjective is the
+            # adnominal "such" all the same (plan 272).
             m.pos = "adnominal"
 
 
@@ -391,6 +400,16 @@ def _one_kana_nouns(morphemes: list[Morpheme]) -> None:
 # a second noun follows (パンやケーキ): a case or topic particle, さん, the
 # copula.
 _SHOP_PARTICLES = frozenset({"格助詞", "係助詞"})
+
+
+@lru_cache(maxsize=1024)
+def _a_word_with(noun: str, suffix: str) -> bool:
+    """Whether noun + suffix is a word the deck or the dictionary holds:
+    芸術家, 作家 (plan 272)."""
+    import content.vocab_jmdict_data as jmdict_db
+
+    word = noun + suffix
+    return jmdict_db.has_form(word) or any(kanji == word for kanji, _kana in _deck_forms())
 
 
 @lru_cache(maxsize=1024)
@@ -706,6 +725,26 @@ _KU_NOUNS = {"近い": ("近く", "ちかく"), "遠い": ("遠く", "とおく"
 _UTTERANCE_MARKS = frozenset("。！？!?「『（(…‥")
 
 
+# What 辛い, "spicy", is said of (plan 272).
+_FOODS = frozenset({"食べ物", "料理", "カレー", "ラーメン", "味", "スープ", "ソース", "キムチ", "唐辛子", "麻婆豆腐",
+                    "鍋", "たれ", "タレ", "辛子", "からし", "わさび", "ワサビ", "ピザ", "パスタ", "チキン", "肉",
+                    "おかず", "お菓子", "スナック", "ポテチ", "メニュー", "唐揚げ", "ルー", "これ", "それ"})
+
+
+def _said_of_food(morphemes, i: int) -> bool:
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    if nxt is not None and nxt.pos == "noun" and nxt.surface in _FOODS - {"これ", "それ"}:
+        return True
+    for k in range(i - 1, max(-1, i - 4), -1):
+        u = morphemes[k]
+        if u.pos == "particle" and u.surface in ("が", "は", "も") and k >= 1 and morphemes[k - 1].surface in _FOODS \
+                and morphemes[k - 1].surface not in ("これ", "それ"):
+            return True
+        if u.pos == "symbol":
+            break
+    return False
+
+
 def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """Kana UniDic read as another word where the sentence says which
     (plan 272):
@@ -748,6 +787,275 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
                 out_m.append(replace(nxt, conjunctive=False))
                 out_t.append(("助詞", "格助詞", "*"))
                 skip.add(i + 1)
+            continue
+        if (m.surface == "もう" and m.pos == "adverb" and prev is not None and prev.surface == "と"
+                and prev.pos == "particle" and nxt is not None and nxt.lemma == "為る" and nxt.surface == "し"
+                and _glued(m, nxt) and after is not None and after.lemma == "ます"):
+            # 田中ともうします, "my name is Tanaka": 申す in kana, no もう
+            # "already" and する (plan 272).
+            out_m.append(replace(m, surface="もうし", end=nxt.end, pos="verb", lemma="申す", reading="もうし",
+                                 lemma_reading="もうす", kana="モウシ", ctype="五段-サ行", cform="連用形-一般",
+                                 written="申し", written_reading="もうし"))
+            out_t.append(("動詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "なさ" and m.pos == "verb" and m.lemma in ("成す", "為す") and nxt is not None
+                and nxt.lemma == "過ぎる" and _glued(m, nxt)):
+            # 変わってなさすぎて, "so unchanged": ない's stem before すぎる,
+            # no 為す, "to accomplish" (plan 272).
+            out_m.append(replace(m, pos="adjective", lemma="無い", lemma_reading="ない", ctype="形容詞",
+                                 cform="語幹-一般", written="なさ", written_reading="なさ"))
+            out_t.append(("形容詞", "非自立可能", "*"))
+            continue
+        if m.lemma == "辛い" and m.pos == "adjective" and m.reading.startswith("つら") and _said_of_food(morphemes, i):
+            # 辛い食べ物, このカレーは辛い: からい, "spicy" -- said of
+            # anything else it is つらい, "hard to bear" (plan 272).
+            said = "から" + m.reading[2:]
+            out_m.append(replace(m, reading=said, lemma_reading="からい", kana=said, written_reading=said))
+            out_t.append(tags[i])
+            continue
+        if (m.surface in ("－", "−", "ー") and m.lemma == "対" and not (prev is not None and prev.surface[-1:].isdigit()
+                                                                     and nxt is not None and nxt.surface[:1].isdigit())
+                and any(u.surface in ("＋", "+") for u in morphemes)):
+            # ＋と－の向き: the minus, a battery's negative pole -- no 対, the
+            # "versus" of a score (3－2), plan 272.
+            out_m.append(replace(m, lemma="マイナス", reading="まいなす", lemma_reading="まいなす", kana="マイナス",
+                                 written="マイナス", written_reading="まいなす"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if (m.surface == "あれ" and m.pos == "pronoun" and (prev is None or (prev.pos == "symbol"
+                                                                            and prev.surface in _UTTERANCE_MARKS))
+                and nxt is not None and nxt.surface in ("、", "，", "？", "?", "っ")
+                and any(u.surface in ("？", "?", "っけ") for u in morphemes[i + 1:])):
+            # あれ、今日って何曜日だっけ？: "huh?", a cry of one trying to
+            # remember, no "that one" (plan 272).
+            out_m.append(replace(m, pos="interjection", lemma="あれ", written="あれ", written_reading="あれ"))
+            out_t.append(("感動詞", "一般", "*"))
+            continue
+        if m.surface in ("ほんま", "ホンマ") and nxt is not None and nxt.surface == "に" and _glued(m, nxt):
+            # ほんまに？, "really?" (Kansai, = 本当に): one adverb (plan 272).
+            out_m.append(replace(m, surface=m.surface + "に", end=nxt.end, pos="adverb", lemma="ほんまに",
+                                 reading="ほんまに", lemma_reading="ほんまに", kana="ホンマニ", ctype="", cform="",
+                                 written="ほんまに", written_reading="ほんまに"))
+            out_t.append(("副詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "帰り" and m.pos == "noun" and nxt is not None and nxt.surface == "や" and nxt.pos == "auxiliary"
+                and _glued(m, nxt) and (after is None or after.pos == "symbol")):
+            # 気ぃつけて帰りや, "get home safe": 帰る's stem before the west's
+            # gentle order, no 帰り, "the way home" (plan 272).
+            out_m.append(replace(m, pos="verb", lemma="帰る", lemma_reading="かえる", ctype="五段-ラ行",
+                                 cform="連用形-一般", written="帰り", written_reading="かえり"))
+            out_t.append(("動詞", "一般", "*"))
+            continue
+        if (m.surface == "とき" and m.pos == "noun" and prev is not None and prev.pos == "verb"
+                and prev.cform.startswith("連用形") and _glued(prev, m) and nxt is not None
+                and nxt.surface in ("や", "な", "なさい") and (after is None or after.pos == "symbol")):
+            # 返しときや, "make sure you give it back": 〜ておく said short
+            # (とく's stem), no 時 (plan 272).
+            out_m.append(replace(m, pos="auxiliary", lemma="とく", lemma_reading="とく", ctype="五段-カ行",
+                                 cform="連用形-一般", auxiliary_use=True, written="とき", written_reading="とき"))
+            out_t.append(("助動詞", "*", "*"))
+            continue
+        if (m.surface == "し" and m.lemma == "為る" and m.pos == "verb" and nxt is not None and nxt.surface == "よ"
+                and nxt.pos == "particle" and _glued(m, nxt) and prev is not None and prev.pos == "noun"
+                and _glued(prev, m) and (after is None or after.pos == "symbol" or after.surface in ("か", "っか"))):
+            # 休憩しよ, "let's take a break": する's volitional said short
+            # (しよう), no し and よ (plan 272).
+            out_m.append(replace(m, surface="しよ", end=nxt.end, reading="しよ", kana="シヨ", cform="意志推量形"))
+            out_t.append(("動詞", "非自立可能", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "正しく" and m.pos == "adverb" and nxt is not None
+                and (nxt.pos == "verb" or (nxt.pos == "prefix" and nxt.surface in ("お", "ご")))):
+            # 正しくお使いください, 正しく入れる: 正しい's adverbial form,
+            # "correctly", no まさしく, "surely" (plan 272).
+            out_m.append(replace(m, pos="adjective", lemma="正しい", reading="ただしく", lemma_reading="ただしい",
+                                 kana="タダシク", ctype="形容詞", cform="連用形-一般", written="正しく",
+                                 written_reading="ただしく"))
+            out_t.append(("形容詞", "一般", "*"))
+            continue
+        if (m.surface == "金貸" and prev is not None and prev.surface == "お" and prev.pos == "prefix"
+                and nxt is not None and nxt.lemma == "為る" and _glued(prev, m) and _glued(m, nxt)):
+            # お金貸して, "lend me some money": お金 and 貸す, no お + 金貸し,
+            # "moneylending", and する (plan 272).
+            out_m[-1] = replace(prev, surface="お金", end=prev.end + 1, pos="noun", lemma="お金", reading="おかね",
+                                lemma_reading="おかね", kana="オカネ", written="お金", written_reading="おかね")
+            out_t[-1] = ("名詞", "普通名詞", "一般")
+            out_m.append(replace(m, surface="貸し", start=m.start + 1, end=nxt.end, pos="verb", lemma="貸す",
+                                 reading="かし", lemma_reading="かす", kana="カシ", ctype="五段-サ行", cform="連用形-一般",
+                                 written="貸し", written_reading="かし"))
+            out_t.append(("動詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "家" and m.pos == "suffix" and m.reading in ("か", "け") and nxt is not None
+                and nxt.pos == "particle" and nxt.surface in ("に", "へ", "から", "まで", "で", "を")
+                and prev is not None and prev.pos == "noun" and not _a_word_with(prev.surface, "家")):
+            # 財布家に忘れた, "left my wallet at home": the noun 家, no -家,
+            # "-ist" -- never 芸術家 or 作家, which are words (plan 272).
+            out_m.append(replace(m, pos="noun", lemma="家", reading="いえ", lemma_reading="いえ", kana="イエ",
+                                 written="家", written_reading="いえ"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if (m.surface == "推し" and nxt is not None and nxt.surface == "活" and _glued(m, nxt)):
+            # #推し活, "supporting one's fave": one word (plan 272).
+            out_m.append(replace(m, surface="推し活", end=nxt.end, pos="noun", lemma="推し活", reading="おしかつ",
+                                 lemma_reading="おしかつ", kana="オシカツ", ctype="", cform="", written="推し活",
+                                 written_reading="おしかつ"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "あっ" and nxt is not None and nxt.surface == "と" and after is not None
+                and after.surface == "いう" and i + 3 < len(morphemes) and morphemes[i + 3].surface == "間"
+                and _glued(m, nxt) and _glued(nxt, after) and _glued(after, morphemes[i + 3])):
+            # あっという間に, "in no time": one expression, no 〜という
+            # (plan 272).
+            last = morphemes[i + 3]
+            out_m.append(replace(m, surface="あっという間", end=last.end, pos="noun", lemma="あっという間",
+                                 reading="あっというま", lemma_reading="あっというま", kana="アットイウマ", ctype="",
+                                 cform="", written="あっという間", written_reading="あっというま"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.update({i + 1, i + 2, i + 3})
+            continue
+        if (m.surface == "お" and m.pos == "interjection" and nxt is not None and nxt.pos == "noun" and _glued(m, nxt)
+                and prev is not None and prev.pos in ("particle", "symbol")):
+            # ご住所とお電話番号: the polite prefix, no "oh!" (plan 272).
+            out_m.append(replace(m, pos="prefix", lemma="御", lemma_reading="お", written="お", written_reading="お"))
+            out_t.append(("接頭辞", "*", "*"))
+            continue
+        if (m.surface == "気" and nxt is not None and nxt.surface in ("ぃ", "ィ") and _glued(m, nxt)):
+            # 気ぃつけて: 気 drawn out, as the west says it (plan 272).
+            out_m.append(replace(m, surface="気ぃ", end=nxt.end, reading="きぃ", kana="キィ"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "この" and nxt is not None and nxt.surface == "前" and _glued(m, nxt) and after is not None
+                and (after.surface in ("は", "も", "、", "，") or (after.surface == "の" and i + 3 < len(morphemes)
+                                                                 and morphemes[i + 3].pos == "noun"))):
+            # この前は, "the other day" -- この前に, "in front of this",
+            # stays two words (plan 272).
+            out_m.append(replace(m, surface="この前", end=nxt.end, pos="noun", lemma="この前", reading="このまえ",
+                                 lemma_reading="このまえ", kana="コノマエ", ctype="", cform="",
+                                 written="この前", written_reading="このまえ"))
+            out_t.append(("名詞", "普通名詞", "副詞可能"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "なん" and m.pos == "pronoun" and nxt is not None and nxt.surface == "と" and _glued(m, nxt)
+                and (prev is None or (prev.pos == "symbol" and prev.surface in _UTTERANCE_MARKS))
+                and after is not None and after.surface in ("、", "，", "！", "!")):
+            # なんと、「炎の剣」を手に入れた！: "lo and behold", one word
+            # (plan 272).
+            out_m.append(replace(m, surface="なんと", end=nxt.end, pos="adverb", lemma="何と", reading="なんと",
+                                 lemma_reading="なんと", kana="ナント", written="何と", written_reading="なんと"))
+            out_t.append(("副詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "よく" and nxt is not None and nxt.surface == "ぞ" and _glued(m, nxt) and after is not None
+                and after.pos not in ("symbol",)):
+            # よくぞここまで, "you have done well to…": one word (plan 272).
+            out_m.append(replace(m, surface="よくぞ", end=nxt.end, pos="adverb", lemma="よくぞ", reading="よくぞ",
+                                 lemma_reading="よくぞ", kana="ヨクゾ", ctype="", cform="",
+                                 written="よくぞ", written_reading="よくぞ"))
+            out_t.append(("副詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        if m.surface == "どん" and nxt is not None and nxt.surface == "だけ" and _glued(m, nxt):
+            # どんだけ, "how much" (= どれだけ), no 殿 and だけ (plan 272).
+            out_m.append(replace(m, surface="どんだけ", end=nxt.end, pos="adverb", lemma="どんだけ", reading="どんだけ",
+                                 lemma_reading="どんだけ", kana="ドンダケ", ctype="", cform="",
+                                 written="どんだけ", written_reading="どんだけ"))
+            out_t.append(("副詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "その" and nxt is not None and nxt.surface == "もの" and _glued(m, nxt) and prev is not None
+                and prev.pos in ("noun", "suffix") and _glued(prev, m)):
+            # 暮らし方そのもの, "the way of life itself": one word (plan 272).
+            out_m.append(replace(m, surface="そのもの", end=nxt.end, pos="noun", lemma="その物", reading="そのもの",
+                                 lemma_reading="そのもの", kana="ソノモノ", ctype="", cform="",
+                                 written="そのもの", written_reading="そのもの"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "あり" and m.pos == "verb" and nxt is not None and nxt.surface in ("さん", "ちゃん")
+                and _glued(m, nxt)):
+            # ありさんたちは, "the ants" (a picture book's): 蟻, no ある (plan 272).
+            out_m.append(replace(m, pos="noun", lemma="蟻", lemma_reading="あり", ctype="", cform="",
+                                 written="蟻", written_reading="あり"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if m.surface == "久し" and m.pos == "adjective" and nxt is not None and nxt.surface == "ぶり" and _glued(m, nxt):
+            # 久しぶり, "it's been a while": one word, the deck's (plan 272).
+            out_m.append(replace(m, surface="久しぶり", end=nxt.end, pos="noun", lemma="久し振り", reading="ひさしぶり",
+                                 lemma_reading="ひさしぶり", kana="ヒサシブリ", ctype="", cform="",
+                                 written="久しぶり", written_reading="ひさしぶり"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "背伸び" and m.pos == "noun" and nxt is not None and nxt.pos == "auxiliary"
+                and nxt.lemma in ("た", "ない", "ます") and _glued(m, nxt)):
+            # 背伸びた, "you've grown taller": 背 and 伸びる, no 背伸び, "on
+            # tiptoe", which takes する (plan 272).
+            out_m.append(replace(m, surface="背", end=m.start + 1, lemma="背", reading="せ", lemma_reading="せ", kana="セ",
+                                 written="背", written_reading="せ"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            out_m.append(replace(m, surface="伸び", start=m.start + 1, pos="verb", lemma="伸びる", reading="のび",
+                                 lemma_reading="のびる", kana="ノビ", ctype="上一段-バ行", cform="連用形-一般",
+                                 written="伸び", written_reading="のび"))
+            out_t.append(("動詞", "一般", "*"))
+            continue
+        if (m.pos == "prefix" and len(m.surface) == 1 and _is_kanji(m.surface) and prev is not None
+                and prev.pos == "noun" and _glued(prev, m)
+                and (nxt is None or nxt.pos not in ("noun", "verb", "adjective", "prefix", "suffix", "other"))):
+            # 朝活はじめて: a kanji with nothing after it to prefix is the
+            # noun's tail (朝 + 活, 朝活), plan 272.
+            out_m.append(replace(m, pos="suffix"))
+            out_t.append(("接尾辞", "名詞的", "一般"))
+            continue
+        if (m.surface == "エ" and m.pos == "symbol" and nxt is not None and nxt.surface == "モ" and after is not None
+                and after.surface in ("かっ", "い", "く", "すぎ") and _glued(m, nxt) and _glued(nxt, after)):
+            # エモかった, エモい, "so moving" (slang), no エ, も and 買う
+            # (plan 272).
+            cform = {"かっ": "連用形-促音便", "い": "終止形-一般", "く": "連用形-一般", "すぎ": "語幹-一般"}[after.surface]
+            surface = "エモ" + ("かっ" if after.surface == "かっ" else "い" if after.surface == "い"
+                                else "く" if after.surface == "く" else "")
+            last = after if after.surface != "すぎ" else nxt
+            out_m.append(replace(m, surface=surface, end=last.end, pos="adjective", lemma="エモい", reading=kata_to_hira(surface),
+                                 lemma_reading="えもい", kana=surface, ctype="形容詞", cform=cform,
+                                 written=surface, written_reading=kata_to_hira(surface)))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.update({i + 1, i + 2} if after.surface != "すぎ" else {i + 1})
+            continue
+        if (m.pos == "noun" and m.surface.isascii() and m.surface.isalpha() and nxt is not None and nxt.surface in ("-", "－")
+                and after is not None and after.surface.isascii() and after.surface.isalpha()
+                and len(m.surface) + len(after.surface) >= 4 and _glued(m, nxt) and _glued(nxt, after)):
+            # Wi-Fi, e-mail: one word, its hyphen inside (plan 272).
+            surface = m.surface + "-" + after.surface
+            out_m.append(replace(m, surface=m.surface + nxt.surface + after.surface, end=after.end, lemma=surface,
+                                 reading=surface, lemma_reading=surface, kana=surface, written=surface,
+                                 written_reading=surface))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.update({i + 1, i + 2})
+            continue
+        if m.surface in ("あ", "え", "お") and m.pos == "symbol":
+            # …あ、じゃあカードで: a cry UniDic can take for a mark (plan 272).
+            out_m.append(replace(m, pos="interjection", lemma=m.surface, lemma_reading=m.surface,
+                                 written=m.surface, written_reading=m.surface))
+            out_t.append(("感動詞", "一般", "*"))
+            continue
+        if m.surface == "せい" and m.pos == "symbol":
+            # ラーメンのせい, "the ramen's fault": the noun 所為, which UniDic
+            # can tag as a mark (plan 272).
+            out_m.append(replace(m, pos="noun", lemma="所為", lemma_reading="せい", written="所為",
+                                 written_reading="せい"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if (m.surface == "ほん" and m.pos == "pronoun" and nxt is not None and nxt.pos == "particle"
+                and nxt.surface in ("を", "が", "は", "も", "の", "や", "と", "に", "が", "って")):
+            # ほんをよむ: the noun 本, "a book", no それ said in the west
+            # (ほんで, ほんなら stay それ's), plan 272.
+            out_m.append(replace(m, pos="noun", lemma="本", lemma_reading="ほん", written="本",
+                                 written_reading="ほん"))
+            out_t.append(("名詞", "普通名詞", "一般"))
             continue
         if (m.surface == "ね" and m.pos == "particle" and prev is not None and prev.pos == "adjective"
                 and prev.cform.startswith("連用形") and prev.surface.endswith("く") and _glued(prev, m)
@@ -1142,6 +1450,47 @@ def _introduced(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, lis
     return out_m, out_t
 
 
+# The animals a picture book names, いぬの ぽち (plan 272), as written in
+# kana or kanji.
+NAMED_ANIMALS = frozenset({"いぬ", "犬", "ねこ", "猫", "うさぎ", "兎", "ふくろう", "梟", "くま", "熊", "さる", "猿",
+                           "とり", "鳥", "ぶた", "豚", "こぶた", "子豚", "きつね", "狐", "たぬき", "狸", "かえる", "蛙",
+                           "かめ", "亀", "ねずみ", "鼠", "りす", "栗鼠", "ぞう", "象", "ひよこ", "あひる", "はと", "鳩",
+                           "からす", "烏", "こいぬ", "子犬", "こねこ", "子猫", "いるか", "くじら", "ペンギン", "パンダ"})
+_NAME_PARTICLES = frozenset({"が", "は", "を", "と", "も", "に", "の", "や"})
+
+
+def named_animal(morphemes, i: int) -> bool:
+    """Whether morphemes[i], a word in hiragana, is the name of the animal
+    before it and its の: いぬの ぽちが, ねこの みいちゃん (plan 272)."""
+    m = morphemes[i]
+    if i < 2 or not _kana_letters(m.surface) or len(m.surface) < 2 or m.pos not in ("noun", "adverb", "interjection"):
+        return False
+    of, animal = morphemes[i - 1], morphemes[i - 2]
+    if not (of.surface == "の" and of.pos == "particle" and (animal.surface in NAMED_ANIMALS or animal.lemma in NAMED_ANIMALS)):
+        return False
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    if nxt is not None and nxt.surface in _HONORIFIC_ENDS:
+        return True
+    # (Without an honorific only a word no noun could be: いぬの はなが is
+    # the dog's nose.)
+    return (nxt is not None and nxt.pos == "particle" and nxt.surface in _NAME_PARTICLES
+            and (m.pos != "noun" or m.unknown))
+
+
+def _named_animals(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """The name a picture book gives its animal, read as a name: いぬの
+    ぽちが is Pochi, no ぽち, "a dot"; ふくろうの ほうほうさん no 方法."""
+    from dataclasses import replace
+
+    out_m, out_t = list(morphemes), list(tags)
+    for i in range(len(morphemes)):
+        if named_animal(morphemes, i):
+            out_m[i] = replace(morphemes[i], pos="noun", proper=True, name_kind="given", unknown=True,
+                               ctype="", cform="")
+            out_t[i] = ("名詞", "固有名詞", "人名")
+    return out_m, out_t
+
+
 def _names_kept(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """A name in hiragana the window reads as a name once is the name
     wherever it stands in it (plan 272): ゆうしゃ　たろうは…, then たろうの
@@ -1230,6 +1579,28 @@ def _written_word(surface: str) -> str:
     return "noun"
 
 
+# The ず words a grammar point is written with after its particle
+# (〜にかかわらず, 〜に限らず, 〜を問わず, 〜によらず): the point's, never a
+# word of their own (plan 272). 運営に至らぬ点 is the word 至らぬ.
+_POINTS_ZU = frozenset({"かかわらず", "拘わらず", "関わらず", "拘らず", "限らず", "かぎらず", "問わず", "とわず",
+                        "よらず", "寄らず", "因らず", "依らず", "構わず", "かまわず", "関せず", "せず"})
+
+
+# The verbs a conjunctive て/で hands to a grammar point in their
+# auxiliary use (〜ている, 〜てある, 〜ておく, 〜てしまう, 〜てみる, 〜てくる,
+# 〜ていく, 〜てあげる／くれる／もらう, 〜てくださる／いただく, 〜ております,
+# 〜てございます, 〜てまいります, 〜ていらっしゃる, 〜てさしあげる, 〜てならない,
+# 〜てたまらない, 〜てほしい), by UniDic's lemma (plan 272). UniDic files
+# 出す, 切れる and 渡る as possible auxiliaries too (書き出す, 使い切れる),
+# and after a て they are the verbs themselves: まとめて出しとく.
+TE_AUXILIARIES = frozenset({
+    "居る", "いる", "有る", "ある", "置く", "おく", "仕舞う", "しまう", "見る", "みる", "来る", "くる",
+    "行く", "いく", "上げる", "あげる", "呉れる", "くれる", "貰う", "もらう", "下さる", "くださる",
+    "頂く", "いただく", "御座る", "ござる", "参る", "まいる", "居らっしゃる", "いらっしゃる",
+    "差し上げる", "さしあげる", "成る", "なる", "堪る", "たまる", "頂戴", "おる", "欲しい", "ほしい",
+})
+
+
 def _zu_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """A word that ends in the negative ず, which UniDic cuts into a verb
     and ず (plan 272): 親 + 知ら + ず is 親知らず, a wisdom tooth, never "not
@@ -1259,8 +1630,14 @@ def _zu_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]
             if n == 3 and run[0].pos not in ("noun", "prefix"):
                 continue
             before = out_m[len(out_m) - n] if len(out_m) >= n else None
-            if n == 2 and before is not None and before.pos == "particle":
-                continue               # 年齢に拘わらず: the verb takes its に (〜にかかわらず)
+            if n == 2 and before is not None and before.pos == "particle" and (
+                    "".join(u.surface for u in run) in _POINTS_ZU
+                    or not (after is not None and after.pos in ("noun", "prefix") or _written_word(
+                        "".join(u.surface for u in run)) == "adverb")):
+                # (年齢に拘わらず: the verb takes its に (〜にかかわらず); してはならぬ
+                # is 〜てはならない's. 運営に至らぬ点 is a word before its noun,
+                # 姉に劣らず an adverb, plan 272.)
+                continue
             surface = "".join(u.surface for u in run)
             kind = _written_word(surface)
             quantity = n == 2 and before is not None and (before.counter or before.surface.translate(_FULLWIDTH_DIGITS).isdigit())
@@ -1292,6 +1669,763 @@ def _zu_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]
             out_m[k] = replace(out_m[k], conjunctive=False)
             out_t[k] = ("助詞", "格助詞", "*")
     return out_m, out_t
+
+
+def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """Words UniDic cuts or joins where the sentence says otherwise
+    (plan 272):
+
+    - お + しら + せ is the noun お知らせ, "notice", where no する makes it
+      the humble お〜する (おしらせします);
+    - い + やがる after a を is いやがる, 嫌がる, "to dislike": 居る takes no
+      を, and its rude やがる is no word of a page that writes を before it;
+    - a verb that is no word alone and ない is the adjective the two
+      spell: 思いがけない, "unexpected";
+    - 家の子, "a retainer" to UniDic, is 家, の and 子: 貧しい家の子;
+    - a noun of ごろ (初めごろ) no dictionary holds is the noun and ごろ;
+      何線 is 何 and 線, "which line";
+    - し + かね after an amount is しか and a kana verb: 三時間しかねられ
+      なかった is 寝る, never 兼ねる;
+    - どう + し + て is どうして, "why", but before いい, も, いる, もらう
+      (どうしていいか, "what to do")."""
+    from dataclasses import replace
+
+    out_m, out_t = [], []
+    skip = set()
+    for i, m in enumerate(morphemes):
+        if i in skip:
+            continue
+        prev = morphemes[i - 1] if i > 0 else None
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+        if (m.surface == "お" and m.pos == "prefix" and nxt is not None and nxt.surface == "しら"
+                and after is not None and after.surface == "せ" and _glued(m, nxt) and _glued(nxt, after)
+                and not (i + 3 < len(morphemes) and morphemes[i + 3].lemma in ("為る", "する", "致す", "いたす"))):
+            out_m.append(replace(m, surface="おしらせ", end=after.end, lemma="お知らせ", reading="おしらせ",
+                                 lemma_reading="おしらせ", kana="オシラセ", pos="noun", ctype="", cform="",
+                                 written="お知らせ", written_reading="おしらせ"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.update({i + 1, i + 2})
+            continue
+        if (m.surface == "い" and m.pos == "verb" and m.lemma == "居る" and nxt is not None
+                and nxt.lemma == "やがる" and _glued(m, nxt) and prev is not None and prev.surface == "を"):
+            surface = m.surface + nxt.surface
+            out_m.append(replace(m, surface=surface, end=nxt.end, lemma="嫌がる", reading=surface,
+                                 lemma_reading="いやがる", kana=m.kana + nxt.kana, ctype="五段-ラ行",
+                                 cform=nxt.cform, auxiliary_use=False, written="嫌がる", written_reading="いやがる"))
+            out_t.append(("動詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.pos == "verb" and nxt is not None and nxt.pos == "auxiliary" and nxt.lemma == "ない"
+                and _glued(m, nxt) and m.cform.startswith("未然形") and any(_is_kanji(c) for c in m.surface)
+                and not _written_word(m.lemma) and _an_adjective(m.surface + "ない")):
+            surface = m.surface + nxt.surface
+            out_m.append(replace(m, surface=surface, end=nxt.end, lemma=m.surface + "ない",
+                                 reading=m.reading + nxt.reading, lemma_reading=m.reading + "ない",
+                                 kana=m.kana + nxt.kana, pos="adjective", ctype="形容詞", cform=nxt.cform,
+                                 auxiliary_use=False, written=m.surface + "ない",
+                                 written_reading=m.reading + "ない"))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.pos == "verb" and m.lemma.endswith("せる") and len(m.lemma) >= 4 and m.lemma[-3] in _A_TO_U
+                and m.surface.startswith(m.lemma[:-2]) and m.surface[len(m.lemma) - 2:len(m.lemma) - 1] == "せ"
+                and not _written_word(m.lemma) and _written_word(m.lemma[:-3] + _A_TO_U[m.lemma[-3]])):
+            # 習わせられた: 習う's causative, UniDic's 習わせる -- no word of
+            # its own (知らせる, 見せる, 聞かせる are), so the verb and せる
+            # (plan 272), and 〜させられる is lit.
+            base = m.lemma[:-3] + _A_TO_U[m.lemma[-3]]
+            base_said = m.lemma_reading[:-3] + _A_TO_U[m.lemma[-3]]
+            stem_len = len(m.lemma) - 2
+            tail = m.surface[stem_len:]
+            cut = m.start + stem_len
+            out_m += [replace(m, surface=m.surface[:stem_len], end=cut, lemma=base, reading=m.reading[:-len(tail)],
+                              lemma_reading=base_said, kana=m.kana[:-len(tail)], ctype="五段", cform="未然形-一般",
+                              auxiliary_use=False, written=base, written_reading=base_said),
+                      replace(m, surface=tail, start=cut, lemma="せる", reading=tail, lemma_reading="せる",
+                              kana=m.kana[-len(tail):], pos="auxiliary", ctype="助動詞-セル",
+                              auxiliary_use=False, goshu="和", written="せる", written_reading="せる")]
+            out_t += [("動詞", "一般", "*"), ("助動詞", "*", "*")]
+            continue
+        if (m.pos == "noun" and not m.proper and len(m.surface) >= 2 and all(_is_kanji(c) for c in m.surface)
+                and not _written_word(m.surface)):
+            alone, _alone_tags = _tag(m.surface, 0, _plain_tagger)
+            if len(alone) == 1 and alone[0].proper and alone[0].name_kind in ("family", "person"):
+                # 大家の山田に言ってください: a surname UniDic read as a noun
+                # in its sentence and as the name alone (plan 272).
+                m = replace(m, proper=True, name_kind=alone[0].name_kind)
+        if (m.pos == "noun" and i == 0 and all("\u3041" <= c <= "\u309f" for c in m.surface)
+                and 2 <= len(m.surface) <= 4 and nxt is not None and nxt.surface == "より"
+                and all(u.pos == "symbol" for u in morphemes[i + 2:]) and not _deck_kana().get(m.surface)):
+            # ゆいより: a letter's signature, "from Yui" (plan 272).
+            m = replace(m, proper=True, name_kind="given", unknown=True)
+        if (m.surface == "しろ" and m.pos == "verb" and m.lemma in ("為る", "する") and m.cform.startswith("命令形")
+                and (prev is None or prev.pos == "symbol") and nxt is not None and nxt.pos == "particle"
+                and nxt.surface not in ("よ", "ね", "な", "わ", "ぞ", "ぜ", "って", "ってば", "よな", "てば")):
+            # しろとあおがあります: 白, "white", written in kana -- an order
+            # opens no phrase before its particle (plan 272).
+            m = replace(m, pos="noun", lemma="白", lemma_reading="しろ", kana="シロ", ctype="", cform="",
+                        auxiliary_use=False, written="白", written_reading="しろ")
+            out_m.append(m)
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if (m.pos == "noun" and m.surface in ("父", "母", "兄", "姉") and nxt is not None and nxt.surface == "上"
+                and nxt.pos == "suffix" and _glued(m, nxt)):
+            # 父上, 母上: "father", said with respect, read うえ (plan 272).
+            surface, said = m.surface + "上", m.reading + "うえ"
+            out_m.append(replace(m, surface=surface, end=nxt.end, lemma=surface, reading=said, lemma_reading=said,
+                                 kana=m.kana + "ウエ", written=surface, written_reading=said))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "それ" and m.pos == "pronoun" and nxt is not None and nxt.surface == "と" and after is not None
+                and after.surface == "も" and _glued(m, nxt) and _glued(nxt, after)
+                and (prev is None or prev.pos == "symbol" or prev.surface == "か")
+                and (i + 3 >= len(morphemes) or morphemes[i + 3].pos in ("symbol", "noun", "prefix", "pronoun",
+                                                                          "verb", "adjective", "adverb"))):
+            # それとも, "or": no それ and the と and も of "with it too"
+            # (plan 272).
+            out_m.append(replace(m, surface="それとも", end=after.end, lemma="其れとも", reading="それとも",
+                                 lemma_reading="それとも", kana="ソレトモ", pos="conjunction",
+                                 written="それとも", written_reading="それとも"))
+            out_t.append(("接続詞", "*", "*"))
+            skip.update({i + 1, i + 2})
+            continue
+        if (m.surface == "その" and m.pos == "adnominal" and prev is not None and prev.pos == "noun" and _glued(prev, m)
+                and nxt is not None and nxt.surface == "もの" and _glued(m, nxt)):
+            # 機会そのもの, "the chance itself" (plan 272).
+            out_m.append(replace(m, surface="そのもの", end=nxt.end, lemma="其の物", reading="そのもの",
+                                 lemma_reading="そのもの", kana="ソノモノ", pos="noun", written="其の物",
+                                 written_reading="そのもの"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "と" and m.pos == "particle" and nxt is not None and nxt.surface == "も" and _glued(m, nxt)
+                and prev is not None and _glued(prev, m) and (prev.surface in _PAIRS or (
+                    prev.pos == "suffix" and i >= 2 and morphemes[i - 2].surface in _PAIRS))
+                and after is not None and after.pos in ("noun", "adjective", "other", "adverb", "symbol",
+                                                        "pronoun", "prefix")):
+            # 上下線とも, 両方とも: "both" (共), no と and も, before what
+            # UniDic reads 両親とも元気 on -- never a verb (両親とも話した,
+            # "with my parents too", plan 272).
+            out_m.append(replace(m, surface="とも", end=nxt.end, lemma="共", reading="とも", lemma_reading="とも",
+                                 kana="トモ", pos="suffix", conjunctive=False, written="共", written_reading="とも"))
+            out_t.append(("接尾辞", "名詞的", "一般"))
+            skip.add(i + 1)
+            continue
+        if m.surface == "草" and m.reading == "そう" and (
+                (prev is not None and _a_laugh_typed(prev.surface)) or (nxt is not None and nxt.lemma in ("生える", "不可避"))):
+            # 草生える, ｗｗｗ 草: net slang's くさ, "lol" (plan 272).
+            m = replace(m, reading="くさ", lemma_reading="くさ", kana="クサ", written_reading="くさ")
+        if (m.surface == "お" and m.pos == "prefix" and nxt is not None and nxt.surface == "いで" and nxt.lemma == "出でる"
+                and _glued(m, nxt)
+                and not (after is not None and after.lemma in ("下さる", "くださる", "成る", "なる", "為さる", "なさる"))):
+            # よくおいでくださいました, こっちにおいで: お出で, coming (said
+            # with respect), no 出でる "to go out" (plan 272).
+            out_m.append(replace(m, surface="おいで", end=nxt.end, lemma="お出で", reading="おいで", lemma_reading="おいで",
+                                 kana="オイデ", pos="noun", written="お出で", written_reading="おいで"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if m.surface == "はっぱ" and m.lemma == "発破":
+            # はっぱ written in kana is 葉っぱ, "leaf"; 発破, "a blast", is
+            # written in kanji (plan 272).
+            m = replace(m, lemma="葉っぱ", written="葉っぱ")
+        if (m.surface == "あ" and nxt is not None and nxt.surface == "かん" and _glued(m, nxt)
+                and (prev is None or prev.pos == "symbol"
+                     or (prev.surface == "かん" and i >= 2 and morphemes[i - 2].surface == "あ"))):
+            # あかん, "no good, don't" (Kansai): no あ and かん (plan 272).
+            out_m.append(replace(m, surface="あかん", end=nxt.end, lemma="あかん", reading="あかん", lemma_reading="あかん",
+                                 kana="アカン", pos="interjection", written="あかん", written_reading="あかん"))
+            out_t.append(("感動詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "あか" and m.lemma in ("明く", "開く") and m.cform.startswith("未然形") and nxt is not None
+                and nxt.surface == "ん" and nxt.lemma == "ず" and _glued(m, nxt)
+                and prev is not None and prev.surface in ("は", "も") and prev.pos == "particle"
+                and (after is None or after.pos == "symbol" or (after.pos == "particle" and after.surface in (
+                    "で", "よ", "わ", "て", "な", "ねん", "のに", "けど", "から", "って", "やん", "ぞ")))):
+            # それはあかん, "that's no good" (Kansai): no 開く's negative,
+            # which a door takes with が (ドアがあかん) (plan 272).
+            out_m.append(replace(m, surface="あかん", end=nxt.end, lemma="あかん", reading="あかん", lemma_reading="あかん",
+                                 kana="アカン", pos="interjection", ctype="", cform="", written="あかん",
+                                 written_reading="あかん"))
+            out_t.append(("感動詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "や" and nxt is not None and nxt.surface == "ん" and nxt.pos == "particle" and _glued(m, nxt)
+                and prev is not None and _glued(prev, m)
+                and (prev.pos in ("adjective", "verb", "noun", "other") or prev.surface in ("ええ", "いい"))
+                and (after is None or after.pos == "symbol" or (after.pos == "particle" and after.surface in (
+                    "か", "け", "けど", "な", "ね", "なあ", "ねえ")))):
+            # 美味しいやん, ええやん: the Kansai "isn't it!" (= じゃない),
+            # no や and の (plan 272).
+            out_m.append(replace(m, surface="やん", end=nxt.end, pos="particle", lemma="やん", reading="やん",
+                                 lemma_reading="やん", kana="ヤン", ctype="", cform="", auxiliary_use=False,
+                                 conjunctive=False, written="やん", written_reading="やん"))
+            out_t.append(("助詞", "終助詞", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "は" and m.pos == "particle" and nxt is not None and nxt.surface == "よ" and _glued(m, nxt)
+                and (prev is None or prev.pos == "symbol") and after is not None
+                and (after.pos == "verb" or (after.lemma in ("為る", "する")))):
+            # はよ帰りたい, はよせんと: 早よ, "quickly" (western Japan),
+            # no topic は and よ (plan 272).
+            out_m.append(replace(m, surface="はよ", end=nxt.end, lemma="早よ", reading="はよ", lemma_reading="はよ",
+                                 kana="ハヨ", pos="adverb", written="早よ", written_reading="はよ"))
+            out_t.append(("副詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        three = (m.surface == "あり" and m.lemma == "有る" and nxt is not None and nxt.surface == "え"
+                 and nxt.lemma == "得る" and after is not None and after.surface in ("ん", "へん", "ねえ", "ねー")
+                 and _glued(m, nxt) and _glued(nxt, after))
+        if three or (m.surface == "あり" and nxt is not None and nxt.surface in ("えん", "えへん", "えねえ", "えねー")
+                     and _glued(m, nxt)):
+            # ありえん, ありえへん, "no way, impossible" (= ありえない), no
+            # 円 nor the interjection えへん (plan 272).
+            last = after if three else nxt
+            surface = m.surface + (nxt.surface + after.surface if three else nxt.surface)
+            out_m.append(replace(m, surface=surface, end=last.end, lemma="有り得ない", reading=surface,
+                                 lemma_reading="ありえない", kana="".join(chr(ord(c) + 0x60) for c in surface), pos="adjective", ctype="",
+                                 cform="", written="有り得ない", written_reading="ありえない"))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.update({i + 1, i + 2} if three else {i + 1})
+            continue
+        three = (m.surface == "つら" and nxt is not None and nxt.surface == "た" and after is not None
+                 and after.surface == "ん" and _glued(m, nxt) and _glued(nxt, after))
+        if three or (m.surface == "つら" and nxt is not None and nxt.surface == "たん" and _glued(m, nxt)):
+            # つらたん, slang for つらい, "it's tough" (plan 272) -- cut つら
+            # + た + ん too.
+            last = after if three else nxt
+            out_m.append(replace(m, surface="つらたん", end=last.end, lemma="つらたん", reading="つらたん",
+                                 lemma_reading="つらたん", kana="ツラタン", pos="adjective", ctype="", cform="",
+                                 written="つらたん", written_reading="つらたん"))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.update({i + 1, i + 2} if three else {i + 1})
+            continue
+        if (m.surface == "へん" and m.pos == "noun" and prev is not None and _glued(prev, m)
+                and (prev.cform.startswith("未然形") or (prev.conjunctive and prev.surface in ("て", "で"))
+                     or prev.pos == "auxiliary" and prev.surface in ("て", "で"))):
+            # 聞いてへん, 知らへん: the Kansai negative, no 辺 (plan 272).
+            out_m.append(replace(m, pos="auxiliary", lemma="へん", lemma_reading="へん", ctype="", cform="",
+                                 written="へん", written_reading="へん"))
+            out_t.append(("助動詞", "*", "*"))
+            continue
+        if (m.surface == "え" and m.pos == "interjection" and nxt is not None and nxt.surface == "え"
+                and nxt.pos == "interjection" and _glued(m, nxt) and after is not None and _glued(nxt, after)
+                and (after.surface in ("やん", "やろ", "やろう", "や", "やで", "やね", "やな", "な", "なあ", "よ", "ね",
+                                       "ねん", "わ", "の", "けど", "から", "し", "で", "ん"))):
+            # まだええやん, "it's fine, isn't it": the west's いい, no two
+            # cries of "eh" (plan 272); its やん is "isn't it!".
+            attributive = after.surface in ("の", "ん")
+            out_m.append(replace(m, surface="ええ", end=nxt.end, pos="adjective", lemma="良い", reading="ええ",
+                                 lemma_reading="よい", kana="エエ", ctype="形容詞",
+                                 cform="連体形-一般" if attributive else "終止形-一般",
+                                 written="ええ", written_reading="ええ"))
+            out_t.append(("形容詞", "非自立可能", "*"))
+            skip.add(i + 1)
+            if after.surface == "やん" and after.lemma == "遣る":
+                out_m.append(replace(after, pos="particle", lemma="やん", lemma_reading="やん", ctype="", cform="",
+                                     auxiliary_use=False, written="やん", written_reading="やん"))
+                out_t.append(("助詞", "終助詞", "*"))
+                skip.add(i + 2)
+            continue
+        if (m.surface == "やん" and (m.pos == "particle" or m.lemma == "遣る") and prev is not None
+                and prev.pos == "noun" and _glued(prev, m)
+                and nxt is not None and nxt.surface == "な" and _glued(m, nxt)
+                and after is not None and after.surface == "よ"):
+            # 宿題やんなよ, "do your homework!": やる's stem said short
+            # before the casual order's な (やりなよ), no Kansai やん
+            # (plan 272).
+            out_m.append(replace(m, pos="verb", lemma="遣る", lemma_reading="やる", ctype="五段-ラ行",
+                                 cform="連用形-撥音便", written="やん", written_reading="やん"))
+            out_t.append(("動詞", "非自立可能", "*"))
+            continue
+        if (m.surface == "やん" and m.lemma == "遣る" and prev is not None and _glued(prev, m)
+                and prev.pos in ("adjective", "auxiliary", "verb", "noun") and (nxt is None or nxt.pos in ("symbol", "particle"))):
+            # 美味しいやん: the Kansai "isn't it!" (= じゃない), no やる
+            # (plan 272).
+            out_m.append(replace(m, pos="particle", lemma="やん", lemma_reading="やん", ctype="", cform="",
+                                 auxiliary_use=False, written="やん", written_reading="やん"))
+            out_t.append(("助詞", "終助詞", "*"))
+            continue
+        if (m.pos == "verb" and m.cform.startswith("連用形") and prev is not None and prev.pos == "noun"
+                and m.lemma not in ("為る", "する", "出来る", "できる") and _glued(prev, m)
+                and any(_is_kanji(c) for c in prev.surface + m.surface)
+                and (nxt is None or nxt.pos == "symbol" or (nxt.pos == "particle" and not nxt.conjunctive)
+                     or nxt.lemma in ("だ", "です"))
+                and _noun_of_two(prev.surface + m.surface)):
+            # 通行止め, "road closed": a noun JMdict holds as one, read
+            # with its sound change, never 通行 and the verb 止める (plan 272).
+            row = _noun_of_two(prev.surface + m.surface)
+            last = out_m.pop()
+            out_t.pop()
+            out_m.append(replace(last, surface=last.surface + m.surface, end=m.end, lemma=row[0], reading=row[1],
+                                 lemma_reading=row[1], kana=last.kana + m.kana, pos="noun", ctype="", cform="",
+                                 written=row[0], written_reading=row[1]))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if (m.proper and m.name_kind in ("person", "family", "given") and nxt is not None and _glued(m, nxt)
+                and nxt.surface in ("行き", "方面", "駅", "発")):
+            # 高尾行き: a place the train goes to, no person (plan 272).
+            m = replace(m, name_kind="place")
+        if (m.surface in ("N", "Ｎ") and nxt is not None and nxt.surface in tuple("12345１２３４５") and _glued(m, nxt)
+                and (after is None or not after.surface[:1].isdigit())):
+            # N3, the JLPT's level, one word (plan 272).
+            surface = m.surface + nxt.surface
+            out_m.append(replace(m, surface=surface, end=nxt.end, lemma=surface, reading=surface,
+                                 lemma_reading=surface, kana=surface, pos="noun", proper=False, name_kind="",
+                                 unknown=False, written=surface, written_reading=surface))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "勝目" and prev is not None and prev.surface[-1:].isdigit() and _glued(prev, m)):
+            # 10勝目, the tenth win: 勝, the counter, then 目 (plan 272), no
+            # 勝ち目, "a chance of winning".
+            out_m += [replace(m, surface="勝", end=m.start + 1, lemma="勝", reading="しょう", lemma_reading="しょう",
+                              kana="ショウ", pos="suffix", counter=True, written="勝", written_reading="しょう"),
+                      replace(m, surface="目", start=m.start + 1, lemma="目", reading="め", lemma_reading="め",
+                              kana="メ", pos="suffix", written="目", written_reading="め")]
+            out_t += [("接尾辞", "名詞的", "助数詞"), ("接尾辞", "名詞的", "一般")]
+            continue
+        if (m.surface == "に" and m.pos == "auxiliary" and nxt is not None and nxt.lemma in ("因る", "依る", "よる")
+                and nxt.surface.startswith("よ") and _glued(m, nxt)):
+            # 不手際により: the particle に of により, no copula's (plan 272).
+            m = replace(m, pos="particle", lemma="に", lemma_reading="に", ctype="", cform="", written="に",
+                        written_reading="に")
+            out_m.append(m)
+            out_t.append(("助詞", "格助詞", "*"))
+            continue
+        if (m.surface == "ざる" and m.pos == "noun" and prev is not None and prev.pos in ("verb", "auxiliary")
+                and _glued(prev, m) and prev.cform.startswith(("未然形", "連用形"))):
+            # 断じざるを得ない: ず's attributive, no 笊, "a basket" (plan 272).
+            m = replace(m, pos="auxiliary", lemma="ず", lemma_reading="ず", ctype="助動詞-ヌ", cform="連体形-一般",
+                        written="ず", written_reading="ず")
+            out_m.append(m)
+            out_t.append(("助動詞", "*", "*"))
+            continue
+        if (m.pos == "verb" and all("\u3041" <= c <= "\u309f" for c in m.surface) and prev is not None
+                and prev.surface == "の" and prev.pos == "particle" and nxt is not None and nxt.pos == "particle"
+                and nxt.surface in ("から", "に", "で", "へ", "まで", "の", "は", "が", "を", "も")
+                and m.cform.startswith("終止形") and _a_deck_noun(m.surface)):
+            # もりのおくから: 奥, a noun after の and before a particle --
+            # a verb takes a noun after it there (雨の降る日), never から
+            # (plan 272).
+            m = replace(m, pos="noun", lemma=_a_deck_noun(m.surface), lemma_reading=m.surface, ctype="", cform="",
+                        auxiliary_use=False, written=_a_deck_noun(m.surface), written_reading=m.surface)
+            out_m.append(m)
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if (m.pos == "noun" and m.surface.endswith("ん") and len(m.surface) >= 3
+                and all("\u3041" <= c <= "\u309f" for c in m.surface) and nxt is not None and nxt.surface == "で"
+                and _glued(m, nxt) and after is not None and (after.surface in ("ない", "いる", "いない", "ある", "ください",
+                                                                                 "しまう", "おく", "も", "は")
+                                                               or after.lemma in ("居る", "無い", "下さる", "仕舞う", "置く"))
+                and _verb_of_n(m.surface)):
+            # たたんでない: 畳む's て-form, no 多端, "many items" (plan 272).
+            verb, said = _verb_of_n(m.surface)
+            out_m.append(replace(m, pos="verb", lemma=verb, lemma_reading=said, ctype="五段", cform="連用形-撥音便",
+                                 written=verb, written_reading=said))
+            out_t.append(("動詞", "一般", "*"))
+            out_m.append(replace(nxt, pos="particle", lemma="て", lemma_reading="て", conjunctive=True, cform="",
+                                 ctype="", written="て", written_reading="て"))
+            out_t.append(("助詞", "接続助詞", "*"))
+            skip.add(i + 1)
+            continue
+        # ── words given another word's reading, or cut apart (plan 272) ──
+        text_here = "".join(u.surface for u in morphemes)
+        two = after is not None and nxt is not None
+        if m.surface == "そら" and m.pos == "pronoun" and nxt is not None and nxt.pos == "particle" \
+                and nxt.surface in ("を", "に", "が", "の", "へ", "は", "も", "で"):
+            m = replace(m, pos="noun", lemma="空", lemma_reading="そら", written="空", written_reading="そら")
+        if m.surface == "かめ" and any(w in text_here for w in ("うさぎ", "ウサギ", "兎", "かめさん", "かめくん")):
+            m = replace(m, lemma="亀", lemma_reading="かめ", written="亀", written_reading="かめ")
+        if m.surface == "はる" and m.pos == "auxiliary" and nxt is not None and nxt.pos == "particle" \
+                and nxt.surface in ("が", "は", "を", "の", "に", "も") and (prev is None or prev.pos in ("symbol", "particle")):
+            m = replace(m, pos="noun", lemma="春", lemma_reading="はる", ctype="", cform="", written="春",
+                        written_reading="はる")
+        if m.surface == "米" and m.reading == "べい" and nxt is not None and (
+                nxt.surface[:1].isdigit() or nxt.pos in ("particle", "symbol")) and not (
+                prev is not None and prev.surface in ("日", "欧", "中", "対", "訪", "駐", "在", "全", "北", "南", "親", "反")):
+            m = replace(m, reading="こめ", lemma_reading="こめ", kana="コメ", written_reading="こめ")   # 米2合を研ぐ
+        if m.surface == "風" and m.reading == "ふう" and (prev is None or prev.pos in ("particle", "symbol")):
+            m = replace(m, reading="かぜ", lemma_reading="かぜ", kana="カゼ", pos="noun", written_reading="かぜ")
+        if (m.surface in ("下り", "上り") and nxt is not None and (nxt.surface in ("線", "車線", "方面", "列車", "電車")
+                or (nxt.pos == "particle" and not nxt.conjunctive and nxt.surface in ("は", "が", "の", "も", "で", "を", "に")
+                    and any(w in text_here for w in ("渋滞", "車線", "方面", "高速", "道", "線"))))):
+            said = "くだり" if m.surface == "下り" else "のぼり"
+            m = replace(m, pos="noun", lemma=m.surface, reading=said, lemma_reading=said, ctype="", cform="",
+                        written=m.surface, written_reading=said)
+        if m.surface == "道" and m.reading == "みち" and prev is not None and _glued(prev, m) \
+                and prev.surface in _EXPRESSWAYS:
+            m = replace(m, reading="どう", lemma_reading="どう", kana="ドウ", written_reading="どう")   # 東北道
+        if m.surface == "上" and m.reading == "じょう" and prev is not None and prev.surface in (
+                "サイズ", "ランク", "レベル", "グレード", "段", "学年", "クラス"):
+            m = replace(m, reading="うえ", lemma_reading="うえ", kana="ウエ", pos="noun", written_reading="うえ")
+        if m.surface == "殿" and m.pos == "suffix" and prev is not None and prev.pos in ("noun", "suffix") \
+                and m.reading != "どの":
+            m = replace(m, reading="どの", lemma_reading="どの", kana="ドノ", written_reading="どの")   # 家老殿
+        joins = None
+        if m.surface == "先" and nxt is not None and nxt.surface == "ほど" and _glued(m, nxt) \
+                and (prev is None or prev.pos in ("symbol", "particle") or prev.surface in ("つい", "ほんの")):
+            joins = (2, "先ほど", "先程", "さきほど", "noun")
+        elif m.surface == "何" and nxt is not None and nxt.surface == "ら" and _glued(m, nxt) \
+                and (after is None or after.surface != "か"):
+            joins = (2, "何ら", "何ら", "なんら", "adverb")
+        elif m.surface == "てる" and nxt is not None and nxt.surface == "てる" and after is not None \
+                and after.surface in ("ぼうず", "坊主") and _glued(nxt, after):
+            joins = (3, "てるてる" + after.surface, "てるてる坊主", "てるてるぼうず", "noun")
+        elif m.surface == "ゆき" and nxt is not None and nxt.surface == "だるま" and _glued(m, nxt):
+            joins = (2, "ゆきだるま", "雪だるま", "ゆきだるま", "noun")
+        elif m.surface == "こと" and two and nxt.surface == "の" and after.surface == "ほか" and _glued(nxt, after) \
+                and i + 3 < len(morphemes) and morphemes[i + 3].pos in ("adjective", "adverb", "verb", "other"):
+            joins = (3, "ことのほか", "殊の外", "ことのほか", "adverb")
+        elif m.surface == "御" and nxt is not None and nxt.surface == "社" and _glued(m, nxt):
+            joins = (2, "御社", "御社", "おんしゃ", "noun")
+        elif m.surface == "上" and nxt is not None and nxt.surface == "様" and _glued(m, nxt) \
+                and (prev is None or prev.pos in ("symbol", "particle")):
+            joins = (2, "上様", "上様", "うえさま", "noun")
+        elif m.surface == "例" and nxt is not None and nxt.surface == "の" and _glued(m, nxt) and after is not None \
+                and after.pos in ("noun", "prefix") and (prev is None or prev.pos in ("symbol", "particle")):
+            joins = (2, "例の", "例の", "れいの", "adnominal")            # 例の店
+        elif (m.surface in ("ゆき", "ゆう", "たく", "けん", "しょう", "ひろ", "まさ", "かず", "たか", "ひで")
+              and nxt is not None and nxt.surface == "お" and after is not None and after.surface == "くん"
+              and _glued(m, nxt) and _glued(nxt, after)):
+            # ゆきおくん: the name ゆきお and くん (plan 272).
+            out_m.append(_joined(m, nxt, m.surface + "お", m.surface + "お", m.surface + "お", "noun"))
+            out_m[-1] = replace(out_m[-1], proper=True, name_kind="given", unknown=True)
+            out_t.append(("名詞", "固有名詞", "人名"))
+            out_m.append(replace(after, pos="suffix", lemma="君", lemma_reading="くん", reading="くん", ctype="",
+                                 cform="", written="君", written_reading="くん"))
+            out_t.append(("接尾辞", "名詞的", "一般"))
+            skip.update({i + 1, i + 2})
+            continue
+        if joins is not None:
+            n, surface, lemma, said, pos = joins
+            out_m.append(_joined(m, morphemes[i + n - 1], surface, lemma, said, pos))
+            out_t.append(_TAGS.get(pos, ("名詞", "普通名詞", "一般")))
+            skip.update(range(i + 1, i + n))
+            continue
+        # ── speech the fifth review found cut or misread (plan 272) ──
+        two = after is not None and nxt is not None
+        joins = None
+        if m.surface == "て" and m.pos == "particle" and nxt is not None and nxt.surface == "か" and _glued(m, nxt) \
+                and (prev is None or prev.pos == "symbol" or prev.end < m.start) and after is not None:
+            joins = (2, "てか", "てか", "てか", "conjunction")            # ウケるwww てかなんで知ってんの
+        elif m.surface == "いい" and nxt is not None and nxt.surface == "ね" and _glued(m, nxt) and after is not None \
+                and (after.lemma in ("押す", "付ける", "つける") or after.surface in ("を", "が", "ボタン", "数", "して",
+                                                                                 "し", "くれ", "ください")):
+            joins = (2, "いいね", "いいね", "いいね", "noun")             # いいね押してってくれ
+        elif m.surface == "お" and nxt is not None and nxt.surface == "わた" and _glued(m, nxt) \
+                and (after is None or after.pos == "symbol" or _a_laugh_typed(after.surface)):
+            joins = (2, "おわた", "おわた", "おわた", "interjection")       # 寝坊したおわた
+        elif m.surface == "おけ" and nxt is not None and nxt.surface.startswith("まる") and _glued(m, nxt):
+            joins = (2, m.surface + nxt.surface, "おけまる", "おけまる", "interjection")
+        elif m.surface in ("なーん", "なあん") and nxt is not None and nxt.surface == "だ" and _glued(m, nxt) \
+                and (prev is None or prev.pos == "symbol"):
+            joins = (2, m.surface + "だ", "なーんだ", m.surface + "だ", "interjection")
+        elif m.surface == "へ" and nxt is not None and nxt.surface in ("へっ", "へ", "へへ") and _glued(m, nxt) \
+                and (prev is None or prev.pos == "symbol"):
+            joins = (2, m.surface + nxt.surface, "へへっ", m.surface + nxt.surface, "interjection")
+        elif m.surface == "ポチ" and nxt is not None and nxt.surface in ("り", "っ", "る", "ら", "れ") and _glued(m, nxt):
+            joins = (2, "ポチ" + nxt.surface, "ポチる", "ぽち" + nxt.surface, "verb")
+        elif m.surface == "ほい" and two and nxt.surface == "じゃ" and after.surface == "けえ" \
+                and _glued(m, nxt) and _glued(nxt, after):
+            joins = (3, "ほいじゃけえ", "じゃけえ", "ほいじゃけえ", "conjunction")
+        elif m.surface == "じゃ" and nxt is not None and nxt.surface == "けえ" and _glued(m, nxt):
+            joins = (2, "じゃけえ", "じゃけえ", "じゃけえ", "conjunction")
+        elif m.surface == "ど" and two and nxt.surface.startswith("えりゃ") and _glued(m, nxt) and _glued(nxt, after) \
+                and after.surface.startswith("あ"):
+            joins = (3, "ど" + nxt.surface + after.surface, "どえりゃあ", "どえりゃあ", "adverb")
+        elif m.surface == "いぎ" and nxt is not None and nxt.surface == "なり" and _glued(m, nxt):
+            joins = (2, "いぎなり", "いぎなり", "いぎなり", "adverb")
+        elif m.surface == "おばん" and nxt is not None and nxt.surface in ("です", "でした") and _glued(m, nxt):
+            joins = (2, "おばん" + nxt.surface, "おばんです", "おばん" + nxt.surface, "interjection")
+        elif m.surface == "ずん" and two and nxt.surface == "だ" and _glued(m, nxt):
+            joins = (2, "ずんだ", "ずんだ", "ずんだ", "noun")
+        elif m.surface == "てけ" and nxt is not None and nxt.surface == "らいん" and _glued(m, nxt):
+            joins = (2, "てけらいん", "てけらいん", "てけらいん", "auxiliary")
+        elif m.surface == "が" and m.pos == "particle" and nxt is not None and nxt.surface == "ね" and _glued(m, nxt) \
+                and prev is not None and prev.pos in ("verb", "auxiliary", "adjective") \
+                and (after is None or after.pos == "symbol"):
+            joins = (2, "がね", "がね", "がね", "particle")               # 怒られてまうがね。
+        elif m.surface == "ど" and m.pos == "particle" and nxt is not None and nxt.surface == "こう" and _glued(m, nxt) \
+                and prev is not None and prev.cform.endswith("撥音便"):
+            joins = (2, "どこう", "とく", "どこう", "auxiliary")             # 取り込んどこう
+        elif m.surface == "ん" and m.pos == "particle" and nxt is not None and nxt.surface == "で" and _glued(m, nxt) \
+                and prev is not None and prev.pos == "auxiliary" and after is not None and after.surface in ("、", "，"):
+            joins = (2, "んで", "ので", "んで", "particle")                 # お留守だったんで、
+        elif m.surface == "し" and m.lemma in ("為る", "する") and nxt is not None and nxt.surface == "ぬ" \
+                and nxt.lemma == "ず" and _glued(m, nxt) and prev is not None and prev.conjunctive \
+                and prev.surface in ("て", "で") and (after is None or after.pos == "symbol"):
+            joins = (2, "しぬ", "死ぬ", "しぬ", "verb")                     # 眠すぎてしぬ
+        if joins is not None:
+            n, surface, lemma, said, pos = joins
+            last = morphemes[i + n - 1]
+            # (a verb joined keeps the form its last kana says: ポチり, the
+            # stem ました follows; ポチっ, the て-form's)
+            form = {"り": "連用形-一般", "っ": "連用形-促音便", "ら": "未然形-一般", "れ": "仮定形-一般"}.get(
+                surface[-1:], "終止形-一般") if pos == "verb" else ""
+            out_m.append(_joined(m, last, surface, lemma, said, pos, cform=form, ctype="五段" if pos == "verb" else ""))
+            out_t.append(_TAGS[pos])
+            skip.update(range(i + 1, i + n))
+            continue
+        if m.surface == "笑" and m.pos == "noun" and (nxt is None or nxt.pos == "symbol") and prev is not None \
+                and (prev.pos != "symbol" or prev.surface in "？！?!"):
+            # 知ってんの笑: a laugh typed after the line, read わら (plan 272).
+            m = replace(m, reading="わら", kana="ワラ")
+        if m.surface == "りょ" and (nxt is None or nxt.pos == "symbol"):
+            m = replace(m, proper=False, name_kind="", unknown=False)     # りょ: 了解, "got it" (slang)
+        if m.surface and all(c in "wWｗＷ" for c in m.surface) and len(m.surface) >= 2:
+            m = replace(m, proper=False, name_kind="", unknown=False)     # www: a laugh, no name
+        if m.surface == "てん" and m.pos == "noun" and prev is not None and prev.pos == "verb" and _glued(prev, m) \
+                and prev.cform.startswith("連用形") and nxt is not None and nxt.surface in ("の", "だ", "や", "ねん", "じゃ"):
+            # 知ってんの: てる said before の, no 点 (plan 272).
+            m = replace(m, pos="auxiliary", lemma="てる", lemma_reading="てる", ctype="", cform="連体形-撥音便",
+                        written="てる", written_reading="てる")
+        if m.surface == "けえ" and m.lemma == "濃い" and prev is not None and _glued(prev, m) \
+                and (prev.pos in ("verb", "auxiliary") or prev.surface in ("じゃ", "ん")) \
+                and (nxt is None or nxt.pos in ("symbol", "particle")):
+            # 知らんけえね: Hiroshima's "because", no 濃い (plan 272).
+            m = replace(m, pos="particle", lemma="けえ", lemma_reading="けえ", ctype="", cform="", written="けえ",
+                        written_reading="けえ")
+        if (m.pos == "verb" and m.surface == "かけん" and prev is not None and prev.pos == "adjective"
+                and prev.cform.startswith("語幹") and _glued(prev, m)):
+            # うまかけん: Kyūshū's うまか, "tasty", and けん, "because" (plan 272).
+            last = out_m.pop()
+            out_t.pop()
+            out_m.append(replace(last, surface=last.surface + "か", end=m.start + 1, reading=last.reading + "か",
+                                 cform="終止形-一般"))
+            out_t.append(("形容詞", "一般", "*"))
+            out_m.append(replace(m, surface="けん", start=m.start + 1, lemma="けん", reading="けん", lemma_reading="けん",
+                                 kana="ケン", pos="particle", ctype="", cform="", written="けん", written_reading="けん"))
+            out_t.append(("助詞", "接続助詞", "*"))
+            continue
+        if m.surface == "らん" and m.lemma == "らむ" and prev is not None and prev.pos == "verb" and _glued(prev, m):
+            m = replace(m, lemma="らん", lemma_reading="らん")              # みらん: Kyūshū's 見ない
+        if (m.surface == "ことし" and m.lemma == "今年" and prev is not None and prev.pos == "adnominal"
+                and nxt is not None and nxt.lemma in ("取る", "とる") and nxt.surface[:1] == "と" and _glued(m, nxt)):
+            # そんなことしとったら: こと and する, then the west's とる (= ている),
+            # no 今年, "this year" (plan 272).
+            out_m += [replace(m, surface="こと", end=m.start + 2, lemma="事", reading="こと", lemma_reading="こと",
+                              kana="コト", written="こと", written_reading="こと"),
+                      replace(m, surface="し", start=m.start + 2, lemma="為る", reading="し", lemma_reading="する",
+                              kana="シ", pos="verb", ctype="サ行変格", cform="連用形-一般", written="する",
+                              written_reading="する")]
+            out_t += [("名詞", "普通名詞", "一般"), ("動詞", "非自立可能", "*")]
+            continue
+        if (m.lemma in ("取る", "とる") and m.surface[:1] == "と" and all("\u3041" <= c <= "\u309f" for c in m.surface)
+                and prev is not None and _glued(prev, m) and prev.pos == "verb" and prev.cform.startswith("連用形")
+                and (out_m and out_m[-1].surface == "し" or prev.surface.endswith(("し", "べ", "て")))):
+            m = replace(m, pos="auxiliary", lemma="とる", lemma_reading="とる")   # しとった: ている
+        if m.surface == "ちょう" and m.pos == "noun" and prev is not None and prev.conjunctive \
+                and prev.surface in ("て", "で") and (nxt is None or nxt.pos == "symbol"):
+            m = replace(m, surface="ちょう", pos="auxiliary", lemma="てちょう", lemma_reading="てちょう")
+        if m.surface == "っぺ" and prev is not None and prev.pos == "verb" and _glued(prev, m):
+            m = replace(m, pos="auxiliary", lemma="っぺ", lemma_reading="っぺ")
+        if m.surface == "っちゃ" and prev is not None and prev.pos in ("adjective", "verb", "auxiliary") \
+                and (nxt is None or nxt.pos == "symbol"):
+            m = replace(m, pos="particle", lemma="っちゃ", lemma_reading="っちゃ", conjunctive=False)
+        if (m.surface == "寒" and nxt is not None and nxt.surface == "ぐ" and _glued(m, nxt) and after is not None
+                and after.lemma in ("成る", "なる")):
+            # 寒ぐなった: Tōhoku's 寒く, voiced (plan 272).
+            out_m.append(replace(m, surface="寒ぐ", end=nxt.end, lemma="寒い", reading="さむぐ", lemma_reading="さむい",
+                                 kana="サムグ", pos="adjective", ctype="形容詞", cform="連用形-一般", written="寒い",
+                                 written_reading="さむい"))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "ひ" and two and nxt.surface == "が" and after.surface == "ね" and _glued(m, nxt)
+                and _glued(nxt, after) and prev is not None and prev.surface == "風邪"):
+            # 風邪ひがね: Tōhoku's 引かねえ, "not catch (a cold)" (plan 272).
+            out_m.append(replace(m, surface="ひがね", end=after.end, lemma="引く", reading="ひがね", lemma_reading="ひく",
+                                 kana="ヒガネ", pos="verb", ctype="五段", cform="終止形-一般", written="引く",
+                                 written_reading="ひく"))
+            out_t.append(("動詞", "一般", "*"))
+            skip.update({i + 1, i + 2})
+            continue
+        if (m.surface == "果たして" and m.pos == "adverb" and nxt is not None and nxt.lemma in (
+                "見せる", "みせる", "居る", "いる", "仕舞う", "しまう", "置く", "おく", "下さる", "くださる", "呉れる",
+                "くれる", "貰う", "もらう", "見る", "みる")):
+            # 果たしてみせよう: 果たす's て-form, no "as expected" (plan 272).
+            out_m += [replace(m, surface="果たし", end=m.end - 1, lemma="果たす", reading="はたし", lemma_reading="はたす",
+                              kana="ハタシ", pos="verb", ctype="五段", cform="連用形-一般", written="果たす",
+                              written_reading="はたす"),
+                      replace(m, surface="て", start=m.end - 1, lemma="て", reading="て", lemma_reading="て", kana="テ",
+                              pos="particle", ctype="", cform="", conjunctive=True, written="て", written_reading="て")]
+            out_t += [("動詞", "一般", "*"), ("助詞", "接続助詞", "*")]
+            continue
+        if (m.pos == "auxiliary" and m.lemma in ("てる", "でる") and m.cform.startswith("意志推量形")
+                and len(m.surface) >= 3 and m.surface[1] == "よ" and m.surface[2:].strip("ー〜～") == ""
+                and prev is not None and prev.pos == "verb"):
+            # やめてよー, "stop it!": the request's て and よ drawn out, no
+            # ていよう (plan 272).
+            te = m.surface[0]
+            out_m += [replace(m, surface=te, end=m.start + 1, lemma="て", reading=te, lemma_reading="て",
+                              kana="テ" if te == "て" else "デ", pos="particle", ctype="", cform="",
+                              conjunctive=True, auxiliary_use=False, written="て", written_reading="て"),
+                      replace(m, surface=m.surface[1:], start=m.start + 1, lemma="よ", reading=m.surface[1:],
+                              lemma_reading="よ", kana="ヨ" + m.surface[2:], pos="particle", ctype="", cform="",
+                              conjunctive=False, auxiliary_use=False, written="よ", written_reading="よ")]
+            out_t += [("助詞", "接続助詞", "*"), ("助詞", "終助詞", "*")]
+            continue
+        if m.pos == "noun" and m.surface == "家の子" and m.lemma == "家の子":
+            at = m.start
+            out_m += [replace(m, surface="家", end=at + 1, lemma="家", reading="いえ", lemma_reading="いえ",
+                              kana="イエ", written="家", written_reading="いえ"),
+                      replace(m, surface="の", start=at + 1, end=at + 2, lemma="の", reading="の",
+                              lemma_reading="の", kana="ノ", pos="particle", goshu="和", written="の",
+                              written_reading="の"),
+                      replace(m, surface="子", start=at + 2, end=at + 3, lemma="子", reading="こ",
+                              lemma_reading="こ", kana="コ", written="子", written_reading="こ")]
+            out_t += [("名詞", "普通名詞", "一般"), ("助詞", "格助詞", "*"), ("名詞", "普通名詞", "一般")]
+            continue
+        if (m.pos == "noun" and len(m.surface) >= 3 and m.surface.endswith(("ごろ", "頃"))
+                and not m.proper and not _written_word(m.surface) and not _written_word(m.lemma)):
+            tail = "ごろ" if m.surface.endswith("ごろ") else "頃"
+            head = m.surface[:-len(tail)]
+            if head != "何時" and _written_word(head):
+                cut = m.start + len(head)
+                said = m.reading[:-2] if m.reading.endswith("ごろ") else m.reading
+                out_m += [replace(m, surface=head, end=cut, lemma=head, reading=said, lemma_reading=said,
+                                  kana=m.kana[:len(said)], written=head, written_reading=said),
+                          replace(m, surface=tail, start=cut, lemma="頃", reading="ごろ", lemma_reading="ころ",
+                                  kana="ゴロ", written="頃", written_reading="ころ")]
+                out_t += [("名詞", "普通名詞", "一般"), ("名詞", "普通名詞", "副詞可能")]
+                continue
+        if (m.pos == "noun" and len(m.surface) == 2 and m.surface[0] == "何" and _is_kanji(m.surface[1])
+                and not m.proper and not _written_word(m.surface) and _written_word(m.surface[1])
+                and m.reading.startswith(("なに", "なん"))):
+            said = m.reading[:2]
+            out_m += [replace(m, surface="何", end=m.start + 1, lemma="何", reading=said, lemma_reading="なに",
+                              kana="ナニ" if said == "なに" else "ナン", pos="pronoun", written="何",
+                              written_reading="なに"),
+                      replace(m, surface=m.surface[1], start=m.start + 1, lemma=m.surface[1], reading=m.reading[2:],
+                              lemma_reading=m.reading[2:], kana=m.kana[2:], written=m.surface[1],
+                              written_reading=m.reading[2:])]
+            out_t += [("代名詞", "*", "*"), ("名詞", "普通名詞", "一般")]
+            continue
+        if (m.surface == "し" and m.lemma in ("為る", "する") and nxt is not None and nxt.surface == "かね"
+                and after is not None and after.surface == "られ" and prev is not None
+                and (prev.counter or prev.surface in ("時間", "分", "日", "回", "人", "度", "円", "個", "つ")
+                     or prev.surface.translate(_FULLWIDTH_DIGITS).isdigit())
+                and _glued(m, nxt) and _glued(nxt, after)):
+            out_m += [replace(m, surface="しか", end=nxt.start + 1, lemma="しか", reading="しか",
+                              lemma_reading="しか", kana="シカ", pos="particle", ctype="", cform="",
+                              conjunctive=False, auxiliary_use=False, written="しか", written_reading="しか"),
+                      replace(nxt, surface="ね", start=nxt.start + 1, lemma="寝る", reading="ね",
+                              lemma_reading="ねる", kana="ネ", pos="verb", ctype="下一段-ナ行",
+                              cform="未然形-一般", auxiliary_use=False, written="寝る", written_reading="ねる")]
+            out_t += [("助詞", "副助詞", "*"), ("動詞", "一般", "*")]
+            skip.add(i + 1)
+            continue
+        if (m.surface == "どう" and m.pos == "adverb" and nxt is not None and nxt.surface == "し"
+                and after is not None and after.surface == "て" and _glued(m, nxt) and _glued(nxt, after)):
+            then = morphemes[i + 3] if i + 3 < len(morphemes) else None
+            if then is None or not (then.surface in ("も", "いい", "よい", "良い", "ほしい", "欲しい")
+                                    or then.lemma in ("居る", "いる", "良い", "貰う", "もらう", "呉れる", "くれる",
+                                                      "居らっしゃる", "おる", "てる", "置く")
+                                    or then.surface in ("る", "た", "ん", "て", "た")):
+                out_m.append(replace(m, surface="どうして", end=after.end, lemma="どうして", reading="どうして",
+                                     lemma_reading="どうして", kana="ドウシテ", written="どうして",
+                                     written_reading="どうして"))
+                out_t.append(("副詞", "*", "*"))
+                skip.update({i + 1, i + 2})
+                continue
+        out_m.append(m)
+        out_t.append(tags[i])
+    return out_m, out_t
+
+
+_A_TO_U = dict(zip("わかがさたなばまら", "うくぐすつぬぶむる"))
+
+
+def _joined(m, last, surface: str, lemma: str, reading: str, pos: str, **more):
+    """One morpheme for m … last, read `reading`."""
+    from dataclasses import replace
+
+    kana = "".join(chr(ord(c) + 0x60) if "\u3041" <= c <= "\u3096" else c for c in reading)
+    return replace(m, surface=surface, end=last.end, lemma=lemma, reading=reading, lemma_reading=reading,
+                   kana=kana, pos=pos, ctype=more.get("ctype", ""), cform=more.get("cform", ""),
+                   auxiliary_use=False, proper=False, name_kind="", unknown=False, conjunctive=False,
+                   written=more.get("written", lemma), written_reading=reading)
+
+
+# The expressways whose 道 is read どう: 東北道, 関越道 (plan 272).
+_EXPRESSWAYS = frozenset({"東北", "関越", "東名", "名神", "中央", "北陸", "常磐", "磐越", "上信越", "東関東", "外環",
+                          "圏央", "京葉", "山陽", "九州", "東海北陸", "新東名", "新名神", "長野", "道央", "道東",
+                          "中国", "山陰", "北関東", "東九州", "秋田", "山形", "八戸", "館山", "京奈和"})
+
+_TAGS = {"adnominal": ("連体詞", "*", "*"),
+         "noun": ("名詞", "普通名詞", "一般"), "interjection": ("感動詞", "一般", "*"), "adverb": ("副詞", "*", "*"),
+         "conjunction": ("接続詞", "*", "*"), "particle": ("助詞", "終助詞", "*"), "auxiliary": ("助動詞", "*", "*"),
+         "verb": ("動詞", "一般", "*"), "adjective": ("形容詞", "一般", "*")}
+
+
+@lru_cache(maxsize=1024)
+def _a_deck_noun(reading: str) -> str:
+    """The spelling of a deck noun read `reading` written with a kanji,
+    or "": おく is 奥."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    for level in ("N5", "N4", "N3", "N2", "N1"):
+        for entry in VOCAB_BY_LEVEL.get(level, []):
+            kanji = entry.get("kanji") or ""
+            if kanji and len(kanji) == 1 and _is_kanji(kanji) and reading in (entry.get("kana") or "").split("/") \
+                    and "verb" not in (entry.get("type") or entry.get("pos") or "").lower():
+                return kanji
+    return ""
+
+
+@lru_cache(maxsize=1024)
+def _verb_of_n(word: str):
+    """(spelling, reading) of the deck's godan verb in む, ぶ or ぬ whose
+    て-form stem `word` is (たたん: 畳む), or None."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    stem = word[:-1]
+    for ending in "むぶぬ":
+        said = stem + ending
+        for level in ("N5", "N4", "N3", "N2", "N1"):
+            for entry in VOCAB_BY_LEVEL.get(level, []):
+                if said in (entry.get("kana") or "").split("/") and (entry.get("kanji") or "").endswith(ending):
+                    return entry["kanji"], said
+    return None
+
+# The pairs とも says "both" of (plan 272): 上下線とも, 両方とも.
+_PAIRS = frozenset({"上下", "両方", "双方", "両者", "男女", "左右", "前後", "夫婦", "兄弟", "姉妹", "親子", "両親",
+                    "上下線", "往復", "公私", "心身", "内外"})
+
+
+def _a_laugh_typed(text: str) -> bool:
+    return bool(text) and all(c in "wWｗＷ" for c in text)
+
+
+@lru_cache(maxsize=2048)
+def _noun_of_two(surface: str):
+    """(kanji, reading) of the one JMdict noun `surface` spells, or None."""
+    import content.vocab_jmdict_data as jmdict_db
+
+    rows = jmdict_db.by_kanji(surface, limit=2)
+    if len(rows) != 1 or rows[0].get("kanji") != surface:
+        return None
+    tags = {t for sense in jmdict_db.get_senses(rows[0]["kanji"], rows[0]["kana"]) or [] for t in sense.get("tags") or ()}
+    return (rows[0]["kanji"], kata_to_hira(rows[0]["kana"])) if "n" in tags else None
+
+
+@lru_cache(maxsize=2048)
+def _an_adjective(surface: str) -> bool:
+    """Whether the deck or JMdict holds `surface` as an い-adjective."""
+    import content.vocab_jmdict_data as jmdict_db
+
+    if any(kanji == surface for kanji, _kana in _deck_forms()):
+        return True
+    for row in jmdict_db.by_kanji(surface, limit=2):
+        tags = {t for sense in jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []
+                for t in sense.get("tags") or ()}
+        if "adj-i" in tags:
+            return True
+    return False
 
 
 def _katakana_adjectives(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
@@ -1545,6 +2679,7 @@ def _tag(text: str, offset: int = 0, tagger=None) -> tuple[list[Morpheme], list[
             counter=(getattr(feat, "pos3", None) or "") in ("助数詞", "助数詞可能"),
             unknown=bool(getattr(w, "is_unk", False)),
             adjectival=(getattr(feat, "pos3", None) or "") == "形状詞可能",
+            verbal=(getattr(feat, "pos3", None) or "") == "サ変可能",
             written=_clean_lemma(getattr(feat, "orthBase", None), surface) if not digits.isdigit() else surface,
             written_reading=kata_to_hira(getattr(feat, "kanaBase", None) or "") if not digits.isdigit() else surface,
         ))
@@ -1972,8 +3107,10 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)
         morphemes, tags = _zu_words(morphemes, tags)
+        morphemes, tags = _cut_words(morphemes, tags)
         morphemes, tags = _introduced(morphemes, tags)
         morphemes, tags = _no_names(morphemes, tags)
+        morphemes, tags = _named_animals(morphemes, tags)
         morphemes, tags = _names_kept(morphemes, tags)
         return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only

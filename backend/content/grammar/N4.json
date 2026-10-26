@@ -19509,19 +19509,19 @@
             "en": "Which form completes the sentence?",
             "fr": "Quelle forme complète la phrase ?"
           },
-          "jp": "冬の山を＿＿＿すきです。",
+          "jp": "ピアノを＿＿＿むずかしいです。",
           "tr": {
-            "en": "I like climbing mountains in winter.",
-            "fr": "J'aime grimper en montagne en hiver."
+            "en": "Playing the piano is hard.",
+            "fr": "Jouer du piano, c'est difficile."
           },
           "choices": [
-            "のぼるのが",
-            "のぼりますのが",
-            "のぼったのが"
+            "ひくのが",
+            "ひきますのが",
+            "ひいたのが"
           ],
           "why": {
-            "en": "の attaches to the dictionary form, のぼるの, and what you like takes が: のぼるのがすき. のぼりますの puts the polite form inside, and のぼったの is the past, \"the one I climbed\".",
-            "fr": "の se place derrière la forme du dictionnaire, のぼるの, et ce qu'on aime prend が : のぼるのがすき. のぼりますの met la forme polie à l'intérieur, et のぼったの est le passé, « celle que j'ai gravie »."
+            "en": "の attaches to the dictionary form, ひくの, and what is hard takes が: ひくのがむずかしい. ひきますの puts the polite form inside, and ひいたの is the past, \"the one I played\".",
+            "fr": "の se place derrière la forme du dictionnaire, ひくの, et ce qui est difficile prend が : ひくのがむずかしい. ひきますの met la forme polie à l'intérieur, et ひいたの est le passé, « celui que j'ai joué »."
           }
         },
         {

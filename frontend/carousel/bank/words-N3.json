@@ -70,7 +70,7 @@
 {"t":"稲","r":"いね","ro":"ine","en":["rice plant"],"fr":["plant de riz"],"fu":[["稲","いね"]],"ex":["N2.37"]},
 {"t":"パイプ","r":"パイプ","ro":"paipu","en":["pipe, tube, channel (contacts)"],"fr":["tuyau, tube, filière (contacts)"]},
 {"t":"単語","r":"たんご","ro":"tango","en":["word, vocabulary (item)"],"fr":["mot, vocabulaire"],"fu":[["単","たん"],["語","ご"]],"hy":["探語","単五","段語"],"ex":["N3.199"]},
-{"t":"感じる","r":"かんじる","ro":"kanjiru","en":["to feel, to sense, to experience"],"fr":["ressentir, percevoir, éprouver"],"fu":[["感","かん"],["じる",""]],"hy":["間じる","漢じる","館じる"]},
+{"t":"感じる","r":"かんじる","ro":"kanjiru","en":["to feel, to sense, to experience"],"fr":["ressentir, percevoir, éprouver"],"fu":[["感","かん"],["じる",""]],"hy":["間じる","漢じる","館じる"],"ex":["N2.183","N2.189"]},
 {"t":"書類","r":"しょるい","ro":"shorui","en":["documents, official papers"],"fr":["documents, papiers officiels"],"fu":[["書","しょ"],["類","るい"]],"hy":["野類","書涙","処類"],"ex":["N3.9","N3.35"]},
 {"t":"人生","r":"じんせい","ro":"jinsei","en":["life (a human lifetime)"],"fr":["vie (une existence humaine)"],"fu":[["人","じん"],["生","せい"]],"hy":["神生","人西","沈生"]},
 {"t":"完成","r":"かんせい","ro":"kansei","en":["completion, perfection, accomplishment"],"fr":["achèvement, perfection, accomplissement"],"fu":[["完","かん"],["成","せい"]],"hy":["間成","完生","漢成"],"ex":["N3.25","N2.144"]},

@@ -4613,11 +4613,11 @@
           "choices": [
             "議長は、山田さんをおいて、ほかにいないと思う。",
             "議長は、山田さんをおいて、先に決めたらどうかな。",
-            "議長は、山田さん以外にも、いい人がいると思う。"
+            "議長は、山田さんをおいてほかにいないとは思わない。"
           ],
           "why": {
-            "en": "をおいて…いない says there is no one but Yamada. In the second line おいて is the verb « put aside » (decide without him), and 以外にも says there are other good people.",
-            "fr": "をおいて…いない dit qu'il n'y a personne d'autre que Yamada. Dans la deuxième ligne, おいて est le verbe « mettre de côté » (décider sans lui), et 以外にも dit qu'il y a d'autres bons candidats."
+            "en": "をおいて…いない says there is no one but Yamada. In the second line おいて is the verb « put aside » (decide without him), and とは思わない turns it round: you do not think he is the only one.",
+            "fr": "をおいて…いない dit qu'il n'y a personne d'autre que Yamada. Dans la deuxième ligne, おいて est le verbe « mettre de côté », et とは思わない renverse tout : tu ne penses pas qu'il soit le seul."
           }
         },
         {
