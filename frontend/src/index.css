@@ -4311,6 +4311,38 @@ textarea:focus-visible {
 .hud__ring-figs { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); }
 .hud__ring-figs b { font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; }
 .hud__status--ring .hud__status-word { font-size: var(--fs-caption-xs); }
+/* 設定 — the gear at the HUD's start (plan 275, the owner's pick C):
+   the soft ink, lit full with the tab bar's lozenge while a settings
+   page is open. Pulled out by a rung so the glyph, not its box, sits on
+   the HUD's gutter; the hairline after it parts it from the panel and
+   goes when there is no panel. */
+.hud__lead { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+.hud__gear {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: calc(-1 * var(--sp-3));
+  border-radius: var(--r-card);
+  color: var(--text-on-panel-soft);
+}
+.hud__gear:hover,
+.hud__gear:focus-visible { color: var(--text-on-panel); }
+.hud__gear--on {
+  color: var(--text-on-panel);
+  background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+}
+.hud__gear:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: var(--sp-3);
+  bottom: var(--sp-3);
+  right: calc(-1 * var(--sp-1));
+  border-right: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, var(--bg-panel));
+}
 
 /* ── 改札口 — the tab bar. Sumi, docked, five gates. ── */
 /* The bar is over the page, and has to look it. A 1px hairline was the

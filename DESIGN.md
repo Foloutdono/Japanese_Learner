@@ -1647,8 +1647,9 @@ widths (`exam/ScoreReveal.jsx`, the `exam-score__*` rules).
 ### The chrome (the mobile canvas, plan 068)
 
 - **Two chromes, one line** (owner's call, 2026-09-22; ADR 0018). Below
-  1100px it is the phone's: the HUD across the top (the goal-status panel
-  · the card as one strip, its level and its balance — plan 173), the five gates across the bottom
+  1100px it is the phone's: the HUD across the top (the gear and the
+  goal-status panel at its start · the card as one strip at its end, its
+  level and its balance — plans 173, 275), the five gates across the bottom
   (Learn · Practice · Today · Dictionary · Profile), the screen between
   them; between 769 and 1099 the same frame is a centred column of
   `--board-w`. At 1100px and up it is **the desk** (below): a rail down
@@ -1724,6 +1725,12 @@ widths (`exam/ScoreReveal.jsx`, the `exam-score__*` rules).
   the state's ink, and beside it the share as a figure over the drift in
   days, signed, in that ink. The same reading as the plate, drawn as the
   chrome's other figures are.
+- **Réglages is the HUD's first door** (plan 275, the owner's pick C of
+  the canvas "Tsuji — settings in the HUD"): a gear at the start, in the
+  soft panel ink, a hairline between it and the panel, lit full on the
+  tab bar's lozenge while any settings page is open. It was a door behind
+  Profile, two taps away; that door stays, as the way in from the card's
+  holder. The desk keeps its settings as a place on the rail.
 - **A run leaves the chrome.** Both bars go; the level bar takes the bottom
   edge (sumi, the level, the gold track, the XP figure — the fare's home once
   the HUD has left), the rating bar (or the field) docks on top of it and
