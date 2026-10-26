@@ -224,7 +224,7 @@ export default function BanzukeScreen({ session }) {
               <span className="bzp__podium-names">
                 {board.champions.map(c => (
                   <span key={c.rank} className="bzp__champ">
-                    <span className={`bzp__medal bzp__medal--${MEDALS[c.rank - 1]}`} aria-hidden="true">{CIRCLED[c.rank - 1]}</span>
+                    <span className={`bzp__medal bzp__medal--${MEDALS[c.rank - 1]}`} aria-hidden="true">{c.rank}</span>
                     <button type="button" className="bz-pick" aria-label={t.bzRowAria(c.username)} onClick={() => setPicked(c.username)}>{c.username}</button>
                   </span>
                 ))}
@@ -310,7 +310,6 @@ export default function BanzukeScreen({ session }) {
 }
 
 const MEDALS = ['gold', 'silver', 'bronze']
-const CIRCLED = ['①', '②', '③']
 
 // The week's end, to the hour.
 function endsIn(end, t) {

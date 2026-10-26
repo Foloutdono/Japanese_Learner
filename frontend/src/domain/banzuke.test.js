@@ -42,7 +42,16 @@ describe('bothRows', () => {
     expect(lines.map(l => (l.gap ? '⋯' : l.rank))).toEqual([1, 2, 3, 4, 5, '⋯', 29, 30, 31])
     expect(sides[0].has(29)).toBe(false)
     expect(sides[1].get(30).username).toBe('me')
-    expect(sides[1].has(4)).toBe(false)
+    expect(sides[1].get(4).username).toBe('u4')
+  })
+
+  it('fills a side cut to its top three at every rank the other shows (the screenshot of 2026-10-26)', () => {
+    const week = { entries: [1, 2, 3, 4, 5].map(n => e(n)), me: e(8, 'me'), near: [e(7), e(8, 'me'), e(9)] }
+    const all = { entries: [e(1, 'me'), ...[2, 3, 4, 5].map(n => e(n))], me: e(1, 'me'), near: [e(1, 'me'), e(2)] }
+    const { lines, sides } = bothRows(week, all)
+    expect(lines.map(l => (l.gap ? '⋯' : l.rank))).toEqual([1, 2, 3, 4, 5, '⋯', 7, 8, 9])
+    expect([...sides[0].keys()]).toEqual([1, 2, 3, 4, 5, 7, 8, 9])
+    expect([...sides[1].keys()]).toEqual([1, 2, 3, 4, 5])
   })
 })
 
