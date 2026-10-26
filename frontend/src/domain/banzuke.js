@@ -69,7 +69,7 @@ export function bothRows(week, all, top = TOP_ROWS) {
   const shown = boards.map(b => boardRows(b, top).filter(r => r.e).map(r => r.e.rank))
   const ranks = [...new Set(shown.flat())].sort((a, b) => a - b)
   const sides = boards.map(b => {
-    const known = new Map(dedupe([...(b?.entries ?? []), ...(b?.near ?? []), b?.me]).map(e => [e.rank, e]))
+    const known = new Map(heldRows(b).map(e => [e.rank, e]))
     return new Map(ranks.filter(r => known.has(r)).map(r => [r, known.get(r)]))
   })
   const lines = []
@@ -78,6 +78,38 @@ export function bothRows(week, all, top = TOP_ROWS) {
     lines.push({ rank })
   })
   return { lines, sides }
+}
+
+// Every row a board holds: its top, the learner's neighbours, the
+// learner, and the rows fetched for the other side's window (`beside`).
+function heldRows(board) {
+  return dedupe([...(board?.entries ?? []), ...(board?.near ?? []), board?.me, ...(board?.beside ?? [])])
+}
+
+/**
+ * The pages each side of the desk's board still has to read: the ranks
+ * the other side shows that this one holds no row for (the lifetime's
+ * 7th to 9th beside a week whose learner is 8th), as runs of
+ * consecutive ranks, { offset, limit } for GET /api/leaderboard. A rank
+ * past the board's last learner is never asked.
+ *
+ * Returns [runs of the week, runs of the lifetime].
+ */
+export function besidePages(week, all, top = TOP_ROWS) {
+  const { lines } = bothRows(week, all, top)
+  const ranks = lines.filter(l => !l.gap).map(l => l.rank)
+  return [week, all].map(b => {
+    const held = new Set(heldRows(b).map(e => e.rank))
+    const total = b?.total ?? Infinity
+    const runs = []
+    for (const r of ranks) {
+      if (held.has(r) || r > total) continue
+      const last = runs[runs.length - 1]
+      if (last && last.offset + last.limit === r - 1) last.limit += 1
+      else runs.push({ offset: r - 1, limit: 1 })
+    }
+    return runs
+  })
 }
 
 /** The row's movement since the day began: 'up', 'down' or null. */

@@ -22686,6 +22686,11 @@ form.stage__foot > .btn-primary {
   font-variant-numeric: tabular-nums;
   color: var(--text-on-panel-soft);
 }
+/* The figure in a ring is centred on its own height, cap to baseline,
+   not on the line box: at a ring's small sizes the face's ascent and
+   descent round to whole pixels apart and set the figure a pixel high.
+   Where text-box is not read, the line box centres it as before. */
+.bz-num { text-box: trim-both cap alphabetic; }
 /* The metal is the ring; the figure inside is the metal mixed toward
    the panel ink — bronze alone measured 2.83:1 on sumi in light theme. */
 .leaderboard-row__rank--gold { color: color-mix(in srgb, var(--medal-gold) 70%, var(--text-on-panel)); box-shadow: inset 0 0 0 1.5px var(--medal-gold); }
