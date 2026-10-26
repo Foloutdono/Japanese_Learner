@@ -940,6 +940,13 @@ def resolve_morpheme(morphemes, i: int):
     m0 = morphemes[i]
     if m0.lemma in ("驕る", "傲る", "奢る") and not _has_kanji(m0.surface):
         return None                         # おごる in kana treats (奢る, the pool's), plan 272
+    if m0.surface == "あれ" and m0.pos == "interjection":
+        return None                         # あれ、…だっけ？ "huh?", glossed (plan 272)
+    if m0.surface == "そう" and i > 0 and morphemes[i - 1].pos in ("verb", "adjective", "auxiliary") \
+            and morphemes[i - 1].end == m0.start:
+        return None                         # 違うそうです, 降りそう: the point's そう, no "like that" (plan 272)
+    if m0.lemma == "マイナス" and m0.surface in ("－", "−", "ー"):
+        return next(iter((lv, e, vocab_to_id(e, lv)) for lv, e in _kana_cards("マイナス")), None)
     hit = _resolve_morpheme(morphemes, i)
     if hit is not None and _there_is(morphemes, i):
         return hit
@@ -1043,6 +1050,8 @@ def _by_neighbours(morphemes, i: int, hit):
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     after = morphemes[i + 2] if i + 2 < len(morphemes) else None
     prev = morphemes[i - 1] if i > 0 else None
+    if m.lemma in ("感ずる",) and m.surface.startswith("感じ"):
+        return _card("感じる", "かんじる") or hit         # 早く感じられる (plan 272)
     if m.surface == "きみ" and hit is not None and (hit[1].get("kanji") or "") == "気味" and not (
             nxt is not None and nxt.surface == "が" and after is not None and after.lemma in ("悪い", "わるい")):
         return _card("君", "きみ") or hit
@@ -1771,7 +1780,7 @@ _PARTNERS = (
                                   "成績", "せいせき", "額", "ひたい", "おでこ", "顔", "かお", "耳", "みみ", "頬", "ほお",
                                   "力", "ちから", "体力", "たいりょく", "筋肉", "きんにく", "習慣", "しゅうかん",
                                   "格好", "かっこう", "かっこ", "区切り", "くぎり", "段取り", "だんどり", "理由",
-                                  "りゆう", "色", "いろ", "香り", "かおり"})),  # 決着をつける
+                                  "りゆう", "色", "いろ", "香り", "かおり", "気ぃ"})),  # 決着をつける
     ("就く", ("に",), frozenset({"配置", "はいち", "持ち場", "もちば", "位置", "いち", "職", "しょく", "任務",
                                 "にんむ", "眠り", "ねむり", "床", "とこ", "帰路", "きろ", "家路", "いえじ", "王位",
                                 "おうい", "職務", "しょくむ", "守備", "しゅび", "仕事", "しごと", "席", "せき"})),  # 配置につけ (plan 272)
@@ -1825,6 +1834,9 @@ def _partners(morphemes, i: int) -> list[tuple[str, str]]:
     k = i - 1
     if k >= 0 and morphemes[k].pos in ("noun", "pronoun", "suffix", "adverb", "adjective"):
         out.append(("", morphemes[k].surface))
+    if k >= 2 and morphemes[k].pos == "suffix" and numeral_value(morphemes[k - 1].surface) is not None \
+            and morphemes[k - 2].pos == "noun":
+        out.append(("", morphemes[k - 2].surface))     # 傷一つつけられない (plan 272)
     while k >= 1 and (morphemes[k].pos == "adverb" or morphemes[k].surface in _WHEN_WORDS):
         k -= 1                         # 祖父が去年なくなった
     if k >= 0 and morphemes[k].pos == "particle" and morphemes[k].surface in ("は", "も") and k >= 1 \
@@ -3475,6 +3487,8 @@ def resolve_interjection(m):
     is no 嫌, "unpleasant")."""
     if m.pos not in ("interjection", "filler") or not m.surface or any(is_kanji(c) for c in m.surface):
         return None
+    if m.surface == "あれ":
+        return None                     # "huh?", glossed: no "that one over there" (plan 272)
     spellings = _said_as(m.surface)
     for spelled in spellings:
         if spelled in _INTERJECTION_CARDS:

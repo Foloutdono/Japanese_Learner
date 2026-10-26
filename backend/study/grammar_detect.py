@@ -288,6 +288,8 @@ _SPELLINGS: tuple[tuple[str, tuple[str, ...]], ...] = (
 # 七時, and is held to its reading as well (_misread).
 _POINT_SPELLINGS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
     "〜とき": (("とき", ("時",)),),
+    # (寝る前に: before, held to a time by _before_refused, plan 272)
+    "〜まえに": (("まえに", ("前に",)),),
     "何か／誰か／どこか": (("何か", ("なにか",)), ("誰か", ("だれか",))),
     # 事 where the construction is fixed around it (事が出来る, 事がある,
     # 事にする): not the bare nominalizer, 〜ことだ or 〜ことに, where
@@ -1172,13 +1174,16 @@ def _is_final_hit(start: int, tokens) -> bool:
     after = False
     for k, t in enumerate(tokens):
         if t.start == start:
-            if t.surface not in _FINAL_PARTICLES:
+            if t.surface not in _FINAL_PARTICLES and t.surface.rstrip("〜ー～") not in _FINAL_PARTICLES:
                 return False
             after = True
             continue
         # (...or trails off, マジかよ…このダンジョン, or calls whoever it
         # is said to, 見ないでよ、バカ！, plan 272)
-        if after and t.pos == "symbol" and (t.surface in _UTTERANCE_ENDS or t.surface in _TRAILS):
+        if after and t.pos == "symbol" and (t.surface in _UTTERANCE_ENDS or t.surface in _TRAILS
+                                            or t.surface in ("#", "＃") or any(ord(c) >= 0x1F000 for c in t.surface)):
+            # (...or a post's line ends on its emoji or hashtag: 来てね〜🎮
+            # #ゲーム, plan 272)
             return True
         if after and t.pos == "symbol" and t.surface in _COMMAS and _a_call_from(tokens, k):
             return True
@@ -1426,6 +1431,8 @@ _ALSO_AFTER = {"〜か（間接疑問）": frozenset({"adjective", "other"}),
                # (からだろう, からでしょう: "it must be because", plan 272)
                "〜だろう": frozenset({"particle"}),
                "〜でしょう": frozenset({"particle"}),
+               # (a な-adjective's stem too: きれいすぎて, plan 272)
+               "〜すぎる": frozenset({"other"}),
                # (そのような, このような: "such", a likeness before a noun)
                "〜ような": frozenset({"adnominal"})}
 
@@ -2123,7 +2130,10 @@ def _stem_spans(tokens, core, relaxed: bool = False, pattern: str = "") -> list[
         prev = tokens[i - 1]
         if not _grammaticalised(tokens[i]):
             continue
-        if not (_stem_before(prev, core) or (nominal and prev.pos in _NOMINAL and tokens[i].surface[:1] in heads)):
+        # (a な-adjective's stem is an adjective's stem too: きれいすぎて,
+        # 静かすぎた, plan 272)
+        if not (_stem_before(prev, core) or (nominal and prev.pos in _NOMINAL and tokens[i].surface[:1] in heads)
+                or (pattern == "〜すぎる" and prev.pos == "other")):
             continue
         if verb_only and not (prev.pos == "verb" or prev.lemma_reading in _PASSIVE | _CAUSATIVE
                               or _misread_stem(prev)):
@@ -2897,6 +2907,8 @@ def _one_no_spans(tokens):
                                                        "少し", "すこし", "ちょっと", "かなり", "最近"):
             if nxt.pos in ("noun", "prefix", "pronoun"):
                 out.append((t.start, t.end))
+        elif prev.pos == "interjection" and len(prev.surface) >= 3 and nxt.pos == "noun":
+            out.append((t.start, t.end))   # さよならの代わりに, ありがとうの気持ち (plan 272)
     return out
 
 
@@ -3160,11 +3172,19 @@ def _sentence_final(tokens, i: int) -> bool:
     sentence goes on (or was left hanging, お腹が空いて…)."""
     for u in tokens[i + 1:]:
         if u.pos == "symbol":
-            return u.surface in _UTTERANCE_ENDS
-        if u.pos == "particle" and u.surface in _SOFTENERS:
+            return u.surface in _UTTERANCE_ENDS or _ends_a_line(u)
+        # (drawn out too: 来てね〜, plan 272)
+        if u.pos == "particle" and u.surface.rstrip("〜ー～") in _SOFTENERS:
             continue
         return False
     return True
+
+
+def _ends_a_line(u) -> bool:
+    """Whether the mark `u` is a post's emoji or hashtag, which ends its
+    line as 。 would: 来てね〜🎮 #ゲーム ends on ね. A space does not (儚き
+    夢よ　いずこへ calls out to the dream)."""
+    return u.surface in ("#", "＃") or any(ord(c) >= 0x1F000 for c in u.surface)
 
 
 def _then_a_call(tokens, i: int) -> bool:
@@ -3221,8 +3241,10 @@ def _casual_request_spans(tokens):
             continue
         prev = tokens[i - 1]
         negative = prev.pos == "auxiliary" and prev.lemma == "ない"
-        # (〜ておく said short: 空けといてね, 始めといて, plan 272)
-        kept = prev.pos == "auxiliary" and prev.surface in ("とい", "どい")
+        # (〜ておく said short: 空けといてね, 始めといて; 〜ている: 待ってて,
+        # plan 272)
+        kept = prev.pos == "auxiliary" and (prev.surface in ("とい", "どい") or (prev.surface in ("て", "で")
+                                                                              and prev.lemma in ("てる", "でる")))
         # (said twice, the first is the request too: 待って待って, plan 272)
         twice = (i + 2 < len(tokens) and tokens[i + 1].lemma == prev.lemma and tokens[i + 1].pos == "verb"
                  and tokens[i + 2].conjunctive and tokens[i + 2].surface in ("て", "で"))
@@ -4703,6 +4725,8 @@ def _passive_refused(tokens, s, e, _g) -> bool:
     verb = tokens[i - 1]
     if verb.surface == "なら" and verb.lemma == "成る" and i >= 2 and tokens[i - 2].surface == "に":
         return True
+    if i + 1 < len(tokens) and tokens[i + 1].surface == "へん":
+        return True                    # 歩かれへん, "I can't walk": the west's potential (plan 272)
     if tokens[i].lemma_reading != "られる":
         return False
     nxt = tokens[i + 1] if i + 1 < len(tokens) else None
@@ -5147,8 +5171,10 @@ def _pattern_refusals():
         "〜ことになる": _after_copula_na,
         "〜ものだ": _after_copula_na,
         "〜じゃないか": lambda t, s, e, g: _followed_by(t, e, "って", "と"),
+        # (and never after a noun: また明日な, "see you tomorrow", plan 272)
         "〜な（禁止）": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
-            p.lemma in ("居る", "いる", "た", "御座る", "ござる") or p.surface in ("てる", "でる", "ござる")),
+            p.lemma in ("居る", "いる", "た", "御座る", "ござる") or p.surface in ("てる", "でる", "ござる")
+            or p.pos in ("noun", "pronoun", "suffix")),
         "〜のに": lambda t, s, e, g: (n := _next_word(t, e)) is not None and (n.surface.startswith("気") or n.pos == "verb"),
         # 高くても, 高くては: the て of 〜ても and 〜ては, no "and" (plan 272).
         "〜くて／〜で": lambda t, s, e, g: _followed_by(t, e, "も", "は") or _a_feeling(t, _index_from(t, e))
@@ -5180,8 +5206,10 @@ def _pattern_refusals():
         "〜と言います": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.pos == "noun",
         "ない形 〜ない": _nai_form_refused,
         # (plan 272) 雨が降っていました: the い of 〜ている, no "there is"
-        "〜があります／います": lambda t, s, e, g: (k := _index_at(t, g[-1][0])) is not None and k >= 1
-            and t[k - 1].conjunctive and t[k - 1].surface in ("て", "で"),
+        # (and 〜ことがある's が, a need's, a plan's: no thing that is there)
+        "〜があります／います": lambda t, s, e, g: ((k := _index_at(t, g[-1][0])) is not None and k >= 1
+            and t[k - 1].conjunctive and t[k - 1].surface in ("て", "で"))
+            or ((p := _prev_word(t, s)) is not None and _not_there(t, t.index(p))),
         "何か／誰か／どこか": lambda t, s, e, g: _nanika_refused(t, s, e, g) or (
             (k := _tok_ending(t, e)) is not None and _embedded_question_at(t, k)),
         "〜てはならない": lambda t, s, e, g: _after_nakute(t, s),
@@ -5300,8 +5328,44 @@ def _greeted(tokens, s, e, _g) -> bool:
     return i is not None and i + 1 < len(tokens) and tokens[i + 1].surface == "ませ"
 
 
+# What happens, that 〜まえに may come before (食事の前に, 試合のまえに) --
+# a place or a thing before の is "in front of" (病院のまえに, plan 272).
+_EVENTS = frozenset({"食事", "ご飯", "ごはん", "朝ご飯", "晩ご飯", "昼ご飯", "授業", "試験", "テスト", "会議",
+                     "出発", "旅行", "試合", "仕事", "結婚", "卒業", "入学", "手術", "発表", "面接", "練習",
+                     "勉強", "説明", "出張", "到着", "開始", "終了", "掃除", "料理", "買い物", "散歩", "入浴",
+                     "運動", "使用", "利用", "参加", "提出", "購入", "注文", "予約", "契約", "帰国", "帰宅",
+                     "出勤", "退社", "就職", "引っ越し", "誕生日", "休み", "夏休み", "冬休み", "春休み",
+                     "連休", "週末", "本番", "朝食", "夕食", "昼食", "寝る", "戦争", "地震", "選挙", "日",
+                     "ライブ", "コンサート", "パーティー", "デート", "イベント", "レッスン", "シャワー"})
+
+
+def _before_refused(tokens, s, e, _g) -> bool:
+    """〜まえに after a noun and its の is "before" an event only:
+    食事の前に, 試験のまえに -- 病院のまえに is in front of the hospital."""
+    prev = _before_token(s, tokens)
+    # (Nor where its に is 〜に比べて's: 十年前に比べて, "compared with
+    # ten years ago", plan 272.)
+    nxt = _next_word(tokens, e)
+    if nxt is not None and nxt.lemma in ("比べる", "較べる", "くらべる", "対する"):
+        return True
+    # (A span of time before it is its lesson's own "ago": 三年まえに.)
+    if prev is None or prev.surface != "の" or prev.pos != "particle":
+        return prev is not None and prev.pos in ("adnominal", "pronoun")      # この前に立つ
+    i = tokens.index(prev)
+    noun = tokens[i - 1] if i >= 1 else None
+    if noun is None:
+        return False
+    polite = i >= 2 and tokens[i - 2].surface in ("お", "ご")
+    return not (polite or noun.surface in _EVENTS or noun.lemma in _EVENTS or _is_numeral(noun) or noun.counter)
+
+
 _REFUSALS = {
     "〜でも": _demo_refused,
+    "〜まえに": _before_refused,
+    # (簡単なことではない, 楽しいこと: こと is "a thing" after what describes
+    # it -- the nominalizer follows a verb, plan 272)
+    "〜こと": lambda t, s, e, g: (p := _before_token(s, t)) is not None and (
+        p.pos == "adjective" or (p.surface == "な" and p.pos == "auxiliary")),
     # (このたびは, "on this occasion", is no "each time", plan 272)
     "〜たびに": lambda t, s, e, g: _before_token(s, t) is not None and _before_token(s, t).surface in ("この", "此の"),
     "〜てもいいです": _said_not_allowed,
@@ -5546,7 +5610,9 @@ _KAKERU_WORDS = frozenset({
 })
 _COMPOUNDS: dict[str, tuple] = {
     "〜こむ": ((("込む", "こむ"),), frozenset({"verb"}), "verb", "", frozenset({"申し込む", "落ち込む", "見込む"})),
-    "〜あう": ((("合う", "あう"),), frozenset({"verb"}), "verb", "", frozenset({"似合う", "見合う", "掛け合う"})),
+    "〜あう": ((("合う", "あう"),), frozenset({"verb"}), "verb", "",
+             # (付き合う, "to go out with", 間に合う: words of their own, plan 272)
+             frozenset({"似合う", "見合う", "掛け合う", "付き合う", "付合う", "間に合う", "釣り合う"})),
     "〜直す": ((("直す", "なおす"),), frozenset({"verb"}), "verb", "", frozenset()),
     "〜通す": ((("通す", "とおす"),), frozenset({"verb"}), "verb", "", frozenset()),
     "〜出す": ((("出す", "だす"),), frozenset({"verb"}), "verb", "", frozenset({"思い出す"})),
@@ -5786,6 +5852,127 @@ def _without_spans(tokens):
         if nxt.pos == "verb" or (nxt.pos == "noun" and after is not None and after.lemma in ("為る", "致す")):
             out.append((t.start, t.end))
     return out
+
+
+# What may stand between a subject's が and what is said of it without
+# leaving the point (plan 272): 神社がたくさんあります, 歌がとても上手,
+# 辛い食べ物があまり好きじゃない.
+_BETWEEN_GA = frozenset({"たくさん", "沢山", "いっぱい", "少し", "すこし", "ちょっと", "とても", "あまり", "よく",
+                         "全然", "ぜんぜん", "すごく", "本当に", "ほんとうに", "一番", "いちばん", "まだ", "全く",
+                         "まったく", "もう", "大変", "たいへん", "なかなか", "かなり", "結構", "けっこう", "もっと",
+                         "少々", "まあまあ", "わりと", "割と", "ずっと", "大分", "だいぶ", "ほとんど", "めっちゃ"})
+# The nouns whose が + ある is a point of its own (〜ことがある) or a need,
+# no thing that is there.
+_NOT_THERE = frozenset({"こと", "事", "はず", "筈", "わけ", "訳", "必要", "ため", "為", "もの", "物", "気", "おそれ",
+                        "恐れ", "可能", "可能性", "つもり", "予定"})
+_GA_PREDICATES = {"好き": "〜が好きです", "大好き": "〜が好きです", "嫌い": "〜がきらいです", "きらい": "〜がきらいです",
+                  "大嫌い": "〜がきらいです", "上手": "〜が上手です／下手です", "下手": "〜が上手です／下手です",
+                  "分かる": "〜が分かります", "わかる": "〜が分かります", "解る": "〜が分かります"}
+
+
+def _not_there(tokens, k: int) -> bool:
+    """Whether tokens[k], before が + ある, is one of `_NOT_THERE` -- but
+    こと after what is said of it is a thing that happened, there:
+    大変なことがありました, 楽しいことがあった (plan 272)."""
+    noun = tokens[k]
+    if noun.surface not in _NOT_THERE:
+        return False
+    return not (noun.surface in ("こと", "事") and k >= 1 and (
+        tokens[k - 1].pos == "adjective" or (tokens[k - 1].pos == "auxiliary" and tokens[k - 1].lemma == "だ")))
+
+
+def _after_ga(tokens, i: int) -> int:
+    """The index of the first word after the が at tokens[i], past the
+    adverbs and the amount (三つ, 二人) that leave it a subject's."""
+    k = i + 1
+    while k < len(tokens) and (tokens[k].surface in _BETWEEN_GA or (
+            tokens[k].pos in ("noun", "suffix") and (_is_numeral(tokens[k]) or tokens[k].counter))
+            or (tokens[k].pos == "suffix" and k > i + 1 and _is_numeral(tokens[k - 1]))):
+        k += 1
+    return k
+
+
+def _existence_spans(tokens):
+    """〜があります／います in every form, and with what its lesson does
+    not show between (plan 272): テストがある, 神社がたくさんあります,
+    郵便局はありますか -- the は of a question or a negative asks whether
+    the thing is there. Never 〜ことがある's が, a need (必要がある), the
+    copula's である, or いる after て (〜ている)."""
+    out = []
+    for i, t in enumerate(tokens):
+        if i == 0 or t.pos != "particle" or t.conjunctive or t.surface not in ("が", "は", "も"):
+            continue
+        noun = tokens[i - 1]
+        if _not_there(tokens, i - 1) or not (
+                noun.pos in ("noun", "pronoun", "suffix") or (noun.surface == "の" and noun.pos == "particle")):
+            continue
+        k = _after_ga(tokens, i)
+        if k >= len(tokens):
+            continue
+        verb = tokens[k]
+        # (Never おる, which the lesson does not teach and UniDic finds in
+        # 荷がおりました, "a load off": 下りる. Nor ある after よく, the
+        # adjective's negative: かたちもよくありません, "is not good".)
+        if verb.pos != "verb" or verb.lemma not in ("有る", "ある", "居る", "いる") or verb.surface.startswith("お") \
+                or any(u.surface == "よく" for u in tokens[i + 1:k]):
+            continue
+        if t.surface != "が":
+            # (はある, もいる: only where it asks or denies -- 本はありますか,
+            # 誰もいない; 本もある is "there is a book too", and other points'.)
+            rest = [u for u in tokens[k + 1:k + 4]]
+            if not any(u.surface in ("か", "ません", "ない", "ず", "ぬ", "ん") or u.lemma in ("ない", "ず")
+                       for u in rest):
+                continue
+        # (...through its polite ending, which the letters also read:
+        # 学生が十二人います is one hit, no second on います.)
+        end = verb.end
+        if k + 1 < len(tokens) and tokens[k + 1].pos == "auxiliary" and tokens[k + 1].lemma == "ます":
+            end = tokens[k + 1].end
+        out.append(((t.start, t.end), (verb.start, end)))
+    return out
+
+
+def _ga_predicate_spans(tokens):
+    """〜が好きです, 〜がきらいです, 〜が上手です／下手です and 〜が分かります
+    with a word between the が and its predicate, which the letters never
+    meet (plan 272): 歌がとても上手です, 食べ物があまり好きじゃありません,
+    流れがよくわかりません."""
+    out = []
+    for i, t in enumerate(tokens):
+        if i == 0 or t.pos != "particle" or t.conjunctive or t.surface != "が":
+            continue
+        noun = tokens[i - 1]
+        if not (noun.pos in ("noun", "pronoun", "suffix") or (noun.surface == "の" and noun.pos == "particle")):
+            continue
+        k = _after_ga(tokens, i)
+        if k == i + 1 or k >= len(tokens):
+            continue                   # (side by side, the letters' to read)
+        word = tokens[k]
+        pattern = _GA_PREDICATES.get(word.surface) or _GA_PREDICATES.get(word.lemma)
+        if pattern is None:
+            continue
+        out.append((pattern, ((t.start, t.end), (word.start, word.end))))
+    return out
+
+
+def _ask_for_spans(tokens):
+    """〜をください with how many between (plan 272): みかんを一袋ください,
+    りんごを三つください."""
+    out = []
+    for i, t in enumerate(tokens):
+        if t.surface != "を" or t.pos != "particle":
+            continue
+        k = i + 1
+        while k < len(tokens) and tokens[k].pos in ("noun", "suffix") and (
+                _is_numeral(tokens[k]) or tokens[k].counter or (k > i + 1 and _is_numeral(tokens[k - 1]))):
+            k += 1
+        if k > i + 1 and k < len(tokens) and tokens[k].surface == "ください":
+            out.append(((t.start, t.end), (tokens[k].start, tokens[k].end)))
+    return out
+
+
+def _ga_predicate_for(pattern: str, tokens):
+    return [span for p, span in _ga_predicate_spans(tokens) if p == pattern]
 
 
 def _humble_verb_spans(tokens):
@@ -6279,6 +6466,10 @@ _EXTRA_RULES = (
     ("まいる／もうす／いたす", _humble_itasu_spans),
     ("まいる／もうす／いたす", _humble_verb_spans),
     ("〜ずに", _without_spans),
+    ("〜があります／います", _existence_spans),
+    ("〜をください", _ask_for_spans),
+    *((p, partial(_ga_predicate_for, p)) for p in ("〜が好きです", "〜がきらいです", "〜が上手です／下手です",
+                                                   "〜が分かります")),
     ("〜んばかりに", _nbakari_spans),
     ("〜っぽい", _ppoi_spans),
     ("〜ずくめ", _zukume_spans),
@@ -6320,7 +6511,11 @@ _EXTRA_RULES = (
 # can confirm them (_confirmed), each written on a word nothing else is
 # spelled with (plan 193): いたす after ご + a noun or お + a stem, a
 # っぽい adjective the tokenizer made one word, 手前 after ている.
-_SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans, _without_spans,
+_SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans, _without_spans, _existence_spans,
+                           _ask_for_spans,
+                           # (plan 272: the lessons write the が beside its
+                           # predicate; the rule reads it with words between)
+                           *(rule for p, rule in _EXTRA_RULES if getattr(rule, "func", None) is _ga_predicate_for),
                            # (plan 272: the lessons show one form of each;
                            # the word before is the evidence)
                            _but_spans, _only_after_verb_spans, _humble_go_come_spans, _one_no_spans,
@@ -6338,6 +6533,13 @@ _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans, _with
                            _should_spans, _honorific_nare_spans,
                            _te_wa_iru_spans, _suggest_spans, _after_so_long_spans, _take_care_spans,
                            _sound_toiu_spans})
+
+
+# Rules that read a point their lessons write otherwise, and so vouch for
+# no other rule of it (plan 272): 〜があります／います's stem rule on いる
+# stays dead whatever _existence_spans finds in its lessons.
+_CONFIRMS_NOTHING = frozenset({_existence_spans, _ask_for_spans, _without_spans,
+                               *(rule for _p, rule in _EXTRA_RULES if getattr(rule, "func", None) is _ga_predicate_for)})
 
 
 # The form points, by the pattern the catalogue files them under. A
@@ -6419,6 +6621,8 @@ def _form_hits(tokens, confirm: bool = True, sentence: str = "") -> list[tuple[s
                     relaxed_hits.extend((pattern, level, s, e, ((s, e),)) for s, e in extra)
     out.extend(h for h in relaxed_hits if (h[2], h[3]) not in in_form)
     for pattern, rule in (*_CLASS_RULES.items(), *_EXTRA_RULES):
+        if not confirm and rule in _CONFIRMS_NOTHING:
+            continue
         spans = rule(tokens)
         if not spans:
             continue
@@ -6811,7 +7015,7 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[
             whole and (s, e) != (start, end) and s <= start and end <= e and _p not in _WORD_FORMS
             # (燃やしてしまえ: the order is the form of しまう, read inside
             # 〜てしまう as the volitional is inside 〜ておこう, plan 272)
-            and not (pattern == "命令形 〜ろ／〜え" and _p.startswith("〜て"))
+            and not (pattern in ("命令形 〜ろ／〜え", "意向形 〜(よ)う") and _p.startswith("〜て"))
             # (変わったんだろう: the guess is said of the explanation, and
             # both are named, plan 272)
             and not (pattern in ("〜だろう", "〜でしょう") and _p == "〜んです／〜のです")

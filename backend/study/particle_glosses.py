@@ -48,7 +48,9 @@ def closes_sentence(morphemes, i: int) -> bool:
     """Whether nothing but particles follows morphemes[i] in its
     sentence: 好きだったの。でも… closes the first one."""
     for m in _rest(morphemes, i):
-        if m.pos == "symbol" and m.surface in "。！？!?」』…‥":
+        # (a hashtag or an emoji after a post's line ends it: 来てね〜🎮 #ゲーム,
+        # plan 272)
+        if m.pos == "symbol" and (m.surface in "。！？!?」』…‥#＃" or any(ord(c) >= 0x1F000 for c in m.surface)):
             return True
         if m.pos not in ("particle", "symbol"):
             return False
@@ -67,7 +69,8 @@ def _after_a_predicate(morphemes, i: int) -> bool:
 def _followed_by_a_word(morphemes, i: int) -> bool:
     for m in _rest(morphemes, i):
         if m.pos == "symbol":
-            if m.surface in "。！？!?":
+            # (a hashtag or an emoji ends a post's line, plan 272)
+            if m.surface in "。！？!?#＃" or any(ord(c) >= 0x1F000 for c in m.surface):
                 return False
             continue
         return m.pos not in ("particle",)
@@ -110,8 +113,20 @@ _GLOSSES = {
                  "fr": "(oral) cite : « … », que… (= と)"},
     "って_topic": {"en": "(spoken) as for, about (= は, というのは)",
                  "fr": "(oral) quant à, au sujet de (= は, というのは)"},
-    "って_end": {"en": "(sentence end) they say, I heard (= そうだ); in a question, you mean…?",
-               "fr": "(fin de phrase) il paraît, on m'a dit (= そうだ) ; dans une question, tu veux dire… ?"},
+    "って_end": {"en": "(sentence end) they say, I heard (= そうだ); or insisting, I'm telling you (いいって, "
+                      "it's fine, really); in a question, you mean…?",
+               "fr": "(fin de phrase) il paraît, on m'a dit (= そうだ) ; ou avec insistance, je te dis (いいって, "
+                     "mais si, ça va) ; dans une question, tu veux dire… ?"},
+    "やろ": {"en": "(Kansai) = だろう: …, isn't it?, I suppose", "fr": "(Kansai) = だろう : …, n'est-ce pas ?, je suppose"},
+    "や_order": {"en": "(Kansai, after a verb's stem) do it: a gentle order (= 〜なさい)",
+                "fr": "(Kansai, après le radical d'un verbe) fais-le : un ordre doux (= 〜なさい)"},
+    "れ_can": {"en": "(the west, before へん) can: 歩かれへん, can't walk (= 歩けない)",
+              "fr": "(l'Ouest, devant へん) pouvoir : 歩かれへん, ne plus pouvoir marcher (= 歩けない)"},
+    "て_hen": {"en": "(before へん) = ている, its negative in the west: 聞いてへん, haven't heard",
+              "fr": "(devant へん) = ている, sa négation dans l'Ouest : 聞いてへん, ne pas avoir entendu"},
+    "ほんまに": {"en": "(Kansai) really, truly (= 本当に)", "fr": "(Kansai) vraiment (= 本当に)"},
+    "そんなん": {"en": "(Kansai, casual) = そんなの: that kind of thing, such a thing",
+                "fr": "(Kansai, familier) = そんなの : ce genre de chose, une chose pareille"},
     "って_insist": {"en": "(after an order, at the end) I'm telling you!: the order said again, insisting",
                    "fr": "(après un ordre, en fin de phrase) je te dis ! : l'ordre répété, avec insistance"},
     "って_iu": {"en": "(before a noun) = という: that …, called … (行かないってこと, the fact that you won't go)",
@@ -134,6 +149,8 @@ _GLOSSES = {
                 "fr": "(après un nom) l'interpelle : ô …, toi …"},
     "は_stress": {"en": "(between a verb's stem and しない) stresses the negative: never, not at all",
                   "fr": "(entre le radical d'un verbe et しない) renforce la négation : jamais, pas du tout"},
+    "も_even": {"en": "(between a verb's stem and しない) not even: 謝りもしなかった, didn't even apologize",
+                "fr": "(entre le radical d'un verbe et しない) même pas : 謝りもしなかった, ne s'est même pas excusé"},
     "な_before_no": {"en": "the な a noun or a な-adjective takes before の: 日なのよ, だめなの？",
                      "fr": "le な que prend un nom ou un adjectif en な devant の : 日なのよ, だめなの ?"},
     "の_explain": {"en": "(at the end) explains, or asks for an explanation: the casual のです (〜んです)",
@@ -179,6 +196,7 @@ _GLOSSES = {
              "fr": "(Kansai, en fin de phrase) = よ : adoucit une demande ou une affirmation (おってや, reste donc)"},
     "おう": {"en": "(rough, mostly men) hey!, yeah!: a greeting or an answer",
             "fr": "(familier, surtout chez les hommes) hé !, ouais ! : un salut ou une réponse"},
+    "あれ_huh": {"en": "huh?, eh?: surprise, or trying to remember", "fr": "hein ?, tiens ? : la surprise, ou un souvenir qui revient"},
     "あ_oh": {"en": "ah!, oh!: something noticed or remembered", "fr": "ah !, oh ! : on remarque ou on se rappelle quelque chose"},
     "stammer": {"en": "(a stammer) the start of the next word, said twice", "fr": "(un bégaiement) le début du mot suivant, dit deux fois"},
     "ませ": {"en": "(after ください, いらっしゃい) ます as a polite order: please, very politely",
@@ -486,6 +504,21 @@ def gloss(morphemes, i: int) -> dict | None:
     elif m.pos == "particle" and m.surface == "で" and i >= 2 and morphemes[i - 1].surface in ("少し", "ちょっと") \
             and morphemes[i - 2].surface in ("もう", "あと"):
         key = "で_almost"                   # もう少しで勝てた (plan 272)
+    elif m.pos == "auxiliary" and m.lemma == "や" and m.surface in ("やろ", "やろう") and m.cform.startswith("意志推量形"):
+        key = "やろ"                        # ちゃうやろ？ (plan 272)
+    elif m.pos == "auxiliary" and m.surface == "や" and m.lemma == "や" and i > 0 \
+            and (morphemes[i - 1].cform.startswith("連用形") or morphemes[i - 1].surface == "とき") \
+            and (i + 1 >= len(morphemes) or morphemes[i + 1].pos == "symbol"):
+        key = "や_order"                    # 気ぃつけて帰りや, 返しときや (plan 272)
+    elif m.surface in ("ほんまに", "ホンマに") and m.pos == "adverb":
+        key = "ほんまに"
+    elif m.surface in ("そんなん", "こんなん", "あんなん") and m.pos in ("noun", "pronoun"):
+        key = "そんなん"
+    elif m.pos == "auxiliary" and m.surface == "れ" and i + 1 < len(morphemes) and morphemes[i + 1].surface == "へん":
+        key = "れ_can"                      # 歩かれへん (plan 272)
+    elif m.surface in ("て", "で") and m.pos == "particle" and i + 1 < len(morphemes) \
+            and morphemes[i + 1].surface == "へん":
+        key = "て_hen"                      # 聞いてへん (plan 272)
     elif m.pos == "auxiliary" and m.surface == "や" and m.lemma == "や" and (
             i + 1 >= len(morphemes) or morphemes[i + 1].pos == "symbol"
             or morphemes[i + 1].surface in ("ねん", "ん", "で", "な", "なあ", "ねえ", "から", "けど", "し", "のに", "ろ", "わ")):
@@ -504,6 +537,8 @@ def gloss(morphemes, i: int) -> dict | None:
         key = "laugh_said"                  # ふっふっふ, えへへ (plan 272)
     elif m.pos == "interjection" and m.surface in ("おう", "おうっ", "おお"):
         key = "おう"                        # おう、リン！ (plan 272)
+    elif m.pos == "interjection" and m.surface == "あれ":
+        key = "あれ_huh"                    # あれ、今日って何曜日だっけ？ (plan 272)
     elif m.pos == "interjection" and m.surface in ("あ", "あっ") and i + 1 < len(morphemes) \
             and morphemes[i + 1].pos == "symbol":
         key = "あ_oh"                       # …あ、じゃあカードで (plan 272)
@@ -609,6 +644,10 @@ def gloss(morphemes, i: int) -> dict | None:
             and morphemes[i - 1].pos in ("verb", "auxiliary") and morphemes[i - 1].cform.startswith("連用形") \
             and morphemes[i + 1].lemma in ("為る", "する") and morphemes[i + 2].lemma in ("ない", "無い", "ぬ", "ず"):
         key = "は_stress"                   # 止められはしない
+    elif m.pos == "particle" and m.surface == "も" and i > 0 and i + 2 < len(morphemes) \
+            and morphemes[i - 1].pos == "verb" and morphemes[i - 1].cform.startswith("連用形") \
+            and morphemes[i + 1].lemma in ("為る", "する") and morphemes[i + 2].lemma in ("ない", "無い", "ぬ", "ず"):
+        key = "も_even"                     # 謝りもしなかった (plan 272)
     elif m.pos == "particle":
         if m.surface == "ってば":
             key = "ってば"
@@ -678,9 +717,11 @@ def _quoting(morphemes, i: int) -> str:
     nxt = rest[0] if rest else None
     if nxt is not None and nxt.pos == "verb" and nxt.lemma in _SAYING:
         return "って_quote"
-    if _closes(morphemes, i) and i > 0 and morphemes[i - 1].cform.startswith("命令形"):
+    # (its own sentence, whatever follows it: 寝坊したんだって。ほんと…,
+    # plan 272)
+    if closes_sentence(morphemes, i) and i > 0 and morphemes[i - 1].cform.startswith("命令形"):
         return "って_insist"              # 早く願い事しろって！ (plan 272)
-    if _closes(morphemes, i):
+    if closes_sentence(morphemes, i):
         return "って_end"
     prev = morphemes[i - 1]
     from study.grammar_detect import _SAID_NOUNS

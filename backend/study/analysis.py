@@ -293,8 +293,9 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
         # one word -- ぷらそにか, a choir; ゆるりんず, a channel -- say so,
         # and what they most often are; a sound shaped as one (ゴゴゴ) is
         # a sound.
+        # (...unless the word is one the glosses know: そんなん, plan 272)
         token["gloss"] = particle_glosses.gloss([m], 0) if particle_glosses._a_sound_word(m.surface, m.pos) \
-            else dict(_UNKNOWN_GLOSS)
+            else (particle_glosses.gloss([m], 0) or dict(_UNKNOWN_GLOSS))
     return token
 
 
@@ -791,6 +792,8 @@ _PREFIX_GLOSSES = {
     "本": {"en": "(prefix) this, the present: 本研究, this study", "fr": "(préfixe) ce, le présent : 本研究, cette étude"},
     "長": {"en": "(prefix) long: 長時間, a long time; 長距離, a long distance",
           "fr": "(préfixe) long : 長時間, longtemps ; 長距離, longue distance"},
+    "立": {"en": "(prefix) standing (as): 立候補, standing as a candidate",
+          "fr": "(préfixe) se présenter (comme) : 立候補, se porter candidat"},
 }
 # A suffix whose card is the word it is on its own, another sense (plan
 # 272): 可能性's 性 is no "sex, gender", 補助金's 金 no "gold". The word

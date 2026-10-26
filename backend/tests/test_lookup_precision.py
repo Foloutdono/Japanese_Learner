@@ -2457,3 +2457,62 @@ class SixthReviewWordTests(unittest.TestCase):
         self.assertEqual(token_of("ありさんたちは ならんで", "あり")["vocab_match"]["entry"]["kanji"], "蟻")
         self.assertEqual(token_of("今度なんかおごらしてな。", "おごら")["vocab_match"]["entry"]["kanji"], "奢る")
         self.assertTrue(gloss_of("早く願い事しろって！", "って").startswith("(after an order, at the end)"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SeventhReviewWordTests(unittest.TestCase):
+    """What a seventh review of 160 lines, most as a textbook writes them,
+    found read wrong, cut or silent (plan 272), each with the sentence it
+    must leave alone."""
+
+    def test_cards_and_readings(self) -> None:
+        for sentence, surface, reading in (("電池は＋と－の向きを確かめて、正しく入れてください。", "正しく", "ただしく"),
+                                           ("電池は＋と－の向きを確かめて", "－", "まいなす"),
+                                           ("私は辛い食べ物があまり好きじゃありません。", "辛い", "からい"),
+                                           ("別れは辛い。", "辛い", "つらい"),
+                                           ("財布家に忘れてきちゃった。", "家", "いえ"),
+                                           ("一日の歩数が200歩とかで震える", "歩", "ぽ"),
+                                           ("一日の歩数が200歩とかで震える", "200", "にひゃっ")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+        self.assertEqual(token_of("これはまさしく彼の字だ。", "まさしく")["reading"], "まさしく")
+        self.assertEqual(token_of("3－2で勝った。", "3－2")["reading"], "さんたいに")
+        self.assertEqual(card_of("私は辛い食べ物があまり好きじゃありません。", "辛い"), "vocab_N5_辛い_からい")
+        for sentence, surface, kanji in (("ちょっとお金貸してくんない？", "お金", "お金"),
+                                         ("ちょっとお金貸してくんない？", "貸し", "貸す"),
+                                         ("新人3人が立候補を表明した。", "候補", "候補"),
+                                         # (the noun 家 only where noun + 家 is no word)
+                                         ("６人の女性芸術家について議論している。", "芸術家", "芸術家"),
+                                         ("作家になりたい。", "作家", "作家"),
+                                         ("#推し活", "推し活", "推し活"),
+                                         ("時間があっという間に過ぎます。", "あっという間", "あっという間"),
+                                         ("時間が早く感じられるようになった。", "感じ", "感じる"),
+                                         ("気ぃつけて帰りや。", "つけ", "付ける"),
+                                         ("気ぃつけて帰りや。", "帰り", "帰る"),
+                                         ("このオレには傷一つつけられないぜ。", "つけ", "付ける"),
+                                         ("ご住所とお電話番号を伺っても", "お", "御")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # The hearsay's そう and the look's are the point's, no "like that";
+        # そうですね is "that's right".
+        self.assertIsNone(token_of("味がずいぶん違うそうです。", "そう").get("vocab_match"))
+        self.assertIsNone(token_of("雨が降りそうだ。", "そう").get("vocab_match"))
+        self.assertIsNotNone(token_of("そうですね。", "そう").get("vocab_match"))
+        self.assertEqual(token_of("音楽家になりたい。", "音楽家")["vocab_match"]["entry"]["kanji"], "音楽家")
+        # 立 of 立候補 stays a prefix, glossed, before the deck's 候補.
+        self.assertTrue(token_of("新人3人が立候補を表明した。", "立")["gloss"]["en"].startswith("(prefix) standing"))
+
+    def test_glosses(self) -> None:
+        for sentence, surface, gloss in (("あれ、今日って何曜日だっけ？", "あれ", "huh?"),
+                                         ("健二のやつ、また寝坊したんだって。ほんと懲りないよね。", "って", "(sentence end) they say"),
+                                         ("その傘、あんたのとちゃうやろ？", "やろ", "(Kansai) = だろう"),
+                                         ("気ぃつけて帰りや。", "や", "(Kansai, after a verb's stem)"),
+                                         ("なんでやねん、そんなん聞いてへんわ。", "そんなん", "(Kansai, casual) = そんなの"),
+                                         ("なんでやねん、そんなん聞いてへんわ。", "て", "(before へん) = ている"),
+                                         ("あかん、もう歩かれへん。", "れ", "(the west, before へん) can"),
+                                         ("ほんまに？それめっちゃおもろいやん。", "ほんまに", "(Kansai) really"),
+                                         ("満員電車で足を踏まれたのに、相手は謝りもしなかった。", "も",
+                                          "(between a verb's stem and しない) not even")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
+        self.assertIsNotNone(token_of("あれは何ですか。", "あれ").get("vocab_match"))

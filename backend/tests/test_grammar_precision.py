@@ -543,8 +543,9 @@ EMBEDDED = [
 # same letters where they are another word: を持って is "holding", に渡って
 # "crossing to", 時 read じ, 駅に止まらず a train not stopping.
 SPELLED = [
-    # (plan 272: in kana, as a picture book writes it)
+    # (plan 272: in kana, as a picture book writes it; 前 in kanji)
     ("ほんをよむのがすきです。", "〜のが好きです", True),
+    ("寝る前に歯をみがきます。", "〜まえに", True),
     ("係員の指示に従って、外へ出てください。", "〜にしたがって", True),
     ("会議は三日間に渡って開かれた。", "〜にわたって", True),
     ("工事は長期に亘って続いた。", "〜にわたって", True),
@@ -2167,3 +2168,66 @@ class SixthReviewPointTests(unittest.TestCase):
                 self.assertIn("〜は〜が", found_in(sentence))
         self.assertIn("〜にします", found_in("私はコーヒーにします。"))
         self.assertIn("お〜ください", found_in("遠慮なくお申し付けください。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SeventhReviewPointTests(unittest.TestCase):
+    """Points a seventh review of 160 lines, most as a textbook writes
+    them, found unlit or lit wrongly (plan 272), each with the sentence
+    it must leave alone."""
+
+    def test_points_found(self) -> None:
+        for sentence, pattern in (("すみません、この近くに郵便局はありますか。", "〜があります／います"),
+                                  ("あした テストが あるから、はやく ねます。", "〜があります／います"),
+                                  ("京都には古いお寺や神社がたくさんあります。", "〜があります／います"),
+                                  ("もっと ちいさいのは ありますか。", "〜があります／います"),
+                                  ("猫が三匹います。", "〜があります／います"),
+                                  ("山田さんは歌がとても上手ですね。", "〜が上手です／下手です"),
+                                  ("私は辛い食べ物があまり好きじゃありません。", "〜が好きです"),
+                                  ("まだ仕事の流れがよくわかりません。", "〜が分かります"),
+                                  ("毎晩寝る前に、日記を書く。", "〜まえに"),
+                                  ("食事の前に手を洗う。", "〜まえに"),
+                                  ("みかんを一袋ください。", "〜をください"),
+                                  ("ご来光きれいすぎて涙出た", "〜すぎる"),
+                                  ("洗濯物は部屋の中に干しておこう。", "意向形 〜(よ)う"),
+                                  ("もうすぐ終わるから、ちょっと待ってて。", "〜て／〜ないで（依頼）"),
+                                  ("みんな来てね〜🎮 #ゲーム", "ね"),
+                                  ("ちょっと休憩しよ。", "意向形 〜(よ)う"),
+                                  ("さよならの代わりに 握りしめた手のひら", "の"),
+                                  ("その傘、ちゃんと返しときや。", "〜ておく")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertIn(pattern, found_in(sentence))
+
+    def test_lookalikes_refused(self) -> None:
+        for sentence, pattern in (("日本に行ったことがあります。", "〜があります／います"),
+                                  ("行く予定があります。", "〜があります／います"),
+                                  ("本もある。", "〜があります／います"),
+                                  ("雨が降っていました。", "〜があります／います"),
+                                  ("このバスはびょういんのまえにとまりますか。", "〜まえに"),
+                                  ("駅の前に新しい本屋ができました。", "〜まえに"),
+                                  ("ほな、また明日な。", "〜な（禁止）"),
+                                  ("あかん、もう歩かれへん。", "受身形 〜られる"),
+                                  ("あの二人付き合ってたの？", "〜あう"),
+                                  ("敬語を使い分けるのは簡単なことではない。", "〜こと"),
+                                  ("ほんまに？それめっちゃおもろいやん。", "に"),
+                                  # (荷がおりる is 下りる; よくありません, "is not good")
+                                  ("これで肩の荷がおりました。", "〜があります／います"),
+                                  ("字が小さくて、かたちもよくありませんでした。", "〜があります／います"),
+                                  ("十年前に比べて、留学する学生が増えた。", "〜まえに")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+        # ...where each still reads its own.
+        self.assertIn("〜ことがある", found_in("日本に行ったことがあります。"))
+        self.assertIn("〜があります／います", found_in("机の上に本があります。"))
+        self.assertIn("〜があります／います", found_in("いろいろ大変なことがありましたが、楽しかったです。"))
+        self.assertIn("〜に比べて", found_in("十年前に比べて、留学する学生が増えた。"))
+        # (one hit, through its ending: no second on います)
+        self.assertEqual(sum(h[0] == "〜があります／います" for h in grammar_detect.detect("クラスには学生が十二人います。")), 1)
+        self.assertEqual(sum(h[0] == "〜があります／います" for h in grammar_detect.detect("猫がいました。")), 1)
+        self.assertIn("〜まえに", found_in("出かける前に電話して。"))
+        # (a span before it is its lesson's own "ago")
+        self.assertIn("〜まえに", found_in("三日前に来た。"))
+        self.assertIn("〜のに", found_in("雨なのに、出かけた。"))
+        self.assertIn("〜のに", found_in("勉強したのに、時間が足りなかった。"))
+        self.assertIn("受身形 〜られる", found_in("先生に叱られた。"))
+        self.assertIn("〜こと", found_in("日本語を話すことが好きです。"))

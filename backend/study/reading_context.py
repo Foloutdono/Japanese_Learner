@@ -107,6 +107,8 @@ _H_COUNTERS = {
     "本": ("ほん", "ぼん"),
     "杯": ("はい", "ばい"),
     "匹": ("ひき", "びき"),
+    # (plan 272: 一歩 いっぽ, 三歩 さんぽ, 200歩 にひゃっぽ)
+    "歩": ("ほ", "ぽ"),
 }
 # k/s/t-initial counters: the numeral geminates (いっかい, はっさい).
 # The value is the reading after 3/何 where it voices, else None.
@@ -122,7 +124,7 @@ _KST_COUNTERS = {
 # Gemination happens before a voiceless consonant only.
 _VOICELESS = set("かきくけこさしすせそたちつてとぱぴぷぺぽ")
 # A counter's own reading, for a token UniDic did not read as one.
-_COUNTER_BASE = {"本": "ほん", "杯": "はい", "匹": "ひき", "分": "ふん", "回": "かい",
+_COUNTER_BASE = {"本": "ほん", "杯": "はい", "匹": "ひき", "分": "ふん", "回": "かい", "歩": "ほ",
                  "個": "こ", "階": "かい", "冊": "さつ", "歳": "さい", "才": "さい",
                  "足": "そく", "軒": "けん", "時": "じ", "時間": "じかん", "月": "がつ",
                  "人": "にん", "年": "ねん", "円": "えん", "日": "にち"}
