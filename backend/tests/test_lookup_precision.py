@@ -2516,3 +2516,32 @@ class SeventhReviewWordTests(unittest.TestCase):
             with self.subTest(sentence=sentence, surface=surface):
                 self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
         self.assertIsNotNone(token_of("あれは何ですか。", "あれ").get("vocab_match"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SeventhReviewLeftWordTests(unittest.TestCase):
+    """What the seventh review found that its first batch left read
+    wrong (plan 272), each with the sentence it must leave alone."""
+
+    def test_cards(self) -> None:
+        self.assertEqual(token_of("先日お借りした資料を、本日お返しに参りました。", "お返し")["vocab_match"]["entry"]["kanji"],
+                         "返す")
+        self.assertNotEqual(token_of("お返しにクッキーをもらった。", "お返し")["vocab_match"]["entry"]["kanji"], "返す")
+        # ケンタ called to may be Kenta: both are named, never a guess.
+        self.assertTrue(token_of("安心しろ、ケンタ。", "ケンタ")["vocab_match"]["entry"]["meaning"].startswith(
+            "a person's name, or:"))
+        self.assertFalse(token_of("ケンタで食べた。", "ケンタ")["vocab_match"]["entry"]["meaning"].startswith(
+            "a person's name"))
+
+    def test_glosses(self) -> None:
+        for sentence, surface, gloss in (("論文に間に合うかどうか、正直なところ自信がない。", "ところ",
+                                          "(set phrase) the truth of it"),
+                                         ("実のところ、知らない。", "ところ", "(set phrase) the truth of it"),
+                                         ("泣きたい夜は 空を見上げて 星の数だけ 君を呼ぶよ", "だけ", "(after 数) as many as"),
+                                         ("「タケシ、まだ起きてる？」「ああ、なんか眠れなくてさ。」", "ああ", "(answering) yeah")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
+                self.assertIsNone(token_of(sentence, surface).get("vocab_match"))
+        # ああ exclaimed keeps its card; ところ of a place, its own.
+        self.assertIsNotNone(token_of("ああ、美しい。", "ああ").get("vocab_match"))
+        self.assertIsNotNone(token_of("静かなところに住みたい。", "ところ").get("vocab_match"))

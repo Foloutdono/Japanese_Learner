@@ -2231,3 +2231,68 @@ class SeventhReviewPointTests(unittest.TestCase):
         self.assertIn("〜のに", found_in("勉強したのに、時間が足りなかった。"))
         self.assertIn("受身形 〜られる", found_in("先生に叱られた。"))
         self.assertIn("〜こと", found_in("日本語を話すことが好きです。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SeventhReviewLeftPointTests(unittest.TestCase):
+    """What the seventh review found that its first batch left unlit
+    (plan 272), each with the sentence it must leave alone."""
+
+    def test_points_found(self) -> None:
+        for sentence, pattern in (("きのうは雨でしたから、どこへも行きませんでした。", "何も／誰も〜ない"),
+                                  ("誰にも言わないで。", "何も／誰も〜ない"),
+                                  ("なにもありません。", "何も／誰も〜ない"),
+                                  ("冬休みに家族で北海道へスキーに行くつもりです。", "〜に行きます"),
+                                  ("買い物に行きます。", "〜に行きます"),
+                                  ("先日お借りした資料を、本日お返しに参りました。", "〜に行きます"),
+                                  ("野菜が嫌いなわけではないんですが、ちょっと大変です。", "〜がきらいです"),
+                                  ("親のありがたさが初めてわかった気がする。", "〜が分かります"),
+                                  ("空港までは、タクシーより電車で行ったほうが早いかもしれません。", "〜より〜のほうが"),
+                                  ("今なにしてる？暇だったらご飯行かない？", "〜たら"),
+                                  ("今日はもう家でゴロゴロしてよっか。", "意向形 〜(よ)う"),
+                                  # (やめてよー is the request and よ, no ていよう)
+                                  ("既読スルーはやめてよー（笑）", "〜て／〜ないで（依頼）"),
+                                  ("既読スルーはやめてよー（笑）", "よ"),
+                                  ("橋の工事のため、県道は11月から通行止めとなります。", "〜ために"),
+                                  ("「もう戻らないつもりなのね」と、母は私の背中に向かって言った。", "〜と言います")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertIn(pattern, found_in(sentence))
+
+    def test_lookalikes_refused(self) -> None:
+        for sentence, pattern in (("いつも行かない。", "何も／誰も〜ない"),
+                                  ("学校に行きます。", "〜に行きます"),
+                                  ("一緒に行きましょうか。", "〜に行きます"),
+                                  ("いっしょに行きましょう。", "〜に行きます"),
+                                  ("少しずつこちらの生活にもどりました。", "〜に行きます"),
+                                  ("何でもない。", "何も／誰も〜ない"),
+                                  ("実際に見てからでないと、何とも言えない。", "何も／誰も〜ない"),
+                                  ("既読スルーはやめてよー（笑）", "意向形 〜(よ)う"),
+                                  ("既読スルーはやめてよー（笑）", "〜ています"),
+                                  ("「徹夜」というのは、夜中ずっと寝ないで起きていることを言う。", "〜と言います"),
+                                  ("早く寝たほうがいい。", "〜より〜のほうが"),
+                                  ("「行こう」と彼は立ち上がった。", "〜と言います"),
+                                  ("家族のための料理。", "〜ために"),
+                                  ("そのため、遅れた。", "〜ために"),
+                                  ("季節が巡っても 変わらないものがある", "〜ものがある"),
+                                  ("泣きたい夜は 空を見上げて 星の数だけ 君を呼ぶよ", "〜だけ")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+        # ...where each still reads its own, and once.
+        self.assertIn("何も／誰も〜ない", found_in("何もありません。"))
+        self.assertIn("〜ものがある", found_in("彼の話には、人を引きつけるものがある。"))
+        self.assertIn("〜だけ", found_in("水だけ飲みました。"))
+        self.assertIn("です／だ", found_in("学生だった。"))
+        self.assertIn("まいる／もうす／いたす", found_in("あしたの朝、駅前までお迎えにまいります。"))
+        self.assertIn("可能形 〜(ら)れる", found_in("今日はバイトに行けます。"))
+        self.assertIn("何も／誰も〜ない", found_in("でも、だれも何も言いませんでした。"))
+        for sentence in ("日本語がわかりません。", "雨がきらいです。", "何もありません。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(len([h for h in grammar_detect.detect(sentence)
+                                      if h[0] in ("〜が分かります", "〜がきらいです", "何も／誰も〜ない")]), 1)
+
+    def test_a_formal_noun_closing_the_text_breaks_nothing(self) -> None:
+        # (ところ with no word after it, plan 272: it raised)
+        for sentence in ("人の多いところ", "そういうもの", "大事なこと"):
+            with self.subTest(sentence=sentence):
+                found_in(sentence)
+        self.assertIn("〜ところだ", found_in("今着いたとこ"))

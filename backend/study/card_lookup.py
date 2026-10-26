@@ -3214,6 +3214,20 @@ def verb_of_stem(m):
 _AFTER_A_NOUN = frozenset({"は", "が", "を", "の", "も", "に", "で", "と", "や", "へ", "から", "まで"})
 
 
+def resolve_humble_errand(morphemes, i: int):
+    """(level, entry, raw_id) for the verb whose stem the polite お makes
+    the errand of a humble going or coming (plan 272): お返しに参りました
+    is "came to return (it)", 返す -- no お返し, "a return gift" -- as お
+    迎えに参ります is 迎える. Else None."""
+    if i + 3 >= len(morphemes):
+        return None
+    prefix, stem, ni, go = morphemes[i:i + 4]
+    if prefix.pos != "prefix" or prefix.surface not in ("お", "御") or stem.pos != "noun" \
+            or ni.surface != "に" or ni.pos != "particle" or go.pos != "verb" or go.lemma not in ("参る", "伺う"):
+        return None
+    return verb_of_stem(stem)
+
+
 def resolve_polite_noun(morphemes, i: int):
     """(("deck", (level, entry, raw_id)) or ("pool", row), 2) for the
     noun the polite お or ご makes of a verb's stem (plan 272): おすすめは

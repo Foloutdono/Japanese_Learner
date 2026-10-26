@@ -30,7 +30,7 @@ from study.card_lookup import (
     resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
-    resolve_te_noun, resolve_interjection, resolve_home, numeral_value, kana_card, resolve_pool_whole_word,
+    resolve_te_noun, resolve_interjection, resolve_home, resolve_humble_errand, numeral_value, kana_card, resolve_pool_whole_word,
     resolve_pool_idiom, resolve_pool_opening, a_points_own_verb, split_unknown_compound,
     compound_tail_readings,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
@@ -1268,22 +1268,27 @@ def _is_kanji_char(c: str) -> bool:
     return "\u4e00" <= c <= "\u9fff"
 
 
-def _name_or_word(token: dict, m, row: dict) -> None:
+def _name_or_word(token: dict, m, row: dict, called: bool = False) -> None:
     """A word in katakana UniDic tags as a person's name and JMdict holds
     as a common word is either one (plan 272): ジャック、よく来てくれたね is
     Jack, ヒューズが飛んだ a fuse, and nothing on the page says which. Its
     line names both -- never a guess -- unless JMdict's row is the person
-    itself (Mozart, Napoleon)."""
+    itself (Mozart, Napoleon). So is a word in katakana JMdict holds as a
+    colloquial short form, where it is called to (`called`): 安心しろ、
+    ケンタ。 is Kenta, the row Kentucky Fried Chicken."""
     import re
 
     import content.vocab_jmdict_data as jmdict_db
 
-    place = m.proper and m.name_kind == "place" and not m.unknown and bool(m.surface)
-    if not place and not (m.proper and m.name_kind in ("person", "given", "family") and not m.unknown
-                          and m.surface and all("\u30a0" <= c <= "\u30ff" for c in m.surface)):
-        return
     senses = jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []
-    if any(re.sub(r"^\([^)]*\)\s*", "", g)[:1].isupper() for sense in senses for g in sense.get("glossary") or ()):
+    katakana = bool(m.surface) and all("\u30a0" <= c <= "\u30ff" for c in m.surface)
+    short = called and katakana and any(t in ("col", "abbr") for sense in senses for t in sense.get("tags") or ())
+    place = m.proper and m.name_kind == "place" and not m.unknown and bool(m.surface)
+    if not place and not short and not (m.proper and m.name_kind in ("person", "given", "family") and not m.unknown
+                                        and katakana):
+        return
+    if not short and any(re.sub(r"^\([^)]*\)\s*", "", g)[:1].isupper()
+                         for sense in senses for g in sense.get("glossary") or ()):
         return
     entry = token["vocab_match"]["entry"]
     # (A place UniDic names that JMdict holds as a word, as either one:
@@ -1291,6 +1296,16 @@ def _name_or_word(token: dict, m, row: dict) -> None:
     entry["meaning"] = ("a place name, or: " if place else "a person's name, or: ") + entry.get("meaning", "")
     if entry.get("meaning_fr"):
         entry["meaning_fr"] = ("un nom de lieu, ou : " if place else "un nom de personne, ou : ") + entry["meaning_fr"]
+
+
+def _called_to(morphemes: list, i: int) -> bool:
+    """Whether morphemes[i] stands alone as whoever is spoken to: after
+    a comma and closing the sentence (安心しろ、ケンタ。), or opening it
+    before a comma (ケンタ、早く！) -- plan 272."""
+    before = morphemes[i - 1].surface if i > 0 else "「"
+    after = morphemes[i + 1].surface if i + 1 < len(morphemes) else "。"
+    return (before in ("、", "，") and after in ("。", "！", "？", "!", "?", "」")) or (
+        before in ("「", "『", "。", "！", "？") and after in ("、", "，"))
 
 
 def _numeral_kanji(surface: str) -> bool:
@@ -1384,7 +1399,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     # The もん that closes a sentence on its reason is no "thing", the 草
     # of 草www no "grass" (plan 272).
     deck_hits = [None if particle_glosses.gives_a_reason(morphemes, j) or particle_glosses.net_laughter(morphemes, j)
-                 or particle_glosses.busy_tokoro(morphemes, j)
+                 or particle_glosses.no_card_here(morphemes, j)
                  else hit for j, hit in enumerate(deck_hits)]
     # Nor is the verb a lit point is made of a word: 洗いなさい's なさい is
     # 〜なさい, 団長である's ある the copula (plan 272). Nor 〜あまり's
@@ -1483,6 +1498,17 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             token["pos"] = "conjunction"
             tokens.append(token)
             i += n
+            continue
+        errand = resolve_humble_errand(morphemes, i) if i not in ruled else None
+        if errand:
+            # お返しに参りました: the verb's stem said politely, 返す, no
+            # "return gift" (plan 272).
+            token = _compound_dict(morphemes[i:i + 2], *errand)
+            token["pos"] = "noun"
+            token["reading"] = morphology.kata_to_hira("".join(m.reading for m in morphemes[i:i + 2]))
+            token["furigana"] = align_deck(token["surface"], token["reading"])
+            tokens.append(token)
+            i += 2
             continue
         hit = resolve_compound(morphemes, i)
         if hit:
@@ -1669,7 +1695,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += 2
             continue
-        said = resolve_interjection(morphemes[i]) if i not in ruled else None
+        said = resolve_interjection(morphemes[i]) if i not in ruled and not particle_glosses.answering_yes(
+            morphemes, i) else None
         if said and said[0] == "deck":
             # An exclamation by the spelling it is said as (plan 272):
             # あのー is the filler あのう, never あの, "that over there".
@@ -1691,11 +1718,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         span = deck is None and morphemes[i].surface in _SPAN_COUNTERS and _after_a_number(morphemes, i, numbers)
         pool = None if deck or (i in ruled and i not in own_forms) or named or span or affix \
             or particle_glosses.gives_a_reason(morphemes, i) or particle_glosses.net_laughter(morphemes, i) \
-            or particle_glosses.busy_tokoro(morphemes, i) \
+            or particle_glosses.no_card_here(morphemes, i) \
             else (said[1] if said else resolve_pool_morpheme(morphemes, i))
         token = _token_dict(morphemes[i], deck, pool, named)
         if pool and not deck:
-            _name_or_word(token, morphemes[i], pool)
+            _name_or_word(token, morphemes[i], pool, called=_called_to(morphemes, i))
         if span:
             token["gloss"] = dict(_SPAN_COUNTERS[morphemes[i].surface])
         elif affix:

@@ -264,6 +264,11 @@ _GLOSSES = {
                  "fr": "(après もう少し) presque : もう少しで勝てた, j'ai failli gagner"},
     "ところ_while": {"en": "(set phrase) at a time when: お忙しいところ, though you are busy",
                     "fr": "(formule) au moment où : お忙しいところ, alors que vous êtes occupé"},
+    "ところ_truth": {"en": "(set phrase) the truth of it: 正直なところ, honestly speaking; 実のところ, in fact",
+                    "fr": "(formule) ce qu'il en est : 正直なところ, à vrai dire ; 実のところ, en fait"},
+    "だけ_as_many": {"en": "(after 数) as many as: 星の数だけ, as many times as there are stars",
+                    "fr": "(après 数) autant que : 星の数だけ, autant de fois qu'il y a d'étoiles"},
+    "ああ_yes": {"en": "(answering) yeah, right: a casual yes", "fr": "(en réponse) ouais, oui : un oui familier"},
     "や_da": {"en": "(Kansai) is (= だ): なんでやねん, why on earth?",
              "fr": "(Kansai) est (= だ) : なんでやねん, mais enfin pourquoi ?"},
     "ねん": {"en": "(Kansai) explains or insists (= のだ, んだ)", "fr": "(Kansai) explique ou insiste (= のだ, んだ)"},
@@ -317,6 +322,38 @@ def _from_not_than(morphemes, i: int) -> bool:
 
 # The states お忙しいところ, お疲れのところ say a request is made in.
 _BUSY = frozenset({"忙しい", "お忙しい", "疲れ", "お疲れ", "急ぎ", "お急ぎ", "休み", "お休み", "取り込み", "お取り込み"})
+
+
+# What ところ says "the truth of it" after (plan 272): 正直なところ, 実のところ.
+_TRUTH = frozenset({"正直", "実", "本当", "ほんとう", "ほんと"})
+
+
+def truth_tokoro(morphemes, i: int) -> bool:
+    """Whether morphemes[i] is the ところ of 正直なところ, 実のところ,
+    本当のところ -- "the truth of the matter", no "place" (plan 272)."""
+    if morphemes[i].surface not in ("ところ", "所") or i < 2:
+        return False
+    return morphemes[i - 1].surface in ("な", "の") and morphemes[i - 2].surface in _TRUTH
+
+
+def answering_yes(morphemes, i: int) -> bool:
+    """Whether morphemes[i] is the ああ that answers a question just
+    asked (plan 272): 「まだ起きてる？」「ああ、なんか眠れなくて」 is
+    "yeah", no "alas"."""
+    m = morphemes[i]
+    if m.pos != "interjection" or m.surface not in ("ああ", "あぁ", "あー"):
+        return False
+    k = i - 1
+    while k >= 0 and morphemes[k].surface in ("「", "」", "『", "』"):
+        k -= 1
+    return k >= 0 and morphemes[k].surface in ("？", "?")
+
+
+def no_card_here(morphemes, i: int) -> bool:
+    """Whether morphemes[i] is a word a set phrase or the talk around it
+    says, which its card would mislead on (plan 272): お忙しいところ,
+    正直なところ, ああ answering."""
+    return busy_tokoro(morphemes, i) or truth_tokoro(morphemes, i) or answering_yes(morphemes, i)
 
 
 def busy_tokoro(morphemes, i: int) -> bool:
@@ -442,6 +479,12 @@ def gloss(morphemes, i: int) -> dict | None:
         key = "やん"                        # (Kansai, plan 272)
     elif busy_tokoro(morphemes, i):
         key = "ところ_while"
+    elif truth_tokoro(morphemes, i):
+        key = "ところ_truth"
+    elif answering_yes(morphemes, i):
+        key = "ああ_yes"
+    elif m.pos == "particle" and m.surface == "だけ" and i > 0 and morphemes[i - 1].surface == "数":
+        key = "だけ_as_many"
     elif m.pos == "particle" and m.surface == "より" and _from_not_than(morphemes, i):
         key = "より_from"
     elif m.pos == "particle" and m.surface == "にて":

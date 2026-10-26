@@ -244,6 +244,9 @@ class Morpheme:
     # stretch of kana it cut into marks and stray letters, read back as
     # the one word it is (_unknown_words: ぷらそにか, a choir's name, was
     # ぷ + ら + そ + に + か). Most often a name.
+    verbal: bool = False  # UniDic's サ変可能 (pos3): a noun that takes する
+    # -- 勉強, 散歩, スキー -- the "noun alone" 〜に行きます's lesson names
+    # (スキーに行く, plan 272).
     adjectival: bool = False  # UniDic's 形状詞可能 (pos3): a noun that is a
     # な-adjective too -- 残酷, 楽, 元気 -- whose で before a comma is the
     # adjective's て form (plan 272).
@@ -2252,6 +2255,20 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                               pos="particle", ctype="", cform="", conjunctive=True, written="て", written_reading="て")]
             out_t += [("動詞", "一般", "*"), ("助詞", "接続助詞", "*")]
             continue
+        if (m.pos == "auxiliary" and m.lemma in ("てる", "でる") and m.cform.startswith("意志推量形")
+                and len(m.surface) >= 3 and m.surface[1] == "よ" and m.surface[2:].strip("ー〜～") == ""
+                and prev is not None and prev.pos == "verb"):
+            # やめてよー, "stop it!": the request's て and よ drawn out, no
+            # ていよう (plan 272).
+            te = m.surface[0]
+            out_m += [replace(m, surface=te, end=m.start + 1, lemma="て", reading=te, lemma_reading="て",
+                              kana="テ" if te == "て" else "デ", pos="particle", ctype="", cform="",
+                              conjunctive=True, auxiliary_use=False, written="て", written_reading="て"),
+                      replace(m, surface=m.surface[1:], start=m.start + 1, lemma="よ", reading=m.surface[1:],
+                              lemma_reading="よ", kana="ヨ" + m.surface[2:], pos="particle", ctype="", cform="",
+                              conjunctive=False, auxiliary_use=False, written="よ", written_reading="よ")]
+            out_t += [("助詞", "接続助詞", "*"), ("助詞", "終助詞", "*")]
+            continue
         if m.pos == "noun" and m.surface == "家の子" and m.lemma == "家の子":
             at = m.start
             out_m += [replace(m, surface="家", end=at + 1, lemma="家", reading="いえ", lemma_reading="いえ",
@@ -2662,6 +2679,7 @@ def _tag(text: str, offset: int = 0, tagger=None) -> tuple[list[Morpheme], list[
             counter=(getattr(feat, "pos3", None) or "") in ("助数詞", "助数詞可能"),
             unknown=bool(getattr(w, "is_unk", False)),
             adjectival=(getattr(feat, "pos3", None) or "") == "形状詞可能",
+            verbal=(getattr(feat, "pos3", None) or "") == "サ変可能",
             written=_clean_lemma(getattr(feat, "orthBase", None), surface) if not digits.isdigit() else surface,
             written_reading=kata_to_hira(getattr(feat, "kanaBase", None) or "") if not digits.isdigit() else surface,
         ))
