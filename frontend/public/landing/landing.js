@@ -420,8 +420,8 @@ rates.forEach((button, k) => {
   button.addEventListener('click', () => {
     // A rating plays the answer, the fare a beat after it, and the card
     // leaving, as the app's does (RatingBar, XpToast, CardTransition).
-    // The bar is drawn worst-first: all but Missed are right.
-    sound(k >= 1 ? 'correct' : 'wrong')
+    // The bar is drawn worst-first: Correct and Easy are right.
+    sound(k >= 2 ? 'correct' : 'wrong')
     sound('fare-tick', { after: FARE_BEAT })
     sound('card-transition')
     const wasHere = trial.contains(document.activeElement)

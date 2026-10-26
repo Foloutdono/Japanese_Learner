@@ -96,7 +96,7 @@ const alpha = (hex, a) => `rgba(${rgb(hex).join(',')},${a})`
 // index.css's verdict inks that tokens.mjs does not carry (the landing
 // page has no rating bar): the same in both themes, held equal to
 // index.css by src/carousel.test.js.
-export const RATING_INKS = { '--rating-correct': '#59b9c6', '--rating-perfect': '#6cc24a' }
+export const RATING_INKS = { '--rating-correct': '#59b9c6' }
 
 export function palette(ground) {
   const paper = ground === 'paper'
