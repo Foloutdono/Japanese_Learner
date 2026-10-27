@@ -1257,11 +1257,13 @@ def off_deck_words(jp: str) -> list[str]:
         match = tok.get("vocab_match")
         if match and not match.get("pool"):
             continue
-        if tok.get("parts") and all(part["vocab_match"] or difficulty.word_level(part["lemma"])
-                                    for part in tok["parts"]):
+        if tok.get("parts") and all(part["vocab_match"] or part["pos"] not in CONTENT_POS
+                                    or difficulty.word_level(part["lemma"]) for part in tok["parts"]):
             # An idiom the pool reads whole and the deck's words make
             # (手に入れる: 手, 入れる; 身につける's つける, which the deck
-            # has under more than one kanji), plan 272.
+            # has under more than one kanji), plan 272, or a run of its
+            # nouns the dictionary writes as one word, a prefix on them
+            # no word (電話番号, 立候補), plan 276.
             continue
         surface = tok["surface"]
         if _is_numeral(surface) or difficulty.word_level(surface) or difficulty.word_level(tok.get("lemma", "")):

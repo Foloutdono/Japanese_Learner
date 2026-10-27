@@ -2119,7 +2119,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # につれ), a particle fused into its construction left without a point
 # of its own (にもかかわらず's も), the tokenizer's misreadings of 重そう,
 # なくして, 出さん and ぶっちゃけ, and 今日, 数, 〜山 read by their neighbours.
-LOCAL_REV = 27
+# 28: a run of the deck's own nouns the dictionary writes as one word is
+# that word (plan 276, the owner's choice): 電話番号, 観光客, 記者会見, read
+# as the dictionary reads them (うでどけい), their cards kept as parts --
+# where the French layer has the word, never over a point, a count (五年後,
+# 何分) or a person said of several (人たち).
+LOCAL_REV = 28
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

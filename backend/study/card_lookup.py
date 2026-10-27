@@ -13,6 +13,7 @@ from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, STATUS_MODES
 from content import vocab_extras
 import content.vocab_jmdict_data as jmdict_db
+from content import jmdict_fr
 from study import morphology
 # What "do I already know this?" means for the clickable badges.
 #
@@ -3907,11 +3908,14 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
     starting at `i` spells as one, longest first, or None.
 
     UniDic cuts 桃源郷 into 桃源 + 郷, and each half alone is another
-    word (郷 read ごう is "countryside"). The run is folded only where the
-    deck has no card for at least one of its nouns (`deck_hits`, the
-    caller's resolve_morpheme answers): 電話 + 番号 stays two N5 words
-    the learner can study rather than becoming one pool word, and お +
-    茶 is the deck's own fold (resolve_compound), asked first. Same run
+    word (郷 read ごう is "countryside"). A run of the deck's own nouns
+    folds too (plan 276, the owner's choice): 電話 + 番号 is 電話番号, one
+    word, as a dictionary prints it, its two cards kept as its parts
+    (analysis._tokens), so a sentence still counts them -- but only where
+    the French layer has the word, so a French learner never trades two
+    cards in French for one in English (`deck_hits`, the caller's
+    resolve_morpheme answers, say which runs those are). お + 茶 is the
+    deck's own fold (resolve_compound), asked first. Same run
     rule as resolve_compound -- nouns and the affixes on them, never
     across a particle -- and a key must hold a kanji, since a run of
     kana joined is a guess at a word boundary. Never a run with a number
@@ -3935,8 +3939,11 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         # there: 熱中症 is "heatstroke", no 熱中 "enthusiasm"; 本品 "this
         # product", no 本 "book" -- where 観光 + 客 says 観光客, plan 272)
         unsaid = "".join(m.surface for m in run) in _WHOLE_OVER_CARDS or _a_place_of(run)
-        if not saying and not unsaid and any(m.pos not in _COMPOUND_POS or m.auxiliary_use or _numeral(m.surface)
-                                             for m in run):
+        # (...and the ordinal 第 with its number, where the pool holds the
+        # word: 第三者 "third party", 第一印象 -- 第三章 is a count, plan 276)
+        ordinal = run[0].surface == "第" and run[0].pos == "prefix"
+        if not saying and not unsaid and any(m.pos not in _COMPOUND_POS or m.auxiliary_use
+                                             or (_numeral(m.surface) and not ordinal) for m in run):
             continue
         polite = n == 2 and run[0].pos == "prefix" and run[0].surface in ("お", "御", "ご")
         # (and お + a noun + 様, the word said of someone else's: お嬢様,
@@ -3948,13 +3955,23 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         # チーズケーキ, whose two deck words say it, plan 272)
         pair = n == 2 and all(_katakana_written(m.surface) and not _has_kanji(m.surface) for m in run)
         loanwords = pair and _another_thing(run, deck_hits[i:i + n])
-        if all(deck_hits[i + k] for k, m in enumerate(run) if m.pos == "noun" or _word_forming(m)) \
-                and not polite and not honoured and not loanwords and not saying and not unsaid:
-            # (A suffix with no card of its own counts too (plan 151):
-            # 参加 + 者 read しゃ is 参加者, "participant", where 者's card
-            # is もの and was a wrong reading on it. The polite prefix folds
-            # where the pool holds the word with it (plan 272): 御中元, the
-            # summer gift, read おちゅうげん -- 中元 alone is the day.)
+        over_cards = all(deck_hits[i + k] for k, m in enumerate(run) if m.pos == "noun" or _word_forming(m)) \
+            and not polite and not honoured and not loanwords and not saying and not unsaid
+        counted = any(k > 0 and (run[k - 1].surface == "何" or m.counter and _numeral(run[k - 1].surface))
+                      for k, m in enumerate(run)) or (run[0].counter and i > 0 and (
+                          _numeral(morphemes[i - 1].surface) or morphemes[i - 1].surface == "何"))
+        if over_cards and (any(deck_hits[i + k] is True for k in range(n)) or counted
+                           or any(m.surface in _OF_PERSONS for m in run[1:])):
+            # (...nor a counter after its number or 何, which is the count's:
+            # 五 + 年 + 後 is five years on, no 年後; nor what 何 asks the
+            # number of, 何分 how many minutes or 何分の一 what share;
+            # nor a person said of several or politely, 人たち, 弟さん, which
+            # any noun of a person takes, plan 276)
+            # (A run of the deck's nouns with a point written on one of
+            # them is the point's: 不幸中, 〜中. A suffix with no card of
+            # its own counts as one with none (plan 151): 参加 + 者 read
+            # しゃ is 参加者. The polite prefix folds where the pool holds
+            # the word with it (plan 272): 御中元, read おちゅうげん.)
             continue
         if any(resolve_compound(morphemes, j) and j + resolve_compound(morphemes, j)[3] > i + n
                for j in range(i + 1, i + n)):
@@ -3968,7 +3985,9 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         # いく日 is 幾日.)
         keys = ["".join(m.surface for m in run),
                 "".join(m.surface if m.pos == "prefix" and m.surface in ("お", "ご") else m.lemma for m in run)]
-        if honoured:
+        if honoured or over_cards:
+            # (a run of cards folds as the page spells it, never through a
+            # lemma's kanji it did not write: 三社とも is no 社共, plan 276)
             keys = keys[:1]
         if polite:
             keys.append("お" + run[1].surface)          # 御中元, filed as お中元
@@ -4020,6 +4039,14 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
                 # お店, お仕事 and ご連絡 are 店, 仕事 and 連絡, the deck's
                 # cards, said politely -- in every spelling of the run.
                 break
+            if hit is not None and over_cards and not jmdict_fr.pool_line(hit.get("kanji", ""), hit.get("kana", "")):
+                continue                   # (no French for it: its cards, which have theirs, plan 276)
+            if hit is not None and over_cards and any(
+                    (inner := resolve_pool_compound(morphemes, j, deck_hits, max_len)) and j + inner[1] > i + n
+                    for j in range(i + 1, i + n)):
+                # (...nor one that cuts the word its last noun makes with
+                # what follows: 最終 + 報告書, no 最終報告 + 書, plan 276)
+                continue
             if hit is not None:
                 return hit, n
     return None
@@ -5100,6 +5127,8 @@ _SAYING_MAX = 7
 # row is written with (借りたい, 許さない), never a mark.
 _SAYING_POS = frozenset({"noun", "pronoun", "prefix", "suffix", "verb", "adjective", "particle", "auxiliary"})
 _PARENS = re.compile(r"\s*\([^)]*\)")
+# What follows a noun of a person and makes no new word of it (plan 276).
+_OF_PERSONS = frozenset({"たち", "達", "ら", "等", "ども", "共", "さん", "様", "さま", "ちゃん", "くん", "君", "殿", "方"})
 # JMdict's tags for a saying: an idiom, a proverb (事実は小説より奇なり).
 _SAYING_TAGS = frozenset({"id", "proverb"})
 

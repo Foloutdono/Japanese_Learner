@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **276**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **277**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -197,6 +197,19 @@ runtime purpose.
   saying read whole takes the particles and the forms inside it, never a
   construction the catalogue teaches: 昼夜を問わず and 若気の至り are
   〜を問わず's and 〜の至り's own examples, and stay in their pieces.
+- **A run of the deck's nouns is the dictionary's word (plan 276).**
+  Where JMdict writes a run of deck nouns as one word (電話番号, 観光客,
+  記者会見), the breakdown reads that word, as the dictionary reads it
+  (腕時計 うでどけい), and keeps its cards as the token's `parts`, which
+  every count reads (`level_mix`, the reading bank): a fold moves no
+  level. It folds only where the French layer has the word
+  (`jmdict_fr.pool_line`), so a word to fold is first a line in
+  `fr_source/pool_lines.json`; never over a point written on one of the
+  nouns (仕事中), a counter after its number or 何 (五年後, 何分), a person
+  said of several or politely (人たち, 弟さん), nor in a spelling the page
+  did not write (三社とも is no 社共), nor cutting the word its last noun
+  makes with what follows (最終 + 報告書). `DeckNounCompoundTests` holds
+  both sides.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
