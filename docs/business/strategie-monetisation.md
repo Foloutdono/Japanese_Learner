@@ -302,6 +302,34 @@ environ 45 % des coûts fixes, et leur baisse est prévue fin 2026 : à 20 $ par
 mois au lieu de 100, le seuil tomberait à environ 850 actifs. Le nouveau
 montant est à saisir dans « Fixed costs » quand il sera connu.
 
+## Acquisition payante
+
+Le but : acheter vite un noyau dur d'apprenants convaincus, puis réduire la
+publicité quand le bouche-à-oreille et le contenu organique (SEO, vidéos
+courtes, YouTube) prennent le relais. Les chiffres sont dans l'onglet
+« Paid acquisition » du tableur ; le business plan détaille les canaux.
+
+| Phase | Quand | Budget | Porte pour passer à la suivante |
+|---|---|---|---|
+| Avant le premier euro | novembre 2026 | 0 € | compte après le premier trajet, démarrage fiable, source demandée à l'inscription, fiches des stores optimisées |
+| Test | décembre 2026 | 400 € | un canal à 4 € ou moins par apprenant engagé ; rétention à J7 des apprenants venus par la pub au moins à 70 % de celle des organiques |
+| Montée | janvier à mars 2027 | 700 €/mois | les canaux qui tiennent 4 € ; un canal à plus de 8 € deux semaines de suite est coupé |
+| Décroissance | avril à juin 2027 | 300 → 125 €/mois | divisée par deux chaque mois dès que l'organique et le parrainage font 60 % des inscriptions |
+
+Les canaux : TikTok Spark Ads (les vidéos organiques qui marchent,
+boostées), Google App campaigns, Apple Ads, micro-influenceurs avec un code
+créateur. Instagram reste coupé tant que TikTok ne sature pas.
+
+Aucun pixel ni SDK publicitaire : chaque canal se mesure en agrégat (sa
+console, l'attribution AdServices d'Apple, le referrer d'installation de
+Google Play, le code créateur, une valeur fermée `source` à l'inscription,
+à ajouter dans `events.VALUES` et `track.js`). Un post d'influenceur payé
+porte la mention « publicité ».
+
+Un apprenant engagé vaut environ 2 € avec ses filleuls et en coûte environ
+5,80 € avec les hypothèses actuelles : la publicité achète de la vitesse,
+pas du revenu. Elle est donc arrêtée dès que l'organique suffit.
+
 ## Mesures
 
 Tout passe par le 足跡 : les événements forment un ensemble fermé (une
