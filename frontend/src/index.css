@@ -2458,6 +2458,13 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
      Dark text on both: 7.7:1 and 7.9:1. */
   --rating-correct:     #59b9c6;
   --rating-perfect:     #6cc24a;
+  /* The inks Correct (4) and Easy (5) wear beyond the bar: on the
+     two- and six-button bars Correct is 新橋 and Easy 若葉; on the
+     four, the owner's pick, Easy is 新橋 and Correct plain, so the one
+     key in colour is the best (:root[data-rating-scale], set by
+     stores/ratingScale.js). */
+  --verdict-q4:         var(--rating-correct);
+  --verdict-q5:         var(--rating-perfect);
 
   /* Washi (和紙) — the one bright surface reserved for diagrams that
      need true white behind black ink (stroke order refs, kanji
@@ -2978,6 +2985,13 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   --medal-gold:     #c99a3e;
   --medal-silver:   #a8adb4;
   --medal-bronze:   #a8703f;
+}
+
+/* The four-button bar (stores/ratingScale.js stamps it): Easy blue,
+   Correct plain, wherever a verdict wears its ink. */
+:root[data-rating-scale="simple"] {
+  --verdict-q4: var(--text-secondary);
+  --verdict-q5: var(--rating-correct);
 }
 
 /* ── Light theme — washi (和紙), rice paper ──────────────────
@@ -6811,8 +6825,8 @@ textarea:focus-visible {
 .run-meter__s--q1 { background: var(--rating-wrong); }
 .run-meter__s--q2 { background: var(--rust); }
 .run-meter__s--q3 { background: var(--warning); }
-.run-meter__s--q4 { background: var(--rating-correct); }
-.run-meter__s--q5 { background: var(--rating-perfect); }
+.run-meter__s--q4 { background: var(--verdict-q4); }
+.run-meter__s--q5 { background: var(--verdict-q5); }
 .run-meter--open .run-meter__s { flex: 0 0 12px; }
 .run-meter--dense .run-meter__segs { gap: 0; overflow: hidden; border-radius: var(--r-pill); }
 .run-meter--dense .run-meter__s { border-radius: 0; }
@@ -15064,6 +15078,19 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .rating-bar__btn--q4 { --rating-color: var(--rating-correct); }
 .rating-bar__btn--q3 { --rating-color: var(--warning); }
 .rating-bar__btn--q2 { --rating-color: var(--rust); }
+/* The four, the owner's pick: Easy is the blue key and Correct a plain
+   one, the dark key a miss is, its check in the panel's ink. */
+.rating-bar__buttons--4 .rating-bar__btn--q5 { --rating-color: var(--rating-correct); }
+.rating-bar__buttons--4 .rating-bar__btn.rating-bar__btn--q4 {
+  --key-light: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+  --key-foot-ink: var(--key-sole);
+  background: var(--key-face);
+  color: var(--text-on-panel);
+}
+.rating-bar__buttons--4 .rating-bar__btn.rating-bar__btn--q4:hover,
+.rating-bar__buttons--4 .rating-bar__btn.rating-bar__btn--q4:focus-visible {
+  background: var(--key-face-lift);
+}
 /* q1's own dedicated ink -- not --accent, which is exactly --line-kana
    in dark theme and exactly --line-kana/--state-learning in light
    theme. See :root, above, for why this gets its own named colour. */
@@ -38591,8 +38618,8 @@ button.brd-stn { cursor: pointer; }
   .desk-verdict--q1 { --rating-color: var(--rating-wrong); }
   .desk-verdict--q2 { --rating-color: var(--rust); }
   .desk-verdict--q3 { --rating-color: var(--warning); }
-  .desk-verdict--q4 { --rating-color: var(--rating-correct); }
-  .desk-verdict--q5 { --rating-color: var(--rating-perfect); }
+  .desk-verdict--q4 { --rating-color: var(--verdict-q4); }
+  .desk-verdict--q5 { --rating-color: var(--verdict-q5); }
   /* The passes' tiles echo their keys on the bar under the card (plan
      180): edged and washed in the key's ink, the wait in it (after
      .desk-verdict__when, below). */
@@ -41441,8 +41468,8 @@ button.brd-stn { cursor: pointer; }
   .gl-out__key--q1 { --rating-color: var(--rating-wrong); }
   .gl-out__key--q2 { --rating-color: var(--rust); }
   .gl-out__key--q3 { --rating-color: var(--warning); }
-  .gl-out__key--q4 { --rating-color: var(--rating-correct); }
-  .gl-out__key--q5 { --rating-color: var(--rating-perfect); }
+  .gl-out__key--q4 { --rating-color: var(--verdict-q4); }
+  .gl-out__key--q5 { --rating-color: var(--verdict-q5); }
   .gl-out__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color); flex: none; }
   .gl-out__note { margin-right: var(--sp-2); font-size: var(--fs-caption); font-weight: 600; color: var(--gl-soft); }
   .gl-out__when {
