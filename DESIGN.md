@@ -1618,7 +1618,7 @@ arrival, the refill, which waits on nothing either:
   trembles, bursts or rolls.
 - **The refill** (補充) — what the refill landed while the app was
   closed — is **charged onto the card**, where the learner carries it
-  (plan 276, the owner's pick C2 of the canvas "Tsuji — the refill,
+  (plan 278, the owner's pick C2 of the canvas "Tsuji — the refill,
   reloaded"; it replaced plan 141's sheet and its book of stubs). On the
   phone's HUD and a run's head the card drops out from under its strip
   and hangs below it at the strip's right edge, swinging once from the

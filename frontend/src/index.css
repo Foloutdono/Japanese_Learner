@@ -2785,7 +2785,7 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   --ease-io:         cubic-bezier(0.6, 0, 0.3, 1);
   --ease-back:       cubic-bezier(0.3, 1.45, 0.5, 1);
   /* 補充 — how long the card is out on arrival, the drop to the way back
-     (plan 276): components/credits/refill.js says the same, and takes
+     (plan 278): components/credits/refill.js says the same, and takes
      the claim at its end (RefillMoment.browser.test.jsx holds the two equal). */
   --refill-ms:       2300ms;
 
@@ -8258,7 +8258,7 @@ textarea:focus-visible {
   100% { filter: drop-shadow(0 0 0 transparent); }
 }
 
-/* ── 補充 — the card, charged (plan 276) ──
+/* ── 補充 — the card, charged (plan 278) ──
    The owner's pick C2 of the canvas "Tsuji — the refill, reloaded"
    (components/credits/RefillCard.jsx). What the refill landed while the
    app was closed is printed on the card while it is out: the strip's
@@ -33695,7 +33695,7 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel) var(--r-panel) 0 0;
     transition: transform 0.25s cubic-bezier(0.3, 0.9, 0.3, 1);
   }
-  /* 補充 — the refill stands the card up out of the mouth (plan 276,
+  /* 補充 — the refill stands the card up out of the mouth (plan 278,
      below): the mouth's clip opens upward only. */
   .desk-holder--refill .desk-holder__card {
     /* Standing, the card wears its own material's lift again, smaller. */
@@ -33706,7 +33706,7 @@ button.brd-stn { cursor: pointer; }
   .desk-holder:hover .desk-holder__card { transform: translateY(-5px); }
   .desk-holder:not(.desk-holder--refill) .desk-holder__card .pcs { box-shadow: none; }
   .desk-holder--free:not(.desk-holder--refill) .desk-holder__card .pcs { box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.14); }
-  /* 補充 — the refill (plan 276, the owner's pick C2;
+  /* 補充 — the refill (plan 278, the owner's pick C2;
      components/chrome/DeskPass.jsx): the card rises clear of the case,
      is charged there in its own lift, and sinks back behind the case,
      which stays over it as at rest. Reduced motion: it stays in the

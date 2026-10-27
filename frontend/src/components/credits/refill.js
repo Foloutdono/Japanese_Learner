@@ -1,4 +1,4 @@
-// ── 補充 — the moment's clock (plan 276) ─────────────────────
+// ── 補充 — the moment's clock (plan 278) ─────────────────────
 // How long the card is out on arrival, from the drop to its way back
 // into its pocket, when the claim is taken (RefillMoment.jsx).
 // index.css's --refill-ms says the same, and places every beat as a

@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 補充 — while you were away, on the desk (plans 141, 276) ──────
+// ── 補充 — while you were away, on the desk (plans 141, 278) ──────
 // On the desk the card lives in its holder at the rail's foot, and that
 // is where it is charged (the owner's pick C2): it stands up out of the
 // holder's mouth, clear of the case, the balance printed on it counting

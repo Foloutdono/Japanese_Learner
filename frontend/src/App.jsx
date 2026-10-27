@@ -917,7 +917,7 @@ export default function App({ front = NO_FRONT }) {
         <FeedbackHost session={session} />
         <OfferScreen />
         {/* 補充 — what the refill landed while the app was closed,
-            charged onto the card on arrival (plans 141, 276). Held
+            charged onto the card on arrival (plans 141, 278). Held
             through the 改札 cutscene and the first ride, which have the
             learner's whole attention, and played once either lets go. */}
         <RefillMoment hold={onboarding === 'finishing'} />

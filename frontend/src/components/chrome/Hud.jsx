@@ -159,7 +159,7 @@ function HudStatus({ onClick }) {
 //                0 (plan 069). Tap → the balance sheet.
 //
 // On arrival with credits the refill landed, the card drops out from
-// under the strip, is charged, and goes back (StripRefill, plan 276);
+// under the strip, is charged, and goes back (StripRefill, plan 278);
 // the balance it comes back with glints once on its door.
 //
 // The roundel's place went to the station panel, on the strip's left.

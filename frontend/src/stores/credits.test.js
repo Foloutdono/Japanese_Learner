@@ -50,7 +50,7 @@ describe('the credits store', () => {
   })
 })
 
-// ── 補充 — the claim (plans 141, 276) ──────────────────────────
+// ── 補充 — the claim (plans 141, 278) ──────────────────────────
 // The card's figure is what it moves: the store takes it into the
 // balance the moment the card goes back to its pocket, and the
 // server's answer wins when it arrives -- or puts the store back on a

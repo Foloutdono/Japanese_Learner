@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 補充 — while you were away, on a phone (plans 141, 276) ────────
+// ── 補充 — while you were away, on a phone (plans 141, 278) ────────
 // The owner's pick C2: the card drops out from under the HUD's strip and
 // hangs below it, at the strip's right edge, as drawn -- 240 wide on a
 // 390 phone -- the strip its empty pocket meanwhile, and goes back into

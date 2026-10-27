@@ -29,7 +29,7 @@ midnight. It lands as the day goes now: one credit every REFILL_EVERY
 user_profiles.credits_accrued_at -- the refill's clock. What has landed
 since the clock is PENDING: owed, not yet in the ledger. Reading the
 balance never moves it; claiming it (POST /api/credits/claim, sent as
-the card the app charges on arrival goes back to its pocket, plan 276)
+the card the app charges on arrival goes back to its pocket, plan 278)
 writes it as one `refill` row and moves the clock on by exactly the credits it paid,
 so the minutes towards the next one are kept.
 
@@ -497,7 +497,7 @@ def _summary_of(s: dict) -> dict:
     return {
         "balance": None if s["unlimited"] else s["balance"],
         # 補充 — landed since the last claim and not yet in the balance
-        # (plan 141): what the card is charged with on arrival (plan 276).
+        # (plan 141): what the card is charged with on arrival (plan 278).
         "pending": 0 if s["unlimited"] else s["pending"],
         "cap": CAP,
         "dailyRefill": DAILY_REFILL,

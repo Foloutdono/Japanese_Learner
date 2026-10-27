@@ -4,10 +4,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
-// ── 補充 — while you were away (plans 141, 276) ──────────────
+// ── 補充 — while you were away (plans 141, 278) ──────────────
 // The refill lands a credit every 48 minutes, open app or not, and the
 // server holds what landed as `pending`. On arrival the card is charged
-// with it (plan 276, the owner's pick C2): it drops out from under its
+// with it (plan 278, the owner's pick C2): it drops out from under its
 // strip, the balance printed on it counting up from what was held to
 // what it holds now, and goes back, and the claim is taken as it does --
 // the one way out, which always claims. Nothing waits on it. While the

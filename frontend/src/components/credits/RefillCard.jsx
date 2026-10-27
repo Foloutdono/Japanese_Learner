@@ -8,7 +8,7 @@ import { playFareTick } from '../../lib/audio'
 import { Wave } from '../offers/icons'
 import { CardFace } from '../pass/PassCard'
 
-// ── 補充 — the card, charged (plan 276) ──────────────────────
+// ── 補充 — the card, charged (plan 278) ──────────────────────
 // The owner's pick C2 of the canvas "Tsuji — the refill, reloaded": what
 // the refill landed while the app was closed is told on the card itself,
 // where the learner carries it, and nothing waits on it. On the phone's

@@ -7,10 +7,10 @@ import { CAP } from '../../domain/credits'
 import { useRefill } from '../../hooks/useRefill'
 import { REFILL_MS } from './refill'
 
-// ── 補充 — while you were away (plans 141, 276) ──────────────
+// ── 補充 — while you were away (plans 141, 278) ──────────────
 // The refill lands a credit every 48 minutes whether the app is open or
 // not; what landed while it was not is charged onto the card on
-// arrival (plan 276, the owner's pick C2: RefillCard.jsx draws it, on
+// arrival (plan 278, the owner's pick C2: RefillCard.jsx draws it, on
 // the strip it hangs from or in the holder it stands up in). This is
 // its clock: the card is out for REFILL_MS, and the claim is taken as
 // it goes back -- one way out, which always claims, since a credit left

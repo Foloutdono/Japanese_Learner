@@ -42,7 +42,7 @@ import { RefillPrint } from '../credits/RefillCard'
 // the balance's: warning at five or fewer, danger at none. Desk only:
 // the phone carries the same doors on its HUD's strip.
 //
-// On arrival with credits the refill landed (plan 276, the owner's pick
+// On arrival with credits the refill landed (plan 278, the owner's pick
 // C2), the card stands up out of the mouth, is charged there -- the
 // balance printed on its face, counting up (RefillPrint) -- and sinks
 // back, and the case's figure takes the new balance with a glint. Not

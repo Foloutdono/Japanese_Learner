@@ -226,12 +226,12 @@ export function useRunOut() {
   return useSyncExternalStore(subscribe, () => runOut, () => null)
 }
 
-// ── 補充 — the refill, claimed (plans 141, 276) ──────────────
+// ── 補充 — the refill, claimed (plans 141, 278) ──────────────
 // The refill lands a credit every 48 minutes and the server keeps what
 // has landed as `pending` until it is claimed (core/credits.py). Two
 // ways it is: on arrival, the card is charged with what landed while
 // the app was closed and claims it as it goes back to its pocket
-// (components/credits/RefillMoment.jsx, plan 276), and quietly, as
+// (components/credits/RefillMoment.jsx, plan 278), and quietly, as
 // each credit lands while the app is open in front of the learner
 // (hooks/useRefill.js) -- the balance filling itself, in the HUD. A
 // fare claims it too, server-side, so nothing here is ever the thing

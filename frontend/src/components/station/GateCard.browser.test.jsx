@@ -14,7 +14,7 @@ const creditsRef = { current: null }
 vi.mock('../../stores/credits', () => ({
   useCredits: () => creditsRef.current,
   openBalance: vi.fn(),
-  // The refill (plan 276), read by the strip the gate prints.
+  // The refill (plan 278), read by the strip the gate prints.
   useClaimOffer: () => null,
   useClaimLanded: () => 0,
 }))

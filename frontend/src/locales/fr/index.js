@@ -101,7 +101,7 @@ const nav = {
   runOutWaiting:     (n) => `${n} ${n > 1 ? 'attendent' : 'attend'} la recharge`,
   runOutWaits:       'en attente',
   // 補充 — ce que la recharge a versé, app fermée, dit pendant que la
-  // carte se charge (plans 141, 276), à un lecteur d'écran
+  // carte se charge (plans 141, 278), à un lecteur d'écran
   refillLanded:      (n, to, cap) => `${n} crédit${n > 1 ? 's' : ''} arrivé${n > 1 ? 's' : ''} pendant ton absence · ${to} sur ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',

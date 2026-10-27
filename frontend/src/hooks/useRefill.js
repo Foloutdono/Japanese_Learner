@@ -9,7 +9,7 @@ import { useCredits, peekCredits, refreshCredits, peekClaimOffer, offerClaim, cl
 //   arriving   the app opened, or came back to the front after AWAY_MS
 //              or longer out of sight: a fresh read, and anything
 //              pending is charged onto the card, "while you were away"
-//              (components/credits/RefillMoment.jsx, plan 276).
+//              (components/credits/RefillMoment.jsx, plan 278).
 //   staying    the app is in front of the learner when a credit lands:
 //              it is claimed quietly on the minute, so the balance
 //              fills itself in the HUD while they watch -- nobody is
