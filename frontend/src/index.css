@@ -32935,9 +32935,9 @@ button.brd-stn { cursor: pointer; }
    The sprint between two learners: sixty seconds, the same questions.
    A duel is about people, so it wears the People family -- the pass's
    ink as its edge, the selection's gold for what waits on the learner --
-   and never a line's pigment. The door in the holder, the plate on
-   Practice and the notice on Today are the app's own objects with a
-   word or a ring more; everything else here is namespaced .pvp-*. */
+   and never a line's pigment. The door in the holder, its Elo insert
+   and the notice on Today are the app's own objects with a word or a
+   ring more; everything else here is namespaced .pvp-*. */
 
 /* What waits, under the door's name and at the plate's foot. */
 .pvp-door__waiting {
@@ -32959,19 +32959,8 @@ button.brd-stn { cursor: pointer; }
 .pvp-elo-move--down { color: var(--danger); }
 .pvp-trend { flex: none; }
 .pvp-trend__line { fill: none; stroke: var(--pass-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-/* The one action, docked over the tab bar as Today's foot is; a quiet
-   way stands a rung over it, never beside or under it. */
-.pvp-foot {
-  position: sticky;
-  bottom: var(--dock-bottom);
-  z-index: 1;
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  padding-bottom: var(--sp-5);
-  border-image: linear-gradient(to bottom, transparent, var(--bg-main) var(--sp-4)) fill 0 / 0 / var(--sp-4) var(--sp-5) 0;
-}
+/* A quiet way out (decline, cancel, block): underlined, a rung over the
+   one action, never beside or under it. */
 .pvp-quiet { align-self: center; min-height: 44px; padding: 0 var(--sp-3); border: 0; background: none; font: inherit; font-weight: 600; color: var(--text-primary); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
 
 /* H3 — the two platforms and the console. */
@@ -33011,10 +33000,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 /* What a screen says when the server refused (an error's code, mapped). */
 .pvp-error { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
 
-/* The Elo, the hall's head (G1) or foot (G2): a card that opens the
-   Elo board, the figure over its curve or its steps. */
-.pvp-curve,
-.pvp-steps {
+/* The Elo at the hall's head (the owner's G1): a card that opens the
+   Elo board, the figure over its curve. */
+.pvp-curve {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
@@ -33029,9 +33017,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   transition: border-color 0.15s ease;
 }
 .pvp-curve:hover,
-.pvp-curve:focus-visible,
-.pvp-steps:hover,
-.pvp-steps:focus-visible { border-color: var(--pass-ink); filter: none; }
+.pvp-curve:focus-visible { border-color: var(--pass-ink); filter: none; }
 .pvp-curve__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
 .pvp-curve__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .pvp-curve__rank { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
@@ -33047,13 +33033,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-curve--none { gap: var(--sp-2); }
 .pvp-curve__none { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
 .pvp-curve--none .pvp-curve__foot { justify-content: flex-start; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
-.pvp-steps__svg { display: block; width: 100%; height: 64px; }
-.pvp-steps__level { stroke: var(--surface-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.pvp-steps__bar--up { fill: var(--pass-ink); }
-.pvp-steps__bar--down { fill: color-mix(in srgb, var(--text-secondary) 45%, transparent); }
-.pvp-steps__figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--surface-line); }
-.pvp-steps__fig { display: flex; flex-direction: column; gap: var(--sp-1); }
-.pvp-steps__num { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 
 /* F2 — the sheet: a request, the friends as radio rows, later or live. */
 .pvp-sheet { display: flex; flex-direction: column; gap: var(--sp-4); }
@@ -33147,7 +33126,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-ticket__side--them { align-items: flex-end; text-align: right; }
 .pvp-ticket__name { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pvp-ticket__level { font-size: var(--fs-caption); font-weight: 700; color: var(--paper-ink-soft); }
-.pvp-ticket__who--scores .pvp-ticket__name { font-family: var(--font-display); font-size: var(--fs-heading); line-height: 1; font-variant-numeric: tabular-nums; }
 .pvp-ticket__vs { padding-bottom: var(--sp-1); font-size: var(--fs-title); font-weight: 700; color: color-mix(in srgb, var(--stamp-ink) 70%, var(--text-on-fill)); }
 .pvp-ticket__facts { position: relative; z-index: 2; margin: 0; display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-sm); }
 .pvp-ticket__fact { display: flex; justify-content: space-between; gap: var(--sp-4); }
@@ -33193,10 +33171,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-track--me .pvp-track__who { color: var(--text-primary); }
 .pvp-track__rail { position: relative; height: 40px; margin-right: 36px; }
 .pvp-track__rail::before { content: ''; position: absolute; left: 0; right: -36px; bottom: 5px; height: 2px; background: var(--surface-line); }
-.pvp-track__rail--bare { height: 14px; }
-.pvp-track__rail--bare::before { content: none; }
-.pvp-track__stop { position: absolute; bottom: 1px; width: 2px; height: 10px; margin-left: 17px; background: var(--border); }
-.pvp-track__mark { position: absolute; top: 0; margin-left: 18px; transform: translateX(-50%); font-size: var(--fs-caption-xs); font-style: normal; font-weight: 700; color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* The train rides a layer as wide as the rail, moved by its own width's share (a transform, never left). */
 .pvp-train { position: absolute; inset: auto 0 0; transform: translateX(var(--at, 0%)); transition: transform 0.3s ease; }
 .pvp-train__body { width: 36px; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
@@ -33204,22 +33178,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-train__car { width: 36px; height: 12px; border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); }
 .pvp-track--me .pvp-train__fig { color: var(--text-primary); }
 .pvp-track--me .pvp-train__car { background: var(--pass-ink); }
-/* P2a — the double track: one band, two rails, each total in its car. */
-.pvp-dbl { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
-.pvp-dbl__track { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); align-items: center; gap: var(--sp-3); }
-.pvp-dbl__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.pvp-dbl__track--me .pvp-dbl__who { color: var(--text-primary); }
-.pvp-dbl__rail { position: relative; height: 24px; margin-right: 64px; }
-.pvp-dbl__rail::before { content: ''; position: absolute; left: 0; right: -64px; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
-.pvp-dbl__rail .pvp-train { inset: 0 0 auto; }
-.pvp-dbl__car { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 24px; padding: 0 var(--sp-3); border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); color: var(--bg-panel); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pvp-dbl__track--me .pvp-dbl__car { background: var(--pass-ink); }
-/* P2b — the terminus: the line ends at the score to beat. */
-.pvp-tracks--terminus .pvp-track { position: relative; }
-.pvp-terminus { position: absolute; right: -1px; bottom: 0; width: 3px; height: 22px; background: var(--sel-ink); }
-.pvp-terminus__plate { display: flex; justify-content: flex-end; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-caption-xs); font-weight: 700; color: var(--sel-ink); }
-.pvp-terminus__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
-/* P2c — the gap on the line: hatched between the two noses, its points in it. */
+/* The gap on the line (the owner's P2c): the trailing rail hatched up to the leader's nose, what it is worth over it. */
 .pvp-gapline { position: absolute; bottom: 0; left: calc(var(--lo, 0%) + 36px); width: var(--span, 0%); height: 12px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--text-secondary) 30%, transparent) 0 4px, transparent 4px 8px); }
 .pvp-gapline--mine { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--pass-ink) 30%, transparent) 0 4px, transparent 4px 8px); }
 .pvp-gapline__fig { position: absolute; bottom: calc(100% + var(--sp-1)); left: var(--sp-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; line-height: 1; white-space: nowrap; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
@@ -33268,8 +33227,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-face__pair--one { grid-template-columns: minmax(0, 1fr); }
 /* The finish, simplified: two rails, each car where its total stopped. */
 .pvp-finish { display: flex; flex-direction: column; gap: var(--sp-2); }
-.pvp-finish__row { display: grid; grid-template-columns: 4.5em minmax(0, 1fr) auto; align-items: center; gap: var(--sp-3); }
-.pvp-finish__row--bare { grid-template-columns: 4.5em minmax(0, 1fr); }
+.pvp-finish__row { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); align-items: center; gap: var(--sp-3); }
 .pvp-finish__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .pvp-finish__row--me .pvp-finish__who { color: var(--text-primary); }
 .pvp-finish__rail { position: relative; height: 14px; margin-right: 32px; }
@@ -33277,23 +33235,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-finish__rail .pvp-train { inset: 0 0 auto; }
 .pvp-finish__car { display: block; width: 32px; height: 14px; border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); }
 .pvp-finish__row--me .pvp-finish__car { background: var(--pass-ink); }
-.pvp-finish__fig { min-width: 3.2em; text-align: right; font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 .pvp-face .pvp-finish { padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
-.pvp-face--photo .pvp-finish,
-.pvp-face--elo .pvp-finish { padding-top: 0; border-top: 0; }
-.pvp-face__tally { display: flex; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-sm); color: var(--text-secondary); }
-/* R1b — the Elo a band of its own under the photo. */
-.pvp-elo-band { flex: none; display: flex; align-items: center; gap: var(--sp-5); padding: var(--sp-4) var(--sp-6); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
-.pvp-elo-band__move { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.pvp-elo-band__move--up { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
-.pvp-elo-band__move--down { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
-.pvp-elo-band__line { display: flex; flex-direction: column; gap: var(--sp-1); }
-.pvp-elo-band__fig { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; }
-/* R1c — the Elo first: what the duel moved, as the headline. */
-.pvp-face__hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
-.pvp-face__move { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.pvp-face__move--up { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
-.pvp-face__move--down { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
 @media (prefers-reduced-motion: reduce) {
   .pvp-platform,
   .pvp-quai,

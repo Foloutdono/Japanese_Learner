@@ -18,6 +18,8 @@
 // commuter pass (定期券), which is the object the profile screen is,
 // down to the roundel printed on it.
 
+import { devVariant } from '../../lib/devVariant'
+
 const base = {
   viewBox: '0 0 24 24',
   fill: 'none',
@@ -144,6 +146,50 @@ function SettingsGlyph(props) {
   )
 }
 
+// 対戦 — the duels, the desk's sixth gate (plan 276). Three drawings for
+// the owner's pick, ?glyph= in development: A the two ways of the duel's
+// ticket (⇄), B two learners side by side, C the sprint's stopwatch.
+function DuelsGlyphA(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 8h15" />
+      <path d="M15.5 4.5L19 8l-3.5 3.5" />
+      <path d="M20 16H5" />
+      <path d="M8.5 12.5L5 16l3.5 3.5" />
+    </svg>
+  )
+}
+
+function DuelsGlyphB(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="8" cy="8" r="2.75" />
+      <path d="M4 19.5v-.8a4 4 0 0 1 8 0v.8" />
+      <circle cx="16" cy="8" r="2.75" />
+      <path d="M12 19.5v-.8a4 4 0 0 1 8 0v.8" />
+    </svg>
+  )
+}
+
+function DuelsGlyphC(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="13.5" r="7" />
+      <path d="M12 13.5V10" />
+      <path d="M10 3h4" />
+      <path d="M12 3v3.5" />
+      <path d="M18.2 7.3l1.4-1.4" />
+    </svg>
+  )
+}
+
+const DUELS_GLYPHS = { A: DuelsGlyphA, B: DuelsGlyphB, C: DuelsGlyphC }
+
+function DuelsGlyph(props) {
+  const Glyph = DUELS_GLYPHS[devVariant('glyph', 'A')] ?? DuelsGlyphA
+  return <Glyph {...props} />
+}
+
 const GLYPHS = {
   learn: LearnGlyph,
   practice: PracticeGlyph,
@@ -154,6 +200,7 @@ const GLYPHS = {
   library: LibraryGlyph,
   stats: StatsGlyph,
   settings: SettingsGlyph,
+  duels: DuelsGlyph,
 }
 
 /** One gate's (or one desk place's) pictogram, by its id in config/tabs.js. */

@@ -8,7 +8,9 @@ import './index.css'
 
 // ── 対戦 — the duels' screens on a phone (plan 276) ─────────────────
 // The screens the owner picked, against a server answering as
-// routes/pvp.py does. The friends (F1): a learner is found by their
+// routes/pvp.py does. The hall (H3, its Elo the curve, G1): the figure,
+// the place and the last twenty duels over where the placement started
+// it, or before any Elo the way to the test. The friends (F1): a learner is found by their
 // exact handle and is that handle alone until a request is accepted; a
 // friend's card holds the report, four closed reasons and never a word
 // typed. The departure (D2): the ranked sprint is paid on the button
@@ -36,6 +38,7 @@ vi.mock('./stores/duels', () => ({ useDuels: () => duels, refreshDuels: vi.fn() 
 vi.mock('./components/chrome/LevelBar', () => ({ LevelBar: () => null }))
 globalThis.fetch = vi.fn().mockRejectedValue(new Error('no backend'))
 
+const { default: DuelsScreen } = await import('./screens/DuelsScreen')
 const { default: DuelFriendsScreen } = await import('./screens/DuelFriendsScreen')
 const { default: DuelDeparture } = await import('./screens/DuelDeparture')
 const { default: DuelBoardScreen } = await import('./screens/DuelBoardScreen')
@@ -83,6 +86,59 @@ beforeEach(() => {
     localStorage.setItem('lang', 'fr')
     localStorage.removeItem('jp-duel-line-hidden')
   } catch { /* private mode */ }
+})
+
+// ── H3 — the hall ──
+
+const HALL = {
+  rating: { placed: true, elo: 1248, provisional: false, games: 21, wins: 15, draws: 0, losses: 6, peak: 1248,
+    placedLevel: 'N4', start: 1200, rank: 3, of: 10, trend: [1180, 1210, 1195, 1230, 1248] },
+  toPlay: [{ id: 45, kind: 'friend', mode: 'async', level: 'N5', status: 'open', against: 'friend', who: 'Kenta', mine: null, theirs: 1552,
+    expiresAt: new Date(Date.now() + 47 * 3_600_000).toISOString() }],
+  live: [], running: [], done: [],
+  friends: { count: 4, requests: 1 }, prices: { ranked: 2, review: 1 }, xp: { today: 0, cap: 150 },
+}
+
+const mountHall = () => mount('/profile/duels', '/profile/duels', <DuelsScreen session={SESSION} />)
+
+describe('the hall (H3, G1)', () => {
+  it('heads with the Elo, its place and its curve over the placement’s start', async () => {
+    duels = { data: HALL }
+    await mountHall()
+    expect($('.pvp-curve__fig').textContent).toBe((1248).toLocaleString('fr'))
+    expect($('.pvp-curve__rank').textContent).toBe('3ᵉ sur 10')
+    expect($('.pvp-curve__svg polyline').getAttribute('points').split(' ')).toHaveLength(5)
+    expect($('.pvp-curve__svg .pvp-curve__start')).toBeTruthy()
+    // The curve keeps its height whatever the card's width.
+    expect(Math.round($('.pvp-curve__svg').getBoundingClientRect().height)).toBe(72)
+    expect($('.pvp-curve__foot').textContent).toContain(`départ ${(1200).toLocaleString('fr')}`)
+    // The first thing under the bar: the hall's head is the Elo.
+    expect($('main.pvp > .pvp-curve')).toBeTruthy()
+    $('.pvp-curve').click()
+    await settle()
+    expect($('.where').textContent).toBe('/profile/duels/board')
+  })
+
+  it('lists the challenge to play and boards the ranked sprint from its platform', async () => {
+    duels = { data: HALL }
+    await mountHall()
+    expect($('.pvp-console__who').textContent).toBe('Kenta')
+    expect($('.pvp-console__what').textContent).toMatch(new RegExp(`^${(1552).toLocaleString('fr')} à battre · reste 4[67] h$`))
+    $$('.pvp-platform')[0].click()
+    await settle()
+    expect($('.where').textContent).toBe('/duel/new')
+  })
+
+  it('says there is no Elo before the placement test, and leads to it', async () => {
+    duels = { data: { ...HALL, rating: { placed: false } } }
+    await mountHall()
+    expect($('.pvp-curve--none .pvp-curve__none').textContent).toBe('Pas encore d’Elo')
+    expect($('.pvp-curve__svg')).toBeNull()
+    expect($('.records--three')).toBeNull()
+    $('.pvp-curve--none').click()
+    await settle()
+    expect($('.where').textContent).toBe(LEVEL_PATH)
+  })
 })
 
 // ── F1 — the friends ──

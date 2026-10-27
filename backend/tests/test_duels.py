@@ -484,7 +484,7 @@ def test_the_board_ranks_those_who_played_and_keeps_the_hidden_off(client, learn
         assert client.get("/api/pvp/board").json()["me"]["rank"] is None
     rating = client.get("/api/pvp/rating").json()
     assert rating["games"] == 1 and rating["losses"] == 1 and rating["trend"] == [980]
-    assert rating["moves"] == [-20] and rating["start"] == 1000
+    assert rating["start"] == 1000 and "moves" not in rating
 
 
 def test_the_history_pages_past_duels(client, learners, clock):

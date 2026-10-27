@@ -6,7 +6,6 @@ import { LevelBar } from '../components/chrome/LevelBar'
 import { Loading } from '../components/ui/Loading'
 import { CorrectionsSheet } from '../components/pvp/CorrectionsSheet'
 import { apiJson } from '../lib/api'
-import { devVariant } from '../lib/devVariant'
 import { playClick } from '../lib/audio'
 import { LIMIT_MS, SPRINT_MS, errorKey, points, totalAt } from '../domain/duel'
 import { refreshDuels } from '../stores/duels'
@@ -22,11 +21,8 @@ import { applyXpGain } from '../stores/profileSummary'
 // the client draws what a question is worth while it waits, the other
 // player's total at the pace it was recorded (or, live, as the poll
 // brings it), and the verdict the server reads once the minute is over.
-//
-// The race and the result are drawn three ways each for the owner's
-// pick: ?race=P2a (the double track), P2b (the terminus), P2c (the gap
-// on the line); ?end=R1a (face to face, the photo under it), R1b (the
-// photo as the face), R1c (the Elo first).
+// The race is the gap on the line (the owner's P2c) and the result the
+// two totals face to face over the finish (R1a).
 const COLOR = 'var(--pass-ink)'
 const RIGHT_HOLD_MS = 300
 // Past the end of the minute and the server's grace for an answer
@@ -48,8 +44,6 @@ export default function DuelRun({ session }) {
   const [error, setError] = useState(null)
   const skew = useRef(0)
   const busy = useRef(false)
-  const race = devVariant('race', 'P2a')
-  const end = devVariant('end', 'R1a')
 
   const load = useCallback(() => apiJson(`/api/pvp/duels/${id}`, session).then(d => {
     skew.current = Date.parse(d.serverNow) - Date.now()
@@ -237,10 +231,10 @@ export default function DuelRun({ session }) {
   // A duel already run: its result, the server's (waiting while the
   // other has yet to run their minute).
   if (!run && duel.you.played) {
-    return <Result kind={end} duel={duel} settled={duel} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error} />
+    return <Result duel={duel} settled={duel} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error} />
   }
   if (over) {
-    return <Result kind={end} duel={duel} settled={settled || null} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error} />
+    return <Result duel={duel} settled={settled || null} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error} />
   }
   if (!run) {
     return (
@@ -254,10 +248,8 @@ export default function DuelRun({ session }) {
   const counting = now < run.startsAt
   const elapsed = Math.max(0, Math.min(SPRINT_MS, now - run.startsAt))
   const opp = totalAt(run.timeline, elapsed)
-  // The other's recording, when there is one: its end is the score to beat.
-  const recorded = !liveMode && run.timeline.length > 0
-  const target = recorded ? totalAt(run.timeline, SPRINT_MS).total : null
-  const racing = liveMode || recorded
+  // Live, or against a recording: the other's train is on the line.
+  const racing = liveMode || run.timeline.length > 0
   const left = Math.ceil((run.endsAt - Math.max(now, run.startsAt)) / 1000)
   const qMs = Math.max(0, now - run.servedAt)
   const worth = run.flash && !run.flash.pending ? run.flash.pts : points(qMs)
@@ -268,7 +260,7 @@ export default function DuelRun({ session }) {
       <main id="main-content" className="container stage exam-run pvp-run" style={{ '--line-color': COLOR }}>
         <StageHead onLeave={leave} leaveLabel={t.pvpQuit} where={duel.kind === 'ranked' && !duel.them ? t.pvpRanked : t.pvpDuelWith(them)}
           sub={counting ? t.pvpReady : t.pvpSeconds(left)} pass={false} keys={false} />
-        <Line kind={race} mine={run.total} theirs={opp.total} target={target} racing={racing} them={them}
+        <Line mine={run.total} theirs={opp.total} racing={racing} them={them}
           clock={1 - elapsed / SPRINT_MS} t={t} lang={lang} />
         {counting
           ? <section className="exam-page pvp-page pvp-page--count" aria-live="polite"><b className="pvp-count">{Math.max(1, Math.ceil((run.startsAt - now) / 1000))}</b></section>
@@ -381,94 +373,40 @@ const pct = share => `${Math.max(0, Math.min(1, share)) * 100}%`
  *  the trains ride the middle of it and the gap reads. */
 const reachOf = (a, b) => Math.max(500, Math.ceil((Math.max(a, b) * 1.3) / 250) * 250)
 
-/** P2 — points as distance: the trains on the line. */
-function Line({ kind, mine, theirs, target, racing, them, clock, t, lang }) {
+/** The race (P2c): points as distance, the trains on the line, and the
+ *  stretch the trailing train has to cover hatched on its rail up to the
+ *  leader's nose in the leader's ink, what it is worth written over it.
+ *  Never a sentence: the gap is read on the line. */
+function Line({ mine, theirs, racing, them, clock, t, lang }) {
   const fig = n => n.toLocaleString(lang)
   const rows = racing
     ? [{ key: 'them', who: them, n: theirs, me: false }, { key: 'me', who: t.pvpYou, n: mine, me: true }]
     : [{ key: 'me', who: t.pvpYou, n: mine, me: true }]
   const label = racing ? `${t.pvpYou} ${fig(mine)}, ${them} ${fig(theirs)}` : `${t.pvpYou} ${fig(mine)}`
-  const minute = <span className="pvp-clock" aria-hidden="true"><i className="pvp-clock__fill" style={{ transform: `scaleX(${Math.max(0, clock)})` }} /></span>
-
-  if (kind === 'P2b') {
-    // The terminus: the line ends at the score to beat, the recording's
-    // own end, its plate under the buffers; live (or first to run) there
-    // is none, and the line runs past the leader.
-    const end = target ?? reachOf(mine, theirs)
-    return (
-      <div className="pvp-line-race">
-        {minute}
-        <div className={`pvp-tracks${target != null ? ' pvp-tracks--terminus' : ''}`} role="img" aria-label={label}>
-          {rows.map(r => (
+  const reach = reachOf(mine, theirs)
+  const lead = mine - theirs
+  return (
+    <div className="pvp-line-race">
+      <span className="pvp-clock" aria-hidden="true"><i className="pvp-clock__fill" style={{ transform: `scaleX(${Math.max(0, clock)})` }} /></span>
+      <div className="pvp-tracks" role="img" aria-label={label}>
+        {rows.map(r => {
+          const trails = racing && lead !== 0 && (r.me ? lead < 0 : lead > 0)
+          return (
             <div key={r.key} className={`pvp-track${r.me ? ' pvp-track--me' : ''}`}>
               <span className="pvp-track__who">{r.who}</span>
               <span className="pvp-track__rail">
-                <span className="pvp-train" style={{ '--at': pct(r.n / Math.max(end, r.n)) }}>
+                {trails && (
+                  <span className={`pvp-gapline${lead > 0 ? ' pvp-gapline--mine' : ''}`} style={{ '--lo': pct(r.n / reach), '--span': pct(Math.abs(lead) / reach) }}>
+                    <b className="pvp-gapline__fig">−{fig(Math.abs(lead))}</b>
+                  </span>
+                )}
+                <span className="pvp-train" style={{ '--at': pct(r.n / reach) }}>
                   <span className="pvp-train__body"><b className="pvp-train__fig">{fig(r.n)}</b><span className="pvp-train__car" /></span>
                 </span>
               </span>
-              {target != null && <span className="pvp-terminus" aria-hidden="true" />}
             </div>
-          ))}
-          {target != null && (
-            <div className="pvp-terminus__plate" aria-hidden="true">
-              <span lang="ja">終点</span>
-              <b className="pvp-terminus__fig">{fig(target)}</b>
-            </div>
-          )}
-        </div>
-        {!racing && <p className="pvp-run__help pvp-run__help--center">{t.pvpRacedLater(them)}</p>}
-      </div>
-    )
-  }
-
-  const reach = reachOf(mine, theirs)
-  if (kind === 'P2c') {
-    // The gap on the line: the stretch the trailing train has to cover,
-    // hatched on its rail up to the leader's nose in the leader's ink,
-    // what it is worth written over it.
-    const lead = mine - theirs
-    return (
-      <div className="pvp-line-race">
-        {minute}
-        <div className="pvp-tracks" role="img" aria-label={label}>
-          {rows.map(r => {
-            const trails = racing && lead !== 0 && (r.me ? lead < 0 : lead > 0)
-            return (
-              <div key={r.key} className={`pvp-track${r.me ? ' pvp-track--me' : ''}`}>
-                <span className="pvp-track__who">{r.who}</span>
-                <span className="pvp-track__rail">
-                  {trails && (
-                    <span className={`pvp-gapline${lead > 0 ? ' pvp-gapline--mine' : ''}`} style={{ '--lo': pct(r.n / reach), '--span': pct(Math.abs(lead) / reach) }}>
-                      <b className="pvp-gapline__fig">−{fig(Math.abs(lead))}</b>
-                    </span>
-                  )}
-                  <span className="pvp-train" style={{ '--at': pct(r.n / reach) }}>
-                    <span className="pvp-train__body"><b className="pvp-train__fig">{fig(r.n)}</b><span className="pvp-train__car" /></span>
-                  </span>
-                </span>
-              </div>
-            )
-          })}
-        </div>
-        {!racing && <p className="pvp-run__help pvp-run__help--center">{t.pvpRacedLater(them)}</p>}
-      </div>
-    )
-  }
-
-  // P2a — the double track: one band, two rails, the figure in each car.
-  return (
-    <div className="pvp-line-race">
-      {minute}
-      <div className="pvp-dbl" role="img" aria-label={label}>
-        {rows.map(r => (
-          <div key={r.key} className={`pvp-dbl__track${r.me ? ' pvp-dbl__track--me' : ''}`}>
-            <span className="pvp-dbl__who">{r.who}</span>
-            <span className="pvp-dbl__rail">
-              <span className="pvp-train" style={{ '--at': pct(r.n / reach) }}><b className="pvp-dbl__car">{fig(r.n)}</b></span>
-            </span>
-          </div>
-        ))}
+          )
+        })}
       </div>
       {!racing && <p className="pvp-run__help pvp-run__help--center">{t.pvpRacedLater(them)}</p>}
     </div>
@@ -478,27 +416,26 @@ function Line({ kind, mine, theirs, target, racing, them, clock, t, lang }) {
 // ── the result ──
 
 /** The finish, simplified: two rails, each car where its total stopped,
- *  on one scale; `figures` writes each total at its row's end. */
-function FinishLine({ mine, theirs, them, figures, t, lang }) {
+ *  on one scale. */
+function FinishLine({ mine, theirs, them, t, lang }) {
   const fig = n => n.toLocaleString(lang)
   const reach = Math.max(mine, theirs, 1) * 1.08
   const rows = [{ key: 'them', who: them, n: theirs, me: false }, { key: 'me', who: t.pvpYou, n: mine, me: true }]
   return (
     <div className="pvp-finish" role="img" aria-label={`${t.pvpYou} ${fig(mine)}, ${them} ${fig(theirs)}`}>
       {rows.map(r => (
-        <div key={r.key} className={`pvp-finish__row${r.me ? ' pvp-finish__row--me' : ''}${figures ? '' : ' pvp-finish__row--bare'}`}>
+        <div key={r.key} className={`pvp-finish__row${r.me ? ' pvp-finish__row--me' : ''}`}>
           <span className="pvp-finish__who">{r.who}</span>
           <span className="pvp-finish__rail">
             <span className="pvp-train" style={{ '--at': pct(r.n / reach) }}><span className="pvp-finish__car" /></span>
           </span>
-          {figures && <b className="pvp-finish__fig">{fig(r.n)}</b>}
         </div>
       ))}
     </div>
   )
 }
 
-function Result({ kind, duel, settled, them, session, t, lang, onLeave, onAgain, error }) {
+function Result({ duel, settled, them, session, t, lang, onLeave, onAgain, error }) {
   // The verdict is the server's (the cover, read once the minute is
   // over). While the other player has yet to run there is no outcome,
   // only the learner's own score; while it loads, nothing.
@@ -565,51 +502,9 @@ function Result({ kind, duel, settled, them, session, t, lang, onLeave, onAgain,
         <span className="pvp-air" aria-hidden="true" />
       </>
     )
-  } else if (kind === 'R1b') {
-    // The photo as the face: each total at the end of its car's run.
-    body = (
-      <>
-        <span className="pvp-air" aria-hidden="true" />
-        <section className="pvp-face pvp-face--photo" aria-label={word}>
-          <div className="pvp-result__verdict"><h2 className={`pvp-result__word pvp-result__word--${result}`}>{word}</h2><span>{by}</span></div>
-          <FinishLine mine={mine} theirs={theirs} them={them} figures t={t} lang={lang} />
-          <div className="pvp-face__tally">
-            <span>{t.pvpYou} · {t.pvpRightsOf(rights, count)}</span>
-            <span>{them} · {t.pvpRightsOf(theirRights, theirCount)}</span>
-          </div>
-        </section>
-        {elo && (
-          <section className="pvp-elo-band" aria-label={`${t.pvpElo} ${signed(elo.delta)}`}>
-            <b className={`pvp-elo-band__move pvp-elo-band__move--${elo.delta >= 0 ? 'up' : 'down'}`}>{signed(elo.delta)}</b>
-            <span className="pvp-elo-band__line"><span className="pvp-curve__cap">{t.pvpElo}</span><span className="pvp-elo-band__fig">{fig(elo.before)} → {fig(elo.after)}</span></span>
-          </section>
-        )}
-        <div className="records pvp-two pvp-result__facts">{rightsRecord}{xpRecord}</div>
-        <span className="pvp-air" aria-hidden="true" />
-      </>
-    )
-  } else if (kind === 'R1c') {
-    // The Elo first: what the duel moved is the headline.
-    body = (
-      <>
-        <span className="pvp-air" aria-hidden="true" />
-        <section className="pvp-face pvp-face--elo" aria-label={word}>
-          <h2 className={`pvp-result__word pvp-result__word--${result}`}>{word}</h2>
-          {elo
-            ? <div className="pvp-face__hero"><b className={`pvp-face__move pvp-face__move--${elo.delta >= 0 ? 'up' : 'down'}`}>{signed(elo.delta)}</b><span className="pvp-face__who">{t.pvpElo} {fig(elo.after)}</span></div>
-            : <div className="pvp-face__hero"><b className="pvp-face__move">{fig(mine)} – {fig(theirs)}</b><span className="pvp-face__who">{by}</span></div>}
-          <FinishLine mine={mine} theirs={theirs} them={them} figures t={t} lang={lang} />
-        </section>
-        <div className="records records--three pvp-result__facts">
-          <div className="record"><span className="record__value">{rights}<span className="record__unit">/ {count}</span></span><span className="record__label">{t.pvpYou}</span></div>
-          <div className="record"><span className="record__value">{theirRights}<span className="record__unit">/ {theirCount}</span></span><span className="record__label">{them}</span></div>
-          {xpRecord}
-        </div>
-        <span className="pvp-air" aria-hidden="true" />
-      </>
-    )
   } else {
-    // R1a — face to face, the photo under the two totals.
+    // Face to face, the finish under the two totals; then the Elo the
+    // duel moved (a friendly duel: the right answers) and the XP it paid.
     body = (
       <>
         <span className="pvp-air" aria-hidden="true" />

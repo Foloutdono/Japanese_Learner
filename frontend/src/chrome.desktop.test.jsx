@@ -4,7 +4,7 @@ import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import { DESK_QUERY } from './hooks/useDesk'
-import { DESK_TAB_IDS, DESK_PLACE_IDS, getSections } from './config/tabs'
+import { DESK_PLACE_IDS, getSections } from './config/tabs'
 import './index.css'
 
 // ── 机 — the desk's chrome at its tightest (plan 113) ───────────
@@ -88,6 +88,9 @@ function mountShell(path = '/today', screen = <main id="main-content">here</main
             <Route path="/profile" element={screen} />
             <Route path="/profile/stats" element={screen} />
             <Route path="/profile/settings/:page" element={screen} />
+            <Route path="/profile/duels" element={screen} />
+            <Route path="/profile/duels/friends" element={screen} />
+            <Route path="/profile/duels/board" element={screen} />
           </Route>
           <Route element={<StageFrame />}>
             <Route path="/learn/kana/:set/:mode" element={screen} />
@@ -180,11 +183,13 @@ describe('the rail', () => {
     expect(rail().querySelector('.desk-rail__name').textContent).toBe('Tsuji')
   })
 
-  it('lists the five gates, Today first, every one of them captioned', async () => {
+  it('lists the five gates and the duels\' after Practice, Today first, every one of them captioned', async () => {
     await mountShell('/learn')
     await settle()
-    expect(gates().map(g => g.dataset.tab)).toEqual(DESK_TAB_IDS)
-    expect(gates().map(g => g.getAttribute('href'))).toEqual(DESK_TAB_IDS.map(id => `/${id}`))
+    expect(gates().map(g => g.dataset.tab)).toEqual(['today', 'learn', 'practice', 'duels', 'dictionary', 'profile'])
+    // The duels' path is the phone's, behind the pass (plan 276).
+    expect(gates().map(g => g.getAttribute('href')))
+      .toEqual(['/today', '/learn', '/practice', '/profile/duels', '/dictionary', '/profile'])
     for (const gate of gates()) {
       const label = gate.querySelector('.desk-gate__label')
       expect(label.textContent.trim().length).toBeGreaterThan(0)
@@ -284,16 +289,31 @@ describe('the rail', () => {
     }
   })
 
-  it('lists no stations under the dictionary, and under Profile the duels alone: their other halls are places', async () => {
+  it('lists no stations under Profile or the dictionary: their halls are places', async () => {
     for (const path of ['/profile', '/dictionary']) {
       const shell = await mountShell(path)
       await settle()
-      // The duels' hall (plan 276) has no room in the desk's holder
-      // (plan 248): its door is a station under the pass.
-      expect(stations().map(s => s.getAttribute('href')), path).toEqual(path === '/profile' ? ['/profile/duels'] : [])
+      expect(stations(), path).toHaveLength(0)
       expect(places().filter(p => p.getAttribute('aria-current')), path).toHaveLength(0)
       await shell.unmount()
     }
+  })
+
+  it('lights the duels\' gate in their hall and behind it, the pass\'s dark (plan 276)', async () => {
+    for (const path of ['/profile/duels', '/profile/duels/friends', '/profile/duels/board']) {
+      const shell = await mountShell(path)
+      await settle()
+      const lit = gates().filter(g => g.classList.contains('desk-gate--on'))
+      expect(lit.map(g => g.dataset.tab), path).toEqual(['duels'])
+      expect(lit[0].getAttribute('aria-current'), path).toBe('page')
+      expect(stations(), path).toHaveLength(0)
+      await shell.unmount()
+    }
+    // On the pass's own screen, the pass is lit and the duels' is a gate.
+    const shell = await mountShell('/profile')
+    await settle()
+    expect(gates().filter(g => g.classList.contains('desk-gate--on')).map(g => g.dataset.tab)).toEqual(['profile'])
+    await shell.unmount()
   })
 
   it('keeps the head the same height on a place, with no guide to play there', async () => {

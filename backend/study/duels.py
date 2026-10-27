@@ -88,7 +88,8 @@ XP_CAP = 150
 WINDOWS = (200, 400)
 # The duels a learner may have unresolved at once.
 OPEN_MAX = 20
-# What the hall shows: the last results, the Elo's last moves.
+# What the hall shows: the last results, the Elo's curve over its last
+# ranked duels.
 RECENT = 5
 TREND = 20
 
@@ -955,13 +956,14 @@ def _named_rows(cur, me: str, rows: list[tuple[dict, list[dict]]]) -> list[dict]
 
 def rating(cur, me: str) -> dict:
     """The learner's Elo: the figure, provisional or not, the record,
-    the peak, the place on the Elo board and the last moves."""
+    the peak, the place on the Elo board, where the placement started
+    it and its curve over the last ranked duels."""
     row = duel_elo.rating_row(cur, me)
     if row is None:
         return {"placed": False}
     cur.execute(
         """
-        SELECT e.rating_before, e.rating_after FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id
+        SELECT e.rating_after FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id
          WHERE e.user_id = %s AND e.role <> 'ghost' AND d.kind = 'ranked' AND e.rating_after IS NOT NULL
          ORDER BY d.resolved_at DESC LIMIT %s
         """,
@@ -978,10 +980,8 @@ def rating(cur, me: str) -> dict:
         # Where the placement test started it: the curve's floor line.
         "start": duel_elo.START.get(row["placed_level"]),
         "rank": place["rank"], "of": place["of"],
-        # The last TREND ranked duels, oldest first: the Elo after each,
-        # and what each one moved it.
-        "trend": [int(a) for _b, a in last],
-        "moves": [int(a) - int(b) for b, a in last],
+        # The Elo after each of the last TREND ranked duels, oldest first.
+        "trend": [int(a) for (a,) in last],
     }
 
 

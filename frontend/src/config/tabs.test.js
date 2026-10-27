@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TAB_IDS, DESK_TAB_IDS, DESK_PLACE_IDS, getDeskTabs, getDeskSections, getDeskPlaces, deskPlaceFor, onDeskRail, inSection, dueBadge, gateBeside, tabFor } from './tabs'
+import { TAB_IDS, DESK_TAB_IDS, DESK_PLACE_IDS, getDeskTabs, getDeskGates, getDeskSections, getDeskPlaces, deskPlaceFor, deskGateFor, onDeskRail, inSection, dueBadge, gateBeside, tabFor } from './tabs'
 
 // ── Which gate is next along the bar ──────────────────────────
 // The arithmetic behind the sideways flick (hooks/useGateSwipe), on
@@ -66,11 +66,10 @@ describe('the rail', () => {
     ])
     // The queue IS the gate, and the catalogue is the dictionary; the
     // analyser, the shelf, the record and the settings are places
-    // (plan 269), listed on their own. Behind the pass, the duels' hall
-    // alone (plan 276).
+    // (plan 269), listed on their own.
     expect(getDeskSections('today', t)).toEqual([])
     expect(getDeskSections('dictionary', t)).toEqual([])
-    expect(getDeskSections('profile', t).map(s => s.path)).toEqual(['/profile/duels'])
+    expect(getDeskSections('profile', t)).toEqual([])
   })
 
   it('lists the four places, each behind the gate its phone route is (plan 269)', () => {
@@ -100,6 +99,22 @@ describe('the rail', () => {
     for (const p of getDeskPlaces(t)) expect(onDeskRail(p.path), p.path).toBe(true)
     expect(onDeskRail('/learn/vocab')).toBe(true)
     expect(onDeskRail('/learn/vocab/themes')).toBe(false)
+    // The duels' hall is a gate on the desk (plan 276); its pages are not.
+    expect(onDeskRail('/profile/duels')).toBe(true)
+    expect(onDeskRail('/profile/duels/friends')).toBe(false)
+  })
+
+  it('stands the duels\' gate after Practice, on the phone\'s path, lit behind it too (plan 276)', () => {
+    expect(getDeskGates(t).map(g => g.id)).toEqual(['today', 'learn', 'practice', 'duels', 'dictionary', 'profile'])
+    expect(getDeskGates(t).find(g => g.id === 'duels').path).toBe('/profile/duels')
+    // The tab bar's five are untouched: the phone opens the duels from the holder.
+    expect(getDeskTabs(t).map(g => g.id)).toEqual(DESK_TAB_IDS)
+    expect(TAB_IDS).not.toContain('duels')
+    expect(deskGateFor('/profile/duels')).toBe('duels')
+    expect(deskGateFor('/profile/duels/board')).toBe('duels')
+    expect(deskGateFor('/profile')).toBe('profile')
+    expect(deskGateFor('/profile/duelsx')).toBe('profile')
+    expect(tabFor('/profile/duels')).toBe('profile')
   })
 
   it('carries no pigment: the rail is chrome', () => {

@@ -7,19 +7,18 @@ import { ChevronIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
 import { stationFor } from '../config/stations'
 import { refreshDuels, useDuels } from '../stores/duels'
-import { devVariant } from '../lib/devVariant'
 import { playClick } from '../lib/audio'
 import { FriendSheet } from '../components/pvp/FriendSheet'
-import { EloCurve, EloMove, EloSteps, Verdict } from '../components/pvp/parts'
+import { EloCurve, EloMove, Verdict } from '../components/pvp/parts'
 import { LEVEL_PATH, hoursLeft, nameOf } from '../domain/duel'
 
 // ── 対戦 — the duels' hall (plan 276, H3) ──────────────────────────
 // Behind the holder's door: the two platforms as cards (a ranked sprint
 // against a stranger near your Elo, two credits; a friend, free and
 // unranked), the console's band over what waits on the learner, what
-// runs and what was played, the friends' door at its foot, and the Elo.
-// The Elo's chart is drawn two ways for the owner's pick (?chart=G1 the
-// curve at the head, G2 each duel's step at the foot).
+// runs and what was played, the friends' door at its foot; the Elo at
+// the head, its curve over the last twenty ranked duels (the owner's G1),
+// and the record in a lattice at the foot.
 const STATION = stationFor('/profile/duels')
 
 export default function DuelsScreen({ session }) {
@@ -27,7 +26,6 @@ export default function DuelsScreen({ session }) {
   const navigate = useNavigate()
   const { data, failed } = useDuels()
   const [sheet, setSheet] = useState(false)
-  const chart = devVariant('chart', 'G1')
   // The hall settles what waits on the learner: read it fresh.
   useEffect(() => { refreshDuels() }, [])
 
@@ -42,20 +40,14 @@ export default function DuelsScreen({ session }) {
 
   return (
     <main id="main-content" className="pvp" style={{ '--line-color': 'var(--pass-ink)' }}>
-      <Bar
-        code={STATION.code}
-        title={t.pvpTitle}
-        sub={chart === 'G2' && data?.rating?.placed ? `${t.pvpElo} ${data.rating.elo.toLocaleString(lang)}` : undefined}
-        color="var(--pass-ink)"
-        aside={<Leave to="/profile">{t.profileTitle}</Leave>}
-      />
-      {data ? <Hall data={data} chart={chart} t={t} lang={lang} go={go} /> : failed ? <p className="pvp-run__fail">{t.pvpErrFailed}</p> : <Loading />}
+      <Bar code={STATION.code} title={t.pvpTitle} color="var(--pass-ink)" aside={<Leave to="/profile">{t.profileTitle}</Leave>} />
+      {data ? <Hall data={data} t={t} lang={lang} go={go} /> : failed ? <p className="pvp-run__fail">{t.pvpErrFailed}</p> : <Loading />}
       <FriendSheet open={sheet} onClose={() => setSheet(false)} session={session} />
     </main>
   )
 }
 
-function Hall({ data, chart, t, lang, go }) {
+function Hall({ data, t, lang, go }) {
   const [view, setView] = useState('play')
   const fig = n => n.toLocaleString(lang)
   const { rating } = data
@@ -63,7 +55,7 @@ function Hall({ data, chart, t, lang, go }) {
   const rows = view === 'play' ? play : view === 'running' ? data.running : data.done
   return (
     <>
-      {chart === 'G1' && <EloHead rating={rating} t={t} lang={lang} go={go} />}
+      <EloHead rating={rating} t={t} lang={lang} go={go} />
       <div className="pvp-platforms">
         <button type="button" className="pvp-platform" onClick={go.ranked}>
           <span className="pvp-platform__title">{t.pvpRanked}</span>
@@ -95,7 +87,7 @@ function Hall({ data, chart, t, lang, go }) {
           <ChevronIcon direction="right" size={15} />
         </button>
       </section>
-      {chart === 'G2' ? <EloFoot rating={rating} t={t} lang={lang} go={go} /> : rating.placed && (
+      {rating.placed && (
         <div className="records records--three">
           <div className="record"><b className="record__value">{rating.games}</b><span className="record__label">{t.pvpSprints}</span></div>
           <div className="record"><b className="record__value">{rating.wins}–{rating.losses}</b><span className="record__label">{t.pvpBilan}</span></div>
@@ -152,8 +144,8 @@ function Unplaced({ t, go }) {
   )
 }
 
-/** G1 — the Elo at the head of the hall: the figure, the place, the
- *  curve of the last twenty duels over the placement's start. */
+/** The Elo at the head of the hall: the figure, the place, the curve of
+ *  the last twenty ranked duels over the placement's start. */
 function EloHead({ rating, t, lang, go }) {
   if (!rating.placed) return <Unplaced t={t} go={go} />
   const fig = n => n.toLocaleString(lang)
@@ -166,30 +158,8 @@ function EloHead({ rating, t, lang, go }) {
       <b className="pvp-curve__fig">{fig(rating.elo)}{rating.provisional && <span className="pvp-curve__prov" title={t.pvpProvisional}>?</span>}</b>
       <EloCurve trend={rating.trend} start={rating.start} label={t.pvpCurveLabel(rating.trend.length)} />
       <span className="pvp-curve__foot">
-        <span className="pvp-curve__key"><i className="pvp-curve__dash" aria-hidden="true" />{t.pvpStartAt(fig(rating.start))}</span>
+        {rating.start != null && <span className="pvp-curve__key"><i className="pvp-curve__dash" aria-hidden="true" />{t.pvpStartAt(fig(rating.start))}</span>}
         <span>{t.pvpPeak(fig(rating.peak))}</span>
-      </span>
-    </button>
-  )
-}
-
-/** G2 — the Elo at the foot: the steps the last twenty duels took, the
- *  figure and the place over them, the record under them. */
-function EloFoot({ rating, t, lang, go }) {
-  if (!rating.placed) return <Unplaced t={t} go={go} />
-  const fig = n => n.toLocaleString(lang)
-  const sum = rating.moves.reduce((a, m) => a + m, 0)
-  return (
-    <button type="button" className="pvp-steps" onClick={go.board} aria-label={`${t.pvpElo} ${fig(rating.elo)}, ${t.pvpEloBoard}`}>
-      <span className="pvp-curve__head">
-        <span className="pvp-curve__cap">{t.pvpLastN(rating.moves.length)}</span>
-        {rating.moves.length > 0 && <EloMove elo={sum} t={t} />}
-      </span>
-      <EloSteps moves={rating.moves} label={t.pvpCurveLabel(rating.moves.length)} />
-      <span className="pvp-steps__figs">
-        <span className="pvp-steps__fig"><b className="pvp-steps__num">{fig(rating.elo)}{rating.provisional && <span className="pvp-curve__prov">?</span>}</b><span className="pvp-curve__cap">{t.pvpElo}</span></span>
-        <span className="pvp-steps__fig"><b className="pvp-steps__num">{rating.wins}–{rating.losses}</b><span className="pvp-curve__cap">{t.pvpBilan}</span></span>
-        <span className="pvp-steps__fig"><b className="pvp-steps__num">{rating.rank ? t.pvpOrdinal(rating.rank) : '—'}</b><span className="pvp-curve__cap">{t.pvpOutOf(rating.of)}</span></span>
       </span>
     </button>
   )

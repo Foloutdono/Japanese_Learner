@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
-import { getDeskTabs, getDeskSections, getDeskPlaces, deskPlaceFor, inSection, tabFor, dueBadge } from '../../config/tabs'
+import { getDeskGates, getDeskSections, getDeskPlaces, deskPlaceFor, deskGateFor, inSection, dueBadge } from '../../config/tabs'
 import { useTodaySummary } from '../../stores/today'
 import { playClick } from '../../lib/audio'
 import { GateIcon } from './GateIcon'
@@ -23,7 +23,8 @@ import { GUIDES } from '../guide/guides'
 //                  pictogram AND its word: the phone captions only the
 //                  lit gate because five words do not fit in 390px
 //                  (DESIGN.md, "A gate is a pictogram"), and a column
-//                  has the room for all five;
+//                  has the room for all five -- and for the duels' after
+//                  Practice (plan 276), the desk's alone;
 //   the stations   under the lit gate, the sections behind it on a
 //                  drawn line — a stop per station, the one you are
 //                  standing in filled. The line is the station
@@ -83,11 +84,12 @@ export function DeskRail() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   // A place (plan 269) lights itself, and the gate behind its path
-  // stays dark: on the desk the analyser is not a station of 辞書.
+  // stays dark: on the desk the analyser is not a station of 辞書. The
+  // duels' gate (plan 276) does the same to the pass's.
   const place = deskPlaceFor(pathname, t)
-  const active = place ? null : tabFor(pathname)
+  const active = place ? null : deskGateFor(pathname)
   const due = useTodaySummary().data?.total ?? 0
-  const tabs = getDeskTabs(t)
+  const tabs = getDeskGates(t)
   const places = getDeskPlaces(t)
   const activeLabel = tabs.find(tab => tab.id === active)?.label ?? ''
 

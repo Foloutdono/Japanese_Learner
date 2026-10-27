@@ -6,11 +6,13 @@ import { StageFrame } from '../components/chrome/Shell'
 import '../index.css'
 
 // ── 対戦 — a duel's run against its server (plan 276) ──────────────
-// What the run must never get wrong, whichever drawing the owner picks:
-// a reply says right or wrong and never which choice was right (the
-// paper is shared, and the corrections are sold once the duel is
-// settled); a word's meanings are read in the learner's language; and
-// the verdict is the server's, waiting while the other has yet to run.
+// What the run must never get wrong: a reply says right or wrong and
+// never which choice was right (the paper is shared, and the corrections
+// are sold once the duel is settled); a word's meanings are read in the
+// learner's language; the verdict is the server's, waiting while the
+// other has yet to run. And the owner's two drawings: the race is the
+// gap on the line, never a sentence (P2c); the result, the two totals
+// face to face and the Elo the duel moved (R1a).
 
 const apiJson = vi.fn()
 vi.mock('../lib/api', () => ({
@@ -44,7 +46,7 @@ const cover = (over = {}) => ({
   ...over,
 })
 
-function serve({ endsIn = 60_000, verdict = null, mine = 0 } = {}) {
+function serve({ endsIn = 60_000, verdict = null, mine = 0, kind = 'friend' } = {}) {
   apiJson.mockReset()
   apiJson.mockImplementation(async (path, _s, init) => {
     if (path.endsWith('/start')) {
@@ -61,8 +63,8 @@ function serve({ endsIn = 60_000, verdict = null, mine = 0 } = {}) {
     }
     // The cover; once the run is over, the settled one.
     return verdict && apiJson.mock.calls.some(([p]) => p.endsWith('/start'))
-      ? cover({ you: { ...cover().you, played: true, started: true, score: mine, rights: 4, xp: 30 }, ...verdict })
-      : cover()
+      ? cover({ kind, you: { ...cover().you, played: true, started: true, score: mine, rights: 4, xp: 30 }, ...verdict })
+      : cover({ kind })
   })
 }
 
@@ -122,5 +124,34 @@ describe('a duel’s run', () => {
     const root = await stage()
     await expect.poll(() => root.querySelector('.pvp-result__word')?.textContent, { timeout: 4000 }).toBe('En attente de Kenta')
     expect(root.querySelector('.pvp-result__review')).toBeNull()
+  })
+
+  it('draws the gap on the trailing train’s rail, and no sentence', async () => {
+    serve()
+    const root = await stage()
+    // The other's recorded answer, a second in: 100 to nothing.
+    await expect.poll(() => root.querySelector('.pvp-gapline__fig')?.textContent, { timeout: 4000 }).toBe('−100')
+    const gap = root.querySelector('.pvp-gapline')
+    expect(gap.closest('.pvp-track').classList.contains('pvp-track--me')).toBe(true)
+    // Behind, the hatching is the leader's ink, not the learner's.
+    expect(gap.classList.contains('pvp-gapline--mine')).toBe(false)
+    expect(root.querySelectorAll('.pvp-gapline')).toHaveLength(1)
+    expect(root.querySelector('.pvp-line-race').textContent).not.toMatch(/mènes|retard/)
+  })
+
+  it('shows the Elo a ranked duel moved beside the XP it paid', async () => {
+    serve({ endsIn: 200, mine: 1572, kind: 'ranked', verdict: { status: 'done', them: { ...cover().them, username: 'Hiro_88' }, result: {
+      outcome: 'win', mine: 1572, theirs: 1559, rights: 19, theirRights: 17, answered: 23, theirAnswered: 21,
+      elo: { before: 1237, after: 1248, delta: 11 }, xp: 137,
+    } } })
+    const root = await stage()
+    await expect.poll(() => root.querySelector('.pvp-result__word')?.textContent, { timeout: 4000 }).toBe('Gagné')
+    expect([...root.querySelectorAll('.pvp-face__fig')].map(f => f.textContent))
+      .toEqual([(1572).toLocaleString('fr'), (1559).toLocaleString('fr')])
+    // The finish under them, each car where its total stopped.
+    expect(root.querySelectorAll('.pvp-finish__row')).toHaveLength(2)
+    const facts = root.querySelector('.pvp-result__facts')
+    expect(facts.textContent).toContain(`${(1248).toLocaleString('fr')}+11`)
+    expect(facts.textContent).toContain('+137XP')
   })
 })
