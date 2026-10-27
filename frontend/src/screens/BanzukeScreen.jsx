@@ -386,10 +386,10 @@ function DivisionHead({ division, ends, t, arrows, onBrowse }) {
     <div className="bzp__division">
       {arrows && step(below, 'left', t.bzDivisionBelow)}
       <span className="bzp__division-name">
-        <span className="bzp__division-title">
-          <span className="bzp__division-jp" lang="ja">{d.jp}</span>
-          <span className="bzp__division-latin">{d.latin}</span>
-        </span>
+        {/* The division by its name alone (plan 277, the owner's pick
+            C5): 序ノ口 set large beside JONOKUCHI went with the sheets'
+            kanji titles. */}
+        <span className="bzp__division-title">{d.latin}</span>
         {notes.length > 0 && <span className="bzp__division-notes">{notes.join(' · ')}</span>}
       </span>
       {arrows && step(above, 'right', t.bzDivisionAbove)}
@@ -420,8 +420,7 @@ function Ladder({ division, t, lang, onBrowse }) {
           className={`bzp__rung${d.index === division.index ? ' bzp__rung--on' : ''}${d.index === division.mine ? ' bzp__rung--mine' : ''}`}
           aria-current={d.index === division.index ? 'true' : undefined}
           onClick={() => { if (d.index !== division.index) { playClick(); onBrowse(d.index) } }}>
-          <span className="bzp__rung-jp" lang="ja">{d.jp}</span>
-          <span className="bzp__rung-latin">{d.latin}</span>
+          <span className="bzp__rung-name">{d.latin}</span>
           <span className="bzp__rung-n">{t.bzLearners(d.size.toLocaleString(lang))}</span>
         </button>
       ))}

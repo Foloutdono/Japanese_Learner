@@ -490,6 +490,8 @@ const quiz = {
   typeRomaji:        'Type the romaji…',
   tapToFlip:          'Tap to flip',
   tapToReveal:         'Tap to reveal',
+  // A Kanji → meaning card's front says what it asks (plan 276).
+  askKanjiMeaning:     'What does it mean?',
   // The desk's hint (plan 113): a key cap, then the words after it.
   keySpace:            'Space',
   revealByKey:         'to reveal',
@@ -1784,6 +1786,14 @@ const dictionary = {
   // The 熟 on a word row whose reading belongs to the whole word
   // (今朝 けさ, 時計 とけい), not to the kanji the row is about.
   readingsWhole:     'Read as a whole word',
+  // Plan 276: the sheet a kanji card's two register names open
+  // (components/study/ReadingsHelp, domain/readingsHelp).
+  readingsHelpCap:   'The two readings',
+  readingsHelpOn:    'It came from China with the kanji and is written in katakana. It is mostly the reading of words of several kanji.',
+  readingsHelpKun:   'The Japanese word the kanji came to write, in hiragana. Often the kanji alone, or followed by kana.',
+  readingsHelpShare: (kanji) => `The share of the course's words that read ${kanji} this way: start with the highest.`,
+  readingsHelpTilde: (kanji, side, word) => `A reading ${kanji} takes ${side === 'after' ? 'after' : 'before'} another part of the word${word ? `: ${word.kanji}, ${word.kana}` : ''}.`,
+  readingsHelpDot:   (written) => `After the dot come kana: ${written}.`,
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',
@@ -1828,9 +1838,7 @@ const progress = {
 const misc = {
   mute:    'Mute',
   unmute:  'Unmute',
-  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} more reading${n > 1 ? 's' : ''} — the dictionary card has them all`,
-  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'word',
   // Shown by components/study/SessionError when a study session has
@@ -2182,9 +2190,9 @@ const decks = {
   // Browse existing cards (BrowseCardsMenu.jsx)
   browseBtn:              'Browse',
   browseTitle:            'Browse existing cards',
-  browseTabKanji:         '漢字 Kanji',
-  browseTabVocab:         '語彙 Vocabulary',
-  browseTabGrammar:       '文法 Grammar',
+  browseTabKanji:         'Kanji',
+  browseTabVocab:         'Vocabulary',
+  browseTabGrammar:       'Grammar',
   browseAllLevels:        'All',
   browseSearchPlaceholder: 'Search (kanji, kana, meaning…)',
   browseResults:          'Results',
@@ -2701,7 +2709,7 @@ const boarding = {
   brdRowGoal: (stop, date) => (date ? `${stop} · arriving ${date}` : stop),
   brdRowRhythm: (name, min) => `${name} · ${min} min a day`,
   brdGoalCap: (min) => `at ${min} min a day`,
-  brdNameOptional: 'optional',
+  brdNameOptional: 'Optional',
   brdNamePlaceholder: 'Your first name',
   brdNameNote: 'It is printed on your card. In Latin letters, it is also your public name on the leaderboard.',
   brdNameSave: 'Save',

@@ -80,8 +80,7 @@ describe('the stroke order, enlarged', () => {
     const screen = await mount()
     await open(screen)
     // Headed by what it is, not by the character it draws.
-    expect(dialog().querySelector('.sheet__jp')).toBe(null)
-    expect(dialog().querySelector('.sheet__cap').textContent).toBe('Stroke order')
+    expect(dialog().querySelector('.sheet__title').textContent).toBe('Stroke order')
     const glyph = dialog().querySelector('.ss-paper__glyph svg')
     expect(glyph).not.toBe(null)
     expect(glyph.getBoundingClientRect().width).toBeGreaterThan(200)

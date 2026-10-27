@@ -812,6 +812,8 @@ function ReadingsList({ entry, groups, onClose, onVocabClick }) {
       <header className="dict-plate">
         <div className="dict-plate__row">
           <div className="dict-plate__marks">
+            {/* The kanji in the sheets' small ring, then the title in
+                words (plan 277, the owner's pick C5). */}
             <span className="dict-readings__glyph" lang="ja">{entry.kanji}</span>
             <span className="dict-readings__title">{t.allReadings}</span>
           </div>

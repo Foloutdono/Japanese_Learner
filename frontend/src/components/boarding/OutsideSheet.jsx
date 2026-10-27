@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
+import { MonitorIcon } from '../ui/Icons'
 import { APP_NAMES, outsideUrl, phoneOs } from '../../lib/inAppBrowser'
 import { BoardLink, Continue } from './BoardFrame'
 
@@ -20,7 +21,7 @@ export function OutsideSheet({ open, app, onClose, onStay }) {
   const name = APP_NAMES[app] ?? app
   const url = open ? outsideUrl(window.location.origin) : null
   return (
-    <Sheet open={open} onClose={onClose} jp={t.brdSheetOutside} label={t.brdSheetOutside} className="brd-sheet brd-sheet--outside" dismiss>
+    <Sheet open={open} onClose={onClose} title={t.brdSheetOutside} icon={MonitorIcon} label={t.brdSheetOutside} className="brd-sheet brd-sheet--outside" dismiss>
       <p className="brd-sheet__lede">{t.brdOutsideLede(name)}</p>
       <p className="brd-sheet__note">{t.brdOutsideMenu}</p>
       <div className="brd-sheet__ways">
