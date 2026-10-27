@@ -382,6 +382,9 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
                                          "deep_analysis", "exam_paper", "line_translation"})},
+    # What a refused fare was for (core/credits.FARES): a review, or
+    # since plan 276 a ranked duel's departure or a duel's corrections.
+    "fare_blocked": {"kind": frozenset({"review", "duel", "duel_review"})},
     "pvp_friend": {"action": frozenset({"request", "accept", "refuse", "withdraw", "remove",
                                         "block", "unblock"})},
     "pvp_report": {"reason": frozenset({"name", "cheat", "spam", "other"})},

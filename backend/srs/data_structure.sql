@@ -1333,6 +1333,7 @@ CREATE TABLE pvp_entries (
     paid            SMALLINT NOT NULL DEFAULT 0,
     reviewed        BOOLEAN NOT NULL DEFAULT FALSE,
     xp              INTEGER NOT NULL DEFAULT 0,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (duel_id, user_id)
 );
 ALTER TABLE pvp_entries ENABLE ROW LEVEL SECURITY;

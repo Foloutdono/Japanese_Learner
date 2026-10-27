@@ -49,6 +49,12 @@ from a guess about what looks old:
   the two job tables claim locks, deleted on success -- so a row that
                      is still there long after its last update is from
                      a run that died. Neither is a lock any more.
+  pvp_duels          (plan 276) a duel that expired, was declined or
+                     cancelled before anybody played it: a paper and two
+                     empty seats, read by no screen past the history's
+                     first page. Gone UNPLAYED_DUEL_DAYS after it ended.
+                     A duel somebody played stays: it is that learner's
+                     history, and a recording another may race.
 
 review_log is deliberately NOT here. It looks like the same kind of
 table and is not one: lifetime XP, the level, the streak, the 番付 and
@@ -115,6 +121,27 @@ BY_AGE = [
     ("event_daily", "day", 761,
      "足跡's daily counts past 25 months (the CNIL bound, plan 218)"),
 ]
+
+
+# (plan 276) A duel nobody played, this long after it ended.
+UNPLAYED_DUEL_DAYS = 30
+
+
+def _unplayed_duels(cur, days: int, user_id: str | None, count_only: bool) -> int:
+    where = (
+        "WHERE d.status IN ('expired', 'declined', 'cancelled')"
+        " AND d.resolved_at < NOW() - make_interval(days => %(days)s)"
+        " AND NOT EXISTS (SELECT 1 FROM pvp_entries e WHERE e.duel_id = d.id AND e.started_at IS NOT NULL)"
+    )
+    params: dict = {"days": days}
+    if user_id is not None:
+        where += " AND EXISTS (SELECT 1 FROM pvp_entries e WHERE e.duel_id = d.id AND e.user_id = %(user)s)"
+        params["user"] = user_id
+    if count_only:
+        cur.execute(f"SELECT COUNT(*) FROM pvp_duels d {where}", params)
+        return cur.fetchone()[0]
+    cur.execute(f"DELETE FROM pvp_duels d {where}", params)
+    return cur.rowcount
 
 
 # The age policies a --user scope can narrow: the ones with a user_id.
@@ -211,6 +238,12 @@ def main() -> int:
                 if n:
                     work.append(("age", table, column, days))
 
+            n = _unplayed_duels(cur, UNPLAYED_DUEL_DAYS, args.user, count_only=True)
+            logger.info("  %-22s %6d unplayed, ended over %d days ago   %s", "pvp_duels", n,
+                        UNPLAYED_DUEL_DAYS, "a duel nobody played: a paper and empty seats")
+            if n:
+                work.append(("duels", "pvp_duels", UNPLAYED_DUEL_DAYS, None))
+
             logger.info("")
             if not work:
                 logger.info("Nothing to prune.")
@@ -223,6 +256,8 @@ def main() -> int:
             for kind, table, a, b in work:
                 if kind == "cap":
                     total += _trim(cur, table, a, b, scope, params)
+                elif kind == "duels":
+                    total += _unplayed_duels(cur, a, args.user, count_only=False)
                 else:
                     job_scope, job_params = (
                         _user_clause(args.user) if table in _USER_SCOPED else ("", {})

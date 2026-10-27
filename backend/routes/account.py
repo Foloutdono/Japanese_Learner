@@ -166,8 +166,10 @@ def user_ids_present(cur) -> set[str]:
                                 the user id is the part before the colon
       user_id = %(user)s        an ordinary column
 
-    video_session_jobs, the one entry scoped through a subquery, is
-    skipped: it cannot hold a user the parent video_sessions does not.
+    video_session_jobs and pvp_duels, the entries scoped through a
+    subquery, are skipped: neither can hold a user its own table does
+    not -- a job's parent video_sessions, a duel's players in
+    pvp_entries.
 
     This is what makes scripts/purge_orphans.py able to answer "who is
     in the database", which no single table can: a learner deleted

@@ -175,6 +175,7 @@ export const VALUES = {
     value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
   ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
+  fare_blocked: { kind: ['review', 'duel', 'duel_review'] },
   pvp_friend: { action: ['request', 'accept', 'refuse', 'withdraw', 'remove', 'block', 'unblock'] },
   pvp_report: { reason: ['name', 'cheat', 'spam', 'other'] },
   pvp_duel_start: {

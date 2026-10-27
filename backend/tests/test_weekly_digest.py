@@ -155,3 +155,27 @@ def test_messages_are_counted_by_kind_and_card_and_never_read():
     assert "| digest-test-card | 1 | 1 | meaning, reading |" in out
     assert "digest-test-secret-words" not in out
     assert "read_feedback" in out
+
+
+def test_duels_are_counted_and_name_nobody():
+    # Plan 276: the sprints by what they were played against, how they
+    # end, and the friends' and reports' gestures by kind -- never a
+    # username, never who reported whom.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            now = datetime.now(timezone.utc)
+            events.write(cur, USER, [(name, events.clean(name, props), now) for name, props in [
+                ("pvp_duel_start", {"kind": "ranked", "mode": "async", "level": "N5", "against": "ghost"}),
+                ("pvp_duel_done", {"kind": "ranked", "mode": "async", "level": "N5", "outcome": "win",
+                                   "rights": 12, "wait_h": 2.5}),
+                ("pvp_report", {"reason": "spam"}),
+            ]])
+        conn.commit()
+    finally:
+        conn.close()
+    out = section(digest.duels)
+    assert "| ranked | ghost | 1 | 1 |" in out
+    assert "| ranked | win | 1 | 2.5 |" in out
+    assert "| pvp_report | spam | 1 |" in out
+    assert "read_reports" in out

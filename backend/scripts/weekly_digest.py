@@ -44,6 +44,10 @@ already looking.
                   kind, who asked for an answer, the cards reported most.
                   Never the words, which this page on GitHub is no place
                   for: scripts/read_feedback.py reads them, run by a person.
+ 10  DUELS        the sprints between learners (plan 276): played, by
+                  what against, how they end, how long a challenge
+                  waits, the friendships and the reports by reason --
+                  never who reported whom (scripts/read_reports.py).
 
 Each reads event_log and event_daily and adds the two together where a
 total is wanted, because scripts/compact_events.py moves rows from the
@@ -507,6 +511,51 @@ def messages(cur, days: int) -> str:
     return "\n".join(out)
 
 
+def duels(cur, days: int) -> str:
+    """The duels (plan 276), from their events: the sprints played by
+    what they were played against, how the duels ended, and the friends'
+    and reports' gestures, by kind only."""
+    cur.execute(
+        """
+        SELECT props->>'kind', props->>'against', COUNT(*), COUNT(DISTINCT user_id)
+          FROM event_log
+         WHERE name = 'pvp_duel_start' AND at > NOW() - (%s || ' days')::interval
+         GROUP BY 1, 2
+         ORDER BY 3 DESC, 1, 2
+        """,
+        (days,),
+    )
+    out = [table(["kind", "against", "sprints", "learners"], cur.fetchall())]
+    cur.execute(
+        """
+        SELECT props->>'kind', props->>'outcome', COUNT(*),
+               ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY (props->>'wait_h')::numeric)::numeric, 1)
+          FROM event_log
+         WHERE name = 'pvp_duel_done' AND at > NOW() - (%s || ' days')::interval
+         GROUP BY 1, 2
+         ORDER BY 1, 3 DESC, 2
+        """,
+        (days,),
+    )
+    out.append("**How they end**\n")
+    out.append(table(["kind", "outcome", "duels", "median wait (h)"], cur.fetchall()))
+    cur.execute(
+        """
+        SELECT name, COALESCE(props->>'action', props->>'reason', props->>'kind'), COUNT(*)
+          FROM event_log
+         WHERE name IN ('pvp_friend', 'pvp_report', 'pvp_review')
+           AND at > NOW() - (%s || ' days')::interval
+         GROUP BY 1, 2
+         ORDER BY 1, 3 DESC, 2
+        """,
+        (days,),
+    )
+    out.append("**Friends, reports and corrections**\n")
+    out.append(table(["event", "what", "times"], cur.fetchall()))
+    out.append(f"_Who reported whom: `python -m scripts.read_reports --days {days}`._\n")
+    return "\n".join(out)
+
+
 SECTIONS = [
     ("みどりの窓口 — where boarding is lost", boarding),
     ("Coming back", retention),
@@ -520,6 +569,7 @@ SECTIONS = [
     ("What gets finished", use),
     ("What broke", friction),
     ("Written to us", messages),
+    ("対戦 — the duels", duels),
 ]
 
 

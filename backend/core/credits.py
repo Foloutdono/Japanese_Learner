@@ -58,7 +58,8 @@ Free: the whole kana line at no fare at all, the refill through the
 day, the learning modes, the dictionary without the analyzer, today's
 run, the full profile, FREE_DECKS decks and FREE_CARDS cards. Pass:
 unlimited credits, the practice modes, the analyzer, PASS_DECKS and
-PASS_CARDS. Practice never spends credits.
+PASS_CARDS. Practice never spends credits; a ranked duel's departure
+and a duel's corrections do (plan 276, pay() below).
 There is no purchase flow yet (HAS_STORE in the frontend's
 domain/credits.js), so `plan` is only ever set by hand.
 
@@ -124,7 +125,13 @@ PASS_CARDS = 10000
 # mid-process would make one request block and the next not.
 ENFORCE = os.environ.get("CREDITS_ENFORCE") == "1"
 
-REASONS = ("refill", "review", "grant", "adjust")
+REASONS = ("refill", "review", "grant", "adjust", "duel", "duel_review")
+# What a fare is charged for. A review is spend()'s; the duels (plan
+# 276) pay through pay(): `duel`, a ranked duel's departure, and
+# `duel_review`, a duel's corrections. Each its own reason, so the
+# ledger and shadow mode's refusals say what was paid for -- and the
+# offer's week, which counts reviews, never counts a duel.
+FARES = ("review", "duel", "duel_review")
 
 
 class OutOfCredits(Exception):
@@ -569,9 +576,48 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
     enforcement it raises OutOfCredits and writes nothing.
     Returns {balance, unlimited} for the response.
     """
+    return _charge(user_id, n, ref, "review")[0]
+
+
+def pay(user_id: str, n: int, reason: str, ref: str | None = None) -> int:
+    """A fare that is not a review (FARES): a ranked duel's departure, a
+    duel's corrections. The same rules as spend() -- the refill claimed
+    first, nothing written on a pass, shadow mode recording what there
+    is, OutOfCredits under enforcement -- and it returns the credits
+    actually taken: n, fewer in shadow mode on a short balance, 0 on a
+    pass. That is what refund() gives back."""
+    assert reason in FARES and reason != "review", reason
+    return _charge(user_id, n, ref, reason)[1]
+
+
+def refund(user_id: str, n: int, reason: str, ref: str | None = None) -> None:
+    """Give back a fare the app did not deliver (a ranked duel whose run
+    waited out its 48 hours with nobody to meet): a positive row of the
+    fare's own reason, so the reason sums to what was really paid."""
+    if n <= 0:
+        return
+    assert reason in FARES and reason != "review", reason
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            now = datetime.now(timezone.utc)
+            _settle(cur, user_id, now, claim=True)
+            _insert(cur, user_id, n, reason, ref)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    forget(user_id)
+
+
+def _charge(user_id: str, n: int, ref: str | None, reason: str) -> tuple[dict, int]:
+    """spend() and pay(): ({balance, unlimited}, the credits taken)."""
     if n <= 0:
         s = _state(user_id)
-        return {"balance": None if s["unlimited"] else s["balance"], "unlimited": s["unlimited"]}
+        return {"balance": None if s["unlimited"] else s["balance"], "unlimited": s["unlimited"]}, 0
     from core.db import db_conn
     conn = db_conn()
     try:
@@ -581,7 +627,7 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
             if s["unlimited"]:
                 conn.commit()
                 forget(user_id)
-                return {"balance": None, "unlimited": True}
+                return {"balance": None, "unlimited": True}, 0
             have = s["balance"]
             if have < n:
                 if ENFORCE:
@@ -589,8 +635,8 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
                     forget(user_id)
                     next_at, _full = schedule(have, 0, s["clock"])
                     raise OutOfCredits(have, _iso(next_at))
-                logger.info("credits: would have blocked user_id=%s balance=%d fare=%d ref=%s",
-                            user_id, have, n, ref)
+                logger.info("credits: would have blocked user_id=%s balance=%d fare=%d reason=%s ref=%s",
+                            user_id, have, n, reason, ref)
                 # ...and again where it can be counted. That log line
                 # goes to stdout, which on Render is not queryable and
                 # does not outlive the instance, so the one signal this
@@ -602,14 +648,16 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
                 # often and to whom, never which card.
                 from core import events
                 events.record(user_id, "fare_blocked",
-                              {"balance": have, "fare": n, "kind": "review"}, cur=cur)
+                              {"balance": have, "fare": n, "kind": reason}, cur=cur)
                 # And as the learner's own record: the review that would
-                # have waited, for the offer's week (week below).
-                cur.execute("INSERT INTO credit_stops (user_id, cards) VALUES (%s, %s)",
-                            (user_id, max(1, n - have)))
+                # have waited, for the offer's week (week below). A
+                # duel is not a review that waited.
+                if reason == "review":
+                    cur.execute("INSERT INTO credit_stops (user_id, cards) VALUES (%s, %s)",
+                                (user_id, max(1, n - have)))
             charge = min(n, have)
             if charge > 0:
-                _insert(cur, user_id, -charge, "review", ref)
+                _insert(cur, user_id, -charge, reason, ref)
             new_balance = have - charge
             _restart_if_under_cap(cur, user_id, s, new_balance, now)
         conn.commit()
@@ -619,7 +667,7 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
     finally:
         conn.close()
     forget(user_id)
-    return {"balance": new_balance, "unlimited": False}
+    return {"balance": new_balance, "unlimited": False}, charge
 
 
 # ── 止 — where the credits stopped the learner (plan 172) ─────
