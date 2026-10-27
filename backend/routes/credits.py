@@ -2,8 +2,9 @@
 Reading it settles the account (a new one is seeded, a clock that has
 never run is started) and counts what the refill has landed without
 claiming it: POST /api/credits/claim is what writes that to the ledger
--- the "while you were away" sheet's button, and the app's quiet claim
-as each credit lands while it is open (plan 141). GET /api/credits/week
+-- the card charged on arrival, as it goes back to its pocket (plan
+276), and the app's quiet claim as each credit lands while it is open
+(plan 141). GET /api/credits/week
 is the offer's week and POST /api/credits/stop what a stopped run left
 waiting (plan 172). See core/credits.py."""
 from fastapi import APIRouter, Depends
