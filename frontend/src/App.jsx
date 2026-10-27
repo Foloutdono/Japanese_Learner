@@ -56,6 +56,10 @@ import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
 import TicketsScreen from './screens/TicketsScreen'
 import BanzukeScreen from './screens/BanzukeScreen'
+import DuelsScreen from './screens/DuelsScreen'
+import DuelFriendsScreen from './screens/DuelFriendsScreen'
+import DuelBoardScreen from './screens/DuelBoardScreen'
+import DuelRun from './screens/DuelRun'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -809,6 +813,9 @@ export default function App({ front = NO_FRONT }) {
             {/* 記念切符 — the tickets a streak has earned (plan 191). */}
             <Route path="/profile/tickets"      element={<TicketsScreen session={session} />} />
             <Route path="/profile/banzuke"      element={<BanzukeScreen session={session} />} />
+            <Route path="/profile/duels"        element={<DuelsScreen session={session} />} />
+            <Route path="/profile/duels/friends" element={<DuelFriendsScreen session={session} />} />
+            <Route path="/profile/duels/board"  element={<DuelBoardScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
             {/* The settings pages (plan 074): display, sound, learning,
                 destination, data, account — each its own page under
@@ -823,6 +830,7 @@ export default function App({ front = NO_FRONT }) {
               under the shell above. */}
           <Route element={<StageFrame />}>
             <Route path="/today/run"                          element={<TodayRun session={session} />} />
+            <Route path="/duel/:id"                           element={<DuelRun session={session} />} />
             <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
             <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />
             {/* The literal `level/` segment keeps the four-segment band

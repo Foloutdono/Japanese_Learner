@@ -32931,6 +32931,377 @@ button.brd-stn { cursor: pointer; }
 .fb-page { max-width: var(--card-w); }
 .fb-page .fb-form__send { align-self: flex-start; width: auto; }
 
+/* ═══ 対戦 — the duels (plan 276) ═════════════════════════════════
+   The sprint between two learners: sixty seconds, the same questions.
+   A duel is about people, so it wears the People family -- the pass's
+   ink as its edge, the selection's gold for what waits on the learner --
+   and never a line's pigment. The door in the holder, the plate on
+   Practice and the notice on Today are the app's own objects with a
+   word or a ring more; everything else here is namespaced .pvp-*. */
+
+/* What waits, under the door's name and at the plate's foot. */
+.pvp-door__waiting {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+.pvp-plate__waiting { color: var(--sel-ink); }
+/* Today's notice: the comeback row's ring, in the selection's gold. */
+.pvp-line__ring { border-color: var(--gate-gold); }
+
+/* ── the hall ── */
+.pvp { flex: 1 0 auto; display: flex; flex-direction: column; gap: var(--sp-4); padding: 0 var(--sp-5); }
+.pvp-verdict { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; }
+.pvp-verdict--win { color: var(--success); }
+.pvp-verdict--loss { color: var(--danger); }
+.pvp-verdict--draw { color: var(--text-secondary); }
+.pvp-elo-move { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.pvp-elo-move--up { color: var(--success); }
+.pvp-elo-move--down { color: var(--danger); }
+.pvp-trend { flex: none; }
+.pvp-trend__line { fill: none; stroke: var(--pass-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* The one action, docked over the tab bar as Today's foot is; a quiet
+   way stands a rung over it, never beside or under it. */
+.pvp-foot {
+  position: sticky;
+  bottom: var(--dock-bottom);
+  z-index: 1;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-5);
+  border-image: linear-gradient(to bottom, transparent, var(--bg-main) var(--sp-4)) fill 0 / 0 / var(--sp-4) var(--sp-5) 0;
+}
+.pvp-quiet { align-self: center; min-height: 44px; padding: 0 var(--sp-3); border: 0; background: none; font: inherit; font-weight: 600; color: var(--text-primary); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+
+/* H1 — the departures board: Today's board, a duel a row. */
+.pvp-tbl .tdy-next__day { display: flex; align-items: baseline; gap: var(--sp-3); min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.pvp-tbl__state { flex: none; min-width: 5.2em; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-tbl__state--you { color: var(--sel-ink); }
+.pvp-tbl .pvp-verdict { flex: none; min-width: 5.2em; }
+.pvp-tbl__score { font-size: var(--fs-body); }
+
+/* H2 — the Elo's card and the tickets. */
+.pvp-elo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--sp-1) var(--sp-5);
+  padding: var(--sp-5) var(--sp-6);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.pvp-elo__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-elo__rank { justify-self: end; font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+.pvp-elo__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-elo .pvp-trend { justify-self: end; }
+.pvp-elo__rec { grid-column: 1 / -1; font-size: var(--fs-sm); font-weight: 600; }
+.pvp-tickets { display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-tk {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  filter: drop-shadow(var(--elev-hang));
+}
+.pvp-tk__paper { gap: var(--sp-2); padding: var(--sp-4) var(--sp-6); border-radius: var(--r-identity) 0 0 var(--r-identity); }
+.pvp-tk__big { position: relative; z-index: 2; font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-tk__stub {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 0 var(--sp-5);
+  border-left: 2px dashed color-mix(in srgb, var(--stamp-ink) 40%, transparent);
+  border-radius: 0 var(--r-identity) var(--r-identity) 0;
+  background: var(--paper);
+  color: var(--text-on-fill);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+.pvp-tk__go { font-size: var(--fs-body); }
+.pvp-list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-list__row { display: flex; align-items: center; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-5); }
+.pvp-list__row + .pvp-list__row { border-top: 1px solid var(--surface-line); }
+.pvp-list__dot { flex: none; width: 10px; height: 10px; border: 2px solid var(--text-secondary); border-radius: var(--r-pill); }
+.pvp-list__dot--win { border-color: var(--success); }
+.pvp-list__dot--loss { border-color: var(--danger); }
+.pvp-list__who { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pvp-list__score { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+/* H3 — the two platforms and the console. */
+.pvp-platforms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.pvp-platform {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.pvp-platform:hover,
+.pvp-platform:focus-visible { border-color: var(--pass-ink); filter: none; }
+.pvp-platform__title { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.pvp-platform__desc { font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); }
+.pvp-platform__price { margin-top: auto; display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+.pvp-console { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); overflow: hidden; }
+.pvp-console__row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--surface-line); }
+.pvp-console__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-console__who { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.pvp-console__what { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-console__go { flex: none; min-height: 36px; padding-inline: var(--sp-5); }
+.pvp-console__end { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+.pvp-console__door { display: flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: 0 var(--sp-5); border: 0; border-top: 1px solid var(--surface-line); background: none; font: inherit; font-weight: 700; color: inherit; text-align: left; cursor: pointer; }
+.pvp-console__door-name { flex: 1; }
+.pvp-console__door-fig { font-size: var(--fs-sm); color: var(--text-secondary); }
+.pvp-console__door-req { color: var(--sel-ink); }
+
+/* F2 — the sheet: a request, the friends as radio rows, later or live. */
+.pvp-sheet { display: flex; flex-direction: column; gap: var(--sp-4); }
+.pvp-request { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.pvp-request__who { flex: 1; min-width: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.pvp-request__name { color: var(--text-primary); }
+.pvp-request__btn { flex: none; min-height: 36px; padding-inline: var(--sp-4); }
+.pvp-pick { display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
+.pvp-pick__row { display: flex; align-items: center; gap: var(--sp-4); min-height: 48px; padding: 0 var(--sp-5); cursor: pointer; }
+.pvp-pick__row + .pvp-pick__row { border-top: 1px solid var(--surface-line); }
+.pvp-pick__radio { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--gate-gold); }
+.pvp-pick__row--on { background: var(--sel-wash); }
+.pvp-pick__name { flex: 1; min-width: 0; font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
+.pvp-pick__row--on .pvp-pick__name { color: var(--sel-ink); }
+.pvp-pick__rec { font-size: var(--fs-caption); color: var(--text-secondary); }
+.pvp-add { display: flex; align-items: center; gap: var(--sp-3); min-height: 44px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-card); background: var(--bg-main); font: inherit; color: var(--text-secondary); text-align: left; cursor: pointer; }
+.pvp-sheet__help { margin: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); text-wrap: pretty; }
+.pvp-sheet__foot { display: flex; flex-direction: column; padding-top: var(--sp-2); }
+/* F1 — the friends: the search well, the requests, the friends. */
+.pvp-find { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-find__cap,
+.pvp-group__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-group { display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-person { display: flex; align-items: center; gap: var(--sp-4); min-height: 56px; padding: var(--sp-3) var(--sp-4); }
+.pvp-list .pvp-person + .pvp-person { border-top: 1px solid var(--surface-line); }
+.pvp-person__names { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); }
+.pvp-person__name { flex: 1; min-width: 0; padding: 0; border: 0; background: none; font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; color: inherit; text-align: left; }
+.pvp-person__names .pvp-person__name { flex: none; }
+.pvp-person__sub { font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-person__act { flex: none; min-height: 36px; padding-inline: var(--sp-4); }
+
+/* L1 — the Elo, an insert in the holder: the door, the figure, the line. */
+.pvp-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pvp-insert {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.pvp-insert:hover,
+.pvp-insert:focus-visible { background: var(--bg-card-hover); filter: none; }
+.pvp-insert:hover .record__chev,
+.pvp-insert:focus-visible .record__chev { opacity: 1; transform: translateX(0); }
+.pvp-insert__head { display: flex; align-items: center; gap: var(--sp-3); }
+.pvp-insert__names { flex: 1; }
+.pvp-insert__elo { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); }
+.pvp-insert__fig { display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-insert__num { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-insert__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-insert__rec { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+
+/* ── the stage: the departure, the race, the result ──
+   The mock exam's paper (.exam-run): the run's head, a page, the
+   answers docked in sumi, the level bar under them. */
+.pvp-air { flex: 1 1 auto; min-height: 0; }
+.pvp-run__help { margin: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); text-wrap: pretty; }
+.pvp-run__help--center { text-align: center; }
+.pvp-run__fail { margin: auto; color: var(--text-secondary); }
+
+/* D1 — the duel's ticket: the cleared day's 硬券, printed for two. */
+.pvp-ticket { flex: none; gap: var(--sp-4); padding: var(--sp-6) var(--sp-7); }
+.pvp-ticket__who { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: var(--sp-3); }
+.pvp-ticket__side { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.pvp-ticket__side--them { align-items: flex-end; text-align: right; }
+.pvp-ticket__name { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pvp-ticket__level { font-size: var(--fs-caption); font-weight: 700; color: var(--paper-ink-soft); }
+.pvp-ticket__who--scores .pvp-ticket__name { font-family: var(--font-display); font-size: var(--fs-heading); line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-ticket__vs { padding-bottom: var(--sp-1); font-size: var(--fs-title); font-weight: 700; color: color-mix(in srgb, var(--stamp-ink) 70%, var(--text-on-fill)); }
+.pvp-ticket__facts { position: relative; z-index: 2; margin: 0; display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-sm); }
+.pvp-ticket__fact { display: flex; justify-content: space-between; gap: var(--sp-4); }
+.pvp-ticket__dt { color: var(--paper-ink-soft); }
+.pvp-ticket__dd { margin: 0; font-weight: 700; text-align: right; }
+
+/* D2 — two platforms, side by side. */
+.pvp-quais { flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.pvp-quai {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-5) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-top: 3px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.pvp-quai--on { border-color: var(--sel-line); border-top-color: var(--gate-gold); background: var(--sel-wash); }
+.pvp-quai__no { display: flex; align-items: baseline; gap: var(--sp-1); padding-top: var(--sp-4); }
+.pvp-quai__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-quai--on .pvp-quai__fig { color: var(--sel-ink); }
+.pvp-quai__jp { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+.pvp-quai__title { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.pvp-quai__line { font-size: var(--fs-sm); line-height: 1.35; color: var(--text-secondary); }
+.pvp-quai__price { margin-top: var(--sp-3); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+
+/* The race: the minute as a bar, then the board the option draws. */
+.pvp-clock { display: block; height: 6px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
+.pvp-clock__fill { display: block; height: 100%; background: var(--pass-ink); transform-origin: left; transition: transform 0.1s linear; }
+/* P1 — the two totals. */
+.pvp-score { flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.pvp-score .pvp-clock { grid-column: 1 / -1; }
+.pvp-score__cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-score__cell--me { border-bottom: 3px solid var(--pass-ink); }
+.pvp-score__fig { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-score__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+/* P2 — two trains on one line, a stop every 500 points. */
+.pvp-line-race { flex: none; display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-tracks { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-track { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); align-items: end; gap: var(--sp-3); }
+.pvp-track__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-bottom: var(--sp-1); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-track--me .pvp-track__who { color: var(--text-primary); }
+.pvp-track__rail { position: relative; height: 40px; margin-right: 36px; }
+.pvp-track__rail::before { content: ''; position: absolute; left: 0; right: -36px; bottom: 5px; height: 2px; background: var(--surface-line); }
+.pvp-track__rail--bare { height: 14px; }
+.pvp-track__rail--bare::before { content: none; }
+.pvp-track__stop { position: absolute; bottom: 1px; width: 2px; height: 10px; margin-left: 17px; background: var(--border); }
+.pvp-track__mark { position: absolute; top: 0; margin-left: 18px; transform: translateX(-50%); font-size: var(--fs-caption-xs); font-style: normal; font-weight: 700; color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* The train rides a layer as wide as the rail, moved by its own width's share (a transform, never left). */
+.pvp-train { position: absolute; inset: auto 0 0; transform: translateX(var(--at, 0%)); transition: transform 0.3s ease; }
+.pvp-train__body { width: 36px; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+.pvp-train__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.pvp-train__car { width: 36px; height: 12px; border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); }
+.pvp-track--me .pvp-train__fig { color: var(--text-primary); }
+.pvp-track--me .pvp-train__car { background: var(--pass-ink); }
+.pvp-gap { margin: 0; text-align: center; font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+.pvp-gap--ahead { color: var(--text-primary); }
+/* P3 — the dial. */
+.pvp-dial { flex: none; display: grid; grid-template-columns: 140px minmax(0, 1fr); align-items: center; gap: var(--sp-6); padding-inline: var(--sp-3); }
+.pvp-dial__face { position: relative; width: 140px; height: 140px; }
+.pvp-dial__svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pvp-dial__track { fill: none; stroke: var(--surface-line); }
+.pvp-dial__time { fill: none; stroke: var(--pass-ink); transition: stroke-dashoffset 0.1s linear; }
+.pvp-dial__q { fill: none; stroke: var(--gate-gold); }
+.pvp-dial__mine { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); }
+.pvp-dial__fig { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-dial__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-dial__them { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); }
+.pvp-dial__them .pvp-gap { text-align: left; }
+/* The question's page: its kind, what it is worth now, the prompt. */
+.pvp-page { transition: border-color 0.15s ease; }
+.pvp-page--right { border-color: var(--rating-correct); }
+.pvp-page--wrong { border-color: var(--rating-wrong); }
+.pvp-page--count { align-items: center; justify-content: center; }
+.pvp-count { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-page__head { padding-right: var(--sp-5); }
+.pvp-page__kind { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-decay { flex: 1; height: 4px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
+.pvp-decay__fill { display: block; height: 100%; background: var(--gate-gold); transform-origin: left; }
+.pvp-page__worth { flex: none; min-width: 2.5em; margin-left: auto; text-align: right; font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--sel-ink); }
+.pvp-page__body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-2); padding: var(--sp-5); text-align: center; }
+.pvp-page__reading { font-family: var(--font-jp); font-size: var(--fs-body); letter-spacing: var(--tr-reading); color: var(--text-secondary); }
+.pvp-page__prompt { font-family: var(--font-jp); font-size: var(--fs-display); font-weight: 500; line-height: 1.2; }
+/* The answers: the exam's tiles, a verdict's ink once answered. */
+.pvp-dock { padding-bottom: var(--sp-4); }
+.pvp-tile__t--latin { font-family: var(--font-display); }
+.pvp-tile--right { border-color: var(--rating-correct); }
+.pvp-tile--right .exam-tile__b { background: var(--rating-correct); border-color: var(--rating-correct); color: var(--bg-panel); }
+.pvp-tile--wrong { border-color: var(--rating-wrong); }
+.pvp-tile--wrong .exam-tile__b { background: var(--rating-wrong); border-color: var(--rating-wrong); color: var(--bg-panel); }
+.pvp-tile:disabled { cursor: default; }
+
+/* The result. */
+.pvp-result__word { margin: 0; font-family: var(--font-serif); font-size: var(--fs-heading); font-weight: 700; line-height: 1.2; text-align: center; }
+.pvp-result__word--win { color: var(--text-primary); }
+.pvp-result__word--loss { color: var(--text-secondary); }
+.pvp-result__verdict { flex: none; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); color: var(--text-secondary); }
+.pvp-result__facts .record__value { display: flex; align-items: baseline; gap: var(--sp-3); }
+.pvp-result__foot { gap: var(--sp-3); }
+.pvp-result__review { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding-inline: var(--sp-5); }
+.pvp-result__price { font-size: var(--fs-sm); color: var(--sel-ink); }
+/* R1 — face to face. */
+.pvp-face { flex: none; display: flex; flex-direction: column; gap: var(--sp-6); padding: var(--sp-6); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-face__pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pvp-face__side { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.pvp-face__side + .pvp-face__side { border-left: 1px solid var(--surface-line); }
+.pvp-face__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-face__side--me .pvp-face__fig { text-decoration: underline 3px var(--pass-ink); text-underline-offset: 0.2em; }
+.pvp-face__who { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-face__rights { font-size: var(--fs-sm); color: var(--text-secondary); }
+/* R2 — the photo finish: the last stretch before the winner, the gap hatched. */
+.pvp-photo { flex: none; display: flex; flex-direction: column; gap: var(--sp-2); }
+.pvp-photo__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-photo__gap { position: absolute; bottom: 0; height: 40px; margin-left: 36px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--pass-ink) 22%, transparent) 0 4px, transparent 4px 8px); }
+/* R3 — the station's stamp, pressed on the duel's ticket, half off its
+   foot where the print leaves room. */
+.pvp-stamped { position: relative; flex: none; display: flex; flex-direction: column; }
+.pvp-stamp {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: calc(-1 * var(--sp-8));
+  width: 92px;
+  height: 92px;
+  margin-left: -46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  border: 3px double var(--stamp-ink);
+  border-radius: var(--r-pill);
+  color: var(--stamp-ink);
+  transform: rotate(-12deg);
+  opacity: 0.86;
+  pointer-events: none;
+}
+.pvp-stamp--loss,
+.pvp-stamp--draw { border-color: var(--pass-ink); color: var(--pass-ink); }
+.pvp-stamp__glyph { font-family: var(--font-serif); font-size: var(--fs-heading); font-weight: 700; line-height: 1; }
+.pvp-stamp__word { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; }
+@media (prefers-reduced-motion: reduce) {
+  .pvp-platform,
+  .pvp-quai,
+  .pvp-page,
+  .pvp-clock__fill,
+  .pvp-dial__time { transition: none; }
+  .pvp-train { transition: none; }
+}
+/* ── 対戦 end ── */
+
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
    The computer's design, at and above 1100px (hooks/useDesk.js's
    DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which

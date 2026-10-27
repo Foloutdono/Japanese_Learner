@@ -12,6 +12,9 @@ import { StampBook, Records, ProfileDoors, TicketsDoor, AgendaDoor, HolderDoors 
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
 import { useAgenda } from '../stores/agenda'
+import { DuelsDoor } from '../components/pvp/DuelsDoor'
+import { DuelsInsert } from '../components/pvp/DuelsInsert'
+import { devVariant } from '../lib/devVariant'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
@@ -185,6 +188,11 @@ export default function ProfileScreen({ session }) {
     // the desk's (plan 248).
     holderDoors: <HolderDoors t={t} navigate={navigate} count={profile.tickets?.length ?? 0} blocks={agenda} />,
     board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} session={session} />,
+    // 対戦 (plan 276): the door to the duels, under the holder's own.
+    // L1: the Elo laid out under the door, as an insert of its own.
+    duels: devVariant('place', 'E1') === 'E1' && (devVariant('elo', '') === 'L1'
+      ? <DuelsInsert t={t} lang={lang} navigate={navigate} />
+      : <DuelsDoor t={t} lang={lang} navigate={navigate} />),
   }
 
   return (
@@ -222,6 +230,7 @@ export default function ProfileScreen({ session }) {
           {inserts.stale}
           {inserts.pass}
           {inserts.doors}
+          {inserts.duels}
           {inserts.stamps}
           {inserts.tickets}
           {inserts.agenda}

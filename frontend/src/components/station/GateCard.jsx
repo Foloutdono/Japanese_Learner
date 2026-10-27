@@ -34,6 +34,8 @@ import { shareTicket } from '../../lib/shareTicket'
 import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys, ThreadKey } from './TodayDial'
 import { TodayDay } from './TodayDay'
+import { DuelLine } from '../pvp/DuelLine'
+import { devVariant } from '../../lib/devVariant'
 import { TodayPrint, PrintTitle } from './TodayPrint'
 import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
 
@@ -576,6 +578,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
       <div className="tdy__foot">
         {/* The reviews piled up (plan 254) and the level that does not
             fit (plan 224), over the run's own row. */}
+        {devVariant('place', 'E1') === 'E3' && <DuelLine hold={Boolean(fin?.playing)} />}
         <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
@@ -671,6 +674,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         </div>
       </div>
       <aside className="tdy-desk__col">
+        {devVariant('place', 'E1') === 'E3' && <DuelLine hold={Boolean(fin?.playing)} />}
         <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
@@ -968,6 +972,7 @@ function ClearedGate({ today, desk, finish = null }) {
   const gateCome = came('GATE')
   const foot = (
     <>
+      {devVariant('place', 'E1') === 'E3' && <DuelLine hold={Boolean(fin?.playing)} />}
       {rows.length > 0 && (boardCome || hold) && (
         <div className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}>{rows}</div>
       )}

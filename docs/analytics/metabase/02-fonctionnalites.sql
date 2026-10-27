@@ -43,6 +43,7 @@ WITH routes(route) AS (VALUES
     ('/today'),
     ('/today/run'),
     ('/today/clear'),
+    ('/duel/:id'),
     ('/ride'),
     ('/ride/intro'),
     ('/ride/cards'),
@@ -116,6 +117,9 @@ WITH routes(route) AS (VALUES
     ('/profile/stats'),
     ('/profile/tickets'),
     ('/profile/banzuke'),
+    ('/profile/duels'),
+    ('/profile/duels/friends'),
+    ('/profile/duels/board'),
     ('/profile/settings'),
     ('/profile/settings/:page')
 ), vues AS (
