@@ -1177,7 +1177,11 @@ ALTER TABLE event_daily ENABLE ROW LEVEL SECURITY;
 -- unprefixed (the content key), `reasons` a card's, from
 -- feedback.CARD_REASONS. `reply_to` is read from the account when the
 -- learner asks for an answer, never from the request. `rating` is the
--- early-access sheet's one to five (plan 269). Erased with the account
+-- early-access sheet's one to five (plan 269). `exam_id`/`revision`/
+-- `question_id` name a mock-exam question reported from its flag (plan
+-- 258). `triage` is the message's place in the owner's queue (plan 278,
+-- feedback.TRIAGE: new, seen, done, dropped), set by read_feedback, and
+-- `triaged_at` when it left new. Erased with the account
 -- (routes/account.py).
 CREATE TABLE feedback (
     id         BIGSERIAL PRIMARY KEY,
@@ -1186,6 +1190,9 @@ CREATE TABLE feedback (
     body       TEXT NOT NULL DEFAULT '',
     reasons    TEXT[] NOT NULL DEFAULT '{}',
     card_id    TEXT,
+    exam_id    TEXT,
+    revision   INT,
+    question_id TEXT,
     rating     SMALLINT,
     route      TEXT,
     area       TEXT,
@@ -1196,6 +1203,8 @@ CREATE TABLE feedback (
     lang       TEXT,
     reply      BOOLEAN NOT NULL DEFAULT FALSE,
     reply_to   TEXT,
+    triage     TEXT NOT NULL DEFAULT 'new',
+    triaged_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;

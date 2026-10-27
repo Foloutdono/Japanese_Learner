@@ -56,6 +56,14 @@ Nothing is answered automatically and nothing is hidden: the rows are
 a queue for a person (scripts/read_feedback.py), counted in Metabase
 (docs/analytics/metabase/10-messages.sql) and in the weekly digest.
 Erased with the account (routes/account.py).
+
+── The bell and the queue (plan 278) ────────────────────────
+Each message rings the owner's private Discord forum once it is
+committed (core/bell.py), tagged by its kind, with its closed classes
+and how many characters it holds -- never its words, its address or
+its author. Its place in the queue is `triage` (TRIAGE): new until a
+person marks it seen, done or dropped with scripts/read_feedback.py,
+which stamps `triaged_at`.
 """
 import logging
 import re
@@ -65,7 +73,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, StringConstraints
 from typing import Annotated
 
-from core import auth, events
+from core import auth, bell, events
 from core.auth import get_user_id
 from core.db import db_conn
 from core.rls import enable_rls
@@ -74,6 +82,9 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 KINDS = ("problem", "idea", "fault", "card", "question", "rating")
+# A message's place in the owner's queue (plan 278): new until a person
+# has read it, seen while it waits on a fix, then done or dropped.
+TRIAGE = ("new", "seen", "done", "dropped")
 # The early-access sheet (plan 269): the lifetime XP from which Today
 # asks once how the learner finds the app, and the rating's bounds.
 OFFER_XP = 400
@@ -133,6 +144,10 @@ def _ensure_schema() -> None:
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS question_id TEXT")
             # The early-access sheet's rating (plan 269).
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS rating SMALLINT")
+            # The owner's queue (plan 278). `status` is a failure's HTTP
+            # status, so the message's own is `triage`.
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS triage TEXT NOT NULL DEFAULT 'new'")
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS triaged_at TIMESTAMPTZ")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS feedback_user_at ON feedback (user_id, created_at)"
             )
@@ -261,6 +276,8 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
     reply_to = _reply_address(user_id) if payload.reply else None
 
     area = _shape("path", payload.area)
+    status = payload.status if area else None
+    route = _shape("route", payload.route)
 
     conn = db_conn()
     try:
@@ -270,14 +287,11 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
                 INSERT INTO feedback (user_id, kind, body, reasons, card_id, exam_id, revision, question_id,
                                       rating, route, area, status, platform, vp, os, lang, reply, reply_to)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING created_at
+                RETURNING id, created_at
                 """,
                 (
                     user_id, payload.kind, text, reasons, card_id, exam_id, revision, question_id,
-                    rating,
-                    _shape("route", payload.route),
-                    area,
-                    payload.status if area else None,
+                    rating, route, area, status,
                     _visit("platform", payload.platform),
                     _visit("vp", payload.vp),
                     _visit("os", payload.os),
@@ -285,7 +299,7 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
                     payload.reply, reply_to,
                 ),
             )
-            (at,) = cur.fetchone()
+            number, at = cur.fetchone()
             if payload.kind == "rating":
                 # Answered: the sheet is not asked again (same commit).
                 _stamp_offer(cur, user_id)
@@ -293,6 +307,12 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
     finally:
         conn.close()
     logger.info("feedback kind=%s user=%s", payload.kind, user_id)
+    # The words stay here: the bell is told how many there are.
+    bell.ring(bell.message_post(
+        number=number, kind=payload.kind, chars=len(text), reasons=reasons, card_id=card_id,
+        exam_id=exam_id, revision=revision, question_id=question_id, rating=rating,
+        route=route, area=area, status=status, reply=payload.reply,
+    ))
     return {"ok": True, "at": at.isoformat()}
 
 

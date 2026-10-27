@@ -268,7 +268,13 @@ runtime purpose.
   alone (`tests/test_metabase_sync.py` refuses a question that selects
   them). The context beside it is the trail's closed classes, shown to
   the learner before sending, and a reply's address is read from the
-  account, never taken from the request.
+  account, never taken from the request. Each message rings the owner's
+  private Discord forum (`core/bell.py`, plan 278), tagged by its kind:
+  the post carries the kind, the row's number and the closed classes,
+  and is handed the count of characters, never the words, the address
+  or the author (`tests/test_bell.py`, and `privacy.html` says so).
+  Whether a message is handled is its `triage` (new, seen, done,
+  dropped), set by `read_feedback --done ID`, never in Discord.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
@@ -568,11 +574,15 @@ python -m scripts.prune_withdrawn      # decks an author deleted, past their gra
 python -m scripts.drop_legacy_tables   # tables a removed feature left behind
 ```
 
-One more is read-only and needs no flag, so it is safe to run at any time:
+These are read-only and need no flag, so they are safe to run at any time
+(`read_feedback` writes only a message's status, and only the ids named
+after `--seen`, `--done`, `--drop` or `--reopen`):
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
-python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
+python -m scripts.read_feedback        # what learners wrote to us (plan 222), the open ones by kind (plan 278)
+python -m scripts.read_feedback --id 412   # one message; --done 412 marks it handled
+python -m scripts.discord_bell         # the Discord bell's webhook and forum tags: report; --yes creates the tags, --test rings
 python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
 
