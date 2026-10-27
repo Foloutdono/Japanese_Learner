@@ -131,6 +131,15 @@ export const EVENTS = {
   // lib/vitals.js; plan 218).
   client_error: ['route', 'step', 'where'],
   vitals: ['route', 'lcp', 'inp', 'cls', 'ttfb'],
+  // 対戦 (plan 276): written by the server (routes/pvp.py), declared
+  // here so the two sets stay one. Never a username.
+  pvp_friend: ['action'],
+  pvp_report: ['reason'],
+  pvp_duel_start: ['kind', 'mode', 'level', 'against'],
+  pvp_duel_done: ['kind', 'mode', 'level', 'outcome', 'rights', 'wait_h'],
+  pvp_review: ['kind'],
+  pvp_placed: ['level'],
+  pvp_smurf: ['games'],
 }
 
 // The values a string property may take where it is an enum (plan 218),
@@ -166,6 +175,22 @@ export const VALUES = {
     value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
   ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
+  pvp_friend: { action: ['request', 'accept', 'refuse', 'withdraw', 'remove', 'block', 'unblock'] },
+  pvp_report: { reason: ['name', 'cheat', 'spam', 'other'] },
+  pvp_duel_start: {
+    kind: ['friend', 'ranked'],
+    mode: ['async', 'live'],
+    level: ['N5', 'N4', 'N3', 'N2', 'N1'],
+    against: ['friend', 'seek', 'ghost', 'open'],
+  },
+  pvp_duel_done: {
+    kind: ['friend', 'ranked'],
+    mode: ['async', 'live'],
+    level: ['N5', 'N4', 'N3', 'N2', 'N1'],
+    outcome: ['win', 'loss', 'draw', 'expired', 'declined'],
+  },
+  pvp_review: { kind: ['friend', 'ranked'] },
+  pvp_placed: { level: ['N5', 'N4', 'N3', 'N2', 'N1'] },
   client_error: {
     where: ['error', 'rejection'],
     step: ['kana', 'reveal', 'level', 'test', 'card', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],

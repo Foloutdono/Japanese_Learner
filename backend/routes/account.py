@@ -118,6 +118,20 @@ PLAN = [
     ("banzuke_division",    "user_id = %(user)s",       "the board's division, this week and the last (plan 262)"),
     ("banzuke_rank",        "user_id = %(user)s",       "the board's place at the start of the day, for the moves"),
     ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
+    # 対戦 (plan 276). A duel whose only real player is this learner goes
+    # whole (the cascade takes its rows, a ghost's copy with them), read
+    # off pvp_entries, so it comes first; a duel shared with another
+    # learner stays theirs, and only this learner's entry goes.
+    ("pvp_duels",           "id IN (SELECT duel_id FROM pvp_entries WHERE user_id = %(user)s) "
+                            "AND NOT EXISTS (SELECT 1 FROM pvp_entries o WHERE o.duel_id = pvp_duels.id "
+                            "AND o.user_id <> %(user)s AND o.role <> 'ghost')",
+                            "the duels no other learner played: their papers, and any ghost's copy"),
+    ("pvp_entries",         "user_id = %(user)s",       "this learner's runs in the duels: answers, scores, Elo, a ghost's copy"),
+    ("pvp_ratings",         "user_id = %(user)s",       "the Elo, its record and the placement it started from"),
+    ("pvp_friends",         "user_id = %(user)s OR friend_id = %(user)s", "the friendships, in both directions"),
+    ("pvp_requests",        "user_id = %(user)s OR target_id = %(user)s", "the friend requests sent and received"),
+    ("pvp_blocks",          "user_id = %(user)s OR blocked_id = %(user)s", "the blocks, by and of this learner"),
+    ("pvp_reports",         "user_id = %(user)s OR reported_id = %(user)s", "the reports by this learner, and of them: a report names a person"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
 

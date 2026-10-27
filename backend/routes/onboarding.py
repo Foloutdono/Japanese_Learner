@@ -289,8 +289,31 @@ def start_climb(user_id: str = Depends(get_user_id)):
 @router.post("/api/onboarding/placement/answer")
 def answer_climb(payload: ClimbPayload, user_id: str = Depends(get_user_id)):
     """The next question, or, once a level is not cleared (or N1 is),
-    where to board. Never the answer key."""
-    return {"seed": payload.seed, **walk(payload.seed, payload.answers, stop=payload.stop)}
+    where to board. Never the answer key.
+
+    The verdict is also the learner's starting Elo for the duels (plan
+    276), noted here while no ranked duel has been played."""
+    step = walk(payload.seed, payload.answers, stop=payload.stop)
+    if step.get("done"):
+        _note_placement(user_id, step["recommendedLevel"])
+    return {"seed": payload.seed, **step}
+
+
+def _note_placement(user_id: str, level: str) -> None:
+    # The duels' bookkeeping never fails the climb.
+    from core import events
+    from study.duel_elo import record_placement
+    try:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                if record_placement(cur, user_id, level):
+                    events.record(user_id, "pvp_placed", {"level": level}, cur=cur)
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        logger.exception("onboarding: the placement could not be noted for the duels")
 
 
 @router.post("/api/onboarding/placement")
