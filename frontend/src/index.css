@@ -2784,6 +2784,10 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   --ease-in:         cubic-bezier(0.55, 0, 0.75, 0.2);
   --ease-io:         cubic-bezier(0.6, 0, 0.3, 1);
   --ease-back:       cubic-bezier(0.3, 1.45, 0.5, 1);
+  /* 補充 — how long the card is out on arrival, the drop to the way back
+     (plan 278): components/credits/refill.js says the same, and takes
+     the claim at its end (RefillMoment.browser.test.jsx holds the two equal). */
+  --refill-ms:       2300ms;
 
   /* ── Flipping tokens — dark theme (default) ── */
   --bg-main:        #17151a;
@@ -4528,31 +4532,6 @@ textarea:focus-visible {
   overflow: hidden;
 }
 .balance__fill { display: block; height: 100%; background: var(--accent2); }
-/* 補充 — the claim sheet's 回数券 book (plan 141, the owner's pick C):
-   the cap as a stub a credit, ten to a row. What the balance already
-   held in a pale metal, what the refill landed while the app was closed
-   in the pass's full gold, the room still to fill as dashed outlines.
-   The new stubs fill in one after another, as the list stagger does
-   (DESIGN.md, Motion): 30ms apart, capped at the eighth. Opacity only,
-   which is already the reduced-motion answer. components/credits/
-   ClaimSheet.jsx. */
-.claim-book {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: var(--sp-1);
-}
-.claim-book__stub {
-  height: var(--sp-6);
-  box-sizing: border-box;
-  border-radius: var(--r-plate);
-}
-.claim-book__stub--held { background: color-mix(in srgb, var(--accent2) 30%, var(--surface)); }
-.claim-book__stub--new {
-  background: var(--accent2);
-  animation: arrive-soft 0.3s ease both;
-  animation-delay: calc(min(var(--i, 0), 8) * 30ms);
-}
-.claim-book__stub--room { border: 1px dashed var(--surface-line); }
 .balance__rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -8277,6 +8256,195 @@ textarea:focus-visible {
   0%   { filter: drop-shadow(0 0 0 color-mix(in srgb, var(--accent2) 80%, transparent)); }
   40%  { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent2) 80%, transparent)); }
   100% { filter: drop-shadow(0 0 0 transparent); }
+}
+
+/* ── 補充 — the card, charged (plan 278) ──
+   The owner's pick C2 of the canvas "Tsuji — the refill, reloaded"
+   (components/credits/RefillCard.jsx). What the refill landed while the
+   app was closed is printed on the card while it is out: the strip's
+   balance door at the card's size in the foot's left, where the fare
+   line stands at rest (the face's middle is the struck 辻's, and a
+   figure over it read as neither), the amount rising off it as the fare
+   rises off the level, the mark's three arcs lit one after another, and
+   under them the gauge in the pass's metal, the balance as a share of
+   the cap. Drawn at the face's own scale over the face (CardFace's
+   children). Every beat is a share of --refill-ms. Each material keeps
+   its own inks, as the face's print does: the band's white, the
+   charcoal's gold ink, the foil's deep gold. */
+.refill-print {
+  --refill-ink: rgba(255, 255, 255, 0.92);
+  --refill-lit: var(--gate-gold-lit);
+  --refill-track: rgba(255, 255, 255, 0.22);
+  --refill-sheen: rgba(255, 255, 255, 0.55);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--pcard-face-w);
+  height: var(--pcard-face-h);
+  overflow: hidden;
+  border-radius: var(--r-identity);
+  transform-origin: 0 0;
+  transform: scale(var(--pcard-kf, 1));
+  pointer-events: none;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.pcard--pro .refill-print { --refill-ink: #d2ae68; --refill-track: rgba(255, 255, 255, 0.1); --refill-sheen: rgba(255, 255, 255, 0.14); }
+.pcard--max .refill-print { --refill-ink: #7a571c; --refill-lit: #b0852f; --refill-track: rgba(34, 36, 42, 0.12); }
+/* The balance takes the fare line's place while the card is out. */
+.pcard:has(> .refill-print) .pcf__meta { visibility: hidden; }
+.refill-print__bal {
+  position: absolute;
+  left: var(--sp-5);
+  bottom: var(--sp-4);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--refill-ink);
+  animation: refill-show var(--refill-ms) ease both;
+}
+.refill-print__fig { display: inline-flex; align-items: baseline; gap: 1px; font-variant-numeric: tabular-nums; }
+.refill-print__fig b { font-size: var(--fs-title); font-weight: 700; }
+.refill-print__fig small { font-size: var(--fs-caption); font-weight: 600; opacity: 0.7; }
+.refill-print .ofr-wave__arc { animation: refill-arc var(--refill-ms) linear both; }
+.refill-print .ofr-wave__arc--2 { animation-delay: calc(var(--refill-ms) * 0.02); }
+.refill-print .ofr-wave__arc--3 { animation-delay: calc(var(--refill-ms) * 0.04); }
+/* Over the figure's end, clear of the class beside it (GRATUIT is wide). */
+.refill-print__plus {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--refill-lit);
+  font-variant-numeric: tabular-nums;
+  animation: refill-plus var(--refill-ms) both;
+}
+.refill-print__gauge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--refill-track);
+  animation: refill-show var(--refill-ms) ease both;
+}
+.refill-print__gauge i {
+  display: block;
+  height: 100%;
+  background: var(--gate-gold-lit);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--refill-share, 0));
+  transition: transform 80ms ease-out;
+}
+.refill-print__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, var(--refill-sheen) 50%, transparent 62%);
+  transform: translateX(-120%);
+  animation: refill-sheen var(--refill-ms) both;
+}
+@keyframes refill-show {
+  0%, 4%   { opacity: 0; }
+  9%, 80%  { opacity: 1; }
+  86%, 100% { opacity: 0; }
+}
+@keyframes refill-arc {
+  0%, 21%   { border-right-color: currentcolor; }
+  23%, 65%  { border-right-color: var(--refill-lit); }
+  74%, 100% { border-right-color: currentcolor; }
+}
+@keyframes refill-plus {
+  0%, 20%   { opacity: 0; transform: translateY(6px); }
+  25%       { opacity: 1; transform: none; }
+  45%       { opacity: 1; transform: translateY(-8px); }
+  52%, 100% { opacity: 0; transform: translateY(-14px); }
+}
+@keyframes refill-sheen {
+  0%, 57%   { transform: translateX(-120%); }
+  68%, 100% { transform: translateX(120%); }
+}
+/* While the card is out the strip is its empty pocket -- the card is
+   never on the screen twice -- drawn as the holder's mouth is when the
+   card is on the page. Its doors stay under it, and still answer. */
+.hstrip__pocket {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.12)), var(--bg-panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  animation: refill-pocket var(--refill-ms) both;
+}
+@keyframes refill-pocket {
+  0%       { opacity: 0; }
+  6%, 94%  { opacity: 1; }
+  100%     { opacity: 0; }
+}
+/* The card drawn out from under its strip and hung below it at the
+   strip's right edge, 240 wide as drawn on a 390 phone, swinging once
+   from the top as it stops; clipped at the strip's foot, so it comes out
+   of the strip and goes back into it. It takes no pointer: what is
+   under it answers. Over the screen, under the sheets (240) and the
+   level-up (250). */
+.refill-hang {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 20;
+  width: 240px;
+  clip-path: inset(0 -48px -64px -48px);
+  pointer-events: none;
+}
+.refill-hang__card {
+  display: block;
+  padding-top: var(--sp-4);
+  transform-origin: 50% 0;
+  animation: refill-hang var(--refill-ms) both;
+}
+@keyframes refill-hang {
+  0%   { transform: translateY(-100%); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  15%  { transform: translateY(4px); }
+  21%  { transform: rotate(1.4deg); }
+  28%  { transform: rotate(-0.8deg); }
+  36%  { transform: none; }
+  83%  { transform: none; animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.4); }
+  100% { transform: translateY(-100%); }
+}
+/* What the card went back with: the balance's door glints once, in the
+   pass's metal (stores/credits.js, useClaimLanded). */
+.hstrip__landed {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+  box-shadow: inset 0 0 0 2px var(--accent2);
+  pointer-events: none;
+  animation: refill-landed 900ms ease-out both;
+}
+@keyframes refill-landed {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* Reduced motion: the card is shown hung, charged to its new balance,
+   and taken away -- it fades, nothing drops, swings, counts or sweeps. */
+@media (prefers-reduced-motion: reduce) {
+  .refill-hang__card { animation-name: refill-still; }
+  .refill-print__plus { animation-name: refill-plus-still; }
+  .refill-print .ofr-wave__arc { animation: none; }
+  .refill-print__sheen { display: none; }
+  .refill-print__gauge i { transition: none; }
+}
+@keyframes refill-still {
+  0%       { opacity: 0; }
+  9%, 86%  { opacity: 1; }
+  100%     { opacity: 0; }
+}
+@keyframes refill-plus-still {
+  0%, 9%    { opacity: 0; }
+  15%, 80%  { opacity: 1; }
+  86%, 100% { opacity: 0; }
 }
 
 /* ══ 定期券 — the pass's charcoal ground ══════════════════════
@@ -33527,9 +33695,44 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel) var(--r-panel) 0 0;
     transition: transform 0.25s cubic-bezier(0.3, 0.9, 0.3, 1);
   }
+  /* 補充 — the refill stands the card up out of the mouth (plan 278,
+     below): the mouth's clip opens upward only. */
+  .desk-holder--refill .desk-holder__card {
+    /* Standing, the card wears its own material's lift again, smaller. */
+    --pcs-lift: 0 10px 22px rgba(0, 0, 0, 0.5), 0 2px 5px rgba(0, 0, 0, 0.3);
+    overflow: visible;
+    clip-path: inset(-200px -48px 0 -48px);
+  }
   .desk-holder:hover .desk-holder__card { transform: translateY(-5px); }
-  .desk-holder__card .pcs { box-shadow: none; }
-  .desk-holder--free .desk-holder__card .pcs { box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.14); }
+  .desk-holder:not(.desk-holder--refill) .desk-holder__card .pcs { box-shadow: none; }
+  .desk-holder--free:not(.desk-holder--refill) .desk-holder__card .pcs { box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.14); }
+  /* 補充 — the refill (plan 278, the owner's pick C2;
+     components/chrome/DeskPass.jsx): the card rises clear of the case,
+     is charged there in its own lift, and sinks back behind the case,
+     which stays over it as at rest. Reduced motion: it stays in the
+     mouth, and the case's figure glints when the claim lands. */
+  .desk-holder--refill .desk-holder__card > .pcard { animation: desk-refill-stand var(--refill-ms) both; }
+  /* Out of the mouth to just above the case (the holder's 32px of
+     mouth, less a hair): the card's own height, less --sp-7. */
+  @keyframes desk-refill-stand {
+    0%   { transform: none; animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+    12%  { transform: translateY(calc(-100% + var(--sp-6))); }
+    17%  { transform: translateY(calc(-100% + var(--sp-7))); }
+    83%  { transform: translateY(calc(-100% + var(--sp-7))); animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.5); }
+    100% { transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .desk-holder--refill .desk-holder__card > .pcard { animation: none; }
+  }
+  /* What it went back with: the case's balance glints once. */
+  .desk-holder__landed {
+    position: absolute;
+    inset: 0;
+    border-bottom-left-radius: var(--r-identity);
+    box-shadow: inset 0 0 0 2px var(--accent2);
+    pointer-events: none;
+    animation: refill-landed 900ms ease-out both;
+  }
   .desk-holder__slot {
     position: absolute;
     left: var(--sp-4);
@@ -33615,7 +33818,7 @@ button.brd-stn { cursor: pointer; }
     border-left: 1px solid rgba(255, 255, 255, 0.07);
     border-bottom-right-radius: var(--r-identity);
   }
-  .desk-holder__cr { border-bottom-left-radius: var(--r-identity); }
+  .desk-holder__cr { position: relative; border-bottom-left-radius: var(--r-identity); }
   .desk-holder__st--slightlyBehind { --st-ink: var(--warning); }
   .desk-holder__st--delayed,
   .desk-holder__st--suspended,
@@ -37114,12 +37317,9 @@ button.brd-stn { cursor: pointer; }
      the desk draws the pass's objects everywhere else, instead of 640px
      in the window's middle a long reach from the pass that opened them.
      Still modal; only placed. Opened from a run's pass, where there is
-     no rail, they stay centred. The claim sheet (plan 141) carries the
-     balance too but nothing on the rail opened it -- it arrives on its
-     own, over whatever screen the learner came back to -- so it is not
-     one of the pass's doors, and keeps the middle (below). */
+     no rail, they stay centred. */
   :root[data-chrome="shell"] .status-sheet,
-  :root[data-chrome="shell"] .sheet:has(> .balance):not(.claim-sheet) {
+  :root[data-chrome="shell"] .sheet:has(> .balance) {
     inset: auto auto var(--sp-5) calc(var(--desk-rail-w) + var(--sp-3));
     width: var(--desk-side-w);
     margin: 0;
@@ -37127,11 +37327,6 @@ button.brd-stn { cursor: pointer; }
   /* At a column's width a row of two actions wraps their labels: they
      stack, as they do at a phone's, which this width is. */
   :root[data-chrome="shell"] .sheet:has(> .balance) > :is(.btn-primary, .btn-secondary, .btn-depart) { flex-basis: 100%; }
-  /* 補充 — the claim sheet in the window's middle, at a column's width:
-     the 回数券 book is drawn for a phone's (a stub is a thumb's width
-     across), and at the dialog's full --card-w it spread into fifty
-     flat bars with the figure a long way from its button. */
-  .claim-sheet { width: var(--desk-side-w); }
   /* 定期券 — the three offers (plan 172) as a dialog in the window's
      middle, the owner's pick A 対 of the canvas's Desktop page: the
      stage beside the words. The phone's stage drawing is kept whole --

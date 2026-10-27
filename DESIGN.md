@@ -1539,7 +1539,8 @@ progress legend back — on the desk too, where the run also prints its keys
 
 Every card is rewarded, and none of it is a ceremony — the cleared day
 is the one ceremony, and it comes after the last card (below). Three
-moments, three objects, none waiting to be dismissed:
+moments, three objects, none waiting to be dismissed — and a fourth on
+arrival, the refill, which waits on nothing either:
 
 - **The fare** (運賃) — the XP an answer earns — is reported on the object it
   was paid into: the **level HUD** on a tab screen, where the strip's struck
@@ -1615,6 +1616,31 @@ moments, three objects, none waiting to be dismissed:
   Under reduced motion the card fades in and out, the engraving stands at
   the new level's climb and the figure changes in place; nothing fills,
   trembles, bursts or rolls.
+- **The refill** (補充) — what the refill landed while the app was
+  closed — is **charged onto the card**, where the learner carries it
+  (plan 278, the owner's pick C2 of the canvas "Tsuji — the refill,
+  reloaded"; it replaced plan 141's sheet and its book of stubs). On the
+  phone's HUD and a run's head the card drops out from under its strip
+  and hangs below it at the strip's right edge, swinging once from the
+  top, the strip an empty pocket meanwhile, so the card is never on the
+  screen twice; on the desk it stands up out of the holder's mouth,
+  clear of the case. While it is out the balance is printed in the
+  foot's left, in the fare line's place (the face's middle is the struck
+  辻's), and counts up from what was held to what it holds now, a coin a
+  step (twelve steps at most); the amount rises off it as the fare
+  rises off the level, the mark's three arcs light one after another,
+  and the gauge along the card's foot, in the pass's metal, fills to the
+  balance's share of the cap. Then it goes back, the claim is taken,
+  and the figure it went back with glints once on the strip or the case.
+  It is 2.3 seconds on one clock (`--refill-ms`,
+  `components/credits/refill.js`), takes no pointer and asks nothing:
+  no scrim, no button, the screen under it answers every tap, and a
+  screen reader hears what landed. A credit that lands while the app is
+  open is claimed quietly; the card comes out only on arrival. The
+  People family throughout: each material keeps its own inks, and gold
+  is the gauge's and the amount's, the pass's metal. Under reduced
+  motion the card fades in hung, already at its new balance, and fades
+  out; on the desk it stays in the mouth and the case's figure glints.
 
 So nothing holds the queue. Every reward plays over the next card, because
 a learner who has just rated one card is already looking for the next.
