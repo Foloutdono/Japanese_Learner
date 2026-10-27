@@ -635,6 +635,12 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
         }
     elif duel["status"] == "done":
         them = {"username": None, "gone": True}
+    refunded = False
+    if duel["kind"] == "ranked":
+        # A fare given back (an expiry, a closing): the result says so.
+        cur.execute("SELECT 1 FROM credit_ledger WHERE user_id = %s AND reason = 'duel' AND ref = %s AND delta > 0",
+                    (me, f"duel:{duel['id']}"))
+        refunded = cur.fetchone() is not None
     return {
         "id": duel["id"],
         "kind": duel["kind"],
@@ -646,7 +652,9 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
                 "played": mine["finished_at"] is not None, "started": mine["started_at"] is not None,
                 "score": mine["score"] if mine["finished_at"] else None,
                 "rights": mine["rights"] if mine["finished_at"] else None,
-                "xp": mine["xp"] if mine["finished_at"] else None},
+                "answered": len(mine["answers"]) if mine["finished_at"] else None,
+                "xp": mine["xp"] if mine["finished_at"] else None,
+                "refunded": refunded},
         "them": them,
         "price": _price(duel, mine),
         "expiresAt": _iso(duel["expires_at"]),
@@ -856,6 +864,96 @@ def cancel(cur, after: list, me: str, duel_id: int) -> None:
     _set_status(cur, duel, "cancelled", now)
 
 
+# ── Closing what can no longer be played out ────────────────────────
+
+def _close(cur, after: list, duel: dict, entries: list[dict], now: datetime, leaving: str | None = None) -> None:
+    """Cancel a duel nobody can finish -- a friendship ended, a block, an
+    account erased (`leaving`): a run under way ends where it stands and
+    is paid its answers, and a fare paid is given back once the closing
+    is committed. The learner leaving is owed nothing: their rows go."""
+    for e in entries:
+        if e["role"] == "ghost" or e["user_id"] == leaving:
+            continue
+        if e["started_at"] and not e["finished_at"]:
+            _finish(cur, after, e, min(now, _end(e)), now)
+        if e["paid"]:
+            uid, n, ref = e["user_id"], e["paid"], f"duel:{duel['id']}"
+            after.append(lambda uid=uid, n=n, ref=ref: _refund(uid, n, ref))
+    _set_status(cur, duel, "cancelled", now)
+
+
+def _up_to_date(cur, after: list, duel_id: int, now: datetime) -> tuple[dict | None, list[dict]]:
+    """A duel locked and brought up to date as far as its runs go: one
+    past its minute is finished, two finished are resolved -- so what was
+    played is kept rather than cancelled. (Not settle(): its expiries and
+    seats given back would refund a learner whose account is going.)"""
+    duel = _duel(cur, duel_id, lock=True)
+    if duel is None:
+        return None, []
+    entries = _entries(cur, duel_id, lock=True)
+    if duel["status"] not in ACTIVE:
+        return duel, entries
+    for e in entries:
+        if e["role"] != "ghost" and e["started_at"] and not e["finished_at"]:
+            if now >= _end(e) + timedelta(milliseconds=GRACE_MS):
+                _finish(cur, after, e, _end(e), now)
+    if len(entries) == 2 and all(e["finished_at"] for e in entries):
+        _resolve(cur, duel, entries, now)
+    return duel, entries
+
+
+def close_between(cur, after: list, a: str, b: str) -> list[int]:
+    """The friend duels between two learners still unresolved, cancelled
+    (study/duel_friends: a friendship ended, a block). Returns their ids."""
+    now = _now()
+    cur.execute(
+        """
+        SELECT d.id FROM pvp_duels d
+         WHERE d.kind = 'friend' AND d.status = ANY(%s)
+           AND EXISTS (SELECT 1 FROM pvp_entries WHERE duel_id = d.id AND user_id = %s)
+           AND EXISTS (SELECT 1 FROM pvp_entries WHERE duel_id = d.id AND user_id = %s)
+         ORDER BY d.id
+        """,
+        (list(ACTIVE), a, b),
+    )
+    closed = []
+    for (duel_id,) in cur.fetchall():
+        duel, entries = _up_to_date(cur, after, duel_id, now)
+        if duel is not None and duel["status"] in ACTIVE:
+            _close(cur, after, duel, entries, now)
+            closed.append(duel_id)
+    return closed
+
+
+def leave_all(cur, after: list, user_id: str) -> list[int]:
+    """A learner's account is being erased (routes/account.py, before
+    PLAN deletes their rows): every duel still unresolved that another
+    learner is in is cancelled for them, what was played kept and their
+    fares given back -- except a seat taken in another learner's ranked
+    run, which the erasure gives back to the run, waiting for a stranger
+    again. A duel nobody else is in goes whole with the erasure. Returns
+    the ids cancelled."""
+    now = _now()
+    cur.execute(
+        "SELECT DISTINCT e.duel_id FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id "
+        "WHERE e.user_id = %s AND d.status = ANY(%s) ORDER BY e.duel_id",
+        (user_id, list(ACTIVE)),
+    )
+    closed = []
+    for (duel_id,) in cur.fetchall():
+        duel, entries = _up_to_date(cur, after, duel_id, now)
+        if duel is None or duel["status"] not in ACTIVE:
+            continue
+        if not any(e["role"] != "ghost" and e["user_id"] != user_id for e in entries):
+            continue
+        seat = _mine(entries, user_id)
+        if duel["kind"] == "ranked" and not duel["ghost"] and seat is not None and seat["role"] == "opponent":
+            continue
+        _close(cur, after, duel, entries, now, leaving=user_id)
+        closed.append(duel_id)
+    return closed
+
+
 # ── The corrections ─────────────────────────────────────────────────
 
 def review(cur, after: list, me: str, duel_id: int, buy: bool) -> dict:
@@ -937,6 +1035,11 @@ def _line(cur, me: str, duel: dict, entries: list[dict], named: dict) -> dict:
         "expiresAt": _iso(duel["expires_at"]),
         "since": _iso(mine["finished_at"] or mine["created_at"]),
     }
+    if mine["started_at"] is not None and mine["finished_at"] is None and duel["status"] in ACTIVE:
+        # A run left mid-minute (the app closed, the screen left): the
+        # way back in, while the minute lasts.
+        row["running"] = True
+        row["endsAt"] = _iso(_end(mine))
     if duel["status"] == "done":
         row["outcome"] = _outcome(mine["result"])
         row["elo"] = (mine["rating_after"] - mine["rating_before"]

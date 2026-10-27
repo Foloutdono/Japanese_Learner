@@ -33118,6 +33118,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-run__help { margin: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); text-wrap: pretty; }
 .pvp-run__help--center { text-align: center; }
 .pvp-run__fail { margin: auto; color: var(--text-secondary); }
+/* A verdict that could not be read: asked again from under the line. */
+.pvp-result .pvp-run__fail { margin: 0 auto; }
+.pvp-retry { align-self: center; }
 
 /* D1 — the duel's ticket: the cleared day's 硬券, printed for two. */
 .pvp-ticket { flex: none; gap: var(--sp-4); padding: var(--sp-6) var(--sp-7); }

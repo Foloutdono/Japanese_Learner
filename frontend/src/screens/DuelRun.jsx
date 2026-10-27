@@ -31,6 +31,8 @@ const SETTLE_MS = 1000
 const LIVE_POLL_MS = 1000
 const LOBBY_POLL_MS = 3000
 const CLOSED = ['expired', 'declined', 'cancelled']
+// The refusals that mean the run cannot go on.
+const CLOSING = ['pvp_closed', 'pvp_not_found', 'pvp_played']
 
 export default function DuelRun({ session }) {
   const { id } = useParams()
@@ -66,6 +68,19 @@ export default function DuelRun({ session }) {
     })
   }, [])
 
+  // A refusal saying the duel closed under the ticket (the other left,
+  // blocked, erased their account; the minute already run elsewhere) is
+  // read again from the server: the ticket then says what the duel is,
+  // rather than keep a button that can only fail again.
+  const refused = useCallback(e => {
+    if (!CLOSING.includes(e?.code)) {
+      setError(errorKey(e))
+      return
+    }
+    refreshDuels()
+    load().then(() => setError(null)).catch(err => setDuel({ failed: errorKey(err) }))
+  }, [load])
+
   // « Partir », or a run already under way picked up where it is.
   const start = useCallback(() => {
     if (busy.current) return
@@ -73,9 +88,9 @@ export default function DuelRun({ session }) {
     setError(null)
     apiJson(`/api/pvp/duels/${id}/start`, session, { method: 'POST', body: '{}' })
       .then(begin)
-      .catch(e => setError(errorKey(e)))
+      .catch(refused)
       .finally(() => { busy.current = false })
-  }, [id, session, begin])
+  }, [id, session, begin, refused])
 
   const join = useCallback(() => {
     if (busy.current) return
@@ -84,9 +99,9 @@ export default function DuelRun({ session }) {
     setError(null)
     apiJson(`/api/pvp/duels/${id}/join`, session, { method: 'POST', body: '{}' })
       .then(begin)
-      .catch(e => setError(errorKey(e)))
+      .catch(refused)
       .finally(() => { busy.current = false })
-  }, [id, session, begin])
+  }, [id, session, begin, refused])
 
   // The departure (D2) already read the price: its duel starts at once.
   // So does a run under way, after a reload or a lost connection.
@@ -141,7 +156,14 @@ export default function DuelRun({ session }) {
         flash: { pick, right: a.right, pts: a.pts, until: a.next ? Date.parse(a.nextAt) : Date.now() + skew.current + RIGHT_HOLD_MS },
         nextQ: a.next,
       }))
-    }).catch(() => setRun(cur => ({ ...cur, busy: false, flash: null })))
+    }).catch(e => setRun(cur => (
+      // The duel closed under the run (a block, the other's account
+      // erased): the run is over, and the cover says how. Anything else
+      // (the network) leaves the question to be answered again.
+      CLOSING.includes(e?.code)
+        ? { ...cur, busy: false, flash: null, done: true }
+        : { ...cur, busy: false, flash: null }
+    )))
   }, [id, session])
 
   const over = run && (run.done || now >= run.endsAt)
@@ -183,18 +205,20 @@ export default function DuelRun({ session }) {
     return () => clearInterval(tick)
   }, [lobby, id, session, start, load])
 
-  // The verdict, read once the minute and its grace are over.
+  // The verdict, read once the minute and its grace are over; a read
+  // that fails says so and can be asked again.
   const endsAt = run?.endsAt
   const doneEarly = Boolean(run?.done)
+  const readVerdict = useCallback(() => {
+    apiJson(`/api/pvp/duels/${id}`, session).then(setSettled).catch(() => setSettled(false))
+  }, [id, session])
   useEffect(() => {
     if (!over) return undefined
     refreshDuels()
     const wait = doneEarly ? 0 : Math.max(0, endsAt + SETTLE_MS - (Date.now() + skew.current))
-    const timer = setTimeout(() => {
-      apiJson(`/api/pvp/duels/${id}`, session).then(setSettled).catch(() => setSettled(false))
-    }, wait)
+    const timer = setTimeout(readVerdict, wait)
     return () => clearTimeout(timer)
-  }, [over, doneEarly, endsAt, id, session])
+  }, [over, doneEarly, endsAt, readVerdict])
 
   // What the run paid, on the level bar once the server has said it.
   const paidXp = settled?.you?.xp ?? null
@@ -234,14 +258,15 @@ export default function DuelRun({ session }) {
     return <Result duel={duel} settled={duel} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error} />
   }
   if (over) {
-    return <Result duel={duel} settled={settled || null} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error} />
+    return <Result duel={duel} settled={settled} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error}
+      onRetry={() => { setSettled(null); readVerdict() }} />
   }
   if (!run) {
     return (
       <Ticket duel={duel} them={them} t={t} lang={lang} now={now} error={error}
         onLeave={leave} onGo={() => { playClick(); start() }} onJoin={join}
-        onDecline={() => { playClick(); apiJson(`/api/pvp/duels/${id}/decline`, session, { method: 'POST', body: '{}' }).then(() => { refreshDuels(); leave() }).catch(e => setError(errorKey(e))) }}
-        onCancel={() => { playClick(); apiJson(`/api/pvp/duels/${id}`, session, { method: 'DELETE' }).then(() => { refreshDuels(); leave() }).catch(e => setError(errorKey(e))) }} />
+        onDecline={() => { playClick(); apiJson(`/api/pvp/duels/${id}/decline`, session, { method: 'POST', body: '{}' }).then(() => { refreshDuels(); leave() }).catch(refused) }}
+        onCancel={() => { playClick(); apiJson(`/api/pvp/duels/${id}`, session, { method: 'DELETE' }).then(() => { refreshDuels(); leave() }).catch(refused) }} />
     )
   }
 
@@ -435,17 +460,20 @@ function FinishLine({ mine, theirs, them, t, lang }) {
   )
 }
 
-function Result({ duel, settled, them, session, t, lang, onLeave, onAgain, error }) {
+function Result({ duel, settled: read, them, session, t, lang, onLeave, onAgain, error, onRetry }) {
   // The verdict is the server's (the cover, read once the minute is
   // over). While the other player has yet to run there is no outcome,
-  // only the learner's own score; while it loads, nothing.
+  // only the learner's own score; while it loads, nothing; when the read
+  // failed (false), the way to ask again.
+  const failed = read === false
+  const settled = failed ? null : read
   const verdict = settled?.result ?? null
   const shut = CLOSED.includes(settled?.status)
   const waiting = settled != null && verdict == null
   const mine = verdict?.mine ?? settled?.you?.score ?? 0
   const theirs = verdict?.theirs ?? 0
   const rights = verdict?.rights ?? settled?.you?.rights ?? 0
-  const count = verdict?.answered ?? rights
+  const count = verdict?.answered ?? settled?.you?.answered ?? rights
   const theirRights = verdict?.theirRights ?? 0
   const theirCount = verdict?.theirAnswered ?? 0
   const result = verdict?.outcome ?? 'draw'
@@ -481,7 +509,16 @@ function Result({ duel, settled, them, session, t, lang, onLeave, onAgain, error
   const rightsRecord = <div className="record"><span className="record__value">{rights}<span className="record__unit">/ {count}</span></span><span className="record__label">{t.pvpRightsCap}</span></div>
 
   let body
-  if (settled == null) {
+  if (failed) {
+    body = (
+      <>
+        <span className="pvp-air" aria-hidden="true" />
+        <p className="pvp-run__fail" role="alert">{t.pvpErrFailed}</p>
+        <button type="button" className="btn-secondary pvp-retry" onClick={() => { playClick(); onRetry?.() }}>{t.retry}</button>
+        <span className="pvp-air" aria-hidden="true" />
+      </>
+    )
+  } else if (settled == null) {
     body = <Loading />
   } else if (waiting) {
     body = (
@@ -496,7 +533,11 @@ function Result({ duel, settled, them, session, t, lang, onLeave, onAgain, error
               <span className="pvp-face__rights">{t.pvpRightsOf(rights, count)}</span>
             </div>
           </div>
-          <p className="pvp-run__help pvp-run__help--center">{shut ? (ranked && settled.status === 'expired' ? t.pvpRefunded : t.pvpNoVerdict) : t.pvpVerdictLater(them)}</p>
+          <p className="pvp-run__help pvp-run__help--center">
+            {!shut ? t.pvpVerdictLater(them)
+              : !settled.you?.refunded ? t.pvpNoVerdict
+                : settled.status === 'expired' ? t.pvpRefunded : t.pvpNoVerdictRefunded}
+          </p>
         </section>
         <div className="records pvp-two pvp-result__facts">{rightsRecord}{xpRecord}</div>
         <span className="pvp-air" aria-hidden="true" />
@@ -543,7 +584,11 @@ function Result({ duel, settled, them, session, t, lang, onLeave, onAgain, error
               {!settled.reviewed && <b className="pvp-result__price">{t.pvpCredits(settled.reviewPrice)}</b>}
             </button>
           )}
-          <button type="button" className="btn-primary exam-cover__go" onClick={onAgain}>{ranked || !duel.them?.username ? t.pvpNewSprint : t.pvpRematch}</button>
+          {/* A friend's duel closed (a block, a friendship ended, an account
+              erased) has no rematch to offer: the way back to the hall. */}
+          {shut && !ranked
+            ? <button type="button" className="btn-primary exam-cover__go" onClick={onLeave}>{t.pvpTitle}</button>
+            : <button type="button" className="btn-primary exam-cover__go" onClick={onAgain}>{ranked || !duel.them?.username ? t.pvpNewSprint : t.pvpRematch}</button>}
         </div>
       </main>
       <LevelBar />

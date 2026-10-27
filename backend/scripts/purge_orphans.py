@@ -158,6 +158,7 @@ def main() -> int:
     if auth.DEV_USER_ID:
         keep.add(auth.DEV_USER_ID)
 
+    after: list = []
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -195,13 +196,16 @@ def main() -> int:
             # is the state this script exists to clean up, so it must not
             # be able to create one.
             for user_id in orphans:
-                delete_user_rows(cur, user_id)
+                delete_user_rows(cur, user_id, after)
         conn.commit()
     except Exception:
         conn.rollback()
         raise
     finally:
         conn.close()
+    # What the duels cancelled owe the other players (study/duels.leave_all).
+    for task in after:
+        task()
 
     logger.info("")
     logger.info("Purged %d orphaned users.", len(orphans))

@@ -153,9 +153,9 @@ def withdraw_request(username: str = Path(..., pattern=USERNAME), user_id: str =
 
 @router.delete("/api/pvp/friends/{username}")
 def remove_friend(username: str = Path(..., pattern=USERNAME), user_id: str = Depends(get_user_id)):
-    def go(cur, _after):
+    def go(cur, after):
         other, _name = friends.reach(cur, user_id, username)
-        friends.unfriend(cur, user_id, other)
+        friends.unfriend(cur, after, user_id, other)
         _friend_event(cur, user_id, "remove")
         return {"status": "removed"}
     return _do(go)
@@ -171,8 +171,8 @@ def _anyone(cur, username: str) -> str:
 
 @router.post("/api/pvp/blocks")
 def block(payload: Named, user_id: str = Depends(get_user_id)):
-    def go(cur, _after):
-        friends.block(cur, user_id, _anyone(cur, payload.username))
+    def go(cur, after):
+        friends.block(cur, after, user_id, _anyone(cur, payload.username))
         _friend_event(cur, user_id, "block")
         return {"status": "blocked"}
     return _do(go)

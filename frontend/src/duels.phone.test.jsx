@@ -129,6 +129,27 @@ describe('the hall (H3, G1)', () => {
     expect($('.where').textContent).toBe('/duel/new')
   })
 
+  it('offers the way back into a sprint left mid-minute', async () => {
+    const running = { id: 52, kind: 'friend', mode: 'async', level: 'N5', status: 'open', against: 'friend', who: 'aiko',
+      mine: null, theirs: 1225, running: true, endsAt: new Date(Date.now() + 40_000).toISOString(),
+      expiresAt: new Date(Date.now() + 47 * 3_600_000).toISOString() }
+    const waiting = { ...running, id: 53, who: 'Sora22', mine: 900, theirs: null, running: undefined, endsAt: undefined }
+    duels = { data: { ...HALL, toPlay: [], running: [running, waiting] } }
+    await mountHall()
+    $$('.pvp-console .console__band-opt').find(b => b.textContent.startsWith('En cours')).click()
+    await settle(50)
+    const rows = $$('.pvp-console__row')
+    expect(rows.map(r => r.querySelector('.pvp-console__what').textContent))
+      .toEqual(['Ton sprint est en cours', `Toi ${(900).toLocaleString('fr')} · En attente de Sora22`])
+    // A run waiting on the other has nothing to open; the one under way, its way back.
+    expect(rows[1].querySelector('.pvp-console__go')).toBeNull()
+    const back = rows[0].querySelector('.pvp-console__go')
+    expect(back.textContent).toBe('Reprendre')
+    back.click()
+    await settle()
+    expect($('.where').textContent).toBe('/duel/52')
+  })
+
   it('says there is no Elo before the placement test, and leads to it', async () => {
     duels = { data: { ...HALL, rating: { placed: false } } }
     await mountHall()

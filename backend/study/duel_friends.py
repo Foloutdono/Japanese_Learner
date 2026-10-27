@@ -234,33 +234,24 @@ def withdraw(cur, me: str, other: str) -> None:
         raise Refused(404, "pvp_no_request")
 
 
-def cancel_between(cur, a: str, b: str) -> list[int]:
-    """Cancel the friend duels between two learners still unresolved,
-    whatever their state. Returns their ids."""
-    cur.execute(
-        """
-        UPDATE pvp_duels d SET status = 'cancelled', resolved_at = NOW()
-         WHERE d.kind = 'friend' AND d.status IN ('open', 'lobby', 'live')
-           AND EXISTS (SELECT 1 FROM pvp_entries WHERE duel_id = d.id AND user_id = %s)
-           AND EXISTS (SELECT 1 FROM pvp_entries WHERE duel_id = d.id AND user_id = %s)
-        RETURNING d.id
-        """,
-        (a, b),
-    )
-    return [row[0] for row in cur.fetchall()]
+def _close_between(cur, after: list, a: str, b: str) -> None:
+    # The friend duels between the two, cancelled with what was played
+    # kept and paid (study/duels, which imports this module).
+    from study import duels
+    duels.close_between(cur, after, a, b)
 
 
-def unfriend(cur, me: str, other: str) -> None:
+def unfriend(cur, after: list, me: str, other: str) -> None:
     cur.execute(
         "DELETE FROM pvp_friends WHERE (user_id = %s AND friend_id = %s) OR (user_id = %s AND friend_id = %s)",
         (me, other, other, me),
     )
     if cur.rowcount == 0:
         raise Refused(404, "pvp_not_friends")
-    cancel_between(cur, me, other)
+    _close_between(cur, after, me, other)
 
 
-def block(cur, me: str, other: str) -> None:
+def block(cur, after: list, me: str, other: str) -> None:
     if other == me:
         raise Refused(400, "pvp_self")
     cur.execute(
@@ -275,7 +266,7 @@ def block(cur, me: str, other: str) -> None:
         "DELETE FROM pvp_requests WHERE (user_id = %s AND target_id = %s) OR (user_id = %s AND target_id = %s)",
         (me, other, other, me),
     )
-    cancel_between(cur, me, other)
+    _close_between(cur, after, me, other)
 
 
 def unblock(cur, me: str, other: str) -> None:

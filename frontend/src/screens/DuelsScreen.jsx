@@ -107,7 +107,10 @@ function Row({ d, view, fig, t, go }) {
     const left = t.pvpHoursLeft(hoursLeft(d.expiresAt))
     what = d.mode === 'live' ? t.pvpLiveWaits : d.theirs != null ? `${t.pvpBeat(fig(d.theirs))} · ${left}` : left
   } else if (view === 'running') {
-    what = d.status === 'live' ? t.pvpLiveNow
+    // A sprint left mid-minute (the app closed, the screen left) is still
+    // the learner's until its minute ends: the way back in.
+    what = d.running ? t.pvpRunning
+      : d.status === 'live' ? t.pvpLiveNow
       : d.status === 'lobby' ? t.pvpWaitingFor(who)
         : waitingRun ? `${t.pvpYou} ${fig(d.mine ?? 0)} · ${t.pvpNobodyYet}`
           : `${t.pvpYou} ${fig(d.mine ?? 0)} · ${t.pvpWaitingFor(who)}`
@@ -122,7 +125,9 @@ function Row({ d, view, fig, t, go }) {
         <span className="pvp-console__what">{what}</span>
       </span>
       {view === 'play' && <button type="button" className="btn-secondary pvp-console__go" onClick={() => go.duel(d.id)}>{d.mode === 'live' ? t.pvpEnter : t.pvpPlay}</button>}
-      {view === 'running' && d.status !== 'open' && <button type="button" className="btn-secondary pvp-console__go" onClick={() => go.duel(d.id)}>{t.pvpOpen}</button>}
+      {view === 'running' && (d.running || d.status !== 'open') && (
+        <button type="button" className="btn-secondary pvp-console__go" onClick={() => go.duel(d.id)}>{d.running ? t.pvpResume : t.pvpOpen}</button>
+      )}
       {view === 'done' && d.outcome && (
         <button type="button" className="pvp-console__end" onClick={() => go.duel(d.id)}>
           <Verdict outcome={d.outcome} t={t} />

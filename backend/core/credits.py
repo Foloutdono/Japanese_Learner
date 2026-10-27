@@ -593,7 +593,12 @@ def pay(user_id: str, n: int, reason: str, ref: str | None = None) -> int:
 def refund(user_id: str, n: int, reason: str, ref: str | None = None) -> None:
     """Give back a fare the app did not deliver (a ranked duel whose run
     waited out its 48 hours with nobody to meet): a positive row of the
-    fare's own reason, so the reason sums to what was really paid."""
+    fare's own reason, so the reason sums to what was really paid.
+
+    A fare is paid from a profile row, so none means the learner was
+    erased since (the account's deletion, or one orphan purge erasing
+    both players of a duel): they are owed nothing, least of all the
+    account _settle would make again, welcome bonus and all."""
     if n <= 0:
         return
     assert reason in FARES and reason != "review", reason
@@ -601,6 +606,9 @@ def refund(user_id: str, n: int, reason: str, ref: str | None = None) -> None:
     conn = db_conn()
     try:
         with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM user_profiles WHERE user_id = %s FOR UPDATE", (user_id,))
+            if cur.fetchone() is None:
+                return
             now = datetime.now(timezone.utc)
             _settle(cur, user_id, now, claim=True)
             _insert(cur, user_id, n, reason, ref)
