@@ -200,10 +200,17 @@ export default function CardPrompt({
         {!showChoices && (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-            front={isF2B ? <CharDisplay char={c.kanji} variant="glyph" /> : <MeaningDisplay meaning={c.meaning} size={44} />}
+            front={isF2B
+              ? <>
+                  <CharDisplay char={c.kanji} variant="glyph" />
+                  {/* The card says what it asks (plan 276): the back
+                      prints readings too, and only the meaning is graded. */}
+                  <p className="prompt-ask">{t.askKanjiMeaning}</p>
+                </>
+              : <MeaningDisplay meaning={c.meaning} size={44} />}
             back={
               <InlineReveal
-                t={t} kana={c.kana} shares={c.reading_shares} isLarge={isF2B}
+                t={t} kana={c.kana} shares={c.reading_shares} glyph={c.kanji} session={session} isLarge={isF2B}
                 main={isF2B ? <MeaningDisplay meaning={c.meaning} size={28} /> : <CharDisplay char={c.kanji} variant="word" />}
               />
             }
@@ -214,7 +221,7 @@ export default function CardPrompt({
         {showChoices && (
           <>
             <InlineReveal
-              t={t} kana={c.kana} shares={c.reading_shares} revealed={answered}
+              t={t} kana={c.kana} shares={c.reading_shares} glyph={c.kanji} session={session} revealed={answered}
               main={isF2B ? <CharDisplay char={c.kanji} variant="glyph" /> : <MeaningDisplay meaning={c.meaning} size={44} />}
             />
             <RevealActions

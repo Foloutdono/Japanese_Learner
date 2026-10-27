@@ -490,6 +490,8 @@ const quiz = {
   typeRomaji:        'Type the romaji…',
   tapToFlip:          'Tap to flip',
   tapToReveal:         'Tap to reveal',
+  // A Kanji → meaning card's front says what it asks (plan 276).
+  askKanjiMeaning:     'What does it mean?',
   // The desk's hint (plan 113): a key cap, then the words after it.
   keySpace:            'Space',
   revealByKey:         'to reveal',
@@ -1784,6 +1786,14 @@ const dictionary = {
   // The 熟 on a word row whose reading belongs to the whole word
   // (今朝 けさ, 時計 とけい), not to the kanji the row is about.
   readingsWhole:     'Read as a whole word',
+  // Plan 276: the sheet a kanji card's two register names open
+  // (components/study/ReadingsHelp, domain/readingsHelp).
+  readingsHelpCap:   'The two readings',
+  readingsHelpOn:    'It came from China with the kanji and is written in katakana. It is mostly the reading of words of several kanji.',
+  readingsHelpKun:   'The Japanese word the kanji came to write, in hiragana. Often the kanji alone, or followed by kana.',
+  readingsHelpShare: (kanji) => `The share of the course's words that read ${kanji} this way: start with the highest.`,
+  readingsHelpTilde: (kanji, side, word) => `A reading ${kanji} takes ${side === 'after' ? 'after' : 'before'} another part of the word${word ? `: ${word.kanji}, ${word.kana}` : ''}.`,
+  readingsHelpDot:   (written) => `After the dot come kana: ${written}.`,
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',

@@ -471,6 +471,8 @@ const quiz = {
   typeRomaji:        'Tape le romaji…',
   tapToFlip:          'Touche pour retourner',
   tapToReveal:        'Touche pour révéler',
+  // Le recto d'une carte Kanji → sens dit ce qu'il demande (plan 276).
+  askKanjiMeaning:    'Quel est son sens ?',
   // L'indice du bureau (plan 113) : une touche, puis les mots qui suivent.
   keySpace:           'Espace',
   revealByKey:        'pour révéler',
@@ -1726,6 +1728,14 @@ const dictionary = {
   readingsKunName:   'Lecture japonaise',
   // Voir en/index.js : le 熟 d'un mot qui se lit d'un bloc.
   readingsWhole:     'Se lit d\'un bloc',
+  // Plan 276 : la fiche que les deux noms d'une carte kanji ouvrent
+  // (components/study/ReadingsHelp, domain/readingsHelp).
+  readingsHelpCap:   'Les deux lectures',
+  readingsHelpOn:    'Venue de Chine avec le kanji, elle s’écrit en katakana. C’est surtout celle des mots de plusieurs kanji.',
+  readingsHelpKun:   'Le mot japonais que le kanji est venu écrire, en hiragana. Souvent le kanji seul, ou suivi de kana.',
+  readingsHelpShare: (kanji) => `La part des mots du cours qui lisent ${kanji} ainsi : commence par les plus hautes.`,
+  readingsHelpTilde: (kanji, side, word) => `Une lecture que ${kanji} prend ${side === 'after' ? 'derrière' : 'devant'} un autre élément du mot${word ? ` : ${word.kanji}, ${word.kana}` : ''}.`,
+  readingsHelpDot:   (written) => `Après le point viennent des kana : ${written}.`,
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',

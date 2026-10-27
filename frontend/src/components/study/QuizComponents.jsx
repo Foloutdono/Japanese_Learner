@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback, useContext } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick, playFlip, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup, ReadingShares } from './Readings'
+import { ReadingsHelp } from './ReadingsHelp'
+import { countUse } from '../../lib/screenTrail'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
@@ -505,8 +507,18 @@ const READINGS_ON_CARD = 5
 // pinned to the primary line's height, visually orphaned from the
 // secondary line under it. Kanji's on'yomi/kun'yomi block is often
 // wider than it is tall, so it keeps the side-by-side default.
-export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false, stacked = false, shares }) {
+//
+// `glyph` (a kanji card's character, with the `session` to look it up
+// under) makes each register's name a door onto ReadingsHelp, the
+// sheet that says what on'yomi and kun'yomi are (plan 276). Only once
+// the panel is open: a closed one is still in the DOM, and a door the
+// keyboard could reach there would be a way into the answer.
+export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false, stacked = false, shares, glyph, session }) {
   const [show, setShow] = useState(false)
+  const [help, setHelp] = useState(false)
+  const explain = glyph && show
+    ? () => { countUse('readings', 'open'); setHelp(true) }
+    : undefined
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- not an id-keyed reset: `show` is a two-phase CSS-transition trigger (mount closed, then flip open one frame later so the transition actually plays), which needs the rAF subscription below regardless.
@@ -550,6 +562,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
                 kunLabel={t.kunyomi}
                 isLarge={isLarge}
                 moreLabel={t.readingsMore}
+                onExplain={explain}
               />
             ) : (
             <Readings
@@ -566,10 +579,18 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
                  lot — see domain/readingPick. */
               limit={READINGS_ON_CARD}
               moreLabel={t.readingsMore}
+              onExplain={explain}
             />
             )}
           </div>
         </div>
+      )}
+      {glyph && (
+        // A portal's click still bubbles through the React tree, and
+        // the scrim's would reach the Flashcard and turn the card: the
+        // close is the sheet's, as RevealActions' own sheet's is.
+        <ReadingsHelp open={help} onClose={e => { e?.stopPropagation?.(); setHelp(false) }}
+                      kanji={glyph} kana={kana} shares={shares} session={session} />
       )}
     </div>
   )

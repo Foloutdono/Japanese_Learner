@@ -13937,6 +13937,94 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .reading-share--core .reading-share__pct { color: var(--sel-ink); }
 
+/* ── 読み — a register's name as a door (plan 276) ──
+   On a kanji card the names over the readings open the sheet that says
+   what the two readings are (ReadingsHelp). The label it was, in its
+   ink and at its rung, with the ⓘ beside it; the padding a finger needs
+   is taken back by the margin, so the readings under it do not move. */
+.reading-group__door {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: calc(-1 * var(--sp-2)) calc(-1 * var(--sp-3));
+  padding: var(--sp-2) var(--sp-3);
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.reading-group__door:hover,
+.reading-group__door:focus-visible { color: var(--text-primary); }
+
+/* The sheet itself, on the sheet's own surface and inks: each reading
+   by its plain name, what it is, and a word of the card's kanji with
+   the kanji and its sound picked out by ink and weight (the sheet is a
+   portal, out of reach of the line's pigment); then the card's marks. */
+.readings-help { display: flex; flex-direction: column; gap: var(--sp-5); }
+.readings-help__row { display: flex; flex-direction: column; gap: var(--sp-1); }
+.readings-help__name {
+  margin: 0;
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+.readings-help__name-jp {
+  margin-left: var(--sp-3);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.readings-help__text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.readings-help__eg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  margin: var(--sp-2) 0 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  color: var(--text-secondary);
+}
+.readings-help__hit { font-weight: 700; color: var(--text-primary); }
+.readings-help__gloss {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+}
+.readings-help__marks {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-3) var(--sp-4);
+  margin: 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.readings-help__mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.readings-help__mark--jp { font-family: var(--font-jp); }
+.readings-help__unit { font-size: var(--fs-caption); font-weight: 500; }
+.readings-help__means { margin: 0; text-wrap: pretty; }
+@media (prefers-reduced-motion: reduce) {
+  .reading-group__door { transition: none; }
+}
+
 .meaning-display {
   text-align: left;
   /* Declared here, set per card by MeaningDisplay. The default keeps
@@ -14181,6 +14269,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
   margin-top: var(--sp-4);
   min-height: 1em;
+}
+
+/* What a card asks, under its specimen (plan 276): a Kanji → meaning
+   front, whose back prints readings as well, says the meaning is the
+   answer. Plain case at the small rung, a step above the tracked hint
+   under it, so it reads as the question and the hint as the gesture. */
+.prompt-ask {
+  margin: var(--sp-4) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* Houses the sound-replay and dictionary-lookup buttons, pinned to

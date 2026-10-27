@@ -243,6 +243,16 @@ leave that height the way the word left its width. Prose on a card is a
 different object and takes a different component — the meaning-first
 direction hands its gloss to `MeaningDisplay`, which wraps.
 
+**A card whose back prints more than it grades says what it asks** (plan
+276, the owner's picks B2 and A3 on the canvas). A Kanji → meaning front
+puts « Quel est son sens ? » under its specimen (`.prompt-ask`, the small
+rung over the tracked hint), because its back prints the readings too and
+a learner took them for part of the answer. The back's two register names
+(音読み · on'yomi, 訓読み · kun'yomi) are doors, the label with an ⓘ at its
+own rung and ink, onto the sheet that says what the two readings are, in a
+word of the card's own kanji (`ReadingsHelp`); the door's tap, and the
+sheet's scrim, never turn the card.
+
 These are the only off-scale font sizes in the app that are not literals to
 be harmonised away — the two ends of each clamp are rungs and the middle is a
 measurement of the box — and they are allowlisted in `design-scale.json` as
