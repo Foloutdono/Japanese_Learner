@@ -47,7 +47,43 @@ export function totalAt(timeline, ms) {
   for (const e of timeline ?? []) {
     if (e.t > ms) break
     total += e.pts
-    if (e.pts > 0) rights += 1
+    if (e.right ?? e.pts > 0) rights += 1
   }
   return { total, rights }
+}
+
+// The locale key for each refusal the duels' server answers with (its
+// `code`, lib/api.js's ApiError): every code study/duel_friends.py,
+// study/duels.py and routes/pvp.py can raise is here, and the test reads
+// them off those files. A code a learner cannot cause (a mode or a
+// reason the screens never send) reads as the plain failure.
+export const ERROR_KEYS = {
+  pvp_not_found: 'pvpErrNotFound',
+  pvp_self: 'pvpErrSelf',
+  pvp_not_friends: 'pvpErrNotFriends',
+  pvp_request_cooldown: 'pvpErrCooldown',
+  pvp_friend_limit: 'pvpErrFriendLimit',
+  pvp_pending_limit: 'pvpErrPendingLimit',
+  pvp_request_limit: 'pvpErrRequestLimit',
+  pvp_search_limit: 'pvpErrSearchLimit',
+  pvp_no_request: 'pvpErrNoRequest',
+  pvp_not_blocked: 'pvpErrNotBlocked',
+  pvp_not_placed: 'pvpErrNotPlaced',
+  pvp_too_many: 'pvpErrTooMany',
+  pvp_closed: 'pvpErrClosed',
+  pvp_played: 'pvpErrPlayed',
+  pvp_waiting: 'pvpErrWaiting',
+  pvp_not_started: 'pvpErrNotStarted',
+  pvp_too_early: 'pvpErrTooEarly',
+  pvp_not_settled: 'pvpErrNotSettled',
+  pvp_review_unpaid: 'pvpErrUnpaid',
+  pvp_bad_mode: 'pvpErrFailed',
+  pvp_bad_reason: 'pvpErrFailed',
+  pvp_no_opponent: 'pvpErrFailed',
+  out_of_credits: 'pvpErrCredits',
+}
+
+/** What a screen says for a refused request: a locale key, never the server's English. */
+export function errorKey(err) {
+  return ERROR_KEYS[err?.code] ?? 'pvpErrFailed'
 }
