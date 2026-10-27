@@ -8,7 +8,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
 from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
-from core import credits
+from core import bell, credits
 from core.db import db_conn
 from core.pace import new_card_limit, resolve_pace
 from core.rls import enable_rls
@@ -1483,7 +1483,8 @@ def report_deck(deck_id: str, payload: ReportPayload,
     Nothing is hidden automatically and nothing is counted toward a
     threshold: the row is a queue for a person to read. Reporting twice
     is one report — the UNIQUE makes that structural rather than a rule
-    the client has to remember.
+    the client has to remember. A learner's first report of a deck rings
+    the owner's bell (core/bell.py, plan 276); a changed reason does not.
     """
     if payload.reason not in REPORT_REASONS:
         raise HTTPException(status_code=400, detail="Unknown reason")
@@ -1497,8 +1498,14 @@ def report_deck(deck_id: str, payload: ReportPayload,
                 INSERT INTO deck_reports (deck_id, user_id, reason) VALUES (%s, %s, %s)
                 ON CONFLICT (deck_id, user_id)
                 DO UPDATE SET reason = EXCLUDED.reason, reported_at = NOW()
+                RETURNING (xmax = 0)
             """, (access.deck_id, user_id, payload.reason))
+            (first,) = cur.fetchone()
+            cur.execute("SELECT count(*) FROM deck_reports WHERE deck_id = %s", (access.deck_id,))
+            (reports,) = cur.fetchone()
         conn.commit()
+        if first:
+            bell.ring(bell.deck_post(deck_id=access.deck_id, reason=payload.reason, reports=reports))
         return {"ok": True}
     finally:
         conn.close()
