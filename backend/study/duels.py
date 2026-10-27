@@ -692,6 +692,14 @@ def _price(duel: dict, mine: dict) -> int:
     return RANKED_PRICE if duel["kind"] == "ranked" and mine["started_at"] is None else 0
 
 
+def _score_kept(duel: dict, mine: dict) -> bool:
+    """A ranked run's score to beat is the player's once their own run
+    has started, and not before: seen with a seat still unstarted (which
+    costs nothing to give back), a strong run would be passed up for a
+    weaker one. A friend's challenge shows it, as the challenge it is."""
+    return duel["kind"] == "ranked" and mine["started_at"] is None
+
+
 def _result(duel: dict, mine: dict, other: dict | None) -> dict | None:
     if duel["status"] != "done":
         return None
@@ -710,8 +718,9 @@ def _result(duel: dict, mine: dict, other: dict | None) -> dict | None:
 
 
 def cover(cur, after: list, me: str, duel_id: int) -> dict:
-    """GET /api/pvp/duels/{id}: who, the level, the score to beat, the
-    price, and once settled the result."""
+    """GET /api/pvp/duels/{id}: who, the level, the score to beat (a
+    ranked one once the learner's run has started), the price, and once
+    settled the result."""
     duel, entries, mine, now = _settled(cur, after, me, duel_id)
     other = _other(entries, me)
     named = names(cur, me, [e["user_id"] for e in entries])
@@ -720,14 +729,16 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
     if other is not None:
         rated = friends.ratings(cur, [other["user_id"]]).get(other["user_id"]) or {}
         played = other["finished_at"] is not None
+        shown = played and not _score_kept(duel, mine)
         them = {
             "username": named.get(other["user_id"]),
             "level": levels.get(other["user_id"]),
             "elo": other["rating_before"] if other["role"] == "ghost" else rated.get("elo"),
             "played": played,
-            # The score to beat, once their run is over.
-            "score": (other["score"] or 0) if played else None,
-            "rights": (other["rights"] or 0) if played else None,
+            # The score to beat, once their run is over -- a ranked one
+            # once the learner's own has started.
+            "score": (other["score"] or 0) if shown else None,
+            "rights": (other["rights"] or 0) if shown else None,
         }
     elif duel["status"] == "done":
         them = {"username": None, "gone": True}
@@ -917,14 +928,17 @@ def live(cur, after: list, me: str, duel_id: int, v: int) -> dict:
     second: the other's answers from the `v`-th on."""
     duel, entries, mine, now = _settled(cur, after, me, duel_id)
     other = _other(entries, me)
-    line = _timeline(other)
+    # Asked of a ranked duel (no screen does), the other's run stays kept
+    # as the cover keeps it.
+    seen = None if _score_kept(duel, mine) else other
+    line = _timeline(seen)
     return {
         "status": duel["status"],
         "startsAt": _iso(duel["live_start"]),
         "endsAt": _iso(duel["live_start"] + timedelta(milliseconds=SPRINT_MS)) if duel["live_start"] else None,
         "expiresAt": _iso(duel["expires_at"]),
         "serverNow": _iso(now),
-        "them": {"total": (other or {}).get("score") or 0, "rights": (other or {}).get("rights") or 0,
+        "them": {"total": (seen or {}).get("score") or 0, "rights": (seen or {}).get("rights") or 0,
                  "timeline": line[v:], "v": len(line)},
         "result": _result(duel, mine, other),
     }
@@ -1129,7 +1143,7 @@ def _line(cur, me: str, duel: dict, entries: list[dict], named: dict) -> dict:
         "who": named.get(other["user_id"]) if other else None,
         "gone": other is None and duel["status"] == "done",
         "mine": mine["score"] if mine["finished_at"] else None,
-        "theirs": other["score"] if other and other["finished_at"] else None,
+        "theirs": other["score"] if other and other["finished_at"] and not _score_kept(duel, mine) else None,
         "expiresAt": _iso(duel["expires_at"]),
         "since": _iso(mine["finished_at"] or mine["created_at"]),
     }

@@ -386,4 +386,13 @@ describe('a duel’s run', () => {
     const root = await ticket()
     await expect.poll(() => root.querySelector('.pvp-run__fail')?.textContent).toBe('Ce duel n’existe plus.')
   })
+  it('prints no score to beat on a ranked ticket: the server keeps it until « Partir »', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => cover({ kind: 'ranked', against: 'seek', price: 2,
+      them: { ...cover().them, played: true, score: null, rights: null } }))
+    const root = await ticket()
+    await expect.poll(() => root.querySelector('.exam-cover__go')?.textContent).toBe('Partir · 2 crédits')
+    expect(root.querySelector('.pvp-ticket').textContent).not.toContain('À battre')
+    expect(root.querySelector('.pvp-ticket__side--them .pvp-ticket__name').textContent).toBe('Kenta')
+  })
 })

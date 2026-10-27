@@ -286,8 +286,12 @@ def test_ranked_play_never_waits(client, learners, clock):
     seek = _ranked(client, B)
     assert seek == {"id": first["id"], "against": "seek"}
     with acting_as(B):
+        # The score to beat is B's once B's run has started, not before.
         cover = client.get(f"/api/pvp/duels/{seek['id']}").json()
-        assert cover["them"]["username"] == learners[A] and cover["them"]["score"] == 400
+        assert cover["them"]["username"] == learners[A] and cover["them"]["score"] is None
+        run = client.post(f"/api/pvp/duels/{seek['id']}/start").json()
+        assert sum(e["pts"] for e in run["opponent"]["timeline"]) == 400
+        assert client.get(f"/api/pvp/duels/{seek['id']}").json()["them"]["score"] == 400
     play(client, clock, B, seek["id"], [(1000, True)] * 6)
     a = client.get(f"/api/pvp/duels/{first['id']}").json()["result"]
     assert a["outcome"] == "loss" and a["elo"]["before"] == 1000 and a["elo"]["after"] == 980
@@ -300,12 +304,13 @@ def test_ranked_play_never_waits(client, learners, clock):
     assert ghost["against"] == "ghost"
     with acting_as(C):
         cover = client.get(f"/api/pvp/duels/{ghost['id']}").json()
-        assert cover["them"]["played"] is True
-        theirs = cover["them"]
+        # A recording, whose score C reads once C's run has started.
+        assert cover["them"]["played"] is True and cover["them"]["score"] is None
     play(client, clock, C, ghost["id"], [(1000, True)] * 8)
     with acting_as(C):
-        result = client.get(f"/api/pvp/duels/{ghost['id']}").json()["result"]
-    assert result["outcome"] == "win" and result["theirs"] == theirs["score"]
+        cover = client.get(f"/api/pvp/duels/{ghost['id']}").json()
+        result = cover["result"]
+    assert result["outcome"] == "win" and result["theirs"] == cover["them"]["score"] == 600
     assert result["elo"]["delta"] > 0
     assert (_elo(A), _elo(B)) == (980, 1020)
     # The recording's author is not told.

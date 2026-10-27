@@ -249,6 +249,10 @@ runtime purpose.
   never which choice was right, and the corrections open only once the
   duel is settled, or the first player could hand the second the keys
   (a paper whose corrections were sold is never dealt again as a ghost).
+  A ranked run's score to beat is the player's once their own run has
+  started (`duels._score_kept`): before, an unstarted seat is free to give
+  back, so whatever another learner's figures reach (the cover, the hall,
+  the live read) keeps them until « Partir ».
   Nothing runs in the background: `settle()` brings a duel up to date
   from its stored instants on every read (a run past its minute paid, a
   duel resolved, expired and its ranked fare refunded, a seat left

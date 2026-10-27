@@ -1109,3 +1109,32 @@ def test_the_board_ranked_in_the_base_is_the_one_ranked_in_full(client, learners
             conn.close()
     finally:
         clean()
+
+
+def test_a_ranked_score_to_beat_is_kept_until_the_run_starts(client, learners, clock):
+    # Seen with a seat still unstarted (free to give back), a strong run
+    # would be passed up for a weaker one: nothing a ranked player can
+    # read tells it before « Partir » -- not the cover, not the hall, not
+    # the live read. A friend's challenge still shows it.
+    for uid in (A, B):
+        place(uid)
+    left = _ranked(client, B)["id"]
+    play(client, clock, B, left, [(1000, True)] * 3)
+    assert _ranked(client, A) == {"id": left, "against": "seek"}
+    cover = client.get(f"/api/pvp/duels/{left}").json()
+    assert cover["them"]["played"] is True and (cover["them"]["score"], cover["them"]["rights"]) == (None, None)
+    group, row = _hall_row(client, left)
+    assert group == "toPlay" and row["theirs"] is None
+    live = client.get(f"/api/pvp/duels/{left}/live").json()["them"]
+    assert (live["total"], live["timeline"]) == (0, [])
+    # Gone, the seat and its kept score: B's run waits for the next one.
+    run = client.post(f"/api/pvp/duels/{left}/start").json()
+    assert sum(e["pts"] for e in run["opponent"]["timeline"]) == 300
+    assert client.get(f"/api/pvp/duels/{left}").json()["them"]["score"] == 300
+
+    befriend(client, A, B, learners)
+    with acting_as(B):
+        challenge = client.post("/api/pvp/duels", json={"opponent": learners[A], "mode": "async"}).json()["id"]
+    play(client, clock, B, challenge, [(1000, True)] * 2)
+    assert client.get(f"/api/pvp/duels/{challenge}").json()["them"]["score"] == 200
+    assert _hall_row(client, challenge)[1]["theirs"] == 200
