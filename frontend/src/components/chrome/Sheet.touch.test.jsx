@@ -49,7 +49,7 @@ async function drag(node, from, to, { pace = STEP, steps = 4 } = {}) {
 async function open(onClose, children = <p>body</p>) {
   // The panel is a PORTAL onto document.body (chrome/Sheet.jsx), so it
   // is never under the render's own container.
-  await render(<Sheet open onClose={onClose} label="sheet" jp="運行状況">{children}</Sheet>)
+  await render(<Sheet open onClose={onClose} label="sheet" title="運行状況">{children}</Sheet>)
   return document.querySelector('.sheet')
 }
 
@@ -100,12 +100,12 @@ describe('a sheet is dragged shut by a mouse, from its grip', () => {
     // Escape while the mouse is still down unmounts the sheet; the
     // release that follows belongs to nothing any more.
     const onClose = vi.fn()
-    const { rerender } = await render(<Sheet open onClose={onClose} label="sheet" jp="運行状況"><p>body</p></Sheet>)
+    const { rerender } = await render(<Sheet open onClose={onClose} label="sheet" title="運行状況"><p>body</p></Sheet>)
     const head = document.querySelector('.sheet__head')
     mouse(head, 'pointerdown', 100)
     mouse(window, 'pointermove', 200)
     await tick(STEP)
-    await rerender(<Sheet open={false} onClose={onClose} label="sheet" jp="運行状況"><p>body</p></Sheet>)
+    await rerender(<Sheet open={false} onClose={onClose} label="sheet" title="運行状況"><p>body</p></Sheet>)
     mouse(window, 'pointermove', 280)
     mouse(window, 'pointerup', 280)
     await tick(0)

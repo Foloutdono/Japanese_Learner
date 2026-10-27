@@ -184,8 +184,8 @@ describe('the whole board at 390×844', () => {
     await mount()
     $$('.bz__seg .seg__opt')[1].click()
     await settle()
-    expect($('.bzp__division-jp').textContent).toBe('序二段')
-    expect($('.bzp__division-latin').textContent).toBe('Jonidan')
+    // By its name alone (plan 277): no 序二段 set beside it.
+    expect($('.bzp__division-title').textContent).toBe('Jonidan')
     expect($('.bzp__division').closest('.bzp__controls')).not.toBeNull()
     expect($('.bzp__division-notes').textContent).toMatch(/^Promu lundi dernier · Fin dans 3 j \d+ h$/)
     // The rows Monday moves: a head over each group, its count, and the
@@ -228,7 +228,7 @@ describe('the whole board at 390×844', () => {
     await mount()
     $$('.bz__seg .seg__opt')[1].click()
     await settle(600)
-    expect($('.bzp__division-jp').textContent).toBe('序二段')
+    expect($('.bzp__division-title').textContent).toBe('Jonidan')
     expect($$('.bzp__list .leaderboard-row')).toHaveLength(5)
   })
 
@@ -256,7 +256,7 @@ describe('the whole board at 390×844', () => {
     const sheet = $('.bz-card')
     expect(sheet.getAttribute('aria-label')).toBe('La carte de L3')
     expect($$('.bz-card__fig dd').map(d => d.textContent)).toEqual(['7', '#3300 XP', '#14' + '4\u202f200 XP'])
-    expect($('.bz-card__division-jp').textContent).toBe('三段目')
+    expect($('.bz-card__division-name').textContent).toBe('Sandanme')
     expect($('.bz-card__deck').getAttribute('href')).toBe('/learn/decks/library/9')
   })
 })

@@ -13,7 +13,7 @@ import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
 import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
-import { CheckIcon, ChevronIcon, PlusIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon, PlusIcon, CalendarIcon } from '../ui/Icons'
 import LevelFitLine from './LevelFitLine'
 import ComebackLine from './ComebackLine'
 import { useCredits } from '../../stores/credits'
@@ -589,7 +589,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
         {gate}
       </div>
 
-      <Sheet open={open} onClose={() => setOpen(false)} jp={t.todayTitle} label={t.gateServicesTitle} className="tdy-sheet">
+      <Sheet open={open} onClose={() => setOpen(false)} title={t.todayTitle} icon={CalendarIcon} label={t.gateServicesTitle} className="tdy-sheet">
         <Services
           lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
           choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}

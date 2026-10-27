@@ -85,7 +85,7 @@ describe('the whole board on the desk', () => {
     expect(heads[1].nextElementSibling.querySelector('.leaderboard-row__rank').textContent).toBe('25')
     // The ladder, top to foot, the one on screen lit and the learner's own marked.
     const rungs = $$('.bzp__rung')
-    expect(rungs.map(r => r.querySelector('.bzp__rung-latin').textContent)).toEqual(['Makuuchi', 'Jūryō', 'Makushita', 'Sandanme', 'Jonidan', 'Jonokuchi'])
+    expect(rungs.map(r => r.querySelector('.bzp__rung-name').textContent)).toEqual(['Makuuchi', 'Jūryō', 'Makushita', 'Sandanme', 'Jonidan', 'Jonokuchi'])
     expect(rungs[2].classList.contains('bzp__rung--on')).toBe(true)
     expect(rungs[2].classList.contains('bzp__rung--mine')).toBe(true)
     expect(rungs[2].getAttribute('aria-current')).toBe('true')

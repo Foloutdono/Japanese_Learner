@@ -1250,7 +1250,7 @@ describe('the kept dialogs (plan 123, P14)', () => {
     const { Sheet } = await import('./components/chrome/Sheet')
     await render(
       <LangProvider>
-        <Sheet open onClose={() => {}} jp="Voyage" cap="Delete" initialFocus=".btn-secondary" dismiss>
+        <Sheet open onClose={() => {}} title="Voyage" sub="Delete" initialFocus=".btn-secondary" dismiss>
           <button type="button" className="btn-primary">Delete</button>
           <button type="button" className="btn-secondary">Cancel</button>
         </Sheet>

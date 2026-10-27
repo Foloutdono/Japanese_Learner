@@ -165,7 +165,7 @@ WITH gestes(feature, action) AS (VALUES
   ('speech', 'play'), ('analyzer', 'text'), ('analyzer', 'photo'), ('analyzer', 'video'),
   ('ocr', 'scan'), ('ask', 'send'), ('explain', 'open'), ('dictionary', 'search'), ('export', 'progress'),
   ('level_fit', 'open'), ('level_fit', 'move'), ('level_fit', 'stay'), ('conversation', 'search'),
-  ('comeback', 'open'), ('comeback', 'hide')
+  ('comeback', 'open'), ('comeback', 'hide'), ('readings', 'open')
 ), used AS (
   SELECT props->>'feature' AS feature, props->>'action' AS action,
          count(DISTINCT user_id) AS apprenants, sum((props->>'n')::int) AS n

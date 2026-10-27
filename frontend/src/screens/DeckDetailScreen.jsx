@@ -24,7 +24,7 @@ import { pairRows } from '../components/decks/importCards'
 import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
-import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PencilIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
+import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PencilIcon, PlusIcon, SearchIcon, BooksIcon, FollowIcon } from '../components/ui/Icons'
 import { composing } from '../lib/keyGuards'
 
 // The name the export endpoint chose, out of its Content-Disposition.
@@ -1471,7 +1471,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
 
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine} initialFocus=".btn-secondary">
+        title={t.libraryMakeMine} sub={deck?.name ?? t.deckFallbackTitle} icon={ImportIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">{t.libraryMakeMineConfirm}</span>
         <button type="button" className="btn-primary" disabled={busy} onClick={makeItMine}>
           {t.libraryMakeMine}
@@ -1482,8 +1482,8 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       </Sheet>
 
       <Sheet open={confirmingUnfollow} onClose={() => setConfirmingUnfollow(false)}
-        jp={deck?.name ?? t.deckFallbackTitle}
-        cap={withdrawn ? t.libraryRemove : t.libraryUnfollow} initialFocus=".btn-secondary">
+        title={withdrawn ? t.libraryRemove : t.libraryUnfollow} sub={deck?.name ?? t.deckFallbackTitle}
+        icon={FollowIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">
           {withdrawn ? t.libraryRemoveConfirm : t.libraryUnfollowConfirm}
         </span>
@@ -1496,7 +1496,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         </button>
       </Sheet>
 
-      <Sheet open={moreOpen && !desk} onClose={closeMore} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
+      <Sheet open={moreOpen && !desk} onClose={closeMore} title={deck?.name ?? t.deckFallbackTitle} icon={BooksIcon} line="var(--line-decks)">
         {moreRows(true)}
         {confirmingDeck && (
           <>
@@ -1517,7 +1517,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           deletion asks in a dialog of its own, as the three other
           irreversibles here do (plan 120). */}
       <Sheet open={desk && confirmingDeck} onClose={() => setConfirmingDeck(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck} initialFocus=".btn-secondary">
+        title={t.deleteDeck} sub={deck?.name ?? t.deckFallbackTitle} icon={TrashIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">
           {deck?.followers > 0
             ? t.libraryDeleteFollowed(deck.followers)
@@ -1537,8 +1537,10 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       <Sheet
         open={confirmingDelete}
         onClose={() => setConfirmingDelete(false)}
-        jp={t.cardsCount(selected.size)}
-        cap={t.delete}
+        title={t.delete}
+        sub={t.cardsCount(selected.size)}
+        icon={TrashIcon}
+        line="var(--line-decks)"
         initialFocus=".btn-secondary"
       >
         <span className="sheet__q">{t.deleteCardsConfirm}</span>
@@ -1553,8 +1555,10 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       <Sheet
         open={confirmingCard && Boolean(editedCard)}
         onClose={() => setConfirmingCard(false)}
-        jp={editedCard?.front ?? ''}
-        cap={t.delete}
+        title={t.delete}
+        sub={editedCard?.front ?? ''}
+        icon={TrashIcon}
+        line="var(--line-decks)"
         initialFocus=".btn-secondary"
       >
         <span className="sheet__q">{t.deleteCardConfirm}</span>
