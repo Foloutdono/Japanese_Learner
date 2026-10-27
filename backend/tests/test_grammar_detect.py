@@ -300,10 +300,15 @@ class ByDictionaryFormTests(unittest.TestCase):
         skill = found_in("私は漢字が書けます。")
         self.assertEqual(skill["可能形 〜(ら)れる"], "書け")
         self.assertNotIn("受身形 〜られる", skill)
-        # A る-verb's られる is both, and both are said (module docstring).
-        both = found_in("この魚は生で食べられます。")
-        self.assertEqual(both["受身形 〜られる"], "られ")
-        self.assertEqual(both["可能形 〜(ら)れる"], "られ")
+        # A る-verb's られる is both, and both are said (module docstring)
+        # -- where the sentence does not say which: 生で食べられます, said
+        # of a fish, is what one can do with it (plan 272).
+        both = found_in("窓が開けられる。")
+        self.assertEqual(both["受身形 〜られる"], "られる")
+        self.assertEqual(both["可能形 〜(ら)れる"], "られる")
+        can = found_in("この魚は生で食べられます。")
+        self.assertEqual(can["可能形 〜(ら)れる"], "られ")
+        self.assertNotIn("受身形 〜られる", can)
         # 見える is in view, not able to look.
         self.assertNotIn("可能形 〜(ら)れる", found_in("山が見えます。"))
 

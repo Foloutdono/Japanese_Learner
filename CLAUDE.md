@@ -193,7 +193,10 @@ runtime purpose.
   reading is kana, a final or half-width mark and a subtitle's spaces
   change no card, the same line reads the same twice, every gloss has its
   French. A rule the catalogue's own tour contradicts is wrong, however
-  right it looks (〜のに's "for (doing)" is its second use).
+  right it looks (〜のに's "for (doing)" is its second use). A word or a
+  saying read whole takes the particles and the forms inside it, never a
+  construction the catalogue teaches: 昼夜を問わず and 若気の至り are
+  〜を問わず's and 〜の至り's own examples, and stay in their pieces.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.

@@ -25,13 +25,14 @@ from study import morphology
 from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_points
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content import jmdict_fr
+import content.vocab_jmdict_data as jmdict_db
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
     resolve_te_noun, resolve_interjection, resolve_home, resolve_humble_errand, numeral_value, kana_card, resolve_pool_whole_word,
-    resolve_pool_idiom, resolve_pool_opening, a_points_own_verb, split_unknown_compound, split_unknown_verb,
+    resolve_pool_idiom, resolve_pool_saying, resolve_pool_opening, a_points_own_verb, split_unknown_compound, split_unknown_verb,
     compound_tail_readings,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
@@ -218,6 +219,102 @@ def _pool_match(entry: dict) -> dict:
     if french:
         out["entry"]["meaning_fr"] = french
     return out
+
+
+# The fields JMdict files a sense under, and the words that say a
+# sentence is in one (plan 272): 画像を読み込めません is computing, so
+# 読み込む is "to load (data)" before "to read thoroughly".
+_FIELDS = {
+    "comp": frozenset({"データ", "ファイル", "画像", "アプリ", "パソコン", "ＰＣ", "PC", "サーバー", "サーバ", "ダウンロード",
+                       "アップロード", "通信", "ブラウザ", "ページ", "システム", "ソフト", "ソフトウェア", "インストール",
+                       "ログイン", "パスワード", "メモリ", "インターネット", "ネット", "サイト", "ウェブ", "スマホ", "端末",
+                       "再起動", "エラー", "プログラム", "動画", "アカウント", "クリック", "タップ", "画面", "回線",
+                       "コンピューター", "コンピュータ", "メール", "アップデート", "バージョン", "キャッシュ", "QR", "ＱＲ"}),
+    "baseb": frozenset({"打者", "投手", "ピッチャー", "バッター", "塁", "満塁", "イニング", "ホームラン", "ストライク",
+                        "アウト", "盗塁", "打席", "安打", "三振", "キャッチャー", "野球", "外角", "内角", "併殺", "犠打"}),
+    "sumo": frozenset({"土俵", "横綱", "大関", "関脇", "小結", "力士", "取組", "行司", "相撲", "番付", "押し出し",
+                       "寄り切り", "上手投げ", "まわし", "幕内", "千秋楽"}),
+    "med": frozenset({"患者", "病院", "診察", "症状", "手術", "処方", "医師", "看護", "治療", "投与", "診断", "病棟",
+                      "外来", "副作用", "服用"}),
+    "law": frozenset({"規約", "契約", "法令", "法律", "条項", "規定", "当事者", "民法", "刑法", "裁判", "判決", "原告",
+                      "被告", "条例", "本規約", "甲", "乙", "第三者", "約款"}),
+    "sports": frozenset({"試合", "選手", "ゴール", "シュート", "キーパー", "得点", "サッカー", "クロス", "ドリブル",
+                         "パス", "前半", "後半", "ハーフ", "コーナー"}),
+    "Buddh": frozenset({"仏教", "寺", "お寺", "僧", "仏", "仏様", "地獄", "極楽", "菩薩", "お経", "住職", "和尚", "念仏",
+                        "修行", "輪廻", "涅槃", "成仏", "罪人", "亡者", "閻魔"}),
+    "Christn": frozenset({"教会", "キリスト", "キリスト教", "聖書", "神父", "牧師", "信者", "礼拝", "イエス", "天国", "洗礼"}),
+}
+# Where JMdict files no sense under the field, the glosses it says
+# first: 規約に定めのない事項 is a "provision", no "law; destiny".
+_FIELD_GLOSSES = {"law": ("provision", "stipulation", "clause", "regulation", "rule")}
+
+
+def _of_another_field(joined: tuple[str, str], morphemes) -> bool:
+    """Whether the dictionary's compound verb is a field's word alone and
+    its sentence is in none of that field (plan 272): 読み出す is "to
+    read out (data)" and nothing else, so 本を読み出した is 読む + 〜出す,
+    "began to read", where データを読み出した is the one verb."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+    lemma, said = joined
+    if any((e.get("kanji") or "") == lemma for entries in VOCAB_BY_LEVEL.values() for e in entries):
+        return False
+    senses = jmdict_db.get_senses(lemma, said) or []
+    owned = [set(s.get("tags") or ()) & set(_FIELDS) for s in senses]
+    if not senses or not all(owned):
+        return False
+    words = {m.surface for m in morphemes} | {m.lemma for m in morphemes}
+    return not any(words & _FIELDS[f] for tags in owned for f in tags)
+
+
+def _senses_by_sentence(tokens: list[dict]) -> None:
+    """A pool word's line by what its sentence says (plan 272): the
+    sense of the sentence's field first (読み込む in a sentence about an
+    image, 立ち合い in a bout, 定め in a contract), and a word used as a
+    な-adjective by that sense (デートにぴったりだ, "perfectly suited",
+    no "tightly"). The first senses stay after it."""
+    from study.card_lookup import _ASIDE, _POOL_GLOSS_MAX
+    surfaces = [t["surface"] for t in tokens]
+    for k, t in enumerate(tokens):
+        vm = t.get("vocab_match") or {}
+        if not vm.get("pool") or vm.get("entry", {}).get("affix"):
+            continue
+        entry = vm["entry"]
+        others = set(surfaces[:k] + surfaces[k + 1:])
+        fields = {f for f, words in _FIELDS.items() if others & words}
+        found = jmdict_db.get_senses(entry.get("kanji", ""), entry.get("kana", "")) or []
+        nxt = tokens[k + 1] if k + 1 < len(tokens) else None
+        as_na = nxt is not None and (nxt["surface"] in ("な", "だ", "です", "でした", "だった")
+                                     or nxt.get("lemma") in ("だ", "です"))
+        chosen, lead = None, None
+        for n, sense in enumerate(found):
+            tags = set(sense.get("tags") or ())
+            if n and (tags & fields or (as_na and "adj-na" in tags and "adj-na" not in set(found[0].get("tags") or ()))):
+                chosen = sense
+                break
+        if chosen is None and found and set(found[0].get("tags") or ()) & set(_FIELDS) - fields:
+            # (and a first sense of a field the sentence is in none of
+            # gives way to the word's plain one: 家計は火の車だ is "dire
+            # straits", no Buddhist "fiery chariot")
+            chosen = next((sense for sense in found[1:] if not set(sense.get("tags") or ()) & set(_FIELDS)), None)
+        if chosen is None and fields & set(_FIELD_GLOSSES):
+            wanted = [g for f in fields & set(_FIELD_GLOSSES) for g in _FIELD_GLOSSES[f]]
+            for sense in found:
+                hit = next((g for g in wanted if g in (sense.get("glossary") or ())), None)
+                if hit and hit != (sense.get("glossary") or [""])[0]:
+                    chosen, lead = sense, hit
+                    break
+        if chosen is None:
+            continue
+        glosses = [_ASIDE.sub("", g).strip() for g in chosen.get("glossary") or ()]
+        head = [lead] + [g for g in glosses if g != lead][:1] if lead else glosses[:2]
+        line = ", ".join(head)
+        for part in (entry.get("meaning") or "").split("; "):
+            if part and part not in head and len(line + "; " + part) <= _POOL_GLOSS_MAX:
+                line += "; " + part
+        entry["meaning"] = line
+        french = jmdict_fr.sense("; ".join(chosen.get("glossary") or ()))
+        if french:
+            entry["meaning_fr"] = french
 
 
 def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
@@ -1106,6 +1203,25 @@ def _compound_dict(run: list, level: str, entry: dict, raw_id: str) -> dict:
     }
 
 
+def _as_its_idiom(token: dict, row: dict) -> None:
+    """A saying's line from its idiom's senses (plan 272): 火の車 is "a
+    desperate financial situation" before JMdict's first sense, the
+    Buddhist "fiery chariot"."""
+    from study.card_lookup import _ASIDE
+    senses = jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []
+    idioms = [sense for sense in senses if {"id", "proverb"} & set(sense.get("tags") or ())]
+    if not idioms or senses[0] in idioms:
+        return
+    glosses = [_ASIDE.sub("", g).strip() for g in idioms[0].get("glossary") or ()][:2]
+    entry = token["vocab_match"]["entry"]
+    entry["meaning"] = ", ".join(glosses)
+    french = jmdict_fr.sense("; ".join(idioms[0].get("glossary") or ()))
+    if french:
+        entry["meaning_fr"] = french
+    else:
+        entry.pop("meaning_fr", None)
+
+
 def _pool_compound_dict(run: list, entry: dict) -> dict:
     """_compound_dict for a run the JMdict pool holds as one word
     (card_lookup.resolve_pool_compound, plan 148): 桃源 + 郷 as 桃源郷."""
@@ -1151,7 +1267,7 @@ def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
 _COUNTERS = "助数詞 〜つ／〜人／〜枚"
 
 # The points that are a word's own forms, not a construction around it.
-_OWN_FORM_POINTS = frozenset({"い形容詞／な形容詞", "ない形 〜ない", "た形 〜た", "可能形 〜(ら)れる",
+_OWN_FORM_POINTS = frozenset({"い形容詞／な形容詞", "〜く／〜に（副詞形）", "ない形 〜ない", "た形 〜た", "可能形 〜(ら)れる",
                               "意向形 〜(よ)う", "命令形 〜ろ／〜え", "〜ます／〜ません", "〜ました／〜ませんでした",
                               # (a compound verb the pool holds whole is its word
                               # too: もつれ込む, 振り込む, 駆け出す, plan 272)
@@ -1569,6 +1685,59 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(token)
             i += n
             continue
+        joined = morphology._compound_verb_at(morphemes[i], morphemes[i + 1] if i + 1 < len(morphemes) else None)
+        if joined is not None and _of_another_field(joined, morphemes):
+            joined = None
+        if joined is not None:
+            # 言い出す, 疲れきる, 見つめ直す, 値する: one verb the deck or the
+            # dictionary holds, which UniDic cut in two -- no 切る "to cut",
+            # 直す "to fix" under it (plan 272). The detector reads the two
+            # pieces still, so 〜すぎる and 〜直す stay on it.
+            run = morphemes[i:i + 2]
+            lemma, said = joined
+            from study.card_lookup import _VOCAB_BY_LEMMA
+            from content.vocab_data import vocab_to_id
+            deck = next(((lv, e) for lv, e in _VOCAB_BY_LEMMA.get(lemma, ())
+                         if (e.get("kanji") or "") == lemma and said in morphology.kata_to_hira(e.get("kana") or "")), None)
+            if deck is not None:
+                token = _compound_dict(run, deck[0], deck[1], vocab_to_id(deck[1], deck[0]))
+            else:
+                token = _pool_compound_dict(run, jmdict_db.get_by_key(lemma, said) or {"kanji": lemma, "kana": said})
+            token["reading"] = _written_reading(run)
+            token["furigana"] = align_deck(token["surface"], token["reading"])
+            token["pos"] = "verb"
+            token["lemma"] = lemma
+            token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
+                               "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                              for k in range(i, i + 2)]
+            tokens.append(token)
+            i += 2
+            continue
+        saying = resolve_pool_saying(morphemes, i)
+        if saying and not any(j in strict and j not in own_forms for j in range(i, i + saying[1])):
+            # 顔から火が出る, 猫の手も借りたい, 火の車: one saying, whose cards
+            # say none of it (plan 272), read as the page writes it
+            row, n = saying
+            run = morphemes[i:i + n]
+            token = _pool_compound_dict(run, row)
+            token["reading"] = _written_reading(run)
+            said, ending = morphology.kata_to_hira(row.get("kana") or ""), morphology.kata_to_hira(run[-1].lemma_reading)
+            if said and said != token["reading"]:
+                # (as the row reads it, where UniDic misread a word of it:
+                # 兜の緒を締めよ is お, no いとぐち; 憂い うれい, plan 272)
+                if token["surface"] == row.get("kanji"):
+                    token["reading"] = said
+                elif said.endswith(ending):
+                    token["reading"] = said[:-len(ending)] + morphology.kata_to_hira(run[-1].reading)
+            token["furigana"] = align_deck(token["surface"], token["reading"])
+            token["pos"] = {"verb": "verb", "adjective": "adjective"}.get(run[-1].pos, "noun")
+            _as_its_idiom(token, row)
+            token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
+                               "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                              for k in range(i, i + n) if morphemes[k].pos not in ("particle", "auxiliary")]
+            tokens.append(token)
+            i += n
+            continue
         pooled = resolve_pool_idiom(morphemes, i)
         if pooled and not any(j in strict and j not in own_forms for j in range(i, i + pooled[1])):
             # 気になる, "to weigh on one's mind" (plan 272), read as written;
@@ -1599,6 +1768,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             # 272): なぜか, "for some reason", never "why" and a question.
             row, n = pooled
             token = _pool_compound_dict(morphemes[i:i + n], row)
+            token["reading"] = _written_reading(morphemes[i:i + n])     # (なんぼなんでも, as said, plan 272)
+            token["furigana"] = align_deck(token["surface"], token["reading"])
             token["pos"] = "adverb"
             tokens.append(token)
             i += n
@@ -1939,7 +2110,16 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # idiom whole (息の長い, 気が長い), a deed's place (勤務地, 連絡先), the
 # west's and Kyoto's speech by its frame (おこしやす, 何しよると？), and
 # キロ, 額, 数, 等 by what their sentence says.
-LOCAL_REV = 26
+# 27: segmentation and grammar (plan 272) -- a compound verb the deck or
+# the dictionary holds read as one (降り出す, 疲れきる, 跳ね回る) where
+# its sentence fits the word's field, a saying its cards cannot say read
+# whole (顔から火が出る, 猫の手も借りたい, 賽は投げられた) and never over a
+# construction the catalogue teaches (昼夜を問わず), a て before no deed
+# as its reason (ほえてうるさい), a pattern on its written stem (に先立ち,
+# につれ), a particle fused into its construction left without a point
+# of its own (にもかかわらず's も), the tokenizer's misreadings of 重そう,
+# なくして, 出さん and ぶっちゃけ, and 今日, 数, 〜山 read by their neighbours.
+LOCAL_REV = 27
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
@@ -1969,6 +2149,7 @@ def analyze_local(text: str, level: str | None = None, before: str = "", after: 
 
     grammar = _grammar_entries(text, morphemes)
     tokens = _tokens(morphemes, grammar)
+    _senses_by_sentence(tokens)
     grammar = _outside_set_phrases(tokens, grammar)
     _attach_grammar(tokens, grammar)
     # Segmented once for both: left to them, estimate_level and report

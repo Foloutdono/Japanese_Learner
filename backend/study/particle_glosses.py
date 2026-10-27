@@ -133,6 +133,8 @@ _GLOSSES = {
                 "fr": "(Kansai, familier) = そんなの : ce genre de chose, une chose pareille"},
     "って_insist": {"en": "(after an order, at the end) I'm telling you!: the order said again, insisting",
                    "fr": "(après un ordre, en fin de phrase) je te dis ! : l'ordre répété, avec insistance"},
+    "とも_even": {"en": "(after the volitional) even if, however much (= 〜ても): 抗おうとも, however one resists",
+                 "fr": "(après le volitif) même si, avoir beau (= 〜ても) : 抗おうとも, on a beau résister"},
     "って_iu": {"en": "(before a noun) = という: that …, called … (行かないってこと, the fact that you won't go)",
               "fr": "(devant un nom) = という : que …, appelé … (行かないってこと, le fait que tu n'iras pas)"},
     "って": {"en": "(spoken) quotes or names: '…', as for… (= と, は)",
@@ -171,6 +173,10 @@ _GLOSSES = {
                              "(for you), however much you want",
                        "fr": "(entre une forme en て et une négation) renforce la négation : 育ってはくれない, ne "
                              "pousse pas (pour toi), quoi qu'on veuille"},
+    "の_nominal": {"en": "(after an adjective or a verb) makes it a noun: being …, doing …, or the one that is …: "
+                         "重いのが難点, being heavy is the drawback",
+                   "fr": "(après un adjectif ou un verbe) en fait un nom : le fait d'être …, de faire …, ou celui qui "
+                         "est … : 重いのが難点, être lourd, c'est le défaut"},
     "の_subject": {"en": "(in a clause before a noun) marks who or what does it, = が: 花粉の飛ぶ量, the amount "
                          "of pollen that flies",
                    "fr": "(dans une proposition devant un nom) marque qui fait l'action, = が : 花粉の飛ぶ量, la "
@@ -773,6 +779,8 @@ def gloss(morphemes, i: int) -> dict | None:
         key = {"やっべえ": "やっべ"}.get(m.surface, m.surface)   # (plan 272)
     elif m.lemma == "はる" and m.pos == "auxiliary" and i > 0 and morphemes[i - 1].pos == "verb":
         key = "はる"                         # 弾かはります, しはって (plan 272)
+    elif m.surface == "とも" and m.pos == "particle" and i > 0 and morphemes[i - 1].cform.startswith("意志推量形"):
+        key = "とも_even"                    # 抗おうとも: "even if" (plan 272)
     elif m.surface == "やす" and m.pos == "auxiliary" and m.lemma == "やす" and i > 0 and (
             morphemes[i - 1].surface in ("おいで", "お越し", "おこし") or morphemes[i - 1].pos == "verb"):
         key = "やす"                         # おいでやす (plan 272)
@@ -1167,6 +1175,8 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "は_te_negative"            # 育ってはくれない, まだ決まってはおりません
         elif m.surface == "の" and _subject_no(morphemes, i):
             key = "の_subject"                # 花粉の飛ぶ量, 持ち主のわからない荷物
+        elif m.surface == "の" and _predicate_named(morphemes, i):
+            key = "の_nominal"                # 重いのが難点だ, 赤いのがほしい (plan 272)
         elif m.surface == "まで" and i > 0 and ((morphemes[i - 1].surface == "に" and morphemes[i - 1].pos == "particle")
                                               or (i + 1 < len(morphemes) and morphemes[i + 1].surface == "も"
                                                   and morphemes[i + 1].pos == "particle")):
@@ -1255,6 +1265,17 @@ def _negative_ahead(morphemes, i: int) -> bool:
     return False
 
 
+def _predicate_named(morphemes, i: int) -> bool:
+    """The の at morphemes[i] after an adjective, a verb or its た and
+    before a particle: the nominaliser (grammar_detect._a_predicate_named)."""
+    if i == 0 or i + 1 >= len(morphemes):
+        return False
+    prev, nxt = morphemes[i - 1], morphemes[i + 1]
+    attributive = prev.pos in ("adjective", "verb") or (prev.pos == "auxiliary" and prev.lemma in ("た", "ない", "無い"))
+    return attributive and prev.cform.startswith(("連体形", "終止形")) and nxt.pos == "particle" \
+        and nxt.surface in ("が", "は", "を", "も", "に", "で")
+
+
 def _quoting(morphemes, i: int) -> str:
     """Which って this is: one that quotes (食べ放題って言っても), names a
     topic (あれって本当に), or closes the sentence on what was heard
@@ -1271,8 +1292,9 @@ def _quoting(morphemes, i: int) -> str:
         return "って_end"
     prev = morphemes[i - 1]
     from study.grammar_detect import _SAID_NOUNS
-    if nxt is not None and nxt.pos == "noun" and nxt.surface in _SAID_NOUNS and nxt.start == morphemes[i].end:
-        return "って_iu"                  # 行かないってこと, 田中って人 (plan 272)
+    if nxt is not None and nxt.pos == "noun" and (nxt.surface in _SAID_NOUNS or nxt.surface in ("もの", "もん", "物")) \
+            and nxt.start == morphemes[i].end:
+        return "って_iu"                  # 行かないってこと, 田中って人, 言い方ってもん (plan 272)
     if prev.pos in ("noun", "pronoun", "suffix") and nxt is not None and (
             nxt.pos not in ("particle", "symbol") or nxt.surface in ("、", "，")):
         return "って_topic"               # (それって、つまり… plan 272)

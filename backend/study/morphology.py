@@ -1001,6 +1001,133 @@ def _how_many_minutes(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[lis
 
 
 @lru_cache(maxsize=2048)
+def _one_adjective(written: str):
+    """The い-adjective `written` (a dictionary form) is when UniDic reads
+    it alone as one -- 重い -- as (lemma, its reading), or None."""
+    words = list(_plain_tagger(written)) if MORPHOLOGY_AVAILABLE else []
+    if len(words) != 1 or words[0].feature.pos1 != "形容詞":
+        return None
+    return words[0].feature.lemma, kata_to_hira(words[0].feature.kana or "")
+
+
+def _looks_so(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """An adjective's stem and the そう of 〜そうです, which UniDic read as
+    a noun the page does not spell (plan 272): 重そうですね is 重曹,
+    "baking soda", to it. Where a noun ends in そう, its lemma is written
+    otherwise, and the letters before そう with い are an adjective UniDic
+    reads whole, the two are read apart, as 高そう is."""
+    out_m, out_t = [], []
+    for k, m in enumerate(morphemes):
+        stem = m.surface[:-2]
+        found = _one_adjective(stem + "い") if (
+            m.pos == "noun" and m.surface.endswith("そう") and m.lemma != m.surface and stem
+            and any(_is_kanji(c) for c in stem) and m.lemma.startswith(stem[:1])) else None
+        if found is None:
+            out_m.append(m)
+            out_t.append(tags[k])
+            continue
+        lemma, said = found
+        cut = m.start + len(stem)
+        out_m.append(Morpheme(
+            surface=stem, start=m.start, end=cut, lemma=lemma, reading=said[:-1], lemma_reading=said,
+            kana="".join(chr(ord(c) + 0x60) for c in said[:-1]), pos="adjective", auxiliary_use=False,
+            conjunctive=False, ctype="形容詞", cform="語幹-一般"))
+        out_t.append(("形容詞", "一般", ""))
+        out_m.append(Morpheme(
+            surface="そう", start=cut, end=m.end, lemma="そう", reading="そう", lemma_reading="そう",
+            kana="ソウ", pos="other", auxiliary_use=False, conjunctive=False))
+        out_t.append(("形状詞", "助動詞語幹", ""))
+    return out_m, out_t
+
+
+def _done_after_an_adverb(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A noun in kana ending in た after an adverb, read as the verb's past
+    its letters spell (plan 272): UniDic read よくねたほうがいい as ねた,
+    "material", and an adverb says how a deed is done -- the letters are
+    寝る's ね and た. Only where the letters before た with る are an
+    ichidan verb UniDic reads whole."""
+    out_m, out_t = [], []
+    for k, m in enumerate(morphemes):
+        prev = morphemes[k - 1] if k > 0 else None
+        verb = _one_verb(m.surface[:-1] + "る") if (
+            prev is not None and prev.pos == "adverb" and m.pos == "noun" and len(m.surface) >= 2
+            and m.surface.endswith("た") and all("\u3041" <= c <= "\u309f" for c in m.surface)) else None
+        if verb is None:
+            out_m.append(m)
+            out_t.append(tags[k])
+            continue
+        stem = m.surface[:-1]
+        cut = m.start + len(stem)
+        out_m.append(Morpheme(
+            surface=stem, start=m.start, end=cut, lemma=verb[0], reading=stem, lemma_reading=stem + "る",
+            kana="".join(chr(ord(c) + 0x60) for c in stem), pos="verb", auxiliary_use=False, conjunctive=False,
+            ctype=_conjugation(verb[1]), cform="連用形-一般"))
+        out_t.append(("動詞", "一般", ""))
+        out_m.append(Morpheme(
+            surface="た", start=cut, end=m.end, lemma="た", reading="た", lemma_reading="た", kana="タ",
+            pos="auxiliary", auxiliary_use=False, conjunctive=False, ctype="助動詞-タ", cform="連体形-一般"))
+        out_t.append(("助動詞", "", ""))
+    return out_m, out_t
+
+
+def _no_honorific_after_a_stem(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """出さん after a verb's stem read as 出す's negative (plan 272): UniDic
+    cut 泣き出さんばかり into 出, "coming out", and the honorific さん --
+    and さん follows a person, never a verb's stem. The letters are 出さ,
+    出す's 未然形, and ん, the negative said short (= 出さない)."""
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+        prev = morphemes[i - 1] if i > 0 else None
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        if (prev is not None and prev.pos == "verb" and prev.cform.startswith("連用形") and m.surface == "出"
+                and m.pos == "suffix" and nxt is not None and nxt.surface == "さん" and nxt.pos == "suffix"
+                and _glued(prev, m) and _glued(m, nxt)):
+            out_m.append(Morpheme(
+                surface="出さ", start=m.start, end=nxt.start + 1, lemma="出す", reading="ださ", lemma_reading="だす",
+                kana="ダサ", pos="verb", auxiliary_use=True, conjunctive=False, ctype="五段-サ行", cform="未然形-一般"))
+            out_t.append(("動詞", "非自立可能", ""))
+            out_m.append(Morpheme(
+                surface="ん", start=nxt.start + 1, end=nxt.end, lemma="ず", reading="ん", lemma_reading="ず",
+                kana="ン", pos="auxiliary", auxiliary_use=False, conjunctive=False, ctype="助動詞-ヌ",
+                cform="終止形-撥音便"))
+            out_t.append(("助動詞", "", ""))
+            i += 2
+            continue
+        out_m.append(m)
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
+def _lost(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """なくし, "lost", which UniDic cut into ない's なく and する's し (plan
+    272): 片方なくしてしまい is 無くす before しまう, where 努力なくして is
+    〜なくして, "without". Only before a verb the て hangs off in its
+    auxiliary use (しまう, いる, おく), which 〜なくして never takes."""
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+        run = morphemes[i:i + 4]
+        if (len(run) == 4 and m.surface == "なく" and m.pos == "adjective" and run[1].surface == "し"
+                and run[1].lemma in ("為る", "する") and run[2].surface == "て" and run[2].conjunctive
+                and run[3].pos == "verb" and run[3].auxiliary_use):
+            out_m.append(Morpheme(
+                surface="なくし", start=m.start, end=run[1].end, lemma="無くす", reading="なくし",
+                lemma_reading="なくす", kana="ナクシ", pos="verb", auxiliary_use=False, conjunctive=False,
+                ctype="五段-サ行", cform="連用形-一般"))
+            out_t.append(("動詞", "一般", ""))
+            i += 2
+            continue
+        out_m.append(m)
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
+@lru_cache(maxsize=2048)
 def _one_verb(kana: str):
     """The ichidan verb `kana` (a dictionary form) is when UniDic reads it
     alone as one -- つかれる is 疲れる -- as (lemma, cType), or None."""
@@ -2681,10 +2808,10 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             skip.update({i + 1, i + 2} if ka else {i + 1})
             continue
         if (m.surface == "は" and m.pos == "particle" and nxt is not None and nxt.surface == "よ" and _glued(m, nxt)
-                and (prev is None or prev.pos == "symbol") and after is not None
-                and (after.pos == "verb" or (after.lemma in ("為る", "する")))):
-            # はよ帰りたい, はよせんと: 早よ, "quickly" (western Japan),
-            # no topic は and よ (plan 272).
+                and (prev is None or prev.pos == "symbol") and after is not None and after.pos != "symbol"):
+            # はよ帰りたい, はよせんと, はよ家に入らんね: 早よ, "quickly"
+            # (western Japan) -- a は that opens its clause tops nothing,
+            # and no よ follows it (plan 272).
             out_m.append(replace(m, surface="はよ", end=nxt.end, lemma="早よ", reading="はよ", lemma_reading="はよ",
                                  kana="ハヨ", pos="adverb", written="早よ", written_reading="はよ"))
             out_t.append(("副詞", "*", "*"))
@@ -3215,6 +3342,15 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "今日" and nxt is not None and nxt.surface == "で" and after is not None and after.surface == "は"):
             # 今日では, "nowadays": こんにち
             out_m.append(replace(m, reading="こんにち", lemma_reading="こんにち", kana="コンニチ", written_reading="こんにち"))
+            out_t.append(tags[i])
+            continue
+        if (m.surface == "今日" and kata_to_hira(m.reading) == "こんにち" and not (
+                nxt is not None and (nxt.lemma in ("至る", "いたる") or nxt.surface == "的"
+                                     or (nxt.surface == "に" and after is not None and after.lemma in ("至る", "いたる"))))):
+            # 今日本当に寒いね: きょう, "today" -- UniDic chose こんにち,
+            # "nowadays", by the word after it; that one is said before
+            # では and に至る alone (plan 272)
+            out_m.append(replace(m, reading="きょう", lemma_reading="きょう", kana="キョウ", written_reading="きょう"))
             out_t.append(tags[i])
             continue
         if (m.pos == "noun" and nxt is not None and nxt.pos == "noun" and _glued(m, nxt) and _katakana_word(m.surface)
@@ -3930,7 +4066,7 @@ def _in_context(morphemes: list[Morpheme], tags: list[tuple]) -> list[Morpheme]:
     try:
         fixed = correct_readings([
             {"surface": m.surface, "reading": m.reading, "pos": m.pos,
-             "lemma": m.lemma, "tags": tag}
+             "lemma": m.lemma, "tags": tag, "start": m.start, "end": m.end}
             for m, tag in zip(morphemes, tags)
         ])
     except Exception:  # pragma: no cover - defensive only
@@ -4162,6 +4298,49 @@ def _kana_letters(text: str) -> bool:
 
 def _glued(a: Morpheme, b: Morpheme) -> bool:
     return a.end == b.start
+
+
+def _compound_verb_at(m, nxt):
+    """(lemma, lemma_reading) of the one verb a verb's stem and the verb
+    glued after it spell, where the deck or the dictionary holds it as
+    a verb -- 言い + 出す, 疲れ + 切る, 見つめ + 直す, はね + 回る -- or
+    of a noun and する the deck writes as one (値する); None elsewhere
+    (plan 272). 降り出した stays apart: no row writes 降り出す? It does,
+    and is joined; 食べ始めた, which no row holds, stays two."""
+    if nxt is None or nxt.pos != "verb" or not _glued(m, nxt):
+        return None
+    if m.pos == "verb" and m.cform.startswith("連用形") and not m.auxiliary_use:
+        return _compound_verb(m.surface, kata_to_hira(m.reading), nxt.lemma, kata_to_hira(nxt.lemma_reading), False)
+    if m.pos == "noun" and len(m.surface) == 1 and _has_kanji_char(m.surface) and nxt.lemma in ("為る", "する"):
+        return _compound_verb(m.surface, kata_to_hira(m.reading), "する", "する", True)
+    return None
+
+
+@lru_cache(maxsize=8192)
+def _compound_verb(first: str, first_reading: str, second: str, second_reading: str, deck_only: bool):
+    import content.vocab_jmdict_data as jmdict_db
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    reading = first_reading + second_reading
+    written = first + second
+    for entries in VOCAB_BY_LEVEL.values():
+        for entry in entries:
+            kanji = entry.get("kanji") or ""
+            if kanji == written and reading in kata_to_hira(entry.get("kana") or "").replace(";", "/").split("/"):
+                return kanji, reading
+    if deck_only:
+        return None
+    rows = [r for r in jmdict_db.by_kana(reading) or [] if r.get("kana") == reading]
+    for row in rows:
+        kanji = row.get("kanji") or ""
+        # (spelled as the page spells it, or with the page's kana stem
+        # in the dictionary's kanji: はね + 回る is 跳ね回る)
+        if kanji not in (written, first + second_reading) and not (kanji.endswith(second) and len(kanji) > len(second)):
+            continue                   # (疲れきる: the second verb in kana)
+        tags = {t for sense in jmdict_db.get_senses(kanji, reading) or [] for t in sense.get("tags") or ()}
+        if any(t.startswith(("v1", "v5")) for t in tags):
+            return kanji, reading
+    return None
 
 
 @lru_cache(maxsize=1)
@@ -4507,6 +4686,10 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes = _went(morphemes)
         morphemes, tags = _how_many_minutes(morphemes, tags)
         morphemes, tags = _not_a_passive(morphemes, tags)
+        morphemes, tags = _looks_so(morphemes, tags)
+        morphemes, tags = _lost(morphemes, tags)
+        morphemes, tags = _no_honorific_after_a_stem(morphemes, tags)
+        morphemes, tags = _done_after_an_adverb(morphemes, tags)
         _place_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)

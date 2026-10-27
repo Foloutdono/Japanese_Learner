@@ -608,7 +608,7 @@
 {"t":"取り除く","r":"とりのぞく","ro":"torinozoku","en":["to remove, to take away, to set apart"],"fr":["retirer, enlever, mettre de côté"],"fu":[["取","と"],["り",""],["除","のぞ"],["く",""]],"hy":["土り除く","図り除く","度り除く"]},
 {"t":"賄う","r":"まかなう","ro":"makanau","en":["to cover (costs), to finance, to supply","to provide meals, to board"],"fr":["couvrir (des frais), financer, fournir","nourrir, offrir le couvert"],"fu":[["賄","まかな"],["う",""]]},
 {"t":"奉る","r":"たてまつる","ro":"tatematsuru","en":["to offer, to present, to revere, to do respectfully"],"fr":["offrir, présenter, vénérer, faire avec respect"],"fu":[["奉","たてまつ"],["る",""]]},
-{"t":"果たす","r":"はたす","ro":"hatasu","en":["to accomplish, to fulfill, to carry out, to achieve"],"fr":["accomplir, réaliser, mener à bien"],"fu":[["果","は"],["たす",""]],"hy":["破たす","波たす","巴たす"],"ex":["N1.121","N1.187"]},
+{"t":"果たす","r":"はたす","ro":"hatasu","en":["to accomplish, to fulfill, to carry out, to achieve"],"fr":["accomplir, réaliser, mener à bien"],"fu":[["果","は"],["たす",""]],"hy":["破たす","波たす","巴たす"],"ex":["N1.121"]},
 {"t":"畜産","r":"ちくさん","ro":"chikusan","en":["animal husbandry"],"fr":["élevage"],"fu":[["畜","ちく"],["産","さん"]],"hy":["竹産","畜三","築産"]},
 {"t":"感慨","r":"かんがい","ro":"kangai","en":["strong feelings, deep emotion"],"fr":["émotion forte, sentiment profond"],"fu":[["感","かん"],["慨","がい"]],"hy":["間慨","感外","漢慨"]},
 {"t":"沿岸","r":"えんがん","ro":"engan","en":["coast, shore"],"fr":["côte, rivage"],"fu":[["沿","えん"],["岸","がん"]],"hy":["円岸","沿元","園岸"],"ex":["N1.36","N1.127"]},

@@ -990,9 +990,29 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # 数 on its own before a particle is かず, "a number" (数だけ見ても,
         # 数が多い); UniDic reads an opening 数 as the prefix すう, which
         # it is before a counter (数日, 数人). Plan 272.
+        # 階 alone is かい, "a floor" (下の階, この階には): UniDic's
+        # きざはし is the old word for stairs (plan 272).
+        if s == "階" and r == "きざはし":
+            out[i] = "かい"
+            continue
+
+        # 高尾山, 筑波山: a mountain a place gives its name to is さん, no
+        # やま, "a mountain" (plan 272).
+        if s == "山" and r == "やま" and i > 0 and "地名" in (tokens[i - 1].get("tags") or ()) \
+                and tokens[i - 1].get("end") == tokens[i].get("start"):
+            out[i] = "さん"
+            continue
+
+        # -- and glued to the noun before it, the すう of "the number of":
+        # 求人数も, 参加者数が (plan 272)
+        glued = i > 0 and tokens[i - 1].get("pos") in ("noun", "suffix") \
+            and tokens[i - 1].get("end") == tokens[i].get("start")
         if s == "数" and r == "すう" and tokens[i].get("pos") == "noun" and i + 1 < n \
-                and tokens[i + 1].get("pos") == "particle":
+                and tokens[i + 1].get("pos") == "particle" and not glued:
             out[i] = "かず"
+            continue
+        if s == "数" and r == "かず" and glued:
+            out[i] = "すう"
             continue
 
         # 数日, 何日: days, にち -- UniDic reads the suffix じつ.

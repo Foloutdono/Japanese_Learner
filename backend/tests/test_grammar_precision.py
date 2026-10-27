@@ -1285,12 +1285,14 @@ class InvariantTests(unittest.TestCase):
 
     def test_a_piece_stands_on_words(self) -> None:
         """A piece starts and stops where a word does, or inside a word
-        that conjugates (〜てしまう ends inside しまい): never inside a
+        that conjugates (〜てしまう ends inside しまい, 〜くて opens inside
+        っぽく, a suffix that conjugates as an adjective): never inside a
         noun, a particle or a mark."""
         for sentence, tokens, hits in self.read:
             starts = {t.start for t in tokens}
             ends = {t.end for t in tokens}
-            inside = {i: t.pos for t in tokens for i in range(t.start, t.end)}
+            inside = {i: "adjective" if t.pos == "suffix" and t.ctype.startswith("形容詞") else t.pos
+                      for t in tokens for i in range(t.start, t.end)}
             for h in hits:
                 for a, b in h["segments"]:
                     with self.subTest(sentence=sentence, pattern=h["pattern"], piece=sentence[a:b]):
@@ -1455,7 +1457,7 @@ class WholeWordTests(unittest.TestCase):
         for sentence, pattern, written in (("いつも私も行きます。", "も", "も"), ("実をいうと、彼は来た。", "は", "は"),
                                            ("友達とともに行く。", "〜とともに", "とともに"),
                                            ("行くかどうか分からない。", "〜かどうか", "かどうか"),
-                                           ("今に見ていろ。", "に", "に"), ("非常に賢い鳥だ。", "〜く／〜に（副詞形）", "に")):
+                                           ("今に分かるよ。", "に", "に"), ("非常に賢い鳥だ。", "〜く／〜に（副詞形）", "に")):
             with self.subTest(sentence=sentence, pattern=pattern):
                 self.assertEqual(found_in(sentence).get(pattern), written)
 
@@ -1898,7 +1900,8 @@ class ThirdReviewPointTests(unittest.TestCase):
                                              ("朝起きられず、遅刻した。", False, True),
                                              ("力が求められている。", True, False),
                                              ("弟にケーキを食べられてしまいました。", True, False),
-                                             ("この魚は食べられますか。", True, True)):
+                                             # (asked politely, what one can do, plan 272)
+                                             ("この魚は食べられますか。", False, True)):
             with self.subTest(sentence=sentence):
                 found = found_in(sentence)
                 self.assertEqual("受身形 〜られる" in found, passive)
@@ -2688,3 +2691,132 @@ class HeldOutPointTests(unittest.TestCase):
                          "赤いのにしよう。", "姉が静かなのにひきかえ、妹はうるさい。", "去年が暖かかったのに対して、今年は寒い。"):
             with self.subTest(sentence=sentence):
                 self.assertNotIn("〜のに", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SegmentationRoundPointTests(unittest.TestCase):
+    """The points a round on segmentation and grammar found lit wrongly
+    or left unlit (plan 272), each on sentences written for the rule."""
+
+    def test_a_request_is_said_to_someone(self) -> None:
+        # a request before a call by name, a person or an insult, or before
+        # the plea it is said with
+        for sentence in ("早く起きて、お父さん！", "ペン貸して、一本だけでいいから。", "手伝って、お願いだから。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜て／〜ないで（依頼）", found_in(sentence))
+        # ...never a play called in a commentary
+        self.assertNotIn("〜て／〜ないで（依頼）", found_in("左サイドを駆け上がって、シュート！"))
+
+    def test_two_descriptions_are_no_adverb(self) -> None:
+        for sentence in ("広く明るい部屋。", "明るく静かな部屋を探している。", "細長く白い指。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜く／〜に（副詞形）", found_in(sentence))
+        for sentence in ("すごく広い。", "珍しく暖かい日だ。", "強く押してください。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜く／〜に（副詞形）", found_in(sentence))
+
+    def test_passive_or_potential_by_what_the_sentence_says(self) -> None:
+        for sentence, point, other in (
+            ("この本は図書館で借りられますか。", "可能形 〜(ら)れる", "受身形 〜られる"),     # asked
+            ("誰でも簡単に覚えられる。", "可能形 〜(ら)れる", "受身形 〜られる"),             # ease
+            ("一晩で全部覚えられっこない。", "可能形 〜(ら)れる", "受身形 〜られる"),
+            ("その城は江戸時代に建てられた。", "受身形 〜られる", "可能形 〜(ら)れる"),       # done
+            ("会議は予定どおり進められた。", "受身形 〜られる", "可能形 〜(ら)れる"),
+            ("この寺は僧侶たちによって守られている。", "受身形 〜られる", "可能形 〜(ら)れる"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))
+                self.assertNotIn(other, found_in(sentence))
+
+    def test_naru_s_own_negative_after_ha(self) -> None:
+        self.assertIn("ない形 〜ない", found_in("努力は決してむだにはならない。"))
+        self.assertIn("〜てはならない", found_in("ここで走ってはならない。"))
+        self.assertNotIn("ない形 〜ない", found_in("ここで走ってはならない。"))
+
+    def test_a_saying_keeps_only_its_particles_and_endings(self) -> None:
+        # a saying folded whole takes its particles and its last word's
+        # endings with it: no たい in 猫の手も借りたい, no passive in 賽は投げ
+        # られた (plan 272)
+        self.assertNotIn("〜たいです", found_in("年末は猫の手も借りたいくらいだ。"))
+        self.assertNotIn("受身形 〜られる", found_in("もう賽は投げられた。"))
+        # ...and never a construction the catalogue teaches on its own words
+        for sentence, point in (("工事は昼夜を問わず続いた。", "〜を問わず"),
+                                ("彼はそれを一顧だにしなかった。", "〜だに"),
+                                ("あんな失敗は若気の至りだ。", "〜の至り")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))
+
+    def test_no_volitional_after_a_demonstrative(self) -> None:
+        # この and その open a noun: このやろう is この + 野郎
+        self.assertNotIn("意向形 〜(よ)う", found_in("このやろう、覚えてろ！"))
+        self.assertIn("意向形 〜(よ)う", found_in("このパンを食べよう。"))
+        self.assertIn("意向形 〜(よ)う", found_in("その店に行こう。"))
+
+    def test_a_fused_particle_has_no_point_of_its_own(self) -> None:
+        # a particle the construction writes between its own letters
+        self.assertNotIn("も", found_in("雪にもかかわらず、彼は来た。"))
+        self.assertNotIn("に", found_in("毎朝走ることにした。"))
+        # ...never one between the pattern's 〜 marks
+        self.assertIn("は", found_in("象は鼻が長い。"))
+        self.assertIn("が", found_in("象は鼻が長い。"))
+
+    def test_a_te_before_no_deed_gives_its_reason(self) -> None:
+        for sentence in ("隣の工事の音が響いてうるさい。", "雪が積もって歩けない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜て（理由）", found_in(sentence))
+                self.assertNotIn("〜て、〜て", found_in(sentence))
+        for sentence in ("朝起きて顔を洗う。", "ちょっと待って、高いよ。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜て（理由）", found_in(sentence))
+        # the て another construction is written with is that one's
+        self.assertNotIn("〜て、〜て", found_in("子どもだからといって、甘やかしてはいけない。"))
+        self.assertIn("〜て、〜て", found_in("駅まで歩いて、電車に乗った。"))
+
+    def test_a_te_pattern_written_on_its_stem(self) -> None:
+        for sentence, point in (("開会に先立ち、市長があいさつした。", "〜に先立って"),
+                                ("気温が上がるにつれ、汗が出る。", "〜につれて"),
+                                ("三日にわたり会議が続いた。", "〜にわたって")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))
+        # ...where the stem closes its clause, never before ます
+        self.assertNotIn("〜にわたって", found_in("工事は三か月にわたります。"))
+
+    def test_points_written_another_way(self) -> None:
+        self.assertIn("〜と〜とどちらが", found_in("りんごとみかんと、どちらが好き？"))
+        self.assertIn("〜上に", found_in("この店は安いうえに、味もいい。"))
+        self.assertNotIn("〜上に", found_in("机の上に本がある。"))
+        self.assertIn("〜くて／〜で", found_in("このペンは書きやすくて便利だ。"))
+        self.assertIn("〜でしょう", found_in("これ、うまいっしょ。"))
+
+    def test_points_their_neighbours_refuse(self) -> None:
+        for sentence, point in (("日本語が上手に話せない。", "〜が上手です／下手です"),
+                                ("そんなことはあり得ない。", "〜があります／います"),
+                                ("考えようによっては、いい話だ。", "〜ように"),
+                                ("もう諦めるしかない。", "もう〜ない"),
+                                ("成績次第では、進学できる。", "〜は〜が"),
+                                ("安いのは助かるが、重いのが難点だ。", "〜のは〜だ"),
+                                ("駅を出たところで、友達に会った。", "〜たところで"),
+                                ("ぶっちゃけ、つまらなかった。", "可能形 〜(ら)れる"),
+                                ("手袋を片方なくしてしまった。", "〜なくして(は)")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(point, found_in(sentence))
+        for sentence, point in (("彼は日本語が上手です。", "〜が上手です／下手です"),
+                                ("好きなのはすしです。", "〜のは〜だ"),
+                                ("今さら謝ったところで、もう遅い。", "〜たところで"),
+                                ("漢字が読める。", "可能形 〜(ら)れる"),
+                                ("努力なくして成功はない。", "〜なくして(は)")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))
+
+    def test_no_point_lights_a_mark(self) -> None:
+        # a point written across a comma lights the words on either side
+        sentence = "お茶とコーヒーと、どちらがいいですか？"
+        from study import analysis
+        hit = next(g for g in analysis.analyze_local(sentence)["grammar"] if g["pattern"] == "〜と〜とどちらが")
+        self.assertTrue(all("、" not in sentence[a:b] for a, b in hit["segments"]))
+
+    def test_advice_is_no_plea(self) -> None:
+        # 〜たほうがいい after a comma is advice, a clause of its own: the て
+        # before it links, and asks for nothing
+        self.assertNotIn("〜て／〜ないで（依頼）", found_in("薬を飲んで、よくねたほうがいいよ。"))
+        self.assertIn("〜て／〜ないで（依頼）", found_in("ペン貸して、一本だけでいいから。"))
