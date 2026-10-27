@@ -173,7 +173,7 @@ def test_delete_user_rows_empties_every_table_and_keeps_other_users():
 
 def test_route_erases_rows_then_the_auth_user(client, monkeypatch):
     calls = []
-    monkeypatch.setattr(account, "delete_user_rows", lambda cur, uid: calls.append(("rows", uid)) or {"user_profiles": 1})
+    monkeypatch.setattr(account, "delete_user_rows", lambda cur, uid, after=None: calls.append(("rows", uid)) or {"user_profiles": 1})
     monkeypatch.setattr(account, "_delete_auth_user", lambda uid: calls.append(("auth", uid)) or True)
     r = client.delete("/api/account")
     assert r.status_code == 200
@@ -186,7 +186,7 @@ def test_route_erases_rows_then_the_auth_user(client, monkeypatch):
 
 def test_route_reports_502_when_the_auth_user_survives(client, monkeypatch):
     calls = []
-    monkeypatch.setattr(account, "delete_user_rows", lambda cur, uid: calls.append("rows") or {})
+    monkeypatch.setattr(account, "delete_user_rows", lambda cur, uid, after=None: calls.append("rows") or {})
 
     def boom(uid):
         raise account.AuthDeleteError("503 upstream")

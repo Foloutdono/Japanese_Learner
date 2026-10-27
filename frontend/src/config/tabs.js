@@ -65,6 +65,30 @@ export function getDeskTabs(t) {
   return DESK_TAB_IDS.map(id => byId[id])
 }
 
+// ── 対戦 — the duels, the desk's sixth gate (plan 279) ──
+// The owner's call: on the desk the duels stand beside the other main
+// modes, a gate of the rail's own -- a pictogram and its word -- after
+// Practice. The phone has no room for a sixth gate and opens them from a
+// door in the holder (E1, the Elo under it, L1), and the desk's holder is
+// whole in the window with room for neither (plan 248). The path stays
+// the phone's, behind the pass, so a bookmark and the trail's route
+// patterns read it unchanged; on the desk the pass's gate is not lit
+// while the duels' is, as with a place (plan 269).
+export const DESK_DUELS_PATH = '/profile/duels'
+
+/** The rail's gates, top to bottom: the five, and the duels after Practice. */
+export function getDeskGates(t) {
+  const gates = getDeskTabs(t)
+  const at = gates.findIndex(g => g.id === 'practice') + 1
+  return [...gates.slice(0, at), { id: 'duels', path: DESK_DUELS_PATH, label: t.pvpTitle }, ...gates.slice(at)]
+}
+
+/** The gate `pathname` lights on the rail: the duels' for their hall and
+ *  what stands behind it, else the tab bar's. */
+export function deskGateFor(pathname) {
+  return inSection(pathname ?? '', DESK_DUELS_PATH) ? 'duels' : tabFor(pathname ?? '')
+}
+
 // ── 所 — the four places beside the gates (plan 269) ──
 // On the desk the analyser, the library (the learner's decks and
 // everyone's, one screen), the statistics and the settings are places
@@ -110,12 +134,13 @@ export function getDeskSections(tabId, t) {
 
 /**
  * Whether the desk's rail already has a door to `path` (plan 114): a
- * gate, one of any gate's stations, or a place. A screen's ‹ way out to
- * one of those is a second door to the same place on the desk, and the
- * Bar drops it (components/chrome/Bar.jsx).
+ * gate (the duels' among them), one of any gate's stations, or a place.
+ * A screen's ‹ way out to one of those is a second door to the same
+ * place on the desk, and the Bar drops it (components/chrome/Bar.jsx).
  */
 export function onDeskRail(path) {
   return DESK_TAB_IDS.some(id => path === `/${id}` || getDeskSections(id, {}).some(s => s.path === path))
+    || path === DESK_DUELS_PATH
     || getDeskPlaces({}).some(p => p.path === path)
 }
 

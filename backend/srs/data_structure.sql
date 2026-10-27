@@ -1248,3 +1248,122 @@ CREATE TABLE banzuke_marks (
     PRIMARY KEY (kind, at)
 );
 ALTER TABLE banzuke_marks ENABLE ROW LEVEL SECURITY;
+
+-- ── 対戦 — the duels (plan 279, study/duel_schema.py) ─────────────────
+-- The sprint between two learners: sixty seconds, the same questions.
+-- Every table here is erased with the account (routes/account.py).
+
+-- pvp_friends: a friendship, one row per direction, so "my friends" is
+-- WHERE user_id = me.
+CREATE TABLE pvp_friends (
+    user_id   TEXT NOT NULL,
+    friend_id TEXT NOT NULL,
+    since     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, friend_id)
+);
+ALTER TABLE pvp_friends ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_friends_friend ON pvp_friends (friend_id);
+
+-- pvp_requests: a request waiting (refused_at NULL) or refused, which
+-- keeps the same learner from asking again for 30 days.
+CREATE TABLE pvp_requests (
+    user_id    TEXT NOT NULL,
+    target_id  TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    refused_at TIMESTAMPTZ,
+    PRIMARY KEY (user_id, target_id)
+);
+ALTER TABLE pvp_requests ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_requests_target ON pvp_requests (target_id);
+
+CREATE TABLE pvp_blocks (
+    user_id    TEXT NOT NULL,
+    blocked_id TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, blocked_id)
+);
+ALTER TABLE pvp_blocks ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_blocks_blocked ON pvp_blocks (blocked_id);
+
+-- pvp_reports: a profile reported, for a closed reason and never a
+-- word typed; one row per pair. Read by a person (scripts/read_reports).
+CREATE TABLE pvp_reports (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    reported_id TEXT NOT NULL,
+    reason      TEXT NOT NULL,
+    duel_id     BIGINT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, reported_id)
+);
+ALTER TABLE pvp_reports ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_reports_reported ON pvp_reports (reported_id);
+
+-- pvp_duels: a duel's paper (its questions and keys, stored: an
+-- asynchronous duel outlives a release) and its state. No learner id:
+-- the players are its pvp_entries rows.
+CREATE TABLE pvp_duels (
+    id          BIGSERIAL PRIMARY KEY,
+    kind        TEXT NOT NULL,
+    mode        TEXT NOT NULL,
+    level       TEXT NOT NULL,
+    seed        BIGINT NOT NULL,
+    paper_rev   TEXT NOT NULL,
+    paper       JSONB NOT NULL,
+    status      TEXT NOT NULL,
+    ghost       BOOLEAN NOT NULL DEFAULT FALSE,
+    live_start  TIMESTAMPTZ,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at  TIMESTAMPTZ NOT NULL,
+    resolved_at TIMESTAMPTZ
+);
+ALTER TABLE pvp_duels ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_duels_seek ON pvp_duels (status, kind, level);
+
+-- pvp_entries: a player in a duel -- the question served and when, the
+-- answers as the server timed them, the score, the Elo before and
+-- after, the credits it paid. A ghost is a copy of a recorded run,
+-- under its author's id (role 'ghost'), and goes with their account.
+CREATE TABLE pvp_entries (
+    duel_id         BIGINT NOT NULL REFERENCES pvp_duels(id) ON DELETE CASCADE,
+    user_id         TEXT NOT NULL,
+    role            TEXT NOT NULL,
+    answers         JSONB NOT NULL DEFAULT '[]',
+    served_q        SMALLINT,
+    served_at       TIMESTAMPTZ,
+    score           INTEGER,
+    rights          SMALLINT,
+    started_at      TIMESTAMPTZ,
+    finished_at     TIMESTAMPTZ,
+    rating_before   INTEGER,
+    rating_after    INTEGER,
+    opponent_rating INTEGER,
+    result          REAL,
+    paid            SMALLINT NOT NULL DEFAULT 0,
+    reviewed        BOOLEAN NOT NULL DEFAULT FALSE,
+    xp              INTEGER NOT NULL DEFAULT 0,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (duel_id, user_id)
+);
+ALTER TABLE pvp_entries ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_entries_user ON pvp_entries (user_id, finished_at);
+-- One player meets a duel's first: two seekers never share one seat.
+CREATE UNIQUE INDEX pvp_entries_one_opponent ON pvp_entries (duel_id) WHERE role = 'opponent';
+
+-- pvp_ratings: the Elo, apart from the 番付's XP. It starts where the
+-- placement test boards the learner (placed_level), never at a level
+-- they declared.
+CREATE TABLE pvp_ratings (
+    user_id      TEXT PRIMARY KEY,
+    rating       INTEGER NOT NULL,
+    games        INTEGER NOT NULL DEFAULT 0,
+    wins         INTEGER NOT NULL DEFAULT 0,
+    draws        INTEGER NOT NULL DEFAULT 0,
+    losses       INTEGER NOT NULL DEFAULT 0,
+    peak         INTEGER NOT NULL,
+    placed_level TEXT NOT NULL,
+    placed_at    TIMESTAMPTZ NOT NULL,
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE pvp_ratings ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_ratings_rating ON pvp_ratings (rating DESC, user_id);

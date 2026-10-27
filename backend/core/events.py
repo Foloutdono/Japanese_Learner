@@ -305,6 +305,20 @@ EVENTS: dict[str, frozenset[str]] = {
     # response body is ever carried.
     "api_error":      frozenset({"path", "status"}),
     "install_prompt": frozenset({"outcome"}),
+
+    # ── 対戦 — the duels (plan 279) ──────────────────────────────
+    # Written server-side by routes/pvp.py. Never a username, never who
+    # played whom: what was done, at which level, and how it ended.
+    # `against` is how the opponent was found (a friend; a ranked run
+    # someone left waiting, `seek`; a recorded run, `ghost`; or none
+    # yet, `open`), `wait_h` the hours an asynchronous duel waited.
+    "pvp_friend":     frozenset({"action"}),
+    "pvp_report":     frozenset({"reason"}),
+    "pvp_duel_start": frozenset({"kind", "mode", "level", "against"}),
+    "pvp_duel_done":  frozenset({"kind", "mode", "level", "outcome", "rights", "wait_h"}),
+    "pvp_review":     frozenset({"kind"}),
+    "pvp_placed":     frozenset({"level"}),
+    "pvp_smurf":      frozenset({"games"}),
 }
 
 # 選択肢 — the values a string property may take, where it is an enum
@@ -369,6 +383,26 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
                                          "deep_analysis", "exam_paper", "line_translation"})},
+    # What a refused fare was for (core/credits.FARES): a review, or
+    # since plan 279 a ranked duel's departure or a duel's corrections.
+    "fare_blocked": {"kind": frozenset({"review", "duel", "duel_review"})},
+    "pvp_friend": {"action": frozenset({"request", "accept", "refuse", "withdraw", "remove",
+                                        "block", "unblock"})},
+    "pvp_report": {"reason": frozenset({"name", "cheat", "spam", "other"})},
+    "pvp_duel_start": {
+        "kind":    frozenset({"friend", "ranked"}),
+        "mode":    frozenset({"async", "live"}),
+        "level":   frozenset({"N5", "N4", "N3", "N2", "N1"}),
+        "against": frozenset({"friend", "seek", "ghost", "open"}),
+    },
+    "pvp_duel_done": {
+        "kind":    frozenset({"friend", "ranked"}),
+        "mode":    frozenset({"async", "live"}),
+        "level":   frozenset({"N5", "N4", "N3", "N2", "N1"}),
+        "outcome": frozenset({"win", "loss", "draw", "expired", "declined"}),
+    },
+    "pvp_review": {"kind": frozenset({"friend", "ranked"})},
+    "pvp_placed": {"level": frozenset({"N5", "N4", "N3", "N2", "N1"})},
     "client_error": {
         "where": frozenset({"error", "rejection"}),
         # The boarding's and the rides' steps, frontend/src/domain/
