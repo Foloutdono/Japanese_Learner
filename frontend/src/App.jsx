@@ -5,7 +5,7 @@ import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, ReleaseNote, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
-import { ClaimSheet } from './components/credits/ClaimSheet'
+import { RefillMoment } from './components/credits/RefillMoment'
 import { OfferScreen } from './components/offers/OfferScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
@@ -916,11 +916,11 @@ export default function App({ front = NO_FRONT }) {
             run's own retry unmounts the failure that raised it. */}
         <FeedbackHost session={session} />
         <OfferScreen />
-        {/* 補充 — what the refill landed while the app was closed, on
-            arrival (plan 141). Held through the 改札 cutscene and the
-            first ride, which have the learner's whole attention, and
-            opened once either lets go. */}
-        <ClaimSheet hold={onboarding === 'finishing'} />
+        {/* 補充 — what the refill landed while the app was closed,
+            charged onto the card on arrival (plans 141, 276). Held
+            through the 改札 cutscene and the first ride, which have the
+            learner's whole attention, and played once either lets go. */}
+        <RefillMoment hold={onboarding === 'finishing'} />
         {/* 運行状況 — the status sheet off the HUD's station panel
             (plan 074): the pass's back, the ghost train and the two
             honest moves. */}

@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus } from '../../stores/journey'
-import { useCredits, openBalance } from '../../stores/credits'
+import { useCredits, useClaimOffer, useClaimLanded, openBalance } from '../../stores/credits'
 import { useOnline } from '../../hooks/useOnline'
 import { useXpGain } from './useXpGain'
 import { FareFigure } from './Hud'
@@ -14,6 +14,7 @@ import { StruckMark } from '../offers/StruckMark'
 import { CardFace } from '../pass/PassCard'
 import { InfinitySign } from '../pass/InfinitySign'
 import { playClick } from '../../lib/audio'
+import { RefillPrint } from '../credits/RefillCard'
 
 // ── 定期入れ — the holder at the rail's foot (plan 127; the holder, plan 173) ──
 // Plan 127 set the HUD's three instruments at the rail's foot as one
@@ -40,6 +41,12 @@ import { playClick } from '../../lib/audio'
 // mouth says so, so the card is never drawn twice. The case's edge is
 // the balance's: warning at five or fewer, danger at none. Desk only:
 // the phone carries the same doors on its HUD's strip.
+//
+// On arrival with credits the refill landed (plan 276, the owner's pick
+// C2), the card stands up out of the mouth, is charged there -- the
+// balance printed on its face, counting up (RefillPrint) -- and sinks
+// back, and the case's figure takes the new balance with a glint. Not
+// while the card is out on the page: there the figure moves alone.
 function cardIsOut(pathname) {
   return pathname === '/profile' || pathname.startsWith('/profile/settings')
 }
@@ -51,6 +58,8 @@ export function DeskPass() {
   const summary = useProfileSummary()
   const { gain, clear } = useXpGain(summary)
   const credits = useCredits()
+  const offer = useClaimOffer()
+  const landed = useClaimLanded()
   const online = useOnline()
   const { data } = useJourneyStatus()
 
@@ -78,9 +87,11 @@ export function DeskPass() {
   const drift = panel?.days ? t.hudDays(panel.days) : null
 
   const away = cardIsOut(pathname)
+  const refill = Boolean(offer) && !away
   const classes = [
     'desk-holder', `desk-holder--${tier}`,
     low ? 'desk-holder--low' : '', out ? 'desk-holder--out' : '', away ? 'desk-holder--away' : '',
+    refill ? 'desk-holder--refill' : '',
   ].filter(Boolean).join(' ')
   return (
     <div className={classes}>
@@ -88,7 +99,9 @@ export function DeskPass() {
         ? <span className="desk-holder__slot">{t.cardOnPage}</span>
         : (
           <span className="desk-holder__card">
-            <CardFace tier={tier} name={holderName(summary)} level={summary?.level ?? ''} share={climb.share} />
+            <CardFace tier={tier} name={holderName(summary)} level={summary?.level ?? ''} share={climb.share}>
+              {refill && <RefillPrint key={offer.id} offer={offer} cap={cap} />}
+            </CardFace>
           </span>
         )}
       <div className="desk-holder__case">
@@ -124,6 +137,7 @@ export function DeskPass() {
             aria-label={[t.passLabel, unlimited ? t.cardUnlimited : balance != null ? `${balance} / ${cap}` : null, note].filter(Boolean).join(' · ')}
             onClick={() => { playClick(); openBalance() }}
           >
+            {landed > 0 && <i key={landed} className="desk-holder__landed" aria-hidden="true" />}
             {unlimited && <span className="desk-holder__fig desk-holder__fig--inf"><InfinitySign /></span>}
             {balance != null && (
               <span className="desk-holder__fig">

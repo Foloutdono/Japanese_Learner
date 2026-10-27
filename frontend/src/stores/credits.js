@@ -41,6 +41,8 @@ export function forgetCredits() {
   // balance, and their "while you were away" is not the next one's.
   claimGeneration += 1
   claimOffer = null
+  claimLanded = 0
+  clearTimeout(landedTimer)
   emit()
 }
 
@@ -224,22 +226,30 @@ export function useRunOut() {
   return useSyncExternalStore(subscribe, () => runOut, () => null)
 }
 
-// ── 補充 — the refill, claimed (plan 141) ────────────────────
+// ── 補充 — the refill, claimed (plans 141, 276) ──────────────
 // The refill lands a credit every 48 minutes and the server keeps what
 // has landed as `pending` until it is claimed (core/credits.py). Two
-// ways it is: the "while you were away" sheet the app opens on arrival
-// (components/credits/ClaimSheet.jsx, its button), and quietly, as
+// ways it is: on arrival, the card is charged with what landed while
+// the app was closed and claims it as it goes back to its pocket
+// (components/credits/RefillMoment.jsx, plan 276), and quietly, as
 // each credit lands while the app is open in front of the learner
 // (hooks/useRefill.js) -- the balance filling itself, in the HUD. A
 // fare claims it too, server-side, so nothing here is ever the thing
 // standing between a learner and a review.
-let claimOffer = null   // { amount, from } or null -- the sheet
+let claimOffer = null   // { id, amount, from } or null -- the card is out while it is set
 let claimGeneration = 0
+let offerSeq = 0       // each offer's id: a new one is a new moment
+// The moment the card went back with its credits: the balance it lands
+// on glints once (the strip's door, the holder's), then this clears.
+let claimLanded = 0
+let landedTimer = null
+const LANDED_MS = 1200
 
-/** Open the sheet on `amount` credits landed over a balance of `from`. */
+/** Charge the card with `amount` credits landed over a balance of `from`. */
 export function offerClaim(amount, from) {
   if (!(amount > 0)) return
-  claimOffer = { amount, from: from ?? 0 }
+  offerSeq += 1
+  claimOffer = { id: offerSeq, amount, from: from ?? 0 }
   emit()
 }
 export function peekClaimOffer() { return claimOffer }
@@ -266,11 +276,11 @@ export async function claimCredits() {
 }
 
 /**
- * The sheet's button (and its scrim, and Escape: there is no reason to
- * leave a credit behind, so every way out of the sheet takes them).
- * Closes at once with the balance already moved -- the answer is the
- * one the sheet printed -- and lets the server's figure win when it
- * arrives, or puts the store back to the server's word on a failure.
+ * The card back in its pocket (RefillMoment, at the moment's end: a
+ * credit left behind is nobody's gain, so nothing ends it without the
+ * claim). Moves the balance at once -- the figure the card was charged
+ * to -- and lets the server's figure win when it arrives, or puts the
+ * store back to the server's word on a failure.
  */
 export function takeClaim() {
   const offer = claimOffer
@@ -280,6 +290,15 @@ export function takeClaim() {
   if (cur && !cur.unlimited && cur.balance != null) {
     store.seed({ ...cur, balance: cur.balance + offer.amount, pending: 0 })
   }
+  claimLanded += 1
+  clearTimeout(landedTimer)
+  landedTimer = setTimeout(() => { claimLanded = 0; emit() }, LANDED_MS)
   emit()
   return claimCredits().catch(() => { refreshCredits(); return 0 })
 }
+
+/** Non-zero for a moment after the card went back charged: the glint's key. */
+export function useClaimLanded() {
+  return useSyncExternalStore(subscribe, () => claimLanded, () => 0)
+}
+export function peekClaimLanded() { return claimLanded }

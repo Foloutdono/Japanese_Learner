@@ -8,8 +8,8 @@ import { useCredits, peekCredits, refreshCredits, peekClaimOffer, offerClaim, cl
 //
 //   arriving   the app opened, or came back to the front after AWAY_MS
 //              or longer out of sight: a fresh read, and anything
-//              pending opens the "while you were away" sheet
-//              (components/credits/ClaimSheet.jsx) with its figure.
+//              pending is charged onto the card, "while you were away"
+//              (components/credits/RefillMoment.jsx, plan 276).
 //   staying    the app is in front of the learner when a credit lands:
 //              it is claimed quietly on the minute, so the balance
 //              fills itself in the HUD while they watch -- nobody is
@@ -42,7 +42,7 @@ async function arrive() {
 export function useRefill(hold = false) {
   const credits = useCredits()
   const arrived = useRef(false)
-  // True while an arrival's read is out: what it finds is the sheet's,
+  // True while an arrival's read is out: what it finds is the card's,
   // and the quiet claim below must not take it first.
   const arriving = useRef(false)
   const hiddenAt = useRef(null)
@@ -81,7 +81,7 @@ export function useRefill(hold = false) {
   }, [hold])
 
   // Staying: a quiet claim on each credit's minute (at once for any
-  // already landed), while in sight and while the sheet is not the one
+  // already landed), while in sight and while the card is not the one
   // offering them.
   const nextAt = credits && !credits.unlimited ? credits.nextCreditAt : null
   const landed = credits && !credits.unlimited ? credits.pending ?? 0 : 0

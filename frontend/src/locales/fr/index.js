@@ -100,10 +100,9 @@ const nav = {
   runOutCleared:     (n) => `${n} révisée${n > 1 ? 's' : ''}`,
   runOutWaiting:     (n) => `${n} ${n > 1 ? 'attendent' : 'attend'} la recharge`,
   runOutWaits:       'en attente',
-  // 補充 — ce que la recharge a versé, app fermée (plan 141)
-  claimTitle:        'Pendant ton absence',
-  claimButton:       'Récupérer',
-  claimBookLabel:    (n, cap) => `${n} crédit${n > 1 ? 's' : ''} sur ${cap}`,
+  // 補充 — ce que la recharge a versé, app fermée, dit pendant que la
+  // carte se charge (plans 141, 276), à un lecteur d'écran
+  refillLanded:      (n, to, cap) => `${n} crédit${n > 1 ? 's' : ''} arrivé${n > 1 ? 's' : ''} pendant ton absence · ${to} sur ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',
   laneNew:           n => `${n} nouv.`,
