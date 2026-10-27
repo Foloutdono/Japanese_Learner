@@ -291,9 +291,10 @@ L'objectif du propriétaire est plus ambitieux que la première proposition
 | Premiers revenus | fin 2026 | premiers abonnés fondateurs, mesures calibrées, crédits activés |
 | Coûts fixes couverts | 31 mars 2027 | environ 1 330 actifs, environ 74 payants |
 
-Partir de 25 actifs pour en avoir 1 330 en cinq mois, c'est **doubler le
-nombre d'actifs chaque mois** (environ +118 % par mois, environ 130 actifs fin
-2026). Cela ne tient que si les vidéos courtes et le parrainage tournent à
+Partir de 35 actifs (au moins 2 jours d'étude sur 30, mesurés le 27 octobre)
+pour en avoir 1 330 fin mars, c'est **un peu plus que doubler chaque mois**
+(×2,2). En doublant tout juste, le seuil tombe en avril. Le business plan
+détaille les trois rythmes. Cela ne tient que si les vidéos courtes et le parrainage tournent à
 plein : le format « Can you read it? » a déjà dépassé 20 000 vues.
 
 Les outils de développement sont un coût de l'activité. Ils représentent
