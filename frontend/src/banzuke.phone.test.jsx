@@ -115,6 +115,15 @@ describe('the whole board at 390×844', () => {
     expect(podium).toBe($('.bzp__list').firstElementChild)
     expect(podium.querySelector('.bzp__podium-cap').textContent).toBe('Sem. dernière')
     expect($$('.bzp__champ .bz-pick').map(n => n.textContent)).toEqual(['Aoi', 'Mei', 'Sora'])
+    // Each medal is a ring with its figure, never ①②③ (no face the app
+    // loads draws them), the figure centred on its own cap height.
+    expect($$('.bzp__medal').map(m => m.textContent)).toEqual(['1', '2', '3'])
+    for (const m of $$('.bzp__medal')) {
+      const ring = m.getBoundingClientRect()
+      const num = m.querySelector('.bz-num').getBoundingClientRect()
+      expect(Math.abs((num.top + num.bottom) / 2 - (ring.top + ring.bottom) / 2)).toBeLessThan(0.5)
+      expect(num.height).toBeLessThan(parseFloat(getComputedStyle(m).fontSize))
+    }
     expect($('.bzp__controls .bzp__sub .bzp__ends').textContent).toMatch(/^Fin dans 3 j \d+ h$/)
   })
 

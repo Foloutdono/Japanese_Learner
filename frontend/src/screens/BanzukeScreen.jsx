@@ -224,7 +224,7 @@ export default function BanzukeScreen({ session }) {
               <span className="bzp__podium-names">
                 {board.champions.map(c => (
                   <span key={c.rank} className="bzp__champ">
-                    <span className={`bzp__medal bzp__medal--${MEDALS[c.rank - 1]}`} aria-hidden="true">{CIRCLED[c.rank - 1]}</span>
+                    <span className={`bzp__medal bzp__medal--${MEDALS[c.rank - 1]}`} aria-hidden="true"><span className="bz-num">{c.rank}</span></span>
                     <button type="button" className="bz-pick" aria-label={t.bzRowAria(c.username)} onClick={() => setPicked(c.username)}>{c.username}</button>
                   </span>
                 ))}
@@ -266,7 +266,7 @@ export default function BanzukeScreen({ session }) {
       {showBar && (
         <div className="bzp__me">
           <div className="leaderboard-row leaderboard-row--me bzp__me-row">
-            <span className="leaderboard-row__rank">{me.rank}</span>
+            <span className="leaderboard-row__rank"><span className="bz-num">{me.rank}</span></span>
             <span className="leaderboard-row__name">{me.username}</span>
             {me.gap && <GapShort gap={me.gap} t={t} lang={lang} />}
             <span className="leaderboard-row__xp">{me.xp.toLocaleString(lang)} XP</span>
@@ -310,7 +310,6 @@ export default function BanzukeScreen({ session }) {
 }
 
 const MEDALS = ['gold', 'silver', 'bronze']
-const CIRCLED = ['①', '②', '③']
 
 // The week's end, to the hour.
 function endsIn(end, t) {

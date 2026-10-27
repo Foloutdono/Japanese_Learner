@@ -15,7 +15,7 @@ vi.mock('./lib/audio', async o => ({ ...(await o()), playClick: vi.fn(), playUi:
 const row = (rank, extra = {}) => ({ rank, username: `L${rank}`, xp: 10000 - rank * 10, level: 3, move: null, zone: 0, ...extra })
 vi.mock('./lib/api', async o => ({
   ...(await o()),
-  apiJson: vi.fn(async () => ({
+  apiJson: vi.fn(async path => (/[?&]offset=[1-9]/.test(path) ? page(path) : {
     period: 'division', offset: 0, total: 30, near: [],
     entries: Array.from({ length: 30 }, (_, i) => row(i + 1, { zone: i < 6 ? 1 : i >= 24 ? -1 : 0 })),
     me: { ...row(12), gap: { xp: 11, username: 'L11' } }, hidden: false,
@@ -23,6 +23,13 @@ vi.mock('./lib/api', async o => ({
     division: { index: 3, key: 'makushita', count: 6, up: 6, down: 6, upCount: 6, downCount: 6, mine: 3, moved: 0, zone: 0, toUp: 61, toStay: null, sizes: [40, 12, 11, 30, 6, 3] },
   })),
 }))
+// A page of a period's board, its learners named after it (A7, W7).
+function page(path) {
+  const q = new URLSearchParams(path.split('?')[1])
+  const from = Number(q.get('offset'))
+  const tag = q.get('period') === 'all' ? 'A' : 'W'
+  return { entries: Array.from({ length: Number(q.get('limit')) }, (_, i) => row(from + i + 1, { username: `${tag}${from + i + 1}` })) }
+}
 vi.mock('./lib/cachedJson', async o => {
   const { apiJson } = await import('./lib/api')
   return { ...(await o()), cachedJson: (path, session) => apiJson(path, session) }
@@ -122,5 +129,27 @@ describe('the profile’s one board with neighbours', () => {
     // Every row as tall as its neighbours: they share the board's height.
     const heights = rows.map(r => Math.round(r.getBoundingClientRect().height))
     for (const h of heights) expect(h).toBe(heights[0])
+  })
+
+  it('reads each side at the ranks only the other shows, so neither leaves a learner blank', async () => {
+    document.body.innerHTML = ''
+    const me = { ...row(8), username: 'Me', gap: { xp: 108, username: 'L7' } }
+    const week = { total: 12, entries: [1, 2, 3, 4, 5].map(n => row(n)), me, near: [row(7), { ...row(8), username: 'Me' }, row(9)] }
+    const all = { total: 40, entries: [{ ...row(1), username: 'Me' }, ...[2, 3, 4, 5].map(n => row(n))], me: { ...row(1), username: 'Me' }, near: [] }
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <div style={{ width: '560px', display: 'flex', flexDirection: 'column', height: '600px' }}>
+            <Banzuke all={all} week={week} t={t} lang="en" both session={{ user: { id: 'me' } }} />
+          </div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const rows = $$('.desk-bz__row')
+    expect(rows.map(r => r.querySelector('.desk-bz__rank').textContent)).toEqual(['1', '2', '3', '4', '5', '7', '8', '9'])
+    const names = rows.map(r => [...r.querySelectorAll('.desk-bz__cell')].map(c => c.querySelector('.leaderboard-row__name')?.textContent ?? ''))
+    expect(names.map(n => n[0])).toEqual(['L1', 'L2', 'L3', 'L4', 'L5', 'L7', 'Me', 'L9'])
+    expect(names.map(n => n[1])).toEqual(['Me', 'L2', 'L3', 'L4', 'L5', 'A7', 'A8', 'A9'])
   })
 })
