@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
+import { OpenBookIcon } from '../ui/Icons'
 import { fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { readingsHelp } from '../../domain/readingsHelp'
 import { formatPct } from '../../domain/readingShare'
@@ -76,7 +77,7 @@ export function ReadingsHelp({ open, onClose, kanji, kana, shares, session }) {
   })
   const tildeWord = help.tilde?.example?.word
   return (
-    <Sheet open onClose={onClose} jp="読み" cap={t.readingsHelpCap} label={t.readingsHelpCap} dismiss>
+    <Sheet open onClose={onClose} title={t.readingsHelpCap} icon={OpenBookIcon} line="var(--line-kanji)" label={t.readingsHelpCap} dismiss>
       <div className="readings-help">
         <Register name={t.readingsOnName} jp="音読み" text={t.readingsHelpOn} example={help.on?.example} />
         <Register name={t.readingsKunName} jp="訓読み" text={t.readingsHelpKun} example={help.kun?.example} />

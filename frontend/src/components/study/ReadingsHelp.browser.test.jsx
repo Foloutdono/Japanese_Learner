@@ -86,7 +86,7 @@ describe('a register name opens what the readings are', () => {
     const { q, doors } = await card(HI)
     expect(doors()).toHaveLength(0)
     await turn(q)
-    expect(doors().map(d => d.textContent)).toEqual([fr.onyomi, fr.kunyomi])
+    expect(doors().map(d => d.textContent)).toEqual([fr.readingsOnName, fr.readingsKunName])
     doors()[0].click()
     await settle()
     const sheet = document.querySelector('.sheet[role="dialog"]')

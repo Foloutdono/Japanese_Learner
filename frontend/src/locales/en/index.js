@@ -1838,9 +1838,7 @@ const progress = {
 const misc = {
   mute:    'Mute',
   unmute:  'Unmute',
-  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} more reading${n > 1 ? 's' : ''} — the dictionary card has them all`,
-  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'word',
   // Shown by components/study/SessionError when a study session has
@@ -2192,9 +2190,9 @@ const decks = {
   // Browse existing cards (BrowseCardsMenu.jsx)
   browseBtn:              'Browse',
   browseTitle:            'Browse existing cards',
-  browseTabKanji:         '漢字 Kanji',
-  browseTabVocab:         '語彙 Vocabulary',
-  browseTabGrammar:       '文法 Grammar',
+  browseTabKanji:         'Kanji',
+  browseTabVocab:         'Vocabulary',
+  browseTabGrammar:       'Grammar',
   browseAllLevels:        'All',
   browseSearchPlaceholder: 'Search (kanji, kana, meaning…)',
   browseResults:          'Results',
@@ -2711,7 +2709,7 @@ const boarding = {
   brdRowGoal: (stop, date) => (date ? `${stop} · arriving ${date}` : stop),
   brdRowRhythm: (name, min) => `${name} · ${min} min a day`,
   brdGoalCap: (min) => `at ${min} min a day`,
-  brdNameOptional: 'optional',
+  brdNameOptional: 'Optional',
   brdNamePlaceholder: 'Your first name',
   brdNameNote: 'It is printed on your card. In Latin letters, it is also your public name on the leaderboard.',
   brdNameSave: 'Save',

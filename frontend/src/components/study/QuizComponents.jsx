@@ -558,8 +558,8 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
               <ReadingShares
                 kana={kana}
                 shares={shares}
-                onLabel={t.onyomi}
-                kunLabel={t.kunyomi}
+                onLabel={t.readingsOnName}
+                kunLabel={t.readingsKunName}
                 isLarge={isLarge}
                 moreLabel={t.readingsMore}
                 onExplain={explain}
@@ -567,8 +567,8 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
             ) : (
             <Readings
               kana={kana}
-              onLabel={t.onyomi}
-              kunLabel={t.kunyomi}
+              onLabel={t.readingsOnName}
+              kunLabel={t.readingsKunName}
               size={25}
               center
               isLarge={isLarge}

@@ -1799,9 +1799,7 @@ const progress = {
 const misc = {
   mute:    'Couper le son',
   unmute:  'Activer le son',
-  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} lecture${n > 1 ? 's' : ''} de plus — la fiche du dictionnaire les donne toutes`,
-  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'mot',
   // Affiché par components/study/SessionError quand une session n'a
@@ -2133,9 +2131,9 @@ const decks = {
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
   browseBtn:              'Parcourir',
   browseTitle:            'Parcourir les cartes existantes',
-  browseTabKanji:         '漢字 Kanji',
-  browseTabVocab:         '語彙 Vocabulaire',
-  browseTabGrammar:       '文法 Grammaire',
+  browseTabKanji:         'Kanji',
+  browseTabVocab:         'Vocabulaire',
+  browseTabGrammar:       'Grammaire',
   browseAllLevels:        'Tous',
   browseSearchPlaceholder: 'Rechercher (kanji, kana, sens…)',
   browseResults:          'Résultats',
@@ -2648,7 +2646,7 @@ const boarding = {
   brdRowGoal: (stop, date) => (date ? `${stop} · arrivée le ${date}` : stop),
   brdRowRhythm: (name, min) => `${name} · ${min} min par jour`,
   brdGoalCap: (min) => `à ${min} min par jour`,
-  brdNameOptional: 'facultatif',
+  brdNameOptional: 'Facultatif',
   brdNamePlaceholder: 'Ton prénom',
   brdNameNote: 'Il s’imprime sur ta carte. En lettres latines, c’est aussi ton nom public dans le classement.',
   brdNameSave: 'Valider',

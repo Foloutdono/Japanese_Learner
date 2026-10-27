@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
 import { Sheet } from '../chrome/Sheet'
+import { HourglassIcon, BoltIcon, BellIcon, BooksIcon, PencilIcon, UserIcon } from '../ui/Icons'
 import { Emphasized } from '../ui/Emphasized'
 import { ProviderButton } from '../account/ProviderButton'
 import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../lib/authRedirect'
@@ -40,9 +41,9 @@ import { CheckMark, LockMark } from './icons'
 // so they wear `.brd-sheet`, which names the boarding's own inks again
 // (index.css): the boards they borrow are drawn in them.
 
-function CardSheet({ open, onClose, jp, cap = null, kind, children }) {
+function CardSheet({ open, onClose, title, sub = null, icon, kind, children }) {
   return (
-    <Sheet open={open} onClose={onClose} jp={jp} cap={cap} label={jp} className={`brd-sheet brd-sheet--${kind}`} dismiss>
+    <Sheet open={open} onClose={onClose} title={title} sub={sub} icon={icon} label={title} className={`brd-sheet brd-sheet--${kind}`} dismiss>
       {children}
     </Sheet>
   )
@@ -76,7 +77,7 @@ export function GoalSheet({ open, onClose, stops, here = null, value, onPick, ca
   const last = rows.length - 1
   const ride = picked < 0 ? 0 : last - picked
   return (
-    <CardSheet open={open} onClose={onClose} jp={t.brdSheetGoal} cap={cap} kind="goal">
+    <CardSheet open={open} onClose={onClose} title={t.brdSheetGoal} sub={cap} icon={HourglassIcon} kind="goal">
       {/* Plain numbers, placed by the sheet: the rail runs a row's height
           between the stops' centres, the ride from the pick down. */}
       <div className="brd-goals" style={{ '--rows': last, '--from': Math.max(0, picked), '--ride': ride }}>
@@ -131,7 +132,7 @@ export function GoalSheet({ open, onClose, stops, here = null, value, onPick, ca
 export function RhythmSheet({ open, onClose, value, onPick, rides = null, stop = null, first = null }) {
   const { t } = useLang()
   return (
-    <CardSheet open={open} onClose={onClose} jp={t.brdSheetRhythm} kind="rhythm">
+    <CardSheet open={open} onClose={onClose} title={t.brdSheetRhythm} icon={BoltIcon} kind="rhythm">
       <DepartureBoard value={value} onChange={min => { pickSound(); onPick(min) }} rides={rides} stop={stop} first={first} />
     </CardSheet>
   )
@@ -202,7 +203,7 @@ export function HourSheet({
   const { t } = useLang()
   const time = minutesToTime(minute)
   return (
-    <CardSheet open={open} onClose={onClose} jp={t.brdSheetHour} kind="hour">
+    <CardSheet open={open} onClose={onClose} title={t.brdSheetHour} icon={BellIcon} kind="hour">
       <HourBoard minute={minute} onChange={onChange} onPick={onPick} now={now ?? new Date()} />
       {native
         ? (
@@ -365,7 +366,7 @@ const ROUNDED = n => approx(n, n < 200 ? 10 : n < 2000 ? 50 : 100)
 export function LinesSheet({ open, onClose, value, onChange, carries = null, stop = null, arrival = null, novice = false }) {
   const { t } = useLang()
   return (
-    <CardSheet open={open} onClose={onClose} jp={t.brdSheetLines} kind="lines">
+    <CardSheet open={open} onClose={onClose} title={t.brdSheetLines} icon={BooksIcon} kind="lines">
       <LineChecks value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} novice={novice} />
       <SheetDone onClose={onClose} />
     </CardSheet>
@@ -428,7 +429,7 @@ function LineChecks({ value, onChange, carries, stop, arrival, novice }) {
 export function NameSheet({ open, onClose, value, onSave }) {
   const { t } = useLang()
   return (
-    <CardSheet open={open} onClose={onClose} jp={t.brdSheetName} cap={t.brdNameOptional} kind="name">
+    <CardSheet open={open} onClose={onClose} title={t.brdSheetName} sub={t.brdNameOptional} icon={PencilIcon} kind="name">
       <NamePlate value={value} onSave={onSave} />
     </CardSheet>
   )
@@ -484,7 +485,7 @@ function NamePlate({ value, onSave }) {
 export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, onGuest = null, sent = null }) {
   const { t } = useLang()
   return (
-    <CardSheet open={open} onClose={onClose} jp={t.brdSheetAccount} kind="account">
+    <CardSheet open={open} onClose={onClose} title={t.brdSheetAccount} icon={UserIcon} kind="account">
       <KeepForm onClose={onClose} onLeaveForAuth={onLeaveForAuth} onKept={onKept} onSent={onSent} onGuest={onGuest} sent={sent} />
     </CardSheet>
   )

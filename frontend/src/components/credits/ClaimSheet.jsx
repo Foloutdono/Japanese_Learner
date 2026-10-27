@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
+import { InboxIcon } from '../ui/Icons'
 import { useCredits, useClaimOffer, takeClaim } from '../../stores/credits'
 import { CAP } from '../../domain/credits'
 import { useRefill } from '../../hooks/useRefill'
@@ -43,7 +44,7 @@ export function ClaimSheet({ hold = false }) {
   }
 
   return (
-    <Sheet open className="claim-sheet" onClose={claim} jp={t.claimTitle} label={t.claimTitle} initialFocus=".btn-depart">
+    <Sheet open className="claim-sheet" onClose={claim} title={t.claimTitle} icon={InboxIcon} line="var(--accent2)" label={t.claimTitle} initialFocus=".btn-depart">
       <div className="balance">
         <span className="balance__fig">
           +{offer.amount}

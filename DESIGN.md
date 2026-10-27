@@ -192,8 +192,19 @@ Two Japanese faces, assigned by **job**, never by taste:
 ### A name's rank (標, plan 174)
 
 - **The screen's own name is serif**, at `--fs-heading`: the bar's title
-  (`.bar__title`) and a sheet's (`.sheet__jp`). On the desk a sheet keeps
-  `--fs-title`, since it is a dialog over a page that already has its name.
+  (`.bar__title`).
+- **A sheet's name is a ring and words** (plan 277, the owner's pick C5 on
+  the canvas "Titres — options"): a 30px ring with the sheet's icon at 16px,
+  in the pigment of the line the sheet belongs to (`Sheet`'s `line`, since a
+  portal is out of reach of its screen's) or the caption's neutral ink, then
+  the name in words, the display face, 700, at `--fs-lead` (`.sheet__title`),
+  and under it a quiet line at `--fs-caption` where a count or the thing a
+  confirm is about goes (`.sheet__sub`). Never a Japanese term set large with
+  its translation small beside it (読み · LES DEUX LECTURES): the name is in
+  the learner's language and stands alone. The same holds for any title
+  beside its translation: a 番付 division is its name alone (Jonokuchi), the
+  dictionary's readings head rings its kanji and names itself in words, and a
+  kanji card's registers read « Lecture chinoise / japonaise ».
 - **Every name under it is set as a station prints its names**: the display
   face, bold, one size a rank — `--fs-title` for a plate, a platform card, a
   deck, a paper, a stop; `--fs-lead` for a row in a list.
@@ -248,10 +259,11 @@ direction hands its gloss to `MeaningDisplay`, which wraps.
 puts « Quel est son sens ? » under its specimen (`.prompt-ask`, the small
 rung over the tracked hint), because its back prints the readings too and
 a learner took them for part of the answer. The back's two register names
-(音読み · on'yomi, 訓読み · kun'yomi) are doors, the label with an ⓘ at its
-own rung and ink, onto the sheet that says what the two readings are, in a
-word of the card's own kanji (`ReadingsHelp`); the door's tap, and the
-sheet's scrim, never turn the card.
+(« Lecture chinoise », « Lecture japonaise » since plan 277) are doors, the
+label with an ⓘ at its own rung and ink, onto the sheet that says what the
+two readings are, 音読み and 訓読み, in a word of the card's own kanji
+(`ReadingsHelp`); the door's tap, and the sheet's scrim, never turn the
+card.
 
 These are the only off-scale font sizes in the app that are not literals to
 be harmonised away — the two ends of each clamp are rungs and the middle is a
