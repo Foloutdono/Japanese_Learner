@@ -181,6 +181,19 @@ runtime purpose.
   nothing, and a marker read inside a folded word is dropped. A missing
   meaning still beats a guessed one: the copula's に after a noun and
   〜らしい after one stay unlit (`test_grammar_precision.py` pins both).
+- **A breakdown rule is held to text it was not written for (plan
+  272).** A rule found on one sentence is decided by what any sentence
+  says (its clause, the verb that governs it, the word it modifies),
+  never by one neighbour that happened to be there; it is pinned on
+  sentences written for it, beside the lookalike it must leave alone, and
+  never only on the line that showed the gap. A list of words is the
+  last resort and is tried on its variants before it ships.
+  `tests/test_breakdown_invariants.py` holds what no line may break, over
+  outside lines (Tatoeba's) and odd input: the parts cover the text, a
+  reading is kana, a final or half-width mark and a subtitle's spaces
+  change no card, the same line reads the same twice, every gloss has its
+  French. A rule the catalogue's own tour contradicts is wrong, however
+  right it looks (〜のに's "for (doing)" is its second use).
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.

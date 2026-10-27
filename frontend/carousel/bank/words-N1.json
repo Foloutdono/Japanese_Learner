@@ -2063,7 +2063,7 @@
 {"t":"受け入れ","r":"うけいれ","ro":"ukeire","en":["receiving, acceptance"],"fr":["réception, acceptation"],"fu":[["受","う"],["け",""],["入","い"],["れ",""]],"hy":["右け入れ","受け以れ","雨け入れ"]},
 {"t":"揺さぶる","r":"ゆさぶる","ro":"yusaburu","en":["to shake, to jolt, to rock, to swing"],"fr":["secouer, ébranler, balancer, faire osciller"],"fu":[["揺","ゆ"],["さぶる",""]],"hy":["由さぶる","遊さぶる","油さぶる"],"ex":["N1.118"]},
 {"t":"愛でたい","r":"めでたい","ro":"medetai","en":["happy, joyous, auspicious"],"fr":["heureux, joyeux, de bon augure"],"fu":[["愛","め"],["でたい",""]]},
-{"t":"取引","r":"とりひき","ro":"torihiki","en":["transactions, dealings, business"],"fr":["transactions, relations d'affaires, commerce"],"fu":[["取","とり"],["引","ひき"]],"ex":["N1.56","N1.202"]},
+{"t":"取引","r":"とりひき","ro":"torihiki","en":["transactions, dealings, business"],"fr":["transactions, relations d'affaires, commerce"],"fu":[["取","とり"],["引","ひき"]],"ex":["N1.233"]},
 {"t":"ランプ","r":"ランプ","ro":"ranpu","en":["lamp, ramp, headlight, light"],"fr":["lampe, rampe, phare, lumière"]},
 {"t":"万人","r":"ばんじん","ro":"banjin","en":["all people, everybody"],"fr":["tout le monde, tous"],"fu":[["万","ばん"],["人","じん"]],"hy":["判人","万神","晩人"]},
 {"t":"動的","r":"どうてき","ro":"douteki","en":["dynamic, kinetic"],"fr":["dynamique, cinétique"],"fu":[["動","どう"],["的","てき"]],"hy":["道的","動適","同的"]},

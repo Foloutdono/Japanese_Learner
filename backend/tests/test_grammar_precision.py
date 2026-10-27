@@ -2538,3 +2538,153 @@ class NinthReviewPointTests(unittest.TestCase):
                                   ("雨だろうか。", "〜だろう")):
             with self.subTest(sentence=sentence, pattern=pattern):
                 self.assertIn(pattern, found_in(sentence))
+
+
+class HeldOutPointTests(unittest.TestCase):
+    """Points that outside text (sentences the app was never tuned on)
+    found unlit or lit wrongly (plan 272): each rule pinned on sentences
+    written for it, never the ones that showed the gap, with the
+    sentence it must leave alone."""
+
+    def test_conditional_to(self) -> None:
+        # a deed's dictionary form, と, and what follows from it
+        for sentence in ("このボタンを押すと、ドアが開く。", "窓を開けると富士山が見えた。", "薬を飲むと眠くなる。",
+                         "角を曲がると駅がある。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn(("〜と", "と"), keys(sentence))
+        # ...never a quotation, whatever verb takes it, nor すると opening
+        for sentence in ("行くと彼は言った。", "あると強く思う。", "辞めると公言している。", "勝てると信じている。",
+                         "新しい靴が欲しいと泣いた。", "すると、雨が降り出した。", "ボールを取ろうと走った。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜と", found_in(sentence))
+        self.assertIn(("と", "と"), keys("行くと彼は言った。"))
+
+    def test_toha_after_a_clause(self) -> None:
+        for sentence in ("雨の中を歩いて帰るとは、彼も物好きだ。", "一人で山に登るとは君は勇敢だ。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜とは", found_in(sentence))
+        # a quotation and its contrast; 〜ようとする and its は
+        for sentence in ("行くとは言っていない。", "勝てるとは誰も思わない。", "ないとは申し上げかねます。",
+                         "彼は謝ろうとはしなかった。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜とは", found_in(sentence))
+        self.assertIn("〜ようとする", found_in("彼は謝ろうとはしなかった。"))
+        self.assertIn("〜ようとする", found_in("話を聞こうともしない。"))
+
+    def test_a_particle_after_any_predicate(self) -> None:
+        # a construction on a particle follows any predicate its lessons
+        # show one of: 来ないなんて, and so 書くなんて and 高いなんて
+        for sentence in ("一日で本を一冊書くなんて無理だ。", "こんなに高いなんて驚いた。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜なんか／〜なんて", found_in(sentence))
+        self.assertIn("〜と言います", found_in("息子は学校に行きたくないと言う。"))
+        # ...never a bare particle of many senses, nor 〜の after an adjective
+        self.assertNotIn("と", found_in("春になると桜が咲く。"))
+        self.assertEqual(sum(h[0] == "の" for h in grammar_detect.detect("赤いのと青いの、どちらがいい？")), 2)
+        self.assertNotIn("〜の", found_in("赤いのと青いの、どちらがいい？"))
+        # (and no choice of two across a question asked politely)
+        self.assertNotIn("〜か〜か", found_in("忘れ物がないか、見ていただけますか。"))
+        self.assertIn("〜か〜か", found_in("お茶かコーヒーか、どちらにしますか。"))
+        self.assertEqual({k for k in keys("明日でなくてもいいですか。") if "も" in k[1]},
+                         {("〜なくてもいいです", "なくてもいい")})
+
+    def test_some_after_any_question_word(self) -> None:
+        for sentence, text in (("棚に本が何冊か残っている。", "何冊か"), ("いくつか質問があります。", "いくつか"),
+                               ("どれか一つ選んでください。", "どれか"), ("どこからか声が聞こえた。", "どこからか"),
+                               ("何年か前に会った。", "何年か")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("何か／誰か／どこか"), text)
+        # ...never a question, nor a word the deck or the dictionary holds whole
+        for sentence in ("これはいくつですか。", "何を買うか決めた。", "いつか京都に住みたい。", "なぜか眠い。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("何か／誰か／どこか", found_in(sentence))
+
+    def test_forms_the_lessons_do_not_write(self) -> None:
+        for sentence, pattern, text in (
+            ("妹は遊んでばかりだ。", "〜てばかりいる", "でばかり"),
+            ("文句を言ってばかりで、何もしない。", "〜てばかりいる", "てばかり"),
+            ("毎日少しずつ練習しさえすれば上手になる。", "〜さえ〜ば", "さえすれば"),
+            ("医者としての意見を聞きたい。", "の", "の"),
+            ("歩きながらの電話は危ない。", "の", "の"),
+            ("もっと勉強せねばならない。", "〜なければなりません", "ねばならない"),
+            ("規則は守らねばなりません。", "〜なければなりません", "ねばなりません"),
+            ("明日は晴れるかなぁ。", "〜かな", "かな"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(pattern), text, found_in(sentence))
+        # ...where the letters are something else
+        self.assertNotIn("〜てばかりいる", found_in("来たばかりです。"))
+        self.assertNotIn("〜ば", found_in("もっと勉強せねばならない。"))
+        self.assertIn("〜ば", found_in("雨が降れば行かない。"))
+
+    def test_narrow_rules_on_their_variants(self) -> None:
+        # (the audit of the narrow rules, plan 272) each rule read by what
+        # its sentence says, never by one word beside it
+        for sentence, pattern in (
+            ("受付は一応午後五時としてあります。", "〜てある"),        # set as, as written
+            ("一か月に、一回は実家に帰る。", "〜に〜回"),               # a comma is no moment
+            ("旅行に行くたび、写真を撮る。", "〜たびに"),
+            ("半月ぶりの休みだ。", "〜ぶりに"),                          # a span spelled whole
+            ("二日酔いで頭が重い。", "〜で（理由）"),
+            ("コロナで旅行が中止になった。", "〜で（理由）"),
+            ("数だけそろえても意味がない。", "〜だけ"),
+            ("本当よ！", "よ"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
+        for sentence, pattern in (
+            ("母親としてあるべき態度。", "〜てある"),
+            ("食べた後に、一回うがいをする。", "〜に〜回"),
+            ("長いたびに出た。", "〜たびに"),
+            ("彼の話しぶりは丁寧だ。", "〜ぶりに"),
+            ("雪で城を作った。", "〜で（理由）"),                      # a material, no cause
+            ("読んだ本の数だけ世界が広がる。", "〜だけ"),
+            ("星よ、光れ。", "よ"),                                      # called to
+            ("いつ来ると？", "と"),                                      # Hakata's question
+            ("いつ来ると？", "〜と"),
+            ("あと一息で完成だ。", "で"),                                # almost
+            ("意味のない話はやめよう。", "の"),                          # = が
+            ("車の多い道は危ない。", "の"),
+            ("おはいりやす。", "〜やすい／〜にくい"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(pattern, found_in(sentence))
+        self.assertIn("の", found_in("日本の古い家。"))
+        self.assertIn("受身形 〜られる", found_in("上司にご指摘された。"))
+        # a quoted clause's を is its own: the passive of 考える stands
+        self.assertIn("受身形 〜られる", found_in("犬が人の言葉を理解すると信じられている。"))
+        # ...and a を of a compound particle or another clause leaves a
+        # passive that goes on, or is called for, the passive
+        self.assertIn("受身形 〜られる", found_in("大会の準備は、地元の学生を中心に進められている。"))
+        self.assertIn("受身形 〜られる", found_in("参加者は全員、名札をつけるよう求められる。"))
+        # 〜と "whenever" after a deed only -- never a noun UniDic read as
+        # an old verb or an adjective's stem, nor と一緒に; 〜のに never
+        # before かえる ("for a new one"); a て-form's point never after
+        # an adjective's くて
+        self.assertIn("〜と", found_in("窓を開けると、海が見える。"))
+        self.assertNotIn("〜と", found_in("ねこといっしょにねる。"))
+        self.assertNotIn("〜と", found_in("日本のおかしと、おちゃ。"))
+        self.assertNotIn("〜のに", found_in("古いシャツを新しいのにかえた。"))
+        self.assertIn("〜てよかった", found_in("間に合ってよかった。"))
+        self.assertNotIn("〜てよかった", found_in("部屋がひろくてよかった。"))
+        # an embedded question, どんな物か, is no 〜か〜か before the
+        # question asked politely
+        self.assertNotIn("〜か〜か", found_in("この箱の中がどんな物か説明できますか。"))
+        # 〜に足る on the verb, never on the foot
+        self.assertIn("〜に足る", found_in("信用するに足る話だ。"))
+        self.assertNotIn("〜に足る", found_in("森に足を踏み入れた。"))
+
+    def test_although_before_a_verb(self) -> None:
+        # 〜のに is "although" before whatever the next clause does
+        for sentence in ("雨なのに出かけた。", "知っているのに教えない。", "約束したのに来なかった。", "悪いのに休まない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜のに", found_in(sentence))
+        # ...and "for (doing)", the second use its tour teaches
+        for sentence in ("パンを切るのに使う。", "駅まで行くのに時間がかかる。", "この部屋は勉強するのに便利だ。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜のに", found_in(sentence))
+        # ...never the の + に of a deed met or noticed
+        for sentence in ("山に登るのに成功した。", "彼がいるのに気づいた。", "人前で話すのに慣れた。",
+                         "赤いのにしよう。", "姉が静かなのにひきかえ、妹はうるさい。", "去年が暖かかったのに対して、今年は寒い。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜のに", found_in(sentence))

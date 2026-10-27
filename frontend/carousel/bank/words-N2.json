@@ -1003,7 +1003,7 @@
 {"t":"ボーナス","r":"ボーナス","ro":"boonasu","en":["bonus"],"fr":["prime"],"ex":["N2.45","N2.140"]},
 {"t":"くるむ","r":"くるむ","ro":"kurumu","en":["to wrap up, to wrap (in), to envelop"],"fr":["envelopper, emballer"]},
 {"t":"襖","r":"ふすま","ro":"fusuma","en":["sliding screen"],"fr":["porte coulissante"],"fu":[["襖","ふすま"]]},
-{"t":"盛る","r":"もる","ro":"moru","en":["to serve (food), to dish up","to pile up, to heap up","to administer (a drug)"],"fr":["servir (de la nourriture)","entasser, remplir","administrer (un médicament)"],"fu":[["盛","も"],["る",""]],"hy":["模る","畝る"]},
+{"t":"盛る","r":"もる","ro":"moru","en":["to serve (food), to dish up","to pile up, to heap up","(slang) to exaggerate (a story)"],"fr":["servir (de la nourriture)","entasser, remplir","(argot) en rajouter, exagérer (une histoire)"],"fu":[["盛","も"],["る",""]],"hy":["模る","畝る"]},
 {"t":"重なる","r":"かさなる","ro":"kasanaru","en":["to be piled up, to overlap","to happen one after another","to coincide"],"fr":["s'empiler, se superposer","se succéder, s'accumuler","coïncider"],"fu":[["重","かさ"],["なる",""]],"ex":["N1.76"]},
 {"t":"そのうえ","r":"そのうえ","ro":"sonoue","en":["in addition, furthermore"],"fr":["en outre, de plus"]},
 {"t":"大木","r":"たいぼく","ro":"taiboku","en":["large tree"],"fr":["grand arbre"],"fu":[["大","たい"],["木","ぼく"]],"hy":["来木","大僕","代木"]},

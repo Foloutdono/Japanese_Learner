@@ -626,6 +626,23 @@ def deck_word_reading(char: str) -> list[str]:
 _WEEKDAY_READINGS = {"月": "げつ", "火": "か", "水": "すい", "木": "もく", "金": "きん", "土": "ど", "日": "にち"}
 
 
+# What a sum or a frame is said with, whose 額 is がく (plan 272).
+_SUMS_AND_FRAMES = frozenset({"円", "金", "お金", "金額", "請求", "合計", "総", "予算", "税", "料金", "賞状", "写真",
+                              "絵", "ドル", "万", "億", "支払", "給料", "差", "全"})
+# Whose 額 is a forehead (plan 272): 子どもの額.
+_BODIES_OF = frozenset({"子ども", "子供", "こども", "彼", "彼女", "母", "父", "私", "僕", "俺", "赤ちゃん", "娘", "息子",
+                        "妻", "夫", "人", "男", "女", "少年", "少女", "患者", "自分", "君", "あなた", "弟", "妹",
+                        "兄", "姉", "友達", "祖母", "祖父"})
+# A verb said up, after which 方 is a person (plan 272): 来られた方に.
+_SAID_UP = frozenset({"れる", "られる", "為さる", "なさる", "いらっしゃる", "おっしゃる", "仰る", "下さる",
+                      "くださる"})
+# What a notice says of a person's state (plan 272): 妊娠中の方.
+_STATES_OF_PEOPLE = ("車椅子", "妊娠中", "授乳中", "治療中", "通院中", "服用中", "入院中", "在学中", "障害", "障がい")
+# What says the 回 is an inning (plan 272).
+_INNINGS = frozenset({"点", "攻撃", "裏", "打者", "イニング", "延長", "先頭", "投手", "安打", "本塁打", "得点", "先制",
+                      "勝ち越し", "同点", "逆転", "打", "ヒット", "ホームラン"})
+
+
 # What sorts the people a notice speaks to (方 かた after it and の).
 _SORTS_PEOPLE = ("付近", "周辺", "沿岸", "沿い", "地域", "在住", "地区", "希望", "該当", "一般", "対象", "年配", "高齢",
                  "外国", "初めて", "予約", "参加", "利用", "ご来場", "来場")
@@ -702,9 +719,23 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "きゅう"
             continue
 
+        # 一行あけて, 一行目: a line, いちぎょう -- no いっこう, "a party"
+        # (plan 272).
+        if s == "一行" and r == "いっこう" and (nxt(i)[:1] in ("あ", "空", "目", "ず", "お", "飛")
+                                                 or nxt(i) in ("ごと", "ずつ")):
+            out[i] = "いちぎょう"
+            continue
         # 七回忌, the seventh-year memorial: しち (plan 272).
-        if s == "七" and r == "なな" and nxt(i) in ("回忌", "五三"):
+        if s == "七" and r == "なな" and (nxt(i) in ("回忌", "五三") or (
+                nxt(i) == "五" and i + 2 < len(surf) and surf[i + 2] == "三")):    # (七 + 五 + 三, plan 272)
             out[i] = "しち"
+            continue
+        # 七周, 七本, 七回: なな before a counter, as it is said now -- しち
+        # only where the word is fixed so (七時, 七月, 十七日, 七福神, plan 272).
+        if s == "七" and r == "しち" and i + 1 < len(tokens) and tokens[i + 1].get("pos") in ("suffix", "noun") \
+                and nxt(i)[:1] not in ("時", "月", "日", "回忌", "五", "福", "夕", "草", "味", "宝", "曜") \
+                and not nxt(i).startswith(("回忌", "五三", "福神")) and prev(i)[-1:] not in ("十", "百", "千"):
+            out[i] = "なな"
             continue
         # いつの間に, "before one knew it": ま, no あいだ (plan 272).
         if s == "間" and r == "あいだ" and prev(i) == "の" and i >= 2 and surf[i - 2] == "いつ":
@@ -718,23 +749,54 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             continue
         # 窓に額をつけて, 額に汗: ひたい, the forehead, where something
         # touches it -- 額 alone is がく, a sum or a frame (plan 272).
-        if s == "額" and r == "がく" and nxt(i) in ("に", "を", "の") and i + 2 < n \
-                and (surf[i + 2] in ("汗", "手", "しわ", "皺", "傷") or tokens[i + 2]["lemma"] in (
-                    "付ける", "つける", "当てる", "押し当てる", "押し付ける", "くっつける", "触れる", "冷やす")):
+        # (...or where a person's it is, 子どもの額にキス, or it is broad:
+        # 額が広い -- never where a sum or a frame is said, 請求額に,
+        # 額に入れて飾る)
+        if s == "額" and r == "がく" and not any(u in _SUMS_AND_FRAMES for u in surf) and not any(
+                t.get("lemma") in ("入れる", "飾る", "納める") for t in tokens) and (
+                (nxt(i) in ("に", "を", "の") and i + 2 < n
+                 and (surf[i + 2] in ("汗", "手", "しわ", "皺", "傷") or tokens[i + 2]["lemma"] in (
+                     "付ける", "つける", "当てる", "押し当てる", "押し付ける", "くっつける", "触れる", "冷やす")))
+                or (prev(i) == "の" and i >= 2 and surf[i - 2] in _BODIES_OF)
+                or (nxt(i) == "が" and i + 2 < n and tokens[i + 2]["lemma"] in ("広い", "狭い"))
+                or any(u in ("キス", "汗", "熱", "撫でる", "なでる") or u.startswith(("撫で", "なで")) for u in surf)):
             out[i] = "ひたい"
             continue
         # 見かけた方は, 参加される方は: かた, a person said politely, after
         # what they did -- 食べた方がいい is ほう (plan 272).
+        # 大きく見える方を選んだ, 曲がった方に: ほう, the one or the way,
+        # where UniDic read かた after a verb's plain form and nothing
+        # says it of a person (plan 272) -- 読み方 is a suffix's.
+        if s == "方" and r == "かた" and tokens[i].get("pos") == "noun" and i > 0 \
+                and tokens[i - 1].get("pos") in ("verb", "auxiliary") \
+                and prev(i)[-1:] in "うくすつぬふむゆるぐずづぶぷただ" and nxt(i) in ("に", "を", "が", "の") \
+                and not (nxt(i) == "が" and i + 2 < n and tokens[i + 2].get("lemma") in (
+                    "多い", "少ない", "居る", "いる", "いらっしゃる", "おる", "居られる")) \
+                and not any(t.get("lemma") in _SAID_UP for t in tokens[max(0, i - 3):i]) \
+                and not any(u in ("ください", "下さい", "願い", "遠慮") for u in surf[i + 1:]):
+            out[i] = "ほう"
+            continue
+        # (before に, を, の only where the verb says it up or the line
+        # asks of them -- 大きく見える方を選んだ is ほう, the one)
         if s == "方" and r == "ほう" and i > 0 and tokens[i - 1].get("pos") in ("verb", "auxiliary") \
-                and nxt(i) in ("は", "には", "へ", "も", "に", "を", "の"):
+                and (nxt(i) in ("は", "には", "へ", "も") or (nxt(i) in ("に", "を", "の") and (
+                    any(t.get("lemma") in _SAID_UP for t in tokens[max(0, i - 3):i])
+                    or any(u in ("ください", "下さい", "願い", "遠慮") for u in surf[i + 1:])))):
             out[i] = "かた"
             continue
         # 海岸付近の方は, ご希望の方は: かた, the people a notice speaks
         # to, after a word that sorts people (plan 272) -- 駅の近くの方が
         # 便利 is ほう, the side.
+        # (and an age, 18歳以上の方, or a state, 妊娠中の方, 車椅子の方 --
+        # never one of a choice, 赤と青、ご希望の方を選んで)
         if s == "方" and r == "ほう" and prev(i) == "の" and i >= 2 and (
-                surf[i - 2].endswith(_SORTS_PEOPLE) or (i >= 3 and surf[i - 3] in ("お", "ご")))  \
-                and nxt(i) in ("は", "には", "へ", "も", "に", "を", "の", "で", "。", ""):
+                surf[i - 2].endswith(_SORTS_PEOPLE) or (i >= 3 and surf[i - 3] in ("お", "ご"))
+                or (i >= 3 and (surf[i - 3] + surf[i - 2]).endswith(_STATES_OF_PEOPLE))
+                or (surf[i - 2] in ("以上", "以下", "未満") and i >= 3 and surf[i - 3].endswith(("歳", "才")))
+                or surf[i - 2].endswith(("歳", "才"))) \
+                and nxt(i) in ("は", "には", "へ", "も", "に", "を", "の", "で", "。", "") \
+                and not any(t.get("lemma") in ("選ぶ", "選べる") for t in tokens[i + 1:]) \
+                and not any(u in ("どちら", "どっち", "どれ") for u in surf):
             out[i] = "かた"
             continue
         # 何しやがる, 何しに来た: なに before する (plan 272).
@@ -744,9 +806,9 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             continue
         # 何言っても, 何食べる: なに before the verb it asks the object of,
         # its を left out (plan 272) -- never 何だ, 何で, 何と.
+        # (...whatever the verb: 何話してるの, 何歌う, plan 272)
         if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1].get("pos") == "verb" \
-                and tokens[i + 1]["lemma"] in ("言う", "食べる", "飲む", "見る", "聞く", "買う", "読む", "作る",
-                                               "書く", "考える", "思う", "持つ", "探す", "知る", "やる", "遣る"):
+                and tokens[i + 1]["lemma"] not in ("為る", "する", "成る", "なる"):
             out[i] = "なに"
             continue
 
@@ -767,8 +829,11 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             continue
 
         # 1回表, 九回裏: the top of an inning, おもて -- no 表 "table" (plan 272).
+        # (never もう1回表を見せて, "the table once more", plan 272)
         if s == "表" and r == "ひょう" and prev(i) == "回" and i >= 2 and (
-                _numeral_value(surf[i - 2]) is not None or surf[i - 2][-1:].isdigit()):
+                _numeral_value(surf[i - 2]) is not None or surf[i - 2][-1:].isdigit()) and (
+                any(u in _INNINGS for u in surf) or not (
+                    (i >= 3 and surf[i - 3] in ("もう", "あと", "後")) or nxt(i) == "を")):
             out[i] = "おもて"
             continue
         # 芦ノ湖, a lake's name: こ, no みずうみ (plan 272).
@@ -913,6 +978,21 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         if (s == "不足" and r == "ふそく" and i > 0 and tokens[i - 1].get("pos") == "noun"
                 and not _is_numeral(prev(i))):
             out[i] = "ぶそく"
+            continue
+
+        # 奴等, 彼等, 僕等: ら, the plural of a person -- UniDic reads the
+        # suffix とう, "etc." (plan 272).
+        if s == "等" and r == "とう" and prev(i) in ("奴", "彼", "僕", "俺", "君", "お前", "あいつ", "こいつ", "そいつ",
+                                                   "我", "私", "子供", "子"):
+            out[i] = "ら"
+            continue
+
+        # 数 on its own before a particle is かず, "a number" (数だけ見ても,
+        # 数が多い); UniDic reads an opening 数 as the prefix すう, which
+        # it is before a counter (数日, 数人). Plan 272.
+        if s == "数" and r == "すう" and tokens[i].get("pos") == "noun" and i + 1 < n \
+                and tokens[i + 1].get("pos") == "particle":
+            out[i] = "かず"
             continue
 
         # 数日, 何日: days, にち -- UniDic reads the suffix じつ.

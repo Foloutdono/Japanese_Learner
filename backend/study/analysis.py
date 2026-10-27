@@ -274,9 +274,13 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
     reading = _card_reading(m, hit[1] if hit else pool)
     furigana = align_deck(m.surface, reading)
 
+    # (低め read as the pool's "lowish" is a noun, whatever UniDic
+    # tagged it, plan 272)
+    pos = "noun" if pool is not None and m.pos == "verb" and (pool.get("kanji") or "") == m.surface \
+        and m.surface.endswith("め") and "ish" in (pool.get("meaning") or "") else m.pos
     token = {
         "surface": m.surface, "start": m.start, "end": m.end,
-        "lemma": m.lemma, "reading": reading, "pos": m.pos,
+        "lemma": m.lemma, "reading": reading, "pos": pos,
         "furigana": furigana,
         "vocab_match": vocab_match,
         "kanji_matches": kanji_matches,
@@ -1579,7 +1583,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
                 # (音を上げる: ね, as the expression reads it, plan 272)
                 token["reading"] = said[:-len(verb_said)] + run[-1].reading
             token["furigana"] = align_deck(token["surface"], token["reading"])
-            token["pos"] = "verb"
+            token["pos"] = "adjective" if run[-1].pos == "adjective" else "verb"     # (息の長い, plan 272)
             # The words it is made of, with their deck cards (手, 入れる),
             # which a sentence written for a level still counts
             # (level_mix.words_at_level, reading_sentences.off_deck_words).
@@ -1626,7 +1630,17 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         pooled = None if i in ruled else resolve_pool_compound(morphemes, i, pool_hits)
         if pooled and not any(j in ruled for j in range(i, i + pooled[1])):
             entry, n = pooled
-            tokens.append(_pool_compound_dict(morphemes[i:i + n], entry))
+            token = _pool_compound_dict(morphemes[i:i + n], entry)
+            nouns = [k for k in range(i, i + n) if morphemes[k].pos == "noun"]
+            if nouns and all(deck_hits[k] for k in nouns):
+                # A pool word folded over the deck's own nouns (観光地,
+                # 取引先, plan 272) keeps them, as an idiom does: a
+                # sentence written for a level still counts its cards.
+                token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma,
+                                   "pos": morphemes[k].pos,
+                                   "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                                  for k in range(i, i + n)]
+            tokens.append(token)
             i += n
             continue
         fragments = resolve_name_fragments(morphemes, i)
@@ -1918,7 +1932,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # ハルノ企画), readings (1回表 おもて, 3割1分 ぶ, お持ちの方 かた), the west's
 # and the north's speech glossed (はる, てえや, とう, でけろ, たろか), and
 # the points a business letter or a recipe uses (お〜申し上げる, 〜すぎる).
-LOCAL_REV = 25
+# 26: held to text it was never tuned on (plan 272) -- each narrow rule
+# tried on sentences written to break it: a kana noun's partners read in
+# its own clause (かぜ… 、かぜをひいた), 方 ほう after a plain verb (見える
+# 方を選んだ), はやい of a runner, 〜のに before any verb, an adjective's
+# idiom whole (息の長い, 気が長い), a deed's place (勤務地, 連絡先), the
+# west's and Kyoto's speech by its frame (おこしやす, 何しよると？), and
+# キロ, 額, 数, 等 by what their sentence says.
+LOCAL_REV = 26
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

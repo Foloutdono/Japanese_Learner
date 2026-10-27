@@ -420,7 +420,7 @@
 {"t":"騒ぐ","r":"さわぐ","ro":"sawagu","en":["to make noise, to be excited, to make merry"],"fr":["faire du bruit, s'agiter, faire la fête"],"fu":[["騒","さわ"],["ぐ",""]],"ex":["N4.52","N4.174"]},
 {"t":"最後","r":"さいご","ro":"saigo","en":["last, end"],"fr":["dernier, fin"],"fu":[["最","さい"],["後","ご"]],"hy":["西後","最五","切後"],"ex":["N4.3","N4.76"]},
 {"t":"テニス","r":"テニス","ro":"tenisu","en":["tennis"],"fr":["tennis"],"ex":["N4.51"]},
-{"t":"具合","r":"ぐあい","ro":"guai","en":["condition, health"],"fr":["état, santé"],"fu":[["具","ぐ"],["合","あい"]],"hy":["工合","具愛","供合"],"ex":["N4.48","N4.86"]},
+{"t":"具合","r":"ぐあい","ro":"guai","en":["condition, health"],"fr":["état, santé"],"fu":[["具","ぐ"],["合","あい"]],"hy":["工合","具愛","供合"],"ex":["N4.48"]},
 {"t":"親切","r":"しんせつ","ro":"shinsetsu","en":["kind, considerate","kindness"],"fr":["gentil, aimable","gentillesse"],"fu":[["親","しん"],["切","せつ"]],"hy":["新切","親折","心切"],"ex":["N4.108","N4.156"]},
 {"t":"妻","r":"つま","ro":"tsuma","en":["wife (one's own, plain)"],"fr":["épouse (la sienne, neutre)"],"fu":[["妻","つま"]],"ex":["N4.89"]},
 {"t":"遅れる","r":"おくれる","ro":"okureru","en":["to be late"],"fr":["être en retard"],"fu":[["遅","おく"],["れる",""]],"hy":["屋れる","億れる","憶れる"],"ex":["N4.22","N4.128"]},
