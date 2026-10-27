@@ -1,6 +1,6 @@
 # Stratégie de monétisation
 
-État au 26 octobre 2026 : les décisions du propriétaire, les propositions
+État au 27 octobre 2026 : les décisions du propriétaire, les propositions
 encore à valider (marquées **proposition**) et ce qu'il faut mesurer. Les
 chiffres sont dans `tsuji-costs.xlsx` (même dossier), qui fait foi pour les
 prix, les plafonds IA, la boutique et l'objectif.
@@ -24,12 +24,16 @@ base d'utilisateurs avec un taux de conversion bas.
 | Recharge continue | 60/jour, arrêt à 90 | 120/jour, arrêt à 200 | illimité |
 | Révisions dues | 1 crédit | gratuites | gratuites |
 | Nouvelles cartes (kana compris) | 1 crédit | 1 crédit | incluses |
-| Pratique | 2 à 5 crédits selon le mode | idem | incluse |
-| Jeux, PvP hors amis | crédits | crédits | inclus |
+| Pratique (par exercice) | lecture 1, compréhension 2, dictée 1, traduction 1, composition 1, conversation 2 | idem | incluse |
+| Examen blanc | 2 crédits par examen | idem | inclus |
+| Duel | entre amis gratuit, sinon 2 crédits | idem | inclus |
+| Jeux solo | prix à fixer | idem | inclus |
 | IA | petites limites/jour | limites/jour | usage raisonnable |
 | Récompenses | crédits + XP | crédits + XP | XP + cosmétiques de statut |
 
 - Kana : 1 crédit par nouvelle carte, révisions gratuites.
+- Un Pro dépense ses crédits en nouvelles cartes, pratique, jeux et duels.
+- Un exercice demandé par une mission ne coûte rien.
 - Le plafond n'arrête que la recharge. Les crédits gagnés ou achetés passent
   au-dessus et n'expirent jamais.
 - À l'arrivée, la carte est remplie jusqu'à sa limite ; 200 crédits sont
@@ -48,21 +52,26 @@ base d'utilisateurs avec un taux de conversion bas.
 
 **Décidé :**
 
-- −25 % sur la première année d'un abonnement annuel, plus un mois offert
-  d'office ;
+- −25 % sur la première année, en mensuel comme en annuel, plus un mois de
+  Max offert d'office ;
 - sur toutes les plateformes ;
 - pour tout compte créé avant l'ouverture des ventes (fin de l'early
   access, vers le 9 novembre 2026).
 
-Acheté dans l'app, un abonné fondateur fait perdre de l'argent s'il utilise
-toutes ses limites IA chaque jour. Le risque est accepté parce qu'il est
-borné : la cohorte est fermée. Avec environ 100 comptes, dont 10 % qui
-s'abonnent, le pire cas coûte environ 3 € par mois. Le mois offert coûte
-environ 24 € en usage normal, 157 € au pire. Le détail est dans « Pricing ».
+Prix fondateur : Pro 3,99 €/mois ou 37,99 €/an, Max 5,99 €/mois ou
+52,99 €/an. Ils sont arrondis vers le haut au palier .99 des stores, si bien
+que Pro mensuel ne fait que −20 % (3,49 € donnerait −30 %).
 
-À écrire dans les conditions : le plan du mois offert, la date à partir de
-laquelle il court, la remise limitée à la première année, puis le prix
-normal, avec un rappel 30 jours avant le renouvellement.
+Acheté dans l'app, un abonnement annuel fondateur fait perdre de l'argent
+si l'abonné utilise toutes ses limites IA chaque jour. Le risque est accepté
+parce qu'il est borné : la cohorte est fermée. Avec environ 100 comptes,
+dont 10 % qui s'abonnent, le pire cas coûte environ 2 € par mois. Le mois de
+Max offert coûte environ 14 € en usage normal, 157 € au pire. Le détail est
+dans « Pricing ».
+
+À écrire dans les conditions : la date à partir de laquelle court le mois de
+Max, la remise limitée à la première année, puis le prix normal, avec un
+rappel 30 jours avant le renouvellement.
 
 ### L'IA : limites et plafond, mais rien n'est bloqué
 
@@ -85,13 +94,18 @@ déjà.
 
 Des crédits achetés n'augmentent jamais les limites IA d'un plan.
 
+La génération de nouveaux examens blancs et de nouveaux textes de
+compréhension est retirée : les examens et les textes écrits à l'avance
+restent, et se paient en crédits. Les apprenants de l'early access utilisent
+peu l'IA : le coût attendu a été baissé en conséquence (Pro 0,15 $, Max
+0,25 $, Free 0,01 $ par mois), à confirmer avec `llm_usage_report`.
+
 ### Les decks : usage raisonnable
 
 Les limites de decks servent à empêcher deux choses : saturer le stockage,
 et accumuler des decks privés jamais utilisés.
 
-- Un deck publié qui a un minimum d'abonnés (**proposition** : 3) ne
-  compte dans aucune limite.
+- Un deck publié qui a au moins 5 abonnés ne compte dans aucune limite.
 - Max peut demander plus via « Nous écrire » ; la demande est acceptée
   quand le deck est étudié ou publié, refusée quand il ne sert qu'à stocker.
 - Rien n'est jamais supprimé à la rétrogradation : 30 jours de grâce, puis
@@ -118,7 +132,7 @@ hebdomadaires d'environ 70 crédits au total (10 par jour). Ces montants sont
 - finir ses révisions dues ;
 - apprendre N nouvelles cartes, N étant sa moyenne des 7 derniers jours
   +10 %, jamais au-delà de la ration du jour (plan 222) ;
-- un exercice de pratique, d'un mode différent chaque jour ;
+- un exercice de pratique, d'un mode différent chaque jour (gratuit) ;
 - faire mieux que sa précision moyenne sur une session ;
 - une dictée ou une phrase en composition.
 
@@ -209,13 +223,14 @@ l'abonnement, qui ne coûte rien à simuler.
 - des duels asynchrones, du temps réel entre amis, un système d'amis, pas
   de chat ;
 - **un duel entre amis est gratuit** (pour tisser des liens entre
-  apprenants) ; les autres coûtent des crédits ;
+  apprenants) ; un duel avec quelqu'un d'autre coûte 2 crédits ;
 - les deux joueurs voient leur score et celui de l'adversaire ; le détail
   et les corrections se paient en crédits ;
 - les questions sont au **niveau le plus bas des deux joueurs** ; la
   rapidité ajoute des points, pour départager ;
-- on trouve un ami en cherchant son pseudo (unique) ; un bouton
-  « signaler » sur chaque profil ; pas d'âge minimum ;
+- on trouve un ami en cherchant son pseudo (unique), même s'il se cache du
+  番付 ; avant qu'une demande soit acceptée, on ne voit que le pseudo ;
+- un bouton « signaler » sur chaque profil ; pas d'âge minimum ;
 - **deux classements séparés** : l'Elo juge le niveau de japonais, le 番付
   le sérieux de l'apprenant. Pas de saisons pour l'instant.
 
@@ -243,8 +258,6 @@ l'abonnement, qui ne coûte rien à simuler.
 
 - chaque nouvelle table (amis, duels, Elo, signalements) est effacée avec
   le compte (`DELETE /api/account`) et fermée à la Data API ;
-- un apprenant qui se cache du 番付 (`board_hidden`) peut-il quand même
-  être trouvé par son pseudo ? À trancher ;
 - sans âge minimum, la fiche des stores doit déclarer que les utilisateurs
   interagissent (amis, duels, signalements). Ce qui repose sur le
   consentement demande celui d'un parent sous l'âge du consentement
@@ -268,25 +281,24 @@ l'abonnement, qui ne coûte rien à simuler.
 
 ## L'objectif, ajusté
 
-« Rentable fin 2026 » demandait de passer de 25 à environ 1 500
-utilisateurs actifs en deux mois, avant même que la vente soit possible.
-
-**Proposition**, calculée dans « Summary » :
+L'objectif du propriétaire est plus ambitieux que la première proposition
+(mi-2027) : couvrir les coûts fixes au **31 mars 2027**.
 
 | Étape | Date | Repère |
 |---|---|---|
 | Ouverture des ventes | vers le 9 novembre 2026 | paiements actifs dès la validation des stores ; crédits en mode fantôme |
 | Premiers revenus | fin 2026 | premiers abonnés fondateurs, mesures calibrées, crédits activés |
-| Coûts fixes couverts | 30 juin 2027 | environ 1 470 actifs, environ 81 payants |
+| Coûts fixes couverts | 31 mars 2027 | environ 1 330 actifs, environ 74 payants |
 
-La dernière étape suppose environ +65 % d'utilisateurs actifs par mois
-pendant 8 mois, soit environ 75 actifs fin 2026. C'est ambitieux : cela
-repose sur les vidéos courtes (le format « Can you read it? » a déjà dépassé
-20 000 vues) et sur le parrainage.
+Partir de 25 actifs pour en avoir 1 330 en cinq mois, c'est **doubler le
+nombre d'actifs chaque mois** (environ +118 % par mois, environ 130 actifs fin
+2026). Cela ne tient que si les vidéos courtes et le parrainage tournent à
+plein : le format « Can you read it? » a déjà dépassé 20 000 vues.
 
-Un levier pèse lourd : les outils de développement (100 $/mois saisis comme
-estimation provisoire) représentent environ 45 % des coûts fixes. Si cette
-dépense est personnelle, le seuil tombe à environ 810 actifs.
+Les outils de développement sont un coût de l'activité. Ils représentent
+environ 45 % des coûts fixes, et leur baisse est prévue fin 2026 : à 20 $ par
+mois au lieu de 100, le seuil tomberait à environ 850 actifs. Le nouveau
+montant est à saisir dans « Fixed costs » quand il sera connu.
 
 ## Mesures
 
@@ -386,7 +398,7 @@ digest hebdomadaire et dans un tableau de bord Metabase « Monétisation »
 | moins de 25 % des essais deviennent payants | revoir l'essai (moment, durée) |
 | un parrain ou un auteur cumule des récompenses sans étude derrière | geler ses récompenses et vérifier à la main |
 | les achats de packs font baisser les abonnements Pro | remonter le prix des packs |
-| la croissance mensuelle reste sous 40 % deux mois de suite | revoir l'objectif ou ouvrir une acquisition payante |
+| les actifs ne doublent pas d'un mois sur l'autre deux mois de suite | décaler l'objectif ou ouvrir une acquisition payante |
 
 ### L'ordre de mise en place
 
