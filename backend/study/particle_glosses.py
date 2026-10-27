@@ -18,6 +18,7 @@ point's, and is never glossed here (study/analysis._tokens asks only for
 a token with no card and no point).
 """
 from __future__ import annotations
+import re
 
 # Marks a word is drawn out with: ねー, よぉ, なぁ.
 _DRAWN = "ーぇェ〜～"
@@ -117,6 +118,8 @@ _GLOSSES = {
                       "it's fine, really); in a question, you mean…?",
                "fr": "(fin de phrase) il paraît, on m'a dit (= そうだ) ; ou avec insistance, je te dis (いいって, "
                      "mais si, ça va) ; dans une question, tu veux dire… ?"},
+    "って_repeated": {"en": "quoting what someone keeps saying (= と言って): 仕事仕事って, \"work, work\", (you always say)",
+                  "fr": "cite ce que quelqu'un répète (= と言って) : 仕事仕事って, « le travail, le travail », (tu ne dis que ça)"},
     "やろ": {"en": "(Kansai) = だろう: …, isn't it?, I suppose", "fr": "(Kansai) = だろう : …, n'est-ce pas ?, je suppose"},
     "や_order": {"en": "(Kansai, after a verb's stem) do it: a gentle order (= 〜なさい)",
                 "fr": "(Kansai, après le radical d'un verbe) fais-le : un ordre doux (= 〜なさい)"},
@@ -314,6 +317,64 @@ _GLOSSES = {
               "fr": "(Kansai) = しまった : 〜てもうた, c'est arrivé, c'est fait"},
     "ちゃう": {"en": "(Kansai) = 違う: no!, it isn't (犬ちゃう, it's not a dog)",
               "fr": "(Kansai) = 違う : non !, ce n'est pas (犬ちゃう, ce n'est pas un chien)"},
+    "あんた": {"en": "you (from あなた, said casually: close, or blunt)", "fr": "toi, vous (de あなた, familier : intime, ou brusque)"},
+    "お_oh": {"en": "oh!: noticing something", "fr": "oh ! : on remarque quelque chose"},
+    "laugh": {"en": "a laugh: ho ho ho!", "fr": "un rire : ho ho ho !"},
+    "おーっほっほ": {"en": "a haughty laugh: oh-ho-ho!", "fr": "un rire hautain : oh-ho-ho !"},
+    "うおおおっ": {"en": "a roar: whoa!", "fr": "un cri : ouaaah !"},
+    "わい": {"en": "(an old man's speech) closing what he says, with force", "fr": "(parler de vieil homme) clôt ce qu'il dit, avec force"},
+    "かかる_attack": {"en": "(with 来い) to come at someone, to attack: かかってこい, come at me!",
+                     "fr": "(avec 来い) s'en prendre à quelqu'un, attaquer : かかってこい, viens te battre !"},
+    "サヨナラ_baseball": {"en": "(baseball) a walk-off: the home side wins in its last turn",
+                        "fr": "(baseball) une victoire en fin de match : l'équipe locale gagne à son dernier tour"},
+    "ちゃ_tewa": {"en": "(spoken) = ては: さわっちゃだめ, you mustn't touch (〜てはいけません said casually)",
+                 "fr": "(parlé) = ては : さわっちゃだめ, tu ne dois pas toucher (〜てはいけません en familier)"},
+    # (plan 272: the regions' words, as the ninth review found them)
+    "はる": {"en": "(Kyoto, Kansai) the respect はる puts on a verb (= お〜になる): 弾かはります, you play",
+            "fr": "(Kyoto, Kansai) le respect que はる met sur un verbe (= お〜になる) : 弾かはります, vous jouez"},
+    "やす": {"en": "(Kyoto) a polite request: おいでやす, welcome, do come",
+            "fr": "(Kyoto) une demande polie : おいでやす, bienvenue, venez donc"},
+    "よう_yoku": {"en": "(Kansai) = よく, so well, so often: 毎日ようお稽古しはって",
+                 "fr": "(Kansai) = よく, si bien, si souvent : 毎日ようお稽古しはって"},
+    "えらい_very": {"en": "(Kansai) very, awfully (= とても): えらい上手に, ever so well",
+                   "fr": "(Kansai) très, drôlement (= とても) : えらい上手に, drôlement bien"},
+    "てえ_ask": {"en": "(Kansai) = て, a request drawn out: 教えてえや, tell me, come on",
+                "fr": "(Kansai) = て, une demande prolongée : 教えてえや, dis-moi, allez"},
+    "や_urge": {"en": "(spoken, rough or Kansai) after a request or a command, urging: 教えてえや, come on, tell me; かかってこいや",
+               "fr": "(parlé, rude ou du Kansai) après une demande ou un ordre, pour presser : 教えてえや, allez, dis-moi ; かかってこいや"},
+    "で_kansai_verb": {"en": "(Kansai, at the end) = よ, telling: 寝るで, I'm off to bed",
+                      "fr": "(Kansai, en fin de phrase) = よ, on annonce : 寝るで, je vais me coucher"},
+    "でら": {"en": "(Nagoya) very (= とても): でら旨い, really tasty", "fr": "(Nagoya) très (= とても) : でら旨い, vraiment bon"},
+    "おみゃーさん": {"en": "(Nagoya) you (= お前さん)", "fr": "(Nagoya) toi, vous (= お前さん)"},
+    "やあ_nagoya": {"en": "(Nagoya) a gentle command (= なさい): 食べてみやあ, go on, try it",
+                   "fr": "(Nagoya) un ordre doux (= なさい) : 食べてみやあ, allez, goûte"},
+    "おる_west": {"en": "(western speech) = いる, to be (somewhere): どこおると, where are you",
+                 "fr": "(parler de l'Ouest) = いる, être (quelque part) : どこおると, où es-tu"},
+    "と_hakata": {"en": "(Hakata) at the end of a question (= の？): どこおると？, where are you?",
+                 "fr": "(Hakata) en fin de question (= の ?) : どこおると ?, où es-tu ?"},
+    "とう_hakata": {"en": "(Hakata, Kobe) = ている: 着いとう, we've arrived",
+                   "fr": "(Hakata, Kobe) = ている : 着いとう, nous sommes arrivés"},
+    "なんくるない": {"en": "(Okinawa) it'll work out, don't worry", "fr": "(Okinawa) ça va s'arranger, ne t'en fais pas"},
+    "でーじ": {"en": "(Okinawa) very (= とても): でーじ暑い, really hot", "fr": "(Okinawa) très (= とても) : でーじ暑い, très chaud"},
+    "そったなごど": {"en": "(Tōhoku) such things (= そんなこと)", "fr": "(Tōhoku) de telles choses (= そんなこと)"},
+    "じゃね": {"en": "(slang) isn't it? (= じゃない？): 休講じゃね？, isn't the class cancelled?",
+              "fr": "(argot) non ? (= じゃない ?) : 休講じゃね ?, le cours n'est pas annulé ?"},
+    "で_voiced_te": {"en": "(Tōhoku) = て, voiced: 見で, watching", "fr": "(Tōhoku) = て, sonorisé : 見で, en regardant"},
+    "たろ_yaro": {"en": "(Kansai) = てやろう (だろ after ん), after a verb's て: 帰ったろか, shall I just go home?",
+                 "fr": "(Kansai) = てやろう (だろ après ん), après le て d'un verbe : 帰ったろか, et si je rentrais ?"},
+    "けろ_kure": {"en": "(Tōhoku) = てくれ, please do it for me: 見ででけろ, watch it for me",
+                 "fr": "(Tōhoku) = てくれ, fais-le pour moi : 見ででけろ, surveille-le pour moi"},
+    "っから_kuru": {"en": "(spoken) = くるから: 行ってくっから, since I'm off (and will be back)",
+                   "fr": "(parlé) = くるから : 行ってくっから, puisque j'y vais (et je reviens)"},
+    "れ_up": {"en": "(honorific) the respect of れる, said of what the other person does: ご希望されますか, would you like",
+             "fr": "(honorifique) le respect de れる, dit de ce que fait l'autre : ご希望されますか, souhaitez-vous"},
+    "って_teyo": {"en": "(a lady's speech, of old) = て before よ: 百年早くってよ, it's a hundred years too soon",
+                 "fr": "(parler de dame, d'autrefois) = て devant よ : 百年早くってよ, c'est cent ans trop tôt"},
+    "っから": {"en": "from, since (= から, said with force): 昔っから, since way back",
+              "fr": "depuis, de (= から, dit avec force) : 昔っから, depuis toujours"},
+    "やっべ": {"en": "(slang) oh no!, damn! (= やばい)", "fr": "(argot) oh non !, mince ! (= やばい)"},
+    "いかん": {"en": "won't do, no good (= いけない, old or western speech)",
+              "fr": "ça ne va pas, pas bien (= いけない, parler ancien ou de l'Ouest)"},
     "あかん": {"en": "(Kansai) no good, mustn't (= だめ): しとったらあかん, you mustn't be doing that",
               "fr": "(Kansai) pas bien, il ne faut pas (= だめ) : しとったらあかん, tu ne dois pas faire ça"},
     "べ": {"en": "(eastern and northern speech) surely, I think, let's (= だろう, よう)",
@@ -333,6 +394,7 @@ _GLOSSES = {
     "つった": {"en": "(rough) って言った said short: なんつった, what did you say?",
               "fr": "(familier, rude) って言った abrégé : なんつった, qu'est-ce que t'as dit ?"},
     "中央線": {"en": "the Chūō Line (a railway line)", "fr": "la ligne Chūō (une ligne de chemin de fer)"},
+    "中央道": {"en": "the Chūō Expressway (a motorway)", "fr": "l'autoroute Chūō"},
     "かけ_piece": {"en": "(counter) a piece, a knob: 生姜1かけ, a knob of ginger; にんにく1かけ, a clove of garlic",
                   "fr": "(compteur) un morceau : 生姜1かけ, un morceau de gingembre ; にんにく1かけ, une gousse d'ail"},
     "おや": {"en": "oh?, well!: mild surprise", "fr": "tiens !, oh ? : une légère surprise"},
@@ -431,12 +493,16 @@ def _a_sound_word(surface: str, pos: str = "adverb") -> bool:
     kana = surface and all("\u3041" <= c <= "\u30fc" for c in surface)
     if not kana or len(surface) < 3:
         return False
-    if surface[-1] in "ッっ":
-        return True
+    if surface[-1] in "ッっ" or (surface.endswith("ッと") and pos == "adverb"
+                                  and all("\u30a1" <= c <= "\u30fc" for c in surface[:-1])):
+        return True                     # (ガッと, its と held, plan 272)
     if surface.endswith(("ーン", "ーん")):
         return pos in ("adverb", "interjection")
     if len(set(surface)) == 1:
         return True
+    if len(surface) in (4, 6) and surface[:len(surface) // 2] == surface[len(surface) // 2:] \
+            and pos in ("adverb", "noun", "other", "interjection"):
+        return True                     # ぴちゃぴちゃ, ぽかぽか: said twice (plan 272)
     if len(surface) == 4 and surface.endswith(("りん", "リン", "るん", "ルン")) and pos == "adverb":
         return True                     # くるりん, ころりん, ぷるるん (plan 272)
     return len(surface) == 3 and surface[-1] == "リ" and all("\u30a1" <= c <= "\u30fc" for c in surface)
@@ -548,11 +614,79 @@ def gloss(morphemes, i: int) -> dict | None:
         key = "ちゃう"                       # ちゃうちゃう, 犬ちゃうねん
     elif m.surface == "あかん":
         key = "あかん"
+    elif m.surface in ("あんた", "アンタ"):
+        key = "あんた"                       # (plan 272)
+    elif m.surface == "って" and i >= 2 and morphemes[i - 1].pos == "noun" \
+            and morphemes[i - 1].surface == morphemes[i - 2].surface:
+        key = "って_repeated"                # 仕事仕事って (plan 272)
+    elif m.surface in ("おーっほっほ", "うおおおっ", "わい"):
+        key = m.surface                      # (plan 272)
+    elif _a_laugh_written(m.surface):
+        key = "laugh"                        # ふぉっふぉっふぉ (plan 272)
+    elif attacked(morphemes, i):
+        key = "かかる_attack"                # かかってこい (plan 272)
+    elif m.surface == "サヨナラ" and _a_ball_game(morphemes):
+        key = "サヨナラ_baseball"            # 押し出しのフォアボールでサヨナラ！ (plan 272)
+    elif m.surface in ("ちゃ", "じゃ") and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary") \
+            and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("だめ", "ダメ", "駄目", "いけ", "いかん", "あかん",
+                                                                       "なら", "困る"):
+        key = "ちゃ_tewa"                    # さわっちゃだめ (plan 272)
+    elif m.surface == "れ" and m.pos == "auxiliary" and i >= 3 and morphemes[i - 1].surface == "さ" \
+            and morphemes[i - 2].pos == "noun" and morphemes[i - 3].surface in ("ご", "お", "御"):
+        key = "れ_up"                        # ご希望されますか (plan 272)
+    elif m.surface == "って" and i > 0 and morphemes[i - 1].pos == "adjective" and morphemes[i - 1].surface.endswith("く") \
+            and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("よ", "ね"):
+        key = "って_teyo"                    # 百年早くってよ (plan 272)
+    elif m.surface in ("お", "おっ") and m.pos == "interjection" and i + 1 < len(morphemes) \
+            and morphemes[i + 1].pos == "symbol":
+        key = "お_oh"                        # お、来たか (plan 272)
+    elif m.surface == "っから" and i > 0 and morphemes[i - 1].surface in ("てく", "く", "でく"):
+        key = "っから_kuru"                  # 行ってくっから (plan 272)
+    elif m.surface in ("っから", "やっべ", "やっべえ", "いかん", "おみゃーさん", "なんくるない", "でーじ", "そったなごど", "じゃね"):
+        key = {"やっべえ": "やっべ"}.get(m.surface, m.surface)   # (plan 272)
+    elif m.lemma == "はる" and m.pos == "auxiliary" and i > 0 and morphemes[i - 1].pos == "verb":
+        key = "はる"                         # 弾かはります, しはって (plan 272)
+    elif m.surface == "やす" and m.pos == "auxiliary" and i > 0 and morphemes[i - 1].surface in ("おいで", "お越し", "おこし"):
+        key = "やす"                         # おいでやす (plan 272)
+    elif m.surface == "よう" and m.pos == "adverb" and m.lemma == "良く":
+        key = "よう_yoku"                    # 毎日よう (plan 272)
+    elif m.surface == "えらい" and _a_kansai_very(morphemes, i):
+        key = "えらい_very"                  # えらい上手に (plan 272)
+    elif m.surface == "でら" and i + 1 < len(morphemes) and morphemes[i + 1].pos in ("adjective", "other", "verb"):
+        key = "でら"                         # でら旨い (plan 272)
+    elif m.surface in ("てえ", "てぇ") and i + 1 < len(morphemes) and morphemes[i + 1].surface == "や":
+        key = "てえ_ask"                     # 教えてえや (plan 272)
+    elif m.surface == "や" and m.pos == "particle" and i > 0 and (morphemes[i - 1].surface in ("てえ", "てぇ")
+                                                               or morphemes[i - 1].cform.startswith("命令形")) \
+            and closes_sentence(morphemes, i):
+        key = "や_urge"                      # 教えてえや (plan 272)
+    elif m.surface == "で" and i > 0 and (morphemes[i - 1].pos == "verb" or (
+            morphemes[i - 1].pos == "adjective" and m.lemma == "で" and not m.conjunctive)) \
+            and morphemes[i - 1].cform.startswith("終止形") and closes_sentence(morphemes, i):
+        key = "で_kansai_verb"               # 寝るで, 安ないで (plan 272)
+    elif m.surface in ("やあ", "やぁ") and m.pos == "auxiliary" and i > 0 and morphemes[i - 1].lemma in ("見る", "みる") \
+            and morphemes[i - 1].surface == "み":
+        key = "やあ_nagoya"                  # 食べてみやあ (plan 272)
+    elif m.surface == "おる" and m.pos == "verb" and m.lemma == "居る" and i > 0 and morphemes[i - 1].pos in ("pronoun", "noun"):
+        key = "おる_west"                    # どこおると (plan 272)
+    elif m.surface == "と" and m.pos == "particle" and i > 0 and morphemes[i - 1].pos == "verb" \
+            and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("？", "?"):
+        key = "と_hakata"                    # どこおると？ (plan 272)
+    elif m.surface == "とう" and m.pos == "auxiliary" and i > 0 and morphemes[i - 1].pos == "verb" \
+            and morphemes[i - 1].cform.startswith("連用形"):
+        key = "とう_hakata"                  # 着いとう (plan 272)
+    elif m.surface == "で" and m.lemma == "て" and i > 0 and morphemes[i - 1].lemma in ("見る",) \
+            and morphemes[i - 1].surface == "見" and i + 1 < len(morphemes) and morphemes[i + 1].lemma == "けろ":
+        key = "で_voiced_te"                 # 見ででけろ (plan 272)
+    elif m.lemma == "たろ" and m.pos == "auxiliary":
+        key = "たろ_yaro"                    # 帰ったろか (plan 272)
+    elif m.lemma == "けろ" and m.pos == "auxiliary":
+        key = "けろ_kure"                    # 見ででけろ (plan 272)
     elif m.surface == "べ" and m.pos == "particle" and closes_sentence(morphemes, i):
         key = "べ"                           # そう思うべ, 楽しみだべ
     elif m.surface in ("なして", "っしゃ", "んだんだ"):
         key = m.surface
-    elif m.surface == "さ" and m.pos == "particle" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun") \
+    elif m.surface == "さ" and m.pos in ("particle", "suffix") and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun") \
             and i + 1 < len(morphemes) and morphemes[i + 1].pos == "verb":
         key = "さ_ni"                        # 孫さ会える
     elif m.surface == "てけろ":
@@ -597,8 +731,8 @@ def gloss(morphemes, i: int) -> dict | None:
             and morphemes[i - 1].surface == "し" and morphemes[i - 2].surface == "と" and morphemes[i - 2].pos == "particle" \
             and morphemes[i - 3].pos in ("verb", "auxiliary") and morphemes[i - 3].cform.startswith(("終止形", "連体形")):
         key = "て_toshite"                   # だまし取ったとして、逮捕 (plan 272)
-    elif m.surface == "中央線" and m.proper:
-        key = "中央線"                       # (plan 272)
+    elif m.surface in ("中央線", "中央道") and m.proper:
+        key = m.surface                      # (plan 272)
     elif m.surface in ("からっ", "辛っ") and i + 1 < len(morphemes) and morphemes[i + 1].pos == "symbol":
         key = "からっ"                       # うわ、からっ！ (plan 272)
     elif m.surface == "い" and m.pos == "particle" and i > 0 and morphemes[i - 1].surface == "だ" \
@@ -888,6 +1022,37 @@ def gloss(morphemes, i: int) -> dict | None:
                      or (morphemes[i - 1].pos == "suffix" and morphemes[i - 1].surface.endswith("く"))):
             key = "て_form"                   # 借りてまでして, 水っぽくて
     return dict(_GLOSSES[key]) if key else None
+
+
+_LAUGHED = re.compile(r"^(?:ふぉ|フォ|ほ|ホ|は|ハ|ひ|ヒ|へ|ヘ)(?:[っッ]?(?:ふぉ|フォ|ほ|ホ|は|ハ|ひ|ヒ|へ|ヘ))+[っッ]?$")
+
+
+def _a_laugh_written(surface: str) -> bool:
+    """Whether `surface` is a laugh written out: ふぉっふぉっふぉ, ははは."""
+    return len(surface) >= 3 and bool(_LAUGHED.match(surface))
+
+
+def attacked(morphemes, i: int) -> bool:
+    """Whether the かかる at morphemes[i] comes at someone: かかってこい,
+    まとめてかかってこいや -- no "to take (time)" (plan 272)."""
+    m = morphemes[i]
+    return (m.lemma in ("掛かる", "かかる") and i + 2 < len(morphemes) and morphemes[i + 1].surface == "て"
+            and morphemes[i + 2].lemma in ("来る", "くる") and morphemes[i + 2].cform.startswith("命令形"))
+
+
+_BALL_GAME = ("回", "裏", "表", "打", "ホームラン", "ヒット", "フォアボール", "押し出し", "投手", "延長", "イニング")
+
+
+def _a_ball_game(morphemes) -> bool:
+    text = "".join(m.surface for m in morphemes)
+    return any(w in text for w in _BALL_GAME)
+
+
+def _a_kansai_very(morphemes, i: int) -> bool:
+    """Whether えらい at morphemes[i] is the west's "very", before the word
+    it says how much of: えらい上手に, えらい寒い (plan 272)."""
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    return nxt is not None and (nxt.pos in ("adjective", "adverb") or (nxt.pos == "other" and nxt.surface != "の"))
 
 
 def _kansai_chau(morphemes, i: int) -> bool:

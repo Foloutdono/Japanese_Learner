@@ -228,7 +228,7 @@
 {"t":"割合","r":"わりあい","ro":"wariai","en":["rate, ratio, percentage"],"fr":["taux, proportion, pourcentage"],"fu":[["割","わり"],["合","あい"]],"hy":["割挨","割乃","割哀"]},
 {"t":"注意","r":"ちゅうい","ro":"chuui","en":["attention, care, caution","warning, advice"],"fr":["attention, prudence","avertissement, conseil"],"fu":[["注","ちゅう"],["意","い"]],"hy":["中意","注以","住意"],"ex":["N4.29","N4.77"]},
 {"t":"こと","r":"こと","ro":"koto","en":["thing, matter (abstract, a fact or event)"],"fr":["chose, affaire (abstraite, fait ou événement)"],"ex":["N4.25","N4.26"]},
-{"t":"表","r":"おもて","ro":"omote","en":["front, face, surface","outside"],"fr":["devant, face, endroit","extérieur"],"fu":[["表","おもて"]]},
+{"t":"表","r":"おもて","ro":"omote","en":["front, face, surface","outside","top (of an inning)"],"fr":["devant, face, endroit","extérieur","haut (d'une manche, au baseball)"],"fu":[["表","おもて"]]},
 {"t":"楽しむ","r":"たのしむ","ro":"tanoshimu","en":["to enjoy, to have fun"],"fr":["profiter de, apprécier, s'amuser"],"fu":[["楽","たの"],["しむ",""]],"ex":["N4.50","N2.34"]},
 {"t":"ピアノ","r":"ピアノ","ro":"piano","en":["piano"],"fr":["piano"],"ex":["N4.140"]},
 {"t":"高校生","r":"こうこうせい","ro":"koukousei","en":["high school student"],"fr":["lycéen"],"fu":[["高","こう"],["校","こう"],["生","せい"]],"hy":["口校生","高口生","高校西"],"ex":["N3.36"]},

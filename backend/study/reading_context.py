@@ -35,6 +35,7 @@ only thing that talks to MeCab.
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 
 # ── Numerals and counters ───────────────────────────────────────
 
@@ -391,8 +392,8 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
             return _swap_tail(n_read, "きゅう", "く"), c_read
         return None
 
-    if ctr_surface in ("人", "年", "円") and cls == 4:
-        return _swap_tail(n_read, "よん", "よ"), c_read
+    if ctr_surface in ("人", "年", "年間", "円") and cls == 4:
+        return _swap_tail(n_read, "よん", "よ"), c_read      # (4年間 よねんかん, plan 272)
 
     return None
 
@@ -420,7 +421,7 @@ LATIN_UNITS = {
 # (numeral_furigana's callers): the ruby over 3日 is みっか, not さん over
 # 3 and か over 日.
 COUNTER_SURFACES = (set(_COUNTER_BASE) | set(_H_COUNTERS) | set(_KST_COUNTERS)
-                    | _NATIVE_COUNTERS | {"日", "日間", "つ", "分", "分間", "泊", "時間"})
+                    | _NATIVE_COUNTERS | {"日", "日間", "つ", "分", "分間", "泊", "時間", "年間"})
 
 
 def numeral_furigana(numeral: str, counter: str = "", counter_reading: str = "",
@@ -443,12 +444,17 @@ def numeral_furigana(numeral: str, counter: str = "", counter_reading: str = "",
     no 1.5本 to be euphonic about -- and a counter these rules do not
     know leaves the number in its plain reading.
     """
+    if counter in ("秒", "分", "") and len(numeral) == 2 and numeral[0] in "0０" and numeral[1] in "123456789１２３４５６７８９" \
+            and before in ("分", "時", "時間", "′"):
+        numeral = numeral[1]            # 2時間21分08秒: a watch's two figures (plan 272)
     base = read_number(numeral)
     if base is None:
         return None, None
     digits = _digits_of(numeral)
     if digits is None or not counter:
         return base, None
+    if counter == "分" and before in ("割", "度"):
+        return base, "ぶ"               # 3割1分2厘, 37度8分: a tenth of the unit before, no minute (plan 272)
     value = int(digits)
     ctr = _to_hira(counter_reading)
 
@@ -620,6 +626,26 @@ def deck_word_reading(char: str) -> list[str]:
 _WEEKDAY_READINGS = {"月": "げつ", "火": "か", "水": "すい", "木": "もく", "金": "きん", "土": "ど", "日": "にち"}
 
 
+# What sorts the people a notice speaks to (方 かた after it and の).
+_SORTS_PEOPLE = ("付近", "周辺", "沿岸", "沿い", "地域", "在住", "地区", "希望", "該当", "一般", "対象", "年配", "高齢",
+                 "外国", "初めて", "予約", "参加", "利用", "ご来場", "来場")
+
+
+@lru_cache(maxsize=2048)
+def _thing_reading(head: str) -> str | None:
+    """How 物 reads after `head`: as JMdict reads the word the two spell
+    (洗濯物 もの, 危険物 ぶつ), ぶつ for a Sino word it lacks (液体物), or
+    None where nothing says."""
+    from content import vocab_jmdict_data as jmdict
+
+    rows = [row for row in jmdict.by_kanji(head + "物", limit=4) if row.get("kanji") == head + "物"]
+    for row in rows:
+        kana = row.get("kana") or ""
+        if kana.endswith(("もの", "ぶつ", "もつ")):
+            return kana[-2:]
+    return "ぶつ" if not rows else None
+
+
 def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list[str]:
     """The readings of `tokens`, each put right where its context says.
 
@@ -703,6 +729,14 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 and nxt(i) in ("は", "には", "へ", "も", "に", "を", "の"):
             out[i] = "かた"
             continue
+        # 海岸付近の方は, ご希望の方は: かた, the people a notice speaks
+        # to, after a word that sorts people (plan 272) -- 駅の近くの方が
+        # 便利 is ほう, the side.
+        if s == "方" and r == "ほう" and prev(i) == "の" and i >= 2 and (
+                surf[i - 2].endswith(_SORTS_PEOPLE) or (i >= 3 and surf[i - 3] in ("お", "ご")))  \
+                and nxt(i) in ("は", "には", "へ", "も", "に", "を", "の", "で", "。", ""):
+            out[i] = "かた"
+            continue
         # 何しやがる, 何しに来た: なに before する (plan 272).
         if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1]["lemma"] in ("為る", "する") \
                 and nxt(i)[:1] in ("し", "す"):
@@ -721,6 +755,25 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         if s == "箱" and r == "ばこ" and (i == 0 or tokens[i - 1].get("pos") not in ("noun", "prefix")
                                           or _numeral_value(prev(i)) is not None):
             out[i] = "はこ"
+            continue
+
+        # 液体物, 洗濯物: 物 after a word in kanji reads as the dictionary
+        # reads the two, ぶつ where it has no such word (plan 272).
+        if s == "物" and r in ("もの", "ぶつ") and i > 0 and len(prev(i)) >= 2 \
+                and all(_is_kanji(c) for c in prev(i)) and tokens[i - 1].get("pos") == "noun":
+            said = _thing_reading(prev(i))
+            if said and said != r:
+                out[i] = said
+            continue
+
+        # 1回表, 九回裏: the top of an inning, おもて -- no 表 "table" (plan 272).
+        if s == "表" and r == "ひょう" and prev(i) == "回" and i >= 2 and (
+                _numeral_value(surf[i - 2]) is not None or surf[i - 2][-1:].isdigit()):
+            out[i] = "おもて"
+            continue
+        # 芦ノ湖, a lake's name: こ, no みずうみ (plan 272).
+        if s.endswith("ノ湖") and r.endswith("のみずうみ"):
+            out[i] = r[:-len("みずうみ")] + "こ"
             continue
 
         # 再来月, the month after next: げつ, as in 来月 (plan 272).

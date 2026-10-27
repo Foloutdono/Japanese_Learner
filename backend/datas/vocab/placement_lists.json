@@ -2490,84 +2490,84 @@
    "level": "N2",
    "lists_say": "N5",
    "meaning": "rice bowl, teacup",
-   "rank": 24238
+   "rank": 24239
   },
   {
    "key": "混ざる::まざる",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to be mixed, to be blended with, to associate with, to mingle with, to join",
-   "rank": 24238
+   "rank": 24239
   },
   {
    "key": "映える::はえる",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to shine, to look attractive, to look pretty",
-   "rank": 24238
+   "rank": 24239
   },
   {
    "key": "当てはめる::あてはめる",
    "level": "N1",
    "lists_say": "N2",
    "meaning": "to apply, to adapt",
-   "rank": 24238
+   "rank": 24239
   },
   {
    "key": "慌ただしい::あわただしい",
    "level": "N1",
    "lists_say": "N2",
    "meaning": "busy, hurried, hectic, flurried",
-   "rank": 24238
+   "rank": 24239
   },
   {
    "key": "卸す::おろす",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to sell wholesale; to grate (vegetables)",
-   "rank": 26293
+   "rank": 26294
   },
   {
    "key": "延ばす::のばす",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to extend, to prolong, to postpone, to delay",
-   "rank": 26293
+   "rank": 26294
   },
   {
    "key": "椀::わん",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "Japanese soup bowl, wooden bowl",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "key": "煮える::にえる",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to boil, to cook, to be cooked",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "key": "::アンケート",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "questionnaire, survey",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "key": "近視::きんし",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "shortsightedness",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "key": "諮る::はかる",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to consult with, to confer",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "key": "真面目::まじめ",
@@ -4326,91 +4326,91 @@
    "expression": "ハンバーグ",
    "reading": "ハンバーグ",
    "level": "N4",
-   "rank": 24238
+   "rank": 24239
   },
   {
    "expression": "振り返る",
    "reading": "ふりかえる",
    "level": "N1",
-   "rank": 24238
+   "rank": 24239
   },
   {
    "expression": "郷土",
    "reading": "きょうど",
    "level": "N1",
-   "rank": 26293
+   "rank": 26294
   },
   {
    "expression": "素っ気無い",
    "reading": "そっけない",
    "level": "N1",
-   "rank": 26293
+   "rank": 26294
   },
   {
    "expression": "見習う",
    "reading": "みならう",
    "level": "N1",
-   "rank": 26293
+   "rank": 26294
   },
   {
    "expression": "ずらり",
    "reading": "ずらり",
    "level": "N2",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "存ずる",
    "reading": "ぞんずる",
    "level": "N2",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "破く",
    "reading": "やぶく",
    "level": "N2",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "取り付ける",
    "reading": "とりつける",
    "level": "N1",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "予て",
    "reading": "かねて",
    "level": "N1",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "切替",
    "reading": "きりかえ",
    "level": "N1",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "継目",
    "reading": "つぎめ",
    "level": "N1",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "やりとげる",
    "reading": "やりとげる",
    "level": "N1",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "晩年",
    "reading": "ばんねん",
    "level": "N1",
-   "rank": 29038
+   "rank": 29039
   },
   {
    "expression": "年賀",
    "reading": "ねんが",
    "level": "N1",
-   "rank": 32936
+   "rank": 32937
   },
   {
    "expression": "かぶる",

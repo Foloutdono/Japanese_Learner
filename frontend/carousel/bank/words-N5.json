@@ -30,7 +30,7 @@
 {"t":"会う","r":"あう","ro":"au","en":["to meet"],"fr":["rencontrer"],"fu":[["会","あ"],["う",""]],"hy":["亜う","阿う"],"ex":["N5.4","N5.24"]},
 {"t":"西","r":"にし","ro":"nishi","en":["west"],"fr":["ouest"],"fu":[["西","にし"]],"ex":["N4.97"]},
 {"t":"狭い","r":"せまい","ro":"semai","en":["narrow"],"fr":["étroit"],"fu":[["狭","せま"],["い",""]]},
-{"t":"覚える","r":"おぼえる","ro":"oboeru","en":["to remember (to memorize, to learn)"],"fr":["se souvenir (retenir, mémoriser)"],"fu":[["覚","おぼ"],["える",""]],"ex":["N5.65","N3.75"]},
+{"t":"覚える","r":"おぼえる","ro":"oboeru","en":["to remember (to memorize, to learn), to feel (a doubt, a pain)"],"fr":["se souvenir (retenir, mémoriser), ressentir (un doute, une douleur)"],"fu":[["覚","おぼ"],["える",""]],"ex":["N5.65","N3.75"]},
 {"t":"入れる","r":"いれる","ro":"ireru","en":["to put in (something)"],"fr":["mettre (quelque chose dedans)"],"fu":[["入","い"],["れる",""]],"hy":["以れる","医れる","意れる"],"ex":["N5.17","N4.64"]},
 {"t":"道","r":"みち","ro":"michi","en":["road, path, way, street"],"fr":["chemin, route, voie, rue"],"fu":[["道","みち"]],"ex":["N5.41","N4.110"]},
 {"t":"電気","r":"でんき","ro":"denki","en":["electricity, electric light"],"fr":["électricité, lumière électrique"],"fu":[["電","でん"],["気","き"]],"hy":["田気","電帰","伝気"],"ex":["N5.25","N3.210"]},

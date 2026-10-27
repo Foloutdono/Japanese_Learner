@@ -247,6 +247,7 @@ _NAME_GLOSS = {
     "place": {"en": "place name", "fr": "nom de lieu"},
     "other": {"en": "a name", "fr": "un nom propre"},
     "business": {"en": "a name (of an inn, a shop, a firm)", "fr": "un nom (d'auberge, de boutique, d'entreprise)"},
+    "vessel": {"en": "a name (of a train, a ship)", "fr": "un nom (de train, de navire)"},
 }
 
 
@@ -280,7 +281,7 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
         "vocab_match": vocab_match,
         "kanji_matches": kanji_matches,
     }
-    if vocab_match is None and m.name_kind and (named or m.name_kind in ("place", "business") or not _hiragana(m.surface)):
+    if vocab_match is None and m.name_kind and (named or m.name_kind in ("place", "business", "vessel") or not _hiragana(m.surface)):
         # A name has no card, and its row said nothing: 田中 and マルタン
         # read as a word the course does not teach (plan 266). Written in
         # hiragana, a name is the tokenizer's guess unless an honorific
@@ -673,8 +674,10 @@ def _fraction_dict(morphemes: list, i: int) -> dict | None:
     if pair is None or i == 0 or not pair[0] or not pair[1]:
         return None
     prev = morphemes[i - 1]
-    if not (prev.surface in _MEASURES or (prev.surface == "と" and i >= 2 and morphemes[i - 2].surface[-1:].isdigit())):
-        return None
+    after = morphemes[i + 3] if i + 3 < len(morphemes) else None
+    if not (prev.surface in _MEASURES or (prev.surface == "と" and i >= 2 and morphemes[i - 2].surface[-1:].isdigit())
+            or (after is not None and after.surface in _MEASURES and after.start == morphemes[i + 2].end)):
+        return None                     # (牛乳1/2カップ: a share of the measure after it, plan 272)
     reading = read_number(str(pair[1])) + "ぶんの" + read_number(str(pair[0]))
     surface = "".join(m.surface for m in morphemes[i:i + 3])
     return {
@@ -1048,8 +1051,13 @@ _HONORIFICS = frozenset({"さん", "ちゃん", "くん", "君", "様", "さま"
 def _named(morphemes: list, i: int) -> bool:
     m = morphemes[i]
     # (...or the animal it is the name of says so: いぬの ぽち, plan 272)
+    # (...or the family name before it: 上原あかり; or a name UniDic reads
+    # alone opening what is said of it: あおいが今日来れないって, plan 272)
     return m.name_kind in ("family", "given", "person") and (
-        (i + 1 < len(morphemes) and morphemes[i + 1].surface in _HONORIFICS) or morphology.named_animal(morphemes, i))
+        (i + 1 < len(morphemes) and morphemes[i + 1].surface in _HONORIFICS) or morphology.named_animal(morphemes, i)
+        or (m.name_kind == "given" and i > 0 and morphemes[i - 1].proper and morphemes[i - 1].name_kind == "family"
+            and morphemes[i - 1].end == m.start)
+        or morphology.named_alone(morphemes, i))
 
 
 def _merged_morpheme(run: list) -> morphology.Morpheme:
@@ -1140,7 +1148,11 @@ _COUNTERS = "助数詞 〜つ／〜人／〜枚"
 
 # The points that are a word's own forms, not a construction around it.
 _OWN_FORM_POINTS = frozenset({"い形容詞／な形容詞", "ない形 〜ない", "た形 〜た", "可能形 〜(ら)れる",
-                              "意向形 〜(よ)う", "命令形 〜ろ／〜え", "〜ます／〜ません", "〜ました／〜ませんでした"})
+                              "意向形 〜(よ)う", "命令形 〜ろ／〜え", "〜ます／〜ません", "〜ました／〜ませんでした",
+                              # (a compound verb the pool holds whole is its word
+                              # too: もつれ込む, 振り込む, 駆け出す, plan 272)
+                              "〜こむ", "〜出す", "〜かける", "〜きる", "〜直す", "〜かねる",
+                              "〜はじめる／〜おわる／〜つづける"})
 
 _MONTHS_EN = ("January", "February", "March", "April", "May", "June", "July", "August", "September",
               "October", "November", "December")
@@ -1561,6 +1573,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             run = morphemes[i:i + n]
             token = _pool_compound_dict(run, row)
             token["reading"] = _written_reading(run)
+            said = morphology.kata_to_hira(row.get("kana") or "")
+            verb_said = morphology.kata_to_hira(run[-1].lemma_reading)
+            if said.endswith(verb_said) and said[:-len(verb_said)] != _written_reading(run[:-1]):
+                # (音を上げる: ね, as the expression reads it, plan 272)
+                token["reading"] = said[:-len(verb_said)] + run[-1].reading
             token["furigana"] = align_deck(token["surface"], token["reading"])
             token["pos"] = "verb"
             # The words it is made of, with their deck cards (手, 入れる),
@@ -1894,7 +1911,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # wrong (来月の一日 ついたち, お金をかける 掛ける, 電車がはやい 速い, a shop's
 # name in kana), のように as 〜ような, and an idiom judged by its card's
 # senses less those written by their own phrase.
-LOCAL_REV = 24
+# 25: a ninth review's 160 lines (drama, announcements, recipes, business
+# mail, regional speech, picture books): words kept whole (熱中症,
+# 住民票, 保育園 in kana), kana verbs by their objects (ながぐつをはく,
+# 金魚をかう), a person's or a firm's name for no word (中島, みどり商事,
+# ハルノ企画), readings (1回表 おもて, 3割1分 ぶ, お持ちの方 かた), the west's
+# and the north's speech glossed (はる, てえや, とう, でけろ, たろか), and
+# the points a business letter or a recipe uses (お〜申し上げる, 〜すぎる).
+LOCAL_REV = 25
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

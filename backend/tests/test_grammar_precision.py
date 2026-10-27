@@ -543,6 +543,8 @@ EMBEDDED = [
 # same letters where they are another word: を持って is "holding", に渡って
 # "crossing to", 時 read じ, 駅に止まらず a train not stopping.
 SPELLED = [
+    # (plan 272: 初めて in kanji after the て form)
+    ("健康は失って初めてその価値がわかる。", "〜てはじめて", True),
     # (plan 272: in kana, as a picture book writes it; 前 in kanji)
     ("ほんをよむのがすきです。", "〜のが好きです", True),
     ("寝る前に歯をみがきます。", "〜まえに", True),
@@ -2467,3 +2469,72 @@ class EighthReviewPointTests(unittest.TestCase):
                 hit = next(h for h in grammar_detect.detect(sentence) if h[0] == "〜のは〜だ")
                 self.assertTrue(sentence[:hit[3]].endswith(closing), sentence[hit[2]:hit[3]])
         self.assertIn("〜まい", found_in("みんなが信じようが信じまいが、これは事実だ。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class NinthReviewPointTests(unittest.TestCase):
+    """Points a ninth review of 160 lines (drama and manga speech,
+    announcements, recipes, business mail, regional speech, picture
+    books) found unlit or lit wrongly (plan 272), each with the sentence
+    it must leave alone."""
+
+    def test_points_found(self) -> None:
+        for sentence, pattern, text in (
+            ("「娘さんを僕にください！」", "〜をください", "を"),
+            ("この程度で音を上げるとは情けない。", "〜とは", "とは"),
+            ("まあ、案外悪くありませんわね。", "い形容詞／な形容詞", "悪くあり"),
+            ("中火で5分蒸し焼きにします。", "〜くする／〜にする", "に"),
+            ("キャベツはざく切りにします。", "〜くする／〜にする", "に"),
+            ("さむすぎ。きょうは一日ふとんから出ない", "〜すぎる", "すぎ"),
+            ("健康は失って初めてその価値がわかる", "〜てはじめて", "て"),
+            ("貴社ますますご清栄のこととお喜び申し上げます。", "お〜になる／お〜する", "お"),
+            ("ご挨拶かたがたご連絡申し上げます。", "お〜になる／お〜する", "ご"),
+            ("ご査収くださいますようお願い申し上げます。", "お〜ください", "ご"),
+            ("戻ったら品出しお願いね。", "ね", "ね"),
+            ("ドキドキが止まらないよぉ。", "が", "が"),
+            ("納品日を3日（月）から6日（木）に変更します。", "から〜まで", "から"),
+            ("やっべ、終電もう出ちゃってんじゃん。", "〜ています", "てん"),
+            ("私事で恐縮ですが、来週休みます。", "〜で（理由）", "で"),
+        ):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertTrue(found_in(sentence).get(pattern, "").startswith(text), found_in(sentence))
+
+    def test_lookalikes_refused(self) -> None:
+        for sentence, pattern in (
+            ("駅につきますか。", "〜につき"),                       # 着く, "arrive"
+            ("閉店1時間前につき、半額です。", "〜まえに"),           # 〜につき's に
+            ("夕飯はすき焼きにします。", "〜くする／〜にする"),     # a dish chosen
+            ("ジェネリック医薬品をご希望されますか？", "受身形 〜られる"),  # the honorific される
+            ("このわたくしに勝とうだなんて、百年早くってよ。", "た形 〜た"),
+            ("百年早くってよ。", "〜く／〜に（副詞形）"),            # the て form, drawn out
+            ("最大の失敗だといえよう。", "〜という"),               # 言える, "one may say"
+            ("はよ教えてえや。", "〜たいです"),                     # the west's request
+            ("うちらもう店に着いとうよ。", "〜たいです"),           # Hakata's ている
+            ("今日はもう帰って寝るで。", "〜て／〜ないで（依頼）"),  # Kansai's で
+            ("雪かきさ行ってくっから、ストーブ見ででけろな。", "〜な（禁止）"),
+            ("田中さんとは残念ながら会えなかった。", "〜とは"),
+            ("電話で恐縮ですが、よろしくお願いします。", "〜で（理由）"),  # a means
+            ("一駅ぐらい歩いて帰ったろか。", "た形 〜た"),           # the west's てやろう
+            ("読んだろか。", "〜だろう"),
+        ):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+        # 入ってない is ている said short, no second "and then" (plan 272)
+        self.assertEqual({k for k in keys("写真と違って具がほぼ入ってない。") if k[0] == "〜て、〜て"},
+                         {("〜て、〜て", "て")})
+        self.assertIn(("〜て、〜て", "て、顔を洗って"), keys("朝起きて、顔を洗って、ご飯を食べます。"))
+        # ...where each still reads its own
+        for sentence, pattern in (("改装工事につき、閉鎖となります。", "〜につき"),
+                                  ("寝る前に歯をみがく。", "〜まえに"),
+                                  ("夕飯はすき焼きにします。", "〜にします"),
+                                  ("先生に叱られた。", "受身形 〜られる"),
+                                  ("早く起きます。", "〜く／〜に（副詞形）"),
+                                  ("田中という人", "〜という"),
+                                  ("食いてえな。", "〜たいです"),
+                                  ("待って。", "〜て／〜ないで（依頼）"),
+                                  ("そこに行くな。", "〜な（禁止）"),
+                                  ("こんな所で会うとは、驚いた。", "〜とは"),
+                                  ("もう帰ったろう。", "た形 〜た"),
+                                  ("雨だろうか。", "〜だろう")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertIn(pattern, found_in(sentence))
