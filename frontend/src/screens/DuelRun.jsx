@@ -7,7 +7,7 @@ import { Loading } from '../components/ui/Loading'
 import { CorrectionsSheet } from '../components/pvp/CorrectionsSheet'
 import { apiJson } from '../lib/api'
 import { playClick } from '../lib/audio'
-import { LIMIT_MS, SPRINT_MS, errorKey, points, totalAt } from '../domain/duel'
+import { LIMIT_MS, SPRINT_MS, duelErrorKey, errorKey, points, totalAt } from '../domain/duel'
 import { refreshDuels } from '../stores/duels'
 import { applyXpGain } from '../stores/profileSummary'
 
@@ -35,7 +35,13 @@ const CLOSED = ['expired', 'declined', 'cancelled']
 const CLOSING = ['pvp_closed', 'pvp_not_found', 'pvp_played']
 
 export default function DuelRun({ session }) {
+  // One duel, one stage: a rematch's new id starts it afresh -- its
+  // ticket, its run, its verdict and the XP it counts -- never the last.
   const { id } = useParams()
+  return <DuelStage key={id} id={id} session={session} />
+}
+
+function DuelStage({ id, session }) {
   const { t, lang } = useLang()
   const navigate = useNavigate()
   const location = useLocation()
@@ -54,7 +60,7 @@ export default function DuelRun({ session }) {
   }), [id, session])
 
   useEffect(() => {
-    load().catch(e => setDuel({ failed: errorKey(e) }))
+    load().catch(e => setDuel({ failed: duelErrorKey(e) }))
   }, [load])
 
   const begin = useCallback(r => {
@@ -64,7 +70,8 @@ export default function DuelRun({ session }) {
       startsAt: Date.parse(r.startsAt), endsAt: Date.parse(r.endsAt),
       q: r.q, servedAt: Date.parse(r.qAt ?? r.startsAt), flash: null, busy: false,
       total: r.total ?? 0, rights: r.rights ?? 0,
-      timeline: r.opponent?.timeline ?? [], seen: 0, done: !r.q,
+      // A recording to race, even one with no answer in it.
+      timeline: r.opponent?.timeline ?? [], recorded: r.opponent != null, seen: 0, done: !r.q,
     })
   }, [])
 
@@ -78,7 +85,7 @@ export default function DuelRun({ session }) {
       return
     }
     refreshDuels()
-    load().then(() => setError(null)).catch(err => setDuel({ failed: errorKey(err) }))
+    load().then(() => setError(null)).catch(err => setDuel({ failed: duelErrorKey(err) }))
   }, [load])
 
   // « Partir », or a run already under way picked up where it is.
@@ -153,7 +160,9 @@ export default function DuelRun({ session }) {
       // shared, and its corrections open once the duel is settled.
       setRun(cur => ({
         ...cur, busy: false, total: a.total, rights: a.rights,
-        flash: { pick, right: a.right, pts: a.pts, until: a.next ? Date.parse(a.nextAt) : Date.now() + skew.current + RIGHT_HOLD_MS },
+        // The pick the answer was recorded with: a reply lost and sent
+        // again, from another tile or device, is about the first one.
+        flash: { pick: a.pick ?? pick, right: a.right, pts: a.pts, until: a.next ? Date.parse(a.nextAt) : Date.now() + skew.current + RIGHT_HOLD_MS },
         nextQ: a.next,
       }))
     }).catch(e => setRun(cur => (
@@ -209,8 +218,21 @@ export default function DuelRun({ session }) {
   // that fails says so and can be asked again.
   const endsAt = run?.endsAt
   const doneEarly = Boolean(run?.done)
+  const reread = useRef(null)
+  useEffect(() => () => clearTimeout(reread.current), [])
   const readVerdict = useCallback(() => {
-    apiJson(`/api/pvp/duels/${id}`, session).then(setSettled).catch(() => setSettled(false))
+    function ask(tries) {
+      apiJson(`/api/pvp/duels/${id}`, session).then(d => {
+        // Read before the server ended the run (its clock is the one
+        // that counts): asked again a moment later, never shown unplayed.
+        if (d.you?.started && !d.you.played && !CLOSED.includes(d.status) && tries < 5) {
+          reread.current = setTimeout(() => ask(tries + 1), SETTLE_MS)
+          return
+        }
+        setSettled(d)
+      }).catch(() => setSettled(false))
+    }
+    ask(0)
   }, [id, session])
   useEffect(() => {
     if (!over) return undefined
@@ -245,11 +267,16 @@ export default function DuelRun({ session }) {
 
   const them = duel.them?.username ?? t.pvpTraveller
   const again = () => {
+    // A write that creates: a second press while the first is on its
+    // way sends nothing.
+    if (busy.current) return
     playClick()
     if (duel.kind === 'ranked' || !duel.them?.username) { navigate('/duel/new'); return }
+    busy.current = true
     apiJson('/api/pvp/duels', session, { method: 'POST', body: JSON.stringify({ opponent: duel.them.username, mode: duel.mode, ranked: false }) })
       .then(d => { refreshDuels(); navigate(`/duel/${d.id}`) })
       .catch(e => setError(errorKey(e)))
+      .finally(() => { busy.current = false })
   }
 
   // A duel already run: its result, the server's (waiting while the
@@ -274,7 +301,7 @@ export default function DuelRun({ session }) {
   const elapsed = Math.max(0, Math.min(SPRINT_MS, now - run.startsAt))
   const opp = totalAt(run.timeline, elapsed)
   // Live, or against a recording: the other's train is on the line.
-  const racing = liveMode || run.timeline.length > 0
+  const racing = liveMode || run.recorded
   const left = Math.ceil((run.endsAt - Math.max(now, run.startsAt)) / 1000)
   const qMs = Math.max(0, now - run.servedAt)
   const worth = run.flash && !run.flash.pending ? run.flash.pts : points(qMs)
@@ -331,7 +358,8 @@ function Ticket({ duel, them, t, lang, now, error, onLeave, onGo, onJoin, onDecl
             <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpDuelLevel}</dt><dd className="pvp-ticket__dd">{duel.level} · {t.pvpLowest}</dd></div>
             <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpQuestions}</dt><dd className="pvp-ticket__dd">{t.pvpWordsKanji}</dd></div>
             {duel.them?.score != null && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpToBeat}</dt><dd className="pvp-ticket__dd">{duel.them.score.toLocaleString(lang)}</dd></div>}
-            <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpPrice}</dt><dd className="pvp-ticket__dd">{ranked ? t.pvpCredits(duel.price || 2) : t.pvpFreeFriends}</dd></div>
+            {/* A run already paid and being picked up again has no price left to print. */}
+            {!(ranked && duel.you.started) && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpPrice}</dt><dd className="pvp-ticket__dd">{!ranked ? t.pvpFreeFriends : duel.price ? t.pvpCredits(duel.price) : t.pvpIncluded}</dd></div>}
           </dl>
           <div className="clrk-tk__row clrk-tk__foot"><span lang="ja">辻駅 発行</span><span>{duel.mode === 'live' ? t.pvpLive : t.pvpSprint60}</span></div>
         </article>
@@ -344,7 +372,7 @@ function Ticket({ duel, them, t, lang, now, error, onLeave, onGo, onJoin, onDecl
           {(invited || (lobby && !host)) && <button type="button" className="pvp-quiet" onClick={onDecline}>{t.pvpDecline}</button>}
           {lobby && host && <button type="button" className="pvp-quiet" onClick={onCancel}>{t.pvpCancel}</button>}
           {!closed && lobby && !host && <button type="button" className="btn-primary exam-cover__go" onClick={onJoin}>{t.pvpEnter}</button>}
-          {!closed && !lobby && <button type="button" className="btn-primary exam-cover__go" onClick={onGo}>{ranked ? t.pvpGoPaid(duel.price || 2) : t.pvpGo}</button>}
+          {!closed && !lobby && <button type="button" className="btn-primary exam-cover__go" onClick={onGo}>{ranked && duel.price ? t.pvpGoPaid(duel.price) : t.pvpGo}</button>}
           {closed && <button type="button" className="btn-secondary" onClick={onLeave}>{t.pvpTitle}</button>}
         </div>
       </main>
@@ -581,7 +609,7 @@ function Result({ duel, settled: read, them, session, t, lang, onLeave, onAgain,
           {verdict && (
             <button type="button" className="btn-secondary pvp-result__review" onClick={corrections}>
               <span>{t.pvpCorrections}</span>
-              {!settled.reviewed && <b className="pvp-result__price">{t.pvpCredits(settled.reviewPrice)}</b>}
+              {!settled.reviewed && <b className="pvp-result__price">{settled.reviewPrice ? t.pvpCredits(settled.reviewPrice) : t.pvpIncluded}</b>}
             </button>
           )}
           {/* A friend's duel closed (a block, a friendship ended, an account

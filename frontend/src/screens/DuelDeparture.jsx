@@ -32,7 +32,7 @@ export default function DuelDeparture({ session }) {
   const placed = data?.rating?.placed !== false
 
   const quais = [
-    { no: 1, title: t.pvpRanked, lines: t.pvpPlatformRanked, price: t.pvpCredits(price), foot: placed ? t.pvpRankedFoot : t.pvpPlaceFirst, go: placed ? t.pvpGoPaid(price) : t.pvpTakeTest },
+    { no: 1, title: t.pvpRanked, lines: t.pvpPlatformRanked, price: price ? t.pvpCredits(price) : t.pvpIncluded, foot: placed ? t.pvpRankedFoot : t.pvpPlaceFirst, go: !placed ? t.pvpTakeTest : price ? t.pvpGoPaid(price) : t.pvpGo },
     { no: 2, title: t.pvpFriendDuel, lines: t.pvpPlatformFriend, price: t.pvpFree, foot: t.pvpFriendFoot, go: t.pvpChooseFriend },
   ]
 

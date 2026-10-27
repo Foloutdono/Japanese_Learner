@@ -131,6 +131,9 @@ INDEXES = {
     "pvp_duels": ["CREATE INDEX IF NOT EXISTS pvp_duels_seek ON pvp_duels (status, kind, level)"],
     "pvp_entries": [
         "CREATE INDEX IF NOT EXISTS pvp_entries_user ON pvp_entries (user_id, finished_at)",
+        # One player meets a duel's first: two seekers can never both
+        # take one run's seat (study/duels._seek).
+        "CREATE UNIQUE INDEX IF NOT EXISTS pvp_entries_one_opponent ON pvp_entries (duel_id) WHERE role = 'opponent'",
     ],
     "pvp_ratings": ["CREATE INDEX IF NOT EXISTS pvp_ratings_rating ON pvp_ratings (rating DESC, user_id)"],
 }

@@ -31,7 +31,9 @@ function Line() {
   const navigate = useNavigate()
   const { data } = useDuels()
   const [hidden, setHidden] = useState(hiddenToday)
-  const first = data?.live?.[0] ?? data?.toPlay?.[0] ?? null
+  // A challenge received: the learner's own, sent or a ranked seat, is
+  // in the hall, and no friend « defies » them with it.
+  const first = data?.live?.[0] ?? data?.toPlay?.find(d => d.kind === 'friend' && d.role === 'opponent') ?? null
   if (!first || hidden) return null
 
   function hide() {

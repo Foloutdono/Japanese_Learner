@@ -74,6 +74,7 @@ export const ERROR_KEYS = {
   pvp_not_placed: 'pvpErrNotPlaced',
   pvp_too_many: 'pvpErrTooMany',
   pvp_closed: 'pvpErrClosed',
+  pvp_running: 'pvpErrRunning',
   pvp_played: 'pvpErrPlayed',
   pvp_waiting: 'pvpErrWaiting',
   pvp_not_started: 'pvpErrNotStarted',
@@ -89,4 +90,10 @@ export const ERROR_KEYS = {
 /** What a screen says for a refused request: a locale key, never the server's English. */
 export function errorKey(err) {
   return ERROR_KEYS[err?.code] ?? 'pvpErrFailed'
+}
+
+/** The same, about a duel itself: not found there is a duel gone (its
+ *  seat given back, its paper dropped), never a username nobody holds. */
+export function duelErrorKey(err) {
+  return err?.code === 'pvp_not_found' ? 'pvpErrDuelGone' : errorKey(err)
 }

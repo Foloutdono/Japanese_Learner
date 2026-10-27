@@ -3478,6 +3478,8 @@ const pvp = {
   pvpFriendDesc:   'En différé ou en direct. Non classé.',
   pvpCredits:      n => (n === 1 ? '1 crédit' : `${n} crédits`),
   pvpFree:         'Gratuit',
+  // The pass pays for everything (the hall's and the ticket's price).
+  pvpIncluded:     'Inclus',
   pvpTabToPlay:    'À jouer',
   pvpTabRunning:   'En cours',
   pvpTabDone:      'Terminés',
@@ -3601,6 +3603,8 @@ const pvp = {
   pvpErrNotPlaced:    'Passe d’abord le test de placement : il fixe ton Elo de départ.',
   pvpErrTooMany:      'Trop de duels en cours. Termine-en un d’abord.',
   pvpErrClosed:       'Ce duel est fermé.',
+  pvpErrDuelGone:     'Ce duel n’existe plus.',
+  pvpErrRunning:      'Ton ami court ce duel en ce moment : tu pourras refuser dans une minute.',
   pvpErrPlayed:       'Tu as déjà couru ce duel.',
   pvpErrWaiting:      'Ton ami n’est pas encore entré.',
   pvpErrNotStarted:   'Le sprint n’a pas commencé.',

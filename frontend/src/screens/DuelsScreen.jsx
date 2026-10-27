@@ -60,7 +60,7 @@ function Hall({ data, t, lang, go }) {
         <button type="button" className="pvp-platform" onClick={go.ranked}>
           <span className="pvp-platform__title">{t.pvpRanked}</span>
           <span className="pvp-platform__desc">{t.pvpRankedDesc}</span>
-          <span className="pvp-platform__price">{t.pvpCredits(data.prices.ranked)}<ChevronIcon direction="right" size={14} /></span>
+          <span className="pvp-platform__price">{data.prices.ranked ? t.pvpCredits(data.prices.ranked) : t.pvpIncluded}<ChevronIcon direction="right" size={14} /></span>
         </button>
         <button type="button" className="pvp-platform" onClick={go.friend}>
           <span className="pvp-platform__title">{t.pvpFriendDuel}</span>

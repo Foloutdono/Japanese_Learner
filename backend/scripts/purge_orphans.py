@@ -203,7 +203,8 @@ def main() -> int:
         raise
     finally:
         conn.close()
-    # What the duels cancelled owe the other players (study/duels.leave_all).
+    # The other players' cached XP and credits, which the duels' closing
+    # moved (study/duels.leave_all), forgotten now it is committed.
     for task in after:
         task()
 

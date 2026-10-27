@@ -195,11 +195,12 @@ def delete_user_rows(cur, user_id: str, after: list | None = None) -> dict[str, 
     """Run PLAN on an open cursor; the caller owns the transaction.
 
     First the duels still unresolved that another learner is in are
-    cancelled for them (study/duels.leave_all), what was played kept:
-    what that owes them -- a fare given back, their XP's history moved
-    on -- goes on `after`, for the caller to run once it has committed.
-    The account's deletion and purge_orphans pass it; a test's clean-up
-    has nobody to owe."""
+    cancelled for them (study/duels.leave_all), what was played kept and
+    their fares given back in this same transaction. What that moves for
+    them in this process -- their XP's history, their credits -- goes on
+    `after`, to forget once the caller has committed. The account's
+    deletion and purge_orphans pass it; a test's clean-up has nobody to
+    tell."""
     from study import duels
     duels.leave_all(cur, after if after is not None else [], user_id)
     params = {"user": user_id, "prefix": prefix_pattern(user_id)}
@@ -253,7 +254,8 @@ def delete_account(user_id: str = Depends(get_user_id)):
         raise
     finally:
         conn.close()
-    # What the duels cancelled owe the other players (study/duels.leave_all).
+    # The other players' cached XP and credits, which the duels' closing
+    # moved (study/duels.leave_all), forgotten now it is committed.
     for task in after:
         task()
     forget_stored_level(user_id)

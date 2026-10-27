@@ -88,6 +88,8 @@ XP_CAP = 150
 WINDOWS = (200, 400)
 # The duels a learner may have unresolved at once.
 OPEN_MAX = 20
+# Namespace half of the advisory locks taken here (cf. routes/favorites).
+DUEL_LOCK = 931_276
 # What the hall shows: the last results, the Elo's curve over its last
 # ranked duels.
 RECENT = 5
@@ -130,34 +132,55 @@ def lower_level(a: str, b: str) -> str:
 
 def run(fn, *args, **kwargs):
     """fn(cur, after, *args) in one transaction; then what it left in
-    `after` (the XP's history moved on, a fare refunded), once it is
+    `after` (the XP's history and the credits moved on), once it is
     committed.
 
     A refusal commits too. Every function here refuses before it writes
     anything of its own, so what the transaction holds then is what
     settle() wrote on the way in -- an expiry, a seat given back -- and
-    that is true whatever the refusal says."""
+    that is true whatever the refusal says.
+
+    A deadlock is run again, once, from the start: settling takes a
+    duel's rows, then its players' Elo and credits, and two reads that
+    settle duels sharing a learner can take them in crossed orders. The
+    connection goes back to the pool whatever happens, a dead one too:
+    a slot lost each time would empty the pool every route shares."""
+    import psycopg2.extensions
     from core.db import db_conn
-    after: list = []
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            out = fn(cur, after, *args, **kwargs)
-        conn.commit()
-    except Refused:
-        conn.commit()
-        conn.close()
+    for attempt in (1, 2):
+        after: list = []
+        refused = None
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                try:
+                    out = fn(cur, after, *args, **kwargs)
+                except Refused as exc:
+                    refused = exc
+            conn.commit()
+        except psycopg2.extensions.TransactionRollbackError:
+            _rollback(conn)
+            if attempt == 1:
+                continue
+            raise
+        except BaseException:
+            _rollback(conn)
+            raise
+        finally:
+            conn.close()
         for task in after:
             task()
-        raise
-    except Exception:
+        if refused is not None:
+            raise refused
+        return out
+
+
+def _rollback(conn) -> None:
+    try:
         conn.rollback()
-        conn.close()
-        raise
-    conn.close()
-    for task in after:
-        task()
-    return out
+    except Exception:
+        # The connection is gone: so is its transaction.
+        pass
 
 
 # ── The rows ────────────────────────────────────────────────────────
@@ -235,21 +258,34 @@ def _day_start(cur, user_id: str, now: datetime) -> datetime:
 
 
 def xp_today(cur, user_id: str, now: datetime) -> int:
+    """The duel XP of the learner's local day that holds `now`."""
+    start = _day_start(cur, user_id, now)
     cur.execute(
-        "SELECT COALESCE(SUM(xp), 0) FROM xp_ledger WHERE user_id = %s AND source = 'duel' AND awarded_at >= %s",
-        (user_id, _day_start(cur, user_id, now)),
+        "SELECT COALESCE(SUM(xp), 0) FROM xp_ledger "
+        "WHERE user_id = %s AND source = 'duel' AND awarded_at >= %s AND awarded_at < %s",
+        (user_id, start, start + timedelta(days=1)),
     )
     return int(cur.fetchone()[0])
 
 
-def _pay_xp(cur, after: list, entry: dict, now: datetime) -> int:
+def _pay_xp(cur, after: list, entry: dict, at: datetime) -> int:
+    """A finished run's XP, dated when it ended (`at`) and held to that
+    day's cap: a run left mid-minute and finished by a later read -- the
+    friend's, the next day -- was the learner's study that day, not on
+    the reader's (their cap, their studied days)."""
     from core.srs_instance import srs
     from srs.xp import BASE_XP_BY_QUALITY
+    uid = entry["user_id"]
     raw = sum(BASE_XP_BY_QUALITY[4] if a["right"] else BASE_XP_BY_QUALITY[1] for a in entry["answers"])
-    xp = max(0, min(raw, XP_CAP - xp_today(cur, entry["user_id"], now)))
+    if raw <= 0:
+        return 0
+    # The day's XP is read and then added to: two of the learner's runs
+    # finished at once, by two reads, would each read it without the
+    # other's and both pay up to the cap.
+    cur.execute("SELECT pg_advisory_xact_lock(%s, hashtext(%s))", (DUEL_LOCK, f"xp:{uid}"))
+    xp = max(0, min(raw, XP_CAP - xp_today(cur, uid, at)))
     if xp > 0:
-        uid = entry["user_id"]
-        srs.award_xp(uid, "duel", f"duel:{entry['duel_id']}", xp, cur=cur)
+        srs.award_xp(uid, "duel", f"duel:{entry['duel_id']}", xp, cur=cur, at=at)
         after.append(lambda: srs.forget_history(uid))
     return xp
 
@@ -258,7 +294,7 @@ def _pay_xp(cur, after: list, entry: dict, now: datetime) -> int:
 
 def _finish(cur, after: list, entry: dict, at: datetime, now: datetime) -> None:
     entry["finished_at"] = at
-    entry["xp"] = _pay_xp(cur, after, entry, now)
+    entry["xp"] = _pay_xp(cur, after, entry, at)
     _save(cur, entry, "finished_at", "xp")
 
 
@@ -283,6 +319,11 @@ def _resolve(cur, duel: dict, entries: list[dict], now: datetime) -> None:
         e["result"] = 1.0 if mine > theirs else 0.0 if mine < theirs else 0.5
     if duel["kind"] == "ranked":
         players = [e for e in entries if e["role"] != "ghost"]
+        # Locked before they are read, in one order: two of a learner's
+        # duels resolved at once each move the Elo the other left, never
+        # both the one they read.
+        cur.execute("SELECT user_id FROM pvp_ratings WHERE user_id = ANY(%s) ORDER BY user_id FOR UPDATE",
+                    (sorted(e["user_id"] for e in players),))
         # Each against the other's Elo as it stood before either moved;
         # a ghost against the Elo its recording had.
         standing = {}
@@ -315,20 +356,30 @@ def _resolve(cur, duel: dict, entries: list[dict], now: datetime) -> None:
 def _expire(cur, after: list, duel: dict, entries: list[dict], now: datetime, outcome: str = "expired") -> None:
     _set_status(cur, duel, outcome, now)
     for e in entries:
-        if e["role"] != "ghost" and e["paid"]:
-            # Once the expiry is committed, so it is given back once.
-            uid, n, ref = e["user_id"], e["paid"], f"duel:{duel['id']}"
-            after.append(lambda uid=uid, n=n, ref=ref: _refund(uid, n, ref))
+        _give_back(cur, after, duel, e)
     first = next((e for e in entries if e["role"] == "challenger"), None)
     if first is not None:
         _done_event(cur, duel, first, outcome, now)
 
 
-def _refund(user_id: str, n: int, ref: str) -> None:
-    try:
-        credits.refund(user_id, n, "duel", ref)
-    except Exception:
-        logger.exception("duels: the fare of %s could not be refunded", ref)
+# ── The fares ───────────────────────────────────────────────────────
+# Taken and given back in the duel's own transaction (core/credits on
+# its cursor): a fare is never taken for a run that failed to start, and
+# a refund never lost between the expiry that owes it and a write of its
+# own. The credits' cache is forgotten once the transaction commits.
+
+def _pay(cur, after: list, me: str, n: int, reason: str, duel_id: int) -> int:
+    paid = credits.pay(me, n, reason, f"duel:{duel_id}", cur=cur)
+    after.append(lambda: credits.forget(me))
+    return paid
+
+
+def _give_back(cur, after: list, duel: dict, entry: dict) -> None:
+    if entry["role"] == "ghost" or not entry["paid"]:
+        return
+    uid = entry["user_id"]
+    credits.refund(uid, entry["paid"], "duel", f"duel:{duel['id']}", cur=cur)
+    after.append(lambda: credits.forget(uid))
 
 
 def settle(cur, after: list, duel: dict, entries: list[dict], now: datetime) -> None:
@@ -359,7 +410,10 @@ def settle(cur, after: list, duel: dict, entries: list[dict], now: datetime) -> 
         return
     if now >= duel["expires_at"]:
         unplayed = len(entries) < 2 or any(e["started_at"] is None for e in entries)
-        if unplayed:
+        # A run started before the deadline has its minute: the expiry
+        # waits for it to be finished above, its minute and grace over.
+        running = any(e["started_at"] is not None and e["finished_at"] is None for e in entries)
+        if unplayed and not running:
             _expire(cur, after, duel, entries, now)
 
 
@@ -402,12 +456,25 @@ def _timeline(entry: dict | None) -> list[dict]:
 # ── Creating a duel ─────────────────────────────────────────────────
 
 def _unresolved(cur, me: str) -> int:
+    """The unresolved duels `me` opened or has run in: what OPEN_MAX
+    bounds. A challenge received and not played is the friend's, counted
+    in theirs: a dozen friends challenging must not shut `me` out."""
     cur.execute(
         "SELECT COUNT(*) FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id "
-        "WHERE e.user_id = %s AND e.role <> 'ghost' AND d.status = ANY(%s)",
+        "WHERE e.user_id = %s AND e.role <> 'ghost' AND d.status = ANY(%s) "
+        "AND (e.role = 'challenger' OR e.started_at IS NOT NULL)",
         (me, list(ACTIVE)),
     )
     return int(cur.fetchone()[0])
+
+
+def _room_for_one(cur, after: list, me: str, now: datetime) -> None:
+    if _unresolved(cur, me) >= OPEN_MAX:
+        # Some may be past their deadline with no read since: settled,
+        # then counted again.
+        _settle_mine(cur, after, me, now)
+        if _unresolved(cur, me) >= OPEN_MAX:
+            raise Refused(409, "pvp_too_many")
 
 
 def _insert_duel(cur, kind: str, mode: str, level: str, seed: int, paper: dict, now: datetime,
@@ -443,6 +510,11 @@ def challenge(cur, after: list, me: str, username: str, mode: str) -> int:
         raise Refused(400, "pvp_self")
     if not friends.are_friends(cur, me, other):
         raise Refused(403, "pvp_not_friends")
+    now = _now()
+    # Two presses at once (a double tap, a rematch pressed twice) would
+    # each find none and make one each: a pair's challenges are made one
+    # at a time, and the second press finds the first's.
+    cur.execute("SELECT pg_advisory_xact_lock(%s, hashtext(%s))", (DUEL_LOCK, f"challenge:{me}:{other}"))
     cur.execute(
         """
         SELECT d.id FROM pvp_duels d
@@ -455,10 +527,13 @@ def challenge(cur, after: list, me: str, username: str, mode: str) -> int:
     )
     row = cur.fetchone()
     if row:
-        return row[0]
-    if _unresolved(cur, me) >= OPEN_MAX:
-        raise Refused(409, "pvp_too_many")
-    now = _now()
+        # One no read has caught up with -- a room its host left, a
+        # challenge past its 48 hours -- is settled, not handed back.
+        duel = _duel(cur, row[0], lock=True)
+        settle(cur, after, duel, _entries(cur, row[0], lock=True), now)
+        if duel["status"] in ACTIVE:
+            return row[0]
+    _room_for_one(cur, after, me, now)
     level = lower_level(resolve_level(me), resolve_level(other))
     seed, paper = _fresh_paper(level)
     duel_id = _insert_duel(cur, "friend", mode, level, seed, paper, now,
@@ -481,54 +556,76 @@ _APART = ("NOT EXISTS (SELECT 1 FROM pvp_blocks b WHERE (b.user_id = %(me)s AND 
 
 def _seek(cur, me: str, elo: int, level: str, now: datetime) -> int | None:
     """A run another learner played that nobody has met, at a level at
-    or under `me`'s and an Elo near theirs: locked, or None."""
+    or under `me`'s and an Elo near theirs: locked, or None. Never one
+    on a retired revision of the paper: it waits out its 48 hours and is
+    refunded, and nobody new is dealt what the revision corrected."""
     levels = list(LEVELS[:LEVELS.index(level) + 1])
+    taken: list[int] = []
     for window in WINDOWS:
-        cur.execute(
-            f"""
-            SELECT d.id FROM pvp_duels d
-              JOIN pvp_entries e ON e.duel_id = d.id
-              JOIN pvp_ratings r ON r.user_id = e.user_id
-             WHERE d.kind = 'ranked' AND d.mode = 'async' AND d.status = 'open' AND NOT d.ghost
-               AND d.expires_at > %(soon)s AND d.level = ANY(%(levels)s)
-               AND e.user_id <> %(me)s AND e.finished_at IS NOT NULL
-               AND (SELECT COUNT(*) FROM pvp_entries x WHERE x.duel_id = d.id) = 1
-               AND ABS(r.rating - %(elo)s) <= %(window)s
-               AND {_APART.format(u="e.user_id")}
-               AND {_met_paper_sql("d")}
-             ORDER BY (d.level = %(level)s) DESC, ABS(r.rating - %(elo)s), d.created_at
-             LIMIT 1
-             FOR UPDATE OF d SKIP LOCKED
-            """,
-            # A seat is held HOLD before it must be started: a run
-            # closer than that to its deadline is not offered.
-            {"me": me, "elo": elo, "level": level, "levels": levels, "window": window, "soon": now + HOLD},
-        )
-        row = cur.fetchone()
-        if row:
-            return row[0]
+        for _try in range(3):
+            cur.execute(
+                f"""
+                SELECT d.id FROM pvp_duels d
+                  JOIN pvp_entries e ON e.duel_id = d.id
+                  JOIN pvp_ratings r ON r.user_id = e.user_id
+                 WHERE d.kind = 'ranked' AND d.mode = 'async' AND d.status = 'open' AND NOT d.ghost
+                   AND d.paper_rev = %(rev)s
+                   AND d.expires_at > %(soon)s AND d.level = ANY(%(levels)s)
+                   AND e.user_id <> %(me)s AND e.finished_at IS NOT NULL
+                   AND (SELECT COUNT(*) FROM pvp_entries x WHERE x.duel_id = d.id) = 1
+                   AND r.rating BETWEEN %(elo)s - %(window)s AND %(elo)s + %(window)s
+                   AND d.id <> ALL(%(taken)s)
+                   AND {_APART.format(u="e.user_id")}
+                   AND {_met_paper_sql("d")}
+                 ORDER BY (d.level = %(level)s) DESC, ABS(r.rating - %(elo)s), d.created_at
+                 LIMIT 1
+                 FOR UPDATE OF d SKIP LOCKED
+                """,
+                # A seat is held HOLD before it must be started: a run
+                # closer than that to its deadline is not offered.
+                {"me": me, "elo": elo, "level": level, "levels": levels, "window": window,
+                 "soon": now + HOLD, "taken": taken, "rev": duel_paper.PAPER_REV},
+            )
+            row = cur.fetchone()
+            if row is None:
+                break
+            # The count above is the statement's snapshot: a seeker who
+            # took the seat and let the lock go while it ran is seen
+            # only by a new statement, now that the run is locked.
+            cur.execute("SELECT COUNT(*) FROM pvp_entries WHERE duel_id = %s", (row[0],))
+            if cur.fetchone()[0] == 1:
+                return row[0]
+            taken.append(row[0])
     return None
 
 
 def _ghost_source(cur, me: str, elo: int, level: str) -> dict | None:
     """The recorded run of a real player of a near Elo, at a level at or
-    under `me`'s, on a paper `me` has never met."""
+    under `me`'s, on a paper `me` has never met. Never a run with no
+    answer in it (a free win), never a paper of a retired revision, and
+    never one whose corrections anyone has bought: dealt again, its keys
+    could be handed to the next player before they run."""
     levels = list(LEVELS[:LEVELS.index(level) + 1])
     for window in WINDOWS:
         cur.execute(
             f"""
             SELECT e.duel_id, e.user_id FROM pvp_entries e
               JOIN pvp_duels d ON d.id = e.duel_id
-             WHERE d.kind = 'ranked' AND d.status IN ('done', 'expired')
+             WHERE d.kind = 'ranked' AND d.status IN ('done', 'expired') AND d.paper_rev = %(rev)s
                AND e.role <> 'ghost' AND e.finished_at IS NOT NULL AND e.rating_before IS NOT NULL
+               AND jsonb_array_length(e.answers) > 0
                AND e.user_id <> %(me)s AND d.level = ANY(%(levels)s)
-               AND ABS(e.rating_before - %(elo)s) <= %(window)s
+               AND e.rating_before BETWEEN %(elo)s - %(window)s AND %(elo)s + %(window)s
                AND {_APART.format(u="e.user_id")}
                AND {_met_paper_sql("d")}
+               AND NOT EXISTS (SELECT 1 FROM pvp_entries rv JOIN pvp_duels rd ON rd.id = rv.duel_id
+                                WHERE rv.reviewed AND rd.seed = d.seed AND rd.level = d.level
+                                  AND rd.paper_rev = d.paper_rev)
              ORDER BY (d.level = %(level)s) DESC, ABS(e.rating_before - %(elo)s), e.finished_at DESC
              LIMIT 1
             """,
-            {"me": me, "elo": elo, "level": level, "levels": levels, "window": window},
+            {"me": me, "elo": elo, "level": level, "levels": levels, "window": window,
+             "rev": duel_paper.PAPER_REV},
         )
         row = cur.fetchone()
         if row:
@@ -556,8 +653,7 @@ def ranked(cur, after: list, me: str) -> tuple[int, str]:
     if row:
         duel = _duel(cur, row[0])
         return row[0], against(duel, _entries(cur, row[0]))
-    if _unresolved(cur, me) >= OPEN_MAX:
-        raise Refused(409, "pvp_too_many")
+    _room_for_one(cur, after, me, now)
     level = resolve_level(me)
     elo = rating["rating"]
 
@@ -635,6 +731,7 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
         }
     elif duel["status"] == "done":
         them = {"username": None, "gone": True}
+    passed = credits.unlimited_on(cur, me)
     refunded = False
     if duel["kind"] == "ranked":
         # A fare given back (an expiry, a closing): the result says so.
@@ -656,13 +753,14 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
                 "xp": mine["xp"] if mine["finished_at"] else None,
                 "refunded": refunded},
         "them": them,
-        "price": _price(duel, mine),
+        # The pass pays for everything: nothing to print on it.
+        "price": 0 if passed else _price(duel, mine),
         "expiresAt": _iso(duel["expires_at"]),
         "startsAt": _iso(duel["live_start"]),
         "serverNow": _iso(now),
         "result": _result(duel, mine, other),
         "reviewed": mine["reviewed"],
-        "reviewPrice": REVIEW_PRICE,
+        "reviewPrice": 0 if passed else REVIEW_PRICE,
         # The day's duel XP against its ceiling, for the result's « N more today ».
         "xp": {"today": xp_today(cur, me, now), "cap": XP_CAP},
     }
@@ -703,14 +801,6 @@ def _start_event(cur, duel: dict, entries: list[dict], mine: dict) -> None:
     }, cur=cur)
 
 
-def _paid_already(cur, user_id: str, duel_id: int, reason: str) -> bool:
-    # A fare is paid on its own connection (core/credits); a transaction
-    # that fails after it must not charge it twice on the retry.
-    cur.execute("SELECT 1 FROM credit_ledger WHERE user_id = %s AND reason = %s AND ref = %s AND delta < 0",
-                (user_id, reason, f"duel:{duel_id}"))
-    return cur.fetchone() is not None
-
-
 def start(cur, after: list, me: str, duel_id: int) -> dict:
     """POST /api/pvp/duels/{id}/start: « Partir ». The run starts LEAD_MS
     from now; a run already under way is resumed where it is."""
@@ -722,10 +812,9 @@ def start(cur, after: list, me: str, duel_id: int) -> dict:
             raise Refused(409, "pvp_waiting")
         if duel["status"] != "open":
             raise Refused(409, "pvp_closed")
-        if duel["kind"] == "ranked" and not _paid_already(cur, me, duel_id, "duel"):
-            mine["paid"] = credits.pay(me, RANKED_PRICE, "duel", f"duel:{duel_id}")
-            _save(cur, mine, "paid")
         if duel["kind"] == "ranked":
+            mine["paid"] = _pay(cur, after, me, RANKED_PRICE, "duel", duel_id)
+            _save(cur, mine, "paid")
             row = duel_elo.rating_row(cur, me)
             mine["rating_before"] = row["rating"] if row else None
             _save(cur, mine, "rating_before")
@@ -773,10 +862,14 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
     mine["served_q"] = n + 1
     mine["served_at"] = now + timedelta(milliseconds=RIGHT_HOLD_MS if right else LOCK_MS)
     keys = ["answers", "score", "rights", "served_q", "served_at"]
-    over = mine["served_q"] >= len(items) or mine["served_at"] >= _end(mine)
     _save(cur, mine, *keys)
-    if mine["served_q"] >= len(items):
-        _finish(cur, after, mine, now, now)
+    # No question left, or the next one would be served after the
+    # minute: the run is over now, not once a grace nobody can use has
+    # run out, so the reply that says so and a cover read right after it
+    # agree -- and no question served after the end is ever answered.
+    over = mine["served_q"] >= len(items) or mine["served_at"] >= _end(mine)
+    if over:
+        _finish(cur, after, mine, min(now, _end(mine)), now)
         settle(cur, after, duel, entries, now)
     return _answered(mine, a, items, over=over)
 
@@ -784,7 +877,9 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
 def _answered(mine: dict, a: dict, items: list, over: bool) -> dict:
     nxt = mine["served_q"]
     return {
-        "n": a["n"], "right": a["right"], "pts": a["pts"], "ms": a["ms"],
+        # The pick the answer was recorded with, which a reply sent again
+        # (lost on the way, a second device) is about: never the key.
+        "n": a["n"], "pick": a["pick"], "right": a["right"], "pts": a["pts"], "ms": a["ms"],
         "total": mine["score"] or 0, "rights": mine["rights"] or 0,
         "next": None if over or nxt >= len(items) else duel_paper.served(items[nxt], nxt),
         "nextAt": _iso(mine["served_at"]),
@@ -843,6 +938,10 @@ def decline(cur, after: list, me: str, duel_id: int) -> None:
         raise Refused(409, "pvp_closed")
     if duel["status"] not in ("open", "lobby"):
         raise Refused(409, "pvp_closed")
+    if any(e["started_at"] is not None and e["finished_at"] is None for e in entries):
+        # The challenger is running their minute: theirs to finish, and
+        # declined only once it is over.
+        raise Refused(409, "pvp_running")
     _expire(cur, after, duel, entries, now, outcome="declined")
 
 
@@ -869,16 +968,14 @@ def cancel(cur, after: list, me: str, duel_id: int) -> None:
 def _close(cur, after: list, duel: dict, entries: list[dict], now: datetime, leaving: str | None = None) -> None:
     """Cancel a duel nobody can finish -- a friendship ended, a block, an
     account erased (`leaving`): a run under way ends where it stands and
-    is paid its answers, and a fare paid is given back once the closing
-    is committed. The learner leaving is owed nothing: their rows go."""
+    is paid its answers, and a fare paid is given back with the closing.
+    The learner leaving is owed nothing: their rows go."""
     for e in entries:
         if e["role"] == "ghost" or e["user_id"] == leaving:
             continue
         if e["started_at"] and not e["finished_at"]:
             _finish(cur, after, e, min(now, _end(e)), now)
-        if e["paid"]:
-            uid, n, ref = e["user_id"], e["paid"], f"duel:{duel['id']}"
-            after.append(lambda uid=uid, n=n, ref=ref: _refund(uid, n, ref))
+        _give_back(cur, after, duel, e)
     _set_status(cur, duel, "cancelled", now)
 
 
@@ -967,8 +1064,7 @@ def review(cur, after: list, me: str, duel_id: int, buy: bool) -> dict:
     if not mine["reviewed"]:
         if not buy:
             raise Refused(409, "pvp_review_unpaid")
-        if not _paid_already(cur, me, duel_id, "duel_review"):
-            credits.pay(me, REVIEW_PRICE, "duel_review", f"duel:{duel_id}")
+        _pay(cur, after, me, REVIEW_PRICE, "duel_review", duel_id)
         mine["reviewed"] = True
         _save(cur, mine, "reviewed")
         events.record(me, "pvp_review", {"kind": duel["kind"]}, cur=cur)
@@ -1027,7 +1123,9 @@ def _line(cur, me: str, duel: dict, entries: list[dict], named: dict) -> dict:
     other = _other(entries, me)
     row = {
         "id": duel["id"], "kind": duel["kind"], "mode": duel["mode"], "level": duel["level"],
-        "status": duel["status"], "against": against(duel, entries),
+        # challenger | opponent: a challenge received is one the learner
+        # is the opponent in (Today's notice names only those).
+        "status": duel["status"], "against": against(duel, entries), "role": mine["role"],
         "who": named.get(other["user_id"]) if other else None,
         "gone": other is None and duel["status"] == "done",
         "mine": mine["score"] if mine["finished_at"] else None,
@@ -1073,7 +1171,7 @@ def rating(cur, me: str) -> dict:
         (me, TREND),
     )
     last = cur.fetchall()[::-1]
-    place = board_place(cur, me)
+    place = board_place(cur, me, row)
     return {
         "placed": True,
         "elo": row["rating"],
@@ -1113,71 +1211,102 @@ def hub(cur, after: list, me: str) -> dict:
         "running": running,
         "done": done,
         "friends": {"count": friends.friend_count(cur, me), "requests": friends.requests_waiting(cur, me)},
-        "prices": {"ranked": RANKED_PRICE, "review": REVIEW_PRICE},
+        "prices": ({"ranked": 0, "review": 0} if credits.unlimited_on(cur, me)
+                   else {"ranked": RANKED_PRICE, "review": REVIEW_PRICE}),
         "xp": {"today": xp_today(cur, me, now), "cap": XP_CAP},
     }
 
 
 def history(cur, after: list, me: str, offset: int, limit: int) -> dict:
-    rows = _rows(cur, me, "d.status = ANY(%s)", (["done", "expired", "declined"],), limit, offset)
+    # A duel closed under a run (a block, an account erased) kept what
+    # was played: it is history too. One closed before anybody ran is not.
+    rows = _rows(cur, me, "(d.status = ANY(%s) OR (d.status = 'cancelled' AND e.started_at IS NOT NULL))",
+                 (["done", "expired", "declined"],), limit, offset)
     return {"entries": _named_rows(cur, me, rows), "offset": offset}
 
 
 # ── The Elo board ───────────────────────────────────────────────────
 
-def _board(cur, me: str, scope: str) -> list[tuple[str, int, int]]:
-    """(user_id, rating, games), best first, the ties by id: everyone
-    rated who has played a ranked duel and keeps on the 番付, or `me`
-    and their friends. `me` is always counted, so a hidden learner sees
-    their own place."""
-    friends_only = "AND (r.user_id = %(me)s OR r.user_id IN (SELECT friend_id FROM pvp_friends WHERE user_id = %(me)s))"
-    cur.execute(
-        f"""
-        SELECT r.user_id, r.rating, r.games FROM pvp_ratings r
-          JOIN user_profiles p ON p.user_id = r.user_id
+def _ranked_sql(scope: str) -> str:
+    """The board, ranked in the base: everyone rated who has played a
+    ranked duel and keeps on the 番付, or `me` and their friends, best
+    first, the ties by id. `me` is always counted, so a hidden learner
+    sees their own place."""
+    friends_only = ("AND (r.user_id = %(me)s OR r.user_id IN "
+                    "(SELECT friend_id FROM pvp_friends WHERE user_id = %(me)s))")
+    return f"""
+        SELECT r.user_id, r.rating, r.games,
+               ROW_NUMBER() OVER (ORDER BY r.rating DESC, r.user_id) AS rank
+          FROM pvp_ratings r JOIN user_profiles p ON p.user_id = r.user_id
          WHERE r.games > 0 AND (NOT COALESCE(p.board_hidden, FALSE) OR r.user_id = %(me)s)
            {friends_only if scope == "friends" else ""}
-         ORDER BY r.rating DESC, r.user_id
+    """
+
+
+def board_place(cur, me: str, mine: dict | None = None) -> dict:
+    """`me`'s place on the whole board and how many are on it, counted
+    in the base (the hall asks on every read): one ahead is rated
+    higher, or as high with a smaller id."""
+    mine = mine if mine is not None else duel_elo.rating_row(cur, me)
+    on = mine is not None and mine["games"] > 0
+    cur.execute(
+        """
+        SELECT COUNT(*),
+               COUNT(*) FILTER (WHERE r.rating > %(rating)s OR (r.rating = %(rating)s AND r.user_id < %(me)s))
+          FROM pvp_ratings r JOIN user_profiles p ON p.user_id = r.user_id
+         WHERE r.games > 0 AND (NOT COALESCE(p.board_hidden, FALSE) OR r.user_id = %(me)s)
         """,
-        {"me": me},
+        {"me": me, "rating": mine["rating"] if on else 0},
     )
-    return [(uid, int(r), int(g)) for uid, r, g in cur.fetchall()]
-
-
-def board_place(cur, me: str) -> dict:
-    ranked = _board(cur, me, "all")
-    rank = next((i + 1 for i, (uid, _r, _g) in enumerate(ranked) if uid == me), None)
-    return {"rank": rank, "of": len(ranked)}
+    of, ahead = cur.fetchone()
+    return {"rank": int(ahead) + 1 if on else None, "of": int(of)}
 
 
 def board(cur, me: str, scope: str, offset: int, limit: int, around: int) -> dict:
-    ranked = _board(cur, me, scope)
-    ids = [uid for uid, _r, _g in ranked]
-    cur.execute("SELECT user_id, username FROM user_profiles WHERE user_id = ANY(%s)", (ids,))
-    usernames = dict(cur.fetchall())
+    """A page of the board, `me`'s place with the gap to the one ahead,
+    and the rows around it: ranked in the base, and only the rows shown
+    leave it."""
+    # One statement, so the size, the place and the rows are one
+    # ranking: read in two, a learner hiding between them would leave a
+    # page asking for a row that is no longer there.
+    cur.execute(
+        f"""
+        WITH ranked AS ({_ranked_sql(scope)}),
+             summary AS (SELECT COUNT(*) AS size, MAX(rank) FILTER (WHERE user_id = %(me)s) AS mine FROM ranked)
+        SELECT s.size, s.mine, r.rank, r.user_id, r.rating, r.games, p.username
+          FROM summary s
+          LEFT JOIN ranked r ON (r.rank > %(offset)s AND r.rank <= %(offset)s + %(limit)s)
+                             -- the rows around `me`, and the one ahead for the gap
+                             OR r.rank BETWEEN s.mine - %(back)s AND s.mine + %(around)s
+          LEFT JOIN user_profiles p ON p.user_id = r.user_id
+        """,
+        {"me": me, "offset": offset, "limit": limit, "around": around, "back": max(around, 1)},
+    )
+    rows = cur.fetchall()
+    of, my_rank = int(rows[0][0]), rows[0][1]
+    by_rank = {int(k): (uid, int(r), int(g), name) for _n, _m, k, uid, r, g, name in rows if k is not None}
 
-    def row(i: int) -> dict:
-        uid, r, g = ranked[i]
-        return {"rank": i + 1, "username": usernames.get(uid), "elo": r,
-                "provisional": g < duel_elo.PROVISIONAL, "me": uid == me}
+    def row(k: int) -> dict:
+        uid, r, g, name = by_rank[k]
+        return {"rank": k, "username": name, "elo": r, "provisional": g < duel_elo.PROVISIONAL, "me": uid == me}
 
-    index = next((i for i, uid in enumerate(ids) if uid == me), None)
     out = {
         "scope": scope,
         "offset": offset,
-        "of": len(ranked),
-        "entries": [row(i) for i in range(offset, min(offset + limit, len(ranked)))],
+        "of": of,
+        "entries": [row(k) for k in range(offset + 1, min(offset + limit, of) + 1)],
         "near": [],
         "me": None,
     }
-    if index is not None:
-        out["me"] = {**row(index), "gap": None}
-        if index > 0:
-            ahead = row(index - 1)
-            out["me"]["gap"] = {"elo": ahead["elo"] - ranked[index][1] + 1,
+    if my_rank is not None:
+        my_rank = int(my_rank)
+        out["me"] = {**row(my_rank), "gap": None}
+        if my_rank > 1:
+            ahead = row(my_rank - 1)
+            out["me"]["gap"] = {"elo": ahead["elo"] - by_rank[my_rank][1] + 1,
                                 "username": ahead["username"], "rank": ahead["rank"]}
         if around:
-            out["near"] = [row(i) for i in range(max(0, index - around), min(len(ranked), index + around + 1))]
+            out["near"] = [row(k) for k in range(max(1, my_rank - around), min(of, my_rank + around) + 1)]
     else:
         mine = duel_elo.rating_row(cur, me)
         out["me"] = {"rank": None, "elo": mine["rating"] if mine else None, "placed": mine is not None,

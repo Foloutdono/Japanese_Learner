@@ -75,6 +75,21 @@ function serve({ endsIn = 60_000, verdict = null, mine = 0, kind = 'friend', ans
   })
 }
 
+async function ticket(at = '/duel/7') {
+  const screen = await render(
+    <LangProvider>
+      <MemoryRouter initialEntries={[at]}>
+        <Routes>
+          <Route element={<StageFrame />}>
+            <Route path="/duel/:id" element={<DuelRun session={{ access_token: 'tok' }} />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </LangProvider>
+  )
+  return screen.container
+}
+
 async function stage() {
   const screen = await render(
     <LangProvider>
@@ -267,5 +282,108 @@ describe('a duel’s run', () => {
     expect([...root.querySelectorAll('button')].map(b => b.textContent)).toContain('Duels')
     expect([...root.querySelectorAll('button')].map(b => b.textContent)).not.toContain('Refuser le défi')
   })
-})
+  it('reads the verdict again while the server has yet to end the run', async () => {
+    // The run's last reply came before the server's grace was over: the
+    // first read finds the run unfinished, the next its verdict.
+    serve({ endsIn: 200, mine: 400, verdict: { status: 'done', result: {
+      outcome: 'win', mine: 400, theirs: 300, rights: 4, theirRights: 3, answered: 5, theirAnswered: 4, elo: null, xp: 30,
+    } } })
+    const served = apiJson.getMockImplementation()
+    let early = 1
+    apiJson.mockImplementation(async (path, s, init) => {
+      const started = apiJson.mock.calls.some(([p]) => p.endsWith('/start'))
+      if (started && path === '/api/pvp/duels/7' && early-- > 0) {
+        return cover({ you: { ...cover().you, started: true, played: false } })
+      }
+      return served(path, s, init)
+    })
+    const root = await stage()
+    await expect.poll(() => root.querySelector('.pvp-result__word')?.textContent, { timeout: 5000 }).toBe('Gagné')
+    expect(root.textContent).not.toContain('En attente')
+  })
 
+  it('starts a rematch’s new duel afresh, from its own ticket, on one press', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async (path, _s, init) => {
+      if (path === '/api/pvp/duels' && init?.method === 'POST') return { id: 8 }
+      if (path === '/api/pvp/duels/8') return cover({ id: 8, them: { ...cover().them, played: false, score: null } })
+      // Duel 7, run and settled: its result, and « Revanche ».
+      return cover({ status: 'done', you: { ...cover().you, played: true, started: true, score: 400, rights: 4, answered: 5, xp: 30 },
+        result: { outcome: 'win', mine: 400, theirs: 300, rights: 4, theirRights: 3, answered: 5, theirAnswered: 4, elo: null, xp: 30 } })
+    })
+    const root = await ticket()
+    await expect.poll(() => root.querySelector('.pvp-result__word')?.textContent).toBe('Gagné')
+    const rematch = root.querySelector('.exam-cover__go')
+    expect(rematch.textContent).toBe('Revanche')
+    rematch.click()
+    rematch.click()
+    await expect.poll(() => root.querySelector('.pvp-result')).toBeNull()
+    await expect.poll(() => root.querySelector('.exam-cover__go')?.textContent).toBe('Partir')
+    expect(apiJson.mock.calls.filter(([p, , i]) => p === '/api/pvp/duels' && i?.method === 'POST')).toHaveLength(1)
+  })
+
+  it('marks the pick the server recorded when a lost answer is sent again', async () => {
+    serve()
+    const served = apiJson.getMockImplementation()
+    let tries = 0
+    apiJson.mockImplementation(async (path, s, init) => {
+      if (path.endsWith('/answer')) {
+        tries += 1
+        // Tile 2 was recorded and its reply lost; tile 0 is then
+        // pressed, and the reply is about the first pick.
+        if (tries === 1) throw new Error('offline')
+        return { n: 0, pick: 2, right: false, pts: 0, ms: 900, total: 0, rights: 0, next: word(1), nextAt: iso(1000), endsAt: iso(60_000) }
+      }
+      return served(path, s, init)
+    })
+    const root = await stage()
+    await expect.poll(() => root.querySelectorAll('.pvp-tile').length).toBe(4)
+    root.querySelectorAll('.pvp-tile')[2].click()
+    await expect.poll(() => root.querySelector('.pvp-tile[disabled]')).toBeNull()
+    root.querySelectorAll('.pvp-tile')[0].click()
+    await expect.poll(() => root.querySelector('.pvp-tile--wrong')).toBeTruthy()
+    const tiles = [...root.querySelectorAll('.pvp-tile')]
+    expect(tiles[2].classList.contains('pvp-tile--wrong')).toBe(true)
+    expect(tiles[0].classList.contains('pvp-tile--wrong')).toBe(false)
+  })
+
+  it('races a recording with no answer in it, rather than say it will be raced', async () => {
+    serve()
+    const served = apiJson.getMockImplementation()
+    apiJson.mockImplementation(async (path, s, init) => {
+      const out = await served(path, s, init)
+      return path.endsWith('/start') ? { ...out, opponent: { timeline: [] } } : out
+    })
+    const root = await stage()
+    await expect.poll(() => root.querySelectorAll('.pvp-track').length).toBe(2)
+    expect(root.textContent).not.toContain('courra contre ton enregistrement')
+  })
+
+  it('prints no price on a ranked ticket the pass pays for', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => cover({ kind: 'ranked', against: 'seek', price: 0 }))
+    const root = await ticket()
+    await expect.poll(() => root.querySelector('.exam-cover__go')?.textContent).toBe('Partir')
+    expect(root.querySelector('.pvp-ticket').textContent).toContain('Inclus')
+    expect(root.querySelector('.pvp-ticket').textContent).not.toContain('crédit')
+  })
+
+  it('says why a decline waits while the challenger runs their minute', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async path => {
+      if (path.endsWith('/decline')) throw refusal('pvp_running')
+      return cover({ them: { ...cover().them, played: false, score: null } })
+    })
+    const root = await ticket()
+    await expect.poll(() => [...root.querySelectorAll('button')].find(b => b.textContent === 'Refuser le défi')).toBeTruthy()
+    ;[...root.querySelectorAll('button')].find(b => b.textContent === 'Refuser le défi').click()
+    await expect.poll(() => root.textContent).toMatch(/Ton ami court ce duel en ce moment\s: tu pourras refuser dans une minute\./)
+  })
+
+  it('says a duel that is gone is gone, never a username nobody holds', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => { throw Object.assign(new Error('pvp_not_found'), { code: 'pvp_not_found', status: 404 }) })
+    const root = await ticket()
+    await expect.poll(() => root.querySelector('.pvp-run__fail')?.textContent).toBe('Ce duel n’existe plus.')
+  })
+})

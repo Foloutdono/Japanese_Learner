@@ -247,17 +247,24 @@ runtime purpose.
   `study/duels.py` serves a sprint one question at a time, notes when,
   and scores each answer as it arrives; a reply says right or wrong and
   never which choice was right, and the corrections open only once the
-  duel is settled, or the first player could hand the second the keys.
+  duel is settled, or the first player could hand the second the keys
+  (a paper whose corrections were sold is never dealt again as a ghost).
   Nothing runs in the background: `settle()` brings a duel up to date
   from its stored instants on every read (a run past its minute paid, a
   duel resolved, expired and its ranked fare refunded, a seat left
   unstarted given back), so anything new that reads a duel settles it
-  first. The Elo (`study/duel_elo.py`) is apart from the 番付: it starts
-  from the placement climb's verdict, never the declared level, and only
-  a ranked duel moves it. A duel's fare goes through `credits.pay` with
-  its own reason (`duel`, `duel_review`), a refund is a positive row of
-  the same reason, and a duel's XP is practice XP (`source = 'duel'`),
-  capped a local day (`duels.XP_CAP`). Who reported whom is read with
+  first. A run started has its minute: nothing expires or is declined
+  under it, and whatever closes a duel (a block, a friendship ended, an
+  account erased: `duels.close_between`, `leave_all`) finishes and pays
+  the runs under way. The Elo (`study/duel_elo.py`) is apart from the
+  番付: it starts from the placement climb's verdict, never the declared
+  level, and only a ranked duel moves it. A duel's fare goes through
+  `credits.pay` with its own reason (`duel`, `duel_review`), a refund is
+  a positive row of the same reason, both on the duel's own cursor
+  (`cur=`), so no fare is taken for a run that failed to start and no
+  refund lost after its expiry; a duel's XP is practice XP
+  (`source = 'duel'`), dated when the run ended (`award_xp(at=)`) and
+  capped that local day (`duels.XP_CAP`). Who reported whom is read with
   `scripts/read_reports`, never on a dashboard.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both

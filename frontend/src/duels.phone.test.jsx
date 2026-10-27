@@ -93,7 +93,7 @@ beforeEach(() => {
 const HALL = {
   rating: { placed: true, elo: 1248, provisional: false, games: 21, wins: 15, draws: 0, losses: 6, peak: 1248,
     placedLevel: 'N4', start: 1200, rank: 3, of: 10, trend: [1180, 1210, 1195, 1230, 1248] },
-  toPlay: [{ id: 45, kind: 'friend', mode: 'async', level: 'N5', status: 'open', against: 'friend', who: 'Kenta', mine: null, theirs: 1552,
+  toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', level: 'N5', status: 'open', against: 'friend', who: 'Kenta', mine: null, theirs: 1552,
     expiresAt: new Date(Date.now() + 47 * 3_600_000).toISOString() }],
   live: [], running: [], done: [],
   friends: { count: 4, requests: 1 }, prices: { ranked: 2, review: 1 }, xp: { today: 0, cap: 150 },
@@ -379,7 +379,7 @@ const mountLine = (props = {}) => mount('/today', '/today', <div className="tdy"
 
 describe('the challenge on Today (E3)', () => {
   it('names the first challenge, its score to beat, and boards it', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', mode: 'async', who: 'Kenta', theirs: 1552 }, { id: 46, kind: 'friend', mode: 'async', who: 'aiko', theirs: 1225 }] } }
+    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }, { id: 46, kind: 'friend', role: 'opponent', mode: 'async', who: 'aiko', theirs: 1225 }] } }
     await mountLine()
     expect($('.pvp-line .tdy-door__what').textContent).toBe(`Kenta te défie · ${(1552).toLocaleString('fr')} à battre`)
     expect($('.pvp-line .tdy-door__go').textContent).toBe('Jouer')
@@ -389,20 +389,36 @@ describe('the challenge on Today (E3)', () => {
   })
 
   it('puts a friend waiting in a live room first', async () => {
-    duels = { data: { live: [{ id: 47, kind: 'friend', mode: 'live', who: 'Sora22', theirs: null }], toPlay: [{ id: 45, kind: 'friend', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
+    duels = { data: { live: [{ id: 47, kind: 'friend', role: 'opponent', mode: 'live', who: 'Sora22', theirs: null }], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
     await mountLine()
     expect($('.pvp-line .tdy-door__what').textContent).toBe('Sora22 t’attend en direct')
     expect($('.pvp-line .tdy-door__go').textContent).toBe('Entrer')
   })
 
+  it('never names the learner’s own challenge, nor their ranked seat, as one they received', async () => {
+    duels = { data: { live: [], toPlay: [
+      { id: 50, kind: 'friend', role: 'challenger', mode: 'async', who: 'Kenta', theirs: null },
+      { id: 51, kind: 'ranked', role: 'opponent', mode: 'async', who: null, theirs: 900 },
+    ] } }
+    await mountLine()
+    expect($('.pvp-line')).toBeNull()
+    document.body.innerHTML = ''
+    duels = { data: { live: [], toPlay: [
+      { id: 50, kind: 'friend', role: 'challenger', mode: 'async', who: 'Kenta', theirs: null },
+      { id: 52, kind: 'friend', role: 'opponent', mode: 'async', who: 'aiko', theirs: 1225 },
+    ] } }
+    await mountLine()
+    expect($('.pvp-line .tdy-door__what').textContent).toBe(`aiko te défie · ${(1225).toLocaleString('fr')} à battre`)
+  })
+
   it('names a learner off the board « Voyageur »', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', mode: 'async', who: null, theirs: 900 }] } }
+    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: null, theirs: 900 }] } }
     await mountLine()
     expect($('.pvp-line .tdy-door__what').textContent).toBe('Voyageur te défie · 900 à battre')
   })
 
   it('hides until tomorrow on its ✕', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
+    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
     await mountLine()
     $('.pvp-line .tdy-cb__hide').click()
     await settle(50)
@@ -411,7 +427,7 @@ describe('the challenge on Today (E3)', () => {
   })
 
   it('says nothing while the finish plays, nor with nothing waiting', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
+    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
     await mountLine({ hold: true })
     expect($('.pvp-line')).toBeNull()
     document.body.innerHTML = ''
