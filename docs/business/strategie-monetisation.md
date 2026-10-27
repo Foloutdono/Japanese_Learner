@@ -24,10 +24,10 @@ base d'utilisateurs avec un taux de conversion bas.
 | Recharge continue | 60/jour, arrêt à 90 | 120/jour, arrêt à 200 | illimité |
 | Révisions dues | 1 crédit | gratuites | gratuites |
 | Nouvelles cartes (kana compris) | 1 crédit | 1 crédit | incluses |
-| Pratique (par exercice) | lecture 1, compréhension 2, dictée 1, traduction 1, composition 1, conversation 2 | idem | incluse |
+| Pratique | 1 par phrase (lecture, dictée, traduction, composition), 2 par texte de compréhension, 2 par conversation | idem | incluse |
 | Examen blanc | 2 crédits par examen | idem | inclus |
 | Duel | entre amis gratuit, sinon 2 crédits | idem | inclus |
-| Jeux solo | prix à fixer | idem | inclus |
+| Jeux solo | selon le jeu | idem | inclus |
 | IA | petites limites/jour | limites/jour | usage raisonnable |
 | Récompenses | crédits + XP | crédits + XP | XP + cosmétiques de statut |
 
@@ -59,8 +59,8 @@ base d'utilisateurs avec un taux de conversion bas.
   access, vers le 9 novembre 2026).
 
 Prix fondateur : Pro 3,99 €/mois ou 37,99 €/an, Max 5,99 €/mois ou
-52,99 €/an. Ils sont arrondis vers le haut au palier .99 des stores, si bien
-que Pro mensuel ne fait que −20 % (3,49 € donnerait −30 %).
+52,99 €/an. Ils sont arrondis vers le haut au palier .99 des stores : Pro
+mensuel fait −20 %, un choix assumé.
 
 Acheté dans l'app, un abonnement annuel fondateur fait perdre de l'argent
 si l'abonné utilise toutes ses limites IA chaque jour. Le risque est accepté
@@ -118,7 +118,8 @@ font découvrir l'app. Un exercice demandé par une mission ne coûte rien :
 le but est que l'apprenant s'exerce et gagne des crédits en le faisant.
 
 **La cible** : un apprenant gratuit qui fait ses missions dispose d'environ
-**125 crédits par jour** (100 révisions et une marge pour les autres modes).
+**125 crédits par jour** : 100 révisions, et environ 25 phrases ou quelques
+textes dans les autres modes.
 La recharge en donne 60 ; les missions doivent donc apporter environ 65 par
 jour.
 
@@ -225,7 +226,7 @@ l'abonnement, qui ne coûte rien à simuler.
 - **un duel entre amis est gratuit** (pour tisser des liens entre
   apprenants) ; un duel avec quelqu'un d'autre coûte 2 crédits ;
 - les deux joueurs voient leur score et celui de l'adversaire ; le détail
-  et les corrections se paient en crédits ;
+  et les corrections coûtent 1 crédit ;
 - les questions sont au **niveau le plus bas des deux joueurs** ; la
   rapidité ajoute des points, pour départager ;
 - on trouve un ami en cherchant son pseudo (unique), même s'il se cache du
