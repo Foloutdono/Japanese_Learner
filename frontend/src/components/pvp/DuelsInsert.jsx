@@ -1,6 +1,6 @@
 import { ChevronIcon } from '../ui/Icons'
 import { useDuels } from '../../stores/duels'
-import { DUELS_PATH } from './DuelsDoor'
+import { DUELS_PATH, DuelsDoor } from './DuelsDoor'
 import { Trend } from './parts'
 
 // ── 対戦 — the Elo, an insert in the holder (plan 276, L1) ─────────
@@ -8,12 +8,13 @@ import { Trend } from './parts'
 // the duels' door with the learner's Elo laid out under it -- the
 // figure, the place, the last twenty duels as a line and the record --
 // so the profile says how the sprints go without a second screen. The
-// whole insert is the door.
+// whole insert is the door. Before a first ranked duel there is no line
+// to draw: the door alone (E1).
 export function DuelsInsert({ t, lang, navigate }) {
   const { data } = useDuels()
   const rating = data?.rating
-  if (!rating) return null
-  const waiting = data.toPlay?.length ?? 0
+  if (!rating?.placed || !rating.trend?.length) return <DuelsDoor t={t} lang={lang} navigate={navigate} />
+  const waiting = (data?.toPlay?.length ?? 0) + (data?.live?.length ?? 0)
   return (
     <button type="button" className="pvp-insert" onClick={() => navigate(DUELS_PATH)} style={{ '--line-color': 'var(--pass-ink)' }}>
       <span className="pvp-insert__head">
@@ -27,7 +28,7 @@ export function DuelsInsert({ t, lang, navigate }) {
       <span className="pvp-insert__elo">
         <span className="pvp-insert__fig">
           <b className="pvp-insert__num">{rating.elo.toLocaleString(lang)}</b>
-          <span className="pvp-insert__cap">{t.pvpElo} · {t.pvpRankOf(rating.rank, rating.of)}</span>
+          <span className="pvp-insert__cap">{t.pvpElo} · {rating.rank ? t.pvpRankOf(rating.rank, rating.of) : t.pvpNotRanked}</span>
         </span>
         <Trend points={rating.trend} width={132} height={36} label={t.pvpRecordLong(rating.wins, rating.draws, rating.losses)} />
       </span>

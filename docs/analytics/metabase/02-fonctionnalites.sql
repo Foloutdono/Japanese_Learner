@@ -43,6 +43,7 @@ WITH routes(route) AS (VALUES
     ('/today'),
     ('/today/run'),
     ('/today/clear'),
+    ('/duel/new'),
     ('/duel/:id'),
     ('/ride'),
     ('/ride/intro'),

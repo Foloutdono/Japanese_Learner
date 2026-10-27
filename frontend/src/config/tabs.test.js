@@ -66,10 +66,11 @@ describe('the rail', () => {
     ])
     // The queue IS the gate, and the catalogue is the dictionary; the
     // analyser, the shelf, the record and the settings are places
-    // (plan 269), listed on their own.
+    // (plan 269), listed on their own. Behind the pass, the duels' hall
+    // alone (plan 276).
     expect(getDeskSections('today', t)).toEqual([])
     expect(getDeskSections('dictionary', t)).toEqual([])
-    expect(getDeskSections('profile', t)).toEqual([])
+    expect(getDeskSections('profile', t).map(s => s.path)).toEqual(['/profile/duels'])
   })
 
   it('lists the four places, each behind the gate its phone route is (plan 269)', () => {

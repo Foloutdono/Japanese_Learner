@@ -12,9 +12,7 @@ import { StampBook, Records, ProfileDoors, TicketsDoor, AgendaDoor, HolderDoors 
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
 import { useAgenda } from '../stores/agenda'
-import { DuelsDoor } from '../components/pvp/DuelsDoor'
 import { DuelsInsert } from '../components/pvp/DuelsInsert'
-import { devVariant } from '../lib/devVariant'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
@@ -188,11 +186,9 @@ export default function ProfileScreen({ session }) {
     // the desk's (plan 248).
     holderDoors: <HolderDoors t={t} navigate={navigate} count={profile.tickets?.length ?? 0} blocks={agenda} />,
     board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} session={session} />,
-    // 対戦 (plan 276): the door to the duels, under the holder's own.
-    // L1: the Elo laid out under the door, as an insert of its own.
-    duels: devVariant('place', 'E1') === 'E1' && (devVariant('elo', '') === 'L1'
-      ? <DuelsInsert t={t} lang={lang} navigate={navigate} />
-      : <DuelsDoor t={t} lang={lang} navigate={navigate} />),
+    // 対戦 (plan 276): the door to the duels under the holder's own
+    // (E1), the Elo laid out under it once there is one (L1).
+    duels: <DuelsInsert t={t} lang={lang} navigate={navigate} />,
   }
 
   return (
@@ -206,8 +202,8 @@ export default function ProfileScreen({ session }) {
         // 115 (--desk-side-w), the record taking the rest on the right. The
         // phone's inserts, split after the stamps — so a screen reader, the
         // Tab key and the guide walk the card, the stamps and the record in
-        // the phone's order — less the two doors the rail already holds
-        // (plan 143). Since plan 248 the tickets' and the agenda's doors
+        // the phone's order — less the doors the rail already holds
+        // (plan 143; the duels', plan 276). Since plan 248 the tickets' and the agenda's doors
         // stand straight under the card, one lattice of two slim rows, and
         // the two columns end together, whole in the window.
         <>

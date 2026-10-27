@@ -60,6 +60,7 @@ import DuelsScreen from './screens/DuelsScreen'
 import DuelFriendsScreen from './screens/DuelFriendsScreen'
 import DuelBoardScreen from './screens/DuelBoardScreen'
 import DuelRun from './screens/DuelRun'
+import DuelDeparture from './screens/DuelDeparture'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -830,6 +831,7 @@ export default function App({ front = NO_FRONT }) {
               under the shell above. */}
           <Route element={<StageFrame />}>
             <Route path="/today/run"                          element={<TodayRun session={session} />} />
+            <Route path="/duel/new"                           element={<DuelDeparture session={session} />} />
             <Route path="/duel/:id"                           element={<DuelRun session={session} />} />
             <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
             <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />

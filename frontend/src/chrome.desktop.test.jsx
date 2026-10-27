@@ -284,11 +284,13 @@ describe('the rail', () => {
     }
   })
 
-  it('lists no stations under Profile or the dictionary: their halls are places', async () => {
+  it('lists no stations under the dictionary, and under Profile the duels alone: their other halls are places', async () => {
     for (const path of ['/profile', '/dictionary']) {
       const shell = await mountShell(path)
       await settle()
-      expect(stations(), path).toHaveLength(0)
+      // The duels' hall (plan 276) has no room in the desk's holder
+      // (plan 248): its door is a station under the pass.
+      expect(stations().map(s => s.getAttribute('href')), path).toEqual(path === '/profile' ? ['/profile/duels'] : [])
       expect(places().filter(p => p.getAttribute('aria-current')), path).toHaveLength(0)
       await shell.unmount()
     }

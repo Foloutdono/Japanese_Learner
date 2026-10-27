@@ -106,6 +106,17 @@ export function getDeskSections(tabId, t) {
   return getSections(tabId, t)
     .filter(s => s.path !== root && !places.some(p => p.path === s.path))
     .map(s => ({ path: s.path, title: s.title }))
+    .concat(DESK_STATIONS[tabId]?.(t) ?? [])
+}
+
+// The rail's stations that are no section: 対戦 (plan 276), the duels'
+// hall behind the pass. The phone opens it from a door in the holder
+// (E1, and the Elo under it, L1); the desk's holder is whole in the
+// window with no room for either (plan 248), so its door is a station
+// under the lit 定期券 gate. Not a section: that would draw it a third
+// time among the phone's Statistics and Settings doors.
+const DESK_STATIONS = {
+  profile: t => [{ path: '/profile/duels', title: t.pvpTitle }],
 }
 
 /**

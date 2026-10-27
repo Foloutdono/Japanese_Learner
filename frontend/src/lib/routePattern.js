@@ -27,7 +27,9 @@ export const ROUTES = [
   '/today',
   '/today/run',
   '/today/clear',
-  // 対戦 (plan 276): a duel, from its ticket to its result, on the stage.
+  // 対戦 (plan 276): the departure, then a duel from its ticket to its
+  // result, on the stage. The literal before the pattern it would match.
+  '/duel/new',
   '/duel/:id',
   // 試乗 — the first ride (plan 098). Before any gate, so tabFor
   // answers null for it.

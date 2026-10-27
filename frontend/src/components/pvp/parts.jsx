@@ -29,6 +29,66 @@ export function Trend({ points, width = 120, height = 32, label }) {
   )
 }
 
+// The curve's drawing box, in the SVG's own units: it stretches to the
+// card's width at its own height (index.css), so the desk's wider card
+// draws a longer line rather than a taller one; the strokes keep their
+// width (non-scaling-stroke), and the dot is a stroke's round cap, which
+// stays round where a circle would stretch.
+const CURVE_W = 320
+const CURVE_H = 72
+
+/** G1 — the Elo over the last twenty ranked duels, the placement's
+ *  start dashed under the line and the last duel a dot. */
+export function EloCurve({ trend, start, label }) {
+  if (!trend?.length) return null
+  const all = start != null ? [...trend, start] : trend
+  const lo = Math.min(...all)
+  const hi = Math.max(...all)
+  const pad = Math.max(8, (hi - lo) * 0.15)
+  const min = lo - pad
+  const span = hi + pad - min
+  const x = i => (trend.length === 1 ? CURVE_W : (i / (trend.length - 1)) * CURVE_W)
+  const y = v => CURVE_H - ((v - min) / span) * CURVE_H
+  const line = trend.map((p, i) => `${x(i).toFixed(1)},${y(p).toFixed(1)}`).join(' ')
+  return (
+    <svg className="pvp-curve__svg" viewBox={`-4 -4 ${CURVE_W + 8} ${CURVE_H + 8}`} preserveAspectRatio="none" role="img" aria-label={label}>
+      {start != null && <line className="pvp-curve__start" x1="0" x2={CURVE_W} y1={y(start)} y2={y(start)} />}
+      <polyline className="pvp-curve__line" points={line} />
+      <line className="pvp-curve__dot" x1={x(trend.length - 1)} y1={y(trend[trend.length - 1])} x2={x(trend.length - 1)} y2={y(trend[trend.length - 1])} />
+    </svg>
+  )
+}
+
+const STEPS_H = 64
+
+/** G2 — what each of the last twenty ranked duels moved the Elo: a step
+ *  up in the pass's ink for a win, down for a loss, from one level line. */
+export function EloSteps({ moves, label }) {
+  if (!moves?.length) return null
+  const most = Math.max(...moves.map(Math.abs), 1)
+  const slot = CURVE_W / Math.max(moves.length, 20)
+  const bar = slot * 0.62
+  const mid = STEPS_H / 2
+  return (
+    <svg className="pvp-steps__svg" viewBox={`0 0 ${CURVE_W} ${STEPS_H}`} preserveAspectRatio="none" role="img" aria-label={label}>
+      <line className="pvp-steps__level" x1="0" x2={CURVE_W} y1={mid} y2={mid} />
+      {moves.map((m, i) => {
+        const h = Math.max(2, (Math.abs(m) / most) * (mid - 2))
+        return (
+          <rect
+            key={i}
+            className={`pvp-steps__bar pvp-steps__bar--${m >= 0 ? 'up' : 'down'}`}
+            x={(i * slot + (slot - bar) / 2).toFixed(1)}
+            y={(m >= 0 ? mid - h : mid).toFixed(1)}
+            width={bar.toFixed(1)}
+            height={h.toFixed(1)}
+          />
+        )
+      })}
+    </svg>
+  )
+}
+
 /** A door in the holder's shape: roundel, name, figure, chevron. */
 export function DoorRow({ glyph, name, sub, figure, onClick }) {
   return (

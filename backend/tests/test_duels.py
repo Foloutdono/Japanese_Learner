@@ -319,12 +319,18 @@ def test_ranked_play_never_waits(client, learners, clock):
 
 
 def _drain(user_id):
-    """Spend the learner's balance down to nothing, in the ledger."""
+    """Spend the learner's balance down to nothing, in the ledger, the
+    refill's clock restarted. The refill lands a credit every 48 minutes
+    of a clock that outlives a run, and the next fare claims what it has
+    landed: drained without it, the balance a test means to be short is
+    not, the first run after a pause."""
     from core import credits
+    credits.claim(user_id)
     have = credits.read_fresh(user_id)["balance"] or 0
     if have:
         sql("INSERT INTO credit_ledger (user_id, delta, reason, ref) VALUES (%s, %s, 'adjust', 'pvp-test')",
             (user_id, -have))
+    sql("UPDATE user_profiles SET credits_accrued_at = NOW() WHERE user_id = %s", (user_id,))
     credits.forget(user_id)
 
 
@@ -478,6 +484,7 @@ def test_the_board_ranks_those_who_played_and_keeps_the_hidden_off(client, learn
         assert client.get("/api/pvp/board").json()["me"]["rank"] is None
     rating = client.get("/api/pvp/rating").json()
     assert rating["games"] == 1 and rating["losses"] == 1 and rating["trend"] == [980]
+    assert rating["moves"] == [-20] and rating["start"] == 1000
 
 
 def test_the_history_pages_past_duels(client, learners, clock):

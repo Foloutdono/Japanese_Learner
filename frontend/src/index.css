@@ -32945,7 +32945,6 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--sel-ink);
 }
-.pvp-plate__waiting { color: var(--sel-ink); }
 /* Today's notice: the comeback row's ring, in the selection's gold. */
 .pvp-line__ring { border-color: var(--gate-gold); }
 
@@ -32974,69 +32973,6 @@ button.brd-stn { cursor: pointer; }
   border-image: linear-gradient(to bottom, transparent, var(--bg-main) var(--sp-4)) fill 0 / 0 / var(--sp-4) var(--sp-5) 0;
 }
 .pvp-quiet { align-self: center; min-height: 44px; padding: 0 var(--sp-3); border: 0; background: none; font: inherit; font-weight: 600; color: var(--text-primary); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
-
-/* H1 — the departures board: Today's board, a duel a row. */
-.pvp-tbl .tdy-next__day { display: flex; align-items: baseline; gap: var(--sp-3); min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.pvp-tbl__state { flex: none; min-width: 5.2em; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.pvp-tbl__state--you { color: var(--sel-ink); }
-.pvp-tbl .pvp-verdict { flex: none; min-width: 5.2em; }
-.pvp-tbl__score { font-size: var(--fs-body); }
-
-/* H2 — the Elo's card and the tickets. */
-.pvp-elo {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: end;
-  gap: var(--sp-1) var(--sp-5);
-  padding: var(--sp-5) var(--sp-6);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-panel);
-}
-.pvp-elo__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.pvp-elo__rank { justify-self: end; font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
-.pvp-elo__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.pvp-elo .pvp-trend { justify-self: end; }
-.pvp-elo__rec { grid-column: 1 / -1; font-size: var(--fs-sm); font-weight: 600; }
-.pvp-tickets { display: flex; flex-direction: column; gap: var(--sp-3); }
-.pvp-tk {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  text-align: left;
-  color: inherit;
-  cursor: pointer;
-  filter: drop-shadow(var(--elev-hang));
-}
-.pvp-tk__paper { gap: var(--sp-2); padding: var(--sp-4) var(--sp-6); border-radius: var(--r-identity) 0 0 var(--r-identity); }
-.pvp-tk__big { position: relative; z-index: 2; font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.pvp-tk__stub {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--sp-1);
-  padding: 0 var(--sp-5);
-  border-left: 2px dashed color-mix(in srgb, var(--stamp-ink) 40%, transparent);
-  border-radius: 0 var(--r-identity) var(--r-identity) 0;
-  background: var(--paper);
-  color: var(--text-on-fill);
-  font-size: var(--fs-caption);
-  white-space: nowrap;
-}
-.pvp-tk__go { font-size: var(--fs-body); }
-.pvp-list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
-.pvp-list__row { display: flex; align-items: center; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-5); }
-.pvp-list__row + .pvp-list__row { border-top: 1px solid var(--surface-line); }
-.pvp-list__dot { flex: none; width: 10px; height: 10px; border: 2px solid var(--text-secondary); border-radius: var(--r-pill); }
-.pvp-list__dot--win { border-color: var(--success); }
-.pvp-list__dot--loss { border-color: var(--danger); }
-.pvp-list__who { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pvp-list__score { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 
 /* H3 — the two platforms and the console. */
 .pvp-platforms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
@@ -33070,6 +33006,54 @@ button.brd-stn { cursor: pointer; }
 .pvp-console__door-name { flex: 1; }
 .pvp-console__door-fig { font-size: var(--fs-sm); color: var(--text-secondary); }
 .pvp-console__door-req { color: var(--sel-ink); }
+.pvp-console__none { margin: 0; padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--surface-line); font-size: var(--fs-sm); color: var(--text-secondary); }
+button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+/* What a screen says when the server refused (an error's code, mapped). */
+.pvp-error { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+
+/* The Elo, the hall's head (G1) or foot (G2): a card that opens the
+   Elo board, the figure over its curve or its steps. */
+.pvp-curve,
+.pvp-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.pvp-curve:hover,
+.pvp-curve:focus-visible,
+.pvp-steps:hover,
+.pvp-steps:focus-visible { border-color: var(--pass-ink); filter: none; }
+.pvp-curve__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.pvp-curve__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-curve__rank { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+.pvp-curve__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-curve__prov { margin-left: var(--sp-1); font-size: var(--fs-lead); color: var(--text-secondary); }
+.pvp-curve__svg { display: block; width: 100%; height: 72px; overflow: visible; }
+.pvp-curve__line { fill: none; stroke: var(--pass-ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.pvp-curve__start { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.pvp-curve__dot { stroke: var(--pass-ink); stroke-width: 8; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.pvp-curve__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-curve__key { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.pvp-curve__dash { width: 16px; border-top: 1.5px dashed var(--border); }
+.pvp-curve--none { gap: var(--sp-2); }
+.pvp-curve__none { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
+.pvp-curve--none .pvp-curve__foot { justify-content: flex-start; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+.pvp-steps__svg { display: block; width: 100%; height: 64px; }
+.pvp-steps__level { stroke: var(--surface-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.pvp-steps__bar--up { fill: var(--pass-ink); }
+.pvp-steps__bar--down { fill: color-mix(in srgb, var(--text-secondary) 45%, transparent); }
+.pvp-steps__figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--surface-line); }
+.pvp-steps__fig { display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-steps__num { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 
 /* F2 — the sheet: a request, the friends as radio rows, later or live. */
 .pvp-sheet { display: flex; flex-direction: column; gap: var(--sp-4); }
@@ -33088,7 +33072,14 @@ button.brd-stn { cursor: pointer; }
 .pvp-add { display: flex; align-items: center; gap: var(--sp-3); min-height: 44px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-card); background: var(--bg-main); font: inherit; color: var(--text-secondary); text-align: left; cursor: pointer; }
 .pvp-sheet__help { margin: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); text-wrap: pretty; }
 .pvp-sheet__foot { display: flex; flex-direction: column; padding-top: var(--sp-2); }
+/* The corrections: the mock exam's miss rows, the other's answer under each. */
+.pvp-fix__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-fix__reading { font-size: var(--fs-caption); color: var(--text-secondary); }
+.pvp-fix__kind { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-fix__time { margin-left: var(--sp-2); font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-fix__them { padding-left: calc(24px + var(--sp-4)); font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 /* F1 — the friends: the search well, the requests, the friends. */
+.pvp-list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
 .pvp-find { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
 .pvp-find__cap,
 .pvp-group__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
@@ -33100,6 +33091,16 @@ button.brd-stn { cursor: pointer; }
 .pvp-person__names .pvp-person__name { flex: none; }
 .pvp-person__sub { font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .pvp-person__act { flex: none; min-height: 36px; padding-inline: var(--sp-4); }
+.pvp-find__go { flex: none; min-height: 36px; padding-inline: var(--sp-4); }
+.pvp-list__none { border-top: 0; }
+/* A learner's card: the figures a friend shows, the report's four reasons, the gestures. */
+.pvp-card__facts { display: flex; gap: var(--sp-6); }
+.pvp-card__fig { display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-card__num { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-card__report { margin: 0; padding: 0; min-inline-size: 0; }
+.pvp-card__legend { padding: var(--sp-3) var(--sp-5); }
+.pvp-card__reason { font-family: inherit; font-size: var(--fs-body); font-weight: 600; }
+.pvp-card__foot { gap: var(--sp-3); }
 
 /* L1 — the Elo, an insert in the holder: the door, the figure, the line. */
 .pvp-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -33128,6 +33129,8 @@ button.brd-stn { cursor: pointer; }
 .pvp-insert__num { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 .pvp-insert__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .pvp-insert__rec { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+/* L2 — an Elo still provisional, after its figure. */
+.pvp-board__prov { margin-left: var(--sp-1); color: var(--text-secondary); }
 
 /* ── the stage: the departure, the race, the result ──
    The mock exam's paper (.exam-run): the run's head, a page, the
@@ -33150,6 +33153,8 @@ button.brd-stn { cursor: pointer; }
 .pvp-ticket__fact { display: flex; justify-content: space-between; gap: var(--sp-4); }
 .pvp-ticket__dt { color: var(--paper-ink-soft); }
 .pvp-ticket__dd { margin: 0; font-weight: 700; text-align: right; }
+/* The live room's wait, under the ticket. */
+.pvp-room__clock { font-variant-numeric: tabular-nums; color: var(--text-primary); }
 
 /* D2 — two platforms, side by side. */
 .pvp-quais { flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
@@ -33180,13 +33185,6 @@ button.brd-stn { cursor: pointer; }
 /* The race: the minute as a bar, then the board the option draws. */
 .pvp-clock { display: block; height: 6px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
 .pvp-clock__fill { display: block; height: 100%; background: var(--pass-ink); transform-origin: left; transition: transform 0.1s linear; }
-/* P1 — the two totals. */
-.pvp-score { flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
-.pvp-score .pvp-clock { grid-column: 1 / -1; }
-.pvp-score__cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
-.pvp-score__cell--me { border-bottom: 3px solid var(--pass-ink); }
-.pvp-score__fig { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.pvp-score__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 /* P2 — two trains on one line, a stop every 500 points. */
 .pvp-line-race { flex: none; display: flex; flex-direction: column; gap: var(--sp-3); }
 .pvp-tracks { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
@@ -33206,20 +33204,26 @@ button.brd-stn { cursor: pointer; }
 .pvp-train__car { width: 36px; height: 12px; border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); }
 .pvp-track--me .pvp-train__fig { color: var(--text-primary); }
 .pvp-track--me .pvp-train__car { background: var(--pass-ink); }
-.pvp-gap { margin: 0; text-align: center; font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
-.pvp-gap--ahead { color: var(--text-primary); }
-/* P3 — the dial. */
-.pvp-dial { flex: none; display: grid; grid-template-columns: 140px minmax(0, 1fr); align-items: center; gap: var(--sp-6); padding-inline: var(--sp-3); }
-.pvp-dial__face { position: relative; width: 140px; height: 140px; }
-.pvp-dial__svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pvp-dial__track { fill: none; stroke: var(--surface-line); }
-.pvp-dial__time { fill: none; stroke: var(--pass-ink); transition: stroke-dashoffset 0.1s linear; }
-.pvp-dial__q { fill: none; stroke: var(--gate-gold); }
-.pvp-dial__mine { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); }
-.pvp-dial__fig { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.pvp-dial__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.pvp-dial__them { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); }
-.pvp-dial__them .pvp-gap { text-align: left; }
+/* P2a — the double track: one band, two rails, each total in its car. */
+.pvp-dbl { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-dbl__track { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); align-items: center; gap: var(--sp-3); }
+.pvp-dbl__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-dbl__track--me .pvp-dbl__who { color: var(--text-primary); }
+.pvp-dbl__rail { position: relative; height: 24px; margin-right: 64px; }
+.pvp-dbl__rail::before { content: ''; position: absolute; left: 0; right: -64px; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
+.pvp-dbl__rail .pvp-train { inset: 0 0 auto; }
+.pvp-dbl__car { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 24px; padding: 0 var(--sp-3); border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); color: var(--bg-panel); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pvp-dbl__track--me .pvp-dbl__car { background: var(--pass-ink); }
+/* P2b — the terminus: the line ends at the score to beat. */
+.pvp-tracks--terminus .pvp-track { position: relative; }
+.pvp-terminus { position: absolute; right: -1px; bottom: 0; width: 3px; height: 22px; background: var(--sel-ink); }
+.pvp-terminus__plate { display: flex; justify-content: flex-end; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-caption-xs); font-weight: 700; color: var(--sel-ink); }
+.pvp-terminus__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+/* P2c — the gap on the line: hatched between the two noses, its points in it. */
+.pvp-gapline { position: absolute; bottom: 0; left: calc(var(--lo, 0%) + 36px); width: var(--span, 0%); height: 12px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--text-secondary) 30%, transparent) 0 4px, transparent 4px 8px); }
+.pvp-gapline--mine { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--pass-ink) 30%, transparent) 0 4px, transparent 4px 8px); }
+.pvp-gapline__fig { position: absolute; bottom: calc(100% + var(--sp-1)); left: var(--sp-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; line-height: 1; white-space: nowrap; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-gapline--mine .pvp-gapline__fig { color: var(--pass-ink); }
 /* The question's page: its kind, what it is worth now, the prompt. */
 .pvp-page { transition: border-color 0.15s ease; }
 .pvp-page--right { border-color: var(--rating-correct); }
@@ -33261,43 +33265,40 @@ button.brd-stn { cursor: pointer; }
 .pvp-face__side--me .pvp-face__fig { text-decoration: underline 3px var(--pass-ink); text-underline-offset: 0.2em; }
 .pvp-face__who { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .pvp-face__rights { font-size: var(--fs-sm); color: var(--text-secondary); }
-/* R2 — the photo finish: the last stretch before the winner, the gap hatched. */
-.pvp-photo { flex: none; display: flex; flex-direction: column; gap: var(--sp-2); }
-.pvp-photo__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.pvp-photo__gap { position: absolute; bottom: 0; height: 40px; margin-left: 36px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--pass-ink) 22%, transparent) 0 4px, transparent 4px 8px); }
-/* R3 — the station's stamp, pressed on the duel's ticket, half off its
-   foot where the print leaves room. */
-.pvp-stamped { position: relative; flex: none; display: flex; flex-direction: column; }
-.pvp-stamp {
-  position: absolute;
-  z-index: 3;
-  left: 50%;
-  bottom: calc(-1 * var(--sp-8));
-  width: 92px;
-  height: 92px;
-  margin-left: -46px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-1);
-  border: 3px double var(--stamp-ink);
-  border-radius: var(--r-pill);
-  color: var(--stamp-ink);
-  transform: rotate(-12deg);
-  opacity: 0.86;
-  pointer-events: none;
-}
-.pvp-stamp--loss,
-.pvp-stamp--draw { border-color: var(--pass-ink); color: var(--pass-ink); }
-.pvp-stamp__glyph { font-family: var(--font-serif); font-size: var(--fs-heading); font-weight: 700; line-height: 1; }
-.pvp-stamp__word { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; }
+.pvp-face__pair--one { grid-template-columns: minmax(0, 1fr); }
+/* The finish, simplified: two rails, each car where its total stopped. */
+.pvp-finish { display: flex; flex-direction: column; gap: var(--sp-2); }
+.pvp-finish__row { display: grid; grid-template-columns: 4.5em minmax(0, 1fr) auto; align-items: center; gap: var(--sp-3); }
+.pvp-finish__row--bare { grid-template-columns: 4.5em minmax(0, 1fr); }
+.pvp-finish__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-finish__row--me .pvp-finish__who { color: var(--text-primary); }
+.pvp-finish__rail { position: relative; height: 14px; margin-right: 32px; }
+.pvp-finish__rail::before { content: ''; position: absolute; left: 0; right: -32px; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
+.pvp-finish__rail .pvp-train { inset: 0 0 auto; }
+.pvp-finish__car { display: block; width: 32px; height: 14px; border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); }
+.pvp-finish__row--me .pvp-finish__car { background: var(--pass-ink); }
+.pvp-finish__fig { min-width: 3.2em; text-align: right; font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-face .pvp-finish { padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
+.pvp-face--photo .pvp-finish,
+.pvp-face--elo .pvp-finish { padding-top: 0; border-top: 0; }
+.pvp-face__tally { display: flex; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-sm); color: var(--text-secondary); }
+/* R1b — the Elo a band of its own under the photo. */
+.pvp-elo-band { flex: none; display: flex; align-items: center; gap: var(--sp-5); padding: var(--sp-4) var(--sp-6); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-elo-band__move { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-elo-band__move--up { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.pvp-elo-band__move--down { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+.pvp-elo-band__line { display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-elo-band__fig { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* R1c — the Elo first: what the duel moved, as the headline. */
+.pvp-face__hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.pvp-face__move { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-face__move--up { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.pvp-face__move--down { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
 @media (prefers-reduced-motion: reduce) {
   .pvp-platform,
   .pvp-quai,
   .pvp-page,
-  .pvp-clock__fill,
-  .pvp-dial__time { transition: none; }
+  .pvp-clock__fill { transition: none; }
   .pvp-train { transition: none; }
 }
 /* ── 対戦 end ── */

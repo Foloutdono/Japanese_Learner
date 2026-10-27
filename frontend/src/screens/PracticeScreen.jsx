@@ -13,10 +13,6 @@ import { useBoxSize } from '../hooks/useBoxWidth'
 import { useStationSamples } from '../stores/stationSamples'
 import { PracticeSpecimen } from '../components/practice/PracticeSpecimen'
 import { LEVELS } from '../domain/sentenceSource'
-import { useDuels } from '../stores/duels'
-import { DUELS_PATH } from '../components/pvp/DuelsDoor'
-import { devVariant } from '../lib/devVariant'
-import { useNavigate } from 'react-router-dom'
 
 // ── 実践 — the Practice gate: seven platforms (plan 068, plates since 094, 作文 since 125, 会話 since 217) ──
 // Reading practice, reading comprehension, translation, dictation,
@@ -153,37 +149,7 @@ function Platforms({ platforms, grade, onDepart }) {
           />
         )
       })}
-      {devVariant('place', 'E1') === 'E2' && <DuelsPlate />}
     </div>
-  )
-}
-
-// ── 対戦 — the duels as a plate of their own (plan 276, E2) ──────
-// The eighth plate, drawn as the seven are: the station's code in its
-// roundel, the name, and a foot that says what waits there -- the
-// challenges to play, the learner's Elo in the grade's place, the share
-// won. Its stripe is the pass's ink: the colour wheel holds no free
-// line pigment, and a duel is about people, whose family that is.
-function DuelsPlate() {
-  const { t, lang } = useLang()
-  const navigate = useNavigate()
-  const { data } = useDuels()
-  const rating = data?.rating ?? null
-  const waiting = data?.toPlay?.length ?? 0
-  const share = rating?.games ? Math.round((rating.wins / rating.games) * 100) : null
-  return (
-    <Plate
-      section={{ path: DUELS_PATH, title: t.pvpTitle, color: 'var(--pass-ink)' }}
-      className="plate--platform"
-      foot={(
-        <span className="plate__foot plate__foot--stops">
-          <span className="plate__prev pvp-plate__waiting">{waiting > 0 ? t.pvpToPlay(waiting) : null}</span>
-          <span className="plate__here">{rating ? rating.elo.toLocaleString(lang) : null}</span>
-          <span className="plate__next">{share != null ? t.pvpWinShare(share) : null}</span>
-        </span>
-      )}
-      onClick={() => navigate(DUELS_PATH)}
-    />
   )
 }
 

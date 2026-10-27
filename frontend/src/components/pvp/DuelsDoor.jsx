@@ -14,7 +14,7 @@ export const DUELS_PATH = '/profile/duels'
 export function DuelsDoor({ t, lang, navigate }) {
   const desk = useDesk()
   const { data } = useDuels()
-  const waiting = data?.toPlay?.length ?? 0
+  const waiting = (data?.toPlay?.length ?? 0) + (data?.live?.length ?? 0)
   const elo = data?.rating?.elo ?? null
   return (
     <div className="records records--one">

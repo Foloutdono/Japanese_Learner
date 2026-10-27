@@ -961,13 +961,13 @@ def rating(cur, me: str) -> dict:
         return {"placed": False}
     cur.execute(
         """
-        SELECT e.rating_after FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id
+        SELECT e.rating_before, e.rating_after FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id
          WHERE e.user_id = %s AND e.role <> 'ghost' AND d.kind = 'ranked' AND e.rating_after IS NOT NULL
          ORDER BY d.resolved_at DESC LIMIT %s
         """,
         (me, TREND),
     )
-    trend = [int(r) for (r,) in cur.fetchall()][::-1]
+    last = cur.fetchall()[::-1]
     place = board_place(cur, me)
     return {
         "placed": True,
@@ -975,8 +975,13 @@ def rating(cur, me: str) -> dict:
         "provisional": row["games"] < duel_elo.PROVISIONAL,
         "games": row["games"], "wins": row["wins"], "draws": row["draws"], "losses": row["losses"],
         "peak": row["peak"], "placedLevel": row["placed_level"],
+        # Where the placement test started it: the curve's floor line.
+        "start": duel_elo.START.get(row["placed_level"]),
         "rank": place["rank"], "of": place["of"],
-        "trend": trend,
+        # The last TREND ranked duels, oldest first: the Elo after each,
+        # and what each one moved it.
+        "trend": [int(a) for _b, a in last],
+        "moves": [int(a) - int(b) for b, a in last],
     }
 
 
