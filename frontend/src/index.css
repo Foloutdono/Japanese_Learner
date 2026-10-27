@@ -7030,6 +7030,7 @@ textarea:focus-visible {
 }
 .sheet {
   --sheet-cap-ink: var(--text-secondary);
+  --sheet-ink: var(--text-primary);
   position: fixed;
   left: 0;
   right: 0;
@@ -7075,6 +7076,7 @@ textarea:focus-visible {
    named on the block (the ink guard's escape hatch, on purpose). */
 .sheet--sumi {
   --sheet-cap-ink: var(--text-on-panel-soft);
+  --sheet-ink: var(--text-on-panel);
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border-color: color-mix(in srgb, var(--pass-ink) 45%, transparent);
@@ -7103,9 +7105,8 @@ textarea:focus-visible {
   height: 30px;
   border-radius: var(--r-pill);
   border: 2px solid var(--line-color, var(--sheet-cap-ink));
-  color: color-mix(in srgb, var(--line-color, var(--sheet-cap-ink)) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--line-color, var(--sheet-cap-ink)) 60%, var(--sheet-ink));
 }
-.sheet--sumi .sheet__mark { color: color-mix(in srgb, var(--line-color, var(--sheet-cap-ink)) 60%, var(--text-on-panel)); }
 .sheet__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
 .sheet__title {
   margin: 0;
