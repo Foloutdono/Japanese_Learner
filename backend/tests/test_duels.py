@@ -1,4 +1,4 @@
-"""対戦 — a duel's life (plan 276, study/duels.py), through the routes.
+"""対戦 — a duel's life (plan 279, study/duels.py), through the routes.
 
 The server keeps the clock: the tests move it (pvp_world.Clock) and
 answer as a learner would, n seconds after each question was served.

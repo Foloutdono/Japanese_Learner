@@ -1,5 +1,5 @@
 """
-対戦 — the sprint's questions (plan 276).
+対戦 — the sprint's questions (plan 279).
 
 A duel is a sprint: sixty seconds of quick questions, the same ones in
 the same order for both players, built once from a seed at the lower

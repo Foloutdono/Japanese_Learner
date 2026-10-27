@@ -3455,7 +3455,7 @@ const transfer = {
 }
 // ── 243b:transfer end ──
 
-// ── 対戦 — les duels (plan 276) ─────────────────────────────────
+// ── 対戦 — les duels (plan 279) ─────────────────────────────────
 // Le sprint : soixante secondes, les mêmes questions pour les deux.
 const pvp = {
   pvpTitle:        'Duels',

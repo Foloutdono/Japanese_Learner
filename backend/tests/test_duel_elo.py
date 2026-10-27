@@ -1,4 +1,4 @@
-"""対戦 — the Elo (plan 276, study/duel_elo.py), its start from the
+"""対戦 — the Elo (plan 279, study/duel_elo.py), its start from the
 placement test, and what reads the duels' rows by hand: the reports'
 reader and the pruning of duels nobody played."""
 from datetime import timedelta

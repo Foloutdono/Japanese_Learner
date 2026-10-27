@@ -1,5 +1,5 @@
 """
-対戦 — friends, blocks and reports (plan 276).
+対戦 — friends, blocks and reports (plan 279).
 
 A friend is found by their exact username, whatever its case: `Taro`
 finds `taro`, `tar` finds nobody, so the usernames cannot be walked. A

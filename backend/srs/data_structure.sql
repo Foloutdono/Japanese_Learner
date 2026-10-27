@@ -1240,7 +1240,7 @@ CREATE TABLE banzuke_marks (
 );
 ALTER TABLE banzuke_marks ENABLE ROW LEVEL SECURITY;
 
--- ── 対戦 — the duels (plan 276, study/duel_schema.py) ─────────────────
+-- ── 対戦 — the duels (plan 279, study/duel_schema.py) ─────────────────
 -- The sprint between two learners: sixty seconds, the same questions.
 -- Every table here is erased with the account (routes/account.py).
 

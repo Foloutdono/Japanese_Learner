@@ -65,7 +65,7 @@ export function getDeskTabs(t) {
   return DESK_TAB_IDS.map(id => byId[id])
 }
 
-// ── 対戦 — the duels, the desk's sixth gate (plan 276) ──
+// ── 対戦 — the duels, the desk's sixth gate (plan 279) ──
 // The owner's call: on the desk the duels stand beside the other main
 // modes, a gate of the rail's own -- a pictogram and its word -- after
 // Practice. The phone has no room for a sixth gate and opens them from a

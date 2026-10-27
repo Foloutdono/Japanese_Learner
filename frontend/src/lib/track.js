@@ -131,7 +131,7 @@ export const EVENTS = {
   // lib/vitals.js; plan 218).
   client_error: ['route', 'step', 'where'],
   vitals: ['route', 'lcp', 'inp', 'cls', 'ttfb'],
-  // 対戦 (plan 276): written by the server (routes/pvp.py), declared
+  // 対戦 (plan 279): written by the server (routes/pvp.py), declared
   // here so the two sets stay one. Never a username.
   pvp_friend: ['action'],
   pvp_report: ['reason'],

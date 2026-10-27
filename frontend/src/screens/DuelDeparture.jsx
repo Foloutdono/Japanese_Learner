@@ -9,7 +9,7 @@ import { playClick } from '../lib/audio'
 import { LEVEL_PATH, errorKey } from '../domain/duel'
 import { refreshDuels, useDuels } from '../stores/duels'
 
-// ── 対戦 — the departure: two platforms side by side (plan 276, D2) ──
+// ── 対戦 — the departure: two platforms side by side (plan 279, D2) ──
 // Where the hall's « Sprint classé » leads: platform 1 the ranked sprint
 // (a stranger near your Elo or a real player's recording, two credits,
 // the Elo moves), platform 2 a friend (free, unranked). The choice lights

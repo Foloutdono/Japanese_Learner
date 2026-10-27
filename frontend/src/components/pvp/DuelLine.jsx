@@ -7,7 +7,7 @@ import { useDuels } from '../../stores/duels'
 import { nameOf } from '../../domain/duel'
 import { ChevronIcon, CrossIcon } from '../ui/Icons'
 
-// ── 対戦 — a challenge waiting, on Today's gate (plan 276, E3) ─────
+// ── 対戦 — a challenge waiting, on Today's gate (plan 279, E3) ─────
 // The comeback notice's shape (ComebackLine, plan 254): one quiet row
 // over the run's own, a ring before what it says, the way in at its end
 // and past a hairline the ✕ that hides it until the next day. The ring

@@ -186,7 +186,7 @@ export default function ProfileScreen({ session }) {
     // the desk's (plan 248).
     holderDoors: <HolderDoors t={t} navigate={navigate} count={profile.tickets?.length ?? 0} blocks={agenda} />,
     board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} session={session} />,
-    // 対戦 (plan 276): the door to the duels under the holder's own
+    // 対戦 (plan 279): the door to the duels under the holder's own
     // (E1), the Elo laid out under it once there is one (L1).
     duels: <DuelsInsert t={t} lang={lang} navigate={navigate} />,
   }
@@ -203,7 +203,7 @@ export default function ProfileScreen({ session }) {
         // phone's inserts, split after the stamps — so a screen reader, the
         // Tab key and the guide walk the card, the stamps and the record in
         // the phone's order — less the doors the rail already holds
-        // (plan 143; the duels', plan 276). Since plan 248 the tickets' and the agenda's doors
+        // (plan 143; the duels', plan 279). Since plan 248 the tickets' and the agenda's doors
         // stand straight under the card, one lattice of two slim rows, and
         // the two columns end together, whole in the window.
         <>

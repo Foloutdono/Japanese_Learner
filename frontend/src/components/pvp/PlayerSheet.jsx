@@ -8,7 +8,7 @@ import { Loading } from '../ui/Loading'
 
 const REASONS = ['name', 'cheat', 'spam', 'other']
 
-// ── 対戦 — a learner's card (plan 276) ─────────────────────────────
+// ── 対戦 — a learner's card (plan 279) ─────────────────────────────
 // What a name opens, as the 番付's row opens its learner (plan 262): a
 // friend's Elo and the record of your duels; anyone else's username
 // alone, the owner's rule. Under it the gestures a person needs against

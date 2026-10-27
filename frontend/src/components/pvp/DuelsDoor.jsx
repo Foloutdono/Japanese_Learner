@@ -5,7 +5,7 @@ import { useDuels } from '../../stores/duels'
 
 export const DUELS_PATH = '/profile/duels'
 
-// ── 対戦 — the door to the duels, in the holder (plan 276, E1) ────
+// ── 対戦 — the door to the duels, in the holder (plan 279, E1) ────
 // Drawn as the holder's other doors are (the tickets', the agenda's): a
 // roundel, the name, a figure, a chevron -- in the pass's ink, because a
 // duel is about people and the People family is the pass's. The figure

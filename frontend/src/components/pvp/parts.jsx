@@ -1,6 +1,6 @@
 import { ChevronIcon } from '../ui/Icons'
 
-// ── 対戦 — the small parts every duels screen draws (plan 276) ──────
+// ── 対戦 — the small parts every duels screen draws (plan 279) ──────
 
 /** The duel's verdict as a word in its state's ink. */
 export function Verdict({ outcome, t }) {

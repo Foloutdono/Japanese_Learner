@@ -1,5 +1,5 @@
 """
-対戦 — the Elo (plan 276).
+対戦 — the Elo (plan 279).
 
 A ranked sprint moves the Elo, a friendly one never does: friendly duels
 are free, and a second account made a friend would lift anyone. The Elo

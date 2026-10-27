@@ -187,7 +187,7 @@ describe('the rail', () => {
     await mountShell('/learn')
     await settle()
     expect(gates().map(g => g.dataset.tab)).toEqual(['today', 'learn', 'practice', 'duels', 'dictionary', 'profile'])
-    // The duels' path is the phone's, behind the pass (plan 276).
+    // The duels' path is the phone's, behind the pass (plan 279).
     expect(gates().map(g => g.getAttribute('href')))
       .toEqual(['/today', '/learn', '/practice', '/profile/duels', '/dictionary', '/profile'])
     for (const gate of gates()) {
@@ -299,7 +299,7 @@ describe('the rail', () => {
     }
   })
 
-  it('lights the duels\' gate in their hall and behind it, the pass\'s dark (plan 276)', async () => {
+  it('lights the duels\' gate in their hall and behind it, the pass\'s dark (plan 279)', async () => {
     for (const path of ['/profile/duels', '/profile/duels/friends', '/profile/duels/board']) {
       const shell = await mountShell(path)
       await settle()

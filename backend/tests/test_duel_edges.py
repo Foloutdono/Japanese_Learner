@@ -1,5 +1,5 @@
 """
-対戦 — what happens to a duel when things go wrong (plan 276).
+対戦 — what happens to a duel when things go wrong (plan 279).
 
 The owner's ask: a crash, a learner who leaves mid-duel, an account
 deleted, and the rest -- every case ends in a state both players can
@@ -1052,7 +1052,7 @@ def test_the_board_ranked_in_the_base_is_the_one_ranked_in_full(client, learners
 
     from core.db import db_conn
     prefix = "pvp-test-board-"
-    rng = random.Random(276)
+    rng = random.Random(279)
     people = [(f"{prefix}{i:03d}", rng.choice([980, 1000, 1000, 1040, 1100, 1210]), rng.choice([0, 3, 20]),
                rng.random() < 0.2) for i in range(60)]
     me = people[17][0]

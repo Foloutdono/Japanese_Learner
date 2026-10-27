@@ -24,7 +24,7 @@ import { GUIDES } from '../guide/guides'
 //                  lit gate because five words do not fit in 390px
 //                  (DESIGN.md, "A gate is a pictogram"), and a column
 //                  has the room for all five -- and for the duels' after
-//                  Practice (plan 276), the desk's alone;
+//                  Practice (plan 279), the desk's alone;
 //   the stations   under the lit gate, the sections behind it on a
 //                  drawn line — a stop per station, the one you are
 //                  standing in filled. The line is the station
@@ -85,7 +85,7 @@ export function DeskRail() {
   const navigate = useNavigate()
   // A place (plan 269) lights itself, and the gate behind its path
   // stays dark: on the desk the analyser is not a station of 辞書. The
-  // duels' gate (plan 276) does the same to the pass's.
+  // duels' gate (plan 279) does the same to the pass's.
   const place = deskPlaceFor(pathname, t)
   const active = place ? null : deskGateFor(pathname)
   const due = useTodaySummary().data?.total ?? 0

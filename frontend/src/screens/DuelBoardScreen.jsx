@@ -7,7 +7,7 @@ import { stationFor } from '../config/stations'
 import { apiJson } from '../lib/api'
 import { errorKey } from '../domain/duel'
 
-// ── 対戦の番付 — the Elo board, apart from the 番付 (plan 276, L2) ──
+// ── 対戦の番付 — the Elo board, apart from the 番付 (plan 279, L2) ──
 // The 番付 ranks XP, which pays study; the Elo ranks sprints, and the
 // owner kept them apart. Same drawing as the 番付's whole board: the
 // medal roundels, the name, the figure at the edge -- the top of the

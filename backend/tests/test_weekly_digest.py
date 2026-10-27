@@ -158,7 +158,7 @@ def test_messages_are_counted_by_kind_and_card_and_never_read():
 
 
 def test_duels_are_counted_and_name_nobody():
-    # Plan 276: the sprints by what they were played against, how they
+    # Plan 279: the sprints by what they were played against, how they
     # end, and the friends' and reports' gestures by kind -- never a
     # username, never who reported whom.
     conn = db_conn()

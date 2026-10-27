@@ -1,5 +1,5 @@
 """
-対戦 — the duels' tables (plan 276).
+対戦 — the duels' tables (plan 279).
 
 Seven tables, each created here at import, each closed to the Data API
 in the transaction that creates it (core/rls.py), each in its own

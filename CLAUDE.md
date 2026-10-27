@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **277**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **280**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -71,7 +71,7 @@ runtime purpose.
   `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
   plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
   session's lines are cut into), `PAPER_REV` in `study/duel_paper.py`
-  (a duel's sprint, plan 276: a duel keeps the paper it was dealt).
+  (a duel's sprint, plan 279: a duel keeps the paper it was dealt).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
   retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
@@ -243,7 +243,7 @@ runtime purpose.
   learner reads and still sees their own place; a row's card shows what
   the board already does (XP, level, places, division) and published
   decks, never the streak, the JLPT level or the card's name.
-- **A duel is timed by the server and told by its replies (plan 276).**
+- **A duel is timed by the server and told by its replies (plan 279).**
   `study/duels.py` serves a sprint one question at a time, notes when,
   and scores each answer as it arrives; a reply says right or wrong and
   never which choice was right, and the corrections open only once the
@@ -601,7 +601,7 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
 python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
-python -m scripts.read_reports         # the duels' reports, who reported whom (plan 276)
+python -m scripts.read_reports         # the duels' reports, who reported whom (plan 279)
 python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
 

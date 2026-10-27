@@ -59,7 +59,7 @@ day, the learning modes, the dictionary without the analyzer, today's
 run, the full profile, FREE_DECKS decks and FREE_CARDS cards. Pass:
 unlimited credits, the practice modes, the analyzer, PASS_DECKS and
 PASS_CARDS. Practice never spends credits; a ranked duel's departure
-and a duel's corrections do (plan 276, pay() below).
+and a duel's corrections do (plan 279, pay() below).
 There is no purchase flow yet (HAS_STORE in the frontend's
 domain/credits.js), so `plan` is only ever set by hand.
 
@@ -127,7 +127,7 @@ ENFORCE = os.environ.get("CREDITS_ENFORCE") == "1"
 
 REASONS = ("refill", "review", "grant", "adjust", "duel", "duel_review")
 # What a fare is charged for. A review is spend()'s; the duels (plan
-# 276) pay through pay(): `duel`, a ranked duel's departure, and
+# 279) pay through pay(): `duel`, a ranked duel's departure, and
 # `duel_review`, a duel's corrections. Each its own reason, so the
 # ledger and shadow mode's refusals say what was paid for -- and the
 # offer's week, which counts reviews, never counts a duel.

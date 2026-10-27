@@ -9,7 +9,7 @@ import { playClick } from '../../lib/audio'
 import { errorKey } from '../../domain/duel'
 import { refreshDuels } from '../../stores/duels'
 
-// ── 対戦 — challenge a friend, without leaving the hall (plan 276, F2) ──
+// ── 対戦 — challenge a friend, without leaving the hall (plan 279, F2) ──
 // The sheet the hall's « Défier un ami » opens: a request waiting, the
 // friends as the radio rows a sheet's list is drawn with, the way to add
 // one by their exact handle, later or live, and the one action. Only a

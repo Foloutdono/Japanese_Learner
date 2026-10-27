@@ -44,7 +44,7 @@ already looking.
                   kind, who asked for an answer, the cards reported most.
                   Never the words, which this page on GitHub is no place
                   for: scripts/read_feedback.py reads them, run by a person.
- 10  DUELS        the sprints between learners (plan 276): played, by
+ 10  DUELS        the sprints between learners (plan 279): played, by
                   what against, how they end, how long a challenge
                   waits, the friendships and the reports by reason --
                   never who reported whom (scripts/read_reports.py).
@@ -512,7 +512,7 @@ def messages(cur, days: int) -> str:
 
 
 def duels(cur, days: int) -> str:
-    """The duels (plan 276), from their events: the sprints played by
+    """The duels (plan 279), from their events: the sprints played by
     what they were played against, how the duels ended, and the friends'
     and reports' gestures, by kind only."""
     cur.execute(

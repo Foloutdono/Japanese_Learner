@@ -1,4 +1,4 @@
-"""対戦 — the sprint's questions (plan 276, study/duel_paper.py).
+"""対戦 — the sprint's questions (plan 279, study/duel_paper.py).
 
 A choice is told apart by understanding, never by its look: the guards
 the mock exam's seeds are held to (study/exam_tells.py,

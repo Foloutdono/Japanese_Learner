@@ -49,7 +49,7 @@ from a guess about what looks old:
   the two job tables claim locks, deleted on success -- so a row that
                      is still there long after its last update is from
                      a run that died. Neither is a lock any more.
-  pvp_duels          (plan 276) a duel that expired, was declined or
+  pvp_duels          (plan 279) a duel that expired, was declined or
                      cancelled before anybody played it: a paper and two
                      empty seats, read by no screen past the history's
                      first page. Gone UNPLAYED_DUEL_DAYS after it ended.
@@ -123,7 +123,7 @@ BY_AGE = [
 ]
 
 
-# (plan 276) A duel nobody played, this long after it ended.
+# (plan 279) A duel nobody played, this long after it ended.
 UNPLAYED_DUEL_DAYS = 30
 
 

@@ -306,7 +306,7 @@ EVENTS: dict[str, frozenset[str]] = {
     "api_error":      frozenset({"path", "status"}),
     "install_prompt": frozenset({"outcome"}),
 
-    # ── 対戦 — the duels (plan 276) ──────────────────────────────
+    # ── 対戦 — the duels (plan 279) ──────────────────────────────
     # Written server-side by routes/pvp.py. Never a username, never who
     # played whom: what was done, at which level, and how it ended.
     # `against` is how the opponent was found (a friend; a ranked run
@@ -383,7 +383,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
                                          "deep_analysis", "exam_paper", "line_translation"})},
     # What a refused fare was for (core/credits.FARES): a review, or
-    # since plan 276 a ranked duel's departure or a duel's corrections.
+    # since plan 279 a ranked duel's departure or a duel's corrections.
     "fare_blocked": {"kind": frozenset({"review", "duel", "duel_review"})},
     "pvp_friend": {"action": frozenset({"request", "accept", "refuse", "withdraw", "remove",
                                         "block", "unblock"})},

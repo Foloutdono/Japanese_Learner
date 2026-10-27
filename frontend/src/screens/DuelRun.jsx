@@ -11,7 +11,7 @@ import { LIMIT_MS, SPRINT_MS, duelErrorKey, errorKey, points, totalAt } from '..
 import { refreshDuels } from '../stores/duels'
 import { applyXpGain } from '../stores/profileSummary'
 
-// ── 対戦 — a duel, from its ticket to its result (plan 276) ────────
+// ── 対戦 — a duel, from its ticket to its result (plan 279) ────────
 // The stage, as the mock exam's paper is drawn: the run's head, the
 // page holding the question, the answers docked under the thumb in sumi,
 // the level bar at the foot. Before it the duel's ticket (D1), after it

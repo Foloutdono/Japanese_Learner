@@ -1,4 +1,4 @@
-// ── 対戦 — the sprint's rules, as the client draws them (plan 276) ──
+// ── 対戦 — the sprint's rules, as the client draws them (plan 279) ──
 // The server keeps the clock and the score (study/duel_*.py): every
 // answer is timed from when it served the question, so nothing here
 // decides a point. The client only draws what a question is worth while

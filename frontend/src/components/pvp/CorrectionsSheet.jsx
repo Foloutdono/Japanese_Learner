@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { Loading } from '../ui/Loading'
 
-// ── 対戦 — a duel's detail and corrections (plan 276) ──────────────
+// ── 対戦 — a duel's detail and corrections (plan 279) ──────────────
 // Bought for a credit once the duel is settled (study/duels.review):
 // every question either player met, as the mock exam's result lists
 // them (the miss row, plan 171) -- its number and its prompt, the four

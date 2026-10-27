@@ -1,5 +1,5 @@
 """
-対戦 — a duel's life (plan 276).
+対戦 — a duel's life (plan 279).
 
 A duel is a sprint (study/duel_paper.py): sixty seconds of quick
 questions, the same ones in the same order for both players. The server
@@ -89,7 +89,7 @@ WINDOWS = (200, 400)
 # The duels a learner may have unresolved at once.
 OPEN_MAX = 20
 # Namespace half of the advisory locks taken here (cf. routes/favorites).
-DUEL_LOCK = 931_276
+DUEL_LOCK = 931_279
 # What the hall shows: the last results, the Elo's curve over its last
 # ranked duels.
 RECENT = 5

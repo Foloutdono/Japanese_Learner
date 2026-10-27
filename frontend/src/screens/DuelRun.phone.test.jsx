@@ -5,7 +5,7 @@ import { LangProvider } from '../LangContext'
 import { StageFrame } from '../components/chrome/Shell'
 import '../index.css'
 
-// ── 対戦 — a duel's run against its server (plan 276) ──────────────
+// ── 対戦 — a duel's run against its server (plan 279) ──────────────
 // What the run must never get wrong: a reply says right or wrong and
 // never which choice was right (the paper is shared, and the corrections
 // are sold once the duel is settled); a word's meanings are read in the

@@ -1,4 +1,4 @@
-// ── 対戦 — the sprint's rules as the client draws them (plan 276) ──
+// ── 対戦 — the sprint's rules as the client draws them (plan 279) ──
 // The server keeps the clock and the score; what the client draws must
 // agree with it, and every refusal it can answer with must say
 // something in both languages rather than the server's English.

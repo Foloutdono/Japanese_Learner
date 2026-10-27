@@ -1,4 +1,4 @@
-"""対戦 — friends, blocks and reports (plan 276, study/duel_friends.py).
+"""対戦 — friends, blocks and reports (plan 279, study/duel_friends.py).
 
 Two learners at least, through the routes: one asks, the other answers.
 Before a request is accepted each side sees the other's username alone;

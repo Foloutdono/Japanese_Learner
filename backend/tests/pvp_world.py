@@ -1,4 +1,4 @@
-"""対戦 — what the duels' tests share (plan 276): three learners, a clock
+"""対戦 — what the duels' tests share (plan 279): three learners, a clock
 the tests move, and a way to play a run as the server times it.
 
 A is DEV_USER_ID (the requests' own identity), B is conftest's

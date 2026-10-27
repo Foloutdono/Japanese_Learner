@@ -117,7 +117,7 @@ describe('the profile at phone width (plan 143)', () => {
     await mount()
     // The doors stand straight under the card (the owner's call after
     // the first round of plan 143), above the stamp book, and the duels'
-    // under them (plan 276, E1); the tickets' door under the stamp book
+    // under them (plan 279, E1); the tickets' door under the stamp book
     // they were earned in (plan 191), and the agenda's under the tickets'
     // (plan 202).
     const [duels, tickets, agendaDoor] = $$('.records--one')

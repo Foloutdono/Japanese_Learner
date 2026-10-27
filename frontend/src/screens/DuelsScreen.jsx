@@ -12,7 +12,7 @@ import { FriendSheet } from '../components/pvp/FriendSheet'
 import { EloCurve, EloMove, Verdict } from '../components/pvp/parts'
 import { LEVEL_PATH, hoursLeft, nameOf } from '../domain/duel'
 
-// ── 対戦 — the duels' hall (plan 276, H3) ──────────────────────────
+// ── 対戦 — the duels' hall (plan 279, H3) ──────────────────────────
 // Behind the holder's door: the two platforms as cards (a ranked sprint
 // against a stranger near your Elo, two credits; a friend, free and
 // unranked), the console's band over what waits on the learner, what

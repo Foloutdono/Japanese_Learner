@@ -11,7 +11,7 @@ import { playClick } from '../lib/audio'
 import { errorKey } from '../domain/duel'
 import { refreshDuels } from '../stores/duels'
 
-// ── 友 — the friends (plan 276, F1) ──────────────────────────────
+// ── 友 — the friends (plan 279, F1) ──────────────────────────────
 // A page behind the hall: a learner is found by their exact handle,
 // asked when the search is sent (thirty searches in ten minutes, and a
 // handle half typed finds nobody anyway); the requests waiting with

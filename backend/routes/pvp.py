@@ -1,5 +1,5 @@
 """
-対戦 — the duels' routes (plan 276).
+対戦 — the duels' routes (plan 279).
 
 Thin, as every router here is: the friends are study/duel_friends.py's,
 a duel's life study/duels.py's, the Elo study/duel_elo.py's and the

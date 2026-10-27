@@ -1,5 +1,5 @@
 """
-The duels' reports (plan 276), newest first, as markdown.
+The duels' reports (plan 279), newest first, as markdown.
 
     python -m scripts.read_reports                  # the last 30 days
     python -m scripts.read_reports --days 90

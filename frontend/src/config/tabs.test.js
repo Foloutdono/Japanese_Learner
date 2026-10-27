@@ -99,12 +99,12 @@ describe('the rail', () => {
     for (const p of getDeskPlaces(t)) expect(onDeskRail(p.path), p.path).toBe(true)
     expect(onDeskRail('/learn/vocab')).toBe(true)
     expect(onDeskRail('/learn/vocab/themes')).toBe(false)
-    // The duels' hall is a gate on the desk (plan 276); its pages are not.
+    // The duels' hall is a gate on the desk (plan 279); its pages are not.
     expect(onDeskRail('/profile/duels')).toBe(true)
     expect(onDeskRail('/profile/duels/friends')).toBe(false)
   })
 
-  it('stands the duels\' gate after Practice, on the phone\'s path, lit behind it too (plan 276)', () => {
+  it('stands the duels\' gate after Practice, on the phone\'s path, lit behind it too (plan 279)', () => {
     expect(getDeskGates(t).map(g => g.id)).toEqual(['today', 'learn', 'practice', 'duels', 'dictionary', 'profile'])
     expect(getDeskGates(t).find(g => g.id === 'duels').path).toBe('/profile/duels')
     // The tab bar's five are untouched: the phone opens the duels from the holder.

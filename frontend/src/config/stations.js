@@ -77,7 +77,7 @@ const STATIONS = {
   '/profile/stats':         { code: 'TO', kana: 'とうけい' },
   // 番付 (plan 262): the whole board, behind the profile's.
   '/profile/banzuke':       { code: 'BZ', kana: 'ばんづけ' },
-  // 対戦 (plan 276): the duels, behind the profile's door.
+  // 対戦 (plan 279): the duels, behind the profile's door.
   '/profile/duels':         { code: 'TS', kana: 'たいせん' },
 
   // 本日 — the daily queue. Not a line on the map (see config/tabs.js's own

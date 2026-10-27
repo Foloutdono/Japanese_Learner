@@ -118,7 +118,7 @@ PLAN = [
     ("banzuke_division",    "user_id = %(user)s",       "the board's division, this week and the last (plan 262)"),
     ("banzuke_rank",        "user_id = %(user)s",       "the board's place at the start of the day, for the moves"),
     ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
-    # 対戦 (plan 276). A duel whose only real player is this learner goes
+    # 対戦 (plan 279). A duel whose only real player is this learner goes
     # whole (the cascade takes its rows, a ghost's copy with them), read
     # off pvp_entries, so it comes first; a duel shared with another
     # learner stays theirs, and only this learner's entry goes.

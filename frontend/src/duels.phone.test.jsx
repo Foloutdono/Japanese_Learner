@@ -6,7 +6,7 @@ import { LangProvider } from './LangContext'
 import { StageFrame } from './components/chrome/Shell'
 import './index.css'
 
-// ── 対戦 — the duels' screens on a phone (plan 276) ─────────────────
+// ── 対戦 — the duels' screens on a phone (plan 279) ─────────────────
 // The screens the owner picked, against a server answering as
 // routes/pvp.py does. The hall (H3, its Elo the curve, G1): the figure,
 // the place and the last twenty duels over where the placement started

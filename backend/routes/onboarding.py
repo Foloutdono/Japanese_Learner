@@ -292,7 +292,7 @@ def answer_climb(payload: ClimbPayload, user_id: str = Depends(get_user_id)):
     where to board. Never the answer key.
 
     The verdict is also the learner's starting Elo for the duels (plan
-    276), noted here while no ranked duel has been played."""
+    279), noted here while no ranked duel has been played."""
     step = walk(payload.seed, payload.answers, stop=payload.stop)
     if step.get("done"):
         _note_placement(user_id, step["recommendedLevel"])

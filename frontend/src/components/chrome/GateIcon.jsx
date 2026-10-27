@@ -144,7 +144,7 @@ function SettingsGlyph(props) {
   )
 }
 
-// 対戦 — the duels, the desk's sixth gate (plan 276): the two ways of the
+// 対戦 — the duels, the desk's sixth gate (plan 279): the two ways of the
 // duel's ticket (⇄), the sign it already prints between the two players
 // (the owner's pick A of three shot in the rail).
 function DuelsGlyph(props) {

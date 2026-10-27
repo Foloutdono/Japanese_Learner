@@ -110,7 +110,7 @@ def test_discovery_covers_every_shape_of_scoping_in_the_plan():
     ]
     # video_session_jobs and pvp_duels are the subquery-scoped entries,
     # and neither can hold a user its own table does not: a job's parent
-    # video_sessions, a duel's players in pvp_entries (plan 276).
+    # video_sessions, a duel's players in pvp_entries (plan 279).
     assert unhandled == ["video_session_jobs", "pvp_duels"], unhandled
 
 

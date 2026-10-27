@@ -3,7 +3,7 @@ import { useDuels } from '../../stores/duels'
 import { DUELS_PATH, DuelsDoor } from './DuelsDoor'
 import { Trend } from './parts'
 
-// ── 対戦 — the Elo, an insert in the holder (plan 276, L1) ─────────
+// ── 対戦 — the Elo, an insert in the holder (plan 279, L1) ─────────
 // The holder's inserts name themselves without a caption: this one is
 // the duels' door with the learner's Elo laid out under it -- the
 // figure, the place, the last twenty duels as a line and the record --

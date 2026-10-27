@@ -1,5 +1,5 @@
 -- dashboard: Tsuji — 足跡 · Duels
--- description: Les duels entre apprenants (plan 276) : des sprints de 60 s, entre amis (gratuits, sans Elo) ou classés (2 crédits, l'Elo). Lancés et terminés, contre qui, combien de temps un défi attend, les corrections achetées, les crédits dépensés, l'Elo, les amitiés et les signalements, comptés par raison seulement : qui a signalé qui se lit avec backend/scripts/read_reports.py, jamais ici.
+-- description: Les duels entre apprenants (plan 279) : des sprints de 60 s, entre amis (gratuits, sans Elo) ou classés (2 crédits, l'Elo). Lancés et terminés, contre qui, combien de temps un défi attend, les corrections achetées, les crédits dépensés, l'Elo, les amitiés et les signalements, comptés par raison seulement : qui a signalé qui se lit avec backend/scripts/read_reports.py, jamais ici.
 
 -- ==== question
 -- title: Sprints lancés par semaine

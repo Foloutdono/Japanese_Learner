@@ -1,6 +1,6 @@
 import { createRemoteStore } from './remote'
 
-// ── 対戦 — the duels at a glance, shared (plan 276) ──────────────
+// ── 対戦 — the duels at a glance, shared (plan 279) ──────────────
 // GET /api/pvp: the learner's Elo and record, the duels waiting on
 // them, the ones running and the last ones played, the friends and the
 // requests waiting. Read by the door into the duels wherever it stands
