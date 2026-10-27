@@ -1,5 +1,5 @@
 """
-Sets up the owner's bell (plan 276, core/bell.py): checks the forum's
+Sets up the owner's bell (plan 278, core/bell.py): checks the forum's
 webhook, finds the forum's tags, creates the ones it lacks, and prints
 the DISCORD_FEEDBACK_TAGS line the backend needs.
 
@@ -71,7 +71,7 @@ def trial() -> int:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Set up the owner's Discord bell (plan 276).")
+    ap = argparse.ArgumentParser(description="Set up the owner's Discord bell (plan 278).")
     ap.add_argument("--yes", action="store_true", help="create the tags the forum lacks (needs Manage Channels)")
     ap.add_argument("--test", action="store_true", help="post a trial thread through the webhook")
     args = ap.parse_args()

@@ -7,6 +7,7 @@ import {
   blockProblem, clashWith, clock, daysLabel, dayName, durationParts, fromInput, toInput,
 } from '../../domain/agenda'
 import { Sheet } from '../chrome/Sheet'
+import { CalendarIcon } from '../ui/Icons'
 import { Chip, Chips, Seg } from '../chrome/Console'
 
 const WEEKEND = [5, 6]
@@ -87,7 +88,7 @@ export function AgendaEditor({ block, index, blocks, onSave, onDelete, onClose }
   const length = draft.start != null && draft.end != null && draft.end > draft.start ? durationParts(draft.end - draft.start) : null
 
   return (
-    <Sheet open onClose={onClose} jp={title} label={title} className="agd-sheet" initialFocus=".agd-subject--on" dismiss>
+    <Sheet open onClose={onClose} title={title} icon={CalendarIcon} label={title} className="agd-sheet" initialFocus=".agd-subject--on" dismiss>
       <form className="agd-form" onSubmit={submit} noValidate>
         <div className="agd-subjects" role="radiogroup" aria-label={t.agdSubject}>
           {[['learn', t.tabLearn], ['practice', t.tabPractice]].map(([group, name]) => (

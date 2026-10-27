@@ -1484,7 +1484,7 @@ def report_deck(deck_id: str, payload: ReportPayload,
     threshold: the row is a queue for a person to read. Reporting twice
     is one report — the UNIQUE makes that structural rather than a rule
     the client has to remember. A learner's first report of a deck rings
-    the owner's bell (core/bell.py, plan 276); a changed reason does not.
+    the owner's bell (core/bell.py, plan 278); a changed reason does not.
     """
     if payload.reason not in REPORT_REASONS:
         raise HTTPException(status_code=400, detail="Unknown reason")

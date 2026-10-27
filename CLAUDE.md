@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **277**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **279**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -269,7 +269,7 @@ runtime purpose.
   them). The context beside it is the trail's closed classes, shown to
   the learner before sending, and a reply's address is read from the
   account, never taken from the request. Each message rings the owner's
-  private Discord forum (`core/bell.py`, plan 276), tagged by its kind:
+  private Discord forum (`core/bell.py`, plan 278), tagged by its kind:
   the post carries the kind, the row's number and the closed classes,
   and is handed the count of characters, never the words, the address
   or the author (`tests/test_bell.py`, and `privacy.html` says so).
@@ -580,7 +580,7 @@ after `--seen`, `--done`, `--drop` or `--reopen`):
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
-python -m scripts.read_feedback        # what learners wrote to us (plan 222), the open ones by kind (plan 276)
+python -m scripts.read_feedback        # what learners wrote to us (plan 222), the open ones by kind (plan 278)
 python -m scripts.read_feedback --id 412   # one message; --done 412 marks it handled
 python -m scripts.discord_bell         # the Discord bell's webhook and forum tags: report; --yes creates the tags, --test rings
 python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)

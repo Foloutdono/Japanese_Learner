@@ -86,7 +86,7 @@ def test_an_address_that_could_not_be_read_says_whom_to_find():
     assert f"address not read — user {USER}" in read_feedback.render(row)
 
 
-# ── The owner's queue (plan 276) ──────────────────────────────
+# ── The owner's queue (plan 278) ──────────────────────────────
 
 def _mark(ids, triage):
     conn = db_conn()

@@ -3533,7 +3533,8 @@ button:focus-visible {
   padding: 28px 20px 28px 18px;
 }
 /* 標 (plan 174, the owner's pick T2 of the canvas "Tsuji — harmony"):
-   a screen's own name is serif (.bar__title, .sheet__jp) and every
+   a screen's own name is serif (.bar__title; a sheet's is its ring and
+   words since plan 277) and every
    name under it — a plate, a platform, a deck, a stop, a paper — is
    set as a station prints its names: the display face, bold, one size
    a rank. One rank of names had come in three faces (a serif plate, a
@@ -7029,6 +7030,7 @@ textarea:focus-visible {
 }
 .sheet {
   --sheet-cap-ink: var(--text-secondary);
+  --sheet-ink: var(--text-primary);
   position: fixed;
   left: 0;
   right: 0;
@@ -7074,6 +7076,7 @@ textarea:focus-visible {
    named on the block (the ink guard's escape hatch, on purpose). */
 .sheet--sumi {
   --sheet-cap-ink: var(--text-on-panel-soft);
+  --sheet-ink: var(--text-on-panel);
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border-color: color-mix(in srgb, var(--pass-ink) 45%, transparent);
@@ -7085,7 +7088,36 @@ textarea:focus-visible {
   border-radius: var(--r-pill);
   background: color-mix(in srgb, currentcolor 30%, transparent);
 }
-.sheet__head { display: flex; align-items: baseline; gap: var(--sp-3); }
+/* The head (plan 277, the owner's pick C5 on the canvas "Titres —
+   options"): a small ring with the sheet's icon, then its name in
+   words, the display face at the lead rung, and a quiet line under it
+   where the old caption sat beside the name. The ring is the
+   analyser's roundel at its own 30px, in the pigment of the sheet's
+   line (Sheet's `line`) or, for a sheet of no line, the caption's
+   neutral ink. */
+.sheet__head { display: flex; align-items: center; gap: var(--sp-3); }
+.sheet__mark {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-color, var(--sheet-cap-ink));
+  color: color-mix(in srgb, var(--line-color, var(--sheet-cap-ink)) 60%, var(--sheet-ink));
+}
+.sheet__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.sheet__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1.2;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.sheet__sub { margin: 0; font-size: var(--fs-caption); color: var(--sheet-cap-ink); overflow-wrap: anywhere; }
 /* The handle and the head are the mouse's grip on the sheet
    (hooks/useSheetDrag): a push down from either shuts it, so neither
    is text to select and both say so under the cursor. */
@@ -7093,6 +7125,9 @@ textarea:focus-visible {
 .sheet__head { cursor: grab; user-select: none; }
 .sheet--dragging .sheet__handle,
 .sheet--dragging .sheet__head { cursor: grabbing; }
+/* The stacked heads a few sheets draw themselves -- a caption over a
+   question (RatingSheet, TransferSheet, ExplainPanel): not the head
+   above, which plan 277 reworked, and kept as they were drawn. */
 .sheet__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-heading); line-height: 1.1; }
 .sheet__cap {
   font-family: var(--font-display);
@@ -7102,25 +7137,6 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--sheet-cap-ink);
 }
-/* 歌 — the lyrics import's head (plan 264; option A of three drawn,
-   the owner's pick of 2026-10-20): the song's icon in the analyser's
-   roundel, and the title in words at a card title's size, where every
-   other sheet prints a kanji over a caption. */
-.lyr-sheet .sheet__head { align-items: center; }
-.lyr-sheet .sheet__jp { display: inline-flex; line-height: 1; }
-/* Two classes: .wmap-roundel, later in the file, sets its own 30px. */
-.sheet__head .lyr-sheet__badge {
-  --line-color: var(--line-kaiseki);
-  width: 40px;
-  height: 40px;
-}
-.lyr-sheet .sheet__cap {
-  font-size: var(--fs-title);
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--text-primary);
-}
-
 /* ── the console: chips over a field with a count ── */
 .console {
   background: var(--surface);
@@ -13937,6 +13953,94 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .reading-share--core .reading-share__pct { color: var(--sel-ink); }
 
+/* ── 読み — a register's name as a door (plan 276) ──
+   On a kanji card the names over the readings open the sheet that says
+   what the two readings are (ReadingsHelp). The label it was, in its
+   ink and at its rung, with the ⓘ beside it; the padding a finger needs
+   is taken back by the margin, so the readings under it do not move. */
+.reading-group__door {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: calc(-1 * var(--sp-2)) calc(-1 * var(--sp-3));
+  padding: var(--sp-2) var(--sp-3);
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.reading-group__door:hover,
+.reading-group__door:focus-visible { color: var(--text-primary); }
+
+/* The sheet itself, on the sheet's own surface and inks: each reading
+   by its plain name, what it is, and a word of the card's kanji with
+   the kanji and its sound picked out by ink and weight (the sheet is a
+   portal, out of reach of the line's pigment); then the card's marks. */
+.readings-help { display: flex; flex-direction: column; gap: var(--sp-5); }
+.readings-help__row { display: flex; flex-direction: column; gap: var(--sp-1); }
+.readings-help__name {
+  margin: 0;
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+.readings-help__name-jp {
+  margin-left: var(--sp-3);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.readings-help__text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.readings-help__eg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  margin: var(--sp-2) 0 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  color: var(--text-secondary);
+}
+.readings-help__hit { font-weight: 700; color: var(--text-primary); }
+.readings-help__gloss {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+}
+.readings-help__marks {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-3) var(--sp-4);
+  margin: 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.readings-help__mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.readings-help__mark--jp { font-family: var(--font-jp); }
+.readings-help__unit { font-size: var(--fs-caption); font-weight: 500; }
+.readings-help__means { margin: 0; text-wrap: pretty; }
+@media (prefers-reduced-motion: reduce) {
+  .reading-group__door { transition: none; }
+}
+
 .meaning-display {
   text-align: left;
   /* Declared here, set per card by MeaningDisplay. The default keeps
@@ -14181,6 +14285,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
   margin-top: var(--sp-4);
   min-height: 1em;
+}
+
+/* What a card asks, under its specimen (plan 276): a Kanji → meaning
+   front, whose back prints readings as well, says the meaning is the
+   answer. Plain case at the small rung, a step above the tracked hint
+   under it, so it reads as the question and the hint as the gesture. */
+.prompt-ask {
+  margin: var(--sp-4) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* Houses the sound-replay and dictionary-lookup buttons, pinned to
@@ -16647,23 +16762,33 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    becomes a band of sumi that carries the register's mark and sticks
    to the top of the list while its words pass under it. Ground and
    position do the dividing that a rung could not. */
-/* The head's own two marks: the kanji at reading size and what this
-   sheet is, in the caption register. The plate's three registers do
-   not appear here — the entry they belong to is still on screen
-   underneath. */
+/* The head's own two marks, as every sheet's head draws them since
+   plan 277 (the owner's pick C5): the kanji in the small ring, in the
+   dictionary's pigment, then what this sheet is in words. The plate's
+   three registers do not appear here — the entry they belong to is
+   still on screen underneath. */
 .dict-readings__glyph {
-  font-family: var(--font-jp);
-  font-size: var(--fs-heading);
+  --line-color: var(--line-jisho);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-color);
+  color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  font-weight: 700;
   line-height: 1;
-  color: var(--text-primary);
 }
 .dict-readings__title {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-lead);
   font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  line-height: 1.2;
+  color: var(--text-primary);
 }
 .dict-gates {
   display: flex;
@@ -22887,14 +23012,13 @@ form.stage__foot > .btn-primary {
   gap: var(--sp-1);
   padding: var(--sp-2) 0;
 }
-.bzp__division-title { display: flex; align-items: baseline; gap: var(--sp-3); }
-.bzp__division-jp {
+/* The division by its name alone (plan 277). */
+.bzp__division-title {
   font-family: var(--font-serif);
   font-size: var(--fs-title);
   font-weight: 700;
   color: var(--text-primary);
 }
-.bzp__division-latin,
 .bzp__podium-cap,
 .bzp__group {
   font-family: var(--font-display);
@@ -23104,19 +23228,10 @@ form.stage__foot > .btn-primary {
 .bzp__rung:last-child { border-bottom: 0; }
 .bzp__rung:hover,
 .bzp__rung:focus-visible { background: var(--overlay-hover); filter: none; }
-.bzp__rung-jp { width: 64px; font-family: var(--font-serif); font-weight: 700; }
+.bzp__rung-name { flex: 1; font-family: var(--font-serif); font-weight: 700; }
 .bzp__rung--on { background: var(--sel-wash); }
-.bzp__rung--on .bzp__rung-jp { color: var(--sel-ink); }
+.bzp__rung--on .bzp__rung-name { color: var(--sel-ink); }
 .bzp__rung--mine { box-shadow: inset 3px 0 0 var(--pass-ink); }
-.bzp__rung-latin {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
 .bzp__rung-n { font-size: var(--fs-caption); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 
 /* ── A row's card (LearnerSheet, plan 262) ──
@@ -23158,7 +23273,7 @@ form.stage__foot > .btn-primary {
 }
 .bz-card__fig small { font-size: var(--fs-caption); color: var(--text-secondary); }
 .bz-card__division { margin: 0; display: flex; align-items: baseline; justify-content: center; gap: var(--sp-3); color: var(--text-secondary); }
-.bz-card__division-jp { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); }
+.bz-card__division-name { font-family: var(--font-serif); font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); }
 .bz-card__decks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--surface-line); }
 .bz-card__deck {
   display: flex;
@@ -31022,8 +31137,11 @@ button.brd-stn { cursor: pointer; }
 /* The sheets portal out of the boarding's frame, so its short step
    (`@container brd`, above) never reaches their gate: a window shorter
    than 800px takes it to the boarding's own 56px here too, which keeps
-   the account's three fields (plan 270) whole on a short desk. */
+   the account's three fields (plan 270) whole on a short desk. The
+   head's ring (plan 277) stands 6px taller than the name it replaced,
+   so the sheet's rhythm takes a rung less there to keep them whole. */
 @media (max-height: 799px) {
+  .brd-sheet { gap: var(--sp-4); }
   .brd-sheet .btn-depart { min-height: 56px; }
 }
 /* On the sheet's surface the hours' cells stand on the paper, as they
@@ -34801,7 +34919,7 @@ button.brd-stn { cursor: pointer; }
   .bzp__ladder { grid-column: 2; grid-row: 4; }
   .bzp__seen { grid-column: 2; grid-row: 5; }
   .bzp__division-name { padding: var(--sp-3) 0; }
-  .bzp__division-jp { font-size: var(--fs-heading); }
+  .bzp__division-title { font-size: var(--fs-heading); }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
      The owner's pick B of four layouts drawn on the canvas "Tsuji — the

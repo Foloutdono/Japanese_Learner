@@ -1,7 +1,7 @@
 """
 What learners wrote to us (plan 222), as markdown, grouped by kind and
 newest first in each, and each message's place in the owner's queue
-(plan 276).
+(plan 278).
 
     python -m scripts.read_feedback                 # the open ones (new, seen), any age
     python -m scripts.read_feedback --id 412        # one message, whatever its state
@@ -26,7 +26,7 @@ open. A message is nothing but words, so it is read here, by a person,
 from the backend's Render Shell or a terminal holding DATABASE_URL --
 and nowhere else. docs/analytics/metabase/10-messages.sql counts them.
 
--- The bell (plan 276) ---------------------------------------------
+-- The bell (plan 278) ---------------------------------------------
 Each message rings the owner's private Discord forum (core/bell.py),
 tagged by its kind, with its number and closed classes and never its
 words; the post names the --id line that prints it here. The forum's

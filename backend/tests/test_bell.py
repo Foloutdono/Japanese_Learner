@@ -1,4 +1,4 @@
-"""The owner's bell (core/bell.py, plan 276).
+"""The owner's bell (core/bell.py, plan 278).
 
 These pin what privacy.html promises of it: a post carries a message's
 kind, number and closed classes, never its words, its reply address or

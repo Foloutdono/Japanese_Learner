@@ -57,7 +57,7 @@ a queue for a person (scripts/read_feedback.py), counted in Metabase
 (docs/analytics/metabase/10-messages.sql) and in the weekly digest.
 Erased with the account (routes/account.py).
 
-── The bell and the queue (plan 276) ────────────────────────
+── The bell and the queue (plan 278) ────────────────────────
 Each message rings the owner's private Discord forum once it is
 committed (core/bell.py), tagged by its kind, with its closed classes
 and how many characters it holds -- never its words, its address or
@@ -82,7 +82,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 KINDS = ("problem", "idea", "fault", "card", "question", "rating")
-# A message's place in the owner's queue (plan 276): new until a person
+# A message's place in the owner's queue (plan 278): new until a person
 # has read it, seen while it waits on a fix, then done or dropped.
 TRIAGE = ("new", "seen", "done", "dropped")
 # The early-access sheet (plan 269): the lifetime XP from which Today
@@ -144,7 +144,7 @@ def _ensure_schema() -> None:
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS question_id TEXT")
             # The early-access sheet's rating (plan 269).
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS rating SMALLINT")
-            # The owner's queue (plan 276). `status` is a failure's HTTP
+            # The owner's queue (plan 278). `status` is a failure's HTTP
             # status, so the message's own is `triage`.
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS triage TEXT NOT NULL DEFAULT 'new'")
             cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS triaged_at TIMESTAMPTZ")

@@ -1179,7 +1179,7 @@ ALTER TABLE event_daily ENABLE ROW LEVEL SECURITY;
 -- learner asks for an answer, never from the request. `rating` is the
 -- early-access sheet's one to five (plan 269). `exam_id`/`revision`/
 -- `question_id` name a mock-exam question reported from its flag (plan
--- 258). `triage` is the message's place in the owner's queue (plan 276,
+-- 258). `triage` is the message's place in the owner's queue (plan 278,
 -- feedback.TRIAGE: new, seen, done, dropped), set by read_feedback, and
 -- `triaged_at` when it left new. Erased with the account
 -- (routes/account.py).

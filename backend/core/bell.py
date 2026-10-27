@@ -1,5 +1,5 @@
 """
-The owner's bell (plan 276): a post in a private Discord forum for each
+The owner's bell (plan 278): a post in a private Discord forum for each
 message a learner writes (routes/feedback.py) and each deck reported
 in the library (routes/decks.report_deck), so a person knows there is
 something to read without having to go and look.
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 WEBHOOK_ENV = "DISCORD_FEEDBACK_WEBHOOK"
 TAGS_ENV = "DISCORD_FEEDBACK_TAGS"
 # Discord asks every client to name itself so.
-USER_AGENT = "DiscordBot (https://github.com/Foloutdono/Japanese_Learner, 276)"
+USER_AGENT = "DiscordBot (https://github.com/Foloutdono/Japanese_Learner, 278)"
 TIMEOUT = httpx.Timeout(5.0, connect=2.0)
 
 # The forum's tags, by key: a message's kind, a reported deck, and the
