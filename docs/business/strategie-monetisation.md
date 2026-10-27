@@ -21,7 +21,7 @@ base d'utilisateurs avec un taux de conversion bas.
 | | Free | Pro | Max |
 |---|---|---|---|
 | Prix | 0 € | 4,99 €/mois · 49,99 €/an | 7,99 €/mois · 69,99 €/an |
-| Recharge continue | 60/jour, arrêt à 90 | 120/jour, arrêt à 200 | illimité |
+| Recharge continue | 90/jour, arrêt à 120 | 180/jour, arrêt à 250 | illimité |
 | Révisions dues | 1 crédit | gratuites | gratuites |
 | Nouvelles cartes (kana compris) | 1 crédit | 1 crédit | incluses |
 | Pratique | 1 par phrase (lecture, dictée, traduction, composition), 2 par texte de compréhension, 2 par conversation | idem | incluse |
@@ -120,12 +120,12 @@ le but est que l'apprenant s'exerce et gagne des crédits en le faisant.
 **La cible** : un apprenant gratuit qui fait ses missions dispose d'environ
 **125 crédits par jour** : 100 révisions, et environ 25 phrases ou quelques
 textes dans les autres modes.
-La recharge en donne 60 ; les missions doivent donc apporter environ 65 par
+La recharge en donne 90 ; les missions doivent donc apporter environ 35 par
 jour.
 
-**Proposition de répartition** : trois missions journalières de 15 crédits,
-un bonus de 10 quand les trois sont faites (55 par jour), et des missions
-hebdomadaires d'environ 70 crédits au total (10 par jour). Ces montants sont
+**Proposition de répartition** : trois missions journalières de 8 crédits,
+un bonus de 6 quand les trois sont faites (30 par jour), et des missions
+hebdomadaires d'environ 35 crédits au total (5 par jour). Ces montants sont
 à ajuster avec les données de l'early access.
 
 **Journalières** (trois par jour, choisies selon le profil) :
@@ -273,7 +273,7 @@ l'abonnement, qui ne coûte rien à simuler.
   baisser le prix.
 - La règle, vérifiée dans le tableur : acheter en packs ce qu'un mois Pro
   apporte coûte au moins 1,5 fois le Pro mensuel, même pendant une promo.
-  Avec la grille proposée, c'est 5,5 fois (3,7 fois avec une promo à +50 %).
+  Avec la grille proposée, c'est 6,9 fois (4,6 fois avec une promo à +50 %).
 - Le prix en euros est affiché à côté de chaque montant en crédits, sans
   pression à l'achat (pas de faux compte à rebours). Ce sont les principes
   des autorités européennes de consommation sur les monnaies virtuelles
