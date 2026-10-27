@@ -302,7 +302,10 @@ environ 45 % des coûts fixes, et leur baisse est prévue fin 2026 : à 20 $ par
 mois au lieu de 100, le seuil tomberait à environ 850 actifs. Le nouveau
 montant est à saisir dans « Fixed costs » quand il sera connu.
 
-## Acquisition payante
+## Acquisition payante (en attente)
+
+En attente depuis le 27 octobre 2026 : aucun budget n'est engagé, le plan
+ci-dessous est prêt pour le jour où il le sera.
 
 Le but : acheter vite un noyau dur d'apprenants convaincus, puis réduire la
 publicité quand le bouche-à-oreille et le contenu organique (SEO, vidéos
