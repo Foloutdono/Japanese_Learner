@@ -716,6 +716,13 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "なに"
             continue
 
+        # 箱 is はこ, "box", on its own and after a number (その箱, 一箱,
+        # 二箱): ばこ only where a noun makes it a compound, 道具箱 (plan 272).
+        if s == "箱" and r == "ばこ" and (i == 0 or tokens[i - 1].get("pos") not in ("noun", "prefix")
+                                          or _numeral_value(prev(i)) is not None):
+            out[i] = "はこ"
+            continue
+
         # 再来月, the month after next: げつ, as in 来月 (plan 272).
         if s == "月" and r == "がつ" and prev(i) in ("再来", "さ来"):
             out[i] = "げつ"
@@ -762,8 +769,9 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
 
         # 四月一日: the first of a month is ついたち, never いちにち, "one
         # day" (plan 272).
-        if s == "一日" and prev(i).endswith(("月", "がつ")):
-            out[i] = "ついたち"
+        if s == "一日" and (prev(i).endswith(("月", "がつ")) or (
+                prev(i) == "の" and i >= 2 and len(surf[i - 2]) > 1 and surf[i - 2].endswith("月"))):
+            out[i] = "ついたち"         # (来月の一日から, too)
             continue
 
         # 日曜日: 日 after 曜 is び.
@@ -864,8 +872,9 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
     # where UniDic's reading does not even begin with the number's.
     for i in range(n):
         s = surf[i]
-        if s == "一日" and i > 0 and surf[i - 1].endswith(("月", "がつ")):
-            continue                     # 四月一日, ついたち (above)
+        if s == "一日" and i > 0 and (surf[i - 1].endswith(("月", "がつ")) or (
+                surf[i - 1] == "の" and i >= 2 and len(surf[i - 2]) > 1 and surf[i - 2].endswith("月"))):
+            continue                     # 四月一日, 来月の一日: ついたち (above)
         for split in range(len(s) - 1, 0, -1):
             num, ctr = s[:split], s[split:]
             if not all(c in _NUMERAL_CHARS - {"何"} for c in num):

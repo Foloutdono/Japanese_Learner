@@ -332,6 +332,7 @@ _GLOSSES = {
              "fr": "(après 〜て, puis une autre action) chaque fois que … : 確かめてはため息をつく, vérifier encore et encore en soupirant"},
     "つった": {"en": "(rough) って言った said short: なんつった, what did you say?",
               "fr": "(familier, rude) って言った abrégé : なんつった, qu'est-ce que t'as dit ?"},
+    "中央線": {"en": "the Chūō Line (a railway line)", "fr": "la ligne Chūō (une ligne de chemin de fer)"},
     "かけ_piece": {"en": "(counter) a piece, a knob: 生姜1かけ, a knob of ginger; にんにく1かけ, a clove of garlic",
                   "fr": "(compteur) un morceau : 生姜1かけ, un morceau de gingembre ; にんにく1かけ, une gousse d'ail"},
     "おや": {"en": "oh?, well!: mild surprise", "fr": "tiens !, oh ? : une légère surprise"},
@@ -596,6 +597,8 @@ def gloss(morphemes, i: int) -> dict | None:
             and morphemes[i - 1].surface == "し" and morphemes[i - 2].surface == "と" and morphemes[i - 2].pos == "particle" \
             and morphemes[i - 3].pos in ("verb", "auxiliary") and morphemes[i - 3].cform.startswith(("終止形", "連体形")):
         key = "て_toshite"                   # だまし取ったとして、逮捕 (plan 272)
+    elif m.surface == "中央線" and m.proper:
+        key = "中央線"                       # (plan 272)
     elif m.surface in ("からっ", "辛っ") and i + 1 < len(morphemes) and morphemes[i + 1].pos == "symbol":
         key = "からっ"                       # うわ、からっ！ (plan 272)
     elif m.surface == "い" and m.pos == "particle" and i > 0 and morphemes[i - 1].surface == "だ" \

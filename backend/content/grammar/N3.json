@@ -26755,8 +26755,8 @@
       },
       {
         "jp": "この店は魚のほかに、肉も売っている。",
-        "en": "Besides fish, this shop sells vegetables too.",
-        "fr": "En plus du poisson, ce magasin vend aussi des légumes.",
+        "en": "Besides fish, this shop sells meat too.",
+        "fr": "En plus du poisson, ce magasin vend aussi de la viande.",
         "register": "casual",
         "contrast": true
       },

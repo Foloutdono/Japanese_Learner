@@ -1058,6 +1058,8 @@ describe('the long videos (plan 233)', () => {
     expect(dictionaryForms('ふったら')).toContain('ふる')
     expect(shortGloss('please (give me, please do)')).toBe('please')
     expect(shortGloss('to be, to have (used for inanimate objects)')).toBe('to be, to have')
+    // (a later sense that needs its note is left out: no bare "to take")
+    expect(shortGloss('to drink, to take (medicine)')).toBe('to drink')
     const chips = longPlan('grammar', files, { level: 'N5', point: '〜たいです' }).items.filter(x => x.type === 'gex').flatMap(x => x.chips)
     const of = t => chips.find(c => c.t === t)?.gloss
     expect(of('飲みたい')).toBe('to drink')

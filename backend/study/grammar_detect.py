@@ -2878,6 +2878,22 @@ def _placed_in_spans(tokens):
     return out
 
 
+def _likeness_spans(tokens):
+    """〜ような before a verb or an adjective, ように, as its first step
+    teaches it (plan 272): 母のように話す, 魚のようにおよぐ, 嘘のように晴れた
+    -- a noun, の, then よう and the に of its adverbial form. Never the
+    ように of an aim after a verb (聞こえるように), 〜ように's own."""
+    out = []
+    for i in range(1, len(tokens) - 1):
+        t, ni = tokens[i], tokens[i + 1]
+        if not (t.surface == "よう" and t.lemma in ("様", "よう") and tokens[i - 1].surface == "の"
+                and tokens[i - 1].pos == "particle" and ni.surface == "に"):
+            continue
+        if i >= 2 and tokens[i - 2].pos in ("noun", "pronoun", "suffix"):
+            out.append((t.start, ni.end))
+    return out
+
+
 def _the_moment_spans(tokens):
     """〜たとたんに with its に dropped, as writing drops it before a
     comma (plan 272): 明かりが見えたとたん、 -- the た form and とたん."""
@@ -7093,6 +7109,7 @@ _EXTRA_RULES = (
     ("〜で（理由）", _reason_de_spans),
     ("〜にあって", _placed_in_spans),
     ("〜たとたんに", _the_moment_spans),
+    ("〜ような", _likeness_spans),
     ("〜ながらも", _although_spans),
     ("〜いかんによらず", _regardless_spans),
     ("〜おそれがある", _risk_spans),
@@ -7121,6 +7138,7 @@ _EXTRA_RULES = (
 _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans, _without_spans, _existence_spans,
                            # (plan 272: the forms the lessons do not write)
                            _the_moment_spans, _risk_spans, _settled_to_be_spans, _not_even_one_spans,
+                           _likeness_spans,
                            _although_spans, _regardless_spans,
                            _ask_for_spans, _nothing_spans, _rather_than_spans, _quoted_said_spans,
                            _because_of_spans,

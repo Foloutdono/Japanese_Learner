@@ -432,6 +432,73 @@ def _deck_godan(verb: str) -> bool:
     return any(kanji == verb for kanji, _kana in _deck_forms())
 
 
+# Where one goes in, whose はいる after it is 入る said without its に
+# (plan 272): お風呂はいる.
+_ENTERED = frozenset({"風呂", "ふろ", "部屋", "へや", "家", "うち", "中", "なか", "学校", "会社", "店", "布団", "ふとん",
+                      "温泉", "車", "教室", "トイレ", "病院", "大学", "電車", "バス"})
+
+
+def _has_kanji_char(text: str) -> bool:
+    return any("\u4e00" <= c <= "\u9fff" for c in text)
+
+
+@lru_cache(maxsize=1024)
+def _deck_word(surface: str) -> bool:
+    """Whether the deck teaches a word written `surface` (休み, a day off:
+    休みだし is the noun and the copula, plan 272 -- never 降りだし)."""
+    return any(kanji == surface for kanji, _kana in _deck_forms())
+
+
+# What a house is named for (plan 272): a name in kana stands straight
+# before it (さくら旅館, ひまわり幼稚園) or before と言う and it (さくら
+# という店); a firm answers the phone with its own (はい、さくらで
+# ございます). Never 病院 or 学校, which a common word can stand before
+# (こども病院).
+_HOUSES = frozenset({"旅館", "ホテル", "荘", "亭", "幼稚園", "保育園", "食堂", "書店", "商店", "温泉", "号"})
+_HOUSES_NAMED = _HOUSES | {"店", "お店", "会社", "レストラン", "喫茶店", "カフェ", "バー", "宿", "民宿", "美容院"}
+
+
+def _a_house_name(morphemes, i: int) -> bool:
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    if nxt is None:
+        return False
+    if nxt.start == morphemes[i].end and (nxt.surface in _HOUSES or (
+            i + 2 < len(morphemes) and nxt.surface + morphemes[i + 2].surface in _HOUSES)):
+        return True                     # (幼稚 + 園)
+    if nxt.surface == "と" and i + 3 < len(morphemes) and morphemes[i + 2].lemma in ("言う", "いう") \
+            and morphemes[i + 3].surface in _HOUSES_NAMED:
+        return True
+    return (nxt.surface == "で" and i + 2 < len(morphemes) and morphemes[i + 2].surface == "ござい"
+            and (i == 0 or morphemes[i - 1].surface in ("、", "。", "はい")) and (
+                i < 2 or morphemes[i - 2].surface in ("はい", "、", "。", "ます", "ありがとう")))
+
+
+@lru_cache(maxsize=1024)
+def _deck_spelled_half_in_kana(head: str, tail: str):
+    """(kanji, kana) of the one two-kanji deck word whose first kanji is
+    `head` and whose reading ends with `tail`, the second kanji written
+    in kana as a learner's text does (野さい, plan 272), or None."""
+    found = {(k, r) for k, r in _deck_forms() if len(k) == 2 and k[0] == head and _has_kanji_char(k[1])
+             for r in [r] if r.endswith(tail) and len(r) > len(tail)}
+    return next(iter(found)) if len(found) == 1 else None
+
+
+def _enters(morphemes, i: int) -> bool:
+    """Whether 入れ at morphemes[i] is 入る's はいれる, "can enter": nothing
+    is put in (no を in its clause), and someone or somewhere is (誰でも,
+    中には, 一日から) -- この店は誰でも入れます (plan 272)."""
+    k = i - 1
+    clause = []
+    while k >= 0 and not (morphemes[k].pos == "symbol" and morphemes[k].surface in "。！？!?、"):
+        clause.append(morphemes[k])
+        k -= 1
+    if any(u.surface == "を" and u.pos == "particle" for u in clause):
+        return False
+    words = [u.surface for u in clause]
+    return "誰" in words or "だれ" in words or (len(clause) >= 2 and clause[0].surface == "は" and clause[1].surface == "に") \
+        or (len(clause) >= 2 and clause[0].surface == "から" and clause[1].surface in ("一日", "日"))
+
+
 # What a thing is that one stands below (plan 272): 街灯の下, 木の下 --
 # never the 下 of guidance, 先生の下で, read もと.
 _THINGS_ABOVE = frozenset({"街灯", "電灯", "木", "桜", "橋", "机", "テーブル", "ベッド", "空", "星空", "傘", "屋根", "窓",
@@ -2615,6 +2682,148 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                  written_reading="かて"))
             out_t.append(("助詞", "接続助詞", "*"))
             skip.add(i + 1)
+            continue
+        # (plan 272: what a sense review of the app's own sentences found
+        # cut or read as another word)
+        if (m.surface == "あ" and m.pos == "interjection" and prev is not None and prev.surface in ("また", "又")
+                and nxt is not None and nxt.surface == "し" and after is not None and after.surface == "た"
+                and _glued(m, nxt) and _glued(nxt, after)):
+            # またあした: 明日, "tomorrow", no "ah" and a past する
+            out_m.append(replace(m, surface="あした", end=after.end, lemma="明日", reading="あした", lemma_reading="あした",
+                                 kana="アシタ", pos="noun", ctype="", cform="", written="明日", written_reading="あした"))
+            out_t.append(("名詞", "普通名詞", "副詞可能"))
+            skip.update({i + 1, i + 2})
+            continue
+        last = out_m[-1] if out_m else None
+        if (m.pos == "verb" and m.lemma == "入る" and m.surface.startswith("はい") and _hiragana_only(m.surface)
+                and last is not None and last.pos == "noun" and _glued(last, m)
+                and last.surface not in _ENTERED and last.surface.lstrip("お") not in _ENTERED):
+            # お箸はいりますか, おつりはいりません: は and 要る, "do you need",
+            # no 入る -- where nothing is gone into
+            said = m.surface[1:]
+            out_m += [replace(m, surface="は", end=m.start + 1, lemma="は", reading="わ", lemma_reading="は", kana="ハ",
+                              pos="particle", ctype="", cform="", conjunctive=False, written="は", written_reading="は"),
+                      replace(m, surface=said, start=m.start + 1, lemma="要る", reading=said, lemma_reading="いる",
+                              kana=kata(said), written="要る", written_reading="いる")]
+            out_t += [("助詞", "係助詞", "*"), tags[i]]
+            continue
+        if (m.surface == "つり" and m.pos == "verb" and prev is not None and prev.surface == "お" and prev.pos == "prefix"):
+            # おつりです: お釣り, "change", no 吊る
+            out_m.append(replace(m, lemma="釣り", lemma_reading="つり", pos="noun", ctype="", cform="", written="釣り",
+                                 written_reading="つり"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
+        if (m.lemma == "呉れる" and m.pos == "verb" and m.surface.startswith("くれ") and prev is not None
+                and prev.surface == "お" and prev.pos == "prefix" and _glued(prev, m)):
+            # おくれる場合は: 遅れる, "to be late", no お and くれる
+            out_m[-1:] = [replace(prev, surface="お" + m.surface, end=m.end, lemma="遅れる", reading="お" + m.reading,
+                                  lemma_reading="おくれる", kana=kata("お" + kata_to_hira(m.reading)), pos="verb",
+                                  ctype="下一段-ラ行", cform=m.cform, conjunctive=m.conjunctive, written="遅れる",
+                                  written_reading="おくれる")]
+            out_t[-1:] = [("動詞", "一般", "*")]
+            continue
+        if (m.pos == "noun" and len(m.surface) == 1 and _has_kanji_char(m.surface) and nxt is not None and _glued(m, nxt)
+                and _hiragana_only(nxt.surface) and len(nxt.surface) >= 2 and nxt.pos == "noun"):
+            word = _deck_spelled_half_in_kana(m.surface, nxt.surface)
+            if word is not None:
+                # 野さい: 野菜, its second kanji in kana, no 野 and 際
+                kanji, kana = word
+                out_m.append(replace(m, surface=m.surface + nxt.surface, end=nxt.end, lemma=kanji, reading=kana,
+                                     lemma_reading=kana, kana=kata(kana), written=kanji, written_reading=kana))
+                out_t.append(("名詞", "普通名詞", "一般"))
+                skip.add(i + 1)
+                continue
+        if (m.surface == "中央" and nxt is not None and _glued(m, nxt) and (nxt.surface == "線" or (
+                nxt.surface[:1] in "一二三四五六七八九十0123456789" and after is not None and after.surface.startswith("丁目")))):
+            # 中央線, 中央三丁目: a line's and a district's name
+            if nxt.surface == "線":
+                out_m.append(replace(m, surface="中央線", end=nxt.end, lemma="中央線", reading="ちゅうおうせん",
+                                     lemma_reading="ちゅうおうせん", kana="チュウオウセン", proper=True, name_kind="place",
+                                     written="中央線", written_reading="ちゅうおうせん"))
+                out_t.append(("名詞", "固有名詞", "地名"))
+                skip.add(i + 1)
+            else:
+                out_m.append(replace(m, proper=True, name_kind="place"))
+                out_t.append(("名詞", "固有名詞", "地名"))
+            continue
+        if m.pos == "noun" and m.name_kind != "place" and _hiragana_only(m.surface) and len(m.surface) >= 2 \
+                and _a_house_name(morphemes, i):
+            # さくら旅館, さくらという店, はい、さくらでございます: the
+            # name of an inn, a shop, a firm, no 桜 "cherry blossom"
+            out_m.append(replace(m, proper=True, name_kind="business", unknown=False))
+            out_t.append(("名詞", "固有名詞", "一般"))
+            continue
+        if (m.surface == "一日" and prev is not None and prev.surface == "の" and i >= 2
+                and len(morphemes[i - 2].surface) > 1 and morphemes[i - 2].surface.endswith("月")
+                and kata_to_hira(m.reading) != "ついたち"):
+            # 来月の一日から: the first of the month, ついたち
+            out_m.append(replace(m, reading="ついたち", lemma_reading="ついたち", kana="ツイタチ",
+                                 written_reading="ついたち"))
+            out_t.append(tags[i])
+            continue
+        if (m.surface == "年" and m.pos == "noun" and kata_to_hira(m.reading) == "ねん" and nxt is not None
+                and nxt.pos == "particle" and nxt.surface in ("の", "が", "を", "は", "も") and _glued(m, nxt)
+                and not (prev is not None and (prev.surface[-1:] in "一二三四五六七八九十百千万何数0123456789毎去今来昨"
+                                               or prev.pos in ("noun", "prefix", "suffix") and _glued(prev, m)))):
+            # 年のわりに, 年のせいか, 年をとる: とし, a person's years
+            out_m.append(replace(m, reading="とし", lemma_reading="とし", kana="トシ", written_reading="とし"))
+            out_t.append(tags[i])
+            continue
+        if (m.surface == "正しく" and m.pos == "adverb" and nxt is not None and nxt.pos in ("verb", "noun")
+                and nxt.surface not in ("それ", "これ") and not nxt.proper):
+            # 正しく判断する: 正しい's ただしく, "correctly", no まさしく
+            out_m.append(replace(m, lemma="正しい", reading="ただしく", lemma_reading="ただしい", kana="タダシク",
+                                 pos="adjective", ctype="形容詞", cform="連用形-一般", written="正しい",
+                                 written_reading="ただしい"))
+            out_t.append(("形容詞", "一般", "*"))
+            continue
+        if (m.surface.startswith("入れ") and m.lemma == "入れる" and m.pos == "verb" and _enters(morphemes, i)):
+            # この店は誰でも入れます, 中には入れません: 入る's はいれる, "can
+            # enter", no 入れる "to put in"
+            out_m.append(replace(m, lemma="入る", reading="はい" + kata_to_hira(m.reading)[1:], lemma_reading="はいる",
+                                 kana="ハイ" + m.kana[1:] if m.kana else m.kana, ctype="五段-ラ行", written="入る",
+                                 written_reading="はいる"))
+            out_t.append(tags[i])
+            continue
+        if (m.surface == "十分" and nxt is not None and _glued(m, nxt)
+                and nxt.surface.startswith(("おき", "後", "前", "ほど", "くらい", "ぐらい", "間", "以内", "程"))):
+            # 十分おきに: ten minutes, じゅっぷん, no じゅうぶん "enough"
+            out_m += [replace(m, surface="十", end=m.start + 1, lemma="十", reading="じゅっ", lemma_reading="じゅう",
+                              kana="ジュッ", pos="noun", ctype="", cform="", written="十", written_reading="じゅう"),
+                      replace(m, surface="分", start=m.start + 1, lemma="分", reading="ぷん", lemma_reading="ふん",
+                              kana="プン", pos="suffix", ctype="", cform="", written="分", written_reading="ふん")]
+            out_t += [("名詞", "数詞", "*"), ("接尾辞", "名詞的", "助数詞")]
+            continue
+        if m.surface == "週" and nxt is not None and nxt.surface == "まつ" and _glued(m, nxt):
+            # 週まつ: 週末, "the weekend", no 待つ
+            out_m.append(replace(m, surface="週まつ", end=nxt.end, lemma="週末", reading="しゅうまつ",
+                                 lemma_reading="しゅうまつ", kana="シュウマツ", pos="noun", written="週末",
+                                 written_reading="しゅうまつ"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "だし" and m.pos == "verb" and m.lemma == "出す" and prev is not None and _glued(prev, m)
+                and (prev.pos in ("noun", "other") or (prev.pos == "verb" and _deck_word(prev.surface)))
+                and (nxt is None or nxt.pos == "symbol")):
+            # 休みだし、: the copula and 〜し, "it's a day off, and", no 出す
+            if prev.pos == "verb" and out_m:
+                out_m[-1] = replace(out_m[-1], pos="noun", lemma=prev.surface, lemma_reading=kata_to_hira(prev.reading),
+                                    ctype="", cform="", conjunctive=False, written=prev.surface,
+                                    written_reading=kata_to_hira(prev.reading))
+                out_t[-1] = ("名詞", "普通名詞", "一般")
+            out_m += [replace(m, surface="だ", end=m.start + 1, lemma="だ", reading="だ", lemma_reading="だ", kana="ダ",
+                              pos="auxiliary", ctype="助動詞-ダ", cform="終止形-一般", written="だ", written_reading="だ"),
+                      replace(m, surface="し", start=m.start + 1, lemma="し", reading="し", lemma_reading="し", kana="シ",
+                              pos="particle", ctype="", cform="", conjunctive=True, written="し", written_reading="し")]
+            out_t += [("助動詞", "*", "*"), ("助詞", "接続助詞", "*")]
+            continue
+        if (m.surface == "見" and m.lemma == "見る" and nxt is not None and nxt.surface == "た" and after is not None
+                and after.surface == "目" and _glued(m, nxt) and _glued(nxt, after)):
+            # 見た目で判断する: 見た目, "looks", no saw + eye
+            out_m.append(replace(m, surface="見た目", end=after.end, lemma="見た目", reading="みため", lemma_reading="みため",
+                                 kana="ミタメ", pos="noun", ctype="", cform="", written="見た目", written_reading="みため"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.update({i + 1, i + 2})
             continue
         if (m.surface == "くらい" and m.pos == "particle" and prev is not None and prev.pos == "adverb"
                 and prev.surface in ("もう", "まだ", "とても", "すごく", "少し", "すこし", "ちょっと", "まだまだ", "かなり")

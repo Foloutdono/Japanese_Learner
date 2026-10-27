@@ -246,6 +246,7 @@ _NAME_GLOSS = {
     "person": {"en": "a person's name", "fr": "nom de personne"},
     "place": {"en": "place name", "fr": "nom de lieu"},
     "other": {"en": "a name", "fr": "un nom propre"},
+    "business": {"en": "a name (of an inn, a shop, a firm)", "fr": "un nom (d'auberge, de boutique, d'entreprise)"},
 }
 
 
@@ -279,7 +280,7 @@ def _token_dict(m: morphology.Morpheme, hit, pool=None, named: bool = False) -> 
         "vocab_match": vocab_match,
         "kanji_matches": kanji_matches,
     }
-    if vocab_match is None and m.name_kind and (named or m.name_kind == "place" or not _hiragana(m.surface)):
+    if vocab_match is None and m.name_kind and (named or m.name_kind in ("place", "business") or not _hiragana(m.surface)):
         # A name has no card, and its row said nothing: 田中 and マルタン
         # read as a word the course does not teach (plan 266). Written in
         # hiragana, a name is the tokenizer's guess unless an honorific
@@ -1888,7 +1889,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # takes (ひと息つく 吐く, 鼻をつく 突く, 返しに行く 返す), a compound verb as
 # its two verbs, and the west's and the north's speech glossed (やで, かて,
 # ちゃう, しよる, べ, なして).
-LOCAL_REV = 23
+# 24: 113 cards given the senses the app's sentences use (うち "one's
+# home", 気 "attention (as in 気にする)"), the cards those sentences took
+# wrong (来月の一日 ついたち, お金をかける 掛ける, 電車がはやい 速い, a shop's
+# name in kana), のように as 〜ような, and an idiom judged by its card's
+# senses less those written by their own phrase.
+LOCAL_REV = 24
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

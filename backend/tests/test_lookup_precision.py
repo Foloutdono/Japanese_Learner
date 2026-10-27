@@ -321,6 +321,16 @@ class PoolLineTests(unittest.TestCase):
     def test_an_affix_keeps_the_one_sense_it_was_chosen_for(self) -> None:
         self.assertEqual(card_lookup.pool_gloss({"affix": True, "meaning": "-ist, -er"}), "-ist, -er")
 
+    def test_an_aside_leaves_room_for_the_next_sense(self) -> None:
+        # (plan 272) 段差 at a station is a step, JMdict's second sense:
+        # its first's "(e.g. in go, shoji, etc.)" is the entry's to give
+        meaning = matches("段差があります。足元にご注意ください。")["段差"]["entry"]["meaning"]
+        self.assertEqual(meaning, "difference in grades; difference in level")
+        # ...and a word of one sense shows its second gloss where it fits
+        meaning = matches("新しい勤怠システムは来月から導入される。")["勤怠"]["entry"]["meaning"]
+        self.assertIn("attendance", meaning)
+        self.assertLessEqual(len(meaning), card_lookup._POOL_GLOSS_MAX)
+
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class CompoundParticleTests(unittest.TestCase):
@@ -1332,10 +1342,11 @@ class SpokenWordTests(unittest.TestCase):
 
     def test_the_polite_prefix_and_a_kana_noun(self) -> None:
         for sentence, surface, kanji in (("おばけきのこがあらわれた！", "おばけ", "お化け"),
-                                         ("おうちではどんな様子ですか。", "おうち", "お家"),
                                          ("おやおや困ったものだ。", "おやおや", "")):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        # おうち is the deck's うち, "one's home", said politely, as お店 is 店
+        self.assertEqual(matches("おうちではどんな様子ですか。")["うち"]["raw_id"], "vocab_N4__うち")
         # おつもり's one row is お積り, "the last cup": the page's is つもり.
         self.assertEqual(matches("どういう対策を取るおつもりですか。")["つもり"]["raw_id"], "vocab_N4__つもり")
         self.assertEqual(matches("お店に行く。")["店"]["raw_id"], "vocab_N5_店_みせ")
@@ -1877,7 +1888,7 @@ class ThirdReviewWordTests(unittest.TestCase):
         self.assertTrue(gloss_of("喉死んだｗ", "ｗ").startswith("(net slang) laughter"))
         # 参ったな said alone is "I'm beaten".
         self.assertEqual(token_of("参ったな、こりゃ一本取られたわ。", "参った")["vocab_match"]["entry"]["meaning"],
-                         "I'm beaten")
+                         "I'm beaten; I give up")
         for sentence in ("参ったな、こりゃ一本取られたわ。", "まあな。", "ちょっとな。"):
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, "な").startswith("(sentence end) feeling"))
@@ -2704,3 +2715,122 @@ class EighthReviewWordTests(unittest.TestCase):
         # ...and never where the letters are the plain word
         self.assertEqual(token_of("電話をかけた", "かけ")["vocab_match"]["entry"]["kanji"], "掛ける")
         self.assertEqual(gloss_of("りんごやみかんを買った。", "や"), "")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SenseReviewWordTests(unittest.TestCase):
+    """What a review of the senses the app's sentences use found taking
+    the wrong card or read wrong (plan 272), each beside the sentence
+    where the same letters are the word they look like."""
+
+    def card(self, sentence: str, surface: str) -> str:
+        entry = (token_of(sentence, surface).get("vocab_match") or {}).get("entry") or {}
+        return entry.get("kanji") or entry.get("kana", "")
+
+    def test_cards_by_the_sentence(self) -> None:
+        for sentence, surface, card, other_sentence, other_surface, other in (
+            ("でしたら、来月の一日から入れますよ。", "入れ", "入る", "コーヒーに砂糖を入れます。", "入れ", "入れる"),
+            ("この店は誰でも入れます。", "入れ", "入る", "箱に入れてください。", "入れ", "入れる"),
+            ("レシートはいりますか。", "いり", "要る", "部屋にはいります。", "はいり", "入る"),
+            ("会社を辞めることにした。", "辞める", "辞める", "たばこをやめる。", "やめる", "止める"),
+            ("命をかけて守る。", "かけ", "賭ける", "壁に絵をかける。", "かける", "掛ける"),
+            ("スーツにお金をかける。", "かける", "掛ける", "人生をかけた勝負", "かけ", "賭ける"),
+            ("電車より車のほうがはやい。", "はやい", "速い", "朝はやく起きた。", "はやく", "早い"),
+            ("はやく走る車", "はやく", "速い", "電車がはやく来た。", "はやく", "早い"),
+            ("赤ちゃんがとつぜんなき出す。", "なき", "泣く", "雨が降りだした。", "だし", "出す"),
+            ("妹は新しいかばんをほしがる。", "ほし", "欲しい", "布団をほした。", "ほし", "干す"),
+            ("行き先が分からないので、知らせようがない。", "知らせ", "知らせる", "いい知らせがある。", "知らせ", "知らせ"),
+            ("どちらの病院をお考えですか。", "考え", "考える", "いい考えだ。", "考え", "考え"),
+            ("データに基づいて、正しく判断してください。", "正しく", "正しい", "まさしく彼だ。", "まさしく", "正しく"),
+            ("ありがとうございます。あの、ゴミの日はいつですか。", "あの", "あのう", "あの人は先生です。", "あの", "あの"),
+            ("うん、じゃあ、またあした。", "あした", "明日", "あしたまた来ます。", "あした", "明日"),
+            ("バスは十分おきに来ます。", "十分", "十分", "時間は十分あります。", "十分", "十分"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), card)
+                self.assertEqual(self.card(other_sentence, other_surface), other)
+        # 十分 is the minutes before おき, the N5 card; "enough" elsewhere
+        self.assertEqual(token_of("バスは十分おきに来ます。", "十分")["vocab_match"]["entry"]["kana"], "じゅっぷん/じっぷん")
+        self.assertEqual(token_of("時間は十分あります。", "十分")["vocab_match"]["entry"]["kana"], "じゅうぶん")
+
+    def test_words_kept_whole(self) -> None:
+        for sentence, surface, card in (("お名前と生年月日をお願いいたします。", "生年月日", "生年月日"),
+                                        ("母は妹に野さいを食べさせました。", "野さい", "野菜"),
+                                        ("週まつ、えいがでも見ませんか。", "週まつ", "週末"),
+                                        ("人を見た目で判断してはならない。", "見た目", "見た目"),
+                                        ("おくれる場合は、電話してください。", "おくれる", "遅れる"),
+                                        ("はい、おつりはいりません。", "おつり", "おつり"),
+                                        ("子供を幼稚園に送る。", "幼稚園", "幼稚園"),
+                                        ("一生懸命努力した。", "一生懸命", "一生懸命")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), card)
+        # ...and cut where they are two: 休みだし is the noun, the copula and し
+        self.assertEqual(self.card("今日は休みだし、映画でも見よう。", "休み"), "休み")
+        self.assertEqual(token_of("今日は休みだし、映画でも見よう。", "し")["pos"], "particle")
+        self.assertEqual(self.card("お休みです。", "お休み"), "お休み")
+        self.assertEqual(self.card("静かな部屋", "静か"), "静か")
+
+    def test_names_no_word(self) -> None:
+        for sentence, surface in (("中央線は上下線とも運転を見合わせております。", "中央線"),
+                                  ("はい、中央三丁目、五の八です。", "中央"),
+                                  ("さくら旅館に泊まった。", "さくら"),
+                                  ("さくらという店に行きました。", "さくら"),
+                                  ("お電話ありがとうございます。さくらでございます。", "さくら"),
+                                  ("みどりホテルまでお願いします。", "みどり"),
+                                  ("ひまわり幼稚園に通っています。", "ひまわり")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertIsNone(token["vocab_match"])
+                self.assertIn("name", token["gloss"]["en"])
+        # ...where the same letters are the word
+        self.assertEqual(self.card("部屋の中央に机がある。", "中央"), "中央")
+        self.assertEqual(self.card("さくらが咲いた。", "さくら"), "桜")
+        self.assertEqual(self.card("さくらという花が好きです。", "さくら"), "桜")
+        self.assertEqual(self.card("これでございます。", "これ"), "これ")
+
+    def test_readings_by_the_sentence(self) -> None:
+        for sentence, surface, reading, other_sentence, other in (
+            ("でしたら、来月の一日から入れますよ。", "一日", "ついたち", "一日の終わりに日記を書く。", "いちにち"),
+            ("毎月の一日に払います。", "一日", "ついたち", "月の一日分の食費", "いちにち"),
+            ("彼は年のわりに若く見える。", "年", "とし", "年に一回旅行する。", "ねん"),
+            ("その箱は重い。", "箱", "はこ", "道具箱を開けた。", "ばこ"),
+            ("一箱にいくつ入っていますか。", "箱", "はこ", "道具箱を開けた。", "ばこ"),
+            ("バスは十分おきに来ます。", "十分", "じゅっぷん", "もう十分だ。", "じゅうぶん"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+                self.assertEqual(token_of(other_sentence, surface)["reading"], other)   # (道具 + 箱)
+        self.assertEqual(self.card("でしたら、来月の一日から入れますよ。", "一日"), "一日")
+        self.assertEqual(token_of("でしたら、来月の一日から入れますよ。", "一日")["vocab_match"]["entry"]["kana"],
+                         "ついたち")
+
+    def test_idioms_beside_a_richer_card(self) -> None:
+        # A card's sense written by the phrase it is read in (気's
+        # "attention (as in 気にする)") yields to the pool's idiom, and a
+        # light verb in a card's gloss says no idiom ("to take part" is
+        # no 電話に出る)...
+        for sentence, surface in (("何が起こっても僕は気にしない。", "気にし"),
+                                  ("試合中は、一瞬たりとも気を抜くな。", "気を抜く"),
+                                  ("休みなしに働き続けて、体を壊した。", "体を壊し"),
+                                  ("夜七時からなら電話に出られます。", "電話に出"),
+                                  ("出かけようとしたところに、電話がかかってきた。", "電話がかかっ"),
+                                  ("職人としての確かな腕前は身につかない。", "身につか"),
+                                  ("まず一歩を踏み出すべきだ。", "一歩を踏み出す"),
+                                  ("その真実が明るみに出た。", "明るみに出"),
+                                  ("地方の支店に顔を出すだけだ。", "顔を出す"),
+                                  ("東京の大学で教鞭をとることが出来た。", "教鞭をとる")):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(token_of(sentence, surface)["vocab_match"]["pool"])
+        # ...where the cards still say all of it
+        for sentence, surface, card in (("服を着る。", "着る", "着る"),
+                                        ("病気になった。", "病気", "病気"),
+                                        ("右に曲がる。", "曲がる", "曲がる"),
+                                        ("歯をみがく。", "みがく", "磨く"),
+                                        ("日本の文化に関心を持った。", "関心", "関心")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), card)
+        # お役に立てず is 役に立つ's potential, humbly: no 役に立てる "to make use of"
+        self.assertEqual(token_of("お役に立てず、申し訳ございません。", "役に立て")["lemma"][:3], "役にた")
+        self.assertNotEqual(token_of("お役に立てず、申し訳ございません。", "役に立て")["vocab_match"]["entry"]["kana"],
+                            "やくにたてる")
+        self.assertEqual(token_of("経験を仕事に役に立てる。", "役に立てる")["vocab_match"]["entry"]["kana"], "やくにたてる")
