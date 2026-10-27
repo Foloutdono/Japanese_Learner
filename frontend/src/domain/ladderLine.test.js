@@ -44,22 +44,21 @@ describe('where a rating moves the point', () => {
 describe('what each verdict does, grouped by outcome', () => {
   it('is two outcomes on Choisir: a miss asks it again, a pass climbs', () => {
     expect(summary(rowsOf(cards.choose))).toEqual([
-      ['stay', false, '10 min', ['4:Raté']],
-      ['next', true, '1 h', ['3:Difficile', '2:Correct', '1:Facile']],
+      ['stay', false, '10 min', ['4:Raté', '3:Presque']],
+      ['next', true, '1 h', ['2:Correct', '1:Facile']],
     ])
   })
 
   it('is two on Construire, with the wait the next step has', () => {
     expect(summary(rowsOf(cards.build))).toEqual([
-      ['stay', false, '10 min', ['4:Raté']],
-      ['next', true, '4 jours', ['3:Difficile', '2:Correct', '1:Facile']],
+      ['stay', false, '10 min', ['4:Raté', '3:Presque']],
+      ['next', true, '4 jours', ['2:Correct', '1:Facile']],
     ])
   })
 
-  it('splits where the waits do, and sends a miss once mastered back to the relapse', () => {
+  it('sends a miss once mastered back to the relapse, and keeps it on a pass', () => {
     expect(summary(rowsOf(cards.mastered))).toEqual([
-      ['back', false, '10 min', ['4:Raté']],
-      ['stay', true, '4 sem.', ['3:Difficile']],
+      ['back', false, '10 min', ['4:Raté', '3:Presque']],
       ['stay', true, '5 sem.', ['2:Correct', '1:Facile']],
     ])
   })

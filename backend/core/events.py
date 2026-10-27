@@ -362,10 +362,11 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # taken, or the level kept. conversation: the 会話 station's
         # search started (plan 246). comeback: Today's notice that the
         # reviews piled up (plan 254) -- its paces opened, or the notice
-        # hidden for the day.
+        # hidden for the day. readings: the sheet a kanji card's
+        # reading names open, on'yomi and kun'yomi said (plan 276).
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
                               "dictionary", "export", "level_fit", "conversation",
-                              "comeback"}),
+                              "comeback", "readings"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
                               "open", "search", "progress", "move", "stay", "hide"}),
     },

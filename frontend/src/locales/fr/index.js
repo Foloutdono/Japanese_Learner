@@ -100,10 +100,9 @@ const nav = {
   runOutCleared:     (n) => `${n} révisée${n > 1 ? 's' : ''}`,
   runOutWaiting:     (n) => `${n} ${n > 1 ? 'attendent' : 'attend'} la recharge`,
   runOutWaits:       'en attente',
-  // 補充 — ce que la recharge a versé, app fermée (plan 141)
-  claimTitle:        'Pendant ton absence',
-  claimButton:       'Récupérer',
-  claimBookLabel:    (n, cap) => `${n} crédit${n > 1 ? 's' : ''} sur ${cap}`,
+  // 補充 — ce que la recharge a versé, app fermée, dit pendant que la
+  // carte se charge (plans 141, 278), à un lecteur d'écran
+  refillLanded:      (n, to, cap) => `${n} crédit${n > 1 ? 's' : ''} arrivé${n > 1 ? 's' : ''} pendant ton absence · ${to} sur ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',
   laneNew:           n => `${n} nouv.`,
@@ -471,6 +470,8 @@ const quiz = {
   typeRomaji:        'Tape le romaji…',
   tapToFlip:          'Touche pour retourner',
   tapToReveal:        'Touche pour révéler',
+  // Le recto d'une carte Kanji → sens dit ce qu'il demande (plan 276).
+  askKanjiMeaning:    'Quel est son sens ?',
   // L'indice du bureau (plan 113) : une touche, puis les mots qui suivent.
   keySpace:           'Espace',
   revealByKey:        'pour révéler',
@@ -1726,6 +1727,14 @@ const dictionary = {
   readingsKunName:   'Lecture japonaise',
   // Voir en/index.js : le 熟 d'un mot qui se lit d'un bloc.
   readingsWhole:     'Se lit d\'un bloc',
+  // Plan 276 : la fiche que les deux noms d'une carte kanji ouvrent
+  // (components/study/ReadingsHelp, domain/readingsHelp).
+  readingsHelpCap:   'Les deux lectures',
+  readingsHelpOn:    'Venue de Chine avec le kanji, elle s’écrit en katakana. C’est surtout celle des mots de plusieurs kanji.',
+  readingsHelpKun:   'Le mot japonais que le kanji est venu écrire, en hiragana. Souvent le kanji seul, ou suivi de kana.',
+  readingsHelpShare: (kanji) => `La part des mots du cours qui lisent ${kanji} ainsi : commence par les plus hautes.`,
+  readingsHelpTilde: (kanji, side, word) => `Une lecture que ${kanji} prend ${side === 'after' ? 'derrière' : 'devant'} un autre élément du mot${word ? ` : ${word.kanji}, ${word.kana}` : ''}.`,
+  readingsHelpDot:   (written) => `Après le point viennent des kana : ${written}.`,
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
@@ -1789,9 +1798,7 @@ const progress = {
 const misc = {
   mute:    'Couper le son',
   unmute:  'Activer le son',
-  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} lecture${n > 1 ? 's' : ''} de plus — la fiche du dictionnaire les donne toutes`,
-  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'mot',
   // Affiché par components/study/SessionError quand une session n'a
@@ -2123,9 +2130,9 @@ const decks = {
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
   browseBtn:              'Parcourir',
   browseTitle:            'Parcourir les cartes existantes',
-  browseTabKanji:         '漢字 Kanji',
-  browseTabVocab:         '語彙 Vocabulaire',
-  browseTabGrammar:       '文法 Grammaire',
+  browseTabKanji:         'Kanji',
+  browseTabVocab:         'Vocabulaire',
+  browseTabGrammar:       'Grammaire',
   browseAllLevels:        'Tous',
   browseSearchPlaceholder: 'Rechercher (kanji, kana, sens…)',
   browseResults:          'Résultats',
@@ -2638,7 +2645,7 @@ const boarding = {
   brdRowGoal: (stop, date) => (date ? `${stop} · arrivée le ${date}` : stop),
   brdRowRhythm: (name, min) => `${name} · ${min} min par jour`,
   brdGoalCap: (min) => `à ${min} min par jour`,
-  brdNameOptional: 'facultatif',
+  brdNameOptional: 'Facultatif',
   brdNamePlaceholder: 'Ton prénom',
   brdNameNote: 'Il s’imprime sur ta carte. En lettres latines, c’est aussi ton nom public dans le classement.',
   brdNameSave: 'Valider',

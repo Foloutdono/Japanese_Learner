@@ -10,7 +10,7 @@ import '../../index.css'
 // lit while Today deals them; a tap writes the line's list. A lane the
 // server marks as ridden in the learner's own modes rides under 主.
 
-vi.mock('../../stores/credits', () => ({ useCredits: () => null, openBalance: vi.fn() }))
+vi.mock('../../stores/credits', () => ({ useCredits: () => null, openBalance: vi.fn(), useClaimOffer: () => null, useClaimLanded: () => 0 }))
 vi.mock('../../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))
 const setExtraModes = vi.hoisted(() => vi.fn(async () => ({})))

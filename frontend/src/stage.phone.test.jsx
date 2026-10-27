@@ -80,7 +80,7 @@ describe('the stage at phone width', () => {
               <div className="rating-bar__buttons rating-bar__buttons--4">
                 <div className="rating-bar__misses">
                   <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Missed</span></button>
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q3"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Difficult</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q2"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Almost</span></button>
                 </div>
                 <div className="rating-bar__keys">
                   <button type="button" className="rating-bar__btn rating-bar__btn--q4 rating-bar__btn--key"><span className="rating-bar__btn-label">Correct</span></button>
@@ -106,15 +106,15 @@ describe('the stage at phone width', () => {
       expect(getComputedStyle(bar).bottom).toBe('36px')
       // 券売機 (plan 203): every verdict a key of one make, a gap apart
       // -- the misses no longer one instrument (plan 180's) -- each on
-      // its own sumi with a corner and a foot, and Correct and Easy the
-      // same key wider than a miss, moulded in its verdict's ink with the sumi
+      // its own sumi with a corner and a foot, and Easy (Correct's twin
+      // on the four, plain) the same key wider than a miss, moulded in its verdict's ink with the sumi
       // type on it. Not gold: gold is the action's metal (plan 174).
       expect(getComputedStyle(screen.container.querySelector('.rating-bar__buttons')).columnGap).toBe('8px')
       const misses = getComputedStyle(screen.container.querySelector('.rating-bar__misses'))
       expect(misses.columnGap).toBe('8px')
       expect(misses.outlineStyle).toBe('none')
       expect(misses.backgroundColor).toBe('rgba(0, 0, 0, 0)')
-      const [plain, , key] = screen.container.querySelectorAll('.rating-bar__btn')
+      const [plain, , , key] = screen.container.querySelectorAll('.rating-bar__btn')
       expect(getComputedStyle(plain).backgroundImage).toContain('linear-gradient')
       expect(getComputedStyle(plain).color).toBe(getComputedStyle(lvl).color)
       expect(getComputedStyle(plain).borderTopLeftRadius).toBe('8px')

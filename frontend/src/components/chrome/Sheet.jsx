@@ -1,3 +1,4 @@
+import { isValidElement } from 'react'
 import { createPortal } from 'react-dom'
 import { useDialog } from '../../hooks/useDialog'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
@@ -36,7 +37,27 @@ import { CrossIcon } from '../ui/Icons'
 //                   pass's back, the deck picker, a report, a new deck):
 //                   the scrim was a mouse's only exit. Last in the tab
 //                   order, drawn in the corner.
-function Panel({ onClose, jp, cap, sumi, label, children, className, over = false, initialFocus = null, dismiss = false }) {
+//
+// The head (plan 277, the owner's pick C5 on the canvas "Titres —
+// options"): a small ring with the sheet's `icon`, then its `title` in
+// words and, under it, a quiet `sub` -- what the old caption beside the
+// name said (a count, the deck a confirm is about). It used to set a
+// Japanese term large with its translation small beside it (読み · LES
+// DEUX LECTURES); the owner asked for the name alone, in words. The
+// ring wears `line`, the pigment of the line the sheet belongs to,
+// injected here because a sheet is a portal out of reach of its
+// screen's; a sheet of no line keeps the caption's neutral ink. `icon`
+// is an icon component, drawn at the ring's size, or an element when
+// it needs a prop of its own (a direction).
+function Mark({ icon: Icon, line }) {
+  return (
+    <span className="sheet__mark" aria-hidden="true" style={line ? { '--line-color': line } : undefined}>
+      {isValidElement(Icon) ? Icon : <Icon size={16} />}
+    </span>
+  )
+}
+
+function Panel({ onClose, title, sub, icon, line, sumi, label, children, className, over = false, initialFocus = null, dismiss = false }) {
   const desk = useDesk()
   // Only the desk's ✕ reads it: a sheet can stand outside a language
   // provider (a hook's own test), and must not need one to open.
@@ -51,15 +72,18 @@ function Panel({ onClose, jp, cap, sumi, label, children, className, over = fals
         ref={ref}
         role="dialog"
         aria-modal="true"
-        aria-label={label ?? jp}
+        aria-label={label ?? title}
         className={classes}
         onClick={e => e.stopPropagation()}
       >
         <span className="sheet__handle" aria-hidden="true" />
-        {(jp || cap) && (
+        {title && (
           <div className="sheet__head">
-            {jp && <span className="sheet__jp">{jp}</span>}
-            {cap && <span className="sheet__cap">{cap}</span>}
+            {icon && <Mark icon={icon} line={line} />}
+            <div className="sheet__names">
+              <h2 className="sheet__title">{title}</h2>
+              {sub && <p className="sheet__sub">{sub}</p>}
+            </div>
           </div>
         )}
         {children}

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { Seg } from '../chrome/Console'
-import { SearchIcon } from '../ui/Icons'
+import { SearchIcon, PencilIcon } from '../ui/Icons'
 import { playClick } from '../../lib/audio'
 import { glyphOfUrl, strokesOf } from '../../domain/kanjivg'
 import { useTraceRun } from '../../hooks/useTraceRun'
@@ -59,7 +59,7 @@ export function StrokeZoom({ src, glyph, className = '', children }) {
 export function StrokeStudy({ open, src, glyph, line, onClose }) {
   const { t } = useLang()
   return (
-    <Sheet open={open} onClose={onClose} cap={t.strokeOrder} label={t.strokeOrder} className="ss-sheet" over dismiss>
+    <Sheet open={open} onClose={onClose} title={t.strokeOrder} icon={PencilIcon} line="var(--line-kanji)" label={t.strokeOrder} className="ss-sheet" over dismiss>
       <Study src={src} glyph={glyph} line={line} />
     </Sheet>
   )

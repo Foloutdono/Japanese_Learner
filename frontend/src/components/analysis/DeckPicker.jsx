@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Sheet } from '../chrome/Sheet'
-import { PlusIcon } from '../ui/Icons'
+import { PlusIcon, BooksIcon } from '../ui/Icons'
 import { composing } from '../../lib/keyGuards'
 import { deckTypeOf } from '../decks/deckTypes'
 
@@ -29,7 +29,7 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate, currentId = 
   }
 
   return (
-    <Sheet open onClose={onClose} jp={word} cap={t.chooseDeck} label={t.chooseDeck} dismiss>
+    <Sheet open onClose={onClose} title={t.chooseDeck} sub={word} icon={BooksIcon} line="var(--line-decks)" label={t.chooseDeck} dismiss>
       <div className="surface picker">
         {decks.length === 0 && (
           <p className="hint picker__empty">{t.noDeckOfType}</p>
