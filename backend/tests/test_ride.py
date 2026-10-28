@@ -235,7 +235,7 @@ def test_guided_refuses_a_gate_it_does_not_know(client):
         assert client.get("/api/profile").json()["guided"] == {}
 
 
-# ── 新しい — the duels' key, told once (plan 286) ──
+# ── 新しい — the duels' key, told once (plan 287) ──
 
 def _guided_before(user_id: str) -> None:
     """A learner whose Today guide ended before the duels' key was in it:

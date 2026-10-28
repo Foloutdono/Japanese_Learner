@@ -9,7 +9,7 @@ import { Sheet } from '../chrome/Sheet'
 import { KeyFace } from './DuelKey'
 import { DUELS_PATH } from './DuelsDoor'
 
-// ── 新しい — the duels' key, announced once (plan 286) ─────────────
+// ── 新しい — the duels' key, announced once (plan 287) ─────────────
 // The owner's ask with the key: the learners who met Today before it
 // stood beside the gate are told, once, over Today. The server decides
 // who is told (GET /api/profile's `duelsNews`, routes/onboarding.

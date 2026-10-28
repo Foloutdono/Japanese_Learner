@@ -285,7 +285,7 @@ describe('TodayScreen — the guide', () => {
     await vi.waitFor(() => expect(document.querySelector('.guide')).toBeTruthy(), { timeout: 5000, interval: 20 })
     const root = screen.container
     expect(root.querySelector('[data-guide="today.gate"]')).toBeTruthy()
-    // The duels' key beside the gate is a stop of its own (plan 286).
+    // The duels' key beside the gate is a stop of its own (plan 287).
     expect(root.querySelector('[data-guide="today.duels"]')).toBeTruthy()
     const guide = document.querySelector('.guide')
     // The tab bar is the shell's, not this screen's: the guide starts
@@ -453,7 +453,7 @@ describe('TodayScreen — the early-access sheet', () => {
   })
 })
 
-// 新しい (plan 286): the duels' key announced, once, to a learner who met
+// 新しい (plan 287): the duels' key announced, once, to a learner who met
 // Today before it stood beside the gate -- after the offers, never
 // beside them, and never to a learner whose guide shows the key.
 describe('TodayScreen — the duels announced', () => {

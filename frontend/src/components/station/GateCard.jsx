@@ -588,7 +588,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
           </span>
           <span className="tdy-door__go">{t.gateAdjust}<ChevronIcon direction="right" size={16} /></span>
         </button>
-        {/* The duels' key beside the gate (plan 286). */}
+        {/* The duels' key beside the gate (plan 287). */}
         <div className="tdy-gaterow">
           {gate}
           <DuelKey hold={Boolean(fin?.playing)} arrive={Boolean(fin?.live)} arriveDelay={fin ? fin.ms('KEY') : 0} />
@@ -977,7 +977,7 @@ function ClearedGate({ today, desk, finish = null }) {
   const gateCome = came('GATE')
   const foot = (
     <>
-      {/* The duels as the board's row once the day is done (plan 286):
+      {/* The duels as the board's row once the day is done (plan 287):
           the gate is shut, and the key with it. */}
       {(boardCome || hold) && (
         <DuelBoard

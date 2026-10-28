@@ -3527,7 +3527,7 @@ const pvp = {
   pvpPlay:         'Play',
   pvpBeatUnit:     'to beat',
   pvpDefy:         'Challenge',
-  // 新しい (plan 286): the duels announced once, on Today, to whoever
+  // 新しい (plan 287): the duels announced once, on Today, to whoever
   // knew it before their key stood there.
   newsCap:         'New',
   newsDuelsTitle:  'Duels are now on Today',

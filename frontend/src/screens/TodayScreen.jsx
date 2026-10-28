@@ -66,7 +66,7 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // (`feedbackOffer`). The finish comes first: the question follows a day
 // cleared, never interrupts it.
 //
-// 新しい (plan 286): a learner who met Today before the duels' key stood
+// 新しい (plan 287): a learner who met Today before the duels' key stood
 // beside its gate is told of it once (DuelsNewsSheet), while the profile
 // says so (`duelsNews`), after the offers above and never beside them,
 // and never on the visit whose guide has just shown the key.

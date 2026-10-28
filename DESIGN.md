@@ -881,7 +881,7 @@ dial's panel, at most 440px. On a phone it never leaves the screen
 `src/todayFit.phone.test.jsx`), and in the services sheet a second gate docks
 at the sheet's foot.
 
-**The duels' key stands beside Today's gate** (対戦, plan 286, the owner's
+**The duels' key stands beside Today's gate** (対戦, plan 287, the owner's
 pick D1 of the canvas "Tsuji — le duel sur Today", for duels found too
 quiet). It is the one thing the gate's row holds, and only on Today's open
 gate, phone and desk alike (`components/pvp/DuelKey.jsx`):
@@ -1383,7 +1383,7 @@ rest of the app is refused:
 
 It is no precedent. The duels' hall, a duel's cover, the board and every
 other screen are the station's, and no `--duel-*` ink is read outside
-the run and its result. Today's key to the duels (plan 286) is the gate's
+the run and its result. Today's key to the duels (plan 287) is the gate's
 reader, not the arcade (*The gate button*).
 
 What the game keeps of the app:

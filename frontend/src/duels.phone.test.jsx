@@ -18,7 +18,7 @@ import './index.css'
 // typed. The departure (D2): the ranked sprint is paid on the button
 // that names its price and starts at once, a first one too. The Elo board (L2):
 // both scopes counted by the server, the learner between their
-// neighbours, the cut only where places are skipped. Today (plan 286):
+// neighbours, the cut only where places are skipped. Today (plan 287):
 // the key beside the gate (D1), what waits counted on its shoulder, the
 // hall behind it; on a day done the board's row (E), the first challenge
 // received -- a live room before it -- or the Elo and the way to the hall.
@@ -412,7 +412,7 @@ describe('the Elo board (L2)', () => {
   })
 })
 
-// ── 対戦 on Today (plan 286) — the key (D1) and the board's row (E) ──
+// ── 対戦 on Today (plan 287) — the key (D1) and the board's row (E) ──
 
 const mountKey = (props = {}) => mount('/today', '/today', <div className="tdy"><DuelKey {...props} /></div>)
 const mountDayBoard = (props = {}) => mount('/today', '/today', <div className="tdy"><DuelBoard className="tdy-board" ask rows={[]} {...props} /></div>)

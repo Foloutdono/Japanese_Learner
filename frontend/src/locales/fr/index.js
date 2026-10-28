@@ -3481,7 +3481,7 @@ const pvp = {
   pvpPlay:         'Jouer',
   pvpBeatUnit:     'à battre',
   pvpDefy:         'Défier',
-  // 新しい (plan 286) : les duels annoncés une fois, sur Aujourd’hui, à
+  // 新しい (plan 287) : les duels annoncés une fois, sur Aujourd’hui, à
   // qui l’a connu avant que leur clé n’y soit.
   newsCap:         'Nouveau',
   newsDuelsTitle:  'Les duels arrivent sur Aujourd’hui',

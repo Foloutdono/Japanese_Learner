@@ -7,7 +7,7 @@ import { useDuels } from '../../stores/duels'
 import { GateIcon } from '../chrome/GateIcon'
 import { DUELS_PATH } from './DuelsDoor'
 
-// ── 対戦 — the duels' key, beside Today's gate (plan 286) ─────────
+// ── 対戦 — the duels' key, beside Today's gate (plan 287) ─────────
 // The owner's pick D1 of the canvas "Tsuji — le duel sur Today": the
 // duels were a door in the holder and a notice that only came when a
 // friend's challenge waited, and the owner found them too quiet. The key

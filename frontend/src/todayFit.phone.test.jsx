@@ -107,7 +107,7 @@ describe('the gate on a full day', () => {
       expect(door.top).toBeGreaterThanOrEqual(key.bottom)
       expect(go.top).toBeGreaterThanOrEqual(door.bottom)
       expect(go.bottom).toBeLessThanOrEqual(tabs.top)
-      // The duels' key (plan 286) stands beside the gate, a square at
+      // The duels' key (plan 287) stands beside the gate, a square at
       // its height, inside the phone, and leaves the gate its word.
       const duels = rect('.pvp-key')
       expect(Math.round(duels.top)).toBe(Math.round(go.top))

@@ -137,7 +137,7 @@ describe('the gate on a wide desk', () => {
     const go = $('.tdy-desk__go .btn-depart').getBoundingClientRect()
     // The dial at the size the print draws it, over the gate, both on
     // the panel's axis: the gate with the duels' key beside it (plan
-    // 286), the pair at the gate's 440px.
+    // 287), the pair at the gate's 440px.
     const pair = $('.tdy-desk__go .tdy-gaterow').getBoundingClientRect()
     const key = $('.tdy-desk__go .pvp-key').getBoundingClientRect()
     expect(Math.abs(dial.width - 2 * (PRINT.frames.desk.fare + 4))).toBeLessThan(3)

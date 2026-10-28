@@ -8,7 +8,7 @@ import { GateIcon } from '../chrome/GateIcon'
 import { ChevronIcon } from '../ui/Icons'
 import { DUELS_PATH } from './DuelsDoor'
 
-// ── 対戦 — the duels on a day done (plan 286, E) ─────────────────
+// ── 対戦 — the duels on a day done (plan 287, E) ─────────────────
 // The day cleared, the gate is shut and the key with it: the departure
 // board takes the duels as a row of its own, the owner's pick E of the
 // canvas "Tsuji — le duel sur Today" -- the duel as what comes after the

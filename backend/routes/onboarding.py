@@ -21,7 +21,7 @@
 #   POST   /api/onboarding/ride/done      stamp tutorial_at (finished or skipped)
 #   DELETE /api/onboarding/ride/done      clear it (Settings' replay)
 #   POST   /api/onboarding/guided/{gate}  note a gate's guide as seen
-#   POST   /api/onboarding/news/{item}    note a new feature as told (plan 286)
+#   POST   /api/onboarding/news/{item}    note a new feature as told (plan 287)
 #   DELETE /api/onboarding/guided         forget them all (Settings' replay)
 #
 # The placement round trip is stateless by design: the paper is a pure
@@ -670,7 +670,7 @@ def mark_guided(gate: str, user_id: str = Depends(get_user_id)):
     # The first time wins, like every stamp here: a guide replayed from
     # Settings clears the map first (DELETE below), so a second POST on
     # a gate already in it is a double-tap and changes nothing.
-    # Today's guide shows the duels' key since plan 286, so its end is
+    # Today's guide shows the duels' key since plan 287, so its end is
     # the key's news told too: the sheet that announces it is for the
     # learners whose Today guide ended before (profile.duels_news_open).
     now = datetime.now(timezone.utc).isoformat()
@@ -687,7 +687,7 @@ def mark_guided(gate: str, user_id: str = Depends(get_user_id)):
     return {"guided": guided}
 
 
-# 新しい — a feature told once, by its column (plan 286). A closed set:
+# 新しい — a feature told once, by its column (plan 287). A closed set:
 # the item names a column, so it is never taken from the path as is.
 NEWS = {"duels": "duels_news_at"}
 

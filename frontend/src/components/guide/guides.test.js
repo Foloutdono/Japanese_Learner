@@ -122,7 +122,7 @@ describe('the guide on the desk', () => {
 // week ahead are left to be found.
 describe('Today\'s guide', () => {
   // ... and the duels' key beside the gate, by the owner's word again
-  // (plan 286): the guide is how a learner new to Today meets it.
+  // (plan 287): the guide is how a learner new to Today meets it.
   it('stops at the gate, the duels\' key and the gates only', () => {
     expect(GUIDES.today.map(s => s.anchor)).toEqual(['today.gate', 'today.duels', 'tabbar'])
   })

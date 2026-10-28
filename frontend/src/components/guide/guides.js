@@ -16,7 +16,7 @@
 // the exception, by the owner's later word (2026-09-28): it is the
 // first gate a learner sees, straight off the first ride, so it says
 // the two things they need to start -- the gate and the way to the
-// others -- and nothing more; and since plan 286, by the owner's word
+// others -- and nothing more; and since plan 287, by the owner's word
 // again, the duels' key beside the gate. The level, the status, the balance, the
 // run's length and fare, the strip, the journey and the week ahead are
 // found by using them, and the profile's guide names the level and the
@@ -39,7 +39,7 @@ export const GUIDES = Object.freeze({
     { anchor: 'practice.exam',  key: 'PracticeExam',  radius: 'plate' },
     { anchor: 'practice.pass',  key: 'PracticePass',  radius: 'pill' },
   ],
-  // The duels' key beside the gate (plan 286), by the owner's word: on
+  // The duels' key beside the gate (plan 287), by the owner's word: on
   // a day done, the board's duel row carries the anchor instead.
   today: [
     { anchor: 'today.gate',   key: 'TodayGate',   radius: 'card' },

@@ -173,7 +173,7 @@ def _init_db() -> None:
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
-                # 新しい (plan 286): when the learner was told the duels'
+                # 新しい (plan 287): when the learner was told the duels'
                 # key stands beside Today's gate -- the sheet that says
                 # so put away, or Today's guide ended with the key's stop
                 # in it. NULL is not told yet; routes/onboarding.py
@@ -463,7 +463,7 @@ def _profile_row(user_id: str) -> tuple:
 
 def duels_news_open(user_id: str, guided) -> bool:
     """Whether Today tells this learner, once, that the duels' key now
-    stands beside its gate (plan 286): GET /api/profile's `duelsNews`.
+    stands beside its gate (plan 287): GET /api/profile's `duelsNews`.
     Only a learner who met Today before it did -- whose Today guide
     ended, without the key's stop, since that guide's end now stamps the
     news too (routes/onboarding.mark_guided) -- and only until told."""
@@ -915,7 +915,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # Early access (plan 269): whether Today asks, once, how the
         # learner finds the app (routes/feedback.offer_open).
         "feedbackOffer": feedback_routes.offer_open(user_id, xp),
-        # 新しい (plan 286): whether Today tells the learner, once, that
+        # 新しい (plan 287): whether Today tells the learner, once, that
         # the duels' key stands beside its gate (duels_news_open).
         "duelsNews": duels_news_open(user_id, guided),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx

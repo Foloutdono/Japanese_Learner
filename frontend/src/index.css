@@ -33296,7 +33296,7 @@ button.brd-stn { cursor: pointer; }
    ink as its edge, the selection's gold for what waits on the learner --
    and never a line's pigment. The door in the holder, its Elo insert
    and the row on Today's board are the app's own objects with a word or
-   a ring more; Today's key is the gate's reader drawn whole (plan 286);
+   a ring more; Today's key is the gate's reader drawn whole (plan 287);
    everything else here is namespaced .pvp-*. The sprint and
    its result are a game since plan 285 (the owner's C1 and E4): there
    alone the duels' arcade inks (--duel-*), its fills and glows, see
@@ -33309,7 +33309,7 @@ button.brd-stn { cursor: pointer; }
   color: var(--sel-ink);
 }
 
-/* ── 対戦 — the key beside Today's gate (plan 286) ──
+/* ── 対戦 — the key beside Today's gate (plan 287) ──
    The owner's pick D1 of the canvas "Tsuji — le duel sur Today": the
    gate's own reader drawn whole as a key -- its sumi lit from the top
    left, ⇄ in its lamp -- in a rim of the gate's gold lit from the top,
@@ -33373,11 +33373,11 @@ button.brd-stn { cursor: pointer; }
   .pvp-key:focus-visible,
   .pvp-key:active { transform: none; }
 }
-/* The duels' row on a day done's board (plan 286, E): the board's own
+/* The duels' row on a day done's board (plan 287, E): the board's own
    row, the duels' pictogram before its name. */
 .pvp-row__day { display: inline-flex; align-items: center; gap: var(--sp-2); min-width: 0; }
 
-/* ── 新しい — the duels announced, once, over Today (plan 286) ──
+/* ── 新しい — the duels announced, once, over Today (plan 287) ──
    To the learners who met Today before the key stood there: Today's
    sheet, the key drawn at the gate's 66px as its picture, a title and
    a line, the way to the hall and the quiet way past. */
