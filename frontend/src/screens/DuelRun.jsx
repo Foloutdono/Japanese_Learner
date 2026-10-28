@@ -5,9 +5,12 @@ import { StageHead } from '../components/chrome/StageHead'
 import { LevelBar } from '../components/chrome/LevelBar'
 import { Loading } from '../components/ui/Loading'
 import { CorrectionsSheet } from '../components/pvp/CorrectionsSheet'
+import { Alone, Versus } from '../components/pvp/DuelEnd'
+import { ANSWER_MS, AnswerFx, BAND_MS, Band, ComboRing, Overtake, PASS_MS, RushPill } from '../components/pvp/RaceFx'
+import { Train } from '../components/pvp/Train'
 import { apiJson } from '../lib/api'
-import { playClick } from '../lib/audio'
-import { LIMIT_MS, SPRINT_MS, clockOf, duelErrorKey, errorKey, points, totalAt } from '../domain/duel'
+import { loadDuelAudio, playClick, releaseDuelAudio, startDuelRace } from '../lib/audio'
+import { LIMIT_MS, SPRINT_MS, clockOf, duelErrorKey, errorKey, points, speedNote, totalAt } from '../domain/duel'
 import { refreshDuels } from '../stores/duels'
 import { applyXpGain } from '../stores/profileSummary'
 
@@ -20,19 +23,62 @@ import { applyXpGain } from '../stores/profileSummary'
 // and it never says which choice was right until the duel is settled;
 // the client draws what a question is worth while it waits, the other
 // player's total at the pace it was recorded (or, live, as the poll
-// brings it), and the verdict the server reads once the minute is over.
-// The race is the gap on the line (the owner's P2c) and the result the
-// two totals face to face over the finish (R1a).
+// brings it), and the verdict the server reads once the sprint is over.
+// The race is the gap on the line (the owner's P2c), played as a game
+// since plan 285 (the owner's C1): the trains on their rails, the
+// combo and the rush the server scores, each answer's moment; and the
+// result is the two runs face to face, line by line (E4).
 const COLOR = 'var(--pass-ink)'
 const RIGHT_HOLD_MS = 300
-// Past the end of the minute and the server's grace for an answer
+// Past the end of the sprint and the server's grace for an answer
 // still on its way (study/duels.GRACE_MS, 750 ms).
 const SETTLE_MS = 1000
 const LIVE_POLL_MS = 1000
 const LOBBY_POLL_MS = 3000
+// « Arrivée ! » holds the line at least this long while the verdict is read.
+const ARRIVAL_MS = 1700
 const CLOSED = ['expired', 'declined', 'cancelled']
 // The refusals that mean the run cannot go on.
 const CLOSING = ['pvp_closed', 'pvp_not_found', 'pvp_played']
+
+/**
+ * The run one beat on, `at` on the server's clock: a flash whose moment
+ * has come gives way to the next question; who leads is read off the two
+ * totals and a change of hands stamped (never the first lead); the end
+ * is stamped on the beat it comes. The same run back when nothing moved.
+ */
+function beat(r, at, live) {
+  let next = r
+  if (r.flash && !r.flash.pending && at >= r.flash.until) {
+    next = r.nextQ
+      ? { ...r, q: r.nextQ, nextQ: null, servedAt: r.flash.until, flash: null }
+      : { ...r, flash: null, done: true }
+  }
+  if (next.done || at >= next.endsAt) {
+    return next.arrivedAt == null ? { ...next, arrivedAt: at } : next
+  }
+  if ((live || next.recorded) && at >= next.startsAt) {
+    const theirs = totalAt(next.timeline, at - next.startsAt).total
+    const lead = Math.sign(next.total - theirs)
+    if (lead && lead !== next.lead) {
+      next = { ...next, lead, pass: next.lead ? { me: lead > 0, at } : next.pass }
+    }
+  }
+  return next
+}
+
+/** Where the picked tile and the learner's train stand in the stage's box when an answer is given. */
+function measure(box, pick) {
+  const tile = box?.querySelectorAll('.pvp-tile')[pick]
+  if (!tile) return null
+  const b = box.getBoundingClientRect()
+  const r = tile.getBoundingClientRect()
+  const train = box.querySelector('.pvp-track--me .pvp-loco')?.getBoundingClientRect()
+  return {
+    x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height,
+    to: train ? { x: train.right - b.left - 24, y: train.top - b.top - 6 } : null,
+  }
+}
 
 export default function DuelRun({ session }) {
   // One duel, one stage: a rematch's new id starts it afresh -- its
@@ -52,6 +98,7 @@ function DuelStage({ id, session }) {
   const [error, setError] = useState(null)
   const skew = useRef(0)
   const busy = useRef(false)
+  const stage = useRef(null)
 
   const load = useCallback(() => apiJson(`/api/pvp/duels/${id}`, session).then(d => {
     skew.current = Date.parse(d.serverNow) - Date.now()
@@ -72,11 +119,19 @@ function DuelStage({ id, session }) {
       total: r.total ?? 0, rights: r.rights ?? 0,
       // A recording to race, even one with no answer in it.
       timeline: r.opponent?.timeline ?? [], recorded: r.opponent != null, seen: 0, done: !r.q,
+      // The combo the run is on and the rules it is scored by (plan
+      // 285): none for a duel scored on speed alone. A run picked up
+      // again keeps its streak.
+      streak: r.streak ?? 0, mult: r.mult ?? 1, rules: r.rules ?? null,
+      // The race's moments, each stamped on the run's clock: who led
+      // last, the last change of hands, the last answer, the last combo
+      // broken and tier reached, the arrival.
+      lead: 0, pass: null, fx: null, broke: null, tierAt: null, arrivedAt: null,
     })
   }, [])
 
   // A refusal saying the duel closed under the ticket (the other left,
-  // blocked, erased their account; the minute already run elsewhere) is
+  // blocked, erased their account; the sprint already run elsewhere) is
   // read again from the server: the ticket then says what the duel is,
   // rather than keep a button that can only fail again.
   const refused = useCallback(e => {
@@ -117,36 +172,72 @@ function DuelStage({ id, session }) {
   useEffect(() => { if (autostart) start() }, [autostart, start])
 
   // One clock for the whole stage, on the server's time. Each beat also
-  // ends a flash whose moment has come: the next question shows when the
-  // server said it was served.
+  // ends a flash whose moment has come (the next question shows when the
+  // server said it was served), reads who leads the race and stamps a
+  // change of hands, and stamps the arrival.
   const started = run != null
+  const racingLive = duel?.mode === 'live'
   useEffect(() => {
     if (!started) return undefined
     const tick = setInterval(() => {
       const at = Date.now() + skew.current
       setNow(at)
-      setRun(r => {
-        if (!r?.flash || r.flash.pending || at < r.flash.until) return r
-        return r.nextQ
-          ? { ...r, q: r.nextQ, nextQ: null, servedAt: r.flash.until, flash: null }
-          : { ...r, flash: null, done: true }
-      })
+      setRun(r => (r ? beat(r, at, racingLive) : r))
     }, 100)
     return () => clearInterval(tick)
-  }, [started])
+  }, [started, racingLive])
 
   // One answer a question: the guard is a ref, so a second tap before
   // the state lands sends nothing, and the request leaves outside any
   // state update (StrictMode runs those twice).
   const live = useRef(null)
   useEffect(() => { live.current = run }, [run])
+
+  // The duel's music and sounds (plan 285, lib/audio/duel.js): fetched
+  // while the ticket shows, let go when the screen closes; a run scored
+  // with the combo and the rush plays them from its first bar, on the
+  // server's clock, picked up wherever a run resumed is.
+  useEffect(() => {
+    loadDuelAudio()
+    return () => releaseDuelAudio()
+  }, [])
+  const race = useRef(null)
+  const raceFrom = run?.startsAt
+  const raceTo = run?.endsAt
+  const rushMs = run?.rules?.rushMs
+  useEffect(() => {
+    if (!rushMs) return undefined
+    const sound = startDuelRace({
+      startsAt: raceFrom, endsAt: raceTo, rushMs,
+      now: () => Date.now() + skew.current, mult: live.current?.mult ?? 1,
+    })
+    race.current = sound
+    return () => {
+      sound.stop()
+      if (race.current === sound) race.current = null
+    }
+  }, [raceFrom, raceTo, rushMs])
+  // A change of hands; every question answered before the end; the duel
+  // closed under the run.
+  const passAt = run?.pass?.at
+  const passMe = run?.pass?.me
+  useEffect(() => { if (passAt != null) race.current?.pass(passMe) }, [passAt, passMe])
+  const ranOut = Boolean(run?.done)
+  const shutUnder = Boolean(run?.closed)
+  useEffect(() => {
+    if (shutUnder) race.current?.stop()
+    else if (ranOut) race.current?.finish()
+  }, [ranOut, shutUnder])
   const answer = useCallback(pick => {
     const r = live.current
     if (!r || r.busy || r.flash || r.done) return
     live.current = { ...r, busy: true }
+    // Where the answer's moment is drawn: the tile under the finger, the
+    // learner's train it flies to.
+    const spot = measure(stage.current, pick)
     setRun(cur => ({ ...cur, busy: true, flash: { pick, pending: true } }))
     apiJson(`/api/pvp/duels/${id}/answer`, session, { method: 'POST', body: JSON.stringify({ n: r.q.n, pick }) }).then(a => {
-      // The minute is over, or the question was not the one being
+      // The sprint is over, or the question was not the one being
       // served: the server's state wins.
       if (a.over) {
         setRun(cur => ({ ...cur, busy: false, flash: null, total: a.total, rights: a.rights, done: true }))
@@ -158,19 +249,32 @@ function DuelStage({ id, session }) {
       }
       // Right or wrong, never which choice was right: the paper is
       // shared, and its corrections open once the duel is settled.
-      setRun(cur => ({
-        ...cur, busy: false, total: a.total, rights: a.rights,
-        // The pick the answer was recorded with: a reply lost and sent
-        // again, from another tile or device, is about the first one.
-        flash: { pick: a.pick ?? pick, right: a.right, pts: a.pts, until: a.next ? Date.parse(a.nextAt) : Date.now() + skew.current + RIGHT_HOLD_MS },
-        nextQ: a.next,
-      }))
+      const at = Date.now() + skew.current
+      // Its sound, and the music the multiplier it reached turns on.
+      race.current?.answer({ right: a.right, flash: a.pts >= 100, mult: a.mult ?? 1, broke: a.right ? 0 : r.streak ?? 0 })
+      setRun(cur => {
+        // The streak and what it pays are the server's (plan 285); a
+        // server from before them scores speed alone.
+        const streak = a.streak ?? 0
+        const mult = a.mult ?? 1
+        return {
+          ...cur, busy: false, total: a.total, rights: a.rights, streak, mult,
+          // The pick the answer was recorded with: a reply lost and sent
+          // again, from another tile or device, is about the first one.
+          flash: { pick: a.pick ?? pick, right: a.right, pts: a.pts, until: a.next ? Date.parse(a.nextAt) : at + RIGHT_HOLD_MS },
+          nextQ: a.next,
+          fx: { when: at, at: spot, right: a.right, note: a.right ? speedNote(a.pts) : null,
+            scored: a.scored ?? a.pts, mult, rush: (a.rush ?? 0) > 0 },
+          broke: !a.right && cur.streak >= 3 ? { n: cur.streak, at } : cur.broke,
+          tierAt: a.right && mult > cur.mult ? at : cur.tierAt,
+        }
+      })
     }).catch(e => setRun(cur => (
       // The duel closed under the run (a block, the other's account
       // erased): the run is over, and the cover says how. Anything else
       // (the network) leaves the question to be answered again.
       CLOSING.includes(e?.code)
-        ? { ...cur, busy: false, flash: null, done: true }
+        ? { ...cur, busy: false, flash: null, done: true, closed: true }
         : { ...cur, busy: false, flash: null }
     )))
   }, [id, session])
@@ -214,7 +318,7 @@ function DuelStage({ id, session }) {
     return () => clearInterval(tick)
   }, [lobby, id, session, start, load])
 
-  // The verdict, read once the minute and its grace are over; a read
+  // The verdict, read once the sprint and its grace are over; a read
   // that fails says so and can be asked again.
   const endsAt = run?.endsAt
   const doneEarly = Boolean(run?.done)
@@ -280,13 +384,18 @@ function DuelStage({ id, session }) {
   }
 
   // A duel already run: its result, the server's (waiting while the
-  // other has yet to run their minute).
+  // other has yet to run their sprint).
   if (!run && duel.you.played) {
     return <Result duel={duel} settled={duel} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error} />
   }
-  if (over) {
+  // The arrival (plan 285): « Arrivée ! » holds the line, the answers
+  // put away, while the verdict is read and ARRIVAL_MS at least; a run
+  // the duel closed under goes to what the server says at once.
+  const finishing = over && !run.closed && settled !== false
+    && (settled == null || run.arrivedAt == null || now - run.arrivedAt < ARRIVAL_MS)
+  if (over && !finishing) {
     return <Result duel={duel} settled={settled} them={them} session={session} t={t} lang={lang} onLeave={leave} onAgain={again} error={error}
-      onRetry={() => { setSettled(null); readVerdict() }} />
+      onRetry={() => { setSettled(null); readVerdict() }} fresh />
   }
   if (!run) {
     return (
@@ -309,20 +418,29 @@ function DuelStage({ id, session }) {
   const qMs = Math.max(0, now - run.servedAt)
   const worth = run.flash && !run.flash.pending ? run.flash.pts : points(qMs)
   const share = run.flash ? 0 : Math.max(0, 1 - qMs / LIMIT_MS)
+  // The rush: the sprint's last seconds, which pay a right answer twice.
+  const rush = Boolean(run.rules) && !counting && !over && run.endsAt - now <= run.rules.rushMs
+  const count = Math.max(1, Math.ceil((run.startsAt - now) / 1000))
 
   return (
     <div className="screen">
-      <main id="main-content" className="container stage exam-run pvp-run" style={{ '--line-color': COLOR }}>
+      <main id="main-content" ref={stage} className={`container stage exam-run pvp-run${finishing ? ' pvp-run--done' : rush ? ' pvp-run--rush' : ''}`} style={{ '--line-color': COLOR }}>
         <StageHead onLeave={leave} leaveLabel={t.pvpQuit} where={duel.kind === 'ranked' && !duel.them ? t.pvpRanked : t.pvpDuelWith(them)}
           sub={counting ? t.pvpReady : clockOf(left)} pass={false} keys={false} />
+        {run.rules && !counting && (
+          <ComboRing streak={run.streak} tiers={run.rules.tiers} broke={run.broke} tierAt={run.tierAt} now={now} t={t} lang={lang} />
+        )}
         <Line mine={run.total} theirs={opp.total} racing={racing} them={them}
-          clock={1 - elapsed / length} t={t} lang={lang} />
+          clock={1 - elapsed / length} t={t} lang={lang} mult={run.mult} rush={rush} finish={finishing}
+          go={!counting && now - run.startsAt < BAND_MS}
+          pass={run.pass && now - run.pass.at < PASS_MS ? run.pass : null} />
         {counting
-          ? <section className="exam-page pvp-page pvp-page--count" aria-live="polite"><b className="pvp-count">{Math.max(1, Math.ceil((run.startsAt - now) / 1000))}</b></section>
+          ? <section className="exam-page pvp-page pvp-page--count" aria-live="polite"><b className="pvp-count" key={count}>{count}</b></section>
           : run.q && <Question q={run.q} worth={worth} share={share} flash={run.flash} t={t} />}
         <div className="exam-dock pvp-dock">
           {!counting && run.q && <Choices q={run.q} flash={run.flash} onPick={answer} lang={lang} />}
         </div>
+        {run.fx && now - run.fx.when < ANSWER_MS && <AnswerFx key={run.fx.when} fx={run.fx} t={t} lang={lang} />}
       </main>
       <LevelBar />
     </div>
@@ -406,7 +524,9 @@ function Question({ q, worth, share, flash, t }) {
 function Choices({ q, flash, onPick, lang }) {
   // A word's meanings come in both languages; a reading or a spelling is
   // Japanese. Every kind is the one list, so the dock never changes shape
-  // from one question to the next (plan 284, the owner's call).
+  // from one question to the next (plan 284, the owner's call), each
+  // answer alone in the middle of its tile, at the size a glance reads
+  // (Q3, plan 285): no number before it, since no key answers a duel.
   const jp = q.kind !== 'word'
   const choices = Array.isArray(q.choices) ? q.choices : (q.choices[lang] ?? q.choices.en)
   return (
@@ -417,8 +537,7 @@ function Choices({ q, flash, onPick, lang }) {
         const held = flash?.pending && i === flash.pick ? ' exam-tile--on' : ''
         return (
           <button key={`${q.n}-${i}`} type="button" className={`exam-tile pvp-tile${state}${held}`} disabled={Boolean(flash)} onClick={() => onPick(i)}>
-            <span className="exam-tile__b">{i + 1}</span>
-            <span className={jp ? 'exam-tile__t' : 'exam-tile__t exam-tile__t--long pvp-tile__t--latin'} lang={jp ? 'ja' : undefined}>{c}</span>
+            <span className={jp ? 'exam-tile__t' : 'exam-tile__t pvp-tile__t--latin'} lang={jp ? 'ja' : undefined}>{c}</span>
           </button>
         )
       })}
@@ -434,8 +553,12 @@ const reachOf = (a, b) => Math.max(500, Math.ceil((Math.max(a, b) * 1.3) / 250) 
 /** The race (P2c): points as distance, the trains on the line, and the
  *  stretch the trailing train has to cover hatched on its rail up to the
  *  leader's nose in the leader's ink, what it is worth written over it.
- *  Never a sentence: the gap is read on the line. */
-function Line({ mine, theirs, racing, them, clock, t, lang }) {
+ *  Never a sentence: the gap is read on the line. Since plan 285 (C1)
+ *  the trains are the owner's T1 on sleepered rails, the learner's hot
+ *  while the combo pays ×2 and more; « Partez ! » and « Arrivée ! » are
+ *  stamped over the line, the rush's pill on the clock, and a change of
+ *  hands over the train that went ahead. */
+function Line({ mine, theirs, racing, them, clock, t, lang, mult = 1, rush = false, go = false, finish = false, pass = null }) {
   const fig = n => n.toLocaleString(lang)
   const rows = racing
     ? [{ key: 'them', who: them, n: theirs, me: false }, { key: 'me', who: t.pvpYou, n: mine, me: true }]
@@ -446,6 +569,7 @@ function Line({ mine, theirs, racing, them, clock, t, lang }) {
   return (
     <div className="pvp-line-race">
       <span className="pvp-clock" aria-hidden="true"><i className="pvp-clock__fill" style={{ transform: `scaleX(${Math.max(0, clock)})` }} /></span>
+      {rush && <RushPill t={t} lang={lang} />}
       <div className="pvp-tracks" role="img" aria-label={label}>
         {rows.map(r => {
           const trails = racing && lead !== 0 && (r.me ? lead < 0 : lead > 0)
@@ -459,12 +583,18 @@ function Line({ mine, theirs, racing, them, clock, t, lang }) {
                   </span>
                 )}
                 <span className="pvp-train" style={{ '--at': pct(r.n / reach) }}>
-                  <span className="pvp-train__body"><b className="pvp-train__fig">{fig(r.n)}</b><span className="pvp-train__car" /></span>
+                  <span className="pvp-train__body">
+                    {pass && pass.me === r.me && <Overtake key={pass.at} me={pass.me} them={them} t={t} />}
+                    <b className="pvp-train__fig" key={r.n}>{fig(r.n)}</b>
+                    <Train me={r.me} mult={r.me ? mult : 1} gain={r.n} />
+                  </span>
                 </span>
               </span>
             </div>
           )
         })}
+        {go && <Band text={t.pvpGoBand} />}
+        {finish && <Band text={t.pvpArrival} finish />}
       </div>
       {!racing && <p className="pvp-run__help pvp-run__help--center">{t.pvpRacedLater(them)}</p>}
     </div>
@@ -473,51 +603,30 @@ function Line({ mine, theirs, racing, them, clock, t, lang }) {
 
 // ── the result ──
 
-/** The finish, simplified: two rails, each car where its total stopped,
- *  on one scale. */
-function FinishLine({ mine, theirs, them, t, lang }) {
-  const fig = n => n.toLocaleString(lang)
-  const reach = Math.max(mine, theirs, 1) * 1.08
-  const rows = [{ key: 'them', who: them, n: theirs, me: false }, { key: 'me', who: t.pvpYou, n: mine, me: true }]
-  return (
-    <div className="pvp-finish" role="img" aria-label={`${t.pvpYou} ${fig(mine)}, ${them} ${fig(theirs)}`}>
-      {rows.map(r => (
-        <div key={r.key} className={`pvp-finish__row${r.me ? ' pvp-finish__row--me' : ''}`}>
-          <span className="pvp-finish__who">{r.who}</span>
-          <span className="pvp-finish__rail">
-            <span className="pvp-train" style={{ '--at': pct(r.n / reach) }}><span className="pvp-finish__car" /></span>
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
+/** A run's lines from a server that kept none (before plan 285): its score, all speed. */
+const plainLines = (score, rights, answered) => ({
+  speed: score ?? 0, combo: 0, rush: 0, best: 0, flashes: 0, rights: rights ?? 0, answered: answered ?? rights ?? 0, grade: null,
+})
 
-function Result({ duel, settled: read, them, session, t, lang, onLeave, onAgain, error, onRetry }) {
-  // The verdict is the server's (the cover, read once the minute is
+function Result({ duel, settled: read, them: named, session, t, lang, onLeave, onAgain, error, onRetry, fresh = false }) {
+  // The verdict is the server's (the cover, read once the sprint is
   // over). While the other player has yet to run there is no outcome,
-  // only the learner's own score; while it loads, nothing; when the read
+  // only the learner's own run; while it loads, nothing; when the read
   // failed (false), the way to ask again.
   const failed = read === false
   const settled = failed ? null : read
+  // Who the verdict was against, as it names them: a ranked run met by
+  // a stranger after « Partir » has its name only now.
+  const them = settled?.them?.username ?? named
   const verdict = settled?.result ?? null
   const shut = CLOSED.includes(settled?.status)
   const waiting = settled != null && verdict == null
-  const mine = verdict?.mine ?? settled?.you?.score ?? 0
-  const theirs = verdict?.theirs ?? 0
-  const rights = verdict?.rights ?? settled?.you?.rights ?? 0
-  const count = verdict?.answered ?? settled?.you?.answered ?? rights
-  const theirRights = verdict?.theirRights ?? 0
-  const theirCount = verdict?.theirAnswered ?? 0
-  const result = verdict?.outcome ?? 'draw'
-  const word = shut ? t.pvpShut[settled.status] : waiting ? t.pvpWaitingFor(them) : result === 'win' ? t.pvpWin : result === 'loss' ? t.pvpLoss : t.pvpDraw
   const ranked = duel.kind === 'ranked'
-  const elo = verdict?.elo ?? null
-  const fig = n => n.toLocaleString(lang)
-  const xp = verdict?.xp ?? settled?.you?.xp ?? 0
   const xpLeft = settled ? Math.max(0, settled.xp.cap - settled.xp.today) : 0
-  const by = verdict && result !== 'draw' ? t.pvpBy(Math.abs(mine - theirs)) : ''
-  const signed = d => (d >= 0 ? `+${d}` : `−${-d}`)
+  const xpShare = settled ? Math.min(1, settled.xp.today / Math.max(1, settled.xp.cap)) : 0
+  // The duel's own rules: its combo's and its rush's lines are drawn
+  // only for a duel scored with them.
+  const rules = settled?.rules ?? null
 
   const [review, setReview] = useState(null)
   const [fixOpen, setFixOpen] = useState(false)
@@ -535,12 +644,6 @@ function Result({ duel, settled: read, them, session, t, lang, onLeave, onAgain,
       .finally(() => { buying.current = false })
   }
 
-  const eloRecord = elo && (
-    <div className="record"><span className="record__value">{fig(elo.after)}<span className={`pvp-elo-move pvp-elo-move--${elo.delta >= 0 ? 'up' : 'down'}`}>{signed(elo.delta)}</span></span><span className="record__label">{t.pvpElo}</span></div>
-  )
-  const xpRecord = <div className="record"><span className="record__value">+{xp}<span className="record__unit">XP</span></span><span className="record__label">{t.pvpXpLeft(xpLeft)}</span></div>
-  const rightsRecord = <div className="record"><span className="record__value">{rights}<span className="record__unit">/ {count}</span></span><span className="record__label">{t.pvpRightsCap}</span></div>
-
   let body
   if (failed) {
     body = (
@@ -554,51 +657,31 @@ function Result({ duel, settled: read, them, session, t, lang, onLeave, onAgain,
   } else if (settled == null) {
     body = <Loading />
   } else if (waiting) {
+    // No verdict beside the run: the friend has yet to run, or the duel
+    // closed (and then whether a fare came back).
+    const you = settled.you ?? {}
+    const word = shut ? t.pvpShut[settled.status] : t.pvpWaitingFor(them)
+    const note = !shut ? t.pvpVerdictLater(them)
+      : !you.refunded ? t.pvpNoVerdict
+        : settled.status === 'expired' ? t.pvpRefunded : t.pvpNoVerdictRefunded
     body = (
       <>
         <span className="pvp-air" aria-hidden="true" />
-        <section className="pvp-face" aria-label={word}>
-          <h2 className="pvp-result__word">{word}</h2>
-          <div className="pvp-face__pair pvp-face__pair--one">
-            <div className="pvp-face__side pvp-face__side--me">
-              <b className="pvp-face__fig">{fig(mine)}</b>
-              <span className="pvp-face__who">{t.pvpYou}</span>
-              <span className="pvp-face__rights">{t.pvpRightsOf(rights, count)}</span>
-            </div>
-          </div>
-          <p className="pvp-run__help pvp-run__help--center">
-            {!shut ? t.pvpVerdictLater(them)
-              : !settled.you?.refunded ? t.pvpNoVerdict
-                : settled.status === 'expired' ? t.pvpRefunded : t.pvpNoVerdictRefunded}
-          </p>
-        </section>
-        <div className="records pvp-two pvp-result__facts">{rightsRecord}{xpRecord}</div>
+        <Alone word={word} note={note} mine={you.score ?? 0} lines={you.lines ?? plainLines(you.score, you.rights, you.answered)}
+          them={them} rules={rules} xp={you.xp ?? 0} xpLeft={xpLeft} xpShare={xpShare} t={t} lang={lang} />
         <span className="pvp-air" aria-hidden="true" />
       </>
     )
   } else {
-    // Face to face, the finish under the two totals; then the Elo the
-    // duel moved (a friendly duel: the right answers) and the XP it paid.
+    const lines = verdict.lines ?? {
+      mine: plainLines(verdict.mine, verdict.rights, verdict.answered),
+      theirs: plainLines(verdict.theirs, verdict.theirRights, verdict.theirAnswered),
+    }
     body = (
       <>
         <span className="pvp-air" aria-hidden="true" />
-        <section className="pvp-face" aria-label={word}>
-          <div className="pvp-result__verdict"><h2 className={`pvp-result__word pvp-result__word--${result}`}>{word}</h2><span>{by}</span></div>
-          <div className="pvp-face__pair">
-            <div className="pvp-face__side pvp-face__side--me">
-              <b className="pvp-face__fig">{fig(mine)}</b>
-              <span className="pvp-face__who">{t.pvpYou}</span>
-              <span className="pvp-face__rights">{t.pvpRightsOf(rights, count)}</span>
-            </div>
-            <div className="pvp-face__side">
-              <b className="pvp-face__fig">{fig(theirs)}</b>
-              <span className="pvp-face__who">{them}</span>
-              <span className="pvp-face__rights">{t.pvpRightsOf(theirRights, theirCount)}</span>
-            </div>
-          </div>
-          <FinishLine mine={mine} theirs={theirs} them={them} t={t} lang={lang} />
-        </section>
-        <div className="records pvp-two pvp-result__facts">{eloRecord || rightsRecord}{xpRecord}</div>
+        <Versus result={{ ...verdict, lines, xp: verdict.xp ?? settled.you?.xp ?? 0 }} them={them} rules={rules}
+          xpLeft={xpLeft} xpShare={xpShare} t={t} lang={lang} sound={fresh} />
         <span className="pvp-air" aria-hidden="true" />
       </>
     )

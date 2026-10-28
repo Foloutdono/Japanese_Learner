@@ -39,7 +39,9 @@ must be told apart by understanding, never by its look.
 
 PAPER_REV is the output's revision (CLAUDE.md, "Bump the revision when
 the output changes"): a duel stores the paper it was built with, and the
-rev it was built under.
+rev it was built under. The duel's rules go with the rev too
+(study/duels): sprint-2's runs are two minutes long (plan 284) and pay
+a streak and the last seconds more (plan 285).
 """
 from __future__ import annotations
 

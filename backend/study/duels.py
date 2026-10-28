@@ -1,17 +1,23 @@
 """
 対戦 — a duel's life (plan 279).
 
-A duel is a sprint (study/duel_paper.py): sixty seconds of quick
-questions, the same ones in the same order for both players. The server
-keeps the clock. A run starts LEAD_MS after « Partir » (live, after the
-friend walks in); the server serves one question at a time, notes when
-it was served, and times each answer as it arrives. A right answer is
-worth TOP points for its first FULL_MS, then less and less, down to
-FLOOR at LIMIT_MS, and nothing after; a wrong one nothing. The next
-question waits RIGHT_HOLD_MS after a right answer and LOCK_MS after a
-wrong one, so guessing costs time. A reply says right or wrong, never
-which choice was right: the paper is shared, and the corrections open
-only once the duel is settled, for a credit (review).
+A duel is a sprint (study/duel_paper.py): two minutes of quick
+questions (plan 284; one under sprint-1), the same ones in the same
+order for both players. The server keeps the clock. A run starts
+LEAD_MS after « Partir » (live, after the friend walks in); the server
+serves one question at a time, notes when it was served, and times each
+answer as it arrives. A right answer is worth TOP points for its first
+FULL_MS, then less and less, down to FLOOR at LIMIT_MS, and nothing
+after; a wrong one nothing. A streak multiplies them (plan 285): ×1.5
+from the fifth right answer in a row, ×2 from the tenth, ×3 from the
+twentieth (COMBO_TIERS), until a wrong one; and a right answer in the
+sprint's last RUSH_MS earns its points once more (the rush). An answer
+keeps its parts (pts, combo, rush), and the result's lines are read
+back from them. The next question waits RIGHT_HOLD_MS after a right
+answer and LOCK_MS after a wrong one, so guessing costs time. A reply
+says right or wrong, never which choice was right: the paper is shared,
+and the corrections open only once the duel is settled, for a credit
+(review).
 
 Three ways to play:
 
@@ -69,6 +75,15 @@ logger = logging.getLogger(__name__)
 # still open when the two minutes came in is run, and raced, in one.
 SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000}
 SPRINT_MS = SPRINT_MS_BY_REV[duel_paper.PAPER_REV]
+# And so does the way an answer is scored (plan 285): sprint-2's runs
+# pay a streak and the last seconds more, sprint-1's pay speed alone.
+COMBO_REVS = frozenset({"sprint-2"})
+# (right answers in a row, the multiplier from there on)
+COMBO_TIERS = ((5, 1.5), (10, 2.0), (20, 3.0))
+RUSH_MS = 15_000
+# The result's grade needs a run of this many answers: a sprint left
+# after three is graded nothing.
+MIN_GRADED = 10
 LEAD_MS = 3_000
 FULL_MS = 1_000
 LIMIT_MS = 6_000
@@ -120,6 +135,83 @@ def points(ms: int) -> int:
     if ms <= FULL_MS:
         return TOP
     return max(FLOOR, math.floor(TOP - (TOP - FLOOR) * (ms - FULL_MS) / (LIMIT_MS - FULL_MS) + 0.5))
+
+
+def multiplier(streak: int) -> float:
+    """What a right answer's points are multiplied by, `streak` right
+    answers in a row with it."""
+    mult = 1.0
+    for at, m in COMBO_TIERS:
+        if streak >= at:
+            mult = m
+    return mult
+
+
+def combo_on(duel: dict) -> bool:
+    """Whether the duel's runs are scored with the combo and the rush."""
+    return duel["paper_rev"] in COMBO_REVS
+
+
+def streak_of(answers: list[dict]) -> int:
+    """The right answers in a row a run ends on."""
+    n = 0
+    for a in reversed(answers):
+        if not a["right"]:
+            break
+        n += 1
+    return n
+
+
+def scored(a: dict) -> int:
+    """What an answer added to the score: its speed's points, the
+    combo's and the rush's (none on an answer of sprint-1)."""
+    return a["pts"] + a.get("combo", 0) + a.get("rush", 0)
+
+
+def grade(rights: int, answered: int, flashes: int) -> str | None:
+    """The result's grade (plan 285): S for a run nearly all right with
+    a third of its right answers given in their first second, then A, B
+    and C by the share right; none for a run too short to say."""
+    if answered < MIN_GRADED:
+        return None
+    share = rights / answered
+    if share >= 0.95 and flashes >= 0.3 * rights:
+        return "S"
+    if share >= 0.88:
+        return "A"
+    if share >= 0.75:
+        return "B"
+    return "C"
+
+
+def lines(entry: dict) -> dict:
+    """What a run's score was made of, for the result's lines (plan
+    285): the points of speed, of the combo and of the rush, the longest
+    streak, the answers worth TOP (« éclairs »), the right ones among
+    the answers, and the grade."""
+    answers = entry["answers"] or []
+    best = run = 0
+    for a in answers:
+        run = run + 1 if a["right"] else 0
+        best = max(best, run)
+    rights = sum(1 for a in answers if a["right"])
+    flashes = sum(1 for a in answers if a["pts"] >= TOP)
+    return {
+        "speed": sum(a["pts"] for a in answers),
+        "combo": sum(a.get("combo", 0) for a in answers),
+        "rush": sum(a.get("rush", 0) for a in answers),
+        "best": best, "flashes": flashes,
+        "rights": rights, "answered": len(answers),
+        "grade": grade(rights, len(answers), flashes),
+    }
+
+
+def rules(duel: dict) -> dict | None:
+    """The combo's tiers and the rush's length, for the run's screen to
+    draw (never to score): none for a duel scored on speed alone."""
+    if not combo_on(duel):
+        return None
+    return {"tiers": [{"at": at, "mult": m} for at, m in COMBO_TIERS], "rushMs": RUSH_MS}
 
 
 def _ms(delta: timedelta) -> int:
@@ -457,9 +549,12 @@ def names(cur, me: str, user_ids: list[str]) -> dict[str, str | None]:
 
 
 def _timeline(entry: dict | None) -> list[dict]:
+    """A run as the other player races it: what each answer added to the
+    score (its combo and rush with it), and when, so the recording sums
+    to the score."""
     if not entry:
         return []
-    return [{"t": a["t"], "pts": a["pts"], "right": a["right"]} for a in entry["answers"]]
+    return [{"t": a["t"], "pts": scored(a), "right": a["right"]} for a in entry["answers"]]
 
 
 # ── Creating a duel ─────────────────────────────────────────────────
@@ -722,6 +817,8 @@ def _result(duel: dict, mine: dict, other: dict | None) -> dict | None:
         "mine": mine["score"] or 0, "theirs": (other or {}).get("score") or 0,
         "rights": mine["rights"] or 0, "theirRights": (other or {}).get("rights") or 0,
         "answered": len(mine["answers"]), "theirAnswered": len((other or {}).get("answers") or []),
+        # What each score was made of, line by line (plan 285).
+        "lines": {"mine": lines(mine), "theirs": lines(other) if other else None},
         "elo": None if delta is None else {"before": mine["rating_before"], "after": mine["rating_after"],
                                            "delta": delta},
         "xp": mine["xp"],
@@ -773,11 +870,13 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
                 "rights": mine["rights"] if mine["finished_at"] else None,
                 "answered": len(mine["answers"]) if mine["finished_at"] else None,
                 "xp": mine["xp"] if mine["finished_at"] else None,
+                "lines": lines(mine) if mine["finished_at"] else None,
                 "refunded": refunded},
         "them": them,
         # The pass pays for everything: nothing to print on it.
         "price": 0 if passed else _price(duel, mine),
         "sprintMs": sprint_ms(duel),
+        "rules": rules(duel),
         "expiresAt": _iso(duel["expires_at"]),
         "startsAt": _iso(duel["live_start"]),
         "serverNow": _iso(now),
@@ -796,6 +895,7 @@ def _run_state(duel: dict, entries: list[dict], mine: dict, paper: dict, now: da
     n = mine["served_q"] or 0
     items = paper["items"]
     over = mine["finished_at"] is not None or n >= len(items)
+    streak = streak_of(mine["answers"] or [])
     return {
         "startsAt": _iso(mine["started_at"]),
         "endsAt": _iso(_end(duel, mine)),
@@ -804,6 +904,10 @@ def _run_state(duel: dict, entries: list[dict], mine: dict, paper: dict, now: da
         "qAt": _iso(mine["served_at"]),
         "total": mine["score"] or 0,
         "rights": mine["rights"] or 0,
+        # The streak a run picked up again is on, and what it pays.
+        "streak": streak,
+        "mult": multiplier(streak) if combo_on(duel) else 1.0,
+        "rules": rules(duel),
         # The other's recording, when there is one to race: a live
         # opponent's comes by the poll.
         "opponent": ({"timeline": _timeline(other)}
@@ -877,10 +981,16 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
     # `t`, where the answer lands on the race: one accepted in the grace
     # after the sprint lands on the finish line, never past it, so the
     # recording the other player races sums to the score.
-    a = {"n": n, "pick": pick, "right": right, "ms": ms, "pts": pts,
-         "t": min(sprint_ms(duel), max(0, _ms(now - mine["started_at"])))}
+    t = min(sprint_ms(duel), max(0, _ms(now - mine["started_at"])))
+    a = {"n": n, "pick": pick, "right": right, "ms": ms, "pts": pts, "t": t}
+    if combo_on(duel):
+        # The streak this answer makes multiplies its points, and the
+        # sprint's last seconds pay them once more (plan 285).
+        mult = multiplier(streak_of(mine["answers"]) + 1) if right else 1.0
+        a["combo"] = math.floor(pts * (mult - 1) + 0.5)
+        a["rush"] = pts if t >= sprint_ms(duel) - RUSH_MS else 0
     mine["answers"] = [*mine["answers"], a]
-    mine["score"] = (mine["score"] or 0) + pts
+    mine["score"] = (mine["score"] or 0) + scored(a)
     mine["rights"] = (mine["rights"] or 0) + int(right)
     mine["served_q"] = n + 1
     mine["served_at"] = now + timedelta(milliseconds=RIGHT_HOLD_MS if right else LOCK_MS)
@@ -899,10 +1009,16 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
 
 def _answered(duel: dict, mine: dict, a: dict, items: list, over: bool) -> dict:
     nxt = mine["served_q"]
+    # The answer is the run's last: the streak it ends on is its own.
+    streak = streak_of(mine["answers"])
     return {
         # The pick the answer was recorded with, which a reply sent again
         # (lost on the way, a second device) is about: never the key.
         "n": a["n"], "pick": a["pick"], "right": a["right"], "pts": a["pts"], "ms": a["ms"],
+        # What it added: the speed's points, the combo's and the rush's
+        # (plan 285), and the streak the run is on with what it pays.
+        "combo": a.get("combo", 0), "rush": a.get("rush", 0), "scored": scored(a),
+        "streak": streak, "mult": multiplier(streak) if combo_on(duel) else 1.0,
         "total": mine["score"] or 0, "rights": mine["rights"] or 0,
         "next": None if over or nxt >= len(items) else duel_paper.served(items[nxt], nxt),
         "nextAt": _iso(mine["served_at"]),

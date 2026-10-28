@@ -170,7 +170,9 @@ nothing else — any other part of the chrome stays sumi and its two inks.
 pill** (`ConsoleAction`, `.console__action` — "+ Créer un deck" on the
 shelf) is a filled use of a line pigment. It is not precedent for filling a card, a row, a chip, a
 header or a second button; it is allowed to exist *because* the rule is
-otherwise absolute.
+otherwise absolute. The duel's run and its result are the other
+deliberate exception (plan 285): a game, drawn in fills and inks of its
+own, and nowhere else (*The duel*).
 
 ### The pigment is injected once
 
@@ -1339,6 +1341,88 @@ owner found them a pain to use and took the plates back from the canvas
   (`PracticeScreen.desktop.test.jsx`, `gates.wide.test.jsx`,
   `gates.short.test.jsx`).
 
+### The duel (対戦, plans 279, 284, 285)
+
+**The duel is the one screen that is a game, and it is drawn as one.** It
+is a sprint of two minutes against another learner, scored on each
+answer's speed, on a run of right answers and on the last fifteen
+seconds. The owner picked C1 on the canvas "Tsuji — le duel, en jeu"
+(plan 285). Inside the run and its result (`.pvp-run`, `.pvp-result`:
+`screens/DuelRun.jsx`, `components/pvp/`) the arcade is allowed what the
+rest of the app is refused:
+- fills, glows and sparks;
+- words stamped over the race;
+- inks of its own (`--duel-*`: the plate, the spark, the gold, the heat,
+  the rush, the rival's blue, the quick note's cyan);
+- music.
+
+It is no precedent. The duels' hall, a duel's cover, the board and every
+other screen are the station's, and no `--duel-*` ink is read outside
+the run and its result.
+
+What the game keeps of the app:
+
+- **The scales.** Its sizes, spaces, radii and tracking are the tokens';
+  only its colours are its own. The learner's train is the People
+  family's, the pass's charcoal with a stripe of the gate's gold; the
+  other's is white with the rival's blue.
+- **Say less.** The combo is a ring, the run of right answers in it and
+  the multiplier beside it, with nothing under it (the owner struck the
+  « ×2 à 10 » that sat there). A moment is a word or two (« Partez ! »,
+  追い越し, 神速), never a sentence.
+- **Nothing holds the race.** Each moment is stamped on the run's clock,
+  which is the server's. The moments are:
+  - the start and arrival bands on the track;
+  - the overtake over the train that went ahead;
+  - a new tier's burst from the ring;
+  - an answer's speed note at its tile;
+  - the points flying from the tile to the learner's train.
+
+  None of them takes a pointer, and each leaves by itself. All of them
+  are aria-hidden: the totals, the clock and the verdict say the same to
+  a screen reader.
+- **The question never moves.** The four answers are one list, centred,
+  with no numbers and no bubbles (Q3). Each tile is the same height from
+  one question to the next, and a long answer wraps inside its tile.
+- **Reduced motion** keeps each moment as a fade and drops every
+  transform.
+
+The race reads the server and never scores. The combo pays ×1.5 from
+five right in a row, ×2 from ten and ×3 from twenty
+(`duels.COMBO_TIERS`). A broken run of three or more says so for a
+moment. The last fifteen seconds pay a right answer twice: the clock
+carries the rush's pill and the screen's edge warms. 神速 marks an answer
+worth the full hundred, which the result counts as an éclair; 快速 marks
+one inside two and a half seconds.
+
+**The ending compares the two runs (E4).**
+- VS, the two trains and the totals counting up.
+- The two runs side by side, line by line, each line a bar:
+  - speed;
+  - the combo;
+  - the rush;
+  - accuracy;
+  - the éclairs.
+
+  A sprint-1 duel, dealt before plan 284, has no combo or rush line.
+- The verdict and its margin.
+- The grade stamped: S, A, B or C, given from ten answers on
+  (`duels.grade`).
+- The Elo moved and the XP's bar.
+- A won duel bursts in sparks.
+
+While the other learner has yet to run, or when the duel closed under the
+run, the learner's side stands alone and the other's reads « ? ».
+
+**The duel is the one other place the app plays music** (the first is
+the level, below in *Rewards*). The music is R3's club music made light.
+It has four layers that the combo turns on, and it is scored to the
+sprint's eighty bars: the rush is a whole tone up, and the last chord
+falls on 0:00 (`frontend/scripts/duel-music/README.md`). It plays on the
+ambiance's slider. The race's sounds are a taiko's and the result's are
+the club's, both on the effects' slider. A result sounds only right after
+its run: a result opened again from the hall is silent.
+
 ## Space
 
 Nine rungs, `--sp-1` … `--sp-9`. The upper rungs carry meaning:
@@ -1401,8 +1485,9 @@ So:
   are waiting on an animation nobody is watching.
 - Hover is a **1px lift**, a border-colour change to the line pigment, a
   roundel that inverts, and a `▶` that slides in from `-4px`. All at
-  0.15–0.16s ease. No scale, no glow, no fill. (The one exception is the
-  boarding's gate button — see "The gate button".)
+  0.15–0.16s ease. No scale, no glow, no fill. (The exceptions are the
+  boarding's gate button — see "The gate button" — and the duel's run and
+  result, a game — see "The duel".)
 - Every `transition` and `animation` needs a `prefers-reduced-motion` answer
   that keeps opacity and drops transform.
 - **Move HTML boxes, never shapes inside an `<svg>`.** "Transform and
@@ -1597,7 +1682,8 @@ arrival, the refill, which waits on nothing either:
   the engraving empties — both parts in the one breath — and refills to
   the line the new level's climb stands on, 十 included once the climb
   has passed its foot, and the level's figure rolls over to the new one. **It is the one
-  sound in the app that is music** (plan 200), scored to the card's own
+  sound of study that is music** (plan 200; a duel, a game, has its own:
+  see *The duel*), scored to the card's own
   clock: a build (`level-charge`) from the road's first movement — a
   swell, a run of bars struck as the road passes each eleventh of its
   height and quickening with it, a roll to the tremble's steps, a riser,

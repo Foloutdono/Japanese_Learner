@@ -158,6 +158,96 @@ def test_a_recording_sums_to_its_score(client, learners, clock):
     assert sum(p["pts"] for p in line if p["t"] <= duels.SPRINT_MS) == cover["them"]["score"]
 
 
+# ── The combo and the rush (plan 285) ───────────────────────────────
+
+def test_a_streak_multiplies_a_right_answers_points():
+    assert [duels.multiplier(n) for n in (0, 1, 4, 5, 9, 10, 19, 20, 60)] == [1, 1, 1, 1.5, 1.5, 2, 2, 3, 3]
+    assert duels.streak_of([]) == 0
+    assert duels.streak_of([{"right": True}, {"right": False}, {"right": True}, {"right": True}]) == 2
+
+
+def test_each_answer_pays_the_streak_it_makes(client, learners, clock):
+    befriend(client, A, B, learners)
+    duel_id = _challenge(client, learners)
+    cover = client.get(f"/api/pvp/duels/{duel_id}").json()
+    assert cover["rules"] == {"tiers": [{"at": 5, "mult": 1.5}, {"at": 10, "mult": 2}, {"at": 20, "mult": 3}],
+                              "rushMs": duels.RUSH_MS}
+    replies = play(client, clock, A, duel_id, [(1000, True)] * 21 + [(1000, False), (2000, True)], finish=False)
+    assert [r["streak"] for r in replies] == [*range(1, 22), 0, 1]
+    assert [r["mult"] for r in replies] == [1] * 4 + [1.5] * 5 + [2] * 10 + [3] * 2 + [1, 1]
+    assert [r["combo"] for r in replies] == [0] * 4 + [50] * 5 + [100] * 10 + [200] * 2 + [0, 0]
+    assert all(r["scored"] == r["pts"] + r["combo"] + r["rush"] and r["rush"] == 0 for r in replies)
+    assert replies[-1]["total"] == sum(r["scored"] for r in replies) == (400 + 5 * 150 + 10 * 200 + 2 * 300
+                                                                         + duels.points(2000))
+    # Picked up again, the run knows the streak it is on.
+    resumed = client.post(f"/api/pvp/duels/{duel_id}/start").json()
+    assert (resumed["streak"], resumed["mult"], resumed["rules"]) == (1, 1, cover["rules"])
+
+
+def test_the_last_seconds_pay_a_right_answer_once_more(client, learners, clock):
+    befriend(client, A, B, learners)
+    duel_id = _challenge(client, learners)
+    key = keys(duel_id)
+    run = client.post(f"/api/pvp/duels/{duel_id}/start").json()
+
+    def at(offset, n, right=True):
+        """Answer question `n`, `offset` ms from the rush's first instant."""
+        clock.to(run["endsAt"])
+        clock.tick(offset - duels.RUSH_MS)
+        pick = key[n] if right else (key[n] + 1) % 4
+        return client.post(f"/api/pvp/duels/{duel_id}/answer", json={"n": n, "pick": pick}).json()
+
+    # Served at the start, the first question is worth nothing by then.
+    assert at(-3000, 0)["pts"] == 0
+    before = at(-1, 1)
+    assert before["pts"] > 0 and before["rush"] == 0
+    rush = at(1299, 2)
+    assert (rush["pts"], rush["rush"], rush["scored"]) == (100, 100, 200)
+    miss = at(2599, 3, right=False)
+    assert (miss["rush"], miss["scored"], miss["total"]) == (0, 0, before["pts"] + 200)
+
+
+def test_a_sprint_1_duel_is_scored_on_speed_alone(client, learners, clock):
+    befriend(client, A, B, learners)
+    duel_id = _challenge(client, learners)
+    sql("UPDATE pvp_duels SET paper_rev = 'sprint-1' WHERE id = %s", (duel_id,))
+    assert client.get(f"/api/pvp/duels/{duel_id}").json()["rules"] is None
+    replies = play(client, clock, A, duel_id, [(1000, True)] * 6)
+    assert [r["mult"] for r in replies] == [1] * 6 and replies[-1]["total"] == 600
+    assert all(r["combo"] == r["rush"] == 0 for r in replies)
+    lines = client.get(f"/api/pvp/duels/{duel_id}").json()["you"]["lines"]
+    assert (lines["speed"], lines["combo"], lines["rush"], lines["best"]) == (600, 0, 0, 6)
+
+
+def test_the_result_reads_both_runs_line_by_line(client, learners, clock):
+    befriend(client, A, B, learners)
+    duel_id = _challenge(client, learners)
+    play(client, clock, A, duel_id, [(1000, True)] * 6 + [(1000, False)] + [(2000, True)] * 5)
+    cover = client.get(f"/api/pvp/duels/{duel_id}").json()
+    # Played first: the learner's own lines, while the friend has yet to run.
+    assert cover["result"] is None
+    # The fifth of the second streak pays ×1.5 on 85 points: 43 more.
+    assert cover["you"]["lines"] == {"speed": 600 + 5 * duels.points(2000), "combo": 2 * 50 + 43, "rush": 0,
+                                     "best": 6, "flashes": 6, "rights": 11, "answered": 12, "grade": "A"}
+    with acting_as(B):
+        assert client.get(f"/api/pvp/duels/{duel_id}").json()["you"]["lines"] is None
+    play(client, clock, B, duel_id, [(1000, True)] * 3)
+    result = client.get(f"/api/pvp/duels/{duel_id}").json()["result"]
+    mine, theirs = result["lines"]["mine"], result["lines"]["theirs"]
+    assert mine == cover["you"]["lines"]
+    assert theirs == {"speed": 300, "combo": 0, "rush": 0, "best": 3, "flashes": 3, "rights": 3, "answered": 3,
+                      "grade": None}
+    assert mine["speed"] + mine["combo"] + mine["rush"] == result["mine"]
+    assert theirs["speed"] + theirs["combo"] + theirs["rush"] == result["theirs"]
+
+
+def test_a_grade_needs_a_run_long_enough_to_say():
+    assert duels.grade(9, 9, 9) is None
+    assert duels.grade(20, 20, 6) == "S" and duels.grade(20, 20, 5) == "A"
+    assert duels.grade(19, 20, 19) == "S" and duels.grade(18, 20, 18) == "A"
+    assert duels.grade(15, 20, 15) == "B" and duels.grade(14, 20, 14) == "C"
+
+
 def test_a_run_resumes_where_it_was(client, learners, clock):
     befriend(client, A, B, learners)
     duel_id = _challenge(client, learners)
@@ -174,15 +264,16 @@ def test_the_second_player_races_the_first_ones_recording(client, learners, cloc
     assert cover["you"]["played"] is True and cover["status"] == "open" and cover["result"] is None
     with acting_as(B):
         cover = client.get(f"/api/pvp/duels/{duel_id}").json()
-        assert cover["them"]["score"] == 500 and cover["them"]["rights"] == 5
+        # The fifth right answer in a row pays ×1.5 (plan 285).
+        assert cover["them"]["score"] == 550 and cover["them"]["rights"] == 5
         run = client.post(f"/api/pvp/duels/{duel_id}/start").json()
         line = run["opponent"]["timeline"]
-        assert [p["pts"] for p in line] == [100] * 5 + [0] * 3
+        assert [p["pts"] for p in line] == [100] * 4 + [150] + [0] * 3
         assert all(a["t"] < b["t"] for a, b in zip(line, line[1:]))
     play(client, clock, B, duel_id, [(1000, True)] * 6)
     mine = client.get(f"/api/pvp/duels/{duel_id}").json()
     assert mine["status"] == "done"
-    assert mine["result"]["outcome"] == "loss" and mine["result"]["mine"] == 500 and mine["result"]["theirs"] == 600
+    assert mine["result"]["outcome"] == "loss" and mine["result"]["mine"] == 550 and mine["result"]["theirs"] == 700
     assert mine["result"]["elo"] is None
     assert (mine["result"]["answered"], mine["result"]["theirAnswered"]) == (8, 6)
     assert mine["you"]["xp"] == mine["result"]["xp"] == 5 * 7 + 3 * 1
@@ -324,7 +415,7 @@ def test_ranked_play_never_waits(client, learners, clock):
     with acting_as(C):
         cover = client.get(f"/api/pvp/duels/{ghost['id']}").json()
         result = cover["result"]
-    assert result["outcome"] == "win" and result["theirs"] == cover["them"]["score"] == 600
+    assert result["outcome"] == "win" and result["theirs"] == cover["them"]["score"] == 700
     assert result["elo"]["delta"] > 0
     assert (_elo(A), _elo(B)) == (980, 1020)
     # The recording's author is not told.
