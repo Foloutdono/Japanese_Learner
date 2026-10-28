@@ -55,9 +55,15 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: PracticeScreen } = await import('./screens/PracticeScreen')
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
+// Past the timer, the plates' staggered arrivals themselves (index.css's
+// `arrive`): a plate caught mid-rise is a row out of line, as the short
+// lane's were on a loaded runner (23c70d2).
 const settle = async (ms = 400) => {
   await new Promise(r => setTimeout(r, ms))
   await document.fonts.ready
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
 }
 const box = el => el.getBoundingClientRect()
 const $ = sel => document.querySelector(sel)

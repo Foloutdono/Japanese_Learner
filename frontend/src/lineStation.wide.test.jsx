@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import { parkPointer } from './testing/parkPointer'
 import './index.css'
 
 // ── 号車 — a line's station: the line over its cars (plan 251) ───────
@@ -200,6 +201,9 @@ describe('a line\'s station: the line over its cars (plan 251)', () => {
 describe('the grammar and the kana lines (plan 251)', () => {
   it('stands grammar\'s points door at the foot beside the fast review, each half the row', async () => {
     await grammar()
+    // Under no pointer: the lane's pointer is shared, and a hovered car
+    // lifts a pixel off the door beside it.
+    await parkPointer()
     await settle()
     const foot = document.querySelector('.desk-platforms__foot')
     const review = rect(foot.querySelector('.platform-card'))
@@ -212,6 +216,8 @@ describe('the grammar and the kana lines (plan 251)', () => {
 
   it('draws every grammar car as its run asks it, the ladder first with its walk', async () => {
     await grammar()
+    // Under no pointer: a hovered car lifts a pixel, a row of its own.
+    await parkPointer()
     await settle()
     const all = cars()
     // Seven cars, four to a row: the ladder spans the two cells a row of
