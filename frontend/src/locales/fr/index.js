@@ -3463,7 +3463,7 @@ const transfer = {
 // ── 243b:transfer end ──
 
 // ── 対戦 — les duels (plan 279) ─────────────────────────────────
-// Le sprint : soixante secondes, les mêmes questions pour les deux.
+// Le sprint : deux minutes, les mêmes questions pour les deux.
 const pvp = {
   pvpTitle:        'Duels',
   pvpChallenges:   n => (n === 1 ? '1 défi à jouer' : `${n} défis à jouer`),
@@ -3511,7 +3511,7 @@ const pvp = {
   pvpLiveHelp:     who => `Vous partez ensemble, trois secondes après l’arrivée de ${who}.`,
   pvpChallenge:    who => `Défier ${who}`,
   pvpInvite:       who => `Inviter ${who}`,
-  pvpSprint60:     'Sprint · 60 secondes',
+  pvpSprintOf:     ms => (ms >= 120_000 && ms % 60_000 === 0 ? `Sprint · ${ms / 60_000} minutes` : `Sprint · ${ms / 1000} secondes`),
   pvpDuelLevel:    'Niveau du duel',
   pvpLowest:       'le plus bas des deux',
   pvpQuestions:    'Questions',
@@ -3529,7 +3529,6 @@ const pvp = {
   pvpKind:         { word: 'Mot', reading: 'Lecture', writing: 'Écriture' },
   pvpQuit:         'Quitter le sprint',
   pvpReady:        'À vos marques',
-  pvpSeconds:      s => `${s} s`,
   pvpOver:         'Fini',
   pvpBy:           n => `de ${n} point${n === 1 ? '' : 's'}`,
   pvpWaitingFor:   who => `En attente de ${who}`,
@@ -3608,7 +3607,7 @@ const pvp = {
   pvpErrTooMany:      'Trop de duels en cours. Termine-en un d’abord.',
   pvpErrClosed:       'Ce duel est fermé.',
   pvpErrDuelGone:     'Ce duel n’existe plus.',
-  pvpErrRunning:      'Ton ami court ce duel en ce moment : tu pourras refuser dans une minute.',
+  pvpErrRunning:      'Ton ami court ce duel en ce moment : tu pourras refuser une fois son sprint fini.',
   pvpErrPlayed:       'Tu as déjà couru ce duel.',
   pvpErrWaiting:      'Ton ami n’est pas encore entré.',
   pvpErrNotStarted:   'Le sprint n’a pas commencé.',

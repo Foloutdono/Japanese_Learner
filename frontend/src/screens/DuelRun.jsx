@@ -7,7 +7,7 @@ import { Loading } from '../components/ui/Loading'
 import { CorrectionsSheet } from '../components/pvp/CorrectionsSheet'
 import { apiJson } from '../lib/api'
 import { playClick } from '../lib/audio'
-import { LIMIT_MS, SPRINT_MS, duelErrorKey, errorKey, points, totalAt } from '../domain/duel'
+import { LIMIT_MS, SPRINT_MS, clockOf, duelErrorKey, errorKey, points, totalAt } from '../domain/duel'
 import { refreshDuels } from '../stores/duels'
 import { applyXpGain } from '../stores/profileSummary'
 
@@ -298,7 +298,10 @@ function DuelStage({ id, session }) {
   }
 
   const counting = now < run.startsAt
-  const elapsed = Math.max(0, Math.min(SPRINT_MS, now - run.startsAt))
+  // The sprint this duel was dealt: two minutes, or one for a duel dealt
+  // before they came in (plan 283). The server's clock says which.
+  const length = run.endsAt - run.startsAt
+  const elapsed = Math.max(0, Math.min(length, now - run.startsAt))
   const opp = totalAt(run.timeline, elapsed)
   // Live, or against a recording: the other's train is on the line.
   const racing = liveMode || run.recorded
@@ -311,9 +314,9 @@ function DuelStage({ id, session }) {
     <div className="screen">
       <main id="main-content" className="container stage exam-run pvp-run" style={{ '--line-color': COLOR }}>
         <StageHead onLeave={leave} leaveLabel={t.pvpQuit} where={duel.kind === 'ranked' && !duel.them ? t.pvpRanked : t.pvpDuelWith(them)}
-          sub={counting ? t.pvpReady : t.pvpSeconds(left)} pass={false} keys={false} />
+          sub={counting ? t.pvpReady : clockOf(left)} pass={false} keys={false} />
         <Line mine={run.total} theirs={opp.total} racing={racing} them={them}
-          clock={1 - elapsed / SPRINT_MS} t={t} lang={lang} />
+          clock={1 - elapsed / length} t={t} lang={lang} />
         {counting
           ? <section className="exam-page pvp-page pvp-page--count" aria-live="polite"><b className="pvp-count">{Math.max(1, Math.ceil((run.startsAt - now) / 1000))}</b></section>
           : run.q && <Question q={run.q} worth={worth} share={share} flash={run.flash} t={t} />}
@@ -343,7 +346,7 @@ function Ticket({ duel, them, t, lang, now, error, onLeave, onGo, onJoin, onDecl
       <main id="main-content" className="container stage exam-run exam-run--cover pvp-run" style={{ '--line-color': COLOR }}>
         <StageHead onLeave={onLeave} leaveLabel={t.pvpTitle} where={ranked && !duel.them ? t.pvpRanked : t.pvpDuelWith(them)} pass={false} keys={false} />
         <span className="pvp-air" aria-hidden="true" />
-        <article className="clrk-tk clrk-tk--paper pvp-ticket" aria-label={t.pvpSprint60}>
+        <article className="clrk-tk clrk-tk--paper pvp-ticket" aria-label={t.pvpSprintOf(duel.sprintMs ?? SPRINT_MS)}>
           <div className="clrk-tk__row">
             <span className="clrk-tk__kind" lang="ja">対戦券</span>
             <span className="clrk-tk__no">N° {String(duel.id).padStart(4, '0')}</span>
@@ -361,7 +364,7 @@ function Ticket({ duel, them, t, lang, now, error, onLeave, onGo, onJoin, onDecl
             {/* A run already paid and being picked up again has no price left to print. */}
             {!(ranked && duel.you.started) && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpPrice}</dt><dd className="pvp-ticket__dd">{!ranked ? t.pvpFreeFriends : duel.price ? t.pvpCredits(duel.price) : t.pvpIncluded}</dd></div>}
           </dl>
-          <div className="clrk-tk__row clrk-tk__foot"><span lang="ja">辻駅 発行</span><span>{duel.mode === 'live' ? t.pvpLive : t.pvpSprint60}</span></div>
+          <div className="clrk-tk__row clrk-tk__foot"><span lang="ja">辻駅 発行</span><span>{duel.mode === 'live' ? t.pvpLive : t.pvpSprintOf(duel.sprintMs ?? SPRINT_MS)}</span></div>
         </article>
         {lobby && host && <p className="pvp-run__help pvp-run__help--center pvp-room" aria-live="polite">{t.pvpWaitingFor(them)} · <b className="pvp-room__clock">{clock}</b></p>}
         {lobby && !host && <p className="pvp-run__help pvp-run__help--center">{t.pvpLiveHelp(them)}</p>}

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **283**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **284**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -284,10 +284,13 @@ runtime purpose.
   back, so whatever another learner's figures reach (the cover, the hall,
   the live read) keeps them until « Partir ».
   Nothing runs in the background: `settle()` brings a duel up to date
-  from its stored instants on every read (a run past its minute paid, a
+  from its stored instants on every read (a run past its sprint paid, a
   duel resolved, expired and its ranked fare refunded, a seat left
   unstarted given back), so anything new that reads a duel settles it
-  first. A run started has its minute: nothing expires or is declined
+  first. A sprint is two minutes, and a duel keeps the length its paper
+  was dealt with (`duels.sprint_ms`, by `paper_rev`, plan 283), so a duel
+  dealt before a change runs and is raced at its own. A run started has
+  its sprint: nothing expires or is declined
   under it, and whatever closes a duel (a block, a friendship ended, an
   account erased: `duels.close_between`, `leave_all`) finishes and pays
   the runs under way. The Elo (`study/duel_elo.py`) is apart from the

@@ -35,7 +35,7 @@ player has met before.
 
 Nothing runs in the background. A duel's state is a function of the
 instants stored, and settle() brings it up to date on every read: a run
-past its minute is finished and paid its XP, a duel whose two runs are
+past its sprint is finished and paid its XP, a duel whose two runs are
 over is resolved (the results, the Elo), one past its deadline with a
 run unplayed expires (its ranked fare refunded), and a ranked seat
 taken and left unstarted for HOLD is given back.
@@ -64,7 +64,11 @@ from study.difficulty import LEVELS
 
 logger = logging.getLogger(__name__)
 
-SPRINT_MS = 60_000
+# A sprint's length goes with its paper (plan 283): a duel keeps the
+# paper it was dealt and the time that came with it, so a sprint-1 duel
+# still open when the two minutes came in is run, and raced, in one.
+SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000}
+SPRINT_MS = SPRINT_MS_BY_REV[duel_paper.PAPER_REV]
 LEAD_MS = 3_000
 FULL_MS = 1_000
 LIMIT_MS = 6_000
@@ -225,8 +229,13 @@ def _other(entries: list[dict], me: str) -> dict | None:
     return next((e for e in entries if not (e["user_id"] == me and e["role"] != "ghost")), None)
 
 
-def _end(entry: dict) -> datetime:
-    return entry["started_at"] + timedelta(milliseconds=SPRINT_MS)
+def sprint_ms(duel: dict) -> int:
+    """The duel's sprint, by the paper it was dealt."""
+    return SPRINT_MS_BY_REV.get(duel["paper_rev"], SPRINT_MS)
+
+
+def _end(duel: dict, entry: dict) -> datetime:
+    return entry["started_at"] + timedelta(milliseconds=sprint_ms(duel))
 
 
 def against(duel: dict, entries: list[dict]) -> str:
@@ -270,7 +279,7 @@ def xp_today(cur, user_id: str, now: datetime) -> int:
 
 def _pay_xp(cur, after: list, entry: dict, at: datetime) -> int:
     """A finished run's XP, dated when it ended (`at`) and held to that
-    day's cap: a run left mid-minute and finished by a later read -- the
+    day's cap: a run left mid-sprint and finished by a later read -- the
     friend's, the next day -- was the learner's study that day, not on
     the reader's (their cap, their studied days)."""
     from core.srs_instance import srs
@@ -390,8 +399,8 @@ def settle(cur, after: list, duel: dict, entries: list[dict], now: datetime) -> 
         return
     for e in entries:
         if e["role"] != "ghost" and e["started_at"] and not e["finished_at"]:
-            if now >= _end(e) + timedelta(milliseconds=GRACE_MS):
-                _finish(cur, after, e, _end(e), now)
+            if now >= _end(duel, e) + timedelta(milliseconds=GRACE_MS):
+                _finish(cur, after, e, _end(duel, e), now)
     if duel["kind"] == "ranked":
         for e in list(entries):
             if e["role"] == "ghost" or e["started_at"] is not None or now - e["created_at"] < HOLD:
@@ -410,8 +419,8 @@ def settle(cur, after: list, duel: dict, entries: list[dict], now: datetime) -> 
         return
     if now >= duel["expires_at"]:
         unplayed = len(entries) < 2 or any(e["started_at"] is None for e in entries)
-        # A run started before the deadline has its minute: the expiry
-        # waits for it to be finished above, its minute and grace over.
+        # A run started before the deadline has its sprint: the expiry
+        # waits for it to be finished above, its sprint and grace over.
         running = any(e["started_at"] is not None and e["finished_at"] is None for e in entries)
         if unplayed and not running:
             _expire(cur, after, duel, entries, now)
@@ -768,6 +777,7 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
         "them": them,
         # The pass pays for everything: nothing to print on it.
         "price": 0 if passed else _price(duel, mine),
+        "sprintMs": sprint_ms(duel),
         "expiresAt": _iso(duel["expires_at"]),
         "startsAt": _iso(duel["live_start"]),
         "serverNow": _iso(now),
@@ -788,7 +798,7 @@ def _run_state(duel: dict, entries: list[dict], mine: dict, paper: dict, now: da
     over = mine["finished_at"] is not None or n >= len(items)
     return {
         "startsAt": _iso(mine["started_at"]),
-        "endsAt": _iso(_end(mine)),
+        "endsAt": _iso(_end(duel, mine)),
         "serverNow": _iso(now),
         "q": None if over else duel_paper.served(items[n], n),
         "qAt": _iso(mine["served_at"]),
@@ -852,9 +862,9 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
     if n in done and n == served - 1:
         # The same answer again (a reply lost on the way): what it got.
         a = done[n]
-        return _answered(mine, a, items, over=mine["finished_at"] is not None)
+        return _answered(duel, mine, a, items, over=mine["finished_at"] is not None)
     if mine["finished_at"] is not None:
-        # settle() finished it: the minute is over.
+        # settle() finished it: the sprint is over.
         return {"over": True, "total": mine["score"] or 0, "rights": mine["rights"] or 0}
     if n != served or n >= len(items):
         return {"stale": True, "q": duel_paper.served(items[served], served) if served < len(items) else None,
@@ -865,10 +875,10 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
     right = pick == items[n]["answer"]
     pts = points(ms) if right else 0
     # `t`, where the answer lands on the race: one accepted in the grace
-    # after the minute lands on the finish line, never past it, so the
+    # after the sprint lands on the finish line, never past it, so the
     # recording the other player races sums to the score.
     a = {"n": n, "pick": pick, "right": right, "ms": ms, "pts": pts,
-         "t": min(SPRINT_MS, max(0, _ms(now - mine["started_at"])))}
+         "t": min(sprint_ms(duel), max(0, _ms(now - mine["started_at"])))}
     mine["answers"] = [*mine["answers"], a]
     mine["score"] = (mine["score"] or 0) + pts
     mine["rights"] = (mine["rights"] or 0) + int(right)
@@ -877,17 +887,17 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
     keys = ["answers", "score", "rights", "served_q", "served_at"]
     _save(cur, mine, *keys)
     # No question left, or the next one would be served after the
-    # minute: the run is over now, not once a grace nobody can use has
+    # sprint: the run is over now, not once a grace nobody can use has
     # run out, so the reply that says so and a cover read right after it
     # agree -- and no question served after the end is ever answered.
-    over = mine["served_q"] >= len(items) or mine["served_at"] >= _end(mine)
+    over = mine["served_q"] >= len(items) or mine["served_at"] >= _end(duel, mine)
     if over:
-        _finish(cur, after, mine, min(now, _end(mine)), now)
+        _finish(cur, after, mine, min(now, _end(duel, mine)), now)
         settle(cur, after, duel, entries, now)
-    return _answered(mine, a, items, over=over)
+    return _answered(duel, mine, a, items, over=over)
 
 
-def _answered(mine: dict, a: dict, items: list, over: bool) -> dict:
+def _answered(duel: dict, mine: dict, a: dict, items: list, over: bool) -> dict:
     nxt = mine["served_q"]
     return {
         # The pick the answer was recorded with, which a reply sent again
@@ -896,7 +906,7 @@ def _answered(mine: dict, a: dict, items: list, over: bool) -> dict:
         "total": mine["score"] or 0, "rights": mine["rights"] or 0,
         "next": None if over or nxt >= len(items) else duel_paper.served(items[nxt], nxt),
         "nextAt": _iso(mine["served_at"]),
-        "endsAt": _iso(_end(mine)),
+        "endsAt": _iso(_end(duel, mine)),
     }
 
 
@@ -937,7 +947,7 @@ def live(cur, after: list, me: str, duel_id: int, v: int) -> dict:
     return {
         "status": duel["status"],
         "startsAt": _iso(duel["live_start"]),
-        "endsAt": _iso(duel["live_start"] + timedelta(milliseconds=SPRINT_MS)) if duel["live_start"] else None,
+        "endsAt": _iso(duel["live_start"] + timedelta(milliseconds=sprint_ms(duel))) if duel["live_start"] else None,
         "expiresAt": _iso(duel["expires_at"]),
         "serverNow": _iso(now),
         "them": {"total": (seen or {}).get("score") or 0, "rights": (seen or {}).get("rights") or 0,
@@ -955,7 +965,7 @@ def decline(cur, after: list, me: str, duel_id: int) -> None:
     if duel["status"] not in ("open", "lobby"):
         raise Refused(409, "pvp_closed")
     if any(e["started_at"] is not None and e["finished_at"] is None for e in entries):
-        # The challenger is running their minute: theirs to finish, and
+        # The challenger is running their sprint: theirs to finish, and
         # declined only once it is over.
         raise Refused(409, "pvp_running")
     _expire(cur, after, duel, entries, now, outcome="declined")
@@ -990,14 +1000,14 @@ def _close(cur, after: list, duel: dict, entries: list[dict], now: datetime, lea
         if e["role"] == "ghost" or e["user_id"] == leaving:
             continue
         if e["started_at"] and not e["finished_at"]:
-            _finish(cur, after, e, min(now, _end(e)), now)
+            _finish(cur, after, e, min(now, _end(duel, e)), now)
         _give_back(cur, after, duel, e)
     _set_status(cur, duel, "cancelled", now)
 
 
 def _up_to_date(cur, after: list, duel_id: int, now: datetime) -> tuple[dict | None, list[dict]]:
     """A duel locked and brought up to date as far as its runs go: one
-    past its minute is finished, two finished are resolved -- so what was
+    past its sprint is finished, two finished are resolved -- so what was
     played is kept rather than cancelled. (Not settle(): its expiries and
     seats given back would refund a learner whose account is going.)"""
     duel = _duel(cur, duel_id, lock=True)
@@ -1008,8 +1018,8 @@ def _up_to_date(cur, after: list, duel_id: int, now: datetime) -> tuple[dict | N
         return duel, entries
     for e in entries:
         if e["role"] != "ghost" and e["started_at"] and not e["finished_at"]:
-            if now >= _end(e) + timedelta(milliseconds=GRACE_MS):
-                _finish(cur, after, e, _end(e), now)
+            if now >= _end(duel, e) + timedelta(milliseconds=GRACE_MS):
+                _finish(cur, after, e, _end(duel, e), now)
     if len(entries) == 2 and all(e["finished_at"] for e in entries):
         _resolve(cur, duel, entries, now)
     return duel, entries
@@ -1150,10 +1160,10 @@ def _line(cur, me: str, duel: dict, entries: list[dict], named: dict) -> dict:
         "since": _iso(mine["finished_at"] or mine["created_at"]),
     }
     if mine["started_at"] is not None and mine["finished_at"] is None and duel["status"] in ACTIVE:
-        # A run left mid-minute (the app closed, the screen left): the
-        # way back in, while the minute lasts.
+        # A run left mid-sprint (the app closed, the screen left): the
+        # way back in, while the sprint lasts.
         row["running"] = True
-        row["endsAt"] = _iso(_end(mine))
+        row["endsAt"] = _iso(_end(duel, mine))
     if duel["status"] == "done":
         row["outcome"] = _outcome(mine["result"])
         row["elo"] = (mine["rating_after"] - mine["rating_before"]

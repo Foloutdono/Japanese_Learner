@@ -1,7 +1,8 @@
 """
 対戦 — the sprint's questions (plan 279).
 
-A duel is a sprint: sixty seconds of quick questions, the same ones in
+A duel is a sprint: two minutes of quick questions (plan 283; sixty
+seconds under sprint-1), the same ones in
 the same order for both players, built once from a seed at the lower
 JLPT level of the two and stored with the duel. Three kinds, mixed in a
 fixed pattern so the eye cannot settle:
@@ -55,19 +56,21 @@ from study.mcq import meaning_key
 from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
 
-PAPER_REV = "sprint-1"
+PAPER_REV = "sprint-2"
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 KINDS = ("word", "reading", "writing")
 
-# More than anyone answers in a minute: a right answer holds the next
-# question back 300 ms, a wrong one a second, and the fastest learner
-# reads a choice in about one.
-ITEMS = 60
+# More than anyone answers in the sprint's two minutes: a right answer
+# holds the next question back 300 ms, a wrong one a second, and the
+# fastest learner reads a choice in about one.
+ITEMS = 120
 PATTERN = ("word", "reading", "word", "writing", "word", "reading")
 # The kanji items a paper may ask, at most: a kanji is asked once in a
-# paper (exam_kanji_choices._build), and the levels' decks run out.
-MAX_READING = 24
-MAX_WRITING = 12
+# paper (exam_kanji_choices._build), and the levels' decks run out. The
+# writing items are drawn first: they need the scarcer kanji, and the
+# readings would otherwise take the ones a spelling can be asked on.
+MAX_READING = 40
+MAX_WRITING = 20
 
 # How near a wrong meaning's length must be to the right one's.
 LENGTH_BAND = (0.6, 1.6)
@@ -215,10 +218,10 @@ def build_paper(seed: int, level: str) -> dict:
     used_words: set = set()
     used_prompts: set = set()
     kanji = {
-        "reading": _kanji_items(level, rng, min(wanted["reading"], MAX_READING), "reading", used_words, used_prompts),
         "writing": [] if level == "N1" else _kanji_items(level, rng, min(wanted["writing"], MAX_WRITING),
                                                           "writing", used_words, used_prompts),
     }
+    kanji["reading"] = _kanji_items(level, rng, min(wanted["reading"], MAX_READING), "reading", used_words, used_prompts)
     short = sum(wanted[k] - len(kanji[k]) for k in ("reading", "writing"))
     words = _word_items(level, rng, wanted["word"] + short)
 

@@ -45,6 +45,25 @@ def test_the_client_draws_the_same_curve():
         assert m and int(m.group(1).replace("_", "")) == value, name
 
 
+def test_a_duel_keeps_the_sprint_its_paper_was_dealt_with(client, learners, clock):
+    # Plan 283: two minutes from sprint-2 on; a sprint-1 duel still open
+    # when they came in is run, and raced, in its one minute.
+    assert duels.SPRINT_MS == duels.SPRINT_MS_BY_REV[duel_paper.PAPER_REV] == 120_000
+    befriend(client, A, B, learners)
+    duel_id = _challenge(client, learners)
+    assert client.get(f"/api/pvp/duels/{duel_id}").json()["sprintMs"] == 120_000
+    sql("UPDATE pvp_duels SET paper_rev = 'sprint-1' WHERE id = %s", (duel_id,))
+    assert client.get(f"/api/pvp/duels/{duel_id}").json()["sprintMs"] == 60_000
+    run = client.post(f"/api/pvp/duels/{duel_id}/start").json()
+    starts, ends = datetime.fromisoformat(run["startsAt"]), datetime.fromisoformat(run["endsAt"])
+    assert ends - starts == timedelta(minutes=1)
+    # Its minute and the grace over, the run is finished there.
+    clock.to(run["endsAt"])
+    clock.tick(duels.GRACE_MS + 1)
+    cover = client.get(f"/api/pvp/duels/{duel_id}").json()
+    assert cover["you"]["played"] is True
+
+
 # ── A friend's challenge ────────────────────────────────────────────
 
 def test_only_a_friend_is_challenged(client, learners):

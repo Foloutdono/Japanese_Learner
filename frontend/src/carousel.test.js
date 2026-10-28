@@ -17,7 +17,7 @@ import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
-import { points } from './domain/duel.js'
+import { SPRINT_MS, points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
@@ -929,7 +929,7 @@ describe('explaining a point in its own sentence', () => {
       expect(D.lowest, lang).toBe(t.pvpLowest)
       expect(D.questions, lang).toBe(t.pvpQuestions)
       expect(D.wordsKanji, lang).toBe(t.pvpWordsKanji)
-      expect(D.sprint60, lang).toBe(t.pvpSprint60)
+      expect(D.sprint, lang).toBe(t.pvpSprintOf(SPRINT_MS))
       expect(D.win, lang).toBe(t.pvpWin)
       expect(D.elo, lang).toBe(t.pvpElo)
       for (const n of [1, 135]) expect(D.by(n), lang).toBe(t.pvpBy(n))
@@ -973,7 +973,7 @@ describe('explaining a point in its own sentence', () => {
           texts.forEach(x => x.split(' ').forEach(w => said.add(w)))
         }
         const D = PROMO[lang].duel
-        for (const line of [...D.hook(60), D.versus, D.same, D.fast(100), D.ahead, D.winElo, D.eloIs, D.climb]) {
+        for (const line of [...D.hook(SPRINT_MS / 1000), D.versus, D.same, D.fast(100), D.ahead, D.winElo, D.eloIs, D.climb]) {
           for (const word of weldIf(lang, line).split(' ')) expect(said, `${lang}: ${word}`).toContain(word)
         }
         const last = stubContext()

@@ -4,8 +4,10 @@
 // decides a point. The client only draws what a question is worth while
 // it waits -- the same curve, read off the same constants.
 
-/** The sprint: sixty seconds of questions, the same ones for both players. */
-export const SPRINT_MS = 60_000
+/** The sprint: two minutes of questions, the same ones for both players
+ *  (plan 283). A new duel's; one dealt before keeps its own, which its
+ *  run's endsAt and its cover's sprintMs say. */
+export const SPRINT_MS = 120_000
 /** A question's time: worth 100 for its first second, 25 at six, then 0. */
 export const LIMIT_MS = 6_000
 const FULL_MS = 1_000
@@ -22,6 +24,12 @@ export function points(ms) {
 /** A learner's name as another learner sees it: the handle, or « Voyageur » for one off the board. */
 export function nameOf(who, t) {
   return who ?? t.pvpTraveller
+}
+
+/** A sprint's time as the head prints it: 1:58, 0:09. */
+export function clockOf(seconds) {
+  const s = Math.max(0, Math.ceil(seconds))
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
 /** Hours left on a challenge, at least one. */

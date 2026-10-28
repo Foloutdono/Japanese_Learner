@@ -27,7 +27,7 @@ export const PROMO = {
   en: {
     names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', pass: 'Your pass', duel: 'Duels' },
     lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', pass: 'The pass', duel: 'Duels' },
-    blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free', duel: 'A 60-second sprint against another learner, and the Elo' },
+    blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free', duel: 'A two-minute sprint against another learner, and the Elo' },
     hours: { dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' },
     hook: 'Learn Japanese, from your first kana to JLPT N1.',
     linesTitle: 'Four lines, five levels',
@@ -81,14 +81,14 @@ export const PROMO = {
       analyser: c => `${c} cut word by word, its grammar numbered`,
       exam: c => `Could you pass the JLPT N5? One question: ${c}`,
       pass: () => 'Your Japanese pass is waiting: start free on tsuji.app',
-      duel: () => 'Japanese duels: 60 seconds against another learner, your Elo at stake',
+      duel: () => 'Japanese duels: 2 minutes against another learner, your Elo at stake',
     },
     ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', pass: 'Board today?', duel: 'Who would you challenge first?' },
     tags: ['japaneseapp', 'jlpt'],
     // The duels' story (plan 281): its own lines, then the app's words on
     // its parts (locales/: the ticket, the race, the result, the Elo).
     duel: {
-      hook: s => ['A duel in Japanese.', `${s} seconds.`],
+      hook: s => ['A duel in Japanese.', s >= 120 && s % 60 === 0 ? `${s / 60} minutes.` : `${s} seconds.`],
       versus: 'You against another learner.',
       same: 'The same questions for you both.',
       fast: top => `Answer fast: up to ${top} points.`,
@@ -106,7 +106,7 @@ export const PROMO = {
       lowest: 'the lower of the two',
       questions: 'Questions',
       wordsKanji: 'words and kanji',
-      sprint60: 'Sprint · 60 seconds',
+      sprint: 'Sprint · 2 minutes',
       win: 'Won',
       by: n => `by ${n} point${n === 1 ? '' : 's'}`,
       rightsOf: (r, n) => `${r} right of ${n}`,
@@ -120,7 +120,7 @@ export const PROMO = {
   fr: {
     names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', pass: 'Ton pass', duel: 'Les duels' },
     lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', pass: 'Le pass', duel: 'Duels' },
-    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 60 secondes contre un autre apprenant, et l’Elo' },
+    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 2 minutes contre un autre apprenant, et l’Elo' },
     hours: { dawn: 'Aube', day: 'Jour', dusk: 'Soir', night: 'Nuit' },
     hook: 'Apprendre le japonais, du premier kana au JLPT N1.',
     linesTitle: 'Quatre lignes, cinq niveaux',
@@ -172,12 +172,12 @@ export const PROMO = {
       analyser: c => `${c} découpée mot à mot, sa grammaire numérotée`,
       exam: c => `Tu réussirais le JLPT N5 ? Une question : ${c}`,
       pass: () => 'Ton pass pour le japonais t’attend : commence gratuitement sur tsuji.app',
-      duel: () => 'Duels de japonais : 60 secondes contre un autre apprenant, ton Elo en jeu',
+      duel: () => 'Duels de japonais : 2 minutes contre un autre apprenant, ton Elo en jeu',
     },
     ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
     tags: ['applijaponais', 'jlpt'],
     duel: {
-      hook: s => ['Un duel en japonais.', `${s} secondes.`],
+      hook: s => ['Un duel en japonais.', s >= 120 && s % 60 === 0 ? `${s / 60} minutes.` : `${s} secondes.`],
       versus: 'Toi contre un autre apprenant.',
       same: 'Mêmes questions pour vous deux.',
       fast: top => `Réponds vite : jusqu’à ${top} points.`,
@@ -195,7 +195,7 @@ export const PROMO = {
       lowest: 'le plus bas des deux',
       questions: 'Questions',
       wordsKanji: 'mots et kanji',
-      sprint60: 'Sprint · 60 secondes',
+      sprint: 'Sprint · 2 minutes',
       win: 'Gagné',
       by: n => `de ${n} point${n === 1 ? '' : 's'}`,
       rightsOf: (r, n) => `${r} justes sur ${n}`,
@@ -980,7 +980,7 @@ export function promoDeck(plan, fmt, opts) {
         no: pr.no, pulse,
         you: { name: D.you, level: pr.you.level }, them: { name: pr.them.name, level: pr.them.level },
         facts: [[D.duelLevel, `${pr.level} · ${D.lowest}`], [D.questions, D.wordsKanji]],
-        foot: ['辻駅 発行', D.sprint60],
+        foot: ['辻駅 発行', D.sprint],
       })
 
       // ── The race: the count, the sprint as played, the minute run out ──

@@ -219,8 +219,10 @@ describe('a duel’s run', () => {
     await expect.poll(() => root.querySelectorAll('.pvp-tile').length).toBe(4)
     expect(root.querySelector('.exam-cover__go')).toBeNull()
     expect(root.querySelector('.pvp-train__fig').textContent).toBe('300')
-    // The minute the server kept: forty seconds left, not sixty.
-    const left = Number(root.querySelector('.stage__where-latin').textContent.match(/\d+/)[0])
+    // The run the server kept: forty seconds left of it, never the sprint
+    // afresh. The head counts down as m:ss.
+    const [, m, sec] = root.querySelector('.stage__where-latin').textContent.match(/^(\d+):(\d\d)$/)
+    const left = Number(m) * 60 + Number(sec)
     expect(left).toBeGreaterThan(30)
     expect(left).toBeLessThanOrEqual(40)
     expect(apiJson.mock.calls.filter(([p]) => p.endsWith('/start'))).toHaveLength(1)
@@ -387,7 +389,23 @@ describe('a duel’s run', () => {
     expect(root.querySelector('.pvp-ticket').textContent).not.toContain('crédit')
   })
 
-  it('says why a decline waits while the challenger runs their minute', async () => {
+  it('runs the sprint its duel was dealt: two minutes, or one for a duel dealt before (plan 283)', async () => {
+    // The ticket names the duel's own sprint.
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => cover({ sprintMs: 60_000 }))
+    let root = await ticket()
+    await expect.poll(() => root.querySelector('.clrk-tk__foot')?.textContent).toContain('Sprint · 60 secondes')
+    document.body.innerHTML = ''
+    // A two-minute run: the head starts at 2:00 and the clock is full.
+    serve({ endsIn: 120_000 })
+    root = await stage()
+    await expect.poll(() => root.querySelectorAll('.pvp-tile').length).toBe(4)
+    expect(root.querySelector('.stage__where-latin').textContent).toMatch(/^(2:00|1:59)$/)
+    const share = Number(root.querySelector('.pvp-clock__fill').style.transform.match(/scaleX\(([\d.]+)\)/)[1])
+    expect(share).toBeGreaterThan(0.98)
+  })
+
+  it('says why a decline waits while the challenger runs their sprint', async () => {
     apiJson.mockReset()
     apiJson.mockImplementation(async path => {
       if (path.endsWith('/decline')) throw refusal('pvp_running')
@@ -396,7 +414,7 @@ describe('a duel’s run', () => {
     const root = await ticket()
     await expect.poll(() => [...root.querySelectorAll('button')].find(b => b.textContent === 'Refuser le défi')).toBeTruthy()
     ;[...root.querySelectorAll('button')].find(b => b.textContent === 'Refuser le défi').click()
-    await expect.poll(() => root.textContent).toMatch(/Ton ami court ce duel en ce moment\s: tu pourras refuser dans une minute\./)
+    await expect.poll(() => root.textContent).toMatch(/Ton ami court ce duel en ce moment\s: tu pourras refuser une fois son sprint fini\./)
   })
 
   it('says a duel that is gone is gone, never a username nobody holds', async () => {
