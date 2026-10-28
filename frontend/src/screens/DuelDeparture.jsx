@@ -6,7 +6,7 @@ import { LevelBar } from '../components/chrome/LevelBar'
 import { FriendSheet } from '../components/pvp/FriendSheet'
 import { apiJson } from '../lib/api'
 import { playClick } from '../lib/audio'
-import { LEVEL_PATH, errorKey } from '../domain/duel'
+import { errorKey } from '../domain/duel'
 import { refreshDuels, useDuels } from '../stores/duels'
 
 // ── 対戦 — the departure: two platforms side by side (plan 279, D2) ──
@@ -15,8 +15,8 @@ import { refreshDuels, useDuels } from '../stores/duels'
 // the Elo moves), platform 2 a friend (free, unranked). The choice lights
 // its platform and changes the one button: « Partir · 2 crédits » makes
 // the duel and starts the run at once (the price was read here), « Choisir
-// un ami » opens the friend's sheet. A learner the placement test has not
-// placed takes it first: the Elo starts from its verdict.
+// un ami » opens the friend's sheet. No test is asked first: a first
+// ranked sprint starts the Elo from the learner's level (plan 282).
 const COLOR = 'var(--pass-ink)'
 
 export default function DuelDeparture({ session }) {
@@ -29,10 +29,9 @@ export default function DuelDeparture({ session }) {
   const [error, setError] = useState(null)
   const busy = useRef(false)
   const price = data?.prices?.ranked ?? 2
-  const placed = data?.rating?.placed !== false
 
   const quais = [
-    { no: 1, title: t.pvpRanked, lines: t.pvpPlatformRanked, price: price ? t.pvpCredits(price) : t.pvpIncluded, foot: placed ? t.pvpRankedFoot : t.pvpPlaceFirst, go: !placed ? t.pvpTakeTest : price ? t.pvpGoPaid(price) : t.pvpGo },
+    { no: 1, title: t.pvpRanked, lines: t.pvpPlatformRanked, price: price ? t.pvpCredits(price) : t.pvpIncluded, foot: t.pvpRankedFoot, go: price ? t.pvpGoPaid(price) : t.pvpGo },
     { no: 2, title: t.pvpFriendDuel, lines: t.pvpPlatformFriend, price: t.pvpFree, foot: t.pvpFriendFoot, go: t.pvpChooseFriend },
   ]
 
@@ -40,7 +39,6 @@ export default function DuelDeparture({ session }) {
     if (busy.current) return
     playClick()
     if (at === 1) { setSheet(true); return }
-    if (!placed) { navigate(LEVEL_PATH); return }
     busy.current = true
     setError(null)
     apiJson('/api/pvp/duels', session, { method: 'POST', body: JSON.stringify({ ranked: true }) })

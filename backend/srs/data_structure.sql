@@ -1350,9 +1350,10 @@ CREATE INDEX pvp_entries_user ON pvp_entries (user_id, finished_at);
 -- One player meets a duel's first: two seekers never share one seat.
 CREATE UNIQUE INDEX pvp_entries_one_opponent ON pvp_entries (duel_id) WHERE role = 'opponent';
 
--- pvp_ratings: the Elo, apart from the 番付's XP. It starts where the
--- placement test boards the learner (placed_level), never at a level
--- they declared.
+-- pvp_ratings: the Elo, apart from the 番付's XP. Written at the
+-- learner's first ranked sprint, from their level (placed_level and
+-- placed_at: the level it started from, and when); no test asked first
+-- (plan 282).
 CREATE TABLE pvp_ratings (
     user_id      TEXT PRIMARY KEY,
     rating       INTEGER NOT NULL,

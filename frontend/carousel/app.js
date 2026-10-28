@@ -1297,7 +1297,7 @@ const CURVE_W = 320
 const CURVE_H = 72
 
 /** The Elo at the hall's head (.pvp-curve, the owner's G1): the figure
- *  over its curve, the last ranked duels, the placement's start dashed
+ *  over its curve, the last ranked duels, the level's start dashed
  *  under the line, the last duel a dot; where it started and its peak
  *  at the foot. `drawn` (0 to 1) is how much of the line is drawn, the
  *  dot at its head. Returns its height. */

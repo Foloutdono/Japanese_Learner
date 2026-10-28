@@ -33362,9 +33362,8 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-curve__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .pvp-curve__key { display: inline-flex; align-items: center; gap: var(--sp-2); }
 .pvp-curve__dash { width: 16px; border-top: 1.5px dashed var(--border); }
-.pvp-curve--none { gap: var(--sp-2); }
-.pvp-curve__none { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
-.pvp-curve--none .pvp-curve__foot { justify-content: flex-start; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+/* Before a first ranked duel: no curve, the level the Elo starts from. */
+.pvp-curve__from { font-size: var(--fs-sm); color: var(--text-secondary); }
 
 /* F2 — the sheet: a request, the friends as radio rows, later or live. */
 .pvp-sheet { display: flex; flex-direction: column; gap: var(--sp-4); }
@@ -33532,12 +33531,19 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-page__body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-2); padding: var(--sp-5); text-align: center; }
 .pvp-page__reading { font-family: var(--font-jp); font-size: var(--fs-body); letter-spacing: var(--tr-reading); color: var(--text-secondary); }
 .pvp-page__prompt { font-family: var(--font-jp); font-size: var(--fs-display); font-weight: 500; line-height: 1.2; }
-/* The answers: the exam's tiles, a verdict's ink once answered. */
+/* The answers: the exam's tiles, a verdict's ink once answered. The ink
+   holds under the finger that touched it (a touched tile keeps :hover
+   until the next touch) and under a pointer resting on it:
+   .exam-tile:hover is two classes, so the verdict names its hover too. */
 .pvp-dock { padding-bottom: var(--sp-4); }
 .pvp-tile__t--latin { font-family: var(--font-display); }
-.pvp-tile--right { border-color: var(--rating-correct); }
+.pvp-tile--right,
+.pvp-tile--right:hover,
+.pvp-tile--right:focus-visible { border-color: var(--rating-correct); }
 .pvp-tile--right .exam-tile__b { background: var(--rating-correct); border-color: var(--rating-correct); color: var(--bg-panel); }
-.pvp-tile--wrong { border-color: var(--rating-wrong); }
+.pvp-tile--wrong,
+.pvp-tile--wrong:hover,
+.pvp-tile--wrong:focus-visible { border-color: var(--rating-wrong); }
 .pvp-tile--wrong .exam-tile__b { background: var(--rating-wrong); border-color: var(--rating-wrong); color: var(--bg-panel); }
 .pvp-tile:disabled { cursor: default; }
 

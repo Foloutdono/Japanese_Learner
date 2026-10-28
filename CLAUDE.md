@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **281**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **283**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -261,8 +261,9 @@ runtime purpose.
   under it, and whatever closes a duel (a block, a friendship ended, an
   account erased: `duels.close_between`, `leave_all`) finishes and pays
   the runs under way. The Elo (`study/duel_elo.py`) is apart from the
-  番付: it starts from the placement climb's verdict, never the declared
-  level, and only a ranked duel moves it. A duel's fare goes through
+  番付: it starts from the learner's level at their first ranked sprint
+  (`duel_elo.start`, written then and once; no test is asked first, plan
+  282), and only a ranked duel moves it. A duel's fare goes through
   `credits.pay` with its own reason (`duel`, `duel_review`), a refund is
   a positive row of the same reason, both on the duel's own cursor
   (`cur=`), so no fare is taken for a run that failed to start and no
