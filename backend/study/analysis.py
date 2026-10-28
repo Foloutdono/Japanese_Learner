@@ -1799,6 +1799,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             i += counted_run
             continue
         pooled = None if i in ruled else resolve_pool_compound(morphemes, i, pool_hits)
+        while pooled and pooled[1] > 2 and any(j in ruled for j in range(i, i + pooled[1])):
+            # (a word over a point is the point's; a shorter one may still
+            # stand before it: 数年 + 前, 〜まえに's, where 数年前 would
+            # take the point's 前, plan 276)
+            pooled = resolve_pool_compound(morphemes, i, pool_hits, max_len=pooled[1] - 1)
         if pooled and not any(j in ruled for j in range(i, i + pooled[1])):
             entry, n = pooled
             token = _pool_compound_dict(morphemes[i:i + n], entry)
@@ -2124,7 +2129,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # as the dictionary reads them (うでどけい), their cards kept as parts --
 # where the French layer has the word, never over a point, a count (五年後,
 # 何分) or a person said of several (人たち).
-LOCAL_REV = 28
+# 29: the French layer gains the 8,258 compounds of deck nouns that stayed
+# two for want of a line (plan 276): 電気料金, 洗濯物, 自由貿易 now fold;
+# 第 with its number folds only before a noun (第三者, never 第三 + 章).
+LOCAL_REV = 29
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

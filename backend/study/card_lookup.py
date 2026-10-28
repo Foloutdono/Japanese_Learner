@@ -3940,8 +3940,9 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         # product", no 本 "book" -- where 観光 + 客 says 観光客, plan 272)
         unsaid = "".join(m.surface for m in run) in _WHOLE_OVER_CARDS or _a_place_of(run)
         # (...and the ordinal 第 with its number, where the pool holds the
-        # word: 第三者 "third party", 第一印象 -- 第三章 is a count, plan 276)
-        ordinal = run[0].surface == "第" and run[0].pos == "prefix"
+        # word and a noun follows the number: 第三者 "third party" -- 第三章
+        # is a count, never 第三 + 章, plan 276)
+        ordinal = run[0].surface == "第" and run[0].pos == "prefix" and not _numeral(run[-1].surface)
         if not saying and not unsaid and any(m.pos not in _COMPOUND_POS or m.auxiliary_use
                                              or (_numeral(m.surface) and not ordinal) for m in run):
             continue
@@ -4043,9 +4044,11 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
                 continue                   # (no French for it: its cards, which have theirs, plan 276)
             if hit is not None and over_cards and any(
                     (inner := resolve_pool_compound(morphemes, j, deck_hits, max_len)) and j + inner[1] > i + n
+                    and inner[0].get("freq_rank", _NO_RANK) < hit.get("freq_rank", _NO_RANK)
                     for j in range(i + 1, i + n)):
-                # (...nor one that cuts the word its last noun makes with
-                # what follows: 最終 + 報告書, no 最終報告 + 書, plan 276)
+                # (...nor one that cuts a commoner word its last noun makes
+                # with what follows: 最終 + 報告書, no 最終報告 + 書 -- where
+                # 原材料 + 費 and 民主党 + 員 keep the commoner word, plan 276)
                 continue
             if hit is not None:
                 return hit, n
@@ -5127,6 +5130,8 @@ _SAYING_MAX = 7
 # row is written with (借りたい, 許さない), never a mark.
 _SAYING_POS = frozenset({"noun", "pronoun", "prefix", "suffix", "verb", "adjective", "particle", "auxiliary"})
 _PARENS = re.compile(r"\s*\([^)]*\)")
+# A pool row with no rank sorts after every ranked one.
+_NO_RANK = 10 ** 9
 # What follows a noun of a person and makes no new word of it (plan 276).
 _OF_PERSONS = frozenset({"たち", "達", "ら", "等", "ども", "共", "さん", "様", "さま", "ちゃん", "くん", "君", "殿", "方"})
 # JMdict's tags for a saying: an idiom, a proverb (事実は小説より奇なり).

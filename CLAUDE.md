@@ -205,11 +205,12 @@ runtime purpose.
   level. It folds only where the French layer has the word
   (`jmdict_fr.pool_line`), so a word to fold is first a line in
   `fr_source/pool_lines.json`; never over a point written on one of the
-  nouns (仕事中), a counter after its number or 何 (五年後, 何分), a person
-  said of several or politely (人たち, 弟さん), nor in a spelling the page
-  did not write (三社とも is no 社共), nor cutting the word its last noun
-  makes with what follows (最終 + 報告書). `DeckNounCompoundTests` holds
-  both sides.
+  nouns (仕事中; a shorter word may stand before it: 数年 + 〜まえに's 前),
+  a counter after its number or 何 (五年後, 何分), a person said of
+  several or politely (人たち, 弟さん), nor in a spelling the page did not
+  write (三社とも is no 社共), nor cutting a commoner word its last noun
+  makes with what follows (最終 + 報告書, where 原材料 + 費 keeps 原材料).
+  `DeckNounCompoundTests` holds both sides.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.

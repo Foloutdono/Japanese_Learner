@@ -298,12 +298,12 @@ class AffixTests(unittest.TestCase):
 
     def test_an_affix_carries_its_affix_sense_or_none(self) -> None:
         self.assertIn("assistant", matches("副店長が来た。")["副"]["entry"]["meaning"])
-        # And before a card the deck holds: 副部長 is 副 and 部長 (plan 272),
-        # where the dictionary has no 副部長 -- 副社長 it has, and that is one
+        # And before a card the deck holds: 副課長 is 副 and 課長 (plan 272),
+        # where the dictionary has no 副課長 -- 副社長 it has, and that is one
         # word, "vice-president", 社長 kept as its part (plan 276).
-        found = matches("部長は来ないで代わりに副部長をよこした。")
+        found = matches("課長は来ないで代わりに副課長をよこした。")
         self.assertIn("associate", found["副"]["entry"]["meaning"])
-        self.assertEqual(found["部長"]["raw_id"], "vocab_N4_部長_ぶちょう")
+        self.assertEqual(found["課長"]["raw_id"], "vocab_N4_課長_かちょう")
         whole = token_of("社長は来ないで代わりに副社長をよこした。", "副社長")
         self.assertIn("vice-president", whole["vocab_match"]["entry"]["meaning"])
         self.assertEqual([p["surface"] for p in whole["parts"]], ["副", "社長"])
@@ -1557,21 +1557,21 @@ class WordsTheTokenizerCutTests(unittest.TestCase):
                 self.assertEqual(token["reading"], reading)
                 self.assertEqual([p["surface"] for p in token["parts"]], parts)
                 self.assertTrue(all(p["vocab_match"] for p in token["parts"] if p["pos"] == "noun"))
-        # ...and where it does not, or has no French for it, they stay two,
-        # the second read with the word's sound change.
-        token = token_of("保険会社に勤める。", "会社")
-        self.assertEqual(token["reading"], "がいしゃ")
+        # ...and where it does not, they stay two, each its card.
+        token = token_of("家具会社に勤める。", "会社")
         self.assertEqual(token["vocab_match"]["raw_id"], "vocab_N5_会社_かいしゃ")
         self.assertEqual(token_of("駅まで何分ですか。", "分")["reading"], "ぷん")
-        # 転校生's 生 is a student, no "life".
-        gloss = token_of("あの転校生の名前", "生")["gloss"]
+        # 見学生's 生 is a student, no "life"; 転校生 is the dictionary's word
+        # over its cards (plan 276).
+        gloss = token_of("あの見学生の名前", "生")["gloss"]
         self.assertTrue(gloss["en"].startswith("(suffix) student") and gloss["fr"])
+        self.assertEqual(token_of("あの転校生の名前", "転校生")["reading"], "てんこうせい")
         # にございます is でございます said of old, glossed in both languages.
         gloss = token_of("殿、一大事にございます！", "に")["gloss"]
         self.assertTrue(gloss["en"].startswith("(with ござる)") and gloss["fr"].startswith("(avec ござる)"))
         # Two cards no dictionary word joins stay two; a count is no word:
         # 五分 is ごふん.
-        for sentence, part in (("英語教室に通う。", "教室"), ("テレビ番組を見る。", "番組"),
+        for sentence, part in (("英語教室に通う。", "教室"), ("映画番組を見る。", "番組"),
                                ("駅まで五分ぐらいかかります。", "分"), ("うちも、七八一二ですよ。", "二")):
             with self.subTest(sentence=sentence):
                 self.assertIn(part, matches(sentence))
@@ -1962,7 +1962,7 @@ class ThirdReviewWordTests(unittest.TestCase):
     def test_a_suffix_or_counter_in_its_sense_there(self) -> None:
         for sentence, surface, start in (("混雑時には電源をお切りください。", "時", "(suffix) at the time of"),
                                          ("一時1ドル160円台", "台", "(suffix) the … range"),
-                                         ("玉ねぎはみじん切りにする。", "切り", "(suffix) cut into"),
+                                         ("トマトはくし形切りにする。", "切り", "(suffix) cut into"),
                                          ("10連ガチャ回した。", "連", "(counter) in a row"),
                                          ("お箸は何膳おつけしましょうか。", "膳", "(counter) pairs of chopsticks")):
             with self.subTest(sentence=sentence):
@@ -1972,14 +1972,17 @@ class ThirdReviewWordTests(unittest.TestCase):
         self.assertIsNotNone(token_of("車が2台ある。", "台")["vocab_match"])
 
     def test_readings_in_context(self) -> None:
-        for sentence, surface, reading in (("番号札十二番でお待ちのお客様", "札", "ふだ"), ("千円札を出した。", "札", "さつ"),
-                                           ("鶏もも肉は一口大に切る。", "鶏", "とり"), ("みじん切りにする。", "切り", "ぎり"),
+        for sentence, surface, reading in (("番号札十二番でお待ちのお客様", "番号札", "ばんごうふだ"),
+                                           ("千円札を出した。", "札", "さつ"),
+                                           ("鶏もも肉は一口大に切る。", "鶏", "とり"), ("みじん切りにする。", "みじん切り", "みじんぎり"),
                                            ("一国の努力だけでは足りない。", "一", "いっ"), ("第2子の保育料", "子", "し"),
                                            ("第一志望でした。", "第一", "だいいち"),
                                            ("興味深い話だ。", "深い", "ぶかい"), ("海は深い。", "深い", "ふかい")):
             with self.subTest(sentence=sentence, surface=surface):
                 self.assertEqual(token_of(sentence, surface)["reading"], reading)
-        self.assertEqual(card_of("番号札十二番でお待ちください。", "札"), "vocab_N1_札_ふだ")
+        # (the word over its cards, 札 the N1 ふだ among them, plan 276)
+        parts = token_of("番号札十二番でお待ちください。", "番号札")["parts"]
+        self.assertEqual(parts[1]["vocab_match"]["raw_id"], "vocab_N1_札_ふだ")
         # 何時ごろ is the N5 何時 and ごろ, as the course reads it.
         r = analysis.analyze_local("先生は何時ごろお戻りになりますか。")
         self.assertEqual([t["surface"] for t in r["tokens"]][2:4], ["何時", "ごろ"])
@@ -2063,9 +2066,9 @@ class LastGapsWordTests(unittest.TestCase):
         self.assertTrue(gloss_of("自転車屋なら、この先にありますよ。", "屋").startswith("(suffix) the shop"))
         self.assertTrue(gloss_of("作業員たちは泥まみれになった。", "たち").startswith("(suffix) plural"))
         self.assertTrue(gloss_of("胆のうごと取る。", "ごと").startswith("(suffix) … and all"))
-        self.assertTrue(gloss_of("長電話をした。", "長").startswith("(prefix) long"))
-        # ...where the dictionary has no word of them in French; 長時間 it has,
-        # "long time", one word over its cards (plan 276).
+        self.assertTrue(gloss_of("首相の長演説に聴衆は疲れた。", "長").startswith("(prefix) long"))
+        # ...where the dictionary has no word of them; 長時間 it has, "long
+        # time", one word over its cards (plan 276).
         self.assertEqual([p["surface"] for p in token_of("長時間の話し合い。", "長時間")["parts"]], ["長", "時間"])
         # ...where a card answers already: 子どもたち's 達, 地域ごと's 毎.
         self.assertEqual(token_of("子どもたちは外であそんでいます。", "たち")["vocab_match"]["entry"]["kanji"], "達")
@@ -2322,11 +2325,12 @@ class FifthReviewWordTests(unittest.TestCase):
         self.assertEqual(token_of("本日はタイムサービスを行います。", "タイムサービス")["vocab_match"]["entry"]["kana"],
                          "タイムサービス")
         # ...where two deck words say the pair, it is the dictionary's one word,
-        # its two cards kept as its parts (チーズケーキ, plan 276), as 追 of
-        # 追体験 stays a prefix, glossed, before the deck's 体験.
+        # its two cards kept as its parts (チーズケーキ, 追体験, plan 276), as
+        # 追 of 追注文, which the dictionary lacks, stays a prefix, glossed.
         cake = token_of("チーズケーキを食べた。", "チーズケーキ")
         self.assertEqual([p["surface"] for p in cake["parts"]], ["チーズ", "ケーキ"])
-        self.assertTrue(gloss_of("他人の人生を追体験する。", "追").startswith("(prefix) after"))
+        self.assertEqual(token_of("他人の人生を追体験する。", "追体験")["reading"], "ついたいけん")
+        self.assertTrue(gloss_of("追注文を受け付けた。", "追").startswith("(prefix) after"))
         self.assertEqual(gloss_of("ゆきおくんは、はるが すき。", "ゆきお"), "given name")
         self.assertEqual(card_of("ゆきおくんは、はるが すき。", "はる"), "vocab_N5_春_はる")
         # 何らか is "some"; そのことのほかに is こと, の and ほか.
@@ -2408,9 +2412,10 @@ class SixthReviewWordTests(unittest.TestCase):
         # ほんで stays the west's それで; 観光客 one word over its two cards.
         self.assertNotEqual((token_of("ほんで、どないしたん？", "ほんで").get("vocab_match") or {}).get("entry", {}).get("kanji"), "本")
         self.assertEqual([t["surface"] for t in analysis.analyze_local("観光客が多い。")["tokens"]][:2], ["観光客", "が"])
-        # A four-kanji compound its cards say stays its cards: 自由貿易 is
-        # "free trade".
-        self.assertIn("貿易", [t["surface"] for t in analysis.analyze_local("自由貿易への障害になる。")["tokens"]])
+        # A four-kanji compound its cards say is the dictionary's word over
+        # them: 自由貿易 is "free trade", libre-échange (plan 276).
+        trade = token_of("自由貿易への障害になる。", "自由貿易")
+        self.assertEqual([p["surface"] for p in trade["parts"]], ["自由", "貿易"])
 
     def test_readings(self) -> None:
         for sentence, surface, reading in (("すいません、これ、試着してもいいですか？", "すいません", "すいません"),
@@ -2823,13 +2828,15 @@ class SenseReviewWordTests(unittest.TestCase):
             ("でしたら、来月の一日から入れますよ。", "一日", "ついたち", "一日の終わりに日記を書く。", "いちにち"),
             ("毎月の一日に払います。", "一日", "ついたち", "月の一日分の食費", "いちにち"),
             ("彼は年のわりに若く見える。", "年", "とし", "年に一回旅行する。", "ねん"),
-            ("その箱は重い。", "箱", "はこ", "道具箱を開けた。", "ばこ"),
-            ("一箱にいくつ入っていますか。", "箱", "はこ", "道具箱を開けた。", "ばこ"),
             ("バスは十分おきに来ます。", "十分", "じゅっぷん", "もう十分だ。", "じゅうぶん"),
         ):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["reading"], reading)
-                self.assertEqual(token_of(other_sentence, surface)["reading"], other)   # (道具 + 箱)
+                self.assertEqual(token_of(other_sentence, surface)["reading"], other)
+        # 箱 alone is はこ; 道具箱 is the dictionary's word, どうぐばこ (plan 276).
+        for sentence in ("その箱は重い。", "一箱にいくつ入っていますか。"):
+            self.assertEqual(token_of(sentence, "箱")["reading"], "はこ")
+        self.assertEqual(token_of("道具箱を開けた。", "道具箱")["reading"], "どうぐばこ")
         self.assertEqual(self.card("でしたら、来月の一日から入れますよ。", "一日"), "一日")
         self.assertEqual(token_of("でしたら、来月の一日から入れますよ。", "一日")["vocab_match"]["entry"]["kana"],
                          "ついたち")
@@ -2976,7 +2983,7 @@ class NinthReviewWordTests(unittest.TestCase):
                                            ("海岸付近の方は、ただちに避難してください。", "方", "かた"),
                                            ("お持ちの方はお申し出ください。", "方", "かた"),
                                            ("液体物は100ml以下の容器に入れ", "物", "ぶつ"),
-                                           ("洗濯物を干す。", "物", "もの"),
+                                           ("洗濯物を干す。", "洗濯物", "せんたくもの"),
                                            ("添付ファイルが開けない場合は", "開け", "ひらけ"),
                                            ("焼き色がつくまで25〜30分焼きます。", "25", "にじゅうご"),
                                            ("牛乳1/2カップを加え", "1/2", "にぶんのいち"),
@@ -3175,7 +3182,7 @@ class HeldOutWordTests(unittest.TestCase):
             ("6回表に3点を入れた。", "表", "おもて"),
             ("あと1回表を確認して。", "表", "ひょう"),
             ("赤ちゃんの額をなでた。", "額", "ひたい"),
-            ("請求額を確認した。", "額", "がく"),
+            ("請求額を確認した。", "請求額", "せいきゅうがく"),
             ("額に入れた写真を飾った。", "額", "がく"),
             ("数が足りない。", "数", "かず"),
         ):
@@ -3357,6 +3364,25 @@ class DeckNounCompoundTests(unittest.TestCase):
                 self.assertTrue(token["vocab_match"]["entry"]["meaning_fr"])
                 self.assertEqual([p["surface"] for p in token["parts"]], parts)
 
+    def test_only_where_the_french_layer_has_it(self) -> None:
+        # The word folds where the French layer gives it a line, and stays
+        # its cards, which have theirs, where it gives none.
+        from unittest import mock
+        from content import jmdict_fr
+        sentence = "電気料金が上がった。"
+        self.assertEqual([t["surface"] for t in analysis.analyze_local(sentence)["tokens"]][:2], ["電気料金", "が"])
+        real = jmdict_fr.pool_line
+        with mock.patch.object(card_lookup.jmdict_fr, "pool_line",
+                               lambda k, r: None if k == "電気料金" else real(k, r)):
+            self.assertEqual([t["surface"] for t in analysis.analyze_local(sentence)["tokens"]][:2], ["電気", "料金"])
+
+    def test_a_word_over_a_point_gives_way_to_a_shorter_one(self) -> None:
+        # 〜まえに is written on 前, so 数年前 gives way to 数年 + 前; with no
+        # point there, 数年前 is the word.
+        self.assertEqual([t["surface"] for t in analysis.analyze_local("私は数年前にゴルフを始めた。")["tokens"]][2:4],
+                         ["数年", "前"])
+        self.assertEqual(analysis.analyze_local("数年前のことだ。")["tokens"][0]["surface"], "数年前")
+
     def test_its_cards_still_count(self) -> None:
         from study import level_mix
         ids = {w["raw_id"] for w in level_mix.words_at_level("電話番号を教えてください。", "N5")}
@@ -3364,9 +3390,11 @@ class DeckNounCompoundTests(unittest.TestCase):
 
     def test_where_it_stays_its_cards(self) -> None:
         for sentence, pieces in (
-            ("英語教室に通う。", ["英語", "教室"]),      # no such word in the dictionary
-            ("電気料金が上がった。", ["電気", "料金"]),  # one, with no French
-            ("保険会社に勤める。", ["保険", "会社"]),
+            # no such word in the dictionary
+            ("英語教室に通う。", ["英語", "教室"]),
+            ("家具会社に勤める。", ["家具", "会社"]),
+            ("子供部屋を片付ける。", ["子供", "部屋"]),
+            ("世界大会で優勝した。", ["世界", "大会"]),
             ("仕事中に電話が来た。", ["仕事", "中"]),    # a point written on 中
             # a counter after its number or 何 is the count's
             ("五年後に会おう。", ["五", "年", "後"]),
@@ -3380,8 +3408,11 @@ class DeckNounCompoundTests(unittest.TestCase):
             ("弟さんは元気？", ["弟", "さん"]),
             # spelled as the page writes it: 三社とも is no 社共
             ("三社とも来た。", ["社", "とも"]),
-            # never cutting the word its last noun makes with what follows
+            # never cutting a commoner word its last noun makes with what
+            # follows -- the commoner word kept either way
             ("委員会は最終報告書をまとめる。", ["最終", "報告書"]),
+            ("原材料費も上がっております。", ["原材料", "費"]),
+            ("彼はまったくの民主党員だ。", ["民主党", "員"]),
         ):
             with self.subTest(sentence=sentence):
                 surfaces = [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
