@@ -122,10 +122,12 @@ def befriend(client, a: str, b: str, names: dict) -> None:
 
 
 def place(user_id: str, level: str = "N5") -> None:
+    """Start the learner's Elo at `level`, as their first ranked sprint
+    would from their level."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            duel_elo.record_placement(cur, user_id, level)
+            duel_elo.start(cur, user_id, level)
         conn.commit()
     finally:
         conn.close()

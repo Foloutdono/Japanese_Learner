@@ -4,9 +4,6 @@
 // decides a point. The client only draws what a question is worth while
 // it waits -- the same curve, read off the same constants.
 
-/** Where the placement test is taken again: it sets the starting Elo. */
-export const LEVEL_PATH = '/profile/settings/level'
-
 /** The sprint: sixty seconds of questions, the same ones for both players. */
 export const SPRINT_MS = 60_000
 /** A question's time: worth 100 for its first second, 25 at six, then 0. */
@@ -71,7 +68,6 @@ export const ERROR_KEYS = {
   pvp_search_limit: 'pvpErrSearchLimit',
   pvp_no_request: 'pvpErrNoRequest',
   pvp_not_blocked: 'pvpErrNotBlocked',
-  pvp_not_placed: 'pvpErrNotPlaced',
   pvp_too_many: 'pvpErrTooMany',
   pvp_closed: 'pvpErrClosed',
   pvp_running: 'pvpErrRunning',

@@ -291,8 +291,9 @@ runtime purpose.
   under it, and whatever closes a duel (a block, a friendship ended, an
   account erased: `duels.close_between`, `leave_all`) finishes and pays
   the runs under way. The Elo (`study/duel_elo.py`) is apart from the
-  番付: it starts from the placement climb's verdict, never the declared
-  level, and only a ranked duel moves it. A duel's fare goes through
+  番付: it starts from the learner's level at their first ranked sprint
+  (`duel_elo.start`, written then and once; no test is asked first, plan
+  282), and only a ranked duel moves it. A duel's fare goes through
   `credits.pay` with its own reason (`duel`, `duel_review`), a refund is
   a positive row of the same reason, both on the duel's own cursor
   (`cur=`), so no fare is taken for a run that failed to start and no
@@ -1114,7 +1115,9 @@ that, build it, a top five, a conversation, kanji spelling, find the
 impostor), and exports the PNGs. Since plan 231 it also draws the app
 itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
-the hour, each story's cover and its call to action also a seven-second MP4 clip;
+the hour, each story's cover and its call to action also a seven-second MP4 clip,
+and since plan 281 the duels' story played whole as one clip (a real N5
+paper's opening raced, the result, the Elo, the board: `bank/duel.json`);
 since plan 232 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice
@@ -1150,7 +1153,8 @@ is a static page outside `src/` and never ships. Its data is `frontend/carousel/
 `python -m scripts.carousel_bank` (backend, needs the tokenizer and the
 JMdict database): rerun it after a change to the reading bank, the deck,
 the kanji, the catalogue or its tours, the comprehension seeds, the
-theme decks or `frontend/carousel/content/`, and commit the files.
+theme decks, the duels' paper (`duel_paper.PAPER_REV`) or
+`frontend/carousel/content/`, and commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a
