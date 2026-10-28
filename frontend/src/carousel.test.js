@@ -850,12 +850,12 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  // ── 対戦, the duels' story (plan 280) ──────────────────────────────
+  // ── 対戦, the duels' story (plan 281) ──────────────────────────────
   const duelBank = bank('duel.json')
   const constant = (file, name) => read(`../backend/${file}`).match(new RegExp(`^${name} = (.+)$`, 'm'))?.[1]
   const int = v => Number(String(v).replace(/_/g, ''))
 
-  it('plays the opening of a paper the duels still deal, on the backend’s own figures (plan 280)', () => {
+  it('plays the opening of a paper the duels still deal, on the backend’s own figures (plan 281)', () => {
     // A paper made under another revision is a paper no duel deals any
     // more: run python -m scripts.carousel_bank again.
     expect(duelBank.paper).toBe(JSON.parse(constant('study/duel_paper.py', 'PAPER_REV')))
@@ -878,7 +878,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('scores the story’s run as the duels score one (plan 280)', () => {
+  it('scores the story’s run as the duels score one (plan 281)', () => {
     for (const lang of ['en', 'fr']) {
       const run = duelRun(duelBank, lang)
       // Each answer pays what its speed is worth, a wrong one nothing,
@@ -919,7 +919,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('says the app’s own words on the duel’s parts, in both languages (plan 280)', () => {
+  it('says the app’s own words on the duel’s parts, in both languages (plan 281)', () => {
     for (const [lang, t] of [['en', EN], ['fr', FR]]) {
       const D = PROMO[lang].duel
       expect(D.you, lang).toBe(t.pvpYou)
@@ -941,7 +941,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('draws the duels’ parts in the inks index.css gives each theme (plan 280)', () => {
+  it('draws the duels’ parts in the inks index.css gives each theme (plan 281)', () => {
     const css = read('src/index.css')
     const escape = v => v.replace(/[()[\].]/g, '\\$&')
     for (const [theme, inks] of Object.entries(DUEL_INKS)) {
@@ -949,7 +949,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('plays the duels’ story whole, beat after beat, ending at the gate (plan 280)', () => {
+  it('plays the duels’ story whole, beat after beat, ending at the gate (plan 281)', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
     try {

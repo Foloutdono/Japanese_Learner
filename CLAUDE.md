@@ -1115,7 +1115,7 @@ impostor), and exports the PNGs. Since plan 231 it also draws the app
 itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
 the hour, each story's cover and its call to action also a seven-second MP4 clip,
-and since plan 280 the duels' story played whole as one clip (a real N5
+and since plan 281 the duels' story played whole as one clip (a real N5
 paper's opening raced, the result, the Elo, the board: `bank/duel.json`);
 since plan 232 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written

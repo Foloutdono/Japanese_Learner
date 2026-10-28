@@ -511,7 +511,7 @@ and its point cards, and Today on the print of the hour.
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
-| Duels (plan 280) | (one) | the duel's ticket, a sprint raced (the count, four questions, the minute run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
+| Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the minute run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
 **The parts are measured, not imagined.** Every figure in `app.js` is a
 CSS pixel of the running app on a 400px phone (the review card, the
@@ -572,7 +572,7 @@ the landing page's bundle of `src/lib/audio/recipes.js`) at the app's
 level, mixes them at their moments and brings the whole to -6dBFS. The
 studio muxes it as AAC, or Opus where the browser has no AAC encoder.
 
-**The duels' story plays whole (plan 280).** Its frames are one sprint
+**The duels' story plays whole (plan 281).** Its frames are one sprint
 told from its ticket to the board, and the story is also one clip, every
 beat after the last (`promo.clips.story`, `DUEL_BEATS`, about 22
 seconds): the ticket comes in and « Partir » is pressed, the count, four
@@ -803,8 +803,8 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 234) |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
-| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 280) |
-| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 280) |
+| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281) |
+| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281) |
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |

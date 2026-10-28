@@ -881,7 +881,7 @@ export const faceOf = p => {
 /** A hex ink at an opacity, for a halo or a scrim over the print. */
 export const inkAlpha = alpha
 
-// ── 対戦, the duels (plan 280) ──────────────────────────────────────
+// ── 対戦, the duels (plan 281) ──────────────────────────────────────
 // The duels' screens (plan 279, index.css's .pvp-*) as a sprint draws
 // them, measured on the same 400px phone, dark and light: the duel's
 // ticket and the stage's gold button, the race on its line, the

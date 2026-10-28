@@ -8,7 +8,7 @@
 // (index.json), never written here. What a story promises is what the
 // app does today: start free, the kana line free for good, no ads and no
 // trackers; no frame prices a mode. The plan is pure; the frames draw.
-// Since plan 280 a sixth, the duels, is a story in motion end to end:
+// Since plan 281 a sixth, the duels, is a story in motion end to end:
 // one sprint played, its result, the Elo it moved and the board.
 import { EDGE, FS, SP, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, text } from './draw.js'
 import * as A from './app.js'
@@ -85,7 +85,7 @@ export const PROMO = {
     },
     ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', pass: 'Board today?', duel: 'Who would you challenge first?' },
     tags: ['japaneseapp', 'jlpt'],
-    // The duels' story (plan 280): its own lines, then the app's words on
+    // The duels' story (plan 281): its own lines, then the app's words on
     // its parts (locales/: the ticket, the race, the result, the Elo).
     duel: {
       hook: s => ['A duel in Japanese.', `${s} seconds.`],
@@ -278,7 +278,7 @@ export function analysed(s, data, lang) {
   return { toks, points }
 }
 
-// ── 対戦, the duels' story (plan 280) ────────────────────────────────
+// ── 対戦, the duels' story (plan 281) ────────────────────────────────
 // One sprint played: the opening of a real N5 paper (bank/duel.json, the
 // duels' own generator), answered as a quick learner answers it -- the
 // first after two seconds, while what it is worth runs down, two at once,
@@ -860,7 +860,7 @@ export function promoDeck(plan, fmt, opts) {
       break
     }
     case 'duel': {
-      // The story plays end to end (plan 280): each beat is drawn at its
+      // The story plays end to end (plan 281): each beat is drawn at its
       // own moment `s`, its parts coming in faster than a cover's, its
       // words landing one by one; a still is its beat at rest (STILL).
       const pr = plan.promo
@@ -1233,7 +1233,7 @@ export function promoDeck(plan, fmt, opts) {
   out.clips = {
     cover: inMotion(out[0], plan.story === 'pitch', () => scoreOf(plan, shownPoints())),
     end: inMotion(out[out.length - 1], false, () => endScoreOf(plan)),
-    // The duels' story whole (plan 280): every beat, one after another.
+    // The duels' story whole (plan 281): every beat, one after another.
     ...(duelStory ? { story: duelStory } : {}),
   }
   out.clip = out.clips.cover

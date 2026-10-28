@@ -19,7 +19,7 @@ be drawn from too: the grammar lessons with their tours, the deck's
 words and kanji, the kana and the comprehension passages; since plan
 229c the wrong spellings the 表記 question deals (each checked against
 the deck and JMdict, so no wrong answer is a word) and index.json, the
-figures a carousel's last slide may quote; since plan 280 duel.json, the
+figures a carousel's last slide may quote; since plan 281 duel.json, the
 opening of a real N5 duel paper for the duels' promo story.
 
     python -m scripts.carousel_bank            # writes frontend/carousel/bank/*.json
@@ -914,7 +914,7 @@ def files(deck: dict):
     })
 
 
-# ── The duels' story (plan 280) ───────────────────────────────────
+# ── The duels' story (plan 281) ───────────────────────────────────
 # The promo story of the duels plays a real sprint: the first questions
 # of an N5 paper as the duels' own generator builds it from a fixed seed
 # (study/duel_paper.py), and what the story's figures are made of --
