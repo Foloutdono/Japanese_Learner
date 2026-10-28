@@ -1171,6 +1171,12 @@ def _named_rows(cur, me: str, rows: list[tuple[dict, list[dict]]]) -> list[dict]
     return [_line(cur, me, d, es, named) for d, es in rows]
 
 
+# What a client built before plan 282 reads before it draws the Elo (it
+# sent a learner without one to the placement test): every learner has
+# one now. A web tab keeps its bundle until the learner reloads.
+_PLACED = {"placed": True}
+
+
 def rating(cur, me: str) -> dict:
     """The learner's Elo: the figure, provisional or not, the record,
     the peak, the place on the Elo board, the level it started from and
@@ -1184,6 +1190,7 @@ def rating(cur, me: str) -> dict:
             "elo": start, "provisional": True, "games": 0, "wins": 0, "draws": 0, "losses": 0,
             "peak": start, "level": level, "start": start,
             "rank": None, "of": board_place(cur, me)["of"], "trend": [],
+            **_PLACED,
         }
     cur.execute(
         """
@@ -1196,6 +1203,7 @@ def rating(cur, me: str) -> dict:
     last = cur.fetchall()[::-1]
     place = board_place(cur, me, row)
     return {
+        **_PLACED,
         "elo": row["rating"],
         "provisional": row["games"] < duel_elo.PROVISIONAL,
         "games": row["games"], "wins": row["wins"], "draws": row["draws"], "losses": row["losses"],

@@ -54,6 +54,8 @@ def test_before_a_first_ranked_sprint_the_elo_is_the_levels_start_and_nothing_is
     assert (rating["elo"], rating["start"], rating["level"]) == (1400, 1400, "N3")
     assert rating["provisional"] and rating["games"] == 0 and rating["rank"] is None and rating["trend"] == []
     assert client.get("/api/pvp").json()["rating"] == rating
+    # A tab still on a bundle from before plan 282 reads `placed` first.
+    assert rating["placed"] is True
     me = client.get("/api/pvp/board").json()["me"]
     assert me["elo"] == 1400 and me["rank"] is None
     assert _row(A) == [] and events_of(A, "pvp_placed") == []
@@ -78,7 +80,7 @@ def test_a_level_moved_later_leaves_the_elo_where_its_duels_took_it(client, lear
     assert client.post("/api/pvp/duels", json={"ranked": True}).status_code == 200
     assert _row(A) == [(1234, "N4", 3)]
     rating = client.get("/api/pvp/rating").json()
-    assert (rating["elo"], rating["level"], rating["start"]) == (1234, "N4", 1200)
+    assert (rating["elo"], rating["level"], rating["start"], rating["placed"]) == (1234, "N4", 1200, True)
     assert events_of(A, "pvp_placed") == []
 
 
