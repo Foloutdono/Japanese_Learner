@@ -7,7 +7,8 @@ The learner the landing page's footage is filmed on (plan 283).
 
 FOOTAGE_DATABASE_URL names the database, and it must be a local one
 (localhost or a socket) that holds nobody else: this script rewrites
-every timestamp in it. frontend/landing/footage/film.mjs runs --restore
+every timestamp in it. --seed wants it empty (createdb), and lays
+srs/data_structure.sql in it first. frontend/landing/footage/film.mjs runs --restore
 before each clip; frontend/landing/README.md, "Footage", has the rest.
 
 WHY THIS EXISTS
@@ -59,6 +60,7 @@ LOCAL_HOSTS = {"", "localhost", "127.0.0.1", "::1"}
 KEEP = Path(__file__).resolve().parent.parent / "datas" / "footage"
 DUMP = KEEP / "learner.dump"
 STAMP = KEEP / "learner.json"
+SCHEMA = Path(__file__).resolve().parent.parent / "srs" / "data_structure.sql"
 
 # Every timestamp column of every table, moved by an interval: what
 # both the month's days and --restore move.
@@ -116,6 +118,15 @@ def others(conn) -> list[str]:
 
 
 def seed(url: str) -> None:
+    conn = connect(url)
+    with conn.cursor() as cur:
+        cur.execute("SELECT to_regclass('public.user_profiles')")
+        if cur.fetchone()[0] is None:
+            # A fresh database: the whole schema first, as CLAUDE.md's
+            # "Local Postgres" stands one up. Not every table is made by
+            # its module on import (phrase_history is not), and the
+            # analyser needs that one.
+            cur.execute(SCHEMA.read_text())
     os.environ["DATABASE_URL"] = url
     os.environ["DEV_USER_ID"] = USER
     from fastapi.testclient import TestClient
@@ -125,7 +136,6 @@ def seed(url: str) -> None:
     import core.user_level
 
     c = TestClient(main.app)
-    conn = connect(url)
     rng = random.Random(7)
     if others(conn):
         sys.exit("Refused: the database holds other learners. Use one of its own.")

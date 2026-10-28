@@ -19,7 +19,7 @@
 // says which), the backend's Python with its requirements (FOOTAGE_PYTHON,
 // or backend/.venv, or python3), ffmpeg and Playwright's Chromium.
 import { spawn, spawnSync } from 'node:child_process'
-import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs'
+import { createReadStream, existsSync, mkdirSync, openSync, statSync } from 'node:fs'
 import { createServer, request } from 'node:http'
 import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -52,6 +52,7 @@ if (!db) {
 }
 const python = process.env.FOOTAGE_PYTHON || (existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3')
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
+mkdirSync(OUT, { recursive: true })
 
 // ── The app, built for the footage ──
 if (flags.has('--build') || !existsSync(join(BUILD, 'index.html'))) {
@@ -87,7 +88,9 @@ async function freshApi() {
   if (api) { api.kill(); await new Promise(r => api.once('exit', r)) }
   const r = spawnSync(python, ['-m', 'scripts.footage_learner', '--restore', '--yes'], { cwd: BACKEND, env, encoding: 'utf8' })
   if (r.status !== 0) throw new Error(`the learner could not be restored:\n${r.stderr || r.stdout}`)
-  api = spawn(python, ['-m', 'uvicorn', 'main:app', '--port', String(API_PORT), '--log-level', 'warning'], { cwd: BACKEND, env, stdio: 'ignore' })
+  // Its log goes to out/api.log: where a scene that stopped looks first.
+  const apiLog = openSync(join(OUT, 'api.log'), 'a')
+  api = spawn(python, ['-m', 'uvicorn', 'main:app', '--port', String(API_PORT), '--log-level', 'warning'], { cwd: BACKEND, env, stdio: ['ignore', apiLog, apiLog] })
   for (let i = 0; i < 120; i++) {
     const ok = await fetch(`http://127.0.0.1:${API_PORT}/api/profile`).then(r => r.ok, () => false)
     if (ok) return
@@ -97,7 +100,6 @@ async function freshApi() {
 }
 
 // ── Each clip ──
-mkdirSync(OUT, { recursive: true })
 let failed = 0
 for (const id of scenes) {
   const scene = (await import(`./scenes/${id}.mjs`)).default
