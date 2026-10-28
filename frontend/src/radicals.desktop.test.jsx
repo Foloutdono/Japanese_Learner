@@ -79,6 +79,11 @@ beforeEach(() => {
 })
 
 const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
+// The cards' arrival (@keyframes arrive, a 10px rise) at its end: a test
+// that reads where a card stands waits for it, not for a timer alone.
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+  .map(a => a.finished.catch(() => {})))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const where = { path: null, search: null, type: null }
@@ -155,6 +160,7 @@ describe('a radical\'s page beside the index', () => {
   it('figures each platform from the family\'s own stats, one to a row', async () => {
     await mount('/learn/kanji/radical/85')
     await settle(400)
+    await landed()
     const figs = $$('.desk-split__page .desk-mode-fig')
     expect(figs.length).toBeGreaterThanOrEqual(2)
     expect(figs[0].querySelector('.desk-mode-fig__due').textContent).toMatch(/^2/)

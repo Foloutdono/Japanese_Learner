@@ -767,6 +767,9 @@ describe('the writing board in the middle column', () => {
   it('keeps the board still when the answer is shown, Show the answer keeping its room', async () => {
     await render(<Draw />)
     await settle(400)
+    // Past the stage's own arrival (@keyframes arrive, a 10px rise): read
+    // on its way, the board stands lower before than after.
+    await Promise.all($('.stage').getAnimations().map(a => a.finished.catch(() => {})))
     const before = rect('.canvas-board')
     $('.drawing-quiz__validate').click()
     await settle(200)

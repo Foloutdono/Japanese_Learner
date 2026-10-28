@@ -83,6 +83,11 @@ beforeEach(() => {
 })
 
 const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
+// The cards' arrival (@keyframes arrive, a 10px rise) at its end: a test
+// that reads where a card stands waits for it, not for a timer alone.
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+  .map(a => a.finished.catch(() => {})))
 const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
@@ -189,6 +194,7 @@ describe('the frequency tiers beside a tier\'s platforms', () => {
   it('stands the tiers upright beside the platforms, each figured', async () => {
     await mount('/learn/vocab/tier/3?size=200', vocabRoutes)
     await settle(400)
+    await landed()
     expect(openTier()).toBe('3')
     const rows = $$('.desk-split__list .platform-card')
     expect(rows).toHaveLength(10)
