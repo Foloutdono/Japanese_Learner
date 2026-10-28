@@ -2132,7 +2132,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 29: the French layer gains the 8,258 compounds of deck nouns that stayed
 # two for want of a line (plan 280): 電気料金, 洗濯物, 自由貿易 now fold;
 # 第 with its number folds only before a noun (第三者, never 第三 + 章).
-LOCAL_REV = 29
+# 30: sixteen cards the course's sentences use (体重, 主人, もしもし,
+# ただいま...) and ten usually-kana words as kana cards (#360, #439).
+LOCAL_REV = 30
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

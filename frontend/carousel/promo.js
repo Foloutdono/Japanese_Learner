@@ -282,8 +282,8 @@ export function analysed(s, data, lang) {
 // One sprint played: the opening of a real N5 paper (bank/duel.json, the
 // duels' own generator), answered as a quick learner answers it -- the
 // first after two seconds, while what it is worth runs down, two at once,
-// then 白 taken for 百 -- against a recorded run that leads, is passed
-// and passes again; the minute run out, the
+// then a lookalike kanji taken for the right one -- against a recorded
+// run that leads, is passed and passes again; the minute run out, the
 // result face to face and the Elo it moved, by the classic expectation
 // at the settled K (study/duel_elo.py); the Elo over the last ranked
 // duels and the board it climbs. The two learners and their figures are

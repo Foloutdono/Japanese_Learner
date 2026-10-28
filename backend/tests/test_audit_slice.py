@@ -158,7 +158,7 @@ class VocabRankingTests(unittest.TestCase):
         self.entries = audit.vocab_entries()
 
     def test_the_whole_deck_is_ranked(self) -> None:
-        # 7,965 cards since #360 folded five N1 spellings into their kana cards.
+        # 7,980 cards since #360 and #439 gave the course's own words theirs.
         self.assertGreater(len(self.entries), 7900)
 
     def test_risk_never_rises_down_the_list(self) -> None:
