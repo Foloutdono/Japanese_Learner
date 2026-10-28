@@ -72,10 +72,15 @@ const KEY = {
 }
 
 // The plates arrive staggered (index.css's `arrive`), and a well's face
-// is chosen from its measured room: wait for both.
+// is chosen from its measured room: wait for both. The arrivals by their
+// own end, not the timer's: a slow runner can still be lifting the last
+// plates when it fires.
 const settle = async (ms = 620) => {
   await new Promise(r => setTimeout(r, ms))
   await document.fonts.ready
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
 }
 // The shell's frame without the shell: the content column beside a
 // rail's width of nothing, which is what the desk leaves a screen.

@@ -75,6 +75,12 @@ const { default: DecksScreen } = await import('./screens/DecksScreen')
 const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
 
 const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
+// The cards' staggered arrival (@keyframes arrive, a 10px rise) at its
+// end: a test that reads where a card stands waits for it, not for a
+// timer alone.
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+  .map(a => a.finished.catch(() => {})))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const where = { path: null, type: null }
@@ -109,6 +115,7 @@ describe('the library on the desk', () => {
   it("is the Bibliothèque's page on the desk, beside the learner's shelf (plan 269)", async () => {
     await mountLibrary('/learn/decks/library')
     await settle(400)
+    await landed()
     // The bare library is a page of the Bibliothèque now, and goes there.
     expect(where.path).toBe('/learn/decks')
     expect(where.type).toBe('REPLACE')

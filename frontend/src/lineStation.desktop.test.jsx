@@ -55,7 +55,15 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: VocabScreen } = await import('./screens/VocabScreen')
 const { default: GrammarScreen } = await import('./screens/GrammarScreen')
-const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
+// Past the timer, the cars' arrival itself (@keyframes arrive, a 10px
+// rise): the timer fires before it has ended, and a car read in flight
+// is not where it stands.
+const settle = async (ms = 300) => {
+  await new Promise(r => setTimeout(r, ms))
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
+}
 const rect = el => el.getBoundingClientRect()
 const cars = () => [...document.querySelectorAll('.desk-platforms > .platform-grid .platform-card')]
 

@@ -147,6 +147,12 @@ const { default: SentenceStation } = await import('./screens/SentenceStation')
 const { default: ExamScreen } = await import('./screens/ExamScreen')
 
 const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
+// The stops' staggered arrival (@keyframes arrive, a 10px rise) at its
+// end: a test that reads where a stop stands waits for it, not for a
+// timer alone.
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+  .map(a => a.finished.catch(() => {})))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const where = { path: null, search: null, type: null }
@@ -204,6 +210,7 @@ describe('a practice station on the desk (plan 159)', () => {
   it('stands the grades beside the grade\'s page, each with a sentence, its bar and the record', async () => {
     await mount('/practice/reading/levels?level=N5')
     await settle()
+    await landed()
     const stops = $$('.desk-split__list .route-stop')
     expect(stops).toHaveLength(5)
     const n5 = stops[0]
