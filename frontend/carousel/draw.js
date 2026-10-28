@@ -129,6 +129,12 @@ export function palette(ground) {
     },
     // The People family: what is the learner's own (their line in a scene).
     pass: t['--pass-ink'],
+    // What waits on the learner, in the selection's ink (index.css's
+    // --sel-ink: the gold toward the text, 65% on sumi, 50% on washi).
+    selInk: mix(t['--accent2'], t['--text-primary'], paper ? 0.5 : 0.65),
+    border: t['--border'],
+    success: t['--success'],
+    danger: t['--danger'],
     // The simple bar, worst first, as the rating bar draws it.
     rating: [t['--rating-wrong'], t['--rust'], t['--warning'], RATING_INKS['--rating-correct']],
     hang: t['--elev-hang'] || DARK['--elev-hang'],

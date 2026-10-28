@@ -312,6 +312,8 @@ EVENTS: dict[str, frozenset[str]] = {
     # `against` is how the opponent was found (a friend; a ranked run
     # someone left waiting, `seek`; a recorded run, `ghost`; or none
     # yet, `open`), `wait_h` the hours an asynchronous duel waited.
+    # `pvp_placed` is the level a learner's Elo started from, written
+    # at their first ranked sprint, no test asked (plan 282).
     "pvp_friend":     frozenset({"action"}),
     "pvp_report":     frozenset({"reason"}),
     "pvp_duel_start": frozenset({"kind", "mode", "level", "against"}),

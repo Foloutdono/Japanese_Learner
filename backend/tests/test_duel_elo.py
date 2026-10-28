@@ -1,6 +1,6 @@
 """対戦 — the Elo (plan 279, study/duel_elo.py), its start from the
-placement test, and what reads the duels' rows by hand: the reports'
-reader and the pruning of duels nobody played."""
+learner's level (plan 282), and what reads the duels' rows by hand: the
+reports' reader and the pruning of duels nobody played."""
 from datetime import timedelta
 
 import pytest
@@ -8,7 +8,8 @@ import pytest
 from scripts import prune_logs, read_reports
 from study import duel_elo
 from tests.conftest import acting_as
-from tests.pvp_world import A, B, befriend, clock, learners, place, play, sql  # noqa: F401
+from tests.pvp_world import (A, B, befriend, clock, events_of, learners, place, play,  # noqa: F401
+                             set_profile, sql)
 
 
 # ── The arithmetic ──────────────────────────────────────────────────
@@ -41,33 +42,54 @@ def test_a_strong_learner_on_a_fresh_account_keeps_k_high():
     assert duel_elo.k_factor(1000, 20, mixed) == duel_elo.K_SETTLED
 
 
-# ── The start comes from the placement test ─────────────────────────
+# ── The start comes from the learner's level ────────────────────────
 
-def _climb_to_the_end(client):
-    """Stop the placement climb at its first level: « too hard »."""
+def _row(user_id):
+    return sql("SELECT rating, placed_level, games FROM pvp_ratings WHERE user_id = %s", (user_id,), fetch=True)
+
+
+def test_before_a_first_ranked_sprint_the_elo_is_the_levels_start_and_nothing_is_written(client, learners):
+    set_profile(A, level="N3")
+    rating = client.get("/api/pvp/rating").json()
+    assert (rating["elo"], rating["start"], rating["level"]) == (1400, 1400, "N3")
+    assert rating["provisional"] and rating["games"] == 0 and rating["rank"] is None and rating["trend"] == []
+    assert client.get("/api/pvp").json()["rating"] == rating
+    # A tab still on a bundle from before plan 282 reads `placed` first.
+    assert rating["placed"] is True
+    me = client.get("/api/pvp/board").json()["me"]
+    assert me["elo"] == 1400 and me["rank"] is None
+    assert _row(A) == [] and events_of(A, "pvp_placed") == []
+
+
+def test_the_first_ranked_sprint_starts_the_elo_at_the_level_with_no_test(client, learners):
+    set_profile(A, level="N3")
+    r = client.post("/api/pvp/duels", json={"ranked": True})
+    assert r.status_code == 200, r.text
+    assert _row(A) == [(1400, "N3", 0)]
+    assert events_of(A, "pvp_placed") == [{"level": "N3"}]
+    # The second press finds the same seat, and starts nothing again.
+    assert client.post("/api/pvp/duels", json={"ranked": True}).json() == r.json()
+    assert events_of(A, "pvp_placed") == [{"level": "N3"}]
+
+
+def test_a_level_moved_later_leaves_the_elo_where_its_duels_took_it(client, learners):
+    set_profile(A, level="N4")
+    place(A, "N4")
+    sql("UPDATE pvp_ratings SET games = 3, rating = 1234 WHERE user_id = %s", (A,))
+    set_profile(A, level="N1")
+    assert client.post("/api/pvp/duels", json={"ranked": True}).status_code == 200
+    assert _row(A) == [(1234, "N4", 3)]
+    rating = client.get("/api/pvp/rating").json()
+    assert (rating["elo"], rating["level"], rating["start"], rating["placed"]) == (1234, "N4", 1200, True)
+    assert events_of(A, "pvp_placed") == []
+
+
+def test_the_placement_climb_writes_no_elo(client, learners):
     step = client.post("/api/onboarding/placement/start").json()
     step = client.post("/api/onboarding/placement/answer",
                        json={"seed": step["seed"], "answers": {}, "stop": True}).json()
     assert step["done"]
-    return step
-
-
-def test_the_climbs_verdict_is_the_starting_elo(client, learners):
-    step = _climb_to_the_end(client)
-    level = step["recommendedLevel"]
-    rows = sql("SELECT rating, placed_level, games FROM pvp_ratings WHERE user_id = %s", (A,), fetch=True)
-    assert rows == [(duel_elo.START[level], level, 0)]
-    assert client.get("/api/pvp/rating").json()["elo"] == duel_elo.START[level]
-
-
-def test_taking_the_test_again_does_not_reset_an_elo_in_play(client, learners):
-    place(A, "N3")
-    assert sql("SELECT rating FROM pvp_ratings WHERE user_id = %s", (A,), fetch=True) == [(1400,)]
-    place(A, "N4")
-    assert sql("SELECT rating FROM pvp_ratings WHERE user_id = %s", (A,), fetch=True) == [(1200,)]
-    sql("UPDATE pvp_ratings SET games = 1, rating = 1234 WHERE user_id = %s", (A,))
-    place(A, "N1")
-    assert sql("SELECT rating, placed_level FROM pvp_ratings WHERE user_id = %s", (A,), fetch=True) == [(1234, "N4")]
+    assert _row(A) == [] and events_of(A, "pvp_placed") == []
 
 
 # ── The reports, read by a person ───────────────────────────────────

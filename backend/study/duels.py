@@ -635,10 +635,13 @@ def _ghost_source(cur, me: str, elo: int, level: str) -> dict | None:
 
 def ranked(cur, after: list, me: str) -> tuple[int, str]:
     """A ranked sprint for `me`, never waiting: (duel id, against). A
-    second press while a seat waits unstarted finds that seat."""
-    rating = duel_elo.rating_row(cur, me)
-    if rating is None:
-        raise Refused(409, "pvp_not_placed")
+    second press while a seat waits unstarted finds that seat. A first
+    one starts the learner's Elo, from their level, with no test asked
+    first (plan 282)."""
+    level = resolve_level(me)
+    rating, started = duel_elo.start(cur, me, level)
+    if started:
+        events.record(me, "pvp_placed", {"level": rating["placed_level"]}, cur=cur)
     now = _now()
     cur.execute(
         """
@@ -654,7 +657,6 @@ def ranked(cur, after: list, me: str) -> tuple[int, str]:
         duel = _duel(cur, row[0])
         return row[0], against(duel, _entries(cur, row[0]))
     _room_for_one(cur, after, me, now)
-    level = resolve_level(me)
     elo = rating["rating"]
 
     duel_id = _seek(cur, me, elo, level, now)
@@ -1169,13 +1171,27 @@ def _named_rows(cur, me: str, rows: list[tuple[dict, list[dict]]]) -> list[dict]
     return [_line(cur, me, d, es, named) for d, es in rows]
 
 
+# What a client built before plan 282 reads before it draws the Elo (it
+# sent a learner without one to the placement test): every learner has
+# one now. A web tab keeps its bundle until the learner reloads.
+_PLACED = {"placed": True}
+
+
 def rating(cur, me: str) -> dict:
     """The learner's Elo: the figure, provisional or not, the record,
-    the peak, the place on the Elo board, where the placement started
-    it and its curve over the last ranked duels."""
+    the peak, the place on the Elo board, the level it started from and
+    its curve over the last ranked duels. Before a first ranked sprint,
+    the Elo their level starts them at, written by none (plan 282)."""
     row = duel_elo.rating_row(cur, me)
     if row is None:
-        return {"placed": False}
+        level = resolve_level(me)
+        start = duel_elo.START[level]
+        return {
+            "elo": start, "provisional": True, "games": 0, "wins": 0, "draws": 0, "losses": 0,
+            "peak": start, "level": level, "start": start,
+            "rank": None, "of": board_place(cur, me)["of"], "trend": [],
+            **_PLACED,
+        }
     cur.execute(
         """
         SELECT e.rating_after FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id
@@ -1187,12 +1203,12 @@ def rating(cur, me: str) -> dict:
     last = cur.fetchall()[::-1]
     place = board_place(cur, me, row)
     return {
-        "placed": True,
+        **_PLACED,
         "elo": row["rating"],
         "provisional": row["games"] < duel_elo.PROVISIONAL,
         "games": row["games"], "wins": row["wins"], "draws": row["draws"], "losses": row["losses"],
-        "peak": row["peak"], "placedLevel": row["placed_level"],
-        # Where the placement test started it: the curve's floor line.
+        "peak": row["peak"], "level": row["placed_level"],
+        # Where the learner's level started it: the curve's floor line.
         "start": duel_elo.START.get(row["placed_level"]),
         "rank": place["rank"], "of": place["of"],
         # The Elo after each of the last TREND ranked duels, oldest first.
@@ -1201,9 +1217,10 @@ def rating(cur, me: str) -> dict:
 
 
 def hub(cur, after: list, me: str) -> dict:
-    """GET /api/pvp: the duels' hall in one call -- the Elo (or « to be
-    placed »), the challenges to play, the live invitations, the duels
-    waiting on the other, the last results, the friends and requests."""
+    """GET /api/pvp: the duels' hall in one call -- the Elo (before a
+    first ranked sprint, the one the learner's level starts them at),
+    the challenges to play, the live invitations, the duels waiting on
+    the other, the last results, the friends and requests."""
     now = _now()
     _settle_mine(cur, after, me, now)
     active = _rows(cur, me, "d.status = ANY(%s)", (list(ACTIVE),), OPEN_MAX * 2)
@@ -1323,6 +1340,6 @@ def board(cur, me: str, scope: str, offset: int, limit: int, around: int) -> dic
             out["near"] = [row(k) for k in range(max(1, my_rank - around), min(of, my_rank + around) + 1)]
     else:
         mine = duel_elo.rating_row(cur, me)
-        out["me"] = {"rank": None, "elo": mine["rating"] if mine else None, "placed": mine is not None,
+        out["me"] = {"rank": None, "elo": mine["rating"] if mine else duel_elo.START[resolve_level(me)],
                      "provisional": True, "gap": None, "me": True}
     return out

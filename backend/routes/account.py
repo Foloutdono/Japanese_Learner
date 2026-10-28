@@ -127,7 +127,7 @@ PLAN = [
                             "AND o.user_id <> %(user)s AND o.role <> 'ghost')",
                             "the duels no other learner played: their papers, and any ghost's copy"),
     ("pvp_entries",         "user_id = %(user)s",       "this learner's runs in the duels: answers, scores, Elo, a ghost's copy"),
-    ("pvp_ratings",         "user_id = %(user)s",       "the Elo, its record and the placement it started from"),
+    ("pvp_ratings",         "user_id = %(user)s",       "the Elo, its record and the level it started from"),
     ("pvp_friends",         "user_id = %(user)s OR friend_id = %(user)s", "the friendships, in both directions"),
     ("pvp_requests",        "user_id = %(user)s OR target_id = %(user)s", "the friend requests sent and received"),
     ("pvp_blocks",          "user_id = %(user)s OR blocked_id = %(user)s", "the blocks, by and of this learner"),

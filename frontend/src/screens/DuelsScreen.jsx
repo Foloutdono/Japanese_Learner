@@ -10,7 +10,7 @@ import { refreshDuels, useDuels } from '../stores/duels'
 import { playClick } from '../lib/audio'
 import { FriendSheet } from '../components/pvp/FriendSheet'
 import { EloCurve, EloMove, Verdict } from '../components/pvp/parts'
-import { LEVEL_PATH, hoursLeft, nameOf } from '../domain/duel'
+import { hoursLeft, nameOf } from '../domain/duel'
 
 // ── 対戦 — the duels' hall (plan 279, H3) ──────────────────────────
 // Behind the holder's door: the two platforms as cards (a ranked sprint
@@ -18,7 +18,9 @@ import { LEVEL_PATH, hoursLeft, nameOf } from '../domain/duel'
 // unranked), the console's band over what waits on the learner, what
 // runs and what was played, the friends' door at its foot; the Elo at
 // the head, its curve over the last twenty ranked duels (the owner's G1),
-// and the record in a lattice at the foot.
+// and the record in a lattice at the foot. Before a first ranked duel the
+// head is the Elo the learner's level starts them at, and what moves it:
+// no test is asked first (plan 282).
 const STATION = stationFor('/profile/duels')
 
 export default function DuelsScreen({ session }) {
@@ -35,7 +37,6 @@ export default function DuelsScreen({ session }) {
     duel: id => { playClick(); navigate(`/duel/${id}`) },
     friends: () => { playClick(); navigate('/profile/duels/friends') },
     board: () => { playClick(); navigate('/profile/duels/board') },
-    place: () => { playClick(); navigate(LEVEL_PATH) },
   }
 
   return (
@@ -87,7 +88,7 @@ function Hall({ data, t, lang, go }) {
           <ChevronIcon direction="right" size={15} />
         </button>
       </section>
-      {rating.placed && (
+      {rating.games > 0 && (
         <div className="records records--three">
           <div className="record"><b className="record__value">{rating.games}</b><span className="record__label">{t.pvpSprints}</span></div>
           <div className="record"><b className="record__value">{rating.wins}–{rating.losses}</b><span className="record__label">{t.pvpBilan}</span></div>
@@ -138,21 +139,10 @@ function Row({ d, view, fig, t, go }) {
   )
 }
 
-/** Not placed yet: what the Elo starts from, and the way to the test. */
-function Unplaced({ t, go }) {
-  return (
-    <button type="button" className="pvp-curve pvp-curve--none" onClick={go.place}>
-      <span className="pvp-curve__cap">{t.pvpElo}</span>
-      <b className="pvp-curve__none">{t.pvpUnplaced}</b>
-      <span className="pvp-curve__foot">{t.pvpPlaceFirst}<ChevronIcon direction="right" size={14} /></span>
-    </button>
-  )
-}
-
 /** The Elo at the head of the hall: the figure, the place, the curve of
- *  the last twenty ranked duels over the placement's start. */
+ *  the last twenty ranked duels over the level's start. Before the first
+ *  one, no curve: the level it starts from, and what moves it. */
 function EloHead({ rating, t, lang, go }) {
-  if (!rating.placed) return <Unplaced t={t} go={go} />
   const fig = n => n.toLocaleString(lang)
   return (
     <button type="button" className="pvp-curve" onClick={go.board} aria-label={`${t.pvpElo} ${fig(rating.elo)}, ${t.pvpEloBoard}`}>
@@ -161,11 +151,15 @@ function EloHead({ rating, t, lang, go }) {
         <span className="pvp-curve__rank">{rating.rank ? t.pvpRankOf(rating.rank, rating.of) : t.pvpNotRanked}<ChevronIcon direction="right" size={14} /></span>
       </span>
       <b className="pvp-curve__fig">{fig(rating.elo)}{rating.provisional && <span className="pvp-curve__prov" title={t.pvpProvisional}>?</span>}</b>
-      <EloCurve trend={rating.trend} start={rating.start} label={t.pvpCurveLabel(rating.trend.length)} />
-      <span className="pvp-curve__foot">
-        {rating.start != null && <span className="pvp-curve__key"><i className="pvp-curve__dash" aria-hidden="true" />{t.pvpStartAt(fig(rating.start))}</span>}
-        <span>{t.pvpPeak(fig(rating.peak))}</span>
-      </span>
+      {rating.trend.length > 0 ? (
+        <>
+          <EloCurve trend={rating.trend} start={rating.start} label={t.pvpCurveLabel(rating.trend.length)} />
+          <span className="pvp-curve__foot">
+            {rating.start != null && <span className="pvp-curve__key"><i className="pvp-curve__dash" aria-hidden="true" />{t.pvpStartAt(fig(rating.start))}</span>}
+            <span>{t.pvpPeak(fig(rating.peak))}</span>
+          </span>
+        </>
+      ) : <span className="pvp-curve__from">{t.pvpEloFrom(rating.level)}</span>}
     </button>
   )
 }

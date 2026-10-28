@@ -13,7 +13,7 @@ import { Trend } from './parts'
 export function DuelsInsert({ t, lang, navigate }) {
   const { data } = useDuels()
   const rating = data?.rating
-  if (!rating?.placed || !rating.trend?.length) return <DuelsDoor t={t} lang={lang} navigate={navigate} />
+  if (!rating?.trend?.length) return <DuelsDoor t={t} lang={lang} navigate={navigate} />
   const waiting = (data?.toPlay?.length ?? 0) + (data?.live?.length ?? 0)
   return (
     <button type="button" className="pvp-insert" onClick={() => navigate(DUELS_PATH)} style={{ '--line-color': 'var(--pass-ink)' }}>
