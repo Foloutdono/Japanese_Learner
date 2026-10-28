@@ -726,4 +726,6 @@
 {"t":"片仮名","r":"かたかな","ro":"katakana","en":["katakana"],"fr":["katakana"],"fu":[["片","かた"],["仮","か"],["名","な"]],"hy":["片下名","片仮南","片何名"]},
 {"t":"また","r":"また","ro":"mata","en":["again, and"],"fr":["encore, et"],"ex":["N5.74","N4.95"]},
 {"t":"よろしく","r":"よろしく","ro":"yoroshiku","en":["well, properly, best regards (set phrase, asks for goodwill), please remember me"],"fr":["bien, correctement, cordialement (formule, demande de bienveillance), je compte sur vous"]},
-{"t":"十分","r":"じゅっぷん","ro":"juppun","en":["10 minutes"],"fr":["dix minutes"],"fu":[["十","じゅっ"],["分","ぷん"]]}]}
+{"t":"十分","r":"じゅっぷん","ro":"juppun","en":["10 minutes"],"fr":["dix minutes"],"fu":[["十","じゅっ"],["分","ぷん"]]},
+{"t":"もしもし","r":"もしもし","ro":"moshimoshi","en":["hello (on the phone)"],"fr":["allô (au téléphone)"]},
+{"t":"ただいま","r":"ただいま","ro":"tadaima","en":["I'm home! (on coming home)","right now, at the moment (formal)"],"fr":["me voilà ! (en rentrant à la maison)","en ce moment, tout de suite (soutenu)"]}]}

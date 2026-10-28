@@ -78,7 +78,8 @@ def test_the_deck_runs_out_before_the_pool_begins(client):
     """The seam. One page wide enough to straddle it: the last of the
     deck, then the pool — and the pool's first word is its commonest,
     not whatever sat at the front of the JMdict dump."""
-    limit = 20
+    # A page whose edge is not the seam itself (7,980 cards are 399 pages of 20).
+    limit = next(n for n in range(20, 40) if DECK_TOTAL % n)
     page = DECK_TOTAL // limit
     results = _page(client, limit=limit, page=page)["results"]
 

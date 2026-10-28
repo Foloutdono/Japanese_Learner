@@ -1,21 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
-import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { LangProvider } from './LangContext'
+import { MemoryRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
+import { LangProvider, useLang } from './LangContext'
 import { StageFrame } from './components/chrome/Shell'
 import './index.css'
 
 // ── 対戦 — the duels' screens on a phone (plan 279) ─────────────────
 // The screens the owner picked, against a server answering as
 // routes/pvp.py does. The hall (H3, its Elo the curve, G1): the figure,
-// the place and the last twenty duels over where the placement started
-// it, or before any Elo the way to the test. The friends (F1): a learner is found by their
+// the place and the last twenty duels over where the learner's level
+// started it, or before a first ranked duel that start and the level it
+// comes from, no test asked (plan 282). The holder's insert (L1) is the
+// door alone (E1) until there is a curve to draw. The friends (F1): a learner is found by their
 // exact handle and is that handle alone until a request is accepted; a
 // friend's card holds the report, four closed reasons and never a word
 // typed. The departure (D2): the ranked sprint is paid on the button
-// that names its price and starts at once; before the placement test
-// there is no Elo, and the button leads to the test. The Elo board (L2):
+// that names its price and starts at once, a first one too. The Elo board (L2):
 // both scopes counted by the server, the learner between their
 // neighbours, the cut only where places are skipped. Today's notice
 // (E3): the first challenge, a live room before it, hidden until
@@ -43,7 +44,7 @@ const { default: DuelFriendsScreen } = await import('./screens/DuelFriendsScreen
 const { default: DuelDeparture } = await import('./screens/DuelDeparture')
 const { default: DuelBoardScreen } = await import('./screens/DuelBoardScreen')
 const { DuelLine } = await import('./components/pvp/DuelLine')
-const { LEVEL_PATH } = await import('./domain/duel')
+const { DuelsInsert } = await import('./components/pvp/DuelsInsert')
 
 const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
 const $ = sel => document.querySelector(sel)
@@ -91,8 +92,8 @@ beforeEach(() => {
 // ── H3 — the hall ──
 
 const HALL = {
-  rating: { placed: true, elo: 1248, provisional: false, games: 21, wins: 15, draws: 0, losses: 6, peak: 1248,
-    placedLevel: 'N4', start: 1200, rank: 3, of: 10, trend: [1180, 1210, 1195, 1230, 1248] },
+  rating: { elo: 1248, provisional: false, games: 21, wins: 15, draws: 0, losses: 6, peak: 1248,
+    level: 'N4', start: 1200, rank: 3, of: 10, trend: [1180, 1210, 1195, 1230, 1248] },
   toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', level: 'N5', status: 'open', against: 'friend', who: 'Kenta', mine: null, theirs: 1552,
     expiresAt: new Date(Date.now() + 47 * 3_600_000).toISOString() }],
   live: [], running: [], done: [],
@@ -150,15 +151,48 @@ describe('the hall (H3, G1)', () => {
     expect($('.where').textContent).toBe('/duel/52')
   })
 
-  it('says there is no Elo before the placement test, and leads to it', async () => {
-    duels = { data: { ...HALL, rating: { placed: false } } }
+  it('shows the Elo the learner’s level starts them at before a first ranked duel, no test asked', async () => {
+    // Plan 281: nothing to take first. The figure is the level's start,
+    // provisional; no curve yet, the level it starts from instead.
+    duels = { data: { ...HALL, rating: { elo: 1200, provisional: true, games: 0, wins: 0, draws: 0, losses: 0, peak: 1200,
+      level: 'N4', start: 1200, rank: null, of: 10, trend: [] } } }
     await mountHall()
-    expect($('.pvp-curve--none .pvp-curve__none').textContent).toBe('Pas encore d’Elo')
+    expect($('.pvp-curve__fig').firstChild.textContent).toBe((1200).toLocaleString('fr'))
+    expect($('.pvp-curve__prov')).not.toBeNull()
     expect($('.pvp-curve__svg')).toBeNull()
+    expect($('.pvp-curve__from').textContent).toBe('Il part de ton niveau N4, puis bouge à chaque sprint classé.')
     expect($('.records--three')).toBeNull()
-    $('.pvp-curve--none').click()
+    $('.pvp-curve').click()
     await settle()
-    expect($('.where').textContent).toBe(LEVEL_PATH)
+    expect($('.where').textContent).toBe('/profile/duels/board')
+  })
+})
+
+// ── L1 / E1 — the Elo in the holder ──
+
+function InsertHost() {
+  const { t, lang } = useLang()
+  return <DuelsInsert t={t} lang={lang} navigate={useNavigate()} />
+}
+
+describe('the Elo in the holder (L1, E1)', () => {
+  const mountInsert = () => mount('/profile', '/profile', <InsertHost />)
+
+  it('is the door alone before a first ranked duel, the level’s start its figure', async () => {
+    duels = { data: { ...HALL, rating: { ...HALL.rating, elo: 1000, games: 0, wins: 0, losses: 0, peak: 1000,
+      level: 'N5', start: 1000, rank: null, trend: [] } } }
+    await mountInsert()
+    expect($('.pvp-insert')).toBeNull()
+    expect($('.record--door .record__value--door').textContent).toBe((1000).toLocaleString('fr'))
+  })
+
+  it('lays the Elo out under the door once a ranked duel has a curve', async () => {
+    duels = { data: HALL }
+    await mountInsert()
+    expect($('.pvp-insert__num').textContent).toBe((1248).toLocaleString('fr'))
+    $('.pvp-insert').click()
+    await settle()
+    expect($('.where').textContent).toBe('/profile/duels')
   })
 })
 
@@ -273,7 +307,7 @@ const mountDeparture = () => mount('/duel/new', '/duel/new', <DuelDeparture sess
 
 describe('the departure (D2)', () => {
   it('pays the ranked sprint on the button that names its price, and starts it', async () => {
-    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { placed: true, elo: 1248 } } }
+    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { elo: 1248, games: 21 } } }
     answer = (path, init) => (path === '/api/pvp/duels' && init?.method === 'POST' ? { id: 51, against: 'seek' } : null)
     await mountDeparture()
     const go = $('.exam-cover__go')
@@ -284,19 +318,22 @@ describe('the departure (D2)', () => {
     expect($('.where').textContent).toBe('/duel/51#start')
   })
 
-  it('sends a learner without an Elo to the placement test, and charges nothing', async () => {
-    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { placed: false } } }
+  it('asks no test of a learner who has never raced: the first ranked sprint starts at once', async () => {
+    // Plan 281: the server starts the Elo from the learner's level.
+    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { elo: 1000, games: 0, level: 'N5', trend: [] } } }
+    answer = (path, init) => (path === '/api/pvp/duels' && init?.method === 'POST' ? { id: 52, against: 'ghost' } : null)
     await mountDeparture()
+    expect($('.pvp-run__help').textContent).toBe('Si personne de ton Elo n’est libre, tu cours contre la partie enregistrée d’un vrai joueur, son pseudo affiché.')
     const go = $('.exam-cover__go')
-    expect(go.textContent).toBe('Passer le test de placement')
+    expect(go.textContent).toBe('Partir · 2 crédits')
     go.click()
     await settle()
-    expect(asked('/api/pvp/duels', 'POST')).toHaveLength(0)
-    expect($('.where').textContent).toBe(LEVEL_PATH)
+    expect(sentBody('/api/pvp/duels')).toEqual({ ranked: true })
+    expect($('.where').textContent).toBe('/duel/52#start')
   })
 
   it('takes platform 2 to the friend’s sheet', async () => {
-    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { placed: true, elo: 1248 } } }
+    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { elo: 1248, games: 21 } } }
     answer = path => (path === '/api/pvp/friends' ? BOOK : null)
     await mountDeparture()
     $$('.pvp-quai')[1].click()
@@ -365,7 +402,7 @@ describe('the Elo board (L2)', () => {
     answer = path => {
       const scope = new URL(path, 'http://x').searchParams.get('scope')
       return { scope, offset: 0, of: 4, entries: [1, 2, 3, 4].map(r => place(r)), near: [],
-        me: { rank: null, elo: 1200, placed: true, provisional: true, gap: null, me: true } }
+        me: { rank: null, elo: 1200, provisional: true, gap: null, me: true } }
     }
     await mountBoard()
     expect($('.leaderboard-row--me')).toBeNull()

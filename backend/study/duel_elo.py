@@ -6,12 +6,14 @@ are free, and a second account made a friend would lift anyone. The Elo
 is apart from the 番付's XP -- the XP pays study, the Elo ranks sprints
 -- and has no seasons.
 
-  - It starts where the placement test boards the learner, never at a
-    level they declared: N5 1000, N4 1200, N3 1400, N2 1600, N1 1800.
-    The climb's verdict is noted when it ends (routes/onboarding.py), and
-    rewritten only while no ranked duel has been played: taking the test
-    again does not reset an Elo. A learner without one takes the test
-    before their first ranked duel.
+  - It starts from the learner's level when their first ranked sprint
+    is dealt (core/user_level.resolve_level, the level they study at):
+    N5 1000, N4 1200, N3 1400, N2 1600, N1 1800, written then and once,
+    so a level moved later leaves the Elo where its duels took it. No
+    test is asked first (plan 282, the owner's call: the placement test
+    was friction on the way to a first sprint). A start too high costs a
+    few provisional duels at K 40; a strong learner starting low is the
+    smurf below.
   - K is 40 for the first PROVISIONAL ranked duels, 20 after.
   - A smurf -- a strong learner on a fresh account -- keeps K at 40:
     from SMURF_GAMES duels on, when the last SMURF_WINDOW duels' rating
@@ -86,27 +88,22 @@ def rating_row(cur, user_id: str) -> dict | None:
     return dict(zip(keys, row))
 
 
-def record_placement(cur, user_id: str, level: str) -> bool:
-    """Note where the placement test boarded the learner, as their
-    starting Elo -- only while no ranked duel has been played. True when
-    it was written."""
-    if level not in START:
-        return False
-    start = START[level]
+def start(cur, user_id: str, level: str) -> tuple[dict, bool]:
+    """The learner's rating row, written at `level`'s start the first
+    time a ranked sprint asks for it (placed_level and placed_at: the
+    level it started from, and when): (the row, written now). A row
+    already there is left as it stands."""
     now = datetime.now(timezone.utc)
     cur.execute(
         """
         INSERT INTO pvp_ratings (user_id, rating, peak, placed_level, placed_at, updated_at)
         VALUES (%(user)s, %(start)s, %(start)s, %(level)s, %(now)s, %(now)s)
-        ON CONFLICT (user_id) DO UPDATE
-           SET rating = EXCLUDED.rating, peak = EXCLUDED.peak,
-               placed_level = EXCLUDED.placed_level, placed_at = EXCLUDED.placed_at,
-               updated_at = EXCLUDED.updated_at
-         WHERE pvp_ratings.games = 0
+        ON CONFLICT (user_id) DO NOTHING
         """,
-        {"user": user_id, "start": start, "level": level, "now": now},
+        {"user": user_id, "start": START[level], "level": level, "now": now},
     )
-    return cur.rowcount == 1
+    written = cur.rowcount == 1
+    return rating_row(cur, user_id), written
 
 
 def recent_results(cur, user_id: str) -> list[tuple[int, float]]:
@@ -129,7 +126,7 @@ def apply(cur, user_id: str, opponent: int, result: float) -> tuple[int, int, bo
     """Move the learner's Elo for one ranked duel: (before, after, smurf)."""
     row = rating_row(cur, user_id)
     if row is None:
-        raise LookupError("not placed")
+        raise LookupError("no Elo started")
     recent = recent_results(cur, user_id)
     smurf = is_smurf(row["rating"], row["games"], recent)
     after = rated(row["rating"], opponent, result, row["games"], recent)

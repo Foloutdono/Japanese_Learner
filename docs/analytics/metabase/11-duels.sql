@@ -119,7 +119,7 @@ GROUP BY 1 ORDER BY 2 DESC;
 -- title: Répartition de l'Elo
 -- display: bar
 -- size: 12x6
--- description: pvp_ratings, les apprenants qui ont joué au moins un duel classé, par tranche de 100. Le départ vient du test de placement : N5 1000, N4 1200, N3 1400, N2 1600, N1 1800.
+-- description: pvp_ratings, les apprenants qui ont joué au moins un duel classé, par tranche de 100. Le départ vient du niveau de l'apprenant à son premier sprint classé : N5 1000, N4 1200, N3 1400, N2 1600, N1 1800.
 SELECT (floor(rating / 100) * 100)::int AS "Elo", count(*) AS "Apprenants"
 FROM pvp_ratings
 WHERE games > 0 AND user_id NOT IN {{snippet: internal_users}}
@@ -129,7 +129,7 @@ GROUP BY 1 ORDER BY 1;
 -- title: Placements notés
 -- display: pie
 -- size: 6x6
--- description: pvp_placed : le verdict du test de placement, noté comme Elo de départ tant qu'aucun duel classé n'a été joué.
+-- description: pvp_placed : le niveau dont part l'Elo d'un apprenant, noté à son premier sprint classé (plan 282 : plus de test de placement avant).
 SELECT props->>'level' AS "Niveau", count(*) AS "Placements"
 FROM event_log
 WHERE name = 'pvp_placed' AND at >= now() - ({{days}} || ' days')::interval

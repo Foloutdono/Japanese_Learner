@@ -10776,7 +10776,7 @@
         "ask": {
           "cue": {
             "who": "them",
-            "jp": "この列車のことは、何でお知りになりましたか。",
+            "jp": "この列車のことは、どのようにお知りになりましたか。",
             "en": "How did you hear about this train?",
             "fr": "Comment avez-vous entendu parler de ce train ?"
           },

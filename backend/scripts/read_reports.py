@@ -74,7 +74,7 @@ def render(reported_id: str, rows: list[dict]) -> str:
     facts = [f"user `{reported_id}`"]
     if first["rating"] is not None:
         facts.append(f"Elo {first['rating']} · {first['wins']}–{first['losses']} in {first['games']} ranked"
-                     f" · placed {first['placed_level']}")
+                     f" · started at {first['placed_level']}")
     lines = []
     for row in rows:
         duel = f" · duel {row['duel_id']}" if row["duel_id"] else ""

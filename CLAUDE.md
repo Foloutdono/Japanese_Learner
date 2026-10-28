@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **281**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **284**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -291,8 +291,9 @@ runtime purpose.
   under it, and whatever closes a duel (a block, a friendship ended, an
   account erased: `duels.close_between`, `leave_all`) finishes and pays
   the runs under way. The Elo (`study/duel_elo.py`) is apart from the
-  番付: it starts from the placement climb's verdict, never the declared
-  level, and only a ranked duel moves it. A duel's fare goes through
+  番付: it starts from the learner's level at their first ranked sprint
+  (`duel_elo.start`, written then and once; no test is asked first, plan
+  282), and only a ranked duel moves it. A duel's fare goes through
   `credits.pay` with its own reason (`duel`, `duel_review`), a refund is
   a positive row of the same reason, both on the duel's own cursor
   (`cur=`), so no fare is taken for a run that failed to start and no
@@ -790,8 +791,10 @@ The French layer over JMdict (plan 215, `content/jmdict_fr.py`) is its
 own small SQLite file, `datas/vocab/jmdict_fr.sqlite3`: the French of the
 deck's dictionary senses, of the Tatoeba sentences the dictionary and
 reading/translation practice serve, and a one-line gloss for the ~20k
-commonest pool words. It sits beside `vocab_jmdict.sqlite3` rather than
-in it, so a correction never re-commits the 76 MB pool. To correct a
+commonest pool words and for every compound of the deck's nouns JMdict
+holds, which is what lets the breakdown fold it (plan 280). It sits
+beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
+re-commits the 76 MB pool. To correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 
 ```bash
@@ -1051,7 +1054,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 7,965 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,980 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
@@ -1067,6 +1070,7 @@ npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
 npm run landing:og  # its two share cards, rendered in Chromium
+npm run landing:footage  # its sixteen feature clips, filmed on a seeded learner (plan 283)
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
 ```
@@ -1113,7 +1117,9 @@ that, build it, a top five, a conversation, kanji spelling, find the
 impostor), and exports the PNGs. Since plan 231 it also draws the app
 itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
-the hour, each story's cover and its call to action also a seven-second MP4 clip;
+the hour, each story's cover and its call to action also a seven-second MP4 clip,
+and since plan 281 the duels' story played whole as one clip (a real N5
+paper's opening raced, the result, the Elo, the board: `bank/duel.json`);
 since plan 232 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice
@@ -1149,7 +1155,8 @@ is a static page outside `src/` and never ships. Its data is `frontend/carousel/
 `python -m scripts.carousel_bank` (backend, needs the tokenizer and the
 JMdict database): rerun it after a change to the reading bank, the deck,
 the kanji, the catalogue or its tours, the comprehension seeds, the
-theme decks or `frontend/carousel/content/`, and commit the files.
+theme decks, the duels' paper (`duel_paper.PAPER_REV`) or
+`frontend/carousel/content/`, and commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a
