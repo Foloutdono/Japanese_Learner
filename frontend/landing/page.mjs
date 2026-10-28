@@ -66,10 +66,13 @@ function badge(t, store) {
 
 const badges = t => `<div class="badges">${badge(t, 'appStore')}${badge(t, 'googlePlay')}</div>`
 
+// Every Embarquer says what it costs under its word (the owner's pick D
+// of the canvas "Tsuji — la landing, gratuit"), so the fare is read where
+// the visitor presses rather than in the note under it.
 function gate(t, cls = '') {
   return `<a class="gate ${cls}" href="${BOARD_ENTRY}" data-board aria-label="${esc(typo(t.lang, t.boardAria))}">`
     + '<span class="gate__reader" aria-hidden="true"><i class="gate__rip"></i><i class="gate__rip"></i><span class="wave"><i></i><i></i><i></i></span></span>'
-    + `<span class="gate__word">${esc(t.board)}</span></a>`
+    + `<span class="gate__word">${esc(t.board)}<span class="gate__sub">${esc(typo(t.lang, t.boardSub))}</span></span></a>`
 }
 
 const ring = (glyph, line, cls = '') =>
