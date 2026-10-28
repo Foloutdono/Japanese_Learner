@@ -2238,7 +2238,7 @@
         "ask": {
           "cue": {
             "who": "them",
-            "jp": "何で来ますか。",
+            "jp": "なにで来ますか。",
             "en": "How will you get here?",
             "fr": "Tu viens comment ?"
           },
@@ -2442,8 +2442,8 @@
           "も"
         ],
         "why": {
-          "en": "と closes the list: my father and me, and nobody else, which is why 二人 fits. や leaves the list open, and も cannot link two nouns.",
-          "fr": "と ferme la liste : mon père et moi, et personne d'autre, d'où 二人. や laisse la liste ouverte, et も ne peut pas relier deux noms."
+          "en": "と closes the list: my father and me, and nobody else, which is why 二人 fits. や leaves the list open, and も never sits between two nouns the way と does: to list with も, it goes on each one (父も母も).",
+          "fr": "と ferme la liste : mon père et moi, et personne d'autre, d'où 二人. や laisse la liste ouverte, et も ne se place jamais entre deux noms comme と : pour énumérer avec も, on le met après chacun (父も母も)."
         }
       },
       {
