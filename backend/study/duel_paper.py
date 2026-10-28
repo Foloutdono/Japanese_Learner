@@ -1,7 +1,7 @@
 """
 対戦 — the sprint's questions (plan 279).
 
-A duel is a sprint: two minutes of quick questions (plan 283; sixty
+A duel is a sprint: two minutes of quick questions (plan 284; sixty
 seconds under sprint-1), the same ones in
 the same order for both players, built once from a seed at the lower
 JLPT level of the two and stored with the duel. Three kinds, mixed in a

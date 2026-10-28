@@ -408,7 +408,7 @@ describe('a duel’s run', () => {
     expect(Math.abs(dock().getBoundingClientRect().height - height)).toBeLessThan(2)
   })
 
-  it('runs the sprint its duel was dealt: two minutes, or one for a duel dealt before (plan 283)', async () => {
+  it('runs the sprint its duel was dealt: two minutes, or one for a duel dealt before (plan 284)', async () => {
     // The ticket names the duel's own sprint.
     apiJson.mockReset()
     apiJson.mockImplementation(async () => cover({ sprintMs: 60_000 }))

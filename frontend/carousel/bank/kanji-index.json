@@ -1773,7 +1773,7 @@
 "臓":{"lv":"N2","on":["ゾウ"],"kun":[["はらわた",""]],"en":["entrails","viscera","bowels"],"fr":["entrailles","viscères","intestins"]},
 "臣":{"lv":"N2","on":["シン","ジン"],"kun":[],"en":["retainer","subject"],"fr":["servant","serviteur","sujet"]},
 "臨":{"lv":"N1","on":["リン"],"kun":[["のぞ","む"]],"en":["look to","face","meet"],"fr":["faire face à","rencontrer","affronter"]},
-"自":{"lv":"N4","on":["ジ","シ"],"kun":[["おの","ずから"],["みずか","ら"]],"en":["oneself"],"fr":["soi-même"]},
+"自":{"lv":"N4","on":["ジ","シ"],"kun":[["みずか","ら"],["おの","ずから"]],"en":["oneself"],"fr":["soi-même"]},
 "臭":{"lv":"N1","on":["シュウ"],"kun":[["くさ","い"],["にお","う"]],"en":["stinking","ill-smelling","suspicious looking"],"fr":["sentir mauvais","malodorant","odeur"]},
 "至":{"lv":"N1","on":["シ"],"kun":[["いた","る"]],"en":["climax","arrive","proceed"],"fr":["aboutissement","paroxysme","solstice"]},
 "致":{"lv":"N1","on":["チ"],"kun":[["いた","す"]],"en":["doth","do","send"],"fr":["faire","causer","provoquer"]},

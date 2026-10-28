@@ -299,7 +299,7 @@ function DuelStage({ id, session }) {
 
   const counting = now < run.startsAt
   // The sprint this duel was dealt: two minutes, or one for a duel dealt
-  // before they came in (plan 283). The server's clock says which.
+  // before they came in (plan 284). The server's clock says which.
   const length = run.endsAt - run.startsAt
   const elapsed = Math.max(0, Math.min(length, now - run.startsAt))
   const opp = totalAt(run.timeline, elapsed)
@@ -406,7 +406,7 @@ function Question({ q, worth, share, flash, t }) {
 function Choices({ q, flash, onPick, lang }) {
   // A word's meanings come in both languages; a reading or a spelling is
   // Japanese. Every kind is the one list, so the dock never changes shape
-  // from one question to the next (plan 283, the owner's call).
+  // from one question to the next (plan 284, the owner's call).
   const jp = q.kind !== 'word'
   const choices = Array.isArray(q.choices) ? q.choices : (q.choices[lang] ?? q.choices.en)
   return (

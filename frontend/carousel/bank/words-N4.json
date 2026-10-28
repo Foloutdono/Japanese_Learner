@@ -659,4 +659,5 @@
 {"t":"お客様","r":"おきゃくさま","ro":"okyakusama","en":["(honorific) customer, guest"],"fr":["client, invité (honorifique)"],"fu":[["お",""],["客","きゃく"],["様","さま"]],"hy":["お格様","お却様","お脚様"],"ex":["N1.103"]},
 {"t":"あら","r":"あら","ro":"ara","en":["oh!, ah!, oh no! (mostly feminine)"],"fr":["oh !, ah !, oh non ! (surtout féminin)"]},
 {"t":"間違う","r":"まちがう","ro":"machigau","en":["to make a mistake, to be incorrect, to be mistaken"],"fr":["se tromper, être incorrect, se méprendre"],"fu":[["間","ま"],["違","ちが"],["う",""]],"hy":["磨違う","摩違う","茉違う"]},
-{"t":"混む","r":"こむ","ro":"komu","en":["to be crowded"],"fr":["être bondé"],"fu":[["混","こ"],["む",""]],"hy":["古む","去む","呼む"]}]}
+{"t":"混む","r":"こむ","ro":"komu","en":["to be crowded"],"fr":["être bondé"],"fu":[["混","こ"],["む",""]],"hy":["古む","去む","呼む"]},
+{"t":"専門","r":"せんもん","ro":"senmon","en":["speciality, field (of study or work), major"],"fr":["spécialité, domaine (d'études ou de travail)"],"fu":[["専","せん"],["門","もん"]],"hy":["先門","専聞","千門"]}]}

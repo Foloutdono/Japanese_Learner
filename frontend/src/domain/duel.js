@@ -5,7 +5,7 @@
 // it waits -- the same curve, read off the same constants.
 
 /** The sprint: two minutes of questions, the same ones for both players
- *  (plan 283). A new duel's; one dealt before keeps its own, which its
+ *  (plan 284). A new duel's; one dealt before keeps its own, which its
  *  run's endsAt and its cover's sprintMs say. */
 export const SPRINT_MS = 120_000
 /** A question's time: worth 100 for its first second, 25 at six, then 0. */

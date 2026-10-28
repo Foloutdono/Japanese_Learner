@@ -64,7 +64,7 @@ from study.difficulty import LEVELS
 
 logger = logging.getLogger(__name__)
 
-# A sprint's length goes with its paper (plan 283): a duel keeps the
+# A sprint's length goes with its paper (plan 284): a duel keeps the
 # paper it was dealt and the time that came with it, so a sprint-1 duel
 # still open when the two minutes came in is run, and raced, in one.
 SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000}

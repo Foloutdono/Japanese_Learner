@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **284**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **286**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -288,7 +288,7 @@ runtime purpose.
   duel resolved, expired and its ranked fare refunded, a seat left
   unstarted given back), so anything new that reads a duel settles it
   first. A sprint is two minutes, and a duel keeps the length its paper
-  was dealt with (`duels.sprint_ms`, by `paper_rev`, plan 283), so a duel
+  was dealt with (`duels.sprint_ms`, by `paper_rev`, plan 284), so a duel
   dealt before a change runs and is raced at its own. A run started has
   its sprint: nothing expires or is declined
   under it, and whatever closes a duel (a block, a friendship ended, an
@@ -794,8 +794,10 @@ The French layer over JMdict (plan 215, `content/jmdict_fr.py`) is its
 own small SQLite file, `datas/vocab/jmdict_fr.sqlite3`: the French of the
 deck's dictionary senses, of the Tatoeba sentences the dictionary and
 reading/translation practice serve, and a one-line gloss for the ~20k
-commonest pool words. It sits beside `vocab_jmdict.sqlite3` rather than
-in it, so a correction never re-commits the 76 MB pool. To correct a
+commonest pool words and for every compound of the deck's nouns JMdict
+holds, which is what lets the breakdown fold it (plan 280). It sits
+beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
+re-commits the 76 MB pool. To correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 
 ```bash
@@ -1055,7 +1057,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 7,965 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,980 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
@@ -1071,6 +1073,7 @@ npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
 npm run landing:og  # its two share cards, rendered in Chromium
+npm run landing:footage  # its sixteen feature clips, filmed on a seeded learner (plan 283)
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
 ```

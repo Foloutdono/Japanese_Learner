@@ -49,6 +49,11 @@ ledger to update and a run can be reproduced later with `--on`. Read
 `scripts/audit_slice.py`'s docstring for the rotation; `--schedule 12`
 shows what is coming.
 
+Check that the run before yours filed its issue (`--on` its date names
+its slice). If it filed none, say so in your issue's notes: the
+maintainer adds that run to `UNFILED`, and its slice is dealt again at
+its area's next turn. A missed firing is otherwise a slice nobody audits.
+
 The dump carries the entries, the `source` file they live in, and a
 `checks` list: the questions this area is audited against. For vocab it
 also carries `risk` and `flags` — see step 3.

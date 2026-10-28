@@ -3356,6 +3356,9 @@ class DeckNounCompoundTests(unittest.TestCase):
             ("学生時代の友達", "学生時代", "がくせいじだい", ["学生", "時代"]),
             # (the ordinal 第 with its number, where the pool holds the word)
             ("第三者に聞く。", "第三者", "だいさんしゃ", ["第", "三", "者"]),
+            # (however rare the word: JMdict ranks both past 100,000)
+            ("業務委託の契約を結んだ。", "業務委託", "ぎょうむいたく", ["業務", "委託"]),
+            ("夏野菜のカレーを作った。", "夏野菜", "なつやさい", ["夏", "野菜"]),
         ):
             with self.subTest(sentence=sentence):
                 token = token_of(sentence, surface)
@@ -3392,6 +3395,9 @@ class DeckNounCompoundTests(unittest.TestCase):
         for sentence, pieces in (
             # no such word in the dictionary
             ("英語教室に通う。", ["英語", "教室"]),
+            # one whose English is not the word's, left without French on
+            # purpose: JMdict's 国民銀行 is China's 人民銀行
+            ("国民銀行に口座を開いた。", ["国民", "銀行"]),
             ("家具会社に勤める。", ["家具", "会社"]),
             ("子供部屋を片付ける。", ["子供", "部屋"]),
             ("世界大会で優勝した。", ["世界", "大会"]),
