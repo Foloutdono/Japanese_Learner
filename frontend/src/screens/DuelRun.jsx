@@ -404,11 +404,13 @@ function Question({ q, worth, share, flash, t }) {
 }
 
 function Choices({ q, flash, onPick, lang }) {
-  const two = q.kind !== 'word'
-  // A word's meanings come in both languages; a reading or a spelling is Japanese.
+  // A word's meanings come in both languages; a reading or a spelling is
+  // Japanese. Every kind is the one list, so the dock never changes shape
+  // from one question to the next (plan 283, the owner's call).
+  const jp = q.kind !== 'word'
   const choices = Array.isArray(q.choices) ? q.choices : (q.choices[lang] ?? q.choices.en)
   return (
-    <div className={two ? 'exam-tiles exam-tiles--two' : 'exam-tiles'} role="group">
+    <div className="exam-tiles" role="group">
       {choices.map((c, i) => {
         const done = flash && !flash.pending
         const state = done && i === flash.pick ? (flash.right ? ' pvp-tile--right' : ' pvp-tile--wrong') : ''
@@ -416,7 +418,7 @@ function Choices({ q, flash, onPick, lang }) {
         return (
           <button key={`${q.n}-${i}`} type="button" className={`exam-tile pvp-tile${state}${held}`} disabled={Boolean(flash)} onClick={() => onPick(i)}>
             <span className="exam-tile__b">{i + 1}</span>
-            <span className={two ? 'exam-tile__t' : 'exam-tile__t exam-tile__t--long pvp-tile__t--latin'} lang={two ? 'ja' : undefined}>{c}</span>
+            <span className={jp ? 'exam-tile__t' : 'exam-tile__t exam-tile__t--long pvp-tile__t--latin'} lang={jp ? 'ja' : undefined}>{c}</span>
           </button>
         )
       })}

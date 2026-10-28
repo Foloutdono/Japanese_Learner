@@ -389,6 +389,25 @@ describe('a duel’s run', () => {
     expect(root.querySelector('.pvp-ticket').textContent).not.toContain('crédit')
   })
 
+  it('keeps the answers in one list whatever the question asks, so the dock never changes shape', async () => {
+    serve()
+    const root = await stage()
+    await expect.poll(() => root.querySelectorAll('.pvp-tile').length).toBe(4)
+    const dock = () => root.querySelector('.exam-tiles')
+    expect(dock().classList.contains('exam-tiles--two')).toBe(false)
+    const height = dock().getBoundingClientRect().height
+    // A reading's choices, Japanese: the same list, the same height.
+    apiJson.mockImplementation(async (path) => (path.endsWith('/answer')
+      ? { n: 0, right: true, pts: 100, ms: 900, total: 100, rights: 1, nextAt: iso(300), endsAt: iso(60_000),
+        next: { n: 1, kind: 'reading', prompt: '先生', reading: null, choices: ['せんせい', 'せんせ', 'ぜんせい', 'せいせん'] } }
+      : cover()))
+    root.querySelectorAll('.pvp-tile')[0].click()
+    await expect.poll(() => root.querySelector('.pvp-tile .exam-tile__t')?.textContent, { timeout: 3000 }).toBe('せんせい')
+    expect(dock().classList.contains('exam-tiles--two')).toBe(false)
+    expect(root.querySelector('.pvp-tile .exam-tile__t').getAttribute('lang')).toBe('ja')
+    expect(Math.abs(dock().getBoundingClientRect().height - height)).toBeLessThan(2)
+  })
+
   it('runs the sprint its duel was dealt: two minutes, or one for a duel dealt before (plan 283)', async () => {
     // The ticket names the duel's own sprint.
     apiJson.mockReset()
