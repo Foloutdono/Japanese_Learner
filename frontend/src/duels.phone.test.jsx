@@ -18,9 +18,10 @@ import './index.css'
 // typed. The departure (D2): the ranked sprint is paid on the button
 // that names its price and starts at once, a first one too. The Elo board (L2):
 // both scopes counted by the server, the learner between their
-// neighbours, the cut only where places are skipped. Today's notice
-// (E3): the first challenge, a live room before it, hidden until
-// tomorrow by its ✕.
+// neighbours, the cut only where places are skipped. Today (plan 286):
+// the key beside the gate (D1), what waits counted on its shoulder, the
+// hall behind it; on a day done the board's row (E), the first challenge
+// received -- a live room before it -- or the Elo and the way to the hall.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playClick: vi.fn(), playUi: vi.fn() }))
 const calls = []
@@ -43,7 +44,8 @@ const { default: DuelsScreen } = await import('./screens/DuelsScreen')
 const { default: DuelFriendsScreen } = await import('./screens/DuelFriendsScreen')
 const { default: DuelDeparture } = await import('./screens/DuelDeparture')
 const { default: DuelBoardScreen } = await import('./screens/DuelBoardScreen')
-const { DuelLine } = await import('./components/pvp/DuelLine')
+const { DuelKey } = await import('./components/pvp/DuelKey')
+const { DuelBoard } = await import('./components/pvp/DuelRow')
 const { DuelsInsert } = await import('./components/pvp/DuelsInsert')
 
 const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
@@ -410,66 +412,124 @@ describe('the Elo board (L2)', () => {
   })
 })
 
-// ── E3 — the challenge on Today ──
+// ── 対戦 on Today (plan 286) — the key (D1) and the board's row (E) ──
 
-const mountLine = (props = {}) => mount('/today', '/today', <div className="tdy"><DuelLine {...props} /></div>)
+const mountKey = (props = {}) => mount('/today', '/today', <div className="tdy"><DuelKey {...props} /></div>)
+const mountDayBoard = (props = {}) => mount('/today', '/today', <div className="tdy"><DuelBoard className="tdy-board" ask rows={[]} {...props} /></div>)
+const RATED = { elo: 1248, games: 21, trend: [] }
 
-describe('the challenge on Today (E3)', () => {
+describe('the duels’ key beside Today’s gate (D1)', () => {
+  it('is the duels’ door by its name alone, and opens the hall', async () => {
+    duels = { data: { rating: RATED, live: [], toPlay: [] } }
+    await mountKey()
+    const key = $('.pvp-key')
+    expect(key.getAttribute('aria-label')).toBe('Duels')
+    expect(key.textContent).toBe('')
+    expect(key.dataset.guide).toBe('today.duels')
+    key.click()
+    await settle()
+    expect($('.where').textContent).toBe('/profile/duels')
+  })
+
+  it('counts what waits on its shoulder, as the holder’s door does', async () => {
+    duels = { data: { rating: RATED, live: [{ id: 47, kind: 'friend', role: 'opponent', mode: 'live', who: 'Sora22' }], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
+    await mountKey()
+    expect($('.pvp-key__due').textContent).toBe('2')
+    expect($('.pvp-key').getAttribute('aria-label')).toBe('Duels · 2 défis à jouer')
+  })
+
+  it('stands while the finish plays, its count held', async () => {
+    duels = { data: { rating: RATED, live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
+    await mountKey({ hold: true })
+    expect($('.pvp-key')).not.toBeNull()
+    expect($('.pvp-key__due')).toBeNull()
+  })
+
+  it('arrives with the gate on a finish, on the gate’s beat', async () => {
+    duels = { data: { rating: RATED, live: [], toPlay: [] } }
+    await mountKey({ hold: true, arrive: true, arriveDelay: 1200 })
+    expect($('.pvp-key').classList.contains('clrk-gate--arrive')).toBe(true)
+    expect($('.pvp-key').style.getPropertyValue('--gate-d')).toBe('1200ms')
+    document.body.innerHTML = ''
+    await mountKey()
+    expect($('.pvp-key').classList.contains('clrk-gate--arrive')).toBe(false)
+  })
+
+  it('is a square at the gate’s height beside it', async () => {
+    duels = { data: { rating: RATED, live: [], toPlay: [] } }
+    await mount('/today', '/today', (
+      <div className="tdy"><div className="tdy-gaterow"><button type="button" className="btn-depart btn-depart--gate">Embarquer</button><DuelKey /></div></div>
+    ))
+    const gate = $('.btn-depart--gate').getBoundingClientRect()
+    const key = $('.pvp-key').getBoundingClientRect()
+    expect(Math.round(key.height)).toBe(Math.round(gate.height))
+    expect(Math.round(key.width)).toBe(Math.round(key.height))
+    expect(key.left).toBeGreaterThan(gate.right)
+  })
+})
+
+describe('the duels on a day done’s board (E)', () => {
+  it('names the learner’s Elo and opens the hall', async () => {
+    duels = { data: { rating: RATED, live: [], toPlay: [] } }
+    await mountDayBoard()
+    expect($('.pvp-row .tdy-next__day').textContent).toBe('Duels')
+    expect($('.pvp-row .tdy-next__n').textContent).toBe(`${(1248).toLocaleString('fr')}Elo`)
+    expect($('.pvp-row .tdy-board__way').textContent).toBe('Défier')
+    $('.pvp-row').click()
+    await settle()
+    expect($('.where').textContent).toBe('/profile/duels')
+  })
+
   it('names the first challenge, its score to beat, and boards it', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }, { id: 46, kind: 'friend', role: 'opponent', mode: 'async', who: 'aiko', theirs: 1225 }] } }
-    await mountLine()
-    expect($('.pvp-line .tdy-door__what').textContent).toBe(`Kenta te défie · ${(1552).toLocaleString('fr')} à battre`)
-    expect($('.pvp-line .tdy-door__go').textContent).toBe('Jouer')
-    $('.pvp-line .tdy-cb__open').click()
+    duels = { data: { rating: RATED, live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }, { id: 46, kind: 'friend', role: 'opponent', mode: 'async', who: 'aiko', theirs: 1225 }] } }
+    await mountDayBoard()
+    expect($('.pvp-row .tdy-next__day').textContent).toBe('Kenta te défie')
+    expect($('.pvp-row .tdy-next__n').textContent).toBe(`${(1552).toLocaleString('fr')}à battre`)
+    expect($('.pvp-row .tdy-board__way').textContent).toBe('Jouer')
+    $('.pvp-row').click()
     await settle()
     expect($('.where').textContent).toBe('/duel/45')
   })
 
   it('puts a friend waiting in a live room first', async () => {
-    duels = { data: { live: [{ id: 47, kind: 'friend', role: 'opponent', mode: 'live', who: 'Sora22', theirs: null }], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
-    await mountLine()
-    expect($('.pvp-line .tdy-door__what').textContent).toBe('Sora22 t’attend en direct')
-    expect($('.pvp-line .tdy-door__go').textContent).toBe('Entrer')
+    duels = { data: { rating: RATED, live: [{ id: 47, kind: 'friend', role: 'opponent', mode: 'live', who: 'Sora22', theirs: null }], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
+    await mountDayBoard()
+    expect($('.pvp-row .tdy-next__day').textContent).toBe('Sora22 t’attend en direct')
+    expect($('.pvp-row .tdy-board__way').textContent).toBe('Entrer')
   })
 
   it('never names the learner’s own challenge, nor their ranked seat, as one they received', async () => {
-    duels = { data: { live: [], toPlay: [
+    duels = { data: { rating: RATED, live: [], toPlay: [
       { id: 50, kind: 'friend', role: 'challenger', mode: 'async', who: 'Kenta', theirs: null },
       { id: 51, kind: 'ranked', role: 'opponent', mode: 'async', who: null, theirs: 900 },
     ] } }
-    await mountLine()
-    expect($('.pvp-line')).toBeNull()
-    document.body.innerHTML = ''
-    duels = { data: { live: [], toPlay: [
-      { id: 50, kind: 'friend', role: 'challenger', mode: 'async', who: 'Kenta', theirs: null },
-      { id: 52, kind: 'friend', role: 'opponent', mode: 'async', who: 'aiko', theirs: 1225 },
-    ] } }
-    await mountLine()
-    expect($('.pvp-line .tdy-door__what').textContent).toBe(`aiko te défie · ${(1225).toLocaleString('fr')} à battre`)
+    await mountDayBoard()
+    expect($('.pvp-row .tdy-next__day').textContent).toBe('Duels')
   })
 
   it('names a learner off the board « Voyageur »', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: null, theirs: 900 }] } }
-    await mountLine()
-    expect($('.pvp-line .tdy-door__what').textContent).toBe('Voyageur te défie · 900 à battre')
+    duels = { data: { rating: RATED, live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: null, theirs: 900 }] } }
+    await mountDayBoard()
+    expect($('.pvp-row .tdy-next__day').textContent).toBe('Voyageur te défie')
   })
 
-  it('hides until tomorrow on its ✕', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
-    await mountLine()
-    $('.pvp-line .tdy-cb__hide').click()
-    await settle(50)
-    expect($('.pvp-line')).toBeNull()
-    expect(localStorage.getItem('jp-duel-line-hidden')).toBe(new Date().toDateString())
-  })
-
-  it('says nothing while the finish plays, nor with nothing waiting', async () => {
-    duels = { data: { live: [], toPlay: [{ id: 45, kind: 'friend', role: 'opponent', mode: 'async', who: 'Kenta', theirs: 1552 }] } }
-    await mountLine({ hold: true })
-    expect($('.pvp-line')).toBeNull()
+  it('stands after the reviews held back, before the day’s own rows', async () => {
+    duels = { data: { rating: RATED, live: [], toPlay: [] } }
+    await mountDayBoard({ rows: [<p key="held" className="row-held" />, <p key="tomorrow" className="row-tomorrow" />] })
+    expect([...$('.tdy-board').children].map(el => el.className)).toEqual(['row-held', 'tdy-next tdy-board__go pvp-row', 'row-tomorrow'])
     document.body.innerHTML = ''
-    duels = { data: { live: [], toPlay: [] } }
-    await mountLine()
-    expect($('.pvp-line')).toBeNull()
+    await mountDayBoard({ rows: [<p key="tomorrow" className="row-tomorrow" />] })
+    expect([...$('.tdy-board').children].map(el => el.className)).toEqual(['tdy-next tdy-board__go pvp-row', 'row-tomorrow'])
+  })
+
+  it('says nothing while the finish plays, nor before the duels have answered', async () => {
+    duels = { data: { rating: RATED, live: [], toPlay: [] } }
+    await mountDayBoard({ ask: false, rows: [<p key="tomorrow" className="row-tomorrow" />] })
+    expect($('.pvp-row')).toBeNull()
+    expect($('.row-tomorrow')).not.toBeNull()
+    document.body.innerHTML = ''
+    duels = { data: null }
+    await mountDayBoard()
+    expect($('.tdy-board')).toBeNull()
   })
 })

@@ -34,7 +34,8 @@ import { shareTicket } from '../../lib/shareTicket'
 import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys, ThreadKey } from './TodayDial'
 import { TodayDay } from './TodayDay'
-import { DuelLine } from '../pvp/DuelLine'
+import { DuelKey } from '../pvp/DuelKey'
+import { DuelBoard } from '../pvp/DuelRow'
 import { TodayPrint, PrintTitle } from './TodayPrint'
 import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
 
@@ -577,7 +578,6 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
       <div className="tdy__foot">
         {/* The reviews piled up (plan 254) and the level that does not
             fit (plan 224), over the run's own row. */}
-        <DuelLine hold={Boolean(fin?.playing)} />
         <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
@@ -588,7 +588,11 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
           </span>
           <span className="tdy-door__go">{t.gateAdjust}<ChevronIcon direction="right" size={16} /></span>
         </button>
-        {gate}
+        {/* The duels' key beside the gate (plan 286). */}
+        <div className="tdy-gaterow">
+          {gate}
+          <DuelKey hold={Boolean(fin?.playing)} arrive={Boolean(fin?.live)} arriveDelay={fin ? fin.ms('KEY') : 0} />
+        </div>
       </div>
 
       <Sheet open={open} onClose={() => setOpen(false)} title={t.todayTitle} icon={CalendarIcon} label={t.gateServicesTitle} className="tdy-sheet">
@@ -661,19 +665,21 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
       </section>
       <div className="tdy-desk__hero" ref={hero}>
         <div className="tdy-desk__go">
-          <GateButton
-            label={fin ? t.finContinue : t.depart}
-            onClick={depart}
-            aria-label={t.todayDue(run.taken)}
-            keys
-            disabled={closed}
-            arrive={Boolean(fin?.live)}
-            arriveDelay={fin ? fin.ms('KEY') : 0}
-          />
+          <div className="tdy-gaterow">
+            <GateButton
+              label={fin ? t.finContinue : t.depart}
+              onClick={depart}
+              aria-label={t.todayDue(run.taken)}
+              keys
+              disabled={closed}
+              arrive={Boolean(fin?.live)}
+              arriveDelay={fin ? fin.ms('KEY') : 0}
+            />
+            <DuelKey hold={Boolean(fin?.playing)} arrive={Boolean(fin?.live)} arriveDelay={fin ? fin.ms('KEY') : 0} />
+          </div>
         </div>
       </div>
       <aside className="tdy-desk__col">
-        <DuelLine hold={Boolean(fin?.playing)} />
         <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
@@ -971,9 +977,14 @@ function ClearedGate({ today, desk, finish = null }) {
   const gateCome = came('GATE')
   const foot = (
     <>
-      <DuelLine hold={Boolean(fin?.playing)} />
-      {rows.length > 0 && (boardCome || hold) && (
-        <div className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}>{rows}</div>
+      {/* The duels as the board's row once the day is done (plan 286):
+          the gate is shut, and the key with it. */}
+      {(boardCome || hold) && (
+        <DuelBoard
+          rows={rows}
+          ask={!fin?.playing}
+          className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}
+        />
       )}
       {(gateCome || hold) && (
         <GateButton

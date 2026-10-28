@@ -173,6 +173,12 @@ def _init_db() -> None:
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
+                # 新しい (plan 286): when the learner was told the duels'
+                # key stands beside Today's gate -- the sheet that says
+                # so put away, or Today's guide ended with the key's stop
+                # in it. NULL is not told yet; routes/onboarding.py
+                # writes it, duels_news_open below reads it.
+                ("duels_news_at", "TIMESTAMPTZ"),
                 # 主 — the mode each line is ridden in, {line: mode},
                 # and the modes added to Today beside it, {line: [mode]}
                 # (plan 273, study/main_modes.py). NULL is never chosen:
@@ -453,6 +459,24 @@ def _profile_row(user_id: str) -> tuple:
     finally:
         conn.close()
     return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False, None)
+
+
+def duels_news_open(user_id: str, guided) -> bool:
+    """Whether Today tells this learner, once, that the duels' key now
+    stands beside its gate (plan 286): GET /api/profile's `duelsNews`.
+    Only a learner who met Today before it did -- whose Today guide
+    ended, without the key's stop, since that guide's end now stamps the
+    news too (routes/onboarding.mark_guided) -- and only until told."""
+    if "today" not in (guided or {}):
+        return False
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT duels_news_at FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    return row is not None and row[0] is None
 
 
 def _ui_lang(user_id: str) -> str | None:
@@ -891,6 +915,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # Early access (plan 269): whether Today asks, once, how the
         # learner finds the app (routes/feedback.offer_open).
         "feedbackOffer": feedback_routes.offer_open(user_id, xp),
+        # 新しい (plan 286): whether Today tells the learner, once, that
+        # the duels' key stands beside its gate (duels_news_open).
+        "duelsNews": duels_news_open(user_id, guided),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.

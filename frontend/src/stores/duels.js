@@ -4,7 +4,7 @@ import { createRemoteStore } from './remote'
 // GET /api/pvp: the learner's Elo and record, the duels waiting on
 // them, the ones running and the last ones played, the friends and the
 // requests waiting. Read by the door into the duels wherever it stands
-// (the holder, a Practice plate, Today's notice) and by the duels' own
+// (the holder, Today's key and its board's row, plan 286) and by the duels' own
 // hall, so the badge and the hall never disagree. A short TTL: a friend's
 // challenge arriving is the thing it says.
 const store = createRemoteStore('/api/pvp', { ttlMs: 30_000 })

@@ -121,7 +121,9 @@ describe('the guide on the desk', () => {
 // balance, the run's length and fare, the strip, the journey and the
 // week ahead are left to be found.
 describe('Today\'s guide', () => {
-  it('stops at the gate and the gates only', () => {
-    expect(GUIDES.today.map(s => s.anchor)).toEqual(['today.gate', 'tabbar'])
+  // ... and the duels' key beside the gate, by the owner's word again
+  // (plan 286): the guide is how a learner new to Today meets it.
+  it('stops at the gate, the duels\' key and the gates only', () => {
+    expect(GUIDES.today.map(s => s.anchor)).toEqual(['today.gate', 'today.duels', 'tabbar'])
   })
 })

@@ -366,9 +366,14 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # reviews piled up (plan 254) -- its paces opened, or the notice
         # hidden for the day. readings: the sheet a kanji card's
         # reading names open, on'yomi and kun'yomi said (plan 276).
+        # duels_key: the duels' key beside Today's gate opened, and
+        # duels_board their row on a day done's board (plan 286);
+        # duels_news: the sheet announcing them, the hall opened from it
+        # or the sheet put away.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
                               "dictionary", "export", "level_fit", "conversation",
-                              "comeback", "readings"}),
+                              "comeback", "readings", "duels_key", "duels_board",
+                              "duels_news"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
                               "open", "search", "progress", "move", "stay", "hide"}),
     },

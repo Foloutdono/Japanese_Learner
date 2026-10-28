@@ -136,13 +136,19 @@ describe('the gate on a wide desk', () => {
     const dial = $('.tdy-desk .tdy-dial__gate').getBoundingClientRect()
     const go = $('.tdy-desk__go .btn-depart').getBoundingClientRect()
     // The dial at the size the print draws it, over the gate, both on
-    // the panel's axis.
+    // the panel's axis: the gate with the duels' key beside it (plan
+    // 286), the pair at the gate's 440px.
+    const pair = $('.tdy-desk__go .tdy-gaterow').getBoundingClientRect()
+    const key = $('.tdy-desk__go .pvp-key').getBoundingClientRect()
     expect(Math.abs(dial.width - 2 * (PRINT.frames.desk.fare + 4))).toBeLessThan(3)
     expect(go.top).toBeGreaterThan(dial.bottom)
     expect(go.bottom).toBeLessThanOrEqual(hero.bottom)
     const axis = hero.left + hero.width / 2
     expect(Math.abs(dial.left + dial.width / 2 - axis)).toBeLessThan(2)
-    expect(Math.abs(go.left + go.width / 2 - axis)).toBeLessThan(2)
+    expect(Math.abs(pair.left + pair.width / 2 - axis)).toBeLessThan(2)
+    expect(Math.round(pair.width)).toBe(440)
+    expect(key.left).toBeGreaterThan(go.right)
+    expect(Math.round(key.top)).toBe(Math.round(go.top))
     // The column beside it, its own height.
     const col = $('.tdy-desk__col').getBoundingClientRect()
     expect(col.left).toBeGreaterThan(hero.right)

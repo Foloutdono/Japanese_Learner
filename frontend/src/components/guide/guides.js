@@ -16,7 +16,8 @@
 // the exception, by the owner's later word (2026-09-28): it is the
 // first gate a learner sees, straight off the first ride, so it says
 // the two things they need to start -- the gate and the way to the
-// others -- and nothing more. The level, the status, the balance, the
+// others -- and nothing more; and since plan 286, by the owner's word
+// again, the duels' key beside the gate. The level, the status, the balance, the
 // run's length and fare, the strip, the journey and the week ahead are
 // found by using them, and the profile's guide names the level and the
 // balance on the pass. The keys are config/tabs.js's TAB_IDS in its
@@ -38,8 +39,11 @@ export const GUIDES = Object.freeze({
     { anchor: 'practice.exam',  key: 'PracticeExam',  radius: 'plate' },
     { anchor: 'practice.pass',  key: 'PracticePass',  radius: 'pill' },
   ],
+  // The duels' key beside the gate (plan 286), by the owner's word: on
+  // a day done, the board's duel row carries the anchor instead.
   today: [
     { anchor: 'today.gate',   key: 'TodayGate',   radius: 'card' },
+    { anchor: 'today.duels',  key: 'TodayDuels',  radius: 'pill' },
     { anchor: 'tabbar',       key: 'TabBar',      radius: 'flat', place: 'above' },
   ],
   dictionary: [
@@ -73,7 +77,7 @@ export const GUIDES = Object.freeze({
 // page first, then the way out -- Statistics, the rail's other station,
 // just before it.
 export const DESK_ORDER = Object.freeze({
-  today: ['tabbar', 'today.gate'],
+  today: ['tabbar', 'today.gate', 'today.duels'],
   profile: ['profile.pass', 'profile.stamps', 'profile.records', 'profile.ledger', 'profile.board', 'profile.stats', 'profile.settings'],
 })
 

@@ -235,6 +235,58 @@ def test_guided_refuses_a_gate_it_does_not_know(client):
         assert client.get("/api/profile").json()["guided"] == {}
 
 
+# ── 新しい — the duels' key, told once (plan 286) ──
+
+def _guided_before(user_id: str) -> None:
+    """A learner whose Today guide ended before the duels' key was in it:
+    the stamp an older guide wrote, without the news's."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE user_profiles SET guided = guided || %s::jsonb, duels_news_at = NULL WHERE user_id = %s",
+                ('{"today": "2026-10-01T09:00:00+00:00"}', user_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_the_duels_news_is_told_once_to_a_learner_who_met_today_before(client):
+    with _clean(RIDE_USER):
+        # A learner who never met Today meets the key in its guide.
+        assert client.get("/api/profile").json()["duelsNews"] is False
+        _guided_before(RIDE_USER)
+        assert client.get("/api/profile").json()["duelsNews"] is True
+        first = client.post("/api/onboarding/news/duels")
+        assert first.status_code == 200
+        assert client.get("/api/profile").json()["duelsNews"] is False
+        # The first time wins, as every stamp here.
+        assert client.post("/api/onboarding/news/duels").json()["at"] == first.json()["at"]
+
+
+def test_todays_guide_tells_the_duels_news(client):
+    # The guide's stop shows the key, so its end is the news told: a
+    # learner new to Today is never shown the sheet after it.
+    with _clean(RIDE_USER):
+        client.post("/api/onboarding/guided/today")
+        assert client.get("/api/profile").json()["duelsNews"] is False
+        # Another gate's guide tells nothing.
+        _guided_before(RIDE_USER)
+        client.post("/api/onboarding/guided/learn")
+        assert client.get("/api/profile").json()["duelsNews"] is True
+        # A guide replayed from Settings tells it again, and keeps it told.
+        client.delete("/api/onboarding/guided")
+        client.post("/api/onboarding/guided/today")
+        assert client.get("/api/profile").json()["duelsNews"] is False
+
+
+def test_the_news_refuses_an_item_it_does_not_know(client):
+    with _clean(RIDE_USER):
+        assert client.post("/api/onboarding/news/duels_news_at").status_code == 422
+        assert client.post("/api/onboarding/news/%3Cscript%3E").status_code == 422
+
+
 def test_the_gates_are_the_tab_bar():
     # config/tabs.js's TAB_IDS, in its order; a sixth gate is a change
     # on both sides.
