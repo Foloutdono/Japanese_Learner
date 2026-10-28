@@ -39,19 +39,87 @@ class RotationTests(unittest.TestCase):
             self.assertTrue(audit.CHECKS[area])
 
     def test_the_areas_advance_in_parallel(self) -> None:
-        """Four runs cover the four areas, always. Grammar's backlog is
+        """Six runs cover the six areas, always. Grammar's backlog is
         a year long and vocab's is longer; walking them in sequence would
         mean the sentence banks were never looked at."""
-        for start in (0, 1, 17, 200):
+        for start in (audit.RESTART, audit.RESTART + 1, 17, 200):
             areas = {audit.slice_for(start + n)["area"] for n in range(len(audit.AREAS))}
             self.assertEqual(areas, set(audit.AREAS))
 
     def test_a_full_pass_of_an_area_reaches_every_one_of_its_slices(self) -> None:
+        audited = audit._audited_before_restart()
         for offset, area in enumerate(audit.AREAS):
             pool = audit.slices(area)
-            seen = {audit.slice_for(offset + n * len(audit.AREAS))["id"] for n in range(len(pool))}
+            turns = len(pool) + sum(1 for s in pool if s["id"] in audited)
+            seen = {audit.slice_for(audit.RESTART + offset + n * len(audit.AREAS))["id"]
+                    for n in range(turns)}
             with self.subTest(area=area):
                 self.assertEqual(seen, {s["id"] for s in pool})
+
+    def test_the_runs_before_the_restart_name_what_they_were_dealt(self) -> None:
+        """--on reproduces a past run: each of these is the slice its issue
+        audited, or, for a run that filed none, the one it was dealt."""
+        dealt = {
+            "2026-09-18": "grammar-N5-1",                 # #124
+            "2026-09-22": "vocab-1",                      # #154
+            "2026-09-25": "reading-N5-1",                 # #184
+            "2026-09-29": "placement-placed-above-1",     # #256
+            "2026-10-02": "grammar-N5-2",                 # no issue
+            "2026-10-06": "grammar-N5-2",                 # #309
+            "2026-10-09": "vocab-2",                      # no issue
+            "2026-10-13": "dictation-N5",                 # #334
+            "2026-10-16": "placement-listed-not-here-1",  # #360
+            "2026-10-20": "placement-listed-not-here-1",  # #439, which audited tours-N5-1
+            "2026-10-23": "tours-N5-2",                   # no issue
+            "2026-10-27": "conversation-N5-2",            # #485
+        }
+        for day, slice_id in dealt.items():
+            with self.subTest(day=day):
+                self.assertEqual(audit.slice_for(audit.run_index(dt.date.fromisoformat(day)))["id"],
+                                 slice_id)
+
+    def test_what_the_runs_before_the_restart_missed_comes_first(self) -> None:
+        """#439: a slice dealt twice, three never. From RESTART each area
+        deals what it was not audited on before it deals anything again."""
+        audited = audit._audited_before_restart()
+        for offset, area in enumerate(audit.AREAS):
+            pool = audit.slices(area)
+            missed = [s["id"] for s in pool if s["id"] not in audited]
+            dealt = [audit.slice_for(audit.RESTART + offset + n * len(audit.AREAS))["id"]
+                     for n in range(len(missed))]
+            with self.subTest(area=area):
+                self.assertEqual(dealt, missed)
+        for slice_id in ("vocab-2", "tours-N5-2", "conversation-N5-1"):
+            self.assertNotIn(slice_id, audited)
+
+    def test_a_new_area_moves_no_run_before_it_joins(self) -> None:
+        # A second grammar stands in for the area: only its date matters.
+        start = audit.RESTART + 20
+        before = [audit.slice_for(n)["id"] for n in range(start + 6)]
+        joins, areas = audit.JOINS, audit.AREAS
+        try:
+            audit.JOINS = joins + (("grammar", audit.run_date(start)),)
+            audit.AREAS = tuple(area for area, _ in audit.JOINS)
+            audit._area_of.cache_clear()
+            after = [audit.slice_for(n)["id"] for n in range(start + 6)]
+        finally:
+            audit.JOINS, audit.AREAS = joins, areas
+            audit._area_of.cache_clear()
+        self.assertEqual(after[:start], before[:start])
+        self.assertNotEqual(after[start:], before[start:])
+
+    def test_an_unfiled_run_is_dealt_again_at_its_areas_next_turn(self) -> None:
+        missed = audit.RESTART + 8
+        turn = len(audit.AREAS)
+        unfiled = audit.UNFILED
+        try:
+            audit.UNFILED = unfiled | {missed}
+            again = audit.slice_for(missed + turn)["id"]
+            earlier = [audit.slice_for(n)["id"] for n in range(missed + 1)]
+        finally:
+            audit.UNFILED = unfiled
+        self.assertEqual(again, audit.slice_for(missed)["id"])
+        self.assertEqual(earlier, [audit.slice_for(n)["id"] for n in range(missed + 1)])
 
 
 class CalendarTests(unittest.TestCase):
