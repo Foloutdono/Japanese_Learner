@@ -52,3 +52,7 @@ datas/kana_source/
 # scripts/build_jmdict_fr.py): the database is the shipped asset and
 # --export writes these back out for an edit.
 datas/vocab/fr_source/
+# The learner the landing page's footage is filmed on (plan 283,
+# scripts/footage_learner.py): a dump of a local database, remade by
+# --seed, and nothing anyone else needs.
+datas/footage/
