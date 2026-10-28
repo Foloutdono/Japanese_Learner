@@ -7,8 +7,8 @@ import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
-import { APP_INKS } from '../carousel/app.js'
-import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { APP_INKS, DUEL_INKS } from '../carousel/app.js'
+import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
@@ -17,6 +17,7 @@ import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
+import { points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
@@ -843,9 +844,146 @@ describe('explaining a point in its own sentence', () => {
         for (const s of clip.sounds) {
           expect(keys.has(s.key), `${story} ${which}: ${s.key}`).toBe(true)
           expect(s.at, `${story} ${which}: ${s.key}`).toBeGreaterThanOrEqual(0)
-          expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(CLIP.seconds)
+          expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(clip.seconds)
         }
       }
+    }
+  })
+
+  // ── 対戦, the duels' story (plan 280) ──────────────────────────────
+  const duelBank = bank('duel.json')
+  const constant = (file, name) => read(`../backend/${file}`).match(new RegExp(`^${name} = (.+)$`, 'm'))?.[1]
+  const int = v => Number(String(v).replace(/_/g, ''))
+
+  it('plays the opening of a paper the duels still deal, on the backend’s own figures (plan 280)', () => {
+    // A paper made under another revision is a paper no duel deals any
+    // more: run python -m scripts.carousel_bank again.
+    expect(duelBank.paper).toBe(JSON.parse(constant('study/duel_paper.py', 'PAPER_REV')))
+    expect(duelBank.level).toBe('N5')
+    expect(duelBank.elo.start).toEqual(JSON.parse(constant('study/duel_elo.py', 'START')))
+    expect(duelBank.elo.k).toBe(int(constant('study/duel_elo.py', 'K_SETTLED')))
+    expect(duelBank.xp.cap).toBe(int(constant('study/duels.py', 'XP_CAP')))
+    expect(duelBank.hold).toEqual({ right: int(constant('study/duels.py', 'RIGHT_HOLD_MS')), wrong: int(constant('study/duels.py', 'LOCK_MS')) })
+    const xp = read('../backend/srs/xp.py')
+    const paid = q => Number(xp.match(new RegExp(`^\\s+${q}: (\\d+),`, 'm'))[1])
+    expect(duelBank.xp).toMatchObject({ right: paid(4), wrong: paid(1) })
+    for (const q of duelBank.items) {
+      expect(['word', 'reading', 'writing'], `${q.n}`).toContain(q.kind)
+      const choices = Array.isArray(q.choices) ? [q.choices] : [q.choices.en, q.choices.fr]
+      for (const c of choices) {
+        expect(c.length, `${q.n}`).toBe(4)
+        expect(new Set(c).size, `${q.n}`).toBe(4)
+        expect(c[q.answer], `${q.n}`).toBeTruthy()
+      }
+    }
+  })
+
+  it('scores the story’s run as the duels score one (plan 280)', () => {
+    for (const lang of ['en', 'fr']) {
+      const run = duelRun(duelBank, lang)
+      // Each answer pays what its speed is worth, a wrong one nothing,
+      // and the next question waits the server's hold.
+      let served = 0
+      run.answers.forEach((a, i) => {
+        const q = run.items[i]
+        expect(a.served, `${lang} ${i}`).toBe(served)
+        expect(a.pts, `${lang} ${i}`).toBe(a.right ? points(a.at - a.served) : 0)
+        expect(a.pick === q.answer, `${lang} ${i}`).toBe(a.right)
+        expect(q.choices[a.pick], `${lang} ${i}`).toBeTruthy()
+        served = a.at + (a.right ? duelBank.hold.right : duelBank.hold.wrong)
+      })
+      expect(run.next).toBe(served)
+      // The other's recorded run keeps the same rules: served after each
+      // hold, paid what its speed is worth.
+      let theirs = 0
+      for (const x of run.their) {
+        expect(x.pts, `${lang} their ${x.at}`).toBe(points(x.at - theirs))
+        theirs = x.at + duelBank.hold.right
+      }
+      // The lead changes hands on the way (the race's line has a gap to show).
+      const lead = m => run.answers.filter(a => a.at <= m).reduce((t, a) => t + a.pts, 0) - run.their.filter(x => x.at <= m).reduce((t, x) => t + x.pts, 0)
+      const leads = [...run.answers.map(a => a.at), ...run.their.map(x => x.at)].sort((a, b) => a - b).map(lead)
+      expect(leads.some(v => v > 0) && leads.some(v => v < 0)).toBe(true)
+      // The result: the XP the answers pay, the Elo by the classic
+      // expectation at the settled K, the board climbed a place.
+      const { final, you, them } = DUEL_RUN
+      expect(final.mine).toBeGreaterThan(final.theirs)
+      expect(run.xp.paid).toBe(final.rights * duelBank.xp.right + (final.answered - final.rights) * duelBank.xp.wrong)
+      expect(run.xp.paid).toBeLessThanOrEqual(duelBank.xp.cap)
+      expect(run.elo.delta).toBe(Math.round(duelBank.elo.k * (1 - 1 / (1 + 10 ** ((them.elo - you.elo) / 400)))))
+      expect(run.elo.trend.at(-1)).toBe(run.elo.after)
+      expect(run.elo.trend.length).toBe(20)
+      expect(run.elo.start).toBe(duelBank.elo.start[you.level])
+      const place = list => list.find(r => r.me).rank
+      expect(place(run.board.after)).toBe(place(run.board.before) - 1)
+    }
+  })
+
+  it('says the app’s own words on the duel’s parts, in both languages (plan 280)', () => {
+    for (const [lang, t] of [['en', EN], ['fr', FR]]) {
+      const D = PROMO[lang].duel
+      expect(D.you, lang).toBe(t.pvpYou)
+      expect(D.go, lang).toBe(t.pvpGo)
+      expect(D.kinds, lang).toEqual(t.pvpKind)
+      expect(D.duelLevel, lang).toBe(t.pvpDuelLevel)
+      expect(D.lowest, lang).toBe(t.pvpLowest)
+      expect(D.questions, lang).toBe(t.pvpQuestions)
+      expect(D.wordsKanji, lang).toBe(t.pvpWordsKanji)
+      expect(D.sprint60, lang).toBe(t.pvpSprint60)
+      expect(D.win, lang).toBe(t.pvpWin)
+      expect(D.elo, lang).toBe(t.pvpElo)
+      for (const n of [1, 135]) expect(D.by(n), lang).toBe(t.pvpBy(n))
+      expect(D.rightsOf(14, 15), lang).toBe(t.pvpRightsOf(14, 15))
+      expect(D.xpLeft(51), lang).toBe(t.pvpXpLeft(51))
+      expect(D.startAt('1 000'), lang).toBe(t.pvpStartAt('1 000'))
+      expect(D.peak('1 224'), lang).toBe(t.pvpPeak('1 224'))
+      for (const r of [1, 3]) expect(D.gapTo(27, r), lang).toBe(t.pvpGapTo(27, r))
+    }
+  })
+
+  it('draws the duels’ parts in the inks index.css gives each theme (plan 280)', () => {
+    const css = read('src/index.css')
+    const escape = v => v.replace(/[()[\].]/g, '\\$&')
+    for (const [theme, inks] of Object.entries(DUEL_INKS)) {
+      for (const [name, value] of Object.entries(inks)) expect(css, `${theme} ${name}`).toMatch(new RegExp(`${name}:\\s*${escape(value)};`))
+    }
+  })
+
+  it('plays the duels’ story whole, beat after beat, ending at the gate (plan 280)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      for (const lang of ['en', 'fr']) {
+        const pl = promoPlan('duel', duelBank, 'duel', { ...OPTS, lang, story: 'duel' })
+        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+        expect(frames.map(f => f.key)).toEqual(DUEL_BEATS.map(([key]) => key))
+        const { story } = frames.clips
+        const race = 1.3 + pl.promo.next / 1000 + 1.0
+        expect(story.seconds).toBeCloseTo(DUEL_BEATS.reduce((t, [, len]) => t + (len ?? race), 0), 5)
+        expect(story.fps).toBe(CLIP.fps)
+        expect(story.print).toBe(false)
+        for (let t = 0; t < story.seconds; t += 0.37) expect(() => story.draw(stubContext().ctx, t), `${lang} at ${t}s`).not.toThrow()
+        // Every beat's words are said in the story, and it ends on the
+        // call to action's.
+        // A beat's headline lands word by word, its other lines whole.
+        const said = new Set()
+        for (let t = 0; t < story.seconds; t += 0.1) {
+          const { ctx, texts } = stubContext()
+          story.draw(ctx, t)
+          texts.forEach(x => x.split(' ').forEach(w => said.add(w)))
+        }
+        const D = PROMO[lang].duel
+        for (const line of [...D.hook(60), D.versus, D.same, D.fast(100), D.ahead, D.winElo, D.eloIs, D.climb]) {
+          for (const word of weldIf(lang, line).split(' ')) expect(said, `${lang}: ${word}`).toContain(word)
+        }
+        const last = stubContext()
+        frames.at(-1).draw(last.ctx)
+        const end = stubContext()
+        story.draw(end.ctx, story.seconds - 0.01)
+        for (const w of last.texts.filter(x => /[A-Za-z]{4}/.test(x))) expect(end.texts, `${lang} end: ${w}`).toContain(w)
+      }
+    } finally {
+      globalThis.Path2D = had
     }
   })
 })
