@@ -1319,7 +1319,10 @@ CREATE TABLE pvp_duels (
     live_start  TIMESTAMPTZ,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at  TIMESTAMPTZ NOT NULL,
-    resolved_at TIMESTAMPTZ
+    resolved_at TIMESTAMPTZ,
+    -- the mix its paper was built at (plan 286): tenths of a level above
+    -- N5, where the Elo stood; null for a paper built at a level before it
+    mix         SMALLINT
 );
 ALTER TABLE pvp_duels ENABLE ROW LEVEL SECURITY;
 CREATE INDEX pvp_duels_seek ON pvp_duels (status, kind, level);

@@ -1440,6 +1440,12 @@ one inside two and a half seconds.
 While the other learner has yet to run, or when the duel closed under the
 run, the learner's side stands alone and the other's reads « ? ».
 
+The ticket says what the paper asks (plan 286, the owner's B): the two
+levels the Elo stands between and their share, N5 10 % · N4 90 %, beside
+a bar in the ticket's own ink, the level below pale and the one above
+full. The ticket is the station's, so the bar is ink, never a level's
+colour; a whole level is its name alone.
+
 **The duel is the one other place the app plays music** (the first is
 the level, below in *Rewards*). The music is R3's club music made light.
 It has four layers that the combo turns on, and it is scored to the

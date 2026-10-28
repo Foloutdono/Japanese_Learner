@@ -103,7 +103,6 @@ export const PROMO = {
       go: 'Depart',
       kinds: { word: 'Word', reading: 'Reading', writing: 'Writing' },
       duelLevel: 'Duel level',
-      lowest: 'the lower of the two',
       questions: 'Questions',
       wordsKanji: 'words and kanji',
       sprint: 'Sprint · 2 minutes',
@@ -192,7 +191,6 @@ export const PROMO = {
       go: 'Partir',
       kinds: { word: 'Mot', reading: 'Lecture', writing: 'Écriture' },
       duelLevel: 'Niveau du duel',
-      lowest: 'le plus bas des deux',
       questions: 'Questions',
       wordsKanji: 'mots et kanji',
       sprint: 'Sprint · 2 minutes',
@@ -979,7 +977,7 @@ export function promoDeck(plan, fmt, opts) {
       const ticketOf = pulse => ({
         no: pr.no, pulse,
         you: { name: D.you, level: pr.you.level }, them: { name: pr.them.name, level: pr.them.level },
-        facts: [[D.duelLevel, `${pr.level} · ${D.lowest}`], [D.questions, D.wordsKanji]],
+        facts: [[D.duelLevel, pr.level], [D.questions, D.wordsKanji]],
         foot: ['辻駅 発行', D.sprint],
       })
 

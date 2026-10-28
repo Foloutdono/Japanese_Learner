@@ -422,6 +422,30 @@ describe('a duel’s run', () => {
     expect(root.querySelector('.pvp-ticket').textContent).not.toContain('crédit')
   })
 
+  it('prints the levels the paper asks, in the share the Elo stands at (plan 286)', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => cover({ kind: 'ranked', against: 'open', level: 'N4',
+      mix: [{ level: 'N5', share: 0.1 }, { level: 'N4', share: 0.9 }] }))
+    const root = await ticket()
+    await expect.poll(() => root.querySelector('.pvp-mix')?.textContent).toBe('N5 10\u00a0% · N4 90\u00a0%')
+    const parts = [...root.querySelectorAll('.pvp-mix__part')].map(p => p.getBoundingClientRect().width)
+    expect(parts).toHaveLength(2)
+    expect(parts[1]).toBeCloseTo(parts[0] * 9, 0)
+    expect(root.querySelector('.pvp-ticket').textContent).not.toContain('plus bas')
+  })
+
+  it('prints a whole level alone, and a paper dealt before the mix at its level', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => cover({ level: 'N3', mix: [{ level: 'N3', share: 1 }] }))
+    let root = await ticket()
+    await expect.poll(() => root.querySelector('.pvp-mix')?.textContent).toBe('N3')
+    expect(root.querySelector('.pvp-mix__bar')).toBeNull()
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => cover({ level: 'N4', mix: null }))
+    root = await ticket('/duel/8')
+    await expect.poll(() => root.querySelector('.pvp-ticket__dd')?.textContent).toBe('N4')
+  })
+
   it('keeps the answers in one list whatever the question asks, so the dock never changes shape', async () => {
     serve()
     const root = await stage()

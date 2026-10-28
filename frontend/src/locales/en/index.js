@@ -3568,7 +3568,6 @@ const pvp = {
   pvpInvite:       who => `Invite ${who}`,
   pvpSprintOf:     ms => (ms >= 120_000 && ms % 60_000 === 0 ? `Sprint · ${ms / 60_000} minutes` : `Sprint · ${ms / 1000} seconds`),
   pvpDuelLevel:    'Duel level',
-  pvpLowest:       'the lower of the two',
   pvpQuestions:    'Questions',
   pvpWordsKanji:   'words and kanji',
   pvpPrice:        'Price',
