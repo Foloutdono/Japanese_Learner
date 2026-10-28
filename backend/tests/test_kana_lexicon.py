@@ -85,6 +85,10 @@ class KanaLexiconTests(unittest.TestCase):
         for level, entries in VOCAB_BY_LEVEL.items():
             for entry in entries:
                 level_of.setdefault(entry.get("kanji") or "", level)
+        # (and the few words of a picture book's page the deck has no
+        # card for, entered as a first-year word, plan 272)
+        for kanji, _ in kana_lexicon._PAGE_WORDS:
+            level_of.setdefault(kanji, "N4")
         rows = kana_lexicon.rows(morphology._plain_tagger)
         self.assertGreater(len(rows), 500)
         for row in rows:
