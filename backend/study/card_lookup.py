@@ -3909,7 +3909,7 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
 
     UniDic cuts 桃源郷 into 桃源 + 郷, and each half alone is another
     word (郷 read ごう is "countryside"). A run of the deck's own nouns
-    folds too (plan 276, the owner's choice): 電話 + 番号 is 電話番号, one
+    folds too (plan 280, the owner's choice): 電話 + 番号 is 電話番号, one
     word, as a dictionary prints it, its two cards kept as its parts
     (analysis._tokens), so a sentence still counts them -- but only where
     the French layer has the word, so a French learner never trades two
@@ -3941,7 +3941,7 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         unsaid = "".join(m.surface for m in run) in _WHOLE_OVER_CARDS or _a_place_of(run)
         # (...and the ordinal 第 with its number, where the pool holds the
         # word and a noun follows the number: 第三者 "third party" -- 第三章
-        # is a count, never 第三 + 章, plan 276)
+        # is a count, never 第三 + 章, plan 280)
         ordinal = run[0].surface == "第" and run[0].pos == "prefix" and not _numeral(run[-1].surface)
         if not saying and not unsaid and any(m.pos not in _COMPOUND_POS or m.auxiliary_use
                                              or (_numeral(m.surface) and not ordinal) for m in run):
@@ -3967,7 +3967,7 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
             # 五 + 年 + 後 is five years on, no 年後; nor what 何 asks the
             # number of, 何分 how many minutes or 何分の一 what share;
             # nor a person said of several or politely, 人たち, 弟さん, which
-            # any noun of a person takes, plan 276)
+            # any noun of a person takes, plan 280)
             # (A run of the deck's nouns with a point written on one of
             # them is the point's: 不幸中, 〜中. A suffix with no card of
             # its own counts as one with none (plan 151): 参加 + 者 read
@@ -3988,7 +3988,7 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
                 "".join(m.surface if m.pos == "prefix" and m.surface in ("お", "ご") else m.lemma for m in run)]
         if honoured or over_cards:
             # (a run of cards folds as the page spells it, never through a
-            # lemma's kanji it did not write: 三社とも is no 社共, plan 276)
+            # lemma's kanji it did not write: 三社とも is no 社共, plan 280)
             keys = keys[:1]
         if polite:
             keys.append("お" + run[1].surface)          # 御中元, filed as お中元
@@ -4041,14 +4041,14 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
                 # cards, said politely -- in every spelling of the run.
                 break
             if hit is not None and over_cards and not jmdict_fr.pool_line(hit.get("kanji", ""), hit.get("kana", "")):
-                continue                   # (no French for it: its cards, which have theirs, plan 276)
+                continue                   # (no French for it: its cards, which have theirs, plan 280)
             if hit is not None and over_cards and any(
                     (inner := resolve_pool_compound(morphemes, j, deck_hits, max_len)) and j + inner[1] > i + n
                     and inner[0].get("freq_rank", _NO_RANK) < hit.get("freq_rank", _NO_RANK)
                     for j in range(i + 1, i + n)):
                 # (...nor one that cuts a commoner word its last noun makes
                 # with what follows: 最終 + 報告書, no 最終報告 + 書 -- where
-                # 原材料 + 費 and 民主党 + 員 keep the commoner word, plan 276)
+                # 原材料 + 費 and 民主党 + 員 keep the commoner word, plan 280)
                 continue
             if hit is not None:
                 return hit, n
@@ -5132,7 +5132,7 @@ _SAYING_POS = frozenset({"noun", "pronoun", "prefix", "suffix", "verb", "adjecti
 _PARENS = re.compile(r"\s*\([^)]*\)")
 # A pool row with no rank sorts after every ranked one.
 _NO_RANK = 10 ** 9
-# What follows a noun of a person and makes no new word of it (plan 276).
+# What follows a noun of a person and makes no new word of it (plan 280).
 _OF_PERSONS = frozenset({"たち", "達", "ら", "等", "ども", "共", "さん", "様", "さま", "ちゃん", "くん", "君", "殿", "方"})
 # JMdict's tags for a saying: an idiom, a proverb (事実は小説より奇なり).
 _SAYING_TAGS = frozenset({"id", "proverb"})

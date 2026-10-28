@@ -1263,7 +1263,7 @@ def off_deck_words(jp: str) -> list[str]:
             # (手に入れる: 手, 入れる; 身につける's つける, which the deck
             # has under more than one kanji), plan 272, or a run of its
             # nouns the dictionary writes as one word, a prefix on them
-            # no word (電話番号, 立候補), plan 276.
+            # no word (電話番号, 立候補), plan 280.
             continue
         surface = tok["surface"]
         if _is_numeral(surface) or difficulty.word_level(surface) or difficulty.word_level(tok.get("lemma", "")):

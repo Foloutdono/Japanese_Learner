@@ -206,7 +206,7 @@ class AnalyzeLocalTests(unittest.TestCase):
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_deck_words_fold_into_a_pool_compound_as_its_parts(self) -> None:
         # 電話 + 番号 are two N5 cards and the pool's 電話番号 is one word: it
-        # reads as the word, its two cards kept as its parts (plan 276). A
+        # reads as the word, its two cards kept as its parts (plan 280). A
         # number is the deck's to read, never the pool's: 二十 read にじゅう
         # shares a kanji and a reading with 二重, "double".
         r = analyze_local("電話番号と三千円と二十人")

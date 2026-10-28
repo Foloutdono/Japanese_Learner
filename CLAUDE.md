@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **280**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **281**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -198,7 +198,7 @@ runtime purpose.
   saying read whole takes the particles and the forms inside it, never a
   construction the catalogue teaches: 昼夜を問わず and 若気の至り are
   〜を問わず's and 〜の至り's own examples, and stay in their pieces.
-- **A run of the deck's nouns is the dictionary's word (plan 276).**
+- **A run of the deck's nouns is the dictionary's word (plan 280).**
   Where JMdict writes a run of deck nouns as one word (電話番号, 観光客,
   記者会見), the breakdown reads that word, as the dictionary reads it
   (腕時計 うでどけい), and keeps its cards as the token's `parts`, which

@@ -300,7 +300,7 @@ class AffixTests(unittest.TestCase):
         self.assertIn("assistant", matches("副店長が来た。")["副"]["entry"]["meaning"])
         # And before a card the deck holds: 副課長 is 副 and 課長 (plan 272),
         # where the dictionary has no 副課長 -- 副社長 it has, and that is one
-        # word, "vice-president", 社長 kept as its part (plan 276).
+        # word, "vice-president", 社長 kept as its part (plan 280).
         found = matches("課長は来ないで代わりに副課長をよこした。")
         self.assertIn("associate", found["副"]["entry"]["meaning"])
         self.assertEqual(found["課長"]["raw_id"], "vocab_N4_課長_かちょう")
@@ -1547,7 +1547,7 @@ class WordsTheTokenizerCutTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kana"], reading)
         # Two cards in kanji the dictionary writes as one word are that word,
-        # read as it reads it, its cards kept as its parts (plan 276): never
+        # read as it reads it, its cards kept as its parts (plan 280): never
         # うで + とけい.
         for sentence, surface, reading, parts in (("祖父から腕時計をもらった。", "腕時計", "うでどけい", ["腕", "時計"]),
                                                   ("大相撲九月場所", "大相撲", "おおずもう", ["大", "相撲"]),
@@ -1562,7 +1562,7 @@ class WordsTheTokenizerCutTests(unittest.TestCase):
         self.assertEqual(token["vocab_match"]["raw_id"], "vocab_N5_会社_かいしゃ")
         self.assertEqual(token_of("駅まで何分ですか。", "分")["reading"], "ぷん")
         # 見学生's 生 is a student, no "life"; 転校生 is the dictionary's word
-        # over its cards (plan 276).
+        # over its cards (plan 280).
         gloss = token_of("あの見学生の名前", "生")["gloss"]
         self.assertTrue(gloss["en"].startswith("(suffix) student") and gloss["fr"])
         self.assertEqual(token_of("あの転校生の名前", "転校生")["reading"], "てんこうせい")
@@ -1980,7 +1980,7 @@ class ThirdReviewWordTests(unittest.TestCase):
                                            ("興味深い話だ。", "深い", "ぶかい"), ("海は深い。", "深い", "ふかい")):
             with self.subTest(sentence=sentence, surface=surface):
                 self.assertEqual(token_of(sentence, surface)["reading"], reading)
-        # (the word over its cards, 札 the N1 ふだ among them, plan 276)
+        # (the word over its cards, 札 the N1 ふだ among them, plan 280)
         parts = token_of("番号札十二番でお待ちください。", "番号札")["parts"]
         self.assertEqual(parts[1]["vocab_match"]["raw_id"], "vocab_N1_札_ふだ")
         # 何時ごろ is the N5 何時 and ごろ, as the course reads it.
@@ -2068,7 +2068,7 @@ class LastGapsWordTests(unittest.TestCase):
         self.assertTrue(gloss_of("胆のうごと取る。", "ごと").startswith("(suffix) … and all"))
         self.assertTrue(gloss_of("首相の長演説に聴衆は疲れた。", "長").startswith("(prefix) long"))
         # ...where the dictionary has no word of them; 長時間 it has, "long
-        # time", one word over its cards (plan 276).
+        # time", one word over its cards (plan 280).
         self.assertEqual([p["surface"] for p in token_of("長時間の話し合い。", "長時間")["parts"]], ["長", "時間"])
         # ...where a card answers already: 子どもたち's 達, 地域ごと's 毎.
         self.assertEqual(token_of("子どもたちは外であそんでいます。", "たち")["vocab_match"]["entry"]["kanji"], "達")
@@ -2325,7 +2325,7 @@ class FifthReviewWordTests(unittest.TestCase):
         self.assertEqual(token_of("本日はタイムサービスを行います。", "タイムサービス")["vocab_match"]["entry"]["kana"],
                          "タイムサービス")
         # ...where two deck words say the pair, it is the dictionary's one word,
-        # its two cards kept as its parts (チーズケーキ, 追体験, plan 276), as
+        # its two cards kept as its parts (チーズケーキ, 追体験, plan 280), as
         # 追 of 追注文, which the dictionary lacks, stays a prefix, glossed.
         cake = token_of("チーズケーキを食べた。", "チーズケーキ")
         self.assertEqual([p["surface"] for p in cake["parts"]], ["チーズ", "ケーキ"])
@@ -2413,7 +2413,7 @@ class SixthReviewWordTests(unittest.TestCase):
         self.assertNotEqual((token_of("ほんで、どないしたん？", "ほんで").get("vocab_match") or {}).get("entry", {}).get("kanji"), "本")
         self.assertEqual([t["surface"] for t in analysis.analyze_local("観光客が多い。")["tokens"]][:2], ["観光客", "が"])
         # A four-kanji compound its cards say is the dictionary's word over
-        # them: 自由貿易 is "free trade", libre-échange (plan 276).
+        # them: 自由貿易 is "free trade", libre-échange (plan 280).
         trade = token_of("自由貿易への障害になる。", "自由貿易")
         self.assertEqual([p["surface"] for p in trade["parts"]], ["自由", "貿易"])
 
@@ -2544,7 +2544,7 @@ class SeventhReviewWordTests(unittest.TestCase):
         self.assertIsNotNone(token_of("そうですね。", "そう").get("vocab_match"))
         self.assertEqual(token_of("音楽家になりたい。", "音楽家")["vocab_match"]["entry"]["kanji"], "音楽家")
         # 立候補 is the dictionary's word, "candidacy", the deck's 候補 its
-        # part (plan 276).
+        # part (plan 280).
         whole = token_of("新人3人が立候補を表明した。", "立候補")
         self.assertIn("candidacy", whole["vocab_match"]["entry"]["meaning"])
         self.assertEqual(whole["parts"][1]["vocab_match"]["raw_id"], "vocab_N3_候補_こうほ")
@@ -2833,7 +2833,7 @@ class SenseReviewWordTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["reading"], reading)
                 self.assertEqual(token_of(other_sentence, surface)["reading"], other)
-        # 箱 alone is はこ; 道具箱 is the dictionary's word, どうぐばこ (plan 276).
+        # 箱 alone is はこ; 道具箱 is the dictionary's word, どうぐばこ (plan 280).
         for sentence in ("その箱は重い。", "一箱にいくつ入っていますか。"):
             self.assertEqual(token_of(sentence, "箱")["reading"], "はこ")
         self.assertEqual(token_of("道具箱を開けた。", "道具箱")["reading"], "どうぐばこ")
@@ -3342,7 +3342,7 @@ class SegmentationRoundWordTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class DeckNounCompoundTests(unittest.TestCase):
-    """Plan 276, the owner's choice. A run of the deck's own nouns that
+    """Plan 280, the owner's choice. A run of the deck's own nouns that
     the dictionary writes as one word is that word, read as it reads it,
     its cards kept as its parts -- where the French layer has the word, so
     a French learner never trades two cards in French for one in English."""

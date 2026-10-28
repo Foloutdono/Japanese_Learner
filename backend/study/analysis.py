@@ -1802,7 +1802,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         while pooled and pooled[1] > 2 and any(j in ruled for j in range(i, i + pooled[1])):
             # (a word over a point is the point's; a shorter one may still
             # stand before it: 数年 + 前, 〜まえに's, where 数年前 would
-            # take the point's 前, plan 276)
+            # take the point's 前, plan 280)
             pooled = resolve_pool_compound(morphemes, i, pool_hits, max_len=pooled[1] - 1)
         if pooled and not any(j in ruled for j in range(i, i + pooled[1])):
             entry, n = pooled
@@ -2125,12 +2125,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # of its own (にもかかわらず's も), the tokenizer's misreadings of 重そう,
 # なくして, 出さん and ぶっちゃけ, and 今日, 数, 〜山 read by their neighbours.
 # 28: a run of the deck's own nouns the dictionary writes as one word is
-# that word (plan 276, the owner's choice): 電話番号, 観光客, 記者会見, read
+# that word (plan 280, the owner's choice): 電話番号, 観光客, 記者会見, read
 # as the dictionary reads them (うでどけい), their cards kept as parts --
 # where the French layer has the word, never over a point, a count (五年後,
 # 何分) or a person said of several (人たち).
 # 29: the French layer gains the 8,258 compounds of deck nouns that stayed
-# two for want of a line (plan 276): 電気料金, 洗濯物, 自由貿易 now fold;
+# two for want of a line (plan 280): 電気料金, 洗濯物, 自由貿易 now fold;
 # 第 with its number folds only before a noun (第三者, never 第三 + 章).
 LOCAL_REV = 29
 
