@@ -19,8 +19,9 @@ be drawn from too: the grammar lessons with their tours, the deck's
 words and kanji, the kana and the comprehension passages; since plan
 229c the wrong spellings the 表記 question deals (each checked against
 the deck and JMdict, so no wrong answer is a word) and index.json, the
-figures a carousel's last slide may quote; since plan 281 duel.json, the
-opening of a real N5 duel paper for the duels' promo story.
+figures a carousel's last slide may quote; since plan 281 duel.json, a
+real N5 duel paper for the duels' promo story, and since plan 281b the
+two runs the story races over it, scored as the server scores them.
 
     python -m scripts.carousel_bank            # writes frontend/carousel/bank/*.json
     python -m scripts.carousel_bank --check    # exits 1 when a file is stale
@@ -28,9 +29,12 @@ opening of a real N5 duel paper for the duels' promo story.
 Run it after a change to content/reading_sentences.py, or to anything
 the breakdown reads (the deck, the catalogue), and commit the files.
 """
+import __future__
 import argparse
 import ast
+import itertools
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -914,40 +918,128 @@ def files(deck: dict):
     })
 
 
-# ── The duels' story (plan 281) ───────────────────────────────────
-# The promo story of the duels plays a real sprint: the first questions
-# of an N5 paper as the duels' own generator builds it from a fixed seed
-# (study/duel_paper.py), and what the story's figures are made of --
-# where the Elo starts at each level and its K once settled
-# (study/duel_elo.py), what an answer pays in XP (srs/xp.py) and the
-# day's cap, and how long the next question waits after a right or a
-# wrong answer (study/duels.py). study/duels.py opens the database when
-# it is imported, so its two figures are read from its source.
+# ── The duels' story (plans 281, 281b) ─────────────────────────────
+# The promo story of the duels plays a real sprint: an N5 paper as the
+# duels' own generator builds it from a fixed seed (study/duel_paper.py)
+# and, since plan 281b, two runs over it scored as the server scores a
+# run of that paper: what each answer's speed is worth, what the streak
+# it makes pays and the rush of the last seconds, then each run's lines
+# and grade (study/duels.py, plan 285). Beside them, what the story's
+# other figures are made of: where the Elo starts at each level and its
+# K once settled (study/duel_elo.py), what an answer pays in XP
+# (srs/xp.py) and the day's cap. study/duels.py opens the database when
+# it is imported, so it is read from its source: its constants, and the
+# functions that score a run, run on their own (_duel_scoring).
 DUEL_SEED = 1330
-DUEL_ITEMS = 16
+# The two runs, the story's own: the opening answer by answer, [ms after
+# the question was served, right or not], then a rhythm of answer times
+# cycled until the rush and another in it, the answers missed counted
+# from the first. The learner takes the first slowly, the next two at
+# once and a lookalike for the fourth, then is right to the end,
+# quicker in the rush; Hana, a level up, is quicker throughout and leads
+# on her own streak until her misses break it, and the learner, on
+# theirs, passes her just before the rush.
+DUEL_RUNS = {
+    "you": {
+        "opening": ((2000, True), (800, True), (750, True), (900, False)),
+        "race": (1500, 1200, 1750, 1350, 1000, 1900, 1300, 1150, 1600, 1050, 1400, 1650),
+        "rush": (1050, 900, 1200, 950, 1100, 850),
+        "missed": (),
+    },
+    "them": {
+        "opening": ((950, True), (1400, True), (1650, True), (800, True)),
+        "race": (950, 1300, 1100, 850, 1450, 1050, 1200, 1000, 1350, 900),
+        "rush": (1250, 1400, 1150, 1500),
+        "missed": (45, 52, 60, 66, 72),
+    },
+}
+DUELS_PY = BACKEND / "study" / "duels.py"
+# What the story reads of study/duels.py: the functions that score a run.
+DUEL_SCORING = ("points", "multiplier", "combo_on", "streak_of", "scored", "bonus", "grade", "lines", "rules", "sprint_ms")
 
 
-def _module_constant(path: Path, name: str):
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+def _duel_scoring(paper_rev: str) -> dict:
+    """study/duels.py's scoring, run from its source: the functions named
+    in DUEL_SCORING, every constant the module sets without its imports
+    (one made of them, its logger, is left out) and its sprint as the
+    module sets it for the paper being dealt. A function that comes to
+    need more fails here, by name, never quietly."""
+    tree = ast.parse(DUELS_PY.read_text(encoding="utf-8"))
+    scope = {"math": math}
+
+    def run(node):
+        code = ast.Module(body=[node], type_ignores=[])
+        exec(compile(code, str(DUELS_PY), "exec", flags=__future__.annotations.compiler_flag, dont_inherit=True), scope)
+
     for node in tree.body:
-        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
-            return ast.literal_eval(node.value)
-    raise KeyError(f"{name} not in {path.name}")
+        if isinstance(node, ast.FunctionDef) and node.name in DUEL_SCORING:
+            run(node)
+        elif isinstance(node, ast.Assign):
+            try:
+                run(node)
+            except NameError:
+                continue
+    missing = [name for name in DUEL_SCORING if name not in scope]
+    if missing:
+        raise KeyError(f"{', '.join(missing)} not in {DUELS_PY.name}")
+    scope["SPRINT_MS"] = scope["SPRINT_MS_BY_REV"][paper_rev]
+    return scope
+
+
+def _duel_run(spec: dict, s: dict, duel: dict) -> list[dict]:
+    """A run of the story as the server plays it (study/duels.answer):
+    each question served once the last answer's hold is over, each
+    answer timed from when its question was served and scored by the
+    server's own functions, none past the sprint. Each answer carries
+    what the server's reply says of it: what it added, the total, the
+    streak the run is on and what it pays."""
+    sprint = s["sprint_ms"](duel)
+    race, rush = itertools.cycle(spec["race"]), itertools.cycle(spec["rush"])
+    opening = iter(spec["opening"])
+    answers: list[dict] = []
+    served = total = 0
+    while True:
+        n = len(answers)
+        step = next(opening, None)
+        if step is None:
+            rhythm = rush if served >= sprint - s["RUSH_MS"] else race
+            step = (next(rhythm), n not in spec["missed"])
+        ms, right = step
+        t = served + ms
+        if t > sprint:
+            return answers
+        pts = s["points"](ms) if right else 0
+        a = {"n": n, "t": t, "ms": ms, "right": right, "pts": pts, **s["bonus"](duel, answers, pts, right, t)}
+        answers.append(a)
+        streak = s["streak_of"](answers)
+        total += s["scored"](a)
+        a.update(scored=s["scored"](a), total=total, streak=streak,
+                 mult=s["multiplier"](streak) if s["combo_on"](duel) else 1.0)
+        served = t + (s["RIGHT_HOLD_MS"] if right else s["LOCK_MS"])
 
 
 def duel_story() -> dict:
     from srs.xp import BASE_XP_BY_QUALITY
     from study import duel_elo, duel_paper
 
-    duels_py = BACKEND / "study" / "duels.py"
     paper = duel_paper.build_paper(DUEL_SEED, "N5")
-    items = [{**duel_paper.served(item, n), "answer": item["answer"]} for n, item in enumerate(paper["items"][:DUEL_ITEMS])]
+    s = _duel_scoring(paper["rev"])
+    duel = {"paper_rev": paper["rev"]}
+    runs = {who: _duel_run(spec, s, duel) for who, spec in DUEL_RUNS.items()}
+    # The questions the learner is served: every one answered, and the
+    # one on the page when the sprint runs out.
+    shown = len(runs["you"]) + 1
+    items = [{**duel_paper.served(item, n), "answer": item["answer"]} for n, item in enumerate(paper["items"][:shown])]
     return {
         "rev": REV, "paper": paper["rev"], "level": paper["level"], "seed": DUEL_SEED,
+        "sprint": s["sprint_ms"](duel), "rules": s["rules"](duel),
         "elo": {"start": duel_elo.START, "k": duel_elo.K_SETTLED},
-        "xp": {"right": BASE_XP_BY_QUALITY[4], "wrong": BASE_XP_BY_QUALITY[1], "cap": _module_constant(duels_py, "XP_CAP")},
-        "hold": {"right": _module_constant(duels_py, "RIGHT_HOLD_MS"), "wrong": _module_constant(duels_py, "LOCK_MS")},
+        "xp": {"right": BASE_XP_BY_QUALITY[4], "wrong": BASE_XP_BY_QUALITY[1], "cap": s["XP_CAP"]},
+        "hold": {"right": s["RIGHT_HOLD_MS"], "wrong": s["LOCK_MS"]},
+        "lines": {who: s["lines"]({"answers": run}) for who, run in runs.items()},
         "items": items,
+        "you": runs["you"],
+        "them": runs["them"],
     }
 
 

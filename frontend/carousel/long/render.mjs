@@ -64,7 +64,7 @@ const server = createServer((req, res) => {
 await new Promise(r => server.listen(0, '127.0.0.1', r))
 const ROOT = `http://127.0.0.1:${server.address().port}`
 const css = []
-for (const [pkg, weights] of [['noto-sans-jp', [400, 500, 700, 900]], ['noto-serif-jp', [600, 700, 900]], ['space-grotesk', [500, 700]]]) {
+for (const [pkg, weights] of [['noto-sans-jp', [400, 500, 700, 900]], ['noto-serif-jp', [600, 700, 900]], ['space-grotesk', [500, 600, 700]]]) {
   for (const w of weights) {
     const file = join(FRONT, `node_modules/@fontsource/${pkg}/${w}.css`)
     if (existsSync(file)) css.push(readFileSync(file, 'utf8').replace(/url\(\.\/files\//g, `url(${ROOT}/node_modules/@fontsource/${pkg}/files/`))

@@ -153,7 +153,7 @@ const FAMILY = {
 export const FONT_FACES = [
   ['serif', 600], ['serif', 700], ['serif', 900],
   ['jp', 400], ['jp', 500], ['jp', 700],
-  ['latin', 500], ['latin', 700], ['emoji', 400],
+  ['latin', 500], ['latin', 600], ['latin', 700], ['emoji', 400],
 ]
 export const font = (weight, size, fam) => `${weight} ${Math.round(size * 10) / 10}px ${FAMILY[fam]}`
 // Where a Japanese face's em box sits around its baseline (Noto's

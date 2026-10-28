@@ -7,8 +7,8 @@ import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
-import { APP_INKS, DUEL_INKS } from '../carousel/app.js'
-import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { APP_INKS, DUEL_INKS, T1_INKS } from '../carousel/app.js'
+import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, raceClock, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
@@ -17,7 +17,8 @@ import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
-import { SPRINT_MS, points } from './domain/duel.js'
+import { LIMIT_MS, SPRINT_MS, multOf, points } from './domain/duel.js'
+import DUEL_AUDIO from './lib/audio/duel.json'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
@@ -835,6 +836,9 @@ describe('explaining a point in its own sentence', () => {
     const { FILL_FROM, FILL_SPAN, FILL_CURVE, BURST_AT } = LEVEL_CLOCK
     expect(LEVEL).toEqual({ FILL_FROM, FILL_SPAN, FILL_CURVE, BURST_AT })
     const keys = new Set(VOICE_EVENTS.map(e => e.key))
+    // The duels' story is scored with the duel's own sounds too (plan
+    // 281b), those lib/audio/duel.js plays, from their shipped files.
+    const duelSounds = new Set(DUEL_AUDIO.sounds)
     for (const story of STORIES) {
       const data = bank(STORY_FILES[story])
       const [{ id }] = promoItems(story, data, 'en')
@@ -842,9 +846,14 @@ describe('explaining a point in its own sentence', () => {
       for (const [which, clip] of Object.entries(clips)) {
         expect(clip.sounds.length, `${story} ${which}`).toBeGreaterThan(0)
         for (const s of clip.sounds) {
-          expect(keys.has(s.key), `${story} ${which}: ${s.key}`).toBe(true)
-          expect(s.at, `${story} ${which}: ${s.key}`).toBeGreaterThanOrEqual(0)
-          expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(clip.seconds)
+          const name = s.duel ?? s.key
+          if (s.duel) {
+            expect(story, name).toBe('duel')
+            expect(duelSounds.has(name), `${story} ${which}: ${name}`).toBe(true)
+            expect(() => read(`public/sounds/duel/${DUEL_AUDIO.rev}/fx-${name}.mp3`), name).not.toThrow()
+          } else expect(keys.has(name), `${story} ${which}: ${name}`).toBe(true)
+          expect(s.at, `${story} ${which}: ${name}`).toBeGreaterThanOrEqual(0)
+          expect(s.at, `${story} ${which}: ${name}`).toBeLessThan(clip.seconds)
         }
       }
     }
@@ -878,38 +887,77 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('scores the story’s run as the duels score one (plan 281)', () => {
+  it('scores the story’s runs as the server scores a sprint-2 one, combo and rush included (plans 281, 281b)', () => {
+    // The rules the bank's runs were scored by are the server's own.
+    const duels = read('../backend/study/duels.py')
+    const tiers = [...constant('study/duels.py', 'COMBO_TIERS').matchAll(/\((\d+), ([\d.]+)\)/g)].map(m => ({ at: Number(m[1]), mult: Number(m[2]) }))
+    expect(tiers.length).toBeGreaterThan(0)
+    expect(duelBank.rules).toEqual({ tiers, rushMs: int(constant('study/duels.py', 'RUSH_MS')) })
+    expect(duelBank.paper).toBe('sprint-2')
+    expect(duelBank.sprint).toBe(int(duels.match(/"sprint-2": ([\d_]+)/)[1]))
+    expect(duelBank.sprint).toBe(SPRINT_MS)
+    const top = int(duels.match(/^TOP, FLOOR = (\d+), (\d+)$/m)[1])
+    const multAt = streak => tiers.reduce((m, x) => (streak >= x.at ? x.mult : m), 1)
+    // Each answer, after the hold of the one before: what its speed is
+    // worth (a wrong one nothing), what its streak multiplies it by, what
+    // the rush pays once more, the total it leaves.
+    for (const side of ['you', 'them']) {
+      const run = duelBank[side]
+      let served = 0
+      let streak = 0
+      let total = 0
+      let best = 0
+      run.forEach((a, i) => {
+        const at = `${side} ${i}`
+        expect(a.n, at).toBe(i)
+        expect(a.t - a.ms, at).toBe(served)
+        expect(a.t, at).toBeLessThanOrEqual(duelBank.sprint)
+        expect(a.pts, at).toBe(a.right ? points(a.ms) : 0)
+        streak = a.right ? streak + 1 : 0
+        best = Math.max(best, streak)
+        const mult = a.right ? multAt(streak) : 1
+        expect(a.combo, at).toBe(Math.floor(a.pts * (mult - 1) + 0.5))
+        expect(a.rush, at).toBe(a.t >= duelBank.sprint - duelBank.rules.rushMs ? a.pts : 0)
+        expect(a.scored, at).toBe(a.pts + a.combo + a.rush)
+        total += a.scored
+        expect(a.total, at).toBe(total)
+        expect(a.streak, at).toBe(streak)
+        expect(a.mult, at).toBe(multAt(streak))
+        served = a.t + (a.right ? duelBank.hold.right : duelBank.hold.wrong)
+      })
+      // The next question would come after the sprint: the run ran to its end.
+      expect(served).toBeGreaterThan(duelBank.sprint - LIMIT_MS)
+      const sum = k => run.reduce((t, a) => t + a[k], 0)
+      expect(duelBank.lines[side], side).toMatchObject({
+        speed: sum('pts'), combo: sum('combo'), rush: sum('rush'), best,
+        flashes: run.filter(a => a.pts >= top).length, rights: run.filter(a => a.right).length, answered: run.length,
+      })
+    }
+    // Both streaks pay (the learner's to its last tier), both runs reach
+    // the rush, and the story has a streak broken to show.
+    expect(Math.max(...duelBank.you.map(a => a.mult))).toBe(tiers.at(-1).mult)
+    for (const side of ['you', 'them']) expect(duelBank.lines[side].rush, side).toBeGreaterThan(0)
     for (const lang of ['en', 'fr']) {
       const run = duelRun(duelBank, lang)
-      // Each answer pays what its speed is worth, a wrong one nothing,
-      // and the next question waits the server's hold.
-      let served = 0
       run.answers.forEach((a, i) => {
-        const q = run.items[i]
-        expect(a.served, `${lang} ${i}`).toBe(served)
-        expect(a.pts, `${lang} ${i}`).toBe(a.right ? points(a.at - a.served) : 0)
+        const q = run.items[a.n]
         expect(a.pick === q.answer, `${lang} ${i}`).toBe(a.right)
         expect(q.choices[a.pick], `${lang} ${i}`).toBeTruthy()
-        served = a.at + (a.right ? duelBank.hold.right : duelBank.hold.wrong)
       })
-      expect(run.next).toBe(served)
-      // The other's recorded run keeps the same rules: served after each
-      // hold, paid what its speed is worth.
-      let theirs = 0
-      for (const x of run.their) {
-        expect(x.pts, `${lang} their ${x.at}`).toBe(points(x.at - theirs))
-        theirs = x.at + duelBank.hold.right
-      }
-      // The lead changes hands on the way (the race's line has a gap to show).
-      const lead = m => run.answers.filter(a => a.at <= m).reduce((t, a) => t + a.pts, 0) - run.their.filter(x => x.at <= m).reduce((t, x) => t + x.pts, 0)
-      const leads = [...run.answers.map(a => a.at), ...run.their.map(x => x.at)].sort((a, b) => a - b).map(lead)
-      expect(leads.some(v => v > 0) && leads.some(v => v < 0)).toBe(true)
-      // The result: the XP the answers pay, the Elo by the classic
-      // expectation at the settled K, the board climbed a place.
-      const { final, you, them } = DUEL_RUN
-      expect(final.mine).toBeGreaterThan(final.theirs)
-      expect(run.xp.paid).toBe(final.rights * duelBank.xp.right + (final.answered - final.rights) * duelBank.xp.wrong)
-      expect(run.xp.paid).toBeLessThanOrEqual(duelBank.xp.cap)
+      const last = run.answers.at(-1)
+      expect(run.next).toBe(last.t + (last.right ? duelBank.hold.right : duelBank.hold.wrong))
+      expect(run.broke.length).toBeGreaterThan(0)
+      // The lead changes hands both ways, and the learner wins.
+      expect(run.passes.some(x => x.me) && run.passes.some(x => !x.me)).toBe(true)
+      expect(run.passes.at(-1).me).toBe(true)
+      expect(run.final).toEqual({ mine: duelBank.you.at(-1).total, theirs: duelBank.them.at(-1).total })
+      expect(run.final.mine).toBeGreaterThan(run.final.theirs)
+      // The result: the XP the answers pay, the day's cap at most, the Elo
+      // by the classic expectation at the settled K, the board climbed a place.
+      const { you, them } = DUEL_RUN
+      const L = duelBank.lines.you
+      expect(run.xp.paid).toBe(Math.min(duelBank.xp.cap, L.rights * duelBank.xp.right + (L.answered - L.rights) * duelBank.xp.wrong))
+      expect(run.xp.left).toBe(duelBank.xp.cap - run.xp.paid)
       expect(run.elo.delta).toBe(Math.round(duelBank.elo.k * (1 - 1 / (1 + 10 ** ((them.elo - you.elo) / 400)))))
       expect(run.elo.trend.at(-1)).toBe(run.elo.after)
       expect(run.elo.trend.length).toBe(20)
@@ -930,10 +978,23 @@ describe('explaining a point in its own sentence', () => {
       expect(D.questions, lang).toBe(t.pvpQuestions)
       expect(D.wordsKanji, lang).toBe(t.pvpWordsKanji)
       expect(D.sprint, lang).toBe(t.pvpSprintOf(SPRINT_MS))
-      expect(D.win, lang).toBe(t.pvpWin)
+      // The run's (plan 285): its head, its bands, the combo, a change of
+      // hands, the notes; the result's lines, its verdict and its margin.
+      expect(D.duelWith('Hana'), lang).toBe(t.pvpDuelWith('Hana'))
+      expect(D.ready, lang).toBe(t.pvpReady)
+      expect(D.goBand, lang).toBe(t.pvpGoBand)
+      expect(D.arrival, lang).toBe(t.pvpArrival)
+      expect(D.rushWord, lang).toBe(t.pvpRush)
+      expect(D.comboCap, lang).toBe(t.pvpCombo)
+      expect(D.comboLost(7), lang).toBe(t.pvpComboLost(7))
+      expect(D.passMe, lang).toBe(t.pvpPassMe)
+      expect(D.passThem('Hana'), lang).toBe(t.pvpPassThem('Hana'))
+      expect(D.notes, lang).toEqual(t.pvpNote)
+      expect(D.lines, lang).toEqual(t.pvpLines)
+      expect(D.inARow(69, 45), lang).toBe(t.pvpInARow(69, 45))
+      expect(D.verdict, lang).toEqual(t.pvpVerdict)
+      for (const n of [1, 3577]) expect(D.aheadBy(n), lang).toBe(t.pvpAhead(n))
       expect(D.elo, lang).toBe(t.pvpElo)
-      for (const n of [1, 135]) expect(D.by(n), lang).toBe(t.pvpBy(n))
-      expect(D.rightsOf(14, 15), lang).toBe(t.pvpRightsOf(14, 15))
       expect(D.xpLeft(51), lang).toBe(t.pvpXpLeft(51))
       expect(D.startAt('1 000'), lang).toBe(t.pvpStartAt('1 000'))
       expect(D.peak('1 224'), lang).toBe(t.pvpPeak('1 224'))
@@ -947,6 +1008,16 @@ describe('explaining a point in its own sentence', () => {
     for (const [theme, inks] of Object.entries(DUEL_INKS)) {
       for (const [name, value] of Object.entries(inks)) expect(css, `${theme} ${name}`).toMatch(new RegExp(`${name}:\\s*${escape(value)};`))
     }
+    // T1's own paint (plan 285), part by part.
+    const T1 = {
+      panto: ['.pvp-t1__panto', 'stroke'], body: ['.pvp-t1__body', 'fill'], rule: ['.pvp-t1__body', 'stroke'],
+      glass: ['.pvp-t1__cab', 'fill'], skirt: ['.pvp-t1__skirt', 'fill'], bogie: ['.pvp-t1__bogie', 'fill'], lamp: ['.pvp-t1__lamp', 'fill'],
+      meGlass: ['.pvp-loco--me .pvp-t1__cab', 'fill'], meSkirt: ['.pvp-loco--me .pvp-t1__skirt', 'fill'],
+    }
+    expect(Object.keys(T1).sort()).toEqual(Object.keys(T1_INKS).sort())
+    for (const [part, [rule, prop]] of Object.entries(T1)) {
+      expect(css, part).toMatch(new RegExp(`(^|\\n)${escape(rule)}\\s*\\{[^}]*${prop}:\\s*${T1_INKS[part]};`))
+    }
   })
 
   it('plays the duels’ story whole, beat after beat, ending at the gate (plan 281)', () => {
@@ -958,8 +1029,11 @@ describe('explaining a point in its own sentence', () => {
         const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
         expect(frames.map(f => f.key)).toEqual(DUEL_BEATS.map(([key]) => key))
         const { story } = frames.clips
-        const race = 1.3 + pl.promo.next / 1000 + 1.0
-        expect(story.seconds).toBeCloseTo(DUEL_BEATS.reduce((t, [, len]) => t + (len ?? race), 0), 5)
+        // The race: its opening and its end in real time, the middle run fast.
+        const clock = raceClock(pl.promo)
+        expect(clock.m(clock.s(pl.promo.answers[10].t))).toBeCloseTo(pl.promo.answers[10].t, 3)
+        expect(clock.m(clock.end)).toBe(pl.promo.sprint)
+        expect(story.seconds).toBeCloseTo(DUEL_BEATS.reduce((t, [, len]) => t + (len ?? clock.length), 0), 5)
         expect(story.fps).toBe(CLIP.fps)
         expect(story.print).toBe(false)
         for (let t = 0; t < story.seconds; t += 0.37) expect(() => story.draw(stubContext().ctx, t), `${lang} at ${t}s`).not.toThrow()
@@ -973,7 +1047,9 @@ describe('explaining a point in its own sentence', () => {
           texts.forEach(x => x.split(' ').forEach(w => said.add(w)))
         }
         const D = PROMO[lang].duel
-        for (const line of [...D.hook(SPRINT_MS / 1000), D.versus, D.same, D.fast(100), D.ahead, D.winElo, D.eloIs, D.climb]) {
+        const top = multOf(Math.max(...duelBank.rules.tiers.map(x => x.mult)), lang)
+        const lines = [D.combo(top), D.rush(duelBank.rules.rushMs / 1000)]
+        for (const line of [...D.hook(SPRINT_MS / 1000), D.versus, D.same, D.fast(100), D.ahead, ...lines, D.winElo, D.eloIs, D.climb]) {
           for (const word of weldIf(lang, line).split(' ')) expect(said, `${lang}: ${word}`).toContain(word)
         }
         const last = stubContext()

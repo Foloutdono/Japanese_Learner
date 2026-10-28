@@ -33,15 +33,33 @@ const TAIL = 4
 // kept at its level against the others.
 const PEAK = 0.5
 
+// The duel's own sounds (plan 281b), as lib/audio/duel.js plays them: the
+// file of the current revision (src/lib/audio/duel.json), from its onset,
+// the build's lead before it, at the duel's trim.
+let duelManifest = null
+async function duelSound(name, base) {
+  duelManifest ??= fetch(`${base}src/lib/audio/duel.json`).then(r => r.json())
+  const d = await duelManifest
+  return { src: `${base}public/sounds/duel/${d.rev}/fx-${name}.mp3`, from: d.lead }
+}
+
 /** The score rendered: [left, right] Float32Arrays, `seconds` long at RATE.
- *  A sound is an app event (`key`) or a recorded clip (`src`). */
-export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices) {
-  const { VOICE_EVENTS, voiceOut, voiceLevel } = voices
+ *  A sound is an app event (`key`), a recorded clip (`src`, played from
+ *  `from` seconds in) or one of the duel's (`duel`); `base` is the
+ *  frontend's root as the page sees it. */
+export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices, { base = '../' } = {}) {
+  const { VOICE_EVENTS, voiceOut, voiceLevel, trimFor } = voices
   const n = Math.round(seconds * RATE)
   const mix = [new Float32Array(n), new Float32Array(n)]
   const clips = new Map()
-  for (const { at, key, src, gain = 1 } of sounds) {
+  for (const sound of sounds) {
+    const { at, key } = sound
+    let { src, gain = 1, from = 0 } = sound
     if (at >= seconds) continue
+    if (sound.duel) {
+      ;({ src, from } = await duelSound(sound.duel, base))
+      gain *= trimFor ? trimFor('sfx', 'duel') : 1
+    }
     let out
     if (src) {
       // A recorded clip (the word echo's voice, plan 232), decoded once, at its own level.
@@ -57,11 +75,14 @@ export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices
       variant.play(ctx, voiceOut(ctx, ctx.destination, { ...level, gain: level.gain * gain }))
       out = await ctx.startRendering()
     }
-    const from = Math.round(at * RATE)
+    const start = Math.round(at * RATE)
+    const skip = src ? Math.round(from * RATE) : 0
     for (let ch = 0; ch < 2; ch++) {
       const data = out.getChannelData(Math.min(ch, out.numberOfChannels - 1))
       const dst = mix[ch]
-      for (let i = 0; i < data.length && from + i < n; i++) dst[from + i] += data[i] * (src ? gain : 1)
+      for (let i = skip; i < data.length && start + i - skip < n; i++) {
+        if (start + i - skip >= 0) dst[start + i - skip] += data[i] * (src ? gain : 1)
+      }
     }
   }
   let peak = 0

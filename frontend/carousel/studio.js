@@ -903,7 +903,7 @@ async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, fra
     if (failed) throw failed
     if (sound) {
       status(`Scoring the ${said}…`)
-      const mix = await clipAudio(sounds, seconds, await loadVoices(BASE))
+      const mix = await clipAudio(sounds, seconds, await loadVoices(BASE), { base: BASE })
       const audio = new AudioEncoder({ output: (chunk, meta) => muxer.addAudioChunk(chunk, meta), error: e => { failed = e } })
       audio.configure(sound.audio)
       const step = RATE / 10

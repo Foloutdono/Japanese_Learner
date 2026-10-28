@@ -168,6 +168,19 @@ def scored(a: dict) -> int:
     return a["pts"] + a.get("combo", 0) + a.get("rush", 0)
 
 
+def bonus(duel: dict, answers: list[dict], pts: int, right: bool, t: int) -> dict:
+    """What an answer `t` ms into the sprint earns beside its speed's
+    `pts`, after the run's `answers` (plan 285): the streak it makes
+    multiplies them, and the sprint's last RUSH_MS pay them once more;
+    nothing on an answer of sprint-1. The carousel's duels story is
+    scored by it too, read from this file (scripts/carousel_bank.py)."""
+    if not combo_on(duel):
+        return {}
+    mult = multiplier(streak_of(answers) + 1) if right else 1.0
+    return {"combo": math.floor(pts * (mult - 1) + 0.5),
+            "rush": pts if t >= sprint_ms(duel) - RUSH_MS else 0}
+
+
 def grade(rights: int, answered: int, flashes: int) -> str | None:
     """The result's grade (plan 285): S for a run nearly all right with
     a third of its right answers given in their first second, then A, B
@@ -982,13 +995,8 @@ def answer(cur, after: list, me: str, duel_id: int, n: int, pick: int) -> dict:
     # after the sprint lands on the finish line, never past it, so the
     # recording the other player races sums to the score.
     t = min(sprint_ms(duel), max(0, _ms(now - mine["started_at"])))
-    a = {"n": n, "pick": pick, "right": right, "ms": ms, "pts": pts, "t": t}
-    if combo_on(duel):
-        # The streak this answer makes multiplies its points, and the
-        # sprint's last seconds pay them once more (plan 285).
-        mult = multiplier(streak_of(mine["answers"]) + 1) if right else 1.0
-        a["combo"] = math.floor(pts * (mult - 1) + 0.5)
-        a["rush"] = pts if t >= sprint_ms(duel) - RUSH_MS else 0
+    a = {"n": n, "pick": pick, "right": right, "ms": ms, "pts": pts, "t": t,
+         **bonus(duel, mine["answers"], pts, right, t)}
     mine["answers"] = [*mine["answers"], a]
     mine["score"] = (mine["score"] or 0) + scored(a)
     mine["rights"] = (mine["rights"] or 0) + int(right)

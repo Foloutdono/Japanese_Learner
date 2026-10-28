@@ -511,7 +511,7 @@ and its point cards, and Today on the print of the hour.
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
-| Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the sprint run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
+| Duels (plans 281, 281b) | (one) | the duel's ticket, a sprint raced (the count, its opening in real time, its middle run fast, the rush and the arrival), the result face to face and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
 **The parts are measured, not imagined.** Every figure in `app.js` is a
 CSS pixel of the running app on a 400px phone (the review card, the
@@ -571,33 +571,47 @@ each promise in, and opens the gate on the platform chime.
 the landing page's bundle of `src/lib/audio/recipes.js`) at the app's
 level, mixes them at their moments and brings the whole to -6dBFS. The
 studio muxes it as AAC, or Opus where the browser has no AAC encoder.
+The duels' story is scored with the duel's own sounds besides (plan
+281b): a sound named `duel` is `lib/audio/duel.js`'s, the file of
+`src/lib/audio/duel.json`'s revision from its onset, at the duel's trim.
+Never its music: the owner lays the feed's own over the clip.
 
-**The duels' story plays whole (plan 281).** Its frames are one sprint
-told from its ticket to the board, and the story is also one clip, every
-beat after the last (`promo.clips.story`, `DUEL_BEATS`, about 22
-seconds): the ticket comes in and « Partir » is pressed, the count, four
-questions answered as a quick learner answers them (the first slowly,
-while what it is worth runs down from 100, two at once, the fourth 白 taken
-for 百), the other's recorded run passing and passed on the line, the rest
-of the sprint run out, the result face to face, the Elo and the XP it
-paid, the Elo drawn over its last ranked duels, the learner's row
-climbing the board, the gate. A beat's words land one by one; a tap is
-shown as a screen recording shows one, a ring that opens and fades. The
-duels' screens are measured as the other parts are (`app.js`: the
-ticket, the stage's gold button, the race and its gap, the page and the
-docked answers, the face-off, the records, the Elo card, the board's
-rows; `DUEL_INKS` the inks a theme gives them, held to `index.css`). The
-paper is a real one: `bank/duel.json`, which `carousel_bank.py` writes,
-is the opening of an N5 paper as `study/duel_paper.py` builds it from a
-fixed seed, with where the Elo starts, its settled K, what an answer
-pays in XP, the day's cap and the holds after an answer, and a test
-holds each to the backend's, its paper to `PAPER_REV`. The two learners
-and their figures are the story's own (`DUEL_RUN`), scored by the app's
-rules: what a speed is worth (`domain/duel.js`), the holds, the Elo's
-expectation; a test plays it back. Its sounds are the stage's press and
-the gate's; "Download the whole story" encodes it as the clips are
-encoded. No frame shows a fare: the ranked sprint's and the
-corrections' prices are left off the ticket and the result.
+**The duels' story plays whole (plans 281, 281b).** Its frames are one
+sprint told from its ticket to the board, and the story is also one
+clip, every beat after the last (`promo.clips.story`, `DUEL_BEATS`,
+about 32 seconds): the ticket comes in and « Partir » is pressed; the
+count; the sprint's opening in real time (the first question taken
+slowly while what it is worth runs down from 100, the next two at once,
+the fourth's lookalike 週聞 taken for 週間, which breaks the streak), its
+middle run fast as a time-lapse eased in and out of real time
+(`RACE`, `raceClock`: the combo climbing its tiers, Hana passed for
+good), its last seconds in real time, in the rush, and « Arrivée ! »;
+the result face to face, line by line, its verdict, its grade, the Elo
+and the XP it paid; the Elo drawn over its last ranked duels; the
+learner's row climbing the board; the gate. A beat's words land one by
+one; a tap is shown as a screen recording shows one, a ring that opens
+and fades. The duels' screens are measured as the other parts are, the
+race and the ending again for plan 281b as plan 285 draws them (`app.js`:
+the ticket, the stage's gold button, the head and its combo ring, the T1
+trains on their rails with the bands, the rush and the changes of hands,
+the page and the answers, each answer's moment, the face to face (E4),
+the Elo card, the board's rows; `DUEL_INKS` the inks a theme gives them
+and `T1_INKS` the train's paint, both held to `index.css`). Where the
+app docks the answers on its sumi panel, the story sets them on its
+ground, in the ground's ink: a frame keeps one background. The paper
+and the runs are real: `bank/duel.json`, which `carousel_bank.py`
+writes, is an N5 paper as `study/duel_paper.py` builds it from a fixed
+seed, and the two runs over it scored by `study/duels.py`'s own
+functions, read from the file (each answer's speed, the combo its
+streak pays, the rush; the result's lines and grade), with where the
+Elo starts, its settled K, what an answer pays in XP, the day's cap and
+the holds after an answer. A test holds each to the backend's, its paper
+to `PAPER_REV`, and plays both runs back by the rules it reads from
+`duels.py`. What is the story's own is who the two learners are, their
+levels and Elo (`DUEL_RUN`) and how fast each answers
+(`carousel_bank.DUEL_RUNS`). "Download the whole story" encodes it as
+the clips are encoded. No frame shows a fare: the ranked sprint's and
+the corrections' prices are left off the ticket and the result.
 
 **A story promises what the app does today.** Its figures are the
 bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
@@ -803,10 +817,10 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 234) |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
-| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281) |
-| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281) |
+| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole, its race on its own clock (plans 281, 281b) |
+| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens, the race and the ending as plan 285 draws them (plans 281, 281b) |
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
-| `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
+| `sound.js` | a clip's sound: the app's own events, recorded clips and the duel's own sounds, mixed (plans 231, 232, 281b); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
 | `long/render.mjs` | a long video, its short or a carousel's short made: voiced, mixed, drawn and encoded (plan 233) |
@@ -841,8 +855,9 @@ python -m scripts.carousel_bank --check    # exit 1 when a file is stale
 ```
 
 Run it after a change to the reading bank, the deck, the kanji, the kana,
-the catalogue, the tours, the comprehension seeds, the analyser or the
-duels' paper (`duel_paper.PAPER_REV`, the Elo's starts), and commit the
+the catalogue, the tours, the comprehension seeds, the analyser, the
+duels' paper (`duel_paper.PAPER_REV`, the Elo's starts) or their scoring
+(`study/duels.py`: a speed's worth, the combo, the rush), and commit the
 files. `src/carousel.test.js` holds the files to what a slide
 needs: every sentence spelled back by its words, every item of every
 source drawn as every type it can be, a question that never deals its

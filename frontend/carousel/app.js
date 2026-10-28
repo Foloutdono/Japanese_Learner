@@ -881,18 +881,33 @@ export const faceOf = p => {
 /** A hex ink at an opacity, for a halo or a scrim over the print. */
 export const inkAlpha = alpha
 
-// ── 対戦, the duels (plan 281) ──────────────────────────────────────
+// ── 対戦, the duels (plans 281, 281b) ───────────────────────────────
 // The duels' screens (plan 279, index.css's .pvp-*) as a sprint draws
 // them, measured on the same 400px phone, dark and light: the duel's
-// ticket and the stage's gold button, the race on its line, the
-// question's page and the answers docked under it, the result face to
-// face over the finish, the records under it, the Elo over its curve and
-// the Elo board's rows. Where index.css gives a theme its own ink the
-// palette does not carry, DUEL_INKS holds it, held equal to index.css by
-// src/carousel.test.js.
+// ticket and the stage's gold button; the run as plan 285 made a game of
+// it (the owner's C1: the head and its combo ring, the T1 trains racing
+// on their sleepered rails with the bands, the rush and the changes of
+// hands, the question's page, the answers in one list and each answer's
+// moment) and its ending face to face (E4), measured again for plan
+// 281b; the Elo over its curve and the Elo board's rows. Where index.css
+// gives a theme an ink the palette does not carry (the medals, the
+// arcade's --duel-*), DUEL_INKS holds it, and T1_INKS the train's own
+// paint, both held equal to index.css by src/carousel.test.js. A
+// moment's motion is index.css's own keyframes, read at the moment drawn.
+// The arcade's inks the two themes share (:root, plan 285).
+const ARCADE = {
+  '--duel-plate-ink': '#f3ecdf', '--duel-spark': '#ffd36a', '--duel-gold': '#d9a43a', '--duel-gold-deep': '#a77b1f',
+  '--duel-heat': '#e0573a', '--duel-rush': '#b8322a', '--duel-rival': '#2f6db5', '--duel-quick': '#7fd6df',
+}
 export const DUEL_INKS = {
-  sumi: { '--medal-gold': '#c99a3e', '--medal-silver': '#a8adb4', '--medal-bronze': '#a8703f', '--overlay-hover': 'rgba(255, 255, 255, 0.035)' },
-  paper: { '--medal-gold': '#a97a25', '--medal-silver': '#8d939b', '--medal-bronze': '#8a5527', '--overlay-hover': 'rgba(28, 24, 17, 0.045)' },
+  sumi: { '--medal-gold': '#c99a3e', '--medal-silver': '#a8adb4', '--medal-bronze': '#a8703f', '--overlay-hover': 'rgba(255, 255, 255, 0.035)', ...ARCADE, '--duel-plate': '#26232b', '--duel-rush-ink': '#ef7a5f' },
+  paper: { '--medal-gold': '#a97a25', '--medal-silver': '#8d939b', '--medal-bronze': '#8a5527', '--overlay-hover': 'rgba(28, 24, 17, 0.045)', ...ARCADE, '--duel-plate': '#1d1b20', '--duel-rush-ink': '#b8322a' },
+}
+// T1's own paint (.pvp-t1__*): the other's white with its rule, glass,
+// skirt, bogies and lamp; the learner's glass and skirt.
+export const T1_INKS = {
+  panto: '#6d665f', body: '#fbf8f1', rule: '#b3a78f', glass: '#2b2833', skirt: '#9c9384', bogie: '#4b4650', lamp: '#fff3c4',
+  meGlass: '#efe6d3', meSkirt: '#2e2a34',
 }
 
 function duelInks(p) {
@@ -909,6 +924,19 @@ function duelInks(p) {
     soft: p.onPanelSoft,
     medal: { 1: d['--medal-gold'], 2: d['--medal-silver'], 3: d['--medal-bronze'] },
     hover: d['--overlay-hover'],
+    // The arcade: the plate the combo and the notes are printed on (ruled
+    // on sumi, where it is lifted a step) and the game's own inks.
+    plate: d['--duel-plate'],
+    plateInk: d['--duel-plate-ink'],
+    plateLine: p.paper ? 'rgba(0,0,0,0)' : alpha(d['--duel-plate-ink'], 0.16),
+    spark: d['--duel-spark'],
+    warm: d['--duel-gold'],
+    deep: d['--duel-gold-deep'],
+    heat: d['--duel-heat'],
+    rush: d['--duel-rush'],
+    rushInk: d['--duel-rush-ink'],
+    rival: d['--duel-rival'],
+    quick: d['--duel-quick'],
   }
 }
 
@@ -924,8 +952,9 @@ function panelBox(ctx, x, y, w, h, r, fill, rule, u) {
 }
 
 /** Stripes `period` apart, `width` wide, across the box, at a CSS
- *  gradient's angle (repeating-linear-gradient's stripes). */
-function stripes(ctx, x, y, w, h, deg, period, width, color) {
+ *  gradient's angle (repeating-linear-gradient's stripes), moved
+ *  `offset` along the gradient. */
+function stripes(ctx, x, y, w, h, deg, period, width, color, offset = 0) {
   const a = (deg * Math.PI) / 180
   const dx = Math.sin(a)
   const dy = -Math.cos(a)
@@ -936,9 +965,9 @@ function stripes(ctx, x, y, w, h, deg, period, width, color) {
   ctx.clip()
   ctx.strokeStyle = color
   ctx.lineWidth = width
-  const n = Math.ceil(R / period) + 1
+  const n = Math.ceil(R / period) + 2
   for (let k = -n; k <= n; k++) {
-    const off = k * period + width / 2
+    const off = k * period + width / 2 + (offset % period)
     const cx = x + w / 2 + dx * off
     const cy = y + h / 2 + dy * off
     ctx.beginPath()
@@ -946,6 +975,39 @@ function stripes(ctx, x, y, w, h, deg, period, width, color) {
     ctx.lineTo(cx - dy * R, cy + dx * R)
     ctx.stroke()
   }
+  ctx.restore()
+}
+
+// The keyframes' timing functions (index.css): `ease`, a keyframe's
+// own when none is named, ease-in, and the app's --ease-out.
+const EASE = cssEase(0.25, 0.1, 0.25, 1)
+const EASE_IN = cssEase(0.42, 0, 1, 1)
+const SETTLE = cssEase(0.2, 0.8, 0.2, 1)
+const clamp01 = v => Math.max(0, Math.min(1, v))
+
+/** A keyframed CSS value `t` seconds into an animation `dur` long:
+ *  `list` [[offset, value]], a value a number or an array of numbers,
+ *  each interval eased as an animation-timing-function eases it; before
+ *  its start the first frame and after its end the last (fill both). */
+function frames(t, dur, list, ease = EASE) {
+  const f = clamp01(t / dur)
+  let i = 1
+  while (i < list.length - 1 && f > list[i][0]) i++
+  const [o0, a] = list[i - 1]
+  const [o1, b] = list[i]
+  const k = ease(o1 > o0 ? clamp01((f - o0) / (o1 - o0)) : 1)
+  return Array.isArray(a) ? a.map((v, j) => v + (b[j] - v) * k) : a + (b - a) * k
+}
+
+/** Draw `fn` faded by `op` and scaled by `s` about (`ox`, `oy`), moved by (`dx`, `dy`). */
+function moved(ctx, { op = 1, s = 1, ox = 0, oy = 0, dx = 0, dy = 0 }, fn) {
+  if (op <= 0) return
+  ctx.save()
+  ctx.globalAlpha *= op
+  ctx.translate(ox + dx, oy + dy)
+  ctx.scale(s, s)
+  ctx.translate(-ox, -oy)
+  fn()
   ctx.restore()
 }
 
@@ -1029,266 +1091,760 @@ export function stageButton(ctx, p, x, y, w, u, label, { press = 0 } = {}) {
   return h
 }
 
-/** The race (.pvp-line-race, the owner's P2c): the minute as a bar, then
- *  the two trains on their line, the other's above. `rows`: [{ who, n,
- *  me, at }], `at` the train's share of its rail; `gap`, on the trailing
- *  train's rail, hatched from its nose to the leader's in the leader's
- *  ink, what it is worth over it: { row, from, span, fig, mine }.
- *  Returns its height. */
-export function raceLine(ctx, p, x, y, w, u, { clock, rows, gap = null }) {
+// ── The run, played as a game (C1, plan 285) ──
+/** The run's head (.stage__head, StageHead), `y` the screen's top: the
+ *  way out, its chevron alone, then where the run is and under it the
+ *  sprint's clock, in the rush's ink in its last seconds. */
+export function stageHead(ctx, p, x, y, w, u, { where, sub = '', rush = false }) {
   const c = duelInks(p)
-  ctx.fillStyle = c.line
-  rrect(ctx, x, y, w, 6 * u, 3 * u)
+  // ‹: ChevronIcon at 18px, 15 5 / 8 12 / 15 19 in its 24 box, 2.5 wide.
+  const k = (18 / 24) * u
+  const top = y + 21 * u
+  ctx.save()
+  ctx.strokeStyle = c.ink2
+  ctx.lineWidth = 2.5 * k
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.beginPath()
+  ctx.moveTo(x + 15 * k, top + 5 * k)
+  ctx.lineTo(x + 8 * k, top + 12 * k)
+  ctx.lineTo(x + 15 * k, top + 19 * k)
+  ctx.stroke()
+  ctx.restore()
+  text(ctx, where, x + w / 2, y + 26.56 * u, { f: font(700, 13.12 * u, 'latin'), color: c.ink, align: 'center' })
+  if (sub) caps(ctx, sub, x + w / 2, y + 43.56 * u, 9.92 * u, rush ? c.rushInk : c.ink2, 'center')
+}
+
+/** The combo at the head's right (.pvp-combo, RaceFx.ComboRing), its
+ *  plate's right edge at `right` and `y` the screen's top: the ring
+ *  filling toward the next tier (`share`) with the streak in it, COMBO
+ *  and the multiplier beside it, the plate lit a step a tier; or, for a
+ *  moment, a streak of three or more broken (`lost`, its words). Nothing
+ *  under two right in a row. `since`: seconds since the streak moved
+ *  (`n`), the multiplier moved (`mult`), a tier was reached (`tier`) or
+ *  the streak broke (`broke`). */
+export function comboRing(ctx, p, right, y, u, { streak = 0, mult = 1, share = 0, cap, multText = '', lost = null, since = {} }) {
+  const c = duelInks(p)
+  const capF = font(700, 9.92 * u, 'latin')
+  const capW = measure(ctx, cap.toLocaleUpperCase(), capF, TR.caption)
+  const top = y + 4 * u
+  if (lost) {
+    // pvp-broke, 1.1s ease-out: a shake, held, then up and out from 80%.
+    const t = since.broke ?? 1
+    const dx = frames(t, 1.1, [[0, 0], [0.08, -7], [0.16, 6], [0.24, -3], [0.32, 0], [1, 0]], EASE_OUT)
+    const [dy, op] = frames(t, 1.1, [[0, [0, 1]], [0.8, [0, 1]], [1, [-4, 0]]], EASE_OUT)
+    const lostF = font(700, 13.12 * u, 'latin')
+    const w = 62 * u + Math.max(capW, measure(ctx, lost, lostF))
+    const x = right - w
+    moved(ctx, { op, dx: dx * u, dy: dy * u }, () => {
+      ctx.fillStyle = c.wrong
+      rrect(ctx, x, top, w, 44 * u, 22 * u)
+      ctx.fill()
+      ctx.fillStyle = 'rgba(0,0,0,0.18)'
+      ctx.beginPath()
+      ctx.arc(x + 22 * u, top + 22 * u, 15 * u, 0, Math.PI * 2)
+      ctx.fill()
+      text(ctx, '✕', x + 22 * u, top + 27.3 * u, { f: font(700, 15.2 * u, 'latin'), color: c.plateInk, align: 'center' })
+      moved(ctx, { op: 0.7 }, () => caps(ctx, cap, x + 45 * u, top + 18.91 * u, 9.92 * u, c.plateInk))
+      text(ctx, lost, x + 45 * u, top + 31.31 * u, { f: lostF, color: c.plateInk })
+    })
+    return
+  }
+  if (streak < 2) return
+  const tier = mult >= 3 ? 3 : mult >= 2 ? 2 : mult > 1 ? 1.5 : 1
+  const multF = font(700, 20 * u, 'latin')
+  const w = 64 * u + Math.max(capW, multText ? measure(ctx, multText, multF) : 0)
+  const x = right - w
+  const h = 48 * u
+  // The plate, lit a step a tier: a glow, then a warm end (×2 gold, ×3 heat).
+  ctx.save()
+  if (tier > 1) {
+    const [blur, ink, a] = tier === 3 ? [18, c.heat, 0.6] : tier === 2 ? [14, c.warm, 0.55] : [10, c.warm, 0.35]
+    ctx.shadowColor = alpha(ink, a)
+    ctx.shadowBlur = blur * u
+  }
+  if (tier >= 2) {
+    const g = ctx.createLinearGradient(x, 0, x + w, 0)
+    g.addColorStop(0, c.plate)
+    g.addColorStop(1, tier === 3 ? mix(c.heat, c.plate, 0.22) : mix(c.warm, c.plate, 0.18))
+    ctx.fillStyle = g
+  } else ctx.fillStyle = c.plate
+  rrect(ctx, x, top, w, h, h / 2)
   ctx.fill()
-  if (clock > 0) {
-    ctx.fillStyle = c.pass
-    rrect(ctx, x, y, w * Math.min(1, clock), 6 * u, 3 * u)
+  ctx.restore()
+  ctx.strokeStyle = c.plateLine
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, top + u / 2, w - u, h - u, h / 2)
+  ctx.stroke()
+  // The ring: the way to the next tier in the gate's gold (×3: heat on spark).
+  const cx = x + 24 * u
+  const cy = top + 24 * u
+  ctx.fillStyle = tier === 3 ? c.spark : mix(c.plateInk, c.plate, 0.18)
+  ctx.beginPath()
+  ctx.arc(cx, cy, 19 * u, 0, Math.PI * 2)
+  ctx.fill()
+  if (share > 0) {
+    ctx.fillStyle = tier === 3 ? c.heat : c.gold
+    ctx.beginPath()
+    ctx.moveTo(cx, cy)
+    ctx.arc(cx, cy, 19 * u, -Math.PI / 2, -Math.PI / 2 + clamp01(share) * Math.PI * 2)
+    ctx.closePath()
     ctx.fill()
   }
-  const py = y + 14 * u
-  const ph = (16 + rows.length * 40 + (rows.length - 1) * 6 + 2) * u
-  panelBox(ctx, x, py, w, ph, 8 * u, c.surface, c.line, u)
-  const inner = w - 26 * u
-  const rx = x + 13 * u + 68.39 * u + 8 * u
-  const rw = inner - 68.39 * u - 8 * u - 36 * u
-  const figF = font(700, 13.12 * u, 'latin')
-  rows.forEach((r, i) => {
-    const bottom = py + (9 + i * 46 + 40) * u
-    caps(ctx, r.who, x + 13 * u, bottom - 8.4 * u, 9.92 * u, r.me ? c.ink : c.ink2)
-    ctx.fillStyle = c.line
-    ctx.fillRect(rx, bottom - 7 * u, rw + 36 * u, 2 * u)
-    if (gap && gap.row === i && gap.span > 0) {
-      const gx = rx + gap.from * rw + 36 * u
-      const gw = gap.span * rw
-      stripes(ctx, gx, bottom - 12 * u, gw, 12 * u, 135, 8 * u, 4 * u, alpha(gap.mine ? c.pass : c.ink2, 0.3))
-      text(ctx, gap.fig, gx + 6 * u, bottom - 17.84 * u, { f: figF, color: gap.mine ? c.pass : c.ink2 })
+  ctx.fillStyle = c.plate
+  ctx.beginPath()
+  ctx.arc(cx, cy, 15 * u, 0, Math.PI * 2)
+  ctx.fill()
+  // A new tier: ten sparks out of the ring (pvp-ringburst, 0.6s ease-out).
+  if (since.tier != null && since.tier < 0.6) {
+    const [r, s, op] = frames(since.tier, 0.6, [[0, [10, 1.2, 1]], [1, [42, 0.3, 0]]], EASE_OUT)
+    for (let i = 0; i < 10; i++) {
+      ctx.save()
+      ctx.globalAlpha *= op
+      ctx.translate(cx, cy)
+      ctx.rotate((i * 36 * Math.PI) / 180)
+      ctx.translate(r * u, 0)
+      ctx.scale(s, s)
+      ctx.fillStyle = i % 2 ? c.heat : c.spark
+      ctx.fillRect(-3 * u, -3 * u, 6 * u, 6 * u)
+      ctx.restore()
     }
-    const tx = rx + Math.max(0, Math.min(1, r.at)) * rw
-    ctx.fillStyle = r.me ? c.pass : c.ink2
-    ctx.beginPath()
-    ctx.roundRect(tx, bottom - 12 * u, 36 * u, 12 * u, [0, 6 * u, 6 * u, 0])
+  }
+  // The streak, popping in at each answer (pvp-pop, 0.3s ease-out).
+  const [ps, po] = frames(since.n ?? 1, 0.3, [[0, [1.5, 0]], [0.6, [0.96, 1]], [1, [1, 1]]], EASE_OUT)
+  moved(ctx, { op: po, s: ps, ox: cx, oy: cy }, () => text(ctx, String(streak), cx, top + 28.84 * u, { f: font(700, 15.2 * u, 'latin'), color: c.plateInk, align: 'center' }))
+  const tx = x + 51 * u
+  moved(ctx, { op: 0.7 }, () => caps(ctx, cap, tx, top + (multText ? 17.8 : 27.8) * u, 9.92 * u, c.plateInk))
+  if (multText) {
+    // The multiplier, stamped in at each tier (pvp-tier, 0.45s).
+    const [ms, mo] = frames(since.mult ?? 1, 0.45, [[0, [2.1, 0]], [0.6, [0.92, 1]], [1, [1, 1]]], cssEase(0.2, 0.9, 0.3, 1.4))
+    const mw = measure(ctx, multText, multF)
+    moved(ctx, { op: mo, s: ms, ox: tx + mw / 2, oy: top + 29.2 * u }, () => text(ctx, multText, tx, top + 36.2 * u, { f: multF, color: tier === 3 ? mix(c.heat, c.spark, 0.45) : c.spark }))
+  }
+}
+
+// T1 (components/pvp/Train.jsx): its drawing in its 120 × 30 box.
+const T1 = {
+  panto: 'M24 6.2 L29 2.2 H35',
+  body: 'M2 9.2 Q2 6.2 5.2 6.2 H62 C79 6.2 95 9.6 108 16.4 Q117.5 21 113.6 23 Q111.6 24 107 24 H5.2 Q2 24 2 21 Z',
+  cab: 'M66.5 9.7 C79 9.8 89.5 12.2 97 15.9 H73.5 Q69 15.9 67.4 13.6 Z',
+  stripe: 'M2 17.6 H103.5 Q105.6 18.5 106.6 19.4 H2 Z',
+}
+const T1_GAPS = [14.5, 22.5, 30.5, 38.5, 46.5]
+let t1Paths = null
+
+/** The T1 alone, 96 × 24 (--duel-train-w), its top left at (x, y) and its
+ *  nose to the right (`flip`: to the left): the learner's in the pass's
+ *  charcoal with the gate's gold band, the other's white with the
+ *  rival's blue. */
+export function trainT1(ctx, p, x, y, u, { me = false, flip = false } = {}) {
+  const c = duelInks(p)
+  t1Paths ??= Object.fromEntries(Object.entries(T1).map(([k, d]) => [k, new Path2D(d)]))
+  const P = t1Paths
+  const k = 0.8 * u
+  const box = (bx, by, bw, bh, r) => { rrect(ctx, bx, by, bw, bh, r); ctx.fill() }
+  ctx.save()
+  ctx.translate(flip ? x + 96 * u : x, y)
+  ctx.scale(flip ? -k : k, k)
+  ctx.fillStyle = 'rgba(0,0,0,0.07)'
+  ctx.beginPath()
+  ctx.ellipse(58, 28.6, 55, 1.4, 0, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.strokeStyle = T1_INKS.panto
+  ctx.lineWidth = 1
+  ctx.lineCap = 'round'
+  ctx.stroke(P.panto)
+  ctx.fillStyle = me ? c.pass : T1_INKS.body
+  ctx.fill(P.body)
+  if (!me) {
+    ctx.strokeStyle = T1_INKS.rule
+    ctx.lineWidth = 0.7
+    ctx.stroke(P.body)
+  }
+  const glass = me ? T1_INKS.meGlass : T1_INKS.glass
+  ctx.fillStyle = glass
+  box(6.5, 10, 52, 4.4, 2.2)
+  ctx.fillStyle = me ? c.pass : T1_INKS.body
+  for (const gx of T1_GAPS) ctx.fillRect(gx, 10, 0.9, 4.4)
+  ctx.fillStyle = glass
+  ctx.fill(P.cab)
+  ctx.fillStyle = me ? c.gold : c.rival
+  ctx.fill(P.stripe)
+  ctx.fillStyle = me ? T1_INKS.meSkirt : T1_INKS.skirt
+  box(5.5, 24, 99, 2.4, 1.2)
+  ctx.fillStyle = T1_INKS.bogie
+  box(12, 25, 15, 2.8, 1.4)
+  box(80, 25, 15, 2.8, 1.4)
+  ctx.fillStyle = me ? c.spark : T1_INKS.lamp
+  ctx.beginPath()
+  ctx.ellipse(110.6, 20.6, 1.9, 0.9, 0, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+}
+
+/** The train as it rides (.pvp-loco), its top left at (x, y): behind the
+ *  learner's a heat trail while the combo pays ×2 (gold) or ×3 (red,
+ *  flickering), `heat` seconds since it came; speed lines `lines`
+ *  seconds after it gained (null: none). */
+export function loco(ctx, p, x, y, u, { me = false, mult = 1, flip = false, lines = null, heat = 1 } = {}) {
+  const c = duelInks(p)
+  if (me && !flip && mult >= 2) {
+    const three = mult >= 3
+    const w = (three ? 68 : 46) * u
+    const hx = x + 6 * u - w
+    const hy = y + 8 * u
+    // pvp-heat, 0.5s ease-out: grown from its right; ×3 then flickers (steps(2) over 0.24s).
+    const grow = frames(heat, 0.5, [[0, [0, 0]], [1, [1, 1]]], EASE_OUT)
+    const flicker = three && heat > 0.5 ? [1, 0.89, 0.78, 0.89][Math.floor(((heat - 0.5) % 0.24) / 0.06)] : 1
+    const g = ctx.createLinearGradient(hx, 0, hx + w, 0)
+    if (three) {
+      g.addColorStop(0, alpha(c.heat, 0))
+      g.addColorStop(0.4, alpha(c.heat, 0.6))
+      g.addColorStop(1, c.spark)
+    } else {
+      g.addColorStop(0, alpha(c.gold, 0))
+      g.addColorStop(1, alpha(c.gold, 0.8))
+    }
+    ctx.save()
+    ctx.globalAlpha *= grow[1] * flicker
+    ctx.translate(hx + w, 0)
+    ctx.scale(grow[0], 1)
+    ctx.translate(-(hx + w), 0)
+    ctx.fillStyle = g
+    rrect(ctx, hx, hy, w, 9 * u, 4.5 * u)
     ctx.fill()
-    text(ctx, r.fig, tx + 18 * u, bottom - 17.85 * u, { f: figF, color: r.me ? c.ink : c.ink2, align: 'center' })
+    ctx.restore()
+  }
+  if (lines != null && lines < 0.6) {
+    // Three lines behind it (pvp-lines, 0.5s ease-out, 0.05s apart): out from its tail, then gone.
+    const right = flip ? x + 98 * u : x - 2 * u
+    ;[22, 14, 19].forEach((lw, j) => {
+      const [sx, tx, op] = frames(lines - 0.05 * j, 0.5, [[0, [0, 0, 0]], [0.3, [1, 0, 1]], [1, [0.3, -10, 0]]], EASE_OUT)
+      if (op <= 0) return
+      ctx.save()
+      ctx.globalAlpha *= op
+      ctx.fillStyle = me ? c.gold : alpha(c.rival, 0.7)
+      const len = lw * sx * u
+      const end = right + tx * sx * u * (flip ? -1 : 1)
+      rrect(ctx, flip ? end : end - len, y + (2 + 6 * j) * u, len, 2 * u, u)
+      ctx.fill()
+      ctx.restore()
+    })
+  }
+  trainT1(ctx, p, x, y, u, { me, flip })
+}
+
+// 3.6em of names before the rail, which stops a train's length short of
+// the line's end so the nose reaches it.
+const railOf = (x, w, u) => ({ x: x + (13 + 54.72 + 8) * u, w: w - (26 + 54.72 + 8 + 96) * u })
+
+/** Where the race drawn at (x, y, w) sets a train, its T1's top left:
+ *  `row` 0 the other's and 1 the learner's, `at` its share of the rail. */
+export function trainSpot(x, y, w, u, { rush = false, row = 1, at = 0 }) {
+  const r = railOf(x, w, u)
+  return { x: r.x + clamp01(at) * r.w, y: y + ((rush ? 8 : 6) + 8 + 55 + row * 50 - 40.13 + 13.12) * u }
+}
+
+/** The race (.pvp-line-race, the owner's C1): the sprint as a bar, then
+ *  the two T1 trains on their sleepered rails, the other's above, each
+ *  under its total; on the trailing rail the stretch to the leader's nose
+ *  hatched in the leader's ink, what it is worth over it. In the rush the
+ *  bar is striped, 8px, its pill on it; « Partez ! » or « Arrivée ! » is
+ *  stamped over the line, a change of hands over the train that went
+ *  ahead. `rows`: [{ who, fig, me, at, mult, gained, heat }], `at` the
+ *  train's share of its rail, `gained` seconds since its total moved;
+ *  `gap`: { row, from, span, fig, mine }; `band`: { word, finish, t };
+ *  `pass`: { me, jp, word, t }; `rush`: { word, mult, t }; `t` the moment.
+ *  Returns its height and where the learner's train stands. */
+export function raceLine(ctx, p, x, y, w, u, { clock, rows, gap = null, band = null, pass = null, rush = null, t = 0 }) {
+  const c = duelInks(p)
+  const ch = (rush ? 8 : 6) * u
+  ctx.save()
+  rrect(ctx, x, y, w, ch, ch / 2)
+  ctx.clip()
+  ctx.fillStyle = c.line
+  ctx.fillRect(x, y, w, ch)
+  const fill = w * clamp01(clock)
+  if (rush) {
+    // repeating-linear-gradient(135deg, rush 0 8px, gold 8px 16px), a stripe further each 0.6s.
+    ctx.fillStyle = c.warm
+    ctx.fillRect(x, y, fill, ch)
+    stripes(ctx, x, y, fill, ch, 135, 16 * u, 8 * u, c.rush, (((t % 0.6) + 0.6) % 0.6 / 0.6) * 16 * u)
+  } else {
+    ctx.fillStyle = c.pass
+    ctx.fillRect(x, y, fill, ch)
+  }
+  ctx.restore()
+  const top = y + ch + 8 * u
+  panelBox(ctx, x, top, w, 114 * u, 8 * u, c.surface, c.line, u)
+  const { x: railX, w: railW } = railOf(x, w, u)
+  const trains = rows.map((r, i) => {
+    const bottom = top + (55 + i * 50) * u
+    caps(ctx, r.who, x + 13 * u, bottom - 8.87 * u, 9.92 * u, r.me ? c.ink : c.ink2)
+    // Its sleepers, then the rail over them, out to the line's end.
+    const len = railW + 96 * u
+    ctx.fillStyle = alpha(c.ink2, 0.32)
+    for (let sx = 0; sx < len; sx += 7 * u) ctx.fillRect(railX + sx, bottom - 5 * u, Math.min(2 * u, len - sx), 4 * u)
+    ctx.fillStyle = alpha(c.ink2, 0.55)
+    ctx.fillRect(railX, bottom - 5.5 * u, len, 1.5 * u)
+    if (gap && gap.row === i && gap.span > 0) {
+      const gx = railX + gap.from * railW + 96 * u
+      const ink = gap.mine ? c.pass : c.ink2
+      stripes(ctx, gx, bottom - 16 * u, gap.span * railW, 10 * u, 135, 8 * u, 4 * u, alpha(ink, 0.3))
+      text(ctx, gap.fig, gx + 6 * u, bottom - 22.12 * u, { f: font(700, 13.12 * u, 'latin'), color: ink })
+    }
+    return { r, x: railX + clamp01(r.at) * railW, y: bottom - 40.13 * u }
   })
-  return 14 * u + ph
+  const figF = font(700, 13.12 * u, 'latin')
+  for (const { r, x: bx, y: by } of trains) {
+    // Its total over it, bumped each time it moves (pvp-bump, 0.35s ease-out, from its foot).
+    const boxW = measure(ctx, r.fig, figF) + 8 * u
+    const s = frames(r.gained ?? 1, 0.35, [[0, 1.22], [1, 1]], EASE_OUT)
+    moved(ctx, { s, ox: bx + 96 * u - boxW * 0.2, oy: by + 13.12 * u }, () => text(ctx, r.fig, bx + 88 * u, by + 11 * u, { f: figF, color: r.me ? c.ink : c.ink2, align: 'right' }))
+    loco(ctx, p, bx, by + 13.12 * u, u, { me: r.me, mult: r.mult ?? 1, lines: r.gained ?? null, heat: r.heat ?? 1 })
+  }
+  if (rush) {
+    // The rush's pill on the clock (pvp-rush-in, 0.6s): up from 20px under, at 0.6 its size.
+    const wf = font(700, 11.52 * u, 'latin')
+    const mf = font(700, 15.2 * u, 'latin')
+    const ww = measure(ctx, rush.word.toLocaleUpperCase(), wf, TR.caption)
+    const pw = (24 + 6) * u + ww + measure(ctx, rush.mult, mf)
+    const ph = 32.31 * u
+    const px = x + w / 2 - pw / 2
+    const py = y - 9 * u
+    const [dy, s, op] = frames(rush.t ?? 1, 0.6, [[0, [20, 0.6, 0]], [1, [0, 1, 1]]], cssEase(0.2, 0.9, 0.3, 1.3))
+    moved(ctx, { op, s, ox: x + w / 2, oy: py + ph / 2, dy: dy * u }, () => {
+      ctx.save()
+      ctx.shadowColor = alpha(c.rush, 0.35)
+      ctx.shadowBlur = 14 * u
+      ctx.shadowOffsetY = 4 * u
+      const g = ctx.createLinearGradient(px, 0, px + pw, 0)
+      g.addColorStop(0, c.rush)
+      g.addColorStop(1, c.warm)
+      ctx.fillStyle = g
+      rrect(ctx, px, py, pw, ph, ph / 2)
+      ctx.fill()
+      ctx.restore()
+      caps(ctx, rush.word, px + 12 * u, py + 21 * u, 11.52 * u, c.plateInk)
+      text(ctx, rush.mult, px + 18 * u + ww, py + 21 * u, { f: mf, color: c.plateInk })
+    })
+  }
+  const mine = trains.find(tr => tr.r.me)
+  if (pass) {
+    // Who just went ahead, over their own train (pvp-pass, 1.5s ease-out):
+    // in from 16px to its right, held, then up and out.
+    const tr = trains.find(x2 => x2.r.me === pass.me)
+    if (tr) {
+      const jf = font(700, 11.52 * u, 'jp')
+      const wf = font(700, 11.52 * u, 'latin')
+      const jw = measure(ctx, pass.jp, jf)
+      const pw = (16 + 6) * u + jw + measure(ctx, pass.word, wf)
+      const ph = 26.42 * u
+      const px = tr.x + 96 * u - pw
+      const py = tr.y + 2 * u - ph
+      const [dx, dy, s, op] = frames(pass.t, 1.5, [[0, [16, 0, 0.8, 0]], [0.14, [0, 0, 1, 1]], [0.78, [0, 0, 1, 1]], [1, [0, -6, 1, 0]]], EASE_OUT)
+      moved(ctx, { op, s, ox: px + pw / 2, oy: py + ph / 2, dx: dx * u, dy: dy * u }, () => {
+        if (pass.me) {
+          const g = ctx.createLinearGradient(px, 0, px + pw, 0)
+          g.addColorStop(0, c.deep)
+          g.addColorStop(1, c.warm)
+          ctx.fillStyle = g
+        } else ctx.fillStyle = mix(c.rival, '#000000', 0.88)
+        rrect(ctx, px, py, pw, ph, ph / 2)
+        ctx.fill()
+        const ink = pass.me ? c.plate : c.plateInk
+        text(ctx, pass.jp, px + 8 * u, py + 17 * u, { f: jf, color: ink })
+        text(ctx, pass.word, px + 14 * u + jw, py + 17 * u, { f: wf, color: ink })
+      })
+    }
+  }
+  if (band) {
+    // « Partez ! » holds its first 55% then fades (pvp-band, 1s ease-in);
+    // « Arrivée ! » fades in (0.25s) and stays, the finish's checkers at
+    // the rails' end. The word is stamped in (pvp-zoom, 0.55s).
+    const bx = x + u
+    const by = top + u
+    const bw = w - 2 * u
+    const bh = 112 * u
+    const op = band.finish ? frames(band.t, 0.25, [[0, 0], [1, 1]], EASE_OUT) : frames(band.t, 1, [[0, 1], [0.55, 1], [1, 0]], EASE_IN)
+    moved(ctx, { op }, () => {
+      ctx.fillStyle = alpha(p.bg, band.finish ? 0.72 : 0.78)
+      rrect(ctx, bx, by, bw, bh, 8 * u)
+      ctx.fill()
+      if (band.finish) {
+        const kx = bx + bw - 22 * u
+        ctx.save()
+        ctx.globalAlpha *= 0.8
+        ctx.beginPath()
+        ctx.rect(kx, by + 8 * u, 10 * u, bh - 16 * u)
+        ctx.clip()
+        for (let row = 0; row * 5 < 96; row++) {
+          for (let col = 0; col < 2; col++) {
+            ctx.fillStyle = (row + col) % 2 ? c.plate : c.plateInk
+            ctx.fillRect(kx + col * 5 * u, by + (8 + row * 5) * u, 5 * u, 5 * u)
+          }
+        }
+        ctx.restore()
+      }
+      const [s, o] = frames(band.t, 0.55, [[0, [2.4, 0]], [0.4, [0.95, 1]], [1, [1, 1]]], cssEase(0.2, 0.9, 0.3, 1.3))
+      moved(ctx, { op: o, s, ox: bx + bw / 2, oy: by + bh / 2 }, () => text(ctx, band.word, bx + bw / 2, by + 70 * u, { f: font(700, 40 * u, 'latin'), color: band.finish ? c.ink : c.sel, align: 'center' }))
+    })
+  }
+  return { h: ch + 122 * u, me: mine ? { x: mine.x, y: mine.y + 13.12 * u } : null }
+}
+
+/** The rush's warmed edge (.pvp-run--rush::after): a 2px rule and a 38px
+ *  glow inside the screen's edge in the heat's ink, breathing (pvp-warm,
+ *  1s ease-in-out), `t` the moment. */
+export function warmEdge(ctx, p, x, y, w, h, u, t) {
+  const c = duelInks(p)
+  const op = frames(((t % 1) + 1) % 1, 1, [[0, 1], [0.5, 0.35], [1, 1]], cssEase(0.42, 0, 0.58, 1))
+  const g = 38 * u
+  const edge = (x0, y0, x1, y1, rx, ry, rw, rh) => {
+    const grad = ctx.createLinearGradient(x0, y0, x1, y1)
+    grad.addColorStop(0, alpha(c.heat, 0.22))
+    grad.addColorStop(1, alpha(c.heat, 0))
+    ctx.fillStyle = grad
+    ctx.fillRect(rx, ry, rw, rh)
+  }
+  ctx.save()
+  ctx.globalAlpha *= op
+  edge(x, 0, x + g, 0, x, y, g, h)
+  edge(x + w, 0, x + w - g, 0, x + w - g, y, g, h)
+  edge(0, y, 0, y + g, x, y, w, g)
+  edge(0, y + h, 0, y + h - g, x, y + h - g, w, g)
+  ctx.strokeStyle = alpha(c.heat, 0.45)
+  ctx.lineWidth = 2 * u
+  ctx.strokeRect(x + u, y + u, w - 2 * u, h - 2 * u)
+  ctx.restore()
 }
 
 /** The question's page (.exam-page.pvp-page): its kind, what it is worth
  *  now over the gold that runs out, the prompt (a word's reading over
- *  it); once answered, its edge in the verdict's ink. With `count` it is
- *  the count before the start. */
-export function duelPage(ctx, p, x, y, w, h, u, { kind, worth, share = 0, prompt, reading, verdict = null, count = null, pop = 0 }) {
-  // `pop` swells the count, or what the answer paid, as it lands.
+ *  it); once answered, its edge in the verdict's ink. A question lands at
+ *  once (pvp-q-in, 110ms), `since` seconds ago. With `count` it is the
+ *  count before the start, stamped in (pvp-zoom, 0.9s). `dim`: the
+ *  arrival puts it away. */
+export function duelPage(ctx, p, x, y, w, h, u, { kind, worth, share = 0, prompt, reading, verdict = null, count = null, since = 1, pop = 0, dim = 1 }) {
   const c = duelInks(p)
-  panelBox(ctx, x, y, w, h, 8 * u, c.card, verdict === 'right' ? c.right : verdict === 'wrong' ? c.wrong : c.border, u)
-  if (count != null) {
-    ctx.save()
-    ctx.translate(x + w / 2, y + h / 2)
-    ctx.scale(1 + pop, 1 + pop)
-    text(ctx, String(count), 0, 40 * u * 0.36, { f: font(700, 40 * u, 'latin'), color: c.ink, align: 'center' })
-    ctx.restore()
-    return
-  }
-  ctx.fillStyle = c.border
-  ctx.fillRect(x + u, y + 52 * u, w - 2 * u, u)
-  const kw = caps(ctx, kind, x + 17 * u, y + 30.07 * u, 9.92 * u, c.ink2)
-  const worthW = 44.8 * u
-  const d0 = x + 17 * u + kw + 12 * u
-  const d1 = x + w - 17 * u - worthW - 12 * u
-  ctx.fillStyle = c.line
-  rrect(ctx, d0, y + 24.5 * u, d1 - d0, 4 * u, 2 * u)
-  ctx.fill()
-  if (share > 0) {
-    ctx.fillStyle = c.gold
-    rrect(ctx, d0, y + 24.5 * u, (d1 - d0) * share, 4 * u, 2 * u)
-    ctx.fill()
-  }
-  ctx.save()
-  ctx.translate(x + w - 17 * u, y + 26.5 * u)
-  ctx.scale(1 + pop, 1 + pop)
-  text(ctx, String(worth), 0, 6.44 * u, { f: font(700, 17.92 * u, 'latin'), color: c.sel, align: 'right' })
-  ctx.restore()
-  // The body: the reading over the prompt, the two centred in what is left.
-  const top = y + 53 * u
-  const room = y + h - u - top
-  const block = (reading ? 24.32 + 6 : 0) + 48
-  const by = top + (room - block * u) / 2
-  if (reading) text(ctx, reading, x + w / 2, by + 17.9 * u, { f: font(400, 15.2 * u, 'jp'), color: c.ink2, align: 'center', tr: 0.3 })
-  let z = 40 * u
-  while (z > 20 * u && measure(ctx, prompt, font(500, z, 'jp')) > w - 34 * u) z -= u
-  text(ctx, prompt, x + w / 2, by + ((reading ? 30.32 : 0) + 24) * u + z * 0.38, { f: font(500, z, 'jp'), color: c.ink, align: 'center' })
-}
-
-/** The answers docked under the thumb (.exam-tiles in .pvp-dock): a word's
- *  meanings one under another, a reading or a spelling two by two; the
- *  picked one, once answered, in the verdict's ink, never the right one
- *  shown. Each tile's centre is returned with the height. */
-export function duelTiles(ctx, p, x, y, w, u, { choices, two, picked = null, verdict = null }) {
-  const c = duelInks(p)
-  const cols = two ? 2 : 1
-  const gap = (two ? 8 : 6) * u
-  const tw = (w - gap * (cols - 1)) / cols
-  const th = 56 * u
-  const centres = []
-  choices.forEach((label, i) => {
-    const tx = x + (i % cols) * (tw + gap)
-    const ty = y + Math.floor(i / cols) * (th + gap)
-    const mine = verdict && i === picked
-    const ink = mine ? (verdict === 'right' ? c.right : c.wrong) : null
-    ctx.strokeStyle = ink || alpha(c.onPanel, 0.18)
-    ctx.lineWidth = u
-    rrect(ctx, tx + u / 2, ty + u / 2, tw - u, th - u, 8 * u)
-    ctx.stroke()
-    const cx = tx + 23 * u
-    const cy = ty + th / 2
-    ctx.beginPath()
-    if (ink) {
-      ctx.fillStyle = ink
-      ctx.arc(cx, cy, 16 * u, 0, Math.PI * 2)
-      ctx.fill()
-    } else {
-      ctx.strokeStyle = c.soft
-      ctx.lineWidth = 2 * u
-      ctx.arc(cx, cy, 15 * u, 0, Math.PI * 2)
-      ctx.stroke()
+  const [dy, op] = count != null ? [0, 1] : frames(since, 0.11, [[0, [3, 0.55]], [1, [0, 1]]], EASE_OUT)
+  moved(ctx, { op: op * dim, dy: dy * u }, () => {
+    panelBox(ctx, x, y, w, h, 8 * u, c.card, verdict === 'right' ? c.right : verdict === 'wrong' ? c.wrong : c.border, u)
+    if (count != null) {
+      const [s, o] = frames(since, 0.9, [[0, [2.4, 0]], [0.4, [0.95, 1]], [1, [1, 1]]], cssEase(0.2, 0.9, 0.3, 1.2))
+      moved(ctx, { op: o, s, ox: x + w / 2, oy: y + h / 2 }, () => text(ctx, String(count), x + w / 2, y + h / 2 + 38 * u, { f: font(700, 104 * u, 'latin'), color: c.sel, align: 'center' }))
+      return
     }
-    text(ctx, String(i + 1), cx, cy + 15.2 * u * 0.36, { f: font(700, 15.2 * u, 'latin'), color: ink ? c.panel : c.soft, align: 'center' })
-    const room = tw - 47 * u - 8 * u
-    if (two) {
-      let z = 17.92 * u
-      while (z > 11 * u && measure(ctx, label, font(600, z, 'jp')) > room) z -= 0.5 * u
-      text(ctx, label, tx + 47 * u, cy + z * 0.38, { f: font(600, z, 'jp'), color: c.onPanel })
-    } else {
-      let z = 13.12 * u
-      while (z > 10 * u && measure(ctx, label, font(500, z, 'latin')) > room) z -= 0.5 * u
-      text(ctx, label, tx + 47 * u, cy + z * 0.36, { f: font(500, z, 'latin'), color: c.onPanel })
-    }
-    centres.push([cx + (tw - 46 * u) / 2, cy])
-  })
-  const rows = Math.ceil(choices.length / cols)
-  return { h: rows * th + (rows - 1) * gap, centres }
-}
-
-/** The tiles' height for a question of `two` columns, as duelTiles sets them. */
-export const tilesHeight = (n, two) => (two ? Math.ceil(n / 2) * 56 + (Math.ceil(n / 2) - 1) * 8 : n * 56 + (n - 1) * 6)
-
-/** The result face to face (.pvp-face, the owner's R1a): the verdict and
- *  by how much, the two totals (the learner's underlined in the pass's
- *  ink) with who and how many right, the finish under them. `show`:
- *  { word, figs, finish } shares (0 to 1) of each part's entrance.
- *  Returns its height. */
-export function faceOff(ctx, p, x, y, w, u, { word, win = true, by, sides, finish, show = {} }) {
-  const c = duelInks(p)
-  const h = 287.27 * u
-  panelBox(ctx, x, y, w, h, 8 * u, c.surface, c.line, u)
-  const ix = x + 23 * u
-  const iw = w - 46 * u
-  const fade = (k, fn) => {
-    const f = show[k] ?? 1
-    if (f <= 0) return
-    ctx.save()
-    ctx.globalAlpha *= f
-    fn(f)
-    ctx.restore()
-  }
-  fade('word', f => {
-    ctx.save()
-    ctx.translate(x + w / 2, y + 48.6 * u)
-    const s = 1 + 0.3 * (1 - f)
-    ctx.scale(s, s)
-    text(ctx, word, 0, 0, { f: font(700, 27.2 * u, 'serif'), color: win ? c.ink : c.ink2, align: 'center' })
-    ctx.restore()
-    text(ctx, by, x + w / 2, y + 74.86 * u, { f: font(400, 13.12 * u, 'latin'), color: c.ink2, align: 'center' })
-  })
-  const pt = y + 102.64 * u
-  ctx.fillStyle = c.line
-  ctx.fillRect(ix + iw / 2, pt, u, 88.88 * u)
-  fade('figs', () => {
-    sides.forEach((s, i) => {
-      const cx = ix + (iw / 2) * i + iw / 4
-      const fw = text(ctx, s.fig, cx, pt + 34.4 * u, { f: font(700, 40 * u, 'latin'), color: c.ink, align: 'center' })
-      if (s.me) {
-        ctx.fillStyle = c.pass
-        ctx.fillRect(cx - fw / 2, pt + 34.4 * u + 6.5 * u, fw, 3 * u)
-      }
-      caps(ctx, s.who, cx, pt + 57.5 * u, 9.92 * u, c.ink2, 'center')
-      text(ctx, s.rights, cx, pt + 83.1 * u, { f: font(400, 13.12 * u, 'latin'), color: c.ink2, align: 'center' })
-    })
-  })
-  const ft = y + 213.52 * u
-  ctx.fillStyle = c.line
-  ctx.fillRect(ix, ft, iw, u)
-  const railX = ix + 76.39 * u
-  const railW = iw - 76.39 * u - 32 * u
-  finish.forEach((r, i) => {
-    const top = ft + (13 + i * 21.88) * u
-    caps(ctx, r.who, ix, top + 11.5 * u, 9.92 * u, r.me ? c.ink : c.ink2)
+    ctx.fillStyle = c.border
+    ctx.fillRect(x + u, y + 52 * u, w - 2 * u, u)
+    const kw = caps(ctx, kind, x + 17 * u, y + 29.56 * u, 9.92 * u, c.ink2)
+    const d0 = x + 17 * u + kw + 12 * u
+    const d1 = x + w - (17 + 44.8 + 12) * u
     ctx.fillStyle = c.line
-    ctx.fillRect(railX, top + 6.94 * u, railW + 32 * u, 2 * u)
-    const at = (show.finish ?? 1) * r.at
-    ctx.fillStyle = r.me ? c.pass : c.ink2
-    ctx.beginPath()
-    ctx.roundRect(railX + at * railW, top + 0.94 * u, 32 * u, 14 * u, [0, 7 * u, 7 * u, 0])
+    rrect(ctx, d0, y + 24.5 * u, d1 - d0, 4 * u, 2 * u)
     ctx.fill()
-  })
-  return h
-}
-
-/** The records under a result (.records.pvp-two): each a figure (its unit,
- *  or the Elo's move in its verdict's ink, after it) over its caption.
- *  `cells`: [{ value, unit, move: { text, up, pop }, label }]. Returns its height. */
-export function recordsRow(ctx, p, x, y, w, u, cells) {
-  const c = duelInks(p)
-  const cw = (w - 2 * u - u * (cells.length - 1)) / cells.length
-  const lf = font(700, 9.92 * u, 'latin')
-  const labelLines = cells.map(cell => wrapCaps(ctx, cell.label, lf, cw - 24 * u))
-  const blocks = labelLines.map(ls => 20 + 4 + ls.length * 15.87)
-  const h = (Math.max(...blocks) + 24 + 2) * u
-  ctx.save()
-  rrect(ctx, x, y, w, h, 8 * u)
-  ctx.fillStyle = c.line
-  ctx.fill()
-  ctx.clip()
-  cells.forEach((cell, i) => {
-    const cx = x + u + i * (cw + u)
-    ctx.fillStyle = c.surface
-    ctx.fillRect(cx, y + u, cw, h - 2 * u)
-    const top = y + (h - blocks[i] * u) / 2
-    const vx = cx + 12 * u
-    const vb = top + 17.2 * u
-    const vw = text(ctx, cell.value, vx, vb, { f: font(700, 20 * u, 'latin'), color: c.ink })
-    if (cell.unit) text(ctx, cell.unit, vx + vw + 8 * u, vb, { f: font(600, 13.12 * u, 'latin'), color: c.ink2 })
-    if (cell.move) {
-      const mx = vx + vw + 8 * u
-      const s = 1 + 0.6 * (cell.move.pop ?? 0)
+    if (share > 0) {
       ctx.save()
-      ctx.translate(mx, vb)
-      ctx.scale(s, s)
-      text(ctx, cell.move.text, 0, 0, { f: font(700, 13.12 * u, 'latin'), color: cell.move.up ? p.success : p.danger })
+      rrect(ctx, d0, y + 24.5 * u, d1 - d0, 4 * u, 2 * u)
+      ctx.clip()
+      ctx.fillStyle = c.gold
+      ctx.fillRect(d0, y + 24.5 * u, (d1 - d0) * share, 4 * u)
       ctx.restore()
     }
-    labelLines[i].forEach((l, j) => text(ctx, l, vx, top + (24 + j * 15.87 + 11.5) * u, { f: lf, color: c.ink2, tr: TR.caption }))
+    moved(ctx, { s: 1 + pop, ox: x + w - 17 * u, oy: y + 26.5 * u }, () => text(ctx, String(worth), x + w - 17 * u, y + 32.53 * u, { f: font(700, 17.92 * u, 'latin'), color: c.sel, align: 'right' }))
+    // The body: the reading over the prompt, the two in the middle of what
+    // is left; the prompt lands a little large (pvp-prompt, 0.22s).
+    const mid = y + 53 * u + (h - 54 * u) / 2
+    let z = 40 * u
+    while (z > 20 * u && measure(ctx, prompt, font(500, z, 'jp')) > w - 34 * u) z -= u
+    const block = reading ? 30.32 * u + 1.2 * z : 1.2 * z
+    const bt = mid - block / 2
+    if (reading) text(ctx, reading, x + w / 2, bt + 17.48 * u, { f: font(400, 15.2 * u, 'jp'), color: c.ink2, align: 'center', tr: 0.3 })
+    const pc = bt + (reading ? 30.32 * u : 0) + 0.6 * z
+    const ps = frames(since, 0.22, [[0, 1.06], [1, 1]], cssEase(0.2, 0.9, 0.3, 1.3))
+    moved(ctx, { s: ps, ox: x + w / 2, oy: pc }, () => text(ctx, prompt, x + w / 2, pc + 0.35 * z, { f: font(500, z, 'jp'), color: c.ink, align: 'center' }))
   })
-  ctx.restore()
-  ctx.strokeStyle = c.line
-  ctx.lineWidth = u
-  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 8 * u)
-  ctx.stroke()
-  return h
 }
 
-/** A caption's words in caps, wrapped to `maxW` at its tracking. */
-function wrapCaps(ctx, str, f, maxW) {
-  const words = str.toLocaleUpperCase().split(' ')
-  const lines = []
-  let cur = ''
-  for (const word of words) {
-    const test = cur ? `${cur} ${word}` : word
-    if (!cur || measure(ctx, test, f, TR.caption) <= maxW) cur = test
-    else { lines.push(cur); cur = word }
+/** The answers under the thumb (.exam-tiles in .pvp-dock, Q3 of plan
+ *  285): one list whatever the question asks, each answer alone in the
+ *  middle of its 64px tile, a word's meanings in the display face, a
+ *  reading or a spelling in the Japanese one; once answered the picked
+ *  tile washed in the verdict's ink (shaken when wrong, `since` seconds
+ *  ago), never the right one shown. The story sets them on its ground,
+ *  not on the dock's sumi panel, so they take the ground's ink where the
+ *  app's take the panel's. Returns its height and each tile. */
+export function duelTiles(ctx, p, x, y, w, u, { choices, jp = false, picked = null, verdict = null, since = 1, dim = 1 }) {
+  const c = duelInks(p)
+  const th = 64 * u
+  const gap = 8 * u
+  const face = z => font(jp ? 500 : 600, z, jp ? 'jp' : 'latin')
+  const tiles = choices.map((label, i) => {
+    const ty = y + i * (th + gap)
+    const mine = verdict != null && i === picked
+    const ink = mine ? (verdict === 'right' ? c.right : c.wrong) : null
+    const dx = mine && verdict === 'wrong' ? frames(since, 0.35, [[0, 0], [0.2, -9], [0.4, 7], [0.6, -4], [0.8, 2], [1, 0]], EASE_OUT) : 0
+    const s = mine && verdict === 'right' ? frames(since, 0.25, [[0, 1], [0.4, 0.97], [1, 1]], EASE_OUT) : 1
+    moved(ctx, { op: dim, s, ox: x + w / 2, oy: ty + th / 2, dx: dx * u }, () => {
+      ctx.fillStyle = ink ? alpha(ink, verdict === 'right' ? 0.22 : 0.26) : alpha(c.ink, 0.07)
+      rrect(ctx, x, ty, w, th, 8 * u)
+      ctx.fill()
+      ctx.strokeStyle = ink || alpha(c.ink, 0.22)
+      ctx.lineWidth = u
+      rrect(ctx, x + u / 2, ty + u / 2, w - u, th - u, 7.5 * u)
+      ctx.stroke()
+      let z = (jp ? 27.2 : 20) * u
+      while (z > 12 * u && measure(ctx, label, face(z)) > w - 88 * u) z -= 0.5 * u
+      text(ctx, label, x + w / 2, ty + th / 2 + 0.35 * z, { f: face(z), color: c.ink, align: 'center' })
+    })
+    return { x, y: ty, w, h: th }
+  })
+  return { h: choices.length * th + (choices.length - 1) * gap, tiles }
+}
+
+/** One answer's moment (RaceFx.AnswerFx) `t` seconds after it was given,
+ *  at the tile it was given on: a wrong one's cross; a right one's speed
+ *  note at the tile's end (`note`: [神速 or 快速, its word, flash]) and
+ *  what it added flying from the tile to the learner's train (`fly`:
+ *  { text, tags, hot }, `to` where the train's nose then was). */
+export function answerFx(ctx, p, tile, u, { t, right, note = null, fly = null, to = null }) {
+  const c = duelInks(p)
+  const cy = tile.y + tile.h / 2
+  if (!right) {
+    // pvp-cross, 0.6s ease-out: stamped in, then gone.
+    const [s, op] = frames(t, 0.6, [[0, [1.8, 0]], [0.25, [1, 1]], [1, [1, 0]]], EASE_OUT)
+    const cx = tile.x + tile.w - 18 * u
+    moved(ctx, { op, s, ox: cx, oy: cy }, () => text(ctx, '✕', cx, cy + 9.24 * u, { f: font(700, 27.2 * u, 'latin'), color: c.wrong, align: 'center' }))
+    return
   }
-  if (cur) lines.push(cur)
-  return lines
+  if (note) {
+    // pvp-note, 0.8s ease-out: popped in, then up and out.
+    const [jp, word, flash] = note
+    const jf = font(700, 20 * u, 'jp')
+    const wf = font(700, 9.92 * u, 'latin')
+    const ww = measure(ctx, word.toLocaleUpperCase(), wf, 0.14)
+    const nw = 16 * u + Math.max(measure(ctx, jp, jf), ww)
+    const nh = 45.88 * u
+    const right2 = tile.x + tile.w - 10 * u
+    const [ty, s, op] = frames(t, 0.8, [[0, [-0.5, 0.6, 0]], [0.2, [-0.5, 1.12, 1]], [0.7, [-0.7, 1, 1]], [1, [-1.1, 1, 0]]], EASE_OUT)
+    const top = cy + ty * nh
+    const ink = flash ? c.spark : c.quick
+    moved(ctx, { op, s, ox: right2 - nw / 2, oy: top + nh / 2 }, () => {
+      ctx.save()
+      if (flash) {
+        ctx.shadowColor = alpha(c.spark, 0.6)
+        ctx.shadowBlur = 16 * u
+      }
+      ctx.fillStyle = c.plate
+      rrect(ctx, right2 - nw, top, nw, nh, 10 * u)
+      ctx.fill()
+      ctx.restore()
+      text(ctx, jp, right2 - 8 * u, top + 22 * u, { f: jf, color: ink, align: 'right' })
+      caps(ctx, word, right2 - 8 * u, top + 37 * u, 9.92 * u, ink, 'right', 0.14)
+    })
+  }
+  if (fly && to) {
+    // pvp-fly: 0.08s, then 0.65s to the train at 0.45 its size, nearly gone.
+    const fromX = tile.x + tile.w * 0.66
+    const [dx, dy, s, op] = frames(t - 0.08, 0.65, [[0, [0, 0, 1, 1]], [1, [to.x - fromX, to.y - cy, 0.45, 0.15]]], cssEase(0.5, 0, 0.75, 0.6))
+    const z = (fly.hot ? 27.2 : 20) * u
+    const f = font(700, z, 'latin')
+    const tf = font(700, 13.12 * u, 'latin')
+    const parts = [[fly.text, f], ...(fly.tags || []).map(tag => [` ${tag}`, tf])]
+    const tw = parts.reduce((m, [str, pf]) => m + measure(ctx, str, pf), 0)
+    moved(ctx, { op, s, ox: fromX, oy: cy, dx, dy }, () => {
+      ctx.save()
+      if (fly.hot) {
+        // Both of .pvp-fly--hot's shadows: its 1px drop, then its glow.
+        ctx.filter = `drop-shadow(0 ${u}px 0 rgba(0,0,0,0.35))`
+        ctx.shadowColor = alpha(c.heat, 0.5)
+        ctx.shadowBlur = 10 * u
+      } else {
+        ctx.shadowColor = 'rgba(0,0,0,0.3)'
+        ctx.shadowOffsetY = u
+      }
+      let px = fromX - tw / 2
+      parts.forEach(([str, pf], i) => {
+        px += text(ctx, str, px, cy + 0.35 * z, { f: pf, color: i ? c.heat : fly.hot ? mix(c.spark, c.heat, 0.8) : c.gold })
+      })
+      ctx.restore()
+    })
+  }
+}
+
+// ── The ending, face to face (E4, plan 285) ──
+// DuelEnd's clock: the first line and the step between lines, the
+// verdict, the grade, the gains (seconds after it shows).
+export const E4 = { bar: 1, step: 0.28, verdict: 2.6, grade: 3.1, gains: 3.3 }
+const GRADE_INK = c => ({ S: c.gold, A: c.right, B: c.ink2, C: c.wrong })
+
+/** A duel settled, the two runs face to face (.pvp-vs, DuelEnd.Versus,
+ *  the owner's E4): both trains facing, VS between them and the totals
+ *  counting up; a bar a line the scores were made of (`bars`: [{ k, sub,
+ *  a, b, show }]), lit on the side that won it; the verdict with its
+ *  margin and the grade stamped beside it; what the duel paid, the Elo
+ *  and the XP's share of the day; sparks on a win. `t` seconds since it
+ *  showed (null: drawn ended); `fmt` writes a figure. Returns its height. */
+export function versus(ctx, p, x, y, w, u, { t = null, mine, theirs, you, them, heat = 1, bars, outcome, word, margin = '', grade = null, elo = null, eloKey, xp, xpLeft, xpShare, fmt }) {
+  const c = duelInks(p)
+  const at = t ?? 99
+  const count = (n, delay, ms) => Math.round(n * (1 - (1 - clamp01((at - delay) / ms)) ** 3))
+  const rise = (d, dur) => frames(at - d, dur, [[0, [10, 0]], [1, [0, 1]]], EASE_OUT)
+  ctx.save()
+  // The screen's edge: a train comes in from beyond it.
+  ctx.beginPath()
+  ctx.rect(x, y - 30 * u, w, 2000 * u)
+  ctx.clip()
+  // ── VS: both trains, the totals counting up (0.9s, after 0.3s), who.
+  const totalF = font(700, 27.2 * u, 'latin')
+  for (const side of [-1, 1]) {
+    const [dx, op] = frames(at, 0.8, [[0, [side * 190, 0]], [1, [0, 1]]], SETTLE)
+    const me = side < 0
+    moved(ctx, { op, dx: dx * u }, () => {
+      loco(ctx, p, me ? x : x + w - 96 * u, y, u, { me, mult: me ? heat : 1, flip: !me, heat: at })
+      const align = me ? 'left' : 'right'
+      const ex = me ? x : x + w
+      text(ctx, fmt(count(me ? mine : theirs, 0.3, 0.9)), ex, y + 47 * u, { f: totalF, color: c.ink, align })
+      caps(ctx, me ? you : them, ex, y + 62.21 * u, 9.92 * u, me ? c.ink : c.ink2, align)
+    })
+  }
+  const [vs, vo] = frames(at - 0.6, 0.6, [[0, [2.4, 0]], [0.4, [0.95, 1]], [1, [1, 1]]])
+  moved(ctx, { op: vo, s: vs, ox: x + w / 2, oy: y + 33.54 * u }, () => text(ctx, 'VS', x + w / 2, y + 40.54 * u, { f: `italic ${font(700, 20 * u, 'latin')}`, color: c.rushInk, align: 'center' }))
+  // ── The lines: a bar each, the learner's share pulled from the left.
+  const top = y + 79.08 * u
+  const ph = (18 + bars.length * 44.19 + (bars.length - 1) * 8) * u
+  panelBox(ctx, x, top, w, ph, 8 * u, c.surface, c.line, u)
+  const figF = font(700, 15.2 * u, 'latin')
+  const capF = font(700, 9.92 * u, 'latin')
+  const subF = font(600, 8.27 * u, 'latin')
+  const trackX = x + (13 + 66.88 + 8) * u
+  const trackW = w - (26 + 2 * 66.88 + 16) * u
+  bars.forEach((b, i) => {
+    const d = E4.bar + i * E4.step
+    const bt = top + (9 + i * 52.19) * u
+    const [dy, op] = rise(d, 0.35)
+    const share = b.a + b.b > 0 ? b.a / (b.a + b.b) : 0.5
+    const won = b.a === b.b ? 0 : b.a > b.b ? 1 : -1
+    moved(ctx, { op, dy: dy * u }, () => {
+      const kw = measure(ctx, b.k.toLocaleUpperCase(), capF, TR.caption)
+      const sw = b.sub ? 6 * u + measure(ctx, b.sub, subF) : 0
+      const kx = x + w / 2 - (kw + sw) / 2
+      caps(ctx, b.k, kx, bt + 11 * u, 9.92 * u, c.ink2, 'left', TR.caption)
+      if (b.sub) moved(ctx, { op: 0.8 }, () => text(ctx, b.sub, kx + kw + 6 * u, bt + 9 * u, { f: subF, color: c.ink2 }))
+      text(ctx, b.show(b.a), x + 79.88 * u, bt + 36.88 * u, { f: figF, color: won > 0 ? c.sel : c.ink, align: 'right' })
+      text(ctx, b.show(b.b), x + w - 79.88 * u, bt + 36.88 * u, { f: figF, color: won < 0 ? c.ink : c.ink2 })
+      const ty = bt + 27.03 * u
+      ctx.save()
+      rrect(ctx, trackX, ty, trackW, 10 * u, 5 * u)
+      ctx.clip()
+      ctx.fillStyle = mix(c.rival, c.surface, 0.55)
+      ctx.fillRect(trackX, ty, trackW, 10 * u)
+      // pvp-pull, 0.9s cubic-bezier(0.3, 1.25, 0.5, 1): from the middle to the share, past it and back.
+      const pull = frames(at - d, 0.9, [[0, 0.5], [1, share]], cssEase(0.3, 1.25, 0.5, 1))
+      const g = ctx.createLinearGradient(trackX, 0, trackX + trackW * pull, 0)
+      g.addColorStop(0, c.pass)
+      g.addColorStop(1, mix(c.gold, c.pass, 0.85))
+      ctx.fillStyle = g
+      ctx.fillRect(trackX, ty, trackW * pull, 10 * u)
+      ctx.globalAlpha *= 0.8
+      ctx.fillStyle = c.surface
+      ctx.fillRect(trackX + trackW / 2, ty, 2 * u, 10 * u)
+      ctx.restore()
+    })
+  })
+  // ── The verdict, its margin, the grade stamped beside it.
+  const vt = top + ph + 12 * u
+  const [vdy, vop] = rise(E4.verdict, 0.5)
+  moved(ctx, { op: vop, dy: vdy * u }, () => {
+    const [ws, wo] = frames(at - E4.verdict, 0.7, [[0, [2.4, 0]], [0.4, [0.95, 1]], [1, [1, 1]]])
+    const wf = font(700, 40 * u, 'latin')
+    const ww = measure(ctx, word, wf)
+    moved(ctx, { op: wo, s: ws, ox: x + ww / 2, oy: vt + 20 * u }, () => text(ctx, word, x, vt + 34 * u, { f: wf, color: outcome === 'win' ? c.sel : c.ink }))
+    if (margin) text(ctx, margin, x, vt + 59 * u, { f: font(700, 13.12 * u, 'latin'), color: c.ink2 })
+    if (grade) {
+      const gx = x + w - 30 * u
+      const gy = vt + 32.5 * u
+      const ink = GRADE_INK(c)[grade]
+      // stamp-press, 0.5s ease-out at its tilt.
+      const [gs, go] = frames(at - E4.grade, 0.5, [[0, [1.8, 0]], [0.6, [0.92, 1]], [1, [1, 1]]], EASE_OUT)
+      moved(ctx, { op: go, s: gs, ox: gx, oy: gy }, () => {
+        ctx.save()
+        ctx.translate(gx, gy)
+        ctx.rotate((-10 * Math.PI) / 180)
+        if (grade === 'S') {
+          ctx.fillStyle = alpha(c.gold, 0.12)
+          ctx.beginPath()
+          ctx.arc(0, 0, 30 * u, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        ctx.strokeStyle = ink
+        ctx.lineWidth = 4 * u
+        ctx.beginPath()
+        ctx.arc(0, 0, 28 * u, 0, Math.PI * 2)
+        ctx.stroke()
+        text(ctx, grade, 0, 14 * u, { f: font(700, 40 * u, 'latin'), color: ink, align: 'center' })
+        ctx.restore()
+      })
+    }
+  })
+  // ── What the duel paid: the Elo a ranked one moved, the XP and the day's share of its cap.
+  const gt = vt + 77 * u
+  const [gdy, gop] = rise(E4.gains, 0.45)
+  moved(ctx, { op: gop, dy: gdy * u }, () => {
+    const cw = elo ? (w - 8 * u) / 2 : w
+    const card = (cx, key, fig, figInk) => {
+      panelBox(ctx, cx, gt, cw, 96.3 * u, 8 * u, c.surface, c.line, u)
+      caps(ctx, key, cx + 13 * u, gt + 20 * u, 9.92 * u, c.ink2)
+      text(ctx, fig, cx + 13 * u, gt + 46.87 * u, { f: font(700, 20 * u, 'latin'), color: figInk })
+    }
+    if (elo) {
+      card(x, eloKey, fmt(count(elo.after, E4.gains + 0.1, 0.8)), c.ink)
+      text(ctx, `${elo.delta >= 0 ? '▲' : '▼'} ${Math.abs(elo.delta)}`, x + 13 * u, gt + 69.87 * u, { f: font(700, 13.12 * u, 'latin'), color: elo.delta >= 0 ? p.success : p.danger })
+    }
+    const xx = elo ? x + cw + 8 * u : x
+    card(xx, 'XP', `+${fmt(count(xp, E4.gains + 0.25, 0.8))}`, c.gold)
+    const bw = cw - 26 * u
+    ctx.fillStyle = c.line
+    rrect(ctx, xx + 13 * u, gt + 58.87 * u, bw, 6 * u, 3 * u)
+    ctx.fill()
+    const fill = frames(at - E4.gains - 0.3, 1, [[0, 0], [1, xpShare]], EASE_OUT)
+    if (fill > 0) {
+      ctx.save()
+      rrect(ctx, xx + 13 * u, gt + 58.87 * u, bw, 6 * u, 3 * u)
+      ctx.clip()
+      ctx.fillStyle = c.gold
+      ctx.fillRect(xx + 13 * u, gt + 58.87 * u, bw * fill, 6 * u)
+      ctx.restore()
+    }
+    text(ctx, xpLeft, xx + 13 * u, gt + 81.87 * u, { f: font(400, 11.52 * u, 'latin'), color: c.ink2 })
+  })
+  const h = gt + 96.3 * u - y
+  // A won duel's sparks, out of the verdict's way (pvp-spark, 1.1s, from 2.7s).
+  if (outcome === 'win' && t != null) {
+    const st = at - (E4.verdict + 0.1)
+    if (st > 0 && st < 1.1) {
+      const bx = x + w / 2
+      const by = y + 0.18 * h
+      const move = cssEase(0.2, 0.7, 0.3, 1)
+      for (let i = 0; i < 20; i++) {
+        const k = i + 1
+        const d = 80 + ((i * 37) % 70)
+        const [r, dy, s] = frames(st, 1.1, [[0, [0, 0, 1.2]], [1, [d, 30, 0.4]]], move)
+        const op = frames(st, 1.1, [[0, 0], [0.03, 1], [1, 0]], move)
+        ctx.save()
+        ctx.globalAlpha *= op
+        ctx.translate(bx, by)
+        ctx.rotate((i * 18 * Math.PI) / 180)
+        ctx.translate(r * u, dy * u)
+        ctx.scale(s, s)
+        ctx.fillStyle = k % 4 === 0 ? c.rival : k % 3 === 1 ? c.heat : k % 3 === 0 ? c.quick : c.gold
+        ctx.fillRect(-5 * u, -5 * u, 10 * u, 10 * u)
+        ctx.restore()
+      }
+    }
+  }
+  ctx.restore()
+  return h
 }
 
 // The curve's drawing box (components/pvp/parts.jsx's EloCurve): its
