@@ -300,10 +300,15 @@ class ByDictionaryFormTests(unittest.TestCase):
         skill = found_in("私は漢字が書けます。")
         self.assertEqual(skill["可能形 〜(ら)れる"], "書け")
         self.assertNotIn("受身形 〜られる", skill)
-        # A る-verb's られる is both, and both are said (module docstring).
-        both = found_in("この魚は生で食べられます。")
-        self.assertEqual(both["受身形 〜られる"], "られ")
-        self.assertEqual(both["可能形 〜(ら)れる"], "られ")
+        # A る-verb's られる is both, and both are said (module docstring)
+        # -- where the sentence does not say which: 生で食べられます, said
+        # of a fish, is what one can do with it (plan 272).
+        both = found_in("窓が開けられる。")
+        self.assertEqual(both["受身形 〜られる"], "られる")
+        self.assertEqual(both["可能形 〜(ら)れる"], "られる")
+        can = found_in("この魚は生で食べられます。")
+        self.assertEqual(can["可能形 〜(ら)れる"], "られ")
+        self.assertNotIn("受身形 〜られる", can)
         # 見える is in view, not able to look.
         self.assertNotIn("可能形 〜(ら)れる", found_in("山が見えます。"))
 
@@ -497,8 +502,11 @@ class EveryKeyTests(unittest.TestCase):
         self.assertEqual(found_in("しずかに話してください。")["〜く／〜に（副詞形）"], "に")
         self.assertEqual(found_in("雨だが、行く。")["〜が（逆接）"], "が")
         self.assertNotIn("〜が（逆接）", found_in("ねこがいます。"))
-        # Written alike and shown alike: the plain point keeps it.
-        self.assertNotIn("〜で（理由）", found_in("病気で休みました。"))
+        # A cause the noun shows is the reason's で, whose lesson it is (で's
+        # is a place or a means, plan 272); a means keeps the plain point.
+        self.assertIn("〜で（理由）", found_in("病気で休みました。"))
+        self.assertNotIn("で", found_in("病気で休みました。"))
+        self.assertNotIn("〜で（理由）", found_in("電車で学校へ行きます。"))
         self.assertNotIn("〜て（理由）", found_in("足跡を辿って会いにきて"))
 
     def test_the_adjectives_where_their_forms_are_written(self) -> None:

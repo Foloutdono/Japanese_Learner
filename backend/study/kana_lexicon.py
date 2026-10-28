@@ -78,6 +78,12 @@ def _cost(kana: str, level: str) -> int | None:
         return None
     return 13000 if n == 4 else 12000
 
+# Words of a child's day that a picture book writes in kana and the deck
+# has no card for (the pool's), entered as a first-year word is: MeCab
+# cut ほいくえん into ほいく + え + んで, みずたまり into み + ず + たまり
+# (見る's negative), おえかき into two interjections and a fence (plan 272).
+_PAGE_WORDS = (("保育園", "ほいくえん"), ("水たまり", "みずたまり"), ("お絵かき", "おえかき"))
+
 # A word written from a numeral is its numeral and its counter to the
 # tokenizer, in kana as in kanji (いち + ど), and its spelling is too often
 # something else: いつか is "someday" far more often than 五日, ようか the
@@ -235,6 +241,12 @@ def rows(tagger) -> list[list[str]]:
                 # level, then the deck's order.
                 if held is None or rank < held[0]:
                     chosen[kana] = (rank, kanji, parts, cost)
+    for kanji, kana in _PAGE_WORDS:
+        # (the few a picture book writes in kana that the deck has no
+        # card for: ほいくえんで was ほいく + え + んで, plan 272)
+        parts = list(tagger(kanji))
+        if kana not in chosen and parts and all(p.feature.cType in (None, "*") for p in parts):
+            chosen[kana] = (_LEVEL_RANK["N4"], kanji, parts, _cost(kana, "N4"))
     out = []
     for kana, (_, kanji, parts, cost) in sorted(chosen.items()):
         out.append(_row(kana, kanji, parts, cost))

@@ -28531,11 +28531,11 @@
           "choices": [
             "水やパンのようなものを売っている店をさがしています。",
             "水やパンと同じものを売っている店をさがしています。",
-            "水やパンのように売っている店をさがしています。"
+            "水やパンだけを売っている店をさがしています。"
           ],
           "why": {
-            "en": "Before a noun (もの), のような: things such as these. と同じ would mean the very same things; ように goes before a verb, not a noun.",
-            "fr": "Devant un nom (もの), のような : des choses comme celles-là. と同じ voudrait dire exactement les mêmes ; ように se place devant un verbe, pas devant un nom."
+            "en": "Before a noun (もの), のような: things such as these. と同じ would mean the very same things, and だけ water and bread alone.",
+            "fr": "Devant un nom (もの), のような : des choses comme celles-là. と同じ voudrait dire exactement les mêmes, et だけ seulement de l'eau et du pain."
           }
         }
       },

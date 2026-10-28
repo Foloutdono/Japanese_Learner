@@ -362,11 +362,17 @@ export function dictionaryForms(word) {
 }
 
 /** A chip's gloss: its first senses without their notes, "please" for
- *  "please (give me, please do)". */
+ *  "please (give me, please do)" -- and never a later sense that needs
+ *  its note to say what it means: 飲む's "to take (medicine)" is no
+ *  "to take" (plan 272). */
 export function shortGloss(g) {
-  const parts = String(g || '').replace(/\s*\([^)]*\)/g, '').replace(/\s*\.\.\.\s*/g, ' ').split(/,\s*/).map(x => x.trim()).filter(Boolean)
-  let out = parts[0] || ''
-  for (const x of parts.slice(1)) if (out.length + x.length + 2 <= 22) out += `, ${x}`; else break
+  const senses = String(g || '').replace(/\s*\.\.\.\s*/g, ' ').split(/,\s*(?![^(]*\))/).map(x => x.trim()).filter(Boolean)
+  const bare = x => x.replace(/\s*\([^)]*\)/g, '').trim()
+  let out = bare(senses[0] || '')
+  for (const x of senses.slice(1)) {
+    if (/^to \S+ \(/.test(x) && !/^to (be|have)\b/.test(x)) break
+    if (out.length + bare(x).length + 2 <= 22) out += `, ${bare(x)}`; else break
+  }
   return out
 }
 
