@@ -791,8 +791,10 @@ The French layer over JMdict (plan 215, `content/jmdict_fr.py`) is its
 own small SQLite file, `datas/vocab/jmdict_fr.sqlite3`: the French of the
 deck's dictionary senses, of the Tatoeba sentences the dictionary and
 reading/translation practice serve, and a one-line gloss for the ~20k
-commonest pool words. It sits beside `vocab_jmdict.sqlite3` rather than
-in it, so a correction never re-commits the 76 MB pool. To correct a
+commonest pool words and for every compound of the deck's nouns JMdict
+holds, which is what lets the breakdown fold it (plan 280). It sits
+beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
+re-commits the 76 MB pool. To correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 
 ```bash
