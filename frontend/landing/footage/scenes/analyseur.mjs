@@ -18,7 +18,8 @@ export default {
     await h.look('word')
     if (h.desk) {
       // The desk keeps the words, the grammar and the entry in columns.
-      await h.press(page.getByRole('button', { name: 'Aller à を' }), { after: 2600 })
+      // A particle has no entry of its own: its point, from the grammar column.
+      await h.press(page.locator('.bkd-point').filter({ hasText: 'complément' }), { after: 2600 })
       await h.press(page.locator('.bkd-point').filter({ hasText: 'ています' }), { after: 2600 })
     } else {
       await h.press(page.getByRole('button', { name: 'Fermer' }), { pause: 300, after: 1000 })
