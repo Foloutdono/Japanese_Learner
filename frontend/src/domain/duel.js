@@ -4,8 +4,10 @@
 // decides a point. The client only draws what a question is worth while
 // it waits -- the same curve, read off the same constants.
 
-/** The sprint: sixty seconds of questions, the same ones for both players. */
-export const SPRINT_MS = 60_000
+/** The sprint: two minutes of questions, the same ones for both players
+ *  (plan 284). A new duel's; one dealt before keeps its own, which its
+ *  run's endsAt and its cover's sprintMs say. */
+export const SPRINT_MS = 120_000
 /** A question's time: worth 100 for its first second, 25 at six, then 0. */
 export const LIMIT_MS = 6_000
 const FULL_MS = 1_000
@@ -19,9 +21,53 @@ export function points(ms) {
   return Math.max(25, Math.round(100 - (75 * (ms - FULL_MS)) / (LIMIT_MS - FULL_MS)))
 }
 
+// What a right answer's speed is called on the run (plan 285): 神速 for
+// one worth the full hundred, which the result counts as an « éclair »
+// (study/duels.lines), 快速 for one inside two and a half seconds.
+const QUICK_PTS = points(2500)
+
+/** 'flash' | 'quick' | null, from the points an answer's speed made. */
+export function speedNote(pts) {
+  if (pts >= 100) return 'flash'
+  if (pts >= QUICK_PTS) return 'quick'
+  return null
+}
+
+/**
+ * Where a streak stands in the combo's tiers (the server's `rules.tiers`,
+ * `[{ at, mult }]`): what it pays, the tier it reached and the next
+ * one, and how far along to it. The server scores; this draws the ring.
+ */
+export function comboOf(streak, tiers = []) {
+  let mult = 1
+  let from = 0
+  let next = null
+  for (const tier of tiers) {
+    if (streak >= tier.at) {
+      mult = tier.mult
+      from = tier.at
+    } else {
+      next = tier.at
+      break
+    }
+  }
+  return { mult, from, next, share: next ? (streak - from) / (next - from) : 1 }
+}
+
+/** A multiplier as the run prints it: ×1,5 in French, ×1.5 in English. */
+export function multOf(mult, lang) {
+  return `×${mult.toLocaleString(lang)}`
+}
+
 /** A learner's name as another learner sees it: the handle, or « Voyageur » for one off the board. */
 export function nameOf(who, t) {
   return who ?? t.pvpTraveller
+}
+
+/** A sprint's time as the head prints it: 1:58, 0:09. */
+export function clockOf(seconds) {
+  const s = Math.max(0, Math.ceil(seconds))
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
 /** Hours left on a challenge, at least one. */

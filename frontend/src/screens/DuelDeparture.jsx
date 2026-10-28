@@ -6,7 +6,7 @@ import { LevelBar } from '../components/chrome/LevelBar'
 import { FriendSheet } from '../components/pvp/FriendSheet'
 import { apiJson } from '../lib/api'
 import { playClick } from '../lib/audio'
-import { errorKey } from '../domain/duel'
+import { SPRINT_MS, errorKey } from '../domain/duel'
 import { refreshDuels, useDuels } from '../stores/duels'
 
 // ── 対戦 — the departure: two platforms side by side (plan 279, D2) ──
@@ -50,7 +50,7 @@ export default function DuelDeparture({ session }) {
   return (
     <div className="screen">
       <main id="main-content" className="container stage exam-run exam-run--cover pvp-run" style={{ '--line-color': COLOR }}>
-        <StageHead onLeave={() => navigate('/profile/duels')} leaveLabel={t.pvpTitle} where={t.pvpSprint60} pass={false} keys={false} />
+        <StageHead onLeave={() => navigate('/profile/duels')} leaveLabel={t.pvpTitle} where={t.pvpSprintOf(SPRINT_MS)} pass={false} keys={false} />
         <span className="pvp-air" aria-hidden="true" />
         <div className="pvp-quais" role="radiogroup" aria-label={t.pvpTitle}>
           {quais.map((q, i) => (

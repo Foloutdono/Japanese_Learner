@@ -68,6 +68,10 @@ export const BASE_GAIN = {
     'card-flip':       1.17,
     'card-transition': 1.60,
     'door-slide':      1.10,
+    // 対戦 (plan 285): the duel's sounds are files, mastered by their
+    // build (scripts/duel-music) so a right answer sits at the 0.042 of
+    // `correct` and the rest where the canvas set them around it.
+    duel:              1,
   },
   ui: {
     click:                    1.17,
@@ -125,7 +129,10 @@ export const BASE_GAIN = {
   },
   jingle:       0.3,
   announcement: 1,
-  ambiance:     0.45,
+  // The lake (plan 219) and the duel's music (plan 285), which plays on
+  // the ambiance's bus while a sprint runs: its build sets its level
+  // against the duel's sounds, as the canvas mixed them.
+  ambiance:     { lake: 0.45, duel: 1 },
 }
 
 export const clamp01 = n => Math.min(1, Math.max(0, n))

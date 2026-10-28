@@ -511,7 +511,7 @@ and its point cards, and Today on the print of the hour.
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
-| Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the minute run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
+| Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the sprint run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
 **The parts are measured, not imagined.** Every figure in `app.js` is a
 CSS pixel of the running app on a 400px phone (the review card, the
@@ -579,7 +579,7 @@ seconds): the ticket comes in and « Partir » is pressed, the count, four
 questions answered as a quick learner answers them (the first slowly,
 while what it is worth runs down from 100, two at once, the fourth 白 taken
 for 百), the other's recorded run passing and passed on the line, the rest
-of the minute run out, the result face to face, the Elo and the XP it
+of the sprint run out, the result face to face, the Elo and the XP it
 paid, the Elo drawn over its last ranked duels, the learner's row
 climbing the board, the gate. A beat's words land one by one; a tap is
 shown as a screen recording shows one, a ring that opens and fades. The
