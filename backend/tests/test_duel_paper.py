@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from study.duel_paper import ITEMS, LEVELS, PAPER_REV, build_paper, served
+from study.duel_paper import ITEMS, LEVELS, PAPER_REV, blend, build_paper, level_of, mix_of, served
 from study.exam_seed import LENGTH_TELL, LIKENESS_TELL, ROTATION_TELL
 from study.exam_tells import centre, outlier, tell
 
@@ -170,3 +170,59 @@ def test_the_paper_is_the_same_in_any_process():
     here = [build_paper(9, lv) for lv in ("N5", "N3")]
     digest = hashlib.sha256(json.dumps(here, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     assert digest == _digest_in_a_fresh_process("3")
+
+
+# ── The mix (plan 286, the owner's B) ───────────────────────────────
+
+MIXES = (9, 17, 26)
+
+
+@pytest.fixture(scope="module")
+def mixed():
+    return {mix: [build_paper(seed, mix=mix) for seed in range(1, 11)] for mix in MIXES}
+
+
+def test_an_elo_stands_between_two_levels():
+    # Each level's starting Elo is the whole level; 200 points a level.
+    assert [mix_of(e) for e in (500, 1000, 1180, 1340, 1400, 1720, 1800, 2400)] == [0, 0, 9, 17, 20, 36, 40, 40]
+    assert blend(9) == [("N5", 0.1), ("N4", 0.9)]
+    assert blend(20) == [("N3", 1.0)]
+    assert blend(36) == [("N2", 0.4), ("N1", 0.6)]
+    # A paper's level is where most of its questions are, the upper at half.
+    assert [level_of(m) for m in (0, 4, 5, 9, 17, 36, 40)] == ["N5", "N5", "N4", "N4", "N3", "N1", "N1"]
+
+
+def test_a_mix_asks_each_level_its_share(mixed):
+    for mix, built in mixed.items():
+        for paper in built:
+            assert paper["rev"] == PAPER_REV and paper["mix"] == mix and paper["level"] == level_of(mix)
+            assert len(paper["items"]) == ITEMS
+            asked = {lv: sum(1 for item in paper["items"] if item["level"] == lv) for lv, _ in blend(mix)}
+            for lv, share in blend(mix):
+                assert abs(asked[lv] - share * ITEMS) <= 2, (mix, asked)
+    # The two levels are dealt in among each other, not one after the other.
+    levels = [item["level"] for item in mixed[17][0]["items"]]
+    assert "N4" in levels[:40] and "N4" in levels[-40:]
+    assert build_paper(42, mix=17) == build_paper(42, mix=17) != build_paper(43, mix=17)
+    # A whole level's mix is that level's paper.
+    assert build_paper(5, mix=20) == build_paper(5, "N3")
+
+
+def test_a_mixed_paper_keeps_the_guards(mixed):
+    low, high = LENGTH_TELL
+    items = [item for built in mixed.values() for paper in built for item in paper["items"]]
+    for item in items:
+        if item["kind"] != "word":
+            assert tell(item["choices"]) is None, item
+            assert item["answer"] not in (centre(item["choices"]), outlier(item["choices"])), item
+    words = [item for item in items if item["kind"] == "word"]
+    for lang in ("fr", "en"):
+        longest, shortest = _rates(words, lang)
+        assert low <= longest <= high and low <= shortest <= high, (lang, longest, shortest)
+    steps = on = 0
+    for built in mixed.values():
+        for paper in built:
+            keys = [item["answer"] for item in paper["items"]]
+            steps += len(keys) - 1
+            on += sum(b == (a + 1) % 4 for a, b in zip(keys, keys[1:]))
+    assert on / steps <= ROTATION_TELL

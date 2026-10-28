@@ -926,7 +926,6 @@ describe('explaining a point in its own sentence', () => {
       expect(D.go, lang).toBe(t.pvpGo)
       expect(D.kinds, lang).toEqual(t.pvpKind)
       expect(D.duelLevel, lang).toBe(t.pvpDuelLevel)
-      expect(D.lowest, lang).toBe(t.pvpLowest)
       expect(D.questions, lang).toBe(t.pvpQuestions)
       expect(D.wordsKanji, lang).toBe(t.pvpWordsKanji)
       expect(D.sprint, lang).toBe(t.pvpSprintOf(SPRINT_MS))

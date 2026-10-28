@@ -3,9 +3,13 @@
 
 A duel is a sprint: two minutes of quick questions (plan 284; sixty
 seconds under sprint-1), the same ones in
-the same order for both players, built once from a seed at the lower
-JLPT level of the two and stored with the duel. Three kinds, mixed in a
-fixed pattern so the eye cannot settle:
+the same order for both players, built once from a seed and stored
+with the duel. Since plan 286 (the owner's B, « le fondu ») a paper is
+built at a mix, where an Elo stands between two levels in tenths
+(mix_of: each level's starting Elo is a whole level, 200 points a
+level), and asks the two levels' words in that share: 1 180 is 0.9,
+nine questions in ten N4 and one N5. Three kinds, mixed in a fixed
+pattern so the eye cannot settle:
 
   word     a word (with its reading) -> what it means, four meanings in
            the learner's language
@@ -17,7 +21,7 @@ fixed pattern so the eye cannot settle:
 Grammar and sentences are not asked: a sentence is not read in six
 seconds.
 
-build_paper is a pure function of (seed, level, content): no model, no
+build_paper is a pure function of (seed, mix, content): no model, no
 database, and nothing that iterates a set before a seeded random touches
 it, so the same paper comes back in any process (the placement test's
 rule, tests/test_duel_paper.py builds it under two hash seeds).
@@ -41,7 +45,8 @@ PAPER_REV is the output's revision (CLAUDE.md, "Bump the revision when
 the output changes"): a duel stores the paper it was built with, and the
 rev it was built under. The duel's rules go with the rev too
 (study/duels): sprint-2's runs are two minutes long (plan 284) and pay
-a streak and the last seconds more (plan 285).
+a streak and the last seconds more (plan 285); sprint-3's papers are
+mixes (plan 286), with the same rules.
 """
 from __future__ import annotations
 
@@ -52,14 +57,22 @@ from functools import lru_cache
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import word_category
 from study import exam_kanji_choices as kc
+from study.duel_elo import START
 from study.exam_gen_utils import GenerationFailed
 from study.exam_vocab_gen import _content_words, _display, _first_reading
 from study.mcq import meaning_key
 from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
 
-PAPER_REV = "sprint-2"
+PAPER_REV = "sprint-3"
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
+# A mix is in tenths of a level above N5: 0 all N5, 9 a tenth N5 and
+# nine tenths N4, 40 all N1.
+STEPS = 10
+MIX_MAX = (len(LEVELS) - 1) * STEPS
+# A tenth of a level, in Elo: each level's start (duel_elo.START) is a
+# whole level, 200 points above the last.
+ELO_STEP = (START["N4"] - START["N5"]) // STEPS
 KINDS = ("word", "reading", "writing")
 
 # More than anyone answers in the sprint's two minutes: a right answer
@@ -211,23 +224,68 @@ def _kanji_items(level: str, rng: random.Random, count: int, kind: str,
     return []
 
 
-def build_paper(seed: int, level: str) -> dict:
-    """The sprint's questions for a duel at `level`, from `seed`."""
-    if level not in LEVELS:
-        raise ValueError(f"unknown level {level!r}")
-    rng = random.Random(f"duel:{PAPER_REV}:{level}:{seed}")
+def mix_of(elo: float) -> int:
+    """Where an Elo stands among the levels, in tenths of a level above
+    N5: each level's starting Elo (duel_elo.START) is a whole level."""
+    return max(0, min(MIX_MAX, round((elo - START["N5"]) / ELO_STEP)))
+
+
+def blend(mix: int) -> list[tuple[str, float]]:
+    """The levels a mix asks and the share of each, lower first:
+    9 -> [("N5", 0.1), ("N4", 0.9)]; a whole level alone."""
+    low, part = divmod(mix, STEPS)
+    if not part:
+        return [(LEVELS[low], 1.0)]
+    return [(LEVELS[low], (STEPS - part) / STEPS), (LEVELS[low + 1], part / STEPS)]
+
+
+def level_of(mix: int) -> str:
+    """The level most of a mix's questions are at (the upper one at half)."""
+    return LEVELS[(mix + STEPS // 2) // STEPS]
+
+
+def _split(n: int, shares: list[tuple[str, float]]) -> dict[str, int]:
+    """n questions shared out as the mix says, the upper level's rounded."""
+    if len(shares) == 1:
+        return {shares[0][0]: n}
+    (low, _), (high, part) = shares
+    up = round(n * part)
+    return {low: n - up, high: up}
+
+
+def build_paper(seed: int, level: str | None = None, mix: int | None = None) -> dict:
+    """The sprint's questions for a duel at `mix` (or a whole `level`),
+    from `seed`."""
+    if mix is None:
+        if level not in LEVELS:
+            raise ValueError(f"unknown level {level!r}")
+        mix = LEVELS.index(level) * STEPS
+    if not 0 <= mix <= MIX_MAX:
+        raise ValueError(f"unknown mix {mix!r}")
+    shares = blend(mix)
+    rng = random.Random(f"duel:{PAPER_REV}:{mix}:{seed}")
     wanted = {kind: sum(1 for i in range(ITEMS) if PATTERN[i % len(PATTERN)] == kind) for kind in KINDS}
     used_words: set = set()
     used_prompts: set = set()
-    kanji = {
-        "writing": [] if level == "N1" else _kanji_items(level, rng, min(wanted["writing"], MAX_WRITING),
-                                                          "writing", used_words, used_prompts),
-    }
-    kanji["reading"] = _kanji_items(level, rng, min(wanted["reading"], MAX_READING), "reading", used_words, used_prompts)
-    short = sum(wanted[k] - len(kanji[k]) for k in ("reading", "writing"))
-    words = _word_items(level, rng, wanted["word"] + short)
-
+    kanji: dict[str, list] = {"writing": [], "reading": []}
+    short = {lv: 0 for lv, _ in shares}
+    # The writing items first, every level's: they need the scarcer
+    # kanji. A level that runs short (N1 asks none) makes it up in words.
+    for kind, cap in (("writing", MAX_WRITING), ("reading", MAX_READING)):
+        for lv, count in _split(min(wanted[kind], cap), shares).items():
+            got = [] if kind == "writing" and lv == "N1" else _kanji_items(lv, rng, count, kind, used_words, used_prompts)
+            kanji[kind] += [{**item, "level": lv} for item in got]
+            short[lv] += count - len(got)
+        short_cap = wanted[kind] - min(wanted[kind], cap)
+        for lv, count in _split(short_cap, shares).items():
+            short[lv] += count
+    words = []
+    for lv, count in _split(wanted["word"], shares).items():
+        words += [{**item, "level": lv} for item in _word_items(lv, rng, count + short[lv])]
     queues = {"word": words, "reading": kanji["reading"], "writing": kanji["writing"]}
+    # The two levels' questions dealt in among each other.
+    for queue in queues.values():
+        rng.shuffle(queue)
     items = []
     i = 0
     while len(items) < ITEMS and any(queues.values()):
@@ -235,7 +293,7 @@ def build_paper(seed: int, level: str) -> dict:
         i += 1
         queue = queues[kind] or queues["word"] or queues["reading"] or queues["writing"]
         items.append(queue.pop(0))
-    return {"rev": PAPER_REV, "level": level, "seed": seed, "items": items}
+    return {"rev": PAPER_REV, "level": level_of(mix), "mix": mix, "seed": seed, "items": items}
 
 
 def served(item: dict, n: int) -> dict:

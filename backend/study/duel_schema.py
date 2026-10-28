@@ -81,7 +81,8 @@ TABLES = {
             live_start  TIMESTAMPTZ,
             created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             expires_at  TIMESTAMPTZ NOT NULL,
-            resolved_at TIMESTAMPTZ
+            resolved_at TIMESTAMPTZ,
+            mix         SMALLINT
         )
     """,
     "pvp_entries": """
@@ -128,7 +129,12 @@ INDEXES = {
     "pvp_requests": ["CREATE INDEX IF NOT EXISTS pvp_requests_target ON pvp_requests (target_id)"],
     "pvp_blocks": ["CREATE INDEX IF NOT EXISTS pvp_blocks_blocked ON pvp_blocks (blocked_id)"],
     "pvp_reports": ["CREATE INDEX IF NOT EXISTS pvp_reports_reported ON pvp_reports (reported_id)"],
-    "pvp_duels": ["CREATE INDEX IF NOT EXISTS pvp_duels_seek ON pvp_duels (status, kind, level)"],
+    "pvp_duels": [
+        # The mix a paper was built at (plan 286): tenths of a level above
+        # N5, null for one built at a level before it.
+        "ALTER TABLE pvp_duels ADD COLUMN IF NOT EXISTS mix SMALLINT",
+        "CREATE INDEX IF NOT EXISTS pvp_duels_seek ON pvp_duels (status, kind, level)",
+    ],
     "pvp_entries": [
         "CREATE INDEX IF NOT EXISTS pvp_entries_user ON pvp_entries (user_id, finished_at)",
         # One player meets a duel's first: two seekers can never both
