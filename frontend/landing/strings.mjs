@@ -98,11 +98,13 @@ const fr = facts => {
       cue: 'Découvrir',
       watch: 'Voir la présentation',
       note: stores => stores
-        ? "Gratuit pendant l'accès anticipé · sans compte · iPhone, Android et navigateur"
-        : "Gratuit pendant l'accès anticipé · sans compte · dans ton navigateur, bientôt sur iPhone et Android",
+        ? "Gratuit pendant l'accès anticipé · iPhone, Android et navigateur"
+        : "Gratuit pendant l'accès anticipé · dans ton navigateur, bientôt sur iPhone et Android",
     },
     board: 'Embarquer',
-    boardAria: 'Embarquer : commencer gratuitement dans le navigateur',
+    // The gate's second line (page.mjs, gate()): the fare, said where the visitor presses.
+    boardSub: 'Gratuit · sans compte',
+    boardAria: 'Embarquer : gratuit, sans compte, dans le navigateur',
     badges: {
       appStore: ['Télécharger dans', "l'App Store"],
       googlePlay: ['Disponible sur', 'Google Play'],
@@ -345,11 +347,12 @@ const en = facts => {
       cue: 'Explore',
       watch: 'Watch the overview',
       note: stores => stores
-        ? 'Free during early access · no account needed · iPhone, Android and the web'
-        : 'Free during early access · no account needed · in your browser, soon on iPhone and Android',
+        ? 'Free during early access · iPhone, Android and the web'
+        : 'Free during early access · in your browser, soon on iPhone and Android',
     },
     board: 'Board',
-    boardAria: 'Board: start for free in your browser',
+    boardSub: 'Free · no account',
+    boardAria: 'Board: free, no account, in your browser',
     badges: {
       appStore: ['Download on the', 'App Store'],
       googlePlay: ['Get it on', 'Google Play'],
