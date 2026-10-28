@@ -145,7 +145,9 @@ describe('levels', () => {
     expect(trimFor('tts', 'anything')).toBe(0.9)
     expect(trimFor('jingle', 'jingle')).toBe(0.3)
     expect(trimFor('announcement', 'home')).toBe(1)
-    expect(trimFor('ambiance', 'home')).toBe(0.45)
+    expect(trimFor('ambiance', 'lake')).toBe(0.45)
+    expect(trimFor('ambiance', 'duel')).toBe(1)
+    expect(trimFor('sfx', 'duel')).toBe(1)
   })
 
   it('defaults an unregistered sound to unity', () => {
