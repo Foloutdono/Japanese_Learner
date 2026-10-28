@@ -26,10 +26,10 @@ def _quick_papers(monkeypatch):
     built = {}
     real = duel_paper.build_paper
 
-    def build(seed, level):
-        key = (duel_paper.PAPER_REV, level)
+    def build(seed, level=None, mix=None):
+        key = (duel_paper.PAPER_REV, level, mix)
         if key not in built:
-            built[key] = real(seed, level)
+            built[key] = real(seed, level, mix)
         return {**built[key], "seed": seed}
     monkeypatch.setattr(duel_paper, "build_paper", build)
 
@@ -621,7 +621,7 @@ def test_two_seekers_racing_for_one_run_never_share_its_seat(client, learners, c
         try:
             with conn.cursor() as cur:
                 t = time.perf_counter()
-                duels._seek(cur, C, 1000, "N5", clock())
+                duels._seek(cur, C, 1000, 0, clock())
                 took = time.perf_counter() - t
             conn.rollback()
         finally:

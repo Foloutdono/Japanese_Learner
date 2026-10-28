@@ -35,9 +35,11 @@ Three ways to play:
                  RANKED_PRICE credits, paid at the start.
 
 Only friends challenge each other; a stranger is met through ranked
-play alone, and never one a block stands between. The paper is at the
-lower of the two players' levels (core/user_level), and never one a
-player has met before.
+play alone, and never one a block stands between. The paper is built
+at the mix the Elo stands at (plan 286, duel_paper.mix_of): the
+lower of two friends' (the start of their level for one with none
+yet), a ranked player's own, whose stranger is met on a paper near
+it; never one a player has met before.
 
 Nothing runs in the background. A duel's state is a function of the
 instants stored, and settle() brings it up to date on every read: a run
@@ -66,18 +68,17 @@ from core import credits, events
 from core.user_level import resolve_level
 from study import duel_elo, duel_friends as friends, duel_paper
 from study.duel_friends import Refused
-from study.difficulty import LEVELS
 
 logger = logging.getLogger(__name__)
 
 # A sprint's length goes with its paper (plan 284): a duel keeps the
 # paper it was dealt and the time that came with it, so a sprint-1 duel
 # still open when the two minutes came in is run, and raced, in one.
-SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000}
+SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000, "sprint-3": 120_000}
 SPRINT_MS = SPRINT_MS_BY_REV[duel_paper.PAPER_REV]
 # And so does the way an answer is scored (plan 285): sprint-2's runs
 # pay a streak and the last seconds more, sprint-1's pay speed alone.
-COMBO_REVS = frozenset({"sprint-2"})
+COMBO_REVS = frozenset({"sprint-2", "sprint-3"})
 # (right answers in a row, the multiplier from there on)
 COMBO_TIERS = ((5, 1.5), (10, 2.0), (20, 3.0))
 RUSH_MS = 15_000
@@ -118,7 +119,7 @@ ACTIVE = ("open", "lobby", "live")
 SETTLED = ("done", "expired", "declined", "cancelled")
 
 _DUEL = ("id", "kind", "mode", "level", "seed", "paper_rev", "status", "ghost",
-         "live_start", "created_at", "expires_at", "resolved_at")
+         "live_start", "created_at", "expires_at", "resolved_at", "mix")
 _ENTRY = ("duel_id", "user_id", "role", "answers", "served_q", "served_at", "score", "rights",
           "started_at", "finished_at", "rating_before", "rating_after", "opponent_rating",
           "result", "paid", "reviewed", "xp", "created_at")
@@ -233,10 +234,6 @@ def _ms(delta: timedelta) -> int:
 
 def _iso(at: datetime | None) -> str | None:
     return at.isoformat() if at else None
-
-
-def lower_level(a: str, b: str) -> str:
-    return LEVELS[min(LEVELS.index(a), LEVELS.index(b))]
 
 
 def run(fn, *args, **kwargs):
@@ -598,11 +595,11 @@ def _insert_duel(cur, kind: str, mode: str, level: str, seed: int, paper: dict, 
                  expires: datetime, ghost: bool = False) -> int:
     cur.execute(
         """
-        INSERT INTO pvp_duels (kind, mode, level, seed, paper_rev, paper, status, ghost, created_at, expires_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+        INSERT INTO pvp_duels (kind, mode, level, seed, paper_rev, paper, status, ghost, created_at, expires_at, mix)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
         """,
         (kind, mode, level, seed, paper["rev"], json.dumps(paper, ensure_ascii=False),
-         "lobby" if mode == "live" else "open", ghost, now, expires),
+         "lobby" if mode == "live" else "open", ghost, now, expires, paper.get("mix")),
     )
     return cur.fetchone()[0]
 
@@ -612,9 +609,23 @@ def _seat(cur, duel_id: int, user_id: str, role: str, now: datetime) -> None:
                 (duel_id, user_id, role, now))
 
 
-def _fresh_paper(level: str) -> tuple[int, dict]:
+def _fresh_paper(mix: int) -> tuple[int, dict]:
     seed = secrets.randbelow(2 ** 62)
-    return seed, duel_paper.build_paper(seed, level)
+    return seed, duel_paper.build_paper(seed, mix=mix)
+
+
+def _elo_of(cur, user_id: str) -> int:
+    """A learner's Elo, or the one their level would start them at."""
+    row = duel_elo.rating_row(cur, user_id)
+    return row["rating"] if row else duel_elo.START[resolve_level(user_id)]
+
+
+def mix_line(duel: dict) -> list[dict] | None:
+    """What a duel's paper asks, level by level, for the ticket: none for
+    a paper built at one level before plan 286."""
+    if duel.get("mix") is None:
+        return None
+    return [{"level": lv, "share": share} for lv, share in duel_paper.blend(duel["mix"])]
 
 
 def challenge(cur, after: list, me: str, username: str, mode: str) -> int:
@@ -651,9 +662,8 @@ def challenge(cur, after: list, me: str, username: str, mode: str) -> int:
         if duel["status"] in ACTIVE:
             return row[0]
     _room_for_one(cur, after, me, now)
-    level = lower_level(resolve_level(me), resolve_level(other))
-    seed, paper = _fresh_paper(level)
-    duel_id = _insert_duel(cur, "friend", mode, level, seed, paper, now,
+    seed, paper = _fresh_paper(duel_paper.mix_of(min(_elo_of(cur, me), _elo_of(cur, other))))
+    duel_id = _insert_duel(cur, "friend", mode, paper["level"], seed, paper, now,
                            now + (LOBBY if mode == "live" else WAIT))
     _seat(cur, duel_id, me, "challenger", now)
     _seat(cur, duel_id, other, "opponent", now)
@@ -664,19 +674,25 @@ def _met_paper_sql(alias: str) -> str:
     # Never a paper the player has met before, in any duel.
     return (f"NOT EXISTS (SELECT 1 FROM pvp_entries m JOIN pvp_duels md ON md.id = m.duel_id "
             f"WHERE m.user_id = %(me)s AND md.seed = {alias}.seed AND md.level = {alias}.level "
-            f"AND md.paper_rev = {alias}.paper_rev)")
+            f"AND md.mix IS NOT DISTINCT FROM {alias}.mix AND md.paper_rev = {alias}.paper_rev)")
 
 
 _APART = ("NOT EXISTS (SELECT 1 FROM pvp_blocks b WHERE (b.user_id = %(me)s AND b.blocked_id = {u}) "
           "OR (b.user_id = {u} AND b.blocked_id = %(me)s))")
 
 
-def _seek(cur, me: str, elo: int, level: str, now: datetime) -> int | None:
-    """A run another learner played that nobody has met, at a level at
-    or under `me`'s and an Elo near theirs: locked, or None. Never one
-    on a retired revision of the paper: it waits out its 48 hours and is
-    refunded, and nobody new is dealt what the revision corrected."""
-    levels = list(LEVELS[:LEVELS.index(level) + 1])
+def _reach(window: int) -> int:
+    """How far a paper's mix may stand from the seeker's, in tenths of a
+    level: half the Elo window (plan 286)."""
+    return window // (2 * duel_paper.ELO_STEP)
+
+
+def _seek(cur, me: str, elo: int, mix: int, now: datetime) -> int | None:
+    """A run another learner played that nobody has met, on a paper
+    whose mix is near `me`'s and by a player of an Elo near theirs:
+    locked, or None. Never one on a retired revision of the paper: it
+    waits out its 48 hours and is refunded, and nobody new is dealt what
+    the revision corrected."""
     taken: list[int] = []
     for window in WINDOWS:
         for _try in range(3):
@@ -687,20 +703,20 @@ def _seek(cur, me: str, elo: int, level: str, now: datetime) -> int | None:
                   JOIN pvp_ratings r ON r.user_id = e.user_id
                  WHERE d.kind = 'ranked' AND d.mode = 'async' AND d.status = 'open' AND NOT d.ghost
                    AND d.paper_rev = %(rev)s
-                   AND d.expires_at > %(soon)s AND d.level = ANY(%(levels)s)
+                   AND d.expires_at > %(soon)s AND ABS(d.mix - %(mix)s) <= %(reach)s
                    AND e.user_id <> %(me)s AND e.finished_at IS NOT NULL
                    AND (SELECT COUNT(*) FROM pvp_entries x WHERE x.duel_id = d.id) = 1
                    AND r.rating BETWEEN %(elo)s - %(window)s AND %(elo)s + %(window)s
                    AND d.id <> ALL(%(taken)s)
                    AND {_APART.format(u="e.user_id")}
                    AND {_met_paper_sql("d")}
-                 ORDER BY (d.level = %(level)s) DESC, ABS(r.rating - %(elo)s), d.created_at
+                 ORDER BY ABS(d.mix - %(mix)s), ABS(r.rating - %(elo)s), d.created_at
                  LIMIT 1
                  FOR UPDATE OF d SKIP LOCKED
                 """,
                 # A seat is held HOLD before it must be started: a run
                 # closer than that to its deadline is not offered.
-                {"me": me, "elo": elo, "level": level, "levels": levels, "window": window,
+                {"me": me, "elo": elo, "mix": mix, "reach": _reach(window), "window": window,
                  "soon": now + HOLD, "taken": taken, "rev": duel_paper.PAPER_REV},
             )
             row = cur.fetchone()
@@ -716,13 +732,12 @@ def _seek(cur, me: str, elo: int, level: str, now: datetime) -> int | None:
     return None
 
 
-def _ghost_source(cur, me: str, elo: int, level: str) -> dict | None:
-    """The recorded run of a real player of a near Elo, at a level at or
-    under `me`'s, on a paper `me` has never met. Never a run with no
+def _ghost_source(cur, me: str, elo: int, mix: int) -> dict | None:
+    """The recorded run of a real player of a near Elo, on a paper whose
+    mix is near `me`'s and that `me` has never met. Never a run with no
     answer in it (a free win), never a paper of a retired revision, and
     never one whose corrections anyone has bought: dealt again, its keys
     could be handed to the next player before they run."""
-    levels = list(LEVELS[:LEVELS.index(level) + 1])
     for window in WINDOWS:
         cur.execute(
             f"""
@@ -731,17 +746,17 @@ def _ghost_source(cur, me: str, elo: int, level: str) -> dict | None:
              WHERE d.kind = 'ranked' AND d.status IN ('done', 'expired') AND d.paper_rev = %(rev)s
                AND e.role <> 'ghost' AND e.finished_at IS NOT NULL AND e.rating_before IS NOT NULL
                AND jsonb_array_length(e.answers) > 0
-               AND e.user_id <> %(me)s AND d.level = ANY(%(levels)s)
+               AND e.user_id <> %(me)s AND ABS(d.mix - %(mix)s) <= %(reach)s
                AND e.rating_before BETWEEN %(elo)s - %(window)s AND %(elo)s + %(window)s
                AND {_APART.format(u="e.user_id")}
                AND {_met_paper_sql("d")}
                AND NOT EXISTS (SELECT 1 FROM pvp_entries rv JOIN pvp_duels rd ON rd.id = rv.duel_id
                                 WHERE rv.reviewed AND rd.seed = d.seed AND rd.level = d.level
-                                  AND rd.paper_rev = d.paper_rev)
-             ORDER BY (d.level = %(level)s) DESC, ABS(e.rating_before - %(elo)s), e.finished_at DESC
+                                  AND rd.mix IS NOT DISTINCT FROM d.mix AND rd.paper_rev = d.paper_rev)
+             ORDER BY ABS(d.mix - %(mix)s), ABS(e.rating_before - %(elo)s), e.finished_at DESC
              LIMIT 1
             """,
-            {"me": me, "elo": elo, "level": level, "levels": levels, "window": window,
+            {"me": me, "elo": elo, "mix": mix, "reach": _reach(window), "window": window,
              "rev": duel_paper.PAPER_REV},
         )
         row = cur.fetchone()
@@ -775,13 +790,15 @@ def ranked(cur, after: list, me: str) -> tuple[int, str]:
         return row[0], against(duel, _entries(cur, row[0]))
     _room_for_one(cur, after, me, now)
     elo = rating["rating"]
+    # The paper stands where the Elo does (plan 286), not at the level.
+    mix = duel_paper.mix_of(elo)
 
-    duel_id = _seek(cur, me, elo, level, now)
+    duel_id = _seek(cur, me, elo, mix, now)
     if duel_id is not None:
         _seat(cur, duel_id, me, "opponent", now)
         return duel_id, "seek"
 
-    source = _ghost_source(cur, me, elo, level)
+    source = _ghost_source(cur, me, elo, mix)
     if source is not None:
         cur.execute("SELECT level, seed, paper_rev, paper FROM pvp_duels WHERE id = %s", (source["duel_id"],))
         lv, seed, _rev, paper = cur.fetchone()
@@ -799,8 +816,8 @@ def ranked(cur, after: list, me: str) -> tuple[int, str]:
         _seat(cur, duel_id, me, "opponent", now)
         return duel_id, "ghost"
 
-    seed, paper = _fresh_paper(level)
-    duel_id = _insert_duel(cur, "ranked", "async", level, seed, paper, now, now + WAIT)
+    seed, paper = _fresh_paper(mix)
+    duel_id = _insert_duel(cur, "ranked", "async", paper["level"], seed, paper, now, now + WAIT)
     _seat(cur, duel_id, me, "challenger", now)
     return duel_id, "open"
 
@@ -875,6 +892,8 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
         "kind": duel["kind"],
         "mode": duel["mode"],
         "level": duel["level"],
+        # The levels the paper asks, and in what share (plan 286).
+        "mix": mix_line(duel),
         "status": duel["status"],
         "against": against(duel, entries),
         "you": {"username": named.get(me), "level": levels.get(me), "role": mine["role"],

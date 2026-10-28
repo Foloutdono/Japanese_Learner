@@ -887,14 +887,14 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('scores the story’s runs as the server scores a sprint-2 one, combo and rush included (plans 281, 281b)', () => {
+  it('scores the story’s runs as the server scores its paper’s, combo and rush included (plans 281, 281b)', () => {
     // The rules the bank's runs were scored by are the server's own.
     const duels = read('../backend/study/duels.py')
     const tiers = [...constant('study/duels.py', 'COMBO_TIERS').matchAll(/\((\d+), ([\d.]+)\)/g)].map(m => ({ at: Number(m[1]), mult: Number(m[2]) }))
     expect(tiers.length).toBeGreaterThan(0)
     expect(duelBank.rules).toEqual({ tiers, rushMs: int(constant('study/duels.py', 'RUSH_MS')) })
-    expect(duelBank.paper).toBe('sprint-2')
-    expect(duelBank.sprint).toBe(int(duels.match(/"sprint-2": ([\d_]+)/)[1]))
+    // The sprint its revision is run at (study/duels.SPRINT_MS_BY_REV).
+    expect(duelBank.sprint).toBe(int(duels.match(new RegExp(`"${duelBank.paper}": ([\\d_]+)`))[1]))
     expect(duelBank.sprint).toBe(SPRINT_MS)
     const top = int(duels.match(/^TOP, FLOOR = (\d+), (\d+)$/m)[1])
     const multAt = streak => tiers.reduce((m, x) => (streak >= x.at ? x.mult : m), 1)
@@ -974,7 +974,6 @@ describe('explaining a point in its own sentence', () => {
       expect(D.go, lang).toBe(t.pvpGo)
       expect(D.kinds, lang).toEqual(t.pvpKind)
       expect(D.duelLevel, lang).toBe(t.pvpDuelLevel)
-      expect(D.lowest, lang).toBe(t.pvpLowest)
       expect(D.questions, lang).toBe(t.pvpQuestions)
       expect(D.wordsKanji, lang).toBe(t.pvpWordsKanji)
       expect(D.sprint, lang).toBe(t.pvpSprintOf(SPRINT_MS))
