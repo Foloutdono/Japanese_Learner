@@ -8,8 +8,9 @@ The learner the landing page's footage is filmed on (plan 283).
 FOOTAGE_DATABASE_URL names the database, and it must be a local one
 (localhost or a socket) that holds nobody else: this script rewrites
 every timestamp in it. --seed wants it empty (createdb), and lays
-srs/data_structure.sql in it first. frontend/landing/footage/film.mjs runs --restore
-before each clip; frontend/landing/README.md, "Footage", has the rest.
+srs/data_structure.sql in it first. frontend/landing/footage/film.mjs
+runs --restore before each clip; frontend/landing/README.md, "Footage",
+has the rest.
 
 WHY THIS EXISTS
 ---------------
@@ -32,7 +33,7 @@ WHAT IT CHANGES AFTER THE MONTH
   level of the same month studied more gently (27).
 - Part of today is answered, down to TODAY_LEFT cards, so the gate
   shows a day under way and no catch-up offer.
-- The fare card is topped up, the interface is French, and the
+- The fare card is filled, the interface is French, and the
   early-access rating and the transfer offer are marked as already
   asked, so no sheet opens over a clip.
 
@@ -212,9 +213,11 @@ def seed(url: str) -> None:
             FROM r WHERE l.id = r.id""")
         cur.execute("SELECT COALESCE(SUM(delta), 0) FROM credit_ledger WHERE user_id = %s", (USER,))
         balance = cur.fetchone()[0]
-        if balance < 20:
+        # A full card: below the day's fare the gate says how many cards
+        # wait for credits, which is no thing to film.
+        if balance < core.credits.CAP:
             cur.execute("INSERT INTO credit_ledger (user_id, delta, reason, ref) VALUES (%s, %s, 'adjust', 'footage')",
-                        (USER, 20 - balance))
+                        (USER, core.credits.CAP - balance))
         cur.execute("""UPDATE user_profiles SET ui_lang = 'fr', feedback_asked_at = NOW(),
                        transfer_offered_at = NOW() WHERE user_id = %s""", (USER,))
     forget()
