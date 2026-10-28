@@ -357,17 +357,14 @@ export function LyricsImportSheet({ session, t, name: named = '', onClose, onMad
 
   return (
     // The head (option A of three drawn, the owner's pick of 2026-10-20):
-    // the song's icon in the analyser's roundel and the title in words,
-    // where every other sheet prints a kanji and a caption.
+    // the song's icon in the analyser's roundel and the title in words --
+    // since plan 277 every sheet's head, at the compact size it chose.
     <Sheet
       open
       onClose={onClose}
-      jp={(
-        <span className="wmap-roundel lyr-sheet__badge" aria-hidden="true">
-          <SongIcon size={20} />
-        </span>
-      )}
-      cap={t.lyricsImportTitle}
+      title={t.lyricsImportTitle}
+      icon={SongIcon}
+      line="var(--line-kaiseki)"
       label={t.lyricsImportTitle}
       className="lyr-sheet"
       dismiss

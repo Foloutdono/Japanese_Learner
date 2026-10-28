@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Sheet } from '../chrome/Sheet'
+import { UserIcon } from '../ui/Icons'
 import { useLang } from '../../LangContext'
 import { useCachedJson } from '../../lib/cachedJson'
 import { DIVISIONS } from '../../domain/banzuke'
@@ -23,7 +24,7 @@ export function LearnerSheet({ username, session, onClose }) {
   const division = card ? DIVISIONS[card.division.index] : null
   const figure = n => (n == null ? '—' : `#${n.toLocaleString(lang)}`)
   return (
-    <Sheet open onClose={onClose} cap={username} label={t.bzCardAria(username)} className="bz-card" dismiss>
+    <Sheet open onClose={onClose} title={username} icon={UserIcon} label={t.bzCardAria(username)} className="bz-card" dismiss>
       {failed && <p className="hint" role="alert">{t.bzCardFailed}</p>}
       {!card && !failed && <p className="bz-card__wait" aria-busy="true">…</p>}
       {card && (
@@ -43,8 +44,7 @@ export function LearnerSheet({ username, session, onClose }) {
             </div>
           </dl>
           <p className="bz-card__division">
-            <span className="bz-card__division-jp" lang="ja">{division.jp}</span>
-            <span>{division.latin}</span>
+            <span className="bz-card__division-name">{division.latin}</span>
           </p>
           {card.decks.length > 0 && (
             <ul className="bz-card__decks" aria-label={t.bzCardDecks}>

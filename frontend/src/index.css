@@ -2458,6 +2458,13 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
      Dark text on both: 7.7:1 and 7.9:1. */
   --rating-correct:     #59b9c6;
   --rating-perfect:     #6cc24a;
+  /* The inks Correct (4) and Easy (5) wear beyond the bar: on the
+     two- and six-button bars Correct is 新橋 and Easy 若葉; on the
+     four, the owner's pick, Easy is 新橋 and Correct plain, so the one
+     key in colour is the best (:root[data-rating-scale], set by
+     stores/ratingScale.js). */
+  --verdict-q4:         var(--rating-correct);
+  --verdict-q5:         var(--rating-perfect);
 
   /* Washi (和紙) — the one bright surface reserved for diagrams that
      need true white behind black ink (stroke order refs, kanji
@@ -2777,6 +2784,10 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   --ease-in:         cubic-bezier(0.55, 0, 0.75, 0.2);
   --ease-io:         cubic-bezier(0.6, 0, 0.3, 1);
   --ease-back:       cubic-bezier(0.3, 1.45, 0.5, 1);
+  /* 補充 — how long the card is out on arrival, the drop to the way back
+     (plan 278): components/credits/refill.js says the same, and takes
+     the claim at its end (RefillMoment.browser.test.jsx holds the two equal). */
+  --refill-ms:       2300ms;
 
   /* ── Flipping tokens — dark theme (default) ── */
   --bg-main:        #17151a;
@@ -2978,6 +2989,13 @@ a.anl-song__deck:focus-visible .picker-row__name { text-decoration: underline; t
   --medal-gold:     #c99a3e;
   --medal-silver:   #a8adb4;
   --medal-bronze:   #a8703f;
+}
+
+/* The four-button bar (stores/ratingScale.js stamps it): Easy blue,
+   Correct plain, wherever a verdict wears its ink. */
+:root[data-rating-scale="simple"] {
+  --verdict-q4: var(--text-secondary);
+  --verdict-q5: var(--rating-correct);
 }
 
 /* ── Light theme — washi (和紙), rice paper ──────────────────
@@ -3519,7 +3537,8 @@ button:focus-visible {
   padding: 28px 20px 28px 18px;
 }
 /* 標 (plan 174, the owner's pick T2 of the canvas "Tsuji — harmony"):
-   a screen's own name is serif (.bar__title, .sheet__jp) and every
+   a screen's own name is serif (.bar__title; a sheet's is its ring and
+   words since plan 277) and every
    name under it — a plate, a platform, a deck, a stop, a paper — is
    set as a station prints its names: the display face, bold, one size
    a rank. One rank of names had come in three faces (a serif plate, a
@@ -4513,31 +4532,6 @@ textarea:focus-visible {
   overflow: hidden;
 }
 .balance__fill { display: block; height: 100%; background: var(--accent2); }
-/* 補充 — the claim sheet's 回数券 book (plan 141, the owner's pick C):
-   the cap as a stub a credit, ten to a row. What the balance already
-   held in a pale metal, what the refill landed while the app was closed
-   in the pass's full gold, the room still to fill as dashed outlines.
-   The new stubs fill in one after another, as the list stagger does
-   (DESIGN.md, Motion): 30ms apart, capped at the eighth. Opacity only,
-   which is already the reduced-motion answer. components/credits/
-   ClaimSheet.jsx. */
-.claim-book {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: var(--sp-1);
-}
-.claim-book__stub {
-  height: var(--sp-6);
-  box-sizing: border-box;
-  border-radius: var(--r-plate);
-}
-.claim-book__stub--held { background: color-mix(in srgb, var(--accent2) 30%, var(--surface)); }
-.claim-book__stub--new {
-  background: var(--accent2);
-  animation: arrive-soft 0.3s ease both;
-  animation-delay: calc(min(var(--i, 0), 8) * 30ms);
-}
-.claim-book__stub--room { border: 1px dashed var(--surface-line); }
 .balance__rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6811,8 +6805,8 @@ textarea:focus-visible {
 .run-meter__s--q1 { background: var(--rating-wrong); }
 .run-meter__s--q2 { background: var(--rust); }
 .run-meter__s--q3 { background: var(--warning); }
-.run-meter__s--q4 { background: var(--rating-correct); }
-.run-meter__s--q5 { background: var(--rating-perfect); }
+.run-meter__s--q4 { background: var(--verdict-q4); }
+.run-meter__s--q5 { background: var(--verdict-q5); }
 .run-meter--open .run-meter__s { flex: 0 0 12px; }
 .run-meter--dense .run-meter__segs { gap: 0; overflow: hidden; border-radius: var(--r-pill); }
 .run-meter--dense .run-meter__s { border-radius: 0; }
@@ -7015,6 +7009,7 @@ textarea:focus-visible {
 }
 .sheet {
   --sheet-cap-ink: var(--text-secondary);
+  --sheet-ink: var(--text-primary);
   position: fixed;
   left: 0;
   right: 0;
@@ -7060,6 +7055,7 @@ textarea:focus-visible {
    named on the block (the ink guard's escape hatch, on purpose). */
 .sheet--sumi {
   --sheet-cap-ink: var(--text-on-panel-soft);
+  --sheet-ink: var(--text-on-panel);
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border-color: color-mix(in srgb, var(--pass-ink) 45%, transparent);
@@ -7071,7 +7067,36 @@ textarea:focus-visible {
   border-radius: var(--r-pill);
   background: color-mix(in srgb, currentcolor 30%, transparent);
 }
-.sheet__head { display: flex; align-items: baseline; gap: var(--sp-3); }
+/* The head (plan 277, the owner's pick C5 on the canvas "Titres —
+   options"): a small ring with the sheet's icon, then its name in
+   words, the display face at the lead rung, and a quiet line under it
+   where the old caption sat beside the name. The ring is the
+   analyser's roundel at its own 30px, in the pigment of the sheet's
+   line (Sheet's `line`) or, for a sheet of no line, the caption's
+   neutral ink. */
+.sheet__head { display: flex; align-items: center; gap: var(--sp-3); }
+.sheet__mark {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-color, var(--sheet-cap-ink));
+  color: color-mix(in srgb, var(--line-color, var(--sheet-cap-ink)) 60%, var(--sheet-ink));
+}
+.sheet__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.sheet__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1.2;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.sheet__sub { margin: 0; font-size: var(--fs-caption); color: var(--sheet-cap-ink); overflow-wrap: anywhere; }
 /* The handle and the head are the mouse's grip on the sheet
    (hooks/useSheetDrag): a push down from either shuts it, so neither
    is text to select and both say so under the cursor. */
@@ -7079,6 +7104,9 @@ textarea:focus-visible {
 .sheet__head { cursor: grab; user-select: none; }
 .sheet--dragging .sheet__handle,
 .sheet--dragging .sheet__head { cursor: grabbing; }
+/* The stacked heads a few sheets draw themselves -- a caption over a
+   question (RatingSheet, TransferSheet, ExplainPanel): not the head
+   above, which plan 277 reworked, and kept as they were drawn. */
 .sheet__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-heading); line-height: 1.1; }
 .sheet__cap {
   font-family: var(--font-display);
@@ -7088,25 +7116,6 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--sheet-cap-ink);
 }
-/* 歌 — the lyrics import's head (plan 264; option A of three drawn,
-   the owner's pick of 2026-10-20): the song's icon in the analyser's
-   roundel, and the title in words at a card title's size, where every
-   other sheet prints a kanji over a caption. */
-.lyr-sheet .sheet__head { align-items: center; }
-.lyr-sheet .sheet__jp { display: inline-flex; line-height: 1; }
-/* Two classes: .wmap-roundel, later in the file, sets its own 30px. */
-.sheet__head .lyr-sheet__badge {
-  --line-color: var(--line-kaiseki);
-  width: 40px;
-  height: 40px;
-}
-.lyr-sheet .sheet__cap {
-  font-size: var(--fs-title);
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--text-primary);
-}
-
 /* ── the console: chips over a field with a count ── */
 .console {
   background: var(--surface);
@@ -8247,6 +8256,195 @@ textarea:focus-visible {
   0%   { filter: drop-shadow(0 0 0 color-mix(in srgb, var(--accent2) 80%, transparent)); }
   40%  { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent2) 80%, transparent)); }
   100% { filter: drop-shadow(0 0 0 transparent); }
+}
+
+/* ── 補充 — the card, charged (plan 278) ──
+   The owner's pick C2 of the canvas "Tsuji — the refill, reloaded"
+   (components/credits/RefillCard.jsx). What the refill landed while the
+   app was closed is printed on the card while it is out: the strip's
+   balance door at the card's size in the foot's left, where the fare
+   line stands at rest (the face's middle is the struck 辻's, and a
+   figure over it read as neither), the amount rising off it as the fare
+   rises off the level, the mark's three arcs lit one after another, and
+   under them the gauge in the pass's metal, the balance as a share of
+   the cap. Drawn at the face's own scale over the face (CardFace's
+   children). Every beat is a share of --refill-ms. Each material keeps
+   its own inks, as the face's print does: the band's white, the
+   charcoal's gold ink, the foil's deep gold. */
+.refill-print {
+  --refill-ink: rgba(255, 255, 255, 0.92);
+  --refill-lit: var(--gate-gold-lit);
+  --refill-track: rgba(255, 255, 255, 0.22);
+  --refill-sheen: rgba(255, 255, 255, 0.55);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--pcard-face-w);
+  height: var(--pcard-face-h);
+  overflow: hidden;
+  border-radius: var(--r-identity);
+  transform-origin: 0 0;
+  transform: scale(var(--pcard-kf, 1));
+  pointer-events: none;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.pcard--pro .refill-print { --refill-ink: #d2ae68; --refill-track: rgba(255, 255, 255, 0.1); --refill-sheen: rgba(255, 255, 255, 0.14); }
+.pcard--max .refill-print { --refill-ink: #7a571c; --refill-lit: #b0852f; --refill-track: rgba(34, 36, 42, 0.12); }
+/* The balance takes the fare line's place while the card is out. */
+.pcard:has(> .refill-print) .pcf__meta { visibility: hidden; }
+.refill-print__bal {
+  position: absolute;
+  left: var(--sp-5);
+  bottom: var(--sp-4);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--refill-ink);
+  animation: refill-show var(--refill-ms) ease both;
+}
+.refill-print__fig { display: inline-flex; align-items: baseline; gap: 1px; font-variant-numeric: tabular-nums; }
+.refill-print__fig b { font-size: var(--fs-title); font-weight: 700; }
+.refill-print__fig small { font-size: var(--fs-caption); font-weight: 600; opacity: 0.7; }
+.refill-print .ofr-wave__arc { animation: refill-arc var(--refill-ms) linear both; }
+.refill-print .ofr-wave__arc--2 { animation-delay: calc(var(--refill-ms) * 0.02); }
+.refill-print .ofr-wave__arc--3 { animation-delay: calc(var(--refill-ms) * 0.04); }
+/* Over the figure's end, clear of the class beside it (GRATUIT is wide). */
+.refill-print__plus {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--refill-lit);
+  font-variant-numeric: tabular-nums;
+  animation: refill-plus var(--refill-ms) both;
+}
+.refill-print__gauge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--refill-track);
+  animation: refill-show var(--refill-ms) ease both;
+}
+.refill-print__gauge i {
+  display: block;
+  height: 100%;
+  background: var(--gate-gold-lit);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--refill-share, 0));
+  transition: transform 80ms ease-out;
+}
+.refill-print__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, var(--refill-sheen) 50%, transparent 62%);
+  transform: translateX(-120%);
+  animation: refill-sheen var(--refill-ms) both;
+}
+@keyframes refill-show {
+  0%, 4%   { opacity: 0; }
+  9%, 80%  { opacity: 1; }
+  86%, 100% { opacity: 0; }
+}
+@keyframes refill-arc {
+  0%, 21%   { border-right-color: currentcolor; }
+  23%, 65%  { border-right-color: var(--refill-lit); }
+  74%, 100% { border-right-color: currentcolor; }
+}
+@keyframes refill-plus {
+  0%, 20%   { opacity: 0; transform: translateY(6px); }
+  25%       { opacity: 1; transform: none; }
+  45%       { opacity: 1; transform: translateY(-8px); }
+  52%, 100% { opacity: 0; transform: translateY(-14px); }
+}
+@keyframes refill-sheen {
+  0%, 57%   { transform: translateX(-120%); }
+  68%, 100% { transform: translateX(120%); }
+}
+/* While the card is out the strip is its empty pocket -- the card is
+   never on the screen twice -- drawn as the holder's mouth is when the
+   card is on the page. Its doors stay under it, and still answer. */
+.hstrip__pocket {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.12)), var(--bg-panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  animation: refill-pocket var(--refill-ms) both;
+}
+@keyframes refill-pocket {
+  0%       { opacity: 0; }
+  6%, 94%  { opacity: 1; }
+  100%     { opacity: 0; }
+}
+/* The card drawn out from under its strip and hung below it at the
+   strip's right edge, 240 wide as drawn on a 390 phone, swinging once
+   from the top as it stops; clipped at the strip's foot, so it comes out
+   of the strip and goes back into it. It takes no pointer: what is
+   under it answers. Over the screen, under the sheets (240) and the
+   level-up (250). */
+.refill-hang {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 20;
+  width: 240px;
+  clip-path: inset(0 -48px -64px -48px);
+  pointer-events: none;
+}
+.refill-hang__card {
+  display: block;
+  padding-top: var(--sp-4);
+  transform-origin: 50% 0;
+  animation: refill-hang var(--refill-ms) both;
+}
+@keyframes refill-hang {
+  0%   { transform: translateY(-100%); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  15%  { transform: translateY(4px); }
+  21%  { transform: rotate(1.4deg); }
+  28%  { transform: rotate(-0.8deg); }
+  36%  { transform: none; }
+  83%  { transform: none; animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.4); }
+  100% { transform: translateY(-100%); }
+}
+/* What the card went back with: the balance's door glints once, in the
+   pass's metal (stores/credits.js, useClaimLanded). */
+.hstrip__landed {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+  box-shadow: inset 0 0 0 2px var(--accent2);
+  pointer-events: none;
+  animation: refill-landed 900ms ease-out both;
+}
+@keyframes refill-landed {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* Reduced motion: the card is shown hung, charged to its new balance,
+   and taken away -- it fades, nothing drops, swings, counts or sweeps. */
+@media (prefers-reduced-motion: reduce) {
+  .refill-hang__card { animation-name: refill-still; }
+  .refill-print__plus { animation-name: refill-plus-still; }
+  .refill-print .ofr-wave__arc { animation: none; }
+  .refill-print__sheen { display: none; }
+  .refill-print__gauge i { transition: none; }
+}
+@keyframes refill-still {
+  0%       { opacity: 0; }
+  9%, 86%  { opacity: 1; }
+  100%     { opacity: 0; }
+}
+@keyframes refill-plus-still {
+  0%, 9%    { opacity: 0; }
+  15%, 80%  { opacity: 1; }
+  86%, 100% { opacity: 0; }
 }
 
 /* ══ 定期券 — the pass's charcoal ground ══════════════════════
@@ -13923,6 +14121,94 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .reading-share--core .reading-share__pct { color: var(--sel-ink); }
 
+/* ── 読み — a register's name as a door (plan 276) ──
+   On a kanji card the names over the readings open the sheet that says
+   what the two readings are (ReadingsHelp). The label it was, in its
+   ink and at its rung, with the ⓘ beside it; the padding a finger needs
+   is taken back by the margin, so the readings under it do not move. */
+.reading-group__door {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: calc(-1 * var(--sp-2)) calc(-1 * var(--sp-3));
+  padding: var(--sp-2) var(--sp-3);
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.reading-group__door:hover,
+.reading-group__door:focus-visible { color: var(--text-primary); }
+
+/* The sheet itself, on the sheet's own surface and inks: each reading
+   by its plain name, what it is, and a word of the card's kanji with
+   the kanji and its sound picked out by ink and weight (the sheet is a
+   portal, out of reach of the line's pigment); then the card's marks. */
+.readings-help { display: flex; flex-direction: column; gap: var(--sp-5); }
+.readings-help__row { display: flex; flex-direction: column; gap: var(--sp-1); }
+.readings-help__name {
+  margin: 0;
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+.readings-help__name-jp {
+  margin-left: var(--sp-3);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.readings-help__text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.readings-help__eg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  margin: var(--sp-2) 0 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  color: var(--text-secondary);
+}
+.readings-help__hit { font-weight: 700; color: var(--text-primary); }
+.readings-help__gloss {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+}
+.readings-help__marks {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-3) var(--sp-4);
+  margin: 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.readings-help__mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.readings-help__mark--jp { font-family: var(--font-jp); }
+.readings-help__unit { font-size: var(--fs-caption); font-weight: 500; }
+.readings-help__means { margin: 0; text-wrap: pretty; }
+@media (prefers-reduced-motion: reduce) {
+  .reading-group__door { transition: none; }
+}
+
 .meaning-display {
   text-align: left;
   /* Declared here, set per card by MeaningDisplay. The default keeps
@@ -14167,6 +14453,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
   margin-top: var(--sp-4);
   min-height: 1em;
+}
+
+/* What a card asks, under its specimen (plan 276): a Kanji → meaning
+   front, whose back prints readings as well, says the meaning is the
+   answer. Plain case at the small rung, a step above the tracked hint
+   under it, so it reads as the question and the hint as the gesture. */
+.prompt-ask {
+  margin: var(--sp-4) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* Houses the sound-replay and dictionary-lookup buttons, pinned to
@@ -15064,6 +15361,19 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .rating-bar__btn--q4 { --rating-color: var(--rating-correct); }
 .rating-bar__btn--q3 { --rating-color: var(--warning); }
 .rating-bar__btn--q2 { --rating-color: var(--rust); }
+/* The four, the owner's pick: Easy is the blue key and Correct a plain
+   one, the dark key a miss is, its check in the panel's ink. */
+.rating-bar__buttons--4 .rating-bar__btn--q5 { --rating-color: var(--rating-correct); }
+.rating-bar__buttons--4 .rating-bar__btn.rating-bar__btn--q4 {
+  --key-light: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+  --key-foot-ink: var(--key-sole);
+  background: var(--key-face);
+  color: var(--text-on-panel);
+}
+.rating-bar__buttons--4 .rating-bar__btn.rating-bar__btn--q4:hover,
+.rating-bar__buttons--4 .rating-bar__btn.rating-bar__btn--q4:focus-visible {
+  background: var(--key-face-lift);
+}
 /* q1's own dedicated ink -- not --accent, which is exactly --line-kana
    in dark theme and exactly --line-kana/--state-learning in light
    theme. See :root, above, for why this gets its own named colour. */
@@ -16620,23 +16930,33 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    becomes a band of sumi that carries the register's mark and sticks
    to the top of the list while its words pass under it. Ground and
    position do the dividing that a rung could not. */
-/* The head's own two marks: the kanji at reading size and what this
-   sheet is, in the caption register. The plate's three registers do
-   not appear here — the entry they belong to is still on screen
-   underneath. */
+/* The head's own two marks, as every sheet's head draws them since
+   plan 277 (the owner's pick C5): the kanji in the small ring, in the
+   dictionary's pigment, then what this sheet is in words. The plate's
+   three registers do not appear here — the entry they belong to is
+   still on screen underneath. */
 .dict-readings__glyph {
-  font-family: var(--font-jp);
-  font-size: var(--fs-heading);
+  --line-color: var(--line-jisho);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-color);
+  color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  font-weight: 700;
   line-height: 1;
-  color: var(--text-primary);
 }
 .dict-readings__title {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-lead);
   font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  line-height: 1.2;
+  color: var(--text-primary);
 }
 .dict-gates {
   display: flex;
@@ -22686,6 +23006,11 @@ form.stage__foot > .btn-primary {
   font-variant-numeric: tabular-nums;
   color: var(--text-on-panel-soft);
 }
+/* The figure in a ring is centred on its own height, cap to baseline,
+   not on the line box: at a ring's small sizes the face's ascent and
+   descent round to whole pixels apart and set the figure a pixel high.
+   Where text-box is not read, the line box centres it as before. */
+.bz-num { text-box: trim-both cap alphabetic; }
 /* The metal is the ring; the figure inside is the metal mixed toward
    the panel ink — bronze alone measured 2.83:1 on sumi in light theme. */
 .leaderboard-row__rank--gold { color: color-mix(in srgb, var(--medal-gold) 70%, var(--text-on-panel)); box-shadow: inset 0 0 0 1.5px var(--medal-gold); }
@@ -22855,14 +23180,13 @@ form.stage__foot > .btn-primary {
   gap: var(--sp-1);
   padding: var(--sp-2) 0;
 }
-.bzp__division-title { display: flex; align-items: baseline; gap: var(--sp-3); }
-.bzp__division-jp {
+/* The division by its name alone (plan 277). */
+.bzp__division-title {
   font-family: var(--font-serif);
   font-size: var(--fs-title);
   font-weight: 700;
   color: var(--text-primary);
 }
-.bzp__division-latin,
 .bzp__podium-cap,
 .bzp__group {
   font-family: var(--font-display);
@@ -22873,7 +23197,9 @@ form.stage__foot > .btn-primary {
   color: var(--text-secondary);
 }
 .bzp__division-notes { font-size: var(--fs-caption); color: var(--text-secondary); text-align: center; }
-/* Last week's podium: the list's first line, the medals as numerals. */
+/* Last week's podium: the list's first line, each medal the board's
+   ringed roundel, small. Not ①②③: no face the app loads draws them, so
+   each came from whichever system font had it, one unlike the next. */
 .bzp__podium {
   display: flex;
   align-items: center;
@@ -22891,11 +23217,23 @@ form.stage__foot > .btn-primary {
   font-size: var(--fs-caption);
   font-weight: 700;
 }
-.bzp__champ { display: inline-flex; align-items: baseline; gap: var(--sp-1); white-space: nowrap; }
+.bzp__champ { display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+.bzp__medal {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-variant-numeric: tabular-nums;
+}
 .bzp__champ .bz-pick { color: var(--text-primary); font-weight: 700; }
-.bzp__medal--gold { color: color-mix(in srgb, var(--medal-gold) 70%, var(--text-primary)); }
-.bzp__medal--silver { color: color-mix(in srgb, var(--medal-silver) 70%, var(--text-primary)); }
-.bzp__medal--bronze { color: color-mix(in srgb, var(--medal-bronze) 55%, var(--text-primary)); }
+.bzp__medal--gold { color: color-mix(in srgb, var(--medal-gold) 70%, var(--text-primary)); box-shadow: inset 0 0 0 1.5px var(--medal-gold); }
+.bzp__medal--silver { color: color-mix(in srgb, var(--medal-silver) 70%, var(--text-primary)); box-shadow: inset 0 0 0 1.5px var(--medal-silver); }
+.bzp__medal--bronze { color: color-mix(in srgb, var(--medal-bronze) 55%, var(--text-primary)); box-shadow: inset 0 0 0 1.5px var(--medal-bronze); }
 /* The rows Monday moves, and their heads: the state's colour as a rail. */
 .bzp__group {
   display: flex;
@@ -23058,19 +23396,10 @@ form.stage__foot > .btn-primary {
 .bzp__rung:last-child { border-bottom: 0; }
 .bzp__rung:hover,
 .bzp__rung:focus-visible { background: var(--overlay-hover); filter: none; }
-.bzp__rung-jp { width: 64px; font-family: var(--font-serif); font-weight: 700; }
+.bzp__rung-name { flex: 1; font-family: var(--font-serif); font-weight: 700; }
 .bzp__rung--on { background: var(--sel-wash); }
-.bzp__rung--on .bzp__rung-jp { color: var(--sel-ink); }
+.bzp__rung--on .bzp__rung-name { color: var(--sel-ink); }
 .bzp__rung--mine { box-shadow: inset 3px 0 0 var(--pass-ink); }
-.bzp__rung-latin {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
 .bzp__rung-n { font-size: var(--fs-caption); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 
 /* ── A row's card (LearnerSheet, plan 262) ──
@@ -23112,7 +23441,7 @@ form.stage__foot > .btn-primary {
 }
 .bz-card__fig small { font-size: var(--fs-caption); color: var(--text-secondary); }
 .bz-card__division { margin: 0; display: flex; align-items: baseline; justify-content: center; gap: var(--sp-3); color: var(--text-secondary); }
-.bz-card__division-jp { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); }
+.bz-card__division-name { font-family: var(--font-serif); font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); }
 .bz-card__decks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--surface-line); }
 .bz-card__deck {
   display: flex;
@@ -30976,8 +31305,11 @@ button.brd-stn { cursor: pointer; }
 /* The sheets portal out of the boarding's frame, so its short step
    (`@container brd`, above) never reaches their gate: a window shorter
    than 800px takes it to the boarding's own 56px here too, which keeps
-   the account's three fields (plan 270) whole on a short desk. */
+   the account's three fields (plan 270) whole on a short desk. The
+   head's ring (plan 277) stands 6px taller than the name it replaced,
+   so the sheet's rhythm takes a rung less there to keep them whole. */
 @media (max-height: 799px) {
+  .brd-sheet { gap: var(--sp-4); }
   .brd-sheet .btn-depart { min-height: 56px; }
 }
 /* On the sheet's surface the hours' cells stand on the paper, as they
@@ -32931,6 +33263,323 @@ button.brd-stn { cursor: pointer; }
 .fb-page { max-width: var(--card-w); }
 .fb-page .fb-form__send { align-self: flex-start; width: auto; }
 
+/* ═══ 対戦 — the duels (plan 279) ═════════════════════════════════
+   The sprint between two learners: sixty seconds, the same questions.
+   A duel is about people, so it wears the People family -- the pass's
+   ink as its edge, the selection's gold for what waits on the learner --
+   and never a line's pigment. The door in the holder, its Elo insert
+   and the notice on Today are the app's own objects with a word or a
+   ring more; everything else here is namespaced .pvp-*. */
+
+/* What waits, under the door's name and at the plate's foot. */
+.pvp-door__waiting {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--sel-ink);
+}
+/* Today's notice: the comeback row's ring, in the selection's gold. */
+.pvp-line__ring { border-color: var(--gate-gold); }
+
+/* ── the hall ── */
+.pvp { flex: 1 0 auto; display: flex; flex-direction: column; gap: var(--sp-4); padding: 0 var(--sp-5); }
+.pvp-verdict { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; }
+.pvp-verdict--win { color: var(--success); }
+.pvp-verdict--loss { color: var(--danger); }
+.pvp-verdict--draw { color: var(--text-secondary); }
+.pvp-elo-move { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.pvp-elo-move--up { color: var(--success); }
+.pvp-elo-move--down { color: var(--danger); }
+.pvp-trend { flex: none; }
+.pvp-trend__line { fill: none; stroke: var(--pass-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* A quiet way out (decline, cancel, block): underlined, a rung over the
+   one action, never beside or under it. */
+.pvp-quiet { align-self: center; min-height: 44px; padding: 0 var(--sp-3); border: 0; background: none; font: inherit; font-weight: 600; color: var(--text-primary); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+
+/* H3 — the two platforms and the console. */
+.pvp-platforms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.pvp-platform {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.pvp-platform:hover,
+.pvp-platform:focus-visible { border-color: var(--pass-ink); filter: none; }
+.pvp-platform__title { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.pvp-platform__desc { font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); }
+.pvp-platform__price { margin-top: auto; display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+.pvp-console { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); overflow: hidden; }
+.pvp-console__row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--surface-line); }
+.pvp-console__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-console__who { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.pvp-console__what { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-console__go { flex: none; min-height: 36px; padding-inline: var(--sp-5); }
+.pvp-console__end { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+.pvp-console__door { display: flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: 0 var(--sp-5); border: 0; border-top: 1px solid var(--surface-line); background: none; font: inherit; font-weight: 700; color: inherit; text-align: left; cursor: pointer; }
+.pvp-console__door-name { flex: 1; }
+.pvp-console__door-fig { font-size: var(--fs-sm); color: var(--text-secondary); }
+.pvp-console__door-req { color: var(--sel-ink); }
+.pvp-console__none { margin: 0; padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--surface-line); font-size: var(--fs-sm); color: var(--text-secondary); }
+button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+/* What a screen says when the server refused (an error's code, mapped). */
+.pvp-error { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+
+/* The Elo at the hall's head (the owner's G1): a card that opens the
+   Elo board, the figure over its curve. */
+.pvp-curve {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.pvp-curve:hover,
+.pvp-curve:focus-visible { border-color: var(--pass-ink); filter: none; }
+.pvp-curve__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.pvp-curve__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-curve__rank { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+.pvp-curve__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-curve__prov { margin-left: var(--sp-1); font-size: var(--fs-lead); color: var(--text-secondary); }
+.pvp-curve__svg { display: block; width: 100%; height: 72px; overflow: visible; }
+.pvp-curve__line { fill: none; stroke: var(--pass-ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.pvp-curve__start { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.pvp-curve__dot { stroke: var(--pass-ink); stroke-width: 8; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.pvp-curve__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-curve__key { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.pvp-curve__dash { width: 16px; border-top: 1.5px dashed var(--border); }
+.pvp-curve--none { gap: var(--sp-2); }
+.pvp-curve__none { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
+.pvp-curve--none .pvp-curve__foot { justify-content: flex-start; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+
+/* F2 — the sheet: a request, the friends as radio rows, later or live. */
+.pvp-sheet { display: flex; flex-direction: column; gap: var(--sp-4); }
+.pvp-request { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.pvp-request__who { flex: 1; min-width: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.pvp-request__name { color: var(--text-primary); }
+.pvp-request__btn { flex: none; min-height: 36px; padding-inline: var(--sp-4); }
+.pvp-pick { display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
+.pvp-pick__row { display: flex; align-items: center; gap: var(--sp-4); min-height: 48px; padding: 0 var(--sp-5); cursor: pointer; }
+.pvp-pick__row + .pvp-pick__row { border-top: 1px solid var(--surface-line); }
+.pvp-pick__radio { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--gate-gold); }
+.pvp-pick__row--on { background: var(--sel-wash); }
+.pvp-pick__name { flex: 1; min-width: 0; font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
+.pvp-pick__row--on .pvp-pick__name { color: var(--sel-ink); }
+.pvp-pick__rec { font-size: var(--fs-caption); color: var(--text-secondary); }
+.pvp-add { display: flex; align-items: center; gap: var(--sp-3); min-height: 44px; padding: 0 var(--sp-4); border: 0; border-radius: var(--r-card); background: var(--bg-main); font: inherit; color: var(--text-secondary); text-align: left; cursor: pointer; }
+.pvp-sheet__help { margin: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); text-wrap: pretty; }
+.pvp-sheet__foot { display: flex; flex-direction: column; padding-top: var(--sp-2); }
+/* The corrections: the mock exam's miss rows, the other's answer under each. */
+.pvp-fix__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-fix__reading { font-size: var(--fs-caption); color: var(--text-secondary); }
+.pvp-fix__kind { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-fix__time { margin-left: var(--sp-2); font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-fix__them { padding-left: calc(24px + var(--sp-4)); font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+/* F1 — the friends: the search well, the requests, the friends. */
+.pvp-list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-find { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-find__cap,
+.pvp-group__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-group { display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-person { display: flex; align-items: center; gap: var(--sp-4); min-height: 56px; padding: var(--sp-3) var(--sp-4); }
+.pvp-list .pvp-person + .pvp-person { border-top: 1px solid var(--surface-line); }
+.pvp-person__names { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); }
+.pvp-person__name { flex: 1; min-width: 0; padding: 0; border: 0; background: none; font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; color: inherit; text-align: left; }
+.pvp-person__names .pvp-person__name { flex: none; }
+.pvp-person__sub { font-size: var(--fs-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-person__act { flex: none; min-height: 36px; padding-inline: var(--sp-4); }
+.pvp-find__go { flex: none; min-height: 36px; padding-inline: var(--sp-4); }
+.pvp-list__none { border-top: 0; }
+/* A learner's card: the figures a friend shows, the report's four reasons, the gestures. */
+.pvp-card__facts { display: flex; gap: var(--sp-6); }
+.pvp-card__fig { display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-card__num { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-card__report { margin: 0; padding: 0; min-inline-size: 0; }
+.pvp-card__legend { padding: var(--sp-3) var(--sp-5); }
+.pvp-card__reason { font-family: inherit; font-size: var(--fs-body); font-weight: 600; }
+.pvp-card__foot { gap: var(--sp-3); }
+
+/* L1 — the Elo, an insert in the holder: the door, the figure, the line. */
+.pvp-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pvp-insert {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.pvp-insert:hover,
+.pvp-insert:focus-visible { background: var(--bg-card-hover); filter: none; }
+.pvp-insert:hover .record__chev,
+.pvp-insert:focus-visible .record__chev { opacity: 1; transform: translateX(0); }
+.pvp-insert__head { display: flex; align-items: center; gap: var(--sp-3); }
+.pvp-insert__names { flex: 1; }
+.pvp-insert__elo { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); }
+.pvp-insert__fig { display: flex; flex-direction: column; gap: var(--sp-1); }
+.pvp-insert__num { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-insert__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-insert__rec { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+/* L2 — an Elo still provisional, after its figure. */
+.pvp-board__prov { margin-left: var(--sp-1); color: var(--text-secondary); }
+
+/* ── the stage: the departure, the race, the result ──
+   The mock exam's paper (.exam-run): the run's head, a page, the
+   answers docked in sumi, the level bar under them. */
+.pvp-air { flex: 1 1 auto; min-height: 0; }
+.pvp-run__help { margin: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); text-wrap: pretty; }
+.pvp-run__help--center { text-align: center; }
+.pvp-run__fail { margin: auto; color: var(--text-secondary); }
+/* A verdict that could not be read: asked again from under the line. */
+.pvp-result .pvp-run__fail { margin: 0 auto; }
+.pvp-retry { align-self: center; }
+
+/* D1 — the duel's ticket: the cleared day's 硬券, printed for two. */
+.pvp-ticket { flex: none; gap: var(--sp-4); padding: var(--sp-6) var(--sp-7); }
+.pvp-ticket__who { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: var(--sp-3); }
+.pvp-ticket__side { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.pvp-ticket__side--them { align-items: flex-end; text-align: right; }
+.pvp-ticket__name { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pvp-ticket__level { font-size: var(--fs-caption); font-weight: 700; color: var(--paper-ink-soft); }
+.pvp-ticket__vs { padding-bottom: var(--sp-1); font-size: var(--fs-title); font-weight: 700; color: color-mix(in srgb, var(--stamp-ink) 70%, var(--text-on-fill)); }
+.pvp-ticket__facts { position: relative; z-index: 2; margin: 0; display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-sm); }
+.pvp-ticket__fact { display: flex; justify-content: space-between; gap: var(--sp-4); }
+.pvp-ticket__dt { color: var(--paper-ink-soft); }
+.pvp-ticket__dd { margin: 0; font-weight: 700; text-align: right; }
+/* The live room's wait, under the ticket. */
+.pvp-room__clock { font-variant-numeric: tabular-nums; color: var(--text-primary); }
+
+/* D2 — two platforms, side by side. */
+.pvp-quais { flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.pvp-quai {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-5) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-top: 3px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.pvp-quai--on { border-color: var(--sel-line); border-top-color: var(--gate-gold); background: var(--sel-wash); }
+.pvp-quai__no { display: flex; align-items: baseline; gap: var(--sp-1); padding-top: var(--sp-4); }
+.pvp-quai__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-quai--on .pvp-quai__fig { color: var(--sel-ink); }
+.pvp-quai__jp { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+.pvp-quai__title { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.pvp-quai__line { font-size: var(--fs-sm); line-height: 1.35; color: var(--text-secondary); }
+.pvp-quai__price { margin-top: var(--sp-3); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+
+/* The race: the minute as a bar, then the board the option draws. */
+.pvp-clock { display: block; height: 6px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
+.pvp-clock__fill { display: block; height: 100%; background: var(--pass-ink); transform-origin: left; transition: transform 0.1s linear; }
+/* P2 — two trains on one line, a stop every 500 points. */
+.pvp-line-race { flex: none; display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-tracks { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-track { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); align-items: end; gap: var(--sp-3); }
+.pvp-track__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-bottom: var(--sp-1); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-track--me .pvp-track__who { color: var(--text-primary); }
+.pvp-track__rail { position: relative; height: 40px; margin-right: 36px; }
+.pvp-track__rail::before { content: ''; position: absolute; left: 0; right: -36px; bottom: 5px; height: 2px; background: var(--surface-line); }
+/* The train rides a layer as wide as the rail, moved by its own width's share (a transform, never left). */
+.pvp-train { position: absolute; inset: auto 0 0; transform: translateX(var(--at, 0%)); transition: transform 0.3s ease; }
+.pvp-train__body { width: 36px; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+.pvp-train__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.pvp-train__car { width: 36px; height: 12px; border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); }
+.pvp-track--me .pvp-train__fig { color: var(--text-primary); }
+.pvp-track--me .pvp-train__car { background: var(--pass-ink); }
+/* The gap on the line (the owner's P2c): the trailing rail hatched up to the leader's nose, what it is worth over it. */
+.pvp-gapline { position: absolute; bottom: 0; left: calc(var(--lo, 0%) + 36px); width: var(--span, 0%); height: 12px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--text-secondary) 30%, transparent) 0 4px, transparent 4px 8px); }
+.pvp-gapline--mine { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--pass-ink) 30%, transparent) 0 4px, transparent 4px 8px); }
+.pvp-gapline__fig { position: absolute; bottom: calc(100% + var(--sp-1)); left: var(--sp-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; line-height: 1; white-space: nowrap; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pvp-gapline--mine .pvp-gapline__fig { color: var(--pass-ink); }
+/* The question's page: its kind, what it is worth now, the prompt. */
+.pvp-page { transition: border-color 0.15s ease; }
+.pvp-page--right { border-color: var(--rating-correct); }
+.pvp-page--wrong { border-color: var(--rating-wrong); }
+.pvp-page--count { align-items: center; justify-content: center; }
+.pvp-count { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-page__head { padding-right: var(--sp-5); }
+.pvp-page__kind { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-decay { flex: 1; height: 4px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
+.pvp-decay__fill { display: block; height: 100%; background: var(--gate-gold); transform-origin: left; }
+.pvp-page__worth { flex: none; min-width: 2.5em; margin-left: auto; text-align: right; font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--sel-ink); }
+.pvp-page__body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-2); padding: var(--sp-5); text-align: center; }
+.pvp-page__reading { font-family: var(--font-jp); font-size: var(--fs-body); letter-spacing: var(--tr-reading); color: var(--text-secondary); }
+.pvp-page__prompt { font-family: var(--font-jp); font-size: var(--fs-display); font-weight: 500; line-height: 1.2; }
+/* The answers: the exam's tiles, a verdict's ink once answered. */
+.pvp-dock { padding-bottom: var(--sp-4); }
+.pvp-tile__t--latin { font-family: var(--font-display); }
+.pvp-tile--right { border-color: var(--rating-correct); }
+.pvp-tile--right .exam-tile__b { background: var(--rating-correct); border-color: var(--rating-correct); color: var(--bg-panel); }
+.pvp-tile--wrong { border-color: var(--rating-wrong); }
+.pvp-tile--wrong .exam-tile__b { background: var(--rating-wrong); border-color: var(--rating-wrong); color: var(--bg-panel); }
+.pvp-tile:disabled { cursor: default; }
+
+/* The result. */
+.pvp-result__word { margin: 0; font-family: var(--font-serif); font-size: var(--fs-heading); font-weight: 700; line-height: 1.2; text-align: center; }
+.pvp-result__word--win { color: var(--text-primary); }
+.pvp-result__word--loss { color: var(--text-secondary); }
+.pvp-result__verdict { flex: none; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); color: var(--text-secondary); }
+.pvp-result__facts .record__value { display: flex; align-items: baseline; gap: var(--sp-3); }
+.pvp-result__foot { gap: var(--sp-3); }
+.pvp-result__review { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding-inline: var(--sp-5); }
+.pvp-result__price { font-size: var(--fs-sm); color: var(--sel-ink); }
+/* R1 — face to face. */
+.pvp-face { flex: none; display: flex; flex-direction: column; gap: var(--sp-6); padding: var(--sp-6); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.pvp-face__pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pvp-face__side { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.pvp-face__side + .pvp-face__side { border-left: 1px solid var(--surface-line); }
+.pvp-face__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pvp-face__side--me .pvp-face__fig { text-decoration: underline 3px var(--pass-ink); text-underline-offset: 0.2em; }
+.pvp-face__who { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-face__rights { font-size: var(--fs-sm); color: var(--text-secondary); }
+.pvp-face__pair--one { grid-template-columns: minmax(0, 1fr); }
+/* The finish, simplified: two rails, each car where its total stopped. */
+.pvp-finish { display: flex; flex-direction: column; gap: var(--sp-2); }
+.pvp-finish__row { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); align-items: center; gap: var(--sp-3); }
+.pvp-finish__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.pvp-finish__row--me .pvp-finish__who { color: var(--text-primary); }
+.pvp-finish__rail { position: relative; height: 14px; margin-right: 32px; }
+.pvp-finish__rail::before { content: ''; position: absolute; left: 0; right: -32px; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
+.pvp-finish__rail .pvp-train { inset: 0 0 auto; }
+.pvp-finish__car { display: block; width: 32px; height: 14px; border-radius: var(--r-flat) var(--r-pill) var(--r-pill) var(--r-flat); background: var(--text-secondary); }
+.pvp-finish__row--me .pvp-finish__car { background: var(--pass-ink); }
+.pvp-face .pvp-finish { padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
+@media (prefers-reduced-motion: reduce) {
+  .pvp-platform,
+  .pvp-quai,
+  .pvp-page,
+  .pvp-clock__fill { transition: none; }
+  .pvp-train { transition: none; }
+}
+/* ── 対戦 end ── */
+
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
    The computer's design, at and above 1100px (hooks/useDesk.js's
    DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which
@@ -33363,9 +34012,44 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel) var(--r-panel) 0 0;
     transition: transform 0.25s cubic-bezier(0.3, 0.9, 0.3, 1);
   }
+  /* 補充 — the refill stands the card up out of the mouth (plan 278,
+     below): the mouth's clip opens upward only. */
+  .desk-holder--refill .desk-holder__card {
+    /* Standing, the card wears its own material's lift again, smaller. */
+    --pcs-lift: 0 10px 22px rgba(0, 0, 0, 0.5), 0 2px 5px rgba(0, 0, 0, 0.3);
+    overflow: visible;
+    clip-path: inset(-200px -48px 0 -48px);
+  }
   .desk-holder:hover .desk-holder__card { transform: translateY(-5px); }
-  .desk-holder__card .pcs { box-shadow: none; }
-  .desk-holder--free .desk-holder__card .pcs { box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.14); }
+  .desk-holder:not(.desk-holder--refill) .desk-holder__card .pcs { box-shadow: none; }
+  .desk-holder--free:not(.desk-holder--refill) .desk-holder__card .pcs { box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.14); }
+  /* 補充 — the refill (plan 278, the owner's pick C2;
+     components/chrome/DeskPass.jsx): the card rises clear of the case,
+     is charged there in its own lift, and sinks back behind the case,
+     which stays over it as at rest. Reduced motion: it stays in the
+     mouth, and the case's figure glints when the claim lands. */
+  .desk-holder--refill .desk-holder__card > .pcard { animation: desk-refill-stand var(--refill-ms) both; }
+  /* Out of the mouth to just above the case (the holder's 32px of
+     mouth, less a hair): the card's own height, less --sp-7. */
+  @keyframes desk-refill-stand {
+    0%   { transform: none; animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+    12%  { transform: translateY(calc(-100% + var(--sp-6))); }
+    17%  { transform: translateY(calc(-100% + var(--sp-7))); }
+    83%  { transform: translateY(calc(-100% + var(--sp-7))); animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.5); }
+    100% { transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .desk-holder--refill .desk-holder__card > .pcard { animation: none; }
+  }
+  /* What it went back with: the case's balance glints once. */
+  .desk-holder__landed {
+    position: absolute;
+    inset: 0;
+    border-bottom-left-radius: var(--r-identity);
+    box-shadow: inset 0 0 0 2px var(--accent2);
+    pointer-events: none;
+    animation: refill-landed 900ms ease-out both;
+  }
   .desk-holder__slot {
     position: absolute;
     left: var(--sp-4);
@@ -33451,7 +34135,7 @@ button.brd-stn { cursor: pointer; }
     border-left: 1px solid rgba(255, 255, 255, 0.07);
     border-bottom-right-radius: var(--r-identity);
   }
-  .desk-holder__cr { border-bottom-left-radius: var(--r-identity); }
+  .desk-holder__cr { position: relative; border-bottom-left-radius: var(--r-identity); }
   .desk-holder__st--slightlyBehind { --st-ink: var(--warning); }
   .desk-holder__st--delayed,
   .desk-holder__st--suspended,
@@ -34755,7 +35439,7 @@ button.brd-stn { cursor: pointer; }
   .bzp__ladder { grid-column: 2; grid-row: 4; }
   .bzp__seen { grid-column: 2; grid-row: 5; }
   .bzp__division-name { padding: var(--sp-3) 0; }
-  .bzp__division-jp { font-size: var(--fs-heading); }
+  .bzp__division-title { font-size: var(--fs-heading); }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
      The owner's pick B of four layouts drawn on the canvas "Tsuji — the
@@ -36950,12 +37634,9 @@ button.brd-stn { cursor: pointer; }
      the desk draws the pass's objects everywhere else, instead of 640px
      in the window's middle a long reach from the pass that opened them.
      Still modal; only placed. Opened from a run's pass, where there is
-     no rail, they stay centred. The claim sheet (plan 141) carries the
-     balance too but nothing on the rail opened it -- it arrives on its
-     own, over whatever screen the learner came back to -- so it is not
-     one of the pass's doors, and keeps the middle (below). */
+     no rail, they stay centred. */
   :root[data-chrome="shell"] .status-sheet,
-  :root[data-chrome="shell"] .sheet:has(> .balance):not(.claim-sheet) {
+  :root[data-chrome="shell"] .sheet:has(> .balance) {
     inset: auto auto var(--sp-5) calc(var(--desk-rail-w) + var(--sp-3));
     width: var(--desk-side-w);
     margin: 0;
@@ -36963,11 +37644,6 @@ button.brd-stn { cursor: pointer; }
   /* At a column's width a row of two actions wraps their labels: they
      stack, as they do at a phone's, which this width is. */
   :root[data-chrome="shell"] .sheet:has(> .balance) > :is(.btn-primary, .btn-secondary, .btn-depart) { flex-basis: 100%; }
-  /* 補充 — the claim sheet in the window's middle, at a column's width:
-     the 回数券 book is drawn for a phone's (a stub is a thumb's width
-     across), and at the dialog's full --card-w it spread into fifty
-     flat bars with the figure a long way from its button. */
-  .claim-sheet { width: var(--desk-side-w); }
   /* 定期券 — the three offers (plan 172) as a dialog in the window's
      middle, the owner's pick A 対 of the canvas's Desktop page: the
      stage beside the words. The phone's stage drawing is kept whole --
@@ -38572,8 +39248,8 @@ button.brd-stn { cursor: pointer; }
   .desk-verdict--q1 { --rating-color: var(--rating-wrong); }
   .desk-verdict--q2 { --rating-color: var(--rust); }
   .desk-verdict--q3 { --rating-color: var(--warning); }
-  .desk-verdict--q4 { --rating-color: var(--rating-correct); }
-  .desk-verdict--q5 { --rating-color: var(--rating-perfect); }
+  .desk-verdict--q4 { --rating-color: var(--verdict-q4); }
+  .desk-verdict--q5 { --rating-color: var(--verdict-q5); }
   /* The passes' tiles echo their keys on the bar under the card (plan
      180): edged and washed in the key's ink, the wait in it (after
      .desk-verdict__when, below). */
@@ -41422,8 +42098,8 @@ button.brd-stn { cursor: pointer; }
   .gl-out__key--q1 { --rating-color: var(--rating-wrong); }
   .gl-out__key--q2 { --rating-color: var(--rust); }
   .gl-out__key--q3 { --rating-color: var(--warning); }
-  .gl-out__key--q4 { --rating-color: var(--rating-correct); }
-  .gl-out__key--q5 { --rating-color: var(--rating-perfect); }
+  .gl-out__key--q4 { --rating-color: var(--verdict-q4); }
+  .gl-out__key--q5 { --rating-color: var(--verdict-q5); }
   .gl-out__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color); flex: none; }
   .gl-out__note { margin-right: var(--sp-2); font-size: var(--fs-caption); font-weight: 600; color: var(--gl-soft); }
   .gl-out__when {

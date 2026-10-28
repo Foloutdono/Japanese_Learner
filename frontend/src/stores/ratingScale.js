@@ -32,11 +32,21 @@ function read() {
   }
 }
 
+// The bar in use, on <html>, for the inks a verdict wears beyond the bar
+// itself (the run's meter, the desk's tiles, the ladder's outcomes):
+// on the four, Easy is the blue key and Correct is plain; on the two and
+// the six, Correct is blue (index.css, --verdict-q4 / --verdict-q5).
+function stamp(id) {
+  if (typeof document !== 'undefined') document.documentElement.dataset.ratingScale = id
+}
+
 let mirrored = read()
+stamp(mirrored ?? DEFAULT_RATING_SCALE)
 
 function mirror(id) {
   if (id === mirrored) return
   mirrored = id
+  stamp(id)
   try { localStorage.setItem(KEY, id) } catch { /* see read() */ }
 }
 

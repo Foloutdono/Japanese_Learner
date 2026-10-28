@@ -275,7 +275,7 @@ export default function KanjiRun({ session }) {
             onReplaySound={c => speakJapanese(c.kana)}
             renderFront={c => <CharDisplay char={c.kanji} size={100} />}
             renderBack={c => (
-              <InlineReveal t={t} kana={c.kana} shares={c.reading_shares} main={<MeaningDisplay meaning={c.meaning} size={28} />} />
+              <InlineReveal t={t} kana={c.kana} shares={c.reading_shares} glyph={c.kanji} session={session} main={<MeaningDisplay meaning={c.meaning} size={28} />} />
             )}
             onExit={leave}
           />
@@ -415,7 +415,13 @@ export default function KanjiRun({ session }) {
                       onReveal={onFlashcardReveal}
                       front={
                         isKjToM
-                          ? <CharDisplay char={card.kanji} size={100} />
+                          ? <>
+                              <CharDisplay char={card.kanji} size={100} />
+                              {/* The card says what it asks (plan 276):
+                                  the back prints readings too, and only
+                                  the meaning is graded. */}
+                              <p className="prompt-ask">{t.askKanjiMeaning}</p>
+                            </>
                           : <MeaningDisplay meaning={card.meaning} size={44} />
                       }
                       back={
@@ -423,6 +429,8 @@ export default function KanjiRun({ session }) {
                           t={t}
                           kana={card.kana}
                           shares={card.reading_shares}
+                          glyph={card.kanji}
+                          session={session}
                           isLarge={isKjToM}
                           main={
                             isKjToM
@@ -444,6 +452,8 @@ export default function KanjiRun({ session }) {
                         t={t}
                         kana={card.kana}
                         shares={card.reading_shares}
+                        glyph={card.kanji}
+                        session={session}
                         revealed={answered}
                         main={
                           isKjToM

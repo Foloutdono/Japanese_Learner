@@ -118,6 +118,20 @@ PLAN = [
     ("banzuke_division",    "user_id = %(user)s",       "the board's division, this week and the last (plan 262)"),
     ("banzuke_rank",        "user_id = %(user)s",       "the board's place at the start of the day, for the moves"),
     ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
+    # 対戦 (plan 279). A duel whose only real player is this learner goes
+    # whole (the cascade takes its rows, a ghost's copy with them), read
+    # off pvp_entries, so it comes first; a duel shared with another
+    # learner stays theirs, and only this learner's entry goes.
+    ("pvp_duels",           "id IN (SELECT duel_id FROM pvp_entries WHERE user_id = %(user)s) "
+                            "AND NOT EXISTS (SELECT 1 FROM pvp_entries o WHERE o.duel_id = pvp_duels.id "
+                            "AND o.user_id <> %(user)s AND o.role <> 'ghost')",
+                            "the duels no other learner played: their papers, and any ghost's copy"),
+    ("pvp_entries",         "user_id = %(user)s",       "this learner's runs in the duels: answers, scores, Elo, a ghost's copy"),
+    ("pvp_ratings",         "user_id = %(user)s",       "the Elo, its record and the placement it started from"),
+    ("pvp_friends",         "user_id = %(user)s OR friend_id = %(user)s", "the friendships, in both directions"),
+    ("pvp_requests",        "user_id = %(user)s OR target_id = %(user)s", "the friend requests sent and received"),
+    ("pvp_blocks",          "user_id = %(user)s OR blocked_id = %(user)s", "the blocks, by and of this learner"),
+    ("pvp_reports",         "user_id = %(user)s OR reported_id = %(user)s", "the reports by this learner, and of them: a report names a person"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
 
@@ -152,8 +166,10 @@ def user_ids_present(cur) -> set[str]:
                                 the user id is the part before the colon
       user_id = %(user)s        an ordinary column
 
-    video_session_jobs, the one entry scoped through a subquery, is
-    skipped: it cannot hold a user the parent video_sessions does not.
+    video_session_jobs and pvp_duels, the entries scoped through a
+    subquery, are skipped: neither can hold a user its own table does
+    not -- a job's parent video_sessions, a duel's players in
+    pvp_entries.
 
     This is what makes scripts/purge_orphans.py able to answer "who is
     in the database", which no single table can: a learner deleted
@@ -175,8 +191,18 @@ def user_ids_present(cur) -> set[str]:
     return found
 
 
-def delete_user_rows(cur, user_id: str) -> dict[str, int]:
-    """Run PLAN on an open cursor; the caller owns the transaction."""
+def delete_user_rows(cur, user_id: str, after: list | None = None) -> dict[str, int]:
+    """Run PLAN on an open cursor; the caller owns the transaction.
+
+    First the duels still unresolved that another learner is in are
+    cancelled for them (study/duels.leave_all), what was played kept and
+    their fares given back in this same transaction. What that moves for
+    them in this process -- their XP's history, their credits -- goes on
+    `after`, to forget once the caller has committed. The account's
+    deletion and purge_orphans pass it; a test's clean-up has nobody to
+    tell."""
+    from study import duels
+    duels.leave_all(cur, after if after is not None else [], user_id)
     params = {"user": user_id, "prefix": prefix_pattern(user_id)}
     counts: dict[str, int] = {}
     for table, clause, _why in PLAN:
@@ -217,16 +243,21 @@ def _delete_auth_user(user_id: str) -> bool:
 @router.delete("/api/account")
 def delete_account(user_id: str = Depends(get_user_id)):
     logger.info("Deleting account user_id=%s", user_id)
+    after: list = []
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            counts = delete_user_rows(cur, user_id)
+            counts = delete_user_rows(cur, user_id, after)
         conn.commit()
     except Exception:
         conn.rollback()
         raise
     finally:
         conn.close()
+    # The other players' cached XP and credits, which the duels' closing
+    # moved (study/duels.leave_all), forgotten now it is committed.
+    for task in after:
+        task()
     forget_stored_level(user_id)
     srs.forget_history(user_id)
     try:

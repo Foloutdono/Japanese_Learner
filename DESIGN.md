@@ -129,8 +129,12 @@ all thirteen in both themes — and the native widgets' copies follow.
 verdicts step off it: Correct (新橋) and
 Easy (若葉) are the rating bar's filled keys and wear their own brighter inks,
 `--rating-correct` and `--rating-perfect`, wherever a verdict's ink is
-drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
-`--success` keep their place on the ramp for everything else.
+drawn (the bar, the run's meter, the desk's verdict tiles). On the
+four-button bar (the owner's pick) only the best key is in colour: Easy
+wears 新橋 and Correct is a plain key, and every other verdict ink follows
+the bar the learner uses (`--verdict-q4` / `--verdict-q5`, switched by
+`:root[data-rating-scale]`). `--teal` and `--success` keep their place on
+the ramp for everything else.
 
 ### One metal, one selection
 
@@ -188,8 +192,19 @@ Two Japanese faces, assigned by **job**, never by taste:
 ### A name's rank (標, plan 174)
 
 - **The screen's own name is serif**, at `--fs-heading`: the bar's title
-  (`.bar__title`) and a sheet's (`.sheet__jp`). On the desk a sheet keeps
-  `--fs-title`, since it is a dialog over a page that already has its name.
+  (`.bar__title`).
+- **A sheet's name is a ring and words** (plan 277, the owner's pick C5 on
+  the canvas "Titres — options"): a 30px ring with the sheet's icon at 16px,
+  in the pigment of the line the sheet belongs to (`Sheet`'s `line`, since a
+  portal is out of reach of its screen's) or the caption's neutral ink, then
+  the name in words, the display face, 700, at `--fs-lead` (`.sheet__title`),
+  and under it a quiet line at `--fs-caption` where a count or the thing a
+  confirm is about goes (`.sheet__sub`). Never a Japanese term set large with
+  its translation small beside it (読み · LES DEUX LECTURES): the name is in
+  the learner's language and stands alone. The same holds for any title
+  beside its translation: a 番付 division is its name alone (Jonokuchi), the
+  dictionary's readings head rings its kanji and names itself in words, and a
+  kanji card's registers read « Lecture chinoise / japonaise ».
 - **Every name under it is set as a station prints its names**: the display
   face, bold, one size a rank — `--fs-title` for a plate, a platform card, a
   deck, a paper, a stop; `--fs-lead` for a row in a list.
@@ -238,6 +253,17 @@ the card cannot resize under the learner on a flip, and a second line would
 leave that height the way the word left its width. Prose on a card is a
 different object and takes a different component — the meaning-first
 direction hands its gloss to `MeaningDisplay`, which wraps.
+
+**A card whose back prints more than it grades says what it asks** (plan
+276, the owner's picks B2 and A3 on the canvas). A Kanji → meaning front
+puts « Quel est son sens ? » under its specimen (`.prompt-ask`, the small
+rung over the tracked hint), because its back prints the readings too and
+a learner took them for part of the answer. The back's two register names
+(« Lecture chinoise », « Lecture japonaise » since plan 277) are doors, the
+label with an ⓘ at its own rung and ink, onto the sheet that says what the
+two readings are, 音読み and 訓読み, in a word of the card's own kanji
+(`ReadingsHelp`); the door's tap, and the sheet's scrim, never turn the
+card.
 
 These are the only off-scale font sizes in the app that are not literals to
 be harmonised away — the two ends of each clamp are rungs and the middle is a
@@ -1131,7 +1157,7 @@ keys (the digit's cap, the verdict's dot and word), a glyph for where it
 sends the point (↻ asked again, ↓ down the line, ↑ back up it to the
 relapse, which a word names beside its wait), and the wait as the figure the
 tiles had. Two verdicts that do the same and wait the same are one row --
-Oublié and Raté, Difficile and Correct, as the learner's own scale (four,
+Raté and Presque, Correct and Facile, as the learner's own scale (four,
 six or two) has them, and a mastered point's passes split where their weeks
 differ -- the pass in the pass key's ink, the miss in the miss's. Where the
 words do not fit beside their keys they stand bare, measured
@@ -1419,13 +1445,14 @@ So:
   as on a ticket machine's panel: a gap apart, each raised off the sumi on a
   foot of its own material (`--key-foot`, 3px, an edge and not a shadow: no
   blur), and a press travels down the foot (under reduced motion it does
-  not, and the lamp alone answers). The misses (Missed, Difficult; Almost
+  not, and the lamp alone answers). The misses (Missed, Almost; Difficult
   and Forgot on the six) are dark keys, each word under a **lamp** in its
   verdict's ink, dimmed into the sumi at rest and lit when pressed, and that
   is the bar's whole acknowledgement. The passes are the same keys
   **moulded in their own verdict ink** (`--rating-correct` 新橋,
   `--rating-perfect` 若葉), lit from the top, the sumi type and a check
-  where the lamp would be, and no glow. Correct and Easy are the widest targets
+  where the lamp would be, and no glow; on the four, Easy is the 新橋 key
+  and Correct a dark one with its check in the panel's ink. Correct and Easy are the widest targets
   on the bar. Each key carries its own sumi, so the bar reads on paper as well as
   on the dock. **No key is gold**: gold is the action's metal, and a verdict
   is not an action. On a phone the bar docks on the run's floor, edge to
@@ -1512,7 +1539,8 @@ progress legend back — on the desk too, where the run also prints its keys
 
 Every card is rewarded, and none of it is a ceremony — the cleared day
 is the one ceremony, and it comes after the last card (below). Three
-moments, three objects, none waiting to be dismissed:
+moments, three objects, none waiting to be dismissed — and a fourth on
+arrival, the refill, which waits on nothing either:
 
 - **The fare** (運賃) — the XP an answer earns — is reported on the object it
   was paid into: the **level HUD** on a tab screen, where the strip's struck
@@ -1588,6 +1616,31 @@ moments, three objects, none waiting to be dismissed:
   Under reduced motion the card fades in and out, the engraving stands at
   the new level's climb and the figure changes in place; nothing fills,
   trembles, bursts or rolls.
+- **The refill** (補充) — what the refill landed while the app was
+  closed — is **charged onto the card**, where the learner carries it
+  (plan 278, the owner's pick C2 of the canvas "Tsuji — the refill,
+  reloaded"; it replaced plan 141's sheet and its book of stubs). On the
+  phone's HUD and a run's head the card drops out from under its strip
+  and hangs below it at the strip's right edge, swinging once from the
+  top, the strip an empty pocket meanwhile, so the card is never on the
+  screen twice; on the desk it stands up out of the holder's mouth,
+  clear of the case. While it is out the balance is printed in the
+  foot's left, in the fare line's place (the face's middle is the struck
+  辻's), and counts up from what was held to what it holds now, a coin a
+  step (twelve steps at most); the amount rises off it as the fare
+  rises off the level, the mark's three arcs light one after another,
+  and the gauge along the card's foot, in the pass's metal, fills to the
+  balance's share of the cap. Then it goes back, the claim is taken,
+  and the figure it went back with glints once on the strip or the case.
+  It is 2.3 seconds on one clock (`--refill-ms`,
+  `components/credits/refill.js`), takes no pointer and asks nothing:
+  no scrim, no button, the screen under it answers every tap, and a
+  screen reader hears what landed. A credit that lands while the app is
+  open is claimed quietly; the card comes out only on arrival. The
+  People family throughout: each material keeps its own inks, and gold
+  is the gauge's and the amount's, the pass's metal. Under reduced
+  motion the card fades in hung, already at its new balance, and fades
+  out; on the desk it stays in the mouth and the case's figure glints.
 
 So nothing holds the queue. Every reward plays over the next card, because
 a learner who has just rated one card is already looking for the next.

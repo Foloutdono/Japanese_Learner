@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **277**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **280**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -70,7 +70,8 @@ runtime purpose.
   `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
   `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
   plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
-  session's lines are cut into).
+  session's lines are cut into), `PAPER_REV` in `study/duel_paper.py`
+  (a duel's sprint, plan 279: a duel keeps the paper it was dealt).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
   retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
@@ -272,6 +273,33 @@ runtime purpose.
   learner reads and still sees their own place; a row's card shows what
   the board already does (XP, level, places, division) and published
   decks, never the streak, the JLPT level or the card's name.
+- **A duel is timed by the server and told by its replies (plan 279).**
+  `study/duels.py` serves a sprint one question at a time, notes when,
+  and scores each answer as it arrives; a reply says right or wrong and
+  never which choice was right, and the corrections open only once the
+  duel is settled, or the first player could hand the second the keys
+  (a paper whose corrections were sold is never dealt again as a ghost).
+  A ranked run's score to beat is the player's once their own run has
+  started (`duels._score_kept`): before, an unstarted seat is free to give
+  back, so whatever another learner's figures reach (the cover, the hall,
+  the live read) keeps them until « Partir ».
+  Nothing runs in the background: `settle()` brings a duel up to date
+  from its stored instants on every read (a run past its minute paid, a
+  duel resolved, expired and its ranked fare refunded, a seat left
+  unstarted given back), so anything new that reads a duel settles it
+  first. A run started has its minute: nothing expires or is declined
+  under it, and whatever closes a duel (a block, a friendship ended, an
+  account erased: `duels.close_between`, `leave_all`) finishes and pays
+  the runs under way. The Elo (`study/duel_elo.py`) is apart from the
+  番付: it starts from the placement climb's verdict, never the declared
+  level, and only a ranked duel moves it. A duel's fare goes through
+  `credits.pay` with its own reason (`duel`, `duel_review`), a refund is
+  a positive row of the same reason, both on the duel's own cursor
+  (`cur=`), so no fare is taken for a run that failed to start and no
+  refund lost after its expiry; a duel's XP is practice XP
+  (`source = 'duel'`), dated when the run ended (`award_xp(at=)`) and
+  capped that local day (`duels.XP_CAP`). Who reported whom is read with
+  `scripts/read_reports`, never on a dashboard.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -298,7 +326,13 @@ runtime purpose.
   alone (`tests/test_metabase_sync.py` refuses a question that selects
   them). The context beside it is the trail's closed classes, shown to
   the learner before sending, and a reply's address is read from the
-  account, never taken from the request.
+  account, never taken from the request. Each message rings the owner's
+  private Discord forum (`core/bell.py`, plan 278), tagged by its kind:
+  the post carries the kind, the row's number and the closed classes,
+  and is handed the count of characters, never the words, the address
+  or the author (`tests/test_bell.py`, and `privacy.html` says so).
+  Whether a message is handled is its `triage` (new, seen, done,
+  dropped), set by `read_feedback --done ID`, never in Discord.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
@@ -598,11 +632,16 @@ python -m scripts.prune_withdrawn      # decks an author deleted, past their gra
 python -m scripts.drop_legacy_tables   # tables a removed feature left behind
 ```
 
-One more is read-only and needs no flag, so it is safe to run at any time:
+These are read-only and need no flag, so they are safe to run at any time
+(`read_feedback` writes only a message's status, and only the ids named
+after `--seen`, `--done`, `--drop` or `--reopen`):
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
-python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
+python -m scripts.read_feedback        # what learners wrote to us (plan 222), the open ones by kind (plan 278)
+python -m scripts.read_feedback --id 412   # one message; --done 412 marks it handled
+python -m scripts.discord_bell         # the Discord bell's webhook and forum tags: report; --yes creates the tags, --test rings
+python -m scripts.read_reports         # the duels' reports, who reported whom (plan 279)
 python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
 
@@ -1144,7 +1183,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 
 ### Backend layout
 - `main.py` — FastAPI app setup: loads `backend/.env`, mounts routers, CORS (deployed frontend origin + `CORS_ORIGINS` env list), static mounts for `kanjivg` (stroke-order diagrams) and `datas/exam_audio` (generated TTS).
-- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station, transfer). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
+- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station, transfer, pvp). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
 - `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), a point's own Choisir questions (`grammar_choose.py`, plan 201), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.

@@ -5,7 +5,7 @@ import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, ReleaseNote, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
-import { ClaimSheet } from './components/credits/ClaimSheet'
+import { RefillMoment } from './components/credits/RefillMoment'
 import { OfferScreen } from './components/offers/OfferScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
@@ -56,6 +56,11 @@ import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
 import TicketsScreen from './screens/TicketsScreen'
 import BanzukeScreen from './screens/BanzukeScreen'
+import DuelsScreen from './screens/DuelsScreen'
+import DuelFriendsScreen from './screens/DuelFriendsScreen'
+import DuelBoardScreen from './screens/DuelBoardScreen'
+import DuelRun from './screens/DuelRun'
+import DuelDeparture from './screens/DuelDeparture'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -809,6 +814,9 @@ export default function App({ front = NO_FRONT }) {
             {/* 記念切符 — the tickets a streak has earned (plan 191). */}
             <Route path="/profile/tickets"      element={<TicketsScreen session={session} />} />
             <Route path="/profile/banzuke"      element={<BanzukeScreen session={session} />} />
+            <Route path="/profile/duels"        element={<DuelsScreen session={session} />} />
+            <Route path="/profile/duels/friends" element={<DuelFriendsScreen session={session} />} />
+            <Route path="/profile/duels/board"  element={<DuelBoardScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
             {/* The settings pages (plan 074): display, sound, learning,
                 destination, data, account — each its own page under
@@ -823,6 +831,8 @@ export default function App({ front = NO_FRONT }) {
               under the shell above. */}
           <Route element={<StageFrame />}>
             <Route path="/today/run"                          element={<TodayRun session={session} />} />
+            <Route path="/duel/new"                           element={<DuelDeparture session={session} />} />
+            <Route path="/duel/:id"                           element={<DuelRun session={session} />} />
             <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
             <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />
             {/* The literal `level/` segment keeps the four-segment band
@@ -916,11 +926,11 @@ export default function App({ front = NO_FRONT }) {
             run's own retry unmounts the failure that raised it. */}
         <FeedbackHost session={session} />
         <OfferScreen />
-        {/* 補充 — what the refill landed while the app was closed, on
-            arrival (plan 141). Held through the 改札 cutscene and the
-            first ride, which have the learner's whole attention, and
-            opened once either lets go. */}
-        <ClaimSheet hold={onboarding === 'finishing'} />
+        {/* 補充 — what the refill landed while the app was closed,
+            charged onto the card on arrival (plans 141, 278). Held
+            through the 改札 cutscene and the first ride, which have the
+            learner's whole attention, and played once either lets go. */}
+        <RefillMoment hold={onboarding === 'finishing'} />
         {/* 運行状況 — the status sheet off the HUD's station panel
             (plan 074): the pass's back, the ghost train and the two
             honest moves. */}

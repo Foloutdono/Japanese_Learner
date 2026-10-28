@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { Seg, Chip } from '../chrome/Console'
-import { FlagIcon } from '../ui/Icons'
+import { FlagIcon, MessageIcon } from '../ui/Icons'
 import {
   KINDS, CARD_REASONS, QUESTION_REASONS, TEXT_MAX, CONTACT,
   feedbackContext, contextWords, failureOf, cardFace, reportable, sendFeedback, questionReport,
@@ -145,7 +145,7 @@ export function FeedbackForm({ session, failure = null, onClose = null }) {
 export function FeedbackSheet({ open, onClose, session, failure = null }) {
   const { t } = useLang()
   return (
-    <Sheet open={open} onClose={onClose} cap={t.settingsWrite} label={t.settingsWrite} className="fb-sheet" dismiss>
+    <Sheet open={open} onClose={onClose} title={t.settingsWrite} icon={MessageIcon} label={t.settingsWrite} className="fb-sheet" dismiss>
       <FeedbackForm session={session} failure={failure} onClose={onClose} />
     </Sheet>
   )
@@ -285,7 +285,7 @@ export function FeedbackHost({ session }) {
   useEffect(() => closeFeedback, [pathname])
   if (open?.card) {
     return (
-      <Sheet open onClose={closeFeedback} cap={open.card.exam ? t.questionReport : t.cardReport} label={open.card.exam ? t.questionReport : t.cardReport} className="fb-sheet" dismiss>
+      <Sheet open onClose={closeFeedback} title={open.card.exam ? t.questionReport : t.cardReport} icon={FlagIcon} label={open.card.exam ? t.questionReport : t.cardReport} className="fb-sheet" dismiss>
         <CardReport session={session} card={open.card} onClose={closeFeedback} />
       </Sheet>
     )

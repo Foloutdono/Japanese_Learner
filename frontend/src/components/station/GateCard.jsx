@@ -13,7 +13,7 @@ import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
 import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
-import { CheckIcon, ChevronIcon, PlusIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon, PlusIcon, CalendarIcon } from '../ui/Icons'
 import LevelFitLine from './LevelFitLine'
 import ComebackLine from './ComebackLine'
 import { useCredits } from '../../stores/credits'
@@ -34,6 +34,7 @@ import { shareTicket } from '../../lib/shareTicket'
 import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys, ThreadKey } from './TodayDial'
 import { TodayDay } from './TodayDay'
+import { DuelLine } from '../pvp/DuelLine'
 import { TodayPrint, PrintTitle } from './TodayPrint'
 import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
 
@@ -576,6 +577,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
       <div className="tdy__foot">
         {/* The reviews piled up (plan 254) and the level that does not
             fit (plan 224), over the run's own row. */}
+        <DuelLine hold={Boolean(fin?.playing)} />
         <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
@@ -589,7 +591,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
         {gate}
       </div>
 
-      <Sheet open={open} onClose={() => setOpen(false)} jp={t.todayTitle} label={t.gateServicesTitle} className="tdy-sheet">
+      <Sheet open={open} onClose={() => setOpen(false)} title={t.todayTitle} icon={CalendarIcon} label={t.gateServicesTitle} className="tdy-sheet">
         <Services
           lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
           choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
@@ -671,6 +673,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         </div>
       </div>
       <aside className="tdy-desk__col">
+        <DuelLine hold={Boolean(fin?.playing)} />
         <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
@@ -968,6 +971,7 @@ function ClearedGate({ today, desk, finish = null }) {
   const gateCome = came('GATE')
   const foot = (
     <>
+      <DuelLine hold={Boolean(fin?.playing)} />
       {rows.length > 0 && (boardCome || hold) && (
         <div className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}>{rows}</div>
       )}

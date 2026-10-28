@@ -36,7 +36,7 @@ const holdJa = s => String(s).replace(/〜(?=[\u3040-\u30ff\u4e00-\u9fff])/g, '�
 // ── Pieces ──
 
 // The four-button bar's qualities, worst first: each key wears its
-// quality's ink (.q1, .q3 …), as the app's bar does.
+// quality's ink (.q1, .q2 …), as the app's bar does: Easy blue, Correct plain.
 const BAR_QUALITIES = [...RATING_SCALES.simple.qualities].reverse()
 const pigment = line => `var(--line-${line === 'today' ? 'jisho' : line})`
 

@@ -39,10 +39,10 @@ export const PROMO = {
     board: 'Board at tsuji.app',
     stillKnow: 'Do you still know this word?',
     how: 'How did it go?',
-    ratings: ['Missed', 'Difficult', 'Correct', 'Easy'],
+    ratings: ['Missed', 'Almost', 'Correct', 'Easy'],
     // The scheduler's forecast for a card mastered a month ago
     // (landing/strings.mjs, KNOWN): backend/srs/scheduler.py's own.
-    due: ['in 2 min', 'in 74 days', 'in 80 days', 'in 90 days'],
+    due: ['in 2 min', 'in 10 min', 'in 80 days', 'in 90 days'],
     mastered: 'Mastered',
     mode: 'Word → meaning',
     tap: 'Tap to reveal',
@@ -100,8 +100,8 @@ export const PROMO = {
     board: 'Embarquer sur tsuji.app',
     stillKnow: 'Tu connais encore ce mot ?',
     how: 'Comment ça s’est passé ?',
-    ratings: ['Raté', 'Difficile', 'Correct', 'Facile'],
-    due: ['dans 2 min', 'dans 74 jours', 'dans 80 jours', 'dans 90 jours'],
+    ratings: ['Raté', 'Presque', 'Correct', 'Facile'],
+    due: ['dans 2 min', 'dans 10 min', 'dans 80 jours', 'dans 90 jours'],
     mastered: 'Maîtrisé',
     mode: 'Mot → sens',
     tap: 'Touche pour révéler',
