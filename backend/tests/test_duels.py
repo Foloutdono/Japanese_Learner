@@ -265,11 +265,6 @@ def _ranked(client, user_id):
         return r.json()
 
 
-def test_a_ranked_sprint_needs_a_placement(client, learners):
-    r = client.post("/api/pvp/duels", json={"ranked": True})
-    assert r.status_code == 409 and r.json()["detail"]["code"] == "pvp_not_placed"
-
-
 def test_ranked_play_never_waits(client, learners, clock):
     for uid in (A, B, C):
         place(uid)

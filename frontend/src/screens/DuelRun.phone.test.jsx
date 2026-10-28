@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { StageFrame } from '../components/chrome/Shell'
@@ -48,7 +49,7 @@ const cover = (over = {}) => ({
 
 const refusal = code => Object.assign(new Error(code), { code, status: 409 })
 
-function serve({ endsIn = 60_000, verdict = null, mine = 0, kind = 'friend', answerFails = null, coverFails = 0 } = {}) {
+function serve({ endsIn = 60_000, verdict = null, mine = 0, kind = 'friend', answerFails = null, coverFails = 0, nextIn = 1000 } = {}) {
   apiJson.mockReset()
   let coverReads = 0
   apiJson.mockImplementation(async (path, _s, init) => {
@@ -63,7 +64,7 @@ function serve({ endsIn = 60_000, verdict = null, mine = 0, kind = 'friend', ans
       const { pick } = JSON.parse(init.body)
       const right = pick === 0
       // `answer` is what an older server said; the run must not show it.
-      return { n: 0, right, answer: 0, pts: right ? 100 : 0, ms: 900, total: right ? 100 : 0, rights: right ? 1 : 0, next: word(1), nextAt: iso(1000), endsAt: iso(endsIn) }
+      return { n: 0, right, answer: 0, pts: right ? 100 : 0, ms: 900, total: right ? 100 : 0, rights: right ? 1 : 0, next: word(1), nextAt: iso(nextIn), endsAt: iso(endsIn) }
     }
     // The cover; once the run is over, the settled one (the first reads
     // after the start failing, when asked to).
@@ -130,6 +131,24 @@ describe('a duel’s run', () => {
     expect(root.querySelector('.pvp-tile--right')).toBeNull()
     const sent = apiJson.mock.calls.find(([p]) => p.endsWith('/answer'))
     expect(JSON.parse(sent[2].body)).toEqual({ n: 0, pick: 2 })
+  })
+
+  it('keeps the verdict’s ink on the tile still under the finger', async () => {
+    // A touched tile keeps :hover until the next touch, a clicked one while
+    // the pointer rests on it, and .exam-tile:hover is two classes: the
+    // tile must still show the verdict's border, never the hover's.
+    // The verdict held long enough to look at it.
+    serve({ nextIn: 30_000 })
+    const root = await stage()
+    await expect.poll(() => root.querySelectorAll('.pvp-tile').length).toBe(4)
+    const tile = () => root.querySelectorAll('.pvp-tile')[2]
+    await userEvent.click(tile())
+    await expect.poll(() => tile().classList.contains('pvp-tile--wrong')).toBe(true)
+    await userEvent.hover(tile())
+    const ink = document.createElement('i')
+    ink.style.color = 'var(--rating-wrong)'
+    root.append(ink)
+    await expect.poll(() => getComputedStyle(tile()).borderTopColor).toBe(getComputedStyle(ink).color)
   })
 
   it('prints the server’s verdict once the minute is over', async () => {
