@@ -86,6 +86,19 @@ def test_a_challenge_is_at_the_lower_level_and_made_once(client, learners, clock
         assert hall["toPlay"][0]["who"] == learners[A]
 
 
+def test_a_challenge_stands_at_the_lower_elo(client, learners, clock):
+    # Plan 286: a friend's paper is built where the lower Elo stands,
+    # the start of their level for one with none yet.
+    set_profile(A, level="N3")
+    place(B, "N4")
+    sql("UPDATE pvp_ratings SET rating = 1180 WHERE user_id = %s", (B,))
+    befriend(client, A, B, learners)
+    cover = client.get(f"/api/pvp/duels/{_challenge(client, learners)}").json()
+    # A has no Elo: N3's start, 1 400. B's 1 180 is nine tenths of N4.
+    assert cover["level"] == "N4"
+    assert cover["mix"] == [{"level": "N5", "share": 0.1}, {"level": "N4", "share": 0.9}]
+
+
 def test_the_server_times_each_answer_and_never_says_which_was_right(client, learners, clock):
     befriend(client, A, B, learners)
     duel_id = _challenge(client, learners)
@@ -444,6 +457,34 @@ def _drain(user_id):
     credits.forget(user_id)
 
 
+def test_a_ranked_paper_stands_where_the_elo_does(client, learners, clock):
+    # Plan 286 (the owner's B): a paper mixes the two levels the Elo
+    # stands between, and a stranger meets a paper near their own mix.
+    for uid in (A, B, C):
+        place(uid)
+    for uid, elo in ((A, 1180), (B, 1240), (C, 1560)):
+        sql("UPDATE pvp_ratings SET rating = %s WHERE user_id = %s", (elo, uid))
+    first = _ranked(client, A)
+    cover = client.get(f"/api/pvp/duels/{first['id']}").json()
+    assert cover["level"] == "N4"
+    assert cover["mix"] == [{"level": "N5", "share": 0.1}, {"level": "N4", "share": 0.9}]
+    assert sum(1 for item in duel_paper_of(first["id"])["items"] if item["level"] == "N4") == 108
+    play(client, clock, A, first["id"], [(1000, True)] * 3)
+    # 1 560 is within the widest Elo window of 1 180, but its paper would
+    # stand two levels off (N3 · N2): it is not dealt A's run.
+    far = _ranked(client, C)
+    assert far["against"] == "open" and far["id"] != first["id"]
+    with acting_as(C):
+        assert client.get(f"/api/pvp/duels/{far['id']}").json()["mix"] == [
+            {"level": "N3", "share": 0.2}, {"level": "N2", "share": 0.8}]
+    # 1 240 stands near 1 180: B meets A's run.
+    assert _ranked(client, B) == {"id": first["id"], "against": "seek"}
+
+
+def duel_paper_of(duel_id: int) -> dict:
+    return sql("SELECT paper FROM pvp_duels WHERE id = %s", (duel_id,), fetch=True)[0][0]
+
+
 def test_in_shadow_mode_a_short_balance_pays_what_it_has(client, learners, clock):
     place(A)
     first = _ranked(client, A)
@@ -637,8 +678,8 @@ def _quick_papers(monkeypatch):
     built = {}
     real = duel_paper.build_paper
 
-    def build(seed, level):
-        if level not in built:
-            built[level] = real(seed, level)
-        return {**built[level], "seed": seed}
+    def build(seed, level=None, mix=None):
+        if (level, mix) not in built:
+            built[level, mix] = real(seed, level, mix)
+        return {**built[level, mix], "seed": seed}
     monkeypatch.setattr(duel_paper, "build_paper", build)

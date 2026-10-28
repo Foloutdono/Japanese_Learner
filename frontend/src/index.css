@@ -33492,6 +33492,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-ticket__fact { display: flex; justify-content: space-between; gap: var(--sp-4); }
 .pvp-ticket__dt { color: var(--paper-ink-soft); }
 .pvp-ticket__dd { margin: 0; font-weight: 700; text-align: right; }
+/* The levels the paper asks (plan 286): the one below pale, the one above full, in the ticket's ink. */
+.pvp-mix { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.pvp-mix__bar { display: flex; width: 56px; height: 6px; border-radius: var(--r-pill); overflow: hidden; }
+.pvp-mix__part { flex-basis: 0; background: color-mix(in srgb, currentcolor 30%, transparent); }
+.pvp-mix__part:last-child { background: currentcolor; }
 /* The live room's wait, under the ticket. */
 .pvp-room__clock { font-variant-numeric: tabular-nums; color: var(--text-primary); }
 

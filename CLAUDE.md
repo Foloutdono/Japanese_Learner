@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **286**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **287**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -299,7 +299,13 @@ runtime purpose.
   scores and the client draws: a reply carries the streak and the
   multiplier, the cover the rules, the result each run's lines and grade
   (`duels.lines`, `duels.grade`), and the timeline the points as scored,
-  so a recorded run sums to its score. The music and the sounds are scored
+  so a recorded run sums to its score. A paper stands where the Elo does
+  (plan 286, the owner's B): built at a mix (`duel_paper.mix_of`, tenths
+  of a level, each level's starting Elo a whole one) that asks the two
+  levels it stands between in their share, at the lower Elo of two
+  friends and at a ranked player's own, whose stranger is met on a paper
+  whose mix is near (half the Elo window, `duels._reach`); the declared
+  level keeps everything else in the app. The music and the sounds are scored
   to the same clock (`scripts/duel-music/`, plan 285: its 80 bars are
   sprint-2's two minutes, its rush is `RUSH_MS`, its layers turn on at the
   tiers, and `src/duelAudio.test.js` holds them to the server). A run started has
