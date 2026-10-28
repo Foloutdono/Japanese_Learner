@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence } from '../carousel/draw.js'
+import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, frame, layoutSentence } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
@@ -876,6 +876,19 @@ describe('explaining a point in its own sentence', () => {
     const xp = read('../backend/srs/xp.py')
     const paid = q => Number(xp.match(new RegExp(`^\\s+${q}: (\\d+),`, 'm'))[1])
     expect(duelBank.xp).toMatchObject({ right: paid(4), wrong: paid(1) })
+    // Dealt where the learner's Elo stands (plan 286): in tenths of a
+    // level above N5, each level's start a whole one, the two levels it
+    // stands between asked in their share.
+    const steps = int(constant('study/duel_paper.py', 'STEPS'))
+    const levels = JSON.parse(constant('study/duel_paper.py', 'LEVELS').replace(/^\(/, '[').replace(/\)$/, ']'))
+    const { start } = duelBank.elo
+    expect(duelBank.mix).toBe(Math.round((DUEL_RUN.you.elo - start.N5) / ((start.N4 - start.N5) / steps)))
+    const low = Math.floor(duelBank.mix / steps)
+    const part = duelBank.mix % steps
+    expect(duelBank.blend).toEqual(part
+      ? [{ level: levels[low], share: (steps - part) / steps }, { level: levels[low + 1], share: part / steps }]
+      : [{ level: levels[low], share: 1 }])
+    expect(duelBank.level).toBe(levels[Math.floor((duelBank.mix + steps / 2) / steps)])
     for (const q of duelBank.items) {
       expect(['word', 'reading', 'writing'], `${q.n}`).toContain(q.kind)
       const choices = Array.isArray(q.choices) ? [q.choices] : [q.choices.en, q.choices.fr]
@@ -1019,6 +1032,25 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
+  it('writes the mix the way the app’s ticket does (plan 286)', () => {
+    const run = read('src/screens/DuelRun.jsx')
+    const share = "m.share.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })"
+    expect(run).toContain(share)
+    expect(run).toContain("words.join(' · ')")
+    expect(read('carousel/promo.js')).toContain(share)
+  })
+
+  it('lets the race’s screen reach below the safe box to just above the feed’s caption (plan 281c)', () => {
+    // TikTok's caption starts at y 1710 (draw.js); the story's words keep
+    // to the safe box, a picture of the app may reach the frame's foot.
+    const tiktok = frame(FORMATS.story)
+    expect(tiktok.foot).toBeGreaterThan(tiktok.bottom)
+    expect(tiktok.foot).toBeLessThan(1710)
+    const normal = frame(formatOf('story', 'normal'))
+    expect(normal.foot).toBe(normal.bottom)
+    expect(frame(FORMATS.post).foot).toBe(frame(FORMATS.post).bottom)
+  })
+
   it('plays the duels’ story whole, beat after beat, ending at the gate (plan 281)', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
@@ -1046,6 +1078,13 @@ describe('explaining a point in its own sentence', () => {
           texts.forEach(x => x.split(' ').forEach(w => said.add(w)))
         }
         const D = PROMO[lang].duel
+        // The ticket says what the paper asks as the app's does (plan 286,
+        // DuelRun's Mix): each level and its share, beside the bar.
+        const ticket = stubContext()
+        frames[0].draw(ticket.ctx)
+        const pct = v => v.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })
+        expect(ticket.texts).toContain(duelBank.blend.map(m => `${m.level} ${pct(m.share)}`).join(' · '))
+        expect(ticket.texts.join(' ')).not.toMatch(/plus bas|lower of/)
         const top = multOf(Math.max(...duelBank.rules.tiers.map(x => x.mult)), lang)
         const lines = [D.combo(top), D.rush(duelBank.rules.rushMs / 1000)]
         for (const line of [...D.hook(SPRINT_MS / 1000), D.versus, D.same, D.fast(100), D.ahead, ...lines, D.winElo, D.eloIs, D.climb]) {

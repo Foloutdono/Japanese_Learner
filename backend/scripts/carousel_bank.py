@@ -20,8 +20,10 @@ words and kanji, the kana and the comprehension passages; since plan
 229c the wrong spellings the 表記 question deals (each checked against
 the deck and JMdict, so no wrong answer is a word) and index.json, the
 figures a carousel's last slide may quote; since plan 281 duel.json, a
-real N5 duel paper for the duels' promo story, and since plan 281b the
-two runs the story races over it, scored as the server scores them.
+real duel paper for the duels' promo story (since plan 286 dealt where
+the story's learner's Elo stands, between two levels), and since plan
+281b the two runs the story races over it, scored as the server scores
+them.
 
     python -m scripts.carousel_bank            # writes frontend/carousel/bank/*.json
     python -m scripts.carousel_bank --check    # exits 1 when a file is stale
@@ -918,10 +920,12 @@ def files(deck: dict):
     })
 
 
-# ── The duels' story (plans 281, 281b) ─────────────────────────────
-# The promo story of the duels plays a real sprint: an N5 paper as the
-# duels' own generator builds it from a fixed seed (study/duel_paper.py)
-# and, since plan 281b, two runs over it scored as the server scores a
+# ── The duels' story (plans 281, 281b, 286) ────────────────────────
+# The promo story of the duels plays a real sprint: a paper as the
+# duels' own generator builds it from a fixed seed (study/duel_paper.py),
+# at the mix the learner's Elo stands at (plan 286: a ranked paper is
+# dealt at the player's own Elo, the two levels it stands between in
+# their share), and, since plan 281b, two runs over it scored as the server scores a
 # run of that paper: what each answer's speed is worth, what the streak
 # it makes pays and the rush of the last seconds, then each run's lines
 # and grade (study/duels.py, plan 285). Beside them, what the story's
@@ -931,6 +935,10 @@ def files(deck: dict):
 # it is imported, so it is read from its source: its constants, and the
 # functions that score a run, run on their own (_duel_scoring).
 DUEL_SEED = 1330
+# The learner's Elo, the story's own (frontend/carousel/promo.js's
+# DUEL_RUN, held equal by src/carousel.test.js): 1 060 stands three
+# tenths of the way from N5 to N4, a paper of N5 70 % · N4 30 %.
+DUEL_ELO = 1060
 # The two runs, the story's own: the opening answer by answer, [ms after
 # the question was served, right or not], then a rhythm of answer times
 # cycled until the rush and another in it, the answers missed counted
@@ -1022,7 +1030,8 @@ def duel_story() -> dict:
     from srs.xp import BASE_XP_BY_QUALITY
     from study import duel_elo, duel_paper
 
-    paper = duel_paper.build_paper(DUEL_SEED, "N5")
+    mix = duel_paper.mix_of(DUEL_ELO)
+    paper = duel_paper.build_paper(DUEL_SEED, mix=mix)
     s = _duel_scoring(paper["rev"])
     duel = {"paper_rev": paper["rev"]}
     runs = {who: _duel_run(spec, s, duel) for who, spec in DUEL_RUNS.items()}
@@ -1031,7 +1040,11 @@ def duel_story() -> dict:
     shown = len(runs["you"]) + 1
     items = [{**duel_paper.served(item, n), "answer": item["answer"]} for n, item in enumerate(paper["items"][:shown])]
     return {
-        "rev": REV, "paper": paper["rev"], "level": paper["level"], "seed": DUEL_SEED,
+        "rev": REV, "paper": paper["rev"], "level": paper["level"], "mix": mix,
+        # The levels the paper asks and their share, as the ticket prints
+        # them (study/duels.mix_line).
+        "blend": [{"level": lv, "share": share} for lv, share in duel_paper.blend(mix)],
+        "seed": DUEL_SEED,
         "sprint": s["sprint_ms"](duel), "rules": s["rules"](duel),
         "elo": {"start": duel_elo.START, "k": duel_elo.K_SETTLED},
         "xp": {"right": BASE_XP_BY_QUALITY[4], "wrong": BASE_XP_BY_QUALITY[1], "cap": s["XP_CAP"]},

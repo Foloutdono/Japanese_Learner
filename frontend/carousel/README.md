@@ -341,7 +341,10 @@ map, off the slide rather than cut), a sentence answer is measured in
 the script it is drawn in (kana runs longer), the answer sheet's labels
 keep clear of its circles, and a carousel asks six questions at most, so
 a mock exam keeps under a feed's twenty slides and its cover and sheet
-a readable row each.
+a readable row each. One picture may pass the safe area's foot: the
+duels' race, a screen of the app, reaches down to just above TikTok's
+caption (the frame's `foot`, `draw.js`; the owner's pick, plan 281c),
+while the story's own words keep to the safe area.
 
 Plan 229m's slides are held the same way, and the check ran over every
 theme post, set and conversation and forty traps. A conversation's line
@@ -511,7 +514,7 @@ and its point cards, and Today on the print of the hour.
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
-| Duels (plans 281, 281b) | (one) | the duel's ticket, a sprint raced (the count, its opening in real time, its middle run fast, the rush and the arrival), the result face to face and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
+| Duels (plans 281, 281b, 286) | (one) | the duel's ticket and the levels its paper asks, a sprint raced (the count, its opening in real time, its middle run fast, the rush and the arrival), the result face to face and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
 **The parts are measured, not imagined.** Every figure in `app.js` is a
 CSS pixel of the running app on a 400px phone (the review card, the
@@ -576,13 +579,13 @@ The duels' story is scored with the duel's own sounds besides (plan
 `src/lib/audio/duel.json`'s revision from its onset, at the duel's trim.
 Never its music: the owner lays the feed's own over the clip.
 
-**The duels' story plays whole (plans 281, 281b).** Its frames are one
+**The duels' story plays whole (plans 281, 281b, 286).** Its frames are one
 sprint told from its ticket to the board, and the story is also one
 clip, every beat after the last (`promo.clips.story`, `DUEL_BEATS`,
 about 32 seconds): the ticket comes in and « Partir » is pressed; the
 count; the sprint's opening in real time (the first question taken
 slowly while what it is worth runs down from 100, the next two at once,
-the fourth's lookalike 週聞 taken for 週間, which breaks the streak), its
+the fourth's lookalike 天人 taken for 大人, which breaks the streak), its
 middle run fast as a time-lapse eased in and out of real time
 (`RACE`, `raceClock`: the combo climbing its tiers, Hana passed for
 good), its last seconds in real time, in the rush, and « Arrivée ! »;
@@ -598,17 +601,22 @@ the page and the answers, each answer's moment, the face to face (E4),
 the Elo card, the board's rows; `DUEL_INKS` the inks a theme gives them
 and `T1_INKS` the train's paint, both held to `index.css`). Where the
 app docks the answers on its sumi panel, the story sets them on its
-ground, in the ground's ink: a frame keeps one background. The paper
-and the runs are real: `bank/duel.json`, which `carousel_bank.py`
-writes, is an N5 paper as `study/duel_paper.py` builds it from a fixed
-seed, and the two runs over it scored by `study/duels.py`'s own
+ground, in the ground's ink: a frame keeps one background. The race's
+screen is as big as it fits under its title, its foot below the safe
+area down to just above TikTok's caption (the owner's pick of the
+canvas, plan 281c). The paper and the runs are real: `bank/duel.json`,
+which `carousel_bank.py` writes, is a paper as `study/duel_paper.py`
+builds it from a fixed seed, dealt where the learner's Elo stands
+(plan 286: at 1 060, N5 70 % · N4 30 %, which the ticket prints beside
+its bar as the app's does), and the two runs over it scored by `study/duels.py`'s own
 functions, read from the file (each answer's speed, the combo its
 streak pays, the rush; the result's lines and grade), with where the
 Elo starts, its settled K, what an answer pays in XP, the day's cap and
 the holds after an answer. A test holds each to the backend's, its paper
 to `PAPER_REV`, and plays both runs back by the rules it reads from
 `duels.py`. What is the story's own is who the two learners are, their
-levels and Elo (`DUEL_RUN`) and how fast each answers
+levels and Elo (`DUEL_RUN`, the learner's also the bank's `DUEL_ELO`,
+held equal) and how fast each answers
 (`carousel_bank.DUEL_RUNS`). "Download the whole story" encodes it as
 the clips are encoded. No frame shows a fare: the ranked sprint's and
 the corrections' prices are left off the ticket and the result.

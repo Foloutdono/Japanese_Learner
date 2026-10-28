@@ -39,9 +39,12 @@ const RING = 2.5 * K // a roundel's ring
 // right, the column of buttons from x 920 down from y 1100, the
 // author's picture at the bottom left and the caption from y 1710.
 // Instagram's story and Reels chrome sits inside the same margins.
+// Words keep to the safe box; a picture of the app may reach lower, to
+// just above the caption (`foot`, from the frame's bottom: the duels'
+// race, plan 281c), as the frame's `foot` says.
 export const FORMATS = {
   post: { id: 'post', fit: 'tiktok', w: 1080, h: 1350, safe: { t: 170, r: 144, b: 112, l: 144 } },
-  story: { id: 'story', fit: 'tiktok', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 430, l: 184 } },
+  story: { id: 'story', fit: 'tiktok', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 430, l: 184 }, foot: 220 },
 }
 // Normal margins (plan 234f): a slide for anywhere that lays nothing over
 // it (an Instagram post, a site, a message), on either ratio. The margins
@@ -584,7 +587,7 @@ const lineOf = (p, row) => (row.k === 'word' ? p.line.vocab : p.line.grammar)
 // ── Frames ────────────────────────────────────────────────────
 function frame(fmt) {
   const { w, h, safe } = fmt
-  return { W: w, H: h, x: safe.l, y: safe.t, w: w - safe.l - safe.r, h: h - safe.t - safe.b, cx: safe.l + (w - safe.l - safe.r) / 2, bottom: h - safe.b, right: w - safe.r }
+  return { W: w, H: h, x: safe.l, y: safe.t, w: w - safe.l - safe.r, h: h - safe.t - safe.b, cx: safe.l + (w - safe.l - safe.r) / 2, bottom: h - safe.b, right: w - safe.r, foot: Math.max(h - safe.b, h - (fmt.foot ?? safe.b)) }
 }
 function ground(ctx, p, fr) {
   ctx.fillStyle = p.bg

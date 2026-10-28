@@ -1150,9 +1150,10 @@ impostor), and exports the PNGs. Since plan 231 it also draws the app
 itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
 the hour, each story's cover and its call to action also a seven-second MP4 clip,
-and since plan 281 the duels' story played whole as one clip (a real N5
-paper's sprint raced, scored by `study/duels.py` itself since plan 281b,
-the result face to face, the Elo, the board: `bank/duel.json`);
+and since plan 281 the duels' story played whole as one clip (a real
+paper's sprint raced, dealt at the learner's Elo as plan 286 deals one
+and scored by `study/duels.py` itself since plan 281b, the result face
+to face, the Elo, the board: `bank/duel.json`);
 since plan 232 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice
@@ -1183,7 +1184,9 @@ right too, and none is answered on the slide that asks it; a sentence's
 carousel asks none after its call to action, where every word of the
 sentence is glossed instead. A slide fits its text to the format's safe area rather than
 let it overflow (its README, "Nothing leaves the frame"): a new slide
-kind, ending or label is fitted the same way. Like the landing page it
+kind, ending or label is fitted the same way; a picture of the app may
+pass the safe area's foot, to just above the feed's caption (the frame's
+`foot`: the duels' race, plan 281c). Like the landing page it
 is a static page outside `src/` and never ships. Its data is `frontend/carousel/bank/*.json`, written by
 `python -m scripts.carousel_bank` (backend, needs the tokenizer and the
 JMdict database): rerun it after a change to the reading bank, the deck,

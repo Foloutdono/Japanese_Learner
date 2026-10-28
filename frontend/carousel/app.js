@@ -1011,14 +1011,20 @@ function moved(ctx, { op = 1, s = 1, ox = 0, oy = 0, dx = 0, dy = 0 }, fn) {
   ctx.restore()
 }
 
+// How far a mix's row drops (.pvp-mix, measured in the app): its box
+// hangs on the bar's foot rather than the words' baseline.
+const MIX_DROP = 1.5
+
 /** The duel's ticket (.clrk-tk--paper.pvp-ticket): the cleared day's
  *  硬券 printed for two -- 対戦券 and its number, the two names and their
- *  levels either side of ⇄, the facts, the station that issued it and
- *  the sprint. `pulse` (0 to 1) swells the ⇄. Returns its height. */
+ *  levels either side of ⇄, the facts ([term, value, shares?]: the
+ *  levels a paper asks beside their bar, plan 286), the station that
+ *  issued it and the sprint. `pulse` (0 to 1) swells the ⇄. Returns its
+ *  height. */
 export function duelTicket(ctx, p, x, y, w, u, { no, you, them, facts, foot, pulse = 0 }) {
   const { '--paper': paper, '--paper-ink-soft': soft } = APP_INKS
   const ink = p.onFill
-  const factsH = facts.length * 21 + (facts.length - 1) * 6
+  const factsH = facts.length * 21 + (facts.length - 1) * 6 + MIX_DROP * facts.filter(f => f[2]).length
   const h = (22 + 13.81 + 12 + 1 + 12 + 46.42 + 12 + factsH + 12 + 11.9 + 22) * u
   ctx.save()
   rrect(ctx, x, y, w, h, 10 * u)
@@ -1057,13 +1063,35 @@ export function duelTicket(ctx, p, x, y, w, u, { no, you, them, facts, foot, pul
   ctx.scale(1 + 0.35 * pulse, 1 + 0.35 * pulse)
   text(ctx, '⇄', 0, 7.2 * u, { f: font(700, 20 * u, 'latin'), color: mix(p.stamp, ink, 0.7), align: 'center' })
   ctx.restore()
-  // The facts, a term and its value a line.
+  // The facts, a term and its value a line. A paper's mix (plan 286,
+  // DuelRun's Mix: `shares`, lower level first) writes its levels'
+  // shares beside a 56 by 6 bar in the ticket's ink, the level below
+  // pale and the one above full; its inline-flex box hangs on the bar's
+  // foot, which drops the value and every row after it.
   const ff = font(400, 13.12 * u, 'latin')
   const fb = font(700, 13.12 * u, 'latin')
-  facts.forEach(([dt, dd], i) => {
-    const by = at(119.23 + i * 27 + 15.2)
-    text(ctx, dt, L, by, { f: ff, color: soft })
-    text(ctx, dd, R, by, { f: fb, color: ink, align: 'right' })
+  let drop = 0
+  facts.forEach(([dt, dd, shares], i) => {
+    const top = 119.23 + i * 27 + drop
+    text(ctx, dt, L, at(top + 15.2), { f: ff, color: soft })
+    if (!shares) {
+      text(ctx, dd, R, at(top + 15.2), { f: fb, color: ink, align: 'right' })
+      return
+    }
+    text(ctx, dd, R, at(top + 15.2 + MIX_DROP), { f: fb, color: ink, align: 'right' })
+    const bx = R - measure(ctx, dd, fb) - (6 + 56) * u
+    const by = at(top + 9)
+    ctx.save()
+    rrect(ctx, bx, by, 56 * u, 6 * u, 3 * u)
+    ctx.clip()
+    let px = bx
+    shares.forEach((share, k) => {
+      ctx.fillStyle = k === shares.length - 1 ? ink : alpha(ink, 0.3)
+      ctx.fillRect(px, by, 56 * u * share, 6 * u)
+      px += 56 * u * share
+    })
+    ctx.restore()
+    drop += MIX_DROP
   })
   const fy = at(119.23 + factsH + 12 + 9.55)
   text(ctx, foot[0], L, fy, { f: font(700, 9.92 * u, 'jp'), color: soft, tr: TR_NAME })

@@ -303,9 +303,11 @@ export function analysed(s, data, lang) {
   return { toks, points }
 }
 
-// ── 対戦, the duels' story (plans 281, 281b) ─────────────────────────
-// One sprint played: a real N5 paper (bank/duel.json, the duels' own
-// generator) and two runs over it as the server scored them (since plan
+// ── 対戦, the duels' story (plans 281, 281b, 286) ────────────────────
+// One sprint played: a real paper (bank/duel.json, the duels' own
+// generator), dealt where the learner's Elo stands (plan 286: 1 060 is
+// N5 70 % · N4 30 %, as its ticket says), and two runs over it as the
+// server scored them (since plan
 // 281b the bank runs study/duels.py's own scoring: each answer's speed,
 // the combo its streak pays and the rush of the last seconds). The
 // learner takes the first question slowly, the next two at once and a
@@ -319,14 +321,16 @@ export function analysed(s, data, lang) {
 // are the story's own, a sample; the paper, the runs' scoring, the holds
 // after an answer, the XP and where the Elo starts are the app's.
 export const DUEL_RUN = {
-  you: { level: 'N5', elo: 1212 },
-  them: { name: 'Hana', level: 'N4', elo: 1282 },
+  // The paper is dealt at the learner's Elo (the bank's DUEL_ELO).
+  you: { level: 'N5', elo: 1060 },
+  them: { name: 'Hana', level: 'N4', elo: 1120 },
   no: 412,
   // The learner's Elo after each of the twenty ranked duels before this
-  // one: the last of the provisional ones (K 40), then settled (K 20).
-  trend: [1056, 1077, 1059, 1082, 1101, 1084, 1106, 1126, 1107, 1128, 1146, 1157, 1148, 1160, 1170, 1183, 1175, 1187, 1198, 1212],
+  // one: the last of the provisional ones (K 40), then settled (K 20),
+  // from N5's start through a dip below it to where the paper stands.
+  trend: [978, 961, 984, 966, 989, 1008, 1018, 1009, 1020, 1031, 1022, 1033, 1043, 1034, 1045, 1036, 1047, 1039, 1050, 1060],
   // The board above the learner.
-  board: [['Sora22', 1341], ['Kenta', 1296], ['aiko', 1251], ['Rin', 1219]],
+  board: [['Sora22', 1131], ['Kenta', 1104], ['aiko', 1086], ['Rin', 1066]],
 }
 
 /** The wrong choice a hurried eye takes: the first that shares a
@@ -394,6 +398,8 @@ export function duelRun(data, lang) {
     rules: data.rules, sprint: data.sprint, lines,
     final: { mine: last.total, theirs: their.length ? their[their.length - 1].total : 0 },
     you: R.you, them: R.them, no: R.no, level: data.level,
+    // The levels the paper asks and their share (plan 286).
+    mix: data.blend ?? [{ level: data.level, share: 1 }],
     top: points(0), seconds: data.sprint / 1000,
     elo: { before: R.you.elo, after, delta, start: data.elo.start[R.you.level], trend, peak: Math.max(...trend) },
     xp: { paid, left: data.xp.cap - paid, share: paid / data.xp.cap },
@@ -1058,10 +1064,15 @@ export function promoDeck(plan, fmt, opts) {
           return by + 52 * U
         })
       }
+      // The levels the paper asks (plan 286), written as DuelRun's Mix
+      // writes them, beside its bar's shares; a whole level alone.
+      const mixFact = mix => (mix.length > 1
+        ? [mix.map(m => `${m.level} ${m.share.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })}`).join(' · '), mix.map(m => m.share)]
+        : [mix[0].level])
       const ticketOf = pulse => ({
         no: pr.no, pulse,
         you: { name: D.you, level: pr.you.level }, them: { name: pr.them.name, level: pr.them.level },
-        facts: [[D.duelLevel, pr.level], [D.questions, D.wordsKanji]],
+        facts: [[D.duelLevel, ...mixFact(pr.mix)], [D.questions, D.wordsKanji]],
         foot: ['辻駅 発行', D.sprint],
       })
 
@@ -1199,7 +1210,11 @@ export function promoDeck(plan, fmt, opts) {
         RACE_AT.forEach((from, i) => { if (s >= from) say1 = i })
         headline(c, [[RACE_WORDS[say1], p.ink]], fr.y, s, RACE_AT[say1], { sizes: RACE_HEAD, maxLines: 2 })
         const y0 = fr.y + headH(c) + SP[4]
-        const us = Math.min(U, (fr.bottom - y0) / NEED)
+        // As big as it fits (the owner's pick, plan 281c): the screen is a
+        // picture of the app, so it may pass the safe box down to just
+        // above the feed's caption (the frame's foot); the story's words
+        // keep to the safe box.
+        const us = Math.min(U, (fr.foot - y0) / NEED)
         const sw = A.PHONE_W * us
         const sx = fr.cx - sw / 2
         const st = raceAt(s)
