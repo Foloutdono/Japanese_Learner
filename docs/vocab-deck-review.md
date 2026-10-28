@@ -958,6 +958,46 @@ and `test_placement` holds thirty seeds to a prompt each.
 Deploy, then `python -m scripts.migrate_vocab_ids --yes`: it renames
 each learner's rows and rewrites `deck_cards.level` from the target id.
 
+### The placement audits' proposals (#360's B, #439's 体重; 2026-10-28)
+
+#360 applied its A findings; its proposals waited. Decision 1 settles
+most of them: a word the course's sentences say has a card, at the
+lowest level a sentence or the lists give it (plan 153's rule).
+
+| level | added | the lowest sentence that says it |
+|---|---|---|
+| N5 | もしもし, ただいま | N5 grammar and conversation (ただいま is a wrong reply's greeting at N5, the adverb from N4: the card carries both) |
+| N4 | 専門 | N2 comprehension (専門の業者), the lists' N4; JMdict gives it no sentence, so two are written |
+| N3 | 体重, 主人, 自宅, 生涯, 地面, イメージ | N3 comprehension (体重, 店の主人), conversation (ご自宅) and exam paper (地面); 生涯 and イメージ are the lists' N3 |
+| N2 | 勝手, 全力, 行方, 職場, 自ら | N2 grammar, or the lists' N2 |
+| N1 | 内緒, バッテリー | an N1 exam reading (内緒) and N1 grammar (スマホのバッテリー); the lists' N1 |
+
+Each took its pool row's senses (`pool_moves.json`), so a learner who
+held it as a pool card keeps it after `migrate_pool_cards`.
+
+#360's B5, the class behind 然して: ten cards whose only spelling
+is one JMdict flags rare for a word it marks usually kana, while the
+course writes the kana, became kana cards at their level (`MOVES`):
+纏める, 漸く, 狡い, 飽くまで, 若しかして, 纏め, 外方, 填まる, 嘗て, 態々.
+Two did not:
+
+- **傲る (N1, "to be haughty") stays.** The course's おごる is 奢る, "to
+  treat", in nine sentences of ten (おごるよ, コーヒーをおごってね),
+  which the pool glosses right today; a kana おごる card would gloss
+  them all "haughty". 奢る has no card, though N3 sentences say it:
+  the next placement slice's to propose.
+- **朝御飯 is the owner's call.** Not usually kana, and one of four N5
+  cards (御飯, 朝御飯, 昼御飯, 晩御飯) that spell 御 where the course
+  writes ご or kana. The four move together or not at all.
+
+#360 counted only the `jp` and `sentence` fields, so it read 地面, 内緒,
+イメージ and バッテリー as unused: the exam seeds and N1 grammar say
+them, and they are above. Not added, the lists and a rank alone (#360's
+B4 rest, #439's 菌): 正体, 台詞, 所有, 親父, お袋, 折, 狩り, パパ, リード,
+ノー, 菌 (the course's 菌 is 黴菌, its own card).
+
+Deploy, then `migrate_vocab_ids --yes` and `migrate_pool_cards --yes`.
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104

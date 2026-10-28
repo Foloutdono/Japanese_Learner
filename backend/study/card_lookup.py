@@ -2929,9 +2929,9 @@ def resolve_phrase(morphemes, i: int, max_len: int = _PHRASE_MAX):
         if _hiragana(surface) and len(surface) >= 4 and run[0].pos == "adverb" \
                 and i + n < len(morphemes) and morphemes[i + n].surface in "、，,":
             # (Or spelled in kanji the page does not write, opening on an
-            # adverb and set off by a comma, plan 272: もし + か + し + て is
-            # the N1 もしかして, "perhaps", which the deck spells 若しかして --
-            # but そうして。 is "do so!", a request.)
+            # adverb and set off by a comma, plan 272: もし + か + し + て was
+            # the N1 もしかして, "perhaps", while the deck spelled it 若しかして
+            # (a kana card since #360) -- but そうして。 is "do so!", a request.)
             for level, entry in _VOCAB_BY_KANA.get(surface, ()):
                 if surface in _reading_variants(entry.get("kana") or "") and not _verb_card(entry):
                     return level, entry, vocab_to_id(entry, level), n

@@ -2696,6 +2696,13 @@
    "rank": null
   },
   {
+   "key": "::まとめる",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "to collect, to put together; to summarize; to settle, to bring to a conclusion",
+   "rank": null
+  },
+  {
    "key": "特長::とくちょう",
    "level": "N2",
    "lists_say": "N3",
@@ -3507,12 +3514,6 @@
    "rank": 522
   },
   {
-   "expression": "もしもし",
-   "reading": "もしもし",
-   "level": "N5",
-   "rank": 540
-  },
-  {
    "expression": "我",
    "reading": "われ",
    "level": "N1",
@@ -3523,12 +3524,6 @@
    "reading": "おやじ",
    "level": "N1",
    "rank": 743
-  },
-  {
-   "expression": "主人",
-   "reading": "しゅじん",
-   "level": "N2",
-   "rank": 745
   },
   {
    "expression": "叔父",
@@ -3543,28 +3538,10 @@
    "rank": 807
   },
   {
-   "expression": "行方",
-   "reading": "ゆくえ",
-   "level": "N2",
-   "rank": 808
-  },
-  {
    "expression": "主",
    "reading": "ぬし",
    "level": "N1",
    "rank": 915
-  },
-  {
-   "expression": "勝手",
-   "reading": "かって",
-   "level": "N1",
-   "rank": 926
-  },
-  {
-   "expression": "専門",
-   "reading": "せんもん",
-   "level": "N4",
-   "rank": 987
   },
   {
    "expression": "届",
@@ -3603,12 +3580,6 @@
    "rank": 1465
   },
   {
-   "expression": "自ら",
-   "reading": "みずから",
-   "level": "N2",
-   "rank": 1799
-  },
-  {
    "expression": "リード",
    "reading": "リード",
    "level": "N1",
@@ -3621,46 +3592,16 @@
    "rank": 1951
   },
   {
-   "expression": "自宅",
-   "reading": "じたく",
-   "level": "N2",
-   "rank": 2081
-  },
-  {
-   "expression": "全力",
-   "reading": "ぜんりょく",
-   "level": "N2",
-   "rank": 2327
-  },
-  {
-   "expression": "地面",
-   "reading": "じめん",
-   "level": "N2",
-   "rank": 2386
-  },
-  {
    "expression": "狩り",
    "reading": "かり",
    "level": "N3",
    "rank": 2502
   },
   {
-   "expression": "ただいま",
-   "reading": "ただいま",
-   "level": "N2",
-   "rank": 2720
-  },
-  {
    "expression": "並",
    "reading": "なみ",
    "level": "N3",
    "rank": 2751
-  },
-  {
-   "expression": "職場",
-   "reading": "しょくば",
-   "level": "N2",
-   "rank": 2918
   },
   {
    "expression": "台詞",
@@ -3673,30 +3614,6 @@
    "reading": "おり",
    "level": "N1",
    "rank": 2968
-  },
-  {
-   "expression": "生涯",
-   "reading": "しょうがい",
-   "level": "N3",
-   "rank": 2982
-  },
-  {
-   "expression": "バッテリー",
-   "reading": "バッテリー",
-   "level": "N1",
-   "rank": 3050
-  },
-  {
-   "expression": "イメージ",
-   "reading": "イメージ",
-   "level": "N3",
-   "rank": 3119
-  },
-  {
-   "expression": "内緒",
-   "reading": "ないしょ",
-   "level": "N1",
-   "rank": 3505
   },
   {
    "expression": "お袋",
@@ -3715,12 +3632,6 @@
    "reading": "あたり",
    "level": "N3",
    "rank": 3832
-  },
-  {
-   "expression": "体重",
-   "reading": "たいじゅう",
-   "level": "N3",
-   "rank": 3855
   },
   {
    "expression": "良し",
@@ -4539,12 +4450,6 @@
    "rank": null
   },
   {
-   "expression": "まとめる",
-   "reading": "まとめる",
-   "level": "N3",
-   "rank": null
-  },
-  {
    "expression": "当然",
    "reading": "とうぜん",
    "level": "N3",
@@ -5127,12 +5032,6 @@
    "rank": null
   },
   {
-   "expression": "かつて",
-   "reading": "かつて",
-   "level": "N1",
-   "rank": null
-  },
-  {
    "expression": "かなわない",
    "reading": "かなわない",
    "level": "N1",
@@ -5463,12 +5362,6 @@
    "rank": null
   },
   {
-   "expression": "わざわざ",
-   "reading": "わざわざ",
-   "level": "N1",
-   "rank": null
-  },
-  {
    "expression": "割当",
    "reading": "わりあて",
    "level": "N1",
@@ -5637,12 +5530,6 @@
    "rank": null
   },
   {
-   "expression": "もしかして",
-   "reading": "もしかして",
-   "level": "N1",
-   "rank": null
-  },
-  {
    "expression": "もしくは",
    "reading": "もしくは",
    "level": "N1",
@@ -5681,12 +5568,6 @@
   {
    "expression": "やりとおす",
    "reading": "やりとおす",
-   "level": "N1",
-   "rank": null
-  },
-  {
-   "expression": "はまる",
-   "reading": "はまる",
    "level": "N1",
    "rank": null
   },
@@ -5897,12 +5778,6 @@
    "meaning": "bill"
   },
   {
-   "lemma": "もしもし",
-   "reading": "もしもし",
-   "rank": 540,
-   "meaning": "hello (e.g. on phone)"
-  },
-  {
    "lemma": "傷付ける",
    "reading": "きずつける",
    "rank": 543,
@@ -5981,12 +5856,6 @@
    "meaning": "encouragement"
   },
   {
-   "lemma": "主人",
-   "reading": "しゅじん",
-   "rank": 745,
-   "meaning": "head (of a household)"
-  },
-  {
    "lemma": "ううん",
    "reading": "ううん",
    "rank": 755,
@@ -6033,12 +5902,6 @@
    "reading": "ゆうしょく",
    "rank": 805,
    "meaning": "evening meal"
-  },
-  {
-   "lemma": "行方",
-   "reading": "ゆくえ",
-   "rank": 808,
-   "meaning": "(one's) whereabouts"
   },
   {
    "lemma": "常",
@@ -6101,12 +5964,6 @@
    "meaning": "partner"
   },
   {
-   "lemma": "勝手",
-   "reading": "かって",
-   "rank": 926,
-   "meaning": "one's own convenience"
-  },
-  {
    "lemma": "抱え",
    "reading": "かかえ",
    "rank": 949,
@@ -6129,12 +5986,6 @@
    "reading": "もくげき",
    "rank": 982,
    "meaning": "witnessing"
-  },
-  {
-   "lemma": "専門",
-   "reading": "せんもん",
-   "rank": 987,
-   "meaning": "speciality"
   },
   {
    "lemma": "桶",
@@ -6563,12 +6414,6 @@
    "meaning": "youngster"
   },
   {
-   "lemma": "自ら",
-   "reading": "みずから",
-   "rank": 1799,
-   "meaning": "oneself"
-  },
-  {
    "lemma": "弾丸",
    "reading": "だんがん",
    "rank": 1800,
@@ -6747,12 +6592,6 @@
    "reading": "じひ",
    "rank": 2066,
    "meaning": "mercy"
-  },
-  {
-   "lemma": "自宅",
-   "reading": "じたく",
-   "rank": 2082,
-   "meaning": "one's home"
   },
   {
    "lemma": "警報",
@@ -6983,12 +6822,6 @@
    "meaning": "United Kingdom"
   },
   {
-   "lemma": "全力",
-   "reading": "ぜんりょく",
-   "rank": 2327,
-   "meaning": "all one's power (strength, energy, efforts)"
-  },
-  {
    "lemma": "破滅",
    "reading": "はめつ",
    "rank": 2329,
@@ -7047,12 +6880,6 @@
    "reading": "ぬけでる",
    "rank": 2386,
    "meaning": "to slip out"
-  },
-  {
-   "lemma": "地面",
-   "reading": "じめん",
-   "rank": 2391,
-   "meaning": "ground"
   },
   {
    "lemma": "暗闇",
@@ -7173,12 +7000,6 @@
    "reading": "せんりゃく",
    "rank": 2542,
    "meaning": "strategy"
-  },
-  {
-   "lemma": "只今",
-   "reading": "ただいま",
-   "rank": 2544,
-   "meaning": "I'm home!"
   },
   {
    "lemma": "共犯",
@@ -7557,12 +7378,6 @@
    "reading": "おうひ",
    "rank": 2906,
    "meaning": "queen (consort)"
-  },
-  {
-   "lemma": "職場",
-   "reading": "しょくば",
-   "rank": 2919,
-   "meaning": "one's post"
   },
   {
    "lemma": "匿名",
@@ -8135,12 +7950,6 @@
    "meaning": "eccentric"
   },
   {
-   "lemma": "内緒",
-   "reading": "ないしょ",
-   "rank": 3518,
-   "meaning": "secrecy"
-  },
-  {
    "lemma": "引き換え",
    "reading": "ひきかえ",
    "rank": 3519,
@@ -8571,12 +8380,6 @@
    "reading": "ふるまい",
    "rank": 3854,
    "meaning": "behavior"
-  },
-  {
-   "lemma": "体重",
-   "reading": "たいじゅう",
-   "rank": 3857,
-   "meaning": "(body) weight"
   },
   {
    "lemma": "想定",

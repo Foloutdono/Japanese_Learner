@@ -15,25 +15,34 @@ rather than imported, so this runs in a fresh clone with nothing installed
 (content/listening_clips.py imports pykakasi; this does not).
 
 ── The rotation ──────────────────────────────────────────────
-Runs are Tuesday and Friday (ANCHOR is the first). The nth run audits
+Runs are Tuesday and Friday (ANCHOR is the first). Each area joined the
+rotation on a date (JOINS), and a run deals only the areas that had
+joined by its own date, in turn, so grammar, vocab, sentences,
+placement, tours and conversation advance in parallel — a whole area is
+never starved behind another's backlog. Within an area the cursor walks
+that area's slices in order, wrapping when it reaches the end, and it
+counts only the runs that area was dealt. (Placement joined on
+2026-09-21, plan 109: the three candidate lists an outside ranking and
+the community JLPT lists raise against the deck. Tours joined on
+2026-10-05, plan 187g: the twists (one per notion since plan 189) and
+the scene written for each grammar point's tour, which no gate reads for
+whether a native speaker would say them. Conversation joined on
+2026-10-17, plan 217: the 会話 bank's scenarios, whose wrong replies no
+gate can tell from a second right answer.)
 
-    AREAS[n % 6]
+So a new area is a line in JOINS dated after the last run, and moves no
+run before it. Until run RESTART the rule was AREAS[n % k], cursor n // k,
+over whatever k areas the code held that day: each join re-mapped every
+past run, which dealt placement-listed-not-here-1 twice (#360, #439) and
+left three slices never dealt (#439). Those runs are still answered by
+that rule (`_dealt_before_restart`), so --on names what each was dealt;
+from RESTART each area first deals what the runs before it did not audit.
 
-so grammar, vocab, sentences, placement, tours and conversation advance in
-parallel — a whole area is never starved behind another's backlog — and
-within an area the cursor is n // 6, walking that area's slices in order and wrapping
-when it reaches the end. (Placement joined on 2026-09-21, plan 109: the
-three candidate lists an outside ranking and the community JLPT lists
-raise against the deck. Runs before that date rotated over three areas.
-Tours joined on 2026-10-05, plan 187g: the twists (one per notion since
-plan 189) and the scene written for each grammar point's tour, which no gate reads for whether a native
-speaker would say them. Runs before that date rotated over four.
-Conversation joined on 2026-10-16, plan 217: the 会話 bank's scenarios,
-whose wrong replies no gate can tell from a second right answer. Runs
-before that date rotated over five.)
-Nothing is stored: the slice is a pure function of the date, so a
-run can be reproduced (--on) and the next months inspected (--schedule)
-without a ledger to keep in sync.
+A firing that filed no issue is a run in UNFILED: its slice counts as
+not dealt, so its area deals it again at its next turn. Name such a run
+before its area comes round again, or the runs between are re-mapped.
+Otherwise nothing is stored: the slice is a function of the date, so a
+run can be reproduced (--on) and the next months inspected (--schedule).
 
 The one area that cannot be walked exhaustively is vocab: 8,405 deck
 entries at 40 a run is years. Its slices are therefore ordered
@@ -62,13 +71,34 @@ _CONTENT = os.path.join(_BASE_DIR, "content")
 _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-AREAS = ("grammar", "vocab", "sentences", "placement", "tours", "conversation")
 
 # The first run — the Routine's own first firing. Tuesdays and Fridays
 # after it are the others, and the two must agree: a run on any other
 # weekday resolves to the run BEFORE it and so audits that slice twice.
 ANCHOR = dt.date(2026, 9, 18)
 RUN_WEEKDAYS = (1, 4)  # Monday is 0
+
+# Each area and the day it joined the rotation. A new area goes last,
+# dated after the last run, so no run before it moves.
+JOINS = (
+    ("grammar", ANCHOR),
+    ("vocab", ANCHOR),
+    ("sentences", ANCHOR),
+    ("placement", dt.date(2026, 9, 21)),
+    ("tours", dt.date(2026, 10, 5)),
+    # Plan 217 landed after the 2026-10-16 run, which was dealt over five.
+    ("conversation", dt.date(2026, 10, 17)),
+)
+AREAS = tuple(area for area, _ in JOINS)
+
+# The first run (2026-10-30) dealt by JOINS; the runs before it keep the
+# rule they were dealt by, `_dealt_before_restart`.
+RESTART = 12
+# Runs that filed no issue: 2026-10-02, 10-09 and 10-23 (#439, #485).
+UNFILED = frozenset({4, 6, 10})
+# Audited by a run beside its own slice: #439, dealt
+# placement-listed-not-here-1 a second time, audited tours-N5-1 instead.
+ALSO_AUDITED = frozenset({"tours-N5-1"})
 
 # How much one run is asked to research. A rich grammar point (steps,
 # compare, five examples) is a page to check; a plain one is a gloss and
@@ -430,11 +460,51 @@ def slices(area: str) -> list[dict]:
             "conversation": _conversation_slices}[area]()
 
 
+def areas_on(on: dt.date) -> tuple[str, ...]:
+    """The areas that had joined the rotation by `on`."""
+    return tuple(area for area, joined in JOINS if joined <= on)
+
+
+def _dealt_before_restart(index: int) -> dict:
+    """The rule runs before RESTART were dealt by: AREAS[n % k], cursor
+    n // k, k the areas the code held that day."""
+    areas = areas_on(run_date(index))
+    pool = slices(areas[index % len(areas)])
+    return pool[(index // len(areas)) % len(pool)]
+
+
+@functools.lru_cache(maxsize=None)
+def _area_of(index: int) -> str:
+    """Run `index`'s area, from RESTART on: the areas joined by its date,
+    in turn, counted from the run their last member joined at."""
+    on = run_date(index)
+    joined = max(day for _, day in JOINS if day <= on)
+    first = run_index(joined)
+    if run_date(first) < joined:
+        first += 1
+    areas = areas_on(on)
+    return areas[(index - max(first, RESTART)) % len(areas)]
+
+
+@functools.lru_cache(maxsize=None)
+def _audited_before_restart() -> frozenset:
+    return frozenset(_dealt_before_restart(n)["id"] for n in range(RESTART)
+                     if n not in UNFILED) | ALSO_AUDITED
+
+
 def slice_for(index: int) -> dict:
     """The slice run `index` audits."""
-    area = AREAS[index % len(AREAS)]
-    pool = slices(area)
-    chosen = dict(pool[(index // len(AREAS)) % len(pool)])
+    if index < RESTART:
+        chosen = dict(_dealt_before_restart(index))
+    else:
+        area = _area_of(index)
+        pool = slices(area)
+        # What the runs before RESTART left, then every slice in turn.
+        first = [s for s in pool if s["id"] not in _audited_before_restart()]
+        cursor = sum(1 for n in range(RESTART, index)
+                     if n not in UNFILED and _area_of(n) == area)
+        chosen = dict(first[cursor] if cursor < len(first)
+                      else pool[(cursor - len(first)) % len(pool)])
     chosen["run"] = index
     chosen["date"] = run_date(index).isoformat()
     return chosen

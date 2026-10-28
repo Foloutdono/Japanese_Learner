@@ -7081,18 +7081,6 @@
     "fr": "Le mois prochain, nous organisons une soirée musicale à l'école."
    }
   ],
-  "外方::そっぽ": [
-   {
-    "jp": "話しかけても、弟は外方を向いたまま返事をしなかった。",
-    "en": "Even when I spoke to him, my little brother kept looking the other way and didn't answer.",
-    "fr": "Même quand je lui parlais, mon petit frère regardait ailleurs et ne répondait pas."
-   },
-   {
-    "jp": "値段を上げすぎると、客に外方を向かれてしまう。",
-    "en": "If you raise prices too much, customers will turn their backs on you.",
-    "fr": "Si on augmente trop les prix, les clients se détournent."
-   }
-  ],
   "夜行::やこう": [
    {
     "jp": "夜行バスで、東京から大阪まで行った。",
@@ -11617,18 +11605,6 @@
     "fr": "Dès que je suis sorti, j'ai instinctivement rentré la tête dans les épaules à cause du froid."
    }
   ],
-  "纏め::まとめ": [
-   {
-    "jp": "授業の最後に、先生が今日の纏めを話した。",
-    "en": "At the end of class, the teacher gave a summary of today's lesson.",
-    "fr": "À la fin du cours, le professeur a fait le récapitulatif de la leçon du jour."
-   },
-   {
-    "jp": "班ごとに出た意見の纏め役を、私が引き受けた。",
-    "en": "I took on the job of pulling together the opinions that came out of each group.",
-    "fr": "J'ai accepté de faire la synthèse des avis exprimés dans chaque groupe."
-   }
-  ],
   "罰::ばち": [
    {
     "jp": "食べ物を粗末にすると、罰が当たるよ。",
@@ -13475,6 +13451,42 @@
     "jp": "新しい店の開店が、静かな商店街に活気を齎らした。",
     "en": "The opening of the new shop brought life to the quiet shopping street.",
     "fr": "L'ouverture de la nouvelle boutique a apporté de l'animation à la rue commerçante, jusque-là calme."
+   }
+  ],
+  "::そっぽ": [
+   {
+    "jp": "話しかけても、弟はそっぽを向いたまま返事をしなかった。",
+    "en": "Even when I spoke to him, my little brother kept looking the other way and didn't answer.",
+    "fr": "Même quand je lui parlais, mon petit frère regardait ailleurs et ne répondait pas."
+   },
+   {
+    "jp": "値段を上げすぎると、客にそっぽを向かれてしまう。",
+    "en": "If you raise prices too much, customers will turn their backs on you.",
+    "fr": "Si on augmente trop les prix, les clients se détournent."
+   }
+  ],
+  "::まとめ": [
+   {
+    "jp": "授業の最後に、先生が今日のまとめを話した。",
+    "en": "At the end of class, the teacher gave a summary of today's lesson.",
+    "fr": "À la fin du cours, le professeur a fait le récapitulatif de la leçon du jour."
+   },
+   {
+    "jp": "班ごとに出た意見のまとめ役を、私が引き受けた。",
+    "en": "I took on the job of pulling together the opinions that came out of each group.",
+    "fr": "J'ai accepté de faire la synthèse des avis exprimés dans chaque groupe."
+   }
+  ],
+  "専門::せんもん": [
+   {
+    "jp": "姉の専門は日本の文学です。",
+    "en": "My older sister's field is Japanese literature.",
+    "fr": "La spécialité de ma grande sœur, c'est la littérature japonaise."
+   },
+   {
+    "jp": "大学では何を専門に勉強していますか。",
+    "en": "What are you majoring in at university?",
+    "fr": "Quelle matière étudiez-vous comme spécialité à l'université ?"
    }
   ]
  }

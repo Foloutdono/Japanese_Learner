@@ -24,6 +24,7 @@ in. The page works without that script.
 | `build.mjs` | `npm run landing`: writes `public/landing/` (the demos' `voices.js` too), `public/sitemap.xml` and `public/robots.txt`. |
 | `og.mjs` | `npm run landing:og`: renders the two share cards (`og-fr.png`, `og-en.png`). |
 | `../public/landing/landing.js` | The client script. Not built; served as written. |
+| `footage/` | `npm run landing:footage`: films the feature clips (plan 283, "Footage" below). |
 
 The built pages are committed, as `public/privacy.html` is: Vite copies
 `public/` as it is, so the deployment needs no step of its own.
@@ -188,6 +189,49 @@ looks for its still, and only a still that loads brings in a player.
 
 The shot list, with what to film in each slot, is the canvas's "Footage
 slots" board.
+
+### Filming the feature clips (plan 283)
+
+The sixteen feature clips are filmed by a script, so a change to a
+screen they show is one command away from footage that matches it:
+
+```bash
+createdb -h localhost tsuji_footage                 # a local database of its own
+export FOOTAGE_DATABASE_URL=postgresql://postgres@localhost:5432/tsuji_footage
+cd backend && python -m scripts.footage_learner --seed --yes   # once: the learner
+cd ../frontend && npm run landing:footage           # all sixteen, into landing/footage/out/
+npm run landing:footage -- kana --desk              # one scene, one format
+npm run landing:footage -- kana --look              # no film: screenshots, and what can be pressed
+```
+
+- **The learner** is `backend/scripts/footage_learner.py`'s: boarded at
+  N5 with N4 as the goal, a month of days cleared through the app's own
+  routes, part of today answered, so the gate shows 62 cards, a streak
+  of 31 and level 27. It is kept as a dump and put back before every
+  clip, moved on to the hour, so every clip starts from the same gate.
+  The script refuses a database that is not local or holds anyone else:
+  it rewrites every timestamp in it.
+- **The app** is built for the footage (`vite build --mode footage`: no
+  Supabase project, so no sign-in, and no service worker), served by the
+  script, which starts its own API on the learner (`DEV_USER_ID`). The
+  browser's clock starts at 22:30 in Tokyo on the learner's day, so the
+  gate wears the same night in every clip.
+- **The scenes** are `landing/footage/scenes/`, one per slot, named as
+  `CLIPS` names them, each played as a learner would and ending where it
+  started, so the loop is seamless: the phone shows a touch's ring at
+  each tap and the desk its pointer. A scene answers as one who knows: it
+  reads the answer from what the app served (a card's meaning, a paper's
+  key) and draws a kana or a kanji in KanjiVG's stroke order.
+- **The camera** takes Chrome's own frames and lays them on 30 fps with
+  ffmpeg (`capture.mjs`); the still is the clip's first frame. A clip over
+  3 MB says so.
+
+Then upload `landing/footage/out/*.mp4` and `*.jpg` to the bucket by
+their names, replacing the old ones. The bucket serves them with an
+hour's cache, so a replaced clip can take that long to show. A screen
+that moved can break a scene: it fails with a screenshot of where it
+stopped (`out/<clip>-FAILED.png`), and `--look` shows what can be
+pressed there now.
 
 The presentation section stays hidden until `presentation.jpg` is in the
 bucket. Once the video is up, **set `PRESENTATION.uploadDate`** in

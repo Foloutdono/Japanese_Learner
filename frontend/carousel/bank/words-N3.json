@@ -1757,4 +1757,10 @@
 {"t":"おとなしい","r":"おとなしい","ro":"otonashii","en":["obedient, docile, quiet"],"fr":["obéissant, docile, calme"]},
 {"t":"楽器","r":"がっき","ro":"gakki","en":["musical instrument"],"fr":["instrument de musique"],"fu":[["楽","がっ"],["器","き"]],"hy":["合器","楽気","楽帰"]},
 {"t":"暖める","r":"あたためる","ro":"atatameru","en":["to warm, to heat"],"fr":["réchauffer, chauffer"],"fu":[["暖","あたた"],["める",""]]},
-{"t":"暖まる","r":"あたたまる","ro":"atatamaru","en":["to warm up, to get warm"],"fr":["se réchauffer, se chauffer"],"fu":[["暖","あたた"],["まる",""]]}]}
+{"t":"暖まる","r":"あたたまる","ro":"atatamaru","en":["to warm up, to get warm"],"fr":["se réchauffer, se chauffer"],"fu":[["暖","あたた"],["まる",""]]},
+{"t":"体重","r":"たいじゅう","ro":"taijuu","en":["(body) weight"],"fr":["poids (du corps)"],"fu":[["体","たい"],["重","じゅう"]],"hy":["大重","体十","来重"]},
+{"t":"主人","r":"しゅじん","ro":"shujin","en":["owner, proprietor (of a shop, an inn)","head of the house","(my) husband"],"fr":["patron, propriétaire (d'une boutique, d'une auberge)","maître de maison","(mon) mari"],"fu":[["主","しゅ"],["人","じん"]],"hy":["手人","主沈","取人"]},
+{"t":"自宅","r":"じたく","ro":"jitaku","en":["one's home, one's own house"],"fr":["domicile, chez soi"],"fu":[["自","じ"],["宅","たく"]],"hy":["二宅","自度","時宅"]},
+{"t":"生涯","r":"しょうがい","ro":"shougai","en":["life, lifetime, one's whole life"],"fr":["vie, toute une vie, existence"],"fu":[["生","しょう"],["涯","がい"]],"hy":["上涯","生外","小涯"]},
+{"t":"地面","r":"じめん","ro":"jimen","en":["ground, the surface of the earth"],"fr":["sol, surface de la terre"],"fu":[["地","じ"],["面","めん"]],"hy":["二面","地綿","時面"]},
+{"t":"イメージ","r":"イメージ","ro":"imeeji","en":["image (in one's mind), impression"],"fr":["image (mentale), impression"]}]}
