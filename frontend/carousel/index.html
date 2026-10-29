@@ -233,6 +233,14 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
     </div>
 
     <div class="field" data-challenge="only">
+      <div class="label">The answer <span>left to the comments, where the viewer writes theirs (the default), or shown on the screen</span></div>
+      <div class="seg" role="group" aria-label="The answer">
+        <button type="button" data-set="challengeAnswer:comments">In the comments 答えはコメントで</button>
+        <button type="button" data-set="challengeAnswer:shown">Shown on screen 画面に出す</button>
+      </div>
+    </div>
+
+    <div class="field" data-challenge="only">
       <label class="label" for="challenge-q">Question <span>asked after the text, its answers in a shuffled order</span></label>
       <select id="challenge-q" class="text-input"></select>
     </div>

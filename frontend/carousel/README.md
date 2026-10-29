@@ -1290,6 +1290,9 @@ under the four answers, all as bright as each other, the chime that says
 right is a plain card's sound, and the post's captions ask for the
 comments too (Reels with 📌, TikTok with 👇). The file's name ends in
 `-comment`. `--show` gives the answer on the screen, as the study does it.
+The studio's "The answer" switch sets the same choice ("In the comments", the
+default, or "Shown on screen"), and its Copy the command writes `--show` only
+when the answer is shown.
 
 ```bash
 cd frontend

@@ -2057,6 +2057,12 @@ describe('the reading challenges (plan 247)', () => {
     for (const season of ['now', ...PRINT_SEASONS]) expect(html, season).toContain(`data-set="season:${season}"`)
   })
 
+  it('offers the answer switch in the studio, the comments by default (plan 275b)', () => {
+    const html = read('carousel/index.html')
+    for (const v of ['comments', 'shown']) expect(html, v).toContain(`data-set="challengeAnswer:${v}"`)
+    expect(read('carousel/studio.js')).toMatch(/challengeAnswer: 'comments'/)
+  })
+
   it('keeps the answer to itself when hidden, the comments asked for it (plan 275)', () => withPath2D(() => {
     for (const lang of ['en', 'fr']) {
       const shown = challengePlan(data, 'n5-06', { question: 2, lang, hide: false })

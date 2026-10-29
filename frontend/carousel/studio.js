@@ -51,6 +51,8 @@ const DEFAULTS = {
   design: 'clarte', length: '5', feature: 'auto',
   // Plan 247: how a reading challenge's text moves.
   challengeStyle: 'scroll',
+  // Plan 275: the answer is left to the comments (the default) or shown on the screen.
+  challengeAnswer: 'comments',
   // Plan 260: the question a reading challenge asks, by text (1-based); the default where none is set.
   challengeQ: {},
   // Plan 248: the values tuned in the Tune panel (tune.js), only those changed.
@@ -80,6 +82,7 @@ function load() {
     if (saved.story && !STORIES.includes(saved.story)) delete saved.story
     if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
     if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
+    if (saved.challengeAnswer && !['comments', 'shown'].includes(saved.challengeAnswer)) delete saved.challengeAnswer
     if (saved.feed && !FEEDS.includes(saved.feed)) delete saved.feed
     if (saved.wordsStyle && !WORDS_STYLES.includes(saved.wordsStyle)) delete saved.wordsStyle
     // No video carries music since plan 273: a visit saved before it forgets its switch.
@@ -851,7 +854,7 @@ async function renderChallenge(mine) {
   const data = await fetchJson('comprehension.json')
   if (mine !== token) return
   const id = currentId()
-  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), question: state.challengeQ[id], tune: state.tune })
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), question: state.challengeQ[id], hide: state.challengeAnswer !== 'shown', tune: state.tune })
   // The text's questions to choose from, the one asked selected (plan 260).
   const pick = $('#challenge-q')
   pick.replaceChildren(...challengeQuestions(data, id, state.lang).map(q => {
@@ -919,7 +922,7 @@ async function renderChallenge(mine) {
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.season}|${state.hour}|${pl.q.n}`
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.challengeAnswer}|${state.season}|${state.hour}|${pl.q.n}`
   const reading = tl.segs.find(sg => sg.key === 'reading')
   player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
   const draw = () => {
