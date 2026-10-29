@@ -8,7 +8,7 @@ import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS, DUEL_INKS } from '../carousel/app.js'
-import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, TODAY_DAY, arrivals, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, sealDate, spanOf, weekdayKanji } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
@@ -16,7 +16,7 @@ import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey,
 import { SITE_ORIGIN } from '../landing/config.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
-import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
+import { kanjiNumber as appKanjiNumber, sealDate as appSealDate, weekdayKanji as appWeekdayKanji } from './domain/dayClear.js'
 import { SPRINT_MS, points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
@@ -804,7 +804,7 @@ describe('explaining a point in its own sentence', () => {
         const pl = promoPlan(story, data, id, { ...OPTS, story })
         const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
         expect(frames.clip, story).toBeTruthy()
-        expect(frames.clip.print, story).toBe(story === 'pitch')
+        expect(frames.clip.print, story).toBe(['pitch', 'today'].includes(story))
         for (const t of [0, 1, 3.5, 4.3, 6.99]) {
           const { ctx } = stubContext()
           expect(() => frames.clip.draw(ctx, t), `${story} at ${t}s`).not.toThrow()
@@ -987,6 +987,121 @@ describe('explaining a point in its own sentence', () => {
     } finally {
       globalThis.Path2D = had
     }
+  })
+})
+
+describe('the Today story (plan 291)', () => {
+  const words = bank(STORY_FILES.today)
+  const printMeta = JSON.parse(read('src/components/station/print/print.json'))
+  // The print of the hour as loadPrint gives it, its pictures stubbed: a
+  // node lane has no canvas to decode them on.
+  const printOf = view => ({
+    hour: 'day',
+    scene: { w: printMeta.frames.phone.w, h: printMeta.frames.phone.h, train: { run: 200, delay: 0, dur: 30 } },
+    frame: printMeta.frames.phone,
+    look: printMeta.prints[view],
+    img: { sky: {}, back: {}, train: {}, front: {}, grain: {}, paper: {} },
+  })
+  const NOW = new Date(2026, 9, 29, 7, 0)
+  const play = (lang, print, id) => {
+    const [first] = promoItems('today', words, lang)
+    const pl = promoPlan('today', words, id ?? first.id, { ...OPTS, lang, story: 'today', now: NOW })
+    return { pl, frames: promoDeck(pl, FORMATS.story, { ground: 'sumi', print }) }
+  }
+
+  it('cuts the day’s seal as the cleared gate cuts it', () => {
+    for (const day of ['2026-10-29', '2026-01-04', '2027-02-28', '2026-12-31']) {
+      expect(weekdayKanji(day), day).toBe(appWeekdayKanji(day))
+      expect(sealDate(day), day).toBe(appSealDate(day))
+    }
+    expect(play('en', null).pl.promo.seal).toEqual({ day: '木', foot: '29·10·2026' })
+  })
+
+  it('says the app’s own words on Today’s parts, in both languages', () => {
+    for (const [lang, t] of [['en', EN], ['fr', FR]]) {
+      expect(PROMO[lang].min, lang).toBe(t.gateMinutes)
+      for (const n of [1, 42]) expect(PROMO[lang].today.reviewed(n), lang).toBe(t.todayReviewedUnit(n))
+    }
+  })
+
+  it('stands the dial where the phone’s print puts it', async () => {
+    // A Today drawn before its print has loaded keeps the phone frame's places.
+    const promo = read('carousel/promo.js')
+    const frame = /const PHONE_FRAME = (\{[^}]+\})/.exec(promo)[1]
+    const { cx, cy, disc, halo, fare } = printMeta.frames.phone
+    expect(frame).toBe(`{ cx: ${cx}, cy: ${cy}, disc: ${disc}, halo: ${halo}, fare: ${fare} }`)
+  })
+
+  it('rides the picked word, then the two after it', () => {
+    for (const lang of ['en', 'fr']) {
+      const items = promoItems('today', words, lang)
+      expect(items.length, lang).toBeGreaterThan(3)
+      const at = items.findIndex(x => x.id === '友達::ともだち')
+      expect(at, lang).toBeGreaterThanOrEqual(0)
+      const { pl } = play(lang, null, items[at].id)
+      expect(pl.id).toBe(items[at].id)
+      expect(pl.promo.ride.map(w => w.word), lang).toEqual([0, 1, 2].map(i => items[(at + i) % items.length].jp))
+      for (const w of pl.promo.ride) expect(w.sense && w.reading, `${lang} ${w.word}`).toBeTruthy()
+      // The day it shows is the pitch's: its lines, its minutes, its end.
+      expect(pl.promo.lines).toEqual(TODAY_DAY.lines)
+    }
+  })
+
+  it('plays Today whole, on its print and before it has loaded, ending at the gate', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      for (const lang of ['en', 'fr']) {
+        for (const print of [null, printOf('autumn-day'), printOf('autumn-dawn'), printOf('autumn-night')]) {
+          const { frames } = play(lang, print)
+          expect(frames.map(f => f.key)).toEqual(['hook', 'gate', 'ride', 'clear', 'board'])
+          const { story } = frames.clips
+          expect(story.fps).toBe(CLIP.fps)
+          expect(story.print).toBe(Boolean(print))
+          expect(story.seconds).toBeGreaterThan(18)
+          expect(story.seconds).toBeLessThan(24)
+          for (const f of frames) expect(() => f.draw(stubContext().ctx), `${lang} still ${f.key}`).not.toThrow()
+          for (let t = 0; t < story.seconds; t += 0.29) expect(() => story.draw(stubContext().ctx, t), `${lang} at ${t}s`).not.toThrow()
+        }
+        // Every line the story says lands, word by word, and it ends on
+        // the call to action's.
+        const { frames } = play(lang, printOf('autumn-day'))
+        const { story } = frames.clips
+        // A short word may be bound to the next by a no-break space.
+        const wordsOf = x => x.split(/[\s\u00a0\u202f]+/).filter(Boolean)
+        const said = new Set()
+        for (let t = 0; t < story.seconds; t += 0.1) {
+          const { ctx, texts } = stubContext()
+          story.draw(ctx, t)
+          texts.forEach(x => wordsOf(x).forEach(w => said.add(w)))
+        }
+        const P = PROMO[lang]
+        const D = P.today
+        // The day's figures too: the count, the minutes and the hour, what it reviewed.
+        const due = TODAY_DAY.lines.reduce((t, [, n]) => t + n, 0)
+        for (const line of [D.hook, P.everyDay, D.time, D.lines, D.one, D.rate, D.done, D.end, P.depart,
+          String(due), `≈ ${TODAY_DAY.minutes} ${P.min}`, P.doneBy(TODAY_DAY.ends), D.reviewed(due)]) {
+          for (const word of wordsOf(weldIf(lang, line))) expect(said, `${lang}: ${word}`).toContain(word)
+        }
+        const last = stubContext()
+        frames.at(-1).draw(last.ctx)
+        const end = stubContext()
+        story.draw(end.ctx, story.seconds - 0.01)
+        for (const w of last.texts.filter(x => /[A-Za-z]{4}/.test(x))) expect(end.texts, `${lang} end: ${w}`).toContain(w)
+      }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
+
+  it('scores Today with the app’s own sounds where the app plays them', () => {
+    const { frames } = play('en', printOf('autumn-day'))
+    const keys = frames.clips.story.sounds.map(s => s.key)
+    // Depart through the ticket gate, each card turned and rated, the day's seal.
+    for (const key of ['gate-chime', 'card-transition', 'card-flip', 'correct', 'card-stamp', 'day-clear', 'platform-chime']) expect(keys, key).toContain(key)
+    expect(keys.filter(k => k === 'card-flip').length).toBe(3)
+    const at = frames.clips.story.sounds.map(s => s.at)
+    expect([...at].sort((a, b) => a - b)).toEqual(at)
   })
 })
 

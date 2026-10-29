@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **291**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **292**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -1178,7 +1178,9 @@ itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
 the hour, each story's cover and its call to action also a seven-second MP4 clip,
 and since plan 281 the duels' story played whole as one clip (a real N5
-paper's opening raced, the result, the Elo, the board: `bank/duel.json`);
+paper's opening raced, the result, the Elo, the board: `bank/duel.json`),
+since plan 291 Today's (a hook asked in the hour's sun, the screen big as
+the camera pulls back, Depart, a ride of three cards, the day stamped);
 since plan 232 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice

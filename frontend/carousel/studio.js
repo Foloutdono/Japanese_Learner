@@ -37,7 +37,7 @@ const T = STRINGS.en
 const LIST_NAME = { long: 'Video', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
-  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
+  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:today': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
   view: 'compare', type: 'plates', format: 'post', fit: 'tiktok', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
@@ -809,13 +809,13 @@ async function exportOne() {
 }
 // ── The clips (plan 231) ──────────────────────────────────────
 // A promo story's cover, or its call to action, in motion, seven
-// seconds, or a story played whole (plan 281), encoded here as the feeds
+// seconds, or a story played whole (plans 281, 291), encoded here as the feeds
 // take a video: H.264 in an MP4 (WebCodecs, muxed by mp4-muxer).
 const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm'
 const CLIPS = {
   cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' },
   end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' },
-  // A story played whole, beat after beat (the duels', plan 281).
+  // A story played whole, beat after beat (the duels', plan 281; Today's, plan 291).
   story: { btn: '#export-story-clip', name: 'story', said: 'story' },
 }
 async function exportClip(which = 'cover') {

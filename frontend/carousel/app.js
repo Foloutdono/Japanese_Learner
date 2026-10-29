@@ -19,6 +19,9 @@ export const APP_INKS = {
   '--tpr-washi': '#efe3bf',
   '--tpr-sumi': '#1d1a16',
   '--tpr-shu': '#a8382a',
+  // A cleared day's seal (plan 206): its red, and the light it sheds on the sky.
+  '--tpr-seal': '#ce6153',
+  '--tpr-seal-glow': '#e98066',
   // The cleared day's 硬券, which the duel's ticket is printed on, and its soft ink.
   '--paper': '#f3ecdf',
   '--paper-ink-soft': '#665c4a',
@@ -500,31 +503,41 @@ const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -
 /** Today's dial as the hour's sun or moon on its print (PrintDial): its
  *  glow, the halo of its lines at dusk and night, the disc, an arc per
  *  line round it, the count in the disc's inks; then the time under it.
- *  (cx, cy) the disc's centre, `u` the print's unit. */
-export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end, breath = null }) {
+ *  (cx, cy) the disc's centre, `u` the print's unit.
+ *  In motion (the Today story, plan 291): `sweep` the share of the ring
+ *  drawn round from the top, `ring` its turn in ({ alpha, scale, rot },
+ *  tdy-fin-ring), `show` the count's shade; `seal` ({ day, foot }) puts a
+ *  cleared day's seal where the disc was, and `stamp` ({ alpha, scale,
+ *  dy, rot }, clr-slam) brings it down over the disc. */
+export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end, breath = null, sweep = 1, ring = null, show = 1, seal = null, stamp = null }) {
   const { frame, look } = P
   const disc = look.disc
   const r = frame.disc * u
   const halo = frame.halo * u
   const width = 3.4 * u
+  // The seal keeps the dawn sun's red and glow; at any other hour its own.
+  const sun = disc.kind === 'sun_red'
+  const [glowInk, glowOp] = seal && !sun ? [APP_INKS['--tpr-seal-glow'], SEAL_GLOW] : [disc.glow, disc.glowOp]
   // The glow breathes in a clip (tpr-breathe: 0.8 to 1, 0.985 to 1.035).
   const glowR = (r + 70 * u) * (breath == null ? 1 : 0.985 + 0.05 * breath)
-  const glowA = breath == null ? 1 : 0.8 + 0.2 * breath
+  const glowA = (breath == null ? 1 : 0.8 + 0.2 * breath) * (seal?.glow ?? 1)
   const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR)
-  g.addColorStop(r / glowR, alpha(disc.glow, disc.glowOp * glowA))
-  g.addColorStop((r + 24 * u) / glowR, alpha(disc.glow, disc.glowOp * 0.35 * glowA))
-  g.addColorStop(1, alpha(disc.glow, 0))
+  g.addColorStop(r / glowR, alpha(glowInk, glowOp * glowA))
+  g.addColorStop((r + 24 * u) / glowR, alpha(glowInk, glowOp * 0.35 * glowA))
+  g.addColorStop(1, alpha(glowInk, 0))
   ctx.fillStyle = g
   ctx.beginPath()
   ctx.arc(cx, cy, glowR, 0, Math.PI * 2)
   ctx.fill()
-  // The arcs: dialArcs at the halo's radius, a gap of 11 units in 101.
+  // The arcs: dialArcs at the halo's radius, a gap of 11 units in 101,
+  // each cut where the sweep has reached.
   const total = parts.reduce((s, q) => s + q.n, 0)
   const C = 2 * Math.PI * halo
   const gap = (11 * halo) / 101
   const cap = width / 2
-  const arcs = parts.length === 1
-    ? [{ color: parts[0].color, a0: 0, a1: Math.PI * 2 }]
+  const reach = -Math.PI / 2 + Math.max(0, Math.min(1, sweep)) * Math.PI * 2
+  const arcs = (parts.length === 1
+    ? [{ color: parts[0].color, a0: -Math.PI / 2, a1: Math.PI * 1.5 }]
     : (() => {
       const usable = C - gap * parts.length
       let at = gap / 2
@@ -534,9 +547,16 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end,
         at += span + gap
         return { color: q.color, a0, a1: a0 + Math.max(0, span - 2 * cap) / halo }
       })
-    })()
+    })()).map(a => ({ ...a, a1: Math.min(a.a1, reach) })).filter(a => a.a1 > a.a0)
   const stroke = (lw, filter) => {
     ctx.save()
+    if (ring) {
+      ctx.globalAlpha *= ring.alpha
+      ctx.translate(cx, cy)
+      ctx.rotate(ring.rot)
+      ctx.scale(ring.scale, ring.scale)
+      ctx.translate(-cx, -cy)
+    }
     ctx.lineCap = parts.length === 1 ? 'butt' : 'round'
     ctx.lineWidth = lw
     if (filter) ctx.filter = filter
@@ -548,7 +568,7 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end,
     }
     ctx.restore()
   }
-  if (disc.haloGlow > 0) {
+  if (disc.haloGlow > 0 && arcs.length) {
     ctx.save()
     ctx.globalAlpha *= disc.haloGlow
     stroke(13 * u, `blur(${4.5 * u}px)`)
@@ -557,45 +577,154 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end,
   const f = ctx.createRadialGradient(cx - 0.2 * r, cy - 0.28 * r, 0, cx - 0.2 * r, cy - 0.28 * r, 0.72 * 2 * r)
   f.addColorStop(0, disc.fill[0])
   f.addColorStop(1, disc.fill[1])
-  ctx.fillStyle = f
-  ctx.beginPath()
-  ctx.arc(cx, cy, r, 0, Math.PI * 2)
-  ctx.fill()
-  if (disc.maria) {
-    ctx.save()
+  const sealFill = sun ? f : APP_INKS['--tpr-seal']
+  // A seal landed is the disc; one coming down stands over the hour's own.
+  if (seal && !stamp) cutSeal(ctx, cx, cy, r, { ...seal, fill: sealFill })
+  else {
+    ctx.fillStyle = f
     ctx.beginPath()
     ctx.arc(cx, cy, r, 0, Math.PI * 2)
-    ctx.clip()
-    ctx.globalAlpha *= 0.2
-    ctx.filter = `blur(${2.4 * u}px)`
-    ctx.fillStyle = '#c9b68a'
-    for (const [mx, my, ms, mq] of MARIA) {
+    ctx.fill()
+    if (disc.maria) {
+      ctx.save()
       ctx.beginPath()
-      ctx.ellipse(cx + mx * r, cy + my * r, ms * r, ms * r * mq, 0, 0, Math.PI * 2)
-      ctx.fill()
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.clip()
+      ctx.globalAlpha *= 0.2
+      ctx.filter = `blur(${2.4 * u}px)`
+      ctx.fillStyle = '#c9b68a'
+      for (const [mx, my, ms, mq] of MARIA) {
+        ctx.beginPath()
+        ctx.ellipse(cx + mx * r, cy + my * r, ms * r, ms * r * mq, 0, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      ctx.restore()
     }
-    ctx.restore()
   }
   stroke(width)
-  // The count, in the disc's two inks, and its unit.
-  const cz = 72 * u * (frame.disc / 80)
-  const cg = ctx.createLinearGradient(0, cy - cz * 0.62, 0, cy + cz * 0.2)
-  cg.addColorStop(0, look.ink.countA)
-  cg.addColorStop(1, look.ink.countB)
-  text(ctx, String(count), cx, cy + cz * 0.14, { f: font(700, cz, 'latin'), color: cg, align: 'center' })
-  caps(ctx, unit, cx, cy + cz * 0.42, 9.92 * u, look.ink.discSoft, 'center')
-  // Under it: the time large, then when the run is done.
-  if (time) {
-    const tz = 20 * u
-    const ez = 13.12 * u
-    const tw = measure(ctx, time, font(700, tz, 'latin'))
-    const sep = end ? ` · ${end}` : ''
-    const ew = sep ? measure(ctx, sep, font(400, ez, 'latin')) : 0
-    const x0 = cx - (tw + ew) / 2
-    const ty = cy + (frame.fare + 32) * u
-    text(ctx, time, x0, ty, { f: font(700, tz, 'latin'), color: look.ink.text })
-    if (sep) text(ctx, sep, x0 + tw, ty, { f: font(400, ez, 'latin'), color: look.ink.soft })
+  if (seal && stamp) {
+    ctx.save()
+    ctx.globalAlpha *= stamp.alpha
+    ctx.translate(cx, cy + stamp.dy * u)
+    ctx.rotate(stamp.rot)
+    ctx.scale(stamp.scale, stamp.scale)
+    cutSeal(ctx, 0, 0, r, { ...seal, fill: sealFill })
+    ctx.restore()
   }
+  // The count, in the disc's two inks, and its unit: none on a seal.
+  if (!seal && count != null && show > 0) {
+    ctx.save()
+    ctx.globalAlpha *= show
+    const cz = 72 * u * (frame.disc / 80)
+    const cg = ctx.createLinearGradient(0, cy - cz * 0.62, 0, cy + cz * 0.2)
+    cg.addColorStop(0, look.ink.countA)
+    cg.addColorStop(1, look.ink.countB)
+    text(ctx, String(count), cx, cy + cz * 0.14, { f: font(700, cz, 'latin'), color: cg, align: 'center' })
+    if (unit) caps(ctx, unit, cx, cy + cz * 0.42, 9.92 * u, look.ink.discSoft, 'center')
+    ctx.restore()
+  }
+  // Under it: the time large, then when the run is done.
+  if (time) dialLine(ctx, P, cx, cy + (frame.fare + 32) * u, u, time, end ? ` · ${end}` : '')
+}
+
+/** The line under the dial (.tdy-dial__line): a figure at the title's
+ *  rung in the hour's ink, then the rest of it small and soft, centred
+ *  on `cx`, its baseline at `y`: the minutes and the hour they end, or
+ *  on a cleared day what the day reviewed (.tdy-recap). */
+export function dialLine(ctx, P, cx, y, u, bold, rest = '') {
+  const { look } = P
+  const tz = 20 * u
+  const ez = 13.12 * u
+  const tw = measure(ctx, bold, font(700, tz, 'latin'))
+  const ew = rest ? measure(ctx, rest, font(400, ez, 'latin')) : 0
+  const x0 = cx - (tw + ew) / 2
+  text(ctx, bold, x0, y, { f: font(700, tz, 'latin'), color: look.ink.text })
+  if (rest) text(ctx, rest, x0 + tw, y, { f: font(400, ez, 'latin'), color: look.ink.soft })
+}
+
+/** The legend under the dial on the print (LineKeys, .tdy-key--lines):
+ *  each line's ring in its pigment and its figure, the names left to a
+ *  screen reader as on a phone, the row centred on (cx, cy). `parts`
+ *  [{ color, n }]; `show(i)` each item's way in, 0 to 1 (tpr-rise). */
+export function lineKeys(ctx, P, cx, cy, u, parts, show = () => 1) {
+  const { look } = P
+  const z = 13.12 * u
+  const f = font(700, z, 'latin')
+  const ring = 10 * u
+  const widths = parts.map(q => ring + 6 * u + measure(ctx, String(q.n), f))
+  let x = cx - (widths.reduce((s, w) => s + w, 0) + 16 * u * (parts.length - 1)) / 2
+  parts.forEach((q, i) => {
+    const k = show(i)
+    if (k > 0) {
+      ctx.save()
+      ctx.globalAlpha *= k
+      ctx.translate(0, (1 - k) * 16 * u)
+      ctx.strokeStyle = q.color
+      ctx.lineWidth = 2 * u
+      ctx.beginPath()
+      ctx.arc(x + ring / 2, cy, ring / 2 - u, 0, Math.PI * 2)
+      ctx.stroke()
+      text(ctx, String(q.n), x + ring + 6 * u, cy + z * 0.36, { f, color: look.ink.text })
+      ctx.restore()
+    }
+    x += widths[i] + 16 * u
+  })
+}
+
+// ── 白文 — a cleared day's seal as the disc (CutSeal, plan 206) ──────
+// The day's 駅スタンプ cut the other way: a disc of the seal's red (the
+// dawn sun's own red at dawn) with its rings, its two rules and its
+// characters left in the slip's paper, drawn in its 192-unit box at
+// the disc's size, turned 6° back, its type the kit's rungs (index.css's
+// .tdy-dial__seal- rules). The ink's sparse voids are left out.
+const SEAL_GLOW = 0.42
+export function cutSeal(ctx, cx, cy, r, { day, foot, fill }) {
+  const washi = APP_INKS['--tpr-washi']
+  const s = (2 * r) / 192
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate((-6 * Math.PI) / 180)
+  ctx.scale(s, s)
+  ctx.translate(-96, -96)
+  ctx.fillStyle = fill
+  ctx.beginPath()
+  ctx.arc(96, 96, 96, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.strokeStyle = washi
+  for (const [rr, lw] of [[87, 3.2], [81.5, 1.2]]) {
+    ctx.lineWidth = lw
+    ctx.beginPath()
+    ctx.arc(96, 96, rr, 0, Math.PI * 2)
+    ctx.stroke()
+  }
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(96, 96, 81, 0, Math.PI * 2)
+  ctx.clip()
+  ctx.fillStyle = washi
+  ctx.fillRect(0, 127, 192, 1.5)
+  ctx.fillRect(0, 149.5, 192, 1.5)
+  ctx.restore()
+  // Each set on its centre (text-anchor middle, dominant-baseline central).
+  const mid = (str, x, y, f, tr = 0) => {
+    ctx.font = f
+    ctx.fillStyle = washi
+    ctx.textBaseline = 'middle'
+    ctx.textAlign = 'left'
+    const size = parseFloat(/([\d.]+)px/.exec(f)[1])
+    const chars = [...str]
+    const w = chars.reduce((t, c) => t + ctx.measureText(c).width + tr * size, 0)
+    let at = x - w / 2
+    for (const c of chars) {
+      ctx.fillText(c, at, y)
+      at += ctx.measureText(c).width + tr * size
+    }
+    ctx.textBaseline = 'alphabetic'
+  }
+  mid('辻駅', 97.9, 38.6, font(700, 13.12, 'jp'), 0.3)
+  mid(day, 96, 85, font(900, 72, 'serif'))
+  mid(foot, 96.8, 138.8, font(700, 11.52, 'latin'), TR_NAME)
+  ctx.restore()
 }
 
 /** The print's title plate: the date and the view's name, set downwards

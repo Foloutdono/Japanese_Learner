@@ -498,7 +498,7 @@ the Japanese as written, with furigana, or in kana.
 ## The promo stories (plan 231)
 
 宣伝, the last source, draws the app itself rather than what it teaches:
-six 9:16 stories, picked by the segments over the list (`promo.js`).
+seven 9:16 stories, picked by the segments over the list (`promo.js`).
 Each frame is drawn with the app's own parts (`app.js`): the review card
 with its stage and band, the rating bar's four keys, a question's choice
 rows, the white pass, the Depart button, the analyser's boxed sentence
@@ -507,6 +507,7 @@ and its point cards, and Today on the print of the hour.
 | Story | Picked from | Its frames |
 | --- | --- | --- |
 | The pitch | (one) | Today on its print, the four lines with their figures, how long to N5 at ten minutes a day, the gate |
+| Today (plan 291) | a word of the N5 deck, the ride's first card | the hook asked in the hour's sun, Today's screen full-bleed (the dial, the minutes, each line's share, Depart), the ride, the day stamped, the gate |
 | One card | a word of the N5 deck | the card's face, its back with the rating bar and each rating's next review, Today, the gate |
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
@@ -598,6 +599,31 @@ expectation; a test plays it back. Its sounds are the stage's press and
 the gate's; "Download the whole story" encodes it as the clips are
 encoded. No frame shows a fare: the ranked sprint's and the
 corrections' prices are left off the ticket and the result.
+
+**Today's story plays whole too (plan 291).** About twenty seconds, one
+shot after another (`promo.clips.story`): the hook, "What should I study
+today?", lands word by word in the hour's sun, close up, in the disc's
+own inks (the count's two golds, the dawn sun's cream), so it reads at
+every hour; the camera pulls back and the sun is Today's dial, the
+screen big, edge to edge, its ring's top kept where the feed's bars
+end; the lines' ring drawn round as the count rolls up, the minutes and
+the hour they end, each line's share (LineKeys), Depart risen, waiting
+and pressed, and the screen dives through the gate. The ride turns
+three cards (the picked word and the two after it, as the review card
+and the rating bar turn and rate them, each key's next review over it,
+`card-transition-enter` and `-exit`'s timings), and the print comes
+back for the day's finish as `useFinish` plays it: the lines' ring
+turned in, the seal slammed down onto the disc (`clr-slam`'s keyframes,
+`app.cutSeal`, the day's weekday and date as `dayClear.js` cuts them,
+held equal by a test), its flash, its bloom and the shake, then what
+the day reviewed. A caption on the slip's washi says what the screen
+just did, one at a time, the plate's height the tallest's; the story
+ends at the gate. Its sounds are the app's at the same moments: the
+platform's chime as the hook is asked, the board's flap as the plate
+comes in, a tick per line, the ticket gate's chime on Depart, each
+card's arrival, turn and right answer, the seal's knock and the day's
+clear. Its stills are the hook, the screen, the ride, the stamped day
+and the gate.
 
 **A story promises what the app does today.** Its figures are the
 bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
@@ -803,7 +829,7 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 234) |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
-| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281) |
+| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281), Today's (plan 291) |
 | `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281) |
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |

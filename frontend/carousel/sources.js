@@ -1098,7 +1098,7 @@ export function sampleText(pl) {
     JSON.stringify([pl.compare, pl.build, pl.list, pl.talk, pl.station, pl.figure, pl.impostor, pl.funnel]), FUNNEL_GLYPHS,
     pl.handle, 'Tsuji問題もんだい正解解答0123456789/·（　）＿★→＋＝…',
     // A promo story's words, its functions' text with them, and the print's slip.
-    ...(pl.promo ? [JSON.stringify(pl.promo), ...Object.values(pl.P).map(v => (typeof v === 'function' ? String(v) : JSON.stringify(v))), '一二三四五六七八九十月日曙帰帆落雁秋月仮語漢文辻≈½'] : []),
+    ...(pl.promo ? [JSON.stringify(pl.promo), ...Object.values(pl.P).map(v => (typeof v === 'function' ? String(v) : JSON.stringify(v))), '一二三四五六七八九十月日曙帰帆落雁秋月仮語漢文辻駅≈½'] : []),
     ...(pl.echo ? [JSON.stringify(pl.echo)] : [])]
   return [...new Set(parts.join(''))].join('')
 }
