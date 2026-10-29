@@ -889,12 +889,15 @@ describe('explaining a point in its own sentence', () => {
       ? [{ level: levels[low], share: (steps - part) / steps }, { level: levels[low + 1], share: part / steps }]
       : [{ level: levels[low], share: 1 }])
     expect(duelBank.level).toBe(levels[Math.floor((duelBank.mix + steps / 2) / steps)])
+    // A sprint asks the server's count of choices (three since plan 288).
+    const count = int(constant('study/duel_paper.py', 'CHOICES'))
+    expect(count).toBe(3)
     for (const q of duelBank.items) {
       expect(['word', 'reading', 'writing'], `${q.n}`).toContain(q.kind)
       const choices = Array.isArray(q.choices) ? [q.choices] : [q.choices.en, q.choices.fr]
       for (const c of choices) {
-        expect(c.length, `${q.n}`).toBe(4)
-        expect(new Set(c).size, `${q.n}`).toBe(4)
+        expect(c.length, `${q.n}`).toBe(count)
+        expect(new Set(c).size, `${q.n}`).toBe(count)
         expect(c[q.answer], `${q.n}`).toBeTruthy()
       }
     }

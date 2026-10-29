@@ -13,6 +13,8 @@ export const LIMIT_MS = 6_000
 const FULL_MS = 1_000
 /** A wrong answer holds the next question back this long. */
 export const LOCK_MS = 1_000
+/** A question's choices (plan 288; study/duel_paper.CHOICES). */
+export const CHOICES = 3
 
 /** What a right answer given `ms` after the question was served is worth. */
 export function points(ms) {

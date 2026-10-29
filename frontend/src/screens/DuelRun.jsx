@@ -8,6 +8,7 @@ import { CorrectionsSheet } from '../components/pvp/CorrectionsSheet'
 import { Alone, Versus } from '../components/pvp/DuelEnd'
 import { ANSWER_MS, AnswerFx, BAND_MS, Band, ComboRing, Overtake, PASS_MS, RushPill } from '../components/pvp/RaceFx'
 import { Train } from '../components/pvp/Train'
+import { Mix } from '../components/pvp/parts'
 import { apiJson } from '../lib/api'
 import { loadDuelAudio, playClick, releaseDuelAudio, startDuelRace } from '../lib/audio'
 import { LIMIT_MS, SPRINT_MS, clockOf, duelErrorKey, errorKey, points, speedNote, totalAt } from '../domain/duel'
@@ -518,28 +519,6 @@ function Question({ q, worth, share, flash, t }) {
         <span className="pvp-page__prompt">{q.prompt}</span>
       </div>
     </article>
-  )
-}
-
-/**
- * The levels a paper asks and their share (plan 286, the owner's B):
- * the paper stands where the Elo does, between two levels. A bar in the
- * ticket's own ink, the level below pale and the one above full, and
- * the shares written beside it; a whole level is its name alone.
- */
-function Mix({ mix, lang }) {
-  const words = mix.length > 1
-    ? mix.map(m => `${m.level} ${m.share.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })}`)
-    : [mix[0].level]
-  return (
-    <span className="pvp-mix">
-      {mix.length > 1 && (
-        <span className="pvp-mix__bar" aria-hidden="true">
-          {mix.map(m => <i key={m.level} className="pvp-mix__part" style={{ flexGrow: m.share }} />)}
-        </span>
-      )}
-      <span>{words.join(' · ')}</span>
-    </span>
   )
 }
 

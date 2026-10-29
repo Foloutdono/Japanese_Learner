@@ -77,3 +77,26 @@ export function DoorRow({ glyph, name, sub, figure, onClick }) {
     </div>
   )
 }
+
+/**
+ * The levels a paper asks and their share (plan 286, the owner's B):
+ * the paper stands where the Elo does, between two levels (the levels
+ * below come with them, plan 288, and are not drawn). A bar in the
+ * ticket's own ink, the level below pale and the one above full, and
+ * the shares written beside it; a whole level is its name alone.
+ */
+export function Mix({ mix, lang }) {
+  const words = mix.length > 1
+    ? mix.map(m => `${m.level} ${m.share.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })}`)
+    : [mix[0].level]
+  return (
+    <span className="pvp-mix">
+      {mix.length > 1 && (
+        <span className="pvp-mix__bar" aria-hidden="true">
+          {mix.map(m => <i key={m.level} className="pvp-mix__part" style={{ flexGrow: m.share }} />)}
+        </span>
+      )}
+      <span>{words.join(' · ')}</span>
+    </span>
+  )
+}

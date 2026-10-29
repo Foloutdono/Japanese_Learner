@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **288**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **289**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -305,7 +305,19 @@ runtime purpose.
   levels it stands between in their share, at the lower Elo of two
   friends and at a ranked player's own, whose stranger is met on a paper
   whose mix is near (half the Elo window, `duels._reach`); the declared
-  level keeps everything else in the app. The music and the sounds are scored
+  level keeps everything else in the app. A sprint question has three
+  choices (plan 288, `duel_paper.CHOICES`): a 漢字読み or 表記 item is
+  the exam's symmetric four with one wrong choice left out, the cut
+  chosen so that over a paper the key is the centre, the outlier, the
+  longest and the shortest as often as a blind pick of three
+  (`_left_out`), and `tests/test_duel_paper.py` holds the exam's margins
+  over that blind pick. A third of a paper is kanji, and each level it
+  asks brings the levels below it, in their share of the words from
+  there down, the duel's level (`level_of`) never under `OWN_FLOOR`,
+  30% (`duel_paper.shares`). The hall's platform leads to that platform
+  alone: the ranked one to its departure, the duel's ticket before it is
+  bought, read off the hall's `ranked` (`duels.departure`: the mix, the
+  first Elo window, the stake against an equal); a friend's to its sheet. The music and the sounds are scored
   to the same clock (`scripts/duel-music/`, plan 285: its 80 bars are
   sprint-2's two minutes, its rush is `RUSH_MS`, its layers turn on at the
   tiers, and `src/duelAudio.test.js` holds them to the server). A run started has
