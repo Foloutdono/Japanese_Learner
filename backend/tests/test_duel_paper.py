@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from study.duel_paper import CHOICES, ITEMS, LEVELS, PAPER_REV, blend, build_paper, level_of, mix_of, served
+from study.duel_paper import CHOICES, ITEMS, LEVELS, OWN_FLOOR, PAPER_REV, blend, build_paper, level_of, mix_of, served, shares
 from study.exam_seed import LENGTH_TELL, LIKENESS_TELL, ROTATION_TELL
 from study.exam_tells import centre, outlier
 
@@ -57,7 +57,8 @@ def test_every_item_has_three_distinct_choices_and_one_key(papers):
 
 
 def test_n1_asks_no_spelling():
-    assert all(item["kind"] != "writing" for item in build_paper(3, "N1")["items"])
+    # The exam asks no 表記 at N1; an N1 paper's spellings are the lower levels'.
+    assert all(item["kind"] != "writing" or item["level"] != "N1" for item in build_paper(3, "N1")["items"])
 
 
 def test_the_kinds_alternate(papers):
@@ -204,12 +205,12 @@ def test_a_mix_asks_each_level_its_share(mixed):
         for paper in built:
             assert paper["rev"] == PAPER_REV and paper["mix"] == mix and paper["level"] == level_of(mix)
             assert len(paper["items"]) == ITEMS
-            asked = {lv: sum(1 for item in paper["items"] if item["level"] == lv) for lv, _ in blend(mix)}
-            for lv, share in blend(mix):
+            asked = {lv: sum(1 for item in paper["items"] if item["level"] == lv) for lv, _ in shares(mix)}
+            for lv, share in shares(mix):
                 assert abs(asked[lv] - share * ITEMS) <= 2, (mix, asked)
-    # The two levels are dealt in among each other, not one after the other.
+    # The levels are dealt in among each other, not one after the other.
     levels = [item["level"] for item in mixed[17][0]["items"]]
-    assert "N4" in levels[:40] and "N4" in levels[-40:]
+    assert all(lv in levels[:40] and lv in levels[-40:] for lv in ("N5", "N4", "N3"))
     assert build_paper(42, mix=17) == build_paper(42, mix=17) != build_paper(43, mix=17)
     # A whole level's mix is that level's paper.
     assert build_paper(5, mix=20) == build_paper(5, "N3")
@@ -232,3 +233,30 @@ def test_a_mixed_paper_keeps_the_guards(mixed):
             steps += len(keys) - 1
             on += sum(b == (a + 1) % CHOICES for a, b in zip(keys, keys[1:]))
     assert on / steps <= ROTATION
+
+
+# ── The levels below, and a third kanji (plan 288) ──────────────────
+
+def test_a_paper_brings_the_levels_below_its_own_and_keeps_its_level():
+    # Each level brings the words of the levels below it, in their share
+    # of the words from there down; the duel's level keeps OWN_FLOOR.
+    assert shares(0) == [("N5", 1.0)]
+    for mix in range(0, 41):
+        parts = dict(shares(mix))
+        assert abs(sum(parts.values()) - 1) < 1e-9, mix
+        assert parts[level_of(mix)] >= OWN_FLOOR - 1e-9, (mix, parts)
+        # every level from N5 up to the blend's top is asked, nothing above
+        top = LEVELS.index(blend(mix)[-1][0])
+        assert list(parts) == list(LEVELS[: top + 1]), (mix, parts)
+    assert OWN_FLOOR == 0.3
+    for level in LEVELS:
+        built = build_paper(4, level)["items"]
+        own = sum(1 for item in built if item["level"] == level)
+        assert own >= OWN_FLOOR * ITEMS - 2, (level, own)
+
+
+def test_a_third_of_a_paper_is_kanji(papers):
+    for level in ("N5", "N4", "N3", "N2"):
+        for paper in papers[level]:
+            kanji = sum(1 for item in paper["items"] if item["kind"] != "word")
+            assert ITEMS // 3 - 6 <= kanji <= ITEMS // 3, (level, paper["seed"], kanji)

@@ -33580,35 +33580,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 /* The live room's wait, under the ticket. */
 .pvp-room__clock { font-variant-numeric: tabular-nums; color: var(--text-primary); }
 
-/* D2 — two platforms, side by side. */
-.pvp-quais { flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
-.pvp-quai {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  padding: 0 var(--sp-5) var(--sp-5);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-top: 3px solid var(--surface-line);
-  border-radius: var(--r-panel);
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
-}
-.pvp-quai--on { border-color: var(--sel-line); border-top-color: var(--gate-gold); background: var(--sel-wash); }
-/* The departure prints the platform the hall chose, alone (plan 288). */
-.pvp-quais--one { grid-template-columns: minmax(0, 1fr); }
-.pvp-quais--one .pvp-quai { cursor: default; }
-.pvp-quai__no { display: flex; align-items: baseline; gap: var(--sp-1); padding-top: var(--sp-4); }
-.pvp-quai__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.pvp-quai--on .pvp-quai__fig { color: var(--sel-ink); }
-.pvp-quai__jp { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
-.pvp-quai__title { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
-.pvp-quai__line { font-size: var(--fs-sm); line-height: 1.35; color: var(--text-secondary); }
-.pvp-quai__price { margin-top: var(--sp-3); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
-
 /* The race: the sprint as a bar, then the line (P2c), played as a game
    since plan 285 (the owner's C1, DESIGN.md "The duel"): two rails on
    their sleepers, each train the owner's T1, the leader's lead hatched
@@ -33862,7 +33833,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 @keyframes pvp-fade { 0% { opacity: 0; } 15%, 75% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .pvp-platform,
-  .pvp-quai,
   .pvp-page,
   .pvp-clock__fill { transition: none; }
   .pvp-train { transition: none; }

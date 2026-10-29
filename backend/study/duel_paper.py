@@ -8,8 +8,12 @@ with the duel. Since plan 286 (the owner's B, « le fondu ») a paper is
 built at a mix, where an Elo stands between two levels in tenths
 (mix_of: each level's starting Elo is a whole level, 200 points a
 level), and asks the two levels' words in that share: 1 180 is 0.9,
-nine questions in ten N4 and one N5. Three kinds, mixed in a fixed
-pattern so the eye cannot settle:
+nine questions in ten N4 and one N5. Since plan 288 each of those
+levels also brings the words of the levels below it, as many as their
+share of the words from there down (a speed game reads an easy word
+gladly, and a level's own kanji ran out in a few papers), never less
+than OWN_FLOOR of its own (shares). A third of the questions are kanji.
+Three kinds, mixed in a fixed pattern so the eye cannot settle:
 
   word     a word (with its reading) -> what it means, three meanings in
            the learner's language
@@ -91,13 +95,18 @@ CHOICES = 3
 # holds the next question back 300 ms, a wrong one a second, and the
 # fastest learner reads a choice in about one.
 ITEMS = 120
-PATTERN = ("word", "reading", "word", "writing", "word", "reading")
+# A third kanji (plan 288; half before): six words, two readings and one
+# spelling in nine, never three of a kind in a row, around the turn too.
+PATTERN = ("word", "reading", "word", "word", "writing", "word", "word", "reading", "word")
 # The kanji items a paper may ask, at most: a kanji is asked once in a
 # paper (exam_kanji_choices._build), and the levels' decks run out. The
 # writing items are drawn first: they need the scarcer kanji, and the
 # readings would otherwise take the ones a spelling can be asked on.
-MAX_READING = 40
-MAX_WRITING = 20
+MAX_READING = 30
+MAX_WRITING = 15
+# What a level keeps of its own questions at least, the levels below it
+# sharing the rest (plan 288, the owner's floor).
+OWN_FLOOR = 0.3
 
 # How near a wrong meaning's length must be to the right one's.
 LENGTH_BAND = (0.6, 1.6)
@@ -299,13 +308,45 @@ def level_of(mix: int) -> str:
     return LEVELS[(mix + STEPS // 2) // STEPS]
 
 
+def _downward(level: str) -> list[tuple[str, float]]:
+    """A level's questions, level by level, lower first: each level from
+    N5 up to it in its share of the words there are from there down,
+    the level itself never under OWN_FLOOR."""
+    under = LEVELS[: LEVELS.index(level) + 1]
+    sizes = {lv: len(_word_bank(lv)) for lv in under}
+    total = sum(sizes.values())
+    own = max(OWN_FLOOR, sizes[level] / total)
+    rest = total - sizes[level]
+    lower = [(lv, (1 - own) * sizes[lv] / rest) for lv in under[:-1]] if rest else []
+    return lower + [(level, own if rest else 1.0)]
+
+
+def shares(mix: int) -> list[tuple[str, float]]:
+    """Every level a mix asks and its share of the paper, lower first:
+    the blend's levels, each with the levels below it (_downward), and
+    the duel's level (level_of) never under OWN_FLOOR, the others
+    giving way in their proportions."""
+    acc: dict[str, float] = {}
+    for lv, part in blend(mix):
+        for low, share in _downward(lv):
+            acc[low] = acc.get(low, 0.0) + part * share
+    top = level_of(mix)
+    if acc[top] < OWN_FLOOR:
+        scale = (1 - OWN_FLOOR) / (1 - acc[top])
+        acc = {lv: OWN_FLOOR if lv == top else share * scale for lv, share in acc.items()}
+    return [(lv, acc[lv]) for lv in LEVELS if lv in acc]
+
+
 def _split(n: int, shares: list[tuple[str, float]]) -> dict[str, int]:
-    """n questions shared out as the mix says, the upper level's rounded."""
-    if len(shares) == 1:
-        return {shares[0][0]: n}
-    (low, _), (high, part) = shares
-    up = round(n * part)
-    return {low: n - up, high: up}
+    """n questions shared out as the shares say: each level its whole
+    part, the rest to the largest remainders, the upper level first on
+    a tie."""
+    raw = [(lv, n * share) for lv, share in shares]
+    out = {lv: int(x) for lv, x in raw}
+    order = sorted(raw, key=lambda r: (-(r[1] - int(r[1])), -LEVELS.index(r[0])))
+    for lv, _ in order[: n - sum(out.values())]:
+        out[lv] += 1
+    return out
 
 
 def build_paper(seed: int, level: str | None = None, mix: int | None = None) -> dict:
@@ -317,29 +358,29 @@ def build_paper(seed: int, level: str | None = None, mix: int | None = None) -> 
         mix = LEVELS.index(level) * STEPS
     if not 0 <= mix <= MIX_MAX:
         raise ValueError(f"unknown mix {mix!r}")
-    shares = blend(mix)
+    parts = shares(mix)
     rng = random.Random(f"duel:{PAPER_REV}:{mix}:{seed}")
     wanted = {kind: sum(1 for i in range(ITEMS) if PATTERN[i % len(PATTERN)] == kind) for kind in KINDS}
     used_words: set = set()
     used_prompts: set = set()
     tally: dict = {}
     kanji: dict[str, list] = {"writing": [], "reading": []}
-    short = {lv: 0 for lv, _ in shares}
+    short = {lv: 0 for lv, _ in parts}
     # The writing items first, every level's: they need the scarcer
     # kanji. A level that runs short (N1 asks none) makes it up in words.
     for kind, cap in (("writing", MAX_WRITING), ("reading", MAX_READING)):
-        for lv, count in _split(min(wanted[kind], cap), shares).items():
+        for lv, count in _split(min(wanted[kind], cap), parts).items():
             got = [] if kind == "writing" and lv == "N1" else _kanji_items(lv, rng, count, kind, used_words, used_prompts, tally)
             kanji[kind] += [{**item, "level": lv} for item in got]
             short[lv] += count - len(got)
         short_cap = wanted[kind] - min(wanted[kind], cap)
-        for lv, count in _split(short_cap, shares).items():
+        for lv, count in _split(short_cap, parts).items():
             short[lv] += count
     words = []
-    for lv, count in _split(wanted["word"], shares).items():
+    for lv, count in _split(wanted["word"], parts).items():
         words += [{**item, "level": lv} for item in _word_items(lv, rng, count + short[lv])]
     queues = {"word": words, "reading": kanji["reading"], "writing": kanji["writing"]}
-    # The two levels' questions dealt in among each other.
+    # The levels' questions dealt in among each other.
     for queue in queues.values():
         rng.shuffle(queue)
     items = []

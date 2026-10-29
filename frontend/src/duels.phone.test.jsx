@@ -334,12 +334,23 @@ describe('the departure (D2)', () => {
     expect($('.where').textContent).toBe('/duel/52#start')
   })
 
-  it('shows the platform the hall chose, alone: no friend’s platform to pick again (plan 288)', async () => {
-    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { elo: 1248, games: 21 } } }
+  it('prints the ranked sprint’s ticket before it is bought, read off the hall (plan 288, A)', async () => {
+    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { elo: 1248, games: 21 },
+      ranked: { mix: [{ level: 'N4', share: 0.8 }, { level: 'N3', share: 0.2 }], low: 1048, high: 1448, stake: 10 } } }
     await mountDeparture()
-    expect($$('.pvp-quai')).toHaveLength(1)
-    expect($('.pvp-quai .pvp-quai__title').textContent).toBe('Sprint classé')
-    expect($('[role="radiogroup"]')).toBeNull()
+    // The hall chose the platform: none is offered again.
+    expect($('[role="radio"]')).toBeNull()
+    expect($('.pvp-ticket').getAttribute('aria-label')).toBe('Sprint classé')
+    expect($('.clrk-tk__no').textContent).toBe('2 crédits')
+    expect($$('.pvp-ticket__level').map(n => n.textContent)).toEqual(['Elo 1\u202f248', 'Elo 1\u202f048 – 1\u202f448'])
+    const facts = $$('.pvp-ticket__fact').map(f => [f.querySelector('dt').textContent, f.querySelector('dd').textContent])
+    expect(facts).toEqual([
+      ['Niveau du duel', 'N4 80\u00a0% · N3 20\u00a0%'],
+      ['Questions', 'mots et kanji · 3 réponses'],
+      ['Durée', '2 min'],
+      ['Enjeu', '± 10 Elo'],
+    ])
+    expect($$('.pvp-mix__part')).toHaveLength(2)
     expect($('.exam-cover__go').textContent).toBe('Partir · 2 crédits')
   })
 })

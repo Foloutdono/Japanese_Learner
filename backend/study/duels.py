@@ -1361,6 +1361,22 @@ def rating(cur, me: str) -> dict:
     }
 
 
+def departure(cur, me: str, mine: dict) -> dict:
+    """What a ranked sprint would be, for the departure's ticket (plan
+    288, the owner's A): the levels its paper stands between (mix_line's
+    shape), the Elo a stranger is first looked for in, and what a duel
+    against an equal moves the Elo by, either way."""
+    elo, games = mine["elo"], mine["games"]
+    k = duel_elo.k_factor(elo, games, duel_elo.recent_results(cur, me) if games else [])
+    mix = duel_paper.mix_of(elo)
+    return {
+        "mix": [{"level": lv, "share": share} for lv, share in duel_paper.blend(mix)],
+        "low": max(duel_elo.FLOOR, elo - WINDOWS[0]),
+        "high": elo + WINDOWS[0],
+        "stake": round(k * (1 - duel_elo.expected(elo, elo))),
+    }
+
+
 def hub(cur, after: list, me: str) -> dict:
     """GET /api/pvp: the duels' hall in one call -- the Elo (before a
     first ranked sprint, the one the learner's level starts them at),
@@ -1380,8 +1396,10 @@ def hub(cur, after: list, me: str) -> dict:
         else:
             running.append(line)
     done = _named_rows(cur, me, _rows(cur, me, "d.status = 'done'", (), RECENT))
+    mine = rating(cur, me)
     return {
-        "rating": rating(cur, me),
+        "rating": mine,
+        "ranked": departure(cur, me, mine),
         "toPlay": to_play,
         "live": live_rooms,
         "running": running,

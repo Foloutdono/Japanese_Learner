@@ -311,8 +311,13 @@ runtime purpose.
   chosen so that over a paper the key is the centre, the outlier, the
   longest and the shortest as often as a blind pick of three
   (`_left_out`), and `tests/test_duel_paper.py` holds the exam's margins
-  over that blind pick. The hall's platform leads to that platform
-  alone: the ranked one to its departure, a friend's to its sheet. The music and the sounds are scored
+  over that blind pick. A third of a paper is kanji, and each level it
+  asks brings the levels below it, in their share of the words from
+  there down, the duel's level (`level_of`) never under `OWN_FLOOR`,
+  30% (`duel_paper.shares`). The hall's platform leads to that platform
+  alone: the ranked one to its departure, the duel's ticket before it is
+  bought, read off the hall's `ranked` (`duels.departure`: the mix, the
+  first Elo window, the stake against an equal); a friend's to its sheet. The music and the sounds are scored
   to the same clock (`scripts/duel-music/`, plan 285: its 80 bars are
   sprint-2's two minutes, its rush is `RUSH_MS`, its layers turn on at the
   tiers, and `src/duelAudio.test.js` holds them to the server). A run started has

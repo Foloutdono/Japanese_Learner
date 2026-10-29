@@ -1440,11 +1440,19 @@ one inside two and a half seconds.
 While the other learner has yet to run, or when the duel closed under the
 run, the learner's side stands alone and the other's reads « ? ».
 
-The ticket says what the paper asks (plan 286, the owner's B): the two
-levels the Elo stands between and their share, N5 10 % · N4 90 %, beside
-a bar in the ticket's own ink, the level below pale and the one above
-full. The ticket is the station's, so the bar is ink, never a level's
-colour; a whole level is its name alone.
+The ticket says where the paper stands (plan 286, the owner's B): the
+two levels the Elo stands between and their share, N5 10 % · N4 90 %,
+beside a bar in the ticket's own ink, the level below pale and the one
+above full. The ticket is the station's, so the bar is ink, never a
+level's colour; a whole level is its name alone. The levels below that
+a paper brings with it (plan 288) are not drawn.
+
+The ranked sprint's departure is that ticket before it is bought (plan
+288, the owner's A of the canvas « La page de départ »): you and your Elo
+⇄ « ? » and the Elo a stranger is looked for in, the level, the
+questions, the length and the Elo at stake, the price in the ticket's
+corner and on the one button. The hall chose the platform: the departure
+offers none again.
 
 **The duel is the one other place the app plays music** (the first is
 the level, below in *Rewards*). The music is R3's club music made light.
