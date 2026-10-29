@@ -141,7 +141,8 @@ describe('every platform\'s specimen on the Practice gate (plans 165, 254)', () 
       expect(w.scrollWidth, nameOf(plate)).toBeLessThanOrEqual(w.clientWidth + 1)
       expect(w.getAttribute('aria-hidden')).toBe('true')
     }
-    const [reading, comprehension, translation, dictation, composition, conversation, exam] = plates().map(well)
+    // The registry's order, its three groups (plan 290), the paper last.
+    const [reading, comprehension, dictation, translation, composition, conversation, exam] = plates().map(well)
     expect(reading.querySelector('.prc-spec__jp').textContent).toBe(CARDS.reading.N4.card.jp)
     expect(reading.querySelector('.prc-spec__clock')).not.toBeNull()
     expect(translation.querySelector('.prc-spec__prompt').textContent).toBe(CARDS.translation.N4.card.en)

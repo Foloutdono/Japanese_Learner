@@ -33,6 +33,8 @@ the widths this canvas covers.
 | `.seg`, `.seg__opt`, `.seg__opt--on`, `.seg__opt-jp`, `.seg__opt-latin`, `.seg--full`, `.seg--kaiseki` | the segmented control | `Seg` in `Console.jsx` (the profile's 番付 already drew `.seg`) |
 | `.loading`, `.loading__dot`, `.empty*` | 待合 / 空 (plan 067) | `components/ui/Loading.jsx`, `components/ui/Empty.jsx` |
 | `.platform-card--line`, `.platform-card__title-jp` | the platform card | `screens/PracticeScreen.jsx` |
+| `.prc-group`, `.prc-group__cap`, `.plate--fold`, `.prc-record*`, `.prc-resume*` | 実践の改札 — the phone's Practice gate, folded in its three groups, the last ride over them (plan 290) | `screens/PracticeScreen.jsx` (`Platforms`, `Resume`) |
+| `.prc-sheet*`, `.prc-page*`, `.prc-tk*`, `.prc-card*` | 引き上げ — the sheet a practice plate raises, a page a platform (plan 290) | `components/practice/PracticeSheet.jsx` |
 
 Tokens minted for the chrome: `--hud-h` (48px, the HUD's own height —
 it was the retired phone level bar's 36px), `--tabbar-h` (50px), and

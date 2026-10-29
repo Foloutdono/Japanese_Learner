@@ -39,12 +39,16 @@ import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 // says what the platform does, so the button's name stays the name.
 // (The painted platforms of plans 225 and 244 stood in the plates'
 // place for a while; plan 254 hung the plates again.)
+//
+// `popup` (plan 290, the phone's Practice gate) says the head opens a
+// sheet rather than a station: its aria-haspopup, so a screen reader
+// hears a dialog coming and not a page.
 
-export function Plate({ section, aside = null, meta = null, foot = null, body = null, describedBy, fill = 1, onClick, className = '', guide }) {
+export function Plate({ section, aside = null, meta = null, foot = null, body = null, describedBy, fill = 1, onClick, className = '', guide, popup }) {
   const code = stationFor(section.path).code
   return (
     <div className={`plate ${className}`.trim()} style={{ '--line-color': section.color }} data-guide={guide}>
-      <button type="button" className="plate__head" onClick={onClick} aria-describedby={describedBy}>
+      <button type="button" className="plate__head" onClick={onClick} aria-describedby={describedBy} aria-haspopup={popup}>
         <span className="pf-line__roundel plate__roundel" aria-hidden="true">{code}</span>
         <span className="plate__names">
           <span className="plate__title">{section.title}</span>

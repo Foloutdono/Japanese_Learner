@@ -10,9 +10,11 @@ import { useLang } from '../LangContext'
 // same for every learner, so it is asked once per line and language
 // for the life of the page, and kept.
 //
-// Read on the desk only: a phone never passes `enabled`, so it never
-// asks. The answer is keyed on the path, so a change of language asks
-// again rather than showing the other language's glosses.
+// Read on the desk, and on a phone by the Practice gate's sheet alone
+// (plan 290: the page in view and its neighbours, `enabled` while they
+// are), never by the gate under it. The answer is keyed on the path, so
+// a change of language asks again rather than showing the other
+// language's glosses.
 const answers = new Map()
 const asked = new Set()
 const listeners = new Set()

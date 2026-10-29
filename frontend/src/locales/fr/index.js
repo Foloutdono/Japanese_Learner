@@ -2819,6 +2819,15 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}\u00a0% justes`,
   practiceNotYet: 'Pas encore',
+  // Le portique de Pratique au téléphone (plan 290) : les exercices en
+  // trois groupes, le dernier trajet à reprendre, et la feuille qu'une
+  // plaque lève, une page par exercice.
+  practiceGroups: { understand: 'Comprendre', express: 'S’exprimer', test: 'S’évaluer' },
+  practiceResume: 'Reprendre',
+  practiceSheet: 'Exercices',
+  practicePct: pct => `${pct}\u00a0%`,
+  practiceAllPapers: 'Toutes les épreuves',
+  practiceAllScenes: 'Toutes les scènes',
   // ── La station de pratique, au bureau (plan 159) ─────────────
   // La source en interrupteur en tête de la liste (les grades JLPT, la
   // fréquence, tes cartes), puis la page de l'arrêt ouvert : ce que
