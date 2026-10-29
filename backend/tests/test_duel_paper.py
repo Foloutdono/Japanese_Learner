@@ -13,9 +13,16 @@ from pathlib import Path
 
 import pytest
 
-from study.duel_paper import ITEMS, LEVELS, PAPER_REV, blend, build_paper, level_of, mix_of, served
+from study.duel_paper import CHOICES, ITEMS, LEVELS, OWN_FLOOR, PAPER_REV, blend, build_paper, level_of, mix_of, served, shares
 from study.exam_seed import LENGTH_TELL, LIKENESS_TELL, ROTATION_TELL
-from study.exam_tells import centre, outlier, tell
+from study.exam_tells import centre, outlier
+
+# A sprint asks three choices (plan 288): the exam's margins over a blind
+# pick of four, held over a blind pick of three.
+BLIND = 1 / CHOICES
+LENGTH = (BLIND - (0.25 - LENGTH_TELL[0]), BLIND + (LENGTH_TELL[1] - 0.25))
+LIKENESS = BLIND + (LIKENESS_TELL - 0.25)
+ROTATION = BLIND + (ROTATION_TELL - 0.25)
 
 BACKEND = Path(__file__).resolve().parent.parent
 # Enough papers to measure a rate, few enough to stay quick.
@@ -38,18 +45,20 @@ def test_a_paper_is_full_and_says_its_revision(papers):
             assert len(paper["items"]) == ITEMS, (level, paper["seed"])
 
 
-def test_every_item_has_four_distinct_choices_and_one_key(papers):
+def test_every_item_has_three_distinct_choices_and_one_key(papers):
+    assert CHOICES == 3
     for built in papers.values():
         for paper in built:
             for item in paper["items"]:
                 for lang in (("fr", "en") if item["kind"] == "word" else ("fr",)):
                     texts = _texts(item, lang)
-                    assert len(texts) == 4 and len(set(texts)) == 4, item
-                assert 0 <= item["answer"] < 4
+                    assert len(texts) == 3 and len(set(texts)) == 3, item
+                assert 0 <= item["answer"] < 3
 
 
 def test_n1_asks_no_spelling():
-    assert all(item["kind"] != "writing" for item in build_paper(3, "N1")["items"])
+    # The exam asks no 表記 at N1; an N1 paper's spellings are the lower levels'.
+    assert all(item["kind"] != "writing" or item["level"] != "N1" for item in build_paper(3, "N1")["items"])
 
 
 def test_the_kinds_alternate(papers):
@@ -61,15 +70,28 @@ def test_the_kinds_alternate(papers):
         assert all(len({kinds[i], kinds[i + 1], kinds[i + 2]}) > 1 for i in range(0, 20))
 
 
+def _look_rates(items):
+    """How often the centre and the outlier of three kana or kanji
+    choices, where one choice alone is it, is the key."""
+    out = {}
+    for name, role in (("centre", centre), ("outlier", outlier)):
+        who = [(role(item["choices"]), item["answer"]) for item in items if item["kind"] != "word"]
+        who = [(w, a) for w, a in who if w is not None]
+        out[name] = (sum(w == a for w, a in who) / len(who), len(who)) if who else (BLIND, 0)
+    return out
+
+
 def test_no_japanese_choice_set_gives_its_key_away(papers):
-    for built in papers.values():
-        for paper in built:
-            for item in paper["items"]:
-                if item["kind"] == "word":
-                    continue
-                choices = item["choices"]
-                assert tell(choices) is None, item
-                assert item["answer"] not in (centre(choices), outlier(choices)), item
+    # Three choices always have a centre: the cut from the exam's four is
+    # what keeps the key the centre, or the outlier, no more often than a
+    # blind pick would find it (duel_paper._left_out).
+    for level, built in papers.items():
+        rates = _look_rates([item for paper in built for item in paper["items"]])
+        rate, n = rates["centre"]
+        assert n < 40 or 2 * BLIND - LIKENESS <= rate <= LIKENESS, (level, rates)
+    every = [item for built in papers.values() for paper in built for item in paper["items"]]
+    for name, (rate, n) in _look_rates(every).items():
+        assert 2 * BLIND - LIKENESS <= rate <= LIKENESS, (name, rate, n)
 
 
 def test_a_word_is_never_asked_against_a_meaning_it_shares_a_word_with(papers):
@@ -98,7 +120,7 @@ def _rates(items, lang):
 
 @pytest.mark.parametrize("level", ["N5", "N4", "N3"])
 def test_length_says_nothing(papers, level):
-    low, high = LENGTH_TELL
+    low, high = LENGTH
     items = [item for paper in papers[level] for item in paper["items"]]
     words = [item for item in items if item["kind"] == "word"]
     for lang in ("fr", "en"):
@@ -106,26 +128,12 @@ def test_length_says_nothing(papers, level):
         assert low <= longest <= high and low <= shortest <= high, (level, lang, longest, shortest)
     kanji = [item for item in items if item["kind"] != "word"]
     longest, shortest = _rates(kanji, "fr")
-    assert longest <= high and shortest <= high, (level, longest, shortest)
-
-
-@pytest.mark.parametrize("level", ["N5", "N4", "N3"])
-def test_likeness_says_nothing(papers, level):
-    items = hits = 0
-    for paper in papers[level]:
-        for item in paper["items"]:
-            if item["kind"] == "word":
-                continue
-            middle = centre(item["choices"])
-            if middle is not None:
-                items += 1
-                hits += middle == item["answer"]
-    assert items == 0 or hits / items <= LIKENESS_TELL
+    assert low <= longest <= high and low <= shortest <= high, (level, longest, shortest)
 
 
 @pytest.mark.parametrize("level", ["N5", "N4", "N3"])
 def test_the_keys_spread_over_the_slots_without_stepping(papers, level):
-    slots = [0, 0, 0, 0]
+    slots = [0] * CHOICES
     steps = on = 0
     for paper in papers[level]:
         keys = [item["answer"] for item in paper["items"]]
@@ -133,10 +141,10 @@ def test_the_keys_spread_over_the_slots_without_stepping(papers, level):
             slots[k] += 1
         for a, b in zip(keys, keys[1:]):
             steps += 1
-            on += b == (a + 1) % 4
+            on += b == (a + 1) % CHOICES
     total = sum(slots)
-    assert all(0.18 <= n / total <= 0.32 for n in slots), slots
-    assert on / steps <= ROTATION_TELL
+    assert all(BLIND - 0.07 <= n / total <= BLIND + 0.07 for n in slots), slots
+    assert on / steps <= ROTATION
 
 
 def test_a_served_question_carries_no_key():
@@ -197,24 +205,23 @@ def test_a_mix_asks_each_level_its_share(mixed):
         for paper in built:
             assert paper["rev"] == PAPER_REV and paper["mix"] == mix and paper["level"] == level_of(mix)
             assert len(paper["items"]) == ITEMS
-            asked = {lv: sum(1 for item in paper["items"] if item["level"] == lv) for lv, _ in blend(mix)}
-            for lv, share in blend(mix):
+            asked = {lv: sum(1 for item in paper["items"] if item["level"] == lv) for lv, _ in shares(mix)}
+            for lv, share in shares(mix):
                 assert abs(asked[lv] - share * ITEMS) <= 2, (mix, asked)
-    # The two levels are dealt in among each other, not one after the other.
+    # The levels are dealt in among each other, not one after the other.
     levels = [item["level"] for item in mixed[17][0]["items"]]
-    assert "N4" in levels[:40] and "N4" in levels[-40:]
+    assert all(lv in levels[:40] and lv in levels[-40:] for lv in ("N5", "N4", "N3"))
     assert build_paper(42, mix=17) == build_paper(42, mix=17) != build_paper(43, mix=17)
     # A whole level's mix is that level's paper.
     assert build_paper(5, mix=20) == build_paper(5, "N3")
 
 
 def test_a_mixed_paper_keeps_the_guards(mixed):
-    low, high = LENGTH_TELL
+    low, high = LENGTH
     items = [item for built in mixed.values() for paper in built for item in paper["items"]]
-    for item in items:
-        if item["kind"] != "word":
-            assert tell(item["choices"]) is None, item
-            assert item["answer"] not in (centre(item["choices"]), outlier(item["choices"])), item
+    assert all(len(_texts(item)) == CHOICES for item in items)
+    for name, (rate, n) in _look_rates(items).items():
+        assert 2 * BLIND - LIKENESS <= rate <= LIKENESS, (name, rate, n)
     words = [item for item in items if item["kind"] == "word"]
     for lang in ("fr", "en"):
         longest, shortest = _rates(words, lang)
@@ -224,5 +231,32 @@ def test_a_mixed_paper_keeps_the_guards(mixed):
         for paper in built:
             keys = [item["answer"] for item in paper["items"]]
             steps += len(keys) - 1
-            on += sum(b == (a + 1) % 4 for a, b in zip(keys, keys[1:]))
-    assert on / steps <= ROTATION_TELL
+            on += sum(b == (a + 1) % CHOICES for a, b in zip(keys, keys[1:]))
+    assert on / steps <= ROTATION
+
+
+# ── The levels below, and a third kanji (plan 288) ──────────────────
+
+def test_a_paper_brings_the_levels_below_its_own_and_keeps_its_level():
+    # Each level brings the words of the levels below it, in their share
+    # of the words from there down; the duel's level keeps OWN_FLOOR.
+    assert shares(0) == [("N5", 1.0)]
+    for mix in range(0, 41):
+        parts = dict(shares(mix))
+        assert abs(sum(parts.values()) - 1) < 1e-9, mix
+        assert parts[level_of(mix)] >= OWN_FLOOR - 1e-9, (mix, parts)
+        # every level from N5 up to the blend's top is asked, nothing above
+        top = LEVELS.index(blend(mix)[-1][0])
+        assert list(parts) == list(LEVELS[: top + 1]), (mix, parts)
+    assert OWN_FLOOR == 0.3
+    for level in LEVELS:
+        built = build_paper(4, level)["items"]
+        own = sum(1 for item in built if item["level"] == level)
+        assert own >= OWN_FLOOR * ITEMS - 2, (level, own)
+
+
+def test_a_third_of_a_paper_is_kanji(papers):
+    for level in ("N5", "N4", "N3", "N2"):
+        for paper in papers[level]:
+            kanji = sum(1 for item in paper["items"] if item["kind"] != "word")
+            assert ITEMS // 3 - 6 <= kanji <= ITEMS // 3, (level, paper["seed"], kanji)

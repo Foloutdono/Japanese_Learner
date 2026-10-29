@@ -40,7 +40,8 @@ def test_a_right_answer_is_worth_less_as_time_passes():
 def test_the_client_draws_the_same_curve():
     js = FRONTEND.read_text()
     for name, value in (("SPRINT_MS", duels.SPRINT_MS), ("LIMIT_MS", duels.LIMIT_MS),
-                        ("LOCK_MS", duels.LOCK_MS), ("FULL_MS", duels.FULL_MS)):
+                        ("LOCK_MS", duels.LOCK_MS), ("FULL_MS", duels.FULL_MS),
+                        ("CHOICES", duel_paper.CHOICES)):
         m = re.search(rf"const {name} = ([\d_]+)", js)
         assert m and int(m.group(1).replace("_", "")) == value, name
 
@@ -464,11 +465,19 @@ def test_a_ranked_paper_stands_where_the_elo_does(client, learners, clock):
         place(uid)
     for uid, elo in ((A, 1180), (B, 1240), (C, 1560)):
         sql("UPDATE pvp_ratings SET rating = %s WHERE user_id = %s", (elo, uid))
+    # The departure's ticket reads the same mix before the run (plan 288),
+    # with the window a stranger is looked for in and the Elo at stake.
+    ranked = client.get("/api/pvp").json()["ranked"]
+    assert ranked == {"mix": [{"level": "N5", "share": 0.1}, {"level": "N4", "share": 0.9}],
+                      "low": 980, "high": 1380, "stake": duel_elo.K_PROVISIONAL // 2}
     first = _ranked(client, A)
     cover = client.get(f"/api/pvp/duels/{first['id']}").json()
     assert cover["level"] == "N4"
-    assert cover["mix"] == [{"level": "N5", "share": 0.1}, {"level": "N4", "share": 0.9}]
-    assert sum(1 for item in duel_paper_of(first["id"])["items"] if item["level"] == "N4") == 108
+    assert cover["mix"] == ranked["mix"]
+    # Each level brings the levels below it, the duel's own kept (plan 288).
+    items = duel_paper_of(first["id"])["items"]
+    for lv, share in duel_paper.shares(9):
+        assert abs(sum(1 for item in items if item["level"] == lv) - share * duel_paper.ITEMS) <= 2, lv
     play(client, clock, A, first["id"], [(1000, True)] * 3)
     # 1 560 is within the widest Elo window of 1 180, but its paper would
     # stand two levels off (N3 · N2): it is not dealt A's run.

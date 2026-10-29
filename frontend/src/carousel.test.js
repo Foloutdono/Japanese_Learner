@@ -867,12 +867,15 @@ describe('explaining a point in its own sentence', () => {
     const xp = read('../backend/srs/xp.py')
     const paid = q => Number(xp.match(new RegExp(`^\\s+${q}: (\\d+),`, 'm'))[1])
     expect(duelBank.xp).toMatchObject({ right: paid(4), wrong: paid(1) })
+    // A sprint asks the server's count of choices (three since plan 288).
+    const count = int(constant('study/duel_paper.py', 'CHOICES'))
+    expect(count).toBe(3)
     for (const q of duelBank.items) {
       expect(['word', 'reading', 'writing'], `${q.n}`).toContain(q.kind)
       const choices = Array.isArray(q.choices) ? [q.choices] : [q.choices.en, q.choices.fr]
       for (const c of choices) {
-        expect(c.length, `${q.n}`).toBe(4)
-        expect(new Set(c).size, `${q.n}`).toBe(4)
+        expect(c.length, `${q.n}`).toBe(count)
+        expect(new Set(c).size, `${q.n}`).toBe(count)
         expect(c[q.answer], `${q.n}`).toBeTruthy()
       }
     }

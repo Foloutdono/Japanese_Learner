@@ -8,10 +8,14 @@ with the duel. Since plan 286 (the owner's B, « le fondu ») a paper is
 built at a mix, where an Elo stands between two levels in tenths
 (mix_of: each level's starting Elo is a whole level, 200 points a
 level), and asks the two levels' words in that share: 1 180 is 0.9,
-nine questions in ten N4 and one N5. Three kinds, mixed in a fixed
-pattern so the eye cannot settle:
+nine questions in ten N4 and one N5. Since plan 288 each of those
+levels also brings the words of the levels below it, as many as their
+share of the words from there down (a speed game reads an easy word
+gladly, and a level's own kanji ran out in a few papers), never less
+than OWN_FLOOR of its own (shares). A third of the questions are kanji.
+Three kinds, mixed in a fixed pattern so the eye cannot settle:
 
-  word     a word (with its reading) -> what it means, four meanings in
+  word     a word (with its reading) -> what it means, three meanings in
            the learner's language
   reading  a word written in kanji -> its reading (the mock exam's
            漢字読み)
@@ -19,7 +23,8 @@ pattern so the eye cannot settle:
            never at N1, where the exam asks none
 
 Grammar and sentences are not asked: a sentence is not read in six
-seconds.
+seconds. Since plan 288 a question has three choices, not the exam's
+four: a sprint is speed, and a fourth line is a second's reading more.
 
 build_paper is a pure function of (seed, mix, content): no model, no
 database, and nothing that iterates a set before a seeded random touches
@@ -29,24 +34,32 @@ rule, tests/test_duel_paper.py builds it under two hash seeds).
 The guards are the exam's, for the reason the exam has them: a choice
 must be told apart by understanding, never by its look.
 
-  - word: the three wrong meanings are words of the same category (a
+  - word: the two wrong meanings are words of the same category (a
     verb's « to … » among nouns is found without reading), share no
     content word with the right one, have the same gloss shape, and a
     length near the right one's in both languages; the word is shown in
     kana when it is written with a kanji the level has not taught.
   - reading, writing: study/exam_kanji_choices' own builders, under the
     duel's seed -- the readings the course's words give a kanji, a
-    symmetric set, the key neither the centre nor the outlier.
-  - over many papers (the tests): the longest and the shortest choice
-    win no more than a blind pick would (exam_seed.LENGTH_TELL), the
-    keys spread over the four slots without stepping through them.
+    symmetric set of four, the key neither the centre nor the outlier,
+    of which one wrong choice is left out. Three choices always have a
+    centre, so no cut is fair alone; the cut is chosen so that over the
+    paper the key is the centre, the outlier, the longest and the
+    shortest about one time in three, as a blind pick would be
+    (_left_out). Left out at random, the exam's filter, which keeps the
+    key in the middle of four, made it the centre of three 43% of the
+    time at N2.
+  - over many papers (the tests): the longest, the shortest, the centre
+    and the outlier win no more than a blind pick of three would, the
+    keys spread over the three slots without stepping through them.
 
 PAPER_REV is the output's revision (CLAUDE.md, "Bump the revision when
 the output changes"): a duel stores the paper it was built with, and the
 rev it was built under. The duel's rules go with the rev too
 (study/duels): sprint-2's runs are two minutes long (plan 284) and pay
 a streak and the last seconds more (plan 285); sprint-3's papers are
-mixes (plan 286), with the same rules.
+mixes (plan 286), sprint-4's ask three choices (plan 288), with the same
+rules.
 """
 from __future__ import annotations
 
@@ -59,12 +72,13 @@ from content.vocab_extras import word_category
 from study import exam_kanji_choices as kc
 from study.duel_elo import START
 from study.exam_gen_utils import GenerationFailed
+from study.exam_tells import centre, outlier
 from study.exam_vocab_gen import _content_words, _display, _first_reading
 from study.mcq import meaning_key
 from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
 
-PAPER_REV = "sprint-3"
+PAPER_REV = "sprint-4"
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 # A mix is in tenths of a level above N5: 0 all N5, 9 a tenth N5 and
 # nine tenths N4, 40 all N1.
@@ -74,18 +88,25 @@ MIX_MAX = (len(LEVELS) - 1) * STEPS
 # whole level, 200 points above the last.
 ELO_STEP = (START["N4"] - START["N5"]) // STEPS
 KINDS = ("word", "reading", "writing")
+# A question's choices (plan 288): the right one and two wrong.
+CHOICES = 3
 
 # More than anyone answers in the sprint's two minutes: a right answer
 # holds the next question back 300 ms, a wrong one a second, and the
 # fastest learner reads a choice in about one.
 ITEMS = 120
-PATTERN = ("word", "reading", "word", "writing", "word", "reading")
+# A third kanji (plan 288; half before): six words, two readings and one
+# spelling in nine, never three of a kind in a row, around the turn too.
+PATTERN = ("word", "reading", "word", "word", "writing", "word", "word", "reading", "word")
 # The kanji items a paper may ask, at most: a kanji is asked once in a
 # paper (exam_kanji_choices._build), and the levels' decks run out. The
 # writing items are drawn first: they need the scarcer kanji, and the
 # readings would otherwise take the ones a spelling can be asked on.
-MAX_READING = 40
-MAX_WRITING = 20
+MAX_READING = 30
+MAX_WRITING = 15
+# What a level keeps of its own questions at least, the levels below it
+# sharing the rest (plan 288, the owner's floor).
+OWN_FLOOR = 0.3
 
 # How near a wrong meaning's length must be to the right one's.
 LENGTH_BAND = (0.6, 1.6)
@@ -144,9 +165,9 @@ def _word_bank(level: str) -> tuple[dict, ...]:
 
 
 def word_item(entry: dict, bank: tuple[dict, ...], level: str, rng: random.Random) -> dict | None:
-    """The word -> its meaning, or None when three fair wrong meanings
+    """The word -> its meaning, or None when two fair wrong meanings
     cannot be found."""
-    # Four meanings that differ in both languages: "thank you" and
+    # Meanings that differ in both languages: "thank you" and
     # "thanks" are two English glosses and one French « merci ».
     seen, seen_fr = {entry["key"]}, {entry["key_fr"]}
     candidates = []
@@ -162,9 +183,9 @@ def word_item(entry: dict, bank: tuple[dict, ...], level: str, rng: random.Rando
         seen.add(other["key"])
         seen_fr.add(other["key_fr"])
         candidates.append(other)
-    if len(candidates) < 3:
+    if len(candidates) < CHOICES - 1:
         return None
-    wrong = rng.sample(candidates, 3)
+    wrong = rng.sample(candidates, CHOICES - 1)
     options = [entry] + wrong
     rng.shuffle(options)
     word = entry["word"]
@@ -194,7 +215,7 @@ def _word_items(level: str, rng: random.Random, count: int) -> list[dict]:
 
 
 def _kanji_items(level: str, rng: random.Random, count: int, kind: str,
-                 used_words: set, used_prompts: set) -> list[dict]:
+                 used_words: set, used_prompts: set, tally: dict) -> list[dict]:
     """漢字読み or 表記 through the mock exam's builders, as many as the
     level holds up to `count`."""
     if count <= 0:
@@ -214,14 +235,57 @@ def _kanji_items(level: str, rng: random.Random, count: int, kind: str,
             continue
         used_words |= words
         used_prompts |= prompts
-        return [{
-            "kind": kind,
-            "prompt": q["promptJp"],
-            "reading": None,
-            "choices": [c["textJp"] for c in q["choices"]],
-            "answer": next(i for i, c in enumerate(q["choices"]) if c["id"] == q["answer"]),
-        } for q in mondai["questions"]]
+        out = []
+        for q in mondai["questions"]:
+            texts = [c["textJp"] for c in q["choices"]]
+            right = texts[next(i for i, c in enumerate(q["choices"]) if c["id"] == q["answer"])]
+            choices = _left_out(texts, right, rng, tally)
+            out.append({"kind": kind, "prompt": q["promptJp"], "reading": None,
+                        "choices": choices, "answer": choices.index(right)})
+        return out
     return []
+
+
+# What the eye can read in three choices: the one most like the others,
+# the one least like them, the longest and the shortest (each where one
+# choice alone is it).
+def _roles(kept: list[str]) -> dict[str, int | None]:
+    sizes = [len(t) for t in kept]
+
+    def alone(size: int) -> int | None:
+        return sizes.index(size) if sizes.count(size) == 1 else None
+
+    return {"centre": centre(kept), "outlier": outlier(kept),
+            "longest": alone(max(sizes)), "shortest": alone(min(sizes))}
+
+
+def _left_out(texts: list[str], right: str, rng: random.Random, tally: dict) -> list[str]:
+    """The exam's four choices cut to CHOICES, the wrong one left out
+    chosen so that, over the paper, each role in _roles falls to the key
+    as often as to a blind pick: the cut that keeps `tally` (role ->
+    [times the key had it, times one choice had it]) nearest one in
+    three, a tie drawn at random."""
+    wrong = sorted(t for t in texts if t != right)
+
+    def after(drop: str) -> dict:
+        kept = [right] + [t for t in wrong if t != drop]
+        out = {}
+        for role, who in _roles(kept).items():
+            hits, n = tally.get(role, (0, 0))
+            if who is not None:
+                hits, n = hits + (who == 0), n + 1
+            out[role] = (hits, n)
+        return out
+
+    def cost(drop: str) -> float:
+        return sum(abs(hits - n / CHOICES) for hits, n in after(drop).values())
+
+    best = min(cost(d) for d in wrong)
+    drop = rng.choice([d for d in wrong if cost(d) - best < 1e-9])
+    tally.update(after(drop))
+    kept = [right] + [t for t in wrong if t != drop]
+    rng.shuffle(kept)
+    return kept
 
 
 def mix_of(elo: float) -> int:
@@ -244,13 +308,45 @@ def level_of(mix: int) -> str:
     return LEVELS[(mix + STEPS // 2) // STEPS]
 
 
+def _downward(level: str) -> list[tuple[str, float]]:
+    """A level's questions, level by level, lower first: each level from
+    N5 up to it in its share of the words there are from there down,
+    the level itself never under OWN_FLOOR."""
+    under = LEVELS[: LEVELS.index(level) + 1]
+    sizes = {lv: len(_word_bank(lv)) for lv in under}
+    total = sum(sizes.values())
+    own = max(OWN_FLOOR, sizes[level] / total)
+    rest = total - sizes[level]
+    lower = [(lv, (1 - own) * sizes[lv] / rest) for lv in under[:-1]] if rest else []
+    return lower + [(level, own if rest else 1.0)]
+
+
+def shares(mix: int) -> list[tuple[str, float]]:
+    """Every level a mix asks and its share of the paper, lower first:
+    the blend's levels, each with the levels below it (_downward), and
+    the duel's level (level_of) never under OWN_FLOOR, the others
+    giving way in their proportions."""
+    acc: dict[str, float] = {}
+    for lv, part in blend(mix):
+        for low, share in _downward(lv):
+            acc[low] = acc.get(low, 0.0) + part * share
+    top = level_of(mix)
+    if acc[top] < OWN_FLOOR:
+        scale = (1 - OWN_FLOOR) / (1 - acc[top])
+        acc = {lv: OWN_FLOOR if lv == top else share * scale for lv, share in acc.items()}
+    return [(lv, acc[lv]) for lv in LEVELS if lv in acc]
+
+
 def _split(n: int, shares: list[tuple[str, float]]) -> dict[str, int]:
-    """n questions shared out as the mix says, the upper level's rounded."""
-    if len(shares) == 1:
-        return {shares[0][0]: n}
-    (low, _), (high, part) = shares
-    up = round(n * part)
-    return {low: n - up, high: up}
+    """n questions shared out as the shares say: each level its whole
+    part, the rest to the largest remainders, the upper level first on
+    a tie."""
+    raw = [(lv, n * share) for lv, share in shares]
+    out = {lv: int(x) for lv, x in raw}
+    order = sorted(raw, key=lambda r: (-(r[1] - int(r[1])), -LEVELS.index(r[0])))
+    for lv, _ in order[: n - sum(out.values())]:
+        out[lv] += 1
+    return out
 
 
 def build_paper(seed: int, level: str | None = None, mix: int | None = None) -> dict:
@@ -262,28 +358,29 @@ def build_paper(seed: int, level: str | None = None, mix: int | None = None) -> 
         mix = LEVELS.index(level) * STEPS
     if not 0 <= mix <= MIX_MAX:
         raise ValueError(f"unknown mix {mix!r}")
-    shares = blend(mix)
+    parts = shares(mix)
     rng = random.Random(f"duel:{PAPER_REV}:{mix}:{seed}")
     wanted = {kind: sum(1 for i in range(ITEMS) if PATTERN[i % len(PATTERN)] == kind) for kind in KINDS}
     used_words: set = set()
     used_prompts: set = set()
+    tally: dict = {}
     kanji: dict[str, list] = {"writing": [], "reading": []}
-    short = {lv: 0 for lv, _ in shares}
+    short = {lv: 0 for lv, _ in parts}
     # The writing items first, every level's: they need the scarcer
     # kanji. A level that runs short (N1 asks none) makes it up in words.
     for kind, cap in (("writing", MAX_WRITING), ("reading", MAX_READING)):
-        for lv, count in _split(min(wanted[kind], cap), shares).items():
-            got = [] if kind == "writing" and lv == "N1" else _kanji_items(lv, rng, count, kind, used_words, used_prompts)
+        for lv, count in _split(min(wanted[kind], cap), parts).items():
+            got = [] if kind == "writing" and lv == "N1" else _kanji_items(lv, rng, count, kind, used_words, used_prompts, tally)
             kanji[kind] += [{**item, "level": lv} for item in got]
             short[lv] += count - len(got)
         short_cap = wanted[kind] - min(wanted[kind], cap)
-        for lv, count in _split(short_cap, shares).items():
+        for lv, count in _split(short_cap, parts).items():
             short[lv] += count
     words = []
-    for lv, count in _split(wanted["word"], shares).items():
+    for lv, count in _split(wanted["word"], parts).items():
         words += [{**item, "level": lv} for item in _word_items(lv, rng, count + short[lv])]
     queues = {"word": words, "reading": kanji["reading"], "writing": kanji["writing"]}
-    # The two levels' questions dealt in among each other.
+    # The levels' questions dealt in among each other.
     for queue in queues.values():
         rng.shuffle(queue)
     items = []
