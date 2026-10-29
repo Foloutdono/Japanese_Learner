@@ -8,7 +8,8 @@ is apart from the 番付's XP -- the XP pays study, the Elo ranks sprints
 
   - It starts from the learner's level when their first ranked sprint
     is dealt (core/user_level.resolve_level, the level they study at):
-    N5 1000, N4 1200, N3 1400, N2 1600, N1 1800, written then and once,
+    N5 1000, N4 1200, N3 1400, N2 1600, N1 1800 (the beginner's stop,
+    a learner riding to the kana, 800 since plan 289), written then and once,
     so a level moved later leaves the Elo where its duels took it. No
     test is asked first (plan 282, the owner's call: the placement test
     was friction on the way to a first sprint). A start too high costs a
@@ -26,7 +27,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-START = {"N5": 1000, "N4": 1200, "N3": 1400, "N2": 1600, "N1": 1800}
+# The beginner's stop (plan 289): a learner riding to the kana (their
+# goal is core/user_level.NOVICE_GOAL) starts a level under N5.
+NOVICE = "novice"
+START = {"novice": 800, "N5": 1000, "N4": 1200, "N3": 1400, "N2": 1600, "N1": 1800}
 K_PROVISIONAL = 40
 K_SETTLED = 20
 PROVISIONAL = 15

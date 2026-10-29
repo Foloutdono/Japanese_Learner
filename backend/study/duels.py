@@ -65,7 +65,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from core import credits, events
-from core.user_level import resolve_level
+from core.user_level import NOVICE_GOAL, resolve_level
 from study import duel_elo, duel_friends as friends, duel_paper
 from study.duel_friends import Refused
 
@@ -74,11 +74,12 @@ logger = logging.getLogger(__name__)
 # A sprint's length goes with its paper (plan 284): a duel keeps the
 # paper it was dealt and the time that came with it, so a sprint-1 duel
 # still open when the two minutes came in is run, and raced, in one.
-SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000, "sprint-3": 120_000, "sprint-4": 120_000}
+SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000, "sprint-3": 120_000, "sprint-4": 120_000,
+                    "sprint-5": 120_000}
 SPRINT_MS = SPRINT_MS_BY_REV[duel_paper.PAPER_REV]
 # And so does the way an answer is scored (plan 285): sprint-2's runs
 # pay a streak and the last seconds more, sprint-1's pay speed alone.
-COMBO_REVS = frozenset({"sprint-2", "sprint-3", "sprint-4"})
+COMBO_REVS = frozenset({"sprint-2", "sprint-3", "sprint-4", "sprint-5"})
 # (right answers in a row, the multiplier from there on)
 COMBO_TIERS = ((5, 1.5), (10, 2.0), (20, 3.0))
 RUSH_MS = 15_000
@@ -601,10 +602,23 @@ def _fresh_paper(mix: int) -> tuple[int, dict]:
     return seed, duel_paper.build_paper(seed, mix=mix)
 
 
+def duel_level(cur, user_id: str) -> str:
+    """The stop a learner's duels start from: their level, or the
+    beginner's (plan 289) when they ride to the kana -- their goal is the
+    novice's stop, which only an N5 learner can hold."""
+    level = resolve_level(user_id)
+    if level == "N5":
+        cur.execute("SELECT goal_level FROM user_profiles WHERE user_id = %s", (user_id,))
+        row = cur.fetchone()
+        if row and row[0] == NOVICE_GOAL:
+            return duel_elo.NOVICE
+    return level
+
+
 def _elo_of(cur, user_id: str) -> int:
     """A learner's Elo, or the one their level would start them at."""
     row = duel_elo.rating_row(cur, user_id)
-    return row["rating"] if row else duel_elo.START[resolve_level(user_id)]
+    return row["rating"] if row else duel_elo.START[duel_level(cur, user_id)]
 
 
 def mix_line(duel: dict) -> list[dict] | None:
@@ -757,7 +771,7 @@ def ranked(cur, after: list, me: str) -> tuple[int, str]:
     second press while a seat waits unstarted finds that seat. A first
     one starts the learner's Elo, from their level, with no test asked
     first (plan 282)."""
-    level = resolve_level(me)
+    level = duel_level(cur, me)
     rating, started = duel_elo.start(cur, me, level)
     if started:
         events.record(me, "pvp_placed", {"level": rating["placed_level"]}, cur=cur)
@@ -849,7 +863,7 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
     duel, entries, mine, now = _settled(cur, after, me, duel_id)
     other = _other(entries, me)
     named = names(cur, me, [e["user_id"] for e in entries])
-    levels = {e["user_id"]: resolve_level(e["user_id"]) for e in entries if e["role"] != "ghost"}
+    levels = {e["user_id"]: duel_level(cur, e["user_id"]) for e in entries if e["role"] != "ghost"}
     them = None
     if other is not None:
         rated = friends.ratings(cur, [other["user_id"]]).get(other["user_id"]) or {}
@@ -1329,7 +1343,7 @@ def rating(cur, me: str) -> dict:
     the Elo their level starts them at, written by none (plan 282)."""
     row = duel_elo.rating_row(cur, me)
     if row is None:
-        level = resolve_level(me)
+        level = duel_level(cur, me)
         start = duel_elo.START[level]
         return {
             "elo": start, "provisional": True, "games": 0, "wins": 0, "draws": 0, "losses": 0,
@@ -1503,6 +1517,6 @@ def board(cur, me: str, scope: str, offset: int, limit: int, around: int) -> dic
             out["near"] = [row(k) for k in range(max(1, my_rank - around), min(of, my_rank + around) + 1)]
     else:
         mine = duel_elo.rating_row(cur, me)
-        out["me"] = {"rank": None, "elo": mine["rating"] if mine else duel_elo.START[resolve_level(me)],
+        out["me"] = {"rank": None, "elo": mine["rating"] if mine else duel_elo.START[duel_level(cur, me)],
                      "provisional": True, "gap": None, "me": True}
     return out

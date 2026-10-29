@@ -446,6 +446,33 @@ describe('a duel’s run', () => {
     await expect.poll(() => root.querySelector('.pvp-ticket__dd')?.textContent).toBe('N4')
   })
 
+  it('names the beginner’s stop in words, on the ticket and in its mix (plan 289)', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async () => cover({ kind: 'ranked', against: 'open', level: 'novice',
+      you: { ...cover().you, level: 'novice' }, mix: [{ level: 'novice', share: 0.3 }, { level: 'N5', share: 0.7 }] }))
+    const root = await ticket()
+    await expect.poll(() => root.querySelector('.pvp-mix')?.textContent).toBe('Débutant 30\u00a0% · N5 70\u00a0%')
+    expect(root.querySelector('.pvp-ticket__level').textContent).toBe('Débutant')
+    // Between the beginner's stop and N5, a paper asks kana and kanji.
+    const facts = [...root.querySelectorAll('.pvp-ticket__fact')].map(f => f.querySelector('dd').textContent)
+    expect(facts).toContain('mots, kana et kanji')
+  })
+
+  it('asks a kana for its romaji, the choices in Latin letters (plan 289)', async () => {
+    serve()
+    const root = await stage()
+    await expect.poll(() => root.querySelectorAll('.pvp-tile').length).toBe(4)
+    apiJson.mockImplementation(async (path) => (path.endsWith('/answer')
+      ? { n: 0, right: true, pts: 100, ms: 900, total: 100, rights: 1, nextAt: iso(300), endsAt: iso(60_000),
+        next: { n: 1, kind: 'kana', prompt: 'カ', reading: null, choices: ['me', 'ro', 'ka'] } }
+      : cover()))
+    root.querySelectorAll('.pvp-tile')[0].click()
+    await expect.poll(() => root.querySelector('.pvp-page__prompt')?.textContent, { timeout: 3000 }).toBe('カ')
+    expect(root.querySelector('.pvp-page__kind').textContent).toBe('Kana')
+    expect([...root.querySelectorAll('.pvp-tile .exam-tile__t')].map(n => n.textContent)).toEqual(['me', 'ro', 'ka'])
+    expect(root.querySelector('.pvp-tile .exam-tile__t').getAttribute('lang')).toBeNull()
+  })
+
   it('keeps the answers in one list whatever the question asks, so the dock never changes shape', async () => {
     serve()
     const root = await stage()

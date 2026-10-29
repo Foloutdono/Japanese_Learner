@@ -1445,7 +1445,10 @@ two levels the Elo stands between and their share, N5 10 % · N4 90 %,
 beside a bar in the ticket's own ink, the level below pale and the one
 above full. The ticket is the station's, so the bar is ink, never a
 level's colour; a whole level is its name alone. The levels below that
-a paper brings with it (plan 288) are not drawn.
+a paper brings with it (plan 288) are not drawn. The beginner's stop
+under N5 (plan 289) is named in words, Débutant, wherever a level code
+would print; a kana question's romaji are set in Latin letters, as a
+word's meanings are.
 
 The ranked sprint's departure is that ticket before it is bought (plan
 288, the owner's A of the canvas « La page de départ »): you and your Elo

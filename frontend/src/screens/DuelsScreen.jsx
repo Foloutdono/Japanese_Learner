@@ -10,7 +10,7 @@ import { refreshDuels, useDuels } from '../stores/duels'
 import { playClick } from '../lib/audio'
 import { FriendSheet } from '../components/pvp/FriendSheet'
 import { EloCurve, EloMove, Verdict } from '../components/pvp/parts'
-import { hoursLeft, nameOf } from '../domain/duel'
+import { hoursLeft, levelName, nameOf } from '../domain/duel'
 
 // ── 対戦 — the duels' hall (plan 279, H3) ──────────────────────────
 // Behind the holder's door: the two platforms as cards (a ranked sprint
@@ -159,7 +159,7 @@ function EloHead({ rating, t, lang, go }) {
             <span>{t.pvpPeak(fig(rating.peak))}</span>
           </span>
         </>
-      ) : <span className="pvp-curve__from">{t.pvpEloFrom(rating.level)}</span>}
+      ) : <span className="pvp-curve__from">{t.pvpEloFrom(levelName(t, rating.level))}</span>}
     </button>
   )
 }

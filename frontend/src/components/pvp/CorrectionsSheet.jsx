@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { Loading } from '../ui/Loading'
+import { japaneseChoices } from '../../domain/duel'
 
 // ── 対戦 — a duel's detail and corrections (plan 279) ──────────────
 // Bought for a credit once the duel is settled (study/duels.review):
@@ -36,7 +37,7 @@ export function CorrectionsSheet({ open, onClose, review, error, them }) {
                   })}
                   <span className="pvp-fix__time">{mine ? `${t.pvpYou} · ${secs(mine.ms)} s · ${mine.pts}` : t.pvpNotMet}</span>
                 </span>
-                <span className="exam-miss__a" lang={q.kind === 'word' ? undefined : 'ja'}>{choices[q.answer]}</span>
+                <span className="exam-miss__a" lang={japaneseChoices(q.kind) ? 'ja' : undefined}>{choices[q.answer]}</span>
                 <span className="pvp-fix__them">
                   {q.theirs
                     ? `${them} · ${q.theirs.right ? t.pvpRightShort : t.pvpWrongShort} · ${secs(q.theirs.ms)} s`

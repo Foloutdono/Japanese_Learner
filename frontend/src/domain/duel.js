@@ -15,6 +15,19 @@ const FULL_MS = 1_000
 export const LOCK_MS = 1_000
 /** A question's choices (plan 288; study/duel_paper.CHOICES). */
 export const CHOICES = 3
+/** Whether a question's choices are Japanese: a reading's or a
+ *  spelling's are; a word's are meanings, a kana's its romaji (plan 289). */
+export const japaneseChoices = kind => kind === 'reading' || kind === 'writing'
+/** A stop's name: a JLPT level as it is written, the beginner's stop
+ *  under N5 (plan 289, `novice`) in words. */
+export const levelName = (t, level) => (level === 'novice' ? t.pvpNovice : level)
+/** What a paper asks, by the stops its mix stands between: the
+ *  beginner's asks kana where the others ask kanji (plan 289). */
+export function questionWords(t, mix) {
+  const levels = (mix ?? []).map(m => m.level)
+  if (levels.length && levels.every(l => l === 'novice')) return t.pvpWordsKana
+  return levels.includes('novice') ? t.pvpWordsKanaKanji : t.pvpWordsKanji
+}
 
 /** What a right answer given `ms` after the question was served is worth. */
 export function points(ms) {

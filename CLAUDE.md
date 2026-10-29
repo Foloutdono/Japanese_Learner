@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **289**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **290**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -314,7 +314,13 @@ runtime purpose.
   over that blind pick. A third of a paper is kanji, and each level it
   asks brings the levels below it, in their share of the words from
   there down, the duel's level (`level_of`) never under `OWN_FLOOR`,
-  30% (`duel_paper.shares`). The hall's platform leads to that platform
+  30% (`duel_paper.shares`). The line starts a stop before N5 (plan
+  289): the beginner's (`duel_elo.NOVICE`, 800 Elo, mix -10, so a mix
+  stored before keeps its meaning), a learner riding to the kana
+  (`goal_level` the novice's, `duels.duel_level`), asked the basics
+  course's words in kana and the kana for their romaji where the others
+  ask kanji; N5 brings it below it by its kana alone (its words are
+  N5's), and the client names it in words (`levelName`). The hall's platform leads to that platform
   alone: the ranked one to its departure, the duel's ticket before it is
   bought, read off the hall's `ranked` (`duels.departure`: the mix, the
   first Elo window, the stake against an equal); a friend's to its sheet. The music and the sounds are scored

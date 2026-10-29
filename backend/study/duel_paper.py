@@ -13,6 +13,11 @@ levels also brings the words of the levels below it, as many as their
 share of the words from there down (a speed game reads an easy word
 gladly, and a level's own kanji ran out in a few papers), never less
 than OWN_FLOOR of its own (shares). A third of the questions are kanji.
+Since plan 289 the line starts a stop before N5, the beginner's
+(NOVICE, 800 Elo, mix -10): the basics course's words, shown in kana,
+and the kana themselves where the others ask kanji -- a kana, its
+reading in romaji -- and N5 brings that stop below it as every level
+brings its own.
 Three kinds, mixed in a fixed pattern so the eye cannot settle:
 
   word     a word (with its reading) -> what it means, three meanings in
@@ -21,6 +26,8 @@ Three kinds, mixed in a fixed pattern so the eye cannot settle:
            漢字読み)
   writing  a word in kana -> its spelling in kanji (the exam's 表記),
            never at N1, where the exam asks none
+  kana     a kana -> its romaji, at the beginner's stop, in the kanji's
+           place
 
 Grammar and sentences are not asked: a sentence is not read in six
 seconds. Since plan 288 a question has three choices, not the exam's
@@ -58,8 +65,8 @@ the output changes"): a duel stores the paper it was built with, and the
 rev it was built under. The duel's rules go with the rev too
 (study/duels): sprint-2's runs are two minutes long (plan 284) and pay
 a streak and the last seconds more (plan 285); sprint-3's papers are
-mixes (plan 286), sprint-4's ask three choices (plan 288), with the same
-rules.
+mixes (plan 286), sprint-4's ask three choices (plan 288), sprint-5's
+start at the beginner's stop (plan 289), with the same rules.
 """
 from __future__ import annotations
 
@@ -67,10 +74,12 @@ import random
 import re
 from functools import lru_cache
 
+from content.kana_data import HIRAGANA_BASIC, KATAKANA_BASIC
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import word_category
+from study import basics
 from study import exam_kanji_choices as kc
-from study.duel_elo import START
+from study.duel_elo import NOVICE, START
 from study.exam_gen_utils import GenerationFailed
 from study.exam_tells import centre, outlier
 from study.exam_vocab_gen import _content_words, _display, _first_reading
@@ -78,11 +87,15 @@ from study.mcq import meaning_key
 from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
 
-PAPER_REV = "sprint-4"
+PAPER_REV = "sprint-5"
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
+# The stops a paper stands among: the beginner's, then the JLPT's.
+LADDER = (NOVICE, *LEVELS)
 # A mix is in tenths of a level above N5: 0 all N5, 9 a tenth N5 and
-# nine tenths N4, 40 all N1.
+# nine tenths N4, 40 all N1, -10 all the beginner's (plan 289; below N5,
+# so a mix stored before keeps its meaning).
 STEPS = 10
+MIX_MIN = -STEPS
 MIX_MAX = (len(LEVELS) - 1) * STEPS
 # A tenth of a level, in Elo: each level's start (duel_elo.START) is a
 # whole level, 200 points above the last.
@@ -137,13 +150,28 @@ def _near(a: str, b: str) -> bool:
     return low <= len(b) / max(1, len(a)) <= high
 
 
-@lru_cache(maxsize=len(LEVELS))
+@lru_cache(maxsize=1)
+def _basics_keys() -> frozenset[str]:
+    """The basics course's words, as "{kanji}::{kana}" (plan 186)."""
+    return frozenset(name for unit in basics.units() for name in unit["vocab"])
+
+
+def _deck(level: str) -> list[dict]:
+    """A stop's words: a level's deck, or the beginner's, the basics
+    course's words out of N5's, in N5's order."""
+    if level != NOVICE:
+        return VOCAB_BY_LEVEL[level]
+    keys = _basics_keys()
+    return [w for w in VOCAB_BY_LEVEL["N5"] if f"{w.get('kanji', '')}::{w.get('kana', '')}" in keys]
+
+
+@lru_cache(maxsize=len(LADDER))
 def _word_bank(level: str) -> tuple[dict, ...]:
     """The level's words a sprint can ask, each with what its guards
     read, in the deck's own order (a list, never a set)."""
     out = []
     seen = set()
-    for word in VOCAB_BY_LEVEL[level]:
+    for word in _deck(level):
         en, fr = _gloss(word, "en"), _gloss(word, "fr")
         if not en or not fr or len(en) > MEANING_MAX or len(fr) > MEANING_MAX:
             continue
@@ -189,8 +217,9 @@ def word_item(entry: dict, bank: tuple[dict, ...], level: str, rng: random.Rando
     options = [entry] + wrong
     rng.shuffle(options)
     word = entry["word"]
-    shown = _display(word, level)
     reading = _first_reading(word)
+    # The beginner reads kana, not yet kanji.
+    shown = reading if level == NOVICE else _display(word, level)
     return {
         "kind": "word",
         "prompt": shown,
@@ -200,17 +229,62 @@ def word_item(entry: dict, bank: tuple[dict, ...], level: str, rng: random.Rando
     }
 
 
-def _word_items(level: str, rng: random.Random, count: int) -> list[dict]:
+def _word_items(level: str, rng: random.Random, count: int, used: set) -> list[dict]:
+    """`count` of a stop's words, none asked twice in a paper (the
+    beginner's are N5's too). The beginner's wrong meanings are N5's:
+    its own few words would leave many a word without two."""
     bank = _word_bank(level)
+    rivals = _word_bank("N5") if level == NOVICE else bank
     order = list(range(len(bank)))
     rng.shuffle(order)
     out = []
     for i in order:
         if len(out) >= count:
             break
-        item = word_item(bank[i], bank, level, rng)
+        key = (bank[i]["word"].get("kanji") or "", bank[i]["word"].get("kana") or "")
+        if key in used:
+            continue
+        item = word_item(bank[i], rivals, level, rng)
         if item:
+            used.add(key)
             out.append(item)
+    return out
+
+
+# ── The kana (plan 289) ─────────────────────────────────────────────
+# A kana -> its romaji, at the beginner's stop where the others ask
+# kanji: the basic hiragana and katakana with their voiced forms. The
+# wrong readings are as long as the right one (ka against shi would be
+# answered by its length), and three of them are cut to two the way a
+# kanji item's four are (_left_out), so the eye wins nothing.
+
+@lru_cache(maxsize=1)
+def _kana_pool() -> tuple[dict, ...]:
+    return tuple(HIRAGANA_BASIC + KATAKANA_BASIC)
+
+
+def _kana_items(rng: random.Random, count: int, used_prompts: set, tally: dict) -> list[dict]:
+    pool = list(_kana_pool())
+    rng.shuffle(pool)
+    out = []
+    for entry in pool:
+        if len(out) >= count:
+            break
+        right = entry["romaji"]
+        if entry["kana"] in used_prompts:
+            continue
+        alike = sorted({o["romaji"] for o in _kana_pool() if o["romaji"] != right and len(o["romaji"]) == len(right)})
+        if len(alike) < CHOICES - 1:
+            continue
+        wrong = rng.sample(alike, min(CHOICES, len(alike)))
+        if len(wrong) == CHOICES:
+            choices = _left_out([right] + wrong, right, rng, tally)
+        else:
+            choices = [right] + wrong
+            rng.shuffle(choices)
+        used_prompts.add(entry["kana"])
+        out.append({"kind": "kana", "prompt": entry["kana"], "reading": None,
+                    "choices": choices, "answer": choices.index(right)})
     return out
 
 
@@ -290,30 +364,33 @@ def _left_out(texts: list[str], right: str, rng: random.Random, tally: dict) -> 
 
 def mix_of(elo: float) -> int:
     """Where an Elo stands among the levels, in tenths of a level above
-    N5: each level's starting Elo (duel_elo.START) is a whole level."""
-    return max(0, min(MIX_MAX, round((elo - START["N5"]) / ELO_STEP)))
+    N5: each level's starting Elo (duel_elo.START) is a whole level, the
+    beginner's one below N5."""
+    return max(MIX_MIN, min(MIX_MAX, round((elo - START["N5"]) / ELO_STEP)))
 
 
 def blend(mix: int) -> list[tuple[str, float]]:
     """The levels a mix asks and the share of each, lower first:
-    9 -> [("N5", 0.1), ("N4", 0.9)]; a whole level alone."""
-    low, part = divmod(mix, STEPS)
+    9 -> [("N5", 0.1), ("N4", 0.9)], -3 -> [("novice", 0.3), ("N5", 0.7)];
+    a whole level alone."""
+    low, part = divmod(mix - MIX_MIN, STEPS)
     if not part:
-        return [(LEVELS[low], 1.0)]
-    return [(LEVELS[low], (STEPS - part) / STEPS), (LEVELS[low + 1], part / STEPS)]
+        return [(LADDER[low], 1.0)]
+    return [(LADDER[low], (STEPS - part) / STEPS), (LADDER[low + 1], part / STEPS)]
 
 
 def level_of(mix: int) -> str:
     """The level most of a mix's questions are at (the upper one at half)."""
-    return LEVELS[(mix + STEPS // 2) // STEPS]
+    return LADDER[(mix - MIX_MIN + STEPS // 2) // STEPS]
 
 
 def _downward(level: str) -> list[tuple[str, float]]:
     """A level's questions, level by level, lower first: each level from
-    N5 up to it in its share of the words there are from there down,
-    the level itself never under OWN_FLOOR."""
-    under = LEVELS[: LEVELS.index(level) + 1]
-    sizes = {lv: len(_word_bank(lv)) for lv in under}
+    the beginner's up to it in its share of what there is to ask from
+    there down, the level itself never under OWN_FLOOR. The beginner's
+    stop weighs its kana: its words are N5's, counted there already."""
+    under = LADDER[: LADDER.index(level) + 1]
+    sizes = {lv: len(_kana_pool()) if lv == NOVICE else len(_word_bank(lv)) for lv in under}
     total = sum(sizes.values())
     own = max(OWN_FLOOR, sizes[level] / total)
     rest = total - sizes[level]
@@ -334,7 +411,7 @@ def shares(mix: int) -> list[tuple[str, float]]:
     if acc[top] < OWN_FLOOR:
         scale = (1 - OWN_FLOOR) / (1 - acc[top])
         acc = {lv: OWN_FLOOR if lv == top else share * scale for lv, share in acc.items()}
-    return [(lv, acc[lv]) for lv in LEVELS if lv in acc]
+    return [(lv, acc[lv]) for lv in LADDER if lv in acc]
 
 
 def _split(n: int, shares: list[tuple[str, float]]) -> dict[str, int]:
@@ -343,7 +420,7 @@ def _split(n: int, shares: list[tuple[str, float]]) -> dict[str, int]:
     a tie."""
     raw = [(lv, n * share) for lv, share in shares]
     out = {lv: int(x) for lv, x in raw}
-    order = sorted(raw, key=lambda r: (-(r[1] - int(r[1])), -LEVELS.index(r[0])))
+    order = sorted(raw, key=lambda r: (-(r[1] - int(r[1])), -LADDER.index(r[0])))
     for lv, _ in order[: n - sum(out.values())]:
         out[lv] += 1
     return out
@@ -353,10 +430,10 @@ def build_paper(seed: int, level: str | None = None, mix: int | None = None) -> 
     """The sprint's questions for a duel at `mix` (or a whole `level`),
     from `seed`."""
     if mix is None:
-        if level not in LEVELS:
+        if level not in LADDER:
             raise ValueError(f"unknown level {level!r}")
-        mix = LEVELS.index(level) * STEPS
-    if not 0 <= mix <= MIX_MAX:
+        mix = MIX_MIN + LADDER.index(level) * STEPS
+    if not MIX_MIN <= mix <= MIX_MAX:
         raise ValueError(f"unknown mix {mix!r}")
     parts = shares(mix)
     rng = random.Random(f"duel:{PAPER_REV}:{mix}:{seed}")
@@ -367,18 +444,25 @@ def build_paper(seed: int, level: str | None = None, mix: int | None = None) -> 
     kanji: dict[str, list] = {"writing": [], "reading": []}
     short = {lv: 0 for lv, _ in parts}
     # The writing items first, every level's: they need the scarcer
-    # kanji. A level that runs short (N1 asks none) makes it up in words.
+    # kanji. A level that runs short (N1 asks none) makes it up in words;
+    # the beginner's stop asks kana in their place.
     for kind, cap in (("writing", MAX_WRITING), ("reading", MAX_READING)):
         for lv, count in _split(min(wanted[kind], cap), parts).items():
-            got = [] if kind == "writing" and lv == "N1" else _kanji_items(lv, rng, count, kind, used_words, used_prompts, tally)
+            if lv == NOVICE:
+                got = _kana_items(rng, count, used_prompts, tally)
+            elif kind == "writing" and lv == "N1":
+                got = []
+            else:
+                got = _kanji_items(lv, rng, count, kind, used_words, used_prompts, tally)
             kanji[kind] += [{**item, "level": lv} for item in got]
             short[lv] += count - len(got)
         short_cap = wanted[kind] - min(wanted[kind], cap)
         for lv, count in _split(short_cap, parts).items():
             short[lv] += count
     words = []
+    asked: set = set()
     for lv, count in _split(wanted["word"], parts).items():
-        words += [{**item, "level": lv} for item in _word_items(lv, rng, count + short[lv])]
+        words += [{**item, "level": lv} for item in _word_items(lv, rng, count + short[lv], asked)]
     queues = {"word": words, "reading": kanji["reading"], "writing": kanji["writing"]}
     # The levels' questions dealt in among each other.
     for queue in queues.values():
