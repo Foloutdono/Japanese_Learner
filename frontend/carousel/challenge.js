@@ -164,7 +164,7 @@ export function challengePlan(data, id, opts = {}) {
   const options = Q.options[lang] || Q.options.en
   const q = { n: qn, ask: Q.question[lang] || Q.question.en, choices: order.map(i => options[i]), right: order.indexOf(Q.correct) }
   return {
-    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P), hidden: Boolean(opts.hide),
+    source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P), hidden: opts.hide !== false,
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), nq: P.questions.length, cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -252,7 +252,7 @@ export function challengeCommand(plan) {
   const question = plan.chosen ? ` --question ${plan.q.n}` : ''
   // The print's season where one is chosen, else the day's the render runs on (plan 267).
   const season = plan.season ? ` --season ${plan.season}` : ''
-  const hide = plan.hidden ? ' --hide' : ''
+  const hide = plan.hidden ? '' : ' --show'
   return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${hide}${tuneFlag(plan.tune, 'challenge')}`
 }
 
@@ -274,7 +274,7 @@ export function challengePage(plan, tl, site) {
   const feed = {
     hook: page.title, lines: [S.body[plan.style]], app: S.app, ask: plan.hidden ? S.askHidden : S.ask, credits,
     // Hidden, the answer is only in the comments: Instagram asks there too.
-    ...(plan.hidden ? { reels: `👇 ${S.askHidden}` } : {}),
+    ...(plan.hidden ? { reels: `📌 ${S.askHidden}` } : {}),
     hashtags: [S.tags[1], S.tags[0], S.tags[2], `jlpt${plan.lv.toLowerCase()}`, '日本語'],
   }
   return { ...page, feeds: feedPosts(page, feed, plan.lang) }
@@ -578,6 +578,8 @@ const QUESTION_STEPS = [
   // The longest (a quote and four answers of three lines, in French at N2):
   // a smaller ring, and the ask for the comments left to the post's caption.
   { ask: [FS.body, FS.sm, FS.caption], answer: [FS.caption], gap: SP[2], least: 88, pad: SP[4], askLines: 5, ring: 40, quiet: true },
+  // Hidden, the comments' two lines take a step more, the last one smaller still.
+  { ask: [FS.sm, FS.caption], answer: [FS.caption], gap: SP[2], least: 80, pad: SP[3], askLines: 5, ring: 40, quiet: true },
 ]
 const RING = 54
 const questionLayouts = new Map()
@@ -587,12 +589,20 @@ function questionLayout(ctx, plan) {
   let L = null
   for (const step of QUESTION_STEPS) {
     const ring = step.ring || RING
-    const foot = Math.max(ring * 2 + (step.quiet ? 0 : SP[4] + FS.body * 1.15), FS.title * 1.15)
     const ask = fit(ctx, plan.q.ask, { weight: 800, fam: 'latin', sizes: step.ask, maxW: fr.w, maxLines: step.askLines || 4, lh: 1.15 })
     const answers = plan.q.choices.map(c => fit(ctx, c, { weight: 700, sizes: step.answer, maxW: fr.w - 150, maxLines: 3, lh: 1.15 }))
     const hs = answers.map(b => Math.max(step.least, b.size * 1.15 * b.lines.length + step.pad))
+    // Each line takes the sizes its step gives the question's ask and answers, so it steps down with them.
+    const yours = plan.hidden ? [
+      { ...fit(ctx, W[plan.lang].yours[0], { weight: 800, sizes: step.ask, maxW: fr.w, maxLines: 1, lh: 1.15 }), sizes: step.ask },
+      { ...fit(ctx, W[plan.lang].yours[1], { weight: 600, sizes: step.answer, maxW: fr.w, maxLines: 2, lh: 1.15 }), sizes: step.answer },
+    ] : null
+    // The countdown's ring stands under the answers until the answer, then the
+    // comments' lines do: the foot is the taller of the two.
+    const ringFoot = Math.max(ring * 2 + (step.quiet ? 0 : SP[4] + FS.body * 1.15), FS.title * 1.15)
+    const foot = yours ? Math.max(ringFoot, yours[0].size * 1.15 + SP[2] + yours[1].size * 1.15 * yours[1].lines.length) : ringFoot
     const end = TOP + 30 + ask.size * 1.15 * ask.lines.length + SP[6] + hs.reduce((n, h) => n + h + step.gap, 0) + SP[6] + foot
-    L = { ask, answers, hs, gap: step.gap, ring, quiet: !!step.quiet, askLines: step.askLines || 4 }
+    L = { ask, answers, hs, gap: step.gap, ring, quiet: !!step.quiet, askLines: step.askLines || 4, yours }
     // Whole, too: a question quoting a long sentence wraps only between phrases.
     if (end <= fr.bottom && !ask.cut && !answers.some(b => b.cut)) break
   }
@@ -642,8 +652,8 @@ function question(ctx, plan, into, answered, P, T) {
   } else if (plan.hidden) {
     // The answer left to the viewer: the four letters asked, then the comments.
     const k = ease((into - 0.3) / 0.5)
-    const end = lines(ctx, T, S.yours[0], y, [FS.title, FS.lead], { weight: 800, maxLines: 1, k })
-    lines(ctx, T, S.yours[1], end + SP[2], [FS.lead, FS.body], { weight: 600, maxLines: 2, k: ease((into - 0.7) / 0.5) })
+    const end = lines(ctx, T, S.yours[0], y, L.yours[0].sizes, { weight: 800, maxLines: 1, k })
+    lines(ctx, T, S.yours[1], end + SP[2], L.yours[1].sizes, { weight: 600, maxLines: 2, k: ease((into - 0.7) / 0.5) })
   } else {
     lines(ctx, T, S.gotIt, y, [FS.title, FS.lead], { weight: 700, maxLines: 1, k: ease((into - 0.4) / 0.5) })
   }

@@ -1788,7 +1788,7 @@ describe('the reading challenges (plan 247)', () => {
       expect(tl.seconds, P.id).toBeCloseTo(tl.segs.at(-1).start + tl.segs.at(-1).dur, 2)
       expect(tl.cues, P.id).toEqual([])
       // The countdown's ticks, the answer, the chime, and the two taps on the reader's card (plan 266).
-      expect(tl.sfx.map(x => x.key), P.id).toEqual(['board-flap', ...Array(CHALLENGE.count).fill('click'), 'correct', 'platform-chime', 'click', 'click'])
+      expect(tl.sfx.map(x => x.key), P.id).toEqual(['board-flap', ...Array(CHALLENGE.count).fill('click'), pl.hidden ? 'card-transition' : 'correct', 'platform-chime', 'click', 'click'])
     }
   })
 
@@ -2059,8 +2059,8 @@ describe('the reading challenges (plan 247)', () => {
 
   it('keeps the answer to itself when hidden, the comments asked for it (plan 275)', () => withPath2D(() => {
     for (const lang of ['en', 'fr']) {
-      const shown = challengePlan(data, 'n5-06', { question: 2, lang })
-      const pl = challengePlan(data, 'n5-06', { question: 2, lang, hide: true })
+      const shown = challengePlan(data, 'n5-06', { question: 2, lang, hide: false })
+      const pl = challengePlan(data, 'n5-06', { question: 2, lang })
       expect(shown.hidden).toBe(false)
       expect(pl.hidden).toBe(true)
       const tl = challengeTimeline(pl)
@@ -2071,11 +2071,13 @@ describe('the reading challenges (plan 247)', () => {
       expect(seen, lang).toMatch(lang === 'en' ? /comments/ : /commentaire/)
       // No chime that says it was right, and every choice as bright as the others.
       expect(tl.sfx.some(x => x.key === 'correct'), lang).toBe(false)
-      expect(challengeCommand(pl)).toContain(' --hide')
-      expect(challengeCommand(shown)).not.toContain('--hide')
+      expect(challengeCommand(pl)).not.toContain('--show')
+      expect(challengeCommand(shown)).toContain(' --show')
       const page = challengePage(pl, tl, 'x')
       expect(page.description).toMatch(lang === 'en' ? /Write your answer in the comments/ : /Écris ta réponse en commentaire/)
-      for (const feed of ['reels', 'tiktok']) expect(page.feeds[feed].caption, feed).toContain(`👇 ${lang === 'en' ? 'A, B, C or D? Write' : 'A, B, C ou D ? Écris'}`)
+      const ask = lang === 'en' ? 'A, B, C or D? Write' : 'A, B, C ou D ? Écris'
+      expect(page.feeds.tiktok.caption, lang).toContain(`👇 ${ask}`)
+      expect(page.feeds.reels.caption, lang).toContain(`📌 ${ask}`)
     }
   }))
 

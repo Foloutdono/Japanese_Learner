@@ -24,8 +24,10 @@
 //                     the day's own, as the app's gate shows it, when left out
 //   --question 4      ... the text's question asked (1-based, as the studio
 //                     lists them; the first about what it says by default)
-//   --hide            ... the answer never shown: the viewer asked for theirs
-//                     in the comments (plan 275)
+//   --show            ... the answer shown on the screen, as the study does it
+//                     (plan 275 made hiding the default: the viewer asks in the comments)
+//   --hide            ... the default: the answer never shown, the viewer asked for
+//                     theirs in the comments (plan 275)
 //   --words ID        a vocabulary short (plan 252, words.js): nine words, 9:16,
 //                     a level's (N5:3) or a theme's (theme:animals:1)
 //   --style quiz      ... as a card on washi (card, the default) or a quiz on sumi (quiz)
@@ -155,7 +157,7 @@ let tl, slug, SIZE, pageText, thumbAt
 if (args.music !== undefined) log('no video carries music since plan 273: --music is ignored')
 if (args.challenge) {
   // ── A reading challenge: the text over the hour's print, read along voiced ──
-  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, question: args.question, hide: args.hide === true, tune })
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, question: args.question, hide: args.show !== true, tune })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null
   // A read-along whose voice did not come is no read-along: stop, unless asked for it anyway.
