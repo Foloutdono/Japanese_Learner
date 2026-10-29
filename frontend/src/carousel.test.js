@@ -1036,10 +1036,12 @@ describe('explaining a point in its own sentence', () => {
   })
 
   it('writes the mix the way the app’s ticket does (plan 286)', () => {
-    const run = read('src/screens/DuelRun.jsx')
+    // The duels' shared parts since plan 288, which DuelRun's ticket uses.
+    const parts = read('src/components/pvp/parts.jsx')
     const share = "m.share.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })"
-    expect(run).toContain(share)
-    expect(run).toContain("words.join(' · ')")
+    expect(parts).toContain(share)
+    expect(parts).toContain("words.join(' · ')")
+    expect(read('src/screens/DuelRun.jsx')).toMatch(/<Mix mix=\{/)
     expect(read('carousel/promo.js')).toContain(share)
   })
 
@@ -1088,6 +1090,19 @@ describe('explaining a point in its own sentence', () => {
         const pct = v => v.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })
         expect(ticket.texts).toContain(duelBank.blend.map(m => `${m.level} ${pct(m.share)}`).join(' · '))
         expect(ticket.texts.join(' ')).not.toMatch(/plus bas|lower of/)
+        // The race's dock holds the paper's choices, three since plan 288:
+        // wherever a question is on the screen, so is each of its answers.
+        expect(pl.promo.choices).toBe(int(constant('study/duel_paper.py', 'CHOICES')))
+        let asked = 0
+        for (let t = 0; t < story.seconds; t += 0.25) {
+          const { ctx, texts } = stubContext()
+          story.draw(ctx, t)
+          const q = pl.promo.items.find(x => texts.includes(x.prompt) && x.choices.some(c => texts.includes(c)))
+          if (!q) continue
+          asked += 1
+          for (const c of q.choices) expect(texts, `${lang} at ${t}s: ${q.prompt}`).toContain(c)
+        }
+        expect(asked).toBeGreaterThan(10)
         const top = multOf(Math.max(...duelBank.rules.tiers.map(x => x.mult)), lang)
         const lines = [D.combo(top), D.rush(duelBank.rules.rushMs / 1000)]
         for (const line of [...D.hook(SPRINT_MS / 1000), D.versus, D.same, D.fast(100), D.ahead, ...lines, D.winElo, D.eloIs, D.climb]) {

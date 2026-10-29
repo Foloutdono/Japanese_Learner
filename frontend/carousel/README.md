@@ -579,14 +579,14 @@ The duels' story is scored with the duel's own sounds besides (plan
 `src/lib/audio/duel.json`'s revision from its onset, at the duel's trim.
 Never its music: the owner lays the feed's own over the clip.
 
-**The duels' story plays whole (plans 281, 281b, 286).** Its frames are one
+**The duels' story plays whole (plans 281, 281b, 286, 288).** Its frames are one
 sprint told from its ticket to the board, and the story is also one
 clip, every beat after the last (`promo.clips.story`, `DUEL_BEATS`,
 about 32 seconds): the ticket comes in and « Partir » is pressed; the
 count; the sprint's opening in real time (the first question taken
 slowly while what it is worth runs down from 100, the next two at once,
-the fourth's lookalike 天人 taken for 大人, which breaks the streak), its
-middle run fast as a time-lapse eased in and out of real time
+the fourth missed, みじかい "short" taken for "sweet", which breaks the
+streak), its middle run fast as a time-lapse eased in and out of real time
 (`RACE`, `raceClock`: the combo climbing its tiers, Hana passed for
 good), its last seconds in real time, in the rush, and « Arrivée ! »;
 the result face to face, line by line, its verdict, its grade, the Elo
@@ -597,14 +597,17 @@ and fades. The duels' screens are measured as the other parts are, the
 race and the ending again for plan 281b as plan 285 draws them (`app.js`:
 the ticket, the stage's gold button, the head and its combo ring, the T1
 trains on their rails with the bands, the rush and the changes of hands,
-the page and the answers, each answer's moment, the face to face (E4),
+the page and its three answers (plan 288), each answer's moment, the
+face to face (E4),
 the Elo card, the board's rows; `DUEL_INKS` the inks a theme gives them
 and `T1_INKS` the train's paint, both held to `index.css`). Where the
 app docks the answers on its sumi panel, the story sets them on its
 ground, in the ground's ink: a frame keeps one background. The race's
 screen is as big as it fits under its title, its foot below the safe
 area down to just above TikTok's caption (the owner's pick of the
-canvas, plan 281c). The paper and the runs are real: `bank/duel.json`,
+canvas, plan 281c); with three answers to a question it fits as wide as
+the safe area, and the page takes what is left above the dock, as the
+app's does (plan 281d). The paper and the runs are real: `bank/duel.json`,
 which `carousel_bank.py` writes, is a paper as `study/duel_paper.py`
 builds it from a fixed seed, dealt where the learner's Elo stands
 (plan 286: at 1 060, N5 70 % · N4 30 %, which the ticket prints beside

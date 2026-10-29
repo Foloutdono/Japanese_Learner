@@ -394,6 +394,8 @@ export function duelRun(data, lang) {
   const ahead = board.after[mineAfter.rank - 2]
   return {
     items, answers, their, passes, tiers, broke,
+    // A question's choices: three since plan 288, the dock's tiles.
+    choices: items[0].choices.length,
     next: last.t + (last.right ? data.hold.right : data.hold.wrong),
     rules: data.rules, sprint: data.sprint, lines,
     final: { mine: last.total, theirs: their.length ? their[their.length - 1].total : 0 },
@@ -1203,8 +1205,11 @@ export function promoDeck(plan, fmt, opts) {
       }))
       // The screen as the stage lays it out (CSS px): the head, the race
       // (2px more in the rush), the page with what is left, at least 120,
-      // and the dock under the thumb; at the size that holds them.
-      const NEED = 52 + 12 + 130 + 12 + 120 + 12 + 304
+      // and the dock under the thumb, a 64px tile a choice 8px apart
+      // (three since plan 288) and 12px above and under; at the size
+      // that holds them.
+      const DOCK = 24 + pr.choices * 64 + (pr.choices - 1) * 8
+      const NEED = 52 + 12 + 130 + 12 + 120 + 12 + DOCK
       const race = (c, s) => {
         let say1 = 0
         RACE_AT.forEach((from, i) => { if (s >= from) say1 = i })
@@ -1213,12 +1218,14 @@ export function promoDeck(plan, fmt, opts) {
         // As big as it fits (the owner's pick, plan 281c): the screen is a
         // picture of the app, so it may pass the safe box down to just
         // above the feed's caption (the frame's foot); the story's words
-        // keep to the safe box.
+        // keep to the safe box. Once it is as wide as the safe box, the
+        // page takes what is left, as the app's does, and the dock stays
+        // at the foot (plan 281d).
         const us = Math.min(U, (fr.foot - y0) / NEED)
         const sw = A.PHONE_W * us
         const sx = fr.cx - sw / 2
         const st = raceAt(s)
-        const dockTop = y0 + (NEED - (st.counting ? 24 : 304)) * us
+        const dockTop = fr.foot - (st.counting ? 24 : DOCK) * us
         lift(c, at(s, 0, 0.25), () => {
           // The answers stand on the ground itself: the story keeps one
           // even background where the app docks them on its sumi panel.
