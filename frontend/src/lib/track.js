@@ -165,7 +165,7 @@ export const VALUES = {
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   feature_use: {
-    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback', 'readings'],
+    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback', 'readings', 'duels_key', 'duels_board', 'duels_news'],
     action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide'],
   },
   transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
