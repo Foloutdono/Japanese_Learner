@@ -310,8 +310,8 @@ export function analysed(s, data, lang) {
 // server scored them (since plan
 // 281b the bank runs study/duels.py's own scoring: each answer's speed,
 // the combo its streak pays and the rush of the last seconds). The
-// learner takes the first question slowly, the next two at once and a
-// lookalike for the fourth, then is right to the end; Hana, a level up,
+// learner takes the first question slowly, the next two at once and
+// misses the fourth, then is right to the end; Hana, a level up,
 // leads on her own streak until her misses break it, and the learner
 // passes her just before the rush. The sprint is told in real time at its
 // opening and its end, and run fast between (RACE); then the result face
