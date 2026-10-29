@@ -2885,6 +2885,14 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}% right`,
   practiceNotYet: 'Not yet',
+  // The phone's Practice gate (plan 290): the modes in three groups,
+  // the last ride to resume, and the sheet a plate raises, a page a mode.
+  practiceGroups: { understand: 'Understand', express: 'Express', test: 'Test yourself' },
+  practiceResume: 'Resume',
+  practiceSheet: 'Practice modes',
+  practicePct: pct => `${pct}%`,
+  practiceAllPapers: 'All papers',
+  practiceAllScenes: 'All scenes',
   // ── A practice station, on the desk (plan 159) ────────────────
   // The source as a switch at the list's head (the JLPT grades, word
   // frequency, your own cards), then the open stop's page: what the

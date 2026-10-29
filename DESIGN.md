@@ -1323,26 +1323,56 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   hold seven.) The pigment is 縹 (`--line-kaiwa`), the dayflower blue
   between 緑青 and 藍.
 
-### The practice gate (練習の改札, plans 165, 254)
+### The practice gate (練習の改札, plans 165, 254, 290)
 
 **Practice hangs plates, as Learn does.** The painted platforms of plans
 225 (the phone) and 244 (the desk) asked for a grade rolled on a sign, a
 train chosen on another and a departure watched before every run; the
 owner found them a pain to use and took the plates back from the canvas
 "Tsuji — Practice, new directions": B on the phone, A on the desk
-(`screens/PracticeScreen.jsx`, plan 254).
+(`screens/PracticeScreen.jsx`, plan 254). On the phone a plate still
+opened a screen of choices before every run, and seven plates sharing
+the gate left no room for an eighth: plan 290 folds them and raises
+each as a sheet (the owner's pick D4 of the canvas "Tsuji — the practice
+gate", improved).
 
-- **On a phone, Learn's plate** (B). The seven stand in a column sharing
-  the gate, their heads a rung tighter than Learn's, so the seven hold a
-  phone's height. A plate is one door, to where the learner is: the
-  platform's list of grades, their own marked, where a tap boards the run
-  (reading's and translation's JLPT list, past the choice of a source,
-  which is one tap back; the exam's papers and 会話's scenes open on the
-  learner's grade by themselves). The foot is Learn's: the learner's grade
-  in its middle, between what they did there and the share of it that was
-  right (`/api/practice/record`), or "not yet". While the record cannot be
-  read the grade stands alone. The stripe is painted raw end to end: a
-  platform has no track behind it.
+- **Three groups, one order** (plan 290). What a learner takes in
+  (*Comprendre*: reading, comprehension, dictation), what they make
+  (*S'exprimer*: translation, composition, 会話) and the paper that tests
+  both (*S'évaluer*: the mock exam). The registry carries the group on
+  each section (`config/tabs.js`, `PRACTICE_GROUPS`) and is the order
+  everywhere, the desk's rail and plates included. The phone captions
+  each group in the learner's language, a caption's rung over its plates.
+- **On a phone, every plate folds to one line** (plan 290). The roundel,
+  the name a rung down from Learn's, and under it the record that was
+  the foot: the learner's grade in the line's ink, what they did there
+  and the share of it right (`/api/practice/record`), or "not yet";
+  while the record cannot be read the grade stands alone. The stripe is
+  painted raw end to end: a platform has no track behind it. The plates
+  keep their own height, so a new platform is one more line and the gate
+  scrolls past what a phone holds. The last ride a grade alone boards
+  again (reading, comprehension, dictation, translation or composition,
+  the newest `last`) waits over the groups as one row, its action the
+  metal: Reprendre boards it in one tap. No ride, no row.
+- **A plate raises the platform's sheet** (`components/practice/
+  PracticeSheet.jsx`). Every platform is a page of it, the one tapped in
+  view, the next a swipe away; the roundels across its top are the
+  pages' index (a gap between the groups), one tab stop, the arrows
+  walking them. The gate under it never moves. Every page has one
+  shape, so the action keeps its place as the pages go by: the name
+  over the record, what the run asks (the station's sample card at the
+  grade, a rung under the run's size; the exam's and 会話's grade switch,
+  and 会話's way of answering), a row of the other departures, and
+  Embarquer pinned to the foot, at one height on every page. A sentence
+  platform's row is the other grades with their record, then reading's
+  and translation's own cards and frequency list (the tiers' page of the
+  station); the exam's is the grade's four papers with their last
+  sitting, Embarquer the next paper not sat; 会話's the grade's scenes,
+  Embarquer the first not done. A ticket boards the run itself; the
+  exam's and 会話's whole stations stay a ticket away at the row's end.
+  A page asks for what it draws only when it or its neighbour is in
+  view, and only that page is in the tab order (inert): the gate itself
+  reads the record and nothing else.
 - **On the desk, every platform's specimen** (A, plan 165). Under its name
   a plate holds a line saying what the run asks and the run's own card in
   a well, at the learner's grade (the station's sample); the whole plate is

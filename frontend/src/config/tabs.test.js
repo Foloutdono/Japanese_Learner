@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TAB_IDS, DESK_TAB_IDS, DESK_PLACE_IDS, getDeskTabs, getDeskGates, getDeskSections, getDeskPlaces, deskPlaceFor, deskGateFor, onDeskRail, inSection, dueBadge, gateBeside, tabFor } from './tabs'
+import { TAB_IDS, DESK_TAB_IDS, DESK_PLACE_IDS, PRACTICE_GROUPS, getDeskTabs, getDeskGates, getDeskSections, getDeskPlaces, getSections, deskPlaceFor, deskGateFor, onDeskRail, inSection, dueBadge, gateBeside, tabFor } from './tabs'
 
 // ── Which gate is next along the bar ──────────────────────────
 // The arithmetic behind the sideways flick (hooks/useGateSwipe), on
@@ -60,9 +60,12 @@ describe('the rail', () => {
     expect(getDeskSections('learn', t).map(s => s.path)).toEqual([
       '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar',
     ])
+    // In the practice gate's three groups (plan 290): what a learner
+    // takes in, what they make, and the paper.
     expect(getDeskSections('practice', t).map(s => s.path)).toEqual([
-      '/practice/reading', '/practice/comprehension', '/practice/translation',
-      '/practice/dictation', '/practice/composition', '/practice/exam', '/practice/conversation',
+      '/practice/reading', '/practice/comprehension', '/practice/dictation',
+      '/practice/translation', '/practice/composition', '/practice/conversation',
+      '/practice/exam',
     ])
     // The queue IS the gate, and the catalogue is the dictionary; the
     // analyser, the shelf, the record and the settings are places
@@ -142,5 +145,19 @@ describe('the rail', () => {
     expect(dueBadge(24)).toBe('24')
     expect(dueBadge(99)).toBe('99')
     expect(dueBadge(100)).toBe('99+')
+  })
+})
+
+// ── The practice gate's groups (plan 290) ──
+// The phone hangs the platforms under three captions, in the
+// registry's order: every platform names one, and a group's platforms
+// stand together, so the desk's rail and plates read them in the same
+// order the phone's groups do.
+describe('the practice platforms\' groups', () => {
+  it('puts every platform in one of the groups, the groups in their order', () => {
+    const platforms = getSections('practice', t)
+    for (const s of platforms) expect(PRACTICE_GROUPS, s.path).toContain(s.group)
+    const runs = platforms.map(s => s.group).filter((g, i, all) => g !== all[i - 1])
+    expect(runs).toEqual(PRACTICE_GROUPS)
   })
 })

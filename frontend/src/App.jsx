@@ -784,7 +784,7 @@ export default function App({ front = NO_FRONT }) {
                 decides). */}
             <Route path="/learn/decks/:deck_id" element={<DecksScreen session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
-            <Route path="/practice"             element={<PracticeScreen />} />
+            <Route path="/practice"             element={<PracticeScreen session={session} />} />
             {/* No /:sectionId segment: every generated paper has exactly
                 one section (see each backend/study/exam_*_gen.py), so it
                 was a parameter with one legal value and a picker screen

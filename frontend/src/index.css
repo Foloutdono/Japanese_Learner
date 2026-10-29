@@ -9922,13 +9922,241 @@ textarea:focus-visible {
    they get, instead of the air pooling under the last plate. Every
    plate is a plate, so every plate gets one share — the shelf too. */
 @media (max-width: 768px) {
-  .learn > .plates,
-  .practice > .plates { flex: 1; }
-  .learn > .plates > .plate,
-  .practice > .plates > .plate { flex: 1 1 auto; }
-  /* Practice hangs seven where Learn hangs five or six (plan 254): its
-     heads stand a rung tighter, so the seven hold a phone's height. */
-  .practice > .plates > .plate > .plate__head { padding-block: var(--sp-3); }
+  .learn > .plates { flex: 1; }
+  .learn > .plates > .plate { flex: 1 1 auto; }
+}
+
+/* ── 実践の改札 — the phone's Practice gate, folded (plan 290) ──────
+   The owner's pick D4 of the canvas "Tsuji — the practice gate",
+   improved. The plates fold to one line each, the name over the
+   learner's record at their grade, and stand under three captions
+   (config/tabs.js, PRACTICE_GROUPS); they no longer share the gate's
+   height, so an eighth platform is one more line, and the gate scrolls
+   past what a phone holds. The last grade's ride waits over them, one
+   tap to board (.prc-resume). A plate raises the platform's sheet
+   (.prc-sheet below). Drawn by screens/PracticeScreen.jsx's Platforms
+   under the desk's 1100px: the desk keeps its specimens. */
+.prc-group { display: flex; flex-direction: column; gap: var(--sp-2); }
+.prc-group__cap {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.prc-group > .plates { gap: var(--sp-2); }
+.plate--fold .plate__head { padding-block: var(--sp-3); }
+.plate--fold .plate__title { font-size: var(--fs-lead); }
+/* The record: the grade in the line's ink, the figures in the quiet
+   one, as the old foot printed them either side of it. */
+.prc-record { font-variant-numeric: tabular-nums; }
+.prc-record__grade {
+  font-weight: 700;
+  color: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
+}
+/* The last ride: a panel like a plate's, its action the metal. */
+.prc-resume {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: var(--sp-4);
+  align-items: center;
+  width: 100%;
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.prc-resume:hover,
+.prc-resume:focus-visible { border-color: var(--line-color, var(--accent2)); filter: none; }
+.prc-resume__names { display: flex; flex-direction: column; min-width: 0; }
+.prc-resume__title,
+.prc-resume__sub {
+  font-family: var(--font-display);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prc-resume__title { font-size: var(--fs-body); font-weight: 700; }
+.prc-resume__sub { font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.prc-resume__go {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 var(--sp-5);
+  background: var(--metal);
+  background-color: var(--gate-gold);
+  color: var(--text-on-fill);
+  border-radius: var(--r-card);
+  box-shadow: var(--elev-action);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── 引き上げ — the platform's sheet (plan 290) ──
+   Every platform a page, the one raised in view, the next a swipe away
+   (components/practice/PracticeSheet.jsx). The pages share the tallest
+   one's height and pin Embarquer to their foot (.btn-depart's own
+   margin-top), so the action keeps its place as the pages go by. The
+   sheet's own touch-action is pan-y (its drag shut, useSheetDrag); the
+   pager and a page's row of departures pan sideways too, each holding
+   its own sideways scroll rather than handing it on. */
+.prc-sheet { gap: var(--sp-4); }
+.prc-sheet__strip { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); }
+.prc-sheet__stop {
+  display: inline-flex;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+/* The strip's ring is the roundel's own (.pf-line__roundel), faded off
+   the page in view. */
+.prc-sheet__ring { opacity: 0.45; }
+.prc-sheet__stop[aria-current] .prc-sheet__ring {
+  opacity: 1;
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent);
+}
+.prc-sheet__sep { width: 1px; align-self: stretch; margin-block: var(--sp-1); background: var(--surface-line); }
+.prc-sheet__pager {
+  flex: none;
+  display: flex;
+  margin-inline: calc(-1 * var(--sp-5));
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  touch-action: pan-x pan-y;
+}
+.prc-page {
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding-inline: var(--sp-5);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.prc-page__head { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: var(--sp-4); align-items: center; }
+.prc-page__names { display: flex; flex-direction: column; min-width: 0; }
+.prc-page__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prc-page__meta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.prc-page__row {
+  display: flex;
+  gap: var(--sp-2);
+  margin-inline-end: calc(-1 * var(--sp-5));
+  padding-inline-end: var(--sp-5);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+}
+.prc-page__go { width: 100%; }
+/* A departure: the grade or the source over what was done there. */
+.prc-tk {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 72px;
+  min-height: 52px;
+  padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-3);
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.prc-tk:hover,
+.prc-tk:focus-visible { border-color: var(--line-color, var(--accent2)); filter: none; }
+.prc-tk__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; white-space: nowrap; }
+.prc-tk__value {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+/* Your cards and the frequency list: another source, not a grade. */
+.prc-tk--source { border-style: dashed; }
+.prc-tk--more .prc-tk__name { color: var(--text-secondary); }
+/* The run's card, a rung under the run's own size. */
+.prc-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 92px;
+  padding: var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.prc-card__jp { font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.5; letter-spacing: var(--tr-term); }
+.prc-card__prompt { font-size: var(--fs-body); font-weight: 500; line-height: 1.4; }
+.prc-card__text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+.prc-card__gloss { font-size: var(--fs-caption); color: var(--text-secondary); }
+.prc-card__mark {
+  text-decoration: underline 2px var(--line-color, var(--accent2));
+  text-underline-offset: 4px;
+}
+.prc-card__opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-1) var(--sp-3);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.prc-card__wave { display: flex; align-items: center; gap: var(--sp-1); height: 34px; }
+.prc-card__wave > i {
+  display: block;
+  width: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 70%, var(--text-primary));
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-resume,
+  .prc-tk { transition: none; }
 }
 
 /* 駅ナンバリング — the roundel on the panel's ink, kept for the doors
