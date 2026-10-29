@@ -107,6 +107,14 @@ describe('the gate on a full day', () => {
       expect(door.top).toBeGreaterThanOrEqual(key.bottom)
       expect(go.top).toBeGreaterThanOrEqual(door.bottom)
       expect(go.bottom).toBeLessThanOrEqual(tabs.top)
+      // The duels' key (plan 287) stands beside the gate, a square at
+      // its height, inside the phone, and leaves the gate its word.
+      const duels = rect('.pvp-key')
+      expect(Math.round(duels.top)).toBe(Math.round(go.top))
+      expect(Math.round(duels.height)).toBe(Math.round(go.height))
+      expect(duels.left).toBeGreaterThan(go.right)
+      expect(duels.right).toBeLessThanOrEqual(window.innerWidth)
+      expect(rect('.btn-depart--gate .btn-depart__jp').left).toBeGreaterThan(rect('.btn-depart--gate .btn-depart__reader').right)
       // The row is a thumb's. Read to the pixel: a rect's edges are
       // float32 in the layout, so a row at a fractional top near 600px
       // reads 44 - 2^-14 tall (it failed CI so at 360×725).

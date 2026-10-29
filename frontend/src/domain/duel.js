@@ -64,6 +64,14 @@ export function nameOf(who, t) {
   return who ?? t.pvpTraveller
 }
 
+/** The first challenge the learner received (GET /api/pvp's answer): a
+ *  friend waiting in a live room before one waiting on the learner's
+ *  run. Their own challenge, sent, and a ranked seat wait in the hall:
+ *  no friend « defies » them with those (plan 287, Today's board). */
+export function firstChallenge(data) {
+  return data?.live?.[0] ?? data?.toPlay?.find(d => d.kind === 'friend' && d.role === 'opponent') ?? null
+}
+
 /** A sprint's time as the head prints it: 1:58, 0:09. */
 export function clockOf(seconds) {
   const s = Math.max(0, Math.ceil(seconds))

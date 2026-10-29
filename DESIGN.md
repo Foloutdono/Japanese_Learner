@@ -881,6 +881,31 @@ dial's panel, at most 440px. On a phone it never leaves the screen
 `src/todayFit.phone.test.jsx`), and in the services sheet a second gate docks
 at the sheet's foot.
 
+**The duels' key stands beside Today's gate** (対戦, plan 287, the owner's
+pick D1 of the canvas "Tsuji — le duel sur Today", for duels found too
+quiet). It is the one thing the gate's row holds, and only on Today's open
+gate, phone and desk alike (`components/pvp/DuelKey.jsx`):
+
+- **The gate's reader drawn whole**: a sumi disc lit from the top left, ⇄
+  in the reader's lamp, a rim of the gate's gold lit from the top, the
+  gate's drop under it. Pressed, it lights as the reader does.
+- **A square at the gate's 66px**, a rung (`--sp-3`) from the pill, which
+  gives it the room; on the desk the pair keeps the gate's 440px.
+- **No word**: its name is its accessible one, as a tab bar gate's. What
+  waits on the learner is the tab bar's chip on its shoulder, in the
+  invitation's gold.
+- **It opens the duels' hall**, where the two platforms and every duel
+  waiting are.
+
+It is no second gate and no precedent: never a gold fill, never a word,
+nowhere but beside Today's gate. A day done has no key, its gate shut: the
+duels are the board's row instead (`components/pvp/DuelRow.jsx`, the pick
+E), the challenge received or the learner's Elo, after the reviews held
+back and before tomorrow -- one way to the duels at a time. A learner who
+met Today before the key stood there is told of it once, over Today
+(`DuelsNewsSheet`, the profile's `duelsNews`); a learner new to Today meets
+it as a stop of the gate's guide.
+
 **Today is read at a glance** (一目, plan 199, the owner's pick A2 of the
 canvas "Tsuji — Today at a glance"). The order is the learner's: how many
 cards and how long, then what they are, then the way in. The run is a
@@ -1358,7 +1383,8 @@ rest of the app is refused:
 
 It is no precedent. The duels' hall, a duel's cover, the board and every
 other screen are the station's, and no `--duel-*` ink is read outside
-the run and its result.
+the run and its result. Today's key to the duels (plan 287) is the gate's
+reader, not the arcade (*The gate button*).
 
 What the game keeps of the app:
 

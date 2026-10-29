@@ -21,6 +21,7 @@
 #   POST   /api/onboarding/ride/done      stamp tutorial_at (finished or skipped)
 #   DELETE /api/onboarding/ride/done      clear it (Settings' replay)
 #   POST   /api/onboarding/guided/{gate}  note a gate's guide as seen
+#   POST   /api/onboarding/news/{item}    note a new feature as told (plan 287)
 #   DELETE /api/onboarding/guided         forget them all (Settings' replay)
 #
 # The placement round trip is stateless by design: the paper is a pure
@@ -669,17 +670,40 @@ def mark_guided(gate: str, user_id: str = Depends(get_user_id)):
     # The first time wins, like every stamp here: a guide replayed from
     # Settings clears the map first (DELETE below), so a second POST on
     # a gate already in it is a double-tap and changes nothing.
+    # Today's guide shows the duels' key since plan 287, so its end is
+    # the key's news told too: the sheet that announces it is for the
+    # learners whose Today guide ended before (profile.duels_news_open).
     now = datetime.now(timezone.utc).isoformat()
     (guided,) = _stamp(
         """
         UPDATE user_profiles
-        SET guided = CASE WHEN guided ? %s THEN guided ELSE guided || %s::jsonb END
+        SET guided = CASE WHEN guided ? %s THEN guided ELSE guided || %s::jsonb END,
+            duels_news_at = CASE WHEN %s THEN COALESCE(duels_news_at, NOW()) ELSE duels_news_at END
         WHERE user_id = %s
         RETURNING guided
         """,
-        (gate, json.dumps({gate: now})), user_id,
+        (gate, json.dumps({gate: now}), gate == "today"), user_id,
     )
     return {"guided": guided}
+
+
+# 新しい — a feature told once, by its column (plan 287). A closed set:
+# the item names a column, so it is never taken from the path as is.
+NEWS = {"duels": "duels_news_at"}
+
+
+@router.post("/api/onboarding/news/{item}")
+def mark_news(item: str, user_id: str = Depends(get_user_id)):
+    """Today's sheet announcing a feature was put away, whichever way:
+    the first time wins, as every stamp here."""
+    column = NEWS.get(item)
+    if column is None:
+        raise HTTPException(status_code=422, detail="unknown news")
+    (at,) = _stamp(
+        f"UPDATE user_profiles SET {column} = COALESCE({column}, NOW()) WHERE user_id = %s RETURNING {column}",
+        (), user_id,
+    )
+    return {"item": item, "at": at.isoformat()}
 
 
 @router.delete("/api/onboarding/guided")

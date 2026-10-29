@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **287**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **288**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -499,6 +499,15 @@ runtime purpose.
   the username where it is, as it is on the 番付 and under every
   published deck. Accounts that boarded before it are brought in line by
   `scripts/migrate_handles.py`, once, by hand.
+
+- **A new feature is told once, to whoever met the app without it
+  (plan 287).** An announcement over Today is a `user_profiles` column
+  stamped by `POST /api/onboarding/news/{item}` (`onboarding.NEWS`, a
+  closed set) whichever way its sheet is shut, and the profile says
+  whether to show it (`duelsNews`), only to a learner who met the screen
+  before the feature did. Whatever teaches it to a new learner (Today's
+  guide shows the duels' key) stamps it too, so nobody is told twice,
+  and it waits its turn in Today's queue of sheets.
 
 - **The interface language is the account's, and only the learner moves it.**
   A choice made in Réglages › Affichage is kept in `user_profiles.ui_lang`

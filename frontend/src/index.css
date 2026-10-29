@@ -31016,7 +31016,8 @@ button.brd-stn { cursor: pointer; }
 .btn-depart--gate.clrk-gate--compact { min-height: 52px; }
 .btn-depart--gate.clrk-gate--compact .btn-depart__reader { width: 40px; height: 40px; }
 .btn-depart--gate.clrk-gate--compact .btn-depart__jp { font-size: var(--fs-body); font-weight: 600; }
-.btn-depart--gate.clrk-gate--arrive {
+.btn-depart--gate.clrk-gate--arrive,
+.pvp-key.clrk-gate--arrive {
   animation: clr-gate-in 0.6s var(--ease-out) backwards;
   animation-delay: var(--gate-d, 0ms);
 }
@@ -31124,6 +31125,7 @@ button.brd-stn { cursor: pointer; }
 .clrk--skip .clrk-clp { display: none; }
 .clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both !important; }
 .clrk--skip .btn-depart--gate.clrk-gate--arrive::after { animation-delay: 0.2s; }
+.clrk--skip .pvp-key.clrk-gate--arrive { animation: clr-fade 0.2s ease both !important; }
 .clrk--skip :where(*),
 .clrk--skip :where(*)::before,
 .clrk--skip :where(*)::after { transition-duration: 0.2s !important; transition-delay: 0s !important; }
@@ -31138,7 +31140,8 @@ button.brd-stn { cursor: pointer; }
   .clrk-slot--wait::before,
   .clrk-tk--gold::after,
   .clrk-odo__col { animation: none; transition: none; }
-  .btn-depart--gate.clrk-gate--arrive { animation: none; }
+  .btn-depart--gate.clrk-gate--arrive,
+  .pvp-key.clrk-gate--arrive { animation: none; }
 }
 /* ── the workbench (/dev/dayclear, development only) ── */
 .clrdev-bar {
@@ -33292,8 +33295,9 @@ button.brd-stn { cursor: pointer; }
    A duel is about people, so it wears the People family -- the pass's
    ink as its edge, the selection's gold for what waits on the learner --
    and never a line's pigment. The door in the holder, its Elo insert
-   and the notice on Today are the app's own objects with a word or a
-   ring more; everything else here is namespaced .pvp-*. The sprint and
+   and the row on Today's board are the app's own objects with a word or
+   a ring more; Today's key is the gate's reader drawn whole (plan 287);
+   everything else here is namespaced .pvp-*. The sprint and
    its result are a game since plan 285 (the owner's C1 and E4): there
    alone the duels' arcade inks (--duel-*), its fills and glows, see
    DESIGN.md, "The duel". */
@@ -33304,8 +33308,84 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   color: var(--sel-ink);
 }
-/* Today's notice: the comeback row's ring, in the selection's gold. */
-.pvp-line__ring { border-color: var(--gate-gold); }
+
+/* ── 対戦 — the key beside Today's gate (plan 287) ──
+   The owner's pick D1 of the canvas "Tsuji — le duel sur Today": the
+   gate's own reader drawn whole as a key -- its sumi lit from the top
+   left, ⇄ in its lamp -- in a rim of the gate's gold lit from the top,
+   on the gate's own drop. A square at the gate's height beside the
+   pill: the gate's 66px across, and the row stretches it to the gate's
+   height (a stretched height does not square a flex item by its ratio,
+   so the width is the gate's own figure; the ratio squares the picture
+   on the news sheet, where nothing stretches it).
+   Pressed, it lights as the reader does. What waits is the tab bar's
+   chip on its shoulder, in the invitation's gold: a challenge is an
+   invitation, not a debt. */
+.tdy-gaterow { display: flex; align-items: stretch; gap: var(--sp-3); }
+.tdy-gaterow > .btn-depart--gate { flex: 1 1 auto; min-width: 0; }
+.pvp-key {
+  --gate-drop: 0 6px 14px rgba(90, 64, 20, 0.32), 0 1px 2px rgba(60, 40, 10, 0.3);
+  --pvp-key-face: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--bg-panel) 86%, var(--gate-gold-lit)) 0%, var(--bg-panel) 70%);
+  --pvp-key-rim: linear-gradient(180deg, var(--gate-gold-crest) 0%, var(--gate-gold-lit) 45%, var(--gate-gold) 100%);
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 66px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 3px solid transparent;
+  border-radius: var(--r-pill);
+  background: var(--pvp-key-face) padding-box, var(--pvp-key-rim) border-box;
+  box-shadow: var(--gate-drop), inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  color: var(--gate-lamp);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.pvp-key:hover,
+.pvp-key:focus-visible { transform: translateY(-2px); filter: none; }
+.pvp-key:active {
+  transform: translateY(1px) scale(0.99);
+  background: linear-gradient(var(--text-on-panel), var(--text-on-panel)) padding-box, var(--pvp-key-rim) border-box;
+  color: var(--text-on-fill);
+}
+.pvp-key__due {
+  position: absolute;
+  top: calc(-1 * var(--sp-1));
+  right: calc(-1 * var(--sp-1));
+  display: inline-flex;
+  align-items: baseline;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--gate-lamp) 55%, transparent);
+  background: var(--bg-panel);
+  color: var(--gate-lamp);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pvp-key { transition: none; }
+  .pvp-key:hover,
+  .pvp-key:focus-visible,
+  .pvp-key:active { transform: none; }
+}
+/* The duels' row on a day done's board (plan 287, E): the board's own
+   row, the duels' pictogram before its name. */
+.pvp-row__day { display: inline-flex; align-items: center; gap: var(--sp-2); min-width: 0; }
+
+/* ── 新しい — the duels announced, once, over Today (plan 287) ──
+   To the learners who met Today before the key stood there: Today's
+   sheet, the key drawn at the gate's 66px as its picture, a title and
+   a line, the way to the hall and the quiet way past. */
+.pvp-news__art { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.pvp-news__art .pvp-key { cursor: default; transform: none; }
+.pvp-news__title { margin: 0; text-wrap: balance; }
+.pvp-news__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.pvp-news__acts { display: flex; flex-direction: column; gap: var(--sp-4); }
 
 /* ── the hall ── */
 .pvp { flex: 1 0 auto; display: flex; flex-direction: column; gap: var(--sp-4); padding: 0 var(--sp-5); }
