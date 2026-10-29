@@ -334,18 +334,13 @@ describe('the departure (D2)', () => {
     expect($('.where').textContent).toBe('/duel/52#start')
   })
 
-  it('takes platform 2 to the friend’s sheet', async () => {
+  it('shows the platform the hall chose, alone: no friend’s platform to pick again (plan 288)', async () => {
     duels = { data: { prices: { ranked: 2, review: 1 }, rating: { elo: 1248, games: 21 } } }
-    answer = path => (path === '/api/pvp/friends' ? BOOK : null)
     await mountDeparture()
-    $$('.pvp-quai')[1].click()
-    await settle(50)
-    expect($$('.pvp-quai').map(q => q.getAttribute('aria-checked'))).toEqual(['false', 'true'])
-    expect($('.exam-cover__go').textContent).toBe('Choisir un ami')
-    $('.exam-cover__go').click()
-    await settle()
-    expect(asked('/api/pvp/friends')).toHaveLength(1)
-    expect($('.pvp-sheet .pvp-pick__row').textContent).toContain('Kenta')
+    expect($$('.pvp-quai')).toHaveLength(1)
+    expect($('.pvp-quai .pvp-quai__title').textContent).toBe('Sprint classé')
+    expect($('[role="radiogroup"]')).toBeNull()
+    expect($('.exam-cover__go').textContent).toBe('Partir · 2 crédits')
   })
 })
 

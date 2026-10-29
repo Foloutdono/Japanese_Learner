@@ -33598,6 +33598,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   transition: border-color 0.15s ease;
 }
 .pvp-quai--on { border-color: var(--sel-line); border-top-color: var(--gate-gold); background: var(--sel-wash); }
+/* The departure prints the platform the hall chose, alone (plan 288). */
+.pvp-quais--one { grid-template-columns: minmax(0, 1fr); }
+.pvp-quais--one .pvp-quai { cursor: default; }
 .pvp-quai__no { display: flex; align-items: baseline; gap: var(--sp-1); padding-top: var(--sp-4); }
 .pvp-quai__fig { font-family: var(--font-display); font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 .pvp-quai--on .pvp-quai__fig { color: var(--sel-ink); }

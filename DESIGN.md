@@ -1407,8 +1407,8 @@ What the game keeps of the app:
   None of them takes a pointer, and each leaves by itself. All of them
   are aria-hidden: the totals, the clock and the verdict say the same to
   a screen reader.
-- **The question never moves.** The four answers are one list, centred,
-  with no numbers and no bubbles (Q3). Each tile is the same height from
+- **The question never moves.** The three answers (plan 288; four
+  before it) are one list, centred, with no numbers and no bubbles (Q3). Each tile is the same height from
   one question to the next, and a long answer wraps inside its tile.
 - **Reduced motion** keeps each moment as a fade and drops every
   transform.
