@@ -30095,5 +30095,988 @@
     ]
    }
   ]
+ },
+ {
+  "id": "n5-31",
+  "level": "N5",
+  "title": "おばあちゃんの家",
+  "grammar": [
+   "〜ています",
+   "〜てから"
+  ],
+  "text": "わたしのおばあちゃんは、大きい木のあるふるいいえにすんでいます。いえの前には、ちいさいはたけがあります。なつやすみに、わたしはひとりで、おばあちゃんのいえへいきます。おばあちゃんは、まいあさはやくおきて、にわのはなにみずをあげます。わたしもてつだいます。おひるは、いっしょにごはんを食べます。おばあちゃんのそばは、とてもおいしいです。おひるをたべてから、ちかくのかわへいきます。川には、魚がたくさんいます。わたしはつかれましたが、とてもたのしかったです。よるは、おばあちゃんに話をききます。わたしは、いつもはやくねます。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Where does the grandmother live?",
+     "fr": "Où habite la grand-mère ?"
+    },
+    "options": {
+     "en": [
+      "In a new apartment in the city",
+      "In an old house",
+      "By the sea",
+      "In a big school"
+     ],
+     "fr": [
+      "Dans un nouvel appartement en ville",
+      "Dans une vieille maison",
+      "Au bord de la mer",
+      "Dans une grande école"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What does the writer do in the summer holidays?",
+     "fr": "Que fait l'auteure pendant les vacances d'été ?"
+    },
+    "options": {
+     "en": [
+      "Goes to the sea with friends",
+      "Goes to grandmother's house alone",
+      "Stays at home all summer",
+      "Studies at a school"
+     ],
+     "fr": [
+      "Va à la mer avec des amis",
+      "Va chez sa grand-mère, seule",
+      "Reste à la maison tout l'été",
+      "Étudie dans une école"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "In 「まいあさはやくおきて」, what does 「はやく」 mean?",
+     "fr": "Dans 「まいあさはやくおきて」, que signifie 「はやく」 ?"
+    },
+    "options": {
+     "en": [
+      "Late",
+      "Slowly",
+      "Early",
+      "Again"
+     ],
+     "fr": [
+      "Tard",
+      "Lentement",
+      "Tôt",
+      "Encore"
+     ]
+    },
+    "correct": 2
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "In 「わたしもてつだいます」, what is the writer doing?",
+     "fr": "Dans 「わたしもてつだいます」, que fait l'auteure ?"
+    },
+    "options": {
+     "en": [
+      "Also helping",
+      "Also cooking",
+      "Also going out",
+      "Also waiting"
+     ],
+     "fr": [
+      "Elle aide aussi",
+      "Elle cuisine aussi",
+      "Elle sort aussi",
+      "Elle attend aussi"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "In 「いつもはやくねます」, what does 「いつも」 mean?",
+     "fr": "Dans 「いつもはやくねます」, que signifie 「いつも」 ?"
+    },
+    "options": {
+     "en": [
+      "Sometimes",
+      "Always",
+      "Never",
+      "Already"
+     ],
+     "fr": [
+      "Parfois",
+      "Toujours",
+      "Jamais",
+      "Déjà"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「おひるをたべてから」 mean?",
+     "fr": "Que signifie 「おひるをたべてから」 ?"
+    },
+    "options": {
+     "en": [
+      "Before eating lunch",
+      "After eating lunch",
+      "Instead of eating lunch",
+      "While eating lunch"
+     ],
+     "fr": [
+      "Avant de déjeuner",
+      "Après le déjeuner",
+      "Au lieu de déjeuner",
+      "Pendant le déjeuner"
+     ]
+    },
+    "correct": 1
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why was the writer tired at the end of the day?",
+     "fr": "Pourquoi l'auteure était-elle fatiguée à la fin de la journée ?"
+    },
+    "options": {
+     "en": [
+      "She was active outside all day",
+      "She slept all afternoon",
+      "She was ill",
+      "She stayed in the house"
+     ],
+     "fr": [
+      "Elle a été active dehors toute la journée",
+      "Elle a dormi tout l'après-midi",
+      "Elle était malade",
+      "Elle est restée à la maison"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "When does grandmother tell stories?",
+     "fr": "Quand la grand-mère raconte-t-elle des histoires ?"
+    },
+    "options": {
+     "en": [
+      "In the morning",
+      "At noon",
+      "In the evening",
+      "After school"
+     ],
+     "fr": [
+      "Le matin",
+      "À midi",
+      "Le soir",
+      "Après l'école"
+     ]
+    },
+    "correct": 2
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "わたしのおばあちゃんは、大きい木のあるふるいいえにすんでいます。",
+    "translation": {
+     "en": "My grandmother lives in an old house with a big tree.",
+     "fr": "Ma grand-mère habite une vieille maison avec un grand arbre."
+    },
+    "note": {
+     "en": "「すんでいます」 is 〜ています: she lives there now, a state that goes on.",
+     "fr": "「すんでいます」 est 〜ています : elle habite là maintenant, un état qui dure."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I, myself",
+       "fr": "moi"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "おばあちゃん",
+      "meaning": {
+       "en": "grandmother",
+       "fr": "grand-mère"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "大きい",
+      "meaning": {
+       "en": "big",
+       "fr": "grand"
+      }
+     },
+     {
+      "surface": "木",
+      "meaning": {
+       "en": "tree",
+       "fr": "arbre"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "that (linking)",
+       "fr": "qui (lien)"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "that has",
+       "fr": "qui a"
+      }
+     },
+     {
+      "surface": "ふるい",
+      "meaning": {
+       "en": "old",
+       "fr": "vieille"
+      }
+     },
+     {
+      "surface": "いえ",
+      "meaning": {
+       "en": "house",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in (place)",
+       "fr": "dans (lieu)"
+      }
+     },
+     {
+      "surface": "すんで",
+      "meaning": {
+       "en": "to live",
+       "fr": "habiter"
+      }
+     },
+     {
+      "surface": "います",
+      "meaning": {
+       "en": "is (ongoing state)",
+       "fr": "(état qui dure)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "いえの前には、ちいさいはたけがあります。",
+    "translation": {
+     "en": "In front of the house there is a small field.",
+     "fr": "Devant la maison, il y a un petit champ."
+    },
+    "note": {
+     "en": "「あります」 is used for things, 「います」 for living beings.",
+     "fr": "「あります」 pour les choses, 「います」 pour les êtres vivants."
+    },
+    "words": [
+     {
+      "surface": "いえ",
+      "meaning": {
+       "en": "house",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "前",
+      "meaning": {
+       "en": "front",
+       "fr": "devant"
+      }
+     },
+     {
+      "surface": "には",
+      "meaning": {
+       "en": "there is (in the place)",
+       "fr": "il y a (dans le lieu)"
+      }
+     },
+     {
+      "surface": "ちいさい",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
+      }
+     },
+     {
+      "surface": "はたけ",
+      "meaning": {
+       "en": "field",
+       "fr": "champ"
+      }
+     },
+     {
+      "surface": "があります",
+      "meaning": {
+       "en": "there is",
+       "fr": "il y a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "なつやすみに、わたしはひとりで、おばあちゃんのいえへいきます。",
+    "translation": {
+     "en": "In summer holidays, I go to grandmother's house alone.",
+     "fr": "Pendant les vacances d'été, je vais chez grand-mère, seule."
+    },
+    "note": {
+     "en": "「ひとりで」 means alone; 「へ」 marks the direction.",
+     "fr": "「ひとりで」 veut dire seule ; 「へ」 marque la direction."
+    },
+    "words": [
+     {
+      "surface": "なつやすみ",
+      "meaning": {
+       "en": "summer holidays",
+       "fr": "vacances d'été"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in (time)",
+       "fr": "pendant (moment)"
+      }
+     },
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I, myself",
+       "fr": "moi"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "ひとりで",
+      "meaning": {
+       "en": "alone",
+       "fr": "seule"
+      }
+     },
+     {
+      "surface": "おばあちゃん",
+      "meaning": {
+       "en": "grandmother",
+       "fr": "grand-mère"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "いえ",
+      "meaning": {
+       "en": "house",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to (direction)",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "いきます",
+      "meaning": {
+       "en": "go",
+       "fr": "vais"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "おばあちゃんは、まいあさはやくおきて、にわのはなにみずをあげます。",
+    "translation": {
+     "en": "Every morning grandmother gets up early and waters the flowers in the garden.",
+     "fr": "Chaque matin, grand-mère se lève tôt et arrose les fleurs du jardin."
+    },
+    "note": {
+     "en": "「おきて」 links two actions: she gets up, and then she waters.",
+     "fr": "「おきて」 relie deux actions : elle se lève, puis elle arrose."
+    },
+    "words": [
+     {
+      "surface": "おばあちゃん",
+      "meaning": {
+       "en": "grandmother",
+       "fr": "grand-mère"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "まいあさ",
+      "meaning": {
+       "en": "every morning",
+       "fr": "chaque matin"
+      }
+     },
+     {
+      "surface": "はやく",
+      "meaning": {
+       "en": "early",
+       "fr": "tôt"
+      }
+     },
+     {
+      "surface": "おきて",
+      "meaning": {
+       "en": "gets up, and",
+       "fr": "se lève, et"
+      }
+     },
+     {
+      "surface": "にわ",
+      "meaning": {
+       "en": "garden",
+       "fr": "jardin"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "はな",
+      "meaning": {
+       "en": "flower",
+       "fr": "fleur"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on, to (target)",
+       "fr": "sur, à (cible)"
+      }
+     },
+     {
+      "surface": "みず",
+      "meaning": {
+       "en": "water",
+       "fr": "eau"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "object marker",
+       "fr": "particule de l'objet"
+      }
+     },
+     {
+      "surface": "あげます",
+      "meaning": {
+       "en": "gives (water)",
+       "fr": "arrose"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしもてつだいます。",
+    "translation": {
+     "en": "I help her too.",
+     "fr": "Moi aussi, je l'aide."
+    },
+    "note": {
+     "en": "「も」 means also: the writer helps as well.",
+     "fr": "「も」 veut dire aussi : l'auteure aide, elle aussi."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I, myself",
+       "fr": "moi"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "てつだいます",
+      "meaning": {
+       "en": "help",
+       "fr": "aide"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "おひるは、いっしょにごはんを食べます。",
+    "translation": {
+     "en": "At noon we eat a meal together.",
+     "fr": "À midi, nous mangeons ensemble."
+    },
+    "note": {
+     "en": "「いっしょに」 means together.",
+     "fr": "「いっしょに」 veut dire ensemble."
+    },
+    "words": [
+     {
+      "surface": "おひる",
+      "meaning": {
+       "en": "noon",
+       "fr": "midi"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "いっしょに",
+      "meaning": {
+       "en": "together",
+       "fr": "ensemble"
+      }
+     },
+     {
+      "surface": "ごはん",
+      "meaning": {
+       "en": "meal, rice",
+       "fr": "repas, riz"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "object marker",
+       "fr": "particule de l'objet"
+      }
+     },
+     {
+      "surface": "食べます",
+      "meaning": {
+       "en": "eat",
+       "fr": "mangeons"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "おばあちゃんのそばは、とてもおいしいです。",
+    "translation": {
+     "en": "Grandmother's soba is very delicious.",
+     "fr": "Les soba de grand-mère sont très délicieux."
+    },
+    "note": {
+     "en": "「おいしい」 describes taste, here of food.",
+     "fr": "「おいしい」 décrit le goût, ici celui de la nourriture."
+    },
+    "words": [
+     {
+      "surface": "おばあちゃん",
+      "meaning": {
+       "en": "grandmother",
+       "fr": "grand-mère"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "そば",
+      "meaning": {
+       "en": "soba noodles",
+       "fr": "nouilles soba"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "とても",
+      "meaning": {
+       "en": "very",
+       "fr": "très"
+      }
+     },
+     {
+      "surface": "おいしい",
+      "meaning": {
+       "en": "delicious",
+       "fr": "délicieux"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "is (polite)",
+       "fr": "est (poli)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "おひるをたべてから、ちかくのかわへいきます。",
+    "translation": {
+     "en": "After eating lunch, I go to the river nearby.",
+     "fr": "Après le déjeuner, je vais à la rivière voisine."
+    },
+    "note": {
+     "en": "「たべてから」 means after eating: 〜てから, after doing something.",
+     "fr": "「たべてから」 : après avoir mangé, 〜てから, après avoir fait quelque chose."
+    },
+    "words": [
+     {
+      "surface": "おひる",
+      "meaning": {
+       "en": "noon",
+       "fr": "midi"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "object marker",
+       "fr": "particule de l'objet"
+      }
+     },
+     {
+      "surface": "たべてから",
+      "meaning": {
+       "en": "after eating",
+       "fr": "après avoir mangé"
+      }
+     },
+     {
+      "surface": "ちかく",
+      "meaning": {
+       "en": "nearby",
+       "fr": "voisine"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "かわ",
+      "meaning": {
+       "en": "river",
+       "fr": "rivière"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to (direction)",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "いきます",
+      "meaning": {
+       "en": "go",
+       "fr": "vais"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "川には、魚がたくさんいます。",
+    "translation": {
+     "en": "There are many fish in the river.",
+     "fr": "Il y a beaucoup de poissons dans la rivière."
+    },
+    "note": {
+     "en": "「います」 is used here for fish, which are living beings.",
+     "fr": "「います」 ici pour les poissons, des êtres vivants."
+    },
+    "words": [
+     {
+      "surface": "川",
+      "meaning": {
+       "en": "river",
+       "fr": "rivière"
+      }
+     },
+     {
+      "surface": "には",
+      "meaning": {
+       "en": "in the river (there is)",
+       "fr": "dans la rivière (il y a)"
+      }
+     },
+     {
+      "surface": "魚",
+      "meaning": {
+       "en": "fish",
+       "fr": "poissons"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "particule du sujet"
+      }
+     },
+     {
+      "surface": "たくさん",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "います",
+      "meaning": {
+       "en": "there are",
+       "fr": "il y a"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしはつかれましたが、とてもたのしかったです。",
+    "translation": {
+     "en": "I got tired, but it was very fun.",
+     "fr": "Je me suis fatiguée, mais c'était très amusant."
+    },
+    "note": {
+     "en": "「つかれましたが」 uses が to mean but.",
+     "fr": "「つかれましたが」 : が veut dire mais."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I, myself",
+       "fr": "moi"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "つかれました",
+      "meaning": {
+       "en": "got tired",
+       "fr": "me suis fatiguée"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "とても",
+      "meaning": {
+       "en": "very",
+       "fr": "très"
+      }
+     },
+     {
+      "surface": "たのしかった",
+      "meaning": {
+       "en": "fun",
+       "fr": "amusant"
+      }
+     },
+     {
+      "surface": "です",
+      "meaning": {
+       "en": "was (polite)",
+       "fr": "était (poli)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "よるは、おばあちゃんに話をききます。",
+    "translation": {
+     "en": "In the evening I listen to grandmother's stories.",
+     "fr": "Le soir, j'écoute les histoires de grand-mère."
+    },
+    "note": {
+     "en": "「ききます」 means to listen to, here to stories.",
+     "fr": "「ききます」 veut dire écouter, ici des histoires."
+    },
+    "words": [
+     {
+      "surface": "よる",
+      "meaning": {
+       "en": "evening",
+       "fr": "soir"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "おばあちゃん",
+      "meaning": {
+       "en": "grandmother",
+       "fr": "grand-mère"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "from",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "話",
+      "meaning": {
+       "en": "stories",
+       "fr": "histoires"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "object marker",
+       "fr": "particule de l'objet"
+      }
+     },
+     {
+      "surface": "ききます",
+      "meaning": {
+       "en": "listen",
+       "fr": "écoute"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "わたしは、いつもはやくねます。",
+    "translation": {
+     "en": "I always go to bed early.",
+     "fr": "Je me couche toujours tôt."
+    },
+    "note": {
+     "en": "「いつも」 means always.",
+     "fr": "「いつも」 veut dire toujours."
+    },
+    "words": [
+     {
+      "surface": "わたし",
+      "meaning": {
+       "en": "I, myself",
+       "fr": "moi"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "as for (topic marker)",
+       "fr": "quant à (thème)"
+      }
+     },
+     {
+      "surface": "いつも",
+      "meaning": {
+       "en": "always",
+       "fr": "toujours"
+      }
+     },
+     {
+      "surface": "はやく",
+      "meaning": {
+       "en": "early",
+       "fr": "tôt"
+      }
+     },
+     {
+      "surface": "ねます",
+      "meaning": {
+       "en": "go to bed",
+       "fr": "me couche"
+      }
+     }
+    ]
+   }
+  ]
  }
 ]

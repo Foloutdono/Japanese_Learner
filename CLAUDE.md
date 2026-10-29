@@ -533,7 +533,7 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-thirty hand-written exercises per level since plan 259, in both languages,
+thirty hand-written exercises per level since plan 259 (N5 has thirty-one), in both languages,
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
