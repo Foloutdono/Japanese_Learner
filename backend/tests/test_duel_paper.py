@@ -13,7 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from study.duel_paper import CHOICES, ITEMS, LEVELS, OWN_FLOOR, PAPER_REV, blend, build_paper, level_of, mix_of, served, shares
+from study.duel_paper import (CHOICES, ITEMS, LADDER, LEVELS, MIX_MIN, NOVICE, OWN_FLOOR, PAPER_REV, blend,
+                              build_paper, level_of, mix_of, served, shares)
 from study.exam_seed import LENGTH_TELL, LIKENESS_TELL, ROTATION_TELL
 from study.exam_tells import centre, outlier
 
@@ -192,7 +193,11 @@ def mixed():
 
 def test_an_elo_stands_between_two_levels():
     # Each level's starting Elo is the whole level; 200 points a level.
-    assert [mix_of(e) for e in (500, 1000, 1180, 1340, 1400, 1720, 1800, 2400)] == [0, 0, 9, 17, 20, 36, 40, 40]
+    assert [mix_of(e) for e in (500, 1000, 1180, 1340, 1400, 1720, 1800, 2400)] == [-10, 0, 9, 17, 20, 36, 40, 40]
+    # The beginner's stop is a level under N5 (plan 289).
+    assert [mix_of(e) for e in (800, 900)] == [-10, -5]
+    assert blend(-10) == [(NOVICE, 1.0)] and blend(-3) == [(NOVICE, 0.3), ("N5", 0.7)]
+    assert [level_of(m) for m in (-10, -6, -5, 0)] == [NOVICE, NOVICE, "N5", "N5"]
     assert blend(9) == [("N5", 0.1), ("N4", 0.9)]
     assert blend(20) == [("N3", 1.0)]
     assert blend(36) == [("N2", 0.4), ("N1", 0.6)]
@@ -240,16 +245,16 @@ def test_a_mixed_paper_keeps_the_guards(mixed):
 def test_a_paper_brings_the_levels_below_its_own_and_keeps_its_level():
     # Each level brings the words of the levels below it, in their share
     # of the words from there down; the duel's level keeps OWN_FLOOR.
-    assert shares(0) == [("N5", 1.0)]
-    for mix in range(0, 41):
+    assert shares(-10) == [(NOVICE, 1.0)]
+    for mix in range(MIX_MIN, 41):
         parts = dict(shares(mix))
         assert abs(sum(parts.values()) - 1) < 1e-9, mix
         assert parts[level_of(mix)] >= OWN_FLOOR - 1e-9, (mix, parts)
-        # every level from N5 up to the blend's top is asked, nothing above
-        top = LEVELS.index(blend(mix)[-1][0])
-        assert list(parts) == list(LEVELS[: top + 1]), (mix, parts)
+        # every stop from the beginner's up to the blend's top is asked, nothing above
+        top = LADDER.index(blend(mix)[-1][0])
+        assert list(parts) == list(LADDER[: top + 1]), (mix, parts)
     assert OWN_FLOOR == 0.3
-    for level in LEVELS:
+    for level in LADDER:
         built = build_paper(4, level)["items"]
         own = sum(1 for item in built if item["level"] == level)
         assert own >= OWN_FLOOR * ITEMS - 2, (level, own)
@@ -260,3 +265,45 @@ def test_a_third_of_a_paper_is_kanji(papers):
         for paper in papers[level]:
             kanji = sum(1 for item in paper["items"] if item["kind"] != "word")
             assert ITEMS // 3 - 6 <= kanji <= ITEMS // 3, (level, paper["seed"], kanji)
+
+
+# ── The beginner's stop (plan 289) ──────────────────────────────────
+
+def test_the_beginners_paper_is_the_basics_words_in_kana_and_the_kana():
+    import re
+    from content.kana_data import HIRAGANA_BASIC, KATAKANA_BASIC
+    from study.duel_paper import _basics_keys
+    romaji = {e["kana"]: e["romaji"] for e in HIRAGANA_BASIC + KATAKANA_BASIC}
+    kanji = re.compile(r"[\u4e00-\u9fff]")
+    for seed in range(1, 6):
+        paper = build_paper(seed, NOVICE)
+        assert paper["level"] == NOVICE and paper["mix"] == MIX_MIN and len(paper["items"]) == ITEMS
+        kinds = {item["kind"] for item in paper["items"]}
+        assert kinds == {"word", "kana"}, kinds
+        for item in paper["items"]:
+            assert item["level"] == NOVICE
+            assert not kanji.search(item["prompt"]), item
+            if item["kind"] == "kana":
+                assert item["choices"][item["answer"]] == romaji[item["prompt"]]
+                # the wrong readings are as long as the right one
+                assert len({len(c) for c in item["choices"]}) == 1, item
+                assert len(set(item["choices"])) == CHOICES
+    keys = _basics_keys()
+    assert len(keys) > 150 and all("::" in k for k in keys)
+
+
+def test_the_kana_say_nothing_by_their_look():
+    items = [item for seed in range(1, 11) for item in build_paper(seed, NOVICE)["items"] if item["kind"] == "kana"]
+    for name, (rate, n) in _look_rates(items).items():
+        assert n < 40 or 2 * BLIND - LIKENESS <= rate <= LIKENESS, (name, rate, n)
+    slots = [0] * CHOICES
+    for item in items:
+        slots[item["answer"]] += 1
+    assert all(BLIND - 0.1 <= n / len(items) <= BLIND + 0.1 for n in slots), slots
+
+
+def test_n5_brings_the_beginners_kana_below_it():
+    parts = dict(shares(0))
+    assert set(parts) == {NOVICE, "N5"} and parts["N5"] >= OWN_FLOOR
+    kinds = {item["kind"] for item in build_paper(2, "N5")["items"] if item["level"] == NOVICE}
+    assert "kana" in kinds

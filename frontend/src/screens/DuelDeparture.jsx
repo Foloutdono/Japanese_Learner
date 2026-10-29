@@ -6,7 +6,7 @@ import { LevelBar } from '../components/chrome/LevelBar'
 import { Mix } from '../components/pvp/parts'
 import { apiJson } from '../lib/api'
 import { playClick } from '../lib/audio'
-import { CHOICES, SPRINT_MS, errorKey } from '../domain/duel'
+import { CHOICES, SPRINT_MS, errorKey, questionWords } from '../domain/duel'
 import { refreshDuels, useDuels } from '../stores/duels'
 
 // ── 対戦 — the departure (plan 279, D2) ──
@@ -60,8 +60,8 @@ export default function DuelDeparture({ session }) {
             <span className="pvp-ticket__side pvp-ticket__side--them"><b className="pvp-ticket__name">?</b><small className="pvp-ticket__level">{ranked ? t.pvpEloRange(fig(ranked.low), fig(ranked.high)) : ''}</small></span>
           </div>
           <dl className="pvp-ticket__facts">
-            {ranked && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpDuelLevel}</dt><dd className="pvp-ticket__dd"><Mix mix={ranked.mix} lang={lang} /></dd></div>}
-            <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpQuestions}</dt><dd className="pvp-ticket__dd">{t.pvpWordsKanji} · {t.pvpChoicesN(CHOICES)}</dd></div>
+            {ranked && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpDuelLevel}</dt><dd className="pvp-ticket__dd"><Mix mix={ranked.mix} lang={lang} t={t} /></dd></div>}
+            <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpQuestions}</dt><dd className="pvp-ticket__dd">{questionWords(t, ranked?.mix)} · {t.pvpChoicesN(CHOICES)}</dd></div>
             <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpLength}</dt><dd className="pvp-ticket__dd">{t.pvpMinutes(SPRINT_MS / 60_000)}</dd></div>
             {ranked && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpStake}</dt><dd className="pvp-ticket__dd">{t.pvpStakeElo(ranked.stake)}</dd></div>}
           </dl>

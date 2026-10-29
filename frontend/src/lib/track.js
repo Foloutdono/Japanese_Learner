@@ -181,17 +181,17 @@ export const VALUES = {
   pvp_duel_start: {
     kind: ['friend', 'ranked'],
     mode: ['async', 'live'],
-    level: ['N5', 'N4', 'N3', 'N2', 'N1'],
+    level: ['novice', 'N5', 'N4', 'N3', 'N2', 'N1'],
     against: ['friend', 'seek', 'ghost', 'open'],
   },
   pvp_duel_done: {
     kind: ['friend', 'ranked'],
     mode: ['async', 'live'],
-    level: ['N5', 'N4', 'N3', 'N2', 'N1'],
+    level: ['novice', 'N5', 'N4', 'N3', 'N2', 'N1'],
     outcome: ['win', 'loss', 'draw', 'expired', 'declined'],
   },
   pvp_review: { kind: ['friend', 'ranked'] },
-  pvp_placed: { level: ['N5', 'N4', 'N3', 'N2', 'N1'] },
+  pvp_placed: { level: ['novice', 'N5', 'N4', 'N3', 'N2', 'N1'] },
   client_error: {
     where: ['error', 'rejection'],
     step: ['kana', 'reveal', 'level', 'test', 'card', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],

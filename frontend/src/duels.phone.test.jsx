@@ -353,6 +353,14 @@ describe('the departure (D2)', () => {
     expect($$('.pvp-mix__part')).toHaveLength(2)
     expect($('.exam-cover__go').textContent).toBe('Partir · 2 crédits')
   })
+
+  it('prints a beginner’s ticket in words and kana (plan 289)', async () => {
+    duels = { data: { prices: { ranked: 2, review: 1 }, rating: { elo: 800, games: 0, level: 'novice' },
+      ranked: { mix: [{ level: 'novice', share: 1 }], low: 600, high: 1000, stake: 20 } } }
+    await mountDeparture()
+    const facts = $$('.pvp-ticket__fact').map(f => f.querySelector('dd').textContent)
+    expect(facts.slice(0, 2)).toEqual(['Débutant', 'mots et kana · 3 réponses'])
+  })
 })
 
 // ── L2 — the Elo board ──

@@ -313,7 +313,8 @@ EVENTS: dict[str, frozenset[str]] = {
     # someone left waiting, `seek`; a recorded run, `ghost`; or none
     # yet, `open`), `wait_h` the hours an asynchronous duel waited.
     # `pvp_placed` is the level a learner's Elo started from, written
-    # at their first ranked sprint, no test asked (plan 282).
+    # at their first ranked sprint, no test asked (plan 282); `novice`
+    # is the beginner's stop under N5 (plan 289), a duel's level too.
     "pvp_friend":     frozenset({"action"}),
     "pvp_report":     frozenset({"reason"}),
     "pvp_duel_start": frozenset({"kind", "mode", "level", "against"}),
@@ -399,17 +400,17 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "pvp_duel_start": {
         "kind":    frozenset({"friend", "ranked"}),
         "mode":    frozenset({"async", "live"}),
-        "level":   frozenset({"N5", "N4", "N3", "N2", "N1"}),
+        "level":   frozenset({"novice", "N5", "N4", "N3", "N2", "N1"}),
         "against": frozenset({"friend", "seek", "ghost", "open"}),
     },
     "pvp_duel_done": {
         "kind":    frozenset({"friend", "ranked"}),
         "mode":    frozenset({"async", "live"}),
-        "level":   frozenset({"N5", "N4", "N3", "N2", "N1"}),
+        "level":   frozenset({"novice", "N5", "N4", "N3", "N2", "N1"}),
         "outcome": frozenset({"win", "loss", "draw", "expired", "declined"}),
     },
     "pvp_review": {"kind": frozenset({"friend", "ranked"})},
-    "pvp_placed": {"level": frozenset({"N5", "N4", "N3", "N2", "N1"})},
+    "pvp_placed": {"level": frozenset({"novice", "N5", "N4", "N3", "N2", "N1"})},
     "client_error": {
         "where": frozenset({"error", "rejection"}),
         # The boarding's and the rides' steps, frontend/src/domain/

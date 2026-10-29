@@ -11,7 +11,7 @@ import { Train } from '../components/pvp/Train'
 import { Mix } from '../components/pvp/parts'
 import { apiJson } from '../lib/api'
 import { loadDuelAudio, playClick, releaseDuelAudio, startDuelRace } from '../lib/audio'
-import { LIMIT_MS, SPRINT_MS, clockOf, duelErrorKey, errorKey, points, speedNote, totalAt } from '../domain/duel'
+import { LIMIT_MS, SPRINT_MS, clockOf, duelErrorKey, errorKey, japaneseChoices, levelName, points, questionWords, speedNote, totalAt } from '../domain/duel'
 import { refreshDuels } from '../stores/duels'
 import { applyXpGain } from '../stores/profileSummary'
 
@@ -472,13 +472,13 @@ function Ticket({ duel, them, t, lang, now, error, onLeave, onGo, onJoin, onDecl
           </div>
           <div className="clrk-tk__rule" />
           <div className="pvp-ticket__who">
-            <span className="pvp-ticket__side"><b className="pvp-ticket__name">{t.pvpYou}</b><small className="pvp-ticket__level">{duel.you.level}</small></span>
+            <span className="pvp-ticket__side"><b className="pvp-ticket__name">{t.pvpYou}</b><small className="pvp-ticket__level">{levelName(t, duel.you.level)}</small></span>
             <span className="pvp-ticket__vs" aria-hidden="true">⇄</span>
-            <span className="pvp-ticket__side pvp-ticket__side--them"><b className="pvp-ticket__name">{duel.them ? them : '?'}</b><small className="pvp-ticket__level">{duel.them?.level ?? ''}</small></span>
+            <span className="pvp-ticket__side pvp-ticket__side--them"><b className="pvp-ticket__name">{duel.them ? them : '?'}</b><small className="pvp-ticket__level">{duel.them?.level ? levelName(t, duel.them.level) : ''}</small></span>
           </div>
           <dl className="pvp-ticket__facts">
-            <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpDuelLevel}</dt><dd className="pvp-ticket__dd">{duel.mix ? <Mix mix={duel.mix} lang={lang} /> : duel.level}</dd></div>
-            <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpQuestions}</dt><dd className="pvp-ticket__dd">{t.pvpWordsKanji}</dd></div>
+            <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpDuelLevel}</dt><dd className="pvp-ticket__dd">{duel.mix ? <Mix mix={duel.mix} lang={lang} t={t} /> : levelName(t, duel.level)}</dd></div>
+            <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpQuestions}</dt><dd className="pvp-ticket__dd">{questionWords(t, duel.mix)}</dd></div>
             {duel.them?.score != null && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpToBeat}</dt><dd className="pvp-ticket__dd">{duel.them.score.toLocaleString(lang)}</dd></div>}
             {/* A run already paid and being picked up again has no price left to print. */}
             {!(ranked && duel.you.started) && <div className="pvp-ticket__fact"><dt className="pvp-ticket__dt">{t.pvpPrice}</dt><dd className="pvp-ticket__dd">{!ranked ? t.pvpFreeFriends : duel.price ? t.pvpCredits(duel.price) : t.pvpIncluded}</dd></div>}
@@ -528,7 +528,7 @@ function Choices({ q, flash, onPick, lang }) {
   // from one question to the next (plan 284, the owner's call), each
   // answer alone in the middle of its tile, at the size a glance reads
   // (Q3, plan 285): no number before it, since no key answers a duel.
-  const jp = q.kind !== 'word'
+  const jp = japaneseChoices(q.kind)
   const choices = Array.isArray(q.choices) ? q.choices : (q.choices[lang] ?? q.choices.en)
   return (
     <div className="exam-tiles" role="group">

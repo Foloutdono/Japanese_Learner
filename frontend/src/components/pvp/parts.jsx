@@ -1,4 +1,5 @@
 import { ChevronIcon } from '../ui/Icons'
+import { levelName } from '../../domain/duel'
 
 // ── 対戦 — the small parts every duels screen draws (plan 279) ──────
 
@@ -85,10 +86,10 @@ export function DoorRow({ glyph, name, sub, figure, onClick }) {
  * ticket's own ink, the level below pale and the one above full, and
  * the shares written beside it; a whole level is its name alone.
  */
-export function Mix({ mix, lang }) {
+export function Mix({ mix, lang, t }) {
   const words = mix.length > 1
-    ? mix.map(m => `${m.level} ${m.share.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })}`)
-    : [mix[0].level]
+    ? mix.map(m => `${levelName(t, m.level)} ${m.share.toLocaleString(lang, { style: 'percent', maximumFractionDigits: 0 })}`)
+    : [levelName(t, mix[0].level)]
   return (
     <span className="pvp-mix">
       {mix.length > 1 && (

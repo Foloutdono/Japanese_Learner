@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 
+from core.db import db_conn
 from study import duel_elo, duel_paper, duels
 from tests.conftest import acting_as
 from tests.pvp_world import (A, B, C, befriend, clock, events_of, keys, learners, place, play,  # noqa: F401
@@ -692,3 +693,32 @@ def _quick_papers(monkeypatch):
             built[level, mix] = real(seed, level, mix)
         return {**built[level, mix], "seed": seed}
     monkeypatch.setattr(duel_paper, "build_paper", build)
+
+
+def test_a_learner_riding_to_the_kana_starts_at_the_beginners_stop(client, learners, clock):
+    # Plan 289: the novice's goal (the kana) puts a learner's duels a
+    # level under N5, at 800, on the basics' words in kana and the kana.
+    (goal,), = sql("SELECT goal_level FROM user_profiles WHERE user_id = %s", (A,), fetch=True)
+    sql("UPDATE user_profiles SET goal_level = 'novice' WHERE user_id = %s", (A,))
+    try:
+        hall = client.get("/api/pvp").json()
+        assert hall["rating"]["elo"] == duel_elo.START[duel_elo.NOVICE] == 800
+        assert hall["rating"]["level"] == "novice"
+        assert hall["ranked"]["mix"] == [{"level": "novice", "share": 1.0}]
+        first = _ranked(client, A)
+        cover = client.get(f"/api/pvp/duels/{first['id']}").json()
+        assert cover["level"] == "novice" and cover["you"]["level"] == "novice"
+        paper = duel_paper_of(first["id"])
+        assert paper["mix"] == duel_paper.MIX_MIN
+        assert {item["kind"] for item in paper["items"]} == {"word", "kana"}
+        assert events_of(A, "pvp_placed")[-1] == {"level": "novice"}
+        # Riding past the kana, the same learner is N5's again.
+        sql("UPDATE user_profiles SET goal_level = 'N5' WHERE user_id = %s", (A,))
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                assert duels.duel_level(cur, A) == "N5"
+        finally:
+            conn.close()
+    finally:
+        sql("UPDATE user_profiles SET goal_level = %s WHERE user_id = %s", (goal, A))
