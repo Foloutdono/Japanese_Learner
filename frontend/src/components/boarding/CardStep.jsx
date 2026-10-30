@@ -62,7 +62,7 @@ function issuedBack(t, lang, contract, credits) {
 // are worth the gate a second time, and say so.
 const ISSUE_ERROR = { refused: 'brdPassRefused', busy: 'brdPassBusy', network: 'onbPassError' }
 
-function IssueError({ error, onReport }) {
+export function IssueError({ error, onReport }) {
   const { t } = useLang()
   if (!error) return null
   return (

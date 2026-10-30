@@ -416,7 +416,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # The boarding's and the rides' steps, frontend/src/domain/
         # flowSteps.js; its test holds the flows to this list.
         "step":  frozenset({"kana", "reveal", "level", "test", "card",
-                            "intro-scripts", "intro-sounds", "intro-table",
+                            "remind", "intro-scripts", "intro-sounds", "intro-table",
                             "intro-katakana", "intro-sentence", "intro-route",
                             "known", "known-dict", "known-back", "unknown",
                             "unknown-back", "done",

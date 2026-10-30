@@ -334,7 +334,7 @@ function prefersStill() {
     && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
 }
 
-function Flaps({ time }) {
+export function Flaps({ time }) {
   const [h1, h2, , m1, m2] = time.split('')
   const { face, stopped } = useSettling([h1, h2, m1, m2])
   // A drum still turning says so, so the board can be styled and read

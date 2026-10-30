@@ -194,7 +194,7 @@ export const VALUES = {
   pvp_placed: { level: ['novice', 'N5', 'N4', 'N3', 'N2', 'N1'] },
   client_error: {
     where: ['error', 'rejection'],
-    step: ['kana', 'reveal', 'level', 'test', 'card', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],
+    step: ['kana', 'reveal', 'level', 'test', 'card', 'remind', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],
   },
 }
 // end VALUES
