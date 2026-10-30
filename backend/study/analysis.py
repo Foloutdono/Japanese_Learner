@@ -213,14 +213,15 @@ def _pool_match(entry: dict) -> dict:
                   "meaning": pool_gloss(entry)},
         "pool": True,
     }
-    # Its French line beside the English, where the pool's French layer
-    # has one (plan 215) -- the same two fields a deck word carries
-    # (_deck_match), so tokens.js's wordGloss reads it unchanged. An
-    # affix row keeps the one sense it was chosen for, in English: the
-    # French line is the word's, not that sense's.
-    french = None if entry.get("affix") else jmdict_fr.pool_line(entry.get("kanji", ""), entry.get("kana", ""))
-    if french:
-        out["entry"]["meaning_fr"] = french
+    # Its French and Spanish lines beside the English, where the pool's
+    # layers have them (plans 215, 291) -- the same fields a deck word
+    # carries (_deck_match), so tokens.js's wordGloss reads them
+    # unchanged. An affix row keeps the one sense it was chosen for, in
+    # English: a layer's line is the word's, not that sense's.
+    for lang in () if entry.get("affix") else jmdict_fr.LANGS:
+        line = jmdict_fr.pool_line(entry.get("kanji", ""), entry.get("kana", ""), lang)
+        if line:
+            out["entry"][f"meaning_{lang}"] = line
     return out
 
 
@@ -315,9 +316,10 @@ def _senses_by_sentence(tokens: list[dict]) -> None:
             if part and part not in head and len(line + "; " + part) <= _POOL_GLOSS_MAX:
                 line += "; " + part
         entry["meaning"] = line
-        french = jmdict_fr.sense("; ".join(chosen.get("glossary") or ()))
-        if french:
-            entry["meaning_fr"] = french
+        for lang in jmdict_fr.LANGS:
+            said = jmdict_fr.sense("; ".join(chosen.get("glossary") or ()), lang)
+            if said:
+                entry[f"meaning_{lang}"] = said
 
 
 def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
@@ -1288,11 +1290,12 @@ def _as_its_idiom(token: dict, row: dict) -> None:
     glosses = [_ASIDE.sub("", g).strip() for g in idioms[0].get("glossary") or ()][:2]
     entry = token["vocab_match"]["entry"]
     entry["meaning"] = ", ".join(glosses)
-    french = jmdict_fr.sense("; ".join(idioms[0].get("glossary") or ()))
-    if french:
-        entry["meaning_fr"] = french
-    else:
-        entry.pop("meaning_fr", None)
+    for lang in jmdict_fr.LANGS:
+        said = jmdict_fr.sense("; ".join(idioms[0].get("glossary") or ()), lang)
+        if said:
+            entry[f"meaning_{lang}"] = said
+        else:
+            entry.pop(f"meaning_{lang}", None)
 
 
 def _pool_compound_dict(run: list, entry: dict) -> dict:
@@ -1508,6 +1511,8 @@ def _name_or_word(token: dict, m, row: dict, called: bool = False) -> None:
     entry["meaning"] = ("a place name, or: " if place else "a person's name, or: ") + entry.get("meaning", "")
     if entry.get("meaning_fr"):
         entry["meaning_fr"] = ("un nom de lieu, ou : " if place else "un nom de personne, ou : ") + entry["meaning_fr"]
+    if entry.get("meaning_es"):
+        entry["meaning_es"] = ("un nombre de lugar, o: " if place else "un nombre de persona, o: ") + entry["meaning_es"]
 
 
 def _called_to(morphemes: list, i: int) -> bool:
@@ -2219,7 +2224,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 33: every gloss the breakdown writes itself gains its `es` (plan 291):
 # a word of speech, a prefix or suffix, a name's kind, a unit, a size, a
 # figure, a time, a date, an ordinal, an age.
-LOCAL_REV = 33
+# 34: a pool word, a chosen sense and an idiom gain their `meaning_es`
+# from the Spanish layer over JMdict (plan 291), as `meaning_fr`.
+LOCAL_REV = 34
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

@@ -43,11 +43,10 @@ rest of the taught content (docs/content-audit/PLAYBOOK.md).
 
 Spanish (plan 291, ADR 0023) is the same layer in a file of its own,
 datas/vocab/jmdict_es.sqlite3, its three tables the same with an `es`
-column for `fr`, built by the same script (`--lang es`). It holds the
-Tatoeba sentences the deck shows so far; its senses and pool lines are
-the pool's wave, and until then a Spanish learner reads them in
-English, as a missing line always reads. The sentence lookups take the
-language; the pool's stay French.
+column for `fr`, built by the same script (`--lang es`), and holding
+what the French one does: every lookup here takes the language. What
+plan 280 folds is still decided by the French layer alone
+(study/card_lookup), so a compound reads the same in every language.
 """
 import os
 import sqlite3
@@ -108,9 +107,11 @@ def _many(sql_head: str, keys: list, width: int = 1, lang: str = "fr") -> list[t
 
 # ── Senses ────────────────────────────────────────────────────
 
-def sense(glossary: str) -> str | None:
-    """A sense's French glossary, from its English one ("a; b; c")."""
-    return _one("SELECT fr FROM sense WHERE en = ?", (glossary,)) if glossary else None
+def sense(glossary: str, lang: str = "fr") -> str | None:
+    """A sense's French (or `lang`'s) glossary, from its English one ("a; b; c")."""
+    if not glossary or lang not in LANGS:
+        return None
+    return _one(f"SELECT {lang} FROM sense WHERE en = ?", (glossary,), lang)
 
 
 def senses(glossaries, lang: str = "fr") -> dict[str, str]:
@@ -157,38 +158,39 @@ def translation(jp: str, en: str, lang: str) -> tuple[str, str]:
 
 # ── Pool words ────────────────────────────────────────────────
 
-def pool_line(kanji: str, kana: str) -> str | None:
-    """A JMdict pool word's French line, or None."""
-    if not (kanji or kana):
+def pool_line(kanji: str, kana: str, lang: str = "fr") -> str | None:
+    """A JMdict pool word's French (or `lang`'s) line, or None."""
+    if not (kanji or kana) or lang not in LANGS:
         return None
-    return _one("SELECT fr FROM pool_line WHERE kanji = ? AND kana = ?", (kanji or "", kana or ""))
+    return _one(f"SELECT {lang} FROM pool_line WHERE kanji = ? AND kana = ?", (kanji or "", kana or ""), lang)
 
 
-def pool_lines(pairs) -> dict[tuple[str, str], str]:
+def pool_lines(pairs, lang: str = "fr") -> dict[tuple[str, str], str]:
+    if lang not in LANGS:
+        return {}
     keys = list(dict.fromkeys((k or "", r or "") for k, r in pairs))
-    return {(k, r): fr for k, r, fr in _many("SELECT kanji, kana, fr FROM pool_line WHERE", keys, width=2) if fr}
+    return {(k, r): tr for k, r, tr in _many(f"SELECT kanji, kana, {lang} FROM pool_line WHERE", keys,
+                                              width=2, lang=lang) if tr}
 
 
 def pool_meaning(entry: dict, lang: str) -> str:
-    """A pool word's gloss in `lang`: its French line where the learner
-    reads French and the layer has one, JMdict's English otherwise.
+    """A pool word's gloss in `lang`: its line where the learner reads
+    French or Spanish and the layer has one, JMdict's English otherwise.
 
     Never the course's VOCAB_FR: that map is keyed by written form, and
     would hand a pool word a deck homograph's French (殿 どの "Mr." read
     as 殿 しんがり's "arrière-garde") -- routes/decks._wrap_vocab's rule,
     now with a French of the pool's own to give instead."""
     english = entry.get("meaning", "")
-    if lang == "fr":
-        return pool_line(entry.get("kanji", ""), entry.get("kana", "")) or english
-    return english
+    return pool_line(entry.get("kanji", ""), entry.get("kana", ""), lang) or english
 
 
-def search_pool(q: str, limit: int = 2000) -> list[tuple[str, str]]:
-    """(kanji, kana) of the pool words whose French line contains `q`,
-    case-insensitively -- the French half of the dictionary's gloss
-    search, which otherwise matched JMdict's English alone (« cheval »
-    found one pool word where "horse" finds 335)."""
-    conn = _conn()
+def search_pool(q: str, limit: int = 2000, lang: str = "fr") -> list[tuple[str, str]]:
+    """(kanji, kana) of the pool words whose French (or `lang`'s) line
+    contains `q`, case-insensitively -- the French half of the
+    dictionary's gloss search, which otherwise matched JMdict's English
+    alone (« cheval » found one pool word where "horse" finds 335)."""
+    conn = _conn(lang)
     if conn is None or not q:
         return []
     from study.search_match import fold

@@ -10,9 +10,9 @@ translation starts from the figures rather than a guess.
 A text is counted where the content writes it in two languages: a dict
 with an "en" and a "fr" (a gloss pair, a sentence row), or a field with
 its "_fr" twin (structure / structure_fr). The Tatoeba sentences are
-counted by layer: the rows of jmdict_es.sqlite3 against the French
-layer's, the deck's own and the pool's together (tests/test_spanish.py
-holds every one a deck card shows). The interface's string table
+counted by layer, as are a dictionary entry's senses and the pool's
+one-line glosses: the rows of jmdict_es.sqlite3 against the French
+layer's (tests/test_spanish.py holds them equal). The interface's string table
 (frontend/src/locales/es) is not here: locales.test.js holds it whole.
 
 Read-only, no database, no network: JSON is read as JSON and the Python
@@ -149,6 +149,8 @@ def banks() -> dict[str, list[int]]:
         "example sentences (fixed)": _pairs(_load("datas", "vocab", "example_fixes.json"), [0, 0]),
         "example sentences (added)": _pairs(_load("datas", "vocab", "example_added.json"), [0, 0]),
         "Tatoeba sentences": [_rows("jmdict_es.sqlite3", "example"), _rows("jmdict_fr.sqlite3", "example")],
+        "dictionary senses": [_rows("jmdict_es.sqlite3", "sense"), _rows("jmdict_fr.sqlite3", "sense")],
+        "pool words": [_rows("jmdict_es.sqlite3", "pool_line"), _rows("jmdict_fr.sqlite3", "pool_line")],
         "breakdown glosses": [a + b for a, b in zip(_module_pairs("study", "particle_glosses.py"),
                                                     _module_pairs("study", "analysis.py"))],
         "theme words (pool)": _theme_pool(),

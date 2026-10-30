@@ -429,10 +429,12 @@ runtime purpose.
   word its `| español` in `content/theme_lists.py` (the build refuses
   one without), a duel's word item its choices in every language
   (`duel_paper.CHOICE_LANGS`, a `PAPER_REV` move), and search matches
-  every gloss in each (`routes/dictionary.py`). Everything else (the
-  pool's words, senses and sentences) gains Spanish a wave at a
-  time, optional where it is added:
-  `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
+  every gloss in each (`routes/dictionary.py`), and the JMdict layer is
+  the French one's twin: a line `jmdict_fr.sqlite3` gains (a sense, a
+  pool word's gloss) has its Spanish in `jmdict_es.sqlite3` in the same
+  change (`test_the_spanish_layer_holds_every_line_the_french_one_does`).
+  Everything else gains Spanish a wave at a time, optional where it is
+  added: `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
   KANJI_GLOSSES)` (`translations/course.py`), a date or a number is
   written in `intlLocale(lang)` (`lib/locale.js`): never a
@@ -882,8 +884,9 @@ commonest pool words and for every compound of the deck's nouns JMdict
 holds, which is what lets the breakdown fold it (plan 280). It sits
 beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
 re-commits the 76 MB pool. The Spanish layer (plan 291) is the same, in
-`datas/vocab/jmdict_es.sqlite3`: so far the Spanish of the Tatoeba
-sentences the deck's cards show. To correct a
+`datas/vocab/jmdict_es.sqlite3`: every sense and pool line the French
+one has, and so far the Tatoeba sentences the deck's cards show. To
+correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 
 ```bash

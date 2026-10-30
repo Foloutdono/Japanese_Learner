@@ -204,3 +204,43 @@ def test_every_chip_has_its_spanish_label_and_tooltip():
     assert es and [t["code"] for t in es] == [t["code"] for t in fr]
     assert all(t["label"] == vocab_extras._short_label(t["code"], "es") for t in es)
     assert all(t["tooltip"] != f["tooltip"] for t, f in zip(es, fr))
+
+
+# ── The Spanish layer over JMdict ────────────────────────────
+
+def test_the_spanish_layer_holds_every_line_the_french_one_does():
+    """Senses and pool lines: the Spanish layer is the French one's twin
+    (plan 291), so nothing a French learner reads in their language
+    reaches a Spanish learner in English."""
+    import sqlite3
+    with sqlite3.connect(jmdict_fr.DB_PATHS["fr"]) as fr, sqlite3.connect(jmdict_fr.DB_PATHS["es"]) as es:
+        for table, key in (("sense", "en"), ("pool_line", "kanji || '::' || kana")):
+            french = {k for (k,) in fr.execute(f"SELECT {key} FROM {table}")}
+            spanish = {k for (k,) in es.execute(f"SELECT {key} FROM {table}")}
+            missing = sorted(french - spanish)
+            assert missing == [], f"{len(missing)} {table} lines with French and no Spanish, e.g. {missing[:5]}"
+
+
+def test_a_dictionary_entry_reads_its_senses_in_spanish():
+    es = get_vocab_extras("食べる", "たべる", "to eat", "es")
+    en = get_vocab_extras("食べる", "たべる", "to eat", "en")
+    assert es["senses"] and all(s["glossary_lang"] == "es" for s in es["senses"])
+    assert es["senses"][0]["glossary"] != en["senses"][0]["glossary"]
+
+
+def test_a_pool_word_reads_spanish_and_is_found_by_it():
+    import content.vocab_jmdict_data as jmdict_db
+    row = jmdict_db.get_by_key("豚", "ぶた")
+    spanish = jmdict_fr.pool_meaning(row, "es")
+    assert spanish == jmdict_fr.pool_line("豚", "ぶた", "es") != row["meaning"]
+    word = spanish.split(",")[0].strip()
+    keys = {(r["kanji"], r["kana"]) for r in jmdict_db.page(word, 50, 0)}
+    assert ("豚", "ぶた") in keys, word
+
+
+def test_a_pool_word_in_a_breakdown_carries_its_spanish():
+    from study import analysis
+    tokens = analysis.analyze_local("豚を飼っている。")["tokens"]
+    pig = next(t for t in tokens if t["surface"] == "豚")
+    entry = (pig.get("vocab_match") or {}).get("entry") or {}
+    assert entry.get("meaning_es") == jmdict_fr.pool_line("豚", "ぶた", "es") or entry.get("meaning_es")

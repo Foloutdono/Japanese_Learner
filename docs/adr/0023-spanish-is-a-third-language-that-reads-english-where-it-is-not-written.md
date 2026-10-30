@@ -119,9 +119,19 @@ not yet written in Spanish reads English**, never French and never blank.
   others, its share card `og-es.png`. A Spanish label may not be the one
   that breaks the phone's width: the page is measured at 320 and 360 px
   beside the French.
+- **The dictionary is whole** (the eleventh wave): every sense a deck
+  word's entry lists (15,091 glossaries) and the one-line gloss of every
+  pool word the French layer has (40,141: the commonest ~20k and every
+  compound of the deck's nouns), translated from the Japanese with the
+  English and the French beside it. The Spanish layer is the French
+  one's twin, line for line (`tests/test_spanish.py`); a pool word reads
+  its Spanish in the dictionary, a kanji's word list, a deck and the
+  breakdown (`meaning_es`, `LOCAL_REV` 33 → 34), and search finds it by
+  its Spanish (`vocab_jmdict_data` attaches every layer). What plan 280
+  folds is still decided by the French layer, so a compound reads the
+  same in every language.
 - **Everything else is written a wave at a time** and reads English until
-  then: the JMdict pool's words, the senses a dictionary entry lists and
-  the 21,800 Tatoeba sentences only the pool shows. `python -m
+  then: the 21,800 Tatoeba sentences only the pool shows. `python -m
   scripts.spanish_coverage` counts what is written and what is left, per
   part. A Spanish text is optional where it is added (`grammar_check` holds
   one that is there, and accepts its absence); `tests/test_spanish.py`
@@ -145,16 +155,16 @@ not yet written in Spanish reads English**, never French and never blank.
   Spanish among them; a Spanish learner now reaches them with `lang=es` and
   their daily ceilings as they are.
 - The breakdown's stored output gained `structure_es` and a deck word's
-  `meaning_es`, so `LOCAL_REV` moved (31 → 32), and its own glosses' `es`
-  (32 → 33).
+  `meaning_es`, so `LOCAL_REV` moved (31 → 32), its own glosses' `es`
+  (32 → 33), and a pool word's, a chosen sense's and an idiom's
+  `meaning_es` (33 → 34).
 - Dictionary search matches the course's Spanish glosses (words, kanji,
-  points); a pool word is still found by its English or French alone,
-  which is the pool's wave.
+  points) and, since the eleventh wave, a pool word's Spanish line.
 - The Spanish layer over JMdict is a second small SQLite file beside the
   French one rather than columns inside it, so each language is built,
-  exported and corrected on its own; its sense and pool tables are
-  empty until the pool's wave, and a sense with no Spanish says it is
-  English (`glossary_lang`), as a French one with no line always has.
+  exported and corrected on its own; its tables hold what the French
+  one's do, and a sense neither has says it is English
+  (`glossary_lang`), as it always has.
 - The catalogue is held in memory. Loaded, its five files held 19.7 MB
   before Spanish, 20.9 MB with the glosses and the lessons, and 24.6 MB
   with the tours and Choisir questions too (measured with tracemalloc,
