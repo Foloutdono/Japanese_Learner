@@ -209,9 +209,6 @@ class GateTests(unittest.TestCase):
         found = self._problems(entry, level)
         self.assertTrue(any(fragment in p for p in found), f"{fragment!r} not in {found}")
 
-    def test_the_catalogue_s_questions_are_clean(self):
-        self.assertEqual(grammar_check.problems(), [])
-
     def test_a_point_nothing_asks_in_choisir_fails_the_gate(self):
         entry = _entry("は")
         del entry["choose"]

@@ -155,11 +155,9 @@ def test_a_point_with_no_rival_gets_no_tour(monkeypatch):
     lonely = {**entry, "pattern": "〜てください", "compare": []}
     from study import grammar_tour
     monkeypatch.setattr(grammar_tour, "find", lambda p: (level, lonely) if p == "〜てください" else find(p))
-    grammar_tour._tour.cache_clear()
-    try:
-        assert tour_payload(level, lonely, "fr") is None
-    finally:
-        grammar_tour._tour.cache_clear()
+    # Past the cache rather than clearing it: a cleared cache made the
+    # file's later sweeps build every tour again, a minute each.
+    assert grammar_tour._tour.__wrapped__(level, "〜てください", "fr") is None
 
 
 def test_the_id_seeds_the_order():

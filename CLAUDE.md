@@ -568,6 +568,7 @@ cp .env.example .env          # then fill in DATABASE_URL / DEV_USER_ID
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 pytest                        # run all tests
+pytest -n auto --dist loadfile            # the same as CI runs it, a worker per core (pip install pytest-xdist)
 pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
