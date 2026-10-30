@@ -2784,7 +2784,7 @@ const guide = {
   guideTabBar: 'Your five tabs: Learn, Practice, Today, Dictionary and your profile.',
   guideTodayDuels: 'Duels: two minutes against a friend or a traveller at your level. A gold number means a challenge is waiting.',
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
-  guideLearnStops: 'Where you are on the line, and the stops around you.',
+  guideLearnStops: 'Your stop on the line, and how much of it you already know.',
   guideLearnShelf: 'Your own decks, plus a library of decks shared by other learners.',
   guidePracticePass: 'These modes come with the pass.',
   // Practice's plates (plan 254): a platform, its foot (your level,
@@ -2890,6 +2890,13 @@ const onboarding = {
   practicePct: pct => `${pct}%`,
   practiceAllPapers: 'All papers',
   practiceAllScenes: 'All scenes',
+  // The phone's Learn gate (plan 291): the sheet a line raises, a page
+  // a line -- the stop and the mode chosen before departing -- and the
+  // shelf of decks under the lines.
+  learnSheet: 'Lines',
+  learnStop: 'Stop',
+  learnMode: 'Mode',
+  learnAllDecks: n => `All my decks (${n})`,
   // ── A practice station, on the desk (plan 159) ────────────────
   // The source as a switch at the list's head (the JLPT grades, word
   // frequency, your own cards), then the open stop's page: what the

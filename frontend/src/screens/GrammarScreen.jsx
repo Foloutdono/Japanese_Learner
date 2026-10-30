@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
+import { noteRide } from '../stores/learnRide'
 import { Leave } from '../components/chrome/Bar'
 import { playUi } from '../lib/audio'
 import { cachedJson, MINE_TTL_MS } from '../lib/cachedJson'
@@ -95,7 +96,8 @@ export default function GrammarScreen({ session }) {
     )
   }
 
-  const run = m => navigate(`/learn/grammar/${level}/${m}`)
+  // 前回 (plan 291): a level's run is the gate's last ride.
+  const run = m => { noteRide(`/learn/grammar/${level}/${m}`); navigate(`/learn/grammar/${level}/${m}`) }
   // Both swaps land at the top: the index is a screen down the
   // platforms, and the way back should not drop the learner mid-list
   // (KanjiScreen's radical family does the same).

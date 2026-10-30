@@ -9915,16 +9915,6 @@ textarea:focus-visible {
   .plate:has(.plate__head:focus-visible) { transform: none; }
   .plate__stripe i { transition: none; }
 }
-/* ── The plates take the gate ──
-   A gate is a bar and a column of plates, and on a phone the column
-   takes the room the page has and the plates share it equally: each
-   head grows, and its roundel, name and chip sit centred in the room
-   they get, instead of the air pooling under the last plate. Every
-   plate is a plate, so every plate gets one share — the shelf too. */
-@media (max-width: 768px) {
-  .learn > .plates { flex: 1; }
-  .learn > .plates > .plate { flex: 1 1 auto; }
-}
 
 /* ── 実践の改札 — the phone's Practice gate, folded (plan 290) ──────
    The owner's pick D4 of the canvas "Tsuji — the practice gate",
@@ -9947,13 +9937,16 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.prc-group > .plates { gap: var(--sp-2); }
+.prc-group > .plates,
+.lrn-folds { gap: var(--sp-2); }
 .plate--fold .plate__head { padding-block: var(--sp-3); }
 .plate--fold .plate__title { font-size: var(--fs-lead); }
 /* The record: the grade in the line's ink, the figures in the quiet
    one, as the old foot printed them either side of it. */
-.prc-record { font-variant-numeric: tabular-nums; }
-.prc-record__grade {
+.prc-record,
+.lrn-record { font-variant-numeric: tabular-nums; }
+.prc-record__grade,
+.lrn-record__stop {
   font-weight: 700;
   color: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
 }
@@ -10010,7 +10003,8 @@ textarea:focus-visible {
    sheet's own touch-action is pan-y (its drag shut, useSheetDrag); the
    pager and a page's row of departures pan sideways too, each holding
    its own sideways scroll rather than handing it on. */
-.prc-sheet { gap: var(--sp-4); }
+.prc-sheet,
+.lrn-sheet { gap: var(--sp-4); }
 .prc-sheet__strip { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); }
 .prc-sheet__stop {
   display: inline-flex;
@@ -10090,7 +10084,8 @@ textarea:focus-visible {
    strip of it a neighbouring page showed beside the one in view. No bar
    under the row either: the room below the tickets is where a touch
    browser draws its overlay bar, and the clip takes it away. */
-.prc-page__row {
+.prc-page__row,
+.lrn-page__modes {
   display: flex;
   gap: var(--sp-2);
   margin-inline: calc(-1 * var(--sp-5));
@@ -10108,9 +10103,11 @@ textarea:focus-visible {
    scrollbar"). */
 @media (pointer: fine) {
   .prc-sheet__pager,
-  .prc-page__row { scrollbar-width: none; }
+  .prc-page__row,
+  .lrn-page__modes { scrollbar-width: none; }
   .prc-sheet__pager::-webkit-scrollbar,
-  .prc-page__row::-webkit-scrollbar { display: none; }
+  .prc-page__row::-webkit-scrollbar,
+  .lrn-page__modes::-webkit-scrollbar { display: none; }
 }
 .prc-page__go { width: 100%; }
 /* A departure: the grade or the source over what was done there. */
@@ -10191,6 +10188,165 @@ textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .prc-resume,
   .prc-tk { transition: none; }
+}
+
+/* ── 学習の改札 — the phone's Learn gate, folded (plan 291) ──────────
+   The owner's pick B of the canvas "Tsuji — Learn on the phone", the
+   shape the Practice gate took (plan 290): the last ride over the lines
+   (.prc-resume, components/station/GateResume), each line folded to one
+   row with its stop and that stop's figure under its name (.plate--fold,
+   .lrn-record above), the decks folded under them, one row each, and a
+   row of two doors. The plates keep their own height, so the gate
+   scrolls past what a phone holds and leaves the rest of it bare rather
+   than stretching five plates over it. Drawn by screens/LearnScreen.jsx
+   under the desk's 1100px: the desk keeps its lines across. */
+.lrn-shelf { display: flex; flex-direction: column; gap: var(--sp-2); }
+.lrn-shelf__doors { display: flex; justify-content: space-between; gap: var(--sp-4); }
+.lrn-shelf__door,
+.lrn-page__door {
+  min-height: 44px;
+  padding: 0 var(--sp-1);
+  background: none;
+  border: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.lrn-shelf__door:hover,
+.lrn-shelf__door:focus-visible,
+.lrn-page__door:hover,
+.lrn-page__door:focus-visible { color: var(--text-primary); filter: none; }
+
+/* ── 引き上げ — the line's sheet (plan 291) ──
+   Every line a page, the one raised in view, the next a swipe away, on
+   Practice's pager and strip (.prc-sheet__*, hooks/useSheetPager). A
+   page is the plate that was tapped, risen whole: its head and its
+   stripe, bled to the sheet's edges; then the line, every stop a ring
+   on the rail filled to its share, its figure under its name, the one
+   chosen in the selection's gold and the one the learner stands at
+   ringed in the line's; the line's other sources; the run's card at
+   that stop in that mode; the modes as chips; Embarquer pinned to the
+   foot (.btn-depart's own margin-top). components/learn/LineSheet.jsx. */
+.lrn-page__head { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: var(--sp-4); align-items: center; }
+.lrn-page__edge { flex: none; margin: calc(-1 * var(--sp-2)) calc(-1 * var(--sp-5)) 0; }
+.lrn-line { display: grid; grid-template-columns: repeat(var(--stops, 5), minmax(0, 1fr)); }
+.lrn-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  min-width: 0;
+  padding: var(--sp-2) 0;
+  background: none;
+  border: 0;
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+/* The rail: each stop draws its stretch, the first and the last only
+   the half toward the others; ridden in the raw pigment where the stop
+   is finished. Through the ring's middle: the pad over the ring and
+   half its height. */
+.lrn-stop::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--sp-2) + 10px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 30%, transparent);
+}
+.lrn-stop:first-child::before { left: 50%; }
+.lrn-stop:last-child::before { right: 50%; }
+.lrn-stop--done::before { background: var(--line-color, var(--accent2)); }
+.lrn-stop__ring {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  margin-bottom: var(--sp-1);
+  border: 2px solid var(--line-color, var(--accent2));
+  border-radius: var(--r-pill);
+  background: conic-gradient(var(--line-color, var(--accent2)) var(--share, 0%), var(--surface) 0);
+}
+.lrn-stop[aria-current] .lrn-stop__ring { box-shadow: 0 0 0 4px color-mix(in srgb, var(--line-color, var(--accent2)) 28%, transparent); }
+.lrn-stop__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.lrn-stop__name:lang(ja) { font-family: var(--font-jp); font-weight: 500; }
+.lrn-stop__fig {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lrn-stop:hover,
+.lrn-stop:focus-visible { background: color-mix(in srgb, var(--line-color, var(--accent2)) 10%, transparent); filter: none; }
+.lrn-stop[aria-pressed="true"] { background: var(--sel-wash); box-shadow: inset 0 0 0 1px var(--sel-line); }
+.lrn-stop[aria-pressed="true"] .lrn-stop__name { color: var(--sel-ink); }
+.lrn-page__doors { display: flex; justify-content: flex-end; gap: var(--sp-5); margin-block: calc(-1 * var(--sp-3)); }
+/* The run's card: the prompt and what is asked of it, centred, a rung
+   under the run's own size. Decorative (aria-hidden). */
+.lrn-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 150px;
+  padding: var(--sp-5);
+  background: var(--bg-card);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  text-align: center;
+}
+.lrn-card__q { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1.25; }
+.lrn-card__q--jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-display);
+  font-weight: 500;
+  letter-spacing: var(--tr-term);
+  line-height: 1.15;
+}
+.lrn-card__a { font-family: var(--font-display); font-size: var(--fs-body); color: var(--text-secondary); line-height: 1.4; }
+.lrn-card__a:lang(ja) { font-family: var(--font-jp); letter-spacing: var(--tr-term); }
+.lrn-card__fold { display: block; width: var(--sp-8); border-top: 1px solid var(--surface-line); }
+.lrn-card__field {
+  min-width: 50%;
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+.lrn-card__ghost { font-family: var(--font-jp); font-size: var(--fs-heading); color: var(--text-secondary); opacity: 0.5; }
+.lrn-card__sentence { font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.6; letter-spacing: var(--tr-term); }
+.lrn-card__hole {
+  display: inline-block;
+  width: 2.5em;
+  height: 1em;
+  vertical-align: -0.1em;
+  border-bottom: 2px solid var(--line-color, var(--accent2));
+}
+.lrn-card__choices { font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); }
+/* The row of modes is a page's row of departures (.prc-page__row,
+   above): to the sheet's edges, faded under them, no bar. */
+.lrn-page__mode { flex: none; }
+@media (prefers-reduced-motion: reduce) {
+  .lrn-stop,
+  .lrn-shelf__door,
+  .lrn-page__door { transition: none; }
 }
 
 /* 駅ナンバリング — the roundel on the panel's ink, kept for the doors

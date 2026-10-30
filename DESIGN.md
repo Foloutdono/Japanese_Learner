@@ -42,8 +42,8 @@ your profile is a **commuter pass** (定期券) in its **holder** (定期入れ)
 the home screen is the
 **gate hall**: the day's reviews at the **fare gate** (改札), your pass under
 them, and behind the Learn and Practice gates a column of **station
-plates** (駅名標): on Learn one per line, each printing the stop you have
-reached and the one ahead, and on Practice one per exercise, printing your
+plates** (駅名標): on Learn one per line, each printing the stop it opens
+and how much of it you know, and on Practice one per exercise, printing your
 grade and what you did there.
 
 The pass is a physical object, so it behaves like one. It has a front and a
@@ -1322,6 +1322,56 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   244's painted board listed it as a train; plan 254's plates wrap to
   hold seven.) The pigment is 縹 (`--line-kaiwa`), the dayflower blue
   between 緑青 and 藍.
+
+### The Learn gate (学習の改札, plans 094, 132, 291)
+
+**On a phone the lines fold, and a line rises as a sheet** (plan 291,
+the owner's pick B of the canvas "Tsuji — Learn on the phone", the
+raised plate improved as drawn there). Five plates shared the phone's
+height, about 116px each for two lines of type; their foot named the
+last stop finished, and any other level, the themes or a deck was four
+taps away. Learn now takes the shape Practice took (plan 290), so the
+two gates read as one design:
+
+- **The last ride waits over the lines** (前回): the line and its stop,
+  the mode and when, Reprendre in the metal's ink, one tap to board it
+  again (`components/station/GateResume`, Practice's row). It is the
+  last run a station boarded at a line's stop in a graded mode, kept on
+  the account (`user_profiles.learn_ride`, `POST /api/profile/ride`,
+  `stores/learnRide.js`): a tier, a theme, a radical or the fast review
+  is no ride, and no ride is no row.
+- **Every line folds to one row**: the roundel, the name, and under it
+  the stop the plate opens (the declared grade; on kana the first set not
+  finished) in the line's ink with that stop's learned / total, what is
+  due at the trailing edge, and the stripe painted to the stop's share.
+  A line off the learner's route says so there instead. The basics, while
+  ridden, fold above the lines with the unit at hand under the name.
+- **The decks fold under the lines**, under a caption as Practice's
+  groups are: one row a deck, its cards under its name and what it is
+  due; the first four, and a row of two doors, a new deck and the library
+  (every deck, when the shelf holds more). A deck's row departs for its
+  page. The plates keep their own height: the gate scrolls past what a
+  phone holds, and the rest of a short gate is bare rather than five
+  plates stretched over it.
+- **A row raises the line's sheet** (`components/learn/LineSheet`), on
+  Practice's pager (`hooks/useSheetPager`): every line a page, the one
+  tapped in view, the next a swipe away, the roundels on top the index.
+  **The page is the plate, risen whole**: its head and its stripe, bled to
+  the sheet's edges, so the sheet reads as the plate the finger lifted
+  rather than a panel of its own. Under it **the line itself**, the
+  desk's line laid across: every stop a ring on the rail filled to its
+  share, its name and its figure under it; the stop chosen in the
+  selection's gold, the stop the learner stands at ringed in the line's
+  pigment, a finished stop's stretch of rail raw. The line's other sources
+  (themes, frequency, radicals) are quiet doors to the station under it.
+  Then **the run's card** at that stop in that mode (the stop's sample,
+  drawn as `domain/specimen` maps it, a rung under the run's size), **the
+  modes as chips**, the learner's main mode chosen (plan 273; grammar's
+  ladder), and **Embarquer · the stop**, pinned to the foot. A choice
+  boards nothing: a stop and a mode are picked, then Embarquer goes, so
+  another level or another mode is two taps from the gate.
+- **On the desk, the lines across beside the shelf** (plan 132, under
+  *The desk*), unchanged.
 
 ### The practice gate (練習の改札, plans 165, 254, 290)
 
@@ -2908,9 +2958,12 @@ line here says otherwise.
   **A stop stands at the END of the leg it names, and the line opens at
   初, the novice's stop** — so reaching a stop is finishing the thing it is
   named for, never starting it, and a learner who has done nothing is drawn
-  standing at 初 rather than on the first level's platform. The plate's foot reads the same rule
-  (`domain/lineProgress.stopsAround`): the stop in the middle is the last level
-  finished, never the one being ridden.
+  standing at 初 rather than on the first level's platform. The desk's
+  stripe reads the same rule (`domain/lineProgress.stopsAround`). The phone's
+  folded plate (plan 291) names no completion: it names the stop it opens,
+  the station's own "You are here", and that stop's figure, because a plate
+  whose foot said « Débutant » over a level 87% done, and opened the next
+  one, said two places at once.
   Three rules the 進捗が主役 round settled on the pass's copy of it, and they
   hold wherever the drawing goes: your train **rides above the rail and reaches
   it on a stem**, so the x it claims is exact and it never covers a stop — a

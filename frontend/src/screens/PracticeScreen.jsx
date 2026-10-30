@@ -4,12 +4,11 @@ import { useLang } from '../LangContext'
 import { useProfileSummaryState } from '../stores/profileSummary'
 import { usePracticeRecord } from '../stores/practiceRecord'
 import { getSections, PRACTICE_GROUPS } from '../config/tabs'
-import { stationFor } from '../config/stations'
 import { beginDeparture } from '../stores/departure'
 import { board } from '../stores/boarding'
 import { playAnnouncement } from '../lib/audio'
-import { relativeDate } from '../lib/formatDate'
 import { Plate } from '../components/station/LinePlate'
+import { GateResume } from '../components/station/GateResume'
 import { PracticeSheet, RecordLine } from '../components/practice/PracticeSheet'
 import { UNIT, platformOf, runAt, lastRide } from '../domain/practiceGate'
 import { Guide } from '../components/guide/Guide'
@@ -148,7 +147,13 @@ function Platforms({ platforms, grade, session, onDepart }) {
   return (
     <>
       {rideSection && (
-        <Resume section={rideSection} ride={ride} onClick={() => boardRun(runAt(ride.platform, ride.grade))} />
+        <GateResume
+          section={rideSection}
+          title={`${rideSection.title} · ${ride.grade}`}
+          at={ride.rec.last}
+          facts={[t.practiceDone[UNIT[ride.platform]](ride.rec.done)]}
+          onClick={() => boardRun(runAt(ride.platform, ride.grade))}
+        />
       )}
       {groups.map(([group, list]) => (
         <section key={group} className="prc-group" aria-labelledby={`${uid}-${group}`}>
@@ -189,24 +194,6 @@ function Platforms({ platforms, grade, session, onDepart }) {
         />
       )}
     </>
-  )
-}
-
-/** The last grade's ride, boarded again in one tap: the platform and
- *  its grade, when it was and what was done there. */
-function Resume({ section, ride, onClick }) {
-  const { t, lang } = useLang()
-  const when = relativeDate(ride.rec.last, lang, t)
-  const done = t.practiceDone[UNIT[ride.platform]](ride.rec.done)
-  return (
-    <button type="button" className="prc-resume" style={{ '--line-color': section.color }} onClick={onClick}>
-      <span className="pf-line__roundel" aria-hidden="true">{stationFor(section.path).code}</span>
-      <span className="prc-resume__names">
-        <span className="prc-resume__title">{section.title} · {ride.grade}</span>
-        <span className="prc-resume__sub">{[when && when.charAt(0).toUpperCase() + when.slice(1), done].filter(Boolean).join(' · ')}</span>
-      </span>
-      <span className="prc-resume__go">{t.practiceResume}</span>
-    </button>
   )
 }
 

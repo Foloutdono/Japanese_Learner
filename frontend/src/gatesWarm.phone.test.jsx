@@ -102,9 +102,12 @@ describe('a gate drawn on the last answer kept, at 390×844', () => {
   })
 
   it("Learn's shelf prints its kept decks at once", async () => {
-    keepCachedJson(GATE_PATHS.decks, session, { decks: [{ id: 1, card_count: 12 }, { id: 2, card_count: 30 }] })
+    keepCachedJson(GATE_PATHS.decks, session, { decks: [{ id: 1, name: 'Gares', card_count: 12 }, { id: 2, name: 'Trains', card_count: 30 }] })
     await mount(<LearnScreen session={session} />, '/learn')
     await settle()
-    expect($('.plate--shelf').textContent).toContain(fr.decksRowMeta(2, 42))
+    const rows = [...document.querySelectorAll('.lrn-shelf .plate--deck')].map(el => el.textContent)
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toContain('Gares')
+    expect(rows[1]).toContain(fr.cardsCount(30))
   })
 })

@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
-import { deckItems, lineMarks, stopsAround, stopsTravelled } from '../../domain/lineProgress'
+import { deckItems, lineMarks, stopsTravelled } from '../../domain/lineProgress'
 import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 
 // ── 駅名標 — a line as its own station plate (plan 094) ──────────
@@ -12,6 +12,9 @@ import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 // a FOOT: what a real 駅名標 prints under the name, the stop behind
 // you and the stop ahead -- on a practice platform, the learner's
 // grade between what they did there and how much of it was right.
+// On a phone both gates fold their plates now (plans 290, 291): the
+// foot became the line under the name (`meta`), and only the desk's
+// lines and the basics' plate there still draw one.
 //
 // It replaced the wall map (plan 071): four tracks of five labels
 // each, at the same weight, on a phone whose width gave a label 60px.
@@ -84,18 +87,6 @@ function Mark({ mark }) {
   const { t } = useLang()
   if (!mark) return null
   return <span lang={mark.jp ? 'ja' : undefined}>{(mark.t && t[mark.t]) || mark.label}</span>
-}
-
-/** The plate's foot on a Learn line: ‹ behind · HERE · ahead ›. */
-export function StopsFoot({ stops, guide }) {
-  const { prev, here, next } = stopsAround(stops)
-  return (
-    <span className="plate__foot plate__foot--stops" data-guide={guide}>
-      <span className="plate__prev">{prev && <>‹ <Mark mark={prev} /></>}</span>
-      <span className="plate__here"><Mark mark={here} /></span>
-      <span className="plate__next">{next && <><Mark mark={next} /> ›</>}</span>
-    </span>
-  )
 }
 
 /**

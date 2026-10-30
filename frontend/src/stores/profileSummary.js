@@ -185,6 +185,14 @@ export function applyXpGain({ amount }) {
 // moved in place until the next real fetch says it: the finish plays on
 // Today, whose desk panel prints the summary's streak beside the rally
 // that rolls to the answer's.
+// 前回 (plan 291): the ride a Learn station has just boarded, set in
+// place so the gate offers it again on the way back, before the next
+// real fetch says the same (stores/learnRide.js).
+export function applyLearnRide(ride) {
+  if (!cache || !ride) return
+  setCache({ ...cache, learnRide: ride })
+}
+
 export function applyStreak(streak) {
   if (!cache || !(streak > 0) || cache.streak === streak) return
   setCache({ ...cache, streak, streakLongest: Math.max(cache.streakLongest ?? 0, streak) })

@@ -1,44 +1,47 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
-// The novice's stop is a word of the interface now, not the glyph 初,
-// so the expected label comes from the string table the lane renders in.
 import fr from '../locales/fr/index.js'
+import { modeLabel } from '../domain/studyModes'
 // The stylesheet-import trick every browser test here uses: the rules
-// this test leans on (the map's grid) only exist once the real sheet
-// is loaded.
+// this test leans on only exist once the real sheet is loaded.
 import '../index.css'
 
-// ── The Learn gate (plan 068; plates since plan 094) ───────────
-// One station plate per line behind the Learn gate, the shelf of
-// decks as a fifth. These pin what the wall map's tests pinned about
-// the map, on the plates that replaced it:
+// ── The Learn gate on a phone (plan 068; plates since 094; folded since 291) ──
+// The browser lane has no viewport of its own (an iframe about 414px
+// wide), so this is the phone's gate: the lines folded one row each,
+// the last ride over them, the decks under them, and the sheet a line
+// raises. These pin:
 //
-//   1. Every line is reachable — four tracked lines and the shelf of
-//      decks. A section silently dropped from the gate is a screen you
-//      can never visit again.
-//   2. The line's arithmetic reaches the DOM: the plate's foot names
-//      the stop the learner stands at — the last level FINISHED, the
-//      novice's stop until then — with the stop ahead beside it, and
-//      the stripe fills with the leg being ridden. Due counts ride as
-//      chips, the due figure from the shared today store the tab
-//      bar's badge reads.
-//   3. A line departs through the gate store, to its route behind the
-//      gate, with its announcement.
-//   4. A failed or foreign stats payload still hangs every plate.
-//   5. The plate prints the name once, in the learner's language: no
-//      reading over it and no caption under it (owner's call, from the
-//      five directions drawn side by side).
+//   1. Every line is reachable -- four tracked lines -- and the decks
+//      fold under them. A section silently dropped from the gate is a
+//      screen you can never visit again.
+//   2. A fold names the stop the plate opens and that stop's figure,
+//      and its stripe is painted to the stop's share. Due counts ride
+//      as chips, from the shared today store the tab bar's badge reads.
+//   3. A fold raises the line's sheet, opened on that line's page at
+//      the learner's stop, in the learner's main mode; a stop and a mode
+//      are chosen there, and Embarquer boards them -- and keeps the ride
+//      as the last one.
+//   4. The last ride waits over the lines and boards in one tap.
+//   5. A failed or foreign stats payload still hangs every plate.
+//   6. The plate prints the name once, in the learner's language.
 
 const apiJson = vi.fn()
+const apiFetch = vi.fn()
 vi.mock('../lib/api', () => ({
   api: p => p,
-  apiFetch: vi.fn(async () => ({ ok: false, status: 500, json: async () => ({}) })),
+  apiFetch: (...a) => apiFetch(...a),
   apiJson: (...a) => apiJson(...a),
   apiJsonWithTimeout: vi.fn(),
   apiUpload: vi.fn(),
   ApiError: class ApiError extends Error {},
+}))
+// cachedJson (grammar's points per level) goes through apiJson too.
+vi.mock('../lib/cachedJson', async (importOriginal) => ({
+  ...(await importOriginal()),
+  cachedJson: (...a) => apiJson(...a),
 }))
 
 const todayRef = { current: null }
@@ -47,8 +50,6 @@ vi.mock('../stores/today', () => ({
   refreshToday: vi.fn(),
   seedTodaySummary: vi.fn(),
 }))
-// The distance travelled comes from the shared stats store now (plan
-// 071: every station reads it too).
 const statsRef = { current: null }
 vi.mock('../stores/stats', () => ({
   useStats: () => ({ data: statsRef.current, failed: false }),
@@ -66,8 +67,14 @@ const beginDeparture = vi.fn()
 vi.mock('../stores/departure', () => ({
   beginDeparture: (...a) => beginDeparture(...a),
 }))
+// The doors: a boarding runs its commit at once here, so the route it
+// goes to can be read off the router.
+const board = vi.fn(commit => commit())
+vi.mock('../stores/boarding', () => ({
+  board: (...a) => board(...a),
+}))
 
-// 基礎 (plan 186g): the course's units, for the plate's neighbours.
+// 基礎 (plan 186g): the course's units, for the plate's stripe.
 const basicsRef = { current: null }
 vi.mock('../stores/basics', () => ({
   useBasics: () => ({ data: basicsRef.current, failed: false }),
@@ -86,10 +93,10 @@ vi.mock('../lib/supabase', () => ({
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: LearnScreen } = await import('./LearnScreen')
-// The lines the learner rides come off the profile summary (a
-// module-level cache): seeded per test, and cleared back to "never
-// answered" so the plates hang in registry order everywhere else.
+// The lines the learner rides, their grade and their last ride come off
+// the profile summary (a module-level cache): seeded per test.
 const { seedSummary } = await import('../stores/profileSummary')
+const BASE = { username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }
 // The shelf's last answer is kept between visits (plan 291): each test
 // starts from none.
 const { forgetCachedJson } = await import('../lib/cachedJson')
@@ -99,211 +106,142 @@ const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 const TODAY = {
   total: 24,
   by_source: { kanji: 12, vocab: 8, kana: 4, personal: 3 },
-  lanes: [],
+  lanes: [{ kind: 'personal', deck_id: 1, due: 3 }],
   next_due: null,
   pace: null,
 }
 
 const STATS = {
-  vocab: {
-    N5: { 'vocab.flashcard.f2b': { total: 10, new: 0, learning: 0, mastered: 10 } },
-    N4: { 'vocab.flashcard.f2b': { total: 10, new: 0, learning: 10, mastered: 0 } },
-  },
-  kana: {}, kanji: {}, grammar: {},
+  vocab: {}, kana: {}, kanji: {}, grammar: {},
   items: {
     vocab: {
       N5: { total: 10, learned: 10, score: 1 },
-      N4: { total: 10, learned: 0, score: 0.5 },
+      N4: { total: 10, learned: 4, score: 0.5 },
     },
-    kana: {}, kanji: {}, grammar: {},
+    // Hiragana done, its combinations begun: the second set is where
+    // this learner stands (domain/kanaSets.currentKanaSet).
+    kana: {
+      hiragana_basic: { total: 46, learned: 46, score: 1 },
+      hiragana_combos: { total: 36, learned: 5, score: 0.2 },
+    },
+    kanji: {}, grammar: {},
   },
+}
+
+// The stop's own card (/api/station/{line}/samples), for the sheet.
+const SAMPLES = {
+  vocab: { stops: { N4: { card: { jp: '会議', reading: 'かいぎ', meaning: 'réunion' } }, N5: { card: { jp: '学校', reading: 'がっこう', meaning: 'école' } } } },
+}
+
+function Where() {
+  const at = useLocation()
+  return <p data-where={at.pathname} />
 }
 
 function mount() {
   return render(
     <LangProvider>
       <MemoryRouter initialEntries={['/learn']}>
-        <LearnScreen session={{ access_token: 'tok' }} />
+        <Routes>
+          <Route path="/learn" element={<LearnScreen session={{ access_token: 'tok' }} />} />
+          <Route path="*" element={<Where />} />
+        </Routes>
       </MemoryRouter>
     </LangProvider>
   )
 }
 
+const where = () => document.querySelector('[data-where]')?.dataset.where ?? null
+const page = () => document.querySelector('.lrn-page:not([inert])')
+
 beforeEach(() => {
   forgetCachedJson()
   apiJson.mockReset()
+  apiFetch.mockReset()
   beginDeparture.mockReset()
   playAnnouncement.mockReset()
+  board.mockClear()
   todayRef.current = TODAY
   statsRef.current = STATS
   basicsRef.current = null
-  apiJson.mockImplementation(async url => (url === '/api/decks' ? { decks: [{ id: 1, card_count: 40 }, { id: 2, card_count: 7 }] } : {}))
+  seedSummary({ ...BASE, jlptLevel: 'N4' })
+  apiJson.mockImplementation(async url => {
+    if (url === '/api/decks') return { decks: [{ id: 1, name: 'Frieren', card_count: 40 }, { id: 2, name: 'Cuisine', card_count: 7 }] }
+    return {}
+  })
+  apiFetch.mockImplementation(async path => {
+    const line = /\/api\/station\/(\w+)\/samples/.exec(path)?.[1]
+    if (line && SAMPLES[line]) return { ok: true, status: 200, json: async () => SAMPLES[line] }
+    if (path === '/api/profile/modes') return { ok: true, status: 200, json: async () => ({ main: { vocab: 'vocab.flashcard.b2f' } }) }
+    return { ok: true, status: 200, json: async () => ({}) }
+  })
 })
 
-describe('LearnScreen — the plates', () => {
-  it('keeps every line reachable: 4 line plates, the shelf as a fifth, no bar over them', async () => {
+describe('LearnScreen — the folded plates', () => {
+  it('keeps every line reachable, folds the decks under them, and prints no bar', async () => {
     const screen = await mount()
     await settle()
     const root = screen.container
-    expect(root.querySelectorAll('.plate--line')).toHaveLength(4)
-    // Nothing answered: every line is on the route.
+    expect(root.querySelectorAll('.plate--line.plate--fold')).toHaveLength(4)
+    // Nothing answered about the lines: every line is on the route.
     expect(root.querySelectorAll('.plate--off')).toHaveLength(0)
-    const shelf = root.querySelectorAll('.plate--shelf')
-    expect(shelf).toHaveLength(1)
-    // The shelf's figures come from /api/decks; the due chip from the
-    // shared today store.
-    expect(shelf[0].querySelector('.plate__meta').textContent).toContain('2')
-    expect(shelf[0].querySelector('.plate__meta').textContent).toContain('47')
-    expect(shelf[0].querySelector('.plate__due').textContent).toContain('3')
+    // The decks: each its own fold, its cards under its name, the due
+    // from today's personal lanes.
+    const decks = [...root.querySelectorAll('.lrn-shelf .plate--deck')]
+    expect(decks.map(d => d.querySelector('.plate__title').textContent)).toEqual(['Frieren', 'Cuisine'])
+    expect(decks[0].querySelector('.plate__meta').textContent).toBe(fr.cardsCount(40))
+    expect(decks[0].querySelector('.plate__due').textContent).toContain('3')
+    expect(decks[1].querySelector('.plate__due')).toBeNull()
     // No bar over the plates (owner's call): the name is the screen's
     // one <h1>, clipped for a screen reader, and nothing prints it.
     expect(root.querySelectorAll('h1')).toHaveLength(1)
     expect(root.querySelector('h1').classList.contains('sr-only')).toBe(true)
     expect(root.querySelector('.bar')).toBeNull()
+    // Folded, a plate has no foot.
+    expect(root.querySelector('.plate--line .plate__foot')).toBeNull()
   })
 
-  it('names the stop reached at the foot, and carries the due chips from the shared store', async () => {
+  it('names the stop each plate opens and its figure, and paints the stripe to its share', async () => {
     const screen = await mount()
     await settle()
-    const root = screen.container
-    // A station is the completion of the level behind it, and every
-    // line opens at the novice's stop — so a line nobody has
-    // touched stands there with its first stop ahead. vocab has N5
-    // finished and N4 half done: standing at N5, N4 ahead, and the
-    // stripe half painted.
-    const plates = [...root.querySelectorAll('.plate--line')]
-    expect(plates.map(p => p.querySelector('.plate__here').textContent)).toEqual([fr.originStop, 'N5', fr.originStop, fr.originStop])
-    expect(plates.map(p => p.querySelector('.plate__next').textContent)).toEqual(['あ ›', 'N4 ›', 'N5 ›', 'N5 ›'])
-    expect(plates[1].querySelector('.plate__prev').textContent).toBe(`‹ ${fr.originStop}`)
-    expect(plates[0].querySelector('.plate__prev').textContent).toBe('')
+    const plates = [...screen.container.querySelectorAll('.plate--line')]
+    expect(plates.map(p => p.querySelector('.lrn-record__stop').textContent)).toEqual(['きゃ', 'N4', 'N4', 'N4'])
+    expect(plates[0].querySelector('.plate__meta').textContent).toBe('きゃ · 5 / 36')
+    expect(plates[1].querySelector('.plate__meta').textContent).toBe('N4 · 4 / 10')
+    // A stop with no figure yet says the stop alone.
+    expect(plates[2].querySelector('.plate__meta').textContent).toBe('N4')
     expect(plates[1].querySelector('.plate__stripe i').style.width).toBe('50%')
-    expect(plates[0].querySelector('.plate__stripe i').style.width).toBe('0%')
-    const chips = [...root.querySelectorAll('.plate__due')].map(el => el.textContent)
+    expect(plates[0].querySelector('.plate__stripe i').style.width).toBe('20%')
+    const chips = [...screen.container.querySelectorAll('.plate--line .plate__due')].map(el => el.textContent)
     expect(chips.join(' ')).toContain('12')
-    expect(chips.join(' ')).toContain('3')
     // grammar has nothing due, so it carries no chip at all.
     expect(plates[3].querySelector('.plate__due')).toBeNull()
   })
 
-  it('prints each name once: no reading, no caption, nothing Japanese but the stops', async () => {
+  it('prints each name once: the only Japanese on a line is its stop', async () => {
     const screen = await mount()
     await settle()
-    const root = screen.container
-    for (const plate of root.querySelectorAll('.plate')) {
+    for (const plate of screen.container.querySelectorAll('.plate--line')) {
       const title = plate.querySelector('.plate__title')
       expect(title.children).toHaveLength(0)
       expect(title.textContent.trim().length).toBeGreaterThan(0)
-      // Every Japanese glyph on the plate is a stop name in the foot.
-      for (const ja of plate.querySelectorAll('[lang="ja"]')) expect(ja.closest('.plate__foot')).toBeTruthy()
+      for (const ja of plate.querySelectorAll('[lang="ja"]')) expect(ja.closest('.lrn-record')).toBeTruthy()
     }
   })
 
   // ── The lines chosen at the boarding hang first ──
-  // A learner riding the kanji alone still has four plates: the kana
-  // (on every ticket) and the kanji first, then the vocabulary and the
-  // grammar marked off their route -- still plates, still buttons.
   it('hangs the chosen lines first and marks the others off the route, all still reachable', async () => {
-    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, lines: ['kanji'] })
-    try {
-      const screen = await mount()
-      await settle()
-      const root = screen.container
-      const plates = [...root.querySelectorAll('.plate--line')]
-      expect(plates).toHaveLength(4)
-      expect(plates.map(p => p.querySelector('.plate__title').textContent)).toEqual(['Kana', 'Kanji', 'Vocabulaire JLPT', 'Grammaire'])
-      expect(plates.map(p => p.classList.contains('plate--off'))).toEqual([false, false, true, true])
-      expect(plates[2].querySelector('.plate__meta').textContent).toBe('Hors de ton trajet')
-      expect(plates[0].querySelector('.plate__meta')).toBeNull()
-      // Off the route is not off the map: the plate still departs.
-      plates[3].querySelector('.plate__head').click()
-      await settle(20)
-      expect(beginDeparture).toHaveBeenCalledWith(expect.objectContaining({ path: '/learn/grammar' }))
-    } finally {
-      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
-    }
-  })
-
-  it('departs to a line through the gate store, announced', async () => {
+    seedSummary({ ...BASE, jlptLevel: 'N4', lines: ['kanji'] })
     const screen = await mount()
     await settle()
-    screen.container.querySelector('.plate--line .plate__head').click()
-    expect(beginDeparture).toHaveBeenCalledTimes(1)
-    expect(beginDeparture.mock.calls[0][0]?.path).toBe('/learn/kana')
-    expect(playAnnouncement).toHaveBeenCalledWith('kana')
-  })
-
-  // ── The plate opens where the learner is ──
-  // The station is a stop list, and the learner picks the same stop
-  // every day: the plate departs for it directly. The declared grade
-  // on a JLPT line, the first unfinished set on かな — the two marks
-  // the stop lists themselves ring as "You are here".
-  it('departs to the stop the learner stands at: the declared grade, and かな\'s own', async () => {
-    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, jlptLevel: 'N4' })
-    statsRef.current = {
-      ...STATS,
-      items: {
-        ...STATS.items,
-        // Hiragana done, its combinations begun: the second set is
-        // where this learner stands (domain/kanaSets.currentKanaSet).
-        kana: {
-          hiragana_basic: { total: 46, learned: 46, score: 1 },
-          hiragana_combos: { total: 36, learned: 5, score: 0.2 },
-        },
-      },
-    }
-    try {
-      const screen = await mount()
-      await settle()
-      const heads = [...screen.container.querySelectorAll('.plate--line .plate__head')]
-      const paths = []
-      for (const head of heads) {
-        head.click()
-        await settle(20)
-        paths.push(beginDeparture.mock.calls.at(-1)[0]?.path)
-      }
-      expect(paths).toEqual([
-        '/learn/kana/hiragana_combos',
-        '/learn/vocab/N4',
-        '/learn/kanji/N4',
-        '/learn/grammar/N4',
-      ])
-      // The gate still wipes in the LINE's identity — the deeper path
-      // is where the train goes, not a different station.
-      expect(beginDeparture.mock.calls.at(-1)[0]?.color).toBe('var(--line-grammar)')
-      expect(playAnnouncement).toHaveBeenLastCalledWith('grammar')
-    } finally {
-      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
-    }
-  })
-
-  // Nothing known about the learner yet — no declared grade, no kana
-  // figures — and the plate opens the station, as it always did: a
-  // guess at the stop would be worse than the question.
-  it('opens the station itself when nothing says where the learner stands', async () => {
-    const screen = await mount()
+    const plates = [...screen.container.querySelectorAll('.plate--line')]
+    expect(plates.map(p => p.querySelector('.plate__title').textContent)).toEqual(['Kana', 'Kanji', 'Vocabulaire JLPT', 'Grammaire'])
+    expect(plates.map(p => p.classList.contains('plate--off'))).toEqual([false, false, true, true])
+    expect(plates[2].querySelector('.plate__meta').textContent).toBe(fr.plateOffRoute)
+    // Off the route is not off the map: the plate still raises its line.
+    plates[3].querySelector('.plate__head').click()
     await settle()
-    const heads = [...screen.container.querySelectorAll('.plate--line .plate__head')]
-    const paths = []
-    for (const head of heads) {
-      head.click()
-      await settle(20)
-      paths.push(beginDeparture.mock.calls.at(-1)[0]?.path)
-    }
-    expect(paths).toEqual(['/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar'])
-  })
-
-  // The shelf is not a line: it has no stops, so it opens on the decks.
-  it('opens the shelf on the decks themselves', async () => {
-    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, jlptLevel: 'N4' })
-    try {
-      const screen = await mount()
-      await settle()
-      screen.container.querySelector('.plate--shelf .plate__head').click()
-      await settle(20)
-      expect(beginDeparture.mock.calls.at(-1)[0]?.path).toBe('/learn/decks')
-    } finally {
-      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
-    }
+    expect(page().getAttribute('aria-label')).toBe('Grammaire')
   })
 
   it('still hangs every plate from a failed or foreign stats payload', async () => {
@@ -314,28 +252,143 @@ describe('LearnScreen — the plates', () => {
     await settle()
     const root = screen.container
     expect(root.querySelectorAll('.plate--line')).toHaveLength(4)
-    // Nobody has travelled, so every line stands at the novice's stop: with no figures
-    // at all the plate still says where the learner is, which is at
-    // the start of every line.
-    expect([...root.querySelectorAll('.plate__here')].map(el => el.textContent)).toEqual(Array(4).fill(fr.originStop))
     expect(root.querySelectorAll('.plate__due')).toHaveLength(0)
-    // And the shelf hangs without its figures.
-    expect(root.querySelectorAll('.plate--shelf')).toHaveLength(1)
-    expect(root.querySelector('.plate--shelf .plate__meta')).toBeNull()
+    // No kana figures, so no kana stop yet; the declared grade still
+    // names the other three.
+    expect(root.querySelectorAll('.lrn-record__stop')).toHaveLength(3)
+    // And the shelf hangs with its doors and no decks.
+    expect(root.querySelectorAll('.plate--deck')).toHaveLength(0)
+    expect(root.querySelectorAll('.lrn-shelf__door')).toHaveLength(2)
   })
 })
 
+describe('LearnScreen — the sheet a line raises', () => {
+  it('opens on the line tapped, at the learner\'s stop, in their main mode, and boards it', async () => {
+    const screen = await mount()
+    await settle()
+    screen.container.querySelectorAll('.plate--line .plate__head')[1].click()
+    await settle(300)
+    expect(document.querySelector('.lrn-sheet')).toBeTruthy()
+    expect(page().getAttribute('aria-label')).toBe('Vocabulaire JLPT')
+    // The head is the plate risen: its name, the stop and its figure.
+    expect(page().querySelector('.prc-page__meta').textContent).toBe('N4 · 4 / 10')
+    // The line: every stop a ring, the learner's ringed, the chosen one
+    // pressed -- here the same one.
+    const stops = [...page().querySelectorAll('.lrn-stop')]
+    expect(stops.map(s => s.querySelector('.lrn-stop__name').textContent)).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(stops[1].getAttribute('aria-current')).toBe('location')
+    expect(stops.map(s => s.getAttribute('aria-pressed'))).toEqual(['false', 'true', 'false', 'false', 'false'])
+    expect(stops[0].classList.contains('lrn-stop--done')).toBe(true)
+    // The main mode is chosen (plan 273), and the card is the stop's own
+    // in that mode: the meaning asked, the word answered.
+    const on = page().querySelector('.lrn-page__mode.chip--on')
+    expect(on.textContent).toBe(modeLabel(fr, 'vocab.flashcard.b2f'))
+    expect(page().querySelector('.lrn-card__q').textContent).toBe('réunion')
+    expect(page().querySelector('.lrn-card__a').textContent).toBe('会議')
+    // Embarquer names the stop and boards it, through the doors.
+    const go = page().querySelector('.prc-page__go')
+    expect(go.textContent).toBe(`${fr.depart} · N4`)
+    go.click()
+    await settle()
+    expect(board).toHaveBeenCalledTimes(1)
+    expect(where()).toBe('/learn/vocab/N4/vocab.flashcard.b2f')
+    // ... and the ride is kept as the last one, on the account.
+    expect(apiFetch).toHaveBeenCalledWith('/api/profile/ride', expect.anything(), expect.objectContaining({
+      method: 'POST', body: JSON.stringify({ path: '/learn/vocab/N4/vocab.flashcard.b2f' }),
+    }))
+  })
+
+  it('boards another stop and another mode: chosen first, then Embarquer', async () => {
+    const screen = await mount()
+    await settle()
+    screen.container.querySelectorAll('.plate--line .plate__head')[1].click()
+    await settle(300)
+    const n5 = [...page().querySelectorAll('.lrn-stop')][0]
+    n5.click()
+    await settle()
+    expect(n5.getAttribute('aria-pressed')).toBe('true')
+    expect(page().querySelector('.prc-page__meta').textContent).toBe('N5 · 10 / 10')
+    expect(page().querySelector('.lrn-card__q').textContent).toBe('école')
+    const first = page().querySelectorAll('.lrn-page__mode')[0]
+    first.click()
+    await settle()
+    expect(first.getAttribute('aria-pressed')).toBe('true')
+    // Nothing boarded yet: a choice is a choice.
+    expect(board).not.toHaveBeenCalled()
+    page().querySelector('.prc-page__go').click()
+    await settle()
+    expect(where()).toBe('/learn/vocab/N5/vocab.flashcard.f2b')
+  })
+
+  it('keeps the line\'s other sources one tap from the sheet', async () => {
+    const screen = await mount()
+    await settle()
+    screen.container.querySelectorAll('.plate--line .plate__head')[1].click()
+    await settle(300)
+    const doors = [...page().querySelectorAll('.lrn-page__door')]
+    expect(doors.map(d => d.textContent)).toEqual([`${fr.byThemeShort} ›`, `${fr.byFrequencyShort} ›`])
+    doors[0].click()
+    await settle()
+    expect(beginDeparture).toHaveBeenCalledWith(expect.objectContaining({ path: '/learn/vocab/themes' }))
+    expect(playAnnouncement).toHaveBeenLastCalledWith('vocab')
+  })
+
+  it('opens kana on its first unfinished set, and the fast review boards with no doors', async () => {
+    const screen = await mount()
+    await settle()
+    screen.container.querySelector('.plate--line .plate__head').click()
+    await settle(300)
+    expect(page().getAttribute('aria-label')).toBe('Kana')
+    const pressed = page().querySelector('.lrn-stop[aria-pressed="true"]')
+    expect(pressed.textContent).toContain('きゃ')
+    const modes = [...page().querySelectorAll('.lrn-page__mode')]
+    modes.at(-1).click()
+    await settle()
+    page().querySelector('.prc-page__go').click()
+    await settle()
+    expect(board).not.toHaveBeenCalled()
+    expect(where()).toBe('/learn/kana/hiragana_combos/fast_review')
+    // A browse is no ride: nothing is kept.
+    expect(apiFetch).not.toHaveBeenCalledWith('/api/profile/ride', expect.anything(), expect.anything())
+  })
+})
+
+describe('LearnScreen — the last ride', () => {
+  it('waits over the lines and boards in one tap', async () => {
+    seedSummary({ ...BASE, jlptLevel: 'N4', learnRide: { path: '/learn/kanji/N5/kanji.readings', at: new Date().toISOString() } })
+    const screen = await mount()
+    await settle()
+    const resume = screen.container.querySelector('.prc-resume')
+    expect(resume.querySelector('.prc-resume__title').textContent).toBe('Kanji · N5')
+    expect(resume.querySelector('.prc-resume__sub').textContent).toContain('Lectures')
+    expect(resume.querySelector('.prc-resume__go').textContent).toBe(fr.practiceResume)
+    resume.click()
+    await settle()
+    expect(board).toHaveBeenCalledTimes(1)
+    expect(where()).toBe('/learn/kanji/N5/kanji.readings')
+  })
+
+  it('offers nothing without one, nor for a path that is no ride', async () => {
+    let screen = await mount()
+    await settle()
+    expect(screen.container.querySelector('.prc-resume')).toBeNull()
+    seedSummary({ ...BASE, jlptLevel: 'N4', learnRide: { path: '/learn/vocab/theme/food/vocab.flashcard.f2b', at: null } })
+    screen = await mount()
+    await settle()
+    expect(screen.container.querySelector('.prc-resume')).toBeNull()
+  })
+})
 
 // ── 案内 — the anchors the guide points at (plan 100) ────────────
 describe('LearnScreen — the guide\'s anchors', () => {
-  it('marks the first plate, its foot and the shelf', async () => {
+  it('marks the first plate, its stop and the shelf', async () => {
     apiJson.mockResolvedValue({ decks: [] })
     const screen = await mount()
     await settle(150)
     const root = screen.container
     expect(root.querySelector('.plate[data-guide="learn.plate"]')).toBeTruthy()
     expect(root.querySelector('[data-guide="learn.plate"] [data-guide="learn.stops"]')).toBeTruthy()
-    expect(root.querySelector('.plate--shelf[data-guide="learn.shelf"]')).toBeTruthy()
+    expect(root.querySelector('.lrn-shelf[data-guide="learn.shelf"]')).toBeTruthy()
     expect(root.querySelectorAll('[data-guide="learn.plate"]')).toHaveLength(1)
   })
 })
@@ -347,19 +400,18 @@ describe('LearnScreen — the basics', () => {
     unit: i + 1, id: ['hajimemashite', 'kore-sore', 'kazu', 'masu'][i], jp, total: 20, met: i < 2 ? 20 : i === 2 ? 5 : 0, learned: 0,
   }))
 
-  it('hangs above the lines while the course is ridden, and opens the unit at hand', async () => {
+  it('hangs above the lines, folded, while the course is ridden, and opens the unit at hand', async () => {
     todayRef.current = { ...TODAY, basics: AT }
     basicsRef.current = { riding: true, at: 3, done: false, units: UNITS }
     const screen = await mount()
     await settle()
-    const plates = [...screen.container.querySelectorAll('.plates > .plate')]
+    const plates = [...screen.container.querySelectorAll('.lrn-folds > .plate')]
     expect(plates[0].classList.contains('plate--basics')).toBe(true)
+    expect(plates[0].classList.contains('plate--fold')).toBe(true)
     // Still four lines: the course is no line.
     expect(screen.container.querySelectorAll('.plate--line')).toHaveLength(4)
-    const foot = plates[0].querySelector('.plate__foot')
-    expect(foot.querySelector('.plate__prev').textContent).toContain('これ・それ')
-    expect(foot.querySelector('.plate__here').textContent).toBe('数')
-    expect(foot.querySelector('.plate__next').textContent).toContain('〜ます')
+    expect(plates[0].querySelector('.plate__meta').textContent).toBe(`${fr.basicsUnit(3, 14)} · 数`)
+    expect(plates[0].querySelector('.plate__foot')).toBeNull()
     // The stripe: the unit at hand's cards met, five of twenty.
     expect(plates[0].querySelector('.plate__stripe > i').style.width).toBe('25%')
     plates[0].querySelector('.plate__head').click()
