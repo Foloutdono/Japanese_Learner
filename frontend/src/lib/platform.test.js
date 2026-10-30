@@ -46,9 +46,11 @@ describe('nudgeAt', () => {
 })
 
 describe('openPath', () => {
-  it('opens the gate from the widget’s link and nothing else', () => {
+  it('opens the gate and the run from the widget’s links and nothing else', () => {
     expect(openPath('app.tsuji://open/today')).toBe('/today')
     expect(openPath('app.tsuji://open/today/')).toBe('/today')
+    expect(openPath('app.tsuji://open/run')).toBe('/today/run')
+    expect(openPath('app.tsuji://open/run?lanes=x')).toBeNull()
     expect(openPath('app.tsuji://open/profile')).toBeNull()
     expect(openPath('app.tsuji://open/../settings')).toBeNull()
     expect(openPath('app.tsuji://auth-callback#access_token=x')).toBeNull()

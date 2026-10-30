@@ -76,7 +76,8 @@ export function NativeBridge() {
 // handed its figures from the same answer. Both are planned again
 // whenever something they read moves -- the profile's two answers, the
 // language, a run landing (the Today store refreshes) -- and when the
-// app comes back to the front. A tap on either opens the gate.
+// app comes back to the front. A tap on either opens the gate; the
+// train's Depart (plan 293) opens the run itself, as the gate's does.
 function AheadPlanner({ enabled, time }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
@@ -113,7 +114,7 @@ function AheadPlanner({ enabled, time }) {
         .catch(() => null)
       if (cancelled) return
       last.current = { key, at: Date.now() }
-      await updateWidget(widgetPayload({ today, ahead, t, now }))
+      await updateWidget(widgetPayload({ today, ahead, t, now, time }))
       // No answer: whatever was scheduled before stays scheduled -- a
       // stale reminder is better than a silent phone.
       if (!ahead) {
@@ -123,7 +124,7 @@ function AheadPlanner({ enabled, time }) {
       const planned = hour
         ? planNudges({ ahead, time, t, kanaSetLabel, now, platform: nativePlatform() })
         : []
-      await syncNudges(enabled ? planned : [], t.nudgeChannel)
+      await syncNudges(enabled ? planned : [], t.nudgeChannel, t.depart)
       if (!cancelled) setAheadPlan({ nudges: planned, failed: false })
     }, PLAN_DELAY_MS)
     return () => { cancelled = true; clearTimeout(handle) }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Depart, as the app's gate (plan 293; GateButton.jsx, DESIGN.md "The
+     gate button"): a gold pill lit from above, gate-gold-crest through
+     gate-gold-lit to gate-gold, its foot a shade deeper. The reader
+     and the hairline are TrainWidget's layout's own views. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="100dp" />
+            <gradient
+                android:angle="270"
+                android:centerY="0.45"
+                android:startColor="#f3cb68"
+                android:centerColor="#e6bd62"
+                android:endColor="#c99a3e"
+                android:type="linear" />
+        </shape>
+    </item>
+    <item android:top="1dp" android:left="12dp" android:right="12dp" android:gravity="top">
+        <shape android:shape="rectangle">
+            <size android:height="1dp" />
+            <solid android:color="#8cfff4d6" />
+        </shape>
+    </item>
+</layer-list>

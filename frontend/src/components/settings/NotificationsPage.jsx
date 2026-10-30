@@ -18,9 +18,10 @@ import { SettingsPage, Slip } from './SettingsPage'
 // The shells only (SettingsScreen leaves the row and the page out of
 // the web): the daily train on or off, its hour -- a door to the
 // ride's own page, the one place the hour is set -- and the next
-// reminder exactly as it will read, from the plan NativeBridge last
-// made (lib/ahead.js). Then the widget, which has nothing to set: how
-// to put it on the lock or home screen, and what it shows.
+// reminder exactly as it will read, its Depart included (plan 293),
+// from the plan NativeBridge last made (lib/ahead.js). Then the widget,
+// which has nothing to set: how to put it on the lock or home screen,
+// and what it shows.
 //
 // Turning the train on asks the OS first; the answer is stored only
 // once the OS has said yes, so the switch never claims a reminder the
@@ -102,6 +103,7 @@ export function NotificationsPage() {
               <span className="brd-notif__title">{next.title}</span>
               <span className="brd-notif__text">{next.summary}</span>
               {next.lines.map(line => <span key={line} className="brd-notif__text">{line}</span>)}
+              {next.actionType && <span className="brd-notif__action">{t.depart}</span>}
             </div>
           </div>
         )}

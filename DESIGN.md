@@ -948,6 +948,37 @@ glass, so it reads on every print, and never a second button. A quiet
 word set on the print takes the page's ink, which the light theme's
 night loses.
 
+### The widget and the reminder (発車案内, plans 156, 293)
+
+What the app says while it is shut is drawn as the owner picked it on
+the canvas "Tsuji — widgets & notifications" (plan 293): C on the home
+screen, A on the lock screen, reminder 2, its Depart the gate.
+
+- **The home-screen widget is a small board on sumi**, in both themes:
+  the mark and the learner's hour at its head (the title when there is
+  no hour), the count over its minutes and new cards, a word they know
+  past a hairline, the lines' stripe, and **Depart drawn as the gate
+  button** — the gold pill lit from above, the sumi reader at its left
+  end with the scanner's mark, the hairline. Depart opens the run (the
+  whole day, as the gate's with every line on); a tap anywhere else
+  opens the gate. Where the size has no room, the word goes first (the
+  2×2, the small), then Depart; the count never does.
+- **The lock screen is A's**: the count in a ring cut into the lines'
+  shares, the word alone in the rectangle, the hour and the count on
+  the inline line — in the lock screen's one ink.
+- **The reminder is the system's**, so what it can carry is chosen, not
+  drawn: the mark in one ink as its icon (`ic_stat_tsuji`), tinted the
+  gate's gold; a title that leads with the hour, as a board's row does
+  (« 19:00 · 42 cartes »); the minutes kept when Android expands it to
+  the lines; no more lines than iOS shows uncut (three); and the day's
+  train carries Depart, which opens the run. The comeback carries none:
+  its door is the gate's paces.
+- **The native copies follow the tokens.** A widget cannot read
+  `index.css`, so its inks are the dark theme's copied by value
+  (`Ink` in `TsujiWidget.swift`, the `widget_*` drawables,
+  `TrainWidget.lineColor`): a change to a pigment, the panel's inks or
+  the gate's gold is a change there too.
+
 ### The tour (発見, plan 187)
 
 A grammar point the learner has never met is **asked before it is
