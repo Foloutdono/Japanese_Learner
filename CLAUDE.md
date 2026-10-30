@@ -411,11 +411,13 @@ runtime purpose.
   Spanish (`kanji_meanings_es.json`, then `build_kanji_db --spanish-only`),
   a grammar point every text it has (`meaning.es`, `structure_es`, its
   lesson, its tour and its own Choisir questions), in the same change
-  (`tests/test_spanish.py`); a reading-bank row its `es` (`row_problems`)
-  and a comprehension seed every string (its `LANGS`, so the pool serves
-  a Spanish learner the seeds before any model call). Everything else
-  (the dictation and conversation banks, example sentences, the pool,
-  the duels) gains Spanish a wave at a time, optional where it is added:
+  (`tests/test_spanish.py`); a reading-bank row its `es` (`row_problems`),
+  a dictation line its `es` (`listening_clips.problems`), a comprehension
+  seed every string (its `LANGS`, so the pool serves a Spanish learner
+  the seeds before any model call) and a conversation scenario every text
+  (`conversation.LANGS`, `check_conversation`). Everything else (example
+  sentences, the basics course's titles, the pool, the duels) gains
+  Spanish a wave at a time, optional where it is added:
   `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
   KANJI_GLOSSES)` (`translations/course.py`), a date or a number is

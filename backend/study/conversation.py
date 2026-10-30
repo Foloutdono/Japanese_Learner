@@ -38,7 +38,8 @@ from study.dictation import bank_words, measure_forms
 from study.furigana import align_deck, align_sentence
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-LANGS = ("en", "fr")
+# Every text around the Japanese is written in each: Spanish since plan 291.
+LANGS = ("en", "fr", "es")
 MODES = ("choose", "translate", "free")
 REGISTERS = ("casual", "polite", "formal")
 
@@ -82,7 +83,7 @@ _LATIN_OR_DIGIT = re.compile(r"[A-Za-z0-9０-９Ａ-Ｚａ-ｚ]")
 # problem rather than a field silently never read.
 _SCENARIO_KEYS = {"id", "place", "title", "situation", "goal", "steps", "them", "register", "turns", "close"}
 _TURN_KEYS = {"them", "me", "wrong"}
-_LINE_KEYS = {"jp", "kana", "en", "fr"}
+_LINE_KEYS = {"jp", "kana", *LANGS}
 _ME_KEYS = _LINE_KEYS | {"romaji", "note", "alt"}
 _ALT_KEYS = {"jp", "kana", "romaji"}
 _WRONG_KEYS = _LINE_KEYS | {"why"}
@@ -120,12 +121,12 @@ def find(scenario_id: str) -> tuple[str, dict] | None:
 
 
 def bank_lang(lang: object) -> str:
-    """A language the bank is written in: French, else English."""
+    """A language the bank is written in (LANGS), else English."""
     return lang if lang in LANGS else "en"
 
 
 def text(pair: dict | None, lang: str) -> str:
-    """One side of an {en, fr} pair, the English when the side is empty."""
+    """One side of an {en, fr, es} pair, the English when the side is empty."""
     if not isinstance(pair, dict):
         return ""
     return pair.get(lang) or pair.get("en") or ""
@@ -135,7 +136,7 @@ def text(pair: dict | None, lang: str) -> str:
 
 def _pair_problems(pair, where: str, *, japanese: bool = True) -> list[str]:
     if not isinstance(pair, dict):
-        return [f"{where}: missing (an {{en, fr}} pair)"]
+        return [f"{where}: missing (an {{en, fr, es}} pair)"]
     out = []
     for lang in LANGS:
         value = pair.get(lang)

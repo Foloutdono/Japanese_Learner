@@ -62,9 +62,17 @@ not yet written in Spanish reads English**, never French and never blank.
   length tells no more in Spanish than in English: picking the longest
   wins 23-24% per level, as a blind pick of four would
   (`comprehension_seed_report`).
+- **The dictation and conversation banks are whole** (the fifth wave):
+  every dictation line's translation (`listening_clips.problems` requires
+  it) and every text of the 111 scenarios -- titles, situations, goals and
+  mission steps (44 characters at most), roles, every line's translation,
+  every note and why -- held by `conversation.LANGS`, so
+  `check_conversation` holds the Spanish to every rule it holds the English
+  and French to. A `me` line's Spanish is what Translate asks the learner
+  to say, so it carries all its Japanese says; the learner has no gender,
+  and a role fixes none where Spanish allows.
 - **Everything else is written a wave at a time** and reads English until
-  then: the dictation and conversation banks, the deck's example
-  sentences, the JMdict pool's words, the breakdown's
+  then: the deck's example sentences, the basics course's unit titles, the JMdict pool's words, the breakdown's
   particle and ending glosses, the duels' choices. `python -m
   scripts.spanish_coverage` counts what is written and what is left, per
   part. A Spanish text is optional where it is added (`grammar_check` holds
