@@ -121,7 +121,7 @@
       "Un programa que alquila casas vacías a bajo precio",
       "Un programa que vende casas vacías a bajo precio",
       "Un festival preparado por todos los vecinos",
-      "Nuevos cafés y tiendas abiertos por el ayuntamiento"
+      "Nuevos cafés y tiendas que abrió el municipio"
      ]
     },
     "correct": 0
@@ -1446,7 +1446,7 @@
       "Ils perdent la liberté de travailler selon leurs propres horaires"
      ],
      "es": [
-      "Acaban trabajando más al mezclarse trabajo y vida privada",
+      "Acaban trabajando más horas al mezclarse el trabajo y la vida privada",
       "Trabajan menos horas porque nadie los vigila",
       "Echan de menos la oficina, donde trabajo y vida iban por separado",
       "Pierden la libertad de trabajar según su propio horario"
@@ -2853,7 +2853,7 @@
       "Eliminar sus motivos para acercarse a la basura",
       "Ahuyentar a los cuervos de la basura",
       "Cambiar el color de las bolsas de basura",
-      "Cambiar la hora a la que pasa el camión de basura"
+      "Cambiar la hora de paso del camión de basura"
      ]
     },
     "correct": 0
@@ -4040,7 +4040,7 @@
       "Réserver des livres et les retirer plus tard"
      ],
      "es": [
-      "Recoger libros reservados y devolver libros",
+      "Recoger los libros reservados y devolver libros",
       "Reservar libros y pedir prestados hasta veinte",
       "Devolver libros y usar una sala de estudio",
       "Reservar libros y recogerlos más tarde"
@@ -4185,7 +4185,7 @@
       "Ses horaires varient selon l'âge"
      ],
      "es": [
-      "Cualquiera puede usarla, sea cual sea su edad",
+      "Cualquier persona puede usarla, sea cual sea su edad",
       "Solo pueden usarla quienes superan cierta edad",
       "Hay que indicar la edad para usarla",
       "Su horario varía según la edad"
@@ -7562,7 +7562,7 @@
       "Surtout dans les foyers, rarement ailleurs"
      ],
      "es": [
-      "En los hogares, y también en otros lugares",
+      "En los hogares, pero también en otros lugares",
       "En los hogares, y en ningún otro lugar",
       "En otros lugares, pero no en los hogares",
       "Sobre todo en los hogares, rara vez en otros"
@@ -7679,7 +7679,7 @@
      ],
      "es": [
       "Vender barato lo que está a punto de caducar",
-      "Pedir mercancía según las ventas pasadas",
+      "Pedir mercancía en función de las ventas pasadas",
       "Dar a los hogares la comida que le sobra",
       "Preguntar a los clientes qué debe tener"
      ]
@@ -7766,7 +7766,7 @@
      ],
      "es": [
       "Va más allá de lo necesario",
-      "No puede lograrlo todo",
+      "Hay cosas que no puede lograr",
       "Es la clave del éxito",
       "Ya ha tenido éxito"
      ]
@@ -7796,7 +7796,7 @@
      "es": [
       "Los supermercados ya han resuelto el problema",
       "Los hogares son la principal causa del desperdicio",
-      "Tiendas y compradores deben poner de su parte",
+      "Tanto las tiendas como los compradores deben poner de su parte",
       "El tiempo importa más que los datos de ventas"
      ]
     },
@@ -8871,7 +8871,7 @@
      ],
      "es": [
       "Da la razón de la ventaja",
-      "Opone un inconveniente a una ventaja",
+      "Contrapone un inconveniente a una ventaja",
       "Añade una segunda ventaja a la primera",
       "Pone en duda la propia ventaja"
      ]
@@ -8901,7 +8901,7 @@
      "es": [
       "El japonés común a todo el país",
       "Una forma local de hablar",
-      "La lengua de los libros antiguos",
+      "La lengua de los libros viejos",
       "El habla cortés del trabajo"
      ]
     },
@@ -10295,7 +10295,7 @@
       "Es un esfuerzo, y algo más aparte",
       "Es la forma de esfuerzo más dura que existe",
       "Es un esfuerzo que siempre da frutos",
-      "No es tanto un esfuerzo como otra cosa"
+      "No es tanto un esfuerzo como, más bien, otra cosa"
      ]
     },
     "correct": 3
@@ -10352,7 +10352,7 @@
      "es": [
       "Confirmó lo que todos suponían",
       "El equipo no pudo explicarlo",
-      "Contradijo lo que la gente suponía",
+      "Fue en contra de lo que la gente había supuesto",
       "Solo se cumplió en unos pocos estudiantes"
      ]
     },
@@ -11365,7 +11365,7 @@
      "es": [
       "Un mal resultado que es seguro",
       "Un resultado que no puede darse",
-      "Un mal resultado que podría darse",
+      "Un mal resultado que podría llegar a darse",
       "Un buen resultado que cabe esperar"
      ]
     },
@@ -11509,7 +11509,7 @@
      ],
      "es": [
       "Cuesta demasiado",
-      "Estropea el peinado",
+      "Le estropea a uno el peinado",
       "Hace ir más lento",
       "Es difícil de transportar"
      ]
@@ -12722,7 +12722,7 @@
      ],
      "es": [
       "Solo los estudiantes que alquilan las casas",
-      "Tanto los propietarios como quienes alquilan",
+      "Tanto los propietarios como las personas que alquilan",
       "Sobre todo la ciudad, que ahorra en reparaciones",
       "Solo los propietarios que viven lejos de la ciudad"
      ]
@@ -13788,7 +13788,7 @@
      "es": [
       "Ahora le inquieta demasiado seguir conduciendo",
       "El nuevo autobús lo lleva al hospital cada semana",
-      "Sin auto no podría ir ni de compras ni al médico",
+      "Sin auto no podría hacer las compras ni ir al médico",
       "El año pasado devolvió su licencia al municipio"
      ]
     },
@@ -13904,7 +13904,7 @@
      "es": [
       "Lo usan menos personas mayores de lo que se esperaba",
       "Sus autobuses no llegan a algunas casas de las colinas",
-      "Faltan conductores y dinero a medida que crece el uso",
+      "Escasean los conductores y el dinero a medida que crece el uso",
       "Ahora hay que reservar con una semana entera de antelación"
      ]
     },
@@ -15057,7 +15057,7 @@
       "No está permitido",
       "No es prudente",
       "No está de moda",
-      "No es poco común"
+      "No es algo poco común"
      ]
     },
     "correct": 3
@@ -15173,7 +15173,7 @@
       "Los clientes las pagan en cada compra",
       "El municipio las paga por los pequeños comercios",
       "Los pequeños comercios están exentos de pagarlas",
-      "Para las tiendas no son en absoluto pequeñas"
+      "Para las tiendas no son, ni mucho menos, pequeñas"
      ]
     },
     "correct": 3
@@ -15199,7 +15199,7 @@
       "La machine était facile à apprendre"
      ],
      "es": [
-      "Los clientes jóvenes podrían dejar de ir",
+      "Los clientes jóvenes podrían dejar de ir a su tienda",
       "Sus comisiones eran más bajas de lo esperado",
       "Sus clientes mayores se lo pedían",
       "La máquina era fácil de aprender"
@@ -16388,7 +16388,7 @@
       "Los turistas no encuentran asiento para ir al jardín",
       "Los autobuses ya no paran en el hospital",
       "Los habitantes tienen que reservar su asiento",
-      "Los habitantes que van al hospital no pueden subir"
+      "Los habitantes que van al hospital no consiguen subir"
      ]
     },
     "correct": 3
@@ -16589,7 +16589,7 @@
      ],
      "es": [
       "Habría que cerrar del todo el casco antiguo a los turistas",
-      "Sigue abierto cómo conciliar la vida local y los ingresos",
+      "Sigue abierto cómo conciliar la vida de los habitantes y los ingresos",
       "La nueva contribución por fin ha resuelto el problema",
       "Los habitantes deberían irse del centro abarrotado"
      ]
@@ -17734,7 +17734,7 @@
       "Devolverlo a la tienda para que le reembolsen",
       "Solicitar uno nuevo por internet o por teléfono",
       "Enviarlo a la fábrica para que lo reparen",
-      "Esperar a que le llegue una tapa nueva por correo"
+      "Esperar a que llegue una tapa nueva por correo"
      ]
     },
     "correct": 1
@@ -17907,7 +17907,7 @@
      "es": [
       "Anunciar un nuevo hervidor que sustituya al Minamo",
       "Dar las gracias a quienes compraron en octubre",
-      "Disculparse por un defecto y explicar el cambio",
+      "Pedir disculpas por un defecto y explicar el cambio",
       "Explicar por qué ha subido el precio del hervidor"
      ]
     },
@@ -18954,7 +18954,7 @@
      "es": [
       "Cuotas más bajas para las familias que usan los clubes",
       "Más tiempo para que los niños estudien en casa",
-      "Entrenadores que tienen conocimientos especializados",
+      "Entrenamiento a cargo de personas con conocimientos especializados",
       "Clubes que se reúnen más cerca de las casas de los niños"
      ]
     },
@@ -20392,7 +20392,7 @@
       "Que tous les repas sont désormais gratuits"
      ],
      "es": [
-      "Que el lugar no es solo para niños pobres",
+      "Que el lugar no es solo para los niños de familias pobres",
       "Que los adultos deben dejar comer primero a los niños",
       "Que se pide a los transeúntes que donen comida",
       "Que ahora todas las comidas son gratis"
@@ -22810,7 +22810,7 @@
       "On ne peut pas le changer"
      ],
      "es": [
-      "No tiene importancia",
+      "No tiene ninguna importancia",
       "Se preguntará por ello",
       "Hay que indicarlo",
       "No se puede cambiar"
@@ -22986,7 +22986,7 @@
      "es": [
       "No debe preocuparse",
       "Nunca se ha preocupado",
-      "No hay por qué preocuparse",
+      "No hay necesidad de preocuparse",
       "No puede evitar preocuparse"
      ]
     },
@@ -24083,7 +24083,7 @@
       "Une ville près d'une grande ville"
      ],
      "es": [
-      "Un pueblo entre montañas",
+      "Un pueblo situado entre las montañas",
       "Un pueblo en la cima de una montaña",
       "Un pueblo junto al mar",
       "Un pueblo cerca de una gran ciudad"
@@ -25718,7 +25718,7 @@
      ],
      "es": [
       "Para mostrar que al final se detuvo el plan",
-      "Para mostrar con qué fuerza se oponen los vecinos",
+      "Para mostrar con cuánta fuerza se oponen los vecinos",
       "Para mostrar que la mayoría apoya la energía solar",
       "Para explicar cómo se hicieron las nuevas normas"
      ]
@@ -27026,7 +27026,7 @@
      ],
      "es": [
       "Reír mucho vuelve a la gente sana y popular a la vez",
-      "Quizá la gente sana y con amigos simplemente ríe más",
+      "Quizá la gente sana y con muchos amigos simplemente ríe más",
       "La gente con muchos amigos suele reír menos",
       "Se preguntó a muy poca gente para fiarse del resultado"
      ]
@@ -28217,7 +28217,7 @@
      ],
      "es": [
       "Lugares para criar animales raros",
-      "Lugares para entretener al público",
+      "Lugares para hacer disfrutar a los visitantes",
       "Lugares para estudiar animales salvajes",
       "Lugares para enseñar sobre la naturaleza"
      ]
@@ -28478,7 +28478,7 @@
      ],
      "es": [
       "Un zoológico puede mostrar menos animales para tratarlos mejor",
-      "Un zoológico debe mostrar más animales para no perder visitantes",
+      "Un zoológico debe mostrar más animales para no perder público",
       "Ya no se deberían tener elefantes en los zoológicos",
       "A los visitantes ya no les importan los animales raros"
      ]
@@ -29750,7 +29750,7 @@
      "es": [
       "A las grandes ciudades",
       "A todos los municipios por igual",
-      "A los municipios con regalos populares",
+      "A los municipios que ofrecen regalos populares",
       "A los municipios natales de los donantes"
      ]
     },
@@ -29808,7 +29808,7 @@
      "es": [
       "Ocurrirá en cuanto se hagan las normas",
       "Depende de las normas que se hagan a partir de ahora",
-      "Es la razón por la que se hicieron las primeras normas",
+      "Por eso se hicieron las primeras normas",
       "Está decidido digan lo que digan las normas"
      ]
     },
@@ -32354,7 +32354,7 @@
      "es": [
       "Recoger",
       "Prescindir de",
-      "Aprovechar",
+      "Hacer buen uso de",
       "Hacer público"
      ]
     },
@@ -32384,7 +32384,7 @@
       "Sin suficientes datos, ningún equipo puede ganar",
       "El equipo que gana siempre tiene más datos",
       "Con más datos, cualquier equipo ganará seguro",
-      "Tener muchos datos no garantiza la victoria"
+      "El hecho de tener muchos datos no garantiza la victoria"
      ]
     },
     "correct": 3
@@ -32497,7 +32497,7 @@
       "Pour réclamer le départ des entraîneurs âgés"
      ],
      "es": [
-      "Para mostrar que no a todos les gusta el cambio",
+      "Para mostrar que no todo el mundo ve con buenos ojos el cambio",
       "Para mostrar que la experiencia ya no cuenta",
       "Para explicar cómo mejoraron los resultados del equipo",
       "Para defender que los entrenadores mayores deberían retirarse"
@@ -33864,7 +33864,7 @@
       "La plupart des foyers ont de grosses économies"
      ],
      "es": [
-      "Los precios siguen subiendo y los sueldos no",
+      "Los precios siguen subiendo mientras los sueldos se estancan",
       "Se espera que los precios bajen pronto",
       "Los sueldos han subido más rápido que los precios",
       "La mayoría de las familias ya tiene muchos ahorros"
@@ -34958,7 +34958,7 @@
       "Documentos, y nada más que eso",
       "Documentos, en vez de reuniones con clientes",
       "Documentos, pero después de las reuniones",
-      "Documentos, por supuesto, y mucho más"
+      "Documentos, por supuesto, y otras cosas además"
      ]
     },
     "correct": 3
@@ -35042,7 +35042,7 @@
       "Agacé à chaque fois"
      ],
      "es": [
-      "Sin poner nunca mala cara",
+      "Sin poner mala cara en ningún momento",
       "Sin decir una palabra",
       "Solo después de poner mala cara",
       "Poniendo mala cara cada vez"
@@ -35131,7 +35131,7 @@
      "es": [
       "Sigue trabajando en ventas",
       "Trabaja para el mismo cliente",
-      "Ha vuelto a la universidad",
+      "Ha vuelto a estudiar en la universidad",
       "Prepara un plan nuevo"
      ]
     },
@@ -36404,7 +36404,7 @@
       "Seuls les experts distinguent le vrai du faux"
      ],
      "es": [
-      "Una simple comprobación podría frenar muchas mentiras",
+      "Una simple comprobación podría frenar muchas de las mentiras",
       "La mayoría de las mentiras en internet no se pueden frenar",
       "Las noticias oficiales a menudo se equivocan",
       "Solo los expertos pueden detectar mentiras"

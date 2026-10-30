@@ -58,7 +58,10 @@ not yet written in Spanish reads English**, never French and never blank.
   as English and French are, and every string of the 180 seeds (each
   sentence's translation, note and word glosses, every question and its
   four options), so `comprehension_seed.LANGS` holds Spanish and the pool
-  serves a Spanish learner the seeds before any model call.
+  serves a Spanish learner the seeds before any model call. The options'
+  length tells no more in Spanish than in English: picking the longest
+  wins 23-24% per level, as a blind pick of four would
+  (`comprehension_seed_report`).
 - **Everything else is written a wave at a time** and reads English until
   then: the dictation and conversation banks, the deck's example
   sentences, the JMdict pool's words, the breakdown's

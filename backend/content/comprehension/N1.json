@@ -31,7 +31,7 @@
       "La librairie de la gare va se mettre à vendre en ligne"
      ],
      "es": [
-      "Cerrará la pequeña librería frente a la estación",
+      "La pequeña librería que está frente a la estación cerrará",
       "Abrirá una librería nueva frente a la estación",
       "El dueño de la librería se la cederá a alguien",
       "La librería de la estación empezará a vender en línea"
@@ -118,7 +118,7 @@
       "Il le lui recommandait sur le site de la boutique"
      ],
      "es": [
-      "Lo ponía donde destacara en el estante",
+      "Lo ponía en un sitio del estante donde destacara",
       "Se lo apartaba detrás del mostrador",
       "Se lo encargaba a la editorial",
       "Se lo recomendaba en la web de la tienda"
@@ -321,7 +321,7 @@
       "Elles remplaceront bientôt toutes les librairies"
      ],
      "es": [
-      "No pueden sustituir a una persona que conoce al lector",
+      "No pueden ocupar el lugar de una persona que conoce al lector",
       "Eligen libros mejor que cualquier librero",
       "Han aprendido a imitar lo que hacían las tiendas pequeñas",
       "Pronto sustituirán por completo a las librerías"
@@ -3092,7 +3092,7 @@
       "L'œuvre des pionnières est oubliée et perdue"
      ],
      "es": [
-      "Que lo demos por sentado muestra lo que lograron las pioneras",
+      "El hecho de que lo demos por sentado muestra lo que lograron las pioneras",
       "Los estudiantes de hoy deberían sentirse culpables por sus plazas",
       "Las mujeres en medicina aún chocan con las viejas barreras",
       "La obra de las pioneras se ha olvidado y desperdiciado"
@@ -4544,7 +4544,7 @@
       "L'auteur avait copié la forme des bols du maître"
      ],
      "es": [
-      "La forma de trabajar del maestro se había vuelto la suya",
+      "La forma de trabajar del maestro se había vuelto la suya propia",
       "El maestro había ayudado en secreto a hacer el cuenco",
       "Era un cuenco que el maestro había hecho hacía mucho",
       "El autor había copiado la forma de los cuencos del maestro"
@@ -7337,7 +7337,7 @@
       "Il y voit une menace pour la liberté des chercheurs"
      ],
      "es": [
-      "Lo acoge como un paso para que se cuenten los fracasos",
+      "Lo acoge con agrado como un paso para que se cuenten los fracasos",
       "Lo pone en duda, porque frena la investigación",
       "Cree que sirve sobre todo a los intereses de las revistas",
       "Lo ve como una amenaza a la libertad de los investigadores"
@@ -8565,7 +8565,7 @@
       "Interroger directement sur"
      ],
      "es": [
-      "No prestar ninguna atención a",
+      "No prestar atención a",
       "Escribir con claridad",
       "Pensar con consideración en",
       "Preguntar directamente por"
@@ -11043,7 +11043,7 @@
       "En comptant comme normaux"
      ],
      "es": [
-      "Teniendo en cuenta",
+      "Tomando en consideración",
       "Dejando de lado",
       "Corrigiendo",
       "Contando como normales"
@@ -12111,7 +12111,7 @@
       "Parce que les habitants se plaignent de désagréments"
      ],
      "es": [
-      "Sin prestar atención a las molestias de los vecinos",
+      "Sin prestar ninguna atención a las molestias de los vecinos",
       "Cuidando mucho las molestias de los vecinos",
       "Trasladando a otro sitio las molestias de los vecinos",
       "Porque los vecinos se quejan de molestias"
@@ -18774,7 +18774,7 @@
       "A través de las cartas que se escribían las dos hermanas",
       "A través de la hermana mayor recordando en su vejez",
       "A través de aldeanos que recuerdan la construcción de la presa",
-      "A través de la hermana menor leyendo el diario de su hermana"
+      "A través de la hermana menor mientras lee el diario de su hermana"
      ]
     },
     "correct": 3
@@ -20406,7 +20406,7 @@
       "Que seuls les spécialistes peuvent les saisir"
      ],
      "es": [
-      "Que nuestra normalidad es igual de hija de su tiempo",
+      "Que nuestra propia normalidad es igual de hija de su tiempo",
       "Que esas costumbres eran, en efecto, simplemente erróneas",
       "Que un lector así debería renunciar a los clásicos",
       "Que solo los especialistas pueden entenderlas"
@@ -20467,7 +20467,7 @@
       "Leerlos con ayuda de las notas",
       "Encontrar extrañas al principio sus costumbres",
       "Leerlos como una especie de viaje",
-      "Buscar en ellos solo lo que se nos asemeja"
+      "Buscar en ellos solo aquello que se nos asemeja"
      ]
     },
     "correct": 3
@@ -21828,7 +21828,7 @@
      ],
      "es": [
       "Cierra con una pregunta prudente, no con una afirmación firme",
-      "Cierra con una regla firme que todos los expertos deben seguir",
+      "Cierra con una regla firme que todo experto debe seguir",
       "Cierra con una cifra que da la razón al autor",
       "Cierra con una advertencia de no fiarse de ningún experto"
      ]
@@ -22990,7 +22990,7 @@
      "es": [
       "Clasificar por tipos de tarea",
       "Confiar a una sola persona",
-      "Repartir entre varios",
+      "Repartir entre varias personas",
       "Pagar a otro para que lo haga"
      ]
     },
@@ -24066,7 +24066,7 @@
       "Pour montrer que les examens deviennent faciles"
      ],
      "es": [
-      "Para conceder un punto antes de rebatirlo",
+      "Para conceder un punto antes de argumentar en su contra",
       "Para recomendarlo como la mejor forma de aprender",
       "Para contar lo que opinan de él los alumnos",
       "Para mostrar que los exámenes son cada vez más fáciles"
@@ -24126,7 +24126,7 @@
      "es": [
       "Leyendo mucho sobre cada una de sus asignaturas",
       "Preguntando a los profesores por qué cada respuesta es correcta",
-      "Analizando preguntas anteriores y repitiendo métodos",
+      "Analizando las preguntas de años anteriores y repitiendo métodos",
       "Trabajando en grupo con problemas de la vida real"
      ]
     },
@@ -24358,7 +24358,7 @@
      "es": [
       "Habría que suprimir los exámenes",
       "La eficiencia es todo lo que necesita la escuela",
-      "Estudiar con eficacia para el examen no basta",
+      "Estudiar con eficacia para el examen no es suficiente",
       "Los alumnos deberían dejar pronto la escuela"
      ]
     },
@@ -25744,7 +25744,7 @@
      ],
      "es": [
       "Para mostrar que el turismo es la causa del problema",
-      "Para mostrar que solo en los pueblos pequeños se ven las estrellas",
+      "Para mostrar que las estrellas solo se ven en pueblos pequeños",
       "Para mostrar que la oscuridad puede valorarse, no solo perderse",
       "Para mostrar que hay que hacer más potentes las farolas"
      ]
@@ -26848,7 +26848,7 @@
       "Son propos est difficile à formuler"
      ],
      "es": [
-      "Su idea es demasiado obvia para decirla",
+      "Su idea es tan obvia que no hace falta decirla",
       "Su idea quedará refutada más adelante",
       "Su idea es un descubrimiento del autor",
       "Su idea es difícil de expresar con palabras"
@@ -28410,7 +28410,7 @@
      ],
      "es": [
       "El autor supo el nombre, pero luego lo olvidó",
-      "En aquellos años el autor nunca supo el nombre",
+      "En aquellos años el autor nunca llegó a saber el nombre",
       "El autor sabía el nombre, pero no se lo dijo a nadie",
       "El autor decidió entonces no aprender el nombre"
      ]
@@ -29805,7 +29805,7 @@
       "Un recueil de lettres"
      ],
      "es": [
-      "Un argumento fijado de antemano",
+      "Un argumento establecido de antemano",
       "Una lista de hechos comprobados",
       "El estilo personal de un escritor",
       "Una colección de cartas"
@@ -29895,7 +29895,7 @@
       "Añade las huellas del esfuerzo a una lista más larga",
       "Admite que las huellas del esfuerzo son secundarias",
       "Pregunta si el esfuerzo deja alguna huella",
-      "Señala las huellas del esfuerzo como lo que importa"
+      "Presenta las huellas del esfuerzo como lo que importa"
      ]
     },
     "correct": 3
@@ -31182,7 +31182,7 @@
      ],
      "es": [
       "Se abren más colegios electorales",
-      "Las políticas para los mayores van primero",
+      "Se da prioridad a las políticas para los mayores",
       "Las elecciones se celebran con menos frecuencia",
       "Se presentan candidatos jóvenes"
      ]
@@ -32426,7 +32426,7 @@
       "Los aviones son más peligrosos y por eso dan más miedo",
       "Ambos son igual de peligrosos, pero los coches dan más miedo",
       "Los coches son más seguros que los aviones en trayectos cortos",
-      "Los coches son más peligrosos, pero los aviones dan más miedo"
+      "Los coches son más peligrosos, aunque los aviones dan más miedo"
      ]
     },
     "correct": 3
@@ -32598,7 +32598,7 @@
      ],
      "es": [
       "Cifras lo más exactas posible",
-      "La confianza en quienes dan las cifras",
+      "La confianza en las personas que dan las cifras",
       "Límites estrictos para cada tipo de alimento",
       "Una larga experiencia personal de seguridad"
      ]
@@ -32686,7 +32686,7 @@
      "es": [
       "Publicaron unas cifras que eran falsas",
       "Se negaron a explicar sus métodos",
-      "Perdieron un día la confianza de la gente",
+      "En algún momento perdieron la confianza de la gente",
       "Midieron la seguridad demasiado pocas veces"
      ]
     },
@@ -33922,7 +33922,7 @@
      "es": [
       "Errores que se cometen al hablar",
       "Palabras tomadas de otras lenguas",
-      "Cambios que se suceden con el tiempo",
+      "Cambios que se suceden uno tras otro con el paso del tiempo",
       "Reglas de gramática que se enseñan en la escuela"
      ]
     },
@@ -34009,7 +34009,7 @@
      "es": [
       "No se puede evitar lamentarlo",
       "Habría que lamentarlo más",
-      "No hay motivo para lamentarlo",
+      "No hay ningún motivo para lamentarlo",
       "Es demasiado tarde para lamentarlo"
      ]
     },
@@ -34037,7 +34037,7 @@
      ],
      "es": [
       "De acuerdo, pues las palabras de moda estropean el idioma",
-      "Poco convencido, pues el idioma siempre ha cambiado así",
+      "Poco convencido, pues el idioma siempre ha cambiado de esta manera",
       "Indiferente, pues la cuestión no merece discusión",
       "Enfadado, pues culpan a los jóvenes de todo cambio"
      ]
@@ -37947,7 +37947,7 @@
       "Una conducta que la empresa no podía evitar",
       "Una conducta que nadie en la empresa había notado",
       "Una conducta que la ley permite a una empresa",
-      "Una conducta que una empresa nunca debió tener"
+      "Una conducta que una empresa nunca debería haber tenido"
      ]
     },
     "correct": 3
@@ -38092,7 +38092,7 @@
       "Cuánto tiempo llevó prepararla",
       "Cuánto pagará la empresa",
       "Cuántas personas resultaron perjudicadas",
-      "Cuán profundo es el arrepentimiento"
+      "Cuán profundamente se arrepiente la persona"
      ]
     },
     "correct": 3
@@ -38149,7 +38149,7 @@
      "es": [
       "Lo profunda y larga que sea la reverencia",
       "La soltura con que se lee el comunicado",
-      "Lo que se cambia después de la rueda de prensa",
+      "Lo que se cambia una vez pasada la rueda de prensa",
       "Cuántos periodistas asisten a la rueda de prensa"
      ]
     },
@@ -39238,7 +39238,7 @@
       "Siempre acaban saliendo bien",
       "Son la forma más segura de evitar el fracaso",
       "Deberían mirar a diez años vista",
-      "No saldrán necesariamente como se pretende"
+      "No saldrán necesariamente tal como se pretende"
      ]
     },
     "correct": 3
@@ -39264,7 +39264,7 @@
       "Hardiment, malgré les risques"
      ],
      "es": [
-      "Con cuidado, sin dejarse nada",
+      "Con cuidado, sin pasar nada por alto",
       "Deprisa, sin pensarlo mucho",
       "Solo, sin ayuda de nadie",
       "Con audacia, pese a los riesgos"

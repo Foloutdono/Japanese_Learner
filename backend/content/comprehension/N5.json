@@ -63,7 +63,7 @@
       "El autor disfruta leyendo libros en el tren",
       "El autor quiere leer un libro en el tren",
       "El autor tiene que leer libros en el tren",
-      "Al autor le gusta más el tren que los libros"
+      "El autor prefiere el tren a los libros"
      ]
     },
     "correct": 0
@@ -147,7 +147,7 @@
       "Chez un ami"
      ],
      "es": [
-      "En la biblioteca de la escuela",
+      "En la biblioteca escolar",
       "En el tren",
       "En el comedor de la escuela",
       "En casa de un amigo"
@@ -176,7 +176,7 @@
       "Je n'ai pas commencé à les mémoriser"
      ],
      "es": [
-      "Aún no los he memorizado todos",
+      "Todavía no los he memorizado todos",
       "Ya los he memorizado todos",
       "Mañana los memorizaré todos",
       "Aún no he empezado a memorizarlos"
@@ -205,7 +205,7 @@
       "Cette personne connaît déjà tous les kanji utiles"
      ],
      "es": [
-      "Aprende japonés como lengua extranjera",
+      "Está aprendiendo japonés como lengua extranjera",
       "Da clases de japonés en una universidad",
       "Trabaja en la biblioteca por las tardes",
       "Ya sabe todos los kanji que necesita"
@@ -234,9 +234,9 @@
       "Se couche tout de suite"
      ],
      "es": [
-      "Vuelve a estudiar los kanji nuevos",
+      "Repasa los kanji nuevos",
       "Ve un poco la televisión",
-      "Lee un libro durante un rato",
+      "Lee un libro un rato",
       "Se acuesta enseguida"
      ]
     },
@@ -1249,7 +1249,7 @@
      ],
      "es": [
       "Porque era más barato que el azul",
-      "Porque a su madre le gusta el color rojo",
+      "Porque el rojo es el color que le gusta a su madre",
       "Porque su amigo dijo que el rojo era más bonito",
       "Porque en la tienda ya no quedaban azules"
      ]
@@ -3473,7 +3473,7 @@
       "La ville est aussi jolie que le parc"
      ],
      "es": [
-      "El parque es el lugar más bonito de la ciudad",
+      "El parque es el lugar más bonito de toda la ciudad",
       "El parque es más bonito que la estación",
       "El parque junto a la estación es bastante bonito",
       "La ciudad es tan bonita como el parque"
@@ -3589,7 +3589,7 @@
       "Elle dit à Yuki de se promener seul au parc"
      ],
      "es": [
-      "Propone dar un paseo juntos por el parque",
+      "Le propone a Yuki dar un paseo juntos por el parque",
       "Recuerda un paseo que dieron por el parque",
       "Pregunta si a Yuki le gusta pasear",
       "Le dice a Yuki que pasee por el parque él solo"
@@ -3619,7 +3619,7 @@
      ],
      "es": [
       "Para que Yuki pueda ir a visitarla entonces",
-      "Para que Yuki pueda buscar un apartamento allí",
+      "Para que Yuki busque un apartamento allí",
       "Porque ella también se va de vacaciones",
       "Porque la cafetería cierra el próximo mes"
      ]
@@ -5909,9 +5909,9 @@
       "On peut manger seulement quelques friandises"
      ],
      "es": [
-      "No se permite comer ni comidas ni dulces",
+      "No está permitido comer ni comidas ni dulces",
       "Se permite comer comida, pero no dulces",
-      "Hay que comer la comida antes que los dulces",
+      "Hay que comer la comida antes de los dulces",
       "Solo se permite comer unos pocos dulces"
      ]
     },
@@ -6972,7 +6972,7 @@
       "El autor compró dos panes en total",
       "El autor compró un pan de cada tipo",
       "El autor compró dos panes de cada tipo",
-      "El autor compró panes dos días seguidos"
+      "El autor compró pan dos días seguidos"
      ]
     },
     "correct": 2
@@ -7087,8 +7087,8 @@
      "es": [
       "Solo el autor y la madre",
       "El autor, el padre y un amigo",
-      "El autor solo, después de los demás",
-      "El autor, la madre y el padre"
+      "El autor solo, tras los demás",
+      "El autor, con la madre y el padre"
      ]
     },
     "correct": 3
@@ -8144,7 +8144,7 @@
      ],
      "es": [
       "No debes ir",
-      "No tienes que ir",
+      "No hace falta que vayas",
       "Tienes que ir",
       "Deberías ir temprano"
      ]
@@ -10292,7 +10292,7 @@
      ],
      "es": [
       "Este sábado",
-      "El próximo sábado",
+      "El sábado que viene",
       "El próximo domingo",
       "El mes pasado"
      ]
@@ -10439,7 +10439,7 @@
       "En los grandes almacenes",
       "En una tienda cerca del parque",
       "En una tienda cerca de la casa de Mari",
-      "En la tienda frente a la estación"
+      "En la tienda que está frente a la estación"
      ]
     },
     "correct": 3
@@ -12768,7 +12768,7 @@
       "Cada uno pidió una ensalada",
       "Primero pidieron una ensalada",
       "No pidieron ensalada",
-      "Pidieron solo una ensalada"
+      "Pidieron solamente una ensalada"
      ]
     },
     "correct": 3
@@ -13951,7 +13951,7 @@
       "Des étapes à éviter"
      ],
      "es": [
-      "Pasos que se hacen uno tras otro",
+      "Pasos que se hacen uno detrás de otro",
       "Pasos entre los que elegir",
       "Pasos que se hacen al mismo tiempo",
       "Pasos que Lin no debe dar"
@@ -14099,7 +14099,7 @@
       "Para invitar a Lin a un café",
       "Para pedirle a Lin que envíe una carta",
       "Para decirle a Lin que el banco se mudó",
-      "Para que Lin encuentre dos lugares"
+      "Para ayudar a Lin a encontrar dos lugares"
      ]
     },
     "correct": 3
@@ -15273,7 +15273,7 @@
       "Le jour de la rentrée"
      ],
      "es": [
-      "Durante las vacaciones de invierno",
+      "En las vacaciones de invierno",
       "Después de volver a casa",
       "Durante las vacaciones de verano",
       "El primer día de clase"
@@ -17689,8 +17689,8 @@
       "Du football et de la télé"
      ],
      "es": [
-      "De películas y música",
-      "De fútbol y comida",
+      "De cine y música",
+      "De fútbol y de comida",
       "De música y escuela",
       "De fútbol y la tele"
      ]
@@ -18886,7 +18886,7 @@
      ],
      "es": [
       "Vieja, gastada",
-      "Pequeña, estrecha",
+      "Pequeña, con poco espacio",
       "Oscura, sombría",
       "Fría, con corrientes"
      ]
@@ -20099,7 +20099,7 @@
       "Le lundi de la semaine prochaine"
      ],
      "es": [
-      "El viernes de la semana que viene",
+      "El viernes de la próxima semana",
       "El jueves de esta semana",
       "El jueves de la semana que viene",
       "El lunes de la semana que viene"
@@ -21483,7 +21483,7 @@
      ],
      "es": [
       "Al hermano le gustaron más que nada",
-      "El autor volvió a casa sin verlas",
+      "El autor volvió a casa sin haberlas visto",
       "Los dos las vieron antes del almuerzo",
       "El autor les tenía miedo"
      ]
@@ -22621,7 +22621,7 @@
       "Hicieron un muñeco de nieve afuera",
       "Volvieron a Tokio en tren",
       "Comieron oden en un restaurante",
-      "Aprendieron origami con la abuela"
+      "Aprendieron a hacer origami con la abuela"
      ]
     },
     "correct": 3
@@ -23672,7 +23672,7 @@
      ],
      "es": [
       "Costaban más de 6000 yenes",
-      "Le quedaban pequeños al autor",
+      "Le quedaban demasiado pequeños al autor",
       "Al autor no le gustaba el color",
       "Solo quedaba un par en la tienda"
      ]
@@ -23700,7 +23700,7 @@
       "Les chaussures que l'auteur portait"
      ],
      "es": [
-      "Los zapatos negros que sacó el dependiente",
+      "Los zapatos negros que había sacado el dependiente",
       "Los zapatos azules del gran almacén",
       "Los zapatos blancos de la tienda de la estación",
       "Los zapatos que llevaba puestos el autor"
@@ -25077,7 +25077,7 @@
      ],
      "es": [
       "El 13, llueva o no",
-      "Solo si llueve el día 6",
+      "Únicamente si llueve el día 6",
       "El día 6, después del té",
       "Ninguno de los dos días"
      ]
@@ -26044,7 +26044,7 @@
       "Un par personne au dîner, lui compris"
      ],
      "es": [
-      "Uno para cada una de las cuatro personas de la familia",
+      "Uno para cada uno de los cuatro de la familia",
       "La tienda solo los vendía en cajas de cinco",
       "El hermano menor quería dos",
       "Uno por cada persona en la cena, el autor también"
@@ -26073,9 +26073,9 @@
       "Du poisson et une salade"
      ],
      "es": [
-      "Gyozas de carne",
+      "Gyozas rellenas de carne",
       "Un curry de verduras",
-      "Gyozas de verduras",
+      "Gyozas rellenas de verduras",
       "Pescado y una ensalada"
      ]
     },
@@ -26190,7 +26190,7 @@
      ],
      "es": [
       "Les faltaba carne de verdad",
-      "Estaban demasiado calientes para comerlas",
+      "Estaban demasiado calientes",
       "Le gustó mucho más el pastel",
       "Estaban buenas incluso sin carne"
      ]
@@ -27184,7 +27184,7 @@
      ],
      "es": [
       "Son las mismas que en Japón",
-      "Son al revés que en Japón",
+      "Son al contrario que en Japón",
       "Es verano todo el año",
       "No hay invierno en absoluto"
      ]
@@ -29739,7 +29739,7 @@
       "Empezó a llover al final de la tarde",
       "Se había acabado toda la comida y la bebida",
       "Sus compañeros tenían que volver al trabajo",
-      "Empezó a hacer frío y no llevaba abrigo"
+      "Empezó a hacer frío y no había llevado abrigo"
      ]
     },
     "correct": 3
@@ -31943,7 +31943,7 @@
      ],
      "es": [
       "Sus padres y su abuela",
-      "Sus padres y su hermano pequeño",
+      "Su padre, su madre y su hermano pequeño",
       "Solo su madre y su hermana mayor",
       "Su padre y unos vecinos"
      ]
@@ -32116,7 +32116,7 @@
       "Elle demande au père de parler"
      ],
      "es": [
-      "Cita lo que dijo el padre",
+      "Reproduce lo que dijo el padre",
       "Le hace una pregunta al padre",
       "Dice lo que piensa el padre",
       "Le pide al padre que hable"
@@ -38056,7 +38056,7 @@
      "es": [
       "Le gustan los huevos quemados",
       "Él mismo hizo la segunda",
-      "La madre le pidió que lo dijera",
+      "La madre se lo había pedido",
       "Quería ser amable con el autor"
      ]
     },
@@ -42415,7 +42415,7 @@
      "es": [
       "Delante de la estación",
       "En la sala junto a la estación",
-      "En la entrada del edificio",
+      "En la entrada del edificio de apartamentos",
       "En el apartamento del autor"
      ]
     },
@@ -43593,10 +43593,10 @@
       "Un téléphone et des livres"
      ],
      "es": [
-      "Una computadora y unos libros",
+      "Una computadora y libros",
       "Un teléfono y un bento",
       "Una computadora y un bento",
-      "Un teléfono y unos libros"
+      "Un teléfono y libros"
      ]
     },
     "correct": 2
@@ -43623,7 +43623,7 @@
      ],
      "es": [
       "Despacio",
-      "Con prisa",
+      "Apresuradamente",
       "En silencio",
       "Con cuidado"
      ]
@@ -46167,7 +46167,7 @@
       "Environ dix minutes"
      ],
      "es": [
-      "Una media hora",
+      "Más o menos media hora",
       "Una hora más o menos",
       "Unas tres horas",
       "Unos diez minutos"
@@ -48438,7 +48438,7 @@
       "Esas pantuflas son solo para los invitados",
       "Nunca se llevan pantuflas en el baño",
       "Solo Yuta puede usar esas pantuflas",
-      "Esas pantuflas son solo para el baño"
+      "Esas pantuflas son solo para dentro del baño"
      ]
     },
     "correct": 3
@@ -51811,7 +51811,7 @@
      ],
      "es": [
       "No ir nunca a ese mar",
-      "Ir a ese mar con el autor",
+      "Ir a ese mar junto con el autor",
       "Que el autor vaya allí solo",
       "Saber si el autor vio el mar"
      ]
@@ -52919,7 +52919,7 @@
      "es": [
       "Es la única foto que le gusta al autor",
       "Es la más antigua de todas las fotos",
-      "De todas las fotos, es su favorita",
+      "De todas las fotos, esta es su favorita",
       "Al autor le gusta un poco esta foto"
      ]
     },
@@ -54058,7 +54058,7 @@
      "es": [
       "Desde abril",
       "Desde la semana pasada",
-      "Es su tercer año",
+      "Es su tercer año en el país",
       "Unos veinte años"
      ]
     },
@@ -56532,9 +56532,9 @@
      ],
      "es": [
       "Su madre la había escondido",
-      "Se había quedado en el restaurante",
+      "Seguía en el restaurante",
       "Un amigo la tenía en su bolso",
-      "No miró en el refrigerador"
+      "No miró dentro del refrigerador"
      ]
     },
     "correct": 3
@@ -59892,7 +59892,7 @@
       "Que cela arrive tous les jours"
      ],
      "es": [
-      "Que la hora es aproximada",
+      "Que la hora indicada es aproximada",
       "Que la hora es exacta",
       "Que la espera terminó entonces",
       "Que pasa todos los días"
@@ -62250,7 +62250,7 @@
      ],
      "es": [
       "La abuela le pidió al autor que fuera a verla",
-      "El autor quiere ver su cara mientras hablan",
+      "El autor quiere ver la cara de la abuela mientras hablan",
       "El autor no tenía nada que hacer en vacaciones",
       "El teléfono de la abuela estaba roto"
      ]
@@ -64652,8 +64652,8 @@
      ],
      "es": [
       "Da la razón del frío de esa mañana",
-      "Opone el tercer día a los dos primeros",
-      "Añade un tercer día igual a los dos primeros",
+      "Contrapone el tercer día a los dos primeros",
+      "Añade un tercer día como los dos primeros",
       "Presenta el plan del autor para el año"
      ]
     },
@@ -65643,7 +65643,7 @@
       "Unos cuatro años",
       "Unos seis años",
       "Unos diez años",
-      "Alrededor de un año"
+      "Cerca de un año"
      ]
     },
     "correct": 0
@@ -68029,7 +68029,7 @@
       "Il faisait du vélo tous les jours"
      ],
      "es": [
-      "No sabía montar en bicicleta",
+      "Todavía no sabía montar en bicicleta",
       "Había dejado de montar en bicicleta",
       "Montaba un poco en bicicleta",
       "Montaba en bicicleta todos los días"
@@ -69302,7 +69302,7 @@
      ],
      "es": [
       "Es una consecuencia de ello",
-      "No es lo que uno esperaría",
+      "No es lo que uno se esperaría",
       "Explica por qué no es hábil",
       "Pasó al mismo tiempo"
      ]
