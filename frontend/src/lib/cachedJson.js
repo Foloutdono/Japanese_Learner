@@ -21,6 +21,18 @@ import { apiJson } from './api'
 //       paths are stale (a level was changed).
 //   invalidateMine()                          the learner's own figures
 //       are stale (a review has landed).
+//   lastCachedJson(path, session)             the last answer kept for
+//       the path, however old, or undefined: what a gate draws on its
+//       first frame while it asks again (plan 291).
+//   keepCachedJson(path, session, body)       an answer a screen asked
+//       for itself, kept for the next visit's first frame.
+//
+// A gate (Learn's shelf, the Dictionary's opening page, Profile's
+// boards) asks again on every visit and draws the last answer kept
+// meanwhile, which lib/warm.js asks for ahead of the first visit, with
+// `ttlMs: 0`: whatever is on its way is shared, anything else asked anew.
+// Asked again on every read, such an answer is never taken for a fresh
+// figure, so a review does not drop it.
 //
 // Kept under the learner and the path, the shape of
 // lib/dictionaryLookup: an answer carries the learner's own figures, so
@@ -67,13 +79,19 @@ function hit(key, ttlMs) {
 }
 
 /** The answer for this path: the one in hand, the one on its way, or a
- *  new request. Rejects when the request fails, and keeps nothing then. */
+ *  new request. Rejects when the request fails, and keeps nothing new
+ *  then: the answer before it, if any, stays the last one kept. */
 export function cachedJson(path, session, { ttlMs = TTL_MS } = {}) {
   const key = keyOf(session, path)
   const kept = hit(key, ttlMs)
   if (kept) return kept.promise
   const gen = generation
-  const entry = { at: Date.now(), done: false, value: undefined, promise: null, mine: ttlMs <= MINE_TTL_MS }
+  // An answer past its TTL, still the last one kept while this is asked.
+  const before = cache.get(key)
+  const entry = {
+    at: Date.now(), done: false, value: undefined, promise: null, last: before?.value,
+    mine: ttlMs > 0 && ttlMs <= MINE_TTL_MS,
+  }
   entry.promise = apiJson(path, session).then(
     body => {
       // A sign-out or an invalidation since: hand the answer to whoever
@@ -86,12 +104,29 @@ export function cachedJson(path, session, { ttlMs = TTL_MS } = {}) {
       return body
     },
     err => {
-      if (cache.get(key) === entry) cache.delete(key)
+      if (cache.get(key) === entry) {
+        if (before?.done) cache.set(key, before)
+        else cache.delete(key)
+      }
       throw err
     },
   )
   touch(key, entry)
   return entry.promise
+}
+
+/** Keep an answer a screen asked for itself (a gate's, above). */
+export function keepCachedJson(path, session, body) {
+  if (body === undefined) return
+  touch(keyOf(session, path), {
+    at: Date.now(), done: true, value: body, promise: Promise.resolve(body), last: undefined, mine: false,
+  })
+}
+
+/** The last answer kept for this path, however old, or undefined. */
+export function lastCachedJson(path, session) {
+  const entry = cache.get(keyOf(session, path))
+  return entry?.done ? entry.value : entry?.last
 }
 
 // The body already in hand for this path, or undefined.

@@ -23,6 +23,7 @@ import { useClaimOffer, usePaywall } from '../stores/credits'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 import { startAmbiance, stopAmbiance } from '../lib/audio'
+import { warmGates } from '../lib/warm'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the fare gate, the day's lanes as the run's picker.
@@ -81,17 +82,28 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
 //
+// 予熱 (plan 291): once the day has come, the four other gates' answers
+// are asked behind it, once a visit and while the page is idle
+// (lib/warm.js), so the first tap on each draws it whole.
+//
 // 湖の刻 (plan 219): the gate stands on the print of the hour, and the
 // print is heard: the ambiance plays the same hour's lake behind it,
 // as it does behind every station page (SelectionScreen).
 
 export default function TodayScreen({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const desk = useDesk()
   const navigate = useNavigate()
   const { pathname, state: routed } = useLocation()
   const { data: today, failed } = useTodaySummary()
   const summary = useProfileSummary()
+
+  // 予熱 — the other gates, behind the day (plan 291).
+  const arrived = Boolean(today)
+  const basics = Boolean(today?.basics && !today.basics.done)
+  useEffect(() => {
+    if (arrived) warmGates({ session, desk, lang, basics })
+  }, [arrived, session, desk, lang, basics])
 
   // 終着 — the run's finish, taken from the router once.
   const [run] = useState(() => {

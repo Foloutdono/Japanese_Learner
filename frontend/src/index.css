@@ -28508,8 +28508,7 @@ button.brd-stn { cursor: pointer; }
    with two grow-only spacers in it cannot be headed by a caption. So
    the line takes the ambient ink at the title rung, and the term it
    was written to carry -- the pace, through Emphasized -- takes the
-   pigment the call had. The plate below keeps the smaller reading:
-   there the heading is .ride__plate-cap. */
+   pigment the call had. */
 .ride__done-text {
   margin: 0;
   max-width: 28em;
@@ -28527,8 +28526,8 @@ button.brd-stn { cursor: pointer; }
 .ride__done-foot {
   width: 100%;
   max-width: var(--card-w);
-  /* The quiet offer over the one filled action (plan 099's plate),
-     the boarding's own order; the card ride's foot holds the action alone. */
+  /* The one filled action (the reading ride's plate held the quiet
+     offer over it until plan 291). */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28541,62 +28540,6 @@ button.brd-stn { cursor: pointer; }
   padding-bottom: var(--sp-5);
 }
 .ride__done-foot .btn-depart { width: 100%; }
-
-/* ── The reading ride's plate (plan 099) ──
-   The done screen's own room (.ride__done): the pair over a sentence,
-   the platforms as a lattice of roundel-and-name in each line's own
-   pigment (a line colour is a section's name, never decoration), the
-   open-for-now note, and the foot with the quiet offer over the one
-   filled action -- the boarding's own order. */
-/* The plate's heading: it captioned 定期券 above it until 2026-09-21
-   and stands alone now, so it takes the rung and the ink the term had
-   (and loses the negative margin that tucked it under it). */
-.ride__plate-cap {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  color: var(--line-color, var(--accent));
-}
-/* Under that heading the sentence is a sentence again, not the call
-   the card ride's is. */
-.ride__plate .ride__done-text {
-  font-size: var(--fs-lead);
-  color: var(--text-secondary);
-}
-.ride__plate-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-width: var(--card-w);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sp-2);
-}
-.ride__plate-item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  text-align: left;
-}
-.ride__plate-icon {
-  flex: none;
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  color: var(--line-color, var(--text-primary));
-}
-.ride__plate-title {
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
 
 /* ── 案内 — the guide over a gate (plan 100) ──
    One element over the anchor whose shadow IS the scrim, wearing the

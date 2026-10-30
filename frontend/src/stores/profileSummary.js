@@ -82,6 +82,12 @@ function fetchIfStale() {
   return inflight
 }
 
+/** The last summary, outside React: a screen drawing the whole of
+ *  /api/profile (the Profile gate) starts from it (plan 291). */
+export function peekSummary() {
+  return cache
+}
+
 // Development only: the reward workbench (/dev/rewards) needs a
 // summary to exist so the level HUD has something to report a gain
 // against, and there is no session there to fetch one. Not a real

@@ -18,11 +18,12 @@ import { useLang } from '../LangContext'
 const answers = new Map()
 const asked = new Set()
 const listeners = new Set()
+const samplesPath = (source, lang) => `/api/station/${source}/samples?lang=${encodeURIComponent(lang)}`
 
 function ask(path) {
-  if (asked.has(path)) return
+  if (asked.has(path)) return Promise.resolve()
   asked.add(path)
-  supabase.auth.getSession()
+  return supabase.auth.getSession()
     .then(({ data }) => (data?.session ? apiFetch(path, data.session) : Promise.reject()))
     .then(r => (r.ok ? r.json() : Promise.reject()))
     .then(body => {
@@ -34,6 +35,11 @@ function ask(path) {
     .catch(() => { asked.delete(path) })
 }
 
+/** A line's samples asked ahead of the desk's Practice gate (lib/warm.js). */
+export function warmStationSamples(source, lang) {
+  return ask(samplesPath(source, lang))
+}
+
 function subscribe(fn) {
   listeners.add(fn)
   return () => { listeners.delete(fn) }
@@ -43,7 +49,7 @@ function subscribe(fn) {
  *  is on its way (or when `enabled` is false). */
 export function useStationSamples(source, enabled = true) {
   const { lang } = useLang()
-  const path = `/api/station/${source}/samples?lang=${encodeURIComponent(lang)}`
+  const path = samplesPath(source, lang)
   useEffect(() => { if (enabled) ask(path) }, [enabled, path])
   const stops = useSyncExternalStore(subscribe, () => answers.get(path) ?? null)
   return enabled ? stops : null

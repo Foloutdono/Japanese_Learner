@@ -143,11 +143,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 定期券 — the offer ───────────────────────────────────────
     # No longer dormant: the pass is SHOWN from five doors and sold from
     # none (frontend/src/domain/paywall.js's HAS_PAYWALL, which is
-    # deliberately not HAS_STORE). `where` is which of the five doors
-    # (frontend/src/domain/paywall.js's SOURCES -- the reading ride's
-    # pass plate among them since plan 097; the profile, a door until
-    # plan 143, reaches the offer through the balance sheet now, and
-    # older rows still say `profile`).
+    # deliberately not HAS_STORE). `where` is which of the doors
+    # (frontend/src/domain/paywall.js's SOURCES; the reading ride's pass
+    # plate was one from plan 097 until plan 291, and its rows say
+    # `ride`; the profile, a door until plan 143, reaches the offer
+    # through the balance sheet now, and older rows still say `profile`).
     #
     # The three verbs are the whole point: a paywall nobody opens and a
     # paywall opened and refused are indistinguishable from
@@ -157,8 +157,8 @@ EVENTS: dict[str, frozenset[str]] = {
     # one-second median is a mis-tap, not demand.
     #
     # The offer is three screens since plan 172, each with its one pick:
-    # Pro yearly's 7-day trial (the boarding, the balance, the ride, the
-    # settings), Pro yearly against the week the credits stopped (a run
+    # Pro yearly's 7-day trial (the boarding, the balance, the settings;
+    # the ride until plan 291), Pro yearly against the week the credits stopped (a run
     # at zero, `where` 'runout'), and the step up to Max ('limit', a Pro
     # learner at one of the plan's ceilings; 'upgrade', from Settings).
     # `plan` and `billing` are the app's own two enums, the pick the

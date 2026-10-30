@@ -11,16 +11,12 @@ import { Loading } from '../components/ui/Loading'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
 import { Cue } from '../components/guide/Spot'
-import { OfferButton } from '../components/credits/OfferButton'
 import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../components/reading/ReadingPieces'
 import { RunLines } from '../components/study/RunLines'
 import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { BreakdownSide } from '../components/analysis/BreakdownSide'
 import { vocabLookup, grammarLookup, pointLookup, docksInColumn, lookupKey } from '../components/analysis/lookup'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { PASS_PLATFORMS, SOURCES } from '../domain/paywall'
-import { getAllSections } from '../config/tabs'
-import { useCredits } from '../stores/credits'
 import { startTally, countReview } from '../stores/runTally'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { useDesk } from '../hooks/useDesk'
@@ -29,31 +25,33 @@ import { useBackGuard } from '../hooks/useBackGuard'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
 import { useProfileSummary } from '../stores/profileSummary'
+import { warmToday } from '../lib/warm'
 
 // ── 試乗 — the reading ride (plan 099) ───────────────────────────
 // The second half of the lesson, on the reading stage: one curated N5
 // sentence served by the ticket office (GET /api/onboarding/ride's
 // `sentence`), the clock, the field, the measure and the rating, drawn
-// with the reading run's own pieces (components/reading/ReadingPieces)
-// -- and then the plate, which is why the owner wanted this ride for
-// everyone: the platforms that ride on the 定期券, listed from the
-// same map the server enforces (domain/paywall.PASS_PLATFORMS), with
-// the offer under it and, while nothing is enforced, the line saying
-// the platforms are open meanwhile.
+// with the reading run's own pieces (components/reading/ReadingPieces).
+// The grade is the way into the station: the plate that listed the
+// platforms on the 定期券 and the offer under it went (plan 291, the
+// owner's ask), so a phone leaves for Today on the grade, the desk on
+// its breakdown's « Entrer en gare ». Today is warmed while the
+// sentence is read (lib/warm.js), so the gate the grade opens onto is
+// drawn at once rather than after a second of its dial waiting.
 //
 // Nothing here is a result: /api/reading/result is never posted, no
 // card is scheduled, and the measure is the ticket office's own
 // (POST /api/onboarding/ride/check, against this sentence only) rather
 // than the pass-gated reading router's. The one write is the lesson's
 // stamp, the moment the sentence is graded -- or on Skip, the same
-// stamp: a learner who skipped is not asked again. Not on "Enter the
-// station": a learner who reached the plate and left it any other way
-// (a reload, a back gesture out of the document, the tab closed) was
-// boarded onto the first card again by the front door, the lesson they
-// had just finished begun from nothing (the trail of 2026-10-18). The
-// plate is a welcome; the lesson is over before it. App's copy of the
-// stamp is set with it (`onDone`), before the POST answers, so the front
-// door sends to the gate from that moment.
+// stamp: a learner who skipped is not asked again. On the desk the
+// grade stamps before the breakdown's way out: a learner who left it any
+// other way (a reload, a back gesture out of the document, the tab
+// closed) was boarded onto the first card again by the front door, the
+// lesson they had just finished begun from nothing (the trail of
+// 2026-10-18). App's copy of the stamp is set with it (`onDone`), before
+// the POST answers, so the front door sends to the gate from that
+// moment.
 //
 // On the first ride (`first`, App's rideDue) the browser's Back is that
 // Skip too: the entry behind the ride is the front door, which boarded
@@ -67,19 +65,18 @@ import { useProfileSummary } from '../stores/profileSummary'
 // left, the sentence in the middle, the breakdown sealed at the right
 // until the grade -- and, once graded, opens the sentence's breakdown
 // there (`graded`: the local tier of /api/phrase/analyze, free and
-// cached, never the paid explanation) before the plate. The sentence,
+// cached, never the paid explanation) before the station. The sentence,
 // the field and the grade are the notes' as on a phone; nothing that
 // only explains is pointed at, the breakdown included. A phone keeps
 // the ride it had.
 const READING_COLOR = 'var(--line-reading)'
-// The steps, as ride_step names them: read, type, measure, pass; on the
-// desk graded between measure and pass (domain/flowSteps.js's
-// READING_STEPS).
+// The steps, as ride_step names them: read, type, measure; on the desk
+// graded after measure (domain/flowSteps.js's READING_STEPS). The last
+// one goes `to` today.
 
 export default function RideReading({ session, onDone, first = false, dryRun = false, sentence: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
-  const credits = useCredits()
   const desk = useDesk()
   const keys = useSentenceKeys()
 
@@ -88,9 +85,11 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
   const [readStep, setStep] = useState('read')
   // 入門 (plan 170): a learner with no kana was handed the map of the
   // language instead of a sentence they could not read one sign of, so
-  // their ride goes from the cards straight to the plate.
-  const plateOnly = useProfileSummary()?.kanaKnown === 'none'
-  const step = plateOnly ? 'pass' : readStep
+  // their ride goes from the cards straight to the station (RideRun).
+  // One boarded here all the same (the cards done, then a reload: App's
+  // rideStart) has nothing to read, and is stamped and sent on at once.
+  const noReading = useProfileSummary()?.kanaKnown === 'none'
+  const step = readStep
   useErrorStep(step)
   // null until the sentence is up: a clock that starts at zero would
   // read as already run out, and cover the sentence before it showed.
@@ -133,13 +132,21 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
   useEffect(() => { startTally('ride-reading') }, [])
 
   useEffect(() => {
-    if (given || plateOnly) return undefined
+    if (given || noReading) return undefined
     let live = true
     apiJson(`/api/onboarding/ride?lang=${encodeURIComponent(lang)}`, session)
       .then(body => { if (live) setSentence(body.sentence ?? null) })
       .catch(() => { if (live) setFailed(true) })
     return () => { live = false }
-  }, [session, lang, given, plateOnly])
+  }, [session, lang, given, noReading])
+
+  // Today, asked for once the sentence is up and never before it: the
+  // ride's own request goes first in the learner's six-at-a-time queue
+  // (CLAUDE.md, "the boot asks for the screen first"), and the gate's
+  // answers arrive while the sentence is read.
+  useEffect(() => {
+    if (sentence && !dryRun) warmToday(desk)
+  }, [sentence, dryRun, desk])
 
   // The clock, as the reading run keeps it: the sentence is covered at
   // zero and writing is open the whole time.
@@ -205,8 +212,14 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
     setCorrect(q >= 3)
     setQuality(q)
     countReview({ quality: q })
-    go(desk ? 'graded' : 'pass')
-    stamp(false)
+    // A phone's lesson ends on its grade, into the station; the desk
+    // opens the breakdown first, stamped already, and its button goes on.
+    if (desk) {
+      go('graded')
+      stamp(false)
+    } else {
+      finish(false)
+    }
   }
 
   // The lesson's stamp, once: the grade's, or a skip's. A stamp that
@@ -224,17 +237,18 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
     return stamped.current
   }
 
-  // A learner with no kana is handed the plate alone: theirs is the
-  // cards' lesson, over when the plate shows.
+  // A learner with no kana has no sentence to read: theirs is the
+  // cards' lesson, over already.
   useEffect(() => {
-    if (plateOnly) stamp(false)
+    if (noReading) finish(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plateOnly])
+  }, [noReading])
 
   function finish(skipped) {
     if (finished.current) return
     finished.current = true
     setBusy(true)
+    if (!skipped && step !== 'read' && step !== 'type') mark(step, 'today')
     // A dry run is the workbench's (/dev/ride), which has no /today:
     // its way out is onDone alone.
     stamp(skipped).then(() => {
@@ -249,14 +263,14 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
     if (!dryRun) release().then(() => navigate('/today', { replace: true }))
   }, [failed, navigate, onDone, dryRun, release])
 
-  const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
   const callouts = {
     // Untimed, nothing hides: the one callout says both halves.
     read:    { anchor: 'ride.sentence', place: 'top',   text: factor == null ? t.rideReadFrontUntimed : t.rideReadFront },
     type:    { anchor: 'ride.answer',   place: 'above', text: t.rideReadType },
     measure: { anchor: 'ride.rate',     place: 'above', text: (desk && t.rideReadMeasureDesk) || t.rideReadMeasure },
   }
-  const callout = sentence && callouts[step]
+  // Graded on a phone, the ride is on its way out: nothing left to point at.
+  const callout = sentence && !busy && callouts[step]
   // The thing a note asks for, lit (guide/Spot.jsx): the field to write
   // in, the bar to grade on. Reading the sentence asks for nothing to be
   // pressed, so that note lights nothing.
@@ -268,7 +282,7 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
 
   const writing = step === 'read' || step === 'type'
   const graded = step === 'graded'
-  const panels = desk && Boolean(sentence) && step !== 'pass'
+  const panels = desk && Boolean(sentence)
   const measured = step === 'measure' || graded
   // The card's own doors (plan 213): the point's tag and each word missed
   // open in the column once it holds the breakdown, else as the sheet.
@@ -311,7 +325,7 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
       ) : undefined}
       sideLabel={t.deskBreakdownLabel}
     >
-      {!sentence && !failed && !plateOnly && <Loading />}
+      {!sentence && !failed && !noReading && <Loading />}
 
       {sentence && writing && (
         <>
@@ -350,8 +364,9 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
           </PromptCard>
           {graded ? (
             <div className="stage__foot">
-              <Continue keys label={t.rideContinue} onClick={() => go('pass')} />
-              <EnterKey onEnter={() => go('pass')} />
+              <Continue keys label={t.brdEnter} onClick={() => finish(false)} disabled={busy} data-action="enter" />
+              {/* 机 (plan 122): Enter goes on, as the key printed says. */}
+              <EnterKey onEnter={() => finish(false)} disabled={busy} />
             </div>
           ) : (
             <RatingBar active onRate={rate} guide="ride.rate" />
@@ -360,29 +375,6 @@ export default function RideReading({ session, onDone, first = false, dryRun = f
             <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
           )}
         </>
-      )}
-
-      {step === 'pass' && (
-        <div className="ride__done ride__plate" data-guide="ride.plate">
-          <p className="ride__plate-cap">{t.ridePlateCap}</p>
-          <p className="ride__done-text">{t.ridePlateBody}</p>
-          <ul className="ride__plate-list">
-            {platforms.map(s => (
-              <li key={s.path} className="ride__plate-item" style={{ '--line-color': s.color }}>
-                <span className="ride__plate-icon" lang="ja">{s.icon}</span>
-                <span className="ride__plate-title">{s.title}</span>
-              </li>
-            ))}
-          </ul>
-          {!credits?.enforced && <p className="ride__done-note">{t.ridePlateOpen}</p>}
-          <div className="ride__done-air" aria-hidden="true" />
-          <div className="ride__done-foot">
-            <OfferButton source={SOURCES.RIDE} className="pw-open--quiet" />
-            <Continue keys label={t.brdEnter} onClick={() => finish(false)} disabled={busy} data-action="enter" />
-            {/* 机 (plan 122): Enter goes on, as the key printed says. */}
-            <EnterKey onEnter={() => finish(false)} disabled={busy} />
-          </div>
-        </div>
       )}
 
       {cue && <Cue target={cue.target} radius={cue.radius} />}

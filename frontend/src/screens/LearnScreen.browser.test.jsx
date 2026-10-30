@@ -90,6 +90,9 @@ const { default: LearnScreen } = await import('./LearnScreen')
 // module-level cache): seeded per test, and cleared back to "never
 // answered" so the plates hang in registry order everywhere else.
 const { seedSummary } = await import('../stores/profileSummary')
+// The shelf's last answer is kept between visits (plan 291): each test
+// starts from none.
+const { forgetCachedJson } = await import('../lib/cachedJson')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
@@ -127,6 +130,7 @@ function mount() {
 }
 
 beforeEach(() => {
+  forgetCachedJson()
   apiJson.mockReset()
   beginDeparture.mockReset()
   playAnnouncement.mockReset()

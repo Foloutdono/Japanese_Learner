@@ -2757,8 +2757,8 @@ const ride = {
   rideGuessed: 'Got the new one right? If it was a guess, choose Wrong next time, or it won’t come back for days.',
   rideDoneBody: n => `That’s it! **${n} new words a day**, each one back right before you’d forget it.`,
   rideContinue: 'Continue',
-  // The reading ride (plan 099): the sentence, the field, the measure,
-  // then the plate that says which platforms ride on the pass.
+  // The reading ride (plan 099): the sentence, the field, the measure;
+  // the grade enters the station (its plate went in plan 291).
   rideReadFront: 'Read it quick! It disappears in a moment.',
   rideReadFrontUntimed: 'Read it, then type it out in romaji or kana.',
   rideReadType: 'Type what you read, in romaji or kana.',
@@ -2767,9 +2767,6 @@ const ride = {
   // Plan 133. On a phone: the known card is not graded until its entry
   // has been opened from the 🔍 and closed again.
   rideKnownDict: 'Every card has a dictionary entry. Tap 🔍 to open this one, then close it.',
-  ridePlateCap: 'The pass',
-  ridePlateBody: 'These practice modes come with the pass.',
-  ridePlateOpen: 'For now, they’re free for everyone.',
 }
 
 const guide = {

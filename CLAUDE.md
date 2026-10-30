@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **291**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **292**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -472,6 +472,16 @@ runtime purpose.
   `/api/today` put the day's queue ahead of the first ride's card. A
   store's fetch shares the one in flight (`stores/remote.js`,
   `profileSummary`'s `fetchIfStale`).
+- **A gate is drawn on its first frame (plan 291).** What Today and
+  the four other gates open on is asked before they are opened, by
+  `lib/warm.js`: Today by the first ride once its sentence is up
+  (`warmToday`), the others by Today once the day has come, once a
+  visit, two at a time when idle (`warmGates`), never ahead of the
+  screen in front of the learner. A gate reads a store, or asks for
+  itself, keeps the answer (`keepCachedJson`) and draws the last one
+  kept (`lastCachedJson`) while it asks again, never a spinner over an
+  answer in hand. A new gate, or a new request one opens on, goes in
+  `GATE_PATHS` and `warmGates` in the same change.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
