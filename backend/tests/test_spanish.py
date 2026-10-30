@@ -1,8 +1,7 @@
 """Spanish is the app's third language (plan 291): the decks and the
-grammar points' glosses and lessons read it whole, and their tours and
-Choisir questions level by level (DRILL_LEVELS); every other text reads
-English until its Spanish is written (scripts/spanish_coverage.py counts
-what is left).
+grammar catalogue (glosses, lessons, tours and Choisir questions) read it
+whole, and every other text reads English until its Spanish is written
+(scripts/spanish_coverage.py counts what is left).
 
 What is whole is held here, as tests/test_kanji_french.py holds the
 French: a card the deck gains, a kanji, a grammar point, is written in
@@ -104,12 +103,6 @@ def test_a_lesson_is_served_in_spanish():
     assert spanish["steps"][0]["text"] == entry["steps"][0]["es"] != english["steps"][0]["text"]
 
 
-# The levels whose tours and Choisir questions are written in Spanish
-# (plan 291's third wave, a batch of levels at a time): held whole, as the
-# lessons are. A level joins in the commit that writes it.
-DRILL_LEVELS = ("N5", "N4", "N3")
-
-
 def _drill_texts(point: dict):
     """(path, text) for every text of a point's tour and its own Choisir
     questions: each dict carrying an `en` and a `fr`."""
@@ -126,8 +119,10 @@ def _drill_texts(point: dict):
         yield from walk(point.get(key), [key])
 
 
-@pytest.mark.parametrize("level", DRILL_LEVELS)
+@pytest.mark.parametrize("level", list(GRAMMAR_POINTS_BY_LEVEL))
 def test_every_tour_and_choisir_question_is_written_in_spanish(level):
+    """The tours and the points' own Choisir questions, whole (plan 291's
+    third wave), as the lessons are."""
     missing = [f"{p['pattern']} {path}" for p in GRAMMAR_POINTS_BY_LEVEL[level]
                for path, text in _drill_texts(p) if not (text.get("es") or "").strip()]
     assert missing == [], f"{len(missing)} tour/choose texts with no Spanish: {missing[:10]}"

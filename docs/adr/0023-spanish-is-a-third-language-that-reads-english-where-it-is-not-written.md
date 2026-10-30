@@ -46,12 +46,21 @@ not yet written in Spanish reads English**, never French and never blank.
   completeness. A reader takes a text's languages with
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair, which
   would drop the Spanish.
+- **The tours and Choisir's own questions are whole** (the third wave):
+  every twist, scene and quiz text and every `choose` question's
+  translation and why. A question's translation still rules out every
+  wrong filling; a set of readings keeps its right one first and tells by
+  its length no more than the English does (the right reading is the
+  longest in 1,074 of 2,601 sets in Spanish, 1,338 in English); the learner
+  has no gender; staff and strangers say usted, friends and the app tú.
 - **Everything else is written a wave at a time** and reads English until
-  then: a grammar point's Choisir questions and its tour, the reading, dictation, comprehension and conversation banks, the
-  deck's example sentences, the JMdict pool's words, the breakdown's particle
-  and ending glosses. `python -m scripts.spanish_coverage` counts what is
-  written and what is left, per part. A Spanish text is optional where it is
-  added (`grammar_check` holds one that is there, and accepts its absence).
+  then: the reading, dictation, comprehension and conversation banks, the
+  deck's example sentences, the JMdict pool's words, the breakdown's
+  particle and ending glosses, the duels' choices. `python -m
+  scripts.spanish_coverage` counts what is written and what is left, per
+  part. A Spanish text is optional where it is added (`grammar_check` holds
+  one that is there, and accepts its absence); `tests/test_spanish.py`
+  holds a part whole once its wave is done.
 - **One reader per kind, not a ternary per screen.** A deck gloss is
   `get_meaning(entry, lang, VOCAB_GLOSSES | KANJI_GLOSSES)`, the course's maps
   by language (`translations/course.py`); a catalogue text is
@@ -75,11 +84,9 @@ not yet written in Spanish reads English**, never French and never blank.
 - Dictionary search still matches English and French glosses only: the pool
   predicate's ASCII gate and the lexicon need their own change.
 - The catalogue is held in memory. Loaded, its five files held 19.7 MB
-  before Spanish and 20.9 MB with the glosses and the whole lesson in
-  Spanish (measured with tracemalloc, plan 291): the lessons cost little.
-  The tours and Choisir's questions are about five times the lessons'
-  text; that wave is to be measured against the 512 MB budget before it
-  lands (an overlay read on demand, as the French JMdict layer is, is the
-  alternative).
+  before Spanish, 20.9 MB with the glosses and the lessons, and 24.6 MB
+  with the tours and Choisir questions too (measured with tracemalloc,
+  plan 291): 4.9 MB for the whole catalogue in a third language, which
+  the 512 MB budget takes without an overlay read on demand.
 - Every new learner-facing text now carries three languages in the UI table
   and two, plus Spanish where its area is whole, in content.

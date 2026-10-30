@@ -409,12 +409,12 @@ runtime purpose.
   a deck card gains its line in `datas/vocab/vocab_es.json` (keyed
   `"{kanji}::{kana}"`, moved with the card on a rename), a kanji its
   Spanish (`kanji_meanings_es.json`, then `build_kanji_db --spanish-only`),
-  a grammar point its `meaning.es`, `structure_es` and its lesson's (every
-  step, `compare` line and example has its `es`), in the same change
-  (`tests/test_spanish.py`). Everything else (the tours and Choisir's own
-  questions, the banks, example sentences, the pool) gains Spanish a wave
-  at a time, optional where it is added: `python -m scripts.spanish_coverage`
-  counts what is left. A catalogue text is read through
+  a grammar point every text it has (`meaning.es`, `structure_es`, its
+  lesson, its tour and its own Choisir questions), in the same change
+  (`tests/test_spanish.py`). Everything else (the reading, dictation,
+  comprehension and conversation banks, example sentences, the pool, the
+  duels) gains Spanish a wave at a time, optional where it is added:
+  `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
   KANJI_GLOSSES)` (`translations/course.py`), a date or a number is
   written in `intlLocale(lang)` (`lib/locale.js`): never a
