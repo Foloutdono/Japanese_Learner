@@ -879,7 +879,7 @@ describe('BoardingFlow', () => {
     expect(posted().notifications).toBe(true)
   })
 
-  // ── 案内 — the reminder's own step, after the card (plan 293) ──────
+  // ── 案内 — the reminder's own step, after the card (plan 294) ──────
   it('on a native shell the card’s issue stops at the reminder, whose gate asks the OS', async () => {
     nudgeRef.current = true
     nudgeState.current = 'prompt'

@@ -4,7 +4,7 @@ import { BoardLink, BoardQuestion, Continue } from './BoardFrame'
 import { Flaps } from './CardSheets'
 import { IssueError } from './CardStep'
 
-// ── 案内 — the reminder, after the card (plan 293) ────────────────
+// ── 案内 — the reminder, after the card (plan 294) ────────────────
 // The owner's pick A of the canvas "Tsuji — le rappel à l'embarquement":
 // on a native shell whose OS has not been asked, the card's issue stops
 // here before the gate. The hour on the board, as the hour's sheet

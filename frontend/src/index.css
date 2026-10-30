@@ -26439,7 +26439,7 @@ button.brd-stn { cursor: pointer; }
 .brd-clock__when { margin: 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; }
 .brd-clock__when strong { font-weight: 700; color: var(--brd-ink); }
 
-/* ── 案内 the reminder, after the card (plan 293, the owner's pick A of
+/* ── 案内 the reminder, after the card (plan 294, the owner's pick A of
    the canvas "Tsuji — le rappel à l'embarquement") ──
    The hour's board without its steps, and hung under its flaps the
    notification as the phone will show it: a slip of paper on the sumi,
@@ -38580,7 +38580,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   /* The test (plan 224): the stage as wide as its choices, so the word
      asked stands over them rather than at the paper's edge. */
   .desk-brd .brd__car[data-car="test"] { --desk-brd-w: var(--card-w); }
-  /* The reminder (plan 293): the board and its notification at the
+  /* The reminder (plan 294): the board and its notification at the
      width of a phone's, not the paper's. */
   .desk-brd .brd__car[data-car="remind"] { --desk-brd-w: var(--desk-entry-w); }
   /* The card (plan 247): its fields in words beside it rather than under

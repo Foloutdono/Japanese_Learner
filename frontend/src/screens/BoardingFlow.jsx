@@ -182,7 +182,7 @@ export default function BoardingFlow({
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
     // Whether the reminder has been answered -- its switch in the hour's
-    // sheet, or the step after the card (plan 293), which is shown until
+    // sheet, or the step after the card (plan 294), which is shown until
     // it has.
     reminderAnswered: false,
     cardName: '',
@@ -577,7 +577,7 @@ export default function BoardingFlow({
       return
     }
     if (answers.reminderAnswered || !canNudge()) { issue(answers.notifications, by); return }
-    // The reminder's own step (plan 293), while the OS has not been
+    // The reminder's own step (plan 294), while the OS has not been
     // asked: one that has decided -- allowed, or refused for good -- is
     // not asked again, and its answer is the answer.
     setBusy(true)

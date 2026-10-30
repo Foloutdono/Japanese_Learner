@@ -6,7 +6,7 @@
 // step outside the list would record its errors with no step.
 
 // みどりの窓口 — the boarding (screens/BoardingFlow.jsx).
-// `remind` stands after the card, on a native shell alone (plan 293).
+// `remind` stands after the card, on a native shell alone (plan 294).
 export const BOARDING_STEPS = ['kana', 'reveal', 'level', 'test', 'card', 'remind']
 
 // 試乗 — the cards ride (screens/RideRun.jsx): known, known-back,
