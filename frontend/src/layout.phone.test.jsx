@@ -327,12 +327,17 @@ describe('the phone layout contract', () => {
     expect(Math.round(foot.getBoundingClientRect().width)).toBe(Math.round(stageBox.width))
   })
 
-  // ── 駅名標 — the plates take the gate ──
-  it('gives the Learn gate\'s plates the whole page too', async () => {
+  // ── 駅名標 — the folded plates keep their own height (plan 291) ──
+  // The Learn gate's five plates used to share the phone's height, about
+  // 116px each for two lines of type. Folded, each keeps the height of
+  // its one row, all alike, and the rest of a short gate is bare.
+  it('keeps the Learn gate\'s folded plates at their own height', async () => {
     const plate = i => (
-      <div key={i} className="plate">
-        <button type="button" className="plate__head"><span className="pf-line__roundel">KN</span><span className="plate__title">Kana</span></button>
-        <span className="plate__foot"><span /><span className="plate__here">Novice</span><span /></span>
+      <div key={i} className="plate plate--line plate--fold">
+        <button type="button" className="plate__head">
+          <span className="pf-line__roundel">KN</span>
+          <span className="plate__names"><span className="plate__title">Kana</span><span className="plate__meta">N4 · 260 / 640</span></span>
+        </button>
         <span className="plate__stripe"><i /></span>
       </div>
     )
@@ -340,8 +345,7 @@ describe('the phone layout contract', () => {
       <div className="phone">
         <div className="phone__content">
           <main className="learn">
-            <div className="bar"><div className="bar__row" /></div>
-            <div className="plates">{[0, 1, 2, 3, 4].map(plate)}</div>
+            <div className="plates lrn-folds">{[0, 1, 2, 3, 4].map(plate)}</div>
           </main>
         </div>
       </div>
@@ -349,8 +353,11 @@ describe('the phone layout contract', () => {
     await settle()
     const content = screen.container.querySelector('.phone__content').getBoundingClientRect()
     const plates = screen.container.querySelector('.plates').getBoundingClientRect()
-    expect(content.bottom - plates.bottom).toBeLessThanOrEqual(24)
+    expect(content.bottom - plates.bottom).toBeGreaterThan(100)
     const boxes = [...screen.container.querySelectorAll('.plate')].map(el => el.getBoundingClientRect())
-    for (const box of boxes) expect(box.height).toBeCloseTo(boxes[0].height, 0)
+    for (const box of boxes) {
+      expect(box.height).toBeCloseTo(boxes[0].height, 0)
+      expect(box.height).toBeLessThan(80)
+    }
   })
 })

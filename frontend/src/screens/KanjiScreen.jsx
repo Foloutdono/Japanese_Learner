@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
+import { noteRide } from '../stores/learnRide'
 import { Leave } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
@@ -286,7 +287,8 @@ export default function KanjiScreen({ session }) {
   const sub = byLevel ? `${level} · ${t[`levelHint${level}`] ?? ''}` : tierLabelFor(Number(tier), tierSize)
   const back = byLevel ? `${BASE}/levels` : `${BASE}/tiers?size=${tierSize}`
   const modes = byLevel ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
-  const run = m => navigate(`${pathname}/${m}${search}`)
+  // 前回 (plan 291): a level's run is the gate's last ride.
+  const run = m => { noteRide(`${pathname}/${m}`); navigate(`${pathname}/${m}${search}`) }
 
   // ── 机 — the line over its cars (plans 114, 251) ──
   // See VocabScreen: on the desk a level's exercises stand under the
