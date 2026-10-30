@@ -414,9 +414,13 @@ runtime purpose.
   (`tests/test_spanish.py`); a reading-bank row its `es` (`row_problems`),
   a dictation line its `es` (`listening_clips.problems`), a comprehension
   seed every string (its `LANGS`, so the pool serves a Spanish learner
-  the seeds before any model call) and a conversation scenario every text
-  (`conversation.LANGS`, `check_conversation`). Everything else (example
-  sentences, the basics course's titles, the pool, the duels) gains
+  the seeds before any model call), a conversation scenario every text
+  (`conversation.LANGS`, `check_conversation`) and a sentence a deck card
+  shows its Spanish: a correction's or a written sentence's `es`
+  (`vocab_examples check`, `check-added`), a Tatoeba sentence's line in
+  `datas/vocab/jmdict_es.sqlite3` (`build_jmdict_fr --lang es`), so a card
+  the deck gains has its sentences in Spanish too. Everything else (the
+  basics course's titles, the pool and its sentences, the duels) gains
   Spanish a wave at a time, optional where it is added:
   `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
@@ -437,11 +441,12 @@ runtime purpose.
   227).** The deck's Tatoeba sentences are read through
   `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
   correction keeps every course word the sentence showed, carries its
-  `en`, `fr` and `why`, and is drafted and checked with
+  `en`, `fr`, `es` and `why`, and is drafted and checked with
   `python -m scripts.vocab_examples check`. A word JMdict gives no
   sentence has two written for it (`datas/vocab/example_added.json`,
-  `check-added`: its course spelling, no kanji above its level), so every
-  card shows one; a word the deck gains is written for in the same change.
+  `check-added`: its course spelling, no kanji above its level, its three
+  translations), so every card shows one; a word the deck gains is
+  written for in the same change.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
@@ -866,12 +871,16 @@ reading/translation practice serve, and a one-line gloss for the ~20k
 commonest pool words and for every compound of the deck's nouns JMdict
 holds, which is what lets the breakdown fold it (plan 280). It sits
 beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
-re-commits the 76 MB pool. To correct a
+re-commits the 76 MB pool. The Spanish layer (plan 291) is the same, in
+`datas/vocab/jmdict_es.sqlite3`: so far the Spanish of the Tatoeba
+sentences the deck's cards show. To correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 
 ```bash
 python -m scripts.build_jmdict_fr --export   # -> datas/vocab/fr_source/
 python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
+python -m scripts.build_jmdict_fr --lang es --export  # -> datas/vocab/es_source/
+python -m scripts.build_jmdict_fr --lang es           # -> datas/vocab/jmdict_es.sqlite3
 python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
 python -m scripts.build_kanji_db --spanish-only # kanji_meanings_es.json into kanji.sqlite3 (plan 291)
 python -m scripts.spanish_coverage              # what reads Spanish, and what still reads English

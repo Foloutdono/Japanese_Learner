@@ -1,22 +1,26 @@
-"""Spanish is the app's third language (plan 291): the decks and the
-grammar catalogue (glosses, lessons, tours and Choisir questions) read it
-whole, and every other text reads English until its Spanish is written
-(scripts/spanish_coverage.py counts what is left).
+"""Spanish is the app's third language (plan 291): the decks, the
+sentences their cards show and the grammar catalogue (glosses, lessons,
+tours and Choisir questions) read it whole, and every other text reads
+English until its Spanish is written (scripts/spanish_coverage.py counts
+what is left).
 
 What is whole is held here, as tests/test_kanji_french.py holds the
-French: a card the deck gains, a kanji, a grammar point, is written in
-Spanish in the same change, and a line for a card the deck no longer has
-is moved with it (content/vocab_renames.py) or dropped."""
+French: a card the deck gains, a kanji, a grammar point, a sentence a
+card shows, is written in Spanish in the same change, and a line for a
+card the deck no longer has is moved with it (content/vocab_renames.py)
+or dropped."""
 import json
 import os
 import sqlite3
 
 import pytest
 
+from content import example_fixes, jmdict_fr
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kanji_data import KANJI_BY_LEVEL
 from content.kanji_meanings import KANJI_ES
 from content.vocab_data import VOCAB_BY_LEVEL
+from content.vocab_extras import get_vocab_extras
 from routes.translations import _load_translation_map
 from translations import get_meaning
 from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
@@ -148,3 +152,41 @@ def test_an_unspoken_language_is_still_refused_by_the_maps():
     from fastapi import HTTPException
     with pytest.raises(HTTPException):
         _load_translation_map("de", "vocab")
+
+
+# ── The sentences a card shows ───────────────────────────────
+
+def test_every_correction_and_written_sentence_carries_its_spanish():
+    fixed = [orig for orig, fix in example_fixes.fixes().items() if not (fix.get("es") or "").strip()]
+    written = [ex["jp"] for exs in example_fixes.written().values() for ex in exs if not (ex.get("es") or "").strip()]
+    assert fixed == [], f"{len(fixed)} corrections without Spanish (example_fixes.json), e.g. {fixed[:5]}"
+    assert written == [], f"{len(written)} written sentences without Spanish (example_added.json), e.g. {written[:5]}"
+
+
+def test_every_sentence_a_card_shows_reads_spanish():
+    missing = []
+    for level, words in VOCAB_BY_LEVEL.items():
+        for w in words:
+            kanji, kana = w.get("kanji") or "", w["kana"]
+            for ex in get_vocab_extras(kanji, kana, w.get("meaning", ""), "es")["examples"]:
+                if ex.get("tr_lang") != "es" or not ex.get("tr"):
+                    missing.append(f"{level} {kanji or kana}: {ex['jp']}")
+    assert missing == [], (f"{len(missing)} sentences a card shows a Spanish learner in English "
+                           f"(jmdict_es.sqlite3, scripts/build_jmdict_fr.py --lang es), e.g. {missing[:10]}")
+
+
+def test_a_spanish_entry_says_which_language_each_line_is_in():
+    es = get_vocab_extras("学校", "がっこう", "school", "es")
+    en = get_vocab_extras("学校", "がっこう", "school", "en")
+    assert es["examples"] and all(ex["tr_lang"] == "es" for ex in es["examples"])
+    assert [ex["en"] for ex in es["examples"]] == [ex["en"] for ex in en["examples"]]
+    # A sense the Spanish layer has no line for keeps its English, and says so.
+    for mine, english in zip(es["senses"], en["senses"]):
+        assert mine["glossary_lang"] == "es" or (mine["glossary_lang"] == "en" and mine["glossary"] == english["glossary"])
+
+
+def test_a_corpus_sentence_is_translated_for_a_spanish_reader():
+    jp = next(ex["jp"] for ex in get_vocab_extras("学校", "がっこう", "school", "en")["examples"])
+    assert jmdict_fr.translation(jp, "the english", "es") == (jmdict_fr.example(jp, "es"), "es")
+    assert jmdict_fr.translation("どこにもない文。", "the english", "es") == ("the english", "en")
+    assert jmdict_fr.translation(jp, "the english", "de") == ("the english", "en")

@@ -18,7 +18,7 @@ a batch is always the original.
 
 A batch item:
 
-    {"jp", "en", "fr", "words": [{"key", "level", "kanji", "kana",
+    {"jp", "en", "fr", "es", "words": [{"key", "level", "kanji", "kana",
      "meaning", "meaning_fr", "sense", "shown"}]}
 
 `shown` says whether the sentence carries the word where the page can
@@ -26,11 +26,11 @@ mark it; a correction must keep every word that was shown so.
 
 A reviewer writes DIR/fixes_NN.json:
 
-    {"fixes": [{"orig", "jp", "en", "fr", "why"}], "glosses": [...]}
+    {"fixes": [{"orig", "jp", "en", "fr", "es", "why"}], "glosses": [...]}
 
 `orig` the sentence as the batch has it; `jp` what to show instead (the
-same sentence when only a translation was wrong); `en`, `fr` its
-translations; `why` one line. `glosses` lists deck glosses found wrong
+same sentence when only a translation was wrong); `en`, `fr`, `es` its
+translations (the Spanish since plan 291); `why` one line. `glosses` lists deck glosses found wrong
 on the way ({"key", "level", "lang", "now", "should", "why"}); they are
 not applied here.
 
@@ -43,7 +43,7 @@ senses JMdict gives them:
 and a writer answers DIR/added_NN.json (a second reader DIR/averify_NN.json,
 whose entries replace the writer's for their word):
 
-    {"added": [{"key", "level", "jp", "en", "fr"}]}
+    {"added": [{"key", "level", "jp", "en", "fr", "es"}]}
 
 two sentences a word, each held to `added_problems`.
 """
@@ -62,10 +62,14 @@ from translations import get_meaning
 from translations.course import VOCAB_GLOSSES
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
+# What a correction and a written sentence carry, every field required:
+# the sentence and its translations, Spanish among them since plan 291.
+FIX_FIELDS = ("jp", "en", "fr", "es", "why")
+ADDED_FIELDS = ("jp", "en", "fr", "es")
 
 
 def _originals() -> dict[str, dict]:
-    """jp -> {en, fr, words}: every sentence the deck shows, uncorrected."""
+    """jp -> {en, fr, es, words}: every sentence the deck shows, uncorrected."""
     saved, saved_written = example_fixes.fixes, example_fixes.written
     example_fixes.fixes = lambda: {}
     example_fixes.written = lambda: {}
@@ -80,7 +84,8 @@ def _originals() -> dict[str, dict]:
                 extras = get_vocab_extras(kanji, kana, word.get("meaning", ""), "en")
                 for ex in extras["examples"]:
                     item = out.setdefault(ex["jp"], {"jp": ex["jp"], "en": ex.get("en", ""),
-                                                     "fr": jmdict_fr.example(ex["jp"]) or "", "words": []})
+                                                     "fr": jmdict_fr.example(ex["jp"]) or "",
+                                                     "es": jmdict_fr.example(ex["jp"], "es") or "", "words": []})
                     item["words"].append({
                         "key": f"{kanji}::{kana}", "level": level, "kanji": kanji, "kana": kana,
                         "meaning": word.get("meaning", ""), "meaning_fr": get_meaning(word, "fr", VOCAB_GLOSSES),
@@ -105,7 +110,7 @@ def problems(fix: dict, originals: dict[str, dict]) -> list[str]:
     if item is None:
         return [f"{where}: not a sentence the deck shows"]
     out = []
-    for field in ("jp", "en", "fr", "why"):
+    for field in FIX_FIELDS:
         value = fix.get(field)
         if not isinstance(value, str) or not value.strip():
             out.append(f"{where}: `{field}` is empty")
@@ -116,7 +121,7 @@ def problems(fix: dict, originals: dict[str, dict]) -> list[str]:
         for word in item["words"]:
             if word["shown"] and not _carries(jp, word):
                 out.append(f"{where}: the new sentence no longer carries {word['key']} where the page can mark it")
-    if jp == orig and fix.get("en") == item["en"] and fix.get("fr") == item["fr"]:
+    if jp == orig and all(fix.get(lang) == item[lang] for lang in ("en", "fr", "es")):
         out.append(f"{where}: changes nothing")
     return out
 
@@ -127,7 +132,9 @@ def cmd_stats() -> int:
     words = sum(len(VOCAB_BY_LEVEL[lv]) for lv in LEVELS)
     with_examples = {w["key"] for item in originals.values() for w in item["words"]}
     print(f"{len(originals)} sentences shown across {len(with_examples)} of {words} deck words")
-    print(f"{sum(1 for i in originals.values() if not i['fr'])} without French")
+    print(f"{sum(1 for i in originals.values() if not i['fr'])} without French, "
+          f"{sum(1 for i in originals.values() if not i['es'])} without Spanish of their own "
+          f"(a correction may give it)")
     print(f"{len(fixes)} corrected ({sum(1 for k, f in fixes.items() if f['jp'] != k)} rewritten)")
     stale = [k for k in fixes if k not in originals]
     print(f"{len(stale)} corrections of a sentence the deck no longer shows")
@@ -205,7 +212,7 @@ def cmd_merge(in_dir: str) -> int:
             if issues:
                 found += [f"{name}: {p}" for p in issues]
                 continue
-            merged[fix["orig"]] = {k: fix[k].strip() for k in ("jp", "en", "fr", "why")}
+            merged[fix["orig"]] = {k: fix[k].strip() for k in FIX_FIELDS}
     # A second reader's DIR/verify_NN.json amends batch NN's corrections:
     # an entry replaces the first reviewer's for its sentence.
     amended: dict[str, str] = {}
@@ -229,7 +236,7 @@ def cmd_merge(in_dir: str) -> int:
             if issues:
                 found += [f"{name}: {p}" for p in issues]
                 continue
-            merged[orig] = {k: fix[k].strip() for k in ("jp", "en", "fr", "why")}
+            merged[orig] = {k: fix[k].strip() for k in FIX_FIELDS}
     for line in found:
         print(line)
     if found:
@@ -275,7 +282,7 @@ def added_problems(entry: dict, cards: dict, taken: set) -> list[str]:
     if word is None:
         return [f"{where}: not a deck word without sentences"]
     out = []
-    for field in ("jp", "en", "fr"):
+    for field in ADDED_FIELDS:
         value = entry.get(field)
         if not isinstance(value, str) or not value.strip():
             out.append(f"{where}: `{field}` is empty")
@@ -294,7 +301,7 @@ def added_problems(entry: dict, cards: dict, taken: set) -> list[str]:
         out.append(f"{where}: kanji above {entry['level']}: {above} (write them in kana)")
     if len(jp) > MAX_LEN[entry["level"]]:
         out.append(f"{where}: {len(jp)} characters, more than {MAX_LEN[entry['level']]} at {entry['level']}")
-    for field in ("en", "fr"):
+    for field in ADDED_FIELDS[1:]:
         if _JAPANESE.search(entry.get(field) or ""):
             out.append(f"{where}: `{field}` has Japanese in it")
     if jp in taken:
@@ -375,7 +382,7 @@ def cmd_merge_added(in_dir: str) -> int:
     if found:
         print(f"{len(found)} problem(s): nothing written")
         return 1
-    out = {key: [{k: e[k].strip() for k in ("jp", "en", "fr")} for e in es]
+    out = {key: [{k: e[k].strip() for k in ADDED_FIELDS} for e in es]
            for (_, key), es in sorted(by_word.items(), key=lambda kv: kv[0][1])}
     data = {"_meta": "Sentences written for the deck words JMdict gives none (plan 227): content/example_fixes.py.",
             "added": out}

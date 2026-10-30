@@ -71,8 +71,23 @@ not yet written in Spanish reads English**, never French and never blank.
   and French to. A `me` line's Spanish is what Translate asks the learner
   to say, so it carries all its Japanese says; the learner has no gender,
   and a role fixes none where Spanish allows.
+- **The sentences a deck card shows are whole** (the sixth wave): all
+  10,300, wherever they come from. A correction (`example_fixes.json`)
+  and a sentence written for a word Tatoeba lacked (`example_added.json`)
+  carry their `es` beside `fr`, required by `vocab_examples check` and
+  `check-added`; a Tatoeba sentence the course left as it was has its
+  line in a Spanish layer over JMdict, `datas/vocab/jmdict_es.sqlite3`,
+  the French layer's twin (plan 215: the same tables with `es` for `fr`,
+  built by `build_jmdict_fr --lang es`). Each was translated from the
+  Japanese with the English and the French beside it, register by the
+  scene (usted to a stranger, tú to a friend), and the card's word in the
+  sense its gloss gives. The readers take the language
+  (`jmdict_fr.examples(jps, lang)`, `example_fixes.translated`), so the
+  card, the dictionary and reading practice serve it as they serve the
+  French.
 - **Everything else is written a wave at a time** and reads English until
-  then: the deck's example sentences, the basics course's unit titles, the JMdict pool's words, the breakdown's
+  then: the basics course's unit titles, the JMdict pool's words and the
+  21,800 Tatoeba sentences only the pool shows, the breakdown's
   particle and ending glosses, the duels' choices. `python -m
   scripts.spanish_coverage` counts what is written and what is left, per
   part. A Spanish text is optional where it is added (`grammar_check` holds
@@ -100,6 +115,11 @@ not yet written in Spanish reads English**, never French and never blank.
   `meaning_es`, so `LOCAL_REV` moved (31 → 32).
 - Dictionary search still matches English and French glosses only: the pool
   predicate's ASCII gate and the lexicon need their own change.
+- The Spanish layer over JMdict is a second small SQLite file beside the
+  French one rather than columns inside it, so each language is built,
+  exported and corrected on its own; its sense and pool tables are
+  empty until the pool's wave, and a sense with no Spanish says it is
+  English (`glossary_lang`), as a French one with no line always has.
 - The catalogue is held in memory. Loaded, its five files held 19.7 MB
   before Spanish, 20.9 MB with the glosses and the lessons, and 24.6 MB
   with the tours and Choisir questions too (measured with tracemalloc,
