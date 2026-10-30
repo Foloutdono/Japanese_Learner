@@ -76,9 +76,11 @@ _BASE_DIR = os.path.join(os.path.dirname(__file__), "comprehension")
 LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 
 # The languages the app's UI ships (frontend/src/locales), and so the
-# ones every seed carries. routes/reading.LANG_NAMES accepts more; a
-# learner on another language is generated for, as before.
-LANGS: tuple[str, ...] = ("en", "fr")
+# ones every seed carries: Spanish since plan 291, so a Spanish learner's
+# first exercises are the seeds too, not model calls. routes/reading.
+# LANG_NAMES accepts more; a learner on another language is generated
+# for, as before.
+LANGS: tuple[str, ...] = ("en", "fr", "es")
 
 # The smallest number of exercises each level's file may carry. A first
 # request at a level needs one; thirty (plan 259, from ten in plan 258,

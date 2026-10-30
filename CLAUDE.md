@@ -391,7 +391,7 @@ runtime purpose.
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level
   besides its grammar point, its focus one of them, its point found by the
-  detector and a French translation (`row_problems`). Draft new rows
+  detector and a French and a Spanish translation (`row_problems`). Draft new rows
   through `python -m scripts.reading_bank_report --check FILE.json`.
 - **A French learner reads French end to end.** Every new learner-facing
   text carries its French beside its English: a content field has its
@@ -411,9 +411,11 @@ runtime purpose.
   Spanish (`kanji_meanings_es.json`, then `build_kanji_db --spanish-only`),
   a grammar point every text it has (`meaning.es`, `structure_es`, its
   lesson, its tour and its own Choisir questions), in the same change
-  (`tests/test_spanish.py`). Everything else (the reading, dictation,
-  comprehension and conversation banks, example sentences, the pool, the
-  duels) gains Spanish a wave at a time, optional where it is added:
+  (`tests/test_spanish.py`); a reading-bank row its `es` (`row_problems`)
+  and a comprehension seed every string (its `LANGS`, so the pool serves
+  a Spanish learner the seeds before any model call). Everything else
+  (the dictation and conversation banks, example sentences, the pool,
+  the duels) gains Spanish a wave at a time, optional where it is added:
   `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
   KANJI_GLOSSES)` (`translations/course.py`), a date or a number is
@@ -734,7 +736,7 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
 thirty hand-written exercises per level since plan 259, sixty at N5
-since plan 274, in both languages,
+since plan 274, in each of the app's languages (Spanish since plan 291),
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,

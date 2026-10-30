@@ -53,9 +53,15 @@ not yet written in Spanish reads English**, never French and never blank.
   its length no more than the English does (the right reading is the
   longest in 1,074 of 2,601 sets in Spanish, 1,338 in English); the learner
   has no gender; staff and strangers say usted, friends and the app tú.
+- **The reading bank and the comprehension seeds are whole** (the fourth
+  wave): every reading sentence's translation, required by `row_problems`
+  as English and French are, and every string of the 180 seeds (each
+  sentence's translation, note and word glosses, every question and its
+  four options), so `comprehension_seed.LANGS` holds Spanish and the pool
+  serves a Spanish learner the seeds before any model call.
 - **Everything else is written a wave at a time** and reads English until
-  then: the reading, dictation, comprehension and conversation banks, the
-  deck's example sentences, the JMdict pool's words, the breakdown's
+  then: the dictation and conversation banks, the deck's example
+  sentences, the JMdict pool's words, the breakdown's
   particle and ending glosses, the duels' choices. `python -m
   scripts.spanish_coverage` counts what is written and what is left, per
   part. A Spanish text is optional where it is added (`grammar_check` holds
