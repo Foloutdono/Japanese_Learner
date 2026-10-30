@@ -486,8 +486,12 @@ runtime purpose.
   as a transition, but nothing paints until it commits. What a gate
   builds at great cost is kept between visits, not rebuilt: Today's
   print layers are put back as they stood, their loops paused while
-  away (`TodayPrint`). Measure a switch on the production build at
-  phone width with the CPU slowed 4×, before and after.
+  away (`TodayPrint`). A page of cards taller than the screen leaves
+  the ones below the fold unlaid (`content-visibility: auto`), each
+  standing in at its own content height written from its tokens (the
+  Dictionary's `.dict-entry-card`), so nothing moves when one is drawn.
+  Measure a switch on the production build at phone width with the
+  CPU slowed 4×, before and after.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
