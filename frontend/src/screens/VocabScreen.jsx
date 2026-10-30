@@ -1,6 +1,7 @@
 import { useNavigate, useParams, useLocation, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
+import { noteRide } from '../stores/learnRide'
 import { Leave } from '../components/chrome/Bar'
 import { Seg } from '../components/chrome/Console'
 import SelectionScreen from '../components/selection/SelectionScreen'
@@ -195,7 +196,8 @@ export default function VocabScreen({ session }) {
     : `${BASE}/tiers?size=${tierSize}${jmdict ? '&domain=jmdict' : ''}`
   const backLabel = level ? t.leaveLevels : theme ? t.leaveThemeLevels : t.leaveTiers
   const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
-  const run = m => navigate(`${pathname}/${m}${search}`)
+  // 前回 (plan 291): a level's run is the gate's last ride.
+  const run = m => { noteRide(`${pathname}/${m}`); navigate(`${pathname}/${m}${search}`) }
 
   // ── 机 — the line over its cars (plans 114, 251) ──
   // On the desk a level's exercises stand under the JLPT line itself

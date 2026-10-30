@@ -35,6 +35,8 @@ the widths this canvas covers.
 | `.platform-card--line`, `.platform-card__title-jp` | the platform card | `screens/PracticeScreen.jsx` |
 | `.prc-group`, `.prc-group__cap`, `.plate--fold`, `.prc-record*`, `.prc-resume*` | 実践の改札 — the phone's Practice gate, folded in its three groups, the last ride over them (plan 290) | `screens/PracticeScreen.jsx` (`Platforms`, `Resume`) |
 | `.prc-sheet*`, `.prc-page*`, `.prc-tk*`, `.prc-card*` | 引き上げ — the sheet a practice plate raises, a page a platform (plan 290) | `components/practice/PracticeSheet.jsx` |
+| `.lrn-folds`, `.lrn-record*`, `.lrn-shelf*` (with Practice's `.plate--fold`, `.prc-resume*`, `.prc-group__cap`) | 学習の改札 — the phone's Learn gate, folded: the last ride, the lines, the decks (plan 291) | `screens/LearnScreen.jsx`, `components/station/GateResume.jsx` |
+| `.lrn-sheet`, `.lrn-page*`, `.lrn-stop*`, `.lrn-card*` (on Practice's `.prc-sheet__*` pager and strip) | 引き上げ — the sheet a line raises, a page a line (plan 291) | `components/learn/LineSheet.jsx`, `hooks/useSheetPager.js` |
 
 Tokens minted for the chrome: `--hud-h` (48px, the HUD's own height —
 it was the retired phone level bar's 36px), `--tabbar-h` (50px), and
