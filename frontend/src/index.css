@@ -20653,6 +20653,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    nothing on its gauge. In progress and mastered are the state inks
    themselves, vermillion and gold, the same two the study card's own
    seal and the deck's progress rule wear. */
+/* A card's place before it is drawn (plan 291, DictionaryScreen's
+   useScreenfulFirst): a frame at most, at a card's own height (its
+   stand-in, above), and nothing of it seen. */
+.dict-entry-card--pending { content-visibility: hidden; visibility: hidden; }
 .dict-entry-card--new       { --stage-edge: var(--surface-line); }
 .dict-entry-card--learning  { --stage-edge: var(--state-learning); }
 .dict-entry-card--mastered  { --stage-edge: var(--state-mastered); }

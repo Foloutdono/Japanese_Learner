@@ -53,4 +53,45 @@ describe('the catalogue at 390×844', () => {
     expect(drawn).toBeGreaterThan(100)
     for (const card of cards) expect(card.getBoundingClientRect().height).toBeCloseTo(drawn, 0)
   })
+
+  // 予熱 (plan 291): a screenful drawn first, the rest a frame later,
+  // in the meantime a card's empty place: the page is its full length
+  // from the first frame, and the walk and the sentinel find it so.
+  it('draws a screenful first and the rest a frame later, the page its length throughout', async () => {
+    apiFetch.mockImplementation(async path => ({
+      ok: true,
+      json: async () => (String(path).startsWith('/api/dictionary/radicals') ? { groups: [] } : { results: ROWS, total: 48, has_more: false }),
+    }))
+    const snap = () => ({
+      cards: document.querySelectorAll('.dict-grid > button.dict-entry-card').length,
+      places: document.querySelectorAll('.dict-grid > .dict-entry-card--pending').length,
+      length: document.querySelector('.dict-grid').getBoundingClientRect().height,
+      // No place is ever seen.
+      unseen: [...document.querySelectorAll('.dict-entry-card--pending')].every(el => getComputedStyle(el).visibility === 'hidden'),
+    })
+    const first = new Promise(resolve => {
+      const mo = new MutationObserver(() => {
+        if (!document.querySelector('.dict-grid')) return
+        mo.disconnect()
+        resolve(snap())
+      })
+      mo.observe(document.body, { childList: true, subtree: true })
+    })
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/dictionary?category=vocab']}>
+          <Routes><Route path="/dictionary" element={<DictionaryScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    const at = await first
+    expect(at.cards).toBeGreaterThanOrEqual(10)
+    expect(at.cards).toBeLessThan(48)
+    expect(at.cards + at.places).toBe(48)
+    expect(at.unseen).toBe(true)
+    await vi.waitFor(() => expect(snap().cards).toBe(48), { timeout: 3000 })
+    const whole = snap()
+    expect(whole.places).toBe(0)
+    expect(whole.length).toBeCloseTo(at.length, 0)
+  })
 })

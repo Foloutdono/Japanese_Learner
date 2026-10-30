@@ -489,7 +489,9 @@ runtime purpose.
   away (`TodayPrint`). A page of cards taller than the screen leaves
   the ones below the fold unlaid (`content-visibility: auto`), each
   standing in at its own content height written from its tokens (the
-  Dictionary's `.dict-entry-card`), so nothing moves when one is drawn.
+  Dictionary's `.dict-entry-card`), so nothing moves when one is drawn;
+  and React draws a screenful of them first, the rest a frame later as
+  unseen places of the same size (`useScreenfulFirst`).
   Measure a switch on the production build at phone width with the
   CPU slowed 4×, before and after.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note

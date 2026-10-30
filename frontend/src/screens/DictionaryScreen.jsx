@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
+import { startTransition, useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { keepCachedJson, lastCachedJson } from '../lib/cachedJson'
@@ -1301,6 +1301,45 @@ function cardHeadword(entry) {
 	return entry.type === 'grammar' ? entry.pattern : (entry.kanji || entry.kana || ' ')
 }
 
+// 予熱 (plan 291, the owner's call): a page is fifty cards and a phone
+// shows a dozen, so the catalogue draws a screenful first and the rest
+// a frame later, each in the meantime a card's empty place (index.css,
+// .dict-entry-card--pending): the page is its full length from the
+// first frame, the sentinel where it will stay, and nothing moves when
+// the cards come. Counted generously: the grid's columns at the
+// window's width (.dict-grid: two on a phone, one per 168px from 560px)
+// by the rows its height holds, and a row more -- a card's 149px, or
+// the desk list's 68px row, whichever the screen may draw.
+const ROW_PX = { card: 149, list: 68 }
+function screenful(desk) {
+	if (typeof window === 'undefined') return Infinity
+	const width = window.innerWidth
+	const columns = width < 560 ? 2 : Math.max(1, Math.floor(width / 168))
+	const rows = Math.ceil(window.innerHeight / (desk ? ROW_PX.list : ROW_PX.card)) + 1
+	return columns * rows
+}
+
+/** How many of `results` to draw now: a screenful when a new page has
+ *  just come (by its first entry, so a page asked again or a page more
+ *  draws whole), every one from the frame after. */
+function useScreenfulFirst(results, desk) {
+	const head = results.length ? entryKey(results[0]) : null
+	const [wholeFor, setWholeFor] = useState(null)
+	const whole = wholeFor === head
+	useEffect(() => {
+		if (whole) return undefined
+		let timer = 0
+		const frame = requestAnimationFrame(() => {
+			timer = setTimeout(() => startTransition(() => setWholeFor(head)))
+		})
+		return () => {
+			cancelAnimationFrame(frame)
+			clearTimeout(timer)
+		}
+	}, [whole, head])
+	return whole ? results.length : Math.min(results.length, screenful(desk))
+}
+
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
 	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onSentenceClick,
@@ -1313,6 +1352,7 @@ function ResultsSection({
 	// the dock beside it was reached only by tabbing through all of them
 	// (and the more they loaded). A move opens the tile it lands on.
 	const onGridWalk = useGridWalk(desk, i => setSelected(results[i]))
+	const drawn = useScreenfulFirst(results, desk)
 	const stopKey = desk && results.length
 		? entryKey(selected && results.some(r => entryKey(r) === entryKey(selected)) ? selected : results[0])
 		: null
@@ -1349,6 +1389,9 @@ function ResultsSection({
 					<div className="dict-results-wrap">
 						<div className="dict-grid" onKeyDown={onGridWalk} aria-keyshortcuts={desk ? 'ArrowLeft ArrowRight ArrowUp ArrowDown Home End' : undefined}>
 							{results.map((entry, i) => {
+								if (i >= drawn) {
+									return <div key={entryKey(entry)} className="dict-entry-card dict-entry-card--pending" aria-hidden="true" />
+								}
 								const stage = stageOf(entry.status?.status)
 								const furigana = cardFurigana(entry)
 								const isGrammar = entry.type === 'grammar'
