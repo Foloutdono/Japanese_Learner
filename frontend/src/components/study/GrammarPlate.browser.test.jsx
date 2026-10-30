@@ -130,14 +130,14 @@ describe('the point’s roundel', () => {
     const rows = [...stop.querySelectorAll(':scope > .gl-outs > .gl-out')]
     expect(rows.map(r => r.className)).toEqual(['gl-out gl-out--stay', 'gl-out gl-out--next gl-out--pass'])
     expect(rows.map(r => [...r.querySelectorAll('.gl-out__key')].map(k => k.textContent))).toEqual([
-      ['4Wrong', '3Almost'], ['2Difficult', '1Correct'],
+      ['4Missed', '3Almost'], ['2Correct', '1Easy'],
     ])
     expect(rows.map(r => r.querySelector('.gl-out__when').textContent)).toEqual(['10min', '1h'])
     // The keys and the wait are drawn; a screen reader hears each row whole.
     expect(rows.every(r => r.querySelector('.gl-out__keys').getAttribute('aria-hidden') === 'true')).toBe(true)
     expect(rows.map(r => r.querySelector(':scope > .sr-only').textContent)).toEqual([
-      'Wrong, Almost: try again, in 10 min',
-      'Difficult, Correct: next step, in 1 h',
+      'Missed, Almost: try again, in 10 min',
+      'Correct, Easy: next step, in 1 h',
     ])
     expect(stop.querySelector('.gl-outs').getAttribute('aria-label')).toBe('What each rating does')
   })
@@ -147,12 +147,12 @@ describe('the point’s roundel', () => {
     const root = (await mount(<LadderMap card={cards.mastered} outcomes={outcomesOf(cards.mastered, verdicts, en)} />)).container
     const rows = [...root.querySelectorAll('.gl-out')]
     expect(rows.map(r => r.className)).toEqual([
-      'gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass', 'gl-out gl-out--stay gl-out--pass',
+      'gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass',
     ])
     expect(rows[0].querySelector('.gl-out__note').textContent).toBe('Relapse')
     expect(rows.slice(1).every(r => !r.querySelector('.gl-out__note'))).toBe(true)
-    expect(rows[0].querySelector(':scope > .sr-only').textContent).toBe('Wrong, Almost: relapse, in 10 min')
-    expect(rows[2].querySelector(':scope > .sr-only').textContent).toMatch(/^Correct: stays mastered, in /)
+    expect(rows[0].querySelector(':scope > .sr-only').textContent).toBe('Missed, Almost: relapse, in 10 min')
+    expect(rows[1].querySelector(':scope > .sr-only').textContent).toMatch(/^Correct, Easy: stays mastered, in /)
   })
 })
 

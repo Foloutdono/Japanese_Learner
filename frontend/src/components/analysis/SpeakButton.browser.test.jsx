@@ -73,8 +73,10 @@ describe('SpeakButton', () => {
     const fake = installFake([{ lang: 'ja-JP' }])
     const screen = await render(<SpeakButton text="こんにちは" t={t} />)
     screen.container.querySelector('button').click()
-    expect(fake.speak).toHaveBeenCalledTimes(1)
-    expect(fake.speak.mock.calls[0][0].text).toBe('こんにちは')
+    // The page's first gesture also spends a silent utterance, which
+    // primes iOS to speak (lib/audio/speech.js); the word is said once.
+    const said = fake.speak.mock.calls.map(([u]) => u.text).filter(text => text.trim())
+    expect(said).toEqual(['こんにちは'])
   })
 
   it('does not let the click bubble, so a wrapping click handler never fires', async () => {

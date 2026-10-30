@@ -28,9 +28,9 @@ midnight. It lands as the day goes now: one credit every REFILL_EVERY
 (48 minutes, the day's thirty spread over it), counted from
 user_profiles.credits_accrued_at -- the refill's clock. What has landed
 since the clock is PENDING: owed, not yet in the ledger. Reading the
-balance never moves it; claiming it (POST /api/credits/claim, the
-"while you were away" sheet the app opens on arrival) writes it as one
-`refill` row and moves the clock on by exactly the credits it paid,
+balance never moves it; claiming it (POST /api/credits/claim, sent as
+the card the app charges on arrival goes back to its pocket, plan 278)
+writes it as one `refill` row and moves the clock on by exactly the credits it paid,
 so the minutes towards the next one are kept.
 
 The tank holds CAP. Pending stops growing at the room under it, and a
@@ -58,7 +58,8 @@ Free: the whole kana line at no fare at all, the refill through the
 day, the learning modes, the dictionary without the analyzer, today's
 run, the full profile, FREE_DECKS decks and FREE_CARDS cards. Pass:
 unlimited credits, the practice modes, the analyzer, PASS_DECKS and
-PASS_CARDS. Practice never spends credits.
+PASS_CARDS. Practice never spends credits; a ranked duel's departure
+and a duel's corrections do (plan 279, pay() below).
 There is no purchase flow yet (HAS_STORE in the frontend's
 domain/credits.js), so `plan` is only ever set by hand.
 
@@ -124,7 +125,13 @@ PASS_CARDS = 10000
 # mid-process would make one request block and the next not.
 ENFORCE = os.environ.get("CREDITS_ENFORCE") == "1"
 
-REASONS = ("refill", "review", "grant", "adjust")
+REASONS = ("refill", "review", "grant", "adjust", "duel", "duel_review")
+# What a fare is charged for. A review is spend()'s; the duels (plan
+# 279) pay through pay(): `duel`, a ranked duel's departure, and
+# `duel_review`, a duel's corrections. Each its own reason, so the
+# ledger and shadow mode's refusals say what was paid for -- and the
+# offer's week, which counts reviews, never counts a duel.
+FARES = ("review", "duel", "duel_review")
 
 
 class OutOfCredits(Exception):
@@ -497,7 +504,7 @@ def _summary_of(s: dict) -> dict:
     return {
         "balance": None if s["unlimited"] else s["balance"],
         # 補充 — landed since the last claim and not yet in the balance
-        # (plan 141): what the "while you were away" sheet offers.
+        # (plan 141): what the card is charged with on arrival (plan 278).
         "pending": 0 if s["unlimited"] else s["pending"],
         "cap": CAP,
         "dailyRefill": DAILY_REFILL,
@@ -545,6 +552,12 @@ def entitlement(user_id: str) -> str:
     return _state(user_id)["plan"]
 
 
+def unlimited_on(cur, user_id: str) -> bool:
+    """Whether the learner rides on the pass, read on the caller's
+    cursor: a price shown in a transaction that already holds one."""
+    return _is_pass(_profile_bits(cur, user_id), datetime.now(timezone.utc))
+
+
 def balance(user_id: str) -> int | None:
     """What a fare can draw on, or None on a pass (nothing to count):
     the balance AND what the refill has landed unclaimed, because
@@ -563,55 +576,56 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
 
     Never called before srs.review() returns: a rejected review is not a
     fare. What the refill has landed is claimed first, so a credit
-    waiting on the "while you were away" sheet is never a refusal. On a
+    not yet charged onto the card is never a refusal. On a
     pass, nothing is written. In shadow mode a fare the balance cannot
     cover records what there is (never below zero) and logs it; under
     enforcement it raises OutOfCredits and writes nothing.
     Returns {balance, unlimited} for the response.
     """
+    return _charge(user_id, n, ref, "review")[0]
+
+
+def pay(user_id: str, n: int, reason: str, ref: str | None = None, cur=None) -> int:
+    """A fare that is not a review (FARES): a ranked duel's departure, a
+    duel's corrections. The same rules as spend() -- the refill claimed
+    first, nothing written on a pass, shadow mode recording what there
+    is, OutOfCredits under enforcement -- and it returns the credits
+    actually taken: n, fewer in shadow mode on a short balance, 0 on a
+    pass. That is what refund() gives back.
+
+    With `cur`, in the caller's transaction (a duel's departure, so a
+    fare is never taken for a run that failed to start): the caller
+    commits, and forget()s the learner once it has."""
+    assert reason in FARES and reason != "review", reason
+    if cur is not None:
+        return _charge_on(cur, user_id, n, ref, reason)[1] if n > 0 else 0
+    return _charge(user_id, n, ref, reason)[1]
+
+
+def refund(user_id: str, n: int, reason: str, ref: str | None = None, cur=None) -> None:
+    """Give back a fare the app did not deliver (a ranked duel whose run
+    waited out its 48 hours with nobody to meet): a positive row of the
+    fare's own reason, so the reason sums to what was really paid.
+
+    With `cur`, in the caller's transaction (the expiry or the closing
+    that owes it, so it is given back once and never lost between the
+    two): the caller commits, and forget()s the learner once it has.
+
+    A fare is paid from a profile row, so none means the learner was
+    erased since (the account's deletion, or one orphan purge erasing
+    both players of a duel): they are owed nothing, least of all the
+    account _settle would make again, welcome bonus and all."""
     if n <= 0:
-        s = _state(user_id)
-        return {"balance": None if s["unlimited"] else s["balance"], "unlimited": s["unlimited"]}
+        return
+    assert reason in FARES and reason != "review", reason
+    if cur is not None:
+        _refund_on(cur, user_id, n, reason, ref)
+        return
     from core.db import db_conn
     conn = db_conn()
     try:
-        with conn.cursor() as cur:
-            now = datetime.now(timezone.utc)
-            s = _settle(cur, user_id, now, claim=True)
-            if s["unlimited"]:
-                conn.commit()
-                forget(user_id)
-                return {"balance": None, "unlimited": True}
-            have = s["balance"]
-            if have < n:
-                if ENFORCE:
-                    conn.rollback()
-                    forget(user_id)
-                    next_at, _full = schedule(have, 0, s["clock"])
-                    raise OutOfCredits(have, _iso(next_at))
-                logger.info("credits: would have blocked user_id=%s balance=%d fare=%d ref=%s",
-                            user_id, have, n, ref)
-                # ...and again where it can be counted. That log line
-                # goes to stdout, which on Render is not queryable and
-                # does not outlive the instance, so the one signal this
-                # whole shadow mode exists to produce -- who wants more
-                # than the free allowance gives -- was being thrown
-                # away. On `cur`, inside the transaction already open,
-                # so a fare and its refusal cannot disagree. `ref` is a
-                # card id and stays out of it: the question is how
-                # often and to whom, never which card.
-                from core import events
-                events.record(user_id, "fare_blocked",
-                              {"balance": have, "fare": n, "kind": "review"}, cur=cur)
-                # And as the learner's own record: the review that would
-                # have waited, for the offer's week (week below).
-                cur.execute("INSERT INTO credit_stops (user_id, cards) VALUES (%s, %s)",
-                            (user_id, max(1, n - have)))
-            charge = min(n, have)
-            if charge > 0:
-                _insert(cur, user_id, -charge, "review", ref)
-            new_balance = have - charge
-            _restart_if_under_cap(cur, user_id, s, new_balance, now)
+        with conn.cursor() as own:
+            _refund_on(own, user_id, n, reason, ref)
         conn.commit()
     except Exception:
         conn.rollback()
@@ -619,7 +633,77 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
     finally:
         conn.close()
     forget(user_id)
-    return {"balance": new_balance, "unlimited": False}
+
+
+def _refund_on(cur, user_id: str, n: int, reason: str, ref: str | None) -> None:
+    cur.execute("SELECT 1 FROM user_profiles WHERE user_id = %s FOR UPDATE", (user_id,))
+    if cur.fetchone() is None:
+        return
+    _settle(cur, user_id, datetime.now(timezone.utc), claim=True)
+    _insert(cur, user_id, n, reason, ref)
+
+
+def _charge(user_id: str, n: int, ref: str | None, reason: str) -> tuple[dict, int]:
+    """spend() and pay(): ({balance, unlimited}, the credits taken)."""
+    if n <= 0:
+        s = _state(user_id)
+        return {"balance": None if s["unlimited"] else s["balance"], "unlimited": s["unlimited"]}, 0
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            out = _charge_on(cur, user_id, n, ref, reason)
+        conn.commit()
+    except OutOfCredits:
+        conn.rollback()
+        forget(user_id)
+        raise
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    forget(user_id)
+    return out
+
+
+def _charge_on(cur, user_id: str, n: int, ref: str | None, reason: str) -> tuple[dict, int]:
+    """_charge's work on an open cursor; the caller commits, or rolls
+    back on OutOfCredits, which writes nothing."""
+    now = datetime.now(timezone.utc)
+    s = _settle(cur, user_id, now, claim=True)
+    if s["unlimited"]:
+        return {"balance": None, "unlimited": True}, 0
+    have = s["balance"]
+    if have < n:
+        if ENFORCE:
+            next_at, _full = schedule(have, 0, s["clock"])
+            raise OutOfCredits(have, _iso(next_at))
+        logger.info("credits: would have blocked user_id=%s balance=%d fare=%d reason=%s ref=%s",
+                    user_id, have, n, reason, ref)
+        # ...and again where it can be counted. That log line goes to
+        # stdout, which on Render is not queryable and does not outlive
+        # the instance, so the one signal this whole shadow mode exists
+        # to produce -- who wants more than the free allowance gives --
+        # was being thrown away. On `cur`, inside the transaction
+        # already open, so a fare and its refusal cannot disagree. `ref`
+        # is a card id and stays out of it: the question is how often
+        # and to whom, never which card.
+        from core import events
+        events.record(user_id, "fare_blocked",
+                      {"balance": have, "fare": n, "kind": reason}, cur=cur)
+        # And as the learner's own record: the review that would have
+        # waited, for the offer's week (week below). A duel is not a
+        # review that waited.
+        if reason == "review":
+            cur.execute("INSERT INTO credit_stops (user_id, cards) VALUES (%s, %s)",
+                        (user_id, max(1, n - have)))
+    charge = min(n, have)
+    if charge > 0:
+        _insert(cur, user_id, -charge, reason, ref)
+    new_balance = have - charge
+    _restart_if_under_cap(cur, user_id, s, new_balance, now)
+    return {"balance": new_balance, "unlimited": False}, charge
 
 
 # ── 止 — where the credits stopped the learner (plan 172) ─────

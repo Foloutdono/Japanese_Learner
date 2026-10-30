@@ -958,7 +958,7 @@ class SRSEngine:
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
-    def award_xp(self, user_id: str, source: str, ref: str, xp: int, cur=None) -> dict[str, Any]:
+    def award_xp(self, user_id: str, source: str, ref: str, xp: int, cur=None, at=None) -> dict[str, Any]:
         """Grant XP that didn't come from answering a card. Returns the
         same {xp_earned, leveled_up, new_level} shape review() does, so
         a reward can drop straight into the frontend's existing XpToast
@@ -967,18 +967,27 @@ class SRSEngine:
         `cur` joins a transaction the caller holds open -- the day's
         clear (record_day_clear) pays in the same one that marks the day
         cleared, so a failure can never leave a day cleared and unpaid.
-        Without it the row is written and committed on its own."""
+        Without it the row is written and committed on its own.
+
+        `at` dates the row when the XP was earned earlier than it is
+        written: a duel's run, paid by the read that finds it over
+        (study/duels), counts on the day it was run. Now otherwise."""
         prior_xp = self.get_lifetime_xp(user_id)
 
-        sql = "INSERT INTO xp_ledger(user_id, source, ref, xp) VALUES (%s, %s, %s, %s)"
-        self._log_sql("award_xp", sql, (user_id, source, ref, xp))
+        if at is None:
+            sql = "INSERT INTO xp_ledger(user_id, source, ref, xp) VALUES (%s, %s, %s, %s)"
+            params = (user_id, source, ref, xp)
+        else:
+            sql = "INSERT INTO xp_ledger(user_id, source, ref, xp, awarded_at) VALUES (%s, %s, %s, %s, %s)"
+            params = (user_id, source, ref, xp, at)
+        self._log_sql("award_xp", sql, params)
         if cur is not None:
             # Committed by the caller, which moves the generation on
             # once it has (record_day_clear).
-            cur.execute(sql, (user_id, source, ref, xp))
+            cur.execute(sql, params)
         else:
             with self.storage.cursor() as own:
-                own.execute(sql, (user_id, source, ref, xp))
+                own.execute(sql, params)
             self._history_changed(user_id)
 
         prior_level = xp_math.level_from_xp(prior_xp)
@@ -2486,6 +2495,80 @@ class SRSEngine:
                 (count,) = cur.fetchone()
         return int(count)
 
+    def get_mode_firsts_today(self, user_id: str, modes) -> set[tuple[str, str]]:
+        """
+        The (card_id, mode) pairs, `mode` among `modes`, first reviewed
+        in that mode today on a card met before today (plan 273). What
+        a mode the learner added to Today, or a main mode they chose,
+        spends of the day's pace beside get_new_items_today, which
+        counts a card once, on the day it was first met in any mode: a
+        kanji known by its meaning since May and drawn for the first
+        time today is new to the drawing, and the ration that dealt it
+        has to see it spent. Same day, same servable modes, same kept
+        checks left out and same compacted firsts as that count.
+        """
+        modes = list(modes)
+        if not modes:
+            return set()
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
+                    WITH events AS (
+                        SELECT card_id, mode, reviewed_at AS at
+                        FROM review_log
+                        WHERE card_id LIKE %s{mode_sql}{_NOT_A_KEPT_CHECK}
+                        UNION ALL
+                        SELECT card_id, mode, first_at AS at
+                        FROM card_first_review
+                        WHERE card_id LIKE %s{mode_sql}
+                    ),
+                    pair_first AS (
+                        SELECT card_id, mode, MIN(at) AS first_at FROM events
+                        WHERE mode = ANY(%s) GROUP BY card_id, mode
+                    ),
+                    card_first AS (
+                        SELECT card_id, MIN(at) AS first_at FROM events GROUP BY card_id
+                    )
+                    SELECT p.card_id, p.mode FROM pair_first p JOIN card_first c USING (card_id)
+                    WHERE p.first_at >= date_trunc('day', NOW())
+                      AND c.first_at < date_trunc('day', NOW())
+                """
+                params = (pattern,) + mode_params + (pattern,) + mode_params + (modes,)
+                self._log_sql("get_mode_firsts_today", sql, params)
+                cur.execute(sql, params)
+                return {(row[0], row[1]) for row in cur.fetchall()}
+
+    def get_taught_new(self, mode: str, taught: str, card_ids: list[str], limit: int) -> list[str]:
+        """Cards never reviewed in `mode` whose row in `taught` has
+        graduated -- reviewed, out of its learning steps -- in the order
+        given, at most `limit`: what a mode the learner added to Today
+        deals, each card once its line's main mode has taught it (plan
+        273). get_new_cards' negative fact, with one positive beside it."""
+        if not card_ids or limit <= 0:
+            return []
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT ids.id
+                    FROM unnest(%s::text[]) WITH ORDINALITY AS ids(id, ord)
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM card_modes cm
+                        WHERE cm.card_id = ids.id AND cm.mode = %s AND cm.total_reviews > 0
+                    )
+                    AND EXISTS (
+                        SELECT 1 FROM card_modes cm
+                        WHERE cm.card_id = ids.id AND cm.mode = %s
+                          AND cm.total_reviews > 0 AND NOT cm.is_learning
+                    )
+                    ORDER BY ids.ord
+                    LIMIT %s
+                """
+                self._log_sql("get_taught_new", sql, (mode, taught, len(card_ids), limit))
+                cur.execute(sql, (list(card_ids), mode, taught, limit))
+                return [row[0] for row in cur.fetchall()]
+
     def get_reviewed_today(self, user_id: str) -> tuple[set, set]:
         """
         What today has already spent of a review ceiling (plan 217): the
@@ -2819,6 +2902,25 @@ class SRSEngine:
                 cur.execute(sql, (mode, list(card_ids)))
                 row = cur.fetchone()
         return int(row[0]) if row else 0
+
+    def mastered_among(self, card_ids: list[str], mode: str) -> list[str]:
+        """The cards among these mastered in `mode` (_classify_stage's
+        "mastered": reviewed, an interval of MASTERED_DAYS or more), in
+        the order given -- what a change of a line's main mode marks
+        known in the new one (plan 273)."""
+        if not card_ids:
+            return []
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT card_id FROM card_modes
+                    WHERE mode = %s AND card_id = ANY(%s)
+                      AND total_reviews > 0 AND interval_days >= %s
+                """
+                self._log_sql("mastered_among", sql, (mode, len(card_ids)))
+                cur.execute(sql, (mode, list(card_ids), MASTERED_DAYS))
+                found = {row[0] for row in cur.fetchall()}
+        return [cid for cid in card_ids if cid in found]
 
     def count_cards_with_rows(self, card_ids: list[str]) -> int:
         """How many of these cards have a row under ANY mode -- the

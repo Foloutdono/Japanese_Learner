@@ -76,8 +76,10 @@ def rows(tokens: list[dict]) -> list[list[dict]]:
             continue
         end = i
         if not _stands_alone(token) and token["pos"] in _FOLDS:
+            # (an ending the server glossed keeps a row of its own, as in
+            # rows.js: せず's ず, plan 272)
             while (end + 1 < len(tokens) and tokens[end + 1]["pos"] == "auxiliary"
-                   and not _stands_alone(tokens[end + 1])):
+                   and not _stands_alone(tokens[end + 1]) and not tokens[end + 1].get("gloss")):
                 end += 1
         out.append(tokens[i:end + 1])
         i = end + 1

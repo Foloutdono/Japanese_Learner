@@ -24,6 +24,7 @@ from content.kanji_meanings import KANJI_FR
 from content import reading_sentences
 from content.reading_sentences import N5 as READING_N5
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from core import learner_modes
 from core.auth import get_user_id, prefixed
 from core.lines import lines_or_all
 from core.srs_instance import srs
@@ -50,9 +51,10 @@ def _progress(user_id: str, sources) -> dict[str, dict[str, float]]:
     """source -> {raw id: progress} over the course's cards, 0.0 for a
     card never met -- one query a line."""
     out: dict[str, dict[str, float]] = {}
+    modes = learner_modes.read(user_id)
     for source in sources:
         ids = basics.course_ids(source)
-        found = srs.get_bulk_progress(prefixed(ids, user_id), primary_mode(source))
+        found = srs.get_bulk_progress(prefixed(ids, user_id), primary_mode(source, modes))
         cut = len(user_id) + 1
         out[source] = {cid[cut:]: p for cid, p in found.items()}
     return out
@@ -60,12 +62,13 @@ def _progress(user_id: str, sources) -> dict[str, dict[str, float]]:
 
 def _met(user_id: str, sources) -> set[str]:
     """The course's raw ids the learner has reviewed at least once in
-    their line's primary mode -- get_new_cards' own negative fact."""
+    their line's main mode (plan 273) -- get_new_cards' own negative fact."""
     met: set[str] = set()
+    modes = learner_modes.read(user_id)
     for source in sources:
         ids = basics.course_ids(source)
         card_ids = prefixed(ids, user_id)
-        unmet = set(srs.get_new_cards(primary_mode(source), limit=len(ids),
+        unmet = set(srs.get_new_cards(primary_mode(source, modes), limit=len(ids),
                                       card_ids=card_ids, ordered=True))
         met |= {raw_id for raw_id, cid in zip(ids, card_ids) if cid not in unmet}
     return met

@@ -8,6 +8,7 @@ import { useTodaySummary, refreshToday } from '../../stores/today'
 import { Loading } from '../ui/Loading'
 import { Emphasized } from '../ui/Emphasized'
 import { Sheet } from '../chrome/Sheet'
+import { ArrowIcon } from '../ui/Icons'
 import PlacementTest from '../onboarding/PlacementTest'
 import { SettingsPage, Slip } from './SettingsPage'
 import { useLearningSave } from './learningSave'
@@ -175,7 +176,7 @@ export function LevelSheet({ from, to, preview, t, lang, onConfirm, onClose, onS
   const returned = preview.returned ?? 0
   const title = up ? t.levelUpTitle(to) : t.levelDownTitle(to)
   return (
-    <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet" initialFocus=".btn-secondary">
+    <Sheet open onClose={onClose} title={title} icon={<ArrowIcon direction={up ? 'up' : 'down'} />} label={title} className="lvl-sheet" initialFocus=".btn-secondary">
       <p className="lvl-sheet__body">
         <Emphasized text={up ? t.levelUpBody(to, preview.spreadWeeks ?? 6) : t.levelDownBody(to, returned)} strongClassName="lvl-sheet__strong" />
       </p>

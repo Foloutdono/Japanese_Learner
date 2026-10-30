@@ -130,6 +130,19 @@ describe('Settings at phone width', () => {
     for (const t of ticks) expect(t.right).toBeLessThanOrEqual(chart.right + 1)
   })
 
+  it('dials a pace of one\'s own inside the page, its steps thumb targets', async () => {
+    await mount('/profile/settings/service')
+    document.querySelector('.svc-row[data-pace="own"]').click()
+    await settle(50)
+    const page = box(document.querySelector('.svc-chart'))
+    const own = box(document.querySelector('.svc-own'))
+    expect(own.left).toBeGreaterThanOrEqual(page.left - 1)
+    expect(own.right).toBeLessThanOrEqual(page.right + 1)
+    for (const step of document.querySelectorAll('.svc-own__step')) expect(box(step).height).toBeGreaterThanOrEqual(44)
+    // The dial is the row's own, inside its ring, not under the chart.
+    expect(document.querySelector('.svc-own-row--on .svc-own')).not.toBeNull()
+  })
+
   it('draws the three themes three across', async () => {
     await mount('/profile/settings/display')
     const picks = [...document.querySelectorAll('.theme-pick')].map(box)

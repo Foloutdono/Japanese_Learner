@@ -20,7 +20,7 @@ describe('the three offers', () => {
     expect(offerScreen(SOURCES.RUNOUT)).toBe(SCREENS.WEEK)
     expect(offerScreen(SOURCES.LIMIT)).toBe(SCREENS.MAX)
     expect(offerScreen(SOURCES.UPGRADE)).toBe(SCREENS.MAX)
-    for (const door of [SOURCES.ONBOARDING, SOURCES.BALANCE, SOURCES.SETTINGS, SOURCES.RIDE]) {
+    for (const door of [SOURCES.ONBOARDING, SOURCES.BALANCE, SOURCES.SETTINGS]) {
       expect(offerScreen(door), door).toBe(SCREENS.DISCOVER)
     }
   })

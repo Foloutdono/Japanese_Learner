@@ -24,7 +24,7 @@ const $ = sel => document.querySelector(sel)
 const rect = sel => $(sel).getBoundingClientRect()
 
 // What a fixed box is laid out in: the window less the scrollbar gutter
-// the root keeps stable (the claim sheet's test measures the same way).
+// the root keeps stable.
 function viewport() {
   const probe = document.createElement('div')
   probe.style.cssText = 'position: fixed; inset: 0'

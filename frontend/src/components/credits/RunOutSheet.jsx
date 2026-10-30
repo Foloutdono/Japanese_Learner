@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
+import { CardIcon } from '../ui/Icons'
 import { useRunOut, clearRunOut, useCredits, recordStop } from '../../stores/credits'
 import { useTodaySummary } from '../../stores/today'
 import { refillMinutes } from '../../domain/credits'
@@ -53,7 +54,7 @@ function RunOut({ runOut }) {
   }
 
   return (
-    <Sheet open onClose={leave} jp={t.balanceTitle} label={t.runOutTitle} initialFocus=".btn-depart">
+    <Sheet open onClose={leave} title={t.balanceTitle} icon={CardIcon} line="var(--accent2)" label={t.runOutTitle} initialFocus=".btn-depart">
       <div className="balance">
         <span className="balance__fig balance__fig--out">
           0<span className="balance__unit">{t.creditsUnit}</span>

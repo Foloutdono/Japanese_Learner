@@ -26,9 +26,14 @@ export const WIDGET_HOUR = { hour: 9, minute: 0 }
 // A notification closer than this is not scheduled: it would fire
 // while the app that planned it is still open.
 const LEAD_MS = 60_000
-// Lines a notification lists, busiest first (Android's inbox style
-// shows five).
-const MAX_LINES = 5
+// Lines a notification lists, busiest first: Android's inbox style
+// shows five; iOS shows four lines of body on the lock screen, the
+// summary and three lanes, and cut the rest (plan 293).
+const MAX_LINES = { android: 5, ios: 3 }
+// The day's train carries Depart (plan 293): its id the shells register
+// (lib/native.js) and the action a tap on it is told apart by.
+export const TRAIN_ACTIONS = 'train'
+export const DEPART_ACTION = 'depart'
 
 /** Midnight at the start of `now`'s day, on the device's clock. */
 export function localMidnight(now) {
@@ -81,8 +86,11 @@ export function laneLine(lane, t, kanaSetLabel) {
  * The notifications to schedule: one for each instant whose train
  * carries anything, none on a day with nothing due, and none today
  * once the learner has already ridden. `platform` decides where the
- * lanes go: Android lists them in the expanded notification, iOS shows
- * them under the body.
+ * lanes go: Android lists them in the expanded notification, under the
+ * summary in its header, iOS shows the busiest three under the body.
+ * The title leads with the hour, as a departure board's row does
+ * (plan 293), and the train carries Depart; the comeback does not, its
+ * door being the gate's paces.
  */
 export function planNudges({ ahead, time, t, kanaSetLabel, now, platform }) {
   const out = []
@@ -111,7 +119,7 @@ export function planNudges({ ahead, time, t, kanaSetLabel, now, platform }) {
     const minutes = minutesFor(point.total, ahead.seconds_per_review)
     const summary = [minutes && t.nudgeMinutes(minutes), point.new > 0 && t.nudgeNew(point.new)]
       .filter(Boolean).join(' · ') || t.brdNotifText
-    const lines = (point.lanes ?? []).slice(0, MAX_LINES)
+    const lines = (point.lanes ?? []).slice(0, MAX_LINES[platform] ?? MAX_LINES.android)
       .map(lane => `${laneLine(lane, t, kanaSetLabel)} · ${lane.count}`)
     out.push({
       id: NUDGE_IDS[out.length],
@@ -120,6 +128,7 @@ export function planNudges({ ahead, time, t, kanaSetLabel, now, platform }) {
       body: platform === 'ios' && lines.length ? [summary, ...lines].join('\n') : summary,
       summary,
       lines,
+      actionType: TRAIN_ACTIONS,
       extra: { to: '/today' },
     })
   }
@@ -132,33 +141,44 @@ export function planNudges({ ahead, time, t, kanaSetLabel, now, platform }) {
  * lanes of now for its stripe, a word the learner knows, and every word
  * it prints already in the learner's language -- the native side
  * carries no strings of its own.
+ *
+ * Since plan 293 (the owner's pick C of the canvas "Tsuji — widgets &
+ * notifications", with A's lock screen) it carries the learner's hour,
+ * which heads the board beside the mark ('' without one: the title
+ * stands there instead), and each count's `meta`, the minutes and the
+ * new cards under it.
  */
-export function widgetPayload({ today, ahead, t, now }) {
+export function widgetPayload({ today, ahead, t, now, time = null }) {
   const spr = ahead?.seconds_per_review ?? today?.seconds_per_review ?? null
-  const point = (from, total) => {
+  const point = (from, total, fresh) => {
     const minutes = minutesFor(total, spr)
     return {
       from,
       total,
       unit: t.widgetUnit(total),
       minutes: minutes ? t.widgetMinutes(minutes) : '',
+      meta: [minutes && t.widgetMinutes(minutes), fresh > 0 && t.nudgeNew(fresh)].filter(Boolean).join(' · '),
     }
   }
   const nowTotal = today?.total ?? ahead?.points?.[0]?.total ?? 0
-  const points = [point(now.getTime(), nowTotal)]
+  const nowNew = today?.lanes
+    ? today.lanes.reduce((n, lane) => n + (lane.new ?? 0), 0)
+    : ahead?.points?.[0]?.new ?? 0
+  const points = [point(now.getTime(), nowTotal, nowNew)]
   const seen = new Set([localMidnight(now).getTime()])
   for (const p of ahead?.points ?? []) {
     const day = localMidnight(new Date(p.at)).getTime()
     if (seen.has(day)) continue
     seen.add(day)
-    points.push(point(day, p.total))
+    points.push(point(day, p.total, p.new ?? 0))
   }
   const lanes = (today?.lanes ?? [])
     .map(lane => ({ line: laneTypeOf(lane), n: laneCount(lane) }))
     .filter(lane => lane.n > 0)
   return {
-    v: 1,
+    v: 2,
     made: now.getTime(),
+    hour: /^\d{2}:\d{2}$/.test(time ?? '') ? time : '',
     labels: { title: t.widgetTitle, clear: t.widgetClear, depart: t.depart },
     points,
     lanes,

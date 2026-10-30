@@ -100,10 +100,9 @@ const nav = {
   runOutCleared:     (n) => `${n} révisée${n > 1 ? 's' : ''}`,
   runOutWaiting:     (n) => `${n} ${n > 1 ? 'attendent' : 'attend'} la recharge`,
   runOutWaits:       'en attente',
-  // 補充 — ce que la recharge a versé, app fermée (plan 141)
-  claimTitle:        'Pendant ton absence',
-  claimButton:       'Récupérer',
-  claimBookLabel:    (n, cap) => `${n} crédit${n > 1 ? 's' : ''} sur ${cap}`,
+  // 補充 — ce que la recharge a versé, app fermée, dit pendant que la
+  // carte se charge (plans 141, 278), à un lecteur d'écran
+  refillLanded:      (n, to, cap) => `${n} crédit${n > 1 ? 's' : ''} arrivé${n > 1 ? 's' : ''} pendant ton absence · ${to} sur ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',
   laneNew:           n => `${n} nouv.`,
@@ -152,6 +151,10 @@ const nav = {
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Les modes : ${name}`,
   gateLineNone:      'Aucun service aujourd’hui',
+  // 主 (plan 273) : les modes d'une ligne, ajoutés à Aujourd'hui ou retirés.
+  gateLineAdd:       'Aussi dans Aujourd’hui',
+  gateModeAdd:       mode => `Ajouter « ${mode} » à Aujourd’hui`,
+  gateModeRemove:    mode => `Retirer « ${mode} » d’Aujourd’hui`,
   gateOpensAt:       at => `Ouvre à ${at}`,
   gateOpensIn:       when => `Ouvre ${when}`,
   todayDayLabel:     'Ta journée',
@@ -196,6 +199,7 @@ const nav = {
   ofrCardFareMax:     'Pratique · sans crédit',
   // ── 定期券 — la carte, face et dos (plan 173) ──
   cardFree:           'Gratuit',
+  cardPaid:           'Pass',
   cardFareFree:       'Pratique · verrouillée',
   cardTurn:           'Retourner la carte',
   cardLevelTo:        (a, b) => `Niveau ${a} → ${b}`,
@@ -466,6 +470,8 @@ const quiz = {
   typeRomaji:        'Tape le romaji…',
   tapToFlip:          'Touche pour retourner',
   tapToReveal:        'Touche pour révéler',
+  // Le recto d'une carte Kanji → sens dit ce qu'il demande (plan 276).
+  askKanjiMeaning:    'Quel est son sens ?',
   // L'indice du bureau (plan 113) : une touche, puis les mots qui suivent.
   keySpace:           'Espace',
   revealByKey:        'pour révéler',
@@ -567,19 +573,19 @@ const quiz = {
   // (plan 045's rebuilt bar) are `ratingJp` below -- the term itself,
   // identical in every language.
   to:                'à',
-  perfect:           'Parfait',
+  easy:              'Facile',
   correctHesit:      'Correct',
   difficult:         'Difficile',
   wrongSeen:         'Presque',
   wrongRated:        'Raté',
-  blackout:          'Trou noir',
+  forgot:            'Oublié',
   ratingJp: {
-    perfect:         '完璧',
+    easy:            '簡単',
     correctHesit:    '正解',
     difficult:       '難しい',
     wrongSeen:       '惜しい',
     wrongRated:      '不正解',
-    blackout:        '白紙',
+    forgot:          '忘れた',
   },
 
   // Mode labels
@@ -855,6 +861,9 @@ const stats = {
   soundMixer:         'Table de mixage',
   levelName:          { N5: 'Débutant', N4: 'Élémentaire', N3: 'Intermédiaire', N2: 'Avancé', N1: 'Confirmé' },
   settingsPaceCap:    'Nouveaux éléments par jour',
+  settingsPaceOwn:    'Sur mesure',
+  settingsPaceLess:   'Un de moins par jour',
+  settingsPaceMore:   'Un de plus par jour',
   settingsPaceCustom: n => `Ton rythme est réglé sur ${n} par jour.`,
   paceName:           { local: 'Omnibus', rapid: 'Rapide', express: 'Express' },
   levelUpTitle:       l => `Monter à ${l} ?`,
@@ -872,6 +881,18 @@ const stats = {
   levelUpGo:          l => `Monter à ${l}`,
   levelDownGo:        l => `Descendre à ${l}`,
   levelStay:          l => `Rester à ${l}`,
+  // 主 — le mode de chaque ligne (plan 273), Réglages › Modes
+  // principaux et sa feuille de confirmation.
+  settingsModes:      'Modes principaux',
+  settingsModesValue: 'Un par ligne',
+  settingsModesHint:  'Aujourd’hui t’apprend chaque ligne dans son mode principal. Ajoute d’autres modes à côté, ici ou depuis Aujourd’hui.',
+  settingsModesAlso:  'Aussi dans Aujourd’hui',
+  modeSwitchTitle:    mode => `Apprendre en « ${mode} » ?`,
+  modeSwitchBody:     (from, to, weeks) => `Garde ce que tu maîtrises en **${from}** : ces cartes sont marquées connues en **${to}**, avec un premier contrôle réparti sur les ${weeks} prochaines semaines. Ou repars de zéro : toutes les cartes sont nouvelles en **${to}**. Dans les deux cas, **rien n'est effacé.**`,
+  modeSwitchBodyNone: to => `Toutes les cartes sont nouvelles en **${to}**, et Aujourd’hui commence par celles que tu n’as pas encore vues. **Rien n'est effacé.**`,
+  modeSwitchGo:       mode => `Passer à « ${mode} »`,
+  modeSwitchKeep:     'Garder mes acquis',
+  modeSwitchFresh:    'Repartir de zéro',
   fitDown: (to, passed, answered) => `${to} · ${passed} contrôle${passed > 1 ? 's' : ''} réussi${passed > 1 ? 's' : ''} sur ${answered}`,
   fitUp: (level, known, met) => `${level} · ${known} mots sur ${met} déjà connus`,
   fitDownGo: to => `Embarquer à ${to}`,
@@ -1706,6 +1727,14 @@ const dictionary = {
   readingsKunName:   'Lecture japonaise',
   // Voir en/index.js : le 熟 d'un mot qui se lit d'un bloc.
   readingsWhole:     'Se lit d\'un bloc',
+  // Plan 276 : la fiche que les deux noms d'une carte kanji ouvrent
+  // (components/study/ReadingsHelp, domain/readingsHelp).
+  readingsHelpCap:   'Les deux lectures',
+  readingsHelpOn:    'Venue de Chine avec le kanji, elle s’écrit en katakana. C’est surtout celle des mots de plusieurs kanji.',
+  readingsHelpKun:   'Le mot japonais que le kanji est venu écrire, en hiragana. Souvent le kanji seul, ou suivi de kana.',
+  readingsHelpShare: (kanji) => `La part des mots du cours qui lisent ${kanji} ainsi : commence par les plus hautes.`,
+  readingsHelpTilde: (kanji, side, word) => `Une lecture que ${kanji} prend ${side === 'after' ? 'derrière' : 'devant'} un autre élément du mot${word ? ` : ${word.kanji}, ${word.kana}` : ''}.`,
+  readingsHelpDot:   (written) => `Après le point viennent des kana : ${written}.`,
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
@@ -1769,9 +1798,7 @@ const progress = {
 const misc = {
   mute:    'Couper le son',
   unmute:  'Activer le son',
-  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} lecture${n > 1 ? 's' : ''} de plus — la fiche du dictionnaire les donne toutes`,
-  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'mot',
   // Affiché par components/study/SessionError quand une session n'a
@@ -2103,9 +2130,9 @@ const decks = {
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
   browseBtn:              'Parcourir',
   browseTitle:            'Parcourir les cartes existantes',
-  browseTabKanji:         '漢字 Kanji',
-  browseTabVocab:         '語彙 Vocabulaire',
-  browseTabGrammar:       '文法 Grammaire',
+  browseTabKanji:         'Kanji',
+  browseTabVocab:         'Vocabulaire',
+  browseTabGrammar:       'Grammaire',
   browseAllLevels:        'Tous',
   browseSearchPlaceholder: 'Rechercher (kanji, kana, sens…)',
   browseResults:          'Résultats',
@@ -2489,8 +2516,10 @@ const boarding = {
   brdNotifText: 'Tes cartes t’attendent au portillon.',
   // ── 発車案内 — le rappel du jour tiré de la file, le widget et
   // Réglages › Notifications (plan 156). Le titre et le texte du rappel
-  // disent ce que le portillon tiendra à l’heure de l’apprenant.
-  nudgeTitle: (time, n) => `Ton train de ${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
+  // disent ce que le portillon tiendra à l’heure de l’apprenant ; le
+  // titre commence par l’heure, comme une ligne du tableau des départs
+  // (plan 293).
+  nudgeTitle: (time, n) => `${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'Environ une minute' : `Environ ${m} min`),
   nudgeNew: (n) => `${n} ${n > 1 ? 'nouvelles' : 'nouvelle'}`,
   // Le nom du canal des rappels dans les réglages d'Android (lib/native.js).
@@ -2618,7 +2647,7 @@ const boarding = {
   brdRowGoal: (stop, date) => (date ? `${stop} · arrivée le ${date}` : stop),
   brdRowRhythm: (name, min) => `${name} · ${min} min par jour`,
   brdGoalCap: (min) => `à ${min} min par jour`,
-  brdNameOptional: 'facultatif',
+  brdNameOptional: 'Facultatif',
   brdNamePlaceholder: 'Ton prénom',
   brdNameNote: 'Il s’imprime sur ta carte. En lettres latines, c’est aussi ton nom public dans le classement.',
   brdNameSave: 'Valider',
@@ -2637,6 +2666,14 @@ const boarding = {
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',
   brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
+  // Embarquer dans le navigateur d'une autre appli (lib/inAppBrowser.js) :
+  // une carte prise là y reste.
+  brdSheetOutside: 'Navigateur',
+  brdOutsideLede: (app) => `Une carte prise dans ${app} reste dans ${app} : ton navigateur ne la verra pas.`,
+  brdOutsideMenu: 'Sinon, le menu ⋯ en haut de l’écran ouvre cette page dans ton navigateur.',
+  brdOutsideSafari: 'Ouvrir dans Safari',
+  brdOutsideChrome: 'Ouvrir dans Chrome',
+  brdOutsideStay: (app) => `Rester dans ${app}`,
 }
 
 const ride = {
@@ -2659,8 +2696,8 @@ const ride = {
   rideGuessed: 'Tu as trouvé la nouvelle ? Si c’était au hasard, choisis « Raté » la prochaine fois. Sinon, elle ne reviendra pas avant plusieurs jours.',
   rideDoneBody: n => `C’est tout ! **${n} nouveaux mots par jour**, chacun de retour juste avant que tu l’oublies.`,
   rideContinue: 'Continuer',
-  // L'essai de lecture (plan 099) : la phrase, le champ, la mesure,
-  // puis la plaque qui dit quels quais sont sur l'abonnement.
+  // L'essai de lecture (plan 099) : la phrase, le champ, la mesure ;
+  // la note fait entrer en gare (sa plaque est partie, plan 292).
   rideReadFront: 'Lis vite, elle disparaît dans un instant !',
   rideReadFrontUntimed: 'Lis-la, puis écris-la en rōmaji ou en kana.',
   rideReadType: 'Écris ce que tu as lu, en rōmaji ou en kana.',
@@ -2669,9 +2706,6 @@ const ride = {
   // Plan 133. Sur un téléphone : la carte connue ne se note qu'une fois
   // sa fiche ouverte depuis la 🔍, puis refermée.
   rideKnownDict: 'Chaque carte a sa fiche de dictionnaire. Touche 🔍 pour ouvrir celle-ci, puis referme-la.',
-  ridePlateCap: 'L\'abonnement',
-  ridePlateBody: 'Ces exercices font partie de l’abonnement.',
-  ridePlateOpen: 'Pour l’instant, ils sont ouverts à tous.',
 }
 
 const guide = {
@@ -2687,8 +2721,9 @@ const guide = {
   guideHelpTour: gate => `Visite guidée : ${gate}`,
   guideTodayGate: 'Tes révisions du jour et le temps qu’elles prennent. Ajuster choisit les cartes et les lignes, puis embarque.',
   guideTabBar: 'Tes cinq onglets : Apprendre, Pratique, Aujourd’hui, Dictionnaire et ton profil.',
+  guideTodayDuels: 'Les duels : deux minutes contre un ami ou un voyageur de ton niveau. Un chiffre d’or dit qu’un défi t’attend.',
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
+  guideLearnStops: 'Ton arrêt sur la ligne, et ce que tu en sais déjà.',
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
   // Les plaques de Pratique (plan 254) : un quai, son pied (ton niveau,
@@ -2783,6 +2818,22 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}\u00a0% justes`,
   practiceNotYet: 'Pas encore',
+  // Le portique de Pratique au téléphone (plan 290) : les exercices en
+  // trois groupes, le dernier trajet à reprendre, et la feuille qu'une
+  // plaque lève, une page par exercice.
+  practiceGroups: { understand: 'Comprendre', express: 'S’exprimer', test: 'S’évaluer' },
+  practiceResume: 'Reprendre',
+  practiceSheet: 'Exercices',
+  practicePct: pct => `${pct}\u00a0%`,
+  practiceAllPapers: 'Toutes les épreuves',
+  practiceAllScenes: 'Toutes les scènes',
+  // Le portique d'Apprendre au téléphone (plan 291) : la feuille qu'une
+  // ligne lève, une page par ligne -- l'arrêt et le mode choisis avant
+  // d'embarquer -- et l'étagère des decks sous les lignes.
+  learnSheet: 'Lignes',
+  learnStop: 'Arrêt',
+  learnMode: 'Mode',
+  learnAllDecks: n => `Tous mes decks (${n})`,
   // ── La station de pratique, au bureau (plan 159) ─────────────
   // La source en interrupteur en tête de la liste (les grades JLPT, la
   // fréquence, tes cartes), puis la page de l'arrêt ouvert : ce que
@@ -3197,7 +3248,7 @@ const clrPrimitives = {
 // The piles' names and a pile's sheet (PileSheet): the À revoir row of
 // the finish opens the run's wrong pile there (plan 250).
 const clrDay = {
-  clrPiles: ['À revoir', 'Justes', 'Parfaites'],
+  clrPiles: ['À revoir', 'Justes', 'Faciles'],
   clrPileCount: n => `${n}\u00a0carte${n === 1 ? '' : 's'}`,
   clrPileEmpty: 'Aucune carte',
   clrPileOpen: term => `Ouvrir ${term} dans le dictionnaire`,
@@ -3427,6 +3478,189 @@ const transfer = {
 }
 // ── 243b:transfer end ──
 
+// ── 対戦 — les duels (plan 279) ─────────────────────────────────
+// Le sprint : deux minutes, les mêmes questions pour les deux.
+const pvp = {
+  pvpTitle:        'Duels',
+  pvpChallenges:   n => (n === 1 ? '1 défi à jouer' : `${n} défis à jouer`),
+  pvpFriendsN:     n => (n === 1 ? '1 ami' : `${n} amis`),
+  pvpRequestsN:    n => (n === 1 ? '1 demande' : `${n} demandes`),
+  pvpElo:          'Elo',
+  pvpRecordLong:   (w, d, l) => `${w} victoires · ${d} nuls · ${l} défaites`,
+  pvpRankOf:       (r, n) => `${r === 1 ? '1er' : `${r}ᵉ`} sur ${n}`,
+  pvpSprints:      'sprints',
+  pvpBeat:         s => `${s} à battre`,
+  pvpHoursLeft:    h => `reste ${h} h`,
+  pvpDefies:       who => `${who} te défie`,
+  pvpLiveDefies:   who => `${who} t’attend en direct`,
+  pvpPlay:         'Jouer',
+  pvpBeatUnit:     'à battre',
+  pvpDefy:         'Défier',
+  // 新しい (plan 287) : les duels annoncés une fois, sur Aujourd’hui, à
+  // qui l’a connu avant que leur clé n’y soit.
+  newsCap:         'Nouveau',
+  newsDuelsTitle:  'Les duels arrivent sur Aujourd’hui',
+  newsDuelsLead:   depart => `Deux minutes de questions contre un ami ou un voyageur de ton niveau, et la vitesse compte. La clé ⇄, à côté d’« ${depart} », ouvre les duels.`,
+  newsDuelsGo:     'Voir les duels',
+  newsDuelsLater:  'Plus tard',
+  pvpRanked:       'Sprint classé',
+  pvpRankedDesc:   'Un inconnu d’Elo proche, ou sa partie enregistrée.',
+  pvpFriendDuel:   'Défier un ami',
+  pvpFriendDesc:   'En différé ou en direct. Non classé.',
+  pvpCredits:      n => (n === 1 ? '1 crédit' : `${n} crédits`),
+  pvpFree:         'Gratuit',
+  // The pass pays for everything (the hall's and the ticket's price).
+  pvpIncluded:     'Inclus',
+  pvpTabToPlay:    'À jouer',
+  pvpTabRunning:   'En cours',
+  pvpTabDone:      'Terminés',
+  pvpFriendTag:    'ami',
+  pvpWin:          'Gagné',
+  pvpLoss:         'Perdu',
+  pvpDraw:         'Égalité',
+  pvpTraveller:    'Voyageur',
+  pvpFriendsTitle: 'Amis',
+  pvpSearchCap:    'Son pseudo, exactement',
+  pvpAsk:          'Demander en ami',
+  pvpAccept:       'Accepter',
+  pvpRefuse:       'Refuser',
+  pvpRequest:      'demande d’amitié',
+  pvpYourDuels:    (w, l) => `vos duels : ${w} V · ${l} D`,
+  pvpAddFriend:    'Ajouter un ami par son pseudo',
+  pvpWhom:         'Qui défier',
+  pvpHow:          'Comment',
+  pvpLater:        'En différé · 48 h',
+  pvpLive:         'En direct',
+  pvpLaterHelp:    who => `Même suite pour vous deux ; ${who} a 48 h pour la courir.`,
+  pvpLiveHelp:     who => `Vous partez ensemble, trois secondes après l’arrivée de ${who}.`,
+  pvpChallenge:    who => `Défier ${who}`,
+  pvpInvite:       who => `Inviter ${who}`,
+  pvpSprintOf:     ms => (ms >= 120_000 && ms % 60_000 === 0 ? `Sprint · ${ms / 60_000} minutes` : `Sprint · ${ms / 1000} secondes`),
+  pvpDuelLevel:    'Niveau du duel',
+  pvpQuestions:    'Questions',
+  pvpWordsKanji:   'mots et kanji',
+  pvpWordsKana:    'mots et kana',
+  pvpWordsKanaKanji: 'mots, kana et kanji',
+  pvpEloOf:        n => `Elo ${n}`,
+  pvpEloRange:     (a, b) => `Elo ${a} – ${b}`,
+  pvpChoicesN:     n => `${n} réponses`,
+  pvpLength:       'Durée',
+  pvpMinutes:      n => `${n} min`,
+  pvpStake:        'Enjeu',
+  pvpStakeElo:     n => `± ${n} Elo`,
+  pvpNovice:       'Débutant',
+  pvpPrice:        'Prix',
+  pvpFreeFriends:  'gratuit entre amis',
+  pvpGo:           'Partir',
+  pvpRankedFoot:   'Si personne de ton Elo n’est libre, tu cours contre la partie enregistrée d’un vrai joueur, son pseudo affiché.',
+  pvpGoPaid:       n => `Partir · ${n} crédits`,
+  pvpYou:          'Toi',
+  pvpKind:         { word: 'Mot', reading: 'Lecture', writing: 'Écriture', kana: 'Kana' },
+  pvpQuit:         'Quitter le sprint',
+  pvpReady:        'À vos marques',
+  pvpOver:         'Fini',
+  // The race as a game (plan 285, the owner's C1) and its result (E4).
+  pvpGoBand:       'Partez !',
+  pvpArrival:      'Arrivée !',
+  pvpRush:         'Rush',
+  pvpCombo:        'Combo',
+  pvpComboLost:    n => `${n} perdu`,
+  pvpPassMe:       'Devant !',
+  pvpPassThem:     who => `${who} devant`,
+  pvpNote:         { flash: 'Éclair', quick: 'Rapide' },
+  pvpLines:        { speed: 'Vitesse', combo: 'Combo', rush: 'Rush', accuracy: 'Justesse', flashes: 'Éclairs' },
+  pvpInARow:       (a, b) => `${a} / ${b} d’affilée`,
+  pvpVerdict:      { win: 'Victoire !', loss: 'Défaite', draw: 'Égalité' },
+  pvpAhead:        n => `${n.toLocaleString('fr')} point${n === 1 ? '' : 's'} d’avance`,
+  pvpBehind:       n => `à ${n.toLocaleString('fr')} point${n === 1 ? '' : 's'}`,
+  pvpGrade:        g => `Note ${g}`,
+  pvpBy:           n => `de ${n} point${n === 1 ? '' : 's'}`,
+  pvpWaitingFor:   who => `En attente de ${who}`,
+  pvpRightsOf:     (r, n) => `${r} justes sur ${n}`,
+  pvpCorrections:  'Détail et corrections',
+  pvpNewSprint:    'Nouveau sprint',
+  pvpRematch:      'Revanche',
+  pvpXpLeft:       n => `${n} encore aujourd’hui`,
+  pvpEloBoard:     'Classement Elo',
+  pvpAll:          n => `Tous · ${n}`,
+  pvpFriendsOnly:  n => `Amis · ${n}`,
+  pvpGapTo:        (n, r) => `${n} points d’Elo de la ${r === 1 ? '1re' : `${r}ᵉ`} place`,
+  pvpBilan:        'bilan',
+  pvpOrdinal:      r => (r === 1 ? '1er' : `${r}ᵉ`),
+  pvpOutOf:        n => `sur ${n}`,
+  pvpDuelWith:     who => `Duel · ${who}`,
+  pvpToBeat:       'À battre',
+  pvpNoneToPlay:   'Aucun défi à jouer.',
+  pvpNoneRunning:  'Rien en cours.',
+  pvpNoneDone:     'Aucun duel terminé.',
+  pvpLiveWaits:    'En direct · t’attend',
+  pvpLiveNow:      'En direct',
+  pvpRunning:      'Ton sprint est en cours',
+  pvpResume:       'Reprendre',
+  pvpNobodyYet:    'en attente d’un adversaire',
+  pvpClosedRow:    'fermé',
+  pvpEnter:        'Entrer',
+  pvpOpen:         'Ouvrir',
+  pvpEloFrom:      level => `Il part de ton niveau ${level}, puis bouge à chaque sprint classé.`,
+  pvpNotRanked:    'pas encore classé',
+  pvpProvisional:  'Provisoire : moins de 15 duels classés',
+  pvpCurveLabel:   n => `Ton Elo sur les ${n} derniers duels classés`,
+  pvpStartAt:      n => `départ ${n}`,
+  pvpPeak:         n => `pic ${n}`,
+  pvpRacedLater:   who => `${who} courra contre ton enregistrement.`,
+  pvpVerdictLater: who => `Le verdict tombe quand ${who} aura couru.`,
+  pvpShut:         { expired: 'Expiré', declined: 'Refusé', cancelled: 'Annulé' },
+  pvpRefunded:     'Personne n’est venu : tes crédits sont rendus.',
+  pvpNoVerdict:    'Pas de verdict pour ce duel.',
+  pvpNoVerdictRefunded: 'Pas de verdict pour ce duel : tes crédits sont rendus.',
+  pvpDecline:      'Refuser le défi',
+  pvpCancel:       'Annuler le défi',
+  pvpNotMet:       'pas vue',
+  pvpRightShort:   'juste',
+  pvpWrongShort:   'faux',
+  pvpBetweenYou:   'entre vous',
+  pvpCardStranger: 'Avant d’être amis, on ne voit que le pseudo.',
+  pvpReport:       'Signaler',
+  pvpReasons:      { name: 'Pseudo inapproprié', cheat: 'Triche', spam: 'Demandes ou défis répétés', other: 'Autre chose' },
+  pvpReportSend:   'Envoyer le signalement',
+  pvpReported:     'Signalement envoyé. Une personne le lira.',
+  pvpRemoved:      'Vous n’êtes plus amis.',
+  pvpBlocked:      'Bloqué : vous ne vous trouverez plus.',
+  pvpRemoveFriend: 'Retirer des amis',
+  pvpBlock:        'Bloquer',
+  pvpFind:         'Chercher',
+  pvpRelation:     { me: 'C’est toi', friend: 'Ami', sent: 'Demandé', received: 'T’a demandé', none: '' },
+  pvpChallengeShort: 'Défier',
+  pvpSentN:        n => (n === 1 ? '1 demande envoyée' : `${n} demandes envoyées`),
+  pvpWithdraw:     'Retirer',
+  pvpBlockedN:     n => (n === 1 ? '1 bloqué' : `${n} bloqués`),
+  pvpUnblock:      'Débloquer',
+  pvpNoFriends:    'Pas encore d’ami : cherche un pseudo exact.',
+  // The server's refusals, by their code (domain/duel.js, errorKey).
+  pvpErrNotFound:     'Personne ne porte ce pseudo.',
+  pvpErrSelf:         'C’est ton propre pseudo.',
+  pvpErrNotFriends:   'Vous n’êtes pas amis.',
+  pvpErrCooldown:     'Tu pourras redemander plus tard.',
+  pvpErrFriendLimit:  'Le carnet est plein : 200 amis au plus.',
+  pvpErrPendingLimit: 'Trop de demandes attendent déjà une réponse.',
+  pvpErrRequestLimit: 'Assez de demandes pour aujourd’hui.',
+  pvpErrSearchLimit:  'Trop de recherches d’affilée. Réessaie dans quelques minutes.',
+  pvpErrNoRequest:    'Cette demande n’attend plus.',
+  pvpErrNotBlocked:   'Ce pseudo n’est pas bloqué.',
+  pvpErrTooMany:      'Trop de duels en cours. Termine-en un d’abord.',
+  pvpErrClosed:       'Ce duel est fermé.',
+  pvpErrDuelGone:     'Ce duel n’existe plus.',
+  pvpErrRunning:      'Ton ami court ce duel en ce moment : tu pourras refuser une fois son sprint fini.',
+  pvpErrPlayed:       'Tu as déjà couru ce duel.',
+  pvpErrWaiting:      'Ton ami n’est pas encore entré.',
+  pvpErrNotStarted:   'Le sprint n’a pas commencé.',
+  pvpErrTooEarly:     'Un instant : la question arrive.',
+  pvpErrNotSettled:   'Les corrections s’ouvrent quand le duel est tranché.',
+  pvpErrUnpaid:       'Les corrections coûtent 1 crédit.',
+  pvpErrCredits:      'Plus assez de crédits.',
+  pvpErrFailed:       'Ça n’a pas marché. Réessaie.',
+}
+
 export default welded({
   ...auth,
   ...landing,
@@ -3462,4 +3696,5 @@ export default welded({
   ...clrTickets,
   ...reviewPlan,
   ...transfer,
+  ...pvp,
 })

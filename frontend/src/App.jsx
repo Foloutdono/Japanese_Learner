@@ -5,7 +5,7 @@ import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, ReleaseNote, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
-import { ClaimSheet } from './components/credits/ClaimSheet'
+import { RefillMoment } from './components/credits/RefillMoment'
 import { OfferScreen } from './components/offers/OfferScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
@@ -28,6 +28,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { forgetParkedGuest, isGuest, parkGuest, startGuest } from './lib/guest'
+import { inAppBrowser } from './lib/inAppBrowser'
 import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
@@ -44,6 +45,7 @@ import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
 import Welcome from './components/boarding/Welcome'
+import { OutsideSheet } from './components/boarding/OutsideSheet'
 import BoardingFlow from './screens/BoardingFlow'
 import RideRun from './screens/RideRun'
 import RideReading from './screens/RideReading'
@@ -54,6 +56,11 @@ import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
 import TicketsScreen from './screens/TicketsScreen'
 import BanzukeScreen from './screens/BanzukeScreen'
+import DuelsScreen from './screens/DuelsScreen'
+import DuelFriendsScreen from './screens/DuelFriendsScreen'
+import DuelBoardScreen from './screens/DuelBoardScreen'
+import DuelRun from './screens/DuelRun'
+import DuelDeparture from './screens/DuelDeparture'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -313,6 +320,17 @@ export default function App({ front = NO_FRONT }) {
   // flag is only the button's own "working on it" — the session
   // arrives through the auth listener like any other.
   const [boarding, setBoarding] = useState(false)
+  // 外 (lib/inAppBrowser.js): the app whose browser this page is open
+  // in, or null. There, Board first offers the phone's own browser
+  // (`askOutside`), since a pass minted here stays here -- and Board
+  // pressed on the landing page waits for that answer too, on the
+  // Welcome, rather than minting at once.
+  const [inApp] = useState(() => inAppBrowser())
+  const [askOutside, setAskOutside] = useState(() => front.entry === 'board' && inApp != null)
+  // Asked once a load: a learner who chose to stay is not asked again by
+  // the next Board (backing out of the first question, say).
+  const stayedInApp = useRef(false)
+  const boardsAtOnce = front.entry === 'board' && inApp == null
   // 机 (plans 155, 163): the learner who pressed Board on this load is
   // on the way into the boarding, so the wait before its first question
   // stays on the paper the Welcome and the boarding both stand on
@@ -322,14 +340,14 @@ export default function App({ front = NO_FRONT }) {
   // When Board was pressed (a performance.now() reading), or null: the
   // wait's dots are drawn a beat after the press, whichever screen is up.
   // Board pressed on the landing page counts from this load.
-  const [boardedHere, setBoardedHere] = useState(() => (front.entry === 'board' ? performance.now() : null))
+  const [boardedHere, setBoardedHere] = useState(() => (boardsAtOnce ? performance.now() : null))
   // 正面口 (lib/frontEntry.js): Board pressed on the landing page is
   // honoured before any screen is drawn -- the pass is minted at once and
   // the boarding opens on its first question, with no Welcome asking a
   // second time.
   // On until a session arrives, or until the pass could not be minted (the
   // Welcome then opens on the sign-up, as its own Board does).
-  const [pageBoard, setPageBoard] = useState(front.entry === 'board')
+  const [pageBoard, setPageBoard] = useState(boardsAtOnce)
   const pageBoarded = useRef(false)
   useEffect(() => {
     if (session !== null || !pageBoard || pageBoarded.current) return
@@ -369,7 +387,13 @@ export default function App({ front = NO_FRONT }) {
   // auth listener, which may land after this resolves -- turning the
   // flag off first put the Welcome back for a frame. Signing out is
   // what turns it off again (the listener below).
-  async function board() {
+  function board() {
+    if (boarding) return
+    if (inApp && !stayedInApp.current) { setAskOutside(true); return }
+    boardNow()
+  }
+
+  async function boardNow() {
     if (boarding) return
     const pressedAt = performance.now()
     setBoarding(true)
@@ -422,11 +446,24 @@ export default function App({ front = NO_FRONT }) {
   // asks once more, while AppLoading keeps drawing the wait.
   const [gateAttempt, setGateAttempt] = useState(0)
 
+  // The gate asks once per USER, not once per session object. A guest
+  // who keeps the card at the boarding's gate (lib/guest.js
+  // claimAccount) gets a new session from USER_UPDATED a second before
+  // the boarding is signed: asked again then, the profile left before
+  // onboarded_at was stamped, landed after the boarding closed, and put
+  // the learner back at its first question (3 of the 7 guests who kept
+  // a card there by 2026-10-25). A token refresh asked again too, and
+  // counted a second app_open. The request reads its session from here.
+  const gateUser = session?.user?.id ?? null
+  const gateSession = useRef(session)
+  useEffect(() => { gateSession.current = session }, [session])
+
   useEffect(() => {
+    const session = gateSession.current
     if (!session) return
     let cancelled = false
     let retry = null
-    const userId = session.user?.id ?? null
+    const userId = gateUser
     // 45 s, not the 10 s default: the backend sleeps on Render's free
     // tier and a cold start takes 30–60 s. On a phone, where every visit
     // is short and the first request of the day is exactly this one, an
@@ -503,7 +540,7 @@ export default function App({ front = NO_FRONT }) {
         retry = setTimeout(() => setGateAttempt(a => a + 1), GATE_RETRY_MS)
       })
     return () => { cancelled = true; clearTimeout(retry) }
-  }, [session, gateAttempt])
+  }, [gateUser, gateAttempt])
 
   const onboarding = gate && gate.userId === (session?.user?.id ?? null) ? gate.state : undefined
   const onboardingProfile = gate?.profile ?? null
@@ -625,6 +662,12 @@ export default function App({ front = NO_FRONT }) {
     return (
       <LangProvider>
         <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={closeSignIn} authMode={authMode} />
+        <OutsideSheet
+          open={askOutside}
+          app={inApp}
+          onClose={() => setAskOutside(false)}
+          onStay={() => { stayedInApp.current = true; setAskOutside(false); boardNow() }}
+        />
       </LangProvider>
     )
   }
@@ -741,7 +784,7 @@ export default function App({ front = NO_FRONT }) {
                 decides). */}
             <Route path="/learn/decks/:deck_id" element={<DecksScreen session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
-            <Route path="/practice"             element={<PracticeScreen />} />
+            <Route path="/practice"             element={<PracticeScreen session={session} />} />
             {/* No /:sectionId segment: every generated paper has exactly
                 one section (see each backend/study/exam_*_gen.py), so it
                 was a parameter with one legal value and a picker screen
@@ -771,6 +814,9 @@ export default function App({ front = NO_FRONT }) {
             {/* 記念切符 — the tickets a streak has earned (plan 191). */}
             <Route path="/profile/tickets"      element={<TicketsScreen session={session} />} />
             <Route path="/profile/banzuke"      element={<BanzukeScreen session={session} />} />
+            <Route path="/profile/duels"        element={<DuelsScreen session={session} />} />
+            <Route path="/profile/duels/friends" element={<DuelFriendsScreen session={session} />} />
+            <Route path="/profile/duels/board"  element={<DuelBoardScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
             {/* The settings pages (plan 074): display, sound, learning,
                 destination, data, account — each its own page under
@@ -785,6 +831,8 @@ export default function App({ front = NO_FRONT }) {
               under the shell above. */}
           <Route element={<StageFrame />}>
             <Route path="/today/run"                          element={<TodayRun session={session} />} />
+            <Route path="/duel/new"                           element={<DuelDeparture session={session} />} />
+            <Route path="/duel/:id"                           element={<DuelRun session={session} />} />
             <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
             <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />
             {/* The literal `level/` segment keeps the four-segment band
@@ -878,11 +926,11 @@ export default function App({ front = NO_FRONT }) {
             run's own retry unmounts the failure that raised it. */}
         <FeedbackHost session={session} />
         <OfferScreen />
-        {/* 補充 — what the refill landed while the app was closed, on
-            arrival (plan 141). Held through the 改札 cutscene and the
-            first ride, which have the learner's whole attention, and
-            opened once either lets go. */}
-        <ClaimSheet hold={onboarding === 'finishing'} />
+        {/* 補充 — what the refill landed while the app was closed,
+            charged onto the card on arrival (plans 141, 278). Held
+            through the 改札 cutscene and the first ride, which have the
+            learner's whole attention, and played once either lets go. */}
+        <RefillMoment hold={onboarding === 'finishing'} />
         {/* 運行状況 — the status sheet off the HUD's station panel
             (plan 074): the pass's back, the ghost train and the two
             honest moves. */}

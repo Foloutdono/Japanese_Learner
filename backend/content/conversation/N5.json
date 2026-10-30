@@ -1056,7 +1056,7 @@
       "fr": "Trouve le quai, l'heure du prochain train et la durée du trajet jusqu'à Shibuya."
     },
     "steps": [
-      {"en": "Find the platform", "fr": "Trouve le quai"},
+      {"en": "Say where you want to go", "fr": "Dis où tu veux aller"},
       {"en": "Ask when the next train leaves", "fr": "Demande l'heure du prochain train"},
       {"en": "Ask how long the ride takes", "fr": "Demande la durée du trajet"}
     ],
@@ -1766,10 +1766,10 @@
     "turns": [
       {
         "them": {
-          "jp": "いらっしゃいませ。ティーシャツを探していますか。",
-          "kana": "いらっしゃいませ。ティーシャツをさがしていますか。",
-          "en": "Welcome. Are you looking for a T-shirt?",
-          "fr": "Bienvenue. Vous cherchez un tee-shirt ?"
+          "jp": "いらっしゃいませ。ティーシャツですか。",
+          "kana": "いらっしゃいませ。ティーシャツですか。",
+          "en": "Welcome. Looking for a T-shirt?",
+          "fr": "Bienvenue. C'est pour un tee-shirt ?"
         },
         "me": {
           "jp": "はい、そうです。",

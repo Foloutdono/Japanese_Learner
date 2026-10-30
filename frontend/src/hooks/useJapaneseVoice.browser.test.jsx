@@ -81,7 +81,7 @@ describe('useJapaneseVoice', () => {
     const fake = installFake([])
     const screen = await render(<Probe />)
     expect(fake.listenerCount()).toBe(1)
-    screen.unmount()
+    await screen.unmount()
     expect(fake.listenerCount()).toBe(0)
   })
 })

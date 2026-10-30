@@ -143,11 +143,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 定期券 — the offer ───────────────────────────────────────
     # No longer dormant: the pass is SHOWN from five doors and sold from
     # none (frontend/src/domain/paywall.js's HAS_PAYWALL, which is
-    # deliberately not HAS_STORE). `where` is which of the five doors
-    # (frontend/src/domain/paywall.js's SOURCES -- the reading ride's
-    # pass plate among them since plan 097; the profile, a door until
-    # plan 143, reaches the offer through the balance sheet now, and
-    # older rows still say `profile`).
+    # deliberately not HAS_STORE). `where` is which of the doors
+    # (frontend/src/domain/paywall.js's SOURCES; the reading ride's pass
+    # plate was one from plan 097 until plan 292, and its rows say
+    # `ride`; the profile, a door until plan 143, reaches the offer
+    # through the balance sheet now, and older rows still say `profile`).
     #
     # The three verbs are the whole point: a paywall nobody opens and a
     # paywall opened and refused are indistinguishable from
@@ -157,8 +157,8 @@ EVENTS: dict[str, frozenset[str]] = {
     # one-second median is a mis-tap, not demand.
     #
     # The offer is three screens since plan 172, each with its one pick:
-    # Pro yearly's 7-day trial (the boarding, the balance, the ride, the
-    # settings), Pro yearly against the week the credits stopped (a run
+    # Pro yearly's 7-day trial (the boarding, the balance, the settings;
+    # the ride until plan 292), Pro yearly against the week the credits stopped (a run
     # at zero, `where` 'runout'), and the step up to Max ('limit', a Pro
     # learner at one of the plan's ceilings; 'upgrade', from Settings).
     # `plan` and `billing` are the app's own two enums, the pick the
@@ -305,6 +305,23 @@ EVENTS: dict[str, frozenset[str]] = {
     # response body is ever carried.
     "api_error":      frozenset({"path", "status"}),
     "install_prompt": frozenset({"outcome"}),
+
+    # ── 対戦 — the duels (plan 279) ──────────────────────────────
+    # Written server-side by routes/pvp.py. Never a username, never who
+    # played whom: what was done, at which level, and how it ended.
+    # `against` is how the opponent was found (a friend; a ranked run
+    # someone left waiting, `seek`; a recorded run, `ghost`; or none
+    # yet, `open`), `wait_h` the hours an asynchronous duel waited.
+    # `pvp_placed` is the level a learner's Elo started from, written
+    # at their first ranked sprint, no test asked (plan 282); `novice`
+    # is the beginner's stop under N5 (plan 289), a duel's level too.
+    "pvp_friend":     frozenset({"action"}),
+    "pvp_report":     frozenset({"reason"}),
+    "pvp_duel_start": frozenset({"kind", "mode", "level", "against"}),
+    "pvp_duel_done":  frozenset({"kind", "mode", "level", "outcome", "rights", "wait_h"}),
+    "pvp_review":     frozenset({"kind"}),
+    "pvp_placed":     frozenset({"level"}),
+    "pvp_smurf":      frozenset({"games"}),
 }
 
 # 選択肢 — the values a string property may take, where it is an enum
@@ -348,10 +365,16 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # taken, or the level kept. conversation: the 会話 station's
         # search started (plan 246). comeback: Today's notice that the
         # reviews piled up (plan 254) -- its paces opened, or the notice
-        # hidden for the day.
+        # hidden for the day. readings: the sheet a kanji card's
+        # reading names open, on'yomi and kun'yomi said (plan 276).
+        # duels_key: the duels' key beside Today's gate opened, and
+        # duels_board their row on a day done's board (plan 287);
+        # duels_news: the sheet announcing them, the hall opened from it
+        # or the sheet put away.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
                               "dictionary", "export", "level_fit", "conversation",
-                              "comeback"}),
+                              "comeback", "readings", "duels_key", "duels_board",
+                              "duels_news"}),
         "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
                               "open", "search", "progress", "move", "stay", "hide"}),
     },
@@ -359,7 +382,8 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "transfer_offer":  {"choice": frozenset({"go", "later"})},
     "setting_change": {
         "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",
-                              "notifications", "level", "lines", "daily_target"}),
+                              "notifications", "level", "lines", "daily_target",
+                              "main_mode", "today_mode"}),
         "value":   frozenset({"light", "dark", "auto", "fr", "en",
                               "binary", "simple", "full",
                               "standard", "relaxed", "slow", "untimed",
@@ -367,6 +391,26 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
                                          "deep_analysis", "exam_paper", "line_translation"})},
+    # What a refused fare was for (core/credits.FARES): a review, or
+    # since plan 279 a ranked duel's departure or a duel's corrections.
+    "fare_blocked": {"kind": frozenset({"review", "duel", "duel_review"})},
+    "pvp_friend": {"action": frozenset({"request", "accept", "refuse", "withdraw", "remove",
+                                        "block", "unblock"})},
+    "pvp_report": {"reason": frozenset({"name", "cheat", "spam", "other"})},
+    "pvp_duel_start": {
+        "kind":    frozenset({"friend", "ranked"}),
+        "mode":    frozenset({"async", "live"}),
+        "level":   frozenset({"novice", "N5", "N4", "N3", "N2", "N1"}),
+        "against": frozenset({"friend", "seek", "ghost", "open"}),
+    },
+    "pvp_duel_done": {
+        "kind":    frozenset({"friend", "ranked"}),
+        "mode":    frozenset({"async", "live"}),
+        "level":   frozenset({"novice", "N5", "N4", "N3", "N2", "N1"}),
+        "outcome": frozenset({"win", "loss", "draw", "expired", "declined"}),
+    },
+    "pvp_review": {"kind": frozenset({"friend", "ranked"})},
+    "pvp_placed": {"level": frozenset({"novice", "N5", "N4", "N3", "N2", "N1"})},
     "client_error": {
         "where": frozenset({"error", "rejection"}),
         # The boarding's and the rides' steps, frontend/src/domain/
@@ -428,7 +472,12 @@ SID_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 # a number, and 64 is comfortably past the longest route pattern the app
 # has while being far short of anything a learner could have typed.
 MAX_STR = 64
-MAX_PROPS = 12
+# A second bound behind the allowlist: no event keeps more keys than the
+# largest set EVENTS allows. Derived, never a literal -- a 12 sat here
+# while boarding_done allowed 15, and as clean() keeps keys in the order
+# they were sent, a learner who took the placement test lost `named` and
+# `kept`, the last two, without a word.
+MAX_PROPS = max(len(keys) for keys in EVENTS.values())
 # A batch bound, so one client cannot post a megabyte. The frontend
 # flushes at 20 (lib/track.js); 50 leaves room for a backlog that built
 # up offline without letting it arrive all at once.

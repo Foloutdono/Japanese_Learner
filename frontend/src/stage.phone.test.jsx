@@ -79,12 +79,12 @@ describe('the stage at phone width', () => {
             <div className="rating-bar">
               <div className="rating-bar__buttons rating-bar__buttons--4">
                 <div className="rating-bar__misses">
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Wrong</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Missed</span></button>
                   <button type="button" className="rating-bar__btn rating-bar__btn--q2"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Almost</span></button>
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q3"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Difficult</span></button>
                 </div>
                 <div className="rating-bar__keys">
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q4 rating-bar__btn--key rating-bar__btn--best"><span className="rating-bar__btn-label">Correct</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q4 rating-bar__btn--key"><span className="rating-bar__btn-label">Correct</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q5 rating-bar__btn--key rating-bar__btn--best"><span className="rating-bar__btn-label">Easy</span></button>
                 </div>
               </div>
             </div>
@@ -106,8 +106,8 @@ describe('the stage at phone width', () => {
       expect(getComputedStyle(bar).bottom).toBe('36px')
       // 券売機 (plan 203): every verdict a key of one make, a gap apart
       // -- the misses no longer one instrument (plan 180's) -- each on
-      // its own sumi with a corner and a foot, and Correct the same key
-      // wider than a miss, moulded in its verdict's ink with the sumi
+      // its own sumi with a corner and a foot, and Easy (Correct's twin
+      // on the four, plain) the same key wider than a miss, moulded in its verdict's ink with the sumi
       // type on it. Not gold: gold is the action's metal (plan 174).
       expect(getComputedStyle(screen.container.querySelector('.rating-bar__buttons')).columnGap).toBe('8px')
       const misses = getComputedStyle(screen.container.querySelector('.rating-bar__misses'))
@@ -123,7 +123,7 @@ describe('the stage at phone width', () => {
       expect(getComputedStyle(key).backgroundImage).not.toContain('201, 154, 62')
       expect(getComputedStyle(key).color).toBe('rgb(28, 24, 17)')
       expect(getComputedStyle(key).borderTopLeftRadius).toBe('8px')
-      expect(key.getBoundingClientRect().width).toBeGreaterThan(plain.getBoundingClientRect().width * 1.3)
+      expect(key.getBoundingClientRect().width).toBeGreaterThan(plain.getBoundingClientRect().width * 1.15)
       expect(Math.round(key.getBoundingClientRect().height)).toBe(Math.round(plain.getBoundingClientRect().height))
       const lamp = getComputedStyle(plain.querySelector('.rating-bar__btn-lamp'))
       expect(lamp.width).toBe('8px')

@@ -10,17 +10,19 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 from psycopg2 import errors as pg_errors
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from core.db import db_conn
 from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits, events, review_plan
+from core import credits, events, learner_modes, review_plan
 from core.lines import clean_lines
+from content.kana_data import KANA_SETS
 from srs.xp import level_progress, next_milestone
-from study import banzuke, level_fit, level_rule
+from study import banzuke, level_fit, level_rule, main_modes
+from study import modes as study_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
 
@@ -173,6 +175,18 @@ def _init_db() -> None:
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
+                # 新しい (plan 287): when the learner was told the duels'
+                # key stands beside Today's gate -- the sheet that says
+                # so put away, or Today's guide ended with the key's stop
+                # in it. NULL is not told yet; routes/onboarding.py
+                # writes it, duels_news_open below reads it.
+                ("duels_news_at", "TIMESTAMPTZ"),
+                # 主 — the mode each line is ridden in, {line: mode},
+                # and the modes added to Today beside it, {line: [mode]}
+                # (plan 273, study/main_modes.py). NULL is never chosen:
+                # every line in its default, nothing added.
+                ("main_modes", "JSONB"),
+                ("extra_modes", "JSONB"),
                 # 署名 — the first name the card prints (plan 247), in
                 # any script: not the username, which stays the public
                 # handle. NULL = never asked (an account boarded before
@@ -192,6 +206,13 @@ def _init_db() -> None:
                 # but the learner's own choice writes it. See
                 # frontend/src/lib/langChoice.js.
                 ("ui_lang", "TEXT"),
+                # 前回 — the last ride a Learn station boarded (plan
+                # 291): {"path": "/learn/vocab/N4/vocab.flashcard.f2b",
+                # "at": ISO}, a line's stop in one of its graded modes.
+                # The phone's Learn gate offers it again in one tap.
+                # NULL = none yet. POST /api/profile/ride writes it,
+                # GET /api/profile reads it (clean_ride both ways).
+                ("learn_ride", "JSONB"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -449,6 +470,24 @@ def _profile_row(user_id: str) -> tuple:
     return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False, None)
 
 
+def duels_news_open(user_id: str, guided) -> bool:
+    """Whether Today tells this learner, once, that the duels' key now
+    stands beside its gate (plan 287): GET /api/profile's `duelsNews`.
+    Only a learner who met Today before it did -- whose Today guide
+    ended, without the key's stop, since that guide's end now stamps the
+    news too (routes/onboarding.mark_guided) -- and only until told."""
+    if "today" not in (guided or {}):
+        return False
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT duels_news_at FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    return row is not None and row[0] is None
+
+
 def _ui_lang(user_id: str) -> str | None:
     """The interface language the learner chose, or None if never. Read
     apart from _profile_row, whose tuple half the server unpacks."""
@@ -461,6 +500,52 @@ def _ui_lang(user_id: str) -> str | None:
         conn.close()
     value = (row["ui_lang"] if isinstance(row, dict) else row[0]) if row else None
     return value if value in UI_LANGS else None
+
+
+# ── 前回 — the last ride (plan 291) ──
+# The phone's Learn gate offers the last run a station boarded again,
+# in one tap. A path the client sends is kept only if it is one: a
+# line's stop (a JLPT level, or a kana set) and one of that line's
+# graded modes, so the row always names a stop of a line, as a plate
+# does. The browse (fast review) is no ride, and a tier, a theme or a
+# radical is not a stop of the line: the row keeps the last one that is.
+RIDE_STOPS = {
+    "kana": tuple(KANA_SETS),
+    "vocab": LEVELS,
+    "kanji": LEVELS,
+    "grammar": LEVELS,
+}
+_RIDE = re.compile(r"/learn/([a-z]+)/([A-Za-z0-9_]+)/([a-z0-9_.]+)")
+
+
+def clean_ride(path: str | None) -> str | None:
+    """`path` if it names a line's stop in one of its graded modes,
+    else None."""
+    match = _RIDE.fullmatch(path or "")
+    if not match:
+        return None
+    line, stop, mode = match.groups()
+    if stop not in RIDE_STOPS.get(line, ()):
+        return None
+    if mode not in study_modes.GRADED_FOR_SOURCE.get(line, ()):
+        return None
+    return path
+
+
+def _learn_ride(user_id: str) -> dict | None:
+    """The last ride, or None: never one, or one whose stop or mode the
+    app no longer offers (read through clean_ride again)."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT learn_ride FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    ride = (row["learn_ride"] if isinstance(row, dict) else row[0]) if row else None
+    if not isinstance(ride, dict) or clean_ride(ride.get("path")) is None:
+        return None
+    return {"path": ride["path"], "at": ride.get("at")}
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -560,6 +645,26 @@ class LearningPayload(BaseModel):
     # › Affichage; sent on a change and again at boot when the account
     # has not heard it.
     uiLang: str | None = None
+    # 主 (plan 273): the mode a line is ridden in, {line: mode}, from
+    # Réglages › Modes principaux, and the modes added to Today beside
+    # it, {line: [mode]}, from Today's services. Each line sent replaces
+    # that line alone; the lines not sent keep theirs.
+    mainModes: dict[str, str] | None = None
+    extraModes: dict[str, list[str]] | None = None
+    # With a main mode changed: False starts the new mode from zero
+    # rather than marking what the old one mastered known in it.
+    # Unsent is True, the carry the confirm sheet leads with.
+    carryKnown: bool | None = None
+
+    @field_validator("mainModes")
+    @classmethod
+    def valid_main_modes(cls, v):
+        return main_modes.clean_main(v)
+
+    @field_validator("extraModes")
+    @classmethod
+    def valid_extra_modes(cls, v):
+        return main_modes.clean_extra(v)
 
     @field_validator("uiLang")
     @classmethod
@@ -633,7 +738,7 @@ def level_rule_preview(user_id: str, current: str | None, target: str) -> dict:
         return {"direction": "same"}
     if direction == "up":
         marked = 0
-        for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target), learner_modes.read(user_id)):
             full = prefixed(ids, user_id)
             marked += len(full) - srs.count_rows(full, mode)
         return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
@@ -647,7 +752,7 @@ def _level_down(user_id: str, current: str, target: str, dry_run: bool) -> dict:
     card in its line's primary mode, the unit seed_known wrote them in."""
     returned = sum(
         srs.forget_assumed(prefixed(ids, user_id), mode, dry_run=dry_run)
-        for _source, mode, ids in level_rule.known_batches(level_rule.stops_from(target))
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_from(target), learner_modes.read(user_id))
     )
     set_aside = sum(
         srs.count_cards_with_history(prefixed(ids, user_id))
@@ -670,7 +775,7 @@ def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
     if direction == "down":
         return _level_down(user_id, current, target, dry_run=False)
     marked = 0
-    for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+    for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target), learner_modes.read(user_id)):
         marked += srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS)
     logger.info("level rule user_id=%s %s -> %s marked_known=%d", user_id, current, target, marked)
     return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
@@ -681,10 +786,37 @@ def apply_kana_rule(user_id: str, known: str | None) -> dict:
     reads known -- one row per sign in the kana line's primary mode,
     spread like the level rule's. Idempotent for the same reason; a
     replay that names MORE scripts adds only the new ones."""
-    mode, ids = level_rule.kana_batch(known)
+    mode, ids = level_rule.kana_batch(known, learner_modes.read(user_id))
     marked = srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS) if ids else 0
     logger.info("kana rule user_id=%s known=%s marked_known=%d", user_id, known, marked)
     return {"kanaKnown": known, "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+
+
+# ── 主 — a line's main mode changed (plan 273) ──────────────────
+# The learner chooses what the new mode starts from. By default, what
+# they have mastered in the old mode is marked known in the new one,
+# the level rule's way (SRSEngine.seed_known): an assumption whose first
+# check is spread over the coming six weeks, a miss starting the card
+# fresh (plan 224). Or nothing is carried (`carry` False) and every card
+# is new in the new mode. Either way rows that exist are left alone and
+# nothing is deleted: going back finds the old mode as it was, and Today
+# deals a chosen mode's new cards from the lowest stop that has any
+# (routes/today._new_pools), so the stops behind the level are learnt
+# too.
+def main_switch(user_id: str, source: str, old: str, new: str, dry_run: bool, carry: bool = True) -> dict:
+    out = {"line": source, "from": old, "to": new, "carried": carry, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    if not carry:
+        if not dry_run:
+            logger.info("main mode user_id=%s %s: %s -> %s from zero", user_id, source, old, new)
+        return {**out, "markedKnown": 0}
+    ids = prefixed(level_rule.line_ids(source, new), user_id)
+    known = srs.mastered_among(ids, old)
+    if dry_run:
+        marked = len(known) - srs.count_rows(known, new)
+    else:
+        marked = srs.seed_known(known, new, spread_days=level_rule.SPREAD_DAYS)
+        logger.info("main mode user_id=%s %s: %s -> %s marked_known=%d", user_id, source, old, new, marked)
+    return {**out, "markedKnown": marked}
 
 
 # ── Records ───────────────────────────────────────────────────
@@ -838,6 +970,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # Early access (plan 269): whether Today asks, once, how the
         # learner finds the app (routes/feedback.offer_open).
         "feedbackOffer": feedback_routes.offer_open(user_id, xp),
+        # 新しい (plan 287): whether Today tells the learner, once, that
+        # the duels' key stands beside its gate (duels_news_open).
+        "duelsNews": duels_news_open(user_id, guided),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.
@@ -849,6 +984,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # The interface language the learner chose, null if never: the
         # app copies it onto the device on boot (lib/langChoice.js).
         "uiLang": _ui_lang(user_id),
+        # 前回 (plan 291): the last ride a Learn station boarded,
+        # {path, at}, or null; the phone's Learn gate offers it again.
+        "learnRide": _learn_ride(user_id),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -1011,6 +1149,8 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     # The level the rule moves FROM, read before the write: a move up
     # seeds the stops crossed, a move down seeds nothing.
     previous_level = _profile_row(user_id)[1] if payload.jlptLevel is not None else None
+    # The modes a main-mode change moves FROM, read before the write too.
+    modes_before = learner_modes.read(user_id) if payload.mainModes else None
     sets, args = [], []
     if payload.jlptLevel is not None:
         sets.append("jlpt_level = %s")
@@ -1042,6 +1182,13 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.uiLang is not None:
         sets.append("ui_lang = %s")
         args.append(payload.uiLang)
+    # Merged line by line: the lines sent replace theirs, the rest stay.
+    if payload.mainModes is not None:
+        sets.append("main_modes = COALESCE(main_modes, '{}'::jsonb) || %s::jsonb")
+        args.append(json.dumps(payload.mainModes))
+    if payload.extraModes is not None:
+        sets.append("extra_modes = COALESCE(extra_modes, '{}'::jsonb) || %s::jsonb")
+        args.append(json.dumps(payload.extraModes))
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -1069,6 +1216,16 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         apply_level_rule(user_id, previous_level, payload.jlptLevel)
         if payload.jlptLevel is not None else None
     )
+    switched = [
+        main_switch(user_id, source, modes_before.main_of(source), mode, dry_run=False,
+                    carry=payload.carryKnown is not False)
+        for source, mode in (payload.mainModes or {}).items()
+        if mode != modes_before.main_of(source)
+    ] if modes_before is not None else []
+    modes_after = (
+        learner_modes.read(user_id).payload()
+        if payload.mainModes is not None or payload.extraModes is not None else None
+    )
     return {
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
@@ -1081,6 +1238,10 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "boardHidden": payload.boardHidden,
         "uiLang": payload.uiLang,
         "levelRule": level_rule_result,
+        # 主 (plan 273): the learner's modes as they now stand, and what
+        # each main-mode change marked known.
+        "modes": modes_after,
+        "mainSwitch": switched,
     }
 
 
@@ -1095,6 +1256,62 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
     return level_rule_preview(user_id, current, jlptLevel)
 
 
+class RidePayload(BaseModel):
+    """The run a Learn station just boarded, as its path."""
+    path: str = Field(max_length=96)
+
+
+@router.post("/api/profile/ride")
+def note_ride(payload: RidePayload, user_id: str = Depends(get_user_id)):
+    """前回 (plan 291): a Learn station boarded a run; it becomes the
+    last ride, the one the phone's gate offers again. Anything but a
+    line's stop in a graded mode is refused (clean_ride)."""
+    path = clean_ride(payload.path)
+    if path is None:
+        raise HTTPException(status_code=422, detail="not a ride")
+    ensure_profile_row(user_id)
+    ride = {"path": path, "at": datetime.now(timezone.utc).isoformat()}
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE user_profiles SET learn_ride = %s::jsonb WHERE user_id = %s",
+                (json.dumps(ride), user_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"learnRide": ride}
+
+
+@router.get("/api/profile/modes")
+def get_modes(user_id: str = Depends(get_user_id)):
+    """主 (plan 273): the learner's modes, every line answered, and what
+    each line offers -- as the main mode, and beside it in Today."""
+    return {
+        **learner_modes.read(user_id).payload(),
+        "choices": {
+            "main": {s: list(m) for s, m in main_modes.MAIN_CHOICES.items()},
+            "extra": {s: list(m) for s, m in main_modes.EXTRA_CHOICES.items()},
+        },
+    }
+
+
+@router.get("/api/profile/modes/preview")
+def preview_modes(line: str = Query(..., max_length=8), mode: str = Query(..., max_length=40),
+                  user_id: str = Depends(get_user_id)):
+    """What riding `line` in `mode` would do, for the confirm sheet: how
+    many cards mastered in the line's current mode are marked known in
+    the new one, and over how many weeks. Nothing is written."""
+    if mode not in main_modes.MAIN_CHOICES.get(line, ()):
+        raise HTTPException(status_code=422, detail="not a main mode of that line")
+    current = learner_modes.read(user_id).main_of(line)
+    if current == mode:
+        return {"line": line, "from": current, "to": mode, "carried": True, "markedKnown": 0,
+                "spreadWeeks": level_rule.SPREAD_WEEKS}
+    return main_switch(user_id, line, current, mode, dry_run=True)
+
+
 @router.get("/api/profile/level-fit")
 def get_level_fit(user_id: str = Depends(get_user_id)):
     """Whether the stored level fits what the learner answers (plan 224,
@@ -1102,7 +1319,7 @@ def get_level_fit(user_id: str = Depends(get_user_id)):
     the level mostly fail, the next one when the level's new words are
     known the first time they are asked, or nothing -- with the figures
     it read. A suggestion only: nothing is written."""
-    return level_fit.level_fit(srs, user_id, _profile_row(user_id)[1])
+    return level_fit.level_fit(srs, user_id, _profile_row(user_id)[1], learner_modes.read(user_id))
 
 
 # The 番付 is routes/banzuke.py since plan 262.

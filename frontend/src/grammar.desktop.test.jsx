@@ -20,7 +20,7 @@ vi.mock('./stores/credits', async o => ({
   ...(await o()),
   useCredits: () => ({ balance: 24, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
-vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []) }))
+vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []), reviewsSettled: vi.fn(async () => {}) }))
 const apiFetch = vi.hoisted(() => vi.fn())
 const apiJson = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({

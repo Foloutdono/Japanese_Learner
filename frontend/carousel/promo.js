@@ -8,23 +8,26 @@
 // (index.json), never written here. What a story promises is what the
 // app does today: start free, the kana line free for good, no ads and no
 // trackers; no frame prices a mode. The plan is pure; the frames draw.
+// Since plan 281 a sixth, the duels, is a story in motion end to end:
+// one sprint played, its result, the Elo it moved and the board.
 import { EDGE, FS, SP, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, text } from './draw.js'
 import * as A from './app.js'
 import { STRINGS, count, weldIf } from './strings.js'
 import { gloss } from './common.js'
 import { sentenceQuizzes } from './quizzes.js'
+import { LIMIT_MS, SPRINT_MS, points } from '../src/domain/duel.js'
 
-export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'pass']
-export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', pass: 'index.json' }
+export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'pass', 'duel']
+export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', pass: 'index.json', duel: 'duel.json' }
 
 // The words, in the two languages: the app's own where the app says it
 // (locales/*: the ratings, the stages, Today's unit, Depart), the landing
 // page's where the page says it (landing/strings.mjs).
 export const PROMO = {
   en: {
-    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', pass: 'Your pass' },
-    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', pass: 'The pass' },
-    blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free' },
+    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', pass: 'Your pass', duel: 'Duels' },
+    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', pass: 'The pass', duel: 'Duels' },
+    blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free', duel: 'A two-minute sprint against another learner, and the Elo' },
     hours: { dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' },
     hook: 'Learn Japanese, from your first kana to JLPT N1.',
     linesTitle: 'Four lines, five levels',
@@ -39,10 +42,10 @@ export const PROMO = {
     board: 'Board at tsuji.app',
     stillKnow: 'Do you still know this word?',
     how: 'How did it go?',
-    ratings: ['Wrong', 'Almost', 'Difficult', 'Correct'],
+    ratings: ['Missed', 'Almost', 'Correct', 'Easy'],
     // The scheduler's forecast for a card mastered a month ago
     // (landing/strings.mjs, KNOWN): backend/srs/scheduler.py's own.
-    due: ['in 3 min', 'in 10 min', 'in 2 months', 'in 3 months'],
+    due: ['in 2 min', 'in 10 min', 'in 80 days', 'in 90 days'],
     mastered: 'Mastered',
     mode: 'Word → meaning',
     tap: 'Tap to reveal',
@@ -78,14 +81,45 @@ export const PROMO = {
       analyser: c => `${c} cut word by word, its grammar numbered`,
       exam: c => `Could you pass the JLPT N5? One question: ${c}`,
       pass: () => 'Your Japanese pass is waiting: start free on tsuji.app',
+      duel: () => 'Japanese duels: 2 minutes against another learner, your Elo at stake',
     },
-    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', pass: 'Board today?' },
+    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', pass: 'Board today?', duel: 'Who would you challenge first?' },
     tags: ['japaneseapp', 'jlpt'],
+    // The duels' story (plan 281): its own lines, then the app's words on
+    // its parts (locales/: the ticket, the race, the result, the Elo).
+    duel: {
+      hook: s => ['A duel in Japanese.', s >= 120 && s % 60 === 0 ? `${s / 60} minutes.` : `${s} seconds.`],
+      versus: 'You against another learner.',
+      same: 'The same questions for you both.',
+      fast: top => `Answer fast: up to ${top} points.`,
+      ahead: 'Get ahead on the line.',
+      winElo: 'Win, and your Elo goes up.',
+      eloIs: 'Your Elo: your level against the others.',
+      eloFrom: 'It starts from your JLPT level, then moves with every ranked sprint.',
+      climb: 'Beat stronger players, climb faster.',
+      ride: 'Learn by playing, against other learners.',
+      modes: 'Ranked sprints or duels with friends.',
+      you: 'You',
+      go: 'Depart',
+      kinds: { word: 'Word', reading: 'Reading', writing: 'Writing', kana: 'Kana' },
+      duelLevel: 'Duel level',
+      questions: 'Questions',
+      wordsKanji: 'words and kanji',
+      sprint: 'Sprint · 2 minutes',
+      win: 'Won',
+      by: n => `by ${n} point${n === 1 ? '' : 's'}`,
+      rightsOf: (r, n) => `${r} right of ${n}`,
+      elo: 'Elo',
+      xpLeft: n => `${n} more today`,
+      startAt: n => `start ${n}`,
+      peak: n => `peak ${n}`,
+      gapTo: (n, r) => `${n} Elo points from #${r}`,
+    },
   },
   fr: {
-    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', pass: 'Ton pass' },
-    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', pass: 'Le pass' },
-    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit' },
+    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', pass: 'Ton pass', duel: 'Les duels' },
+    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', pass: 'Le pass', duel: 'Duels' },
+    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 2 minutes contre un autre apprenant, et l’Elo' },
     hours: { dawn: 'Aube', day: 'Jour', dusk: 'Soir', night: 'Nuit' },
     hook: 'Apprendre le japonais, du premier kana au JLPT N1.',
     linesTitle: 'Quatre lignes, cinq niveaux',
@@ -100,8 +134,8 @@ export const PROMO = {
     board: 'Embarquer sur tsuji.app',
     stillKnow: 'Tu connais encore ce mot ?',
     how: 'Comment ça s’est passé ?',
-    ratings: ['Raté', 'Presque', 'Difficile', 'Correct'],
-    due: ['dans 3 min', 'dans 10 min', 'dans 2 mois', 'dans 3 mois'],
+    ratings: ['Raté', 'Presque', 'Correct', 'Facile'],
+    due: ['dans 2 min', 'dans 10 min', 'dans 80 jours', 'dans 90 jours'],
     mastered: 'Maîtrisé',
     mode: 'Mot → sens',
     tap: 'Touche pour révéler',
@@ -137,9 +171,38 @@ export const PROMO = {
       analyser: c => `${c} découpée mot à mot, sa grammaire numérotée`,
       exam: c => `Tu réussirais le JLPT N5 ? Une question : ${c}`,
       pass: () => 'Ton pass pour le japonais t’attend : commence gratuitement sur tsuji.app',
+      duel: () => 'Duels de japonais : 2 minutes contre un autre apprenant, ton Elo en jeu',
     },
-    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', pass: 'Tu embarques aujourd’hui ?' },
+    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
     tags: ['applijaponais', 'jlpt'],
+    duel: {
+      hook: s => ['Un duel en japonais.', s >= 120 && s % 60 === 0 ? `${s / 60} minutes.` : `${s} secondes.`],
+      versus: 'Toi contre un autre apprenant.',
+      same: 'Mêmes questions pour vous deux.',
+      fast: top => `Réponds vite : jusqu’à ${top} points.`,
+      ahead: 'Passe devant sur la ligne.',
+      winElo: 'Gagne, et ton Elo monte.',
+      eloIs: 'Ton Elo, ton niveau face aux autres.',
+      eloFrom: 'Il part de ton niveau JLPT, puis bouge à chaque sprint classé.',
+      climb: 'Bats plus fort que toi, grimpe plus vite.',
+      ride: 'Apprends en jouant, contre d’autres apprenants.',
+      modes: 'Sprints classés ou duels entre amis.',
+      you: 'Toi',
+      go: 'Partir',
+      kinds: { word: 'Mot', reading: 'Lecture', writing: 'Écriture', kana: 'Kana' },
+      duelLevel: 'Niveau du duel',
+      questions: 'Questions',
+      wordsKanji: 'mots et kanji',
+      sprint: 'Sprint · 2 minutes',
+      win: 'Gagné',
+      by: n => `de ${n} point${n === 1 ? '' : 's'}`,
+      rightsOf: (r, n) => `${r} justes sur ${n}`,
+      elo: 'Elo',
+      xpLeft: n => `${n} encore aujourd’hui`,
+      startAt: n => `départ ${n}`,
+      peak: n => `pic ${n}`,
+      gapTo: (n, r) => `${n} points d’Elo de la ${r === 1 ? '1re' : `${r}ᵉ`} place`,
+    },
   },
 }
 
@@ -183,6 +246,8 @@ export function promoItems(story, data, lang) {
       return data.sentences.filter(s => s.gram.some(g => data.points[g.p])).map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.p }))
     case 'exam':
       return data.sentences.filter(s => readingOf(s, data, lang)).map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.rows[s.fi]?.t || '' }))
+    case 'duel':
+      return [{ id: story, jp: '対戦', sub: P.blurb.duel, tag: data.level || '' }]
     default:
       return [{ id: story, jp: '辻', sub: P.blurb[story], tag: '' }]
   }
@@ -210,6 +275,100 @@ export function analysed(s, data, lang) {
   })
   return { toks, points }
 }
+
+// ── 対戦, the duels' story (plan 281) ────────────────────────────────
+// One sprint played: the opening of a real N5 paper (bank/duel.json, the
+// duels' own generator), answered as a quick learner answers it -- the
+// first after two seconds, while what it is worth runs down, two at once,
+// then a lookalike kanji taken for the right one -- against a recorded
+// run that leads, is passed and passes again; the minute run out, the
+// result face to face and the Elo it moved, by the classic expectation
+// at the settled K (study/duel_elo.py); the Elo over the last ranked
+// duels and the board it climbs. The two learners and their figures are
+// the story's own, a sample; the questions, what a speed is worth, the
+// holds after an answer, the XP and where the Elo starts are the app's.
+export const DUEL_RUN = {
+  you: { level: 'N5', elo: 1212 },
+  them: { name: 'Hana', level: 'N4', elo: 1282 },
+  no: 412,
+  // The paper's first four, each [ms after it was served, right or not].
+  taps: [[2000, true], [800, true], [750, true], [900, false]],
+  // The other's recorded run over the same stretch, [ms into the sprint,
+  // points]: theirs too served after the holds and paid what its speed is worth.
+  theirs: [[950, 100], [2650, 94], [4600, 90], [5700, 100]],
+  // The minute as it ends.
+  final: { mine: 1240, theirs: 1105, rights: 14, answered: 15, theirRights: 13, theirAnswered: 15 },
+  // The learner's Elo after each of the twenty ranked duels before this
+  // one: the last of the provisional ones (K 40), then settled (K 20).
+  trend: [1056, 1077, 1059, 1082, 1101, 1084, 1106, 1126, 1107, 1128, 1146, 1157, 1148, 1160, 1170, 1183, 1175, 1187, 1198, 1212],
+  // The board above the learner.
+  board: [['Sora22', 1341], ['Kenta', 1296], ['aiko', 1251], ['Rin', 1219]],
+}
+
+/** The wrong choice a hurried eye takes: the first that shares a
+ *  character with the right one (白円 for 百円), else the first wrong one. */
+function wrongPick(q) {
+  const right = q.choices[q.answer]
+  const wrong = q.choices.map((c, i) => i).filter(i => i !== q.answer)
+  return wrong.find(i => [...q.choices[i]].some(ch => right.includes(ch))) ?? wrong[0]
+}
+
+/** The duels' story, played (pure): the questions in the reader's
+ *  language, each answer when it lands and what it pays, the other's
+ *  run, the result, the Elo before and after, the XP, the board. */
+export function duelRun(data, lang) {
+  const R = DUEL_RUN
+  const items = data.items.map(q => ({
+    n: q.n, kind: q.kind, prompt: q.prompt, reading: q.reading || '', two: q.kind !== 'word', answer: q.answer,
+    choices: Array.isArray(q.choices) ? q.choices : (q.choices[lang] || q.choices.en),
+  }))
+  // Served at once, answered after its ms, the next served after the
+  // server's hold: a right answer's, or a wrong one's lock.
+  let served = 0
+  let mine = 0
+  const answers = R.taps.map(([ms, right], i) => {
+    const q = items[i]
+    const pts = right ? points(ms) : 0
+    mine += pts
+    const a = { n: i, served, at: served + ms, pick: right ? q.answer : wrongPick(q), right, pts, total: mine }
+    served = a.at + (right ? data.hold.right : data.hold.wrong)
+    return a
+  })
+  let theirs = 0
+  const their = R.theirs.map(([at, pts]) => ({ at, pts, total: (theirs += pts) }))
+  const expected = 1 / (1 + 10 ** ((R.them.elo - R.you.elo) / 400))
+  const delta = Math.round(data.elo.k * (1 - expected))
+  const after = R.you.elo + delta
+  const trend = [...R.trend.slice(1), after]
+  const xp = R.final.rights * data.xp.right + (R.final.answered - R.final.rights) * data.xp.wrong
+  const ranked = elo => [...R.board.map(([name, e]) => ({ name, elo: e, me: false })), { name: null, elo, me: true }]
+    .sort((a, b) => b.elo - a.elo).map((r, i) => ({ ...r, rank: i + 1 }))
+  const board = { before: ranked(R.you.elo), after: ranked(after) }
+  const mineAfter = board.after.find(r => r.me)
+  const ahead = board.after[mineAfter.rank - 2]
+  return {
+    items, answers, next: served, their, final: R.final, you: R.you, them: R.them, no: R.no, level: data.level,
+    top: points(0), seconds: SPRINT_MS / 1000,
+    elo: { before: R.you.elo, after, delta, start: data.elo.start[R.you.level], trend, peak: Math.max(...trend) },
+    xp: { paid: xp, left: Math.max(0, data.xp.cap - xp) },
+    board: { ...board, gap: ahead ? { elo: ahead.elo - after, rank: ahead.rank } : null },
+  }
+}
+
+/** The race's line (DuelRun's reachOf): past the leader by a quarter, in
+ *  steps of 250, so the trains ride the middle of it and the gap reads. */
+const reachOf = (a, b) => Math.max(500, Math.ceil((Math.max(a, b) * 1.3) / 250) * 250)
+
+/** The story's beats, in order, and how long each holds (seconds): the
+ *  ticket, the race (the count, the sprint as played, the rest of the
+ *  minute run out: as long as the run makes it), the result, the Elo,
+ *  the Elo board, and the call to action, a story's last (`board`). */
+export const DUEL_BEATS = [['ticket', 2.45], ['race', null], ['result', 2.6], ['elo', 2.5], ['ranking', 2.4], ['board', 3.5]]
+const COUNT = 1.3
+const RUN_OUT = 1.0
+const EXIT = 0.12
+// When « Partir » is pressed on the ticket.
+const DUEL_PRESS = 2.05
 
 /** A story's plan: what its frames say, from the bank. */
 export function promoPlan(story, data, id, opts) {
@@ -244,6 +403,8 @@ export function promoPlan(story, data, id, opts) {
         title: P.titles.exam(row.t), caption: { jp: s.jp, romaji: '', tr: s[lang] || s.en, ask, tags, name: row.t },
       }
     }
+    case 'duel':
+      return { ...base, id: story, level: data.level, promo: duelRun(data, lang), title: P.titles.duel(), caption: { jp: '対戦', romaji: '', tr: P.names.duel, ask, tags, name: P.names.duel } }
     default:
       return { ...base, id: story, promo: {}, title: P.titles[story](), caption: { jp: '辻', romaji: '', tr: P.names[story], ask, tags, name: P.names[story] } }
   }
@@ -281,6 +442,7 @@ export function promoDeck(plan, fmt, opts) {
   // move as the print moves. With no clock the cover stands still, whole.
   let clock = null
   let shownPoints = () => 0
+  let duelStory = null
   const ease = x => 1 - (1 - x) ** 3
   const k = (start, dur) => (clock ? ease(Math.min(1, Math.max(0, (clock.t - start) / dur))) : 1)
   const part = (c, prog, fn) => {
@@ -499,10 +661,10 @@ export function promoDeck(plan, fmt, opts) {
           y += cardH + SP[7]
           y = lead(c, P.how, y, p.ink, [FS.title], { maxLines: 1 })
           y += SP[4]
-          const bar = A.ratingBar(c, p, fr.x, y + 34 * U, fr.w, U, P.ratings, { pressed: 3 })
+          const bar = A.ratingBar(c, p, fr.x, y + 34 * U, fr.w, U, P.ratings, { pressed: 2 })
           bar.centres.forEach((cx, i) => {
             const f = fit(c, P.due[i], { weight: 700, sizes: [12 * U, 10.5 * U], maxW: (fr.w / 4.6), maxLines: 1, fam: 'latin' })
-            text(c, f.lines[0], cx, y + 20 * U, { f: f.f, color: i === 3 ? p.ink : p.ink2, align: 'center' })
+            text(c, f.lines[0], cx, y + 20 * U, { f: f.f, color: i === 2 ? p.ink : p.ink2, align: 'center' })
           })
           return y + 34 * U + bar.h
         })
@@ -695,6 +857,364 @@ export function promoDeck(plan, fmt, opts) {
       })
       break
     }
+    case 'duel': {
+      // The story plays end to end (plan 281): each beat is drawn at its
+      // own moment `s`, its parts coming in faster than a cover's, its
+      // words landing one by one; a still is its beat at rest (STILL).
+      const pr = plan.promo
+      const D = P.duel
+      const beats = DUEL_BEATS.map(([key, len]) => [key, len ?? COUNT + pr.next / 1000 + RUN_OUT])
+      const clamp = x => Math.min(1, Math.max(0, x))
+      const io = x => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2)
+      const at = (s, start, dur) => (s == null ? 1 : ease(clamp((s - start) / dur)))
+      const glide = A.cssEase(0.25, 0.1, 0.25, 1)
+      const HEAD = [FS.heading, FS.title]
+      // Words that land one after another, 0.05s apart, each rising 14px
+      // over 0.22s; `parts` [[text, ink]] each start a line, all at the
+      // largest size at which the whole sets in `maxLines`.
+      const setOf = (c, parts, sizes, maxLines) => {
+        for (const z of sizes) {
+          const blocks = parts.map(([str, ink]) => ({ ink, b: fit(c, say(str), { sizes: [z], maxW: fr.w, maxLines: 9 }) }))
+          if (blocks.reduce((m, x) => m + x.b.lines.length, 0) <= maxLines || z === sizes[sizes.length - 1]) return { z, blocks }
+        }
+      }
+      const headline = (c, parts, y, s, start = 0, { sizes = HEAD, maxLines = 3 } = {}) => {
+        const { z, blocks } = setOf(c, parts, sizes, maxLines)
+        let i = 0
+        let line = 0
+        for (const { ink, b } of blocks) {
+          for (const l of b.lines) {
+            const by = y + z * (0.8 + line * 1.18)
+            let x = fr.x
+            for (const word of l.split(' ')) {
+              const f = at(s, start + i * 0.05, 0.22)
+              if (f > 0) {
+                c.save()
+                c.globalAlpha *= f
+                text(c, word, x, by + (1 - f) * 14, { f: b.f, color: ink })
+                c.restore()
+              }
+              x += measure(c, `${word} `, b.f)
+              i += 1
+            }
+            line += 1
+          }
+        }
+        return y + z * (0.8 + (line - 1) * 1.18 + 0.3)
+      }
+      // What a block below a headline takes, measured off the page, then
+      // set in the middle of the room the headline leaves.
+      const below = (c, top, body) => {
+        const h = body(scratch(c), 0)
+        const room = fr.bottom - top
+        if (h <= room) return body(c, top + (room - h) / 2)
+        c.save()
+        c.translate(fr.cx, top)
+        c.scale(room / h, room / h)
+        c.translate(-fr.cx, -top)
+        body(c, top)
+        c.restore()
+      }
+      // A tap, as a screen recording shows one: a ring that opens and fades.
+      const tap = (c, x, y, dt) => {
+        if (!clock || dt < 0 || dt > 0.45) return
+        const f = dt / 0.45
+        c.save()
+        c.globalAlpha *= 0.6 * (1 - f)
+        c.strokeStyle = '#ffffff'
+        c.lineWidth = 2.5 * U
+        c.beginPath()
+        c.arc(x, y, (14 + 22 * ease(f)) * U, 0, Math.PI * 2)
+        c.stroke()
+        if (dt < 0.18) {
+          c.globalAlpha = 0.35 * (1 - dt / 0.18)
+          c.fillStyle = '#ffffff'
+          c.beginPath()
+          c.arc(x, y, 14 * U, 0, Math.PI * 2)
+          c.fill()
+        }
+        c.restore()
+      }
+      const lift = (c, f, fn, dy = 16 * U) => {
+        if (f <= 0) return
+        c.save()
+        c.globalAlpha *= f
+        c.translate(0, (1 - f) * dy)
+        fn()
+        c.restore()
+      }
+
+      // ── The ticket: the hook, the duel's ticket, « Partir » pressed ──
+      const PRESS = DUEL_PRESS
+      const ticket = (c, s) => {
+        lift(c, at(s, 0, 0.3), () => masthead(c, p, fr), 0)
+        const top = fr.y + 64 + SP[7]
+        below(c, top, (cc, y) => {
+          y = headline(cc, [[D.hook(pr.seconds)[0], p.ink], [D.hook(pr.seconds)[1], p.gold]], y, s, 0.05, { sizes: [FS.display, FS.display * 0.85, FS.display * 0.72], maxLines: 3 })
+          y += SP[6]
+          const tf = at(s, 0.5, 0.45)
+          const th = A.duelTicket(scratch(cc), p, fr.x, y, fr.w, U, ticketOf(0))
+          if (tf > 0) {
+            cc.save()
+            cc.globalAlpha *= tf
+            cc.translate(fr.cx, y + th / 2 + (1 - tf) * 40 * U)
+            cc.rotate((1 - tf) * -0.05)
+            cc.translate(-fr.cx, -(y + th / 2))
+            A.duelTicket(cc, p, fr.x, y, fr.w, U, ticketOf(s == null ? 0 : Math.max(0, 1 - Math.abs(s - 1.0) / 0.2)))
+            cc.restore()
+          }
+          y += th + SP[5]
+          const vy = y
+          lift(cc, at(s, 1.1, 0.35), () => lead(cc, D.versus, vy, p.ink2, [FS.lead, FS.body], { maxLines: 2, weight: 500 }))
+          y = lead(scratch(cc), D.versus, vy, p.ink2, [FS.lead, FS.body], { maxLines: 2, weight: 500 }) + SP[7]
+          const press = s == null ? 0 : clamp(1 - Math.abs(s - PRESS - 0.07) / 0.09)
+          const by = y
+          lift(cc, at(s, 1.45, 0.35), () => A.stageButton(cc, p, fr.x, by, fr.w, U, D.go, { press }))
+          if (s != null) tap(cc, fr.cx, by + 26 * U, s - PRESS)
+          return by + 52 * U
+        })
+      }
+      const ticketOf = pulse => ({
+        no: pr.no, pulse,
+        you: { name: D.you, level: pr.you.level }, them: { name: pr.them.name, level: pr.them.level },
+        facts: [[D.duelLevel, pr.level], [D.questions, D.wordsKanji]],
+        foot: ['辻駅 発行', D.sprint],
+      })
+
+      // ── The race: the count, the sprint as played, the minute run out ──
+      const sprintEnd = COUNT + pr.next / 1000
+      const totalAt = (list, m) => list.filter(x => x.at <= m).reduce((t, x) => t + x.pts, 0)
+      const changes = [...new Set([...pr.answers.filter(a => a.pts > 0).map(a => a.at), ...pr.their.map(x => x.at)])].sort((a, b) => a - b)
+      const sharesAt = m => {
+        const mine = totalAt(pr.answers, m)
+        const theirs = totalAt(pr.their, m)
+        const reach = reachOf(mine, theirs)
+        return [theirs / reach, mine / reach]
+      }
+      // The trains glide to each new total as the app's do (0.3s, ease).
+      const trainsAt = m => {
+        const e = [...changes].reverse().find(x => x <= m)
+        if (e == null) return sharesAt(m)
+        const from = sharesAt(e - 1)
+        const to = sharesAt(e)
+        const f = glide((m - e) / 300)
+        return to.map((v, i) => from[i] + (v - from[i]) * f)
+      }
+      // The rest of the paper as the minute runs out: its readings and
+      // spellings, two by two, so the dock holds still while they flash by.
+      const RUN_IN = pr.items.slice(pr.answers.length).filter(q => q.two)
+      const QUICK = [100, 94, 100, 88, 97, 100, 91, 100]
+      const raceAt = s => {
+        if (s < COUNT) {
+          const n = s < 0.5 ? 3 : s < 0.9 ? 2 : 1
+          return { count: n, since: s - (n === 3 ? 0.1 : n === 2 ? 0.5 : 0.9), m: 0, mine: 0, theirs: 0, trains: [0, 0] }
+        }
+        if (s < sprintEnd) {
+          const m = (s - COUNT) * 1000
+          const a = [...pr.answers].reverse().find(x => x.served <= m)
+          return {
+            q: pr.items[a.n], a, m, qMs: m - a.served, flash: m >= a.at ? a : null,
+            mine: totalAt(pr.answers, m), theirs: totalAt(pr.their, m), trains: trainsAt(m),
+          }
+        }
+        // The rest of the minute run out: a question a beat, each right,
+        // the two totals climbing to the result, the lead changing hands.
+        const f = clamp((s - sprintEnd) / RUN_OUT)
+        const m0 = totalAt(pr.answers, pr.next)
+        const t0 = totalAt(pr.their, pr.next)
+        const mine = Math.round(m0 + (pr.final.mine - m0) * f ** 1.3)
+        const theirs = Math.round(t0 + (pr.final.theirs - t0) * f ** 0.8)
+        const reach = Math.max(500, Math.max(mine, theirs) * 1.3)
+        const k = Math.min(RUN_IN.length - 1, Math.floor(f * RUN_IN.length))
+        const q = RUN_IN[k]
+        return {
+          q, m: pr.next + (SPRINT_MS - pr.next) * f, qMs: 0, flash: { pick: q.answer, right: true, pts: QUICK[k % QUICK.length] },
+          mine, theirs, trains: [theirs / reach, mine / reach], runOut: f,
+        }
+      }
+      // The screen as the stage lays it out: the race, the page, the dock
+      // under the thumb, at the size that holds the tallest dock.
+      const raceHead = c => Math.max(...[D.same, D.fast(pr.top), D.ahead].map(str => setOf(c, [[str, p.ink]], HEAD, 2).z * (0.8 + 1.18 + 0.3)))
+      const DOCK_MAX = Math.max(...[...pr.items.slice(0, pr.answers.length), ...RUN_IN].map(q => A.tilesHeight(q.choices.length, q.two)))
+      const NEED = 118 + 12 + 150 + 12 + 12 + DOCK_MAX + 12
+      const race = (c, s) => {
+        const hh = raceHead(c)
+        // The beat's words: the same questions, then speed, then the line
+        // from the third question on, where the learner passes.
+        const third = COUNT + pr.answers[2].served / 1000
+        const say1 = s < COUNT ? 0 : s < third ? 1 : 2
+        headline(c, [[[D.same, D.fast(pr.top), D.ahead][say1], p.ink]], fr.y, s, [0, COUNT, third][say1], { maxLines: 2 })
+        const y0 = fr.y + hh + SP[5]
+        const us = Math.min(U, (fr.bottom - y0) / NEED)
+        const sw = A.PHONE_W * us
+        const sx = fr.cx - sw / 2
+        const bottom = y0 + NEED * us
+        const st = raceAt(s)
+        const dockH = (24 + (st.q ? A.tilesHeight(st.q.choices.length, st.q.two) : 0)) * us
+        const dockTop = bottom - dockH
+        const enter = at(s, 0, 0.25)
+        lift(c, enter, () => {
+          // The dock, edge to edge and down to the frame's foot.
+          c.fillStyle = p.panel
+          c.fillRect(0, dockTop, fr.W, fr.H - dockTop)
+          const lead0 = st.mine - st.theirs
+          const trails = lead0 > 0 ? 0 : 1
+          const span = Math.abs(st.trains[1] - st.trains[0])
+          A.raceLine(c, p, sx, y0, sw, us, {
+            clock: 1 - st.m / SPRINT_MS,
+            rows: [
+              { who: pr.them.name, fig: n(st.theirs), me: false, at: st.trains[0] },
+              { who: D.you, fig: n(st.mine), me: true, at: st.trains[1] },
+            ],
+            gap: lead0 !== 0 ? { row: trails, from: st.trains[trails], span, fig: `−${n(Math.abs(lead0))}`, mine: lead0 > 0 } : null,
+          })
+          const py = y0 + 130 * us
+          const ph = dockTop - 12 * us - py
+          if (st.count) {
+            A.duelPage(c, p, sx, py, sw, ph, us, { count: st.count, pop: 0.6 * (1 - at(st.since, 0, 0.18)) })
+            return
+          }
+          const { q, flash, qMs } = st
+          A.duelPage(c, p, sx, py, sw, ph, us, {
+            kind: D.kinds[q.kind], prompt: q.prompt, reading: q.kind === 'word' ? q.reading : '',
+            worth: flash ? flash.pts : points(qMs), share: flash ? 0 : Math.max(0, 1 - qMs / LIMIT_MS),
+            verdict: flash ? (flash.right ? 'right' : 'wrong') : null,
+            // What it paid swells as the answer lands.
+            pop: st.a && flash ? 0.35 * (1 - clamp((st.m - st.a.at) / 250)) : 0,
+          })
+          const tiles = A.duelTiles(c, p, sx, dockTop + 12 * us, sw, us, { choices: q.choices, two: q.two, picked: flash?.pick ?? null, verdict: flash ? (flash.right ? 'right' : 'wrong') : null })
+          if (st.a && flash) tap(c, ...tiles.centres[st.a.pick], (st.m - st.a.at) / 1000)
+        }, 0)
+      }
+
+      // ── The result face to face, the Elo it moved, the XP it paid ──
+      const result = (c, s) => {
+        const top = headline(c, [[D.winElo, p.ink]], fr.y, s) + SP[6]
+        below(c, top, (cc, y) => {
+          const f = at(s, 0.05, 0.3)
+          const count1 = s == null ? 1 : ease(clamp((s - 0.25) / 0.6))
+          const mine = Math.round(pr.final.mine * count1)
+          const theirs = Math.round(pr.final.theirs * count1)
+          const reach = Math.max(pr.final.mine, pr.final.theirs, 1) * 1.08
+          lift(cc, f, () => {
+            A.faceOff(cc, p, fr.x, y, fr.w, U, {
+              word: D.win, by: D.by(pr.final.mine - pr.final.theirs),
+              sides: [
+                { fig: n(mine), who: D.you, rights: D.rightsOf(pr.final.rights, pr.final.answered), me: true },
+                { fig: n(theirs), who: pr.them.name, rights: D.rightsOf(pr.final.theirRights, pr.final.theirAnswered) },
+              ],
+              finish: [{ who: pr.them.name, at: pr.final.theirs / reach }, { who: D.you, at: pr.final.mine / reach, me: true }],
+              show: { word: at(s, 0.15, 0.3), figs: at(s, 0.2, 0.3), finish: at(s, 0.35, 0.6) },
+            })
+          })
+          y += 287.27 * U + 12 * U
+          const elo = s == null ? 1 : io(clamp((s - 1.15) / 0.4))
+          const pop = s == null ? 0 : 1 - clamp((s - 1.55) / 0.25)
+          const cells = [
+            { value: n(Math.round(pr.elo.before + pr.elo.delta * elo)), move: s == null || s >= 1.55 ? { text: `+${pr.elo.delta}`, up: pr.elo.delta >= 0, pop } : null, label: D.elo },
+            { value: `+${Math.round(pr.xp.paid * elo)}`, unit: 'XP', label: D.xpLeft(pr.xp.left) },
+          ]
+          const ry = y
+          lift(cc, at(s, 0.95, 0.3), () => A.recordsRow(cc, p, fr.x, ry, fr.w, U, cells))
+          return ry + A.recordsRow(scratch(cc), p, fr.x, ry, fr.w, U, cells)
+        })
+      }
+
+      // ── The Elo: where it started, the curve it drew ──
+      const elo = (c, s) => {
+        let y = headline(c, [[D.eloIs, p.ink]], fr.y, s)
+        y += SP[4]
+        let subB = lead(scratch(c), D.eloFrom, y, p.ink2, [FS.lead, FS.body], { maxLines: 3, weight: 500 })
+        lift(c, at(s, 0.35, 0.35), () => { subB = lead(c, D.eloFrom, y, p.ink2, [FS.lead, FS.body], { maxLines: 3, weight: 500 }) })
+        below(c, subB + SP[6], (cc, yy) => {
+          const drawn = s == null ? 1 : io(clamp((s - 0.55) / 1.0))
+          const tr = pr.elo.trend
+          const pos = drawn * (tr.length - 1)
+          const i = Math.min(tr.length - 2, Math.floor(pos))
+          const v = Math.round(tr[i] + (tr[i + 1] - tr[i]) * (pos - i))
+          let h = 209.42 * U
+          lift(cc, at(s, 0.2, 0.3), () => {
+            h = A.eloCard(cc, p, fr.x, yy, fr.w, U, {
+              cap: D.elo, fig: n(v), trend: tr, start: pr.elo.start, drawn,
+              foot: [D.startAt(n(pr.elo.start)), D.peak(n(pr.elo.peak))], footShow: at(s, 1.5, 0.3),
+            })
+          })
+          return yy + h
+        })
+      }
+
+      // ── The Elo board, climbed a place ──
+      const ranking = (c, s) => {
+        const top = headline(c, [[D.climb, p.ink]], fr.y, s) + SP[6]
+        const before = pr.board.before
+        const after = pr.board.after
+        const swap = s == null ? 1 : io(clamp((s - 1.0) / 0.4))
+        const value = s == null ? 1 : io(clamp((s - 0.8) / 0.3))
+        const rows = before.map(r => {
+          const was = r.rank
+          const now = after.find(x => x.me === r.me && x.name === r.name).rank
+          const dy = (now - was) * 55 * swap
+          const elo = r.me ? Math.round(pr.elo.before + pr.elo.delta * value) : r.elo
+          return { rank: swap < 0.5 ? was : now, name: r.me ? D.you : r.name, elo: n(elo), me: r.me, dy }
+        })
+        const gap = pr.board.gap
+        const foot = gap ? D.gapTo(n(gap.elo), gap.rank) : ''
+        below(c, top, (cc, y) => {
+          lift(cc, at(s, 0.1, 0.3), () => A.boardRows(cc, p, fr.x, y, fr.w, U, rows, { foot, footShow: at(s, 1.5, 0.3) }))
+          return y + A.boardRows(scratch(cc), p, fr.x, y, fr.w, U, rows, { foot })
+        })
+      }
+
+      // ── The call to action: the mark, its words, the gate ──
+      const gate = ctx => board(ctx, 1, 1, D.ride, D.modes)
+
+      const scenes = { ticket, race, result, elo, ranking }
+      const STILL = { ticket: 1.9, race: COUNT + 4.3, result: 2.6, elo: 2.5, ranking: 2.4 }
+      for (const [key] of beats) {
+        add(key, ctx => {
+          if (key === 'board') return gate(ctx)
+          ground(ctx, p, fr)
+          // The ticket's cover clip holds once « Partir » is let go.
+          scenes[key](ctx, clock ? (key === 'ticket' ? Math.min(clock.t, PRESS + 0.25) : clock.t) : STILL[key])
+        })
+      }
+      const total = beats.reduce((t, [, len]) => t + len, 0)
+      const gateAt = total - beats[beats.length - 1][1]
+      duelStory = {
+        seconds: total,
+        fps: CLIP.fps,
+        print: false,
+        sounds: [{ at: PRESS, key: 'click' }, ...endScoreOf(plan).map(x => ({ ...x, at: gateAt + x.at }))],
+        draw: (ctx, t) => {
+          let start = 0
+          for (const [key, len] of beats) {
+            if (t < start + len || key === 'board') {
+              const s = t - start
+              ctx.save()
+              clock = { t: s }
+              try {
+                if (key === 'board') gate(ctx)
+                else {
+                  ground(ctx, p, fr)
+                  const exit = clamp((s - (len - EXIT)) / EXIT)
+                  if (exit > 0) {
+                    ctx.globalAlpha *= 1 - exit
+                    ctx.translate(0, -28 * exit)
+                  }
+                  scenes[key](ctx, s)
+                }
+              } finally {
+                clock = null
+                ctx.restore()
+              }
+              return
+            }
+            start += len
+          }
+        },
+      }
+      break
+    }
     default:
   }
   // The cover and the call to action in motion: CLIP.seconds of each,
@@ -711,6 +1231,8 @@ export function promoDeck(plan, fmt, opts) {
   out.clips = {
     cover: inMotion(out[0], plan.story === 'pitch', () => scoreOf(plan, shownPoints())),
     end: inMotion(out[out.length - 1], false, () => endScoreOf(plan)),
+    // The duels' story whole (plan 281): every beat, one after another.
+    ...(duelStory ? { story: duelStory } : {}),
   }
   out.clip = out.clips.cover
   return out
@@ -758,6 +1280,9 @@ function scoreOf(plan, points = 0) {
     case 'pass':
       // The gate's punch as the pass comes in, then the level-up's build and its burst.
       return [{ at: 0.4, key: 'pass-clip' }, { at: FILL_START, key: 'level-charge' }, { at: LEVEL_UP, key: 'level-burst' }]
+    case 'duel':
+      // « Partir » pressed: the stage's one sound (DuelRun's playClick).
+      return [{ at: DUEL_PRESS, key: 'click' }]
     default:
       return []
   }

@@ -5,6 +5,7 @@ os.environ.setdefault("DEV_USER_ID", "test-user")
 
 from fastapi.testclient import TestClient
 from main import app
+from study import duel_paper
 
 client = TestClient(app)
 
@@ -53,6 +54,14 @@ class TestQueryBounds:
         ("/api/frequency/vocab/tiers/started", "tier_size", 100, 7),
         ("/api/frequency/vocab/stats?tier=1&mode=vocab.flashcard.f2b", "tier_size", 1000, 3),
         ("/api/reading/batch?source=frequency&domain=vocab&tier=1", "tier_size", 200, 1),
+        # plan 279: the duels' pages and the live poll.
+        ("/api/pvp/history", "limit", 20, 51),
+        ("/api/pvp/history", "offset", 0, 10001),
+        ("/api/pvp/board", "limit", 20, 201),
+        ("/api/pvp/board", "offset", 0, 100001),
+        ("/api/pvp/board", "around", 2, 6),
+        # The live poll's version runs to a paper's last question.
+        ("/api/pvp/duels/1/live", "v", 0, duel_paper.ITEMS + 1),
     ]
 
     def test_an_overlong_query_string_returns_422(self):

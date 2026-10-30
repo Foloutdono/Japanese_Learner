@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Seg } from '../chrome/Console'
 import { ChevronIcon } from '../ui/Icons'
-import { boardRows, bothRows, moveOf } from '../../domain/banzuke'
+import { apiJson } from '../../lib/api'
+import { besidePages, boardRows, bothRows, moveOf } from '../../domain/banzuke'
 import { LearnerSheet } from './LearnerSheet'
 
 // ── The ranking (canvas ProfileInserts, plan 074) ─────────────
@@ -49,7 +50,7 @@ export function Row({ e, isMe, lang, t, onPick, className = '', rowRef }) {
   return (
     <div ref={rowRef} className={`leaderboard-row${isMe ? ' leaderboard-row--me' : ''}${className ? ` ${className}` : ''}`}>
       <span className={`leaderboard-row__rank${medal ? ` leaderboard-row__rank--${medal}` : ''}`}>
-        {e.rank ?? '—'}
+        <span className="bz-num">{e.rank ?? '—'}</span>
       </span>
       <Name e={e} t={t} onPick={onPick} />
       <Move e={e} t={t} />
@@ -95,11 +96,12 @@ export function Banzuke({ all, week, t, lang, both = false, session = null }) {
   const [picked, setPicked] = useState(null)
   const onPick = session ? setPicked : undefined
   const sheet = picked && <LearnerSheet username={picked} session={session} onClose={() => setPicked(null)} />
+  const [besideWeek, besideAll] = useBeside(both && session ? week : null, both && session ? all : null, session)
 
   if (both && week && all) {
     return (
       <>
-        <BothBoard week={week} all={all} t={t} lang={lang} onPick={onPick} />
+        <BothBoard week={besideWeek ?? week} all={besideAll ?? all} t={t} lang={lang} onPick={onPick} />
         {sheet}
       </>
     )
@@ -129,6 +131,34 @@ export function Banzuke({ all, week, t, lang, both = false, session = null }) {
       {sheet}
     </>
   )
+}
+
+// Each period's rows at the ranks only the other one shows, so the
+// desk's board has no blank where a period has a learner: the lifetime's
+// 7th to 9th beside a week whose learner is 8th. Read once both boards
+// are in, a page per run of ranks (domain/banzuke.besidePages); a page
+// that fails leaves its ranks blank, as they were.
+function useBeside(week, all, session) {
+  const [got, setGot] = useState(null)
+  useEffect(() => {
+    if (!week || !all) return
+    let live = true
+    const periods = ['week', 'all']
+    const pages = besidePages(week, all)
+    Promise.all(pages.map((runs, side) => Promise.all(runs.map(({ offset, limit }) => (
+      apiJson(`/api/leaderboard?period=${periods[side]}&offset=${offset}&limit=${limit}`, session)
+        .then(b => b.entries ?? [])
+        .catch(() => [])
+    ))).then(got => got.flat())))
+      .then(([w, a]) => {
+        if (!live || (!w.length && !a.length)) return
+        setGot({ week, all, boards: [w.length ? { ...week, beside: w } : null, a.length ? { ...all, beside: a } : null] })
+      })
+    return () => { live = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [week, all])
+  // Only the pages read for the boards on screen: new boards wait for theirs.
+  return got && got.week === week && got.all === all ? got.boards : [null, null]
 }
 
 // ── 東西 — both periods on one board (plan 248) ──────────────────
@@ -164,7 +194,7 @@ function BothBoard({ week, all, t, lang, onPick }) {
           <div key={rank} className="desk-bz__row" role="row">
             <SideCell e={sides[0].get(rank)} me={mes[0]} lang={lang} t={t} onPick={onPick} west />
             <span className="desk-bz__rank" role="rowheader">
-              <span className={`leaderboard-row__rank${medal ? ` leaderboard-row__rank--${medal}` : ''}`}>{rank}</span>
+              <span className={`leaderboard-row__rank${medal ? ` leaderboard-row__rank--${medal}` : ''}`}><span className="bz-num">{rank}</span></span>
             </span>
             <SideCell e={sides[1].get(rank)} me={mes[1]} lang={lang} t={t} onPick={onPick} />
           </div>

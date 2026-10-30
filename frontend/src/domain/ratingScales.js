@@ -5,9 +5,9 @@
 // that does not change with the bar. Each shorter bar is the longer one
 // with buttons left off, never a rescaling:
 //
-//   binary  [4, 1]              correct / wrong
-//   simple  [4, 3, 2, 1]        + difficult, almost   (the default)
-//   full    [5, 4, 3, 2, 1, 0]  + perfect, blackout
+//   binary  [4, 1]              correct / missed
+//   simple  [5, 4, 2, 1]        + easy, almost        (the default)
+//   full    [5, 4, 3, 2, 1, 0]  + difficult, forgot
 //
 // So a stored 4 means Correct whichever bar was on screen when it was
 // pressed, the stats mix stays directly comparable, and a learner can
@@ -15,20 +15,19 @@
 // underneath them. Nothing anywhere needs to know which bar a row came
 // from, which is the whole reason the scales nest.
 //
-// Why the default is four: blackout and perfect went almost entirely
-// unused. Six segments is also a squeeze on a phone (the bar wraps to
-// two rows below 560px) and a six-way judgement is a slower decision
-// than a four-way one on a control you press hundreds of times a day.
+// Why the default is four: six segments are a squeeze on a phone (the
+// bar wraps to two rows below 560px) and a six-way judgement is a slower
+// decision than a four-way one on a control you press hundreds of times a day.
 //
-// Dropping perfect had a cost that had to be paid on the backend: 4 is
-// the best answer the shorter bars can give, and it used to leave a
-// card's difficulty untouched while 3 raised it, so nothing on them
-// could ever say "that one is getting easier". See the PASS table in
-// backend/srs/scheduler.py, where 4 now eases a card and 5 eases it
-// further.
+// The four are two misses and two passes, the owner's pick: Missed and
+// Almost, Correct and Easy. A near miss keeps a step of progress (the
+// FAIL table in backend/srs/scheduler.py), and 4 eases a card and 5
+// eases it further, so both shorter bars can still say "that one is
+// getting easier" (its PASS table). Difficult (3) and Forgot (0) are the
+// six-button bar's alone.
 //
 // The two-button bar needs no further backend work — it is exactly the
-// four-button bar with Difficult and Almost never pressed — but it does
+// four-button bar with Easy and Almost never pressed — but it does
 // give up something real, and it is the right thing to give up
 // knowingly: with no Difficult there is no way to slow a card down
 // short of failing it, so a card you keep getting right drifts to the
@@ -45,7 +44,7 @@ export const DEFAULT_RATING_SCALE = 'simple'
 // DRAWS them worst-first; that is a display-only reversal.
 export const RATING_SCALES = {
   binary: { id: 'binary', qualities: [4, 1] },
-  simple: { id: 'simple', qualities: [4, 3, 2, 1] },
+  simple: { id: 'simple', qualities: [5, 4, 2, 1] },
   full:   { id: 'full',   qualities: [5, 4, 3, 2, 1, 0] },
 }
 
@@ -54,12 +53,12 @@ export const RATING_SCALES = {
 // buttons they share are labelled identically and the stats screen
 // needs to know nothing about which bar is in use.
 export const QUALITY_LABEL_KEY = {
-  5: 'perfect',
+  5: 'easy',
   4: 'correctHesit',
   3: 'difficult',
   2: 'wrongSeen',
   1: 'wrongRated',
-  0: 'blackout',
+  0: 'forgot',
 }
 
 /** The named scale, or the default for anything unrecognised — a stale

@@ -15,6 +15,7 @@
 import { pickVariedReadings, isOnyomiToken } from '../../domain/readingPick'
 import { formatPct, topReadings } from '../../domain/readingShare'
 import { useLang } from '../../LangContext'
+import { InfoIcon } from '../ui/Icons'
 
 // Exported so DictionaryScreen's card-preview truncation (shortKana)
 // splits on the exact same separators instead of drifting out of
@@ -116,7 +117,25 @@ function readingVars(size, color, isLarge) {
   }
 }
 
-export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false, limit, moreLabel }) {
+// A register's name over its readings. With `onExplain` (the study
+// card's, plan 276) the name is a door onto the sheet that says what
+// the two readings are; its tap is its own and never turns the card
+// it sits on.
+function GroupLabel({ label, center, onExplain }) {
+  return (
+    <div className={`reading-group__label${center ? ' reading-group__label--center' : ''}`}>
+      {onExplain ? (
+        <button type="button" className="reading-group__door" aria-haspopup="dialog"
+                onClick={e => { e.stopPropagation(); onExplain() }}>
+          {label}
+          <InfoIcon size={14} />
+        </button>
+      ) : label}
+    </div>
+  )
+}
+
+export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false, limit, moreLabel, onExplain }) {
   if (!readings.length) return null
   // The study card passes a limit; the dictionary passes none and gets
   // the lot. See domain/readingPick for why the few are chosen by stem
@@ -126,11 +145,7 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
   const style = readingVars(size, color, isLarge)
   return (
     <div className="reading-group" style={style}>
-      {label && (
-        <div className={`reading-group__label${center ? ' reading-group__label--center' : ''}`}>
-          {label}
-        </div>
-      )}
+      {label && <GroupLabel label={label} center={center} onExplain={onExplain} />}
       <div className={`reading-group__list${center ? ' reading-group__list--center' : ''}`}>
         {shown.map((r, i) => (
           <span key={i} className="reading-group__item">
@@ -153,7 +168,7 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
 // Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
 // kanji's mixed readings, or a plain (numbered if there's more than one)
 // list for a single-register reading like vocab. Returns null if empty.
-export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false, limit, moreLabel }) {
+export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false, limit, moreLabel, onExplain }) {
   const tokens = splitReadingTokens(kana)
   if (!tokens.length) return null
 
@@ -163,8 +178,8 @@ export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = f
   if (on.length && kun.length) {
     return (
       <div>
-        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} />
-        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} />
+        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} onExplain={onExplain} />
+        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} onExplain={onExplain} />
       </div>
     )
   }
@@ -180,7 +195,7 @@ export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = f
 // readings, and the readings the card leaves out are counted as "+N".
 // Returns null where the kanji has no word in the course, so the caller
 // keeps the list it had.
-export function ReadingShares({ kana, shares, onLabel, kunLabel, size = 25, isLarge = false, moreLabel }) {
+export function ReadingShares({ kana, shares, onLabel, kunLabel, size = 25, isLarge = false, moreLabel, onExplain }) {
   const { lang } = useLang()
   const { top, more } = topReadings(splitReadingTokens(kana), shares)
   if (!top.length) return null
@@ -192,7 +207,7 @@ export function ReadingShares({ kana, shares, onLabel, kunLabel, size = 25, isLa
     <div className="reading-shares" style={readingVars(size, undefined, isLarge)}>
       {groups.map(([label, list]) => (
         <div key={label} className="reading-group">
-          <div className="reading-group__label reading-group__label--center">{label}</div>
+          <GroupLabel label={label} center onExplain={onExplain} />
           <div className="reading-group__list reading-group__list--center">
             {list.map(r => (
               <span key={r.reading} className={`reading-share reading-share--${r.tier}`}>

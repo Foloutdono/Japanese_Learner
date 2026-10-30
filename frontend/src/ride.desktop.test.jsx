@@ -148,7 +148,7 @@ describe('the ride\'s ends on the desk (P8)', () => {
     expect(onNext).toHaveBeenCalledTimes(1)
   })
 
-  it('stamps the lesson from the plate on Enter', async () => {
+  it('enters the station from the graded breakdown on Enter', async () => {
     const onDone = vi.fn()
     await mount(<RideReading session={{ access_token: 'tok' }} onDone={onDone} />, '/ride/reading-run')
     await settle(950)
@@ -157,16 +157,18 @@ describe('the ride\'s ends on the desk (P8)', () => {
     await settle(250)
     await userEvent.keyboard('1')
     await settle(250)
-    // Graded: Continue goes on to the plate, on Enter too.
-    await userEvent.keyboard('{Enter}')
-    await settle(250)
-    const go = $('.ride__plate [data-action="enter"]')
-    expect(go, 'the plate is up').toBeTruthy()
+    // Graded: the breakdown's one action enters the station (plan 292:
+    // no plate after it), on Enter too.
+    const go = $('.stage__foot [data-action="enter"]')
+    expect(go, 'the way in is up').toBeTruthy()
     expect(go.getAttribute('aria-keyshortcuts')).toBe('Enter')
+    expect($('.ride__plate')).toBeNull()
     await userEvent.keyboard('{Enter}')
     await settle(250)
-    const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
-    expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
+    expect($('.gate-probe')).not.toBeNull()
+    const done = posts().filter(([u]) => u === '/api/onboarding/ride/done')
+    expect(done).toHaveLength(1)
+    expect(JSON.parse(done[0][2].body)).toEqual({ skipped: false })
     expect(onDone).toHaveBeenCalledTimes(1)
   })
 })
@@ -281,10 +283,10 @@ describe('the reading ride on the desk\'s panels (P12)', () => {
     expect($('.desk-run__side .desk-sealed')).toBeNull()
     expect($('.desk-run__side').textContent).toContain('station')
     expect($('.desk-sentence__text').textContent).toBe(SENTENCE.phrase)
-    expect($('.desk-sentence__dot--q4')).not.toBeNull()  // '1' is the best tile: q4 on the default scale
+    expect($('.desk-sentence__dot--q5')).not.toBeNull()  // '1' is the best tile: q5 on the default scale
     expect(figure()).toBe('1')
     // The lesson is over at its grade (2026-10-18): stamped now, not on
-    // the plate's Enter, so a ride left at the plate is not begun again.
+    // the way out, so a ride left at its breakdown is not begun again.
     const done = posts().filter(([u]) => u === '/api/onboarding/ride/done')
     expect(done).toHaveLength(1)
     expect(JSON.parse(done[0][2].body)).toEqual({ skipped: false })

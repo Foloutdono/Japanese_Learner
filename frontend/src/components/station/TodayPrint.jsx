@@ -42,24 +42,70 @@ import { PRINT, usePrintScene } from './print/usePrint'
 const lifted = new WeakMap()
 const drawn = (scene, name) => `<svg viewBox="0 0 ${scene.w} ${scene.h}" focusable="false">${scene.layers[name]}</svg>`
 
+// 予熱 (plan 292): each layer as it stood when Today was last left, put
+// back as it is when Today is opened again. Rebuilt at every visit, the
+// hand-over alone (getAnimations, then every loop's keyframes) held the
+// tab bar's tap for most of a second on a phone. Its loops are paused
+// while it is out of the page -- the browser would go on turning them,
+// unseen, on every frame of every other screen -- and play again, all
+// together and so still in step, when it is back. One print's layers at
+// a time: another print (the hour turned, the frame went wide) lets the
+// last one's go.
+let kept = { scene: null, layers: new Map() }
+
+function keptLayers(scene) {
+  if (kept.scene !== scene) {
+    for (const layer of kept.layers.values()) for (const a of layer.moving) a.cancel()
+    kept = { scene, layers: new Map() }
+  }
+  return kept.layers
+}
+
+function buildLayer(el, scene, name) {
+  const done = lifted.get(scene) ?? {}
+  if (!(name in done)) {
+    el.innerHTML = drawn(scene, name)
+    try {
+      done[name] = `<div class="tpr-lift__root">${liftLayer(el.firstChild)}</div>`
+    } catch {
+      done[name] = null
+    }
+    lifted.set(scene, done)
+  }
+  el.innerHTML = done[name] ?? drawn(scene, name)
+  return { node: el.firstChild, moving: done[name] ? handOver(el.firstChild) : [] }
+}
+
 function PrintLayer({ scene, name }) {
   const ref = useRef(null)
   const reduced = useReducedMotion()
   useLayoutEffect(() => {
     const el = ref.current
-    const done = lifted.get(scene) ?? {}
-    if (!(name in done)) {
-      el.innerHTML = drawn(scene, name)
-      try {
-        done[name] = `<div class="tpr-lift__root">${liftLayer(el.firstChild)}</div>`
-      } catch {
-        done[name] = null
+    const layers = keptLayers(scene)
+    const key = `${name}:${reduced ? 'still' : 'moving'}`
+    let layer = layers.get(key)
+    // Another print mounted at once keeps its own: a node has one place.
+    if (layer && !layer.node.isConnected) {
+      el.replaceChildren(layer.node)
+      for (const a of layer.moving) a.play()
+    } else {
+      // A change to reduced motion lets the other way go.
+      for (const [k, other] of layers) {
+        if (k !== key && k.startsWith(`${name}:`) && !other.node.isConnected) {
+          for (const a of other.moving) a.cancel()
+          layers.delete(k)
+        }
       }
-      lifted.set(scene, done)
+      layer = buildLayer(el, scene, name)
+      if (!layers.has(key)) layers.set(key, layer)
     }
-    el.innerHTML = done[name] ?? drawn(scene, name)
-    const moving = done[name] ? handOver(el.firstChild) : []
-    return () => { for (const a of moving) a.cancel() }
+    // Taken out and paused, for the next visit to play again. A layer
+    // not kept (another print held the place) stops for good.
+    return () => {
+      layer.node.remove()
+      const keep = kept.layers.get(key) === layer
+      for (const a of layer.moving) keep ? a.pause() : a.cancel()
+    }
   }, [scene, name, reduced])
   return <div className="tpr__layer" ref={ref} />
 }

@@ -77,7 +77,10 @@ img, video { display: block; max-width: 100%; }
 .gate__reader { position: relative; width: 48px; height: 48px; border-radius: var(--r-pill); background: var(--bg-panel); color: var(--gate-lamp); display: flex; align-items: center; justify-content: center; }
 .gate__rip { position: absolute; inset: 0; border: 2px solid color-mix(in srgb, var(--bg-panel) 55%, transparent); border-radius: inherit; animation: rip 2.2s ease-out infinite; }
 .gate__rip + .gate__rip { animation-delay: 1.1s; }
-.gate__word { font-weight: 700; font-size: var(--fs-lead); white-space: nowrap; text-align: center; }
+.gate__word { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); font-weight: 700; font-size: var(--fs-lead); line-height: 1.15; white-space: nowrap; text-align: center; }
+/* The fare under the word, in the gate's own ink: a dimmed ink fails
+   contrast on the deep end of the gold. */
+.gate__sub { font-size: var(--fs-caption); letter-spacing: var(--tr-caption); text-transform: uppercase; }
 .wave { position: relative; width: 22px; height: 24px; translate: -4px 0; }
 .wave i { position: absolute; top: 50%; left: 1px; border: 2px solid transparent; border-right-color: currentColor; border-radius: 50%; }
 .wave i:nth-child(1) { width: 8px; height: 8px; margin-top: -4px; }
@@ -358,8 +361,8 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .rbar__dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--dot); transition: box-shadow .2s ease; }
 .q1 { --dot: var(--rating-wrong); }
 .q2 { --dot: var(--rust); }
-.q3 { --dot: var(--warning); }
-.q4 { --dot: var(--teal); }
+.q4 { --dot: var(--text-on-panel-soft); }
+.q5 { --dot: var(--teal); }
 /* The press is the bar's whole acknowledgement (DESIGN.md, the rating bar). */
 .is-pressed .rbar__dot { box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot) 35%, transparent); }
 .rbar button.is-pressed { background: color-mix(in srgb, var(--text-on-panel) 8%, transparent); }
@@ -1046,8 +1049,11 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
        the reader and a reader's width of pill) centres the word in the
        pill past the reader instead of pushing it off centre. */
     .fare__stub { container: stub / inline-size; }
+    /* Nor has it the width for the fare under the word, which the
+       ticket's heading beside it already says. */
     @container stub (max-width: 279px) {
       .fare__gate { grid-template-columns: 48px minmax(0, 1fr); }
+      .fare__gate .gate__sub { display: none; }
     }
     .promises > div { padding: var(--sp-6) var(--sp-7); }
     @media (max-height: 899px) {

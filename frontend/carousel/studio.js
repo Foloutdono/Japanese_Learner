@@ -405,6 +405,8 @@ async function render() {
   }
   $('#export-short').hidden = clipped
   $('#copy-short').hidden = clipped
+  // A story that plays whole has its own download (plan 281).
+  $('#export-story-clip').hidden = !current.decks[0]?.slides.clips?.story
   const typeName = id => (promo ? PROMO.en.names[state.story] : T.types[id].name)
   $('#export-name').textContent = typeName(state.type)
   const stage = $('#stage')
@@ -807,10 +809,15 @@ async function exportOne() {
 }
 // ── The clips (plan 231) ──────────────────────────────────────
 // A promo story's cover, or its call to action, in motion, seven
-// seconds, encoded here as the feeds take a video: H.264 in an MP4
-// (WebCodecs, muxed by mp4-muxer).
+// seconds, or a story played whole (plan 281), encoded here as the feeds
+// take a video: H.264 in an MP4 (WebCodecs, muxed by mp4-muxer).
 const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm'
-const CLIPS = { cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' }, end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' } }
+const CLIPS = {
+  cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' },
+  end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' },
+  // A story played whole, beat after beat (the duels', plan 281).
+  story: { btn: '#export-story-clip', name: 'story', said: 'story' },
+}
 async function exportClip(which = 'cover') {
   const d = current.decks[0]
   const clip = d?.slides.clips?.[which]
@@ -1041,6 +1048,7 @@ function wire() {
   $('#export').addEventListener('click', exportZip)
   $('#export-clip').addEventListener('click', () => exportClip('cover'))
   $('#export-end-clip').addEventListener('click', () => exportClip('end'))
+  $('#export-story-clip').addEventListener('click', () => exportClip('story'))
   $('#copy').addEventListener('click', () => copyField('#caption', state.source === 'long' ? 'Description' : 'Caption'))
   $('#copy-tags').addEventListener('click', () => copyField('#tags', 'Tags'))
   $('#copy-command').addEventListener('click', async () => {

@@ -104,6 +104,6 @@ describe('a whole scene on a short window (plan 221)', () => {
     inTalk(document.querySelector('.kaiwa-talk > .kaiwa-line--taken'))
     inTalk(document.querySelector('.kaiwa-talk > .kaiwa-line--right'))
     inWindow(primary())
-    screen.unmount()
+    await screen.unmount()
   })
 })

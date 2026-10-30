@@ -10,7 +10,7 @@ import Empty from '../ui/Empty'
 import { Loading } from '../ui/Loading'
 import { deckTypeOf } from './deckTypes'
 import { DeckSamples } from './GateShelf'
-import { BooksIcon, WarningIcon } from '../ui/Icons'
+import { BooksIcon, WarningIcon, FlagIcon } from '../ui/Icons'
 
 // ── One published deck, before you commit to it ───────────────
 // The page you read to decide. It shows what the deck is, who wrote it,
@@ -149,7 +149,7 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
       )}
 
       <Sheet open={reportOpen} onClose={() => setReport(false)} label={t.libraryReport}
-        cap={t.libraryReport} dismiss>
+        title={t.libraryReport} icon={FlagIcon} line="var(--line-decks)" dismiss>
         <p className="lib-note">{t.libraryReportNote}</p>
         <div className="type-list" role="group" aria-label={t.libraryReport}>
           {REASONS.map(([reason, key]) => (

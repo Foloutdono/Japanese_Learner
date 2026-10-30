@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, onTestFinished } from 'vitest'
 import { render } from 'vitest-browser-react'
 import './index.css'
 
@@ -45,6 +45,8 @@ vi.mock('./lib/audio', async o => ({
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: App } = await import('./App')
+const { apiFetch } = await import('./lib/api')
+const { refreshSummary } = await import('./stores/profileSummary')
 
 const CARDS = [
   { card_id: 'vocab_N5__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b', kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N5', romaji: 'konnichiwa', stage: null, review_preview: null, hints: {} },
@@ -112,7 +114,8 @@ async function backFromTheGate() {
   expect(window.location.pathname).toBe('/today')
 }
 
-/** The sentence written and graded: the lesson over, the plate up. */
+/** The sentence written and graded: the lesson over, into the station
+ *  (plan 292: no plate after it). */
 async function rideTheReading(root) {
   await found(root, '.sentence')
   const input = root.querySelector('input')
@@ -122,7 +125,7 @@ async function rideTheReading(root) {
   root.querySelector('.stage__foot button').click()
   await graded(root)
   root.querySelector('.rating-bar__btn--q4').click()
-  await found(root, '.ride__plate')
+  await at('/today')
 }
 
 beforeEach(() => {
@@ -245,13 +248,14 @@ describe('Back on the first ride, at 390×844', () => {
   })
 })
 
-// ── The lesson is over at its grade, not at « Entrer en gare » ──────
+// ── The lesson is over at its grade ─────────────────────────────────
 // Reported 2026-10-18 from the trail: a learner reached the reading's
 // plate, left it some other way than its button, and the front door
-// boarded them onto the first card again. The stamp is the grade's
-// now, and the cards done leave a note the door reads.
+// boarded them onto the first card again. The stamp is the grade's, and
+// on a phone the grade is the way into the station since plan 292; the
+// cards done leave a note the door reads.
 describe('A ride left before its last button, at 390×844', () => {
-  it('is stamped the moment the sentence is graded, and Back from the plate is no skip', async () => {
+  it('is stamped the moment the sentence is graded, and the grade enters the station', async () => {
     const root = await boot()
     await at('/ride/cards')
     await rideTheCards(root)
@@ -261,11 +265,38 @@ describe('A ride left before its last button, at 390×844', () => {
     const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
     expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
     expect(rideDone()).toEqual([expect.objectContaining({ skipped: false, at: 'reading' })])
+    expect(views().at(-1)).toBe('/today')
 
-    window.history.back()
-    await at('/today')
+    await backFromTheGate()
     expect(rideDone()).toHaveLength(1)
     expect(posts().filter(([u]) => u === '/api/onboarding/ride/done')).toHaveLength(1)
+  })
+
+  // 入門 (plan 170): the learner with no kana has no sentence to read, so
+  // the cards' last button stamps the lesson and enters the station.
+  it('takes a learner with no kana from the cards into the station', async () => {
+    // The summary the cards read says so, as /api/profile does.
+    const answer = apiFetch.getMockImplementation()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ dailyNewTarget: 10, kanaKnown: 'none' }) }))
+    onTestFinished(async () => {
+      apiFetch.mockImplementation(answer)
+      await refreshSummary()
+    })
+    await refreshSummary()
+    const root = await boot({ ...PROFILE, kanaKnown: 'none' })
+    await at('/ride/intro')
+    await found(root, 'main.brd.nyu')
+    await vi.waitFor(() => expect(window.history.state?.guard).toBe(true), { timeout: 4000 })
+    // The introduction's first screen: Back is its Skip, to the cards.
+    window.history.back()
+    await at('/ride/cards')
+    await rideTheCards(root)
+
+    await at('/today')
+    const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
+    expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
+    expect(rideDone()).toEqual([expect.objectContaining({ skipped: false, at: 'cards' })])
+    expect(views()).not.toContain('/ride/reading')
     await backFromTheGate()
   })
 

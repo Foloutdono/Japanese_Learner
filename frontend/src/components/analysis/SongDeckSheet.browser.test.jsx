@@ -121,7 +121,7 @@ describe('the song sheet', () => {
     expect(doors[0].querySelector('.picker-row__roundel').textContent).toBe('歌')
     expect(doors[0].querySelector('.picker-row__count').textContent).toBe(en.cardsUnit(7))
     expect(document.querySelector('form.anl-song')).toBeNull()
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('takes only the half that is pressed, and nothing without a name', async () => {
@@ -150,7 +150,7 @@ describe('the song sheet', () => {
     expect(mining.ensureDeck).toHaveBeenCalledWith('lyrics', 'Yoru', { remember: false })
     expect(apiJson.mock.calls.some(([url]) => url === '/api/decks/3/cards/app')).toBe(false)
     expect(track).toHaveBeenCalledWith('song_deck', { words: 0, lines: 2 })
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('tops a deck made before up with the lines it does not hold', async () => {
@@ -161,7 +161,7 @@ describe('the song sheet', () => {
     await settle(120)
     const lines = apiJson.mock.calls.filter(([url]) => url === '/api/decks/3/cards/batch')
     expect(JSON.parse(lines[0][2].body).cards.map(c => c.front)).toEqual(['夜が来る'])
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('says so when the plan\'s limit leaves part of the song out', async () => {
@@ -173,7 +173,7 @@ describe('the song sheet', () => {
     expect(document.querySelector('.anl-song__error').textContent).toBe(en.songDeckLimit)
     // The deck was made all the same, and stays reachable.
     expect(document.querySelectorAll('a.anl-song__deck')).toHaveLength(1)
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('keeps the form, and says so, when a deck cannot be made', async () => {
@@ -185,6 +185,6 @@ describe('the song sheet', () => {
     expect(document.querySelector('.anl-song__error').textContent).toBe(en.songDeckFailed)
     expect(document.querySelector('form.anl-song')).not.toBeNull()
     expect(track).not.toHaveBeenCalled()
-    screen.unmount()
+    await screen.unmount()
   })
 })

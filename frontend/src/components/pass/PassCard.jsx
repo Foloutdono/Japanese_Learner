@@ -62,7 +62,7 @@ export function FacePrint({ tier, name, level, share, levelSlot = null }) {
  * sparks).
  */
 export function CardFace({ tier, name, level, share, levelSlot, className = '', label, children }) {
-  const [ref, width] = useSlotWidth()
+  const [ref, width] = useSlotWidth(className)
   return (
     <div
       ref={ref}
@@ -113,7 +113,7 @@ function useTurning(side) {
  */
 export function PassCard({ tier, name, level, share, side = 'face', onTurn, back, className = '', label }) {
   const { t } = useLang()
-  const [ref, width] = useSlotWidth()
+  const [ref, width] = useSlotWidth(className)
   const turned = side === 'back'
   const turning = useTurning(side)
   const offDoor = e => {

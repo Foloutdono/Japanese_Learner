@@ -23,7 +23,7 @@ vi.mock('./stores/today', () => ({
   refreshToday: vi.fn(),
   seedTodaySummary: vi.fn(),
 }))
-vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []) }))
+vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []), reviewsSettled: vi.fn(async () => {}) }))
 const apiFetch = vi.hoisted(() => vi.fn())
 const apiJson = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({

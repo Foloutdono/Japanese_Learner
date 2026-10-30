@@ -172,7 +172,7 @@ describe('a whole scene on a phone (plan 221)', () => {
     // tile read as cut off under the floor.
     const last = [...document.querySelectorAll('.kaiwa-reply')].at(-1).getBoundingClientRect()
     expect(document.querySelector('.run-floor').getBoundingClientRect().top - last.bottom).toBeGreaterThanOrEqual(16)
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('draws the talk as bubbles: theirs at the left on the line\'s rail, the learner\'s at the right on the gold (plan 223)', async () => {
@@ -192,7 +192,7 @@ describe('a whole scene on a phone (plan 221)', () => {
     const who = theirs.parentElement.querySelector('.tour-line__who')
     expect(who.textContent).toBe(LONG_SCENE.them)
     expect(who.getBoundingClientRect().width).toBeLessThanOrEqual(1)
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('sends a wrong pick into the talk struck, the right reply after it, the exchange in view and Next under it', async () => {
@@ -220,7 +220,7 @@ describe('a whole scene on a phone (plan 221)', () => {
     inTalk(document.querySelector('.kaiwa-over'))
     document.querySelectorAll('.stage__foot button').forEach(onScreen)
     pageIsStill()
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('keeps what to say and the field on the screen in Translate, and the practice card in view', async () => {
@@ -241,7 +241,7 @@ describe('a whole scene on a phone (plan 221)', () => {
     expect(talkBox().scrollHeight).toBeGreaterThan(talkBox().clientHeight)
     inTalk(document.querySelector('.kaiwa-ask'))
     onScreen(document.querySelector('.stage__foot input'))
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('holds the free talk\'s wait in the talk, then the learner\'s line in view over the bar', async () => {
@@ -266,6 +266,6 @@ describe('a whole scene on a phone (plan 221)', () => {
     }
     expect(talkBox().scrollHeight).toBeGreaterThan(talkBox().clientHeight)
     onScreen(document.querySelector('.stage__foot input'))
-    screen.unmount()
+    await screen.unmount()
   })
 })

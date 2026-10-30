@@ -100,10 +100,9 @@ const nav = {
   runOutCleared:     (n) => `${n} cleared`,
   runOutWaiting:     (n) => `${n} wait${n === 1 ? 's' : ''} for the refill`,
   runOutWaits:       'waiting',
-  // 補充 — what the refill landed while the app was closed (plan 141)
-  claimTitle:        'While you were away',
-  claimButton:       'Claim',
-  claimBookLabel:    (n, cap) => `${n} credit${n === 1 ? '' : 's'} of ${cap}`,
+  // 補充 — what the refill landed while the app was closed, told as the
+  // card is charged with it (plans 141, 278), to a screen reader
+  refillLanded:      (n, to, cap) => `${n} credit${n === 1 ? '' : 's'} landed while you were away · ${to} of ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'free',
   laneNew:           n => `${n} new`,
@@ -152,6 +151,10 @@ const nav = {
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Modes: ${name}`,
   gateLineNone:      'No service today',
+  // 主 (plan 273): the modes of a line, added to Today or taken off.
+  gateLineAdd:       'Also in Today',
+  gateModeAdd:       mode => `Add “${mode}” to Today`,
+  gateModeRemove:    mode => `Take “${mode}” off Today`,
   gateOpensAt:       at => `Opens at ${at}`,
   gateOpensIn:       when => `Opens ${when}`,
   todayDayLabel:     'Your day',
@@ -196,6 +199,7 @@ const nav = {
   ofrCardFareMax:     'Practice · no credit',
   // ── 定期券 — the card, face and back (plan 173) ──
   cardFree:           'Free',
+  cardPaid:           'Pass',
   cardFareFree:       'Practice · locked',
   cardTurn:           'Turn the card over',
   cardLevelTo:        (a, b) => `Level ${a} → ${b}`,
@@ -485,6 +489,8 @@ const quiz = {
   typeRomaji:        'Type the romaji…',
   tapToFlip:          'Tap to flip',
   tapToReveal:         'Tap to reveal',
+  // A Kanji → meaning card's front says what it asks (plan 276).
+  askKanjiMeaning:     'What does it mean?',
   // The desk's hint (plan 113): a key cap, then the words after it.
   keySpace:            'Space',
   revealByKey:         'to reveal',
@@ -584,21 +590,23 @@ const quiz = {
   // that pair with them (plan 045's rebuilt bar) are `ratingJp` below —
   // the term itself, identical in every language. Plan 045's
   // mockup restates wrongSeen as ALMOST (clearer against 惜しい than the
-  // original "Wrong (seen)"); wrongRated's WRONG already matched "Wrong".
+  // original "Wrong (seen)"). Easy (5), Missed (1) and Forgot (0) replaced
+  // Perfect, Wrong and Blackout when the four-button bar became
+  // Missed / Difficult / Correct / Easy.
   to:                'to',
-  perfect:           'Perfect',
+  easy:              'Easy',
   correctHesit:      'Correct',
   difficult:         'Difficult',
   wrongSeen:         'Almost',
-  wrongRated:        'Wrong',
-  blackout:          'Blackout',
+  wrongRated:        'Missed',
+  forgot:            'Forgot',
   ratingJp: {
-    perfect:         '完璧',
+    easy:            '簡単',
     correctHesit:    '正解',
     difficult:       '難しい',
     wrongSeen:       '惜しい',
     wrongRated:      '不正解',
-    blackout:        '白紙',
+    forgot:          '忘れた',
   },
 
   // Mode labels
@@ -892,6 +900,9 @@ const stats = {
   soundMixer:         'Mixer',
   levelName:          { N5: 'Beginner', N4: 'Elementary', N3: 'Intermediate', N2: 'Advanced', N1: 'Proficient' },
   settingsPaceCap:    'New items a day',
+  settingsPaceOwn: 'Custom',
+  settingsPaceLess: 'One fewer a day',
+  settingsPaceMore: 'One more a day',
   settingsPaceCustom: n => `Your pace is set to ${n} a day.`,
   paceName:           { local: 'Local', rapid: 'Rapid', express: 'Express' },
   levelUpTitle:       l => `Move up to ${l}?`,
@@ -909,6 +920,18 @@ const stats = {
   levelUpGo:          l => `Move up to ${l}`,
   levelDownGo:        l => `Move down to ${l}`,
   levelStay:          l => `Stay at ${l}`,
+  // 主 — the mode each line is ridden in (plan 273), Settings › Main
+  // modes and its confirm sheet.
+  settingsModes:      'Main modes',
+  settingsModesValue: 'One per line',
+  settingsModesHint:  'Today teaches each line in its main mode. Add more of its modes beside it, here or from Today.',
+  settingsModesAlso:  'Also in Today',
+  modeSwitchTitle:    mode => `Learn in “${mode}”?`,
+  modeSwitchBody:     (from, to, weeks) => `Keep what you have mastered in **${from}**: those cards are marked known in **${to}**, with a first check spread over the next ${weeks} weeks. Or start from zero: every card is new in **${to}**. Either way, **nothing is deleted.**`,
+  modeSwitchBodyNone: to => `Every card is new in **${to}**, and Today starts with the ones you have not met. **Nothing is deleted.**`,
+  modeSwitchGo:       mode => `Switch to “${mode}”`,
+  modeSwitchKeep:     'Keep what I know',
+  modeSwitchFresh:    'Start from zero',
   fitDown: (to, passed, answered) => `${to} · ${passed} of ${answered} checks known`,
   fitUp: (level, known, met) => `${level} · ${known} of ${met} new words already known`,
   fitDownGo: to => `Board at ${to}`,
@@ -1762,6 +1785,14 @@ const dictionary = {
   // The 熟 on a word row whose reading belongs to the whole word
   // (今朝 けさ, 時計 とけい), not to the kanji the row is about.
   readingsWhole:     'Read as a whole word',
+  // Plan 276: the sheet a kanji card's two register names open
+  // (components/study/ReadingsHelp, domain/readingsHelp).
+  readingsHelpCap:   'The two readings',
+  readingsHelpOn:    'It came from China with the kanji and is written in katakana. It is mostly the reading of words of several kanji.',
+  readingsHelpKun:   'The Japanese word the kanji came to write, in hiragana. Often the kanji alone, or followed by kana.',
+  readingsHelpShare: (kanji) => `The share of the course's words that read ${kanji} this way: start with the highest.`,
+  readingsHelpTilde: (kanji, side, word) => `A reading ${kanji} takes ${side === 'after' ? 'after' : 'before'} another part of the word${word ? `: ${word.kanji}, ${word.kana}` : ''}.`,
+  readingsHelpDot:   (written) => `After the dot come kana: ${written}.`,
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',
@@ -1806,9 +1837,7 @@ const progress = {
 const misc = {
   mute:    'Mute',
   unmute:  'Unmute',
-  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} more reading${n > 1 ? 's' : ''} — the dictionary card has them all`,
-  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'word',
   // Shown by components/study/SessionError when a study session has
@@ -2160,9 +2189,9 @@ const decks = {
   // Browse existing cards (BrowseCardsMenu.jsx)
   browseBtn:              'Browse',
   browseTitle:            'Browse existing cards',
-  browseTabKanji:         '漢字 Kanji',
-  browseTabVocab:         '語彙 Vocabulary',
-  browseTabGrammar:       '文法 Grammar',
+  browseTabKanji:         'Kanji',
+  browseTabVocab:         'Vocabulary',
+  browseTabGrammar:       'Grammar',
   browseAllLevels:        'All',
   browseSearchPlaceholder: 'Search (kanji, kana, meaning…)',
   browseResults:          'Results',
@@ -2549,8 +2578,9 @@ const boarding = {
   brdNotifText: 'Your cards are waiting at the gate.',
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
   // Settings › Notifications (plan 156). The nudge's title and body are
-  // written from what the gate will hold at the learner's hour.
-  nudgeTitle: (time, n) => `Your ${time} train · ${n} ${n === 1 ? 'card' : 'cards'}`,
+  // written from what the gate will hold at the learner's hour; the
+  // title leads with the hour, as a departure board's row (plan 293).
+  nudgeTitle: (time, n) => `${time} · ${n} ${n === 1 ? 'card' : 'cards'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'About a minute' : `About ${m} min`),
   nudgeNew: (n) => `${n} new`,
   // The reminders' channel, as Android's settings name it (lib/native.js).
@@ -2679,7 +2709,7 @@ const boarding = {
   brdRowGoal: (stop, date) => (date ? `${stop} · arriving ${date}` : stop),
   brdRowRhythm: (name, min) => `${name} · ${min} min a day`,
   brdGoalCap: (min) => `at ${min} min a day`,
-  brdNameOptional: 'optional',
+  brdNameOptional: 'Optional',
   brdNamePlaceholder: 'Your first name',
   brdNameNote: 'It is printed on your card. In Latin letters, it is also your public name on the leaderboard.',
   brdNameSave: 'Save',
@@ -2698,6 +2728,14 @@ const boarding = {
   brdAgendaAdd: 'Add to my calendar',
   brdAgendaTitle: 'Tsuji · your Japanese train',
   brdAgendaBody: (min) => `${min} min of Japanese, every day.`,
+  // Boarding inside another app's browser (lib/inAppBrowser.js): a card
+  // made there stays there.
+  brdSheetOutside: 'Browser',
+  brdOutsideLede: (app) => `A card made inside ${app} stays inside ${app}: your browser won’t see it.`,
+  brdOutsideMenu: 'Or use the ⋯ menu at the top of the screen to open this page in your browser.',
+  brdOutsideSafari: 'Open in Safari',
+  brdOutsideChrome: 'Open in Chrome',
+  brdOutsideStay: (app) => `Stay in ${app}`,
 }
 
 const ride = {
@@ -2720,8 +2758,8 @@ const ride = {
   rideGuessed: 'Got the new one right? If it was a guess, choose Wrong next time, or it won’t come back for days.',
   rideDoneBody: n => `That’s it! **${n} new words a day**, each one back right before you’d forget it.`,
   rideContinue: 'Continue',
-  // The reading ride (plan 099): the sentence, the field, the measure,
-  // then the plate that says which platforms ride on the pass.
+  // The reading ride (plan 099): the sentence, the field, the measure;
+  // the grade enters the station (its plate went in plan 292).
   rideReadFront: 'Read it quick! It disappears in a moment.',
   rideReadFrontUntimed: 'Read it, then type it out in romaji or kana.',
   rideReadType: 'Type what you read, in romaji or kana.',
@@ -2730,9 +2768,6 @@ const ride = {
   // Plan 133. On a phone: the known card is not graded until its entry
   // has been opened from the 🔍 and closed again.
   rideKnownDict: 'Every card has a dictionary entry. Tap 🔍 to open this one, then close it.',
-  ridePlateCap: 'The pass',
-  ridePlateBody: 'These practice modes come with the pass.',
-  ridePlateOpen: 'For now, they’re free for everyone.',
 }
 
 const guide = {
@@ -2748,8 +2783,9 @@ const guide = {
   guideHelpTour: gate => `Guided tour: ${gate}`,
   guideTodayGate: 'Today’s reviews and the time they take. Adjust picks the cards and the lines, then hit Depart.',
   guideTabBar: 'Your five tabs: Learn, Practice, Today, Dictionary and your profile.',
+  guideTodayDuels: 'Duels: two minutes against a friend or a traveller at your level. A gold number means a challenge is waiting.',
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
-  guideLearnStops: 'Where you are on the line, and the stops around you.',
+  guideLearnStops: 'Your stop on the line, and how much of it you already know.',
   guideLearnShelf: 'Your own decks, plus a library of decks shared by other learners.',
   guidePracticePass: 'These modes come with the pass.',
   // Practice's plates (plan 254): a platform, its foot (your level,
@@ -2847,6 +2883,21 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}% right`,
   practiceNotYet: 'Not yet',
+  // The phone's Practice gate (plan 290): the modes in three groups,
+  // the last ride to resume, and the sheet a plate raises, a page a mode.
+  practiceGroups: { understand: 'Understand', express: 'Express', test: 'Test yourself' },
+  practiceResume: 'Resume',
+  practiceSheet: 'Practice modes',
+  practicePct: pct => `${pct}%`,
+  practiceAllPapers: 'All papers',
+  practiceAllScenes: 'All scenes',
+  // The phone's Learn gate (plan 291): the sheet a line raises, a page
+  // a line -- the stop and the mode chosen before departing -- and the
+  // shelf of decks under the lines.
+  learnSheet: 'Lines',
+  learnStop: 'Stop',
+  learnMode: 'Mode',
+  learnAllDecks: n => `All my decks (${n})`,
   // ── A practice station, on the desk (plan 159) ────────────────
   // The source as a switch at the list's head (the JLPT grades, word
   // frequency, your own cards), then the open stop's page: what the
@@ -3249,7 +3300,7 @@ const clrPrimitives = {
 // ── 191:piles ──
 // See the French table.
 const clrDay = {
-  clrPiles: ['To review', 'Correct', 'Perfect'],
+  clrPiles: ['To review', 'Correct', 'Easy'],
   clrPileCount: n => `${n} card${n === 1 ? '' : 's'}`,
   clrPileEmpty: 'No cards',
   clrPileOpen: term => `Open ${term} in the dictionary`,
@@ -3471,6 +3522,189 @@ const transfer = {
 }
 // ── 243b:transfer end ──
 
+// ── 対戦 — duels (plan 279) ─────────────────────────────────────
+// The sprint: two minutes, the same questions for both players.
+const pvp = {
+  pvpTitle:        'Duels',
+  pvpChallenges:   n => (n === 1 ? '1 challenge to play' : `${n} challenges to play`),
+  pvpFriendsN:     n => (n === 1 ? '1 friend' : `${n} friends`),
+  pvpRequestsN:    n => (n === 1 ? '1 request' : `${n} requests`),
+  pvpElo:          'Elo',
+  pvpRecordLong:   (w, d, l) => `${w} wins · ${d} draws · ${l} losses`,
+  pvpRankOf:       (r, n) => `#${r} of ${n}`,
+  pvpSprints:      'sprints',
+  pvpBeat:         s => `${s} to beat`,
+  pvpHoursLeft:    h => `${h} h left`,
+  pvpDefies:       who => `${who} challenges you`,
+  pvpLiveDefies:   who => `${who} is waiting for you, live`,
+  pvpPlay:         'Play',
+  pvpBeatUnit:     'to beat',
+  pvpDefy:         'Challenge',
+  // 新しい (plan 287): the duels announced once, on Today, to whoever
+  // knew it before their key stood there.
+  newsCap:         'New',
+  newsDuelsTitle:  'Duels are now on Today',
+  newsDuelsLead:   depart => `Two minutes of questions against a friend or a traveller at your level, and speed counts. The ⇄ key beside “${depart}” opens the duels.`,
+  newsDuelsGo:     'See the duels',
+  newsDuelsLater:  'Later',
+  pvpRanked:       'Ranked sprint',
+  pvpRankedDesc:   'A stranger near your Elo, or their recorded run.',
+  pvpFriendDuel:   'Challenge a friend',
+  pvpFriendDesc:   'Later or live. Unranked.',
+  pvpCredits:      n => (n === 1 ? '1 credit' : `${n} credits`),
+  pvpFree:         'Free',
+  // The pass pays for everything (the hall's and the ticket's price).
+  pvpIncluded:     'Included',
+  pvpTabToPlay:    'To play',
+  pvpTabRunning:   'Running',
+  pvpTabDone:      'Done',
+  pvpFriendTag:    'friend',
+  pvpWin:          'Won',
+  pvpLoss:         'Lost',
+  pvpDraw:         'Draw',
+  pvpTraveller:    'Traveller',
+  pvpFriendsTitle: 'Friends',
+  pvpSearchCap:    'Their username, exactly',
+  pvpAsk:          'Add as a friend',
+  pvpAccept:       'Accept',
+  pvpRefuse:       'Decline',
+  pvpRequest:      'friend request',
+  pvpYourDuels:    (w, l) => `your duels: ${w} W · ${l} L`,
+  pvpAddFriend:    'Add a friend by username',
+  pvpWhom:         'Whom to challenge',
+  pvpHow:          'How',
+  pvpLater:        'Later · 48 h',
+  pvpLive:         'Live',
+  pvpLaterHelp:    who => `The same run for you both; ${who} has 48 h to ride it.`,
+  pvpLiveHelp:     who => `You leave together, three seconds after ${who} arrives.`,
+  pvpChallenge:    who => `Challenge ${who}`,
+  pvpInvite:       who => `Invite ${who}`,
+  pvpSprintOf:     ms => (ms >= 120_000 && ms % 60_000 === 0 ? `Sprint · ${ms / 60_000} minutes` : `Sprint · ${ms / 1000} seconds`),
+  pvpDuelLevel:    'Duel level',
+  pvpQuestions:    'Questions',
+  pvpWordsKanji:   'words and kanji',
+  pvpWordsKana:    'words and kana',
+  pvpWordsKanaKanji: 'words, kana and kanji',
+  pvpEloOf:        n => `Elo ${n}`,
+  pvpEloRange:     (a, b) => `Elo ${a} – ${b}`,
+  pvpChoicesN:     n => `${n} choices`,
+  pvpLength:       'Length',
+  pvpMinutes:      n => `${n} min`,
+  pvpStake:        'At stake',
+  pvpStakeElo:     n => `± ${n} Elo`,
+  pvpNovice:       'Beginner',
+  pvpPrice:        'Price',
+  pvpFreeFriends:  'free between friends',
+  pvpGo:           'Depart',
+  pvpRankedFoot:   'If nobody near your Elo is free, you race a real player’s recorded run, their username shown.',
+  pvpGoPaid:       n => `Depart · ${n} credits`,
+  pvpYou:          'You',
+  pvpKind:         { word: 'Word', reading: 'Reading', writing: 'Writing', kana: 'Kana' },
+  pvpQuit:         'Leave the sprint',
+  pvpReady:        'Ready?',
+  pvpOver:         'Over',
+  // The race as a game (plan 285, the owner's C1) and its result (E4).
+  pvpGoBand:       'Go!',
+  pvpArrival:      'Finish!',
+  pvpRush:         'Rush',
+  pvpCombo:        'Combo',
+  pvpComboLost:    n => `${n} lost`,
+  pvpPassMe:       'Ahead!',
+  pvpPassThem:     who => `${who} ahead`,
+  pvpNote:         { flash: 'Flash', quick: 'Quick' },
+  pvpLines:        { speed: 'Speed', combo: 'Combo', rush: 'Rush', accuracy: 'Accuracy', flashes: 'Flashes' },
+  pvpInARow:       (a, b) => `${a} / ${b} in a row`,
+  pvpVerdict:      { win: 'Victory!', loss: 'Defeat', draw: 'Draw' },
+  pvpAhead:        n => `ahead by ${n.toLocaleString('en')} point${n === 1 ? '' : 's'}`,
+  pvpBehind:       n => `${n.toLocaleString('en')} point${n === 1 ? '' : 's'} behind`,
+  pvpGrade:        g => `Grade ${g}`,
+  pvpBy:           n => `by ${n} point${n === 1 ? '' : 's'}`,
+  pvpWaitingFor:   who => `Waiting for ${who}`,
+  pvpRightsOf:     (r, n) => `${r} right of ${n}`,
+  pvpCorrections:  'Details and corrections',
+  pvpNewSprint:    'New sprint',
+  pvpRematch:      'Rematch',
+  pvpXpLeft:       n => `${n} more today`,
+  pvpEloBoard:     'Elo ranking',
+  pvpAll:          n => `All · ${n}`,
+  pvpFriendsOnly:  n => `Friends · ${n}`,
+  pvpGapTo:        (n, r) => `${n} Elo points from #${r}`,
+  pvpBilan:        'record',
+  pvpOrdinal:      r => `#${r}`,
+  pvpOutOf:        n => `of ${n}`,
+  pvpDuelWith:     who => `Duel · ${who}`,
+  pvpToBeat:       'To beat',
+  pvpNoneToPlay:   'No challenge to play.',
+  pvpNoneRunning:  'Nothing under way.',
+  pvpNoneDone:     'No duel played yet.',
+  pvpLiveWaits:    'Live · waiting for you',
+  pvpLiveNow:      'Live',
+  pvpRunning:      'Your sprint is still running',
+  pvpResume:       'Resume',
+  pvpNobodyYet:    'waiting for an opponent',
+  pvpClosedRow:    'closed',
+  pvpEnter:        'Walk in',
+  pvpOpen:         'Open',
+  pvpEloFrom:      level => `It starts from your ${level} level, then moves with every ranked sprint.`,
+  pvpNotRanked:    'not ranked yet',
+  pvpProvisional:  'Provisional: fewer than 15 ranked duels',
+  pvpCurveLabel:   n => `Your Elo over the last ${n} ranked duels`,
+  pvpStartAt:      n => `start ${n}`,
+  pvpPeak:         n => `peak ${n}`,
+  pvpRacedLater:   who => `${who} will race your recording.`,
+  pvpVerdictLater: who => `The verdict comes once ${who} has run.`,
+  pvpShut:         { expired: 'Expired', declined: 'Declined', cancelled: 'Cancelled' },
+  pvpRefunded:     'Nobody came: your credits are back.',
+  pvpNoVerdict:    'No verdict for this duel.',
+  pvpNoVerdictRefunded: 'No verdict for this duel: your credits are back.',
+  pvpDecline:      'Decline the challenge',
+  pvpCancel:       'Cancel the challenge',
+  pvpNotMet:       'not reached',
+  pvpRightShort:   'right',
+  pvpWrongShort:   'wrong',
+  pvpBetweenYou:   'between you',
+  pvpCardStranger: 'Before you are friends, only the username shows.',
+  pvpReport:       'Report',
+  pvpReasons:      { name: 'Inappropriate username', cheat: 'Cheating', spam: 'Repeated requests or challenges', other: 'Something else' },
+  pvpReportSend:   'Send the report',
+  pvpReported:     'Report sent. A person will read it.',
+  pvpRemoved:      'You are no longer friends.',
+  pvpBlocked:      'Blocked: you will no longer find each other.',
+  pvpRemoveFriend: 'Remove from friends',
+  pvpBlock:        'Block',
+  pvpFind:         'Search',
+  pvpRelation:     { me: 'That’s you', friend: 'Friend', sent: 'Requested', received: 'Asked you', none: '' },
+  pvpChallengeShort: 'Challenge',
+  pvpSentN:        n => (n === 1 ? '1 request sent' : `${n} requests sent`),
+  pvpWithdraw:     'Withdraw',
+  pvpBlockedN:     n => (n === 1 ? '1 blocked' : `${n} blocked`),
+  pvpUnblock:      'Unblock',
+  pvpNoFriends:    'No friend yet: search an exact username.',
+  // The server's refusals, by their code (domain/duel.js, errorKey).
+  pvpErrNotFound:     'Nobody has that username.',
+  pvpErrSelf:         'That is your own username.',
+  pvpErrNotFriends:   'You are not friends.',
+  pvpErrCooldown:     'You can ask again later.',
+  pvpErrFriendLimit:  'The book is full: 200 friends at most.',
+  pvpErrPendingLimit: 'Too many requests are already waiting for an answer.',
+  pvpErrRequestLimit: 'Enough requests for today.',
+  pvpErrSearchLimit:  'Too many searches in a row. Try again in a few minutes.',
+  pvpErrNoRequest:    'That request is no longer waiting.',
+  pvpErrNotBlocked:   'That username is not blocked.',
+  pvpErrTooMany:      'Too many duels under way. Finish one first.',
+  pvpErrClosed:       'This duel is closed.',
+  pvpErrDuelGone:     'This duel is no longer there.',
+  pvpErrRunning:      'Your friend is running this duel right now: you can decline once their sprint is over.',
+  pvpErrPlayed:       'You have already run this duel.',
+  pvpErrWaiting:      'Your friend has not walked in yet.',
+  pvpErrNotStarted:   'The sprint has not started.',
+  pvpErrTooEarly:     'One moment: the question is coming.',
+  pvpErrNotSettled:   'The corrections open once the duel is settled.',
+  pvpErrUnpaid:       'The corrections cost 1 credit.',
+  pvpErrCredits:      'Not enough credits left.',
+  pvpErrFailed:       'That did not work. Try again.',
+}
+
 export default {
   ...auth,
   ...landing,
@@ -3506,4 +3740,5 @@ export default {
   ...clrTickets,
   ...reviewPlan,
   ...transfer,
+  ...pvp,
 }

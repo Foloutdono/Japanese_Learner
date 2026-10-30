@@ -6,6 +6,7 @@
 // the script only turns the demos and the footage on.
 import { readFileSync } from 'node:fs'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
+import { RATING_SCALES } from '../src/domain/ratingScales.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
   SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, SIGNIN_ENTRY, STORES, CONTACT,
@@ -34,6 +35,9 @@ const holdJa = s => String(s).replace(/〜(?=[\u3040-\u30ff\u4e00-\u9fff])/g, '�
 
 // ── Pieces ──
 
+// The four-button bar's qualities, worst first: each key wears its
+// quality's ink (.q1, .q2 …), as the app's bar does: Easy blue, Correct plain.
+const BAR_QUALITIES = [...RATING_SCALES.simple.qualities].reverse()
 const pigment = line => `var(--line-${line === 'today' ? 'jisho' : line})`
 
 function mark(size, cls = '') {
@@ -62,10 +66,13 @@ function badge(t, store) {
 
 const badges = t => `<div class="badges">${badge(t, 'appStore')}${badge(t, 'googlePlay')}</div>`
 
+// Every Embarquer says what it costs under its word (the owner's pick D
+// of the canvas "Tsuji — la landing, gratuit"), so the fare is read where
+// the visitor presses rather than in the note under it.
 function gate(t, cls = '') {
   return `<a class="gate ${cls}" href="${BOARD_ENTRY}" data-board aria-label="${esc(typo(t.lang, t.boardAria))}">`
     + '<span class="gate__reader" aria-hidden="true"><i class="gate__rip"></i><i class="gate__rip"></i><span class="wave"><i></i><i></i><i></i></span></span>'
-    + `<span class="gate__word">${esc(t.board)}</span></a>`
+    + `<span class="gate__word">${esc(t.board)}<span class="gate__sub">${esc(typo(t.lang, t.boardSub))}</span></span></a>`
 }
 
 const ring = (glyph, line, cls = '') =>
@@ -187,7 +194,7 @@ function hero(t, live) {
     + `<a class="watch" href="#${t.ids.presentation}" data-watch${live ? '' : ' hidden'}><span class="watch__play" aria-hidden="true">${PLAY}</span>${esc(typo(t.lang, h.watch))} · ${clock(PRESENTATION.seconds)}</a>`
     // A separator keeps to the word before it, so a wrapped note never
     // opens its second line on a dot.
-    + `<p class="hero__note">${esc(typo(t.lang, h.note(STORES.appStore || STORES.googlePlay))).replace(/ · /g, '\u00a0· ')}</p>`
+    + `<p class="hero__note">${esc(typo(t.lang, h.note(STORES))).replace(/ · /g, '\u00a0· ')}</p>`
     + `<a class="hero__cue" href="#${t.ids.lines}"><span>${esc(h.cue)}</span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v13M6 12l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`
     + `</div>${figures(t)}</section>`
 }
@@ -286,7 +293,7 @@ function method(t) {
     ? `<span class="stamp stamp--miss" lang="ja">${d}</span>`
     : `<span class="stamp" style="--turn:${rotations[k]}deg" lang="ja">${d}</span>`).join('')
   const ratings = M.ratings.map((word, k) =>
-    `<button type="button" class="q${k + 1}" data-rate="${k}" disabled><span class="rbar__dot"></span><span class="rbar__w">${esc(word)}</span><span class="rbar__t">${esc(M.due(card.due[k]))}</span></button>`).join('')
+    `<button type="button" class="q${BAR_QUALITIES[k]}" data-rate="${k}" disabled><span class="rbar__dot"></span><span class="rbar__w">${esc(word)}</span><span class="rbar__t">${esc(M.due(card.due[k]))}</span></button>`).join('')
   // The day as one ticket: its count and length, each line's share, and
   // the week's stamps at its foot.
   return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h">${stop(t, 'method')}<div class="wrap split split--method cols">`
@@ -345,7 +352,7 @@ function mockScreen(t, clip, on) {
   const bar = count => `<div class="mock__bar">${ring(clip.glyph, clip.line, 'mock__ring')}<span class="mock__title">${ty(f.name)}</span>`
     + `${count ? `<span class="mock__count fig">${count}</span>` : ''}</div>`
   const rate = (due, pressed = -1) => `<div class="mock__rate">${t.method.ratings.map((w, k) =>
-    `<span class="q${k + 1}${k === pressed ? ' is-pressed' : ''}"><i class="rbar__dot"></i><b>${esc(w)}</b>${due ? `<small>${esc(t.method.due(due[k]))}</small>` : ''}</span>`).join('')}</div>`
+    `<span class="q${BAR_QUALITIES[k]}${k === pressed ? ' is-pressed' : ''}"><i class="rbar__dot"></i><b>${esc(w)}</b>${due ? `<small>${esc(t.method.due(due[k]))}</small>` : ''}</span>`).join('')}</div>`
   const button = label => `<span class="mock__btn">${esc(label)}</span>`
   const card = (inner, stage, progress) => `<div class="mk-card"><span class="qcard__stage st-${stage}">${esc(t.method.stages[stage])}</span>${inner}`
     + `<span class="qcard__band"><i style="width:${progress * 100}%"></i></span></div>`
@@ -365,7 +372,7 @@ function mockScreen(t, clip, on) {
     vocabulaire: () => [bar('3 / 18'),
       card(`<span class="qcard__reading" lang="ja">でんしゃ</span><span class="mk-card__word" lang="ja">電車</span><span class="qcard__meaning">${ty(t.method.cards[1].meaning)}</span>`
         + `<span class="mk-card__ex" lang="ja">電車で行きます。</span>`, 'learning', CARDS[1].progress),
-      rate(CARDS[1].due, 3)],
+      rate(CARDS[1].due, 2)],
     kanji: () => [bar('5 / 10'),
       `<div class="mk-kanji"><span class="mk-strokes" aria-hidden="true"><svg viewBox="0 0 109 109">${STATION_STROKES.map((d, k) =>
         `<path pathLength="1" d="${d}" style="--s:${k}"/>`).join('')}</svg></span>`
@@ -541,7 +548,7 @@ function fare(t) {
   const F = t.fare
   const ty = s => esc(typo(t.lang, s))
   const [, covers = F.body, later = ''] = F.body.match(/^(.+?\.)\s+(.+)$/s) || []
-  const [first, ...rest] = t.hero.note(STORES.appStore || STORES.googlePlay).split(' · ')
+  const [first, ...rest] = t.hero.note(STORES).split(' · ')
   const how = first === F.h2 ? rest.map(ty).join('\u00a0· ') : ''
   const valid = [...ROADS.map(r => [r.line, r.glyph, t.hero.stations[r.line]]), ...FARE_STOPS.map(s => [s.line, s.glyph, t[s.key].kicker])]
   const lines = valid.map(([line, glyph, name]) => `<li style="--c:${pigment(line)}"><span class="ring" aria-hidden="true" lang="ja">${esc(glyph)}</span><span class="fare__name">${ty(name)}</span></li>`).join('')
@@ -666,7 +673,7 @@ function jsonLd(t, facts, media, live) {
     url: url(page.path),
     description: t.description,
     applicationCategory: t.appCategory,
-    operatingSystem: stores.length ? 'Web, iOS, Android' : 'Web',
+    operatingSystem: ['Web', STORES.appStore && 'iOS', STORES.googlePlay && 'Android'].filter(Boolean).join(', '),
     inLanguage: ['fr', 'en'],
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
     publisher: { '@id': org['@id'] },

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 発車案内 — the widget's corner (plan 293): the launcher's own from
+         Android 12 (values-v31), where the system clips a widget to it. -->
+    <dimen name="widget_radius">24dp</dimen>
+</resources>

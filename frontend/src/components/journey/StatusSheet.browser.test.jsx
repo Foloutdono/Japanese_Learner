@@ -29,7 +29,7 @@ vi.mock('../../lib/audio', async o => ({ ...(await o()), playClick: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { StatusSheet } = await import('./StatusSheet')
-const { openStatus, closeStatus, seedJourneyStatus, seedVolumes } = await import('../../stores/journey')
+const { openStatus, closeStatus, forgetJourney, seedJourneyStatus, seedVolumes } = await import('../../stores/journey')
 const { seedSummary } = await import('../../stores/profileSummary')
 
 const VOLUMES = {
@@ -78,8 +78,12 @@ function renderSheet() {
 
 const dialog = () => document.querySelector('[role="dialog"].status-sheet')
 
+// A seed does not start the journey store's five minutes, so the sheet
+// opening asks /api/journey/status -- unless an earlier test's answer
+// already did. Forgotten, every test opens on that same first ask, and
+// a mocked server answers the facts before a reprint until one is made.
 beforeEach(() => {
-  closeStatus()
+  forgetJourney()
   apiJson.mockReset()
   apiFetch.mockReset()
   seedVolumes(VOLUMES)
@@ -154,14 +158,16 @@ describe('StatusSheet', () => {
 
   it('offers the two honest moves when behind, and a pace reprint adopts the recovery', async () => {
     seedJourneyStatus(behindStatus())
+    let reprinted = false
     apiJson.mockImplementation(async (path, _session, opts = {}) => {
-      if (path === '/api/journey/reprint') return { ...behindStatus(), plannedPerDay: JSON.parse(opts.body).dailyNewTarget }
-      return {}
+      if (path !== '/api/journey/reprint') return {}
+      reprinted = true
+      return { ...behindStatus(), plannedPerDay: JSON.parse(opts.body).dailyNewTarget }
     })
     // The refetch after the reprint brings the fresh facts.
     apiFetch.mockImplementation(async path => ({
       ok: true, status: 200,
-      json: async () => (path === '/api/journey/status' ? { ...behindStatus(), plannedPerDay: 21 } : {}),
+      json: async () => (path === '/api/journey/status' ? { ...behindStatus(), ...(reprinted && { plannedPerDay: 21 }) } : {}),
     }))
     await renderSheet()
     openStatus()
@@ -170,6 +176,7 @@ describe('StatusSheet', () => {
     const acts = dialog().querySelectorAll('.jour-act')
     expect(acts.length).toBe(2)
     expect(acts[0].textContent).toContain('21')
+    const asked = apiFetch.mock.calls.length
     acts[0].click()
     await vi.waitFor(() => {
       const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/reprint')
@@ -180,7 +187,7 @@ describe('StatusSheet', () => {
     // sheet re-judges the pass on them (the card prints no promised
     // pace to read the 21 back off).
     await vi.waitFor(() => {
-      expect(apiFetch.mock.calls.some(([path]) => path === '/api/journey/status')).toBe(true)
+      expect(apiFetch.mock.calls.slice(asked).some(([path]) => path === '/api/journey/status')).toBe(true)
     })
     expect(dialog().querySelector('.jcard')).not.toBeNull()
   })
@@ -188,13 +195,15 @@ describe('StatusSheet', () => {
   it('moves the date in ink and re-judges the pass on the way back', async () => {
     seedJourneyStatus(behindStatus())
     const projectedIso = isoDate(addDays(NOW, 444))
+    let reprinted = false
     apiJson.mockImplementation(async (path, _session, opts = {}) => {
-      if (path === '/api/journey/reprint') return { ...behindStatus(), goalTargetDate: JSON.parse(opts.body).goalTargetDate }
-      return {}
+      if (path !== '/api/journey/reprint') return {}
+      reprinted = true
+      return { ...behindStatus(), goalTargetDate: JSON.parse(opts.body).goalTargetDate }
     })
     apiFetch.mockImplementation(async path => ({
       ok: true, status: 200,
-      json: async () => (path === '/api/journey/status' ? { ...behindStatus(), goalTargetDate: projectedIso } : {}),
+      json: async () => (path === '/api/journey/status' ? { ...behindStatus(), ...(reprinted && { goalTargetDate: projectedIso }) } : {}),
     }))
     await renderSheet()
     openStatus()

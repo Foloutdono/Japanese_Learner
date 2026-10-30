@@ -37,14 +37,19 @@ class FakeUtterance {
   constructor(text) { this.text = text }
 }
 
-/** A speechSynthesis that reports `voices` and does `onSpeak` when asked. */
-function stubSynth({ voices = [], onSpeak } = {}) {
+/** A speechSynthesis that reports `voices` and does `onSpeak` when asked.
+ *  The prime's empty utterance ends at once, as a browser's does, unless
+ *  `primeEnds` is false. */
+function stubSynth({ voices = [], onSpeak, primeEnds = true } = {}) {
   const synth = {
     speaking: false,
     pending: false,
     getVoices: () => voices,
     cancel: vi.fn(),
-    speak: vi.fn(utterance => onSpeak?.(utterance)),
+    speak: vi.fn(utterance => {
+      onSpeak?.(utterance)
+      if (primeEnds && !utterance.text.trim()) utterance.onend?.()
+    }),
   }
   Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true })
   Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: FakeUtterance, configurable: true })
@@ -53,11 +58,21 @@ function stubSynth({ voices = [], onSpeak } = {}) {
 
 /** speech.js keeps a sticky "the device cannot speak" flag, so every
  *  test gets its own module instance rather than the previous test's
- *  verdict. */
+ *  verdict. By a query: vi.resetModules() hands the browser lane back
+ *  the instance it already has. The mocks still apply -- they are keyed
+ *  on what speech.js imports, not on how it was imported itself. */
+let fresh = 0
+const loaded = []
 async function loadSpeech() {
-  vi.resetModules()
-  return import('./speech')
+  const speech = await import(/* @vite-ignore */ `./speech.js?test=${++fresh}`)
+  loaded.push(speech)
+  return speech
 }
+
+/** The words a synthesiser was asked to say: not the prime's silence,
+ *  which every module spends when its gesture comes (mocked here as at
+ *  once). */
+const wordsSaid = synth => synth.speak.mock.calls.map(([u]) => u.text).filter(text => text.trim())
 
 const realSynth = Object.getOwnPropertyDescriptor(window, 'speechSynthesis')
 const realUtterance = Object.getOwnPropertyDescriptor(window, 'SpeechSynthesisUtterance')
@@ -68,6 +83,9 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  // A word a test left on its way must not land in the next test: each
+  // module is stopped, which calls off its watchdog.
+  loaded.splice(0).forEach(speech => speech.stopSpeaking())
   if (realSynth) Object.defineProperty(window, 'speechSynthesis', realSynth)
   if (realUtterance) Object.defineProperty(window, 'SpeechSynthesisUtterance', realUtterance)
 })
@@ -111,10 +129,8 @@ describe('spokenForm', () => {
 // A grammar, reading or translation card says its sentence once it is
 // revealed. The device first, as for a word; the server's fallback is
 // the grammar catalogue's reader, since /api/tts declines a sentence.
-// Ahead of speakJapanese's tests: its silent device sets speech.js's
-// sticky flag, which the browser lane carries into the tests after it.
 // The silence watchdog is one path for both (startUtterance), pinned
-// there.
+// with speakJapanese.
 
 const lineFor = text => `/api/grammar/audio?text=${text}&who=reader&v=${VOICE_REV}`
 
@@ -150,7 +166,7 @@ describe('speakSentence', () => {
     speakSentence(null)
     speakSentence('  ')
 
-    expect(window.speechSynthesis.speak).not.toHaveBeenCalled()
+    expect(wordsSaid(window.speechSynthesis)).toEqual([])
     expect(mocks.getBuffer).not.toHaveBeenCalled()
   })
 })
@@ -175,7 +191,7 @@ describe('speakJapanese', () => {
 
     speakJapanese('まいげつ')
 
-    expect(synth.speak).not.toHaveBeenCalled()
+    expect(wordsSaid(synth)).toEqual([])
     expect(clipRequest()).toBe(clipFor('まいげつ'))
   })
 
@@ -210,11 +226,36 @@ describe('speakJapanese', () => {
     await vi.waitFor(() => expect(clipRequest()).toBe(clipFor('まいげつ')))
     expect(synth.cancel).toHaveBeenCalled()
 
-    // And it does not spend that silence again on the next card.
+    // One silence is not a verdict: a device still waking its engine
+    // is slow once. The next card asks it again...
     synth.speak.mockClear()
     speakJapanese('つち')
+    expect(synth.speak).toHaveBeenCalled()
+    await vi.waitFor(() => expect(clipRequest()).toBe(clipFor('つち')))
+
+    // ...and a second silence in a row is one: it does not spend that
+    // silence again on the card after.
+    synth.speak.mockClear()
+    speakJapanese('みず')
     expect(synth.speak).not.toHaveBeenCalled()
-    expect(clipRequest()).toBe(clipFor('つち'))
+    expect(clipRequest()).toBe(clipFor('みず'))
+  })
+
+  it('keeps the device after a slow first word that it then gets over', async () => {
+    // The first utterance outlives the watchdog (an engine waking); the
+    // next one starts. The session stays on the device.
+    let first = true
+    const synth = stubSynth({ voices: [JA_VOICE], onSpeak: u => { if (!first && u.text.trim()) u.onstart?.(); if (u.text.trim()) first = false } })
+    const { speakJapanese } = await loadSpeech()
+
+    speakJapanese('まいげつ')
+    await vi.waitFor(() => expect(clipRequest()).toBe(clipFor('まいげつ')))
+    speakJapanese('つち')
+    mocks.getBuffer.mockClear()
+    speakJapanese('みず')
+    expect(synth.speak.mock.calls.at(-1)[0].text).toBe('みず')
+    await new Promise(r => setTimeout(r, 500))
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
   })
 
   it('plays the clip through the mixer, so mute and the sliders reach it', async () => {
@@ -237,6 +278,131 @@ describe('speakJapanese', () => {
   })
 })
 
+// ── What a cancel is not ─────────────────────────────────────────
+// The app cancels its own speech: for the next word, and to stop (the
+// tour moving on, the tab hidden). None of that is the device failing,
+// and none of it may bring back what was cancelled: a cancelled word
+// used to switch the session to the server for good and play its clip
+// over the next one, and a clip still on its way when its turn passed
+// used to be played anyway.
+
+/** A synthesiser that cancels as Chrome does: every utterance it holds
+ *  reports `error`, `canceled` if it had not started. */
+function cancellingSynth({ starts = () => true } = {}) {
+  const held = []
+  const synth = stubSynth({
+    voices: [JA_VOICE],
+    onSpeak: u => { held.push(u); if (u.text.trim() && starts(u)) u.onstart?.() },
+  })
+  synth.cancel.mockImplementation(() => {
+    held.splice(0).forEach(u => u.onerror?.({ error: 'canceled' }))
+  })
+  return synth
+}
+
+const silence = () => new Promise(r => setTimeout(r, 500))
+
+/** A getBuffer answer that waits to be let go, as a clip the engine is
+ *  still making does. */
+function slowClip() {
+  let release
+  mocks.getBuffer.mockImplementationOnce(() => new Promise(r => { release = () => r('decoded') }))
+  return () => release()
+}
+
+describe('a cancel', () => {
+  it('for the next word is not a device that failed', async () => {
+    // The first word has not started when the second is asked for.
+    const synth = cancellingSynth({ starts: u => u.text !== 'まいげつ' })
+    const { speakJapanese } = await loadSpeech()
+
+    speakJapanese('まいげつ')
+    synth.speaking = true
+    speakJapanese('つち')
+    synth.speaking = false
+    await silence()
+
+    // No clip of the first word over the second, nothing cancelled
+    // under the second by the first's watchdog, and the device kept.
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
+    expect(synth.cancel).toHaveBeenCalledTimes(1)
+    speakJapanese('みず')
+    expect(synth.speak.mock.calls.at(-1)[0].text).toBe('みず')
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
+  })
+
+  it('to stop is not a device that failed, and says nothing after', async () => {
+    const synth = cancellingSynth({ starts: () => false })
+    const { speakJapanese, stopSpeaking } = await loadSpeech()
+
+    speakJapanese('まいげつ')
+    stopSpeaking()
+    await silence()
+
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
+    synth.speak.mockClear()
+    speakJapanese('つち')
+    expect(synth.speak).toHaveBeenCalled()
+  })
+
+  it('leaves the prime\'s silent utterance to finish under the first word', async () => {
+    // cancel() then speak() in one tick is silence on Safari; the tap
+    // that primed can be the one that asks for the first word.
+    const synth = stubSynth({ voices: [JA_VOICE], primeEnds: false })
+    await loadSpeech().then(({ speakJapanese }) => {
+      expect(synth.speak.mock.calls[0][0].text).toBe(' ')
+      synth.speaking = true
+      speakJapanese('まいげつ')
+    })
+    expect(synth.cancel).not.toHaveBeenCalled()
+    expect(synth.speak.mock.calls.at(-1)[0].text).toBe('まいげつ')
+  })
+})
+
+describe('a server clip whose turn has passed', () => {
+  beforeEach(() => {
+    Object.defineProperty(window, 'speechSynthesis', { value: undefined, configurable: true })
+  })
+
+  it('is dropped when a stop came while it was on its way', async () => {
+    const release = slowClip()
+    const { speakJapanese, stopSpeaking } = await loadSpeech()
+
+    speakJapanese('まいげつ')
+    stopSpeaking()
+    release()
+    await silence()
+
+    expect(mocks.playBuffer).not.toHaveBeenCalled()
+  })
+
+  it('is dropped when a later word was asked for', async () => {
+    const release = slowClip()
+    const { speakJapanese } = await loadSpeech()
+
+    speakJapanese('まいげつ')
+    speakJapanese('つち')
+    await vi.waitFor(() => expect(mocks.playBuffer).toHaveBeenCalledTimes(1))
+    release()
+    await silence()
+
+    expect(mocks.playBuffer).toHaveBeenCalledTimes(1)
+    expect(mocks.playBuffer).toHaveBeenCalledWith('decoded', 'tts', 'つち')
+  })
+
+  it('ends a tour\'s line unsaid, so the scene goes no further', async () => {
+    const release = slowClip()
+    const { speakLine, stopSpeaking } = await loadSpeech()
+
+    const said = speakLine('いらっしゃいませ。', 'them')
+    stopSpeaking()
+    release()
+
+    expect(await said).toBe(false)
+    expect(mocks.playBuffer).not.toHaveBeenCalled()
+  })
+})
+
 // ── A lone kana (plan 121) ───────────────────────────────────────
 // Read as text by a device voice, a lone は is the topic particle, "wa",
 // and へ is "e". The server names the syllable instead, so a lone kana
@@ -248,7 +414,7 @@ describe('a lone kana', () => {
     const { speakJapanese } = await loadSpeech()
 
     speakJapanese('は')
-    expect(synth.speak).not.toHaveBeenCalled()
+    expect(wordsSaid(synth)).toEqual([])
     expect(clipRequest()).toBe(clipFor('は'))
 
     // A kanji's one-mora reading, out of its packed field.

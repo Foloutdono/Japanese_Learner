@@ -16,12 +16,14 @@ import { useDesk } from '../hooks/useDesk'
 import RestDayNotice from '../components/dayclear/RestDayNotice'
 import { TransferSheet } from '../components/station/TransferSheet'
 import { RatingSheet } from '../components/feedback/RatingSheet'
+import { DuelsNewsSheet } from '../components/pvp/DuelsNewsSheet'
 import { AccountSheet } from '../components/boarding/CardSheets'
 import { noteAskedToKeep, shouldAskToKeep } from '../lib/guest'
 import { useClaimOffer, usePaywall } from '../stores/credits'
 import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 import { startAmbiance, stopAmbiance } from '../lib/audio'
+import { warmGates } from '../lib/warm'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the fare gate, the day's lanes as the run's picker.
@@ -65,6 +67,11 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // (`feedbackOffer`). The finish comes first: the question follows a day
 // cleared, never interrupts it.
 //
+// 新しい (plan 287): a learner who met Today before the duels' key stood
+// beside its gate is told of it once (DuelsNewsSheet), while the profile
+// says so (`duelsNews`), after the offers above and never beside them,
+// and never on the visit whose guide has just shown the key.
+//
 // 本乗車券 (plan 270): a guest is asked to make the card an account --
 // Google, or an address and a password -- further and further apart (a
 // day, two, four, a week, two weeks, a month, then never: lib/guest.js),
@@ -75,17 +82,28 @@ import { startAmbiance, stopAmbiance } from '../lib/audio'
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
 //
+// 予熱 (plan 292): once the day has come, the four other gates' answers
+// are asked behind it, once a visit and while the page is idle
+// (lib/warm.js), so the first tap on each draws it whole.
+//
 // 湖の刻 (plan 219): the gate stands on the print of the hour, and the
 // print is heard: the ambiance plays the same hour's lake behind it,
 // as it does behind every station page (SelectionScreen).
 
 export default function TodayScreen({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const desk = useDesk()
   const navigate = useNavigate()
   const { pathname, state: routed } = useLocation()
   const { data: today, failed } = useTodaySummary()
   const summary = useProfileSummary()
+
+  // 予熱 — the other gates, behind the day (plan 292).
+  const arrived = Boolean(today)
+  const basics = Boolean(today?.basics && !today.basics.done)
+  useEffect(() => {
+    if (arrived) warmGates({ session, desk, lang, basics })
+  }, [arrived, session, desk, lang, basics])
 
   // 終着 — the run's finish, taken from the router once.
   const [run] = useState(() => {
@@ -146,6 +164,10 @@ export default function TodayScreen({ session }) {
   const showRate = Boolean(summary?.feedbackOffer) && !rateLeft && Boolean(today)
     && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
     && !showTransfer
+  const [newsLeft, setNewsLeft] = useState(false)
+  const showNews = Boolean(summary?.duelsNews) && !newsLeft && Boolean(today)
+    && Boolean(summary.guided?.today) && !wasShown('today') && !guide.open && !held && !showRest && !finishing
+    && !showTransfer && !showRate
   // Read once, at mount: the visit that asks keeps the sheet up.
   const [keepAsk] = useState(() => shouldAskToKeep(session))
   const [keepLeft, setKeepLeft] = useState(false)
@@ -154,7 +176,7 @@ export default function TodayScreen({ session }) {
   const paywall = usePaywall()
   const showKeep = keepAsk && !keepLeft && Boolean(today)
     && (summary?.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
-    && !showTransfer && !showRate && !claimOffer && !paywall
+    && !showTransfer && !showRate && !showNews && !claimOffer && !paywall
   const keepUserId = session?.user?.id
   useEffect(() => {
     if (showKeep) noteAskedToKeep(keepUserId)
@@ -206,6 +228,9 @@ export default function TodayScreen({ session }) {
       )}
       {showRate && (
         <RatingSheet session={session} onClose={() => setRateLeft(true)} />
+      )}
+      {showNews && (
+        <DuelsNewsSheet session={session} onClose={() => setNewsLeft(true)} />
       )}
       {showKeep && (
         <AccountSheet

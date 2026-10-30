@@ -204,14 +204,18 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual(pooled["まじ"]["meaning"], "serious")
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
-    def test_deck_words_are_never_folded_into_a_pool_compound(self) -> None:
-        # 電話 + 番号 are two N5 cards; the pool's 電話番号 does not take
-        # them. A number is the deck's to read, never the pool's: 二十
-        # read にじゅう shares a kanji and a reading with 二重, "double".
+    def test_deck_words_fold_into_a_pool_compound_as_its_parts(self) -> None:
+        # 電話 + 番号 are two N5 cards and the pool's 電話番号 is one word: it
+        # reads as the word, its two cards kept as its parts (plan 280). A
+        # number is the deck's to read, never the pool's: 二十 read にじゅう
+        # shares a kanji and a reading with 二重, "double".
         r = analyze_local("電話番号と三千円と二十人")
-        surfaces = [t["surface"] for t in r["tokens"]]
-        self.assertEqual(surfaces[:2], ["電話", "番号"])
-        for t in r["tokens"]:
+        phone = r["tokens"][0]
+        self.assertEqual(phone["surface"], "電話番号")
+        self.assertEqual(phone["vocab_match"]["entry"]["meaning_fr"], "numéro de téléphone")
+        self.assertEqual([p["vocab_match"]["raw_id"] for p in phone["parts"]],
+                         ["vocab_N5_電話_でんわ", "vocab_N5_番号_ばんごう"])
+        for t in r["tokens"][1:]:
             self.assertFalse((t["vocab_match"] or {}).get("pool"), t["surface"])
 
     def test_distinctive_grammar_point_produces_a_grammar_card_id(self) -> None:

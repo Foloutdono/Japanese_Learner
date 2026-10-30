@@ -6,18 +6,19 @@ import { sectionFor } from '../../config/stations'
 import { LINE_COLOR } from '../../config/tabs'
 import { beginDeparture } from '../../stores/departure'
 import { holdAmbianceHour, playAnnouncement, playClick } from '../../lib/audio'
-import { Seg } from '../chrome/Console'
+import { Chip, Chips, Seg } from '../chrome/Console'
 import { Sheet } from '../chrome/Sheet'
 import { DepartKey } from '../chrome/DeskKeys'
 import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
 import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
-import { CheckIcon, ChevronIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon, PlusIcon, CalendarIcon } from '../ui/Icons'
 import LevelFitLine from './LevelFitLine'
 import ComebackLine from './ComebackLine'
 import { useCredits } from '../../stores/credits'
 import { useProfileSummary } from '../../stores/profileSummary'
+import { useLearnerModes, setExtraModes, MODE_LINES } from '../../stores/learnerModes'
 import { publishLeft } from '../../stores/gateRun'
 import { runFit, isFreeLane, laneFreeShare, nextCreditClock, refillClock } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
@@ -33,6 +34,8 @@ import { shareTicket } from '../../lib/shareTicket'
 import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys, ThreadKey } from './TodayDial'
 import { TodayDay } from './TodayDay'
+import { DuelKey } from '../pvp/DuelKey'
+import { DuelBoard } from '../pvp/DuelRow'
 import { TodayPrint, PrintTitle } from './TodayPrint'
 import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
 
@@ -385,8 +388,12 @@ function LaneRow({ lane, on, metered, t }) {
 // chevron, on the desk as on a phone (plan 199b, the owner's word: the
 // details are not opened by default). `bare` (the desk's board, A3·1)
 // keeps a closed line to its one row: what rides of it is a tap away.
-function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen, bare = false, t }) {
+// Opened, a line whose modes the learner chooses (plan 273) also offers
+// its other modes, to add to Today or take off (LineModes).
+function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen, bare = false, session, t }) {
   const many = line.lanes.length > 1
+  const modal = MODE_LINES.includes(line.type)
+  const opens = many || modal
   const title = LINE_TITLE[line.type]?.(t) ?? line.type
   const lineShare = line.lanes.reduce((n, l) => n + share(l), 0)
   const free = metered && line.lanes.every(isFreeLane)
@@ -409,22 +416,29 @@ function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen,
           {line.on && lineShare !== line.due && <small> / {line.due}</small>}
         </span>
       </button>
-      {many && (
+      {opens && (
         <button type="button" className="tdy-line__more" aria-expanded={open} aria-label={t.gateLineModes(title)} onClick={() => { playClick(); onOpen() }}>
           <ChevronIcon direction={open ? 'up' : 'down'} size={16} />
         </button>
       )}
-      {many && open ? (
-        <div className="tdy-line__lanes" role="group" aria-label={t.gateLineModes(title)}>
-          {line.lanes.map(lane => {
-            const on = isOn(lane)
-            return (
-              <button key={lane.id} type="button" className={`lane${on ? '' : ' lane--off'}`} aria-pressed={on} onClick={() => toggle(lane.id)}>
-                <LaneRow lane={lane} on={on} metered={metered} t={t} />
-              </button>
-            )
-          })}
-        </div>
+      {opens && open ? (
+        <>
+          {many ? (
+            <div className="tdy-line__lanes" role="group" aria-label={t.gateLineModes(title)}>
+              {line.lanes.map(lane => {
+                const on = isOn(lane)
+                return (
+                  <button key={lane.id} type="button" className={`lane${on ? '' : ' lane--off'}`} aria-pressed={on} onClick={() => toggle(lane.id)}>
+                    <LaneRow lane={lane} on={on} metered={metered} t={t} />
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <span className="tdy-line__sub">{sub}</span>
+          )}
+          {modal && <LineModes line={line.type} session={session} t={t} />}
+        </>
       ) : bare ? null : (
         <span className="tdy-line__sub">{sub}</span>
       )}
@@ -432,11 +446,54 @@ function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen,
   )
 }
 
+// ── 主 — a line's other modes, added to Today or taken off (plan 273) ──
+// Each a chip, lit while Today deals it beside the line's main mode: a
+// tap adds it (its first cards come once the main mode has taught
+// them) or takes it off, for every day after this one too. The modes
+// are asked when a line is opened, never before.
+function LineModes({ line, session, t }) {
+  const { data } = useLearnerModes()
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
+  if (!data) return null
+  const main = data.main?.[line]
+  const extras = (data.choices?.extra?.[line] ?? []).filter(mode => mode !== main)
+  const added = data.extra?.[line] ?? []
+  if (!extras.length) return null
+  function flip(mode) {
+    playClick()
+    setBusy(true)
+    setFailed(false)
+    const next = added.includes(mode) ? added.filter(m => m !== mode) : [...added, mode]
+    setExtraModes(line, next, session)
+      .catch(() => setFailed(true))
+      .finally(() => setBusy(false))
+  }
+  return (
+    <div className="tdy-line__add">
+      <span className="tdy-line__add-name" aria-hidden="true">{t.gateLineAdd}</span>
+      <Chips label={t.gateLineAdd}>
+        {extras.map(mode => {
+          const on = added.includes(mode)
+          const name = modeLabel(t, mode)
+          return (
+            <Chip key={mode} on={on} disabled={busy} data-mode={mode} aria-label={on ? t.gateModeRemove(name) : t.gateModeAdd(name)} onClick={() => flip(mode)}>
+              {on ? <CheckIcon size={12} /> : <PlusIcon size={12} />}
+              {name}
+            </Chip>
+          )
+        })}
+      </Chips>
+      {failed && <span className="hint" role="alert">{t.onbPassError}</span>}
+    </div>
+  )
+}
+
 // ── 選 — the services: the two choices and the lines ─────────────
 // The sheet's body on a phone and the column's head on the desk. No
 // title over either choice (the owner's word on the canvas): each
 // option says what it is and what it rides.
-function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMain, cut, setTake, metered, desk = false, t }) {
+function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMain, cut, setTake, metered, desk = false, session, t }) {
   const [open, setOpen] = useState(() => new Set())
   const flip = type => setOpen(prev => {
     const next = new Set(prev)
@@ -460,6 +517,7 @@ function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMa
             open={open.has(line.type)}
             onOpen={() => flip(line.type)}
             bare={desk}
+            session={session}
           />
         ))}
       </ul>
@@ -530,14 +588,18 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
           </span>
           <span className="tdy-door__go">{t.gateAdjust}<ChevronIcon direction="right" size={16} /></span>
         </button>
-        {gate}
+        {/* The duels' key beside the gate (plan 287). */}
+        <div className="tdy-gaterow">
+          {gate}
+          <DuelKey hold={Boolean(fin?.playing)} arrive={Boolean(fin?.live)} arriveDelay={fin ? fin.ms('KEY') : 0} />
+        </div>
       </div>
 
-      <Sheet open={open} onClose={() => setOpen(false)} jp={t.todayTitle} label={t.gateServicesTitle} className="tdy-sheet">
+      <Sheet open={open} onClose={() => setOpen(false)} title={t.todayTitle} icon={CalendarIcon} label={t.gateServicesTitle} className="tdy-sheet">
         <Services
           lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
           choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
-          metered={metered} t={t}
+          metered={metered} session={session} t={t}
         />
         <TodayDay today={today} />
         <div className="tdy-sheet__foot">{gate}</div>
@@ -603,15 +665,18 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
       </section>
       <div className="tdy-desk__hero" ref={hero}>
         <div className="tdy-desk__go">
-          <GateButton
-            label={fin ? t.finContinue : t.depart}
-            onClick={depart}
-            aria-label={t.todayDue(run.taken)}
-            keys
-            disabled={closed}
-            arrive={Boolean(fin?.live)}
-            arriveDelay={fin ? fin.ms('KEY') : 0}
-          />
+          <div className="tdy-gaterow">
+            <GateButton
+              label={fin ? t.finContinue : t.depart}
+              onClick={depart}
+              aria-label={t.todayDue(run.taken)}
+              keys
+              disabled={closed}
+              arrive={Boolean(fin?.live)}
+              arriveDelay={fin ? fin.ms('KEY') : 0}
+            />
+            <DuelKey hold={Boolean(fin?.playing)} arrive={Boolean(fin?.live)} arriveDelay={fin ? fin.ms('KEY') : 0} />
+          </div>
         </div>
       </div>
       <aside className="tdy-desk__col">
@@ -621,7 +686,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
           <Services
             lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
             choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
-            metered={metered} desk t={t}
+            metered={metered} desk session={session} t={t}
           />
           <DeskDay today={today} part />
         </section>
@@ -912,8 +977,14 @@ function ClearedGate({ today, desk, finish = null }) {
   const gateCome = came('GATE')
   const foot = (
     <>
-      {rows.length > 0 && (boardCome || hold) && (
-        <div className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}>{rows}</div>
+      {/* The duels as the board's row once the day is done (plan 287):
+          the gate is shut, and the key with it. */}
+      {(boardCome || hold) && (
+        <DuelBoard
+          rows={rows}
+          ask={!fin?.playing}
+          className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}
+        />
       )}
       {(gateCome || hold) && (
         <GateButton

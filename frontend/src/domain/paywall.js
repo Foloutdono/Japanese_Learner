@@ -9,7 +9,10 @@ import { PASS_DECKS, PASS_CARDS } from './credits'
 //                 gates (the pass tags on Practice and the analyzer,
 //                 the "Go unlimited" controls that would charge) stays
 //                 out of the tree exactly as before.
-//   HAS_PAYWALL — the offer may be SHOWN, and interest recorded. True.
+//   HAS_PAYWALL — the offer may be SHOWN, and interest recorded. False
+//                 while the plans are being reworked: no door opens an
+//                 offer, and the screens, plan table and tier styling
+//                 wait in the tree for the new system.
 //
 // The reason the two are not one flag: the codebase's standing rule is
 // that a control leading nowhere is worse than none (domain/credits.js,
@@ -22,7 +25,7 @@ import { PASS_DECKS, PASS_CARDS } from './credits'
 //
 // When the store lands: flip HAS_STORE, and the offer's foot buys the
 // pick instead of recording an interest in it. Nothing else here moves.
-export const HAS_PAYWALL = true
+export const HAS_PAYWALL = false
 
 // Where an offer can be opened from. The backend's note beside
 // offer_view (backend/core/events.py) must name exactly these — every
@@ -41,7 +44,7 @@ export const SOURCES = Object.freeze({
   BALANCE: 'balance',         // the balance sheet, off the HUD
   SETTINGS: 'settings',       // the settings list
   RUNOUT: 'runout',           // the run stopped at a zero balance
-  RIDE: 'ride',               // the reading ride's pass plate (plan 097)
+  // 'ride' was the reading ride's pass plate (plan 097) until plan 292.
   LIMIT: 'limit',             // a Pro learner at one of the plan's ceilings
   UPGRADE: 'upgrade',         // a Pro learner's Settings: "Passer à Max"
 })
@@ -176,8 +179,9 @@ export function offerable(credits) {
 // (plan 125), conversation (plan 217), the exams, and the analyzer
 // (phrase, ocr and video).
 // backend/tests/test_pass_platforms.py pins this map against the
-// routers, so the reading ride's plate (plan 099) can never promise
-// more or less than the server enforces.
+// routers, so whatever lists the pass's platforms can never promise
+// more or less than the server enforces. The reading ride's plate
+// (plan 099) listed them until plan 292; nothing draws them today.
 export const PASS_PLATFORMS = Object.freeze({
   reading: '/practice/reading',
   comprehension: '/practice/comprehension',

@@ -283,6 +283,15 @@ CREATE TABLE user_profiles (
     -- Early access (plan 269): when Today asked how the learner finds the
     -- app, once 400 XP were earned. routes/feedback.py.
     feedback_asked_at TIMESTAMPTZ,
+    -- 新しい (plan 287): when the learner was told the duels' key stands
+    -- beside Today's gate, by its sheet or Today's guide.
+    -- routes/onboarding.py writes it, routes/profile.py reads it.
+    duels_news_at TIMESTAMPTZ,
+    -- 主 (plan 273): the mode each line is ridden in, {line: mode}, and
+    -- the modes added to Today beside it, {line: [mode]}. NULL = never
+    -- chosen (study/main_modes.py).
+    main_modes JSONB,
+    extra_modes JSONB,
     -- 署名 (plan 247): the first name the card prints, in any script, up
     -- to 24 characters -- not the username, which stays the public
     -- handle (番付, the library). NULL = never asked (an account boarded
@@ -295,7 +304,11 @@ CREATE TABLE user_profiles (
     -- The interface language the learner chose ('fr' | 'en'); NULL = never
     -- chosen, the device's language applies. Copied back onto the device
     -- on boot (frontend/src/lib/langChoice.js).
-    ui_lang TEXT
+    ui_lang TEXT,
+    -- 前回 (plan 291): the last ride a Learn station boarded, {path, at},
+    -- a line's stop in a graded mode; the phone's Learn gate offers it
+    -- again. NULL = none yet. routes/profile.py (clean_ride).
+    learn_ride JSONB
 );
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
@@ -1172,7 +1185,11 @@ ALTER TABLE event_daily ENABLE ROW LEVEL SECURITY;
 -- unprefixed (the content key), `reasons` a card's, from
 -- feedback.CARD_REASONS. `reply_to` is read from the account when the
 -- learner asks for an answer, never from the request. `rating` is the
--- early-access sheet's one to five (plan 269). Erased with the account
+-- early-access sheet's one to five (plan 269). `exam_id`/`revision`/
+-- `question_id` name a mock-exam question reported from its flag (plan
+-- 258). `triage` is the message's place in the owner's queue (plan 278,
+-- feedback.TRIAGE: new, seen, done, dropped), set by read_feedback, and
+-- `triaged_at` when it left new. Erased with the account
 -- (routes/account.py).
 CREATE TABLE feedback (
     id         BIGSERIAL PRIMARY KEY,
@@ -1181,6 +1198,9 @@ CREATE TABLE feedback (
     body       TEXT NOT NULL DEFAULT '',
     reasons    TEXT[] NOT NULL DEFAULT '{}',
     card_id    TEXT,
+    exam_id    TEXT,
+    revision   INT,
+    question_id TEXT,
     rating     SMALLINT,
     route      TEXT,
     area       TEXT,
@@ -1191,6 +1211,8 @@ CREATE TABLE feedback (
     lang       TEXT,
     reply      BOOLEAN NOT NULL DEFAULT FALSE,
     reply_to   TEXT,
+    triage     TEXT NOT NULL DEFAULT 'new',
+    triaged_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
@@ -1234,3 +1256,126 @@ CREATE TABLE banzuke_marks (
     PRIMARY KEY (kind, at)
 );
 ALTER TABLE banzuke_marks ENABLE ROW LEVEL SECURITY;
+
+-- ── 対戦 — the duels (plan 279, study/duel_schema.py) ─────────────────
+-- The sprint between two learners: sixty seconds, the same questions.
+-- Every table here is erased with the account (routes/account.py).
+
+-- pvp_friends: a friendship, one row per direction, so "my friends" is
+-- WHERE user_id = me.
+CREATE TABLE pvp_friends (
+    user_id   TEXT NOT NULL,
+    friend_id TEXT NOT NULL,
+    since     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, friend_id)
+);
+ALTER TABLE pvp_friends ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_friends_friend ON pvp_friends (friend_id);
+
+-- pvp_requests: a request waiting (refused_at NULL) or refused, which
+-- keeps the same learner from asking again for 30 days.
+CREATE TABLE pvp_requests (
+    user_id    TEXT NOT NULL,
+    target_id  TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    refused_at TIMESTAMPTZ,
+    PRIMARY KEY (user_id, target_id)
+);
+ALTER TABLE pvp_requests ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_requests_target ON pvp_requests (target_id);
+
+CREATE TABLE pvp_blocks (
+    user_id    TEXT NOT NULL,
+    blocked_id TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, blocked_id)
+);
+ALTER TABLE pvp_blocks ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_blocks_blocked ON pvp_blocks (blocked_id);
+
+-- pvp_reports: a profile reported, for a closed reason and never a
+-- word typed; one row per pair. Read by a person (scripts/read_reports).
+CREATE TABLE pvp_reports (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    reported_id TEXT NOT NULL,
+    reason      TEXT NOT NULL,
+    duel_id     BIGINT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, reported_id)
+);
+ALTER TABLE pvp_reports ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_reports_reported ON pvp_reports (reported_id);
+
+-- pvp_duels: a duel's paper (its questions and keys, stored: an
+-- asynchronous duel outlives a release) and its state. No learner id:
+-- the players are its pvp_entries rows.
+CREATE TABLE pvp_duels (
+    id          BIGSERIAL PRIMARY KEY,
+    kind        TEXT NOT NULL,
+    mode        TEXT NOT NULL,
+    level       TEXT NOT NULL,
+    seed        BIGINT NOT NULL,
+    paper_rev   TEXT NOT NULL,
+    paper       JSONB NOT NULL,
+    status      TEXT NOT NULL,
+    ghost       BOOLEAN NOT NULL DEFAULT FALSE,
+    live_start  TIMESTAMPTZ,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at  TIMESTAMPTZ NOT NULL,
+    resolved_at TIMESTAMPTZ,
+    -- the mix its paper was built at (plan 286): tenths of a level above
+    -- N5, where the Elo stood; null for a paper built at a level before it
+    mix         SMALLINT
+);
+ALTER TABLE pvp_duels ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_duels_seek ON pvp_duels (status, kind, level);
+
+-- pvp_entries: a player in a duel -- the question served and when, the
+-- answers as the server timed them, the score, the Elo before and
+-- after, the credits it paid. A ghost is a copy of a recorded run,
+-- under its author's id (role 'ghost'), and goes with their account.
+CREATE TABLE pvp_entries (
+    duel_id         BIGINT NOT NULL REFERENCES pvp_duels(id) ON DELETE CASCADE,
+    user_id         TEXT NOT NULL,
+    role            TEXT NOT NULL,
+    answers         JSONB NOT NULL DEFAULT '[]',
+    served_q        SMALLINT,
+    served_at       TIMESTAMPTZ,
+    score           INTEGER,
+    rights          SMALLINT,
+    started_at      TIMESTAMPTZ,
+    finished_at     TIMESTAMPTZ,
+    rating_before   INTEGER,
+    rating_after    INTEGER,
+    opponent_rating INTEGER,
+    result          REAL,
+    paid            SMALLINT NOT NULL DEFAULT 0,
+    reviewed        BOOLEAN NOT NULL DEFAULT FALSE,
+    xp              INTEGER NOT NULL DEFAULT 0,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (duel_id, user_id)
+);
+ALTER TABLE pvp_entries ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_entries_user ON pvp_entries (user_id, finished_at);
+-- One player meets a duel's first: two seekers never share one seat.
+CREATE UNIQUE INDEX pvp_entries_one_opponent ON pvp_entries (duel_id) WHERE role = 'opponent';
+
+-- pvp_ratings: the Elo, apart from the 番付's XP. Written at the
+-- learner's first ranked sprint, from their level (placed_level and
+-- placed_at: the level it started from, and when); no test asked first
+-- (plan 282).
+CREATE TABLE pvp_ratings (
+    user_id      TEXT PRIMARY KEY,
+    rating       INTEGER NOT NULL,
+    games        INTEGER NOT NULL DEFAULT 0,
+    wins         INTEGER NOT NULL DEFAULT 0,
+    draws        INTEGER NOT NULL DEFAULT 0,
+    losses       INTEGER NOT NULL DEFAULT 0,
+    peak         INTEGER NOT NULL,
+    placed_level TEXT NOT NULL,
+    placed_at    TIMESTAMPTZ NOT NULL,
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE pvp_ratings ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pvp_ratings_rating ON pvp_ratings (rating DESC, user_id);

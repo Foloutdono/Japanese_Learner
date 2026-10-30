@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { track } from '../lib/track'
 import { runFigures, runWhere } from '../lib/runTrail'
+import { reviewsSettled } from '../lib/reviews'
 
 // Once the queue drops to this many unreviewed cards, kick off a
 // background refill — small enough that a refill is rarely idle for
@@ -14,6 +15,18 @@ const REFILL_AT = 4
 // plays as saved, and the late answer still trims every card behind
 // the one on screen.
 const CHECK_WAIT_MS = 2500
+
+// How long a card just answered stays out of every refill. Its review
+// POST is fire-and-forget, and until it lands the backend still holds
+// the card as due (or new), so a refill in that window was handed it
+// straight back: answered at a card every two seconds, the same three
+// or four kana came round again ten seconds later, in the same order.
+// Held until every review in the air has settled, at least the FLOOR
+// (a refill already out asked before the answer), at most the CEILING
+// (a review that never answers must not hide its card for good; the
+// shortest learning step is thirty seconds).
+const ANSWERED_FLOOR_MS = 8000
+const ANSWERED_CEILING_MS = 30000
 
 // Bump when the shape of a cached card changes. Every storageKey built
 // by sessionKey() carries this, so a bump orphans (and then sweeps) the
@@ -169,9 +182,12 @@ function sweepStaleCaches() {
  *
  * @param {string} storageKey  built with sessionKey(); changing it
  *   starts a fresh session for the new key.
- * @param {(count: number, excludeIds: string[], signal: AbortSignal) => Promise<object[]>} fetchBatch
+ * @param {(count: number, excludeIds: string[], signal: AbortSignal, answered: Set<string>) => Promise<object[]>} fetchBatch
  *   Resolves to card objects, each with a `card_id`. Must THROW on a
  *   failed request rather than resolving to [] — see `done` below.
+ *   `excludeIds` holds the cards in hand and the ones just answered
+ *   whose review may still be on its way; `answered` names the latter,
+ *   for a screen that counts what is held (Today's quota).
  *   The `signal` is aborted on unmount and on key change; the hook also
  *   applies its own timeout, so implementations no longer need one.
  * @param {number} [batchSize=10]
@@ -283,6 +299,22 @@ export function useCardSession({
   useEffect(() => { queueRef.current = queue }, [queue])
 
   const activeKeyRef = useRef(storageKey)
+
+  // The cards popped by advance() whose review may not have landed yet,
+  // by cardKey. See ANSWERED_FLOOR_MS. Every screen used to need its
+  // own copy through extraExcludeIds, and four of the six had none.
+  const answeredRef = useRef(new Set())
+  // advance() reads cardKey through a ref: its default is a new
+  // function on every render.
+  const cardKeyRef = useRef(cardKey)
+  useEffect(() => { cardKeyRef.current = cardKey })
+  const holdAnswered = useCallback((key) => {
+    if (answeredRef.current.has(key)) return
+    answeredRef.current.add(key)
+    const floor = new Promise(r => setTimeout(r, ANSWERED_FLOOR_MS))
+    Promise.all([floor, reviewsSettled(ANSWERED_CEILING_MS)])
+      .then(() => answeredRef.current.delete(key))
+  }, [])
 
   // 足跡 — one run, from the first card to whatever ended it.
   //
@@ -459,11 +491,13 @@ export function useCardSession({
     if (queued.length === 0) setFetching(true)
 
     try {
-      const excludeIds = [
+      const answered = new Set(answeredRef.current)
+      const excludeIds = [...new Set([
         ...queued.map(cardKey),
+        ...answered,
         ...(extraExcludeIds ? extraExcludeIds() : []),
-      ]
-      const fresh = await fetchBatch(batchSize, excludeIds, controller.signal)
+      ])]
+      const fresh = await fetchBatch(batchSize, excludeIds, controller.signal, answered)
 
       // The session moved on while this was in flight — drop the
       // response rather than merging stale cards into the new one.
@@ -480,7 +514,9 @@ export function useCardSession({
           // De-dup by the session's own card identity (see cardKey):
           // the old blind append could seat the same card twice when a
           // refill raced a key change.
-          const seen = new Set(q.map(cardKey))
+          // A card answered while this batch was out is no fresher
+          // for it.
+          const seen = new Set([...q.map(cardKey), ...answeredRef.current])
           const merged = [...q, ...fresh.filter(c => !seen.has(cardKey(c)))]
           saveCache(storageKey, merged)
           return merged
@@ -543,11 +579,12 @@ export function useCardSession({
   const advance = useCallback(() => {
     runRef.current.answered += 1
     setQueue(q => {
+      if (q.length > 0) holdAnswered(cardKeyRef.current(q[0]))
       const next = q.slice(1)
       saveCache(storageKey, next)
       return next
     })
-  }, [storageKey])
+  }, [storageKey, holdAnswered])
 
   // Patch the current (head) card in place without advancing —
   // e.g. Kanji/Vocab re-translating the displayed card after a UI

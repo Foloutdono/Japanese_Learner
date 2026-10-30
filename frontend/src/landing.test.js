@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { DARK, LIGHT, SCALE } from '../landing/tokens.mjs'
 import { PAGES, SITE_ORIGIN, STORES, PRESENTATION, CLIPS } from '../landing/config.mjs'
 import { landingFiles, landingVoices } from '../landing/build.mjs'
@@ -194,6 +194,11 @@ describe('the landing page', () => {
       for (const t of [fr, en]) {
         expect(Object.keys(t.features.items)).toEqual(CLIPS.map(c => c.id))
       }
+    })
+
+    it('film every clip the footage slots hold (plan 283)', () => {
+      const scenes = readdirSync(new URL('../landing/footage/scenes/', import.meta.url)).map(f => f.replace(/\.mjs$/, ''))
+      expect(scenes.sort()).toEqual(CLIPS.map(c => c.id).sort())
     })
 
     it('count the decks the app serves', () => {

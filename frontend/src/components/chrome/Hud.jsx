@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus } from '../../stores/journey'
-import { useCredits, openBalance } from '../../stores/credits'
+import { useCredits, useClaimLanded, openBalance } from '../../stores/credits'
 import { useOnline } from '../../hooks/useOnline'
 import { useXpGain } from './useXpGain'
 import { journeyModel } from '../../domain/goalMath'
@@ -11,15 +11,21 @@ import { cardTier, xpClimb } from '../../domain/passCard'
 import { StruckMark } from '../offers/StruckMark'
 import { Wave } from '../offers/icons'
 import { InfinitySign } from '../pass/InfinitySign'
+import { GearIcon } from '../ui/Icons'
 import { playClick } from '../../lib/audio'
 import { useDesk } from '../../hooks/useDesk'
 import { statusOf, showStatus } from './hudStatus'
+import { StripRefill } from '../credits/RefillCard'
 
 // ── 運行案内 — the HUD (plan 068) ─────────────────────────────
 // The strip across the top of every tab screen: sumi, two registers
-// of ink, no line colour. Two objects (three until plan 173 folded the
+// of ink, no line colour. Three objects (four until plan 173 folded the
 // level's roundel and the pass into one strip, below), each a door:
 //
+//   gear     Réglages, at the start (plan 275, the owner's pick C of
+//            the canvas "Tsuji — settings in the HUD"): the soft ink,
+//            lit as the tab bar lights its gate while a settings page
+//            is open. The phone's settings were a door behind Profile.
 //   status   a station panel: since plan 199 the goal's ring (環, the
 //            owner's pick A, after plan 174's arrival plate), the
 //            destination's grade in a roundel whose arc is the share
@@ -152,6 +158,10 @@ function HudStatus({ onClick }) {
 //                one. The strip's edge goes warning at ≤5 and danger at
 //                0 (plan 069). Tap → the balance sheet.
 //
+// On arrival with credits the refill landed, the card drops out from
+// under the strip, is charged, and goes back (StripRefill, plan 278);
+// the balance it comes back with glints once on its door.
+//
 // The roundel's place went to the station panel, on the strip's left.
 
 /** The balance half: the mark and the figure. */
@@ -159,10 +169,12 @@ function HudBalance({ onClick }) {
   const { t } = useLang()
   const desk = useDesk()
   const credits = useCredits()
+  const landed = useClaimLanded()
   const balance = credits?.unlimited ? null : credits?.balance
   const label = [t.passLabel, credits?.unlimited ? t.cardUnlimited : balance != null ? `${balance} / ${credits.cap}` : null].filter(Boolean).join(' · ')
   return (
     <button type="button" className="hstrip__bal" onClick={onClick} aria-label={label} title={desk ? label : undefined} data-guide="hud.pass">
+      {landed > 0 && <i key={landed} className="hstrip__landed" aria-hidden="true" />}
       <Wave />
       {credits?.unlimited && <span className="hstrip__fig hstrip__fig--inf"><InfinitySign /></span>}
       {balance != null && (
@@ -192,6 +204,7 @@ export function HudPass({ onClick }) {
   return (
     <div className={stripClass(credits, true)}>
       <HudBalance onClick={onClick} />
+      <StripRefill />
     </div>
   )
 }
@@ -222,19 +235,48 @@ function HudStrip() {
       </button>
       <i className="hstrip__perf" aria-hidden="true" />
       <HudBalance onClick={() => { playClick(); openBalance() }} />
+      <StripRefill />
     </div>
   )
 }
 
-// The HUD's two objects, in the order it prints them: the station
-// panel, then the strip. The desk's rail sets the same doors at its
-// foot (DeskPass.jsx, the holder): the same stores, doors and anchors.
+// ── 設定 — the gear (plan 275) ───────────────────────────────
+// A place, so a link. Lit on every settings page, the index and the
+// pages behind it, as the tab bar's gate is lit on its stations. A
+// hairline parts it from the panel beside it (index.css), and goes with
+// the panel when there is none.
+function HudGear() {
+  const { t } = useLang()
+  const { pathname } = useLocation()
+  const on = pathname === '/profile/settings' || pathname.startsWith('/profile/settings/')
+  return (
+    <Link
+      to="/profile/settings"
+      className={on ? 'hud__gear hud__gear--on' : 'hud__gear'}
+      aria-label={t.settings}
+      aria-current={on ? 'page' : undefined}
+      data-guide="hud.settings"
+      onClick={() => playClick()}
+    >
+      <GearIcon size={22} />
+    </Link>
+  )
+}
+
+// The HUD's three objects, in the order it prints them: the gear and
+// the station panel at the start, the strip at the end. The desk's rail
+// sets the panel's and the strip's doors at its foot (DeskPass.jsx, the
+// holder): the same stores, doors and anchors; its settings are a place
+// on the rail.
 export function HudInstruments() {
   return (
     <>
-      {/* The panel opens the status sheet — the card's journey (plan
-          074) — rather than walking to the card. */}
-      <HudStatus onClick={() => { playClick(); showStatus() }} />
+      <div className="hud__lead">
+        <HudGear />
+        {/* The panel opens the status sheet — the card's journey (plan
+            074) — rather than walking to the card. */}
+        <HudStatus onClick={() => { playClick(); showStatus() }} />
+      </div>
       <HudStrip />
     </>
   )

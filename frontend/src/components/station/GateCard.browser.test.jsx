@@ -14,6 +14,9 @@ const creditsRef = { current: null }
 vi.mock('../../stores/credits', () => ({
   useCredits: () => creditsRef.current,
   openBalance: vi.fn(),
+  // The refill (plan 278), read by the strip the gate prints.
+  useClaimOffer: () => null,
+  useClaimLanded: () => 0,
 }))
 vi.mock('../../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))
