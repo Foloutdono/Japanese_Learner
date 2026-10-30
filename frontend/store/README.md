@@ -23,6 +23,9 @@ steps with a `tablet` argument and `--tablet`: `node store/capture.mjs fr main t
 The **7-inch tablet set is landscape 16:9 (1920×1080)**: `node store/capture_tablet.mjs <lang> main` (and `kanji`,
 with 学 new), then `node store/compose_tablet.mjs` into `out/<lang>-tablet7/`. The app is captured at 1280×720,
 where it draws its own wide layout (the rail, the side panels); each slide enlarges one real piece of it.
+The same layout serves the 10-inch tablet, Chromebook and Android XR slots (2560×1440):
+`node store/compose_tablet.mjs --device tablet10|chromebook|xr`. `python3 store/pack.py` then checks every
+image against its slot's limits and writes `out/tsuji-store-<lang>.zip`, one folder per size.
 The older portrait `tablet` mode of `capture.mjs`/`compose.mjs` is superseded by it.
 
 ```bash

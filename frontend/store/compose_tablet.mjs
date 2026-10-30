@@ -1,7 +1,10 @@
 // Store screenshots, tablet (7-inch, landscape): 1920×1080 PNGs (16:9, Google Play's tablet
 // screenshot). The title and an enlarged piece of the app on the left, a tablet showing the
 // app's own wide layout on the right, the same piece lifted out of the dimmed screen.
-//   node store/compose_tablet.mjs [fr|en ...] [--only today,grammar]
+//   node store/compose_tablet.mjs [fr|en ...] [--only today,grammar] [--device tablet7|tablet10|chromebook|xr]
+// The same slides for every 16:9 surface Play asks for, the frame and the pixel size per
+// device: a 7-inch tablet (1920×1080), a 10-inch one and a Chromebook (2560×1440, each side
+// at least 1080), Android XR (the app as a window floating in its space, 2560×1440).
 import { chromium } from 'playwright'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -11,11 +14,20 @@ const here = dirname(fileURLToPath(import.meta.url))
 const args = process.argv.slice(2)
 const onlyAt = args.indexOf('--only')
 const only = onlyAt >= 0 ? args[onlyAt + 1].split(',') : null
-const langs = args.filter((a, i) => !a.startsWith('--') && (onlyAt < 0 || i !== onlyAt + 1))
+const langs = args.filter((a, i) => !a.startsWith('--') && (onlyAt < 0 || i !== onlyAt + 1) && (args.indexOf('--device') < 0 || i !== args.indexOf('--device') + 1))
 const COPY = JSON.parse(readFileSync(join(here, 'copy.json'), 'utf8'))
 
+const devAt = args.indexOf('--device')
+const DEVICE = devAt >= 0 ? args[devAt + 1] : 'tablet7'
+const OUT_SCALE = DEVICE === 'tablet7' ? 1 : 4 / 3 // drawn on the same 1920×1080 page, saved larger
 const W = 1920, H = 1080
-const FL = 650, FW = 1240, BZ = 22, FT = 190 // the tablet: left, width, bezel, top
+const FRAME = {
+  tablet7: { FL: 650, FW: 1240, BZ: 22, FT: 190 },
+  tablet10: { FL: 640, FW: 1250, BZ: 16, FT: 196 },
+  chromebook: { FL: 660, FW: 1220, BZ: 14, FT: 150 },
+  xr: { FL: 660, FW: 1220, BZ: 0, FT: 200 },
+}[DEVICE]
+const { FL, FW, BZ, FT } = FRAME // the device: left, width, bezel, top
 const K = (FW - 2 * BZ) / 1280 // css px of the app → canvas px
 const SX = FL + BZ, SY = FT + BZ
 const SH = Math.round(720 * K)
@@ -57,6 +69,14 @@ h1 em{font-style:normal;color:#ffe08f}
 .tablet{position:absolute;left:${FL}px;top:${FT}px;width:${FW}px;padding:${BZ}px;border-radius:${BZ + 34}px;background:linear-gradient(145deg,#4a4650,#15131a 30%,#0c0b10 70%,#3a363f);box-shadow:0 50px 110px rgba(0,0,0,.55),inset 0 0 0 3px rgba(255,255,255,.18)}
 .tablet .cam{position:absolute;left:${BZ / 2 - 5}px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:#1d1b22;box-shadow:inset 0 0 0 2px #35323b}
 .screen{position:relative;width:${FW - 2 * BZ}px;height:${SH}px;border-radius:${34}px;overflow:hidden;background:#000}
+${DEVICE === 'tablet10' ? `.tablet{border-radius:${BZ + 26}px}.screen{border-radius:26px}` : ''}
+${DEVICE === 'chromebook' ? `.tablet{border-radius:22px 22px 6px 6px;padding:${BZ}px ${BZ}px ${BZ + 16}px}.screen{border-radius:8px}.tablet .cam{left:50%;top:${BZ / 2 - 4}px;width:7px;height:7px;margin:0 0 0 -3px}
+.base{position:absolute;left:${FL - 28}px;top:${FT + SH + 2 * BZ + 16}px;width:${FW + 56}px;height:30px;border-radius:2px 2px 26px 26px;background:linear-gradient(#cfcbd4,#8d8994 55%,#55525b);box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.base i{position:absolute;left:50%;top:0;width:190px;height:9px;margin-left:-95px;border-radius:0 0 10px 10px;background:#6c6873}` : ''}
+${DEVICE === 'xr' ? `.tablet{background:none;box-shadow:none;padding:0;border-radius:34px}.tablet .cam{display:none}
+.screen{border-radius:30px;box-shadow:0 0 0 2px rgba(255,255,255,.35),0 0 80px 10px rgba(255,255,255,.12),0 60px 120px rgba(0,0,0,.6)}
+.xrbar{position:absolute;left:${FL + FW / 2 - 70}px;top:${FT + SH + 22}px;width:140px;height:12px;border-radius:6px;background:rgba(255,255,255,.55)}
+.floor{position:absolute;left:0;right:0;bottom:0;height:300px;background:radial-gradient(1100px 160px at 65% 100%,rgba(255,255,255,.14),transparent 70%)}` : ''}
 .screen img.s{display:block;width:100%;height:100%}
 .dim{position:absolute;inset:0;background:#0b0914}
 .lift{position:absolute;overflow:hidden;box-shadow:0 0 0 5px #ffe08f,0 0 0 14px rgba(255,224,143,.28),0 26px 60px rgba(0,0,0,.55)}
@@ -113,7 +133,7 @@ function slideHtml(slide, lang) {
   <h1 data-loose="${esc(titleLoose)}">${title}</h1>
   ${chips}
   <svg width="0" height="0" style="position:absolute"><filter id="vb" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="0 5"/></filter></svg>
-  <div class="tablet"><div class="cam"></div><div class="screen"><img class="s" src="${raw(slide.shot)}"><div class="dim" style="opacity:${slide.dim}"></div></div></div>
+  ${DEVICE === 'xr' ? '<div class="floor"></div>' : ''}<div class="tablet"><div class="cam"></div><div class="screen"><img class="s" src="${raw(slide.shot)}"><div class="dim" style="opacity:${slide.dim}"></div></div></div>${DEVICE === 'chromebook' ? '<div class="base"><i></i></div>' : ''}${DEVICE === 'xr' ? '<div class="xrbar"></div>' : ''}
   ${lifts}${chevs}${call}
 </div>
 <script>document.fonts.ready.then(() => {
@@ -129,13 +149,13 @@ function slideHtml(slide, lang) {
 }
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox', '--allow-file-access-from-files'] })
-const pg = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 })
+const pg = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: OUT_SCALE })
 for (const lang of langs.length ? langs : ['fr', 'en']) {
-  const out = join(here, 'out', `${lang}-tablet7`); mkdirSync(out, { recursive: true })
+  const out = join(here, 'out', `${lang}-${DEVICE}`); mkdirSync(out, { recursive: true })
   const tmp = join(here, '.tmp'); mkdirSync(tmp, { recursive: true })
   for (const [i, s] of SLIDES.entries()) {
     if (only && !only.includes(s.id)) continue
-    const file = join(tmp, `${lang}-tablet7-${s.id}.html`)
+    const file = join(tmp, `${lang}-${DEVICE}-${s.id}.html`)
     writeFileSync(file, slideHtml(s, lang))
     await pg.goto('file://' + file)
     await pg.waitForSelector('body[data-ready]', { timeout: 20000 })
