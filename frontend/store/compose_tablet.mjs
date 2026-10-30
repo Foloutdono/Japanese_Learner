@@ -27,7 +27,7 @@ const SLIDES = [
   { id: 'today', shot: 'today', bg: ['#2a3a78', '#0e1330'], mark: '今', dim: 0.5,
     lift: [{ piece: 'today_plan' }, { piece: 'today_board', shape: 'btn' }], callout: { piece: 'today_plan' } },
   { id: 'grammar', shot: 'grammar', bg: ['#5f9248', '#2a4a20'], mark: '文', dim: 0.5,
-    lift: [{ piece: 'grammar_fiche' }], callout: { piece: 'grammar_fiche', crop: [0, 0, 1, 0.62] } },
+    lift: [{ piece: 'grammar_fiche' }], callout: { piece: 'grammar_rule', maxH: 540 } },
   { id: 'dictionary', shot: 'dictionary', bg: ['#c28a22', '#6a440a'], mark: '辞', dim: 0.5,
     lift: [{ piece: 'dict_entry' }], callout: { piece: 'dict_entry' } },
   { id: 'practice', shot: 'practice', bg: ['#2f8a89', '#154543'], mark: '練', dim: 0, chips: true },
@@ -59,10 +59,10 @@ h1 em{font-style:normal;color:#ffe08f}
 .screen{position:relative;width:${FW - 2 * BZ}px;height:${SH}px;border-radius:${34}px;overflow:hidden;background:#000}
 .screen img.s{display:block;width:100%;height:100%}
 .dim{position:absolute;inset:0;background:#0b0914}
-.lift{position:absolute;border-radius:14px;overflow:hidden;box-shadow:0 0 0 5px #ffe08f,0 0 0 14px rgba(255,224,143,.28),0 26px 60px rgba(0,0,0,.55)}
+.lift{position:absolute;overflow:hidden;box-shadow:0 0 0 5px #ffe08f,0 0 0 14px rgba(255,224,143,.28),0 26px 60px rgba(0,0,0,.55)}
 .lift.btn{border-radius:999px;box-shadow:0 0 0 4px rgba(255,224,143,.95),0 0 44px 16px rgba(255,208,70,.85),0 24px 60px rgba(0,0,0,.55);filter:saturate(1.9) brightness(1.1)}
 .lift img,.call img{display:block;width:100%;height:100%}
-.call{position:absolute;border-radius:26px;overflow:hidden;border:7px solid #fff;box-shadow:0 0 0 14px rgba(255,255,255,.22),0 40px 90px rgba(0,0,0,.55);background:#f6efe0}
+.call{position:absolute;overflow:hidden;box-shadow:0 0 0 6px #fff,0 0 0 18px rgba(255,255,255,.2),0 40px 90px rgba(0,0,0,.55)}
 .call img.ghost{position:absolute;left:0;mix-blend-mode:multiply;filter:url(#vb)}
 .chips{position:absolute;left:${COL.left}px;width:${COL.width}px;display:flex;flex-wrap:wrap;gap:14px}
 .chips span{font:700 31px 'Space Grotesk';padding:13px 26px;border-radius:999px;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
@@ -77,11 +77,17 @@ function slideHtml(slide, lang) {
   const rawDir = join(here, 'raw', `${lang}-tablet7`)
   const raw = n => `file://${join(rawDir, n + '.png')}`
   const rects = JSON.parse(readFileSync(join(rawDir, 'rects.json'), 'utf8'))
-  const nb = t => t.replace(/(\d) (?=\d)/g, '$1\u00a0').replace(/\b([^\s\d]{1,3}) (?=\S)/g, '$1\u00a0')
-  const hi = nb(c.hi), title = esc(nb(c.h.join(' ')).replace(/–/g, '\u2060–\u2060')).replace(esc(hi), `<em>${esc(hi)}</em>`)
+  // numbers keep their groups, a word of three letters at most stays with the next one
+  const nb = t => t.replace(/(\d) (?=\d)/g, '$1\u00a0').replace(/(?<=^|\s)(\S{1,3}) (?=\S)/gu, '$1\u00a0')
+  const nbNum = t => t.replace(/(\d) (?=\d)/g, '$1\u00a0').replace(/–/g, '\u2060–\u2060')
+  // two versions of the title: short words held to the next one, and, where that leaves a block
+  // too wide for the column, numbers alone held together (the page picks the first that fits)
+  const titleOf = f => esc(f(c.h.join(' '))).replace(esc(f(c.hi)), `<em>${esc(f(c.hi))}</em>`)
+  const title = titleOf(t => nbNum(nb(t))), titleLoose = titleOf(nbNum)
   const lifts = (slide.lift || []).map(k => {
-    const [x, y, w, h] = rects[k.piece]
-    return `<div class="lift ${k.shape || ''}" style="left:${SX + x * K}px;top:${SY + y * K}px;width:${w * K}px;height:${h * K}px"><img src="${raw(k.piece)}"></div>`
+    const [x, y, w, h, r = 0] = rects[k.piece]
+    const rad = k.shape === 'btn' ? '' : `border-radius:${Math.max(r, 6) * K}px;`
+    return `<div class="lift ${k.shape || ''}" style="${rad}left:${SX + x * K}px;top:${SY + y * K}px;width:${w * K}px;height:${h * K}px"><img src="${raw(k.piece)}"></div>`
   }).join('')
   let call = ''
   if (slide.callout) {
@@ -89,31 +95,35 @@ function slideHtml(slide, lang) {
     const [pw, ph] = pngSize(join(rawDir, k.piece + '.png'))
     const [cx, cy, cw, ch] = k.crop || [0, 0, 1, 1]
     const sw = pw * cw, sh = ph * ch
-    const maxH = 470 - (k.trail ? 30 : 0)
+    const maxH = (k.maxH || 470) - (k.trail ? 30 : 0)
     const bw = Math.min(COL.width - 20, maxH * sw / sh), bh = bw * sh / sw
-    const left = COL.left + 8, top = H - 70 - bh
+    const left = COL.left + 8, top = H - 76 - bh
     const scale = bw / sw
+    const r = Math.max(rects[k.piece]?.[4] || 0, 8) * scale * 2
     const img = (extra = '') => `<img ${extra} src="${raw(k.piece)}" style="position:absolute;width:${pw * scale}px;height:${ph * scale}px;left:${-cx * pw * scale}px;top:${-cy * ph * scale}px">`
     const ghosts = k.trail ? [[-30, .32], [-60, .16]].map(([dy, o]) => `<img class="ghost" src="${raw(k.piece)}" style="position:absolute;width:${pw * scale}px;height:${ph * scale}px;left:0;top:${dy}px;opacity:${o}">`).join('') : ''
-    call = `<div class="call" style="left:${left}px;top:${top}px;width:${bw + 14}px;height:${bh + 14}px">${ghosts}${img()}</div>`
+    call = `<div class="call" style="border-radius:${r}px;left:${left}px;top:${top}px;width:${bw}px;height:${bh}px">${ghosts}${img()}</div>`
   }
   const chips = slide.chips ? `<div class="chips" style="top:520px">${c.chips.map(t => `<span>${esc(t)}</span>`).join('')}</div>` : ''
-  const chevs = slide.chevrons ? (() => { const [x, y, w, h] = rects.comp_card; return chev(SX + (x - 52) * K, SY + (y + h / 2 - 130) * K) + chev(SX + (x + w + 18) * K, SY + (y + h / 2 - 130) * K) })() : ''
+  const chevs = slide.chevrons ? (() => { const [x, y, w, h] = rects.comp_card, cy = SY + (y + h / 2) * K - 135; return chev(SX + x * K - 84 - 26, cy) + chev(SX + (x + w) * K + 26, cy) })() : ''
   return `<!doctype html><meta charset="utf-8"><style>${css}</style>
 <div class="slide" style="background:linear-gradient(165deg,${slide.bg[0]},${slide.bg[1]})">
   <div class="mark">${slide.mark}</div><div class="shade"></div>
   <div class="brand"><b>辻</b>Tsuji</div>
-  <h1>${title}</h1>
+  <h1 data-loose="${esc(titleLoose)}">${title}</h1>
   ${chips}
   <svg width="0" height="0" style="position:absolute"><filter id="vb" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="0 5"/></filter></svg>
   <div class="tablet"><div class="cam"></div><div class="screen"><img class="s" src="${raw(slide.shot)}"><div class="dim" style="opacity:${slide.dim}"></div></div></div>
   ${lifts}${chevs}${call}
 </div>
 <script>document.fonts.ready.then(() => {
-  const h = document.querySelector('h1'); let fs = 100
-  const fits = () => h.scrollHeight <= 330 && [...h.querySelectorAll('em')].concat([h]).every(e => e.scrollWidth <= e.clientWidth + 1)
-  h.style.fontSize = fs + 'px'
-  while (!fits() && fs > 60) { fs -= 2; h.style.fontSize = fs + 'px' }
+  const h = document.querySelector('h1'), tight = h.innerHTML, loose = h.dataset.loose
+  const fits = () => h.scrollHeight <= 330 && h.scrollWidth <= h.clientWidth + 1
+  let done = false
+  for (let fs = 100; fs >= 60 && !done; fs -= 2) {
+    h.style.fontSize = fs + 'px'
+    for (const html of [tight, loose]) { h.innerHTML = html; if (fits()) { done = true; break } }
+  }
   const c = document.querySelector('.chips'); if (c) c.style.top = (h.offsetTop + h.scrollHeight + 36) + 'px'
   document.body.dataset.ready = '1' })</script>`
 }

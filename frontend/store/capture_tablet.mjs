@@ -27,10 +27,18 @@ let p
 const shot = async name => { await p.screenshot({ path: `${OUT}${name}.png` }); console.log('shot', name) }
 const go = async (path, ms = 4500) => { await p.goto(BASE + path); await p.waitForTimeout(ms) }
 const box = async loc => { const b = await loc.first().boundingBox(); if (!b) throw new Error('no box'); return [b.x, b.y, b.width, b.height] }
-const piece = async (name, rect) => {
-  const [x, y, w, h] = rect
+// A piece is cut to its element's own edges, so its frame on the slide follows the element's
+// corners rather than boxing the page around it; `sel` names the element whose radius it keeps.
+const radius = async sel => (sel ? p.evaluate(s => parseFloat(getComputedStyle(document.querySelector(s)).borderTopLeftRadius) || 0, sel) : 0)
+const piece = async (name, rect, sel) => {
+  const [x, y, w, h] = rect.map(Math.round)
   await p.screenshot({ path: `${OUT}${name}.png`, clip: { x, y, width: w, height: h } })
-  rects[name] = rect.map(Math.round); console.log('piece', name, rects[name].join(','))
+  rects[name] = [x, y, w, h, await radius(sel)]; console.log('piece', name, rects[name].join(','))
+}
+const cut = async (name, sel, [dy0, maxH] = [0, Infinity]) => {
+  const [x, y, w, h] = await box(p.locator(sel))
+  const top = Math.max(0, y + dy0), bottom = Math.min(720, y + h, top + maxH)
+  await piece(name, [x, top, w, bottom - top], sel)
 }
 
 if (stage === 'main') {
@@ -41,18 +49,25 @@ if (stage === 'main') {
   // the gate button says what the title says
   if (lang === 'en') await p.evaluate(() => { const b = document.querySelector('.btn-depart'); const t = [...b.querySelectorAll('*')].filter(e => !e.children.length && /^Depart$/.test(e.textContent.trim())).pop(); if (t) t.textContent = 'Board' })
   await shot('today')
-  const col = await box(p.locator('.tdy-desk__col'))
-  await piece('today_plan', [col[0], col[1], col[2], 316])
-  await piece('today_board', await box(p.locator('.btn-depart')))
+  await cut('today_plan', '.tdy-desk__col', [0, 316])
+  await cut('today_board', '.btn-depart')
   // 2 A grammar answer: the card, and the fiche that opens beside it.
   p = await page()
   await go('/learn/grammar/N5/grammar.contrast'); await p.keyboard.press('1'); await p.waitForTimeout(1800); await shot('grammar')
-  await piece('grammar_fiche', [896, 12, 372, 696])
+  await cut('grammar_fiche', '.desk-entry', [0, 688])
+  // the callout: the fiche from its head to the end of its rule, never cut mid-sentence
+  const ruleEnd = await p.evaluate(() => {
+    const head = [...document.querySelectorAll('.desk-entry *')].find(e => !e.children.length && /^(Règle|Rule)$/.test(e.textContent.trim()))
+    let sec = head; while (sec && sec.parentElement && sec.parentElement.getBoundingClientRect().height < 300) sec = sec.parentElement
+    return sec.getBoundingClientRect().bottom
+  })
+  const fe = await box(p.locator('.desk-entry'))
+  await piece('grammar_rule', [fe[0], fe[1], fe[2], ruleEnd + 10 - fe[1]], '.desk-entry')
   // 3 The dictionary: the results and the entry beside them.
   await go('/dictionary', 3000)
   await p.getByRole('button', { name: L.vocab }).first().click(); await p.waitForTimeout(800)
   const inp = p.locator('input').first(); await inp.click(); await inp.fill('電車'); await p.waitForTimeout(3500); await shot('dictionary')
-  await piece('dict_entry', [820, 16, 448, 466])
+  await cut('dict_entry', '.dict-dock')
   // 4 Practice: the seven stations, each with its exercise in miniature.
   await go('/practice'); await shot('practice')
   // 5 A mock exam question, and the answer sheet beside it.
@@ -60,19 +75,19 @@ if (stage === 'main') {
   await p.getByRole('button', { name: L.start }).first().click(); await p.waitForTimeout(2500)
   for (let k = 1; k < 9; k++) { await p.getByRole('button', { name: L.next }).first().click(); await p.waitForTimeout(300) }
   await p.waitForTimeout(600); await shot('exam')
-  await piece('exam_sheet', [920, 0, 360, 520])
+  await cut('exam_sheet', '.desk-run__side', [0, 520])
   // 7 A flashcard answered: what each rating schedules, and the goal card.
   await go('/learn/vocab/N5/vocab.flashcard.f2b', 5500)
   await p.locator('.prompt-card').first().click(); await p.waitForTimeout(1200); await shot('flash')
-  await piece('flash_intervals', [20, 168, 316, 480])
+  await cut('flash_intervals', '.desk-run__panel.desk-card')
   await go('/today', 4500)
   await p.locator('.desk-holder__st').click(); await p.waitForTimeout(2500); await shot('goal_sheet')
-  await piece('goal_card', [266, 444, 358, 262])
+  await cut('goal_card', '.status-sheet', [74, 400])
   // 8 A comprehension text rolling up its card.
   await go('/practice/comprehension/N5', 5500)
   await p.locator('.roll-chip').click(); await p.waitForTimeout(3000); await shot('comp')
-  await piece('comp_ctl', await box(p.locator('.roll-ctl')))
-  await piece('comp_card', await box(p.locator('.prompt-card--roll')))
+  await cut('comp_ctl', '.roll-ctl')
+  await cut('comp_card', '.prompt-card--roll')
 }
 
 if (stage === 'kanji') {
@@ -94,14 +109,14 @@ if (stage === 'kanji') {
     await p.mouse.up(); await p.waitForTimeout(700)
   }
   await p.waitForTimeout(900); await shot('kanji')
-  await piece('kanji_board', await box(p.locator('.gt-board')))
+  await cut('kanji_board', '.gt-board')
   await p.getByRole('button', { name: L.show }).click(); await p.waitForTimeout(7000)
   await p.getByRole('button', { name: L.cont }).click(); await p.waitForTimeout(2500)
   await p.getByRole('button', { name: L.start }).click(); await p.waitForTimeout(3500)
   await p.locator('.prompt-card').first().click(); await p.waitForTimeout(1200)
   await p.addStyleTag({ content: '.reading-share__pct{background:#ffe08f !important;color:#3a2a00 !important;padding:2px 10px !important;border-radius:12px !important;font-weight:700 !important}' })
   await p.waitForTimeout(300); await shot('kanji_card')
-  await piece('kanji_readings', [448, 240, 384, 200])
+  await piece('kanji_readings', [448, 240, 384, 200], '.prompt-card')
 }
 writeFileSync(RECTS, JSON.stringify(rects, null, 1))
 await browser.close()
