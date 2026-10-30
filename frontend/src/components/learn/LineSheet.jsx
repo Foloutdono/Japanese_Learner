@@ -101,28 +101,30 @@ export function LineSheet({ sections, start, stops, stats, today, session, onClo
           </button>
         ))}
       </div>
-      <div className="prc-sheet__pager" ref={pager} onScroll={onScroll}>
-        {sections.map((s, i) => (
-          <section
-            key={s.path}
-            className="prc-page lrn-page"
-            style={{ '--line-color': s.color }}
-            aria-label={s.title}
-            inert={i !== at}
-          >
-            <LinePage
-              section={s}
-              near={Math.abs(i - at) <= 1}
-              here={stops[TRACKED[s.path]] ?? null}
-              main={main}
-              stats={stats}
-              today={today}
-              session={session}
-              onBoard={onBoard}
-              onStation={onStation}
-            />
-          </section>
-        ))}
+      <div className="prc-sheet__deck">
+        <div className="prc-sheet__pager" ref={pager} onScroll={onScroll}>
+          {sections.map((s, i) => (
+            <section
+              key={s.path}
+              className="prc-page lrn-page"
+              style={{ '--line-color': s.color }}
+              aria-label={s.title}
+              inert={i !== at}
+            >
+              <LinePage
+                section={s}
+                near={Math.abs(i - at) <= 1}
+                here={stops[TRACKED[s.path]] ?? null}
+                main={main}
+                stats={stats}
+                today={today}
+                session={session}
+                onBoard={onBoard}
+                onStation={onStation}
+              />
+            </section>
+          ))}
+        </div>
       </div>
     </Sheet>
   )

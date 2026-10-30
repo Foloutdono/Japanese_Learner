@@ -102,18 +102,20 @@ export function PracticeSheet({ sections, start, grade, records, session, onClos
           </Fragment>
         ))}
       </div>
-      <div className="prc-sheet__pager" ref={pager} onScroll={onScroll}>
-        {sections.map((s, i) => (
-          <section
-            key={s.path}
-            className="prc-page"
-            style={{ '--line-color': s.color }}
-            aria-label={s.title}
-            inert={i !== at}
-          >
-            <Page section={s} near={Math.abs(i - at) <= 1} grade={grade} records={records} session={session} onBoard={onBoard} onStation={onStation} />
-          </section>
-        ))}
+      <div className="prc-sheet__deck">
+        <div className="prc-sheet__pager" ref={pager} onScroll={onScroll}>
+          {sections.map((s, i) => (
+            <section
+              key={s.path}
+              className="prc-page"
+              style={{ '--line-color': s.color }}
+              aria-label={s.title}
+              inert={i !== at}
+            >
+              <Page section={s} near={Math.abs(i - at) <= 1} grade={grade} records={records} session={session} onBoard={onBoard} onStation={onStation} />
+            </section>
+          ))}
+        </div>
       </div>
     </Sheet>
   )
