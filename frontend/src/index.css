@@ -10311,7 +10311,6 @@ textarea:focus-visible {
   overflow-x: auto;
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
-  scrollbar-width: none;
 }
 .lrn-page__mode { flex: none; }
 @media (prefers-reduced-motion: reduce) {
