@@ -130,12 +130,15 @@ not yet written in Spanish reads English**, never French and never blank.
   its Spanish (`vocab_jmdict_data` attaches every layer). What plan 280
   folds is still decided by the French layer, so a compound reads the
   same in every language.
-- **Everything else is written a wave at a time** and reads English until
-  then: the 21,800 Tatoeba sentences only the pool shows. `python -m
-  scripts.spanish_coverage` counts what is written and what is left, per
-  part. A Spanish text is optional where it is added (`grammar_check` holds
-  one that is there, and accepts its absence); `tests/test_spanish.py`
-  holds a part whole once its wave is done.
+- **The sentences are whole** (the twelfth wave): the 21,832 Tatoeba
+  sentences only the pool shows (in the dictionary, reading and
+  translation practice), translated from the Japanese with the English
+  and the French beside them, so the layer holds every one of the
+  French layer's 25,857.
+- **Nothing is left to a later wave.** `python -m scripts.spanish_coverage`
+  shows every part whole, and `tests/test_spanish.py` holds each so: a
+  part that grows (a deck card, a point, a bank row, a layer line) takes
+  its Spanish in the same change.
 - **One reader per kind, not a ternary per screen.** A deck gloss is
   `get_meaning(entry, lang, VOCAB_GLOSSES | KANJI_GLOSSES)`, the course's maps
   by language (`translations/course.py`); a catalogue text is
@@ -147,9 +150,11 @@ not yet written in Spanish reads English**, never French and never blank.
 
 ## Consequences
 
-- A Spanish learner sees English wherever a wave has not reached. That is
-  the honest fallback: the English is the course's source, and the French
-  would be a language the learner did not choose.
+- A Spanish learner sees English wherever a wave has not reached (none
+  has not, since the twelfth): the honest fallback, the English being the
+  course's source and the French a language the learner did not choose.
+  What only a model writes (the deep breakdown, a generated exercise)
+  answers in the learner's language as it always has.
 - Model-backed features (the deep breakdown, comprehension, conversation,
   the tutor) already answered in any language `reading.known_lang` names,
   Spanish among them; a Spanish learner now reaches them with `lang=es` and

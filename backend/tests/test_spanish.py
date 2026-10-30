@@ -209,12 +209,12 @@ def test_every_chip_has_its_spanish_label_and_tooltip():
 # ── The Spanish layer over JMdict ────────────────────────────
 
 def test_the_spanish_layer_holds_every_line_the_french_one_does():
-    """Senses and pool lines: the Spanish layer is the French one's twin
-    (plan 291), so nothing a French learner reads in their language
-    reaches a Spanish learner in English."""
+    """Senses, sentences and pool lines: the Spanish layer is the French
+    one's twin (plan 291), so nothing a French learner reads in their
+    language reaches a Spanish learner in English."""
     import sqlite3
     with sqlite3.connect(jmdict_fr.DB_PATHS["fr"]) as fr, sqlite3.connect(jmdict_fr.DB_PATHS["es"]) as es:
-        for table, key in (("sense", "en"), ("pool_line", "kanji || '::' || kana")):
+        for table, key in (("sense", "en"), ("example", "jp"), ("pool_line", "kanji || '::' || kana")):
             french = {k for (k,) in fr.execute(f"SELECT {key} FROM {table}")}
             spanish = {k for (k,) in es.execute(f"SELECT {key} FROM {table}")}
             missing = sorted(french - spanish)
