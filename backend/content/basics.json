@@ -6,7 +6,8 @@
       "jp": "はじめまして",
       "title": {
         "en": "Nice to meet you",
-        "fr": "Enchanté"
+        "fr": "Enchanté",
+        "es": "Mucho gusto"
       },
       "grammar": [
         "です／だ",
@@ -53,7 +54,8 @@
       "jp": "これ・それ",
       "title": {
         "en": "This and that",
-        "fr": "Ceci et cela"
+        "fr": "Ceci et cela",
+        "es": "Esto y eso"
       },
       "grammar": [
         "これ／それ／あれ／どれ",
@@ -103,7 +105,8 @@
       "jp": "数",
       "title": {
         "en": "Numbers and prices",
-        "fr": "Les nombres et les prix"
+        "fr": "Les nombres et les prix",
+        "es": "Los números y los precios"
       },
       "grammar": [
         "助数詞 〜つ／〜人／〜枚"
@@ -159,7 +162,8 @@
       "jp": "〜ます",
       "title": {
         "en": "Everyday verbs",
-        "fr": "Les verbes du quotidien"
+        "fr": "Les verbes du quotidien",
+        "es": "Los verbos de cada día"
       },
       "grammar": [
         "〜ます／〜ません",
@@ -211,7 +215,8 @@
       "jp": "時間",
       "title": {
         "en": "Telling the time",
-        "fr": "L'heure"
+        "fr": "L'heure",
+        "es": "La hora"
       },
       "grammar": [
         "に",
@@ -258,7 +263,8 @@
       "jp": "曜日",
       "title": {
         "en": "The days of the week",
-        "fr": "Les jours de la semaine"
+        "fr": "Les jours de la semaine",
+        "es": "Los días de la semana"
       },
       "grammar": [],
       "vocab": [
@@ -300,7 +306,8 @@
       "jp": "月と年",
       "title": {
         "en": "Months and years",
-        "fr": "Les mois et les années"
+        "fr": "Les mois et les années",
+        "es": "Los meses y los años"
       },
       "grammar": [],
       "vocab": [
@@ -340,7 +347,8 @@
       "jp": "行きます",
       "title": {
         "en": "Going places",
-        "fr": "Aller quelque part"
+        "fr": "Aller quelque part",
+        "es": "Ir a algún lugar"
       },
       "grammar": [
         "へ"
@@ -386,7 +394,8 @@
       "jp": "で・と",
       "title": {
         "en": "Where, how and with whom",
-        "fr": "Où, comment et avec qui"
+        "fr": "Où, comment et avec qui",
+        "es": "Dónde, cómo y con quién"
       },
       "grammar": [
         "で",
@@ -421,7 +430,8 @@
       "jp": "〜ました",
       "title": {
         "en": "What you did",
-        "fr": "Ce que l'on a fait"
+        "fr": "Ce que l'on a fait",
+        "es": "Lo que hiciste"
       },
       "grammar": [
         "〜ました／〜ませんでした"
@@ -449,7 +459,8 @@
       "jp": "あります・います",
       "title": {
         "en": "Where things are",
-        "fr": "Où sont les choses"
+        "fr": "Où sont les choses",
+        "es": "Dónde están las cosas"
       },
       "grammar": [
         "〜があります／います",
@@ -495,7 +506,8 @@
       "jp": "形容詞",
       "title": {
         "en": "Describing things",
-        "fr": "Décrire"
+        "fr": "Décrire",
+        "es": "Describir las cosas"
       },
       "grammar": [
         "い形容詞／な形容詞",
@@ -538,7 +550,8 @@
       "jp": "誘う",
       "title": {
         "en": "Inviting",
-        "fr": "Inviter"
+        "fr": "Inviter",
+        "es": "Invitar"
       },
       "grammar": [
         "〜ませんか",
@@ -577,7 +590,8 @@
       "jp": "好き",
       "title": {
         "en": "Likes, skills and family",
-        "fr": "Goûts, talents et famille"
+        "fr": "Goûts, talents et famille",
+        "es": "Gustos, habilidades y familia"
       },
       "grammar": [
         "〜が好きです",

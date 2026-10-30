@@ -85,10 +85,14 @@ not yet written in Spanish reads English**, never French and never blank.
   (`jmdict_fr.examples(jps, lang)`, `example_fixes.translated`), so the
   card, the dictionary and reading practice serve it as they serve the
   French.
+- **The basics course is whole** (the seventh wave): its fourteen unit
+  titles carry their `es`, required by `test_basics` as the English and
+  French are. The rest of the course was already Spanish: its cards'
+  glosses are the decks', its sentences the reading bank's.
 - **Everything else is written a wave at a time** and reads English until
-  then: the basics course's unit titles, the JMdict pool's words and the
-  21,800 Tatoeba sentences only the pool shows, the breakdown's
-  particle and ending glosses, the duels' choices. `python -m
+  then: the JMdict pool's words and the 21,800 Tatoeba sentences only the
+  pool shows, the breakdown's particle and ending glosses, the duels'
+  choices. `python -m
   scripts.spanish_coverage` counts what is written and what is left, per
   part. A Spanish text is optional where it is added (`grammar_check` holds
   one that is there, and accepts its absence); `tests/test_spanish.py`

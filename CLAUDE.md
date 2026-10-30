@@ -419,9 +419,10 @@ runtime purpose.
   shows its Spanish: a correction's or a written sentence's `es`
   (`vocab_examples check`, `check-added`), a Tatoeba sentence's line in
   `datas/vocab/jmdict_es.sqlite3` (`build_jmdict_fr --lang es`), so a card
-  the deck gains has its sentences in Spanish too. Everything else (the
-  basics course's titles, the pool and its sentences, the duels) gains
-  Spanish a wave at a time, optional where it is added:
+  the deck gains has its sentences in Spanish too; a basics unit its
+  title's `es` (`test_basics`). Everything else (the pool and its
+  sentences, the duels) gains Spanish a wave at a time, optional where it
+  is added:
   `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
   KANJI_GLOSSES)` (`translations/course.py`), a date or a number is

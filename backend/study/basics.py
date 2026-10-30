@@ -58,7 +58,7 @@ def _resolve(names: list[str], ids: dict[str, str], what: str, unit: str) -> lis
 @lru_cache(maxsize=1)
 def units() -> tuple[dict, ...]:
     """The course's units in order, each with its cards resolved to ids:
-    {"id", "jp", "title": {"en", "fr"}, "sentences", "grammar", "vocab",
+    {"id", "jp", "title": {"en", "fr", "es"}, "sentences", "grammar", "vocab",
     "kanji", "cards": {source: [raw_id, ...]}}. Raises on a name that is
     no N5 card, so a deck change cannot leave the course pointing at
     nothing (content/vocab_renames.py moves the id, not this file)."""
