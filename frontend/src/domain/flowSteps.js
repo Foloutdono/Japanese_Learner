@@ -20,7 +20,7 @@ export function stepFor(index, answered, lookFirst = false) {
 }
 
 // The reading ride (screens/RideReading.jsx): read, type, measure; on
-// the desk graded after measure. `pass` was its plate's, until plan 291.
+// the desk graded after measure. `pass` was its plate's, until plan 292.
 export const READING_STEPS = ['read', 'type', 'measure', 'graded']
 
 // 入門 (screens/RideIntro.jsx) names its steps intro-<step>, over

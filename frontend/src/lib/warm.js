@@ -3,7 +3,7 @@ import { warmStore } from '../stores/remote'
 import { warmStationSamples } from '../stores/stationSamples'
 import { preloadHourPrint } from '../components/station/print/usePrint'
 
-// ── 予熱 — a gate's answers, asked before it is opened (plan 291) ──
+// ── 予熱 — a gate's answers, asked before it is opened (plan 292) ──
 // The first ride ended on a plate, then Today's dial waited a second or
 // two on its day and its print; every gate after it drew a wait of its
 // own on its first visit (Profile and the Dictionary a spinner, Learn

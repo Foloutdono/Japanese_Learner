@@ -42,7 +42,7 @@ import { GateIcon } from './GateIcon'
 const GLYPH = 21
 const GLYPH_ON = 25
 
-// 予熱 (plan 291): the gate tapped is lit at once, and the next screen
+// 予熱 (plan 292): the gate tapped is lit at once, and the next screen
 // drawn a frame after it. The router draws a screen as a transition,
 // but the browser paints nothing until it is committed: the bar kept
 // the old gate lit for as long as the next screen took (most of a

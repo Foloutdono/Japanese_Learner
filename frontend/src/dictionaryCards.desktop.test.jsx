@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 予熱 — the cards below the fold stand in until near (plan 291) ──
+// ── 予熱 — the cards below the fold stand in until near (plan 292) ──
 // A page is fifty cards and a phone shows ten: the rest are not laid
 // out until they near the screen (content-visibility), each standing in
 // at a card's height. The stand-in is the card's own height, so the

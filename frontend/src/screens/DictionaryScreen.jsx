@@ -184,7 +184,7 @@ export default function DictionaryScreen({ session }) {
 	const initialCategory = (CATEGORIES.some(([key]) => key === sp.get('category')) || sp.get('category') === FAVORITES)
 		? sp.get('category') : 'kanji'
 	const initialLevel = LEVELLED.includes(initialCategory) && LEVELS.includes(sp.get('level')) ? sp.get('level') : null
-	// 予熱 (plan 291): the catalogue as the gate opens on it -- kanji, every
+	// 予熱 (plan 292): the catalogue as the gate opens on it -- kanji, every
 	// level, no query -- is drawn at once on the last answer kept
 	// (lib/warm.js asks it behind Today; every opening keeps its own) and
 	// asked again quietly behind it, with no loading line over it.
@@ -1301,7 +1301,7 @@ function cardHeadword(entry) {
 	return entry.type === 'grammar' ? entry.pattern : (entry.kanji || entry.kana || ' ')
 }
 
-// 予熱 (plan 291, the owner's call): a page is fifty cards and a phone
+// 予熱 (plan 292, the owner's call): a page is fifty cards and a phone
 // shows a dozen, so the catalogue draws a screenful first and the rest
 // a frame later, each in the meantime a card's empty place (index.css,
 // .dict-entry-card--pending): the page is its full length from the

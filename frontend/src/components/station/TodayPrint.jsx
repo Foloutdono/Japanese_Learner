@@ -42,7 +42,7 @@ import { PRINT, usePrintScene } from './print/usePrint'
 const lifted = new WeakMap()
 const drawn = (scene, name) => `<svg viewBox="0 0 ${scene.w} ${scene.h}" focusable="false">${scene.layers[name]}</svg>`
 
-// 予熱 (plan 291): each layer as it stood when Today was last left, put
+// 予熱 (plan 292): each layer as it stood when Today was last left, put
 // back as it is when Today is opened again. Rebuilt at every visit, the
 // hand-over alone (getAnimations, then every loop's keyframes) held the
 // tab bar's tap for most of a second on a phone. Its loops are paused

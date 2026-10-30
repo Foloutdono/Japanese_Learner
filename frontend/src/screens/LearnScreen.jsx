@@ -100,7 +100,7 @@ export default function LearnScreen({ session }) {
   // The shelf: on the phone its decks folded under the lines, on the
   // desk every deck in the column beside them (plan 132). `shelfNonce`
   // asks again after a Follow from the library's panel. The last answer
-  // kept (lib/warm.js asks it behind Today, plan 291) is drawn at once,
+  // kept (lib/warm.js asks it behind Today, plan 292) is drawn at once,
   // and asked again behind it.
   const [decks, setDecks] = useState(() => lastCachedJson(GATE_PATHS.decks, session)?.decks ?? null)
   const [shelfNonce, setShelfNonce] = useState(0)

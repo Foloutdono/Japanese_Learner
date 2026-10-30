@@ -83,7 +83,7 @@ function fetchIfStale() {
 }
 
 /** The last summary, outside React: a screen drawing the whole of
- *  /api/profile (the Profile gate) starts from it (plan 291). */
+ *  /api/profile (the Profile gate) starts from it (plan 292). */
 export function peekSummary() {
   return cache
 }

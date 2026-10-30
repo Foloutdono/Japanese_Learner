@@ -73,7 +73,7 @@ const LIFT = { phone: 56, desk: 64 }
 const WIDE = 0.7
 
 /** The print the gate will stand on at this hour, fetched before Today
- *  is opened (lib/warm.js, plan 291) with the two papers laid over it.
+ *  is opened (lib/warm.js, plan 292) with the two papers laid over it.
  *  Which device's print the frame takes is decided once it is measured;
  *  this guesses it the same way from the window, Today's frame being the
  *  window less the chrome. A wrong guess costs the fetch it would have

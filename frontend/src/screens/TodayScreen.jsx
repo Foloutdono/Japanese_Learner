@@ -82,7 +82,7 @@ import { warmGates } from '../lib/warm'
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
 //
-// 予熱 (plan 291): once the day has come, the four other gates' answers
+// 予熱 (plan 292): once the day has come, the four other gates' answers
 // are asked behind it, once a visit and while the page is idle
 // (lib/warm.js), so the first tap on each draws it whole.
 //
@@ -98,7 +98,7 @@ export default function TodayScreen({ session }) {
   const { data: today, failed } = useTodaySummary()
   const summary = useProfileSummary()
 
-  // 予熱 — the other gates, behind the day (plan 291).
+  // 予熱 — the other gates, behind the day (plan 292).
   const arrived = Boolean(today)
   const basics = Boolean(today?.basics && !today.basics.done)
   useEffect(() => {

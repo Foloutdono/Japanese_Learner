@@ -120,7 +120,7 @@ describe('cachedJson', () => {
   })
 })
 
-// ── A gate's first frame (plan 291) ─────────────────────────────
+// ── A gate's first frame (plan 292) ─────────────────────────────
 // A gate asks again on every visit and draws the last answer kept
 // meanwhile: lib/warm.js's, or its own last visit's.
 describe('the last answer kept', () => {

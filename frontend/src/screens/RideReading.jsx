@@ -33,7 +33,7 @@ import { warmToday } from '../lib/warm'
 // `sentence`), the clock, the field, the measure and the rating, drawn
 // with the reading run's own pieces (components/reading/ReadingPieces).
 // The grade is the way into the station: the plate that listed the
-// platforms on the 定期券 and the offer under it went (plan 291, the
+// platforms on the 定期券 and the offer under it went (plan 292, the
 // owner's ask), so a phone leaves for Today on the grade, the desk on
 // its breakdown's « Entrer en gare ». Today is warmed while the
 // sentence is read (lib/warm.js), so the gate the grade opens onto is

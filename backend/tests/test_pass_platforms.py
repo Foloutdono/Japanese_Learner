@@ -1,7 +1,7 @@
 # ── The plate cannot promise more or less than the server enforces ──
 # frontend/src/domain/paywall.js's PASS_PLATFORMS names the sections
 # that front the routers under core/credits.require_pass; the reading
-# ride's plate (plan 099) listed them until plan 291. Pinned both ways: every gated
+# ride's plate (plan 099) listed them until plan 292. Pinned both ways: every gated
 # router is fronted by a listed platform, and every listed platform
 # fronts a gated router.
 import re

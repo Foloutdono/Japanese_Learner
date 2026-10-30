@@ -44,7 +44,7 @@ export const SOURCES = Object.freeze({
   BALANCE: 'balance',         // the balance sheet, off the HUD
   SETTINGS: 'settings',       // the settings list
   RUNOUT: 'runout',           // the run stopped at a zero balance
-  // 'ride' was the reading ride's pass plate (plan 097) until plan 291.
+  // 'ride' was the reading ride's pass plate (plan 097) until plan 292.
   LIMIT: 'limit',             // a Pro learner at one of the plan's ceilings
   UPGRADE: 'upgrade',         // a Pro learner's Settings: "Passer à Max"
 })
@@ -181,7 +181,7 @@ export function offerable(credits) {
 // backend/tests/test_pass_platforms.py pins this map against the
 // routers, so whatever lists the pass's platforms can never promise
 // more or less than the server enforces. The reading ride's plate
-// (plan 099) listed them until plan 291; nothing draws them today.
+// (plan 099) listed them until plan 292; nothing draws them today.
 export const PASS_PLATFORMS = Object.freeze({
   reading: '/practice/reading',
   comprehension: '/practice/comprehension',

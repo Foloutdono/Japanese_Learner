@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 予熱 — a gate drawn on its first frame (plan 291) ─────────────
+// ── 予熱 — a gate drawn on its first frame (plan 292) ─────────────
 // Profile and the Dictionary drew a spinner on every visit, Learn its
 // shelf a beat late: each asked for itself on mount and drew nothing
 // until it answered. Each now draws the last answer kept -- the one

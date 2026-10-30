@@ -103,7 +103,7 @@ const MOCK_WEEK_LEADERBOARD = {
 export default function ProfileScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
-  // 予熱 (plan 291): the gate is drawn at once on the last answers kept
+  // 予熱 (plan 292): the gate is drawn at once on the last answers kept
   // -- the HUD's /api/profile, the boards lib/warm.js asked behind Today
   // or the last visit kept, the map's stats -- and asks again behind them.
   const [profile, setProfile]         = useState(peekSummary)

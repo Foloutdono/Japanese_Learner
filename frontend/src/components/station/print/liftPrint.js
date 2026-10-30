@@ -197,7 +197,7 @@ export function handOver(root, { loops = false, keep = false } = {}) {
   }
   // Every CSS animation handed over, none may start again: a cancelled
   // one is made afresh when its box is put back in the page, which
-  // TodayPrint does with a layer kept between visits (plan 291). Not
+  // TodayPrint does with a layer kept between visits (plan 292). Not
   // for `loops`, whose boxes keep their single turns as CSS.
   if (!loops) for (const el of targets) el.style.animationName = 'none'
   // The print's own custom properties have been read into the keyframes

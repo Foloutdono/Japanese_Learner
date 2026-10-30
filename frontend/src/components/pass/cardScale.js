@@ -11,7 +11,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 export const FACE_W = 272
 export const BACK_W = 424
 
-// The width each slot last measured (plan 291): a card drawn again in
+// The width each slot last measured (plan 292): a card drawn again in
 // its slot (the profile's, at every visit) starts at it, so the reading
 // before paint confirms it rather than drawing the card a second time,
 // which held the Profile gate's tap for a beat.

@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 予熱 — the cards below the fold stand in until near (plan 291) ──
+// ── 予熱 — the cards below the fold stand in until near (plan 292) ──
 // A page is fifty cards and a phone shows ten: the rest are not laid
 // out until they near the screen (content-visibility), each standing in
 // at a card's height. The stand-in is the card's own height, so the
@@ -54,7 +54,7 @@ describe('the catalogue at 390×844', () => {
     for (const card of cards) expect(card.getBoundingClientRect().height).toBeCloseTo(drawn, 0)
   })
 
-  // 予熱 (plan 291): a screenful drawn first, the rest a frame later,
+  // 予熱 (plan 292): a screenful drawn first, the rest a frame later,
   // in the meantime a card's empty place: the page is its full length
   // from the first frame, and the walk and the sentinel find it so.
   it('draws a screenful first and the rest a frame later, the page its length throughout', async () => {

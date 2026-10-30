@@ -7341,3 +7341,16 @@ The owner: redesign the Learn screen on mobile. Drawn first on the canvas "Tsuji
 | 291 | **Folded, as Practice**: the phone's Learn gate folds each line to one row (the stop it opens and that stop's learned / total, the due, the stripe to the stop's share), the decks under them one row each with two doors, the basics folded above; the last ride over them (`user_profiles.learn_ride`, `POST /api/profile/ride`, `routes/profile.clean_ride`, `stores/learnRide.js`, noted where the four stations board); a row raises `components/learn/LineSheet` on Practice's pager (`hooks/useSheetPager`, PracticeSheet moved onto it): the plate risen whole, the line as rings (stop chosen in gold), the sources, the run's card, the modes as chips (main mode chosen), Embarquer · stop. `GateResume` shared by both gates; the three-stop foot (`StopsFoot`) retired. Tests: `test_learn_ride.py`, `LearnScreen.browser`, `deskfree.phone` | DONE |
 
 Open: `useDialog` focuses the first button even at tabindex -1, so both sheets land focus on the strip's first roundel rather than the page in view's.
+
+## Plan 292 — 予熱, the gates drawn on their first frame (2026-10-30)
+
+The owner: remove the reading ride's subscription plate, and take away the second or two a screen took to load after the ride and on every tab switch. Measured on the production build at 390×844 with the CPU slowed 4× (tap to the new screen's first frame), before and after each change.
+
+| Phase | What | Status |
+|---|---|---|
+| 292 | **The plate goes**: the reading ride's grade enters the station (the desk's breakdown, « Entrer en gare »); a learner with no kana enters from the cards. `ridePlate*`, the `pass` step and the `ride` offer door retired | DONE |
+| 292 | **The answers asked ahead** (`lib/warm.js`): Today by the ride once its sentence is up (`warmToday`: the day, the balance, the journey, the print of the hour); the four other gates by Today, once a visit, two at a time when idle (`warmGates`). Stores warmed by path (`stores/remote`'s `warmStore`/`peekStore`); a gate that asks for itself keeps its answer and draws the last one kept (`keepCachedJson`, `lastCachedJson`) | DONE |
+| 292 | **The switch itself**: Today's print layers kept between visits, their loops paused while away (`TodayPrint`, 825 → 152 ms); the tapped gate lit at once and the move a frame later (`TabBar`); the card's slot width remembered (`cardScale`) | DONE |
+| 292 | **The Dictionary**: its cards below the fold not laid out until near (`content-visibility`, each standing in at its own height from its tokens), and a screenful drawn first, the rest a frame later as unseen places (`useScreenfulFirst`): first frame 492 → 311 ms | DONE |
+
+Open: the Dictionary's first frame is now mostly the page's own style and layout (the console, the chips, the Japanese fonts), not its cards.

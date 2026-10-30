@@ -20774,7 +20774,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
   overflow: hidden;
   transition: background 0.16s ease, border-color 0.16s ease;
-  /* 予熱 (plan 291, the owner's call): a page is fifty cards and a
+  /* 予熱 (plan 292, the owner's call): a page is fifty cards and a
      phone shows ten, so a card below the fold is not laid out until it
      nears it -- the Dictionary's first frame was most of its tab
      switch. It stands in at the height a card is wherever one is drawn
@@ -20809,7 +20809,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    nothing on its gauge. In progress and mastered are the state inks
    themselves, vermillion and gold, the same two the study card's own
    seal and the deck's progress rule wear. */
-/* A card's place before it is drawn (plan 291, DictionaryScreen's
+/* A card's place before it is drawn (plan 292, DictionaryScreen's
    useScreenfulFirst): a frame at most, at a card's own height (its
    stand-in, above), and nothing of it seen. */
 .dict-entry-card--pending { content-visibility: hidden; visibility: hidden; }
@@ -28696,7 +28696,7 @@ button.brd-stn { cursor: pointer; }
   width: 100%;
   max-width: var(--card-w);
   /* The one filled action (the reading ride's plate held the quiet
-     offer over it until plan 291). */
+     offer over it until plan 292). */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40163,7 +40163,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     border-width: 0 0 1px;
     border-radius: 0;
     text-align: left;
-    /* A row stands in at a row's height until drawn (plan 291), inside
+    /* A row stands in at a row's height until drawn (plan 292), inside
        its padding: the word's line, the gap, the meaning's. */
     contain-intrinsic-size: auto calc(var(--fs-title) * 1.3 + var(--sp-1) + var(--fs-sm) * 1.6);
   }

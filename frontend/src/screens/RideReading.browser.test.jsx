@@ -8,7 +8,7 @@ import '../index.css'
 // The sentence, the clock, the field, the measure against the ticket
 // office's own check, and the rating, which is the lesson's one stamp
 // and, on a phone, the way into the station: the plate that listed the
-// pass's platforms after it went (plan 291). Skip is the same stamp.
+// pass's platforms after it went (plan 292). Skip is the same stamp.
 // Today is warmed while the sentence is read, never before it is up.
 
 const apiJson = vi.fn()

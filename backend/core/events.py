@@ -145,7 +145,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # none (frontend/src/domain/paywall.js's HAS_PAYWALL, which is
     # deliberately not HAS_STORE). `where` is which of the doors
     # (frontend/src/domain/paywall.js's SOURCES; the reading ride's pass
-    # plate was one from plan 097 until plan 291, and its rows say
+    # plate was one from plan 097 until plan 292, and its rows say
     # `ride`; the profile, a door until plan 143, reaches the offer
     # through the balance sheet now, and older rows still say `profile`).
     #
@@ -158,7 +158,7 @@ EVENTS: dict[str, frozenset[str]] = {
     #
     # The offer is three screens since plan 172, each with its one pick:
     # Pro yearly's 7-day trial (the boarding, the balance, the settings;
-    # the ride until plan 291), Pro yearly against the week the credits stopped (a run
+    # the ride until plan 292), Pro yearly against the week the credits stopped (a run
     # at zero, `where` 'runout'), and the step up to Max ('limit', a Pro
     # learner at one of the plan's ceilings; 'upgrade', from Settings).
     # `plan` and `billing` are the app's own two enums, the pick the

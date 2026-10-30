@@ -2695,7 +2695,7 @@ const ride = {
   rideDoneBody: n => `C’est tout ! **${n} nouveaux mots par jour**, chacun de retour juste avant que tu l’oublies.`,
   rideContinue: 'Continuer',
   // L'essai de lecture (plan 099) : la phrase, le champ, la mesure ;
-  // la note fait entrer en gare (sa plaque est partie, plan 291).
+  // la note fait entrer en gare (sa plaque est partie, plan 292).
   rideReadFront: 'Lis vite, elle disparaît dans un instant !',
   rideReadFrontUntimed: 'Lis-la, puis écris-la en rōmaji ou en kana.',
   rideReadType: 'Écris ce que tu as lu, en rōmaji ou en kana.',

@@ -4,7 +4,7 @@ import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 予熱 — a tapped gate answers at once (plan 291) ──────────────────
+// ── 予熱 — a tapped gate answers at once (plan 292) ──────────────────
 // The router draws the next screen as a transition, and the browser
 // painted nothing until it was committed: the bar kept the old gate lit
 // for as long as the next screen took to draw. The gate tapped lights

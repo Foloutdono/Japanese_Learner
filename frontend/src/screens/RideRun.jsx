@@ -85,7 +85,7 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // grade carries the lesson's stamp. A SKIP stamps from here, because a
 // skip is the whole lesson declined; and so does the cards' end for a
 // learner with no kana (plan 170), who has no sentence to read: the
-// reading held only its plate for them, and the plate went (plan 291),
+// reading held only its plate for them, and the plate went (plan 292),
 // so they go on into the station. The cards done leave a note on the device
 // (lib/rideProgress.js), so a ride left before the reading's stamp is
 // boarded again at the reading, not the first card.

@@ -20,11 +20,11 @@ import { apiFetch } from '../lib/api'
 //   today.refresh()  -> Promise, bypassing the TTL
 //   today.warm()     -> Promise: asks what a consumer mounting now would
 //                       ask, and nothing while an answer is fresh or on
-//                       its way (lib/warm.js, plan 291)
+//                       its way (lib/warm.js, plan 292)
 //   today.seed(data) -> for the dev workbenches; never resets the TTL
 //   today.forget()   -> the account that answered has left (stores/account)
 //
-// Every store is also reached by its path (plan 291): lib/warm.js asks a
+// Every store is also reached by its path (plan 292): lib/warm.js asks a
 // gate's stores ahead of it with warmStore(path), and a screen that asks
 // for itself starts from one's last answer with peekStore(path), so
 // neither needs a store module's own export (which the tests' mocks of

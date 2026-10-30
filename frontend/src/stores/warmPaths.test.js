@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 
-// ── 予熱 — every store lib/warm.js names answers at its path (plan 291) ──
+// ── 予熱 — every store lib/warm.js names answers at its path (plan 292) ──
 // The warm reaches the shared stores by path (stores/remote's
 // warmStore), so a store whose endpoint moved would leave its gate
 // unwarmed without a word. Each path the warm names is a real store's,

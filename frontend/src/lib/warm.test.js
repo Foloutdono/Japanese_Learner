@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-// ── 予熱 — a gate's answers, asked before it is opened (plan 291) ──
+// ── 予熱 — a gate's answers, asked before it is opened (plan 292) ──
 // Today is warmed by the first ride; the four other gates by Today,
 // once a visit, behind the day and two at a time, so no warm stands in
 // the learner's six-at-a-time queue ahead of the screen in front of them.

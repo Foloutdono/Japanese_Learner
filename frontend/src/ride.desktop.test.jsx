@@ -157,7 +157,7 @@ describe('the ride\'s ends on the desk (P8)', () => {
     await settle(250)
     await userEvent.keyboard('1')
     await settle(250)
-    // Graded: the breakdown's one action enters the station (plan 291:
+    // Graded: the breakdown's one action enters the station (plan 292:
     // no plate after it), on Enter too.
     const go = $('.stage__foot [data-action="enter"]')
     expect(go, 'the way in is up').toBeTruthy()

@@ -115,7 +115,7 @@ async function backFromTheGate() {
 }
 
 /** The sentence written and graded: the lesson over, into the station
- *  (plan 291: no plate after it). */
+ *  (plan 292: no plate after it). */
 async function rideTheReading(root) {
   await found(root, '.sentence')
   const input = root.querySelector('input')
@@ -252,7 +252,7 @@ describe('Back on the first ride, at 390×844', () => {
 // Reported 2026-10-18 from the trail: a learner reached the reading's
 // plate, left it some other way than its button, and the front door
 // boarded them onto the first card again. The stamp is the grade's, and
-// on a phone the grade is the way into the station since plan 291; the
+// on a phone the grade is the way into the station since plan 292; the
 // cards done leave a note the door reads.
 describe('A ride left before its last button, at 390×844', () => {
   it('is stamped the moment the sentence is graded, and the grade enters the station', async () => {

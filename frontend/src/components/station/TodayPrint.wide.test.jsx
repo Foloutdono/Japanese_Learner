@@ -32,7 +32,7 @@ describe('the print behind the gate', () => {
     expect(loops.filter(a => a instanceof CSSAnimation)).toHaveLength(0)
   })
 
-  // 予熱 (plan 291): Today opened again takes its layers back as they
+  // 予熱 (plan 292): Today opened again takes its layers back as they
   // stood, rather than rebuilding them and handing every loop over again
   // (most of a second on a phone). Out of the page they are paused, so
   // no other screen pays for them; back, they play, and no CSS loop is

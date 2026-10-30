@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **292**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **293**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -472,7 +472,7 @@ runtime purpose.
   `/api/today` put the day's queue ahead of the first ride's card. A
   store's fetch shares the one in flight (`stores/remote.js`,
   `profileSummary`'s `fetchIfStale`).
-- **A gate is drawn on its first frame (plan 291).** What Today and
+- **A gate is drawn on its first frame (plan 292).** What Today and
   the four other gates open on is asked before they are opened, by
   `lib/warm.js`: Today by the first ride once its sentence is up
   (`warmToday`), the others by Today once the day has come, once a

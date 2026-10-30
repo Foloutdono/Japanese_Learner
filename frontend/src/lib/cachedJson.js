@@ -23,7 +23,7 @@ import { apiJson } from './api'
 //       are stale (a review has landed).
 //   lastCachedJson(path, session)             the last answer kept for
 //       the path, however old, or undefined: what a gate draws on its
-//       first frame while it asks again (plan 291).
+//       first frame while it asks again (plan 292).
 //   keepCachedJson(path, session, body)       an answer a screen asked
 //       for itself, kept for the next visit's first frame.
 //

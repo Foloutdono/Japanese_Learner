@@ -329,7 +329,7 @@ describe('RideRun', () => {
     expect(speakJapanese).toHaveBeenCalledWith('こんにちは')
   })
 
-  // Plan 291: the reading held only its plate for a learner with no
+  // Plan 292: the reading held only its plate for a learner with no
   // kana, and the plate went, so the cards' end is the lesson's stamp
   // and the way into the station, warmed while the second card is read.
   it('a learner with no kana enters the station from the cards, stamped', async () => {

@@ -97,7 +97,7 @@ const { default: LearnScreen } = await import('./LearnScreen')
 // the profile summary (a module-level cache): seeded per test.
 const { seedSummary } = await import('../stores/profileSummary')
 const BASE = { username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }
-// The shelf's last answer is kept between visits (plan 291): each test
+// The shelf's last answer is kept between visits (plan 292): each test
 // starts from none.
 const { forgetCachedJson } = await import('../lib/cachedJson')
 

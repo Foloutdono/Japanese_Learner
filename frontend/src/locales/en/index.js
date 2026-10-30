@@ -2758,7 +2758,7 @@ const ride = {
   rideDoneBody: n => `That’s it! **${n} new words a day**, each one back right before you’d forget it.`,
   rideContinue: 'Continue',
   // The reading ride (plan 099): the sentence, the field, the measure;
-  // the grade enters the station (its plate went in plan 291).
+  // the grade enters the station (its plate went in plan 292).
   rideReadFront: 'Read it quick! It disappears in a moment.',
   rideReadFrontUntimed: 'Read it, then type it out in romaji or kana.',
   rideReadType: 'Type what you read, in romaji or kana.',
