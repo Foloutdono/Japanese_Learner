@@ -341,17 +341,24 @@ def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
 
 # What a name the course has no card for is (plan 266), by the kind
 # UniDic files it under (morphology.Morpheme.name_kind). The analysis is
-# shared across learners, so the line carries both languages, as a
+# shared across learners, so the line carries every language, as a
 # grammar point's gloss does, and the screen reads its own (frontend
 # tokens.js's wordGloss).
 _NAME_GLOSS = {
-    "family": {"en": "family name", "fr": "nom de famille"},
-    "given": {"en": "given name", "fr": "prénom"},
-    "person": {"en": "a person's name", "fr": "nom de personne"},
-    "place": {"en": "place name", "fr": "nom de lieu"},
-    "other": {"en": "a name", "fr": "un nom propre"},
-    "business": {"en": "a name (of an inn, a shop, a firm)", "fr": "un nom (d'auberge, de boutique, d'entreprise)"},
-    "vessel": {"en": "a name (of a train, a ship)", "fr": "un nom (de train, de navire)"},
+    "family": {"en": "family name", "fr": "nom de famille",
+               "es": "apellido"},
+    "given": {"en": "given name", "fr": "prénom",
+              "es": "nombre de pila"},
+    "person": {"en": "a person's name", "fr": "nom de personne",
+               "es": "nombre de persona"},
+    "place": {"en": "place name", "fr": "nom de lieu",
+              "es": "nombre de lugar"},
+    "other": {"en": "a name", "fr": "un nom propre",
+              "es": "un nombre propio"},
+    "business": {"en": "a name (of an inn, a shop, a firm)", "fr": "un nom (d'auberge, de boutique, d'entreprise)",
+                 "es": "un nombre (de una posada, una tienda, una empresa)"},
+    "vessel": {"en": "a name (of a train, a ship)", "fr": "un nom (de train, de navire)",
+               "es": "un nombre (de un tren, un barco)"},
 }
 
 
@@ -451,7 +458,8 @@ def _card_reading(m: morphology.Morpheme, entry: dict | None) -> str:
 
 
 # What a word no dictionary knows is, most often (plan 272).
-_UNKNOWN_GLOSS = {"en": "not in the dictionary (a name?)", "fr": "absent du dictionnaire (un nom ?)"}
+_UNKNOWN_GLOSS = {"en": "not in the dictionary (a name?)", "fr": "absent du dictionnaire (un nom ?)",
+                  "es": "no está en el diccionario (¿un nombre?)"}
 _JAPANESE_LETTERS = re.compile(r"[ぁ-ヿ一-鿿]")
 
 
@@ -476,7 +484,7 @@ def _number_dict(run: list, value: int) -> dict:
             for char, lvl, e, rid in find_kanji_matches(surface)
         ],
         "number": value,
-        "gloss": {"en": f"{value:,}", "fr": f"{value:,}".replace(",", " ")},
+        "gloss": {"en": f"{value:,}", "fr": f"{value:,}".replace(",", " "), "es": _es_figure(value)},
     }
 
 
@@ -554,6 +562,10 @@ def _glued_ordinal(m) -> bool:
 def _ordinal(value: int, lang: str) -> str:
     if lang == "fr":
         return "1er" if value == 1 else f"{value:,}".replace(",", " ") + "e"
+    if lang == "es":
+        # (n.º 3, "number 3": 3.º and 3.ª would give the counted noun a
+        # gender, plan 291)
+        return f"n.º {_es_figure(value)}"
     suffix = "th" if 10 <= value % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(value % 10, "th")
     return f"{value:,}{suffix}"
 
@@ -588,11 +600,13 @@ def _counted_dict(run: list, numerals: int, printed=None) -> dict | None:
         if counted.reading.endswith("もく"):
             token["reading"] = (printed[2] if printed else "".join(m.reading for m in run[:numerals])) \
                 + counted.reading[:-2] + "め"
-        english, french = _counted_sense(counted.surface[0], counted.reading[:-2])
+        english, french, spanish = _counted_sense(counted.surface[0], counted.reading[:-2])
         if counted.surface[0] not in _ORDINAL_SENSE:
-            english, french = english or counted.surface[0], french or english or counted.surface[0]
+            english, french, spanish = (english or counted.surface[0], french or english or counted.surface[0],
+                                        spanish or english or counted.surface[0])
         token["gloss"] = {"en": " · ".join(filter(None, (_ordinal(value, "en"), english))),
-                          "fr": " · ".join(filter(None, (_ordinal(value, "fr"), french)))}
+                          "fr": " · ".join(filter(None, (_ordinal(value, "fr"), french))),
+                          "es": " · ".join(filter(None, (_ordinal(value, "es"), spanish)))}
     elif value is not None and 1 <= value <= 10 and not any(c in _KANJI_DIGITS for c in surface):
         written = _KANJI_DIGITS[value - 1] + "".join(m.surface for m in run[numerals:])
         hit = resolve_lemma(written, reading, written)
@@ -722,7 +736,8 @@ def _clock_dict(run: list) -> dict:
         "lemma": surface, "reading": reading, "pos": "noun",
         "furigana": [{"text": surface, "reading": reading}],
         "vocab_match": None, "kanji_matches": [],
-        "gloss": {"en": f"{h}:{minutes} (a time of day)", "fr": f"{h} h {minutes}"},
+        "gloss": {"en": f"{h}:{minutes} (a time of day)", "fr": f"{h} h {minutes}",
+                  "es": f"{h}:{minutes} (una hora del día)"},
     }
 
 
@@ -768,7 +783,8 @@ def _score_dict(morphemes: list, i: int) -> dict | None:
         "lemma": surface, "reading": reading, "pos": "noun",
         "furigana": [{"text": surface, "reading": reading}],
         "vocab_match": None, "kanji_matches": [],
-        "gloss": {"en": f"{pair[0]} to {pair[1]} (a score)", "fr": f"{pair[0]} à {pair[1]} (un score)"},
+        "gloss": {"en": f"{pair[0]} to {pair[1]} (a score)", "fr": f"{pair[0]} à {pair[1]} (un score)",
+                  "es": f"{pair[0]} a {pair[1]} (un marcador)"},
     }
 
 
@@ -793,28 +809,29 @@ def _fraction_dict(morphemes: list, i: int) -> dict | None:
         "lemma": surface, "reading": reading, "pos": "noun",
         "furigana": [{"text": surface, "reading": reading}],
         "vocab_match": None, "kanji_matches": [],
-        "gloss": {"en": f"{pair[0]}/{pair[1]} (a fraction)", "fr": f"{pair[0]}/{pair[1]} (une fraction)"},
+        "gloss": {"en": f"{pair[0]}/{pair[1]} (a fraction)", "fr": f"{pair[0]}/{pair[1]} (une fraction)",
+                  "es": f"{pair[0]}/{pair[1]} (una fracción)"},
     }
 
 
 # Sizes printed in Latin letters, read where the sentence speaks of a
 # size (普段はMですが、ワンサイズ上のLに).
 _SIZES = {
-    "XS": ("えっくすえす", "size XS (extra small)", "taille XS (très petite)"),
-    "S": ("えす", "size S (small)", "taille S (petite)"),
-    "M": ("えむ", "size M (medium)", "taille M (moyenne)"),
-    "L": ("える", "size L (large)", "taille L (grande)"),
-    "LL": ("えるえる", "size LL (extra large)", "taille LL (très grande)"),
-    "XL": ("えっくすえる", "size XL (extra large)", "taille XL (très grande)"),
+    "XS": ("えっくすえす", "size XS (extra small)", "taille XS (très petite)", "talla XS (extra pequeña)"),
+    "S": ("えす", "size S (small)", "taille S (petite)", "talla S (pequeña)"),
+    "M": ("えむ", "size M (medium)", "taille M (moyenne)", "talla M (mediana)"),
+    "L": ("える", "size L (large)", "taille L (grande)", "talla L (grande)"),
+    "LL": ("えるえる", "size LL (extra large)", "taille LL (très grande)", "talla LL (extra grande)"),
+    "XL": ("えっくすえる", "size XL (extra large)", "taille XL (très grande)", "talla XL (extra grande)"),
 }
 _SIZE_WORDS = ("サイズ", "服", "シャツ", "着", "身長", "靴", "ズボン", "スカート", "パンツ", "ワンピース", "上着")
 
 
 # Latin words a page writes that JMdict holds no row for (plan 272).
-_LATIN_WORDS = {"MV": ("えむぶい", "a music video (MV)", "un clip musical (MV)"),
-                "PV": ("ぴーぶい", "a promotional video (PV), a music video", "une vidéo promotionnelle (PV), un clip"),
-                "ver": ("ばー", "version (ver.)", "version (ver.)"),
-                "Ver": ("ばー", "version (Ver.)", "version (Ver.)")}
+_LATIN_WORDS = {"MV": ("えむぶい", "a music video (MV)", "un clip musical (MV)", "un video musical (MV)"),
+                "PV": ("ぴーぶい", "a promotional video (PV), a music video", "une vidéo promotionnelle (PV), un clip", "un video promocional (PV), un video musical"),
+                "ver": ("ばー", "version (ver.)", "version (ver.)", "versión (ver.)"),
+                "Ver": ("ばー", "version (Ver.)", "version (Ver.)", "versión (Ver.)")}
 
 
 def _latin_sense(morphemes: list, i: int) -> tuple[str, dict] | None:
@@ -826,21 +843,22 @@ def _latin_sense(morphemes: list, i: int) -> tuple[str, dict] | None:
     m = morphemes[i]
     prev = morphemes[i - 1] if i > 0 else None
     if m.surface in LATIN_UNITS and prev is not None and prev.surface[-1:].isdigit() and prev.end == m.start:
-        said, en, fr = LATIN_UNITS[m.surface]
-        return said, {"en": en, "fr": fr}
+        said, en, fr, es = LATIN_UNITS[m.surface]
+        return said, {"en": en, "fr": fr, "es": es}
     text = "".join(u.surface for u in morphemes)
     if m.surface in _SIZES and any(w in text for w in _SIZE_WORDS):
-        said, en, fr = _SIZES[m.surface]
-        return said, {"en": en, "fr": fr}
+        said, en, fr, es = _SIZES[m.surface]
+        return said, {"en": en, "fr": fr, "es": es}
     if m.surface in _LATIN_WORDS:
-        said, en, fr = _LATIN_WORDS[m.surface]
-        return said, {"en": en, "fr": fr}
+        said, en, fr, es = _LATIN_WORDS[m.surface]
+        return said, {"en": en, "fr": fr, "es": es}
     level = re.fullmatch(r"[NＮ]([1-5１-５])", m.surface)
     if level:
         n = level.group(1).translate(_DIGITS_HALF)
         said = "えぬ" + ("いち", "に", "さん", "よん", "ご")[int(n) - 1]
         return said, {"en": f"the JLPT's level N{n} (N5 the first, N1 the last)",
-                      "fr": f"le niveau N{n} du JLPT (N5 le premier, N1 le dernier)"}
+                      "fr": f"le niveau N{n} du JLPT (N5 le premier, N1 le dernier)",
+                      "es": f"el nivel N{n} del JLPT (N5 el primero, N1 el último)"}
     return None
 
 
@@ -848,9 +866,22 @@ _MYRIADS = {"万": "まん", "億": "おく", "兆": "ちょう"}
 _MYRIAD_VALUE = {"万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12}
 
 
+def _es_figure(value, fraction: str = "") -> str:
+    """A figure as the RAE writes it (plan 291): no mark in four digits
+    (2000), a narrow space between thousands from five (10 000), a point
+    before the decimals (3.5)."""
+    if isinstance(value, float):
+        whole, _, decimals = repr(value).partition(".")
+        return _es_figure(int(whole), "" if decimals == "0" else decimals)
+    digits = str(value)
+    if len(digits.lstrip("-")) > 4:
+        digits = f"{value:,}".replace(",", "\u202f")
+    return f"{digits}.{fraction}" if fraction else digits
+
+
 def _figure(printed: str) -> dict:
-    """A number's gloss, its figure as each language writes it: 1,500
-    and 1 500, 3.5 and 3,5, １００万 1,000,000."""
+    """A number's gloss, its figure as each language writes it: 1,500,
+    1 500 and 1500, 3.5 and 3,5, １００万 1,000,000."""
     text = printed.translate(_FULLWIDTH_DIGITS).replace("，", ",").replace("．", ".")
     unit = _MYRIAD_VALUE.get(text[-1:], 1)
     if unit > 1:
@@ -858,11 +889,12 @@ def _figure(printed: str) -> dict:
     whole, dot, fraction = text.replace(",", "").partition(".")
     if unit > 1:
         value = int(float(f"{whole}.{fraction or 0}") * unit)
-        return {"en": f"{value:,}", "fr": f"{value:,}".replace(",", "\u202f")}
+        return {"en": f"{value:,}", "fr": f"{value:,}".replace(",", "\u202f"), "es": _es_figure(value)}
     en, fr = f"{int(whole):,}", f"{int(whole):,}".replace(",", "\u202f")
+    es = _es_figure(int(whole), fraction if dot else "")
     if dot:
         en, fr = f"{en}.{fraction}", f"{fr},{fraction}"
-    return {"en": en, "fr": fr}
+    return {"en": en, "fr": fr, "es": es}
 
 
 def _digits_dict(run: list, printed: str, reading: str) -> dict:
@@ -886,13 +918,20 @@ def _digits_dict(run: list, printed: str, reading: str) -> dict:
 # (plan 272): ７日間 is seven days, which the pool's 日間 read にっかん,
 # "daytime", glossed.
 _SPAN_COUNTERS = {
-    "日間": {"en": "days (how long)", "fr": "jours (durée)"},
-    "分間": {"en": "minutes (how long)", "fr": "minutes (durée)"},
-    "秒間": {"en": "seconds (how long)", "fr": "secondes (durée)"},
-    "か月": {"en": "months", "fr": "mois"},
-    "カ月": {"en": "months", "fr": "mois"},
-    "ヵ月": {"en": "months", "fr": "mois"},
-    "箇月": {"en": "months", "fr": "mois"},
+    "日間": {"en": "days (how long)", "fr": "jours (durée)",
+           "es": "días (duración)"},
+    "分間": {"en": "minutes (how long)", "fr": "minutes (durée)",
+           "es": "minutos (duración)"},
+    "秒間": {"en": "seconds (how long)", "fr": "secondes (durée)",
+           "es": "segundos (duración)"},
+    "か月": {"en": "months", "fr": "mois",
+           "es": "meses"},
+    "カ月": {"en": "months", "fr": "mois",
+           "es": "meses"},
+    "ヵ月": {"en": "months", "fr": "mois",
+           "es": "meses"},
+    "箇月": {"en": "months", "fr": "mois",
+           "es": "meses"},
 }
 
 
@@ -901,30 +940,40 @@ _SPAN_COUNTERS = {
 _PREFIX_GLOSSES = {
     # (plan 272: 追体験, 追加; 閉室, 閉店)
     "追": {"en": "(prefix) after, re-, in pursuit: 追体験, reliving; 追加, addition",
-          "fr": "(préfixe) après, re-, à la suite : 追体験, revivre ; 追加, ajout"},
+          "fr": "(préfixe) après, re-, à la suite : 追体験, revivre ; 追加, ajout",
+          "es": "(prefijo) después, re-, en pos de: 追体験, revivir; 追加, adición"},
     "閉": {"en": "(prefix) closing, shut: 閉室, closing the room; 閉店, closing time",
-          "fr": "(préfixe) fermeture : 閉室, fermeture de la salle ; 閉店, fermeture"},
-    "本": {"en": "(prefix) this, the present: 本研究, this study", "fr": "(préfixe) ce, le présent : 本研究, cette étude"},
+          "fr": "(préfixe) fermeture : 閉室, fermeture de la salle ; 閉店, fermeture",
+          "es": "(prefijo) cierre, cerrado: 閉室, cierre de la sala; 閉店, hora de cierre"},
+    "本": {"en": "(prefix) this, the present: 本研究, this study", "fr": "(préfixe) ce, le présent : 本研究, cette étude",
+          "es": "(prefijo) este, el presente: 本研究, este estudio"},
     "長": {"en": "(prefix) long: 長時間, a long time; 長距離, a long distance",
-          "fr": "(préfixe) long : 長時間, longtemps ; 長距離, longue distance"},
+          "fr": "(préfixe) long : 長時間, longtemps ; 長距離, longue distance",
+          "es": "(prefijo) largo: 長時間, mucho tiempo; 長距離, larga distancia"},
     "立": {"en": "(prefix) standing (as): 立候補, standing as a candidate",
-          "fr": "(préfixe) se présenter (comme) : 立候補, se porter candidat"},
+          "fr": "(préfixe) se présenter (comme) : 立候補, se porter candidat",
+          "es": "(prefijo) presentarse (como): 立候補, presentarse como candidato"},
 }
 # A suffix whose card is the word it is on its own, another sense (plan
 # 272): 可能性's 性 is no "sex, gender", 補助金's 金 no "gold". The word
 # before it keeps its card.
 _SUFFIX_GLOSSES = {
     "性": {"en": "(suffix) -ness, -ity: the nature of (可能性, possibility)",
-          "fr": "(suffixe) -ité, caractère de (可能性, possibilité)"},
+          "fr": "(suffixe) -ité, caractère de (可能性, possibilité)",
+          "es": "(sufijo) -eza, -idad: la naturaleza de (可能性, posibilidad)"},
     "金": {"en": "(suffix) money, fund, fee (補助金, subsidy)",
-          "fr": "(suffixe) argent, fonds, frais (補助金, subvention)"},
+          "fr": "(suffixe) argent, fonds, frais (補助金, subvention)",
+          "es": "(sufijo) dinero, fondo, tarifa (補助金, subvención)"},
     "用": {"en": "(suffix) for, meant for (子供用, for children)",
-          "fr": "(suffixe) pour, destiné à (子供用, pour enfants)"},
+          "fr": "(suffixe) pour, destiné à (子供用, pour enfants)",
+          "es": "(sufijo) para, destinado a (子供用, para niños)"},
     "化": {"en": "(suffix) -ization, becoming (国際化, internationalization)",
-          "fr": "(suffixe) -isation, devenir (国際化, internationalisation)"},
+          "fr": "(suffixe) -isation, devenir (国際化, internationalisation)",
+          "es": "(sufijo) -ización, volverse (国際化, internacionalización)"},
     # (read せい after a noun, plan 272: never the card's "life, living")
     "生": {"en": "(suffix) student, pupil (転校生, transfer student)",
-          "fr": "(suffixe) élève, étudiant (転校生, élève transféré)"},
+          "fr": "(suffixe) élève, étudiant (転校生, élève transféré)",
+          "es": "(sufijo) estudiante, alumno (転校生, estudiante transferido)"},
 }
 
 
@@ -932,27 +981,41 @@ _SUFFIX_GLOSSES = {
 # its card leads with another sense (plan 272).
 _AFFIX_SENSES = {
     "時": {"en": "(suffix) at the time of, when: 混雑時, at busy times",
-          "fr": "(suffixe) au moment de, lors de : 混雑時, aux heures d'affluence"},
+          "fr": "(suffixe) au moment de, lors de : 混雑時, aux heures d'affluence",
+          "es": "(sufijo) en el momento de, cuando: 混雑時, en horas de mucha afluencia"},
     "台": {"en": "(suffix) the … range or level: 160円台, the 160-yen range",
-          "fr": "(suffixe) la tranche des … : 160円台, autour de 160 yens"},
+          "fr": "(suffixe) la tranche des … : 160円台, autour de 160 yens",
+          "es": "(sufijo) la franja o el nivel de …: 160円台, la franja de los 160 yenes"},
     "切り": {"en": "(suffix) cut into …: みじん切り, finely chopped",
-           "fr": "(suffixe) coupé en … : みじん切り, haché fin"},
-    "連": {"en": "(counter) in a row: 10連, ten in a row", "fr": "(compteur) d'affilée : 10連, dix d'affilée"},
-    "膳": {"en": "(counter) pairs of chopsticks, bowls of rice", "fr": "(compteur) paires de baguettes, bols de riz"},
+           "fr": "(suffixe) coupé en … : みじん切り, haché fin",
+           "es": "(sufijo) cortado en …: みじん切り, picado fino"},
+    "連": {"en": "(counter) in a row: 10連, ten in a row", "fr": "(compteur) d'affilée : 10連, dix d'affilée",
+          "es": "(contador) seguidos: 10連, diez seguidos"},
+    "膳": {"en": "(counter) pairs of chopsticks, bowls of rice", "fr": "(compteur) paires de baguettes, bols de riz",
+          "es": "(contador) pares de palillos, cuencos de arroz"},
     "入り": {"en": "(suffix) holding, with … in it: 十二個入り, a pack of twelve; ミルク入り, with milk",
-           "fr": "(suffixe) contenant, avec … dedans : 十二個入り, un paquet de douze ; ミルク入り, au lait"},
+           "fr": "(suffixe) contenant, avec … dedans : 十二個入り, un paquet de douze ; ミルク入り, au lait",
+           "es": "(sufijo) que contiene, con … dentro: 十二個入り, un paquete de doce; ミルク入り, con leche"},
     "屋": {"en": "(suffix) the shop or trade of …, or one given to it: 自転車屋, a bicycle shop; 照れ屋, a shy person",
-          "fr": "(suffixe) la boutique ou le métier de …, ou qui y est enclin : 自転車屋, un marchand de vélos ; 照れ屋, un timide"},
+          "fr": "(suffixe) la boutique ou le métier de …, ou qui y est enclin : 自転車屋, un marchand de vélos ; 照れ屋, un timide",
+          "es": "(sufijo) la tienda o el oficio de …, o quien es dado a ello: 自転車屋, una tienda de bicicletas; 照れ屋, una persona tímida"},
     "たち": {"en": "(suffix) plural, … and the others: 作業員たち, the workers",
-           "fr": "(suffixe) pluriel, … et les autres : 作業員たち, les ouvriers"},
-    "ごと_whole": {"en": "(suffix) … and all, whole: 皮ごと, skin and all", "fr": "(suffixe) avec, en entier : 皮ごと, avec la peau"},
-    "合": {"en": "(after a number) gō, a measure of rice, about 180 ml: 米2合", "fr": "(après un nombre) gō, mesure de riz, environ 180 ml : 米2合"},
-    "牛": {"en": "(suffix) beef, cattle: 国産牛, domestic beef", "fr": "(suffixe) bœuf : 国産牛, bœuf japonais"},
-    "殿": {"en": "(after a name or a title, old or formal) Lord, Sir: 家老殿", "fr": "(après un nom ou un titre, ancien ou formel) seigneur, monsieur : 家老殿"},
+           "fr": "(suffixe) pluriel, … et les autres : 作業員たち, les ouvriers",
+           "es": "(sufijo) plural, … y los demás: 作業員たち, los trabajadores"},
+    "ごと_whole": {"en": "(suffix) … and all, whole: 皮ごと, skin and all", "fr": "(suffixe) avec, en entier : 皮ごと, avec la peau",
+                 "es": "(sufijo) … y todo, entero: 皮ごと, con piel y todo"},
+    "合": {"en": "(after a number) gō, a measure of rice, about 180 ml: 米2合", "fr": "(après un nombre) gō, mesure de riz, environ 180 ml : 米2合",
+          "es": "(tras un número) gō, medida de arroz, unos 180 ml: 米2合"},
+    "牛": {"en": "(suffix) beef, cattle: 国産牛, domestic beef", "fr": "(suffixe) bœuf : 国産牛, bœuf japonais",
+          "es": "(sufijo) carne de vacuno, ganado: 国産牛, vacuno nacional"},
+    "殿": {"en": "(after a name or a title, old or formal) Lord, Sir: 家老殿", "fr": "(après un nom ou un titre, ancien ou formel) seigneur, monsieur : 家老殿",
+          "es": "(tras un nombre o un título, antiguo o formal) señor, don: 家老殿"},
     "超": {"en": "(after a number) over, more than: 500円超, over 500 yen",
-          "fr": "(après un nombre) plus de : 500円超, plus de 500 yens"},
+          "fr": "(après un nombre) plus de : 500円超, plus de 500 yens",
+          "es": "(tras un número) más de: 500円超, más de 500 yenes"},
     "先": {"en": "(suffix) where or to whom one …: 連絡先, contact details; 勤務先, workplace; 行き先, destination",
-          "fr": "(suffixe) le lieu ou la personne où l'on … : 連絡先, coordonnées ; 勤務先, lieu de travail ; 行き先, destination"},
+          "fr": "(suffixe) le lieu ou la personne où l'on … : 連絡先, coordonnées ; 勤務先, lieu de travail ; 行き先, destination",
+          "es": "(sufijo) dónde o a quién uno …: 連絡先, datos de contacto; 勤務先, lugar de trabajo; 行き先, destino"},
 }
 _RANGED = frozenset({"円", "ドル", "ユーロ", "度", "歳", "才", "点", "パーセント", "％", "%", "分", "秒", "時間", "キロ",
                      "メートル"})
@@ -1061,36 +1124,38 @@ def _age_dict(run: list, numbers: dict, start: int) -> dict:
         ],
         "number": value,
         "gloss": {"en": f"in one's {value}s ({value}-{value + 9})" if value > 10 else "teens (10-19)",
-                  "fr": f"de {value} à {value + 9} ans"},
+                  "fr": f"de {value} à {value + 9} ans", "es": f"de {value} a {value + 9} años"},
     }
 
 
 # 3つ目, 何年目, 2回目: a number, what it counts and 目, the ordinal
 # suffix, which read alone is the N5 目, "eye" (plan 272).
-_WHICH = {"en": "which (in order)", "fr": "combientième"}
+_WHICH = {"en": "which (in order)", "fr": "combientième",
+          "es": "qué número (en orden)"}
 # What an ordinal counts, where the counter's card leads with another
 # sense (度 "degree (temperature)", 代 "charge, cost"); any other counter
 # is glossed with its card.
 _ORDINAL_SENSE = {
-    "度": ("time", "fois"), "回": ("time", "fois"), "代": ("generation", "génération"),
-    "番": ("", ""), "年": ("year", "année"), "日": ("day", "jour"),
-    "人": ("person", "personne"), "曲": ("song", "morceau"), "杯": ("cup, glass", "verre, tasse"),
-    "週": ("week", "semaine"), "階": ("floor", "étage"), "期": ("term", "période"),
-    "試合": ("match", "match"), "巻": ("volume", "tome"), "話": ("episode", "épisode"),
-    "時間": ("period (of school)", "heure de cours"),
+    "度": ("time", "fois", "vez"), "回": ("time", "fois", "vez"), "代": ("generation", "génération", "generación"),
+    "番": ("", "", ""), "年": ("year", "année", "año"), "日": ("day", "jour", "día"),
+    "人": ("person", "personne", "persona"), "曲": ("song", "morceau", "canción"),
+    "杯": ("cup, glass", "verre, tasse", "taza, vaso"),
+    "週": ("week", "semaine", "semana"), "階": ("floor", "étage", "piso, planta"), "期": ("term", "période", "período"),
+    "試合": ("match", "match", "partido"), "巻": ("volume", "tome", "tomo"), "話": ("episode", "épisode", "episodio"),
+    "時間": ("period (of school)", "heure de cours", "hora de clase"),
 }
 
 
-def _counted_sense(counter: str, reading: str) -> tuple[str, str]:
-    """(English, French) for what an ordinal counts (_ORDINAL_SENSE),
-    else its card's meaning, or ("", "")."""
+def _counted_sense(counter: str, reading: str) -> tuple[str, str, str]:
+    """(English, French, Spanish) for what an ordinal counts
+    (_ORDINAL_SENSE), else its card's meaning, or ("", "", "")."""
     if counter in _ORDINAL_SENSE:
         return _ORDINAL_SENSE[counter]
     hit = resolve_lemma(counter, reading) if counter != "つ" else None
     if not hit:
-        return "", ""
+        return "", "", ""
     english = hit[1].get("meaning") or ""
-    return english, fr_gloss(hit[1], VOCAB_FR) or english
+    return english, fr_gloss(hit[1], VOCAB_FR) or english, fr_gloss(hit[1], VOCAB_ES) or english
 
 
 def _ordinal_run(morphemes: list, i: int, numbers: dict) -> int:
@@ -1139,13 +1204,14 @@ def _ordinal_dict(run: list, numbers: dict, start: int) -> dict:
             for char, lvl, e, rid in find_kanji_matches(surface)
         ],
     }
-    english, french = _counted_sense(counter.surface, counter.lemma_reading)
+    english, french, spanish = _counted_sense(counter.surface, counter.lemma_reading)
     if value is None:
-        en, fr = _WHICH["en"], _WHICH["fr"]
+        en, fr, es = _WHICH["en"], _WHICH["fr"], _WHICH["es"]
     else:
         token["number"] = value
-        en, fr = _ordinal(value, "en"), _ordinal(value, "fr")
-    token["gloss"] = {"en": f"{en} · {english}" if english else en, "fr": f"{fr} · {french or english}" if english else fr}
+        en, fr, es = _ordinal(value, "en"), _ordinal(value, "fr"), _ordinal(value, "es")
+    token["gloss"] = {"en": f"{en} · {english}" if english else en, "fr": f"{fr} · {french or english}" if english else fr,
+                      "es": f"{es} · {spanish or english}" if english else es}
     token["furigana"] = _printed_furigana(run, len(head), numbers.get(start), token["reading"])
     return token
 
@@ -1285,6 +1351,8 @@ _MONTHS_EN = ("January", "February", "March", "April", "May", "June", "July", "A
               "October", "November", "December")
 _MONTHS_FR = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
               "octobre", "novembre", "décembre")
+_MONTHS_ES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre",
+              "octubre", "noviembre", "diciembre")
 _SLASHES = ("/", "／")
 
 
@@ -1343,7 +1411,8 @@ def _date_dict(run: list, month: int, day: int) -> dict:
     token["reading"] = month_reading + day_reading
     token["furigana"] = [{"text": token["surface"], "reading": token["reading"]}]
     token["gloss"] = {"en": f"{_MONTHS_EN[month - 1]} {day} (month/day)",
-                      "fr": f"{day} {_MONTHS_FR[month - 1]} (mois/jour)"}
+                      "fr": f"{day} {_MONTHS_FR[month - 1]} (mois/jour)",
+                      "es": f"{day} de {_MONTHS_ES[month - 1]} (mes/día)"}
     return token
 
 # The catalogue's conjunctions, each a point written as the word itself.
@@ -2147,7 +2216,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 32: a point's gloss and formation line in Spanish (plan 291): `meaning`
 # gains its `es` and the point its `structure_es`, and a deck card's
 # match its `meaning_es`.
-LOCAL_REV = 32
+# 33: every gloss the breakdown writes itself gains its `es` (plan 291):
+# a word of speech, a prefix or suffix, a name's kind, a unit, a size, a
+# figure, a time, a date, an ordinal, an age.
+LOCAL_REV = 33
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

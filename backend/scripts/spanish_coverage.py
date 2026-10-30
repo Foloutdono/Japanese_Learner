@@ -132,6 +132,8 @@ def banks() -> dict[str, list[int]]:
         "example sentences (fixed)": _pairs(_load("datas", "vocab", "example_fixes.json"), [0, 0]),
         "example sentences (added)": _pairs(_load("datas", "vocab", "example_added.json"), [0, 0]),
         "Tatoeba sentences": [_rows("jmdict_es.sqlite3", "example"), _rows("jmdict_fr.sqlite3", "example")],
+        "breakdown glosses": [a + b for a, b in zip(_module_pairs("study", "particle_glosses.py"),
+                                                    _module_pairs("study", "analysis.py"))],
     }
     for name, folder in (("comprehension seeds", "comprehension"), ("conversation bank", "conversation")):
         total = [0, 0]

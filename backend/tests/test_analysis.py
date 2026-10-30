@@ -378,7 +378,7 @@ class EveryPartTests(unittest.TestCase):
     def test_a_number_is_one_token_with_its_figure(self) -> None:
         tok = self._token("九千三百五十円のおつりです。", "九千三百五十")
         self.assertEqual(tok["number"], 9350)
-        self.assertEqual(tok["gloss"], {"en": "9,350", "fr": "9\u202f350"})
+        self.assertEqual(tok["gloss"], {"en": "9,350", "fr": "9\u202f350", "es": "9350"})
         self.assertIsNone(tok["vocab_match"])
         self.assertEqual(self._token("駅で三十分待ちました。", "三十")["gloss"]["en"], "30")
         self.assertEqual(self._token("三万五千人が来た。", "三万五千")["number"], 35000)

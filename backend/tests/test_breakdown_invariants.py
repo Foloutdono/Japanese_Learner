@@ -119,16 +119,43 @@ class OddInputTests(unittest.TestCase):
 
 
 class GlossTableTests(unittest.TestCase):
-    """Every line the breakdown can print for a part, in both languages."""
+    """Every line the breakdown can print for a part, in every language."""
 
-    def test_every_gloss_has_its_french(self) -> None:
+    def test_every_gloss_has_its_french_and_spanish(self) -> None:
         tables = {"particle_glosses": particle_glosses._GLOSSES, "prefix": analysis._PREFIX_GLOSSES,
-                  "suffix": analysis._SUFFIX_GLOSSES, "name": analysis._NAME_GLOSS}
+                  "suffix": analysis._SUFFIX_GLOSSES, "affix": analysis._AFFIX_SENSES,
+                  "span": analysis._SPAN_COUNTERS, "name": analysis._NAME_GLOSS,
+                  "unknown": {"": analysis._UNKNOWN_GLOSS}, "which": {"": analysis._WHICH}}
         for name, table in tables.items():
             for key, gloss in table.items():
                 with self.subTest(table=name, key=key):
-                    self.assertTrue((gloss.get("en") or "").strip())
-                    self.assertTrue((gloss.get("fr") or "").strip())
+                    for lang in ("en", "fr", "es"):
+                        self.assertTrue((gloss.get(lang) or "").strip(), lang)
+
+    def test_every_row_of_a_tuple_table_has_its_spanish(self) -> None:
+        # (reading,) English, French, Spanish: the Spanish last (plan 291).
+        from study.reading_context import LATIN_UNITS
+        tables = {"units": (LATIN_UNITS, 4), "sizes": (analysis._SIZES, 4), "latin": (analysis._LATIN_WORDS, 4),
+                  "adverbs": (particle_glosses._ADVERBS, 3), "ordinal": (analysis._ORDINAL_SENSE, 3)}
+        for name, (table, width) in tables.items():
+            for key, row in table.items():
+                with self.subTest(table=name, key=key):
+                    self.assertEqual(len(row), width)
+                    self.assertEqual(bool(row[-1].strip()), bool(row[-3].strip()))
+
+    def test_every_gloss_a_breakdown_prints_has_its_spanish(self) -> None:
+        # The tables and the glosses made on the spot: a figure, a time,
+        # a score, a fraction, an age, a date, an ordinal, a unit, a size,
+        # a JLPT level, an adverb made with に (plan 291).
+        made = ("九千三百五十円", "1,500円です", "１００万人", "３．５キロ走った", "19:30に会おう", "26-24でセットを取った",
+                "大さじ1と1/2を入れる", "20代の女性", "10/24（土）の飲み会", "3曲目は新曲です", "何年目ですか",
+                "600Wで温める", "普段はMですが、ワンサイズ上のLにした", "N3に合格した", "本当に楽しかった",
+                "許さぬ", "行くぞ", "田中さんは今日、元気そうですね。")
+        for s in made + tuple(_outside_lines(60)):
+            for token in analysis.analyze_local(s)["tokens"]:
+                if token.get("gloss"):
+                    with self.subTest(text=s[:20], part=token["surface"]):
+                        self.assertTrue((token["gloss"].get("es") or "").strip(), token["gloss"])
 
     def test_every_key_the_rules_name_is_in_the_table(self) -> None:
         source = Path(particle_glosses.__file__).read_text(encoding="utf-8")

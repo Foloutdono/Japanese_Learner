@@ -89,10 +89,20 @@ not yet written in Spanish reads English**, never French and never blank.
   titles carry their `es`, required by `test_basics` as the English and
   French are. The rest of the course was already Spanish: its cards'
   glosses are the decks', its sentences the reading bank's.
+- **The breakdown's own glosses are whole** (the eighth wave): every line
+  the local tier writes for a part no card or point explains -- the 197
+  words of speech of `particle_glosses` (ぞ, かしら, the negative ぬ, the
+  Kansai へん), the adverbs made with に, the prefixes, suffixes and
+  counters, a name's kind, the units, sizes and Latin words -- carries its
+  `es`, a tuple table's row its Spanish last; and every gloss it makes on
+  the spot (a figure, a time, a score, a fraction, an age, a date, an
+  ordinal, a JLPT level) is made in Spanish too. A figure is the RAE's
+  (2000, 10 000, 3.5), an ordinal «n.º 3», since 3.º and 3.ª would give
+  the counted noun a gender. `test_breakdown_invariants` holds every
+  table and every gloss a breakdown prints; `LOCAL_REV` moved (32 → 33).
 - **Everything else is written a wave at a time** and reads English until
   then: the JMdict pool's words and the 21,800 Tatoeba sentences only the
-  pool shows, the breakdown's particle and ending glosses, the duels'
-  choices. `python -m
+  pool shows, the duels' choices. `python -m
   scripts.spanish_coverage` counts what is written and what is left, per
   part. A Spanish text is optional where it is added (`grammar_check` holds
   one that is there, and accepts its absence); `tests/test_spanish.py`
@@ -116,7 +126,8 @@ not yet written in Spanish reads English**, never French and never blank.
   Spanish among them; a Spanish learner now reaches them with `lang=es` and
   their daily ceilings as they are.
 - The breakdown's stored output gained `structure_es` and a deck word's
-  `meaning_es`, so `LOCAL_REV` moved (31 → 32).
+  `meaning_es`, so `LOCAL_REV` moved (31 → 32), and its own glosses' `es`
+  (32 → 33).
 - Dictionary search still matches English and French glosses only: the pool
   predicate's ASCII gate and the lexicon need their own change.
 - The Spanish layer over JMdict is a second small SQLite file beside the

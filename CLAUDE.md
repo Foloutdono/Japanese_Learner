@@ -174,7 +174,7 @@ runtime purpose.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's
-  `gloss`, `{en, fr}`); a part with none of these is a gap, and
+  `gloss`, `{en, fr, es}`); a part with none of these is a gap, and
   `python -m scripts.breakdown_gaps` lists them over every sentence the
   app teaches. A function word reaches the deck's kana card through
   `card_lookup`'s breakdown-only resolvers ("the words that hold a
@@ -195,8 +195,9 @@ runtime purpose.
   outside lines (Tatoeba's) and odd input: the parts cover the text, a
   reading is kana, a final or half-width mark and a subtitle's spaces
   change no card, the same line reads the same twice, every gloss has its
-  French. A rule the catalogue's own tour contradicts is wrong, however
-  right it looks (〜のに's "for (doing)" is its second use). A word or a
+  French and its Spanish. A rule the catalogue's own tour contradicts is
+  wrong, however right it looks (〜のに's "for (doing)" is its second
+  use). A word or a
   saying read whole takes the particles and the forms inside it, never a
   construction the catalogue teaches: 昼夜を問わず and 若気の至り are
   〜を問わず's and 〜の至り's own examples, and stay in their pieces.
@@ -420,9 +421,11 @@ runtime purpose.
   (`vocab_examples check`, `check-added`), a Tatoeba sentence's line in
   `datas/vocab/jmdict_es.sqlite3` (`build_jmdict_fr --lang es`), so a card
   the deck gains has its sentences in Spanish too; a basics unit its
-  title's `es` (`test_basics`). Everything else (the pool and its
-  sentences, the duels) gains Spanish a wave at a time, optional where it
-  is added:
+  title's `es` (`test_basics`); a gloss the breakdown writes itself (a
+  word of speech, an affix, a unit, a figure, a date) its `es`, a tuple
+  table's row its Spanish last (`test_breakdown_invariants`). Everything
+  else (the pool and its sentences, the duels) gains Spanish a wave at a
+  time, optional where it is added:
   `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
   KANJI_GLOSSES)` (`translations/course.py`), a date or a number is

@@ -1096,6 +1096,8 @@ class CountedTests(unittest.TestCase):
         self.assertIsNone(token["vocab_match"])
         self.assertTrue(token["gloss"]["en"].startswith("3rd · "))
         self.assertTrue(token["gloss"]["fr"].startswith("3e · "))
+        # (n.º 3: 3.º or 3.ª would give the song a gender, plan 291)
+        self.assertTrue(token["gloss"]["es"].startswith("n.º 3 · "))
 
     def test_a_number_and_its_counter_stay_two_words(self) -> None:
         tokens = [t["surface"] for t in analysis.analyze_local("この一回のテイクで")["tokens"]]
@@ -1126,6 +1128,11 @@ class PrintedNumberTests(unittest.TestCase):
                 self.assertEqual(token["gloss"]["en"], figure)
                 self.assertEqual(token["furigana"], [{"text": number, "reading": reading}])
         self.assertEqual(token_of("３．５キロ走った", "３．５")["gloss"]["fr"], "3,5")
+        # The RAE's figure: a point before the decimals, no mark in four
+        # digits, a narrow space from five (plan 291).
+        self.assertEqual(token_of("３．５キロ走った", "３．５")["gloss"]["es"], "3.5")
+        self.assertEqual(token_of("1,500円です", "1,500")["gloss"]["es"], "1500")
+        self.assertEqual(token_of("12,000円です", "12,000")["gloss"]["es"], "12\u202f000")
 
     def test_what_is_no_quantity_is_left_bare(self) -> None:
         # A code and a telephone's number are not read as one; a time of
@@ -1172,6 +1179,7 @@ class PrintedNumberTests(unittest.TestCase):
         token = token_of("１０代の友だち同士が徹夜でおしゃべりした。", "１０代")
         self.assertEqual((token["reading"], token["gloss"]["en"]), ("じゅうだい", "teens (10-19)"))
         self.assertEqual(token_of("20代の女性", "20代")["gloss"]["fr"], "de 20 à 29 ans")
+        self.assertEqual(token_of("20代の女性", "20代")["gloss"]["es"], "de 20 a 29 años")
         # ７日間 is seven days, never the pool's 日間, "daytime".
         span = token_of("水がないと７日間しか生きられない。", "日間")
         self.assertIsNone(span["vocab_match"])
@@ -1697,6 +1705,7 @@ class RealLineWordTests(unittest.TestCase):
         self.assertEqual(token["reading"], "じゅうがつにじゅうよっか")
         self.assertEqual(token["gloss"]["en"], "October 24 (month/day)")
         self.assertEqual(token["gloss"]["fr"], "24 octobre (mois/jour)")
+        self.assertEqual(token["gloss"]["es"], "24 de octubre (mes/día)")
         self.assertEqual(token_of("4/1から始まる。", "4/1")["reading"], "しがつついたち")
         self.assertFalse(any(t["surface"] == "10/24" for t in analysis.analyze_local("2024/10/24")["tokens"]))
         # A fraction, or a day no month has, is no date; a weekday makes one.
