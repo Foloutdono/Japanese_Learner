@@ -1377,8 +1377,8 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     all_senses = _find_senses(kanji, kana)
     if not all_senses:
         examples = _written(kanji, kana, set(), None, meaning_hint, _MAX_EXAMPLES)
-        if examples and lang == "fr":
-            _in_french([], examples)
+        if examples and lang != "en":
+            _in_layer([], examples, lang)
         return {"tags": [], "senses": [], "examples": examples}
 
     senses = all_senses[:_MAX_SENSES]
@@ -1429,8 +1429,8 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     # it with the word rather than under a sense.
     examples += _written(kanji, kana, seen_jp, None, meaning_hint, _MAX_EXAMPLES - len(examples))
 
-    if lang == "fr":
-        _in_french(senses_out, examples)
+    if lang != "en":
+        _in_layer(senses_out, examples, lang)
 
     return {
         "tags": _collect_word_tags(senses, lang),
@@ -1439,29 +1439,32 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     }
 
 
-def _in_french(senses_out: list[dict], examples: list[dict]) -> None:
-    """The French layer over an entry (content/jmdict_fr.py, plan 215),
-    in place: a sense's glossary where its English line has French, and
-    each example's translation as `tr` -- the field ExampleSentence
-    already prefers to `en`. What has no French keeps its English, and
-    says so in `glossary_lang` / `tr_lang`, so the page can mark it
-    rather than pass it off as French. `sense_glossary` and `en` stay
-    English: they are what the primary-sense scoring and the practice
-    screens read."""
+def _in_layer(senses_out: list[dict], examples: list[dict], lang: str) -> None:
+    """The learner's layer over an entry (content/jmdict_fr.py: French
+    since plan 215, Spanish since plan 291), in place: a sense's
+    glossary where its English line has a line in `lang`, and each
+    example's translation as `tr` -- the field ExampleSentence already
+    prefers to `en`. What has none keeps its English, and says so in
+    `glossary_lang` / `tr_lang`, so the page can mark it rather than
+    pass it off as the learner's language. `sense_glossary` and `en`
+    stay English: they are what the primary-sense scoring and the
+    practice screens read."""
     from content import jmdict_fr
-    glosses = jmdict_fr.senses(s["glossary"] for s in senses_out)
+    if lang not in jmdict_fr.LANGS:
+        return
+    glosses = jmdict_fr.senses((s["glossary"] for s in senses_out), lang)
     for sense in senses_out:
-        fr = glosses.get(sense["glossary"])
-        if fr:
-            sense["glossary"] = fr
-            sense["glossary_lang"] = "fr"
+        line = glosses.get(sense["glossary"])
+        if line:
+            sense["glossary"] = line
+            sense["glossary_lang"] = lang
         else:
             sense["glossary_lang"] = "en"
-    sentences = jmdict_fr.examples(ex["jp"] for ex in examples)
+    sentences = jmdict_fr.examples((ex["jp"] for ex in examples), lang)
     for ex in examples:
-        fr = sentences.get(ex["jp"])
-        if fr:
-            ex["tr"] = fr
-            ex["tr_lang"] = "fr"
+        tr = sentences.get(ex["jp"])
+        if tr:
+            ex["tr"] = tr
+            ex["tr_lang"] = lang
         else:
             ex["tr_lang"] = "en"

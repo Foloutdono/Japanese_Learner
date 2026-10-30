@@ -9,7 +9,10 @@ translation starts from the figures rather than a guess.
 
 A text is counted where the content writes it in two languages: a dict
 with an "en" and a "fr" (a gloss pair, a sentence row), or a field with
-its "_fr" twin (structure / structure_fr). The interface's string table
+its "_fr" twin (structure / structure_fr). The Tatoeba sentences are
+counted by layer: the rows of jmdict_es.sqlite3 against the French
+layer's, the deck's own and the pool's together (tests/test_spanish.py
+holds every one a deck card shows). The interface's string table
 (frontend/src/locales/es) is not here: locales.test.js holds it whole.
 
 Read-only, no database, no network: JSON is read as JSON and the Python
@@ -108,6 +111,18 @@ def grammar() -> dict[str, dict[str, list[int]]]:
     return out
 
 
+def _rows(name: str, table: str) -> int:
+    """A layer's rows in `table` (content/jmdict_fr.py), 0 without the file."""
+    path = _path("datas", "vocab", name)
+    if not os.path.exists(path):
+        return 0
+    conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        return conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+    finally:
+        conn.close()
+
+
 def banks() -> dict[str, list[int]]:
     """The other written content, each as one figure."""
     out = {
@@ -116,6 +131,7 @@ def banks() -> dict[str, list[int]]:
         "dictation bank": _module_pairs("content", "listening_clips.py"),
         "example sentences (fixed)": _pairs(_load("datas", "vocab", "example_fixes.json"), [0, 0]),
         "example sentences (added)": _pairs(_load("datas", "vocab", "example_added.json"), [0, 0]),
+        "Tatoeba sentences": [_rows("jmdict_es.sqlite3", "example"), _rows("jmdict_fr.sqlite3", "example")],
     }
     for name, folder in (("comprehension seeds", "comprehension"), ("conversation bank", "conversation")):
         total = [0, 0]

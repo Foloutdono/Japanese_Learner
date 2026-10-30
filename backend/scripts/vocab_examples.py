@@ -69,9 +69,9 @@ def _originals() -> dict[str, dict]:
     saved, saved_written = example_fixes.fixes, example_fixes.written
     example_fixes.fixes = lambda: {}
     example_fixes.written = lambda: {}
-    # The French index is cached from fixes(): built while it is patched
-    # out, it would stay empty for the rest of the process.
-    example_fixes._french.cache_clear()
+    # The translations' index is cached from fixes(): built while it is
+    # patched out, it would stay empty for the rest of the process.
+    example_fixes._own.cache_clear()
     try:
         out: dict[str, dict] = {}
         for level in LEVELS:
@@ -90,7 +90,7 @@ def _originals() -> dict[str, dict]:
         return out
     finally:
         example_fixes.fixes, example_fixes.written = saved, saved_written
-        example_fixes._french.cache_clear()
+        example_fixes._own.cache_clear()
 
 
 def _carries(jp: str, word: dict) -> bool:

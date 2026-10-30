@@ -50,8 +50,10 @@ datas/voice_audition/
 datas/kana_source/
 # The JSON drafts datas/vocab/jmdict_fr.sqlite3 is built from (plan 215,
 # scripts/build_jmdict_fr.py): the database is the shipped asset and
-# --export writes these back out for an edit.
+# --export writes these back out for an edit. The same for the Spanish
+# layer, jmdict_es.sqlite3 (plan 291, --lang es).
 datas/vocab/fr_source/
+datas/vocab/es_source/
 # The learner the landing page's footage is filmed on (plan 283,
 # scripts/footage_learner.py): a dump of a local database, remade by
 # --seed, and nothing anyone else needs.

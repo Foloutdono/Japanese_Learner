@@ -40,6 +40,14 @@ it) is the same case, everywhere.
 
 Text drafted with an AI model, from the Japanese, and audited like the
 rest of the taught content (docs/content-audit/PLAYBOOK.md).
+
+Spanish (plan 291, ADR 0023) is the same layer in a file of its own,
+datas/vocab/jmdict_es.sqlite3, its three tables the same with an `es`
+column for `fr`, built by the same script (`--lang es`). It holds the
+Tatoeba sentences the deck shows so far; its senses and pool lines are
+the pool's wave, and until then a Spanish learner reads them in
+English, as a missing line always reads. The sentence lookups take the
+language; the pool's stay French.
 """
 import os
 import sqlite3
@@ -49,32 +57,40 @@ from content import example_fixes
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "jmdict_fr.sqlite3")
+DB_PATHS = {"fr": DB_PATH, "es": os.path.join(_BASE_DIR, "datas", "vocab", "jmdict_es.sqlite3")}
+# The languages a layer exists for, and the only names a query's column
+# is spelled from.
+LANGS = tuple(DB_PATHS)
 
 _local = threading.local()
 
 
-def _conn() -> sqlite3.Connection | None:
-    conn = getattr(_local, "conn", None)
+def _conn(lang: str = "fr") -> sqlite3.Connection | None:
+    conns = getattr(_local, "conns", None)
+    if conns is None:
+        conns = _local.conns = {}
+    conn = conns.get(lang)
     if conn is None:
-        if not os.path.exists(DB_PATH):
+        path = DB_PATHS.get(lang)
+        if path is None or not os.path.exists(path):
             return None
-        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, check_same_thread=False)
-        _local.conn = conn
+        conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True, check_same_thread=False)
+        conns[lang] = conn
     return conn
 
 
-def _one(sql: str, params: tuple) -> str | None:
-    conn = _conn()
+def _one(sql: str, params: tuple, lang: str = "fr") -> str | None:
+    conn = _conn(lang)
     if conn is None:
         return None
     row = conn.execute(sql, params).fetchone()
     return row[0] if row and row[0] else None
 
 
-def _many(sql_head: str, keys: list, width: int = 1) -> list[tuple]:
+def _many(sql_head: str, keys: list, width: int = 1, lang: str = "fr") -> list[tuple]:
     """Rows for a bounded batch, 400 keys a query (SQLite's variable cap
     is far above that; the batches here are a page's worth)."""
-    conn = _conn()
+    conn = _conn(lang)
     if conn is None or not keys:
         return []
     out = []
@@ -97,39 +113,45 @@ def sense(glossary: str) -> str | None:
     return _one("SELECT fr FROM sense WHERE en = ?", (glossary,)) if glossary else None
 
 
-def senses(glossaries) -> dict[str, str]:
-    """{english glossary: french} for the ones that have French."""
+def senses(glossaries, lang: str = "fr") -> dict[str, str]:
+    """{english glossary: its line in `lang`} for the ones that have one."""
+    if lang not in LANGS:
+        return {}
     keys = list(dict.fromkeys(g for g in glossaries if g))
-    return {en: fr for en, fr in _many("SELECT en, fr FROM sense WHERE en", keys) if fr}
+    return {en: tr for en, tr in _many(f"SELECT en, {lang} FROM sense WHERE en", keys, lang=lang) if tr}
 
 
 # ── Sentences ─────────────────────────────────────────────────
 
-def example(jp: str) -> str | None:
-    """A Tatoeba sentence's French, or None. A sentence the course
-    corrected (content/example_fixes.py, plan 227) answers its own."""
-    return example_fixes.french(jp) or (_one("SELECT fr FROM example WHERE jp = ?", (jp,)) if jp else None)
+def example(jp: str, lang: str = "fr") -> str | None:
+    """A Tatoeba sentence's French (or `lang`'s), or None. A sentence the
+    course corrected or wrote (content/example_fixes.py, plan 227)
+    answers its own."""
+    if not jp or lang not in LANGS:
+        return None
+    return example_fixes.translated(jp, lang) or _one(f"SELECT {lang} FROM example WHERE jp = ?", (jp,), lang)
 
 
-def examples(jps) -> dict[str, str]:
+def examples(jps, lang: str = "fr") -> dict[str, str]:
+    if lang not in LANGS:
+        return {}
     keys = list(dict.fromkeys(j for j in jps if j))
-    out = {jp: fr for jp, fr in _many("SELECT jp, fr FROM example WHERE jp", keys) if fr}
+    out = {jp: tr for jp, tr in _many(f"SELECT jp, {lang} FROM example WHERE jp", keys, lang=lang) if tr}
     for jp in keys:
-        fixed = example_fixes.french(jp)
+        fixed = example_fixes.translated(jp, lang)
         if fixed:
             out[jp] = fixed
     return out
 
 
 def translation(jp: str, en: str, lang: str) -> tuple[str, str]:
-    """(text, its language) for a corpus sentence: the French where the
-    learner reads French and it exists, the English otherwise -- the
-    pair routes/reading._finish_phrase carries as translation /
+    """(text, its language) for a corpus sentence: the learner's
+    language where a layer has the sentence, the English otherwise --
+    the pair routes/reading._finish_phrase carries as translation /
     translation_lang."""
-    if lang == "fr":
-        fr = example(jp)
-        if fr:
-            return fr, "fr"
+    own = example(jp, lang)
+    if own:
+        return own, lang
     return en, "en"
 
 
@@ -175,9 +197,9 @@ def search_pool(q: str, limit: int = 2000) -> list[tuple[str, str]]:
     ).fetchall()
 
 
-def counts() -> dict[str, int]:
+def counts(lang: str = "fr") -> dict[str, int]:
     """Rows per table -- for the tests and the build report."""
-    conn = _conn()
+    conn = _conn(lang)
     if conn is None:
         return {"sense": 0, "example": 0, "pool_line": 0}
     return {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]

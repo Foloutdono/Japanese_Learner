@@ -21,6 +21,13 @@ rebuild:
 glosses in French (the theme cards' meaning_fr) to pool_lines.json before
 building, without overwriting a line already there.
 
+`--lang es` does all of it for the Spanish layer (plan 291):
+datas/vocab/jmdict_es.sqlite3 from datas/vocab/es_source/, the same three
+tables with an `es` column for `fr`.
+
+    python -m scripts.build_jmdict_fr --lang es --export
+    python -m scripts.build_jmdict_fr --lang es
+
 An empty line is dropped and reported; a line identical to its English
 is kept (a cognate, a cross-reference) and counted.
 """
@@ -34,29 +41,36 @@ from study.search_match import fold
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _VOCAB_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
-_OUT_PATH = os.path.join(_VOCAB_DIR, "jmdict_fr.sqlite3")
-_SRC_DIR = os.path.join(_VOCAB_DIR, "fr_source")
+LANGS = ("fr", "es")
 
 SCHEMA = """
 CREATE TABLE sense (
   en TEXT PRIMARY KEY,
-  fr TEXT NOT NULL
+  {lang} TEXT NOT NULL
 );
 CREATE TABLE example (
   jp TEXT PRIMARY KEY,
-  fr TEXT NOT NULL
+  {lang} TEXT NOT NULL
 );
--- `fold` is `fr` lowercased and accent-stripped (study/search_match.fold),
+-- `fold` is `{lang}` lowercased and accent-stripped (study/search_match.fold),
 -- so the dictionary's French search over the pool is a plain LIKE that
 -- still finds « épée » for "epee", without a Python call per row.
 CREATE TABLE pool_line (
   kanji TEXT NOT NULL,
   kana  TEXT NOT NULL,
-  fr    TEXT NOT NULL,
+  {lang}    TEXT NOT NULL,
   fold  TEXT NOT NULL,
   PRIMARY KEY (kanji, kana)
 );
 """
+
+
+def _out_path(lang: str) -> str:
+    return os.path.join(_VOCAB_DIR, f"jmdict_{lang}.sqlite3")
+
+
+def _src_dir(lang: str) -> str:
+    return os.path.join(_VOCAB_DIR, f"{lang}_source")
 
 FILES = ("senses.json", "examples.json", "pool_lines.json")
 
@@ -118,7 +132,7 @@ def seed_themes(src: str) -> int:
     return added
 
 
-def build(src: str, out_path: str) -> None:
+def build(src: str, out_path: str, lang: str = "fr") -> None:
     senses = _clean(_read(src, "senses.json"), "senses", True)
     examples = _clean(_read(src, "examples.json"), "examples", False)
     pool = _clean(_read(src, "pool_lines.json"), "pool_lines", False)
@@ -135,7 +149,7 @@ def build(src: str, out_path: str) -> None:
     if os.path.exists(tmp):
         os.remove(tmp)
     conn = sqlite3.connect(tmp)
-    conn.executescript(SCHEMA)
+    conn.executescript(SCHEMA.format(lang=lang))
     conn.executemany("INSERT INTO sense VALUES (?, ?)", sorted(senses.items()))
     conn.executemany("INSERT INTO example VALUES (?, ?)", sorted(examples.items()))
     conn.executemany("INSERT INTO pool_line VALUES (?, ?, ?, ?)", sorted(pool_rows))
@@ -148,30 +162,34 @@ def build(src: str, out_path: str) -> None:
           f"{len(pool_rows)} pool lines, {size:.1f} MB")
 
 
-def export(db_path: str, dst: str) -> None:
+def export(db_path: str, dst: str, lang: str = "fr") -> None:
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     os.makedirs(dst, exist_ok=True)
-    _write(dst, "senses.json", dict(conn.execute("SELECT en, fr FROM sense")))
-    _write(dst, "examples.json", dict(conn.execute("SELECT jp, fr FROM example")))
+    _write(dst, "senses.json", dict(conn.execute(f"SELECT en, {lang} FROM sense")))
+    _write(dst, "examples.json", dict(conn.execute(f"SELECT jp, {lang} FROM example")))
     _write(dst, "pool_lines.json",
-           {f"{k}::{r}": fr for k, r, fr in conn.execute("SELECT kanji, kana, fr FROM pool_line")})
+           {f"{k}::{r}": tr for k, r, tr in conn.execute(f"SELECT kanji, kana, {lang} FROM pool_line")})
     conn.close()
     print(f"Exported {db_path} to {dst}/ ({', '.join(FILES)})")
 
 
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--src", default=_SRC_DIR, help="folder holding the three JSON files")
-    ap.add_argument("--out", default=_OUT_PATH)
+    ap.add_argument("--lang", choices=LANGS, default="fr", help="the layer: French (default) or Spanish")
+    ap.add_argument("--src", help="folder holding the three JSON files (default: datas/vocab/<lang>_source)")
+    ap.add_argument("--out", help="the database (default: datas/vocab/jmdict_<lang>.sqlite3)")
     ap.add_argument("--export", action="store_true", help="dump the database to --src instead of building")
     ap.add_argument("--seed-themes", action="store_true", help="add theme_words.json's pool French first")
     args = ap.parse_args(argv)
+    src, out = args.src or _src_dir(args.lang), args.out or _out_path(args.lang)
     if args.export:
-        export(args.out, args.src)
+        export(out, src, args.lang)
         return
     if args.seed_themes:
-        seed_themes(args.src)
-    build(args.src, args.out)
+        if args.lang != "fr":
+            ap.error("--seed-themes reads the theme cards' French: it builds the French layer only")
+        seed_themes(src)
+    build(src, out, args.lang)
 
 
 if __name__ == "__main__":

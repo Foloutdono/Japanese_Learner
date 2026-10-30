@@ -574,9 +574,9 @@ def _pick_words_mastery(user_id: str, count: int) -> list[tuple[str, str, str | 
 def _corpus_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
                    lang: str) -> dict:
     """A Tatoeba sentence as a phrase, translated into the learner's
-    language where the French layer has it (content/jmdict_fr.py, plan
-    210) and in the corpus's English otherwise -- `translation_lang`
-    says which, as it always has."""
+    language where its layer has it (content/jmdict_fr.py: French since
+    plan 210, Spanish since plan 291) and in the corpus's English
+    otherwise -- `translation_lang` says which, as it always has."""
     text, text_lang = jmdict_fr.translation(jp, en, lang)
     return _finish_phrase(jp, text, kanji, kana, level, translation_lang=text_lang)
 
