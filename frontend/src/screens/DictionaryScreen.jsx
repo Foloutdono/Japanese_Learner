@@ -1,6 +1,8 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
+import { startTransition, useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { keepCachedJson, lastCachedJson } from '../lib/cachedJson'
+import { GATE_PATHS } from '../lib/warm'
 import { countUse } from '../lib/screenTrail'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
@@ -182,6 +184,14 @@ export default function DictionaryScreen({ session }) {
 	const initialCategory = (CATEGORIES.some(([key]) => key === sp.get('category')) || sp.get('category') === FAVORITES)
 		? sp.get('category') : 'kanji'
 	const initialLevel = LEVELLED.includes(initialCategory) && LEVELS.includes(sp.get('level')) ? sp.get('level') : null
+	// 予熱 (plan 292): the catalogue as the gate opens on it -- kanji, every
+	// level, no query -- is drawn at once on the last answer kept
+	// (lib/warm.js asks it behind Today; every opening keeps its own) and
+	// asked again quietly behind it, with no loading line over it.
+	const opening = GATE_PATHS.catalogue(lang)
+	const [warmed] = useState(() => (
+		initialCategory === 'kanji' && !initialLevel ? lastCachedJson(opening, session) : undefined
+	))
 
 	// The plate's add-to-deck roundel (a grammar entry's one action)
 	// writes through the same mining the analyzer uses; one instance
@@ -199,12 +209,12 @@ export default function DictionaryScreen({ session }) {
 	const [category, setCategory]     = useState(initialCategory) // 'kanji' | 'vocab' | 'grammar' | 'hiragana' | 'katakana'
 	// The JLPT level the grammar collection is narrowed to; null is every level.
 	const [level, setLevel]           = useState(initialLevel)
-	const [results, setResults]       = useState([])
+	const [results, setResults]       = useState(() => warmed?.results ?? [])
 	const [loading, setLoading]       = useState(false)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [page, setPage]             = useState(0)
-	const [hasMore, setHasMore]       = useState(true)
-	const [total, setTotal]           = useState(0)
+	const [hasMore, setHasMore]       = useState(() => warmed?.has_more ?? true)
+	const [total, setTotal]           = useState(() => warmed?.total ?? 0)
 	// The spelling the answer is actually for, when a query that found
 	// nothing was retried against the nearest word the catalogue holds.
 	const [corrected, setCorrected]   = useState(null)
@@ -217,7 +227,8 @@ export default function DictionaryScreen({ session }) {
 	// of chips over the catalogue was too much on a phone for a setting
 	// most searches never touch. Closed on arrival.
 	const [optsOpen, setOptsOpen]     = useState(false)
-	const [selected, setSelected]     = useState(null)
+	// The desk's dock stands open on the page's first row (fetchPage).
+	const [selected, setSelected]     = useState(() => (isDesk() ? warmed?.results?.[0] ?? null : null))
 	// The entry a door inside the open panel leads to: a word from a
 	// kanji's ledger, a kanji from a word's, a kana's twin, a grammar
 	// point's rival. It opens as a lookup sheet stacked over the dock —
@@ -229,7 +240,8 @@ export default function DictionaryScreen({ session }) {
 	const [lookup, setLookup]         = useState(null)
 
 	// Radical browsing
-	const [radicalGroups, setRadicalGroups]     = useState(null)
+	// The same for every learner: the one kept is good for the visit.
+	const [radicalGroups, setRadicalGroups]     = useState(() => lastCachedJson(GATE_PATHS.radicals, session)?.groups ?? null)
 	const [loadingRadicals, setLoadingRadicals] = useState(false)
 	const [selectedRadical, setSelectedRadical] = useState(null) // number | null
 
@@ -264,8 +276,8 @@ export default function DictionaryScreen({ session }) {
 
 
 	useEffect(() => {
-		fetchPage(0, '', category, null, level)
-		loadRadicalGrid()
+		fetchPage(0, '', category, null, level, Boolean(warmed))
+		if (!radicalGroups) loadRadicalGrid()
 	}, [])
 
 	// ── Keyboard ──
@@ -359,10 +371,12 @@ export default function DictionaryScreen({ session }) {
 
 	// `lvl` is the collection's JLPT level — the state's value unless the
 	// caller is changing it in the same breath (switchLevel, the mount),
-	// since a setState is not readable until the next render.
-	function fetchPage(p, q, cat, rad, lvl = level) {
-		if (p === 0) setLoading(true)
-		else setLoadingMore(true)
+	// since a setState is not readable until the next render. `quiet` is
+	// the opening asked again under the answer kept: no loading line, and
+	// the desk's open entry left where the learner has it.
+	function fetchPage(p, q, cat, rad, lvl = level, quiet = false) {
+		if (p > 0) setLoadingMore(true)
+		else if (!quiet) setLoading(true)
 		if (p === 0) {
 			pageSeq.current += 1
 			// A page 0 asked by a chip or a mode supersedes a typed search
@@ -408,6 +422,7 @@ export default function DictionaryScreen({ session }) {
 		apiFetch(url, session, { signal: controller.signal })
 			.then(r => r.json())
 			.then(data => {
+				if (url === opening && Array.isArray(data?.results)) keepCachedJson(url, session, data)
 				if (seq !== pageSeq.current) return
 				const newResults = data.results || []
 				// 足跡 (plan 218): a search that answered, counted -- never
@@ -441,8 +456,12 @@ export default function DictionaryScreen({ session }) {
 				// nothing to show. Only the FIRST page, so loading more rows
 				// never moves a selection the learner made.
 				if (p === 0 && hasSideDock()) {
-					setLookup(null)
-					setSelected(newResults[0] ?? null)
+					if (quiet) {
+						setSelected(prev => (prev ? newResults.find(r => entryKey(r) === entryKey(prev)) ?? prev : newResults[0] ?? null))
+					} else {
+						setLookup(null)
+						setSelected(newResults[0] ?? null)
+					}
 				}
 			})
 			// A failed page used to leave the loading line up for good.
@@ -455,9 +474,13 @@ export default function DictionaryScreen({ session }) {
 
 	function loadRadicalGrid() {
 		setLoadingRadicals(true)
-		apiFetch('/api/dictionary/radicals', session)
+		apiFetch(GATE_PATHS.radicals, session)
 			.then(r => r.json())
-			.then(data => { setRadicalGroups(data.groups || []); setLoadingRadicals(false) })
+			.then(data => {
+				if (Array.isArray(data?.groups)) keepCachedJson(GATE_PATHS.radicals, session, data)
+				setRadicalGroups(data.groups || [])
+				setLoadingRadicals(false)
+			})
 			.catch(() => setLoadingRadicals(false))
 	}
 
@@ -1278,6 +1301,45 @@ function cardHeadword(entry) {
 	return entry.type === 'grammar' ? entry.pattern : (entry.kanji || entry.kana || ' ')
 }
 
+// 予熱 (plan 292, the owner's call): a page is fifty cards and a phone
+// shows a dozen, so the catalogue draws a screenful first and the rest
+// a frame later, each in the meantime a card's empty place (index.css,
+// .dict-entry-card--pending): the page is its full length from the
+// first frame, the sentinel where it will stay, and nothing moves when
+// the cards come. Counted generously: the grid's columns at the
+// window's width (.dict-grid: two on a phone, one per 168px from 560px)
+// by the rows its height holds, and a row more -- a card's 149px, or
+// the desk list's 68px row, whichever the screen may draw.
+const ROW_PX = { card: 149, list: 68 }
+function screenful(desk) {
+	if (typeof window === 'undefined') return Infinity
+	const width = window.innerWidth
+	const columns = width < 560 ? 2 : Math.max(1, Math.floor(width / 168))
+	const rows = Math.ceil(window.innerHeight / (desk ? ROW_PX.list : ROW_PX.card)) + 1
+	return columns * rows
+}
+
+/** How many of `results` to draw now: a screenful when a new page has
+ *  just come (by its first entry, so a page asked again or a page more
+ *  draws whole), every one from the frame after. */
+function useScreenfulFirst(results, desk) {
+	const head = results.length ? entryKey(results[0]) : null
+	const [wholeFor, setWholeFor] = useState(null)
+	const whole = wholeFor === head
+	useEffect(() => {
+		if (whole) return undefined
+		let timer = 0
+		const frame = requestAnimationFrame(() => {
+			timer = setTimeout(() => startTransition(() => setWholeFor(head)))
+		})
+		return () => {
+			cancelAnimationFrame(frame)
+			clearTimeout(timer)
+		}
+	}, [whole, head])
+	return whole ? results.length : Math.min(results.length, screenful(desk))
+}
+
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
 	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onSentenceClick,
@@ -1290,6 +1352,7 @@ function ResultsSection({
 	// the dock beside it was reached only by tabbing through all of them
 	// (and the more they loaded). A move opens the tile it lands on.
 	const onGridWalk = useGridWalk(desk, i => setSelected(results[i]))
+	const drawn = useScreenfulFirst(results, desk)
 	const stopKey = desk && results.length
 		? entryKey(selected && results.some(r => entryKey(r) === entryKey(selected)) ? selected : results[0])
 		: null
@@ -1326,6 +1389,9 @@ function ResultsSection({
 					<div className="dict-results-wrap">
 						<div className="dict-grid" onKeyDown={onGridWalk} aria-keyshortcuts={desk ? 'ArrowLeft ArrowRight ArrowUp ArrowDown Home End' : undefined}>
 							{results.map((entry, i) => {
+								if (i >= drawn) {
+									return <div key={entryKey(entry)} className="dict-entry-card dict-entry-card--pending" aria-hidden="true" />
+								}
 								const stage = stageOf(entry.status?.status)
 								const furigana = cardFurigana(entry)
 								const isGrammar = entry.type === 'grammar'

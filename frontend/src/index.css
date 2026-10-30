@@ -20774,6 +20774,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
   overflow: hidden;
   transition: background 0.16s ease, border-color 0.16s ease;
+  /* 予熱 (plan 292, the owner's call): a page is fifty cards and a
+     phone shows ten, so a card below the fold is not laid out until it
+     nears it -- the Dictionary's first frame was most of its tab
+     switch. It stands in at the height a card is wherever one is drawn
+     -- inside its padding, which the browser adds: the headword's box
+     of two --sp-8, the gap, one line of --fs-sm at the body's leading
+     -- and keeps its real height once drawn (`auto`). */
+  content-visibility: auto;
+  contain-intrinsic-size: auto calc(2 * var(--sp-8) + var(--sp-1) + var(--fs-sm) * 1.6);
 }
 .dict-entry-card::after {
   content: '';
@@ -20800,6 +20809,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    nothing on its gauge. In progress and mastered are the state inks
    themselves, vermillion and gold, the same two the study card's own
    seal and the deck's progress rule wear. */
+/* A card's place before it is drawn (plan 292, DictionaryScreen's
+   useScreenfulFirst): a frame at most, at a card's own height (its
+   stand-in, above), and nothing of it seen. */
+.dict-entry-card--pending { content-visibility: hidden; visibility: hidden; }
 .dict-entry-card--new       { --stage-edge: var(--surface-line); }
 .dict-entry-card--learning  { --stage-edge: var(--state-learning); }
 .dict-entry-card--mastered  { --stage-edge: var(--state-mastered); }
@@ -28664,8 +28677,7 @@ button.brd-stn { cursor: pointer; }
    with two grow-only spacers in it cannot be headed by a caption. So
    the line takes the ambient ink at the title rung, and the term it
    was written to carry -- the pace, through Emphasized -- takes the
-   pigment the call had. The plate below keeps the smaller reading:
-   there the heading is .ride__plate-cap. */
+   pigment the call had. */
 .ride__done-text {
   margin: 0;
   max-width: 28em;
@@ -28683,8 +28695,8 @@ button.brd-stn { cursor: pointer; }
 .ride__done-foot {
   width: 100%;
   max-width: var(--card-w);
-  /* The quiet offer over the one filled action (plan 099's plate),
-     the boarding's own order; the card ride's foot holds the action alone. */
+  /* The one filled action (the reading ride's plate held the quiet
+     offer over it until plan 292). */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28697,62 +28709,6 @@ button.brd-stn { cursor: pointer; }
   padding-bottom: var(--sp-5);
 }
 .ride__done-foot .btn-depart { width: 100%; }
-
-/* ── The reading ride's plate (plan 099) ──
-   The done screen's own room (.ride__done): the pair over a sentence,
-   the platforms as a lattice of roundel-and-name in each line's own
-   pigment (a line colour is a section's name, never decoration), the
-   open-for-now note, and the foot with the quiet offer over the one
-   filled action -- the boarding's own order. */
-/* The plate's heading: it captioned 定期券 above it until 2026-09-21
-   and stands alone now, so it takes the rung and the ink the term had
-   (and loses the negative margin that tucked it under it). */
-.ride__plate-cap {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  color: var(--line-color, var(--accent));
-}
-/* Under that heading the sentence is a sentence again, not the call
-   the card ride's is. */
-.ride__plate .ride__done-text {
-  font-size: var(--fs-lead);
-  color: var(--text-secondary);
-}
-.ride__plate-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-width: var(--card-w);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sp-2);
-}
-.ride__plate-item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  text-align: left;
-}
-.ride__plate-icon {
-  flex: none;
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  color: var(--line-color, var(--text-primary));
-}
-.ride__plate-title {
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
 
 /* ── 案内 — the guide over a gate (plan 100) ──
    One element over the anchor whose shadow IS the scrim, wearing the
@@ -40207,6 +40163,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     border-width: 0 0 1px;
     border-radius: 0;
     text-align: left;
+    /* A row stands in at a row's height until drawn (plan 292), inside
+       its padding: the word's line, the gap, the meaning's. */
+    contain-intrinsic-size: auto calc(var(--fs-title) * 1.3 + var(--sp-1) + var(--fs-sm) * 1.6);
   }
   .desk-dict--page .dict-entry-card:last-child { border-bottom-width: 0; }
   .desk-dict--page .dict-entry-card:is(:hover, :focus-visible, .dict-entry-card--selected) { border-color: var(--surface-line); }

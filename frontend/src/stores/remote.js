@@ -18,8 +18,29 @@ import { apiFetch } from '../lib/api'
 //                       reading can take the answer's own instead of
 //                       reading Date.now() in render)
 //   today.refresh()  -> Promise, bypassing the TTL
+//   today.warm()     -> Promise: asks what a consumer mounting now would
+//                       ask, and nothing while an answer is fresh or on
+//                       its way (lib/warm.js, plan 292)
 //   today.seed(data) -> for the dev workbenches; never resets the TTL
 //   today.forget()   -> the account that answered has left (stores/account)
+//
+// Every store is also reached by its path (plan 292): lib/warm.js asks a
+// gate's stores ahead of it with warmStore(path), and a screen that asks
+// for itself starts from one's last answer with peekStore(path), so
+// neither needs a store module's own export (which the tests' mocks of
+// a store would have to repeat).
+const byPath = new Map()
+
+/** Warm the store that answers `path`; nothing when no store does. */
+export function warmStore(path) {
+  return byPath.get(path)?.warm() ?? Promise.resolve()
+}
+
+/** The last answer of the store that answers `path`, or null. */
+export function peekStore(path) {
+  return byPath.get(path)?.peek() ?? null
+}
+
 export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
   let cache = null
   let cacheAt = 0
@@ -87,9 +108,13 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
     return state
   }
 
-  return {
+  const store = {
     use,
     refresh: fetchOnce,
+    warm() {
+      if (inflight) return inflight
+      return cache && Date.now() - cacheAt < ttlMs ? Promise.resolve() : fetchOnce()
+    },
     /**
      * A fresh answer: one asked after any request already in flight has
      * landed (that one may have left before what the caller changed).
@@ -120,4 +145,6 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
     /** The last answer, outside React (a store mutating another). */
     peek: () => cache,
   }
+  byPath.set(path, store)
+  return store
 }

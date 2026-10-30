@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 vi.mock('./api', () => ({ apiJson: vi.fn() }))
 import { apiJson } from './api'
-import { cachedJson, forgetCachedJson, invalidateCachedJson, invalidateMine, MINE_TTL_MS } from './cachedJson'
+import { cachedJson, forgetCachedJson, invalidateCachedJson, invalidateMine, keepCachedJson, lastCachedJson, MINE_TTL_MS } from './cachedJson'
 
 // ── One answer per path, shared (plan 211) ──────────────────────
 // A selector walked fast sent a request per step and per figure beside
@@ -117,5 +117,55 @@ describe('cachedJson', () => {
     expect(apiJson).not.toHaveBeenCalled()
     await cachedJson('/api/p/1', me)
     expect(apiJson).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ── A gate's first frame (plan 292) ─────────────────────────────
+// A gate asks again on every visit and draws the last answer kept
+// meanwhile: lib/warm.js's, or its own last visit's.
+describe('the last answer kept', () => {
+  it('is drawn however old, and while the next is on its way', async () => {
+    vi.useFakeTimers()
+    apiJson.mockResolvedValueOnce({ n: 1 })
+    await cachedJson('/api/decks', me, { ttlMs: 0 })
+    vi.advanceTimersByTime(60 * 60_000)
+    expect(lastCachedJson('/api/decks', me)).toEqual({ n: 1 })
+    const next = later()
+    apiJson.mockReturnValueOnce(next.promise)
+    const asked = cachedJson('/api/decks', me, { ttlMs: 0 })
+    expect(lastCachedJson('/api/decks', me)).toEqual({ n: 1 })
+    next.resolve({ n: 2 })
+    await asked
+    expect(lastCachedJson('/api/decks', me)).toEqual({ n: 2 })
+    expect(lastCachedJson('/api/decks', other)).toBeUndefined()
+  })
+
+  it('survives a failed ask, and a review', async () => {
+    apiJson.mockResolvedValueOnce({ n: 1 })
+    await cachedJson('/api/decks', me, { ttlMs: 0 })
+    apiJson.mockRejectedValueOnce(new Error('offline'))
+    await expect(cachedJson('/api/decks', me, { ttlMs: 0 })).rejects.toThrow('offline')
+    expect(lastCachedJson('/api/decks', me)).toEqual({ n: 1 })
+    // Asked again on every read, it is never taken for a fresh figure.
+    invalidateMine()
+    expect(lastCachedJson('/api/decks', me)).toEqual({ n: 1 })
+  })
+
+  it('takes what a screen asked for itself, and shares an ask on its way', async () => {
+    keepCachedJson('/api/dictionary/radicals', me, { groups: [] })
+    expect(lastCachedJson('/api/dictionary/radicals', me)).toEqual({ groups: [] })
+    const answer = later()
+    apiJson.mockReturnValueOnce(answer.promise)
+    const warm = cachedJson('/api/leaderboard?limit=5&around=1', me, { ttlMs: 0 })
+    const gate = cachedJson('/api/leaderboard?limit=5&around=1', me, { ttlMs: 0 })
+    answer.resolve({ entries: [] })
+    expect(await gate).toBe(await warm)
+    expect(apiJson).toHaveBeenCalledTimes(1)
+  })
+
+  it('is forgotten with the learner', async () => {
+    keepCachedJson('/api/decks', me, { decks: [] })
+    forgetCachedJson()
+    expect(lastCachedJson('/api/decks', me)).toBeUndefined()
   })
 })

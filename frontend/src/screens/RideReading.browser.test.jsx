@@ -6,18 +6,12 @@ import '../index.css'
 
 // ── 試乗 — the reading ride (plan 099) ───────────────────────────
 // The sentence, the clock, the field, the measure against the ticket
-// office's own check, the rating, and the plate: the platforms on the
-// pass from the same map the server enforces, the offer under it, the
-// open-for-now line keyed on the server's `enforced`, and "Enter the
-// station" as the lesson's one stamp. Skip is the same stamp.
+// office's own check, and the rating, which is the lesson's one stamp
+// and, on a phone, the way into the station: the plate that listed the
+// pass's platforms after it went (plan 292). Skip is the same stamp.
+// Today is warmed while the sentence is read, never before it is up.
 
 const apiJson = vi.fn()
-// The paywall is switched off (domain/paywall.js's HAS_PAYWALL) while the
-// plans are reworked; this test covers the offer's doors, which stay.
-vi.mock('../domain/paywall', async o => ({
-  ...(await o()),
-  offerable: credits => !(credits?.unlimited || credits?.plan === 'pass'),
-}))
 
 vi.mock('../lib/api', () => ({
   api: p => p,
@@ -29,11 +23,8 @@ vi.mock('../lib/api', () => ({
 }))
 const track = vi.fn()
 vi.mock('../lib/track', () => ({ track: (...a) => track(...a), flush: vi.fn() }))
-const creditsRef = { current: null }
-vi.mock('../stores/credits', async (o) => ({
-  ...(await o()),
-  useCredits: () => creditsRef.current,
-}))
+const warmToday = vi.fn()
+vi.mock('../lib/warm', async (o) => ({ ...(await o()), warmToday: (...a) => warmToday(...a) }))
 vi.mock('../lib/audio', async (o) => ({
   ...(await o()), playCorrect: vi.fn(), playWrong: vi.fn(), playClick: vi.fn(), playSfx: vi.fn(), speakJapanese: vi.fn(),
 }))
@@ -41,7 +32,6 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: RideReading } = await import('./RideReading')
 const { default: fr } = await import('../locales/fr/index.js')
-const { PASS_PLATFORMS } = await import('../domain/paywall')
 const { seedSummary, forgetSummary } = await import('../stores/profileSummary')
 
 const SENTENCE = {
@@ -49,7 +39,6 @@ const SENTENCE = {
   translation: 'I meet a friend at the station.', translation_lang: 'en',
   display_seconds: 0.4, grammar: 'で',
 }
-const FREE = { balance: 200, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 // A controlled input: React listens to its own value tracker, so the
 // prototype's setter is what makes a programmatic value an onChange.
@@ -84,11 +73,11 @@ function serve() {
 beforeEach(() => {
   apiJson.mockReset()
   track.mockReset()
-  creditsRef.current = FREE
+  warmToday.mockReset()
 })
 
 describe('RideReading', () => {
-  it('reads, writes, measures, rates, and the plate stamps the lesson on Enter', async () => {
+  it('reads, writes, measures, and the grade stamps the lesson and enters the station', async () => {
     serve()
     const onDone = vi.fn()
     const screen = await mount({ onDone })
@@ -121,42 +110,33 @@ describe('RideReading', () => {
 
     root.querySelector('.rating-bar__btn--q4').click()
     await settle(200)
-    // The plate: the six platforms from the map, the offer, the open
-    // line (nothing enforced), the one filled action. No note.
-    const plate = root.querySelector('.ride__plate')
-    expect(plate).toBeTruthy()
-    expect(plate.querySelectorAll('.ride__plate-item')).toHaveLength(Object.keys(PASS_PLATFORMS).length)
-    expect(plate.querySelector('[data-action="paywall-open"]').dataset.source).toBe('ride')
-    expect(plate.querySelector('.ride__done-note').textContent).toContain(fr.ridePlateOpen)
-    expect(document.querySelector('.guide-callout')).toBeNull()
-    // No result was posted anywhere: the ride is not a reading run.
-    expect(posts().some(([u]) => /reading/.test(String(u)))).toBe(false)
-
-    root.querySelector('[data-action="enter"]').click()
-    await settle(200)
+    // The grade is the way in: stamped, and on to the gate. No plate.
     const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
     expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
     expect(onDone).toHaveBeenCalledTimes(1)
     expect(root.querySelector('.gate-probe')).toBeTruthy()
+    // No result was posted anywhere: the ride is not a reading run.
+    expect(posts().some(([u]) => /reading/.test(String(u)))).toBe(false)
     const steps = track.mock.calls.filter(([n]) => n === 'ride_step').map(([, p]) => `${p.step}>${p.to}`)
-    expect(steps).toEqual(['read>type', 'type>measure', 'measure>pass'])
+    expect(steps).toEqual(['read>type', 'type>measure', 'measure>today'])
     expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: false, at: 'reading' })
   })
 
-  it('under enforcement the plate drops the open-for-now line', async () => {
-    serve()
-    creditsRef.current = { ...FREE, enforced: true }
-    const screen = await mount({ dryRun: true, sentence: { ...SENTENCE, display_seconds: 5 } })
-    await settle(100)
-    const root = screen.container
-    type(root.querySelector('input'), 'eki')
-    await settle(50)
-    root.querySelector('.stage__foot button').click()
-    await settle(100)
-    root.querySelector('.rating-bar__btn--q1').click()
-    await settle(100)
-    expect(root.querySelector('.ride__plate')).toBeTruthy()
-    expect(root.querySelector('.ride__done-note')).toBeNull()
+  // Today's answers are asked behind the ride's own (CLAUDE.md, "the
+  // boot asks for the screen first"): once the sentence is up, once.
+  it('warms Today once the sentence is up, and not before', async () => {
+    let serveSentence
+    apiJson.mockImplementation(url => (String(url).startsWith('/api/onboarding/ride?')
+      ? new Promise(resolve => { serveSentence = () => resolve({ cards: [], sentence: SENTENCE }) })
+      : Promise.resolve({})))
+    const screen = await mount()
+    await settle(150)
+    expect(warmToday).not.toHaveBeenCalled()
+    serveSentence()
+    await settle(150)
+    expect(screen.container.querySelector('.sentence')).toBeTruthy()
+    expect(warmToday).toHaveBeenCalledTimes(1)
+    expect(warmToday).toHaveBeenCalledWith(false)
   })
 
   // The first ride (App's rideDue): the entry behind it is the front
@@ -180,7 +160,7 @@ describe('RideReading', () => {
     expect(window.history.state?.guard).toBeFalsy()
   })
 
-  it('on the first ride, Enter takes the guard out before it leaves', async () => {
+  it('on the first ride, the grade takes the guard out before it leaves', async () => {
     serve()
     const screen = await mount({ first: true, sentence: { ...SENTENCE, display_seconds: 5 } })
     await settle(150)
@@ -189,10 +169,8 @@ describe('RideReading', () => {
     await settle(50)
     root.querySelector('.stage__foot button').click()
     await settle(100)
-    root.querySelector('.rating-bar__btn--q1').click()
-    await settle(100)
     expect(window.history.state?.guard).toBe(true)
-    root.querySelector('[data-action="enter"]').click()
+    root.querySelector('.rating-bar__btn--q1').click()
     await settle(200)
     expect(root.querySelector('.gate-probe')).toBeTruthy()
     expect(window.history.state?.guard).toBeFalsy()
@@ -226,25 +204,23 @@ describe('RideReading', () => {
   })
 
   // 入門 (plan 170): a learner with no kana was handed the map of the
-  // language instead of a sentence, so their ride is the plate alone --
-  // no sentence asked for -- and Enter stamps the lesson as it does at
-  // the reading's end.
-  it('is the plate alone for a learner who reads no kana', async () => {
+  // language instead of a sentence, so the cards were their lesson
+  // (RideRun goes on into the station). One boarded here all the same
+  // -- the cards done, then a reload -- is stamped and sent on at once,
+  // no sentence asked for.
+  it('sends a learner who reads no kana on to the station at once', async () => {
     serve()
     seedSummary({ kanaKnown: 'none' })
     try {
       const onDone = vi.fn()
       const screen = await mount({ onDone })
-      await settle(150)
-      const root = screen.container
-      expect(root.querySelector('.ride__plate')).toBeTruthy()
-      expect(root.querySelector('.sentence')).toBeNull()
-      expect(apiJson.mock.calls.some(([u]) => String(u).startsWith('/api/onboarding/ride?'))).toBe(false)
-      root.querySelector('[data-action="enter"]').click()
       await settle(200)
+      expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
+      expect(apiJson.mock.calls.some(([u]) => String(u).startsWith('/api/onboarding/ride?'))).toBe(false)
       const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
       expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
       expect(onDone).toHaveBeenCalledTimes(1)
+      expect(track.mock.calls.filter(([n]) => n === 'ride_step')).toEqual([])
     } finally {
       forgetSummary()
     }

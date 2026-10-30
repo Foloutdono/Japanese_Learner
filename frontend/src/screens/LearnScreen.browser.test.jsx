@@ -97,6 +97,9 @@ const { default: LearnScreen } = await import('./LearnScreen')
 // the profile summary (a module-level cache): seeded per test.
 const { seedSummary } = await import('../stores/profileSummary')
 const BASE = { username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }
+// The shelf's last answer is kept between visits (plan 292): each test
+// starts from none.
+const { forgetCachedJson } = await import('../lib/cachedJson')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
@@ -152,6 +155,7 @@ const where = () => document.querySelector('[data-where]')?.dataset.where ?? nul
 const page = () => document.querySelector('.lrn-page:not([inert])')
 
 beforeEach(() => {
+  forgetCachedJson()
   apiJson.mockReset()
   apiFetch.mockReset()
   beginDeparture.mockReset()

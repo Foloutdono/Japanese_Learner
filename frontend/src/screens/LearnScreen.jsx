@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { getSections, getAllSections } from '../config/tabs'
 import { apiJson } from '../lib/api'
+import { keepCachedJson, lastCachedJson } from '../lib/cachedJson'
+import { GATE_PATHS } from '../lib/warm'
 import { useTodaySummary } from '../stores/today'
 import { useBasics } from '../stores/basics'
 import { useStats } from '../stores/stats'
@@ -97,16 +99,21 @@ export default function LearnScreen({ session }) {
   const here = profile?.jlptLevel ?? null
   // The shelf: on the phone its decks folded under the lines, on the
   // desk every deck in the column beside them (plan 132). `shelfNonce`
-  // asks again after a Follow from the library's panel.
-  const [decks, setDecks] = useState(null)
+  // asks again after a Follow from the library's panel. The last answer
+  // kept (lib/warm.js asks it behind Today, plan 292) is drawn at once,
+  // and asked again behind it.
+  const [decks, setDecks] = useState(() => lastCachedJson(GATE_PATHS.decks, session)?.decks ?? null)
   const [shelfNonce, setShelfNonce] = useState(0)
   // The line whose sheet is raised, by its path (plan 291).
   const [open, setOpen] = useState(null)
 
   useEffect(() => {
     let live = true
-    apiJson('/api/decks', session)
-      .then(data => { if (live) setDecks(data?.decks ?? []) })
+    apiJson(GATE_PATHS.decks, session)
+      .then(data => {
+        keepCachedJson(GATE_PATHS.decks, session, data)
+        if (live) setDecks(data?.decks ?? [])
+      })
       .catch(() => { if (live) setDecks(d => d ?? []) })
     return () => { live = false }
   }, [session, shelfNonce])

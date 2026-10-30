@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **292**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **293**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -472,6 +472,28 @@ runtime purpose.
   `/api/today` put the day's queue ahead of the first ride's card. A
   store's fetch shares the one in flight (`stores/remote.js`,
   `profileSummary`'s `fetchIfStale`).
+- **A gate is drawn on its first frame (plan 292).** What Today and
+  the four other gates open on is asked before they are opened, by
+  `lib/warm.js`: Today by the first ride once its sentence is up
+  (`warmToday`), the others by Today once the day has come, once a
+  visit, two at a time when idle (`warmGates`), never ahead of the
+  screen in front of the learner. A gate reads a store, or asks for
+  itself, keeps the answer (`keepCachedJson`) and draws the last one
+  kept (`lastCachedJson`) while it asks again, never a spinner over an
+  answer in hand. A new gate, or a new request one opens on, goes in
+  `GATE_PATHS` and `warmGates` in the same change. A tab tap lights its
+  gate at once and moves a frame later (`TabBar`): the router renders
+  as a transition, but nothing paints until it commits. What a gate
+  builds at great cost is kept between visits, not rebuilt: Today's
+  print layers are put back as they stood, their loops paused while
+  away (`TodayPrint`). A page of cards taller than the screen leaves
+  the ones below the fold unlaid (`content-visibility: auto`), each
+  standing in at its own content height written from its tokens (the
+  Dictionary's `.dict-entry-card`), so nothing moves when one is drawn;
+  and React draws a screenful of them first, the rest a frame later as
+  unseen places of the same size (`useScreenfulFirst`).
+  Measure a switch on the production build at phone width with the
+  CPU slowed 4×, before and after.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
