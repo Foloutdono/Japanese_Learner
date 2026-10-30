@@ -1,4 +1,5 @@
-"""The French gloss is the card's, not the written form's (plan 107)."""
+"""The French gloss is the card's, not the written form's (plan 107);
+the Spanish reads the same way, English where it is not written (plan 291)."""
 from translations import fr_gloss, get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 
@@ -20,8 +21,19 @@ def test_the_form_is_the_fallback_and_kana_only_cards_read_by_kana():
     assert fr_gloss({"kanji": "山", "kana": "やま"}, fr) is None
 
 
-def test_get_meaning_falls_back_to_english_and_ignores_french_for_english():
+def test_get_meaning_falls_back_to_english_and_ignores_the_maps_for_english():
     entry = {"kanji": "山", "kana": "やま", "meaning": "mountain"}
+    glosses = {"fr": {"山": "montagne"}, "es": {"山::やま": "montaña"}}
     assert get_meaning(entry, "fr", {}) == "mountain"
-    assert get_meaning(entry, "en", {"山": "montagne"}) == "mountain"
-    assert get_meaning(entry, "fr", {"山": "montagne"}) == "montagne"
+    assert get_meaning(entry, "en", glosses) == "mountain"
+    assert get_meaning(entry, "fr", glosses) == "montagne"
+    assert get_meaning(entry, "es", glosses) == "montaña"
+
+
+def test_a_card_spanish_has_not_written_reads_english_never_blank():
+    # Plan 291: Spanish is written card by card; a card without its line
+    # (and a language with no map at all) reads the deck's English.
+    entry = {"kanji": "川", "kana": "かわ", "meaning": "river"}
+    assert get_meaning(entry, "es", {"es": {"山::やま": "montaña"}}) == "river"
+    assert get_meaning(entry, "es", {"fr": {"川": "rivière"}}) == "river"
+    assert get_meaning(entry, "de", {"fr": {"川": "rivière"}}) == "river"

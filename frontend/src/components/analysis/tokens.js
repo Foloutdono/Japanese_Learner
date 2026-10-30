@@ -97,7 +97,7 @@ export function lineState(tok, grammar) {
 export function wordGloss(tok, lang) {
   if (tok?.meaning) return tok.meaning
   const entry = tok?.vocab_match?.entry
-  if (entry) return (lang === 'fr' && entry.meaning_fr) || entry.meaning || ''
+  if (entry) return (lang !== 'en' && entry[`meaning_${lang}`]) || entry.meaning || ''
   const own = tok?.gloss
-  return (own && ((lang === 'fr' && own.fr) || own.en)) || ''
+  return (own && ((lang !== 'en' && own[lang]) || own.en)) || ''
 }

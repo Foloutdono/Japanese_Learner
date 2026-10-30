@@ -21,6 +21,7 @@ import {
 } from '../ui/Icons'
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
+import { intlLocale } from '../../lib/locale'
 
 // ── The list under the pass (plans 139, 182) ─────────────────────
 // Every row is one shape: a glyph for what it is, its name over what it
@@ -98,7 +99,7 @@ function useGroups(session) {
 // catch-up under way, the ceiling, or none -- the first that holds.
 function reviewsValue(review, t, lang) {
   if (review?.away) {
-    const from = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'long' })
+    const from = new Intl.DateTimeFormat(intlLocale(lang, 'en'), { day: 'numeric', month: 'long' })
       .format(new Date(`${review.away.from}T12:00:00`))
     return t.rvRowAway(from)
   }

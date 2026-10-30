@@ -19,9 +19,10 @@ export function grammarGloss(point, lang) {
 }
 
 // The formation line the same way: the analysis carries the English
-// `structure` and, since plan 215, the French `structure_fr` beside it
-// (study/analysis._grammar_entries) -- a stored breakdown from before
-// that has the English alone, and reads as it did.
+// `structure` and, since plan 215, the French `structure_fr` beside it,
+// since plan 291 the Spanish `structure_es` (study/analysis._grammar_entries)
+// -- a stored breakdown from before that has the English alone, and reads
+// as it did.
 export function grammarStructure(point, lang) {
-  return (lang === 'fr' && point?.structure_fr) || point?.structure || ''
+  return (lang !== 'en' && point?.[`structure_${lang}`]) || point?.structure || ''
 }

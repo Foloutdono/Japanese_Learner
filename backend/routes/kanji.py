@@ -8,7 +8,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
-from content.kanji_meanings import KANJI_FR
+from translations.course import KANJI_GLOSSES
 from study.modes import (
     KANJI, GRADED_FOR_SOURCE, INDICE_CHOICES, RADICAL, READINGS,
     Mode, eligible_for, require_mode, resolve_for_source,
@@ -78,7 +78,7 @@ def _stage_demotion(prev_stage: str | None, new_stage: str | None) -> str | None
         return None
     return STAGE_DEMOTIONS.get((prev_stage, new_stage))
 
-FR_MAP = KANJI_FR
+GLOSSES = KANJI_GLOSSES
 MAX_BATCH = 25
 
 
@@ -125,7 +125,7 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode,
     the `QCM_FLASHCARD_MODES[mode]` lookup that would KeyError on any key
     outside that dict.
     """
-    meaning = get_meaning(entry, lang, FR_MAP)
+    meaning = get_meaning(entry, lang, GLOSSES)
     payload = {
         "card_id":      raw_id,
         "mode":         m.key,
@@ -156,11 +156,11 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode,
         # learner can ask for them mid-card and a second round trip at
         # that moment would stall the card.
         choice_entries = pick_distractors(
-            kanji_list, lambda k: get_meaning(k, lang, FR_MAP), meaning,
+            kanji_list, lambda k: get_meaning(k, lang, GLOSSES), meaning,
         ) + [entry]
         random.shuffle(choice_entries)
         payload["hints"][INDICE_CHOICES] = [
-            {"kanji": c.get("kanji", ""), "meaning": get_meaning(c, lang, FR_MAP)}
+            {"kanji": c.get("kanji", ""), "meaning": get_meaning(c, lang, GLOSSES)}
             for c in choice_entries
         ]
 
@@ -416,7 +416,7 @@ def get_kanji_review_cards(level: str | None = None, lang: str = "fr", radical: 
             "kanji":        entry.get("kanji", ""),
             "kana":         entry.get("kana", ""),
             "reading_shares": course_shares(entry.get("kanji", "")),
-            "meaning":      get_meaning(entry, lang, FR_MAP),
+            "meaning":      get_meaning(entry, lang, GLOSSES),
             "stroke_count": entry.get("stroke_count", ""),
             "stage":        stage,
         })
@@ -588,7 +588,7 @@ def get_kanji_radical(number: int, lang: str = "fr", user_id: str = Depends(get_
             "card_id":      raw_id,
             "kanji":        entry["kanji"],
             "kana":         entry.get("kana", ""),
-            "meaning":      get_meaning(entry, lang, FR_MAP),
+            "meaning":      get_meaning(entry, lang, GLOSSES),
             "stroke_count": row["stroke_count"] if row else None,
             "stage":        stages[raw_id],
         })

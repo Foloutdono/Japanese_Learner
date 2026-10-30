@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **291**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **292**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -402,6 +402,22 @@ runtime purpose.
   JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
   (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
+- **A Spanish learner reads Spanish where it is written, English where it
+  is not yet (plan 291, ADR 0023).** Never French, never blank. The
+  interface is whole: a screen string is written in `es` too
+  (`locales.test.js`). The decks and the grammar points' glosses are whole:
+  a deck card gains its line in `datas/vocab/vocab_es.json` (keyed
+  `"{kanji}::{kana}"`, moved with the card on a rename), a kanji its
+  Spanish (`kanji_meanings_es.json`, then `build_kanji_db --spanish-only`),
+  a grammar point its `meaning.es` and `structure_es`, in the same change
+  (`tests/test_spanish.py`). Everything else (lessons, drills, the banks,
+  example sentences, the pool) gains Spanish a wave at a time, optional
+  where it is added: `python -m scripts.spanish_coverage` counts what is
+  left. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
+  KANJI_GLOSSES)` (`translations/course.py`), a date or a number is
+  written in `intlLocale(lang)` (`lib/locale.js`): never a
+  `lang === 'fr' ? … : …` that sends a third language to English or French
+  by accident. Neutral Spanish, tú, «…» quotes.
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
@@ -529,7 +545,8 @@ runtime purpose.
 
 - **The interface language is the account's, and only the learner moves it.**
   A choice made in Réglages › Affichage is kept in `user_profiles.ui_lang`
-  (NULL = never chosen: French on a French device, English otherwise) as well as in
+  (NULL = never chosen: French on a French device, Spanish on a Spanish one,
+  English otherwise) as well as in
   localStorage `lang`, which stays because the first paint reads it
   synchronously. `lib/langChoice.js` writes both (`rememberLang`) and, at
   boot, copies the account's answer onto the device (`syncLang`, from
@@ -850,6 +867,8 @@ line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 python -m scripts.build_jmdict_fr --export   # -> datas/vocab/fr_source/
 python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
 python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
+python -m scripts.build_kanji_db --spanish-only # kanji_meanings_es.json into kanji.sqlite3 (plan 291)
+python -m scripts.spanish_coverage              # what reads Spanish, and what still reads English
 ```
 
 Two things are worth knowing before reaching for any of them:

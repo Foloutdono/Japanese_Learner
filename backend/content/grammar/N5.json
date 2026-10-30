@@ -3,9 +3,11 @@
     "pattern": "です／だ",
     "structure": "Noun/な-adj + です・だ",
     "structure_fr": "Nom/adj. en な + です・だ",
+    "structure_es": "Sustantivo/adj. な + です・だ",
     "meaning": {
       "en": "the copula: is/am/are",
-      "fr": "la copule : être"
+      "fr": "la copule : être",
+      "es": "la cópula: ser"
     },
     "register": "polite",
     "steps": [
@@ -503,9 +505,11 @@
     "pattern": "は",
     "structure": "topic + は",
     "structure_fr": "thème + は",
+    "structure_es": "tema + は",
     "meaning": {
       "en": "marks the sentence topic",
-      "fr": "marque le thème de la phrase"
+      "fr": "marque le thème de la phrase",
+      "es": "marca el tema de la frase"
     },
     "steps": [
       {
@@ -971,9 +975,11 @@
     "pattern": "が",
     "structure": "subject + が",
     "structure_fr": "sujet + が",
+    "structure_es": "sujeto + が",
     "meaning": {
       "en": "marks the grammatical subject",
-      "fr": "marque le sujet grammatical"
+      "fr": "marque le sujet grammatical",
+      "es": "marca el sujeto gramatical"
     },
     "steps": [
       {
@@ -1325,9 +1331,11 @@
     "pattern": "を",
     "structure": "object + を",
     "structure_fr": "complément d'objet + を",
+    "structure_es": "objeto directo + を",
     "meaning": {
       "en": "marks the direct object",
-      "fr": "marque le complément d'objet direct"
+      "fr": "marque le complément d'objet direct",
+      "es": "marca el complemento directo"
     },
     "steps": [
       {
@@ -1634,9 +1642,11 @@
     "pattern": "に",
     "structure": "noun + に",
     "structure_fr": "nom + に",
+    "structure_es": "sustantivo + に",
     "meaning": {
       "en": "time, destination, or indirect object",
-      "fr": "le moment, la destination ou le destinataire"
+      "fr": "le moment, la destination ou le destinataire",
+      "es": "el momento, el destino o el complemento indirecto"
     },
     "steps": [
       {
@@ -2000,9 +2010,11 @@
     "pattern": "で",
     "structure": "noun + で",
     "structure_fr": "nom + で",
+    "structure_es": "sustantivo + で",
     "meaning": {
       "en": "location of an action, or means/method",
-      "fr": "le lieu d'une action, ou le moyen"
+      "fr": "le lieu d'une action, ou le moyen",
+      "es": "el lugar de una acción, o el medio/método"
     },
     "steps": [
       {
@@ -2354,9 +2366,11 @@
     "structure": "noun + と + noun ／ 「quotation」 + と + 言う・思う",
     "structure_reading": "noun + と + noun ／ 「quotation」 + と + いう・おもう",
     "structure_fr": "nom + と + nom ／ 「citation」 + と + 言う・思う",
+    "structure_es": "sustantivo + と + sustantivo ／ 「cita」 + と + 言う・思う",
     "meaning": {
       "en": "and (nouns); with, together with; marks what is said or thought",
-      "fr": "et (entre noms) ; avec, en compagnie de ; introduit ce qui est dit ou pensé"
+      "fr": "et (entre noms) ; avec, en compagnie de ; introduit ce qui est dit ou pensé",
+      "es": "y (entre sustantivos); con, junto con; marca lo que se dice o se piensa"
     },
     "steps": [
       {
@@ -2766,9 +2780,11 @@
     "pattern": "も",
     "structure": "noun + も, replacing は or が",
     "structure_fr": "nom + も, à la place de は ou が",
+    "structure_es": "sustantivo + も, en lugar de は o が",
     "meaning": {
       "en": "also, too",
-      "fr": "aussi, également"
+      "fr": "aussi, également",
+      "es": "también"
     },
     "steps": [
       {
@@ -3178,9 +3194,11 @@
     "pattern": "の",
     "structure": "noun + の + noun",
     "structure_fr": "nom + の + nom",
+    "structure_es": "sustantivo + の + sustantivo",
     "meaning": {
       "en": "possessive, or links two nouns",
-      "fr": "possessif, ou relie deux noms"
+      "fr": "possessif, ou relie deux noms",
+      "es": "posesivo, o une dos sustantivos"
     },
     "steps": [
       {
@@ -3619,9 +3637,11 @@
     "pattern": "から〜まで",
     "structure": "noun + から〜noun + まで",
     "structure_fr": "nom + から〜nom + まで",
+    "structure_es": "sustantivo + から〜sustantivo + まで",
     "meaning": {
       "en": "from ... to ...",
-      "fr": "de... à..., depuis... jusqu'à..."
+      "fr": "de... à..., depuis... jusqu'à...",
+      "es": "desde… hasta…"
     },
     "steps": [
       {
@@ -3928,9 +3948,11 @@
     "pattern": "〜ます／〜ません",
     "structure": "verb stem + ます・ません",
     "structure_fr": "radical verbal + ます・ません",
+    "structure_es": "raíz verbal + ます・ません",
     "meaning": {
       "en": "polite present/future, affirmative and negative",
-      "fr": "présent/futur poli, affirmatif et négatif"
+      "fr": "présent/futur poli, affirmatif et négatif",
+      "es": "presente/futuro cortés, afirmativo y negativo"
     },
     "register": "polite",
     "steps": [
@@ -4298,9 +4320,11 @@
     "pattern": "〜ました／〜ませんでした",
     "structure": "verb stem + ました・ませんでした",
     "structure_fr": "radical verbal + ました・ませんでした",
+    "structure_es": "raíz verbal + ました・ませんでした",
     "meaning": {
       "en": "polite past, affirmative and negative",
-      "fr": "passé poli, affirmatif et négatif"
+      "fr": "passé poli, affirmatif et négatif",
+      "es": "pasado cortés, afirmativo y negativo"
     },
     "register": "polite",
     "steps": [
@@ -4618,9 +4642,11 @@
     "reading": "ないけい 〜ない",
     "structure": "う-verb あ-row ・ る-verb stem + ない",
     "structure_fr": "verbe en う au son en あ ・ radical d'un verbe en る + ない",
+    "structure_es": "verbo en う en la fila あ ・ raíz de verbo en る + ない",
     "meaning": {
       "en": "the plain negative: don't, doesn't",
-      "fr": "la négation neutre : ne… pas"
+      "fr": "la négation neutre : ne… pas",
+      "es": "la negación llana: no (hago, hace…)"
     },
     "register": "casual",
     "steps": [
@@ -5182,9 +5208,11 @@
     "reading": "たけい 〜た",
     "structure": "verb て-form with た for て (…た・だ)",
     "structure_fr": "verbe forme en て avec た à la place de て (…た・だ)",
+    "structure_es": "verbo en forma て con た en lugar de て (…た・だ)",
     "meaning": {
       "en": "the plain past: did",
-      "fr": "le passé neutre : j'ai fait"
+      "fr": "le passé neutre : j'ai fait",
+      "es": "el pasado llano: hice, hizo"
     },
     "register": "casual",
     "steps": [
@@ -5692,9 +5720,11 @@
     "pattern": "〜たいです",
     "structure": "verb stem + たいです",
     "structure_fr": "radical verbal + たいです",
+    "structure_es": "raíz verbal + たいです",
     "meaning": {
       "en": "want to do something",
-      "fr": "vouloir faire quelque chose"
+      "fr": "vouloir faire quelque chose",
+      "es": "querer hacer algo"
     },
     "register": "polite",
     "steps": [
@@ -6084,9 +6114,11 @@
     "pattern": "〜てください",
     "structure": "verb て-form + ください",
     "structure_fr": "verbe forme en て + ください",
+    "structure_es": "verbo en forma て + ください",
     "meaning": {
       "en": "please do",
-      "fr": "faites..., s'il vous plaît"
+      "fr": "faites..., s'il vous plaît",
+      "es": "por favor, haz…"
     },
     "register": "polite",
     "steps": [
@@ -6454,9 +6486,11 @@
     "pattern": "〜ています",
     "structure": "verb て-form + います",
     "structure_fr": "verbe forme en て + います",
+    "structure_es": "verbo en forma て + います",
     "meaning": {
       "en": "ongoing action, or a resulting state",
-      "fr": "action en cours, ou état qui en résulte"
+      "fr": "action en cours, ou état qui en résulte",
+      "es": "acción en curso, o estado resultante"
     },
     "register": "polite",
     "steps": [
@@ -6810,9 +6844,11 @@
     "pattern": "〜てもいいです",
     "structure": "verb て-form + もいいです",
     "structure_fr": "verbe forme en て + もいいです",
+    "structure_es": "verbo en forma て + もいいです",
     "meaning": {
       "en": "it's okay to / may I",
-      "fr": "il est permis de / puis-je"
+      "fr": "il est permis de / puis-je",
+      "es": "se puede / ¿puedo…?"
     },
     "register": "polite",
     "steps": [
@@ -7164,9 +7200,11 @@
     "pattern": "〜てはいけません",
     "structure": "verb て-form + はいけません",
     "structure_fr": "verbe forme en て + はいけません",
+    "structure_es": "verbo en forma て + はいけません",
     "meaning": {
       "en": "must not do",
-      "fr": "il est interdit de"
+      "fr": "il est interdit de",
+      "es": "no se debe hacer"
     },
     "register": "polite",
     "steps": [
@@ -7484,9 +7522,11 @@
     "pattern": "〜ことができます",
     "structure": "verb dictionary form + ことができます",
     "structure_fr": "verbe forme du dictionnaire + ことができます",
+    "structure_es": "verbo en forma de diccionario + ことができます",
     "meaning": {
       "en": "can do, is able to",
-      "fr": "pouvoir, être capable de"
+      "fr": "pouvoir, être capable de",
+      "es": "poder hacer, ser capaz de"
     },
     "register": "polite",
     "steps": [
@@ -7838,9 +7878,11 @@
     "pattern": "〜ないでください",
     "structure": "verb ない-form + でください",
     "structure_fr": "verbe forme en ない + でください",
+    "structure_es": "verbo en forma ない + でください",
     "meaning": {
       "en": "please don't do",
-      "fr": "ne faites pas..., s'il vous plaît"
+      "fr": "ne faites pas..., s'il vous plaît",
+      "es": "por favor, no hagas…"
     },
     "register": "polite",
     "steps": [
@@ -8192,9 +8234,11 @@
     "pattern": "〜なければなりません",
     "structure": "verb ない-form (drop い) + ければなりません",
     "structure_fr": "verbe forme en ない (sans い) + ければなりません",
+    "structure_es": "verbo en forma ない (sin い) + ければなりません",
     "meaning": {
       "en": "must do",
-      "fr": "devoir, il faut"
+      "fr": "devoir, il faut",
+      "es": "tener que, deber"
     },
     "register": "polite",
     "steps": [
@@ -8571,9 +8615,11 @@
     "pattern": "へ",
     "structure": "noun + へ",
     "structure_fr": "nom + へ",
+    "structure_es": "sustantivo + へ",
     "meaning": {
       "en": "direction of movement: to, toward",
-      "fr": "direction d'un déplacement : vers, à"
+      "fr": "direction d'un déplacement : vers, à",
+      "es": "dirección del movimiento: a, hacia"
     },
     "steps": [
       {
@@ -8968,9 +9014,11 @@
     "pattern": "や",
     "structure": "noun + や + noun",
     "structure_fr": "nom + や + nom",
+    "structure_es": "sustantivo + や + sustantivo",
     "meaning": {
       "en": "and — an open-ended list, unlike と",
-      "fr": "et... (liste ouverte, à la différence de と)"
+      "fr": "et... (liste ouverte, à la différence de と)",
+      "es": "y — una lista abierta, a diferencia de と"
     },
     "steps": [
       {
@@ -9341,9 +9389,11 @@
     "pattern": "か",
     "structure": "sentence + か",
     "structure_fr": "phrase + か",
+    "structure_es": "frase + か",
     "meaning": {
       "en": "turns a statement into a question; also 'or' between nouns",
-      "fr": "transforme une phrase en question ; aussi « ou » entre noms"
+      "fr": "transforme une phrase en question ; aussi « ou » entre noms",
+      "es": "convierte una afirmación en pregunta; también «o» entre sustantivos"
     },
     "steps": [
       {
@@ -9659,9 +9709,11 @@
     "pattern": "ね",
     "structure": "sentence + ね",
     "structure_fr": "phrase + ね",
+    "structure_es": "frase + ね",
     "meaning": {
       "en": "seeks agreement: right?, isn't it?",
-      "fr": "cherche l'accord : n'est-ce pas ?"
+      "fr": "cherche l'accord : n'est-ce pas ?",
+      "es": "busca el acuerdo: ¿verdad?, ¿no?"
     },
     "steps": [
       {
@@ -10045,9 +10097,11 @@
     "pattern": "よ",
     "structure": "sentence + よ",
     "structure_fr": "phrase + よ",
+    "structure_es": "frase + よ",
     "meaning": {
       "en": "asserts something the listener may not know yet",
-      "fr": "affirme quelque chose que l'autre ignore peut-être"
+      "fr": "affirme quelque chose que l'autre ignore peut-être",
+      "es": "afirma algo que quien escucha quizá aún no sabe"
     },
     "steps": [
       {
@@ -10446,9 +10500,11 @@
     "pattern": "〜から",
     "structure": "plain/polite form + から",
     "structure_fr": "forme neutre/polie + から",
+    "structure_es": "forma llana/cortés + から",
     "meaning": {
       "en": "because, since (gives the reason first)",
-      "fr": "parce que, puisque (la raison d'abord)"
+      "fr": "parce que, puisque (la raison d'abord)",
+      "es": "porque, ya que (da primero la razón)"
     },
     "register": "neutral",
     "steps": [
@@ -10799,9 +10855,11 @@
     "pattern": "〜ませんか",
     "structure": "verb stem + ませんか",
     "structure_fr": "radical verbal + ませんか",
+    "structure_es": "raíz verbal + ませんか",
     "meaning": {
       "en": "won't you? — an invitation",
-      "fr": "voulez-vous... ? (une invitation)"
+      "fr": "voulez-vous... ? (une invitation)",
+      "es": "¿no quieres…? — una invitación"
     },
     "register": "polite",
     "steps": [
@@ -11110,9 +11168,11 @@
     "pattern": "〜ましょう",
     "structure": "verb stem + ましょう",
     "structure_fr": "radical verbal + ましょう",
+    "structure_es": "raíz verbal + ましょう",
     "meaning": {
       "en": "let's do",
-      "fr": "faisons..., allons-y"
+      "fr": "faisons..., allons-y",
+      "es": "hagamos…, vamos a…"
     },
     "register": "polite",
     "steps": [
@@ -11465,9 +11525,11 @@
     "pattern": "〜ましょうか",
     "structure": "verb stem + ましょうか",
     "structure_fr": "radical verbal + ましょうか",
+    "structure_es": "raíz verbal + ましょうか",
     "meaning": {
       "en": "shall I?, shall we?",
-      "fr": "voulez-vous que je... ? et si nous... ?"
+      "fr": "voulez-vous que je... ? et si nous... ?",
+      "es": "¿lo hago?, ¿lo hacemos?"
     },
     "register": "polite",
     "steps": [
@@ -11824,9 +11886,11 @@
     "pattern": "〜があります／います",
     "structure": "noun + が + あります・います",
     "structure_fr": "nom + が + あります・います",
+    "structure_es": "sustantivo + が + あります・います",
     "meaning": {
       "en": "there is/are — あります for things, います for the living",
-      "fr": "il y a : あります pour les choses, います pour les êtres vivants"
+      "fr": "il y a : あります pour les choses, います pour les êtres vivants",
+      "es": "hay — あります para las cosas, います para los seres vivos"
     },
     "register": "polite",
     "steps": [
@@ -12207,9 +12271,11 @@
     "reading": "いけいようし／なけいようし",
     "structure": "い-adj + noun / な-adj + な + noun",
     "structure_fr": "adj. en い + nom / adj. en な + な + nom",
+    "structure_es": "adj. い + sustantivo / adj. な + な + sustantivo",
     "meaning": {
       "en": "the two adjective classes, and how each attaches to a noun",
-      "fr": "les deux classes d'adjectifs, et leur accroche au nom"
+      "fr": "les deux classes d'adjectifs, et leur accroche au nom",
+      "es": "las dos clases de adjetivos, y cómo se une cada una a un sustantivo"
     },
     "steps": [
       {
@@ -12673,9 +12739,11 @@
     "pattern": "〜くて／〜で",
     "structure": "い-adj (drop い) + くて / な-adj + で",
     "structure_fr": "adj. en い (sans い) + くて / adj. en な + で",
+    "structure_es": "adj. い (sin い) + くて / adj. な + で",
     "meaning": {
       "en": "joins two adjectives or clauses: and",
-      "fr": "relie deux adjectifs ou propositions : et"
+      "fr": "relie deux adjectifs ou propositions : et",
+      "es": "une dos adjetivos u oraciones: y"
     },
     "steps": [
       {
@@ -13065,9 +13133,11 @@
     "pattern": "〜くなる／〜になる",
     "structure": "い-adj (drop い) + くなる / noun・な-adj + になる",
     "structure_fr": "adj. en い (sans い) + くなる / nom・adj. en な + になる",
+    "structure_es": "adj. い (sin い) + くなる / sustantivo・adj. な + になる",
     "meaning": {
       "en": "become, turn into",
-      "fr": "devenir"
+      "fr": "devenir",
+      "es": "volverse, llegar a ser"
     },
     "steps": [
       {
@@ -13452,9 +13522,11 @@
     "pattern": "〜より〜のほうが",
     "structure": "noun + より + noun + のほうが + adjective",
     "structure_fr": "nom + より + nom + のほうが + adjectif",
+    "structure_es": "sustantivo + より + sustantivo + のほうが + adjetivo",
     "meaning": {
       "en": "comparison: the second one is more ...",
-      "fr": "comparaison : le second est plus..."
+      "fr": "comparaison : le second est plus...",
+      "es": "comparación: el segundo es más…"
     },
     "steps": [
       {
@@ -13839,9 +13911,11 @@
     "pattern": "〜で〜がいちばん",
     "structure": "group + で + noun + が + いちばん + adjective",
     "structure_fr": "groupe + で + nom + が + いちばん + adjectif",
+    "structure_es": "grupo + で + sustantivo + が + いちばん + adjetivo",
     "meaning": {
       "en": "the most ... within a group",
-      "fr": "le plus... d'un ensemble"
+      "fr": "le plus... d'un ensemble",
+      "es": "el más… dentro de un grupo"
     },
     "steps": [
       {
@@ -14188,9 +14262,11 @@
     "pattern": "〜ほうがいいです",
     "structure": "verb た-form/ない-form + ほうがいいです",
     "structure_fr": "verbe forme en た/forme en ない + ほうがいいです",
+    "structure_es": "verbo en forma た/forma ない + ほうがいいです",
     "meaning": {
       "en": "had better, it would be better to",
-      "fr": "il vaut mieux, tu ferais mieux de"
+      "fr": "il vaut mieux, tu ferais mieux de",
+      "es": "más vale, sería mejor"
     },
     "register": "polite",
     "steps": [
@@ -14508,9 +14584,11 @@
     "pattern": "〜なくてもいいです",
     "structure": "verb ない-form (drop い) + くてもいいです",
     "structure_fr": "verbe forme en ない (sans い) + くてもいいです",
+    "structure_es": "verbo en forma ない (sin い) + くてもいいです",
     "meaning": {
       "en": "don't have to, need not",
-      "fr": "ne pas être obligé de"
+      "fr": "ne pas être obligé de",
+      "es": "no hace falta, no es necesario"
     },
     "register": "polite",
     "steps": [
@@ -14862,9 +14940,11 @@
     "pattern": "〜てから",
     "structure": "verb て-form + から",
     "structure_fr": "verbe forme en て + から",
+    "structure_es": "verbo en forma て + から",
     "meaning": {
       "en": "after doing, and then",
-      "fr": "après avoir fait, puis"
+      "fr": "après avoir fait, puis",
+      "es": "después de hacer, y luego"
     },
     "register": "neutral",
     "steps": [
@@ -15216,9 +15296,11 @@
     "pattern": "〜まえに",
     "structure": "verb dictionary form / noun + の + まえに",
     "structure_fr": "verbe forme du dictionnaire / nom + の + まえに",
+    "structure_es": "verbo en forma de diccionario / sustantivo + の + まえに",
     "meaning": {
       "en": "before doing",
-      "fr": "avant de faire"
+      "fr": "avant de faire",
+      "es": "antes de hacer"
     },
     "register": "neutral",
     "steps": [
@@ -15526,9 +15608,11 @@
     "pattern": "〜あとで",
     "structure": "verb た-form / noun + の + あとで",
     "structure_fr": "verbe forme en た / nom + の + あとで",
+    "structure_es": "verbo en forma た / sustantivo + の + あとで",
     "meaning": {
       "en": "after doing",
-      "fr": "après avoir fait"
+      "fr": "après avoir fait",
+      "es": "después de hacer"
     },
     "register": "neutral",
     "steps": [
@@ -15842,9 +15926,11 @@
     "pattern": "〜とき",
     "structure": "plain form / noun + の + とき",
     "structure_fr": "forme neutre / nom + の + とき",
+    "structure_es": "forma llana / sustantivo + の + とき",
     "meaning": {
       "en": "when, at the time of",
-      "fr": "quand, au moment de"
+      "fr": "quand, au moment de",
+      "es": "cuando, en el momento de"
     },
     "register": "neutral",
     "steps": [
@@ -16158,9 +16244,11 @@
     "structure": "Noun + が好きです",
     "structure_reading": "Noun + がすきです",
     "structure_fr": "Nom + が好きです",
+    "structure_es": "Sustantivo + が好きです",
     "meaning": {
       "en": "like something",
-      "fr": "aimer quelque chose"
+      "fr": "aimer quelque chose",
+      "es": "gustar algo"
     },
     "register": "polite",
     "steps": [
@@ -16570,9 +16658,11 @@
     "pattern": "〜がきらいです",
     "structure": "Noun + がきらいです",
     "structure_fr": "Nom + がきらいです",
+    "structure_es": "Sustantivo + がきらいです",
     "meaning": {
       "en": "dislike something",
-      "fr": "ne pas aimer quelque chose"
+      "fr": "ne pas aimer quelque chose",
+      "es": "no gustar algo, detestar"
     },
     "register": "polite",
     "steps": [
@@ -16926,9 +17016,11 @@
     "structure": "Noun + が上手です・が下手です",
     "structure_reading": "Noun + がじょうずです・がへたです",
     "structure_fr": "Nom + が上手です・が下手です",
+    "structure_es": "Sustantivo + が上手です・が下手です",
     "meaning": {
       "en": "be skilled at / poor at",
-      "fr": "être doué / ne pas être doué pour"
+      "fr": "être doué / ne pas être doué pour",
+      "es": "ser hábil / torpe en algo"
     },
     "register": "polite",
     "steps": [
@@ -17270,9 +17362,11 @@
     "pattern": "〜がほしいです",
     "structure": "Noun + がほしいです",
     "structure_fr": "Nom + がほしいです",
+    "structure_es": "Sustantivo + がほしいです",
     "meaning": {
       "en": "want to have a thing",
-      "fr": "vouloir avoir une chose"
+      "fr": "vouloir avoir une chose",
+      "es": "querer tener una cosa"
     },
     "register": "polite",
     "steps": [
@@ -17624,9 +17718,11 @@
     "pattern": "〜でしょう",
     "structure": "plain form + でしょう",
     "structure_fr": "forme neutre + でしょう",
+    "structure_es": "forma llana + でしょう",
     "meaning": {
       "en": "probably, I expect",
-      "fr": "probablement, je suppose"
+      "fr": "probablement, je suppose",
+      "es": "probablemente, supongo"
     },
     "register": "polite",
     "steps": [
@@ -17945,9 +18041,11 @@
     "pattern": "まだ〜ていません",
     "structure": "まだ + verb て-form + いません",
     "structure_fr": "まだ + verbe forme en て + いません",
+    "structure_es": "まだ + verbo en forma て + いません",
     "meaning": {
       "en": "has not done it yet",
-      "fr": "ne pas encore avoir fait"
+      "fr": "ne pas encore avoir fait",
+      "es": "todavía no lo ha hecho"
     },
     "register": "polite",
     "steps": [
@@ -18299,9 +18397,11 @@
     "pattern": "もう〜ました",
     "structure": "もう + verb stem + ました",
     "structure_fr": "もう + radical verbal + ました",
+    "structure_es": "もう + raíz verbal + ました",
     "meaning": {
       "en": "has already done it",
-      "fr": "avoir déjà fait"
+      "fr": "avoir déjà fait",
+      "es": "ya lo ha hecho"
     },
     "register": "polite",
     "steps": [
@@ -18582,9 +18682,11 @@
     "pattern": "〜くらい／〜ぐらい",
     "structure": "quantity + くらい・ぐらい",
     "structure_fr": "quantité + くらい・ぐらい",
+    "structure_es": "cantidad + くらい・ぐらい",
     "meaning": {
       "en": "roughly that much",
-      "fr": "environ, à peu près"
+      "fr": "environ, à peu près",
+      "es": "más o menos esa cantidad"
     },
     "register": "neutral",
     "steps": [
@@ -18902,9 +19004,11 @@
     "pattern": "〜ごろ",
     "structure": "point in time + ごろ",
     "structure_fr": "moment + ごろ",
+    "structure_es": "momento + ごろ",
     "meaning": {
       "en": "at about that time",
-      "fr": "vers (une heure, un moment)"
+      "fr": "vers (une heure, un moment)",
+      "es": "hacia ese momento, a eso de"
     },
     "register": "neutral",
     "steps": [
@@ -19226,9 +19330,11 @@
     "pattern": "〜ずつ",
     "structure": "quantity + ずつ",
     "structure_fr": "quantité + ずつ",
+    "structure_es": "cantidad + ずつ",
     "meaning": {
       "en": "that many apiece",
-      "fr": "chacun, à raison de"
+      "fr": "chacun, à raison de",
+      "es": "esa cantidad cada uno, de… en…"
     },
     "register": "neutral",
     "steps": [
@@ -19556,9 +19662,11 @@
     "pattern": "〜だけ",
     "structure": "noun/quantity + だけ",
     "structure_fr": "nom/quantité + だけ",
+    "structure_es": "sustantivo/cantidad + だけ",
     "meaning": {
       "en": "nothing more than that",
-      "fr": "seulement, rien de plus"
+      "fr": "seulement, rien de plus",
+      "es": "nada más que eso, solo"
     },
     "register": "neutral",
     "steps": [
@@ -19910,9 +20018,11 @@
     "pattern": "〜など",
     "structure": "noun + など",
     "structure_fr": "nom + など",
+    "structure_es": "sustantivo + など",
     "meaning": {
       "en": "and things of that sort",
-      "fr": "et autres choses du même genre"
+      "fr": "et autres choses du même genre",
+      "es": "y cosas por el estilo"
     },
     "register": "neutral",
     "steps": [
@@ -20226,9 +20336,11 @@
     "pattern": "〜でも",
     "structure": "noun + でも",
     "structure_fr": "nom + でも",
+    "structure_es": "sustantivo + でも",
     "meaning": {
       "en": "or something along those lines",
-      "fr": "ou quelque chose comme ça"
+      "fr": "ou quelque chose comme ça",
+      "es": "o algo por el estilo"
     },
     "register": "neutral",
     "steps": [
@@ -20549,9 +20661,11 @@
     "structure": "plain form + と思います",
     "structure_reading": "plain form + とおもいます",
     "structure_fr": "forme neutre + と思います",
+    "structure_es": "forma llana + と思います",
     "meaning": {
       "en": "I think that",
-      "fr": "je pense que"
+      "fr": "je pense que",
+      "es": "creo que"
     },
     "register": "polite",
     "steps": [
@@ -20937,9 +21051,11 @@
     "structure": "quoted words + と言います",
     "structure_reading": "quoted words + といいます",
     "structure_fr": "paroles citées + と言います",
+    "structure_es": "palabras citadas + と言います",
     "meaning": {
       "en": "says that",
-      "fr": "dire que"
+      "fr": "dire que",
+      "es": "dice que"
     },
     "register": "polite",
     "steps": [
@@ -21251,9 +21367,11 @@
     "structure": "verb dictionary form + のが好きです",
     "structure_reading": "verb dictionary form + のがすきです",
     "structure_fr": "verbe forme du dictionnaire + のが好きです",
+    "structure_es": "verbo en forma de diccionario + のが好きです",
     "meaning": {
       "en": "enjoy doing something",
-      "fr": "aimer faire quelque chose"
+      "fr": "aimer faire quelque chose",
+      "es": "disfrutar haciendo algo"
     },
     "register": "polite",
     "steps": [
@@ -21605,9 +21723,11 @@
     "pattern": "〜ないで",
     "structure": "verb ない-form + で",
     "structure_fr": "verbe forme en ない + で",
+    "structure_es": "verbo en forma ない + で",
     "meaning": {
       "en": "without doing it",
-      "fr": "sans faire"
+      "fr": "sans faire",
+      "es": "sin hacerlo"
     },
     "register": "neutral",
     "steps": [
@@ -21959,9 +22079,11 @@
     "pattern": "〜をください",
     "structure": "Noun + をください",
     "structure_fr": "Nom + をください",
+    "structure_es": "Sustantivo + をください",
     "meaning": {
       "en": "asking to be given something",
-      "fr": "demander qu'on vous donne quelque chose"
+      "fr": "demander qu'on vous donne quelque chose",
+      "es": "pedir que te den algo"
     },
     "register": "polite",
     "steps": [
@@ -22333,9 +22455,11 @@
     "structure": "Noun + が分かります",
     "structure_reading": "Noun + がわかります",
     "structure_fr": "Nom + が分かります",
+    "structure_es": "Sustantivo + が分かります",
     "meaning": {
       "en": "grasp or understand something",
-      "fr": "comprendre quelque chose"
+      "fr": "comprendre quelque chose",
+      "es": "captar o entender algo"
     },
     "register": "polite",
     "steps": [
@@ -22687,9 +22811,11 @@
     "pattern": "〜ができます",
     "structure": "Noun + ができます",
     "structure_fr": "Nom + ができます",
+    "structure_es": "Sustantivo + ができます",
     "meaning": {
       "en": "be capable of something",
-      "fr": "savoir, être capable de"
+      "fr": "savoir, être capable de",
+      "es": "ser capaz de algo, saber hacerlo"
     },
     "register": "polite",
     "steps": [
@@ -22999,9 +23125,11 @@
     "pattern": "〜たくないです",
     "structure": "verb stem + たくないです",
     "structure_fr": "radical verbal + たくないです",
+    "structure_es": "raíz verbal + たくないです",
     "meaning": {
       "en": "have no wish to do",
-      "fr": "ne pas vouloir faire"
+      "fr": "ne pas vouloir faire",
+      "es": "no tener ganas de hacer"
     },
     "register": "polite",
     "steps": [
@@ -23355,9 +23483,11 @@
     "structure": "group + の中で",
     "structure_reading": "group + のなかで",
     "structure_fr": "groupe + の中で",
+    "structure_es": "grupo + の中で",
     "meaning": {
       "en": "within a given set",
-      "fr": "parmi, au sein d'un ensemble"
+      "fr": "parmi, au sein d'un ensemble",
+      "es": "dentro de un conjunto dado"
     },
     "register": "neutral",
     "steps": [
@@ -23708,9 +23838,11 @@
     "pattern": "そして",
     "structure": "sentence + 。 そして + sentence",
     "structure_fr": "phrase + 。 そして + phrase",
+    "structure_es": "frase + 。 そして + frase",
     "meaning": {
       "en": "and then, joining two statements",
-      "fr": "et puis, relie deux énoncés"
+      "fr": "et puis, relie deux énoncés",
+      "es": "y luego, une dos enunciados"
     },
     "register": "neutral",
     "steps": [
@@ -24034,9 +24166,11 @@
     "pattern": "それから",
     "structure": "sentence + 。 それから + sentence",
     "structure_fr": "phrase + 。 それから + phrase",
+    "structure_es": "frase + 。 それから + frase",
     "meaning": {
       "en": "after that, next",
-      "fr": "après cela, ensuite"
+      "fr": "après cela, ensuite",
+      "es": "después de eso, a continuación"
     },
     "register": "neutral",
     "steps": [
@@ -24350,9 +24484,11 @@
     "pattern": "しかし",
     "structure": "sentence + 。 しかし + sentence",
     "structure_fr": "phrase + 。 しかし + phrase",
+    "structure_es": "frase + 。 しかし + frase",
     "meaning": {
       "en": "but, marking a reversal",
-      "fr": "mais, cependant"
+      "fr": "mais, cependant",
+      "es": "pero, marca un giro"
     },
     "register": "neutral",
     "steps": [
@@ -24672,9 +24808,11 @@
     "structure": "verb stem + に行きます",
     "structure_reading": "verb stem + にいきます",
     "structure_fr": "radical verbal + に行きます",
+    "structure_es": "raíz verbal + に行きます",
     "meaning": {
       "en": "go somewhere in order to do",
-      "fr": "aller quelque part pour faire"
+      "fr": "aller quelque part pour faire",
+      "es": "ir a algún sitio a hacer algo"
     },
     "register": "polite",
     "steps": [
@@ -25049,9 +25187,11 @@
     "structure": "clause + が（逆接） + clause",
     "structure_reading": "clause + が（ぎゃくせつ） + clause",
     "structure_fr": "proposition + が（逆接） + proposition",
+    "structure_es": "oración + が（逆接） + oración",
     "meaning": {
       "en": "but; and yet (joins two clauses)",
-      "fr": "mais ; pourtant (relie deux propositions)"
+      "fr": "mais ; pourtant (relie deux propositions)",
+      "es": "pero; y sin embargo (une dos oraciones)"
     },
     "register": "neutral",
     "steps": [
@@ -25438,9 +25578,11 @@
     "pattern": "〜て、〜て",
     "structure": "verb て-form + 、 + verb て-form + …",
     "structure_fr": "verbe forme en て + 、 + verbe forme en て + …",
+    "structure_es": "verbo en forma て + 、 + verbo en forma て + …",
     "meaning": {
       "en": "and then (linking actions in order)",
-      "fr": "puis, et (enchaîne des actions dans l'ordre)"
+      "fr": "puis, et (enchaîne des actions dans l'ordre)",
+      "es": "y luego (enlaza acciones en orden)"
     },
     "register": "neutral",
     "steps": [
@@ -25786,9 +25928,11 @@
     "structure": "cause as て（理由）: verb て-form ／ い-adj + くて ／ noun + で, then the result",
     "structure_reading": "cause as て（りゆう）: verb て-form ／ い-adj + くて ／ noun + で, then the result",
     "structure_fr": "la cause en て（理由） : verbe forme en て ／ adj. en い + くて ／ nom + で, puis le résultat",
+    "structure_es": "la causa en て（理由）: verbo en forma て ／ adj. い + くて ／ sustantivo + で, y luego el resultado",
     "meaning": {
       "en": "because …, and so (the て-form giving a reason)",
-      "fr": "parce que…, alors (la forme en て qui donne la cause)"
+      "fr": "parce que…, alors (la forme en て qui donne la cause)",
+      "es": "porque…, y por eso (la forma て que da una razón)"
     },
     "register": "neutral",
     "steps": [
@@ -25933,9 +26077,11 @@
     "pattern": "〜けど",
     "structure": "clause + けど + clause",
     "structure_fr": "proposition + けど + proposition",
+    "structure_es": "oración + けど + oración",
     "meaning": {
       "en": "but (spoken); also softens a request",
-      "fr": "mais (à l'oral) ; adoucit aussi une demande"
+      "fr": "mais (à l'oral) ; adoucit aussi une demande",
+      "es": "pero (hablado); también suaviza una petición"
     },
     "register": "casual",
     "steps": [
@@ -26277,9 +26423,11 @@
     "pattern": "〜か〜か",
     "structure": "A + か + B + か",
     "structure_fr": "A + か + B + か",
+    "structure_es": "A + か + B + か",
     "meaning": {
       "en": "A or B (a choice between two)",
-      "fr": "A ou B (un choix entre deux)"
+      "fr": "A ou B (un choix entre deux)",
+      "es": "A o B (una elección entre dos)"
     },
     "register": "neutral",
     "steps": [
@@ -26660,9 +26808,11 @@
     "pattern": "あまり〜ない",
     "structure": "あまり + negative predicate (〜ない／〜ません)",
     "structure_fr": "あまり + prédicat négatif (〜ない／〜ません)",
+    "structure_es": "あまり + predicado negativo (〜ない／〜ません)",
     "meaning": {
       "en": "not very, not much",
-      "fr": "pas très, pas beaucoup"
+      "fr": "pas très, pas beaucoup",
+      "es": "no muy, no mucho"
     },
     "register": "neutral",
     "steps": [
@@ -26958,9 +27108,11 @@
     "pattern": "ぜんぜん〜ない",
     "structure": "ぜんぜん + verb / adjective ない-form",
     "structure_fr": "ぜんぜん + verbe / adjectif forme en ない",
+    "structure_es": "ぜんぜん + verbo / adjetivo en forma ない",
     "meaning": {
       "en": "not at all",
-      "fr": "pas du tout"
+      "fr": "pas du tout",
+      "es": "nada en absoluto"
     },
     "register": "neutral",
     "steps": [
@@ -27276,9 +27428,11 @@
     "structure": "noun + と同じ (+ noun／です)",
     "structure_reading": "noun + とおなじ (+ noun／です)",
     "structure_fr": "nom + と同じ (+ nom／です)",
+    "structure_es": "sustantivo + と同じ (+ sustantivo／です)",
     "meaning": {
       "en": "the same as",
-      "fr": "le même que, pareil à"
+      "fr": "le même que, pareil à",
+      "es": "lo mismo que, igual que"
     },
     "register": "neutral",
     "steps": [
@@ -27598,9 +27752,11 @@
     "structure": "period + に + number + 回 (how often)",
     "structure_reading": "period + に + number + かい (how often)",
     "structure_fr": "période + に + nombre + 回 (combien de fois)",
+    "structure_es": "periodo + に + número + 回 (cuántas veces)",
     "meaning": {
       "en": "N times per (day, week…)",
-      "fr": "N fois par (jour, semaine…)"
+      "fr": "N fois par (jour, semaine…)",
+      "es": "N veces por (día, semana…)"
     },
     "register": "neutral",
     "steps": [
@@ -27979,9 +28135,11 @@
     "structure": "い-adj (drop い) + く ／ な-adj + に（副詞形） + verb",
     "structure_reading": "い-adj (drop い) + く ／ な-adj + に（ふくしけい） + verb",
     "structure_fr": "adj. en い (sans い) + く ／ adj. en な + に（副詞形） + verbe",
+    "structure_es": "adj. い (sin い) + く ／ adj. な + に（副詞形） + verbo",
     "meaning": {
       "en": "turning an adjective into an adverb",
-      "fr": "transformer un adjectif en adverbe"
+      "fr": "transformer un adjectif en adverbe",
+      "es": "convierte un adjetivo en adverbio"
     },
     "register": "neutral",
     "steps": [
@@ -28362,9 +28520,11 @@
     "pattern": "〜にします",
     "structure": "noun + にします",
     "structure_fr": "nom + にします",
+    "structure_es": "sustantivo + にします",
     "meaning": {
       "en": "I'll have…, I'll go with… (choosing)",
-      "fr": "je prends…, je choisis…"
+      "fr": "je prends…, je choisis…",
+      "es": "tomaré…, me quedo con… (al elegir)"
     },
     "register": "polite",
     "steps": [
@@ -28673,9 +28833,11 @@
     "pattern": "〜も〜も",
     "structure": "A + も + B + も (+ predicate)",
     "structure_fr": "A + も + B + も (+ prédicat)",
+    "structure_es": "A + も + B + も (+ predicado)",
     "meaning": {
       "en": "both A and B; with a negative, neither A nor B",
-      "fr": "A et B aussi ; avec une négation, ni A ni B"
+      "fr": "A et B aussi ; avec une négation, ni A ni B",
+      "es": "tanto A como B; con negación, ni A ni B"
     },
     "register": "neutral",
     "steps": [
@@ -29052,9 +29214,11 @@
     "structure": "place + を（移動） + verb of movement",
     "structure_reading": "place + を（いどう） + verb of movement",
     "structure_fr": "lieu + を（移動） + verbe de déplacement",
+    "structure_es": "lugar + を（移動） + verbo de movimiento",
     "meaning": {
       "en": "the space passed through or left (walk along, leave)",
-      "fr": "l'espace parcouru ou quitté (marcher dans, sortir de)"
+      "fr": "l'espace parcouru ou quitté (marcher dans, sortir de)",
+      "es": "el espacio que se recorre o se deja (caminar por, salir de)"
     },
     "register": "neutral",
     "steps": [
@@ -29183,9 +29347,11 @@
     "pattern": "これ／それ／あれ／どれ",
     "structure": "これ／それ／あれ／どれ + は／が… (this one, that one, that one over there, which one)",
     "structure_fr": "これ／それ／あれ／どれ + は／が… (ceci, cela, cela là-bas, lequel)",
+    "structure_es": "これ／それ／あれ／どれ + は／が… (esto, eso, aquello, cuál)",
     "meaning": {
       "en": "this, that, that over there, which (things)",
-      "fr": "ceci, cela, cela là-bas, lequel (des objets)"
+      "fr": "ceci, cela, cela là-bas, lequel (des objets)",
+      "es": "esto, eso, aquello, cuál (cosas)"
     },
     "register": "neutral",
     "steps": [
@@ -29536,9 +29702,11 @@
     "pattern": "この／その／あの／どの",
     "structure": "この／その／あの／どの + noun",
     "structure_fr": "この／その／あの／どの + nom",
+    "structure_es": "この／その／あの／どの + sustantivo",
     "meaning": {
       "en": "this, that, that over there, which (before a noun)",
-      "fr": "ce…-ci, ce…-là, ce…-là-bas, quel (devant un nom)"
+      "fr": "ce…-ci, ce…-là, ce…-là-bas, quel (devant un nom)",
+      "es": "este, ese, aquel, qué (delante de un sustantivo)"
     },
     "register": "neutral",
     "steps": [
@@ -29838,9 +30006,11 @@
     "structure": "number + つ／人／枚 (a counter per kind of thing)",
     "structure_reading": "number + つ／にん／まい (a counter per kind of thing)",
     "structure_fr": "nombre + つ／人／枚 (un classificateur par genre de chose)",
+    "structure_es": "número + つ／人／枚 (un contador por tipo de cosa)",
     "meaning": {
       "en": "counters: general things, people, flat things",
-      "fr": "les classificateurs : objets, personnes, choses plates"
+      "fr": "les classificateurs : objets, personnes, choses plates",
+      "es": "contadores: cosas en general, personas, cosas planas"
     },
     "register": "neutral",
     "steps": [
@@ -30231,9 +30401,11 @@
     "pattern": "〜と〜とどちらが",
     "structure": "A + と + B + とどちらが + adjective",
     "structure_fr": "A + と + B + とどちらが + adjectif",
+    "structure_es": "A + と + B + とどちらが + adjetivo",
     "meaning": {
       "en": "which of A and B is more…",
-      "fr": "lequel de A et B est plus…"
+      "fr": "lequel de A et B est plus…",
+      "es": "cuál de los dos, A o B, es más…"
     },
     "register": "polite",
     "steps": [
@@ -30558,9 +30730,11 @@
     "structure": "noun + で（理由） + result",
     "structure_reading": "noun + で（りゆう） + result",
     "structure_fr": "nom + で（理由） + résultat",
+    "structure_es": "sustantivo + で（理由） + resultado",
     "meaning": {
       "en": "because of (a cause stated as a noun)",
-      "fr": "à cause de (la cause est un nom)"
+      "fr": "à cause de (la cause est un nom)",
+      "es": "a causa de (una causa expresada con un sustantivo)"
     },
     "register": "neutral",
     "steps": [
@@ -30696,9 +30870,11 @@
     "structure": "何か／誰か／どこか (+ particle) + predicate",
     "structure_reading": "なにか／だれか／どこか (+ particle) + predicate",
     "structure_fr": "何か／誰か／どこか (+ particule) + prédicat",
+    "structure_es": "何か／誰か／どこか (+ partícula) + predicado",
     "meaning": {
       "en": "something, someone, somewhere",
-      "fr": "quelque chose, quelqu'un, quelque part"
+      "fr": "quelque chose, quelqu'un, quelque part",
+      "es": "algo, alguien, algún sitio"
     },
     "register": "neutral",
     "steps": [
@@ -31018,9 +31194,11 @@
     "structure": "何も／誰も + negative predicate (〜ない)",
     "structure_reading": "なにも／だれも + negative predicate (〜ない)",
     "structure_fr": "何も／誰も + prédicat négatif (〜ない)",
+    "structure_es": "何も／誰も + predicado negativo (〜ない)",
     "meaning": {
       "en": "nothing, nobody (with a negative)",
-      "fr": "rien, personne (avec une négation)"
+      "fr": "rien, personne (avec une négation)",
+      "es": "nada, nadie (con negación)"
     },
     "register": "neutral",
     "steps": [
@@ -31332,9 +31510,11 @@
     "pattern": "〜は〜が",
     "structure": "topic + は + subject + が + predicate",
     "structure_fr": "thème + は + sujet + が + prédicat",
+    "structure_es": "tema + は + sujeto + が + predicado",
     "meaning": {
       "en": "topic first, then what is true of it (elephants: their trunks are long)",
-      "fr": "d'abord le thème, puis ce qui en est dit (l'éléphant : sa trompe est longue)"
+      "fr": "d'abord le thème, puis ce qui en est dit (l'éléphant : sa trompe est longue)",
+      "es": "primero el tema, luego lo que es cierto de él (el elefante: su trompa es larga)"
     },
     "register": "neutral",
     "steps": [
@@ -31716,9 +31896,11 @@
     "pattern": "だから",
     "structure": "sentence。だから + sentence",
     "structure_fr": "phrase。だから + phrase",
+    "structure_es": "frase。だから + frase",
     "meaning": {
       "en": "so, therefore (sentence-initial)",
-      "fr": "donc, c'est pourquoi (en tête de phrase)"
+      "fr": "donc, c'est pourquoi (en tête de phrase)",
+      "es": "así que, por lo tanto (al inicio de la frase)"
     },
     "register": "neutral",
     "steps": [
@@ -32070,9 +32252,11 @@
     "pattern": "もう〜ない",
     "structure": "もう + negative predicate (〜ない／〜ません)",
     "structure_fr": "もう + prédicat négatif (〜ない／〜ません)",
+    "structure_es": "もう + predicado negativo (〜ない／〜ません)",
     "meaning": {
       "en": "not any more",
-      "fr": "ne … plus"
+      "fr": "ne … plus",
+      "es": "ya no, no… más"
     },
     "register": "neutral",
     "steps": [
@@ -32390,9 +32574,11 @@
     "pattern": "〜はどうですか",
     "structure": "noun + はどうですか",
     "structure_fr": "nom + はどうですか",
+    "structure_es": "sustantivo + はどうですか",
     "meaning": {
       "en": "how about…? (a suggestion, or asking an opinion)",
-      "fr": "et si… ? / que pensez-vous de… ?"
+      "fr": "et si… ? / que pensez-vous de… ?",
+      "es": "¿qué tal…? (una sugerencia, o pedir una opinión)"
     },
     "register": "polite",
     "steps": [

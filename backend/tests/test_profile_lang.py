@@ -37,6 +37,8 @@ def test_the_choice_is_kept_on_the_account(client):
     assert client.get("/api/profile").json()["uiLang"] == "en"
     client.patch("/api/profile/learning", json={"uiLang": "fr"})
     assert client.get("/api/profile").json()["uiLang"] == "fr"
+    client.patch("/api/profile/learning", json={"uiLang": "es"})      # plan 291
+    assert client.get("/api/profile").json()["uiLang"] == "es"
 
 
 def test_another_setting_never_moves_it(client):
@@ -46,7 +48,7 @@ def test_another_setting_never_moves_it(client):
     assert client.get("/api/profile").json()["uiLang"] == "en"
 
 
-@pytest.mark.parametrize("value", ["de", "EN", "", "fr-FR"])
+@pytest.mark.parametrize("value", ["de", "EN", "", "fr-FR", "es-MX"])
 def test_a_language_the_app_does_not_speak_is_refused(client, value):
     client.patch("/api/profile/learning", json={"uiLang": "en"})
     assert client.patch("/api/profile/learning", json={"uiLang": value}).status_code == 422

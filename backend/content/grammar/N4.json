@@ -3,9 +3,11 @@
     "pattern": "〜たら",
     "structure": "verb た-form + ら",
     "structure_fr": "verbe forme en た + ら",
+    "structure_es": "verbo en forma た + ら",
     "meaning": {
       "en": "conditional: if/when",
-      "fr": "conditionnel : si / quand"
+      "fr": "conditionnel : si / quand",
+      "es": "condicional: si/cuando"
     },
     "register": "neutral",
     "steps": [
@@ -368,9 +370,11 @@
     "pattern": "〜ば",
     "structure": "verb ば-form",
     "structure_fr": "verbe forme en ば",
+    "structure_es": "verbo en forma ば",
     "meaning": {
       "en": "conditional: if",
-      "fr": "conditionnel : si"
+      "fr": "conditionnel : si",
+      "es": "condicional: si"
     },
     "register": "neutral",
     "steps": [
@@ -869,9 +873,11 @@
     "pattern": "〜なら",
     "structure": "noun/plain form + なら",
     "structure_fr": "nom/forme neutre + なら",
+    "structure_es": "sustantivo/forma llana + なら",
     "meaning": {
       "en": "conditional: if it's the case that",
-      "fr": "conditionnel : s'il s'agit de, si c'est le cas"
+      "fr": "conditionnel : s'il s'agit de, si c'est le cas",
+      "es": "condicional: si se da el caso de que, si se trata de"
     },
     "register": "neutral",
     "steps": [
@@ -1190,9 +1196,11 @@
     "pattern": "〜ので",
     "structure": "plain form + ので",
     "structure_fr": "forme neutre + ので",
+    "structure_es": "forma llana + ので",
     "meaning": {
       "en": "because (more objective/polite than から)",
-      "fr": "parce que (plus objectif et poli que から)"
+      "fr": "parce que (plus objectif et poli que から)",
+      "es": "porque (más objetivo/cortés que から)"
     },
     "register": "polite",
     "steps": [
@@ -1556,9 +1564,11 @@
     "pattern": "〜のに",
     "structure": "plain form + のに",
     "structure_fr": "forme neutre + のに",
+    "structure_es": "forma llana + のに",
     "meaning": {
       "en": "although, even though (often with surprise/complaint)",
-      "fr": "bien que, pourtant (souvent surprise ou reproche)"
+      "fr": "bien que, pourtant (souvent surprise ou reproche)",
+      "es": "aunque, a pesar de que (a menudo con sorpresa/queja)"
     },
     "register": "neutral",
     "steps": [
@@ -1963,9 +1973,11 @@
     "pattern": "〜てあげる／てくれる／てもらう",
     "structure": "verb て-form + あげる・くれる・もらう",
     "structure_fr": "verbe forme en て + あげる・くれる・もらう",
+    "structure_es": "verbo en forma て + あげる・くれる・もらう",
     "meaning": {
       "en": "giving and receiving an action as a favor",
-      "fr": "donner et recevoir une action comme une faveur"
+      "fr": "donner et recevoir une action comme une faveur",
+      "es": "dar y recibir una acción como favor"
     },
     "register": "neutral",
     "steps": [
@@ -2317,9 +2329,11 @@
     "pattern": "〜そうです",
     "structure": "verb stem / adjective stem + そうです",
     "structure_fr": "radical verbal / radical d'adjectif + そうです",
+    "structure_es": "raíz verbal / raíz de adjetivo + そうです",
     "meaning": {
       "en": "looks like, appears to be (visual impression)",
-      "fr": "avoir l'air, sembler (impression visuelle)"
+      "fr": "avoir l'air, sembler (impression visuelle)",
+      "es": "parece, tiene aspecto de (impresión visual)"
     },
     "register": "polite",
     "steps": [
@@ -2695,9 +2709,11 @@
     "pattern": "〜ようです",
     "structure": "plain form + ようです",
     "structure_fr": "forme neutre + ようです",
+    "structure_es": "forma llana + ようです",
     "meaning": {
       "en": "seems like, appears that (inference)",
-      "fr": "il semble que (déduction)"
+      "fr": "il semble que (déduction)",
+      "es": "parece que (deducción)"
     },
     "register": "polite",
     "steps": [
@@ -3042,9 +3058,11 @@
     "reading": "しえきけい 〜させる",
     "structure": "verb causative stem + させる",
     "structure_fr": "radical verbal causatif + させる",
+    "structure_es": "raíz causativa del verbo + させる",
     "meaning": {
       "en": "make or let someone do",
-      "fr": "faire faire, laisser faire"
+      "fr": "faire faire, laisser faire",
+      "es": "hacer o dejar que alguien haga algo"
     },
     "register": "neutral",
     "steps": [
@@ -3418,9 +3436,11 @@
     "reading": "うけみけい 〜られる",
     "structure": "verb passive stem + られる",
     "structure_fr": "radical verbal passif + られる",
+    "structure_es": "raíz pasiva del verbo + られる",
     "meaning": {
       "en": "be done to, have something done to oneself",
-      "fr": "le passif : subir une action"
+      "fr": "le passif : subir une action",
+      "es": "ser objeto de una acción, que a uno le hagan algo"
     },
     "register": "neutral",
     "steps": [
@@ -3822,9 +3842,11 @@
     "pattern": "〜てしまう",
     "structure": "verb て-form + しまう",
     "structure_fr": "verbe forme en て + しまう",
+    "structure_es": "verbo en forma て + しまう",
     "meaning": {
       "en": "completion, or regret at having done",
-      "fr": "achèvement, ou regret d'avoir fait"
+      "fr": "achèvement, ou regret d'avoir fait",
+      "es": "acción terminada, o pesar por haberla hecho"
     },
     "register": "neutral",
     "steps": [
@@ -4172,9 +4194,11 @@
     "pattern": "〜ておく",
     "structure": "verb て-form + おく",
     "structure_fr": "verbe forme en て + おく",
+    "structure_es": "verbo en forma て + おく",
     "meaning": {
       "en": "do in advance, or leave as is",
-      "fr": "faire à l'avance, ou laisser tel quel"
+      "fr": "faire à l'avance, ou laisser tel quel",
+      "es": "hacer de antemano, o dejar como está"
     },
     "register": "neutral",
     "steps": [
@@ -4530,9 +4554,11 @@
     "pattern": "〜ことがある",
     "structure": "verb た-form + ことがある",
     "structure_fr": "verbe forme en た + ことがある",
+    "structure_es": "verbo en forma た + ことがある",
     "meaning": {
       "en": "have done before (experience)",
-      "fr": "avoir déjà fait (expérience)"
+      "fr": "avoir déjà fait (expérience)",
+      "es": "haber hecho alguna vez (experiencia)"
     },
     "register": "polite",
     "steps": [
@@ -4888,9 +4914,11 @@
     "pattern": "〜ようになる",
     "structure": "verb dictionary form + ようになる",
     "structure_fr": "verbe forme du dictionnaire + ようになる",
+    "structure_es": "verbo en forma de diccionario + ようになる",
     "meaning": {
       "en": "come to do, reach the point of doing",
-      "fr": "en venir à, devenir capable de"
+      "fr": "en venir à, devenir capable de",
+      "es": "llegar a hacer, llegar al punto de hacer"
     },
     "register": "polite",
     "steps": [
@@ -5246,9 +5274,11 @@
     "pattern": "〜ことにする",
     "structure": "verb dictionary/ない form + ことにする",
     "structure_fr": "verbe forme du dictionnaire/en ない + ことにする",
+    "structure_es": "verbo en forma de diccionario/ない + ことにする",
     "meaning": {
       "en": "decide to",
-      "fr": "décider de"
+      "fr": "décider de",
+      "es": "decidir (hacer)"
     },
     "register": "polite",
     "steps": [
@@ -5636,9 +5666,11 @@
     "pattern": "〜つもりです",
     "structure": "verb dictionary form + つもりです",
     "structure_fr": "verbe forme du dictionnaire + つもりです",
+    "structure_es": "verbo en forma de diccionario + つもりです",
     "meaning": {
       "en": "intend to",
-      "fr": "avoir l'intention de"
+      "fr": "avoir l'intention de",
+      "es": "tener la intención de"
     },
     "register": "polite",
     "steps": [
@@ -5995,9 +6027,11 @@
     "pattern": "〜という",
     "structure": "noun/plain form + という",
     "structure_fr": "nom/forme neutre + という",
+    "structure_es": "sustantivo/forma llana + という",
     "meaning": {
       "en": "called ..., that is said to be",
-      "fr": "appelé..., qu'on dit être"
+      "fr": "appelé..., qu'on dit être",
+      "es": "llamado…, del que se dice que es"
     },
     "register": "neutral",
     "steps": [
@@ -6344,9 +6378,11 @@
     "pattern": "〜はずです",
     "structure": "plain form + はずです",
     "structure_fr": "forme neutre + はずです",
+    "structure_es": "forma llana + はずです",
     "meaning": {
       "en": "should be, expected to be",
-      "fr": "devrait, est censé"
+      "fr": "devrait, est censé",
+      "es": "debería ser, se supone que es"
     },
     "register": "polite",
     "steps": [
@@ -6665,9 +6701,11 @@
     "pattern": "〜かもしれません",
     "structure": "plain form + かもしれません",
     "structure_fr": "forme neutre + かもしれません",
+    "structure_es": "forma llana + かもしれません",
     "meaning": {
       "en": "might, maybe",
-      "fr": "peut-être, il se peut que"
+      "fr": "peut-être, il se peut que",
+      "es": "quizá, puede que"
     },
     "register": "polite",
     "steps": [
@@ -7017,9 +7055,11 @@
     "pattern": "〜まま",
     "structure": "た-form/noun + の + まま",
     "structure_fr": "forme en た/nom + の + まま",
+    "structure_es": "forma た/sustantivo + の + まま",
     "meaning": {
       "en": "as is, while remaining in a state",
-      "fr": "tel quel, en restant dans un état"
+      "fr": "tel quel, en restant dans un état",
+      "es": "tal cual, sin salir de un estado"
     },
     "register": "neutral",
     "steps": [
@@ -7380,9 +7420,11 @@
     "reading": "かのうけい 〜(ら)れる",
     "structure": "verb potential stem + る・られる",
     "structure_fr": "radical verbal potentiel + る・られる",
+    "structure_es": "raíz potencial del verbo + る・られる",
     "meaning": {
       "en": "can do, be able to — the conjugated potential",
-      "fr": "pouvoir, être capable de : la forme potentielle"
+      "fr": "pouvoir, être capable de : la forme potentielle",
+      "es": "poder hacer, ser capaz de — el potencial conjugado"
     },
     "register": "neutral",
     "steps": [
@@ -7855,9 +7897,11 @@
     "reading": "いこうけい 〜(よ)う",
     "structure": "verb volitional form",
     "structure_fr": "verbe forme volitive",
+    "structure_es": "verbo en forma volitiva",
     "meaning": {
       "en": "let's, I think I'll — the plain counterpart of ましょう",
-      "fr": "allons, je vais... : le pendant neutre de ましょう"
+      "fr": "allons, je vais... : le pendant neutre de ましょう",
+      "es": "vamos a, creo que voy a — la contraparte llana de ましょう"
     },
     "register": "casual",
     "steps": [
@@ -8295,9 +8339,11 @@
     "structure": "verb volitional form + と思う",
     "structure_reading": "verb volitional form + とおもう",
     "structure_fr": "verbe forme volitive + と思う",
+    "structure_es": "verbo en forma volitiva + と思う",
     "meaning": {
       "en": "be thinking of doing, plan to",
-      "fr": "penser faire, projeter de"
+      "fr": "penser faire, projeter de",
+      "es": "pensar hacer, tener planeado"
     },
     "register": "polite",
     "steps": [
@@ -8663,9 +8709,11 @@
     "pattern": "〜と",
     "structure": "plain form + と",
     "structure_fr": "forme neutre + と",
+    "structure_es": "forma llana + と",
     "meaning": {
       "en": "conditional: whenever A happens, B follows (automatic result)",
-      "fr": "conditionnel : chaque fois que A, B suit (résultat automatique)"
+      "fr": "conditionnel : chaque fois que A, B suit (résultat automatique)",
+      "es": "condicional: siempre que ocurre A, sigue B (resultado automático)"
     },
     "register": "neutral",
     "steps": [
@@ -9110,9 +9158,11 @@
     "pattern": "〜ながら",
     "structure": "verb stem + ながら",
     "structure_fr": "radical verbal + ながら",
+    "structure_es": "raíz verbal + ながら",
     "meaning": {
       "en": "while doing — two actions at once, one subject",
-      "fr": "tout en faisant : deux actions à la fois, même sujet"
+      "fr": "tout en faisant : deux actions à la fois, même sujet",
+      "es": "mientras hace — dos acciones a la vez, un solo sujeto"
     },
     "register": "neutral",
     "steps": [
@@ -9469,9 +9519,11 @@
     "pattern": "〜たり〜たり",
     "structure": "verb た-form + り + verb た-form + り + する",
     "structure_fr": "verbe forme en た + り + verbe forme en た + り + する",
+    "structure_es": "verbo en forma た + り + verbo en forma た + り + する",
     "meaning": {
       "en": "doing this and that, alternating between",
-      "fr": "faire ceci et cela, alterner"
+      "fr": "faire ceci et cela, alterner",
+      "es": "hacer esto y aquello, alternando"
     },
     "register": "polite",
     "steps": [
@@ -9861,9 +9913,11 @@
     "pattern": "〜すぎる",
     "structure": "verb stem / adjective stem + すぎる",
     "structure_fr": "radical verbal / radical d'adjectif + すぎる",
+    "structure_es": "raíz verbal / raíz de adjetivo + すぎる",
     "meaning": {
       "en": "too much, excessively",
-      "fr": "trop, excessivement"
+      "fr": "trop, excessivement",
+      "es": "demasiado, en exceso"
     },
     "register": "polite",
     "steps": [
@@ -10186,9 +10240,11 @@
     "pattern": "〜やすい／〜にくい",
     "structure": "verb stem + やすい・にくい",
     "structure_fr": "radical verbal + やすい・にくい",
+    "structure_es": "raíz verbal + やすい・にくい",
     "meaning": {
       "en": "easy to do / hard to do",
-      "fr": "facile à / difficile à"
+      "fr": "facile à / difficile à",
+      "es": "fácil de hacer / difícil de hacer"
     },
     "register": "neutral",
     "steps": [
@@ -10544,9 +10600,11 @@
     "pattern": "〜はじめる／〜おわる／〜つづける",
     "structure": "verb stem + はじめる・おわる・つづける",
     "structure_fr": "radical verbal + はじめる・おわる・つづける",
+    "structure_es": "raíz verbal + はじめる・おわる・つづける",
     "meaning": {
       "en": "start, finish, or keep on doing",
-      "fr": "commencer, finir ou continuer à faire"
+      "fr": "commencer, finir ou continuer à faire",
+      "es": "empezar, terminar o seguir haciendo"
     },
     "register": "neutral",
     "steps": [
@@ -10898,9 +10956,11 @@
     "pattern": "〜ていく／〜てくる",
     "structure": "verb て-form + いく・くる",
     "structure_fr": "verbe forme en て + いく・くる",
+    "structure_es": "verbo en forma て + いく・くる",
     "meaning": {
       "en": "movement or change heading away from / toward the speaker",
-      "fr": "mouvement ou changement qui s'éloigne / se rapproche du locuteur"
+      "fr": "mouvement ou changement qui s'éloigne / se rapproche du locuteur",
+      "es": "movimiento o cambio que se aleja de / se acerca a quien habla"
     },
     "register": "neutral",
     "steps": [
@@ -11252,9 +11312,11 @@
     "pattern": "〜てみる",
     "structure": "verb て-form + みる",
     "structure_fr": "verbe forme en て + みる",
+    "structure_es": "verbo en forma て + みる",
     "meaning": {
       "en": "try doing and see how it turns out",
-      "fr": "essayer de faire pour voir"
+      "fr": "essayer de faire pour voir",
+      "es": "probar a hacer algo y ver qué pasa"
     },
     "register": "polite",
     "steps": [
@@ -11584,9 +11646,11 @@
     "pattern": "〜てある",
     "structure": "verb て-form + ある",
     "structure_fr": "verbe forme en て + ある",
+    "structure_es": "verbo en forma て + ある",
     "meaning": {
       "en": "has been done and stays that way (someone did it deliberately)",
-      "fr": "a été fait et le reste (quelqu'un l'a fait exprès)"
+      "fr": "a été fait et le reste (quelqu'un l'a fait exprès)",
+      "es": "está hecho y sigue así (alguien lo hizo a propósito)"
     },
     "register": "neutral",
     "steps": [
@@ -11942,9 +12006,11 @@
     "pattern": "〜らしい",
     "structure": "plain form / noun + らしい",
     "structure_fr": "forme neutre / nom + らしい",
+    "structure_es": "forma llana / sustantivo + らしい",
     "meaning": {
       "en": "apparently, I gather that (from an outside source)",
-      "fr": "apparemment, à ce qu'on dit (source extérieure)"
+      "fr": "apparemment, à ce qu'on dit (source extérieure)",
+      "es": "por lo visto, según parece (de una fuente externa)"
     },
     "register": "polite",
     "steps": [
@@ -12301,9 +12367,11 @@
     "pattern": "〜みたいだ",
     "structure": "plain form / noun + みたいだ",
     "structure_fr": "forme neutre / nom + みたいだ",
+    "structure_es": "forma llana / sustantivo + みたいだ",
     "meaning": {
       "en": "seems like, looks like — the colloquial ようだ",
-      "fr": "on dirait, ça ressemble à : le ようだ familier"
+      "fr": "on dirait, ça ressemble à : le ようだ familier",
+      "es": "parece, da la impresión — el ようだ coloquial"
     },
     "register": "casual",
     "steps": [
@@ -12657,9 +12725,11 @@
     "reading": "じどうし／たどうし",
     "structure": "intransitive: noun + が + verb / transitive: noun + を + verb",
     "structure_fr": "intransitif : nom + が + verbe / transitif : nom + を + verbe",
+    "structure_es": "intransitivo: sustantivo + が + verbo / transitivo: sustantivo + を + verbo",
     "meaning": {
       "en": "paired verbs: one thing happens, the other is done to something",
-      "fr": "verbes en paire : l'un arrive tout seul, l'autre est fait à quelque chose"
+      "fr": "verbes en paire : l'un arrive tout seul, l'autre est fait à quelque chose",
+      "es": "pares de verbos: con uno algo ocurre; con el otro, se actúa sobre algo"
     },
     "register": "neutral",
     "steps": [
@@ -12788,9 +12858,11 @@
     "pattern": "〜ことになる",
     "structure": "verb dictionary/ない form + ことになる",
     "structure_fr": "verbe forme du dictionnaire/en ない + ことになる",
+    "structure_es": "verbo en forma de diccionario/ない + ことになる",
     "meaning": {
       "en": "it has been decided that, it works out that",
-      "fr": "il a été décidé que, il se trouve que"
+      "fr": "il a été décidé que, il se trouve que",
+      "es": "se ha decidido que, resulta que"
     },
     "register": "polite",
     "steps": [
@@ -13128,9 +13200,11 @@
     "pattern": "〜ようにする",
     "structure": "verb dictionary/ない form + ようにする",
     "structure_fr": "verbe forme du dictionnaire/en ない + ようにする",
+    "structure_es": "verbo en forma de diccionario/ない + ようにする",
     "meaning": {
       "en": "make a point of, see to it that",
-      "fr": "s'efforcer de, faire en sorte de"
+      "fr": "s'efforcer de, faire en sorte de",
+      "es": "procurar, asegurarse de que"
     },
     "register": "polite",
     "steps": [
@@ -13516,9 +13590,11 @@
     "pattern": "〜かどうか",
     "structure": "plain form + かどうか",
     "structure_fr": "forme neutre + かどうか",
+    "structure_es": "forma llana + かどうか",
     "meaning": {
       "en": "whether or not",
-      "fr": "si... ou non"
+      "fr": "si... ou non",
+      "es": "si… o no (sin saber cuál)"
     },
     "register": "polite",
     "steps": [
@@ -13832,9 +13908,11 @@
     "pattern": "〜しか〜ない",
     "structure": "noun + しか + negative verb",
     "structure_fr": "nom + しか + verbe négatif",
+    "structure_es": "sustantivo + しか + verbo negativo",
     "meaning": {
       "en": "only, nothing but",
-      "fr": "seulement, rien que"
+      "fr": "seulement, rien que",
+      "es": "solo, nada más que"
     },
     "register": "neutral",
     "steps": [
@@ -14192,9 +14270,11 @@
     "pattern": "〜ても",
     "structure": "verb て-form + も / adjective + ても",
     "structure_fr": "verbe forme en て + も / adjectif + ても",
+    "structure_es": "verbo en forma て + も / adjetivo + ても",
     "meaning": {
       "en": "even if, no matter",
-      "fr": "même si, quoi que"
+      "fr": "même si, quoi que",
+      "es": "aunque, por más que"
     },
     "register": "neutral",
     "steps": [
@@ -14556,9 +14636,11 @@
     "pattern": "お〜になる／お〜する",
     "structure": "お + verb stem + になる (respectful)・する (humble)",
     "structure_fr": "お + radical verbal + になる (respectueux)・する (humble)",
+    "structure_es": "お + raíz verbal + になる (respetuoso)・する (humilde)",
     "meaning": {
       "en": "keigo: raises the other person, or lowers oneself",
-      "fr": "keigo : élever l'autre, ou s'abaisser soi-même"
+      "fr": "keigo : élever l'autre, ou s'abaisser soi-même",
+      "es": "keigo: eleva a la otra persona, o rebaja a uno mismo"
     },
     "register": "polite",
     "steps": [
@@ -14970,9 +15052,11 @@
     "pattern": "〜んです／〜のです",
     "structure": "plain form + んです・のです",
     "structure_fr": "forme neutre + んです・のです",
+    "structure_es": "forma llana + んです・のです",
     "meaning": {
       "en": "framing a statement as an explanation",
-      "fr": "présenter un énoncé comme une explication"
+      "fr": "présenter un énoncé comme une explication",
+      "es": "presentar lo que se dice como una explicación"
     },
     "register": "polite",
     "steps": [
@@ -15354,9 +15438,11 @@
     "pattern": "〜てほしい",
     "structure": "verb て-form + ほしい",
     "structure_fr": "verbe forme en て + ほしい",
+    "structure_es": "verbo en forma て + ほしい",
     "meaning": {
       "en": "want someone else to do",
-      "fr": "vouloir que quelqu'un d'autre fasse"
+      "fr": "vouloir que quelqu'un d'autre fasse",
+      "es": "querer que otra persona haga algo"
     },
     "register": "neutral",
     "steps": [
@@ -15747,9 +15833,11 @@
     "pattern": "〜たがる",
     "structure": "verb stem + たがる",
     "structure_fr": "radical verbal + たがる",
+    "structure_es": "raíz verbal + たがる",
     "meaning": {
       "en": "someone else shows they want to",
-      "fr": "quelqu'un d'autre montre qu'il veut"
+      "fr": "quelqu'un d'autre montre qu'il veut",
+      "es": "otra persona muestra que quiere hacer algo"
     },
     "register": "neutral",
     "steps": [
@@ -16105,9 +16193,11 @@
     "pattern": "〜そうにない",
     "structure": "verb stem + そうにない",
     "structure_fr": "radical verbal + そうにない",
+    "structure_es": "raíz verbal + そうにない",
     "meaning": {
       "en": "shows no sign of happening",
-      "fr": "ne montre aucun signe de se produire"
+      "fr": "ne montre aucun signe de se produire",
+      "es": "no da señales de que vaya a ocurrir"
     },
     "register": "neutral",
     "steps": [
@@ -16459,9 +16549,11 @@
     "pattern": "〜なくてはいけない",
     "structure": "verb ない-form (drop い) + くてはいけない",
     "structure_fr": "verbe forme en ない (sans い) + くてはいけない",
+    "structure_es": "verbo en forma ない (sin い) + くてはいけない",
     "meaning": {
       "en": "obliged to do",
-      "fr": "être obligé de"
+      "fr": "être obligé de",
+      "es": "estar obligado a hacer"
     },
     "register": "neutral",
     "steps": [
@@ -16784,9 +16876,11 @@
     "pattern": "〜なきゃ／〜なくちゃ",
     "structure": "verb ない-form (drop い) + きゃ・くちゃ",
     "structure_fr": "verbe forme en ない (sans い) + きゃ・くちゃ",
+    "structure_es": "verbo en forma ない (sin い) + きゃ・くちゃ",
     "meaning": {
       "en": "the spoken short form of must",
-      "fr": "la forme courte et parlée de « il faut »"
+      "fr": "la forme courte et parlée de « il faut »",
+      "es": "la forma corta y hablada de «tener que»"
     },
     "register": "casual",
     "steps": [
@@ -17143,9 +17237,11 @@
     "pattern": "〜ないといけない",
     "structure": "verb ない-form + といけない",
     "structure_fr": "verbe forme en ない + といけない",
+    "structure_es": "verbo en forma ない + といけない",
     "meaning": {
       "en": "it won't do unless you",
-      "fr": "il faut absolument, sinon ça ne va pas"
+      "fr": "il faut absolument, sinon ça ne va pas",
+      "es": "hay que hacerlo, si no, no vale"
     },
     "register": "neutral",
     "steps": [
@@ -17465,9 +17561,11 @@
     "pattern": "〜し",
     "structure": "plain form + し",
     "structure_fr": "forme neutre + し",
+    "structure_es": "forma llana + し",
     "meaning": {
       "en": "listing reasons, with more implied",
-      "fr": "énumérer des raisons, d'autres restant sous-entendues"
+      "fr": "énumérer des raisons, d'autres restant sous-entendues",
+      "es": "enumera razones, dando a entender que hay más"
     },
     "register": "neutral",
     "steps": [
@@ -17908,9 +18006,11 @@
     "pattern": "〜だろう",
     "structure": "plain form + だろう",
     "structure_fr": "forme neutre + だろう",
+    "structure_es": "forma llana + だろう",
     "meaning": {
       "en": "the plain counterpart of でしょう",
-      "fr": "le pendant neutre de でしょう"
+      "fr": "le pendant neutre de でしょう",
+      "es": "la contraparte llana de でしょう"
     },
     "register": "casual",
     "steps": [
@@ -18267,9 +18367,11 @@
     "pattern": "〜かな",
     "structure": "plain form + かな",
     "structure_fr": "forme neutre + かな",
+    "structure_es": "forma llana + かな",
     "meaning": {
       "en": "wondering to oneself",
-      "fr": "se demander à soi-même"
+      "fr": "se demander à soi-même",
+      "es": "preguntarse uno a sí mismo"
     },
     "register": "casual",
     "steps": [
@@ -18583,9 +18685,11 @@
     "pattern": "〜のは〜だ",
     "structure": "clause + のは + noun + だ",
     "structure_fr": "proposition + のは + nom + だ",
+    "structure_es": "oración + のは + sustantivo + だ",
     "meaning": {
       "en": "singling one element out as the point",
-      "fr": "mettre un élément en relief"
+      "fr": "mettre un élément en relief",
+      "es": "destaca un elemento como lo esencial"
     },
     "register": "neutral",
     "steps": [
@@ -18861,9 +18965,11 @@
     "pattern": "〜こと",
     "structure": "verb dictionary form + こと",
     "structure_fr": "verbe forme du dictionnaire + こと",
+    "structure_es": "verbo en forma de diccionario + こと",
     "meaning": {
       "en": "turning a verb into a noun",
-      "fr": "transformer un verbe en nom"
+      "fr": "transformer un verbe en nom",
+      "es": "convierte un verbo en sustantivo"
     },
     "register": "neutral",
     "steps": [
@@ -19215,9 +19321,11 @@
     "pattern": "〜の",
     "structure": "verb dictionary form + の",
     "structure_fr": "verbe forme du dictionnaire + の",
+    "structure_es": "verbo en forma de diccionario + の",
     "meaning": {
       "en": "the spoken nominaliser",
-      "fr": "le nominalisateur de la langue parlée"
+      "fr": "le nominalisateur de la langue parlée",
+      "es": "el nominalizador de la lengua hablada"
     },
     "register": "casual",
     "steps": [
@@ -19633,9 +19741,11 @@
     "pattern": "〜ばよかった",
     "structure": "verb ば-form + よかった",
     "structure_fr": "verbe forme en ば + よかった",
+    "structure_es": "verbo en forma ば + よかった",
     "meaning": {
       "en": "regret at not having done",
-      "fr": "regret de ne pas avoir fait"
+      "fr": "regret de ne pas avoir fait",
+      "es": "lamentar no haber hecho algo"
     },
     "register": "neutral",
     "steps": [
@@ -19982,9 +20092,11 @@
     "pattern": "〜たらどうですか",
     "structure": "verb た-form + らどうですか",
     "structure_fr": "verbe forme en た + らどうですか",
+    "structure_es": "verbo en forma た + らどうですか",
     "meaning": {
       "en": "suggesting a course of action",
-      "fr": "suggérer une façon de faire"
+      "fr": "suggérer une façon de faire",
+      "es": "sugerir qué hacer"
     },
     "register": "polite",
     "steps": [
@@ -20352,9 +20464,11 @@
     "pattern": "〜ずに",
     "structure": "verb ない-stem + ずに",
     "structure_fr": "radical en ない + ずに",
+    "structure_es": "raíz ない + ずに",
     "meaning": {
       "en": "the written form of without doing",
-      "fr": "la forme écrite de « sans faire »"
+      "fr": "la forme écrite de « sans faire »",
+      "es": "la forma escrita de «sin hacer»"
     },
     "register": "written",
     "steps": [
@@ -20710,9 +20824,11 @@
     "pattern": "〜あいだに",
     "structure": "clause/noun + の + あいだに",
     "structure_fr": "proposition/nom + の + あいだに",
+    "structure_es": "oración/sustantivo + の + あいだに",
     "meaning": {
       "en": "at some point within a span",
-      "fr": "à un moment au cours d'une période"
+      "fr": "à un moment au cours d'une période",
+      "es": "en algún momento dentro de un periodo"
     },
     "register": "neutral",
     "steps": [
@@ -21069,9 +21185,11 @@
     "pattern": "〜あいだ",
     "structure": "clause/noun + の + あいだ",
     "structure_fr": "proposition/nom + の + あいだ",
+    "structure_es": "oración/sustantivo + の + あいだ",
     "meaning": {
       "en": "throughout a span",
-      "fr": "pendant toute une période"
+      "fr": "pendant toute une période",
+      "es": "durante todo un periodo"
     },
     "register": "neutral",
     "steps": [
@@ -21419,9 +21537,11 @@
     "pattern": "〜ところだ",
     "structure": "verb dictionary/た-form + ところだ",
     "structure_fr": "verbe forme du dictionnaire/en た + ところだ",
+    "structure_es": "verbo en forma de diccionario/た + ところだ",
     "meaning": {
       "en": "right at that stage of an action",
-      "fr": "être précisément à ce stade de l'action"
+      "fr": "être précisément à ce stade de l'action",
+      "es": "justo en esa fase de una acción"
     },
     "register": "neutral",
     "steps": [
@@ -21812,9 +21932,11 @@
     "pattern": "〜たばかり",
     "structure": "verb た-form + ばかり",
     "structure_fr": "verbe forme en た + ばかり",
+    "structure_es": "verbo en forma た + ばかり",
     "meaning": {
       "en": "only just finished doing",
-      "fr": "venir tout juste de faire"
+      "fr": "venir tout juste de faire",
+      "es": "acabar de hacer algo"
     },
     "register": "polite",
     "steps": [
@@ -22196,9 +22318,11 @@
     "pattern": "〜させてください",
     "structure": "verb causative stem + せてください",
     "structure_fr": "radical verbal causatif + せてください",
+    "structure_es": "raíz causativa del verbo + せてください",
     "meaning": {
       "en": "asking to be allowed to do",
-      "fr": "demander la permission de faire"
+      "fr": "demander la permission de faire",
+      "es": "pedir permiso para hacer algo"
     },
     "register": "polite",
     "steps": [
@@ -22545,9 +22669,11 @@
     "pattern": "〜なさい",
     "structure": "verb stem + なさい",
     "structure_fr": "radical verbal + なさい",
+    "structure_es": "raíz verbal + なさい",
     "meaning": {
       "en": "a firm but gentle order",
-      "fr": "un ordre ferme mais doux"
+      "fr": "un ordre ferme mais doux",
+      "es": "una orden firme pero amable"
     },
     "register": "neutral",
     "steps": [
@@ -22944,9 +23070,11 @@
     "reading": "〜て／〜ないで（いらい）",
     "structure": "verb て-form ／ ない-form + で, ending the sentence",
     "structure_fr": "verbe forme en て ／ forme en ない + で, en fin de phrase",
+    "structure_es": "verbo en forma て ／ forma ない + で, al final de la frase",
     "meaning": {
       "en": "a casual request: do this, don't do that",
-      "fr": "une demande familière : fais ceci, ne fais pas cela"
+      "fr": "une demande familière : fais ceci, ne fais pas cela",
+      "es": "una petición informal: haz esto, no hagas aquello"
     },
     "register": "casual",
     "steps": [
@@ -23378,9 +23506,11 @@
     "pattern": "〜ために",
     "structure": "verb dictionary form / noun + の + ために",
     "structure_fr": "verbe forme du dictionnaire / nom + の + ために",
+    "structure_es": "verbo en forma de diccionario / sustantivo + の + ために",
     "meaning": {
       "en": "for the sake of, in order to",
-      "fr": "pour, afin de"
+      "fr": "pour, afin de",
+      "es": "por el bien de, para"
     },
     "register": "neutral",
     "steps": [
@@ -23728,9 +23858,11 @@
     "pattern": "〜ように",
     "structure": "verb potential/ない form + ように",
     "structure_fr": "verbe forme potentielle/en ない + ように",
+    "structure_es": "verbo en forma potencial/ない + ように",
     "meaning": {
       "en": "so that a state comes about",
-      "fr": "pour que, de façon à ce que"
+      "fr": "pour que, de façon à ce que",
+      "es": "para que se dé un estado"
     },
     "register": "neutral",
     "steps": [
@@ -24085,9 +24217,11 @@
     "structure": "verb stem + 方",
     "structure_reading": "verb stem + かた",
     "structure_fr": "radical verbal + 方",
+    "structure_es": "raíz verbal + 方",
     "meaning": {
       "en": "the way of doing something",
-      "fr": "la façon de faire"
+      "fr": "la façon de faire",
+      "es": "la manera de hacer algo"
     },
     "register": "neutral",
     "steps": [
@@ -24445,9 +24579,11 @@
     "structure": "verb stem + 出す",
     "structure_reading": "verb stem + だす",
     "structure_fr": "radical verbal + 出す",
+    "structure_es": "raíz verbal + 出す",
     "meaning": {
       "en": "break into an action abruptly",
-      "fr": "se mettre brusquement à"
+      "fr": "se mettre brusquement à",
+      "es": "ponerse de golpe a hacer algo"
     },
     "register": "neutral",
     "steps": [
@@ -24801,9 +24937,11 @@
     "structure": "verb stem + 直す",
     "structure_reading": "verb stem + なおす",
     "structure_fr": "radical verbal + 直す",
+    "structure_es": "raíz verbal + 直す",
     "meaning": {
       "en": "do it over again",
-      "fr": "refaire, recommencer"
+      "fr": "refaire, recommencer",
+      "es": "volver a hacerlo, rehacer"
     },
     "register": "neutral",
     "steps": [
@@ -25135,9 +25273,11 @@
     "pattern": "〜てもらえませんか",
     "structure": "verb て-form + もらえませんか",
     "structure_fr": "verbe forme en て + もらえませんか",
+    "structure_es": "verbo en forma て + もらえませんか",
     "meaning": {
       "en": "a polite request for a favour",
-      "fr": "une demande polie de service"
+      "fr": "une demande polie de service",
+      "es": "una petición cortés de un favor"
     },
     "register": "polite",
     "steps": [
@@ -25497,9 +25637,11 @@
     "pattern": "〜がする",
     "structure": "sensation noun + がする",
     "structure_fr": "nom de sensation + がする",
+    "structure_es": "sustantivo de sensación + がする",
     "meaning": {
       "en": "a smell, sound or taste is perceived",
-      "fr": "percevoir une odeur, un son, un goût"
+      "fr": "percevoir une odeur, un son, un goût",
+      "es": "se percibe un olor, un sonido o un sabor"
     },
     "register": "neutral",
     "steps": [
@@ -25857,9 +25999,11 @@
     "pattern": "〜までに",
     "structure": "time/event + までに",
     "structure_fr": "moment/événement + までに",
+    "structure_es": "momento/suceso + までに",
     "meaning": {
       "en": "no later than that point",
-      "fr": "au plus tard à, avant"
+      "fr": "au plus tard à, avant",
+      "es": "no más tarde de ese momento"
     },
     "register": "neutral",
     "steps": [
@@ -26174,9 +26318,11 @@
     "reading": "〜そうだ（でんぶん）",
     "structure": "plain form + そうだ",
     "structure_fr": "forme neutre + そうだ",
+    "structure_es": "forma llana + そうだ",
     "meaning": {
       "en": "I hear that, they say that",
-      "fr": "il paraît que, on dit que"
+      "fr": "il paraît que, on dit que",
+      "es": "he oído que, dicen que"
     },
     "register": "neutral",
     "steps": [
@@ -26529,9 +26675,11 @@
     "structure": "verb plain form ／ noun + の + 場合 (+ は)",
     "structure_reading": "verb plain form ／ noun + の + ばあい (+ は)",
     "structure_fr": "verbe forme neutre ／ nom + の + 場合 (+ は)",
+    "structure_es": "verbo en forma llana ／ sustantivo + の + 場合 (+ は)",
     "meaning": {
       "en": "in the case that, if it happens that",
-      "fr": "au cas où, dans le cas de"
+      "fr": "au cas où, dans le cas de",
+      "es": "en caso de que, si llegara a pasar"
     },
     "register": "polite",
     "steps": [
@@ -26899,9 +27047,11 @@
     "structure": "verb dictionary form + 必要がある",
     "structure_reading": "verb dictionary form + ひつようがある",
     "structure_fr": "verbe forme du dictionnaire + 必要がある",
+    "structure_es": "verbo en forma de diccionario + 必要がある",
     "meaning": {
       "en": "it is necessary to, need to",
-      "fr": "il faut, il est nécessaire de"
+      "fr": "il faut, il est nécessaire de",
+      "es": "es necesario, hace falta"
     },
     "register": "polite",
     "steps": [
@@ -27213,9 +27363,11 @@
     "pattern": "〜じゃないか",
     "structure": "plain form ／ noun + じゃないか（ではないか）",
     "structure_fr": "forme neutre ／ nom + じゃないか（ではないか）",
+    "structure_es": "forma llana ／ sustantivo + じゃないか（ではないか）",
     "meaning": {
       "en": "isn't it?; I told you so (seeking agreement, or pointing something out)",
-      "fr": "n'est-ce pas ? ; je te l'avais dit (chercher l'accord, ou faire remarquer)"
+      "fr": "n'est-ce pas ? ; je te l'avais dit (chercher l'accord, ou faire remarquer)",
+      "es": "¿no es así?; ya te lo dije (buscar acuerdo, o hacer notar algo)"
     },
     "register": "casual",
     "steps": [
@@ -27563,9 +27715,11 @@
     "pattern": "〜がる",
     "structure": "い-adj (drop い) ／ な-adj + がる",
     "structure_fr": "adj. en い (sans い) ／ adj. en な + がる",
+    "structure_es": "adj. い (sin い) ／ adj. な + がる",
     "meaning": {
       "en": "shows signs of feeling… (someone else's wants and feelings)",
-      "fr": "montrer des signes de… (les envies et sentiments d'autrui)"
+      "fr": "montrer des signes de… (les envies et sentiments d'autrui)",
+      "es": "muestra señales de sentir… (deseos y sentimientos de otra persona)"
     },
     "register": "neutral",
     "steps": [
@@ -27917,9 +28071,11 @@
     "pattern": "〜くする／〜にする",
     "structure": "い-adj (drop い) + くする ／ な-adj・noun + にする",
     "structure_fr": "adj. en い (sans い) + くする ／ adj. en な・nom + にする",
+    "structure_es": "adj. い (sin い) + くする ／ adj. な・sustantivo + にする",
     "meaning": {
       "en": "to make something (smaller, quiet…): acting on a thing",
-      "fr": "rendre (plus petit, calme…) : agir sur une chose"
+      "fr": "rendre (plus petit, calme…) : agir sur une chose",
+      "es": "hacer algo (más pequeño, tranquilo…): actuar sobre una cosa"
     },
     "register": "neutral",
     "steps": [
@@ -28312,9 +28468,11 @@
     "pattern": "〜ような",
     "structure": "noun + の + ような + noun ／ plain form + ような",
     "structure_fr": "nom + の + ような + nom ／ forme neutre + ような",
+    "structure_es": "sustantivo + の + ような + sustantivo ／ forma llana + ような",
     "meaning": {
       "en": "like, such as (a likeness before a noun)",
-      "fr": "comme, tel que (une ressemblance devant un nom)"
+      "fr": "comme, tel que (une ressemblance devant un nom)",
+      "es": "como, tal como (un parecido delante de un sustantivo)"
     },
     "register": "neutral",
     "steps": [
@@ -28679,9 +28837,11 @@
     "pattern": "〜でございます",
     "structure": "noun + でございます (the very polite です)",
     "structure_fr": "nom + でございます (le です très poli)",
+    "structure_es": "sustantivo + でございます (el です muy cortés)",
     "meaning": {
       "en": "the very polite 'is' of shops and announcements",
-      "fr": "le « est » très poli des magasins et des annonces"
+      "fr": "le « est » très poli des magasins et des annonces",
+      "es": "el «es» muy cortés de tiendas y anuncios"
     },
     "register": "formal",
     "steps": [
@@ -29033,9 +29193,11 @@
     "pattern": "いらっしゃる／おっしゃる／なさる",
     "structure": "いらっしゃる (be, come, go) ／ おっしゃる (say) ／ なさる (do): honorific verbs for others",
     "structure_fr": "いらっしゃる (être, venir, aller) ／ おっしゃる (dire) ／ なさる (faire) : verbes de respect pour autrui",
+    "structure_es": "いらっしゃる (estar, venir, ir) ／ おっしゃる (decir) ／ なさる (hacer): verbos honoríficos para los demás",
     "meaning": {
       "en": "the respectful verbs that replace いる・来る・行く, 言う and する",
-      "fr": "les verbes de respect qui remplacent いる・来る・行く, 言う et する"
+      "fr": "les verbes de respect qui remplacent いる・来る・行く, 言う et する",
+      "es": "los verbos de respeto que sustituyen a いる・来る・行く, 言う y する"
     },
     "register": "polite",
     "steps": [
@@ -29403,9 +29565,11 @@
     "pattern": "まいる／もうす／いたす",
     "structure": "まいる (come, go) ／ もうす (say, be called) ／ いたす (do): humble verbs for oneself",
     "structure_fr": "まいる (venir, aller) ／ もうす (dire, s'appeler) ／ いたす (faire) : verbes de modestie pour soi-même",
+    "structure_es": "まいる (venir, ir) ／ もうす (decir, llamarse) ／ いたす (hacer): verbos humildes para uno mismo",
     "meaning": {
       "en": "the humble verbs that lower the speaker's own actions",
-      "fr": "les verbes de modestie qui abaissent les actions du locuteur"
+      "fr": "les verbes de modestie qui abaissent les actions du locuteur",
+      "es": "los verbos humildes que rebajan las acciones de quien habla"
     },
     "register": "polite",
     "steps": [
@@ -29791,9 +29955,11 @@
     "pattern": "〜てくださる／〜ていただく",
     "structure": "verb て-form + くださる (the respectful てくれる); 〜ていただく is the respectful てもらう",
     "structure_fr": "verbe forme en て + くださる (le てくれる respectueux) ; 〜ていただく est le てもらう humble",
+    "structure_es": "verbo en forma て + くださる (el てくれる respetuoso); 〜ていただく es el てもらう humilde",
     "meaning": {
       "en": "someone above you does something for you; you receive it, humbly",
-      "fr": "un supérieur fait quelque chose pour vous ; vous le recevez avec modestie"
+      "fr": "un supérieur fait quelque chose pour vous ; vous le recevez avec modestie",
+      "es": "alguien superior hace algo por ti; tú lo recibes con humildad"
     },
     "register": "polite",
     "steps": [
@@ -30145,9 +30311,11 @@
     "pattern": "お〜ください",
     "structure": "お + verb stem + ください",
     "structure_fr": "お + radical verbal + ください",
+    "structure_es": "お + raíz verbal + ください",
     "meaning": {
       "en": "please do (a respectful request)",
-      "fr": "veuillez… (une demande respectueuse)"
+      "fr": "veuillez… (une demande respectueuse)",
+      "es": "haga…, por favor (una petición respetuosa)"
     },
     "register": "polite",
     "steps": [
@@ -30513,9 +30681,11 @@
     "structure": "verb dictionary form／ない-form + ように言う（頼む・伝える）",
     "structure_reading": "verb dictionary form／ない-form + ようにいう（たのむ・つたえる）",
     "structure_fr": "verbe forme du dictionnaire／forme en ない + ように言う（頼む・伝える）",
+    "structure_es": "verbo en forma de diccionario／forma ない + ように言う（頼む・伝える）",
     "meaning": {
       "en": "tell someone to do (reporting an instruction)",
-      "fr": "dire à quelqu'un de faire (rapporter une consigne)"
+      "fr": "dire à quelqu'un de faire (rapporter une consigne)",
+      "es": "decirle a alguien que haga algo (transmitir una instrucción)"
     },
     "register": "polite",
     "steps": [
@@ -30857,9 +31027,11 @@
     "pattern": "〜ていただけませんか",
     "structure": "verb て-form + いただけませんか",
     "structure_fr": "verbe forme en て + いただけませんか",
+    "structure_es": "verbo en forma て + いただけませんか",
     "meaning": {
       "en": "could you possibly… (the most polite request)",
-      "fr": "pourriez-vous… (la demande la plus polie)"
+      "fr": "pourriez-vous… (la demande la plus polie)",
+      "es": "¿podría usted…? (la petición más cortés)"
     },
     "register": "polite",
     "steps": [
@@ -31214,9 +31386,11 @@
     "pattern": "〜てよかった",
     "structure": "verb て-form + よかった",
     "structure_fr": "verbe forme en て + よかった",
+    "structure_es": "verbo en forma て + よかった",
     "meaning": {
       "en": "I'm glad that…, it was good that…",
-      "fr": "heureusement que…, j'ai bien fait de…"
+      "fr": "heureusement que…, j'ai bien fait de…",
+      "es": "me alegro de que…, menos mal que…"
     },
     "register": "neutral",
     "steps": [
@@ -31536,9 +31710,11 @@
     "structure": "verb dictionary form + な（禁止）",
     "structure_reading": "verb dictionary form + な（きんし）",
     "structure_fr": "verbe forme du dictionnaire + な（禁止）",
+    "structure_es": "verbo en forma de diccionario + な（禁止）",
     "meaning": {
       "en": "don't! (a blunt prohibition)",
-      "fr": "ne fais pas ! (une interdiction brutale)"
+      "fr": "ne fais pas ! (une interdiction brutale)",
+      "es": "¡no lo hagas! (una prohibición tajante)"
     },
     "register": "casual",
     "steps": [
@@ -31946,9 +32122,11 @@
     "structure": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (書け, 待て)",
     "structure_reading": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (かけ, まて)",
     "structure_fr": "verbe à l'impératif : radical d'un verbe en る + ろ ／ verbe en う, finale au son en え (書け, 待て)",
+    "structure_es": "verbo en imperativo: raíz de verbo en る + ろ ／ verbo en う, final en la fila え (書け, 待て)",
     "meaning": {
       "en": "the plain command form",
-      "fr": "l'impératif brut"
+      "fr": "l'impératif brut",
+      "es": "el imperativo llano"
     },
     "register": "casual",
     "steps": [
@@ -32453,9 +32631,11 @@
     "pattern": "〜といい／〜たらいい／〜ばいい",
     "structure": "verb dictionary form + といい ／ た-form + らいい ／ ば-form + いい",
     "structure_fr": "verbe forme du dictionnaire + といい ／ forme en た + らいい ／ forme en ば + いい",
+    "structure_es": "verbo en forma de diccionario + といい ／ forma た + らいい ／ forma ば + いい",
     "meaning": {
       "en": "it would be good if…; you should just…; I hope…",
-      "fr": "il serait bien que… ; tu n'as qu'à… ; j'espère que…"
+      "fr": "il serait bien que… ; tu n'as qu'à… ; j'espère que…",
+      "es": "estaría bien que…; solo tienes que…; ojalá…"
     },
     "register": "neutral",
     "steps": [
@@ -32842,9 +33022,11 @@
     "pattern": "〜ないほうがいい",
     "structure": "verb ない-form + ほうがいい",
     "structure_fr": "verbe forme en ない + ほうがいい",
+    "structure_es": "verbo en forma ない + ほうがいい",
     "meaning": {
       "en": "you had better not",
-      "fr": "il vaut mieux ne pas"
+      "fr": "il vaut mieux ne pas",
+      "es": "más vale no"
     },
     "register": "polite",
     "steps": [
@@ -33162,9 +33344,11 @@
     "pattern": "〜さ",
     "structure": "い-adj (drop い) + さ ／ な-adj + さ",
     "structure_fr": "adj. en い (sans い) + さ ／ adj. en な + さ",
+    "structure_es": "adj. い (sin い) + さ ／ adj. な + さ",
     "meaning": {
       "en": "turns an adjective into a noun: height, kindness",
-      "fr": "transforme un adjectif en nom : la hauteur, la gentillesse"
+      "fr": "transforme un adjectif en nom : la hauteur, la gentillesse",
+      "es": "convierte un adjetivo en sustantivo: altura, amabilidad"
     },
     "register": "neutral",
     "steps": [
@@ -33489,9 +33673,11 @@
     "structure": "noun + 中（ちゅう：during ／ じゅう：throughout）",
     "structure_reading": "noun + ちゅう・じゅう（ちゅう：during ／ じゅう：throughout）",
     "structure_fr": "nom + 中（ちゅう：pendant ／ じゅう：tout au long de）",
+    "structure_es": "sustantivo + 中（ちゅう：durante ／ じゅう：a lo largo de）",
     "meaning": {
       "en": "during (〜ちゅう) or all through (〜じゅう)",
-      "fr": "pendant (〜ちゅう) ou tout au long de (〜じゅう)"
+      "fr": "pendant (〜ちゅう) ou tout au long de (〜じゅう)",
+      "es": "durante (〜ちゅう) o a lo largo de todo (〜じゅう)"
     },
     "register": "neutral",
     "steps": [
@@ -33860,9 +34046,11 @@
     "pattern": "〜おきに",
     "structure": "number + counter + おきに",
     "structure_fr": "nombre + classificateur + おきに",
+    "structure_es": "número + contador + おきに",
     "meaning": {
       "en": "every other…, at intervals of",
-      "fr": "tous les… (à intervalles de)"
+      "fr": "tous les… (à intervalles de)",
+      "es": "cada dos…, a intervalos de"
     },
     "register": "neutral",
     "steps": [
@@ -34181,9 +34369,11 @@
     "pattern": "〜なくて",
     "structure": "verb ない-form (drop い) + なくて ／ い-adj + くなくて ／ noun・な-adj + じゃなくて",
     "structure_fr": "verbe forme en ない (sans い) + なくて ／ adj. en い + くなくて ／ nom・adj. en な + じゃなくて",
+    "structure_es": "verbo en forma ない (sin い) + なくて ／ adj. い + くなくて ／ sustantivo・adj. な + じゃなくて",
     "meaning": {
       "en": "not … and so (a negative cause), or 'not A but B'",
-      "fr": "ne pas… et donc (une cause négative), ou « pas A mais B »"
+      "fr": "ne pas… et donc (une cause négative), ou « pas A mais B »",
+      "es": "no… y por eso (una causa negativa), o «no A sino B»"
     },
     "register": "neutral",
     "steps": [
@@ -34583,9 +34773,11 @@
     "pattern": "〜ますように",
     "structure": "verb ます-stem + ますように",
     "structure_fr": "radical en ます + ますように",
+    "structure_es": "raíz ます + ますように",
     "meaning": {
       "en": "may it be that… (a wish or a prayer)",
-      "fr": "pourvu que… (un souhait ou une prière)"
+      "fr": "pourvu que… (un souhait ou une prière)",
+      "es": "ojalá… (un deseo o una plegaria)"
     },
     "register": "polite",
     "steps": [
@@ -34944,9 +35136,11 @@
     "structure": "question word + plain clause + か（間接疑問） + 知っている／分かる／教える",
     "structure_reading": "question word + plain clause + か（かんせつぎもん） + しっている／わかる／おしえる",
     "structure_fr": "mot interrogatif + proposition neutre + か（間接疑問） + 知っている／分かる／教える",
+    "structure_es": "palabra interrogativa + oración en forma llana + か（間接疑問） + 知っている／分かる／教える",
     "meaning": {
       "en": "an embedded question: I know where… / do you know when…",
-      "fr": "une question enchâssée : je sais où… / sais-tu quand…"
+      "fr": "une question enchâssée : je sais où… / sais-tu quand…",
+      "es": "una pregunta indirecta: sé dónde… / ¿sabes cuándo…?"
     },
     "register": "polite",
     "steps": [
@@ -35375,9 +35569,11 @@
     "structure": "何でも／誰でも／いつでも／どこでも (question word + でも) + predicate",
     "structure_reading": "なんでも／だれでも／いつでも／どこでも (question word + でも) + predicate",
     "structure_fr": "何でも／誰でも／いつでも／どこでも (mot interrogatif + でも) + prédicat",
+    "structure_es": "何でも／誰でも／いつでも／どこでも (palabra interrogativa + でも) + predicado",
     "meaning": {
       "en": "anything, anyone, any time, anywhere: whichever it is",
-      "fr": "n'importe quoi, n'importe qui, n'importe quand, n'importe où"
+      "fr": "n'importe quoi, n'importe qui, n'importe quand, n'importe où",
+      "es": "cualquier cosa, cualquiera, cuando sea, donde sea: sea cual sea"
     },
     "register": "neutral",
     "steps": [
@@ -35775,9 +35971,11 @@
     "pattern": "〜でしょうか",
     "structure": "plain form ／ noun + でしょうか",
     "structure_fr": "forme neutre ／ nom + でしょうか",
+    "structure_es": "forma llana ／ sustantivo + でしょうか",
     "meaning": {
       "en": "I wonder if…? (a soft, polite question)",
-      "fr": "est-ce que… ? (une question douce et polie)"
+      "fr": "est-ce que… ? (une question douce et polie)",
+      "es": "¿será que…? (una pregunta suave y cortés)"
     },
     "register": "polite",
     "steps": [
@@ -36178,9 +36376,11 @@
     "structure": "number + counter + も（強調） + predicate",
     "structure_reading": "number + counter + も（きょうちょう） + predicate",
     "structure_fr": "nombre + classificateur + も（強調） + prédicat",
+    "structure_es": "número + contador + も（強調） + predicado",
     "meaning": {
       "en": "as much as, as many as (stressing a large amount)",
-      "fr": "pas moins de, jusqu'à (insister sur une grande quantité)"
+      "fr": "pas moins de, jusqu'à (insister sur une grande quantité)",
+      "es": "nada menos que, hasta (recalca una gran cantidad)"
     },
     "register": "neutral",
     "steps": [
@@ -36595,9 +36795,11 @@
     "pattern": "それで",
     "structure": "sentence。それで + sentence",
     "structure_fr": "phrase。それで + phrase",
+    "structure_es": "frase。それで + frase",
     "meaning": {
       "en": "and so, that's why; 'and then?'",
-      "fr": "et donc, c'est pour ça ; « et alors ? »"
+      "fr": "et donc, c'est pour ça ; « et alors ? »",
+      "es": "y por eso, por eso es que; «¿y entonces?»"
     },
     "register": "neutral",
     "steps": [
@@ -36954,9 +37156,11 @@
     "pattern": "それに",
     "structure": "sentence。それに + sentence",
     "structure_fr": "phrase。それに + phrase",
+    "structure_es": "frase。それに + frase",
     "meaning": {
       "en": "besides, what's more",
-      "fr": "en plus, de surcroît"
+      "fr": "en plus, de surcroît",
+      "es": "además, encima"
     },
     "register": "neutral",
     "steps": [
@@ -37285,9 +37489,11 @@
     "pattern": "ところで",
     "structure": "sentence。ところで + new topic",
     "structure_fr": "phrase。ところで + nouveau sujet",
+    "structure_es": "frase。ところで + tema nuevo",
     "meaning": {
       "en": "by the way (changing the subject)",
-      "fr": "au fait (pour changer de sujet)"
+      "fr": "au fait (pour changer de sujet)",
+      "es": "por cierto (para cambiar de tema)"
     },
     "register": "neutral",
     "steps": [
@@ -37597,9 +37803,11 @@
     "pattern": "または",
     "structure": "A + または + B",
     "structure_fr": "A + または + B",
+    "structure_es": "A + または + B",
     "meaning": {
       "en": "or (formal, in writing and notices)",
-      "fr": "ou (formel, à l'écrit et sur les avis)"
+      "fr": "ou (formel, à l'écrit et sur les avis)",
+      "es": "o (formal, por escrito y en avisos)"
     },
     "register": "written",
     "steps": [
@@ -37931,9 +38139,11 @@
     "pattern": "こんな／そんな／あんな／どんな",
     "structure": "こんな／そんな／あんな／どんな + noun",
     "structure_fr": "こんな／そんな／あんな／どんな + nom",
+    "structure_es": "こんな／そんな／あんな／どんな + sustantivo",
     "meaning": {
       "en": "this kind of, that kind of, what kind of",
-      "fr": "ce genre de, quel genre de"
+      "fr": "ce genre de, quel genre de",
+      "es": "este tipo de, ese tipo de, qué tipo de"
     },
     "register": "neutral",
     "steps": [
@@ -38290,9 +38500,11 @@
     "pattern": "こんなに／そんなに／あんなに",
     "structure": "こんなに／そんなに／あんなに + adjective／verb",
     "structure_fr": "こんなに／そんなに／あんなに + adjectif／verbe",
+    "structure_es": "こんなに／そんなに／あんなに + adjetivo／verbo",
     "meaning": {
       "en": "this much, that much (degree)",
-      "fr": "autant que ça, à ce point (le degré)"
+      "fr": "autant que ça, à ce point (le degré)",
+      "es": "tanto, hasta ese punto (el grado)"
     },
     "register": "neutral",
     "steps": [
@@ -38676,9 +38888,11 @@
     "structure": "verb dictionary form ／ noun + の + 予定だ",
     "structure_reading": "verb dictionary form ／ noun + の + よていだ",
     "structure_fr": "verbe forme du dictionnaire ／ nom + の + 予定だ",
+    "structure_es": "verbo en forma de diccionario ／ sustantivo + の + 予定だ",
     "meaning": {
       "en": "it is planned that, I am due to",
-      "fr": "il est prévu que, je dois…"
+      "fr": "il est prévu que, je dois…",
+      "es": "está previsto que, tengo previsto"
     },
     "register": "polite",
     "steps": [
@@ -39035,9 +39249,11 @@
     "pattern": "〜ちゃいけない／〜じゃいけない",
     "structure": "verb て-form with て→ちゃ／で→じゃ + いけない (the spoken 〜てはいけない; 〜ではいけない → 〜じゃいけない)",
     "structure_fr": "verbe forme en て avec て→ちゃ／で→じゃ + いけない (le 〜てはいけない parlé ; 〜ではいけない → 〜じゃいけない)",
+    "structure_es": "verbo en forma て con て→ちゃ／で→じゃ + いけない (el 〜てはいけない hablado; 〜ではいけない → 〜じゃいけない)",
     "meaning": {
       "en": "mustn't (spoken)",
-      "fr": "il ne faut pas (à l'oral)"
+      "fr": "il ne faut pas (à l'oral)",
+      "es": "no se debe (hablado)"
     },
     "register": "casual",
     "steps": [
@@ -39434,9 +39650,11 @@
     "structure": "noun + が見える ／ が聞こえる",
     "structure_reading": "noun + がみえる ／ がきこえる",
     "structure_fr": "nom + が見える ／ が聞こえる",
+    "structure_es": "sustantivo + が見える ／ が聞こえる",
     "meaning": {
       "en": "can be seen / can be heard (of itself, no effort)",
-      "fr": "on voit / on entend (de soi-même, sans effort)"
+      "fr": "on voit / on entend (de soi-même, sans effort)",
+      "es": "se ve / se oye (por sí solo, sin esfuerzo)"
     },
     "register": "neutral",
     "steps": [
@@ -39803,9 +40021,11 @@
     "structure": "noun／な-adj + に見える ／ い-adj + く見える",
     "structure_reading": "noun／な-adj + にみえる ／ い-adj + くみえる",
     "structure_fr": "nom／adj. en な + に見える ／ adj. en い + く見える",
+    "structure_es": "sustantivo／adj. な + に見える ／ adj. い + く見える",
     "meaning": {
       "en": "looks (like), appears",
-      "fr": "avoir l'air, sembler"
+      "fr": "avoir l'air, sembler",
+      "es": "parece, se ve (como)"
     },
     "register": "neutral",
     "steps": [

@@ -1,7 +1,8 @@
 import fr from './locales/fr'
 import en from './locales/en'
+import es from './locales/es'
 
-export const translations = { fr, en }
+export const translations = { fr, en, es }
 
 // `flag` used to carry a country-flag emoji per entry — dropped, not
 // replaced with an icon, because nothing ever read it (Settings › Display in
@@ -10,4 +11,5 @@ export const translations = { fr, en }
 export const LANGUAGES = [
     { code: 'fr', label: 'Français' },
     { code: 'en', label: 'English' },
+    { code: 'es', label: 'Español' },
 ]

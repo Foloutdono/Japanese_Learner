@@ -55,3 +55,9 @@ def get_kanji_meaning(kanji: str, lang: str = "en") -> str:
 # has no French — so translations.get_meaning()'s fallback still fires
 # for any character that ever lacks one.
 KANJI_FR: dict[str, str] = _db.meanings_for(DECK_BY_CHAR, "fr")
+
+# The same for Spanish (plan 291): KANJIDIC2 has it for all but 71 of the
+# deck's characters, and the app's own (datas/kanji/kanji_meanings_es.json)
+# is folded into the database over those by scripts/build_kanji_db.py, as
+# the French is.
+KANJI_ES: dict[str, str] = _db.meanings_for(DECK_BY_CHAR, "es")

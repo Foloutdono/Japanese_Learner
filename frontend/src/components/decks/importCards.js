@@ -276,7 +276,7 @@ export function exampleText(structure, termSep, t, lang = 'fr') {
   }
   const quote = cell => (cell.includes(termSep) || cell.includes('\n') || cell.includes('"')
     ? `"${cell.replace(/"/g, '""')}"` : cell)
-  const pick = lang === 'en' ? 1 : 0
+  const pick = lang === 'fr' ? 0 : 1
   return [
     cols.map(label).map(quote).join(termSep),
     sample.map(([, value]) => quote(Array.isArray(value) ? value[pick] : value)).join(termSep),

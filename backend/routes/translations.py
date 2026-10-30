@@ -9,7 +9,7 @@ router = APIRouter()
 # per-word routes below would otherwise rebuild one for every word asked.
 # The content is fixed for the life of the process. An unsupported
 # language raises, so it is never cached.
-@lru_cache(maxsize=4)
+@lru_cache(maxsize=6)
 def _load_translation_map(lang: str, item_type: str) -> dict:
     if lang == "fr":
         if item_type == "kanji":
@@ -19,11 +19,17 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
             from translations.fr.vocab_fr import VOCAB_FR
             return VOCAB_FR
 
-    if lang == "en":
+    # English, and Spanish (plan 291) walked the same way: a card Spanish
+    # has no line for yet carries its English, as get_meaning serves it,
+    # so the map the client swaps meanings from never blanks a card.
+    if lang in ("en", "es"):
+        from translations import get_meaning
+        from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
+
         if item_type == "kanji":
             from content.kanji_data import KANJI_BY_LEVEL
             return {
-                entry["kanji"]: entry.get("meaning", "")
+                entry["kanji"]: get_meaning(entry, lang, KANJI_GLOSSES)
                 for level_list in KANJI_BY_LEVEL.values()
                 for entry in level_list
                 if entry.get("kanji")
@@ -32,7 +38,7 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
         if item_type == "vocab":
             from content.vocab_data import VOCAB_BY_LEVEL
             return {
-                key: entry.get("meaning", "")
+                key: get_meaning(entry, lang, VOCAB_GLOSSES)
                 for level_list in VOCAB_BY_LEVEL.values()
                 for entry in level_list
                 for key in [entry.get("kanji"), entry.get("kana")]

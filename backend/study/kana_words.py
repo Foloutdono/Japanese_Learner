@@ -64,7 +64,7 @@ from content.vocab_data import VOCAB_BY_LEVEL
 import content.vocab_jmdict_data as jmdict_db
 from translations import get_meaning
 from content.jmdict_fr import pool_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 
 # Rows in the ledger. The kanji panel's own number: four rows is what
 # the block holds before it becomes a list to scroll rather than a fact
@@ -270,7 +270,7 @@ def kana_words(kana: str, lang: str) -> list[dict]:
             # A pool row (no level) is glossed from the pool's own
             # French, never VOCAB_FR's, which is keyed by written form
             # and would give it a deck homograph's (plan 215).
-            "meaning": get_meaning(entry, lang, VOCAB_FR) if level else pool_meaning(entry, lang),
+            "meaning": get_meaning(entry, lang, VOCAB_GLOSSES) if level else pool_meaning(entry, lang),
             "level":   level,
         })
         if len(rows) == MAX_WORDS:

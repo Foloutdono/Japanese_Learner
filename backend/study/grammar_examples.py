@@ -197,13 +197,14 @@ def pattern_furigana(pattern: str, reading: str | None) -> list[dict]:
 
 def structure_text(entry: dict, lang: str = "en") -> str:
     """The formation line in the learner's language (plan 215):
-    `structure_fr` for French, `structure` otherwise.
+    `structure_fr` for French, `structure_es` for Spanish where it is
+    written (plan 291), `structure` otherwise.
 
     `structure` itself stays English and is never localised in place:
     grammar_detect reads what a point attaches to from it, and the tour
     asks whether it starts with "verb"."""
-    if lang == "fr" and entry.get("structure_fr"):
-        return entry["structure_fr"]
+    if lang in ("fr", "es") and entry.get(f"structure_{lang}"):
+        return entry[f"structure_{lang}"]
     return entry.get("structure") or ""
 
 

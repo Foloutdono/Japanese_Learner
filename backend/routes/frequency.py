@@ -34,8 +34,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
-from content.kanji_meanings import KANJI_FR
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 from study.modes import KANJI, VOCAB, Mode, eligible_for, resolve_for_source
 # The payload builders themselves, not copies of them. KanjiScreen and
 # VocabScreen treat /api/frequency/{domain}/cards as a drop-in sibling
@@ -99,8 +98,8 @@ def _augment(domain: str, entry: dict) -> dict:
     return entry
 
 
-def _fr_map(domain: str) -> dict:
-    return KANJI_FR if domain == "kanji" else VOCAB_FR
+def _glosses(domain: str) -> dict:
+    return KANJI_GLOSSES if domain == "kanji" else VOCAB_GLOSSES
 
 
 def _build_card(domain: str, raw_id: str, entry: dict, pool: list[dict], m: Mode, lang: str,
@@ -302,7 +301,7 @@ def get_tier_items(domain: str, tier: int, lang: str = "fr", tier_size: int = fr
 
     overrides = frequency_store.get_overrides(user_id, domain)
     keys = freq.tier_keys(domain, tier, tier_size=tier_size, overrides=overrides)
-    fr_map = _fr_map(domain)
+    glosses = _glosses(domain)
 
     items = []
     for key in keys:
@@ -314,7 +313,7 @@ def get_tier_items(domain: str, tier: int, lang: str = "fr", tier_size: int = fr
             "key": key,
             "kanji": entry.get("kanji", ""),
             "kana": entry.get("kana", ""),
-            "meaning": get_meaning(entry, lang, fr_map),
+            "meaning": get_meaning(entry, lang, glosses),
             "level": level,
             "standard_tier": freq.standard_tier_of(domain, key, freq.DEFAULT_TIER_SIZE),
             "is_override": key in overrides,

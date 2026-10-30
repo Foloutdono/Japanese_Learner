@@ -33,7 +33,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 from study.modes import VOCAB, Mode, eligible_for, require_mode
 from content import theme_data
 # reuse, don't duplicate -- a theme card and a level card are rendered by
@@ -43,7 +43,7 @@ from routes.vocab import _build_vocab_card, MAX_BATCH
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-FR_MAP = VOCAB_FR
+GLOSSES = VOCAB_GLOSSES
 
 # No ThemeReviewPayload / POST /api/vocab/theme/review here — reviews
 # are posted to vocab.py's existing POST /api/vocab/review instead.
@@ -67,7 +67,7 @@ def _entry_meaning(entry: dict, lang: str) -> str:
     if lang == "fr" and entry.get("meaning_fr"):
         return entry["meaning_fr"]
     if entry["domain"] == "vocab":
-        return get_meaning(entry, lang, FR_MAP)
+        return get_meaning(entry, lang, GLOSSES)
     return entry["meaning"]
 
 

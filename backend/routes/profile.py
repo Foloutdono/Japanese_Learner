@@ -556,7 +556,7 @@ DEFAULT_READING_PACE = "standard"
 
 
 # The interface languages (frontend/src/lib/locale.js SUPPORTED_LANGS).
-UI_LANGS = ("fr", "en")
+UI_LANGS = ("fr", "en", "es")
 
 
 class LearningPayload(BaseModel):

@@ -10,7 +10,6 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss
 from content.grammar_sentences_data import get_sentences
 from content.kana_data import KANA_SETS
 from content.kanji_data import KANJI_BY_LEVEL
-from content.kanji_meanings import KANJI_FR
 from content.kanji_readings import display_reading, split_readings
 from content.radical_data import radical_for
 from content.vocab_data import VOCAB_BY_LEVEL
@@ -20,7 +19,7 @@ from study.grammar_forms import choice_forms
 from study.grammar_ladder import build_specimen, write_payload
 from study.grammar_lesson import contrast_payload
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 
 # ── 見本 — what each stop of a line holds (plan 137) ──────────────
 # The desk's line station shows each platform with the card it will
@@ -58,7 +57,7 @@ SOURCES = (
     "reading", "translation", "comprehension", "dictation", "composition", "exam", "conversation",
 )
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-LANGS = ("fr", "en")
+LANGS = ("fr", "en", "es")
 
 SAMPLE_SIZE = {"kana": 11, "kanji": 10, "vocab": 8, "grammar": 6, "composition": 6}
 
@@ -110,7 +109,7 @@ def _kanji_line(lang: str) -> dict:
             "sample": [e["kanji"] for e in entries[: SAMPLE_SIZE["kanji"]]],
             "card": {
                 "jp": first["kanji"],
-                "meaning": get_meaning(first, lang, KANJI_FR),
+                "meaning": get_meaning(first, lang, KANJI_GLOSSES),
                 "reading": _kanji_reading(first),
                 "radical": rad["char"] if rad else None,
             },
@@ -134,7 +133,7 @@ def _vocab_line(lang: str) -> dict:
             "card": {
                 "jp": first.get("kanji") or first.get("kana", ""),
                 "reading": (first.get("kana") or "").split("/")[0].strip(),
-                "meaning": get_meaning(first, lang, VOCAB_FR),
+                "meaning": get_meaning(first, lang, VOCAB_GLOSSES),
             },
         }
     return stops

@@ -23,6 +23,7 @@ from translations import get_meaning, fr_gloss
 from content.jmdict_fr import pool_meaning
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 from core.auth import get_user_id
 from core.srs_instance import srs
 from study.card_lookup import (
@@ -192,7 +193,7 @@ def _kanji_deck_matches(query, lang: str, level: str | None = None) -> list[tupl
         (row[1].get("kanji", ""), row[1].get("kana", "")),
         (row[1].get("meaning", ""), KANJI_FR_MAP.get(row[1].get("kanji", ""), "")),
     ))
-    return [(lvl, k, get_meaning(k, lang, KANJI_FR_MAP)) for lvl, k in hits]
+    return [(lvl, k, get_meaning(k, lang, KANJI_GLOSSES)) for lvl, k in hits]
 
 
 @lru_cache(maxsize=1)
@@ -295,7 +296,7 @@ def _word_kanji(word: str, furigana: list[dict], lang: str,
     out = []
     for char in chars:
         deck = DECK_BY_CHAR.get(char)
-        meaning = get_meaning(deck[1], lang, KANJI_FR_MAP) if deck else pool.get(char, "")
+        meaning = get_meaning(deck[1], lang, KANJI_GLOSSES) if deck else pool.get(char, "")
         out.append({
             "char": char,
             "reading": reading_of(char, furigana),
@@ -451,7 +452,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
             # index that found it, not a second source of truth for it.
             deck_level, entry = deck_hit
             results.append(_deck_kanji_result(
-                deck_level, entry, get_meaning(entry, lang, KANJI_FR_MAP),
+                deck_level, entry, get_meaning(entry, lang, KANJI_GLOSSES),
                 lang, states, user_id,
             ))
         return {
@@ -576,7 +577,7 @@ def _deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str,
         )
 
     rows = [(lvl, w) for lvl, vocab_list in _levels_of(VOCAB_BY_LEVEL, level) for w in vocab_list]
-    return [(lvl, w, get_meaning(w, lang, VOCAB_FR_MAP))
+    return [(lvl, w, get_meaning(w, lang, VOCAB_GLOSSES))
             for lvl, w in search_match.ranked(query, rows, fields)]
 
 
@@ -707,7 +708,7 @@ def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> di
         if hit is not None:
             level, w = hit
             raw_id = vocab_to_id(w, level)
-            return _vocab_result(w, level, get_meaning(w, lang, VOCAB_FR_MAP),
+            return _vocab_result(w, level, get_meaning(w, lang, VOCAB_GLOSSES),
                                  lang, own(raw_id), user_id, raw_id)
     for kanji, reading in pairs:
         entry = jmdict_db.get_by_key(kanji, reading)

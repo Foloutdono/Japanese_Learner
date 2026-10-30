@@ -152,7 +152,7 @@ export const VALUES = {
     platform: ['web', 'native'],
     vp: ['phone', 'tablet', 'desk', 'wide'],
     os: ['ios', 'android', 'windows', 'mac', 'linux', 'chromeos', 'other'],
-    lang: ['fr', 'en'],
+    lang: ['fr', 'en', 'es'],
     theme: ['light', 'dark', 'auto'],
     input: ['touch', 'mouse'],
   },
@@ -172,7 +172,7 @@ export const VALUES = {
   transfer_offer: { choice: ['go', 'later'] },
   setting_change: {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target', 'main_mode', 'today_mode'],
-    value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
+    value: ['light', 'dark', 'auto', 'fr', 'en', 'es', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
   ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
   fare_blocked: { kind: ['review', 'duel', 'duel_review'] },

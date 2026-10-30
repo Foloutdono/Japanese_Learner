@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import fr from './fr/index.js'
 import en from './en/index.js'
+import es from './es/index.js'
 
 // ── One key, one value ─────────────────────────────────────────
 // Each table is a row of groups spread into one object, so a key written
@@ -27,7 +28,7 @@ function groupKeys(lang) {
 }
 
 describe('locale keys (each table)', () => {
-  for (const [lang, table] of [['fr', fr], ['en', en]]) {
+  for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {
     it(`defines every ${lang} key once`, () => {
       const keys = groupKeys(lang)
       expect([...new Set(keys.map(k => k.key))].sort(), `${lang}/index.js: a key the reader cannot see (indented off the group's two spaces?)`)
@@ -66,6 +67,19 @@ describe('locale parity (fr <-> en)', () => {
     expect(mismatched, `type mismatch: ${mismatched.join(', ')}`).toEqual([])
   })
 
+  // Spanish (plan 291) is held to the same parity: a key the Spanish
+  // table lacks renders nothing, exactly the silent blank above.
+  it('has every English key present in Spanish, and no other', () => {
+    const missing = Object.keys(en).filter(k => !(k in es))
+    const extra = Object.keys(es).filter(k => !(k in en))
+    expect(missing, `missing in es/index.js: ${missing.join(', ')}`).toEqual([])
+    expect(extra, `in es/index.js but not en/index.js: ${extra.join(', ')}`).toEqual([])
+    const mismatched = Object.keys(en)
+      .filter(k => k in es && typeof en[k] !== typeof es[k])
+      .map(k => `${k} (en: ${typeof en[k]}, es: ${typeof es[k]})`)
+    expect(mismatched, `type mismatch: ${mismatched.join(', ')}`).toEqual([])
+  })
+
   // ── **…** ────────────────────────────────────────────────────
   // The emphasis marker (components/ui/Emphasized.jsx) is the one
   // piece of markup the string tables carry, and an unclosed run is
@@ -74,7 +88,7 @@ describe('locale parity (fr <-> en)', () => {
   // catch here, in both tables at once.
   it('closes every emphasis run it opens', () => {
     const unbalanced = []
-    for (const [lang, table] of [['fr', fr], ['en', en]]) {
+    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {
       for (const [key, value] of Object.entries(table)) {
         // Interpolated copy is a function; the arguments only have to
         // be enough to build the string, not to be right.
@@ -100,9 +114,10 @@ describe('locale parity (fr <-> en)', () => {
   // the orphan back.
   it('never leaves a breakable space against high punctuation', () => {
     const loose = []
-    // Both tables: French because the space is its own, English
-    // because a guillemet that strays in brings the same break with it.
-    for (const [lang, table] of [['fr', fr], ['en', en]]) walk(table, lang, loose)
+    // Every table: French because the space is its own, English and
+    // Spanish because a guillemet that strays in brings the same break
+    // with it (Spanish quotes «…» tight, as the RAE writes them).
+    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) walk(table, lang, loose)
     expect(loose, `breakable space before : ; ! ? » (or after «) in: ${loose.join(', ')}`).toEqual([])
   })
 })

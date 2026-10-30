@@ -5,9 +5,7 @@
 // every screen of the day cleared, so the week is said the same way on
 // the phone, the desk and the rest-day notice.
 
-function locale(lang) {
-  return lang === 'fr' ? 'fr-FR' : 'en-US'
-}
+import { intlLocale } from '../../lib/locale'
 
 // A formatter is slow to make and quick to use: one per language and
 // shape, kept, since the ceremony says its days on every frame it draws
@@ -16,7 +14,7 @@ const formats = new Map()
 function format(lang, opts) {
   const key = lang + JSON.stringify(opts)
   let f = formats.get(key)
-  if (!f) formats.set(key, (f = new Intl.DateTimeFormat(locale(lang), opts)))
+  if (!f) formats.set(key, (f = new Intl.DateTimeFormat(intlLocale(lang), opts)))
   return f
 }
 

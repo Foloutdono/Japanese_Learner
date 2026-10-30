@@ -32,7 +32,7 @@ from pathlib import Path
 
 from content.kana_data import KANA_SETS, kana_to_id, sound_of, twin
 from content.kanji_data import DECK_BY_CHAR, kanji_to_id
-from content.kanji_meanings import KANJI_FR
+from translations.course import KANJI_GLOSSES
 from core.auth import prefixed, unprefixed
 from core.db import db_conn
 from core.rls import enable_rls
@@ -57,9 +57,11 @@ _PATH = re.compile(r'<path\b[^>]*?\bid="kvg:[0-9a-f]+-s(\d+)"[^>]*?\bd="([^"]+)"
 
 
 def _lang(lang: str | None) -> str:
-    """The two languages a meaning is served in: French, else English.
-    The payloads are cached by it, so nothing else may key them."""
-    return "fr" if str(lang or "").lower().startswith("fr") else "en"
+    """The languages a meaning is served in: French, Spanish (plan 291),
+    else English. The payloads are cached by it, so nothing else may key
+    them."""
+    code = str(lang or "").lower()[:2]
+    return code if code in ("fr", "es") else "en"
 
 
 def _level_rank(level: str | None) -> int:
@@ -190,7 +192,7 @@ def _kanji_tour(raw_id: str, lang: str) -> dict | None:
     return {
         "kind": KANJI,
         "glyph": char,
-        "meaning": get_meaning(entry, lang, KANJI_FR),
+        "meaning": get_meaning(entry, lang, KANJI_GLOSSES),
         # The deck's packed field, as the card's reveal reads it
         # (Readings on the client splits on'yomi from kun'yomi).
         "readings": entry.get("kana", ""),

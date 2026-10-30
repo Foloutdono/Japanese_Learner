@@ -6,6 +6,7 @@ import { refreshToday } from '../../stores/today'
 import { Seg } from '../chrome/Console'
 import { Loading } from '../ui/Loading'
 import { SettingsPage, Slip } from './SettingsPage'
+import { intlLocale } from '../../lib/locale'
 
 // ── 回復運転 — Settings › Reviews (plan 217) ──────────────────────
 // What bounds the day's reviews, as Service bounds its new cards
@@ -77,7 +78,7 @@ export function ReviewsPage({ session }) {
     )
   }
 
-  const fmt = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'long' })
+  const fmt = new Intl.DateTimeFormat(intlLocale(lang, 'en'), { day: 'numeric', month: 'long' })
   const date = s => fmt.format(new Date(`${s}T12:00:00`))
   const capOptions = [
     { key: 'none', label: t.rvCapNone },

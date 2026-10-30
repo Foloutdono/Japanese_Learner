@@ -5,6 +5,7 @@ import { QUALITY_LABEL_KEY } from '../../domain/ratingScales'
 import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 import { useRegisterRunKeys } from '../../stores/runKeys'
 import { DeskFigure } from './RunRecords'
+import { intlLocale } from '../../lib/locale'
 
 // ── 机 — the run's lines, the second of a practice run's left panels (plan 129) ──
 // What a card run's card panel (CardPanel, plan 126) is to a card, this
@@ -152,7 +153,7 @@ function useLinesRhythm() {
   const now = useClock(30000)
   const elapsed = tally.startedAt ? Math.max(0, now - tally.startedAt) : 0
   const perMinute = tally.reviewed > 0 && elapsed >= 60000 ? tally.reviewed / (elapsed / 60000) : null
-  const decimal = new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-GB', { maximumFractionDigits: 1 })
+  const decimal = new Intl.NumberFormat(intlLocale(lang, 'en-GB'), { maximumFractionDigits: 1 })
   return {
     elapsed: { label: t.deskElapsed, value: Math.floor(elapsed / 60000), unit: 'min' },
     perMinute: { label: t.deskPerMinuteLines, value: perMinute == null ? '—' : decimal.format(perMinute) },

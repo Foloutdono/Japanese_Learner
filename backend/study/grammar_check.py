@@ -28,7 +28,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.grammar_sentence_gen import check_sentence
 from study.llm_shared import sentence_kanji_ok
 
-ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "structure_fr", "meaning", "register", "steps", "compare", "examples", "choose", "tour"})
+ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "structure_fr", "structure_es", "meaning", "register", "steps", "compare", "examples", "choose", "tour"})
 REQUIRED_KEYS = frozenset({"pattern", "structure", "structure_fr", "meaning", "steps", "compare", "examples"})
 STEP_KINDS = ("rule", "use", "careful")
 REGISTERS = frozenset({"neutral", "casual", "polite", "formal", "written"})
@@ -78,6 +78,31 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
                     out.append(f"{what}.{lang}: a bullet line must start with '- '")
     if rich and isinstance(pair.get("en"), str) and pair.get("en") == pair.get("fr"):
         out.append(f"{what}: fr is a copy of en (rich levels are written in both languages)")
+    out += _spanish_problems(what, pair, max_chars)
+    return out
+
+
+# ── Spanish, where it is written (plan 291) ──
+# The catalogue is written in English and French; Spanish is added point
+# by point and a text without its `es` reads English. So Spanish is never
+# required, but a side that is there is held as the other two are.
+def _spanish_problems(what: str, pair: dict, max_chars: int) -> list[str]:
+    if "es" not in pair:
+        return []
+    text = pair["es"]
+    if not isinstance(text, str) or not text.strip():
+        return [f"{what}.es is empty (leave it out rather than blank)"]
+    out = []
+    if text != text.strip():
+        out.append(f"{what}.es has surrounding whitespace")
+    if not _LATIN.search(text):
+        out.append(f"{what}.es is not prose")
+    if len(text) > max_chars:
+        out.append(f"{what}.es is {len(text)} chars, cap {max_chars}")
+    if text.count("**") % 2:
+        out.append(f"{what}.es has an unbalanced ** run")
+    if text in (pair.get("en"), pair.get("fr")):
+        out.append(f"{what}: es is a copy of {'en' if text == pair.get('en') else 'fr'}")
     return out
 
 
@@ -103,22 +128,25 @@ def _japanese_skeleton(text: str) -> str:
     )
 
 
-def _structure_fr_problems(entry: dict) -> list[str]:
-    fr = entry.get("structure_fr")
+def _structure_fr_problems(entry: dict, lang: str = "fr") -> list[str]:
+    """`structure_fr`, or (plan 291) `structure_es`, held to the same
+    rule: the English line's Japanese, in order, and no English left."""
+    key = f"structure_{lang}"
+    fr = entry.get(key)
     if not isinstance(fr, str) or not fr.strip():
-        return ["structure_fr is empty"]
+        return [f"{key} is empty"]
     out = []
     if fr != fr.strip():
-        out.append("structure_fr has surrounding whitespace")
+        out.append(f"{key} has surrounding whitespace")
     english = entry["structure"]
     if _japanese_skeleton(fr) != _japanese_skeleton(english):
-        out.append(f"structure_fr {fr!r} does not carry structure {english!r}'s Japanese, in order")
+        out.append(f"{key} {fr!r} does not carry structure {english!r}'s Japanese, in order")
     left = _FR_ENGLISH.findall(fr)
     if left:
-        out.append(f"structure_fr {fr!r} still has English: {sorted(set(w.lower() for w in left))}")
+        out.append(f"{key} {fr!r} still has English: {sorted(set(w.lower() for w in left))}")
     if entry.get("structure_reading") and not any(
-            p.get("reading") for p in structure_furigana(entry, "fr")):
-        out.append(f"structure_fr {fr!r} takes no ruby from the English line's reading")
+            p.get("reading") for p in structure_furigana(entry, lang)):
+        out.append(f"{key} {fr!r} takes no ruby from the English line's reading")
     return out
 
 
@@ -634,6 +662,8 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         out += [f"{tag}: {p}" for p in _reading_problems(
             "structure", "structure_reading", entry["structure"], entry.get("structure_reading"))]
         out += [f"{tag}: {p}" for p in _structure_fr_problems(entry)]
+    if "structure_es" in entry:
+        out += [f"{tag}: {p}" for p in _structure_fr_problems(entry, "es")]
     if isinstance(pattern, str) and ":" in pattern:
         # core.auth splits "{user_id}:{raw_id}" on the first colon.
         out.append(f"{tag}: pattern contains ':'")

@@ -6,6 +6,7 @@ import { MiniPass } from './MiniPass'
 import { PassTurn } from './PassTurn'
 import { PadLock } from './icons'
 import { clockTime, firstOfNextMonth } from './format'
+import { intlLocale } from '../../lib/locale'
 
 // ── 3 · The step up to Max (plan 172) ──────────────────────────────
 // A Pro learner at one of the plan's ceilings (domain/paywall.js's
@@ -318,7 +319,7 @@ function ExamsStage({ pass, level, next }) {
 // (the owner, round 12).
 function UpGrid() {
   const { t, lang } = useLang()
-  const n = v => v.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US')
+  const n = v => v.toLocaleString(intlLocale(lang))
   const rows = [
     { k: t.ofrUpPractice, pro: t.ofrUpCredit, max: t.ofrUpNoCredit },
     { k: t.ofrUpPhotos, pro: pro.photos, max: max.photos },

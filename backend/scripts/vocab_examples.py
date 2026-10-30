@@ -59,7 +59,7 @@ from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import _find_senses, _target_span, get_vocab_extras
 from study.llm_shared import kanji_set_for_level
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 
@@ -83,7 +83,7 @@ def _originals() -> dict[str, dict]:
                                                      "fr": jmdict_fr.example(ex["jp"]) or "", "words": []})
                     item["words"].append({
                         "key": f"{kanji}::{kana}", "level": level, "kanji": kanji, "kana": kana,
-                        "meaning": word.get("meaning", ""), "meaning_fr": get_meaning(word, "fr", VOCAB_FR),
+                        "meaning": word.get("meaning", ""), "meaning_fr": get_meaning(word, "fr", VOCAB_GLOSSES),
                         "sense": ex.get("sense_glossary", ""),
                         "shown": _target_span(ex["jp"], kanji, kana) is not None,
                     })
@@ -333,7 +333,7 @@ def cmd_gaps(out_dir: str, batches: int) -> int:
         kanji, kana = w.get("kanji") or "", w["kana"]
         senses = ["; ".join(s.get("glossary") or []) for s in (_find_senses(kanji, kana) or [])][:4]
         items.append({"key": _key(w), "level": level, "kanji": kanji, "kana": kana,
-                      "meaning": w.get("meaning", ""), "meaning_fr": get_meaning(w, "fr", VOCAB_FR),
+                      "meaning": w.get("meaning", ""), "meaning_fr": get_meaning(w, "fr", VOCAB_GLOSSES),
                       "senses": senses})
     os.makedirs(out_dir, exist_ok=True)
     size = -(-len(items) // batches)

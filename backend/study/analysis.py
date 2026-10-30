@@ -40,6 +40,7 @@ from study.card_lookup import (
 from study.furigana import align_deck
 from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
+from translations.es.vocab_es import VOCAB_ES
 from study import difficulty
 from study import grammar_detect
 from study import particle_glosses
@@ -113,10 +114,12 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
             # able to edit the catalogue through it.
             "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
             "structure": entry.get("structure", ""),
-            # The formation line in French (plan 215), beside the
-            # English, as `meaning` carries both: the analysis is shared
-            # across learners and the screen reads its own.
+            # The formation line in French (plan 215) and Spanish (plan
+            # 291), beside the English, as `meaning` carries them all: the
+            # analysis is shared across learners and the screen reads its
+            # own.
             "structure_fr": entry.get("structure_fr", ""),
+            "structure_es": entry.get("structure_es", ""),
         })
     return out
 
@@ -145,7 +148,7 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
             # line above -- the same point twice in a sentence is two
             # lights, not one (frontend grammarSpans.js).
             {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure",
-                               "structure_fr", "start", "end", "segments")}
+                               "structure_fr", "structure_es", "start", "end", "segments")}
             for g in grammar
             if any(s < end and start < e for s, e in g["segments"])
         ]
@@ -324,11 +327,15 @@ def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
     as a grammar point carries its {en, fr}; the screen reads its own
     (frontend tokens.js's wordGloss). The French is the card's own line
     (plan 107's per-card key, then the form's), and absent where the
-    card has none, so a screen falls back to the English."""
+    card has none, so a screen falls back to the English. The Spanish
+    (plan 291) rides the same way, as `meaning_es`."""
     out = {"level": level, "raw_id": raw_id, "entry": serializable_entry(entry)}
     french = fr_gloss(entry, VOCAB_FR)
     if french:
         out["entry"]["meaning_fr"] = french
+    spanish = fr_gloss(entry, VOCAB_ES)
+    if spanish:
+        out["entry"]["meaning_es"] = spanish
     return out
 
 
@@ -2137,7 +2144,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # that writes them; none of the app's own sentences does.
 # 31: sixteen cards the course's sentences use (体重, 主人, もしもし,
 # ただいま...) and ten usually-kana words as kana cards (#360, #439).
-LOCAL_REV = 31
+# 32: a point's gloss and formation line in Spanish (plan 291): `meaning`
+# gains its `es` and the point its `structure_es`, and a deck card's
+# match its `meaning_es`.
+LOCAL_REV = 32
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

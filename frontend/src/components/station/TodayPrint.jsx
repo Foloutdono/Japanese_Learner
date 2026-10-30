@@ -5,6 +5,7 @@ import { useDeparture } from '../../stores/departure'
 import { useReducedMotion } from '../dayclear/useReducedMotion'
 import { handOver, liftLayer } from './print/liftPrint'
 import { PRINT, usePrintScene } from './print/usePrint'
+import { intlLocale } from '../../lib/locale'
 
 // ── 浮世絵 — the print of the hour, behind Today's gate (plan 205) ──
 // The owner's pick of the canvas "Tsuji — Today, the visit card"
@@ -123,7 +124,7 @@ export function TodayPrint({ look, device, frameRef, train = true }) {
 // paragraph cannot be named, so the words are there, unseen).
 export function PrintTitle({ now, look }) {
   const { t, lang } = useLang()
-  const day = new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }).format(now)
+  const day = new Intl.DateTimeFormat(intlLocale(lang), { weekday: 'long', day: 'numeric', month: 'long' }).format(now)
   return (
     <p className="tpr-title">
       <span lang="ja" aria-hidden="true">

@@ -56,7 +56,7 @@ from content.vocab_extras import is_written_in_kana
 from study.furigana import align_deck, is_kanji, reading_stem, reading_token_for
 from translations import get_meaning
 from content.jmdict_fr import pool_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 
 # Words shown per reading in the panel, and in the ledger overall.
 MAX_WORDS = 4
@@ -229,7 +229,7 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
         entry = {
             "kanji":    kanji,
             "kana":     w.get("kana", ""),
-            "meaning":  get_meaning(w, lang, VOCAB_FR),
+            "meaning":  get_meaning(w, lang, VOCAB_GLOSSES),
             "level":    level,
             "furigana": furigana,
         }

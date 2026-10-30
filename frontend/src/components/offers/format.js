@@ -1,27 +1,31 @@
 // Small readings the offers print (plan 172). Pure, so the screens
 // stay drawings and these stay testable.
 
+import { intlLocale } from '../../lib/locale'
+
 /** "14:32" / "2:32 PM": when the refill lands its next credit. */
 export function clockTime(iso, lang) {
   if (!iso) return null
   const at = new Date(iso)
   if (Number.isNaN(at.getTime())) return null
-  return new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(at)
+  return new Intl.DateTimeFormat(intlLocale(lang), { hour: 'numeric', minute: '2-digit' }).format(at)
 }
 
 /** The 1st of next month, as a learner reads it: "1er novembre" /
- *  "November 1". When a month's new mock papers come back. */
+ *  "1 de noviembre" / "November 1". When a month's new mock papers
+ *  come back. */
 export function firstOfNextMonth(lang, now = new Date()) {
   const first = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-  const month = new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { month: 'long' }).format(first)
-  return lang === 'fr' ? `1er ${month}` : `${month} 1`
+  const month = new Intl.DateTimeFormat(intlLocale(lang), { month: 'long' }).format(first)
+  if (lang === 'fr') return `1er ${month}`
+  return lang === 'es' ? `1 de ${month}` : `${month} 1`
 }
 
 /** A day's one-letter name: "L", "M" … / "M", "T" …, from its ISO date. */
 export function dayLetter(isoDate, lang) {
   const [y, m, d] = isoDate.split('-').map(Number)
   const day = new Date(y, m - 1, d)
-  return new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'narrow' }).format(day)
+  return new Intl.DateTimeFormat(intlLocale(lang), { weekday: 'narrow' }).format(day)
 }
 
 /** The share of the level climbed, 0..1, from the profile's summary. */
