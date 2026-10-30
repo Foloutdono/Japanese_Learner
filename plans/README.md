@@ -7331,3 +7331,13 @@ The owner: verify the analyser's breakdowns, the goal being to explain every par
 | 266d | **The report**: `python -m scripts.breakdown_gaps` (read-only, no database): every part that says nothing, by kind. 979 of 7,625 sentences after 266a–c | DONE |
 
 Open: the copula's に after a noun (安全に, 急に) and 〜らしい after one stay unlit, as the owner pinned (平和に, 春らしい). Left: kana misread by the tokenizer (としょかん as と + しょ + かん, きって as 切って, おつり as お + 吊る), kana verbs two deck verbs share (おります, ふります, つける), the copula で the tokenizer reads for a particle (この店で、), the conjunctive ず (頼らず), 〜となる's と, the nominalising の after an adjective (大きいの).
+
+## Plan 291 — 学習の改札, the Learn gate folded on the phone (2026-10-30)
+
+The owner: redesign the Learn screen on mobile. Drawn first on the canvas "Tsuji — Learn on the phone" (https://claude.ai/artifact/KikNBcw9sLfrTXZsC6Q5kn: today and four directions, A the whole line, B folded as Practice, C you are here, D the gate is the station); the owner picked **B** and asked for the raised plate to look better, redrawn on the canvas before it was built.
+
+| Phase | What | Status |
+|---|---|---|
+| 291 | **Folded, as Practice**: the phone's Learn gate folds each line to one row (the stop it opens and that stop's learned / total, the due, the stripe to the stop's share), the decks under them one row each with two doors, the basics folded above; the last ride over them (`user_profiles.learn_ride`, `POST /api/profile/ride`, `routes/profile.clean_ride`, `stores/learnRide.js`, noted where the four stations board); a row raises `components/learn/LineSheet` on Practice's pager (`hooks/useSheetPager`, PracticeSheet moved onto it): the plate risen whole, the line as rings (stop chosen in gold), the sources, the run's card, the modes as chips (main mode chosen), Embarquer · stop. `GateResume` shared by both gates; the three-stop foot (`StopsFoot`) retired. Tests: `test_learn_ride.py`, `LearnScreen.browser`, `deskfree.phone` | DONE |
+
+Open: `useDialog` focuses the first button even at tabindex -1, so both sheets land focus on the strip's first roundel rather than the page in view's.

@@ -2724,7 +2724,7 @@ const guide = {
   guideTabBar: 'Tes cinq onglets : Apprendre, Pratique, Aujourd’hui, Dictionnaire et ton profil.',
   guideTodayDuels: 'Les duels : deux minutes contre un ami ou un voyageur de ton niveau. Un chiffre d’or dit qu’un défi t’attend.',
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
+  guideLearnStops: 'Ton arrêt sur la ligne, et ce que tu en sais déjà.',
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
   // Les plaques de Pratique (plan 254) : un quai, son pied (ton niveau,
@@ -2828,6 +2828,13 @@ const onboarding = {
   practicePct: pct => `${pct}\u00a0%`,
   practiceAllPapers: 'Toutes les épreuves',
   practiceAllScenes: 'Toutes les scènes',
+  // Le portique d'Apprendre au téléphone (plan 291) : la feuille qu'une
+  // ligne lève, une page par ligne -- l'arrêt et le mode choisis avant
+  // d'embarquer -- et l'étagère des decks sous les lignes.
+  learnSheet: 'Lignes',
+  learnStop: 'Arrêt',
+  learnMode: 'Mode',
+  learnAllDecks: n => `Tous mes decks (${n})`,
   // ── La station de pratique, au bureau (plan 159) ─────────────
   // La source en interrupteur en tête de la liste (les grades JLPT, la
   // fréquence, tes cartes), puis la page de l'arrêt ouvert : ce que

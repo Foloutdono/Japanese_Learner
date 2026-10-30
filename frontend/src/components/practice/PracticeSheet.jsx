@@ -1,7 +1,8 @@
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
 import { Sheet } from '../chrome/Sheet'
+import { useSheetPager } from '../../hooks/useSheetPager'
 import { Seg } from '../chrome/Console'
 import { useStationSamples } from '../../stores/stationSamples'
 import { apiJson } from '../../lib/api'
@@ -46,17 +47,6 @@ import { UNIT, platformOf, isSourced, runAt, shareRight, nextPaper, nextScene } 
 // its neighbour is in view: the gate itself reads nothing but the
 // record (DESIGN.md, "The boot asks for the screen first").
 
-const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
-// Where page i starts in the pager's scroll, measured. The pager's
-// clientWidth is rounded to a whole pixel and a page in a zoomed
-// browser is not one, so i times it falls short of the page, and
-// further short the further along it is.
-function leftOf(el, i) {
-  const page = el.children[i]
-  return page ? el.scrollLeft + page.getBoundingClientRect().left - el.getBoundingClientRect().left : 0
-}
-
 /** The record line a plate and a page print: the grade, then what was
  *  done there and the share right, or "not yet". `rec` undefined is a
  *  record still on its way: the grade stands alone. */
@@ -84,38 +74,12 @@ export function RecordLine({ platform, grade, rec, guide }) {
  */
 export function PracticeSheet({ sections, start, grade, records, session, onClose, onBoard, onStation }) {
   const { t } = useLang()
-  const pager = useRef(null)
-  const [at, setAt] = useState(() => Math.max(0, sections.findIndex(s => s.path === start)))
-
-  // The sheet opens on the plate that raised it.
-  useLayoutEffect(() => {
-    const el = pager.current
-    if (el) el.scrollLeft = leftOf(el, at)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once: where the sheet opened
-  }, [])
-
-  function onScroll(e) {
-    const el = e.currentTarget
-    const i = Math.min(sections.length - 1, Math.max(0, Math.round(el.scrollLeft / Math.max(1, el.clientWidth))))
-    if (i !== at) setAt(i)
-  }
-  function slideTo(i) {
-    const el = pager.current
-    if (!el) return
-    el.scrollTo({ left: leftOf(el, i), behavior: reduced() ? 'auto' : 'smooth' })
-  }
-  // The roundels are one tab stop, the page in view's (the sheet's
-  // first focus lands there, not on the first platform's), and the
-  // arrows walk them, sliding the pages along.
-  function walk(e) {
-    const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key]
-    if (!step) return
-    e.preventDefault()
-    // The page in view is the scroll's to say (onScroll), as for a swipe.
-    const i = Math.min(sections.length - 1, Math.max(0, at + step))
-    slideTo(i)
-    e.currentTarget.querySelectorAll('.prc-sheet__stop')[i]?.focus()
-  }
+  // The pager (hooks/useSheetPager, shared with Learn's lines): the
+  // sheet opens on the plate that raised it, the strip's roundels are
+  // one tab stop, and the arrows walk them, sliding the pages along.
+  const { pager, at, onScroll, slideTo, walk } = useSheetPager(
+    sections.length, sections.findIndex(s => s.path === start),
+  )
 
   return (
     <Sheet open onClose={onClose} label={t.practiceSheet} className="prc-sheet">
@@ -126,6 +90,7 @@ export function PracticeSheet({ sections, start, grade, records, session, onClos
             <button
               type="button"
               className="prc-sheet__stop"
+              data-page-stop
               style={{ '--line-color': s.color }}
               aria-label={s.title}
               aria-current={i === at ? 'true' : undefined}
