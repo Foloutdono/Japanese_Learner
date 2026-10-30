@@ -1,7 +1,8 @@
 """Spanish is the app's third language (plan 291): the decks and the
-grammar points' glosses and lessons read it whole, and every other text
-reads English until its Spanish is written (scripts/spanish_coverage.py
-counts what is left).
+grammar points' glosses and lessons read it whole, and their tours and
+Choisir questions level by level (DRILL_LEVELS); every other text reads
+English until its Spanish is written (scripts/spanish_coverage.py counts
+what is left).
 
 What is whole is held here, as tests/test_kanji_french.py holds the
 French: a card the deck gains, a kanji, a grammar point, is written in
@@ -101,6 +102,44 @@ def test_a_lesson_is_served_in_spanish():
     level, entry = "N5", GRAMMAR_POINTS_BY_LEVEL["N5"][0]
     spanish, english = lesson_payload(level, entry, "es"), lesson_payload(level, entry, "en")
     assert spanish["steps"][0]["text"] == entry["steps"][0]["es"] != english["steps"][0]["text"]
+
+
+# The levels whose tours and Choisir questions are written in Spanish
+# (plan 291's third wave, a batch of levels at a time): held whole, as the
+# lessons are. A level joins in the commit that writes it.
+DRILL_LEVELS = ("N5", "N4", "N3")
+
+
+def _drill_texts(point: dict):
+    """(path, text) for every text of a point's tour and its own Choisir
+    questions: each dict carrying an `en` and a `fr`."""
+    def walk(node, path):
+        if isinstance(node, dict):
+            if isinstance(node.get("en"), str) and isinstance(node.get("fr"), str):
+                yield "/".join(path), node
+            for k, v in node.items():
+                yield from walk(v, path + [k])
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                yield from walk(v, path + [str(i)])
+    for key in ("tour", "choose"):
+        yield from walk(point.get(key), [key])
+
+
+@pytest.mark.parametrize("level", DRILL_LEVELS)
+def test_every_tour_and_choisir_question_is_written_in_spanish(level):
+    missing = [f"{p['pattern']} {path}" for p in GRAMMAR_POINTS_BY_LEVEL[level]
+               for path, text in _drill_texts(p) if not (text.get("es") or "").strip()]
+    assert missing == [], f"{len(missing)} tour/choose texts with no Spanish: {missing[:10]}"
+
+
+def test_a_tour_is_served_in_spanish():
+    from study.grammar_tour import tour_payload
+    level, entry = "N5", next(p for p in GRAMMAR_POINTS_BY_LEVEL["N5"] if p.get("tour"))
+    tour = tour_payload(level, entry, "es")
+    twist = entry["tour"]["twists"][0]
+    assert tour["twists"][0]["notion"] == twist["notion"]["es"] != twist["notion"]["en"]
+    assert tour["scene"]["them"] == entry["tour"]["scene"]["them"]["es"]
 
 
 def test_the_spanish_maps_the_client_preloads_are_whole_and_spanish():
