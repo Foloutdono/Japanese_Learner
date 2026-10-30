@@ -10028,10 +10028,24 @@ textarea:focus-visible {
   background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent);
 }
 .prc-sheet__sep { width: 1px; align-self: stretch; margin-block: var(--sp-1); background: var(--surface-line); }
-.prc-sheet__pager {
+/* No bar under the pages on any pointer: they scroll inside a clip, as
+   .stroke-rail's counts do. The pager runs on below the pages, first
+   the room Embarquer's glow needs (the pager cut it flat at the
+   button's foot), then the room a touch browser draws its overlay bar
+   in, along the pager's bottom edge; the clip keeps the one and cuts
+   the other. Both are pulled back up, so the sheet's layout is the
+   pages' own. */
+.prc-sheet__deck {
   flex: none;
-  display: flex;
   margin-inline: calc(-1 * var(--sp-5));
+  padding-bottom: var(--sp-4);
+  margin-bottom: calc(-1 * var(--sp-4));
+  overflow: hidden;
+}
+.prc-sheet__pager {
+  display: flex;
+  padding-bottom: var(--sp-6);
+  margin-bottom: calc(-1 * var(--sp-6));
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
@@ -10069,14 +10083,34 @@ textarea:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* A page's row of departures runs to the sheet's edges on both sides
+   and fades out under them. A ticket the row cannot fit passes under
+   the edge, where it was cut short of it on the left once the row was
+   scrolled; and no page holds a ticket at full ink at its own edge, the
+   strip of it a neighbouring page showed beside the one in view. No bar
+   under the row either: the room below the tickets is where a touch
+   browser draws its overlay bar, and the clip takes it away. */
 .prc-page__row {
   display: flex;
   gap: var(--sp-2);
-  margin-inline-end: calc(-1 * var(--sp-5));
-  padding-inline-end: var(--sp-5);
+  margin-inline: calc(-1 * var(--sp-5));
+  padding: 0 var(--sp-5) var(--sp-3);
+  margin-bottom: calc(-1 * var(--sp-3));
+  scroll-padding-inline: var(--sp-5);
   overflow-x: auto;
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
+  mask-image: linear-gradient(to right, transparent var(--sp-1), #000 var(--sp-5), #000 calc(100% - var(--sp-5)), transparent calc(100% - var(--sp-1)));
+  clip-path: inset(0 0 var(--sp-3));
+}
+/* A cursor's bar is a classic one, which the clips above would only
+   hide: it is not drawn at all, and takes no room (see "Themed
+   scrollbar"). */
+@media (pointer: fine) {
+  .prc-sheet__pager,
+  .prc-page__row { scrollbar-width: none; }
+  .prc-sheet__pager::-webkit-scrollbar,
+  .prc-page__row::-webkit-scrollbar { display: none; }
 }
 .prc-page__go { width: 100%; }
 /* A departure: the grade or the source over what was done there. */
