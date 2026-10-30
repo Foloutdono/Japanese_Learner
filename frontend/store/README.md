@@ -20,6 +20,11 @@ The 7-inch tablet set (portrait, 540×960 screens at 2x, drawn into a tablet fra
 steps with a `tablet` argument and `--tablet`: `node store/capture.mjs fr main tablet`, `node store/compose.mjs --tablet`
 (into `out/<lang>-tablet/`). `node store/compose.mjs --feature` makes Google Play's 1024×500 feature graphic.
 
+The **7-inch tablet set is landscape 16:9 (1920×1080)**: `node store/capture_tablet.mjs <lang> main` (and `kanji`,
+with 学 new), then `node store/compose_tablet.mjs` into `out/<lang>-tablet7/`. The app is captured at 1280×720,
+where it draws its own wide layout (the rail, the side panels); each slide enlarges one real piece of it.
+The older portrait `tablet` mode of `capture.mjs`/`compose.mjs` is superseded by it.
+
 ```bash
 # 0. a dev stack with a learner who has a history (local database only)
 cd backend && cp .env.example .env     # DEV_USER_ID=local-dev-user

@@ -1,22 +1,136 @@
 {
   "fr": {
-    "today":      { "h": ["Ta journée,", "prête à embarquer"], "hi": "embarquer" },
-    "grammar":    { "h": ["La grammaire,", "enfin claire"], "hi": "claire" },
-    "dictionary": { "h": ["200 000 mots,", "13 000 kanji"], "hi": "200 000 mots" },
-    "practice":   { "h": ["7 façons de", "pratiquer"], "hi": "7" },
-    "exam":       { "h": ["Examens blancs", "format JLPT"], "hi": "JLPT" },
-    "kanji":      { "h": ["Trace chaque kanji,", "trait par trait"], "hi": "trait par trait" },
-    "goal":       { "h": ["Des cartes vers", "ton objectif"], "hi": "objectif" },
-    "comprehension": { "h": ["Un texte qui", "défile pour toi"], "hi": "défile" }
+    "today": {
+      "h": [
+        "Ta journée,",
+        "prête à embarquer"
+      ],
+      "hi": "embarquer"
+    },
+    "grammar": {
+      "h": [
+        "La grammaire,",
+        "enfin claire"
+      ],
+      "hi": "claire"
+    },
+    "dictionary": {
+      "h": [
+        "200 000 mots,",
+        "13 000 kanji"
+      ],
+      "hi": "200 000 mots"
+    },
+    "practice": {
+      "h": [
+        "7 façons de",
+        "pratiquer"
+      ],
+      "hi": "7",
+      "chips": [
+        "Lecture",
+        "Compréhension",
+        "Traduction",
+        "Dictée",
+        "Rédaction",
+        "Examen blanc",
+        "Conversation"
+      ]
+    },
+    "exam": {
+      "h": [
+        "Examens blancs",
+        "format JLPT"
+      ],
+      "hi": "JLPT"
+    },
+    "kanji": {
+      "h": [
+        "Trace chaque kanji,",
+        "trait par trait"
+      ],
+      "hi": "trait par trait"
+    },
+    "goal": {
+      "h": [
+        "Des cartes vers",
+        "ton objectif"
+      ],
+      "hi": "objectif"
+    },
+    "comprehension": {
+      "h": [
+        "Un texte qui",
+        "défile pour toi"
+      ],
+      "hi": "défile"
+    }
   },
   "en": {
-    "today":      { "h": ["Your day,", "ready to board"], "hi": "board" },
-    "grammar":    { "h": ["Grammar,", "finally clear"], "hi": "clear" },
-    "dictionary": { "h": ["200,000 words,", "13,000 kanji"], "hi": "200,000 words" },
-    "practice":   { "h": ["7 ways to", "practice"], "hi": "7" },
-    "exam":       { "h": ["JLPT mock", "exams, N5–N1"], "hi": "JLPT" },
-    "kanji":      { "h": ["Write every kanji,", "stroke by stroke"], "hi": "stroke by stroke" },
-    "goal":       { "h": ["Flashcards toward", "your goal"], "hi": "goal" },
-    "comprehension": { "h": ["Text that scrolls", "at your pace"], "hi": "scrolls" }
+    "today": {
+      "h": [
+        "Your day,",
+        "ready to board"
+      ],
+      "hi": "board"
+    },
+    "grammar": {
+      "h": [
+        "Grammar,",
+        "finally clear"
+      ],
+      "hi": "clear"
+    },
+    "dictionary": {
+      "h": [
+        "200,000 words,",
+        "13,000 kanji"
+      ],
+      "hi": "200,000 words"
+    },
+    "practice": {
+      "h": [
+        "7 ways to",
+        "practice"
+      ],
+      "hi": "7",
+      "chips": [
+        "Reading",
+        "Comprehension",
+        "Translation",
+        "Dictation",
+        "Writing",
+        "Mock exam",
+        "Conversation"
+      ]
+    },
+    "exam": {
+      "h": [
+        "JLPT mock",
+        "exams, N5–N1"
+      ],
+      "hi": "JLPT"
+    },
+    "kanji": {
+      "h": [
+        "Write every kanji,",
+        "stroke by stroke"
+      ],
+      "hi": "stroke by stroke"
+    },
+    "goal": {
+      "h": [
+        "Flashcards toward",
+        "your goal"
+      ],
+      "hi": "goal"
+    },
+    "comprehension": {
+      "h": [
+        "Text that scrolls",
+        "at your pace"
+      ],
+      "hi": "scrolls"
+    }
   }
 }
