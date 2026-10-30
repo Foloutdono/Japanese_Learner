@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   aheadInstants, aheadQuery, laneLine, localMidnight, minutesFor, planNudges, whenLabel, widgetPayload,
-  NUDGE_IDS,
+  NUDGE_IDS, TRAIN_ACTIONS,
 } from './ahead'
 import en from '../locales/en/index.js'
 
@@ -74,10 +74,24 @@ describe('planNudges', () => {
     const [n] = plan(ahead([{ at: at(0).toISOString(), total: 42, new: 3, lanes: [lane('vocab', 'N5', 30), lane('kanji', 'N5', 12)] }]))
     expect(n.id).toBe(NUDGE_IDS[0])
     expect(n.at).toEqual(at(0))
-    expect(n.title).toBe('Your 19:00 train · 42 cards')
+    expect(n.title).toBe('19:00 · 42 cards')
     expect(n.body).toBe('About 7 min · 3 new')
     expect(n.lines).toEqual(['Vocabulary N5 · 30', 'Kanji N5 · 12'])
     expect(n.extra).toEqual({ to: '/today' })
+  })
+
+  it('carries Depart on the day’s train (plan 293)', () => {
+    const [n] = plan(ahead([{ at: at(0).toISOString(), total: 4, new: 0, lanes: [] }]))
+    expect(n.actionType).toBe(TRAIN_ACTIONS)
+  })
+
+  it('lists five lanes on Android and three on iOS, so nothing is cut on the lock screen', () => {
+    const lanes = ['vocab', 'kanji', 'grammar', 'kana', 'vocab'].map((s, i) => lane(s, `N${5 - i}`, 9 - i))
+    const a = ahead([{ at: at(0).toISOString(), total: 35, new: 0, lanes }])
+    expect(plan(a, 'android')[0].lines).toHaveLength(5)
+    const [ios] = plan(a, 'ios')
+    expect(ios.lines).toHaveLength(3)
+    expect(ios.body.split('\n')).toHaveLength(4)
   })
 
   it('puts the lanes under the body on iOS, in the expanded list on Android', () => {
@@ -116,6 +130,8 @@ describe('planNudges', () => {
     expect(n.title).not.toContain('412')
     expect(n.lines).toEqual([])
     expect(n.extra).toEqual({ to: '/today' })
+    // Its door is the gate's paces: no Depart past them.
+    expect(n.actionType).toBeUndefined()
   })
 
   it('never schedules one that would fire while the app is open', () => {
@@ -138,10 +154,21 @@ describe('widgetPayload', () => {
   it('counts now from the gate, then each day ahead from its midnight', () => {
     const w = widgetPayload({ today, ahead: a, t, now: NOW })
     expect(w.points).toEqual([
-      { from: NOW.getTime(), total: 24, unit: 'cards', minutes: '4 min' },
-      { from: localMidnight(at(1)).getTime(), total: 40, unit: 'cards', minutes: '7 min' },
-      { from: localMidnight(at(2)).getTime(), total: 61, unit: 'cards', minutes: '10 min' },
+      { from: NOW.getTime(), total: 24, unit: 'cards', minutes: '4 min', meta: '4 min · 2 new' },
+      { from: localMidnight(at(1)).getTime(), total: 40, unit: 'cards', minutes: '7 min', meta: '7 min · 5 new' },
+      { from: localMidnight(at(2)).getTime(), total: 61, unit: 'cards', minutes: '10 min', meta: '10 min · 5 new' },
     ])
+  })
+
+  it('heads the board with the learner’s hour, and with nothing that is not a clock (plan 293)', () => {
+    expect(widgetPayload({ today, ahead: a, t, now: NOW, time: '07:30' }).hour).toBe('07:30')
+    expect(widgetPayload({ today, ahead: a, t, now: NOW, time: null }).hour).toBe('')
+    expect(widgetPayload({ today, ahead: a, t, now: NOW, time: 'soon' }).hour).toBe('')
+  })
+
+  it('leaves the new cards out of the line under the count when there are none', () => {
+    const quiet = { ...today, lanes: today.lanes.map(l => ({ ...l, new: 0 })) }
+    expect(widgetPayload({ today: quiet, ahead: null, t, now: NOW }).points[0].meta).toBe('4 min')
   })
 
   it('carries the stripe’s lanes, the words and every label, in the learner’s language', () => {
@@ -153,7 +180,7 @@ describe('widgetPayload', () => {
 
   it('still counts when the plan could not be fetched', () => {
     const w = widgetPayload({ today, ahead: null, t, now: NOW })
-    expect(w.points).toEqual([{ from: NOW.getTime(), total: 24, unit: 'cards', minutes: '4 min' }])
+    expect(w.points).toEqual([{ from: NOW.getTime(), total: 24, unit: 'cards', minutes: '4 min', meta: '4 min · 2 new' }])
     expect(w.words).toEqual([])
   })
 })

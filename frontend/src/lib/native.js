@@ -15,7 +15,7 @@ import { Share } from '@capacitor/share'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { nativePlatform, openPath } from './platform'
-import { LEGACY_NUDGE_ID, NUDGE_IDS } from './ahead'
+import { DEPART_ACTION, LEGACY_NUDGE_ID, NUDGE_IDS, TRAIN_ACTIONS } from './ahead'
 import { AGENDA_IDS } from './agenda'
 import { OPENABLE_PATHS } from '../domain/agenda'
 
@@ -165,22 +165,47 @@ async function remindersChannel(name) {
   }
 }
 
+// ── Depart, on the day's train (plan 293) ──────────────────────
+// The train's notification carries the gate's own action: Depart opens
+// the run, where a tap on the notification opens the gate. Registered
+// in the learner's language each time the train is planned -- the type
+// registered again replaces the last, so a change of language renames
+// it. The reminder's look is otherwise the system's: the icon is the
+// mark (res/drawable/ic_stat_tsuji.xml, capacitor.config.json's
+// smallIcon) in the gate's gold.
+async function trainActions(depart) {
+  if (!depart) return {}
+  try {
+    await LocalNotifications.registerActionTypes({
+      types: [{ id: TRAIN_ACTIONS, actions: [{ id: DEPART_ACTION, title: depart, foreground: true }] }],
+    })
+    return { actionTypeId: TRAIN_ACTIONS }
+  } catch {
+    return {}
+  }
+}
+
 /** The day's notifications (lib/ahead.js), replacing whatever was
  *  scheduled; nothing when the OS has not allowed them. Android lists
- *  the lanes in the expanded notification (its inbox style); iOS has
- *  them in the body already. `channel` is the reminders' channel's name. */
-export async function scheduleNudges(nudges, channel) {
+ *  the lanes in the expanded notification (its inbox style), the
+ *  minutes in its header where the body was; iOS has them in the body
+ *  already. `channel` is the reminders' channel's name, `depart` the
+ *  train's action's. */
+export async function scheduleNudges(nudges, channel, depart) {
   await cancelNudges()
   if (!nudges.length) return []
   const { display } = await LocalNotifications.checkPermissions()
   if (display !== 'granted') return []
   const onChannel = await remindersChannel(channel)
+  const withDepart = await trainActions(depart)
+  const android = nativePlatform() === 'android'
   await LocalNotifications.schedule({
     notifications: nudges.map(n => ({
       id: n.id,
       title: n.title,
       body: n.body,
-      ...(n.lines.length ? { inboxList: n.lines } : {}),
+      ...(n.lines.length ? { inboxList: n.lines, ...(android ? { summaryText: n.summary } : {}) } : {}),
+      ...(n.actionType === TRAIN_ACTIONS ? withDepart : {}),
       ...onChannel,
       schedule: { at: n.at, allowWhileIdle: true },
       // Inexact. The plugin's default is an exact alarm, and where Android
@@ -241,7 +266,12 @@ export function onOpenings(handler) {
     handler({ to, via })
   }
   const pending = [
-    LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
+    LocalNotifications.addListener('localNotificationActionPerformed', ({ actionId, notification }) => {
+      // Depart boards the day's run, as the gate's does (plan 293).
+      if (actionId === DEPART_ACTION) {
+        take('/today/run', 'depart', `n${notification?.id}`)
+        return
+      }
       const to = notification?.extra?.to
       // The day's train opens the gate; an agenda block opens its subject.
       if (OPENABLE_PATHS.has(to)) take(to, 'notification', `n${notification.id}`)
