@@ -97,9 +97,11 @@ const fr = facts => {
       tagline: 'Un trajet taillé pour toi.',
       cue: 'Découvrir',
       watch: 'Voir la présentation',
-      note: stores => stores
+      note: ({ appStore, googlePlay }) => appStore && googlePlay
         ? "Gratuit pendant l'accès anticipé · iPhone, Android et navigateur"
-        : "Gratuit pendant l'accès anticipé · dans ton navigateur, bientôt sur iPhone et Android",
+        : googlePlay
+          ? "Gratuit pendant l'accès anticipé · Android et navigateur, bientôt sur iPhone"
+          : "Gratuit pendant l'accès anticipé · dans ton navigateur, bientôt sur iPhone et Android",
     },
     board: 'Embarquer',
     // The gate's second line (page.mjs, gate()): the fare, said where the visitor presses.
@@ -346,9 +348,11 @@ const en = facts => {
       tagline: 'A ride cut to fit you.',
       cue: 'Explore',
       watch: 'Watch the overview',
-      note: stores => stores
+      note: ({ appStore, googlePlay }) => appStore && googlePlay
         ? 'Free during early access · iPhone, Android and the web'
-        : 'Free during early access · in your browser, soon on iPhone and Android',
+        : googlePlay
+          ? 'Free during early access · Android and the web, soon on iPhone'
+          : 'Free during early access · in your browser, soon on iPhone and Android',
     },
     board: 'Board',
     boardSub: 'Free · no account',

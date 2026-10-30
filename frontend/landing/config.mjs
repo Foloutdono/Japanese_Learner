@@ -41,9 +41,8 @@ export const SIGNIN_ENTRY = `${APP_ENTRY}?${SIGNIN_PARAM}`
 
 // The two store listings. Null draws the badge as "coming soon" and
 // links nowhere: a badge that 404s is worse than one that waits.
-// Google Play is https://play.google.com/store/apps/details?id=app.tsuji
-// once the app is published; the App Store link needs its numeric id.
-export const STORES = { appStore: null, googlePlay: null }
+// The App Store link needs the app's numeric id once it is published.
+export const STORES = { appStore: null, googlePlay: 'https://play.google.com/store/apps/details?id=app.tsuji' }
 
 // The contact address for the footer. Null prints no Contact link.
 export const CONTACT = 'contact.tsujijapanese@gmail.com'

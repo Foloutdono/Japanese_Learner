@@ -242,10 +242,10 @@ once the file is really there.
 
 ## Later: going live
 
-- **The stores:** put the two listing URLs in `STORES`. The badges then link
-  instead of saying "coming soon". Google Play's is
-  `https://play.google.com/store/apps/details?id=app.tsuji`; the App Store's
-  needs the app's numeric id. For store-ready artwork, Apple and Google
+- **The stores:** put the two listing URLs in `STORES`. A badge then links
+  instead of saying "coming soon". Google Play's is in
+  (`https://play.google.com/store/apps/details?id=app.tsuji`); the App
+  Store's needs the app's numeric id. For store-ready artwork, Apple and Google
   publish their official badges.
 - **Contact:** set `CONTACT` to an address and the footer prints it.
 - **A custom domain:** change `SITE_ORIGIN`, then run `npm run landing` and

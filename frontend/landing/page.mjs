@@ -194,7 +194,7 @@ function hero(t, live) {
     + `<a class="watch" href="#${t.ids.presentation}" data-watch${live ? '' : ' hidden'}><span class="watch__play" aria-hidden="true">${PLAY}</span>${esc(typo(t.lang, h.watch))} · ${clock(PRESENTATION.seconds)}</a>`
     // A separator keeps to the word before it, so a wrapped note never
     // opens its second line on a dot.
-    + `<p class="hero__note">${esc(typo(t.lang, h.note(STORES.appStore || STORES.googlePlay))).replace(/ · /g, '\u00a0· ')}</p>`
+    + `<p class="hero__note">${esc(typo(t.lang, h.note(STORES))).replace(/ · /g, '\u00a0· ')}</p>`
     + `<a class="hero__cue" href="#${t.ids.lines}"><span>${esc(h.cue)}</span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v13M6 12l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`
     + `</div>${figures(t)}</section>`
 }
@@ -548,7 +548,7 @@ function fare(t) {
   const F = t.fare
   const ty = s => esc(typo(t.lang, s))
   const [, covers = F.body, later = ''] = F.body.match(/^(.+?\.)\s+(.+)$/s) || []
-  const [first, ...rest] = t.hero.note(STORES.appStore || STORES.googlePlay).split(' · ')
+  const [first, ...rest] = t.hero.note(STORES).split(' · ')
   const how = first === F.h2 ? rest.map(ty).join('\u00a0· ') : ''
   const valid = [...ROADS.map(r => [r.line, r.glyph, t.hero.stations[r.line]]), ...FARE_STOPS.map(s => [s.line, s.glyph, t[s.key].kicker])]
   const lines = valid.map(([line, glyph, name]) => `<li style="--c:${pigment(line)}"><span class="ring" aria-hidden="true" lang="ja">${esc(glyph)}</span><span class="fare__name">${ty(name)}</span></li>`).join('')
@@ -673,7 +673,7 @@ function jsonLd(t, facts, media, live) {
     url: url(page.path),
     description: t.description,
     applicationCategory: t.appCategory,
-    operatingSystem: stores.length ? 'Web, iOS, Android' : 'Web',
+    operatingSystem: ['Web', STORES.appStore && 'iOS', STORES.googlePlay && 'Android'].filter(Boolean).join(', '),
     inLanguage: ['fr', 'en'],
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
     publisher: { '@id': org['@id'] },
