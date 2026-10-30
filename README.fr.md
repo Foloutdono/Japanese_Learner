@@ -480,6 +480,9 @@ docker exec -i jp-db psql -U postgres -c "CREATE DATABASE jp_test;"
 docker exec -i jp-db psql -U postgres -d jp_test < backend/srs/data_structure.sql
 cd backend
 DATABASE_URL=postgresql://postgres:dev@localhost:5432/jp_test DEV_USER_ID=test-user python -m pytest -q
+# Plus vite, comme la CI : un worker par cœur, chacun sur sa copie du schéma
+# (pip install pytest-xdist ; tests/conftest.py crée jp_test_gw0, _gw1, ...).
+DATABASE_URL=postgresql://postgres:dev@localhost:5432/jp_test DEV_USER_ID=test-user python -m pytest -q -n auto --dist loadfile
 ```
 
 ```bash

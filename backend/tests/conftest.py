@@ -1,6 +1,48 @@
 import os
 
 os.environ.setdefault("DATABASE_URL", "postgresql://postgres:dev@localhost:5433/jp_test")
+
+
+def _worker_database() -> None:
+    """Under pytest-xdist (`pytest -n 4`), each worker gets a database of
+    its own beside DATABASE_URL's, made fresh from srs/data_structure.sql
+    before anything connects: the tests share one learner (DEV_USER_ID)
+    and clean up after themselves, which holds in one process and not
+    across four writing the same rows. Without xdist nothing changes."""
+    worker = os.environ.get("PYTEST_XDIST_WORKER")
+    # Once a process: test files that `from conftest import ...` load
+    # this module a second time.
+    if not worker or os.environ.get("TEST_WORKER_DATABASE") == worker:
+        return
+    os.environ["TEST_WORKER_DATABASE"] = worker
+    from pathlib import Path
+    from urllib.parse import urlsplit, urlunsplit
+
+    import psycopg2
+
+    url = urlsplit(os.environ["DATABASE_URL"])
+    own = f"{url.path.lstrip('/')}_{worker}"
+    admin = psycopg2.connect(urlunsplit(url._replace(path="/postgres")))
+    admin.autocommit = True
+    try:
+        with admin.cursor() as cur:
+            cur.execute(f'DROP DATABASE IF EXISTS "{own}"')
+            cur.execute(f'CREATE DATABASE "{own}"')
+    finally:
+        admin.close()
+    os.environ["DATABASE_URL"] = urlunsplit(url._replace(path=f"/{own}"))
+    schema = Path(__file__).resolve().parent.parent / "srs" / "data_structure.sql"
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    try:
+        with conn.cursor() as cur:
+            cur.execute(schema.read_text(encoding="utf-8"))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+_worker_database()
+
 # setdefault, not assignment: an ambient DEV_USER_ID wins, and CI sets it to
 # "ci-test-user". So "test-user" is the FALLBACK, never a fact — a test that
 # names it literally in its own setup or teardown is acting on a different

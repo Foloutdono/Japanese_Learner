@@ -146,7 +146,7 @@ class RankingTests(unittest.TestCase):
         """placement_lists.json feeds the audit's rotation without a
         tokenizer; a deck change that forgets `--write-lists` lands here."""
         current = json.load(open(report.LISTS_FILE, encoding="utf-8"))
-        self.assertEqual(current, report.candidate_lists())
+        self.assertEqual(current, report.candidate_lists(report.measure(self.rank, self.lookups)))
 
     def test_the_lists_are_candidates_with_the_shape_the_audit_reads(self) -> None:
         lookups = self.lookups

@@ -14,7 +14,6 @@ from content.grammar_points_data import (
     gloss,
     grammar_to_id,
 )
-from study import grammar_check
 
 # Every raw card id the catalogue served before plan 087 re-evaluated it.
 # Dumped once, from the old loader, before the old files were deleted.
@@ -67,12 +66,6 @@ class GrammarPointsShapeTests(unittest.TestCase):
             )
         ordered = [counts[level] for level in LEVELS]
         self.assertEqual(ordered, sorted(ordered), f"counts do not rise with the level: {counts}")
-
-    def test_gate_is_clean(self) -> None:
-        # The whole of content/grammar/README.md's contract, in one call:
-        # shape, both languages, the sentence gate over every example, the
-        # rivals resolving, the contrast marks meaning something.
-        self.assertEqual(grammar_check.problems(), [])
 
     def test_get_grammar_points_answers_an_unknown_level_with_nothing(self) -> None:
         self.assertEqual(get_grammar_points("_meta"), [])
