@@ -180,6 +180,7 @@ export function liftLayer(layer) {
 export function handOver(root, { loops = false, keep = false } = {}) {
   const made = []
   if (!root?.getAnimations) return made
+  const targets = new Set()
   for (const css of root.getAnimations({ subtree: true })) {
     if (typeof CSSAnimation === 'undefined' || !(css instanceof CSSAnimation)) continue
     if (loops && css.effect.getTiming().iterations !== Infinity) continue
@@ -191,8 +192,14 @@ export function handOver(root, { loops = false, keep = false } = {}) {
     if (css.startTime != null) web.startTime = css.startTime
     else web.currentTime = css.currentTime
     css.cancel()
+    targets.add(el)
     made.push(web)
   }
+  // Every CSS animation handed over, none may start again: a cancelled
+  // one is made afresh when its box is put back in the page, which
+  // TodayPrint does with a layer kept between visits (plan 291). Not
+  // for `loops`, whose boxes keep their single turns as CSS.
+  if (!loops) for (const el of targets) el.style.animationName = 'none'
   // The print's own custom properties have been read into the keyframes
   // above. Left on the boxes, each would keep the stack in every
   // restyle a change of an inherited variable at the page's root makes

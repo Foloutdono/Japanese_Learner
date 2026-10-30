@@ -481,7 +481,13 @@ runtime purpose.
   itself, keeps the answer (`keepCachedJson`) and draws the last one
   kept (`lastCachedJson`) while it asks again, never a spinner over an
   answer in hand. A new gate, or a new request one opens on, goes in
-  `GATE_PATHS` and `warmGates` in the same change.
+  `GATE_PATHS` and `warmGates` in the same change. A tab tap lights its
+  gate at once and moves a frame later (`TabBar`): the router renders
+  as a transition, but nothing paints until it commits. What a gate
+  builds at great cost is kept between visits, not rebuilt: Today's
+  print layers are put back as they stood, their loops paused while
+  away (`TodayPrint`). Measure a switch on the production build at
+  phone width with the CPU slowed 4×, before and after.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s

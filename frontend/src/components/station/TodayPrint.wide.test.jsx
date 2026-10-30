@@ -31,4 +31,34 @@ describe('the print behind the gate', () => {
     expect(loops.length).toBeGreaterThan(100)
     expect(loops.filter(a => a instanceof CSSAnimation)).toHaveLength(0)
   })
+
+  // 予熱 (plan 291): Today opened again takes its layers back as they
+  // stood, rather than rebuilding them and handing every loop over again
+  // (most of a second on a phone). Out of the page they are paused, so
+  // no other screen pays for them; back, they play, and no CSS loop is
+  // made afresh beside them.
+  it('keeps its layers between visits, paused while away', async () => {
+    const box = { print: 'phone', u: 1, x: 0, y: 0 }
+    const frame = () => (
+      <div className="tdy--print" style={{ ...printVars('autumn-dusk', 'phone', box), position: 'relative', width: 390, height: 746 }}>
+        <TodayPrint look="autumn-dusk" device="phone" />
+      </div>
+    )
+    const first = await render(frame())
+    await vi.waitFor(() => expect(first.container.querySelectorAll('.tpr__layer > .tpr-lift__root')).toHaveLength(3), { timeout: 10_000 })
+    const roots = [...first.container.querySelectorAll('.tpr-lift__root')]
+    const loops = roots.flatMap(r => r.getAnimations({ subtree: true }))
+    expect(loops.length).toBeGreaterThan(100)
+    await first.unmount()
+    expect(loops.every(a => a.playState === 'paused')).toBe(true)
+
+    const again = await render(frame())
+    await vi.waitFor(() => expect(again.container.querySelectorAll('.tpr__layer > .tpr-lift__root')).toHaveLength(3), { timeout: 10_000 })
+    const back = [...again.container.querySelectorAll('.tpr-lift__root')]
+    expect(back).toEqual(roots)
+    expect(loops.every(a => a.playState === 'running')).toBe(true)
+    const now = back.flatMap(r => r.getAnimations({ subtree: true }))
+    expect(now).toHaveLength(loops.length)
+    expect(now.filter(a => a instanceof CSSAnimation)).toHaveLength(0)
+  })
 })
