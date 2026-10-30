@@ -20,7 +20,7 @@ import re
 import unicodedata
 
 from content.grammar_points_data import (
-    GRAMMAR_POINTS_BY_LEVEL, LEVELS, RICH_LEVELS, find,
+    GRAMMAR_POINTS_BY_LEVEL, LEVELS, RICH_LEVELS, find, TEXT_LANGS,
 )
 from study.furigana import is_kanji
 from study.grammar_examples import KANA_READING, blank_span, pattern_furigana, structure_furigana
@@ -260,13 +260,13 @@ def _line_problems(what: str, jp, level: str, pattern: str) -> list[str]:
 def _spoken_problems(what: str, line, level: str, pattern: str, rich: bool) -> list[str]:
     """A line of a scene: who says it, what, and its translation."""
     from study.grammar_tour import SCENE_WHO
-    if not isinstance(line, dict) or set(line) != {"who", "jp", "en", "fr"}:
-        return [f"{what} must be {{who, jp, en, fr}}"]
+    if not isinstance(line, dict) or not {"who", "jp", "en", "fr"} <= set(line) <= {"who", "jp", "en", "fr", "es"}:
+        return [f"{what} must be {{who, jp, en, fr[, es]}}"]
     out = []
     if line["who"] not in SCENE_WHO:
         out.append(f"{what} who {line['who']!r} not in {SCENE_WHO}")
     out += _line_problems(f"{what} jp", line["jp"], level, pattern)
-    for lang in LANGS:
+    for lang in LANGS + (("es",) if "es" in line else ()):
         tr = line[lang]
         if not isinstance(tr, str) or not tr.strip() or tr != tr.strip():
             out.append(f"{what} {lang} is empty or has surrounding whitespace")
@@ -274,6 +274,8 @@ def _spoken_problems(what: str, line, level: str, pattern: str, rich: bool) -> l
             out.append(f"{what} {lang} contains Japanese")
     if rich and line["en"] == line["fr"]:
         out.append(f"{what} fr is a copy of en")
+    if line.get("es") in (line["en"], line["fr"]):
+        out.append(f"{what} es is a copy of {'en' if line['es'] == line['en'] else 'fr'}")
     return out
 
 
@@ -302,7 +304,7 @@ def _twist_problems(what: str, twist, level: str, pattern: str, rich: bool) -> l
         # The sentence's translation, shown under it (plan 194): no
         # Japanese, as no translation may hold any.
         out += _text_problems(f"{what} tr", tr, rich, MAX_TOUR_CHARS)
-        if isinstance(tr, dict) and any(_CJK.search(tr.get(lang) or "") for lang in LANGS):
+        if isinstance(tr, dict) and any(_CJK.search(tr.get(lang) or "") for lang in TEXT_LANGS):
             out.append(f"{what} tr holds Japanese")
     if "kind" in twist and twist["kind"] not in TWIST_KINDS:
         out.append(f"{what} kind must be one of {sorted(TWIST_KINDS)}")
@@ -430,7 +432,7 @@ def _quiz_problems(level: str, entry: dict, rich: bool) -> list[str]:
         if kind == "meaning":
             out += _line_problems(f"{what} jp", q["jp"], level, pattern)
             out += _text_problems(f"{what} tr", q["tr"], rich, MAX_TOUR_CHARS)
-            if isinstance(q["tr"], dict) and any(_CJK.search(q["tr"].get(lang) or "") for lang in LANGS):
+            if isinstance(q["tr"], dict) and any(_CJK.search(q["tr"].get(lang) or "") for lang in TEXT_LANGS):
                 out.append(f"{what} tr holds Japanese")
             for i, choice in enumerate(choices):
                 out += _text_problems(f"{what} choice {i}", choice, rich, MAX_TOUR_CHARS)
@@ -444,7 +446,7 @@ def _quiz_problems(level: str, entry: dict, rich: bool) -> list[str]:
         if kind == "form":
             jp = q["jp"]
             out += _text_problems(f"{what} tr", q["tr"], rich, MAX_TOUR_CHARS)
-            if isinstance(q["tr"], dict) and any(_CJK.search(q["tr"].get(lang) or "") for lang in LANGS):
+            if isinstance(q["tr"], dict) and any(_CJK.search(q["tr"].get(lang) or "") for lang in TEXT_LANGS):
                 out.append(f"{what} tr holds Japanese")
             if not isinstance(jp, str) or jp.count(BLANK) != 1:
                 out.append(f"{what} jp must hold the blank {BLANK!r} once")
@@ -538,7 +540,7 @@ def _choose_problems(level: str, entry: dict, rich: bool) -> list[str]:
             continue
         before = len(out)
         out += _text_problems(f"{what} tr", item["tr"], rich, MAX_TOUR_CHARS)
-        if isinstance(item["tr"], dict) and any(_CJK.search(item["tr"].get(lang) or "") for lang in LANGS):
+        if isinstance(item["tr"], dict) and any(_CJK.search(item["tr"].get(lang) or "") for lang in TEXT_LANGS):
             out.append(f"{what} tr holds Japanese")
         out += _text_problems(f"{what} why", item["why"], rich, MAX_TOUR_CHARS)
         jp, choices = item["jp"], item["choices"]
