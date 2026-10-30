@@ -295,6 +295,8 @@ describe('BoardingFlow', () => {
     expect(body.rhythmMin).toBe(10)
     expect(body.reminderTime).toBe('07:30')
     expect(body.notifications).toBe(false)
+    // The web has no reminder to ask the OS for.
+    expect(requestNudge).not.toHaveBeenCalled()
     expect(body.cardName).toBe('')
     expect(typeof body.tzOffsetMin).toBe('number')
     // Why is no longer asked.
@@ -875,6 +877,121 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="issue"]')
     await settle(80)
     expect(posted().notifications).toBe(true)
+  })
+
+  // ── 案内 — the reminder's own step, after the card (plan 294) ──────
+  it('on a native shell the card’s issue stops at the reminder, whose gate asks the OS', async () => {
+    nudgeRef.current = true
+    nudgeState.current = 'prompt'
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(340)
+    expect(stepOf(screen)).toBe('remind')
+    expect(completes()).toHaveLength(0)
+    // The notification as it will arrive, at the card's hour.
+    expect(q(screen, '.brd-annonce__title').textContent).toBe(fr.nudgeTitle('07:30', 10))
+    await click(screen, '[data-action="remind-yes"]')
+    await settle(80)
+    expect(requestNudge).toHaveBeenCalledTimes(1)
+    expect(posted().notifications).toBe(true)
+    expect(done()[0].notifications).toBe(true)
+  })
+
+  it('« Pas maintenant » issues the card without the reminder, and never asks the OS', async () => {
+    nudgeRef.current = true
+    nudgeState.current = 'prompt'
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(340)
+    await click(screen, '[data-action="remind-later"]')
+    await settle(80)
+    expect(requestNudge).not.toHaveBeenCalled()
+    expect(posted().notifications).toBe(false)
+  })
+
+  it('the reminder’s way back is the card, and the card’s issue brings it back', async () => {
+    nudgeRef.current = true
+    nudgeState.current = 'prompt'
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(340)
+    await click(screen, '.brd__back')
+    await settle(340)
+    expect(stepOf(screen)).toBe('card')
+    await click(screen, '[data-action="issue"]')
+    await settle(340)
+    expect(stepOf(screen)).toBe('remind')
+    expect(completes()).toHaveLength(0)
+  })
+
+  it('a refused issue on the reminder’s step is said there, and its gate tries again', async () => {
+    nudgeRef.current = true
+    nudgeState.current = 'prompt'
+    apiJsonWithTimeout.mockImplementationOnce(async () => { throw new TypeError('Failed to fetch') })
+    const { screen } = await renderFlow()
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="issue"]')
+    await settle(340)
+    await click(screen, '[data-action="remind-yes"]')
+    await settle(80)
+    expect(stepOf(screen)).toBe('remind')
+    expect(q(screen, '.brd__error').dataset.error).toBe('network')
+    await click(screen, '[data-action="remind-yes"]')
+    await settle(80)
+    expect(completes()).toHaveLength(2)
+  })
+
+  it('the issue never asks again once the switch was pressed', async () => {
+    nudgeRef.current = true
+    nudgeState.current = 'prompt'
+    const first = await renderFlow()
+    await toCardBeginner(first.screen)
+    await door(first.screen, 'hour')
+    await clickSheet('[data-action="remind"]')
+    await settle(40)
+    await clickSheet('[data-action="remind"]')
+    await settle(40)
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle(60)
+    await click(first.screen, '[data-action="issue"]')
+    await settle(80)
+    // Switched on, then off: the learner's off stands, and no step asks.
+    expect(stepOf(first.screen)).not.toBe('remind')
+    expect(requestNudge).toHaveBeenCalledTimes(1)
+    expect(posted().notifications).toBe(false)
+  })
+
+  it('an OS that has refused for good is not asked again, and boards without the step', async () => {
+    nudgeRef.current = true
+    nudgeState.current = 'denied'
+    try {
+      const { screen } = await renderFlow()
+      await toCardBeginner(screen)
+      await click(screen, '[data-action="issue"]')
+      await settle(80)
+      expect(requestNudge).not.toHaveBeenCalled()
+      expect(posted().notifications).toBe(false)
+    } finally {
+      nudgeState.current = 'prompt'
+    }
+  })
+
+  it('an OS that already allows is not asked, no step is shown, and its allowance is the answer', async () => {
+    nudgeRef.current = true
+    nudgeState.current = 'granted'
+    try {
+      const { screen } = await renderFlow()
+      await toCardBeginner(screen)
+      await click(screen, '[data-action="issue"]')
+      await settle(80)
+      expect(requestNudge).not.toHaveBeenCalled()
+      expect(posted().notifications).toBe(true)
+    } finally {
+      nudgeState.current = 'prompt'
+    }
   })
 
   it('on the web the hour’s sheet hands the learner a daily event for their own calendar', async () => {

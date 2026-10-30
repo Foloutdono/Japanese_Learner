@@ -26439,6 +26439,49 @@ button.brd-stn { cursor: pointer; }
 .brd-clock__when { margin: 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; }
 .brd-clock__when strong { font-weight: 700; color: var(--brd-ink); }
 
+/* ── 案内 the reminder, after the card (plan 294, the owner's pick A of
+   the canvas "Tsuji — le rappel à l'embarquement") ──
+   The hour's board without its steps, and hung under its flaps the
+   notification as the phone will show it: a slip of paper on the sumi,
+   the mark on its own tile as the home screen draws it. A drawing, not
+   a control: nothing in it is pressed. */
+.brd-board.brd-annonce { gap: var(--sp-6); padding: var(--sp-6) var(--sp-5) var(--sp-5); }
+.brd-annonce__note {
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  background: var(--paper);
+  color: var(--text-on-fill);
+  border-radius: var(--r-identity);
+}
+.brd-annonce__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-radius: var(--r-panel);
+  font-size: var(--fs-title);
+}
+.brd-annonce__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.brd-annonce__app {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--paper-ink-soft);
+}
+.brd-annonce__app > :last-child { letter-spacing: normal; text-transform: none; }
+.brd-annonce__title { font-size: var(--fs-body); font-weight: 600; line-height: 1.3; }
+.brd-annonce__body { font-size: var(--fs-sm); line-height: 1.4; color: var(--paper-ink-soft); }
+
 /* ── Compte: the account's sheet, Google over the address ── */
 .auth-provider.brd-provider { min-height: 52px; }
 .field.brd-fld { min-height: 52px; padding-inline: var(--sp-5); border-color: var(--surface-line); }
@@ -38537,6 +38580,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   /* The test (plan 224): the stage as wide as its choices, so the word
      asked stands over them rather than at the paper's edge. */
   .desk-brd .brd__car[data-car="test"] { --desk-brd-w: var(--card-w); }
+  /* The reminder (plan 294): the board and its notification at the
+     width of a phone's, not the paper's. */
+  .desk-brd .brd__car[data-car="remind"] { --desk-brd-w: var(--desk-entry-w); }
   /* The card (plan 247): its fields in words beside it rather than under
      it, the card at its back's width and the rows at the side column's,
      and the line of where it lives under both. */

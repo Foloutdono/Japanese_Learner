@@ -2663,6 +2663,12 @@ const boarding = {
   brdPasswordMismatch: 'Les deux mots de passe ne sont pas les mêmes.',
   brdAccountSentNote: (email) => `Presque : confirme ${email} depuis le lien que nous venons de t’envoyer.`,
   brdRemindAt: (time) => `Me rappeler à **${time}**`,
+  // Plan 294 : le rappel, une étape après la carte (sur l'appli seule).
+  brdRemindQ: 'On t’annonce ton train ?',
+  brdRemindHint: 'Chaque jour, à l’heure de ta carte.',
+  brdRemindYes: (time) => `Oui, à ${time}`,
+  brdRemindLater: 'Pas maintenant',
+  brdRemindNow: 'maintenant',
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',
   brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
