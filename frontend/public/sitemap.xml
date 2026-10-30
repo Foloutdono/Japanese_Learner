@@ -4,10 +4,18 @@
     <loc>https://tsuji.app/</loc>
     <xhtml:link rel="alternate" hreflang="fr" href="https://tsuji.app/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://tsuji.app/en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://tsuji.app/es"/>
   </url>
   <url>
     <loc>https://tsuji.app/en</loc>
     <xhtml:link rel="alternate" hreflang="fr" href="https://tsuji.app/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://tsuji.app/en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://tsuji.app/es"/>
+  </url>
+  <url>
+    <loc>https://tsuji.app/es</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tsuji.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tsuji.app/en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://tsuji.app/es"/>
   </url>
 </urlset>

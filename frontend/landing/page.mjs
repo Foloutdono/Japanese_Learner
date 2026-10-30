@@ -10,7 +10,7 @@ import { RATING_SCALES } from '../src/domain/ratingScales.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
   SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, SIGNIN_ENTRY, STORES, CONTACT,
-  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey,
+  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey, LANG_NAMES, OTHER,
 } from './config.mjs'
 import { LEVELS, EXAM_N5, arrivals, spanOf, kanjiStrokes } from './content.mjs'
 import { STRINGS, CARDS, TOKENS, EXAM_OPTIONS } from './strings.mjs'
@@ -158,7 +158,7 @@ function crossroads(t) {
 
 function header(t, other) {
   const nav = t.nav.map(([key, label]) => `<a href="#${t.ids[key]}" data-spy="${t.ids[key]}">${esc(typo(t.lang, label))}</a>`).join('')
-  const langs = ['fr', 'en'].map(code => code === t.lang
+  const langs = Object.keys(PAGES).map(code => code === t.lang
     ? `<a aria-current="page" lang="${code}">${code.toUpperCase()}</a>`
     : `<a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${code.toUpperCase()}</a>`).join('')
   return `<header class="top" data-top><span class="top__rail" aria-hidden="true"></span><div class="wrap top__in">`
@@ -300,7 +300,7 @@ function method(t) {
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.method}-h">${esc(typo(t.lang, M.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, M.body))}</p>`
     + `<div class="card day"><div class="day__top"><span class="day__count"><span class="fig">${M.day.count}</span> ${esc(typo(t.lang, M.day.unit))}</span>`
-    + `<span class="seg seg--still" role="img" aria-label="${esc(M.day.lengthLabel)} : 50">${M.day.lengths.map(v => `<span${v === '50' ? ' class="on"' : ''}>${esc(v)}</span>`).join('')}</span></div>`
+    + `<span class="seg seg--still" role="img" aria-label="${esc(typo(t.lang, `${M.day.lengthLabel}${t.lang === 'fr' ? ' : ' : ': '}50`))}">${M.day.lengths.map(v => `<span${v === '50' ? ' class="on"' : ''}>${esc(v)}</span>`).join('')}</span></div>`
     + `<div class="day__bars" role="img" aria-label="${esc(M.day.sharesLabel)}">${lanes.map(([l, n]) => `<span class="bar" style="--c:${pigment(l)};flex-grow:${n}"></span>`).join('')}</div>`
     + `<div class="day__lanes"><ul>${lanes.map(([l, n]) => `<li style="--c:${pigment(l)}"><i></i><span>${esc(typo(t.lang, t.hero.stations[l]))}</span><b class="fig">${n}</b></li>`).join('')}</ul></div>`
     + `<div class="stamps"><div class="stamps__row" data-reveal role="img" aria-label="${esc(typo(t.lang, M.stampsLabel))}">${stamps}</div><span class="body body--small">${esc(typo(t.lang, M.stampsNote))}</span></div></div>`
@@ -623,12 +623,13 @@ function pass(t) {
     + `<div class="way__pass" data-reveal data-tilt>${card(t, 0.22)}</div>${form}</div></section>`
 }
 
-function footer(t, other) {
+function footer(t) {
   const F = t.footer
   const links = [
     `<a href="/privacy?lang=${t.lang}">${esc(F.privacy)}</a>`,
     CONTACT ? `<a href="mailto:${esc(CONTACT)}">${esc(F.contact)}</a>` : '',
-    `<a href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${esc(F.other)}</a>`,
+    ...Object.keys(PAGES).filter(code => code !== t.lang)
+      .map(code => `<a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${esc(LANG_NAMES[code])}</a>`),
   ].join('')
   return `<footer class="foot"><div class="wrap foot__in"><span class="foot__brand">${mark(28)}<span class="brand__name">Tsuji</span></span>`
     + `<div class="foot__end"><nav class="foot__links" aria-label="Tsuji">${links}</nav><p class="foot__credits">${esc(typo(t.lang, F.credits)).replace('KanjiVG', '<a href="https://kanjivg.tagaini.net" rel="noopener">KanjiVG</a>')}</p></div></div></footer>`
@@ -674,7 +675,7 @@ function jsonLd(t, facts, media, live) {
     description: t.description,
     applicationCategory: t.appCategory,
     operatingSystem: ['Web', STORES.appStore && 'iOS', STORES.googlePlay && 'Android'].filter(Boolean).join(', '),
-    inLanguage: ['fr', 'en'],
+    inLanguage: Object.keys(PAGES),
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
     publisher: { '@id': org['@id'] },
     ...(stores.length ? { sameAs: stores } : {}),
@@ -755,7 +756,7 @@ export function forwardScript() {
 
 export function renderPage(lang, facts, media) {
   const t = STRINGS[lang](facts)
-  const other = lang === 'fr' ? 'en' : 'fr'
+  const other = OTHER[lang]
   const page = PAGES[lang]
   const live = Boolean(PRESENTATION.uploadDate)
   const alternates = Object.values(PAGES).map(p => `<link rel="alternate" hreflang="${p.lang}" href="${url(p.path)}">`).join('')
@@ -811,7 +812,7 @@ ${fare(t)}
 ${faq(t)}
 ${pass(t)}
 </main>
-${footer(t, other)}
+${footer(t)}
 <script type="application/json" id="landing-data">${safeJson(JSON.stringify(clientData(t, facts, media)))}</script>
 </body>
 </html>

@@ -1162,7 +1162,7 @@ npm test          # vitest: node, browser, phone, tablet, touch, desktop and wid
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
-npm run landing:og  # its two share cards, rendered in Chromium
+npm run landing:og  # its three share cards, rendered in Chromium
 npm run landing:footage  # its sixteen feature clips, filmed on a seeded learner (plan 283)
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
@@ -1189,7 +1189,7 @@ result's sounds. `scripts/duel-music/` renders them in Chromium into
 and one more: the render is not byte-deterministic, so rebuild only with
 a change to the score, under a new `REV` (`scripts/duel-music/README.md`).
 
-The landing page is the site's **`/`** (and `/en`), and the app's front
+The landing page is the site's **`/`** (and `/en`, `/es`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`
 (`appShell.js`) so that `vercel.json` can rewrite `/` to the page, and the
 page sends a signed-in learner and every sign-in's return on to `/app`

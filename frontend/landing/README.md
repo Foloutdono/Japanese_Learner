@@ -2,9 +2,9 @@
 
 The public page for search and the stores: 辻 the crossroads (the owner's
 pick A on the canvas "Tsuji — landing page", improved with the others' best
-ideas). It is the site's `/` in French and `/en` in English; the files
-live under `public/landing/` and `vercel.json` rewrites the two addresses
-to them (the old `/landing/` addresses redirect there for good).
+ideas). It is the site's `/` in French, `/en` in English and `/es` in Spanish
+(plan 291); the files live under `public/landing/` and `vercel.json`
+rewrites the three addresses to them (the old `/landing/` addresses redirect there for good).
 
 It is a **static page**, not a screen of the app: plain HTML that search
 engines read whole, a stylesheet inlined in it, and one small script
@@ -16,13 +16,13 @@ in. The page works without that script.
 | File | What it is |
 | --- | --- |
 | `config.mjs` | Everything that changes when the page goes live: the origin, the paths, the store links, the contact, the footage. |
-| `strings.mjs` | Every word, French and English. Titles and descriptions come from `docs/seo/keywords.md`. |
+| `strings.mjs` | Every word, in French, English and Spanish. Titles and descriptions come from `docs/seo/keywords.md`. |
 | `content.mjs` | The figures, counted from the decks the app serves. |
 | `tokens.mjs` | The app's tokens, copied. `src/landing.test.js` holds them equal to `index.css`. |
 | `page.mjs` | The renderer: the sections, the SEO head, the JSON-LD. |
 | `landing.css` | The stylesheet, phone first, inlined at build. |
 | `build.mjs` | `npm run landing`: writes `public/landing/` (the demos' `voices.js` too), `public/sitemap.xml` and `public/robots.txt`. |
-| `og.mjs` | `npm run landing:og`: renders the two share cards (`og-fr.png`, `og-en.png`). |
+| `og.mjs` | `npm run landing:og`: renders the three share cards (`og-fr.png`, `og-en.png`, `og-es.png`). |
 | `../public/landing/landing.js` | The client script. Not built; served as written. |
 | `footage/` | `npm run landing:footage`: films the feature clips (plan 283, "Footage" below). |
 
@@ -280,5 +280,5 @@ gate). Four things make that work, and each has a test:
   keeping its `id` of `/`, so every existing install stays the same app.
 - **`npm run dev` and `npm run preview` route as the deployment does.**
   `appShell.js`'s `siteRoutes` reads `vercel.json` itself, so the landing
-  page is at `/` and `/en` there too, the old addresses redirect, and the
+  page is at `/`, `/en` and `/es` there too, the old addresses redirect, and the
   app is at `/app` and every app route. Open `/app` for the app.

@@ -115,6 +115,22 @@ English page leans harder on the specific terms:
 | spaced repetition Japanese, Anki alternative for Japanese | The method |
 | Japanese dictation practice, Japanese reading practice by level | Practice |
 
+## Spanish, at `/es/` (plan 291)
+
+A translation of the French page, as the English one is. The Spanish
+results are held by the same names (Duolingo, Busuu) and by Spanish
+blogs and course sites, so it leans on the plain queries a Spanish
+speaker types:
+
+| Query | Section |
+|---|---|
+| aprender japonés, app para aprender japonés | title, H1 |
+| examen JLPT, simulacro JLPT N5 | Mock exam |
+| aprender hiragana y katakana | Kana |
+| gramática japonesa por nivel JLPT | Grammar |
+| repetición espaciada japonés, alternativa a Anki | The method |
+| dictado en japonés, lectura en japonés por nivel | Practice |
+
 ## The title and the description
 
 ```
@@ -127,6 +143,11 @@ EN  <title>Learn Japanese: kana, kanji and JLPT N5 to N1 | Tsuji</title>
     <meta name="description" content="The app to learn Japanese a little every day:
     kana, vocabulary, kanji and grammar reviewed at the right moment, with dictation
     and JLPT mock exams.">
+
+ES  <title>Aprender japonés: kana, kanji y JLPT N5 a N1 | Tsuji</title>               (52)
+    <meta name="description" content="La app para aprender japonés un poco cada día:
+    kana, vocabulario, kanji y gramática repasados en el momento justo, dictados y
+    exámenes de prueba del JLPT.">                                                   (154)
 ```
 
 ## The store listings (ASO)

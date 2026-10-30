@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Politique de confidentialité · Privacy policy — 辻 Tsuji</title>
+  <title>Politique de confidentialité · Privacy policy · Política de privacidad — 辻 Tsuji</title>
   <meta name="robots" content="noindex">
   <!-- A static page, on purpose: both app stores want a privacy policy at a
        URL that answers without signing in, and the app itself gates every
        route behind a session. Outside src/ so the design guards do not scan
        it; the values below are the paper/sumi tokens copied as literals.
 
-       One language at a time: the switch reads ?lang=, then #fr/#en, then
-       the app's own saved choice (localStorage 'lang', same origin), then
-       the browser's language. Without JavaScript both sections show, one
-       after the other, and the switch is two anchors. The choice stays on
-       this page: it never writes the app's 'lang'. -->
+       One language at a time: the switch reads ?lang=, then #fr/#en/#es,
+       then the app's own saved choice (localStorage 'lang', same origin),
+       then the browser's language. Without JavaScript the three sections
+       show, one after the other, and the switch is three anchors. The
+       choice stays on this page: it never writes the app's 'lang'. -->
   <script>
     (function () {
       try {
@@ -52,15 +52,17 @@
     th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); }
     th { color: var(--dim); font-weight: 500; }
     @media (max-width: 520px) { .toc { columns: 1; } }
+    @media (max-width: 360px) { .lang a { padding: 6px 10px; } }
   </style>
 </head>
 <body>
 <main>
   <div class="top">
     <div class="glyph" lang="ja" aria-hidden="true">辻</div>
-    <nav class="lang" aria-label="Langue · Language">
+    <nav class="lang" aria-label="Langue · Language · Idioma">
       <a href="#fr" hreflang="fr" lang="fr" data-lang="fr">Français</a>
       <a href="#en" hreflang="en" lang="en" data-lang="en">English</a>
+      <a href="#es" hreflang="es" lang="es" data-lang="es">Español</a>
     </nav>
   </div>
 
@@ -383,18 +385,181 @@
     <p>Write to Alexandre Bauwens at <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>, or from the app: Settings › Write to us.</p>
     <p>If this policy changes, the date at the top of the page changes with it.</p>
   </section>
+
+  <!-- OWNER: revisar, fechar. -->
+  <section id="es" lang="es">
+    <p class="cap">Política de privacidad</p>
+    <h1>Lo que la aplicación sabe de ti, y por qué</h1>
+    <p class="updated">Última actualización: 28 de octubre de 2026.</p>
+
+    <div class="short">
+      <h2>En resumen</h2>
+      <ul>
+        <li>Guardamos lo necesario para enseñarte: tu cuenta, tus repasos, tus ajustes y lo que creas.</li>
+        <li>Sin publicidad, sin rastreadores, sin venta de datos. Las estadísticas de uso se quedan con nosotros, no contienen nada de lo que escribes y puedes rechazarlas.</li>
+        <li>Algunos textos (análisis de frases, correcciones) y las fotos que le das a leer a la aplicación se envían a un modelo de IA, sin nada que te identifique.</li>
+        <li>Los demás estudiantes solo ven tu nombre de usuario (clasificación, mazos publicados) y, si juegas duelos, tu Elo — nunca tu correo electrónico.</li>
+        <li>Puedes descargarlo todo, reiniciarlo todo o eliminar tu cuenta desde la aplicación, en cualquier momento.</li>
+      </ul>
+    </div>
+
+    <ol class="toc" aria-label="Índice">
+      <li><a href="#es-who">Quiénes somos</a></li>
+      <li><a href="#es-account">La cuenta</a></li>
+      <li><a href="#es-public">Lo que ven los demás</a></li>
+      <li><a href="#es-duels">Duelos</a></li>
+      <li><a href="#es-learning">Tu aprendizaje</a></li>
+      <li><a href="#es-reminders">Recordatorios y horario</a></li>
+      <li><a href="#es-device">En tu dispositivo</a></li>
+      <li><a href="#es-stats">Estadísticas de uso</a></li>
+      <li><a href="#es-messages">Tus mensajes</a></li>
+      <li><a href="#es-import">Tu progreso en otras aplicaciones</a></li>
+      <li><a href="#es-third">Alojamiento y terceros</a></li>
+      <li><a href="#es-bases">Por qué tenemos derecho a hacerlo</a></li>
+      <li><a href="#es-retention">Cuánto tiempo lo conservamos</a></li>
+      <li><a href="#es-rights">Tus derechos</a></li>
+      <li><a href="#es-contact">Contacto y cambios</a></li>
+    </ol>
+
+    <h2 id="es-who">Quiénes somos</h2>
+    <p>Tsuji (辻) es una aplicación para aprender japonés, diseñada y gestionada por Alexandre Bauwens, desarrollador independiente («nosotros» en esta página), que es el responsable del tratamiento de tus datos según el RGPD. Para cualquier pregunta: <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>.</p>
+
+    <h2 id="es-account">La cuenta</h2>
+    <p>El inicio de sesión lo gestiona Supabase. Según cómo entres:</p>
+    <ul>
+      <li><b>Sin cuenta (pase de invitado)</b>: se crea un identificador técnico, sin correo electrónico. Tu progreso queda vinculado a él; si más adelante creas una cuenta, te acompaña.</li>
+      <li><b>Con un correo electrónico</b>: guardamos tu dirección de correo electrónico (el identificador de la cuenta), un identificador técnico y la fecha de creación. Supabase guarda tu contraseña en forma de hash y nosotros nunca podemos leerla.</li>
+      <li><b>Con Google</b>: Google nos transmite tu dirección de correo electrónico y los datos de perfil que le permitas compartir (nombre, foto). Nunca recibimos tu contraseña de Google.</li>
+    </ul>
+    <p>Además: tu <b>nombre de usuario</b> y, si nos das uno, el <b>nombre</b> impreso en tu pase.</p>
+
+    <h2 id="es-public">Lo que ven los demás estudiantes</h2>
+    <ul>
+      <li><b>Tu nombre de usuario</b>, en la clasificación (番付) y como autor de los mazos que publicas. Se elige al azar, o se forma a partir del nombre que das al registrarte (sus letras latinas), y puedes cambiarlo en cualquier momento.</li>
+      <li><b>Los mazos que publicas</b>: su nombre y sus tarjetas. Un mazo privado solo lo ves tú.</li>
+    </ul>
+    <p>Nadie más ve tu correo electrónico, el nombre de tu pase, tus repasos ni tus ajustes.</p>
+
+    <h2 id="es-duels">Duelos</h2>
+    <p>En Perfil › Duelos juegas sprints de 2 minutos contra otros estudiantes. De cada duelo guardamos las preguntas planteadas, tus respuestas, sus tiempos y tu puntuación, y para ti un Elo (calculado a partir de tu nivel y luego de tus duelos clasificatorios); tus amigos, tus solicitudes de amistad, los estudiantes que bloqueas y tus reportes. Lo que ven los demás:</p>
+    <ul>
+      <li><b>Antes de ser amigos</b>: solo tu nombre de usuario. Solo te encuentran escribiendo ese nombre exactamente, y un estudiante al que bloqueas (o que te bloquea) ya no te encuentra.</li>
+      <li><b>Tus amigos</b>: tu Elo y el balance de tus duelos con ellos.</li>
+      <li><b>Un rival en un duelo clasificatorio</b>: tu nombre de usuario y tu Elo, tu puntuación y el momento de cada respuesta durante el duelo. Si te mantienes fuera de la clasificación (番付), allí eres «Viajero», sin nombre.</li>
+      <li><b>La clasificación Elo</b>: tu nombre y tu Elo, salvo si te mantienes fuera de la clasificación (番付).</li>
+    </ul>
+    <p>Otro estudiante de Elo cercano puede volver a jugar una partida clasificatoria terminada, como un fantasma: compite contra tu puntuación y el momento de cada respuesta, bajo tu nombre (o «Viajero»), y solo cambia su Elo. Un reporte lleva un motivo elegido de una lista, sin texto, y lo lee una persona. No hay mensajería entre estudiantes.</p>
+
+    <h2 id="es-learning">Tu aprendizaje</h2>
+    <p>Cada repaso queda registrado: la tarjeta, el modo, la calificación que le das, la fecha. Es lo que hace funcionar la repetición espaciada, tus estadísticas, tu nivel, tu racha y la clasificación. Además: tus mazos y tarjetas personales, tus ajustes (nivel JLPT, ritmo, destino, hora del recordatorio), la prueba de nivel, las frases que analizas, tus intentos de examen de prueba y tus prácticas de lectura, traducción, dictado y redacción.</p>
+
+    <h2 id="es-reminders">Recordatorios y horario</h2>
+    <p>En las aplicaciones de Android e iOS, los recordatorios (el tren del día, los bloques de tu horario) los programa <b>tu propio teléfono</b>, una vez que lo has permitido en el sistema; no se usa ningún servicio de notificaciones push. Solo guardamos si los recordatorios están activados, su hora y los bloques de tu horario. El widget muestra cifras que la aplicación le pasa en el dispositivo.</p>
+
+    <h2 id="es-device">En tu dispositivo</h2>
+    <p>La aplicación guarda en tu dispositivo (el almacenamiento local del navegador o de la aplicación) tu sesión iniciada, el idioma y el tema que elegiste, y copias temporales para ir más rápido y funcionar sin conexión. <b>No hay cookies publicitarias ni de medición de terceros</b>: este almacenamiento solo sirve para que la aplicación funcione. Cerrar sesión borra la sesión del dispositivo.</p>
+
+    <h2 id="es-stats">Estadísticas de uso</h2>
+    <p>Para saber qué se usa de verdad y qué no, la aplicación mide cómo se usa. Registra:</p>
+    <ul>
+      <li><b>las pantallas</b> que abres y cuánto tiempo está cada una delante de ti (el tiempo en que la pestaña está oculta no cuenta): el nombre de la pantalla, nunca su contenido;</li>
+      <li><b>tus visitas</b>: cuándo empiezan, y algunas clases de dispositivo — teléfono, tableta o computadora, la familia del sistema (iOS, Android, Windows…), navegador o aplicación instalada, táctil o ratón, el idioma y el tema de la interfaz, si pediste menos animaciones. Nunca el modelo del dispositivo, su resolución, tu dirección IP ni nada que permita reconocerlo;</li>
+      <li><b>tus sesiones</b> de repaso y de práctica: su tipo, el número de respuestas, cuántas fueron correctas, cuánto duraron y el tiempo por tarjeta;</li>
+      <li><b>las funciones que usas</b> — la escucha, el análisis de frases, la lectura de fotos, las preguntas al tutor, la búsqueda en el diccionario — como número de usos por pantalla, y los <b>ajustes</b> que cambias (tema, idioma, ritmo…);</li>
+      <li>los pasos del registro, del primer trayecto y de las guías, las ofertas mostradas, los límites alcanzados, los errores de carga y la velocidad de las páginas.</li>
+    </ul>
+    <p><b>Nada de lo que escribes aparece ahí</b>: ni tus respuestas de dictado, ni las frases que analizas, ni tus búsquedas, ni tus preguntas, ni tus tarjetas, ni los nombres de tus mazos o temas. El servidor solo acepta valores decididos de antemano y rechaza todo lo demás.</p>
+    <p>Estas mediciones se usan solo para mejorar la aplicación, se quedan en nuestro propio servidor y no se transmiten a nadie; no se usa ninguna herramienta de terceros y nada te sigue de un sitio a otro. Están vinculadas a tu cuenta (por eso son seudónimas, no anónimas), dentro del marco de medición de audiencia exento de consentimiento descrito por la CNIL, la autoridad francesa de protección de datos.</p>
+    <p><b>Puedes oponerte en cualquier momento</b>: Ajustes › Cuenta › Estadísticas de uso. La elección vale para tu cuenta, en todos tus dispositivos. En el mismo lugar, «Descargar las mías» te entrega todo lo que se ha registrado sobre ti.</p>
+
+    <h2 id="es-messages">Tus mensajes</h2>
+    <p>Ajustes › Escríbenos, la bandera de una tarjeta respondida y el enlace bajo un error te permiten escribirnos: un problema, una idea, un error en lo que se enseña, una tarjeta que corregir. Guardamos lo que escribes y el tipo de mensaje. Además:</p>
+    <ul>
+      <li>si la casilla «Adjuntar la pantalla y el dispositivo» sigue marcada, el nombre de la pantalla y las mismas clases de dispositivo que las estadísticas de uso, que se muestran antes del envío;</li>
+      <li>bajo un error, el área y el código del fallo; para una tarjeta, su identificador y lo que está mal en ella;</li>
+      <li>si marcas «Respóndeme», la dirección de correo electrónico de tu cuenta, para poder responderte.</li>
+    </ul>
+    <p>Estos mensajes los lee una persona, se usan solo para corregir y mejorar la aplicación, no se transmiten a nadie, no aparecen en ninguna estadística salvo como recuentos y se borran con tu cuenta. Cinco mensajes al día como máximo.</p>
+    <p>Para que ningún mensaje espere, cada uno se nos notifica en un canal privado de Discord (Discord es una empresa estadounidense): el aviso solo indica el tipo de mensaje, su número y, cuando corresponde, la tarjeta o la pregunta en cuestión y lo que está mal en ella, la pantalla, el error, la calificación, el número de caracteres y si quieres una respuesta. Nunca tus palabras, tu dirección de correo electrónico ni tu cuenta: eso se queda con nosotros.</p>
+
+    <h2 id="es-import">Tu progreso en otras aplicaciones (Anki, WaniKani, Renshuu)</h2>
+    <p>Ajustes › Transbordo trae tu progreso desde otra aplicación.</p>
+    <ul>
+      <li><b>Anki</b>: el archivo de un mazo o de una colección se lee en tu dispositivo y nunca se envía.</li>
+      <li><b>WaniKani y Renshuu</b>: es tu propio dispositivo el que lee tu cuenta allí, con la clave de API que pegas. Esa clave solo va a WaniKani o a Renshuu, nunca a nuestro servidor, y no se guarda.</li>
+    </ul>
+    <p>En cualquier caso, lo único que llega a nuestro servidor, para lo que eliges, son los campos cortos en japonés de cada palabra o kanji que has aprendido (la palabra y su lectura) y su calendario. El servidor busca en ellos las tarjetas del curso y solo guarda el calendario de las que encontró, como si las hubieras aprendido aquí; el resto no se guarda, ni tampoco los nombres de tus mazos, que nunca salen de tu dispositivo. Cuando llegas, la aplicación te lo ofrece una vez; guardamos la fecha de tu respuesta para no volver a preguntártelo.</p>
+
+    <h2 id="es-third">Alojamiento y terceros</h2>
+    <p><b>Dónde están tus datos.</b> Tu cuenta y todos tus datos de aprendizaje se almacenan en la Unión Europea:</p>
+    <ul>
+      <li><b>Supabase</b> — inicio de sesión y base de datos, en Irlanda;</li>
+      <li><b>Render</b> — nuestro servidor, en Fráncfort (Alemania);</li>
+      <li><b>Vercel</b> — sirve el sitio y transmite tus solicitudes a nuestro servidor; como cualquier proveedor de alojamiento, técnicamente ve tu dirección IP para poder responderte, pero no guarda ningún dato de aprendizaje.</li>
+    </ul>
+    <p>Las voces (tarjetas, dictados, exámenes) se sintetizan en nuestro propio servidor: no se envía nada a ningún servicio de síntesis de voz.</p>
+    <p><b>Lo que se envía a otros servicios, y solo cuando usas la función:</b></p>
+    <ul>
+      <li><b>Análisis de frases, corrección de traducciones y redacciones, preguntas sobre un ejercicio, generación de exámenes y textos</b>: el texto en cuestión se envía a un proveedor de modelos de lenguaje (primero Google Gemini, luego OpenAI, luego OpenRouter, según la disponibilidad) — incluido lo que escribiste para el ejercicio, como tu traducción, tu frase o tu pregunta. No lo acompaña ningún dato de la cuenta. Estos proveedores pueden tratar el texto fuera de la Unión Europea (en particular en Estados Unidos), según sus propias condiciones: no escribas ahí nada personal.</li>
+      <li><b>Lectura de una foto</b>: por defecto, la imagen que encuadras se envía a un modelo de visión (primero Google Gemini, luego OpenRouter) para extraer su texto, y después no la guardamos. En la web, «Leer en mi dispositivo» lee la imagen sin que salga de tu dispositivo (menos preciso); el motor de lectura se descarga entonces una vez desde una red pública de distribución de contenidos.</li>
+      <li><b>Iniciar sesión con Google</b>: si lo eliges, Google sabe que inicias sesión en Tsuji, según su propia política.</li>
+      <li><b>Videos</b>: el reproductor de YouTube es el propio de YouTube, con su propia política, y la imagen de vista previa de un video que analizas la carga tu navegador desde YouTube.</li>
+      <li><b>WaniKani y Renshuu</b>: solo si importas desde ellos, ver más arriba.</li>
+    </ul>
+    <p>Sin publicidad, sin rastreadores, sin venta de datos.</p>
+
+    <h2 id="es-bases">Por qué tenemos derecho a hacerlo</h2>
+    <ul>
+      <li><b>Para prestarte el servicio</b> (cuenta, repasos, mazos, ejercicios, mensajes): la ejecución del contrato que aceptas al usar la aplicación (RGPD, art. 6.1.b).</li>
+      <li><b>Para las estadísticas de uso y la seguridad</b> (límites, protección contra abusos): nuestro interés legítimo en medir y proteger la aplicación (art. 6.1.f), con tu derecho a oponerte.</li>
+      <li><b>Para los recordatorios</b>: tu consentimiento, dado al sistema de tu teléfono y revocable en cualquier momento.</li>
+    </ul>
+
+    <h2 id="es-retention">Cuánto tiempo lo conservamos</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th scope="col">Dato</th><th scope="col">Se conserva</th></tr></thead>
+        <tbody>
+          <tr><td>Cuenta, aprendizaje, mazos, ajustes, mensajes, duelos, amigos, Elo y reportes</td><td>Mientras exista tu cuenta; se borran al eliminarla (un duelo jugado contra ti se queda con el otro jugador, sin tu nombre)</td></tr>
+          <tr><td>Un duelo que nadie jugó (caducado, rechazado o cancelado)</td><td>30 días después de terminar</td></tr>
+          <tr><td>Estadísticas de uso, detalle</td><td>30 días</td></tr>
+          <tr><td>Eventos únicos por cuenta (pasos del registro, primer trayecto, guías, ofertas, límites, curso básico, publicación de un mazo, una importación)</td><td>12 meses</td></tr>
+          <tr><td>Recuentos diarios que quedan de las estadísticas</td><td>25 meses</td></tr>
+          <tr><td>Un mazo publicado que eliminas mientras otros lo siguen</td><td>Sale de tu estante de inmediato, se conserva un tiempo limitado para que sus seguidores puedan hacer una copia, y luego se borra</td></tr>
+          <tr><td>Fotos y textos enviados a un modelo de IA</td><td>No los guardamos más allá de la respuesta (salvo las frases que analizas, guardadas en tu cuenta)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="es-rights">Tus derechos</h2>
+    <p>En cualquier momento puedes:</p>
+    <ul>
+      <li><b>acceder a tus datos y llevártelos</b>: Ajustes › Cuenta, para descargar tu progreso y tus estadísticas de uso; para todo lo demás, escríbenos;</li>
+      <li><b>corregirlos</b>: desde los ajustes o escribiéndonos;</li>
+      <li><b>borrarlos</b>: reiniciar tu progreso, o <b>eliminar tu cuenta</b> (Ajustes › Cuenta › Eliminar tu cuenta), lo que borra todos tus datos y tu identificador de inicio de sesión, de inmediato y de forma irreversible. Con la sesión iniciada, el mismo camino está en <a href="/profile/settings/account">/profile/settings/account</a>. Los pasos, lo que se elimina y qué hacer si ya no puedes abrir la aplicación están en la página <a href="/delete-account">Eliminar mi cuenta</a>;</li>
+      <li><b>oponerte</b> a las estadísticas de uso (Ajustes › Cuenta › Estadísticas de uso), o <b>pedir la limitación</b> de un tratamiento escribiéndonos.</li>
+    </ul>
+    <p>Respondemos en un plazo máximo de un mes. Si consideras que no se respetan tus derechos, puedes presentar una reclamación ante la CNIL (<a href="https://www.cnil.fr/en/complaints" rel="noreferrer">cnil.fr</a>) o ante la autoridad de protección de datos de tu propio país.</p>
+
+    <h2 id="es-contact">Contacto y cambios</h2>
+    <p>Escribe a Alexandre Bauwens a <a href="mailto:contact.tsujijapanese@gmail.com">contact.tsujijapanese@gmail.com</a>, o desde la aplicación: Ajustes › Escríbenos.</p>
+    <p>Si esta política cambia, la fecha de la parte superior de la página cambia con ella.</p>
+  </section>
 </main>
 <script>
   (function () {
-    var LANGS = ['fr', 'en']
-    var TITLES = { fr: 'Politique de confidentialité — 辻 Tsuji', en: 'Privacy policy — 辻 Tsuji' }
+    var LANGS = ['fr', 'en', 'es']
+    var TITLES = { fr: 'Politique de confidentialité — 辻 Tsuji', en: 'Privacy policy — 辻 Tsuji', es: 'Política de privacidad — 辻 Tsuji' }
     function pick() {
       var q = (location.search.match(/[?&]lang=([a-z]{2})/) || [])[1]
       if (LANGS.indexOf(q) >= 0) return q
       var h = location.hash.slice(1, 3)
       if (LANGS.indexOf(h) >= 0) return h
       try { var s = localStorage.getItem('lang'); if (LANGS.indexOf(s) >= 0) return s } catch (e) {}
-      return /^fr\b/i.test(navigator.language || '') ? 'fr' : 'en'
+      var n = navigator.language || ''
+      if (/^fr\b/i.test(n)) return 'fr'
+      if (/^es\b/i.test(n)) return 'es'
+      return 'en'
     }
     function show(code, scroll) {
       LANGS.forEach(function (l) {
@@ -415,7 +580,7 @@
         history.replaceState(null, '', location.pathname + location.search.replace(/([?&])lang=[a-z]{2}&?/, '$1').replace(/[?&]$/, '') + '#' + code)
       })
     })
-    // A link to a heading of the other language (#en-rights) switches to it.
+    // A link to a heading of another language (#en-rights) switches to it.
     window.addEventListener('hashchange', function () {
       var h = location.hash.slice(1, 3)
       if (LANGS.indexOf(h) >= 0 && document.getElementById(h).hidden) show(h, false)

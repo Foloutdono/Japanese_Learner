@@ -1,6 +1,6 @@
-// ── The landing page's words, in both languages (plan 167) ──
-// French first, as the app is: the English page is a translation of
-// this one, never a page of its own. The titles and descriptions are
+// ── The landing page's words, in each language (plan 167) ──
+// French first, as the app is: the English page, and the Spanish one
+// (plan 291), are translations of this one, never pages of their own. The titles and descriptions are
 // docs/seo/keywords.md's, character for character; change them there
 // first. French typography (the space before : ; ? !) is set by the
 // renderer, so the strings below are written with plain spaces.
@@ -11,6 +11,9 @@ import { arrivals, spanOf } from './content.mjs'
 
 const FR_NUM = new Intl.NumberFormat('fr-FR')
 const EN_NUM = new Intl.NumberFormat('en-GB')
+// The RAE's figures: four digits run together (7980), five and more
+// grouped by a space (10 000), as the French groups them.
+const ES_NUM = { format: n => (Math.abs(n) < 10000 ? String(n) : FR_NUM.format(n)) }
 
 // The demo cards (the method's trial). Each carries the forecast the
 // app's scheduler gives it, in seconds, for Missed, Almost, Correct
@@ -306,7 +309,6 @@ const fr = facts => {
     footer: {
       privacy: 'Confidentialité',
       contact: 'Contact',
-      other: 'English',
       credits: 'Voix : VOICEVOX Nemo · 波音リツ. Tracés des kanji : KanjiVG (CC BY-SA 3.0). JLPT est une marque de la Japan Foundation et de JEES, sans lien avec Tsuji.',
     },
     appCategory: 'EducationalApplication',
@@ -551,11 +553,256 @@ const en = facts => {
     footer: {
       privacy: 'Privacy',
       contact: 'Contact',
-      other: 'Français',
       credits: 'Voices: VOICEVOX Nemo · 波音リツ. Kanji strokes: KanjiVG (CC BY-SA 3.0). JLPT is a trademark of the Japan Foundation and JEES, not affiliated with Tsuji.',
     },
     appCategory: 'EducationalApplication',
   }
 }
 
-export const STRINGS = { fr, en }
+const es = facts => {
+  const n = x => ES_NUM.format(x)
+  const span = ({ months, years, half }) => months != null
+    ? `≈ ${months} mes${months > 1 ? 'es' : ''}`
+    : `≈ ${years}${half ? '½' : ''} año${years > 1 || half ? 's' : ''}`
+  const n5At10 = spanOf(arrivals(facts, 10)[0].days)
+  return {
+    lang: 'es',
+    num: n,
+    title: 'Aprender japonés: kana, kanji y JLPT N5 a N1 | Tsuji',
+    description: 'La app para aprender japonés un poco cada día: kana, vocabulario, kanji y gramática repasados en el momento justo, dictados y exámenes de prueba del JLPT.',
+    ogTitle: 'Tsuji — aprender japonés, del primer kana al JLPT N1',
+    ogAlt: 'Tsuji, el cruce: cuatro líneas, del kana al JLPT N1.',
+    skip: 'Saltar al contenido',
+    home: 'Tsuji, inicio',
+    ids: { lines: 'lines', line: 'your-line', method: 'method', features: 'features', jlpt: 'jlpt', tools: 'tools', fare: 'pricing', faq: 'faq', presentation: 'presentation', way: 'board' },
+    next: 'Siguiente',
+    nextTo: name => `Siguiente: ${name}`,
+    terminus: 'Última parada',
+    nav: [['lines', 'Aprender'], ['line', 'Tu línea'], ['method', 'El método'], ['features', 'Funciones'], ['jlpt', 'Examen JLPT'], ['fare', 'Precio'], ['faq', 'Preguntas']],
+    navLabel: 'Secciones',
+    langLabel: 'Idioma',
+    signIn: 'Iniciar sesión',
+    sound: 'Sonido',
+
+    hero: {
+      kicker: 'La app para aprender japonés',
+      h1: 'Aprender japonés, del primer kana al JLPT N1.',
+      lead: 'Cada día, Tsuji te trae las tarjetas que estabas a punto de olvidar y, después, frases reales para leer, escuchar y escribir. Kana, vocabulario, kanji y gramática, del N5 al N1.',
+      stations: { kana: 'Kana', vocab: 'Vocabulario', kanji: 'Kanji', grammar: 'Gramática', reading: 'Lectura', honyaku: 'Traducción', kakitori: 'Dictado' },
+      rolls: [['あ', 'Kana'], ['電車', 'Vocabulario'], ['駅', 'Kanji'], ['〜ている', 'Gramática'], ['ア', 'Kana'],
+        ['読む', 'Lectura'], ['訳す', 'Traducción'], ['書く', 'Dictado'], ['解析', 'Analizador'], ['模試', 'Examen de prueba']],
+      tagline: 'Un trayecto hecho a tu medida.',
+      cue: 'Descubrir',
+      watch: 'Ver la presentación',
+      // Its first part is fare.h2, word for word (page.mjs, fare()).
+      note: ({ appStore, googlePlay }) => appStore && googlePlay
+        ? 'Gratis durante el acceso anticipado · en iPhone, Android y el navegador'
+        : googlePlay
+          ? 'Gratis durante el acceso anticipado · en Android y el navegador, pronto en iPhone'
+          : 'Gratis durante el acceso anticipado · en tu navegador, pronto en iPhone y Android',
+    },
+    board: 'Embarcar',
+    boardSub: 'Gratis · sin cuenta',
+    boardAria: 'Embarcar: gratis, sin cuenta, en tu navegador',
+    badges: {
+      appStore: ['Descárgalo en el', 'App Store'],
+      googlePlay: ['Disponible en', 'Google Play'],
+      soon: { appStore: 'Próximamente en el', googlePlay: 'Próximamente en' },
+    },
+
+    figuresLabel: 'Tsuji en cifras',
+    figures: [
+      [n(facts.words), 'palabras, del N5 al N1'],
+      [n(facts.kanji), 'kanji y sus trazos'],
+      [n(facts.grammar), 'puntos de gramática'],
+      ['N5 → N1', 'los cinco niveles del JLPT'],
+      ['6', 'formas de practicar'],
+    ],
+
+    presentation: {
+      kicker: 'Presentación',
+      h2: 'Todo Tsuji en 90 segundos',
+      body: 'Del primer kana al examen de prueba: la app en un solo video, con subtítulos en francés e inglés.',
+      play: 'Reproducir la presentación de Tsuji',
+      chapters: ['Hoy', 'Kana y kanji', 'Gramática', 'Práctica', 'Analizador', 'Examen de prueba'],
+      chaptersLabel: 'Capítulos',
+      captions: 'Subtítulos',
+      videoName: 'Tsuji, la presentación',
+      videoDescription: 'Tsuji en un minuto y medio: el trayecto del día, los kana y los kanji, la gramática, la práctica, el analizador y el examen de prueba del JLPT.',
+    },
+
+    lines: {
+      kicker: 'Aprender',
+      h2: 'Hiragana, vocabulario, kanji y gramática japonesa: cuatro líneas, del N5 al N1',
+      body: 'Cada línea tiene parada en cada nivel del JLPT. Subes en la estación que te corresponde; Tsuji dosifica las tarjetas nuevas y te avisa cuando llegas a la siguiente.',
+      plates: {
+        kana: { reading: 'かな', h3: 'Hiragana y katakana', body: 'Sonido a sonido, cada kana con una voz grabada. Primero los reconoces, luego los escribes a mano: la base sobre la que se apoya todo lo demás.', chips: ['Hiragana', 'Katakana'], stage: 'En curso', gloss: 'a' },
+        vocab: { reading: 'ごい', h3: 'Vocabulario del JLPT', body: `Las ${n(facts.words)} palabras del temario, por nivel, por frecuencia o por tema, todas con su significado en español. De la forma al significado y del significado a la forma.`, stops: 'Del N5 al N1', stage: 'Nuevo', gloss: 'tren' },
+        kanji: { reading: 'かんじ', h3: 'Kanji', body: `${n(facts.kanji)} caracteres por nivel, con el orden de trazos animado. Cada lectura, cada significado; primero los lees y luego los trazas de memoria.`, chips: ['Orden de trazos', `${n(facts.radicals)} radicales`], stage: 'Dominado', strokes: 'エキ · 14 trazos', gloss: 'estación' },
+        grammar: { reading: 'ぶんぽう', h3: 'Gramática japonesa', body: `${n(facts.grammar)} puntos, del N5 al N1, cada uno con su lección: a qué se une, qué hace, con qué no confundirlo y frases que lo usan de verdad.`, chips: ['Lecciones en español', `${n(facts.examples)} ejemplos`], gloss: 'Está lloviendo (ahora mismo).' },
+      },
+    },
+
+    line: {
+      kicker: 'Tu línea',
+      h2: '¿Cuánto tiempo se tarda en aprender japonés? Del primer kana al JLPT N1, a tu ritmo',
+      body: 'Tsuji te pregunta desde dónde partes y cuántos minutos tienes cada día, sitúa tu salida y calcula tu llegada a cada estación. Elige un ritmo:',
+      rhythmsLabel: 'Minutos al día',
+      rhythm: m => `${m} min`,
+      note: 'Estimación de Tsuji: una palabra, un kanji o un punto nuevo por minuto, partiendo de cero. Los repasos se suman al trayecto.',
+      plate: 'Tu línea',
+      at: m => `A ${m} min al día`,
+      kana: `${n(facts.kana)} kana`,
+      here: 'estás aquí',
+      start: 'salida',
+      counts: l => `${n(l.words)} palabras · ${n(l.kanji)} kanji · ${n(l.grammar)} puntos`,
+      countsShort: l => `${n(l.words)} palabras · ${n(l.kanji)} kanji`,
+      span,
+    },
+
+    method: {
+      kicker: 'El método',
+      h2: 'Repetición espaciada sin configurar nada: pruébala',
+      body: 'Dale la vuelta a la tarjeta y di cómo te fue: Tsuji decide cuándo vuelve. Cada día, todo lo pendiente de todas tus líneas te espera en una sola cola, con el tiempo que te llevará.',
+      day: { count: '42', unit: 'tarjetas · ≈ 14 min', lengthLabel: 'Duración del trayecto', lengths: ['20', '50', '100', 'Todas'], sharesLabel: 'La parte de cada línea' },
+      stamps: '月火水木金土日',
+      stampsLabel: 'Seis días de trayecto de cada siete',
+      stampsNote: 'Un sello por cada día de trayecto',
+      reminder: 'En la app móvil, un recordatorio a la hora que elijas, nunca más de uno al día, y un widget con el recuento del día.',
+      trial: 'Pruébalo: un repaso',
+      trialPos: (i, total) => `Prueba · tarjeta ${i} / ${total}`,
+      flip: 'Toca para dar la vuelta',
+      flipAria: 'Dar la vuelta a la tarjeta',
+      rateLabel: '¿Cómo te fue?',
+      ratings: ['Fallado', 'Casi', 'Correcto', 'Fácil'],
+      level: 'Nv. 3',
+      xp: x => `+${x} XP`,
+      kinds: { kanji: 'Kanji', vocab: 'Vocabulario', kana: 'Kana', grammar: 'Gramática' },
+      stages: { new: 'Nuevo', learning: 'En curso', mastered: 'Dominado' },
+      cards: [
+        { meaning: 'estación', translation: '¿Dónde está la estación?' },
+        { meaning: 'tren', translation: 'Voy en tren.' },
+        { meaning: 'nu', translation: 'perro' },
+        { meaning: 'una acción en curso', translation: 'Está lloviendo ahora mismo.' },
+        { meaning: 'amigo', translation: 'Estoy esperando a un amigo.' },
+      ],
+      due: dueWith({ minutes: x => `${x} min`, hours: x => `${x} h`, tomorrow: 'mañana', days: x => `${x} d`, weeks: x => `${x} sem.`, months: x => `${x} mes${x > 1 ? 'es' : ''}` }),
+    },
+
+    features: {
+      kicker: 'Funciones',
+      h2: 'Kana, kanji, gramática, analizador: cada función en acción',
+      body: 'Elige una función: el video muestra la app tal como es, sin editar.',
+      tabsLabel: 'Funciones',
+      devicesLabel: 'Dispositivo',
+      devices: { phone: 'Teléfono', desk: 'Computadora' },
+      play: name => `Ver el video: ${name}`,
+      items: {
+        aujourdhui: { name: 'Hoy', line: 'Todos tus repasos en una sola cola, con el tiempo que te llevará.', what: 'La taquilla del día: las tarjetas pendientes de todas las líneas y, luego, la salida.' },
+        kana: { name: 'Kana', line: 'Hiragana y katakana, sonido a sonido, y luego trazados con el dedo.', what: 'Reconocer un kana, oírlo y luego trazarlo.' },
+        vocabulaire: { name: 'Vocabulario', line: `${n(facts.words)} palabras del JLPT, con su significado en español, en ambos sentidos.`, what: 'Una tarjeta volteada y calificada, y la siguiente que llega.' },
+        kanji: { name: 'Kanji', line: 'El orden de trazos animado y luego el kanji trazado de memoria.', what: 'El trazo animado y luego el kanji escrito de memoria.' },
+        grammaire: { name: 'Gramática', line: 'Una lección por punto y luego la frase que hay que completar.', what: 'La lección de un punto y luego la frase que lo usa.' },
+        pratique: { name: 'Lectura y dictado', line: 'Frases reales para leer, escuchar y escribir, a tu nivel.', what: 'Una frase leída, otra escuchada, y cada una corregida.' },
+        analyseur: { name: 'Analizador', line: 'Un video de YouTube, una foto o un texto, desglosados palabra por palabra.', what: 'Un subtítulo de YouTube desglosado, con su gramática numerada.' },
+        examen: { name: 'Examen de prueba', line: 'Un examen con el formato del JLPT, cronometrado y puntuado sobre 180.', what: 'Un examen cronometrado y, después, la nota y la corrección.' },
+      },
+    },
+
+    jlpt: {
+      kicker: 'Examen JLPT',
+      h2: 'Exámenes de prueba del JLPT, del N5 al N1',
+      body: `Vocabulario, gramática, lectura y comprensión auditiva, cronometrados y puntuados sobre 180 con los mínimos oficiales para aprobar. En el N5, ${facts.exam.questions} preguntas en ${facts.exam.minutes} minutos: sabes dónde estás antes de inscribirte.`,
+      note: 'Formato oficial, puntuación no oficial. Ninguna pregunta está copiada de un examen real.',
+      head: 'N5 · Lectura de kanji · Pregunta 1',
+      timer: `${facts.exam.minutes - 1}:12`,
+      optionsLabel: 'Elige la lectura',
+      ask: 'Elige una lectura.',
+      right: 'Correcto: 駅 se lee えき.',
+      wrong: 'No del todo: 駅 se lee えき.',
+    },
+
+    tools: {
+      kicker: 'Herramientas',
+      h2: 'Un diccionario de japonés y un analizador de frases',
+      body: 'Escribe, fotografía o pega un enlace de YouTube: Tsuji desglosa la frase palabra por palabra y numera su gramática. La foto se lee en tu dispositivo; la imagen nunca sale de él.',
+      stage: 'En curso',
+      sense: '1. estación',
+      compounds: [['駅', '員', 'えきいん', 'empleado de estación'], ['駅', '前', 'えきまえ', 'delante de la estación'], ['東京', '駅', 'とうきょうえき', 'estación de Tokio']],
+      intakes: ['Texto', 'Foto', 'YouTube'],
+      tap: 'Toca una palabra',
+      translation: 'Estoy esperando a un amigo en la estación.',
+      tokens: [
+        { meaning: 'estación', kind: 'Sustantivo · N5', note: 'El lugar: lleva la partícula で.' },
+        { meaning: 'el lugar de la acción', kind: 'Partícula · punto 1', note: 'Donde ocurre lo que hace el verbo.' },
+        { meaning: 'amigo', kind: 'Sustantivo · N5', note: 'A quien se espera: lleva を.' },
+        { meaning: 'el objeto de la acción', kind: 'Partícula · punto 2', note: 'Aquello sobre lo que actúa el verbo.' },
+        { meaning: 'esperar', kind: 'Verbo · N5 · punto 3', note: '待つ en la forma 〜ています: una acción en curso.' },
+      ],
+      points: [['〜で', 'el lugar'], ['〜を', 'el objeto'], ['〜ている', 'en curso']],
+      pointsLabel: 'La gramática de la frase',
+    },
+
+    fare: {
+      kicker: 'Precio',
+      h2: 'Gratis durante el acceso anticipado',
+      // Its first sentence is the ticket, the rest its stub (page.mjs, fare()).
+      body: 'Todas las líneas, todos los ejercicios, el analizador y el diccionario, abiertos a todo el mundo. Más adelante llegará una suscripción para repasar sin límite; los kana seguirán siendo gratis para siempre.',
+      promises: [
+        ['Sin anuncios ni rastreadores', 'No vendemos datos. Nuestras estadísticas nunca contienen lo que escribes.'],
+        ['Una gramática revisada con lupa', 'Redactada con IA y luego releída sin pausa por agentes de IA que buscan sus errores. Cada ejemplo se comprueba.'],
+        ['Todo se lee en voz alta', 'Los kana, con una voz humana grabada; el resto, con una voz japonesa sintética.'],
+        ['Tus datos son tuyos', 'Exporta tu progreso en CSV y borra tu cuenta en dos toques.'],
+      ],
+    },
+
+    faq: {
+      kicker: 'Preguntas',
+      h2: 'Aprender japonés con Tsuji',
+      items: [
+        ['¿Cuánto tiempo se tarda en aprender japonés?', `Hasta el N5, ${span(n5At10).replace('≈ ', 'alrededor de ')} a diez minutos al día partiendo de cero, kana incluidos, según la estimación de Tsuji. Te muestra tu propia fecha de llegada y la recalcula si cambias de ritmo.`, 'line'],
+        ['¿Por dónde empezar: hiragana, katakana o kanji?', 'Por los hiragana y luego los katakana: con ellos se escribe todo lo demás. Tsuji te pregunta qué sabes ya y te hace subir en la estación que te corresponde.', 'lines'],
+        ['¿Qué es la repetición espaciada?', 'Cada tarjeta vuelve justo cuando estabas a punto de olvidarla: a los pocos minutos si fallas, a los días y luego a las semanas cuando ya te la sabes. Es lo que hace la tarjeta de prueba de más arriba.', 'method'],
+        ['¿Es gratis Tsuji?', 'Sí, durante el acceso anticipado, y sin cuenta para empezar. Más adelante llegará una suscripción para repasar sin límite; los kana seguirán siendo gratis.', 'fare'],
+        ['¿Tsuji sustituye a Anki?', 'La misma repetición espaciada, sin nada que configurar y con el temario del JLPT ya escrito. Puedes sumar tus propias tarjetas o importarlas desde una hoja de cálculo.', 'method'],
+        ['¿Venden mis datos?', 'No. Ni anuncios, ni rastreadores, ni venta de datos; tu progreso se exporta y tu cuenta se borra en dos toques.', 'fare'],
+      ],
+    },
+
+    pass: {
+      h2: 'Tu pase te espera.',
+      body: 'Un trayecto hecho a tu medida: escribe tu nombre, embarca y Tsuji imprime tu línea.',
+      nameLabel: 'Tu nombre',
+      name: 'Tu nombre',
+      aria: 'Vista previa de tu pase',
+      // The app's card face (src/locales/es: ofrCardBrand, cardFareFree, cardFree).
+      brand: 'Pase',
+      fare: 'Práctica · bloqueada',
+      tier: 'Gratis',
+    },
+
+    mock: {
+      depart: 'Embarcar',
+      check: 'Comprobar',
+      explain: 'Explicar',
+      question: (i, n) => `Pregunta ${i} / ${n}`,
+      lanes: 'Líneas de hoy',
+      typed: 'eki de tomodachi o matte imasu',
+      field: 'En rōmaji',
+      fill: 'Completa la frase',
+      subtitle: 'Subtítulo',
+      strokes: n => `${n} trazos`,
+      readings: 'Lecturas',
+      traced: 'Orden de trazos',
+    },
+
+    footer: {
+      privacy: 'Privacidad',
+      contact: 'Contacto',
+      credits: 'Voces: VOICEVOX Nemo · 波音リツ. Trazos de los kanji: KanjiVG (CC BY-SA 3.0). JLPT es una marca de la Japan Foundation y de JEES, sin relación con Tsuji.',
+    },
+    appCategory: 'EducationalApplication',
+  }
+}
+
+export const STRINGS = { fr, en, es }

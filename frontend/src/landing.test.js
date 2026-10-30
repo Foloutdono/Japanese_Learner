@@ -178,20 +178,23 @@ describe('the landing page', () => {
     const facts = readFacts()
     const fr = STRINGS.fr(facts)
     const en = STRINGS.en(facts)
+    const es = STRINGS.es(facts)
 
     /** Every key path in `o`, functions and arrays included. */
     const shape = (o, at = '') => Object.entries(o).flatMap(([k, v]) =>
       v && typeof v === 'object' && !Array.isArray(v) ? shape(v, `${at}${k}.`) : [`${at}${k}`])
 
-    it('say the same things in both languages', () => {
-      expect(shape(en)).toEqual(shape(fr))
-      for (const key of ['figures', 'nav']) expect(en[key]).toHaveLength(fr[key].length)
-      expect(en.faq.items).toHaveLength(fr.faq.items.length)
-      expect(en.presentation.chapters).toHaveLength(PRESENTATION.chapters.length)
+    it('say the same things in every language', () => {
+      for (const t of [en, es]) {
+        expect(shape(t)).toEqual(shape(fr))
+        for (const key of ['figures', 'nav']) expect(t[key]).toHaveLength(fr[key].length)
+        expect(t.faq.items).toHaveLength(fr.faq.items.length)
+        expect(t.presentation.chapters).toHaveLength(PRESENTATION.chapters.length)
+      }
     })
 
     it('name every clip the footage slots hold', () => {
-      for (const t of [fr, en]) {
+      for (const t of [fr, en, es]) {
         expect(Object.keys(t.features.items)).toEqual(CLIPS.map(c => c.id))
       }
     })

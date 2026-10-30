@@ -111,6 +111,14 @@ not yet written in Spanish reads English**, never French and never blank.
   (`sprint-6`), and the deck import's sample and headers read Spanish.
   Every route that takes a language answers `lang=es` with no French in
   what it serves.
+- **The pages outside the app are whole** (the tenth wave): the privacy
+  policy and the account-deletion page have a Spanish section beside the
+  French and the English, chosen by the switch or a Spanish browser, and
+  the landing page is at `/es` (`frontend/landing/`, its title and
+  description in `docs/seo/keywords.md`), each language linking the
+  others, its share card `og-es.png`. A Spanish label may not be the one
+  that breaks the phone's width: the page is measured at 320 and 360 px
+  beside the French.
 - **Everything else is written a wave at a time** and reads English until
   then: the JMdict pool's words, the senses a dictionary entry lists and
   the 21,800 Tatoeba sentences only the pool shows. `python -m

@@ -10,13 +10,21 @@ import { BOARD_PARAM, SIGNIN_PARAM } from '../src/lib/frontEntry.js'
 export const SITE_ORIGIN = 'https://tsuji.app'
 
 // Where each language's page is served: the French page is the site's
-// `/`, the English one `/en`. The files stay under public/landing/ and
-// vercel.json rewrites the two addresses to them, since a file named
-// public/index.html would stand in the app's way in `npm run dev`.
+// `/`, the English one `/en`, the Spanish one `/es` (plan 291). The files
+// stay under public/landing/ and vercel.json rewrites the addresses to
+// them, since a file named public/index.html would stand in the app's way
+// in `npm run dev`.
 export const PAGES = {
   fr: { lang: 'fr', path: '/', out: 'public/landing/index.html', ogLocale: 'fr_FR', ogImage: '/landing/og-fr.png' },
   en: { lang: 'en', path: '/en', out: 'public/landing/en/index.html', ogLocale: 'en_GB', ogImage: '/landing/og-en.png' },
+  es: { lang: 'es', path: '/es', out: 'public/landing/es/index.html', ogLocale: 'es_ES', ogImage: '/landing/og-es.png' },
 }
+// Each language by its own name, for the footer's links to the others.
+export const LANG_NAMES = { fr: 'Français', en: 'English', es: 'Español' }
+// The one other language the phone's header offers (its full switch is
+// the desktop's): French and English each other's, as before Spanish;
+// the Spanish page's English.
+export const OTHER = { fr: 'en', en: 'fr', es: 'en' }
 export const DEFAULT_LANG = 'fr'
 
 // The app's front door, now that `/` is this page: Se connecter leads
