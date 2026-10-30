@@ -66,7 +66,8 @@ rev it was built under. The duel's rules go with the rev too
 (study/duels): sprint-2's runs are two minutes long (plan 284) and pay
 a streak and the last seconds more (plan 285); sprint-3's papers are
 mixes (plan 286), sprint-4's ask three choices (plan 288), sprint-5's
-start at the beginner's stop (plan 289), with the same rules.
+start at the beginner's stop (plan 289), sprint-6's word choices are
+written in Spanish too (plan 291), with the same rules.
 """
 from __future__ import annotations
 
@@ -85,9 +86,12 @@ from study.exam_tells import centre, outlier
 from study.exam_vocab_gen import _content_words, _display, _first_reading
 from study.mcq import meaning_key
 from translations import fr_gloss
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 
-PAPER_REV = "sprint-5"
+PAPER_REV = "sprint-6"
+# The languages a word item's choices are written in: a learner reads
+# their own, English where it is missing (the client's choices[lang]).
+CHOICE_LANGS = ("en", "fr", "es")
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 # The stops a paper stands among: the beginner's, then the JLPT's.
 LADDER = (NOVICE, *LEVELS)
@@ -140,8 +144,8 @@ def _first_sense(text: str) -> str:
 
 
 def _gloss(word: dict, lang: str) -> str:
-    if lang == "fr":
-        return _first_sense(fr_gloss(word, VOCAB_FR) or "")
+    if lang in VOCAB_GLOSSES:
+        return _first_sense(fr_gloss(word, VOCAB_GLOSSES[lang]) or "")
     return _first_sense(word.get("meaning", ""))
 
 
@@ -172,8 +176,8 @@ def _word_bank(level: str) -> tuple[dict, ...]:
     out = []
     seen = set()
     for word in _deck(level):
-        en, fr = _gloss(word, "en"), _gloss(word, "fr")
-        if not en or not fr or len(en) > MEANING_MAX or len(fr) > MEANING_MAX:
+        said = {lang: _gloss(word, lang) for lang in CHOICE_LANGS}
+        if not all(said.values()) or any(len(text) > MEANING_MAX for text in said.values()):
             continue
         key = (word.get("kanji") or "", word.get("kana") or "")
         if key in seen:
@@ -181,13 +185,12 @@ def _word_bank(level: str) -> tuple[dict, ...]:
         seen.add(key)
         out.append({
             "word": word,
-            "en": en,
-            "fr": fr,
-            "key": meaning_key(en),
-            "key_fr": meaning_key(fr),
+            **said,
+            "key": meaning_key(said["en"]),
+            "keys": {lang: meaning_key(text) for lang, text in said.items()},
             "category": word_category(word.get("kanji") or "", word["kana"]),
             "content": frozenset(_content_words(word.get("meaning", ""))),
-            "to": en.lower().startswith("to "),
+            "to": said["en"].lower().startswith("to "),
         })
     return tuple(out)
 
@@ -195,21 +198,21 @@ def _word_bank(level: str) -> tuple[dict, ...]:
 def word_item(entry: dict, bank: tuple[dict, ...], level: str, rng: random.Random) -> dict | None:
     """The word -> its meaning, or None when two fair wrong meanings
     cannot be found."""
-    # Meanings that differ in both languages: "thank you" and
+    # Meanings that differ in every language: "thank you" and
     # "thanks" are two English glosses and one French « merci ».
-    seen, seen_fr = {entry["key"]}, {entry["key_fr"]}
+    seen = {lang: {entry["keys"][lang]} for lang in CHOICE_LANGS}
     candidates = []
     for other in bank:
-        if other is entry or other["key"] in seen or other["key_fr"] in seen_fr:
+        if other is entry or any(other["keys"][lang] in seen[lang] for lang in CHOICE_LANGS):
             continue
         if other["category"] != entry["category"] or other["to"] != entry["to"]:
             continue
         if entry["content"] & other["content"]:
             continue
-        if not (_near(entry["en"], other["en"]) and _near(entry["fr"], other["fr"])):
+        if not all(_near(entry[lang], other[lang]) for lang in CHOICE_LANGS):
             continue
-        seen.add(other["key"])
-        seen_fr.add(other["key_fr"])
+        for lang in CHOICE_LANGS:
+            seen[lang].add(other["keys"][lang])
         candidates.append(other)
     if len(candidates) < CHOICES - 1:
         return None
@@ -224,7 +227,7 @@ def word_item(entry: dict, bank: tuple[dict, ...], level: str, rng: random.Rando
         "kind": "word",
         "prompt": shown,
         "reading": reading if reading and shown != reading else None,
-        "choices": {"fr": [o["fr"] for o in options], "en": [o["en"] for o in options]},
+        "choices": {lang: [o[lang] for o in options] for lang in CHOICE_LANGS},
         "answer": options.index(entry),
     }
 

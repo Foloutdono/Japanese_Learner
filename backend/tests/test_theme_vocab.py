@@ -296,6 +296,22 @@ def test_a_pool_word_reads_in_french(client):
         assert card["meaning"] == by_id[card["card_id"]]["meaning_fr"]
 
 
+def test_a_pool_word_reads_in_spanish(client):
+    """The same for a Spanish learner (plan 291): every pool word of a
+    theme carries its Spanish, the build refusing one without, and it is
+    what the card shows."""
+    rows = [r for t in theme_data.list_themes() for r in theme_data.theme_entries(t["key"])]
+    assert all(r["meaning_es"].strip() for r in rows if r["domain"] == "vocab_jmdict")
+    pool = [e for e in theme_data.theme_entries("fruits", "advanced") if e["domain"] == "vocab_jmdict"]
+    body = client.get("/api/vocab/theme/fruits/cards",
+                      params={"level": "advanced", "mode": MODE, "count": 25, "lang": "es"}).json()
+    by_id = {e["card_id"]: e for e in pool}
+    served = [c for c in body["cards"] if c["card_id"] in by_id]
+    assert served
+    for card in served:
+        assert card["meaning"] == by_id[card["card_id"]]["meaning_es"]
+
+
 def test_every_mode_the_ui_offers_can_serve_the_smallest_band(client):
     """vocab.word_reading drops kana-only words, so a small band of
     loanwords can filter to nothing. That is an empty session, not an

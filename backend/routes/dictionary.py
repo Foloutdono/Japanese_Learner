@@ -41,6 +41,8 @@ router = APIRouter()
 
 KANJI_FR_MAP = KANJI_FR
 VOCAB_FR_MAP = VOCAB_FR
+KANJI_ES_MAP = KANJI_GLOSSES["es"]
+VOCAB_ES_MAP = VOCAB_GLOSSES["es"]
 
 # The radical tiles used to be scoped to the app's own deck -- a tile
 # leading to zero results a learner could study was worth hiding. Now that
@@ -53,8 +55,9 @@ VOCAB_FR_MAP = VOCAB_FR
 
 # ── What a query MEANS, before any collection answers it ─────
 # study/search_match.py: a term is matched folded (case and accents off,
-# so "eleve" finds élève), against BOTH app languages rather than the one
-# on screen, and — when it is romaji — against the kana it spells as
+# so "eleve" finds élève), against EVERY app language rather than the one
+# on screen (Spanish since plan 291: "agua" finds 水), and — when it is
+# romaji — against the kana it spells as
 # well ("mizu" finds みず). A query that finds nothing at all is retried
 # once against the nearest word the collection actually holds, so a typo
 # is answered rather than reported as an empty catalogue.
@@ -184,14 +187,15 @@ def _kanji_deck_matches(query, lang: str, level: str | None = None) -> list[tupl
     matches, in deck order — N5 first, N1 last. 2,383 rows, filtered in
     memory.
 
-    Matched against BOTH glosses; SHOWN in the session's language. The
+    Matched against every gloss; SHOWN in the session's language. The
     displayed meaning is now built for the matches alone rather than for
     all 2,383 rows on the way past.
     """
     rows = [(lvl, k) for lvl, kanji_list in _levels_of(KANJI_BY_LEVEL, level) for k in kanji_list]
     hits = search_match.ranked(query, rows, lambda row: (
         (row[1].get("kanji", ""), row[1].get("kana", "")),
-        (row[1].get("meaning", ""), KANJI_FR_MAP.get(row[1].get("kanji", ""), "")),
+        (row[1].get("meaning", ""), KANJI_FR_MAP.get(row[1].get("kanji", ""), ""),
+         KANJI_ES_MAP.get(row[1].get("kanji", ""), "")),
     ))
     return [(lvl, k, get_meaning(k, lang, KANJI_GLOSSES)) for lvl, k in hits]
 
@@ -202,7 +206,8 @@ def _kanji_lexicon() -> tuple[str, ...]:
         gloss
         for kanji_list in KANJI_BY_LEVEL.values()
         for k in kanji_list
-        for gloss in (k.get("meaning", ""), KANJI_FR_MAP.get(k.get("kanji", ""), ""))
+        for gloss in (k.get("meaning", ""), KANJI_FR_MAP.get(k.get("kanji", ""), ""),
+                      KANJI_ES_MAP.get(k.get("kanji", ""), ""))
     )
 
 
@@ -562,7 +567,7 @@ def _deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str,
     """(level, entry, display meaning) for every curated-deck word the
     query matches, in deck order — N5 first, N1 last.
 
-    Matched against BOTH glosses; SHOWN in the session's language. See
+    Matched against every gloss; SHOWN in the session's language. See
     the leniency note at the top of this module. The Japanese side also
     matches a spelling folded into the card (_folded_fields).
     """
@@ -573,7 +578,7 @@ def _deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str,
         kanji, kana = w.get("kanji", ""), w.get("kana", "")
         return (
             (kanji, kana, *folded.get((lvl, kanji, kana), ())),
-            (w.get("meaning", ""), (fr_gloss(w, VOCAB_FR_MAP) or "")),
+            (w.get("meaning", ""), (fr_gloss(w, VOCAB_FR_MAP) or ""), (fr_gloss(w, VOCAB_ES_MAP) or "")),
         )
 
     rows = [(lvl, w) for lvl, vocab_list in _levels_of(VOCAB_BY_LEVEL, level) for w in vocab_list]
@@ -590,6 +595,7 @@ def _vocab_lexicon() -> tuple[str, ...]:
         for gloss in (
             w.get("meaning", ""),
             (fr_gloss(w, VOCAB_FR_MAP) or ""),
+            (fr_gloss(w, VOCAB_ES_MAP) or ""),
         )
     )
 
@@ -844,7 +850,7 @@ def _grammar_matches(query, level: str | None) -> list[tuple[str, dict]]:
     """(level, entry) for every point the query matches, catalogue order.
 
     The pattern is matched as typed (〜, ／ and all); the structure and
-    both glosses folded, as _deck_matches folds a word's meaning. The
+    every gloss folded, as _deck_matches folds a word's meaning. The
     structure is offered to both halves of the query because it is
     itself both — "動詞てform + から" is Japanese and English in one
     string. An unknown `level` is no level at all — the whole catalogue —
@@ -855,7 +861,7 @@ def _grammar_matches(query, level: str | None) -> list[tuple[str, dict]]:
     rows = [(lvl, entry) for lvl in levels for entry in GRAMMAR_POINTS_BY_LEVEL.get(lvl, [])]
     return search_match.ranked(query, rows, lambda row: (
         (row[1]["pattern"], row[1].get("structure", "")),
-        (row[1].get("structure", ""), gloss(row[1], "en"), gloss(row[1], "fr")),
+        (row[1].get("structure", ""), gloss(row[1], "en"), gloss(row[1], "fr"), gloss(row[1], "es")),
     ))
 
 
@@ -865,7 +871,7 @@ def _grammar_lexicon() -> tuple[str, ...]:
         text
         for points in GRAMMAR_POINTS_BY_LEVEL.values()
         for entry in points
-        for text in (gloss(entry, "en"), gloss(entry, "fr"), entry.get("structure", ""))
+        for text in (gloss(entry, "en"), gloss(entry, "fr"), gloss(entry, "es"), entry.get("structure", ""))
     )
 
 

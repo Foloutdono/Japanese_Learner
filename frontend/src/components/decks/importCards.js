@@ -91,32 +91,41 @@ export function columnsFor(structure) {
 }
 
 // Header names, per field (and per part of a pair), beside each field's
-// label in the learner's language (t.field_*). Compared folded: lower
-// case, no accents, no digits (Exemple 2), no punctuation.
+// label in the learner's language (t.field_*): English, French and, since
+// plan 291, Spanish. Compared folded: lower case, no accents, no digits
+// (Exemple 2), no punctuation.
 const ALIASES = {
-  front: ['front', 'recto', 'question', 'term', 'terme'],
-  back: ['back', 'verso', 'answer', 'reponse', 'definition'],
+  front: ['front', 'recto', 'question', 'term', 'terme', 'anverso', 'pregunta', 'termino'],
+  back: ['back', 'verso', 'answer', 'reponse', 'definition', 'reverso', 'respuesta', 'definicion'],
   kana: ['kana'],
-  romaji: ['romaji', 'romanization', 'romanisation'],
-  kanji: ['kanji', 'character', 'caractere'],
-  meaning: ['meaning', 'meanings', 'sens', 'signification', 'definition', 'gloss', 'traduction du mot'],
-  readings: ['readings', 'reading', 'lectures', 'lecture', 'yomi'],
-  reading: ['reading', 'lecture', 'kana', 'furigana', 'yomi'],
-  radical: ['radical', 'cle'],
-  word: ['word', 'mot', 'vocab', 'vocabulary', 'vocabulaire', 'expression'],
-  rule: ['rule', 'regle', 'regle de grammaire', 'grammar rule', 'pattern', 'grammar', 'grammaire', 'point'],
+  romaji: ['romaji', 'romanization', 'romanisation', 'romanizacion'],
+  kanji: ['kanji', 'character', 'caractere', 'caracter'],
+  meaning: ['meaning', 'meanings', 'sens', 'signification', 'definition', 'gloss', 'traduction du mot',
+    'significado', 'significados', 'definicion'],
+  readings: ['readings', 'reading', 'lectures', 'lecture', 'yomi', 'lecturas', 'lectura'],
+  reading: ['reading', 'lecture', 'kana', 'furigana', 'yomi', 'lectura'],
+  radical: ['radical', 'cle', 'clave'],
+  word: ['word', 'mot', 'vocab', 'vocabulary', 'vocabulaire', 'expression', 'palabra', 'vocabulario', 'expresion'],
+  rule: ['rule', 'regle', 'regle de grammaire', 'grammar rule', 'pattern', 'grammar', 'grammaire', 'point',
+    'regla', 'regla gramatical', 'gramatica', 'punto'],
   rule_reading: ['reading', 'lecture', 'furigana', 'yomi', 'kana', 'reading of the rule', 'lecture de la regle'],
-  structure: ['structure', 'formation', 'form', 'forme', 'construction', 'conjugaison'],
-  register: ['register', 'registre', 'niveau de langue', 'politesse'],
-  explanation: ['explanation', 'explication', 'description', 'lesson', 'lecon'],
-  usage: ['usage', 'usages', 'use', 'uses', 'emploi', 'emplois', 'utilisation'],
-  careful: ['careful', 'caution', 'warning', 'pitfall', 'pitfalls', 'attention', 'piege', 'pieges', 'watch out'],
+  structure: ['structure', 'formation', 'form', 'forme', 'construction', 'conjugaison', 'estructura', 'forma',
+    'construccion', 'conjugacion'],
+  register: ['register', 'registre', 'niveau de langue', 'politesse', 'registro', 'cortesia'],
+  explanation: ['explanation', 'explication', 'description', 'lesson', 'lecon', 'explicacion', 'descripcion', 'leccion'],
+  usage: ['usage', 'usages', 'use', 'uses', 'emploi', 'emplois', 'utilisation', 'uso', 'usos'],
+  careful: ['careful', 'caution', 'warning', 'pitfall', 'pitfalls', 'attention', 'piege', 'pieges', 'watch out',
+    'cuidado', 'atencion', 'trampa', 'trampas'],
   'sentences.jp': ['sentence', 'sentences', 'example', 'examples', 'exemple', 'exemples', 'phrase', 'phrases',
-    'phrase d exemple', 'example sentence', 'jp', 'japanese', 'japonais'],
-  'sentences.tr': ['translation', 'traduction', 'tr', 'en', 'fr'],
-  'compare.pattern': ['compare', 'comparer', 'rival', 'contrast', 'contraste', 'similar rule', 'regle voisine', 'voisine'],
-  'compare.text': ['difference', 'distinction', 'nuance', 'compare note', 'ce qui les distingue', 'what sets them apart'],
-  notes: ['notes', 'note', 'remarque', 'remarques', 'comment', 'comments', 'commentaire'],
+    'phrase d exemple', 'example sentence', 'jp', 'japanese', 'japonais', 'ejemplo', 'ejemplos', 'oracion',
+    'oraciones', 'frase', 'frases', 'japones'],
+  'sentences.tr': ['translation', 'traduction', 'tr', 'en', 'fr', 'traduccion', 'es'],
+  'compare.pattern': ['compare', 'comparer', 'rival', 'contrast', 'contraste', 'similar rule', 'regle voisine', 'voisine',
+    'comparar', 'regla vecina', 'vecina'],
+  'compare.text': ['difference', 'distinction', 'nuance', 'compare note', 'ce qui les distingue', 'what sets them apart',
+    'diferencia', 'distincion', 'matiz', 'lo que las distingue'],
+  notes: ['notes', 'note', 'remarque', 'remarques', 'comment', 'comments', 'commentaire', 'notas', 'nota',
+    'comentario', 'comentarios'],
 }
 
 export function fold(s) {
@@ -168,13 +177,13 @@ export function readHeader(row, structure, t) {
   return cols
 }
 
-// A register cell in either language's words, or the key itself.
+// A register cell in any of the app's languages, or the key itself.
 const REGISTER_WORDS = {
-  neutral: ['neutral', 'neutre'],
-  polite: ['polite', 'poli', 'polie', 'politesse', 'teinei', '丁寧'],
-  casual: ['casual', 'familier', 'familiere', 'informal', 'informel'],
-  formal: ['formal', 'formel', 'soutenu', 'keigo', '敬語'],
-  written: ['written', 'ecrit', 'ecrite', 'litteraire'],
+  neutral: ['neutral', 'neutre', 'neutro'],
+  polite: ['polite', 'poli', 'polie', 'politesse', 'teinei', '丁寧', 'cortes', 'educado'],
+  casual: ['casual', 'familier', 'familiere', 'informal', 'informel', 'coloquial', 'familiar'],
+  formal: ['formal', 'formel', 'soutenu', 'keigo', '敬語', 'culto', 'elevado'],
+  written: ['written', 'ecrit', 'ecrite', 'litteraire', 'escrito', 'escrita', 'literario'],
 }
 
 function choiceValue(field, cell, t) {
@@ -276,7 +285,8 @@ export function exampleText(structure, termSep, t, lang = 'fr') {
   }
   const quote = cell => (cell.includes(termSep) || cell.includes('\n') || cell.includes('"')
     ? `"${cell.replace(/"/g, '""')}"` : cell)
-  const pick = lang === 'fr' ? 0 : 1
+  // [fr, en, es]: a language the sample is not written in reads English.
+  const pick = { fr: 0, en: 1, es: 2 }[lang] ?? 1
   return [
     cols.map(label).map(quote).join(termSep),
     sample.map(([, value]) => quote(Array.isArray(value) ? value[pick] : value)).join(termSep),
@@ -284,27 +294,30 @@ export function exampleText(structure, termSep, t, lang = 'fr') {
 }
 
 const SAMPLES = {
-  standard: [[{ key: 'front' }, '水'], [{ key: 'back' }, ['eau', 'water']]],
+  standard: [[{ key: 'front' }, '水'], [{ key: 'back' }, ['eau', 'water', 'agua']]],
   kana: [[{ key: 'kana' }, 'ヴ'], [{ key: 'romaji' }, 'vu']],
-  vocab: [[{ key: 'word' }, '水'], [{ key: 'meaning' }, ['eau', 'water']], [{ key: 'reading' }, 'みず']],
-  kanji: [[{ key: 'kanji' }, '水'], [{ key: 'meaning' }, ['eau', 'water']], [{ key: 'readings' }, 'スイ・みず'], [{ key: 'radical' }, '85']],
+  vocab: [[{ key: 'word' }, '水'], [{ key: 'meaning' }, ['eau', 'water', 'agua']], [{ key: 'reading' }, 'みず']],
+  kanji: [[{ key: 'kanji' }, '水'], [{ key: 'meaning' }, ['eau', 'water', 'agua']], [{ key: 'readings' }, 'スイ・みず'], [{ key: 'radical' }, '85']],
   grammar: [
     [{ key: 'rule' }, '〜てください'],
-    [{ key: 'meaning' }, ['faites…, s’il vous plaît', 'please do']],
-    [{ key: 'structure' }, ['verbe forme て + ください', 'verb て-form + ください']],
-    [{ key: 'register' }, ['poli', 'polite']],
+    [{ key: 'meaning' }, ['faites…, s’il vous plaît', 'please do', 'haz…, por favor']],
+    [{ key: 'structure' }, ['verbe forme て + ください', 'verb て-form + ください', 'verbo en forma て + ください']],
+    [{ key: 'register' }, ['poli', 'polite', 'cortés']],
     [{ key: 'explanation' }, ['**forme en て + ください** demande poliment de faire quelque chose.',
-      '**て-form + ください** asks someone to do something politely.']],
+      '**て-form + ください** asks someone to do something politely.',
+      '**forma て + ください** pide con cortesía que alguien haga algo.']],
     [{ key: 'usage' }, ['- Consignes : ここに名前を書いてください\n- Invitations : どうぞ入ってください',
-      '- Instructions: ここに名前を書いてください\n- Invitations: どうぞ入ってください']],
+      '- Instructions: ここに名前を書いてください\n- Invitations: どうぞ入ってください',
+      '- Instrucciones: ここに名前を書いてください\n- Invitaciones: どうぞ入ってください']],
     [{ key: 'careful' }, ['Cela reste un ordre : à un supérieur, préfère 〜ていただけませんか.',
-      'It is still an instruction: to a superior, 〜ていただけませんか is safer.']],
+      'It is still an instruction: to a superior, 〜ていただけませんか is safer.',
+      'Sigue siendo una indicación: con un superior, es mejor 〜ていただけませんか.']],
     [{ key: 'sentences', part: 'jp' }, 'この本を読んでください。'],
-    [{ key: 'sentences', part: 'tr' }, ['Lisez ce livre, s’il vous plaît.', 'Please read this book.']],
+    [{ key: 'sentences', part: 'tr' }, ['Lisez ce livre, s’il vous plaît.', 'Please read this book.', 'Lee este libro, por favor.']],
     [{ key: 'sentences', part: 'jp' }, 'ちょっとまってください。'],
-    [{ key: 'sentences', part: 'tr' }, ['Attendez un instant, s’il vous plaît.', 'Please wait a moment.']],
+    [{ key: 'sentences', part: 'tr' }, ['Attendez un instant, s’il vous plaît.', 'Please wait a moment.', 'Espera un momento, por favor.']],
     [{ key: 'compare', part: 'pattern' }, '〜ないでください'],
-    [{ key: 'compare', part: 'text' }, ['demande de ne pas faire', 'asks someone not to do']],
+    [{ key: 'compare', part: 'text' }, ['demande de ne pas faire', 'asks someone not to do', 'pide que no se haga algo']],
   ],
 }
 

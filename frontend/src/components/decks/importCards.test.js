@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import fr from '../../locales/fr/index.js'
+import es from '../../locales/es/index.js'
 import { columnsFor, exampleText, pairRows, readCards, readHeader, splitRows } from './importCards'
 
 // The grammar structure as GET /api/decks/structures describes it.
@@ -130,6 +131,24 @@ describe('the example', () => {
       expect(cards[0].fields.usage.split('\n')).toHaveLength(2)
       expect(cards[0].fields.register).toBe('polite')
     }
+  })
+
+  it('reads back in Spanish too, under its Spanish headers (plan 291)', () => {
+    const text = exampleText(GRAMMAR, '\t', es, 'es')
+    expect(text).toContain('Lee este libro, por favor.')
+    const { cards, header, ignored } = readCards(text, '\t', '\n', GRAMMAR, es)
+    expect(header).toBe(true)
+    expect(ignored).toEqual([])
+    expect(cards).toHaveLength(1)
+    expect(cards[0].missing).toEqual([])
+    expect(cards[0].fields.register).toBe('polite')
+    expect(cards[0].fields.sentences).toHaveLength(2)
+    // A Spanish header the app's own labels do not spell is read too.
+    const own = readCards('Regla\tSignificado\tEjemplo\tTraducción\n〜ても\taunque\t雨でも行く。\tIré aunque llueva.',
+      '\t', '\n', GRAMMAR, fr)
+    expect(own.ignored).toEqual([])
+    expect(own.cards[0].fields).toMatchObject({ rule: '〜ても', meaning: 'aunque',
+      sentences: [{ jp: '雨でも行く。', tr: 'Iré aunque llueva.' }] })
   })
 })
 

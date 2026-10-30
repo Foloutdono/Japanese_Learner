@@ -123,6 +123,23 @@ def _rows(name: str, table: str) -> int:
         conn.close()
 
 
+def _theme_pool() -> list[int]:
+    """The theme words the deck has no card for: the theme's own Spanish
+    is all they have (a deck word reads the deck's)."""
+    rows = [r for rows in _load("datas", "vocab", "theme_words.json").values() for r in rows
+            if r.get("domain") == "vocab_jmdict"]
+    return [sum(bool(r.get("meaning_es")) for r in rows), len(rows)]
+
+
+def _radicals() -> list[int]:
+    """The 214 radicals' meanings (content/radical_info.py's RADICAL_ES)."""
+    with open(_path("content", "radical_info.py"), encoding="utf-8") as f:
+        tree = ast.parse(f.read())
+    spanish = next((node.value for node in tree.body if isinstance(node, ast.AnnAssign)
+                    and getattr(node.target, "id", "") == "RADICAL_ES"), None)
+    return [len(spanish.keys) if spanish is not None else 0, 214]
+
+
 def banks() -> dict[str, list[int]]:
     """The other written content, each as one figure."""
     out = {
@@ -134,6 +151,8 @@ def banks() -> dict[str, list[int]]:
         "Tatoeba sentences": [_rows("jmdict_es.sqlite3", "example"), _rows("jmdict_fr.sqlite3", "example")],
         "breakdown glosses": [a + b for a, b in zip(_module_pairs("study", "particle_glosses.py"),
                                                     _module_pairs("study", "analysis.py"))],
+        "theme words (pool)": _theme_pool(),
+        "radicals": _radicals(),
     }
     for name, folder in (("comprehension seeds", "comprehension"), ("conversation bank", "conversation")):
         total = [0, 0]

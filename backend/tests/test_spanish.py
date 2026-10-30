@@ -190,3 +190,17 @@ def test_a_corpus_sentence_is_translated_for_a_spanish_reader():
     assert jmdict_fr.translation(jp, "the english", "es") == (jmdict_fr.example(jp, "es"), "es")
     assert jmdict_fr.translation("どこにもない文。", "the english", "es") == ("the english", "en")
     assert jmdict_fr.translation(jp, "the english", "de") == ("the english", "en")
+
+
+# ── The dictionary's chips ───────────────────────────────────
+
+def test_every_chip_has_its_spanish_label_and_tooltip():
+    from content import vocab_extras
+    assert set(vocab_extras._SHORT_LABELS_ES) == set(vocab_extras._SHORT_LABELS_FR)
+    assert set(vocab_extras._TOOLTIPS_ES) == set(vocab_extras._TOOLTIPS_FR)
+    assert all(t.strip() for t in (*vocab_extras._SHORT_LABELS_ES.values(), *vocab_extras._TOOLTIPS_ES.values()))
+    es = get_vocab_extras("食べる", "たべる", "to eat", "es")["tags"]
+    fr = get_vocab_extras("食べる", "たべる", "to eat", "fr")["tags"]
+    assert es and [t["code"] for t in es] == [t["code"] for t in fr]
+    assert all(t["label"] == vocab_extras._short_label(t["code"], "es") for t in es)
+    assert all(t["tooltip"] != f["tooltip"] for t, f in zip(es, fr))

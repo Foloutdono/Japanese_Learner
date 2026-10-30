@@ -58,14 +58,15 @@ GLOSSES = VOCAB_GLOSSES
 
 def _entry_meaning(entry: dict, lang: str) -> str:
     """The theme's own gloss: content/theme_lists.py writes every word's
-    meaning in the sense it has in the theme, in English and in French.
-    The French one matters most for a JMdict-pool word, which VOCAB_FR
-    (the course's table, keyed by written form) does not cover and which
-    used to fall back to JMdict's English. A row without a French gloss
+    meaning in the sense it has in the theme, in English and in French,
+    and a pool word's in Spanish too (plan 291). The theme's own line
+    matters most for a JMdict-pool word, which VOCAB_FR and VOCAB_ES (the
+    course's tables, keyed by written form) do not cover and which used
+    to fall back to JMdict's English. A row without the learner's gloss
     keeps the old rule: the deck's translation for a deck word, the
     English otherwise."""
-    if lang == "fr" and entry.get("meaning_fr"):
-        return entry["meaning_fr"]
+    if lang in ("fr", "es") and entry.get(f"meaning_{lang}"):
+        return entry[f"meaning_{lang}"]
     if entry["domain"] == "vocab":
         return get_meaning(entry, lang, GLOSSES)
     return entry["meaning"]

@@ -163,6 +163,21 @@ def test_a_term_answers_in_either_language(client):
            _page(client, category="vocab", q="eau", lang="en", limit=5)["total"]
 
 
+def test_a_spanish_term_finds_the_course_in_any_session(client):
+    """Spanish is the third (plan 291): a word, a kanji and a point are
+    found by their Spanish gloss, folded like the others ("cancion"
+    finds canción), whichever language is on screen."""
+    for lang in ("es", "fr", "en"):
+        assert "水" in _surfaces(_page(client, category="vocab", q="agua", lang=lang, limit=50)), lang
+        assert "水" in _surfaces(_page(client, category="kanji", q="agua", lang=lang, limit=50)), lang
+        assert "の" in _surfaces(_page(client, category="grammar", q="posesivo", lang=lang, limit=50)), lang
+    assert "歌" in _surfaces(_page(client, category="vocab", q="cancion", lang="es", limit=50))
+    # Shown in Spanish to a Spanish session.
+    water = next(e for e in _page(client, category="vocab", q="agua", lang="es", limit=50)["results"]
+                 if e.get("kanji") == "水")
+    assert water["meaning"] == "agua"
+
+
 # ── Accents ───────────────────────────────────────────────────
 
 

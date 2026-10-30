@@ -423,8 +423,14 @@ runtime purpose.
   the deck gains has its sentences in Spanish too; a basics unit its
   title's `es` (`test_basics`); a gloss the breakdown writes itself (a
   word of speech, an affix, a unit, a figure, a date) its `es`, a tuple
-  table's row its Spanish last (`test_breakdown_invariants`). Everything
-  else (the pool and its sentences, the duels) gains Spanish a wave at a
+  table's row its Spanish last (`test_breakdown_invariants`); a
+  dictionary chip its label and tooltip (`_SHORT_LABELS_ES`,
+  `_TOOLTIPS_ES`), a radical its meaning (`RADICAL_ES`), a theme's pool
+  word its `| español` in `content/theme_lists.py` (the build refuses
+  one without), a duel's word item its choices in every language
+  (`duel_paper.CHOICE_LANGS`, a `PAPER_REV` move), and search matches
+  every gloss in each (`routes/dictionary.py`). Everything else (the
+  pool's words, senses and sentences) gains Spanish a wave at a
   time, optional where it is added:
   `python -m scripts.spanish_coverage` counts what is left. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |

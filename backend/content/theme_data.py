@@ -46,7 +46,7 @@ _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DATA_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "theme_words.json")
 
 with open(_DATA_PATH, encoding="utf-8") as f:
-    # {theme: [{rank, level, domain, kanji, kana, meaning, meaning_fr}, ...]},
+    # {theme: [{rank, level, domain, kanji, kana, meaning, meaning_fr[, meaning_es]}, ...]},
     # each list already in rank order: basic to expert, easiest first.
     _THEMES: dict[str, list[dict]] = json.load(f)
 
@@ -86,11 +86,13 @@ def has_theme(theme: str) -> bool:
 
 def theme_entries(theme: str, level: str | None = None) -> list[dict]:
     """Full display rows for `theme`, easiest first — {card_id, domain,
-    kanji, kana, meaning, meaning_fr, level, theme_level}.
+    kanji, kana, meaning, meaning_fr, meaning_es, level, theme_level}.
 
-    `meaning` and `meaning_fr` are the theme's own glosses, the sense the
-    word has IN the theme (羽 is a feather in `birds`, not a counter), and
-    the French one is what a pool word has no other source for.
+    `meaning`, `meaning_fr` and `meaning_es` are the theme's own glosses,
+    the sense the word has IN the theme (羽 is a feather in `birds`, not a
+    counter), and the French and Spanish ones are what a pool word has no
+    other source for (a deck word's `meaning_es` is "": it reads the
+    deck's own, plan 291).
 
     `level` filters to one band; None returns the whole theme.
 
@@ -123,6 +125,7 @@ def theme_entries(theme: str, level: str | None = None) -> list[dict]:
             "kana":        row["kana"],
             "meaning":     row["meaning"],
             "meaning_fr":  row["meaning_fr"],
+            "meaning_es":  row.get("meaning_es", ""),
             "level":       native_level,
             "theme_level": row["level"],
         })

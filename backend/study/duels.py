@@ -75,11 +75,11 @@ logger = logging.getLogger(__name__)
 # paper it was dealt and the time that came with it, so a sprint-1 duel
 # still open when the two minutes came in is run, and raced, in one.
 SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000, "sprint-3": 120_000, "sprint-4": 120_000,
-                    "sprint-5": 120_000}
+                    "sprint-5": 120_000, "sprint-6": 120_000}
 SPRINT_MS = SPRINT_MS_BY_REV[duel_paper.PAPER_REV]
 # And so does the way an answer is scored (plan 285): sprint-2's runs
 # pay a streak and the last seconds more, sprint-1's pay speed alone.
-COMBO_REVS = frozenset({"sprint-2", "sprint-3", "sprint-4", "sprint-5"})
+COMBO_REVS = frozenset({"sprint-2", "sprint-3", "sprint-4", "sprint-5", "sprint-6"})
 # (right answers in a row, the multiplier from there on)
 COMBO_TIERS = ((5, 1.5), (10, 2.0), (20, 3.0))
 RUSH_MS = 15_000

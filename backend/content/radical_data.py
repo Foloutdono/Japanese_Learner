@@ -130,7 +130,7 @@ def siblings_by_stroke(number: int, want: int = 3) -> list[int]:
 # nothing the course teaches, and a lesson with no family is not a
 # lesson.
 from content.kanji_data import LEVELS as _LEVELS
-from content.radical_info import RADICAL_INFO
+from content.radical_info import RADICAL_ES, RADICAL_INFO
 
 _LEVEL_RANK = {lv: i for i, lv in enumerate(_LEVELS)}
 
@@ -176,8 +176,8 @@ def info_for(number: int, lang: str = "fr") -> dict | None:
     study screens print large — the first of `forms`, which is how the
     learner meets it. They differ for the two dozen radicals KANJIDIC2
     files under a form nobody writes (才 for hand, 邗 for city).
-    `meaning` is in the learner's language, English unless French is
-    asked for — the two the table is written in."""
+    `meaning` is in the learner's language: English, French or Spanish
+    (RADICAL_ES, plan 291), English for any other."""
     r = RADICAL_BY_NUMBER.get(number)
     if r is None:
         return None
@@ -188,7 +188,7 @@ def info_for(number: int, lang: str = "fr") -> dict | None:
         "stroke_count": r["stroke_count"],
         "glyph": forms[0],
         "forms": list(forms),
-        "meaning": meaning_fr if lang == "fr" else meaning_en,
+        "meaning": {"fr": meaning_fr, "es": RADICAL_ES[number]}.get(lang, meaning_en),
         "names_ja": list(names_ja),
         "position": position,
     }

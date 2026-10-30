@@ -100,9 +100,20 @@ not yet written in Spanish reads English**, never French and never blank.
   (2000, 10 000, 3.5), an ordinal «n.º 3», since 3.º and 3.ª would give
   the counted noun a gender. `test_breakdown_invariants` holds every
   table and every gloss a breakdown prints; `LOCAL_REV` moved (32 → 33).
+- **The rest of what the screens print is wired** (the ninth wave, an
+  audit of every path that branched on French): dictionary search matches
+  the Spanish gloss of a word, a kanji and a point (in any session, as it
+  matches French), a dictionary chip has its Spanish label and tooltip,
+  each of the 214 radicals its meaning (`RADICAL_ES`), each of the 684
+  theme words the deck has no card for its Spanish (a fourth column in
+  `content/theme_lists.py`, which the build requires), a duel's word item
+  its choices in Spanish, held to the same guards of meaning and length
+  (`sprint-6`), and the deck import's sample and headers read Spanish.
+  Every route that takes a language answers `lang=es` with no French in
+  what it serves.
 - **Everything else is written a wave at a time** and reads English until
-  then: the JMdict pool's words and the 21,800 Tatoeba sentences only the
-  pool shows, the duels' choices. `python -m
+  then: the JMdict pool's words, the senses a dictionary entry lists and
+  the 21,800 Tatoeba sentences only the pool shows. `python -m
   scripts.spanish_coverage` counts what is written and what is left, per
   part. A Spanish text is optional where it is added (`grammar_check` holds
   one that is there, and accepts its absence); `tests/test_spanish.py`
@@ -128,8 +139,9 @@ not yet written in Spanish reads English**, never French and never blank.
 - The breakdown's stored output gained `structure_es` and a deck word's
   `meaning_es`, so `LOCAL_REV` moved (31 → 32), and its own glosses' `es`
   (32 → 33).
-- Dictionary search still matches English and French glosses only: the pool
-  predicate's ASCII gate and the lexicon need their own change.
+- Dictionary search matches the course's Spanish glosses (words, kanji,
+  points); a pool word is still found by its English or French alone,
+  which is the pool's wave.
 - The Spanish layer over JMdict is a second small SQLite file beside the
   French one rather than columns inside it, so each language is built,
   exported and corrected on its own; its sense and pool tables are

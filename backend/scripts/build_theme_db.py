@@ -69,22 +69,23 @@ LEVELS = ("basic", "medium", "advanced", "expert")
 DECK_LEVELS = ("N5", "N4", "N3", "N2", "N1")
 
 
-def parse_line(line: str) -> tuple[str, str, str, str]:
-    """`漢字 かな | english | français` or `かな | english | français`
-    -> (kanji, kana, en, fr)."""
+def parse_line(line: str) -> tuple[str, str, str, str, str]:
+    """`漢字 かな | english | français [| español]` or `かな | english |
+    français [| español]` -> (kanji, kana, en, fr, es), es "" where the
+    line has none (a deck word reads the deck's own, vocab_es.json)."""
     parts = [p.strip() for p in line.split("|")]
-    if len(parts) != 3 or not all(parts):
-        raise ValueError(f"expected 'word | en | fr', got {line!r}")
-    word, en, fr = parts
+    if len(parts) not in (3, 4) or not all(parts):
+        raise ValueError(f"expected 'word | en | fr' or 'word | en | fr | es', got {line!r}")
+    word, en, fr, es = (*parts, "") if len(parts) == 3 else parts
     forms = word.split()
     if len(forms) == 1:
-        return "", forms[0], en, fr
+        return "", forms[0], en, fr, es
     if len(forms) == 2:
-        return forms[0], forms[1], en, fr
+        return forms[0], forms[1], en, fr, es
     raise ValueError(f"expected 'kanji kana' or 'kana', got {word!r}")
 
 
-def parsed_themes() -> dict[str, dict[str, list[tuple[str, str, str, str]]]]:
+def parsed_themes() -> dict[str, dict[str, list[tuple[str, str, str, str, str]]]]:
     out = {}
     for theme, levels in THEMES.items():
         if tuple(levels) != LEVELS:
@@ -173,7 +174,7 @@ def build(check: bool = False) -> tuple[dict[str, list[dict]], list[str]]:
     for theme, levels in sorted(parsed_themes().items()):
         rows, surfaces, glosses = [], set(), set()
         for level in LEVELS:
-            for kanji, kana, en, fr in levels[level]:
+            for kanji, kana, en, fr, es in levels[level]:
                 where = f"{theme}/{level} {kanji or '-'} {kana}"
                 domain, s_kanji, s_kana, problems = resolver.resolve(kanji, kana, en)
                 surface = s_kanji or s_kana
@@ -184,11 +185,15 @@ def build(check: bool = False) -> tuple[dict[str, list[dict]], list[str]]:
                     problems.append(f"repeats the gloss {head!r} in this theme")
                 surfaces.add(surface)
                 glosses.add(head)
+                # A pool word has no Spanish but the theme's own (plan
+                # 291); a deck word reads the deck's.
+                if domain == "vocab_jmdict" and not es:
+                    problems.append("a pool word without its Spanish (word | en | fr | es)")
                 if problems:
                     errors.append(f"{where}: " + " | ".join(problems))
                 if domain is None:
                     continue
-                rows.append({
+                row = {
                     "rank": len(rows) + 1,
                     "level": level,
                     "domain": domain,
@@ -196,7 +201,10 @@ def build(check: bool = False) -> tuple[dict[str, list[dict]], list[str]]:
                     "kana": s_kana,
                     "meaning": en,
                     "meaning_fr": fr,
-                })
+                }
+                if es:
+                    row["meaning_es"] = es
+                rows.append(row)
         themes[theme] = rows
     return themes, errors
 
