@@ -25961,6 +25961,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
 .brd-notif__text { font-size: var(--fs-body); color: var(--text-secondary); }
+/* The train's Depart (plan 293), under the notification as the phone
+   lays its actions: a word in the gate's gold, the selection's ink so it
+   holds 4.5:1 on the surface in both themes. */
+.brd-notif__action { margin-top: var(--sp-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
 
 /* ══ 辻 on a phone — the boarding drawn as maps (plan 168) ═════════
    The owner's pick A of the canvas "Onboarding on the phone", direction

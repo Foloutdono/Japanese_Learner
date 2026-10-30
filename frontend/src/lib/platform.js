@@ -97,11 +97,12 @@ export async function nudgePermission() {
 /** 発車案内 (plan 156): the day's notifications, as lib/ahead.js planned
  *  them, replacing every one scheduled before -- an empty list cancels
  *  the lot. Resolves to what was scheduled. A no-op on the web.
- *  `channel` names Android's channel for them, in the learner's language. */
-export async function syncNudges(nudges, channel) {
+ *  `channel` names Android's channel for them, in the learner's language,
+ *  and `depart` the train's action (plan 293). */
+export async function syncNudges(nudges, channel, depart) {
   if (!isNative()) return []
   const n = await native()
-  return n.scheduleNudges(nudges, channel)
+  return n.scheduleNudges(nudges, channel, depart)
 }
 
 /** 時間割 (plan 181): the agenda's notifications, as lib/agenda.js planned
@@ -132,8 +133,9 @@ export function clearAhead() {
 }
 
 /** Where a notification or the widget opened the app for: the handler
- *  receives { to, via } -- a path in the app, and 'notification' or
- *  'widget'. Resolves to the unbind function. */
+ *  receives { to, via } -- a path in the app, and 'notification',
+ *  'widget' or 'depart' (the train's action, straight to the run).
+ *  Resolves to the unbind function. */
 export async function bindOpenings(handler) {
   if (!isNative()) return () => {}
   const n = await native()
@@ -179,12 +181,14 @@ export function backAction({ hasDialog, pathname, canGoBack = true }) {
 }
 
 // The places a link from outside the app may open. Any app can fire
-// the scheme, so it names a door, never an arbitrary path.
-const OPEN_PATHS = { today: '/today' }
+// the scheme, so it names a door, never an arbitrary path: the gate, and
+// the day's run, which the widget's Depart boards (plan 293) -- the
+// whole queue, as the gate's Depart with every line on.
+const OPEN_PATHS = { today: '/today', run: '/today/run' }
 
-/** A deep link the widget opens the app with -- app.tsuji://open/today
- *  -- as the path it names, or null for any other link (the OAuth
- *  callback shares the scheme). */
+/** A deep link the widget opens the app with -- app.tsuji://open/today,
+ *  or /run from its Depart -- as the path it names, or null for any
+ *  other link (the OAuth callback shares the scheme). */
 export function openPath(url) {
   const m = /^app\.tsuji:\/\/open\/([a-z]+)\/?$/.exec(String(url ?? ''))
   return (m && OPEN_PATHS[m[1]]) || null

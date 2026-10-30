@@ -2578,8 +2578,9 @@ const boarding = {
   brdNotifText: 'Your cards are waiting at the gate.',
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
   // Settings › Notifications (plan 156). The nudge's title and body are
-  // written from what the gate will hold at the learner's hour.
-  nudgeTitle: (time, n) => `Your ${time} train · ${n} ${n === 1 ? 'card' : 'cards'}`,
+  // written from what the gate will hold at the learner's hour; the
+  // title leads with the hour, as a departure board's row (plan 293).
+  nudgeTitle: (time, n) => `${time} · ${n} ${n === 1 ? 'card' : 'cards'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'About a minute' : `About ${m} min`),
   nudgeNew: (n) => `${n} new`,
   // The reminders' channel, as Android's settings name it (lib/native.js).
