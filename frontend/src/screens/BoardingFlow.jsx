@@ -180,6 +180,9 @@ export default function BoardingFlow({
     rhythm: RECOMMENDED_RHYTHM,
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
+    // Whether the learner has pressed the reminder's switch: until they
+    // have, the card's issue asks the OS itself.
+    reminderAnswered: false,
     cardName: '',
     ...(resumed?.answers ?? {}),
   })
@@ -466,6 +469,7 @@ export default function BoardingFlow({
   // (it will not ask a second time) is said under the switch, which
   // would otherwise do nothing at every press (plan 247).
   function remind() {
+    set({ reminderAnswered: true })
     if (answers.notifications) { set({ notifications: false }); return }
     requestNudgePermission()
       .then(granted => {
@@ -569,6 +573,24 @@ export default function BoardingFlow({
     if (dryRun) { onComplete(); return }
     setBusy(true)
     setSaveError(null)
+    askReminder().then(notifications => issue(notifications, by))
+  }
+
+  // The reminder is asked for on the way out, not only behind the hour's
+  // sheet, which most never open: on a native shell, a learner who never
+  // pressed the switch is shown the OS's own prompt as the card is
+  // issued, the hour just chosen on it. Its answer is the answer; a
+  // learner who pressed the switch has answered already, and an OS that
+  // has decided (allowed, or refused for good) is not asked again.
+  function askReminder() {
+    if (answers.reminderAnswered || !canNudge()) return Promise.resolve(answers.notifications)
+    return nudgePermission()
+      .then(state => (state === 'prompt' ? requestNudgePermission() : state === 'granted'))
+      .then(granted => { set({ notifications: granted, reminderAnswered: true }); return granted })
+      .catch(() => false)
+  }
+
+  function issue(notifications, by) {
     const fresh = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, new Date(), answers.lines)
     const body = {
       jlptLevel: jlpt,
@@ -585,7 +607,7 @@ export default function BoardingFlow({
       lines: answers.lines,
       rhythmMin: answers.rhythm,
       reminderTime: time,
-      notifications: answers.notifications,
+      notifications,
       tzOffsetMin: -new Date().getTimezoneOffset(),
       // The name the card prints, '' for none (routes/profile.py card_name).
       cardName: answers.cardName,
@@ -606,7 +628,7 @@ export default function BoardingFlow({
           pace: perDay,
           // The chosen names joined, never text a learner typed.
           lines: answers.lines.join(','),
-          notifications: answers.notifications,
+          notifications,
           // How the level was found (plan 224), and where the test placed
           // the learner when they took it.
           ...(answers.kana === 'both' ? { level_how: answers.placed ? 'test' : 'pick' } : {}),
