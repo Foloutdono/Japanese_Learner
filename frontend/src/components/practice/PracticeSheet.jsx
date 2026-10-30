@@ -48,6 +48,15 @@ import { UNIT, platformOf, isSourced, runAt, shareRight, nextPaper, nextScene } 
 
 const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
+// Where page i starts in the pager's scroll, measured. The pager's
+// clientWidth is rounded to a whole pixel and a page in a zoomed
+// browser is not one, so i times it falls short of the page, and
+// further short the further along it is.
+function leftOf(el, i) {
+  const page = el.children[i]
+  return page ? el.scrollLeft + page.getBoundingClientRect().left - el.getBoundingClientRect().left : 0
+}
+
 /** The record line a plate and a page print: the grade, then what was
  *  done there and the share right, or "not yet". `rec` undefined is a
  *  record still on its way: the grade stands alone. */
@@ -81,7 +90,7 @@ export function PracticeSheet({ sections, start, grade, records, session, onClos
   // The sheet opens on the plate that raised it.
   useLayoutEffect(() => {
     const el = pager.current
-    if (el) el.scrollLeft = at * el.clientWidth
+    if (el) el.scrollLeft = leftOf(el, at)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once: where the sheet opened
   }, [])
 
@@ -93,7 +102,7 @@ export function PracticeSheet({ sections, start, grade, records, session, onClos
   function slideTo(i) {
     const el = pager.current
     if (!el) return
-    el.scrollTo({ left: i * el.clientWidth, behavior: reduced() ? 'auto' : 'smooth' })
+    el.scrollTo({ left: leftOf(el, i), behavior: reduced() ? 'auto' : 'smooth' })
   }
   // The roundels are one tab stop, the page in view's (the sheet's
   // first focus lands there, not on the first platform's), and the
@@ -128,18 +137,20 @@ export function PracticeSheet({ sections, start, grade, records, session, onClos
           </Fragment>
         ))}
       </div>
-      <div className="prc-sheet__pager" ref={pager} onScroll={onScroll}>
-        {sections.map((s, i) => (
-          <section
-            key={s.path}
-            className="prc-page"
-            style={{ '--line-color': s.color }}
-            aria-label={s.title}
-            inert={i !== at}
-          >
-            <Page section={s} near={Math.abs(i - at) <= 1} grade={grade} records={records} session={session} onBoard={onBoard} onStation={onStation} />
-          </section>
-        ))}
+      <div className="prc-sheet__deck">
+        <div className="prc-sheet__pager" ref={pager} onScroll={onScroll}>
+          {sections.map((s, i) => (
+            <section
+              key={s.path}
+              className="prc-page"
+              style={{ '--line-color': s.color }}
+              aria-label={s.title}
+              inert={i !== at}
+            >
+              <Page section={s} near={Math.abs(i - at) <= 1} grade={grade} records={records} session={session} onBoard={onBoard} onStation={onStation} />
+            </section>
+          ))}
+        </div>
       </div>
     </Sheet>
   )
