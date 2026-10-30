@@ -248,16 +248,17 @@ class AnalyzeLocalTests(unittest.TestCase):
 
     def test_a_point_carries_its_gloss_in_both_languages(self) -> None:
         """Plan 095: a chip says what its rule does without the sheet
-        being opened. The gloss is the catalogue's {en, fr} pair rather
-        than one language, because this result is pure and shared across
-        every learner -- the screen picks the language (frontend
-        grammarGloss.js), and the copy a token carries is the same one,
-        so a particle's row can print it too."""
+        being opened. The gloss is the catalogue's {en, fr} pair (and its
+        Spanish since plan 291) rather than one language, because this
+        result is pure and shared across every learner -- the screen picks
+        the language (frontend grammarGloss.js), and the copy a token
+        carries is the same one, so a particle's row can print it too."""
         r = analyze_local("今日は学校へ行きません。")
         wa = next(g for g in r["grammar"] if g["pattern"] == "は")
-        self.assertEqual(set(wa["meaning"]), {"en", "fr"})
-        self.assertTrue(wa["meaning"]["en"] and wa["meaning"]["fr"])
+        self.assertEqual(set(wa["meaning"]), {"en", "fr", "es"})
+        self.assertTrue(wa["meaning"]["en"] and wa["meaning"]["fr"] and wa["meaning"]["es"])
         self.assertTrue(wa["structure"])
+        self.assertTrue(wa["structure_es"])
         on_token = next(g for t in r["tokens"] for g in t["grammar"] if g["raw_id"] == wa["raw_id"])
         self.assertEqual(on_token["meaning"], wa["meaning"])
         self.assertEqual(on_token["structure"], wa["structure"])

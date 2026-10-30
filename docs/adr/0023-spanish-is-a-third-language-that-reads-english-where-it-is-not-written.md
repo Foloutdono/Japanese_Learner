@@ -39,9 +39,15 @@ not yet written in Spanish reads English**, never French and never blank.
   Japanese, in order, no English left). `tests/test_spanish.py` holds all
   three whole: a card, a kanji or a point the course gains is written in
   Spanish in the same change.
+- **The grammar lessons are whole** (the second wave): every step, every
+  neighbour's `compare` line and every example's translation carries its
+  `es`, held by `grammar_check` to the English and French texts' rules
+  (caps, bullets, no Japanese in a translation) and by `test_spanish.py` to
+  completeness. A reader takes a text's languages with
+  `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair, which
+  would drop the Spanish.
 - **Everything else is written a wave at a time** and reads English until
-  then: a grammar lesson's steps and examples, its Choisir questions and its
-  tour, the reading, dictation, comprehension and conversation banks, the
+  then: a grammar point's Choisir questions and its tour, the reading, dictation, comprehension and conversation banks, the
   deck's example sentences, the JMdict pool's words, the breakdown's particle
   and ending glosses. `python -m scripts.spanish_coverage` counts what is
   written and what is left, per part. A Spanish text is optional where it is
@@ -68,9 +74,11 @@ not yet written in Spanish reads English**, never French and never blank.
   `meaning_es`, so `LOCAL_REV` moved (31 → 32).
 - Dictionary search still matches English and French glosses only: the pool
   predicate's ASCII gate and the lexicon need their own change.
-- The catalogue is held in memory. Its Spanish glosses are small; the
-  lessons and drills, when written, add roughly half again to the catalogue's
-  RSS, which the 512 MB budget must be measured against before that wave
+- The catalogue is held in memory. Loaded, its five files held 19.7 MB
+  before Spanish and 20.9 MB with the glosses and the whole lesson in
+  Spanish (measured with tracemalloc, plan 291): the lessons cost little.
+  The tours and Choisir's questions are about five times the lessons'
+  text; that wave is to be measured against the 512 MB budget before it
   lands (an overlay read on demand, as the French JMdict layer is, is the
   alternative).
 - Every new learner-facing text now carries three languages in the UI table

@@ -40,7 +40,9 @@ RICH_LEVELS: frozenset[str] = frozenset({"N5", "N4", "N3", "N2", "N1"})
 # see tests/test_grammar_points.py.
 MIN_PER_LEVEL: dict[str, int] = {"N5": 90, "N4": 100, "N3": 100, "N2": 110, "N1": 110}
 
-_TEXT_LANGS = ("en", "fr")
+# The languages a text of the catalogue is written in: English and French
+# on every one, Spanish (plan 291) where it is written.
+TEXT_LANGS = ("en", "fr", "es")
 
 
 def _load(level: str) -> list[dict]:
@@ -79,6 +81,13 @@ def localise(pair, lang: str) -> str:
     if not pair:
         return ""
     return pair.get(lang) or pair.get("en") or ""
+
+
+def texts(source: dict) -> dict:
+    """The language fields of a dict that carries others beside them (a
+    step's `kind`, a rival's `pattern`, an example's `jp`): what localise
+    reads, and nothing it could take for a language."""
+    return {lang: source[lang] for lang in TEXT_LANGS if lang in source}
 
 
 def gloss(entry: dict, lang: str = "en") -> str:

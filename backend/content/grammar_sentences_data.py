@@ -15,7 +15,7 @@ study/grammar_sentence_gen.check_sentence -- see content/grammar/README.md
 and tests/test_grammar_sentences.py. The generator in
 study/grammar_sentence_gen.py is kept for drafting.
 """
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, localise
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, localise, texts
 
 SENTENCES_BY_LEVEL: dict[str, dict[str, list[dict]]] = {
     level: {entry["pattern"]: entry.get("examples", []) for entry in entries}
@@ -40,10 +40,8 @@ def has_sentences(level: str, pattern: str) -> bool:
 
 def translation(example: dict, lang: str) -> str:
     """The sentence's translation in the learner's language, English
-    when the French is not written yet."""
-    if lang == "fr":
-        return example.get("fr") or example.get("en", "")
-    return localise({"en": example.get("en", ""), "fr": example.get("fr", "")}, lang)
+    where that language's is not written yet (Spanish, plan 291)."""
+    return localise(texts(example), lang)
 
 
 def contrast_examples(level: str, pattern: str) -> list[dict]:

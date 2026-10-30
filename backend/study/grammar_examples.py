@@ -123,12 +123,12 @@ def parts_with_span(jp: str, span: tuple[int, int] | None, mark: str) -> list[di
 
 
 @lru_cache(maxsize=4096)
-def _payload(jp: str, en: str, fr: str, register: str | None, contrast: bool,
-             pattern: str, lang: str, blank: bool, level: str | None = None) -> dict:
+def _payload(jp: str, tr: str, register: str | None, contrast: bool,
+             pattern: str, blank: bool, level: str | None = None) -> dict:
     span = blank_span(jp, pattern, level) if blank and level else highlight_span(jp, pattern)
     payload = {
         "jp": jp,
-        "tr": translation({"en": en, "fr": fr}, lang),
+        "tr": tr,
         "furigana": parts_with_span(jp, span, "blank" if blank else "highlight"),
     }
     if blank and span:
@@ -152,8 +152,8 @@ def _frozen(payload: dict) -> dict:
 def example_payload(example: dict, pattern: str, lang: str) -> dict:
     """{jp, tr, furigana (highlighted), register?, contrast?}."""
     return _frozen(_payload(
-        example["jp"], example.get("en", ""), example.get("fr", ""),
-        example.get("register"), bool(example.get("contrast")), pattern, lang, False,
+        example["jp"], translation(example, lang),
+        example.get("register"), bool(example.get("contrast")), pattern, False,
     ))
 
 
@@ -163,8 +163,8 @@ def blanked_payload(example: dict, pattern: str, lang: str, level: str | None = 
     the point's `level`, a pattern the stems cannot point at is blanked
     where the detector finds it (blank_span)."""
     return _frozen(_payload(
-        example["jp"], example.get("en", ""), example.get("fr", ""),
-        example.get("register"), bool(example.get("contrast")), pattern, lang, True, level,
+        example["jp"], translation(example, lang),
+        example.get("register"), bool(example.get("contrast")), pattern, True, level,
     ))
 
 

@@ -32,7 +32,7 @@ ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", 
 REQUIRED_KEYS = frozenset({"pattern", "structure", "structure_fr", "meaning", "steps", "compare", "examples"})
 STEP_KINDS = ("rule", "use", "careful")
 REGISTERS = frozenset({"neutral", "casual", "polite", "formal", "written"})
-EXAMPLE_KEYS = frozenset({"jp", "en", "fr", "register", "contrast"})
+EXAMPLE_KEYS = frozenset({"jp", "en", "fr", "es", "register", "contrast"})
 LANGS = ("en", "fr")
 
 # Caps that keep a step a step and not an essay (README: rule <= 2
@@ -78,7 +78,7 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
                     out.append(f"{what}.{lang}: a bullet line must start with '- '")
     if rich and isinstance(pair.get("en"), str) and pair.get("en") == pair.get("fr"):
         out.append(f"{what}: fr is a copy of en (rich levels are written in both languages)")
-    out += _spanish_problems(what, pair, max_chars)
+    out += _spanish_problems(what, pair, max_chars, bullets)
     return out
 
 
@@ -86,7 +86,7 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
 # The catalogue is written in English and French; Spanish is added point
 # by point and a text without its `es` reads English. So Spanish is never
 # required, but a side that is there is held as the other two are.
-def _spanish_problems(what: str, pair: dict, max_chars: int) -> list[str]:
+def _spanish_problems(what: str, pair: dict, max_chars: int, bullets: bool = False) -> list[str]:
     if "es" not in pair:
         return []
     text = pair["es"]
@@ -103,7 +103,17 @@ def _spanish_problems(what: str, pair: dict, max_chars: int) -> list[str]:
         out.append(f"{what}.es has an unbalanced ** run")
     if text in (pair.get("en"), pair.get("fr")):
         out.append(f"{what}: es is a copy of {'en' if text == pair.get('en') else 'fr'}")
+    if bullets:
+        for line in text.split("\n"):
+            if line.startswith("-") and not line.startswith("- "):
+                out.append(f"{what}.es: a bullet line must start with '- '")
     return out
+
+
+def _with_spanish(pair: dict, source: dict) -> dict:
+    """An {en, fr} pair with the source's `es` beside it where it has one,
+    so _text_problems holds a Spanish text that is there."""
+    return {**pair, "es": source["es"]} if "es" in source else pair
 
 
 # ── The formation line in French (plan 215) ──
@@ -689,14 +699,14 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         steps = []
     kinds = []
     for i, step in enumerate(steps):
-        if not isinstance(step, dict) or set(step) != {"kind", "en", "fr"}:
-            out.append(f"{tag}: step {i} must be {{kind, en, fr}}")
+        if not isinstance(step, dict) or not {"kind", "en", "fr"} <= set(step) <= {"kind", "en", "fr", "es"}:
+            out.append(f"{tag}: step {i} must be {{kind, en, fr[, es]}}")
             continue
         if step["kind"] not in STEP_KINDS:
             out.append(f"{tag}: step {i} kind {step['kind']!r} not in {STEP_KINDS}")
         kinds.append(step["kind"])
         out += [f"{tag}: step {i} {p}" for p in _text_problems(
-            "text", {"en": step["en"], "fr": step["fr"]}, rich, MAX_STEP_CHARS, bullets=True)]
+            "text", _with_spanish({"en": step["en"], "fr": step["fr"]}, step), rich, MAX_STEP_CHARS, bullets=True)]
     if rich and (not kinds or kinds[0] != "rule"):
         out.append(f"{tag}: a rich level's lesson opens with a 'rule' step")
     if len(kinds) != len(set(kinds)):
@@ -709,8 +719,8 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         compare = []
     rivals: list[str] = []
     for i, rival in enumerate(compare):
-        if not isinstance(rival, dict) or set(rival) != {"pattern", "en", "fr"}:
-            out.append(f"{tag}: compare {i} must be {{pattern, en, fr}}")
+        if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", "es"}:
+            out.append(f"{tag}: compare {i} must be {{pattern, en, fr[, es]}}")
             continue
         rp = rival["pattern"]
         if rp == pattern:
@@ -723,7 +733,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
             out.append(f"{tag}: compare {rp!r} listed twice")
         rivals.append(rp)
         out += [f"{tag}: compare {rp!r} {p}" for p in _text_problems(
-            "text", {"en": rival["en"], "fr": rival["fr"]}, rich, MAX_COMPARE_CHARS)]
+            "text", _with_spanish({"en": rival["en"], "fr": rival["fr"]}, rival), rich, MAX_COMPARE_CHARS)]
 
     # ── examples ──
     examples = entry["examples"]
@@ -737,13 +747,13 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
     checkable_rivals = [r for r in rivals if verifiable(r)]
     for i, ex in enumerate(examples):
         if not isinstance(ex, dict) or not {"jp", "en", "fr"} <= set(ex) or set(ex) - EXAMPLE_KEYS:
-            out.append(f"{tag}: example {i} must be {{jp, en, fr[, register][, contrast]}}")
+            out.append(f"{tag}: example {i} must be {{jp, en, fr[, es][, register][, contrast]}}")
             continue
         jp = ex["jp"]
         if jp in seen_jp:
             out.append(f"{tag}: example {i} repeats {jp!r}")
         seen_jp.add(jp)
-        for lang in LANGS:
+        for lang in LANGS + (("es",) if "es" in ex else ()):
             why = check_sentence(jp, ex[lang], pattern, level)
             if why:
                 out.append(f"{tag}: example {i} ({lang}) {why}")
@@ -755,6 +765,8 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
                     out.append(f"{tag}: example {i} {lang} is not prose")
         if rich and ex["en"] == ex["fr"]:
             out.append(f"{tag}: example {i} fr is a copy of en")
+        if ex.get("es") in (ex["en"], ex["fr"]):
+            out.append(f"{tag}: example {i} es is a copy of {'en' if ex['es'] == ex['en'] else 'fr'}")
         if ex.get("register") is not None and ex["register"] not in REGISTERS:
             out.append(f"{tag}: example {i} register {ex['register']!r} unknown")
         if ex.get("contrast"):

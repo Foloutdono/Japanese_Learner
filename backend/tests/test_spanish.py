@@ -1,6 +1,7 @@
 """Spanish is the app's third language (plan 291): the decks and the
-grammar points read it whole, and every other text reads English until
-its Spanish is written (scripts/spanish_coverage.py counts what is left).
+grammar points' glosses and lessons read it whole, and every other text
+reads English until its Spanish is written (scripts/spanish_coverage.py
+counts what is left).
 
 What is whole is held here, as tests/test_kanji_french.py holds the
 French: a card the deck gains, a kanji, a grammar point, is written in
@@ -77,6 +78,29 @@ def test_every_grammar_point_has_its_spanish_gloss_and_formation(level):
     missing = [p["pattern"] for p in GRAMMAR_POINTS_BY_LEVEL[level]
                if not (p.get("meaning") or {}).get("es") or not p.get("structure_es")]
     assert missing == []
+
+
+@pytest.mark.parametrize("level", list(GRAMMAR_POINTS_BY_LEVEL))
+def test_every_grammar_lesson_is_written_in_spanish(level):
+    """The lesson, whole (plan 291's second wave): every step, every
+    neighbour's line and every example's translation. Their form is
+    grammar_check's; a point the catalogue gains is written in Spanish in
+    the same change, as it is in French."""
+    missing = [
+        f"{p['pattern']} {part} {i}"
+        for p in GRAMMAR_POINTS_BY_LEVEL[level]
+        for part in ("steps", "compare", "examples")
+        for i, text in enumerate(p.get(part) or [])
+        if not (text.get("es") or "").strip()
+    ]
+    assert missing == [], f"{len(missing)} lesson texts with no Spanish: {missing[:10]}"
+
+
+def test_a_lesson_is_served_in_spanish():
+    from study.grammar_lesson import lesson_payload
+    level, entry = "N5", GRAMMAR_POINTS_BY_LEVEL["N5"][0]
+    spanish, english = lesson_payload(level, entry, "es"), lesson_payload(level, entry, "en")
+    assert spanish["steps"][0]["text"] == entry["steps"][0]["es"] != english["steps"][0]["text"]
 
 
 def test_the_spanish_maps_the_client_preloads_are_whole_and_spanish():

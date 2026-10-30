@@ -36,7 +36,7 @@ import unicodedata
 from functools import lru_cache
 from pathlib import Path
 
-from content.grammar_points_data import find
+from content.grammar_points_data import find, texts
 from content.grammar_sentences_data import translation
 from srs import ladder as steps
 from study.furigana import align_sentence, mark_spans
@@ -117,7 +117,7 @@ def _sources(entry: dict) -> list[tuple[str, str, dict]]:
     out = []
     for n, ex in enumerate(entry.get("examples") or []):
         if ex.get("jp") and ex.get("en") and ex.get("fr"):
-            out.append((f"ex:{n}", ex["jp"], {"en": ex["en"], "fr": ex["fr"]}))
+            out.append((f"ex:{n}", ex["jp"], texts(ex)))
     tour = entry.get("tour") or {}
     for n, tw in enumerate(tour.get("twists") or []):
         tr = tw.get("tr") or {}
@@ -129,7 +129,7 @@ def _sources(entry: dict) -> list[tuple[str, str, dict]]:
         lines.append(scene["ask"]["cue"])
     for n, line in enumerate(lines):
         if line.get("jp") and line.get("en") and line.get("fr"):
-            out.append((f"sc:{n}", line["jp"], {"en": line["en"], "fr": line["fr"]}))
+            out.append((f"sc:{n}", line["jp"], texts(line)))
     return out
 
 
@@ -139,10 +139,12 @@ MAX_GAPS = 2
 @lru_cache(maxsize=1024)
 def _build_items(level: str, pattern: str) -> tuple:
     """The point's sentences a Construire can be cut from, each as (key,
-    jp, spans, en, fr): the point lit in one stretch, or two for a point
+    jp, spans, tr): the point lit in one stretch, or two for a point
     written in two pieces (あまり〜ない), never the whole sentence, every
     edge between ruby parts. Cached: the tokenizer reads each sentence
-    once."""
+    once. `tr` is the translation as (lang, text) pairs, every language
+    it is written in (Spanish where it is, plan 291), frozen with the rest
+    of the cached item."""
     found = find(pattern)
     if found is None or found[0] != level:
         return ()
@@ -159,7 +161,7 @@ def _build_items(level: str, pattern: str) -> tuple:
             continue
         if not all(_reading(_slice(parts, a, b)) for a, b in spans):
             continue
-        out.append((key, jp, tuple(spans), tr["en"], tr["fr"]))
+        out.append((key, jp, tuple(spans), tuple(sorted(texts(tr).items()))))
     return tuple(out)
 
 
@@ -191,7 +193,7 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
     item = _build_item(level, entry["pattern"], turn)
     if item is None:
         return None
-    key, jp, spans, en, fr = item
+    key, jp, spans, tr = item
     parts = align_sentence(jp)
     pieces, pos = [], 0
     for n, (a, b) in enumerate(spans):
@@ -201,7 +203,7 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
         pos = b
     if pos < len(jp):
         pieces.append({"furigana": _slice(parts, pos, len(jp))})
-    return {"key": key, "tr": translation({"en": en, "fr": fr}, lang), "pieces": pieces}
+    return {"key": key, "tr": translation(dict(tr), lang), "pieces": pieces}
 
 
 def build_specimen(level: str, entry: dict, lang: str) -> dict | None:
@@ -213,7 +215,7 @@ def build_specimen(level: str, entry: dict, lang: str) -> dict | None:
     item = _build_item(level, entry["pattern"])
     if item is None:
         return None
-    _key, jp, spans, en, fr = item
+    _key, jp, spans, tr = item
     pieces, pos = [], 0
     for a, b in spans:
         if a > pos:
@@ -222,7 +224,7 @@ def build_specimen(level: str, entry: dict, lang: str) -> dict | None:
         pos = b
     if pos < len(jp):
         pieces.append({"text": jp[pos:]})
-    return {"pieces": pieces, "tr": translation({"en": en, "fr": fr}, lang)}
+    return {"pieces": pieces, "tr": translation(dict(tr), lang)}
 
 
 def _norm(text: str) -> str:
@@ -291,7 +293,7 @@ def check_build(level: str, pattern: str, key: str, answers: list[str], lang: st
     item = next((i for i in _build_items(level, pattern) if i[0] == key), None)
     if item is None:
         return None
-    _, jp, spans, en, fr = item
+    _, jp, spans, tr = item
     parts = align_sentence(jp)
     gaps = []
     for n, (a, b) in enumerate(spans):
@@ -313,7 +315,7 @@ def check_build(level: str, pattern: str, key: str, answers: list[str], lang: st
         "verdict": whole,
         "gaps": gaps,
         "jp": jp,
-        "tr": translation({"en": en, "fr": fr}, lang),
+        "tr": translation(dict(tr), lang),
         "furigana": mark_spans(parts, list(spans)),
     }
 
@@ -434,7 +436,7 @@ def write_payload(level: str, entry: dict, lang: str, rng: random.Random | None 
     index, spans = rng.choice(options)
     example = entry["examples"][index]
     jp = example["jp"]
-    tr = translation({"en": example.get("en", ""), "fr": example.get("fr", "")}, lang)
+    tr = translation(example, lang)
     return {
         "situation": tr,
         "helpers": _helpers(jp, spans[0]),
