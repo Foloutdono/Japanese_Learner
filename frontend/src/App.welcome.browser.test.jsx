@@ -79,29 +79,36 @@ describe('App signed out', () => {
   // state, so Back used to leave Tsuji. It returns to Welcome now, and
   // the ‹ leaves no entry behind it.
   it('returns to Welcome on the browser\'s Back, and ‹ leaves no entry behind', async () => {
-    // history.length counts the entries ahead of the page too, and the
-    // lane's files share one history: a test that went back, here or in
-    // a file before, leaves one there for the sign-in's push to replace
-    // rather than add to. A push drops it.
+    // Read by the entry the sign-in pushes ({ auth: true }), never by
+    // history.length: the lane's files share one history, which Chromium
+    // caps at 50 entries, so once the files before this one have filled
+    // it a push drops the oldest and the length stands still. Welcome's
+    // own entry carries no state, and the page before it a mark of its
+    // own: a sign-in that replaced Welcome's entry rather than adding
+    // one would send Back past Welcome, onto the mark.
+    window.history.replaceState({ before: true }, '', '/')
     window.history.pushState(null, '', '/')
-    const start = window.history.length
     const screen = await render(<App />)
     await settle()
     const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
 
+    // The sign-in adds an entry, and Back pops it to Welcome.
     screen.container.querySelector('[data-action="sign-in"]').click()
     await settle(60)
     expect(screen.container.querySelector('.brd-signin')).not.toBeNull()
-    expect(window.history.length).toBe(start + 1)
+    expect(window.history.state).toEqual({ auth: true })
     let back = popped()
     window.history.back()
     await back
     await settle(60)
     expect(screen.container.querySelector('.brd-signin')).toBeNull()
     expect(screen.container.querySelector('.brd-front__promise')).not.toBeNull()
+    expect(window.history.state).toBeNull()
 
+    // The ‹ takes its own entry out again: Welcome's is the one left.
     screen.container.querySelector('[data-action="sign-in"]').click()
     await settle(60)
+    expect(window.history.state).toEqual({ auth: true })
     back = popped()
     screen.container.querySelector('[data-action="welcome"]').click()
     await back
