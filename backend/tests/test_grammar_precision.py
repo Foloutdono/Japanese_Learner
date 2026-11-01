@@ -2878,3 +2878,19 @@ class AnotherConstructionsMoTests(unittest.TestCase):
                          "雨の日も風の日も歩いた。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("〜も〜も", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AGuessIsNoWillTests(unittest.TestCase):
+    """Plan 296: 〜ようと思う is a will (起きようと思う); the copula's だろう
+    before と思う is a guess, and lights 〜だろう alone."""
+
+    def test_the_copulas_guess(self) -> None:
+        for sentence in ("夜の山はさむいだろうと思って、セーターを持っていきました。", "田中さんも来るだろうと思います。",
+                         "有利だろうと思われていた。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜ようと思う", found_in(sentence))
+                self.assertIn("〜だろう", found_in(sentence))
+        for sentence in ("明日は早く起きようと思います。", "日本へ行こうと思っています。", "勉強しようと思う。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ようと思う", found_in(sentence))

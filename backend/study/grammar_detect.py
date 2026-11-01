@@ -7096,6 +7096,8 @@ def _mean_to_spans(tokens):
     思う in any form."""
     out = []
     for i in range(len(tokens)):
+        if tokens[i].pos == "auxiliary" and tokens[i].lemma in ("だ", "です"):
+            continue                    # (寒いだろうと思って: the copula's guess, no will, plan 296)
         vol = _volitional_at(tokens, i)
         if vol is None or vol[1] + 2 >= len(tokens):
             continue
