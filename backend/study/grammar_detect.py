@@ -5069,7 +5069,11 @@ def _ga_in_a_clause_of_its_own(tokens, first: int, k: int) -> bool:
     if opened:
         return True
     i = k + 1
-    while i < len(tokens) and tokens[i].pos not in ("verb", "adjective") \
+    # (...past an adjective's adverb form to the verb it describes:
+    # 効果が実際より大きく見える危険, plan 296)
+    while i < len(tokens) and (tokens[i].pos not in ("verb", "adjective") or (
+            tokens[i].pos == "adjective" and tokens[i].cform.startswith("連用形") and tokens[i].surface.endswith("く")
+            and i + 1 < len(tokens) and tokens[i + 1].pos == "verb")) \
             and not (tokens[i].pos == "auxiliary" and tokens[i].lemma in ("だ", "です")):
         if tokens[i].pos == "symbol" and tokens[i].surface in _UTTERANCE_ENDS:
             return False
@@ -5091,6 +5095,9 @@ def _ga_in_a_clause_of_its_own(tokens, first: int, k: int) -> bool:
         # leaves to the topic, nor a question the sentence itself asks,
         # 君には正義感がないのか.)
         return True
+    if nxt.pos == "noun" and nxt.surface in ("こと", "事") and i + 1 < len(tokens) \
+            and tokens[i + 1].pos == "particle" and tokens[i + 1].surface in ("で", "を", "が", "は", "に", "も"):
+        return True                     # 成功例ばかりが目に入ることで: こと makes it a noun (plan 296)
     if nxt.pos == "particle" and nxt.surface == "と" and i + 1 < len(tokens) and (
             tokens[i + 1].lemma in _SAYING_VERBS or tokens[i + 1].lemma in _SAYING_NOUNS
             or tokens[i + 1].lemma in ("聞く", "伺う", "見る", "嘆く", "分かる", "信じる", "いう")):
@@ -6496,7 +6503,7 @@ def _pattern_refusals():
         "〜のに": lambda t, s, e, g: (n := _next_word(t, e)) is not None and (
             n.surface.startswith("気") or _a_deed_met(t, e)),
         # 高くても, 高くては: the て of 〜ても and 〜ては, no "and" (plan 272).
-        "〜くて／〜で": lambda t, s, e, g: _followed_by(t, e, "も", "は") or _a_feeling(t, _index_from(t, e))
+        "〜くて／〜で": lambda t, s, e, g: _followed_by(t, e, "も", "は", "すら", "さえ", "こそ") or _a_feeling(t, _index_from(t, e))
         or (_index_from(t, e) > 0 and _felt_so(t, _index_from(t, e) - 1)),
         # だろうが！ insists, no "but" (plan 272); 足掻くがいい is "go ahead
         # and", 私ごときが the subject's が after the likes of me.
@@ -7581,8 +7588,11 @@ def _reason_de_spans(tokens):
         made = {"".join(u.surface for u in tokens[k:i]) for k in (i - 2, i - 3)
                 if k >= 0 and all(tokens[j].end == tokens[j + 1].start for j in range(k, i - 1))}
         cause = noun.lemma in _CAUSES or noun.surface in _CAUSES or bool(made & _CAUSES)
-        busy = noun.surface in ("仕事", "しごと", "用事", "ようじ") and any(
-            u.pos == "adjective" for u in tokens[i + 1:i + 4])
+        busy = noun.surface in ("仕事", "しごと", "用事", "ようじ") and (any(
+            u.pos == "adjective" for u in tokens[i + 1:i + 4]) or (
+            # (母はしごとでいませんでした: away for it, plan 296)
+            nxt.lemma in ("居る", "いる", "おる") and i + 2 < len(tokens)
+            and (tokens[i + 2].lemma in ("無い", "ない") or tokens[i + 2].surface.startswith("ませ"))))
         # (私事で恐縮ですが: what one is sorry for, then the sorrow)
         sorry = nxt.surface == "恐縮" and noun.surface not in ("電話", "メール", "手紙")
         verb = next((u for u in tokens[i + 1:] if u.pos == "verb" or u.pos == "symbol"), None)
@@ -8873,7 +8883,9 @@ _FUSED_PARTICLES = frozenset({"〜が早いか", "〜ものの", "〜たとこ�
                               "〜ようが〜まいが",
                               # (済んだものを: the を of 〜ものを is no object;
                               # 開けるや否や lists nothing, plan 296)
-                              "〜ものを", "〜や否や"})
+                              "〜ものを", "〜や否や",
+                              # (子どもではあるまいし: the copula's で, no place)
+                              "〜ではあるまいし"})
 
 
 def _around_marks(tokens, segments):

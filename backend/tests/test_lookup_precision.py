@@ -2456,7 +2456,7 @@ class SixthReviewWordTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
         for sentence, surface, gloss in (("お前一人で進むしかないと。", "と", "(at the end) the rest left unsaid"),
-                                         ("とどまるものではあるまい。", "で", "(with は or も, then ある or ない) is"),
+                                         ("とどまるものではあるまい。", "で", "(with は, も or すら, then ある or ない) is"),
                                          ("とどまるものではあるまい。", "は", "(between で and ある or ない)"),
                                          ("信頼を取り戻すには、行動で示すほかない。", "に", "(after a verb, before は) for, to"),
                                          ("言葉を尽くすよりも行動で示す。", "も", "(after より) stresses"),
@@ -3714,3 +3714,47 @@ class WhatTheSentenceSaysTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertTrue(set(words) <= set(cut(sentence)), cut(sentence))
         self.assertEqual(token_of("はは、そうか。", "はは")["pos"], "interjection")   # a laugh, never 母
+
+
+class ParticleOrCopulaDeTests(unittest.TestCase):
+    """Plan 296: で is the case particle or the copula's て form by what
+    follows it. The particle where its noun is an argument of what goes
+    on in its own clause (仕事で忙しい, 仕事ではメールしか, 窓口でのみ,
+    教えあうことで, 一台置くだけで, 父と母と三人で); the copula where a topic,
+    the noun said of it and a comma give way to a clause with a subject
+    of its own (小さいじしょは千九百円で、ことばは少ない)."""
+
+    def de(self, sentence: str, nth: int = 0) -> str:
+        tokens = [t for t in analysis.analyze_local(sentence)["tokens"] if t["surface"] == "で"]
+        return tokens[nth]["pos"]
+
+    def test_the_case_particle(self) -> None:
+        for sentence in ("疲れていると、仕事で単純な間違いをしがちだ。", "この仕事で大事なのは、丁寧なあいさつだ。",
+                         "わたしも仕事ではメールしか使わないが、", "予約した本は、小さな窓口でのみ受け取れます。",
+                         "若者は戦火というものを頭でしか知らない。", "クラスの仲間と教えあうことで、成績が上がった。",
+                         "はんばい機なら一台置くだけで、二十四時間売り続けてくれる。", "黙ってレジに並ぶだけで、買い物が済む。",
+                         "地元の人ならではの案内で、観光客が知らない店をいくつも回れた。",
+                         "ふゆ休みに、父と母と三人で、おばあさんのうちへ行きました。", "母はしごとでいませんでした。",
+                         "私たちは５時間の旅でぐったりしてしまった。", "会社は問い合わせでてんやわんやだった。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.de(sentence), "particle")
+        self.assertIn("〜で（理由）", [g["pattern"] for t in analysis.analyze_local("母はしごとでいませんでした。")["tokens"]
+                                       if t["surface"] == "で" for g in t.get("grammar") or []])
+
+    def test_the_copula(self) -> None:
+        for sentence in ("彼は単なる愚か者でしかない。", "よくあることで、問題ない。", "当然のことをしただけで、ほめるにはあたらない。",
+                         "人口は３４１万人で、その７分の１はマオリ族です。", "元気で友人も多い人だ。", "みんなが元気でいられますように。",
+                         "これが情熱でなくてなんだろう。", "魚は水中でなければ生きられない。", "窓を開けっぱなしで外出した。",
+                         "彼は金持ちで、その上家柄がよい。", "小さいじしょは千九百円で、ことばは少ないですが、かるいです。",
+                         "私もその一人で、ひまがあると、ついスマホばかり見がちだった。", "あさからいい天気で、空がとてもきれいでした。",
+                         "針は止まったままで、ガラスには細かい傷がついている。", "今日から祭りで、今夜は川で花火大会もあるんです。",
+                         "私は学生で、妹は大学で働いている。", "東京は大きいだけで、人はしんせつではありません。",
+                         "五人で、一人は単品"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.de(sentence), "auxiliary")
+        # ...and a place, a means or a medium stays the particle before a comma
+        for sentence in ("私は駅で、友達に会った。", "彼は電話で、私が行くと言った。", "私はバスで、妹は電車で来た。",
+                         "この店で、この本がいちばん高いです。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.de(sentence), "particle")
+        self.assertEqual(self.de("今日から祭りで、今夜は川で花火大会もあるんです。", 1), "particle")

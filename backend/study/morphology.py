@@ -1382,6 +1382,173 @@ def _place_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
         tags[i] = ("助詞", "格助詞", "*")
 
 
+# What carries a copula's て form on (plan 296): 元気でいる, 学生である,
+# 件でいらっしゃいます, 不安でならない -- the で before them is the copula's.
+_COPULA_GOES_ON = frozenset({"居る", "いる", "おる", "有る", "ある", "御座る", "ござる", "いらっしゃる", "成る", "なる",
+                             "無い", "ない"})
+_FORMAL_NOUNS = frozenset({"もの", "物", "こと", "事", "よう", "様", "そう", "みたい", "わけ", "訳", "はず", "ため",
+                           "為", "つもり", "まま", "儘", "ところ", "所", "おかげ", "お陰", "せい", "ほう", "方"})
+_DIGITS = "0123456789０１２３４５６７８９一二三四五六七八九十百千万何数"
+# A state a suffix makes of a deed, whose で is the copula's (開けっぱなしで
+# 外出した, 間違いだらけで).
+_STATE_SUFFIXES = ("っぱなし", "っ放し", "だらけ", "ずくめ", "まみれ", "がち", "気味", "ぎみ")
+
+
+def _topic_in_clause(morphemes: list[Morpheme], k: int) -> bool:
+    """Whether a topic (は, も, って, とは) stands in the clause that ends
+    at morphemes[k], back to the sentence's start or its last comma."""
+    while k >= 0 and not (morphemes[k].pos == "symbol" and morphemes[k].surface in "。！？!?、，,「『"):
+        if morphemes[k].pos == "particle" and morphemes[k].surface in _TOPICS and morphemes[k].surface not in ("が", "なら"):
+            return True
+        k -= 1
+    return False
+
+
+def _case_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
+    """で read back as the case particle where UniDic took it for the
+    copula's て form and what follows says it is one (plan 296): a plain
+    noun's で before a word that goes on with its own clause (仕事で忙しい,
+    一杯で千円, 旅でぐったり, ホットでお願いします); で before は, のみ or しか
+    with no negative after it (仕事ではメールしか使わない, 窓口でのみ行う,
+    頭でしか知らない -- never 学生ではない, 愚か者でしかない); a deed and
+    ことで, "by doing" (教えあうことで、成績が上がった); だけで after a deed
+    with no topic before it, "just by" (一台置くだけで、売り続けてくれる --
+    never したただけで, "only did", nor 東京は大きいだけで、); and a count of people with no topic before it (父と母と
+    三人で、行きました -- never 人口は三百万人で、). A noun that is a
+    な-adjective too keeps the copula (元気で友人も多い), and so does a noun
+    the copula says of something (もので、, 金持ちで、), and so does what
+    carries a copula's て form on (元気でいる, 件でいらっしゃいます)."""
+    from dataclasses import replace
+
+    def particle(i: int) -> None:
+        morphemes[i] = replace(morphemes[i], lemma="で", lemma_reading="で", pos="particle", ctype="", cform="")
+        tags[i] = ("助詞", "格助詞", "*")
+
+    def negative_or_being(k: int) -> bool:
+        return k < len(morphemes) and (morphemes[k].lemma in _COPULA_GOES_ON
+                                       or morphemes[k].surface.startswith(("あり", "ござ")))
+
+    for i in range(1, len(morphemes) - 1):
+        m, prev, nxt = morphemes[i], morphemes[i - 1], morphemes[i + 1]
+        if not (m.surface == "で" and m.pos == "auxiliary" and m.lemma == "だ" and m.cform.startswith("連用形")):
+            continue
+        if prev.surface in ("仕事", "しごと", "用事", "ようじ", "出張", "留守") and nxt.lemma in ("居る", "いる", "おる") \
+                and i + 2 < len(morphemes) and (morphemes[i + 2].lemma in ("無い", "ない")
+                                                or morphemes[i + 2].surface.startswith("ませ")):
+            particle(i)                   # 母はしごとでいませんでした: away for work
+            continue
+        if negative_or_being(i + 1):
+            continue                      # 情熱でなくてなんだろう, 無料でなければ, 元気でいる
+        plain = prev.pos in ("noun", "pronoun", "suffix") and not prev.adjectival and not prev.proper \
+            and prev.surface not in _COPULA_NOUNS and prev.lemma not in _COPULA_NOUNS \
+            and prev.surface not in _FORMAL_NOUNS and not prev.surface.endswith(_STATE_SUFFIXES)
+        if nxt.pos == "particle" and nxt.surface in ("は", "のみ", "しか") and prev.pos in ("noun", "pronoun", "suffix") \
+                and not prev.adjectival and prev.surface not in _FORMAL_NOUNS and not negative_or_being(i + 2):
+            particle(i)                   # 仕事では, 窓口でのみ, 頭でしか
+            continue
+        if plain and (nxt.pos in ("adjective", "adverb", "noun", "pronoun", "other")
+                      or (nxt.pos == "verb" and nxt.lemma not in _COPULA_GOES_ON)
+                      or (nxt.pos == "prefix" and i + 2 < len(morphemes) and morphemes[i + 2].pos in ("noun", "verb"))):
+            particle(i)                   # 仕事で忙しい, 一杯で千円, 旅でぐったり, ホットでお願い
+            continue
+        if negative_or_being(i + 1) or (nxt.pos == "particle" and nxt.surface in ("は", "も") and negative_or_being(i + 2)):
+            continue
+        before = morphemes[i - 2] if i >= 2 else None
+        if prev.surface in ("こと", "事") and before is not None and before.pos in ("verb", "auxiliary") \
+                and before.lemma not in ("有る", "ある", "居る", "いる", "だ", "です"):
+            particle(i)                   # 教えあうことで、成績が上がった
+            continue
+        if prev.surface == "だけ" and prev.pos == "particle" and before is not None \
+                and (before.pos == "verb" or (before.pos == "auxiliary" and before.lemma == "ない")) \
+                and not _topic_in_clause(morphemes, i - 2):
+            particle(i)                   # 一台置くだけで、; never 東京は大きいだけで、, したただけで
+            continue
+        if prev.surface == "人" and before is not None and before.surface and all(c in _DIGITS for c in before.surface) \
+                and nxt.pos == "symbol" and nxt.surface in "、，,":
+            start = i - 2
+            while start > 0 and not (morphemes[start - 1].pos == "symbol" and morphemes[start - 1].surface in "。！？!?「『、，,"):
+                start -= 1
+            rest = []
+            for t in morphemes[i + 2:]:
+                if t.pos == "symbol" and t.surface in "。！？!?":
+                    break
+                rest.append(t)
+            # (...and only where what follows has a deed they do together:
+            # 五人で、一人は単品, a booking's note, says no more than how many)
+            if not any(t.pos == "particle" and t.surface in _TOPICS for t in morphemes[start:i - 1]) \
+                    and any(t.pos == "verb" and not (n > 0 and rest[n - 1].conjunctive and rest[n - 1].surface in ("て", "で"))
+                            for n, t in enumerate(rest)):
+                particle(i)               # 父と母と三人で、 -- never 人口は三百万人で、
+
+
+# A means or a medium a で after it takes (plan 296): 電話で、, バスで、.
+_MEANS = frozenset({"電話", "メール", "手紙", "車", "バス", "電車", "自転車", "飛行機", "船", "タクシー", "地下鉄",
+                    "徒歩", "歩き", "声", "大声", "口", "手", "ペン", "鉛筆", "はし", "箸", "ネット", "テレビ", "ラジオ"})
+_PLACE_ENDINGS = tuple("機店館局駅室所場港院園器国町市村県区校社屋")
+# The nouns a construction ends on with its で (〜一方で, 〜せいで): the
+# construction's, whatever the clause after it says.
+_CONSTRUCTION_NOUNS = frozenset({"一方", "反面", "せい", "おかげ", "お陰", "ため", "為", "結果", "代わり", "上", "うえ",
+                                 "ところ", "所", "次第", "ついで", "最中", "途中", "わり", "割", "以上"})
+_PLACE_WORDS = frozenset({"家", "うち", "いえ", "海", "山", "川", "庭", "外", "部屋", "へや", "教室", "台所", "道",
+                          "ここ", "そこ", "あそこ", "どこ", "こちら", "そちら", "あちら", "日本", "東京", "大阪",
+                          "京都", "外国", "田舎", "都会", "世界", "空", "森", "島", "湖", "池"})
+
+
+def _copula_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
+    """で read back as the copula's て form where UniDic took it for the
+    particle and the sentence joins two things said (plan 296): a topic,
+    the noun said of it and its で, a comma, then a clause with a topic
+    or a subject of its own -- 小さいじしょは千九百円で、ことばは少ない,
+    私もその一人で、ひまがあると, 針は止まったままで、ガラスには, のは
+    「時間がない」で、二番目は. Never a place, a means or a medium (私は
+    駅で、友達に会った; 彼は電話で、私が行くと言った; 私はバスで、妹は電車
+    で来た)."""
+    from dataclasses import replace
+
+    # (Never card_lookup's places: it tokenizes the deck as it loads, and an
+    # import from here, mid-build, fails every word it reads.)
+    for i in range(1, len(morphemes) - 2):
+        m, prev, nxt = morphemes[i], morphemes[i - 1], morphemes[i + 1]
+        if not (m.surface == "で" and m.pos == "particle" and not m.conjunctive) \
+                or not (nxt.pos == "symbol" and nxt.surface in "、，,"):
+            continue
+        quoted = prev.pos == "symbol" and prev.surface in "」』"
+        if not (quoted or prev.pos in ("noun", "suffix", "pronoun")):
+            continue
+        if not quoted and ((prev.proper and prev.name_kind == "place") or prev.surface in _PLACE_WORDS
+                           or prev.surface in _CONSTRUCTION_NOUNS
+                           or prev.surface in _RELATIONAL_PLACES or prev.surface in _MEANS
+                           or prev.surface.endswith(_PLACE_ENDINGS) or prev.surface.endswith("語")
+                           or (prev.counter and not prev.surface.endswith(("円", "歳", "さい", "人")))):
+            continue
+        start = i - 1
+        while start > 0 and not (morphemes[start - 1].pos == "symbol" and morphemes[start - 1].surface in "。！？!?、，,「『"):
+            start -= 1
+        clause = morphemes[start:i - 1]
+        # (...or a time it holds from, with no deed in it: あさからいい天気で、
+        # -- never 蛇口から漏れた水で、, a cause)
+        # (never the は of ならでは, 仕事では: a は after で sets a scope)
+        topic = any(t.pos == "particle" and t.surface in ("は", "も", "って", "とは")
+                    and not (n > 0 and clause[n - 1].surface == "で") for n, t in enumerate(clause)) or (
+            len(clause) >= 2 and clause[1].surface == "から" and clause[0].pos == "noun"
+            and not any(t.pos == "verb" for t in clause))
+        if not topic:
+            continue
+        own = False
+        for t in morphemes[i + 2:]:
+            if t.pos == "symbol" and t.surface in "。！？!?":
+                break
+            if t.pos == "particle" and t.surface in ("は", "が", "も") and not t.conjunctive:
+                own = True
+                continue
+            if t.pos in ("verb", "adjective") or (t.pos == "auxiliary" and t.lemma in ("だ", "です")):
+                break
+        if own:
+            morphemes[i] = replace(m, lemma="だ", lemma_reading="だ", pos="auxiliary", ctype="助動詞-ダ",
+                                   cform="連用形-一般", conjunctive=False)
+            tags[i] = ("助動詞", "*", "*")
+
+
 # An adjective's く form after の is the noun it makes: おおさかのちかく,
 # "near Osaka" -- no adjective follows の.
 _KU_NOUNS = {"近い": ("近く", "ちかく"), "遠い": ("遠く", "とおく")}
@@ -5181,6 +5348,8 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _no_honorific_after_a_stem(morphemes, tags)
         morphemes, tags = _done_after_an_adverb(morphemes, tags)
         _place_de(morphemes, tags)
+        _case_de(morphemes, tags)
+        _copula_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)
         morphemes, tags = _zu_words(morphemes, tags)

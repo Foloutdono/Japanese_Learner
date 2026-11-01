@@ -3068,3 +3068,28 @@ class WhatIsSaidIsNoConditionTests(unittest.TestCase):
                 self.assertNotIn("と", lit)
                 self.assertNotIn("〜と", lit)
         self.assertEqual(found_in("お金をはらわないといけない。").get("〜ないといけない"), "ないといけない")
+
+
+class TheCopulasDeTests(unittest.TestCase):
+    """Plan 296: the で of 〜ではあるまいし is the copula's, no place; で
+    + すら + ある is no 〜くて／〜で; and 〜は〜が never pairs a topic with a
+    が inside a clause こと makes a noun of, or one that describes a noun
+    past an adverb (効果が実際より大きく見える危険)."""
+
+    def test_copula_de_points(self) -> None:
+        hits = grammar_detect.hits("子どもではあるまいし、一人で電車に乗れるよ。")
+        self.assertFalse([h for h in hits if h["pattern"] == "で" and h["start"] == 3])
+        self.assertIn("〜ではあるまいし", found_in("子どもではあるまいし、一人で電車に乗れるよ。"))
+        self.assertNotIn("〜くて／〜で", found_in("今の私たちには奇妙ですらある感覚だが、当時は自然だった。"))
+        from study import analysis
+        de = next(t for t in analysis.analyze_local("今の私たちには奇妙ですらある感覚だ。")["tokens"] if t["surface"] == "で")
+        self.assertIn("ですらある", (de.get("gloss") or {}).get("en", ""))
+        self.assertIn("〜くて／〜で", found_in("このへやはひろくて、しずかです。"))
+
+    def test_wa_ga_held_out_of_inner_clauses(self) -> None:
+        sentence = ("失敗が共有されないことの害は、時間や研究費の無駄にとどまらず、成功例ばかりが目に入ることで、"
+                    "治療の効果が実際より大きく見える危険にまで及ぶ。")
+        self.assertNotIn("〜は〜が", found_in(sentence))
+        for sentence in ("象は鼻が長い。", "私は背が高く見える。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜は〜が", found_in(sentence))

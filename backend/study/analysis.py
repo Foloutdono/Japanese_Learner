@@ -2158,7 +2158,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 辞書でもなく), 〜の中で with も held to "among", まで "even" after an
 # addition (ガス代まで), 〜ものを's を and 〜や否や's や, 〜ても on にとって's
 # て, 〜ば〜ほど and 〜も〜ば〜も held to their shape, a quotation's と across
-# a comma, and 〜ないといけない said short (帰らないと。).
+# a comma, and 〜ないといけない said short (帰らないと。); で read as the
+# case particle or the copula by what follows it (仕事で忙しい, 教えあうこと
+# で, 置くだけで, 三人で、…行きました; 千九百円で、ことばは少ない).
 LOCAL_REV = 33
 
 

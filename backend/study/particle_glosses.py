@@ -211,8 +211,10 @@ _GLOSSES = {
     "laugh_said": {"en": "(a laugh) heh heh, ha ha", "fr": "(un rire) hé hé, ha ha"},
     "と_end": {"en": "(at the end) the rest left unsaid: a quote, '…' (I said), or after ない a must (= 〜ないといけない)",
               "fr": "(en fin de phrase) la suite non dite : une citation, « … » (ai-je dit), ou après ない une obligation (= 〜ないといけない)"},
-    "で_aru": {"en": "(with は or も, then ある or ない) is: the copula written out (ではない, ではあるまい, is not)",
-              "fr": "(avec は ou も, puis ある ou ない) est : la copule écrite en entier (ではない, ではあるまい, n'est pas)"},
+    "で_aru": {"en": "(with は, も or すら, then ある or ない) is: the copula written out (ではない, ではあるまい, is not; "
+                     "ですらある, is even)",
+              "fr": "(avec は, も ou すら, puis ある ou ない) est : la copule écrite en entier (ではない, ではあるまい, n'est "
+                    "pas ; ですらある, est même)"},
     "は_dewa": {"en": "(between で and ある or ない) sets off what is denied: ではない, ではあるまい",
                "fr": "(entre で et ある ou ない) met en relief ce qui est nié : ではない, ではあるまい"},
     "に_purpose": {"en": "(after a verb, before は) for, to: what it takes (取り戻すには, to win it back)",
@@ -988,8 +990,9 @@ def gloss(morphemes, i: int) -> dict | None:
             and (i + 1 >= len(morphemes) or (morphemes[i + 1].pos == "symbol" and morphemes[i + 1].surface in "。！？!?…」")):
         key = "と_end"                      # 進むしかないと。 (plan 272)
     elif m.pos == "auxiliary" and m.surface == "で" and m.lemma == "だ" and i + 2 < len(morphemes) \
-            and morphemes[i + 1].surface in ("は", "も") and morphemes[i + 2].lemma in ("有る", "ある", "無い", "ない"):
-        key = "で_aru"                      # ものではあるまい (plan 272)
+            and morphemes[i + 1].surface in ("は", "も", "すら", "さえ", "こそ") \
+            and morphemes[i + 2].lemma in ("有る", "ある", "無い", "ない"):
+        key = "で_aru"                      # ものではあるまい (plan 272), 奇妙ですらある (plan 296)
     elif m.pos == "particle" and m.surface == "は" and i >= 1 and i + 1 < len(morphemes) \
             and morphemes[i - 1].surface == "で" and morphemes[i - 1].lemma == "だ" \
             and morphemes[i + 1].lemma in ("有る", "ある", "無い", "ない"):
