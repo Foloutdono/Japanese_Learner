@@ -5709,14 +5709,22 @@ def _potential_refused_by_use(tokens, s, e) -> bool:
     verb = tokens[i - 1] if i >= 1 else None
     negative = nxt is not None and nxt.lemma in ("ない", "ず", "ぬ")
     if verb is not None and not negative and (verb.lemma in _SAID_OF or (
-            verb.lemma == "見る" and i >= 2 and tokens[i - 2].surface == "と" and tokens[i - 2].pos == "particle")):
+            verb.lemma in _SAID_AFTER_TO and i >= 2 and tokens[i - 2].surface == "と"
+            and tokens[i - 2].pos == "particle")):
         return True                    # 支援が求められる, 有効と認められる, 回復したと見られる (plan 272)
+        # (...and what is said or thought after と: と読み上げられる謝罪文,
+        # と考えられる, plan 296)
     return _suffered_by(tokens, i)
 
 
 # The る-verbs whose られる says what is asked or held of a thing (plan
 # 272): 支援が求められる is "is called for", no "can ask for".
 _SAID_OF = frozenset({"求める", "認める"})
+# The る-verbs of saying and thinking whose られる after a quotation's と is
+# the passive (plan 272's と見られる; plan 296): と読み上げられる, と考え
+# られる, と伝えられる -- "is read out", "is thought", never "can".
+_SAID_AFTER_TO = frozenset({"見る", "読み上げる", "考える", "伝える", "感じる", "信じる", "述べる", "唱える",
+                            "告げる", "報じる", "教える", "答える", "称える", "捉える", "位置付ける", "位置づける"})
 
 
 # Intransitive る-verbs whose られる, with nobody before に, can only be
@@ -5731,6 +5739,17 @@ _DOERS = frozenset({"私", "僕", "俺", "彼", "彼女", "弟", "妹", "兄", "
                     "雨", "泥棒", "警察", "親", "夫", "妻", "息子", "娘", "隣", "店員", "医者", "他人", "相手"})
 
 
+def _a_person_by_gloss(w) -> bool:
+    """Whether a noun is a person or people by the first gloss the deck or
+    the dictionary gives it (家族 "family", 先輩, 客): a doer _DOERS does
+    not list (plan 296)."""
+    from study.morphology import _noun_meaning, kata_to_hira
+    from study.reading_context import _PERSON_GLOSS
+
+    first = re.split(r"[,;]", _noun_meaning(w.surface, kata_to_hira(w.reading)) or "", maxsplit=1)[0]
+    return bool(_PERSON_GLOSS.search(first.lower()))
+
+
 def _suffered_by(tokens, i: int) -> bool:
     """Whether a doer and its に stand in the clause before tokens[i]: 弟
     に, 母に, 田中さんに (_DOERS, or a name's honorific)."""
@@ -5741,7 +5760,8 @@ def _suffered_by(tokens, i: int) -> bool:
         if t.pos == "particle" and t.surface == "に":
             w = tokens[k - 1]
             if w.surface in _DOERS or w.surface.endswith(("さん", "くん", "ちゃん", "様", "たち", "達")) \
-                    or (w.pos == "suffix" and w.surface in ("さん", "くん", "ちゃん", "様", "たち", "達")):
+                    or (w.pos == "suffix" and w.surface in ("さん", "くん", "ちゃん", "様", "たち", "達")) \
+                    or (w.pos == "noun" and _a_person_by_gloss(w)):
                 return True
     return False
 

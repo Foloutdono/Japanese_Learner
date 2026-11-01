@@ -2894,3 +2894,23 @@ class AGuessIsNoWillTests(unittest.TestCase):
         for sentence in ("明日は早く起きようと思います。", "日本へ行こうと思っています。", "勉強しようと思う。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("〜ようと思う", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SaidAndSufferedTests(unittest.TestCase):
+    """Plan 296: the られる of what is said or thought after と, and of
+    what someone the dictionary calls a person did to one, is the passive
+    alone -- never the potential beside it."""
+
+    def test_the_passive_alone(self) -> None:
+        for sentence in ("「深くおわび申し上げます」と読み上げられる謝罪文は、どれもよく似ている。",
+                         "家だと、スマホが鳴ったり家族に話しかけられたりして、集中しづらい。",
+                         "原因は寝不足だと考えられる。",
+                         "出てきたところを友人に見られてばつが悪かった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("受身形 〜られる", found_in(sentence))
+                self.assertNotIn("可能形 〜(ら)れる", found_in(sentence))
+        for sentence in ("この本は図書館で借りられますか。", "誰でも簡単に覚えられる。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("可能形 〜(ら)れる", found_in(sentence))
+                self.assertNotIn("受身形 〜られる", found_in(sentence))
