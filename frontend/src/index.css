@@ -27522,7 +27522,12 @@ button.brd-stn { cursor: pointer; }
 .gl-sent rt { color: var(--text-secondary); }
 .gl-tr { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: balance; }
 .gl-tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-primary); }
-.gl-hold { white-space: nowrap; }
+/* A hole held to the word before it (GrammarPlate's holdGaps): one unit
+   wherever a line holds it, so the line breaks before the word rather
+   than between it and its hole; wrapped inside the card where it is
+   wider than a line, never past it. A nowrap here drew a sentence in
+   kana, its whole clause held, off both edges of the card. */
+.gl-hold { display: inline-block; }
 
 /* The hole: a sunk well with a dashed rule in the line's pigment; once
    answered, the well holds the answer and the rule goes. */

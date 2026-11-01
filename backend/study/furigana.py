@@ -648,4 +648,41 @@ def mark_spans(parts: list[dict], spans: list[tuple[int, int]]) -> list[dict]:
     return out
 
 
+@lru_cache(maxsize=4096)
+def word_start(text: str, at: int) -> int:
+    """Where the word that `text[at - 1]` belongs to begins: the start of
+    the morpheme holding it, read in its sentence (さかな of …さかなが,
+    読ん of 読んで, おもしろく cut by a hole at its く). One character back
+    where the tokenizer is not installed."""
+    from study import morphology
+
+    if at <= 0:
+        return 0
+    for m in morphology.tokenize(text) or ():
+        if m.start < at <= m.end:
+            return m.start
+    return at - 1
+
+
+def hold_word(parts: list[dict], text: str, at: int) -> list[dict]:
+    """The parts before a hole at offset `at` of `text` (they end there),
+    the word the hole follows cut out of the run of kana it ends, as a
+    part of its own.
+
+    A client holds a hole to the part before it, so that no line breaks
+    between a word and its ending (GrammarPlate's holdGaps). A run with
+    no reading is merged whole (align_sentence), so in a sentence written
+    in kana the part before the hole is its whole clause -- すみません、
+    わたしはさかな＿＿＿ was held on one line wider than the card. Cut
+    here, the hole is held to さかな alone. A ruby part is never cut: the
+    word is cut out only where it starts inside the readingless part."""
+    if not parts or parts[-1].get("reading") is not None:
+        return parts
+    last = parts[-1]
+    cut = word_start(text, at) - (at - len(last["text"]))
+    if cut <= 0 or cut >= len(last["text"]):
+        return parts
+    return [*parts[:-1], {**last, "text": last["text"][:cut]}, {**last, "text": last["text"][cut:]}]
+
+
 _DECK_READINGS: dict[str, str] | None = None

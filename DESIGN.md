@@ -962,7 +962,10 @@ screen, A on the lock screen, reminder 2, its Depart the gate.
   end with the scanner's mark, the hairline. Depart opens the run (the
   whole day, as the gate's with every line on); a tap anywhere else
   opens the gate. Where the size has no room, the word goes first (the
-  2×2, the small), then Depart; the count never does.
+  2×2, the small), then Depart; the count never does. **The stripe and
+  the ring are a share a line**, in the lines' order, as Today's dial is
+  an arc a line (`lineShares` in `domain/lanes.js`): never a bar a lane,
+  which cut the stripe into a dozen pieces of the same few pigments.
 - **The lock screen is A's**: the count in a ring cut into the lines'
   shares, the word alone in the rectangle, the hour and the count on
   the inline line — in the lock screen's one ink.

@@ -37,7 +37,7 @@ from functools import lru_cache
 
 from content.grammar_points_data import find
 from content.grammar_sentences_data import translation
-from study.furigana import align_deck, align_sentence, is_kanji, mark_spans
+from study.furigana import align_deck, align_sentence, hold_word, is_kanji, mark_spans
 from study.grammar_detect import hits
 from study.grammar_match import stems, verifiable
 
@@ -117,6 +117,11 @@ def parts_with_span(jp: str, span: tuple[int, int] | None, mark: str) -> list[di
         if not part.get("highlight"):
             out.append(part)
         elif not blanked:
+            # The word before the blank a part of its own, which the
+            # client holds the blank to (furigana.hold_word). The blank
+            # starts where the parts before it end: a ruby part the span
+            # touched is blanked whole.
+            out = hold_word(out, jp, sum(len(p["text"]) for p in out))
             out.append({"text": BLANK, "blank": True})
             blanked = True
     return out

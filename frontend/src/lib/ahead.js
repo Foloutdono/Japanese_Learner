@@ -8,7 +8,7 @@
 //
 // Pure: the instants, the notifications' words and the widget's
 // figures. The network and the plugins are lib/platform.js's.
-import { laneTypeOf, laneCount } from '../domain/lanes'
+import { lineShares } from '../domain/lanes'
 
 // One notification a day at most, as the boarding promised ("One a
 // day, at your time. Never more."): a dated one for each of the next
@@ -172,9 +172,11 @@ export function widgetPayload({ today, ahead, t, now, time = null }) {
     seen.add(day)
     points.push(point(day, p.total, p.new ?? 0))
   }
-  const lanes = (today?.lanes ?? [])
-    .map(lane => ({ line: laneTypeOf(lane), n: laneCount(lane) }))
-    .filter(lane => lane.n > 0)
+  // The stripe is the lines' (DESIGN.md, "The widget"): one bar a line
+  // in the lines' order, as the gate's dial has one arc a line. A bar a
+  // lane cut it into a dozen pieces, the same pigment again and again
+  // and a level of three cards a dot between them.
+  const lanes = lineShares(today?.lanes)
   return {
     v: 2,
     made: now.getTime(),

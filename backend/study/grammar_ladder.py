@@ -39,7 +39,7 @@ from pathlib import Path
 from content.grammar_points_data import find
 from content.grammar_sentences_data import translation
 from srs import ladder as steps
-from study.furigana import align_sentence, mark_spans
+from study.furigana import align_sentence, hold_word, mark_spans
 from study.grammar_examples import blank_span
 from study.grammar_detect import can_find
 from study.grammar_match import verifiable
@@ -187,7 +187,9 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
     width gives nothing away. `turn` picks the sentence, so each review
     asks another one (the review count); the order is shuffled once per
     point. The answer stays here: the client sends what was typed to
-    check_build with the `key`."""
+    check_build with the `key`. The word before a gap is a part of its
+    own (hold_word), so the client holds the gap to that word and not to
+    the whole run of kana before it."""
     item = _build_item(level, entry["pattern"], turn)
     if item is None:
         return None
@@ -196,7 +198,7 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
     pieces, pos = [], 0
     for n, (a, b) in enumerate(spans):
         if a > pos:
-            pieces.append({"furigana": _slice(parts, pos, a)})
+            pieces.append({"furigana": hold_word(_slice(parts, pos, a), jp, a)})
         pieces.append({"gap": n, "size": len(_reading(_slice(parts, a, b)))})
         pos = b
     if pos < len(jp):
