@@ -79,7 +79,7 @@ Public surface:
 """
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 
 logger = logging.getLogger(__name__)
@@ -3641,6 +3641,16 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             out_t.append(("動詞", "一般", "*"))
             skip.add(i + 1)
             continue
+        if m.surface == "もったい" and nxt is not None and nxt.lemma in ("無い", "ない") and nxt.pos == "adjective" \
+                and _glued(m, nxt):
+            # もったいない, もったいなく: one adjective, no 勿体 and ない (plan 296)
+            out_m.append(replace(m, surface=m.surface + nxt.surface, end=nxt.end, lemma="勿体無い",
+                                 reading="もったい" + nxt.reading, lemma_reading="もったいない",
+                                 kana="モッタイ" + nxt.kana, pos="adjective", ctype="形容詞", cform=nxt.cform,
+                                 written="もったいない", written_reading="もったいない"))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
         if m.surface == "もったい" and nxt is not None and nxt.surface == "ないし" and _glued(m, nxt):
             # もったいないし: もったいない and the し that lists a reason, no 乃至
             out_m += [replace(m, surface="もったいない", end=nxt.start + 2, lemma="勿体無い", reading="もったいない",
@@ -5044,6 +5054,150 @@ def _no_letter_alone(morphemes: list[Morpheme], tags: list[tuple], text: str,
     return morphemes, tags
 
 
+# What a case particle is: after one, a と is a word's last letter (plan 296).
+_CASE_AFTER_TO = frozenset({"へ", "まで", "を", "が", "に", "で", "から", "より"})
+
+
+def _a_word_before_its_particle(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A word in kana MeCab cut on its last letter と, read whole where a
+    case particle follows (plan 296): きょう + と + へ is きょうと, 京都,
+    then へ; せい + と + に is せいと, 生徒, then に. A と that joins, goes
+    with or quotes takes no case particle after it -- nobody says 友だちと
+    へ -- so it is the last letter of what the deck, or JMdict's commonest
+    row, spells (_known): きょうとではなく, きょうとまで."""
+    out_m, out_t, skip = [], [], False
+    for i, m in enumerate(morphemes):
+        if skip:
+            skip = False
+            continue
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+        if (m.pos in ("noun", "pronoun") and _kana_letters(m.surface) and nxt is not None and nxt.surface == "と"
+                and nxt.pos == "particle" and not nxt.conjunctive and after is not None
+                and after.surface in _CASE_AFTER_TO and after.pos in ("particle", "auxiliary")
+                and _glued(m, nxt) and _glued(nxt, after)):
+            joined = m.surface + "と"
+            word = _known(joined) if len(joined) >= 3 else None
+            if word:
+                out_m.append(replace(m, surface=joined, end=nxt.end, lemma=word, reading=joined, lemma_reading=joined,
+                                     kana=m.kana + nxt.kana, pos="noun", ctype="", cform="", proper=False,
+                                     name_kind="", unknown=False, written="", written_reading=""))
+                out_t.append(("名詞", "普通名詞", "一般"))
+                skip = True
+                continue
+        out_m.append(m)
+        out_t.append(tags[i])
+    return out_m, out_t
+
+
+def _deck_level_of(u: Morpheme) -> str | None:
+    """The level of the deck's card a verb or an adjective is, by its lemma
+    and its reading; None where the deck has none."""
+    spellings, level = _first_cards(kata_to_hira(u.lemma_reading or ""))
+    return level if level and (u.lemma in spellings or kata_to_hira(u.lemma_reading or "") in spellings) else None
+
+
+_RANKS = {"N5": 0, "N4": 1, "N3": 2, "N2": 3, "N1": 4}
+
+
+def _particle_in_a_verb(morphemes: list[Morpheme], tags: list[tuple], text: str,
+                        tagger=None) -> tuple[list, list]:
+    """A は or も MeCab took for the first letter of a verb, read back as
+    the particle where its next reading leaves a verb the deck teaches,
+    where the one it read has none, or after a noun one three levels
+    above it (plan 296): 友だちには + かさない, 貸す (N5) where it read はかさ,
+    穿かす, which the deck has no card for; どこにも + とまらずに, 止まる
+    over もとまら, 求まる; 今夜は + ねない, 寝る (N5) over はね, 跳ねる (N2).
+    Only where a particle can stand: after a noun or a case particle."""
+    if tagger is None:
+        return morphemes, tags
+    i = 1
+    while i < len(morphemes):
+        m, prev = morphemes[i], morphemes[i - 1]
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        # (...or an adverb before a case particle, which no adverb takes:
+        # 足 + もう + で + も is 足 + も + うで + も, legs and arms)
+        adverb = m.pos == "adverb" and nxt is not None and nxt.pos == "particle" \
+            and nxt.surface in ("で", "を", "が", "に") and _glued(m, nxt)
+        if not ((m.pos in ("verb", "adjective") or adverb) and m.surface[:1] in ("は", "も") and len(m.surface) >= 2
+                and _kana_letters(m.surface) and _glued(prev, m)
+                and (prev.pos in ("noun", "pronoun", "suffix")
+                     or (prev.pos == "particle" and prev.surface in ("に", "で", "と", "から", "まで", "へ", "より")))):
+            i += 1
+            continue
+        mine = None if adverb else _deck_level_of(m)
+        at, end, after_noun = m.start, m.end, prev.pos in ("noun", "pronoun", "suffix")
+
+        def wanted(alt, at=at, end=end, mine=mine, adverb=adverb, after_noun=after_noun):
+            for n_, u in enumerate(alt[:-1]):
+                v = alt[n_ + 1]
+                if not (u.start == at and u.pos == "particle" and len(u.surface) == 1 and v.start == at + 1):
+                    continue
+                if adverb and v.pos == "noun" and _a_first_year_word(v):
+                    return u.start, v.end
+                # (the verb is the rest of the word, read as its own reading
+                # begins: never もどる as も + 取る voiced, はさんだ as は + さ
+                # + ん)
+                said, own = kata_to_hira(v.reading or ""), kata_to_hira(v.lemma_reading or "")
+                if adverb or v.pos not in ("verb", "adjective") or v.end != end or said[:1] != own[:1]:
+                    continue
+                level = _deck_level_of(v)
+                # (a card the deck has over a word it has none for -- はかさ,
+                # 穿かす; もとまら, 求まる -- or one three levels above after
+                # a noun: 今夜は + 寝る over 跳ねる, never 若者には + やる over
+                # 流行る, nor 道からは + 慣れる over 離れる)
+                if level and (mine is None or (after_noun and _RANKS[mine] - _RANKS[level] >= 3)):
+                    return u.start, v.end
+            return None
+
+        again = _next_best(text, morphemes, i, tagger, wanted)
+        if again and again[0] >= i - 1 and again[1] <= i + 2:
+            morphemes = morphemes[:again[0]] + again[2] + morphemes[again[1]:]
+            tags = tags[:again[0]] + again[3] + tags[again[1]:]
+        i += 1
+    return morphemes, tags
+
+
+def _it_hurts(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
+    """いたい after a が is 痛い, "it hurts", where MeCab read 居る's い and
+    たい, "want to be" (plan 296): 足が少しいたい. 居たい is said of who
+    wants to stay somewhere (ここにいたい), never of a thing that has a が
+    and no place. Before なる, いたく is 痛い's く form, never the adverb
+    痛く, "deeply" (うでもいたくなりました; いたく感動した keeps it)."""
+    i = 0
+    while i < len(morphemes) - 1:
+        m, nxt = morphemes[i], morphemes[i + 1]
+        if m.surface == "いたく" and m.pos == "adverb" and nxt.lemma in ("成る", "なる"):
+            morphemes[i] = replace(m, lemma="痛い", lemma_reading="いたい", pos="adjective", ctype="形容詞",
+                                   cform="連用形-一般", written="痛い", written_reading="いたい")
+            tags[i] = ("形容詞", "一般", "*")
+            i += 1
+            continue
+        if not (m.surface == "い" and m.lemma in ("居る", "いる") and nxt.surface.startswith("た")
+                and nxt.lemma == "たい" and _glued(m, nxt) and tagger is not None):
+            i += 1
+            continue
+        k = i - 1
+        while k >= 0 and morphemes[k].pos == "adverb":
+            k -= 1
+        if not (k >= 0 and morphemes[k].surface == "が" and morphemes[k].pos == "particle"
+                and not any(u.surface == "に" and u.pos == "particle" for u in morphemes[max(0, k - 3):k])):
+            i += 1
+            continue
+        at = m.start
+
+        def wanted(alt, at=at):
+            return next(((u.start, u.end) for u in alt if u.start == at and u.pos == "adjective"
+                         and u.lemma == "痛い"), None)
+
+        again = _next_best(text, morphemes, i, tagger, wanted)
+        if again and again[0] >= i - 1 and again[1] <= i + 3:
+            morphemes = morphemes[:again[0]] + again[2] + morphemes[again[1]:]
+            tags = tags[:again[0]] + again[3] + tags[again[1]:]
+        i += 1
+    return morphemes, tags
+
+
 def _a_first_year_word(u: Morpheme) -> bool:
     """A noun or an adjective of two letters or more that a first-year
     page writes in kana (N5, N4), spelled as the deck spells it: the word
@@ -5330,6 +5484,9 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _no_letter_alone(morphemes, tags, text, tagger)
         morphemes, tags = _unknown_words(text, morphemes, tags)
         morphemes, tags = _opened_on_a_particle(morphemes, tags, text, tagger)
+        morphemes, tags = _a_word_before_its_particle(morphemes, tags)
+        morphemes, tags = _particle_in_a_verb(morphemes, tags, text, tagger)
+        morphemes, tags = _it_hurts(morphemes, tags, text, tagger)
         morphemes, tags = _kana_names(morphemes, tags)
         _demonstratives(morphemes)
         _picture(morphemes)

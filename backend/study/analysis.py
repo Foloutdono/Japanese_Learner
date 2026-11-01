@@ -2160,7 +2160,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # て, 〜ば〜ほど and 〜も〜ば〜も held to their shape, a quotation's と across
 # a comma, and 〜ないといけない said short (帰らないと。); で read as the
 # case particle or the copula by what follows it (仕事で忙しい, 教えあうこと
-# で, 置くだけで, 三人で、…行きました; 千九百円で、ことばは少ない).
+# で, 置くだけで, 三人で、…行きました; 千九百円で、ことばは少ない); and a
+# word in kana read whole where its cut cannot be meant (きょうと + へ 京都,
+# せいと + に, には + かさない, 足が少しいたい, もったいない, 足もうでも).
 LOCAL_REV = 33
 
 

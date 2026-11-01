@@ -3758,3 +3758,51 @@ class ParticleOrCopulaDeTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertEqual(self.de(sentence), "particle")
         self.assertEqual(self.de("今日から祭りで、今夜は川で花火大会もあるんです。", 1), "particle")
+
+
+class AKanaWordCutTests(unittest.TestCase):
+    """Plan 296: a word written in kana that MeCab cut into pieces, read
+    whole where the cut is one no sentence can mean: a と before a case
+    particle (きょうと + へ), a particle swallowed into a verb the deck
+    has no card for (はかさない), いたい after a が, もったいない in all
+    its forms, an adverb before a case particle (足 + もう + で + も)."""
+
+    def card(self, sentence: str, surface: str) -> str:
+        token = token_of(sentence, surface)
+        entry = (token.get("vocab_match") or {}).get("entry") or {}
+        return entry.get("kanji") or entry.get("kana") or ""
+
+    def test_a_word_ending_on_to(self) -> None:
+        for sentence, surface, kanji in (("一度、きょうとへ行ってみたいです。", "きょうと", "京都"),
+                                         ("あ、まちがえました。きょうとではなく、おおさかです。", "きょうと", "京都"),
+                                         ("せっかくきょうとまで来たんだから、古いおてらを見ていこう。", "きょうと", "京都"),
+                                         ("あの先生は、せいとにやさしすぎます。", "せいと", "生徒")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+        # ...never the と of "and" or "with", nor before what is no particle
+        self.assertIn("と", cut("今日と明日。"))
+        self.assertIn("と", cut("友だちと行きます。"))
+
+    def test_a_particle_read_back_out_of_a_verb(self) -> None:
+        for sentence, surface, kanji in (("お金は、友だちにはかさないことにしている。", "かさ", "貸す"),
+                                         ("あしたは大切なテストだから、今夜はねないといけない。", "ね", "寝る"),
+                                         ("はい、どこにもとまらずに、東京駅まで行きます。", "とまら", "止まる"),
+                                         ("夕方には足もうでもいたくなりました。", "うで", "腕")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+        # ...never a verb the deck teaches cut for a commoner one: もどる,
+        # はさむ, はなれる, a はやる of what is popular
+        for sentence, word in (("それで、家にもどったんですね。", "もどっ"), ("ドアにはさんだ指が、まだ痛い。", "はさん"),
+                               ("犬を追いかけて、道からはなれてしまった。", "はなれ"), ("この歌は若者にはやっている。", "はやっ")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(word, cut(sentence))
+
+    def test_it_hurts_and_a_waste(self) -> None:
+        self.assertEqual(self.card("あたらしいくつのせいか、足が少しいたい。", "いたい"), "痛い")
+        self.assertEqual(token_of("夕方には足もうでもいたくなりました。", "いたく")["lemma"], "痛い")
+        self.assertEqual(token_of("ここにいたい。", "い")["lemma"], "居る")
+        self.assertEqual(token_of("彼はいたく感動した。", "いたく")["pos"], "adverb")
+        for sentence, surface in (("費用はあまり変わらなかったが、もったいないとは思わない。", "もったいない"),
+                                  ("新しい時計を買うのはもったいないから", "もったいない")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["lemma"], "勿体無い")
