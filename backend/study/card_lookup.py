@@ -3140,10 +3140,26 @@ def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):
     in auxiliary use (居る as 〜ている) is never part of one.
     """
     longest = min(max_len, len(morphemes) - i)
+    if i >= 2 and _numeral(morphemes[i].surface) and morphemes[i - 1].surface in ("、", "，", "・") \
+            and _numeral(morphemes[i - 2].surface):
+        # (二、三日 is "two or three days", read さんにち: no 三日 card, the
+        # third of the month, plan 296)
+        return None
+    from study.reading_context import COUNTER_SURFACES
+    if i >= 1 and i + 1 < len(morphemes) and (morphemes[i].counter or morphemes[i].surface in COUNTER_SURFACES) \
+            and morphemes[i].pos in ("suffix", "noun") and _numeral(morphemes[i - 1].surface) \
+            and morphemes[i + 1].surface in ("中", "前", "後"):
+        # (A counter is its number's, and what is placed by the span after
+        # it is the span's: 三日 + 中, 一年 + 中, 一駅 + 前 -- never 日中,
+        # "daytime", 年中 after 一, nor 駅前; 三年生 folds, plan 296)
+        return None
     for n in range(longest, 1, -1):
         run = morphemes[i:i + n]
         if any((m.pos not in _COMPOUND_POS and not _kanji_stem(m)) or m.auxiliary_use for m in run):
             continue
+        if run[-1].surface == "分" and _numeral(run[0].surface) and i + n + 1 < len(morphemes) \
+                and morphemes[i + n].surface == "の" and _numeral(morphemes[i + n + 1].surface):
+            continue                    # (十分の一, a tenth: no 十分, "enough", plan 296)
         joined_reading = "".join(m.reading for m in run)
         for key in ("".join(m.surface for m in run), "".join(m.lemma for m in run)):
             # The joined reading picks between entries that share the

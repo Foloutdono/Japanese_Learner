@@ -923,7 +923,16 @@ _SUFFIX_GLOSSES = {
 
 # What a noun means as the second half of what it is said with, where
 # its card leads with another sense (plan 272).
+# A counter whose card is another word (plan 296): 本 is "book".
+_COUNTER_SENSES = {
+    surface: {"en": "counter for long, thin things (pens, bottles, trees, cigarettes)",
+              "fr": "classificateur des objets longs et fins (stylos, bouteilles, arbres, cigarettes)"}
+    for surface in ("本", "ほん", "ぽん", "ぼん")
+}
+
 _AFFIX_SENSES = {
+    "余り": {"en": "(after an amount) just over, a little more than: 三割余り, just over 30%",
+           "fr": "(après une quantité) un peu plus de : 三割余り, un peu plus de 30 %"},
     "時": {"en": "(suffix) at the time of, when: 混雑時, at busy times",
           "fr": "(suffixe) au moment de, lors de : 混雑時, aux heures d'affluence"},
     "台": {"en": "(suffix) the … range or level: 160円台, the 160-yen range",
@@ -1934,6 +1943,16 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             # うち, "home", where the deck's うち is "inside, while" (plan 272).
             deck, said = None, ("pool", home)
         sense = _affix_sense(morphemes, i, numbers) if i not in ruled else None
+        if sense is None and morphemes[i].surface in ("余り", "あまり") and i > 0 and _glued_to(morphemes[i - 1], morphemes[i]) \
+                and (morphemes[i - 1].counter or _after_a_number(morphemes, i, numbers)):
+            # (三割余り, 二十人あまり: just over an amount, no あまり〜ない, plan 296)
+            sense = _AFFIX_SENSES["余り"]
+        if sense is None and deck is not None and morphemes[i].surface in _COUNTER_SENSES \
+                and (_after_a_number(morphemes, i, numbers) or (i > 0 and morphemes[i - 1].surface[:1] in ("何", "数")
+                                                                and all(c in "何数十百千" for c in morphemes[i - 1].surface))) \
+                and "counter" not in (deck[1].get("meaning") or "").lower():
+            # (一本も's 本 counts: no "book", whatever point holds it, plan 296)
+            sense = _COUNTER_SENSES[morphemes[i].surface]
         affix = sense is not None
         if affix:
             deck, said = None, None
@@ -2162,7 +2181,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # case particle or the copula by what follows it (仕事で忙しい, 教えあうこと
 # で, 置くだけで, 三人で、…行きました; 千九百円で、ことばは少ない); and a
 # word in kana read whole where its cut cannot be meant (きょうと + へ 京都,
-# せいと + に, には + かさない, 足が少しいたい, もったいない, 足もうでも).
+# せいと + に, には + かさない, 足が少しいたい, もったいない, 足もうでも);
+# numbers read with their counters, in kanji or in kana (一割 いちわり,
+# 二十箱 にじゅっぱこ, 一ぴき いっぴき), かい 回 or 階 by what is done on
+# a floor, 何かい, a counter's own sense (一本も), 十分の一, 三割余り,
+# 一駅前 and 二、三日 さんにち.
 LOCAL_REV = 33
 
 

@@ -272,6 +272,16 @@ _DAYS = {
 }
 
 
+# A counter a page writes in kana, by the counter it spells (plan 296):
+# 一ぴき いっぴき, 一かい いっかい. The kana is the page's and keeps its
+# own reading; only the number before it is read with the counter.
+_KANA_COUNTERS = {"ぴき": "匹", "ひき": "匹", "びき": "匹", "ほん": "本", "ぽん": "本", "ぼん": "本",
+                  "はい": "杯", "ぱい": "杯", "ばい": "杯", "かい": "回", "こ": "個", "さつ": "冊", "さい": "歳"}
+# Counters that take the Sino-Japanese number, never ひと or ふた (plan
+# 296): 一割 いちわり, 一度 いちど, 一番 いちばん.
+_SINO_NUMBER = frozenset({"割", "度", "番", "位", "枚", "台", "倍", "割引"})
+
+
 def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_pos,
                       whole=True, after=()):
     """(numeral reading, counter reading) with the euphony a counter
@@ -284,6 +294,14 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
     cls = _numeral_class(num_surface)
     if cls is None:
         return None
+    if ctr_surface in _KANA_COUNTERS:
+        fixed = _counter_readings(num_surface, num_reading, _KANA_COUNTERS[ctr_surface], ctr_surface, ctr_pos,
+                                  whole=whole, after=after)
+        return (fixed[0], ctr_surface) if fixed else None
+    if ctr_surface in _SINO_NUMBER and whole and _to_hira(num_reading) in ("ひと", "ふた"):
+        return ("いち" if _to_hira(num_reading) == "ひと" else "に"), ctr_reading
+    if ctr_surface == "箱" and cls in (6, 8, 10, 100) and _to_hira(ctr_reading) == "はこ":
+        return _geminate(num_reading), "ぱこ"            # 二十箱 にじゅっぱこ, 六箱 ろっぱこ (plan 296)
     n_read, c_read = num_reading, ctr_reading
     # Digits whose reading is already kana (plan 177, numeral_furigana):
     # the tokenizer's pass leaves a digit as itself, and the two rules
@@ -1128,6 +1146,12 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         if surf[i] == "分" and start > 0 and surf[start - 1] in ("割", "度"):
             out[i - 1] = read_numeral(surf[i - 1]) or out[i - 1]
             out[i] = "ぶ"
+            continue
+        # 二、三日, 四、五日: "two or three days", a span read さんにち, ごにち
+        # -- never みっか, the third of the month (plan 296).
+        if surf[i] == "日" and start == i - 1 and surf[i - 1] in ("三", "五") and start >= 2 \
+                and surf[start - 1] in ("、", "，", "・") and _numeral_value(surf[start - 2]) == _numeral_value(surf[i - 1]) - 1:
+            out[i - 1], out[i] = ("さん" if surf[i - 1] == "三" else "ご"), "にち"
             continue
         fixed = _counter_readings("".join(surf[start:i]), out[i - 1], surf[i], out[i],
                                   tokens[i].get("pos", ""), whole=start == i - 1,

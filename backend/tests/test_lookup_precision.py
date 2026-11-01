@@ -3806,3 +3806,59 @@ class AKanaWordCutTests(unittest.TestCase):
                                   ("新しい時計を買うのはもったいないから", "もったいない")):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["lemma"], "勿体無い")
+
+
+class NumbersAndCountersTests(unittest.TestCase):
+    """Plan 296: a number takes the reading its counter asks for, in kanji
+    or in kana (一割 いちわり, 二十箱 にじゅっぱこ, 一ぴき いっぴき); かい in
+    kana is 回 unless something is or is done on the floor; a counter keeps
+    its number and gives no common noun's card (一本も, no "book"); 十分の一
+    is a tenth, 三割余り just over, 一駅前 a station before, 二、三日 a span."""
+
+    def reading(self, sentence: str, surface: str) -> str:
+        return token_of(sentence, surface)["reading"]
+
+    def test_the_number_before_its_counter(self) -> None:
+        for sentence, surface, said in (("まったく食べない生徒も一割いた。", "一", "いち"),
+                                        ("段ボール箱は、二十箱ほどになると思います。", "二十", "にじゅっ"),
+                                        ("店の人は、一ぴきずつ、ふくろに入れました。", "一", "いっ"),
+                                        ("一かいの入り口に来てください。", "一", "いっ"),
+                                        ("夏休みのあいだに、本を十さつ読んだ。", "十", "じゅっ"),
+                                        ("わたしは三十さいです。", "三十", "さんじゅっ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.reading(sentence, surface), said)
+        self.assertEqual(token_of("段ボール箱は、二十箱ほどになると思います。", "二十")["end"], 9)
+        self.assertEqual([t["reading"] for t in analysis.analyze_local("二十箱ほど。")["tokens"][:2]], ["にじゅっ", "ぱこ"])
+        self.assertEqual(self.reading("一つください。", "一つ"), "ひとつ")
+        self.assertEqual(self.reading("帰りは一駅前で降りる。", "一"), "ひと")
+
+    def test_times_or_floor(self) -> None:
+        for sentence, kanji in (("いもうとは三かいしましたが、だめでした。", "回"), ("かならず二かいかぞえます。", "回"),
+                                ("会が二かいになって、うれしい。", "回"), ("くすりを一日三かい、ごはんの後に飲む。", "回"),
+                                ("きんぎょすくいは一かい三百円です。", "回"), ("一かいの入り口に来てください。", "階"),
+                                ("おてあらいは二かいでございます。", "階"), ("みどりビルの三かいで、クラスがあります。", "階"),
+                                ("二かいには子どものへやがあります。", "階")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "かい")["vocab_match"]["entry"]["kanji"], kanji)
+        for sentence in ("何かい書いても、字が小さい。", "何かいれんしゅうしても、うまく言えません。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "かい")["vocab_match"]["entry"]["kanji"], "回")
+        self.assertIn("いい", cut("何かいいことあった？"))
+
+    def test_a_counter_is_its_numbers(self) -> None:
+        for sentence in ("たばこは一本も吸っていない。", "雨の日には何十本も集まるそうだ。"):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, "本")
+                self.assertIsNone(token.get("vocab_match"))
+                self.assertIn("counter", token["gloss"]["en"])
+        self.assertEqual(cut("十分の一ほどのにもつ。")[:2], ["十", "分"])
+        self.assertEqual(token_of("時間は十分にある。", "十分")["reading"], "じゅうぶん")
+        self.assertEqual(cut("帰りは一駅前で降りる。")[2:5], ["一", "駅", "前"])
+        self.assertIn("駅前", cut("駅前で会いましょう。"))
+        self.assertIn("just over", token_of("二十代の投票率は三割余りにとどまった。", "余り")["gloss"]["en"])
+        self.assertEqual(token_of("あまりおいしくない。", "あまり")["vocab_match"]["entry"]["kana"], "あまり")
+        span = analysis.analyze_local("では、二、三日中にご連絡しますね。")["tokens"]
+        self.assertEqual([t["reading"] for t in span if t["surface"] in ("三", "日")], ["さん", "にち"])
+        self.assertFalse([t for t in span if t["surface"] in ("三日", "日中")])
+        self.assertEqual(self.reading("三日休みます。", "三日"), "みっか")
+        self.assertIn("年生", cut("しかし、三年生になると、行きたくないと言った。"))

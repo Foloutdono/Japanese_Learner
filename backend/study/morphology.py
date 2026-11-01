@@ -383,6 +383,78 @@ def _all_through(morphemes: list[Morpheme], tags: list) -> None:
             tags[k] = ("接尾辞", "名詞的", "副詞可能")
 
 
+# What a floor is said of (plan 296): its places, a motion to it, what is
+# done or found on it.
+_ON_A_FLOOR = frozenset({"入り口", "入口", "出口", "売り場", "部屋", "へや", "教室", "トイレ", "ロビー", "受付",
+                         "フロア", "窓", "まど", "ベランダ", "店", "みせ", "レストラン", "会議室", "事務所"})
+_TO_A_FLOOR = frozenset({"行く", "来る", "上がる", "下りる", "降りる", "戻る", "着く", "上る", "登る", "移る",
+                         "待つ", "売る", "有る", "ある", "居る", "いる", "住む", "集まる"})
+
+
+def _times_or_floor(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """かい written in kana after a number is 回, "times", which UniDic
+    files under 階, "floor" (plan 296): 三かいしましたが, 二かいかぞえます,
+    会が二かいになって, 一日三かい, 一かい三百円. It is the floor only where
+    something is or is done on it -- ビルの三かい, 一かいの入り口, 二かいで
+    待つ, おてあらいは二かいです, 二かいには…へやがあります, 三かいに行く,
+    五かいから. And 何 + か + い before a deed or a noun is 何かい, 何回
+    (何かい書いても, 何かいれんしゅうしても), never 何か + いい."""
+    out_m, out_t, skip = [], [], 0
+    for i, m in enumerate(morphemes):
+        if skip:
+            skip -= 1
+            continue
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+        if (m.surface == "何" and nxt is not None and nxt.surface == "か" and nxt.pos == "particle"
+                and after is not None and after.surface == "い" and _glued(m, nxt) and _glued(nxt, after)
+                and i + 3 < len(morphemes) and morphemes[i + 3].pos in ("verb", "noun")):
+            out_m += [m, replace(nxt, surface="かい", end=after.end, lemma="回", reading="かい", lemma_reading="かい",
+                                 kana="カイ", pos="suffix", ctype="", cform="", conjunctive=False, counter=True,
+                                 written="回", written_reading="かい")]
+            out_t += [tags[i], ("接尾辞", "名詞的", "助数詞")]
+            skip = 2
+            continue
+        if (m.surface == "十分" and nxt is not None and nxt.surface == "の" and after is not None
+                and all(c in "一二三四五六七八九十百千0123456789０１２３４５６７８９" for c in after.surface)):
+            # 十分の一, a tenth: 十 and the 分 of a share, never 十分, "enough"
+            # -- a number of parts, の, and how many (plan 296)
+            out_m += [replace(m, surface="十", end=m.start + 1, lemma="十", reading="じゅう", lemma_reading="じゅう",
+                              kana="ジュウ", pos="noun", ctype="", cform="", adjectival=False),
+                      replace(m, surface="分", start=m.start + 1, lemma="分", reading="ぶん", lemma_reading="ぶん",
+                              kana="ブン", pos="suffix", ctype="", cform="", adjectival=False, counter=True)]
+            out_t += [("名詞", "数詞", "*"), ("接尾辞", "名詞的", "助数詞")]
+            continue
+        if (m.surface == "駅前" and i > 0 and _glued(morphemes[i - 1], m)
+                and all(c in "一二三四五六七八九十何0123456789０１２３４５６７８９" for c in morphemes[i - 1].surface)):
+            # 一駅前で降りる: one station before, 一駅 and 前 -- no 駅前, the
+            # station square, after a number (plan 296)
+            out_m += [replace(m, surface="駅", end=m.start + 1, lemma="駅", reading="えき", lemma_reading="えき",
+                              kana="エキ", pos="suffix", counter=True),
+                      replace(m, surface="前", start=m.start + 1, lemma="前", reading="まえ", lemma_reading="まえ",
+                              kana="マエ", pos="noun", counter=False)]
+            out_t += [("接尾辞", "名詞的", "助数詞"), ("名詞", "普通名詞", "副詞可能")]
+            continue
+        if (m.surface == "かい" and m.lemma == "階" and i > 0 and _glued(morphemes[i - 1], m)
+                and (morphemes[i - 1].surface == "何" or all(c in "一二三四五六七八九十百何0123456789０１２３４５６７８９"
+                                                             for c in morphemes[i - 1].surface))):
+            # (where something is or is done: ビルの三かい, 一かいの入り口,
+            # 二かいで待つ, 五かいです, 二かいには…へやがあります, 三かいに行く)
+            building = i >= 3 and morphemes[i - 2].surface == "の" and morphemes[i - 3].pos == "noun"
+            rest = [u.lemma for u in morphemes[i + 1:i + 8]]
+            floor = building or (nxt is not None and (
+                nxt.surface in ("から", "まで", "の", "で")
+                or (nxt.pos == "auxiliary" and nxt.lemma in ("だ", "です"))
+                or (nxt.surface in ("に", "へ") and after is not None
+                    and (after.lemma in _TO_A_FLOOR or (after.surface == "は" and any(r in ("有る", "ある", "居る", "いる")
+                                                                                      for r in rest))))))
+            if not floor:
+                m = replace(m, lemma="回", lemma_reading="かい", written="回", written_reading="かい")
+        out_m.append(m)
+        out_t.append(tags[i])
+    return out_m, out_t
+
+
 def _one_kana_nouns(morphemes: list[Morpheme]) -> None:
     """A noun of one kana UniDic read as something else, read back as the
     noun (_ONE_KANA_NOUNS) where only a noun can stand: before a case
@@ -5493,6 +5565,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _notice(morphemes, tags)
         _one_kana_nouns(morphemes)
         _all_through(morphemes, tags)
+        morphemes, tags = _times_or_floor(morphemes, tags)
         _shops(morphemes, tags)
         morphemes, tags = _sleep(morphemes, tags)
         morphemes, tags = _pain(morphemes, tags)
