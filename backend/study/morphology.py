@@ -2123,7 +2123,9 @@ def named_animal(morphemes, i: int) -> bool:
     """Whether morphemes[i], a word in hiragana, is the name of the animal
     before it and its の: いぬの ぽちが, ねこの みいちゃん (plan 272)."""
     m = morphemes[i]
-    if i < 2 or not _kana_letters(m.surface) or len(m.surface) < 2 or m.pos not in ("noun", "adverb", "interjection"):
+    katakana = _katakana_only(m.surface)
+    if i < 2 or not (_kana_letters(m.surface) or katakana) or len(m.surface) < 2 \
+            or m.pos not in ("noun", "adverb", "interjection"):
         return False
     of, animal = morphemes[i - 1], morphemes[i - 2]
     if not (of.surface == "の" and of.pos == "particle" and (animal.surface in NAMED_ANIMALS or animal.lemma in NAMED_ANIMALS)):
@@ -2131,6 +2133,11 @@ def named_animal(morphemes, i: int) -> bool:
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     if nxt is not None and nxt.surface in _HONORIFIC_ENDS:
         return True
+    if katakana:
+        # (犬のポチを: a word in katakana the deck does not teach is its
+        # name -- 犬のエサ is its food, plan 296)
+        return nxt is not None and nxt.pos == "particle" and nxt.surface in _NAME_PARTICLES \
+            and kata_to_hira(m.surface) not in _deck_kana()
     # (Without an honorific only a word no noun could be: いぬの はなが is
     # the dog's nose.)
     return (nxt is not None and nxt.pos == "particle" and nxt.surface in _NAME_PARTICLES
@@ -2147,6 +2154,47 @@ def _named_animals(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, 
         if named_animal(morphemes, i):
             out_m[i] = replace(morphemes[i], pos="noun", proper=True, name_kind="given", unknown=True,
                                ctype="", cform="")
+            out_t[i] = ("名詞", "固有名詞", "人名")
+    return out_m, out_t
+
+
+# The colours a pet is named by (クロ, シロ, チャ).
+_COLOURS = frozenset({"黒", "白", "茶", "赤", "灰", "金", "銀", "三毛"})
+# What a person or an animal does, which a colour or a dot never does
+# (plan 296): クロは…ねていました is the cat, ポチは…走りはじめました the dog.
+_AN_ANIMAL_DOES = _A_PERSON_DOES | {"鳴く", "吠える", "ほえる", "飛ぶ", "泳ぐ", "逃げる", "眠る", "なれる", "慣れる",
+                                   "喜ぶ", "隠れる", "噛む", "かむ", "なく", "はしる", "ねる"}
+
+
+def _pet_names(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A word in katakana that cannot itself be the one who does it -- an
+    adverb (ぽち), a colour (黒, 白), a proper noun UniDic names no person
+    nor place (ポチ, タマ) -- and stands as the topic or the subject of
+    what only a person or an animal does is a name, the way a page names its pet:
+    ポチは急に元気になって、にわを走りはじめました is Pochi, no ぽち "a dot";
+    クロはベッドの上でねていました the cat, no 黒 (plan 296). クロは好きな色
+    です does nothing; カラスが鳴く is the crow, its name in katakana as
+    animals' are; ロボットは歩く, ペンギンが泳ぐ are loanwords."""
+    from dataclasses import replace
+
+    out_m, out_t = list(morphemes), list(tags)
+    for i, m in enumerate(morphemes):
+        if not (_katakana_only(m.surface) and 2 <= len(m.surface) <= 4 and not m.unknown and i + 1 < len(morphemes)
+                and morphemes[i + 1].surface in ("は", "が", "も") and morphemes[i + 1].pos == "particle"):
+            continue
+        # (what cannot be the one who does it: an adverb, a proper noun
+        # UniDic can call no person nor place (ポチ, タマ), a colour --
+        # カラスが鳴く is the crow, written in katakana as animals are,
+        # and トム, スイス are UniDic's names already)
+        if not (m.pos == "adverb" or (m.proper and m.name_kind == "other") or m.lemma in _COLOURS):
+            continue
+        rest = []
+        for u in morphemes[i + 2:]:
+            if u.pos == "symbol" and u.surface in "。！？!?":
+                break
+            rest.append(u)
+        if any(u.pos == "verb" and (u.lemma in _AN_ANIMAL_DOES or u.written in _AN_ANIMAL_DOES) for u in rest):
+            out_m[i] = replace(m, pos="noun", proper=True, name_kind="given", unknown=True, ctype="", cform="")
             out_t[i] = ("名詞", "固有名詞", "人名")
     return out_m, out_t
 
@@ -5125,6 +5173,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _introduced(morphemes, tags)
         morphemes, tags = _no_names(morphemes, tags)
         morphemes, tags = _named_animals(morphemes, tags)
+        morphemes, tags = _pet_names(morphemes, tags)
         morphemes, tags = _names_kept(morphemes, tags)
         return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only

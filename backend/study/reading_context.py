@@ -565,7 +565,7 @@ _PARTICLE_AFTER = {"を", "が", "は", "も", "へ", "に", "で", "と", "の"
                    "まで", "より", "や", "こそ", "さえ", "しか", "だけ"}
 
 
-def _stands_alone(tokens: list[dict], i: int, after_adjectival: bool = False) -> bool:
+def _stands_alone(tokens: list[dict], i: int, after_adjectival: bool = False, before_a_mark: bool = False) -> bool:
     """Is the token at `i` a word of its own rather than the tail of a
     compound? A particle follows it, and what comes before it cannot
     take a suffix: nothing, punctuation, a particle, a verb, an
@@ -573,8 +573,11 @@ def _stands_alone(tokens: list[dict], i: int, after_adjectival: bool = False) ->
     adverbial (以来, 来月), which UniDic joins a suffix onto.
     `after_adjectival` counts a na-adjective's stem (一生懸命) as a
     word a noun can stand after; a suffix can, so it is off by default
-    (積極|的)."""
-    if i + 1 >= len(tokens) or tokens[i + 1]["surface"] not in _PARTICLE_AFTER:
+    (積極|的). `before_a_mark` lets a mark follow it as a particle would
+    (その間、: plan 296), for the nouns of _NOUN_ALONE alone -- a suffix
+    before a comma (今月中、) stays the suffix it is."""
+    after = tokens[i + 1]["surface"] if i + 1 < len(tokens) else ""
+    if not (after in _PARTICLE_AFTER or (before_a_mark and after in _PUNCT)):
         return False
     if i == 0:
         return True
@@ -1017,7 +1020,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = taught[0]
             continue
         if s in _NOUN_ALONE and r == _NOUN_ALONE[s][0] and _stands_alone(
-                tokens, i, after_adjectival=True):
+                tokens, i, after_adjectival=True, before_a_mark=True):
             out[i] = _NOUN_ALONE[s][1]
             continue
 

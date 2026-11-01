@@ -5162,6 +5162,21 @@ def _mo_mo_refused(tokens, start: int, end: int, segments) -> bool:
                 i >= 1 and tokens[i - 1].pos == "noun" and tokens[i - 1].surface.startswith("一")
                 and len(tokens[i - 1].surface) == 2):
             return True                # 30分も待たされ, 一言もなく: an amount stressed, nothing listed (plan 272)
+        # A も another construction owns lists nothing (plan 296): 〜ても's
+        # after a て form (必要になっても, チャイムが鳴っても), a question
+        # word's, with its particle or without (誰にも負けない, 誰も口にしない),
+        # こともある's and とも限らない's.
+        if i >= 1 and tokens[i - 1].surface in ("て", "で") and getattr(tokens[i - 1], "conjunctive", False):
+            return True
+        if (i >= 1 and tokens[i - 1].surface in _QUESTION_WORDS) or (
+                i >= 2 and tokens[i - 1].pos == "particle" and tokens[i - 1].surface in ("に", "で", "から", "と", "へ")
+                and tokens[i - 2].surface in _QUESTION_WORDS):
+            return True
+        if i >= 1 and tokens[i - 1].surface in ("こと", "事") and i + 1 < len(tokens) \
+                and tokens[i + 1].lemma in ("有る", "ある", "無い", "ない"):
+            return True
+        if i >= 1 and tokens[i - 1].surface == "と" and i + 1 < len(tokens) and tokens[i + 1].surface.startswith("限ら"):
+            return True
     return False
 
 

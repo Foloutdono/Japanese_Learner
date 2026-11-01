@@ -2860,3 +2860,21 @@ class CanEnterPointTests(unittest.TestCase):
         for sentence in ("お茶を入れましょう。", "冷蔵庫に入れてください。", "ねぎは入れますか。"):
             with self.subTest(sentence=sentence):
                 self.assertNotIn("可能形 〜(ら)れる", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AnotherConstructionsMoTests(unittest.TestCase):
+    """Plan 296: 〜も〜も lists two things alike -- never with a も another
+    construction owns, as the breakdown audit found it lit."""
+
+    def test_a_mo_owned_elsewhere_lists_nothing(self) -> None:
+        for sentence in ("お金を下ろせる店も多く、夜中に急に現金が必要になっても困らない。",       # 〜ても
+                         "私も以前は、チャイムが鳴っても、手がはなせなかった。",
+                         "地元の歴史にかけては誰にも負けないという方はもちろん、話すのが好きな方もどうぞ。",  # 誰にも
+                         "根拠も示さずに言う人が、かえって支持を集めることもある。"):                  # こともある
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜も〜も", found_in(sentence))
+        for sentence in ("山も川もきれいです。", "私も弟も行きます。", "肉も魚も食べない。", "学校でも家でも勉強する。",
+                         "雨の日も風の日も歩いた。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜も〜も", found_in(sentence))

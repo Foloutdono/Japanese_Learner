@@ -3579,6 +3579,33 @@ class WhatTheSentenceSaysTests(unittest.TestCase):
                 self.assertEqual(token_of(sentence, surface)["reading"], reading)
         self.assertEqual(token_of("今朝は三十七度八分ありました。", "八")["reading"], "はち")
 
+    def test_the_while_of_that(self) -> None:
+        # その間 and この間 before a comma as before a particle: あいだ
+        for sentence in ("二週間ですか。その間、このヘッドホンを使っていてもいいですか。", "この間、駅で先生に会いました。",
+                         "その間に準備しておきます。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "間")["reading"], "あいだ")
+        # ...and a suffix before a comma stays the suffix
+        self.assertEqual(token_of("今月中、ずっと忙しい。", "中")["reading"], "ちゅう")
+
+    def test_a_pet_named_in_katakana(self) -> None:
+        # a word in katakana, no loanword, as the subject of what only an
+        # animal or a person does, or after an animal and its の, is a name
+        for sentence, surface in (("ボールを見せると、ポチは急に元気になって、にわを走りはじめました。", "ポチ"),
+                                  ("ポチは私によく会っているので、すぐになれると思っていました。", "ポチ"),
+                                  ("となりの山本さんが旅行に行くので、犬のポチをあずかることになりました。", "ポチ"),
+                                  ("つぎの朝、クロは妹のベッドの上でねていました。", "クロ"),
+                                  ("タマが鳴いた。", "タマ")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertIsNone(token.get("vocab_match"))
+                self.assertIn("name", (token.get("gloss") or {}).get("en", ""))
+        # ...never a colour said of nothing done, a loanword, an animal's food
+        for sentence, surface, meaning in (("クロは好きな色です。", "クロ", "black"), ("ペンギンが泳ぐ。", "ペンギン", "penguin"),
+                                           ("犬のエサを買った。", "エサ", "feed")):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(token_of(sentence, surface)["vocab_match"]["entry"]["meaning"].startswith(meaning))
+
     def test_what_opens_of_itself(self) -> None:
         # 開く あく, "to open (by itself)", where nothing is opened
         for sentence, surface in (("何時まで開いていますか。", "開い"), ("ドアが開いた。", "開い"),

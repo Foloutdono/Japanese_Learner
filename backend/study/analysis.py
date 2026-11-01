@@ -2148,7 +2148,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # (学生の方, 後任の方), 末 まつ after a period, 〜引き びき after an amount,
 # 度/割 + 分 ぶ, and a letter MeCab left alone in kana read inside its word
 # (こうえん, あかい + ふく, まど) or a phrase of particles that spells one
-# (かさ、).
+# (かさ、); then, from the breakdown audit, 〜も〜も refused where a も is
+# another construction's (〜ても, 誰にも, こともある), その間、 あいだ,
+# and a pet named in katakana (ポチは…走りはじめました, クロ) read as a name.
 LOCAL_REV = 33
 
 
