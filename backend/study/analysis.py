@@ -2137,7 +2137,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # that writes them; none of the app's own sentences does.
 # 31: sixteen cards the course's sentences use (体重, 主人, もしもし,
 # ただいま...) and ten usually-kana words as kana cards (#360, #439).
-LOCAL_REV = 31
+# 32: a kana word whose first letter is also a particle is read whole
+# where no particle can stand (plan 295): はいしゃ after a comma or an
+# adverb (the kana lexicon's, now that a compound is counted by its
+# rarest part), a は opening what is said (はこ + の, never は + この),
+# and no bare 子 after the topic (二人で + はこ, never では + こ).
+LOCAL_REV = 32
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

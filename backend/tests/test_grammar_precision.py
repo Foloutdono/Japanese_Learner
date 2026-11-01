@@ -2820,3 +2820,28 @@ class SegmentationRoundPointTests(unittest.TestCase):
         # before it links, and asks for nothing
         self.assertNotIn("〜て／〜ないで（依頼）", found_in("薬を飲んで、よくねたほうがいいよ。"))
         self.assertIn("〜て／〜ないで（依頼）", found_in("ペン貸して、一本だけでいいから。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ParticleLetterPointTests(unittest.TestCase):
+    """Plan 295: a は that is the first letter of a word written in kana
+    (はいしゃ, はこ) lights no topic, and no 〜は〜が over it; the topic
+    before a kana word stays lit."""
+
+    def topics(self, sentence: str) -> list[int]:
+        return [h["start"] for h in grammar_detect.hits(sentence) if h["pattern"] == "は"]
+
+    def test_no_topic_on_a_words_first_letter(self) -> None:
+        for sentence in ("子どものころから、はいしゃがこわくて、行けなかった。", "やっとはいしゃへ行きました。",
+                         "二人ではこを運びました。", "ここではこがよくうれています。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.topics(sentence), [])
+                self.assertNotIn("〜は〜が", found_in(sentence))
+        # (はこの中には: the は of には alone)
+        self.assertEqual(self.topics("はこの中にはねこがいました。"), [5])
+
+    def test_the_topic_before_a_kana_word(self) -> None:
+        for sentence, at in (("それはいしゃのかばんです。", 2), ("父はいしゃです。", 1),
+                             ("日本ではこめを食べます。", 3), ("わたしはこの本が好きです。", 3)):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.topics(sentence), [at])

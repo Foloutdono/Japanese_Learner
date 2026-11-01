@@ -4149,11 +4149,13 @@ def _spoken_reading(text: str, tagger) -> tuple[str, list[int]]:
     return read, origin
 
 
-def _tag(text: str, offset: int = 0, tagger=None) -> tuple[list[Morpheme], list[tuple]]:
+def _tag(text: str, offset: int = 0, tagger=None, nodes=None) -> tuple[list[Morpheme], list[tuple]]:
     """MeCab's morphemes for `text`, their offsets counted from `offset`
     (where `text` stands in the sentence), with UniDic's pos1-3 for each
     -- what _in_context's rules read and Morpheme does not carry.
-    `tagger` is the kana lexicon's (the default) or UniDic's alone."""
+    `tagger` is the kana lexicon's (the default) or UniDic's alone.
+    `nodes` is one of MeCab's other readings of the same letters, which
+    _next_best asked for, read in place of its best."""
     tagger = tagger or _tagger
     morphemes = []
     tags = []
@@ -4166,7 +4168,7 @@ def _tag(text: str, offset: int = 0, tagger=None) -> tuple[list[Morpheme], list[
     # before them.
     read, origin = _spoken_reading(text.translate(_FULLWIDTH_DIGITS), tagger)
     at = 0
-    for w in tagger(read):
+    for w in (tagger(read) if nodes is None else nodes):
         # MeCab drops ASCII whitespace between words and hands it
         # back as the next word's `white_space`. Uncounted, every
         # offset after a space was short by it -- and a subtitle
@@ -4388,18 +4390,84 @@ def _known(text: str) -> str | None:
 
 
 # One-letter particles nothing said opens on: a か, が or を there is the
-# first letter of a word UniDic cut.
-_NO_OPENER = frozenset("かがをにのへもや")
+# first letter of a word UniDic cut, and a は, which marks what comes
+# before it, has nothing there to mark. (で and と open a phrase as
+# words of their own: で、 "so", 「…」、と言った's quotative.)
+_NO_OPENER = frozenset("かがをにのへもやは")
 _PHRASE_OPENS = frozenset("。！？!?「『（(…‥、，,\u3000 ")
 
 
-def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+# How many of MeCab's readings _next_best looks through: the one a rule
+# wants came within the first ten on every line it was written for.
+_NBEST = 10
+
+
+def _next_best(text: str, morphemes: list[Morpheme], i: int, tagger, wanted):
+    """MeCab's best reading of the phrase morpheme i stands in, among
+    its _NBEST, where `wanted` finds the word a rule is looking for --
+    what MeCab itself reads next when its first reading is one the page
+    cannot mean (plan 295). `wanted(alt)` is the (start, end) of that
+    word in a reading, or None. Returns (k, j, morphemes, tags): what
+    replaces morphemes[k:j], the stretch where the two readings differ;
+    None where no reading has the word.
+
+    The phrase runs from the mark before morpheme i to the first mark
+    after it, so MeCab reads it as it stood, and never across a space,
+    which its other readings do not hand back."""
+    k = i
+    while k > 0 and _glued(morphemes[k - 1], morphemes[k]) and not (
+            morphemes[k - 1].pos == "symbol" and morphemes[k - 1].surface in _PHRASE_OPENS):
+        k -= 1
+    j = i + 1
+    while j < len(morphemes) and _glued(morphemes[j - 1], morphemes[j]) \
+            and not (morphemes[j - 1].pos == "symbol" and j - 1 > i):
+        j += 1
+    lo, hi = morphemes[k].start, morphemes[j - 1].end
+    window = text[lo:hi]
+    if any(c.isspace() and c != "\u3000" for c in window):
+        return None
+    read, _ = _spoken_reading(window.translate(_FULLWIDTH_DIGITS), tagger)
+    for parse in tagger.nbestToNodeList(read, _NBEST):
+        alt, alt_tags = _tag(window, lo, tagger, nodes=parse)
+        span = wanted(alt)
+        if not span:
+            continue
+        # The shortest stretch both readings begin and end a word on.
+        mine = morphemes[k:j]
+        left = max((e for e in {u.start for u in mine} & {u.start for u in alt} if e <= span[0]), default=None)
+        right = min((e for e in {u.end for u in mine} & {u.end for u in alt} if e >= span[1]), default=None)
+        if left is None or right is None:
+            return None
+        a = k + next(n for n, u in enumerate(mine) if u.start == left)
+        b = k + next(n for n, u in enumerate(mine) if u.end == right) + 1
+        keep = [n for n, u in enumerate(alt) if left <= u.start and u.end <= right]
+        return a, b, [alt[n] for n in keep], [alt_tags[n] for n in keep]
+    return None
+
+
+def _a_deck_noun_at(alt: list[Morpheme], start: int, past: int):
+    """(start, end) of a noun of the deck written in kana that begins at
+    `start` and runs past `past` in a reading, before a particle, a mark
+    or the end: the word _next_best's callers look for."""
+    for n, u in enumerate(alt):
+        if u.start == start and u.end > past and u.pos == "noun" and not u.unknown \
+                and _kana_letters(u.surface) and u.surface in _deck_kana():
+            after = alt[n + 1] if n + 1 < len(alt) else None
+            if after is None or after.pos in ("particle", "symbol"):
+                return u.start, u.end
+    return None
+
+
+def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple], text: str = "",
+                          tagger=None) -> tuple[list, list]:
     """A kana word MeCab cut into a particle and the letters after it,
     where what is said opens and no particle can stand (plan 272): かお
     いろが悪い is 顔色, "complexion", which UniDic reads か + お + いろ.
     The longest run of three kana or more from the particle that spells a
     word of the deck or of JMdict (_known) and ends before a particle or
-    a mark is read as that word."""
+    a mark is read as that word. Where no run of whole words spells one,
+    MeCab's next reading that begins a noun of the deck on the letter is
+    taken (plan 295): はこの中には is はこ + の, the box, never は + この."""
     from dataclasses import replace
 
     out_m, out_t = [], []
@@ -4418,6 +4486,16 @@ def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple]) -> tuple
                 spelled = _known(joined) if len(joined) >= 3 else None
                 if spelled and (after is None or after.pos in ("particle", "symbol")):
                     best = (j, joined, spelled)
+            if not best and text:
+                start, end = m.start, m.end
+                again = _next_best(text, morphemes, i, tagger or _tagger,
+                                   lambda alt: _a_deck_noun_at(alt, start, end))
+                if again and again[0] == i:
+                    _, j, new_m, new_t = again
+                    out_m.extend(new_m)
+                    out_t.extend(new_t)
+                    i = j
+                    continue
         if best:
             j, joined, spelled = best
             out_m.append(replace(m, surface=joined, end=morphemes[j - 1].end, lemma=spelled, reading=joined,
@@ -4430,6 +4508,37 @@ def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple]) -> tuple
         out_t.append(tags[i])
         i += 1
     return out_m, out_t
+
+
+def _no_word_after_the_topic(morphemes: list[Morpheme], tags: list[tuple], text: str,
+                             tagger=None) -> tuple[list, list]:
+    """What no word can be after the topic は, read as the end of a word
+    the は begins (plan 295). Written こ, a child stands after what says
+    whose or which -- このこ, うちのこ, いいこ -- and a topic marker says
+    neither, so UniDic's 子 standing bare after it is the last letter of
+    that word: 二人ではこを運んだ is 二人で + はこ, the box, where MeCab
+    read では + 子. So is a kana MeCab read as no word at all, a mark (run
+    before _unknown_words glues it to the letters after it): ここではこが
+    うれる, では + こ + が. MeCab's next reading that begins a noun of the
+    deck on the は is taken; with none (今日はこない's こ is 来る, ではこれで's
+    これ, わたしはぷらそにかが's name), the sentence stays as it was read."""
+    i = 1
+    while i < len(morphemes):
+        m, before = morphemes[i], morphemes[i - 1]
+        bare = (m.surface == "こ" and m.pos == "noun" and m.lemma == "子") or (
+            _kana_letters(m.surface) and (m.unknown or tags[i][0] in ("記号", "補助記号")))
+        if bare and before.surface == "は" and before.pos == "particle" and _glued(before, m):
+            start, past = before.start, before.end
+            again = _next_best(text, morphemes, i, tagger or _tagger,
+                               lambda alt: _a_deck_noun_at(alt, start, past))
+            if again:
+                a, b, new_m, new_t = again
+                morphemes = morphemes[:a] + new_m + morphemes[b:]
+                tags = tags[:a] + new_t + tags[b:]
+                i = a + len(new_m)
+                continue
+        i += 1
+    return morphemes, tags
 
 
 def _unknown_words(text: str, morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
@@ -4673,8 +4782,9 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
     tagger = _plain_tagger if plain else _tagger
     try:
         morphemes, tags = _quotative_to(text, *_tag(text, 0, tagger), tagger)
+        morphemes, tags = _no_word_after_the_topic(morphemes, tags, text, tagger)
         morphemes, tags = _unknown_words(text, morphemes, tags)
-        morphemes, tags = _opened_on_a_particle(morphemes, tags)
+        morphemes, tags = _opened_on_a_particle(morphemes, tags, text, tagger)
         morphemes, tags = _kana_names(morphemes, tags)
         _demonstratives(morphemes)
         _picture(morphemes)

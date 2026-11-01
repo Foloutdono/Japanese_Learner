@@ -3424,3 +3424,76 @@ class DeckNounCompoundTests(unittest.TestCase):
                 surfaces = [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
                 k = surfaces.index(pieces[0])
                 self.assertEqual(surfaces[k:k + len(pieces)], pieces)
+
+
+def cut(sentence: str) -> list[str]:
+    return [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ParticleLetterWordTests(unittest.TestCase):
+    """Plan 295. A word written in kana whose first letter is also a
+    particle is read whole where no particle can stand, never cut into
+    the particle and a shorter word: はいしゃ is no topic は + いしゃ, the
+    doctor. Each on sentences written for the rule, beside the topic は
+    that stands before a kana word and stays the topic."""
+
+    def kanji(self, sentence: str, surface: str) -> str:
+        return token_of(sentence, surface)["vocab_match"]["entry"]["kanji"]
+
+    def test_a_kana_word_where_no_topic_can_stand(self) -> None:
+        # after a comma or an adverb, and opening what is said: nothing a
+        # は could mark (the kana lexicon's はいしゃ, which MeCab weighs)
+        for sentence in ("子どものころから、はいしゃがこわかった。",
+                         "やっとはいしゃへ行きました。",
+                         "ちょっとはいしゃに行ってきます。",
+                         "はいしゃの先生はやさしい。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.kanji(sentence, "はいしゃ"), "歯医者")
+        # a は opening what is said begins the word MeCab reads next (はこ
+        # + の, never は + この)
+        for sentence in ("はこの中にはねこがいました。", "「はこの中を見て。」", "まず、はこのふたをあけた。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.kanji(sentence, "はこ"), "箱")
+                self.assertNotIn("この", cut(sentence))
+
+    def test_no_bare_child_after_the_topic(self) -> None:
+        # a こ standing bare after は, read as 子 or as no word at all, is
+        # the end of the word the は begins
+        for sentence in ("二人ではこを運びました。", "へやではこをあけました。", "駅ではこを二つかいました。",
+                         "ここではこがよくうれています。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.kanji(sentence, "はこ"), "箱")
+                self.assertNotIn("は", cut(sentence))
+        # ...and a child after what says whose or which stays a child
+        self.assertEqual(self.kanji("いいこにしてね。", "こ"), "子")
+
+    def test_the_topic_before_a_kana_word_stays_the_topic(self) -> None:
+        for sentence, words in (("それはいしゃのかばんです。", ["は", "いしゃ"]),
+                                ("父はいしゃです。", ["は", "いしゃ"]),
+                                ("かれはいしゃになりたいです。", ["は", "いしゃ"]),
+                                ("わたしはこの本が好きです。", ["は", "この"]),
+                                ("母はこう言いました。", ["は", "こう"]),
+                                ("今日はこない。", ["は", "こ", "ない"]),         # 来る
+                                ("日本ではこめを食べます。", ["は", "こめ"]),
+                                ("ここではこまります。", ["は", "こまり"]),
+                                ("うちではこどもがねています。", ["は", "こども"]),
+                                ("ではこれで。", ["では", "これ"]),
+                                ("わたしはえをかきます。", ["は", "え"]),
+                                ("わたしはぷらそにかがすきです。", ["は", "ぷらそにか"])):
+            with self.subTest(sentence=sentence):
+                tokens = cut(sentence)
+                at = next((i for i in range(len(tokens)) if tokens[i:i + len(words)] == words), None)
+                self.assertIsNotNone(at, tokens)
+        self.assertEqual(self.kanji("それはいしゃのかばんです。", "いしゃ"), "医者")
+        self.assertEqual(self.kanji("日本ではこめを食べます。", "こめ"), "米")
+
+    def test_a_particle_letter_inside_a_verb_or_a_word(self) -> None:
+        # ね, the particle, is no part of ねたかった or ねよう: 寝る's stem
+        for sentence, surface in (("きのうは早くねたかったです。", "ね"), ("もうねようか。", "ねよう"),
+                                  ("今日は早くねたい。", "ね")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertEqual(token["pos"], "verb")
+                self.assertEqual(token["lemma"], "寝る")
+        self.assertEqual(self.kanji("でも、むずかしいのははつおんです。", "はつおん"), "発音")

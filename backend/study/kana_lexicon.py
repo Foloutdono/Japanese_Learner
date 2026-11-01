@@ -139,7 +139,20 @@ def _spoken_counts() -> dict[str, int]:
     return out
 
 
-def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool = False) -> bool:
+def _said(kanji: str, parts: list, spoken: dict) -> int:
+    """How often the subtitles say a word: its own line's count, or, for
+    a word their segmenter cut into shorter ones (歯医者 is 歯 + 医者 there,
+    as in UniDic; 何時 何 + 時), the count of its rarest part, which it
+    is said at most as often as. Read as 0, such a word had lost to any
+    rival said thirty times: はいしゃ to 敗者 "loser" (55), so a page's
+    はいしゃ was cut は + いしゃ, the topic and "doctor"."""
+    if kanji in spoken or len(parts) < 2:
+        return spoken.get(kanji, 0)
+    return min(spoken.get(p.surface, 0) for p in parts)
+
+
+def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool = False,
+               said: int | None = None) -> bool:
     """Whether the page may well mean another word by `kana` (a missing
     meaning beats a guessed one): a deck card or a JMdict word read so,
     with a gloss that shares nothing with this one's, said at least a
@@ -148,7 +161,8 @@ def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool
     more than 地震, ふくしゅう 復讐 "revenge" more than 復習 "review"; but
     こうえん is 公園, whatever 講演 and 後援, and しょうひん 商品, whatever
     賞品. The same word in another spelling (受け付け beside 受付) shares
-    a gloss word and is no rival.
+    a gloss word and is no rival. `said` is this word's count where its
+    line alone does not give it (_said).
 
     `strict`, for a word past a first-year text's (N2, N1): any rival at
     all. The subtitles' count is a film's -- せんとう is 戦闘 "battle" there
@@ -158,7 +172,8 @@ def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool
 
     kanji = entry.get("kanji") or ""
     mine = _gloss_words(entry.get("meaning") or "")
-    floor = 0 if strict else max(_SPOKEN, spoken.get(kanji, 0) / 3)
+    own = spoken.get(kanji, 0) if said is None else said
+    floor = 0 if strict else max(_SPOKEN, own / 3)
     rivals = [(other.get("kanji") or "", other.get("meaning") or "") for other in spelled.get(kana, ())]
     rivals += [(row.get("kanji") or "", row.get("meaning") or "") for row in jmdict.by_kana(kana, limit=12)]
     return any(written and written != kanji and spoken.get(written, 0) >= floor
@@ -223,9 +238,10 @@ def rows(tagger) -> list[list[str]]:
                 cost = _cost(kana, level)
                 if cost is None or not _hiragana(kana) or len(kana) < _MIN_KANA or kana in _NOT_ENTERED:
                     continue
-                if _homophone(kana, entry, spelled, spoken, strict=level in ("N2", "N1")):
-                    continue
                 parts = list(tagger(kanji))
+                if _homophone(kana, entry, spelled, spoken, strict=level in ("N2", "N1"),
+                              said=_said(kanji, parts, spoken)):
+                    continue
                 if not parts or any(p.feature.cType not in (None, "*") or p.feature.pos1 not in _ENTERED_POS
                                     for p in parts):
                     continue
