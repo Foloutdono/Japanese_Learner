@@ -4991,6 +4991,16 @@ def _ga_in_a_clause_of_its_own(tokens, first: int, k: int) -> bool:
     or thinks it (彼は自分が一番だと言った; 警視庁は、被害が相次いでいる
     として) -- not where the topic is said of inside it (御社は残業が多いと
     伺いました, "I heard your firm has a lot of overtime")."""
+    # (A quotation opened after the topic holds its own が: 母は、おとうとに
+    # 「どちらがおいしいですか。」と聞きました, plan 296.)
+    opened = 0
+    for j in range(first + 1, k):
+        if tokens[j].surface in ("「", "『"):
+            opened += 1
+        elif tokens[j].surface in ("」", "』"):
+            opened = max(0, opened - 1)
+    if opened:
+        return True
     i = k + 1
     while i < len(tokens) and tokens[i].pos not in ("verb", "adjective") \
             and not (tokens[i].pos == "auxiliary" and tokens[i].lemma in ("だ", "です")):
@@ -5004,6 +5014,16 @@ def _ga_in_a_clause_of_its_own(tokens, first: int, k: int) -> bool:
     if i >= len(tokens):
         return False
     nxt = tokens[i]
+    if nxt.pos == "particle" and nxt.surface == "の" and i + 1 < len(tokens) \
+            and tokens[i + 1].surface in ("か", "は", "が", "を", "も") \
+            and not (tokens[i + 1].surface == "か" and (i + 2 >= len(tokens) or (
+                tokens[i + 2].pos == "symbol" and tokens[i + 2].surface in _UTTERANCE_ENDS))):
+        # (A clause the nominaliser の closes as what is said of, asked or
+        # done holds its own が: 何が問われているのか, 違いが失われていくのは,
+        # 魚が腐るのを防ぐ, plan 296 -- never ので's reason, which plan 272
+        # leaves to the topic, nor a question the sentence itself asks,
+        # 君には正義感がないのか.)
+        return True
     if nxt.pos == "particle" and nxt.surface == "と" and i + 1 < len(tokens) and (
             tokens[i + 1].lemma in _SAYING_VERBS or tokens[i + 1].lemma in _SAYING_NOUNS
             or tokens[i + 1].lemma in ("聞く", "伺う", "見る", "嘆く", "分かる", "信じる", "いう")):
@@ -5040,6 +5060,8 @@ def _carries_the_predicate(tokens, i: int) -> bool:
     or ところ／もの before the copula (歯が生えかけているところです, 蛙が
     たくさんいたものだった)."""
     nxt, after = tokens[i], tokens[i + 1] if i + 1 < len(tokens) else None
+    if nxt.surface in ("ため", "為") and after is not None and after.surface == "の":
+        return False                    # (選手が考えるための手がかり: a purpose said of a noun, plan 296)
     if nxt.surface in _PREDICATE_GOES_ON:
         return True
     if nxt.surface in ("こと", "事") and after is not None and after.surface == "から":

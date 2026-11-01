@@ -2914,3 +2914,24 @@ class SaidAndSufferedTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertIn("可能形 〜(ら)れる", found_in(sentence))
                 self.assertNotIn("受身形 〜られる", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AGaOfItsOwnClauseTests(unittest.TestCase):
+    """Plan 296: 〜は〜が's が is the subject of what is said of the topic
+    -- never one inside a quotation opened after it, a clause the
+    nominaliser の makes into what is said, asked or done, or a purpose
+    said of a noun (〜ための)."""
+
+    def test_a_ga_held_elsewhere(self) -> None:
+        for sentence in ("母は、おとうとに「えびとたまごとどちらがおいしいですか。」と聞きました。",
+                         "問題の多くは、そもそも何が問われているのかさえはっきりしない。",
+                         "標準語は便利な反面、地域ごとの言葉の違いが失われていくのはさびしい。",
+                         "大切なのは、選手が自分で考えるための手がかりとして使うことだろう。",
+                         "塩は魚が腐るのを防ぐ。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜は〜が", found_in(sentence))
+        for sentence in ("象は鼻が長い。", "わたしは中国語が話せます。", "私は寒いのが苦手です。", "彼は経験が多いので、向いている。",
+                         "君には正義感がないのか。", "この町は「さくら」という名前が有名だ。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜は〜が", found_in(sentence))
