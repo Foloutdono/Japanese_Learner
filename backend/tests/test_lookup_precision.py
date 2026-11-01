@@ -3506,3 +3506,119 @@ class ParticleLetterWordTests(unittest.TestCase):
         self.assertEqual([m.surface for m in morphology.tokenize("にちがいない")][:2], ["に", "ちがい"])
         self.assertEqual([m.surface for m in morphology.tokenize("にしか")], ["に", "しか"])
         self.assertNotIn("にじ", cut("だいたいまいばん、にじかんぐらいつづいています。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WhatTheSentenceSaysTests(unittest.TestCase):
+    """Plan 296: readings and cards the hand-written answers of the
+    conversation, dictation and comprehension banks disagreed with, each
+    decided by what the sentence says and pinned beside the lookalike it
+    must leave alone."""
+
+    def card(self, sentence: str, surface: str) -> str:
+        return token_of(sentence, surface)["vocab_match"]["entry"]["kanji"]
+
+    def test_inside_is_entered_where_someone_can(self) -> None:
+        # 入れる as 入る's potential, はいれる: no object, no place a thing
+        # goes into, and the phrase says who can or when
+        for sentence, surface in (("うん、日曜日なら入れる。", "入れる"),
+                                  ("土曜日は入れますが、日曜日はどうしても都合がつかないんです。", "入れ"),
+                                  ("週に何日ぐらい入れそうですか。", "入れ"),
+                                  ("うん、きっぷを持っている人しか入れないよ。", "入れ"),
+                                  ("四人では入れないから", "入れ"),
+                                  ("でも、きっぷがないと入れないんじゃない？", "入れ"),
+                                  ("待たずに入れるから", "入れる"),
+                                  ("この店は誰でも入れます。", "入れ")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertEqual(token["lemma"], "入る")
+                self.assertTrue(token["reading"].startswith("はいれ"))
+                self.assertEqual(self.card(sentence, surface), "入る")
+        # ...and 入れる, to put in, wherever a thing is put somewhere
+        for sentence, surface in (("ねぎは入れますか。", "入れ"), ("砂糖は毎日入れます。", "入れ"),
+                                  ("冷蔵庫に入れる。", "入れる"), ("お茶を入れましょう。", "入れ"),
+                                  ("えびの天ぷらも入れてください。", "入れ"), ("次からは入れないようにします。", "入れ"),
+                                  ("いいえ、入れなくてもいいです。", "入れ"),
+                                  ("前の日のえさが残っていたら、新しくは入れない。", "入れ"),
+                                  ("このきっぷはここに入れますか。", "入れ"),
+                                  ("父はそこにさとうもたくさん入れます。", "入れ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["lemma"], "入れる")
+
+    def test_a_person_said_politely(self) -> None:
+        # 方 かた after a noun the dictionary calls a person, and before
+        # には after what someone did
+        for sentence in ("はい、学生の方は千五百円になります。", "社員の方の同意は必要ございません。",
+                         "退職日までに資料をすべて整理し、後任の方に責任を持って引き継ぎます。",
+                         "では、落とし主の方に、お名前をお伝えしてもよろしいですか。",
+                         "わかりました。拾った方には、お礼を受け取る権利があります。",
+                         "お留守中に男の方がお見えになりました。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "方")["reading"], "かた")
+        # ...never where the sentence compares, goes toward someone, or the
+        # noun's first sense is no person (上 "above")
+        for sentence in ("学生の方が多いです。", "先生より学生の方がたくさん来ました。", "先生の方を見た。",
+                         "母の方へ歩いていった。", "本は上の方に置いてください。", "駅の近くの方が便利です。",
+                         "大きく見える方を選んだ。", "食べた方がいいですよ。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "方")["reading"], "ほう")
+
+    def test_readings_by_the_period_the_amount_and_the_unit(self) -> None:
+        for sentence, surface, reading in (("先月末をもちまして、退職させていただきました。", "末", "まつ"),
+                                           ("翌月末にお支払いいただけますか。", "末", "まつ"),
+                                           ("三月の末に引っ越します。", "末", "すえ"),
+                                           ("悩んだ末に決めた。", "末", "すえ"),
+                                           ("全量八パーセント引きでご検討ください。", "引き", "びき"),
+                                           ("五百円引きのクーポン", "引き", "びき"),
+                                           ("線を引きました。", "引き", "ひき"),
+                                           ("今朝は三十七度八分ありました。", "分", "ぶ"),
+                                           ("打率は三割一分です。", "分", "ぶ"),
+                                           ("九時三十分に来た。", "分", "ぷん"),
+                                           ("温度は二十度で、五分待った。", "分", "ふん")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+        self.assertEqual(token_of("今朝は三十七度八分ありました。", "八")["reading"], "はち")
+
+    def test_what_opens_of_itself(self) -> None:
+        # 開く あく, "to open (by itself)", where nothing is opened
+        for sentence, surface in (("何時まで開いていますか。", "開い"), ("ドアが開いた。", "開い"),
+                                  ("風でドアが開きました。", "開き"), ("店が開くか開かないか見てきて。", "開く"),
+                                  ("開く時刻は変わらず、閉まる時刻が二時間遅くなる。", "開く")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kana"], "あく")
+                self.assertTrue(token_of(sentence, surface)["reading"].startswith("あ"))
+        # ...and ひらく with an object, an event held, what opens out, a shop
+        # founded on a date, and a bank at its hour, which is either (the
+        # dictation bank reads it ひらきます)
+        for sentence, surface in (("自分の店を開くつもりです。", "開く"), ("パーティーを開きます。", "開き"),
+                                  ("本を開いてください。", "開い"), ("大会が開かれる。", "開か"),
+                                  ("花が開いた。", "開い"), ("傘が開かない。", "開か"),
+                                  ("この店は先月開いたばかりです。", "開い"),
+                                  ("雨のばあいは、つぎの日曜日の十九日に開きます。", "開き"),
+                                  ("銀行は何時に開きますか。", "開き")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kana"], "ひらく")
+
+    def test_a_letter_left_alone_joins_its_word(self) -> None:
+        # a page in kana where MeCab stranded a letter as an interjection
+        for sentence, surface, kanji in (("あしたは、こうえんでともだちとテニスをします。", "こうえん", "公園"),
+                                         ("このあかいふくはすこしたかいとおもいます。", "あかい", "赤い"),
+                                         ("からいカレーはむずかしいから", "からい", "辛い"),
+                                         ("まどのそとをみてください。", "まど", "窓"),
+                                         ("弟はいつもまどのせきがほしいです。", "まど", "窓"),
+                                         ("母とあねがきました。", "あね", "姉"),
+                                         ("インターネットにはうそのじょうほうがある。", "うそ", ""),
+                                         ("二人はあした何時にどこで会いますか。", "あした", "明日"),
+                                         ("かさ、持ってきた？", "かさ", "傘")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+        # ...never a homophone the deck does not mean, a word cut that the
+        # letter did not touch, nor an interjection with its comma
+        self.assertNotIn("ふん", cut("じゃあ、ごふんまえにのりました。"))
+        self.assertNotIn("むし", cut("この駅のじむしつ"))
+        self.assertNotIn("なが", cut("とっきゅうで、ながのまでお願いします。"))
+        for sentence, words in (("それは、あ、そうだ。", ["あ"]), ("では、また。", ["では"]),
+                                ("でも、きっぷがない！", ["でも"]), ("はは、そうか。", ["はは"])):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(set(words) <= set(cut(sentence)), cut(sentence))
+        self.assertEqual(token_of("はは、そうか。", "はは")["pos"], "interjection")   # a laugh, never 母

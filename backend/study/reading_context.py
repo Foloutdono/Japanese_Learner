@@ -648,6 +648,41 @@ _SORTS_PEOPLE = ("付近", "周辺", "沿岸", "沿い", "地域", "在住", "�
                  "外国", "初めて", "予約", "参加", "利用", "ご来場", "来場")
 
 
+# What a dictionary says of a person, whose 方 after it and の is かた
+# (plan 296): 学生 "student", 後任 "successor", 落とし主 "owner".
+_PERSON_GLOSS = re.compile(r"\b(person|people|man|woman|men|women|child|children|boy|girl|student|pupil|teacher|"
+                           r"employee|staff|worker|member|owner|successor|newcomer|new face|recruit|customer|"
+                           r"guest|client|patient|visitor|participant|resident|user|applicant|passenger|parent|"
+                           r"officer|official|manager|director|president|doctor|nurse|clerk|colleague|adult|"
+                           r"elder|player|author|speaker|representative|candidate|volunteer|tenant|landlord|"
+                           r"buyer|seller|partner|spouse|husband|wife|family|foreigner|beginner|expert|"
+                           r"predecessor|superior|subordinate|senior|junior|friend|neighbou?r)s?\b")
+# What one looks or goes toward (方 ほう, the direction: 先生の方を見た).
+_TOWARD = frozenset({"見る", "向く", "向ける", "振り向く", "眺める", "行く", "来る", "歩く", "走る", "向かう",
+                     "近付く", "近づく", "寄る", "戻る", "進む", "飛ぶ", "逃げる", "指す", "指差す"})
+
+
+def _names_a_person(token: dict) -> bool:
+    """Whether a noun is a person by the first gloss the deck or the
+    dictionary gives it (学生 "student", 社員, 新人) -- never by a later one:
+    上 is "above, up, ... superior (higher in rank)", and 上の方に置く is
+    the top."""
+    from study.morphology import _noun_meaning
+
+    meaning = _noun_meaning(token.get("surface") or "", _to_hira(token.get("reading") or "")) or ""
+    first = re.split(r"[,;]", meaning, maxsplit=1)[0]
+    return bool(_PERSON_GLOSS.search(first.lower()))
+
+
+def _compares(tokens: list[dict], i: int) -> bool:
+    """Whether the sentence of 方 at tokens[i] compares two things: より,
+    どちら, 比べる, or 方が before what it is more of (多い, いい)."""
+    if any(t["surface"] in ("より", "どちら", "どっち", "どれ") or (t.get("lemma") or "").startswith("比べ")
+           for t in tokens):
+        return True
+    return i + 2 < len(tokens) and tokens[i + 1]["surface"] == "が" and tokens[i + 2].get("pos") == "adjective"
+
+
 @lru_cache(maxsize=2048)
 def _thing_reading(head: str) -> str | None:
     """How 物 reads after `head`: as JMdict reads the word the two spell
@@ -770,6 +805,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         if s == "方" and r == "かた" and tokens[i].get("pos") == "noun" and i > 0 \
                 and tokens[i - 1].get("pos") in ("verb", "auxiliary") \
                 and prev(i)[-1:] in "うくすつぬふむゆるぐずづぶぷただ" and nxt(i) in ("に", "を", "が", "の") \
+                and not (nxt(i) == "に" and i + 2 < n and surf[i + 2] == "は") \
                 and not (nxt(i) == "が" and i + 2 < n and tokens[i + 2].get("lemma") in (
                     "多い", "少ない", "居る", "いる", "いらっしゃる", "おる", "居られる")) \
                 and not any(t.get("lemma") in _SAID_UP for t in tokens[max(0, i - 3):i]) \
@@ -779,7 +815,9 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # (before に, を, の only where the verb says it up or the line
         # asks of them -- 大きく見える方を選んだ is ほう, the one)
         if s == "方" and r == "ほう" and i > 0 and tokens[i - 1].get("pos") in ("verb", "auxiliary") \
-                and (nxt(i) in ("は", "には", "へ", "も") or (nxt(i) in ("に", "を", "の") and (
+                and (nxt(i) in ("は", "には", "へ", "も")
+                     or (nxt(i) == "に" and i + 2 < n and surf[i + 2] == "は")  # (拾った方には, plan 296)
+                     or (nxt(i) in ("に", "を", "の") and (
                     any(t.get("lemma") in _SAID_UP for t in tokens[max(0, i - 3):i])
                     or any(u in ("ください", "下さい", "願い", "遠慮") for u in surf[i + 1:])))):
             out[i] = "かた"
@@ -799,6 +837,15 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 and not any(u in ("どちら", "どっち", "どれ") for u in surf):
             out[i] = "かた"
             continue
+        # 学生の方は, 社員の方の同意, 後任の方に: かた, a person said
+        # politely, after a noun the dictionary calls a person (plan 296)
+        # -- never where the sentence compares, 学生の方が多い, AよりBの方が
+        # (the side), nor toward them, 先生の方を見た, 母の方へ歩いた.
+        if s == "方" and r == "ほう" and prev(i) == "の" and i >= 2 and tokens[i - 2].get("pos") == "noun" \
+                and _names_a_person(tokens[i - 2]) and not _compares(tokens, i) \
+                and not (nxt(i) in ("を", "に", "へ") and any(t.get("lemma") in _TOWARD for t in tokens[i + 1:])):
+            out[i] = "かた"
+            continue
         # 何しやがる, 何しに来た: なに before する (plan 272).
         if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1]["lemma"] in ("為る", "する") \
                 and nxt(i)[:1] in ("し", "す"):
@@ -810,6 +857,23 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1].get("pos") == "verb" \
                 and tokens[i + 1]["lemma"] not in ("為る", "する", "成る", "なる"):
             out[i] = "なに"
+            continue
+
+        # 先月末, 翌月末, 年度末: まつ, the end of the period named right
+        # before it (plan 296), whatever UniDic read -- it reads まつ, and
+        # the rule for a suffix standing alone (来月|国) below took the
+        # period for no host and gave it the deck's すえ. 三月の末, 末っ子
+        # and 悩んだ末に keep すえ: nothing names a period glued to them.
+        if s == "末" and r in ("すえ", "まつ") and i > 0 and tokens[i - 1].get("pos") == "noun" \
+                and prev(i).endswith(("月", "年", "週", "期", "度", "紀")) and not _is_numeral(prev(i)):
+            out[i] = "まつ"
+            continue
+        # 八パーセント引き, 五百円引き, 二割引き: びき, so much off, after the
+        # amount it takes off (plan 296) -- 線を引き, 綱引き and くじ引き
+        # are no discount.
+        if s == "引き" and r == "ひき" and tokens[i].get("pos") == "noun" \
+                and prev(i) in ("パーセント", "％", "%", "割", "円", "ドル", "ユーロ"):
+            out[i] = "びき"
             continue
 
         # 箱 is はこ, "box", on its own and after a number (その箱, 一箱,
@@ -1048,6 +1112,13 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         start = i - 1
         while start > 0 and _is_numeral(surf[start - 1]):
             start -= 1
+        # 三割一分, 三十七度八分: a tenth of the unit before, ぶ, and the
+        # numeral its own reading -- numeral_furigana's rule for figures,
+        # for a numeral in kanji (plan 296). No minute: はっぷん was one.
+        if surf[i] == "分" and start > 0 and surf[start - 1] in ("割", "度"):
+            out[i - 1] = read_numeral(surf[i - 1]) or out[i - 1]
+            out[i] = "ぶ"
+            continue
         fixed = _counter_readings("".join(surf[start:i]), out[i - 1], surf[i], out[i],
                                   tokens[i].get("pos", ""), whole=start == i - 1,
                                   after=surf[i + 1:i + 3])

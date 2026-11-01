@@ -1095,7 +1095,8 @@ GOLD = {
     "電車が遅れて。": {("が", "が")},
     "これは何ですか。": {("これ／それ／あれ／どれ", "これ"), ("は", "は"), ("です／だ", "です"), ("か", "か")},
     "誰か来ましたよ。": {("何か／誰か／どこか", "誰か"), ("〜ました／〜ませんでした", "ました"), ("よ", "よ")},
-    "だれでも入れます。": {(ANY, "だれでも"), ("〜ます／〜ません", "ます")},
+    "だれでも入れます。": {(ANY, "だれでも"), ("〜ます／〜ません", "ます"),
+                         ("可能形 〜(ら)れる", "入れ")},       # 入る's potential, はいれます (plan 296)
     "いつでも来てください。": {(ANY, "いつでも"), ("〜てください", "てください")},
     "お茶でも飲みませんか。": {("〜でも", "でも"), ("〜ませんか", "ませんか"), ("か", "か")},
     "子どもでも分かる。": {("〜でも", "でも")},
@@ -2845,3 +2846,17 @@ class ParticleLetterPointTests(unittest.TestCase):
                              ("日本ではこめを食べます。", 3), ("わたしはこの本が好きです。", 3)):
             with self.subTest(sentence=sentence):
                 self.assertEqual(self.topics(sentence), [at])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class CanEnterPointTests(unittest.TestCase):
+    """Plan 296: 入る's potential, はいれる, lights 可能形 -- read as 入る
+    conjugating as 下一段 -- and 入れる, to put in, never does."""
+
+    def test_the_potential_of_entering(self) -> None:
+        for sentence in ("うん、日曜日なら入れる。", "この店は誰でも入れます。", "四人では入れないから"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("可能形 〜(ら)れる", found_in(sentence))
+        for sentence in ("お茶を入れましょう。", "冷蔵庫に入れてください。", "ねぎは入れますか。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("可能形 〜(ら)れる", found_in(sentence))

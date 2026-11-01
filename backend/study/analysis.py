@@ -2142,7 +2142,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # adverb (the kana lexicon's, now that a compound is counted by its
 # rarest part), a は opening what is said (はこ + の, never は + この),
 # and no bare 子 after the topic (二人で + はこ, never では + こ).
-LOCAL_REV = 32
+# 33: what the sentence says, against the banks' hand-written answers
+# (plan 296): 入れる as 入る's potential where someone can enter and
+# nothing is put in (日曜日なら入れる, 人しか入れない), 方 かた after a person
+# (学生の方, 後任の方), 末 まつ after a period, 〜引き びき after an amount,
+# 度/割 + 分 ぶ, and a letter MeCab left alone in kana read inside its word
+# (こうえん, あかい + ふく, まど) or a phrase of particles that spells one
+# (かさ、).
+LOCAL_REV = 33
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
