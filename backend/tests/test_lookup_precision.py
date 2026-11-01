@@ -632,7 +632,8 @@ class KanaStemTests(unittest.TestCase):
 
     def test_the_refusal_never_trades_one_card_for_another(self) -> None:
         # Only what stands beside the word may name another card (plan
-        # 272): the verb's partner, the neighbours of a kana noun.
+        # 272): the verb's partner, the neighbours of a kana noun -- and
+        # what a kana adjective is said of (plan 296).
         for sentence in _corpus()[::7]:
             morphemes = morphology.tokenize(sentence)
             for i, m in enumerate(morphemes):
@@ -640,8 +641,9 @@ class KanaStemTests(unittest.TestCase):
                 after = card_lookup.resolve_morpheme(morphemes, i)
                 nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
                 beside = card_lookup._by_neighbours(morphemes, i, before)
+                noun = card_lookup._kana_noun(morphemes, i, beside)
                 named = (card_lookup._by_partner(morphemes, i, card_lookup._deck_verbs_spelled(m, nxt)),
-                         beside, card_lookup._kana_noun(morphemes, i, beside))
+                         beside, noun, card_lookup._kana_adjective(morphemes, i, noun))
                 with self.subTest(sentence=sentence, word=m.surface):
                     self.assertIn(after, (before, None, *named))
 
@@ -3605,6 +3607,28 @@ class WhatTheSentenceSaysTests(unittest.TestCase):
                                            ("犬のエサを買った。", "エサ", "feed")):
             with self.subTest(sentence=sentence):
                 self.assertTrue(token_of(sentence, surface)["vocab_match"]["entry"]["meaning"].startswith(meaning))
+
+    def test_a_kana_homograph_by_what_it_is_said_of(self) -> None:
+        # あつい, やさしい, せき and のる in kana: the card the clause says
+        # (a comma after a topic ends no clause)
+        for sentence, surface, kanji in (("ドイツのなつは、あまりあつくありません。", "あつく", "暑い"),
+                                         ("今日はあつくてたまらない。", "あつく", "暑い"),
+                                         ("おゆがとてもあつくて、わたしは五分だけ入りました。", "あつく", "熱い"),
+                                         ("あついおふろが大すきです。", "あつい", "熱い"),
+                                         ("あついじしょですね。", "あつい", "厚い"),
+                                         ("ルーカスさんは、やさしい日本語が分かります。", "やさしい", "易しい"),
+                                         ("予想に反して、試験はやさしかった。", "やさしかっ", "易しい"),
+                                         ("やさしい先生です。", "やさしい", "優しい"),
+                                         ("その店は少し高かったですが、八人のせきがありました。", "せき", "席"),
+                                         ("せきはもういっぱいでした。", "せき", "席"),
+                                         ("せきがでます。", "せき", "咳"),
+                                         ("地図にのっていない小さな店にも入ってみた。", "のっ", "載る"),
+                                         ("電車にのって学校へ行きます。", "のっ", "乗る")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+        # (plan 272's own: the wind, then a cold, across a comma after て)
+        winds = [t for t in analysis.analyze_local("かぜがつよくて、かぜをひいた。")["tokens"] if t["surface"] == "かぜ"]
+        self.assertEqual([t["vocab_match"]["entry"]["kanji"] for t in winds], ["風", "風邪"])
 
     def test_what_opens_of_itself(self) -> None:
         # 開く あく, "to open (by itself)", where nothing is opened

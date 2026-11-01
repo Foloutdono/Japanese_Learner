@@ -1183,6 +1183,7 @@ def resolve_morpheme(morphemes, i: int):
             and not _has_kanji(morphemes[i].surface):
         return hit                          # (おうちで かっても いい？ after the goldfish: 飼う, plan 272)
     hit = _kana_noun(morphemes, i, hit)
+    hit = _kana_adjective(morphemes, i, hit)
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     spelled = _deck_verbs_spelled(morphemes[i], nxt)
     if len(spelled) > 1:
@@ -1532,7 +1533,10 @@ _NOUN_PARTNERS = {
                     "あげる", "くれる", "買う", "かう", "個", "粒", "つ", "おやつ", "持つ", "もつ"})),
     "せき": (("席", {"空く", "あく", "空いる", "座る", "すわる", "譲る", "ゆずる", "予約", "よやく", "立つ", "たつ",
                     "窓側", "通路", "指定", "自由", "取る", "とる", "前", "まえ", "後ろ", "うしろ", "隣", "となり",
-                    "戻る", "もどる", "外す", "はずす"}),
+                    "戻る", "もどる", "外す", "はずす",
+                    # (八人のせき, せきはもういっぱい: a seat counted and full,
+                    # plan 296)
+                    "人", "にん", "いっぱい", "満席", "まんせき", "空き", "あき", "店", "みせ", "レストラン"}),
              ("咳", {"出る", "でる", "止まる", "とまる", "風邪", "かぜ", "熱", "ねつ", "喉", "のど", "くしゃみ",
                     "ひどい", "薬", "くすり", "咳き込む"})),
     "かんじ": (("漢字", {"覚える", "おぼえる", "書く", "かく", "読む", "よむ", "習う", "ならう", "勉強", "べんきょう",
@@ -1632,14 +1636,20 @@ def _verb_card(entry: dict) -> bool:
         written[-1] in "うくぐすつぬぶむる" and (entry.get("meaning") or "").startswith("to ")))
 
 
-def _by_noun_partner(morphemes, i: int, cards):
+def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None):
     """The card of `cards` ((kanji, partner words), ...) whose partners
-    alone stand in morphemes[i]'s sentence, or None."""
+    alone stand in morphemes[i]'s sentence, or None. `kana` is the card's
+    reading where the word stands inflected (あつく, plan 296)."""
     # (the noun's own clause, plan 272: かぜがつよくて、かぜをひいた says
     # the wind, then a cold)
     a, b = i, i
     while a > 0 and not (morphemes[a - 1].pos == "symbol" and morphemes[a - 1].surface in "、，。！？!?"):
         a -= 1
+        # (a comma after a topic ends no clause: ドイツのなつは、あまりあつく
+        # ありません says the summer is hot, plan 296)
+        if a >= 3 and morphemes[a - 1].surface in "、，" and morphemes[a - 2].surface in ("は", "も") \
+                and morphemes[a - 2].pos == "particle":
+            a -= 1
     while b + 1 < len(morphemes) and not (morphemes[b + 1].pos == "symbol" and morphemes[b + 1].surface in "、，。！？!?"):
         b += 1
     if a == 0 and b == len(morphemes) - 1 or not any(
@@ -1657,7 +1667,47 @@ def _by_noun_partner(morphemes, i: int, cards):
     named = [kanji for kanji, partners in cards if partners & words]
     if len(named) != 1:
         return None
-    return _card(named[0], morphemes[i].surface)
+    return _card(named[0], kana or morphemes[i].surface)
+
+
+# Kana adjectives two or three deck cards are spelled as, and the words of
+# their clause that say which (plan 296): the weather is 暑い, a drink 熱い,
+# a book 厚い; a test or a language 易しい (日本語 is 日本 + 語), a person
+# 優しい. A word on two lists, or none, leaves UniDic's pick (言葉 is
+# 易しい and 優しい). (A soup's あたたかい is the pool's 温かい, which no
+# deck card is: left as the deck's 暖かい reads it.)
+_ADJECTIVE_PARTNERS = {
+    "あつい": (("暑い", {"夏", "なつ", "今日", "きょう", "天気", "てんき", "部屋", "へや", "国", "くに", "日本", "にほん",
+                       "季節", "きせつ", "気温", "夜", "よる", "昼", "ひる", "外", "そと", "東京", "太陽", "汗", "あせ",
+                       "冷房", "エアコン", "夏休み", "なつやすみ", "日", "ひ"}),
+               ("熱い", {"お茶", "おちゃ", "茶", "コーヒー", "スープ", "湯", "ゆ", "お湯", "おゆ", "風呂", "ふろ",
+                       "お風呂", "おふろ", "鍋", "なべ", "ラーメン", "熱", "ねつ", "飲み物", "のみもの", "みそしる",
+                       "ストーブ", "アイロン"}),
+               ("厚い", {"本", "ほん", "紙", "かみ", "辞書", "じしょ", "壁", "かべ", "板", "いた", "雲", "くも", "コート",
+                       "セーター", "肉", "にく", "パン", "ページ"})),
+    "やさしい": (("易しい", {"問題", "もんだい", "日本語", "にほんご", "語", "英語", "えいご", "テスト", "試験", "しけん",
+                          "説明", "せつめい", "漢字", "かんじ", "文", "ぶん", "質問", "しつもん", "宿題", "しゅくだい",
+                          "教科書", "きょうかしょ", "読み方", "書き方", "クイズ", "練習", "れんしゅう"}),
+                ("優しい", {"人", "ひと", "先生", "せんせい", "母", "はは", "父", "ちち", "声", "こえ", "心", "こころ",
+                          "性格", "せいかく", "友達", "友だち", "ともだち", "彼", "かれ", "彼女", "かのじょ", "笑顔",
+                          "えがお", "子", "子ども", "こども", "おばあさん", "おじいさん", "お姉さん", "お兄さん",
+                          "店員", "動物", "どうぶつ"})),
+}
+
+
+def _kana_adjective(morphemes, i: int, hit):
+    """The card a deck adjective written in kana is, of the two or three
+    spelled alike (_ADJECTIVE_PARTNERS), where its clause says which
+    (plan 296): ドイツのなつは、あまりあつくありません is 暑い, never the
+    厚い UniDic named; やさしい日本語 易しい; あたたかいおでん 温かい."""
+    m = morphemes[i]
+    if m.pos != "adjective" or not _hiragana(m.surface):
+        return hit
+    said = morphology.kata_to_hira(m.lemma_reading or "")
+    cards = _ADJECTIVE_PARTNERS.get(said)
+    if not cards:
+        return hit
+    return _by_noun_partner(morphemes, i, cards, said) or hit
 
 
 # What one does at home, or goes home to do (plan 272): うちにかえる.
@@ -2480,6 +2530,17 @@ _SENTENCE_PARTNERS = {
                        "痛い", "いたい", "虫", "むし", "怪我", "けが"}),
     "点く": frozenset({"押す", "おす", "ボタン", "スイッチ", "電気", "でんき", "テレビ", "エアコン", "リモコン",
                      "電源", "でんげん", "明かり", "あかり", "ライト", "電池", "でんち", "パソコン"}),
+    # (地図にのっていない: what is printed somewhere, plan 296 -- and what
+    # one rides, so a sentence with both is left as UniDic reads it)
+    "載る": frozenset({"地図", "ちず", "新聞", "しんぶん", "雑誌", "ざっし", "記事", "きじ", "辞書", "じしょ",
+                     "リスト", "名簿", "教科書", "きょうかしょ", "ガイドブック", "広告", "こうこく", "メニュー"}),
+    "乗る": frozenset({"電車", "でんしゃ", "バス", "車", "くるま", "自転車", "じてんしゃ", "飛行機", "ひこうき",
+                     "船", "ふね", "タクシー", "馬", "うま", "エレベーター", "新幹線", "しんかんせん", "地下鉄"}),
+    # (手がはなせない, 目をはなさないで: what is let go, plan 296 -- and what
+    # one speaks, for the sentence that has both)
+    "離す": frozenset({"手", "て", "目", "め"}),
+    "話す": frozenset({"日本語", "にほんご", "英語", "えいご", "言葉", "ことば", "電話", "でんわ", "話", "はなし",
+                     "声", "こえ", "先生", "せんせい", "友達", "友だち", "ともだち"}),
     "着く": frozenset({"駅", "えき", "空港", "くうこう", "家", "いえ", "うち", "ホテル", "到着", "とうちゃく",
                      "電車", "でんしゃ", "バス", "飛行機", "ひこうき",
                      # (あと五分でつく: what is left before one arrives)

@@ -2150,7 +2150,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # (こうえん, あかい + ふく, まど) or a phrase of particles that spells one
 # (かさ、); then, from the breakdown audit, 〜も〜も refused where a も is
 # another construction's (〜ても, 誰にも, こともある), その間、 あいだ,
-# and a pet named in katakana (ポチは…走りはじめました, クロ) read as a name.
+# and a pet named in katakana (ポチは…走りはじめました, クロ) read as a name,
+# and kana homographs by what they are said of (あつい 暑い/熱い/厚い,
+# やさしい 易しい/優しい, せき 席, のる 載る).
 LOCAL_REV = 33
 
 
