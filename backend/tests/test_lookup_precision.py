@@ -2642,7 +2642,7 @@ class EighthReviewWordTests(unittest.TestCase):
 
     def test_glosses(self) -> None:
         for sentence, surface, gloss in (("花粉の飛ぶ量は、非常に多いでしょう。", "の", "(in a clause before a noun)"),
-                                         ("ついには親の預金にまで手をつけるしまつだ。", "まで", "(after に, or before も) even"),
+                                         ("ついには親の預金にまで手をつけるしまつだ。", "まで", "even, as far as"),
                                          ("人の都合に合わせて育ってはくれない。", "は",
                                           "(between a て form and a negative)"),
                                          ("一円たりともむだにはできない。", "は", "(after a particle)")):
@@ -2729,7 +2729,7 @@ class EighthReviewWordTests(unittest.TestCase):
                                          ("何度も確かめては ため息ついた", "は", "(after 〜て, then another doing)"),
                                          ("そんな運転をしていては、大けがをする。", "は", "(after a て form) if"),
                                          ("てめえ、今なんつった？", "つっ", "(rough) って言った"),
-                                         ("老舗の鮮魚店までもが店を閉めた。", "まで", "(after に, or before も) even"),
+                                         ("老舗の鮮魚店までもが店を閉めた。", "まで", "even, as far as"),
                                          ("なんぼやと思う？", "や", "(Kansai) is"),
                                          ("千円やで、千円！", "で", "(Kansai, at the end)"),
                                          ("言うたかて、しゃあないやんか。", "かて", "(Kansai) even if"),
@@ -3649,6 +3649,47 @@ class WhatTheSentenceSaysTests(unittest.TestCase):
                                   ("銀行は何時に開きますか。", "開き")):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kana"], "ひらく")
+
+    def test_a_card_read_as_none_of_its_readings_gives_way(self) -> None:
+        # a word that does not inflect is said as the page reads it: in
+        # kana, the word the letters spell (ぶちょう, 部長, which MeCab heard
+        # as 不調 voiced otherwise); in kanji, JMdict's row of that reading
+        # where its sense is another (中 じゅう, "all through", 等 ら, the
+        # plural), or the point that row is
+        self.assertEqual(self.card("ぶちょうは何と言っていましたか。", "ぶちょう"), "部長")
+        self.assertEqual(self.card("最近、体の調子が不調だ。", "不調"), "不調")
+        for sentence in ("あの人は世界中を旅しています。", "明日は一日中雨だそうです。",
+                         "一日中さいふを使いませんでした。", "その警備員は一晩中勤務だった。"):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, "中")
+                self.assertEqual((token["reading"], token["pos"]), ("じゅう", "suffix"))
+                self.assertNotEqual(((token.get("vocab_match") or {}).get("entry") or {}).get("kana"), "ちゅう")
+                self.assertIn("〜中", [g["pattern"] for g in token.get("grammar") or []])
+        self.assertEqual(token_of("今は授業中です。", "中")["vocab_match"]["entry"]["kana"], "ちゅう")
+        self.assertEqual(token_of("俺を奴等と一緒にするな。", "等")["vocab_match"]["entry"]["kana"], "ら")
+        self.assertEqual(token_of("机の上に本、ノート等がある。", "等")["vocab_match"]["entry"]["kana"], "とう")
+        self.assertEqual(token_of("来館された方に見どころを説明する。", "見どころ")["vocab_match"]["entry"]["kana"],
+                         "みどころ")
+        # ...and the card stands where the two readings are one word, and
+        # for the voicing a compound's second half takes
+        self.assertEqual(self.card("他人の悪口を言う前に、自分の欠点を直すべきだ。", "悪口"), "悪口")
+        for sentence, surface, kanji in (("七時ごろ学校へ行きます。", "ごろ", "頃"), ("魚を三びき買った。", "びき", "匹"),
+                                         ("最近は疲れ気味で食欲もない。", "気味", "気味"),
+                                         ("大会は予定どおり行われました。", "どおり", "通り"),
+                                         ("ほんと？うれしい！", "ほんと", ""), ("そうなんだ。バイトならしょうがないね。", "しょう", "仕様")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+        self.assertEqual(self.card("ジョーンは姉さんと同じように魅力がある。", "姉"), "姉")
+
+    def test_all_of_them_before_a_noun(self) -> None:
+        # 皆 cut off before a noun is みな, "all of them"; the prefix かい-
+        # makes words UniDic reads whole
+        for sentence in ("法学を学んでいる学生が皆法律家になれるというわけではない。", "有名選手は皆天国にいるのだ。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "皆")["reading"], "みな")
+        self.assertEqual(token_of("皆様、おはようございます。", "皆")["reading"], "みな")
+        self.assertEqual(token_of("皆既日食を見た。", "皆既日食")["reading"], "かいきにっしょく")
+        self.assertEqual(token_of("免許皆伝だ。", "免許皆伝")["reading"], "めんきょかいでん")
 
     def test_a_letter_left_alone_joins_its_word(self) -> None:
         # a page in kana where MeCab stranded a letter as an interjection

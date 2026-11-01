@@ -211,6 +211,22 @@ def _conjugated(parts) -> bool:
                     and (p.feature.orthBase or p.surface) in _ENDINGS for p in parts[1:]))
 
 
+_UNVOICE = str.maketrans("ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ", "カキクケコサシスセソタチツテトハヒフヘホハヒフヘホ")
+
+
+def _voiced_otherwise(kana: str, node) -> bool:
+    """Whether MeCab's one word for the letters is a noun said otherwise
+    than its own reading by a letter's voicing alone (plan 296): ぶちょう
+    is 不調 there, whose reading is ふちょう; じたく 支度 (したく), ごうり
+    行李 (こうり). A spelling that names its word outright is never that
+    word misheard: such a word is entered like one MeCab reads nothing
+    for. A word said shorter or longer is itself (ほんと, にほん)."""
+    f = node.feature
+    said, own = _katakana(kana), f.lForm or ""
+    return (f.pos1 == "名詞" and f.cType in (None, "*") and len(own) == len(said) and own != said
+            and own.translate(_UNVOICE) == said.translate(_UNVOICE))
+
+
 def rows(tagger) -> list[list[str]]:
     """The user dictionary's entries, as MeCab's CSV rows (surface, left
     and right context ids left for the compiler to fill in, cost, then
@@ -246,7 +262,7 @@ def rows(tagger) -> list[list[str]]:
                                     for p in parts):
                     continue
                 alone = list(tagger(kana))
-                if len(alone) == 1 and not alone[0].is_unk:
+                if len(alone) == 1 and not alone[0].is_unk and not _voiced_otherwise(kana, alone[0]):
                     # MeCab reads it as a word already (ないしょ, ひらがな,
                     # うるさい), and may read it as that word on the page.
                     continue

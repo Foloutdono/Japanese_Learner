@@ -369,6 +369,20 @@ _ONE_KANA_AFTER = frozenset({"が", "を", "に", "で", "の", "は", "も", "�
 _KANA_NOUN_NOT_VERB = {"いえ": "家"}
 
 
+def _all_through(morphemes: list[Morpheme], tags: list) -> None:
+    """中 glued after a span of time (a noun UniDic files as countable or
+    adverbial: 日, 年, 晩) is the suffix じゅう, "all through", wherever
+    UniDic took it for the prefix of the noun after it: 一日中さいふを is
+    一日 + 中 + さいふ, no 中- of さいふ; 一晩中勤務 (plan 296). A prefix 中
+    opens its word (中学年, 中・高一貫校, 中１), after a place too: 東中学校
+    is a school."""
+    for k, m in enumerate(morphemes):
+        if m.surface == "中" and m.pos == "prefix" and k > 0 and tags[k - 1][2] in ("助数詞可能", "副詞可能") \
+                and morphemes[k - 1].pos in ("noun", "suffix") and _glued(morphemes[k - 1], m):
+            m.pos, m.reading = "suffix", "じゅう"
+            tags[k] = ("接尾辞", "名詞的", "副詞可能")
+
+
 def _one_kana_nouns(morphemes: list[Morpheme]) -> None:
     """A noun of one kana UniDic read as something else, read back as the
     noun (_ONE_KANA_NOUNS) where only a noun can stand: before a case
@@ -5154,6 +5168,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _picture(morphemes)
         morphemes, tags = _notice(morphemes, tags)
         _one_kana_nouns(morphemes)
+        _all_through(morphemes, tags)
         _shops(morphemes, tags)
         morphemes, tags = _sleep(morphemes, tags)
         morphemes, tags = _pain(morphemes, tags)

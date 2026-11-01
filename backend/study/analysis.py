@@ -2152,7 +2152,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # another construction's (〜ても, 誰にも, こともある), その間、 あいだ,
 # and a pet named in katakana (ポチは…走りはじめました, クロ) read as a name,
 # and kana homographs by what they are said of (あつい 暑い/熱い/厚い,
-# やさしい 易しい/優しい, せき 席, のる 載る).
+# やさしい 易しい/優しい, せき 席, のる 載る); a card read as none of its
+# readings giving way (中 じゅう, 等 ら, 見どころ; ぶちょう 部長), 皆 みな, 一日中
+# + さいふ; 〜でも on a で of where (家の中でも) and a copula pair (学者でも
+# 辞書でもなく), 〜の中で with も held to "among", まで "even" after an
+# addition (ガス代まで), 〜ものを's を and 〜や否や's や, 〜ても on にとって's
+# て, 〜ば〜ほど and 〜も〜ば〜も held to their shape, a quotation's と across
+# a comma, and 〜ないといけない said short (帰らないと。).
 LOCAL_REV = 33
 
 

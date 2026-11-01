@@ -2935,3 +2935,136 @@ class AGaOfItsOwnClauseTests(unittest.TestCase):
                          "君には正義感がないのか。", "この町は「さくら」という名前が有名だ。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("〜は〜が", found_in(sentence))
+
+
+class AWhereWithEvenTests(unittest.TestCase):
+    """Plan 296: 〜でも is a noun + でも offered (お茶でも) or "even" in
+    place of が (子どもでも) -- never a で of where or of in what respect
+    after a noun and its の, with も (家の中でも, お金の面でも), nor the
+    first of a pair the copula closes (学者でも辞書でもなく, 恥でも何でも
+    ない), whose で is the copula's as the second's is. And 〜の中で is
+    "among" with も as without it: 家の中でもセーターを着る is inside."""
+
+    def test_a_place_with_even_is_no_demo(self) -> None:
+        for sentence in ("それに、家の中でもセーターを着ることにしました。", "高校野球の世界でも、データを活用するチームが増えている。",
+                         "電車代があまりかからなくなったので、お金の面でも助かっている。",
+                         "専門家の間でも、この問題については意見が分かれている。",
+                         "助けを受けることは、恥でも何でもなかったのだ。",
+                         "言葉の寿命を決めるのは、学者でも辞書でもなく、使う人々である。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜でも", found_in(sentence))
+        for sentence in ("お水でも飲みませんか。", "このかんじは子どもでも読めます。", "雨でも行きます。",
+                         "週まつ、えいがでも見ませんか。", "試験の前でも勉強しない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜でも", found_in(sentence))
+
+    def test_the_first_of_a_copula_pair_is_the_copula(self) -> None:
+        for sentence in ("彼は医者でも弁護士でもない。", "学者でも辞書でもなく、使う人々である。", "恥でも何でもなかった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn(("です／だ", "でも"), keys(sentence))
+
+    def test_inside_with_even_is_not_among(self) -> None:
+        for sentence in ("それに、家の中でもセーターを着ることにしました。", "船は大しけの中でも性能よく運航した。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜の中で", found_in(sentence))
+        for sentence in ("果物の中でも、特にりんごが好きです。", "四人の中で、わたしがいちばん小さいです。",
+                         "日本の都市の中でも東京は特に大きい。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜の中で", found_in(sentence))
+
+
+class AnEvenMadeTests(unittest.TestCase):
+    """Plan 296: まで after a thing added to what its sentence listed or
+    said before it is "even", no から〜まで: 電気代やガス代まで上がって
+    いる, 強い風に加えて、雨まで降り出した -- never after a place, a count
+    or a time, which a list may hold as an end (駅や空港まで送ります)."""
+
+    def test_even_after_what_is_added(self) -> None:
+        for sentence in ("小麦や石油を輸入する費用が増え、パンや調味料のみならず、電気代やガス代まで上がっている。",
+                         "カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。",
+                         "試合の流れや選手の気持ちまでは、数字に表れないからだ。",
+                         "強い風に加えて、雨まで降り出した。", "道に迷った上に、雨まで降ってきた。",
+                         "駅前のこの書店は新しい本に限らず、古典の全集までそろえている。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("から〜まで", found_in(sentence))
+        for sentence in ("駅や空港まで送ります。", "一人につき二枚まで買えます。", "十時まで働きます。", "最後まで読んだ。",
+                         "机の上に本を置いて、駅まで歩いた。", "東京から大阪まで行きます。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("から〜まで", found_in(sentence))
+
+
+class APieceAnotherConstructionOwnsTests(unittest.TestCase):
+    """Plan 296: a particle a construction has fused (〜ものを's を, 〜や
+    否や's や) is no marker of its own; 〜ても is never the て of a
+    particle made of a verb (にとっても is にとって and "too"); 〜にします
+    is never ように's に."""
+
+    def test_pieces_owned(self) -> None:
+        for sentence, pattern, at in (("もっと早く相談していれば、損失を出さずに済んだものを。", "を", "ものを"),
+                                      ("私が鍵を開けるや否や、ビデオ通話がかかってくる。", "や", "や否や"),
+                                      ("持ち主にとっても、ありがたい。", "〜ても", "て"),
+                                      ("日本の歴史についても学びたい。", "〜ても", "て"),
+                                      ("夜おそくまで起きないようにします。", "〜にします", "に")):
+            with self.subTest(sentence=sentence):
+                first = sentence.index(at)
+                self.assertFalse([h for h in grammar_detect.hits(sentence)
+                                  if h["pattern"] == pattern and first <= h["start"] < first + len(at)])
+        self.assertIn(("も", "も"), keys("持ち主にとっても、ありがたい。"))
+        for sentence, pattern in (("パンやケーキを買う。", "や"), ("雨がふっても、私は歩いて行きます。", "〜ても"),
+                                  ("コーヒーにします。", "〜にします"), ("損失を出した。", "を")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
+
+
+class TwoPartsOfOnePointTests(unittest.TestCase):
+    """Plan 296: 〜ば〜ほど says one word twice (読めば読むほど), never a
+    ば and a later これほど or どれほど; 〜も〜ば〜も lists two things
+    alike, never an amount's も (数年もすれば) or a question word's."""
+
+    def test_ba_hodo_and_mo_ba_mo(self) -> None:
+        for sentence, pattern in (("もっと早く専門家に相談していれば、これほどの損失を出さずに済んだものを。", "〜ば〜ほど"),
+                                  ("測る側が信頼を失えば、どれほど正確な数字も人を安心させはしない。", "〜ば〜ほど"),
+                                  ("だが、選ばれた言葉の多くは、数年もすれば誰も口にしなくなる。", "〜も〜ば〜も"),
+                                  ("三日もすれば、誰も覚えていない。", "〜も〜ば〜も")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(pattern, found_in(sentence))
+        for sentence, pattern in (("日本語は勉強すればするほど面白くなる。", "〜ば〜ほど"), ("値段は安ければ安いほどいい。", "〜ば〜ほど"),
+                                  ("考えれば考えるほど、分からなくなった。", "〜ば〜ほど"),
+                                  ("運動は、しなければしないほど、つかれやすくなる。", "〜ば〜ほど"),
+                                  ("この町は海もあれば、山もある。", "〜も〜ば〜も"),
+                                  ("人生には、いい日もあれば悪い日もある。", "〜も〜ば〜も")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
+        # (考える人もいれば…守っても…考える人もいる: the pair's last も is 人も)
+        sentence = "教えれば言葉を残せると考える人もいれば、教室で守っても意味がないと考える人もいる。"
+        hit = next(h for h in grammar_detect.hits(sentence) if h["pattern"] == "〜も〜ば〜も")
+        self.assertEqual(hit["end"], sentence.rindex("人も") + 2)
+
+
+class WhatIsSaidIsNoConditionTests(unittest.TestCase):
+    """Plan 296: the と of what is said or realised is the quotation's,
+    never 〜と's "whenever" -- after a stated clause and before a verb of
+    knowing (すぎないと気づかされる), or across a comma to the one verb of
+    saying or showing that follows (いけないと、母が言った). And ないと at
+    the end of what is said is 〜ないといけない said short."""
+
+    def test_quoted(self) -> None:
+        for sentence in ("自分たちの「当たり前」が、ある時代のある土地の習慣にすぎないと気づかされるからだ。",
+                         "しかし、減り方を変えることはできるのだと、この町は示している。",
+                         "ねる前にスマホを見ちゃいけないと、母が言った。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜と", found_in(sentence))
+                self.assertIn("と", found_in(sentence))
+        for sentence in ("家に帰ると、母が言った。", "春になると、花が咲きます。", "雨が降らないと、困る。",
+                         "この道をまっすぐ行くと、駅があります。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜と", found_in(sentence))
+
+    def test_must_said_short(self) -> None:
+        for sentence in ("もうこんな時間だから、帰らないと。", "早く行かないとね。"):
+            with self.subTest(sentence=sentence):
+                lit = found_in(sentence)
+                self.assertEqual(lit.get("〜ないといけない"), "ないと")
+                self.assertNotIn("と", lit)
+                self.assertNotIn("〜と", lit)
+        self.assertEqual(found_in("お金をはらわないといけない。").get("〜ないといけない"), "ないといけない")

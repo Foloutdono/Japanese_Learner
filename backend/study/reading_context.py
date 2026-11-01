@@ -752,6 +752,13 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = _WEEKDAY_READINGS[s]
             continue
 
+        # 学生が皆法律家に, 選手は皆天国に: 皆 before a noun is みな, "all
+        # of them" -- the prefix かい- makes words UniDic reads whole (皆勤,
+        # 皆無, 皆既, 皆伝), so one cut off is みな (plan 296).
+        if s == "皆" and r == "かい" and t.get("pos") == "prefix":
+            out[i] = "みな"
+            continue
+
         # 4球目, the fourth pitch: きゅう, after a number (plan 272).
         if s == "球" and r == "たま" and i > 0 and _numeral_value(prev(i)) is not None:
             out[i] = "きゅう"

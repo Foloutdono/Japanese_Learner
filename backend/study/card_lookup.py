@@ -1961,7 +1961,12 @@ def _read_as_written(m, by_lemma, refused, after_conjunctive: bool):
     that is not one: ゆう of ゆうがた is no 言う, "to say"."""
     if by_lemma is None or refused is not by_lemma or any(is_kanji(c) for c in m.surface):
         return None
-    hit = resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive, m.surface, m.goshu)
+    # (A word that does not inflect, by the reading the page spells: ぶちょう
+    # is 部長, where UniDic's lemma 不調 is read ふちょう, plan 296.)
+    spelled = morphology.kata_to_hira(m.surface)
+    reading = spelled if m.pos not in ("verb", "adjective", "auxiliary") \
+        and morphology.kata_to_hira(m.reading or "") == spelled else m.lemma_reading
+    hit = resolve_kana(reading, m.pos, m.auxiliary_use, after_conjunctive, m.surface, m.goshu)
     if hit is None or hit[2] == refused[2] or _kana_word_instead(m, hit[1]) or _read_otherwise(m, hit[1]):
         return None
     if _level_rank(hit[0]) >= _level_rank(refused[0]) or (m.pos != "verb" and _a_verbs_card(hit[1])):
@@ -2870,11 +2875,40 @@ def _read_otherwise(m, entry: dict) -> bool:
         return False
     token = {_zuru(morphology.kata_to_hira(r)) for r in (m.lemma_reading, m.reading) if r}
     if token & card or {t.translate(_VOICED) for t in token if t} & card:
-        return False
+        if not _said_otherwise(m, entry, card):
+            return False
+        return True
     form = _page_form(m) or m.lemma
     if not _has_kanji(form):
         return True                     # written in kana, read otherwise: another word
     return _pool_by_form(form, tuple(token), seen_kanji=False) is not None
+
+
+def _said_otherwise(m, entry: dict, card: set[str]) -> bool:
+    """Whether a word that does not inflect is said, as the page reads
+    it, as none of the card's readings, where UniDic's lemma reading is
+    one of them, and JMdict holds the page's spelling read the page's way
+    as a word whose gloss shares nothing with the card's (plan 296):
+    世界中's 中 is じゅう, "all through", a row of its own, where UniDic
+    files it under 中 read ちゅう, the card "during". The card stands where
+    the two readings are one word (悪口 read わるぐち, 姉 read ねえ), and
+    for the voicing a compound's second half takes (七時ごろ, 疲れ気味)."""
+    if m.pos not in ("noun", "suffix", "prefix", "pronoun") or not m.reading or not m.lemma_reading:
+        return False
+    if m.surface != m.lemma or not _has_kanji(m.surface):
+        return False
+    said = _zuru(morphology.kata_to_hira(m.reading))
+    if said == _zuru(morphology.kata_to_hira(m.lemma_reading)) or said in card or said.translate(_VOICED) in card \
+            or said[:1].translate(_UNVOICED) + said[1:] in card or said[:1].translate(_HALF_VOICED) + said[1:] in card:
+        return False
+    row = jmdict_db.get_by_key(m.surface, said)
+    if row is None:
+        return False
+    mine, theirs = _row_gloss_words(row), _gloss_words(entry)
+    return not (mine & theirs) and not _glosses_meet(mine, theirs)
+
+
+_UNVOICED = str.maketrans("がぎぐげござじずぜぞだぢづでどばびぶべぼ", "かきくけこさしすせそたちつてとはひふへほ")
 
 
 def _kanji_head(text: str) -> str:
@@ -3545,6 +3579,14 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
         return _pool_by_form(m.surface, (m.reading, m.lemma_reading, _to_katakana(m.reading)),
                              seen_kanji=False)
     inflects = m.pos in ("verb", "adjective")
+    if not inflects and m.surface != lemma and _has_kanji(m.surface):
+        # The page's spelling read as the page reads it, where JMdict
+        # holds that pair (plan 296): 見どころ read みどころ, a highlight,
+        # whose lemma 見所's commonest row is けんじょ, a noh stage's seats.
+        for said in dict.fromkeys((morphology.kata_to_hira(m.reading), m.reading)):
+            own = jmdict_db.get_by_key(m.surface, said) if said else None
+            if own is not None:
+                return own
     written = {c for c in m.surface if is_kanji(c)}
     page = morphology.written_form(m)
     respelled = bool(written) and written <= set(lemma) and page and page != lemma and _has_kanji(page)

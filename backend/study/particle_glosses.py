@@ -181,8 +181,8 @@ _GLOSSES = {
                          "of pollen that flies",
                    "fr": "(dans une proposition devant un nom) marque qui fait l'action, = が : 花粉の飛ぶ量, la "
                          "quantité de pollen qui vole"},
-    "まで_even": {"en": "(after に, or before も) even, as far as: 預金にまで手をつける, even touches the savings",
-                 "fr": "(après に, ou devant も) jusqu'à, même : 預金にまで手をつける, toucher même à l'épargne"},
+    "まで_even": {"en": "even, as far as (the furthest case): 預金にまで手をつける, even touches the savings",
+                 "fr": "jusqu'à, même (le cas le plus extrême) : 預金にまで手をつける, toucher même à l'épargne"},
     "まで_upto": {"en": "up to, as far as, until: 最後まで, to the end", "fr": "jusqu'à : 最後まで, jusqu'au bout"},
     "て_form": {"en": "the て form: joins what comes before to what follows (and, so, by doing)",
                "fr": "la forme en て : relie ce qui précède à ce qui suit (et, donc, en faisant)"},
@@ -1177,10 +1177,8 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "の_subject"                # 花粉の飛ぶ量, 持ち主のわからない荷物
         elif m.surface == "の" and _predicate_named(morphemes, i):
             key = "の_nominal"                # 重いのが難点だ, 赤いのがほしい (plan 272)
-        elif m.surface == "まで" and i > 0 and ((morphemes[i - 1].surface == "に" and morphemes[i - 1].pos == "particle")
-                                              or (i + 1 < len(morphemes) and morphemes[i + 1].surface == "も"
-                                                  and morphemes[i + 1].pos == "particle")):
-            key = "まで_even"                 # 親の預金にまで手をつける, 老舗までもが
+        elif m.surface == "まで" and i > 0 and _even_made(morphemes, i):
+            key = "まで_even"                 # 親の預金にまで手をつける, 老舗までもが, 電気代やガス代まで
         elif m.surface == "まで" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix", "adverb"):
             key = "まで_upto"                 # 最後まで残れますか, どのくらいまで
         elif m.surface in ("て", "で") and m.conjunctive and i > 0 \
@@ -1188,6 +1186,11 @@ def gloss(morphemes, i: int) -> dict | None:
                      or (morphemes[i - 1].pos == "suffix" and morphemes[i - 1].surface.endswith("く"))):
             key = "て_form"                   # 借りてまでして, 水っぽくて
     return dict(_GLOSSES[key]) if key else None
+
+
+def _even_made(morphemes, i: int) -> bool:
+    from study.grammar_detect import _even_made as even
+    return even(morphemes, i)
 
 
 _LAUGHED = re.compile(r"^(?:ふぉ|フォ|ほ|ホ|は|ハ|ひ|ヒ|へ|ヘ)(?:[っッ]?(?:ふぉ|フォ|ほ|ホ|は|ハ|ひ|ヒ|へ|ヘ))+[っッ]?$")
