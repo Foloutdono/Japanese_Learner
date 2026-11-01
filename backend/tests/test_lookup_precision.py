@@ -3497,3 +3497,12 @@ class ParticleLetterWordTests(unittest.TestCase):
                 self.assertEqual(token["pos"], "verb")
                 self.assertEqual(token["lemma"], "寝る")
         self.assertEqual(self.kanji("でも、むずかしいのははつおんです。", "はつおん"), "発音")
+
+    def test_only_the_topic_marker_opens_on_nothing(self) -> None:
+        # The catalogue writes its patterns from their particle (にちがいない,
+        # にしか), and a に after a comma may open on a longer word: MeCab's
+        # next reading there is a shorter noun (にち, にし, にじ + か + ん),
+        # so only a は's is taken.
+        self.assertEqual([m.surface for m in morphology.tokenize("にちがいない")][:2], ["に", "ちがい"])
+        self.assertEqual([m.surface for m in morphology.tokenize("にしか")], ["に", "しか"])
+        self.assertNotIn("にじ", cut("だいたいまいばん、にじかんぐらいつづいています。"))

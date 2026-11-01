@@ -4465,9 +4465,9 @@ def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple], text: st
     いろが悪い is 顔色, "complexion", which UniDic reads か + お + いろ.
     The longest run of three kana or more from the particle that spells a
     word of the deck or of JMdict (_known) and ends before a particle or
-    a mark is read as that word. Where no run of whole words spells one,
-    MeCab's next reading that begins a noun of the deck on the letter is
-    taken (plan 295): はこの中には is はこ + の, the box, never は + この."""
+    a mark is read as that word. Where no run of whole words spells one
+    after a は, MeCab's next reading that begins a noun of the deck on it
+    is taken (plan 295): はこの中には is はこ + の, the box, never は + この."""
     from dataclasses import replace
 
     out_m, out_t = [], []
@@ -4486,7 +4486,11 @@ def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple], text: st
                 spelled = _known(joined) if len(joined) >= 3 else None
                 if spelled and (after is None or after.pos in ("particle", "symbol")):
                     best = (j, joined, spelled)
-            if not best and text:
+            # (は alone: it marks what stands before it, so nothing it opens
+            # is a fragment of the catalogue's patterns, which open on the
+            # others as written -- にちがいない, にしか, のきっての, where
+            # MeCab's next reading takes a shorter noun, にち, にし, のき.)
+            if not best and text and m.surface == "は":
                 start, end = m.start, m.end
                 again = _next_best(text, morphemes, i, tagger or _tagger,
                                    lambda alt: _a_deck_noun_at(alt, start, end))

@@ -362,105 +362,105 @@
    "level": "N1",
    "lists_say": "N3",
    "meaning": "plan, policy",
-   "rank": 1899
+   "rank": 1900
   },
   {
    "key": "科::か",
    "level": "N1",
    "lists_say": "N2",
    "meaning": "department, section",
-   "rank": 1901
+   "rank": 1902
   },
   {
    "key": "驚き::おどろき",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "surprise, astonishment, wonder",
-   "rank": 1903
+   "rank": 1904
   },
   {
    "key": "::ショック",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "shock",
-   "rank": 1936
+   "rank": 1937
   },
   {
    "key": "応援::おうえん",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "support, cheering; aid, help, reinforcement",
-   "rank": 2013
+   "rank": 2014
   },
   {
    "key": "押さえる::おさえる",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to hold down, to press down; to cover (with one's hand); to seize, to secure",
-   "rank": 2030
+   "rank": 2031
   },
   {
    "key": "動揺::どうよう",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "agitation, being shaken, unrest; shaking, trembling",
-   "rank": 2055
+   "rank": 2056
   },
   {
    "key": "角::かく",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "angle; square; bishop (shogi)",
-   "rank": 2065
+   "rank": 2066
   },
   {
    "key": "着ける::つける",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to put on, to wear (accessories, a mask); to attach",
-   "rank": 2081
+   "rank": 2082
   },
   {
    "key": "外れる::はずれる",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to come off; to miss (the mark), to be wrong (guess); to be excluded",
-   "rank": 2087
+   "rank": 2088
   },
   {
    "key": "同士::どうし",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "fellow, companion, comrade",
-   "rank": 2119
+   "rank": 2120
   },
   {
    "key": "載る::のる",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to appear (in print), to be recorded; to be placed on",
-   "rank": 2123
+   "rank": 2124
   },
   {
    "key": "産む::うむ",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to give birth, to deliver, to produce",
-   "rank": 2147
+   "rank": 2148
   },
   {
    "key": "浴びる::あびる",
    "level": "N3",
    "lists_say": "N5",
    "meaning": "to bathe, to bask in the sun, to shower",
-   "rank": 2154
+   "rank": 2155
   },
   {
    "key": "下る::くだる",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to get down, to descend",
-   "rank": 2202
+   "rank": 2203
   },
   {
    "key": "選挙::せんきょ",
@@ -790,6 +790,13 @@
    "lists_say": "N3",
    "meaning": "edition",
    "rank": 3773
+  },
+  {
+   "key": "羽根::はね",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "feather, plume; wing; shuttlecock",
+   "rank": 3813
   },
   {
    "key": "是非::ぜひ",
@@ -1203,13 +1210,6 @@
    "lists_say": "N3",
    "meaning": "organic",
    "rank": 5992
-  },
-  {
-   "key": "羽根::はね",
-   "level": "N2",
-   "lists_say": "N3",
-   "meaning": "feather, plume; wing; shuttlecock",
-   "rank": 6052
   },
   {
    "key": "宛てる::あてる",
@@ -3583,13 +3583,13 @@
    "expression": "リード",
    "reading": "リード",
    "level": "N1",
-   "rank": 1881
+   "rank": 1882
   },
   {
    "expression": "伯母",
    "reading": "おば",
    "level": "N2",
-   "rank": 1951
+   "rank": 1952
   },
   {
    "expression": "狩り",
@@ -6482,247 +6482,247 @@
   {
    "lemma": "妄想",
    "reading": "もうそう",
-   "rank": 1875,
+   "rank": 1876,
    "meaning": "delusion"
   },
   {
    "lemma": "大尉",
    "reading": "たいい",
-   "rank": 1912,
+   "rank": 1913,
    "meaning": "captain (Army, US Marine Corps, USAF)"
   },
   {
    "lemma": "がんば",
    "reading": "がんば",
-   "rank": 1915,
+   "rank": 1916,
    "meaning": "go for it"
   },
   {
    "lemma": "救出",
    "reading": "きゅうしゅつ",
-   "rank": 1920,
+   "rank": 1921,
    "meaning": "rescue"
   },
   {
    "lemma": "援護",
    "reading": "えんご",
-   "rank": 1924,
+   "rank": 1925,
    "meaning": "support"
   },
   {
    "lemma": "吸血",
    "reading": "きゅうけつ",
-   "rank": 1926,
+   "rank": 1927,
    "meaning": "bloodsucking"
   },
   {
    "lemma": "従業",
    "reading": "じゅうぎょう",
-   "rank": 1928,
+   "rank": 1929,
    "meaning": "employment"
   },
   {
    "lemma": "ナイト",
    "reading": "ないと",
-   "rank": 1929,
+   "rank": 1930,
    "meaning": "have to (do, be)"
   },
   {
    "lemma": "死者",
    "reading": "ししゃ",
-   "rank": 1930,
+   "rank": 1931,
    "meaning": "dead person"
   },
   {
    "lemma": "姫",
    "reading": "ひめ",
-   "rank": 1932,
+   "rank": 1933,
    "meaning": "young lady of noble birth"
   },
   {
    "lemma": "白人",
    "reading": "はくじん",
-   "rank": 1969,
+   "rank": 1970,
    "meaning": "white person"
   },
   {
    "lemma": "地上",
    "reading": "ちじょう",
-   "rank": 1977,
+   "rank": 1978,
    "meaning": "above ground"
   },
   {
    "lemma": "企み",
    "reading": "たくらみ",
-   "rank": 2012,
+   "rank": 2013,
    "meaning": "plot"
   },
   {
    "lemma": "両手",
    "reading": "りょうて",
-   "rank": 2019,
+   "rank": 2020,
    "meaning": "both hands"
   },
   {
    "lemma": "偽",
    "reading": "にせ",
-   "rank": 2042,
+   "rank": 2043,
    "meaning": "imitation"
   },
   {
    "lemma": "人殺し",
    "reading": "ひとごろし",
-   "rank": 2052,
+   "rank": 2053,
    "meaning": "murder"
   },
   {
    "lemma": "無人",
    "reading": "むじん",
-   "rank": 2055,
+   "rank": 2056,
    "meaning": "unmanned"
   },
   {
    "lemma": "喋り",
    "reading": "しゃべり",
-   "rank": 2064,
+   "rank": 2065,
    "meaning": "talk"
   },
   {
    "lemma": "慈悲",
    "reading": "じひ",
-   "rank": 2066,
+   "rank": 2067,
    "meaning": "mercy"
   },
   {
    "lemma": "警報",
    "reading": "けいほう",
-   "rank": 2083,
+   "rank": 2084,
    "meaning": "warning"
   },
   {
    "lemma": "蛇",
    "reading": "へび",
-   "rank": 2092,
+   "rank": 2093,
    "meaning": "snake"
   },
   {
    "lemma": "取得",
    "reading": "しゅとく",
-   "rank": 2094,
+   "rank": 2095,
    "meaning": "obtaining (a qualification, right, object, etc.)"
   },
   {
    "lemma": "いで",
    "reading": "いで",
-   "rank": 2116,
+   "rank": 2117,
    "meaning": "oh no"
   },
   {
    "lemma": "陪審",
    "reading": "ばいしん",
-   "rank": 2117,
+   "rank": 2118,
    "meaning": "jury"
   },
   {
    "lemma": "失踪",
    "reading": "しっそう",
-   "rank": 2121,
+   "rank": 2122,
    "meaning": "disappearance"
   },
   {
    "lemma": "最新",
    "reading": "さいしん",
-   "rank": 2128,
+   "rank": 2129,
    "meaning": "latest"
   },
   {
    "lemma": "逃れ",
    "reading": "のがれ",
-   "rank": 2135,
+   "rank": 2136,
    "meaning": "escaping"
   },
   {
    "lemma": "何事",
    "reading": "なにごと",
-   "rank": 2152,
+   "rank": 2153,
    "meaning": "what"
   },
   {
    "lemma": "無罪",
    "reading": "むざい",
-   "rank": 2159,
+   "rank": 2160,
    "meaning": "innocence"
   },
   {
    "lemma": "銃撃",
    "reading": "じゅうげき",
-   "rank": 2160,
+   "rank": 2161,
    "meaning": "shooting"
   },
   {
    "lemma": "黒人",
    "reading": "こくじん",
-   "rank": 2162,
+   "rank": 2163,
    "meaning": "black person"
   },
   {
    "lemma": "凶器",
    "reading": "きょうき",
-   "rank": 2166,
+   "rank": 2167,
    "meaning": "dangerous weapon"
   },
   {
    "lemma": "若者",
    "reading": "わかもの",
-   "rank": 2168,
+   "rank": 2169,
    "meaning": "young person"
   },
   {
    "lemma": "寝室",
    "reading": "しんしつ",
-   "rank": 2172,
+   "rank": 2173,
    "meaning": "bedroom"
   },
   {
    "lemma": "共有",
    "reading": "きょうゆう",
-   "rank": 2185,
+   "rank": 2186,
    "meaning": "joint ownership"
   },
   {
    "lemma": "薬物",
    "reading": "やくぶつ",
-   "rank": 2188,
+   "rank": 2189,
    "meaning": "drug"
   },
   {
    "lemma": "操",
    "reading": "みさお",
-   "rank": 2223,
+   "rank": 2224,
    "meaning": "fidelity"
   },
   {
    "lemma": "神々",
    "reading": "かみがみ",
-   "rank": 2226,
+   "rank": 2227,
    "meaning": "gods"
   },
   {
    "lemma": "死因",
    "reading": "しいん",
-   "rank": 2229,
+   "rank": 2230,
    "meaning": "cause of death"
   },
   {
    "lemma": "何百",
    "reading": "なんびゃく",
-   "rank": 2235,
+   "rank": 2236,
    "meaning": "hundreds"
   },
   {
    "lemma": "送信",
    "reading": "そうしん",
-   "rank": 2240,
+   "rank": 2241,
    "meaning": "transmission"
   },
   {
