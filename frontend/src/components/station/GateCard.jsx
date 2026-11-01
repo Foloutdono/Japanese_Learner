@@ -21,7 +21,7 @@ import { useProfileSummary } from '../../stores/profileSummary'
 import { useLearnerModes, setExtraModes, MODE_LINES } from '../../stores/learnerModes'
 import { publishLeft } from '../../stores/gateRun'
 import { runFit, isFreeLane, laneFreeShare, nextCreditClock, refillClock } from '../../domain/credits'
-import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
+import { LINE_ORDER, laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
 import { restWeek, sealDate, ticketDate, utcToday, weekdayKanji } from '../../domain/dayClear'
 import { longDate } from '../dayclear/aria'
 import { WeekStamps } from '../dayclear/kit/WeekStamps'
@@ -70,7 +70,7 @@ import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, prelo
 // Grouped by type, in the lines' order, because the pigment is what
 // tells one lane from another and the backend's order interleaves them.
 // Stable, so the backend's urgency order within a type survives.
-const TYPE_ORDER = ['kana', 'vocab', 'kanji', 'grammar', 'personal']
+const TYPE_ORDER = LINE_ORDER
 function orderLanes(lanes) {
   const rank = l => { const i = TYPE_ORDER.indexOf(laneTypeOf(l)); return i < 0 ? TYPE_ORDER.length : i }
   return [...lanes].sort((a, b) => rank(a) - rank(b))

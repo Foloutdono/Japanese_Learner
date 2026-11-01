@@ -314,6 +314,52 @@ def test_a_point_in_two_pieces_has_two_gaps():
     assert [p["gap"] for p in built["pieces"] if "gap" in p] == [0, 1]
 
 
+def _held(pieces):
+    """The parts a client holds each gap to: the part before it, and
+    the kanji before that where the part is the kanji's kana."""
+    out = []
+    for i, piece in enumerate(pieces):
+        if "gap" in piece and i and "furigana" in pieces[i - 1]:
+            parts = pieces[i - 1]["furigana"]
+            take = 2 if len(parts) > 1 and parts[-1].get("reading") is None and parts[-2].get("reading") else 1
+            out.append("".join(p["text"] for p in parts[-take:]))
+    return out
+
+
+def test_construire_holds_a_gap_to_its_word_not_to_the_sentence():
+    # すみません、わたしはさかな＿＿＿。 on a phone: a run of kana is one
+    # part, the client holds the gap to the part before it, and the whole
+    # clause stood with the gap on one line wider than the card.
+    level, entry, _ = _point("〜がきらいです")
+    built = next(b for b in (grammar_ladder.build_payload(level, entry, "fr", t) for t in range(8))
+                 if b["key"] == "sc:1")
+    assert built["pieces"][0]["furigana"] == [{"text": "すみません、わたしは"}, {"text": "さかな"}]
+    assert _held(built["pieces"]) == ["さかな"]
+    # A ruby part is never cut, and its kana stays with it: 書い of 書いて.
+    level, entry, _ = _point("〜てください")
+    for turn in range(8):
+        b = grammar_ladder.build_payload(level, entry, "en", turn)
+        if b["key"] == "ex:1":
+            assert _held(b["pieces"]) == ["書い"]
+            break
+    else:
+        raise AssertionError("ex:1 never asked")
+
+
+def test_no_gap_is_held_to_more_than_its_word():
+    # Over every Construire: the text the client holds a gap to is one
+    # word, never a clause -- at most the tokenizer's morpheme the gap
+    # follows, with its kanji.
+    seen = 0
+    for level, entry in _builds():
+        for turn in range(3):
+            built = grammar_ladder.build_payload(level, entry, "en", turn)
+            for held in _held(built["pieces"]):
+                assert len(held) <= 8, (entry["pattern"], built["key"], held)
+                seen += 1
+    assert seen > 1000
+
+
 def test_the_check_endpoint_judges_and_keeps_nothing(client):
     level, entry, raw_id = _point("〜てください")
     built = grammar_ladder.build_payload(level, entry, "fr", 0)
