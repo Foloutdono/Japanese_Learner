@@ -511,7 +511,7 @@ comprehension's clock, passage card, question card and lettered options.
 | One card | a word of the N5 deck | the card's face, its back with the rating bar and each rating's next review, Today, the gate |
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
-| Read a whole text (plan 298) | a comprehension seed's vocabulary or grammar question, N5 to N1 | the passage on its card under the run's clock, the question with its type and its four options, the answer folded and the line of the text it quotes (its readings, the quoted words lit, its translation), the gate |
+| Read a whole text (plans 298, 298b) | a comprehension seed's vocabulary or grammar question, N5 to N1 | the passage on its card under the run's clock, the same text rolling (its speed stepped up, ふ pressed, the readings over the kanji), the question with its type and its four options, the answer folded and the line of the text it quotes (its readings, the quoted words lit, its translation), the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
 | Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the sprint run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
@@ -612,6 +612,22 @@ level, read from `routes/reading.py`). The cover sets the text at the
 passage's reading rung, steps it down to the small one, and only then
 bounds it as the run does, the cut line fading into the card's foot; the
 clock runs from the moment it is up, and the still is the clip's end.
+
+**And it rolls (plan 298b).** The second frame is the run's other way
+to read (plan 258, `RollingPassage`), drawn by `app.rollCard`: a sentence
+a line, centred, rising up a viewport that fades at its top and bottom,
+the line at the middle lit and the others stepped back by their
+distance from it, the clock counting the roll's own time, and the row
+of controls under it. The column moves as the app's does, its middle
+going from the first line's to the last's as the characters go by
+(`app.rollAt`), so a change of speed keeps its place. In motion
+(`ROLL_DEMO`) the first line stands, the roll runs at 6 characters a
+second, + is pressed twice (8, then 10: the stepper's own steps) and ふ
+once, and the readings fade in over the kanji; the still is its last
+moment. The story also plays whole (`clips.story`, `COMP_BEATS`, about
+25 seconds): each frame on its own clock, the cover's text, the roll,
+the question, the answer, the gate, scored with the app's sounds;
+"Download the whole story" encodes it.
 
 **A story promises what the app does today.** Its figures are the
 bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
