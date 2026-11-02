@@ -8,7 +8,7 @@ import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS, DUEL_INKS } from '../carousel/app.js'
-import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, askable, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
@@ -746,6 +746,15 @@ describe('explaining a point in its own sentence', () => {
       expect(P.depart, lang).toBe(t.depart)
       expect(P.unit, lang).toBe(t.dueUnit)
       expect(P.doneBy('08:14'), lang).toBe(t.gateEndsAt('08:14'))
+      // Reading comprehension's story (plan 298): the run's clock, its
+      // name on the card's foot, the question and its type's badge.
+      expect(P.comp.timeLeft, lang).toBe(t.timeRemaining)
+      expect(P.comp.title, lang).toBe(t.comprehensionTitle)
+      expect(P.comp.question, lang).toBe(t.question)
+      expect(P.comp.types, lang).toEqual({
+        comprehension: t.questionTypeComprehension, vocabulary: t.questionTypeVocabulary,
+        grammar: t.questionTypeGrammar, inference: t.questionTypeInference,
+      })
     }
   })
 
@@ -781,6 +790,49 @@ describe('explaining a point in its own sentence', () => {
           }
         }
       }
+    }
+  })
+
+  // ── 理解, reading comprehension's story (plan 298) ────────────
+  it('asks a seed passage its own question and answers it on the line it quotes (plan 298)', () => {
+    const data = bank('comprehension.json')
+    for (const lang of ['en', 'fr']) {
+      const items = promoItems('comprehension', data, lang)
+      expect(items.length, lang).toBeGreaterThan(100)
+      for (const { id } of items) {
+        const [pid, n] = id.split(':q')
+        const ps = data.passages.find(x => x.id === pid)
+        const q = ps.questions[Number(n) - 1]
+        // Only a question whose quote is in one sentence, as the run opens it.
+        expect(['vocabulary', 'grammar'], id).toContain(q.type)
+        const a = askable(ps, lang).find(x => x.q === Number(n) - 1)
+        const sentence = ps.sents[a.at].map(r => r[0]).join('')
+        expect(sentence, id).toContain(a.quote)
+        const pl = promoPlan('comprehension', data, id, { ...OPTS, lang, story: 'comprehension' })
+        expect(pl.id, id).toBe(id)
+        expect(pl.level, id).toBe(ps.lv)
+        const { promo } = pl
+        expect(promo.text, id).toBe(ps.sents.flat().map(r => r[0]).join(''))
+        expect(promo.read, id).toBeGreaterThan(0)
+        expect(new Set(promo.choices).size, id).toBe(4)
+        expect(promo.choices[promo.right], id).toBeTruthy()
+        expect(promo.n, id).toBe(Number(n))
+        expect(promo.total, id).toBe(ps.questions.length)
+        // The line it rests on, whole, its translation in the reader's
+        // language, the words it quotes lit (none when it quotes it whole).
+        expect(promo.quote.toks.map(x => x.t).join(''), id).toBe(sentence)
+        expect(promo.quote.tr.length, id).toBeGreaterThan(0)
+        const lit = promo.quote.toks.filter(x => x.lit).map(x => x.t).join('')
+        if (lit) expect(lit, id).toContain(a.quote)
+        else expect(sentence.replace(/[。！？、]/g, ''), id).toBe(a.quote.replace(/[。！？、]/g, ''))
+      }
+    }
+    // A sentence the seed's breakdown cuts alike carries its translation.
+    const seeds = Object.fromEntries(['N5', 'N4', 'N3', 'N2', 'N1'].flatMap(lv => JSON.parse(read(`../backend/content/comprehension/${lv}.json`))).map(x => [x.id, x]))
+    for (const ps of data.passages) {
+      expect(ps.tr, ps.id).toHaveLength(ps.sents.length)
+      const said = Object.fromEntries(seeds[ps.id].breakdown.map(b => [b.jp.trim(), b.translation]))
+      ps.sents.forEach((rows, i) => expect(ps.tr[i], `${ps.id} ${i}`).toEqual(said[rows.map(r => r[0]).join('').trim()] ?? null))
     }
   })
 

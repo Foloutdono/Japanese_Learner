@@ -817,7 +817,12 @@ def kana_cards() -> dict:
 
 def passages() -> dict:
     """The comprehension seeds (content/comprehension/*.json): each text
-    cut into its sentences, each sentence into words, and its questions."""
+    cut into its sentences, each sentence into words, and its questions.
+    Since plan 298 each sentence's translation too (`tr`, beside `sents`,
+    {en, fr} or None), the seed's breakdown's own for the sentence it
+    cuts alike: what the run's breakdown prints under it, and what the
+    comprehension story's answer prints under the line a question quotes.
+    A sentence the breakdown cuts otherwise (a quotation over a 。) has none."""
     out = []
     for level in LEVELS:
         path = BACKEND / "content" / "comprehension" / f"{level}.json"
@@ -825,13 +830,19 @@ def passages() -> dict:
             continue
         for ex in json.loads(path.read_text(encoding="utf-8")):
             parts = [x for x in re.split(r"(?<=[。！？])(?!」)", ex["text"]) if x.strip()]
+            said = {b["jp"].strip(): b.get("translation") for b in ex.get("breakdown", [])}
             out.append({
                 "id": ex["id"], "lv": level, "title": ex.get("title", ""), "grammar": ex.get("grammar", []),
                 "sents": [text_rows(x, level) for x in parts],
+                "tr": [said.get(x.strip()) or None for x in parts],
                 "words": _passage_words(parts, level),
                 "questions": ex.get("questions", []),
             })
-    return {"rev": REV, "passages": out}
+    # The reading window at each level, as the run's clock counts it (the
+    # comprehension story's clock, plan 298). routes/reading.py opens the
+    # database when it is imported, so it is read from its source.
+    read = _module_constant(BACKEND / "routes" / "reading.py", "READ_SECONDS_BY_LEVEL")
+    return {"rev": REV, "read": read, "passages": out}
 
 
 def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:

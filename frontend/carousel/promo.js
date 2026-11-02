@@ -9,24 +9,28 @@
 // app does today: start free, the kana line free for good, no ads and no
 // trackers; no frame prices a mode. The plan is pure; the frames draw.
 // Since plan 281 a sixth, the duels, is a story in motion end to end:
-// one sprint played, its result, the Elo it moved and the board.
+// one sprint played, its result, the Elo it moved and the board. Since
+// plan 298 a seventh, reading comprehension: a seed passage under the
+// run's clock, one of its own questions, answered on the line of the text
+// it quotes, and the board.
 import { EDGE, FS, SP, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, text } from './draw.js'
 import * as A from './app.js'
 import { STRINGS, count, weldIf } from './strings.js'
 import { gloss } from './common.js'
 import { sentenceQuizzes } from './quizzes.js'
 import { LIMIT_MS, SPRINT_MS, points } from '../src/domain/duel.js'
+import { quotedFragments, sentenceFor } from '../src/domain/quotedFragments.js'
 
-export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'pass', 'duel']
-export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', pass: 'index.json', duel: 'duel.json' }
+export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'comprehension', 'pass', 'duel']
+export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', comprehension: 'comprehension.json', pass: 'index.json', duel: 'duel.json' }
 
 // The words, in the two languages: the app's own where the app says it
 // (locales/*: the ratings, the stages, Today's unit, Depart), the landing
 // page's where the page says it (landing/strings.mjs).
 export const PROMO = {
   en: {
-    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', pass: 'Your pass', duel: 'Duels' },
-    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', pass: 'The pass', duel: 'Duels' },
+    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', comprehension: 'Read a whole text', pass: 'Your pass', duel: 'Duels' },
+    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', comprehension: 'Passage', pass: 'The pass', duel: 'Duels' },
     blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free', duel: 'A two-minute sprint against another learner, and the Elo' },
     hours: { dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' },
     hook: 'Learn Japanese, from your first kana to JLPT N1.',
@@ -80,11 +84,27 @@ export const PROMO = {
       card: c => `Do you still know ${c}? Spaced repetition, nothing to set up`,
       analyser: c => `${c} cut word by word, its grammar numbered`,
       exam: c => `Could you pass the JLPT N5? One question: ${c}`,
+      comprehension: (c, lv) => `Can you read a whole text in Japanese? ${c}, a JLPT ${lv} reading`,
       pass: () => 'Your Japanese pass is waiting: start free on tsuji.app',
       duel: () => 'Japanese duels: 2 minutes against another learner, your Elo at stake',
     },
-    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', pass: 'Board today?', duel: 'Who would you challenge first?' },
+    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', comprehension: 'A, B, C or D?', pass: 'Board today?', duel: 'Who would you challenge first?' },
     tags: ['japaneseapp', 'jlpt'],
+    // Reading comprehension's story (plan 298): its own lines, then the
+    // app's words on its parts (locales/: the clock, the exercise's
+    // name, the question and its type's badge).
+    comp: {
+      kind: lv => `JLPT ${lv} · Reading comprehension`,
+      hook: 'Can you read a whole text in Japanese?',
+      timeLeft: 'Time remaining',
+      title: 'Reading comprehension',
+      question: 'Question',
+      types: { comprehension: 'Comprehension', vocabulary: 'Vocabulary', grammar: 'Grammar', inference: 'Inference' },
+      inText: 'In the text',
+      then: 'Then the whole text, sentence by sentence: each word with its reading and its meaning.',
+      head: 'Read whole texts, not just words.',
+      note: 'A text at your level, then its questions: the JLPT’s reading section, rehearsed.',
+    },
     // The duels' story (plan 281): its own lines, then the app's words on
     // its parts (locales/: the ticket, the race, the result, the Elo).
     duel: {
@@ -117,8 +137,8 @@ export const PROMO = {
     },
   },
   fr: {
-    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', pass: 'Ton pass', duel: 'Les duels' },
-    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', pass: 'Le pass', duel: 'Duels' },
+    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', comprehension: 'Lis un texte entier', pass: 'Ton pass', duel: 'Les duels' },
+    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', comprehension: 'Texte', pass: 'Le pass', duel: 'Duels' },
     blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 2 minutes contre un autre apprenant, et l’Elo' },
     hours: { dawn: 'Aube', day: 'Jour', dusk: 'Soir', night: 'Nuit' },
     hook: 'Apprendre le japonais, du premier kana au JLPT N1.',
@@ -170,11 +190,24 @@ export const PROMO = {
       card: c => `Tu connais encore ${c} ? La répétition espacée, sans rien régler`,
       analyser: c => `${c} découpée mot à mot, sa grammaire numérotée`,
       exam: c => `Tu réussirais le JLPT N5 ? Une question : ${c}`,
+      comprehension: (c, lv) => `Tu lirais un texte entier en japonais ? ${c}, une lecture du JLPT ${lv}`,
       pass: () => 'Ton pass pour le japonais t’attend : commence gratuitement sur tsuji.app',
       duel: () => 'Duels de japonais : 2 minutes contre un autre apprenant, ton Elo en jeu',
     },
-    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
+    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', comprehension: 'A, B, C ou D ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
     tags: ['applijaponais', 'jlpt'],
+    comp: {
+      kind: lv => `JLPT ${lv} · Compréhension écrite`,
+      hook: 'Tu lirais un texte entier en japonais ?',
+      timeLeft: 'Temps restant',
+      title: 'Compréhension écrite',
+      question: 'Question',
+      types: { comprehension: 'Compréhension', vocabulary: 'Vocabulaire', grammar: 'Grammaire', inference: 'Inférence' },
+      inText: 'Dans le texte',
+      then: 'Puis le texte entier, phrase par phrase : chaque mot avec sa lecture et son sens.',
+      head: 'Lis des textes entiers, pas que des mots.',
+      note: 'Un texte à ton niveau, puis ses questions : l’épreuve de lecture du JLPT, en répétition.',
+    },
     duel: {
       hook: s => ['Un duel en japonais.', s >= 120 && s % 60 === 0 ? `${s / 60} minutes.` : `${s} secondes.`],
       versus: 'Toi contre un autre apprenant.',
@@ -246,11 +279,56 @@ export function promoItems(story, data, lang) {
       return data.sentences.filter(s => s.gram.some(g => data.points[g.p])).map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.p }))
     case 'exam':
       return data.sentences.filter(s => readingOf(s, data, lang)).map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.rows[s.fi]?.t || '' }))
+    case 'comprehension':
+      return data.passages.flatMap(ps => askable(ps, lang).map(a => ({ id: `${ps.id}:q${a.q + 1}`, jp: ps.title, sub: firstUp(ps.questions[a.q].question[lang] || ps.questions[a.q].question.en), tag: ps.lv })))
     case 'duel':
       return [{ id: story, jp: '対戦', sub: P.blurb.duel, tag: data.level || '' }]
     default:
       return [{ id: story, jp: '辻', sub: P.blurb[story], tag: '' }]
   }
+}
+
+// ── 理解, reading comprehension's story (plan 298) ──────────────────
+const passageText = ps => ps.sents.map(rows => rows.map(r => r[0]).join(''))
+/** The questions of a seed passage its story can answer on a line of the
+ *  text: those that quote one sentence of it (the run's own rule,
+ *  domain/quotedFragments.js, the one the desk and the phone open the
+ *  breakdown by) whose translation the bank carries; a vocabulary
+ *  question first, its quote a word, then a grammar one. [{ q, at, quote }] */
+export function askable(ps, lang) {
+  const sents = passageText(ps).map(jp => ({ jp }))
+  const out = []
+  for (const type of ['vocabulary', 'grammar']) {
+    ps.questions.forEach((q, i) => {
+      if (q.type !== type) return
+      const quotes = quotedFragments(q.question[lang] || q.question.en)
+      const at = sentenceFor(sents, quotes)
+      if (at < 0 || !ps.tr?.[at]) return
+      out.push({ q: i, at, quote: quotes.find(f => sents[at].jp.includes(f)) })
+    })
+  }
+  return out
+}
+/** The line a question quotes, as the breakdown's open sentence draws it:
+ *  each word with its reading, a particle or the copula bare, the
+ *  words the question quotes lit. */
+function quotedLine(rows, quote) {
+  const jp = rows.map(r => r[0]).join('')
+  // A question that quotes its sentence whole lights nothing in it.
+  const whole = jp.replace(/[。！？、]/g, '') === quote.replace(/[。！？、]/g, '')
+  const from = whole ? -1 : jp.indexOf(quote)
+  let at = 0
+  return rows.map(([t, kind, , fu]) => {
+    const start = at
+    at += t.length
+    return {
+      t, k: kind ? 'word' : 'punct',
+      fu: fu && hasKanji(t) ? reading({ t, fu }) : '',
+      bare: kind === 'p' || kind === 'c',
+      lit: from >= 0 && start < from + quote.length && at > from,
+      point: 0,
+    }
+  })
 }
 
 /** The analyser's view of a bank sentence: its tokens, each grammar
@@ -401,6 +479,24 @@ export function promoPlan(story, data, id, opts) {
         ...base, id: s.id,
         promo: { before, word: row.t, after, choices: q.choices.map(c => c.text), right: q.right, explain: P.reads(row.t, reading(row), sense), exam: figures?.examN5 },
         title: P.titles.exam(row.t), caption: { jp: s.jp, romaji: '', tr: s[lang] || s.en, ask, tags, name: row.t },
+      }
+    }
+    case 'comprehension': {
+      const [pid, n] = String(id ?? '').split(':q')
+      const ps = data.passages.find(x => x.id === pid && askable(x, lang).some(a => a.q === Number(n) - 1)) ?? data.passages.find(x => askable(x, lang).length)
+      const a = askable(ps, lang).find(x => x.q === Number(n) - 1) ?? askable(ps, lang)[0]
+      const q = ps.questions[a.q]
+      const said = pair => weldIf(lang, (pair && (pair[lang] || pair.en)) || '')
+      return {
+        ...base, id: `${ps.id}:q${a.q + 1}`, level: ps.lv,
+        promo: {
+          level: ps.lv, title: ps.title, text: passageText(ps).join(''), read: data.read?.[ps.lv] ?? 0,
+          n: a.q + 1, total: ps.questions.length, type: q.type,
+          question: said(q.question), choices: (q.options[lang] || q.options.en).map(o => weldIf(lang, o)), right: q.correct,
+          quote: { toks: quotedLine(ps.sents[a.at], a.quote), tr: said(ps.tr[a.at]) },
+        },
+        title: P.titles.comprehension(ps.title, ps.lv),
+        caption: { jp: ps.title, romaji: '', tr: said(q.question), ask, tags: [...P.tags, `jlpt${ps.lv.toLowerCase()}`], name: ps.title },
       }
     }
     case 'duel':
@@ -816,6 +912,103 @@ export function promoDeck(plan, fmt, opts) {
         })
       })
       add('board', ctx => board(ctx, 3, 3, P.stand, P.examNote))
+      break
+    }
+    case 'comprehension': {
+      // Plan 298: the text under the run's clock, one of its questions,
+      // answered on the line of the text it quotes, and the board. In a
+      // clip the cover's parts come in, the card last, and the clock
+      // runs from the moment it is up; the still is the clip's end.
+      const pr = plan.promo
+      const C = P.comp
+      const rikai = p.line.rikai
+      const badge = { vocabulary: p.success, grammar: p.warning }[pr.type] || p.ink2
+      const kicker = (c, str, y, color = rikai) => {
+        text(c, str.toLocaleUpperCase(), fr.x, y + FS.caption, { f: font(700, FS.caption, 'latin'), color, tr: 0.18 })
+        return y + FS.caption * 1.6
+      }
+      const left = () => Math.max(0, pr.read - Math.max(0, (clock ? clock.t : CLIP.seconds) - COMP_CLOCK))
+      const mmss = secs => `${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, '0')}`
+      // The cover's text: whole at the reading rung, else at the small
+      // one, else bounded as the run bounds it, the rest under the foot.
+      const pad = A.PASSAGE.pad * U
+      const footH = 2 * 12 * U + A.PASSAGE.foot * U * 1.35
+      const HOOK = [FS.heading, FS.title]
+      const coverOf = c => {
+        const y = lead(scratch(c), C.hook, fr.y + 64 + SP[7] + FS.caption * 1.6 + SP[2], p.ink, HOOK, { maxLines: 2 }) + SP[6]
+          + A.readClock(scratch(c), p, fr.x, 0, fr.w, U, { fill: 1, label: '0:00' }) + SP[4]
+        const room = fr.bottom - y - footH - 2 * pad
+        for (const size of [A.PASSAGE.size, A.PASSAGE.small]) {
+          const lines = A.passageLines(c, pr.text, fr.w, U, size)
+          const step = size * A.PASSAGE.lh * U
+          if (lines.length * step <= room || size === A.PASSAGE.small) return { size, lines, step, rows: Math.max(1, Math.min(lines.length, Math.floor(room / step))) }
+        }
+      }
+      add('text', ctx => {
+        page(ctx, 1, 4)
+        const cover = coverOf(ctx)
+        let y = fr.y + 64 + SP[7]
+        y = part(ctx, k(0, 0.8), () => kicker(ctx, C.kind(pr.level), y))
+        y += SP[2]
+        y = part(ctx, k(0.1, 0.8), () => lead(ctx, C.hook, y, p.ink, HOOK, { maxLines: 2 }))
+        y += SP[6]
+        const secs = left()
+        y += part(ctx, k(0.5, 0.6), () => A.readClock(ctx, p, fr.x, y, fr.w, U, { fill: pr.read ? secs / pr.read : 0, label: `${C.timeLeft} · ${mmss(Math.ceil(secs))}`, low: secs < 60 })) + SP[4]
+        const h = footH + 2 * pad + cover.rows * cover.step
+        part(ctx, k(COMP_CARD, 0.9), () => A.passageCard(ctx, p, fr.x, y, fr.w, h, U, { lines: cover.lines, size: cover.size, foot: [pr.level, C.title] }))
+      })
+      const head = (c, y) => kicker(c, `${pr.level} · ${C.question} ${pr.n} / ${pr.total}`, y)
+      const asked = (c, y) => {
+        y = head(c, y)
+        y += SP[2]
+        // The run's progress (.deck-progress): the line's segment to this question.
+        const bh = 6 * U
+        c.fillStyle = p.surfaceLine
+        rrect(c, fr.x, y, fr.w, bh, bh / 2)
+        c.fill()
+        c.save()
+        rrect(c, fr.x, y, fr.w, bh, bh / 2)
+        c.clip()
+        c.fillStyle = rikai
+        c.fillRect(fr.x, y, fr.w * (pr.n / pr.total), bh)
+        c.restore()
+        y += bh + SP[4]
+        return y + A.askCard(c, p, fr.x, y, fr.w, U, { badge: C.types[pr.type] || pr.type, color: badge, question: pr.question }) + SP[3]
+      }
+      add('question', ctx => {
+        page(ctx, 2, 4)
+        centred(ctx, (c, y) => {
+          y = asked(c, y)
+          y += A.letterRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: rikai })
+          return lead(c, P.comment, y + SP[5], p.ink2, [FS.body], { maxLines: 2, weight: 500 })
+        })
+      })
+      add('answer', ctx => {
+        page(ctx, 3, 4)
+        centred(ctx, (c, y) => {
+          // The question again in a line, its card on the slide before.
+          y = head(c, y) + SP[2]
+          const qb = A.mixedFit(c, pr.question, { weight: 500, sizes: [FS.lead / U, FS.body / U], maxW: fr.w, maxLines: 3, u: U })
+          qb.lines.forEach((l, i) => text(c, l, fr.x, y + qb.size * (0.8 + i * 1.18), { f: qb.f, color: p.ink2 }))
+          y += paragraphH(qb) + SP[4]
+          y += A.letterRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: rikai, right: pr.right, answered: true }) + SP[6]
+          // The line it rests on, on the breakdown's open rail: the
+          // sentence with its readings, the words quoted lit, its translation.
+          y = kicker(c, C.inText, y, p.ink2)
+          y += SP[2]
+          const x = fr.x + 3 * U + 12 * U
+          const w = fr.right - x
+          const y0 = y
+          y += A.analyserLine(c, p, x, y, w, U, pr.quote.toks, { center: false })
+          const tb = fit(c, pr.quote.tr, { weight: 500, sizes: [FS.lead, FS.body], maxW: w, maxLines: 3 })
+          tb.lines.forEach((l, i) => text(c, l, x, y + tb.size * (0.8 + i * 1.18), { f: tb.f, color: p.ink }))
+          y += paragraphH(tb)
+          c.fillStyle = rikai
+          c.fillRect(fr.x, y0, 3 * U, y - y0)
+          return lead(c, C.then, y + SP[6], p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 })
+        })
+      })
+      add('board', ctx => board(ctx, 4, 4, C.head, C.note))
       break
     }
     case 'pass': {
@@ -1240,6 +1433,10 @@ export function promoDeck(plan, fmt, opts) {
 
 /** A cover clip's length and rate: seven seconds, at thirty frames. */
 export const CLIP = { seconds: 7, fps: 30 }
+// Reading comprehension's cover (plan 298): the card lands at COMP_CARD,
+// the clock runs from COMP_CLOCK, once it is up.
+const COMP_CARD = 0.6
+const COMP_CLOCK = 1.1
 
 // The call to action's clock: the mark, the ask, its note, then the
 // gate at GATE, risen GATE_RISE later and waiting from then on, so its
@@ -1274,6 +1471,9 @@ function scoreOf(plan, points = 0) {
       const ticks = Array.from({ length: points }, (_, i) => ({ at: 3.9 + 0.35 * i, key: 'toggle', gain: 0.7 }))
       return [...keys, { at: 3.1, key: 'click' }, { at: 3.5, key: 'card-transition' }, ...ticks]
     }
+    case 'comprehension':
+      // The text's card laid down on the stage.
+      return [{ at: COMP_CARD, key: 'card-transition' }]
     case 'exam':
       // The question laid down, then each reading in with a press.
       return [{ at: 0.6, key: 'card-transition' }, ...[0, 1, 2, 3].map(i => ({ at: 1.5 + 0.3 * i, key: 'click', gain: 0.6 }))]

@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231, 232, 233, 234)
+# The carousel studio (plans 229–229n, 231, 232, 233, 234, 298)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -498,11 +498,12 @@ the Japanese as written, with furigana, or in kana.
 ## The promo stories (plan 231)
 
 宣伝, the last source, draws the app itself rather than what it teaches:
-six 9:16 stories, picked by the segments over the list (`promo.js`).
+seven 9:16 stories, picked by the segments over the list (`promo.js`).
 Each frame is drawn with the app's own parts (`app.js`): the review card
 with its stage and band, the rating bar's four keys, a question's choice
 rows, the white pass, the Depart button, the analyser's boxed sentence
-and its point cards, and Today on the print of the hour.
+and its point cards, Today on the print of the hour, and reading
+comprehension's clock, passage card, question card and lettered options.
 
 | Story | Picked from | Its frames |
 | --- | --- | --- |
@@ -510,6 +511,7 @@ and its point cards, and Today on the print of the hour.
 | One card | a word of the N5 deck | the card's face, its back with the rating bar and each rating's next review, Today, the gate |
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
+| Read a whole text (plan 298) | a comprehension seed's vocabulary or grammar question, N5 to N1 | the passage on its card under the run's clock, the question with its type and its four options, the answer folded and the line of the text it quotes (its readings, the quoted words lit, its translation), the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
 | Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the sprint run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
@@ -598,6 +600,18 @@ expectation; a test plays it back. Its sounds are the stage's press and
 the gate's; "Download the whole story" encodes it as the clips are
 encoded. No frame shows a fare: the ranked sprint's and the
 corrections' prices are left off the ticket and the result.
+
+**Reading comprehension's story answers on the text (plan 298).** Its
+item is a seed passage and one of its own questions, `n5-33:q5`: only a
+vocabulary or grammar question whose quote is in one sentence of the
+text, the rule the run opens a missed question's sentence by
+(`domain/quotedFragments.js`), and only where the bank carries that
+sentence's translation (`comprehension.json`'s `tr`, the seed
+breakdown's own, beside `sents`; `read` is the run's reading window per
+level, read from `routes/reading.py`). The cover sets the text at the
+passage's reading rung, steps it down to the small one, and only then
+bounds it as the run does, the cut line fading into the card's foot; the
+clock runs from the moment it is up, and the still is the clip's end.
 
 **A story promises what the app does today.** Its figures are the
 bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
@@ -803,8 +817,8 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 234) |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
-| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281) |
-| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281) |
+| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281); reading comprehension's (plan 298) |
+| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281); the comprehension run's (plan 298) |
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |

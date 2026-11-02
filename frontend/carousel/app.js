@@ -10,7 +10,7 @@
 // equal to index.css by src/carousel.test.js.
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
-import { RATING_INKS, TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
+import { RATING_INKS, TR, alpha, fit, font, measure, mix, rrect, shadow, text } from './draw.js'
 
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
@@ -276,6 +276,225 @@ export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answ
     ctx.restore()
   })
   return rows.length * rowH + (rows.length - 1) * gap
+}
+
+// ── The comprehension run (plan 298) ─────────────────────────────
+// ComprehensionRun's own parts: the reading clock over the passage on
+// its bounded card, a question on its card with its type's badge, and
+// its four options lettered A to D, in the learner's language.
+
+/** The reading clock (.timer, ReadingPieces' Clock): a 4px hairline that
+ *  empties in the warning ink (the danger's under the last minute), and
+ *  what is left centred under it. Returns the height. */
+export function readClock(ctx, p, x, y, w, u, { fill, label, low = false }) {
+  const c = inks(p)
+  const h = 4 * u
+  ctx.fillStyle = p.surfaceLine
+  rrect(ctx, x, y, w, h, h / 2)
+  ctx.fill()
+  const f = Math.max(0, Math.min(1, fill))
+  if (f > 0) {
+    ctx.save()
+    rrect(ctx, x, y, w, h, h / 2)
+    ctx.clip()
+    ctx.fillStyle = low ? p.danger : p.warning
+    ctx.fillRect(x, y, w * f, h)
+    ctx.restore()
+  }
+  const lz = 11.52 * u
+  text(ctx, label, x + w / 2, y + h + 6 * u + lz * 0.9, { f: font(700, lz, 'latin'), color: c.ink2, align: 'center' })
+  return h + 6 * u + lz * 1.2
+}
+
+// A line of the learner's language that quotes the text (「電車の中で…」):
+// a browser breaks it between Latin words and between any two Japanese
+// characters, never before a closing mark or after an opening one.
+const NO_START = /^[、。，．・：；？！」』）】〕］｝ゝゞー々ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ,.;:!?)\]}»…’”]/
+const NO_END = /[「『（【〔［｛〈《([{«‘“]$/
+export function mixedLines(ctx, str, f, maxW) {
+  const units = String(str).match(/\s+|[\u3000-\u30ff\u3400-\u9fff\uff00-\uffef]|[^\s\u3000-\u30ff\u3400-\u9fff\uff00-\uffef]+/g) || []
+  const lines = []
+  let cur = ''
+  for (const unit of units) {
+    if (/^\s+$/.test(unit)) {
+      if (cur) cur += ' '
+      continue
+    }
+    const test = cur + unit
+    if (!cur.trim() || measure(ctx, test.trimEnd(), f) <= maxW || NO_START.test(unit) || NO_END.test(cur.trimEnd())) {
+      cur = test
+      continue
+    }
+    lines.push(cur.trimEnd())
+    cur = unit
+  }
+  if (cur.trim()) lines.push(cur.trimEnd())
+  return lines
+}
+/** The largest of `sizes` (CSS px, times `u`) at which `str` sets in
+ *  `maxLines` mixed lines. */
+export function mixedFit(ctx, str, { weight, sizes, maxW, maxLines, u }) {
+  for (const z of sizes) {
+    const f = font(weight, z * u, 'latin')
+    const lines = mixedLines(ctx, str, f, maxW)
+    if (lines.length <= maxLines || z === sizes[sizes.length - 1]) return { size: z * u, f, lines }
+  }
+}
+
+// The passage's body (.prose__jp--passage): the reading rung, a page's
+// leading; a passage the stage cannot hold whole steps down to the small
+// rung (--fs-sm) before it is bounded.
+export const PASSAGE = { size: 15.2, small: 13.12, lh: 1.75, pad: 16, foot: 13.12 }
+
+/** The passage on its card (.prompt-card--footed.prompt-card--passage):
+ *  the text top-down in its 16px padding, bounded to `h` and scrolled
+ *  `scroll` CSS pixels inside the body, as the run's card scrolls, under
+ *  the foot strip's two facts (the level, the exercise). `lines` are the
+ *  text set at PASSAGE.size (see passageLines). */
+export function passageCard(ctx, p, x, y, w, h, u, { lines, foot = [], scroll = 0, size = PASSAGE.size }) {
+  const c = inks(p)
+  ctx.save()
+  shadow(ctx, p.hang)
+  ctx.fillStyle = c.card
+  rrect(ctx, x, y, w, h, 8 * u)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = c.border
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 8 * u)
+  ctx.stroke()
+  const fz = PASSAGE.foot * u
+  const footH = 2 * 12 * u + fz * 1.35
+  const fy = y + h - footH
+  ctx.fillStyle = c.border
+  ctx.fillRect(x + u, fy, w - 2 * u, u)
+  if (foot[0]) text(ctx, foot[0], x + 22 * u, fy + footH / 2 + fz * 0.36, { f: font(400, fz, 'latin'), color: c.ink2 })
+  if (foot[1]) text(ctx, foot[1], x + w - 22 * u, fy + footH / 2 + fz * 0.36, { f: font(400, fz, 'latin'), color: c.ink2, align: 'right' })
+  const z = size * u
+  const step = z * PASSAGE.lh
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(x + u, y + u, w - 2 * u, fy - y - u)
+  ctx.clip()
+  const top = y + PASSAGE.pad * u - scroll * u
+  lines.forEach((l, i) => {
+    const by = top + i * step + z * (PASSAGE.lh - 1) / 2 + z * 0.88
+    if (by + z * 0.3 < y || by - z > fy) return
+    text(ctx, l, x + PASSAGE.pad * u, by, { f: font(500, z, 'jp'), color: c.ink })
+  })
+  // A text longer than its card goes on under the foot, as the run's
+  // scrolls: the line the strip cuts fades into the card.
+  if (top + lines.length * step > fy - PASSAGE.pad * u) {
+    const g = ctx.createLinearGradient(0, fy - PASSAGE.pad * u - step * 0.6, 0, fy)
+    g.addColorStop(0, alpha(c.card, 0))
+    g.addColorStop(1, c.card)
+    ctx.fillStyle = g
+    ctx.fillRect(x + u, fy - PASSAGE.pad * u - step * 0.6, w - 2 * u, PASSAGE.pad * u + step * 0.6)
+  }
+  ctx.restore()
+  return { footH, step, body: fy - y }
+}
+
+/** A passage cut into the card's lines at `size` (CSS px): the inner
+ *  width, Japanese broken between characters as a page breaks it (kinsoku). */
+export function passageLines(ctx, str, w, u, size = PASSAGE.size) {
+  const inner = w - 2 * PASSAGE.pad * u - 2 * u
+  return fit(ctx, str, { weight: 500, fam: 'jp', sizes: [size * u], maxW: inner, balanced: false, lh: PASSAGE.lh }).lines
+}
+
+/** A question on its card (.prompt-card--ask): the type's badge
+ *  (QuestionTypeBadge, its ink a tint on the hairline and the letters),
+ *  then the question in the title rung, both in the card's 16px padding.
+ *  Returns the height. */
+export function askCard(ctx, p, x, y, w, u, { badge, color, question }) {
+  const c = inks(p)
+  const pad = 16 * u
+  const qz = 20 * u
+  const qb = mixedFit(ctx, question, { weight: 500, sizes: [qz / u, 17.92, 15.2], maxW: w - 2 * pad, maxLines: 3, u })
+  const bh = 20 * u
+  const h = pad + bh + 8 * u + qb.size * (0.3 + qb.lines.length * 1.3) + pad
+  ctx.save()
+  shadow(ctx, p.hang)
+  ctx.fillStyle = c.card
+  rrect(ctx, x, y, w, h, 8 * u)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = c.border
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 8 * u)
+  ctx.stroke()
+  const bz = 9.92 * u
+  const label = badge.toLocaleUpperCase()
+  const bw = measure(ctx, label, font(700, bz, 'latin'), TR.caption) + 2 * 6 * u
+  ctx.strokeStyle = alpha(color, 0.55)
+  rrect(ctx, x + pad + u / 2, y + pad + u / 2, bw - u, bh - u, 4 * u)
+  ctx.stroke()
+  text(ctx, label, x + pad + 6 * u, y + pad + bh / 2 + bz * 0.36, { f: font(700, bz, 'latin'), color: mix(color, c.ink, 0.6), tr: TR.caption })
+  const qy = y + pad + bh + 8 * u
+  qb.lines.forEach((l, i) => text(ctx, l, x + pad, qy + qb.size * (0.95 + i * 1.3), { f: qb.f, color: c.ink }))
+  return h
+}
+
+/** A comprehension question's options (.mcq-row with .mcq-row__text--latin):
+ *  a row each, A to D in a ring of the line's pigment, the option in the
+ *  learner's language over up to two lines. Answered, the run keeps the
+ *  right one (the fillers fold away), in the success ink, ring filled.
+ *  `reveal` brings the rows in one by one in a clip. Returns the height. */
+export function letterRows(ctx, p, x, y, w, u, choices, { line, right = -1, answered = false, reveal = null } = {}) {
+  const c = inks(p)
+  const pad = 16 * u
+  const ring = 16 * u
+  const gap = 12 * u
+  const success = p.paper ? '#4d7639' : '#74a15f'
+  const tx = x + pad + 2 * ring + 16 * u
+  const room = x + w - pad - tx
+  const rows = answered ? [right] : choices.map((_, i) => i)
+  let ry = y
+  rows.forEach((i, at) => {
+    const b = mixedFit(ctx, choices[i], { weight: 500, sizes: [15.2, 13.12], maxW: room, maxLines: 2, u })
+    const th = b.size * (0.3 + b.lines.length * 1.3)
+    const rowH = Math.max(2 * ring, th) + 2 * pad
+    const r = reveal ? reveal[at] ?? 1 : 1
+    ctx.save()
+    ctx.globalAlpha *= r
+    ctx.translate(0, (1 - r) * 16 * u)
+    const ok = answered && i === right
+    const ink = ok ? success : line
+    ctx.fillStyle = ok ? mix(success, c.card, 0.12) : c.face
+    rrect(ctx, x, ry, w, rowH, 6 * u)
+    ctx.fill()
+    ctx.strokeStyle = ok ? success : c.faceLine
+    ctx.lineWidth = u
+    rrect(ctx, x + u / 2, ry + u / 2, w - u, rowH - u, 6 * u)
+    ctx.stroke()
+    if (ok) {
+      ctx.save()
+      rrect(ctx, x, ry, w, rowH, 6 * u)
+      ctx.clip()
+      ctx.fillStyle = success
+      ctx.fillRect(x, ry, 3 * u, rowH)
+      ctx.restore()
+    }
+    const cx = x + pad + ring
+    const cy = ry + rowH / 2
+    ctx.beginPath()
+    ctx.arc(cx, cy, ring - u, 0, Math.PI * 2)
+    if (ok) {
+      ctx.fillStyle = success
+      ctx.fill()
+    } else {
+      ctx.strokeStyle = alpha(ink, 0.55)
+      ctx.lineWidth = 2 * u
+      ctx.stroke()
+    }
+    const nz = 12.8 * u
+    text(ctx, String.fromCharCode(65 + i), cx, cy + nz * 0.36, { f: font(700, nz, 'latin'), color: ok ? p.bg : c.faceSoft, align: 'center' })
+    const ty = cy - th / 2
+    b.lines.forEach((l, k) => text(ctx, l, tx, ty + b.size * (0.95 + k * 1.3), { f: b.f, color: ok ? success : c.faceInk }))
+    ctx.restore()
+    ry += rowH + (at < rows.length - 1 ? gap : 0)
+  })
+  return ry - y
 }
 
 // ── The pass (.pcard--free: the profile's card) ────────────────────
@@ -737,7 +956,10 @@ function NUDGE(s) {
  *  over it and its stage's rule under it, each grammar point's words in
  *  a box of the grammar line's ink with its number on the box's corner.
  *  `toks`: [{ t, fu, point }] (point from 1, 0 for none). Lines wrap
- *  inside `w`; returns the height. */
+ *  inside `w`; returns the height. Since plan 298 a token may be `lit`
+ *  (.bkd-tok--lit: the grammar ink at 22% behind it, what a breakdown's
+ *  chip lights) or `bare` (a particle or an ending with no card: the
+ *  breakdown draws it in the ink with no rule under it). */
 export function analyserLine(ctx, p, x, y, w, u, toks, { center = true } = {}) {
   const c = inks(p)
   const wz = 20 * u
@@ -780,9 +1002,13 @@ export function analyserLine(ctx, p, x, y, w, u, toks, { center = true } = {}) {
         const tw = tokW(tk)
         const gram = !!g.point || tk.k === 'punct'
         const base = ly + 4 * u + 15 * u + wz * 0.82
+        if (tk.lit) {
+          ctx.fillStyle = alpha(green, 0.22)
+          ctx.fillRect(tx, ly, tw, 47 * u)
+        }
         if (tk.fu && !gram) text(ctx, tk.fu, tx + tw / 2, ly + 4 * u + fz * 0.9, { f: font(500, fz, 'jp'), color: c.ink2, align: 'center' })
         text(ctx, tk.t, tx + tw / 2, base, { f: font(600, wz, 'jp'), color: gram ? c.ink2 : c.ink, align: 'center' })
-        if (!gram) {
+        if (!gram && !tk.bare) {
           ctx.fillStyle = c.stateNew
           ctx.fillRect(tx + u, base + 8 * u, tw - 2 * u, 2 * u)
         }
