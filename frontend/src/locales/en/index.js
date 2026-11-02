@@ -1689,7 +1689,14 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
-  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
+  // How the sentence says the hole when another form was taken as right:
+  // its register (plan 241), or では in full or contracted (plan 295).
+  bldOther: (said, register) => `The sentence says ${said}: the same, ${({
+    plain: 'in plain speech',
+    polite: 'in polite speech',
+    full: 'with では in full',
+    contracted: 'with では contracted, as speech says it',
+  })[register] ?? 'in polite speech'}.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',

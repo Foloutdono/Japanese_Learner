@@ -1655,7 +1655,14 @@ const dictionary = {
   bldRight: 'Juste.',
   bldClose: 'Presque.',
   bldWrong: 'Pas tout à fait.',
-  bldOther: (said, register) => `La phrase dit ${said} : la même chose, en style ${register === 'plain' ? 'neutre' : 'poli'}.`,
+  // Comment la phrase dit le trou quand une autre forme est jugée juste :
+  // son registre (plan 241), ou では en entier ou contracté (plan 295).
+  bldOther: (said, register) => `La phrase dit ${said} : la même chose, ${({
+    plain: 'en style neutre',
+    polite: 'en style poli',
+    full: 'avec では en entier',
+    contracted: 'avec では contracté, comme à l’oral',
+  })[register] ?? 'en style poli'}.`,
   mapAria: 'La ligne du point',
   mapTutorial: 'Tutoriel',
   mapNow: 'maintenant',

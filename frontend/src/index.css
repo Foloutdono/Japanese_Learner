@@ -27592,6 +27592,15 @@ button.brd-stn { cursor: pointer; }
   white-space: nowrap;
   color: color-mix(in srgb, var(--success) 70%, var(--text-primary));
 }
+/* A kana left out: nothing to strike, so the right one stands in the
+   line where it was missing, underlined as written in. */
+.gl-fix--missing ins {
+  position: static;
+  font-size: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
 
 /* Choisir's forms as the mock exam's answer tiles (.exam-tile): docked
    under the thumb in sumi on a phone, where the rating bar comes up once

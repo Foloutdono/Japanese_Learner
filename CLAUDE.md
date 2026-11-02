@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **295**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **296**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -168,9 +168,15 @@ runtime purpose.
   たい for たいです), and a kanji the keyboard put in is read before it is
   judged. Never inside the sentence (学生だと思います), never before か
   polite to plain, never where the point is the polite ending or a form.
+  Nor does it say では or じゃ: before a negative each is right for the
+  other (`plain_polite.contracted`, plan 295), and never the voiced ては.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
-  diffed over every sentence Construire asks.
+  diffed over every sentence Construire asks. A hole may stop where a
+  word's ending begins (てしまい + ました), never inside the ending
+  (せいで|す, が分かりま|せん) nor inside ありません, which is ない said
+  politely (`grammar_ladder._word_kept`, plan 295): typed whole, the
+  word was marked a kana off.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's
