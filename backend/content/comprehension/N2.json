@@ -30,7 +30,14 @@
       "D'environ dix pour cent"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「人口が二割ほど減った」: 二割 is two tenths, about a fifth; the 十 in 「この十年」 is the ten years, not a percentage.",
+     "fr": "「人口が二割ほど減った」 : 二割, ce sont deux dixièmes, environ un cinquième ; le 十 de 「この十年」 désigne les dix ans, pas un pourcentage."
+    }
    },
    {
     "type": "grammar",
@@ -52,7 +59,14 @@
       "Une hausse empêchée"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「上がりつつある」: 〜つつある marks a change under way: the average age is still going up.",
+     "fr": "「上がりつつある」 : 〜つつある marque un changement en cours : l'âge moyen continue de monter."
+    }
    },
    {
     "type": "grammar",
@@ -74,7 +88,14 @@
       "Ce qui suit précède l'apparition de la situation"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「にもかかわらず」 is \"despite\": with fewer, older residents you would expect decline, yet the town is coming back to life.",
+     "fr": "「にもかかわらず」 veut dire « malgré » : avec des habitants moins nombreux et plus âgés, on attendrait le déclin, or la ville reprend vie."
+    }
    },
    {
     "type": "comprehension",
@@ -96,7 +117,14 @@
       "De nouveaux cafés et boutiques ouverts par la mairie"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「きっかけは」 names the trigger: 「空き家を安く貸し出す制度」, a scheme renting out (貸し出す) empty houses cheaply, not selling them.",
+     "fr": "「きっかけは」 désigne le déclencheur : 「空き家を安く貸し出す制度」, un dispositif qui loue (貸し出す) les maisons vides à bas prix, sans les vendre."
+    }
    },
    {
     "type": "comprehension",
@@ -118,7 +146,14 @@
       "Des patrons de café cherchant un local"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「都会の生活に疲れた人」: people tired of city life; the young people in the text are the ones who left for the cities.",
+     "fr": "「都会の生活に疲れた人」 : des gens fatigués de la vie urbaine ; les jeunes du texte, eux, sont partis vers les villes."
+    }
    },
    {
     "type": "vocabulary",
@@ -140,7 +175,14 @@
       "Logement"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「活気を取り戻している」: 活気 is liveliness, energy; the town is getting that back, not its population.",
+     "fr": "「活気を取り戻している」 : 活気, c'est la vitalité, l'animation ; la ville retrouve cela, pas sa population."
+    }
    },
    {
     "type": "comprehension",
@@ -162,7 +204,14 @@
       "Ils les ont vendues pour ouvrir des cafés en grande ville"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「古い家を自分たちで直し」: they fixed the old houses themselves, then 「カフェや小さな店を開いた」.",
+     "fr": "「古い家を自分たちで直し」 : ils ont réparé eux-mêmes les vieilles maisons, puis 「カフェや小さな店を開いた」."
+    }
    },
    {
     "type": "grammar",
@@ -184,7 +233,14 @@
       "En dehors de"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「この制度を通じて」: 〜を通じて is \"through, by means of\": the scheme is how they came to move to the town.",
+     "fr": "「この制度を通じて」 : 〜を通じて veut dire « par le biais de » : c'est grâce au dispositif qu'ils sont venus s'installer."
+    }
    },
    {
     "type": "comprehension",
@@ -206,7 +262,14 @@
       "Tenir ensemble des réunions municipales"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「祭りの準備を一緒に行ううちに」: while they prepare the festival together, their chances to understand each other grow.",
+     "fr": "「祭りの準備を一緒に行ううちに」 : à force de préparer le festival ensemble, les occasions de se comprendre se multiplient."
+    }
    },
    {
     "type": "inference",
@@ -228,7 +291,15 @@
       "Le déclin est inévitable, la ville doit donc simplement l'accepter"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7,
+     8
+    ],
+    "why": {
+     "en": "「止めるのは難しい」 admits the fall can hardly be stopped, but 「減り方を変えることはできる」: the way it declines can change.",
+     "fr": "「止めるのは難しい」 admet qu'on peut difficilement arrêter la baisse, mais 「減り方を変えることはできる」 : sa manière de décliner peut changer."
+    }
    },
    {
     "type": "inference",
@@ -250,7 +321,15 @@
       "La crainte que les nouveaux venus changent la ville"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2,
+     7
+    ],
+    "why": {
+     "en": "The writer admits 「止めるのは難しい」 (the fall is hard to stop) yet shows a town 「活気を取り戻している」: hope, not a promise of growth.",
+     "fr": "L'auteur admet 「止めるのは難しい」 (la baisse est dure à arrêter) mais montre une ville qui 「活気を取り戻している」 : de l'espoir, pas une promesse de croissance."
+    }
    }
   ],
   "breakdown": [
@@ -1181,7 +1260,14 @@
       "Plus de place au bureau pour ceux qui y viennent"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「通勤時間がなくなり」: no commute, and 「自分の都合に合わせて働ける」: work fitted to one's own schedule.",
+     "fr": "「通勤時間がなくなり」 : plus de trajet, et 「自分の都合に合わせて働ける」 : travailler selon ses propres contraintes."
+    }
    },
    {
     "type": "grammar",
@@ -1203,7 +1289,14 @@
       "On peut travailler chez soi, mais seulement quand le travail est facile"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「からといって」 is \"just because\" and 「わけではない」 denies what follows: home working does not make the work easier.",
+     "fr": "「からといって」 veut dire « ce n'est pas parce que » et 「わけではない」 nie la suite : le travail ne devient pas plus facile pour autant."
+    }
    },
    {
     "type": "comprehension",
@@ -1225,7 +1318,14 @@
       "Ils perdent la liberté de travailler selon leurs propres horaires"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「境目があいまいになり」: the line blurs, and 「かえって長く働いてしまう人」: some end up working longer, not less.",
+     "fr": "「境目があいまいになり」 : la frontière s'estompe, et 「かえって長く働いてしまう人」 : certains finissent par travailler plus, pas moins."
+    }
    },
    {
     "type": "vocabulary",
@@ -1247,7 +1347,14 @@
       "Emploi du temps"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「境目」 is the line where two things meet: here between work and private life, a line that 「あいまいになり」, blurs.",
+     "fr": "「境目」, c'est la ligne où deux choses se touchent : ici entre travail et vie privée, une frontière qui 「あいまいになり」, s'estompe."
+    }
    },
    {
     "type": "comprehension",
@@ -1269,7 +1376,14 @@
       "Plus de soixante-dix pour cent des entreprises autorisent le télétravail"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「続けたいと答えた人が七割を超えた」: over 70% of people want to keep it up; it counts people, not companies.",
+     "fr": "「続けたいと答えた人が七割を超えた」 : plus de 70 % des personnes veulent continuer ; ce sont des gens, pas des entreprises."
+    }
    },
    {
     "type": "grammar",
@@ -1291,7 +1405,14 @@
       "Qu'elle n'a écouté que par hasard"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「聞かないわけにはいかない」: 〜ないわけにはいかない is \"cannot not do\", so the company has to listen to what staff want.",
+     "fr": "「聞かないわけにはいかない」 : 〜ないわけにはいかない veut dire « ne pas pouvoir ne pas faire » : l'entreprise doit écouter ses employés."
+    }
    },
    {
     "type": "comprehension",
@@ -1313,7 +1434,14 @@
       "Tous travaillent moins longtemps qu'à la maison"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「全員が同じ日に会社に来れば」, 「オフィスの広さが足りなくなる」: the office is too small for everyone at once.",
+     "fr": "「全員が同じ日に会社に来れば」, 「オフィスの広さが足りなくなる」 : le bureau est trop petit pour tout le monde à la fois."
+    }
    },
    {
     "type": "grammar",
@@ -1335,7 +1463,14 @@
       "La recherche est remise à plus tard"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「探さざるを得ない」: 〜ざるを得ない is \"have no choice but to\": every company is forced to search.",
+     "fr": "「探さざるを得ない」 : 〜ざるを得ない veut dire « ne pas avoir d'autre choix que de » : chaque entreprise est obligée de chercher."
+    }
    },
    {
     "type": "grammar",
@@ -1357,7 +1492,14 @@
       "Il reformule le point précédent autrement"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「一方で」 turns to the other side: after the staff's wish to stay home comes the problem of office space if all come in.",
+     "fr": "「一方で」 passe à l'autre facette : après le souhait des employés de rester chez eux, le manque de place si tous reviennent."
+    }
    },
    {
     "type": "inference",
@@ -1379,7 +1521,15 @@
       "Pour montrer que le télétravail fait faire des économies aux entreprises"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6,
+     7
+    ],
+    "why": {
+     "en": "「オフィスの広さが足りなくなる」: a full return fails too, so each firm needs 「それぞれの事情に合った働き方」.",
+     "fr": "「オフィスの広さが足りなくなる」 : un retour de tous échoue aussi, d'où 「それぞれの事情に合った働き方」 pour chaque entreprise."
+    }
    },
    {
     "type": "inference",
@@ -1401,7 +1551,15 @@
       "Léger, moqueur envers la vie de bureau"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1,
+     3
+    ],
+    "why": {
+     "en": "The text grants 「よい点は大きい」 but notes quite a few 「かえって長く働いてしまう」: it weighs both sides and takes neither.",
+     "fr": "Le texte reconnaît que 「よい点は大きい」 mais note que bon nombre 「かえって長く働いてしまう」 : il pèse les deux côtés sans trancher."
+    }
    }
   ],
   "breakdown": [
@@ -2221,7 +2379,14 @@
       "Le départ des corbeaux des villes"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「カラスの数が増えている」: crow numbers are rising in cities, and 「報告が相次いでいる」 says such reports keep coming.",
+     "fr": "「カラスの数が増えている」 : le nombre de corbeaux augmente en ville, et 「報告が相次いでいる」 dit que ces signalements se succèdent."
+    }
    },
    {
     "type": "comprehension",
@@ -2243,7 +2408,14 @@
       "Plus d'arbres en ville"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「家庭から出るごみの量が増えたこと」: the rise in household rubbish is given as the cause (原因).",
+     "fr": "「家庭から出るごみの量が増えたこと」 : la hausse des déchets ménagers est donnée comme la cause (原因)."
+    }
    },
    {
     "type": "vocabulary",
@@ -2265,7 +2437,14 @@
       "Affamé"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「非常に賢い鳥」: 賢い is \"clever\", which is why they can remember bag colours and collection times.",
+     "fr": "「非常に賢い鳥」 : 賢い veut dire « malin, intelligent », d'où leur mémoire des couleurs de sacs et des horaires."
+    }
    },
    {
     "type": "comprehension",
@@ -2287,7 +2466,14 @@
       "Les jours où les déchets ne sont pas ramassés"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「ごみ袋の色や、ごみを集める車が来る時刻」: the colour of the bags and the time the collection truck comes.",
+     "fr": "「ごみ袋の色や、ごみを集める車が来る時刻」 : la couleur des sacs et l'heure de passage du camion de collecte."
+    }
    },
    {
     "type": "grammar",
@@ -2309,7 +2495,14 @@
       "C'était une partie que les chercheurs n'expliquaient pas"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「ごく一部にすぎなかった」: 〜にすぎない is \"no more than\" and ごく一部 \"a tiny part\": rubbish was a minor food.",
+     "fr": "「ごく一部にすぎなかった」 : 〜にすぎない veut dire « ne… que » et ごく一部 « une infime partie » : les déchets comptaient peu."
+    }
    },
    {
     "type": "grammar",
@@ -2331,7 +2524,14 @@
       "Il cite l'aliment que les corbeaux aiment le moins"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「木の実をはじめ」: 〜をはじめ is \"starting with\": nuts open a list that goes on with insects and small animals.",
+     "fr": "「木の実をはじめ」 : 〜をはじめ veut dire « à commencer par » : les fruits ouvrent une liste qui continue avec insectes et petits animaux."
+    }
    },
    {
     "type": "grammar",
@@ -2353,7 +2553,14 @@
       "Un changement antérieur à la croissance de la population"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「人口の増加に伴って」: 〜に伴って is \"along with\": the crows' food changed as the population grew.",
+     "fr": "「人口の増加に伴って」 : 〜に伴って veut dire « avec, à mesure de » : la nourriture a changé à mesure que la population augmentait."
+    }
    },
    {
     "type": "comprehension",
@@ -2375,7 +2582,14 @@
       "Les récoltes agricoles"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「人間のごみへと変わっていった」: the city crows' food shifted to human rubbish.",
+     "fr": "「人間のごみへと変わっていった」 : la nourriture des corbeaux des villes s'est tournée vers les déchets humains."
+    }
    },
    {
     "type": "comprehension",
@@ -2397,7 +2611,14 @@
       "Changer l'heure de passage du camion"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「ごみに近づく理由をなくすこと」 is called the surest way, and 「追い払うのではなく」 rules out chasing them.",
+     "fr": "「ごみに近づく理由をなくすこと」 est la voie la plus sûre, et 「追い払うのではなく」 écarte le fait de les chasser."
+    }
    },
    {
     "type": "inference",
@@ -2419,7 +2640,15 @@
       "Pour prouver qu'ils sont plus malins qu'on ne le croit"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3,
+     4
+    ],
+    "why": {
+     "en": "「本来は」 is \"by nature\": they lived on nuts, insects and animals, and rubbish 「ごく一部にすぎなかった」.",
+     "fr": "「本来は」 veut dire « par nature » : ils vivaient de fruits, d'insectes et d'animaux, et les déchets 「ごく一部にすぎなかった」."
+    }
    },
    {
     "type": "inference",
@@ -2441,7 +2670,15 @@
       "Les signalements l'ont créée en exagérant les chiffres"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1,
+     6
+    ],
+    "why": {
+     "en": "The cause is 「家庭から出るごみ」, our own rubbish, and the fix is 「理由をなくすこと」: change what we do, not chase crows.",
+     "fr": "La cause, ce sont 「家庭から出るごみ」, nos propres déchets, et le remède 「理由をなくすこと」 : changer nos habitudes, pas chasser les corbeaux."
+    }
    }
   ],
   "breakdown": [
@@ -3353,7 +3590,14 @@
       "De juin à juillet l'an prochain"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「来年一月から六月まで休館いたします」: closed January to June; December is only when the loan limit goes up.",
+     "fr": "「来年一月から六月まで休館いたします」 : fermée de janvier à juin ; décembre, c'est seulement la hausse du nombre de prêts."
+    }
    },
    {
     "type": "grammar",
@@ -3375,7 +3619,14 @@
       "Elles dépendent de l'avancée des travaux"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「工事に先立って」: 〜に先立って is \"ahead of\": the two December weeks come before the work starts.",
+     "fr": "「工事に先立って」 : 〜に先立って veut dire « avant, en préalable à » : les deux semaines de décembre précèdent les travaux."
+    }
    },
    {
     "type": "comprehension",
@@ -3397,7 +3648,14 @@
       "On peut rendre ses livres devant la gare"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「借りられる本を二十冊まで増やします」: the number of books one person may borrow goes up to twenty.",
+     "fr": "「借りられる本を二十冊まで増やします」 : le nombre de livres qu'une personne peut emprunter passe à vingt."
+    }
    },
    {
     "type": "comprehension",
@@ -3419,7 +3677,14 @@
       "Réserver des livres et les retirer plus tard"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「予約した本の受け取りと返却」: collecting reserved books and returning books; reserving itself is done online.",
+     "fr": "「予約した本の受け取りと返却」 : retirer les livres réservés et rendre des livres ; la réservation, elle, se fait en ligne."
+    }
    },
    {
     "type": "grammar",
@@ -3441,7 +3706,14 @@
       "Ce guichet, quand le temps le permet"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「でのみ行います」: のみ means \"only\": it is done at that counter and nowhere else.",
+     "fr": "「でのみ行います」 : のみ veut dire « seulement » : cela se fait à ce guichet et nulle part ailleurs."
+    }
    },
    {
     "type": "vocabulary",
@@ -3463,7 +3735,14 @@
       "Un panneau d'affichage"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「小さな窓口」: a 窓口 is a service counter, where reserved books are handed over and books returned.",
+     "fr": "「小さな窓口」 : un 窓口 est un guichet, où l'on retire les livres réservés et où l'on rend les livres empruntés."
+    }
    },
    {
     "type": "comprehension",
@@ -3485,7 +3764,14 @@
       "Son prêt est prolongé de deux semaines"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「七月の再開まで返さなくても構いません」: such books may be kept until the library reopens in July.",
+     "fr": "「七月の再開まで返さなくても構いません」 : on peut garder ces livres jusqu'à la réouverture en juillet."
+    }
    },
    {
     "type": "vocabulary",
@@ -3507,7 +3793,14 @@
       "C'est obligatoire"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「返さなくても構いません」: 〜なくても構わない is \"it is fine not to\": not returning them yet is allowed.",
+     "fr": "「返さなくても構いません」 : 〜なくても構わない veut dire « on peut ne pas » : ne pas les rendre tout de suite est permis."
+    }
    },
    {
     "type": "grammar",
@@ -3529,7 +3822,14 @@
       "Ses horaires varient selon l'âge"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「年齢を問わず」: 〜を問わず is \"regardless of\": the room is open to people of any age.",
+     "fr": "「年齢を問わず」 : 〜を問わず veut dire « sans distinction de » : la salle est ouverte quel que soit l'âge."
+    }
    },
    {
     "type": "inference",
@@ -3551,7 +3851,15 @@
       "Pour fêter l'ouverture de la nouvelle salle d'étude"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0,
+     1
+    ],
+    "why": {
+     "en": "The limit rises 「工事に先立って」, just before six months of closure: readers can take more books home first.",
+     "fr": "La limite monte 「工事に先立って」, juste avant six mois de fermeture : on peut emporter plus de livres d'avance."
+    }
    },
    {
     "type": "inference",
@@ -3573,7 +3881,15 @@
       "Le réserver au guichet de la gare et l'y retirer"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2,
+     3
+    ],
+    "why": {
+     "en": "In March the library is shut, but 「予約はインターネットで受け付けます」 and books are collected at the 「駅前の市民センター」.",
+     "fr": "En mars la bibliothèque est fermée, mais 「予約はインターネットで受け付けます」, et le retrait se fait au 「駅前の市民センター」."
+    }
    }
   ],
   "breakdown": [
@@ -4366,7 +4682,14 @@
       "L'été dernier"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「高校を卒業してから、もう十年になります」: ten years since high school; spring is when the writer began teaching.",
+     "fr": "「高校を卒業してから、もう十年になります」 : dix ans depuis le lycée ; le printemps, c'est quand il a commencé à enseigner."
+    }
    },
    {
     "type": "comprehension",
@@ -4388,7 +4711,14 @@
       "Il enseigne dans un collège, mais pas l'anglais"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「中学校で英語を教えております」: teaching English at a junior high school (中学校), not at the old high school.",
+     "fr": "「中学校で英語を教えております」 : il enseigne l'anglais dans un collège (中学校), pas dans son ancien lycée."
+    }
    },
    {
     "type": "grammar",
@@ -4410,7 +4740,14 @@
       "Il aimait le professeur plus que l'anglais"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「授業をきっかけに」: 〜をきっかけに is \"prompted by\": the teacher's classes are what started the writer's love of English.",
+     "fr": "「授業をきっかけに」 : 〜をきっかけに veut dire « à partir de, grâce à » : ce sont ces cours qui lui ont fait aimer l'anglais."
+    }
    },
    {
     "type": "vocabulary",
@@ -4432,7 +4769,14 @@
       "J'espère que vous vous portez bien"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「ごぶさたしております」 is a polite way to open a letter after a long silence: \"I have not been in touch for so long.\"",
+     "fr": "「ごぶさたしております」 est une formule polie pour ouvrir une lettre après un long silence : « je ne vous ai pas donné de nouvelles »."
+    }
    },
    {
     "type": "vocabulary",
@@ -4454,7 +4798,14 @@
       "Une leçon utile"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「失敗の連続」: 連続 is a series with no break: one failure after another, every day.",
+     "fr": "「失敗の連続」 : 連続, c'est une suite sans interruption : un échec après l'autre, chaque jour."
+    }
    },
    {
     "type": "comprehension",
@@ -4476,7 +4827,14 @@
       "Les jours où les cours finissent tard"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「生徒が話を聞いてくれない日には」: on days the pupils won't listen, the writer doubts being suited to the job.",
+     "fr": "「生徒が話を聞いてくれない日には」 : les jours où les élèves n'écoutent pas, il doute d'être fait pour ce métier."
+    }
    },
    {
     "type": "grammar",
@@ -4498,7 +4856,14 @@
       "Un sentiment venu une fois, puis parti"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「思えてならない」: 〜てならない marks a feeling one cannot hold back: the doubt keeps forcing itself on the writer.",
+     "fr": "「思えてならない」 : 〜てならない marque un sentiment qu'on ne peut retenir : le doute s'impose à lui."
+    }
    },
    {
     "type": "grammar",
@@ -4520,7 +4885,14 @@
       "On apprend pour ne plus se tromper"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「間違えてこそ」: 〜てこそ is \"only by doing\": it is precisely through mistakes that people learn.",
+     "fr": "「間違えてこそ」 : 〜てこそ veut dire « c'est justement en » : c'est en se trompant qu'on apprend."
+    }
    },
    {
     "type": "comprehension",
@@ -4542,7 +4914,14 @@
       "Revenir enseigner dans son ancien lycée"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「町へ戻りましたら、ぜひお目にかかりたい」: back in the town this summer, the writer wants to see the teacher.",
+     "fr": "「町へ戻りましたら、ぜひお目にかかりたい」 : de retour dans sa ville cet été, il veut voir son professeur."
+    }
    },
    {
     "type": "inference",
@@ -4564,7 +4943,15 @@
       "Elles lui suggèrent de changer de métier"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "「そんなとき思い出すのは」: on days of doubt the writer recalls that mistakes are how one learns, a reason to keep going.",
+     "fr": "「そんなとき思い出すのは」 : dans les moments de doute, il se rappelle qu'on apprend en se trompant, de quoi tenir bon."
+    }
    },
    {
     "type": "inference",
@@ -4586,7 +4973,15 @@
       "De l'envie devant sa carrière facile"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3,
+     7
+    ],
+    "why": {
+     "en": "The writer's love of English began 「先生の授業をきっかけに」, and the letter ends on 「ぜひお目にかかりたい」: thanks and a wish to meet.",
+     "fr": "Son amour de l'anglais est né 「先生の授業をきっかけに」, et la lettre finit sur 「ぜひお目にかかりたい」 : gratitude et envie de le revoir."
+    }
    }
   ],
   "breakdown": [
@@ -5378,7 +5773,14 @@
       "Le jour même de la mort du grand-père"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「祖父が亡くなって一年が過ぎたころ」: about a year after the death; a month is how long the repair took.",
+     "fr": "「祖父が亡くなって一年が過ぎたころ」 : environ un an après la mort ; un mois, c'est la durée de la réparation."
+    }
    },
    {
     "type": "comprehension",
@@ -5400,7 +5802,14 @@
       "En retard, et le bracelet cassé"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「針は止まったまま」: the hands had stopped, and 「細かい傷」: fine scratches on the glass.",
+     "fr": "「針は止まったまま」 : les aiguilles étaient arrêtées, et 「細かい傷」 : de fines rayures sur le verre."
+    }
    },
    {
     "type": "grammar",
@@ -5422,7 +5831,14 @@
       "Elle a eu lieu en pleine hésitation"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「迷った末に」: 〜た末に is \"in the end, after\": the visit came only after much hesitation.",
+     "fr": "「迷った末に」 : 〜た末に veut dire « au terme de » : la visite n'est venue qu'après une longue hésitation."
+    }
    },
    {
     "type": "comprehension",
@@ -5444,7 +5860,14 @@
       "Près de la maison du grand-père"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「駅の裏にある小さな時計店」: 裏 is the back: the shop was behind the station, not in front of it.",
+     "fr": "「駅の裏にある小さな時計店」 : 裏, c'est l'arrière : la boutique était derrière la gare, pas devant."
+    }
    },
    {
     "type": "vocabulary",
@@ -5466,7 +5889,14 @@
       "Avec un sourire"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「しばらく黙って見ていた」: 黙る is to keep silent: the owner looked at the watch without a word.",
+     "fr": "「しばらく黙って見ていた」 : 黙る veut dire « se taire » : l'horloger a regardé la montre sans un mot."
+    }
    },
    {
     "type": "comprehension",
@@ -5488,7 +5918,14 @@
       "Qu'elle n'avait presque jamais été portée"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「長い間大切に使われてきた」: the watch had been used with great care for a long time.",
+     "fr": "「長い間大切に使われてきた」 : on s'était servi de cette montre avec grand soin pendant longtemps."
+    }
    },
    {
     "type": "grammar",
@@ -5510,7 +5947,14 @@
       "Elle marchait moins bien qu'une montre neuve"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「新品であるかのように」: 〜かのように is \"as if\": it ran like a new watch, though it was the old one.",
+     "fr": "「新品であるかのように」 : 〜かのように veut dire « comme si » : elle marchait comme une neuve, alors que c'était la vieille."
+    }
    },
    {
     "type": "vocabulary",
@@ -5532,7 +5976,14 @@
       "En brillant comme une neuve"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「正確に動いていた」: 正確 is \"accurate, exact\": the repaired watch kept the right time.",
+     "fr": "「正確に動いていた」 : 正確 veut dire « exact, précis » : la montre réparée donnait l'heure juste."
+    }
    },
    {
     "type": "grammar",
@@ -5554,7 +6005,14 @@
       "On a dit à l'auteur de ne pas le penser"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「思わずにはいられなかった」: 〜ずにはいられない is \"cannot help doing\": the wish came whether the writer wanted it or not.",
+     "fr": "「思わずにはいられなかった」 : 〜ずにはいられない veut dire « ne pas pouvoir s'empêcher de » : l'envie s'est imposée à lui."
+    }
    },
    {
     "type": "inference",
@@ -5576,7 +6034,15 @@
       "Il avait dit à l'auteur de la vendre un jour"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4,
+     5
+    ],
+    "why": {
+     "en": "His watch was 「大切に使われてきた」, cared for over years, and now runs 「新品であるかのように」: he would be glad to see it running again.",
+     "fr": "Sa montre avait été 「大切に使われてきた」, soignée des années, et marche 「新品であるかのように」 : il serait heureux de la voir marcher de nouveau."
+    }
    },
    {
     "type": "inference",
@@ -5598,7 +6064,14 @@
       "De l'agacement d'avoir attendu un mois entier"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "Wearing it, the writer can't stop wishing 「この時計を祖父に見せたい」: the watch brings the grandfather close again.",
+     "fr": "En la portant, l'auteur ne peut s'empêcher de souhaiter 「この時計を祖父に見せたい」 : la montre lui rend son grand-père proche."
+    }
    }
   ],
   "breakdown": [
@@ -6377,7 +6850,14 @@
       "Plusieurs milliards de tonnes"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「年間数百万トン」: 百万 is a million and 数 adds \"several\": several million tonnes a year.",
+     "fr": "「年間数百万トン」 : 百万, c'est un million, et 数 ajoute « plusieurs » : plusieurs millions de tonnes par an."
+    }
    },
    {
     "type": "grammar",
@@ -6399,7 +6879,14 @@
       "Surtout dans les foyers, rarement ailleurs"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「家庭ばかりか」: 〜ばかりか is \"not only… but also\": the cause is in homes and 「店や工場にもある」.",
+     "fr": "「家庭ばかりか」 : 〜ばかりか veut dire « non seulement… mais aussi » : la cause est dans les foyers et 「店や工場にもある」."
+    }
    },
    {
     "type": "comprehension",
@@ -6421,7 +6908,14 @@
       "La peur de la rupture de stock"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「商品が足りなくなるのを恐れて」: afraid of running short of goods, shops put out more than they need.",
+     "fr": "「商品が足りなくなるのを恐れて」 : par peur de manquer de marchandises, les magasins en exposent plus que nécessaire."
+    }
    },
    {
     "type": "vocabulary",
@@ -6443,7 +6937,14 @@
       "Une heure de fermeture"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「期限が近づいたもの」: food is thrown away as its 期限, the date it must be sold or eaten by, draws near.",
+     "fr": "「期限が近づいたもの」 : on jette les produits dont le 期限, la date limite, approche."
+    }
    },
    {
     "type": "grammar",
@@ -6465,7 +6966,14 @@
       "Avant de recueillir les données"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「データに基づいて」: 〜に基づいて is \"based on\": past sales figures decide how much is bought.",
+     "fr": "「データに基づいて」 : 〜に基づいて veut dire « en se fondant sur » : les ventes passées décident des quantités achetées."
+    }
    },
    {
     "type": "comprehension",
@@ -6487,7 +6995,14 @@
       "Demander aux clients quoi commander"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「過去の売り上げのデータに基づいて、仕入れる量を決める」: it sets how much stock to buy from past sales.",
+     "fr": "「過去の売り上げのデータに基づいて、仕入れる量を決める」 : elle fixe ses achats d'après ses ventes passées."
+    }
    },
    {
     "type": "grammar",
@@ -6509,7 +7024,14 @@
       "Agir à la place de quelque chose"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「行事に応じて」: 〜に応じて is \"according to\": the amounts change with the weather and local events.",
+     "fr": "「行事に応じて」 : 〜に応じて veut dire « selon » : les quantités varient avec la météo et les fêtes locales."
+    }
    },
    {
     "type": "comprehension",
@@ -6531,7 +7053,14 @@
       "Il jette trente pour cent d'aliments en moins"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「捨てる食品は三割減った」: 三割 is thirty percent, and what fell is the food thrown away, not sales.",
+     "fr": "「捨てる食品は三割減った」 : 三割, c'est trente pour cent, et ce sont les aliments jetés qui ont baissé, pas les ventes."
+    }
    },
    {
     "type": "vocabulary",
@@ -6553,7 +7082,14 @@
       "Cela a déjà réussi"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「店の努力だけでは限界がある」: 限界 is a limit: shops' efforts alone can only go so far.",
+     "fr": "「店の努力だけでは限界がある」 : 限界, c'est une limite : les efforts des magasins seuls ne peuvent pas tout."
+    }
    },
    {
     "type": "inference",
@@ -6575,7 +7111,15 @@
       "La météo compte plus que les ventes"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "「店の努力だけでは限界がある」, and good habits are asked 「買う側にも」: shops and shoppers both have a part.",
+     "fr": "「店の努力だけでは限界がある」, et de bonnes habitudes sont demandées 「買う側にも」 : magasins et clients ont chacun un rôle."
+    }
    },
    {
     "type": "inference",
@@ -6597,7 +7141,15 @@
       "Il propose moins de sortes de produits"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2,
+     3
+    ],
+    "why": {
+     "en": "Waste came from stocking 「多めに」; buying 「過去の売り上げのデータに基づいて」 keeps stock closer to what will sell.",
+     "fr": "Le gaspillage venait d'un stock 「多めに」 ; acheter 「過去の売り上げのデータに基づいて」 rapproche le stock de ce qui se vendra."
+    }
    }
   ],
   "breakdown": [
@@ -7460,7 +8012,14 @@
       "Des parents qui ne le parlent plus"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「テレビやインターネットが広まったことで」: 〜ことで gives the cause: the spread of TV and the internet.",
+     "fr": "「テレビやインターネットが広まったことで」 : 〜ことで donne la cause : la diffusion de la télé et d'internet."
+    }
    },
    {
     "type": "grammar",
@@ -7482,7 +8041,14 @@
       "Elles ne baissent que dans certaines régions"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「減る一方だ」: 〜一方だ is \"keeps on, only goes on\": the chances just keep shrinking.",
+     "fr": "「減る一方だ」 : 〜一方だ veut dire « ne faire que » : les occasions ne cessent de diminuer."
+    }
    },
    {
     "type": "grammar",
@@ -7504,7 +8070,14 @@
       "Mettre en doute l'avantage lui-même"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「便利な反面」: 〜反面 is \"while, on the other hand\": convenience is set against the sadness of losing local speech.",
+     "fr": "「便利な反面」 : 〜反面 veut dire « mais d'un autre côté » : la commodité est opposée à la tristesse de perdre les parlers."
+    }
    },
    {
     "type": "vocabulary",
@@ -7526,7 +8099,14 @@
       "Le langage poli du travail"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「標準語が全国どこでも通じる」: standard Japanese is understood anywhere in the country, the language all share.",
+     "fr": "「標準語が全国どこでも通じる」 : le japonais standard se comprend partout dans le pays : c'est la langue commune."
+    }
    },
    {
     "type": "grammar",
@@ -7548,7 +8128,14 @@
       "Au sujet d'une question débattue"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「をめぐっては、意見が分かれている」: 〜をめぐって is \"over, concerning\": the question of teaching dialect is debated.",
+     "fr": "「をめぐっては、意見が分かれている」 : 〜をめぐって veut dire « au sujet de » : la question d'enseigner le dialecte fait débat."
+    }
    },
    {
     "type": "comprehension",
@@ -7570,7 +8157,14 @@
       "Il attirera des touristes dans la région"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「教えれば言葉を残せる」: by teaching it, the language can be kept alive.",
+     "fr": "「教えれば言葉を残せる」 : en l'enseignant, on peut préserver ces parlers."
+    }
    },
    {
     "type": "comprehension",
@@ -7592,7 +8186,14 @@
       "Le dialecte doit s'apprendre en famille"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「教室で守っても意味がない」: there is no point protecting in class a way of speaking 「日常で話されなくなった」.",
+     "fr": "「教室で守っても意味がない」 : inutile de protéger en classe un parler 「日常で話されなくなった」."
+    }
    },
    {
     "type": "vocabulary",
@@ -7614,7 +8215,14 @@
       "Perd de son attrait"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「人気を集めている」: literally \"gathering popularity\": these goods and posters are catching on with the young.",
+     "fr": "「人気を集めている」 : littéralement « rassembler la popularité » : ces produits et affiches plaisent aux jeunes."
+    }
    },
    {
     "type": "comprehension",
@@ -7636,7 +8244,14 @@
       "Des produits et affiches en dialecte"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「方言を使った商品や観光のポスター」: goods and tourist posters that use dialect, not lessons or TV.",
+     "fr": "「方言を使った商品や観光のポスター」 : des produits et des affiches touristiques en dialecte, ni cours ni télé."
+    }
    },
    {
     "type": "inference",
@@ -7658,7 +8273,14 @@
       "Le japonais standard deviendra un dialecte"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「消えるのではなく、形を変えて生き続ける」: not vanishing, but living on in a changed form.",
+     "fr": "「消えるのではなく、形を変えて生き続ける」 : non pas disparaître, mais continuer à vivre sous une autre forme."
+    }
    },
    {
     "type": "inference",
@@ -7680,7 +8302,15 @@
       "Très critique"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4,
+     5
+    ],
+    "why": {
+     "en": "After the losses, the writer notes dialect's new popularity and ends on 「生き続けるのかもしれない」: a quiet hope.",
+     "fr": "Après les pertes, l'auteur note le succès du dialecte chez les jeunes et finit sur 「生き続けるのかもしれない」 : un espoir prudent."
+    }
    }
   ],
   "breakdown": [
@@ -8516,7 +9146,14 @@
       "Pendant une semaine"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「夜に新しい単語を覚えてもらった」: they learnt the words in the evening; the other group then stayed up until morning.",
+     "fr": "「夜に新しい単語を覚えてもらった」 : ils ont appris les mots le soir ; l'autre groupe a ensuite veillé jusqu'au matin."
+    }
    },
    {
     "type": "comprehension",
@@ -8538,7 +9175,14 @@
       "Il est resté éveillé jusqu'au matin"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「もう一方は朝まで起きていた」: the other group stayed awake until morning; sleeping at once was the first group.",
+     "fr": "「もう一方は朝まで起きていた」 : l'autre groupe est resté éveillé jusqu'au matin ; dormir aussitôt, c'est le premier groupe."
+    }
    },
    {
     "type": "comprehension",
@@ -8560,7 +9204,14 @@
       "Ils avaient moins de mots à retenir"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「試験の直前まで単語を見直せる」: staying up, they could go over the words right up to the test.",
+     "fr": "「試験の直前まで単語を見直せる」 : en veillant, ils pouvaient revoir les mots jusqu'à juste avant l'examen."
+    }
    },
    {
     "type": "grammar",
@@ -8582,7 +9233,14 @@
       "Il était trop flou pour être comparé"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「予想に反して」: 〜に反して is \"contrary to\": the group that slept, not the one expected, did better.",
+     "fr": "「予想に反して」 : 〜に反して veut dire « contrairement à » : c'est le groupe qui a dormi, pas celui qu'on attendait, qui a réussi."
+    }
    },
    {
     "type": "grammar",
@@ -8604,7 +9262,14 @@
       "Donner un exemple parmi d'autres"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「成績がよかったことから」: 〜ことから is \"from the fact that\": the better scores are what the researchers' view rests on.",
+     "fr": "「成績がよかったことから」 : 〜ことから veut dire « du fait que » : les meilleurs résultats fondent l'avis des chercheurs."
+    }
    },
    {
     "type": "vocabulary",
@@ -8626,7 +9291,14 @@
       "Avantagé"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「有利だろう」: 有利 is \"at an advantage\": able to review until the test, they were expected to do better.",
+     "fr": "「有利だろう」 : 有利 veut dire « avantagé » : pouvant réviser jusqu'à l'examen, on les croyait favoris."
+    }
    },
    {
     "type": "comprehension",
@@ -8648,7 +9320,14 @@
       "On apprend plus vite de nouveaux mots"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「脳が覚えたことをまとめている」: まとめる is to gather and sort: the brain puts what it learnt in order.",
+     "fr": "「脳が覚えたことをまとめている」 : まとめる veut dire « rassembler, mettre en ordre » : le cerveau range ce qu'il a appris."
+    }
    },
    {
     "type": "vocabulary",
@@ -8670,7 +9349,14 @@
       "Tard dans la nuit"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「一晩中起きて」: 一晩 is one night and 〜中 \"throughout\": staying up the whole night.",
+     "fr": "「一晩中起きて」 : 一晩, c'est une nuit, et 〜中 « tout au long de » : veiller toute la nuit."
+    }
    },
    {
     "type": "grammar",
@@ -8692,7 +9378,14 @@
       "Ce n'est pas tant un effort qu'autre chose"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「努力というより」: 〜というより is \"rather than\": an all-nighter is less effort than a waste of what was learnt.",
+     "fr": "「努力というより」 : 〜というより veut dire « plutôt que » : la nuit blanche est moins un effort qu'un gâchis de ce qu'on a appris."
+    }
    },
    {
     "type": "inference",
@@ -8714,7 +9407,15 @@
       "Apprendre moins de mots à la fois"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3,
+     5
+    ],
+    "why": {
+     "en": "The sleepers 「ずっと多くの単語を覚えていた」, and staying up 「むだにする」 what was learnt: better to sleep.",
+     "fr": "Les dormeurs 「ずっと多くの単語を覚えていた」, et veiller 「むだにする」 ce qu'on a appris : mieux vaut dormir."
+    }
    },
    {
     "type": "inference",
@@ -8736,7 +9437,15 @@
       "Il ne vaut que pour quelques étudiants"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2,
+     3
+    ],
+    "why": {
+     "en": "The awake group was expected to win, but 「予想に反して」 the sleepers did better: the finding went against the assumption.",
+     "fr": "On attendait le groupe éveillé en tête, mais 「予想に反して」 les dormeurs ont fait mieux : le résultat contredit l'attente."
+    }
    }
   ],
   "breakdown": [
@@ -9544,7 +10253,14 @@
       "Seulement ceux qui vont au travail à vélo"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「市内で自転車に乗る人は全員」: everyone who rides a bicycle in the city; until now it was only children.",
+     "fr": "「市内で自転車に乗る人は全員」 : toute personne qui roule à vélo en ville ; jusqu'ici, seuls les enfants."
+    }
    },
    {
     "type": "comprehension",
@@ -9566,7 +10282,14 @@
       "D'autres villes avaient adopté la même règle"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「大人の事故が増えたことを受けて」: 〜を受けて is \"in response to\": accidents involving adults went up.",
+     "fr": "「大人の事故が増えたことを受けて」 : 〜を受けて veut dire « suite à » : les accidents d'adultes ont augmenté."
+    }
    },
    {
     "type": "vocabulary",
@@ -9588,7 +10311,14 @@
       "Ceux à qui s'applique une règle"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「子どもだけが対象だった」: 対象 is who a rule is aimed at: before, it applied to children only.",
+     "fr": "「子どもだけが対象だった」 : 対象, c'est ceux que vise une règle : avant, elle ne s'appliquait qu'aux enfants."
+    }
    },
    {
     "type": "grammar",
@@ -9610,7 +10340,14 @@
       "Un bon résultat à espérer"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「つながりかねない」: 〜かねない is \"could well lead to (something bad)\": a serious injury is possible, not certain.",
+     "fr": "「つながりかねない」 : 〜かねない veut dire « risquer de » : une blessure grave est possible, pas certaine."
+    }
    },
    {
     "type": "grammar",
@@ -9632,7 +10369,14 @@
       "Afin de (faire)"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「頭を守らずに」: 〜ずに is \"without doing\": falling without protecting your head.",
+     "fr": "「頭を守らずに」 : 〜ずに veut dire « sans » : tomber sans protéger sa tête."
+    }
    },
    {
     "type": "grammar",
@@ -9654,7 +10398,14 @@
       "Elle couvre le casque et autre chose en plus"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「代金に加えて」: 〜に加えて is \"in addition to\": the helmet is paid for, plus half of some repairs.",
+     "fr": "「代金に加えて」 : 〜に加えて veut dire « en plus de » : le casque est payé, et la moitié de certaines réparations en plus."
+    }
    },
    {
     "type": "comprehension",
@@ -9676,7 +10427,14 @@
       "Rien du tout"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「費用の半分も出す」: 半分 is half: the city pays half the cost of fixing brakes and lights.",
+     "fr": "「費用の半分も出す」 : 半分, c'est la moitié : la ville paie la moitié des réparations des freins et des feux."
+    }
    },
    {
     "type": "vocabulary",
@@ -9698,7 +10456,14 @@
       "Ceux qui le portent mal"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「かぶりたがらない」: 〜たがる is wanting, seen in others; in the negative, these people don't want to wear one.",
+     "fr": "「かぶりたがらない」 : 〜たがる dit l'envie qu'on voit chez les autres ; au négatif, ces gens n'ont pas envie d'en porter."
+    }
    },
    {
     "type": "comprehension",
@@ -9720,7 +10485,14 @@
       "C'est encombrant"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「髪型がくずれる」: it spoils one's hairstyle; the other reason is 「夏はあつい」, not the price.",
+     "fr": "「髪型がくずれる」 : cela abîme la coiffure ; l'autre raison est 「夏はあつい」, pas le prix."
+    }
    },
    {
     "type": "inference",
@@ -9742,7 +10514,14 @@
       "Une règle valable aussi pour les enfants"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「一人一人が安全の大切さを理解しないことには」: unless each person grasps why safety matters, accidents won't fall.",
+     "fr": "「一人一人が安全の大切さを理解しないことには」 : tant que chacun ne comprend pas l'importance de la sécurité, les accidents ne baisseront pas."
+    }
    },
    {
     "type": "inference",
@@ -9764,7 +10543,15 @@
       "Il l'approuve, mais doute qu'elle suffise"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2,
+     5
+    ],
+    "why": {
+     "en": "A fall can be 「大けがにつながりかねない」, so helmets make sense, but 「決まりを作っても」 a rule alone will not cut accidents.",
+     "fr": "Une chute peut 「大けがにつながりかねない」, le casque a donc du sens, mais 「決まりを作っても」, la règle seule ne fera pas baisser les accidents."
+    }
    }
   ],
   "breakdown": [
@@ -10544,7 +11331,14 @@
       "Une règle interdit de les vendre"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「持ち主が遠くに住んでいたり」: the owner living far away is one reason; the other is not knowing who inherits.",
+     "fr": "「持ち主が遠くに住んでいたり」 : le propriétaire habite loin, c'est une raison ; l'autre, ne pas savoir à qui revient la maison."
+    }
    },
    {
     "type": "grammar",
@@ -10566,7 +11360,14 @@
       "Une fois dans chaque période"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「十年以上にわたって」: 〜にわたって is \"over, throughout\": left alone for the whole of ten years or more.",
+     "fr": "「十年以上にわたって」 : 〜にわたって veut dire « sur toute la durée de » : laissées à l'abandon dix ans ou plus d'affilée."
+    }
    },
    {
     "type": "comprehension",
@@ -10588,7 +11389,14 @@
       "Elle a démoli ses plus vieilles maisons"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「三年前に行った調査」: three years ago the city carried out a survey, and the scheme was built on it.",
+     "fr": "「三年前に行った調査」 : il y a trois ans, la ville a mené une enquête, sur laquelle repose le dispositif."
+    }
    },
    {
     "type": "grammar",
@@ -10610,7 +11418,14 @@
       "Il repose sur les résultats de l'enquête"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「調査をもとに」: 〜をもとに is \"based on\": the scheme was built from what the survey found.",
+     "fr": "「調査をもとに」 : 〜をもとに veut dire « en s'appuyant sur » : le dispositif repose sur les résultats de l'enquête."
+    }
    },
    {
     "type": "comprehension",
@@ -10632,7 +11447,14 @@
       "Des résidences de vacances ou des salles pour touristes"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「大学生が暮らすシェアハウスや地域の集会所」: shared houses for students, or local meeting halls.",
+     "fr": "「大学生が暮らすシェアハウスや地域の集会所」 : des colocations d'étudiants ou des salles de réunion de quartier."
+    }
    },
    {
     "type": "vocabulary",
@@ -10654,7 +11476,14 @@
       "Une maison où des étudiants vivent ensemble"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「地域の集会所」: 集会 is a meeting and 所 a place: a hall where local people gather.",
+     "fr": "「地域の集会所」 : 集会, c'est une réunion, et 所 un lieu : une salle où se retrouvent les habitants."
+    }
    },
    {
     "type": "grammar",
@@ -10676,7 +11505,14 @@
       "Ils ne peuvent pas démolir la maison seuls"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「取りこわさずに済む」: 〜ずに済む is \"get by without having to\": owners are spared pulling the house down.",
+     "fr": "「取りこわさずに済む」 : 〜ずに済む veut dire « s'épargner de » : les propriétaires évitent d'avoir à démolir."
+    }
    },
    {
     "type": "comprehension",
@@ -10698,7 +11534,14 @@
       "Plus elles sont vieilles, plus elles coûtent à réparer"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「古い家ほど直すのにお金がかかる」: 〜ほど is \"the more…\": the older the house, the more repairs cost.",
+     "fr": "「古い家ほど直すのにお金がかかる」 : 〜ほど veut dire « plus… plus » : plus la maison est vieille, plus la réparer coûte."
+    }
    },
    {
     "type": "vocabulary",
@@ -10720,7 +11563,14 @@
       "Ne pas avoir le droit de la vendre"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「市も手を出せない」: literally \"cannot put a hand in\": even the city can do nothing about such a house.",
+     "fr": "「市も手を出せない」 : littéralement « ne pas pouvoir y mettre la main » : même la ville ne peut rien y faire."
+    }
    },
    {
     "type": "inference",
@@ -10742,7 +11592,15 @@
       "Aux seuls propriétaires qui habitent loin"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2,
+     4
+    ],
+    "why": {
+     "en": "The scheme helps 「家を借りたい人」, and 「持ち主にとっても」 it is a relief: owners and renters both gain.",
+     "fr": "Le dispositif aide les 「家を借りたい人」, et 「持ち主にとっても」 c'est un soulagement : propriétaires et locataires y gagnent."
+    }
    },
    {
     "type": "inference",
@@ -10764,7 +11622,15 @@
       "Celle dont le propriétaire vit dans une autre ville"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2,
+     6
+    ],
+    "why": {
+     "en": "The scheme links owners with renters, but for 「持ち主と連絡が取れない家」 the city 「手を出せない」: there is no one to link.",
+     "fr": "Le dispositif relie propriétaires et locataires, mais pour 「持ち主と連絡が取れない家」, la ville 「手を出せない」 : personne à relier."
+    }
    }
   ],
   "breakdown": [
@@ -11592,7 +12458,14 @@
       "Quand un nouveau service de bus est lancé"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「じこが伝えられるたびに」: 〜たびに is \"every time\": each reported accident by an older driver brings the debate back.",
+     "fr": "「じこが伝えられるたびに」 : 〜たびに veut dire « chaque fois que » : chaque accident d'un conducteur âgé relance le débat."
+    }
    },
    {
     "type": "grammar",
@@ -11614,7 +12487,14 @@
       "Ils sont inquiets, mais le gardent malgré tout"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「不安を感じつつも」: 〜つつも is \"even while\": they feel uneasy, yet still cannot give the licence up.",
+     "fr": "「不安を感じつつも」 : 〜つつも veut dire « tout en » : inquiets, ils ne peuvent pourtant pas renoncer au permis."
+    }
    },
    {
     "type": "vocabulary",
@@ -11636,7 +12516,14 @@
       "Elle est trop dangereuse"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「生活に欠かせない」: 欠かす is to go without, so 欠かせない is \"cannot do without\" where buses and trains are few.",
+     "fr": "「生活に欠かせない」 : 欠かす, c'est se passer de ; 欠かせない : on ne peut s'en passer là où bus et trains sont rares."
+    }
    },
    {
     "type": "comprehension",
@@ -11658,7 +12545,14 @@
       "Il a rendu son permis à la commune l'an dernier"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「買い物にも病院にも行けなくなる」: without a car, he could get neither to the shops nor to the hospital.",
+     "fr": "「買い物にも病院にも行けなくなる」 : sans voiture, il ne pourrait plus ni faire ses courses ni aller à l'hôpital."
+    }
    },
    {
     "type": "grammar",
@@ -11680,7 +12574,14 @@
       "Il espère que cela n'arrivera pas"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「行けなくなるに決まっている」: 〜に決まっている is \"is bound to\": he is sure that is what would happen; nobody decided it.",
+     "fr": "「行けなくなるに決まっている」 : 〜に決まっている veut dire « c'est sûr que » : il est certain que cela arriverait ; personne n'a rien décidé."
+    }
    },
    {
     "type": "grammar",
@@ -11702,7 +12603,14 @@
       "Dans quelle direction le bus est tourné"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「高齢者向け」: 〜向け is \"aimed at, for\": the bus is meant for older people.",
+     "fr": "「高齢者向け」 : 〜向け veut dire « destiné à » : le bus est fait pour les personnes âgées."
+    }
    },
    {
     "type": "comprehension",
@@ -11724,7 +12632,14 @@
       "Appeler au plus tard la veille pour être pris chez soi"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「前の日までに電話で頼めば、家の前から」: phone by the day before, and you are picked up at your door.",
+     "fr": "「前の日までに電話で頼めば、家の前から」 : on appelle au plus tard la veille, et l'on est pris devant chez soi."
+    }
    },
    {
     "type": "comprehension",
@@ -11746,7 +12661,14 @@
       "Il faut désormais réserver une semaine à l'avance"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「利用者が増えるにつれて、運転手も費用も足りなくなっている」: as use grows, drivers and money run short.",
+     "fr": "「利用者が増えるにつれて、運転手も費用も足りなくなっている」 : avec plus d'usagers, on manque de chauffeurs et d'argent."
+    }
    },
    {
     "type": "vocabulary",
@@ -11768,7 +12690,14 @@
       "La marche pour rester en forme"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「暮らしの足」: 足 (foot) here means a way to get around, like the car or the bus in the text.",
+     "fr": "「暮らしの足」 : 足 (le pied) désigne ici un moyen de se déplacer, comme la voiture ou le bus du texte."
+    }
    },
    {
     "type": "inference",
@@ -11790,7 +12719,14 @@
       "Les médias exagèrent les accidents des conducteurs âgés"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「暮らしの足の問題と分けては考えられない」: giving back a licence cannot be weighed apart from how people get around.",
+     "fr": "「暮らしの足の問題と分けては考えられない」 : rendre son permis ne se pense pas à part des moyens de se déplacer."
+    }
    },
    {
     "type": "inference",
@@ -11812,7 +12748,15 @@
       "Pour inciter les conducteurs âgés à renouveler leur permis"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3,
+     4
+    ],
+    "why": {
+     "en": "Without a car, people 「買い物にも病院にも行けなくなる」; 「そこで」, \"so\", the town started a door-to-door bus.",
+     "fr": "Sans voiture, on 「買い物にも病院にも行けなくなる」 ; 「そこで」, « c'est pourquoi », la commune a lancé un bus porte à porte."
+    }
    }
   ],
   "breakdown": [
@@ -12716,7 +13660,14 @@
       "Les jeunes qui n'ont pas de smartphone"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「スマートフォンだけで代金を払える店」: shops where a phone alone is enough to pay, and they 「急に増えた」.",
+     "fr": "「スマートフォンだけで代金を払える店」 : les magasins où un smartphone suffit pour payer, qui 「急に増えた」."
+    }
    },
    {
     "type": "vocabulary",
@@ -12738,7 +13689,14 @@
       "Ce n'est pas rare"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「珍しくない」: 珍しい is \"rare, unusual\", so 珍しくない is \"not unusual\": plenty of young people go out with no wallet.",
+     "fr": "「珍しくない」 : 珍しい veut dire « rare », donc 珍しくない « pas rare » : bien des jeunes sortent sans portefeuille."
+    }
    },
    {
     "type": "comprehension",
@@ -12760,7 +13718,14 @@
       "Les petits commerces et leurs fournisseurs"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「取り残されているのが、高齢者と小さな商店」: those left behind are older people and small shops.",
+     "fr": "「取り残されているのが、高齢者と小さな商店」 : les laissés pour compte sont les personnes âgées et les petits commerces."
+    }
    },
    {
     "type": "grammar",
@@ -12782,7 +13747,14 @@
       "Une fois appris, elle s'en souviendra"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「覚えたところで」: 〜たところで is \"even if one did\": learning it would change nothing, as she would soon forget.",
+     "fr": "「覚えたところで」 : 〜たところで veut dire « même si l'on » : apprendre ne changerait rien, elle oublierait vite."
+    }
    },
    {
     "type": "grammar",
@@ -12804,7 +13776,14 @@
       "Mis à part les commerçants"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「店の側からすると」: 〜からすると is \"from the point of view of\": seen from the shops' side.",
+     "fr": "「店の側からすると」 : 〜からすると veut dire « du point de vue de » : vu du côté des commerçants."
+    }
    },
    {
     "type": "comprehension",
@@ -12826,7 +13805,14 @@
       "Ils pèsent lourd pour les commerçants"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「手数料は決して小さくない」: 決して〜ない is \"by no means\": the fees are a real cost for the shops.",
+     "fr": "「手数料は決して小さくない」 : 決して〜ない veut dire « nullement » : ces frais pèsent vraiment sur les commerçants."
+    }
    },
    {
     "type": "comprehension",
@@ -12848,7 +13834,14 @@
       "La machine était facile à apprendre"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「現金しか使えない店だと若い客が来なくなる」: a cash-only shop would lose its young customers.",
+     "fr": "「現金しか使えない店だと若い客が来なくなる」 : un magasin qui n'accepte que les espèces perdrait ses jeunes clients."
+    }
    },
    {
     "type": "vocabulary",
@@ -12870,7 +13863,14 @@
       "La fierté de son choix"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「迷いながらも」: 迷う here is to hesitate, to be torn: the owner brought it in while still unsure.",
+     "fr": "「迷いながらも」 : 迷う veut dire ici « hésiter » : le commerçant l'a adopté tout en restant indécis."
+    }
    },
    {
     "type": "grammar",
@@ -12892,7 +13892,14 @@
       "En avance sur"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「使えない人の声ぬきで」: 〜ぬきで is \"without, leaving out\": changing rules without hearing those who cannot use it.",
+     "fr": "「使えない人の声ぬきで」 : 〜ぬきで veut dire « sans, en laissant de côté » : changer les règles sans écouter ceux qui ne peuvent pas l'utiliser."
+    }
    },
    {
     "type": "inference",
@@ -12914,7 +13921,15 @@
       "Bon en soi, si l'on écoute ceux qui en sont exclus"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6,
+     7
+    ],
+    "why": {
+     "en": "「便利さを求めること自体は悪くない」, but changing rules 「使えない人の声ぬきで」 only creates new trouble.",
+     "fr": "「便利さを求めること自体は悪くない」, mais changer les règles 「使えない人の声ぬきで」 ne crée que de nouveaux désagréments."
+    }
    },
    {
     "type": "inference",
@@ -12936,7 +13951,15 @@
       "Pour montrer que les petits commerces accueillent les jeunes"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0,
+     1
+    ],
+    "why": {
+     "en": "Going out 「財布を持たずに」, with no wallet, is 「珍しくない」: a sign of how far paying by phone has spread.",
+     "fr": "Sortir 「財布を持たずに」, sans portefeuille, est 「珍しくない」 : signe de la diffusion du paiement par téléphone."
+    }
    }
   ],
   "breakdown": [
@@ -13819,7 +14842,14 @@
       "Son château et son port"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「城と古い家並みで知られる」: 〜で知られる is \"known for\": its castle and its rows of old houses.",
+     "fr": "「城と古い家並みで知られる」 : 〜で知られる veut dire « connu pour » : son château et ses rangées de vieilles maisons."
+    }
    },
    {
     "type": "grammar",
@@ -13841,7 +14871,14 @@
       "Elle ne se forme que les jours d'ouverture"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「開くか開かないかのうちに」: 〜か〜ないかのうちに is \"no sooner… than\": the queue forms the very moment the shutters go up.",
+     "fr": "「開くか開かないかのうちに」 : 〜か〜ないかのうちに veut dire « à peine… que » : la file se forme dès que les rideaux se lèvent."
+    }
    },
    {
     "type": "comprehension",
@@ -13863,7 +14900,14 @@
       "Des habitants allant à l'hôpital ne peuvent pas monter"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「病院へ通う住民が乗れない日もある」: on some days residents going to hospital cannot get on the full buses.",
+     "fr": "「病院へ通う住民が乗れない日もある」 : certains jours, les habitants qui vont à l'hôpital ne peuvent pas monter dans les bus pleins."
+    }
    },
    {
     "type": "vocabulary",
@@ -13885,7 +14929,14 @@
       "Venir moins souvent qu'avant"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「観光客が押し寄せている」: 押し寄せる is to surge in like a wave: tourists arriving in great numbers.",
+     "fr": "「観光客が押し寄せている」 : 押し寄せる, c'est déferler comme une vague : les touristes arrivent en masse."
+    }
    },
    {
     "type": "grammar",
@@ -13907,7 +14958,14 @@
       "Vivre en paix reste possible par moments"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「落ち着いて暮らすどころではない」: 〜どころではない is \"in no state for\": a calm life is simply out of the question.",
+     "fr": "「落ち着いて暮らすどころではない」 : 〜どころではない veut dire « il n'en est pas question » : vivre au calme est devenu impossible."
+    }
    },
    {
     "type": "comprehension",
@@ -13929,7 +14987,14 @@
       "Faire payer 500 yens chaque trajet en bus de ligne"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「庭園の見学を予約制にし」 and 「一人五百円の協力金」: garden visits by booking, and 500 yen a person.",
+     "fr": "「庭園の見学を予約制にし」 et 「一人五百円の協力金」 : la visite du jardin sur réservation, et 500 yens par personne."
+    }
    },
    {
     "type": "vocabulary",
@@ -13951,7 +15016,14 @@
       "Concilier les deux"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「両立させる」: 両 is \"both\" and 立つ \"to stand\": making residents' lives and the economy work side by side.",
+     "fr": "「両立させる」 : 両 veut dire « les deux » et 立つ « tenir debout » : faire tenir ensemble vie des habitants et économie."
+    }
    },
    {
     "type": "grammar",
@@ -13973,7 +15045,14 @@
       "Que la ville a autrefois renoncé à ses revenus"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「手放すということでもある」: 〜ということでもある is \"it also means\": cutting tourists amounts to giving up income too.",
+     "fr": "「手放すということでもある」 : 〜ということでもある veut dire « c'est aussi » : réduire les touristes revient aussi à renoncer à des revenus."
+    }
    },
    {
     "type": "comprehension",
@@ -13995,7 +15074,14 @@
       "À l'entrée du jardin le plus visité"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「名物の菓子を売る店の前には長い列ができる」: the queue forms outside the shop selling the famous sweets.",
+     "fr": "「名物の菓子を売る店の前には長い列ができる」 : la file se forme devant la boutique qui vend les confiseries réputées."
+    }
    },
    {
     "type": "inference",
@@ -14017,7 +15103,14 @@
       "Les habitants devraient quitter le centre bondé"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「答えはまだ見えていない」: how to balance residents' lives and the town's economy has no answer yet.",
+     "fr": "「答えはまだ見えていない」 : comment concilier vie des habitants et économie de la ville reste sans réponse."
+    }
    },
    {
     "type": "inference",
@@ -14039,7 +15132,15 @@
       "Que les habitants ne sortent plus de chez eux"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2,
+     3
+    ],
+    "why": {
+     "en": "Buses so full that 「病院へ通う住民が乗れない」, and residents say 「落ち着いて暮らすどころではない」: crowds weigh on daily life.",
+     "fr": "Des bus si pleins que 「病院へ通う住民が乗れない」, et des habitants qui disent 「落ち着いて暮らすどころではない」 : la foule pèse sur leur vie."
+    }
    }
   ],
   "breakdown": [
@@ -14910,7 +16011,14 @@
       "Elles ont été livrées à la mauvaise adresse"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「ふたが閉まりにくい」: 〜にくい is \"hard to\": the lid is hard to close.",
+     "fr": "「ふたが閉まりにくい」 : 〜にくい veut dire « difficile à » : le couvercle ferme mal."
+    }
    },
    {
     "type": "comprehension",
@@ -14932,7 +16040,14 @@
       "Environ deux mille de celles vendues en octobre"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「十月に販売した」 and 「約二千台」: about two thousand of those sold in October, not September.",
+     "fr": "「十月に販売した」 et 「約二千台」 : environ deux mille de celles vendues en octobre, pas en septembre."
+    }
    },
    {
     "type": "comprehension",
@@ -14954,7 +16069,14 @@
       "Une mauvaise utilisation par les clients"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「部品工場でのチェックが不十分だった」: the checks at the parts factory were not enough.",
+     "fr": "「部品工場でのチェックが不十分だった」 : les contrôles à l'usine de pièces étaient insuffisants."
+    }
    },
    {
     "type": "vocabulary",
@@ -14976,7 +16098,14 @@
       "Une hausse de prix"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「不具合が見つかりました」: 不具合 is a fault, something not working right: here a lid that won't close.",
+     "fr": "「不具合が見つかりました」 : 不具合, c'est un défaut, un mauvais fonctionnement : ici un couvercle qui ferme mal."
+    }
    },
    {
     "type": "comprehension",
@@ -14998,7 +16127,14 @@
       "Attendre qu'un couvercle neuf arrive par la poste"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「新しいものと交換いたします」: it is swapped free for a new one; apply 「ホームページか電話で」, online or by phone.",
+     "fr": "「新しいものと交換いたします」 : l'appareil est échangé gratuitement contre un neuf ; on le demande 「ホームページか電話で」."
+    }
    },
    {
     "type": "vocabulary",
@@ -15020,7 +16156,14 @@
       "Les plus appréciés des clients"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「対象の商品」: 対象 is what something applies to: the kettles the fault and the exchange concern.",
+     "fr": "「対象の商品」 : 対象, c'est ce qui est concerné : les bouilloires touchées par le défaut et l'échange."
+    }
    },
    {
     "type": "grammar",
@@ -15042,7 +16185,14 @@
       "Il porte les excuses de la société"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「おわびの気持ちをこめて」: 〜をこめて is \"putting (a feeling) into\": the gift carries the company's apology.",
+     "fr": "「おわびの気持ちをこめて」 : 〜をこめて veut dire « en y mettant (un sentiment) » : le présent porte les excuses de la société."
+    }
    },
    {
     "type": "grammar",
@@ -15064,7 +16214,14 @@
       "En dehors d'une nouvelle organisation"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「新たな体制のもとで」: 〜のもとで is \"under\": every product will be checked under a new system.",
+     "fr": "「新たな体制のもとで」 : 〜のもとで veut dire « sous, dans le cadre de » : tous les produits seront vérifiés sous une nouvelle organisation."
+    }
    },
    {
     "type": "grammar",
@@ -15086,7 +16243,14 @@
       "La crainte que cela se reproduise"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "「くり返すまい」: 〜まい here is a firm \"will not\"; with 「心に決めております」 it is a resolve, not a guess.",
+     "fr": "「くり返すまい」 : 〜まい marque ici un refus ferme ; avec 「心に決めております」, c'est une résolution, pas une supposition."
+    }
    },
    {
     "type": "inference",
@@ -15108,7 +16272,14 @@
       "Rien, car son appareil n'a pas de défaut"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「九月以前の商品には問題はございません」: a kettle from September has no fault, so there is nothing to do.",
+     "fr": "「九月以前の商品には問題はございません」 : une bouilloire de septembre n'a aucun défaut ; il n'y a rien à faire."
+    }
    },
    {
     "type": "inference",
@@ -15130,7 +16301,15 @@
       "Expliquer pourquoi le prix de la bouilloire a augmenté"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3,
+     4
+    ],
+    "why": {
+     "en": "It says 「心よりおわび申し上げます」 and explains how kettles are 「新しいものと交換」: an apology and an exchange.",
+     "fr": "La lettre dit 「心よりおわび申し上げます」 et explique comment les bouilloires sont 「新しいものと交換」 : excuses et échange."
+    }
    }
   ],
   "breakdown": [
@@ -15942,7 +17121,14 @@
       "Les clubs de l'école primaire, des villes vers les campagnes"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「中学校の部活動」 are junior high clubs, and they move 「学校から地域のスポーツクラブなどへ」: from schools to local groups.",
+     "fr": "「中学校の部活動」, ce sont les clubs du collège, et ils passent 「学校から地域のスポーツクラブなどへ」 : de l'école à des structures locales."
+    }
    },
    {
     "type": "grammar",
@@ -15964,7 +17150,14 @@
       "Il laisse de côté les activités des jours de repos"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「を中心に」 means \"centred on\": the move mainly concerns 「休日の活動」, club activities on days off.",
+     "fr": "「を中心に」 veut dire « centré sur » : le transfert porte surtout sur 「休日の活動」, les activités des jours de repos."
+    }
    },
    {
     "type": "comprehension",
@@ -15986,7 +17179,14 @@
       "Beaucoup d'enseignants n'ont presque plus de temps à eux"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「からだ」 gives the reason: many teachers 「自分の時間がほとんど持てない」, have almost no time of their own.",
+     "fr": "「からだ」 donne la raison : beaucoup d'enseignants 「自分の時間がほとんど持てない」, n'ont presque plus de temps à eux."
+    }
    },
    {
     "type": "vocabulary",
@@ -16008,7 +17208,14 @@
       "Être réprimandé pour une erreur"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「指導に追われ」: 追われる here means swamped by work, kept busy coaching after school and on days off, not chased away.",
+     "fr": "「指導に追われ」 : 追われる veut dire ici être accaparé, occupé à encadrer après les cours et les jours de repos, pas chassé."
+    }
    },
    {
     "type": "comprehension",
@@ -16030,7 +17237,14 @@
       "Des clubs plus proches du domicile des enfants"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「専門的な知識を持つ指導者から教わる」: in local clubs, children can learn from coaches with specialist knowledge.",
+     "fr": "「専門的な知識を持つ指導者から教わる」 : dans les clubs locaux, les enfants peuvent être formés par des encadrants spécialisés."
+    }
    },
    {
     "type": "vocabulary",
@@ -16052,7 +17266,14 @@
       "Être formé par quelqu'un"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "In 「指導者から教わる」, 教わる is \"to be taught\" and から marks who teaches: the children learn from the coaches.",
+     "fr": "Dans 「指導者から教わる」, 教わる veut dire « être formé » et から indique qui enseigne : les enfants apprennent des encadrants."
+    }
    },
    {
     "type": "comprehension",
@@ -16074,7 +17295,14 @@
       "Elles risquent d'avoir moins leur mot à dire"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「家庭が払うお金が増えるおそれがある」: with fees and travel costs, what families pay may go up.",
+     "fr": "「家庭が払うお金が増えるおそれがある」 : avec les cotisations et les transports, ce que paient les familles risque d'augmenter."
+    }
    },
    {
     "type": "grammar",
@@ -16096,7 +17324,14 @@
       "Elles ont le même problème que les régions"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「はともかく」 sets something aside: cities may cope, but in thinly populated regions finding coaches is hard.",
+     "fr": "「はともかく」 met une chose de côté : passe encore pour les villes, mais dans les régions peu peuplées, trouver des encadrants est difficile."
+    }
    },
    {
     "type": "grammar",
@@ -16118,7 +17353,14 @@
       "On en décide partout de la même façon"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「決まるようでは」 means \"if it came to be decided that way\": then the change would 「本来の目的から外れてしまう」, stray from its aim.",
+     "fr": "「決まるようでは」 veut dire « si l'on en venait à en décider ainsi » : la réforme 「本来の目的から外れてしまう」, s'écarterait de son but."
+    }
    },
    {
     "type": "inference",
@@ -16140,7 +17382,14 @@
       "Que chaque enfant puisse continuer le sport"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "If 「住む場所や家の経済力」 decided who keeps playing, the change would miss 「本来の目的」: a chance for every child.",
+     "fr": "Si 「住む場所や家の経済力」 décidait qui continue le sport, la réforme manquerait 「本来の目的」 : une chance pour chaque enfant."
+    }
    },
    {
     "type": "inference",
@@ -16162,7 +17411,15 @@
       "Il ne concerne que les enseignants, pas les familles"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2,
+     3
+    ],
+    "why": {
+     "en": "The writer names a benefit, specialist coaches, then adds 「しかし、問題も多い」: the move has merits, but problems to solve.",
+     "fr": "L'auteur cite un atout, des encadrants spécialisés, puis ajoute 「しかし、問題も多い」 : la réforme a du bon, mais des problèmes à régler."
+    }
    }
   ],
   "breakdown": [
@@ -17039,7 +18296,14 @@
       "Des cuisiniers de restaurants voisins"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「地域の住民が」 serve the meals: the people who live in the area, not city staff or teachers.",
+     "fr": "「地域の住民が」 servent les repas : ce sont les habitants du quartier, pas du personnel municipal ni des enseignants."
+    }
    },
    {
     "type": "comprehension",
@@ -17061,7 +18325,14 @@
       "Pour aider les enfants mal nourris chez eux"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「家で十分に食事がとれない子どもを支えるため」: they began to support children who did not get enough to eat at home.",
+     "fr": "「家で十分に食事がとれない子どもを支えるため」 : elles ont commencé pour soutenir les enfants qui ne mangeaient pas assez chez eux."
+    }
    },
    {
     "type": "grammar",
@@ -17083,7 +18354,14 @@
       "Tout le monde sauf les enfants"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「に限らず」 means \"not limited to\": children still come, but elderly people and busy parents use them too.",
+     "fr": "「に限らず」 veut dire « pas seulement » : les enfants viennent toujours, mais des personnes âgées et des parents aussi."
+    }
    },
    {
     "type": "comprehension",
@@ -17105,7 +18383,14 @@
       "Des employés de bureaux voisins, à midi"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「一人暮らしの高齢者や忙しい親も利用している」: elderly people living alone and busy parents use them too.",
+     "fr": "「一人暮らしの高齢者や忙しい親も利用している」 : des personnes âgées vivant seules et des parents débordés les fréquentent aussi."
+    }
    },
    {
     "type": "grammar",
@@ -17127,7 +18412,14 @@
       "Un rôle qui remplace le premier"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「と同時に」 means \"at the same time as\": besides serving meals, the cafeterias are also places where people meet.",
+     "fr": "「と同時に」 veut dire « en même temps que » : en plus de servir des repas, les cantines sont aussi des lieux de rencontre."
+    }
    },
    {
     "type": "comprehension",
@@ -17149,7 +18441,14 @@
       "Grâce aux cuisines scolaires"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「食材も寄付で集められている」: the ingredients are gathered through donations (寄付), not paid for by the city.",
+     "fr": "「食材も寄付で集められている」 : les ingrédients proviennent de dons (寄付), pas du budget de la ville."
+    }
    },
    {
     "type": "grammar",
@@ -17171,7 +18470,14 @@
       "Le regret de l'auteur face à ce qui suit"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「残念なことに」 means \"sadly\": the writer regrets what follows, that children in real need find it hardest to come.",
+     "fr": "「残念なことに」 veut dire « malheureusement » : l'auteur regrette ce qui suit, que les enfants dans le besoin aient du mal à venir."
+    }
    },
    {
     "type": "comprehension",
@@ -17193,7 +18499,14 @@
       "Ils devraient payer plus que les autres"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「と見られるのを恐れて」: 〜と見られる is \"to be regarded as\": they fear the place is seen as one for poor children.",
+     "fr": "「と見られるのを恐れて」 : 〜と見られる veut dire « être considéré comme » : ils craignent que la cantine passe pour un lieu d'enfants pauvres."
+    }
    },
    {
     "type": "vocabulary",
@@ -17215,7 +18528,14 @@
       "Un tarif à payer à l'avance"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「工夫」 is a clever idea for a problem: writing a welcome at the entrance is one way to make anyone feel free to come.",
+     "fr": "「工夫」 est une astuce pour régler un problème : écrire un mot d'accueil à l'entrée en est une, pour que tous osent entrer."
+    }
    },
    {
     "type": "inference",
@@ -17237,7 +18557,15 @@
       "Que tous les repas sont désormais gratuits"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "Needy children fear the label 「貧しい家の子が行く所」, so 「どなたでもどうぞ」 says the place is for everyone, not only the poor.",
+     "fr": "Les enfants dans le besoin craignent l'étiquette 「貧しい家の子が行く所」 ; 「どなたでもどうぞ」 dit que le lieu est pour tous, pas seulement pour eux."
+    }
    },
    {
     "type": "inference",
@@ -17259,7 +18587,15 @@
       "De nourrir des enfants à accueillir tout le quartier"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1,
+     3
+    ],
+    "why": {
+     "en": "Begun 「子どもを支えるため」, they are now also 「年齢の違う人々が知り合う場」: from feeding children to serving the community.",
+     "fr": "Créées 「子どもを支えるため」, elles sont aussi devenues 「年齢の違う人々が知り合う場」 : de l'aide aux enfants à l'accueil de tout le quartier."
+    }
    }
   ],
   "breakdown": [
@@ -18136,7 +19472,14 @@
       "Patients et soignants qui ne se comprennent pas"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「病院で言葉が通じない」: in hospital, patients and staff cannot make themselves understood to each other.",
+     "fr": "「病院で言葉が通じない」 : à l'hôpital, patients et soignants n'arrivent pas à se comprendre."
+    }
    },
    {
     "type": "grammar",
@@ -18158,7 +19501,14 @@
       "Il l'a prise comme on le lui avait dit"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "After a verb, 「ところだった」 means \"nearly did\": in 「飲むところだった」, he almost took the double dose but did not.",
+     "fr": "Après un verbe, 「ところだった」 veut dire « a failli » : dans 「飲むところだった」, il a failli prendre la double dose, sans le faire."
+    }
    },
    {
     "type": "comprehension",
@@ -18180,7 +19530,14 @@
       "Il avait oublié combien il en avait déjà pris"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「医師の説明を誤解して」: he misunderstood (誤解) the doctor's explanation, which nearly led him to a double dose.",
+     "fr": "「医師の説明を誤解して」 : il a mal compris (誤解) les explications du médecin, et a failli prendre une double dose."
+    }
    },
    {
     "type": "vocabulary",
@@ -18202,7 +19559,14 @@
       "Les maladies qu'on a eues"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「体の具合」 is the state of one's body, how one feels: these patients cannot explain their symptoms.",
+     "fr": "「体の具合」, c'est l'état du corps, comment on se sent : ces patients n'arrivent pas à expliquer ce qu'ils ont."
+    }
    },
    {
     "type": "grammar",
@@ -18224,7 +19588,14 @@
       "Cela peut arriver"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「あり得る」 means \"can happen\": even a small misunderstanding may put a life in danger.",
+     "fr": "「あり得る」 veut dire « cela peut arriver » : même un petit malentendu peut mettre une vie en danger."
+    }
    },
    {
     "type": "comprehension",
@@ -18246,7 +19617,14 @@
       "Envoyer les patients vers d'autres cliniques"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「医療通訳を置く病院」 are increasing: more and more hospitals keep (置く) medical interpreters.",
+     "fr": "「医療通訳を置く病院」 sont de plus en plus nombreux : davantage d'hôpitaux ont (置く) des interprètes médicaux."
+    }
    },
    {
     "type": "comprehension",
@@ -18268,7 +19646,14 @@
       "Le patient tape ses symptômes sur une tablette"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「遠くにいる通訳者が手伝う」: a person far away interprets through the tablet; the tablet does not translate alone.",
+     "fr": "「遠くにいる通訳者が手伝う」 : une personne à distance interprète via la tablette ; la tablette ne traduit pas seule."
+    }
    },
    {
     "type": "comprehension",
@@ -18290,7 +19675,14 @@
       "Combien d'interprètes il faut par hôpital"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "Whether 「病院が払うのか、患者が払うのか」, the hospital or the patient pays, is 「まだはっきり決まっていない」.",
+     "fr": "Savoir si 「病院が払うのか、患者が払うのか」, l'hôpital ou le patient, est 「まだはっきり決まっていない」, pas encore tranché."
+    }
    },
    {
     "type": "grammar",
@@ -18312,7 +19704,14 @@
       "Que cela ne s'est produit qu'une fois"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「あってはならない」 means \"must not happen\": being denied needed treatment over language must never be allowed.",
+     "fr": "「あってはならない」 veut dire « ne doit pas arriver » : être privé de soins pour une question de langue est inacceptable."
+    }
    },
    {
     "type": "inference",
@@ -18334,7 +19733,15 @@
       "Pour montrer le danger d'un malentendu"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1,
+     3
+    ],
+    "why": {
+     "en": "The man nearly took 「二倍の薬」, and the writer adds that a small slip can lead to 「命の危険」: a misunderstanding is dangerous.",
+     "fr": "L'homme a failli prendre 「二倍の薬」, et l'auteur ajoute qu'une petite erreur peut mener à 「命の危険」 : un malentendu est dangereux."
+    }
    },
    {
     "type": "inference",
@@ -18356,7 +19763,15 @@
       "Obliger les patients étrangers à venir avec un ami"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6,
+     7
+    ],
+    "why": {
+     "en": "Who pays is 「まだはっきり決まっていない」, yet no one must miss treatment over language: settling the cost lets interpreting spread.",
+     "fr": "Qui doit payer est 「まだはっきり決まっていない」, or personne ne doit être privé de soins : régler le coût permet à l'interprétariat de s'étendre."
+    }
    }
   ],
   "breakdown": [
@@ -19260,7 +20675,14 @@
       "Trente"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「社内で五名募集します」: 五名 means five people; thirty is only the deadline's date, 30 November.",
+     "fr": "「社内で五名募集します」 : 五名 veut dire cinq personnes ; trente n'est que la date limite, le 30 novembre."
+    }
    },
    {
     "type": "comprehension",
@@ -19282,7 +20704,14 @@
       "Les salariés dès leur troisième année, tous services confondus"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「入社三年目以上」 and 「現在の部署や職種は問いません」: year three or later, from any department or job.",
+     "fr": "「入社三年目以上」 et 「現在の部署や職種は問いません」 : dès la troisième année, quels que soient le service et le métier."
+    }
    },
    {
     "type": "vocabulary",
@@ -19304,7 +20733,14 @@
       "On ne peut pas le changer"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「問いません」 is \"we do not ask about it\": the kind of job you do now makes no difference.",
+     "fr": "「問いません」 veut dire « on ne s'en préoccupe pas » : le métier qu'on exerce aujourd'hui n'a pas d'importance."
+    }
    },
    {
     "type": "comprehension",
@@ -19326,7 +20762,14 @@
       "Un rapport sur leur travail, au nouveau service"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「希望の理由とこれまでの経験をまとめた書類」 is sent 「人事部へ」: reasons and experience, to HR, not to the new department.",
+     "fr": "「希望の理由とこれまでの経験をまとめた書類」 s'envoie 「人事部へ」 : motivations et expérience, aux RH, pas au nouveau service."
+    }
    },
    {
     "type": "comprehension",
@@ -19348,7 +20791,14 @@
       "À la mi-décembre"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「十二月の半ばに面接を行います」: 半ば is the middle, so mid-December; 30 November is the deadline for documents.",
+     "fr": "「十二月の半ばに面接を行います」 : 半ば veut dire le milieu, donc mi-décembre ; le 30 novembre est la date limite des dossiers."
+    }
    },
    {
     "type": "grammar",
@@ -19370,7 +20820,14 @@
       "Malgré l'entretien"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「に際しては」 means \"on the occasion of\": 「面接に際しては」 is at the interview itself.",
+     "fr": "「に際しては」 veut dire « à l'occasion de » : 「面接に際しては」, c'est lors de l'entretien lui-même."
+    }
    },
    {
     "type": "comprehension",
@@ -19392,7 +20849,14 @@
       "Répondre à des questions sur leurs ventes"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「取り組みたい仕事について、五分ほど」: about five minutes on the work they want to take on in the new department.",
+     "fr": "「取り組みたい仕事について、五分ほど」 : environ cinq minutes sur le travail qu'ils veulent mener dans le nouveau service."
+    }
    },
    {
     "type": "grammar",
@@ -19414,7 +20878,14 @@
       "Jamais, même après l'admission"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「からでないと」 means \"not until\": the department hears only once 「合格が決まって」, once acceptance is decided.",
+     "fr": "「からでないと」 veut dire « pas avant » : le service n'est informé qu'une fois 「合格が決まって」, l'admission décidée."
+    }
    },
    {
     "type": "grammar",
@@ -19436,7 +20907,14 @@
       "Vous ne pouvez pas vous empêcher de vous en soucier"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "After a verb, 「ことはありません」 means \"there is no need to\": you need not worry about what others think.",
+     "fr": "Après un verbe, 「ことはありません」 veut dire « inutile de » : pas besoin de se soucier du regard des autres."
+    }
    },
    {
     "type": "inference",
@@ -19458,7 +20936,15 @@
       "Pour que l'on puisse postuler sans crainte"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "The department is told only after acceptance, so 「周りの目を気にすることはありません」: staff can apply without worry.",
+     "fr": "Le service n'est informé qu'après l'admission, donc 「周りの目を気にすることはありません」 : on peut postuler sans crainte."
+    }
    },
    {
     "type": "inference",
@@ -19480,7 +20966,15 @@
       "L'entreprise, pour des demandeurs d'emploi"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0,
+     2
+    ],
+    "why": {
+     "en": "It recruits 「社内で」, among the staff, and has documents sent 「人事部へ」: HR writing to the company's own employees.",
+     "fr": "On recrute 「社内で」, parmi le personnel, et les dossiers vont 「人事部へ」 : les RH s'adressent aux salariés de l'entreprise."
+    }
    }
   ],
   "breakdown": [
@@ -20363,7 +21857,14 @@
       "Les jeunes artisans partaient pour la ville"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「弟子になりたいという若者が、ほとんど来なかった」: hardly any young people came wanting to be apprentices.",
+     "fr": "「弟子になりたいという若者が、ほとんど来なかった」 : presque aucun jeune ne venait pour devenir apprenti."
+    }
    },
    {
     "type": "vocabulary",
@@ -20385,7 +21886,14 @@
       "Une ville près d'une grande ville"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「山あい」 is the space between mountains: 「山あいの町」 is a town among the mountains, not on a summit.",
+     "fr": "「山あい」, c'est l'espace entre les montagnes : 「山あいの町」 est une ville entre les montagnes, pas sur un sommet."
+    }
    },
    {
     "type": "grammar",
@@ -20407,7 +21915,14 @@
       "Elle a été prise après un long combat intérieur"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「あげくに」 means \"in the end, after much\": 「悩んだあげくに」, he decided only after agonising for a long time.",
+     "fr": "「あげくに」 veut dire « au bout de » : 「悩んだあげくに」, il n'a décidé qu'après avoir longtemps hésité."
+    }
    },
    {
     "type": "comprehension",
@@ -20429,7 +21944,14 @@
       "Près de quatre-vingt-dix ans"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「八十歳近い親方」: 近い means close to, so the master is nearly eighty, not past it.",
+     "fr": "「八十歳近い親方」 : 近い veut dire proche de, donc le maître a près de quatre-vingts ans, pas plus."
+    }
    },
    {
     "type": "comprehension",
@@ -20451,7 +21973,14 @@
       "Une personne de France et une de la ville"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「フランスとベトナムから来た二人」: two people, who came from France and Vietnam, are learning there now.",
+     "fr": "「フランスとベトナムから来た二人」 : deux personnes venues de France et du Vietnam y apprennent aujourd'hui."
+    }
    },
    {
     "type": "grammar",
@@ -20473,7 +22002,14 @@
       "Les règles ne visent que les outils les plus anciens"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「だけあって」 means \"as you would expect of\": a workshop three hundred years old naturally has detailed rules.",
+     "fr": "「だけあって」 veut dire « comme on peut s'y attendre » : un atelier vieux de trois cents ans a forcément des règles précises."
+    }
    },
    {
     "type": "comprehension",
@@ -20495,7 +22031,14 @@
       "Ils ne faisaient que le ménage et la corvée d'eau"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「掃除と水くみばかりの毎日」: ばかり means nothing but, so every day was cleaning and fetching water, no paper.",
+     "fr": "「掃除と水くみばかりの毎日」 : ばかり veut dire rien que, donc ménage et corvée d'eau chaque jour, sans toucher le papier."
+    }
    },
    {
     "type": "grammar",
@@ -20517,7 +22060,14 @@
       "On a décidé après avoir essayé un moment"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「からには」 means \"now that\": having decided to be a craftsperson, they mean to see it through, 「十年は続けたい」.",
+     "fr": "「からには」 veut dire « puisque » : ayant décidé de devenir artisan, il veut aller jusqu'au bout, 「十年は続けたい」."
+    }
    },
    {
     "type": "comprehension",
@@ -20539,7 +22089,14 @@
       "La rapidité à fabriquer beaucoup de feuilles"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "「使う人を思って一枚一枚作る心こそ」: こそ stresses it, the care of making each sheet with its user in mind.",
+     "fr": "「使う人を思って一枚一枚作る心こそ」 : こそ insiste dessus, le souci de faire chaque feuille en pensant à son utilisateur."
+    }
    },
    {
     "type": "inference",
@@ -20561,7 +22118,14 @@
       "Il espère ouvrir bientôt son propre atelier"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「十年は続けたい」: は after 十年 means \"at least ten years\", so this apprentice means to stay for the long term.",
+     "fr": "「十年は続けたい」 : は après 十年 veut dire « au moins dix ans », donc cet apprenti compte rester longtemps."
+    }
    },
    {
     "type": "inference",
@@ -20583,7 +22147,15 @@
       "Il peut aider le métier à survivre"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1,
+     3
+    ],
+    "why": {
+     "en": "Young Japanese hardly came, but now two from abroad 「技術を学んでいる」: the craft has new learners to carry it on.",
+     "fr": "Les jeunes Japonais ne venaient presque plus, mais deux étrangers 「技術を学んでいる」 : le métier a de nouveaux héritiers."
+    }
    }
   ],
   "breakdown": [
@@ -21528,7 +23100,14 @@
       "Pour créer des emplois en montagne"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「地球の気温が上がるのを防ぐため」: solar power is expanded to keep the planet's temperature from rising.",
+     "fr": "「地球の気温が上がるのを防ぐため」 : on développe le solaire pour empêcher la température de la planète d'augmenter."
+    }
    },
    {
     "type": "comprehension",
@@ -21550,7 +23129,14 @@
       "Abattre des arbres pour ouvrir une route"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「山の木を切ってパネルを並べる計画」: plans to cut down a mountain's trees and set out panels there.",
+     "fr": "「山の木を切ってパネルを並べる計画」 : des projets qui abattent les arbres d'une montagne pour y aligner des panneaux."
+    }
    },
    {
     "type": "grammar",
@@ -21572,7 +23158,14 @@
       "Il n'a été ni bien accueilli ni combattu"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「どころか」 means \"far from\": instead of 「喜ばれる」, being welcomed, the plan at once drew 「反対の署名」, signatures against it.",
+     "fr": "「どころか」 veut dire « loin de » : au lieu de 「喜ばれる」, être bien accueilli, le projet a suscité 「反対の署名」, une pétition contre."
+    }
    },
    {
     "type": "grammar",
@@ -21594,7 +23187,14 @@
       "Déjà accepté"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "After a verb stem, 「がたい」 means \"hard to\": 「認めがたい」, losing the familiar scenery is hard to accept.",
+     "fr": "Après un radical verbal, 「がたい」 veut dire « difficile à » : 「認めがたい」, perdre ce paysage familier est difficile à accepter."
+    }
    },
    {
     "type": "comprehension",
@@ -21616,7 +23216,14 @@
       "Le feu peut s'étendre par temps sec"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「大雨のとき土砂が流れ出るおそれ」: on a cleared mountain, earth and rocks may wash down in heavy rain.",
+     "fr": "「大雨のとき土砂が流れ出るおそれ」 : sur une montagne déboisée, la terre risque de dévaler lors de fortes pluies."
+    }
    },
    {
     "type": "grammar",
@@ -21638,7 +23245,14 @@
       "Il doute que cela aide vraiment la planète"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「だとしても」 means \"even if it is\": the writer grants it helps the planet, then objects: 「意味がない」, pointless, if local life suffers.",
+     "fr": "「だとしても」 veut dire « même si c'est » : l'auteur concède que c'est bon pour la planète, puis objecte : 「意味がない」, cela n'a pas de sens si la vie locale en pâtit."
+    }
    },
    {
     "type": "comprehension",
@@ -21660,7 +23274,14 @@
       "Déplacer les panneaux des collines aux toits"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「決まりを作り、パネルを置ける場所を限る」: some local governments make rules limiting where panels may go.",
+     "fr": "「決まりを作り、パネルを置ける場所を限る」 : certaines collectivités fixent des règles qui limitent où poser des panneaux."
+    }
    },
    {
     "type": "vocabulary",
@@ -21682,7 +23303,14 @@
       "Les sources d'eau"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「景観」 is the landscape, the scenery: the question is how to protect it while using natural energy.",
+     "fr": "「景観」, c'est le paysage : la question est de le préserver tout en tirant parti des énergies naturelles."
+    }
    },
    {
     "type": "vocabulary",
@@ -21704,7 +23332,14 @@
       "Se succèdent sans cesse"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「相次いでいる」 means \"come one after another\": residents' protests keep following each other.",
+     "fr": "「相次いでいる」 veut dire « se succèdent » : les protestations des habitants s'enchaînent les unes après les autres."
+    }
    },
    {
     "type": "inference",
@@ -21726,7 +23361,14 @@
       "Des règles sur l'emplacement sont inutiles"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「地域の暮らしを守れなければ意味がない」: clean power is pointless if it cannot protect local life.",
+     "fr": "「地域の暮らしを守れなければ意味がない」 : une énergie propre n'a pas de sens si elle ne préserve pas la vie locale."
+    }
    },
    {
     "type": "inference",
@@ -21748,7 +23390,14 @@
       "Pour expliquer comment les règles ont été faites"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "Far from welcoming the plan, in that town 「すぐに反対の署名が集まった」: signatures at once, a sign of how strongly residents object.",
+     "fr": "Loin d'accueillir le projet, dans cette ville 「すぐに反対の署名が集まった」 : une pétition aussitôt, signe d'une opposition très forte."
+    }
    }
   ],
   "breakdown": [
@@ -22687,7 +24336,14 @@
       "Les hôpitaux qui ont des cours de rire"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「近年それを確かめる研究が増えている」: studies testing the old idea that laughter is good for the body are on the rise.",
+     "fr": "「近年それを確かめる研究が増えている」 : les études qui vérifient la vieille idée que le rire est bon pour le corps se multiplient."
+    }
    },
    {
     "type": "vocabulary",
@@ -22709,7 +24365,14 @@
       "Expliquer d'où elle vient"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「確かめる」 means \"to make sure\": these studies check whether the old idea is really true.",
+     "fr": "「確かめる」 veut dire « s'assurer » : ces études vérifient si la vieille idée est vraiment juste."
+    }
    },
    {
     "type": "comprehension",
@@ -22731,7 +24394,14 @@
       "Ceux qui riaient chaque jour avaient plus d'amis"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "Among those 「ほとんど笑わない」, hardly ever laughing, heart disease was more common: 「割合が高かった」, a higher share.",
+     "fr": "Chez ceux qui 「ほとんど笑わない」, ne rient presque jamais, les maladies du cœur étaient plus fréquentes : 「割合が高かった」."
+    }
    },
    {
     "type": "vocabulary",
@@ -22753,7 +24423,14 @@
       "Vitesse"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「割合」 is a proportion: the share of people with heart disease was higher among those who seldom laughed.",
+     "fr": "「割合」 veut dire proportion : la part de malades du cœur était plus élevée chez ceux qui riaient peu."
+    }
    },
    {
     "type": "grammar",
@@ -22775,7 +24452,14 @@
       "On en attend beaucoup car elle est gratuite"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「だけに」 means \"precisely because\": since it needs neither money nor equipment, hopes for it are high.",
+     "fr": "「だけに」 veut dire « justement parce que » : comme elle ne demande ni argent ni matériel, on en attend beaucoup."
+    }
    },
    {
     "type": "comprehension",
@@ -22797,7 +24481,14 @@
       "On fait du sport et on parle de santé"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「理由もなく声を出して笑う」: in laughter yoga, people laugh out loud for no reason at all.",
+     "fr": "「理由もなく声を出して笑う」 : au yoga du rire, on rit aux éclats sans aucune raison."
+    }
    },
    {
     "type": "grammar",
@@ -22819,7 +24510,14 @@
       "Ils semblent chaleureux aux seuls participants"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「ものがある」 means \"there is something\": the bright faces have something that 「見る人の心まで温かくする」, warms even onlookers' hearts.",
+     "fr": "「ものがある」 veut dire « il y a quelque chose » : ces visages ont quelque chose qui 「見る人の心まで温かくする」, réchauffe même ceux qui regardent."
+    }
    },
    {
     "type": "inference",
@@ -22841,7 +24539,15 @@
       "Pour expliquer comment l'enquête a été menée"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4,
+     5
+    ],
+    "why": {
+     "en": "「ことまでだ」 limits the finding: laughers are ill less often, but 「もともと元気」 people may just laugh more. A link, not a cause.",
+     "fr": "「ことまでだ」 limite le résultat : les rieurs sont moins malades, mais les gens 「もともと元気」 rient peut-être plus. Un lien, pas une cause."
+    }
    },
    {
     "type": "comprehension",
@@ -22863,7 +24569,14 @@
       "L'enquête a interrogé trop peu de gens pour être fiable"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「もともと元気で友人も多い人」 may simply be the ones who laugh a lot: the health could come first.",
+     "fr": "Ce sont peut-être simplement 「もともと元気で友人も多い人」 qui rient souvent : la santé viendrait d'abord."
+    }
    },
    {
     "type": "grammar",
@@ -22885,7 +24598,14 @@
       "C'est une idée que personne n'avait eue"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「言い過ぎ」 is \"saying too much\", and 「というものだろう」 a calm verdict: to think laughing cures illness would surely go too far.",
+     "fr": "「言い過ぎ」, c'est « en dire trop », et 「というものだろう」 un jugement posé : croire que rire guérit, ce serait sans doute aller trop loin."
+    }
    },
    {
     "type": "inference",
@@ -22907,7 +24627,15 @@
       "Utile seulement aux gens très entourés"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2,
+     6
+    ],
+    "why": {
+     "en": "Laughter raises 「期待」, hopes, in health care, yet saying it cures is 「言い過ぎ」: promising, but not proven.",
+     "fr": "Le rire suscite des 「期待」, des espoirs, chez les soignants, mais dire qu'il guérit est 「言い過ぎ」 : prometteur, pas prouvé."
+    }
    }
   ],
   "breakdown": [
@@ -23896,7 +25624,14 @@
       "Des lieux pour faire connaître la nature"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「珍しい動物を見せて客を楽しませる場所」: zoos used to show rare animals to entertain visitors.",
+     "fr": "「珍しい動物を見せて客を楽しませる場所」 : les zoos montraient des animaux rares pour divertir le public."
+    }
    },
    {
     "type": "comprehension",
@@ -23918,7 +25653,14 @@
       "Faire venir des animaux de l'étranger"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「いなくなるおそれのある動物を守り、増やす」: protect and breed animals in danger of disappearing.",
+     "fr": "「いなくなるおそれのある動物を守り、増やす」 : protéger et faire se reproduire les animaux qui risquent de disparaître."
+    }
    },
    {
     "type": "vocabulary",
@@ -23940,7 +25682,14 @@
       "Vivant à l'état sauvage"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「野生」 is the wild: these animals' numbers have fallen out in nature, not in zoos.",
+     "fr": "「野生」, c'est l'état sauvage : le nombre de ces animaux a chuté dans la nature, pas dans les zoos."
+    }
    },
    {
     "type": "grammar",
@@ -23962,7 +25711,14 @@
       "Cela leur donne plus de liberté que la nature"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「も同然だ」 means \"is as good as\": a whole life in a confined space amounts to having its freedom taken away.",
+     "fr": "「も同然だ」 veut dire « revient à » : toute une vie dans un espace restreint, c'est comme être privé de liberté."
+    }
    },
    {
     "type": "grammar",
@@ -23984,7 +25740,14 @@
       "Cette mort est survenue malgré le changement"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「を契機に」 means \"prompted by\": the elephant's death led the zoo to rethink how it shows its animals.",
+     "fr": "「を契機に」 veut dire « à l'occasion de » : la mort de l'éléphant a poussé le zoo à repenser sa présentation."
+    }
    },
    {
     "type": "comprehension",
@@ -24006,7 +25769,14 @@
       "Il a réduit les espaces pour montrer plus d'animaux"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「種類を半分に減らし」 and 「一頭ごとの場所を広げた」: half as many species, and more room for each animal.",
+     "fr": "「種類を半分に減らし」 et 「一頭ごとの場所を広げた」 : deux fois moins d'espèces, et plus de place pour chaque animal."
+    }
    },
    {
     "type": "vocabulary",
@@ -24028,7 +25798,14 @@
       "Au même endroit"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「その分」 means \"by that much, in return\": the room saved by showing fewer species went to each animal.",
+     "fr": "「その分」 veut dire « d'autant, en contrepartie » : la place gagnée avec moins d'espèces est allée à chaque animal."
+    }
    },
    {
     "type": "grammar",
@@ -24050,7 +25827,14 @@
       "Du point de vue des visiteurs"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「から見ると」 means \"seen from\": 「客から見ると」 is from the visitors' point of view.",
+     "fr": "「から見ると」 veut dire « vu par » : 「客から見ると」, c'est du point de vue des visiteurs."
+    }
    },
    {
     "type": "comprehension",
@@ -24072,7 +25856,14 @@
       "On aurait pu éviter la mort de l'éléphant"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「のびのびと動く様子こそが自然の大切さを伝える」: animals moving freely are what convey nature's importance.",
+     "fr": "「のびのびと動く様子こそが自然の大切さを伝える」 : des animaux qui bougent librement font comprendre l'importance de la nature."
+    }
    },
    {
     "type": "inference",
@@ -24094,7 +25885,15 @@
       "Le public ne s'intéresse plus aux animaux rares"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5,
+     7
+    ],
+    "why": {
+     "en": "The zoo halved its species to give each animal room, for 「のびのびと動く様子」, free movement: fewer animals, better treated.",
+     "fr": "Le zoo a réduit ses espèces de moitié pour donner de la place à chacun, pour qu'on voie 「のびのびと動く様子」 : moins d'animaux, mieux traités."
+    }
    },
    {
     "type": "inference",
@@ -24116,7 +25915,15 @@
       "Comme une affaire que seul le public tranche"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0,
+     2
+    ],
+    "why": {
+     "en": "Once 「客を楽しませる場所」, zoos are now asked to 「守り、増やす」 animals at risk: from show to protection.",
+     "fr": "Jadis 「客を楽しませる場所」, les zoos doivent désormais 「守り、増やす」 les espèces menacées : du spectacle à la protection."
+    }
    }
   ],
   "breakdown": [
@@ -25048,7 +26855,14 @@
       "Le don lui est remboursé un an plus tard"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「住んでいる町に払う税金が減る」: after a donation, the tax paid to one's own town goes down by about that much.",
+     "fr": "「住んでいる町に払う税金が減る」 : après un don, l'impôt payé à sa propre ville baisse d'à peu près autant."
+    }
    },
    {
     "type": "comprehension",
@@ -25070,7 +26884,14 @@
       "Seulement les villes qui se peuplent"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「生まれ育った町などに」: など means \"and the like\", so one's home town is one choice, not the only one.",
+     "fr": "「生まれ育った町などに」 : など veut dire « entre autres », donc sa ville natale est un choix, pas le seul."
+    }
    },
    {
     "type": "comprehension",
@@ -25092,7 +26913,14 @@
       "Pour aider les villes qui se dépeuplent"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「人口が減る町を支えるために作られた」: it was made to support towns whose population is shrinking.",
+     "fr": "「人口が減る町を支えるために作られた」 : il a été créé pour soutenir les villes qui se dépeuplent."
+    }
    },
    {
     "type": "vocabulary",
@@ -25114,7 +26942,14 @@
       "Les centres-villes"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「地方」 is the provinces, outside the big cities: tax that gathers in 「都市」 is sent out there.",
+     "fr": "「地方」, c'est la province, hors des grandes villes : l'impôt qui se concentre dans les 「都市」 y est redistribué."
+    }
    },
    {
     "type": "grammar",
@@ -25136,7 +26971,14 @@
       "Les cadeaux ont été permis malgré le problème"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「ばかりに」 means \"just because\": allowing local gifts is what led towns to 「競い合う」, compete over them.",
+     "fr": "「ばかりに」 veut dire « simplement parce que » : c'est d'avoir permis les cadeaux qui a poussé les villes à 「競い合う」, rivaliser."
+    }
    },
    {
     "type": "grammar",
@@ -25158,7 +27000,14 @@
       "Même après avoir payé leur propre ville"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「くらいなら」 means \"rather than\": rather than just pay one's own town, donating for meat or rice seems better.",
+     "fr": "「くらいなら」 veut dire « plutôt que » : plutôt que de tout payer à sa ville, mieux vaut donner pour de la viande ou du riz."
+    }
    },
    {
     "type": "comprehension",
@@ -25180,7 +27029,14 @@
       "Dans les villes natales des donateurs"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「寄付は人気の品のある町にばかり集まり」: donations gather only in towns with popular gifts.",
+     "fr": "「寄付は人気の品のある町にばかり集まり」 : les dons ne vont qu'aux villes qui offrent des cadeaux prisés."
+    }
    },
    {
     "type": "vocabulary",
@@ -25202,7 +27058,14 @@
       "Les gens se taisent"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「不満の声」 is a voice of discontent, and 「上がっている」 means it is being raised: the cities losing tax complain.",
+     "fr": "「不満の声」, c'est une voix mécontente, et 「上がっている」 veut dire qu'elle s'élève : les villes qui perdent des impôts se plaignent."
+    }
    },
    {
     "type": "grammar",
@@ -25224,7 +27087,14 @@
       "C'est réglé quoi que disent les règles"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「次第だ」 means \"depends on\": whether the scheme nears its aim depends on the rules made from now on.",
+     "fr": "「次第だ」 veut dire « dépend de » : que le dispositif se rapproche de son but dépend des règles à venir."
+    }
    },
    {
     "type": "inference",
@@ -25246,7 +27116,14 @@
       "Comme perdus face au dispositif"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「無理はない」 means \"it is no wonder\": the writer finds choosing a town for its meat or rice understandable.",
+     "fr": "「無理はない」 veut dire « il n'est pas étonnant » : l'auteur trouve compréhensible de choisir une ville pour sa viande ou son riz."
+    }
    },
    {
     "type": "inference",
@@ -25268,7 +27145,15 @@
       "Trop peu de gens connaissent le dispositif"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2,
+     5
+    ],
+    "why": {
+     "en": "Gifts led towns to 「競い合う」, and the scheme must be brought back 「本来の目的に」: the gifts drew it off course.",
+     "fr": "Les cadeaux ont poussé les villes à 「競い合う」, et il faut ramener le dispositif 「本来の目的に」 : ils l'ont détourné de son but."
+    }
    }
   ],
   "breakdown": [
@@ -26216,7 +28101,14 @@
       "Les étudiants en histoire locale"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「市内に住む十八歳以上の方」: you must live in the city and be eighteen or over; no experience is needed.",
+     "fr": "「市内に住む十八歳以上の方」 : il faut habiter la ville et avoir dix-huit ans ou plus ; aucune expérience n'est exigée."
+    }
    },
    {
     "type": "grammar",
@@ -26238,7 +28130,14 @@
       "Quelqu'un qui y habite depuis le plus longtemps"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「にかけては」 means \"when it comes to\": on local history, 「誰にも負けない」, second to nobody.",
+     "fr": "「にかけては」 veut dire « en matière de » : sur l'histoire locale, 「誰にも負けない」, imbattable."
+    }
    },
    {
     "type": "comprehension",
@@ -26260,7 +28159,14 @@
       "Travailler trois heures par semaine un mois"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「六月から三か月間、月二回の勉強会」: two study sessions a month for three months, not a single session in June.",
+     "fr": "「六月から三か月間、月二回の勉強会」 : deux séances par mois pendant trois mois, pas une seule séance en juin."
+    }
    },
    {
     "type": "grammar",
@@ -26282,7 +28188,14 @@
       "Chaque fois que l'activité a lieu"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「にあたって」 marks what you prepare for: the study sessions come first, before 「活動を始める」, starting the work.",
+     "fr": "「にあたって」 indique ce à quoi l'on se prépare : les séances passent d'abord, avant de 「活動を始める」, commencer l'activité."
+    }
    },
    {
     "type": "comprehension",
@@ -26304,7 +28217,14 @@
       "Chaque semaine, environ trois heures"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「活動は週一回、一日三時間程度」: once a week, for about three hours each time.",
+     "fr": "「活動は週一回、一日三時間程度」 : une fois par semaine, environ trois heures chaque fois."
+    }
    },
    {
     "type": "vocabulary",
@@ -26326,7 +28246,14 @@
       "Une cotisation"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「交通費」 is travel costs: 500 yen a visit to cover getting to the museum, not a wage.",
+     "fr": "「交通費」, ce sont les frais de transport : 500 yens par venue pour le trajet, pas un salaire."
+    }
    },
    {
     "type": "vocabulary",
@@ -26348,7 +28275,14 @@
       "Le nombre de séances"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「定員」 is the set number of places: 「定員は二十名」, twenty people can be taken.",
+     "fr": "「定員」, c'est le nombre de places fixé : 「定員は二十名」, vingt personnes peuvent être retenues."
+    }
    },
    {
     "type": "comprehension",
@@ -26370,7 +28304,15 @@
       "Remplir un formulaire en ligne d'ici le 10 mai"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6,
+     7
+    ],
+    "why": {
+     "en": "Fill in 「受付の申し込み用紙」, the form at reception, and bring it in by 10 May; phone and email are not accepted.",
+     "fr": "Remplir 「受付の申し込み用紙」, le formulaire de l'accueil, et le rapporter d'ici le 10 mai ; ni téléphone ni courriel."
+    }
    },
    {
     "type": "grammar",
@@ -26392,7 +28334,14 @@
       "Elles ne sont acceptées que parfois"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "After a verb stem, 「かねます」 is a polite \"cannot\": 「受け付けかねます」, such applications cannot be accepted.",
+     "fr": "Après un radical verbal, 「かねます」 est un « ne peut pas » poli : 「受け付けかねます」, ces candidatures sont refusées."
+    }
    },
    {
     "type": "inference",
@@ -26414,7 +28363,14 @@
       "Un habitant de la ville de 45 ans féru d'histoire"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「市内に住む」 is a condition: someone living in a nearby town is outside the city, whatever their age.",
+     "fr": "「市内に住む」 est une condition : une personne qui habite une ville voisine n'est pas de la ville, quel que soit son âge."
+    }
    },
    {
     "type": "inference",
@@ -26436,7 +28392,14 @@
       "La date limite serait repoussée à juin"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「申し込みが多い場合は面接で決めます」: with thirty for twenty places, interviews decide, not the order of applying.",
+     "fr": "「申し込みが多い場合は面接で決めます」 : trente pour vingt places, ce sont des entretiens qui tranchent, pas l'ordre d'inscription."
+    }
    }
   ],
   "breakdown": [
@@ -27305,7 +29268,14 @@
       "Enregistrer chaque match et chronométrer la course des joueurs"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「練習を動画に残し、打球の速さや角度を数字で示す」: they filmed practice and put each hit's speed and angle in figures.",
+     "fr": "「練習を動画に残し、打球の速さや角度を数字で示す」 : ils ont filmé l'entraînement et chiffré la vitesse et l'angle des frappes."
+    }
    },
    {
     "type": "grammar",
@@ -27327,7 +29297,14 @@
       "Qu'ils venaient tout juste de vérifier"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "After a past verb, 「たところ」 means \"when they did it, they found\": checking led to a clear aim and better results.",
+     "fr": "Après un verbe au passé, 「たところ」 veut dire « quand ils l'ont fait, il s'est avéré » : la vérification a clarifié le but."
+    }
    },
    {
     "type": "comprehension",
@@ -27349,7 +29326,14 @@
       "L'entraînement avait un but clair et l'équipe a progressé"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「練習の目的がはっきりし、チームの成績も上がった」: practice gained a clear aim and the team's results improved.",
+     "fr": "「練習の目的がはっきりし、チームの成績も上がった」 : l'entraînement a trouvé un but clair et l'équipe a progressé."
+    }
    },
    {
     "type": "grammar",
@@ -27371,7 +29355,14 @@
       "À la place des entraîneurs âgés"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「にしたら」 means \"from the standpoint of\": as the older coaches see it, relying on figures leaves something missing.",
+     "fr": "「にしたら」 veut dire « du point de vue de » : pour les entraîneurs âgés, s'en remettre aux chiffres laisse à désirer."
+    }
    },
    {
     "type": "vocabulary",
@@ -27393,7 +29384,14 @@
       "Rendre public"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「活用する」 means \"to put to good use\": teams are making real use of data, not just gathering it.",
+     "fr": "「活用する」 veut dire « mettre à profit » : les équipes exploitent vraiment les données, au lieu de seulement les recueillir."
+    }
    },
    {
     "type": "grammar",
@@ -27415,7 +29413,14 @@
       "Avoir plus de données ne garantit pas la victoire"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「というものではない」 means \"it does not follow that\": having lots of data does not mean a sure win.",
+     "fr": "「というものではない」 veut dire « cela ne veut pas dire que » : avoir beaucoup de données ne garantit pas la victoire."
+    }
    },
    {
     "type": "comprehension",
@@ -27437,7 +29442,14 @@
       "Si les résultats de l'équipe progressent"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「試合の流れや選手の気持ち」: the flow of a game and the players' feelings do not show up in figures.",
+     "fr": "「試合の流れや選手の気持ち」 : le déroulement du match et l'état d'esprit des joueurs n'apparaissent pas dans les chiffres."
+    }
    },
    {
     "type": "vocabulary",
@@ -27459,7 +29471,14 @@
       "Une réponse définitive"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「手がかり」 is a clue: the figures are a starting point for players to think for themselves, not a final answer.",
+     "fr": "「手がかり」 veut dire une piste : les chiffres sont un point de départ pour réfléchir soi-même, pas une réponse."
+    }
    },
    {
     "type": "inference",
@@ -27481,7 +29500,14 @@
       "Indispensables, car elles seules désignent le vainqueur"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "Use figures 「答えとしてではなく」, not as answers, but as clues to think with: data is useful if players think.",
+     "fr": "Utiliser les chiffres 「答えとしてではなく」, non comme réponses, mais comme pistes : les données servent si l'on réfléchit."
+    }
    },
    {
     "type": "inference",
@@ -27503,7 +29529,14 @@
       "Pour réclamer le départ des entraîneurs âgés"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "Older coaches feel 「物足りなさ」, something missing, in relying on figures: not everyone welcomes the change.",
+     "fr": "Face aux chiffres, les entraîneurs âgés ressentent 「物足りなさ」, un manque : le changement ne plaît pas à tous."
+    }
    },
    {
     "type": "inference",
@@ -27525,7 +29558,15 @@
       "Choisissez quoi travailler d'après vos chiffres"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2,
+     6
+    ],
+    "why": {
+     "en": "Seeing 「弱点」 in figures gave practice an aim, and figures should be 「自分で考えるための手がかり」: clues to what to work on.",
+     "fr": "Voir ses 「弱点」 en chiffres a donné un but, et les chiffres doivent être 「自分で考えるための手がかり」 : des pistes pour savoir quoi travailler."
+    }
    }
   ],
   "breakdown": [
@@ -28465,7 +30506,14 @@
       "Moins de gens vont au restaurant"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「小麦や石油を輸入する費用が増え」: importing wheat and oil costs more, so prices go up.",
+     "fr": "「小麦や石油を輸入する費用が増え」 : importer du blé et du pétrole coûte plus cher, donc les prix montent."
+    }
    },
    {
     "type": "grammar",
@@ -28487,7 +30535,14 @@
       "Le pain et les condiments ne sont pas seuls en hausse"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「のみならず」 means \"not only\": bread and seasonings rise, and even electricity and gas do too.",
+     "fr": "「のみならず」 veut dire « non seulement » : le pain et les condiments augmentent, et même l'électricité et le gaz."
+    }
    },
    {
     "type": "grammar",
@@ -28509,7 +30564,14 @@
       "C'est devenu difficile, puis cela s'est arrangé"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "After a verb, 「ばかりだ」 means \"only keeps on\": 「苦しくなるばかりだ」, budgets just keep getting tighter.",
+     "fr": "Après un verbe, 「ばかりだ」 veut dire « ne fait que » : 「苦しくなるばかりだ」, les budgets ne cessent de se resserrer."
+    }
    },
    {
     "type": "comprehension",
@@ -28531,7 +30593,14 @@
       "Dépenser moins et épargner pour leurs enfants"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「外食を減らし」 and 「スーパーが自社で作る安い商品を選ぶ」: they eat out less and buy the store's own cheap goods.",
+     "fr": "「外食を減らし」 et 「スーパーが自社で作る安い商品を選ぶ」 : ils vont moins au restaurant et prennent les produits bon marché de la marque du magasin."
+    }
    },
    {
     "type": "vocabulary",
@@ -28553,7 +30622,14 @@
       "Faire ses achats avec ses voisins"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「買いだめ」 is buying a lot at once to keep: here, stocking up on food that can be frozen.",
+     "fr": "「買いだめ」, c'est acheter beaucoup d'un coup pour stocker : ici, faire des réserves d'aliments à congeler."
+    }
    },
    {
     "type": "grammar",
@@ -28575,7 +30651,14 @@
       "Impossible de réduire encore ce budget"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「っこない」 means \"there is no way\": 「減らせっこない」, food spending simply cannot go lower, not that it must not.",
+     "fr": "「っこない」 veut dire « pas moyen » : 「減らせっこない」, le budget ne peut tout simplement plus baisser, pas qu'il ne le faut pas."
+    }
    },
    {
     "type": "comprehension",
@@ -28597,7 +30680,14 @@
       "Les foyers qui achètent des produits importés"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「特に苦しいのは、もともと貯金の少ない家庭だ」: hit hardest are households with little in savings.",
+     "fr": "「特に苦しいのは、もともと貯金の少ない家庭だ」 : les plus touchés sont les foyers qui ont peu d'économies."
+    }
    },
    {
     "type": "vocabulary",
@@ -28619,7 +30709,14 @@
       "Une aide des entreprises à leurs salariés"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「一時的」 means temporary: 「一時的な支え」 is help that lasts a short time, unlike a system that raises wages.",
+     "fr": "「一時的」 veut dire temporaire : 「一時的な支え」 est une aide de courte durée, à la différence d'un système qui relève les salaires."
+    }
    },
    {
     "type": "comprehension",
@@ -28641,7 +30738,14 @@
       "Ils n'ont augmenté que pour les parents"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「給料はほとんど上がらず」: wages have hardly risen at all, while prices keep climbing.",
+     "fr": "「給料はほとんど上がらず」 : les salaires n'augmentent presque pas, alors que les prix grimpent."
+    }
    },
    {
     "type": "inference",
@@ -28663,7 +30767,15 @@
       "La plupart des foyers ont de grosses économies"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2,
+     7
+    ],
+    "why": {
+     "en": "Wages 「ほとんど上がらず」 as prices climb, so passing help is not enough: 「給料が上がる仕組み」 is needed.",
+     "fr": "Les salaires 「ほとんど上がらず」 alors que les prix grimpent : une aide ponctuelle ne suffit pas, il faut 「給料が上がる仕組み」."
+    }
    },
    {
     "type": "inference",
@@ -28685,7 +30797,14 @@
       "Pour montrer que l'on veut plus d'enfants"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「もうこれ以上、食費は減らせっこない」: this family has already cut all it can; there is little left to cut.",
+     "fr": "「もうこれ以上、食費は減らせっこない」 : cette famille a déjà tout réduit ; il ne reste presque rien à couper."
+    }
    }
   ],
   "breakdown": [
@@ -29561,7 +31680,14 @@
       "Rendre visite aux clients sans aide"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「お客様との打ち合わせにも同席させていただき」: the intern was allowed to sit in on meetings with clients.",
+     "fr": "「お客様との打ち合わせにも同席させていただき」 : on a permis au stagiaire d'assister aux réunions avec les clients."
+    }
    },
    {
     "type": "grammar",
@@ -29583,7 +31709,14 @@
       "Que le 30 août était le jour de la réunion"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "After a date, 「をもって」 marks the end: 「八月三十日をもって実習を終え」, the placement ended on 30 August.",
+     "fr": "Après une date, 「をもって」 marque la fin : 「八月三十日をもって実習を終え」, le stage s'est achevé le 30 août."
+    }
    },
    {
     "type": "grammar",
@@ -29605,7 +31738,14 @@
       "Des documents, bien sûr, et bien plus"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「はもとより」 means \"not to mention\": documents, of course, and client meetings as well.",
+     "fr": "「はもとより」 veut dire « sans parler de » : des documents, bien sûr, et aussi des réunions avec les clients."
+    }
    },
    {
     "type": "comprehension",
@@ -29627,7 +31767,14 @@
       "Le personnel l'a réécrit lui-même"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「私たちのプランがお客様に断られた」: a client turned down the plan the intern had worked on.",
+     "fr": "「私たちのプランがお客様に断られた」 : un client a refusé le projet auquel le stagiaire avait participé."
+    }
    },
    {
     "type": "vocabulary",
@@ -29649,7 +31796,14 @@
       "Est une chose à retenter"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「心に残っている」 is \"has stayed in the heart\": that day is still vividly remembered, not a worry.",
+     "fr": "「心に残っている」, c'est « resté dans le cœur » : ce jour reste gravé dans la mémoire, ce n'est pas une inquiétude."
+    }
    },
    {
     "type": "grammar",
@@ -29671,7 +31825,14 @@
       "Agacé à chaque fois"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「ことなく」 means \"without\": they answered 「一度もいやな顔をすることなく」, never once looking annoyed.",
+     "fr": "「ことなく」 veut dire « sans » : cette personne répondait 「一度もいやな顔をすることなく」, sans jamais montrer d'agacement."
+    }
    },
    {
     "type": "vocabulary",
@@ -29693,7 +31854,14 @@
       "La fierté"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「がっかりしている」 means \"disappointed\": the intern felt let down after the client refused the plan.",
+     "fr": "「がっかりしている」 veut dire « déçu » : le stagiaire était abattu après le refus du client."
+    }
    },
    {
     "type": "inference",
@@ -29715,7 +31883,14 @@
       "Encourager le stagiaire à ne pas abandonner"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "To a disappointed intern, 「断られてからが本当の仕事だ」: the real work starts after a refusal, so do not give up.",
+     "fr": "À un stagiaire déçu : 「断られてからが本当の仕事だ」, le vrai travail commence après un refus, donc il ne faut pas abandonner."
+    }
    },
    {
     "type": "comprehension",
@@ -29737,7 +31912,14 @@
       "Il prépare un nouveau projet"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「実習を終え、大学に戻りました」: the placement is over and the intern is back at university.",
+     "fr": "「実習を終え、大学に戻りました」 : le stage est fini et le stagiaire a repris le chemin de l'université."
+    }
    },
    {
     "type": "comprehension",
@@ -29759,7 +31941,14 @@
       "Commencer à enseigner à l'université"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「ここで学んだことを生かして仕事を探すつもり」: next year, look for work using what was learned here.",
+     "fr": "「ここで学んだことを生かして仕事を探すつもり」 : l'an prochain, chercher un emploi en mettant à profit ce stage."
+    }
    },
    {
     "type": "inference",
@@ -29781,7 +31970,15 @@
       "Demander conseil pour trouver un emploi"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0,
+     7
+    ],
+    "why": {
+     "en": "It opens with 「大変お世話になりました」 and closes with 「心よりお礼申し上げます」: a letter of thanks.",
+     "fr": "Elle s'ouvre sur 「大変お世話になりました」 et se ferme sur 「心よりお礼申し上げます」 : c'est une lettre de remerciement."
+    }
    }
   ],
   "breakdown": [
@@ -30615,7 +32812,14 @@
       "Quand les nouvelles officielles tardent"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「大きな地震や台風のあと」: false information spreads easily online after a big earthquake or typhoon.",
+     "fr": "「大きな地震や台風のあと」 : les fausses informations circulent facilement après un grand séisme ou un typhon."
+    }
    },
    {
     "type": "grammar",
@@ -30637,7 +32841,14 @@
       "Il est apparu parce qu'on l'attendait"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「現れたかと思うと」 means \"no sooner had it appeared\": the post was shared tens of thousands of times in 「わずか一時間」.",
+     "fr": "「現れたかと思うと」 veut dire « à peine apparu » : le message était partagé des dizaines de milliers de fois en 「わずか一時間」, une heure seulement."
+    }
    },
    {
     "type": "comprehension",
@@ -30659,7 +32870,14 @@
       "Qu'un zoo avait besoin d'aide"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「動物園からライオンが逃げた」: the post said a lion had escaped from the zoo.",
+     "fr": "「動物園からライオンが逃げた」 : le message affirmait qu'un lion s'était échappé du zoo."
+    }
    },
    {
     "type": "grammar",
@@ -30681,7 +32899,14 @@
       "Il cite un détail qui suffit à juger"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「からして」 means \"judging just from\": the foreign shop names alone show the photo was not from that town.",
+     "fr": "「からして」 veut dire « rien qu'à voir » : les noms de magasins en langue étrangère suffisent à montrer que la photo vient d'ailleurs."
+    }
    },
    {
     "type": "comprehension",
@@ -30703,7 +32928,14 @@
       "Elles coûtent très cher à la ville"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「本当に助けを必要とする人への連絡を遅らせ」: rumours hold up contact with people who really need help.",
+     "fr": "「本当に助けを必要とする人への連絡を遅らせ」 : ces rumeurs retardent les échanges avec ceux qui ont vraiment besoin d'aide."
+    }
    },
    {
     "type": "grammar",
@@ -30725,7 +32957,14 @@
       "La surprise de les voir agir"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「に相違ない」 means \"there is no doubt that\": the writer is sure they acted 「よかれと思って」, meaning well.",
+     "fr": "「に相違ない」 veut dire « sans aucun doute » : l'auteur est certain qu'ils ont agi 「よかれと思って」, en croyant bien faire."
+    }
    },
    {
     "type": "vocabulary",
@@ -30747,7 +32986,14 @@
       "Le bruit et la foule"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「混乱」 is confusion and disorder: such rumours make the chaos in town worse.",
+     "fr": "「混乱」, c'est la confusion, le désordre : ces rumeurs aggravent la pagaille en ville."
+    }
    },
    {
     "type": "comprehension",
@@ -30769,7 +33015,14 @@
       "Pour avertir d'un danger"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「周りに危険を知らせようと」: most shared it trying to warn those around them of danger.",
+     "fr": "「周りに危険を知らせようと」 : la plupart l'ont partagé pour avertir leur entourage d'un danger."
+    }
    },
    {
     "type": "vocabulary",
@@ -30791,7 +33044,14 @@
       "Une rumeur reconnue comme fausse"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「公式」 means official: 「市や国の公式の発表」 are announcements from the city or the state.",
+     "fr": "「公式」 veut dire officiel : 「市や国の公式の発表」, ce sont les annonces de la ville ou de l'État."
+    }
    },
    {
     "type": "inference",
@@ -30813,7 +33073,15 @@
       "Seuls les experts distinguent le vrai du faux"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "Just comparing with official news is enough: 「それだけで防げるうそは少なくない」, that alone stops many lies.",
+     "fr": "Il suffit de comparer aux annonces officielles : 「それだけで防げるうそは少なくない」, cela seul arrête bien des mensonges."
+    }
    },
    {
     "type": "inference",
@@ -30835,7 +33103,15 @@
       "Sans s'intéresser à leurs raisons"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3,
+     4
+    ],
+    "why": {
+     "en": "The writer grants they meant well, 「よかれと思って」, 「だが」, but, such rumours do harm: understanding, with a warning.",
+     "fr": "L'auteur admet qu'ils ont agi 「よかれと思って」, en croyant bien faire, 「だが」, mais, ces rumeurs nuisent : compréhension et mise en garde."
+    }
    }
   ],
   "breakdown": [
@@ -31761,7 +34037,14 @@
       "De près de trente pour cent en dix ans"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「この十年で三割近く減った」: 三割 is thirty percent, so nearly thirty percent fewer in ten years.",
+     "fr": "「この十年で三割近く減った」 : 三割 veut dire trente pour cent, donc près de trente pour cent de moins en dix ans."
+    }
    },
    {
     "type": "comprehension",
@@ -31783,7 +34066,14 @@
       "Les jeunes sont souvent refusés"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「長くとっておけないため」: blood for transfusions cannot be kept for long, so it is needed every day.",
+     "fr": "「長くとっておけないため」 : le sang des transfusions ne se garde pas longtemps, donc il en faut chaque jour."
+    }
    },
    {
     "type": "grammar",
@@ -31805,7 +34095,14 @@
       "Malgré l'appel de la Croix-Rouge"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「にこたえて」 means \"in response to\": the students acted on the Red Cross's appeal (呼びかけ).",
+     "fr": "「にこたえて」 veut dire « en réponse à » : les étudiants ont répondu à l'appel (呼びかけ) de la Croix-Rouge."
+    }
    },
    {
     "type": "comprehension",
@@ -31827,7 +34124,14 @@
       "Collecter de l'argent pour la Croix-Rouge"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「学内にけん血バスを呼ぶ活動」: a campaign to bring a blood-donation bus onto their campus.",
+     "fr": "「学内にけん血バスを呼ぶ活動」 : une action pour faire venir un car de collecte de sang sur le campus."
+    }
    },
    {
     "type": "grammar",
@@ -31849,7 +34153,14 @@
       "L'auteur y était allé pour décliner une invitation"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「きり」 means \"and never since\": 「一度断られたきり」, turned away once, the writer 「足が遠のいていた」, stayed away.",
+     "fr": "「きり」 veut dire « et plus jamais depuis » : 「一度断られたきり」, refusé une fois, l'auteur 「足が遠のいていた」, n'y allait plus."
+    }
    },
    {
     "type": "vocabulary",
@@ -31871,7 +34182,14 @@
       "Sur l'invitation d'un ami"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「さそわれて」 is the passive of さそう, to invite: the writer went because a friend invited them.",
+     "fr": "「さそわれて」 est le passif de さそう, inviter : l'auteur y est allé parce qu'un ami l'avait invité."
+    }
    },
    {
     "type": "comprehension",
@@ -31893,7 +34211,14 @@
       "Il avait peur de l'aiguille"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「鉄分が足りないと言われて」: in high school they were told their iron (鉄分) was too low.",
+     "fr": "「鉄分が足りないと言われて」 : au lycée, on lui avait dit qu'il manquait de fer (鉄分)."
+    }
    },
    {
     "type": "inference",
@@ -31915,7 +34240,14 @@
       "Que son manque de fer l'a gêné"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "The needle was in for 「十分ほど」, about ten minutes, and 「痛みもほとんどなかった」: far easier than feared.",
+     "fr": "L'aiguille n'est restée que 「十分ほど」, une dizaine de minutes, et 「痛みもほとんどなかった」 : bien plus facile que prévu."
+    }
    },
    {
     "type": "vocabulary",
@@ -31937,7 +34269,14 @@
       "Purifier le sang d'un patient"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「輸血」 is a transfusion, putting blood into a patient: the blood used for it cannot be kept for long.",
+     "fr": "「輸血」, c'est la transfusion, donner du sang à un patient : le sang qui y sert ne se garde pas longtemps."
+    }
    },
    {
     "type": "grammar",
@@ -31959,7 +34298,14 @@
       "À quel point l'auteur a été heureux"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「どんなにうれしかったことか」 is an exclamation, \"how happy I was!\": the writer is saying how very happy they felt, not asking.",
+     "fr": "「どんなにうれしかったことか」 est une exclamation, « quelle joie ! » : l'auteur dit à quel point il a été heureux, il ne pose pas de question."
+    }
    },
    {
     "type": "inference",
@@ -31981,7 +34327,15 @@
       "Qu'ils réclament un car de collecte en ville"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "It hardly hurt, 「痛みもほとんどなかった」, and the blood 「だれかの命を助けます」, will save a life: the writer hopes readers will try too.",
+     "fr": "Le don n'a presque pas fait mal, 「痛みもほとんどなかった」, et ce sang 「だれかの命を助けます」 : l'auteur espère que le lecteur essaiera aussi."
+    }
    }
   ],
   "breakdown": [

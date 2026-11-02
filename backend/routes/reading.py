@@ -1153,7 +1153,9 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) matching exa
       "type": "comprehension",
       "question": "...",
       "options": ["...", "...", "...", "..."],
-      "correct": 0
+      "correct": 0,
+      "at": [0],
+      "why": "..."
     }}
   ],
   "breakdown": [
@@ -1177,6 +1179,8 @@ Rules:
 - Each "question" is written in {lang_name} (quoting the relevant Japanese word or phrase from the text in 「 」 where that helps) and must be answerable using only the text provided.
 - "options" must contain exactly 4 choices in {lang_name}. All options must be plausible — avoid obviously wrong distractors.
 - "correct" is the 0-based index of the only correct option.
+- "at" lists the 0-based index, in "breakdown", of the sentence the correct option rests on — one index, or two when the answer truly needs both sentences (an inference often does), never more than three. For a "vocabulary" or "grammar" question it is the sentence the quoted Japanese comes from.
+- "why" is ONE short {lang_name} sentence for a learner who chose wrong: why the correct option is right, quoting the decisive Japanese from an "at" sentence in 「 」 and saying what it means or does there. It may contrast the most tempting wrong option by what it says, never by its letter, number or position — the options are shuffled before anyone sees them. Like a "note", it must BEGIN with a word of {lang_name}, never on a bracket.
 - Generate exactly {questions} questions, with at least one of each type if {questions} >= 4, and a roughly even mix overall.
 - "breakdown" has ONE entry per sentence of "text", in the order the sentences appear. Splitting on 。！？, every sentence of the text must appear exactly once and nothing that is not in the text may appear at all: concatenating every "jp" in order must reproduce "text" exactly, punctuation included.
 - "jp" is the sentence copied verbatim from "text" — never re-written, re-spelled or given kanji the text does not use.
@@ -1303,6 +1307,38 @@ def _clean_breakdown(raw) -> list[dict]:
             "words": _clean_words(part.get("words")),
         })
     return cleaned
+
+
+# What a question carries to answer a miss with (plan 298b): `at`, the
+# breakdown sentence(s) its right option rests on, and `why`, one line
+# on why that option is right. Neither is required -- an exercise
+# without them still serves, as every pool row written before them
+# does, and the screen falls back to the sentence the question quotes --
+# so a malformed one is dropped, never a reason to ask again.
+_WHY_MAX = 300
+_AT_MAX = 3
+
+
+def _clean_answer_line(q: dict, landed: dict[int, int]) -> None:
+    """`at` and `why` on one model-written question, cleaned in place:
+    `at` mapped through `landed` (raw breakdown index -> served index),
+    kept only as 1-3 distinct sentences that exist; `why` kept only as one
+    line of plain text, short."""
+    at = q.pop("at", None)
+    if isinstance(at, int) and not isinstance(at, bool):
+        at = [at]
+    if isinstance(at, list):
+        mapped = []
+        for i in at:
+            if isinstance(i, int) and not isinstance(i, bool) and i in landed and landed[i] not in mapped:
+                mapped.append(landed[i])
+        if 1 <= len(mapped) <= _AT_MAX:
+            q["at"] = sorted(mapped)
+    why = q.pop("why", None)
+    if isinstance(why, str):
+        why = " ".join(why.split())
+        if why and len(why) <= _WHY_MAX:
+            q["why"] = why
 
 
 # ── The seeds ────────────────────────────────────────────────────────
@@ -1697,7 +1733,7 @@ def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] 
 # cannot change the meaning of a well-formed answer: a value that does
 # not open on a quote is not valid JSON under any reading. The closing
 # quote is the one the model did write.
-_UNOPENED_VALUE = re.compile(r'("(?:jp|translation|note|question|surface|meaning)":[ \t]*)(?=[^"\s\[{])')
+_UNOPENED_VALUE = re.compile(r'("(?:jp|translation|note|question|surface|meaning|why)":[ \t]*)(?=[^"\s\[{])')
 
 
 def _parse_comprehension(content: str) -> dict:
@@ -1738,9 +1774,16 @@ def _parse_comprehension(content: str) -> dict:
         if q.get("type") not in VALID_QUESTION_TYPES:
             q["type"] = "comprehension"
 
+    # Where each raw sentence lands once the cleaning has dropped the ones
+    # it cannot show, so a question's `at` still names its sentence.
+    raw = data["breakdown"] if isinstance(data["breakdown"], list) else []
+    kept = [i for i, part in enumerate(raw) if isinstance(part, dict) and _text_field(part, "jp")]
     data["breakdown"] = _clean_breakdown(data["breakdown"])
     if not data["breakdown"]:
         raise HTTPException(status_code=502, detail="LLM response carried no usable breakdown")
+    landed = {r: n for n, r in enumerate(kept)}
+    for q in data["questions"]:
+        _clean_answer_line(q, landed)
 
     # The whole-text translation is no longer asked for: it is the
     # breakdown read end to end, which is the same text by construction

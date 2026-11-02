@@ -57,10 +57,12 @@ MODEL_IDS = {
 # the allowed-kanji list (N5 103 chars ... N1 2,212) is worth caching.
 FEATURES = {
     "reading_comprehension": (
-        34, 2700, 3000,
+        34, 2800, 3400,
         "26 exercises/mo x 1.3 attempts (_COMPREHENSION_ATTEMPTS=3, most "
-        "pass first). In: 6.5k-char template + kanji list + seeds. Out: a "
-        "250-char passage, 10 questions, a per-sentence breakdown. This row "
+        "pass first). In: 7k-char template + kanji list + seeds. Out: a "
+        "250-char passage, 10 questions each with its sentence and a line "
+        "on why (plan 298b, ~40 tokens a question), a per-sentence "
+        "breakdown. This row "
         "is now the COLD-POOL worst case -- one learner alone in their "
         "(level, lang) bucket. Since plan 092 the answer is pooled and "
         "shared, so divide these calls by the learners sharing a bucket: "
