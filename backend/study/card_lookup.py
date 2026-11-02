@@ -242,8 +242,11 @@ def card_stats(states: dict, user_id: str, raw_id: str, modes) -> dict:
             "progress": 0.0,
         }
 
-    total = sum(i["total_reviews"] for i in items)
-    correct = sum(i["correct_reviews"] for i in items)
+    # The answers, not the row's counts: a card the level rule marked
+    # known carries one virtual check of one until it is answered (plan
+    # 300), and a learner who never met it read "1 review, 100%".
+    total = sum(i["answers"] for i in items)
+    correct = sum(i["correct_answers"] for i in items)
     intervals = [i["interval_days"] for i in items if i["interval_days"] is not None]
     next_reviews = [i["next_review"] for i in items if i["next_review"] is not None]
 

@@ -322,8 +322,12 @@ def test_the_undo_takes_back_what_no_answer_touched(aclient):
     # 食べる is N5, behind the level: the level's assumption is back.
     back = _state("vocab_N5_食べる_たべる")
     assert SRSEngine.is_assumed(back) and back.learning_step == 0 and back.interval_days == 21
-    # 学校 was answered: history, untouched by the undo.
-    assert srs._load_state(answered, VOCAB_MODE).total_reviews == 2
+    # 学校 was answered: history, untouched by the undo. Its row counts
+    # the one answer, the import's virtual check gone (plan 300), and
+    # reads answered, never an assumption again.
+    kept = srs._load_state(answered, VOCAB_MODE)
+    assert (kept.total_reviews, kept.correct_reviews) == (1, 1)
+    assert not SRSEngine.is_assumed(kept)
     assert _events("transfer_undo") == [{"removed": 1}]
 
 

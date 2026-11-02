@@ -220,6 +220,49 @@ def test_an_assumption_is_no_answer_to_the_retention(lclient):
     assert profile["retention"] == 0.5
 
 
+def test_an_assumption_is_no_answer_on_a_card_or_a_deck(lclient):
+    # A card's figures and the statistics' deck grid count answers too
+    # (plan 300): mastered by the level rule, answered nowhere. A check
+    # passed is one answer, in the row as in the figure, and the answer
+    # after it is an answer, never a second check.
+    from study.card_lookup import card_stats
+    lclient.post("/api/onboarding/complete", json={"jlptLevel": "N4", "dailyNewTarget": 10})
+    mode = level_rule.primary_mode("kanji")
+    raw = card_index.raw_ids("kanji", "N5", mode)[:3]
+    passed, missed, untouched = prefixed(raw, LUID)
+
+    def card(i):
+        states = srs.get_states_for(prefixed(raw, LUID), [mode])
+        return card_stats(states, LUID, raw[i], mode)
+
+    def deck():
+        return lclient.get("/api/stats").json()["kanji"]["N5"][mode]
+
+    assert deck()["mastered"] > 0
+    assert (deck()["reviews"], deck()["correct"]) == (0, 0)
+    assert card(2)["status"] == "mastered"
+    assert (card(2)["total_reviews"], card(2)["accuracy"]) == (0, None)
+
+    srs.review(passed, mode, 4)
+    srs.review(missed, mode, 1)
+    rows = _rows(LUID, mode)
+    assert rows[passed][3] == 1 and rows[missed][3] == 1
+    assert (card(0)["correct_reviews"], card(0)["total_reviews"], card(0)["accuracy"]) == (1, 1, 100.0)
+    assert (card(1)["correct_reviews"], card(1)["total_reviews"]) == (0, 1)
+    assert card(2)["total_reviews"] == 0
+
+    srs.review(passed, mode, 1)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT assumed FROM review_log WHERE card_id = %s ORDER BY id", (passed,))
+            assert [r[0] for r in cur.fetchall()] == [True, False]
+    finally:
+        conn.close()
+    assert (card(0)["correct_reviews"], card(0)["total_reviews"], card(0)["accuracy"]) == (1, 2, 50.0)
+    assert (deck()["reviews"], deck()["correct"]) == (3, 1)
+
+
 def test_settings_previews_then_applies_a_move_up_and_a_move_down(lclient):
     lclient.post("/api/onboarding/complete", json={"jlptLevel": "N5", "dailyNewTarget": 10})
     n5 = sum(len(ids) for _, _, ids in level_rule.known_batches(["N5"]))

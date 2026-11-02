@@ -477,7 +477,10 @@ runtime purpose.
   total, retention, XP) reads `review_log` and its rollup, never a sum
   of `card_modes`' counters, or every assumption is an answer (plan
   300: a learner who boarded at N4 read 100% retention before answering
-  once).
+  once). A card's and a deck's figures read `_state_row`'s `answers`,
+  which leave an untouched assumption's check out, and a check passed
+  takes the virtual one's place in the row (`SRSEngine.review`), so the
+  row counts what was answered; `total_reviews` still says met or new.
 - **An import is an assumption the level does not give back (plans
   243, 243b).** `SRSEngine.seed_imported` writes `KNOWN_STATE`'s
   signature with the source's interval and ease and `IMPORTED_STEP` in
@@ -859,6 +862,16 @@ those learners typed the name for their card, so read the report before
 
 ```bash
 python -m scripts.migrate_handles      # report; --yes to apply, --user to scope (repeatable)
+```
+
+And one after the deploy that carries plan 300: a check passed before it
+counted on top of the level rule's virtual one, so those cards read 2 of
+2 for one answer. It sets every row that is exactly one check of one over
+its logged history to the log's count, and leaves alone a row whose
+history was folded into the rollup.
+
+```bash
+python -m scripts.recount_known_checks  # report; --yes to apply, --user to scope
 ```
 
 And one after any deploy that changes the voice (plan 121 did, from edge-tts

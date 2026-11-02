@@ -266,6 +266,7 @@ def test_history_round_trip_reflects_live_srs_state_not_anything_stored(client, 
             return {
                 (f"{user_id}:{raw_id}", "vocab.flashcard.f2b"): {
                     "state": "mastered", "total_reviews": 5, "correct_reviews": 5,
+                    "answers": 5, "correct_answers": 5,
                     "interval_days": 30, "due": False, "next_review": None,
                 },
             }
