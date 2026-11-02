@@ -441,6 +441,13 @@ runtime purpose.
   どっち), one of another word read alike is dropped (開く under 空く),
   and a kana card whose curated row holds another word's entry before
   its own keeps its own (`vocab_extras._OWN_ENTRY`, ママ behind まま).
+  The word marked is the card's, not a card read alike: written with
+  the card's kanji (速い under 早い, 作る under 造る were dropped,
+  `test_no_card_marks_another_cards_spelling`), read its way (一日 read
+  いちにち under いちじつ), or in kana where the card's kanji is the
+  usual one (値段をつける is 付ける's, not 着ける's); a card the drops
+  leave bare is written for, and one whose gloss reaches a second JMdict
+  entry lists its senses (`_SENSES_ALSO`, 回り's surroundings).
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own

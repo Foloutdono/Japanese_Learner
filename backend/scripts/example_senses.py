@@ -42,7 +42,7 @@ import os
 import re
 import sys
 
-from content import example_fixes
+from content import example_fixes, vocab_extras
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import get_vocab_extras
 
@@ -84,6 +84,11 @@ def items() -> dict[str, dict]:
     (plan 297: 開く's door under 空く), which a drop takes off it."""
     saved = example_fixes.refiled_all
     example_fixes.refiled_all = lambda: {}
+    # Every sentence JMdict files under the word, not the five a page
+    # shows: a drop lets the next one up (plan 297), and its move or drop
+    # must be one the tools accept.
+    saved_max = vocab_extras._MAX_EXAMPLES
+    vocab_extras._MAX_EXAMPLES = 10 ** 6
     try:
         out: dict[str, dict] = {}
         for level in LEVELS:
@@ -120,6 +125,7 @@ def items() -> dict[str, dict]:
         return out
     finally:
         example_fixes.refiled_all = saved
+        vocab_extras._MAX_EXAMPLES = saved_max
 
 
 def problems(move: dict, known: dict[str, dict]) -> list[str]:

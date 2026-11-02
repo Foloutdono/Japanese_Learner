@@ -267,9 +267,17 @@ def _key(word: dict) -> str:
 
 
 def gap_words() -> list[tuple[str, dict]]:
-    """(level, card) for every deck word that shows no sentence of JMdict's."""
-    originals = _originals()
-    shown = {w["key"] for item in originals.values() for w in item["words"]}
+    """(level, card) for every deck word that shows no sentence of JMdict's:
+    none filed under it, or every one taken off it (plan 297: a drop is
+    keyed by the sentence as shown, a correction's, so the uncorrected
+    originals cannot tell)."""
+    saved = example_fixes.written
+    example_fixes.written = lambda: {}
+    try:
+        shown = {_key(w) for level in LEVELS for w in VOCAB_BY_LEVEL[level]
+                 if get_vocab_extras(w.get("kanji") or "", w["kana"], w.get("meaning", ""), "en")["examples"]}
+    finally:
+        example_fixes.written = saved
     return [(level, w) for level in LEVELS for w in VOCAB_BY_LEVEL[level] if _key(w) not in shown]
 
 

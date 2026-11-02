@@ -23185,6 +23185,12 @@
    "fr": "Mettez votre sac sous le siège, s'il vous plaît.",
    "why": "EN unnatural"
   },
+  "音楽が好きで、毎日聴いています。": {
+   "jp": "音楽が好きで、毎日聞いています。",
+   "en": "I like music, and I listen to it every day.",
+   "fr": "J'aime la musique, et j'en écoute tous les jours.",
+   "why": "聴く has no card, so the 聞く card's page marked the き of 好き; 聞く for listening to music is the card's own spelling"
+  },
   "音楽の好みは人によって好きずきです。": {
    "jp": "服の色なんて好き好きだから、好きなのを選べばいい。",
    "en": "The colour of clothes is a matter of taste, so just pick the one you like.",

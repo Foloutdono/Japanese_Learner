@@ -155,3 +155,33 @@ def test_a_card_lists_the_senses_its_gloss_reaches():
     assert "surroundings" in glosses[2] and "rotation" in glosses.values()
     ex = next(ex for ex in extras["examples"] if ex["jp"] == "家のまわりに花を植えた。")
     assert ex["sense_number"] == 2
+
+
+def test_no_card_marks_another_cards_spelling():
+    """Plan 297: a card showed sentences of another card read alike, its
+    word marked in the other card's kanji -- 速い under 早い, 跳べ under
+    飛ぶ, 作る under 造る, 延ばし under 伸ばす. A marked kanji the card's
+    spelling lacks may be a variant with no card of its own (包丁 under
+    庖丁, 5日 under 五日), never the spelling of a card read alike."""
+    import re
+    from content.vocab_extras import _readings
+    kanji_of = lambda text: set(re.findall(r"[一-鿿々]", text))
+    spellings: dict[str, set] = {}
+    for words in VOCAB_BY_LEVEL.values():
+        for w in words:
+            for reading in _readings(w["kana"]):
+                spellings.setdefault(reading, set()).add(w.get("kanji") or "")
+    found = []
+    for level, words in VOCAB_BY_LEVEL.items():
+        for w in words:
+            kanji = w.get("kanji") or ""
+            if not kanji:
+                continue
+            others = {s for r in _readings(w["kana"]) for s in spellings[r]} - {kanji, ""}
+            for ex in get_vocab_extras(kanji, w["kana"], w.get("meaning", ""), "en")["examples"]:
+                marked = "".join(seg["text"] for seg in ex["segments"] if seg["highlight"])
+                alien = kanji_of(marked) - set(kanji)
+                hit = sorted(o for o in others if alien and alien <= kanji_of(o))
+                if hit:
+                    found.append(f"{level} {kanji}::{w['kana']}: {marked} is {hit}'s: {ex['jp']}")
+    assert not found, "\n".join(found[:40])
