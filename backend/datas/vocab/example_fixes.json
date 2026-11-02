@@ -385,6 +385,12 @@
    "fr": "« Tu as mal au dos ? » « Non, ça va. » « Ah, tant mieux. »",
    "why": "too hard for N4 (不幸中の幸い)"
   },
+  "「花子と太郎のどちらが若いですか」「太郎です」": {
+   "jp": "「花子と太郎のどちらが若いですか。」「えっ、どっちだろう。太郎かな。」",
+   "en": "\"Which is younger, Hanako or Taro?\" \"Hmm, which one? Taro, I think.\"",
+   "fr": "« Qui est le plus jeune, Hanako ou Taro ? » « Euh, lequel des deux ? Taro, je crois. »",
+   "why": "どっち absent from the どっち card's sentence; a casual reply beside the polite question, as the other どっち sentence"
+  },
   "「行った」というのが適切な言葉だ。": {
    "jp": "先生は、私の質問に適切な答えをくれた。",
    "en": "The teacher gave an appropriate answer to my question.",
@@ -5034,6 +5040,12 @@
    "en": "There are lots of shops underground at the station.",
    "fr": "Il y a beaucoup de boutiques au sous-sol de la gare.",
    "why": "fragment; EN mismatch"
+  },
+  "そちらの条件を受け入れましょう。": {
+   "jp": "「そっちの条件は？」「そちらに合わせますよ。」",
+   "en": "\"What are your conditions?\" \"I'll go along with yours.\"",
+   "fr": "« C'est quoi, tes conditions ? » « Je m'aligne sur les vôtres. »",
+   "why": "そっち absent from the そっち card's sentence; a casual question beside the polite reply, as the other そっち sentences"
   },
   "そちらはセントラル自動車学校ではないんですか。": {
    "jp": "「そっちは出口？」「いいえ、そちらは入口です。」",
@@ -19609,6 +19621,12 @@
    "fr": "Dans le contrat, le vendeur est désigné comme partie A et l'acheteur comme partie B.",
    "why": "fixed saying, unclear sense"
   },
+  "申し訳ありませんが、ただ今満室になっています。": {
+   "jp": "申し訳ありませんが、ただいま満室になっています。",
+   "en": "I'm afraid we're quite full at the moment.",
+   "fr": "Toutes nos excuses, mais nous sommes complets pour le moment.",
+   "why": "ただ今 hides the ただいま card's word from its page; the kana spelling is as usual in this phrase"
+  },
   "男の子たちが、私の柿の木になっている熟した実を全部持ち去ってしまった。": {
    "jp": "庭の木にたくさんの実がなった。",
    "en": "Lots of fruit grew on the tree in the garden.",
@@ -23166,6 +23184,12 @@
    "en": "Please put your bag under the seat.",
    "fr": "Mettez votre sac sous le siège, s'il vous plaît.",
    "why": "EN unnatural"
+  },
+  "音楽が好きで、毎日聴いています。": {
+   "jp": "音楽が好きで、毎日聞いています。",
+   "en": "I like music, and I listen to it every day.",
+   "fr": "J'aime la musique, et j'en écoute tous les jours.",
+   "why": "聴く has no card, so the 聞く card's page marked the き of 好き; 聞く for listening to music is the card's own spelling"
   },
   "音楽の好みは人によって好きずきです。": {
    "jp": "服の色なんて好き好きだから、好きなのを選べばいい。",
