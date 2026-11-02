@@ -1528,6 +1528,32 @@ class WordsTheTokenizerCutTests(unittest.TestCase):
         self.assertIn("なぜ", matches("なぜか分からない。"))
         self.assertIn("二", matches("二度とも失敗した。"))
 
+    def test_a_de_that_belongs_after_ends_no_word(self) -> None:
+        # The segments a sentence is graded on (plan 299): 何 + で + も is
+        # 何でも, "anything", and the copula's で ends no word -- never the
+        # N3 何で, "why", which graded every 何でも N3, nor ところで.
+        def segments(sentence: str) -> dict[str, str]:
+            return {s["text"]: s.get("raw_id", "") for s in card_lookup.find_segments_in_text(sentence)
+                    if s.get("type") == "vocab"}
+        for sentence in ("兄は何でも食べます。", "なんでもいいです。", "何でもない。", "いくら何でも遅い。",
+                         "何でも屋に頼んだ。", "恥でも何でもなかった。", "理由が何であれ、暴力は許されない。",
+                         "これは何でございますか。", "何であろうと構わない。"):
+            with self.subTest(sentence=sentence):
+                found = segments(sentence)
+                self.assertNotIn("何で", found)
+                self.assertNotIn("vocab_N3_何で_なんで", found.values())
+        self.assertEqual(segments("売り場は、エスカレーターを下りた所でございます。").get("所"), "vocab_N5_所_ところ")
+        # "Why" is 何 + the particle で, the word ending there: the gate
+        # still reads it, a negative after it too.
+        for sentence in ("何で泣いてるの？", "何でだろう。", "何でって、好きだからだよ。",
+                         "何でそんなことを言うの？", "何で来なかったの？"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(segments(sentence).get("何で"), "vocab_N3_何で_なんで")
+        # And the level read off them is the point's, not the N3 card's.
+        from study import difficulty
+        self.assertEqual(difficulty.estimate_level("兄は何でも食べます。"), "N4")
+        self.assertEqual(difficulty.estimate_level("何で泣いてるの？"), "N3")
+
     def test_a_polite_set_phrase(self) -> None:
         for sentence, surface in (("今日はお先に失礼します。", "お先に"), ("お大事に。", "お大事に"),
                                   ("おかげさまで、元気です。", "おかげさまで")):

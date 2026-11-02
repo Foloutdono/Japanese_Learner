@@ -5419,6 +5419,28 @@ def numeral_value(text: str) -> int | None:
     return total + section + (digits or 0)
 
 
+def _de_belongs_after(morphemes, i: int) -> bool:
+    """Whether the で after morphemes[i] belongs to what follows it rather
+    than ending a word there (plan 299): the で of でも, which a question
+    word opens into "any-" (何でも "anything", the N4 point 何でも／誰でも／
+    いつでも／どこでも; 何でもない, いくら何でも), and the copula's で,
+    UniDic's だ (何であれ "whatever it is", 何でございますか "what is it").
+    Merged with 何, either read as the deck's 何で, "why": every 何でも
+    graded its sentence N3, and the level gate counted a word the text
+    did not say. "Why" is 何 + the particle で, the word ending there
+    (何で泣いてるの？, 何でだろう); the breakdown's own reading of it is
+    _what_word's."""
+    if i + 1 >= len(morphemes):
+        return False
+    de = morphemes[i + 1]
+    if de.surface != "で":
+        return False
+    if de.pos == "auxiliary" and de.lemma == "だ":
+        return True
+    after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+    return de.pos == "particle" and after is not None and after.surface == "も" and after.pos == "particle"
+
+
 def _find_segments_morphological(text: str):
     """Preferred scan path (see find_segments_in_text): tokenize with a
     real morphological analyzer instead of guessing word boundaries by
@@ -5455,8 +5477,10 @@ def _find_segments_morphological(text: str):
         # 年 is さ来年; 何 + 時 read なんじ is not いつ). Across a particle
         # there is no reading, so no fold merges there: 彼 + の and 所 +
         # で spell folds (あの, ところで), and are "his" and "at the
-        # place" far more often than either.
-        if i + 1 < len(morphemes):
+        # place" far more often than either. Nor does a word end on a で
+        # that belongs to what follows (_de_belongs_after): 何 + で + も is
+        # 何でも, never 何で.
+        if i + 1 < len(morphemes) and not _de_belongs_after(morphemes, i):
             m2 = morphemes[i + 1]
             merged = m.surface + m2.surface
             crosses = "particle" in (m.pos, m2.pos)

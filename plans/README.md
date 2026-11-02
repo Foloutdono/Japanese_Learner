@@ -7366,3 +7366,13 @@ The owner: write thirty new N4 texts and twenty new N5, every one coherent. Hand
 | 298 | **The figures**: 230/230 clean; the longest or the shortest option wins 21-25% at N4 and N5 in both languages; the carousel bank over 230 passages; the seed module's memory re-measured (20 MB parsed, a 343 KB index) | DONE |
 
 Open: the matcher reads some points narrowly, and the texts bent to it rather than it to them: 何でも is read as 何で (N3), 〜がする is found only plain, 〜くする needs くする written out, 何も／誰も need the kanji, 〜が分かります needs が just before it, and だろうと思いました is read as 〜ようと思う.
+
+## Plan 299 — 何でも, the level gate's 何で (2026-11-02)
+
+Found while writing plan 298's seeds: the level gate counted 何でも, "anything" (the N4 point 何でも／誰でも／いつでも／どこでも), as the N3 card 何で, "why", so every text that said it spent its one hard word in twenty on a word it did not say, and the breakdown graded 兄は何でも食べます N3. The owner: fix this bug.
+
+| Phase | What | Status |
+|---|---|---|
+| 299 | **The merge stops where で belongs to what follows** (`card_lookup._de_belongs_after`): the segments a sentence is graded on (`find_segments_in_text`, read by `level_mix`, `difficulty.estimate_level` and the breakdown's level) no longer merge a word across the で of でも or the copula's で. Diffed over the 8,472 sentences the app teaches: 10 move, all misreadings put right (eight 何でも, 何であれ, and 下りた所でございます, which read ところで, "by the way"); no "why" moves. `LOCAL_REV` 32 | DONE |
+
+Open: the breakdown's own `_what_word` reads a kanji 何で before a way of going as "by what", so 何で来なかったの？ ("why didn't you come?") shows 何 + で there while the gate reads "why"; the legacy substring scan, used only without a tokenizer (when `level_mix` gives no verdict anyway), still finds 何で inside 何でも.

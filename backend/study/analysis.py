@@ -2137,7 +2137,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # that writes them; none of the app's own sentences does.
 # 31: sixteen cards the course's sentences use (体重, 主人, もしもし,
 # ただいま...) and ten usually-kana words as kana cards (#360, #439).
-LOCAL_REV = 31
+# 32: the level read off the segments no longer takes 何でも, "anything",
+# or 何であれ for the N3 何で, "why", nor 所 + the copula's で for ところで
+# (plan 299): 兄は何でも食べます is graded N4, its point's level, not N3.
+LOCAL_REV = 32
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
