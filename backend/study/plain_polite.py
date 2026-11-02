@@ -30,6 +30,16 @@ never 高いだ). Nor:
 
 Read through the tokenizer; without it there is no other reading, and
 Construire's check is what it was.
+
+Nor does a translation say whether では is said in full or contracted
+(plan 295): « Ce n'est pas mon parapluie » is かさではありません as much
+as かさじゃありません, and the copula's lesson teaches both (« spoken:
+じゃありません »). So contracted() reads では as じゃ and じゃ as では
+where it opens a negative -- the copula's or the particle's で, then は,
+then ない or ありません (学生ではない, 学生じゃない) -- and nowhere else:
+never the voiced ては of 読んではいけない, nor a では no negative follows
+(学校では is « at school », 学校じゃ another style of speech), nor the
+じゃあ that opens a reply.
 """
 import re
 from functools import lru_cache
@@ -37,6 +47,8 @@ from functools import lru_cache
 from study.morphology import kata_to_hira, tokenize
 
 POLITE, PLAIN = "polite", "plain"
+# では as the sentence writes it: in full, or contracted (contracted()).
+FULL, CONTRACTED = "full", "contracted"
 
 # The particles that may follow the ending and still close the sentence.
 _FINAL = ("よ", "ね", "か")
@@ -265,3 +277,49 @@ def other_register(jp: str, start: int, end: int, reading: str, pattern: str = "
         if form[1] and form[1] != reading and form not in out:
             out.append(form)
     return (register, tuple(out)) if out else None
+
+
+# ── では said in full or contracted (plan 295) ────────────────
+
+def _negative_at(tokens: list, k: int) -> bool:
+    """ない, or ありません, at tokens[k]."""
+    if k >= len(tokens):
+        return False
+    t = tokens[k]
+    return t.lemma in ("無い", "ない") or (
+        t.lemma in ("有る", "ある") and k + 1 < len(tokens)
+        and tokens[k + 1].lemma == "ます" and tokens[k + 1].surface.startswith("ませ"))
+
+
+def _de(t) -> bool:
+    """Whether the token is the で of では: the copula's or the particle's
+    (never the voiced て of 読んでは)."""
+    return (t.pos == "auxiliary" and t.lemma == "だ") or (t.pos == "particle" and t.lemma == "で")
+
+
+@lru_cache(maxsize=4096)
+def contracted(jp: str, start: int, end: int, reading: str) -> tuple | None:
+    """(said, old, new): the hole jp[start:end] (read `reading`) with its
+    では said じゃ, or its じゃ said では, where it opens a negative; `said`
+    is FULL or CONTRACTED, as the sentence writes it, and old → new is
+    the swap, for a caller to make in any other form of the hole. None
+    where the hole has no such では or じゃ, or where the swap could fall
+    on another one."""
+    tokens = tokenize(jp)
+    if not tokens:
+        return None
+    for i, t in enumerate(tokens):
+        if t.start < start or t.end > end:
+            continue
+        nxt = tokens[i + 1] if i + 1 < len(tokens) else None
+        if t.surface == "で" and _de(t) and nxt is not None and nxt.surface == "は" and nxt.end <= end \
+                and _negative_at(tokens, i + 2):
+            said, old, new = FULL, "では", "じゃ"
+        elif t.surface == "じゃ" and _de(t) and _negative_at(tokens, i + 1):
+            said, old, new = CONTRACTED, "じゃ", "では"
+        else:
+            continue
+        if jp[start:end].count(old) != 1 or reading.count(old) != 1:
+            return None
+        return said, old, new
+    return None

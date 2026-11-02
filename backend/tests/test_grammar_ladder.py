@@ -302,6 +302,119 @@ def test_construire_reads_a_kanji_the_keyboard_put_in():
     assert wrong["verdict"] == "wrong" and "言" not in "".join(m.get("wrong", "") for m in wrong["marks"])
 
 
+def _key(level, pattern, jp):
+    return next(i[0] for i in grammar_ladder._build_items(level, pattern) if i[1] == jp)
+
+
+def _hole(level, pattern, jp):
+    item = next(i for i in grammar_ladder._build_items(level, pattern) if i[1] == jp)
+    return [jp[a:b] for a, b in item[2]]
+
+
+def test_construire_never_cuts_the_negative_off_its_word():
+    # Plan 295, the owner's screenshot: これはわたしのかさ＿＿＿＿ません。
+    # asked ではあり, the copula's negative without its negation, and あり
+    # typed in it was corrected to ではあり -- no form of です -- while the
+    # card read これはわたしのかさありません.
+    level, entry, _ = _point("です／だ")
+    jp = "これはわたしのかさではありません。"
+    key = _key(level, entry["pattern"], jp)
+    assert _hole(level, entry["pattern"], jp) == ["ではありません"]
+    built = next(b for b in (grammar_ladder.build_payload(level, entry, "fr", t) for t in range(12)) if b["key"] == key)
+    assert [p["size"] for p in built["pieces"] if "gap" in p] == [7]
+    assert built["pieces"][-1] == {"furigana": [{"text": "。"}]}
+    wrong = grammar_ladder.check_build(level, entry["pattern"], key, ["あり"], "fr")["gaps"][0]
+    assert wrong["verdict"] == "wrong" and wrong["answer"] == "ではありません"
+    assert wrong["marks"] == [{"wrong": "", "fix": "では"}, {"ok": "あり"}, {"wrong": "", "fix": "ません"}]
+    # The negative, typed whole, is right; in plain speech too.
+    for typed in ("ではありません", "de wa arimasen", "ではない"):
+        assert grammar_ladder.check_build(level, entry["pattern"], key, [typed], "fr")["verdict"] == "right", typed
+    # もうお金が＿＿＿＿。 asked ありませ: ありません typed was one kana too many.
+    level, entry, _ = _point("もう〜ない")
+    jp = "もうお金がありません。"
+    assert _hole(level, entry["pattern"], jp) == ["もう", "ありません"]
+    verdict = grammar_ladder.check_build(level, entry["pattern"], _key(level, entry["pattern"], jp),
+                                         ["もう", "ありません"], "fr")
+    assert verdict["verdict"] == "right"
+    # Another point's ありません is no more cut than the copula's.
+    assert _hole("N4", "〜ことがある", "その映画は見たことがありません。") == ["ことがありません"]
+
+
+def test_construire_carries_a_hole_cut_inside_an_ending_to_the_words_end():
+    # The stems lit a word to the middle of its ending: ことがあ|ります,
+    # が分かりま|せん, せいで|す. The rest of the word goes in the hole...
+    for pattern, jp, hole in (
+            ("〜ことがある", "朝の電車は、おくれることがあります。", ["ことがあり"]),
+            ("〜が分かります", "このことばのいみが分かりません。", ["が分かりません"]),
+            ("〜ができます", "わたしはりょうりができません。", ["ができません"]),
+            ("〜せいで", "失敗したのは私のせいです。", ["せいです"]),
+            ("〜と思います", "母は、わたしがまだ子どもだと思っています。", ["と思っ"]),
+            ("〜にします", "会うのは日よう日にしましょう。", ["にしましょう"])):
+        level, _entry, _ = _point(pattern)
+        assert _hole(level, pattern, jp) == hole, jp
+    # ...and the hole still stops where the word's ending begins, the
+    # sentence's inflection outside it, as before.
+    level, _entry, _ = _point("〜ことがある")
+    assert _hole(level, "〜ことがある", "北海道へ行ったことがあります。") == ["ことがあり"]
+    level, _entry, _ = _point("〜しか〜ない")
+    assert _hole(level, "〜しか〜ない", "きのうは三時間しかねられなかった。") == ["しか", "なかっ"]
+    # Where the tokenizer read a word across the point, nothing is cut:
+    # 何時ごろつきますか is ごろ and つきます, not ごろつく (a thug); つけた
+    # ままねて is まま and ねて, not まねる; 作りがいがない is がい, not 衣蛾.
+    for pattern, jp, hole in (
+            ("〜ごろ", "おおさかには何時ごろつきますか。", ["ごろ"]),
+            ("〜まま", "電気をつけたままねてしまいました。", ["まま"]),
+            ("〜がい", "せっかく作ったのに、だれも食べない。作りがいがないなあ。", ["がい"])):
+        level, _entry, _ = _point(pattern)
+        assert _hole(level, pattern, jp) == hole, jp
+    # A point's piece at the end of a word keeps its start: 大き + く.
+    level, _entry, _ = _point("〜く／〜に（副詞形）")
+    assert _hole(level, "〜く／〜に（副詞形）", "大きく書いてください。") == ["く"]
+
+
+def test_no_construire_hole_ends_inside_an_ending():
+    # Over every Construire: no hole ends between an auxiliary's letters
+    # (で|す, ま|せ), nor leaves the ん of ません or the ません of ありません
+    # outside it.
+    from study.morphology import tokenize
+    seen = 0
+    for level, entry in _builds():
+        for key, jp, spans, *_ in grammar_ladder._build_items(level, entry["pattern"]):
+            tokens = tokenize(jp)
+            for a, b in spans:
+                where = (entry["pattern"], key, jp[a:b])
+                assert not any(t.pos == "auxiliary" and t.start < b < t.end for t in tokens), where
+                k = next((i for i, t in enumerate(tokens) if t.end == b), None)
+                if k is None or k + 2 >= len(tokens):
+                    continue
+                t, nxt, then = tokens[k], tokens[k + 1], tokens[k + 2]
+                assert not (t.surface == "ませ" and nxt.lemma == "ず"), where
+                assert not (t.lemma in ("有る", "ある") and nxt.surface == "ませ" and then.lemma == "ず"), where
+                seen += 1
+    assert seen > 1000
+
+
+def test_construire_takes_de_wa_in_full_and_contracted():
+    # Plan 295: « Cette personne n'est pas professeur » under あの人は先生
+    # ＿＿ありません。 -- では was corrected to じゃ, though the lesson
+    # teaches では first and the translation says neither.
+    level, entry, _ = _point("です／だ")
+    key = _key(level, entry["pattern"], "あの人は先生じゃありません。")
+    verdict = grammar_ladder.check_build(level, entry["pattern"], key, ["では"], "en")
+    assert verdict["verdict"] == "right"
+    assert verdict["gaps"][0] == {"verdict": "right", "answer": "では", "reading": "じゃ", "marks": [],
+                                  "said": "じゃ", "register": "contracted"}
+    # The other way, and with the other register: the sentence says では
+    # in full, and politely.
+    key = _key(level, entry["pattern"], "これはわたしのかさではありません。")
+    gap = grammar_ladder.check_build(level, entry["pattern"], key, ["じゃありません"], "en")["gaps"][0]
+    assert gap["verdict"] == "right" and gap["said"] == "ではありません" and gap["register"] == "full"
+    gap = grammar_ladder.check_build(level, entry["pattern"], key, ["じゃない"], "en")["gaps"][0]
+    assert gap["verdict"] == "right" and gap["register"] == "polite"
+    # The sentence's own answer says nothing more.
+    assert "said" not in grammar_ladder.check_build(level, entry["pattern"], key, ["ではありません"], "en")["gaps"][0]
+
+
 def test_construire_asks_another_sentence_each_turn():
     level, entry, _ = _point("〜てください")
     keys = [grammar_ladder.build_payload(level, entry, "en", turn)["key"] for turn in range(4)]
