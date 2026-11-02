@@ -54,7 +54,7 @@ import os
 import re
 import sys
 
-from content import example_fixes, jmdict_fr
+from content import example_fixes, jmdict_fr, vocab_extras
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import _find_senses, _target_span, get_vocab_extras
 from study.llm_shared import kanji_set_for_level
@@ -67,8 +67,14 @@ LEVELS = ("N5", "N4", "N3", "N2", "N1")
 def _originals() -> dict[str, dict]:
     """jp -> {en, fr, words}: every sentence the deck shows, uncorrected."""
     saved, saved_written = example_fixes.fixes, example_fixes.written
+    saved_own = vocab_extras._OWN_ENTRY
     example_fixes.fixes = lambda: {}
     example_fixes.written = lambda: {}
+    # A card that keeps its own entry of a row two words share (plan 297,
+    # ママ beside まま) shows the other's sentences only where a correction
+    # made them its own: uncorrected, they are the row's, as plan 227 read
+    # them, or those corrections would read as stale.
+    vocab_extras._OWN_ENTRY = {}
     # The French index is cached from fixes(): built while it is patched
     # out, it would stay empty for the rest of the process.
     example_fixes._french.cache_clear()
@@ -90,6 +96,7 @@ def _originals() -> dict[str, dict]:
         return out
     finally:
         example_fixes.fixes, example_fixes.written = saved, saved_written
+        vocab_extras._OWN_ENTRY = saved_own
         example_fixes._french.cache_clear()
 
 
@@ -260,9 +267,17 @@ def _key(word: dict) -> str:
 
 
 def gap_words() -> list[tuple[str, dict]]:
-    """(level, card) for every deck word that shows no sentence of JMdict's."""
-    originals = _originals()
-    shown = {w["key"] for item in originals.values() for w in item["words"]}
+    """(level, card) for every deck word that shows no sentence of JMdict's:
+    none filed under it, or every one taken off it (plan 297: a drop is
+    keyed by the sentence as shown, a correction's, so the uncorrected
+    originals cannot tell)."""
+    saved = example_fixes.written
+    example_fixes.written = lambda: {}
+    try:
+        shown = {_key(w) for level in LEVELS for w in VOCAB_BY_LEVEL[level]
+                 if get_vocab_extras(w.get("kanji") or "", w["kana"], w.get("meaning", ""), "en")["examples"]}
+    finally:
+        example_fixes.written = saved
     return [(level, w) for level in LEVELS for w in VOCAB_BY_LEVEL[level] if _key(w) not in shown]
 
 
