@@ -7,6 +7,7 @@ import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useInstallPrompt, promptInstall, isIosSafari } from '../../stores/installPrompt'
 import { isNative } from '../../lib/platform'
 import { InstallSheet, InstallSteps } from '../ui/InstallSheet'
+import Flag from '../ui/Flag'
 import { useDesk } from '../../hooks/useDesk'
 import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 import { SettingsPage, Slip, SlipRow } from './SettingsPage'
@@ -81,7 +82,7 @@ export function DisplayPage() {
                   className={`lang-pick${lang === l.code ? ' lang-pick--on' : ''}`}
                   onClick={() => { if (lang !== l.code) { switchLang(l.code); playClick() } }}
                 >
-                  <span className="lang-pick__name">{l.label}</span>
+                  <span className="lang-pick__name"><Flag code={l.code} />{l.label}</span>
                   <span className="lang-pick__sample">{own.tabToday} · {own.tabDictionary}</span>
                 </button>
               )

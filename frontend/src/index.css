@@ -25203,7 +25203,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
 .lang-pick {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
@@ -25223,7 +25223,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   box-shadow: inset 0 0 0 1px var(--accent2);
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
-.lang-pick__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
+.lang-pick__name { display: inline-flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
+/* A language's flag (plan 291, the owner's choice): a country's own
+   colours, at the size of the name it stands before, and nowhere else
+   (DESIGN.md, "The language flags"). The ring keeps a white stripe
+   from melting into a light ground. */
+.lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
 .lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
 
@@ -36543,7 +36548,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     flex: 1;
     grid-auto-rows: 1fr;
   }
-  .desk-settings__page--two .lang-pick { align-items: center; }
   /* The mixer across the page (SoundPage, plan 145): its names in one
      column as wide as the longest, each on one line -- the phone's 132px
      broke VOLUME PRINCIPAL in two -- and every track starting where the

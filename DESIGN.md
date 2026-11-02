@@ -166,6 +166,15 @@ the chrome, and it is not a line's pigment there: it is the mark's material,
 the pass's `--accent2`, drawn the same on every ground (plan 158). It licenses
 nothing else — any other part of the chrome stays sumi and its two inks.
 
+**The language flags carry their countries' colours** (plan 291, the owner's
+choice, for clarity). Where a learner picks a language (Réglages › Affichage,
+the landing page's switch and its phone menu), a small flag stands before the
+language's name or code: drawn from `components/ui/flags.js`, never an emoji
+(Windows has none and prints the letters), the height of the text beside it
+and ringed in `--surface-line`. It licenses no other picture of a country, and
+a flag never stands for a language alone: the name or the code is always
+beside it.
+
 **One standing exception, decided deliberately**: the **console's action
 pill** (`ConsoleAction`, `.console__action` — "+ Créer un deck" on the
 shelf) is a filled use of a line pigment. It is not precedent for filling a card, a row, a chip, a

@@ -6,11 +6,12 @@
 // the script only turns the demos and the footage on.
 import { readFileSync } from 'node:fs'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
+import { flagSvg } from '../src/components/ui/flags.js'
 import { RATING_SCALES } from '../src/domain/ratingScales.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
   SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, SIGNIN_ENTRY, STORES, CONTACT,
-  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey, LANG_NAMES, OTHER,
+  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey, LANG_NAMES,
 } from './config.mjs'
 import { LEVELS, EXAM_N5, arrivals, spanOf, kanjiStrokes } from './content.mjs'
 import { STRINGS, CARDS, TOKENS, EXAM_OPTIONS } from './strings.mjs'
@@ -96,6 +97,7 @@ const stopName = (t, key) => (key === 'way' ? t.terminus : t[key].kicker)
 const SPEAKER = '<svg class="top__sound-on" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18.2 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
   + '<svg class="top__sound-off" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
 
+const CHEVRON = '<svg class="lmenu__chev" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 const ONWARD = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 function stop(t, key) {
@@ -156,18 +158,30 @@ function crossroads(t) {
 
 // ── Sections ──
 
-function header(t, other) {
+// The languages, each beside its flag (plan 291): the desktop's switch
+// FR · EN · ES, and on a phone, where three do not fit beside the sign-in,
+// a menu of them by name. A <details>, so it opens without the script,
+// which only closes it on a tap outside or Escape.
+function langMenu(t) {
+  const items = Object.keys(PAGES).map(code => code === t.lang
+    ? `<li><a aria-current="page" lang="${code}">${flagSvg(code)}${esc(LANG_NAMES[code])}</a></li>`
+    : `<li><a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${flagSvg(code)}${esc(LANG_NAMES[code])}</a></li>`).join('')
+  return `<details class="lmenu" data-lmenu><summary aria-label="${esc(`${t.langLabel} · ${LANG_NAMES[t.lang]}`)}">`
+    + `${flagSvg(t.lang)}<span>${t.lang.toUpperCase()}</span>${CHEVRON}</summary><ul class="lmenu__list">${items}</ul></details>`
+}
+
+function header(t) {
   const nav = t.nav.map(([key, label]) => `<a href="#${t.ids[key]}" data-spy="${t.ids[key]}">${esc(typo(t.lang, label))}</a>`).join('')
   const langs = Object.keys(PAGES).map(code => code === t.lang
-    ? `<a aria-current="page" lang="${code}">${code.toUpperCase()}</a>`
-    : `<a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${code.toUpperCase()}</a>`).join('')
+    ? `<a aria-current="page" lang="${code}">${flagSvg(code)}${code.toUpperCase()}</a>`
+    : `<a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${flagSvg(code)}${code.toUpperCase()}</a>`).join('')
   return `<header class="top" data-top><span class="top__rail" aria-hidden="true"></span><div class="wrap top__in">`
     + `<a class="brand" href="${PAGES[t.lang].path}" aria-label="${esc(t.home)}">${mark(32)}<span class="brand__name">Tsuji</span></a>`
     + `<nav class="nav" aria-label="${esc(t.navLabel)}">${nav}</nav>`
     // The demos' sounds: drawn by the script alone, which alone plays them.
     + `<div class="top__end"><button type="button" class="top__sound" data-sound aria-pressed="true" aria-label="${esc(t.sound)}" title="${esc(t.sound)}" hidden>${SPEAKER}</button>`
     + `<nav class="seg langs" aria-label="${esc(t.langLabel)}">${langs}</nav>`
-    + `<a class="top__other" href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${other.toUpperCase()}</a>`
+    + langMenu(t)
     + `<a class="ghost top__signin" href="${SIGNIN_ENTRY}" data-board>${esc(t.signIn)}</a>`
     // The way in, kept in reach once the hero's gate has scrolled away.
     + `<a class="top__board" href="${BOARD_ENTRY}" data-board data-top-board tabindex="-1" aria-hidden="true">${esc(t.board)}</a></div>`
@@ -756,7 +770,6 @@ export function forwardScript() {
 
 export function renderPage(lang, facts, media) {
   const t = STRINGS[lang](facts)
-  const other = OTHER[lang]
   const page = PAGES[lang]
   const live = Boolean(PRESENTATION.uploadDate)
   const alternates = Object.values(PAGES).map(p => `<link rel="alternate" hreflang="${p.lang}" href="${url(p.path)}">`).join('')
@@ -780,7 +793,7 @@ ${alternates}
 <meta property="og:description" content="${esc(typo(lang, t.description))}">
 <meta property="og:url" content="${url(page.path)}">
 <meta property="og:locale" content="${page.ogLocale}">
-<meta property="og:locale:alternate" content="${PAGES[other].ogLocale}">
+${Object.values(PAGES).filter(p => p.lang !== lang).map(p => `<meta property="og:locale:alternate" content="${p.ogLocale}">`).join('\n')}
 <meta property="og:image" content="${url(page.ogImage)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -798,7 +811,7 @@ ${fonts}
 </head>
 <body>
 <a class="skip" href="#main">${esc(t.skip)}</a>
-${header(t, other)}
+${header(t)}
 <main id="main">
 ${hero(t, live)}
 ${presentation(t, media, live)}

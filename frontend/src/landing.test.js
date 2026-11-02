@@ -82,12 +82,32 @@ describe('the landing page', () => {
       expect(html.match(/<h1\b/g)).toHaveLength(1)
     })
 
-    it('names its canonical address and both languages', () => {
+    it('names its canonical address and every language', () => {
       expect(text(/<link rel="canonical" href="([^"]+)"/)).toBe(`${SITE_ORIGIN}${page.path}`)
       for (const other of Object.values(PAGES)) {
         expect(html).toContain(`<link rel="alternate" hreflang="${other.lang}" href="${SITE_ORIGIN}${other.path}">`)
       }
       expect(html).toContain('hreflang="x-default"')
+    })
+
+    // Plan 291: three languages, so the phone's header lists them all in
+    // a menu (the desktop's switch never fitted there), each beside its
+    // flag; the one read is lit and links nowhere.
+    it('offers every language in the header, each beside its flag', () => {
+      const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
+      const menu = header.slice(header.indexOf('data-lmenu'), header.indexOf('</details>'))
+      const others = Object.values(PAGES).filter(p => p.lang !== page.lang)
+      for (const part of [header.slice(header.indexOf('class="seg langs"')), menu]) {
+        expect(part).toMatch(new RegExp(`<a aria-current="page" lang="${page.lang}"><svg class="lang-flag"`))
+        for (const other of others) {
+          expect(part).toContain(`<a href="${other.path}" hreflang="${other.lang}" lang="${other.lang}"><svg class="lang-flag"`)
+        }
+      }
+      expect(menu).toContain('<summary aria-label=')
+      expect(header).not.toContain('top__other')
+      for (const other of others) {
+        expect(html).toContain(`<meta property="og:locale:alternate" content="${other.ogLocale}">`)
+      }
     })
 
     it('describes itself in JSON-LD whose FAQ is the one on the page', () => {

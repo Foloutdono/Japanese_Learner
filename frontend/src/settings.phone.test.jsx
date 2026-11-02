@@ -14,8 +14,8 @@ import './index.css'
 //      off at the screen's edge);
 //   3. the themes stand three across, drawn;
 //   4. the languages stand one per row, each name and its two words on
-//      one line (plan 291: two across left the third alone, and three
-//      across broke the words in two).
+//      one line, its flag before it (plan 291: two across left the third
+//      alone, and three across broke the words in two).
 
 const JOURNEY = {
   goalStartLevel: 'N4', goalLevel: 'N3', goalTargetDate: '2027-03-12', goalSetAt: '2026-09-01T00:00:00+00:00',
@@ -162,6 +162,10 @@ describe('Settings at phone width', () => {
     const page = box(document.querySelector('.lang-picks'))
     picks.forEach((pick, i) => {
       const [whole, name, words] = [pick, pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')].map(box)
+      // Its flag before its name, drawn (never an emoji, which Windows lacks).
+      const flag = pick.querySelector('.lang-pick__name > svg.lang-flag')
+      expect(flag).not.toBeNull()
+      expect(box(flag).height).toBeGreaterThan(8)
       if (i) expect(whole.top).toBeGreaterThan(box(picks[i - 1]).bottom)
       expect(Math.round(whole.width)).toBe(Math.round(page.width))
       // Side by side, and the words in one line: never wrapped under the name.

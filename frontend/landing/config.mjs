@@ -19,12 +19,9 @@ export const PAGES = {
   en: { lang: 'en', path: '/en', out: 'public/landing/en/index.html', ogLocale: 'en_GB', ogImage: '/landing/og-en.png' },
   es: { lang: 'es', path: '/es', out: 'public/landing/es/index.html', ogLocale: 'es_ES', ogImage: '/landing/og-es.png' },
 }
-// Each language by its own name, for the footer's links to the others.
+// Each language by its own name, for the phone header's menu and the
+// footer's links to the others.
 export const LANG_NAMES = { fr: 'Français', en: 'English', es: 'Español' }
-// The one other language the phone's header offers (its full switch is
-// the desktop's): French and English each other's, as before Spanish;
-// the Spanish page's English.
-export const OTHER = { fr: 'en', en: 'fr', es: 'en' }
 export const DEFAULT_LANG = 'fr'
 
 // The app's front door, now that `/` is this page: Se connecter leads

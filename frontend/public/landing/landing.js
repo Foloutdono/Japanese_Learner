@@ -105,6 +105,20 @@ const top = $('[data-top]')
 const topBoard = $('[data-top-board]')
 let ticking = false
 
+// The phone's language menu (plan 291) opens as a <details> on its own;
+// a tap outside it, or Escape, closes it again.
+const langMenu = $('[data-lmenu]')
+if (langMenu) {
+  document.addEventListener('click', event => {
+    if (langMenu.open && !langMenu.contains(event.target)) langMenu.open = false
+  })
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !langMenu.open) return
+    langMenu.open = false
+    langMenu.querySelector('summary').focus()
+  })
+}
+
 function onScroll() {
   if (ticking) return
   ticking = true

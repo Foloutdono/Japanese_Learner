@@ -4,10 +4,10 @@ import es from './locales/es'
 
 export const translations = { fr, en, es }
 
-// `flag` used to carry a country-flag emoji per entry — dropped, not
-// replaced with an icon, because nothing ever read it (Settings › Display in
-// NavControls.jsx only consumes code/label) and a flag icon implies a
-// country, not a language, which isn't a distinction this app makes.
+// A language's flag is drawn from components/ui/flags.js by its code
+// (plan 291, the owner's choice "for clarity"), never as an emoji: Windows
+// has none and prints the letters. A flag stands for a country, not a
+// language; the label beside it is what names the language.
 export const LANGUAGES = [
     { code: 'fr', label: 'Français' },
     { code: 'en', label: 'English' },
