@@ -2266,7 +2266,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # ありません 差し支え, さくらも…さくかな 咲く, このやり方 やる, これで
 # おしまいになります おしまい); and the longest frame on と + 言う owning its
 # pieces (〜といい〜といい's 言う, あの事故からというもの, といったらなかった,
-# ＿＿＿とはいえ, a plot's 、というものだ).
+# ＿＿＿とはいえ, a plot's 、というものだ); and 方 かた by what its sentence
+# says of a person (同意のない方の発話, 拾った方のもの, 上の方にもお越し,
+# 足の悪い方で…お知らせください, 車いすの方).
 LOCAL_REV = 33
 
 

@@ -4295,3 +4295,32 @@ class ToIiToIiTests(unittest.TestCase):
         self.assertTrue(all(not t.get("vocab_match") or "良い" not in t["vocab_match"]["entry"].get("kanji", "")
                             for t in said))
         self.assertEqual(token_of("天気がいいといいですね。", "いい")["lemma"], "良い")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class APersonsKataBySentenceTests(unittest.TestCase):
+    """Plan 296: 方 is かた, a person said politely, where its sentence
+    says so -- before の and what only a person has, before what a person
+    is asked or said up to do, after a description before an honorific
+    request -- and ほう where it compares, goes toward or places a thing."""
+
+    def readings(self, sentence: str) -> list[str]:
+        return [t["reading"] for t in analysis.analyze_local(sentence)["tokens"] if t["surface"] == "方"]
+
+    def test_a_person(self) -> None:
+        for sentence, said in (
+                ("その場合は、同意のない方の発話を、すでにすべて削除いたしました。", ["かた"]),
+                ("その場合は、同意をいただいていない方の声を記録から消し、分析の対象から外します。", ["かた"]),
+                ("三か月たっても落とし主が見つからなければ、財布は拾った方のものになります。", ["かた"]),
+                ("では、お返事の際は、上の方にもお越しいただけますか。", ["かた"]),
+                ("また、お年寄りや足の悪い方で、公園まで来るのが難しい方は、前の日までに町内会にお知らせください。",
+                 ["かた", "かた"]),
+                ("このエレベーターは、車いすの方に限らず、どなたでもご利用いただけます。", ["かた"])):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.readings(sentence), said)
+
+    def test_a_side(self) -> None:
+        for sentence in ("こちらの方が安いです。", "駅の方へ歩いた。", "早く行った方がいい。", "上の方に置いてください。",
+                         "拾った方が早い。", "安い方をください。", "上の方にお置きください。", "大きい方は、あとで食べます。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.readings(sentence), ["ほう"])

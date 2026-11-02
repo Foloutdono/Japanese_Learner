@@ -658,7 +658,16 @@ _BODIES_OF = frozenset({"子ども", "子供", "こども", "彼", "彼女", "�
 _SAID_UP = frozenset({"れる", "られる", "為さる", "なさる", "いらっしゃる", "おっしゃる", "仰る", "下さる",
                       "くださる"})
 # What a notice says of a person's state (plan 272): 妊娠中の方.
-_STATES_OF_PEOPLE = ("車椅子", "妊娠中", "授乳中", "治療中", "通院中", "服用中", "入院中", "在学中", "障害", "障がい")
+_STATES_OF_PEOPLE = ("車椅子", "車いす", "車イス", "妊娠中", "授乳中", "治療中", "通院中", "服用中", "入院中", "在学中", "障害",
+                     "障がい")
+# What only a person has, whose 方 before it and の is かた (plan 296):
+# 同意のない方の発話, 拾った方のもの (the finder's).
+_A_PERSONS = frozenset({"発話", "声", "名前", "お名前", "意見", "ご意見", "話", "お話", "気持ち", "顔", "連絡先", "住所",
+                        "電話番号", "署名", "サイン", "荷物", "お荷物", "同意", "希望", "ご希望", "体調", "家族", "ご家族"})
+# What a person is asked or said up to do, whose 方 is かた (plan 296):
+# 上の方にもお越しいただけますか, 難しい方は…お知らせください.
+_DONE_BY_PEOPLE = ("越し", "いらっしゃ", "おいで", "見え", "来場", "来店", "来社", "会い", "連絡", "知らせ", "申し出",
+                   "申し込", "利用", "参加", "相談")
 # What says the 回 is an inning (plan 272).
 _INNINGS = frozenset({"点", "攻撃", "裏", "打者", "イニング", "延長", "先頭", "投手", "安打", "本塁打", "得点", "先制",
                       "勝ち越し", "同点", "逆転", "打", "ヒット", "ホームラン"})
@@ -693,6 +702,42 @@ def _names_a_person(token: dict) -> bool:
     meaning = _noun_meaning(token.get("surface") or "", _to_hira(token.get("reading") or "")) or ""
     first = re.split(r"[,;]", meaning, maxsplit=1)[0]
     return bool(_PERSON_GLOSS.search(first.lower()))
+
+
+def _asked_of_people(tokens: list[dict], k: int) -> bool:
+    """Whether the clause from tokens[k] on asks a person, or says up of
+    one, what only a person does: お越しいただけますか, ご利用いただけます,
+    お知らせください -- an honorific prefix and a stem of _DONE_BY_PEOPLE,
+    or いらっしゃる."""
+    rest = tokens[k:]
+    for q, t in enumerate(rest):
+        if t["surface"] in ("。", "！", "？"):
+            break
+        surface = t["surface"]
+        prefixed = q > 0 and rest[q - 1]["surface"] in ("お", "ご", "御")
+        if (prefixed and surface.startswith(_DONE_BY_PEOPLE)) or surface.startswith(("いらっしゃ", "おいで")):
+            return True
+    return False
+
+
+def _a_person_by_the_sentence(tokens: list[dict], i: int) -> bool:
+    """Whether 方 at tokens[i] is a person by what its sentence says of it
+    (plan 296; see the rule in correct_readings)."""
+    n = len(tokens)
+    prev, nxt = tokens[i - 1], (tokens[i + 1]["surface"] if i + 1 < n else "")
+    after = tokens[i + 2]["surface"] if i + 2 < n else ""
+    described = prev.get("pos") in ("verb", "auxiliary", "adjective")
+    if nxt == "の" and after in _A_PERSONS:
+        return described or prev["surface"] == "の"
+    if nxt == "の" and after in ("もの", "物") and prev.get("pos") in ("verb", "auxiliary"):
+        return True                    # (財布は拾った方のものになります)
+    if nxt in ("に", "には", "は", "も", "が") and _asked_of_people(tokens, i + 1) \
+            and not any(t.get("lemma") in ("置く", "入れる", "載せる", "乗せる", "並べる") for t in tokens[i + 1:]):
+        return True                    # (上の方にもお越しいただけますか)
+    if described and nxt in ("は", "には", "で", "も") and any(
+            t["surface"] in ("ください", "下さい") for t in tokens[i + 1:]) and _asked_of_people(tokens, i + 1):
+        return True                    # (足の悪い方で、…難しい方は…お知らせください)
+    return False
 
 
 def _compares(tokens: list[dict], i: int) -> bool:
@@ -884,6 +929,18 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         if s == "方" and r == "ほう" and prev(i) == "の" and i >= 2 and tokens[i - 2].get("pos") == "noun" \
                 and _names_a_person(tokens[i - 2]) and not _compares(tokens, i) \
                 and not (nxt(i) in ("を", "に", "へ") and any(t.get("lemma") in _TOWARD for t in tokens[i + 1:])):
+            out[i] = "かた"
+            continue
+        # (plan 296) 方 of a person by what the sentence says of it, past
+        # the rules above: before の and what only a person has (同意の
+        # ない方の発話, 拾った方のもの, the finder's); before what a person
+        # is asked or said up to do (上の方にもお越しいただけますか, 車いすの
+        # 方に限らず…ご利用いただけます); after a description, before an
+        # honorific request to those it describes (足の悪い方で、…難しい方
+        # は…お知らせください). Never where the sentence compares
+        # (拾った方が早い), goes toward it (駅の方へ) or puts a thing there
+        # (上の方に置いてください).
+        if s == "方" and r == "ほう" and i > 0 and not _compares(tokens, i) and _a_person_by_the_sentence(tokens, i):
             out[i] = "かた"
             continue
         # 何しやがる, 何しに来た: なに before する (plan 272).
