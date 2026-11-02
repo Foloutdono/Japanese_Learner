@@ -2929,11 +2929,14 @@ def _by_partner(morphemes, i: int, spelled):
     subject = _subject_of(morphemes, i)
     if subject is not None and subject not in [(p, w) for p, w, _ in pairs]:
         pairs.append((*subject, True))
+    # (a potential's object takes が: ピアノがひけない, plan 296)
+    potential = morphology._a_godan_potential(m)
     for particle, word, far in pairs:
         for kanji, particles, words in _PARTNERS:
             # (嘘ばっかりつく, 専門家さえいる: a focus particle stands where
             # the を or the が would, plan 272)
-            standing = particle in _FOCUS_PARTICLES and any(p in particles for p in ("を", "が", "は", "も"))
+            standing = (particle in _FOCUS_PARTICLES and any(p in particles for p in ("を", "が", "は", "も"))) \
+                or (potential and particle in ("が", "は", "も") and "を" in particles)
             if (particle not in particles and not standing) or (far and kanji not in _SUBJECT_VERBS):
                 continue
             if words is not None and not (words(word) if callable(words) else word in words):

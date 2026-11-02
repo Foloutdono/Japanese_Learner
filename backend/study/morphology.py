@@ -403,6 +403,187 @@ def _jiru_not_zuru(morphemes: list[Morpheme]) -> None:
             m.written, m.written_reading = m.lemma, m.lemma_reading
 
 
+# How soon or how gradually one gets used to a thing, the one word
+# before 慣れる where なれる of becoming would need what it becomes (plan
+# 296): すぐになれる, もうなれた, だんだんなれて.
+_SOON = frozenset({"直ぐ", "すぐ", "じき", "次第", "段々", "だんだん", "徐々", "ずつ", "もう", "早く", "すっかり",
+                   "やっと", "ようやく"})
+# What follows a feeling one cannot help (plan 296): 思えてならない is 思える,
+# "it seems", said of itself -- no "can think".
+_CANNOT_HELP = ("ならない", "ならぬ", "たまらない", "しかたがない", "仕方がない", "しかたない", "仕方ない",
+                "しょうがない", "しようがない")
+# The ichidan verbs UniDic files a kana stem under where the godan verb
+# beside them takes an object (plan 296): ピアノがひけない is 弾く's
+# potential, no 引ける "to close early"; 写真はとれません 撮る's, no 取れる
+# "to come off". Each godan verb with what it is done to.
+_E_STEM_OF = {
+    "引ける": ("引く", {"弾く": frozenset({"ピアノ", "ギター", "バイオリン", "曲", "きょく", "楽器", "がっき", "琴", "こと"}),
+                     "引く": frozenset({"線", "せん", "くじ", "辞書", "じしょ", "風邪", "かぜ"})}),
+    "取れる": ("取る", {"撮る": frozenset({"写真", "しゃしん", "ビデオ", "動画", "どうが", "映像"})}),
+}
+_E_ROW_OF = {"う": "え", "く": "け", "ぐ": "げ", "す": "せ", "つ": "て", "ぬ": "ね", "ぶ": "べ", "む": "め", "る": "れ"}
+
+
+def _a_godan_potential(m: Morpheme) -> bool:
+    """Whether `m` is a godan verb's potential as UniDic files it: the
+    godan lemma, conjugating as 下一段 on its え-row stem (読め of 読む)."""
+    if m.pos != "verb" or not m.ctype.startswith("下一段"):
+        return False
+    said, stem = kata_to_hira(m.lemma_reading), kata_to_hira(m.reading)
+    stem = stem[:-1] if m.cform.startswith(("終止形", "連体形")) and stem.endswith("る") else stem
+    return len(said) >= 2 and stem[:-1] == said[:-1] and _E_ROW_OF.get(said[-1]) == stem[-1:]
+
+
+def _ichidan_spelled(stem: str, lemma: str) -> tuple[str, str] | None:
+    """(kanji, kana) of the deck's or the dictionary's ichidan verb read
+    `stem` + る and written with `lemma`'s first kanji: 近付ける for 近付く's
+    ちかづけ."""
+    import content.vocab_jmdict_data as jmdict_db
+
+    kana = stem + "る"
+    for kanji, said in sorted(_deck_forms()):
+        if said == kana and kanji[:1] == lemma[:1]:
+            return kanji, kana
+    rows = [r for r in jmdict_db.by_kana(kana, limit=8) if r.get("kana") == kana and (r.get("kanji") or "")[:1] == lemma[:1]]
+    return (rows[0]["kanji"], kana) if rows else None
+
+
+def _own_clause(morphemes: list[Morpheme], i: int) -> list[Morpheme]:
+    """What stands before morphemes[i] in its own clause: back to a mark,
+    or a verb, an adjective or an ending of another."""
+    out = []
+    for u in reversed(morphemes[:i]):
+        if (u.pos == "symbol" and u.surface in "、。！？!?「」") or u.pos in ("verb", "adjective", "auxiliary"):
+            break
+        out.append(u)
+    return out[::-1]
+
+
+def _which_verb(morphemes: list[Morpheme]) -> None:
+    """The verb an え-row stem belongs to, read off its clause (plan 296).
+
+    - なれる in kana with nothing it becomes, only how soon, is 慣れる:
+      ポチは…すぐになれると思っていました (先生になれる keeps 成る's).
+    - A godan potential that takes られる, or a を while its godan verb
+      takes none, is the ichidan verb spelled so: 制度を…近づけられる is
+      近付ける, never 近付く's "can approach".
+    - 思えてならない, 思えてしかたがない: 思える, "it seems" of itself.
+    - 気が引ける: 引ける, "to feel awkward", no "can pull".
+    - A kana stem UniDic files under 引ける or 取れる is the godan verb's
+      potential where its clause has a を (neither ichidan verb takes one:
+      線をひけますか) or what the godan verb is done to (ピアノがひけない,
+      写真はとれません) -- 魚がとれる and ボタンがとれた keep 取れる."""
+    for i, m in enumerate(morphemes):
+        if m.pos != "verb":
+            continue
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        prev = morphemes[i - 1] if i > 0 else None
+        if m.lemma == "成る" and m.ctype.startswith("下一段") and _hiragana_only(m.surface):
+            k = i - 2 if prev is not None and prev.surface == "に" and prev.pos == "particle" else i - 1
+            if k >= 0 and (morphemes[k].lemma in _SOON or morphemes[k].surface in _SOON) \
+                    and morphemes[k].pos in ("adverb", "particle", "adjective"):
+                m.lemma, m.lemma_reading, m.written, m.written_reading = "慣れる", "なれる", "慣れる", "なれる"
+            continue
+        if _a_godan_potential(m):
+            stem = kata_to_hira(m.reading)
+            stem = stem[:-1] if m.cform.startswith(("終止形", "連体形")) else stem
+            takes = nxt is not None and nxt.pos == "auxiliary" and nxt.lemma_reading in ("られる", "させる") \
+                and _glued(m, nxt)
+            if not takes and any(u.surface == "を" and u.pos == "particle" for u in _own_clause(morphemes, i)):
+                from study.grammar_detect import _intransitive
+                takes = _intransitive(m.lemma, m.lemma_reading)
+            if takes:
+                own = _ichidan_spelled(stem, m.lemma)
+                if own is not None:
+                    m.lemma, m.lemma_reading = own
+                    m.written, m.written_reading = own
+                    continue
+            if m.lemma == "思う" and nxt is not None and nxt.surface == "て" \
+                    and "".join(u.surface for u in morphemes[i + 2:i + 6]).startswith(_CANNOT_HELP):
+                m.lemma, m.lemma_reading, m.written, m.written_reading = "思える", "おもえる", "思える", "おもえる"
+                continue
+            if m.lemma == "引く" and prev is not None and prev.surface == "が" and i >= 2 and morphemes[i - 2].surface == "気":
+                m.lemma, m.lemma_reading, m.written, m.written_reading = "引ける", "ひける", "引ける", "ひける"
+            continue
+        if m.lemma in _E_STEM_OF and _hiragana_only(m.surface) and m.ctype.startswith("下一段"):
+            # (in a form a potential takes: before ない, ます, そう, or
+            # ending its clause or a noun's)
+            if not (m.cform.startswith(("終止形", "連体形")) or (
+                    nxt is not None and nxt.lemma in ("ない", "ず", "ぬ", "ます", "そう"))):
+                continue
+            godan, objects = _E_STEM_OF[m.lemma]
+            clause = _own_clause(morphemes, i)
+            named = {verb for verb, words in objects.items()
+                     for q, u in enumerate(clause[:-1]) if u.surface in words
+                     and clause[q + 1].pos == "particle" and clause[q + 1].surface in ("を", "が", "は", "も")}
+            if len(named) > 1:
+                continue
+            if named or any(u.surface == "を" and u.pos == "particle" for u in clause):
+                verb = next(iter(named), godan)
+                said = kata_to_hira(m.reading)
+                said = said[:-2] if m.cform.startswith(("終止形", "連体形")) else said[:-1]
+                m.lemma, m.lemma_reading = verb, said + {"け": "く", "れ": "る"}[kata_to_hira(m.reading)[len(said)]]
+                m.written, m.written_reading = verb, m.lemma_reading
+
+
+def _someone(m: Morpheme) -> bool:
+    """Whether `m` names a person or an animal -- someone made to do a
+    thing; a vehicle is moved, and is no one (この車を動かせない)."""
+    if m.proper or m.pos == "pronoun" or m.surface in ("さん", "くん", "ちゃん", "様", "さま", "たち", "達"):
+        return True
+    meaning = _noun_meaning(m.surface, kata_to_hira(m.reading))
+    return bool(_ALIVE.search(meaning)) and not _VEHICLES.search(meaning.split(";")[0])
+
+
+_VEHICLES = re.compile(r"\b(train|bus|car|ship|boat|plane|aircraft|vehicle|automobile)\b")
+
+
+def _the_transitive_can(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """A godan verb's 未然形 + せ(る), where its す verb is the deck's and
+    what is acted on is a thing, as that す verb's potential (plan 296):
+    食費は減らせっこない is 減らす's "can't reduce", never 減る + the
+    causative -- a thing made to decrease is 減らした, and the causative of
+    an intransitive verb is said of someone made to do it (子どもを泣かせる
+    keeps it)."""
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        if (m.pos == "verb" and m.ctype.startswith("五段") and m.cform.startswith("未然形") and nxt is not None
+                and nxt.pos == "auxiliary" and nxt.lemma == "せる" and _glued(m, nxt) and m.lemma):
+            stem = kata_to_hira(m.reading)
+            forms = sorted(_deck_forms())
+            own = next(((k, said) for k, said in forms if said == stem + "す" and k[:1] == m.lemma[:1]
+                        and k != m.lemma), None)
+            # (宿題を済ませた: the deck's 済ませる, "to finish", a verb of
+            # its own -- neither 済む's causative nor 済ます's potential)
+            ichidan = next(((k, said) for k, said in forms if said == stem + "せる" and k[:1] == m.lemma[:1]), None)
+            clause = _own_clause(morphemes, i)
+            someone = any(u.surface in ("を", "に") and u.pos == "particle" and q > 0 and _someone(clause[q - 1])
+                          for q, u in enumerate(clause))
+            after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+            # (...where the sentence says "can't": 動かせない, 減らせっこない --
+            # 頭を悩ませている, 胸を膨らませていた are the す verb said as
+            # 下一段, "rack", "swell", and stay as read)
+            cannot = after is not None and (after.lemma in ("ない", "ず", "ぬ") or after.surface.startswith("っこ")
+                                            or (after.lemma == "ます" and i + 3 < len(morphemes)
+                                                and morphemes[i + 3].lemma in ("ず", "ぬ")))
+            if (ichidan is not None or (own is not None and cannot)) and not someone:
+                lemma, said = ichidan or own
+                out_m.append(replace(m, surface=m.surface + nxt.surface, end=nxt.end, lemma=lemma, lemma_reading=said,
+                                     reading=stem + kata_to_hira(nxt.reading), kana=m.kana + nxt.kana,
+                                     ctype="下一段-サ行", cform=nxt.cform, auxiliary_use=False, written=lemma,
+                                     written_reading=said))
+                out_t.append(("動詞", "一般", "*"))
+                i += 2
+                continue
+        out_m.append(m)
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
 def _whether_or_not(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """〜ようが〜まいが, one verb said twice (plan 296): 伏せようが伏せ
     まいが, 参加しようがしまいが, 食べようが食べまいが. UniDic reads the
@@ -1042,7 +1223,10 @@ def _enters(morphemes, i: int, tags=None) -> bool:
     if _NOT_A_POTENTIAL.match("".join(u.surface for u in morphemes[i + 1:i + 6])):
         return False
     if m.cform.startswith(("終止形", "連体形")):
-        if nxt is not None and (nxt.pos == "verb" or nxt.lemma in ("方", "過ぎる", "すぎる")):
+        if nxt is not None and (nxt.pos == "verb" or nxt.lemma in ("過ぎる", "すぎる") or (
+                # (入れる方がいい compares putting in; 時間に入れる方を探して
+                # is who can come in, plan 296)
+                nxt.lemma == "方" and i + 2 < len(morphemes) and morphemes[i + 2].surface == "が")):
             return False
     elif m.cform.startswith(("未然形", "連用形")):
         if nxt is None or nxt.lemma not in _CAN_ENDINGS or nxt.cform.startswith(("意志", "命令")):
@@ -1055,6 +1239,8 @@ def _enters(morphemes, i: int, tags=None) -> bool:
         clause.append(morphemes[k])
         k -= 1
     phrase_at = k + 1
+    if k >= 1 and morphemes[k].surface == "、" and morphemes[k - 1].surface == "を" and morphemes[k - 1].pos == "particle":
+        return False                    # (言葉を、…一つは入れること: what is put in, past its comma, plan 296)
     # Its own clause: back to the verb, adjective or ending before it.
     own = []
     for u in clause:
@@ -1063,9 +1249,15 @@ def _enters(morphemes, i: int, tags=None) -> bool:
         own.append(u)
     if any(u.surface == "を" and u.pos == "particle" for u in own):
         return False
-    if any(u.surface in ("に", "へ") and u.pos == "particle" and q + 1 < len(own)
-           and (own[q + 1].pos == "noun" or (own[q + 1].pos == "pronoun" and not _a_person(own[q + 1])))
-           and not _a_time_word(own[q + 1], tags[i - q - 2]) for q, u in enumerate(own)):
+    # (お風呂に入れますか: a place one goes into, no を, plan 296)
+    gone_into = any(u.surface == "に" and u.pos == "particle" and q + 1 < len(own) and own[q + 1].lemma in _ENTERED
+                    and own[q + 1].lemma not in ("中", "なか", "車", "電車", "バス") for q, u in enumerate(own))
+    if not gone_into and any(
+            u.surface in ("に", "へ") and u.pos == "particle" and q + 1 < len(own)
+            and (own[q + 1].pos == "noun" or (own[q + 1].pos == "pronoun" and not _a_person(own[q + 1])))
+            # (代わりに, "instead", says where nothing goes, plan 296)
+            and own[q + 1].lemma not in ("代わり", "代り", "かわり")
+            and not _a_time_word(own[q + 1], tags[i - q - 2]) for q, u in enumerate(own)):
         if not (len(clause) >= 2 and clause[0].surface == "は" and clause[1].surface == "に"):
             return False                # (コーヒーに砂糖、誰が入れたの？: what it goes in, plan 272)
     # (a thing said as the topic is what goes in, 砂糖は毎日入れます -- where
@@ -1086,7 +1278,11 @@ def _enters(morphemes, i: int, tags=None) -> bool:
     without = any(phrase[q].surface in ("ない", "ず") and q + 1 < len(phrase) and phrase[q + 1].surface in ("と", "に")
                   for q in range(len(phrase)))
     when = any(_a_time_word(u, tags[phrase_at + q]) for q, u in enumerate(phrase)) and not thing_topic
-    return anyone or a_person or who or without or when \
+    # (日曜日に入る予定だった田中さんが…。代わりに入れない？: the text has
+    # said 入る already, of the same shift, plan 296)
+    said_before = not thing_topic and any(u.lemma == "入る" and u.lemma_reading == "はいる" and u.pos == "verb"
+                                          for u in morphemes[:phrase_at])
+    return anyone or a_person or who or without or when or (gone_into and not thing_topic) or said_before \
         or (len(clause) >= 2 and clause[0].surface == "は" and clause[1].surface == "に") \
         or (len(clause) >= 2 and clause[0].surface == "から" and clause[1].surface in ("一日", "日"))
 
@@ -5841,6 +6037,8 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _all_through(morphemes, tags)
         morphemes, tags = _times_or_floor(morphemes, tags)
         _jiru_not_zuru(morphemes)
+        _which_verb(morphemes)
+        morphemes, tags = _the_transitive_can(morphemes, tags)
         _radical_hen(morphemes)
         _soko_de_aru(morphemes)
         morphemes, tags = _apart_inside_a_clause(morphemes, tags)

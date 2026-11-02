@@ -1753,8 +1753,12 @@ class ChatAndStreamWordTests(unittest.TestCase):
         token = token_of("Yeah　鳴らせ　鳴らせ　そのギターを", "鳴らせ")
         self.assertEqual(token["vocab_match"]["entry"]["kanji"], "鳴らす")
         self.assertIn("命令形 〜ろ／〜え", {g["pattern"] for g in token["grammar"]})
-        # Before an ending it is the causative still: 鳴らせない.
-        self.assertNotIn("鳴らせ", matches("ここではベルを鳴らせない。"))
+        # Before an ending it is no imperative: ベルを鳴らせない is 鳴らす's
+        # potential, "can't ring" -- a bell made to ring is 鳴らす itself,
+        # never 鳴る's causative (plan 296).
+        token = token_of("ここではベルを鳴らせない。", "鳴らせ")
+        self.assertEqual(token["vocab_match"]["entry"]["kanji"], "鳴らす")
+        self.assertEqual({g["pattern"] for g in token["grammar"]}, {"可能形 〜(ら)れる"})
 
     def test_a_name_a_speaker_gives(self) -> None:
         token = token_of("どうもーゲーム実況のカイトです", "カイト")
@@ -4124,3 +4128,65 @@ class NamesAndCommonWordsTests(unittest.TestCase):
         self.assertEqual(token_of(sentence, "ミナモ")["pos"], "noun")
         # (one letter alone stays the letter it is)
         self.assertEqual(cut("「ア」と書いてください。")[:3], ["「", "ア", "」"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WhichVerbAnEStemIsTests(unittest.TestCase):
+    """Plan 296: the verb an え-row stem belongs to, read off its clause:
+    入る's potential where a person goes in, 慣れる where nothing is
+    become, the ichidan verb a られる or a を shows, 思える and 気が引ける
+    of themselves, a kana stem's godan verb by its object, and a す verb's
+    potential where a thing is acted on."""
+
+    def verb(self, sentence: str, surface: str) -> tuple[str | None, list[str]]:
+        t = token_of(sentence, surface)
+        return (t.get("vocab_match") or {}).get("raw_id"), [g["pattern"] for g in t.get("grammar") or []]
+
+    def test_the_verb_its_clause_names(self) -> None:
+        for sentence, surface, card, potential in (
+                ("わかりました。着く前に、お風呂に入れますか。", "入れ", "vocab_N5_入る_はいる", True),
+                ("実は、日曜日に入る予定だった田中さんが、急に来られなくなっちゃって。代わりに入れない？", "入れ",
+                 "vocab_N5_入る_はいる", True),
+                ("では早速ですが、うちは今、週末と閉店までの時間に入れる方を探しているんです。", "入れる",
+                 "vocab_N5_入る_はいる", True),
+                ("ポチは私によく会っているので、すぐになれると思っていました。", "なれる", "vocab_N4_慣れる_なれる", False),
+                ("だんだんなれてきた。", "なれ", "vocab_N4_慣れる_なれる", False),
+                ("制度を本来の目的に近づけられるかどうかは、これからのルール作り次第だ。", "近づけ",
+                 "vocab_N2_近付ける_ちかづける", False),
+                ("もうこれ以上、食費は減らせっこない", "減らせ", "vocab_N3_減らす_へらす", True),
+                ("この車を動かせない。", "動かせ", "vocab_N3_動かす_うごかす", True),
+                ("宿題を早く済ませた。", "済ませ", "vocab_N3_済ませる_すませる", False),
+                ("わたしはピアノがひけない。", "ひけ", "vocab_N5_弾く_ひく", True),
+                ("線をひけますか。", "ひけ", "vocab_N5_引く_ひく", True),
+                ("てんじのへやでは、写真はとれません。", "とれ", "vocab_N5_撮る_とる", True)):
+            with self.subTest(sentence=sentence):
+                card_now, points = self.verb(sentence, surface)
+                self.assertEqual(card_now, card)
+                self.assertEqual("可能形 〜(ら)れる" in points, potential)
+        # (a feeling one cannot help, an idiom: no "can")
+        self.assertEqual(token_of("自分はこの仕事に向いていないのではないかと思えてならないのです。", "思え")["lemma"], "思える")
+        self.assertNotIn("可能形 〜(ら)れる",
+                         self.verb("自分はこの仕事に向いていないのではないかと思えてならないのです。", "思え")[1])
+        self.assertEqual(token_of("今さら断るのはどうにも気が引ける。", "気が引ける")["lemma"], "気が引ける")
+
+    def test_the_lookalikes_keep_theirs(self) -> None:
+        for sentence, surface, card, potential in (
+                ("お風呂にお湯を入れる。", "入れる", "vocab_N5_入れる_いれる", False),
+                ("荷物は車に入れますか。", "入れ", "vocab_N5_入れる_いれる", False),
+                ("砂糖は入れる方がいい。", "入れる", "vocab_N5_入れる_いれる", False),
+                ("きっと医者になれる。", "なれる", "vocab_N5__なる", True),
+                ("もう大人になれた。", "なれ", "vocab_N5__なる", False),
+                ("目標に近づける。", "近づける", "vocab_N3_近付く_ちかづく", True),
+                ("川で魚がとれる。", "とれる", "vocab_N3_取れる_とれる", False),
+                ("ボタンがとれた。", "とれ", "vocab_N3_取れる_とれる", False),
+                ("体重が減った。", "減っ", "vocab_N3_減る_へる", False),
+                ("日本語が話せる。", "話せる", "vocab_N5_話す_はなす", True)):
+            with self.subTest(sentence=sentence):
+                card_now, points = self.verb(sentence, surface)
+                self.assertEqual(card_now, card)
+                self.assertEqual("可能形 〜(ら)れる" in points, potential)
+        # (someone made to do it keeps the causative)
+        for sentence in ("子どもを泣かせてしまった。", "母を待たせた。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("使役形 〜させる", [g["pattern"] for t in analysis.analyze_local(sentence)["tokens"]
+                                                for g in t.get("grammar") or []])

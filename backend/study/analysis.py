@@ -2253,7 +2253,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # and a name where the sentence names someone (森様、 a letter's addressee,
 # アナより its signature, ゆうたとけんた two names), a common word where it
 # says one (まえのせき 前 + 席, 高いへい 塀, はしのせき 端), タイから来て
-# Thailand, and 「ミナモ」 one word, not three marks.
+# Thailand, and 「ミナモ」 one word, not three marks; and the verb an え-row
+# stem belongs to (お風呂に入れますか はいれる, すぐになれる 慣れる, 制度を
+# 近づけられる 近付ける, 減らせっこない 減らす's potential, 済ませた 済ませる,
+# ピアノがひけない 弾く, 写真はとれません 撮る, 思えてならない, 気が引ける).
 LOCAL_REV = 33
 
 
