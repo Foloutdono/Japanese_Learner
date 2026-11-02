@@ -4282,3 +4282,16 @@ class AVerbsStemOrANounTests(unittest.TestCase):
         self.assertEqual(token_of("これでおしまいになります。", "おしまい")["vocab_match"]["entry"]["meaning"][:7], "the end")
         self.assertNotIn("お〜になる／お〜する", {g["pattern"] for g in analysis.analyze_local("これでおしまいになります。")["grammar"]})
         self.assertEqual(token_of("彼は食べもしないで帰った。", "食べ")["pos"], "verb")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ToIiToIiTests(unittest.TestCase):
+    """Plan 296: both いい of 〜といい〜といい are 言う, no 良い."""
+
+    def test_both_are_said(self) -> None:
+        tokens = analysis.analyze_local("重さといい手ざわりといい、これは本物ではなさそうだ。")["tokens"]
+        said = [t for t in tokens if t["surface"] == "いい"]
+        self.assertEqual([t["lemma"] for t in said], ["言う", "言う"])
+        self.assertTrue(all(not t.get("vocab_match") or "良い" not in t["vocab_match"]["entry"].get("kanji", "")
+                            for t in said))
+        self.assertEqual(token_of("天気がいいといいですね。", "いい")["lemma"], "良い")

@@ -3286,3 +3286,35 @@ class APiecesOwnerTests(unittest.TestCase):
         self.assertIn("〜も〜も", found_in("父も母も元気です。"))
         self.assertIn("〜も〜ば〜も", found_in(
             "教えれば言葉を残せると考える人もいれば、日常で話されなくなった言葉を教室で守っても意味がないと考える人もいる。"))
+
+
+class TheLongestToIuFrameTests(unittest.TestCase):
+    """Plan 296: the longest frame on と + 言う owns its pieces --
+    〜といい〜といい no 〜という, Nからというもの 〜てからというもの, the
+    たら of といったらない and the いえ of とはいえ no 〜たら and no order --
+    and a story's plot after a comma is no 〜というものだ."""
+
+    def test_the_frame_owns_its_pieces(self) -> None:
+        for sentence in ("重さといい手ざわりといい、これは本物ではなさそうだ。",
+                         "投票所の場所といい、期日前投票の手続きといい、若者の暮らしに合っているとは言いがたい。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertIn("〜といい〜といい", found)
+                self.assertNotIn("〜という", found)
+        found = found_in("あの事故からというもの、彼は車に乗らなくなった。")
+        self.assertEqual(found.get("〜てからというもの"), "からというもの")
+        self.assertFalse({"〜という", "から〜まで"} & set(found))
+        self.assertNotIn("〜たら", found_in("あの日の＿＿＿といったらなかった。"))
+        self.assertNotIn("命令形 〜ろ／〜え", found_in("三年間日本語を＿＿＿とはいえ、まだ新聞はうまく読めない。"))
+        found = found_in("幼いころから町きっての神童ともてはやされ、苦労もせずして偉業を成し遂げた、というものだ。")
+        self.assertFalse({"〜というものだ", "〜ものだ"} & set(found))
+
+    def test_the_lookalikes_keep_theirs(self) -> None:
+        for sentence, point in (("田中という人が来ました。", "〜という"), ("それが友情というものだ。", "〜というものだ"),
+                                ("一日で覚えろというのは、むりというものだ。", "〜というものだ"),
+                                ("雨だったら、行かない。", "〜たら"), ("早く言え！", "命令形 〜ろ／〜え"),
+                                ("日本に来てからというもの、毎日が楽しい。", "〜てからというもの"),
+                                ("その美しさといったらない。", "〜といったらない"), ("春とはいえ、まだ寒い。", "〜とはいえ"),
+                                ("昔はよくここで遊んだものだ。", "〜ものだ"), ("東京から大阪までは遠い。", "から〜まで")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))

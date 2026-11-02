@@ -2264,7 +2264,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # はじめてでも 〜でも's "even"; and a verb's stem or a noun by what follows
 # (おのりになる 乗る, 寄せ…返しつ 返す, ひっこしの日 引越し, さしつかえ
 # ありません 差し支え, さくらも…さくかな 咲く, このやり方 やる, これで
-# おしまいになります おしまい).
+# おしまいになります おしまい); and the longest frame on と + 言う owning its
+# pieces (〜といい〜といい's 言う, あの事故からというもの, といったらなかった,
+# ＿＿＿とはいえ, a plot's 、というものだ).
 LOCAL_REV = 33
 
 

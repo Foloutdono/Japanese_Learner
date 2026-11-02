@@ -2518,6 +2518,8 @@ def _imperative_spans(tokens):
             continue
         if i + 1 < len(tokens) and tokens[i + 1].pos in ("auxiliary", "verb"):
             continue
+        if t.lemma == "言う" and i >= 2 and tokens[i - 1].surface == "は" and tokens[i - 2].surface == "と":
+            continue                   # (＿＿＿とはいえ、: 〜とはいえ's いえ, "even so", no order, plan 296)
         out.append((t.start, t.end))
     return out
 
@@ -3453,6 +3455,19 @@ def _suggest_spans(tokens):
 _SPANS_OF_TIME = frozenset({"年", "月", "か月", "カ月", "ヶ月", "ヵ月", "週間", "日", "時間", "分", "年間", "日間"})
 # (...and a span spelled whole, 半年, 一晩, 数日: by its last letter)
 _SPAN_ENDS = ("年", "月", "日", "週", "間", "分", "秒", "晩", "夜")
+
+
+def _since_a_noun_spans(tokens):
+    """〜てからというもの after a noun and its から (plan 296): あの事故から
+    というもの, "ever since that accident", the point's own example --
+    から + と + いう + もの after a noun, as after a て form."""
+    out = []
+    for i, t in enumerate(tokens[:-3]):
+        if t.surface == "から" and t.pos == "particle" and i > 0 and tokens[i - 1].pos in ("noun", "pronoun", "suffix") \
+                and tokens[i + 1].surface == "と" and tokens[i + 2].lemma == "言う" \
+                and tokens[i + 2].cform.startswith(("連体形", "終止形")) and tokens[i + 3].surface in ("もの", "物"):
+            out.append((t.start, tokens[i + 3].end))
+    return out
 
 
 def _after_so_long_spans(tokens):
@@ -6828,7 +6843,13 @@ def _pattern_refusals():
         "〜らしい（典型）": _rashii_typical_refused,
         "〜らしい": lambda t, s, e, g: (k := _tok_ending(t, e)) is not None and (
             t[k].pos == "suffix" or t[k].surface.startswith("らしさ")),
-        "〜たら": lambda t, s, e, g: (n := _next_word(t, e)) is None or (n.pos == "symbol" and n.surface in _UTTERANCE_ENDS),
+        # (…偉業を成し遂げた、というものだ: what a story says, set off by its
+        # comma -- "it is one that goes", no verdict on what a thing is, plan 296)
+        "〜というものだ": lambda t, s, e, g: any(x.end == s and x.pos == "symbol" and x.surface in _COMMAS for x in t),
+        "〜たら": lambda t, s, e, g: (n := _next_word(t, e)) is None or (n.pos == "symbol" and n.surface in _UTTERANCE_ENDS)
+            # (あの日の＿＿＿といったらなかった: 〜といったらない's たら, plan 296)
+            or (n.lemma in ("無い", "ない") or n.surface.startswith("ありゃ")) and (p := _prev_word(t, s)) is not None
+            and p.lemma == "言う" and (q := _prev_word(t, p.start)) is not None and q.surface == "と",
         "〜と": lambda t, s, e, g: _toka_to_refused(t, s, e, g) or _a_hakata_to(t, s),
         # なくては, なくても and なくていい are "must" and "need not";
         # なくちゃ is 〜なきゃ／〜なくちゃ's
@@ -6895,7 +6916,11 @@ def _pattern_refusals():
         "〜がする": _ga_suru_refused,
         "〜ことがある": _kotogaaru_refused,
         "〜ことになる": _after_copula_na,
-        "〜ものだ": _after_copula_na,
+        # (…成し遂げた、というものだ: the もの という names, "one that goes",
+        # no "should" nor "used to", plan 296)
+        "〜ものだ": lambda t, s, e, g: _after_copula_na(t, s, e, g) or (
+            (p := _prev_word(t, s)) is not None and p.lemma == "言う" and (q := _prev_word(t, p.start)) is not None
+            and q.surface == "と"),
         "〜じゃないか": lambda t, s, e, g: _followed_by(t, e, "って", "と"),
         # (and never after a noun: また明日な, "see you tomorrow", plan 272)
         "〜な（禁止）": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
@@ -7320,15 +7345,17 @@ def adverbial_ni(tokens, i: int) -> bool:
 # お金さえあれば is 〜さえ〜ば's "as long as", not 〜さえ's "even"; the
 # まい of 来ようが来まいが 〜ようが〜まいが's; one なり of 休むなり散歩する
 # なり 〜なり〜なり's, not 〜なり's "as soon as".
-_PART_OF = {"〜さえ": "〜さえ〜ば", "〜まい": "〜ようが〜まいが", "〜なり": "〜なり〜なり",
+_PART_OF = {"〜さえ": ("〜さえ〜ば",), "〜まい": ("〜ようが〜まいが",), "〜なり": ("〜なり〜なり",),
             # (たとえ日曜日でも: たとえ〜ても's own example, plan 296)
-            "〜でも": "たとえ〜ても"}
+            "〜でも": ("たとえ〜ても",),
+            # (重さといい手ざわりといい: 〜といい〜といい's, no 〜という each, plan 296)
+            "〜という": ("〜といい〜といい",)}
 
 
 def _parts_owned(found):
     owned = {(h[0], a, b) for h in found if not h[5] for a, b in h[6]}
     return [h for h in found
-            if not (h[5] and h[0] in _PART_OF and (_PART_OF[h[0]], h[2], h[3]) in owned)]
+            if not (h[5] and any((whole, h[2], h[3]) in owned for whole in _PART_OF.get(h[0], ())))]
 
 
 _REFUSALS.update({p: r for p, r in _pattern_refusals().items() if p not in _REFUSALS})
@@ -8609,6 +8636,7 @@ def _too_much_spans(tokens):
 
 _EXTRA_RULES = (
     ("〜と", _conditional_to_spans),
+    ("〜てからというもの", _since_a_noun_spans),
     ("何か／誰か／どこか", _indefinite_spans),
     ("〜てばかりいる", _te_bakari_spans),
     ("から〜にかけて", _until_spans),
@@ -8732,6 +8760,9 @@ _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans, _with
                            _na_adjective_sa_spans, _after_doing_spans, _so_that_spans, _so_much_spans,
                            _should_spans, _honorific_nare_spans,
                            _te_wa_iru_spans, _suggest_spans, _after_so_long_spans, _take_care_spans,
+                           # (plan 296: the lessons write it after て; one
+                           # example after a noun)
+                           _since_a_noun_spans,
                            _sound_toiu_spans})
 
 

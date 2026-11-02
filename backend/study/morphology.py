@@ -1920,6 +1920,22 @@ def _verb_stems(morphemes: list[Morpheme], tags: list[tuple]) -> None:
                 tags[i] = ("動詞", "一般", "*")
 
 
+def _toii_toii(morphemes: list[Morpheme], tags: list[tuple]) -> None:
+    """Two nouns each followed by と + いい are 〜といい〜といい, and both
+    いい are 言う's 連用形 (plan 296): 重さといい手ざわりといい is "be it
+    the weight or the feel", no 良い, "good"."""
+    pairs = [i for i, m in enumerate(morphemes)
+             if m.surface in ("いい", "言い") and i >= 2 and morphemes[i - 1].surface == "と"
+             and morphemes[i - 1].pos == "particle" and morphemes[i - 2].pos in ("noun", "suffix", "pronoun")]
+    if len(pairs) < 2:
+        return
+    for i in pairs:
+        m = morphemes[i]
+        m.pos, m.lemma, m.lemma_reading, m.ctype, m.cform = "verb", "言う", "いう", "五段-ワア行", "連用形-一般"
+        m.written, m.written_reading, m.auxiliary_use = "言う", "いう", False
+        tags[i] = ("動詞", "一般", "*")
+
+
 def _first_time(morphemes: list[Morpheme]) -> None:
     """初めて before でも is a noun, "the first time" (plan 296): はじめて
     でもだいじょうぶ is "even a first time is fine", 〜でも's "even" as in
@@ -6210,6 +6226,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _ni_of_a_noun(morphemes, tags)
         _first_time(morphemes)
         _verb_stems(morphemes, tags)
+        _toii_toii(morphemes, tags)
         _copula_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)
