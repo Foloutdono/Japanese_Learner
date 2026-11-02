@@ -13524,6 +13524,469 @@
     "en": "This town has changed a great deal since the old days, hasn't it?",
     "fr": "Cette ville aussi a beaucoup changé depuis le temps, n'est-ce pas ?"
    }
+  ],
+  "行く::ゆく": [
+   {
+    "jp": "父は、いつもわが道を行く人だ。",
+    "en": "My father is someone who always goes his own way.",
+    "fr": "Mon père est quelqu'un qui suit toujours son propre chemin."
+   },
+   {
+    "jp": "山の中、道なき道を行く。",
+    "en": "Through the mountains, we make our way where there is no path.",
+    "fr": "Dans la montagne, nous avançons là où il n'y a pas de chemin."
+   }
+  ],
+  "舟::ふね": [
+   {
+    "jp": "おじいさんは、毎朝小さな舟で魚をとりに行く。",
+    "en": "Every morning, the old man goes out fishing in a small boat.",
+    "fr": "Chaque matin, le vieil homme part pêcher dans une petite barque."
+   },
+   {
+    "jp": "川で、友だちと二人で舟をこいだ。",
+    "en": "My friend and I rowed a boat together on the river.",
+    "fr": "Mon ami et moi avons ramé à deux dans une barque sur la rivière."
+   }
+  ],
+  "角::すみ": [
+   {
+    "jp": "能の舞台で、シテが角に出て、正面を向いた。",
+    "en": "On the noh stage, the lead actor stepped out to the corner at the front of the stage and turned to face the audience.",
+    "fr": "Sur la scène de nô, l'acteur principal s'avança jusqu'au coin avant de la scène et se tourna face à la salle."
+   }
+  ],
+  "円::まる": [
+   {
+    "jp": "正しいと思えば円を、ちがうと思えばばつをつけてください。",
+    "en": "Mark a circle if you think it is right, and a cross if you think it is wrong.",
+    "fr": "Mettez un rond si vous pensez que c'est juste, et une croix si vous pensez que c'est faux."
+   },
+   {
+    "jp": "テストが返ってきたが、円よりばつのほうが多かった。",
+    "en": "I got my test back, and it had more crosses than circles.",
+    "fr": "On m'a rendu mon contrôle, et il y avait plus de croix que de ronds."
+   }
+  ],
+  "務め::つとめ": [
+   {
+    "jp": "子どもを守るのは、親の務めだ。",
+    "en": "Protecting one's children is a parent's duty.",
+    "fr": "Protéger ses enfants est le devoir des parents."
+   },
+   {
+    "jp": "彼は、最後まで自分の務めを果たした。",
+    "en": "He fulfilled his duty to the very end.",
+    "fr": "Il a accompli son devoir jusqu'au bout."
+   }
+  ],
+  "梅雨::ばいう": [
+   {
+    "jp": "梅雨期の終わりには、大雨になることが多い。",
+    "en": "Toward the end of the rainy season, there is often heavy rain.",
+    "fr": "À la fin de la saison des pluies, il y a souvent de fortes pluies."
+   },
+   {
+    "jp": "この地方の梅雨期は、六月の中ごろから七月までだ。",
+    "en": "The rainy season in this region lasts from mid-June to July.",
+    "fr": "Dans cette région, la saison des pluies va de la mi-juin à juillet."
+   }
+  ],
+  "河::かわ": [
+   {
+    "jp": "大きな河が、ゆっくりと海へ流れていく。",
+    "en": "A great river flows slowly toward the sea.",
+    "fr": "Un grand fleuve s'écoule lentement vers la mer."
+   },
+   {
+    "jp": "その河を船でわたると、となりの国に入る。",
+    "en": "Cross that river by boat and you enter the neighbouring country.",
+    "fr": "Quand on traverse ce fleuve en bateau, on entre dans le pays voisin."
+   }
+  ],
+  "言う::ゆう": [
+   {
+    "jp": "「何回言うたらわかるん？」と、母がおこった。",
+    "en": "\"How many times do I have to tell you?\" my mother snapped (in Kansai dialect).",
+    "fr": "« Combien de fois faut-il que je te le dise ? » s'est fâchée ma mère (en dialecte du Kansai)."
+   },
+   {
+    "jp": "「なんて言うか、ちょっと変わった人だね。」",
+    "en": "\"How should I put it... he's a bit of an odd one, isn't he?\"",
+    "fr": "« Comment dire... c'est quelqu'un d'un peu particulier, hein ? »"
+   }
+  ],
+  "魚::うお": [
+   {
+    "jp": "彼は新しい仕事で、水を得た魚のように働いている。",
+    "en": "In his new job he is working like a fish in water.",
+    "fr": "Dans son nouveau travail, il est comme un poisson dans l'eau."
+   },
+   {
+    "jp": "水きよければ魚すまずと言うように、きびしすぎるのもよくない。",
+    "en": "As the saying goes, no fish live in water that is too clear: being too strict is no good either.",
+    "fr": "Comme dit le proverbe, aucun poisson ne vit dans une eau trop pure : être trop sévère n'est pas bon non plus."
+   }
+  ],
+  "素::もと": [
+   {
+    "jp": "このスープの素をおゆに入れるだけで、すぐ食べられる。",
+    "en": "Just put this soup base in hot water and it's ready to eat.",
+    "fr": "Il suffit de mettre cette base de soupe dans de l'eau chaude pour pouvoir manger tout de suite."
+   },
+   {
+    "jp": "からあげの素で、とり肉に味をつけた。",
+    "en": "I seasoned the chicken with a karaage mix.",
+    "fr": "J'ai assaisonné le poulet avec un mélange tout prêt pour karaage."
+   }
+  ],
+  "代える::かえる": [
+   {
+    "jp": "命に代えても、この子を守ってみせる。",
+    "en": "I will protect this child, even if it costs me my life.",
+    "fr": "Je protégerai cet enfant, même au prix de ma vie."
+   },
+   {
+    "jp": "かんとくは、つかれた選手をほかの選手に代えた。",
+    "en": "The coach replaced the tired player with another one.",
+    "fr": "L'entraîneur a remplacé le joueur fatigué par un autre."
+   }
+  ],
+  "堅い::かたい": [
+   {
+    "jp": "彼女は口が堅いから、ひみつを話しても大丈夫だ。",
+    "en": "She can keep a secret, so it's safe to tell her.",
+    "fr": "Elle sait tenir sa langue, on peut lui confier un secret sans crainte."
+   },
+   {
+    "jp": "堅い話はこのくらいにして、みんなで食べましょう。",
+    "en": "That's enough serious talk; let's all eat.",
+    "fr": "Assez parlé de choses sérieuses, mangeons tous ensemble."
+   }
+  ],
+  "具える::そなえる": [
+   {
+    "jp": "彼女は、リーダーに必要な力をすべて具えている。",
+    "en": "She possesses every quality a leader needs.",
+    "fr": "Elle possède toutes les qualités nécessaires à un chef."
+   },
+   {
+    "jp": "この作品は、美しさと強さの両方を具えている。",
+    "en": "This work has both beauty and strength.",
+    "fr": "Cette œuvre est dotée à la fois de beauté et de force."
+   }
+  ],
+  "個所::かしょ": [
+   {
+    "jp": "まちがっている個所に、赤い線を引いてください。",
+    "en": "Please draw a red line under the parts that are wrong.",
+    "fr": "Tracez un trait rouge sous les passages qui sont faux, s'il vous plaît."
+   },
+   {
+    "jp": "大雨で、この道は三個所もくずれてしまった。",
+    "en": "The heavy rain made this road give way in as many as three places.",
+    "fr": "Avec les fortes pluies, cette route s'est effondrée à trois endroits."
+   }
+  ],
+  "軟らかい::やわらかい": [
+   {
+    "jp": "雨のあとで、畑の土が軟らかくなっている。",
+    "en": "After the rain, the soil in the field has become soft.",
+    "fr": "Après la pluie, la terre du champ est devenue meuble."
+   },
+   {
+    "jp": "祖父のために、ご飯を少し軟らかくたいた。",
+    "en": "I cooked the rice a little soft for my grandfather.",
+    "fr": "J'ai fait cuire le riz un peu plus tendre pour mon grand-père."
+   }
+  ],
+  "中味::なかみ": [
+   {
+    "jp": "プレゼントの箱を開けて、中味を確かめた。",
+    "en": "I opened the present's box and checked what was inside.",
+    "fr": "J'ai ouvert la boîte du cadeau pour voir ce qu'elle contenait."
+   },
+   {
+    "jp": "あの人の話は長いが、中味はあまりない。",
+    "en": "That person talks at length, but there isn't much substance to it.",
+    "fr": "Cette personne parle longtemps, mais son discours n'a pas grand contenu."
+   }
+  ],
+  "慶び::よろこび": [
+   {
+    "jp": "新年のお慶びを申し上げます。",
+    "en": "I offer you my congratulations on the New Year.",
+    "fr": "Je vous présente mes meilleurs vœux pour la nouvelle année."
+   },
+   {
+    "jp": "孫が生まれ、家族みんなでその慶びを分かち合った。",
+    "en": "A grandchild was born, and the whole family shared in the joy.",
+    "fr": "Un petit-enfant est né, et toute la famille a partagé cette joie."
+   }
+  ],
+  "交ぜる::まぜる": [
+   {
+    "jp": "先生は、じょうだんを交ぜながら楽しく話をした。",
+    "en": "The teacher gave an enjoyable talk, mixing in jokes as she went.",
+    "fr": "Le professeur a parlé de façon agréable, en y mêlant des plaisanteries."
+   },
+   {
+    "jp": "トランプをよく交ぜてから、一人に五枚ずつ配ってください。",
+    "en": "Shuffle the cards well, then deal five to each person.",
+    "fr": "Mélangez bien les cartes, puis distribuez-en cinq à chacun."
+   }
+  ],
+  "明き::あき": [
+   {
+    "jp": "来週の土曜日、部屋に明きはありますか。",
+    "en": "Do you have a room free next Saturday?",
+    "fr": "Avez-vous une chambre de libre samedi prochain ?"
+   },
+   {
+    "jp": "会議と会議の間に、三十分ほど明きがある。",
+    "en": "I have about thirty minutes free between the two meetings.",
+    "fr": "J'ai une demi-heure de libre environ entre les deux réunions."
+   }
+  ],
+  "載せる::のせる": [
+   {
+    "jp": "トラックに荷物を載せて、新しい家へ運んだ。",
+    "en": "We loaded the luggage onto a truck and carried it to the new house.",
+    "fr": "Nous avons chargé les bagages sur un camion et les avons apportés à la nouvelle maison."
+   },
+   {
+    "jp": "旅行で写した写真を、ブログに載せた。",
+    "en": "I put the photos I took on my trip on my blog.",
+    "fr": "J'ai publié sur mon blog les photos prises pendant mon voyage."
+   }
+  ],
+  "円い::まるい": [
+   {
+    "jp": "家族みんなで、円いテーブルを囲んで食事をした。",
+    "en": "The whole family ate together around a round table.",
+    "fr": "Toute la famille a mangé autour d'une table ronde."
+   },
+   {
+    "jp": "話し合いで、二人のけんかを円く収めた。",
+    "en": "By talking it over, we settled the quarrel between the two of them amicably.",
+    "fr": "En discutant, nous avons réglé à l'amiable la dispute entre les deux."
+   }
+  ],
+  "殖える::ふえる": [
+   {
+    "jp": "池の金魚が、いつの間にかずいぶん殖えていた。",
+    "en": "Before we knew it, the goldfish in the pond had multiplied a great deal.",
+    "fr": "Sans qu'on s'en rende compte, les poissons rouges de l'étang s'étaient beaucoup multipliés."
+   },
+   {
+    "jp": "つゆの時期は、かびが殖えやすい。",
+    "en": "Mould multiplies easily during the rainy season.",
+    "fr": "Pendant la saison des pluies, la moisissure se multiplie facilement."
+   }
+  ],
+  "交じる::まじる": [
+   {
+    "jp": "父のかみの毛に、白いものが交じってきた。",
+    "en": "Grey hairs have started to appear among my father's hair.",
+    "fr": "Des cheveux blancs ont commencé à se mêler aux cheveux de mon père."
+   },
+   {
+    "jp": "父親たちも子どもに交じって、ボールを追いかけた。",
+    "en": "The fathers joined in with the children and chased the ball too.",
+    "fr": "Les pères se sont mêlés aux enfants et ont couru eux aussi après le ballon."
+   }
+  ],
+  "規準::きじゅん": [
+   {
+    "jp": "何が正しいかを決める規準は、時代によって変わる。",
+    "en": "The norms that decide what is right change with the times.",
+    "fr": "Les normes qui décident de ce qui est juste changent avec les époques."
+   },
+   {
+    "jp": "このクラブには、メンバーが守るべき行動の規準がある。",
+    "en": "This club has a code of conduct its members must follow.",
+    "fr": "Ce club a des règles de conduite que ses membres doivent respecter."
+   }
+  ],
+  "永い::ながい": [
+   {
+    "jp": "永い間、本当にお世話になりました。",
+    "en": "Thank you so much for everything over all these years.",
+    "fr": "Merci du fond du cœur pour tout ce que vous avez fait pour moi pendant toutes ces années."
+   },
+   {
+    "jp": "祖父は、家族に見守られて永い眠りについた。",
+    "en": "My grandfather passed away peacefully, watched over by his family.",
+    "fr": "Mon grand-père s'est endormi pour toujours, entouré de sa famille."
+   }
+  ],
+  "片寄る::かたよる": [
+   {
+    "jp": "荷物が片寄らないように、トラックの両側に分けて積んだ。",
+    "en": "We split the load between both sides of the truck so it would not lean to one side.",
+    "fr": "Nous avons réparti le chargement des deux côtés du camion pour qu'il ne penche pas d'un côté."
+   },
+   {
+    "jp": "この国では、人口が大きな都市に片寄っている。",
+    "en": "In this country, the population is concentrated in the big cities.",
+    "fr": "Dans ce pays, la population est concentrée dans les grandes villes."
+   }
+  ],
+  "殖やす::ふやす": [
+   {
+    "jp": "この植物は、さし木で簡単に殖やすことができる。",
+    "en": "This plant is easy to propagate from cuttings.",
+    "fr": "Cette plante se multiplie facilement par bouturage."
+   },
+   {
+    "jp": "彼は親から受けついだ財産を、さらに殖やした。",
+    "en": "He increased the fortune he had inherited from his parents even further.",
+    "fr": "Il a encore fait fructifier la fortune héritée de ses parents."
+   }
+  ],
+  "児::こ": [
+   {
+    "jp": "その児は、母親の背中ですやすやと眠っていた。",
+    "en": "The child was sleeping peacefully on its mother's back.",
+    "fr": "L'enfant dormait paisiblement sur le dos de sa mère."
+   },
+   {
+    "jp": "生まれたばかりの児を、母はやさしく抱き上げた。",
+    "en": "The mother gently picked up her newborn child.",
+    "fr": "La mère a pris doucement dans ses bras son enfant qui venait de naître."
+   }
+  ],
+  "六::む": [
+   {
+    "jp": "暮れ六つの鐘が、町に鳴りひびいた。",
+    "en": "The evening bell of the sixth hour (around 6 p.m.) rang out across the town.",
+    "fr": "La cloche de la sixième heure du soir (vers 18 h) a retenti sur la ville."
+   },
+   {
+    "jp": "明け六つに家を出て、江戸へ向かった。",
+    "en": "He left home at the sixth hour of dawn (around 6 a.m.) and set off for Edo.",
+    "fr": "Il quitta la maison à la sixième heure de l'aube (vers 6 h) et partit pour Edo."
+   }
+  ],
+  "軍::いくさ": [
+   {
+    "jp": "「腹が減っては軍はできぬ」と言って、彼はまず弁当を食べた。",
+    "en": "\"You can't fight a battle on an empty stomach,\" he said, and ate his lunch first.",
+    "fr": "« On ne fait pas la guerre le ventre vide », dit-il, et il mangea d'abord son bentō."
+   },
+   {
+    "jp": "城では、夜おそくまで軍評定が続いた。",
+    "en": "In the castle, the council of war went on late into the night.",
+    "fr": "Au château, le conseil de guerre se prolongea tard dans la nuit."
+   }
+  ],
+  "納まる::おさまる": [
+   {
+    "jp": "刀が、さやにぴたりと納まった。",
+    "en": "The sword slid neatly back into its sheath.",
+    "fr": "Le sabre est rentré parfaitement dans son fourreau."
+   },
+   {
+    "jp": "今年の税金は、もうすべて納まっています。",
+    "en": "This year's taxes have all been paid already.",
+    "fr": "Les impôts de cette année sont déjà entièrement acquittés."
+   }
+  ],
+  "保障::ほしょう": [
+   {
+    "jp": "憲法は、すべての国民に表現の自由を保障している。",
+    "en": "The constitution guarantees freedom of expression to every citizen.",
+    "fr": "La Constitution garantit la liberté d'expression à tous les citoyens."
+   },
+   {
+    "jp": "国は、国民の最低限の生活を保障しなければならない。",
+    "en": "The state must guarantee its citizens a minimum standard of living.",
+    "fr": "L'État doit garantir à ses citoyens un niveau de vie minimum."
+   }
+  ],
+  "銅::あかがね": [
+   {
+    "jp": "東京の小石川には、「銅御殿」と呼ばれる古い屋敷がある。",
+    "en": "In Koishikawa, Tokyo, there is an old mansion called the \"Copper Palace\".",
+    "fr": "À Koishikawa, à Tokyo, il y a une vieille demeure qu'on appelle le « Palais de cuivre »."
+   },
+   {
+    "jp": "江戸時代、「銅街道」と呼ばれる道を通って、足尾から江戸へ荷が運ばれた。",
+    "en": "In the Edo period, goods were carried from Ashio to Edo along a road called the \"Copper Road\".",
+    "fr": "À l'époque d'Edo, des marchandises étaient transportées d'Ashio à Edo par une route qu'on appelait la « route du cuivre »."
+   }
+  ],
+  "三::み": [
+   {
+    "jp": "手紙を三つ折りにして、封筒に入れた。",
+    "en": "I folded the letter in three and put it in an envelope.",
+    "fr": "J'ai plié la lettre en trois et je l'ai mise dans une enveloppe."
+   },
+   {
+    "jp": "女将は三つ指をついて、ていねいに客をむかえた。",
+    "en": "The proprietress bowed with her fingertips on the floor and welcomed the guests politely.",
+    "fr": "La patronne s'inclina, le bout des doigts posé au sol, et accueillit poliment les clients."
+   }
+  ],
+  "堪える::たえる": [
+   {
+    "jp": "ひどい言葉ばかりで、聞くに堪えない話だった。",
+    "en": "It was nothing but cruel words, a story unbearable to listen to.",
+    "fr": "Ce n'étaient que des mots cruels, un discours insupportable à entendre."
+   },
+   {
+    "jp": "この作品は、専門家の鑑賞にも十分堪える。",
+    "en": "This work fully stands up even to the appreciation of experts.",
+    "fr": "Cette œuvre supporte largement le regard des spécialistes."
+   }
+  ],
+  "造る::つくる": [
+   {
+    "jp": "この町では、三百年前から酒を造っている。",
+    "en": "This town has been brewing sake for three hundred years.",
+    "fr": "Dans cette ville, on brasse du saké depuis trois cents ans."
+   },
+   {
+    "jp": "祖父は、大きな船を造る工場で働いていた。",
+    "en": "My grandfather worked at a factory that built large ships.",
+    "fr": "Mon grand-père travaillait dans une usine qui construisait de grands navires."
+   }
+  ],
+  "箇箇::ここ": [
+   {
+    "jp": "箇箇の問題について、一つずつ話し合おう。",
+    "en": "Let's discuss the individual problems one by one.",
+    "fr": "Discutons des problèmes particuliers un par un."
+   },
+   {
+    "jp": "チームの力だけでなく、箇箇の選手の力も大切だ。",
+    "en": "Not only the team's strength but each individual player's ability matters.",
+    "fr": "Ce n'est pas seulement la force de l'équipe qui compte, mais aussi celle de chaque joueur."
+   }
+  ],
+  "一日::いちじつ": [
+   {
+    "jp": "経験では、彼のほうに一日の長がある。",
+    "en": "When it comes to experience, he has the edge.",
+    "fr": "Pour ce qui est de l'expérience, il a une petite longueur d'avance."
+   },
+   {
+    "jp": "この仕事では、先に入った山田さんに一日の長がある。",
+    "en": "In this job, Yamada, who joined before me, has the edge.",
+    "fr": "Dans ce travail, M. Yamada, entré avant moi, a une petite longueur d'avance."
+   }
+  ],
+  "付属::ふぞく": [
+   {
+    "jp": "この病院は、大学の付属病院です。",
+    "en": "This hospital is attached to the university.",
+    "fr": "Cet hôpital est rattaché à l'université."
+   },
+   {
+    "jp": "カメラを買ったら、付属品がすべて入っているか確かめよう。",
+    "en": "When you buy a camera, check that all the accessories are included.",
+    "fr": "Quand on achète un appareil photo, il faut vérifier que tous les accessoires sont fournis."
+   }
   ]
  }
 }
