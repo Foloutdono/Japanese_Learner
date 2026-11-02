@@ -7355,14 +7355,14 @@ The owner: remove the reading ride's subscription plate, and take away the secon
 
 Open: the Dictionary's first frame is now mostly the page's own style and layout (the console, the chips, the Japanese fonts), not its cards.
 
-## Plan 296 — 読解, sixty N4 and eighty N5 comprehension seeds (2026-11-02)
+## Plan 298 — 読解, sixty N4 and eighty N5 comprehension seeds (2026-11-02)
 
 The owner: write thirty new N4 texts and twenty new N5, every one coherent. Hand-written reading exercises in `content/comprehension/`, held to the same gates as before (`comprehension_seed_report`, `tests/test_comprehension_seed.py`).
 
 | Phase | What | Status |
 |---|---|---|
-| 296 | **The points shared out**: each of N4's ninety checkable points once over n4-31..60; at N5 the fifty-seven points the sixty shipped seeds used least, over n5-61..80. Each text drafted against the gates first (220-280 characters, the level's kanji, nothing filed above the level, each point found); titles in the level's kanji alone, a text's kanji above it only its own points' | DONE |
-| 296 | **Written and attacked**: eight writers; per batch a reviewer, a blind reader and a language editor per entry, a fixer, two rounds of fresh blind readers (every key matched), then a last blind sheet over all fifty (430 questions, no mismatch) and a native-speaker proofread, whose eight fixes were checked again | DONE |
-| 296 | **The figures**: 230/230 clean; the longest or the shortest option wins 21-25% at N4 and N5 in both languages; the carousel bank over 230 passages; the seed module's memory re-measured (20 MB parsed, a 343 KB index) | DONE |
+| 298 | **The points shared out**: each of N4's ninety checkable points once over n4-31..60; at N5 the fifty-seven points the sixty shipped seeds used least, over n5-61..80. Each text drafted against the gates first (220-280 characters, the level's kanji, nothing filed above the level, each point found); titles in the level's kanji alone, a text's kanji above it only its own points' | DONE |
+| 298 | **Written and attacked**: eight writers; per batch a reviewer, a blind reader and a language editor per entry, a fixer, two rounds of fresh blind readers (every key matched), then a last blind sheet over all fifty (430 questions, no mismatch) and a native-speaker proofread, whose eight fixes were checked again | DONE |
+| 298 | **The figures**: 230/230 clean; the longest or the shortest option wins 21-25% at N4 and N5 in both languages; the carousel bank over 230 passages; the seed module's memory re-measured (20 MB parsed, a 343 KB index) | DONE |
 
 Open: the matcher reads some points narrowly, and the texts bent to it rather than it to them: 何でも is read as 何で (N3), 〜がする is found only plain, 〜くする needs くする written out, 何も／誰も need the kanji, 〜が分かります needs が just before it, and だろうと思いました is read as 〜ようと思う.

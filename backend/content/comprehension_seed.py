@@ -2,7 +2,7 @@
 The seed pool: hand-written reading-comprehension exercises, one file
 per JLPT level, in both of the app's languages (plan 111; six per level
 since plan 230, ten since plan 258, thirty since plan 259, sixty at N5
-since plan 274, and sixty at N4 and eighty at N5 since plan 296,
+since plan 274, and sixty at N4 and eighty at N5 since plan 298,
 drafted and reviewed with scripts/comprehension_seed_report).
 
 ── Why this exists ───────────────────────────────────────────
