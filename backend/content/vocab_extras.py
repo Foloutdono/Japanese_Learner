@@ -497,6 +497,42 @@ def _senses_of_own_word(key: str, own: list[dict] | None) -> list[dict] | None:
     return senses
 
 
+# Kana cards whose curated row holds two words read alike, another's
+# entry before the card's own (plan 297): ママ "mom" came behind まま
+# "as it is", and the card listed まま's four senses and nested まま's
+# sentences under them. The card keeps its own entry, by its place in
+# the row (JMdict numbers each word's senses from 1, so an entry starts
+# where the numbering does). The other entry's sentences go with it,
+# save those a correction made the card's own (plan 227 rewrote まま's
+# into ママ's): they are borrowed, and get_vocab_extras shows one only
+# where it carries the card's word.
+_OWN_ENTRY: dict[str, int] = {
+    "::ママ": 1,
+}
+
+
+def _entries(senses: list[dict]) -> list[list[dict]]:
+    out: list[list[dict]] = []
+    for sense in senses:
+        number = (sense.get("tags") or [""])[0]
+        if not out or number == "1":
+            out.append([])
+        out[-1].append(sense)
+    return out
+
+
+def _own_entry(key: str, senses: list[dict] | None) -> list[dict] | None:
+    entries = _entries(senses or [])
+    index = _OWN_ENTRY[key]
+    if index >= len(entries):
+        return senses
+    own = [{**sense, "examples": list(sense.get("examples", []))} for sense in entries[index]]
+    own[0]["examples"] += [{**ex, "borrowed": True}
+                           for i, entry in enumerate(entries) if i != index
+                           for sense in entry for ex in sense.get("examples", [])]
+    return own
+
+
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     # Fast path: curated_senses keys its rows with the exact same
     # packed kana string vocab_deck.json uses (see module docstring),
@@ -505,6 +541,8 @@ def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     senses = vocab_meanings_data.get(f"{kanji}::{kana}")
     if f"{kanji}::{kana}" in _SENSES_OF:
         return _senses_of_own_word(f"{kanji}::{kana}", senses)
+    if f"{kanji}::{kana}" in _OWN_ENTRY:
+        return _own_entry(f"{kanji}::{kana}", senses)
     if senses:
         return senses
     # Fallback for any mismatch in reading order/subset between the two
@@ -1409,6 +1447,10 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
             ex = example_fixes.for_word(ex, lambda s: _target_span(s, kanji, kana) is not None)
             jp = ex.get("jp")
             if not jp or jp in seen_jp:
+                continue
+            # Another word's sentence, kept where a correction made it
+            # this card's (_OWN_ENTRY).
+            if ex.get("borrowed") and _target_span(jp, kanji, kana) is None:
                 continue
             seen_jp.add(jp)
             num, gloss = numbers[id(sense)], glosses[numbers[id(sense)]]

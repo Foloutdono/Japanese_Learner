@@ -58,7 +58,8 @@ sense's English (so a sense list that moves under it is caught,
 tests/test_example_senses.py), `why` the reviewer's reason. A sentence
 that uses the word in no sense listed has `"sense": null` and is shown
 with the word, under none; one that is not this word at all (another
-word written alike: 方 read かた under ほう) has `"drop": true` and is
+word written alike: 方 read かた under ほう; or read alike and written
+otherwise, plan 297: 開く's door under 空く) has `"drop": true` and is
 not shown under it.
 
 Loaded once, on first use: a few thousand short lines.

@@ -117,3 +117,30 @@ def test_a_kana_card_reads_the_senses_of_its_own_word():
         first = "; ".join(_find_senses(kanji, kana)[0]["glossary"])
         assert words(first) & words(cards[key]["meaning"]), (key, first)
     assert "thank" not in "; ".join(_find_senses("", "だんだん")[0]["glossary"])
+
+
+def test_every_sentence_a_card_shows_carries_its_word():
+    """Plan 297: a card showed sentences its word is not in -- どっち's
+    and そっち's in どちら and そちら, ママ's in まま, 空く's in 開く --
+    which the page cannot mark. A sentence is a card's when the page
+    marks the word in it."""
+    missing = []
+    for level, words in VOCAB_BY_LEVEL.items():
+        for w in words:
+            for ex in get_vocab_extras(w.get("kanji") or "", w["kana"], w.get("meaning", ""), "en")["examples"]:
+                if not any(seg["highlight"] for seg in ex["segments"]):
+                    missing.append(f"{level} {w.get('kanji') or ''}::{w['kana']}: {ex['jp']}")
+    assert not missing, "\n".join(missing[:40])
+
+
+def test_a_kana_card_keeps_its_own_word_of_a_row_two_words_share():
+    """Plan 297: ママ's row held まま's entry before its own, so the card
+    listed "as (it is)" and showed 「足の向くままに歩いた。」. It keeps
+    its own entry, and of まま's sentences the ones plan 227 rewrote into
+    ママ's."""
+    extras = get_vocab_extras("", "ママ", "Mama", "en")
+    assert [s["glossary"].split(";")[0] for s in extras["senses"]] == ["mom", "female proprietress (of a bar, etc.)"]
+    shown = [ex["jp"] for ex in extras["examples"]]
+    assert "足の向くままに歩いた。" not in shown
+    assert "ママは台所で料理をしている。" in shown
+    assert all(ex["sense_number"] == 1 for ex in extras["examples"])

@@ -54,7 +54,7 @@ import os
 import re
 import sys
 
-from content import example_fixes, jmdict_fr
+from content import example_fixes, jmdict_fr, vocab_extras
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import _find_senses, _target_span, get_vocab_extras
 from study.llm_shared import kanji_set_for_level
@@ -67,8 +67,14 @@ LEVELS = ("N5", "N4", "N3", "N2", "N1")
 def _originals() -> dict[str, dict]:
     """jp -> {en, fr, words}: every sentence the deck shows, uncorrected."""
     saved, saved_written = example_fixes.fixes, example_fixes.written
+    saved_own = vocab_extras._OWN_ENTRY
     example_fixes.fixes = lambda: {}
     example_fixes.written = lambda: {}
+    # A card that keeps its own entry of a row two words share (plan 297,
+    # ママ beside まま) shows the other's sentences only where a correction
+    # made them its own: uncorrected, they are the row's, as plan 227 read
+    # them, or those corrections would read as stale.
+    vocab_extras._OWN_ENTRY = {}
     # The French index is cached from fixes(): built while it is patched
     # out, it would stay empty for the rest of the process.
     example_fixes._french.cache_clear()
@@ -90,6 +96,7 @@ def _originals() -> dict[str, dict]:
         return out
     finally:
         example_fixes.fixes, example_fixes.written = saved, saved_written
+        vocab_extras._OWN_ENTRY = saved_own
         example_fixes._french.cache_clear()
 
 

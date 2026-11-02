@@ -29,7 +29,9 @@ under now. A reviewer writes DIR/senses_NN.json, the moves alone:
 `sense` the number of the sense the sentence uses; `"sense": null` where
 it uses the word in no sense listed (shown with the word, under none);
 `"drop": true` in place of `sense` where the sentence is another word
-written alike (方 read かた under ほう). A second reader's
+written alike (方 read かた under ほう), or read alike and written
+otherwise (開く under 空く, plan 297): a drop is open to any word whose
+page nests sentences under a sense, one sense or more. A second reader's
 DIR/sverify_NN.json, of the same shape, replaces the reviewer's move for
 each sentence it names, and `"keep": true` in place of `sense` undoes it.
 """
@@ -76,8 +78,10 @@ def _key(word: dict) -> str:
 
 
 def items() -> dict[str, dict]:
-    """key -> batch item, for every deck word whose page can nest a
-    sentence under the wrong sense: JMdict's filing, the moves ignored."""
+    """key -> batch item, for every deck word whose page nests a sentence
+    under a sense: JMdict's filing, the moves ignored. A word of one sense
+    can show no sentence under the wrong one, but can show another word's
+    (plan 297: 開く's door under 空く), which a drop takes off it."""
     saved = example_fixes.refiled_all
     example_fixes.refiled_all = lambda: {}
     try:
@@ -102,7 +106,7 @@ def items() -> dict[str, dict]:
                     first[k] = rep[sense["number"]] = sense["number"]
                     senses[str(sense["number"])] = sense["glossary"]
                 filed = [ex for ex in extras["examples"] if ex["sense_number"] is not None]
-                if len(senses) < 2 or not filed:
+                if not filed:
                     continue
                 out[key] = {
                     "key": key, "level": level,
@@ -124,7 +128,7 @@ def problems(move: dict, known: dict[str, dict]) -> list[str]:
     where = f"{key}: {jp[:24] or '?'}"
     item = known.get(key or "")
     if item is None:
-        return [f"{where}: not a deck word with sentences under two senses or more"]
+        return [f"{where}: not a deck word that nests sentences under a sense"]
     shown = {ex["jp"]: ex for ex in item["examples"]}
     if jp not in shown:
         return [f"{where}: not a sentence the word nests under a sense"]
@@ -166,8 +170,9 @@ def _load(path: str) -> dict:
 
 def cmd_stats() -> int:
     known = items()
-    pairs = sum(len(i["examples"]) for i in known.values())
-    print(f"{pairs} sentences nested under a sense, across {len(known)} words with two senses or more")
+    several = [i for i in known.values() if len(i["senses"]) >= 2]
+    pairs = sum(len(i["examples"]) for i in several)
+    print(f"{pairs} sentences nested under a sense, across {len(several)} words with two senses or more")
     moved = example_fixes.refiled_all()
     entries = [(k, jp, e) for k, by in moved.items() for jp, e in by.items()]
     print(f"{len(entries)} filed elsewhere: {sum(1 for *_, e in entries if e.get('sense'))} under another sense, "
@@ -186,7 +191,9 @@ def _write_batch(path: str, chunk: list[dict]) -> None:
 
 
 def cmd_prep(out_dir: str, batches: int) -> int:
-    known = list(items().values())
+    # Only a word of two senses or more can show a sentence under the
+    # wrong one: the review reads those.
+    known = [i for i in items().values() if len(i["senses"]) >= 2]
     total = sum(len(i["examples"]) for i in known)
     os.makedirs(out_dir, exist_ok=True)
     # Batches of about the same number of sentences, a word never split.

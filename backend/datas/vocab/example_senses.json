@@ -287,28 +287,6 @@
     "why": "children throwing a ball, not a pitch outside the strike zone"
    }
   },
-  "::ママ": {
-   "うちのママは毎朝早く起きる。": {
-    "sense": 5,
-    "gloss": "mom; mommy; mum; mummy; mother; mama; mamma",
-    "why": "うちのママ is my mum, not まま 'while; with'"
-   },
-   "その子はママの手をしっかり握っていた。": {
-    "sense": 5,
-    "gloss": "mom; mommy; mum; mummy; mother; mama; mamma",
-    "why": "ママの手 is mum's hand, not まま 'as it is'"
-   },
-   "ママ、この本を読んで！": {
-    "sense": 5,
-    "gloss": "mom; mommy; mum; mummy; mother; mama; mamma",
-    "why": "calling out to ママ is mum, not まま 'as it is'"
-   },
-   "ママは台所で料理をしている。": {
-    "sense": 5,
-    "gloss": "mom; mommy; mum; mummy; mother; mama; mamma",
-    "why": "ママ here is mum, not まま 'as it is'"
-   }
-  },
   "::メール": {
    "写真をメールで送ります。": {
     "sense": 1,
@@ -466,6 +444,12 @@
     "sense": 1,
     "gloss": "to be attached; to be connected with; to adhere; to stick; to cling",
     "why": "a room that comes with a bath has it attached, not a person accompanying"
+   }
+  },
+  "伯母さん::おばさん": {
+   "叔母さんを訪ねた時はすごいごちそうだったね。": {
+    "drop": true,
+    "why": "叔母さん is the younger aunt, its own card; 伯母さん is the elder"
    }
   },
   "低い::ひくい": {
@@ -740,6 +724,12 @@
     "sense": 2,
     "gloss": "outside (of a group, company, etc.); outside world",
     "why": "a secret leaking out reaches the outside world, not the exterior of a building"
+   }
+  },
+  "大分::だいぶん": {
+   "だいぶ痛みがなくなりました。": {
+    "drop": true,
+    "why": "the sentence says だいぶ, its own card; the card teaches the reading だいぶん"
    }
   },
   "大学::だいがく": {
@@ -1430,6 +1420,12 @@
     "why": "a serious face is the adjective 'serious', not a real sword"
    }
   },
+  "着ける::つける": {
+   "自宅を改築する際に、この部屋にだけ防音設備と内鍵を付けたんだ。": {
+    "drop": true,
+    "why": "fitting a lock is 付ける, its own card, not 着ける (to put on, to wear)"
+   }
+  },
   "着る::きる": {
    "寒いので、コートを着て出かけた。": {
     "sense": 1,
@@ -1484,6 +1480,12 @@
     "sense": 2,
     "gloss": "pit; hollow; cavity; hole (e.g. in the ground)",
     "why": "a hole in the road surface, not a gap left by a missing team member"
+   }
+  },
+  "空く::あく": {
+   "ぐいと押すとドアは開いた。": {
+    "drop": true,
+    "why": "a door that opens is 開く, its own card; 空く is to be empty"
    }
   },
   "競争::きょうそう": {

@@ -13500,6 +13500,30 @@
     "en": "That year, he won the triple crown.",
     "fr": "Cette année-là, il a remporté la triple couronne."
    }
+  ],
+  "伯母さん::おばさん": [
+   {
+    "jp": "伯母さんは毎年、わたしのうちに来ます。",
+    "en": "My aunt comes to our house every year.",
+    "fr": "Ma tante vient chez nous chaque année."
+   },
+   {
+    "jp": "伯母さんといっしょに、えいがを見に行きました。",
+    "en": "I went to see a film with my aunt.",
+    "fr": "Je suis allé voir un film avec ma tante."
+   }
+  ],
+  "大分::だいぶん": [
+   {
+    "jp": "薬を飲んだら、大分楽になった。",
+    "en": "After I took the medicine, I felt a good deal better.",
+    "fr": "Après avoir pris le médicament, je me suis senti bien mieux."
+   },
+   {
+    "jp": "この町も、昔とは大分変わりましたね。",
+    "en": "This town has changed a great deal since the old days, hasn't it?",
+    "fr": "Cette ville aussi a beaucoup changé depuis le temps, n'est-ce pas ?"
+   }
   ]
  }
 }
