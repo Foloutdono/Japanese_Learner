@@ -5978,10 +5978,11 @@ def _passive_refused(tokens, s, e, _g) -> bool:
         return True
     if _said_as_can(tokens, i):
         return True                    # 借りられますか, 覚えられっこない, 簡単に組み立てられる (plan 272)
-    if _suffered_by(tokens, i):
-        return False
-    if nxt is not None and nxt.conjunctive and nxt.surface == "て" and i + 2 < len(tokens) \
-            and tokens[i + 2].lemma in ("居る", "いる", "おる"):
+    if _suffered_by(tokens, i) or _given_to(tokens, i) or verb.lemma in _SAID_OF or _done_by_name(tokens, i):
+        return False                   # (遅刻は認められない: what is not allowed; 声をかけられるままに, plan 296)
+    if _on_a_condition(tokens, i):
+        return True                    # 少し待てば家で見られる, 四つんばいになれば…くぐり抜けられる (plan 296)
+    if _goes_on(tokens, i):
         return False                    # (進められている: what goes on is done to it, plan 272)
     # (plan 272) With no one before に to do it: what it takes with を, not
     # in the past (通知のオン・オフを切り替えられます, "you can switch"), or
@@ -5991,7 +5992,128 @@ def _passive_refused(tokens, s, e, _g) -> bool:
     if nxt is not None and (nxt.lemma in ("ない", "ず", "ぬ") or (nxt.lemma == "ます" and i + 2 < len(tokens)
                                                                 and tokens[i + 2].surface == "ん")):
         return True
-    return verb.lemma in _INTRANSITIVE
+    # (...a verb said with nothing around it, the bare form an exam
+    # offers, says nothing of who does it: ふれられる, plan 296)
+    return verb.lemma in _INTRANSITIVE or (_intransitive(verb.lemma, verb.lemma_reading)
+                                           and any(u.pos != "symbol" for u in tokens[:i - 1]))
+
+
+# The verbs that give a thing to someone, whose passive's subject is
+# the one given to and keeps the gift with its を (plan 296): 機会すら
+# 与えられず, 苦い豆を勧められて, 悪口雑言を浴びせられれば.
+_GIVING = frozenset({"与える", "授ける", "勧める", "薦める", "浴びせる", "課する", "課す"})
+
+
+def _given_to(tokens, i: int) -> bool:
+    """Whether the られる at tokens[i] is a verb of giving whose clause
+    keeps what is given (を, すら, さえ) and names nobody before に to give
+    it to: the subject is the one given it, the passive (plan 296) --
+    子どもにおもちゃを与えられない, where に names who receives, may be
+    "cannot give"."""
+    if i < 1 or tokens[i - 1].lemma not in _GIVING:
+        return False
+    clause = _clause_ending_at(tokens, i - 2)
+    if any(u.pos == "particle" and u.surface == "に" for u in clause):
+        return False
+    return any(u.pos == "particle" and u.surface in ("を", "すら", "さえ") for u in clause)
+
+
+# What befalls without warning (plan 296): 急に, 突然, いきなり.
+_SUDDENLY = frozenset({"急", "急に", "突然", "いきなり", "不意", "不意に"})
+
+
+def _befell_suddenly(tokens, i: int) -> bool:
+    """Whether the られる at tokens[i] happens without warning -- 急に
+    敬語で話しかけられて: an event, the passive, since what one can do does
+    not befall one (plan 296). Never where it becomes an ability (急に食べ
+    られるようになった, 突然起きられなくなった)."""
+    if any(u.lemma in ("成る", "なる") for u in tokens[i + 1:i + 5]):
+        return False
+    return any(u.surface in _SUDDENLY for u in _clause_ending_at(tokens, i - 1))
+
+
+def _on_a_condition(tokens, i: int) -> bool:
+    """Whether the clause right before the られる at tokens[i] is a
+    condition met with ば -- 少し待てば家で見られる, 材料さえ集まれば…始め
+    られる: what becomes possible once it holds (plan 296). A ば inside a
+    quotation is that quotation's: 取り替えれば乗れると勧められた."""
+    for k in range(i - 2, 0, -1):
+        u = tokens[k]
+        if u.pos == "symbol" and u.surface in _SENTENCE_ENDS:
+            return False
+        if u.pos == "particle" and (u.conjunctive or (u.surface in ("と", "って") and k > 0
+                                                       and tokens[k - 1].pos in ("verb", "adjective", "auxiliary"))):
+            return u.conjunctive and u.surface == "ば"
+    return False
+
+
+def _a_passive_goes_on(tokens, i: int) -> bool:
+    """Whether the られる at tokens[i] carries on a sentence that has
+    just said, in a passive no one can read otherwise, what is done to
+    its subject -- 置かれたあと、…に集められる, 何かが失われ、何かが付け
+    加えられる (plan 296): the clause right before it closes on a godan
+    verb's れる or される, with a comma, て, or たあと. Any other close is
+    another clause's (作られているので、…耐えられる; 聞かれたら、…答えられる)."""
+    def _passive(k: int) -> bool:
+        return k >= 1 and tokens[k].pos == "auxiliary" and tokens[k].lemma == "れる" \
+            and tokens[k - 1].pos == "verb" and (tokens[k - 1].ctype.startswith("五段")
+                                                 or tokens[k - 1].lemma in ("為る", "する"))
+    for k in range(i - 2, 0, -1):
+        u = tokens[k]
+        if u.pos == "symbol" and u.surface in _SENTENCE_ENDS:
+            return False
+        if u.pos == "particle" and u.conjunctive:
+            return u.surface == "て" and _passive(k - 1)
+        if u.pos == "symbol" and u.surface in _COMMAS:
+            before = tokens[k - 1]
+            if before.surface in ("あと", "後"):
+                return k >= 3 and tokens[k - 2].lemma == "た" and _passive(k - 3)
+            return _passive(k - 1) and before.cform.startswith("連用形")
+    return False
+
+
+def _goes_on(tokens, i: int) -> bool:
+    """Whether the られる at tokens[i] goes on, comes about or is done
+    for good: 進められている, 伝えられてきた, 追いつめられていく, 忘れられて
+    しまう, 作り替えられてはいない -- what is done to its subject over time,
+    which an ability is not (plan 272, plan 296)."""
+    k = i + 1
+    if k >= len(tokens) or not (tokens[k].conjunctive and tokens[k].surface == "て"):
+        return False
+    k += 1
+    if k < len(tokens) and tokens[k].pos == "particle" and tokens[k].surface == "は":
+        k += 1                          # (作り替えられてはいない)
+        return k < len(tokens) and tokens[k].lemma in ("居る", "いる", "おる")
+    return k < len(tokens) and tokens[k].lemma in ("居る", "いる", "おる", "来る", "くる", "行く", "いく",
+                                                   "仕舞う", "しまう")
+
+
+@lru_cache(maxsize=4096)
+def _intransitive(lemma: str, lemma_reading: str) -> bool:
+    """Whether the dictionary's first sense of a verb is intransitive
+    alone (答える, 触れる, 生きる): nothing is done to anyone by it, so its
+    られる, with nobody before に to suffer it, is the potential (plan
+    296). The deck's own senses first, then the pool's."""
+    from content import vocab_jmdict_data, vocab_meanings_data
+    from study.morphology import kata_to_hira
+
+    reading = kata_to_hira(lemma_reading)
+    senses = vocab_meanings_data.get(f"{lemma}::{reading}") or vocab_jmdict_data.get_senses(lemma, reading) or []
+    first = set(senses[0].get("tags") or ()) if senses else set()
+    return "vi" in first and "vt" not in first
+
+
+def _felt_as(tokens, i: int) -> bool:
+    """Whether the られる at tokens[i] says how a thing strikes one --
+    重く感じられ, さびしく感じられる, 親友のように感じられる, 小さく見られる:
+    a verb of feeling, thinking or seeing after the way it is felt, the
+    passive's "it feels", never "can feel" (plan 296). With an object
+    instead it is what one can feel: 喜びも感じられる."""
+    if i < 2 or tokens[i - 1].lemma not in ("感じる", "考える", "見る"):
+        return False
+    how = tokens[i - 2]
+    return (how.pos == "adjective" and how.cform.startswith("連用形")) or how.surface in ("ように", "ようで") \
+        or (how.surface == "に" and i >= 3 and tokens[i - 3].surface == "よう")
 
 
 def _clause_ending_at(tokens, k: int) -> list:
@@ -6008,6 +6130,10 @@ def _clause_ending_at(tokens, k: int) -> list:
             or (tokens[k].surface in ("よう", "ように", "こと", "事", "の") and k > 0
                 and tokens[k - 1].pos in ("verb", "auxiliary"))):
         out.append(tokens[k])
+        if tokens[k].pos in ("noun", "pronoun") and k > 0 and tokens[k - 1].pos in ("verb", "auxiliary") \
+                and tokens[k - 1].cform.startswith("連体形") and tokens[k - 1].lemma not in ("だ", "です"):
+            break                       # (...or a noun a clause describes: 規則違反をする者は, 地表を砕くために,
+            # the を the inner verb's -- never a な-adjective's な, 好きなときに, plan 296)
         k -= 1
     return out
 
@@ -6023,8 +6149,11 @@ def _takes_its_object(tokens, i: int) -> bool:
 
 # What says a られる is what one can do (plan 272): 簡単に組み立てられる,
 # 誰でも借りられる, 一目で比べられる, 好きなときに止められる.
-_EASILY = frozenset({"簡単", "気軽", "手軽", "楽", "自由", "誰でも", "いつでも", "どこでも", "何でも", "一目", "すぐ",
+_EASILY = frozenset({"うまく", "上手く", "上手", "簡単", "気軽", "手軽", "楽", "自由", "誰でも", "いつでも", "どこでも", "何でも", "一目", "すぐ",
                      "好き", "生", "安心", "無料", "まで", "でも"})
+
+
+_SAID_OF_WHAT_COMES = frozenset({"すぐ", "まで", "でも"})
 
 
 def _said_as_can(tokens, i: int) -> bool:
@@ -6034,12 +6163,27 @@ def _said_as_can(tokens, i: int) -> bool:
     clause (簡単に組み立てられる, 生で食べられます) -- never in the past,
     which tells what was done (迎えられた)."""
     after = [u.surface for u in tokens[i + 1:i + 4]]
-    if after[:2] == ["ます", "か"] or (after and after[0] in ("っこ", "ものなら")) or after[:2] in (["は", "し"],
-                                                                                              ["は", "しな"]):
-        return True
+    if after[:2] == ["ます", "か"] or "".join(after).startswith(("っこ", "ものなら")) or after[:2] in (["は", "し"],
+                                                                                                 ["は", "しな"]):
+        return True                     # (もの + なら to the tokenizer: 忘れられるものなら, plan 296)
+    quoted = i >= 2 and tokens[i - 2].surface == "と" and tokens[i - 1].lemma in _SAID_AFTER_TO
+    if after and (after[0] in ("か", "？", "?")) and not quoted:
+        return True                     # (...or asked plainly: 食べられる？, 乗りかえられるかな, 続けられるかどうか --
+        # never なぜだと考えられるか, what is thought, plan 296)
     if any(u.lemma == "た" for u in tokens[i + 1:i + 3]):
         return False
-    return any(u.surface in _EASILY or u.lemma in _EASILY for u in _clause_ending_at(tokens, i - 1))
+    clause = _clause_ending_at(tokens, i - 1)
+    return any((u.surface in _EASILY or u.lemma in _EASILY) and (u.surface != "まで" or _a_limit(clause, n))
+               for n, u in enumerate(clause))
+
+
+def _a_limit(clause: list, n: int) -> bool:
+    """Whether the まで at clause[n] (the clause read backwards) closes a
+    quantity -- 十冊まで, "up to ten": a limit says what one can do, where
+    夕方おそくまで, how long, does not (plan 296)."""
+    before = clause[n + 1] if n + 1 < len(clause) else None
+    return before is not None and (before.pos == "suffix" or bool(re.fullmatch(r"[0-9０-９一二三四五六七八九十百千万]+",
+                                                                               before.surface)))
 
 
 def _done_to_it(tokens, i: int) -> bool:
@@ -6048,15 +6192,26 @@ def _done_to_it(tokens, i: int) -> bool:
     迎えられた, 報じられました), by someone named by によって, or in 〜られ方
     and 〜られるまま (plan 272)."""
     after = tokens[i + 1:i + 4]
-    if after and after[0].surface in ("方", "まま") or any(u.surface == "よっ" for u in tokens[max(0, i - 4):i]):
+    if _done_by_name(tokens, i):
         return True
     past = any(u.lemma == "た" and u.pos == "auxiliary" for u in after[:2]) and not any(
         u.lemma in ("ない", "ず", "ぬ") or u.surface in ("なら", "ら") for u in after[:3])
     if i >= 1 and tokens[i - 1].lemma in _INTRANSITIVE:
         return False                    # (生きられたなら: nobody lives a life to anyone, plan 272)
-    managed = any(u.surface in _EASILY or u.surface in ("やっと", "ようやく", "なんとか", "何とか", "無事", "全部", "全て")
+    # (...but no limit or speed, which say "can" of what is to come and
+    # how fast it was done in the past: 深夜まで続けられた, すぐに鎮め
+    # られた, 八時までに決められた場所, plan 296)
+    managed = any((u.surface in _EASILY and u.surface not in _SAID_OF_WHAT_COMES)
+                  or u.surface in ("やっと", "ようやく", "なんとか", "何とか", "無事", "全部", "全て")
                   for u in _clause_ending_at(tokens, i - 1))
     return past and not managed
+
+
+def _done_by_name(tokens, i: int) -> bool:
+    """〜られ方, 〜られるまま, by someone named with によって: the passive
+    by its own words (plan 272)."""
+    after = tokens[i + 1:i + 2]
+    return bool(after and after[0].surface in ("方", "まま")) or any(u.surface == "よっ" for u in tokens[max(0, i - 4):i])
 
 
 def _potential_refused_by_use(tokens, s, e) -> bool:
@@ -6066,16 +6221,16 @@ def _potential_refused_by_use(tokens, s, e) -> bool:
     i = _index_at(tokens, s)
     if i is None or tokens[i].lemma_reading != "られる":
         return False
-    if _done_to_it(tokens, i):
-        return True
+    if _done_by_name(tokens, i) or (_done_to_it(tokens, i) and not _passive_refused(tokens, s, e, None)):
+        return True                     # (...the past unless it says it could: くださればこそやりとげられた, plan 296)
     nxt = tokens[i + 1] if i + 1 < len(tokens) else None
-    after = tokens[i + 2] if i + 2 < len(tokens) else None
-    if nxt is not None and nxt.conjunctive and nxt.surface == "て" and after is not None \
-            and after.lemma in ("居る", "いる", "おる"):
+    if _goes_on(tokens, i) or _felt_as(tokens, i) or _given_to(tokens, i):
         return True
+    if (_befell_suddenly(tokens, i) or _a_passive_goes_on(tokens, i)) and not _passive_refused(tokens, s, e, None):
+        return True                     # (...where nothing says "can": 届けようにも届けられない, plan 296)
     verb = tokens[i - 1] if i >= 1 else None
     negative = nxt is not None and nxt.lemma in ("ない", "ず", "ぬ")
-    if verb is not None and not negative and (verb.lemma in _SAID_OF or (
+    if verb is not None and ((verb.lemma in _SAID_OF and not _said_as_can(tokens, i)) or (not negative and
             verb.lemma in _SAID_AFTER_TO and i >= 2 and tokens[i - 2].surface == "と"
             and tokens[i - 2].pos == "particle" and not _takes_its_object(tokens, i))):
         return True                    # 支援が求められる, 有効と認められる, 回復したと見られる (plan 272)
@@ -6086,8 +6241,11 @@ def _potential_refused_by_use(tokens, s, e) -> bool:
 
 
 # The る-verbs whose られる says what is asked or held of a thing (plan
-# 272): 支援が求められる is "is called for", no "can ask for".
-_SAID_OF = frozenset({"求める", "認める"})
+# 272): 支援が求められる is "is called for", no "can ask for" -- in the
+# negative too (遅刻は認められない, 何も求められず), and 用いる, what a
+# thing is used for (原子力製造に用いられる, この語は今では用いられない,
+# plan 296).
+_SAID_OF = frozenset({"求める", "認める", "用いる"})
 # The る-verbs of saying and thinking whose られる after a quotation's と is
 # the passive (plan 272's と見られる; plan 296): と読み上げられる, と考え
 # られる, と伝えられる -- "is read out", "is thought", never "can".

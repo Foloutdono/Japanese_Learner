@@ -2194,7 +2194,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # what its clauses say: the cause of what befell (電車が遅れて、間に合い
 # ませんでした 〜て（理由）), a manner inside the phrase it closes (子どもを
 # 連れて登るのは), a frame (言われて久しい, 任せて差し支えない), and を通して
-# as 〜を通じて.
+# as 〜を通じて; and a る-verb's られる read from its clause, passive or
+# potential (伝えられてきた, 機会すら与えられず; 答えられる, 少し待てば…見られる).
 LOCAL_REV = 33
 
 

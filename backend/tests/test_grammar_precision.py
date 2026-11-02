@@ -2920,6 +2920,79 @@ class SaidAndSufferedTests(unittest.TestCase):
                 self.assertNotIn("受身形 〜られる", found_in(sentence))
 
 
+def _on(sentence: str, piece: str) -> set[str]:
+    """The points lit on the られ of `piece` (its last occurrence)."""
+    at = sentence.rindex(piece) + piece.index("られ")
+    return {h["pattern"] for h in grammar_detect.hits(sentence) if any(a <= at < b for a, b in h["segments"])}
+
+
+_PASSIVE, _POTENTIAL = "受身形 〜られる", "可能形 〜(ら)れる"
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ThePassiveOrThePotentialTests(unittest.TestCase):
+    """Plan 296: a る-verb's られる is read from its clause. The passive
+    where something goes on, comes about or is done for good (伝えられて
+    きた, 忘れられてしまう), where it says how a thing strikes one (重く
+    感じられ), where a gift is kept (機会すら与えられず), where it befalls
+    without warning (急に話しかけられて), where the clause right before
+    has just said, in a passive, what is done to it (置かれたあと、…集め
+    られる), in the past with no limit or speed to say "could" (深夜まで
+    続けられた), and for what is asked, held or used (認められない, 用い
+    られない). The potential for a verb the dictionary calls intransitive
+    (答えられる, 触れられる), with a word of skill (うまく), asked (乗りかえ
+    られるかな), wished (ものなら) or after a condition met (少し待てば). A
+    rule's evidence never takes both readings away."""
+
+    def test_the_passive(self) -> None:
+        for sentence, piece in (
+                ("見つかった物は、数日その駅に置かれたあと、大きな駅の忘れ物センターに集められる。", "集められる"),
+                ("訳者が言葉を一つ選ぶたびに、何かが失われ、何かが付け加えられることは想像にかたくない。", "付け加えられる"),
+                ("親しい友人と口論した翌日、急に敬語で話しかけられて、その冷たさにたじろいだことがある。", "話しかけられ"),
+                ("世に認められる前、その画家は作品を展示する機会すら与えられず、貧困の中で創作を続けた。", "与えられ"),
+                ("苦い豆を勧められて、コーヒーが好きになった。", "勧められ"),
+                ("住民から何度も苦情が寄せられたにもかかわらず、工事は深夜まで続けられた。", "続けられ"),
+                ("暴動はすぐに鎮められた。", "鎮められ"),
+                ("その物語は世代から世代へと口伝えで伝えられてきた。", "伝えられ"),
+                ("写真に写っていない場面は、時間がたつと忘れられてしまう。", "忘れられ"),
+                ("万年筆が手に重く感じられ、まだうまく使いこなせずにいる。", "感じられ"),
+                ("不思議と昔からの親友のように感じられる。", "感じられる"),
+                ("理由のいかんによらず、遅刻は認められない。", "認められ"),
+                ("この語は今では用いられない。", "用いられ"),
+                ("ピックは硬い地表を砕くために用いられる長い取っ手の道具だ。", "用いられる"),
+                ("声をかけられるままに、何度も仕事を変えてきました。", "かけられる"),
+                # (and as before: a doer before に, a quotation's と)
+                ("先生にほめられた。", "ほめられ"),
+                ("夜十時に、友だちに来られました。", "来られ"),
+                ("二年目の冬に葉が落ち始めたのは、なぜだと考えられるか。", "考えられる"),
+                ("自転車店の主人に、部品を取り替えればまだ長く乗れると勧められたから", "勧められ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(_on(sentence, piece), {_PASSIVE})
+
+    def test_the_potential(self) -> None:
+        for sentence, piece in (
+                ("しかし、私にとって外国語を学ぶいちばんの楽しさは、ほかの国の人の考え方にふれられる点だ。", "ふれられる"),
+                ("あしたの面接で長所や短所を聞かれたら、うまく答えられるか不安でならない。", "答えられる"),
+                ("今は、新しい映画も少し待てば家で見られるようになった。", "見られる"),
+                ("必要な材料さえ集まれば、来月から製品の製造を始められる。", "始められる"),
+                ("皆さんが支えてくださればこそ、この仕事をやりとげられたのです。", "やりとげられ"),
+                ("忘れられるものなら、あの日のことは忘れたい。", "忘れられる"),
+                ("次の駅で、八時の特急に乗りかえられるかな。", "乗りかえられる"),
+                ("誰でも簡単に用いられる方法だ。", "用いられる"),
+                # (and as before: a negative, a wish to proceed that cannot)
+                ("朝早く起きられない。", "起きられ"),
+                ("雪崩で道路が封鎖され、救援物資を届けようにも届けられない状況が続いている。", "届けられ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(_on(sentence, piece), {_POTENTIAL})
+
+    def test_both_where_nothing_decides(self) -> None:
+        for sentence, piece in (("ふれられる", "ふれられる"), ("決められる", "決められる"),
+                                ("この橋は心強く作られているので、地震にも耐えられる。", "耐えられる"),
+                                ("手に入らない日があるから、手に入る日の喜びも感じられる。", "感じられる")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(_on(sentence, piece), {_PASSIVE, _POTENTIAL})
+
+
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheTeOfACauseTests(unittest.TestCase):
     """Plan 296: a て whose clause is what a thing went through, or what
