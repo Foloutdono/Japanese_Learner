@@ -169,9 +169,9 @@ describe('buildBookmarklet', () => {
     expect(src).toContain("languageCode==='ja'&&t.kind!=='asr'")
     expect(src).toContain("languageCode==='ja'&&t.kind==='asr'")
     expect(src).toContain("'&fmt=srv3'")
-    // And the video's own translation, hand-written, in the app's two
-    // languages (plan 242).
-    expect(src).toContain('["fr","en"]')
+    // And the video's own translation, hand-written, in the app's three
+    // languages (plan 242; Spanish, plan 291).
+    expect(src).toContain('["fr","en","es"]')
     expect(src).toContain("t.kind!=='asr'&&(t.languageCode===L")
     expect(src).toContain('t:tr')
     expect(src).toContain('#grab=v3.')
