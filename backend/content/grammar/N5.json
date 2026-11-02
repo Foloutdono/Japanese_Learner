@@ -9905,7 +9905,7 @@
           "ask": {
             "en": "Your teacher says the homework has to be handed in tomorrow, with no exceptions. You tell your host mother what you have to do.",
             "fr": "Ton professeur dit que les devoirs sont à rendre demain, sans exception. Tu dis à ta mère d'accueil ce que tu dois faire.",
-            "es": "Tu profesor dice que la tarea se entrega mañana, sin excepciones. Le cuentas a tu madre de acogida lo que tienes que hacer."
+            "es": "Tu profesor dice que la tarea se entrega mañana, sin excepciones. Le cuentas a tu madre anfitriona lo que tienes que hacer."
           },
           "choices": [
             "あした、しゅくだいを出さなければなりません。",
@@ -20060,7 +20060,7 @@
           "tr": {
             "en": "I'm poor at drawing, but I love doing it.",
             "fr": "Le dessin n'est pas mon fort, mais j'adore dessiner.",
-            "es": "Se me da mal dibujar, pero me encanta hacerlo."
+            "es": "Dibujo mal, pero me encanta hacerlo."
           },
           "choices": [
             {
@@ -26837,7 +26837,7 @@
           "tr": {
             "en": "I can ski, but I'm not very good at it.",
             "fr": "Je sais skier, mais je ne skie pas très bien.",
-            "es": "Sé esquiar, pero no se me da muy bien."
+            "es": "Sé esquiar, pero no muy bien."
           },
           "choices": [
             {

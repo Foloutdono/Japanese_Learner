@@ -118,10 +118,10 @@
       "Il le lui recommandait sur le site de la boutique"
      ],
      "es": [
-      "Lo ponía en un sitio del estante donde destacara",
+      "Lo ponía en un lugar del estante donde destacara",
       "Se lo apartaba detrás del mostrador",
       "Se lo encargaba a la editorial",
-      "Se lo recomendaba en la web de la tienda"
+      "Se lo recomendaba en la página web de la tienda"
      ]
     },
     "correct": 0
@@ -205,8 +205,8 @@
       "L'absence de successeur"
      ],
      "es": [
-      "Una subida del alquiler de la tienda",
-      "Una bajada de las ventas de la tienda",
+      "Un aumento del alquiler de la tienda",
+      "Una caída de las ventas de la tienda",
       "La avanzada edad del dueño",
       "La falta de un sucesor"
      ]
@@ -236,7 +236,7 @@
      "es": [
       "Verse obligado a cerrar, contra su voluntad",
       "Decidir cerrar mientras las ventas aún van bien",
-      "Que el ayuntamiento le prohíba cerrar",
+      "Que la municipalidad le prohíba cerrar",
       "Planear cerrar en una fecha posterior"
      ]
     },
@@ -351,8 +351,8 @@
      ],
      "es": [
       "Reflexivo, con una sensación de pérdida",
-      "Enfadado, culpando a las tiendas en línea",
-      "Esperanzado sobre el futuro de las tiendas pequeñas",
+      "Enojado, culpando a las tiendas en línea",
+      "Esperanzado con el futuro de las tiendas pequeñas",
       "Neutral, se limita a dar cifras"
      ]
     },
@@ -1570,7 +1570,7 @@
      ],
      "es": [
       "En ver las cosas desde dentro de la otra cultura",
-      "En poder arreglárselas sin máquina",
+      "En poder arreglárselas sin una máquina",
       "En traducir con más precisión que una máquina",
       "En hacerse entender al viajar al extranjero"
      ]
@@ -2862,7 +2862,7 @@
      "es": [
       "Las normas impedían a las mujeres estudiar medicina",
       "No podía pagar la matrícula de la escuela",
-      "Suspendió el examen en su primer intento",
+      "No aprobó el examen en su primer intento",
       "Su familia no la dejaba seguir estudiando"
      ]
     },
@@ -2948,7 +2948,7 @@
      ],
      "es": [
       "Llegó a serlo por fin, tras un largo proceso",
-      "Lo fue de la noche a la mañana, por pura suerte",
+      "Lo logró de la noche a la mañana, por pura suerte",
       "Lo rechazó cuando se lo ofrecieron",
       "Estaba a punto de llegar a serlo"
      ]
@@ -4283,10 +4283,10 @@
       "Pour remercier le maître d'un bol reçu récemment"
      ],
      "es": [
-      "Para anunciar que por fin ya tiene un horno de su propiedad",
+      "Para anunciar que por fin tiene un horno de su propiedad",
       "Para pedir al maestro que venga a ver el nuevo taller",
       "Para disculparse por dejar el taller hace diez años",
-      "Para agradecer al maestro un cuenco recibido hace poco"
+      "Para agradecer al maestro un tazón recibido hace poco"
      ]
     },
     "correct": 0
@@ -4325,7 +4325,7 @@
     "question": {
      "en": "What did the teacher scold the writer for, time and again?",
      "fr": "Que reprochait sans cesse le maître à son élève ?",
-     "es": "¿Por qué reñía una y otra vez el maestro al autor?"
+     "es": "¿Por qué regañaba una y otra vez el maestro al autor?"
     },
     "options": {
      "en": [
@@ -4430,7 +4430,7 @@
      "es": [
       "Una sensación de urgencia ansiosa",
       "Un orgullo tranquilo por la propia destreza",
-      "Enfado por ser tratado injustamente",
+      "Enojo por ser tratado injustamente",
       "Cansancio tras largas horas de trabajo"
      ]
     },
@@ -4515,8 +4515,8 @@
       "Il dessine la forme de la pièce"
      ],
      "es": [
-      "Toca el barro, lo primero de todo",
-      "Vuelve a mirar el cuenco",
+      "Primero que nada, toca el barro",
+      "Vuelve a mirar el tazón",
       "Relee las cartas del maestro",
       "Hace un boceto de la forma de la pieza"
      ]
@@ -4545,9 +4545,9 @@
      ],
      "es": [
       "La forma de trabajar del maestro se había vuelto la suya propia",
-      "El maestro había ayudado en secreto a hacer el cuenco",
-      "Era un cuenco que el maestro había hecho hacía mucho",
-      "El autor había copiado la forma de los cuencos del maestro"
+      "El maestro había ayudado en secreto a hacer el tazón",
+      "Era un tazón que el maestro había hecho hacía mucho",
+      "El autor había copiado la forma de los tazones del maestro"
      ]
     },
     "correct": 0
@@ -4602,7 +4602,7 @@
       "De l'inquiétude, car le maître est malade"
      ],
      "es": [
-      "Gratitud, y emoción de que sus lecciones perduren",
+      "Gratitud y emoción al ver que sus lecciones perduran",
       "Rencor por haber sido regañado tan a menudo",
       "Indiferencia: escribe solo por cortesía",
       "Preocupación, porque se sabe que el maestro está enfermo"
@@ -5675,8 +5675,8 @@
       "Ce que la famille espérait qu'elle en ferait"
      ],
      "es": [
-      "Lo que esperaba la familia, y resultó equivocado",
-      "Lo que esperaba la familia, y resultó acertado",
+      "Lo que esperaba la familia, y que resultó equivocado",
+      "Lo que esperaba la familia, y que resultó acertado",
       "Lo que la propia abuela pensaba hacer",
       "Lo que la familia esperaba que hiciera con él"
      ]
@@ -5765,7 +5765,7 @@
       "En cuanto el narrador abre la puerta",
       "Tanto si el narrador abre la puerta como si no",
       "Poco antes de que el narrador abra la puerta",
-      "Solo si el narrador se acuerda de abrir"
+      "Solo si el narrador se acuerda de abrirla"
      ]
     },
     "correct": 0
@@ -5791,7 +5791,7 @@
       "De ses inquiétudes à vivre seule"
      ],
      "es": [
-      "De las flores de su jardín y un gato del barrio",
+      "De las flores de su jardín y de un gato del barrio",
       "De lo difícil que le resulta usar el teléfono",
       "De las fotos que la familia le manda al teléfono",
       "De su preocupación por vivir sola"
@@ -6009,7 +6009,7 @@
       "meaning": {
        "en": "no good at",
        "fr": "pas doué pour",
-       "es": "se le dan mal"
+       "es": "no es buena para"
       }
      },
      {
@@ -7105,9 +7105,9 @@
       "Échéance, délai"
      ],
      "es": [
-      "Posibilidad, perspectiva",
+      "Posibilidad, probabilidad",
       "Primer borrador, esquema",
-      "Aspecto exterior, maquetación",
+      "Aspecto exterior, diseño",
       "Fecha límite, plazo"
      ]
     },
@@ -7137,7 +7137,7 @@
       "Les ahorra cometer el mismo error otra vez",
       "Les muestra de qué revistas mantenerse alejados",
       "Demuestra que el método funcionará la próxima vez",
-      "Les ayuda a conseguir más financiación"
+      "Los ayuda a conseguir más fondos"
      ]
     },
     "correct": 0
@@ -7310,7 +7310,7 @@
      "es": [
       "Ocultar los fracasos deja una imagen incompleta",
       "La mayoría de los artículos científicos quedan a medias",
-      "Los científicos cuentan historias en lugar de informar de hechos",
+      "Los científicos cuentan historias en lugar de informar sobre hechos",
       "Solo la mitad de los experimentos fracasa"
      ]
     },
@@ -7337,7 +7337,7 @@
       "Il y voit une menace pour la liberté des chercheurs"
      ],
      "es": [
-      "Lo acoge con agrado como un paso para que se cuenten los fracasos",
+      "Lo celebra como un paso para que se cuenten los fracasos",
       "Lo pone en duda, porque frena la investigación",
       "Cree que sirve sobre todo a los intereses de las revistas",
       "Lo ve como una amenaza a la libertad de los investigadores"
@@ -8452,7 +8452,7 @@
       "El mismo día",
       "El día anterior",
       "Dentro de la semana",
-      "Al día siguiente"
+      "El día siguiente"
      ]
     },
     "correct": 3
@@ -8479,7 +8479,7 @@
      ],
      "es": [
       "La respuesta a la carta de un amigo",
-      "Una ambulancia por una enfermedad súbita",
+      "Una ambulancia ante una enfermedad repentina",
       "El tiempo que se tarda en elegir una palabra",
       "Un viaje en tren a una ciudad lejana"
      ]
@@ -8597,7 +8597,7 @@
       "Escribía enseguida otra carta",
       "Volvía a repasar sus propias palabras",
       "Iba a ver a la otra persona",
-      "Se olvidaba de lo que les había escrito"
+      "Se olvidaba de lo que había escrito"
      ]
     },
     "correct": 1
@@ -8683,7 +8683,7 @@
      "es": [
       "Hay que rechazarla siempre que se pueda",
       "Ha resuelto la mayoría de nuestros problemas",
-      "Tiene un precio oculto que vale la pena ver",
+      "Tiene un precio oculto que vale la pena notar",
       "Solo importa en las emergencias"
      ]
     },
@@ -9865,7 +9865,7 @@
      "es": [
       "Respeto por una tarea que jamás será perfecta",
       "Decepción porque pierden tanto",
-      "Duda de que su trabajo haga de verdad alguna falta",
+      "Duda de que su trabajo sea realmente necesario",
       "Envidia por todas las lenguas que saben"
      ]
     },
@@ -10929,7 +10929,7 @@
      "es": [
       "Unos pocos habitantes muy ricos elevan la cifra",
       "La mayoría de sus habitantes tiene un buen sueldo",
-      "Los precios allí son más altos que en otros sitios",
+      "Los precios allí son más altos que en otros lugares",
       "Solo se ha contado a los adultos que trabajan"
      ]
     },
@@ -11043,7 +11043,7 @@
       "En comptant comme normaux"
      ],
      "es": [
-      "Tomando en consideración",
+      "Teniendo en cuenta",
       "Dejando de lado",
       "Corrigiendo",
       "Contando como normales"
@@ -11133,7 +11133,7 @@
       "Fiarse de ellas más que de las historias personales",
       "Usarlas, pero nunca por sí solas",
       "Dejar de confiar en ellas por completo",
-      "Mirar la media y nada más"
+      "Mirar el promedio y nada más"
      ]
     },
     "correct": 1
@@ -12025,7 +12025,7 @@
      ],
      "es": [
       "Planes para sustituir casas viejas por otras nuevas",
-      "Las visitas turísticas a ciudades antiguas",
+      "Visitas turísticas a ciudades antiguas",
       "Iniciativas para conservar los barrios antiguos",
       "Tiendas nuevas en calles antiguas"
      ]
@@ -12111,9 +12111,9 @@
       "Parce que les habitants se plaignent de désagréments"
      ],
      "es": [
-      "Sin prestar ninguna atención a las molestias de los vecinos",
-      "Cuidando mucho las molestias de los vecinos",
-      "Trasladando a otro sitio las molestias de los vecinos",
+      "Sin prestar atención a las molestias de los vecinos",
+      "Ocupándose con esmero de las molestias de los vecinos",
+      "Trasladando a otro lugar las molestias de los vecinos",
       "Porque los vecinos se quejan de molestias"
      ]
     },
@@ -12316,7 +12316,7 @@
      "es": [
       "Convertir las ciudades antiguas en museos al aire libre",
       "Reconstruir las ciudades antiguas tal como eran",
-      "Dejar que los edificios antiguos se arruinen",
+      "Dejar que los edificios antiguos queden en ruinas",
       "Permitir a los vecinos que modernicen sus viviendas"
      ]
     },
@@ -14520,7 +14520,7 @@
       "Lire des avis sans s'inscrire"
      ],
      "es": [
-      "Averiguar quién escribió un mensaje dado",
+      "Averiguar quién escribió cualquier mensaje",
       "Dar su opinión sin decir su nombre",
       "Publicar con el nombre de otro",
       "Leer opiniones sin registrarse"
@@ -14549,7 +14549,7 @@
       "Demander conseil à sa propre famille"
      ],
      "es": [
-      "Destapar irregularidades laborales",
+      "Destapar irregularidades en el trabajo",
       "Dar a conocer mejor su verdadero nombre",
       "Resolver una pelea con un colega",
       "Pedir consejo a su propia familia"
@@ -14637,7 +14637,7 @@
      ],
      "es": [
       "Para mostrar que los débiles también atacan",
-      "Para mostrar que una misma protección sirve a dos fines opuestos",
+      "Para mostrar que una protección sirve a fines opuestos",
       "Para mostrar que ya no hacen falta escudos",
       "Para mostrar que el nombre real protege mejor"
      ]
@@ -14784,7 +14784,7 @@
       "Estar en juego",
       "Mantenerse en secreto",
       "Someterse a votación",
-      "Ser culpado"
+      "Recibir la culpa"
      ]
     },
     "correct": 0
@@ -15916,7 +15916,7 @@
      "es": [
       "Contemplarlo en silencio",
       "Describirlo en una carta",
-      "Pedir que nos hagan una foto",
+      "Pedir que nos tomen una foto",
       "Alzar el teléfono"
      ]
     },
@@ -16001,9 +16001,9 @@
       "Les deux groupes retenaient autant"
      ],
      "es": [
-      "Quienes hacían fotos recordaban más cosas del museo",
-      "Quienes hacían fotos recordaban menos detalles",
-      "Mirar cansaba más que hacer fotos",
+      "Quienes tomaban fotos recordaban más cosas del museo",
+      "Quienes tomaban fotos recordaban menos detalles",
+      "Mirar cansaba más que tomar fotos",
       "Ambos grupos recordaban lo mismo"
      ]
     },
@@ -16088,7 +16088,7 @@
       "Des routes qu'il a longtemps parcourues"
      ],
      "es": [
-      "Fotos que el autor volvió a ver más",
+      "Fotos que el autor miró más veces",
       "Museos que el autor visitó con unos amigos",
       "Escenas que el autor nunca fotografió",
       "Caminos que el autor recorrió más tiempo"
@@ -16175,10 +16175,10 @@
       "L'auteur regrette l'absence de photo"
      ],
      "es": [
-      "Deberíamos hacer mejores fotos",
+      "Deberíamos tomar mejores fotos",
       "La memoria es menos fiable que las fotos",
       "No registrar las cosas quizá nos ayude a recordar",
-      "El autor lamenta no haber hecho ninguna foto"
+      "El autor lamenta no haber tomado ninguna foto"
      ]
     },
     "correct": 2
@@ -16233,9 +16233,9 @@
       "Cela lui est indifférent"
      ],
      "es": [
-      "Molesto con la gente que las hace",
+      "Molesto con la gente que las toma",
       "Duda de que ayude a recordar",
-      "Orgulloso de las fotos que ha hecho",
+      "Orgulloso de las fotos que ha tomado",
       "Le es indiferente"
      ]
     },
@@ -16367,7 +16367,7 @@
     "translation": {
      "en": "Yet we look back at the photos we took surprisingly rarely.",
      "fr": "Pourtant, il est étonnamment rare qu'on revoie ensuite les photos prises.",
-     "es": "Sin embargo, es sorprendente lo poco que volvemos a mirar después las fotos que hicimos."
+     "es": "Sin embargo, es sorprendente lo poco que volvemos a mirar después las fotos que tomamos."
     },
     "note": {
      "en": "「意外なほど」, to a surprising degree, means surprisingly; 「見返す」 is to look at something again.",
@@ -17286,7 +17286,7 @@
      "es": [
       "Cada pieza varía un poco de forma",
       "Es más fina y ligera que la vajilla hecha a mano",
-      "Ninguna pieza difiere en forma ni en grosor",
+      "Ninguna pieza difiere de otra en forma ni en grosor",
       "La hacen artesanos reconocidos"
      ]
     },
@@ -17372,7 +17372,7 @@
      ],
      "es": [
       "Son todavía más precisas que las hechas a máquina",
-      "Pequeños defectos dan a cada pieza su carácter",
+      "Pequeños defectos dan a cada pieza su propio carácter",
       "Cuestan menos que las hechas a máquina",
       "Grandes maestros las firman todas"
      ]
@@ -17487,10 +17487,10 @@
       "La plupart préfèrent les bols de série"
      ],
      "es": [
-      "Los cuencos son lo más difícil de fabricar",
+      "Los tazones de arroz son lo más difícil de fabricar",
       "Cada compra cotidiana es una elección sobre la artesanía",
-      "Los cuencos hechos a mano ya cuestan tan poco como los demás",
-      "La mayoría prefiere los cuencos hechos a máquina"
+      "Los tazones hechos a mano ya cuestan tan poco como los demás",
+      "La mayoría prefiere los tazones hechos a máquina"
      ]
     },
     "correct": 1
@@ -17577,7 +17577,7 @@
       "Las máquinas pronto sustituirán a todos los artesanos",
       "Habría que abaratar lo hecho a mano",
       "La precisión importa más que el carácter",
-      "Lo artesanal solo vive si el comprador lo elige"
+      "Lo artesanal solo sobrevive si el comprador lo elige"
      ]
     },
     "correct": 3
@@ -18772,9 +18772,9 @@
      ],
      "es": [
       "A través de las cartas que se escribían las dos hermanas",
-      "A través de la hermana mayor recordando en su vejez",
+      "A través de la hermana mayor, que recuerda en su vejez",
       "A través de aldeanos que recuerdan la construcción de la presa",
-      "A través de la hermana menor mientras lee el diario de su hermana"
+      "A través de la hermana menor, que lee el diario de su hermana"
      ]
     },
     "correct": 3
@@ -18859,7 +18859,7 @@
      ],
      "es": [
       "El comienzo de la obra",
-      "El pasaje más flojo de la obra",
+      "La parte más floja de la obra",
       "La última página de la obra",
       "La mejor parte de la obra"
      ]
@@ -19035,7 +19035,7 @@
       "Prometedora, pero aún no vale la pena leerla",
       "Impecable de la primera a la última página",
       "Imperfecta, pero sobresaliente",
-      "Conmovedora, pero corta para ser novela"
+      "Conmovedora, pero demasiado corta para una novela"
      ]
     },
     "correct": 2
@@ -20377,7 +20377,7 @@
       "Pour suggérer que les rêves révèlent l'avenir"
      ],
      "es": [
-      "Para mostrar que entonces se sentía como nosotros",
+      "Para mostrar que la gente de entonces sentía como nosotros",
       "Para explicar por qué se escribían los viejos poemas de amor",
       "Como ejemplo de una sensibilidad lejana a la nuestra",
       "Para sugerir que los sueños pueden revelar el futuro"
@@ -22815,7 +22815,7 @@
      ],
      "es": [
       "Comprar para otra persona",
-      "Comprar más de lo que se acaba",
+      "Reponer lo que se acaba",
       "Comprar por capricho",
       "Devolver una compra"
      ]
@@ -22901,7 +22901,7 @@
       "Elle remercie l'auteur chaque jour"
      ],
      "es": [
-      "Sabe qué hay en la nevera",
+      "Sabe qué hay en el refrigerador",
       "Pregunta qué hay de cenar",
       "Cocina la cena por turnos",
       "Agradece al autor cada día"
@@ -23017,7 +23017,7 @@
       "Acheter des machines pour le ménage"
      ],
      "es": [
-      "Pagar ayuda para las tareas domésticas",
+      "Contratar ayuda para las tareas domésticas",
       "Dar un nombre a las tareas invisibles",
       "Agradecer a la familia su ayuda",
       "Comprar máquinas para las tareas de casa"
@@ -23046,9 +23046,9 @@
       "Savoir ce qu'il contient est un travail invisible"
      ],
      "es": [
-      "La familia suele olvidar cerrarla",
+      "La familia suele olvidar cerrarlo",
       "Comprar comida es la tarea que el autor más odia",
-      "La familia la llena de tentempiés",
+      "La familia lo llena de cosas para picar",
       "Saber qué contiene es un trabajo invisible"
      ]
     },
@@ -23075,9 +23075,9 @@
       "Neutre, comme un simple relevé de chiffres"
      ],
      "es": [
-      "Irónico, con un deje de queja",
+      "Irónico, con un dejo de queja",
       "Furioso, con ganas de irse de casa",
-      "Admirado por su esfuerzo",
+      "Lleno de admiración por su esfuerzo",
       "Neutro, como una simple lista de cifras"
      ]
     },
@@ -24124,7 +24124,7 @@
       "En travaillant en groupe sur des cas réels"
      ],
      "es": [
-      "Leyendo mucho sobre cada una de sus asignaturas",
+      "Leyendo mucho sobre cada una de sus materias",
       "Preguntando a los profesores por qué cada respuesta es correcta",
       "Analizando las preguntas de años anteriores y repitiendo métodos",
       "Trabajando en grupo con problemas de la vida real"
@@ -24359,7 +24359,7 @@
       "Habría que suprimir los exámenes",
       "La eficiencia es todo lo que necesita la escuela",
       "Estudiar con eficacia para el examen no es suficiente",
-      "Los alumnos deberían dejar pronto la escuela"
+      "Los alumnos deberían dejar la escuela antes de tiempo"
      ]
     },
     "correct": 2
@@ -25514,7 +25514,7 @@
       "Su vista se debilita con los años",
       "Se sienten menos seguras",
       "Se altera su ritmo de sueño",
-      "Gastan más en la factura de la luz"
+      "Gastan más en el recibo de la luz"
      ]
     },
     "correct": 2
@@ -25542,7 +25542,7 @@
      "es": [
       "Cegados para siempre por el resplandor",
       "Desorientados, pierden el rumbo",
-      "Despertados demasiado pronto",
+      "Despertados demasiado temprano",
       "Calentados por las lámparas"
      ]
     },
@@ -26906,7 +26906,7 @@
       "A eu un mouvement de recul"
      ],
      "es": [
-      "Se enfadó y replicó",
+      "Se enojó y replicó",
       "Fingió no haberse dado cuenta",
       "Se sintió aliviado y se calmó",
       "Se quedó desconcertado y retrocedió"
@@ -27023,7 +27023,7 @@
      ],
      "es": [
       "Lo hacen igual que sus mayores",
-      "Lo hacen a su manera, según lo que son",
+      "Lo hacen a su manera, a su medida",
       "Solo lo hacen cuando se lo piden",
       "Lo hacen mucho peor de lo que creen"
      ]
@@ -28207,7 +28207,7 @@
      ],
      "es": [
       "Ir a pie a las tiendas y leer la letra pequeña",
-      "Cargar bultos pesados y subir escaleras de un tirón",
+      "Cargar bolsas pesadas y subir escaleras de un tirón",
       "Salir sin compañía y ocuparse del jardín",
       "Recordar nombres y hallar el camino de vuelta a casa"
      ]
@@ -28266,7 +28266,7 @@
      "es": [
       "Encerrarse en casa",
       "Irse a vivir con su familia",
-      "Pagar a alguien para que hiciera la compra",
+      "Pagar a alguien para que hiciera las compras",
       "No salir hasta tarde por la noche"
      ]
     },
@@ -28440,7 +28440,7 @@
      "es": [
       "Ya no es de mi agrado",
       "Ya no se espera de mí",
-      "Ya no merece la pena el esfuerzo",
+      "Ya no vale la pena el esfuerzo",
       "Ya no está en mi poder"
      ]
     },
@@ -29632,7 +29632,7 @@
      ],
      "es": [
       "Trabajando más duro que todos los demás",
-      "Gracias a un maestro que los descubrió pronto",
+      "Gracias a un maestro que los descubrió temprano",
       "Tras muchos fracasos en sus primeros años",
       "Sin pasar por verdaderas dificultades"
      ]
@@ -31183,7 +31183,7 @@
      "es": [
       "Se abren más colegios electorales",
       "Se da prioridad a las políticas para los mayores",
-      "Las elecciones se celebran con menos frecuencia",
+      "Las elecciones se realizan con menos frecuencia",
       "Se presentan candidatos jóvenes"
      ]
     },
@@ -31300,7 +31300,7 @@
       "Votar debería ser obligatorio para los jóvenes",
       "Cada parte debe actuar, no solo los jóvenes",
       "Los jóvenes son los principales culpables de la abstención",
-      "La baja participación es natural y no preocupa"
+      "La baja participación es natural y no es preocupante"
      ]
     },
     "correct": 1
@@ -32424,9 +32424,9 @@
      ],
      "es": [
       "Los aviones son más peligrosos y por eso dan más miedo",
-      "Ambos son igual de peligrosos, pero los coches dan más miedo",
-      "Los coches son más seguros que los aviones en trayectos cortos",
-      "Los coches son más peligrosos, aunque los aviones dan más miedo"
+      "Ambos son igual de peligrosos, pero los autos dan más miedo",
+      "Los autos son más seguros que los aviones en trayectos cortos",
+      "Los autos son más peligrosos, aunque los aviones dan más miedo"
      ]
     },
     "correct": 3
@@ -32482,7 +32482,7 @@
      ],
      "es": [
       "No se puede descartar lo peor",
-      "Lo peor va a ocurrir sin falta",
+      "Lo peor ocurrirá sin remedio",
       "Lo peor ya ha ocurrido",
       "Lo peor siempre puede evitarse"
      ]
@@ -32568,7 +32568,7 @@
       "La sécurité et la tranquillité d'esprit"
      ],
      "es": [
-      "A los coches y los aviones",
+      "A los autos y los aviones",
       "A los consumidores y los productores",
       "Al autor y al lector",
       "A la seguridad y la tranquilidad"
@@ -33776,7 +33776,7 @@
      ],
      "es": [
       "Sale una nueva edición del diccionario",
-      "Los estudiosos listan las palabras que han muerto",
+      "Los estudiosos enumeran las palabras que han muerto",
       "Se anuncian las últimas palabras de moda",
       "La televisión deja de usar las palabras tenidas por jerga"
      ]
@@ -33922,7 +33922,7 @@
      "es": [
       "Errores que se cometen al hablar",
       "Palabras tomadas de otras lenguas",
-      "Cambios que se suceden uno tras otro con el paso del tiempo",
+      "Cambios que se suceden con el paso del tiempo",
       "Reglas de gramática que se enseñan en la escuela"
      ]
     },
@@ -34037,9 +34037,9 @@
      ],
      "es": [
       "De acuerdo, pues las palabras de moda estropean el idioma",
-      "Poco convencido, pues el idioma siempre ha cambiado de esta manera",
+      "Poco convencido, pues el idioma siempre ha cambiado así",
       "Indiferente, pues la cuestión no merece discusión",
-      "Enfadado, pues culpan a los jóvenes de todo cambio"
+      "Enojado, pues culpan a los jóvenes de todo cambio"
      ]
     },
     "correct": 1
@@ -34097,7 +34097,7 @@
       "Una palabra debe protegerse en cuanto entra en el diccionario",
       "Las palabras de moda deberían elegirse con mucho más cuidado",
       "Los adultos deberían dejar de tomar prestadas las palabras de los jóvenes",
-      "Una palabra que se apaga simplemente ha cumplido su tiempo"
+      "Una palabra que se apaga simplemente ha cumplido su ciclo"
      ]
     },
     "correct": 3
@@ -35422,7 +35422,7 @@
       "On les parcourt trop vite pour voir quoi que ce soit"
      ],
      "es": [
-      "Uno mira la flecha, no lo que le rodea",
+      "Uno mira la flecha, no lo que lo rodea",
       "Las rutas elegidas son siempre las mismas",
       "La pantalla cansa los ojos demasiado deprisa",
       "Se recorren demasiado deprisa para ver nada"
@@ -37888,7 +37888,7 @@
      "es": [
       "Empleados protestando frente a la sede central",
       "Periodistas esperando ante la casa del presidente",
-      "Directivos en fila que se inclinan hondo",
+      "Directivos en fila inclinándose profundamente",
       "Clientes devolviendo los productos de la empresa"
      ]
     },
@@ -38149,8 +38149,8 @@
      "es": [
       "Lo profunda y larga que sea la reverencia",
       "La soltura con que se lee el comunicado",
-      "Lo que se cambia una vez pasada la rueda de prensa",
-      "Cuántos periodistas asisten a la rueda de prensa"
+      "Lo que se cambia después de la conferencia de prensa",
+      "Cuántos periodistas asisten a la conferencia de prensa"
      ]
     },
     "correct": 2
@@ -39237,7 +39237,7 @@
      "es": [
       "Siempre acaban saliendo bien",
       "Son la forma más segura de evitar el fracaso",
-      "Deberían mirar a diez años vista",
+      "Deberían proyectarse a diez años",
       "No saldrán necesariamente tal como se pretende"
      ]
     },
@@ -39409,7 +39409,7 @@
       "Demander conseil aux autres"
      ],
      "es": [
-      "Compartir ampliamente las preocupaciones",
+      "Compartir con todos las preocupaciones",
       "Cargar con un peso uno solo",
       "Huir de un problema",
       "Pedir consejo a los demás"
@@ -39497,7 +39497,7 @@
      ],
      "es": [
       "El patio de la escuela estará abierto al público",
-      "Los graduados podrán volver a repetir clases",
+      "Los graduados podrán volver para repetir clases",
       "La puerta nunca se cierra con llave, ni de noche",
       "La escuela seguirá ayudándolos después de que se vayan"
      ]

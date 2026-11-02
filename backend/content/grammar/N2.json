@@ -7535,7 +7535,7 @@
             "jp": "本当だ。写真をとらずにはいられないね。",
             "en": "So you can. I can't help taking a picture.",
             "fr": "C'est vrai. Je ne peux pas m'empêcher de prendre une photo.",
-            "es": "Es verdad. No puedo evitar hacerle una foto."
+            "es": "Es verdad. No puedo evitar tomarle una foto."
           },
           {
             "who": "them",
@@ -10346,7 +10346,7 @@
           "tr": {
             "en": "I'm confident when it comes to saving money, but I'm bad at cooking.",
             "fr": "Pour ce qui est d'économiser, j'ai confiance en moi, mais la cuisine n'est pas mon point fort.",
-            "es": "En cuanto a ahorrar, me tengo confianza, pero la cocina se me da mal."
+            "es": "En cuanto a ahorrar, me tengo confianza, pero la cocina no es lo mío."
           },
           "choices": [
             {
@@ -18942,7 +18942,7 @@
         "kind": "rule",
         "en": "**noun + を契機に (をけいきに)** means « taking that as the turning point »: the formal をきっかけに. 入学を契機に (starting school was the turning point). Also を契機として.",
         "fr": "**nom + を契機に (をけいきに)** signifie « en prenant cela pour tournant » : le をきっかけに formel. 入学を契機に (l'entrée à l'école a été le tournant). Aussi を契機として.",
-        "es": "**sustantivo + を契機に (をけいきに)** significa «tomando eso como punto de inflexión»: el をきっかけに formal. 入学を契機に (entrar en la escuela fue el punto de inflexión). También を契機として."
+        "es": "**sustantivo + を契機に (をけいきに)** significa «tomando eso como punto de inflexión»: el をきっかけに formal. 入学を契機に (entrar a la escuela fue el punto de inflexión). También を契機として."
       },
       {
         "kind": "use",
@@ -45771,7 +45771,7 @@
           "tr": {
             "en": "I was just about to call you myself.",
             "fr": "J'étais justement sur le point de vous appeler.",
-            "es": "Justo iba a llamarle yo."
+            "es": "Justo iba a llamarlo yo."
           },
           "ask": {
             "en": "ようとしていたところだった. A close call?",

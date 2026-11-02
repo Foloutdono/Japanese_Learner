@@ -153,15 +153,19 @@ not yet written in Spanish reads English**, never French and never blank.
   tomar — never coger); the preterite for a finished past; no leísmo;
   no vosotros, no voseo; usted where a scene calls for it. Figures are
   es-419's (2,000; 3.5), on the screens (`intlLocale`), in the breakdown
-  (`analysis._es_figure`) and on the landing page alike. Quotes are «…»
+  (`analysis._es_figure`), on the landing page and in the content
+  (1,000 yenes; 37.8) alike. Quotes are «…»
   tight, “…” inside them, and a sentence's period after the closing one
   («Está Tom».), as the RAE writes them.
 - **The review** (the last wave): every Spanish string was swept by
   script (wrong forms, leaks, punctuation, regional words) and read by
   native-speaker reviewers — in full for the interface, the pages, the
   decks, the grammar catalogue's lessons and the banks; in samples for
-  the drills, the comprehension seeds and the JMdict layer, whose
-  regional words were then corrected on every line. KANJIDIC2's Spanish
+  the drills, the comprehension passages and the JMdict layer, whose
+  regional words were then corrected on every line. The comprehension
+  questions' 6,960 options were then read in full, held to the seeds'
+  rules (no right option given away by its length, its form or an echo
+  of its question). KANJIDIC2's Spanish
   proved unreliable for the deck's kanji (a missing first sense, English
   read in the wrong sense, a lookalike's meaning), so the deck's
   corrected lines live in `kanji_meanings_es.json` and override it.

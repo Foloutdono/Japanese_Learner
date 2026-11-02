@@ -9774,7 +9774,7 @@
           "tr": {
             "en": "My older sister is thinking of going to university next year.",
             "fr": "Ma grande sœur pense entrer à l'université l'année prochaine.",
-            "es": "Mi hermana mayor está pensando en entrar en la universidad el año que viene."
+            "es": "Mi hermana mayor está pensando en entrar a la universidad el año que viene."
           },
           "ask": {
             "en": "Whose plan is it?",
@@ -34887,12 +34887,12 @@
           "tr": {
             "en": "The person next to me kindly took a photo for me.",
             "fr": "La personne à côté de moi a eu la gentillesse de prendre une photo pour moi.",
-            "es": "La persona de al lado tuvo la amabilidad de hacerme una foto."
+            "es": "La persona de al lado tuvo la amabilidad de tomarme una foto."
           },
           "ask": {
             "en": "Who took the photo?",
             "fr": "Qui a pris la photo ?",
-            "es": "¿Quién hizo la foto?"
+            "es": "¿Quién tomó la foto?"
           },
           "choices": [
             {

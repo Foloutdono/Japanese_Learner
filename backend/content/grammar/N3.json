@@ -27591,18 +27591,18 @@
           "tr": {
             "en": "It was only after entering university that I rode a train alone.",
             "fr": "C'est seulement après mon entrée à l'université que j'ai pris le train sans que personne m'accompagne.",
-            "es": "No fue hasta entrar en la universidad cuando viajé en tren sin compañía."
+            "es": "No fue hasta entrar a la universidad cuando viajé en tren sin compañía."
           },
           "choices": [
             {
               "en": "After entering university.",
               "fr": "Après son entrée à l'université.",
-              "es": "Después de entrar en la universidad."
+              "es": "Después de entrar a la universidad."
             },
             {
               "en": "Before entering university.",
               "fr": "Avant son entrée à l'université.",
-              "es": "Antes de entrar en la universidad."
+              "es": "Antes de entrar a la universidad."
             },
             {
               "en": "Only on the day of the entrance ceremony.",

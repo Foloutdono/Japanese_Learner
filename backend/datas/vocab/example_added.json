@@ -3106,7 +3106,7 @@
     "jp": "「来月から上の部屋に住む者です。どうぞよろしくお願いします。」",
     "en": "\"I'll be living in the flat upstairs from next month. Pleased to meet you.\"",
     "fr": "« J'emménage dans l'appartement du dessus le mois prochain. Ravi de faire votre connaissance. »",
-    "es": "«A partir del mes que viene viviré en el apartamento de arriba. Encantado de conocerle»."
+    "es": "«A partir del mes que viene viviré en el apartamento de arriba. Encantado de conocerlo»."
    }
   ],
   "::どこ": [
@@ -3512,7 +3512,7 @@
     "jp": "一時間も並んだのに売り切れで、ばからしくて笑ってしまった。",
     "en": "I queued for a whole hour and it was sold out; it was so absurd I just had to laugh.",
     "fr": "J'ai fait la queue une heure entière pour rien, c'était épuisé : c'était tellement absurde que j'en ai ri.",
-    "es": "Estuve una hora entera en la cola y se había agotado todo; fue tan absurdo que me dio risa."
+    "es": "Estuve una hora entera en la fila y se había agotado todo; fue tan absurdo que me dio risa."
    }
   ],
   "::ひげ": [
@@ -5066,7 +5066,7 @@
     "jp": "今夜は、弟の大学入学のお祝いをします。",
     "en": "Tonight we're celebrating my little brother getting into university.",
     "fr": "Ce soir, nous fêtons l'entrée de mon petit frère à l'université.",
-    "es": "Esta noche celebramos que mi hermano menor entró en la universidad."
+    "es": "Esta noche celebramos que mi hermano menor entró a la universidad."
    }
   ],
   "お祭り::おまつり": [
@@ -5116,7 +5116,7 @@
     "jp": "さ来年、大学に入ります。",
     "en": "I will start university the year after next.",
     "fr": "J'entrerai à l'université dans deux ans.",
-    "es": "Dentro de dos años entraré en la universidad."
+    "es": "Dentro de dos años entraré a la universidad."
    },
    {
     "jp": "友だちはさ来年、アメリカへ行きます。",
@@ -6110,7 +6110,7 @@
     "jp": "うちの伜も、春から大学生になります。",
     "en": "My son is starting university this spring too.",
     "fr": "Mon fils entre lui aussi à l'université ce printemps.",
-    "es": "Mi hijo también entra en la universidad esta primavera."
+    "es": "Mi hijo también entra a la universidad esta primavera."
    },
    {
     "jp": "伜が店を継いでくれるので、安心しています。",
@@ -6838,7 +6838,7 @@
     "jp": "小学生の弟は、分数の計算が苦手だ。",
     "en": "My little brother, who is in elementary school, is bad at sums with fractions.",
     "fr": "Mon petit frère, qui est à l'école primaire, a du mal avec les calculs de fractions.",
-    "es": "A mi hermano menor, que está en primaria, se le dan mal los cálculos con fracciones."
+    "es": "A mi hermano menor, que está en primaria, le cuestan los cálculos con fracciones."
    },
    {
     "jp": "答えは小数ではなく、分数で書いてください。",
@@ -7076,7 +7076,7 @@
     "jp": "弟は足し算と引き算はできるが、割り算はまだ苦手だ。",
     "en": "My little brother can add and subtract, but he still struggles with division.",
     "fr": "Mon petit frère sait faire des additions et des soustractions, mais il a encore du mal avec les divisions.",
-    "es": "Mi hermano menor sabe sumar y restar, pero las divisiones todavía se le dan mal."
+    "es": "Mi hermano menor sabe sumar y restar, pero todavía le cuestan las divisiones."
    },
    {
     "jp": "割り算をして、一人いくら払えばいいか計算しよう。",
@@ -7664,7 +7664,7 @@
     "jp": "二人は同じ年に入社したので、今も同格の立場だ。",
     "en": "The two joined the company in the same year, so they still hold positions of the same rank.",
     "fr": "Tous deux sont entrés dans l'entreprise la même année, ils occupent donc toujours des postes de même rang.",
-    "es": "Los dos entraron en la empresa el mismo año, así que todavía ocupan puestos del mismo rango."
+    "es": "Los dos entraron a la empresa el mismo año, así que todavía ocupan puestos del mismo rango."
    },
    {
     "jp": "「妹のはな」の「の」は、同格を表している。",
@@ -9070,7 +9070,7 @@
     "jp": "彼は入社十年で幹部に選ばれた。",
     "en": "He was chosen for the executive staff ten years after joining the company.",
     "fr": "Il a été nommé cadre dirigeant dix ans après son entrée dans l'entreprise.",
-    "es": "Diez años después de entrar en la empresa, lo eligieron para formar parte de la directiva."
+    "es": "Diez años después de entrar a la empresa, lo eligieron para formar parte de la directiva."
    }
   ],
   "庁::ちょう": [
@@ -13026,7 +13026,7 @@
     "jp": "入社して最初の三年間は、社宅に住んでいた。",
     "en": "For the first three years after joining the company, I lived in company housing.",
     "fr": "Pendant mes trois premières années dans l'entreprise, j'ai vécu dans un logement de fonction.",
-    "es": "Durante los tres primeros años después de entrar en la empresa, residí en una vivienda de empresa."
+    "es": "Durante los tres primeros años después de entrar a la empresa, residí en una vivienda de empresa."
    },
    {
     "jp": "社宅は家賃が安いので、若い社員に人気がある。",

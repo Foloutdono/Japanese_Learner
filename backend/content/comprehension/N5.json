@@ -147,7 +147,7 @@
       "Chez un ami"
      ],
      "es": [
-      "En la biblioteca escolar",
+      "En la biblioteca de la escuela",
       "En el tren",
       "En el comedor de la escuela",
       "En casa de un amigo"
@@ -1191,7 +1191,7 @@
      ],
      "es": [
       "Lo que el autor quiere hacer",
-      "Lo que el autor ya ha hecho",
+      "Lo que el autor ya hizo",
       "Lo que el autor tiene que hacer",
       "Lo que quiere la madre del autor"
      ]
@@ -1249,7 +1249,7 @@
      ],
      "es": [
       "Porque era más barato que el azul",
-      "Porque el rojo es el color que le gusta a su madre",
+      "Porque a su madre le gusta el color rojo",
       "Porque su amigo dijo que el rojo era más bonito",
       "Porque en la tienda ya no quedaban azules"
      ]
@@ -3473,7 +3473,7 @@
       "La ville est aussi jolie que le parc"
      ],
      "es": [
-      "El parque es el lugar más bonito de toda la ciudad",
+      "El parque es el lugar más bonito de la ciudad",
       "El parque es más bonito que la estación",
       "El parque junto a la estación es bastante bonito",
       "La ciudad es tan bonita como el parque"
@@ -3589,7 +3589,7 @@
       "Elle dit à Yuki de se promener seul au parc"
      ],
      "es": [
-      "Le propone a Yuki dar un paseo juntos por el parque",
+      "Propone dar un paseo juntos por el parque",
       "Recuerda un paseo que dieron por el parque",
       "Pregunta si a Yuki le gusta pasear",
       "Le dice a Yuki que pasee por el parque él solo"
@@ -5764,10 +5764,10 @@
       "De 9 h à 19 h, fermée le dimanche"
      ],
      "es": [
-      "De 9 h a 19 h, cerrada los lunes",
-      "De 7 h a 21 h, cerrada los lunes",
-      "De 9 h a 19 h, abierta todos los días",
-      "De 9 h a 19 h, cerrada los domingos"
+      "De 9:00 a 19:00, cerrada los lunes",
+      "De 7:00 a 21:00, cerrada los lunes",
+      "De 9:00 a 19:00, abierta todos los días",
+      "De 9:00 a 19:00, cerrada los domingos"
      ]
     },
     "correct": 0
@@ -5796,7 +5796,7 @@
       "Hasta diez libros, durante dos semanas",
       "Hasta dos libros, durante diez días",
       "Hasta diez libros, durante una semana",
-      "Hasta una docena de libros, durante dos semanas"
+      "Hasta doce libros, durante dos semanas"
      ]
     },
     "correct": 0
@@ -5824,7 +5824,7 @@
      "es": [
       "Tomar prestado",
       "Comprar",
-      "Devolver, regresar",
+      "Devolver",
       "Leer"
      ]
     },
@@ -5880,9 +5880,9 @@
       "Il faut apporter sa propre eau"
      ],
      "es": [
-      "Se puede beber agua dentro",
-      "No se puede beber agua dentro",
-      "Hay que beber agua fuera",
+      "Se puede beber agua adentro",
+      "No se puede beber agua adentro",
+      "Hay que beber agua afuera",
       "Cada uno debe traer su propia agua"
      ]
     },
@@ -5969,8 +5969,8 @@
      "es": [
       "Fuera de la biblioteca",
       "En la sala infantil",
-      "Dentro, cerca de la entrada",
-      "En una mesa tranquila, dentro"
+      "Adentro, cerca de la entrada",
+      "En una mesa tranquila, adentro"
      ]
     },
     "correct": 0
@@ -6982,7 +6982,7 @@
     "question": {
      "en": "What is a 「パンや」?",
      "fr": "Qu'est-ce qu'une 「パンや」 ?",
-     "es": "¿Qué es una 「パンや」?"
+     "es": "¿Qué es 「パンや」?"
     },
     "options": {
      "en": [
@@ -6998,7 +6998,7 @@
       "Une boulangerie"
      ],
      "es": [
-      "Un café",
+      "Una cafetería",
       "Una pastelería",
       "Un supermercado",
       "Una panadería"
@@ -7027,9 +7027,9 @@
       "200 yens"
      ],
      "es": [
-      "1000 yenes",
-      "1200 yenes",
-      "2200 yenes",
+      "1,000 yenes",
+      "1,200 yenes",
+      "2,200 yenes",
       "200 yenes"
      ]
     },
@@ -7088,7 +7088,7 @@
       "Solo el autor y la madre",
       "El autor, el padre y un amigo",
       "El autor solo, tras los demás",
-      "El autor, con la madre y el padre"
+      "El autor, la madre y el padre"
      ]
     },
     "correct": 3
@@ -7735,7 +7735,7 @@
       "meaning": {
        "en": "1,200 yen",
        "fr": "1 200 yens",
-       "es": "1200 yenes"
+       "es": "1,200 yenes"
       }
      },
      {
@@ -8201,7 +8201,7 @@
       "Vous feriez mieux de bien dormir"
      ],
      "es": [
-      "Ha dormido demasiado",
+      "Durmió demasiado",
       "Todavía no debe dormir",
       "Puede dormir si quiere",
       "Es mejor que duerma mucho"
@@ -10292,7 +10292,7 @@
      ],
      "es": [
       "Este sábado",
-      "El sábado que viene",
+      "El próximo sábado",
       "El próximo domingo",
       "El mes pasado"
      ]
@@ -10322,7 +10322,7 @@
      "es": [
       "Pide ayuda",
       "Se niega a ayudar",
-      "Dice que ya ha ayudado",
+      "Dice que ya ayudó",
       "Ofrece su ayuda"
      ]
     },
@@ -10391,7 +10391,7 @@
     "question": {
      "en": "What is a 「こうえん」?",
      "fr": "Qu'est-ce qu'un 「こうえん」 ?",
-     "es": "¿Qué es un 「こうえん」?"
+     "es": "¿Qué es 「こうえん」?"
     },
     "options": {
      "en": [
@@ -10436,10 +10436,10 @@
       "À la boutique devant la gare"
      ],
      "es": [
-      "En los grandes almacenes",
+      "En la tienda departamental",
       "En una tienda cerca del parque",
       "En una tienda cerca de la casa de Mari",
-      "En la tienda que está frente a la estación"
+      "En la tienda frente a la estación"
      ]
     },
     "correct": 3
@@ -11457,7 +11457,7 @@
      ],
      "es": [
       "Un balcón",
-      "Una floristería",
+      "Una florería",
       "Una cocina",
       "Un jardín"
      ]
@@ -11543,7 +11543,7 @@
       "Le père"
      ],
      "es": [
-      "La hermana pequeña",
+      "La hermana menor",
       "El hermano mayor",
       "La madre",
       "El padre"
@@ -12882,9 +12882,9 @@
      ],
      "es": [
       "800 yenes",
-      "1100 yenes",
+      "1,100 yenes",
       "950 yenes",
-      "1900 yenes"
+      "1,900 yenes"
      ]
     },
     "correct": 2
@@ -13176,7 +13176,7 @@
       "meaning": {
        "en": "1,000 yen",
        "fr": "1 000 yens",
-       "es": "1000 yenes"
+       "es": "1,000 yenes"
       }
      },
      {
@@ -13721,7 +13721,7 @@
       "meaning": {
        "en": "1,900 yen",
        "fr": "1 900 yens",
-       "es": "1900 yenes"
+       "es": "1,900 yenes"
       }
      },
      {
@@ -14038,10 +14038,10 @@
       "Je vous ai téléphoné"
      ],
      "es": [
-      "Yo le llamaré a usted",
+      "Yo lo llamaré",
       "No me llame",
       "Llámeme, por favor",
-      "Yo le llamé"
+      "Yo lo llamé"
      ]
     },
     "correct": 2
@@ -14069,7 +14069,7 @@
      "es": [
       "Solo a la oficina de correos",
       "Solo al banco",
-      "A los dos sitios",
+      "A los dos lugares",
       "A ninguno de los dos"
      ]
     },
@@ -15273,7 +15273,7 @@
       "Le jour de la rentrée"
      ],
      "es": [
-      "En las vacaciones de invierno",
+      "Durante las vacaciones de invierno",
       "Después de volver a casa",
       "Durante las vacaciones de verano",
       "El primer día de clase"
@@ -16350,7 +16350,7 @@
      "es": [
       "Las verduras",
       "El pan y la leche",
-      "El cerdo y la ternera",
+      "El cerdo y la carne de res",
       "Los huevos y el pescado"
      ]
     },
@@ -16419,7 +16419,7 @@
     "question": {
      "en": "What is a 「ふくろ」?",
      "fr": "Que désigne 「ふくろ」 ?",
-     "es": "¿Qué es una 「ふくろ」?"
+     "es": "¿Qué es 「ふくろ」?"
     },
     "options": {
      "en": [
@@ -16437,8 +16437,8 @@
      "es": [
       "Una caja",
       "Una bolsa",
-      "Una cesta",
-      "Un tique de caja"
+      "Una canasta",
+      "Un recibo"
      ]
     },
     "correct": 1
@@ -17547,7 +17547,7 @@
       "El mes pasado",
       "El sábado pasado",
       "La semana pasada",
-      "Hace un par de semanas"
+      "Hace dos semanas"
      ]
     },
     "correct": 2
@@ -17574,7 +17574,7 @@
      ],
      "es": [
       "Invita a Lucas a almorzar juntos",
-      "Pregunta si Lucas ya ha comido",
+      "Pregunta si Lucas ya comió",
       "Dice que no van a comer juntos",
       "Pregunta a Lucas qué va a comer"
      ]
@@ -17689,10 +17689,10 @@
       "Du football et de la télé"
      ],
      "es": [
-      "De cine y música",
+      "De cine y de música",
       "De fútbol y de comida",
-      "De música y escuela",
-      "De fútbol y la tele"
+      "De música y de la escuela",
+      "De fútbol y de la tele"
      ]
     },
     "correct": 1
@@ -18772,7 +18772,7 @@
       "Une dos cosas buenas: luminosa y tranquila",
       "Da una causa: es tranquila porque es luminosa",
       "Las opone: luminosa pero no tranquila",
-      "Muestra un cambio: se ha vuelto luminosa"
+      "Muestra un cambio: se volvió luminosa"
      ]
     },
     "correct": 0
@@ -18886,7 +18886,7 @@
      ],
      "es": [
       "Vieja, gastada",
-      "Pequeña, con poco espacio",
+      "Pequeña, estrecha",
       "Oscura, sombría",
       "Fría, con corrientes"
      ]
@@ -20129,7 +20129,7 @@
      ],
      "es": [
       "El profesor le pide a Tom que elija una hora",
-      "El profesor ha elegido el viernes a las diez",
+      "El profesor eligió el viernes a las diez",
       "El examen siempre se hace los viernes",
       "El profesor espera que el viernes sea posible"
      ]
@@ -20244,10 +20244,10 @@
       "Six heures et demie"
      ],
      "es": [
-      "A las dos de la tarde",
-      "A las ocho de la noche",
-      "A las diez del viernes por la mañana",
-      "A las seis y media"
+      "Las dos de la tarde",
+      "Las ocho de la noche",
+      "Las diez del viernes por la mañana",
+      "Las seis y media"
      ]
     },
     "correct": 1
@@ -21279,8 +21279,8 @@
       "Sept camarades de classe"
      ],
      "es": [
-      "Con su hermana pequeña de siete años",
-      "Con su hermano pequeño de siete años",
+      "Con su hermana menor de siete años",
+      "Con su hermano menor de siete años",
       "Con su hermano mayor de diecisiete años",
       "Con siete compañeros de clase"
      ]
@@ -21396,7 +21396,7 @@
      ],
      "es": [
       "Añade lo que hicieron después",
-      "Da la razón por la que comieron fuera",
+      "Da la razón por la que comieron afuera",
       "Opone el almuerzo a las jirafas",
       "Dice que comieron mirando las jirafas"
      ]
@@ -22473,7 +22473,7 @@
       "En train, pendant cinq heures environ"
      ],
      "es": [
-      "En coche, unas cinco horas",
+      "En auto, unas cinco horas",
       "En tren, unas dos horas",
       "En autobús, unas cinco horas",
       "En tren, unas cinco horas"
@@ -22621,7 +22621,7 @@
       "Hicieron un muñeco de nieve afuera",
       "Volvieron a Tokio en tren",
       "Comieron oden en un restaurante",
-      "Aprendieron a hacer origami con la abuela"
+      "Aprendieron origami con la abuela"
      ]
     },
     "correct": 3
@@ -23587,7 +23587,7 @@
       "Va a caminar por la montaña con su madre",
       "Sus zapatos se rompieron en el viaje escolar del mes pasado",
       "Va a caminar mucho en un viaje escolar el mes que viene",
-      "La zapatería cerca de la estación está de rebajas"
+      "La zapatería cerca de la estación tiene ofertas"
      ]
     },
     "correct": 2
@@ -23700,7 +23700,7 @@
       "Les chaussures que l'auteur portait"
      ],
      "es": [
-      "Los zapatos negros que había sacado el dependiente",
+      "Los zapatos negros que sacó el vendedor",
       "Los zapatos azules del gran almacén",
       "Los zapatos blancos de la tienda de la estación",
       "Los zapatos que llevaba puestos el autor"
@@ -24147,7 +24147,7 @@
       "meaning": {
        "en": "8,000 yen",
        "fr": "8 000 yens",
-       "es": "8000 yenes"
+       "es": "8,000 yenes"
       }
      },
      {
@@ -24210,7 +24210,7 @@
       "meaning": {
        "en": "6,000 yen",
        "fr": "6 000 yens",
-       "es": "6000 yenes"
+       "es": "6,000 yenes"
       }
      },
      {
@@ -24352,7 +24352,7 @@
       "meaning": {
        "en": "5,000 yen",
        "fr": "5 000 yens",
-       "es": "5000 yenes"
+       "es": "5,000 yenes"
       }
      },
      {
@@ -24574,7 +24574,7 @@
       "meaning": {
        "en": "5,500 yen",
        "fr": "5 500 yens",
-       "es": "5500 yenes"
+       "es": "5,500 yenes"
       }
      },
      {
@@ -25986,7 +25986,7 @@
       "Il demande à l'auteur de faire le dîner"
      ],
      "es": [
-      "Pregunta si el autor ya ha cenado",
+      "Pregunta si el autor ya cenó",
       "Invita al autor a cenar en su casa",
       "Dice que la familia no cenará en casa",
       "Le pide al autor que prepare la cena"
@@ -26047,7 +26047,7 @@
       "Uno para cada uno de los cuatro de la familia",
       "La tienda solo los vendía en cajas de cinco",
       "El hermano menor quería dos",
-      "Uno por cada persona en la cena, el autor también"
+      "Uno para cada persona en la cena, incluido el autor"
      ]
     },
     "correct": 3
@@ -26189,7 +26189,7 @@
       "Qu'ils étaient bons, même sans viande"
      ],
      "es": [
-      "Les faltaba carne de verdad",
+      "Realmente les faltaba carne",
       "Estaban demasiado calientes",
       "Le gustó mucho más el pastel",
       "Estaban buenas incluso sin carne"
@@ -27184,7 +27184,7 @@
      ],
      "es": [
       "Son las mismas que en Japón",
-      "Son al contrario que en Japón",
+      "Son opuestas a las de Japón",
       "Es verano todo el año",
       "No hay invierno en absoluto"
      ]
@@ -28473,7 +28473,7 @@
      "es": [
       "Puso la carne y las verduras en la olla",
       "Cortó las verduras en trozos pequeños",
-      "Coció el arroz para el curry",
+      "Hizo el arroz para el curry",
       "Volvió a salir a comprar pan"
      ]
     },
@@ -29649,10 +29649,10 @@
       "Takagi avait gardé cette place depuis le matin"
      ],
      "es": [
-      "Los sitios bajo los cerezos estaban llenos",
+      "Los lugares bajo los cerezos estaban llenos",
       "El árbol pequeño tenía más flores que los otros",
       "Bajo ese árbol no llegaba el viento frío",
-      "Takagi había guardado el sitio desde temprano"
+      "Takagi había guardado el lugar desde temprano"
      ]
     },
     "correct": 0
@@ -31943,7 +31943,7 @@
      ],
      "es": [
       "Sus padres y su abuela",
-      "Su padre, su madre y su hermano pequeño",
+      "Sus padres y su hermano menor",
       "Solo su madre y su hermana mayor",
       "Su padre y unos vecinos"
      ]
@@ -32013,7 +32013,7 @@
     "question": {
      "en": "In 「母のおべんとうは、とてもおいしかったです」, what is an 「おべんとう」?",
      "fr": "Dans 「母のおべんとうは、とてもおいしかったです」, qu'est-ce qu'un 「おべんとう」 ?",
-     "es": "En 「母のおべんとうは、とてもおいしかったです」, ¿qué es una 「おべんとう」?"
+     "es": "En 「母のおべんとうは、とてもおいしかったです」, ¿qué es 「おべんとう」?"
     },
     "options": {
      "en": [
@@ -32032,7 +32032,7 @@
       "Un comedor escolar",
       "Un dulce para merendar",
       "Una bebida fría",
-      "Un almuerzo en caja"
+      "Un almuerzo para llevar"
      ]
     },
     "correct": 3
@@ -32148,7 +32148,7 @@
       "Triste, y no quiere volver a correr nunca",
       "Orgulloso, porque quedó primero",
       "Feliz, pero quiere ganar el próximo año",
-      "Enfadado con los otros corredores"
+      "Enojado con los otros corredores"
      ]
     },
     "correct": 2
@@ -33052,7 +33052,7 @@
       "En la planta baja",
       "En el segundo piso",
       "En el cuarto piso",
-      "En la planta del sótano"
+      "En el sótano"
      ]
     },
     "correct": 1
@@ -33078,10 +33078,10 @@
       "1 900 yens"
      ],
      "es": [
-      "3800 yenes",
-      "1800 yenes",
+      "3,800 yenes",
+      "1,800 yenes",
       "900 yenes",
-      "1900 yenes"
+      "1,900 yenes"
      ]
     },
     "correct": 3
@@ -33486,7 +33486,7 @@
       "meaning": {
        "en": "3,800 yen",
        "fr": "3 800 yens",
-       "es": "3800 yenes"
+       "es": "3,800 yenes"
       }
      },
      {
@@ -33612,7 +33612,7 @@
       "meaning": {
        "en": "1,900 yen",
        "fr": "1 900 yens",
-       "es": "1900 yenes"
+       "es": "1,900 yenes"
       }
      },
      {
@@ -34350,7 +34350,7 @@
       "Llevar su paraguas",
       "Ponerse un abrigo caliente",
       "Volver a casa en autobús",
-      "Volver pronto a casa"
+      "Volver temprano a casa"
      ]
     },
     "correct": 0
@@ -34377,7 +34377,7 @@
      ],
      "es": [
       "Pide que se pongan un abrigo caliente",
-      "Dice que hoy hay rebajas de abrigos calientes",
+      "Dice que hoy hay ofertas de abrigos calientes",
       "Pregunta si los oyentes tienen un abrigo caliente",
       "Dice a los oyentes que no salgan para nada"
      ]
@@ -35382,7 +35382,7 @@
       "Da una razón: pequeño porque es blanco",
       "Pone 「白い」 en pasado: era blanco",
       "Une los dos: blanco y pequeño",
-      "Hace negativo 「白い」: no es blanco"
+      "Pone 「白い」 en negativo: no es blanco"
      ]
     },
     "correct": 2
@@ -37639,7 +37639,7 @@
       "meaning": {
        "en": "1,500 yen",
        "fr": "1 500 yens",
-       "es": "1500 yenes"
+       "es": "1,500 yenes"
       }
      },
      {
@@ -37882,7 +37882,7 @@
      "es": [
       "Da la razón de la mezcla",
       "Añade el paso siguiente de la receta",
-      "Opone este paso al anterior",
+      "Contrasta este paso con el anterior",
       "Dice que dos pasos ocurren a la vez"
      ]
     },
@@ -41240,7 +41240,7 @@
      ],
      "es": [
       "Exacta: las seis en punto",
-      "Un límite: a las seis como muy tarde",
+      "Un límite: a más tardar a las seis",
       "Un inicio: a partir de las seis",
       "Aproximada: hacia las seis"
      ]
@@ -42356,7 +42356,7 @@
      ],
      "es": [
       "Una puerta",
-      "Un suelo",
+      "Un piso",
       "Una ventana",
       "Una pared"
      ]
@@ -42415,7 +42415,7 @@
      "es": [
       "Delante de la estación",
       "En la sala junto a la estación",
-      "En la entrada del edificio de apartamentos",
+      "En la entrada del edificio",
       "En el apartamento del autor"
      ]
     },
@@ -42835,7 +42835,7 @@
     "translation": {
      "en": "Nakamura is very good at the piano.",
      "fr": "Nakamura joue très bien du piano.",
-     "es": "A Nakamura se le da muy bien el piano."
+     "es": "Nakamura toca muy bien el piano."
     },
     "note": {
      "en": "The pattern 「〜が上手です」 says someone is good at something; 「が」 marks the skill, here the piano.",
@@ -43623,7 +43623,7 @@
      ],
      "es": [
       "Despacio",
-      "Apresuradamente",
+      "Con prisa",
       "En silencio",
       "Con cuidado"
      ]
@@ -43681,7 +43681,7 @@
      ],
      "es": [
       "Antes de empezar a trabajar",
-      "Durante la pausa del almuerzo",
+      "Durante la hora del almuerzo",
       "Al terminar el trabajo",
       "Justo después de la llamada"
      ]
@@ -44934,7 +44934,7 @@
     "question": {
      "en": "How often does Kevin want to meet, and for how long?",
      "fr": "À quel rythme Kevin propose-t-il de se retrouver, et pour combien de temps ?",
-     "es": "¿Con qué frecuencia quiere Kevin reunirse, y durante cuánto tiempo?"
+     "es": "¿Con qué frecuencia quiere Kevin reunirse y durante cuánto tiempo?"
     },
     "options": {
      "en": [
@@ -44980,9 +44980,9 @@
      ],
      "es": [
       "En el comedor de la universidad",
-      "En la cafetería de delante de la estación",
+      "En la cafetería frente a la estación",
       "En la planta baja de la biblioteca",
-      "En la última planta de la biblioteca"
+      "En el último piso de la biblioteca"
      ]
     },
     "correct": 2
@@ -46111,7 +46111,7 @@
      "es": [
       "Fue antes del saludo de Año Nuevo",
       "Se comió en el santuario",
-      "Fue tras el saludo de Año Nuevo",
+      "Fue después del saludo de Año Nuevo",
       "Fue el motivo de la visita"
      ]
     },
@@ -46151,7 +46151,7 @@
     "question": {
      "en": "How long did they wait in line at the shrine?",
      "fr": "Combien de temps ont-ils fait la queue au sanctuaire ?",
-     "es": "¿Cuánto tiempo hicieron cola en el santuario?"
+     "es": "¿Cuánto tiempo hicieron fila en el santuario?"
     },
     "options": {
      "en": [
@@ -46197,7 +46197,7 @@
      ],
      "es": [
       "Que podría comprar otro más tarde",
-      "Que la cola era demasiado larga",
+      "Que la fila era demasiado larga",
       "Que solo se compra uno al año",
       "Que podría comprar uno en otro santuario"
      ]
@@ -46714,7 +46714,7 @@
     "translation": {
      "en": "There were so many people that we queued for about thirty minutes.",
      "fr": "Il y avait tellement de monde que nous avons fait la queue environ trente minutes.",
-     "es": "Había tantísima gente que hicimos cola unos treinta minutos."
+     "es": "Había tantísima gente que hicimos fila unos treinta minutos."
     },
     "note": {
      "en": "「ぐらい」 after a length of time means about: about thirty minutes.",
@@ -47174,7 +47174,7 @@
     "question": {
      "en": "How many showings of the film does Rina list?",
      "fr": "Combien de séances du film Rina donne-t-elle ?",
-     "es": "¿Cuántas sesiones de la película menciona Rina?"
+     "es": "¿Cuántas funciones de la película menciona Rina?"
     },
     "options": {
      "en": [
@@ -47248,7 +47248,7 @@
       "Après son travail, avant le film"
      ],
      "es": [
-      "Tras la película de las cuatro",
+      "Después de la película de las cuatro",
       "Antes de la película de las cuatro",
       "Durante la película de las cuatro",
       "Después del trabajo, antes de la película"
@@ -47367,7 +47367,7 @@
       "Al cine, a reunirse con Rina",
       "A casa de Rina, para verla",
       "Al restaurante de ramen, a almorzar",
-      "Al cine, para la sesión de la una"
+      "Al cine, para la función de la una"
      ]
     },
     "correct": 0
@@ -47953,7 +47953,7 @@
     "translation": {
      "en": "How about the four o'clock showing?",
      "fr": "Et la séance de 16 h, ça te va ?",
-     "es": "¿Qué tal la sesión de las cuatro?"
+     "es": "¿Qué tal la función de las cuatro?"
     },
     "note": {
      "en": "The pattern 「〜はどうですか」 makes a suggestion: how about the four o'clock film?",
@@ -48274,7 +48274,7 @@
     "question": {
      "en": "Who is in the host family?",
      "fr": "Qui fait partie de la famille d'accueil ?",
-     "es": "¿Quiénes forman la familia de acogida?"
+     "es": "¿Quiénes forman la familia anfitriona?"
     },
     "options": {
      "en": [
@@ -48466,7 +48466,7 @@
      "es": [
       "Una alacena",
       "Una mesa",
-      "Una nevera",
+      "Un refrigerador",
       "Una cocina"
      ]
     },
@@ -48496,7 +48496,7 @@
       "El autor llevaba las pantuflas del baño",
       "Yuta había contado una historia graciosa",
       "El autor no se había quitado los zapatos",
-      "El autor se había bebido todas las bebidas"
+      "El autor se había tomado todas las bebidas"
      ]
     },
     "correct": 0
@@ -50815,9 +50815,9 @@
      ],
      "es": [
       "No le gusta el agua caliente",
-      "Conoce bien las termas",
+      "Conoce bien las aguas termales",
       "Salió a los cinco minutos",
-      "Nunca había ido a una antes"
+      "Nunca había ido a unas aguas termales"
      ]
     },
     "correct": 1
@@ -51725,7 +51725,7 @@
      "es": [
       "Siguió hasta la estación junto al mar",
       "Se bajó del autobús enseguida",
-      "Pidió el autobús número 12",
+      "Preguntó por el autobús número 12",
       "Llamó a su amigo desde el autobús"
      ]
     },
@@ -53005,7 +53005,7 @@
      ],
      "es": [
       "Trabajo",
-      "Tareas escolares",
+      "Tarea",
       "Pasatiempo",
       "Sueño"
      ]
@@ -54261,7 +54261,7 @@
      "es": [
       "Por una carta que envió a la clase",
       "Otro profesor se lo dijo a la clase",
-      "Lo leyeron en la web de la escuela",
+      "Lo leyeron en el sitio web de la escuela",
       "Se lo dijo cuando le preguntaron"
      ]
     },
@@ -55321,7 +55321,7 @@
       "Pendant qu'ils mangeaient la pizza"
      ],
      "es": [
-      "Nada más llegar ellos",
+      "En cuanto llegaron",
       "Cuando todo había terminado",
       "Unas dos horas después de empezar",
       "Mientras comían pizza"
@@ -55353,7 +55353,7 @@
       "El vecino anciano",
       "John",
       "El autor",
-      "El autor junto con John"
+      "John y el autor"
      ]
     },
     "correct": 0
@@ -56445,8 +56445,8 @@
      ],
      "es": [
       "¿Dónde?",
-      "En algún sitio",
-      "En ningún sitio",
+      "En algún lugar",
+      "En ningún lugar",
       "En todas partes"
      ]
     },
@@ -57601,10 +57601,10 @@
       "Elle s'y prend mal"
      ],
      "es": [
-      "Se le da muy bien",
+      "Es muy buena para eso",
       "No le gusta nada",
       "Nunca lo ha hecho",
-      "Se le da mal"
+      "Es mala para eso"
      ]
     },
     "correct": 3
@@ -58256,7 +58256,7 @@
     "translation": {
      "en": "My sister is bad at goldfish scooping.",
      "fr": "Ma sœur n'est pas douée pour la pêche aux poissons rouges.",
-     "es": "A mi hermana se le da mal pescar peces dorados."
+     "es": "Mi hermana es mala para pescar peces dorados."
     },
     "note": {
      "en": "「〜が下手です」 says someone is poor at something; the skill takes 「が」.",
@@ -58674,7 +58674,7 @@
       "El domingo por la mañana",
       "El lunes por la mañana",
       "El domingo al anochecer",
-      "El sábado después del mediodía"
+      "El sábado por la tarde"
      ]
     },
     "correct": 0
@@ -58847,7 +58847,7 @@
      "es": [
       "No sabía qué hacer",
       "Estaba muy aburrido",
-      "Estaba enfadado",
+      "Estaba enojado",
       "Tenía sueño"
      ]
     },
@@ -59892,7 +59892,7 @@
       "Que cela arrive tous les jours"
      ],
      "es": [
-      "Que la hora indicada es aproximada",
+      "Que la hora es aproximada",
       "Que la hora es exacta",
       "Que la espera terminó entonces",
       "Que pasa todos los días"
@@ -61127,7 +61127,7 @@
      "es": [
       "No se permite traer uno",
       "No hace falta traer uno",
-      "Hay que traer el propio",
+      "Hay que traer uno propio",
       "Se puede comprar uno en la clase"
      ]
     },
@@ -62250,7 +62250,7 @@
      ],
      "es": [
       "La abuela le pidió al autor que fuera a verla",
-      "El autor quiere ver la cara de la abuela mientras hablan",
+      "El autor quiere verle la cara mientras hablan",
       "El autor no tenía nada que hacer en vacaciones",
       "El teléfono de la abuela estaba roto"
      ]
@@ -62278,10 +62278,10 @@
       "Regarder le nom ou appuyer ici"
      ],
      "es": [
-      "Mirar el nombre y luego pulsar aquí",
-      "Pulsar aquí y luego mirar el nombre",
-      "Pulsar aquí mientras dice el nombre",
-      "Mirar el nombre o pulsar aquí"
+      "Mirar el nombre y luego presionar aquí",
+      "Presionar aquí y luego mirar el nombre",
+      "Presionar aquí mientras dice el nombre",
+      "Mirar el nombre o presionar aquí"
      ]
     },
     "correct": 0
@@ -62799,7 +62799,7 @@
     "translation": {
      "en": "\"Press this button, look at my name, then press here.\"",
      "fr": "« Appuie sur ce bouton, regarde mon nom, puis appuie ici. »",
-     "es": "«Pulsa este botón, mira mi nombre y luego pulsa aquí»."
+     "es": "«Presiona este botón, mira mi nombre y luego presiona aquí»."
     },
     "note": {
      "en": "Three て-forms, 「おして」, 「見て」 and 「おして」, line the steps up in order before 「ください」.",
@@ -62836,7 +62836,7 @@
       "meaning": {
        "en": "press, and",
        "fr": "appuie, et",
-       "es": "pulsa, y"
+       "es": "presiona, y"
       }
      },
      {
@@ -62900,7 +62900,7 @@
       "meaning": {
        "en": "please press",
        "fr": "appuie, s'il te plaît",
-       "es": "pulsa, por favor"
+       "es": "presiona, por favor"
       }
      }
     ]
@@ -63353,7 +63353,7 @@
       "Quatre"
      ],
      "es": [
-      "Solo dos",
+      "Dos",
       "Tres",
       "Cinco",
       "Cuatro"
@@ -63412,7 +63412,7 @@
      ],
      "es": [
       "Giran",
-      "Se paran",
+      "Se detienen",
       "Se colocan",
       "Se enfrían"
      ]
@@ -63472,7 +63472,7 @@
       "El sábado",
       "El domingo",
       "El lunes",
-      "El viernes por la noche"
+      "El viernes"
      ]
     },
     "correct": 1
@@ -64711,7 +64711,7 @@
      "es": [
       "Alguien de la familia del autor",
       "Alguien del trabajo del autor",
-      "Un corredor que vio junto al río",
+      "Un corredor que conoció junto al río",
       "Un amigo de la escuela del autor"
      ]
     },
@@ -65729,7 +65729,7 @@
      "es": [
       "Al padre de Masato",
       "A una mujer del sexto piso",
-      "A un policía de fuera",
+      "A un policía en la calle",
       "A un empleado de la tienda"
      ]
     },
@@ -65815,7 +65815,7 @@
      ],
      "es": [
       "Un cliente que no conocía al niño",
-      "Alguien que trabaja en los grandes almacenes",
+      "Alguien que trabaja en la tienda departamental",
       "Un amigo de la familia de Masato",
       "El hermano mayor de Masato"
      ]
@@ -66856,7 +66856,7 @@
      "es": [
       "A Lisa le gusta mucho el japonés",
       "Lisa debería hablar japonés",
-      "El japonés de Lisa aún es flojo",
+      "El japonés de Lisa aún es malo",
       "Lisa habla bien japonés"
      ]
     },
@@ -66912,7 +66912,7 @@
       "N'importe quel café qui plaît au professeur"
      ],
      "es": [
-      "Una cafetería a la que Lisa fue con un cliente la semana pasada",
+      "Una cafetería a la que Lisa fue con un huésped la semana pasada",
       "Una cafetería nueva que Lisa quiere probar",
       "Una cafetería que Lisa y el profesor conocen",
       "Cualquier cafetería que le guste al profesor"
@@ -68029,10 +68029,10 @@
       "Il faisait du vélo tous les jours"
      ],
      "es": [
-      "Todavía no sabía montar en bicicleta",
-      "Había dejado de montar en bicicleta",
-      "Montaba un poco en bicicleta",
-      "Montaba en bicicleta todos los días"
+      "Todavía no sabía andar en bicicleta",
+      "Había dejado de andar en bicicleta",
+      "Andaba un poco en bicicleta",
+      "Andaba en bicicleta todos los días"
      ]
     },
     "correct": 0
@@ -68088,7 +68088,7 @@
      ],
      "es": [
       "Antes de venir a Japón",
-      "Tras venir a Japón",
+      "Después de venir a Japón",
       "Mientras venía a Japón",
       "Hasta venir a Japón"
      ]
@@ -68203,7 +68203,7 @@
       "Deux jours"
      ],
      "es": [
-      "Un mes entero",
+      "Un mes",
       "Ocho días",
       "Dos semanas",
       "Dos días"
@@ -68232,10 +68232,10 @@
       "Il faisait du vélo quand il était enfant"
      ],
      "es": [
-      "No se crió en Japón",
+      "No se crio en Japón",
       "Es el profesor de Yui en la escuela",
       "Todavía vive en una montaña",
-      "De niño montaba en bicicleta"
+      "De niño andaba en bicicleta"
      ]
     },
     "correct": 0

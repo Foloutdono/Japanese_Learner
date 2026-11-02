@@ -1482,7 +1482,7 @@
    "jp": "彼女は料理の大会で優勝し、賞金十万円を手にした。",
    "en": "She won a cooking contest and took home 100,000 yen in prize money.",
    "fr": "Elle a remporté un concours de cuisine et empoché 100 000 yens de prix.",
-   "es": "Ella ganó un concurso de cocina y se llevó 100 000 yenes de premio.",
+   "es": "Ella ganó un concurso de cocina y se llevó 100,000 yenes de premio.",
    "why": "too long, scam-like"
   },
   "あなたはチェスの仕方を知っていますか。": {
@@ -6207,7 +6207,7 @@
    "jp": "その辞典には約五十万語が収められている。",
    "en": "The dictionary contains about half a million words.",
    "fr": "Ce dictionnaire contient environ 500 000 mots.",
-   "es": "Ese diccionario contiene unas 500 000 palabras.",
+   "es": "Ese diccionario contiene unas 500,000 palabras.",
    "why": "redundant 語の単語; FR 事典"
   },
   "その事務員は過労がもとで死んだ。": {
@@ -10533,7 +10533,7 @@
    "jp": "大学に入って、初めて家族と離れて暮らした。",
    "en": "When I started university, I lived away from my family for the first time.",
    "fr": "En entrant à l'université, j'ai vécu loin de ma famille pour la première fois.",
-   "es": "Al entrar en la universidad, viví lejos de mi familia por primera vez.",
+   "es": "Al entrar a la universidad, viví lejos de mi familia por primera vez.",
    "why": "stiff 永久に, translationese"
   },
   "ケイトは映画で主役を演じる機会を与えられました。": {
@@ -11205,7 +11205,7 @@
    "jp": "電気代の請求が来た。",
    "en": "The electricity bill has arrived.",
    "fr": "La facture d'électricité est arrivée.",
-   "es": "Llegó la factura de la electricidad.",
+   "es": "Llegó la recibo de la luz.",
    "why": "legal jargon, hard"
   },
   "スージーは真夜中までおきていた。すると奇妙な物音が聞こえた。": {
@@ -16161,7 +16161,7 @@
    "jp": "家内もお目に掛かるのを楽しみにしております。",
    "en": "My wife is also looking forward to meeting you.",
    "fr": "Ma femme aussi se réjouit de vous rencontrer.",
-   "es": "Mi esposa también está deseando tener el gusto de conocerle.",
+   "es": "Mi esposa también está deseando tener el gusto de conocerlo.",
    "why": "word not marked (かかる in kana); trailing から"
   },
   "容易に試験に通ると思う。": {
@@ -16413,7 +16413,7 @@
    "jp": "平日料金と休日料金で、１万円も違うんだ。",
    "en": "There's a 10,000-yen difference between the weekday rate and the holiday rate.",
    "fr": "Entre le tarif de semaine et celui des jours fériés, il y a 10 000 yens d'écart.",
-   "es": "Entre la tarifa de entre semana y la de días festivos hay nada menos que 10 000 yenes de diferencia.",
+   "es": "Entre la tarifa de entre semana y la de días festivos hay nada menos que 10,000 yenes de diferencia.",
    "why": "EN inaccurate"
   },
   "年来の経済病には手軽にきく万能薬などありません。": {
@@ -16658,7 +16658,7 @@
    "jp": "田中さんの長女は今年大学に入った。",
    "en": "Mr. Tanaka's eldest daughter started university this year.",
    "fr": "La fille aînée de M. Tanaka est entrée à l'université cette année.",
-   "es": "La hija mayor del señor Tanaka entró en la universidad este año.",
+   "es": "La hija mayor del señor Tanaka entró a la universidad este año.",
    "why": "bizarre, confusing pronouns"
   },
   "彼が仲裁してその場は丸く収めた。": {
@@ -17876,7 +17876,7 @@
    "jp": "姉は今年、大学に入りました。",
    "en": "My older sister started university this year.",
    "fr": "Ma grande sœur est entrée à l'université cette année.",
-   "es": "Mi hermana mayor entró en la universidad este año.",
+   "es": "Mi hermana mayor entró a la universidad este año.",
    "why": "too hard for N5 (実業界)"
   },
   "彼は大学卒業後カメラマンになった。": {
@@ -25079,7 +25079,7 @@
    "jp": "第１学年には５つのクラスがあった。",
    "en": "There were five classes in the first year.",
    "fr": "Il y avait cinq classes en première année.",
-   "es": "En el primer curso había cinco clases.",
+   "es": "En primer año había cinco grupos.",
    "why": "missing particle"
   },
   "答案を出す前にもう一度読み返しなさい。": {
@@ -26661,7 +26661,7 @@
    "jp": "銀行で１０万円下ろしてください。",
    "en": "Please draw a hundred thousand yen from the bank.",
    "fr": "Retirez 100 000 yens à la banque, s'il vous plaît.",
-   "es": "Retire 100 000 yenes en el banco, por favor.",
+   "es": "Retire 100,000 yenes en el banco, por favor.",
    "why": "missing 円"
   },
   "銀行に行けばその５０ドルの小切手を現金に換えてくれる。": {
@@ -27893,7 +27893,7 @@
    "jp": "このカメラは三万円でした。",
    "en": "This camera cost 30,000 yen.",
    "fr": "Cet appareil photo coûtait 30 000 yens.",
-   "es": "Esta cámara costó 30 000 yenes.",
+   "es": "Esta cámara costó 30,000 yenes.",
    "why": "too hard for N5 (oil spill, gallons)"
   },
   "５ドルをやる。": {

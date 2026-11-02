@@ -5621,7 +5621,7 @@
           "note": {
             "en": "「度」 and 「分」 read a temperature, 「三十七度八分」 being 37.8, and 「ありました」 says that is what it came to.",
             "fr": "「度」 et 「分」 servent à lire une température, 「三十七度八分」 étant 37,8, et 「ありました」 dit que c'est ce que tu avais.",
-            "es": "「度」 y 「分」 sirven para leer una temperatura, 「三十七度八分」 es 37,8, y 「ありました」 dice que eso es lo que marcó."
+            "es": "「度」 y 「分」 sirven para leer una temperatura, 「三十七度八分」 es 37.8, y 「ありました」 dice que eso es lo que marcó."
           },
           "alt": [
             {"jp": "はい、今朝測ったら、三十七度八分でした。", "kana": "はい、けさはかったら、さんじゅうななどはちぶでした。", "romaji": "hai, kesa hakattara, sanjuu nana do hachibu deshita"}

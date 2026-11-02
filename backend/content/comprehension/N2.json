@@ -206,7 +206,7 @@
      ],
      "es": [
       "Las repararon ellos mismos y abrieron cafés y tiendas",
-      "Hicieron que el ayuntamiento las reparara y luego las alquilaron",
+      "Hicieron que la municipalidad las reparara y luego las alquilaron",
       "Las alquilaron baratas a los jóvenes del pueblo",
       "Las vendieron y, en cambio, abrieron cafés en la ciudad"
      ]
@@ -266,7 +266,7 @@
       "Preparar juntos el festival",
       "Compartir las mismas casas viejas",
       "Trabajar en los mismos cafés",
-      "Celebrar juntos reuniones vecinales"
+      "Hacer juntos reuniones vecinales"
      ]
     },
     "correct": 0
@@ -1448,7 +1448,7 @@
      "es": [
       "Acaban trabajando más horas al mezclarse el trabajo y la vida privada",
       "Trabajan menos horas porque nadie los vigila",
-      "Echan de menos la oficina, donde trabajo y vida iban por separado",
+      "Extrañan la oficina, donde trabajo y vida iban por separado",
       "Pierden la libertad de trabajar según su propio horario"
      ]
     },
@@ -2620,7 +2620,7 @@
      "es": [
       "Más cuervos en zonas urbanas",
       "Un descenso del número de cuervos",
-      "Nuevas normas de recogida de basura",
+      "Nuevas normas de recolección de basura",
       "Cuervos que dejan la ciudad"
      ]
     },
@@ -2705,9 +2705,9 @@
       "Les jours où les déchets ne sont pas ramassés"
      ],
      "es": [
-      "El color de las bolsas de basura y la hora de recogida",
+      "El color de las bolsas de basura y la hora de recolección",
       "La cara de quienes sacan la basura",
-      "Las calles donde para el camión de la basura",
+      "Las calles donde para el camión recolector",
       "Los días en que no se recoge la basura"
      ]
     },
@@ -2853,7 +2853,7 @@
       "Eliminar sus motivos para acercarse a la basura",
       "Ahuyentar a los cuervos de la basura",
       "Cambiar el color de las bolsas de basura",
-      "Cambiar la hora de paso del camión de basura"
+      "Cambiar la hora de paso del camión recolector"
      ]
     },
     "correct": 0
@@ -4071,7 +4071,7 @@
      "es": [
       "Esa ventanilla y ningún otro lugar",
       "Esa ventanilla, entre otros lugares",
-      "Primero esa ventanilla, luego otros sitios",
+      "Primero esa ventanilla, luego otros lugares",
       "Esa ventanilla, si el tiempo lo permite"
      ]
     },
@@ -4082,7 +4082,7 @@
     "question": {
      "en": "What is a 「窓口」 in this notice?",
      "fr": "Qu'est-ce qu'un 「窓口」 dans cet avis ?",
-     "es": "¿Qué es un 「窓口」 en este aviso?"
+     "es": "¿Qué es 「窓口」 en este aviso?"
     },
     "options": {
      "en": [
@@ -4101,7 +4101,7 @@
       "Una ventanilla de atención",
       "Una sala de espera",
       "Un rincón de lectura",
-      "Un tablón de anuncios"
+      "Un tablero de anuncios"
      ]
     },
     "correct": 0
@@ -4158,7 +4158,7 @@
      "es": [
       "Está bien",
       "No está permitido",
-      "Eso tiene un coste",
+      "Eso tiene un costo",
       "Es obligatorio"
      ]
     },
@@ -5299,7 +5299,7 @@
      "es": [
       "Los días en que los alumnos no escuchan",
       "Los días en que se equivoca con el inglés",
-      "Los días en que echa de menos el bachillerato",
+      "Los días en que extraña el bachillerato",
       "Los días en que las clases terminan tarde"
      ]
     },
@@ -6382,7 +6382,7 @@
       "Parado y con el cristal rayado",
       "En marcha, pero con el cristal agrietado",
       "Parado y sin ninguna de las agujas",
-      "Con retraso y con la correa rota"
+      "Atrasado y con la correa rota"
      ]
     },
     "correct": 0
@@ -6553,7 +6553,7 @@
       "En brillant comme une neuve"
      ],
      "es": [
-      "Con precisión, en hora",
+      "Con precisión, marcando bien la hora",
       "En silencio, sin hacer ruido",
       "Despacio, atrasándose un poco",
       "Con brillo, reluciente como nuevo"
@@ -7796,7 +7796,7 @@
      "es": [
       "Los supermercados ya han resuelto el problema",
       "Los hogares son la principal causa del desperdicio",
-      "Tanto las tiendas como los compradores deben poner de su parte",
+      "Tiendas y compradores deben poner de su parte",
       "El tiempo importa más que los datos de ventas"
      ]
     },
@@ -8814,7 +8814,7 @@
      "es": [
       "Escuelas que solo enseñan la lengua estándar",
       "La difusión de la tele e internet",
-      "Que los jóvenes se van de su región",
+      "Que los jóvenes se vayan de su región",
       "Los padres que deciden no hablarlo"
      ]
     },
@@ -8883,7 +8883,7 @@
     "question": {
      "en": "What is 「標準語」?",
      "fr": "Qu'est-ce que le 「標準語」 ?",
-     "es": "¿Qué es el 「標準語」?"
+     "es": "¿Qué es 「標準語」?"
     },
     "options": {
      "en": [
@@ -8986,7 +8986,7 @@
       "Le dialecte doit s'apprendre en famille"
      ],
      "es": [
-      "Quita tiempo a asignaturas más útiles",
+      "Quita tiempo a materias más útiles",
       "Los profesores no conocen bien el dialecto local",
       "Salvarlo en clase sirve de poco si nadie lo habla",
       "El dialecto debe aprenderse en familia"
@@ -9046,7 +9046,7 @@
      "es": [
       "Clases de dialecto en la escuela",
       "Programas de televisión en dialecto",
-      "Webs que enseñan el dialecto",
+      "Páginas web que enseñan el dialecto",
       "Productos y carteles en dialecto"
      ]
     },
@@ -10264,7 +10264,7 @@
      ],
      "es": [
       "Toda la noche",
-      "Una velada",
+      "Una noche",
       "Cada noche",
       "A altas horas de la noche"
      ]
@@ -10295,7 +10295,7 @@
       "Es un esfuerzo, y algo más aparte",
       "Es la forma de esfuerzo más dura que existe",
       "Es un esfuerzo que siempre da frutos",
-      "No es tanto un esfuerzo como, más bien, otra cosa"
+      "No es tanto un esfuerzo como otra cosa"
      ]
     },
     "correct": 3
@@ -11365,7 +11365,7 @@
      "es": [
       "Un mal resultado que es seguro",
       "Un resultado que no puede darse",
-      "Un mal resultado que podría llegar a darse",
+      "Un mal resultado que podría darse",
       "Un buen resultado que cabe esperar"
      ]
     },
@@ -11450,10 +11450,10 @@
       "Rien du tout"
      ],
      "es": [
-      "Todo el coste",
-      "La mitad del coste",
-      "Una décima parte del coste",
-      "Nada del coste"
+      "Todo el costo",
+      "La mitad del costo",
+      "Una décima parte del costo",
+      "Nada del costo"
      ]
     },
     "correct": 1
@@ -11509,7 +11509,7 @@
      ],
      "es": [
       "Cuesta demasiado",
-      "Le estropea a uno el peinado",
+      "Le arruina a uno el peinado",
       "Hace ir más lento",
       "Es difícil de transportar"
      ]
@@ -12589,7 +12589,7 @@
     "question": {
      "en": "What is a 「集会所」?",
      "fr": "Qu'est-ce qu'un 「集会所」 ?",
-     "es": "¿Qué es un 「集会所」?"
+     "es": "¿Qué es 「集会所」?"
     },
     "options": {
      "en": [
@@ -13934,7 +13934,7 @@
       "El ritmo de la vida diaria",
       "Un medio para desplazarse",
       "El costo de la vida diaria",
-      "Andar por salud"
+      "Caminar por salud"
      ]
     },
     "correct": 1
@@ -15199,7 +15199,7 @@
       "La machine était facile à apprendre"
      ],
      "es": [
-      "Los clientes jóvenes podrían dejar de ir a su tienda",
+      "Los clientes jóvenes podrían dejar de venir",
       "Sus comisiones eran más bajas de lo esperado",
       "Sus clientes mayores se lo pedían",
       "La máquina era fácil de aprender"
@@ -15257,7 +15257,7 @@
       "En avance sur"
      ],
      "es": [
-      "Dejando fuera",
+      "Dejando afuera",
       "Poniendo primero",
       "Gracias a",
       "Por delante de"
@@ -15289,7 +15289,7 @@
       "Debería frenarse para proteger a las personas mayores",
       "Los pequeños comercios deberían negarse a participar",
       "Acaba con todas las molestias para todo el mundo",
-      "Bueno en sí, si se escucha a quienes quedan fuera"
+      "Bueno en sí, si se escucha a quienes quedan afuera"
      ]
     },
     "correct": 3
@@ -16533,7 +16533,7 @@
       "Que alguien informa de que la ciudad renuncia a ingresos",
       "Que eso también equivale a renunciar a ingresos",
       "Que la ciudad piensa renunciar a sus ingresos",
-      "Que la ciudad renunció en su día a sus ingresos"
+      "Que la ciudad renunció alguna vez a sus ingresos"
      ]
     },
     "correct": 1
@@ -16589,7 +16589,7 @@
      ],
      "es": [
       "Habría que cerrar del todo el casco antiguo a los turistas",
-      "Sigue abierto cómo conciliar la vida de los habitantes y los ingresos",
+      "Aún no se sabe cómo conciliar la vida local y los ingresos",
       "La nueva contribución por fin ha resuelto el problema",
       "Los habitantes deberían irse del centro abarrotado"
      ]
@@ -17703,8 +17703,8 @@
      ],
      "es": [
       "Un retraso en la entrega",
-      "Una reclamación de un cliente",
-      "Un fallo en un producto",
+      "Un reclamo de un cliente",
+      "Una falla en un producto",
       "Una subida de precio"
      ]
     },
@@ -17850,7 +17850,7 @@
       "Una suposición de que no volverá a ocurrir",
       "La decisión de que no vuelva a ocurrir",
       "Un anuncio de que no volverá a ocurrir",
-      "El miedo de que vuelva a ocurrir"
+      "El miedo a que vuelva a ocurrir"
      ]
     },
     "correct": 1
@@ -18868,7 +18868,7 @@
       "Se centra ante todo en la actividad de los días libres",
       "Solo afecta a los clubes que se reúnen en el centro de las ciudades",
       "Empezará cuando hayan terminado las vacaciones escolares",
-      "Deja fuera las actividades que se hacen en los días libres"
+      "Deja afuera las actividades que se hacen en los días libres"
      ]
     },
     "correct": 0
@@ -18894,7 +18894,7 @@
       "Beaucoup d'enseignants n'ont presque plus de temps à eux"
      ],
      "es": [
-      "Muchos alumnos han dejado de apuntarse a los clubes",
+      "Muchos alumnos han dejado de inscribirse en los clubes",
       "Los clubes deportivos locales pidieron acoger a los alumnos",
       "Las escuelas ya no tienen espacio para los clubes",
       "Muchos profesores casi no tienen tiempo para sí mismos"
@@ -18954,7 +18954,7 @@
      "es": [
       "Cuotas más bajas para las familias que usan los clubes",
       "Más tiempo para que los niños estudien en casa",
-      "Entrenamiento a cargo de personas con conocimientos especializados",
+      "Entrenadores con conocimientos especializados",
       "Clubes que se reúnen más cerca de las casas de los niños"
      ]
     },
@@ -18984,7 +18984,7 @@
       "Enseñar a otra persona",
       "Aprender sin ninguna ayuda",
       "Ser evaluado por alguien",
-      "Ser enseñado por alguien"
+      "Aprender de alguien"
      ]
     },
     "correct": 3
@@ -19098,7 +19098,7 @@
      ],
      "es": [
       "Que las escuelas gasten menos en sus clubes",
-      "Que se entrene a los niños para ganar competiciones",
+      "Que se entrene a los niños para ganar competencias",
       "Que todos los clubes salgan de la escuela para siempre",
       "Que todo niño conserve la oportunidad de hacer deporte"
      ]
@@ -20392,7 +20392,7 @@
       "Que tous les repas sont désormais gratuits"
      ],
      "es": [
-      "Que el lugar no es solo para los niños de familias pobres",
+      "Que el lugar no es solo para niños pobres",
       "Que los adultos deben dejar comer primero a los niños",
       "Que se pide a los transeúntes que donen comida",
       "Que ahora todas las comidas son gratis"
@@ -21429,7 +21429,7 @@
       "Hospitales que rechazan a pacientes extranjeros",
       "Medicinas demasiado caras para los extranjeros",
       "Pocos médicos donde viven extranjeros",
-      "Pacientes y personal sanitario que no se entienden"
+      "Pacientes y personal médico que no se entienden"
      ]
     },
     "correct": 3
@@ -21544,7 +21544,7 @@
      "es": [
       "Nunca ha ocurrido",
       "No debe ocurrir",
-      "Ocurre cada vez",
+      "Ocurre siempre",
       "Puede ocurrir"
      ]
     },
@@ -22783,7 +22783,7 @@
      "es": [
       "Personal de ventas con tres años o más en la empresa",
       "Personal que ha pasado tres años trabajando en el extranjero",
-      "Cualquiera que entre en la empresa el próximo abril",
+      "Cualquiera que entre a la empresa el próximo abril",
       "Personal de cualquier departamento, desde el tercer año"
      ]
     },
@@ -23213,7 +23213,7 @@
       "meaning": {
        "en": "joining the company",
        "fr": "entrée dans l'entreprise",
-       "es": "entrada en la empresa"
+       "es": "entrada a la empresa"
       }
      },
      {
@@ -24288,7 +24288,7 @@
      "es": [
       "Las herramientas de trescientos años del taller",
       "Las normas detalladas para cuidar las herramientas",
-      "El cuidado por las personas que usarán el papel",
+      "La consideración hacia quienes usarán el papel",
       "La rapidez para hacer muchas hojas al día"
      ]
     },
@@ -24318,7 +24318,7 @@
       "Piensa quedarse durante mucho tiempo",
       "Piensa volver a casa al cabo de un año",
       "Duda de poder llegar a ser artesano",
-      "Espera abrir pronto un taller que sea suyo"
+      "Espera abrir pronto su propio taller"
      ]
     },
     "correct": 0
@@ -25456,7 +25456,7 @@
       "Abattre des arbres pour ouvrir une route"
      ],
      "es": [
-      "Poner paneles en los tejados de las viviendas",
+      "Poner paneles en los techos de las viviendas",
       "Talar los árboles de un monte para paneles",
       "Construir una central junto a un río",
       "Cortar árboles para abrir una carretera"
@@ -25604,7 +25604,7 @@
       "Prohibir la energía solar en todo su territorio",
       "Pagar a los vecinos para que acepten los paneles",
       "Crear normas que limitan dónde se pueden poner paneles",
-      "Trasladar los paneles de las colinas a los tejados"
+      "Trasladar los paneles de las colinas a los techos"
      ]
     },
     "correct": 2
@@ -26851,9 +26851,9 @@
       "Ceux qui riaient chaque jour avaient plus d'amis"
      ],
      "es": [
-      "Reír a diario les curó los males del corazón",
-      "Los males del corazón eran más raros en quienes apenas reían",
-      "Quienes apenas reían tenían más males del corazón",
+      "Reír a diario les curó las enfermedades del corazón",
+      "Las enfermedades del corazón eran más raras en quienes apenas reían",
+      "Quienes apenas reían tenían más enfermedades del corazón",
       "Quienes reían a diario tenían más amigos que los demás"
      ]
     },
@@ -26997,7 +26997,7 @@
      ],
      "es": [
       "Para admitir que las clases sí cuestan algo de dinero",
-      "Para señalar que en realidad poca gente se apunta",
+      "Para señalar que en realidad poca gente se inscribe",
       "Para advertir que una relación no prueba una causa",
       "Para explicar cómo se hizo la encuesta"
      ]
@@ -27028,7 +27028,7 @@
       "Reír mucho vuelve a la gente sana y popular a la vez",
       "Quizá la gente sana y con muchos amigos simplemente ríe más",
       "La gente con muchos amigos suele reír menos",
-      "Se preguntó a muy poca gente para fiarse del resultado"
+      "Se preguntó a muy poca gente como para confiar en el resultado"
      ]
     },
     "correct": 1
@@ -28217,7 +28217,7 @@
      ],
      "es": [
       "Lugares para criar animales raros",
-      "Lugares para hacer disfrutar a los visitantes",
+      "Lugares para entretener a los visitantes",
       "Lugares para estudiar animales salvajes",
       "Lugares para enseñar sobre la naturaleza"
      ]
@@ -29750,7 +29750,7 @@
      "es": [
       "A las grandes ciudades",
       "A todos los municipios por igual",
-      "A los municipios que ofrecen regalos populares",
+      "A los municipios con regalos populares",
       "A los municipios natales de los donantes"
      ]
     },
@@ -31125,7 +31125,7 @@
      ],
      "es": [
       "La edad mínima",
-      "El número de plazas",
+      "El número de lugares",
       "El personal a cargo",
       "El número de sesiones"
      ]
@@ -31153,10 +31153,10 @@
       "Remplir un formulaire en ligne d'ici le 10 mai"
      ],
      "es": [
-      "Enviar un correo hasta el 10 de mayo",
-      "Llamar a recepción hasta el 10 de mayo",
-      "Llevar un formulario en papel hasta el 10 de mayo",
-      "Rellenar un formulario en línea hasta el 10 de mayo"
+      "Enviar un correo a más tardar el 10 de mayo",
+      "Llamar a recepción a más tardar el 10 de mayo",
+      "Llevar un formulario en papel a más tardar el 10 de mayo",
+      "Llenar un formulario en línea a más tardar el 10 de mayo"
      ]
     },
     "correct": 2
@@ -32384,7 +32384,7 @@
       "Sin suficientes datos, ningún equipo puede ganar",
       "El equipo que gana siempre tiene más datos",
       "Con más datos, cualquier equipo ganará seguro",
-      "El hecho de tener muchos datos no garantiza la victoria"
+      "Tener más datos no garantiza la victoria"
      ]
     },
     "correct": 3
@@ -32529,7 +32529,7 @@
       "Olvida las cifras y confía en tus sensaciones",
       "Sigue la experiencia del entrenador antes que la tuya",
       "Mira las cifras solo después de perder un partido",
-      "Usa tus cifras para decidir qué trabajar"
+      "Usa tus cifras para decidir en qué trabajar"
      ]
     },
     "correct": 3
@@ -33606,7 +33606,7 @@
       "Las tiendas pagan sueldos más altos a su personal",
       "Importar trigo y petróleo cuesta más",
       "Los hogares están haciendo acopio de comida",
-      "Menos gente come fuera en restaurantes"
+      "Menos gente come en restaurantes"
      ]
     },
     "correct": 1
@@ -33692,7 +33692,7 @@
      "es": [
       "Comprar solo los días de oferta y congelar la comida",
       "Cocinar a diario y no comprar nada importado",
-      "Comer menos fuera y comprar la marca de la tienda",
+      "Comer menos afuera y comprar la marca de la tienda",
       "Gastar menos y ahorrar para sus hijos"
      ]
     },
@@ -33779,7 +33779,7 @@
      "es": [
       "Los hogares que tienen pocos ahorros",
       "Los hogares con tres hijos o más",
-      "Los hogares que comen fuera a menudo",
+      "Los hogares que comen afuera a menudo",
       "Los hogares que compran comida importada"
      ]
     },
@@ -33808,7 +33808,7 @@
      "es": [
       "Una ayuda que solo se da a los niños",
       "Una ayuda que las familias se dan entre sí",
-      "Una ayuda que dura solo poco tiempo",
+      "Una ayuda que dura poco tiempo",
       "Una ayuda que las empresas dan a su personal"
      ]
     },
@@ -33894,7 +33894,7 @@
      ],
      "es": [
       "Para mostrar que las familias gastan demasiado",
-      "Para mostrar que las familias numerosas son las que más comen fuera",
+      "Para mostrar que las familias numerosas son las que más comen afuera",
       "Para mostrar que a las familias les queda poco por recortar",
       "Para mostrar que los trabajadores quieren más hijos"
      ]
@@ -33963,7 +33963,7 @@
     "translation": {
      "en": "The cost of importing wheat and oil has grown, and not only bread and seasonings but even electricity and gas bills are going up.",
      "fr": "Le coût des importations de blé et de pétrole a augmenté : non seulement le pain et les condiments, mais même les factures d'électricité et de gaz sont en hausse.",
-     "es": "El costo de importar trigo y petróleo ha aumentado, y no solo el pan y los condimentos, sino incluso las facturas de la electricidad y del gas están subiendo."
+     "es": "El costo de importar trigo y petróleo ha aumentado, y no solo el pan y los condimentos, sino incluso los recibos de la luz y del gas están subiendo."
     },
     "note": {
      "en": "「AのみならずB(まで)」 is a formal not only A but (even) B; 「まで」 stresses how far the rises reach.",
@@ -34072,7 +34072,7 @@
       "meaning": {
        "en": "electricity bill",
        "fr": "facture d'électricité",
-       "es": "factura de la electricidad"
+       "es": "recibo de la luz"
       }
      },
      {
@@ -34088,7 +34088,7 @@
       "meaning": {
        "en": "gas bill",
        "fr": "facture de gaz",
-       "es": "factura del gas"
+       "es": "recibo del gas"
       }
      },
      {
@@ -34898,7 +34898,7 @@
      ],
      "es": [
       "Atender las llamadas de clientes",
-      "Enseñar la empresa a los clientes",
+      "Mostrar la empresa a los clientes",
       "Asistir a las reuniones con clientes",
       "Visitar a clientes por su cuenta"
      ]
@@ -36319,7 +36319,7 @@
      "es": [
       "Daños en los edificios",
       "Confusión y desorden",
-      "Enfado contra la ciudad",
+      "Enojo contra la ciudad",
       "Ruido y multitudes"
      ]
     },
@@ -36404,7 +36404,7 @@
       "Seuls les experts distinguent le vrai du faux"
      ],
      "es": [
-      "Una simple comprobación podría frenar muchas de las mentiras",
+      "Una simple comprobación podría frenar muchas mentiras",
       "La mayoría de las mentiras en internet no se pueden frenar",
       "Las noticias oficiales a menudo se equivocan",
       "Solo los expertos pueden detectar mentiras"
@@ -36433,7 +36433,7 @@
       "Sans s'intéresser à leurs raisons"
      ],
      "es": [
-      "Con enfado por su descuido",
+      "Con enojo por su descuido",
       "Con comprensión, aunque advierte del daño",
       "Con plena aprobación de lo que hicieron",
       "Sin interés por saber por qué lo hicieron"
@@ -37552,10 +37552,10 @@
       "Malgré l'appel de la Croix-Rouge"
      ],
      "es": [
-      "Antes de que la Cruz Roja hiciera un llamamiento",
-      "Respondiendo al llamamiento de la Cruz Roja",
-      "En lugar del llamamiento de la Cruz Roja",
-      "Pese al llamamiento de la Cruz Roja"
+      "Antes de que la Cruz Roja hiciera un llamado",
+      "Respondiendo al llamado de la Cruz Roja",
+      "En lugar del llamado de la Cruz Roja",
+      "Pese al llamado de la Cruz Roja"
      ]
     },
     "correct": 1
@@ -37641,7 +37641,7 @@
      "es": [
       "Echado por un amigo",
       "Regañado por un amigo",
-      "Llevado allí en coche por un amigo",
+      "Llevado allí en auto por un amigo",
       "Invitado por un amigo"
      ]
     },
@@ -37785,7 +37785,7 @@
      ],
      "es": [
       "Lanzar campañas en sus escuelas",
-      "Probar ellos mismos a donar sangre",
+      "Animarse ellos mismos a donar sangre",
       "Hacerse medir el nivel de hierro",
       "Pedir autobuses de donación en su ciudad"
      ]

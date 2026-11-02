@@ -3085,7 +3085,7 @@ const onboarding = {
   readingPaceOption: { standard: 'Estándar', relaxed: 'Pausado', slow: 'Lento', untimed: 'Sin límite' },
   // The chip at the clock's end, in Reading and Comprehension: each
   // press moves to the next pace.
-  readingPaceShort: { standard: '×1', relaxed: '×1,5', slow: '×2', untimed: '∞' },
+  readingPaceShort: { standard: '×1', relaxed: '×1.5', slow: '×2', untimed: '∞' },
   readingPaceChip: name => `Ritmo de lectura: ${name}. Toca para cambiar`,
   readingPaceDesc: {
     standard: 'El tiempo habitual',
