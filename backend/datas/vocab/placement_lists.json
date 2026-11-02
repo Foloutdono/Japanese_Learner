@@ -4270,12 +4270,6 @@
    "rank": 29038
   },
   {
-   "expression": "存ずる",
-   "reading": "ぞんずる",
-   "level": "N2",
-   "rank": 29038
-  },
-  {
    "expression": "破く",
    "reading": "やぶく",
    "level": "N2",
@@ -4500,6 +4494,12 @@
   {
    "expression": "それなら",
    "reading": "それなら",
+   "level": "N2",
+   "rank": null
+  },
+  {
+   "expression": "存ずる",
+   "reading": "ぞんずる",
    "level": "N2",
    "rank": null
   },

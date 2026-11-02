@@ -391,6 +391,18 @@ _TO_A_FLOOR = frozenset({"行く", "来る", "上がる", "下りる", "降り�
                          "待つ", "売る", "有る", "ある", "居る", "いる", "住む", "集まる"})
 
 
+def _jiru_not_zuru(morphemes: list[Morpheme]) -> None:
+    """A verb UniDic files under its literary ずる, written without a ず,
+    is the じる verb the page conjugates (plan 296): 信じ, 信じれば and
+    信じる are 信じる -- 信ずる's are 信ずれば, 信ずる; 感じる, 通じる."""
+    for m in morphemes:
+        if m.pos == "verb" and m.lemma.endswith("ずる") and m.lemma_reading.endswith("ずる") and "ず" not in m.surface:
+            m.lemma = m.lemma[:-2] + "じる"
+            m.lemma_reading = m.lemma_reading[:-2] + "じる"
+            m.ctype = "上一段-ザ行"
+            m.written, m.written_reading = m.lemma, m.lemma_reading
+
+
 def _times_or_floor(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """かい written in kana after a number is 回, "times", which UniDic
     files under 階, "floor" (plan 296): 三かいしましたが, 二かいかぞえます,
@@ -5578,6 +5590,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _one_kana_nouns(morphemes)
         _all_through(morphemes, tags)
         morphemes, tags = _times_or_floor(morphemes, tags)
+        _jiru_not_zuru(morphemes)
         _shops(morphemes, tags)
         morphemes, tags = _sleep(morphemes, tags)
         morphemes, tags = _pain(morphemes, tags)

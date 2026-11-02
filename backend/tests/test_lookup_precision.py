@@ -3901,3 +3901,43 @@ class AKanaVerbByWhatItTakesTests(unittest.TestCase):
         self.assertEqual(cut("あの人を信じればこそ、うそをつかれた悲しみは大きかった。")[9:12], ["つか", "れ", "た"])
         self.assertEqual(self.card("あの人を信じればこそ、うそをつかれた悲しみは大きかった。", "つか"), "吐く")
         self.assertIn("つかれ", cut("つかれたので、休みます。"))
+
+
+class TheWordThePageSpelledTests(unittest.TestCase):
+    """Plan 296: the card is the word the page spelled -- in its own kanji
+    where JMdict holds them as a word of their own (温かく, 架ける, 抑え),
+    never where JMdict's one word is written two ways (充分, 眼); by what is
+    warm in kana (あたたかいおでん 温かい, あたたかい部屋 暖かい); by the
+    conjugation the page shows (信じれば is 信じる, 信ずる's is 信ずれば);
+    by what is reached (数百万トンにのぼる 上る); by what is scooped
+    (きんぎょすくい)."""
+
+    def card(self, sentence: str, surface: str) -> str:
+        entry = (token_of(sentence, surface).get("vocab_match") or {}).get("entry") or {}
+        return entry.get("kanji") or entry.get("kana") or ""
+
+    def test_the_card_is_the_word_spelled(self) -> None:
+        for sentence, surface, kanji in (
+                ("翻訳は、二つの言語の間に橋を架ける仕事だと言われる。", "架ける", "架ける"),
+                ("日記には、後悔が、抑えた筆致でつづられている。", "抑え", "抑える"),
+                ("この町は景色もさることながら、人が温かい。", "温かい", "温かい"),
+                ("ばんごはんは、おばあさんのあたたかいおでんでした。", "あたたかい", "温かい"),
+                ("家に帰ってからも、体はずっとあたたかかったです。", "あたたかかっ", "温かい"),
+                ("皆様のあたたかいお言葉に、感激にたえません。", "あたたかい", "温かい"),
+                ("捨てられる食品が、年間数百万トンにのぼるという。", "のぼる", "上る"),
+                ("いもうとは、きんぎょすくいが下手です。", "すくい", "掬い"),
+                ("あの話は、とても信じがたい。", "信じ", "信じる"),
+                ("あの人を信じればこそ、悲しみは大きかった。", "信じれ", "信じる"),
+                ("受けた恩に報いたくても、報いるすべがない。", "報い", "報いる")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+        # ...and the card stands for one word written two ways, the weather,
+        # a mountain, help, the literary ずる where the page writes it
+        for sentence, surface, kanji in (("水は充分に加熱すると沸騰する。", "充分", "十分"), ("眼は手を見極め得る。", "眼", "目"),
+                                         ("もっと良い方法がある。", "良い", "いい/よい"),
+                                         ("今日はあたたかいですね。", "あたたかい", "暖かい"),
+                                         ("あたたかい部屋で休む。", "あたたかい", "暖かい"), ("山にのぼる。", "のぼる", "登る"),
+                                         ("神のすくいを求める。", "すくい", "救い"), ("神を信ずる。", "信ずる", "信ずる"),
+                                         ("この文章は意味を成さない。", "成さ", "為す")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)

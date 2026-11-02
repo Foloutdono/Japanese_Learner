@@ -1594,6 +1594,9 @@ def _kana_noun(morphemes, i: int, hit):
         return hit
     if i > 0 and numeral_value(morphemes[i - 1].surface) is not None:
         return hit                     # 二かい: a counter, the counters' to read
+    if hit is not None and m.surface == "すくい" and (hit[1].get("kanji") or "") == "救い" and i > 0 \
+            and morphemes[i - 1].surface in ("金魚", "きんぎょ", "魚", "さかな", "どじょう", "スーパーボール"):
+        return None                    # (きんぎょすくい: scooping, the lemma's 掬い -- no 救い, "help", plan 296)
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     if hit is not None and m.pos in ("noun", "pronoun") and _verb_card(hit[1]) and nxt is not None \
             and nxt.pos == "particle" and nxt.surface in ("は", "が", "を", "の", "に", "へ", "と", "も") \
@@ -1643,7 +1646,7 @@ def _verb_card(entry: dict) -> bool:
         written[-1] in "うくぐすつぬぶむる" and (entry.get("meaning") or "").startswith("to ")))
 
 
-def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None):
+def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None, _named_only: bool = False):
     """The card of `cards` ((kanji, partner words), ...) whose partners
     alone stand in morphemes[i]'s sentence, or None. `kana` is the card's
     reading where the word stands inflected (あつく, plan 296)."""
@@ -1674,6 +1677,8 @@ def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None):
     named = [kanji for kanji, partners in cards if partners & words]
     if len(named) != 1:
         return None
+    if _named_only:
+        return named[0]
     return _card(named[0], kana or morphemes[i].surface)
 
 
@@ -1681,8 +1686,8 @@ def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None):
 # their clause that say which (plan 296): the weather is 暑い, a drink 熱い,
 # a book 厚い; a test or a language 易しい (日本語 is 日本 + 語), a person
 # 優しい. A word on two lists, or none, leaves UniDic's pick (言葉 is
-# 易しい and 優しい). (A soup's あたたかい is the pool's 温かい, which no
-# deck card is: left as the deck's 暖かい reads it.)
+# 易しい and 優しい). (あたたかい is _WARM's: the pool's 温かい is no
+# deck card.)
 _ADJECTIVE_PARTNERS = {
     "あつい": (("暑い", {"夏", "なつ", "今日", "きょう", "天気", "てんき", "部屋", "へや", "国", "くに", "日本", "にほん",
                        "季節", "きせつ", "気温", "夜", "よる", "昼", "ひる", "外", "そと", "東京", "太陽", "汗", "あせ",
@@ -1711,10 +1716,28 @@ def _kana_adjective(morphemes, i: int, hit):
     if m.pos != "adjective" or not _hiragana(m.surface):
         return hit
     said = morphology.kata_to_hira(m.lemma_reading or "")
+    if said == "あたたかい" and hit is not None and (hit[1].get("kanji") or "") == "暖かい":
+        # (a thing warm to the touch or at heart is the pool's 温かい, which
+        # no deck card is: the card refused, the lemma's row answers, plan 296)
+        named = _by_noun_partner(morphemes, i, _WARM, said, _named_only=True)
+        return None if named == "温かい" else hit
     cards = _ADJECTIVE_PARTNERS.get(said)
     if not cards:
         return hit
     return _by_noun_partner(morphemes, i, cards, said) or hit
+
+
+# What is warm (plan 296): the weather, a season, a room or what keeps one
+# warm is 暖かい; food, a drink, a body, a hand, words and people 温かい.
+_WARM = (("暖かい", {"日", "ひ", "天気", "てんき", "春", "はる", "冬", "ふゆ", "風", "かぜ", "空気", "くうき", "部屋",
+                    "へや", "地方", "国", "くに", "気候", "きこう", "気温", "今日", "きょう", "朝", "あさ", "昼", "ひる",
+                    "午後", "南", "みなみ", "毛布", "セーター", "コート", "服", "ふく", "布団", "ふとん", "ストーブ",
+                    "暖房", "日差し", "ひざし", "季節", "きせつ", "沖縄", "海", "うみ"}),
+         ("温かい", {"料理", "りょうり", "ご飯", "ごはん", "スープ", "おでん", "お茶", "おちゃ", "茶", "飲み物",
+                    "のみもの", "食べ物", "たべもの", "パン", "牛乳", "ぎゅうにゅう", "ミルク", "みそしる", "コーヒー",
+                    "体", "からだ", "手", "て", "心", "こころ", "言葉", "ことば", "お言葉", "人", "ひと", "家族",
+                    "かぞく", "気持ち", "きもち", "声", "こえ", "拍手", "はくしゅ", "歓迎", "かんげい", "お湯", "おゆ",
+                    "うどん", "そば", "なべ", "鍋", "弁当", "べんとう"}))
 
 
 # What one does at home, or goes home to do (plan 272): うちにかえる.
@@ -2264,6 +2287,10 @@ def _placelike(word: str) -> bool:
     return word in _PLACES or word in _HOMES or word.endswith(_PLACE_ENDINGS)
 
 
+# What an amount is counted in (plan 296): 数百万トン, 三割, 一億円.
+_AMOUNTS = ("トン", "円", "人", "件", "割", "億", "万", "倍", "名", "個", "台", "キロ", "メートル", "パーセント", "％", "%",
+            "ドル", "回", "社", "校", "軒", "種類")
+
 _HOMES = frozenset({"アパート", "マンション", "寮", "りょう", "近く", "ちかく", "そば", "田舎", "いなか", "都会",
                     "とかい", "海外", "かいがい", "隣", "となり", "大阪", "おおさか", "京都", "きょうと", "北海道"})
 _PARTNERS = (
@@ -2366,6 +2393,8 @@ _PARTNERS = (
     # (雨がふり出した, 実がなる, 手がはなせない, のどがかわく: the subject
     # names the verb, plan 296)
     ("降り出す", ("が", "は", "も"), frozenset({"雨", "あめ", "雪", "ゆき"})),
+    # (数百万トンにのぼる: an amount reached, plan 296 -- a mountain is 登る)
+    ("上る", ("に",), lambda word: _numeral(word) or word.endswith(_AMOUNTS)),
     ("生る", ("が", "は", "も"), frozenset({"実", "み", "果物", "くだもの", "柿", "かき", "りんご", "みかん", "ぶどう",
                                          "桃", "もも", "トマト", "きゅうり"})),
     ("離す", ("が", "を", "から"), frozenset({"手", "て", "目", "め"})),
@@ -2998,9 +3027,34 @@ def _another_word(m, entry: dict) -> dict | None:
     if not form:
         return None
     row = _pool_by_form(form, (m.reading, m.lemma_reading), seen_kanji=False)
-    if row is None or _row_gloss_words(row) & _gloss_words(entry):
+    if row is None:
+        return None
+    if (row.get("kanji") or "") == form and entry.get("kanji"):
+        # The page's spelling as a JMdict entry of its own, whose senses
+        # are not the card's (plan 296): 温かく is 温かい, "warm (to the
+        # touch, at heart)", whatever the card 暖かい, "warm (weather)",
+        # shares of its first sense; 架ける "to build (a bridge)", 抑える "to
+        # restrain", 上手い "skilful". Where the senses are the card's (充分,
+        # 眼, 交代: JMdict's one word in two spellings) the card stands.
+        return None if _same_senses(entry, row) else row
+    if _row_gloss_words(row) & _gloss_words(entry):
         return None
     return row
+
+
+def _same_senses(entry: dict, row: dict) -> bool:
+    """Whether a pool row's glosses are, nine in ten, the deck card's own
+    senses, or hold every one of them: JMdict's one word, written another
+    way -- 成す lists the whole of the card 為す, "to do", among its own
+    (この事業は成し得ませんでした is the card's "to accomplish")."""
+    from content import vocab_meanings_data
+
+    kana = morphology.kata_to_hira(_reading_variants(entry.get("kana") or "")[0]) if entry.get("kana") else ""
+    mine = {g for sense in vocab_meanings_data.get(f"{entry.get('kanji') or ''}::{kana}") or []
+            for g in sense.get("glossary") or ()}
+    theirs = {g for sense in jmdict_db.get_senses(row.get("kanji") or "", row.get("kana") or "") or []
+              for g in sense.get("glossary") or ()}
+    return bool(theirs) and (len(theirs & mine) >= 0.9 * len(theirs) or (bool(mine) and mine <= theirs))
 
 
 def _glosses_meet(mine: set[str], theirs: set[str]) -> bool:
@@ -3666,6 +3720,14 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     # the word as said (ぶっころす), where UniDic's lemma reading is its
     # citation (ぶちころす); for an inflected one it matches nothing and
     # the lemma's reading answers.
+    if m.pos == "verb" and lemma.endswith("う") and m.surface.endswith("い") and _has_kanji(lemma) and m.lemma_reading:
+        # (報いたく: the ichidan 報いる UniDic's godan 報う spells alike, where
+        # JMdict's 報いる is the commoner word, plan 296)
+        ichidan = jmdict_db.get_by_key(lemma[:-1] + "いる", m.lemma_reading[:-1] + "いる")
+        godan = jmdict_db.get_by_key(lemma, m.lemma_reading)
+        if ichidan is not None and (godan is None or (ichidan.get("freq_rank") or _NO_RANK)
+                                    < (godan.get("freq_rank") or _NO_RANK)):
+            return ichidan
     hit = _pool_by_form(lemma, (m.reading, m.lemma_reading), _has_kanji(m.surface), shared=inflects)
     if hit is None and m.surface != lemma and not inflects:
         # A word UniDic files under another spelling than the page's

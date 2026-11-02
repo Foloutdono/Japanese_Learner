@@ -1393,7 +1393,7 @@ def _adverbs_to(morphemes: list, i: int) -> bool:
             # it becomes.)
             and not (after is not None and after.pos == "verb" and after.lemma not in ("為る", "する")
                      and (after.lemma in grammar_detect._SAYING_VERBS
-                          or after.lemma in ("感ずる", "成る", "なる", "見なす", "見做す"))))
+                          or after.lemma in ("感ずる", "感じる", "成る", "なる", "見なす", "見做す"))))
 
 
 def _adverb_to_length(morphemes: list, i: int) -> int:
@@ -2187,7 +2187,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # a floor, 何かい, a counter's own sense (一本も), 十分の一, 三割余り,
 # 一駅前 and 二、三日 さんにち; and a verb in kana by what it takes (雨が
 # ふり出す 降り出す, 実がなる 生る, 手がはなせない 離す, のどがかわく 渇く,
-# 窓口はあく 開く, 写真…とった 撮る, あの子は、おこった 怒る, うそをつかれた).
+# 窓口はあく 開く, 写真…とった 撮る, あの子は、おこった 怒る, うそをつかれた);
+# and the card the page spelled (温かく, 架ける, 抑え; あたたかい by what is
+# warm; 信じれば 信じる; 数百万トンにのぼる 上る; きんぎょすくい; 報いる),
+# with 〜ように言う for any instruction (命じる, 注意する).
 LOCAL_REV = 33
 
 

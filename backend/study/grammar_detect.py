@@ -3002,9 +3002,16 @@ def _ask_to_spans(tokens):
         u = tokens[k]
         if u.pos == "prefix" and u.surface == "お" and k + 1 < len(tokens):
             u = tokens[k + 1]
-        if u.lemma in ("願う", "頼む", "言う", "伝える") or u.surface.startswith("願い"):
+        if u.lemma in _INSTRUCTING or u.surface.startswith("願い"):
             out.append((t.start, tokens[k - 1].end if k > i + 1 else t.end))
     return out
+
+
+# What tells someone to do something (plan 296): 全員に残るように命じた,
+# 医者にやめるように注意された, 早く来るように求める -- 〜ように言う's
+# instruction, as 頼む's is.
+_INSTRUCTING = frozenset({"願う", "頼む", "言う", "伝える", "命じる", "命ずる", "求める", "勧める", "注意", "指示",
+                          "合図", "呼びかける", "言い聞かせる", "要求", "要請", "依頼", "忠告", "促す"})
 
 
 def _so_much_spans(tokens):
@@ -3489,7 +3496,7 @@ def _niyotte_forms_spans(tokens):
 # What a clause and its と are said, thought or reported with, besides
 # the lesson's 言う and 思う (plan 272).
 _SAYING_VERBS = frozenset({"言う", "思う", "考える", "話す", "答える", "書く", "聞く", "伝える", "述べる", "叫ぶ",
-                           "信じる", "感じる", "語る", "記す", "告げる", "申す", "おっしゃる", "仰る", "存ずる",
+                           "信じる", "感じる", "語る", "記す", "告げる", "申す", "おっしゃる", "仰る", "存ずる", "存じる",
                            "見る", "呼ぶ", "為る", "する",
                            "伺う", "承る",                         # (いらっしゃると伺っております, plan 272)
                            # (plan 272: 信じ is 信ずる to UniDic; what is
@@ -5770,8 +5777,7 @@ def _passive_refused(tokens, s, e, _g) -> bool:
     # (plan 272) With no one before に to do it: what it takes with を, not
     # in the past (通知のオン・オフを切り替えられます, "you can switch"), or
     # what it cannot do (刺身は食べられない, 忘れられない) -- the potential.
-    past = any(u.lemma == "た" for u in tokens[i + 1:i + 3])
-    if not past and any(u.surface == "を" and u.pos == "particle" for u in _clause_ending_at(tokens, i - 1)):
+    if _takes_its_object(tokens, i):
         return True
     if nxt is not None and (nxt.lemma in ("ない", "ず", "ぬ") or (nxt.lemma == "ます" and i + 2 < len(tokens)
                                                                 and tokens[i + 2].surface == "ん")):
@@ -5795,6 +5801,15 @@ def _clause_ending_at(tokens, k: int) -> list:
         out.append(tokens[k])
         k -= 1
     return out
+
+
+def _takes_its_object(tokens, i: int) -> bool:
+    """Whether the られる at tokens[i] keeps a を in its own clause, not in
+    the past: 通知のオン・オフを切り替えられます, それを当然と感じられる --
+    "can", since a passive with nobody before に keeps no object (plan 272,
+    plan 296)."""
+    past = any(u.lemma == "た" for u in tokens[i + 1:i + 3])
+    return not past and any(u.surface == "を" and u.pos == "particle" for u in _clause_ending_at(tokens, i - 1))
 
 
 # What says a られる is what one can do (plan 272): 簡単に組み立てられる,
@@ -5853,10 +5868,11 @@ def _potential_refused_by_use(tokens, s, e) -> bool:
     negative = nxt is not None and nxt.lemma in ("ない", "ず", "ぬ")
     if verb is not None and not negative and (verb.lemma in _SAID_OF or (
             verb.lemma in _SAID_AFTER_TO and i >= 2 and tokens[i - 2].surface == "と"
-            and tokens[i - 2].pos == "particle")):
+            and tokens[i - 2].pos == "particle" and not _takes_its_object(tokens, i))):
         return True                    # 支援が求められる, 有効と認められる, 回復したと見られる (plan 272)
         # (...and what is said or thought after と: と読み上げられる謝罪文,
-        # と考えられる, plan 296)
+        # と考えられる, plan 296 -- but それを当然と感じられる keeps its を,
+        # which no passive does with nobody before に: "can feel it")
     return _suffered_by(tokens, i)
 
 

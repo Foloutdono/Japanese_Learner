@@ -2906,11 +2906,15 @@ class SaidAndSufferedTests(unittest.TestCase):
         for sentence in ("「深くおわび申し上げます」と読み上げられる謝罪文は、どれもよく似ている。",
                          "家だと、スマホが鳴ったり家族に話しかけられたりして、集中しづらい。",
                          "原因は寝不足だと考えられる。",
+                         "この町は昔から住みやすいと感じられている。",
                          "出てきたところを友人に見られてばつが悪かった。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("受身形 〜られる", found_in(sentence))
                 self.assertNotIn("可能形 〜(ら)れる", found_in(sentence))
-        for sentence in ("この本は図書館で借りられますか。", "誰でも簡単に覚えられる。"):
+        # (...but a を the clause keeps is no passive's, with nobody
+        # before に: "being able to feel it as natural")
+        for sentence in ("この本は図書館で借りられますか。", "誰でも簡単に覚えられる。",
+                         "それを当然と感じられること自体が、先人のおかげなのだ。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("可能形 〜(ら)れる", found_in(sentence))
                 self.assertNotIn("受身形 〜られる", found_in(sentence))
@@ -3093,3 +3097,16 @@ class TheCopulasDeTests(unittest.TestCase):
         for sentence in ("象は鼻が長い。", "私は背が高く見える。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("〜は〜が", found_in(sentence))
+
+
+class AnInstructionReportedTests(unittest.TestCase):
+    """Plan 296: 〜ように言う reports any instruction -- 命じる, 注意する,
+    求める as 頼む -- never a purpose its comma sets apart."""
+
+    def test_instructions(self) -> None:
+        for sentence in ("部長は全員に残るように命じた。", "医者にたばこをやめるように注意された。",
+                         "ペリーは、日本に門戸を開くように要求した。", "母に早く帰るように頼んだ。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ように言う", found_in(sentence))
+        self.assertIn("〜ように", found_in("かぜをひかないように、注意してください。"))
+        self.assertIn(("と", "と"), keys("新聞を読むにつけ、道の整備を急ぐべきだと強く感じる。"))
