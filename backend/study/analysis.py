@@ -2190,7 +2190,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 窓口はあく 開く, 写真…とった 撮る, あの子は、おこった 怒る, うそをつかれた);
 # and the card the page spelled (温かく, 架ける, 抑え; あたたかい by what is
 # warm; 信じれば 信じる; 数百万トンにのぼる 上る; きんぎょすくい; 報いる),
-# with 〜ように言う for any instruction (命じる, 注意する).
+# with 〜ように言う for any instruction (命じる, 注意する); and a て by
+# what its clauses say: the cause of what befell (電車が遅れて、間に合い
+# ませんでした 〜て（理由）), a manner inside the phrase it closes (子どもを
+# 連れて登るのは), a frame (言われて久しい, 任せて差し支えない), and を通して
+# as 〜を通じて.
 LOCAL_REV = 33
 
 

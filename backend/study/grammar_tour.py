@@ -55,7 +55,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 13  # 13: で's and を通じて's scene cues no longer lit 何で as なんで, "why" (#439)
+TOUR_REV = 14  # 14: 〜て（理由） lit on its lesson's own 雨がふって, を通して on 〜を通じて's, and no guess a lesson example uses (plan 296)
 # 12: 〜ような's scene reply wrong by meaning (だけ), no のように, now read as the point (plan 272)
 # 11: 〜にして's meaning question on 一夜にして, no にする lookalike, now the point is read (plan 272)
 # 10: 〜をおいて's use question, its wrong line written with the point; 〜の's form question on a
@@ -179,8 +179,12 @@ def _guesses(level: str, entry: dict, look: list[dict], lang: str) -> list[dict]
 
     rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}")
     # A point the examples themselves use could honestly be "what it
-    # does" -- は and です in 学生ですか -- so it is never offered.
+    # does" -- は and です in 学生ですか -- so it is never offered: any of
+    # the lesson's examples, shown here or not (この本は高くて's 〜くて／〜で
+    # beside 〜て（理由）'s 天気がよくて, plan 296).
     present = {h["pattern"] for item in look for h in hits(item["jp"])}
+    present |= {h["pattern"] for example in entry.get("examples", []) if example.get("jp")
+                for h in hits(example["jp"])}
     fillers = [
         g for g in get_grammar_points(level)
         if g["pattern"] not in named and g["pattern"] not in present

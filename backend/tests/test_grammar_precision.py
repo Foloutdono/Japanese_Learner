@@ -2921,6 +2921,76 @@ class SaidAndSufferedTests(unittest.TestCase):
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TheTeOfACauseTests(unittest.TestCase):
+    """Plan 296: a て whose clause is what a thing went through, or what
+    one could do, before what befell (a deed not done, what it became,
+    what one had to do) gives the cause -- 〜て（理由）, never 〜て、〜て.
+    Someone's deed before it, a deed after it, a condition, a question
+    or a second clause that says "and then" stays a sequence; a て inside
+    the phrase it closes is its verb's manner; a frame of its own is
+    neither."""
+
+    def test_the_cause(self) -> None:
+        for sentence in ("雨がふって、行きませんでした。",
+                         "電車が遅れて、約束の時間に間に合いませんでした。",
+                         "借金がふえて、家を売らざるを得なかった。",
+                         "海ではあそべませんでしたが、家族でゆっくり話せて、いい旅行になりました。",
+                         "数字を見てこわくなったことが、今思えばよいきっかけだった。",
+                         "雨が降って、楽しみにしていた試合が中止になった。",
+                         "行き先が分からなくなって、不安になった。",
+                         "その鉄の棒はさびてぼろぼろになった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜て（理由）", found_in(sentence))
+                self.assertNotIn("〜て、〜て", found_in(sentence))
+
+    def test_a_sequence(self) -> None:
+        for sentence in ("店に入って、コーヒーを注文した。",
+                         "電車が来て、乗りました。",
+                         "家に帰って、何も食べなかった。",
+                         "夜中に目がさめて、それから眠れなかった。",
+                         "季節が変わって寒くなると、体の具合が悪くなります。",
+                         "月曜日は午前中だけ開館して、午後からは休館となる。",
+                         "しかし王女は部屋に立てこもって出てこなかった。",
+                         "収穫の直前に台風で稲が倒れたのを見て、農家の悔しさを思わずにはいられなかった。",
+                         # (a manner inside the phrase its verb closes)
+                         "通勤時間がなくなり、自分の都合に合わせて働けるというよい点は大きい。",
+                         "持ち主にとっても、高い費用をかけて家を取りこわさずに済むのはありがたい。",
+                         "一人で行くならいざ知らず、小さな子どもを連れて山に登るのは危ない。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜て（理由）", found_in(sentence))
+
+    def test_neither(self) -> None:
+        for sentence in ("若者の政治離れが言われて久しいが、若者ばかりを責めるのは酷だろう。",
+                         "この習慣は絶えて久しい。",
+                         "確かに、旅行先で道を尋ねる程度なら、機械に任せて差し支えない場面は増えた。",
+                         "随意に退席してかまいません。",
+                         "枝葉末節の議論はもうそろそろ止めにして、本筋の話に移りませんか。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜て（理由）", found_in(sentence))
+                self.assertNotIn("〜て、〜て", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ThroughWrittenToushiteTests(unittest.TestCase):
+    """Plan 296: 〜を通じて's lesson says "Also を通して": a channel or a
+    span (画面を通して, 一年を通して, 機械を通した会話) -- never the verb
+    通す, passing a thing through (目を通す, 針に糸を通す, 手を通してない)
+    or letting someone by (彼らを通した。)."""
+
+    def test_the_channel(self) -> None:
+        for sentence in ("最近では、タブレットの画面を通して、遠くにいる通訳者が手伝う方法も広まっている。",
+                         "この地方は一年を通して雨が多い。",
+                         "機械を通した会話では、相手の冗談の間合いはおろか、沈黙の意味すら伝わらない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜を通じて", found_in(sentence))
+                self.assertNotIn("〜て、〜て", found_in(sentence))
+        for sentence in ("書類に目を通してください。", "針に糸を通して、ボタンをつけた。",
+                         "私はわきによって彼らを通した。", "まだその上着には手を通してないんだ。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜を通じて", found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AGaOfItsOwnClauseTests(unittest.TestCase):
     """Plan 296: 〜は〜が's が is the subject of what is said of the topic
     -- never one inside a quotation opened after it, a clause the
