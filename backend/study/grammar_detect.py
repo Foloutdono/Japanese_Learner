@@ -6582,7 +6582,9 @@ def _o_kudasai_refused(tokens, s, e, segments) -> bool:
         i + 2 < len(tokens) and tokens[i + 2].pos == "auxiliary" and tokens[i + 2].lemma in ("せる", "させる")))
     # お帰り, お声がけ: a verb's stem the tagger files as a noun, ending in
     # the stem's kana -- and not お金, お名前 or お世話, which are nouns
-    as_noun = stem.pos == "noun" and stem.surface[-1:] in _STEM_ENDINGS
+    as_noun = stem.pos == "noun" and stem.surface[-1:] in _STEM_ENDINGS and not (
+        # (これでおしまいになります: おしまい, "the end", a word of its own, plan 296)
+        i + 2 < len(tokens) and tokens[i + 2].surface == "に" and morphology.an_o_noun(t, stem))
     # ご + a する-noun + する is the humble form too: ごれんらくします (plan 188)
     as_suru_noun = (t.surface == "ご" and stem.pos == "noun" and i + 2 < len(tokens)
                     and tokens[i + 2].lemma in ("為る", "申し上げる", "致す", "いたす"))   # (ご連絡申し上げます, plan 272)

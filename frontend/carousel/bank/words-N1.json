@@ -146,7 +146,7 @@
 {"t":"区々","r":"まちまち","ro":"machimachi","en":["various, diverse, different, divergent"],"fr":["divers, variés, différents, divergents"],"fu":[["区々","まちまち"]]},
 {"t":"敬具","r":"けいぐ","ro":"keigu","en":["Sincerely yours, Yours truly (letter closing)"],"fr":["salutations distinguées (formule finale de lettre)"],"fu":[["敬","けい"],["具","ぐ"]],"hy":["京具","敬工","兄具"]},
 {"t":"釣鐘","r":"つりがね","ro":"tsurigane","en":["hanging bell"],"fr":["cloche suspendue"],"fu":[["釣","つり"],["鐘","がね"]]},
-{"t":"差し支える","r":"さしつかえる","ro":"sashitsukaeru","en":["to interfere, to hinder, to become impeded"],"fr":["gêner, entraver, faire obstacle"],"fu":[["差","さ"],["し",""],["支","つか"],["える",""]],"hy":["左し支える","作し支える","茶し支える"],"ex":["N1.179","N1.180"]},
+{"t":"差し支える","r":"さしつかえる","ro":"sashitsukaeru","en":["to interfere, to hinder, to become impeded"],"fr":["gêner, entraver, faire obstacle"],"fu":[["差","さ"],["し",""],["支","つか"],["える",""]],"hy":["左し支える","作し支える","茶し支える"],"ex":["N1.180"]},
 {"t":"設置","r":"せっち","ro":"setchi","en":["establishment, setting up","installation (of equipment)"],"fr":["création, mise en place","installation (d'équipement)"],"fu":[["設","せっ"],["置","ち"]],"hy":["設地","設知","設質"]},
 {"t":"兎角","r":"とかく","ro":"tokaku","en":["apt to, prone to","at any rate, anyway","this and that, various things"],"fr":["avoir tendance à, être enclin à","en tout cas, de toute façon","ceci et cela, toutes sortes de choses"],"fu":[["兎","と"],["角","かく"]],"hy":["兎画","兎客","兎格"],"ex":["N1.223"]},
 {"t":"短歌","r":"たんか","ro":"tanka","en":["tanka, 31-syllable Japanese poem"],"fr":["tanka, poème japonais de 31 syllabes"],"fu":[["短","たん"],["歌","か"]],"hy":["単歌","短下","探歌"]},

@@ -2261,7 +2261,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 多くの困難に耐え, このへんに, 春めく陽気に誘われて), ように's に no
 # adjective's, and 当然と感じる no manner; and a piece its construction
 # owns (たとえ日曜日でも's でも, ともなると's も, もう一度's もう), and
-# はじめてでも 〜でも's "even".
+# はじめてでも 〜でも's "even"; and a verb's stem or a noun by what follows
+# (おのりになる 乗る, 寄せ…返しつ 返す, ひっこしの日 引越し, さしつかえ
+# ありません 差し支え, さくらも…さくかな 咲く, このやり方 やる, これで
+# おしまいになります おしまい).
 LOCAL_REV = 33
 
 

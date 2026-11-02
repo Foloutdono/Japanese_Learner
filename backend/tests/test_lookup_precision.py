@@ -4244,3 +4244,41 @@ class ANounsNiOrAnAdverbsTests(unittest.TestCase):
                 gloss = self.ni(sentence, word)["gloss"]
                 self.assertTrue(gloss["en"].startswith("(after よう, みたい)") and gloss["fr"])
         self.assertEqual(cut("ように"), ["よう", "に"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AVerbsStemOrANounTests(unittest.TestCase):
+    """Plan 296: a verb's stem or a noun, by what follows it -- お〜になる
+    and 〜つ〜つ take a stem, の, が, を and ある a noun, and a flower's
+    さく is 咲く."""
+
+    def test_the_word_its_neighbours_make_it(self) -> None:
+        for sentence, surface, card, pos in (
+                ("はい、そうです。つぎの電車におのりになりますか。", "のり", "vocab_N5_乗る_のる", "verb"),
+                ("お客様の席は取ってありますので、お並びになるには＿＿＿。", "並び", "vocab_N5_並ぶ_ならぶ", "verb"),
+                ("波が寄せ＿＿＿返しつ、砂浜の足あとを消していった。", "返し", "vocab_N5_返す_かえす", "verb"),
+                ("この資料は、コピーを取ってもさしつかえありませんが、持ち出しはできません。", "さしつかえ",
+                 "vocab_N2_差し支え_さしつかえ", "noun"),
+                ("さくらも、もうすぐさくかな。", "さく", "vocab_N5_咲く_さく", "verb"),
+                ("このやり方は、時間的にむりです。", "やり", "vocab_N5__やる", "verb"),
+                ("ひっこしの日、友だちはだれもてつだってくれなかった。", "ひっこし", "vocab_N3_引越し_ひっこし", "noun")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertEqual(((token.get("vocab_match") or {}).get("raw_id"), token["pos"]), (card, pos))
+        self.assertIn("お〜になる／お〜する", {g["pattern"] for g in analysis.analyze_local(
+            "はい、そうです。つぎの電車におのりになりますか。")["grammar"]})
+
+    def test_the_lookalikes_keep_theirs(self) -> None:
+        for sentence, surface, card in (("のりで紙をはる。", "のり", "vocab_N2_糊_のり"),
+                                        ("書留で送ってください。", "書留", "vocab_N2_書留_かきとめ"),
+                                        ("来月ひっこす。", "ひっこす", "vocab_N4_引っ越す_ひっこす"),
+                                        ("庭のさくをなおした。", "さく", "vocab_N1_柵_さく"),
+                                        ("帰りの電車に乗る。", "帰り", "vocab_N4_帰り_かえり"),
+                                        ("いつもお世話になっております。", "世話", "vocab_N4_世話_せわ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, surface), card)
+        self.assertEqual(token_of("やりを投げる。", "やり")["vocab_match"]["entry"]["kanji"], "槍")
+        # (おしまい, "the end", is a word of its own, no しまう said up)
+        self.assertEqual(token_of("これでおしまいになります。", "おしまい")["vocab_match"]["entry"]["meaning"][:7], "the end")
+        self.assertNotIn("お〜になる／お〜する", {g["pattern"] for g in analysis.analyze_local("これでおしまいになります。")["grammar"]})
+        self.assertEqual(token_of("彼は食べもしないで帰った。", "食べ")["pos"], "verb")

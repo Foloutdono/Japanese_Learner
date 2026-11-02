@@ -1222,7 +1222,7 @@
 {"t":"清い","r":"きよい","ro":"kiyoi","en":["clear, pure, noble"],"fr":["clair, pur, noble"],"fu":[["清","きよ"],["い",""]]},
 {"t":"寺院","r":"じいん","ro":"jiin","en":["temple"],"fr":["temple"],"fu":[["寺","じ"],["院","いん"]],"hy":["時院","寺飲","耳院"],"ex":["N2.153","N2.199"]},
 {"t":"食器","r":"しょっき","ro":"shokki","en":["tableware"],"fr":["vaisselle"],"fu":[["食","しょっ"],["器","き"]],"hy":["食気","食帰","食起"],"ex":["N2.125"]},
-{"t":"差し支え","r":"さしつかえ","ro":"sashitsukae","en":["hindrance, impediment"],"fr":["obstacle, entrave"],"fu":[["差","さ"],["し",""],["支","つか"],["え",""]],"hy":["左し支え","作し支え","茶し支え"]},
+{"t":"差し支え","r":"さしつかえ","ro":"sashitsukae","en":["hindrance, impediment"],"fr":["obstacle, entrave"],"fu":[["差","さ"],["し",""],["支","つか"],["え",""]],"hy":["左し支え","作し支え","茶し支え"],"ex":["N1.179"]},
 {"t":"毛皮","r":"けがわ","ro":"kegawa","en":["fur, skin, pelt"],"fr":["fourrure, peau"],"fu":[["毛","け"],["皮","がわ"]],"hy":["気皮","花皮","家皮"]},
 {"t":"さっさと","r":"さっさと","ro":"sassato","en":["quickly"],"fr":["rapidement"]},
 {"t":"児童","r":"じどう","ro":"jidou","en":["children, juvenile"],"fr":["enfants, mineurs"],"fu":[["児","じ"],["童","どう"]],"hy":["二童","児道","時童"],"ex":["N2.9","N2.183"]},

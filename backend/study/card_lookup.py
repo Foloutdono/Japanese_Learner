@@ -1065,6 +1065,8 @@ def _named_by_a_demonstrative(morphemes, i: int):
     if m.pos != "verb" or _has_kanji(m.surface) or i == 0 or morphemes[i - 1].surface not in _DEMONSTRATIVES \
             or morphemes[i - 1].pos != "adnominal":
         return None
+    if i + 1 < len(morphemes) and morphemes[i + 1].lemma == "方" and morphemes[i + 1].pos == "suffix":
+        return None                     # (このやり方: この + やる's 〜方, no 槍, plan 296)
     said = morphology.kata_to_hira(m.surface)
     for row in jmdict_db.by_kana(said, limit=4):
         tags = {t for sense in jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []

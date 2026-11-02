@@ -1809,6 +1809,117 @@ def _topic_in_clause(morphemes: list[Morpheme], k: int) -> bool:
     return False
 
 
+_GODAN_ROW = {"う": "ワア行", "く": "カ行", "ぐ": "ガ行", "す": "サ行", "つ": "タ行", "ぬ": "ナ行", "ぶ": "バ行", "む": "マ行",
+              "る": "ラ行"}
+_I_ROW_TO_U = dict(zip("いきぎしちにびみり", "うくぐすつぬぶむる"))
+_KANA_ROW = {**{c: "ア行" for c in "あいうえお"}, **{c: "カ行" for c in "かきくけこ"}, **{c: "ガ行" for c in "がぎぐげご"},
+             **{c: "サ行" for c in "さしすせそ"}, **{c: "ザ行" for c in "ざじずぜぞ"}, **{c: "タ行" for c in "たちつてと"},
+             **{c: "ダ行" for c in "だぢづでど"}, **{c: "ナ行" for c in "なにぬねの"}, **{c: "ハ行" for c in "はひふへほ"},
+             **{c: "バ行" for c in "ばびぶべぼ"}, **{c: "マ行" for c in "まみむめも"}, **{c: "ラ行" for c in "らりるれろ"}}
+# A flower, whose kana さく is 咲く, never the noun 柵 (plan 296).
+_FLOWERS = frozenset({"花", "はな", "さくら", "桜", "梅", "うめ", "ばら", "バラ", "ひまわり", "チューリップ", "つぼみ",
+                      "あじさい", "菊", "きく", "たんぽぽ", "ゆり", "百合"})
+
+
+def _verb_of_a_stem(m: Morpheme) -> tuple[str, str, str] | None:
+    """(lemma, lemma reading, ctype) of the deck verb a noun is the stem of
+    -- のり 乗る, 並び 並ぶ, 返し 返す, 寄せ 寄せる -- at the lowest level that
+    has one, its kanji the stem's where it shows any; or None."""
+    said = kata_to_hira(m.reading)
+    kanji = [c for c in m.surface if _is_kanji(c)]
+    tries = []
+    if said[-1:] in _I_ROW_TO_U:
+        tries.append((said[:-1] + _I_ROW_TO_U[said[-1]], "五段-" + _GODAN_ROW[_I_ROW_TO_U[said[-1]]]))
+    if said[-1:] in _KANA_ROW:
+        tries.append((said + "る", ("上一段-" if said[-1] in "いきぎしじちにひびみり" else "下一段-") + _KANA_ROW[said[-1]]))
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    for kana, ctype in tries:
+        # (A stem in kana takes the lowest verb the deck spells in kanji --
+        # おかけになる 掛ける, N4, before the N5 かける "to call" -- and a
+        # card in kana only where the deck spells none.)
+        found = [entry.get("kanji") or kana for level in ("N5", "N4", "N3", "N2", "N1")
+                 for entry in VOCAB_BY_LEVEL.get(level, [])
+                 if kana in (kata_to_hira(k.strip()) for k in (entry.get("kana") or "").replace(";", "/").split("/"))]
+        found = [sp for sp in found if sp[-1:] == kana[-1:] and all(c in sp for c in kanji) and sp != kana[:-1]]
+        spelled = next((sp for sp in found if any(_is_kanji(c) for c in sp)), found[0] if found else None)
+        if spelled is not None:
+            return spelled, kana, ctype
+    return None
+
+
+@lru_cache(maxsize=512)
+def _an_o_word(said: str) -> bool:
+    """Whether the dictionary holds a word read `said` that is お + a noun
+    of its own and is written in kana alone (おしまい, "the end") -- never
+    お帰り, お作り or お手伝い, which a verb's stem said up spells too."""
+    import content.vocab_jmdict_data as jmdict_db
+
+    return any(r.get("kana") == said and not r.get("kanji") for r in jmdict_db.by_kana(said, limit=6))
+
+
+def an_o_noun(prefix: Morpheme, stem: Morpheme) -> bool:
+    """Whether お + a stem written in kana is the dictionary's word of its
+    own (おしまい): no verb said up (plan 296)."""
+    return prefix.surface == "お" and _hiragana_only(stem.surface) and _an_o_word("お" + kata_to_hira(stem.reading))
+
+
+def _verb_stems(morphemes: list[Morpheme], tags: list[tuple]) -> None:
+    """A verb's stem or a noun, by what follows it (plan 296).
+
+    - A noun after お or ご and before に + なる is a verb's stem, お〜になる
+      said up: おのりになりますか is 乗る, no 糊; お並びになる 並ぶ.
+    - A noun before the つ of 〜つ〜つ is one: 寄せ＿＿＿返しつ is 返す.
+    - A verb's 連用形 before の, が or を (or は, も not before する) is the
+      deck's noun read so: ひっこしの日 is 引越し, "the move" -- a verb
+      takes no の; 食べもしない keeps its verb, and a stem said up
+      (おすすめの) is the prefix's to read.
+    - A verb in kana before ある is the deck's noun: さしつかえありません is
+      差し支え, "hindrance", as 差し支えありません is.
+    - さく ending a clause whose subject is a flower is 咲く: さくらも、もう
+      すぐさくかな -- 庭のさくをなおした keeps 柵."""
+    for i, m in enumerate(morphemes):
+        prev = morphemes[i - 1] if i > 0 else None
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+        if m.pos == "noun" and nxt is not None and _glued(m, nxt) and (
+                (prev is not None and prev.pos == "prefix" and prev.surface in ("お", "ご", "御") and _glued(prev, m)
+                 and nxt.surface == "に" and after is not None and after.lemma in ("成る", "なる"))
+                or (nxt.surface == "つ" and (nxt.pos == "particle" or nxt.lemma == "つう"))):
+            verb = _verb_of_a_stem(m)
+            if verb is not None and nxt.surface == "に" and an_o_noun(prev, m):
+                continue                # (これでおしまいになります: the noun おしまい, "the end")
+            if verb is not None:
+                m.pos, m.lemma, m.lemma_reading, m.ctype, m.cform = "verb", verb[0], verb[1], verb[2], "連用形-一般"
+                m.written, m.written_reading = verb[0], verb[1]
+                tags[i] = ("動詞", "一般", "*")
+            continue
+        if m.pos == "verb" and _hiragana_only(m.surface) and m.cform.startswith(("連用形-一般", "未然形-一般")) \
+                and nxt is not None and _glued(m, nxt) and not (prev is not None and prev.pos == "prefix") and (
+                    (nxt.pos == "particle" and (nxt.surface in ("の", "が", "を") or (
+                        nxt.surface in ("は", "も") and not (after is not None and after.pos == "verb"))))
+                    or (nxt.pos == "verb" and nxt.lemma == "有る")):
+            said = kata_to_hira(m.reading)
+            spellings, level = _first_cards(said)
+            noun = next((sp for sp in spellings if level is not None and sp != said and sp[-1:] == said[-1:]), None)
+            if noun is not None and m.cform.startswith("連用形") or (noun is not None and nxt.lemma == "有る"):
+                m.pos, m.lemma, m.lemma_reading, m.ctype, m.cform = "noun", noun, said, "", ""
+                m.written, m.written_reading = noun, said
+                tags[i] = ("名詞", "普通名詞", "一般")
+            continue
+        if m.surface == "さく" and m.pos == "noun" and (nxt is None or (nxt.pos in ("particle", "symbol", "auxiliary")
+                                                                    and nxt.surface not in ("を", "が", "の", "に", "で", "は", "も"))):
+            clause = _own_clause(morphemes, i)
+            k = len(clause) - 1
+            whole = list(reversed(morphemes[:i]))
+            subject = any(u.surface in _FLOWERS and q > 0 and whole[q - 1].surface in ("が", "は", "も")
+                          for q, u in enumerate(whole[:12]))
+            if subject:
+                m.pos, m.lemma, m.lemma_reading, m.ctype, m.cform = "verb", "咲く", "さく", "五段-カ行", "終止形-一般"
+                m.written, m.written_reading = "咲く", "さく"
+                tags[i] = ("動詞", "一般", "*")
+
+
 def _first_time(morphemes: list[Morpheme]) -> None:
     """初めて before でも is a noun, "the first time" (plan 296): はじめて
     でもだいじょうぶ is "even a first time is fine", 〜でも's "even" as in
@@ -6098,6 +6209,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _case_de(morphemes, tags)
         _ni_of_a_noun(morphemes, tags)
         _first_time(morphemes)
+        _verb_stems(morphemes, tags)
         _copula_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)
