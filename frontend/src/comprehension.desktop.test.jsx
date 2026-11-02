@@ -178,7 +178,7 @@ describe('comprehension on the desk', () => {
     expect($('.desk-run__side .desk-entry')).not.toBeNull()
   })
 
-  // Plan 298b: a question names the sentence its right option rests on
+  // Plan 301b: a question names the sentence its right option rests on
   // (`at`) and a miss says why in one line, under the options.
   it('opens a miss on the sentence it names, its why under the options', async () => {
     const WHY = 'They met 「駅で」: at the station.'

@@ -29,7 +29,7 @@ describe('the sentence a question quotes', () => {
   })
 })
 
-describe('the sentence a question rests on (plan 298b)', () => {
+describe('the sentence a question rests on (plan 301b)', () => {
   it('reads the sentences the question names, sorted, once each', () => {
     expect(answerSentences({ question: 'Why did they go?', at: [2] }, TEXT)).toEqual([2])
     expect(answerSentences({ question: 'Why?', at: [2, 0, 2] }, TEXT)).toEqual([0, 2])

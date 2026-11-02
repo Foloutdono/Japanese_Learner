@@ -464,6 +464,7 @@ class AttachUserStateTests(unittest.TestCase):
         def states(state):
             return {("u:" + raw_id, "vocab.flashcard.f2b"): {
                 "state": state, "total_reviews": 0, "correct_reviews": 0,
+                "answers": 0, "correct_answers": 0,
                 "due": False, "interval_days": None, "next_review": None,
             }}
 

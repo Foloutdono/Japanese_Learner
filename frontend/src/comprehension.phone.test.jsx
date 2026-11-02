@@ -93,7 +93,7 @@ describe('comprehension on the phone', () => {
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
   })
 
-  // Plan 298: what the desk's breakdown opens beside a question, the
+  // Plan 301: what the desk's breakdown opens beside a question, the
   // phone opens under it -- the line of the text it quotes, over its
   // translation -- and Show breakdown lands on that sentence.
   it('opens a question on the line of the text it quotes', async () => {
@@ -132,7 +132,7 @@ describe('comprehension on the phone', () => {
     expect(items[0].classList.contains('bkd-passage__item--open')).toBe(false)
   })
 
-  // Plan 298b: the review opens on the first miss, as the desk's does;
+  // Plan 301b: the review opens on the first miss, as the desk's does;
   // a question names the sentence its right option rests on (`at`), and
   // a miss says why in one line.
   const answerAll = async () => {

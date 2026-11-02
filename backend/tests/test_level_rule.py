@@ -97,6 +97,9 @@ def _wipe(user_id: str) -> None:
     finally:
         conn.close()
     user_level._cache.pop(user_id, None)
+    # The review total is kept in the engine until a write moves it
+    # (plan 212): an erase outside a review says so.
+    srs.forget_history(user_id)
 
 
 @pytest.fixture()
@@ -193,6 +196,71 @@ def test_the_office_marks_the_stops_behind_the_boarding_level_known(lclient):
     # A replay of the office costs nothing a second time.
     again = lclient.post("/api/onboarding/complete", json={"jlptLevel": "N4", "dailyNewTarget": 10})
     assert again.json()["levelRule"]["markedKnown"] == 0
+
+
+def test_an_assumption_is_no_answer_to_the_retention(lclient):
+    # Each row the level rule writes carries one virtual check, one of
+    # one (KNOWN_STATE, plan 224), and the profile's retention summed
+    # those counters: a learner who boarded at N4 and had answered
+    # nothing read 100% (plan 300). It reads the answers, as the review
+    # total does.
+    lclient.post("/api/onboarding/complete", json={"jlptLevel": "N4", "dailyNewTarget": 10})
+    profile = lclient.get("/api/profile").json()
+    assert profile["totalReviews"] == 0
+    assert profile["retention"] is None
+
+    # The checks themselves are answers: one passed and one missed are
+    # one right in two, not the seeded rows' thousands of ones.
+    mode = level_rule.primary_mode("kanji")
+    passed, missed = prefixed(card_index.raw_ids("kanji", "N5", mode)[:2], LUID)
+    srs.review(passed, mode, 4)
+    srs.review(missed, mode, 1)
+    profile = lclient.get("/api/profile").json()
+    assert profile["totalReviews"] == 2
+    assert profile["retention"] == 0.5
+
+
+def test_an_assumption_is_no_answer_on_a_card_or_a_deck(lclient):
+    # A card's figures and the statistics' deck grid count answers too
+    # (plan 300): mastered by the level rule, answered nowhere. A check
+    # passed is one answer, in the row as in the figure, and the answer
+    # after it is an answer, never a second check.
+    from study.card_lookup import card_stats
+    lclient.post("/api/onboarding/complete", json={"jlptLevel": "N4", "dailyNewTarget": 10})
+    mode = level_rule.primary_mode("kanji")
+    raw = card_index.raw_ids("kanji", "N5", mode)[:3]
+    passed, missed, untouched = prefixed(raw, LUID)
+
+    def card(i):
+        states = srs.get_states_for(prefixed(raw, LUID), [mode])
+        return card_stats(states, LUID, raw[i], mode)
+
+    def deck():
+        return lclient.get("/api/stats").json()["kanji"]["N5"][mode]
+
+    assert deck()["mastered"] > 0
+    assert (deck()["reviews"], deck()["correct"]) == (0, 0)
+    assert card(2)["status"] == "mastered"
+    assert (card(2)["total_reviews"], card(2)["accuracy"]) == (0, None)
+
+    srs.review(passed, mode, 4)
+    srs.review(missed, mode, 1)
+    rows = _rows(LUID, mode)
+    assert rows[passed][3] == 1 and rows[missed][3] == 1
+    assert (card(0)["correct_reviews"], card(0)["total_reviews"], card(0)["accuracy"]) == (1, 1, 100.0)
+    assert (card(1)["correct_reviews"], card(1)["total_reviews"]) == (0, 1)
+    assert card(2)["total_reviews"] == 0
+
+    srs.review(passed, mode, 1)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT assumed FROM review_log WHERE card_id = %s ORDER BY id", (passed,))
+            assert [r[0] for r in cur.fetchall()] == [True, False]
+    finally:
+        conn.close()
+    assert (card(0)["correct_reviews"], card(0)["total_reviews"], card(0)["accuracy"]) == (1, 2, 50.0)
+    assert (deck()["reviews"], deck()["correct"]) == (3, 1)
 
 
 def test_settings_previews_then_applies_a_move_up_and_a_move_down(lclient):

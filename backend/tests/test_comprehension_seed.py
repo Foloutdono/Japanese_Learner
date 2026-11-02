@@ -116,7 +116,7 @@ def _bare(s: str) -> str:
 
 @pytest.mark.parametrize("entry", seed.entries(), ids=lambda e: e["id"])
 def test_every_question_points_at_its_sentence_and_says_why(entry):
-    """Plan 298b: a missed question opens on the sentence(s) its right
+    """Plan 301b: a missed question opens on the sentence(s) its right
     option rests on (`at`) and one line on why (`why`), in both
     languages. The line quotes the text verbatim, from those sentences,
     the two languages the same Japanese; it never names an option by
@@ -167,11 +167,11 @@ def test_a_rendered_seed_has_the_generated_shape():
 
 
 def test_a_request_reads_the_index_and_nothing_keeps_the_seeds():
-    """Parsed, the seeds weigh some 86 KB each (15 MB at 180), which a
+    """Parsed, the seeds weigh some 85 KB each (20 MB at 230), which a
     process that kept them would carry for its whole life inside the
     backend's 512 MB. So entries() reads the files at each call, and a
     request reads index(): each seed's title, text and grammar, and the
-    questions of each level's first seed besides, 311 KB at 180 seeds.
+    questions of each level's first seed besides, 343 KB at 230 seeds.
     index() parses the files on its own, cutting each seed as it is
     read, so it is held to by_level(): the same seeds in the same order,
     and nothing else."""

@@ -818,7 +818,7 @@ def kana_cards() -> dict:
 def passages() -> dict:
     """The comprehension seeds (content/comprehension/*.json): each text
     cut into its sentences, each sentence into words, and its questions.
-    Since plan 298 each sentence's translation too (`tr`, beside `sents`,
+    Since plan 301 each sentence's translation too (`tr`, beside `sents`,
     {en, fr} or None), the seed's breakdown's own for the sentence it
     cuts alike: what the run's breakdown prints under it, and what the
     comprehension story's answer prints under the line a question quotes.
@@ -839,7 +839,7 @@ def passages() -> dict:
                 "questions": ex.get("questions", []),
             })
     # The reading window at each level, as the run's clock counts it (the
-    # comprehension story's clock, plan 298). routes/reading.py opens the
+    # comprehension story's clock, plan 301). routes/reading.py opens the
     # database when it is imported, so it is read from its source.
     read = _module_constant(BACKEND / "routes" / "reading.py", "READ_SECONDS_BY_LEVEL")
     return {"rev": REV, "read": read, "passages": out}

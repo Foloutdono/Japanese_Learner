@@ -549,7 +549,7 @@ def test_a_dead_provider_is_not_asked_twice(monkeypatch):
     assert len(calls) == 1
 
 
-# ── at and why (plan 298b) ───────────────────────────────────────────
+# ── at and why (plan 301b) ───────────────────────────────────────────
 # What a question carries to answer a miss with: the breakdown sentence
 # its right option rests on and one line on why. Soft on purpose: a
 # malformed one is dropped and the exercise still serves, as every pool

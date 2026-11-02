@@ -947,7 +947,7 @@ const stats = {
   destMovesTo:        date => `moves to ${date} at today's pace`,
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
-  // A text handed back past the day's ceiling on new ones (plan 298).
+  // A text handed back past the day's ceiling on new ones (plan 301).
   compReadBefore: 'Read before',
   examPart: (n) => `Part ${n}`,
   serviceName: {

@@ -908,7 +908,7 @@ const stats = {
   destMovesTo:        date => `glisse au ${date} au rythme actuel`,
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Toi · ${you} — correct · ${right}`,
-  // A text handed back past the day's ceiling on new ones (plan 298).
+  // A text handed back past the day's ceiling on new ones (plan 301).
   compReadBefore: 'Déjà lu',
   examPart: (n) => `Partie ${n}`,
   serviceName: {

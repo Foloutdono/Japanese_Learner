@@ -746,7 +746,7 @@ describe('explaining a point in its own sentence', () => {
       expect(P.depart, lang).toBe(t.depart)
       expect(P.unit, lang).toBe(t.dueUnit)
       expect(P.doneBy('08:14'), lang).toBe(t.gateEndsAt('08:14'))
-      // Reading comprehension's story (plan 298): the run's clock, its
+      // Reading comprehension's story (plan 301): the run's clock, its
       // name on the card's foot, the question and its type's badge.
       expect(P.comp.timeLeft, lang).toBe(t.timeRemaining)
       expect(P.comp.title, lang).toBe(t.comprehensionTitle)
@@ -794,8 +794,8 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  // ── 理解, reading comprehension's story (plan 298) ────────────
-  it('asks a seed passage its own question and answers it on the line it quotes (plan 298)', () => {
+  // ── 理解, reading comprehension's story (plan 301) ────────────
+  it('asks a seed passage its own question and answers it on the line it quotes (plan 301)', () => {
     const data = bank('comprehension.json')
     for (const lang of ['en', 'fr']) {
       const items = promoItems('comprehension', data, lang)
@@ -837,7 +837,7 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
-  it('rolls the text at the stepper’s own speeds, and plays the story whole (plan 298b)', () => {
+  it('rolls the text at the stepper’s own speeds, and plays the story whole (plan 301b)', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
     try {

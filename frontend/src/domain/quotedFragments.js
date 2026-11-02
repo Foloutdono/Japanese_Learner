@@ -28,7 +28,7 @@ export function sentenceFor(sentences, fragments) {
   return -1
 }
 
-// The sentence(s) a question's right option rests on (plan 298b): the
+// The sentence(s) a question's right option rests on (plan 301b): the
 // ones the question names (`at`, indices into the breakdown, which every
 // seed question and every exercise written since carries), else the one
 // sentence its quote is in, else none. Sorted, each once, in range.

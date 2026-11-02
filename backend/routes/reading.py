@@ -1309,7 +1309,7 @@ def _clean_breakdown(raw) -> list[dict]:
     return cleaned
 
 
-# What a question carries to answer a miss with (plan 298b): `at`, the
+# What a question carries to answer a miss with (plan 301b): `at`, the
 # breakdown sentence(s) its right option rests on, and `why`, one line
 # on why that option is right. Neither is required -- an exercise
 # without them still serves, as every pool row written before them

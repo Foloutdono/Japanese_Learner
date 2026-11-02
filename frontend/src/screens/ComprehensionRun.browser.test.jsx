@@ -233,7 +233,7 @@ describe('ComprehensionRun', () => {
     expect(root.querySelectorAll('.qrow__note')).toHaveLength(1)
     expect(root.querySelector('.qrow__note').textContent).toContain('A')
     expect(root.querySelector('.qrow__note').textContent).toContain('B')
-    // The missed row stands open on arrival (plan 298b), on its question
+    // The missed row stands open on arrival (plan 301b), on its question
     // with the options marked.
     expect(root.querySelectorAll('.qrow')[1].getAttribute('aria-expanded')).toBe('true')
     expect(root.querySelector('.qrow__detail .mcq-row--wrong')).toBeTruthy()

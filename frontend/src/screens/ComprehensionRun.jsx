@@ -302,7 +302,7 @@ export default function ComprehensionRun({ session }) {
         fare.pay(data)
         // The review opens on the first miss, its question in the middle
         // and the sentence it rests on in the breakdown: on the desk, and
-        // on a phone since plan 298b, where a paper with no miss opens on
+        // on a phone since plan 301b, where a paper with no miss opens on
         // nothing (the desk's middle always stands one question).
         const first = data.results?.findIndex(r => !r.is_correct) ?? -1
         const at = first >= 0 ? first : desk ? 0 : null
@@ -393,7 +393,7 @@ export default function ComprehensionRun({ session }) {
   // One frame for the whole exercise, one way out, and a sub that says
   // where in it you are.
   // A text handed back past the day's ceiling on new ones (the
-  // server's `repeat`) says so while it is read (plan 298): the same
+  // server's `repeat`) says so while it is read (plan 301): the same
   // text again with no word on it read as the app stuck on one text.
   const sub =
     stage === 'questions' || stage === 'submitting' ? `${level} · ${t.question} ${currentQ + 1} / ${total}` :
@@ -474,7 +474,7 @@ export default function ComprehensionRun({ session }) {
   // learner's, and the words of the sentence it quotes. Sealed until
   // the results (plan 131).
   const reviewed = stage === 'results' && results ? results.results[openRow ?? 0] : null
-  // The question as it was served: its `at` and `why` (plan 298b) ride
+  // The question as it was served: its `at` and `why` (plan 301b) ride
   // on the exercise, not on the graded rows the server sends back.
   const servedQ = i => exercise?.questions?.[i] ?? results?.results?.[i]
   // On the desk opening a row opens the sentence the question rests on,
@@ -501,7 +501,7 @@ export default function ComprehensionRun({ session }) {
 
   // A result row opens its question, and the sentence it rests on opens
   // in the breakdown: beside it on the desk, under the rows on a phone
-  // once Show breakdown is pressed (plans 298, 298b). From the run's
+  // once Show breakdown is pressed (plans 301, 301b). From the run's
   // lines (plan 129) a row is only ever opened, never folded: the middle
   // always stands one question.
   function openLine(i) {
@@ -753,7 +753,7 @@ export default function ComprehensionRun({ session }) {
                 )
               })}
             </div>
-            {/* A miss says why, in one line (plan 298b); the sentence it
+            {/* A miss says why, in one line (plan 301b); the sentence it
                 rests on is open in the breakdown beside it. */}
             {!r.is_correct && servedQ(openRow ?? 0)?.why && (
               <span className="prose__ai comp-why">{servedQ(openRow ?? 0).why}</span>
@@ -790,7 +790,7 @@ export default function ComprehensionRun({ session }) {
             {results.results.map((r, i) => {
               const isOpen = openRow === i
               // The line(s) of the text the right option rests on, under
-              // its options (plans 298, 298b): what the desk's breakdown
+              // its options (plans 301, 301b): what the desk's breakdown
               // opens beside the question, here where the phone opens it,
               // and on a miss the one line on why.
               const source = isOpen ? answerSentences(servedQ(i), breakdown).map(k => breakdown[k]) : []

@@ -1110,7 +1110,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   }
 
   const status = entry.status
-  const record = status?.total_reviews > 0
+  // On the record once met, by its stage: a card the level rule marked
+  // known is mastered with no answer yet (plan 300), and keeps its
+  // schedule and its board here, its figures at 0/0 and —.
+  const record = status?.status === 'learning' || status?.status === 'mastered'
 
   // ── Readings ──
   // The plate shows two: the first on'yomi and the first kun'yomi when

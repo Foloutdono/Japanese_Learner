@@ -1528,6 +1528,67 @@ class WordsTheTokenizerCutTests(unittest.TestCase):
         self.assertIn("なぜ", matches("なぜか分からない。"))
         self.assertIn("二", matches("二度とも失敗した。"))
 
+    def test_a_way_of_going_not_taken_asks_why(self) -> None:
+        # No means is asked of a way of going said in the negative (plan
+        # 299): 何で来なかったの？ is "why didn't you come?", where
+        # 何で来ましたか asks "by what".
+        for sentence in ("何で来なかったの？", "何で行かないの？", "何で行きませんか。", "何で食べないの？",
+                         "何で連絡しなかったの？", "何で作ってないの？", "何で来ないで帰ったの？"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "何で")["vocab_match"]["raw_id"], "vocab_N3_何で_なんで")
+        for sentence in ("何で行きますか。", "何で来ましたか。", "何で行ったらいいですか。", "何で書きますか。",
+                         "何で払いますか。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("何", matches(sentence))
+                self.assertNotIn("何で", matches(sentence))
+
+    def test_the_gate_reads_what_the_breakdown_reads(self) -> None:
+        # The segments a sentence is graded on and the breakdown read 何で
+        # by one rule (_why, plan 299): where the one says "why", so does
+        # the other, in kana too.
+        sentences = ("何で泣いてるの？", "なんで泣いているの。", "は？五千円も？なんで急に上がるわけ？",
+                     "何で来なかったの？", "何で連絡しなかったの？", "何で行きますか。", "何で来ましたか。",
+                     "兄は何でも食べます。", "なんでもいいです。", "理由が何であれ、暴力は許されない。", "何でだろう。")
+        for sentence in sentences:
+            with self.subTest(sentence=sentence):
+                breakdown = any((t.get("vocab_match") or {}).get("raw_id") == "vocab_N3_何で_なんで"
+                                for t in analysis.analyze_local(sentence)["tokens"])
+                gate = any(s.get("raw_id") == "vocab_N3_何で_なんで"
+                           for s in card_lookup.find_segments_in_text(sentence))
+                self.assertEqual(breakdown, gate)
+        # Without a tokenizer the scan takes the longest word: 何でも is
+        # the deck's "anything", never 何で inside it.
+        legacy = {s["text"]: s.get("raw_id") for s in card_lookup._find_segments_legacy("兄は何でも食べます。")
+                  if s.get("type") == "vocab"}
+        self.assertEqual(legacy.get("何でも"), "vocab_N3_何でも_なんでも")
+        self.assertNotIn("何で", legacy)
+
+    def test_a_de_that_belongs_after_ends_no_word(self) -> None:
+        # The segments a sentence is graded on (plan 299): 何 + で + も is
+        # 何でも, "anything", and the copula's で ends no word -- never the
+        # N3 何で, "why", which graded every 何でも N3, nor ところで.
+        def segments(sentence: str) -> dict[str, str]:
+            return {s["text"]: s.get("raw_id", "") for s in card_lookup.find_segments_in_text(sentence)
+                    if s.get("type") == "vocab"}
+        for sentence in ("兄は何でも食べます。", "なんでもいいです。", "何でもない。", "いくら何でも遅い。",
+                         "何でも屋に頼んだ。", "恥でも何でもなかった。", "理由が何であれ、暴力は許されない。",
+                         "これは何でございますか。", "何であろうと構わない。"):
+            with self.subTest(sentence=sentence):
+                found = segments(sentence)
+                self.assertNotIn("何で", found)
+                self.assertNotIn("vocab_N3_何で_なんで", found.values())
+        self.assertEqual(segments("売り場は、エスカレーターを下りた所でございます。").get("所"), "vocab_N5_所_ところ")
+        # "Why" is 何 + the particle で, the word ending there: the gate
+        # still reads it, a negative after it too.
+        for sentence in ("何で泣いてるの？", "何でだろう。", "何でって、好きだからだよ。",
+                         "何でそんなことを言うの？", "何で来なかったの？"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(segments(sentence).get("何で"), "vocab_N3_何で_なんで")
+        # And the level read off them is the point's, not the N3 card's.
+        from study import difficulty
+        self.assertEqual(difficulty.estimate_level("兄は何でも食べます。"), "N4")
+        self.assertEqual(difficulty.estimate_level("何で泣いてるの？"), "N3")
+
     def test_a_polite_set_phrase(self) -> None:
         for sentence, surface in (("今日はお先に失礼します。", "お先に"), ("お大事に。", "お大事に"),
                                   ("おかげさまで、元気です。", "おかげさまで")):

@@ -61,7 +61,7 @@ FEATURES = {
         "26 exercises/mo x 1.3 attempts (_COMPREHENSION_ATTEMPTS=3, most "
         "pass first). In: 7k-char template + kanji list + seeds. Out: a "
         "250-char passage, 10 questions each with its sentence and a line "
-        "on why (plan 298b, ~40 tokens a question), a per-sentence "
+        "on why (plan 301b, ~40 tokens a question), a per-sentence "
         "breakdown. This row "
         "is now the COLD-POOL worst case -- one learner alone in their "
         "(level, lang) bucket. Since plan 092 the answer is pooled and "

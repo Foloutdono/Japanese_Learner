@@ -315,7 +315,7 @@ describe('the asking in comprehension, on a phone', () => {
     await settle(200)
     press('b'); await settle(60); press('Enter'); await settle(120)
     press('a'); await settle(60); press('Enter'); await settle(400)
-    // Results, open on the first miss (plan 298b): the asking is in its
+    // Results, open on the first miss (plan 301b): the asking is in its
     // detail, about it, and never about the screen-long text.
     expect($$('.qrow')[1].getAttribute('aria-expanded')).toBe('true')
     expect($('.qrow__detail > .ask-launch')).not.toBeNull()

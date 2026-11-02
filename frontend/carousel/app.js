@@ -278,7 +278,7 @@ export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answ
   return rows.length * rowH + (rows.length - 1) * gap
 }
 
-// ── The comprehension run (plan 298) ─────────────────────────────
+// ── The comprehension run (plan 301) ─────────────────────────────
 // ComprehensionRun's own parts: the reading clock over the passage on
 // its bounded card, a question on its card with its type's badge, and
 // its four options lettered A to D, in the learner's language.
@@ -1147,7 +1147,7 @@ function NUDGE(s) {
  *  over it and its stage's rule under it, each grammar point's words in
  *  a box of the grammar line's ink with its number on the box's corner.
  *  `toks`: [{ t, fu, point }] (point from 1, 0 for none). Lines wrap
- *  inside `w`; returns the height. Since plan 298 a token may be `lit`
+ *  inside `w`; returns the height. Since plan 301 a token may be `lit`
  *  (.bkd-tok--lit: the grammar ink at 22% behind it, what a breakdown's
  *  chip lights) or `bare` (a particle or an ending with no card: the
  *  breakdown draws it in the ink with no rule under it). */

@@ -10,8 +10,8 @@
 // trackers; no frame prices a mode. The plan is pure; the frames draw.
 // Since plan 281 a sixth, the duels, is a story in motion end to end:
 // one sprint played, its result, the Elo it moved and the board. Since
-// plan 298 a seventh, reading comprehension: a seed passage under the
-// run's clock, the same text rolling (plan 298b), one of its own
+// plan 301 a seventh, reading comprehension: a seed passage under the
+// run's clock, the same text rolling (plan 301b), one of its own
 // questions, answered on the line of the text it quotes, and the board;
 // it plays whole as one clip too.
 import { EDGE, FS, SP, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, text } from './draw.js'
@@ -91,7 +91,7 @@ export const PROMO = {
     },
     ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', comprehension: 'A, B, C or D?', pass: 'Board today?', duel: 'Who would you challenge first?' },
     tags: ['japaneseapp', 'jlpt'],
-    // Reading comprehension's story (plan 298): its own lines, then the
+    // Reading comprehension's story (plan 301): its own lines, then the
     // app's words on its parts (locales/: the clock, the exercise's
     // name, the question and its type's badge).
     comp: {
@@ -102,7 +102,7 @@ export const PROMO = {
       question: 'Question',
       types: { comprehension: 'Comprehension', vocabulary: 'Vocabulary', grammar: 'Grammar', inference: 'Inference' },
       inText: 'In the text',
-      // The roll (plan 298b), and its speed as the stepper prints it (locales' rollSpeed).
+      // The roll (plan 301b), and its speed as the stepper prints it (locales' rollSpeed).
       roll: 'Or let it roll, at your speed.',
       speed: n => `${n} char/s`,
       then: 'Then the whole text, sentence by sentence: each word with its reading and its meaning.',
@@ -294,7 +294,7 @@ export function promoItems(story, data, lang) {
   }
 }
 
-// ── 理解, reading comprehension's story (plan 298) ──────────────────
+// ── 理解, reading comprehension's story (plan 301) ──────────────────
 const passageText = ps => ps.sents.map(rows => rows.map(r => r[0]).join(''))
 /** The questions of a seed passage its story can answer on a line of the
  *  text: those that quote one sentence of it (the run's own rule,
@@ -497,7 +497,7 @@ export function promoPlan(story, data, id, opts) {
         ...base, id: `${ps.id}:q${a.q + 1}`, level: ps.lv,
         promo: {
           level: ps.lv, title: ps.title, text: passageText(ps).join(''), read: data.read?.[ps.lv] ?? 0,
-          // The roll's lines (plan 298b): each sentence's words, with the
+          // The roll's lines (plan 301b): each sentence's words, with the
           // readings of their kanji for the furigana.
           roll: ps.sents.map(rows => rows.map(([t, , , fu]) => ({ t, fu: fu && hasKanji(t) ? fu : null }))),
           // What the roll's timeline counts (domain/readingRoll's rollSeconds).
@@ -927,7 +927,7 @@ export function promoDeck(plan, fmt, opts) {
       break
     }
     case 'comprehension': {
-      // Plan 298: the text under the run's clock, one of its questions,
+      // Plan 301: the text under the run's clock, one of its questions,
       // answered on the line of the text it quotes, and the board. In a
       // clip the cover's parts come in, the card last, and the clock
       // runs from the moment it is up; the still is the clip's end.
@@ -987,7 +987,7 @@ export function promoDeck(plan, fmt, opts) {
         y += bh + SP[4]
         return y + A.askCard(c, p, fr.x, y, fr.w, U, { badge: C.types[pr.type] || pr.type, color: badge, question: pr.question }) + SP[3]
       }
-      // ── The roll (plan 298b): the same text a sentence a line, rising
+      // ── The roll (plan 301b): the same text a sentence a line, rising
       // at the chosen speed, the line being read lit. Still, it is the
       // demo's last moment (ROLL_DEMO.seconds); in a clip the card lands,
       // its first line stands, the roll runs, + is pressed twice and ふ
@@ -1087,7 +1087,7 @@ export function promoDeck(plan, fmt, opts) {
         })
       })
       add('board', ctx => board(ctx, 5, 5, C.head, C.note))
-      // The story whole (plan 298b), as the duels' plays: each frame on its
+      // The story whole (plan 301b), as the duels' plays: each frame on its
       // own clock, one after another, a frame leaving as the next comes.
       const beats = COMP_BEATS.map(([key, len]) => [out.findIndex(f => f.key === key), len])
       const total = beats.reduce((sum, [, len]) => sum + len, 0)
@@ -1542,7 +1542,7 @@ export function promoDeck(plan, fmt, opts) {
     cover: inMotion(out[0], plan.story === 'pitch', () => scoreOf(plan, shownPoints())),
     end: inMotion(out[out.length - 1], false, () => endScoreOf(plan)),
     // The duels' story whole (plan 281): every beat, one after another;
-    // reading comprehension's (plan 298b).
+    // reading comprehension's (plan 301b).
     ...(duelStory ? { story: duelStory } : {}),
     ...(compStory ? { story: compStory } : {}),
   }
@@ -1552,11 +1552,11 @@ export function promoDeck(plan, fmt, opts) {
 
 /** A cover clip's length and rate: seven seconds, at thirty frames. */
 export const CLIP = { seconds: 7, fps: 30 }
-// Reading comprehension's cover (plan 298): the card lands at COMP_CARD,
+// Reading comprehension's cover (plan 301): the card lands at COMP_CARD,
 // the clock runs from COMP_CLOCK, once it is up.
 const COMP_CARD = 0.6
 const COMP_CLOCK = 1.1
-// The roll shown (plan 298b): the card lands at `card`, its first line
+// The roll shown (plan 301b): the card lands at `card`, its first line
 // stands ROLL.lead, then it rolls at 6 characters a second; + is pressed
 // at 2.4s and 3.0s (8, then 10, the stepper's own steps) and ふ at 4.4s.
 export const ROLL_DEMO = { card: 0.3, speeds: [[0, 6], [2.4, 8], [3.0, 10]], furi: 4.4, seconds: 9 }
