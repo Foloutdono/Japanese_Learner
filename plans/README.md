@@ -7354,3 +7354,38 @@ The owner: remove the reading ride's subscription plate, and take away the secon
 | 292 | **The Dictionary**: its cards below the fold not laid out until near (`content-visibility`, each standing in at its own height from its tokens), and a screenful drawn first, the rest a frame later as unseen places (`useScreenfulFirst`): first frame 492 → 311 ms | DONE |
 
 Open: the Dictionary's first frame is now mostly the page's own style and layout (the console, the chips, the Japanese fonts), not its cards.
+
+## Plan 298 — 読解, sixty N4 and eighty N5 comprehension seeds (2026-11-02)
+
+The owner: write thirty new N4 texts and twenty new N5, every one coherent. Hand-written reading exercises in `content/comprehension/`, held to the same gates as before (`comprehension_seed_report`, `tests/test_comprehension_seed.py`).
+
+| Phase | What | Status |
+|---|---|---|
+| 298 | **The points shared out**: each of N4's ninety checkable points once over n4-31..60; at N5 the fifty-seven points the sixty shipped seeds used least, over n5-61..80. Each text drafted against the gates first (220-280 characters, the level's kanji, nothing filed above the level, each point found); titles in the level's kanji alone, a text's kanji above it only its own points' | DONE |
+| 298 | **Written and attacked**: eight writers; per batch a reviewer, a blind reader and a language editor per entry, a fixer, two rounds of fresh blind readers (every key matched), then a last blind sheet over all fifty (430 questions, no mismatch) and a native-speaker proofread, whose eight fixes were checked again | DONE |
+| 298 | **The figures**: 230/230 clean; the longest or the shortest option wins 21-25% at N4 and N5 in both languages; the carousel bank over 230 passages; the seed module's memory re-measured (20 MB parsed, a 343 KB index) | DONE |
+
+Open: the matcher reads some points narrowly, and the texts bent to it rather than it to them: 何でも is read as 何で (N3), 〜がする is found only plain, 〜くする needs くする written out, 何も／誰も need the kanji, 〜が分かります needs が just before it, and だろうと思いました is read as 〜ようと思う.
+
+## Plan 299 — 何でも, the level gate's 何で (2026-11-02)
+
+Found while writing plan 298's seeds: the level gate counted 何でも, "anything" (the N4 point 何でも／誰でも／いつでも／どこでも), as the N3 card 何で, "why", so every text that said it spent its one hard word in twenty on a word it did not say, and the breakdown graded 兄は何でも食べます N3. The owner: fix this bug.
+
+| Phase | What | Status |
+|---|---|---|
+| 299 | **The merge stops where で belongs to what follows** (`card_lookup._de_belongs_after`): the segments a sentence is graded on (`find_segments_in_text`, read by `level_mix`, `difficulty.estimate_level` and the breakdown's level) no longer merge a word across the で of でも or the copula's で. Diffed over the 8,472 sentences the app teaches: 10 move, all misreadings put right (eight 何でも, 何であれ, and 下りた所でございます, which read ところで, "by the way"); no "why" moves. `LOCAL_REV` 32 | DONE |
+| 299 | **One rule for 何で, both paths** (the owner: fix the gaps): `card_lookup._why` decides whether 何 + the particle で is なんで, "why", and the breakdown (`_what_word`) and the segments both ask it. A way of going said in the negative asks why (`_negated`: 何で来なかったの？, 何で連絡しなかったの？), where 何で来ましたか still asks "by what", now in the segments too; the segments read kana なんで as "why", not 何 "what". Diffed over the 8,472 sentences: one moves (なんで急に上がるわけ？'s segment; no level) | DONE |
+
+The second gap named here was not one: without a tokenizer the scan takes the longest word, and the deck's 何でも ("anything", N3) has always matched before 何で; a test now holds it. Open: the deck files the word 何でも at N3 and the catalogue teaches 何でも／誰でも at N4; the breakdown keeps the point in its pieces (plan 272), so no count reads that card.
+
+
+## Plan 300 — 正答率, retention counts answers (2026-11-02)
+
+The owner: fix the profile holder flake. `test_profile_holder`'s `test_profile_retention_is_a_share_or_absent` failed once in a full run: retention 1.0 with no review. The leak that fed it was `test_onboarding_profile`'s (its reset left the declared level's assumptions, 3f253eb), but what it showed is the product's: `get_retention` summed `card_modes`' counters, and every row the level rule seeds carries `KNOWN_STATE`'s virtual check, one of one.
+
+| Phase | What | Status |
+|---|---|---|
+| 300 | **Retention reads the answers** (`srs.get_retention`): good (3 or more) over all, from `review_log` and its rollup, as the review total beside it and the statistics screen's retention by week (`get_daily_quality`) are. A learner who boarded at N4 read 100% before answering once, and a check passed weighed twice. `test_level_rule.test_an_assumption_is_no_answer_to_the_retention` fails on the old reading (`1.0 is None`); `_wipe` there now calls `forget_history`. CLAUDE.md's plan-224 rule says a learner's total of answers never sums `card_modes`' counters | DONE |
+| 300 | **A card counts its answers** (the owner: fix the card accuracy too): `_state_row` serves `answers` and `correct_answers` beside `total_reviews`, the untouched assumption's virtual check left out (`SRSEngine._virtual_checks`, which `is_assumed` now reads), and `card_stats` and the statistics' deck grid (`routes/stats.py`) sum them; a check passed takes the virtual one's place in the row (`SRSEngine.review`), unless the pass grew no repetition and the row would read untouched again. The dictionary's record shows by the card's stage, so an assumption keeps its schedule and its door at 0/0 and —. `scripts/recount_known_checks.py` (report; `--yes`) sets the rows answered before to their log's count: exactly one check of one over a whole logged history, never a row folded into the rollup. Before: the N5 kanji deck of a learner boarded at N4 read 103 reviews at 100% | DONE |
+
+Open: a row whose history was folded into the rollup before the recount keeps its virtual check, if it had one; with 180 days kept, none of plan 224's checks had been folded when it shipped. The weakest cards (`get_weakest_by_source`) read `card_modes` directly and never list an untouched assumption (it was never missed); after the recount their figures are the rows' answers.

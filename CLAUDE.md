@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **298**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **301**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -472,7 +472,15 @@ runtime purpose.
   (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
-  read as an assumption.
+  read as an assumption. `KNOWN_STATE`'s one check of one is a
+  `card_modes` count only: a learner's total of answers (the review
+  total, retention, XP) reads `review_log` and its rollup, never a sum
+  of `card_modes`' counters, or every assumption is an answer (plan
+  300: a learner who boarded at N4 read 100% retention before answering
+  once). A card's and a deck's figures read `_state_row`'s `answers`,
+  which leave an untouched assumption's check out, and a check passed
+  takes the virtual one's place in the row (`SRSEngine.review`), so the
+  row counts what was answered; `total_reviews` still says met or new.
 - **An import is an assumption the level does not give back (plans
   243, 243b).** `SRSEngine.seed_imported` writes `KNOWN_STATE`'s
   signature with the source's interval and ease and `IMPORTED_STEP` in
@@ -765,8 +773,8 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-thirty hand-written exercises per level since plan 259, sixty at N5
-since plan 274, in both languages,
+thirty hand-written exercises per level since plan 259, sixty at N4
+and eighty at N5 since plan 298, in both languages,
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -854,6 +862,16 @@ those learners typed the name for their card, so read the report before
 
 ```bash
 python -m scripts.migrate_handles      # report; --yes to apply, --user to scope (repeatable)
+```
+
+And one after the deploy that carries plan 300: a check passed before it
+counted on top of the level rule's virtual one, so those cards read 2 of
+2 for one answer. It sets every row that is exactly one check of one over
+its logged history to the log's count, and leaves alone a row whose
+history was folded into the rollup.
+
+```bash
+python -m scripts.recount_known_checks  # report; --yes to apply, --user to scope
 ```
 
 And one after any deploy that changes the voice (plan 121 did, from edge-tts
@@ -1165,7 +1183,7 @@ npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
+npm test          # vitest's eight lanes in CI's three groups, one after another (scripts/test-lanes.mjs)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
