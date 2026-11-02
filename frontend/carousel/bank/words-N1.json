@@ -1611,7 +1611,7 @@
 {"t":"輪","r":"りん","ro":"rin","en":["counter for wheels and flowers"],"fr":["compteur pour les roues et les fleurs"],"fu":[["輪","りん"]],"hy":["倫","凜","琳"]},
 {"t":"取り替え","r":"とりかえ","ro":"torikae","en":["swap, exchange, replacement"],"fr":["échange, remplacement"],"fu":[["取","と"],["り",""],["替","か"],["え",""]],"hy":["土り替え","取り下え","図り替え"]},
 {"t":"課外","r":"かがい","ro":"kagai","en":["extracurricular"],"fr":["extrascolaire"],"fu":[["課","か"],["外","がい"]],"hy":["下外","課害","何外"]},
-{"t":"難い","r":"かたい","ro":"katai","en":["difficult, hard"],"fr":["difficile, ardu"],"fu":[["難","かた"],["い",""]]},
+{"t":"難い","r":"かたい","ro":"katai","en":["difficult, hard"],"fr":["difficile, ardu"],"fu":[["難","かた"],["い",""]],"ex":["N1.125","N1.126"]},
 {"t":"気軽","r":"きがる","ro":"kigaru","en":["carefree, casual, lighthearted, without hesitation"],"fr":["insouciant, décontracté, léger, sans hésitation"],"fu":[["気","き"],["軽","がる"]],"hy":["帰軽","起軽","危軽"]},
 {"t":"各種","r":"かくしゅ","ro":"kakushu","en":["every kind, all sorts"],"fr":["toutes sortes"],"fu":[["各","かく"],["種","しゅ"]],"hy":["画種","各手","格種"]},
 {"t":"実費","r":"じっぴ","ro":"jippi","en":["actual expense, cost price"],"fr":["frais réels, prix de revient"],"fu":[["実","じっ"],["費","ぴ"]],"hy":["十費"]},

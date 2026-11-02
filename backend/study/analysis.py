@@ -26,6 +26,7 @@ from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_poin
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content import jmdict_fr
 import content.vocab_jmdict_data as jmdict_db
+from study.card_lookup import _card  # noqa: E402  (the deck card spelled so, plan 296)
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
@@ -1275,9 +1276,21 @@ def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
 
 _COUNTERS = "助数詞 〜つ／〜人／〜枚"
 
+# A point's piece and the cards of the homographs it is not (plan 296),
+# with the point's own word where the deck holds it.
+_POINT_HOMOGRAPHS = {
+    "〜きる": (frozenset({"切る"}), None),
+    "〜かける": (frozenset({"掛ける"}), None),
+    "〜と相まって": (frozenset({"待つ", "相"}), None),
+    "〜にかたくない": (frozenset({"固い", "堅い", "硬い"}), ("難い", "かたい")),
+}
+
 # The points that are a word's own forms, not a construction around it.
 _OWN_FORM_POINTS = frozenset({"い形容詞／な形容詞", "〜く／〜に（副詞形）", "ない形 〜ない", "た形 〜た", "可能形 〜(ら)れる",
                               "意向形 〜(よ)う", "命令形 〜ろ／〜え", "〜ます／〜ません", "〜ました／〜ませんでした",
+                              # (one verb said twice in two forms: 伏せようが
+                              # 伏せまいが is 伏せる's, plan 296)
+                              "〜ようが〜まいが",
                               # (a compound verb the pool holds whole is its word
                               # too: もつれ込む, 振り込む, 駆け出す, plan 272)
                               "〜こむ", "〜出す", "〜かける", "〜きる", "〜直す", "〜かねる",
@@ -1550,6 +1563,15 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     held = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") in no_good_points()])
     deck_hits = [None if j in held and morphemes[j].pos == "verb" and morphemes[j].lemma in NO_GOOD_VERBS else hit
                  for j, hit in enumerate(deck_hits)]
+    # And a piece of a point that shows another word's card is the point's
+    # (plan 296): 食べきる's きり is no 切る "to cut", はさまりかける's かけ
+    # no 掛ける "to hang", 相まって's まっ no 待つ "to wait" -- or the
+    # point's own word where the deck has it: 察するにかたくない's かたく is
+    # 難い, "difficult", never 固い "hard".
+    for pattern, (others, own) in _POINT_HOMOGRAPHS.items():
+        inside = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") == pattern])
+        deck_hits = [(_card(*own) if own else None) if j in inside and hit and (hit[1].get("kanji") or "") in others
+                     else hit for j, hit in enumerate(deck_hits)]
     # A name before an honorific is the name, never the card its letters
     # spell (plan 266): ゆきさん is no "snow".
     deck_hits = [None if _named(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
@@ -1816,11 +1838,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         if pooled and not any(j in ruled for j in range(i, i + pooled[1])):
             entry, n = pooled
             token = _pool_compound_dict(morphemes[i:i + n], entry)
-            nouns = [k for k in range(i, i + n) if morphemes[k].pos == "noun"]
+            nouns = [k for k in range(i, i + n) if morphemes[k].pos in ("noun", "other")]
             if nouns and all(deck_hits[k] for k in nouns):
                 # A pool word folded over the deck's own nouns (観光地,
                 # 取引先, plan 272) keeps them, as an idiom does: a
-                # sentence written for a level still counts its cards.
+                # sentence written for a level still counts its cards
+                # -- an adjectival noun's too, 不 + 可能 (plan 296).
                 token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma,
                                    "pos": morphemes[k].pos,
                                    "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
@@ -2197,7 +2220,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # as 〜を通じて; and a る-verb's られる read from its clause, passive or
 # potential (伝えられてきた, 機会すら与えられず; 答えられる, 少し待てば…見られる);
 # and a kana noun by its clause (まどがわのせき 席, このきかいの使い方 機械,
-# せんを引く 線, このへん 辺, へんな味 変, くちへん 偏, あぶら 油, 色のむら 斑).
+# せんを引く 線, このへん 辺, へんな味 変, くちへん 偏, あぶら 油, 色のむら 斑);
+# and the audit's small classes: そこで, すると, どうしても one word where
+# they open, their pieces inside a clause (＿＿＿ですから, 母がかえって); a
+# point's piece without a homograph's card (相まって, 食べきる, 察するに
+# かたくない 難い); 大けが おおけが, 不器用, 資料作り づくり, みなと通り どおり;
+# 〜ようが〜まいが one verb twice; 気がきく 気が利く, 眉をひそめる 顰める.
 LOCAL_REV = 33
 
 

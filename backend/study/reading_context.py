@@ -719,6 +719,18 @@ def _thing_reading(head: str) -> str | None:
     return "ぶつ" if not rows else None
 
 
+def _prefix_reading(prefix: str, lemma: str, said: str) -> str | None:
+    """How a prefix reads before a noun read `said`: as JMdict reads the
+    word the two spell (大怪我 おおけが), or None where it has none."""
+    from content import vocab_jmdict_data as jmdict
+
+    for row in jmdict.by_kanji(prefix + lemma, limit=4):
+        kana = row.get("kana") or ""
+        if row.get("kanji") == prefix + lemma and said and kana.endswith(said) and len(kana) > len(said):
+            return kana[:-len(said)]
+    return None
+
+
 def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list[str]:
     """The readings of `tokens`, each put right where its context says.
 
@@ -918,6 +930,30 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             said = _thing_reading(prev(i))
             if said and said != r:
                 out[i] = said
+            continue
+
+        # 大けが, 大雨: 大 before a noun reads as JMdict reads the word the
+        # two spell (大怪我 おおけが, 大問題 だいもんだい), whatever UniDic
+        # read -- it read だい before けが (plan 296).
+        if s == "大" and tokens[i].get("pos") == "prefix" and i + 1 < n and tokens[i + 1].get("pos") == "noun":
+            said = _prefix_reading(s, tokens[i + 1].get("lemma") or nxt(i), out[i + 1])
+            if said and said != r:
+                out[i] = said
+            continue
+        # 資料作り, 手作り: 作り glued to the noun it makes reads づくり, and
+        # 通り glued to a name or a noun どおり (みなと通り, 予定通り, 人通り)
+        # -- never after a number (二通り ふたとおり), a demonstrative (その
+        # 通り) or a verb (言った通り), which take it apart, nor 作り the
+        # verb's stem (一財産作りたがる, plan 296).
+        if s in ("作り", "造り") and r == "つくり" and tokens[i].get("pos") != "verb" and i > 0 \
+                and tokens[i - 1].get("pos") == "noun" \
+                and not _is_numeral(prev(i)) and tokens[i - 1].get("end") == t.get("start"):
+            out[i] = "づくり"
+            continue
+        if s == "通り" and r == "とおり" and i > 0 and tokens[i - 1].get("pos") == "noun" \
+                and not _is_numeral(prev(i)) and _numeral_value(prev(i)) is None \
+                and tokens[i - 1].get("end") == t.get("start"):
+            out[i] = "どおり"
             continue
 
         # 1回表, 九回裏: the top of an inning, おもて -- no 表 "table" (plan 272).

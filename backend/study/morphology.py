@@ -403,6 +403,104 @@ def _jiru_not_zuru(morphemes: list[Morpheme]) -> None:
             m.written, m.written_reading = m.lemma, m.lemma_reading
 
 
+def _whether_or_not(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """〜ようが〜まいが, one verb said twice (plan 296): 伏せようが伏せ
+    まいが, 参加しようがしまいが, 食べようが食べまいが. UniDic reads the
+    first half's よう as 様, "way", after an ichidan verb's stem or する's
+    し (and 伏せ as the noun "lying down"), and the second half's しまい
+    as 仕舞い, "end": where the まい half follows, the first is that verb's
+    volitional, one word as UniDic writes 食べよう, and しまい is し + まい.
+    Without the まい half, 書きようがない keeps 様, 〜ようがない's own."""
+    morphemes, tags = list(morphemes), list(tags)
+    # し + まい first, where a が or と follows it and a よう half stands before it
+    for i in range(len(morphemes) - 1, 0, -1):
+        m = morphemes[i]
+        if m.surface == "しまい" and m.pos == "noun" and i + 1 < len(morphemes) \
+                and morphemes[i + 1].surface in ("が", "と") \
+                and any(u.surface == "よう" and k + 1 < len(morphemes) and morphemes[k + 1].surface in ("が", "と")
+                        for k, u in enumerate(morphemes[:i])):
+            morphemes[i:i + 1] = [
+                replace(m, surface="し", end=m.start + 1, lemma="為る", reading="し", lemma_reading="する",
+                        kana="シ", pos="verb", ctype="サ行変格", cform="未然形-一般", written="為る",
+                        written_reading="する"),
+                replace(m, surface="まい", start=m.start + 1, lemma="まい", reading="まい", lemma_reading="まい",
+                        kana="マイ", pos="auxiliary", ctype="助動詞-マイ", cform="終止形-一般", written="まい",
+                        written_reading="まい")]
+            tags[i:i + 1] = [("動詞", "非自立可能", "*"), ("助動詞", "*", "*")]
+    i = 1
+    while i < len(morphemes) - 1:
+        m, stem, nxt = morphemes[i], morphemes[i - 1], morphemes[i + 1]
+        if m.surface == "よう" and m.pos == "suffix" and nxt.surface in ("が", "と") and stem.end == m.start:
+            second = next((morphemes[k - 1] for k in range(i + 2, len(morphemes))
+                           if morphemes[k].surface == "まい" and morphemes[k].pos == "auxiliary"
+                           and morphemes[k - 1].surface == stem.surface and morphemes[k - 1].pos == "verb"), None)
+            if second is not None:
+                # (来る's volitional is こよう, its 未然形's こ -- never the
+                # stem's き)
+                said = "こよう" if second.lemma == "来る" else stem.reading + "よう"
+                morphemes[i - 1:i + 1] = [replace(
+                    stem, surface=stem.surface + "よう", end=m.end, lemma=second.lemma,
+                    reading=said, lemma_reading=second.lemma_reading,
+                    kana=stem.kana + "ヨウ", pos="verb", ctype=second.ctype, cform="意志推量形",
+                    written=second.written, written_reading=second.written_reading)]
+                tags[i - 1:i + 1] = [("動詞", "一般", "*")]
+                continue
+        i += 1
+    return morphemes, tags
+
+
+def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """Two words UniDic writes as one conjunction or adverb, where the
+    clause shows them apart (plan 296): ですから after a word or a blank
+    is the copula and から, "because" -- ＿＿＿ですから、…てください; the
+    conjunction "therefore" opens its sentence -- and かえって after a
+    subject and its が, closing its clause with a comma, is 帰る's て form
+    (母がかえって、「…」と言いました), never 却って, "rather", which leads
+    into the predicate after it."""
+    out_m, out_t = [], []
+    for i, m in enumerate(morphemes):
+        prev = morphemes[i - 1] if i > 0 else None
+        nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        if m.surface == "ですから" and prev is not None and (prev.pos != "symbol" or prev.surface.startswith("＿")):
+            out_m += [replace(m, surface="です", end=m.start + 2, lemma="です", reading="です", lemma_reading="です",
+                              kana="デス", pos="auxiliary", ctype="助動詞-デス", cform="終止形-一般",
+                              conjunctive=False, written="です", written_reading="です"),
+                      replace(m, surface="から", start=m.start + 2, lemma="から", reading="から", lemma_reading="から",
+                              kana="カラ", pos="particle", ctype="", cform="", conjunctive=True,
+                              written="から", written_reading="から")]
+            out_t += [("助動詞", "*", "*"), ("助詞", "接続助詞", "*")]
+            continue
+        if m.surface == "かえって" and m.pos == "adverb" and prev is not None and prev.surface == "が" \
+                and prev.pos == "particle" and nxt is not None and nxt.surface in ("、", "，"):
+            out_m += [replace(m, surface="かえっ", end=m.start + 3, lemma="帰る", reading="かえっ",
+                              lemma_reading="かえる", kana="カエッ", pos="verb", ctype="五段-ラ行",
+                              cform="連用形-促音便", written="帰る", written_reading="かえる"),
+                      replace(m, surface="て", start=m.start + 3, lemma="て", reading="て", lemma_reading="て",
+                              kana="テ", pos="particle", ctype="", cform="", conjunctive=True,
+                              written="て", written_reading="て")]
+            out_t += [("動詞", "一般", "*"), ("助詞", "接続助詞", "*")]
+            continue
+        out_m.append(m)
+        out_t.append(tags[i])
+    return out_m, out_t
+
+
+def _soko_de_aru(morphemes: list[Morpheme]) -> None:
+    """そこである町は, opening a sentence, is そこで, "so", and ある, "a
+    certain", before its noun (plan 296) -- never そこ and the copula
+    である, "it is there", which UniDic read: a copula takes no noun
+    after it."""
+    for i in range(len(morphemes) - 3):
+        so, de, aru, noun = morphemes[i:i + 4]
+        if so.surface == "そこ" and so.pos == "pronoun" and (i == 0 or morphemes[i - 1].pos == "symbol") \
+                and de.surface == "で" and de.pos == "auxiliary" and aru.surface == "ある" and aru.pos == "verb" \
+                and noun.pos == "noun":
+            de.pos, de.lemma, de.lemma_reading, de.ctype, de.cform = "particle", "で", "で", "", ""
+            aru.pos, aru.lemma, aru.lemma_reading, aru.ctype, aru.cform = "adnominal", "或る", "ある", "", ""
+            aru.auxiliary_use = False
+            aru.written, aru.written_reading = aru.lemma, aru.lemma_reading
+
+
 def _radical_hen(morphemes: list[Morpheme]) -> None:
     """A へん glued to a noun is a kanji's left-hand radical, 偏 (plan
     296): いしへん, くちへん, ふねへん -- the west's negative へん, which
@@ -5605,6 +5703,9 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _times_or_floor(morphemes, tags)
         _jiru_not_zuru(morphemes)
         _radical_hen(morphemes)
+        _soko_de_aru(morphemes)
+        morphemes, tags = _apart_inside_a_clause(morphemes, tags)
+        morphemes, tags = _whether_or_not(morphemes, tags)
         _shops(morphemes, tags)
         morphemes, tags = _sleep(morphemes, tags)
         morphemes, tags = _pain(morphemes, tags)

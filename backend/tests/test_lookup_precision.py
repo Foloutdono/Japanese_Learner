@@ -3952,6 +3952,72 @@ class AKanaNounByItsClauseTests(unittest.TestCase):
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TheAuditsSmallClassesTests(unittest.TestCase):
+    """Plan 296: a conjunction where it opens its sentence and its pieces
+    inside a clause; a point's piece without a homograph's card; a prefix
+    read as its compound and a suffix voiced in it; 〜ようが〜まいが one
+    verb said twice; an idiom whose verb the page writes in kana."""
+
+    def test_one_word_or_its_pieces(self) -> None:
+        for sentence, surface, card in (
+                ("そこで母が「電気代が下がったら、おすしを食べに行こう」と言うと、弟はストーブを使わなくなりました。",
+                 "そこで", "vocab_N3__そこで"),
+                ("そこで、日曜日はスマホを家に置いて出かけることにしている。", "そこで", "vocab_N3__そこで"),
+                ("そこである町は昨年、高齢者向けの予約制バスを走らせ始めた。", "そこで", "vocab_N3__そこで"),
+                ("そこである町は昨年、高齢者向けの予約制バスを走らせ始めた。", "ある", "vocab_N3_或る_ある"),
+                ("すると父が「車で二時間の山の町に、いいおんせんがあるよ」と言いました。", "すると", "vocab_N4__すると"),
+                ("どうしてもお金がひつようなので、ここではたらかせてください。", "どうしても", "vocab_N3__どうしても"),
+                ("七時に母がかえって、「おいしいですね。」と言いました。", "かえっ", "vocab_N5_帰る_かえる"),
+                ("新しい薬を使ってみたところ、かえって頭が痛くなった。", "かえって", "vocab_N2_却って_かえって"),
+                ("ですから、周りの目を気にすることはありません。", "ですから", "vocab_N3__ですから")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(card_of(sentence, surface), card)
+        self.assertEqual(cut("そこで待っていてください。")[:2], ["そこ", "で"])
+        self.assertEqual(cut("すると言いました。")[:2], ["する", "と"])
+        self.assertEqual(cut("先生は今、＿＿＿ですから、また後で来てください。")[7:9], ["です", "から"])
+        self.assertIn("かもしれない", cut("いろいろな問題が＿＿＿＿かもしれない。"))
+        self.assertEqual(cut("問題はそこである。")[2:5], ["そこ", "で", "ある"])
+
+    def test_a_points_piece(self) -> None:
+        for sentence, surface, card in (
+                ("その静けさは、一日歩いた疲れと相まって、深く心にしみた。", "まっ", None),
+                ("ええ。でも、みなさん食べきりますよ。", "きり", None),
+                ("電車のドアに、かばんがはさまりかけた。", "かけ", None),
+                ("親を亡くした彼の悲しみは、察するにかたくない。", "かたく", "vocab_N1_難い_かたい"),
+                ("この紙をはさみで切ってください。", "切っ", "vocab_N5_切る_きる"),
+                ("壁に絵を掛けた。", "掛け", "vocab_N4_掛ける_かける")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, surface), card)
+
+    def test_a_prefix_or_a_suffix_in_its_compound(self) -> None:
+        self.assertEqual(token_of("小さな事故でも大けがにつながりかねない。", "大けが")["reading"], "おおけが")
+        self.assertEqual(token_of("彼は不器用ゆえに、損をすることが多い。", "不器用")["reading"], "ぶきよう")
+        self.assertEqual(token_of("営業部では、資料作りはもとより、打ち合わせにも同席した。", "作り")["reading"], "づくり")
+        self.assertEqual(token_of("ここは昔、「みなと通り」という名前がついた。", "通り")["reading"], "どおり")
+        self.assertEqual(token_of("その通りです。", "通り")["reading"], "とおり")
+        self.assertEqual(token_of("二通りの方法がある。", "通り")["reading"], "とおり")
+        self.assertEqual(token_of("彼はしきりと一財産作りたがっている。", "作り")["reading"], "つくり")
+
+    def test_one_verb_said_twice(self) -> None:
+        self.assertEqual(cut("参加しようがしまいが、費用は同じだ。")[1:5], ["しよう", "が", "し", "まい"])
+        self.assertIn("伏せよう", cut("名前を伏せようが伏せまいが、言葉が誰かに届く以上、その重みは変わらない。"))
+        self.assertIn("〜ようが〜まいが", grammar_detect_patterns(
+            "名前を伏せようが伏せまいが、言葉が誰かに届く以上、その重みは変わらない。"))
+        self.assertEqual(card_of("あの人が会社をやめようがやめまいが、私の仕事は変わらない。", "やめ"),
+                         "vocab_N3_辞める_やめる")
+        self.assertEqual(cut("書きようがない。")[:3], ["書き", "よう", "が"])
+        self.assertEqual(cut("しまいには泣いた。")[0], "しまい")
+
+    def test_an_idiom_whose_verb_is_in_kana(self) -> None:
+        self.assertEqual(card_of("百年も続いている店だけあって、細かいところまで気がきいている。", "気がきい"),
+                         jmdict.vocab_jmdict_to_id(jmdict.get_by_key("気が利く", "きがきく")))
+        self.assertEqual(card_of("かつて俗語として眉をひそめられたものが少なくない。", "ひそめ"),
+                         jmdict.vocab_jmdict_to_id(jmdict.get_by_key("顰める", "ひそめる")))
+        self.assertEqual(card_of("声をひそめて話した。", "ひそめ"),
+                         jmdict.vocab_jmdict_to_id(jmdict.get_by_key("潜める", "ひそめる")))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ARadicalsHenTests(unittest.TestCase):
     """Plan 296: a へん glued to a noun is a kanji's left-hand radical, 偏
     (いしへん, あしへん); the west's negative へん follows a verb."""
