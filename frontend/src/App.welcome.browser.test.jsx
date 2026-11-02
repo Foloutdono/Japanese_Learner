@@ -79,12 +79,14 @@ describe('App signed out', () => {
   // state, so Back used to leave Tsuji. It returns to Welcome now, and
   // the ‹ leaves no entry behind it.
   it('returns to Welcome on the browser\'s Back, and ‹ leaves no entry behind', async () => {
-    // history.length counts the entries ahead of the page too, and the
-    // lane's files share one history: a test that went back, here or in
-    // a file before, leaves one there for the sign-in's push to replace
-    // rather than add to. A push drops it.
+    // The sign-in's entry is counted as it is pushed, not by
+    // history.length: the lane's files share one history, and Chromium
+    // stops counting at 50, so a lane that has filled it leaves the
+    // length where it was whatever is pushed (it read 50 for 51 once a
+    // file ahead of this one went over). A push first, so a test that
+    // went back, here or in a file before, leaves nothing ahead.
     window.history.pushState(null, '', '/')
-    const start = window.history.length
+    const pushed = vi.spyOn(window.history, 'pushState')
     const screen = await render(<App />)
     await settle()
     const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
@@ -92,7 +94,10 @@ describe('App signed out', () => {
     screen.container.querySelector('[data-action="sign-in"]').click()
     await settle(60)
     expect(screen.container.querySelector('.brd-signin')).not.toBeNull()
-    expect(window.history.length).toBe(start + 1)
+    // One entry added, the sign-in's own, not one replaced.
+    expect(pushed).toHaveBeenCalledTimes(1)
+    expect(window.history.state).toEqual({ auth: true })
+    pushed.mockRestore()
     let back = popped()
     window.history.back()
     await back
