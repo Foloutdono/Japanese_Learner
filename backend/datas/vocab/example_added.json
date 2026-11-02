@@ -13488,6 +13488,18 @@
     "en": "What are you majoring in at university?",
     "fr": "Quelle matière étudiez-vous comme spécialité à l'université ?"
    }
+  ],
+  "冠::かん": [
+   {
+    "jp": "この会社の技術は世界に冠たるものだ。",
+    "en": "This company's technology is second to none in the world.",
+    "fr": "La technologie de cette entreprise n'a pas d'égale au monde."
+   },
+   {
+    "jp": "彼はその年、三冠を達成した。",
+    "en": "That year, he won the triple crown.",
+    "fr": "Cette année-là, il a remporté la triple couronne."
+   }
   ]
  }
 }

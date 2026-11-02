@@ -38,8 +38,17 @@ def _with(moves):
     return saved
 
 
+def _as_jmdict_files(kanji, kana, hint):
+    """The word's sentences under JMdict's senses, the moves set aside."""
+    saved = _with({})
+    try:
+        return get_vocab_extras(kanji, kana, hint, "en")
+    finally:
+        example_fixes.refiled_all = saved
+
+
 def test_a_move_files_the_sentence_under_its_sense_the_primary_first():
-    plain = get_vocab_extras("渡す", "わたす", "to hand over", "en")
+    plain = _as_jmdict_files("渡す", "わたす", "to hand over")
     by_number = {s["number"]: s["glossary"] for s in plain["senses"]}
     jp = next(ex["jp"] for ex in plain["examples"] if ex["sense_number"] == 1)
     saved = _with({"渡す::わたす": {jp: {"sense": 3, "gloss": by_number[3], "why": "test"}}})
@@ -57,7 +66,7 @@ def test_a_move_files_the_sentence_under_its_sense_the_primary_first():
 
 
 def test_a_sentence_of_no_sense_is_the_words_and_another_words_is_not_shown():
-    plain = get_vocab_extras("渡す", "わたす", "to hand over", "en")
+    plain = _as_jmdict_files("渡す", "わたす", "to hand over")
     first, second = [ex["jp"] for ex in plain["examples"]][:2]
     saved = _with({"渡す::わたす": {first: {"sense": None, "why": "test"},
                                    second: {"drop": True, "why": "test"}}})
@@ -71,7 +80,7 @@ def test_a_sentence_of_no_sense_is_the_words_and_another_words_is_not_shown():
 
 
 def test_a_sense_the_list_no_longer_has_leaves_jmdicts_filing():
-    plain = get_vocab_extras("渡す", "わたす", "", "en")
+    plain = _as_jmdict_files("渡す", "わたす", "")
     ex = plain["examples"][0]
     saved = _with({"渡す::わたす": {ex["jp"]: {"sense": 99, "gloss": "gone", "why": "test"}}})
     try:
@@ -94,3 +103,35 @@ def test_a_move_is_held_to_the_senses_and_sentences_of_its_word(known):
     assert problems({"key": "渡す::わたす", "jp": jp, "sense": other, "why": ""}, known)
     assert problems({"key": "渡す::わたす", "jp": "ない文。", "sense": other, "why": "x"}, known)
     assert problems({"key": "渡す::わたす", "jp": jp, "sense": other, "drop": True, "why": "x"}, known)
+
+
+# ── What the review found (plan 296) ────────────────────────
+
+
+def _filed(kanji, kana):
+    extras = get_vocab_extras(kanji, kana, "", "en")
+    glosses = {s["number"]: s["glossary"] for s in extras["senses"]}
+    return {ex["jp"]: glosses.get(ex["sense_number"], "") for ex in extras["examples"]}
+
+
+def test_a_baton_and_a_ticket_are_handed_over_not_ferried_across():
+    """The owner's report: 渡す "to ferry across" showed a relay's baton
+    (JMdict's first sense, for a link naming none) and a ticket handed
+    to a friend (plan 227's correction of "take me over to the other
+    side")."""
+    filed = _filed("渡す", "わたす")
+    assert "hand over" in filed["リレーでは、次の人にバトンを渡します。"]
+    assert "hand over" in filed["駅で友だちに切符を渡した。"]
+
+
+def test_a_sentence_first_in_jmdict_is_filed_by_what_it_says():
+    """A sample of what plan 296's review moved off JMdict's first sense:
+    a mother under まま's "as (it is)", a "well then" under the particle
+    では "at; in; by"."""
+    assert "mom" in _filed("", "ママ")["ママは台所で料理をしている。"]
+    assert "well then" in _filed("", "では")["では、これで失礼します。"]
+
+
+def test_another_word_written_alike_is_not_shown():
+    """一つ is ひとつ, not the numeral いち the card teaches."""
+    assert "卵を一つ割ってください。" not in _filed("一", "いち")
