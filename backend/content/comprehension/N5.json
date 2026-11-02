@@ -63466,7 +63466,14 @@
       "Près de l'école de l'autrice"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「駅の前のヘアサロン」: the salon is in front of (前) the station.",
+     "fr": "「駅の前のヘアサロン」 : le salon est devant (前) la gare."
+    }
    },
    {
     "type": "grammar",
@@ -63488,7 +63495,14 @@
       "Vingt minutes plus tard"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "After an amount, 「ぐらい」 means \"about\": 「二十分ぐらい」 is roughly twenty minutes, not exactly.",
+     "fr": "Après une quantité, 「ぐらい」 veut dire « environ » : 「二十分ぐらい」, c'est à peu près vingt minutes."
+    }
    },
    {
     "type": "grammar",
@@ -63510,7 +63524,15 @@
       "Elle demande le prix de cette coupe"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4,
+     5
+    ],
+    "why": {
+     "en": "「これにします」 is \"I'll go with this one\": the writer liked the short-hair photo best and picks that style.",
+     "fr": "「これにします」 veut dire « je prends celle-ci » : l'autrice a préféré la photo aux cheveux courts et choisit cette coupe."
+    }
    },
    {
     "type": "comprehension",
@@ -63532,7 +63554,14 @@
       "Une femme aux cheveux courts"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「かみがみじかい女の人のしゃしん」 was the best: a woman whose hair is short (みじかい).",
+     "fr": "「かみがみじかい女の人のしゃしん」 était la meilleure : une femme aux cheveux courts (みじかい)."
+    }
    },
    {
     "type": "comprehension",
@@ -63554,7 +63583,14 @@
       "Environ deux heures"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「一時間ぐらいで」: in about an hour the hair looked like the photo. Twenty minutes was the time spent on the book.",
+     "fr": "「一時間ぐらいで」 : en une heure environ, les cheveux étaient comme sur la photo. Les vingt minutes, c'était pour le livre."
+    }
    },
    {
     "type": "grammar",
@@ -63576,7 +63612,14 @@
       "Ils ressemblaient aux anciens cheveux de l'autrice"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「と同じ」 means \"the same as\": after the cut, the writer's hair was just like the hair in the photo.",
+     "fr": "「と同じ」 veut dire « pareil à » : après la coupe, les cheveux de l'autrice étaient comme ceux de la photo."
+    }
    },
    {
     "type": "vocabulary",
@@ -63598,7 +63641,14 @@
       "Occupée"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「わかいころの母」 is the mother in her young days: わかい means \"young\", and the photo is thirty years old.",
+     "fr": "「わかいころの母」, c'est la mère quand elle était jeune : わかい veut dire « jeune », et la photo a trente ans."
+    }
    },
    {
     "type": "inference",
@@ -63620,7 +63670,15 @@
       "La nouvelle coupe était comme la sienne autrefois"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     10,
+     11
+    ],
+    "why": {
+     "en": "The mother's old photo had hair 「今のわたしのかみと同じ」, like the new cut: 「三十年前のわたしですよ」, she said.",
+     "fr": "Sur la vieille photo, la mère avait des cheveux 「今のわたしのかみと同じ」, comme la nouvelle coupe : 「三十年前のわたしですよ」, dit-elle."
+    }
    }
   ],
   "breakdown": [
@@ -64604,7 +64662,14 @@
       "Celui de la sœur de l'auteur"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「あしたは、おばあちゃんのたんじょう日です」: tomorrow is the birthday of the writer's grandma.",
+     "fr": "「あしたは、おばあちゃんのたんじょう日です」 : demain, c'est l'anniversaire de la mamie de l'auteur."
+    }
    },
    {
     "type": "grammar",
@@ -64626,7 +64691,14 @@
       "L'auteur avait aussi 1 000 yens"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「だけ」 means \"only\": just 1,000 yen in the wallet, not enough for a 3,000-yen melon.",
+     "fr": "「だけ」 veut dire « seulement » : rien que 1 000 yens dans le porte-monnaie, pas assez pour un melon à 3 000 yens."
+    }
    },
    {
     "type": "inference",
@@ -64648,7 +64720,15 @@
       "150 yens"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3,
+     7
+    ],
+    "why": {
+     "en": "The writer had 「千円だけ」 and paid 「ぜんぶで八百五十円」: 1,000 minus 850 leaves 150 yen.",
+     "fr": "L'auteur avait 「千円だけ」 et a payé 「ぜんぶで八百五十円」 : 1 000 moins 850, il reste 150 yens."
+    }
    },
    {
     "type": "grammar",
@@ -64670,7 +64750,15 @@
       "Un fruit loin d'eux deux"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "「それ」 points back to what the shopkeeper had just offered, 「このりんご」: the apples at 150 yen each.",
+     "fr": "「それ」 renvoie à ce que le vendeur venait de proposer, 「このりんご」 : les pommes à 150 yens pièce."
+    }
    },
    {
     "type": "grammar",
@@ -64692,7 +64780,14 @@
       "Il demande à acheter les mandarines"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「をください」 is \"…, please\": with 「そのみかんをください」 the writer asks to buy those mandarins.",
+     "fr": "「をください」 veut dire « …, s'il vous plaît » : avec 「そのみかんをください」, l'auteur demande à acheter ces mandarines."
+    }
    },
    {
     "type": "comprehension",
@@ -64714,7 +64809,14 @@
       "3 000 yens"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「ぜんぶで八百五十円でした」: 850 yen in all, three apples at 150 plus a bag of mandarins at 400.",
+     "fr": "「ぜんぶで八百五十円でした」 : 850 yens en tout, trois pommes à 150 et un sac de mandarines à 400."
+    }
    },
    {
     "type": "comprehension",
@@ -64736,7 +64838,15 @@
       "Une"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6,
+     8
+    ],
+    "why": {
+     "en": "The writer bought three (「それを三つ」), and the shopkeeper put in 「もう一つ」, one more as a present: four.",
+     "fr": "L'auteur en a acheté trois (「それを三つ」), et le vendeur en a mis 「もう一つ」, une de plus en cadeau : quatre."
+    }
    },
    {
     "type": "vocabulary",
@@ -64758,7 +64868,14 @@
       "Carte bancaire"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「わたしのさいふには千円だけありました」: the money is kept in the さいふ, the wallet.",
+     "fr": "「わたしのさいふには千円だけありました」 : l'argent se trouve dans le さいふ, le porte-monnaie."
+    }
    }
   ],
   "breakdown": [
@@ -65675,7 +65792,14 @@
       "Quatre"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「子どもが四人いました」: four children. Six is their age (「六さい」), not how many there were.",
+     "fr": "「子どもが四人いました」 : quatre enfants. Six, c'est leur âge (「六さい」), pas leur nombre."
+    }
    },
    {
     "type": "grammar",
@@ -65697,7 +65821,14 @@
       "Il vaut mieux s'arrêter souvent"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「とまってはいけません」 forbids: they must not stop in front of people, 「あぶないですから」, because it is dangerous.",
+     "fr": "「とまってはいけません」 est une interdiction : il ne faut pas s'arrêter devant les gens, 「あぶないですから」, car c'est dangereux."
+    }
    },
    {
     "type": "comprehension",
@@ -65719,7 +65850,14 @@
       "Un cours d'une semaine"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「二日間のクラス」: a class lasting two days (二日間), not two hours.",
+     "fr": "「二日間のクラス」 : un cours de deux jours (二日間), pas de deux heures."
+    }
    },
    {
     "type": "grammar",
@@ -65741,7 +65879,14 @@
       "Il donne un conseil à l'auteur"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「たほうがいいです」 gives advice, \"you'd better\": the teacher tells the writer to look ahead.",
+     "fr": "「たほうがいいです」 donne un conseil, « il vaut mieux » : le professeur dit à l'auteur de regarder devant."
+    }
    },
    {
     "type": "inference",
@@ -65763,7 +65908,15 @@
       "Il s'arrêtait devant les gens"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6,
+     8
+    ],
+    "why": {
+     "en": "The teacher said 「下を見ないで」, \"don't look down\", and once the writer looked ahead, 「もうころびませんでした」: no more falls.",
+     "fr": "Le professeur a dit 「下を見ないで」, « ne regardez pas en bas », et dès que l'auteur a regardé devant, 「もうころびませんでした」 : plus de chutes."
+    }
    },
    {
     "type": "grammar",
@@ -65785,7 +65938,14 @@
       "Il devrait venir plus tôt demain"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「来なくてもいいです」 means \"you don't have to come\": coming is not needed, but it is not forbidden.",
+     "fr": "「来なくてもいいです」 veut dire « vous n'avez pas besoin de venir » : ce n'est pas nécessaire, mais pas interdit."
+    }
    },
    {
     "type": "comprehension",
@@ -65807,7 +65967,14 @@
       "Skier sans jamais s'arrêter"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     12
+    ],
+    "why": {
+     "en": "「一人ですべることができます」: the writer can already ski alone (一人で, on one's own).",
+     "fr": "「一人ですべることができます」 : l'auteur sait déjà skier seul (一人で)."
+    }
    },
    {
     "type": "vocabulary",
@@ -65829,7 +65996,14 @@
       "Était content"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「びっくりしました」 means \"was surprised\": being told not to come was unexpected, so the writer asked why.",
+     "fr": "「びっくりしました」 veut dire « a été surpris » : on lui dit de ne pas venir, c'est inattendu, alors il demande pourquoi."
+    }
    }
   ],
   "breakdown": [
@@ -66657,7 +66831,14 @@
       "Dans un grand magasin"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「なつまつりで、きんぎょを二ひきもらいました」: the goldfish were a gift at the summer festival.",
+     "fr": "「なつまつりで、きんぎょを二ひきもらいました」 : les poissons rouges ont été reçus à la fête d'été."
+    }
    },
    {
     "type": "comprehension",
@@ -66679,7 +66860,14 @@
       "Ils partent tous ensemble"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「わたしは八時半に出ます」: the writer leaves at 8:30, after the father at seven and the mother at eight.",
+     "fr": "「わたしは八時半に出ます」 : l'auteur part à 8 h 30, après le père à sept heures et la mère à huit heures."
+    }
    },
    {
     "type": "grammar",
@@ -66701,7 +66889,15 @@
       "あります sert aux grandes choses, います aux petites"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1,
+     4
+    ],
+    "why": {
+     "en": "A tank is a thing, so 「水そうがあります」; \"nobody\" is about people, so 「だれもいません」, with the verb for living beings.",
+     "fr": "Un aquarium est une chose, d'où 「水そうがあります」 ; « personne » parle des gens, d'où 「だれもいません」, avec le verbe des êtres vivants."
+    }
    },
    {
     "type": "grammar",
@@ -66723,7 +66919,14 @@
       "Personne n'avait rien dit aux autres"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「みんな」 is everyone, and 「何も」 with a negative is \"nothing at all\": none of them told the others anything.",
+     "fr": "「みんな」, c'est tout le monde, et 「何も」 avec une négation veut dire « rien du tout » : personne n'avait rien dit aux autres."
+    }
    },
    {
     "type": "comprehension",
@@ -66745,7 +66948,14 @@
       "Un mois plus tard"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「一か月あとに」: a month later, the tank water became very dirty.",
+     "fr": "「一か月あとに」 : un mois plus tard, l'eau de l'aquarium est devenue très sale."
+    }
    },
    {
     "type": "inference",
@@ -66767,7 +66977,16 @@
       "L'auteur oubliait toujours de leur donner à manger"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7,
+     8,
+     9
+    ],
+    "why": {
+     "en": "「父も母も」 fed them every day and 「わたしも」, each telling no one: three meals a day for fish that need only a little.",
+     "fr": "「父も母も」 les nourrissaient chaque jour, et 「わたしも」, sans rien dire aux autres : trois repas par jour pour des poissons qui en ont besoin de peu."
+    }
    },
    {
     "type": "comprehension",
@@ -66789,7 +67008,15 @@
       "On les nourrit une deuxième fois"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     10,
+     11
+    ],
+    "why": {
+     "en": "「ごはんをやった人は、そこに名前を書きます」: whoever fed them writes their name there, in the notebook by the tank.",
+     "fr": "「ごはんをやった人は、そこに名前を書きます」 : celui qui les a nourris écrit son nom là, dans le cahier devant l'aquarium."
+    }
    },
    {
     "type": "vocabulary",
@@ -66811,7 +67038,14 @@
       "Pendant le week-end"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「ひる」 is the daytime: after everyone leaves in the morning, 「うちにだれもいません」, nobody is home.",
+     "fr": "「ひる」, c'est la journée : après les départs du matin, 「うちにだれもいません」, il n'y a personne."
+    }
    }
   ],
   "breakdown": [
@@ -67822,7 +68056,14 @@
       "Hanako et deux amis"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「友だちと二人で」: Hanako and a friend, two people in all. Her mother is the one she writes to.",
+     "fr": "「友だちと二人で」 : Hanako et un ami, deux en tout. Sa mère, c'est à elle qu'elle écrit."
+    }
    },
    {
     "type": "comprehension",
@@ -67844,7 +68085,14 @@
       "Elle a dormi un moment dans sa chambre"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "After the hotel, 「すぐに古いおてらを見に行きました」: she went straight to see an old temple. The mountains came the next day.",
+     "fr": "Après l'hôtel, 「すぐに古いおてらを見に行きました」 : elle est tout de suite allée voir un vieux temple. La montagne, c'était le lendemain."
+    }
    },
    {
     "type": "grammar",
@@ -67866,7 +68114,14 @@
       "Avec qui elle le mangera"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「食べに」 before 「行きます」 gives the purpose: she goes out in order to eat tofu.",
+     "fr": "「食べに」 devant 「行きます」 donne le but : elle sort pour manger du tofu."
+    }
    },
    {
     "type": "grammar",
@@ -67888,7 +68143,14 @@
       "Elles suivent l'ordre des actions"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「おきて、山へ行って」 lists the actions one after another: she got up, then went to the mountains, then ate lunch.",
+     "fr": "「おきて、山へ行って」 enchaîne les actions dans l'ordre : elle s'est levée, puis est allée à la montagne, puis a mangé."
+    }
    },
    {
     "type": "grammar",
@@ -67910,7 +68172,14 @@
       "Elle ne l'a pas encore acheté"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「もう」 with a past verb, 「もう買いました」, means \"already\": the souvenir is bought.",
+     "fr": "「もう」 avec un verbe au passé, 「もう買いました」, veut dire « déjà » : le souvenir est acheté."
+    }
    },
    {
     "type": "vocabulary",
@@ -67932,7 +68201,15 @@
       "Une carte envoyée à la famille"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     7,
+     8
+    ],
+    "why": {
+     "en": "An 「おみやげ」 is a gift brought back from a trip: here, the tea her mother likes (「お母さんのすきなおちゃ」).",
+     "fr": "Une 「おみやげ」, c'est un cadeau rapporté de voyage : ici, le thé qu'aime sa mère (「お母さんのすきなおちゃ」)."
+    }
    },
    {
     "type": "comprehension",
@@ -67954,7 +68231,14 @@
       "Elle arrivera sans doute après son retour"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「わたしがかえったあとで来るでしょう」: the card will probably (たぶん) arrive after she is home.",
+     "fr": "「わたしがかえったあとで来るでしょう」 : la carte arrivera sans doute (たぶん) après son retour."
+    }
    },
    {
     "type": "inference",
@@ -67976,7 +68260,15 @@
       "Demain soir, à la maison"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "Today's lunch is already past (「おべんとうを食べました」) but the tofu is still ahead (「食べに行きます」): she writes in between.",
+     "fr": "Le bentô d'aujourd'hui est passé (「おべんとうを食べました」), mais le tofu est encore à venir (「食べに行きます」) : elle écrit entre les deux."
+    }
    }
   ],
   "breakdown": [
@@ -68813,7 +69105,14 @@
       "Il n'y avait jamais neigé avant"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「ゆきはあまりふりません」: あまり with a negative is \"not much\", so snow is rare in the town.",
+     "fr": "「ゆきはあまりふりません」 : あまり avec une négation veut dire « pas beaucoup », la neige y est donc rare."
+    }
    },
    {
     "type": "grammar",
@@ -68835,7 +69134,14 @@
       "Il demande si c'est difficile à faire"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「つくりましょう」 is \"let's make\": the brother invites the writer to make a snowman together, and they do.",
+     "fr": "「つくりましょう」 veut dire « faisons » : le frère propose de faire un bonhomme de neige ensemble, et ils le font."
+    }
    },
    {
     "type": "grammar",
@@ -68857,7 +69163,14 @@
       "Il donne la raison des mains rouges"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「つめたくて」 links cause and result: the snow was cold, so their hands went red.",
+     "fr": "「つめたくて」 relie la cause et le résultat : la neige était froide, alors leurs mains ont rougi."
+    }
    },
    {
     "type": "grammar",
@@ -68879,7 +69192,14 @@
       "Il a été fait à cause du grand"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「それから」 means \"after that\": the small snowman came after the big one in the garden.",
+     "fr": "「それから」 veut dire « ensuite » : le petit bonhomme est venu après le grand du jardin."
+    }
    },
    {
     "type": "comprehension",
@@ -68901,7 +69221,14 @@
       "L'auteur et son frère ensemble"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「おとうとは小さいゆきだるまもつくって」: the brother made the small one; the big one they made together.",
+     "fr": "「おとうとは小さいゆきだるまもつくって」 : c'est le frère qui a fait le petit ; le grand, ils l'ont fait à deux."
+    }
    },
    {
     "type": "comprehension",
@@ -68923,7 +69250,14 @@
       "La pièce est chaude"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「へやはあたたかいですから」: the 「から」 gives her reason, the room is warm, so the snowman is better outside.",
+     "fr": "「へやはあたたかいですから」 : le 「から」 donne sa raison, la pièce est chaude, alors le bonhomme est mieux dehors."
+    }
    },
    {
     "type": "inference",
@@ -68945,7 +69279,15 @@
       "Aujourd'hui, il fait froid et gris"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     9,
+     10
+    ],
+    "why": {
+     "en": "The garden snowman was gone (「もうありませんでした」), but the small one on the 「北がわ」, the north side, is still there (「まだあります」): that side stays cold.",
+     "fr": "Le bonhomme du jardin a disparu (「もうありませんでした」), mais le petit du 「北がわ」, côté nord, est toujours là (「まだあります」) : le côté nord reste froid."
+    }
    },
    {
     "type": "vocabulary",
@@ -68967,7 +69309,14 @@
       "Rue"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「にわ」 is the garden: 「にわに大きいゆきだるまをつくりました」, they made a big snowman in the garden.",
+     "fr": "「にわ」, c'est le jardin : 「にわに大きいゆきだるまをつくりました」, ils ont fait un grand bonhomme de neige dans le jardin."
+    }
    }
   ],
   "breakdown": [
@@ -69825,7 +70174,14 @@
       "Une fois par mois"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「金よう日のよるは、よくみんなで行きます」: they often (よく) go together on Friday evenings.",
+     "fr": "「金よう日のよるは、よくみんなで行きます」 : ils y vont souvent (よく) ensemble le vendredi soir."
+    }
    },
    {
     "type": "grammar",
@@ -69847,7 +70203,14 @@
       "Il fait de « je ne chanterai pas » une question"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「けど」 means \"but\": \"I won't sing, but is that OK?\" It joins two ideas that pull apart; it gives no reason.",
+     "fr": "「けど」 veut dire « mais » : « Je ne chanterai pas, mais c'est d'accord ? » Il relie deux idées opposées, sans donner de raison."
+    }
    },
    {
     "type": "comprehension",
@@ -69869,7 +70232,14 @@
       "La sœur de l'auteur"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「川口さん」 said 「いっしょに行きましょう」, \"let's go together\". Nakayama is the president the writer talked to there.",
+     "fr": "「川口さん」 a dit 「いっしょに行きましょう」, « allons-y ensemble ». Nakayama, c'est le président avec qui l'auteur a parlé là-bas."
+    }
    },
    {
     "type": "comprehension",
@@ -69891,7 +70261,14 @@
       "Toute la nuit"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「三時間ぐらいうたいました」: everyone sang for about three hours.",
+     "fr": "「三時間ぐらいうたいました」 : tout le monde a chanté environ trois heures."
+    }
    },
    {
     "type": "grammar",
@@ -69913,7 +70290,14 @@
       "Que Nakayama n'aime pas le karaoké non plus"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「わたしも」 means \"I too\", and 「きらいです」 \"dislike\": Nakayama dislikes karaoke, just like the writer.",
+     "fr": "「わたしも」 veut dire « moi aussi » et 「きらいです」 « ne pas aimer » : Nakayama n'aime pas le karaoké, lui non plus."
+    }
    },
    {
     "type": "comprehension",
@@ -69935,7 +70319,14 @@
       "De leur famille"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「えいがの話をしました」: the two of them talked about films (えいが).",
+     "fr": "「えいがの話をしました」 : tous les deux ont parlé de films (えいが)."
+    }
    },
    {
     "type": "vocabulary",
@@ -69957,7 +70348,14 @@
       "La semaine dernière"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「先週の金よう日」 is last Friday: 「先週」 means \"last week\", and the evening is told in the past.",
+     "fr": "「先週の金よう日」, c'est vendredi dernier : 「先週」 veut dire « la semaine dernière », et la soirée est racontée au passé."
+    }
    },
    {
     "type": "inference",
@@ -69979,7 +70377,15 @@
       "Nakayama lui a demandé de chanter la prochaine fois"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     10,
+     11
+    ],
+    "why": {
+     "en": "Not for the singing, which the writer dislikes: talking films with Nakayama was 「とてもたのしかったです」, a lot of fun.",
+     "fr": "Pas pour chanter, l'auteur n'aime pas ça : parler de films avec Nakayama, 「とてもたのしかったです」, c'était très amusant."
+    }
    }
   ],
   "breakdown": [
@@ -70850,7 +71256,15 @@
       "45 000 yens"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6,
+     8
+    ],
+    "why": {
+     "en": "「もう一つは川のそば」 and it costs 「一か月五万五千円」: 55,000 yen. The 48,000-yen one is by the station.",
+     "fr": "「もう一つは川のそば」, et il coûte 「一か月五万五千円」 : 55 000 yens. Celui à 48 000 yens est devant la gare."
+    }
    },
    {
     "type": "comprehension",
@@ -70872,7 +71286,14 @@
       "Vieux, avec une petite pièce"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「古くて、へやは小さいです」: the station flat is old, and its room is small.",
+     "fr": "「古くて、へやは小さいです」 : l'appartement de la gare est vieux, et la pièce est petite."
+    }
    },
    {
     "type": "grammar",
@@ -70894,7 +71315,14 @@
       "Il dit que la pièce était plus claire avant"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「あまり」 with a negative means \"not very\": the room is rather dark, but not without any light.",
+     "fr": "「あまり」 avec une négation veut dire « pas très » : la pièce est un peu sombre, mais pas sans lumière."
+    }
    },
    {
     "type": "grammar",
@@ -70916,7 +71344,14 @@
       "Si un des appartements est bien ou non"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「どちらがいいですか」 asks \"which is better?\" of two: by the station or by the river.",
+     "fr": "「どちらがいいですか」 demande « lequel est le mieux ? » entre deux : devant la gare ou au bord de la rivière."
+    }
    },
    {
     "type": "grammar",
@@ -70938,7 +71373,14 @@
       "Il veut dire « que » : il marque ce à quoi on compare"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     13
+    ],
+    "why": {
+     "en": "「より」 means \"than\": the river flat is better than 「駅の前のアパート」, the one it is compared with.",
+     "fr": "「より」 veut dire « que » : l'appartement de la rivière est mieux que 「駅の前のアパート」, celui auquel on le compare."
+    }
    },
    {
     "type": "vocabulary",
@@ -70960,7 +71402,14 @@
       "Je cherche du travail"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「大学のちかくにひっこします」: the writer is moving home, to a place near the university.",
+     "fr": "「大学のちかくにひっこします」 : l'auteur change de logement pour s'installer près de l'université."
+    }
    },
    {
     "type": "inference",
@@ -70982,7 +71431,16 @@
       "Exactement autant"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5,
+     8,
+     13
+    ],
+    "why": {
+     "en": "The writer prefers 「川のそばのアパート」: 「五万五千円」 against 「四万八千円」, so 7,000 yen more a month.",
+     "fr": "L'auteur préfère 「川のそばのアパート」 : 「五万五千円」 contre 「四万八千円」, donc 7 000 yens de plus par mois."
+    }
    },
    {
     "type": "comprehension",
@@ -71004,7 +71462,14 @@
       "Qu'il est plus sûr le soir"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「駅の前のほうがべんりですよ」: the mother said the station flat is more convenient (べんり).",
+     "fr": "「駅の前のほうがべんりですよ」 : la mère a dit que l'appartement de la gare est plus pratique (べんり)."
+    }
    }
   ],
   "breakdown": [
@@ -72042,7 +72507,14 @@
       "Jusque vers minuit"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「まいばん十時ごろまで」: every evening until about ten, so the father is not home for dinner.",
+     "fr": "「まいばん十時ごろまで」 : tous les soirs jusque vers dix heures, alors le père ne dîne pas à la maison."
+    }
    },
    {
     "type": "grammar",
@@ -72064,7 +72536,14 @@
       "Une chose que l'auteur n'a pas envie de faire"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「たくない」 is \"don't want to\": the writer has no wish to be a doctor for people. It is a wish, not an ability.",
+     "fr": "「たくない」 veut dire « ne pas vouloir » : l'auteur n'a pas envie d'être médecin pour les gens. C'est un souhait, pas une capacité."
+    }
    },
    {
     "type": "comprehension",
@@ -72086,7 +72565,14 @@
       "Vendeur dans une animalerie"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「どうぶつのいしゃになりたいです」: the writer wants to be a doctor for animals, a vet.",
+     "fr": "「どうぶつのいしゃになりたいです」 : l'auteur veut devenir médecin pour les animaux, vétérinaire."
+    }
    },
    {
     "type": "grammar",
@@ -72108,7 +72594,14 @@
       "Une opposition avec ce qu'a dit le père"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「から」 gives a reason: the writer loves animals, so even a busy job will be all right.",
+     "fr": "「から」 donne une raison : l'auteur adore les animaux, alors même un métier chargé, ça ira."
+    }
    },
    {
     "type": "comprehension",
@@ -72130,7 +72623,14 @@
       "Il s'est blessé à la patte au parc"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「二日、何も食べませんでした」: for two days the dog ate nothing at all.",
+     "fr": "「二日、何も食べませんでした」 : pendant deux jours, le chien n'a rien mangé du tout."
+    }
    },
    {
     "type": "vocabulary",
@@ -72152,7 +72652,14 @@
       "Gentil, et"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「やさしくて」 comes from やさしい, \"kind\": the vet was kind, and the dog soon got well.",
+     "fr": "「やさしくて」 vient de やさしい, « gentil » : le vétérinaire était gentil, et le chien a vite guéri."
+    }
    },
    {
     "type": "inference",
@@ -72174,7 +72681,15 @@
       "Pourquoi l'auteur ne veut pas être médecin pour les gens"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6,
+     7
+    ],
+    "why": {
+     "en": "The kind vet made the dog well; then the writer says 「わたしも」, I too, want to help sick animals: the dream starts there.",
+     "fr": "Le gentil vétérinaire a guéri le chien ; puis l'auteur dit 「わたしも」, moi aussi, je veux aider les animaux malades : le rêve vient de là."
+    }
    },
    {
     "type": "comprehension",
@@ -72196,7 +72711,14 @@
       "Il est allé voir l'hôpital de son père"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "「きのう、父にこのゆめを話しました」: yesterday the writer told the father about this dream.",
+     "fr": "「きのう、父にこのゆめを話しました」 : hier, l'auteur a parlé de ce rêve à son père."
+    }
    }
   ],
   "breakdown": [
@@ -73069,7 +73591,14 @@
       "5 heures"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「三時間日本語のべんきょうをしました」: three hours of Japanese study, before going to bed.",
+     "fr": "「三時間日本語のべんきょうをしました」 : trois heures de japonais, avant d'aller se coucher."
+    }
    },
    {
     "type": "grammar",
@@ -73091,7 +73620,14 @@
       "Au lieu de dormir"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「まえに」 after a verb means \"before\": 「ねるまえに」 is before going to bed, so the study came first.",
+     "fr": "「まえに」 après un verbe veut dire « avant » : 「ねるまえに」, c'est avant d'aller se coucher."
+    }
    },
    {
     "type": "grammar",
@@ -73113,7 +73649,14 @@
       "Il n'y avait déjà plus de temps"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「もう」 with a negative means \"no longer\": up at 8:40 for a test at nine, the writer felt no time was left.",
+     "fr": "「もう」 avec une négation veut dire « ne… plus » : levé à 8 h 40 pour un test à neuf heures, l'auteur pense qu'il n'a plus de temps."
+    }
    },
    {
     "type": "grammar",
@@ -73135,7 +73678,14 @@
       "Ne mange pas, s'il te plaît"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「食べないで」 here means \"without eating\": the writer left home with no breakfast.",
+     "fr": "「食べないで」 veut dire ici « sans manger » : l'auteur est parti de chez lui sans petit-déjeuner."
+    }
    },
    {
     "type": "comprehension",
@@ -73157,7 +73707,15 @@
       "Le professeur a lu le nom de l'auteur"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     8,
+     9
+    ],
+    "why": {
+     "en": "In the quiet room, 「おなかから大きいおとが出ました」, a loud noise from the stomach, and then 「みんながわらいました」.",
+     "fr": "Dans la classe silencieuse, 「おなかから大きいおとが出ました」, un gros bruit de ventre, puis 「みんながわらいました」."
+    }
    },
    {
     "type": "vocabulary",
@@ -73179,7 +73737,14 @@
       "Pleine de monde"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "「とてもしずかなきょうしつ」: a very quiet classroom, which is why everyone heard the stomach.",
+     "fr": "「とてもしずかなきょうしつ」 : une classe très silencieuse, c'est pourquoi tout le monde a entendu le ventre."
+    }
    },
    {
     "type": "inference",
@@ -73201,7 +73766,15 @@
       "Une demi-heure"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2,
+     3
+    ],
+    "why": {
+     "en": "Up at 「八時四十分」 for a test 「九時から」: twenty minutes. Two minutes is how early the writer reached the classroom.",
+     "fr": "Levé à 「八時四十分」 pour un test 「九時から」 : vingt minutes. Deux minutes, c'est son avance en arrivant en classe."
+    }
    },
    {
     "type": "comprehension",
@@ -73223,7 +73796,14 @@
       "Il n'y avait pas de nom sur la copie"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「このテストには名前がありませんよ」: the teacher said there was no name on the test.",
+     "fr": "「このテストには名前がありませんよ」 : le professeur a dit qu'il n'y avait pas de nom sur la copie."
+    }
    }
   ],
   "breakdown": [
@@ -74059,7 +74639,14 @@
       "Ils les ont achetés dans un magasin"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「おべんとうを一つずつつくって」: they made the lunches \"one each\", so each of the three friends made one.",
+     "fr": "「おべんとうを一つずつつくって」 : ils ont fait les repas « un chacun », donc chacun des trois amis en a préparé un."
+    }
    },
    {
     "type": "grammar",
@@ -74081,7 +74668,14 @@
       "Il présente la pluie comme probable"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「でしょう」 makes 「雨でしょう」 a guess, \"will probably rain\": the forecast says what is likely, not what has happened.",
+     "fr": "「でしょう」 fait de 「雨でしょう」 une supposition, « il pleuvra sans doute » : la météo dit ce qui est probable, pas ce qui est arrivé."
+    }
    },
    {
     "type": "comprehension",
@@ -74103,7 +74697,14 @@
       "Sous un arbre au bord de la rivière"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「山本さんのうちのへやでしました」: because of the forecast, they had the picnic in a room at Yamamoto's home, not in the park.",
+     "fr": "「山本さんのうちのへやでしました」 : à cause de la météo, ils ont fait le pique-nique dans une pièce chez Yamamoto, pas au parc."
+    }
    },
    {
     "type": "grammar",
@@ -74125,7 +74726,14 @@
       "La façon dont les repas ont été faits"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「の中で」 is \"among\": 「三つのおべんとうの中で」 names the three lunches, the group the best one is picked from.",
+     "fr": "「の中で」 veut dire « parmi » : 「三つのおべんとうの中で」 désigne les trois repas, le groupe dans lequel on choisit le meilleur."
+    }
    },
    {
     "type": "comprehension",
@@ -74147,7 +74755,14 @@
       "Ils étaient tous aussi bons"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「川口さんのおべんとうがいちばんおいしかった」: of the three, Kawaguchi's lunch tasted best.",
+     "fr": "「川口さんのおべんとうがいちばんおいしかった」 : des trois, c'est le repas de Kawaguchi qui était le meilleur."
+    }
    },
    {
     "type": "vocabulary",
@@ -74169,7 +74784,14 @@
       "Une carte d'invitation"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「ピクニックをするやくそくをしました」: the three friends agreed together on a picnic, a plan they promised each other.",
+     "fr": "「ピクニックをするやくそくをしました」 : les trois amis ont convenu ensemble d'un pique-nique, un projet promis entre eux."
+    }
    },
    {
     "type": "inference",
@@ -74191,7 +74813,15 @@
       "Le parc était resté vide toute la journée"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "They stayed in for the rain, yet the park had 「ずっと、いい天気」, fine weather all along, and the rain came only 「ゆうがた五時ごろ」.",
+     "fr": "Ils sont restés à l'intérieur à cause de la pluie, mais au parc 「ずっと、いい天気」, beau temps tout du long, et la pluie n'est venue que 「ゆうがた五時ごろ」."
+    }
    },
    {
     "type": "comprehension",
@@ -74213,7 +74843,14 @@
       "Vers cinq heures du soir"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「ゆうがた五時ごろ、やっと雨になりました」: the rain began around five in the evening, not in the morning as the forecast said.",
+     "fr": "「ゆうがた五時ごろ、やっと雨になりました」 : la pluie n'a commencé que vers cinq heures du soir, pas le matin comme l'annonçait la météo."
+    }
    }
   ],
   "breakdown": [
@@ -75033,7 +75670,14 @@
       "Jusque vers dix heures"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「九時ごろまで会社です」: the mother is at work until about nine today.",
+     "fr": "「九時ごろまで会社です」 : aujourd'hui, la mère est au bureau jusque vers neuf heures."
+    }
    },
    {
     "type": "grammar",
@@ -75055,7 +75699,14 @@
       "Tu n'es pas obligé de le manger"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「食べないでください」 asks someone not to do something: \"please don't eat it\", because the cake is for Grandma.",
+     "fr": "「食べないでください」 demande de ne pas faire quelque chose : « ne le mange pas, s'il te plaît », car le gâteau est pour grand-mère."
+    }
    },
    {
     "type": "grammar",
@@ -75077,7 +75728,14 @@
       "Ken doit les faire avant de dormir"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「しなければなりません」 means \"must do\": Ken has to do his homework 「ねるまえに」, before going to bed.",
+     "fr": "「しなければなりません」 veut dire « il faut le faire » : Ken doit faire ses devoirs 「ねるまえに」, avant de se coucher."
+    }
    },
    {
     "type": "grammar",
@@ -75099,7 +75757,14 @@
       "Il dit qu'il ne veut plus de gâteau"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     14
+    ],
+    "why": {
+     "en": "「買いましょうか」 is \"shall I buy?\": Ken offers to buy a new cake himself, after school tomorrow.",
+     "fr": "「買いましょうか」 veut dire « veux-tu que j'achète ? » : Ken propose d'acheter lui-même un nouveau gâteau demain après l'école."
+    }
    },
    {
     "type": "comprehension",
@@ -75121,7 +75786,14 @@
       "Sous le frigo"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     12
+    ],
+    "why": {
+     "en": "「れいぞうこの下にありました」: 「下」 is \"under\", so the note was under the fridge, not on its door.",
+     "fr": "「れいぞうこの下にありました」 : 「下」 veut dire « sous », le mot était donc sous le frigo, pas sur sa porte."
+    }
    },
    {
     "type": "vocabulary",
@@ -75143,7 +75815,14 @@
       "Partage-le"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「あたためて」 is \"warm it up\": the curry is in the fridge, so Ken heats it before eating it.",
+     "fr": "「あたためて」 veut dire « fais-le chauffer » : le curry est au frigo, Ken doit le chauffer avant de le manger."
+    }
    },
    {
     "type": "inference",
@@ -75165,7 +75844,14 @@
       "Un nouveau, acheté par Ken aujourd'hui"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     13
+    ],
+    "why": {
+     "en": "「ケーキを半分食べました」: Ken ate half of the cake and only offers to buy a new one tomorrow, so about half is left.",
+     "fr": "「ケーキを半分食べました」 : Ken a mangé la moitié du gâteau et ne propose d'en acheter un nouveau que demain : il en reste donc à peu près la moitié."
+    }
    },
    {
     "type": "comprehension",
@@ -75187,7 +75873,14 @@
       "Ken, pour son anniversaire"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「おばあさんにあげるケーキです」: it is a cake to give to Grandma tomorrow.",
+     "fr": "「おばあさんにあげるケーキです」 : c'est un gâteau à offrir à grand-mère demain."
+    }
    }
   ],
   "breakdown": [
@@ -76034,7 +76727,14 @@
       "Son grand frère"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「一人で」 means \"on my own\": the writer went to the grandfather's house alone, with nobody.",
+     "fr": "「一人で」 veut dire « seul » : l'auteur est allé chez son grand-père tout seul, sans personne."
+    }
    },
    {
     "type": "grammar",
@@ -76056,7 +76756,14 @@
       "Il fait d'une action ce qu'il aime"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "In 「はたらくのが好き」, 「の」 makes the verb a thing, \"working\", and 「好き」 says the grandfather likes it.",
+     "fr": "Dans 「はたらくのが好き」, 「の」 fait du verbe une chose, « travailler », et 「好き」 dit que le grand-père aime ça."
+    }
    },
    {
     "type": "comprehension",
@@ -76078,7 +76785,14 @@
       "À 5 h 30"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「毎あさ五時におきて」: the writer got up at five every morning to go to the field.",
+     "fr": "「毎あさ五時におきて」 : l'auteur se levait à cinq heures tous les matins pour aller au champ."
+    }
    },
    {
     "type": "grammar",
@@ -76100,7 +76814,14 @@
       "Les tomates étaient ses plus gros légumes"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "「おじいさんのやさいで」 sets the group, his vegetables, and 「いちばんおいしかった」 says the tomatoes were the best of them.",
+     "fr": "「おじいさんのやさいで」 pose le groupe, ses légumes, et 「いちばんおいしかった」 dit que les tomates étaient les meilleures."
+    }
    },
    {
     "type": "comprehension",
@@ -76122,7 +76843,14 @@
       "Il les préférait à tous les légumes"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「トマトがあまり好きではありませんでした」: at first, the writer did not like tomatoes very much.",
+     "fr": "「トマトがあまり好きではありませんでした」 : au début, l'auteur n'aimait pas beaucoup les tomates."
+    }
    },
    {
     "type": "vocabulary",
@@ -76144,7 +76872,14 @@
       "Sucrée, et"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「あまくて」 is \"sweet, and\": the tomato was so sweet that the writer was surprised.",
+     "fr": "「あまくて」 veut dire « sucrée, et » : la tomate était si sucrée que l'auteur a été surpris."
+    }
    },
    {
     "type": "inference",
@@ -76166,7 +76901,15 @@
       "C'était la première tomate de sa vie"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6,
+     10
+    ],
+    "why": {
+     "en": "The writer had eaten a tomato just picked (「とって、すぐ食べました」); after that, the shop one was 「あまりおいしくなかった」, not very good.",
+     "fr": "L'auteur avait mangé une tomate à peine cueillie (「とって、すぐ食べました」) ; après ça, celle du supermarché était 「あまりおいしくなかった」, pas très bonne."
+    }
    },
    {
     "type": "grammar",
@@ -76188,7 +76931,15 @@
       "Un autre choix possible"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     3,
+     4
+    ],
+    "why": {
+     "en": "「そして」 is \"and then\": after going to the field each morning, the next thing they did was pick vegetables.",
+     "fr": "「そして」 veut dire « et puis » : après être allés au champ le matin, ils cueillaient ensuite des légumes."
+    }
    }
   ],
   "breakdown": [
@@ -76998,7 +77749,14 @@
       "Jeudi, au téléphone"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     0
+    ],
+    "why": {
+     "en": "「金よう日、学校で」: they talked on Friday, at school, not on the phone.",
+     "fr": "「金よう日、学校で」 : ils ont parlé vendredi, à l'école, pas au téléphone."
+    }
    },
    {
     "type": "grammar",
@@ -77020,7 +77778,14 @@
       "Qu'ils n'iront nulle part"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「どこか」 is \"somewhere\": the writer wants to go out on Sunday but has not chosen where yet.",
+     "fr": "「どこか」 veut dire « quelque part » : l'auteur veut sortir dimanche, mais n'a pas encore choisi où."
+    }
    },
    {
     "type": "comprehension",
@@ -77042,7 +77807,14 @@
       "L'auteur l'aime"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「山が好きですから」: 「から」 gives the reason, the writer likes the mountains; Nakayama does not.",
+     "fr": "「山が好きですから」 : 「から」 donne la raison, l'auteur aime la montagne ; Nakayama, lui, ne l'aime pas."
+    }
    },
    {
     "type": "grammar",
@@ -77064,7 +77836,14 @@
       "Dire que l'aquarium est le meilleur endroit"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「水ぞくかんはどうですか」 is \"how about the aquarium?\": Nakayama suggests it as a place to go on Sunday.",
+     "fr": "「水ぞくかんはどうですか」 veut dire « et l'aquarium ? » : Nakayama le propose comme sortie pour dimanche."
+    }
    },
    {
     "type": "comprehension",
@@ -77086,7 +77865,14 @@
       "Il y aurait du vent au bord de la mer"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "「日よう日は、雨でしょう」: 「でしょう」 makes it a guess, so rain is likely on Sunday.",
+     "fr": "「日よう日は、雨でしょう」 : 「でしょう」 en fait une supposition, il pleuvra sans doute dimanche."
+    }
    },
    {
     "type": "vocabulary",
@@ -77108,7 +77894,14 @@
       "Loin"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「雨の日でもだいじょうぶ」: the aquarium is all right, no problem, even on a rainy day.",
+     "fr": "「雨の日でもだいじょうぶ」 : l'aquarium, ça va, pas de problème, même un jour de pluie."
+    }
    },
    {
     "type": "inference",
@@ -77130,7 +77923,15 @@
       "L'auteur ne sait pas bien nager"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "Nakayama said 「うみが好きです」, but right after, the writer says 「すいえいが下手です」: bad at swimming.",
+     "fr": "Nakayama a dit 「うみが好きです」, mais juste après, l'auteur dit 「すいえいが下手です」 : il nage mal."
+    }
    },
    {
     "type": "comprehension",
@@ -77152,7 +77953,14 @@
       "Dimanche à 14 h, à l'aquarium"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     11
+    ],
+    "why": {
+     "en": "「日よう日の十時に、駅の前で会います」: they meet at ten on Sunday, in front of the station, not at the aquarium.",
+     "fr": "「日よう日の十時に、駅の前で会います」 : rendez-vous dimanche à 10 h devant la gare, pas à l'aquarium."
+    }
    }
   ],
   "breakdown": [
@@ -78080,7 +78888,14 @@
       "Chez l'auteur, tous les samedis"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「毎週土よう日に、中川さんのうちで」: the lessons are every Saturday, at Nakagawa's home.",
+     "fr": "「毎週土よう日に、中川さんのうちで」 : les leçons ont lieu tous les samedis, chez Nakagawa."
+    }
    },
    {
     "type": "grammar",
@@ -78102,7 +78917,14 @@
       "L'auteur ne comprend pas les explications"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「分かります」 is \"understand\": because Nakagawa speaks slowly (「ゆっくり話しますから」), the writer follows.",
+     "fr": "「分かります」 veut dire « comprendre » : comme Nakagawa parle lentement (「ゆっくり話しますから」), l'auteur suit les explications."
+    }
    },
    {
     "type": "grammar",
@@ -78124,7 +78946,14 @@
       "fait des fleurs et des bateaux en ce moment"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「ことができます」 says someone can do something: the writer can already make flowers and boats.",
+     "fr": "「ことができます」 dit qu'on sait faire quelque chose : l'auteur sait déjà faire des fleurs et des bateaux."
+    }
    },
    {
     "type": "grammar",
@@ -78146,7 +78975,14 @@
       "L'auteur en fait une tout seul en ce moment"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「まだ」 with 「つくっていません」 is \"not yet\": the writer has not managed a crane alone so far.",
+     "fr": "「まだ」 avec 「つくっていません」 veut dire « pas encore » : l'auteur n'a pas encore réussi seul une grue."
+    }
    },
    {
     "type": "comprehension",
@@ -78168,7 +79004,15 @@
       "La dernière étape de la grue en papier"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5,
+     6
+    ],
+    "why": {
+     "en": "「さいごのところがむずかしいです」: 「さいご」 is \"last\", so the last step of the crane is what is hard.",
+     "fr": "「さいごのところがむずかしいです」 : 「さいご」 veut dire « dernier », c'est donc la dernière étape de la grue qui est difficile."
+    }
    },
    {
     "type": "comprehension",
@@ -78190,7 +79034,15 @@
       "Le frère de Nakagawa n'a pas su faire de grue"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     7,
+     8
+    ],
+    "why": {
+     "en": "Nakagawa's little brother made 「おりづるを五つ」, five cranes, and he is 「まだ六さい」, only six.",
+     "fr": "Le petit frère de Nakagawa a fait 「おりづるを五つ」, cinq grues, et il est 「まだ六さい」 : il n'a que six ans."
+    }
    },
    {
     "type": "vocabulary",
@@ -78212,7 +79064,14 @@
       "J'ai été surpris"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「びっくりしました」 is \"was surprised\": a six-year-old had just folded five cranes, which the writer cannot yet do alone.",
+     "fr": "「びっくりしました」 veut dire « j'ai été surpris » : un enfant de six ans venait de plier cinq grues, ce que l'auteur ne sait pas encore faire seul."
+    }
    },
    {
     "type": "inference",
@@ -78234,7 +79093,15 @@
       "Apprendre l'origami à sa mère"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     5,
+     11
+    ],
+    "why": {
+     "en": "The gift is to be 「一人でつくったおりづる」, a crane made alone, and the writer has not managed one yet: that comes first.",
+     "fr": "Le cadeau doit être 「一人でつくったおりづる」, une grue faite tout seul, et l'auteur n'y arrive pas encore : il doit d'abord apprendre."
+    }
    }
   ],
   "breakdown": [
@@ -79155,7 +80022,14 @@
       "À son hôtel"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「東山駅へ行きたいです」: the woman wants to go to Higashiyama Station; the station after it is the writer's home.",
+     "fr": "「東山駅へ行きたいです」 : la femme veut aller à la gare de Higashiyama ; la gare d'après, c'est chez l'auteur."
+    }
    },
    {
     "type": "grammar",
@@ -79177,7 +80051,14 @@
       "Il veut dire « quand » ou « si »"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「と」 marks what was said: 「あの白い電車です」 comes before 「と言いました」, so those are the writer's words.",
+     "fr": "「と」 marque les paroles rapportées : 「あの白い電車です」 vient avant 「と言いました」, ce sont donc les mots de l'auteur."
+    }
    },
    {
     "type": "grammar",
@@ -79199,7 +80080,15 @@
       "L'auteur parle d'un autre train"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2,
+     6
+    ],
+    "why": {
+     "en": "「あの」 points to something over there, 「この」 to something close: the writer had gone 「白い電車まで」, right up to it.",
+     "fr": "「あの」 montre une chose là-bas, 「この」 une chose toute proche : l'auteur était allé 「白い電車まで」, juste à côté."
+    }
    },
    {
     "type": "grammar",
@@ -79221,7 +80110,14 @@
       "L'auteur ne veut pas le savoir"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「しりませんでした」 is past and negative, \"did not know\": the writer learned it only when the station worker spoke.",
+     "fr": "「しりませんでした」 est au passé et au négatif, « ne savait pas » : l'auteur ne l'a appris qu'en entendant l'employé."
+    }
    },
    {
     "type": "comprehension",
@@ -79243,7 +80139,14 @@
       "Le train blanc ne s'arrête pas à Higashiyama"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「白い電車は東山駅にとまりません」: the white train does not stop there today; the yellow one is the train to take.",
+     "fr": "「白い電車は東山駅にとまりません」 : aujourd'hui le train blanc ne s'y arrête pas ; c'est le jaune qu'il faut prendre."
+    }
    },
    {
     "type": "comprehension",
@@ -79265,7 +80168,14 @@
       "Elle a demandé à un employé"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「電車をおりて、わらいました」: she got off the train and laughed.",
+     "fr": "「電車をおりて、わらいました」 : elle est descendue du train et a ri."
+    }
    },
    {
     "type": "vocabulary",
@@ -79287,7 +80197,14 @@
       "Sans bruit"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「すぐに」 is \"right away\": as soon as the station worker spoke, the writer went up to the white train.",
+     "fr": "「すぐに」 veut dire « tout de suite » : dès que l'employé a parlé, l'auteur est allé jusqu'au train blanc."
+    }
    },
    {
     "type": "inference",
@@ -79309,7 +80226,14 @@
       "C'était son chemin pour rentrer"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「東山駅のつぎの駅です」: the writer lives one station past Higashiyama, so the yellow train was the way home too.",
+     "fr": "「東山駅のつぎの駅です」 : l'auteur habite une gare après Higashiyama, le train jaune était donc aussi son chemin."
+    }
    }
   ],
   "breakdown": [
@@ -80232,7 +81156,14 @@
       "Le lundi et le 15 août"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「月よう日と八月十五日は、休みです」: closed on Mondays and on August 15; on rainy days it is open.",
+     "fr": "「月よう日と八月十五日は、休みです」 : fermée le lundi et le 15 août ; les jours de pluie, elle est ouverte."
+    }
    },
    {
     "type": "grammar",
@@ -80254,7 +81185,14 @@
       "Quand les billets sont mis en vente"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「から」 marks the start and 「まで」 the end: the season runs from July 20 to August 31.",
+     "fr": "「から」 marque le début et 「まで」 la fin : la saison va du 20 juillet au 31 août."
+    }
    },
    {
     "type": "comprehension",
@@ -80276,7 +81214,14 @@
       "500 yens"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「おとなが四百円、子どもが百円」: 400 yen for the mother plus 100 for her son makes 500 yen.",
+     "fr": "「おとなが四百円、子どもが百円」 : 400 yens pour la mère et 100 pour son fils, cela fait 500 yens."
+    }
    },
    {
     "type": "grammar",
@@ -80298,7 +81243,14 @@
       "Ils devraient boire beaucoup"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "「飲んでもいいです」 is \"you may drink\": it allows water or tea on the chairs outside the pool, it is not an order.",
+     "fr": "「飲んでもいいです」 veut dire « vous pouvez boire » : c'est permis sur les chaises hors de la piscine, pas obligatoire."
+    }
    },
    {
     "type": "grammar",
@@ -80320,7 +81272,14 @@
       "La glace ou le pain, l'un des deux seulement"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「など」 is \"and so on\": not only ice cream and bread, but any such food is banned in the pool.",
+     "fr": "「など」 veut dire « etc. » : pas seulement la glace et le pain, tout aliment de ce genre est interdit dans la piscine."
+    }
    },
    {
     "type": "vocabulary",
@@ -80342,7 +81301,14 @@
       "Maître-nageur"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "In 「おとなが四百円、子どもが百円」, 「おとな」 is set against 「子ども」, children: it means \"adult\".",
+     "fr": "Dans 「おとなが四百円、子どもが百円」, 「おとな」 s'oppose à 「子ども」, les enfants : il veut dire « adulte »."
+    }
    },
    {
     "type": "comprehension",
@@ -80364,7 +81330,15 @@
       "Les enfants ne peuvent pas venir"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     10,
+     11
+    ],
+    "why": {
+     "en": "Rain is fine: 「雨の日もプールに入ってもいいです」; but 「かみなりのときは」, when there is thunder, you must get out at once.",
+     "fr": "La pluie, ça va : 「雨の日もプールに入ってもいいです」 ; mais 「かみなりのときは」, quand il y a de l'orage, il faut sortir tout de suite."
+    }
    },
    {
     "type": "inference",
@@ -80386,7 +81360,15 @@
       "Un enfant de six ans, à 14 h"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     2,
+     5
+    ],
+    "why": {
+     "en": "Children up to six (「六さいまで」) may not swim alone, and the pool shuts at five (「午後五時まで」): only the eight-year-old at 3 p.m. fits.",
+     "fr": "Les enfants jusqu'à six ans (「六さいまで」) ne nagent pas seuls, et la piscine ferme à 17 h (「午後五時まで」) : seul l'enfant de huit ans à 15 h convient."
+    }
    }
   ],
   "breakdown": [
@@ -81300,7 +82282,14 @@
       "Ils se sont parlé au téléphone toute la nuit"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「コーヒーをたくさん飲んで」 and 「えいがを見ました」: they drank lots of coffee and watched a film, from ten to twelve.",
+     "fr": "「コーヒーをたくさん飲んで」 et 「えいがを見ました」 : ils ont bu beaucoup de café et regardé un film, de dix heures à minuit."
+    }
    },
    {
     "type": "grammar",
@@ -81322,7 +82311,14 @@
       "Pas du tout sommeil"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「ぜんぜん」 with a negative is \"not at all\": in bed, the writer was not sleepy in the least.",
+     "fr": "「ぜんぜん」 avec une négation veut dire « pas du tout » : au lit, l'auteur n'avait pas sommeil du tout."
+    }
    },
    {
     "type": "comprehension",
@@ -81344,7 +82340,14 @@
       "Vers 11 h"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「四時ごろまで、本を読みました」: the writer read until about four; twelve is when the film ended.",
+     "fr": "「四時ごろまで、本を読みました」 : l'auteur a lu jusque vers quatre heures ; minuit, c'est la fin du film."
+    }
    },
    {
     "type": "comprehension",
@@ -81366,7 +82369,14 @@
       "Étudier ensemble"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「テニスをするやくそくでした」: on Saturday at ten, they had arranged to play tennis.",
+     "fr": "「テニスをするやくそくでした」 : samedi à 10 h, ils avaient prévu de jouer au tennis."
+    }
    },
    {
     "type": "grammar",
@@ -81388,7 +82398,15 @@
       "Il amène un nouveau sujet"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     9,
+     10
+    ],
+    "why": {
+     "en": "「だから」 is \"so\": Yamamoto drank a lot of coffee too, and as a result the writer thinks Yamamoto was not sleepy either.",
+     "fr": "「だから」 veut dire « alors » : Yamamoto aussi a bu beaucoup de café, et par conséquent l'auteur pense qu'il n'avait pas sommeil non plus."
+    }
    },
    {
     "type": "grammar",
@@ -81410,7 +82428,14 @@
       "L'auteur pose la question à Yamamoto"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     10
+    ],
+    "why": {
+     "en": "「と思います」 is \"I think\": the writer is guessing how Yamamoto felt; Yamamoto never said so.",
+     "fr": "「と思います」 veut dire « je pense » : l'auteur suppose ce que ressentait Yamamoto, qui ne l'a pas dit lui-même."
+    }
    },
    {
     "type": "vocabulary",
@@ -81432,7 +82457,14 @@
       "Un souhait"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「テニスをするやくそくでした」: 「やくそく」 is a plan the two friends agreed on, here tennis at ten.",
+     "fr": "「テニスをするやくそくでした」 : 「やくそく」 est un projet convenu entre les deux amis, ici le tennis à 10 h."
+    }
    },
    {
     "type": "inference",
@@ -81454,7 +82486,15 @@
       "Ils dormaient encore tous les deux"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     6,
+     8
+    ],
+    "why": {
+     "en": "The writer slept until eleven (「十一時まで、ずっとねていました」), and Yamamoto says 「わたしも今まで、ねていました」: at ten, both were asleep.",
+     "fr": "L'auteur a dormi jusqu'à onze heures (「十一時まで、ずっとねていました」), et Yamamoto dit 「わたしも今まで、ねていました」 : à 10 h, ils dormaient tous les deux."
+    }
    }
   ],
   "breakdown": [
@@ -82333,7 +83373,14 @@
       "Dans une école de langues"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "「テレビのニュースで日本語をべんきょうしています」: the writer studies with the TV news; dramas are still too hard.",
+     "fr": "「テレビのニュースで日本語をべんきょうしています」 : l'auteur étudie avec les infos à la télé ; les séries sont encore trop difficiles."
+    }
    },
    {
     "type": "grammar",
@@ -82355,7 +83402,14 @@
       "Une habitude de ces temps-ci"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     1
+    ],
+    "why": {
+     "en": "With 「毎あさ」, every morning, 「べんきょうしています」 is a habit: something the writer keeps doing these days.",
+     "fr": "Avec 「毎あさ」, tous les matins, 「べんきょうしています」 est une habitude : une chose que l'auteur fait régulièrement ces temps-ci."
+    }
    },
    {
     "type": "grammar",
@@ -82377,7 +83431,14 @@
       "L'auteur aime un peu le japonais"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     3
+    ],
+    "why": {
+     "en": "「できます」 here is \"can (do)\": now the writer can use a little (「少し」) Japanese.",
+     "fr": "「できます」 veut dire ici « savoir faire » : maintenant, l'auteur sait un peu (「少し」) de japonais."
+    }
    },
    {
     "type": "grammar",
@@ -82399,7 +83460,14 @@
       "Une négation au présent"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「分かりません」 is a present negative, \"don't understand\": even now, 「まだ」 (still), dramas are too hard.",
+     "fr": "「分かりません」 est une négation au présent, « je ne comprends pas » : aujourd'hui encore, 「まだ」, les séries sont trop difficiles."
+    }
    },
    {
     "type": "comprehension",
@@ -82421,7 +83489,14 @@
       "Un peu de pluie vers 16 h"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「午後から雨がたくさんふります」: a lot of rain starting in the afternoon; four o'clock is just when it came.",
+     "fr": "「午後から雨がたくさんふります」 : beaucoup de pluie à partir de l'après-midi ; quatre heures, c'est juste le moment où elle est arrivée."
+    }
    },
    {
     "type": "comprehension",
@@ -82443,7 +83518,15 @@
       "En courant sous la pluie"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     9,
+     10
+    ],
+    "why": {
+     "en": "No coworker had an umbrella (「だれもかさをもっていませんでした」), so Yamaguchi went 「わたしのかさで」, under the writer's.",
+     "fr": "Aucun collègue n'avait de parapluie (「だれもかさをもっていませんでした」), alors Yamaguchi est allé à la gare 「わたしのかさで」, sous celui de l'auteur."
+    }
    },
    {
     "type": "vocabulary",
@@ -82465,7 +83548,14 @@
       "Par exemple"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     2
+    ],
+    "why": {
+     "en": "「はじめは」 is \"at first\": at the start the writer understood nothing; the next sentence tells how it is now.",
+     "fr": "「はじめは」 veut dire « au début » : au départ, l'auteur ne comprenait rien ; la phrase suivante dit comment c'est maintenant."
+    }
    },
    {
     "type": "inference",
@@ -82487,7 +83577,15 @@
       "L'auteur veut travailler à la télé"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     6,
+     7
+    ],
+    "why": {
+     "en": "The news warned of 「午後から雨」, rain from the afternoon, so the writer had an umbrella to share with Yamaguchi.",
+     "fr": "La télé avait annoncé 「午後から雨」, de la pluie l'après-midi, alors l'auteur avait un parapluie à partager avec Yamaguchi."
+    }
    }
   ],
   "breakdown": [
@@ -83387,7 +84485,14 @@
       "Ils ont regardé le foot à la télé chaque jour"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     9
+    ],
+    "why": {
+     "en": "「その一週間、二人は毎日サッカーをしました」: father and brother played soccer together every day that week.",
+     "fr": "「その一週間、二人は毎日サッカーをしました」 : le père et le frère ont joué au foot ensemble chaque jour cette semaine-là."
+    }
    },
    {
     "type": "grammar",
@@ -83409,7 +84514,14 @@
       "Après"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     5
+    ],
+    "why": {
+     "en": "「のあとで」 is \"after\": the mother looked at the notebook once dinner was over.",
+     "fr": "「のあとで」 veut dire « après » : la mère a regardé le cahier une fois le dîner fini."
+    }
    },
    {
     "type": "comprehension",
@@ -83431,7 +84543,14 @@
       "Qu'il ne les comprenait pas"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     4
+    ],
+    "why": {
+     "en": "「もうしたよ」: 「もう」 is \"already\" and 「した」 \"did\": he said the homework was done.",
+     "fr": "「もうしたよ」 : 「もう」 veut dire « déjà » et 「した」 « j'ai fait » : il a dit que ses devoirs étaient faits."
+    }
    },
    {
     "type": "grammar",
@@ -83453,7 +84572,15 @@
       "La suite s'est passée avant"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     4,
+     5
+    ],
+    "why": {
+     "en": "「しかし」 is \"however\": it warns that what comes next will go against his 「もうしたよ」, \"I already did it\".",
+     "fr": "「しかし」 veut dire « cependant » : il annonce que la suite va contredire son 「もうしたよ」, « je les ai déjà faits »."
+    }
    },
    {
     "type": "comprehension",
@@ -83475,7 +84602,14 @@
       "Toutes les réponses étaient fausses"
      ]
     },
-    "correct": 0
+    "correct": 0,
+    "at": [
+     6
+    ],
+    "why": {
+     "en": "「まだ白かったです」: the homework pages were still white, so nothing had been written.",
+     "fr": "「まだ白かったです」 : les pages des devoirs étaient encore blanches, rien n'y était écrit."
+    }
    },
    {
     "type": "grammar",
@@ -83497,7 +84631,14 @@
       "Mais le foot"
      ]
     },
-    "correct": 2
+    "correct": 2,
+    "at": [
+     8
+    ],
+    "why": {
+     "en": "After a noun, 「でも」 softens an offer: 「サッカーでもしない？」 is \"how about soccer or something?\"",
+     "fr": "Après un nom, 「でも」 adoucit une proposition : 「サッカーでもしない？」, c'est « et si on jouait au foot, ou autre chose ? »"
+    }
    },
    {
     "type": "vocabulary",
@@ -83519,7 +84660,14 @@
       "C'est cassé"
      ]
     },
-    "correct": 1
+    "correct": 1,
+    "at": [
+     7
+    ],
+    "why": {
+     "en": "「ゲームはだめ」: 「だめ」 is \"no good, not allowed\": no games for a week.",
+     "fr": "「ゲームはだめ」 : 「だめ」 veut dire « interdit, pas question » : pas de jeux pendant une semaine."
+    }
    },
    {
     "type": "inference",
@@ -83541,7 +84689,15 @@
       "Jeudi"
      ]
     },
-    "correct": 3
+    "correct": 3,
+    "at": [
+     2,
+     7
+    ],
+    "why": {
+     "en": "It all happened on 「水よう日」, Wednesday, and the mother said 「あしたから」, from tomorrow: so the week starts on Thursday.",
+     "fr": "Tout se passe 「水よう日」, mercredi, et la mère dit 「あしたから」, à partir de demain : la semaine commence donc jeudi."
+    }
    }
   ],
   "breakdown": [
