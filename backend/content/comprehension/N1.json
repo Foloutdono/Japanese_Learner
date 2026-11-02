@@ -17354,30 +17354,30 @@
    {
     "type": "inference",
     "question": {
-     "en": "What does the reviewer seem to expect of this writer's future work?",
-     "fr": "Que semble penser le critique des prochaines œuvres de cet écrivain ?"
+     "en": "What does the diary suggest about the elder sister?",
+     "fr": "Que laisse entendre le journal sur la sœur aînée ?"
     },
     "options": {
      "en": [
-      "That the flaws will pass with experience",
-      "That it will repeat the same flaws",
-      "That it can never equal this first novel",
-      "That it should add more narrators"
+      "She moved to the city with her sister",
+      "She told her sister about every love",
+      "She kept much of her life to herself",
+      "She wanted the village to be flooded"
      ],
      "fr": [
-      "Que les défauts passeront avec l'expérience",
-      "Qu'elles répéteront les mêmes défauts",
-      "Qu'elles ne pourront jamais égaler ce premier roman",
-      "Qu'elles devraient multiplier les narrateurs"
+      "Elle était partie vivre en ville avec sa sœur",
+      "Elle racontait chacun de ses amours à sa sœur",
+      "Elle gardait pour elle une grande part de sa vie",
+      "Elle voulait que le village soit englouti"
      ]
     },
-    "correct": 0,
+    "correct": 2,
     "at": [
-     6
+     2
     ],
     "why": {
-     "en": "Blaming the flaws on its being a first novel (「初めての長編のこととて」) implies experience should cure them.",
-     "fr": "Mettre les défauts sur le compte d'un premier roman (「初めての長編のこととて」) laisse entendre que l'expérience les corrigera."
+     "en": "Her loves and regrets were 「妹の知らなかった」, unknown to her sister: she kept them to herself and set them down in the diary.",
+     "fr": "Ses amours et ses regrets étaient 「妹の知らなかった」, inconnus de sa sœur : elle les gardait pour elle et les confiait au journal."
     }
    }
   ],

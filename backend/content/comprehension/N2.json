@@ -8,7 +8,7 @@
    "〜つつある",
    "〜を通じて"
   ],
-  "text": "私の住む町では、この十年で人口が二割ほど減った。若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。こうした状況にもかかわらず、町は最近、少しずつ活気を取り戻している。きっかけは、空き家を安く貸し出す制度だった。都会の生活に疲れた人が、この制度を通じて町に移り住むようになったのだ。彼らは古い家を自分たちで直し、カフェや小さな店を開いた。祭りの準備を一緒に行ううちに、互いを理解する機会は確実に増えている。人が減ることを止めるのは難しい。しかし、減り方を変えることはできるのだと、この町は示している。",
+  "text": "私の住む町では、この十年で人口が二割ほど減った。若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。こうした状況にもかかわらず、町は最近、少しずつ活気を取り戻している。きっかけは、空き家を安く貸し出す制度だった。都会の生活に疲れた人が、この制度を通じて町に移り住むようになったのだ。彼らは古い家を自分たちで直し、カフェや小さな店を開いた。昔からの住民と新しい住民が祭りの準備を一緒に行ううちに、互いを理解する機会は確実に増えている。人が減ることを止めるのは難しい。しかし、減り方を変えることはできるのだと、この町は示している。",
   "questions": [
    {
     "type": "comprehension",
@@ -267,8 +267,8 @@
      6
     ],
     "why": {
-     "en": "「祭りの準備を一緒に行ううちに」: while they prepare the festival together, their chances to understand each other grow.",
-     "fr": "「祭りの準備を一緒に行ううちに」 : à force de préparer le festival ensemble, les occasions de se comprendre se multiplient."
+     "en": "「昔からの住民と新しい住民」 prepare the festival together, and their chances to understand each other grow.",
+     "fr": "「昔からの住民と新しい住民」 préparent le festival ensemble, et leurs occasions de se comprendre augmentent."
     }
    },
    {
@@ -944,16 +944,72 @@
     ]
    },
    {
-    "jp": "祭りの準備を一緒に行ううちに、互いを理解する機会は確実に増えている。",
+    "jp": "昔からの住民と新しい住民が祭りの準備を一緒に行ううちに、互いを理解する機会は確実に増えている。",
     "translation": {
-     "en": "As they prepare the festival together, the chances to understand one another are surely increasing.",
-     "fr": "À force de préparer le festival ensemble, les occasions de se comprendre augmentent sans aucun doute."
+     "en": "As long-time and new residents prepare the festival together, the chances to understand one another are surely increasing.",
+     "fr": "Comme anciens et nouveaux habitants préparent le festival ensemble, les occasions de se comprendre augmentent sans aucun doute."
     },
     "note": {
      "en": "The pattern 「〜うちに」 means while or in the course of doing something, a change happens.",
      "fr": "La structure 「〜うちに」 signifie qu'au fil d'une action, un changement se produit."
     },
     "words": [
+     {
+      "surface": "昔",
+      "meaning": {
+       "en": "long ago",
+       "fr": "autrefois"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "since",
+       "fr": "depuis"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "住民",
+      "meaning": {
+       "en": "residents",
+       "fr": "habitants"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "新しい",
+      "meaning": {
+       "en": "new",
+       "fr": "nouveaux"
+      }
+     },
+     {
+      "surface": "住民",
+      "meaning": {
+       "en": "residents",
+       "fr": "habitants"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
      {
       "surface": "祭り",
       "meaning": {
