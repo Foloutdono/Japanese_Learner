@@ -144,3 +144,14 @@ def test_a_kana_card_keeps_its_own_word_of_a_row_two_words_share():
     assert "足の向くままに歩いた。" not in shown
     assert "ママは台所で料理をしている。" in shown
     assert all(ex["sense_number"] == 1 for ex in extras["examples"])
+
+
+def test_a_card_lists_the_senses_its_gloss_reaches():
+    """Plan 297: 回り teaches "circumference, surroundings, circulation",
+    and its row held only 回り's rotations, so 「家のまわりに花を植えた。」
+    stood under no sense. It lists 周り;回り's senses first."""
+    extras = get_vocab_extras("回り", "まわり", "circumference, surroundings, circulation", "en")
+    glosses = {s["number"]: s["glossary"] for s in extras["senses"]}
+    assert "surroundings" in glosses[2] and "rotation" in glosses.values()
+    ex = next(ex for ex in extras["examples"] if ex["jp"] == "家のまわりに花を植えた。")
+    assert ex["sense_number"] == 2

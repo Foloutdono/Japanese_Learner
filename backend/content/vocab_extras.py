@@ -533,6 +533,27 @@ def _own_entry(key: str, senses: list[dict] | None) -> list[dict] | None:
     return own
 
 
+# A card whose gloss reaches into a second JMdict entry the curated row
+# left out (plan 297): 回り teaches "circumference, surroundings,
+# circulation", and JMdict files the first two under 周り;回り, apart
+# from 回り's rotations, so 「家のまわりに花を植えた。」 had no sense to
+# stand under. The card lists that entry's senses before its own, as its
+# gloss does, without the sentences of the card that row is.
+_SENSES_ALSO: dict[str, tuple[str, str]] = {
+    "回り::まわり": ("周り", "まわり"),
+}
+
+
+def _with_senses_of(key: str, own: list[dict] | None) -> list[dict] | None:
+    src_kanji, src_kana = _SENSES_ALSO[key]
+    other = vocab_meanings_data.get(f"{src_kanji}::{src_kana}")
+    if not other and _jmdict_db is not None:
+        other = _jmdict_db.get_senses(src_kanji, src_kana)
+    if not other:
+        return own
+    return [{**sense, "examples": []} for sense in other] + list(own or [])
+
+
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     # Fast path: curated_senses keys its rows with the exact same
     # packed kana string vocab_deck.json uses (see module docstring),
@@ -543,6 +564,8 @@ def _find_senses(kanji: str, kana: str) -> list[dict] | None:
         return _senses_of_own_word(f"{kanji}::{kana}", senses)
     if f"{kanji}::{kana}" in _OWN_ENTRY:
         return _own_entry(f"{kanji}::{kana}", senses)
+    if f"{kanji}::{kana}" in _SENSES_ALSO:
+        return _with_senses_of(f"{kanji}::{kana}", senses)
     if senses:
         return senses
     # Fallback for any mismatch in reading order/subset between the two

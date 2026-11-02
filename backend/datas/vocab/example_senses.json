@@ -680,8 +680,9 @@
   },
   "回り::まわり": {
    "家のまわりに花を植えた。": {
-    "sense": null,
-    "why": "家のまわり is surroundings (周り), which none of these senses of 回り give"
+    "sense": 2,
+    "gloss": "surroundings; neighbourhood; neighborhood; vicinity",
+    "why": "家のまわり is the surroundings of the house, the sense the card now lists from 周り;回り"
    }
   },
   "因る::よる": {
