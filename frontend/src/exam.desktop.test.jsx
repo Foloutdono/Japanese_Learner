@@ -418,11 +418,12 @@ describe('the exam result on the desk', () => {
     expect(sheetRows().filter(r => r.tabIndex === 0)).toEqual([sheetRows()[1]])
     sheetRows()[1].focus()
     sheetRows()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
-    await settle()
-    expect(openQ()).toBe('3')
-    expect(document.activeElement).toBe(sheetRows()[2])
+    // Until the move has drawn, not a fixed wait: every lane at once on
+    // four cores took longer than 100ms to commit it (open read '2').
+    await expect.poll(openQ).toBe('3')
+    await expect.poll(() => document.activeElement).toBe(sheetRows()[2])
     sheetRows()[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }))
-    expect(document.activeElement).toBe(sheetRows()[1])
+    await expect.poll(() => document.activeElement).toBe(sheetRows()[1])
   })
 
   // As M7 draws it: the sheet and the page the window's height, the

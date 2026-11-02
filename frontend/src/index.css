@@ -7367,7 +7367,12 @@ textarea:focus-visible {
   padding: var(--sp-3) var(--sp-4);
   color: var(--text-secondary);
 }
-.console__well { flex: 1 1 0; }
+/* min-width: 0, or the well cannot shrink below its input's own width
+   -- twenty characters of whatever face is drawing it -- and a wide
+   fallback face, before the app's has arrived, pushed the keys out of
+   the row's end (14px at 390px under Inter). The input already gives
+   way (.field--search > input); the well has to let it. */
+.console__well { flex: 1 1 0; min-width: 0; }
 .console__well > .console__field { font-size: 1rem; }
 .console__clear {
   position: relative;

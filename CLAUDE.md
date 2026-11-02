@@ -1183,7 +1183,7 @@ npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
+npm test          # vitest's eight lanes in CI's three groups, one after another (scripts/test-lanes.mjs)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
