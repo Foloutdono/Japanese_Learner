@@ -2259,7 +2259,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # ピアノがひけない 弾く, 写真はとれません 撮る, 思えてならない, 気が引ける);
 # and だ's に the case particle where its word is a noun (命の危険につながる,
 # 多くの困難に耐え, このへんに, 春めく陽気に誘われて), ように's に no
-# adjective's, and 当然と感じる no manner.
+# adjective's, and 当然と感じる no manner; and a piece its construction
+# owns (たとえ日曜日でも's でも, ともなると's も, もう一度's もう), and
+# はじめてでも 〜でも's "even".
 LOCAL_REV = 33
 
 

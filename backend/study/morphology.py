@@ -1809,6 +1809,16 @@ def _topic_in_clause(morphemes: list[Morpheme], k: int) -> bool:
     return False
 
 
+def _first_time(morphemes: list[Morpheme]) -> None:
+    """初めて before でも is a noun, "the first time" (plan 296): はじめて
+    でもだいじょうぶ is "even a first time is fine", 〜でも's "even" as in
+    子どもでも -- no adverb and も "also"."""
+    for i, m in enumerate(morphemes[:-2]):
+        if m.pos == "adverb" and m.lemma == "初めて" and morphemes[i + 1].surface == "で" \
+                and morphemes[i + 2].surface == "も" and _glued(m, morphemes[i + 1]):
+            m.pos = "noun"
+
+
 def _ni_of_a_noun(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """だ's に after a word UniDic files as a な-adjective, or a noun that
     may be one, read as the case particle where the sentence makes the
@@ -6087,6 +6097,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _place_de(morphemes, tags)
         _case_de(morphemes, tags)
         _ni_of_a_noun(morphemes, tags)
+        _first_time(morphemes)
         _copula_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)

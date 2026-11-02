@@ -3253,3 +3253,36 @@ class AnInstructionReportedTests(unittest.TestCase):
                 self.assertIn("〜ように言う", found_in(sentence))
         self.assertIn("〜ように", found_in("かぜをひかないように、注意してください。"))
         self.assertIn(("と", "と"), keys("新聞を読むにつけ、道の整備を急ぐべきだと強く感じる。"))
+
+
+class APiecesOwnerTests(unittest.TestCase):
+    """Plan 296: a point's piece another construction owns lights nothing
+    of its own -- たとえ日曜日でも's でも is たとえ〜ても's, ともなると's も
+    lists nothing, もう before an amount is "more" -- and はじめてでも is
+    〜でも's "even", as 子どもでも is."""
+
+    def test_the_construction_owns_its_piece(self) -> None:
+        for sentence in ("たとえ日曜日でも、駅の窓口はあいています。", "たとえ子どもでも、約束は守るべきだ。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertIn("たとえ〜ても", found)
+                self.assertFalse({"〜でも", "で", "も"} & set(found))
+        self.assertEqual(found_in("お茶でも飲みませんか。")["〜でも"], "でも")
+        self.assertEqual(found_in("このかんじは子どもでも読めます。")["〜でも"], "でも")
+        self.assertEqual(found_in("はじめてでもだいじょうぶ、まずお客さんにあいさつしてごらん。")["〜でも"], "でも")
+        self.assertNotIn("も", found_in("はじめてでもだいじょうぶ、まずお客さんにあいさつしてごらん。"))
+
+    def test_a_pair_never_takes_anothers_piece(self) -> None:
+        found = found_in("連休ともなると、駅前の商店街は観光客で賑わい、歩くのも容易ではない。")
+        self.assertIn("〜ともなると", found)
+        self.assertNotIn("〜も〜も", found)
+        for sentence in ("もう一度彼女に会えないものか。", "何とかもう少し時間をのばせない＿＿＿。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("もう〜ない", found_in(sentence))
+        for sentence in ("もう食べられない。", "もう時間がない。", "パンはもうありません。", "もう一歩も歩けないよ。",
+                         "あの店にはもう二度と行かない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("もう〜ない", found_in(sentence))
+        self.assertIn("〜も〜も", found_in("父も母も元気です。"))
+        self.assertIn("〜も〜ば〜も", found_in(
+            "教えれば言葉を残せると考える人もいれば、日常で話されなくなった言葉を教室で守っても意味がないと考える人もいる。"))

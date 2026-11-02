@@ -5428,6 +5428,12 @@ def _happened_then(tokens, end: int) -> bool:
     return not any(u.lemma in ("ない", "無い", "ず", "ぬ", "ん") or u.surface.startswith("ませ") for u in clause)
 
 
+# What もう before an amount means "more" of (plan 296): もう少し, もう
+# ちょっと, もう一度 -- never "any longer".
+_MORE_OF = frozenset({"少し", "すこし", "ちょっと", "ちょい", "一度", "一回", "一つ", "ひとつ", "一人", "ひとり", "一杯",
+                      "いっぱい", "一本", "一枚", "一歩", "一日", "一週間"})
+
+
 def _negative_part_refused(tokens, start: int, end: int, segments) -> bool:
     """もう〜ない, あまり〜ない and their kin: the negative must be the
     clause's, not the ません of かもしれません (姉はもう帰ったかもしれ
@@ -5444,6 +5450,17 @@ def _negative_part_refused(tokens, start: int, end: int, segments) -> bool:
                 b.pos in ("verb", "adjective", "auxiliary") for b in between[:k]):
             return True
     last = next((k for k in range(i, len(tokens)) if tokens[k].end >= segments[-1][1]), i)
+    first = _index_at(tokens, segments[0][0])
+    amount = first + 1 if first is not None else 0
+    while first is not None and amount < len(tokens) and amount <= first + 3 and (
+            tokens[amount].pos in ("noun", "suffix") and (amount == first + 1 or tokens[amount].counter
+                                                          or tokens[amount].pos == "suffix")):
+        amount += 1
+    if first is not None and tokens[first].surface == "もう" and first + 2 < len(tokens) \
+            and (tokens[first + 1].surface in _MORE_OF or tokens[first + 1].surface.startswith(("一", "ひと"))) \
+            and not (amount < len(tokens) and tokens[amount].surface == "も"):
+        return True                    # (もう一度会えないものか, もう少しのばせない: "more" -- もう一歩も
+        #                                歩けない, もう一つも残っていない keep "no more", plan 296)
     if i >= 1 and tokens[i - 1].lemma in ("知れる", "しれる"):
         return True
     if i >= 1 and tokens[i - 1].surface in ("しか", "ほか", "他", "外"):
@@ -5531,6 +5548,8 @@ def _mo_mo_refused(tokens, start: int, end: int, segments) -> bool:
             return True
         if i >= 1 and tokens[i - 1].surface == "と" and i + 1 < len(tokens) and tokens[i + 1].surface.startswith("限ら"):
             return True
+        if i >= 1 and tokens[i - 1].surface == "と" and i + 1 < len(tokens) and tokens[i + 1].lemma in ("成る", "なる"):
+            return True                # 連休ともなると: 〜ともなると's (plan 296)
     return False
 
 
@@ -7299,7 +7318,9 @@ def adverbial_ni(tokens, i: int) -> bool:
 # お金さえあれば is 〜さえ〜ば's "as long as", not 〜さえ's "even"; the
 # まい of 来ようが来まいが 〜ようが〜まいが's; one なり of 休むなり散歩する
 # なり 〜なり〜なり's, not 〜なり's "as soon as".
-_PART_OF = {"〜さえ": "〜さえ〜ば", "〜まい": "〜ようが〜まいが", "〜なり": "〜なり〜なり"}
+_PART_OF = {"〜さえ": "〜さえ〜ば", "〜まい": "〜ようが〜まいが", "〜なり": "〜なり〜なり",
+            # (たとえ日曜日でも: たとえ〜ても's own example, plan 296)
+            "〜でも": "たとえ〜ても"}
 
 
 def _parts_owned(found):
@@ -9097,8 +9118,14 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[
         # no less the obligation's (plan 151).
         cut = {(h[0], h[2]) for h in refused if h[5]}
         found = [h for h in found if h not in refused and not (h[5] and (h[0], h[2]) in cut)]
+    owned_parts: list[tuple[int, int]] = []
     if tokens:
-        found = _parts_owned(found)
+        kept_parts = _parts_owned(found)
+        # (a piece its whole owns still covers its particles: たとえ日曜日
+        # でも's でも is たとえ〜ても's, its で no place, its も no "also",
+        # plan 296)
+        owned_parts = [(h[2], h[3]) for h in found if h not in kept_parts]
+        found = kept_parts
     shadowed = _shadowed()
     plain_spans = {(h[2], h[3]) for h in found if not _sense(h[0])}
     found = [h for h in found
@@ -9178,6 +9205,7 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[
     # the form of the whole word it spans, not a construction: the
     # 〜こむ of 乗りこもう is the word's own second half (plan 188).
     words = [(s, e) for p, _l, s, e, _k, whole, _segs in deduped if whole and "〜" not in p]
+    words += [(s, e) for s, e in owned_parts if tokens and _all_particles(tokens, s, e)]
     words += [(s, e) for p, _l, s, e, k, whole, _segs in deduped
               if whole and k != "marker" and _all_particles(tokens, s, e)]
     # And inside a word the deck teaches whole that the tokenizer writes
