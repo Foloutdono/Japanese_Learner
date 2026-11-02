@@ -3903,6 +3903,20 @@ class AKanaVerbByWhatItTakesTests(unittest.TestCase):
         self.assertIn("つかれ", cut("つかれたので、休みます。"))
 
 
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ARadicalsHenTests(unittest.TestCase):
+    """Plan 296: a へん glued to a noun is a kanji's left-hand radical, 偏
+    (いしへん, あしへん); the west's negative へん follows a verb."""
+
+    def test_the_radical(self) -> None:
+        for sentence in ("いしへん", "あしへん"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "へん"), "vocab_N1_偏_へん")
+        for sentence in ("今日は行かへん。", "そんなこと知らへん"):
+            with self.subTest(sentence=sentence):
+                self.assertIsNone(card_of(sentence, "へん"))
+
+
 class TheWordThePageSpelledTests(unittest.TestCase):
     """Plan 296: the card is the word the page spelled -- in its own kanji
     where JMdict holds them as a word of their own (温かく, 架ける, 抑え),

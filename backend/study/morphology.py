@@ -403,6 +403,18 @@ def _jiru_not_zuru(morphemes: list[Morpheme]) -> None:
             m.written, m.written_reading = m.lemma, m.lemma_reading
 
 
+def _radical_hen(morphemes: list[Morpheme]) -> None:
+    """A へん glued to a noun is a kanji's left-hand radical, 偏 (plan
+    296): いしへん, うしへん, かねへん -- the west's negative へん, which
+    UniDic reads there, follows a verb (行かへん), never a noun."""
+    for i, m in enumerate(morphemes):
+        if m.surface == "へん" and m.pos == "auxiliary" and i > 0 and morphemes[i - 1].pos == "noun" \
+                and morphemes[i - 1].end == m.start:
+            m.pos, m.lemma, m.lemma_reading = "noun", "偏", "へん"
+            m.ctype, m.cform, m.auxiliary_use, m.conjunctive = "", "", False, False
+            m.written, m.written_reading = m.lemma, m.lemma_reading
+
+
 def _times_or_floor(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """かい written in kana after a number is 回, "times", which UniDic
     files under 階, "floor" (plan 296): 三かいしましたが, 二かいかぞえます,
@@ -5591,6 +5603,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _all_through(morphemes, tags)
         morphemes, tags = _times_or_floor(morphemes, tags)
         _jiru_not_zuru(morphemes)
+        _radical_hen(morphemes)
         _shops(morphemes, tags)
         morphemes, tags = _sleep(morphemes, tags)
         morphemes, tags = _pain(morphemes, tags)
