@@ -267,6 +267,25 @@ def _of_another_field(joined: tuple[str, str], morphemes) -> bool:
     return not any(words & _FIELDS[f] for tags in owned for f in tags)
 
 
+# What one does to or from a place (plan 296).
+_GONE_TO = frozenset({"来る", "行く", "帰る", "戻る", "出る", "着く", "住む", "引っ越す", "旅行", "留学", "出発", "到着",
+                      "移る", "渡る"})
+
+
+def _a_place_gone_to(tokens: list[dict], k: int) -> bool:
+    """Whether tokens[k] is where one comes from, goes to or lives: before
+    から, へ or に, with a verb of going, coming or living in its clause."""
+    nxt = tokens[k + 1] if k + 1 < len(tokens) else None
+    if nxt is None or nxt["surface"] not in ("から", "へ", "に") or nxt.get("pos") != "particle":
+        return False
+    for t in tokens[k + 2:k + 8]:
+        if t.get("pos") == "symbol" and t["surface"] in ("。", "！", "？"):
+            return False
+        if t.get("lemma") in _GONE_TO or t["surface"] in _GONE_TO:
+            return True
+    return False
+
+
 def _senses_by_sentence(tokens: list[dict]) -> None:
     """A pool word's line by what its sentence says (plan 272): the
     sense of the sentence's field first (読み込む in a sentence about an
@@ -297,6 +316,11 @@ def _senses_by_sentence(tokens: list[dict]) -> None:
             # gives way to the word's plain one: 家計は火の車だ is "dire
             # straits", no Buddhist "fiery chariot")
             chosen = next((sense for sense in found[1:] if not set(sense.get("tags") or ()) & set(_FIELDS)), None)
+        if chosen is None and _a_place_gone_to(tokens, k):
+            # (...and where it is a place one comes from, goes to or lives
+            # in, its sense named as a place: タイから日本に来て is
+            # Thailand, never "tie" -- タイを締める keeps it, plan 296)
+            chosen = next((sense for sense in found[1:] if (sense.get("glossary") or [""])[0][:1].isupper()), None)
         if chosen is None and fields & set(_FIELD_GLOSSES):
             wanted = [g for f in fields & set(_FIELD_GLOSSES) for g in _FIELD_GLOSSES[f]]
             for sense in found:
@@ -2225,7 +2249,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # they open, their pieces inside a clause (＿＿＿ですから, 母がかえって); a
 # point's piece without a homograph's card (相まって, 食べきる, 察するに
 # かたくない 難い); 大けが おおけが, 不器用, 資料作り づくり, みなと通り どおり;
-# 〜ようが〜まいが one verb twice; 気がきく 気が利く, 眉をひそめる 顰める.
+# 〜ようが〜まいが one verb twice; 気がきく 気が利く, 眉をひそめる 顰める;
+# and a name where the sentence names someone (森様、 a letter's addressee,
+# アナより its signature, ゆうたとけんた two names), a common word where it
+# says one (まえのせき 前 + 席, 高いへい 塀, はしのせき 端), タイから来て
+# Thailand, and 「ミナモ」 one word, not three marks.
 LOCAL_REV = 33
 
 

@@ -799,13 +799,24 @@ _HOUSES_NAMED = _HOUSES | {"店", "お店", "会社", "レストラン", "喫茶
 def named_alone(morphemes, i: int) -> bool:
     """Whether morphemes[i], a word in hiragana, is a given name UniDic
     reads alone, opening what is said of the one it names (plan 272):
-    あおいが今日来れないって, where the deck's あおい is the adjective 青い."""
+    あおいが今日来れないって, where the deck's あおい is the adjective 青い.
+    Or a name a letter is signed with, alone before より (plan 296):
+    アナより."""
     m = morphemes[i]
+    words = [u for u in morphemes if u.pos != "symbol"]
+    if m.proper and m.name_kind in ("given", "family", "person") and len(words) == 2 and words[0] is m \
+            and words[1].surface == "より":
+        return True
     prev = morphemes[i - 1] if i > 0 else None
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     opens = prev is None or prev.surface in ("、", "。", "「", "！", "？") or prev.pos == "adverb" or (
         # (実はあおいが入院した: a sentence's own adverb before, plan 272)
-        prev.surface == "は" and i >= 2 and morphemes[i - 2].surface == "実")
+        prev.surface == "は" and i >= 2 and morphemes[i - 2].surface == "実") or (
+        # (ゆうたとけんたは友だちです: a name joined to a name read as one,
+        # never the pool's けんた, "KFC", plan 296)
+        prev.surface in ("と", "や") and prev.pos == "particle" and i >= 2 and morphemes[i - 2].proper
+        and morphemes[i - 2].name_kind == "given" and _hiragana_only(morphemes[i - 2].surface)
+        and named_alone(morphemes, i - 2))
     if not (m.pos == "noun" and _hiragana_only(m.surface) and 3 <= len(m.surface) <= 4 and opens
             and nxt is not None and nxt.pos == "particle" and not nxt.conjunctive and nxt.surface in ("が", "は", "も", "と")
             and _a_name_alone(m.surface)):
@@ -2105,17 +2116,20 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
             out_t.append(("感動詞", "一般", "*"))
             skip.add(i + 1)
             continue
-        if (m.surface == "ガ" and m.pos == "symbol" and nxt is not None and nxt.surface == "チ" and _glued(m, nxt)):
+        joined = m.surface == "ガチ" and m.unknown      # (the two marks _katakana_marks joined, plan 296)
+        if joined or (m.surface == "ガ" and m.pos == "symbol" and nxt is not None and nxt.surface == "チ"
+                      and _glued(m, nxt)):
             # ガチ, "for real" (slang), which UniDic cuts into two marks;
             # ガチで, "seriously" (plan 272).
-            with_de = after is not None and after.surface == "で" and _glued(nxt, after)
-            last = after if with_de else nxt
+            tail, following = (m, nxt) if joined else (nxt, after)
+            with_de = following is not None and following.surface == "で" and _glued(tail, following)
+            last = following if with_de else tail
             surface = "ガチで" if with_de else "ガチ"
             out_m.append(replace(m, surface=surface, end=last.end, lemma=surface, reading=kata_to_hira(surface),
                                  lemma_reading=kata_to_hira(surface), kana=surface.replace("で", "デ"),
-                                 pos="adverb" if with_de else "noun", ctype="", cform=""))
+                                 pos="adverb" if with_de else "noun", ctype="", cform="", unknown=False))
             out_t.append(("副詞", "*", "*") if with_de else ("名詞", "普通名詞", "一般"))
-            skip.update({i + 1, i + 2} if with_de else {i + 1})
+            skip.update(({i + 1} if with_de else set()) if joined else ({i + 1, i + 2} if with_de else {i + 1}))
             continue
         if ((m.surface == "あ" and nxt is not None and nxt.surface in ("ざす", "ざーす", "ざっす"))
                 or (m.surface == "あざ" and nxt is not None and nxt.surface == "っす")) and _glued(m, nxt):
@@ -5365,6 +5379,102 @@ def _particle_in_a_verb(morphemes: list[Morpheme], tags: list[tuple], text: str,
     return morphemes, tags
 
 
+# What follows a name and keeps it one (plan 296).
+_HONORIFICS_AFTER = frozenset({"さん", "くん", "君", "ちゃん", "様", "さま", "先生", "せんせい", "殿", "氏", "選手"})
+
+
+def _not_a_full_name(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
+    """A family name and a given name MeCab read in a learner's kana where
+    the letters are common words (plan 296): まえのせきが高い is 前の席,
+    はしのせき 端の席, 高いへいの上 高い and 塀 -- a full name, partly in
+    hiragana, no honorific after it, read again as MeCab's next reading
+    that names no one, knows every word and leaves no letter alone.
+    けんたが and ゆうたと, a given name alone, stay names, as does a name an
+    honorific follows."""
+    if tagger is None:
+        return morphemes, tags
+
+    def kana(word: str) -> bool:
+        return bool(word) and all("ぁ" <= c <= "ゖ" or c == "ー" for c in word)
+
+    i = 0
+    while i < len(morphemes) - 1:
+        m, n = morphemes[i], morphemes[i + 1]
+        after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+        if not (m.proper and n.proper and m.name_kind == "family" and n.name_kind == "given" and _glued(m, n)
+                and (kana(m.surface) or kana(n.surface))
+                and not (after is not None and after.surface in _HONORIFICS_AFTER)):
+            i += 1
+            continue
+
+        def wanted(alt, lo=m.start, hi=n.end):
+            over = [u for u in alt if u.start < hi and lo < u.end]
+            if not over or any(u.proper or u.unknown for u in over) or not any(u.pos == "noun" for u in over):
+                return None
+            if any(len(u.surface) == 1 and u.pos not in ("particle", "auxiliary") for u in over):
+                return None
+            return over[0].start, over[-1].end
+
+        again = _next_best(text, morphemes, i, tagger, wanted)
+        if again and again[0] >= i - 1 and again[1] <= i + 3:
+            morphemes = morphemes[:again[0]] + again[2] + morphemes[again[1]:]
+            tags = tags[:again[0]] + again[3] + tags[again[1]:]
+        i += 1
+    return morphemes, tags
+
+
+def _addressee(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
+    """The name a letter opens on (plan 296): 森様、二週間の…では is Mr
+    Mori, never "forest" -- a noun with 様 or さん and a comma, opening the
+    text or a quotation, read as MeCab's next reading of it as a family
+    name, where it has one. (Not in running text, where a title follows
+    common words: お客様, 神様, 皆様.)"""
+    if tagger is None or len(morphemes) < 3:
+        return morphemes, tags
+    m = morphemes[0]
+    if not (m.pos == "noun" and not m.proper and any("\u4e00" <= c <= "\u9fff" for c in m.surface)
+            and morphemes[1].surface in ("様", "さま", "さん") and morphemes[2].surface in ("、", "，")):
+        return morphemes, tags
+
+    def wanted(alt, lo=m.start, hi=m.end):
+        hit = next((u for u in alt if u.start == lo and u.end == hi), None)
+        return (lo, hi) if hit is not None and hit.proper and hit.name_kind == "family" else None
+
+    again = _next_best(text, morphemes, 0, tagger, wanted)
+    if again and again[0] == 0 and again[1] <= 2:
+        morphemes = again[2] + morphemes[again[1]:]
+        tags = again[3] + tags[again[1]:]
+    return morphemes, tags
+
+
+def _signature(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
+    """The name a letter is signed with (plan 296): アナより, alone on its
+    line, is from Ana, never "announcer" -- a noun and より and nothing
+    else, read as MeCab's next reading of the noun as a name, where it has
+    one (コーヒーより, an exam's "than coffee", has none) and the course
+    has no card for it."""
+    words = [u for u in morphemes if u.pos != "symbol"]
+    if tagger is None or len(words) != 2 or words[0].pos != "noun" or words[0].proper \
+            or words[1].surface != "より" or words[1].pos != "particle":
+        return morphemes, tags
+    m = words[0]
+    i = morphemes.index(m)
+    # (A word the course teaches keeps its card: 心より, "from the heart",
+    # 母より, from Mother.)
+    if _deck_word(m.surface) or any(not kanji and kana == m.surface for kanji, kana in _deck_forms()):
+        return morphemes, tags
+
+    def wanted(alt, lo=m.start, hi=m.end):
+        hit = next((u for u in alt if u.start == lo and u.end == hi), None)
+        return (lo, hi) if hit is not None and hit.proper and hit.name_kind in ("given", "family", "person") else None
+
+    again = _next_best(text, morphemes, i, tagger, wanted)
+    if again and again[0] == i and again[1] <= i + 1:
+        morphemes = morphemes[:i] + again[2] + morphemes[again[1]:]
+        tags = tags[:i] + again[3] + tags[again[1]:]
+    return morphemes, tags
+
+
 def _it_hurts(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
     """いたい after a が is 痛い, "it hurts", where MeCab read 居る's い and
     たい, "want to be" (plan 296): 足が少しいたい. 居たい is said of who
@@ -5648,6 +5758,31 @@ def _kana_names(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, lis
     return out, out_t
 
 
+def _katakana_marks(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """Katakana letters MeCab read as marks, one by one, as the one word
+    they spell (plan 296): the kettle 「ミナモ」 came out ミ, ナ, モ, three
+    symbols the breakdown dropped. The katakana twin of _unknown_words,
+    which reads hiragana alone: a glued run of two or more one-letter
+    katakana UniDic files as 記号, a word no dictionary has, most often a
+    name."""
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        j = i
+        while (j < len(morphemes) and len(morphemes[j].surface) == 1 and _katakana_only(morphemes[j].surface)
+               and morphemes[j].surface != "ー" and tags[j][0] == "記号" and (j == i or _glued(morphemes[j - 1], morphemes[j]))):
+            j += 1
+        if j - i >= 2:
+            out_m.append(_merged(morphemes[i:j], unknown=True))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            i = j
+            continue
+        out_m.append(morphemes[i])
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
 def _merged(run: list[Morpheme], unknown: bool, lemma: str | None = None) -> Morpheme:
     """One word of kana letters, read as written, and filed under the
     word the dictionary spells it as (`lemma`), where it knows one."""
@@ -5690,10 +5825,14 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _no_word_after_the_topic(morphemes, tags, text, tagger)
         morphemes, tags = _no_letter_alone(morphemes, tags, text, tagger)
         morphemes, tags = _unknown_words(text, morphemes, tags)
+        morphemes, tags = _katakana_marks(morphemes, tags)
         morphemes, tags = _opened_on_a_particle(morphemes, tags, text, tagger)
         morphemes, tags = _a_word_before_its_particle(morphemes, tags)
         morphemes, tags = _particle_in_a_verb(morphemes, tags, text, tagger)
         morphemes, tags = _it_hurts(morphemes, tags, text, tagger)
+        morphemes, tags = _not_a_full_name(morphemes, tags, text, tagger)
+        morphemes, tags = _addressee(morphemes, tags, text, tagger)
+        morphemes, tags = _signature(morphemes, tags, text, tagger)
         morphemes, tags = _kana_names(morphemes, tags)
         _demonstratives(morphemes)
         _picture(morphemes)

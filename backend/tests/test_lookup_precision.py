@@ -4069,3 +4069,58 @@ class TheWordThePageSpelledTests(unittest.TestCase):
                                          ("この文章は意味を成さない。", "成さ", "為す")):
             with self.subTest(sentence=sentence):
                 self.assertEqual(self.card(sentence, surface), kanji)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class NamesAndCommonWordsTests(unittest.TestCase):
+    """Plan 296: a name where the sentence names someone (a letter's
+    addressee, its signature, two names joined), a common word where it
+    says one (まえのせき is no 前野 Seki), a place's sense where one comes
+    from it, and katakana letters MeCab read as marks one word."""
+
+    def test_a_name_where_someone_is_named(self) -> None:
+        for sentence, surface, gloss in (
+                ("森様、いつもお世話になっております。", "森", "family name"),
+                ("アナより", "アナ", "a person's name"),
+                ("ゆいより", "ゆい", "given name"),
+                ("ゆうたとけんたは友だちです。", "ゆうた", "given name"),
+                ("ゆうたとけんたは友だちです。", "けんた", "given name"),
+                ("たなかさんはどこですか。", "たなか", "family name")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(gloss_of(sentence, surface), gloss)
+                self.assertIsNone(card_of(sentence, surface))
+        # ...and the common word where the sentence says one
+        for sentence, surface, card in (
+                ("大きな森の中を歩きました。", "森", "vocab_N4_森_もり"),
+                ("皆様、こんにちは。", "皆", "vocab_N4_皆_みな"),
+                ("コーヒーより", "コーヒー", "vocab_N5__コーヒー"),
+                ("母より", "母", "vocab_N5_母_はは"),
+                ("心より", "心", "vocab_N4_心_こころ"),
+                ("まえのせきにすわってください。", "まえ", "vocab_N5_前_まえ"),
+                ("まえのせきにすわってください。", "せき", "vocab_N4_席_せき"),
+                ("高いへいがあります。", "へい", "vocab_N3_塀_へい")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(card_of(sentence, surface), card)
+
+    def test_a_common_word_by_its_clause(self) -> None:
+        for sentence, card in (
+                ("男の人は、どうしてはしのせきにすわりたいのですか。", "vocab_N3_端_はし"),
+                ("黒ずくめの男が、ホームのはしに立っていた。", "vocab_N3_端_はし"),
+                ("はしがうまく使えないので、フォークをください。", "vocab_N5__はし"),
+                ("このはし＿＿＿わたって、右にまがってください。", "vocab_N5_橋_はし")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "はし"), card)
+
+    def test_a_place_one_comes_from(self) -> None:
+        meaning = lambda sentence: token_of(sentence, "タイ")["vocab_match"]["entry"]
+        self.assertTrue(meaning("私はタイから日本に来て、大学で勉強しています。")["meaning"].startswith("Thailand"))
+        self.assertEqual(meaning("来年タイへ行きます。")["meaning_fr"], "Thaïlande")
+        self.assertEqual(meaning("ネクタイの代わりにタイを締める。")["meaning"], "tie")
+
+    def test_katakana_letters_read_as_marks(self) -> None:
+        sentence = "十月に販売した電気ケトル「ミナモ」の約二千台に、ふたが閉まりにくい不具合が見つかりました。"
+        self.assertIn("ミナモ", cut(sentence))
+        self.assertEqual(cut("ミアです。")[0], "ミア")
+        self.assertEqual(token_of(sentence, "ミナモ")["pos"], "noun")
+        # (one letter alone stays the letter it is)
+        self.assertEqual(cut("「ア」と書いてください。")[:3], ["「", "ア", "」"])
