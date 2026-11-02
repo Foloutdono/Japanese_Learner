@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **296**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **297**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -426,6 +426,15 @@ runtime purpose.
   sentence has two written for it (`datas/vocab/example_added.json`,
   `check-added`: its course spelling, no kanji above its level), so every
   card shows one; a word the deck gains is written for in the same change.
+  A sentence sits under the sense it uses (plan 296): JMdict files one
+  whose link names no sense under the first (渡す "to ferry across"
+  showed a relay's baton), so a sentence under the wrong sense is filed
+  under its own in the same layer (`datas/vocab/example_senses.json`, per
+  word and by the sentence shown, with the sense's gloss), drafted and
+  checked with `python -m scripts.example_senses check`. A correction
+  that rewrites a sentence keeps the sense it is filed under, or files it
+  anew: the rewritten sentence's old move no longer matches, and
+  `tests/test_example_senses.py` fails on it.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own

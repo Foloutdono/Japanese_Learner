@@ -1398,11 +1398,11 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     # Examples: primary sense(s) first, then the rest in their original
     # order, so the sentence matching the app's own gloss shows up first.
     ordered = [s for s in senses if id(s) in primary_ids] + [s for s in senses if id(s) not in primary_ids]
+    glosses = {numbers[id(s)]: "; ".join(s.get("glossary", [])) for s in senses}
+    refiled = example_fixes.refiled(kanji, kana)
     examples = []
     seen_jp = set()
     for sense in ordered:
-        num = numbers[id(sense)]
-        gloss = "; ".join(sense.get("glossary", []))
         for ex in sense.get("examples", []):
             # The course's correction of the sentence, where it has one
             # and it still carries this word (content/example_fixes.py).
@@ -1411,6 +1411,19 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
             if not jp or jp in seen_jp:
                 continue
             seen_jp.add(jp)
+            num, gloss = numbers[id(sense)], glosses[numbers[id(sense)]]
+            # JMdict files a sentence whose link names no sense under the
+            # first: the course files it under the sense it uses (plan
+            # 296), with the word under none, or not at all where it is
+            # another word written alike. A sense number the list no
+            # longer has leaves JMdict's (tests/test_example_senses.py).
+            refile = refiled.get(jp)
+            if refile and refile.get("drop"):
+                continue
+            if refile and "sense" in refile and refile["sense"] is None:
+                num, gloss = None, meaning_hint
+            elif refile and refile.get("sense") in glosses:
+                num, gloss = refile["sense"], glosses[refile["sense"]]
             examples.append({
                 "jp": jp,
                 "en": ex.get("en", ""),
@@ -1422,6 +1435,9 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
                 break
         if len(examples) >= _MAX_EXAMPLES:
             break
+    # A sentence filed under another sense keeps the primary's first.
+    primary_numbers = {numbers[id(s)] for s in senses if id(s) in primary_ids}
+    examples.sort(key=lambda ex: ex["sense_number"] not in primary_numbers)
     # Where JMdict's sentences run short, the course's own follow them.
     # Under no sense of JMdict's: a kana card can draw its senses from
     # another word read alike (だんだん's are the dialect "thank you"),
