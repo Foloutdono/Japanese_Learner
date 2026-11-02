@@ -3904,6 +3904,54 @@ class AKanaVerbByWhatItTakesTests(unittest.TestCase):
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AKanaNounByItsClauseTests(unittest.TestCase):
+    """Plan 296: a noun written in kana is the homophone its clause says
+    -- where it is and whose it is (まどがわのせき, そのせきはわたしのです),
+    what it is used for (このきかいの使い方), what draws or runs it (せんを
+    引く, となりのせん), what comes before and after it (このへんに; へんな
+    味), what it is the oil or the fat of, the colour it is uneven in, and
+    who speaks of themselves as うち -- each beside the homophone it
+    leaves alone."""
+
+    def test_the_card_its_clause_names(self) -> None:
+        for sentence, surface, card in (
+                ("ふじさんを見るために、まどがわのせきをおねがいします。", "せき", "vocab_N4_席_せき"),
+                ("ちょっと言いにくいんですが、そのせきはわたしのです。", "せき", "vocab_N4_席_せき"),
+                ("こちらが、おきゃくさまのおせきです。", "せき", "vocab_N4_席_せき"),
+                ("かぜでせきが出る。", "せき", "vocab_N3_咳_せき"),
+                ("のどは痛いですが、せきはありません。", "せき", "vocab_N3_咳_せき"),
+                ("それに、紙の本なら、読んでいる途中で気に入った文にせんを引いたり、ページの間にメモをはさんだりできる。",
+                 "せん", "vocab_N4_線_せん"),
+                ("あぶないから、白いせんの前に出るな。", "せん", "vocab_N4_線_せん"),
+                ("あ、アナウンスだ。となりのせんの人が乗るまで、この電車は待つって。", "せん", "vocab_N4_線_せん"),
+                ("せんえんです。", "せん", "vocab_N5_千_せん"),
+                ("このきかいの使い方を教えてもらえませんか。", "きかい", "vocab_N3_機械_きかい"),
+                ("きっぷは、あのきかいでも買えますよ。", "きかい", "vocab_N3_機械_きかい"),
+                ("機会があれば行きたい。", "機会", "vocab_N4_機会_きかい"),
+                ("すみません、このへんにコンビニがありますか。", "へん", "vocab_N5_辺_へん"),
+                ("ここらへんで休もう。", "へん", "vocab_N5_辺_へん"),
+                ("ちょっとへんだね。", "へん", "vocab_N4_変_へん"),
+                ("このへんな人は誰？", "へん", "vocab_N4_変_へん"),
+                ("このスープはへんな味がする。", "へん", "vocab_N4_変_へん"),
+                ("くちへん", "へん", "vocab_N1_偏_へん"),
+                ("少しあぶらが多かったですが、家族はおいしいと言って、ぜんぶ食べました。", "あぶら", "vocab_N3_油_あぶら"),
+                ("チェーンにあぶらがないから", "あぶら", "vocab_N3_油_あぶら"),
+                ("肉のあぶらが多い。", "あぶら", "vocab_N2_脂_あぶら"),
+                ("山の中の小さいむらで、おばあさんと二人で住む。", "むら", "vocab_N5_村_むら"),
+                ("では早速ですが、うちは今、週末と閉店までの時間に入れる方を探しているんです。", "うち",
+                 "vocab_N4__うち"),
+                ("うちに帰る。", "うち", jmdict.vocab_jmdict_to_id(jmdict.get_by_key("家", "うち"))),
+                ("あまりのあつさに、ホームでたおれた人がいた。", "あつ", "vocab_N5_暑い_あつい"),
+                ("本のあつさは三センチだ。", "あつ", "vocab_N5_厚い_あつい")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, surface), card)
+
+    def test_unevenness_is_the_pools(self) -> None:
+        self.assertEqual(card_of("わずかなゆがみや色のむらが、かえってその器にしかない表情となるからだ。", "むら"),
+                         jmdict.vocab_jmdict_to_id(jmdict.get_by_key("斑", "むら")))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ARadicalsHenTests(unittest.TestCase):
     """Plan 296: a へん glued to a noun is a kanji's left-hand radical, 偏
     (いしへん, あしへん); the west's negative へん follows a verb."""

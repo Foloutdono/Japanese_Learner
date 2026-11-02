@@ -405,11 +405,12 @@ def _jiru_not_zuru(morphemes: list[Morpheme]) -> None:
 
 def _radical_hen(morphemes: list[Morpheme]) -> None:
     """A へん glued to a noun is a kanji's left-hand radical, 偏 (plan
-    296): いしへん, うしへん, かねへん -- the west's negative へん, which
-    UniDic reads there, follows a verb (行かへん), never a noun."""
+    296): いしへん, くちへん, ふねへん -- the west's negative へん, which
+    UniDic reads after some, follows a verb (行かへん), and the area, 辺,
+    which it reads after others, a demonstrative (このへん, ここらへん)."""
     for i, m in enumerate(morphemes):
-        if m.surface == "へん" and m.pos == "auxiliary" and i > 0 and morphemes[i - 1].pos == "noun" \
-                and morphemes[i - 1].end == m.start:
+        if m.surface == "へん" and (m.pos == "auxiliary" or (m.pos == "noun" and m.lemma == "辺")) and i > 0 \
+                and morphemes[i - 1].pos == "noun" and morphemes[i - 1].end == m.start:
             m.pos, m.lemma, m.lemma_reading = "noun", "偏", "へん"
             m.ctype, m.cform, m.auxiliary_use, m.conjunctive = "", "", False, False
             m.written, m.written_reading = m.lemma, m.lemma_reading

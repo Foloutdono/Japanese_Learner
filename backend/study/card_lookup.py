@@ -1543,7 +1543,14 @@ _NOUN_PARTNERS = {
                     "戻る", "もどる", "外す", "はずす",
                     # (八人のせき, せきはもういっぱい: a seat counted and full,
                     # plan 296)
-                    "人", "にん", "いっぱい", "満席", "まんせき", "空き", "あき", "店", "みせ", "レストラン"}),
+                    "人", "にん", "いっぱい", "満席", "まんせき", "空き", "あき", "店", "みせ", "レストラン",
+                    # (...and where it is, as a page in kana writes it: まどがわの
+                    # せき, いちばんおくのせき, はしのせき; whose it is and which
+                    # one is bought, plan 296)
+                    "窓", "まど", "まどがわ", "つうろ", "つうろがわ", "奥", "おく", "真ん中", "まん中", "まんなか",
+                    "まん", "端", "はし", "入り口", "いりぐち", "近く", "ちかく", "カウンター", "側", "がわ",
+                    "右がわ", "左がわ", "みぎがわ", "ひだりがわ", "ステージ", "舞台", "見える", "みえる", "客",
+                    "きゃく", "どの", "買う", "かう", "私", "わたし", "僕", "ぼく", "あなた"}),
              ("咳", {"出る", "でる", "止まる", "とまる", "風邪", "かぜ", "熱", "ねつ", "喉", "のど", "くしゃみ",
                     "ひどい", "薬", "くすり", "咳き込む"})),
     "かんじ": (("漢字", {"覚える", "おぼえる", "書く", "かく", "読む", "よむ", "習う", "ならう", "勉強", "べんきょう",
@@ -1569,12 +1576,53 @@ _NOUN_PARTNERS = {
                     "買う", "かう", "屋", "や", "束", "たば"}),
              ("鼻", {"目", "め", "口", "くち", "耳", "みみ", "顔", "かお", "かむ", "高い", "たかい", "水", "血", "ち",
                     "鼻水", "においを"})),
+    # (plan 296: what is used, bought from or breaks down is a machine;
+    # what is had, missed or made the most of, a chance)
+    "きかい": (("機械", {"使う", "つかう", "使い方", "つかいかた", "動く", "うごく", "動かす", "うごかす", "壊れる",
+                        "こわれる", "故障", "こしょう", "直す", "なおす", "修理", "しゅうり", "止まる", "とまる",
+                        "工場", "こうじょう", "ボタン", "押す", "おす", "コイン", "お札", "おさつ", "きっぷ", "切符",
+                        "買う", "かう", "操作", "そうさ", "エンジン", "電気", "でんき"}),
+               ("機会", {"逃す", "のがす", "得る", "える", "与える", "あたえる", "貴重", "きちょう", "めったに",
+                        "チャンス", "最後", "さいご", "次", "つぎ", "利用", "りよう", "恵まれる", "めぐまれる",
+                        "失う", "うしなう", "生かす", "いかす", "作る", "つくる"})),
+    # (plan 296: a line is drawn, white or red, and a railway line runs
+    # late or stops; a thousand counts -- what it counts glued to it,
+    # せんえん, never 人 elsewhere in the clause: となりのせんの人が乗る)
+    "せん": (("線", {"引く", "ひく", "白い", "しろい", "赤い", "あかい", "黄色い", "きいろい", "青い", "あおい",
+                    "太い", "ふとい", "細い", "ほそい", "地図", "ちず", "電車", "でんしゃ", "遅れる", "おくれる",
+                    "止まる", "とまる", "乗る", "のる", "駅", "えき", "乗り換え", "のりかえ", "内側", "うちがわ",
+                    "外側", "そとがわ", "越える", "こえる"}),
+             ("千", {"万", "まん", "百", "ひゃく"})),
+    # (plan 296: oil fries and runs a chain; fat is meat's, fish's, skin's
+    # -- with neither, the oil, the general word: _NOUN_DEFAULTS)
+    "あぶら": (("油", {"揚げる", "天ぷら", "てんぷら", "フライパン", "炒める", "いためる", "サラダ", "ごま",
+                      "オリーブ", "石油", "せきゆ", "ガソリン", "差す", "さす", "チェーン", "エンジン", "機械"}),
+               ("脂", {"肉", "にく", "豚", "ぶた", "牛", "ぎゅう", "魚", "さかな", "脂肪", "しぼう", "身", "み",
+                      "乗る", "のる", "顔", "かお", "汗", "あせ", "皮膚", "ひふ"})),
+    # (plan 296: unevenness of a colour, a glaze, a mood -- the pool's 斑
+    # -- where a village is lived in, small, in the mountains)
+    "むら": (("村", {"町", "まち", "山", "やま", "住む", "すむ", "人", "ひと", "小さい", "ちいさい", "祭り",
+                    "まつり", "村長", "帰る", "かえる", "旅行", "りょこう", "行く", "いく", "バス", "外", "そと",
+                    "若い", "わかい", "男", "おとこ", "女", "おんな"}),
+             ("斑", {"色", "いろ", "塗り", "ぬり", "染め", "そめ", "焼き", "やき", "器", "うつわ", "ゆがみ",
+                    "仕上がり", "しあがり", "気分", "きぶん", "成績", "せいせき"})),
     # (a たび after a verb or a noun's の is 度, "each time": asked only of
     # one that follows neither, plan 272 -- ひとりでたびに出る)
     "たび": (("旅", {"出る", "でる", "続ける", "つづける", "一人", "ひとり", "長い", "ながい", "楽しい", "たのしい",
                     "終わる", "おわる", "始める", "はじめる", "気まま", "きまま", "人生", "途中", "とちゅう"}),
              ("足袋", {"はく", "履く", "着物", "きもの", "和服", "わふく", "白い", "しろい", "草履", "ぞうり"})),
 }
+
+
+# What a number counts, glued to it in kana (plan 296): せんえん, せんにん.
+_COUNTED_AFTER = frozenset({"円", "えん", "人", "にん", "本", "ほん", "ぼん", "枚", "まい", "年", "ねん", "冊", "さつ",
+                            "個", "こ", "メートル", "グラム", "キロ", "回", "かい", "台", "だい", "匹", "ひき", "びき"})
+
+
+# The card a kana noun is where nothing beside it names one (plan 296):
+# あぶら is oil, the general word, and 脂 only where meat or skin says so
+# (あぶらっぽい, チェーンにあぶらがない, あぶらが多い).
+_NOUN_DEFAULTS = {"あぶら": "油"}
 
 
 def _kana_noun(morphemes, i: int, hit):
@@ -1608,10 +1656,29 @@ def _kana_noun(morphemes, i: int, hit):
         return _card("雨", "あめ") or hit    # あしたはあめです: the weather said of a day (plan 272)
     each_time = m.surface == "たび" and i > 0 and (morphemes[i - 1].surface in ("の", "この", "その")
                                                    or morphemes[i - 1].pos in ("verb", "auxiliary"))
+    prev = morphemes[i - 1] if i > 0 else None
+    if m.surface == "へん":
+        # (plan 296) このへんに, そのへんで: the area, 辺 -- never before な,
+        # このへんな人; へんな味, ちょっとへんです: strange, 変.
+        if prev is not None and prev.surface in ("この", "その", "あの", "どの", "ここら", "そこら", "あそこら") \
+                and not (nxt is not None and nxt.surface == "な"):
+            return _card("辺", "へん") or hit
+        if nxt is not None and (nxt.surface == "な" or nxt.lemma in ("だ", "です")):
+            return _card("変", "へん") or hit
+    if m.surface == "せん" and nxt is not None and nxt.start == m.end and (nxt.pos == "suffix" or nxt.counter
+                                                                           or nxt.surface in _COUNTED_AFTER):
+        return hit                      # せんえん, せんにん: a thousand, counted (plan 296)
+    if m.surface == "せき" and prev is not None and prev.pos == "prefix" and prev.surface in ("お", "ご", "御"):
+        return _card("席", "せき") or hit    # おきゃくさまのおせき: a seat, said up (plan 296)
     if m.surface in _NOUN_PARTNERS and not each_time:
-        chosen = _by_noun_partner(morphemes, i, _NOUN_PARTNERS[m.surface])
-        if chosen is not None:
-            return chosen
+        named = _by_noun_partner(morphemes, i, _NOUN_PARTNERS[m.surface], _named_only=True,
+                                 default=_NOUN_DEFAULTS.get(m.surface))
+        if named is not None:
+            chosen = _card(named, m.surface)
+            if chosen is not None:
+                return chosen
+            if jmdict_db.get_by_key(named, m.surface) is not None:
+                return None             # (色のむら: the pool's 斑, resolve_pool_morpheme's, plan 296)
     if hit is None:
         return hit
     readings = {morphology.kata_to_hira(r) for r in _reading_variants(hit[1].get("kana") or "")}
@@ -1646,10 +1713,12 @@ def _verb_card(entry: dict) -> bool:
         written[-1] in "うくぐすつぬぶむる" and (entry.get("meaning") or "").startswith("to ")))
 
 
-def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None, _named_only: bool = False):
+def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None, _named_only: bool = False,
+                     default: str | None = None):
     """The card of `cards` ((kanji, partner words), ...) whose partners
     alone stand in morphemes[i]'s sentence, or None. `kana` is the card's
-    reading where the word stands inflected (あつく, plan 296)."""
+    reading where the word stands inflected (あつく, plan 296); `default`
+    the card where no partner stands at all (plan 296)."""
     # (the noun's own clause, plan 272: かぜがつよくて、かぜをひいた says
     # the wind, then a cold)
     a, b = i, i
@@ -1674,7 +1743,7 @@ def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None, _named_o
                 # of はながさいた is 裂く, "to tear", and the page's 咲く.
                 nxt = morphemes[k + 1] if k + 1 < len(morphemes) else None
                 words.update((e.get("kanji") or "") for _lv, e, _id in _deck_verbs_spelled(t, nxt))
-    named = [kanji for kanji, partners in cards if partners & words]
+    named = [kanji for kanji, partners in cards if partners & words] or ([default] if default else [])
     if len(named) != 1:
         return None
     if _named_only:
@@ -1691,7 +1760,9 @@ def _by_noun_partner(morphemes, i: int, cards, kana: str | None = None, _named_o
 _ADJECTIVE_PARTNERS = {
     "あつい": (("暑い", {"夏", "なつ", "今日", "きょう", "天気", "てんき", "部屋", "へや", "国", "くに", "日本", "にほん",
                        "季節", "きせつ", "気温", "夜", "よる", "昼", "ひる", "外", "そと", "東京", "太陽", "汗", "あせ",
-                       "冷房", "エアコン", "夏休み", "なつやすみ", "日", "ひ"}),
+                       "冷房", "エアコン", "夏休み", "なつやすみ", "日", "ひ",
+                       # (あまりのあつさに、ホームでたおれた: what heat does, plan 296)
+                       "倒れる", "たおれる", "熱中症", "ねっちゅうしょう"}),
                ("熱い", {"お茶", "おちゃ", "茶", "コーヒー", "スープ", "湯", "ゆ", "お湯", "おゆ", "風呂", "ふろ",
                        "お風呂", "おふろ", "鍋", "なべ", "ラーメン", "熱", "ねつ", "飲み物", "のみもの", "みそしる",
                        "ストーブ", "アイロン"}),
@@ -1771,9 +1842,20 @@ def resolve_home(morphemes, i: int) -> dict | None:
         return None
     # (never うちの before a noun: うちの父, うちの部署 is "our", the deck's
     # うち "we, our side", plan 272)
-    opens = (prev is None or prev.pos == "symbol") and nxt.pos == "particle" and nxt.surface in (
-        "は", "に", "で", "も", "が", "から", "まで", "へ")
+    opens = (prev is None or (prev.pos == "symbol" and prev.surface not in ("〜", "～"))) \
+        and nxt.pos == "particle" and nxt.surface in ("は", "に", "で", "も", "が", "から", "まで", "へ") \
+        and not any(t.surface in _TRADE or t.lemma in _TRADE for t in morphemes)
+    # (...never a shop or a firm speaking of itself, the deck's うち,
+    # "we, our side": うちは今…閉店までの時間に入れる方を探している,
+    # うちで働いてみたいかね, うちは生産ラインを止めざるを得なかった; nor
+    # 〜うちに, the pattern written out, plan 296)
     return jmdict_db.get_by_key("家", "うち") if going or opens else None
+
+
+# The words of a firm's or a shop's business (plan 296).
+_TRADE = frozenset({"働く", "はたらく", "生産", "発注", "受注", "援助", "雇う", "やとう", "募集", "採用", "社員",
+                    "店員", "閉店", "開店", "営業", "取引", "商品", "製品", "工場", "給料", "販売", "注文", "仕入れ",
+                    "値引き", "契約", "御社", "弊社", "取引先"})
 
 
 _TE_AUXILIARIES = morphology.TE_AUXILIARIES
@@ -3559,6 +3641,19 @@ _ASIDE = re.compile(r"\s*\(e\.g\.[^)]*\)")
 _OUT_OF_USE = frozenset({"arch", "obs"})
 
 
+def _pool_noun_partner(morphemes, i: int) -> dict | None:
+    """The pool row a kana noun's partners name where the deck has no
+    card spelled so (色のむら: 斑, plan 296)."""
+    m = morphemes[i]
+    if m.surface not in _NOUN_PARTNERS or not _hiragana(m.surface):
+        return None
+    named = _by_noun_partner(morphemes, i, _NOUN_PARTNERS[m.surface], _named_only=True,
+                             default=_NOUN_DEFAULTS.get(m.surface))
+    if named is None or _card(named, m.surface) is not None:
+        return None
+    return jmdict_db.get_by_key(named, m.surface)
+
+
 def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     """The JMdict pool entry morphemes[i] is, by its dictionary form
     first and as written second, or None. Asked only for a token the
@@ -3571,6 +3666,9 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
                            morphemes[i + 1] if i + 1 < len(morphemes) else None)
     if m.surface == "それがし" and m.pos == "pronoun":
         return None                        # (a samurai's "I", glossed, plan 272)
+    row = _pool_noun_partner(morphemes, i)
+    if row is not None:
+        return row                         # 色のむら: 斑, "unevenness" (plan 296)
     if m.surface == "ナシ" and any(u.surface == "アリ" for u in morphemes):
         return None
     degree = _a_degree_noun(morphemes, i)
