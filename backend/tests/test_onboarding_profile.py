@@ -19,6 +19,16 @@ from routes.profile import get_user_id
 from study import level_rule
 
 
+def _card_rows(user_id: str) -> set[tuple[str, str]]:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT card_id, mode FROM card_modes WHERE starts_with(card_id, %s)", (f"{user_id}:",))
+            return set(cur.fetchall())
+    finally:
+        conn.close()
+
+
 @contextlib.contextmanager
 def _clean_onboarding_state(user_id: str):
     # A first boarding with a name takes the username too (plan 247b), so
@@ -31,6 +41,13 @@ def _clean_onboarding_state(user_id: str):
     finally:
         conn.close()
     handle = row[0] if row else None
+    # A boarding above N5 has the level rule mark the levels under it
+    # known (study/level_rule, srs.seed_known): a card_modes row per
+    # card and mode, which no profile reset gives back. Left behind, every
+    # N5 kanji was known to the shared test user, and a later file asking
+    # for a new one (test_glyph_tour) got none -- in whichever worker this
+    # file happened to run first. The rows a test here added go again.
+    rows_before = _card_rows(user_id)
     try:
         yield
     finally:
@@ -52,6 +69,16 @@ def _clean_onboarding_state(user_id: str):
                     """,
                     (handle, user_id),
                 )
+                added = sorted(_card_rows(user_id) - rows_before)
+                if added:
+                    cur.execute(
+                        """
+                        DELETE FROM card_modes c
+                        USING unnest(%s::text[], %s::text[]) AS a(card_id, mode)
+                        WHERE c.card_id = a.card_id AND c.mode = a.mode
+                        """,
+                        ([c for c, _ in added], [m for _, m in added]),
+                    )
             conn.commit()
         finally:
             conn.close()
