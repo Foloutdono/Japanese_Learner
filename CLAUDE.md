@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **300**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **301**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -472,7 +472,12 @@ runtime purpose.
   (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
-  read as an assumption.
+  read as an assumption. `KNOWN_STATE`'s one check of one is a
+  `card_modes` count only: a learner's total of answers (the review
+  total, retention, XP) reads `review_log` and its rollup, never a sum
+  of `card_modes`' counters, or every assumption is an answer (plan
+  300: a learner who boarded at N4 read 100% retention before answering
+  once).
 - **An import is an assumption the level does not give back (plans
   243, 243b).** `SRSEngine.seed_imported` writes `KNOWN_STATE`'s
   signature with the source's interval and ease and `IMPORTED_STEP` in

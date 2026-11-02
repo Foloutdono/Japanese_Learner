@@ -2132,22 +2132,34 @@ class SRSEngine:
         return int(row[0]) if row else 0
 
     def get_retention(self, user_id: str) -> float | None:
-        """Correct answers over all answers, across every (card, mode)
-        the learner has reviewed — the profile's 正答率. None until the
-        first review, so the screen can leave the figure out rather than
-        print 0%. Same servable-mode scope as the mastered count, so the
-        two figures describe the same set of cards."""
+        """Correct answers over all answers -- the profile's 正答率, a
+        grade of 3 or more being correct as the scheduler counts it. None
+        until the first answer, so the screen can leave the figure out
+        rather than print 0%.
+
+        Read off the answers themselves, review_log and its rollup, as
+        the review total printed beside it is and as the statistics
+        screen's retention by week is (get_daily_quality). Never off
+        card_modes' counters: every card the level rule marks known
+        carries KNOWN_STATE's virtual check, one of one (plan 224), so a
+        learner who declared N4 at boarding and had answered nothing
+        read 100%, and every check they passed counted twice (plan 300)."""
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                mode_sql, mode_params = self._servable_filter()
-                sql = f"""
-                    SELECT COALESCE(SUM(correct_reviews), 0), COALESCE(SUM(total_reviews), 0)
-                    FROM card_modes
-                    WHERE card_id LIKE %s{mode_sql}
+                sql = """
+                    SELECT COALESCE(SUM(good), 0), COALESCE(SUM(n), 0) FROM (
+                        SELECT COUNT(*) FILTER (WHERE quality >= 3) AS good, COUNT(*) AS n
+                        FROM review_log
+                        WHERE card_id LIKE %s
+                        UNION ALL
+                        SELECT SUM(q3 + q4 + q5), SUM(reviews)
+                        FROM review_daily
+                        WHERE user_id = %s
+                    ) both_halves
                 """
-                self._log_sql("get_retention", sql, (pattern,) + mode_params)
-                cur.execute(sql, (pattern,) + mode_params)
+                self._log_sql("get_retention", sql, (pattern, user_id))
+                cur.execute(sql, (pattern, user_id))
                 row = cur.fetchone()
         correct, total = (int(row[0]), int(row[1])) if row else (0, 0)
         return (correct / total) if total else None

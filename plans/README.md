@@ -7378,3 +7378,13 @@ Found while writing plan 298's seeds: the level gate counted 何でも, "anythin
 
 The second gap named here was not one: without a tokenizer the scan takes the longest word, and the deck's 何でも ("anything", N3) has always matched before 何で; a test now holds it. Open: the deck files the word 何でも at N3 and the catalogue teaches 何でも／誰でも at N4; the breakdown keeps the point in its pieces (plan 272), so no count reads that card.
 
+
+## Plan 300 — 正答率, retention counts answers (2026-11-02)
+
+The owner: fix the profile holder flake. `test_profile_holder`'s `test_profile_retention_is_a_share_or_absent` failed once in a full run: retention 1.0 with no review. The leak that fed it was `test_onboarding_profile`'s (its reset left the declared level's assumptions, 3f253eb), but what it showed is the product's: `get_retention` summed `card_modes`' counters, and every row the level rule seeds carries `KNOWN_STATE`'s virtual check, one of one.
+
+| Phase | What | Status |
+|---|---|---|
+| 300 | **Retention reads the answers** (`srs.get_retention`): good (3 or more) over all, from `review_log` and its rollup, as the review total beside it and the statistics screen's retention by week (`get_daily_quality`) are. A learner who boarded at N4 read 100% before answering once, and a check passed weighed twice. `test_level_rule.test_an_assumption_is_no_answer_to_the_retention` fails on the old reading (`1.0 is None`); `_wipe` there now calls `forget_history`. CLAUDE.md's plan-224 rule says a learner's total of answers never sums `card_modes`' counters | DONE |
+
+Open: a card's own accuracy still reads its row's counters, the check included (`card_lookup.card_stats`, `get_weakest_by_source`'s ranking and figure): an assumption passed and later missed shows 2 of 3 where it was answered 1 of 2. A card's answers cannot be rebuilt from the log once compaction folds them, so that is a choice of its own.

@@ -97,6 +97,9 @@ def _wipe(user_id: str) -> None:
     finally:
         conn.close()
     user_level._cache.pop(user_id, None)
+    # The review total is kept in the engine until a write moves it
+    # (plan 212): an erase outside a review says so.
+    srs.forget_history(user_id)
 
 
 @pytest.fixture()
@@ -193,6 +196,28 @@ def test_the_office_marks_the_stops_behind_the_boarding_level_known(lclient):
     # A replay of the office costs nothing a second time.
     again = lclient.post("/api/onboarding/complete", json={"jlptLevel": "N4", "dailyNewTarget": 10})
     assert again.json()["levelRule"]["markedKnown"] == 0
+
+
+def test_an_assumption_is_no_answer_to_the_retention(lclient):
+    # Each row the level rule writes carries one virtual check, one of
+    # one (KNOWN_STATE, plan 224), and the profile's retention summed
+    # those counters: a learner who boarded at N4 and had answered
+    # nothing read 100% (plan 300). It reads the answers, as the review
+    # total does.
+    lclient.post("/api/onboarding/complete", json={"jlptLevel": "N4", "dailyNewTarget": 10})
+    profile = lclient.get("/api/profile").json()
+    assert profile["totalReviews"] == 0
+    assert profile["retention"] is None
+
+    # The checks themselves are answers: one passed and one missed are
+    # one right in two, not the seeded rows' thousands of ones.
+    mode = level_rule.primary_mode("kanji")
+    passed, missed = prefixed(card_index.raw_ids("kanji", "N5", mode)[:2], LUID)
+    srs.review(passed, mode, 4)
+    srs.review(missed, mode, 1)
+    profile = lclient.get("/api/profile").json()
+    assert profile["totalReviews"] == 2
+    assert profile["retention"] == 0.5
 
 
 def test_settings_previews_then_applies_a_move_up_and_a_move_down(lclient):
