@@ -25197,12 +25197,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .theme-mini__line { height: var(--sp-1); margin: var(--sp-2) var(--sp-3) 0; border-radius: var(--r-pill); background: currentcolor; opacity: 0.2; }
 .theme-mini__line--short { width: 50%; }
-.lang-picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+/* The languages one per row (plan 291, the owner's pick B): the name,
+   then its own two words on the same line, so a third language never
+   stands alone under two and a phone never breaks the words in two. */
+.lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
 .lang-pick {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-1);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -25221,7 +25224,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
 .lang-pick__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
-.lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); }
+.lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
 
 /* ── Notation: the three bars themselves (plan 139) ──
@@ -36533,15 +36536,14 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .desk-settings__page--two .slip--ways > .slip__label { grid-column: 1 / -1; }
   .desk-settings__page--two .slip--ways > .slip__way { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* What a row's taller card lends the shorter (plan 145): the two
-     languages stand one over the other down the theme screens' height,
+     languages stand one over another down the theme screens' height,
      each an equal share of it, rather than two short cards at the top
      of a card twice their height. */
   .desk-settings__page--two .lang-picks {
     flex: 1;
-    grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: 1fr;
   }
-  .desk-settings__page--two .lang-pick { justify-content: center; }
+  .desk-settings__page--two .lang-pick { align-items: center; }
   /* The mixer across the page (SoundPage, plan 145): its names in one
      column as wide as the longest, each on one line -- the phone's 132px
      broke VOLUME PRINCIPAL in two -- and every track starting where the

@@ -12,7 +12,10 @@ import './index.css'
 //      the chart and clear of each other on a track ~150px wide (the
 //      first draw printed four ticks over each other and cut the dates
 //      off at the screen's edge);
-//   3. the themes stand three across, drawn.
+//   3. the themes stand three across, drawn;
+//   4. the languages stand one per row, each name and its two words on
+//      one line (plan 291: two across left the third alone, and three
+//      across broke the words in two).
 
 const JOURNEY = {
   goalStartLevel: 'N4', goalLevel: 'N3', goalTargetDate: '2027-03-12', goalSetAt: '2026-09-01T00:00:00+00:00',
@@ -150,5 +153,21 @@ describe('Settings at phone width', () => {
     expect(Math.round(picks[0].top)).toBe(Math.round(picks[2].top))
     expect(document.querySelectorAll('.theme-pick .theme-mini__face')).toHaveLength(4)
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
+  })
+
+  it('stands the languages one per row, each on one line', async () => {
+    await mount('/profile/settings/display')
+    const picks = [...document.querySelectorAll('.lang-pick')]
+    expect(picks).toHaveLength(3)
+    const page = box(document.querySelector('.lang-picks'))
+    picks.forEach((pick, i) => {
+      const [whole, name, words] = [pick, pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')].map(box)
+      if (i) expect(whole.top).toBeGreaterThan(box(picks[i - 1]).bottom)
+      expect(Math.round(whole.width)).toBe(Math.round(page.width))
+      // Side by side, and the words in one line: never wrapped under the name.
+      expect(words.left).toBeGreaterThan(name.right)
+      expect(words.top).toBeLessThan(name.bottom)
+      expect(words.height).toBeLessThan(name.height * 1.5)
+    })
   })
 })
