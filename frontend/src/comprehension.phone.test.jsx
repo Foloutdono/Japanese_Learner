@@ -132,6 +132,80 @@ describe('comprehension on the phone', () => {
     expect(items[0].classList.contains('bkd-passage__item--open')).toBe(false)
   })
 
+  // Plan 298b: the review opens on the first miss, as the desk's does;
+  // a question names the sentence its right option rests on (`at`), and
+  // a miss says why in one line.
+  const answerAll = async () => {
+    $('.stage__foot .btn-primary').click()
+    await settle()
+    press('a'); await settle(40); press('Enter'); await settle(40)
+    press('a'); await settle(40); press('Enter'); await settle(250)
+  }
+  const serve = (exercise, result) => apiFetch.mockImplementation(async url => {
+    const u = String(url)
+    if (u.startsWith('/api/reading/comprehension/result')) return ok(result)
+    if (u.startsWith('/api/reading/comprehension')) return ok(exercise)
+    return ok({})
+  })
+
+  it('opens the results on the first miss', async () => {
+    await mount()
+    await answerAll()
+    const rows = $$('.qrow')
+    expect(rows.map(r => r.getAttribute('aria-expanded'))).toEqual(['false', 'true'])
+    expect($('.qrow__source').textContent).toContain('The train was late.')
+  })
+
+  it('opens nothing on a paper with no miss', async () => {
+    serve(EXERCISE, { ...RESULT, score: 2, results: RESULT.results.map(r => ({ ...r, user_answer: r.correct, is_correct: true })) })
+    await mount()
+    await answerAll()
+    expect($$('.qrow[aria-expanded="true"]')).toHaveLength(0)
+    expect($('.qrow__detail')).toBeNull()
+  })
+
+  it('opens a miss on the sentence it names and the line on why', async () => {
+    const WHY = 'They met 「駅で」: at the station, before the train.'
+    const exercise = {
+      ...EXERCISE,
+      questions: [
+        { ...EXERCISE.questions[0], at: [0], why: WHY },
+        { ...EXERCISE.questions[1], at: [1], why: 'A right answer is not explained.' },
+      ],
+    }
+    const result = {
+      score: 1, total: 2,
+      results: [
+        { question: exercise.questions[0].question, options: exercise.questions[0].options, correct: 1, user_answer: 0, is_correct: false },
+        { question: exercise.questions[1].question, options: exercise.questions[1].options, correct: 2, user_answer: 2, is_correct: true },
+      ],
+    }
+    serve(exercise, result)
+    await mount()
+    await answerAll()
+    // Q1 quotes nothing; its `at` names the first sentence.
+    expect($$('.qrow')[0].getAttribute('aria-expanded')).toBe('true')
+    const detail = $('.qrow__detail')
+    expect(detail.querySelector('.comp-why').textContent).toBe(WHY)
+    expect(detail.querySelector('.qrow__source').textContent).toContain('I waited for a friend at the station.')
+    // The why under the options, the sentence under the why.
+    const why = detail.querySelector('.comp-why')
+    expect(detail.querySelector('.mcq-list').compareDocumentPosition(why) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(why.compareDocumentPosition(detail.querySelector('.qrow__source')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // A right answer opens on its sentence, with no why.
+    $$('.qrow')[1].click(); await settle()
+    expect($('.qrow__detail .comp-why')).toBeNull()
+    expect($('.qrow__source').textContent).toContain('The train was late.')
+  })
+
+  it('opens a question on every sentence it names', async () => {
+    const exercise = { ...EXERCISE, questions: [{ ...EXERCISE.questions[0], at: [0, 1], why: 'Both lines together.' }, EXERCISE.questions[1]] }
+    serve(exercise, { ...RESULT, results: [{ ...RESULT.results[0], user_answer: 0, is_correct: false }, RESULT.results[1]] })
+    await mount()
+    await answerAll()
+    expect($$('.qrow__source')).toHaveLength(2)
+  })
+
   it('says a text handed back past the day’s ceiling was read before', async () => {
     apiFetch.mockImplementation(async url => {
       const u = String(url)

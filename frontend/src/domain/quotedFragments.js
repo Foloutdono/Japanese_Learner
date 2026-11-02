@@ -27,3 +27,17 @@ export function sentenceFor(sentences, fragments) {
   }
   return -1
 }
+
+// The sentence(s) a question's right option rests on (plan 298b): the
+// ones the question names (`at`, indices into the breakdown, which every
+// seed question and every exercise written since carries), else the one
+// sentence its quote is in, else none. Sorted, each once, in range.
+export function answerSentences(question, sentences) {
+  const n = sentences?.length ?? 0
+  const at = Array.isArray(question?.at)
+    ? [...new Set(question.at.filter(i => Number.isInteger(i) && i >= 0 && i < n))].sort((a, b) => a - b)
+    : []
+  if (at.length) return at
+  const k = sentenceFor(sentences, quotedFragments(question?.question))
+  return k >= 0 ? [k] : []
+}
