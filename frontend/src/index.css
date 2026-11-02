@@ -13554,6 +13554,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-3);
   padding: 0 var(--sp-4) var(--sp-4);
 }
+/* The line of the text an opened question quotes (plan 298): the
+   sentence over its translation on the breakdown's open rail
+   (.bkd-passage__item--open), under the options it decides between. */
+.qrow__source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-left: var(--sp-3);
+  box-shadow: inset 3px 0 0 var(--line-color, var(--accent));
+}
 /* ── 解析 — the word-by-word breakdown, as rows (plan 084) ──
    One shape for every practice mode (SentenceBreakdown's 'rows'
    layout; the comprehension passage is a list of them,

@@ -391,9 +391,13 @@ export default function ComprehensionRun({ session }) {
 
   // One frame for the whole exercise, one way out, and a sub that says
   // where in it you are.
+  // A text handed back past the day's ceiling on new ones (the
+  // server's `repeat`) says so while it is read (plan 298): the same
+  // text again with no word on it read as the app stuck on one text.
   const sub =
     stage === 'questions' || stage === 'submitting' ? `${level} · ${t.question} ${currentQ + 1} / ${total}` :
     stage === 'results' ? `${level} · ${t.practiceResult}` :
+    stage === 'reading' && exercise?.repeat ? `${level} · ${t.compReadBefore}` :
     level
 
   // The desk's side column (plan 115). While the questions are asked
@@ -490,10 +494,11 @@ export default function ComprehensionRun({ session }) {
     open: true,
   } : { key: 'sealed', open: false })
 
-  // A result row opens its question; on the desk it also opens the
-  // sentence the question quotes, in the breakdown beside it. From the
-  // run's lines (plan 129) a row is only ever opened, never folded: the
-  // middle always stands one question.
+  // A result row opens its question, and the sentence the question
+  // quotes opens in the breakdown: beside it on the desk, under the rows
+  // on a phone once Show breakdown is pressed (plan 298). From the run's
+  // lines (plan 129) a row is only ever opened, never folded: the middle
+  // always stands one question.
   function openLine(i) {
     const r = results?.results?.[i]
     if (!r || i === openRow) return
@@ -502,10 +507,10 @@ export default function ComprehensionRun({ session }) {
   function openResultRow(i, isOpen, r) {
     playUi('click-mode-selection')
     setOpenRow(isOpen ? null : i)
-    if (!desk || isOpen) return
+    if (isOpen) return
     const k = sentenceFor(breakdown, quotedFragments(r.question))
     if (k >= 0) {
-      setLookup(null)
+      if (desk) setLookup(null)
       setOpenIndex(k)
     }
   }
@@ -774,6 +779,11 @@ export default function ComprehensionRun({ session }) {
           <div className="surface qrows">
             {results.results.map((r, i) => {
               const isOpen = openRow === i
+              // The line of the text the question quotes, under its
+              // options (plan 298): what the desk's breakdown opens
+              // beside the question, here where the phone opens it.
+              const k = isOpen ? sentenceFor(breakdown, quotedFragments(r.question)) : -1
+              const source = k >= 0 ? breakdown[k] : null
               return (
                 <div key={i} className="qrow-item">
                   <button
@@ -813,6 +823,12 @@ export default function ComprehensionRun({ session }) {
                           )
                         })}
                       </div>
+                      {source && (
+                        <div className="qrow__source">
+                          <SentenceLine analysis={source.analysis} text={source.jp} t={t} onTokenClick={w => setLookup(vocabLookup(w))} />
+                          {source.translation && <span className="bkd__en">{source.translation}</span>}
+                        </div>
+                      )}
                       {/* The open question is the asking's thread (plan 197):
                           the page opens on it, not on the whole text. */}
                       <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.comprehensionTitle} text />
