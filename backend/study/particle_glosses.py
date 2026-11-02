@@ -295,6 +295,11 @@ _GLOSSES = {
             "fr": "(formel) à, dans, par (= で) : 体育館にて, au gymnase"},
     "ながら_though": {"en": "(after a quality) though…, while: 勝手ながら, though it is selfish of us",
                      "fr": "(après une qualité) bien que…, tout en : 勝手ながら, bien que ce soit cavalier de notre part"},
+    # (plan 296)
+    "に_you": {"en": "(after よう, みたい) says how, the adverbial form: like, as (同じように, in the same way); so that",
+              "fr": "(après よう, みたい) dit comment, la forme adverbiale : comme (同じように, de la même façon) ; pour que"},
+    "と_regarded": {"en": "(before 感じる, 思う, 考える) as: what a thing is felt or thought to be (当然と感じる, to find it natural)",
+                    "fr": "(devant 感じる, 思う, 考える) comme : ce qu'on ressent ou pense qu'une chose est (当然と感じる, trouver cela naturel)"},
     "と_as": {"en": "(before する, formal) as, to be: 休業とさせていただきます, we will close; …ものとする, shall …",
              "fr": "(devant する, formel) comme, en tant que : 休業とさせていただきます, nous fermerons ; …ものとする, doit …"},
     "やがる": {"en": "(rude) has the nerve to…, dares to: 何しやがる！, what do you think you're doing!",
@@ -450,6 +455,10 @@ def _a_laugh_said(surface: str) -> bool:
 
 
 # The な-adjectives of manner said with と (analysis.TO_MANNER).
+# The verbs that take what a thing is felt, thought or held as before
+# their と (plan 296): それを当然と感じる, 当然と思う.
+_REGARDED_AS = frozenset({"感じる", "思う", "考える", "見なす", "見做す", "受け止める", "信じる", "認める", "判断",
+                          "捉える", "とらえる"})
 _TO_MANNER = frozenset({"意外", "案外", "平然", "漠然", "毅然", "呆然", "唖然", "悠然", "颯爽", "歴然", "断然",
                           "公然", "決然", "整然", "雑然", "騒然", "愕然", "泰然", "超然", "敢然", "漫然", "黙然",
                           "茫然", "憤然", "釈然", "厳然", "粛然", "猛然", "忽然"})
@@ -1064,6 +1073,9 @@ def gloss(morphemes, i: int) -> dict | None:
                 morphemes[i + 1].surface == "。" and morphemes[i - 1].surface.startswith("じゃろ"))):
         key = "が_insist"                  # 見りゃ分かるだろうが！, 言うたじゃろうが。
     elif m.pos == "auxiliary" and m.surface == "に" and m.lemma == "だ" and i > 0 \
+            and (morphemes[i - 1].lemma in ("様", "みたい") or morphemes[i - 1].surface in ("よう", "みたい")):
+        key = "に_you"                     # 同じように, 春みたいに, 話しやすいように (plan 296)
+    elif m.pos == "auxiliary" and m.surface == "に" and m.lemma == "だ" and i > 0 \
             and morphemes[i - 1].pos == "noun" and morphemes[i - 1].adjectival:
         # 安全に泳げます, 平和に役立つ: the letters do not say which; the
         # gloss names both, and no point is lit (plan 150, 272).
@@ -1146,8 +1158,12 @@ def gloss(morphemes, i: int) -> dict | None:
         elif m.surface == "と" and i > 0 and (morphemes[i - 1].pos == "adverb" or (
                 morphemes[i - 1].pos == "other" and (morphemes[i - 1].surface.endswith("々")
                                                      or morphemes[i - 1].surface in _TO_MANNER))) \
-                and morphemes[i - 1].surface not in ("そう", "こう", "ああ", "どう"):
+                and morphemes[i - 1].surface not in ("そう", "こう", "ああ", "どう") \
+                and not (i + 1 < len(morphemes) and morphemes[i + 1].lemma in _REGARDED_AS):
             key = "と_adverb"                # ざあざあと, an adverb no dictionary has
+        elif m.surface == "と" and i > 0 and morphemes[i - 1].pos in ("adverb", "other") \
+                and i + 1 < len(morphemes) and morphemes[i + 1].lemma in _REGARDED_AS:
+            key = "と_regarded"              # それを当然と感じる: what it is felt as, no manner (plan 296)
         elif m.surface == "と" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix") \
                 and i + 1 < len(morphemes) and morphemes[i + 1].pos == "verb" \
                 and morphemes[i + 1].lemma in ("成る", "なる"):

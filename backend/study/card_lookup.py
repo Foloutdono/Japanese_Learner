@@ -5015,6 +5015,8 @@ def resolve_pool_phrase(morphemes, i: int, deck_hits: list, explained: list,
             continue
         if any(deck_hits[i + k] and m.pos == "interjection" for k, m in enumerate(run)):
             continue
+        if n == 2 and run[1].surface == "に" and run[1].pos == "auxiliary" and run[1].lemma == "だ":
+            continue                    # (ように alone: よう and its に, a fragment, no phrase -- plan 296)
         surface = "".join(m.surface for m in run).rstrip(_DRAWN_OUT) if farewell else "".join(m.surface for m in run)
         reading = morphology.kata_to_hira("".join(m.kana for m in run))
         rows = ([jmdict_db.get_by_key(surface, reading)] if _has_kanji(surface)

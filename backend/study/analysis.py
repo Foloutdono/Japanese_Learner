@@ -2256,7 +2256,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # Thailand, and 「ミナモ」 one word, not three marks; and the verb an え-row
 # stem belongs to (お風呂に入れますか はいれる, すぐになれる 慣れる, 制度を
 # 近づけられる 近付ける, 減らせっこない 減らす's potential, 済ませた 済ませる,
-# ピアノがひけない 弾く, 写真はとれません 撮る, 思えてならない, 気が引ける).
+# ピアノがひけない 弾く, 写真はとれません 撮る, 思えてならない, 気が引ける);
+# and だ's に the case particle where its word is a noun (命の危険につながる,
+# 多くの困難に耐え, このへんに, 春めく陽気に誘われて), ように's に no
+# adjective's, and 当然と感じる no manner.
 LOCAL_REV = 33
 
 

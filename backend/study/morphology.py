@@ -1809,6 +1809,36 @@ def _topic_in_clause(morphemes: list[Morpheme], k: int) -> bool:
     return False
 
 
+def _ni_of_a_noun(morphemes: list[Morpheme], tags: list[tuple]) -> None:
+    """だ's に after a word UniDic files as a な-adjective, or a noun that
+    may be one, read as the case particle where the sentence makes the
+    word a noun (plan 296): modified as only a noun is -- by の (命の危険に
+    つながる, お客様の安全に), an adnominal (このへんにコンビニが) or a
+    clause before it (春めく陽気に誘われて, 大きく見える危険にまで及ぶ).
+    An adjective said adverbially takes none of them: 安全に運転する, 静かに
+    話す keep the adverb's に. Never よう, みたい, そう or ふう, whose に
+    is their own (彼のように, あんなふうに), nor before なる or する, whose
+    〜になる and 〜にする the noun keeps, nor before an adjective, which a
+    degree's に says how much of (芭蕉の非常に有名な俳句)."""
+    for i, m in enumerate(morphemes):
+        if not (m.surface == "に" and m.pos == "auxiliary" and m.lemma == "だ" and i >= 2):
+            continue
+        word, before = morphemes[i - 1], morphemes[i - 2]
+        if word.pos not in ("noun", "other") or word.lemma in ("様", "みたい", "そう", "風") \
+                or word.surface in ("よう", "みたい", "そう", "ふう") or not _glued(before, word):
+            continue                    # (あんなふうに話す: the manner's own に)
+        after = next((u for u in morphemes[i + 1:] if not (u.pos == "particle" and u.surface in ("は", "も", "まで", "さえ"))),
+                     None)
+        if after is not None and (after.lemma in ("成る", "なる", "為る", "する") or after.pos in ("adjective", "other")
+                                  or (after.pos == "noun" and after.adjectival)):
+            continue                    # (芭蕉の非常に有名な俳句: "very", said of 有名)
+        if (before.surface == "の" and before.pos == "particle") or before.pos == "adnominal" \
+                or (before.pos in ("verb", "adjective", "auxiliary", "suffix") and before.cform.startswith("連体形")):
+            m.pos, m.lemma, m.lemma_reading, m.ctype, m.cform = "particle", "に", "に", "", ""
+            m.written, m.written_reading = "に", "に"
+            tags[i] = ("助詞", "格助詞", "*")
+
+
 def _case_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """で read back as the case particle where UniDic took it for the
     copula's て form and what follows says it is one (plan 296): a plain
@@ -6056,6 +6086,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _done_after_an_adverb(morphemes, tags)
         _place_de(morphemes, tags)
         _case_de(morphemes, tags)
+        _ni_of_a_noun(morphemes, tags)
         _copula_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)

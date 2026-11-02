@@ -6751,7 +6751,11 @@ def _pattern_refusals():
         # どんなに ("however much") and こんなに／そんなに／あんなに (their
         # own point) are adverbs, no な-adjective's adverbial form
         "〜く／〜に（副詞形）": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None
-            and p.surface in ("どんな", "こんな", "そんな", "あんな"))
+            and (p.surface in ("どんな", "こんな", "そんな", "あんな")
+                 # (ように, みたいに: their own に, no adjective's -- バスが
+                 # はやく来ますように; よう強く勧める keeps 強く's, plan 296)
+                 or ((p.lemma in ("様", "みたい") or p.surface in ("よう", "みたい"))
+                     and "".join(x.surface for x in t if s <= x.start < e) == "に")))
             # (The く of 高くても or 高くない is the adjective's て form or
             # negative, no adverb, plan 272.)
             or _followed_by(t, e, "て", "ない", "なかっ", "なけれ", "なく", "なかろ")

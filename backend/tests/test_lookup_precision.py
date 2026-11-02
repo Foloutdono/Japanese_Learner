@@ -4190,3 +4190,57 @@ class WhichVerbAnEStemIsTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertIn("使役形 〜させる", [g["pattern"] for t in analysis.analyze_local(sentence)["tokens"]
                                                 for g in t.get("grammar") or []])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ANounsNiOrAnAdverbsTests(unittest.TestCase):
+    """Plan 296: だ's に after a word that may be a な-adjective is the case
+    particle where the sentence makes the word a noun (modified by の, an
+    adnominal or a clause); よう's に is never an adjective's; と after a
+    word said "as" what is felt is no manner."""
+
+    def ni(self, sentence: str, word: str) -> dict:
+        tokens = analysis.analyze_local(sentence)["tokens"]
+        k = next(k for k, t in enumerate(tokens) if t["surface"] == "に" and k and tokens[k - 1]["surface"] == word)
+        return tokens[k]
+
+    def test_a_nouns_ni(self) -> None:
+        for sentence, word in (
+                ("小さな誤解でも、命の危険につながることがあり得るのだ。", "危険"),
+                ("治療の効果が実際より大きく見える危険にまで及ぶ。", "危険"),
+                ("彼女は多くの困難に耐え、ついに夢を実現した。", "困難"),
+                ("ホームの端は、お客様の安全に＿＿＿、黄色い線の内側までお下がりください。", "安全"),
+                ("すみません、このへんにコンビニがありますか。", "へん"),
+                ("春めく陽気に誘われて、近郊の丘陵まで足を延ばした。", "陽気")):
+            with self.subTest(sentence=sentence):
+                token = self.ni(sentence, word)
+                self.assertEqual(token["pos"], "particle")
+                self.assertNotIn("〜く／〜に（副詞形）", [g["pattern"] for g in token.get("grammar") or []])
+
+    def test_an_adverbs_ni(self) -> None:
+        for sentence, word, point in (("安全に運転してください。", "安全", False), ("元気に遊んでいる。", "元気", False),
+                                      ("静かに話しましょう。", "静か", True), ("きれいに書いてください。", "きれい", True),
+                                      ("とても静かに話す。", "静か", True)):
+            with self.subTest(sentence=sentence):
+                token = self.ni(sentence, word)
+                self.assertEqual(token["pos"], "auxiliary")
+                self.assertEqual("〜く／〜に（副詞形）" in [g["pattern"] for g in token.get("grammar") or []], point)
+        # (...and the noun's own なる keeps its point: 迷惑になる)
+        self.assertIn("〜くなる／〜になる", {g["pattern"] for g in analysis.analyze_local("人の迷惑になる。")["grammar"]})
+
+    def test_its_own_ni_and_what_it_is_felt_as(self) -> None:
+        # (はやく keeps its own: 早い said adverbially)
+        self.assertNotIn("〜く／〜に（副詞形）",
+                         [g["pattern"] for g in self.ni("あしたの朝、バスがはやく＿＿＿ように。", "よう").get("grammar") or []])
+        self.assertIn("〜く／〜に（副詞形）",
+                      [g["pattern"] for g in token_of("あしたの朝、バスがはやく＿＿＿ように。", "はやく").get("grammar") or []])
+        for sentence in ("それを当然と感じられること自体が、証しなのだ。", "それを当然と思う。"):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(token_of(sentence, "と")["gloss"]["en"].startswith("(before 感じる"))
+        self.assertTrue(token_of("彼女は堂々と話した。", "と")["gloss"]["en"].startswith("(after an adverb)"))
+        # ...and ように's, みたいに's に say what they are, in both languages
+        for sentence, word in (("15番のバスと同じように、本町通りを走る。", "よう"), ("今日は春みたいにあたたかいですね。", "みたい")):
+            with self.subTest(sentence=sentence):
+                gloss = self.ni(sentence, word)["gloss"]
+                self.assertTrue(gloss["en"].startswith("(after よう, みたい)") and gloss["fr"])
+        self.assertEqual(cut("ように"), ["よう", "に"])
