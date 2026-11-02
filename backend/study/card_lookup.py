@@ -1186,6 +1186,13 @@ def resolve_morpheme(morphemes, i: int):
     hit = _kana_adjective(morphemes, i, hit)
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     spelled = _deck_verbs_spelled(morphemes[i], nxt)
+    previous = morphemes[i - 1] if i > 0 else None
+    if len(spelled) > 1 and previous is not None and previous.pos == "particle" and previous.surface in ("に", "を", "と") \
+            and nxt is not None and nxt.conjunctive and nxt.surface in ("て", "で"):
+        from study.grammar_detect import alternatives, compound_particles
+        joined = previous.surface + morphemes[i].surface + nxt.surface
+        if any(joined in alt for pattern in compound_particles() for alt in alternatives(pattern)):
+            spelled = []                # (私にとって: a particle's verb, no 撮る, plan 296)
     if len(spelled) > 1:
         # Several deck verbs share the spelling: the word it takes says
         # which (plan 272) -- にすんでいる lives, うそをついた lied.
@@ -2135,15 +2142,27 @@ def _deck_verbs_spelled(m, nxt=None) -> list[tuple[str, dict, str]]:
     a godan verb takes its sound-changed stem (置いて, never おきて), so a
     plain stem there is an ichidan verb's or a す verb's (おきて is 起きる,
     plan 272)."""
-    if (m.pos != "verb" or not m.cform or not m.surface
-            or any(is_kanji(c) for c in m.surface) or _katakana_written(m.surface)):
+    if m.pos != "verb" or not m.cform or not m.surface or _katakana_written(m.surface):
         return []
-    stem = morphology.kata_to_hira(m.surface)
+    needed = {c for c in m.surface if is_kanji(c)}
+    if needed and not _hiragana(m.surface[:1]):
+        return []
+    # (A verb its page writes half in kana, ふり出す, by its reading and the
+    # kanji it shows -- 降り出す and 振り出す both write 出, plan 296.)
+    stem = morphology.kata_to_hira(m.reading if needed else m.surface)
     before_te = (nxt is not None and m.cform == "連用形-一般"
                  and ((nxt.pos == "particle" and nxt.conjunctive and nxt.surface in ("て", "で"))
                       or (nxt.pos == "auxiliary" and nxt.lemma in ("た", "だ"))))
     out = []
     forms = [(reading, m.cform) for reading in _dictionary_forms(stem, m.cform)]
+    said = morphology.kata_to_hira(m.lemma_reading or "")
+    godan_lemma = not said.endswith("る") or said[-2:-1] not in "えけげせてねべめれいきぎしちにびみり"
+    if stem[-1:] in _E_TO_U and nxt is not None and nxt.pos == "auxiliary" and nxt.lemma in ("ない", "ず", "ぬ") \
+            and (m.ctype.startswith("五段") or (m.ctype.startswith("下一段") and godan_lemma)):
+        # (A godan verb's potential before its negative, which UniDic files
+        # as a 下一段 under the godan lemma: 手がはなせず is 離す's as much as
+        # 話す's, plan 296.)
+        forms += [(stem[:-1] + _E_TO_U[stem[-1]], "仮定形-一般")]
     if m.cform.startswith("終止形") and stem.endswith("う") and nxt is not None and (
             nxt.pos == "symbol" or nxt.surface in ("よ", "ね", "か", "と", "って", "ぜ", "や")):
         # (手紙をかこう: UniDic's 囲う, as often 書く's volitional -- the
@@ -2152,6 +2171,8 @@ def _deck_verbs_spelled(m, nxt=None) -> list[tuple[str, dict, str]]:
     for reading, cform in forms:
         for level, entry in _VOCAB_BY_KANA.get(reading, ()):
             written = re.split(r"[/／;、,・]", entry.get("kanji") or "")[0].strip() or reading
+            if needed and not needed <= set(written):
+                continue
             ctype = _READ_CLASS.get((written, reading)) or _verb_class(written)
             if before_te and ctype.startswith("五段") and ctype != "五段-サ行":
                 continue
@@ -2337,7 +2358,20 @@ _PARTNERS = (
                                   "注意", "ちゅうい", "関心", "かんしん", "興味", "きょうみ", "気", "き"})),  # かぜをひく
     ("弾く", ("を",), frozenset({"ピアノ", "ギター", "バイオリン", "曲", "きょく", "楽器", "がっき"})),
     ("開く", ("が",), frozenset({"ドア", "窓", "まど", "戸", "と", "門", "もん", "ふた", "口", "くち"})),
+    # (駅の窓口はあいています: a place open for business, plan 296)
+    ("開く", ("が", "は", "も"), frozenset({"窓口", "まどぐち", "店", "みせ", "銀行", "ぎんこう", "デパート", "図書館",
+                                         "としょかん", "郵便局", "ゆうびんきょく", "美術館", "博物館", "病院",
+                                         "びょういん", "スーパー", "コンビニ", "本屋", "ほんや", "受付", "うけつけ"})),
     ("空く", ("が",), frozenset({"席", "せき", "手", "て", "部屋", "へや"})),
+    # (雨がふり出した, 実がなる, 手がはなせない, のどがかわく: the subject
+    # names the verb, plan 296)
+    ("降り出す", ("が", "は", "も"), frozenset({"雨", "あめ", "雪", "ゆき"})),
+    ("生る", ("が", "は", "も"), frozenset({"実", "み", "果物", "くだもの", "柿", "かき", "りんご", "みかん", "ぶどう",
+                                         "桃", "もも", "トマト", "きゅうり"})),
+    ("離す", ("が", "を", "から"), frozenset({"手", "て", "目", "め"})),
+    ("渇く", ("が", "は", "も"), frozenset({"のど", "喉"})),
+    ("乾く", ("が", "は", "も"), frozenset({"洗濯物", "せんたくもの", "服", "ふく", "シャツ", "タオル", "髪", "かみ",
+                                         "空気", "くうき", "地面", "じめん", "ペンキ", "インク"})),
     ("効く", ("が", "は"), frozenset({"薬", "くすり"})),
     ("晴れる", ("が", "は", "も", "から"), frozenset({"天気", "てんき", "空", "そら", "明日", "あした", "あす", "今日",
                                                  "きょう", "今", "いま", "朝", "あさ", "午後", "ごご", "午前",
@@ -2546,6 +2580,8 @@ _SENTENCE_PARTNERS = {
     "離す": frozenset({"手", "て", "目", "め"}),
     "話す": frozenset({"日本語", "にほんご", "英語", "えいご", "言葉", "ことば", "電話", "でんわ", "話", "はなし",
                      "声", "こえ", "先生", "せんせい", "友達", "友だち", "ともだち"}),
+    # (この写真は、母が…とったもの: what a photo is, plan 296)
+    "撮る": frozenset({"写真", "しゃしん", "カメラ", "ビデオ", "動画", "どうが", "スマホ"}),
     "着く": frozenset({"駅", "えき", "空港", "くうこう", "家", "いえ", "うち", "ホテル", "到着", "とうちゃく",
                      "電車", "でんしゃ", "バス", "飛行機", "ひこうき",
                      # (あと五分でつく: what is left before one arrives)
@@ -2731,12 +2767,19 @@ def _subject_of(morphemes, i: int):
     nearest が, は or も after a noun, back to the clause's start."""
     for k in range(i - 1, 0, -1):
         t = morphemes[k]
+        # (a topic set off by its comma is the clause's: あの子は、おこった
+        # かと思うと, plan 296)
+        if t.pos == "symbol" and t.surface in ("、", "，") and k >= 2 and morphemes[k - 1].pos == "particle" \
+                and morphemes[k - 1].surface in ("は", "も", "が"):
+            continue
         if t.pos == "symbol" or (t.pos == "particle" and t.conjunctive):
             return None
         if t.pos == "particle" and t.surface in ("が", "は", "も"):
             word = morphemes[k - 1]
             if t.surface == "も" and _a_quantity(morphemes, k - 1):
                 continue                   # ゆきが三十センチもふった: how much, no subject (plan 272)
+            if t.surface == "も" and word.surface in ("いつ", "何時"):
+                continue                   # (いつも, "always": no subject, plan 296)
             if word.pos == "suffix" and k >= 2:
                 return t.surface, morphemes[k - 2].surface + word.surface
             return (t.surface, word.surface) if word.pos in ("noun", "pronoun") else None
@@ -2796,6 +2839,7 @@ _FOCUS_PARTICLES = frozenset({"なんて", "なんか", "さえ", "すら", "だ
 # back in the clause (_subject_of): 女の子が一人でないていた. Never a verb
 # whose が marks what it takes: 犬は匂いをかいだ is no 飼う.
 _SUBJECT_VERBS = frozenset({"泣く", "鳴く", "来る", "居る", "要る", "亡くなる", "無くなる", "降る", "晴れる", "住む",
+                            "降り出す", "渇く", "乾く",
                             "吹く", "咲く", "点く", "経つ", "済む", "空く", "開く", "効く",
                             # (plan 272; 付ける by what its は puts first: お箸は
                             # おつけしますか)

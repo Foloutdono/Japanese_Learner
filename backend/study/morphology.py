@@ -1386,9 +1386,12 @@ def _not_a_passive(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, 
     while i < len(morphemes):
         m = morphemes[i]
         nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+        # (...never after a を: the verbs it reads whole take none, so うそを
+        # つかれた is つく's passive, "was lied to", plan 296)
+        taken = i > 0 and morphemes[i - 1].pos == "particle" and morphemes[i - 1].surface == "を"
         if (nxt is not None and m.pos == "verb" and m.cform.startswith("未然形") and m.ctype.startswith("五段")
                 and all("\u3041" <= c <= "\u309f" for c in m.surface) and nxt.pos == "auxiliary"
-                and nxt.lemma == "れる" and nxt.start == m.end and nxt.surface.startswith("れ")):
+                and nxt.lemma == "れる" and nxt.start == m.end and nxt.surface.startswith("れ") and not taken):
             verb = _one_verb(m.surface + "れる")
             if verb is not None:
                 surface = m.surface + nxt.surface
@@ -4795,6 +4798,15 @@ def _compound_verb(first: str, first_reading: str, second: str, second_reading: 
             kanji = entry.get("kanji") or ""
             if kanji == written and reading in kata_to_hira(entry.get("kana") or "").replace(";", "/").split("/"):
                 return kanji, reading
+    if _kana_letters(first):
+        # (A first verb in kana is any verb read so: the deck's one card of
+        # the whole reading that ends on the second, 雨がふり出した 降り出す,
+        # before JMdict's commonest row, 振り出す, plan 296.)
+        mine = {entry.get("kanji") for entries in VOCAB_BY_LEVEL.values() for entry in entries
+                if (entry.get("kanji") or "").endswith(second) and len(entry.get("kanji") or "") > len(second)
+                and reading in kata_to_hira(entry.get("kana") or "").replace(";", "/").split("/")}
+        if len(mine) == 1:
+            return next(iter(mine)), reading
     if deck_only:
         return None
     rows = [r for r in jmdict_db.by_kana(reading) or [] if r.get("kana") == reading]

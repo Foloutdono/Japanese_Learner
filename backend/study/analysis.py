@@ -2185,7 +2185,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # numbers read with their counters, in kanji or in kana (一割 いちわり,
 # 二十箱 にじゅっぱこ, 一ぴき いっぴき), かい 回 or 階 by what is done on
 # a floor, 何かい, a counter's own sense (一本も), 十分の一, 三割余り,
-# 一駅前 and 二、三日 さんにち.
+# 一駅前 and 二、三日 さんにち; and a verb in kana by what it takes (雨が
+# ふり出す 降り出す, 実がなる 生る, 手がはなせない 離す, のどがかわく 渇く,
+# 窓口はあく 開く, 写真…とった 撮る, あの子は、おこった 怒る, うそをつかれた).
 LOCAL_REV = 33
 
 

@@ -3862,3 +3862,42 @@ class NumbersAndCountersTests(unittest.TestCase):
         self.assertFalse([t for t in span if t["surface"] in ("三日", "日中")])
         self.assertEqual(self.reading("三日休みます。", "三日"), "みっか")
         self.assertIn("年生", cut("しかし、三年生になると、行きたくないと言った。"))
+
+
+class AKanaVerbByWhatItTakesTests(unittest.TestCase):
+    """Plan 296: a verb in kana another deck verb could be is read by what
+    it takes in its own clause -- the subject (雨がふり出す, 実がなる,
+    のどがかわく, 窓口はあく, あの子は、おこった), the object (手がはなせない,
+    写真…とった), and a passive's object (うそをつかれた, no 疲れる)."""
+
+    def card(self, sentence: str, surface: str) -> str:
+        entry = (token_of(sentence, surface).get("vocab_match") or {}).get("entry") or {}
+        return entry.get("kanji") or entry.get("kana") or ""
+
+    def test_by_what_it_takes(self) -> None:
+        for sentence, surface, kanji in (
+                ("花から花へ飛んで、実がなるのを助けるむしもいるからだ。", "なる", "生る"),
+                ("料理をしている最中にチャイムが鳴っても、手がはなせず、出られない。", "はなせ", "離す"),
+                ("駅に着いたところで、雨がふり出した。", "ふり出し", "降り出す"),
+                ("風が強くなると、雨がふり出す。", "ふり出す", "降り出す"),
+                ("この写真は、母が子どものころにとったものに相違ない。", "とっ", "撮る"),
+                ("あの子は、おこったかと思うと、すぐに笑い出した。", "おこっ", "怒る"),
+                ("あの先生は、いつもおこっていて、こわい。", "おこっ", "怒る"),
+                ("たとえ日曜日でも、駅の窓口はあいています。", "あい", "開く"),
+                ("のどがかわきましたね。", "かわき", "渇く"),
+                ("のどが、かわきましたか。", "かわき", "渇く"),
+                ("となりのおじいさんが、きのうなくなりました。", "なくなり", "亡くなる")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+        # ...and the lookalikes it must leave alone
+        for sentence, surface, kanji in (("トマトが赤くなるまで、ただ待つしかない。", "なる", "なる"),
+                                         ("日本語がはなせない。", "はなせ", "話す"),
+                                         ("せんたくものがかわいた。", "かわい", "乾く"),
+                                         ("せきがあいていますか。", "あい", "空く")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(self.card(sentence, surface), kanji)
+
+    def test_a_passive_with_its_object(self) -> None:
+        self.assertEqual(cut("あの人を信じればこそ、うそをつかれた悲しみは大きかった。")[9:12], ["つか", "れ", "た"])
+        self.assertEqual(self.card("あの人を信じればこそ、うそをつかれた悲しみは大きかった。", "つか"), "吐く")
+        self.assertIn("つかれ", cut("つかれたので、休みます。"))
