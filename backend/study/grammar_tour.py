@@ -69,13 +69,13 @@ GUESS_COUNT = 4
 # already is, each drawn as a station plate with its plain-language caption
 # (a place is what gets a pair, DESIGN.md). A scene's `place` is one key.
 SCENE_PLACES: dict[str, dict] = {
-    "窓口":   {"reading": "まどぐち",     "en": "Ticket window",           "fr": "Guichet"},
-    "売店":   {"reading": "ばいてん",     "en": "Kiosk",                   "fr": "Kiosque"},
-    "ホーム": {"reading": None,          "en": "Platform",                "fr": "Quai"},
-    "車内":   {"reading": "しゃない",     "en": "On the train",            "fr": "Dans le train"},
-    "改札":   {"reading": "かいさつ",     "en": "Ticket gates",            "fr": "Portillons"},
-    "待合室": {"reading": "まちあいしつ", "en": "Waiting room",            "fr": "Salle d'attente"},
-    "駅前":   {"reading": "えきまえ",     "en": "In front of the station", "fr": "Devant la gare"},
+    "窓口":   {"reading": "まどぐち",     "en": "Ticket window",           "fr": "Guichet",         "es": "Ventanilla"},
+    "売店":   {"reading": "ばいてん",     "en": "Kiosk",                   "fr": "Kiosque",         "es": "Quiosco"},
+    "ホーム": {"reading": None,          "en": "Platform",                "fr": "Quai",            "es": "Andén"},
+    "車内":   {"reading": "しゃない",     "en": "On the train",            "fr": "Dans le train",   "es": "En el tren"},
+    "改札":   {"reading": "かいさつ",     "en": "Ticket gates",            "fr": "Portillons",      "es": "Torniquetes"},
+    "待合室": {"reading": "まちあいしつ", "en": "Waiting room",            "fr": "Salle d'attente", "es": "Sala de espera"},
+    "駅前":   {"reading": "えきまえ",     "en": "In front of the station", "fr": "Devant la gare",  "es": "Frente a la estación"},
 }
 # The two voices of a scene: the other person, whom the scene names
 # (`them`: the agent, the vendor, a traveller), and the learner.

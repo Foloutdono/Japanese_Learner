@@ -164,7 +164,7 @@ looks for its still, and only a still that loads brings in a player.
 
 | Slot | Files |
 | --- | --- |
-| Overview presentation | `presentation.mp4`, `presentation.jpg`, `presentation.fr.vtt`, `presentation.en.vtt` |
+| Overview presentation | `presentation.mp4`, `presentation.jpg`, `presentation.fr.vtt`, `presentation.en.vtt` (and `presentation.es.vtt` once written: add `'es'` to `PRESENTATION.captions` in `config.mjs`; until then the Spanish page plays the English) |
 | Aujourd'hui | `aujourdhui.mp4`, `aujourdhui.jpg` |
 | Kana | `kana.mp4`, `kana.jpg` |
 | Vocabulaire | `vocabulaire.mp4`, `vocabulaire.jpg` |

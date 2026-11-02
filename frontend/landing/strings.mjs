@@ -11,9 +11,9 @@ import { arrivals, spanOf } from './content.mjs'
 
 const FR_NUM = new Intl.NumberFormat('fr-FR')
 const EN_NUM = new Intl.NumberFormat('en-GB')
-// The RAE's figures: four digits run together (7980), five and more
-// grouped by a space (10 000), as the French groups them.
-const ES_NUM = { format: n => (Math.abs(n) < 10000 ? String(n) : FR_NUM.format(n)) }
+// Latin-American Spanish (plan 291, the owner's choice of variety): a
+// comma between thousands, as the app writes them (lib/locale.js, es-419).
+const ES_NUM = new Intl.NumberFormat('es-419')
 
 // The demo cards (the method's trial). Each carries the forecast the
 // app's scheduler gives it, in seconds, for Missed, Almost, Correct
@@ -568,8 +568,8 @@ const es = facts => {
   return {
     lang: 'es',
     num: n,
-    title: 'Aprender japonés: kana, kanji y JLPT N5 a N1 | Tsuji',
-    description: 'La app para aprender japonés un poco cada día: kana, vocabulario, kanji y gramática repasados en el momento justo, dictados y exámenes de prueba del JLPT.',
+    title: 'Aprender japonés: kana, kanji y JLPT del N5 al N1 | Tsuji',
+    description: 'La app para aprender japonés un poco cada día: kana, vocabulario, kanji y gramática repasados en el momento justo, con dictados y exámenes de prueba del JLPT.',
     ogTitle: 'Tsuji — aprender japonés, del primer kana al JLPT N1',
     ogAlt: 'Tsuji, el cruce: cuatro líneas, del kana al JLPT N1.',
     skip: 'Saltar al contenido',
@@ -698,10 +698,10 @@ const es = facts => {
       devices: { phone: 'Teléfono', desk: 'Computadora' },
       play: name => `Ver el video: ${name}`,
       items: {
-        aujourdhui: { name: 'Hoy', line: 'Todos tus repasos en una sola cola, con el tiempo que te llevará.', what: 'La taquilla del día: las tarjetas pendientes de todas las líneas y, luego, la salida.' },
+        aujourdhui: { name: 'Hoy', line: 'Todos tus repasos en una sola cola, con el tiempo que te llevará.', what: 'El torniquete del día: las tarjetas pendientes de todas las líneas y, luego, la salida.' },
         kana: { name: 'Kana', line: 'Hiragana y katakana, sonido a sonido, y luego trazados con el dedo.', what: 'Reconocer un kana, oírlo y luego trazarlo.' },
         vocabulaire: { name: 'Vocabulario', line: `${n(facts.words)} palabras del JLPT, con su significado en español, en ambos sentidos.`, what: 'Una tarjeta volteada y calificada, y la siguiente que llega.' },
-        kanji: { name: 'Kanji', line: 'El orden de trazos animado y luego el kanji trazado de memoria.', what: 'El trazo animado y luego el kanji escrito de memoria.' },
+        kanji: { name: 'Kanji', line: 'El orden de trazos animado y luego el kanji trazado de memoria.', what: 'Los trazos animados y luego el kanji escrito de memoria.' },
         grammaire: { name: 'Gramática', line: 'Una lección por punto y luego la frase que hay que completar.', what: 'La lección de un punto y luego la frase que lo usa.' },
         pratique: { name: 'Lectura y dictado', line: 'Frases reales para leer, escuchar y escribir, a tu nivel.', what: 'Una frase leída, otra escuchada, y cada una corregida.' },
         analyseur: { name: 'Analizador', line: 'Un video de YouTube, una foto o un texto, desglosados palabra por palabra.', what: 'Un subtítulo de YouTube desglosado, con su gramática numerada.' },
@@ -712,7 +712,7 @@ const es = facts => {
     jlpt: {
       kicker: 'Examen JLPT',
       h2: 'Exámenes de prueba del JLPT, del N5 al N1',
-      body: `Vocabulario, gramática, lectura y comprensión auditiva, cronometrados y puntuados sobre 180 con los mínimos oficiales para aprobar. En el N5, ${facts.exam.questions} preguntas en ${facts.exam.minutes} minutos: sabes dónde estás antes de inscribirte.`,
+      body: `Vocabulario, gramática, lectura y comprensión auditiva, cronometrados y puntuados sobre 180 con los mínimos oficiales para aprobar. En el N5, ${facts.exam.questions} preguntas en ${facts.exam.minutes} minutos: sabes en qué punto estás antes de inscribirte.`,
       note: 'Formato oficial, puntuación no oficial. Ninguna pregunta está copiada de un examen real.',
       head: 'N5 · Lectura de kanji · Pregunta 1',
       timer: `${facts.exam.minutes - 1}:12`,
@@ -752,7 +752,7 @@ const es = facts => {
         ['Sin anuncios ni rastreadores', 'No vendemos datos. Nuestras estadísticas nunca contienen lo que escribes.'],
         ['Una gramática revisada con lupa', 'Redactada con IA y luego releída sin pausa por agentes de IA que buscan sus errores. Cada ejemplo se comprueba.'],
         ['Todo se lee en voz alta', 'Los kana, con una voz humana grabada; el resto, con una voz japonesa sintética.'],
-        ['Tus datos son tuyos', 'Exporta tu progreso en CSV y borra tu cuenta en dos toques.'],
+        ['Tus datos son tuyos', 'Exporta tu progreso en CSV o borra tu cuenta en dos toques.'],
       ],
     },
 

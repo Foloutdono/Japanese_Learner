@@ -6,7 +6,7 @@
     "situation": {
       "en": "You walk into an estate agent's to find a flat to rent. An agent greets you at the counter.",
       "fr": "Tu entres dans une agence immobilière pour trouver un appartement à louer. Un agent t'accueille au comptoir.",
-      "es": "Entras en una inmobiliaria para encontrar un apartamento de alquiler. Alguien de la agencia te recibe en el mostrador."
+      "es": "Entras a una inmobiliaria para encontrar un apartamento de alquiler. Alguien de la agencia te recibe en el mostrador."
     },
     "goal": {
       "en": "Describe the flat you want (your budget, how near the station) and arrange a viewing.",
@@ -64,7 +64,7 @@
             "kana": "ワンルームをみつけています。",
             "en": "I've found a studio.",
             "fr": "J'ai trouvé un studio.",
-            "es": "Ya he encontrado un estudio.",
+            "es": "Ya encontré un estudio.",
             "why": {
               "en": "「見つける」 is to find, so 「見つけています」 says you already have one; to look for one is 「探す」.",
               "fr": "「見つける」, c'est trouver : 「見つけています」 dit que tu en as déjà un ; chercher se dit 「探す」.",
@@ -344,7 +344,7 @@
     "situation": {
       "en": "The estate agent has brought you to see a studio flat that matches what you asked for. You have just stepped inside together.",
       "fr": "L'agent immobilier t'emmène visiter un studio qui correspond à ta demande. Vous venez d'entrer ensemble.",
-      "es": "Alguien de la inmobiliaria te lleva a ver un estudio que se ajusta a lo que pediste. Acabas de entrar con esa persona."
+      "es": "Alguien de la inmobiliaria te lleva a ver un estudio que se ajusta a lo que pediste. Acaban de entrar juntos."
     },
     "goal": {
       "en": "Look the flat over: ask about the noise, playing your guitar and the money due up front, say when you could move in, and ask for time to think.",
@@ -1022,7 +1022,7 @@
     "situation": {
       "en": "You have just arrived at a traditional inn for the night. A member of staff shows you to your room and explains how the stay works.",
       "fr": "Tu viens d'arriver dans une auberge traditionnelle pour la nuit. Quelqu'un du personnel te conduit à ta chambre et t'explique le déroulement du séjour.",
-      "es": "Acabas de llegar a una posada tradicional para pasar la noche. Alguien del personal te acompaña a tu habitación y te explica cómo funciona la estancia."
+      "es": "Acabas de llegar a una posada tradicional para pasar la noche. Alguien del personal te acompaña a tu habitación y te explica cómo funciona la estadía."
     },
     "goal": {
       "en": "Settle in: choose your dinner time and find out about the baths and breakfast.",
@@ -1107,7 +1107,7 @@
           "note": {
             "en": "「も」 adds the outdoor bath to the one just described: is there one of those as well?",
             "fr": "「も」 ajoute le bain en plein air à celui qu'on vient de décrire : y en a-t-il un aussi ?",
-            "es": "「も」 añade el baño al aire libre al que acaban de describirte: ¿también hay uno así?"
+            "es": "「も」 agrega el baño al aire libre al que acaban de describirte: ¿también hay uno así?"
           },
           "alt": [
             {"jp": "外のお風呂もありますか。", "kana": "そとのおふろもありますか。", "romaji": "soto no ofuro mo arimasu ka"}
@@ -1233,11 +1233,11 @@
             "kana": "はい、きたことがあります。",
             "en": "Yes, I've worn one before.",
             "fr": "Oui, j'en ai déjà porté un.",
-            "es": "Sí, ya he llevado uno antes.",
+            "es": "Sí, ya he usado uno antes.",
             "why": {
               "en": "「着たことがあります」 says you have worn a yukata before, as if you had been asked that; the question was whether the size fits.",
               "fr": "「着たことがあります」 dit que tu en as déjà porté, comme si c'était la question ; on te demandait si la taille va.",
-              "es": "「着たことがあります」 dice que ya has llevado un yukata, como si te hubieran preguntado eso; la pregunta era si la talla te queda bien."
+              "es": "「着たことがあります」 dice que ya has usado un yukata, como si te hubieran preguntado eso; la pregunta era si la talla te queda bien."
             }
           }
         ]
@@ -1339,7 +1339,7 @@
             "why": {
               "en": "「おかげさまで、元気です」 answers someone who has asked how you are, and nobody has asked.",
               "fr": "「おかげさまで、元気です」 répond à quelqu'un qui t'a demandé comment tu vas, et personne ne l'a demandé.",
-              "es": "「おかげさまで、元気です」 responde a quien te ha preguntado cómo estás, y nadie lo ha preguntado."
+              "es": "「おかげさまで、元気です」 responde a quien te pregunta cómo estás, y nadie te lo preguntó."
             }
           }
         ]
@@ -1350,17 +1350,17 @@
       "kana": "では、どうぞごゆっくりおすごしください。",
       "en": "Well then, please make yourself at home.",
       "fr": "Eh bien, passez un agréable séjour.",
-      "es": "Bueno, que tenga una estancia agradable."
+      "es": "Bueno, que tenga una estadía agradable."
     }
   },
   {
     "id": "ryokan-late",
-    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone", "es": "Al teléfono"},
+    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone", "es": "Por teléfono"},
     "title": {"en": "The ryokan, running late", "fr": "Le ryokan, avec du retard", "es": "El ryokan, con retraso"},
     "situation": {
       "en": "You are booked into a ryokan tonight under your name, Lopez, but your train is running late. You call the inn while changing trains.",
       "fr": "Tu as réservé une nuit dans un ryokan ce soir, au nom de Lopez, mais ton train a du retard. Tu appelles l'auberge pendant une correspondance.",
-      "es": "Tienes una reserva para esta noche en un ryokan, a nombre de Lopez, pero tu tren va con retraso. Llamas a la posada mientras cambias de tren."
+      "es": "Tienes una reserva para esta noche en un ryokan, a nombre de López, pero tu tren va con retraso. Llamas a la posada mientras cambias de tren."
     },
     "goal": {
       "en": "Tell the inn you will be late, accept what it offers for dinner, find out how late you can arrive and ask about the bath.",
@@ -1391,7 +1391,7 @@
           "romaji": "konban yoyaku shite iru ropesu desu ga, densha ga okurete shimatte, sukoshi osoku narisou nan desu",
           "en": "This is Lopez, booked for tonight. My train has been delayed, so I'm going to be a little late.",
           "fr": "C'est Lopez, j'ai une réservation pour ce soir. Mon train a pris du retard, alors je vais arriver un peu tard.",
-          "es": "Soy Lopez, tengo una reserva para esta noche. Mi tren se ha retrasado, así que parece que llegaré un poco tarde.",
+          "es": "Soy López, tengo una reserva para esta noche. Mi tren se retrasó, así que parece que llegaré un poco tarde.",
           "note": {
             "en": "「予約している」 says who you are by your booking, and 「〜てしまって」 gives the delay as something that happened against your will.",
             "fr": "「予約している」 dit qui tu es par ta réservation, et 「〜てしまって」 présente le retard comme une chose arrivée malgré toi.",
@@ -1407,7 +1407,7 @@
             "kana": "こんばんよやくしているロペスですが、でんしゃがおくれてしまって、すこしはやくつきそうなんです。",
             "en": "This is Lopez, booked for tonight. My train has been delayed, so I'm going to be a little early.",
             "fr": "C'est Lopez, j'ai une réservation pour ce soir. Mon train a pris du retard, alors je vais arriver un peu en avance.",
-            "es": "Soy Lopez, tengo una reserva para esta noche. Mi tren se ha retrasado, así que parece que llegaré un poco antes.",
+            "es": "Soy López, tengo una reserva para esta noche. Mi tren se retrasó, así que parece que llegaré un poco antes.",
             "why": {
               "en": "「遅れてしまって」 gives the delay as your reason, then 「早く着きそう」 says you will be early: the reason works against what it explains.",
               "fr": "「遅れてしまって」 donne le retard comme raison, puis 「早く着きそう」 annonce que tu seras en avance : la raison va contre ce qu'elle explique.",
@@ -1419,7 +1419,7 @@
             "kana": "あ、こんばんよやくしてるロペスだけど、でんしゃがおくれちゃってさ。",
             "en": "Hi, it's Lopez, booked for tonight. My train's gone and got delayed, you know.",
             "fr": "Salut, c'est Lopez, j'ai réservé pour ce soir. Mon train a du retard, tu vois.",
-            "es": "Oye, soy Lopez, reservé para esta noche. Es que el tren se me retrasó, ¿sabes?",
+            "es": "Oye, soy López, reservé para esta noche. Es que el tren se me retrasó, ¿sabes?",
             "why": {
               "en": "「だけど」 and 「遅れちゃってさ」 are how you talk to a friend; to the inn's staff, on the phone, you keep to polite speech.",
               "fr": "「だけど」 et 「遅れちゃってさ」, c'est le ton entre amis ; au personnel de l'auberge, au téléphone, tu restes poli.",
@@ -1564,7 +1564,7 @@
             "why": {
               "en": "「着いてもらえますか」 asks the inn to get somewhere by a certain time, when it is you who are travelling.",
               "fr": "「着いてもらえますか」 demande à l'auberge d'arriver quelque part avant une certaine heure, alors que c'est toi qui voyages.",
-              "es": "「着いてもらえますか」 le pide a la posada que llegue a algún sitio a cierta hora, cuando quien viaja eres tú."
+              "es": "「着いてもらえますか」 le pide a la posada que llegue a algún lugar a cierta hora, cuando quien viaja eres tú."
             }
           },
           {
@@ -1643,7 +1643,7 @@
   },
   {
     "id": "redelivery",
-    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone", "es": "Al teléfono"},
+    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone", "es": "Por teléfono"},
     "title": {"en": "Asking for a redelivery", "fr": "Faire relivrer un colis", "es": "Pedir una nueva entrega"},
     "situation": {
       "en": "A parcel came while you were out, and the driver left a missed-delivery notice in your letterbox. You call the number on it.",
@@ -1884,7 +1884,7 @@
           "note": {
             "en": "An address runs from the largest unit down: the district, its numbered section in 「丁目」, then the block and the house, with 「の」 between the two numbers.",
             "fr": "Une adresse va du plus grand au plus petit : le quartier, sa section numérotée en 「丁目」, puis le pâté de maisons et la maison, avec 「の」 entre les deux numéros.",
-            "es": "Una dirección va de la unidad más grande a la más pequeña: el barrio, su sección numerada en 「丁目」, luego la manzana y la casa, con 「の」 entre los dos números."
+            "es": "Una dirección va de la unidad más grande a la más pequeña: el barrio, su sección numerada en 「丁目」, luego la cuadra y la casa, con 「の」 entre los dos números."
           },
           "alt": [
             {"jp": "はい、住所は中央三丁目、五の八です。", "kana": "はい、じゅうしょはちゅうおうさんちょうめ、ごのはちです。", "romaji": "hai, juusho wa chuuou sanchoume, go no hachi desu"}
@@ -1928,7 +1928,7 @@
   },
   {
     "id": "redelivery-full",
-    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone", "es": "Al teléfono"},
+    "place": {"jp": "電話", "kana": "でんわ", "en": "On the phone", "fr": "Au téléphone", "es": "Por teléfono"},
     "title": {"en": "No slot tomorrow evening", "fr": "Plus de créneau demain soir", "es": "Sin horario libre mañana por la noche"},
     "situation": {
       "en": "A parcel came while you were out, and you call the number on the missed-delivery notice. You work during the day, so you want it brought tomorrow evening.",
@@ -2242,7 +2242,7 @@
           "kana": "こんばん、みんなでのみにいくんですが、いっしょにどうですか。",
           "en": "A few of us are going for drinks tonight. Would you like to come along?",
           "fr": "Ce soir, on va boire un verre tous ensemble. Vous voulez venir ?",
-          "es": "Esta noche vamos a ir a tomar algo con los demás. ¿Le gustaría venir?"
+          "es": "Esta noche vamos a ir varios a tomar algo. ¿Le gustaría venir?"
         },
         "me": {
           "jp": "すみません、今日はちょっと都合が悪くて。",
@@ -2301,7 +2301,7 @@
           "romaji": "ee, kuni kara tomodachi ga kite iru n desu",
           "en": "Yes, a friend is visiting from back home.",
           "fr": "Oui, un ami de mon pays est venu me voir.",
-          "es": "Sí, es que ha venido un amigo de mi país.",
+          "es": "Sí, es que está de visita un amigo de mi país.",
           "note": {
             "en": "「〜んです」 gives your situation as an explanation, the way a reason is offered in conversation.",
             "fr": "「〜んです」 présente ta situation comme une explication : c'est ainsi qu'on donne une raison à l'oral.",
@@ -2321,7 +2321,7 @@
             "why": {
               "en": "「行っている」 says your friend has gone off somewhere; a friend who has come here to you 「来ている」.",
               "fr": "「行っている」 dit que ton ami est parti ailleurs ; un ami venu jusqu'à toi 「来ている」.",
-              "es": "「行っている」 dice que tu amigo se ha ido a otro sitio; de un amigo que ha venido hasta ti se dice 「来ている」."
+              "es": "「行っている」 dice que tu amigo se ha ido a otro lugar; de un amigo que ha venido hasta ti se dice 「来ている」."
             }
           },
           {
@@ -2446,7 +2446,7 @@
           "kana": "じゃあ、おみせをよやくしておきますね。",
           "en": "Great, I'll book us a table somewhere, then.",
           "fr": "Très bien, je réserve une table quelque part, alors.",
-          "es": "Bueno, entonces reservo mesa en algún sitio."
+          "es": "Bueno, entonces reservo mesa en algún lugar."
         },
         "me": {
           "jp": "ありがとうございます。楽しみにしています。",
@@ -2458,7 +2458,7 @@
           "note": {
             "en": "「楽しみにしています」 says you are looking forward to it, the warm way to close an arrangement.",
             "fr": "「楽しみにしています」 dit que tu attends ce moment avec plaisir : la façon chaleureuse de conclure.",
-            "es": "「楽しみにしています」 dice que esperas ese momento con ilusión, la forma cálida de cerrar un plan."
+            "es": "「楽しみにしています」 dice que esperas ese momento con ganas, la forma cálida de cerrar un plan."
           },
           "alt": [
             {"jp": "ありがとうございます。楽しみです。", "kana": "ありがとうございます。たのしみです。", "romaji": "arigatou gozaimasu. tanoshimi desu."}
@@ -2529,7 +2529,7 @@
           "kana": "こんばん、みんなでのみにいくんですけど、いっしょにいきませんか。",
           "en": "A few of us are going for drinks tonight. Do you want to come along?",
           "fr": "Ce soir, on va boire un verre tous ensemble. Vous venez avec nous ?",
-          "es": "Esta noche vamos a ir a tomar algo con los demás. ¿Viene con nosotros?"
+          "es": "Esta noche vamos a ir varios a tomar algo. ¿Viene con nosotros?"
         },
         "me": {
           "jp": "ぜひ行きたいです。でも、仕事が残っているので、少し遅れて行きます。",
@@ -2631,7 +2631,7 @@
           "kana": "わかりました。じゃあ、おみせのばしょはあとでメッセージでおくりますね。",
           "en": "OK. I'll message you where the place is later, then.",
           "fr": "D'accord. Je vous enverrai l'adresse par message tout à l'heure, alors.",
-          "es": "De acuerdo. Entonces luego le mando un mensaje con la dirección del sitio."
+          "es": "De acuerdo. Entonces luego le mando un mensaje con la dirección del lugar."
         },
         "me": {
           "jp": "ありがとうございます。駅のどの出口から出ればいいですか。",
@@ -2639,7 +2639,7 @@
           "romaji": "arigatou gozaimasu. eki no dono deguchi kara dereba ii desu ka.",
           "en": "Thanks. Which exit of the station should I take?",
           "fr": "Merci. Je dois prendre quelle sortie de la gare ?",
-          "es": "Gracias. ¿Por qué salida de la estación tengo que salir?",
+          "es": "Gracias. ¿Qué salida de la estación tengo que tomar?",
           "note": {
             "en": "「〜ばいいですか」 asks what you should do: which exit to come out of.",
             "fr": "「〜ばいいですか」 demande ce que tu dois faire : par quelle sortie passer.",
@@ -2659,7 +2659,7 @@
             "why": {
               "en": "「どういたしまして」 answers a thank-you, and your colleague has made you an offer, not thanked you.",
               "fr": "「どういたしまして」 répond à un merci, or ton collègue te fait une proposition, pas un remerciement.",
-              "es": "「どういたしまして」 responde a un agradecimiento, y tu colega te ha hecho una oferta, no te ha dado las gracias."
+              "es": "「どういたしまして」 responde a un agradecimiento, y tu colega te hizo una oferta, no te dio las gracias."
             }
           },
           {
@@ -2667,11 +2667,11 @@
             "kana": "ありがとうございます。じゃあ、おみせのばしょはあとでおくりますね。",
             "en": "Thanks. Then I'll send you where the place is later.",
             "fr": "Merci. Alors je vous enverrai l'adresse tout à l'heure.",
-            "es": "Gracias. Entonces luego le mando la dirección del sitio.",
+            "es": "Gracias. Entonces luego le mando la dirección del lugar.",
             "why": {
               "en": "「送りますね」 makes your colleague's offer your own, when it is they who know where the place is.",
               "fr": "「送りますね」 reprend à ton compte l'offre de ton collègue, alors que c'est lui qui connaît l'adresse.",
-              "es": "「送りますね」 hace tuya la oferta de tu colega, cuando quien sabe dónde está el sitio es la otra persona."
+              "es": "「送りますね」 hace tuya la oferta de tu colega, cuando quien sabe dónde está el lugar es la otra persona."
             }
           }
         ]
@@ -2682,7 +2682,7 @@
           "kana": "ひがしぐちをでて、まっすぐごふんぐらいです。まよったら、でんわしてくださいね。",
           "en": "Come out of the east exit and it's about five minutes straight ahead. If you get lost, give me a ring.",
           "fr": "Sortez par la sortie est, c'est à cinq minutes tout droit. Si vous vous perdez, appelez-moi.",
-          "es": "Salga por la salida este y siga recto unos cinco minutos. Si se pierde, llámeme."
+          "es": "Salga por la salida este y siga derecho unos cinco minutos. Si se pierde, llámeme."
         },
         "me": {
           "jp": "わかりました。会社を出るときに、メッセージを送ります。",
@@ -2789,12 +2789,12 @@
   },
   {
     "id": "city-hall",
-    "place": {"jp": "市役所", "kana": "しやくしょ", "en": "City hall", "fr": "Mairie", "es": "Ayuntamiento"},
+    "place": {"jp": "市役所", "kana": "しやくしょ", "en": "City hall", "fr": "Mairie", "es": "Municipalidad"},
     "title": {"en": "Registering a new address", "fr": "Déclarer sa nouvelle adresse", "es": "Registrar una nueva dirección"},
     "situation": {
       "en": "You have just moved to a new town. At the city hall, a clerk at the residents' counter calls you over.",
       "fr": "Tu viens d'emménager dans une nouvelle ville. À la mairie, un agent du guichet des résidents t'appelle.",
-      "es": "Acabas de mudarte a otra ciudad. En el ayuntamiento, alguien de la ventanilla de residentes te llama."
+      "es": "Acabas de mudarte a otra ciudad. En la municipalidad, alguien de la ventanilla de residentes te llama."
     },
     "goal": {
       "en": "Register your new address after your move.",
@@ -2802,13 +2802,13 @@
       "es": "Registra tu nueva dirección después de la mudanza."
     },
     "steps": [
-      {"en": "Say you have moved", "fr": "Dis que tu as déménagé", "es": "Di que te has mudado"},
+      {"en": "Say you have moved", "fr": "Dis que tu as déménagé", "es": "Di que te mudaste"},
       {"en": "Show your residence card", "fr": "Montre ta carte de résident", "es": "Muestra tu tarjeta de residencia"},
       {"en": "Say where you lived before", "fr": "Dis où tu habitais avant", "es": "Di dónde vivías antes"},
       {"en": "Fill in the form", "fr": "Remplis le formulaire", "es": "Completa el formulario"},
       {"en": "Sign up for health insurance", "fr": "Inscris-toi à l'assurance maladie", "es": "Inscríbete en el seguro de salud"}
     ],
-    "them": {"en": "City hall clerk", "fr": "Agent de la mairie", "es": "Personal del ayuntamiento"},
+    "them": {"en": "City hall clerk", "fr": "Agent de la mairie", "es": "Personal de la municipalidad"},
     "register": "polite",
     "turns": [
       {
@@ -2825,7 +2825,7 @@
           "romaji": "hikkoshite kita node, juusho henkou no tetsuzuki o onegai shitai n desu ga",
           "en": "I've just moved here, so I'd like to register my change of address.",
           "fr": "Je viens d'emménager ici, alors je voudrais faire mon changement d'adresse.",
-          "es": "Me he mudado aquí, así que quisiera hacer el trámite de cambio de dirección.",
+          "es": "Me acabo de mudar aquí, así que quisiera hacer el trámite de cambio de dirección.",
           "note": {
             "en": "「引っ越してきた」 uses 「〜てくる」: you moved here, into this town, and 「住所変更の手続き」 names the errand, the change of address.",
             "fr": "「引っ越してきた」 utilise 「〜てくる」 : tu as déménagé jusqu'ici, dans cette ville, et 「住所変更の手続き」 nomme la démarche, le changement d'adresse.",
@@ -2854,11 +2854,11 @@
             "kana": "ひっこしてきたので、じゅうしょをおしえてください。",
             "en": "I've just moved here, so please tell me my address.",
             "fr": "Je viens d'emménager ici, alors dites-moi mon adresse, s'il vous plaît.",
-            "es": "Me he mudado aquí, así que dígame mi dirección, por favor.",
+            "es": "Me acabo de mudar aquí, así que dígame mi dirección, por favor.",
             "why": {
               "en": "「教えてください」 asks the clerk to tell you the address; you have come to give them yours.",
               "fr": "「教えてください」 demande à l'agent de te dire l'adresse ; c'est toi qui viens lui donner la tienne.",
-              "es": "「教えてください」 le pide a quien te atiende que te diga la dirección; has venido a darle la tuya."
+              "es": "「教えてください」 le pide a quien te atiende que te diga la dirección; viniste a darle la tuya."
             }
           }
         ]
@@ -2897,7 +2897,7 @@
             "why": {
               "en": "「こちらこそ」 hands someone's thanks or greeting back to them (likewise), and nobody has thanked or greeted you: the clerk asked to see your card.",
               "fr": "「こちらこそ」 renvoie à l'autre son remerciement ou sa salutation (« moi de même »), et personne ne te remercie ni ne te salue : l'agent demandait à voir ta carte.",
-              "es": "「こちらこそ」 le devuelve a la otra persona su agradecimiento o su saludo («igualmente»), y nadie te ha dado las gracias ni te ha saludado: te pidieron ver tu tarjeta."
+              "es": "「こちらこそ」 le devuelve a la otra persona su agradecimiento o su saludo («igualmente»), y nadie te dio las gracias ni te saludó: te pidieron ver tu tarjeta."
             }
           },
           {
@@ -2960,7 +2960,7 @@
             "why": {
               "en": "「泊まる」 is to stay somewhere for a night or a few, as at a hotel; the place you lived takes 「住む」.",
               "fr": "「泊まる」, c'est passer une nuit ou quelques-unes quelque part, comme à l'hôtel ; pour l'endroit où tu habitais, c'est 「住む」.",
-              "es": "「泊まる」 es pasar una noche o unas pocas en algún sitio, como en un hotel; el lugar donde vivías es 「住む」."
+              "es": "「泊まる」 es pasar una noche o unas pocas en algún lugar, como en un hotel; el lugar donde vivías es 「住む」."
             }
           }
         ]
@@ -3078,17 +3078,17 @@
   },
   {
     "id": "city-hall-missing",
-    "place": {"jp": "市役所", "kana": "しやくしょ", "en": "City hall", "fr": "Mairie", "es": "Ayuntamiento"},
+    "place": {"jp": "市役所", "kana": "しやくしょ", "en": "City hall", "fr": "Mairie", "es": "Municipalidad"},
     "title": {"en": "No moving-out certificate", "fr": "Sans certificat de départ", "es": "Sin certificado de traslado"},
     "situation": {
       "en": "Ten days after moving to a new town, you go to the city hall to register your new address. The clerk at the residents' counter takes your form.",
       "fr": "Dix jours après avoir emménagé dans une nouvelle ville, tu vas à la mairie déclarer ta nouvelle adresse. L'agent du guichet des résidents prend ton formulaire.",
-      "es": "Diez días después de mudarte a otra ciudad, vas al ayuntamiento a registrar tu nueva dirección. En la ventanilla de residentes, recogen tu formulario."
+      "es": "Diez días después de mudarte a otra ciudad, vas a la municipalidad a registrar tu nueva dirección. En la ventanilla de residentes, recogen tu formulario."
     },
     "goal": {
       "en": "Find out what the moving-out certificate you lack is, arrange to get it by post, and ask whether the fourteen-day limit will be a problem.",
       "fr": "Renseigne-toi sur le certificat de départ qui te manque, prévois de le demander par courrier et demande si le délai de quatorze jours posera problème.",
-      "es": "Averigua qué es el certificado de traslado que te falta, organiza pedirlo por correo y pregunta si el plazo de catorce días será un problema."
+      "es": "Averigua qué es el certificado de traslado que te falta, decide pedirlo por correo y pregunta si el plazo de catorce días será un problema."
     },
     "steps": [
       {"en": "Ask what the document is", "fr": "Demande ce qu'est ce document", "es": "Pregunta qué es ese documento"},
@@ -3097,7 +3097,7 @@
       {"en": "Ask about the fourteen days", "fr": "Demande pour les quatorze jours", "es": "Pregunta por los catorce días"},
       {"en": "Promise to send it today", "fr": "Promets de l'envoyer aujourd'hui", "es": "Promete enviarlo hoy"}
     ],
-    "them": {"en": "City hall clerk", "fr": "Agent de la mairie", "es": "Personal del ayuntamiento"},
+    "them": {"en": "City hall clerk", "fr": "Agent de la mairie", "es": "Personal de la municipalidad"},
     "register": "polite",
     "turns": [
       {
@@ -3106,7 +3106,7 @@
           "kana": "おまたせしました。てんにゅうのおてつづきですね。まえのしやくしょでもらったてんしゅつしょうめいしょはおもちですか。",
           "en": "Thank you for waiting. You're registering a move into the city, I see. Do you have the moving-out certificate from your previous city hall?",
           "fr": "Merci d'avoir patienté. C'est pour une arrivée dans la commune, je vois. Vous avez le certificat de départ remis par votre ancienne mairie ?",
-          "es": "Gracias por esperar. Viene a registrar su llegada a la ciudad, ¿verdad? ¿Tiene el certificado de traslado que le dieron en su ayuntamiento anterior?"
+          "es": "Gracias por esperar. Viene a registrar su llegada a la ciudad, ¿verdad? ¿Tiene el certificado de traslado que le dieron en su municipalidad anterior?"
         },
         "me": {
           "jp": "すみません、それは何ですか。初めて聞きました。",
@@ -3130,11 +3130,11 @@
             "kana": "はい、まえのしやくしょでじゅうしょをかえてもらいました。",
             "en": "Yes, my old city hall changed my address for me.",
             "fr": "Oui, mon ancienne mairie a changé mon adresse.",
-            "es": "Sí, en mi antiguo ayuntamiento me cambiaron la dirección.",
+            "es": "Sí, en mi antigua municipalidad me cambiaron la dirección.",
             "why": {
               "en": "A move is registered at the new town's city hall, not changed by the old one, and 「住所を変えてもらいました」 says nothing of the certificate she asked about.",
               "fr": "Un déménagement se déclare à la mairie de la nouvelle ville, pas à l'ancienne, et 「住所を変えてもらいました」 ne dit rien du certificat demandé.",
-              "es": "Una mudanza se registra en el ayuntamiento de la nueva ciudad, no la cambia el anterior, y 「住所を変えてもらいました」 no dice nada del certificado por el que te preguntaron."
+              "es": "Una mudanza se registra en la municipalidad de la nueva ciudad, no la cambia la anterior, y 「住所を変えてもらいました」 no dice nada del certificado por el que te preguntaron."
             }
           },
           {
@@ -3157,7 +3157,7 @@
           "kana": "まえのしやくしょにてんしゅつとどけをだすと、もらえるしょるいです。てんしゅつとどけはだされましたか。",
           "en": "It's a document you get when you report your move-out to your previous city hall. Did you report your move-out there?",
           "fr": "C'est un document qu'on vous remet quand vous déclarez votre départ à votre ancienne mairie. Vous avez fait cette déclaration ?",
-          "es": "Es un documento que le dan al presentar el aviso de traslado en su ayuntamiento anterior. ¿Presentó ese aviso?"
+          "es": "Es un documento que le dan al presentar el aviso de traslado en su municipalidad anterior. ¿Presentó ese aviso?"
         },
         "me": {
           "jp": "いいえ、知らなかったので、まだ出していないんです。",
@@ -3208,7 +3208,7 @@
           "kana": "そうですか。では、まえのしやくしょにてんしゅつとどけをだしてください。ゆうそうでもできますよ。",
           "en": "I see. Then you'll need to report your move-out to your previous city hall. You can do it by post, too.",
           "fr": "Je vois. Alors il faut faire la déclaration de départ à votre ancienne mairie. C'est possible aussi par courrier.",
-          "es": "Entiendo. Entonces tiene que presentar el aviso de traslado en su ayuntamiento anterior. También se puede hacer por correo."
+          "es": "Entiendo. Entonces tiene que presentar el aviso de traslado en su municipalidad anterior. También se puede hacer por correo."
         },
         "me": {
           "jp": "前の町は遠いので、郵便で出すことにします。証明書が届くまで、何日ぐらいかかりますか。",
@@ -3216,7 +3216,7 @@
           "romaji": "mae no machi wa tooi node, yuubin de dasu koto ni shimasu. shoumeisho ga todoku made, nannichi gurai kakarimasu ka.",
           "en": "My old town is a long way off, so I'll do it by post. How many days until the certificate reaches me?",
           "fr": "Mon ancienne ville est loin, alors je vais le faire par courrier. Combien de jours faut-il pour recevoir le certificat ?",
-          "es": "Mi antigua ciudad queda lejos, así que he decidido hacerlo por correo. ¿Cuántos días tarda en llegarme el certificado?",
+          "es": "Mi antigua ciudad queda lejos, así que lo voy a hacer por correo. ¿Cuántos días tarda en llegarme el certificado?",
           "note": {
             "en": "「ことにします」 makes the post your decision, and 「届くまで」 asks how long until the certificate reaches you.",
             "fr": "「ことにします」 fait du courrier ta décision, et 「届くまで」 demande combien de temps avant que le certificat t'arrive.",
@@ -3232,7 +3232,7 @@
             "kana": "まえのまちはとおいので、ゆうびんでだすことにします。しょうめいしょをとどけるまで、なんにちぐらいかかりますか。",
             "en": "My old town is a long way off, so I'll do it by post. How many days until I deliver the certificate?",
             "fr": "Mon ancienne ville est loin, alors je vais le faire par courrier. Combien de jours avant que je livre le certificat ?",
-            "es": "Mi antigua ciudad queda lejos, así que he decidido hacerlo por correo. ¿Cuántos días faltan para que yo entregue el certificado?",
+            "es": "Mi antigua ciudad queda lejos, así que lo voy a hacer por correo. ¿Cuántos días faltan para que yo entregue el certificado?",
             "why": {
               "en": "「届ける」 is to deliver something yourself; the certificate reaching you is 「届く」.",
               "fr": "「届ける」, c'est livrer soi-même quelque chose ; le certificat qui t'arrive, c'est 「届く」.",
@@ -3244,11 +3244,11 @@
             "kana": "まえのまちはとおいので、こちらのしやくしょからだしてもらいます。",
             "en": "My old town is a long way off, so I'll have this city hall send it.",
             "fr": "Mon ancienne ville est loin, alors je vais demander à cette mairie de l'envoyer.",
-            "es": "Mi antigua ciudad queda lejos, así que le pediré a este ayuntamiento que lo envíe.",
+            "es": "Mi antigua ciudad queda lejos, así que le pediré a esta municipalidad que lo envíe.",
             "why": {
               "en": "「こちらの市役所から出してもらいます」 hands the move-out to this city hall, when it is reported to your old one, and by you.",
               "fr": "「こちらの市役所から出してもらいます」 confie la déclaration de départ à cette mairie, alors qu'elle se fait auprès de l'ancienne, et par toi.",
-              "es": "「こちらの市役所から出してもらいます」 deja el aviso de traslado en manos de este ayuntamiento, cuando se presenta en el anterior, y lo presentas tú."
+              "es": "「こちらの市役所から出してもらいます」 deja el aviso de traslado en manos de esta municipalidad, cuando se presenta en la anterior, y lo presentas tú."
             }
           }
         ]
@@ -3350,7 +3350,7 @@
             "why": {
               "en": "「そちらで書いておいてください」 asks the city hall to write your reason for you, when it would be yours to write, and only if you are late.",
               "fr": "「そちらで書いておいてください」 demande à la mairie d'écrire ta raison à ta place, alors que ce serait à toi de le faire, et seulement en cas de retard.",
-              "es": "「そちらで書いておいてください」 le pide al ayuntamiento que escriba tu motivo por ti, cuando te tocaría escribirlo a ti, y solo si llegas tarde."
+              "es": "「そちらで書いておいてください」 le pide a la municipalidad que escriba tu motivo por ti, cuando te tocaría escribirlo a ti, y solo si llegas tarde."
             }
           }
         ]
@@ -3371,7 +3371,7 @@
     "situation": {
       "en": "You have just found that your wallet is gone. You go into the police box by the station, where an officer is on duty.",
       "fr": "Tu viens de t'apercevoir que ton portefeuille a disparu. Tu entres au poste de police près de la gare, où un policier est de service.",
-      "es": "Acabas de darte cuenta de que no tienes la billetera. Entras en el puesto de policía junto a la estación, donde hay alguien de guardia."
+      "es": "Acabas de darte cuenta de que no tienes la billetera. Entras al puesto de policía junto a la estación, donde hay alguien de guardia."
     },
     "goal": {
       "en": "Report your lost wallet: when and where you noticed, what it looks like, what was in it, and how the police can reach you.",
@@ -3402,7 +3402,7 @@
           "romaji": "saifu o nakushite shimatta n desu",
           "en": "I've lost my wallet.",
           "fr": "J'ai perdu mon portefeuille.",
-          "es": "Es que he perdido mi billetera.",
+          "es": "Es que perdí mi billetera.",
           "note": {
             "en": "「〜てしまった」 says it has happened and you wish it had not, and 「んです」 explains what brings you in.",
             "fr": "「〜てしまった」 dit que c'est arrivé et que tu le regrettes, et 「んです」 explique ce qui t'amène.",
@@ -3536,7 +3536,7 @@
             "why": {
               "en": "「今ポケットに入っています」 says the wallet is on you, when you have come in because it is lost.",
               "fr": "「今ポケットに入っています」 dit que le portefeuille est sur toi, alors que tu viens justement signaler sa perte.",
-              "es": "「今ポケットに入っています」 dice que llevas la billetera encima, cuando has venido porque la perdiste."
+              "es": "「今ポケットに入っています」 dice que llevas la billetera encima, cuando viniste porque la perdiste."
             }
           }
         ]
@@ -3571,7 +3571,7 @@
             "kana": "そのさいふは、デパートでいちまんえんぐらいでかいました。",
             "en": "I bought that wallet at a department store for about ten thousand yen.",
             "fr": "Ce portefeuille, je l'ai acheté environ dix mille yens dans un grand magasin.",
-            "es": "Esa billetera la compré en unos grandes almacenes por unos diez mil yenes.",
+            "es": "Esa billetera la compré en una tienda por departamentos por unos diez mil yenes.",
             "why": {
               "en": "「一万円ぐらいで買いました」 gives what the wallet cost you; the officer asked what was inside it.",
               "fr": "「一万円ぐらいで買いました」 donne le prix du portefeuille ; le policier demandait ce qu'il y avait dedans.",
@@ -3689,7 +3689,7 @@
             "why": {
               "en": "「どういたしまして」 answers a thank-you, and the officer has not thanked you: he has promised to ring.",
               "fr": "「どういたしまして」 répond à un merci, or le policier ne te remercie pas : il promet de t'appeler.",
-              "es": "「どういたしまして」 responde a un agradecimiento, y la policía no te ha dado las gracias: te ha prometido llamarte."
+              "es": "「どういたしまして」 responde a un agradecimiento, y la policía no te dio las gracias: te prometió llamarte."
             }
           }
         ]
@@ -3769,7 +3769,7 @@
             "kana": "えきのちかくで、このさいふをひろってもいいですか。",
             "en": "May I pick up this wallet near the station?",
             "fr": "Je peux ramasser ce portefeuille près de la gare ?",
-            "es": "¿Puedo recoger esta billetera de cerca de la estación?",
+            "es": "¿Puedo recoger esta billetera cerca de la estación?",
             "why": {
               "en": "「拾ってもいいですか」 asks leave to pick the wallet up, when it is already in your hand.",
               "fr": "「拾ってもいいですか」 demande la permission de ramasser le portefeuille, alors qu'il est déjà dans ta main.",
@@ -4172,7 +4172,7 @@
           "kana": "かくにんいたしました。こちらのまちがいでした。オムライスはあとじゅっぷんほどかかりますが、よろしいですか。",
           "en": "I've checked: the mistake was ours. The omurice will be about another ten minutes. Is that all right?",
           "fr": "J'ai vérifié : l'erreur vient de chez nous. L'omurice sera prête dans une dizaine de minutes. Cela vous convient ?",
-          "es": "Lo he comprobado: el error fue nuestro. El omurice tardará unos diez minutos más. ¿Le parece bien?"
+          "es": "Ya lo comprobé: el error fue nuestro. El omurice tardará unos diez minutos más. ¿Le parece bien?"
         },
         "me": {
           "jp": "急いでいるわけではないので、大丈夫ですよ。",
@@ -4223,7 +4223,7 @@
           "kana": "ありがとうございます。おまたせしてしまうので、よろしければコーヒーをいっぱいサービスさせてください。",
           "en": "Thank you. Since we're keeping you waiting, please let us bring you a coffee on the house.",
           "fr": "Merci. Comme nous vous faisons attendre, permettez-nous de vous offrir un café.",
-          "es": "Muchas gracias. Como le vamos a hacer esperar, permítanos invitarle a un café, si le parece bien."
+          "es": "Muchas gracias. Como le vamos a hacer esperar, permítanos ofrecerle un café por cuenta de la casa, si le parece bien."
         },
         "me": {
           "jp": "いいんですか。じゃあ、お願いします。",
@@ -4302,7 +4302,7 @@
             "why": {
               "en": "「どういたしまして」 answers a thank-you, and the server has apologised, not thanked you.",
               "fr": "「どういたしまして」 répond à un merci, or le serveur vient de s'excuser, pas de te remercier.",
-              "es": "「どういたしまして」 responde a un «gracias», y quien te atiende se ha disculpado, no te ha dado las gracias."
+              "es": "「どういたしまして」 responde a un «gracias», y quien te atiende se disculpó, no te dio las gracias."
             }
           },
           {
@@ -4382,7 +4382,7 @@
             "kana": "すみません、さっきたのんだばかりのカレーが、もうきたんですが。",
             "en": "Excuse me, the curry I only just ordered has come already.",
             "fr": "Excusez-moi, le curry que je viens à peine de commander est déjà arrivé.",
-            "es": "Disculpe, el curry que acabo de pedir ya ha llegado.",
+            "es": "Disculpe, el curry que acabo de pedir ya llegó.",
             "why": {
               "en": "「もう来た」 says the curry is already here, and 「頼んだばかり」 that you have only just ordered it, when you have waited twenty minutes for nothing.",
               "fr": "「もう来た」 dit que le curry est déjà là, et 「頼んだばかり」 que tu viens à peine de le commander, alors que tu attends depuis vingt minutes.",
@@ -4409,7 +4409,7 @@
           "kana": "たいへんもうしわけございません。かくにんしましたら、ごちゅうもんがキッチンにとおっていなかったようです。",
           "en": "I'm terribly sorry. I've checked, and it seems your order never went through to the kitchen.",
           "fr": "Toutes mes excuses. J'ai vérifié : il semble que votre commande ne soit jamais arrivée en cuisine.",
-          "es": "Lo siento muchísimo. Lo he comprobado y parece que su pedido nunca llegó a la cocina."
+          "es": "Lo siento muchísimo. Lo comprobé y parece que su pedido nunca llegó a la cocina."
         },
         "me": {
           "jp": "そうですか。今からだと、どのくらいかかりますか。",
@@ -4460,7 +4460,7 @@
           "kana": "いまからですと、じゅうごふんほどかかってしまいますが、よろしいでしょうか。",
           "en": "Starting now, it would take about fifteen minutes, I'm afraid. Would that be all right?",
           "fr": "En la lançant maintenant, il faudrait compter un quart d'heure environ. Cela vous convient-il ?",
-          "es": "Si empezamos ahora, tardaría unos quince minutos, me temo. ¿Le parece bien?"
+          "es": "Si empezamos ahora, me temo que tardaría unos quince minutos. ¿Le parece bien?"
         },
         "me": {
           "jp": "すみません、一時から会議があるので、カレーはやめておきます。",
@@ -4651,7 +4651,7 @@
           "romaji": "tonari ni hikkoshite kita mono desu. go aisatsu ni ukagaimashita.",
           "en": "I've just moved in next door. I've come to say hello.",
           "fr": "Je viens d'emménager à côté. Je passe vous dire bonjour.",
-          "es": "Acabo de mudarme al lado. Vengo a saludarle.",
+          "es": "Acabo de mudarme al lado. Vengo a presentarme.",
           "note": {
             "en": "「者」 is the humble word for yourself, and 「伺いました」 humbly says you have come to call.",
             "fr": "「者」 est le mot humble pour parler de toi, et 「伺いました」 dit humblement que tu viens rendre visite.",
@@ -4667,7 +4667,7 @@
             "kana": "となりにひっこしてきたものです。ごあいさつにいらっしゃいました。",
             "en": "I've just moved in next door. I have graciously come to say hello.",
             "fr": "Je viens d'emménager à côté. J'ai daigné passer vous dire bonjour.",
-            "es": "Acabo de mudarme al lado. Me he dignado a venir a saludarle.",
+            "es": "Acabo de mudarme al lado. Me digné a venir a presentarme.",
             "why": {
               "en": "「いらっしゃいました」 is the honorific that raises someone else's coming; your own visit is the humble 「伺いました」.",
               "fr": "「いらっしゃいました」 est l'honorifique qui élève la venue de quelqu'un d'autre ; ta propre visite, c'est l'humble 「伺いました」.",
@@ -4836,7 +4836,7 @@
             "why": {
               "en": "「八時から」 starts at the very hour the rubbish must be out by: the deadline is 「までに」.",
               "fr": "「八時から」 commence à l'heure même avant laquelle il faut les sortir : la limite, c'est 「までに」.",
-              "es": "「八時から」 empieza justo a la hora antes de la cual la basura tiene que estar fuera: el límite es 「までに」."
+              "es": "「八時から」 empieza justo a la hora antes de la cual la basura tiene que estar afuera: el límite es 「までに」."
             }
           }
         ]
@@ -4847,7 +4847,7 @@
           "kana": "たてもののいりぐちのよこに、ゴミをだすばしょがありますよ。",
           "en": "There's a place for rubbish beside the entrance to the building.",
           "fr": "Il y a un local à poubelles à côté de l'entrée de l'immeuble.",
-          "es": "Al lado de la entrada del edificio hay un sitio para dejar la basura."
+          "es": "Al lado de la entrada del edificio hay un lugar para dejar la basura."
         },
         "me": {
           "jp": "ありがとうございます。もしうるさかったら、遠慮なく言ってください。",
@@ -5400,7 +5400,7 @@
             "why": {
               "en": "「朝十時から」 reads back hours that begin in the morning, when you can only come from one.",
               "fr": "「朝十時から」 répète des horaires qui commencent le matin, alors que tu ne peux venir qu'à treize heures.",
-              "es": "「朝十時から」 repite un horario que empieza por la mañana, cuando solo puedes venir desde la una."
+              "es": "「朝十時から」 repite un horario que empieza por la mañana, cuando solo puedes venir a partir de la una."
             }
           },
           {
@@ -5535,7 +5535,7 @@
             "why": {
               "en": "「まで」 with the past says the pain stopped last night, when that is when it began and it still hurts; since then is 「から」.",
               "fr": "「まで」 avec le passé dit que la douleur s'est arrêtée hier soir, alors qu'elle a commencé là et dure encore ; « depuis », c'est 「から」.",
-              "es": "「まで」 con el pasado dice que el dolor se acabó anoche, cuando fue entonces cuando empezó y todavía te duele; «desde» es 「から」."
+              "es": "「まで」 con el pasado dice que el dolor se acabó anoche, pero fue entonces cuando empezó, y todavía te duele; «desde» es 「から」."
             }
           },
           {
@@ -5543,11 +5543,11 @@
             "kana": "おなかがいたそうです。",
             "en": "My stomach looks as if it hurts.",
             "fr": "Mon ventre a l'air de me faire mal.",
-            "es": "Mi estómago parece dolorido, por cómo se ve.",
+            "es": "Mi estómago se ve adolorido.",
             "why": {
               "en": "「痛そう」 judges pain from the outside, as you would someone else's; your own pain, which you feel, is 「痛いんです」.",
               "fr": "「痛そう」 juge une douleur de l'extérieur, comme celle d'un autre ; la tienne, que tu ressens, c'est 「痛いんです」.",
-              "es": "「痛そう」 juzga un dolor desde fuera, como el de otra persona; tu propio dolor, que sientes, es 「痛いんです」."
+              "es": "「痛そう」 juzga un dolor desde afuera, como el de otra persona; tu propio dolor, que sientes, es 「痛いんです」."
             }
           }
         ]
@@ -5558,7 +5558,7 @@
           "kana": "そうですか。なにか、いつもとちがうものをたべましたか。",
           "en": "I see. Have you eaten anything out of the ordinary?",
           "fr": "Je vois. Vous avez mangé quelque chose d'inhabituel ?",
-          "es": "Ya veo. ¿Ha comido algo fuera de lo normal?"
+          "es": "Ya veo. ¿Comió algo fuera de lo normal?"
         },
         "me": {
           "jp": "昨日食べたお寿司が、少し古かったみたいです。",
@@ -5586,7 +5586,7 @@
             "why": {
               "en": "「行くつもりです」 tells a plan for tomorrow, when the doctor asked what you have already eaten.",
               "fr": "「行くつもりです」 annonce un projet pour demain, alors que le médecin demandait ce que tu as déjà mangé.",
-              "es": "「行くつもりです」 cuenta un plan para mañana, cuando en la consulta te preguntaron qué has comido ya."
+              "es": "「行くつもりです」 cuenta un plan para mañana, cuando en la consulta te preguntaron qué habías comido."
             }
           },
           {
@@ -5609,7 +5609,7 @@
           "kana": "ねつははかりましたか。",
           "en": "Have you taken your temperature?",
           "fr": "Vous avez pris votre température ?",
-          "es": "¿Se ha tomado la temperatura?"
+          "es": "¿Se tomó la temperatura?"
         },
         "me": {
           "jp": "はい、今朝は三十七度八分ありました。",
@@ -5948,7 +5948,7 @@
           "kana": "でしたら、こちらのにじゅうギガのプランが、つきさんぜんえんです。にねんけいやくのようなきまったきかんはありません。",
           "en": "In that case, this twenty-gig plan is three thousand yen a month. There's no fixed period, like a two-year contract.",
           "fr": "Dans ce cas, ce forfait de vingt gigas est à trois mille yens par mois. Il n'y a pas de durée imposée, comme un engagement de deux ans.",
-          "es": "En ese caso, este plan de veinte gigas cuesta tres mil yenes al mes. No tiene un periodo fijo de permanencia, como un contrato de dos años."
+          "es": "En ese caso, este plan de veinte gigas cuesta tres mil yenes al mes. No tiene un período fijo de permanencia, como un contrato de dos años."
         },
         "me": {
           "jp": "じゃあ、途中でやめても、お金はかからないんですか。",
@@ -6129,7 +6129,7 @@
             "why": {
               "en": "「すぐ終わる」 takes a wait of an hour for a quick one.",
               "fr": "「すぐ終わる」 prend une attente d'une heure pour une formalité rapide.",
-              "es": "「すぐ終わる」 toma una espera de una hora por una rápida."
+              "es": "「すぐ終わる」 toma por rápida una espera de una hora."
             }
           },
           {
@@ -6157,17 +6157,17 @@
   },
   {
     "id": "garbage-day",
-    "place": {"jp": "ゴミ置き場", "kana": "ゴミおきば", "en": "Rubbish point", "fr": "Point de collecte", "es": "Punto de recogida de basura"},
-    "title": {"en": "The wrong rubbish day", "fr": "Pas le bon jour pour les poubelles", "es": "Un día de basura equivocado"},
+    "place": {"jp": "ゴミ置き場", "kana": "ゴミおきば", "en": "Rubbish point", "fr": "Point de collecte", "es": "Punto de recolección de basura"},
+    "title": {"en": "The wrong rubbish day", "fr": "Pas le bon jour pour les poubelles", "es": "Basura en el día equivocado"},
     "situation": {
       "en": "You moved in last week, and early this morning you put a bag of plastic out at your building's rubbish point. An older woman who lives in the building calls out to you.",
       "fr": "Tu as emménagé la semaine dernière, et ce matin, tu déposes un sac de plastique au point de collecte de ton immeuble. Une dame âgée de l'immeuble t'interpelle.",
-      "es": "Te mudaste la semana pasada, y esta mañana temprano dejaste una bolsa de plástico en el punto de basura de tu edificio. Una señora mayor que vive en el edificio se dirige a ti."
+      "es": "Te mudaste la semana pasada, y esta mañana temprano dejaste una bolsa de residuos plásticos en el punto de basura de tu edificio. Una señora mayor que vive en el edificio se dirige a ti."
     },
     "goal": {
       "en": "Own up to the wrong day, take the bag back, and find out which rubbish goes out when and where to get the collection calendar.",
       "fr": "Reconnais l'erreur de jour, reprends le sac, demande quels déchets sortent quel jour et où trouver le calendrier des collectes.",
-      "es": "Reconoce que te equivocaste de día, llévate la bolsa y averigua qué basura se saca cada día y dónde conseguir el calendario de recogida."
+      "es": "Reconoce que te equivocaste de día, llévate la bolsa y averigua qué basura se saca cada día y dónde conseguir el calendario de recolección."
     },
     "steps": [
       {"en": "Say the bag is yours", "fr": "Dis que le sac est à toi", "es": "Di que la bolsa es tuya"},
@@ -6176,7 +6176,7 @@
       {"en": "Ask where to get the calendar", "fr": "Demande où trouver le calendrier", "es": "Pregunta dónde conseguir el calendario"},
       {"en": "Say you will drop by", "fr": "Dis que tu passeras à la mairie", "es": "Di que pasarás por la oficina municipal"}
     ],
-    "them": {"en": "Neighbour", "fr": "Voisine", "es": "Residente del edificio"},
+    "them": {"en": "Neighbour", "fr": "Voisine", "es": "Vecina"},
     "register": "polite",
     "turns": [
       {
@@ -6193,7 +6193,7 @@
           "romaji": "hai, uchi no desu. nani ka arimashita ka.",
           "en": "Yes, it's mine. Is something wrong?",
           "fr": "Oui, c'est le mien. Il y a un problème ?",
-          "es": "Sí, es mía. ¿Ha pasado algo?",
+          "es": "Sí, es mía. ¿Pasó algo?",
           "note": {
             "en": "「うちの」 says the bag is from your home, and 「何かありましたか」 asks what the matter is.",
             "fr": "「うちの」 dit que le sac vient de chez toi, et 「何かありましたか」 demande ce qui ne va pas.",
@@ -6276,7 +6276,7 @@
             "why": {
               "en": "「ここに置いておきます」 leaves the bag out for days, when she has just told you it cannot go out today.",
               "fr": "「ここに置いておきます」 laisse le sac dehors pendant des jours, alors qu'elle vient de te dire qu'il ne peut pas sortir aujourd'hui.",
-              "es": "「ここに置いておきます」 deja la bolsa fuera varios días, cuando ella te acaba de decir que hoy no se puede sacar."
+              "es": "「ここに置いておきます」 deja la bolsa afuera varios días, cuando ella te acaba de decir que hoy no se puede sacar."
             }
           }
         ]
@@ -6429,7 +6429,7 @@
             "why": {
               "en": "「もらってきてください」 sends your elderly neighbour to the city hall on your errand, a favour nobody asks of someone just met.",
               "fr": "「もらってきてください」 envoie ta voisine âgée à la mairie faire ta course, un service qu'on ne demande pas à quelqu'un qu'on vient de rencontrer.",
-              "es": "「もらってきてください」 manda a tu vecina mayor a la oficina municipal a hacerte el recado, un favor que nadie pide a alguien a quien acaba de conocer."
+              "es": "「もらってきてください」 manda a tu vecina mayor a la oficina municipal a hacerte el mandado, un favor que nadie pide a alguien a quien acaba de conocer."
             }
           }
         ]
@@ -6450,7 +6450,7 @@
     "situation": {
       "en": "You are waiting outside the station when an elderly man comes up to you. You know the way to the city art museum: ten minutes on foot, straight on and right at the second lights, or a bus from stand three.",
       "fr": "Tu attends devant la gare quand un monsieur âgé s'approche de toi. Tu connais le chemin du musée d'art de la ville : dix minutes à pied, tout droit puis à droite au deuxième feu, ou un bus depuis le quai trois.",
-      "es": "Estás esperando frente a la estación cuando un señor mayor se te acerca. Conoces el camino al museo de arte de la ciudad: diez minutos a pie, recto y a la derecha en el segundo semáforo, o un autobús desde la parada número tres."
+      "es": "Estás esperando frente a la estación cuando un señor mayor se te acerca. Conoces el camino al museo de arte de la ciudad: diez minutos a pie, derecho y a la derecha en el segundo semáforo, o un autobús desde la parada número tres."
     },
     "goal": {
       "en": "Tell an elderly man the way to the city art museum, mention the bus when the walk sounds too far for him, and offer to go part of the way with him.",
@@ -6464,7 +6464,7 @@
       {"en": "Offer to walk with him", "fr": "Propose de faire un bout de chemin", "es": "Ofrécete a acompañarlo"},
       {"en": "Say it is no trouble", "fr": "Dis que ça ne te dérange pas", "es": "Di que no es ninguna molestia"}
     ],
-    "them": {"en": "Elderly man", "fr": "Monsieur âgé", "es": "Persona mayor"},
+    "them": {"en": "Elderly man", "fr": "Monsieur âgé", "es": "Señor mayor"},
     "register": "polite",
     "turns": [
       {
@@ -6532,7 +6532,7 @@
           "romaji": "kono michi o massugu itte, futatsume no shingou o migi ni magatte kudasai",
           "en": "Go straight along this road and turn right at the second set of lights.",
           "fr": "Allez tout droit dans cette rue, puis tournez à droite au deuxième feu.",
-          "es": "Siga recto por esta calle y gire a la derecha en el segundo semáforo.",
+          "es": "Siga derecho por esta calle y gire a la derecha en el segundo semáforo.",
           "note": {
             "en": "「二つ目」 counts the lights you pass, and 「を右に曲がって」 says where to turn.",
             "fr": "「二つ目」 compte les feux que l'on passe, et 「を右に曲がって」 dit où tourner.",
@@ -6548,7 +6548,7 @@
             "kana": "このみちをまっすぐいって、ふたつめのしんごうをみぎにまげてください。",
             "en": "Go straight along this road and bend the second set of lights to the right.",
             "fr": "Allez tout droit dans cette rue, puis pliez le deuxième feu vers la droite.",
-            "es": "Siga recto por esta calle y curve el segundo semáforo hacia la derecha.",
+            "es": "Siga derecho por esta calle y curve el segundo semáforo hacia la derecha.",
             "why": {
               "en": "「曲げる」 is to bend something; turning a corner yourself is 「曲がる」.",
               "fr": "「曲げる」, c'est plier quelque chose ; tourner soi-même à un carrefour, c'est 「曲がる」.",
@@ -6560,11 +6560,11 @@
             "kana": "このみちをまっすぐきて、ふたつめのしんごうをみぎにまがってください。",
             "en": "Come straight along this road and turn right at the second set of lights.",
             "fr": "Venez tout droit dans cette rue, puis tournez à droite au deuxième feu.",
-            "es": "Venga recto por esta calle y gire a la derecha en el segundo semáforo.",
+            "es": "Venga derecho por esta calle y gire a la derecha en el segundo semáforo.",
             "why": {
               "en": "「来て」 has him come towards where you are, when the road leads away from you both: 「行って」.",
               "fr": "「来て」 le fait venir vers toi, alors que la rue part loin de vous deux : 「行って」.",
-              "es": "「来て」 le hace venir hacia donde estás tú, cuando la calle se aleja de los dos: 「行って」."
+              "es": "「来て」 lo hace venir hacia donde estás tú, cuando la calle se aleja de los dos: 「行って」."
             }
           }
         ]
@@ -6634,11 +6634,11 @@
           "romaji": "jaa, watashi mo tochuu made onaji houkou na node, issho ni ikimashou ka.",
           "en": "Then, since I'm going the same way for part of it, shall I come with you?",
           "fr": "Alors, comme je vais dans la même direction sur une partie du trajet, je vous accompagne ?",
-          "es": "Entonces, como yo voy en la misma dirección parte del camino, ¿le acompaño?",
+          "es": "Entonces, como yo voy en la misma dirección parte del camino, ¿lo acompaño?",
           "note": {
             "en": "「途中まで」 offers part of the way, and 「〜ましょうか」 offers to go together, leaving him free to say no.",
             "fr": "「途中まで」 propose un bout du trajet, et 「〜ましょうか」 offre de faire la route ensemble, en le laissant libre de refuser.",
-            "es": "「途中まで」 ofrece parte del camino, y 「〜ましょうか」 ofrece ir juntos, dejándole libre de decir que no."
+            "es": "「途中まで」 ofrece parte del camino, y 「〜ましょうか」 ofrece ir juntos, dejándolo libre de decir que no."
           },
           "alt": [
             {"jp": "じゃあ、途中まで同じ道なので、一緒に行きませんか。", "kana": "じゃあ、とちゅうまでおなじみちなので、いっしょにいきませんか。", "romaji": "jaa, tochuu made onaji michi na node, issho ni ikimasen ka."}
@@ -6650,7 +6650,7 @@
             "kana": "じゃあ、わたしもとちゅうまでおなじほうこうなので、いっしょにいらっしゃいましょうか。",
             "en": "Then, since I'm going the same way for part of it, shall I graciously come with you?",
             "fr": "Alors, comme je vais dans la même direction sur une partie du trajet, vais-je daigner vous accompagner ?",
-            "es": "Entonces, como yo voy en la misma dirección parte del camino, ¿me digno a acompañarle?",
+            "es": "Entonces, como yo voy en la misma dirección parte del camino, ¿me digno a acompañarlo?",
             "why": {
               "en": "「いらっしゃる」 honours someone else's going, never your own; offering to go with him is 「行きましょうか」.",
               "fr": "「いらっしゃる」 honore les déplacements d'autrui, jamais les tiens ; pour proposer de l'accompagner, c'est 「行きましょうか」.",
@@ -6662,7 +6662,7 @@
             "kana": "じゃあ、わたしはえきのはんたいのほうこうにかえるので、いっしょにいきましょうか。",
             "en": "Then, since I'm heading home the other way from the station, shall I come with you?",
             "fr": "Alors, comme je rentre chez moi dans la direction opposée, je vous accompagne ?",
-            "es": "Entonces, como yo vuelvo a casa en dirección contraria a la estación, ¿le acompaño?",
+            "es": "Entonces, como yo vuelvo a casa en dirección contraria a la estación, ¿lo acompaño?",
             "why": {
               "en": "「反対の方向に帰るので」 gives going the other way as your reason for walking with him: the reason works against the offer.",
               "fr": "「反対の方向に帰るので」 donne le fait de partir dans l'autre sens comme raison de l'accompagner : la raison va contre l'offre.",
@@ -6797,7 +6797,7 @@
             "kana": "うん、いちねんだよ。テニス、ちょっときょうみあるかも。",
             "en": "Yeah, first year. Tennis, I might be up for it.",
             "fr": "Ouais, première année. Le tennis, ça pourrait me plaire.",
-            "es": "Sí, de primero. El tenis, a lo mejor me interesa, ¿eh?",
+            "es": "Sí, de primer año. El tenis, a lo mejor me interesa, ¿eh?",
             "why": {
               "en": "「うん」 and 「だよ」 are how you talk to a friend; a first-year speaks politely to an older student of the club.",
               "fr": "「うん」 et 「だよ」, c'est le ton entre amis ; en première année, on parle poliment à un aîné du club.",

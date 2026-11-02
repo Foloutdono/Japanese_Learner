@@ -142,3 +142,33 @@ function walk(value, path, out) {
     for (const [k, v] of Object.entries(value)) walk(v, `${path}.${k}`, out)
   }
 }
+
+// ── Nested groups, key for key ─────────────────────────────────
+// A value may be a group of its own (pvpLines, examMondai…), and the
+// tables' parity above reads the top level only: a nested key English
+// has and Spanish lacks would print undefined on a Spanish screen.
+// Every nested object is held key for key and every list to its length,
+// against the English (a function's arity is not: a default parameter
+// changes it without changing what the function says).
+function shape(value) {
+  if (typeof value === 'function') return 'ƒ'
+  if (Array.isArray(value)) return value.map(shape)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(k => [k, shape(value[k])]))
+  }
+  return typeof value
+}
+
+// One group is each language's own by design: nyuSoundsLike says what a
+// vowel sounds like in the reader's language, so French names the two
+// that differ from its spelling and Spanish, whose vowels are Japan's, none.
+const OWN_BY_LANGUAGE = new Set(['nyuSoundsLike'])
+
+describe('locale tables (nested)', () => {
+  for (const [lang, table] of [['fr', fr], ['es', es]]) {
+    it(`gives ${lang} every nested key and list English has`, () => {
+      const nested = Object.keys(en).filter(k => en[k] && typeof en[k] === 'object' && !OWN_BY_LANGUAGE.has(k))
+      for (const key of nested) expect(shape(table[key]), `${lang}: ${key}`).toEqual(shape(en[key]))
+    })
+  }
+})

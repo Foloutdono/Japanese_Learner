@@ -11,15 +11,15 @@
     "goal": {
       "en": "Buy your lunch: have the bento heated, take chopsticks, say no to a bag and pay by card.",
       "fr": "Achète ton déjeuner : fais réchauffer le bento, prends des baguettes, refuse le sac et paie par carte.",
-      "es": "Compra tu almuerzo: pide que calienten el bento, acepta palillos, rechaza la bolsa y paga con tarjeta."
+      "es": "Compra tu almuerzo: pide que calienten el bento, acepta los palillos, rechaza la bolsa y paga con tarjeta."
     },
     "steps": [
       {"en": "Have the bento heated", "fr": "Fais réchauffer le bento", "es": "Pide que calienten el bento"},
-      {"en": "Take chopsticks", "fr": "Prends des baguettes", "es": "Acepta palillos"},
+      {"en": "Take chopsticks", "fr": "Prends des baguettes", "es": "Acepta los palillos"},
       {"en": "Say no to a bag", "fr": "Refuse le sac", "es": "Rechaza la bolsa"},
       {"en": "Pay by card", "fr": "Paie par carte", "es": "Paga con tarjeta"}
     ],
-    "them": {"en": "Clerk", "fr": "Vendeur", "es": "Dependiente"},
+    "them": {"en": "Clerk", "fr": "Vendeur", "es": "Personal de la tienda"},
     "register": "polite",
     "turns": [
       {
@@ -289,7 +289,7 @@
   {
     "id": "konbini-cash",
     "place": {"jp": "コンビニ", "kana": "コンビニ", "en": "Convenience store", "fr": "Supérette", "es": "Tienda de conveniencia"},
-    "title": {"en": "The konbini, paying cash", "fr": "La supérette, en espèces", "es": "La tienda de conveniencia, en efectivo"},
+    "title": {"en": "The konbini, paying cash", "fr": "La supérette, en espèces", "es": "Pago en efectivo en la tienda de conveniencia"},
     "situation": {
       "en": "You are at a convenience store till with two custard puddings and a bottle of tea, and all you have on you is a ten-thousand-yen note. The clerk serves you.",
       "fr": "Tu es à la caisse d'une supérette avec deux flans et une bouteille de thé, et tu n'as sur toi qu'un billet de dix mille yens. Le vendeur s'occupe de toi.",
@@ -307,7 +307,7 @@
       {"en": "Pay with your big note", "fr": "Paie avec ton gros billet", "es": "Paga con tu billete grande"},
       {"en": "Take the receipt", "fr": "Prends le ticket", "es": "Acepta el recibo"}
     ],
-    "them": {"en": "Clerk", "fr": "Vendeur", "es": "Dependiente"},
+    "them": {"en": "Clerk", "fr": "Vendeur", "es": "Personal de la tienda"},
     "register": "polite",
     "turns": [
       {
@@ -583,12 +583,12 @@
     "situation": {
       "en": "You are having lunch on your own in a small ramen shop. The server seats you, takes your order and, after the meal, tells you what you owe.",
       "fr": "Tu déjeunes en solo dans un petit restaurant de ramen. Le serveur t'installe, prend ta commande et, après le repas, t'annonce l'addition.",
-      "es": "Almuerzas por tu cuenta en un pequeño restaurante de ramen. Te dan sitio, te toman el pedido y, después de comer, te dicen cuánto debes."
+      "es": "Almuerzas por tu cuenta en un pequeño restaurante de ramen. Te dan un lugar, te toman el pedido y, después de comer, te dicen cuánto debes."
     },
     "goal": {
       "en": "Get a seat at the counter, order a large ramen and a drink, and thank the shop for the meal as you pay.",
       "fr": "Installe-toi au comptoir, commande un grand ramen et une boisson, et remercie pour le repas en payant.",
-      "es": "Consigue un sitio en la barra, pide un ramen grande y una bebida, y da las gracias por la comida al pagar."
+      "es": "Consigue un lugar en la barra, pide un ramen grande y una bebida, y da las gracias por la comida al pagar."
     },
     "steps": [
       {"en": "Take a seat at the counter", "fr": "Installe-toi au comptoir", "es": "Siéntate en la barra"},
@@ -821,7 +821,7 @@
           "note": {
             "en": "Name the drink, mark it with 「を」 and add 「お願いします」 to order it politely.",
             "fr": "Nomme la boisson, marque-la avec 「を」 et ajoute 「お願いします」 pour la commander poliment.",
-            "es": "Nombra la bebida, márcala con 「を」 y añade 「お願いします」 para pedirla con cortesía."
+            "es": "Nombra la bebida, márcala con 「を」 y agrega 「お願いします」 para pedirla con cortesía."
           },
           "alt": [
             {"jp": "ウーロン茶をください。", "kana": "ウーロンちゃをください。", "romaji": "uuroncha o kudasai"}
@@ -923,7 +923,7 @@
     "goal": {
       "en": "Order a ramen when the one you wanted has run out: ask what is good, order it without green onions and ask where the glasses are for the water.",
       "fr": "Commande un ramen alors que celui que tu voulais n'est plus disponible : demande ce qui est bon, commande-le sans ciboule et demande où sont les verres pour l'eau.",
-      "es": "Pide un ramen cuando el que querías se ha agotado: pregunta qué está bueno, pídelo sin cebolla verde y pregunta dónde están los vasos para el agua."
+      "es": "Pide un ramen cuando el que querías se agotó: pregunta qué está bueno, pídelo sin cebolla verde y pregunta dónde están los vasos para el agua."
     },
     "steps": [
       {"en": "Order a miso ramen", "fr": "Commande un ramen au miso", "es": "Pide un ramen de miso"},
@@ -941,7 +941,7 @@
           "kana": "メニューはこちらです。なににしますか。",
           "en": "Here's the menu. What will you have?",
           "fr": "Voici la carte. Qu'est-ce que vous prenez ?",
-          "es": "Aquí tiene la carta. ¿Qué va a pedir?"
+          "es": "Aquí tiene el menú. ¿Qué va a pedir?"
         },
         "me": {
           "jp": "みそラーメンをお願いします。",
@@ -1137,7 +1137,7 @@
             "why": {
               "en": "「入らない」 comes from 「入る」, to go in by itself, as if the green onions were told to stay out; putting them in is 「入れる」.",
               "fr": "「入らない」 vient de 「入る」, entrer soi-même, comme si on disait à la ciboule de rester dehors ; en mettre, c'est 「入れる」.",
-              "es": "「入らない」 viene de 「入る」, entrar por sí misma, como si le dijeras a la cebolla verde que se quede fuera; ponerla es 「入れる」."
+              "es": "「入らない」 viene de 「入る」, entrar por sí misma, como si le dijeras a la cebolla verde que se quede afuera; ponerla es 「入れる」."
             }
           }
         ]
@@ -1148,7 +1148,7 @@
           "kana": "わかりました。おみずはあそこです。じぶんでいれてくださいね。",
           "en": "Right. The water's over there; please help yourself.",
           "fr": "Très bien. L'eau est là-bas : servez-vous, s'il vous plaît.",
-          "es": "Muy bien. El agua está allí. Sírvase, por favor."
+          "es": "Muy bien. El agua está allí. Sírvasela usted, por favor."
         },
         "me": {
           "jp": "分かりました。コップはどこですか。",
@@ -1209,7 +1209,7 @@
     "situation": {
       "en": "You are in a big station with your ticket and want to go to Shibuya. A station attendant sees you looking lost and comes over.",
       "fr": "Tu es dans une grande gare, ton billet en main, et tu veux aller à Shibuya. Un agent de gare voit que tu cherches ton chemin et vient vers toi.",
-      "es": "Estás en una estación grande con tu billete y quieres ir a Shibuya. Alguien del personal de la estación ve que no sabes por dónde ir y se te acerca."
+      "es": "Estás en una estación grande con tu boleto y quieres ir a Shibuya. Alguien del personal de la estación ve que no sabes por dónde ir y se te acerca."
     },
     "goal": {
       "en": "Find out the platform, the time of the next train and how long the ride to Shibuya takes.",
@@ -1281,7 +1281,7 @@
           "kana": "きっぷはもうかいましたか。",
           "en": "Have you bought your ticket yet?",
           "fr": "Vous avez déjà acheté votre billet ?",
-          "es": "¿Ya compró su billete?"
+          "es": "¿Ya compró su boleto?"
         },
         "me": {
           "jp": "はい、もう買いました。",
@@ -1305,11 +1305,11 @@
             "kana": "はい、きっぷをかいたいです。",
             "en": "Yes, I'd like to buy a ticket.",
             "fr": "Oui, je voudrais acheter un billet.",
-            "es": "Sí, quisiera comprar un billete.",
+            "es": "Sí, quisiera comprar un boleto.",
             "why": {
               "en": "「買いたいです」 says you want to buy a ticket; the attendant asked whether you already have.",
               "fr": "「買いたいです」 dit que tu veux acheter un billet ; l'agent te demandait si c'était déjà fait.",
-              "es": "「買いたいです」 dice que quieres comprar un billete; te preguntaban si ya lo habías comprado."
+              "es": "「買いたいです」 dice que quieres comprar un boleto; te preguntaban si ya lo habías comprado."
             }
           },
           {
@@ -1732,7 +1732,7 @@
     "situation": {
       "en": "You are Alex, here from Canada to study Japanese at a Japanese university, and this is your first class. The student at the next desk turns to you and says hello.",
       "fr": "Tu es Alex, tu arrives du Canada pour étudier le japonais dans une université japonaise, et c'est ton premier cours. L'étudiant assis à côté de toi se tourne vers toi pour te saluer.",
-      "es": "Eres Alex, vienes de Canadá para estudiar japonés en una universidad japonesa, y es tu primera clase. La persona del pupitre de al lado se vuelve hacia ti y te saluda."
+      "es": "Eres Alex, vienes de Canadá para estudiar japonés en una universidad japonesa, y es tu primera clase. La persona sentada a tu lado se vuelve hacia ti y te saluda."
     },
     "goal": {
       "en": "Introduce yourself to a new classmate: your name, your country and what you study.",
@@ -1868,7 +1868,7 @@
           "note": {
             "en": "「を」 marks what you study, and 「勉強しています」 says it is what you are doing these days.",
             "fr": "「を」 marque ce que tu étudies, et 「勉強しています」 dit que c'est ce que tu fais en ce moment.",
-            "es": "「を」 marca lo que estudias, y 「勉強しています」 dice que es lo que haces en esta época."
+            "es": "「を」 marca lo que estudias, y 「勉強しています」 dice que es lo que haces estos días."
           },
           "alt": [
             {"jp": "日本語です。", "kana": "にほんごです。", "romaji": "nihongo desu"}
@@ -1947,7 +1947,7 @@
             "why": {
               "en": "「明日」 is tomorrow but 「見ました」 is past: the two cannot go together.",
               "fr": "「明日」, c'est demain, mais 「見ました」 est au passé : les deux ne vont pas ensemble.",
-              "es": "「明日」 es mañana, pero 「見ました」 está en pasado: los dos no van juntos."
+              "es": "「明日」 es mañana, pero 「見ました」 está en pasado: no pueden ir juntos."
             }
           }
         ]
@@ -2021,7 +2021,7 @@
     "goal": {
       "en": "Buy a T-shirt in your size and colour.",
       "fr": "Achète un tee-shirt à ta taille et de la couleur que tu veux.",
-      "es": "Compra una camiseta de tu talla y del color que quieres."
+      "es": "Compra una camiseta de tu talla y del color que quieras."
     },
     "steps": [
       {"en": "Ask for it in blue", "fr": "Demande-le en bleu", "es": "Pídela en azul"},
@@ -2029,7 +2029,7 @@
       {"en": "Ask for a bigger size", "fr": "Demande une taille au-dessus", "es": "Pide una talla más grande"},
       {"en": "Buy the one that fits", "fr": "Achète celui qui te va", "es": "Compra la que te queda bien"}
     ],
-    "them": {"en": "Shop assistant", "fr": "Vendeur", "es": "Dependiente"},
+    "them": {"en": "Shop assistant", "fr": "Vendeur", "es": "Personal de la tienda"},
     "register": "polite",
     "turns": [
       {
@@ -2078,7 +2078,7 @@
             "why": {
               "en": "「いらっしゃいませ」 is how a shop welcomes its customers; a customer never says it back.",
               "fr": "「いらっしゃいませ」, c'est le magasin qui accueille ses clients ; un client ne le dit jamais en retour.",
-              "es": "「いらっしゃいませ」 es como la tienda da la bienvenida a sus clientes; un cliente nunca lo dice de vuelta."
+              "es": "「いらっしゃいませ」 es como la tienda da la bienvenida a sus clientes; un cliente nunca lo usa para responder."
             }
           }
         ]
@@ -2303,7 +2303,7 @@
     "situation": {
       "en": "In a clothes shop, a grey sweater catches your eye, but you would like it in white. You have just asked the shop assistant whether there is a white one.",
       "fr": "Dans un magasin de vêtements, un pull gris te plaît, mais tu le voudrais en blanc. Tu viens de demander au vendeur s'il en a un blanc.",
-      "es": "En una tienda de ropa te gusta un suéter gris, pero lo quisieras en blanco. Acabas de preguntar si lo tienen en blanco."
+      "es": "En una tienda de ropa te gusta un suéter gris, pero lo prefieres en blanco. Acabas de preguntar si lo tienen en blanco."
     },
     "goal": {
       "en": "Look at the other colours, try on the red one and, since none suits you, leave politely without buying.",
@@ -2317,7 +2317,7 @@
       {"en": "Say you will think about it", "fr": "Dis que tu vas réfléchir", "es": "Di que lo vas a pensar"},
       {"en": "Say you will come back", "fr": "Dis que tu repasseras", "es": "Di que volverás"}
     ],
-    "them": {"en": "Shop assistant", "fr": "Vendeur", "es": "Dependiente"},
+    "them": {"en": "Shop assistant", "fr": "Vendeur", "es": "Personal de la tienda"},
     "register": "polite",
     "turns": [
       {
@@ -2542,7 +2542,7 @@
           "note": {
             "en": "「また来ます」, I'll come again, leaves the shop on a kind note, and 「来週」 matches the white ones coming in.",
             "fr": "「また来ます」, je reviendrai, permet de partir sur une note aimable, et 「来週」 correspond à l'arrivée du blanc.",
-            "es": "「また来ます」, volveré, te despide con amabilidad, y 「来週」 coincide con la llegada de los blancos."
+            "es": "「また来ます」, volveré, es una despedida amable, y 「来週」 coincide con la llegada de los blancos."
           },
           "alt": [
             {"jp": "そうですか。じゃあ、来週また来ます。", "kana": "そうですか。じゃあ、らいしゅうまたきます。", "romaji": "sou desu ka. jaa, raishuu mata kimasu"}
@@ -2600,7 +2600,7 @@
     },
     "steps": [
       {"en": "Ask where the post office is", "fr": "Demande où est la poste", "es": "Pregunta dónde está la oficina de correos"},
-      {"en": "Check the way", "fr": "Vérifie le chemin", "es": "Comprueba el camino"},
+      {"en": "Check the way", "fr": "Vérifie le chemin", "es": "Confirma el camino"},
       {"en": "Ask how far it is on foot", "fr": "Demande combien de temps à pied", "es": "Pregunta cuánto se tarda a pie"}
     ],
     "them": {"en": "Passer-by", "fr": "Passant", "es": "Transeúnte"},
@@ -2663,7 +2663,7 @@
           "kana": "このみちをまっすぐいって、ふたつめのかどをみぎにまがってください。",
           "en": "Go straight down this street and turn right at the second corner.",
           "fr": "Continuez tout droit dans cette rue et prenez la deuxième à droite.",
-          "es": "Siga recto por esta calle y gire a la derecha en la segunda esquina."
+          "es": "Siga derecho por esta calle y gire a la derecha en la segunda esquina."
         },
         "me": {
           "jp": "二つ目の角を右ですね。",
@@ -3134,7 +3134,7 @@
             "kana": "おかえりなさい。",
             "en": "Welcome home.",
             "fr": "Bon retour à la maison.",
-            "es": "¡Ya de vuelta en casa!",
+            "es": "¡Bienvenido a casa!",
             "why": {
               "en": "「おかえりなさい」 welcomes someone back home, and nobody here has come home.",
               "fr": "「おかえりなさい」 accueille quelqu'un qui rentre chez lui, et personne ici ne rentre chez soi.",
@@ -3169,7 +3169,7 @@
     "steps": [
       {"en": "Order an iced coffee", "fr": "Commande un café glacé", "es": "Pide un café con hielo"},
       {"en": "Take it with milk", "fr": "Prends-le avec du lait", "es": "Pídelo con leche"},
-      {"en": "Add a cake", "fr": "Ajoute un gâteau", "es": "Añade un pastel"},
+      {"en": "Add a cake", "fr": "Ajoute un gâteau", "es": "Agrega un pastel"},
       {"en": "Eat in", "fr": "Mange sur place", "es": "Come en el local"}
     ],
     "them": {"en": "Barista", "fr": "Barista", "es": "Barista"},
@@ -3346,7 +3346,7 @@
           "note": {
             "en": "「も」 adds the cake to what you have already ordered: a cake as well.",
             "fr": "「も」 ajoute le gâteau à ce que tu as déjà commandé : un gâteau aussi.",
-            "es": "「も」 añade el pastel a lo que ya pediste: un pastel también."
+            "es": "「も」 agrega el pastel a lo que ya pediste: un pastel también."
           },
           "alt": [
             {"jp": "じゃあ、ケーキも一つください。", "kana": "じゃあ、ケーキもひとつください。", "romaji": "jaa, keeki mo hitotsu kudasai"}
@@ -3702,7 +3702,7 @@
             "why": {
               "en": "「持って来ます」 brings something here; leaving with it is 「持って帰ります」.",
               "fr": "「持って来ます」 apporte quelque chose ici ; repartir avec, c'est 「持って帰ります」.",
-              "es": "「持って来ます」 trae algo aquí; irte con ello es 「持って帰ります」."
+              "es": "「持って来ます」 trae algo aquí; llevártelo es 「持って帰ります」."
             }
           },
           {
@@ -3778,17 +3778,17 @@
   },
   {
     "id": "friend-home",
-    "place": {"jp": "友達の家", "kana": "ともだちのいえ", "en": "A friend's home", "fr": "Chez un ami", "es": "Casa de una amistad"},
-    "title": {"en": "Dropping by a friend's", "fr": "En visite chez un ami", "es": "De visita en casa de una amistad"},
+    "place": {"jp": "友達の家", "kana": "ともだちのいえ", "en": "A friend's home", "fr": "Chez un ami", "es": "Casa de una amiga"},
+    "title": {"en": "Dropping by a friend's", "fr": "En visite chez un ami", "es": "De visita en casa de una amiga"},
     "situation": {
       "en": "A Japanese friend has you over and opens the door as you arrive. You talk the way friends do, in plain forms.",
       "fr": "Un ami japonais te reçoit chez lui et t'ouvre la porte quand tu arrives. Vous vous parlez comme des amis, à la forme simple.",
-      "es": "Una amistad japonesa te invita a su casa y te abre la puerta al llegar. La conversación es de confianza, en forma simple."
+      "es": "Una amiga japonesa te invita a su casa y te abre la puerta al llegar. La conversación es de confianza, en forma llana."
     },
     "goal": {
       "en": "Visit your friend: come in, have a drink and a snack, then take your leave.",
       "fr": "Rends visite à ton ami : entre, prends à boire et un goûter, puis prends congé.",
-      "es": "Haz una visita en casa de tu amistad: entra, toma una bebida y algo de picar, y luego despídete."
+      "es": "Visita a tu amiga: entra, toma una bebida y algo de picar, y luego despídete."
     },
     "steps": [
       {"en": "Come in", "fr": "Entre", "es": "Entra"},
@@ -3797,7 +3797,7 @@
       {"en": "Talk about your Japanese", "fr": "Parle de ton japonais", "es": "Habla de tu japonés"},
       {"en": "Take your leave", "fr": "Prends congé", "es": "Despídete"}
     ],
-    "them": {"en": "Friend", "fr": "Ami", "es": "Amistad"},
+    "them": {"en": "Friend", "fr": "Ami", "es": "Amiga"},
     "register": "casual",
     "turns": [
       {
@@ -3866,7 +3866,7 @@
           "note": {
             "en": "「〜がいい」 picks one in plain form, and 「な」 makes it sound relaxed.",
             "fr": "「〜がいい」 choisit à la forme simple, et 「な」 rend la phrase détendue.",
-            "es": "「〜がいい」 elige uno en forma simple, y 「な」 le da un tono relajado."
+            "es": "「〜がいい」 elige uno en forma llana, y 「な」 le da un tono relajado."
           },
           "alt": [
             {"jp": "お茶がいい。", "kana": "おちゃがいい。", "romaji": "ocha ga ii"},
@@ -3918,7 +3918,7 @@
           "note": {
             "en": "Between friends 「うん」 is yes, and the plain 「食べる」 answers 「食べる？」 in kind.",
             "fr": "Entre amis, 「うん」 veut dire oui, et la forme simple 「食べる」 répond à 「食べる？」 sur le même ton.",
-            "es": "En confianza, 「うん」 es sí, y la forma simple 「食べる」 responde a 「食べる？」 en el mismo tono."
+            "es": "En confianza, 「うん」 es sí, y la forma llana 「食べる」 responde a 「食べる？」 en el mismo tono."
           },
           "alt": [
             {"jp": "うん、食べたい！ありがとう。", "kana": "うん、たべたい！ありがとう。", "romaji": "un, tabetai! arigatou"},
@@ -3970,7 +3970,7 @@
           "note": {
             "en": "「けど」 joins two plain sentences with but: fun, but a little hard.",
             "fr": "「けど」 relie deux phrases simples par mais : sympa, mais un peu difficile.",
-            "es": "「けど」 une dos frases simples con pero: divertido, pero un poco difícil."
+            "es": "「けど」 une dos frases en forma llana con pero: divertido, pero un poco difícil."
           },
           "alt": [
             {"jp": "楽しい。でも、ちょっと難しい。", "kana": "たのしい。でも、ちょっとむずかしい。", "romaji": "tanoshii. demo, chotto muzukashii"}
@@ -4354,7 +4354,7 @@
           "note": {
             "en": "「も」 adds the receipt to the card you are handed: the receipt too.",
             "fr": "「も」 ajoute le reçu à la carte qu'on te rend : le reçu aussi.",
-            "es": "「も」 añade el recibo a la tarjeta que te devuelven: el recibo también."
+            "es": "「も」 agrega el recibo a la tarjeta que te devuelven: el recibo también."
           },
           "alt": [
             {"jp": "すみません、レシートもください。", "kana": "すみません、レシートもください。", "romaji": "sumimasen, reshiito mo kudasai"}
@@ -4408,7 +4408,7 @@
     "goal": {
       "en": "Get to the restaurant: when the driver does not know it, guide him with landmarks, say where to stop and pay in cash.",
       "fr": "Va jusqu'au restaurant : comme le chauffeur ne le connaît pas, guide-le avec des repères, dis-lui où t'arrêter et paie en espèces.",
-      "es": "Llega al restaurante: cuando no sepan dónde está, indica el camino con puntos de referencia, di dónde parar y paga en efectivo."
+      "es": "Llega al restaurante: si el taxista no sabe dónde está, indica el camino con puntos de referencia, di dónde parar y paga en efectivo."
     },
     "steps": [
       {"en": "Say where you are going", "fr": "Dis où tu vas", "es": "Di adónde vas"},
@@ -4536,7 +4536,7 @@
           "romaji": "massugu itte, futatsume no kado o migi desu",
           "en": "Straight on, then right at the second corner.",
           "fr": "Tout droit, puis la deuxième à droite.",
-          "es": "Recto, y luego a la derecha en la segunda esquina.",
+          "es": "Derecho, y luego a la derecha en la segunda esquina.",
           "note": {
             "en": "「〜て」 links the steps in order, and 「二つ目の角」 is the second corner.",
             "fr": "「〜て」 enchaîne les étapes dans l'ordre, et 「二つ目の角」, c'est le deuxième coin de rue.",
@@ -4552,7 +4552,7 @@
             "kana": "まっすぐきて、ふたつめのかどをみぎです。",
             "en": "Come straight here, then right at the second corner.",
             "fr": "Venez tout droit, puis la deuxième à droite.",
-            "es": "Venga recto, y luego a la derecha en la segunda esquina.",
+            "es": "Venga derecho, y luego a la derecha en la segunda esquina.",
             "why": {
               "en": "「来て」 is coming toward the speaker; you are both in the car, heading away, so it is 「行って」.",
               "fr": "「来て」, c'est venir vers celui qui parle ; vous êtes tous les deux dans la voiture et vous partez, c'est donc 「行って」.",
@@ -4564,7 +4564,7 @@
             "kana": "まっすぐいって、にかいめのかどをみぎです。",
             "en": "Straight on, then right at the corner of the second time.",
             "fr": "Tout droit, puis à droite au coin de la deuxième fois.",
-            "es": "Recto, y luego a la derecha en la esquina de la segunda vez.",
+            "es": "Derecho, y luego a la derecha en la esquina de la segunda vez.",
             "why": {
               "en": "「回目」 counts times; corners one after another are counted 「二つ目」.",
               "fr": "「回目」 compte les fois ; des coins de rue à la suite se comptent 「二つ目」.",
@@ -4607,7 +4607,7 @@
             "why": {
               "en": "「います」 is for people and animals; a restaurant is somewhere with 「あります」, or simply 「です」.",
               "fr": "「います」 s'emploie pour les personnes et les animaux ; un restaurant se trouve quelque part avec 「あります」, ou simplement 「です」.",
-              "es": "「います」 es para personas y animales; un restaurante está en algún sitio con 「あります」, o simplemente 「です」."
+              "es": "「います」 es para personas y animales; un restaurante está en algún lugar con 「あります」, o simplemente 「です」."
             }
           },
           {
@@ -4879,7 +4879,7 @@
           "note": {
             "en": "「も」 adds the tomatoes to what you are buying: two tomatoes as well.",
             "fr": "「も」 ajoute les tomates à tes achats : deux tomates aussi.",
-            "es": "「も」 añade los tomates a tu compra: dos tomates también."
+            "es": "「も」 agrega los tomates a tu compra: dos tomates también."
           },
           "alt": [
             {"jp": "トマトも二つお願いします。", "kana": "トマトもふたつおねがいします。", "romaji": "tomato mo futatsu onegai shimasu"}
@@ -4918,7 +4918,7 @@
           "kana": "トマトはひとふくろさんびゃくえんだよ。よっつはいっているよ。",
           "en": "Tomatoes are three hundred yen a bag. There are four in it.",
           "fr": "Les tomates, c'est trois cents yens le sachet. Il y en a quatre dedans.",
-          "es": "Los tomates van a trescientos yenes la bolsa. Trae cuatro."
+          "es": "Los tomates están a trescientos yenes la bolsa. Trae cuatro."
         },
         "me": {
           "jp": "じゃあ、一袋ください。",
@@ -5214,7 +5214,7 @@
           "romaji": "iie, madamada desu",
           "en": "Oh no, I've a long way to go.",
           "fr": "Oh non, j'ai encore beaucoup à apprendre.",
-          "es": "Oh, no, todavía me falta mucho.",
+          "es": "Ay, no, todavía me falta mucho.",
           "note": {
             "en": "「まだまだです」, still far from it, is the modest answer a compliment calls for in Japanese.",
             "fr": "「まだまだです」, encore loin du compte, est la réponse modeste qu'appelle un compliment en japonais.",
@@ -5246,7 +5246,7 @@
             "why": {
               "en": "「もう」 says it has already come to that; still not good is 「まだ」, as in 「まだ下手です」.",
               "fr": "「もう」 dit que c'est déjà arrivé ; pas encore bon, c'est 「まだ」, comme dans 「まだ下手です」.",
-              "es": "「もう」 dice que ya se llegó a eso; todavía no bien es 「まだ」, como en 「まだ下手です」."
+              "es": "「もう」 dice que ya se llegó a eso; para decir que aún no lo hablas bien, es 「まだ」, como en 「まだ下手です」."
             }
           }
         ]
@@ -5269,7 +5269,7 @@
           "note": {
             "en": "「持っています」 says you have one with you, and 「ありがとうございます」 thanks her for thinking of it.",
             "fr": "「持っています」 dit que tu en as un sur toi, et 「ありがとうございます」 la remercie d'y avoir pensé.",
-            "es": "「持っています」 dice que llevas uno contigo, y 「ありがとうございます」 le agradece que lo haya pensado."
+            "es": "「持っています」 dice que llevas uno contigo, y 「ありがとうございます」 le agradece que se haya preocupado."
           },
           "alt": [
             {"jp": "はい、あります。ありがとうございます。", "kana": "はい、あります。ありがとうございます。", "romaji": "hai, arimasu. arigatou gozaimasu"}
@@ -5366,7 +5366,7 @@
     "situation": {
       "en": "You are ten minutes late to meet a friend at the station, and she rings you. You talk the way friends do, in plain forms.",
       "fr": "Tu as dix minutes de retard pour retrouver une amie à la gare, et elle t'appelle. Vous vous parlez comme entre amis, à la forme simple.",
-      "es": "Llegas diez minutos tarde a tu cita con una amiga en la estación, y ella te llama. La conversación es de confianza, en forma simple."
+      "es": "Llegas diez minutos tarde a tu cita con una amiga en la estación, y ella te llama. La conversación es de confianza, en forma llana."
     },
     "goal": {
       "en": "Tell your friend where you are and how long you will be, suggest where she can wait and say sorry.",
@@ -5417,7 +5417,7 @@
             "why": {
               "en": "「ある」 is for things; a person is somewhere with 「いる」.",
               "fr": "「ある」 s'emploie pour les choses ; une personne se trouve quelque part avec 「いる」.",
-              "es": "「ある」 es para cosas; una persona está en algún sitio con 「いる」."
+              "es": "「ある」 es para cosas; una persona está en algún lugar con 「いる」."
             }
           },
           {
@@ -5503,7 +5503,7 @@
           "note": {
             "en": "「〜はどう？」 suggests something, plainly, the way friends do: how about the café?",
             "fr": "「〜はどう？」 propose quelque chose, à la forme simple, comme entre amis : et le café ?",
-            "es": "「〜はどう？」 propone algo, en forma simple, como se hace en confianza: ¿qué tal la cafetería?"
+            "es": "「〜はどう？」 propone algo, en forma llana, como se hace en confianza: ¿qué tal la cafetería?"
           },
           "alt": [
             {"jp": "駅の前の喫茶店がいいな。", "kana": "えきのまえのきっさてんがいいな。", "romaji": "eki no mae no kissaten ga ii na"}
@@ -5644,7 +5644,7 @@
       "kana": "うん、あとでね！",
       "en": "Yeah, see you!",
       "fr": "Ouais, à tout de suite !",
-      "es": "¡Sí, hasta ahora!"
+      "es": "¡Sí, nos vemos!"
     }
   },
   {
@@ -5654,7 +5654,7 @@
     "situation": {
       "en": "You are at a bus stop, not sure which bus goes to the station. A bus has just pulled in, and you have asked the woman waiting beside you whether it goes there.",
       "fr": "Tu es à un arrêt de bus et tu ne sais pas quel bus va à la gare. Un bus vient d'arriver, et tu as demandé à la dame qui attend à côté de toi s'il y va.",
-      "es": "Estás en una parada de autobús y no sabes qué autobús va a la estación. Acaba de llegar uno, y le has preguntado a la señora que espera a tu lado si va allí."
+      "es": "Estás en una parada de autobús y no sabes qué autobús va a la estación. Acaba de llegar uno, y le preguntaste a la señora que espera a tu lado si va allí."
     },
     "goal": {
       "en": "Find the bus to the station: which number, how often it comes, how to get on and pay, and thank the woman who helps you.",
@@ -5890,7 +5890,7 @@
     "situation": {
       "en": "You are at the ticket desk of an art museum. You are a student, but you have left your student card at home.",
       "fr": "Tu es au guichet d'un musée d'art. Tu fais des études, mais tu as laissé ta carte d'étudiant chez toi.",
-      "es": "Estás en la taquilla de un museo de arte. Eres estudiante, pero te dejaste el carné de estudiante en casa."
+      "es": "Estás en la taquilla de un museo de arte. Eres estudiante, pero olvidaste tu credencial de estudiante en casa."
     },
     "goal": {
       "en": "Buy your ticket, find out what to do with your bag and about photos, and ask the closing time and the way in.",
@@ -5964,7 +5964,7 @@
           "kana": "がくせいですね。がくせいしょうはありますか。",
           "en": "A student. Do you have your student card?",
           "fr": "D'accord. Vous avez votre carte d'étudiant ?",
-          "es": "De estudiante. ¿Tiene su carné de estudiante?"
+          "es": "De estudiante. ¿Tiene su credencial de estudiante?"
         },
         "me": {
           "jp": "すみません、今日は持っていません。",
@@ -5992,7 +5992,7 @@
             "why": {
               "en": "「はい」 says you have the card, then 「持っていません」 says you do not: the clerk cannot tell which.",
               "fr": "「はい」 dit que tu as la carte, puis 「持っていません」 dit que non : l'employée ne peut pas savoir.",
-              "es": "「はい」 dice que tienes el carné, y luego 「持っていません」 dice que no: no se entiende cuál es."
+              "es": "「はい」 dice que tienes la credencial, y luego 「持っていません」 dice que no: no se entiende cuál es."
             }
           },
           {
@@ -6004,7 +6004,7 @@
             "why": {
               "en": "「いません」 says a person is not here; not having a card on you is 「持っていません」.",
               "fr": "「いません」 dit qu'une personne n'est pas là ; ne pas avoir une carte sur soi, c'est 「持っていません」.",
-              "es": "「いません」 dice que una persona no está; no llevar un carné encima es 「持っていません」."
+              "es": "「いません」 dice que una persona no está; no llevar una credencial encima es 「持っていません」."
             }
           }
         ]
@@ -6043,7 +6043,7 @@
             "why": {
               "en": "「学生一枚」 asks for the student ticket you have just agreed you cannot have without your card.",
               "fr": "「学生一枚」 demande le billet étudiant, alors que tu viens d'accepter que sans ta carte, ce n'est pas possible.",
-              "es": "「学生一枚」 pide la entrada de estudiante que acabas de aceptar que no puedes tener sin tu carné."
+              "es": "「学生一枚」 pide la entrada de estudiante que acabas de aceptar que no puedes tener sin tu credencial."
             }
           },
           {
@@ -6234,13 +6234,13 @@
     "goal": {
       "en": "Have dinner with your host mother: say kindly what you do not eat, use the right phrases before and after the meal, praise the food and turn down a second helping.",
       "fr": "Dîne avec ta mère d'accueil : dis gentiment ce que tu ne manges pas, emploie les bonnes formules avant et après le repas, complimente sa cuisine et refuse d'en reprendre.",
-      "es": "Cena con tu madre anfitriona: di con amabilidad lo que no comes, usa las fórmulas correctas antes y después de comer, elogia la comida y rechaza servirte más."
+      "es": "Cena con tu madre anfitriona: di con amabilidad lo que no comes, usa las fórmulas correctas antes y después de comer, elogia la comida y rechaza otra porción."
     },
     "steps": [
       {"en": "Say kindly what you don't eat", "fr": "Dis gentiment ce que tu ne manges pas", "es": "Di con amabilidad lo que no comes"},
       {"en": "Say the phrase before eating", "fr": "Dis la formule avant de manger", "es": "Di la fórmula antes de comer"},
       {"en": "Praise the food", "fr": "Complimente sa cuisine", "es": "Elogia la comida"},
-      {"en": "Turn down a second helping", "fr": "Refuse d'en reprendre", "es": "Rechaza servirte más"},
+      {"en": "Turn down a second helping", "fr": "Refuse d'en reprendre", "es": "Rechaza otra porción"},
       {"en": "Thank her for the meal", "fr": "Remercie-la pour le repas", "es": "Agradécele la comida"}
     ],
     "them": {"en": "Host mother", "fr": "Mère d'accueil", "es": "Madre anfitriona"},
@@ -6892,7 +6892,7 @@
       "kana": "いいえ、こちらこそ。",
       "en": "Not at all, thank you!",
       "fr": "Je vous en prie, merci à vous !",
-      "es": "No, gracias a usted."
+      "es": "Al contrario, gracias a usted."
     }
   },
   {
@@ -6952,7 +6952,7 @@
             "why": {
               "en": "「います」 is for people and animals; milk on a shelf is somewhere with 「あります」.",
               "fr": "「います」 s'emploie pour les personnes et les animaux ; du lait en rayon se trouve quelque part avec 「あります」.",
-              "es": "「います」 es para personas y animales; la leche en un estante está en algún sitio con 「あります」."
+              "es": "「います」 es para personas y animales; la leche en un estante está en algún lugar con 「あります」."
             }
           },
           {
@@ -7135,7 +7135,7 @@
     "situation": {
       "en": "Between classes, a friend from your Japanese school stops you in the corridor. You talk the way friends do, in plain forms.",
       "fr": "Entre deux cours, une amie de ton école de japonais t'arrête dans le couloir. Vous vous parlez comme entre amis, à la forme simple.",
-      "es": "Entre clase y clase, una amiga de tu escuela de japonés te para en el pasillo. La conversación es de confianza, en forma simple."
+      "es": "Entre clase y clase, una amiga de tu escuela de japonés te para en el pasillo. La conversación es de confianza, en forma llana."
     },
     "goal": {
       "en": "Accept your friend's invitation to her birthday party: ask the time, say you will be a little late, ask what to bring and offer a cake.",
@@ -7158,7 +7158,7 @@
           "kana": "ねえ、どようびにうちでたんじょうびパーティーをするよ。こない？",
           "en": "Hey, I'm having a birthday party at my place on Saturday. Want to come?",
           "fr": "Dis, samedi, je fais une fête d'anniversaire chez moi. Tu viens ?",
-          "es": "Oye, el sábado hago una fiesta de cumpleaños en mi casa. ¿Te vienes?"
+          "es": "Oye, el sábado hago una fiesta de cumpleaños en mi casa. ¿Quieres venir?"
         },
         "me": {
           "jp": "うん、行く！何時から？",
@@ -7170,7 +7170,7 @@
           "note": {
             "en": "Going to your friend's is 「行く」, said plainly, and 「何時から？」 asks when it starts.",
             "fr": "Aller chez ton amie, c'est 「行く」, à la forme simple, et 「何時から？」 demande à quelle heure ça commence.",
-            "es": "Ir a casa de tu amiga es 「行く」, en forma simple, y 「何時から？」 pregunta a qué hora empieza."
+            "es": "Ir a casa de tu amiga es 「行く」, en forma llana, y 「何時から？」 pregunta a qué hora empieza."
           },
           "alt": [
             {"jp": "うん、行きたい！何時から？", "kana": "うん、いきたい！なんじから？", "romaji": "un, ikitai! nanji kara?"}
@@ -7221,7 +7221,7 @@
           "note": {
             "en": "「遅くなる」 is to end up late, and 「〜てもいい？」 asks your friend, plainly, whether that is all right.",
             "fr": "「遅くなる」, c'est finir par arriver tard, et 「〜てもいい？」 demande à ton amie, à la forme simple, si ça lui va.",
-            "es": "「遅くなる」 es acabar llegando tarde, y 「〜てもいい？」 le pregunta a tu amiga, en forma simple, si le parece bien."
+            "es": "「遅くなる」 es acabar llegando tarde, y 「〜てもいい？」 le pregunta a tu amiga, en forma llana, si le parece bien."
           },
           "alt": [
             {"jp": "ごめん、ちょっと遅く行ってもいい？", "kana": "ごめん、ちょっとおそくいってもいい？", "romaji": "gomen, chotto osoku itte mo ii?"}
@@ -7272,7 +7272,7 @@
           "note": {
             "en": "「何か」 is something, anything, and 「持って行く？」 asks plainly whether to bring it along.",
             "fr": "「何か」 veut dire quelque chose, et 「持って行く？」 demande, à la forme simple, s'il faut l'apporter.",
-            "es": "「何か」 es algo, lo que sea, y 「持って行く？」 pregunta en forma simple si hay que llevarlo."
+            "es": "「何か」 es algo, lo que sea, y 「持って行く？」 pregunta en forma llana si hay que llevarlo."
           },
           "alt": [
             {"jp": "うん。何か持って行く？", "kana": "うん。なにかもっていく？", "romaji": "un. nanika motte iku?"}
@@ -7323,7 +7323,7 @@
           "note": {
             "en": "「でも」 brings a cake all the same, and the plain 「持って行くね」 says it the way friends do.",
             "fr": "「でも」 apporte un gâteau quand même, et la forme simple 「持って行くね」 le dit comme entre amis.",
-            "es": "「でも」 lleva un pastel de todos modos, y la forma simple 「持って行くね」 lo dice con confianza."
+            "es": "「でも」 lleva un pastel de todos modos, y la forma llana 「持って行くね」 lo dice con confianza."
           },
           "alt": [
             {"jp": "じゃあ、ケーキを持って行くね。", "kana": "じゃあ、ケーキをもっていくね。", "romaji": "jaa, keeki o motte iku ne"}
@@ -7374,7 +7374,7 @@
           "note": {
             "en": "「分かった」 is the plain 「分かりました」, and 「土曜日にね」 settles the day as you part.",
             "fr": "「分かった」 est la forme simple de 「分かりました」, et 「土曜日にね」 fixe le jour en vous quittant.",
-            "es": "「分かった」 es la forma simple de 「分かりました」, y 「土曜日にね」 fija el día al despedirse."
+            "es": "「分かった」 es la forma llana de 「分かりました」, y 「土曜日にね」 fija el día al despedirse."
           },
           "alt": [
             {"jp": "分かった。じゃあ、また土曜日に！", "kana": "わかった。じゃあ、またどようびに！", "romaji": "wakatta. jaa, mata doyoubi ni!"}

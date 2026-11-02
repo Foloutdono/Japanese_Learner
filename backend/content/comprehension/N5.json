@@ -1090,7 +1090,7 @@
     "note": {
      "en": "The connector 「そして」 opens the sentence and adds the last step of the day.",
      "fr": "Le connecteur 「そして」 ouvre la phrase et ajoute la dernière étape de la journée.",
-     "es": "El conector 「そして」 abre la oración y añade el último paso del día."
+     "es": "El conector 「そして」 abre la oración y agrega el último paso del día."
     },
     "words": [
      {
@@ -6464,7 +6464,7 @@
     "translation": {
      "en": "But you must not eat meals or snacks.",
      "fr": "Mais il ne faut pas manger de repas ni de friandises.",
-     "es": "Pero no se permite comer comidas ni dulces."
+     "es": "Pero no se permite comer, ni comidas ni dulces."
     },
     "note": {
      "en": "The pattern 「〜てはいけません」 in 「食べてはいけません」 forbids something.",
@@ -6532,7 +6532,7 @@
     "note": {
      "en": "The word 「それから」 adds one more rule to the list.",
      "fr": "Le mot 「それから」 ajoute une règle de plus à la liste.",
-     "es": "La palabra 「それから」 añade una regla más a la lista."
+     "es": "La palabra 「それから」 agrega una regla más a la lista."
     },
     "words": [
      {
@@ -6582,7 +6582,7 @@
     "translation": {
      "en": "Please make phone calls outside.",
      "fr": "Téléphonez dehors, s'il vous plaît.",
-     "es": "Por favor, hagan las llamadas fuera."
+     "es": "Por favor, hagan las llamadas afuera."
     },
     "note": {
      "en": "The verb 「かけて」 goes with 「電話」: to make a phone call.",
@@ -6611,7 +6611,7 @@
       "meaning": {
        "en": "outside",
        "fr": "dehors",
-       "es": "fuera"
+       "es": "afuera"
       }
      },
      {
@@ -10984,7 +10984,7 @@
     "translation": {
      "en": "So yesterday I bought a blue hat at a department store.",
      "fr": "Alors hier, j'ai acheté un chapeau bleu dans un grand magasin.",
-     "es": "Por eso, ayer compré un sombrero azul en unos grandes almacenes."
+     "es": "Por eso, ayer compré un sombrero azul en una tienda departamental."
     },
     "note": {
      "en": "「だから」 ties this act to its reason, in the sentence before.",
@@ -11013,7 +11013,7 @@
       "meaning": {
        "en": "department store",
        "fr": "grand magasin",
-       "es": "grandes almacenes"
+       "es": "tienda departamental"
       }
      },
      {
@@ -11469,7 +11469,7 @@
     "question": {
      "en": "What does 「やさいがきらいです」 say about the younger sister?",
      "fr": "Que dit 「やさいがきらいです」 de la petite sœur ?",
-     "es": "¿Qué dice 「やさいがきらいです」 de la hermana pequeña?"
+     "es": "¿Qué dice 「やさいがきらいです」 de la hermana menor?"
     },
     "options": {
      "en": [
@@ -11650,7 +11650,7 @@
     "translation": {
      "en": "There are my father, my mother, my older brother and my younger sister.",
      "fr": "Il y a mon père, ma mère, mon grand frère et ma petite sœur.",
-     "es": "Están mi padre, mi madre, mi hermano mayor y mi hermana pequeña."
+     "es": "Están mi padre, mi madre, mi hermano mayor y mi hermana menor."
     },
     "note": {
      "en": "「います」 is used for people and animals; for things, Japanese says 「あります」.",
@@ -11711,7 +11711,7 @@
       "meaning": {
        "en": "my younger sister",
        "fr": "ma petite sœur",
-       "es": "mi hermana pequeña"
+       "es": "mi hermana menor"
       }
      },
      {
@@ -12196,7 +12196,7 @@
     "translation": {
      "en": "My younger sister is seven.",
      "fr": "Ma petite sœur a sept ans.",
-     "es": "Mi hermana pequeña tiene siete años."
+     "es": "Mi hermana menor tiene siete años."
     },
     "note": {
      "en": "「さい」 counts years of age: 「七さい」 is seven years old.",
@@ -12209,7 +12209,7 @@
       "meaning": {
        "en": "my younger sister",
        "fr": "ma petite sœur",
-       "es": "mi hermana pequeña"
+       "es": "mi hermana menor"
       }
      },
      {
@@ -12462,7 +12462,7 @@
       "meaning": {
        "en": "my younger sister",
        "fr": "ma petite sœur",
-       "es": "mi hermana pequeña"
+       "es": "mi hermana menor"
       }
      },
      {
@@ -13273,7 +13273,7 @@
     "translation": {
      "en": "But the waiter said, \"I'm sorry. We have no hamburger steak today.\"",
      "fr": "Mais le serveur a dit : « Désolé. Aujourd'hui, nous n'avons pas de steak haché. »",
-     "es": "Pero el camarero dijo: «Lo siento. Hoy no tenemos hamburguesa»."
+     "es": "Pero el mesero dijo: «Lo siento. Hoy no tenemos hamburguesa»."
     },
     "note": {
      "en": "「店の人」 is the person who works in the shop; 「と言いました」 reports their words.",
@@ -14276,12 +14276,12 @@
     "translation": {
      "en": "Leave the station by the north exit, go straight on, and turn right at the second corner.",
      "fr": "Sortez de la gare par la sortie nord, allez tout droit, puis tournez à droite au deuxième coin de rue.",
-     "es": "Salga de la estación por la salida norte, siga todo recto y gire a la derecha en la segunda esquina."
+     "es": "Salga de la estación por la salida norte, siga derecho y gire a la derecha en la segunda esquina."
     },
     "note": {
      "en": "Each て-form (出て, 行って) adds the next step, and 「〜てください」 at the end makes the whole a polite request.",
      "fr": "Chaque forme en て (出て, 行って) ajoute l'étape suivante, et 「〜てください」 à la fin fait de l'ensemble une demande polie.",
-     "es": "Cada forma て (出て, 行って) añade el paso siguiente, y 「〜てください」 al final convierte el conjunto en una petición cortés."
+     "es": "Cada forma て (出て, 行って) agrega el paso siguiente, y 「〜てください」 al final convierte el conjunto en una petición cortés."
     },
     "words": [
      {
@@ -14329,7 +14329,7 @@
       "meaning": {
        "en": "straight on",
        "fr": "tout droit",
-       "es": "todo recto"
+       "es": "derecho"
       }
      },
      {
@@ -16147,7 +16147,7 @@
     "note": {
      "en": "「どこか」 means somewhere: the question asks whether the teacher went anywhere, not where.",
      "fr": "「どこか」 veut dire quelque part : la question demande si le professeur est parti quelque part, pas où.",
-     "es": "「どこか」 significa algún sitio: la pregunta es si el profesor fue a alguna parte, no adónde."
+     "es": "「どこか」 significa algún lugar: la pregunta es si el profesor fue a alguna parte, no adónde."
     },
     "words": [
      {
@@ -16187,7 +16187,7 @@
       "meaning": {
        "en": "somewhere",
        "fr": "quelque part",
-       "es": "algún sitio"
+       "es": "algún lugar"
       }
      },
      {
@@ -17865,7 +17865,7 @@
     "translation": {
      "en": "That day, Lucas sat in the chair next to me.",
      "fr": "Ce jour-là, Lucas s'est assis sur la chaise à côté de moi.",
-     "es": "Ese día, Lucas se sentó en la silla que está a mi lado."
+     "es": "Ese día, Lucas se sentó en la silla junto a la mía."
     },
     "note": {
      "en": "「わたしのとなりのいす」 chains two 「の」: the chair (いす) next to (となり) me (わたし).",
@@ -18840,7 +18840,7 @@
     "question": {
      "en": "What does 「など」 add in 「ふゆのふくやくつなど」?",
      "fr": "Qu'ajoute 「など」 dans 「ふゆのふくやくつなど」 ?",
-     "es": "¿Qué añade 「など」 en 「ふゆのふくやくつなど」?"
+     "es": "¿Qué agrega 「など」 en 「ふゆのふくやくつなど」?"
     },
     "options": {
      "en": [
@@ -21497,12 +21497,12 @@
     "translation": {
      "en": "On Saturday, I went to the zoo with my seven-year-old little brother.",
      "fr": "Samedi, je suis allé au zoo avec mon petit frère de sept ans.",
-     "es": "El sábado fui al zoológico con mi hermano pequeño, que tiene siete años."
+     "es": "El sábado fui al zoológico con mi hermano menor, que tiene siete años."
     },
     "note": {
      "en": "「と」 after a person means with: おとうとと, with my little brother.",
      "fr": "「と」 après une personne veut dire avec : おとうとと, avec mon petit frère.",
-     "es": "「と」 después de una persona significa con: おとうとと, con mi hermano pequeño."
+     "es": "「と」 después de una persona significa con: おとうとと, con mi hermano menor."
     },
     "words": [
      {
@@ -21550,7 +21550,7 @@
       "meaning": {
        "en": "little brother",
        "fr": "petit frère",
-       "es": "hermano pequeño"
+       "es": "hermano menor"
       }
      },
      {
@@ -21786,7 +21786,7 @@
     "note": {
      "en": "「で」 after 「くび」 marks the means: with their long necks.",
      "fr": "「で」 après 「くび」 marque le moyen : avec leur long cou.",
-     "es": "「で」 después de 「くび」 marca el medio: con su largo cuello."
+     "es": "「で」 después de 「くび」 marca el medio: con sus largos cuellos."
     },
     "words": [
      {
@@ -21897,7 +21897,7 @@
       "meaning": {
        "en": "little brother",
        "fr": "petit frère",
-       "es": "hermano pequeño"
+       "es": "hermano menor"
       }
      },
      {
@@ -22008,7 +22008,7 @@
     "note": {
      "en": "「そして」 starts a sentence that adds the next event: and then.",
      "fr": "「そして」 ouvre une phrase qui ajoute l'événement suivant : et puis.",
-     "es": "「そして」 empieza una oración que añade lo que pasó después: y luego."
+     "es": "「そして」 empieza una oración que agrega lo que pasó después: y luego."
     },
     "words": [
      {
@@ -22174,7 +22174,7 @@
       "meaning": {
        "en": "little brother",
        "fr": "petit frère",
-       "es": "hermano pequeño"
+       "es": "hermano menor"
       }
      },
      {
@@ -22293,7 +22293,7 @@
       "meaning": {
        "en": "little brother",
        "fr": "petit frère",
-       "es": "hermano pequeño"
+       "es": "hermano menor"
       }
      },
      {
@@ -23160,7 +23160,7 @@
     "translation": {
      "en": "After eating lunch, we made a big snowman outside.",
      "fr": "Après le déjeuner, nous avons fait un grand bonhomme de neige dehors.",
-     "es": "Después de almorzar, hicimos afuera un muñeco de nieve grande."
+     "es": "Después de almorzar, hicimos un gran muñeco de nieve afuera."
     },
     "note": {
      "en": "「〜てから」 means after doing: first lunch, then the snowman.",
@@ -24426,7 +24426,7 @@
     "translation": {
      "en": "A shop assistant brought out some black shoes and said, \"These are 24 centimetres.\"",
      "fr": "Un vendeur a sorti des chaussures noires et a dit : « Celles-ci font 24 centimètres. »",
-     "es": "Un dependiente sacó unos zapatos negros y dijo: «Estos son de 24 centímetros»."
+     "es": "Un vendedor sacó unos zapatos negros y dijo: «Estos son de 24 centímetros»."
     },
     "note": {
      "en": "The word 「これ」 points to something near the speaker: the black shoes the assistant is holding.",
@@ -25183,7 +25183,7 @@
       "meaning": {
        "en": "on (a day)",
        "fr": "marque le jour",
-       "es": "en (un día)"
+       "es": "el (día)"
       }
      },
      {
@@ -25719,7 +25719,7 @@
     "note": {
      "en": "The particle 「も」 adds the snacks to the tea: there are snacks too.",
      "fr": "La particule 「も」 ajoute les friandises au thé : il y en a aussi.",
-     "es": "La partícula 「も」 añade los dulces al té: también hay dulces."
+     "es": "La partícula 「も」 agrega los dulces al té: también hay dulces."
     },
     "words": [
      {
@@ -26273,7 +26273,7 @@
       "meaning": {
        "en": "on (a day)",
        "fr": "marque le jour",
-       "es": "en (un día)"
+       "es": "el (día)"
       }
      },
      {
@@ -26669,7 +26669,7 @@
     "note": {
      "en": "The phrase 「にくを入れないぎょうざ」 is gyoza with no meat put in: 「にくを入れない」 describes 「ぎょうざ」.",
      "fr": "La tournure 「にくを入れないぎょうざ」 désigne des gyoza où l'on ne met pas de viande : 「にくを入れない」 décrit 「ぎょうざ」.",
-     "es": "La expresión 「にくを入れないぎょうざ」 son gyozas sin carne dentro: 「にくを入れない」 describe a 「ぎょうざ」."
+     "es": "La expresión 「にくを入れないぎょうざ」 se refiere a gyozas sin carne dentro: 「にくを入れない」 describe a 「ぎょうざ」."
     },
     "words": [
      {
@@ -28954,7 +28954,7 @@
     "note": {
      "en": "The form 「小さく」, from 「小さい」, says how something is done: cut small.",
      "fr": "La forme 「小さく」, de 「小さい」, dit comment on fait une chose : couper petit.",
-     "es": "La forma 「小さく」, de 「小さい」, dice cómo se hace algo: cortar pequeño."
+     "es": "La forma 「小さく」, de 「小さい」, dice cómo se hace algo: cortar en trozos pequeños."
     },
     "words": [
      {
@@ -31074,7 +31074,7 @@
     "note": {
      "en": "「どうもありがとう」 is a friendly thank-you; to someone you do not know well, 「ございます」 would be added.",
      "fr": "「どうもありがとう」 est un merci amical ; avec quelqu'un qu'on connaît peu, on ajouterait 「ございます」.",
-     "es": "「どうもありがとう」 es un agradecimiento amistoso; con alguien a quien no se conoce bien, se añadiría 「ございます」."
+     "es": "「どうもありがとう」 es un agradecimiento amistoso; con alguien a quien no se conoce bien, se agregaría 「ございます」."
     },
     "words": [
      {
@@ -32071,7 +32071,7 @@
     "question": {
      "en": "How did the writer do in the 100 metres?",
      "fr": "Quel a été le résultat de l'auteur au cent mètres ?",
-     "es": "¿Qué puesto sacó el autor en los cien metros?"
+     "es": "¿Cómo le fue al autor en los cien metros?"
     },
     "options": {
      "en": [
@@ -32326,7 +32326,7 @@
     "translation": {
      "en": "My father, my mother and my little brother came to watch.",
      "fr": "Mon père, ma mère et mon petit frère sont venus regarder.",
-     "es": "Mi padre, mi madre y mi hermano pequeño vinieron a verlo."
+     "es": "Mi padre, mi madre y mi hermanito vinieron a verlo."
     },
     "note": {
      "en": "「見に来ました」: a verb stem + 「に」 + 「来る」 means 'come to do': they came to watch.",
@@ -33272,7 +33272,7 @@
     "note": {
      "en": "「買いに行きました」: a verb stem + 「に」 + 「行く」 gives the purpose of going: to buy.",
      "fr": "「買いに行きました」 : radical du verbe + 「に」 + 「行く」 donne le but du déplacement : pour acheter.",
-     "es": "「買いに行きました」: raíz del verbo + 「に」 + 「行く」 da el propósito del desplazamiento: a comprar."
+     "es": "「買いに行きました」: raíz ます + 「に」 + 「行く」 da el propósito del desplazamiento: a comprar."
     },
     "words": [
      {
@@ -38069,7 +38069,7 @@
     "translation": {
      "en": "On Sunday morning, I learned to make a rolled omelette from my mother.",
      "fr": "Dimanche matin, ma mère m'a appris à faire une omelette roulée.",
-     "es": "El domingo por la mañana aprendí de mi madre a hacer una tortilla enrollada."
+     "es": "El domingo por la mañana aprendí de mi madre a hacer una tortilla de huevo enrollada."
     },
     "note": {
      "en": "With 「ならう」 (to learn), 「に」 marks the person you learn from: 母に, from my mother.",
@@ -38122,7 +38122,7 @@
       "meaning": {
        "en": "rolled omelette",
        "fr": "omelette roulée",
-       "es": "tortilla enrollada"
+       "es": "tortilla de huevo enrollada"
       }
      },
      {
@@ -38148,7 +38148,7 @@
     "translation": {
      "en": "First, I broke three eggs and added a little salt and sugar.",
      "fr": "D'abord, j'ai cassé trois œufs et j'ai ajouté un peu de sel et de sucre.",
-     "es": "Primero rompí tres huevos y añadí un poco de sal y de azúcar."
+     "es": "Primero rompí tres huevos y agregué un poco de sal y de azúcar."
     },
     "note": {
      "en": "「まず」 opens the first step, and the て-form 「わって」 leads on to the next.",
@@ -38241,7 +38241,7 @@
       "meaning": {
        "en": "put in",
        "fr": "ai ajouté",
-       "es": "añadí"
+       "es": "agregué"
       }
      }
     ]
@@ -38256,7 +38256,7 @@
     "note": {
      "en": "「そして」 at the head of the sentence adds the next step: and then.",
      "fr": "「そして」 en tête de phrase ajoute l'étape suivante : et ensuite.",
-     "es": "「そして」 al principio de la oración añade el paso siguiente: y luego."
+     "es": "「そして」 al principio de la oración agrega el paso siguiente: y luego."
     },
     "words": [
      {
@@ -38630,12 +38630,12 @@
     "translation": {
      "en": "This time, it turned the same pretty yellow as my mother's omelette.",
      "fr": "Cette fois, elle a pris le même joli jaune que l'omelette de ma mère.",
-     "es": "Esta vez quedó del mismo amarillo bonito que la tortilla de mi madre."
+     "es": "Esta vez quedó del mismo amarillo bonito que la tortilla de huevo de mi madre."
     },
     "note": {
      "en": "「〜と同じ」 means the same as: the same yellow as my mother's omelette.",
      "fr": "「〜と同じ」 signifie le même que : le même jaune que l'omelette de ma mère.",
-     "es": "「〜と同じ」 significa lo mismo que: el mismo amarillo que la tortilla de mi madre."
+     "es": "「〜と同じ」 significa lo mismo que: el mismo amarillo que la tortilla de huevo de mi madre."
     },
     "words": [
      {
@@ -38675,7 +38675,7 @@
       "meaning": {
        "en": "rolled omelette",
        "fr": "omelette roulée",
-       "es": "tortilla enrollada"
+       "es": "tortilla de huevo enrollada"
       }
      },
      {
@@ -38762,7 +38762,7 @@
       "meaning": {
        "en": "one (the omelette)",
        "fr": "celle (l'omelette)",
-       "es": "la (tortilla)"
+       "es": "la (tortilla de huevo)"
       }
      },
      {
@@ -38786,7 +38786,7 @@
       "meaning": {
        "en": "one (the omelette)",
        "fr": "celle (l'omelette)",
-       "es": "la (tortilla)"
+       "es": "la (tortilla de huevo)"
       }
      },
      {
@@ -39010,7 +39010,7 @@
     "question": {
      "en": "What was at the collection point last Sunday?",
      "fr": "Qu'y avait-il au point de collecte dimanche dernier ?",
-     "es": "¿Qué había en el punto de recogida el domingo pasado?"
+     "es": "¿Qué había en el punto de recolección el domingo pasado?"
     },
     "options": {
      "en": [
@@ -39620,7 +39620,7 @@
     "translation": {
      "en": "Also, last Sunday, there were five bags at the rubbish collection point.",
      "fr": "Autre chose : dimanche dernier, il y avait cinq sacs au point de collecte.",
-     "es": "Además, el domingo pasado había cinco bolsas en el punto de recogida de basura."
+     "es": "Además, el domingo pasado había cinco bolsas en el punto de recolección de basura."
     },
     "note": {
      "en": "「五つ」 counts things in general, and 「〜に〜がありました」 says what was where.",
@@ -39665,7 +39665,7 @@
       "meaning": {
        "en": "rubbish collection point",
        "fr": "point de collecte des ordures",
-       "es": "punto de recogida de basura"
+       "es": "punto de recolección de basura"
       }
      },
      {
@@ -39673,7 +39673,7 @@
       "meaning": {
        "en": "at (where it is)",
        "fr": "à (où se trouve la chose)",
-       "es": "en (dónde está)"
+       "es": "en (donde está)"
       }
      },
      {
@@ -41194,7 +41194,7 @@
     "question": {
      "en": "In 「花はまださいていません」, what does 「まだ」 add?",
      "fr": "Dans 「花はまださいていません」, qu'ajoute 「まだ」 ?",
-     "es": "En 「花はまださいていません」, ¿qué añade 「まだ」?"
+     "es": "En 「花はまださいていません」, ¿qué agrega 「まだ」?"
     },
     "options": {
      "en": [
@@ -42896,7 +42896,7 @@
       "meaning": {
        "en": "is good at",
        "fr": "est doué pour",
-       "es": "se le da bien"
+       "es": "es bueno para"
       }
      }
     ]
@@ -42967,7 +42967,7 @@
       "meaning": {
        "en": "marks what is possible",
        "fr": "marque ce qui est possible",
-       "es": "marca el sujeto"
+       "es": "marca lo que es posible"
       }
      },
      {
@@ -43318,7 +43318,7 @@
     "translation": {
      "en": "Nakamura was delighted and said, \"Next month I'm giving a concert at the hall in front of the station. Would you like to come?\"",
      "fr": "Avec joie, Nakamura a répondu : « Le mois prochain, je donne un concert dans la salle devant la gare. Vous voulez venir ? »",
-     "es": "Nakamura se alegró y dijo: «El mes que viene doy un concierto en la sala de delante de la estación. ¿Le gustaría venir?»."
+     "es": "Nakamura se alegró y dijo: «El mes que viene doy un concierto en la sala frente a la estación. ¿Le gustaría venir?»."
     },
     "note": {
      "en": "「来ませんか」, a negative question, is a polite invitation: won't you come?",
@@ -43724,12 +43724,12 @@
     "translation": {
      "en": "Last Monday, I left my bag on the train.",
      "fr": "Lundi dernier, j'ai oublié mon sac dans le train.",
-     "es": "El lunes pasado me dejé el bolso en el tren."
+     "es": "El lunes pasado olvidé el bolso en el tren."
     },
     "note": {
      "en": "With 「わすれました」, 「に」 marks where something was left behind: on the train.",
      "fr": "Avec 「わすれました」, 「に」 marque où l'on a laissé quelque chose : dans le train.",
-     "es": "Con 「わすれました」, 「に」 marca dónde se dejó algo olvidado: en el tren."
+     "es": "Con 「わすれました」, 「に」 marca dónde se olvidó algo: en el tren."
     },
     "words": [
      {
@@ -43769,7 +43769,7 @@
       "meaning": {
        "en": "on (where it was left)",
        "fr": "dans (là où on l'a laissé)",
-       "es": "en (donde se dejó)"
+       "es": "en (donde se olvidó)"
       }
      },
      {
@@ -43938,7 +43938,7 @@
     "translation": {
      "en": "At the station in front of my office, I hurried off the train.",
      "fr": "À la gare devant mon bureau, je suis descendu du train en vitesse.",
-     "es": "En la estación de delante de mi oficina, bajé del tren a toda prisa."
+     "es": "En la estación frente a mi oficina, bajé del tren a toda prisa."
     },
     "note": {
      "en": "The て-form 「いそいで」 tells how the action was done: in a hurry.",
@@ -45429,7 +45429,7 @@
     "note": {
      "en": "「下手です」 is the opposite of 「上手です」: not good at it.",
      "fr": "「下手です」 est le contraire de 「上手です」 : pas doué.",
-     "es": "「下手です」 es lo contrario de 「上手です」: no se le da bien."
+     "es": "「下手です」 es lo contrario de 「上手です」: no ser bueno para algo."
     },
     "words": [
      {
@@ -45724,7 +45724,7 @@
     "translation": {
      "en": "As for the place, the university cafeteria or the café in front of the station would be good.",
      "fr": "Pour le lieu, la cantine de l'université ou le café devant la gare, ce serait bien.",
-     "es": "En cuanto al lugar, estaría bien el comedor de la universidad o la cafetería de delante de la estación."
+     "es": "En cuanto al lugar, estaría bien el comedor de la universidad o la cafetería frente a la estación."
     },
     "note": {
      "en": "「か」 between two nouns means or: the cafeteria or the café.",
@@ -46064,7 +46064,7 @@
     "question": {
      "en": "In 「ひるごろ」, what does 「〜ごろ」 add?",
      "fr": "Dans 「ひるごろ」, qu'ajoute 「〜ごろ」 ?",
-     "es": "En 「ひるごろ」, ¿qué añade 「〜ごろ」?"
+     "es": "En 「ひるごろ」, ¿qué agrega 「〜ごろ」?"
     },
     "options": {
      "en": [
@@ -46775,7 +46775,7 @@
       "meaning": {
        "en": "queued",
        "fr": "avons fait la queue",
-       "es": "hicimos cola"
+       "es": "hicimos fila"
       }
      }
     ]
@@ -47520,7 +47520,7 @@
     "translation": {
      "en": "There's a new anime film on at the cinema in front of the station.",
      "fr": "Au cinéma devant la gare, il y a un nouveau film d'animation.",
-     "es": "En el cine de delante de la estación ponen una nueva película de anime."
+     "es": "En el cine frente a la estación están pasando una nueva película de anime."
     },
     "note": {
      "en": "For an event such as a film showing, 「あります」 takes 「で」 for the place: at the cinema.",
@@ -48116,7 +48116,7 @@
       "meaning": {
        "en": "at (where it is)",
        "fr": "à (là où il se trouve)",
-       "es": "en (dónde está)"
+       "es": "en (donde está)"
       }
      },
      {
@@ -48585,7 +48585,7 @@
       "meaning": {
        "en": "homestay",
        "fr": "séjour chez l'habitant",
-       "es": "estancia con una familia"
+       "es": "estadía con una familia"
       }
      },
      {
@@ -48880,7 +48880,7 @@
     "translation": {
      "en": "You may drink the drinks in the fridge.",
      "fr": "Tu peux boire les boissons du frigo.",
-     "es": "Puedes tomar las bebidas de la nevera."
+     "es": "Puedes tomar las bebidas del refrigerador."
     },
     "note": {
      "en": "The pattern 「〜てもいいです」 gives permission: 「飲んでもいいです」, you may drink them.",
@@ -48893,7 +48893,7 @@
       "meaning": {
        "en": "fridge",
        "fr": "frigo",
-       "es": "nevera, refrigerador"
+       "es": "refrigerador"
       }
      },
      {
@@ -49311,7 +49311,7 @@
     "note": {
      "en": "The word 「だけ」 means only: the slippers stay in the toilet and nowhere else.",
      "fr": "Le mot 「だけ」 veut dire seulement : les chaussons restent dans les toilettes, nulle part ailleurs.",
-     "es": "La palabra 「だけ」 significa solo: las pantuflas se quedan en el baño y en ningún otro sitio."
+     "es": "La palabra 「だけ」 significa solo: las pantuflas se quedan en el baño y en ningún otro lugar."
     },
     "words": [
      {
@@ -49719,7 +49719,7 @@
     "translation": {
      "en": "Since last week, I have been working part-time at a café in front of the station.",
      "fr": "Depuis la semaine dernière, je travaille à temps partiel dans un café devant la gare.",
-     "es": "Desde la semana pasada trabajo a medio tiempo en una cafetería de delante de la estación."
+     "es": "Desde la semana pasada trabajo a medio tiempo en una cafetería frente a la estación."
     },
     "note": {
      "en": "「〜ています」 with 「先週から」 describes something that began last week and is still going on.",
@@ -50041,7 +50041,7 @@
     "note": {
      "en": "「多かった」 is the past of the い-adjective 「多い」: 〜い becomes 〜かった.",
      "fr": "「多かった」 est le passé de l'adjectif en い 「多い」 : 〜い devient 〜かった.",
-     "es": "「多かった」 es el pasado del adj. い 「多い」: 〜い se vuelve 〜かった."
+     "es": "「多かった」 es el pasado del adjetivo en い 「多い」: 〜い se vuelve 〜かった."
     },
     "words": [
      {
@@ -50993,7 +50993,7 @@
       "meaning": {
        "en": "outside",
        "fr": "dehors",
-       "es": "fuera"
+       "es": "afuera"
       }
      },
      {
@@ -51678,7 +51678,7 @@
     "question": {
      "en": "In 「三十分ぐらいあとで」, what does 「ぐらい」 add?",
      "fr": "Dans 「三十分ぐらいあとで」, qu'ajoute 「ぐらい」 ?",
-     "es": "En 「三十分ぐらいあとで」, ¿qué añade 「ぐらい」?"
+     "es": "En 「三十分ぐらいあとで」, ¿qué agrega 「ぐらい」?"
     },
     "options": {
      "en": [
@@ -54721,7 +54721,7 @@
       "meaning": {
        "en": "natto (fermented soybeans)",
        "fr": "natto (soja fermenté)",
-       "es": "natto (soja fermentada)"
+       "es": "natto (soya fermentada)"
       }
      },
      {
@@ -54823,7 +54823,7 @@
     "note": {
      "en": "「もう」 with a past verb means already: she has already climbed about twenty.",
      "fr": "「もう」 avec un verbe au passé signifie déjà : elle en a déjà gravi une vingtaine.",
-     "es": "「もう」 con un verbo en pasado significa ya: ya ha subido unas veinte."
+     "es": "「もう」 con un verbo en pasado significa ya: ya subió unas veinte."
     },
     "words": [
      {
@@ -56950,12 +56950,12 @@
     "translation": {
      "en": "My mother said, \"The key is probably somewhere in the house.\"",
      "fr": "Ma mère a dit : « La clé est sans doute quelque part dans la maison. »",
-     "es": "Mi madre dijo: «Seguramente la llave está en algún sitio de la casa»."
+     "es": "Mi madre dijo: «Seguramente la llave está en algún lugar de la casa»."
     },
     "note": {
      "en": "「どこか」 means somewhere, and 「でしょう」 makes it a guess: it is probably there.",
      "fr": "「どこか」 veut dire quelque part, et 「でしょう」 en fait une supposition : elle y est sans doute.",
-     "es": "「どこか」 significa en algún sitio, y 「でしょう」 lo convierte en una suposición: seguramente está ahí."
+     "es": "「どこか」 significa en algún lugar, y 「でしょう」 lo convierte en una suposición: seguramente está ahí."
     },
     "words": [
      {
@@ -57011,7 +57011,7 @@
       "meaning": {
        "en": "somewhere",
        "fr": "quelque part",
-       "es": "algún sitio"
+       "es": "algún lugar"
       }
      },
      {
@@ -59376,7 +59376,7 @@
     "note": {
      "en": "「おもしろかった」 is the past of the い-adjective 「おもしろい」: い becomes かった.",
      "fr": "「おもしろかった」 est le passé de l'adjectif en い 「おもしろい」 : い devient かった.",
-     "es": "「おもしろかった」 es el pasado del adj. い 「おもしろい」: い pasa a かった."
+     "es": "「おもしろかった」 es el pasado del adjetivo en い 「おもしろい」: い pasa a かった."
     },
     "words": [
      {
@@ -59676,7 +59676,7 @@
       "meaning": {
        "en": "on (a day)",
        "fr": "(marque le jour)",
-       "es": "en (un día)"
+       "es": "el (día)"
       }
      },
      {
@@ -59876,7 +59876,7 @@
     "question": {
      "en": "What does 「ごろ」 add in 「二時半ごろから」?",
      "fr": "Qu'ajoute 「ごろ」 dans 「二時半ごろから」 ?",
-     "es": "¿Qué añade 「ごろ」 en 「二時半ごろから」?"
+     "es": "¿Qué agrega 「ごろ」 en 「二時半ごろから」?"
     },
     "options": {
      "en": [
@@ -65286,7 +65286,7 @@
       "meaning": {
        "en": "on (a day)",
        "fr": "(marque le jour)",
-       "es": "en (un día)"
+       "es": "el (día)"
       }
      },
      {
@@ -65858,7 +65858,7 @@
     "translation": {
      "en": "On Sunday, on the ground floor of a department store, a little boy was standing on his own.",
      "fr": "Dimanche, au rez-de-chaussée d'un grand magasin, un petit garçon se tenait debout tout seul.",
-     "es": "El domingo, en la planta baja de unos grandes almacenes, había un niño pequeño de pie, solo."
+     "es": "El domingo, en la planta baja de una tienda departamental, había un niño pequeño de pie, solo."
     },
     "note": {
      "en": "「立っていました」 (〜ていました) describes a state going on at that moment: he was standing there.",
@@ -65879,7 +65879,7 @@
       "meaning": {
        "en": "department store",
        "fr": "grand magasin",
-       "es": "grandes almacenes"
+       "es": "tienda departamental"
       }
      },
      {
@@ -66384,7 +66384,7 @@
       "meaning": {
        "en": "department store",
        "fr": "grand magasin",
-       "es": "grandes almacenes"
+       "es": "tienda departamental"
       }
      },
      {
@@ -66442,12 +66442,12 @@
     "translation": {
      "en": "Over the store's speakers, the staff member said, \"Would Masato's mother please come to the entrance on the ground floor.\"",
      "fr": "Par les haut-parleurs du magasin, l'employé a dit : « La maman de Masato est priée de venir à l'entrée du rez-de-chaussée. »",
-     "es": "Por los altavoces de la tienda, el empleado dijo: «Se ruega a la madre de Masato que venga a la entrada de la planta baja»."
+     "es": "Por los altoparlantes de la tienda, el empleado dijo: «Se ruega a la madre de Masato que venga a la entrada de la planta baja»."
     },
     "note": {
      "en": "「スピーカーで」: 「で」 marks the means, by the speakers, and 「〜てください」 makes the request polite.",
      "fr": "「スピーカーで」 : 「で」 marque le moyen, par les haut-parleurs, et 「〜てください」 rend la demande polie.",
-     "es": "「スピーカーで」: 「で」 marca el medio, por los altavoces, y 「〜てください」 hace cortés la petición."
+     "es": "「スピーカーで」: 「で」 marca el medio, por los altoparlantes, y 「〜てください」 hace cortés la petición."
     },
     "words": [
      {
@@ -66455,7 +66455,7 @@
       "meaning": {
        "en": "department store",
        "fr": "grand magasin",
-       "es": "grandes almacenes"
+       "es": "tienda departamental"
       }
      },
      {
@@ -66487,7 +66487,7 @@
       "meaning": {
        "en": "department store",
        "fr": "grand magasin",
-       "es": "grandes almacenes"
+       "es": "tienda por departamentos"
       }
      },
      {
@@ -66519,7 +66519,7 @@
       "meaning": {
        "en": "speakers",
        "fr": "haut-parleurs",
-       "es": "altavoces"
+       "es": "altoparlantes"
       }
      },
      {
@@ -66925,7 +66925,7 @@
     "question": {
      "en": "In 「コーヒーを飲みたいと思います」, what does 「と思います」 add?",
      "fr": "Dans 「コーヒーを飲みたいと思います」, qu'ajoute 「と思います」 ?",
-     "es": "En 「コーヒーを飲みたいと思います」, ¿qué añade 「と思います」?"
+     "es": "En 「コーヒーを飲みたいと思います」, ¿qué agrega 「と思います」?"
     },
     "options": {
      "en": [
@@ -68042,7 +68042,7 @@
     "question": {
      "en": "Why didn't the writer ride a bicycle as a child?",
      "fr": "Pourquoi l'auteur ne faisait-il pas de vélo quand il était enfant ?",
-     "es": "¿Por qué el autor no montaba en bicicleta de niño?"
+     "es": "¿Por qué el autor no andaba en bicicleta de niño?"
     },
     "options": {
      "en": [
@@ -68129,7 +68129,7 @@
     "question": {
      "en": "Who taught the writer to ride?",
      "fr": "Qui a appris à l'auteur à faire du vélo ?",
-     "es": "¿Quién le enseñó al autor a montar en bicicleta?"
+     "es": "¿Quién le enseñó al autor a andar en bicicleta?"
     },
     "options": {
      "en": [
@@ -68187,7 +68187,7 @@
     "question": {
      "en": "How long did it take the writer to ride alone?",
      "fr": "Combien de temps l'auteur a-t-il mis pour rouler seul ?",
-     "es": "¿Cuánto tardó el autor en poder montar solo?"
+     "es": "¿Cuánto tardó el autor en poder andar solo en bicicleta?"
     },
     "options": {
      "en": [
@@ -68294,7 +68294,7 @@
     "translation": {
      "en": "But until last month, I couldn't ride a bicycle.",
      "fr": "Mais jusqu'au mois dernier, je ne savais pas faire de vélo.",
-     "es": "Pero hasta el mes pasado no sabía montar en bicicleta."
+     "es": "Pero hasta el mes pasado no sabía andar en bicicleta."
     },
     "note": {
      "en": "In 「のることができませんでした」, dictionary form + ことができません says one cannot do it, here in the past.",
@@ -68347,7 +68347,7 @@
       "meaning": {
        "en": "ride",
        "fr": "monter",
-       "es": "montar"
+       "es": "andar (en bicicleta)"
       }
      },
      {
@@ -68460,12 +68460,12 @@
     "translation": {
      "en": "The road was very dangerous, so I didn't ride a bicycle.",
      "fr": "La route était très dangereuse, alors je ne faisais pas de vélo.",
-     "es": "El camino era muy peligroso, así que no montaba en bicicleta."
+     "es": "El camino era muy peligroso, así que no andaba en bicicleta."
     },
     "note": {
      "en": "「から」 after the first clause gives the reason for the second: dangerous, so I didn't ride.",
      "fr": "「から」 après la première proposition donne la raison de la seconde : dangereux, donc je n'en faisais pas.",
-     "es": "「から」 después de la primera oración da la razón de la segunda: peligroso, así que no montaba."
+     "es": "「から」 después de la primera oración da la razón de la segunda: peligroso, así que no andaba en bicicleta."
     },
     "words": [
      {
@@ -68537,7 +68537,7 @@
       "meaning": {
        "en": "did not ride",
        "fr": "ne faisais pas (de vélo)",
-       "es": "no montaba"
+       "es": "no andaba (en bicicleta)"
       }
      }
     ]
@@ -68658,7 +68658,7 @@
     "translation": {
      "en": "After I came to Japan, I started to want a bicycle too.",
      "fr": "Après être venu au Japon, j'ai eu envie d'un vélo, moi aussi.",
-     "es": "Después de venir a Japón, yo también empecé a querer una bicicleta."
+     "es": "Después de venir a Japón, a mí también me dieron ganas de tener una bicicleta."
     },
     "note": {
      "en": "「来てから」 (〜てから) means after coming, and 「ほしくなりました」 says the wish began then.",
@@ -69022,12 +69022,12 @@
     "translation": {
      "en": "Two weeks later, I could ride on my own.",
      "fr": "Deux semaines plus tard, j'ai pu rouler tout seul.",
-     "es": "Dos semanas después, pude montar solo."
+     "es": "Dos semanas después, pude andar en bicicleta solo."
     },
     "note": {
      "en": "「のることができました」 is the past of 〜ことができます: I was able to ride.",
      "fr": "「のることができました」 est le passé de 〜ことができます : j'ai pu rouler.",
-     "es": "「のることができました」 es el pasado de 〜ことができます: pude montar."
+     "es": "「のることができました」 es el pasado de 〜ことができます: pude andar (en bicicleta)."
     },
     "words": [
      {
@@ -69059,7 +69059,7 @@
       "meaning": {
        "en": "ride",
        "fr": "rouler",
-       "es": "montar"
+       "es": "andar (en bicicleta)"
       }
      },
      {
@@ -69082,7 +69082,7 @@
     "note": {
      "en": "In 「今は」, 「は」 sets now against the past: once unable to ride, now every morning.",
      "fr": "Dans 「今は」, 「は」 oppose maintenant au passé : autrefois incapable, maintenant chaque matin.",
-     "es": "En 「今は」, 「は」 opone el ahora al pasado: antes no podía montar, ahora lo hace cada mañana."
+     "es": "En 「今は」, 「は」 opone el ahora al pasado: antes no podía andar en bicicleta, ahora lo hace cada mañana."
     },
     "words": [
      {

@@ -123,11 +123,10 @@ def _rows(name: str, table: str) -> int:
         conn.close()
 
 
-def _theme_pool() -> list[int]:
-    """The theme words the deck has no card for: the theme's own Spanish
-    is all they have (a deck word reads the deck's)."""
-    rows = [r for rows in _load("datas", "vocab", "theme_words.json").values() for r in rows
-            if r.get("domain") == "vocab_jmdict"]
+def _theme_words() -> list[int]:
+    """Every theme word, in the sense it has in its theme: a pool word has
+    no other Spanish, and a deck card's gloss may be another sense."""
+    rows = [r for rows in _load("datas", "vocab", "theme_words.json").values() for r in rows]
     return [sum(bool(r.get("meaning_es")) for r in rows), len(rows)]
 
 
@@ -153,7 +152,7 @@ def banks() -> dict[str, list[int]]:
         "pool words": [_rows("jmdict_es.sqlite3", "pool_line"), _rows("jmdict_fr.sqlite3", "pool_line")],
         "breakdown glosses": [a + b for a, b in zip(_module_pairs("study", "particle_glosses.py"),
                                                     _module_pairs("study", "analysis.py"))],
-        "theme words (pool)": _theme_pool(),
+        "theme words": _theme_words(),
         "radicals": _radicals(),
     }
     for name, folder in (("comprehension seeds", "comprehension"), ("conversation bank", "conversation")):

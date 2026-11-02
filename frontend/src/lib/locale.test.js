@@ -29,7 +29,7 @@ describe('pickInitialLang', () => {
 describe('intlLocale', () => {
   it('writes each language in its own locale, English in the one the screen asks', () => {
     expect(intlLocale('fr')).toBe('fr-FR')
-    expect(intlLocale('es')).toBe('es-ES')
+    expect(intlLocale('es')).toBe('es-419')
     expect(intlLocale('en')).toBe('en-US')
     expect(intlLocale('en', 'en-GB')).toBe('en-GB')
     expect(intlLocale('de')).toBe('en-US')

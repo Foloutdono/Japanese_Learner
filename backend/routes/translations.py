@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 router = APIRouter()
 
@@ -79,14 +79,31 @@ def get_kanji_translation(word: str, lang: str = "fr"):
         "translation": translations.get(word, ""),
     }
 
+# Each deck card's own gloss, keyed by its written form and its kana:
+# 148 written forms are several cards (後 is あと, うしろ, ご and のち), and
+# the map by written form holds one of them, so a run switching language
+# mid-card would hand the card another card's gloss (plan 291's review).
+@lru_cache(maxsize=3)
+def _card_glosses(lang: str) -> dict:
+    from content.vocab_data import VOCAB_BY_LEVEL
+    from translations import get_meaning
+    from translations.course import VOCAB_GLOSSES
+    return {
+        f"{entry.get('kanji') or entry['kana']}::{entry['kana']}": get_meaning(entry, lang, VOCAB_GLOSSES)
+        for level_list in VOCAB_BY_LEVEL.values()
+        for entry in level_list
+    }
+
+
 @router.get("/api/translation/vocab")
-def get_vocab_translation(word: str, lang: str = "fr"):
+def get_vocab_translation(word: str, lang: str = "fr", kana: str = Query("", max_length=40)):
     if not word:
         raise HTTPException(status_code=400, detail="Query parameter 'word' is required")
 
     translations = _load_translation_map(lang, "vocab")
+    own = _card_glosses(lang).get(f"{word}::{kana}") if kana else None
     return {
         "word": word,
         "lang": lang,
-        "translation": translations.get(word, ""),
+        "translation": own or translations.get(word, ""),
     }

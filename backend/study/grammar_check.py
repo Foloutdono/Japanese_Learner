@@ -82,10 +82,11 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
     return out
 
 
-# ── Spanish, where it is written (plan 291) ──
-# The catalogue is written in English and French; Spanish is added point
-# by point and a text without its `es` reads English. So Spanish is never
-# required, but a side that is there is held as the other two are.
+# ── Spanish (plan 291) ──
+# Every text of the catalogue carries its Spanish now, and
+# tests/test_spanish.py requires it of each point (its gloss, its
+# lesson, its tour, its own Choisir questions). This check holds a side
+# that is there as the other two are; the test is what fails a missing one.
 def _spanish_problems(what: str, pair: dict, max_chars: int, bullets: bool = False) -> list[str]:
     if "es" not in pair:
         return []

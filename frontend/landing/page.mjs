@@ -656,6 +656,7 @@ function clientData(t, facts, media) {
   const ty = s => typo(t.lang, s)
   return {
     lang: t.lang,
+    captions: PRESENTATION.captions.map(code => [code, LANG_NAMES[code]]),
     media,
     rhythm: DEFAULT_RHYTHM,
     at: Object.fromEntries(RHYTHMS.map(m => [m, ty(t.line.at(m))])),

@@ -274,7 +274,7 @@ RADICAL_ES: dict[int, str] = {
     63: "puerta", 64: "mano", 65: "rama", 66: "golpear", 67: "escritura", 68: "cucharón",
     69: "hacha", 70: "dirección", 71: "negación", 72: "sol, día", 73: "decir", 74: "luna",
     75: "árbol", 76: "falta, bostezo", 77: "parar", 78: "muerte, huesos", 79: "arma",
-    80: "no hacer", 81: "comparar", 82: "pelaje", 83: "clan", 84: "vapor", 85: "agua", 86: "fuego",
+    80: "no (prohibición)", 81: "comparar", 82: "pelaje", 83: "clan", 84: "vapor", 85: "agua", 86: "fuego",
     87: "garra", 88: "padre", 89: "líneas cruzadas", 90: "medio tronco", 91: "rebanada",
     92: "colmillo", 93: "vaca", 94: "perro", 95: "profundo", 96: "jade, rey", 97: "melón",
     98: "teja", 99: "dulce", 100: "vida", 101: "uso", 102: "arrozal", 103: "rollo de tela",

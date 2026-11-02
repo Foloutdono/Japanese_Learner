@@ -18,8 +18,10 @@ export function pickInitialLang(saved, deviceLang) {
 // ── The locale a number or a date is written in ──────────────
 // Each language's own, and English's as the screen asks (a decimal is
 // 'en-GB' on a card, 'en-US' on a price). One table, so a third language
-// is one line here rather than a ternary at every Intl call.
-const INTL = { fr: 'fr-FR', es: 'es-ES' }
+// is one line here rather than a ternary at every Intl call. Spanish is
+// Latin America's (es-419: 3.5, 12,000), the variety the app writes (plan
+// 291), and the breakdown's own figures agree (study/analysis._es_figure).
+const INTL = { fr: 'fr-FR', es: 'es-419' }
 
 export function intlLocale(lang, english = 'en-US') {
   return INTL[lang] ?? english

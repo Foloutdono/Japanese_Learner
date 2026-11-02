@@ -222,7 +222,7 @@
     "jp": "寒い朝、たき火で冷えた手をあぶった。",
     "en": "On a cold morning, I warmed my chilled hands over the bonfire.",
     "fr": "Par un matin froid, j'ai réchauffé mes mains glacées au-dessus du feu de camp.",
-    "es": "Una mañana fría, me calenté las manos heladas en la hoguera."
+    "es": "Una mañana fría, me calenté las manos heladas en la fogata."
    }
   ],
   "::あまり": [
@@ -328,7 +328,7 @@
     "jp": "地震のときは、あわてずに机の下に入ってください。",
     "en": "In an earthquake, don't panic: get under a desk.",
     "fr": "En cas de séisme, ne paniquez pas et mettez-vous sous une table.",
-    "es": "En caso de terremoto, no entre en pánico y métase debajo de una mesa."
+    "es": "En caso de terremoto, no entre en pánico y métase debajo de un escritorio."
    },
    {
     "jp": "寝坊して、あわてて家を飛び出した。",
@@ -356,13 +356,13 @@
     "jp": "「手伝いましょうか。」「いえ、大丈夫です。」",
     "en": "\"Shall I help you?\" \"No, I'm fine.\"",
     "fr": "« Je peux vous aider ? » « Non, ça va. »",
-    "es": "«¿Le ayudo?» «No, está bien.»"
+    "es": "«¿Le ayudo?» «No, está bien»."
    },
    {
     "jp": "「遅れてすみません。」「いえ、わたしも今来たところです。」",
     "en": "\"Sorry I'm late.\" \"Not at all, I've only just arrived myself.\"",
     "fr": "« Désolé d'être en retard. » « Pas du tout, je viens moi-même d'arriver. »",
-    "es": "«Siento llegar tarde.» «Nada de eso, yo también acabo de llegar.»"
+    "es": "«Perdón por llegar tarde». «No, para nada, yo también acabo de llegar»."
    }
   ],
   "::いかが": [
@@ -474,7 +474,7 @@
     "jp": "「わあ、おいしそう。いただきます！」",
     "en": "\"Wow, that looks delicious. Let's eat!\"",
     "fr": "« Oh, ça a l'air délicieux. Bon appétit ! »",
-    "es": "«¡Oh, parece delicioso! ¡Buen provecho!»"
+    "es": "«¡Guau, se ve delicioso! ¡A comer!»"
    }
   ],
   "::いただく": [
@@ -572,7 +572,7 @@
     "jp": "駅前のパン屋は、いつでも人が多い。",
     "en": "The bakery in front of the station is always busy.",
     "fr": "Il y a toujours du monde à la boulangerie devant la gare.",
-    "es": "La panadería de delante de la estación siempre tiene mucha gente."
+    "es": "La panadería frente a la estación siempre tiene mucha gente."
    }
   ],
   "::いつのまにか": [
@@ -622,7 +622,7 @@
     "jp": "「今日はいやに静かだね。」「みんな試験の勉強をしているんだよ。」",
     "en": "\"It's awfully quiet today.\" \"Everyone's studying for the exam.\"",
     "fr": "« C'est drôlement calme aujourd'hui. » « Tout le monde révise pour l'examen. »",
-    "es": "«Hoy está todo terriblemente tranquilo, ¿no?» «Es que todo el mundo está estudiando para el examen.»"
+    "es": "«Hoy está todo terriblemente tranquilo, ¿no?» «Es que todo el mundo está estudiando para el examen»."
    },
    {
     "jp": "今朝の弟はいやに機嫌がいいが、何かあったのだろうか。",
@@ -664,7 +664,7 @@
     "jp": "このデパートには、いろいろな店があります。",
     "en": "There are all sorts of shops in this department store.",
     "fr": "Il y a toutes sortes de boutiques dans ce grand magasin.",
-    "es": "En estos grandes almacenes hay tiendas muy variadas."
+    "es": "En esta tienda por departamentos hay locales de todo tipo."
    },
    {
     "jp": "いろいろありがとうございました。",
@@ -796,7 +796,7 @@
     "jp": "「ご注文は？」「ええと、じゃあカレーライスをお願いします。」",
     "en": "\"What would you like to order?\" \"Um, well then, the curry rice, please.\"",
     "fr": "« Que désirez-vous ? » « Euh… alors, le riz au curry, s'il vous plaît. »",
-    "es": "«¿Qué desea pedir?» «A ver… entonces, el arroz con curry, por favor.»"
+    "es": "«¿Qué desea pedir?» «A ver… entonces, el arroz con curry, por favor»."
    }
   ],
   "::おいしい": [
@@ -832,7 +832,7 @@
     "jp": "「おおい、忘れ物だよ！」と、後ろから友達が追いかけてきた。",
     "en": "\"Hey! You forgot something!\" my friend called, running after me.",
     "fr": "« Hé ! Tu as oublié quelque chose ! » m'a crié mon ami en me courant après.",
-    "es": "«¡Oye, te dejaste algo!», me dijo un amigo, que venía corriendo detrás de mí."
+    "es": "«¡Oye, se te olvidó algo!», me dijo un amigo, que venía corriendo detrás de mí."
    },
    {
     "jp": "船の上から「おおい！」と呼ぶと、岸の人たちが手を振り返した。",
@@ -866,7 +866,7 @@
     "jp": "「お元気ですか」「はい、おかげさまで」",
     "en": "“How are you?” “Very well, thank you.”",
     "fr": "« Vous allez bien ? » « Oui, très bien, merci. »",
-    "es": "«¿Cómo está usted?» «Muy bien, gracias.»"
+    "es": "«¿Cómo está usted?» «Muy bien, gracias»."
    }
   ],
   "::おかげさまで": [
@@ -874,13 +874,13 @@
     "jp": "「お元気ですか。」「おかげさまで、元気にしております。」",
     "en": "\"How are you?\" \"Very well, thank you.\"",
     "fr": "« Comment allez-vous ? » « Très bien, je vous remercie. »",
-    "es": "«¿Cómo está usted?» «Afortunadamente, muy bien, gracias.»"
+    "es": "«¿Cómo está usted?» «Afortunadamente, muy bien, gracias»."
    },
    {
     "jp": "おかげさまで、無事に大学を卒業することができました。",
     "en": "Thanks to you, I was able to graduate from university without a hitch.",
     "fr": "Grâce à vous, j'ai pu terminer mes études universitaires sans encombre.",
-    "es": "Gracias a usted, he podido terminar la universidad sin contratiempos."
+    "es": "Gracias a usted, pude terminar la universidad sin contratiempos."
    }
   ],
   "::おかしい": [
@@ -908,7 +908,7 @@
     "jp": "べんとうのおかずに、卵焼きを入れた。",
     "en": "I put a rolled omelette in the lunch box as one of the side dishes.",
     "fr": "J'ai mis une omelette roulée dans la boîte à repas pour accompagner le riz.",
-    "es": "Puse una tortilla enrollada en la caja del almuerzo como acompañamiento."
+    "es": "Puse una tortilla de huevo enrollada en la caja del almuerzo como acompañamiento."
    }
   ],
   "::おさきに": [
@@ -916,7 +916,7 @@
     "jp": "「おさきに失礼します。」「お疲れさまでした。」",
     "en": "\"Excuse me for leaving before you.\" \"Thanks for all your hard work today.\"",
     "fr": "« Excusez-moi, je pars avant vous. » « Merci pour votre travail aujourd'hui. »",
-    "es": "«Disculpe, me voy antes que usted.» «Gracias por su trabajo de hoy.»"
+    "es": "«Disculpe, me voy antes que usted». «Gracias por su trabajo de hoy»."
    },
    {
     "jp": "エレベーターで「おさきにどうぞ」と言われ、お礼を言って先に降りた。",
@@ -972,7 +972,7 @@
     "jp": "「どうぞ、上がって。」「じゃあ、おじゃまします。」",
     "en": "\"Come on in.\" \"Thanks, sorry to intrude.\"",
     "fr": "« Entre, je t'en prie. » « Merci, excuse-moi de déranger. »",
-    "es": "«Pasa, por favor.» «Bueno, perdona la molestia.»"
+    "es": "«Pasa, por favor». «Bueno, perdona la molestia»."
    },
    {
     "jp": "友だちの家に入るときは、「おじゃまします」と言いましょう。",
@@ -1000,7 +1000,7 @@
     "jp": "「かぜをひいてしまって。」「それは大変ですね。おだいじに。」",
     "en": "\"I've caught a cold.\" \"Oh, I'm sorry to hear that. Take care of yourself.\"",
     "fr": "« J'ai attrapé un rhume. » « Oh, c'est embêtant. Prenez soin de vous. »",
-    "es": "«Me he resfriado.» «Vaya, qué mal. Cuídese.»"
+    "es": "«Me he resfriado». «Vaya, qué mal. Cuídese»."
    },
    {
     "jp": "医者は「おだいじに」と言って、薬を出してくれた。",
@@ -1014,7 +1014,7 @@
     "jp": "うちの父は、怒るとおっかない。",
     "en": "My father is scary when he gets angry.",
     "fr": "Mon père fait peur quand il se met en colère.",
-    "es": "Mi padre da miedo cuando se enfada."
+    "es": "Mi padre da miedo cuando se enoja."
    },
    {
     "jp": "夜の山道を一人で歩くのは、ちょっとおっかないな。",
@@ -1048,7 +1048,7 @@
     "jp": "おつりは、さいふに入れておいてね。",
     "en": "Put the change in your wallet, okay?",
     "fr": "Mets la monnaie dans ton porte-monnaie, d'accord ?",
-    "es": "Guarda el cambio en tu cartera, ¿de acuerdo?"
+    "es": "Guarda el cambio en tu billetera, ¿de acuerdo?"
    }
   ],
   "::おとなしい": [
@@ -1154,7 +1154,7 @@
     "jp": "「おまたせしました。ご注文のコーヒーです。」",
     "en": "\"Sorry to have kept you waiting. Here's the coffee you ordered.\"",
     "fr": "« Désolé de vous avoir fait attendre. Voici le café que vous avez commandé. »",
-    "es": "«Siento haberle hecho esperar. Aquí tiene el café que pidió.»"
+    "es": "«Siento haberle hecho esperar. Aquí tiene el café que pidió»."
    },
    {
     "jp": "窓口で「おまたせしました」と言われ、書類を受け取った。",
@@ -1182,7 +1182,7 @@
     "jp": "「おまちどおさま。ラーメン二つです。」",
     "en": "\"Sorry to keep you waiting. Two ramen.\"",
     "fr": "« Désolé de vous avoir fait attendre. Voici vos deux ramens. »",
-    "es": "«Perdonen la espera. Aquí tienen dos ramen.»"
+    "es": "«Perdonen la espera. Aquí tienen dos ramen»."
    },
    {
     "jp": "おまちどおさま。電車が少し遅れちゃって。",
@@ -1322,13 +1322,13 @@
     "jp": "「コーヒーを二つお願いします。」「かしこまりました。少々お待ちください。」",
     "en": "\"Two coffees, please.\" \"Certainly. One moment, please.\"",
     "fr": "« Deux cafés, s'il vous plaît. » « Très bien. Un instant, je vous prie. »",
-    "es": "«Dos cafés, por favor.» «Desde luego. Un momento, por favor.»"
+    "es": "«Dos cafés, por favor». «Desde luego. Un momento, por favor»."
    },
    {
     "jp": "「この書類、三部コピーしてくれる？」「かしこまりました。すぐにお持ちします。」",
     "en": "\"Can you make three copies of this document?\" \"Certainly. I'll bring them right away.\"",
     "fr": "« Tu peux me faire trois copies de ce document ? » « Très bien. Je vous les apporte tout de suite. »",
-    "es": "«¿Me haces tres copias de este documento?» «Desde luego. Se las traigo enseguida.»"
+    "es": "«¿Me haces tres copias de este documento?» «Desde luego. Se las traigo enseguida»."
    }
   ],
   "::かじる": [
@@ -1728,13 +1728,13 @@
     "jp": "「今日は来てくれてありがとう。」「こちらこそ、呼んでくれてありがとう。」",
     "en": "\"Thanks for coming today.\" \"No, thank you for inviting me.\"",
     "fr": "« Merci d'être venu aujourd'hui. » « C'est moi qui te remercie de m'avoir invité. »",
-    "es": "«Gracias por venir hoy.» «Al contrario, gracias a ti por invitarme.»"
+    "es": "«Gracias por venir hoy». «Al contrario, gracias a ti por invitarme»."
    },
    {
     "jp": "「長い間お待たせしてすみません。」「いえ、こちらこそ急にお願いしてすみません。」",
     "en": "\"I'm sorry to have kept you waiting so long.\" \"Not at all, I'm the one who should apologise for asking so suddenly.\"",
     "fr": "« Désolé de vous avoir fait attendre si longtemps. » « Pas du tout, c'est plutôt à moi de m'excuser de vous l'avoir demandé si soudainement. »",
-    "es": "«Siento haberle hecho esperar tanto.» «No, soy yo quien le pide disculpas por habérselo pedido tan de repente.»"
+    "es": "«Siento haberle hecho esperar tanto». «No, soy yo quien le pide disculpas por habérselo pedido tan de repente»."
    }
   ],
   "::こと": [
@@ -1818,7 +1818,7 @@
     "jp": "合格の知らせを聞いて、母の目から涙がこぼれた。",
     "en": "When she heard the news that I had passed, tears fell from my mother's eyes.",
     "fr": "En apprenant la nouvelle de ma réussite, ma mère a laissé couler des larmes.",
-    "es": "Al oír la noticia de mi aprobado, a mi madre se le cayeron las lágrimas."
+    "es": "Al oír la noticia de que yo había aprobado, a mi madre se le cayeron las lágrimas."
    }
   ],
   "::こらえる": [
@@ -1882,7 +1882,7 @@
     "jp": "「配達、ごくろうさまです。」",
     "en": "\"Thank you for the delivery.\"",
     "fr": "« Merci pour la livraison. »",
-    "es": "«Gracias por la molestia de la entrega.»"
+    "es": "«Gracias por la molestia de la entrega»."
    },
    {
     "jp": "仕事から帰った父に、母が「ごくろうさま」と声をかけた。",
@@ -1916,7 +1916,7 @@
     "jp": "「ごちそうさまでした。」「お口に合ってよかったです。」",
     "en": "\"Thank you for the meal.\" \"I'm glad you liked it.\"",
     "fr": "« Merci pour ce repas. » « Tant mieux si ça vous a plu. »",
-    "es": "«Gracias por la comida.» «Me alegro de que le haya gustado.»"
+    "es": "«Gracias por la comida». «Me alegro de que le haya gustado»."
    }
   ],
   "::ごみ": [
@@ -1924,7 +1924,7 @@
     "jp": "ごみの日は、月曜日と木曜日です。",
     "en": "Rubbish collection days are Monday and Thursday.",
     "fr": "Les ordures sont ramassées le lundi et le jeudi.",
-    "es": "Los días de recogida de basura son los lunes y los jueves."
+    "es": "Los días de recolección de basura son los lunes y los jueves."
    },
    {
     "jp": "道にごみをすてないでください。",
@@ -1944,7 +1944,7 @@
     "jp": "「ごめんください。田中さんはいらっしゃいますか。」「はい、少々お待ちください。」",
     "en": "\"Excuse me, may I come in? Is Mr. Tanaka in?\" \"Yes, one moment, please.\"",
     "fr": "« Pardon, je peux entrer ? M. Tanaka est-il là ? » « Oui, un instant, s'il vous plaît. »",
-    "es": "«Disculpe, ¿se puede pasar? ¿Está el señor Tanaka?» «Sí, espere un momento, por favor.»"
+    "es": "«Disculpe, ¿se puede pasar? ¿Está el señor Tanaka?» «Sí, espere un momento, por favor»."
    }
   ],
   "::ごめんなさい": [
@@ -1986,7 +1986,7 @@
     "jp": "「その本、いつ買ったの？」「さきおとといだよ。」",
     "en": "\"When did you buy that book?\" \"Three days ago.\"",
     "fr": "« Tu as acheté ce livre quand ? » « Il y a trois jours. »",
-    "es": "«¿Cuándo compraste ese libro?» «Hace tres días.»"
+    "es": "«¿Cuándo compraste ese libro?» «Hace tres días»."
    }
   ],
   "::さわやか": [
@@ -2064,7 +2064,7 @@
     "jp": "この道は工事中です。したがって、通ることはできません。",
     "en": "This road is under construction. Therefore, you cannot go through.",
     "fr": "Cette route est en travaux. Par conséquent, on ne peut pas passer.",
-    "es": "Esta calle está en obras. Por lo tanto, no se puede pasar."
+    "es": "Esta calle está en construcción. Por lo tanto, no se puede pasar."
    },
    {
     "jp": "先生の説明にしたがって、実験を進めた。",
@@ -2168,7 +2168,7 @@
     "jp": "弟は何度言っても聞かず、しまいには母も怒り出した。",
     "en": "My little brother wouldn't listen however many times he was told, and in the end even my mother got angry.",
     "fr": "Mon petit frère n'écoutait pas, on avait beau le lui répéter, et à la fin même ma mère s'est fâchée.",
-    "es": "Mi hermano menor no hacía caso por más que se lo dijeran, y al final hasta mi madre se enfadó."
+    "es": "Mi hermano menor no hacía caso por más que se lo dijeran, y al final hasta mi madre se enojó."
    }
   ],
   "::しゃべる": [
@@ -2190,13 +2190,13 @@
     "jp": "すみません、しょうゆをとってください。",
     "en": "Excuse me, could you pass me the soy sauce?",
     "fr": "Excusez-moi, pouvez-vous me passer la sauce soja ?",
-    "es": "Disculpe, ¿me pasa la salsa de soja, por favor?"
+    "es": "Disculpe, ¿me pasa la salsa de soya, por favor?"
    },
    {
     "jp": "しょうゆがもうありません。買ってきてください。",
     "en": "We are out of soy sauce. Please go and buy some.",
     "fr": "Il n'y a plus de sauce soja. Allez en acheter, s'il vous plaît.",
-    "es": "Ya no queda salsa de soja. Por favor, vaya a comprar."
+    "es": "Ya no queda salsa de soya. Por favor, vaya a comprar."
    }
   ],
   "::じゃま": [
@@ -2316,7 +2316,7 @@
     "jp": "「待たせてすまない。道が混んでいたんだ。」",
     "en": "\"Sorry to keep you waiting. The roads were jammed.\"",
     "fr": "« Désolé de t'avoir fait attendre. Il y avait des bouchons. »",
-    "es": "«Siento haberte hecho esperar. Había mucho tráfico.»"
+    "es": "«Siento haberte hecho esperar. Había mucho tráfico»."
    },
    {
     "jp": "手伝ってもらってばかりで、本当にすまないと思っている。",
@@ -2392,7 +2392,7 @@
     "jp": "開店前から、店の前に客がずらっと列を作っていた。",
     "en": "Customers had been forming a long line in front of the shop since before it opened.",
     "fr": "Dès avant l'ouverture, une longue file de clients s'était formée devant la boutique.",
-    "es": "Desde antes de abrir, los clientes habían formado una larga hilera frente a la tienda."
+    "es": "Desde antes de abrir, los clientes habían formado una larga fila frente a la tienda."
    }
   ],
   "::ずれ": [
@@ -2406,7 +2406,7 @@
     "jp": "時計のずれを直すために、毎朝時報に合わせている。",
     "en": "To correct the clock's drift, I set it by the time signal every morning.",
     "fr": "Pour corriger le décalage de l'horloge, je la règle chaque matin sur le signal horaire.",
-    "es": "Para corregir el desajuste del reloj, todas las mañanas lo pongo en hora con la señal horaria."
+    "es": "Para corregir el desajuste del reloj, todas las mañanas lo ajusto con la señal horaria."
    }
   ],
   "::せっけん": [
@@ -2434,7 +2434,7 @@
     "jp": "その映画、ぜひ見たいです。",
     "en": "I'd really love to see that movie.",
     "fr": "J'aimerais vraiment voir ce film.",
-    "es": "Esa película quiero verla sin falta."
+    "es": "Tengo muchísimas ganas de ver esa película."
    }
   ],
   "::ぜひとも": [
@@ -2448,7 +2448,7 @@
     "jp": "来年こそ、ぜひとも試験に合格したい。",
     "en": "Next year, I absolutely want to pass the exam.",
     "fr": "L'année prochaine, je veux absolument réussir l'examen.",
-    "es": "El año que viene sí que quiero aprobar el examen a toda costa."
+    "es": "El año que viene sí quiero aprobar el examen a toda costa."
    }
   ],
   "::ぜんぜん": [
@@ -2470,7 +2470,7 @@
     "jp": "「来週の土曜日は山田さんの送別会だね。」「そういえば、プレゼントをまだ買っていなかった。」",
     "en": "\"Yamada's farewell party is next Saturday, isn't it?\" \"That reminds me, I still haven't bought a present.\"",
     "fr": "« Le pot de départ de Yamada, c'est samedi prochain, hein ? » « Ça me fait penser que je n'ai toujours pas acheté de cadeau. »",
-    "es": "«El sábado que viene es la fiesta de despedida de Yamada, ¿no?» «Ahora que lo dices, todavía no he comprado un regalo.»"
+    "es": "«El sábado que viene es la fiesta de despedida de Yamada, ¿no?» «Ahora que lo dices, todavía no he comprado un regalo»."
    },
    {
     "jp": "そういえば、最近木村さんを見かけないけど、元気かな。",
@@ -2568,7 +2568,7 @@
     "jp": "コーヒーをお願いします。それと、ケーキも一つください。",
     "en": "A coffee, please. And a piece of cake as well.",
     "fr": "Un café, s'il vous plaît. Et aussi une part de gâteau.",
-    "es": "Un café, por favor. Y también un pastel, por favor."
+    "es": "Un café, por favor. Y también un pedazo de pastel, por favor."
    },
    {
     "jp": "明日は九時に集合です。それと、昼ご飯を持ってきてください。",
@@ -2680,7 +2680,7 @@
     "jp": "たとえ雨が降っても、試合は行われます。",
     "en": "Even if it rains, the match will go ahead.",
     "fr": "Même s'il pleut, le match aura lieu.",
-    "es": "Aunque llueva, el partido se celebrará."
+    "es": "Aunque llueva, el partido se jugará."
    },
    {
     "jp": "たとえ失敗しても、もう一度やってみたい。",
@@ -2736,7 +2736,7 @@
     "jp": "たまには外で食べようか。",
     "en": "Shall we eat out for a change?",
     "fr": "Et si on mangeait dehors, pour changer ?",
-    "es": "¿Qué tal si comemos fuera, para variar?"
+    "es": "¿Qué tal si comemos afuera, para variar?"
    },
    {
     "jp": "兄とはたまにしか会いません。",
@@ -2812,7 +2812,7 @@
     "jp": "上手な手品は、見ている人の目をだます。",
     "en": "A good magic trick fools the eyes of the people watching.",
     "fr": "Un bon tour de magie trompe les yeux de ceux qui regardent.",
-    "es": "Un buen truco de magia engaña los ojos de quienes lo miran."
+    "es": "Un buen truco de magia engaña la vista de quienes lo miran."
    }
   ],
   "::だめ": [
@@ -2840,7 +2840,7 @@
     "jp": "日本語がだんだんおもしろくなりました。",
     "en": "Japanese has gradually become more interesting.",
     "fr": "Le japonais est devenu peu à peu plus intéressant.",
-    "es": "El japonés se ha vuelto poco a poco más interesante."
+    "es": "El japonés se volvió poco a poco más interesante."
    }
   ],
   "::ちぎる": [
@@ -2862,13 +2862,13 @@
     "jp": "ごはんのあとで、ちゃわんをあらってください。",
     "en": "Please wash the rice bowls after the meal.",
     "fr": "Lavez les bols après le repas, s'il vous plaît.",
-    "es": "Por favor, lave los cuencos después de comer."
+    "es": "Por favor, lave los tazones después de comer."
    },
    {
     "jp": "大きいちゃわんで、おちゃを飲みました。",
     "en": "I drank tea from a big bowl.",
     "fr": "J'ai bu du thé dans un grand bol.",
-    "es": "Bebí té en un cuenco grande."
+    "es": "Bebí té en un tazón grande."
    }
   ],
   "::ちょうだい": [
@@ -2904,7 +2904,7 @@
     "jp": "買い物のついでに、郵便局で切手を買ってきた。",
     "en": "While I was out shopping, I also bought some stamps at the post office.",
     "fr": "En faisant les courses, j'en ai profité pour acheter des timbres à la poste.",
-    "es": "Aprovechando que salí de compras, compré unos sellos en la oficina de correos."
+    "es": "Aprovechando que salí de compras, compré unas estampillas en la oficina de correos."
    },
    {
     "jp": "「出かけるなら、ついでにこの手紙を出してくれる？」",
@@ -3100,13 +3100,13 @@
     "jp": "「今日からこちらでお世話になる田中です。どうぞよろしく。」",
     "en": "\"I'm Tanaka, and I'll be working with you from today. Pleased to meet you.\"",
     "fr": "« Je m'appelle Tanaka, je commence chez vous aujourd'hui. Enchanté. »",
-    "es": "«Me llamo Tanaka y desde hoy trabajaré aquí con ustedes. Encantado de conocerlos.»"
+    "es": "«Me llamo Tanaka y desde hoy trabajaré aquí con ustedes. Encantado de conocerlos»."
    },
    {
     "jp": "「来月から上の部屋に住む者です。どうぞよろしくお願いします。」",
     "en": "\"I'll be living in the flat upstairs from next month. Pleased to meet you.\"",
     "fr": "« J'emménage dans l'appartement du dessus le mois prochain. Ravi de faire votre connaissance. »",
-    "es": "«A partir del mes que viene viviré en el apartamento de arriba. Encantado de conocerle.»"
+    "es": "«A partir del mes que viene viviré en el apartamento de arriba. Encantado de conocerle»."
    }
   ],
   "::どこ": [
@@ -3156,13 +3156,13 @@
     "jp": "「テストで百点を取ったよ！」「どれどれ、見せてごらん。」",
     "en": "\"I got full marks on the test!\" \"Well now, let me see.\"",
     "fr": "« J'ai eu la note maximale au contrôle ! » « Voyons voir, montre-moi ça. »",
-    "es": "«¡Saqué cien puntos en el examen!» «A ver, muéstramelo.»"
+    "es": "«¡Saqué cien puntos en el examen!» «A ver, muéstramelo»."
    },
    {
     "jp": "「このスープ、ちょっと薄いかな。」「どれどれ、味見してみよう。」",
     "en": "\"Is this soup a bit bland?\" \"Let me see, I'll taste it.\"",
     "fr": "« Cette soupe est un peu fade, non ? » « Voyons voir, je vais goûter. »",
-    "es": "«¿Esta sopa no estará un poco insípida?» «A ver, voy a probarla.»"
+    "es": "«¿Esta sopa no estará un poco insípida?» «A ver, voy a probarla»."
    }
   ],
   "::ない": [
@@ -3282,7 +3282,7 @@
     "jp": "「この字は、こう読むんですよ」「なるほど」",
     "en": "“This character is read like this.” “I see.”",
     "fr": "« Ce caractère se lit comme ça. » « Ah, je vois. »",
-    "es": "«Este carácter se lee así.» «Ah, ya entiendo.»"
+    "es": "«Este carácter se lee así». «Ah, ya veo»."
    },
    {
     "jp": "なるほど、そういうことだったんですね。",
@@ -3372,7 +3372,7 @@
     "jp": "駅前の店は、ねだんが少し高いです。",
     "en": "Prices at the shop in front of the station are a little high.",
     "fr": "Au magasin devant la gare, les prix sont un peu élevés.",
-    "es": "En la tienda de enfrente de la estación, los precios son un poco altos."
+    "es": "En la tienda frente a la estación, los precios son un poco altos."
    }
   ],
   "::ねっしん": [
@@ -3436,7 +3436,7 @@
     "jp": "はさみを使ったら、元の場所に戻してね。",
     "en": "When you've used the scissors, put them back where they were, okay?",
     "fr": "Quand tu as fini avec les ciseaux, remets-les à leur place, d'accord ?",
-    "es": "Cuando termines de usar las tijeras, devuélvelas a su sitio, ¿de acuerdo?"
+    "es": "Cuando termines de usar las tijeras, devuélvelas a su lugar, ¿de acuerdo?"
    },
    {
     "jp": "このはさみはよく切れる。",
@@ -3470,7 +3470,7 @@
     "jp": "「はじめまして。いつも息子がお世話になっております。」",
     "en": "\"How do you do? Thank you for always taking such good care of my son.\"",
     "fr": "« Enchantée. Merci de toujours si bien vous occuper de mon fils. »",
-    "es": "«Mucho gusto. Gracias por cuidar siempre tan bien de mi hijo.»"
+    "es": "«Mucho gusto. Gracias por cuidar siempre tan bien de mi hijo»."
    }
   ],
   "::はず": [
@@ -3786,7 +3786,7 @@
     "jp": "「もう六時か。ぼつぼつ帰ろうか。」",
     "en": "\"It's six already? Shall we start heading home?\"",
     "fr": "« Déjà six heures ? On commence à rentrer ? »",
-    "es": "«¿Ya son las seis? ¿Vamos volviendo a casa?»"
+    "es": "«¿Ya son las seis? ¿Nos vamos yendo a casa?»"
    },
    {
     "jp": "駅の周りに、新しい店がぼつぼつ増えてきた。",
@@ -3820,7 +3820,7 @@
     "jp": "知ったかぶりをしていたが、質問されてすぐにぼろが出た。",
     "en": "He was pretending to know, but as soon as he was asked a question, he gave himself away.",
     "fr": "Il faisait semblant de savoir, mais dès qu'on lui a posé une question, il s'est trahi.",
-    "es": "Él fingía saber del tema, pero en cuanto le hicieron una pregunta, salieron a la luz sus carencias."
+    "es": "Él fingía saber del tema, pero en cuanto le hicieron una pregunta, quedó en evidencia."
    }
   ],
   "::ぼんやり": [
@@ -3968,7 +3968,7 @@
     "jp": "この道をまっすぐ行ってください。",
     "en": "Please go straight along this road.",
     "fr": "Continuez tout droit sur cette route, s'il vous plaît.",
-    "es": "Por favor, siga todo recto por esta calle."
+    "es": "Por favor, siga derecho por esta calle."
    },
    {
     "jp": "学校がおわったら、まっすぐうちにかえります。",
@@ -4030,7 +4030,7 @@
     "jp": "クラスのみんなは、もうかえりました。",
     "en": "Everyone in the class has already gone home.",
     "fr": "Tout le monde dans la classe est déjà rentré.",
-    "es": "Todos los de la clase ya se han ido a casa."
+    "es": "Todos los de la clase ya se fueron a casa."
    }
   ],
   "::めちゃくちゃ": [
@@ -4318,13 +4318,13 @@
     "jp": "三人目のバッターがアウトになって、試合が終わった。",
     "en": "The third batter was out, and the game ended.",
     "fr": "Le troisième batteur a été éliminé et le match s'est terminé.",
-    "es": "El tercer bateador quedó fuera y el partido terminó."
+    "es": "El tercer bateador fue out y el partido terminó."
    },
    {
     "jp": "ボールがラインの外に出て、アウトになった。",
     "en": "The ball went outside the line, so it was out.",
     "fr": "La balle est sortie des lignes : elle était out.",
-    "es": "La pelota salió de las líneas, así que fue fuera."
+    "es": "La pelota salió de las líneas, así que fue afuera."
    }
   ],
   "::アワー": [
@@ -4374,13 +4374,13 @@
     "jp": "ウエートレスが水とメニューを持ってきてくれた。",
     "en": "The waitress brought us water and the menu.",
     "fr": "La serveuse nous a apporté de l'eau et la carte.",
-    "es": "La camarera nos trajo agua y el menú."
+    "es": "La mesera nos trajo agua y el menú."
    },
    {
     "jp": "学生のころ、駅前の喫茶店でウエートレスをしていた。",
     "en": "When I was a student, I worked as a waitress at a café in front of the station.",
     "fr": "Quand j'étais étudiante, j'étais serveuse dans un café devant la gare.",
-    "es": "Cuando era estudiante, trabajaba de camarera en una cafetería frente a la estación."
+    "es": "Cuando era estudiante, trabajaba de mesera en una cafetería frente a la estación."
    }
   ],
   "::ウーマン": [
@@ -4444,7 +4444,7 @@
     "jp": "「明日、引っ越しを手伝ってくれる？」「オーケー、任せて。」",
     "en": "\"Can you help me move tomorrow?\" \"OK, leave it to me.\"",
     "fr": "« Tu peux m'aider à déménager demain ? » « OK, compte sur moi. »",
-    "es": "«¿Me ayudas con la mudanza mañana?» «OK, déjamelo a mí.»"
+    "es": "«¿Me ayudas con la mudanza mañana?» «OK, déjamelo a mí»."
    },
    {
     "jp": "部長からオーケーが出たので、すぐに準備に取りかかった。",
@@ -4458,7 +4458,7 @@
     "jp": "免許を取るなら、オートマチック車に限定するのも一つの方法だ。",
     "en": "If you're getting a driving license, limiting it to automatic cars is one option.",
     "fr": "Pour passer le permis, se limiter aux voitures automatiques est une option.",
-    "es": "Si vas a sacar la licencia de conducir, limitarla a coches automáticos es una opción."
+    "es": "Si vas a sacar la licencia de conducir, limitarla a autos automáticos es una opción."
    },
    {
     "jp": "祖父の腕時計は、ねじを巻かなくても動くオートマチックだ。",
@@ -4514,7 +4514,7 @@
     "jp": "「これ、使っていいよ。」「サンキュー、助かる！」",
     "en": "\"You can use this.\" \"Thanks, that's a big help!\"",
     "fr": "« Tu peux utiliser ça. » « Merci, ça m'aide beaucoup ! »",
-    "es": "«Puedes usar esto.» «¡Gracias, me salvas!»"
+    "es": "«Puedes usar esto». «¡Gracias, me salvas!»"
    },
    {
     "jp": "傘を貸すと、友達は「サンキュー」と手を振って帰っていった。",
@@ -4604,7 +4604,7 @@
     "jp": "スマホで写真をとりました。",
     "en": "I took a photo with my smartphone.",
     "fr": "J'ai pris une photo avec mon smartphone.",
-    "es": "Tomé una foto con mi teléfono inteligente."
+    "es": "Tomé una foto con mi celular."
    }
   ],
   "::セレモニー": [
@@ -4612,7 +4612,7 @@
     "jp": "新しい橋の完成を祝って、セレモニーが行われた。",
     "en": "A ceremony was held to celebrate the completion of the new bridge.",
     "fr": "Une cérémonie a eu lieu pour célébrer l'achèvement du nouveau pont.",
-    "es": "Se celebró una ceremonia para festejar la finalización del nuevo puente."
+    "es": "Se llevó a cabo una ceremonia para festejar la finalización del nuevo puente."
    },
    {
     "jp": "結婚式は、家族だけの小さなセレモニーにしたい。",
@@ -4646,7 +4646,7 @@
     "jp": "百にゼロを一つつけると、千になります。",
     "en": "If you add one zero to a hundred, you get a thousand.",
     "fr": "Si on ajoute un zéro à cent, on obtient mille.",
-    "es": "Si le añades un cero a cien, obtienes mil."
+    "es": "Si le agregas un cero a cien, obtienes mil."
    }
   ],
   "::タイムリー": [
@@ -4730,7 +4730,7 @@
     "jp": "ショーウインドーのデコレーションが、すっかり春らしくなった。",
     "en": "The decorations in the shop window now look completely spring-like.",
     "fr": "La décoration de la vitrine a pris un air tout à fait printanier.",
-    "es": "La decoración del escaparate ya tiene un aire totalmente primaveral."
+    "es": "La decoración de la vitrina ya tiene un aire totalmente primaveral."
    }
   ],
   "::トーン": [
@@ -4794,7 +4794,7 @@
     "jp": "風邪の多くは、ビールスによって起こる。",
     "en": "Most colds are caused by viruses.",
     "fr": "La plupart des rhumes sont causés par des virus.",
-    "es": "Muchos resfriados son causados por virus."
+    "es": "La mayoría de los resfriados son causados por virus."
    },
    {
     "jp": "外から帰ったら、ビールスを落とすために手を洗いなさい。",
@@ -4884,7 +4884,7 @@
     "jp": "両親の結婚記念日に、ペアのマグカップを贈った。",
     "en": "For my parents' wedding anniversary, I gave them a pair of matching mugs.",
     "fr": "Pour l'anniversaire de mariage de mes parents, je leur ai offert une paire de tasses assorties.",
-    "es": "Por el aniversario de bodas de mis padres, les regalé un par de tazas a juego."
+    "es": "Por el aniversario de bodas de mis padres, les regalé un par de tazas que combinan."
    }
   ],
   "::ペンチ": [
@@ -4892,13 +4892,13 @@
     "jp": "曲がった針金を、ペンチでまっすぐに直した。",
     "en": "I straightened the bent wire with pliers.",
     "fr": "J'ai redressé le fil de fer tordu avec une pince.",
-    "es": "Enderecé con unos alicates el alambre doblado."
+    "es": "Enderecé con unas pinzas el alambre doblado."
    },
    {
     "jp": "工具箱からペンチを取ってくれる？",
     "en": "Could you get me the pliers from the toolbox?",
     "fr": "Tu peux me passer la pince qui est dans la boîte à outils ?",
-    "es": "¿Me pasas los alicates de la caja de herramientas?"
+    "es": "¿Me pasas las pinzas de la caja de herramientas?"
    }
   ],
   "::ページ": [
@@ -5094,7 +5094,7 @@
     "jp": "「どうぞ、上がって。」「じゃあ、お邪魔します。」",
     "en": "\"Come on in.\" \"Well then, sorry to intrude.\"",
     "fr": "« Entre donc. » « Alors, excuse-moi de te déranger. »",
-    "es": "«Pasa, por favor.» «Bueno, perdón por la molestia.»"
+    "es": "«Pasa, por favor». «Bueno, perdón por la molestia»."
    }
   ],
   "ご座います::ございます": [
@@ -5102,7 +5102,7 @@
     "jp": "「お手洗いはどちらですか。」「二階にございます。」",
     "en": "\"Where is the restroom?\" \"It is on the second floor.\"",
     "fr": "« Où se trouvent les toilettes ? » « Elles sont au premier étage. »",
-    "es": "«¿Dónde está el baño?» «Se encuentra en el segundo piso.»"
+    "es": "«¿Dónde está el baño?» «Se encuentra en el segundo piso»."
    },
    {
     "jp": "こちらが本日のおすすめの料理でございます。",
@@ -5402,7 +5402,7 @@
     "jp": "窓から、三角の屋根の小さな家が見える。",
     "en": "From the window, you can see a small house with a triangular roof.",
     "fr": "De la fenêtre, on voit une petite maison au toit triangulaire.",
-    "es": "Desde la ventana se ve una pequeña casa de tejado triangular."
+    "es": "Desde la ventana se ve una pequeña casa con techo triangular."
    }
   ],
   "上::うわ": [
@@ -5620,7 +5620,7 @@
     "jp": "彼女の料理は、お世辞抜きで本当においしい。",
     "en": "Her cooking is truly delicious, and that's not flattery.",
     "fr": "Sa cuisine est vraiment délicieuse, sans flatterie aucune.",
-    "es": "Sin cumplidos: lo que ella cocina está realmente delicioso."
+    "es": "No lo digo por halagarla: lo que ella cocina está realmente delicioso."
    },
    {
     "jp": "「お上手ですね」と言われたが、ただのお世辞だと分かっていた。",
@@ -5746,13 +5746,13 @@
     "jp": "丼にご飯をよそって、上に天ぷらをのせた。",
     "en": "I served rice into a bowl and put tempura on top.",
     "fr": "J'ai servi du riz dans un bol et j'ai posé des tempuras dessus.",
-    "es": "Serví arroz en un cuenco y le puse tempura encima."
+    "es": "Serví arroz en un tazón y le puse tempura encima."
    },
    {
     "jp": "この店の丼は量が多くて、学生に人気がある。",
     "en": "The rice bowls at this restaurant are generous, so they're popular with students.",
     "fr": "Les bols de riz garnis de ce restaurant sont copieux, alors ils ont du succès auprès des étudiants.",
-    "es": "Los cuencos de arroz de este restaurante son abundantes, así que son populares entre los estudiantes."
+    "es": "Los tazones de arroz de este restaurante son abundantes, así que son populares entre los estudiantes."
    }
   ],
   "乾::かん": [
@@ -5802,13 +5802,13 @@
     "jp": "私の家は古い二階建てです。",
     "en": "My house is an old two-story building.",
     "fr": "Ma maison est un vieux bâtiment à deux niveaux.",
-    "es": "Mi casa es un viejo edificio de dos plantas."
+    "es": "Mi casa es un viejo edificio de dos pisos."
    },
    {
     "jp": "駅の前に二階建ての本屋があります。",
     "en": "There is a two-story bookstore in front of the station.",
     "fr": "Il y a une librairie sur deux niveaux devant la gare.",
-    "es": "Delante de la estación hay una librería de dos plantas."
+    "es": "Delante de la estación hay una librería de dos pisos."
    }
   ],
   "云々::うんぬん": [
@@ -5822,7 +5822,7 @@
     "jp": "始まったばかりの計画を、今の段階で云々するのは早すぎる。",
     "en": "It's too early to pass judgement at this stage on a plan that has only just begun.",
     "fr": "Il est trop tôt pour critiquer à ce stade un projet qui vient à peine de commencer.",
-    "es": "Es demasiado pronto para hacer comentarios, en esta etapa, sobre un plan que acaba de empezar."
+    "es": "Es demasiado temprano para hacer comentarios, en esta etapa, sobre un plan que acaba de empezar."
    }
   ],
   "五::ご": [
@@ -6074,7 +6074,7 @@
     "jp": "「お名前は何と仰っしゃいますか。」「田中と申します。」",
     "en": "\"May I ask your name?\" \"My name is Tanaka.\"",
     "fr": "« Puis-je vous demander votre nom ? » « Je m'appelle Tanaka. »",
-    "es": "«¿Cómo se llama usted?» «Me llamo Tanaka.»"
+    "es": "«¿Cómo se llama usted?» «Me llamo Tanaka»."
    }
   ],
   "仲人::なこうど": [
@@ -6152,7 +6152,7 @@
     "jp": "住居を移したら、市役所に届け出なければならない。",
     "en": "When you change your residence, you have to notify city hall.",
     "fr": "Quand on change de domicile, il faut le déclarer à la mairie.",
-    "es": "Cuando uno cambia de vivienda, tiene que notificarlo al ayuntamiento."
+    "es": "Cuando uno cambia de vivienda, tiene que notificarlo a la municipalidad."
    },
    {
     "jp": "祖父は古い工場を改装して、住居として使っている。",
@@ -6354,7 +6354,7 @@
     "jp": "職人として一人前になるには、長い修行が欠かせない。",
     "en": "Long training is essential to becoming a fully fledged craftsman.",
     "fr": "Pour devenir un artisan accompli, un long apprentissage est indispensable.",
-    "es": "Para convertirse en un artesano hecho y derecho, es imprescindible una larga formación."
+    "es": "Para convertirse en un artesano hecho y derecho, es imprescindible un largo aprendizaje."
    }
   ],
   "個体::こたい": [
@@ -6382,7 +6382,7 @@
     "jp": "その大学の入試は、倍率が十倍を超えたそうだ。",
     "en": "I hear that the university's entrance exam had more than ten applicants for every place.",
     "fr": "Il paraît qu'il y a eu plus de dix candidats par place à l'examen d'entrée de cette université.",
-    "es": "Dicen que en el examen de ingreso de esa universidad hubo más de diez aspirantes por plaza."
+    "es": "Dicen que en el examen de ingreso de esa universidad hubo más de diez aspirantes por cada lugar."
    }
   ],
   "偏::へん": [
@@ -6452,7 +6452,7 @@
     "jp": "元首が外国を訪問するときは、盛大な歓迎式が開かれる。",
     "en": "When a head of state visits a foreign country, a grand welcoming ceremony is held.",
     "fr": "Lorsqu'un chef d'État se rend à l'étranger, une grande cérémonie d'accueil est organisée.",
-    "es": "Cuando un jefe de Estado visita otro país, se celebra una gran ceremonia de bienvenida."
+    "es": "Cuando un jefe de Estado visita otro país, se realiza una gran ceremonia de bienvenida."
    }
   ],
   "先々月::せんせんげつ": [
@@ -6466,7 +6466,7 @@
     "jp": "先々月の電気代は、先月よりずっと高かった。",
     "en": "The electricity bill for the month before last was much higher than last month's.",
     "fr": "La facture d'électricité d'il y a deux mois était bien plus élevée que celle du mois dernier.",
-    "es": "La factura de la luz de hace dos meses fue mucho más alta que la del mes pasado."
+    "es": "El recibo de la luz de hace dos meses fue mucho más alto que el del mes pasado."
    }
   ],
   "先代::せんだい": [
@@ -6536,7 +6536,7 @@
     "jp": "「わざわざ届けていただき、恐れ入ります。」",
     "en": "\"Thank you so much for going to the trouble of bringing it.\"",
     "fr": "« Merci infiniment d'avoir pris la peine de l'apporter. »",
-    "es": "«Le agradezco muchísimo que se haya tomado la molestia de traérmelo.»"
+    "es": "«Le agradezco muchísimo que se haya tomado la molestia de traérmelo»."
    }
   ],
   "公募::こうぼ": [
@@ -6572,7 +6572,7 @@
     "jp": "大会で出した記録は、追い風が強すぎたため公認されなかった。",
     "en": "The record set at the competition was not officially recognized because the tailwind was too strong.",
     "fr": "Le record établi lors de la compétition n'a pas été homologué, car le vent arrière était trop fort.",
-    "es": "La marca lograda en la competición no fue reconocida oficialmente porque el viento a favor era demasiado fuerte."
+    "es": "La marca lograda en la competencia no fue reconocida oficialmente porque el viento a favor era demasiado fuerte."
    },
    {
     "jp": "二人は、今では両親も公認の仲だ。",
@@ -6768,7 +6768,7 @@
     "jp": "車をぶつけて、ドアが少し凹んでしまった。",
     "en": "I bumped the car, and the door got a little dented.",
     "fr": "J'ai heurté quelque chose avec la voiture, et la portière s'est un peu cabossée.",
-    "es": "Le di un golpe al coche y la puerta se abolló un poco."
+    "es": "Le di un golpe al auto y la puerta se abolló un poco."
    },
    {
     "jp": "テストの点が悪くて、すっかり凹んでいる。",
@@ -6872,7 +6872,7 @@
     "jp": "回答者が少ないと分母が小さくなり、割合はあてにならない。",
     "en": "With few respondents, the denominator is small and the percentages are unreliable.",
     "fr": "Quand il y a peu de répondants, le dénominateur est petit et les pourcentages ne sont pas fiables.",
-    "es": "Si hay pocos encuestados, el denominador es pequeño y las proporciones no son fiables."
+    "es": "Si hay pocos encuestados, el denominador es pequeño y las proporciones no son confiables."
    }
   ],
   "切ない::せつない": [
@@ -7104,13 +7104,13 @@
     "jp": "成績は、試験の点数に授業態度を加味して決めます。",
     "en": "Grades are decided from exam scores, taking attitude in class into account as well.",
     "fr": "Les notes sont fixées d'après les résultats aux examens, en tenant compte aussi de l'attitude en classe.",
-    "es": "Las notas se deciden a partir de la puntuación de los exámenes, teniendo en cuenta también la actitud en clase."
+    "es": "Las notas se deciden a partir del puntaje de los exámenes, teniendo en cuenta también la actitud en clase."
    },
    {
     "jp": "この小説は、推理小説に恋愛の要素を加味した作品だ。",
     "en": "This novel is a mystery story with an added element of romance.",
     "fr": "Ce roman est un récit policier auquel s'ajoute une dimension romantique.",
-    "es": "Esta novela es una obra de misterio a la que se ha añadido un elemento romántico."
+    "es": "Esta novela es una obra de misterio a la que se ha agregado un elemento romántico."
    }
   ],
   "加熱::かねつ": [
@@ -7188,7 +7188,7 @@
     "jp": "兄は大学で野球部のキャプテンを務めている。",
     "en": "My older brother serves as captain of the baseball club at his university.",
     "fr": "Mon grand frère est capitaine du club de baseball de son université.",
-    "es": "Mi hermano mayor ejerce de capitán del club de béisbol de su universidad."
+    "es": "Mi hermano mayor se desempeña como capitán del club de béisbol de su universidad."
    },
    {
     "jp": "学校の劇で、娘が主役を務めた。",
@@ -7440,7 +7440,7 @@
     "jp": "湿気のせいで、木の板が反ってしまった。",
     "en": "The wooden board has warped because of the humidity.",
     "fr": "La planche en bois s'est gauchie à cause de l'humidité.",
-    "es": "La tabla de madera se ha curvado por culpa de la humedad."
+    "es": "La tabla de madera se combó por culpa de la humedad."
    },
    {
     "jp": "体の柔らかい彼女は、背中が驚くほど後ろに反る。",
@@ -7580,7 +7580,7 @@
     "jp": "今年の文化祭は、二つの高校の合同で開かれる。",
     "en": "This year's school festival will be held jointly by two high schools.",
     "fr": "Cette année, la fête culturelle sera organisée conjointement par deux lycées.",
-    "es": "Este año, el festival cultural se celebrará conjuntamente entre dos escuelas de secundaria."
+    "es": "Este año, el festival cultural se realizará conjuntamente entre dos escuelas de secundaria."
    },
    {
     "jp": "来週、三年生全員で合同練習をすることになった。",
@@ -7810,7 +7810,7 @@
     "jp": "今夜はしょうゆ味の和風パスタを作ろう。",
     "en": "Tonight I'll make a Japanese-style pasta flavored with soy sauce.",
     "fr": "Ce soir, je vais faire des pâtes à la japonaise parfumées à la sauce soja.",
-    "es": "Esta noche voy a hacer pasta al estilo japonés con sabor a salsa de soja."
+    "es": "Esta noche voy a hacer pasta al estilo japonés con sabor a salsa de soya."
    }
   ],
   "商::しょう": [
@@ -7846,7 +7846,7 @@
     "jp": "デパートの喫茶コーナーで、少し休んでいこう。",
     "en": "Let's stop for a little rest at the department store's café corner.",
     "fr": "Faisons une petite pause au coin café du grand magasin.",
-    "es": "Paremos a descansar un poco en la cafetería de los grandes almacenes."
+    "es": "Paremos a descansar un poco en la cafetería de la tienda departamental."
    },
    {
     "jp": "喫茶の習慣は、中国から日本に伝わったと言われている。",
@@ -8280,7 +8280,7 @@
     "jp": "早めに医者に行ったので、大事にならずに済んだ。",
     "en": "I went to the doctor early, so it didn't turn into anything serious.",
     "fr": "Comme je suis allé tôt chez le médecin, ça ne s'est pas aggravé.",
-    "es": "Como fui pronto al médico, la cosa no llegó a ser nada grave."
+    "es": "Como fui al médico a tiempo, la cosa no llegó a ser nada grave."
    },
    {
     "jp": "ちょっとした誤解が、クラス中を巻き込む大事になった。",
@@ -8384,7 +8384,7 @@
     "jp": "賃上げをめぐる労使の交渉は、妥結に至らなかった。",
     "en": "The labour-management negotiations over a pay rise did not reach a settlement.",
     "fr": "Les négociations salariales entre la direction et les syndicats n'ont pas abouti à un accord.",
-    "es": "Las negociaciones entre la patronal y los sindicatos sobre la subida salarial no llegaron a un acuerdo."
+    "es": "Las negociaciones entre los empleadores y los sindicatos sobre el aumento salarial no llegaron a un acuerdo."
    }
   ],
   "姓名::せいめい": [
@@ -8538,7 +8538,7 @@
     "jp": "守備の乱れから、相手に二点を許してしまった。",
     "en": "Lapses in our defence let the other side score two points.",
     "fr": "Une défense désorganisée nous a fait concéder deux points à l'adversaire.",
-    "es": "Por los fallos en la defensa, le concedimos dos puntos al rival."
+    "es": "Por las fallas en la defensa, le concedimos dos puntos al rival."
    }
   ],
   "宝器::ほうき": [
@@ -8546,7 +8546,7 @@
     "jp": "この茶わんは、代々家に伝わる宝器として大切にされてきた。",
     "en": "This tea bowl has been cherished as a treasure handed down in the family for generations.",
     "fr": "Ce bol à thé est précieusement conservé comme un trésor transmis dans la famille depuis des générations.",
-    "es": "Este cuenco de té se ha guardado con cariño como un tesoro transmitido en la familia de generación en generación."
+    "es": "Este tazón de té se ha guardado con cariño como un tesoro transmitido en la familia de generación en generación."
    },
    {
     "jp": "彼女は若くして、国の宝器と呼ばれるほどの才能を見せた。",
@@ -8560,7 +8560,7 @@
     "jp": "参加費は無料ですが、材料費は実費をいただきます。",
     "en": "Participation is free, but we charge the actual cost of the materials.",
     "fr": "La participation est gratuite, mais le matériel est facturé à prix coûtant.",
-    "es": "La participación es gratuita, pero los materiales se cobran a precio de coste."
+    "es": "La participación es gratuita, pero los materiales se cobran a precio de costo."
    },
    {
     "jp": "出張にかかった交通費は、会社が実費で払ってくれる。",
@@ -8622,7 +8622,7 @@
     "jp": "迎えの車を寄こしてくれるそうなので、駅で待っていよう。",
     "en": "Apparently they're sending a car to pick us up, so let's wait at the station.",
     "fr": "Il paraît qu'ils vont envoyer une voiture nous chercher, alors attendons à la gare.",
-    "es": "Parece que nos van a enviar un coche a recogernos, así que esperemos en la estación."
+    "es": "Parece que nos van a enviar un auto a recogernos, así que esperemos en la estación."
    }
   ],
   "密度::みつど": [
@@ -8944,7 +8944,7 @@
     "jp": "連休が終わり、帰京する車で高速道路が混んでいる。",
     "en": "The long holiday is over, and the expressway is jammed with cars heading back to Tokyo.",
     "fr": "Les congés sont finis et l'autoroute est encombrée de voitures qui rentrent à Tokyo.",
-    "es": "Terminadas las vacaciones, la autopista está congestionada por los coches que regresan a Tokio."
+    "es": "Terminadas las vacaciones, la autopista está congestionada por los autos que regresan a Tokio."
    }
   ],
   "幅::はば": [
@@ -8952,7 +8952,7 @@
     "jp": "この道は幅がせまいので、車は通れません。",
     "en": "This road is narrow, so cars can't get through.",
     "fr": "Cette route est étroite, donc les voitures ne peuvent pas passer.",
-    "es": "Como este camino tiene poca anchura, los coches no pueden pasar."
+    "es": "Como este camino tiene poca anchura, los autos no pueden pasar."
    },
    {
     "jp": "ソファーを買う前に、部屋の幅をはかった。",
@@ -9252,7 +9252,7 @@
     "jp": "テントを張ったら、ロープに弛みがないか確かめてください。",
     "en": "Once you've pitched the tent, please check that the ropes have no slack.",
     "fr": "Une fois la tente montée, vérifiez que les cordes ne sont pas détendues.",
-    "es": "Una vez montada la tienda, compruebe que las cuerdas no estén flojas."
+    "es": "Una vez armada la carpa, compruebe que las cuerdas no estén flojas."
    }
   ],
   "弛む::たるむ": [
@@ -9358,13 +9358,13 @@
     "jp": "引っ越したので、役場へ転入の届けを出しに行った。",
     "en": "Since I had moved, I went to the town hall to register my new address.",
     "fr": "Comme j'avais déménagé, je suis allé à la mairie déclarer mon arrivée.",
-    "es": "Como me había mudado, fui al ayuntamiento a registrar mi nueva dirección."
+    "es": "Como me había mudado, fui a la municipalidad a registrar mi nueva dirección."
    },
    {
     "jp": "町の役場の向かいに、新しい図書館が建てられた。",
     "en": "A new library has been built opposite the town hall.",
     "fr": "Une nouvelle bibliothèque a été construite en face de la mairie.",
-    "es": "Frente al ayuntamiento del pueblo se construyó una nueva biblioteca."
+    "es": "Frente a la municipalidad del pueblo se construyó una nueva biblioteca."
    }
   ],
   "御::ご": [
@@ -9400,7 +9400,7 @@
     "jp": "「御免ください。どなたかいらっしゃいますか。」「はい、ただいま参ります。」",
     "en": "\"Excuse me! Is anyone there?\" \"Yes, I'm coming right away.\"",
     "fr": "« Pardon ! Il y a quelqu'un ? » « Oui, j'arrive tout de suite. »",
-    "es": "«¿Se puede? ¿Hay alguien?» «Sí, enseguida voy.»"
+    "es": "«¿Se puede? ¿Hay alguien?» «Sí, enseguida voy»."
    },
    {
     "jp": "玄関の戸を開けて「御免ください」と声をかけたが、返事はなかった。",
@@ -9540,7 +9540,7 @@
     "jp": "怒れる市民たちが、市役所の前で抗議の声を上げた。",
     "en": "Angry citizens raised their voices in protest in front of city hall.",
     "fr": "Des citoyens en colère ont protesté haut et fort devant la mairie.",
-    "es": "Unos ciudadanos enfadados alzaron la voz en protesta frente al ayuntamiento."
+    "es": "Unos ciudadanos enojados alzaron la voz en protesta frente a la municipalidad."
    },
    {
     "jp": "怒れる海が、小さな漁船を木の葉のように揺さぶった。",
@@ -9694,7 +9694,7 @@
     "jp": "試合に負けて涙を流す弟を、優しく慰めた。",
     "en": "I gently comforted my little brother, who was in tears after losing his match.",
     "fr": "J'ai consolé avec douceur mon petit frère, qui était en larmes après avoir perdu son match.",
-    "es": "Consolé con dulzura a mi hermano pequeño, que lloraba tras perder su partido."
+    "es": "Consolé con dulzura a mi hermano menor, que lloraba tras perder su partido."
    },
    {
     "jp": "落ち込んでいたとき、友だちの言葉に慰められた。",
@@ -9756,7 +9756,7 @@
     "jp": "「冷めないうちにどうぞ。」「では、戴きます。」",
     "en": "\"Please help yourself before it gets cold.\" \"Then thank you, I will.\"",
     "fr": "« Servez-vous avant que ça refroidisse. » « Alors, merci, je me sers. »",
-    "es": "«Sírvase antes de que se enfríe.» «Muchas gracias, entonces me sirvo.»"
+    "es": "«Sírvase antes de que se enfríe». «Muchas gracias, entonces me sirvo»."
    }
   ],
   "手回し::てまわし": [
@@ -9764,7 +9764,7 @@
     "jp": "会場の予約まで済ませてあるとは、ずいぶん手回しがいいね。",
     "en": "You've already booked the venue too? You've certainly got everything arranged in good time.",
     "fr": "Tu as même déjà réservé la salle ? Tu t'y es vraiment pris à l'avance !",
-    "es": "¿Ya tienes reservado hasta el local? ¡Sí que lo has preparado todo con tiempo!"
+    "es": "¿Ya tienes reservado hasta el local? ¡Realmente lo preparaste todo con tiempo!"
    },
    {
     "jp": "旅行の手回しは、すべて姉がしてくれた。",
@@ -9896,7 +9896,7 @@
     "jp": "両方の意見を取り入れた折衷案で、ようやく話がまとまった。",
     "en": "A compromise that took in both views finally settled the matter.",
     "fr": "Un compromis reprenant les deux points de vue a enfin permis de trouver un accord.",
-    "es": "Por fin se llegó a un acuerdo con una solución de compromiso que recogía ambas opiniones."
+    "es": "Por fin se llegó a un acuerdo con una solución intermedia que recogía ambas opiniones."
    }
   ],
   "抽象::ちゅうしょう": [
@@ -9918,7 +9918,7 @@
     "jp": "コンサートのチケットは、抽選で販売される。",
     "en": "Tickets for the concert will be sold by lottery.",
     "fr": "Les billets du concert seront vendus par tirage au sort.",
-    "es": "Las entradas para el concierto se venderán por sorteo."
+    "es": "Los boletos para el concierto se venderán por sorteo."
    },
    {
     "jp": "抽選に当たって、温泉旅行のペア券をもらった。",
@@ -10114,7 +10114,7 @@
     "jp": "この道は狭くて、車の擦れ違いがやっとだ。",
     "en": "This road is so narrow that two cars can barely pass each other.",
     "fr": "Cette route est si étroite que deux voitures ont du mal à se croiser.",
-    "es": "Este camino es tan estrecho que dos coches apenas pueden cruzarse."
+    "es": "Este camino es tan estrecho que dos autos apenas pueden cruzarse."
    },
    {
     "jp": "夫婦は仕事の時間が合わず、擦れ違いの生活が続いている。",
@@ -10128,7 +10128,7 @@
     "jp": "駅の改修工事のため、北口がしばらく使えません。",
     "en": "Because of renovation work on the station, the north exit cannot be used for a while.",
     "fr": "En raison de travaux de rénovation de la gare, la sortie nord est fermée pour quelque temps.",
-    "es": "Por obras de reforma en la estación, la salida norte no se podrá usar durante un tiempo."
+    "es": "Por obras de remodelación en la estación, la salida norte no se podrá usar durante un tiempo."
    },
    {
     "jp": "古い民家を改修して、カフェとして使っている。",
@@ -10240,7 +10240,7 @@
     "jp": "日本語では、数詞のあとに助数詞をつけて物を数える。",
     "en": "In Japanese, you count things by adding a counter after the numeral.",
     "fr": "En japonais, on compte les objets en ajoutant un classificateur après le numéral.",
-    "es": "En japonés, las cosas se cuentan añadiendo un contador después del numeral."
+    "es": "En japonés, las cosas se cuentan agregando un contador después del numeral."
    },
    {
     "jp": "この辞書では、数詞は名詞の一種として扱われている。",
@@ -10394,7 +10394,7 @@
     "jp": "卒業式は、本校体育館に於いて行われます。",
     "en": "The graduation ceremony will be held in the school gymnasium.",
     "fr": "La cérémonie de remise des diplômes aura lieu dans le gymnase de l'établissement.",
-    "es": "La ceremonia de graduación se celebrará en el gimnasio de esta escuela."
+    "es": "La ceremonia de graduación se llevará a cabo en el gimnasio de esta escuela."
    },
    {
     "jp": "料理の腕に於いては、彼の右に出る者はいない。",
@@ -10408,7 +10408,7 @@
     "jp": "出張中は、交通費のほかに日当が支給される。",
     "en": "During business trips, a daily allowance is paid in addition to travel expenses.",
     "fr": "Pendant les déplacements professionnels, une indemnité journalière est versée en plus des frais de transport.",
-    "es": "Durante los viajes de trabajo, se pagan dietas además de los gastos de transporte."
+    "es": "Durante los viajes de trabajo, se pagan viáticos además de los gastos de transporte."
    },
    {
     "jp": "イベントの手伝いの日当は、その日のうちに現金で支払われた。",
@@ -10632,7 +10632,7 @@
     "jp": "新しい部長は有能な人だと聞いている。",
     "en": "I hear the new department head is a capable person.",
     "fr": "J'ai entendu dire que le nouveau chef de service était quelqu'un de compétent.",
-    "es": "He oído que el nuevo jefe de departamento es una persona competente."
+    "es": "Escuché que el nuevo jefe de departamento es una persona competente."
    },
    {
     "jp": "会社は有能な若者を求めている。",
@@ -10688,7 +10688,7 @@
     "jp": "来る十二月三日に、創立記念式典を行います。",
     "en": "The founding anniversary ceremony will be held this coming December 3rd.",
     "fr": "La cérémonie anniversaire de la fondation aura lieu le 3 décembre prochain.",
-    "es": "El próximo 3 de diciembre se celebrará la ceremonia del aniversario de la fundación."
+    "es": "El próximo 3 de diciembre se llevará a cabo la ceremonia del aniversario de la fundación."
    },
    {
     "jp": "来る選挙に向けて、各党が準備を急いでいる。",
@@ -10736,7 +10736,7 @@
     "jp": "『万葉集』には、東の人々がよんだ歌も多く収められている。",
     "en": "The Man'yoshu also contains many poems composed by people from the eastern provinces.",
     "fr": "Le Man'yōshū contient aussi de nombreux poèmes composés par des habitants des provinces de l'Est.",
-    "es": "El Man'yoshu también recoge muchos poemas compuestos por gente de las provincias del Este."
+    "es": "El Man'yoshu también recoge muchos poemas compuestos por gente de las provincias del este."
    }
   ],
   "松::まつ": [
@@ -10912,7 +10912,7 @@
     "jp": "このテーブルは丸ではなく、楕円の形をしている。",
     "en": "This table isn't round; it's oval.",
     "fr": "Cette table n'est pas ronde, elle est ovale.",
-    "es": "Esta mesa no es redonda, tiene forma de elipse."
+    "es": "Esta mesa no es redonda, es ovalada."
    },
    {
     "jp": "顔をかくときは、まず大きな楕円をかく。",
@@ -11444,7 +11444,7 @@
     "jp": "お茶が濃くなったので、きゅうすにお湯を注した。",
     "en": "The tea had got too strong, so I added hot water to the teapot.",
     "fr": "Le thé était devenu trop fort, alors j'ai ajouté de l'eau chaude dans la théière.",
-    "es": "Como el té se había quedado muy cargado, le añadí agua caliente a la tetera."
+    "es": "Como el té se había quedado muy cargado, le agregué agua caliente a la tetera."
    },
    {
     "jp": "祖父はお客さんの杯に酒を注しながら、楽しそうに昔の話をしていた。",
@@ -11710,7 +11710,7 @@
     "jp": "降りる駅に準急は止まらないので、途中で各駅停車に乗り換えた。",
     "en": "The semi-express doesn't stop at my station, so I changed to a local train partway.",
     "fr": "Comme le semi-express ne s'arrête pas à ma gare, j'ai pris un omnibus en cours de route.",
-    "es": "Como el semiexpreso no para en la estación donde me bajo, cambié a un tren local a mitad de camino."
+    "es": "Como el semiexpreso no para en la estación donde me bajo, me cambié a un tren local a mitad de camino."
    },
    {
     "jp": "急ぐ旅ではないので、特急ではなく準急でのんびり帰った。",
@@ -11786,7 +11786,7 @@
     "jp": "この授業は講義が少なく、演習が中心だ。",
     "en": "This course has few lectures and centres on practical exercises.",
     "fr": "Ce module compte peu de cours magistraux : il est centré sur les exercices pratiques.",
-    "es": "Esta asignatura tiene pocas clases teóricas y se centra en los ejercicios prácticos."
+    "es": "Esta materia tiene pocas clases teóricas y se centra en los ejercicios prácticos."
    }
   ],
   "漠然::ばくぜん": [
@@ -11940,7 +11940,7 @@
     "jp": "熱湯による火傷は、すぐに流水で十分に冷やすことが大切だ。",
     "en": "With a scald from boiling water, it is important to cool it at once and thoroughly under running water.",
     "fr": "En cas de brûlure par l'eau bouillante, il est important de la refroidir aussitôt et longuement sous l'eau courante.",
-    "es": "En caso de escaldadura con agua hirviendo, es importante enfriarla enseguida y a fondo bajo el agua corriente."
+    "es": "En caso de quemadura con agua hirviendo, es importante enfriarla enseguida y a fondo bajo el agua corriente."
    }
   ],
   "火口::かこう": [
@@ -12164,7 +12164,7 @@
     "jp": "美術館で、江戸時代の版画の展覧会が開かれている。",
     "en": "An exhibition of Edo-period prints is being held at the art museum.",
     "fr": "Une exposition d'estampes de l'époque d'Edo se tient au musée d'art.",
-    "es": "En el museo de arte se está celebrando una exposición de grabados del período Edo."
+    "es": "En el museo de arte se está presentando una exposición de grabados del período Edo."
    }
   ],
   "牧畜::ぼくちく": [
@@ -12186,7 +12186,7 @@
     "jp": "こんな雨の日に山に登るなんて、物好きな人もいるものだ。",
     "en": "Climbing a mountain on a rainy day like this — some people have strange tastes.",
     "fr": "Faire de la montagne par un jour de pluie pareil… il y a vraiment des gens qui ont des goûts bizarres.",
-    "es": "Subir una montaña en un día de lluvia como este… sí que hay gente excéntrica."
+    "es": "Subir una montaña en un día de lluvia como este… realmente hay gente excéntrica."
    },
    {
     "jp": "「誰がこんなものを買うんだろう。」「物好きはどこにでもいるよ。」",
@@ -12626,7 +12626,7 @@
     "jp": "ウイルスに感染しても、必ず発病するとは限らない。",
     "en": "Being infected with a virus doesn't necessarily mean you will fall ill.",
     "fr": "Être infecté par un virus ne signifie pas forcément qu'on va tomber malade.",
-    "es": "Infectarse con un virus no significa necesariamente que uno vaya a enfermar."
+    "es": "Infectarse con un virus no significa necesariamente que uno vaya a enfermarse."
    }
   ],
   "発芽::はつが": [
@@ -12690,7 +12690,7 @@
     "jp": "ご飯を茶わんに盛って、テーブルに運んだ。",
     "en": "I dished the rice into bowls and carried them to the table.",
     "fr": "J'ai servi le riz dans les bols et je les ai apportés à table.",
-    "es": "Serví el arroz en los cuencos y los llevé a la mesa."
+    "es": "Serví el arroz en los tazones y los llevé a la mesa."
    },
    {
     "jp": "大きなお皿に、果物がたくさん盛ってある。",
@@ -12766,7 +12766,7 @@
     "jp": "家庭のコンセントは交流なので、この機械を使うには直流に変える必要がある。",
     "en": "Household sockets supply alternating current, so to use this machine you need to convert it to direct current.",
     "fr": "Les prises domestiques fournissent du courant alternatif ; pour utiliser cet appareil, il faut donc le convertir en courant continu.",
-    "es": "Los enchufes de las casas dan corriente alterna, así que para usar esta máquina hay que convertirla en corriente continua."
+    "es": "Los enchufes de las casas dan corriente alterna, así que para usar esta máquina hay que convertir la corriente en continua."
    }
   ],
   "相::あい": [
@@ -12998,13 +12998,13 @@
     "jp": "お碗にみそしるをよそって、テーブルに並べた。",
     "en": "I ladled miso soup into the bowls and set them out on the table.",
     "fr": "J'ai servi la soupe miso dans les bols et je les ai disposés sur la table.",
-    "es": "Serví la sopa de miso en los cuencos y los puse en la mesa."
+    "es": "Serví la sopa de miso en los tazones y los puse en la mesa."
    },
    {
     "jp": "焼き物の教室で、毎日使う碗を自分で作った。",
     "en": "At a pottery class, I made myself a bowl for everyday use.",
     "fr": "Dans un atelier de poterie, j'ai fabriqué moi-même un bol pour tous les jours.",
-    "es": "En una clase de cerámica, hice con mis propias manos un cuenco para el uso diario."
+    "es": "En una clase de cerámica, hice con mis propias manos un tazón para el uso diario."
    }
   ],
   "磁器::じき": [
@@ -13074,7 +13074,7 @@
     "jp": "会社の備品を私物のように使ってはいけない。",
     "en": "You must not use the company's supplies as if they were your own property.",
     "fr": "Il ne faut pas utiliser le matériel de l'entreprise comme s'il s'agissait de ses affaires personnelles.",
-    "es": "No se debe usar el material de la empresa como si fueran efectos personales."
+    "es": "No se debe usar el material de la empresa como si fuera propiedad personal."
    }
   ],
   "私鉄::してつ": [
@@ -13130,7 +13130,7 @@
     "jp": "自分が正しいと最後まで突っ張って、彼は謝らなかった。",
     "en": "He insisted to the end that he was right and didn't apologize.",
     "fr": "Il a soutenu jusqu'au bout qu'il avait raison et ne s'est pas excusé.",
-    "es": "Él se aferró hasta el final a que tenía razón y no se disculpó."
+    "es": "Él insistió hasta el final en que tenía razón y no se disculpó."
    }
   ],
   "立体::りったい": [
@@ -13228,7 +13228,7 @@
     "jp": "祝いの席なので、等級の高い牛肉を用意した。",
     "en": "Since it was a celebration, we prepared top-grade beef.",
     "fr": "Comme c'était une fête, nous avons préparé du bœuf de catégorie supérieure.",
-    "es": "Como era una celebración, preparamos carne de vaca de clase superior."
+    "es": "Como era una celebración, preparamos carne de res de primera calidad."
    }
   ],
   "筒::つつ": [
@@ -13292,13 +13292,13 @@
     "jp": "この簡易テントは、一人でも数分で組み立てられる。",
     "en": "This simple tent can be put up in a few minutes, even by one person.",
     "fr": "Cette tente toute simple, on la monte en quelques minutes, même seul.",
-    "es": "Esta tienda de campaña simple puede montarla incluso una sola persona en unos minutos."
+    "es": "Esta carpa simple puede armarla incluso una sola persona en unos minutos."
    },
    {
     "jp": "手続きが簡易になり、ネットでも申し込めるようになった。",
     "en": "The procedure has been simplified, and you can now apply online as well.",
     "fr": "La procédure a été simplifiée et l'on peut désormais aussi faire sa demande en ligne.",
-    "es": "El trámite se ha simplificado y ahora también se puede solicitar por internet."
+    "es": "El trámite se simplificó y ahora también se puede solicitar por internet."
    }
   ],
   "籤引::くじびき": [
@@ -13340,7 +13340,7 @@
     "jp": "庭の紅葉の木が、赤く色づいてきた。",
     "en": "The maple tree in the garden has started to turn red.",
     "fr": "L'érable du jardin commence à rougir.",
-    "es": "El arce del jardín ha empezado a ponerse rojo."
+    "es": "El arce del jardín empezó a ponerse rojo."
    }
   ],
   "納入::のうにゅう": [
@@ -13642,7 +13642,7 @@
     "jp": "畑に肥料をまいてから、苗を植えた。",
     "en": "I spread fertilizer on the field and then planted the seedlings.",
     "fr": "J'ai épandu de l'engrais dans le champ, puis j'ai repiqué les jeunes plants.",
-    "es": "Esparcí fertilizante por el campo y después puse los plantones."
+    "es": "Esparcí fertilizante por el campo y después planté los plantones."
    },
    {
     "jp": "肥料をやりすぎると、植物はかえって弱ってしまう。",
@@ -14110,7 +14110,7 @@
     "jp": "英語では、名詞を複数にするとき、ふつう最後に「s」をつける。",
     "en": "In English, when you make a noun plural, you usually add an \"s\" at the end.",
     "fr": "En anglais, pour mettre un nom au pluriel, on ajoute en général un « s » à la fin.",
-    "es": "En inglés, para poner un sustantivo en plural, normalmente se añade una «s» al final."
+    "es": "En inglés, para poner un sustantivo en plural, normalmente se agrega una «s» al final."
    }
   ],
   "襖::ふすま": [
@@ -14244,7 +14244,7 @@
     "jp": "放課後は、課外活動でバスケットボールをしている。",
     "en": "After school, I play basketball as an extracurricular activity.",
     "fr": "Après les cours, je fais du basket dans le cadre d'une activité extrascolaire.",
-    "es": "Después de clase juego al baloncesto como actividad extracurricular."
+    "es": "Después de clase juego al básquetbol como actividad extracurricular."
    },
    {
     "jp": "夏休みには、希望者を対象に課外授業が行われる。",
@@ -14258,7 +14258,7 @@
     "jp": "しょうゆやみそは、日本料理に欠かせない調味料だ。",
     "en": "Soy sauce and miso are seasonings that Japanese cooking can't do without.",
     "fr": "La sauce soja et le miso sont des condiments indispensables à la cuisine japonaise.",
-    "es": "La salsa de soja y el miso son condimentos indispensables en la cocina japonesa."
+    "es": "La salsa de soya y el miso son condimentos indispensables en la cocina japonesa."
    },
    {
     "jp": "このスープは、調味料を使わずに野菜の味だけで作った。",
@@ -14370,7 +14370,7 @@
     "jp": "新しい図書館を建てるには、財源の確保が欠かせない。",
     "en": "To build a new library, securing a source of funds is essential.",
     "fr": "Pour construire une nouvelle bibliothèque, il est indispensable de s'assurer des financements.",
-    "es": "Para construir una nueva biblioteca, es imprescindible asegurar las fuentes de financiación."
+    "es": "Para construir una nueva biblioteca, es imprescindible asegurar las fuentes de financiamiento."
    },
    {
     "jp": "その町は、観光を主な財源としている。",
@@ -14482,7 +14482,7 @@
     "jp": "子どもは自転車に跨がって、坂を下りていった。",
     "en": "The child got astride the bicycle and rode off down the hill.",
     "fr": "L'enfant a enfourché son vélo et a descendu la côte.",
-    "es": "El niño se montó en la bicicleta y bajó la cuesta."
+    "es": "El niño se subió a la bicicleta y bajó la cuesta."
    },
    {
     "jp": "この国立公園は、三つの県に跨がっている。",
@@ -14566,7 +14566,7 @@
     "jp": "この道路は転回禁止なので、先の交差点を右に曲がって戻ろう。",
     "en": "U-turns are prohibited on this road, so let's turn right at the intersection ahead and come back.",
     "fr": "Le demi-tour est interdit sur cette route, alors tournons à droite au prochain carrefour pour revenir.",
-    "es": "En esta carretera está prohibido dar media vuelta, así que giremos a la derecha en el próximo cruce y regresemos."
+    "es": "En esta carretera está prohibido dar vuelta en U, así que giremos a la derecha en el próximo cruce y regresemos."
    },
    {
     "jp": "体操の授業で、マットの上で前方転回の練習をした。",
@@ -15300,7 +15300,7 @@
     "jp": "古い茶わんには、新しいものにはない雅致がある。",
     "en": "Old tea bowls have a grace that new ones lack.",
     "fr": "Les vieux bols à thé ont une grâce que les neufs n'ont pas.",
-    "es": "Los viejos cuencos de té tienen una gracia que los nuevos no tienen."
+    "es": "Los viejos tazones de té tienen una gracia que los nuevos no tienen."
    }
   ],
   "集金::しゅうきん": [
@@ -15342,7 +15342,7 @@
     "jp": "早めに高台へ移ったおかげで、家族は洪水の難を逃れた。",
     "en": "Thanks to moving to higher ground early, the family escaped the danger of the flood.",
     "fr": "Grâce à un départ précoce vers les hauteurs, la famille a échappé aux dangers de l'inondation.",
-    "es": "Gracias a que se trasladó pronto a una zona alta, la familia escapó de los peligros de la inundación."
+    "es": "Gracias a que se trasladó a tiempo a una zona alta, la familia escapó de los peligros de la inundación."
    }
   ],
   "零::れい": [
@@ -15546,7 +15546,7 @@
     "jp": "駅前の駐輪場はいつも飽和状態で、自転車を止める場所がない。",
     "en": "The bicycle parking in front of the station is always saturated, with no room to leave a bike.",
     "fr": "Le parking à vélos devant la gare est toujours saturé : impossible d'y garer son vélo.",
-    "es": "El estacionamiento de bicicletas frente a la estación siempre está saturado y no hay sitio para dejar la bici."
+    "es": "El estacionamiento de bicicletas frente a la estación siempre está saturado y no hay lugar para dejar la bici."
    },
    {
     "jp": "理科の実験で、水に砂糖を溶かし続けると、やがて飽和して溶けなくなることを確かめた。",
@@ -15602,7 +15602,7 @@
     "jp": "弟は駆けっこが得意で、クラスでいちばん足が速い。",
     "en": "My little brother is good at running races and is the fastest in his class.",
     "fr": "Mon petit frère est doué pour la course : c'est le plus rapide de sa classe.",
-    "es": "A mi hermano menor se le dan bien las carreras: es el más rápido de su clase."
+    "es": "Mi hermano menor es bueno para las carreras: es el más rápido de su clase."
    },
    {
     "jp": "公園で、子どもたちが駆けっこをして遊んでいる。",
@@ -15636,7 +15636,7 @@
     "jp": "高層ビルの最上階から見る夜景は、本当にきれいだ。",
     "en": "The night view from the top floor of a skyscraper is really beautiful.",
     "fr": "La vue nocturne depuis le dernier étage d'un gratte-ciel est vraiment magnifique.",
-    "es": "La vista nocturna desde la última planta de un edificio de gran altura es realmente hermosa."
+    "es": "La vista nocturna desde el último piso de un edificio de gran altura es realmente hermosa."
    }
   ],
   "鬼::おに": [

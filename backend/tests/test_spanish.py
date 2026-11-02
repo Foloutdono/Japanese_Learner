@@ -139,6 +139,11 @@ def test_a_tour_is_served_in_spanish():
     twist = entry["tour"]["twists"][0]
     assert tour["twists"][0]["notion"] == twist["notion"]["es"] != twist["notion"]["en"]
     assert tour["scene"]["them"] == entry["tour"]["scene"]["them"]["es"]
+    # The place the scene happens at is captioned in Spanish too: every
+    # place of the closed set has its line.
+    from study.grammar_tour import SCENE_PLACES
+    assert all(place.get("es") for place in SCENE_PLACES.values())
+    assert tour["scene"]["place_caption"] == SCENE_PLACES[entry["tour"]["scene"]["place"]]["es"]
 
 
 def test_the_spanish_maps_the_client_preloads_are_whole_and_spanish():
@@ -152,6 +157,19 @@ def test_an_unspoken_language_is_still_refused_by_the_maps():
     from fastapi import HTTPException
     with pytest.raises(HTTPException):
         _load_translation_map("de", "vocab")
+
+
+def test_every_theme_word_reads_spanish_in_its_theme_s_sense():
+    """A deck card's gloss is one sense of its word; the theme's line is
+    the one the word has there, in each language (丸 is a shape in
+    `shapes`, 先生 a teacher beside 教授), so every line has its own."""
+    from content import theme_data
+    from routes.theme_vocab import _entry_meaning
+    missing = [f"{theme} {e['kanji'] or e['kana']}" for theme in (t["key"] for t in theme_data.list_themes())
+               for e in theme_data.theme_entries(theme) if not e["meaning_es"]]
+    assert missing == [], missing[:10]
+    entry = next(e for e in theme_data.theme_entries("shapes") if e["kanji"] == "丸")
+    assert _entry_meaning(entry, "es") == entry["meaning_es"]
 
 
 # ── The sentences a card shows ───────────────────────────────
@@ -242,5 +260,51 @@ def test_a_pool_word_in_a_breakdown_carries_its_spanish():
     from study import analysis
     tokens = analysis.analyze_local("豚を飼っている。")["tokens"]
     pig = next(t for t in tokens if t["surface"] == "豚")
-    entry = (pig.get("vocab_match") or {}).get("entry") or {}
-    assert entry.get("meaning_es") == jmdict_fr.pool_line("豚", "ぶた", "es") or entry.get("meaning_es")
+    match = pig.get("vocab_match") or {}
+    assert match.get("pool"), "豚 is read as the pool's word"
+    assert match["entry"]["meaning_es"] == jmdict_fr.pool_line("豚", "ぶた", "es")
+
+
+def test_a_kanji_outside_the_course_is_found_by_its_spanish():
+    """KANJIDIC2's Spanish is searched as its English and French are, an
+    accented query included (it is a meaning, not a reading)."""
+    from content import kanji_pool_data
+    rows, total = kanji_pool_data.search("caballo", 20, 0)
+    assert total and {"駕", "騨"} & {r["char"] for r in rows}
+    assert kanji_pool_data._is_latin("canción") and not kanji_pool_data._is_latin("水")
+
+
+def test_a_card_switched_to_spanish_mid_run_keeps_its_own_gloss():
+    """A written form several cards share (後: あと, うしろ…) is answered by
+    the card's kana, not by whichever card the form's map kept."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+    from routes.translations import get_vocab_translation
+    cards = [e for lv in VOCAB_BY_LEVEL.values() for e in lv if e.get("kanji") == "後"]
+    assert len({e["kana"] for e in cards}) > 1
+    for card in cards:
+        got = get_vocab_translation("後", "es", card["kana"])["translation"]
+        assert got == get_meaning(card, "es", VOCAB_GLOSSES), card["kana"]
+
+
+def test_no_table_in_the_code_says_a_text_in_english_and_french_alone():
+    """A literal {"en": "...", "fr": "..."} in the server's code is a text a
+    learner reads, and one without its "es" reaches a Spanish learner in
+    English (the tours' scene places did until plan 291's review)."""
+    import ast
+    import glob
+    import os
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    missing = []
+    for folder in ("routes", "study", "content", "translations", "core"):
+        for path in glob.glob(os.path.join(root, folder, "*.py")):
+            with open(path, encoding="utf-8") as f:
+                tree = ast.parse(f.read())
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Dict):
+                    continue
+                texts = {k.value: v for k, v in zip(node.keys, node.values)
+                         if isinstance(k, ast.Constant) and isinstance(k.value, str)}
+                if {"en", "fr"} <= texts.keys() and "es" not in texts and all(
+                        isinstance(texts[k], ast.Constant) and isinstance(texts[k].value, str) for k in ("en", "fr")):
+                    missing.append(f"{os.path.relpath(path, root)}:{node.lineno}")
+    assert missing == [], missing

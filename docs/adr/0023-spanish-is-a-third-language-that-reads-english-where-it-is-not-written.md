@@ -140,13 +140,38 @@ not yet written in Spanish reads English**, never French and never blank.
   part that grows (a deck card, a point, a bank row, a layer line) takes
   its Spanish in the same change.
 - **One reader per kind, not a ternary per screen.** A deck gloss is
-  `get_meaning(entry, lang, VOCAB_GLOSSES | KANJI_GLOSSES)`, the course's maps
-  by language (`translations/course.py`); a catalogue text is
+  `get_meaning(entry, lang, VOCAB_GLOSSES)` for a word, `KANJI_GLOSSES` for
+  a kanji, the course's maps by language (`translations/course.py`; the
+  two merged would keep only the kanji maps); a catalogue text is
   `localise(pair, lang)`; a number or a date is `intlLocale(lang)`
   (`lib/locale.js`). Each already falls back to English.
-- **Neutral Spanish, tú.** No vosotros, no voseo; where Spain and Latin
-  America name an everyday thing differently, a gloss gives both («zumo,
-  jugo»). Quotes are «…» tight, as the RAE writes them.
+- **Latin-American neutral Spanish, tú** (the owner's choice at the
+  review that closed plan 291): what an international app writes for
+  Latin America, which Spain also reads without trouble. Where the two
+  name an everyday thing differently, the Latin-American word, alone
+  (boleto, auto, celular, computadora, jugo, estacionar, departamento,
+  tomar — never coger); the preterite for a finished past; no leísmo;
+  no vosotros, no voseo; usted where a scene calls for it. Figures are
+  es-419's (2,000; 3.5), on the screens (`intlLocale`), in the breakdown
+  (`analysis._es_figure`) and on the landing page alike. Quotes are «…»
+  tight, “…” inside them, and a sentence's period after the closing one
+  («Está Tom».), as the RAE writes them.
+- **The review** (the last wave): every Spanish string was swept by
+  script (wrong forms, leaks, punctuation, regional words) and read by
+  native-speaker reviewers — in full for the interface, the pages, the
+  decks, the grammar catalogue's lessons and the banks; in samples for
+  the drills, the comprehension seeds and the JMdict layer, whose
+  regional words were then corrected on every line. KANJIDIC2's Spanish
+  proved unreliable for the deck's kanji (a missing first sense, English
+  read in the wrong sense, a lookalike's meaning), so the deck's
+  corrected lines live in `kanji_meanings_es.json` and override it.
+  Each theme word is written in its theme's sense in Spanish too, as in
+  French. The code review that went with it gave the iOS shell its
+  Spanish (and English as the fallback, as the web), the Android widget
+  its strings, the tours' scene places, kanji search outside the course
+  and a video's own Spanish subtitles; the tests now hold a table with
+  English and French but no Spanish, a nested interface group, the
+  shells' languages and a card's own gloss on a language switch.
 
 ## Consequences
 

@@ -869,15 +869,14 @@ _MYRIAD_VALUE = {"万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12}
 
 
 def _es_figure(value, fraction: str = "") -> str:
-    """A figure as the RAE writes it (plan 291): no mark in four digits
-    (2000), a narrow space between thousands from five (10 000), a point
-    before the decimals (3.5)."""
+    """A figure as Latin-American Spanish writes it (plan 291, the owner's
+    choice of variety): a comma between thousands (2,000; 10,000), a point
+    before the decimals (3.5) -- what Intl's es-419 prints on the screens
+    (lib/locale.js), so the breakdown and the app agree."""
     if isinstance(value, float):
         whole, _, decimals = repr(value).partition(".")
         return _es_figure(int(whole), "" if decimals == "0" else decimals)
-    digits = str(value)
-    if len(digits.lstrip("-")) > 4:
-        digits = f"{value:,}".replace(",", "\u202f")
+    digits = f"{value:,}"
     return f"{digits}.{fraction}" if fraction else digits
 
 
@@ -994,7 +993,7 @@ _AFFIX_SENSES = {
     "連": {"en": "(counter) in a row: 10連, ten in a row", "fr": "(compteur) d'affilée : 10連, dix d'affilée",
           "es": "(contador) seguidos: 10連, diez seguidos"},
     "膳": {"en": "(counter) pairs of chopsticks, bowls of rice", "fr": "(compteur) paires de baguettes, bols de riz",
-          "es": "(contador) pares de palillos, cuencos de arroz"},
+          "es": "(contador) pares de palillos, tazones de arroz"},
     "入り": {"en": "(suffix) holding, with … in it: 十二個入り, a pack of twelve; ミルク入り, with milk",
            "fr": "(suffixe) contenant, avec … dedans : 十二個入り, un paquet de douze ; ミルク入り, au lait",
            "es": "(sufijo) que contiene, con … dentro: 十二個入り, un paquete de doce; ミルク入り, con leche"},
@@ -1009,7 +1008,7 @@ _AFFIX_SENSES = {
     "合": {"en": "(after a number) gō, a measure of rice, about 180 ml: 米2合", "fr": "(après un nombre) gō, mesure de riz, environ 180 ml : 米2合",
           "es": "(tras un número) gō, medida de arroz, unos 180 ml: 米2合"},
     "牛": {"en": "(suffix) beef, cattle: 国産牛, domestic beef", "fr": "(suffixe) bœuf : 国産牛, bœuf japonais",
-          "es": "(sufijo) carne de vacuno, ganado: 国産牛, vacuno nacional"},
+          "es": "(sufijo) carne de res, ganado: 国産牛, carne de res nacional"},
     "殿": {"en": "(after a name or a title, old or formal) Lord, Sir: 家老殿", "fr": "(après un nom ou un titre, ancien ou formel) seigneur, monsieur : 家老殿",
           "es": "(tras un nombre o un título, antiguo o formal) señor, don: 家老殿"},
     "超": {"en": "(after a number) over, more than: 500円超, over 500 yen",
@@ -1142,7 +1141,7 @@ _ORDINAL_SENSE = {
     "番": ("", "", ""), "年": ("year", "année", "año"), "日": ("day", "jour", "día"),
     "人": ("person", "personne", "persona"), "曲": ("song", "morceau", "canción"),
     "杯": ("cup, glass", "verre, tasse", "taza, vaso"),
-    "週": ("week", "semaine", "semana"), "階": ("floor", "étage", "piso, planta"), "期": ("term", "période", "período"),
+    "週": ("week", "semaine", "semana"), "階": ("floor", "étage", "piso"), "期": ("term", "période", "período"),
     "試合": ("match", "match", "partido"), "巻": ("volume", "tome", "tomo"), "話": ("episode", "épisode", "episodio"),
     "時間": ("period (of school)", "heure de cours", "hora de clase"),
 }
@@ -2226,7 +2225,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # figure, a time, a date, an ordinal, an age.
 # 34: a pool word, a chosen sense and an idiom gain their `meaning_es`
 # from the Spanish layer over JMdict (plan 291), as `meaning_fr`.
-LOCAL_REV = 34
+# 35: the Spanish reviewed into Latin-American neutral (plan 291): the
+# deck's and the pool's glosses, the senses, the breakdown's own lines,
+# and its figures written es-419 (2,000; 3.5).
+LOCAL_REV = 35
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

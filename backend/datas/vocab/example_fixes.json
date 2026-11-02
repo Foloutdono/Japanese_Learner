@@ -40,7 +40,7 @@
    "jp": "この店では、平日だけランチを提供している。",
    "en": "This restaurant serves a set lunch on weekdays only.",
    "fr": "Ce restaurant ne propose un menu du midi qu'en semaine.",
-   "es": "Este restaurante solo ofrece menú del mediodía entre semana.",
+   "es": "Este restaurante solo ofrece menú de almuerzo entre semana.",
    "why": "wrong sense (launch), garbled"
   },
   "REM睡眠中の脳波は起きている時と同じ脳波であり、夢を見るステージです。": {
@@ -110,7 +110,7 @@
    "jp": "「あの赤い服は着ないほうがいいよ」「どうして？」",
    "en": "\"You'd better not wear that red dress.\" \"Why not?\"",
    "fr": "« Tu ferais mieux de ne pas mettre cette robe rouge. » « Pourquoi ? »",
-   "es": "«Será mejor que no te pongas aquel vestido rojo.» «¿Por qué?»",
+   "es": "«Será mejor que no te pongas aquel vestido rojo». «¿Por qué?»",
    "why": "old-fashioned よしなさい"
   },
   "「あの音で考え事ができないわ」と、彼女はタイプライターを見つめながら言った。": {
@@ -166,7 +166,7 @@
    "jp": "「この問題がわからないんです。」「どれ、見せてごらん。」",
    "en": "\"I don't understand this problem.\" \"Let's see, show me.\"",
    "fr": "« Je ne comprends pas cet exercice. » « Voyons, montre-moi ça. »",
-   "es": "«No entiendo este problema.» «A ver, muéstramelo.»",
+   "es": "«No entiendo este problema». «A ver, muéstramelo».",
    "why": "too hard for N5 (被子植物)"
   },
   "「じゃんけんね」「ぐー」「ちょ・・パー」「後出しかよ！」": {
@@ -187,7 +187,7 @@
    "jp": "「この店、高いね。」「でも、おいしいよ。」",
    "en": "\"This place is expensive.\" \"But the food is good.\"",
    "fr": "« Ce resto est cher. » « Mais c'est bon. »",
-   "es": "«Este restaurante es caro.» «Pero la comida está rica.»",
+   "es": "«Este restaurante es caro». «Pero la comida está rica».",
    "why": "translationese narration"
   },
   "「そっかぁ、アルクさんはワーウルフなんですね」「俺は混血だから変身したりはしねーよ」": {
@@ -201,14 +201,14 @@
    "jp": "「猫はどこ？」「机の下にいるよ。」",
    "en": "\"Where's the cat?\" \"It's under the desk.\"",
    "fr": "« Où est le chat ? » « Il est sous le bureau. »",
-   "es": "«¿Dónde está el gato?» «Está debajo del escritorio.»",
+   "es": "«¿Dónde está el gato?» «Está debajo del escritorio».",
    "why": "rude slang; father under a crashed truck"
   },
   "「なんて言ってるの？」「祝詞も知らないのか？」「祝詞？」「神道の呪文のようなもん」": {
    "jp": "「今、なんて言ったの？」「何でもないよ。」",
    "en": "\"What did you just say?\" \"Nothing.\"",
    "fr": "« Qu'est-ce que tu viens de dire ? » « Rien. »",
-   "es": "«¿Qué acabas de decir?» «No es nada.»",
+   "es": "«¿Qué acabas de decir?» «No es nada».",
    "why": "misleading religious gloss, hard"
   },
   "「びっくりさせないでよ」と彼女は彼が背後に近づいた時言った。": {
@@ -236,7 +236,7 @@
    "jp": "子どもたちは車の中でなぞなぞをして遊んだ。",
    "en": "The children played a riddle game in the car.",
    "fr": "Les enfants ont joué aux devinettes dans la voiture.",
-   "es": "Los niños jugaron a las adivinanzas en el coche.",
+   "es": "Los niños jugaron a las adivinanzas en el auto.",
    "why": "verify: EN 'played at riddles' reads as pretending"
   },
   "「もしや、あなたは小川さんではありませんか？」「そうですが、何か？」": {
@@ -250,7 +250,7 @@
    "jp": "「朝ご飯に何を食べましたか。」「パンを食べました。」",
    "en": "\"What did you have for breakfast?\" \"I had bread.\"",
    "fr": "« Qu'avez-vous mangé au petit déjeuner ? » « Du pain. »",
-   "es": "«¿Qué comió en el desayuno?» «Comí pan.»",
+   "es": "«¿Qué comió en el desayuno?» «Comí pan».",
    "why": "sexual content"
   },
   "「ウィキペディアを引用するな」という主張が昨日だか一昨日だかの朝日新聞に載っていた。": {
@@ -264,14 +264,14 @@
    "jp": "「ケーキはお好きですか」「はい、好きです」",
    "en": "\"Do you like cake?\" \"Yes, I do.\"",
    "fr": "« Vous aimez les gâteaux ? » « Oui, je les aime. »",
-   "es": "«¿Le gustan los pasteles?» «Sí, me gustan.»",
+   "es": "«¿Le gustan los pasteles?» «Sí, me gustan».",
    "why": "FR adds 'beaucoup'"
   },
   "「コーヒーのお替わりいる？」「うん、ぼくのは少なめ、弟のには多めについでね」": {
    "jp": "「コーヒーのおかわりいる？」「うん、少なめについでね。」",
    "en": "\"Do you want another cup of coffee?\" \"Yeah, just pour me a little.\"",
    "fr": "« Tu reprends du café ? » « Oui, sers-m'en juste un peu. »",
-   "es": "«¿Quieres más café?» «Sí, sírveme solo un poco.»",
+   "es": "«¿Quieres más café?» «Sí, sírveme solo un poco».",
    "why": "too long for N4, お替わり spelling"
   },
   "「トイレの便座からエイズが感染することってあるの？」「いいえ、ありません」": {
@@ -292,7 +292,7 @@
    "jp": "「これ、あなたの傘ですか。」「ええ、そうです。ありがとう。」",
    "en": "\"Is this your umbrella?\" \"Yes, it is. Thank you.\"",
    "fr": "« C'est votre parapluie ? » « Oui, c'est bien le mien. Merci. »",
-   "es": "«¿Este paraguas es suyo?» «Sí, así es. Gracias.»",
+   "es": "«¿Este paraguas es suyo?» «Sí, así es. Gracias».",
    "why": "word absent; slang 見して"
   },
   "「一部屋に３人で泊まっていただけますか」と彼はたずねました。「ええ、かまいませんよ」と３人の男性は答えました。": {
@@ -320,7 +320,7 @@
    "jp": "「手伝おうか。」「いいよ、一人でできるから。」",
    "en": "\"Shall I help?\" \"It's fine, I can do it by myself.\"",
    "fr": "« Je t'aide ? » « Non, ça va, je peux le faire tout seul. »",
-   "es": "«¿Te ayudo?» «No, está bien, puedo hacerlo por mi cuenta.»",
+   "es": "«¿Te ayudo?» «No, está bien, puedo hacerlo por mi cuenta».",
    "why": "too hard for N5 (進路相談)"
   },
   "「冬の時代」が大学改革の起爆剤となってくれればと思う。": {
@@ -341,14 +341,14 @@
    "jp": "「もう終わった？」「とんでもない、始めたばかりだよ」",
    "en": "\"Are you done yet?\" \"Far from it, I've only just started.\"",
    "fr": "« Tu as déjà fini ? » « Pas du tout, je viens juste de commencer. »",
-   "es": "«¿Ya terminaste?» «En absoluto, acabo de empezar.»",
+   "es": "«¿Ya terminaste?» «En absoluto, acabo de empezar».",
    "why": "translationese 君はそれを終えたか"
   },
   "「塩を取って下さい」「はい、どうぞ」": {
    "jp": "「塩を取ってください」「はい、どうぞ」",
    "en": "\"Pass me the salt, please.\" \"Here you are.\"",
    "fr": "« Passez-moi le sel, s'il vous plaît. » « Tenez, voilà. »",
-   "es": "«Páseme la sal, por favor.» «Sí, aquí tiene.»",
+   "es": "«Páseme la sal, por favor». «Sí, aquí tiene».",
    "why": "orthography 下さい → ください"
   },
   "「学園の廊下で、濃厚なキスシーン・・・聞いたぞ聞いたぞ」「濃厚じゃなーい！話に尾ひれ付いてるって・・・」": {
@@ -362,7 +362,7 @@
    "jp": "「安いですね。じゃあ、三つください。」",
    "en": "\"That's cheap. Well then, I'll take three.\"",
    "fr": "« C'est bon marché. Alors, j'en prends trois. »",
-   "es": "«Está barato. Entonces, deme tres.»",
+   "es": "«Está barato. Entonces, deme tres».",
    "why": "derogatory 小娘; odd yards"
   },
   "「居住外国人」とは、どういう意味ですか。": {
@@ -432,7 +432,7 @@
    "jp": "「私の名刺です。追加情報があったらいつでも連絡ください」と記者は言った。",
    "en": "\"Here is my business card. Please call me anytime with more information,\" said the reporter.",
    "fr": "« Voici ma carte de visite. Contactez-moi à tout moment si vous avez d'autres informations », dit le journaliste.",
-   "es": "«Aquí tiene mi tarjeta de visita. Si tiene más información, comuníquese conmigo cuando quiera», dijo el periodista.",
+   "es": "«Aquí tiene mi tarjeta de presentación. Si tiene más información, comuníquese conmigo cuando quiera», dijo el periodista.",
    "why": "orthography 下さい"
   },
   "「私の後から来る方は私に優る方である。私より先におられたからである」といったのはこの方の事です。": {
@@ -446,7 +446,7 @@
    "jp": "「腰は痛い？」「ううん、大丈夫。」「そう、よかった。」",
    "en": "\"Does your back hurt?\" \"No, I'm fine.\" \"Oh, good.\"",
    "fr": "« Tu as mal au dos ? » « Non, ça va. » « Ah, tant mieux. »",
-   "es": "«¿Te duele la espalda?» «No, estoy bien.» «Ah, qué bien.»",
+   "es": "«¿Te duele la espalda?» «No, estoy bien». «Ah, qué bien».",
    "why": "too hard for N4 (不幸中の幸い)"
   },
   "「行った」というのが適切な言葉だ。": {
@@ -481,14 +481,14 @@
    "jp": "「誰か車の中にいるのですか」「トムがいます」",
    "en": "\"Is anyone in the car?\" \"Tom is.\"",
    "fr": "« Il y a quelqu'un dans la voiture ? » « Oui, Tom. »",
-   "es": "«¿Hay alguien en el coche?» «Está Tom.»",
+   "es": "«¿Hay alguien en el auto?» «Está Tom».",
    "why": "verify: EN answer 'Tom is.' does not fit 'Is there someone…'"
   },
   "「財布を無くした」ジョンは嘆いた。": {
    "jp": "「財布をなくした」とジョンは嘆いた。",
    "en": "\"I lost my wallet,\" lamented John.",
    "fr": "« J'ai perdu mon portefeuille », s'est lamenté John.",
-   "es": "«Perdí la cartera», se lamentó John.",
+   "es": "«Perdí la billetera», se lamentó John.",
    "why": "missing と after quote"
   },
   "「軽くならいいけど」「うむ、では金的と目潰しは有効にするか？」": {
@@ -516,7 +516,7 @@
    "jp": "「ちょっと熱があるんだ」「それはいけないね」",
    "en": "\"I have a bit of a fever.\" \"That's too bad.\"",
    "fr": "« J'ai un peu de fièvre. » « Oh, c'est embêtant. »",
-   "es": "«Tengo un poco de fiebre.» «Vaya, eso no está bien.»",
+   "es": "«Tengo un poco de fiebre». «Vaya, eso no está bien».",
    "why": "word absent (いけない)"
   },
   "「騙された」と言ってしまえばそれまでですが、「うまい話」に乗った当人であることは間違いありません。": {
@@ -628,7 +628,7 @@
    "jp": "あいつはカーマニアだから、車のことならなんでも知ってるよ。",
    "en": "He's a car nut, so he knows everything about cars.",
    "fr": "C'est un fana de voitures, il sait tout là-dessus.",
-   "es": "Ese es un fanático de los coches, así que de coches lo sabe todo.",
+   "es": "Ese es un fanático de los autos, así que de autos lo sabe todo.",
    "why": "EN mistranslation"
   },
   "あいつは海千山千だから、取り引き相手としてはかなり手強いぞ。": {
@@ -656,7 +656,7 @@
    "jp": "あいにく、カメラを家に置いてきてしまった。",
    "en": "Unfortunately, I've left my camera at home.",
    "fr": "Malheureusement, j'ai laissé mon appareil photo à la maison.",
-   "es": "Por desgracia, me dejé la cámara en casa.",
+   "es": "Por desgracia, dejé la cámara en casa.",
    "why": "orthography, translationese 私は"
   },
   "あえて言いますが、もし我々がそんなことをすれば大変な誤りを犯すことになると私は思います。": {
@@ -712,7 +712,7 @@
    "jp": "見て、あそこにスポーツカーが止まっているよ。",
    "en": "Look, there's a sports car parked over there.",
    "fr": "Regarde, il y a une voiture de sport garée là-bas.",
-   "es": "Mira, allí hay un coche deportivo estacionado.",
+   "es": "Mira, allí hay un auto deportivo estacionado.",
    "why": "unnatural 見なさい"
   },
   "あそこの建物が燃えているに違いない。": {
@@ -733,14 +733,14 @@
    "jp": "「あちらが田中さんです。」「え、あっちの背の高い人？」",
    "en": "\"That's Mr Tanaka over there.\" \"What, the tall man over there?\"",
    "fr": "« C'est M. Tanaka, là-bas. » « Ah bon, le grand, là-bas ? »",
-   "es": "«Aquel de allí es el señor Tanaka.» «¿Eh? ¿El alto de allá?»",
+   "es": "«Aquel de allí es el señor Tanaka». «¿Eh? ¿El alto de allá?»",
    "why": "verify: FR 'Voici … là-bas' points near and far at once; C'est"
   },
   "あちらに着いたら手紙をください。": {
    "jp": "「お手洗いはあちらです。」「あっちだって。行こう。」",
    "en": "\"The restrooms are over there.\" \"Over there, apparently. Let's go.\"",
    "fr": "« Les toilettes sont par là-bas. » « C'est par là, apparemment. On y va. »",
-   "es": "«Los baños están allí.» «Dicen que es por allá. Vamos.»",
+   "es": "«Los baños están allí». «Dicen que es por allá. Vamos».",
    "why": "verify: translations invented a 'she' that だって does not carry"
   },
   "あっちへ行きな、ぼうや。": {
@@ -1118,7 +1118,7 @@
    "jp": "新しい車の調子はどうですか。",
    "en": "How is your new car running?",
    "fr": "Comment marche votre nouvelle voiture ?",
-   "es": "¿Qué tal funciona su coche nuevo?",
+   "es": "¿Qué tal funciona su auto nuevo?",
    "why": "translationese あなたの…動いていますか"
   },
   "あなたの時計では何時ですか。": {
@@ -1447,7 +1447,7 @@
    "jp": "「明日、晴れるかな。」「でも、天気予報は雨だって。」",
    "en": "\"I wonder if it'll be sunny tomorrow.\" \"But the forecast says rain.\"",
    "fr": "« Tu crois qu'il fera beau demain ? » « Mais la météo annonce de la pluie. »",
-   "es": "«¿Hará sol mañana?» «Pero el pronóstico dice que va a llover.»",
+   "es": "«¿Hará sol mañana?» «Pero el pronóstico dice que va a llover».",
    "why": "particle でも, not the card's sense"
   },
   "あなたはもっと理性的であるべきだ。": {
@@ -1510,7 +1510,7 @@
    "jp": "バスケットボールが上手ですね。",
    "en": "You're good at basketball!",
    "fr": "Vous jouez bien au basket !",
-   "es": "¡Qué bien juega al baloncesto!",
+   "es": "¡Qué bien juega al básquetbol!",
    "why": "translationese"
   },
   "あなたは何と賢い生徒なのでしょう。": {
@@ -1846,7 +1846,7 @@
    "jp": "姉と揃いのセーターを買った。",
    "en": "I bought a sweater to match my older sister's.",
    "fr": "J'ai acheté un pull assorti à celui de ma grande sœur.",
-   "es": "Me compré un suéter a juego con el de mi hermana mayor.",
+   "es": "Me compré un suéter igual al de mi hermana mayor.",
    "why": "verify: 姉と揃いのセーターを買った: I bought it (a sweater matching my sister's); EN/FR made both sisters the buyers"
   },
   "あのテーマパークでスリルを味わった。": {
@@ -1972,7 +1972,7 @@
    "jp": "あの子はよくお使いをする。",
    "en": "That child often runs errands.",
    "fr": "Cet enfant rend souvent service en faisant des courses.",
-   "es": "Ese niño hace recados a menudo.",
+   "es": "Ese niño hace mandados a menudo.",
    "why": "EN adds gender"
   },
   "あの子供は明るい微笑でみんなをひきつける。": {
@@ -2273,7 +2273,7 @@
    "jp": "ある日、駅で昔の友だちに会った。",
    "en": "One day, I ran into an old friend at the station.",
    "fr": "Un jour, j'ai croisé un vieil ami à la gare.",
-   "es": "Cierto día, me encontré con un viejo amigo en la estación.",
+   "es": "Un día, me encontré con un viejo amigo en la estación.",
    "why": "vague, odd"
   },
   "ある批評家が、バレーを描いた私の絵を見たら、生のバレー公演を見に行く必要がないと言ったことがあります。": {
@@ -2343,7 +2343,7 @@
    "jp": "「あれは誰？」「となりのクラスの先生だよ。」",
    "en": "\"Who's that?\" \"A teacher from the class next door.\"",
    "fr": "« C'est qui, celui-là ? » « Un prof de la classe d'à côté. »",
-   "es": "«¿Quién es aquel?» «Es un profesor de la clase de al lado.»",
+   "es": "«¿Quién es aquel?» «Es un profesor de la clase de al lado».",
    "why": "EN mistranslation; sense unclear"
   },
   "あれは世界で最も速い電車です。": {
@@ -2686,7 +2686,7 @@
    "jp": "うちのクーラーが故障してしまった。",
    "en": "Our air conditioner has broken down.",
    "fr": "Notre climatiseur est tombé en panne.",
-   "es": "Se nos ha averiado el aire acondicionado.",
+   "es": "Se nos descompuso el aire acondicionado.",
    "why": "EN omits うちの, tense"
   },
   "うちの一番腕利きの交渉者はいつも強引に有利な取り引きをする。": {
@@ -2721,7 +2721,7 @@
    "jp": "この話は外の人には言わないでね。",
    "en": "Don't tell anyone outside about this, OK?",
    "fr": "N'en parle à personne d'extérieur, d'accord ?",
-   "es": "No se lo cuentes a nadie de fuera, ¿de acuerdo?",
+   "es": "No se lo cuentes a nadie de afuera, ¿de acuerdo?",
    "why": "garbled saying (idiom is よそはよそ), fragment"
   },
   "うっとうしい梅雨期に、すっきりしない話で恐縮ですが、少しの間お付き合いください。": {
@@ -2749,7 +2749,7 @@
    "jp": "「宿題は終わった？」「うん、もう終わったよ。」",
    "en": "\"Have you finished your homework?\" \"Yeah, I already did.\"",
    "fr": "« Tu as fini tes devoirs ? » « Oui, c'est déjà fait. »",
-   "es": "«¿Terminaste la tarea?» «Sí, ya la terminé.»",
+   "es": "«¿Terminaste la tarea?» «Sí, ya la terminé».",
    "why": "word absent (ン十万 sense)"
   },
   "えっ嘘でしょ。": {
@@ -2833,7 +2833,7 @@
    "jp": "俺は虫を殺すのが苦手なんだ。",
    "en": "I'm no good at killing bugs.",
    "fr": "J'ai du mal à tuer les insectes.",
-   "es": "No se me da bien matar insectos.",
+   "es": "No soy bueno para matar insectos.",
    "why": "violent (murder threat)"
   },
   "おまえも決して戦う拳を忘れるな。": {
@@ -2994,7 +2994,7 @@
    "jp": "「お母さんはどこ？」「買い物に行ったよ。」",
    "en": "\"Where's Mum?\" \"She went shopping.\"",
    "fr": "« Où est maman ? » « Elle est partie faire les courses. »",
-   "es": "«¿Dónde está mamá?» «Se fue de compras.»",
+   "es": "«¿Dónde está mamá?» «Se fue de compras».",
    "why": "too hard for N5 (口答え)"
   },
   "お父さんの破産は家名の汚れでした。": {
@@ -3148,7 +3148,7 @@
    "jp": "店員はぎこちない笑いを浮かべて答えた。",
    "en": "The clerk answered with an awkward smile.",
    "fr": "Le vendeur a répondu avec un sourire gêné.",
-   "es": "El dependiente respondió con una sonrisa incómoda.",
+   "es": "El vendedor respondió con una sonrisa incómoda.",
    "why": "unnatural; EN mistranslation"
   },
   "ぎざぎざのかどが彼のズボンに引っかかって穴を空けた。": {
@@ -3351,7 +3351,7 @@
    "jp": "「なんで来たの？」「バスで来たよ。」",
    "en": "\"How did you get here?\" \"I came by bus.\"",
    "fr": "« Tu es venu comment ? » « En bus. »",
-   "es": "«¿En qué viniste?» «Vine en autobús.»",
+   "es": "«¿En qué viniste?» «Vine en autobús».",
    "why": "ambiguous (reads as why), context added"
   },
   "ここに先物取引で儲けた方いらっしゃいますか？": {
@@ -3372,7 +3372,7 @@
    "jp": "ここに車を止めてはいけません。",
    "en": "You mustn't park your car here.",
    "fr": "Il est interdit de garer sa voiture ici.",
-   "es": "Aquí no se puede estacionar el coche.",
+   "es": "Aquí no se puede estacionar el auto.",
    "why": "verify: 停める is a non-jōyō reading; course spelling 止める"
   },
   "ここのソースは舐めてみるとちょっと塩っぱい。": {
@@ -3456,14 +3456,14 @@
    "jp": "「こっちの方が高いの？」「はい、こちらの方が少し高いです。」",
    "en": "\"Is this one more expensive?\" \"Yes, this one is a little more expensive.\"",
    "fr": "« C'est celui-ci, le plus cher ? » « Oui, celui-ci est un peu plus cher. »",
-   "es": "«¿Este es más caro?» «Sí, este es un poco más caro.»",
+   "es": "«¿Este es más caro?» «Sí, este es un poco más caro».",
    "why": "こっち absent; dialogue shows both"
   },
   "こちらはあちらに比べれば全く原始的だった。": {
    "jp": "「あちらの部屋の方が広いですよ。」「じゃあ、あっちにします。」",
    "en": "\"That room over there is bigger.\" \"Then I'll take that one.\"",
    "fr": "« La chambre là-bas est plus grande. » « Alors je prends celle-là. »",
-   "es": "«La habitación de allí es más grande.» «Entonces me quedo con la de allá.»",
+   "es": "«La habitación de allí es más grande». «Entonces me quedo con la de allá».",
    "why": "odd context; あっち absent"
   },
   "こちらはケンです。彼は自分の犬が大好きです。": {
@@ -3526,7 +3526,7 @@
    "jp": "父は一人で家族を支えてきた。",
    "en": "My father has supported the family on his own.",
    "fr": "Mon père a fait vivre la famille à lui seul.",
-   "es": "Mi padre ha sustentado a la familia él solo.",
+   "es": "Mi padre ha mantenido a la familia él solo.",
    "why": "long, translationese"
   },
   "このことは水の入ったグラスにストローを入れて見れば容易にわかる。": {
@@ -3624,7 +3624,7 @@
    "jp": "今年一番うれしい出来事は、妹が生まれたことだ。",
    "en": "The happiest event of my year was the birth of my little sister.",
    "fr": "Le plus bel événement de mon année, c'est la naissance de ma petite sœur.",
-   "es": "El acontecimiento más feliz de este año ha sido el nacimiento de mi hermana menor.",
+   "es": "El acontecimiento más feliz de este año fue el nacimiento de mi hermana menor.",
    "why": "typo ようのして, weak illustration"
   },
   "このアパートは６家族が暮らしている。": {
@@ -3687,7 +3687,7 @@
    "jp": "牛肉を300グラムください。",
    "en": "300 grams of beef, please.",
    "fr": "300 grammes de bœuf, s'il vous plaît.",
-   "es": "Deme 300 gramos de carne de vaca, por favor.",
+   "es": "Deme 300 gramos de carne de res, por favor.",
    "why": "too hard for N5 (正味重量)"
   },
   "このスイミングスクールの毎月の月謝はいくらですか。": {
@@ -3967,7 +3967,7 @@
    "jp": "今夜、駅前のレストランで歓迎の会を開きます。",
    "en": "Tonight we are holding a welcome party at the restaurant in front of the station.",
    "fr": "Ce soir, nous organisons une fête de bienvenue au restaurant devant la gare.",
-   "es": "Esta noche organizamos una fiesta de bienvenida en el restaurante de enfrente de la estación.",
+   "es": "Esta noche organizamos una fiesta de bienvenida en el restaurante frente a la estación.",
    "why": "too long and formal"
   },
   "この会の名称はＥ．Ｓ．Ｓ．とする。": {
@@ -4590,7 +4590,7 @@
    "jp": "村の小さな社で、毎年秋祭りが行われる。",
    "en": "Every autumn, a festival is held at the village's small shrine.",
    "fr": "Chaque automne, une fête a lieu au petit sanctuaire du village.",
-   "es": "Cada año se celebra una fiesta de otoño en el pequeño santuario del pueblo.",
+   "es": "Cada año se realiza una fiesta de otoño en el pequeño santuario del pueblo.",
    "why": "社 is a Shinto shrine, not Jupiter's"
   },
   "この神殿は建てるのに４６年かかりました。": {
@@ -4807,7 +4807,7 @@
    "jp": "この車は古いけれど、まだよく走る。",
    "en": "This car is old, but it still runs well.",
    "fr": "Cette voiture est vieille, mais elle roule encore bien.",
-   "es": "Este coche es viejo, pero todavía marcha bien.",
+   "es": "Este auto es viejo, pero todavía marcha bien.",
    "why": "快調 too hard"
   },
   "この辞書は初級者に、いやそれどころか上級者にも役に立つ。": {
@@ -4996,7 +4996,7 @@
    "jp": "メニューに新しい料理が加わった。",
    "en": "A new dish has been added to the menu.",
    "fr": "Un nouveau plat a été ajouté au menu.",
-   "es": "Se añadió un nuevo plato al menú.",
+   "es": "Se agregó un nuevo plato al menú.",
    "why": "too hard (蔵書)"
   },
   "これがブレークの葬られている教会です。": {
@@ -5052,7 +5052,7 @@
    "jp": "「これとそっち、何が違うの？」「そちらは少し大きいんです。」",
    "en": "\"What's the difference between this one and that one?\" \"That one is a little bigger.\"",
    "fr": "« Quelle est la différence entre celui-ci et celui-là ? » « Celui-là est un peu plus grand. »",
-   "es": "«¿Qué diferencia hay entre este y ese?» «Ese es un poco más grande.»",
+   "es": "«¿Qué diferencia hay entre este y ese?» «Ese es un poco más grande».",
    "why": "mixed register; そっち absent"
   },
   "これはたいそう快適な暖炉ですね。": {
@@ -5255,7 +5255,7 @@
    "jp": "日本人の平均寿命は、世界でもトップクラスだ。",
    "en": "Average life expectancy in Japan is among the highest in the world.",
    "fr": "L'espérance de vie moyenne des Japonais est parmi les plus élevées du monde.",
-   "es": "La esperanza de vida media de los japoneses está entre las más altas del mundo.",
+   "es": "La esperanza de vida promedio de los japoneses está entre las más altas del mundo.",
    "why": "vague false claim"
   },
   "これらの要素をすべて包含するような最良の公式はこれまでのところ提案されていない。": {
@@ -5276,7 +5276,7 @@
    "jp": "外に出たとたん、真っ青な空が目に入った。",
    "en": "The moment I stepped outside, I saw a deep blue sky.",
    "fr": "À peine sorti, j'ai vu un ciel d'un bleu profond.",
-   "es": "Nada más salir, vi un cielo de un azul intenso.",
+   "es": "Apenas salí, vi un cielo de un azul intenso.",
    "why": "真っ青 not in its sense (deep blue)"
   },
   "これ以上の値引きは、私どもを赤字に追いやるでしょう。": {
@@ -5304,7 +5304,7 @@
    "jp": "こんな余計な機能、なんでつけたんだろう。",
    "en": "Why did they add such a needless feature?",
    "fr": "Pourquoi ont-ils ajouté une fonction aussi inutile ?",
-   "es": "¿Por qué habrán añadido una función tan innecesaria?",
+   "es": "¿Por qué habrán agregado una función tan innecesaria?",
    "why": "missing comma (なんで read as なんて)"
   },
   "こんな夜更けに女の子の一人歩きは危ない。": {
@@ -5325,7 +5325,7 @@
    "jp": "そんな話を信じるなんて、私は馬鹿だった。",
    "en": "I was a fool to believe a story like that.",
    "fr": "J'ai été bête de croire une histoire pareille.",
-   "es": "Fue de tontos creerme una historia así.",
+   "es": "Fue una tontería de mi parte creerme una historia así.",
    "why": "insult, hard 荒れ模様"
   },
   "こんな風に、彼は私を扱った。": {
@@ -5360,7 +5360,7 @@
    "jp": "「今日は何曜日ですか。」「水曜日です。」",
    "en": "\"What day is it today?\" \"It's Wednesday.\"",
    "fr": "« Quel jour sommes-nous ? » « Mercredi. »",
-   "es": "«¿Qué día de la semana es hoy?» «Es miércoles.»",
+   "es": "«¿Qué día de la semana es hoy?» «Es miércoles».",
    "why": "too hard for N5 (ごひいき)"
   },
   "ごめん、取り消すよ。": {
@@ -5878,7 +5878,7 @@
    "jp": "「そっちは出口？」「いいえ、そちらは入口です。」",
    "en": "\"Is that way the exit?\" \"No, that way is the entrance.\"",
    "fr": "« La sortie, c'est par là ? » « Non, par là, c'est l'entrée. »",
-   "es": "«¿Por ahí está la salida?» «No, por ahí está la entrada.»",
+   "es": "«¿Por ahí está la salida?» «No, por ahí está la entrada».",
    "why": "sense mismatch; そっち absent"
   },
   "そっちの生活はどうだい？": {
@@ -5913,7 +5913,7 @@
    "jp": "一日中歩いたので、とても疲れた。",
    "en": "I walked all day, so I'm very tired.",
    "fr": "J'ai marché toute la journée, alors je suis très fatigué.",
-   "es": "Caminé todo el día, así que me cansé mucho.",
+   "es": "Caminé todo el día, así que estoy muy cansado.",
    "why": "garbled, too long, EN wrong"
   },
   "そのねじまわしを私は、友人から借りた。": {
@@ -5934,7 +5934,7 @@
    "jp": "うちの父は、しょっちゅう眼鏡をなくす。",
    "en": "My father is always losing his glasses.",
    "fr": "Mon père perd sans arrêt ses lunettes.",
-   "es": "Mi padre pierde las gafas constantemente.",
+   "es": "Mi padre pierde los lentes constantemente.",
    "why": "translationese"
   },
   "そのような情緒と行動の分離に比べれば、破局的結果の方がまだましである。": {
@@ -6025,7 +6025,7 @@
    "jp": "雨の日は車のスピードを落としてください。",
    "en": "On rainy days, please slow down when you drive.",
    "fr": "Par temps de pluie, veuillez réduire votre vitesse.",
-   "es": "Los días de lluvia, reduzca la velocidad del coche, por favor.",
+   "es": "Los días de lluvia, reduzca la velocidad del auto, por favor.",
    "why": "too hard for N4"
   },
   "そのチームの選手は各自めいめいのバットを持っている。": {
@@ -6256,7 +6256,7 @@
    "jp": "「何かペットがいますか。」「はい、猫が一匹います。」",
    "en": "\"Do you have any pets?\" \"Yes, I have a cat.\"",
    "fr": "« Vous avez un animal de compagnie ? » « Oui, j'ai un chat. »",
-   "es": "«¿Tiene alguna mascota?» «Sí, tengo un gato.»",
+   "es": "«¿Tiene alguna mascota?» «Sí, tengo un gato».",
    "why": "bizarre, no context"
   },
   "その人気テレビシリーズが発端となって、秋には二つのショー番組が誕生することになっている。": {
@@ -6389,7 +6389,7 @@
    "jp": "兄弟はそれぞれ自分の車を持っている。",
    "en": "The brothers each have their own car.",
    "fr": "Les frères ont chacun leur propre voiture.",
-   "es": "Cada uno de los hermanos tiene su propio coche.",
+   "es": "Cada uno de los hermanos tiene su propio auto.",
    "why": "stiff 所有"
   },
   "その光景を見て私は背筋に寒気がした。": {
@@ -6606,7 +6606,7 @@
    "jp": "大家さんに家賃を払いに行った。",
    "en": "I went to pay the rent to my landlord.",
    "fr": "Je suis allé payer le loyer à mon propriétaire.",
-   "es": "Fui a pagarle el alquiler al casero.",
+   "es": "Fui a pagarle el alquiler al propietario.",
    "why": "hard 暮らし向き, odd context"
   },
   "その大富豪は貧しい少年として生涯を始めた。": {
@@ -6830,7 +6830,7 @@
    "jp": "弟は父の話し方を真似するのが上手だ。",
    "en": "My little brother is good at imitating the way our father talks.",
    "fr": "Mon petit frère imite très bien la façon de parler de notre père.",
-   "es": "A mi hermano menor se le da bien imitar la forma de hablar de nuestro padre.",
+   "es": "Mi hermano menor es bueno para imitar la forma de hablar de nuestro padre.",
    "why": "sense mismatch (imitation)"
   },
   "その島には漁業を営む人たちが住んでいた。": {
@@ -6865,7 +6865,7 @@
    "jp": "その工場はコンクリートで造られている。",
    "en": "The factory is built of concrete.",
    "fr": "Cette usine est construite en béton.",
-   "es": "Esa fábrica está construida con hormigón.",
+   "es": "Esa fábrica está construida con concreto.",
    "why": "建造 is for ships, unnatural"
   },
   "その工場は玩具を製造している。": {
@@ -7040,7 +7040,7 @@
    "jp": "下り坂で車が加速した。",
    "en": "The car picked up speed going downhill.",
    "fr": "La voiture a pris de la vitesse dans la descente.",
-   "es": "El coche aceleró en la bajada.",
+   "es": "El auto aceleró en la bajada.",
    "why": "political opinion"
   },
   "その救助投手でエースの代わりはとても務まらなかった。": {
@@ -7131,7 +7131,7 @@
    "jp": "市民会館で子供向けのコンサートが開かれる。",
    "en": "A concert for children will be held at the civic hall.",
    "fr": "Un concert pour enfants aura lieu à la salle municipale.",
-   "es": "En el salón de actos municipal se celebrará un concierto para niños.",
+   "es": "En el auditorio municipal se realizará un concierto para niños.",
    "why": "translationese"
   },
   "その日は国会の法令によって祝日になった。": {
@@ -7670,7 +7670,7 @@
    "jp": "冬はどうしても電気代が高くなる。",
    "en": "In winter the electricity bill inevitably goes up.",
    "fr": "En hiver, la facture d'électricité augmente forcément.",
-   "es": "En invierno, la factura de la luz sube inevitablemente.",
+   "es": "En invierno, la cuenta de la luz sube inevitablemente.",
    "why": "sense mismatch; 援助 hard"
   },
   "その訴訟の判事は公平ではなかった。": {
@@ -7733,14 +7733,14 @@
    "jp": "車にワックスをかけたら、ぴかぴかになった。",
    "en": "I waxed the car and now it's all shiny.",
    "fr": "J'ai ciré la voiture, et maintenant elle brille comme un sou neuf.",
-   "es": "Le pasé cera al coche y quedó reluciente.",
+   "es": "Le pasé cera al auto y quedó reluciente.",
    "why": "word absent (ピカピカ), awkward passive"
   },
   "その車は何週間も放ってある。": {
    "jp": "弟は宿題を放っておいて、ゲームばかりしている。",
    "en": "My little brother leaves his homework undone and does nothing but play games.",
    "fr": "Mon petit frère laisse ses devoirs de côté et ne fait que jouer aux jeux vidéo.",
-   "es": "Mi hermano pequeño deja los deberes de lado y no hace más que jugar a los videojuegos.",
+   "es": "Mi hermano menor deja la tarea de lado y no hace más que jugar a los videojuegos.",
    "why": "awkward; EN adds roadside"
   },
   "その迷信は彼らの間で今なお残っている。": {
@@ -7775,7 +7775,7 @@
    "jp": "その道は車で混雑している。",
    "en": "That road is congested with cars.",
    "fr": "Cette route est encombrée de voitures.",
-   "es": "Esa carretera está congestionada por los coches.",
+   "es": "Esa carretera está congestionada por los autos.",
    "why": "EN plural"
   },
   "その道路は人通りはなかった。": {
@@ -8020,7 +8020,7 @@
    "jp": "妹は来年から幼稚園に通う。",
    "en": "My little sister starts kindergarten next year.",
    "fr": "Ma petite sœur entre à l'école maternelle l'année prochaine.",
-   "es": "Mi hermana menor empezará a ir al jardín de infancia el año que viene.",
+   "es": "Mi hermana menor empezará a ir al kínder el año que viene.",
    "why": "fragment, generalisation"
   },
   "それにも関わらず彼は試験に合格することができた。": {
@@ -8244,14 +8244,14 @@
    "jp": "勝手に触ると怒られますよ。",
    "en": "If you touch it without asking, you'll get told off.",
    "fr": "Si vous y touchez sans permission, vous allez vous faire gronder.",
-   "es": "Si lo toca sin permiso, se van a enfadar con usted.",
+   "es": "Si lo toca sin permiso, se van a enojar con usted.",
    "why": "translationese (そうしないと)"
   },
   "それを今論議するのはまだ早い。": {
    "jp": "あきらめるのはまだ早い。",
    "en": "It's too early to give up.",
    "fr": "Il est encore trop tôt pour abandonner.",
-   "es": "Todavía es pronto para rendirse.",
+   "es": "Todavía es temprano para rendirse.",
    "why": "too hard for N5 (論議)"
   },
   "それを発明した教授は大学から相当の対価を受ける権利がある。": {
@@ -8580,7 +8580,7 @@
    "jp": "「で、旅行の行き先は決まった？」「まだだけど、北海道がいいな。」",
    "en": "\"So, have you decided where you're going on your trip?\" \"Not yet, but Hokkaido sounds good.\"",
    "fr": "« Alors, tu as choisi la destination de ton voyage ? » « Pas encore, mais Hokkaido me tente bien. »",
-   "es": "«Entonces, ¿ya decidiste el destino del viaje?» «Todavía no, pero Hokkaido estaría bien.»",
+   "es": "«Entonces, ¿ya decidiste el destino del viaje?» «Todavía no, pero Hokkaido estaría bien».",
    "why": "too long/hard for N5; gossip"
   },
   "できるあいだに人生を楽しみなさい。": {
@@ -8692,7 +8692,7 @@
    "jp": "「どうして部長にお詫びに行くんですか。」「理由はあとで話すよ。」",
    "en": "\"Why are we going to apologise to the manager?\" \"I'll tell you the reason later.\"",
    "fr": "« Pourquoi on va présenter des excuses au chef ? » « Je t'expliquerai pourquoi plus tard. »",
-   "es": "«¿Por qué vamos a ir a pedirle disculpas al jefe?» «Luego te explico el motivo.»",
+   "es": "«¿Por qué vamos a ir a pedirle disculpas al jefe?» «Luego te explico el motivo».",
    "why": "translationese"
   },
   "どうしてあなたは彼らを罰しているのですか。": {
@@ -8748,7 +8748,7 @@
    "jp": "あのテントで、どうやって寒い冬を越すのだろう。",
    "en": "How will they get through the cold winter in that tent?",
    "fr": "Comment vont-ils passer ce rude hiver dans cette tente ?",
-   "es": "¿Cómo van a pasar el frío invierno en esa tienda de campaña?",
+   "es": "¿Cómo van a pasar el frío invierno en esa carpa?",
    "why": "unnatural word order"
   },
   "どうやって新鮮な魚をえらぶのですか。": {
@@ -8986,7 +8986,7 @@
    "jp": "「何？聞こえないよ。」",
    "en": "\"What? I can't hear you.\"",
    "fr": "« Quoi ? Je ne t'entends pas. »",
-   "es": "«¿Qué? No te oigo.»",
+   "es": "«¿Qué? No te escucho».",
    "why": "insults"
   },
   "なんだかすごく辛いの。": {
@@ -9084,21 +9084,21 @@
    "jp": "「明日は八時に来てください。」「はい、わかりました。」",
    "en": "\"Please come at eight tomorrow.\" \"Yes, understood.\"",
    "fr": "« Venez à huit heures demain, s'il vous plaît. » « D'accord, entendu. »",
-   "es": "«Venga mañana a las ocho, por favor.» «Sí, entendido.»",
+   "es": "«Venga mañana a las ocho, por favor». «Sí, entendido».",
    "why": "translationese"
   },
   "はがきにこの切手を貼って郵便箱に投函しなさい。": {
    "jp": "このはがきに切手を貼って、ポストに入れてください。",
    "en": "Please put a stamp on this postcard and post it.",
    "fr": "Collez un timbre sur cette carte postale et mettez-la à la boîte, s'il vous plaît.",
-   "es": "Pegue un sello en esta postal y échela al buzón, por favor.",
+   "es": "Pegue una estampilla en esta postal y échela al buzón, por favor.",
    "why": "投函 too hard, 郵便箱 unusual"
   },
   "はちには砂糖が全然ない。": {
    "jp": "大きな鉢に小麦粉と砂糖を入れて混ぜます。",
    "en": "Put the flour and sugar in a large bowl and mix.",
    "fr": "Mettez la farine et le sucre dans un grand bol et mélangez.",
-   "es": "Ponga la harina y el azúcar en un cuenco grande y mézclelos.",
+   "es": "Ponga la harina y el azúcar en un tazón grande y mézclelos.",
    "why": "odd (sugar in a 鉢), kana はち ambiguous"
   },
   "はるか昔の初期の文化においては、競技で使われているボールは太陽を象徴していました。": {
@@ -9203,7 +9203,7 @@
    "jp": "最後に塩を少々加えてください。",
    "en": "Finally, add a pinch of salt.",
    "fr": "Pour finir, ajoutez une pincée de sel.",
-   "es": "Para terminar, añada una pizca de sal.",
+   "es": "Para terminar, agregue una pizca de sal.",
    "why": "formal 少々 in casual speech"
   },
   "まあまあなんて細い腰なの！お顔も小さくて、本当にお人形さんみたい！": {
@@ -9238,7 +9238,7 @@
    "jp": "目撃者の証言によると、車は赤だったそうだ。",
    "en": "According to an eyewitness's testimony, the car was red.",
    "fr": "D'après le témoignage d'une personne qui a vu la scène, la voiture était rouge.",
-   "es": "Según el testimonio de un testigo, el coche era rojo.",
+   "es": "Según el testimonio de un testigo, el auto era rojo.",
    "why": "Bible verse"
   },
   "また僕をかつごうとしているのかい、このいたずら小僧め。": {
@@ -9385,7 +9385,7 @@
    "jp": "もう１日滞在を延ばしたいのですが、泊まれますか。",
    "en": "I'd like to extend my stay by one more night. Is that possible?",
    "fr": "J'aimerais prolonger mon séjour d'une nuit. Est-ce possible ?",
-   "es": "Quisiera prolongar mi estancia un día más. ¿Puedo quedarme?",
+   "es": "Quisiera prolongar mi estadía un día más. ¿Puedo quedarme?",
    "why": "EN omits 'extend' (延ばす)"
   },
   "もう３ページ残っている。": {
@@ -9413,7 +9413,7 @@
    "jp": "コーヒーが濃すぎたら、お湯を少し足してください。",
    "en": "If the coffee is too strong, add a little hot water.",
    "fr": "Si le café est trop fort, ajoutez un peu d'eau chaude.",
-   "es": "Si el café está demasiado fuerte, añada un poco de agua caliente.",
+   "es": "Si el café está demasiado fuerte, agregue un poco de agua caliente.",
    "why": "unnatural wording; EN"
   },
   "もし嘘なら、彼女はうそつきだ。": {
@@ -9560,7 +9560,7 @@
    "jp": "「この書類を明日までにお願いします。」「承知しました。」",
    "en": "\"Please have these documents done by tomorrow.\" \"Certainly.\"",
    "fr": "« Merci de préparer ces documents pour demain. » « Entendu. »",
-   "es": "«Por favor, tenga estos documentos listos para mañana.» «Entendido.»",
+   "es": "«Por favor, tenga estos documentos listos para mañana». «Entendido».",
    "why": "unnatural よろしい, show typical use"
   },
   "よろしければ塩をこちらに回して下さいませんか。": {
@@ -9658,7 +9658,7 @@
    "jp": "わははは！そりゃ傑作だ！",
    "en": "Ha ha ha! That's priceless!",
    "fr": "Ha ha ha ! Elle est bien bonne, celle-là !",
-   "es": "¡Ja, ja, ja! ¡Esa sí que es buena!",
+   "es": "¡Ja, ja, ja! ¡Esa estuvo buenísima!",
    "why": "EN 'blunder' not in jp"
   },
   "われわれの先生は真の意味で紳士です。": {
@@ -9742,7 +9742,7 @@
    "jp": "アキラはテニス部で一番強い選手です。",
    "en": "Akira is the strongest player in the tennis club.",
    "fr": "Akira est le meilleur joueur du club de tennis.",
-   "es": "Akira es el jugador más fuerte del club de tenis.",
+   "es": "Akira es el mejor jugador del club de tenis.",
    "why": "unnatural 上手な選手"
   },
   "アコギなんか弾いて遊んでる暇があったらベースの練習しろ！": {
@@ -9917,7 +9917,7 @@
    "jp": "「あれは何ですか。」「新しい駅です。」",
    "en": "\"What's that?\" \"It's the new station.\"",
    "fr": "« Qu'est-ce que c'est, là-bas ? » « C'est la nouvelle gare. »",
-   "es": "«¿Qué es aquello?» «Es la nueva estación.»",
+   "es": "«¿Qué es aquello?» «Es la nueva estación».",
    "why": "adult content; word absent"
   },
   "アンディはけっしてデートにおくれたことはない。": {
@@ -10057,7 +10057,7 @@
    "jp": "スポーツセンターには、屋内のものも含めてテニスコートが6面ある。",
    "en": "The sports centre has six tennis courts, including the indoor ones.",
    "fr": "Le centre sportif compte six courts de tennis, y compris les couverts.",
-   "es": "El centro deportivo tiene seis pistas de tenis, incluidas las cubiertas.",
+   "es": "El centro deportivo tiene seis canchas de tenis, incluidas las cubiertas.",
    "why": "dated factual claim"
   },
   "ウイスキーは紅茶とよく合う。": {
@@ -10078,7 +10078,7 @@
    "jp": "父は市役所の観光課で働いている。",
    "en": "My father works in the tourism section at the city hall.",
    "fr": "Mon père travaille au service du tourisme de la mairie.",
-   "es": "Mi padre trabaja en la sección de turismo del ayuntamiento.",
+   "es": "Mi padre trabaja en la sección de turismo de la municipalidad.",
    "why": "hard 取り仕切る"
   },
   "ウェストハンプトン州住民によって、議会の構成員として選出されるのです。": {
@@ -10190,7 +10190,7 @@
    "jp": "切符をなくしたので、車掌さんに相談した。",
    "en": "I lost my ticket, so I asked the conductor for help.",
    "fr": "J'ai perdu mon billet, alors je me suis adressé au contrôleur.",
-   "es": "Perdí el boleto, así que se lo consulté al revisor.",
+   "es": "Perdí el boleto, así que le pedí ayuda al inspector.",
    "why": "outdated Orange Card"
   },
   "オンラインでお話しした方がよろしければそうします。": {
@@ -10218,7 +10218,7 @@
    "jp": "週末は海までドライブした。",
    "en": "At the weekend I went for a drive to the sea.",
    "fr": "Ce week-end, je suis allé faire un tour en voiture jusqu'à la mer.",
-   "es": "El fin de semana di un paseo en coche hasta el mar.",
+   "es": "El fin de semana di un paseo en auto hasta el mar.",
    "why": "verify: FR 'Le week-end' + passé composé reads as habitual; one past outing is 'Ce week-end'"
   },
   "カエルが鳴いたら帰ろう。": {
@@ -10351,7 +10351,7 @@
    "jp": "キャロルはレンタカーを運転しています。",
    "en": "Carol is driving a rental car.",
    "fr": "Carol conduit une voiture de location.",
-   "es": "Carol está conduciendo un coche de alquiler.",
+   "es": "Carol está conduciendo un auto de alquiler.",
    "why": "EN unnatural rent-a-car"
   },
   "キャロルは拒絶した。言い換えると、彼女の答えは「ノー」だった。": {
@@ -10414,7 +10414,7 @@
    "jp": "クモが巣を張るところを見たことがありますか。",
    "en": "Have you ever seen a spider spinning its web?",
    "fr": "Avez-vous déjà vu une araignée tisser sa toile ?",
-   "es": "¿Ha visto alguna vez a una araña tejer su tela?",
+   "es": "¿Ha visto alguna vez a una araña tejer su telaraña?",
    "why": "repetitive クモの巣"
   },
   "クモはいつも自分たちの巣を３次元に織る。": {
@@ -10673,7 +10673,7 @@
    "jp": "コンクリートは中に鉄筋を入れることで補強される。",
    "en": "Concrete is reinforced by putting steel bars inside it.",
    "fr": "On renforce le béton en y insérant des barres d'acier.",
-   "es": "El hormigón se refuerza colocando barras de acero en su interior.",
+   "es": "El concreto se refuerza colocando barras de acero en su interior.",
    "why": "orthography 事, wording"
   },
   "コンサートはどうだった？": {
@@ -10827,7 +10827,7 @@
    "jp": "電気系統の故障で、電車が一時間止まった。",
    "en": "Trains were stopped for an hour by a fault in the electrical system.",
    "fr": "Une panne du système électrique a immobilisé les trains pendant une heure.",
-   "es": "Debido a una avería en el sistema eléctrico, el tren estuvo detenido una hora.",
+   "es": "Debido a una falla en el sistema eléctrico, el tren estuvo detenido una hora.",
    "why": "long translationese"
   },
   "シャッターを押してくれますか。": {
@@ -11247,7 +11247,7 @@
    "jp": "ソフィーは未知の差し出し人からまた手紙が来るのを心待ちにしていた。",
    "en": "Sophie was looking forward to another letter from the unknown sender.",
    "fr": "Sophie attendait avec impatience une nouvelle lettre de l'expéditeur inconnu.",
-   "es": "Sophie esperaba con ilusión otra carta del remitente desconocido.",
+   "es": "Sophie esperaba con ansias otra carta del remitente desconocido.",
    "why": "typo ソフイー"
   },
   "ソースを別にください。": {
@@ -11436,14 +11436,14 @@
    "jp": "デパートの屋上にアドバルーンが上がっている。",
    "en": "An advertising balloon is flying from the roof of the department store.",
    "fr": "Un ballon publicitaire flotte au-dessus du toit du grand magasin.",
-   "es": "Sobre la azotea de los grandes almacenes flota un globo publicitario.",
+   "es": "Sobre la azotea de la tienda departamental flota un globo publicitario.",
    "why": "EN drops rooftop"
   },
   "トップエンジニアが、その車に一連の厳重な検査を加えた。": {
    "jp": "新しい車は出荷前に厳重な検査を受ける。",
    "en": "New cars undergo rigorous inspection before they are shipped.",
    "fr": "Les voitures neuves subissent un contrôle rigoureux avant d'être expédiées.",
-   "es": "Los coches nuevos pasan una inspección rigurosa antes de ser enviados.",
+   "es": "Los autos nuevos pasan una inspección rigurosa antes de ser enviados.",
    "why": "translationese 検査を加えた"
   },
   "トニーはシャツを脱いで、それでピアノのよごれを落としました。": {
@@ -11737,7 +11737,7 @@
    "jp": "救急車とパトカーがサイレンを鳴らして走っていった。",
    "en": "An ambulance and a police car went by with their sirens on.",
    "fr": "Une ambulance et une voiture de police sont passées toutes sirènes hurlantes.",
-   "es": "Pasaron una ambulancia y un coche patrulla haciendo sonar las sirenas.",
+   "es": "Pasaron una ambulancia y una patrulla haciendo sonar las sirenas.",
    "why": "fleeing police"
   },
   "パリはセーヌ川のほとりにあり、美しい都市です。": {
@@ -11800,7 +11800,7 @@
    "jp": "旅行のビデオを家族に見せた。",
    "en": "I showed my family the video of our trip.",
    "fr": "J'ai montré la vidéo du voyage à ma famille.",
-   "es": "Les mostré a mi familia el vídeo del viaje.",
+   "es": "Les mostré a mi familia el video del viaje.",
    "why": "obsolete VCR sense, ambiguous translations"
   },
   "ピアノ・コンクールで私が第１位になるなんて夢想だにしなかった。": {
@@ -12024,7 +12024,7 @@
    "jp": "ボート競技に参加するために、新しいチームが結成された。",
    "en": "A new team was formed to take part in the boat race.",
    "fr": "Une nouvelle équipe a été formée pour participer à la course d'aviron.",
-   "es": "Se formó un nuevo equipo para participar en la competición de remo.",
+   "es": "Se formó un nuevo equipo para participar en la competencia de remo.",
    "why": "orthography 為に"
   },
   "ボーリングに行くなら私をメンバーからはずしておいて。": {
@@ -12108,7 +12108,7 @@
    "jp": "ストーブで部屋を暖めておいた。",
    "en": "I warmed up the room with the heater beforehand.",
    "fr": "J'ai chauffé la pièce à l'avance avec le poêle.",
-   "es": "Calenté la habitación con la estufa de antemano.",
+   "es": "Calenté la habitación con el calefactor de antemano.",
    "why": "verify: translations dropped the ておいた (done in advance) of the Japanese"
   },
   "ミーティングに穴をあけてしまったことに対し、再度お詫びします。": {
@@ -12234,7 +12234,7 @@
    "jp": "「兄弟はいますか。」「はい、姉が一人います。」",
    "en": "\"Do you have any brothers or sisters?\" \"Yes, I have one older sister.\"",
    "fr": "« Vous avez des frères et sœurs ? » « Oui, j'ai une grande sœur. »",
-   "es": "«¿Tiene hermanos?» «Sí, tengo una hermana mayor.»",
+   "es": "«¿Tiene hermanos?» «Sí, tengo una hermana mayor».",
    "why": "兄弟 only in a proper name (ライト兄弟)"
   },
   "ラジオに雑音が入る。": {
@@ -12255,7 +12255,7 @@
    "jp": "ラッシュアワーの交通渋滞にあった。",
    "en": "I got stuck in rush-hour traffic.",
    "fr": "J'ai été pris dans les embouteillages de l'heure de pointe.",
-   "es": "Me encontré con el embotellamiento de la hora punta.",
+   "es": "Me encontré con el embotellamiento de la hora pico.",
    "why": "EN omits traffic jam"
   },
   "ラップは屑だ。": {
@@ -12360,7 +12360,7 @@
    "jp": "この会社は若い社員の育成に力を入れている。",
    "en": "This company puts a lot of effort into training its young employees.",
    "fr": "Cette entreprise s'investit beaucoup dans la formation de ses jeunes employés.",
-   "es": "Esta empresa se esfuerza mucho en la formación de sus empleados jóvenes.",
+   "es": "Esta empresa se esfuerza mucho en la capacitación de sus empleados jóvenes.",
    "why": "wrong word for wine ageing (熟成)"
   },
   "ワインは本来害にならない。": {
@@ -12388,7 +12388,7 @@
    "jp": "「どうして行かないの？」「一つには、お金がないから。」",
    "en": "\"Why aren't you going?\" \"For one thing, I don't have the money.\"",
    "fr": "« Pourquoi tu n'y vas pas ? » « D'abord, parce que je n'ai pas d'argent. »",
-   "es": "«¿Por qué no vas?» «Una razón es que no tengo dinero.»",
+   "es": "«¿Por qué no vas?» «Una razón es que no tengo dinero».",
    "why": "translationese"
   },
   "一人で原始林へ乗り込もうとは君はなんて勇ましいんだ。": {
@@ -12493,7 +12493,7 @@
    "jp": "「それ、おいしそうだね。」「うん、母が作ったんだ。」",
    "en": "\"That looks tasty.\" \"Yeah, my mum made it.\"",
    "fr": "« Ça a l'air bon ! » « Oui, c'est ma mère qui l'a fait. »",
-   "es": "«Eso parece muy rico.» «Sí, lo hizo mi madre.»",
+   "es": "«Eso parece muy rico». «Sí, lo hizo mi madre».",
    "why": "translationese; 万一 too hard for N5"
   },
   "万一彼がこちらへきたらすぐ知らせます。": {
@@ -12535,14 +12535,14 @@
    "jp": "「どのくらいかかりますか。」「三日から五日ぐらいです。」",
    "en": "\"How long will it take?\" \"About three to five days.\"",
    "fr": "« Combien de temps ça prendra ? » « Entre trois et cinq jours environ. »",
-   "es": "«¿Cuánto tiempo tardará?» «Entre tres y cinco días, más o menos.»",
+   "es": "«¿Cuánto tiempo tardará?» «Entre tres y cinco días, más o menos».",
    "why": "fragment"
   },
   "三郎はテーブルの上に出されたおやつをガッと取った。": {
    "jp": "お腹がすいたので、おやつにおにぎりを食べた。",
    "en": "I was hungry, so I had a rice ball as a snack.",
    "fr": "J'avais faim, alors j'ai mangé un onigiri en guise de collation.",
-   "es": "Tenía hambre, así que comí una bola de arroz como tentempié.",
+   "es": "Tenía hambre, así que comí una bola de arroz de merienda.",
    "why": "odd ガッと"
   },
   "上へ昇れば昇るほど、それだけ墜落の程度は大きくなる。": {
@@ -12612,7 +12612,7 @@
    "jp": "入場の際は、チケットを提示してください。",
    "en": "Please show your ticket when you enter.",
    "fr": "Veuillez présenter votre billet à l'entrée.",
-   "es": "Por favor, muestre su entrada al acceder.",
+   "es": "Por favor, muestre su boleto al entrar.",
    "why": "awkward 下記に対して, sense"
   },
   "不幸の裏には幸いあり。": {
@@ -12934,7 +12934,7 @@
    "jp": "車のマフラーから大きな音がする。",
    "en": "There's a loud noise coming from the car's muffler.",
    "fr": "Le silencieux de la voiture fait beaucoup de bruit.",
-   "es": "Del silenciador del coche sale un ruido muy fuerte.",
+   "es": "Del silenciador del auto sale un ruido muy fuerte.",
    "why": "brand name, bizarre"
   },
   "井戸には少しの水も無かった。": {
@@ -12948,14 +12948,14 @@
    "jp": "夜になっても、車の流れはとぎれなかった。",
    "en": "Even at night, the stream of cars never let up.",
    "fr": "Même la nuit, le flot de voitures ne s'interrompait pas.",
-   "es": "Incluso al llegar la noche, la circulación de coches no se interrumpía.",
+   "es": "Incluso al llegar la noche, la circulación de autos no se interrumpía.",
    "why": "noun とぎれ instead of verb"
   },
   "交通規制には従わないといけない。": {
    "jp": "祭りの日は、駅の周りで交通規制が行われる。",
    "en": "On festival days, traffic restrictions are in place around the station.",
    "fr": "Les jours de fête, la circulation est réglementée autour de la gare.",
-   "es": "Los días de fiesta, se aplica una regulación del tráfico alrededor de la estación.",
+   "es": "Los días de fiesta, se restringe el tránsito alrededor de la estación.",
    "why": "wrong word (交通規制 is not traffic rules)"
   },
   "人々はフットボールをするように奨励さえされたのです。": {
@@ -12976,7 +12976,7 @@
    "jp": "彼は家族を養うために毎日奮闘している。",
    "en": "He works hard every day to support his family.",
    "fr": "Il se démène chaque jour pour faire vivre sa famille.",
-   "es": "Él lucha denodadamente cada día para mantener a su familia.",
+   "es": "Él se esfuerza al máximo cada día para mantener a su familia.",
    "why": "ungrammatical 貧困に向かって"
   },
   "人々は貧困に苦しんだ。": {
@@ -13179,7 +13179,7 @@
    "jp": "世論調査では、Ａ案が優勢だ。",
    "en": "In the poll, Plan A is ahead.",
    "fr": "Dans le sondage, le projet A est en tête.",
-   "es": "En la encuesta de opinión, el plan A es el que predomina.",
+   "es": "En la encuesta de opinión, el plan A lleva la ventaja.",
    "why": "translationese, sweeping claim"
   },
   "人類は高等哺乳動物である。": {
@@ -13242,7 +13242,7 @@
    "jp": "携帯電話の会社を乗り換えた。",
    "en": "I switched mobile phone companies.",
    "fr": "J'ai changé d'opérateur mobile.",
-   "es": "Cambié de compañía de telefonía móvil.",
+   "es": "Cambié de compañía de telefonía celular.",
    "why": "partisan politics"
   },
   "今や時代との競争になった。": {
@@ -13298,7 +13298,7 @@
    "jp": "この町では毎月、定期演奏会が開かれている。",
    "en": "A regular concert is held in this town every month.",
    "fr": "Cette ville accueille chaque mois un concert régulier.",
-   "es": "En esta ciudad se celebra cada mes un concierto periódico.",
+   "es": "En esta ciudad se realiza cada mes un concierto periódico.",
    "why": "contradiction 定期/頻繁"
   },
   "今年タイ航空は５０周年記念を祝います。": {
@@ -13354,7 +13354,7 @@
    "jp": "今日は祖母のお使いを兼ねて、街へ買い物に行った。",
    "en": "Today I went shopping in town, and ran an errand for my grandmother at the same time.",
    "fr": "Aujourd'hui, je suis allé faire des courses en ville, et j'en ai profité pour faire une commission pour ma grand-mère.",
-   "es": "Hoy fui de compras al centro y aproveché para hacerle un recado a mi abuela.",
+   "es": "Hoy fui de compras al centro y aproveché para hacerle un mandado a mi abuela.",
    "why": "rude ばーさん, fragment"
   },
   "今日はすがすがしいお天気ですね。": {
@@ -13837,7 +13837,7 @@
    "jp": "お使いの途中で道草を食わないでね。",
    "en": "Don't dawdle on the way while you're running your errand.",
    "fr": "Ne traîne pas en route pendant ta course.",
-   "es": "No te entretengas por el camino cuando vayas a hacer el recado.",
+   "es": "No te entretengas por el camino cuando vayas a hacer el mandado.",
    "why": "missing particle, お使い"
   },
   "例えば、ペパーバーグは緑色のもくせいの留めくぎと赤色の紙の三角形のような物体を見せる。": {
@@ -13886,7 +13886,7 @@
    "jp": "私のめがね、どこにやったかな。",
    "en": "Where did I put my glasses?",
    "fr": "Où est-ce que j'ai mis mes lunettes ?",
-   "es": "¿Dónde habré dejado mis gafas?",
+   "es": "¿Dónde habré dejado mis lentes?",
    "why": "aggressive tone; !!"
   },
   "俺はベストを尽くそうと努力している。": {
@@ -13963,7 +13963,7 @@
    "jp": "僕の彼女はカナダへ行ってしまった。",
    "en": "My girlfriend has gone to Canada.",
    "fr": "Ma copine est partie au Canada.",
-   "es": "Mi novia se ha ido a Canadá.",
+   "es": "Mi novia se fue a Canadá.",
    "why": "orthography いって"
   },
   "僕の趣味は漫画を読む事です。": {
@@ -14222,7 +14222,7 @@
    "jp": "説明会の席にはまだ若干の余裕がある。",
    "en": "There are still a few seats left at the information session.",
    "fr": "Il reste encore quelques places pour la séance d'information.",
-   "es": "Todavía quedan algunas plazas libres para la sesión informativa.",
+   "es": "Todavía quedan algunos lugares libres para la sesión informativa.",
    "why": "odd 若干名 out of a job ad"
   },
   "兵士たちは故国のために死ぬ覚悟が出来ていた。": {
@@ -14376,14 +14376,14 @@
    "jp": "駅の前で、たくさんの人がバスを待って並んでいます。",
    "en": "Lots of people are lined up in front of the station, waiting for the bus.",
    "fr": "Devant la gare, beaucoup de gens font la queue pour attendre le bus.",
-   "es": "Delante de la estación hay mucha gente haciendo cola para esperar el autobús.",
+   "es": "Delante de la estación hay mucha gente haciendo fila para esperar el autobús.",
    "why": "too long/hard for N5; EN/FR subject mismatch"
   },
   "列車のコンパートメントはすぐ窮屈になる。": {
    "jp": "五人で乗ると、この車は窮屈だ。",
    "en": "This car is cramped with five people in it.",
    "fr": "À cinq, on est à l'étroit dans cette voiture.",
-   "es": "Con cinco personas a bordo, este coche va apretado.",
+   "es": "Con cinco personas a bordo, este auto va apretado.",
    "why": "translationese (コンパートメント)"
   },
   "列車は満員だった。そこで彼女は２等車で旅行せねばならなかったし、ずっと立っていなければならなかった。": {
@@ -14572,7 +14572,7 @@
    "jp": "母は熱を出した弟を一晩中看病した。",
    "en": "My mother nursed my little brother, who had a fever, all night.",
    "fr": "Ma mère a veillé toute la nuit sur mon petit frère, qui avait de la fièvre.",
-   "es": "Mi madre cuidó toda la noche de mi hermano pequeño, que tenía fiebre.",
+   "es": "Mi madre cuidó toda la noche de mi hermano menor, que tenía fiebre.",
    "why": "unnatural (doctor doing 看病)"
   },
   "医者は紺のスーツの上に白衣を着ていた。": {
@@ -14593,7 +14593,7 @@
    "jp": "近眼なので、眼鏡がないと黒板の字が見えない。",
    "en": "I'm nearsighted, so I can't see the writing on the blackboard without glasses.",
    "fr": "Je suis myope, donc sans lunettes je ne vois pas ce qui est écrit au tableau.",
-   "es": "Soy miope, así que sin gafas no veo lo que está escrito en la pizarra.",
+   "es": "Soy miope, así que sin lentes no veo lo que está escrito en la pizarra.",
    "why": "false fact (1 in 10)"
   },
   "十分な情報を受け取ることができなかったという理由も一部にはあって、ハーパーの描写は不完全なものにとどまっている。": {
@@ -14950,7 +14950,7 @@
    "jp": "刺身に醤油をつけて食べる。",
    "en": "You eat sashimi dipped in soy sauce.",
    "fr": "On mange les sashimis en les trempant dans la sauce soja.",
-   "es": "El sashimi se come mojándolo en salsa de soja.",
+   "es": "El sashimi se come mojándolo en salsa de soya.",
    "why": "stiff translationese"
   },
   "名詞を修飾するものは、形容詞または形容詞相当語句です。": {
@@ -14985,7 +14985,7 @@
    "jp": "「明日も来ますか。」「ええ、また来ます。」",
    "en": "\"Are you coming tomorrow too?\" \"Yes, I'll come again.\"",
    "fr": "« Vous venez aussi demain ? » « Oui, je reviendrai. »",
-   "es": "«¿Viene también mañana?» «Sí, vendré otra vez.»",
+   "es": "«¿Viene también mañana?» «Sí, vendré otra vez».",
    "why": "dialect ええ (good), not the card's 'yes'"
   },
   "君が座っている腰掛けのペンキはまだ塗り立てだよ。": {
@@ -15440,7 +15440,7 @@
    "jp": "「こちらにお名前を書いてください。」「こっちですか。」「はい、そこです。」",
    "en": "\"Please write your name here.\" \"Here?\" \"Yes, right there.\"",
    "fr": "« Écrivez votre nom ici, s'il vous plaît. » « Ici ? » « Oui, juste là. »",
-   "es": "«Escriba su nombre aquí, por favor.» «¿Aquí?» «Sí, ahí mismo.»",
+   "es": "«Escriba su nombre aquí, por favor». «¿Aquí?» «Sí, ahí mismo».",
    "why": "unnatural こちらへ取って; こっち absent"
   },
   "塩漬けキャベツを細かく切る。": {
@@ -15496,7 +15496,7 @@
    "jp": "外相は来週ヨーロッパを訪問する予定だ。",
    "en": "The Foreign Minister is scheduled to visit Europe next week.",
    "fr": "Le ministre des Affaires étrangères doit se rendre en Europe la semaine prochaine.",
-   "es": "El ministro de Asuntos Exteriores tiene previsto visitar Europa la semana que viene.",
+   "es": "El ministro de Relaciones Exteriores tiene previsto visitar Europa la semana que viene.",
    "why": "war"
   },
   "外米はぼそぼそしていて、日本人の口には合わない。": {
@@ -15524,7 +15524,7 @@
    "jp": "住民たちは町の公園を守るために立ち上がった。",
    "en": "The residents rose up to protect the town park.",
    "fr": "Les habitants se sont mobilisés pour protéger le parc de la ville.",
-   "es": "Los vecinos se levantaron para proteger el parque de la ciudad.",
+   "es": "Los vecinos se movilizaron para proteger el parque de la ciudad.",
    "why": "political (tax protest)"
   },
   "多額の金がその橋に費やされた。": {
@@ -15622,7 +15622,7 @@
    "jp": "上着をハンガーに掛けてください。",
    "en": "Please hang your jacket on a hanger.",
    "fr": "Accrochez votre veste à un cintre, s'il vous plaît.",
-   "es": "Cuelgue la chaqueta en una percha, por favor.",
+   "es": "Cuelgue la chaqueta en un gancho, por favor.",
    "why": "rare sense (hangar is 格納庫)"
   },
   "大学は彼に名誉学位を与えた。": {
@@ -15678,7 +15678,7 @@
    "jp": "家庭裁判所は来月、この件について審判を下す予定だ。",
    "en": "The family court is due to give its ruling on this matter next month.",
    "fr": "Le tribunal aux affaires familiales doit rendre sa décision sur cette affaire le mois prochain.",
-   "es": "El tribunal de familia tiene previsto dictar su veredicto sobre este caso el mes que viene.",
+   "es": "El tribunal de familia tiene previsto dictar su fallo sobre este caso el mes que viene.",
    "why": "verify: an ordinary court gives a 判決; 審判 is the family court's ruling"
   },
   "大部分ではないにしても多くの人々が文学的趣味を優美なたしなみと見なしている。": {
@@ -15916,7 +15916,7 @@
    "jp": "父は休みの日になると車をいじっている。",
    "en": "On his days off, my father tinkers with his car.",
    "fr": "Les jours de congé, mon père bricole sa voiture.",
-   "es": "Los días libres, mi padre se dedica a hacerle ajustes a su coche.",
+   "es": "Los días libres, mi padre se dedica a hacerle ajustes a su auto.",
    "why": "sense (hobby) not shown"
   },
   "子供が健康だということは母親の育て方が立派であるということを物語る。": {
@@ -16378,7 +16378,7 @@
    "jp": "スーパーで牛肉の塊を買ってきた。",
    "en": "I bought a chunk of beef at the supermarket.",
    "fr": "J'ai acheté un morceau de bœuf au supermarché.",
-   "es": "Compré en el supermercado un trozo de carne de vaca.",
+   "es": "Compré en el supermercado un trozo de carne de res.",
    "why": "bizarre"
   },
   "市の産業はみんな好景気に沸いている。": {
@@ -16476,7 +16476,7 @@
    "jp": "床は緑色だったが、一方、壁は黄色だった。",
    "en": "The floor was green, while the walls were yellow.",
    "fr": "Le sol était vert, tandis que les murs étaient jaunes.",
-   "es": "El suelo era verde, mientras que las paredes eran amarillas.",
+   "es": "El piso era verde, mientras que las paredes eran amarillas.",
    "why": "simplified for N5, missing comma"
   },
   "庭には様々な花が咲き乱れていた。": {
@@ -16497,7 +16497,7 @@
    "jp": "車の列がずっと続いていた。",
    "en": "The line of cars went on and on.",
    "fr": "La file de voitures n'en finissait pas.",
-   "es": "La fila de coches se extendía sin fin.",
+   "es": "La fila de autos se extendía sin fin.",
    "why": "延々 too hard for N4"
   },
   "建物は小麦の袋で一杯です。": {
@@ -16644,7 +16644,7 @@
    "jp": "彼が怒るのはもっともだ。",
    "en": "It's only natural that he's angry.",
    "fr": "Il est normal qu'il soit en colère.",
-   "es": "Es natural que él se enfade.",
+   "es": "Es natural que él se enoje.",
    "why": "too hard for N4; translations inaccurate"
   },
   "彼がソロを歌うとき、音程が外れるんじゃないかって、手に汗握っちゃうよね。": {
@@ -16770,7 +16770,7 @@
    "jp": "この歌の節はどこかで聞いたことがある。",
    "en": "I feel I've heard the tune of this song somewhere before.",
    "fr": "J'ai l'impression d'avoir déjà entendu l'air de cette chanson quelque part.",
-   "es": "La melodía de esta canción ya la he oído en algún sitio.",
+   "es": "La melodía de esta canción ya la he oído en algún lugar.",
    "why": "contempt for people of a real town"
   },
   "彼には友情というもののよさが理解できない。": {
@@ -16840,7 +16840,7 @@
    "jp": "彼のまじめさがかえってマイナスになった。",
    "en": "His earnestness actually worked against him.",
    "fr": "Son sérieux s'est au contraire retourné contre lui.",
-   "es": "Su seriedad acabó siendo, al contrario, una desventaja para él.",
+   "es": "Su seriedad, en vez de ayudarlo, terminó jugándole en contra.",
    "why": "EN awkward"
   },
   "彼のスキーヤーとしての優秀性は十分に買っています。": {
@@ -17113,14 +17113,14 @@
    "jp": "彼の車は会社へ向かう途上で故障した。",
    "en": "His car broke down on the way to work.",
    "fr": "Sa voiture est tombée en panne sur le chemin du bureau.",
-   "es": "Su coche se averió cuando iba de camino a la empresa.",
+   "es": "Su auto se descompuso cuando iba de camino a la empresa.",
    "why": "stray comma, awkward 会社への途上"
   },
   "彼の辞職で官僚の席に空きができた。": {
    "jp": "父は若い頃、財務省の官僚だった。",
    "en": "When he was young, my father was an official at the Ministry of Finance.",
    "fr": "Dans sa jeunesse, mon père était fonctionnaire au ministère des Finances.",
-   "es": "De joven, mi padre fue burócrata del Ministerio de Finanzas.",
+   "es": "De joven, mi padre fue funcionario del Ministerio de Finanzas.",
    "why": "unnatural 官僚の席, EN 'cabinet' wrong"
   },
   "彼の返報は鼻への強烈なパンチだった。": {
@@ -17288,7 +17288,7 @@
    "jp": "子どもを近くの店にお使いにやった。",
    "en": "I sent my child to the nearby shop on an errand.",
    "fr": "J'ai envoyé mon enfant faire une course au magasin d'à côté.",
-   "es": "Mandé a mi hijo a hacer un recado a la tienda de cerca.",
+   "es": "Envié a mi hijo a hacer un mandado a la tienda de cerca.",
    "why": "translationese (彼は/その少年)"
   },
   "彼はその手紙に返事を出し損なった。": {
@@ -17477,7 +17477,7 @@
    "jp": "彼は辞めるほか仕方がない。",
    "en": "He has no choice but to resign.",
    "fr": "Il n'a pas d'autre choix que de démissionner.",
-   "es": "A él no le queda más remedio que dimitir.",
+   "es": "A él no le queda más remedio que renunciar.",
    "why": "kana やめる ambiguous with 止める"
   },
   "彼はよく会合を休む。": {
@@ -17995,7 +17995,7 @@
    "jp": "子どもの頃は工作が大好きで、よく段ボールで車を作った。",
    "en": "As a child, I loved crafts and often made cars out of cardboard.",
    "fr": "Enfant, j'adorais les travaux manuels et je fabriquais souvent des voitures en carton.",
-   "es": "En mi infancia me encantaban las manualidades y a menudo hacía coches de cartón.",
+   "es": "En mi infancia me encantaban las manualidades y a menudo hacía autos de cartón.",
    "why": "unnatural"
   },
   "彼は幼児虐待で罰せられた。": {
@@ -18338,7 +18338,7 @@
    "jp": "話し合いがまとまらず、ついに訴訟に及んだ。",
    "en": "The talks failed, and it finally came to a lawsuit.",
    "fr": "Faute d'accord, on en est finalement venu au procès.",
-   "es": "Las conversaciones no llegaron a ningún acuerdo y, al final, se acabó llegando a juicio.",
+   "es": "Las conversaciones no llegaron a ningún acuerdo y al final se llegó a juicio.",
    "why": "verify: 及ぶ (resort to) collocates with 訴訟, not 裁判"
   },
   "彼は玄人にちかい。": {
@@ -18450,7 +18450,7 @@
    "jp": "車が道をふさいで、救急車の通行を妨害した。",
    "en": "A car was blocking the road and obstructed the ambulance.",
    "fr": "Une voiture bloquait la route et a gêné le passage de l'ambulance.",
-   "es": "Un coche bloqueaba la calle y obstruyó el paso de la ambulancia.",
+   "es": "Un auto bloqueaba la calle y obstruyó el paso de la ambulancia.",
    "why": "wrong word for interrupting a conversation"
   },
   "彼は私と弟を取り違えた。": {
@@ -18632,7 +18632,7 @@
    "jp": "ご飯をお茶碗に軽くよそってください。",
    "en": "Please put a small serving of rice in the bowl.",
    "fr": "Servez un peu de riz dans le bol, s'il vous plaît.",
-   "es": "Sirva un poco de arroz en el cuenco, por favor.",
+   "es": "Sirva un poco de arroz en el tazón, por favor.",
    "why": "violent outburst"
   },
   "彼は衛生監視員である。": {
@@ -18688,7 +18688,7 @@
    "jp": "彼は車を電柱にぶつけた。",
    "en": "He ran his car into a utility pole.",
    "fr": "Il a envoyé sa voiture dans un poteau électrique.",
-   "es": "Él chocó el coche contra un poste eléctrico.",
+   "es": "Él chocó el auto contra un poste eléctrico.",
    "why": "EN mistranslation (lamppost)"
   },
   "彼は過ちをあからさまに白状した。": {
@@ -18786,14 +18786,14 @@
    "jp": "焼いた餅に醤油をつけて食べた。",
    "en": "I ate grilled mochi dipped in soy sauce.",
    "fr": "J'ai mangé des mochis grillés trempés dans de la sauce soja.",
-   "es": "Comí mochi asado mojado en salsa de soja.",
+   "es": "Comí mochi asado mojado en salsa de soya.",
    "why": "odd partial negation"
   },
   "彼は首を前後に振りました。": {
    "jp": "出かける前に、車の前後に人がいないか確認した。",
    "en": "Before setting off, I checked there was no one in front of or behind the car.",
    "fr": "Avant de démarrer, j'ai vérifié qu'il n'y avait personne devant ou derrière la voiture.",
-   "es": "Antes de salir, comprobé que no hubiera nadie delante ni detrás del coche.",
+   "es": "Antes de salir, comprobé que no hubiera nadie delante ni detrás del auto.",
    "why": "unnatural 首を前後に振る"
   },
   "彼は１人で飛ぶことに慣れていた。そして彼は想像の中で何度もこの経路を飛んでいたのだ。": {
@@ -19430,7 +19430,7 @@
    "jp": "これはまさしく私が探していた本だ。",
    "en": "This is exactly the book I was looking for.",
    "fr": "C'est exactement le livre que je cherchais.",
-   "es": "Este es, sin duda, el libro que estaba buscando.",
+   "es": "Este es justo el libro que estaba buscando.",
    "why": "odd, unclear"
   },
   "彼女はまばたきして涙を止めようとした。": {
@@ -19486,7 +19486,7 @@
    "jp": "バターを少し入れると、おいしくなりますよ。",
    "en": "If you add a little butter, it tastes better.",
    "fr": "Si vous ajoutez un peu de beurre, c'est meilleur.",
-   "es": "Si le añade un poco de mantequilla, queda más rico.",
+   "es": "Si le agrega un poco de mantequilla, queda más rico.",
    "why": "pounds unnatural in Japan"
   },
   "彼女はミルクをボールに注いだ。": {
@@ -19745,7 +19745,7 @@
    "jp": "そんなことで怒るなんて、心が狭いね。",
    "en": "Getting angry over a thing like that? That's narrow-minded.",
    "fr": "Te fâcher pour si peu ? Tu as l'esprit bien étroit.",
-   "es": "¿Enfadarte por algo así? Tienes una mentalidad muy estrecha.",
+   "es": "¿Enojarte por algo así? Tienes una mentalidad muy estrecha.",
    "why": "unnatural, EN loose"
   },
   "彼女は痛風を病んでいる。": {
@@ -19948,7 +19948,7 @@
    "jp": "彼らは貿易問題について臨時の会合を開いた。",
    "en": "They held a special session on trade problems.",
    "fr": "Ils ont tenu une réunion extraordinaire sur les questions commerciales.",
-   "es": "Ellos celebraron una reunión extraordinaria sobre los problemas comerciales.",
+   "es": "Ellos sostuvieron una reunión extraordinaria sobre los problemas comerciales.",
    "why": "orthography 彼等"
   },
   "後ろを刈り上げてください。": {
@@ -20214,7 +20214,7 @@
    "jp": "部長は「君、ここに座りたまえ」と言った。",
    "en": "\"Sit here,\" the manager told him.",
    "fr": "« Assieds-toi ici », lui a dit le directeur.",
-   "es": "«Tú, siéntate aquí», dijo el jefe de departamento.",
+   "es": "«Siéntate aquí», le dijo el jefe de departamento.",
    "why": "religious content"
   },
   "我々のところの気候は温帯性です。": {
@@ -20613,7 +20613,7 @@
    "jp": "この道をまっすぐ行くと、駅があります。",
    "en": "Go straight along this road and you'll come to the station.",
    "fr": "Continuez tout droit sur cette route et vous arriverez à la gare.",
-   "es": "Si sigue recto por este camino, encontrará la estación.",
+   "es": "Si sigue derecho por este camino, encontrará la estación.",
    "why": "literary, too hard for N5"
   },
   "推定によれば、今年の鉄鋼生産は１億トンに達するだろう。": {
@@ -20844,21 +20844,21 @@
    "jp": "新しい車は、売る前にたくさんのテストをします。",
    "en": "New cars go through many tests before they are sold.",
    "fr": "Les nouvelles voitures passent de nombreux tests avant d'être vendues.",
-   "es": "A los coches nuevos se les hacen muchas pruebas antes de venderlos.",
+   "es": "A los autos nuevos se les hacen muchas pruebas antes de venderlos.",
    "why": "simpler for N5"
   },
   "新しいオイル・タンカーが進水した。": {
    "jp": "そろそろ車のオイルを交換しないといけない。",
    "en": "I'll need to change the car's oil soon.",
    "fr": "Il va bientôt falloir faire la vidange de la voiture.",
-   "es": "Pronto tendré que cambiarle el aceite al coche.",
+   "es": "Pronto tendré que cambiarle el aceite al auto.",
    "why": "too hard (進水)"
   },
   "新しいバイクは買えないのでこの古いやつでなんとか間に合わせなくてはならないだろう。": {
    "jp": "新しいバイクは買えないから、この古いやつで何とか間に合わせるしかない。",
    "en": "I can't afford a new motorbike, so I'll just have to make do with this old one.",
    "fr": "Je n'ai pas les moyens d'acheter une moto neuve, alors il va falloir que je me débrouille avec cette vieille-là.",
-   "es": "No puedo comprarme una moto nueva, así que tendré que arreglármelas con esta vieja.",
+   "es": "No me alcanza para una moto nueva, así que tendré que arreglármelas con esta vieja.",
    "why": "translationese なくてはならないだろう, overlong"
   },
   "新しい出生政策は人口増加ゼロをめざしています。": {
@@ -20872,7 +20872,7 @@
    "jp": "新しい切手が来週発行される。",
    "en": "New stamps will be issued next week.",
    "fr": "De nouveaux timbres seront émis la semaine prochaine.",
-   "es": "Los nuevos sellos se emitirán la semana que viene.",
+   "es": "Las nuevas estampillas se emitirán la semana que viene.",
    "why": "EN says next month"
   },
   "新しい法が成立した。": {
@@ -20984,7 +20984,7 @@
    "jp": "先生は情けをかけて、遅刻した私を許してくれた。",
    "en": "The teacher took pity on me and forgave me for being late.",
    "fr": "Le professeur a eu pitié de moi et m'a pardonné mon retard.",
-   "es": "El profesor tuvo compasión de mí y me perdonó el retraso.",
+   "es": "El profesor tuvo compasión de mí y me perdonó que llegara tarde.",
    "why": "verify: kept a famous proverb (旅は道連れ世は情け); replaced"
   },
   "既婚女性が家や夫や子供たちの面倒を見ることがどんなことか、彼女は知っていた。": {
@@ -21068,7 +21068,7 @@
    "jp": "夕飯は牛と豚、どっちがいい？",
    "en": "For dinner, would you rather have beef or pork?",
    "fr": "Pour le dîner, tu préfères du bœuf ou du porc ?",
-   "es": "Para la cena, ¿prefieres carne de vaca o de cerdo?",
+   "es": "Para la cena, ¿prefieres carne de res o de cerdo?",
    "why": "unnatural, too hard"
   },
   "日本の貿易黒字は史上最高を記録しました。": {
@@ -21320,7 +21320,7 @@
    "jp": "去年、彼は期末試験で２科目を落とした。",
    "en": "Last year, he failed two subjects in his end-of-term exams.",
    "fr": "L'année dernière, il a échoué dans deux matières aux examens de fin de semestre.",
-   "es": "El año pasado, él reprobó dos asignaturas en los exámenes de fin de semestre.",
+   "es": "El año pasado, él reprobó dos materias en los exámenes de fin de semestre.",
    "why": "unnatural wording"
   },
   "昨日ゆっくり休んだ分、今日は頭が冴えている。": {
@@ -21404,7 +21404,7 @@
    "jp": "銀行で強盗事件があった。",
    "en": "There was a robbery at the bank.",
    "fr": "Il y a eu un braquage à la banque.",
-   "es": "Hubo un atraco en el banco.",
+   "es": "Hubo un asalto en el banco.",
    "why": "organised crime 暴力団"
   },
   "暴漢のピストルが発射された。": {
@@ -21488,7 +21488,7 @@
    "jp": "携帯を家に忘れてきてしまった。",
    "en": "I've left my phone at home.",
    "fr": "J'ai oublié mon portable à la maison.",
-   "es": "Me olvidé el teléfono móvil en casa.",
+   "es": "Se me olvidó el celular en casa.",
    "why": "dated generalisation about girls"
   },
   "最近の漫画は暴力や性の描写が多すぎる。": {
@@ -21635,7 +21635,7 @@
    "jp": "本当に参りましたね。",
    "en": "We're really in a bind, aren't we?",
    "fr": "Nous voilà bien embêtés.",
-   "es": "Sí que estamos en un buen aprieto.",
+   "es": "Realmente estamos en un buen aprieto.",
    "why": "EN/FR inaccurate"
   },
   "本日定休日。": {
@@ -21873,7 +21873,7 @@
    "jp": "この橋は車でも渡れます。",
    "en": "You can cross this bridge by car, too.",
    "fr": "On peut aussi traverser ce pont en voiture.",
-   "es": "Este puente también se puede cruzar en coche.",
+   "es": "Este puente también se puede cruzar en auto.",
    "why": "translationese 橋は安全です"
   },
   "橋は開通している。": {
@@ -22223,7 +22223,7 @@
    "jp": "この川の水は清くて、泳ぐ魚がよく見える。",
    "en": "The water in this river is so clear you can easily see the fish swimming.",
    "fr": "L'eau de cette rivière est si limpide qu'on voit bien les poissons nager.",
-   "es": "El agua de este río es tan límpida que se ven bien los peces nadando.",
+   "es": "El agua de este río es tan cristalina que se ven bien los peces nadando.",
    "why": "classical proverb"
   },
   "水面から飛び立つ鳥は努めてあとを濁さぬようにする。": {
@@ -22251,7 +22251,7 @@
    "jp": "電車の中で寝ている間に、財布と定期を盗まれてしまった。",
    "en": "My wallet and commuter pass were stolen while I was asleep on the train.",
    "fr": "Pendant que je dormais dans le train, on m'a volé mon portefeuille et ma carte d'abonnement.",
-   "es": "Mientras dormía en el tren, me robaron la cartera y el abono de transporte.",
+   "es": "Mientras dormía en el tren, me robaron la billetera y el pase de transporte.",
    "why": "dated 汽車"
   },
   "汽車はトンネルを通り抜けた。": {
@@ -22594,7 +22594,7 @@
    "jp": "この照明はツマミ一つで光量を変えられ、好きな明るさを演出できる。",
    "en": "This light's intensity can be changed with a single knob, so you can create whatever brightness you like.",
    "fr": "Cet éclairage se règle avec un seul bouton, ce qui permet de créer la luminosité qu'on veut.",
-   "es": "Con esta lámpara se puede cambiar la intensidad de la luz con un solo botón y crear la luminosidad que uno prefiera.",
+   "es": "Con esta lámpara se puede cambiar la intensidad de la luz con una sola perilla y crear la luminosidad que uno prefiera.",
    "why": "repetitive ようになって, EN tense"
   },
   "燃料の節約がこの自動車の大きな特長だ。": {
@@ -22958,7 +22958,7 @@
    "jp": "畜生、パンクだ。",
    "en": "Damn it, a flat tire!",
    "fr": "Bon sang, un pneu crevé !",
-   "es": "¡Maldita sea, una rueda pinchada!",
+   "es": "¡Maldita sea, se pinchó una llanta!",
    "why": "EN vulgar"
   },
   "異論はないです。": {
@@ -23336,7 +23336,7 @@
    "jp": "インターフォンが鳴ったので、玄関に出た。",
    "en": "The intercom rang, so I went to the door.",
    "fr": "L'interphone a sonné, alors je suis allé ouvrir.",
-   "es": "Sonó el interfono, así que fui a abrir la puerta.",
+   "es": "Sonó el interfón, así que fui a abrir la puerta.",
    "why": "word absent (other spelling); translationese"
   },
   "私たちがエンジンを動かせるかどうかは疑わしい。": {
@@ -23581,7 +23581,7 @@
    "jp": "今は新車を買うゆとりがない。",
    "en": "I can't afford a new car right now.",
    "fr": "Je n'ai pas les moyens d'acheter une voiture neuve en ce moment.",
-   "es": "Ahora no tengo margen económico para comprar un coche nuevo.",
+   "es": "Ahora no me alcanza para comprar un auto nuevo.",
    "why": "unusual orthography 無い"
   },
   "私に泥をぶつけて、泥だらけになった。": {
@@ -23602,7 +23602,7 @@
    "jp": "メールアドレスが変わりました。",
    "en": "My email address has changed.",
    "fr": "Mon adresse e-mail a changé.",
-   "es": "Mi dirección de correo electrónico ha cambiado.",
+   "es": "Cambió mi dirección de correo electrónico.",
    "why": "odd 私のE-mail"
   },
   "私のおいは卵に対してアレルギー体質だ。": {
@@ -23623,7 +23623,7 @@
    "jp": "このスピーカーは音が悪い。",
    "en": "These speakers have poor sound.",
    "fr": "Ces enceintes ont un mauvais son.",
-   "es": "Estos altavoces tienen mal sonido.",
+   "es": "Estos parlantes tienen mal sonido.",
    "why": "translationese あなたのより, 音質"
   },
   "私のテープレコーダーは君のアンプにもつなげられる。": {
@@ -23686,7 +23686,7 @@
    "jp": "小麦粉に水を加えて、よく練ってください。",
    "en": "Add water to the flour and knead it well.",
    "fr": "Ajoutez de l'eau à la farine et pétrissez bien.",
-   "es": "Añada agua a la harina y amásela bien.",
+   "es": "Agregue agua a la harina y amásela bien.",
    "why": "Bible verse"
   },
   "私の父は外務省に勤めている。": {
@@ -23707,7 +23707,7 @@
    "jp": "彼はゲームにおぼれて、勉強をしなくなった。",
    "en": "He got so hooked on video games that he stopped studying.",
    "fr": "Il est devenu tellement accro aux jeux vidéo qu'il a arrêté d'étudier.",
-   "es": "Él se entregó tanto a los videojuegos que dejó de estudiar.",
+   "es": "Él se volvió tan adicto a los videojuegos que dejó de estudiar.",
    "why": "verify: FR 'plongé' loses the addiction sense of 溺れる that EN 'hooked' keeps"
   },
   "私の父は私に、ぜひそこを見てくるようにといった。": {
@@ -23959,7 +23959,7 @@
    "jp": "これは確かな情報です。",
    "en": "This is reliable information.",
    "fr": "C'est une information sûre.",
-   "es": "Esta es una información fiable.",
+   "es": "Esta es una información confiable.",
    "why": "筋 too hard for N4"
   },
   "私はそのレコードを買うのに３０００円かかった。": {
@@ -24092,7 +24092,7 @@
    "jp": "私はタイヤの跡を見つけた。",
    "en": "I found tyre tracks.",
    "fr": "J'ai trouvé des traces de pneus.",
-   "es": "Encontré huellas de neumáticos.",
+   "es": "Encontré huellas de llantas.",
    "why": "EN awkward"
   },
   "私はダンテをミルトンのしたに置く。": {
@@ -24127,7 +24127,7 @@
    "jp": "私は眼鏡がないと読めません。",
    "en": "I cannot read without glasses.",
    "fr": "Je ne peux pas lire sans lunettes.",
-   "es": "No puedo leer sin gafas.",
+   "es": "No puedo leer sin lentes.",
    "why": "word not in course spelling, なくては"
   },
   "私は一つの袋は運んできたが、もう一つのほうは後へ残してきた。": {
@@ -24400,7 +24400,7 @@
    "jp": "技術の進歩で、生活が便利になった。",
    "en": "Thanks to technological progress, life has become more convenient.",
    "fr": "Grâce aux progrès techniques, la vie est devenue plus pratique.",
-   "es": "Gracias al progreso de la tecnología, la vida se ha vuelto más cómoda.",
+   "es": "Gracias al progreso de la tecnología, la vida se volvió más cómoda.",
    "why": "translationese; not the sense (technology)"
   },
   "私は彼の過ちはたいしたことはないとみなしている。": {
@@ -24512,7 +24512,7 @@
    "jp": "私は数学は苦手だ。",
    "en": "I'm bad at math.",
    "fr": "Je ne suis pas doué en maths.",
-   "es": "Las matemáticas no se me dan bien.",
+   "es": "Las matemáticas no son lo mío.",
    "why": "EN stilted"
   },
   "私は敵意をもったまでも、冷ややかな対応を受けた。": {
@@ -24813,14 +24813,14 @@
    "jp": "初めての駅で出口がわからず、まごついた。",
    "en": "At a station I'd never been to, I couldn't find the exit and got flustered.",
    "fr": "Dans une gare que je ne connaissais pas, je ne trouvais pas la sortie et j'étais tout désorienté.",
-   "es": "En una estación donde nunca había estado, no encontraba la salida y me aturullé.",
+   "es": "En una estación donde nunca había estado, no encontraba la salida y me desorienté.",
    "why": "vague context"
   },
   "私宛に何か伝言がとどいていませんか。": {
    "jp": "私宛に何か伝言が届いていませんか。",
    "en": "Are there any messages for me?",
    "fr": "Est-ce qu'il y a un message pour moi ?",
-   "es": "¿Ha llegado algún recado para mí?",
+   "es": "¿Llegó algún mensaje para mí?",
    "why": "orthography とどいて"
   },
   "私服警官が終始大統領の身辺を固めていた。": {
@@ -25184,7 +25184,7 @@
    "jp": "式は厳かな雰囲気の中で行われた。",
    "en": "The ceremony was held in a solemn atmosphere.",
    "fr": "La cérémonie s'est déroulée dans une atmosphère solennelle.",
-   "es": "La ceremonia se celebró en un ambiente solemne.",
+   "es": "La ceremonia se llevó a cabo en un ambiente solemne.",
    "why": "religious sermon; too long"
   },
   "結婚生活は夫婦仲が良ければ天国であり、夫婦仲が悪ければこの世の地獄である。": {
@@ -25205,7 +25205,7 @@
    "jp": "「何にする？」「私はカレーにする。」",
    "en": "\"What are you having?\" \"I'll have the curry.\"",
    "fr": "« Tu prends quoi ? » « Moi, je prends le curry. »",
-   "es": "«¿Qué vas a pedir?» «Yo quiero el curry.»",
+   "es": "«¿Qué vas a pedir?» «Yo quiero el curry».",
    "why": "word absent (する)"
   },
   "給与が増えるに比例して、所得税率もあがっていく。": {
@@ -25219,7 +25219,7 @@
    "jp": "店員さんが新しいお皿を持ってきてくれた。",
    "en": "The waiter brought us a new plate.",
    "fr": "Le serveur nous a apporté une nouvelle assiette.",
-   "es": "El camarero nos trajo un plato nuevo.",
+   "es": "El mesero nos trajo un plato nuevo.",
    "why": "dated 給仕"
   },
   "統計の数字を理論とつじつまの合うように変える。": {
@@ -25240,7 +25240,7 @@
    "jp": "出発前に、車のタイヤを点検した。",
    "en": "Before setting off, I checked the car's tires.",
    "fr": "Avant de partir, j'ai vérifié les pneus de la voiture.",
-   "es": "Antes de salir, revisé los neumáticos del auto.",
+   "es": "Antes de salir, revisé las llantas del auto.",
    "why": "translationese"
   },
   "練習がどんなに厳しくても、彼女は決して泣かなかった。": {
@@ -25380,7 +25380,7 @@
    "jp": "夏になると、ゴミ箱に虫がわく。",
    "en": "In summer, bugs breed in the rubbish bin.",
    "fr": "En été, des insectes prolifèrent dans la poubelle.",
-   "es": "En verano, en la basura pululan los bichos.",
+   "es": "En verano, el basurero se llena de bichos.",
    "why": "gross (maggots in meat)"
   },
   "肉によって生まれたものは肉です。御霊によって生まれたものは霊です。": {
@@ -25912,7 +25912,7 @@
    "jp": "明細書は三か月ごとに郵送されます。",
    "en": "Statements are mailed every three months.",
    "fr": "Les relevés sont envoyés par la poste tous les trois mois.",
-   "es": "Los extractos se envían por correo cada tres meses.",
+   "es": "Los estados de cuenta se envían por correo cada tres meses.",
    "why": "unnatural word 計算書"
   },
   "記念碑の一番上で禎子が頭の上に金の鶴をかざしている。": {
@@ -26010,7 +26010,7 @@
    "jp": "毎週土曜日の朝、駅前で市場が開かれる。",
    "en": "Every Saturday morning, a market is held in front of the station.",
    "fr": "Tous les samedis matin, un marché se tient devant la gare.",
-   "es": "Todos los sábados por la mañana se celebra un mercado delante de la estación.",
+   "es": "Todos los sábados por la mañana se instala un mercado delante de la estación.",
    "why": "verify: 市場が立つ is not the usual collocation (市が立つ); 市場が開かれる"
   },
   "誰かが戸をやかましくノックしている。": {
@@ -26290,7 +26290,7 @@
    "jp": "車に乗せてください。",
    "en": "Please give me a ride in your car.",
    "fr": "Emmenez-moi en voiture, s'il vous plaît.",
-   "es": "Por favor, lléveme en su coche.",
+   "es": "Por favor, lléveme en su auto.",
    "why": "EN tone"
   },
   "車も何もなく、生活保護で生きてます。": {
@@ -26304,7 +26304,7 @@
    "jp": "車を運転する時は、よく注意してください。",
    "en": "Please be very careful when you drive a car.",
    "fr": "Soyez très prudent quand vous conduisez.",
-   "es": "Cuando conduzca un coche, tenga mucho cuidado, por favor.",
+   "es": "Cuando conduzca un auto, tenga mucho cuidado, por favor.",
    "why": "N2 grammar for N5"
   },
   "軍が政府を乗っ取った。": {
@@ -26507,7 +26507,7 @@
    "jp": "車を道の脇に寄せてください。",
    "en": "Please pull the car over to the side of the road.",
    "fr": "Rangez la voiture sur le bas-côté, s'il vous plaît.",
-   "es": "Por favor, acerque el coche a un lado del camino.",
+   "es": "Por favor, acerque el auto a un lado del camino.",
    "why": "object missing, unclear"
   },
   "道は急斜面をジグザグにのぼっていた。": {
@@ -26787,7 +26787,7 @@
    "jp": "店員の迅速で的確な応対には恐れ入った。",
    "en": "The shop assistant's quick and precise service left me amazed.",
    "fr": "Le service rapide et précis du vendeur m'a laissé admiratif.",
-   "es": "Me asombró la atención rápida y precisa del dependiente.",
+   "es": "Me asombró la atención rápida y precisa del vendedor.",
    "why": "verify: いつも恐れ入ります reads as the stock 'thank you, sorry for the trouble', and is odd said to someone about their handling of customers; 恐れ入った (was amazed) shows the listed sense plainly"
   },
   "関係代名詞は「接続詞+代名詞」のはたらきをしています。": {
@@ -26864,7 +26864,7 @@
    "jp": "車に乗ったら、シートベルトを締めてください。",
    "en": "Please fasten your seat belt when you get in the car.",
    "fr": "Attachez votre ceinture quand vous montez en voiture.",
-   "es": "Cuando suba al coche, abróchese el cinturón de seguridad, por favor.",
+   "es": "Cuando suba al auto, abróchese el cinturón de seguridad, por favor.",
    "why": "離陸の際 too hard"
   },
   "雨があたり一帯に降っている。": {
@@ -27417,7 +27417,7 @@
    "jp": "入口の前に車が一台止まった。",
    "en": "A car stopped in front of the entrance.",
    "fr": "Une voiture s'est arrêtée devant l'entrée.",
-   "es": "Un coche se detuvo delante de la entrada.",
+   "es": "Un auto se detuvo delante de la entrada.",
    "why": "translationese １台の車; 入口 (いりくち) unmarked"
   },
   "１塁があいていたので打者を歩かせた。": {
@@ -27529,7 +27529,7 @@
    "jp": "「誕生日はいつですか。」「10月3日です。」",
    "en": "\"When is your birthday?\" \"October 3rd.\"",
    "fr": "« C'est quand, votre anniversaire ? » « Le 3 octobre. »",
-   "es": "«¿Cuándo es su cumpleaños?» «El 3 de octubre.»",
+   "es": "«¿Cuándo es su cumpleaños?» «El 3 de octubre».",
    "why": "no context; 三日 unmarked (full-width digits)"
   },
   "１０軒の家がその火事で焼失した。": {
@@ -27655,7 +27655,7 @@
    "jp": "うちには車が二台あります。",
    "en": "We have two cars.",
    "fr": "Nous avons deux voitures.",
-   "es": "En casa tenemos dos coches.",
+   "es": "En casa tenemos dos autos.",
    "why": "odd context"
   },
   "２国間の貿易上のアンバランスを改善しなければならない。": {
@@ -27774,7 +27774,7 @@
    "jp": "この大学には中国からの留学生がたくさんいます。",
    "en": "There are many students from China at this university.",
    "fr": "Il y a beaucoup d'étudiants venus de Chine dans cette université.",
-   "es": "En esta universidad hay muchos estudiantes extranjeros de China.",
+   "es": "En esta universidad hay muchos estudiantes provenientes de China.",
    "why": "double が, translationese"
   },
   "３人の少年達はその建物の扉を開けました。": {
@@ -27872,7 +27872,7 @@
    "jp": "フライパンでバターを溶かしてから、卵を入れる。",
    "en": "Melt the butter in the frying pan, then add the eggs.",
    "fr": "Faire fondre le beurre dans la poêle, puis ajouter les œufs.",
-   "es": "Se derrite la mantequilla en la sartén y luego se añaden los huevos.",
+   "es": "Se derrite la mantequilla en la sartén y luego se agregan los huevos.",
    "why": "numbered recipe fragment"
   },
   "４．煮え立たせる寸前で弱火にして、もう一度灰汁を取り除きます。": {
@@ -27963,7 +27963,7 @@
    "jp": "６時にホテルまで車で迎えに来てください。",
    "en": "Please pick me up at the hotel at six o'clock.",
    "fr": "Venez me chercher en voiture à l'hôtel à 6 heures, s'il vous plaît.",
-   "es": "Venga a buscarme en coche al hotel a las seis, por favor.",
+   "es": "Venga a buscarme en auto al hotel a las seis, por favor.",
    "why": "ungrammatical 迎えて"
   },
   "６時起床、７時家を出る。": {
@@ -28089,7 +28089,7 @@
    "jp": "車を持っていますか。",
    "en": "Do you have a car?",
    "fr": "Vous avez une voiture ?",
-   "es": "¿Tiene usted coche?",
+   "es": "¿Tiene usted auto?",
    "why": "typo 障害保険 (傷害), too hard"
   },
   "ＡＬＳのために、彼の手や腕はペンを握ったりタイプを打ったりすることができないほど弱くなってしまっていた。": {
@@ -28138,7 +28138,7 @@
    "jp": "名刺には「（株）さくら電機」と書いてある。",
    "en": "The business card says \"Sakura Denki Co., Ltd.\"",
    "fr": "Sur la carte de visite, il est écrit « Sakura Denki SA ».",
-   "es": "La tarjeta de visita dice «Sakura Denki S. A.».",
+   "es": "La tarjeta de presentación dice «Sakura Denki S. A.».",
    "why": "invented claim about a real company"
   },
   "ＩＮＦ社の誰か最も適当な人を教えてください。": {
@@ -28152,7 +28152,7 @@
    "jp": "昼休みに教室を使ってもいいですか。",
    "en": "May we use the classroom at lunchtime?",
    "fr": "Pouvons-nous utiliser la salle de classe à l'heure du déjeuner ?",
-   "es": "¿Podemos usar el aula durante la pausa del almuerzo?",
+   "es": "¿Podemos usar el aula a la hora del almuerzo?",
    "why": "dated LL教室"
   },
   "Ｍａｃ ＯＳ Ｘといっても、Ｍａｃ ＯＳのコードをバージョンアップした訳ではない。": {

@@ -72,7 +72,7 @@ DECK_LEVELS = ("N5", "N4", "N3", "N2", "N1")
 def parse_line(line: str) -> tuple[str, str, str, str, str]:
     """`漢字 かな | english | français [| español]` or `かな | english |
     français [| español]` -> (kanji, kana, en, fr, es), es "" where the
-    line has none (a deck word reads the deck's own, vocab_es.json)."""
+    line has none, which build() refuses."""
     parts = [p.strip() for p in line.split("|")]
     if len(parts) not in (3, 4) or not all(parts):
         raise ValueError(f"expected 'word | en | fr' or 'word | en | fr | es', got {line!r}")
@@ -185,10 +185,12 @@ def build(check: bool = False) -> tuple[dict[str, list[dict]], list[str]]:
                     problems.append(f"repeats the gloss {head!r} in this theme")
                 surfaces.add(surface)
                 glosses.add(head)
-                # A pool word has no Spanish but the theme's own (plan
-                # 291); a deck word reads the deck's.
-                if domain == "vocab_jmdict" and not es:
-                    problems.append("a pool word without its Spanish (word | en | fr | es)")
+                # Every word has its Spanish in the theme's own sense
+                # (plan 291), as it has its English and its French: a
+                # deck card's gloss is one sense of the word, the theme's
+                # line the one it has there (丸 a shape, not "round").
+                if not es:
+                    problems.append("a word without its Spanish (word | en | fr | es)")
                 if problems:
                     errors.append(f"{where}: " + " | ".join(problems))
                 if domain is None:

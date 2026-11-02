@@ -425,9 +425,9 @@ runtime purpose.
   word of speech, an affix, a unit, a figure, a date) its `es`, a tuple
   table's row its Spanish last (`test_breakdown_invariants`); a
   dictionary chip its label and tooltip (`_SHORT_LABELS_ES`,
-  `_TOOLTIPS_ES`), a radical its meaning (`RADICAL_ES`), a theme's pool
-  word its `| español` in `content/theme_lists.py` (the build refuses
-  one without), a duel's word item its choices in every language
+  `_TOOLTIPS_ES`), a radical its meaning (`RADICAL_ES`), every theme
+  word its `| español` in `content/theme_lists.py`, in the theme's own
+  sense (the build refuses one without), a duel's word item its choices in every language
   (`duel_paper.CHOICE_LANGS`, a `PAPER_REV` move), and search matches
   every gloss in each (`routes/dictionary.py`), and the JMdict layer is
   the French one's twin: a line `jmdict_fr.sqlite3` gains (a sense, a
@@ -437,11 +437,18 @@ runtime purpose.
   Nothing is left to a later wave: `python -m scripts.spanish_coverage`
   shows every part whole, and a part that grows takes its Spanish with
   it. A catalogue text is read through
-  `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES |
-  KANJI_GLOSSES)` (`translations/course.py`), a date or a number is
-  written in `intlLocale(lang)` (`lib/locale.js`): never a
+  `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES)` for a
+  word and `KANJI_GLOSSES` for a kanji (`translations/course.py`; never
+  the two merged, which keeps only the kanji maps), a date or a number is
+  written in `intlLocale(lang)` (`lib/locale.js`, es-419 for Spanish): never a
   `lang === 'fr' ? … : …` that sends a third language to English or French
-  by accident. Neutral Spanish, tú, «…» quotes.
+  by accident. Latin-American neutral Spanish (the owner's choice, ADR
+  0023): the Latin-American word where the two differ (boleto, auto,
+  celular, computadora, jugo, estacionar; never coger), the preterite for
+  a finished past, no leísmo, tú, «…» quotes with the period after the
+  closing one, figures as es-419 writes them. A deck kanji's Spanish is
+  KANJIDIC2's unless `kanji_meanings_es.json` has the line, which then
+  wins (`build_kanji_db --spanish-only`): correct a kanji there.
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list

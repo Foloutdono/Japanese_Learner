@@ -85,6 +85,10 @@ export const PRESENTATION = {
   // The chapters' starts, in seconds, in the order of the strings'
   // `presentation.chapters`: the player's bar and Google's key moments.
   chapters: [0, 15, 30, 45, 60, 75],
+  // The subtitle files in the bucket (presentation.<lang>.vtt). A page
+  // whose language has none plays the English (plan 291: no Spanish file
+  // yet; add 'es' here once presentation.es.vtt is uploaded).
+  captions: ['fr', 'en'],
 }
 
 // The features, one by one: one clip slot each, named by its file.

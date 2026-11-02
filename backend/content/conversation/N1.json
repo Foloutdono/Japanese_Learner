@@ -19,7 +19,7 @@
       {"en": "Ask for two more weeks", "fr": "Demande deux semaines de plus", "es": "Pide dos semanas más"},
       {"en": "Offer a partial delivery", "fr": "Propose une livraison partielle", "es": "Propón una entrega parcial"}
     ],
-    "them": {"en": "Client project manager", "fr": "Chef de projet du client", "es": "Responsable de proyecto del cliente"},
+    "them": {"en": "Client project manager", "fr": "Chef de projet du client", "es": "Gerente de proyecto del cliente"},
     "register": "formal",
     "turns": [
       {
@@ -28,7 +28,7 @@
           "kana": "ほんじつはどういったごようけんでしょうか。",
           "en": "What brings you here today?",
           "fr": "Qu'est-ce qui vous amène aujourd'hui ?",
-          "es": "¿Qué le trae hoy por aquí?"
+          "es": "¿De qué quería hablarme hoy?"
         },
         "me": {
           "jp": "来月末の納期の件で、ご相談したいことがございまして、お時間をいただきました。",
@@ -36,7 +36,7 @@
           "romaji": "raigetsumatsu no nouki no ken de, go soudan shitai koto ga gozaimashite, ojikan o itadakimashita",
           "en": "I asked for some of your time because there is something I need to discuss about the delivery date at the end of next month.",
           "fr": "Je vous ai demandé un peu de votre temps, car j'aurais besoin de vous parler de la livraison prévue fin du mois prochain.",
-          "es": "Le he pedido un momento de su tiempo porque quisiera consultarle un asunto relativo a la fecha de entrega de finales del mes que viene.",
+          "es": "Le pedí un momento de su tiempo porque quisiera consultarle un asunto relativo a la fecha de entrega de finales del mes que viene.",
           "note": {
             "en": "「ご相談したいことがございまして」 opens bad news as a matter to discuss together, the way it is brought to a client.",
             "fr": "「ご相談したいことがございまして」 amène la mauvaise nouvelle comme une question à discuter ensemble, ainsi qu'on l'annonce à un client.",
@@ -52,7 +52,7 @@
             "kana": "らいげつまつののうきのけんで、ごそうだんなさりたいことがございまして、おじかんをいただきました。",
             "en": "I asked for some of your time because there is something I would graciously wish to discuss about the delivery date at the end of next month.",
             "fr": "Je vous ai demandé un peu de votre temps, car il y a une chose dont je daignerais vous parler, au sujet de la livraison prévue fin du mois prochain.",
-            "es": "Le he pedido un momento de su tiempo porque me dignaría consultarle un asunto relativo a la fecha de entrega de finales del mes que viene.",
+            "es": "Le pedí un momento de su tiempo porque me dignaría consultarle un asunto relativo a la fecha de entrega de finales del mes que viene.",
             "why": {
               "en": "「なさる」 is honorific and raises whoever acts, here yourself; your own wish to consult is 「ご相談したい」.",
               "fr": "「なさる」 est honorifique et élève celui qui agit, ici toi-même ; ton propre souhait de consulter, c'est 「ご相談したい」.",
@@ -79,7 +79,7 @@
           "kana": "のうきですか。なにかあったんですか。",
           "en": "The delivery date? Has something happened?",
           "fr": "La livraison ? Il s'est passé quelque chose ?",
-          "es": "¿La fecha de entrega? ¿Ha pasado algo?"
+          "es": "¿La fecha de entrega? ¿Pasó algo?"
         },
         "me": {
           "jp": "実は、部品の仕入れ先で生産設備の故障があり、入荷が大幅に遅れております。",
@@ -87,7 +87,7 @@
           "romaji": "jitsu wa, buhin no shiiresaki de seisan setsubi no koshou ga ari, nyuuka ga oohaba ni okurete orimasu",
           "en": "Actually, a breakdown in the production line at our parts supplier has badly delayed the parts we are waiting for.",
           "fr": "En fait, une panne sur la chaîne de production de notre fournisseur de pièces a fortement retardé nos approvisionnements.",
-          "es": "Lo cierto es que ha habido una avería en los equipos de producción de nuestro proveedor de piezas, y la llegada del material se está retrasando mucho.",
+          "es": "Lo cierto es que hubo una falla en los equipos de producción de nuestro proveedor de piezas, y la llegada del material se está retrasando mucho.",
           "note": {
             "en": "「遅れております」 reports the delay with the humble 「おる」, and 「入荷」 names what is late: the parts coming in to your company.",
             "fr": "「遅れております」 annonce le retard avec l'humble 「おる」, et 「入荷」 nomme ce qui est en retard : l'arrivée des pièces chez ton entreprise.",
@@ -103,7 +103,7 @@
             "kana": "じつは、ぶひんのしいれさきでせいさんせつびのこしょうがあり、にゅうかがおおはばにおくれていらっしゃいます。",
             "en": "Actually, after a breakdown at our parts supplier, the parts are most honourably running late.",
             "fr": "En fait, après une panne chez notre fournisseur, les pièces ont l'honneur d'être très en retard.",
-            "es": "Lo cierto es que, tras una avería en nuestro proveedor de piezas, el material se digna llegar con mucho retraso.",
+            "es": "Lo cierto es que, tras una falla en nuestro proveedor de piezas, el material se digna llegar con mucho retraso.",
             "why": {
               "en": "「いらっしゃいます」 raises a person; a delay in your own supply chain takes the humble 「おります」.",
               "fr": "「いらっしゃいます」 élève une personne ; un retard dans ta propre chaîne d'approvisionnement prend l'humble 「おります」.",
@@ -221,7 +221,7 @@
             "why": {
               "en": "「二週間前倒し」 promises to win back the whole two weeks, a promise the supplier's breakdown you have just described leaves no way to keep.",
               "fr": "「二週間前倒し」 promet de rattraper les deux semaines entières, une promesse que la panne du fournisseur, que tu viens d'expliquer, ne permet pas de tenir.",
-              "es": "「二週間前倒し」 promete recuperar las dos semanas enteras, una promesa que la avería del proveedor que acabas de describir no permite cumplir."
+              "es": "「二週間前倒し」 promete recuperar las dos semanas enteras, una promesa que la falla del proveedor que acabas de describir no permite cumplir."
             }
           }
         ]
@@ -240,7 +240,7 @@
           "romaji": "zentai no hachiwari hodo wa, tousho no yotei doori otodoke dekiru mikomi desu",
           "en": "We expect to deliver about eighty percent of the total on the original date.",
           "fr": "Nous pensons pouvoir livrer environ quatre-vingts pour cent du total à la date initiale.",
-          "es": "Prevemos poder entregar alrededor del ochenta por ciento del total en la fecha prevista inicialmente.",
+          "es": "Prevemos poder entregar alrededor del ochenta por ciento del total en la fecha original.",
           "note": {
             "en": "「見込みです」 gives a forecast rather than a promise, and 「当初の予定どおり」 ties it to the original date.",
             "fr": "「見込みです」 donne une prévision plutôt qu'une promesse, et 「当初の予定どおり」 la rattache à la date initiale.",
@@ -268,7 +268,7 @@
             "kana": "ぜんたいのはちわりぐらいなら、たぶんさいしょのよていどおりにだせるとおもうよ。",
             "en": "Eighty percent of the total or so, I reckon we can probably get out on the original date.",
             "fr": "Dans les quatre-vingts pour cent du total, je pense qu'on peut sûrement sortir ça à la date prévue au départ.",
-            "es": "Si es el ochenta por ciento o así, yo creo que seguramente lo sacamos para la fecha de antes, ¿eh?",
+            "es": "Si es como el ochenta por ciento, yo creo que seguramente lo sacamos para la fecha original, ¿eh?",
             "why": {
               "en": "「出せると思うよ」 is how you talk to a colleague you know well; to a client's project manager it breaks the formal register.",
               "fr": "「出せると思うよ」, c'est le ton qu'on prend avec un collègue proche ; face au chef de projet d'un client, il rompt le registre soutenu.",
@@ -323,7 +323,7 @@
             "why": {
               "en": "「お気の毒です」 pities someone for a misfortune you had no part in, and this one is yours to apologise for.",
               "fr": "「お気の毒です」 plaint quelqu'un d'un malheur où tu n'es pour rien, et celui-ci, c'est à toi de t'en excuser.",
-              "es": "「お気の毒です」 compadece a alguien por una desgracia en la que no tienes nada que ver, y de esta te toca a ti pedir perdón."
+              "es": "「お気の毒です」 compadece a alguien por una desgracia con la que no tienes nada que ver, y de esta te toca a ti pedir perdón."
             }
           }
         ]
@@ -344,7 +344,7 @@
     "situation": {
       "en": "You are at a client's offices to tell their project manager that a breakdown at your parts supplier will make your company miss next month's delivery date. Speak formally: this is a client.",
       "fr": "Tu te rends chez un client pour annoncer à son chef de projet qu'une panne chez ton fournisseur de pièces empêchera ton entreprise de tenir la date de livraison du mois prochain. Parle de façon soutenue : c'est un client.",
-      "es": "Estás en las oficinas de un cliente para comunicar a la persona responsable del proyecto que, por una avería en tu proveedor de piezas, tu empresa no cumplirá la fecha de entrega del mes que viene. Habla con formalidad: es un cliente."
+      "es": "Estás en las oficinas de un cliente para comunicar a la persona responsable del proyecto que, por una falla en tu proveedor de piezas, tu empresa no cumplirá la fecha de entrega del mes que viene. Habla con formalidad: es un cliente."
     },
     "goal": {
       "en": "Explain the delay and, since the client cannot move the date, propose how to keep it, ask what matters most to them and commit to a revised plan by a set day.",
@@ -357,7 +357,7 @@
       {"en": "Ask what matters most to them", "fr": "Demande ce qui compte le plus pour lui", "es": "Pregunta qué es lo que más le importa"},
       {"en": "Commit to a revised plan", "fr": "Engage-toi sur un planning révisé", "es": "Comprométete con un plan revisado"}
     ],
-    "them": {"en": "Client project manager", "fr": "Chef de projet du client", "es": "Responsable de proyecto del cliente"},
+    "them": {"en": "Client project manager", "fr": "Chef de projet du client", "es": "Gerente de proyecto del cliente"},
     "register": "formal",
     "turns": [
       {
@@ -366,7 +366,7 @@
           "kana": "のうきのけんでおはなしがあるとのことですが、なにかあったんですか。",
           "en": "You said there was something about the delivery date. Has something happened?",
           "fr": "Vous vouliez me parler de la date de livraison, c'est bien ça ? Il s'est passé quelque chose ?",
-          "es": "Me dijo que quería hablar de la fecha de entrega. ¿Ha pasado algo?"
+          "es": "Me dijo que quería hablar de la fecha de entrega. ¿Pasó algo?"
         },
         "me": {
           "jp": "実は、部品の仕入れ先で設備の故障があり、このままですと納品が二週間ほど遅れる見込みです。",
@@ -374,7 +374,7 @@
           "romaji": "jitsu wa, buhin no shiiresaki de setsubi no koshou ga ari, kono mama desu to nouhin ga nishuukan hodo okureru mikomi desu",
           "en": "Actually, there has been a breakdown at our parts supplier, and as things stand, delivery will be about two weeks late.",
           "fr": "En fait, il y a eu une panne chez notre fournisseur de pièces et, en l'état actuel des choses, la livraison aura environ deux semaines de retard.",
-          "es": "Lo cierto es que ha habido una avería en los equipos de nuestro proveedor de piezas y, tal como están las cosas, prevemos que la entrega se retrase unas dos semanas.",
+          "es": "Lo cierto es que hubo una falla en los equipos de nuestro proveedor de piezas y, tal como están las cosas, prevemos que la entrega se retrase unas dos semanas.",
           "note": {
             "en": "「このままですと」 gives the two weeks as what happens if nothing is done, which leaves room to look for a remedy.",
             "fr": "「このままですと」 présente les deux semaines comme ce qui arrivera si rien n'est fait, ce qui laisse place à une solution.",
@@ -394,7 +394,7 @@
             "why": {
               "en": "「御社からの仕様の最終確定が遅れたため」 blames the client for a delay that comes from the breakdown at your own supplier.",
               "fr": "「御社からの仕様の最終確定が遅れたため」 rejette sur le client un retard qui vient de la panne chez ton propre fournisseur.",
-              "es": "「御社からの仕様の最終確定が遅れたため」 culpa al cliente de un retraso que viene de la avería en tu propio proveedor."
+              "es": "「御社からの仕様の最終確定が遅れたため」 culpa al cliente de un retraso que viene de la falla en tu propio proveedor."
             }
           },
           {
@@ -402,11 +402,11 @@
             "kana": "じつはせんげつ、ぶひんのしいれさきでせつびのこしょうがあり、そのえいきょうでのうひんがにしゅうかんほどおくれてしまいました。",
             "en": "Actually, last month there was a breakdown at our parts supplier, and because of it delivery ended up about two weeks late.",
             "fr": "En fait, le mois dernier, il y a eu une panne chez notre fournisseur de pièces, et la livraison a fini par avoir environ deux semaines de retard.",
-            "es": "Lo cierto es que el mes pasado hubo una avería en nuestro proveedor de piezas y, por ello, la entrega acabó retrasándose unas dos semanas.",
+            "es": "Lo cierto es que el mes pasado hubo una falla en nuestro proveedor de piezas y, por ello, la entrega acabó retrasándose unas dos semanas.",
             "why": {
               "en": "「遅れてしまいました」 says the delivery has already been late, when it is not due until next month.",
               "fr": "「遅れてしまいました」 dit que la livraison a déjà eu du retard, alors qu'elle n'est prévue que le mois prochain.",
-              "es": "「遅れてしまいました」 dice que la entrega ya se ha retrasado, cuando no está prevista hasta el mes que viene."
+              "es": "「遅れてしまいました」 dice que la entrega ya se retrasó, cuando no está prevista hasta el mes que viene."
             }
           }
         ]
@@ -417,7 +417,7 @@
           "kana": "にしゅうかんですか。それはこまります。さらいげつのあたまにしんせいひんのはつばいをひかえているので、のうきはうごかせないんです。",
           "en": "Two weeks? That's a problem. We launch a new product at the very start of the month after next, so the delivery date cannot move.",
           "fr": "Deux semaines ? Ça nous pose problème. Nous lançons un nouveau produit juste après, au début du mois suivant : la date de livraison ne peut pas bouger.",
-          "es": "¿Dos semanas? Eso es un problema. Dentro de dos meses, nada más empezar el mes, lanzamos un producto nuevo, así que la fecha de entrega no se puede mover."
+          "es": "¿Dos semanas? Eso es un problema. Dentro de dos meses, justo a principios de mes, lanzamos un producto nuevo, así que la fecha de entrega no se puede mover."
         },
         "me": {
           "jp": "申し訳ございません。別の仕入れ先からも部品を調達し、間に合うよう手を尽くします。",
@@ -695,7 +695,7 @@
       {"en": "Set out the measures", "fr": "Expose les mesures prises", "es": "Expón las medidas tomadas"},
       {"en": "Offer compensation", "fr": "Propose un dédommagement", "es": "Ofrece una compensación"}
     ],
-    "them": {"en": "Client purchasing manager", "fr": "Responsable des achats", "es": "Responsable de compras del cliente"},
+    "them": {"en": "Client purchasing manager", "fr": "Responsable des achats", "es": "Gerente de compras del cliente"},
     "register": "formal",
     "turns": [
       {
@@ -704,7 +704,7 @@
           "kana": "で、こんかいのしゅっかのけん、いったいどうなっているんですか。",
           "en": "So, this shipment. What on earth happened?",
           "fr": "Alors, cette expédition, qu'est-ce qui s'est passé au juste ?",
-          "es": "Bueno, este envío. ¿Se puede saber qué ha pasado?"
+          "es": "Bueno, sobre este envío: ¿se puede saber qué pasó?"
         },
         "me": {
           "jp": "このたびは、ご注文と異なる商品をお送りしてしまい、誠に申し訳ございませんでした。",
@@ -767,7 +767,7 @@
           "note": {
             "en": "「不十分で」 names the failure as your own, and 「取り違えてしまいました」 says exactly what went wrong.",
             "fr": "「不十分で」 reconnaît la défaillance comme celle de ton entreprise, et 「取り違えてしまいました」 dit exactement ce qui s'est mal passé.",
-            "es": "「不十分で」 reconoce el fallo como propio, y 「取り違えてしまいました」 dice exactamente qué salió mal."
+            "es": "「不十分で」 reconoce el error como propio, y 「取り違えてしまいました」 dice exactamente qué salió mal."
           },
           "alt": [
             {"jp": "弊社の確認不足により、品番の似た商品を誤って出荷してしまいました。", "kana": "へいしゃのかくにんぶそくにより、ひんばんのにたしょうひんをあやまってしゅっかしてしまいました。", "romaji": "heisha no kakunin busoku ni yori, hinban no nita shouhin o ayamatte shukka shite shimaimashita"}
@@ -857,7 +857,7 @@
           "kana": "こんかいうちがうけたそんがいについては、どうされるおつもりですか。",
           "en": "And what do you intend to do about the losses we have suffered this time?",
           "fr": "Et pour le préjudice que nous avons subi, que comptez-vous faire ?",
-          "es": "¿Y qué piensan hacer con los perjuicios que hemos sufrido esta vez?"
+          "es": "¿Y qué piensan hacer con los perjuicios que sufrimos esta vez?"
         },
         "me": {
           "jp": "正しい商品は本日の夕方までにお届けし、生じた損害も弊社で補償させていただきます。",
@@ -869,7 +869,7 @@
           "note": {
             "en": "「弊社で補償させていただきます」 puts the cost on your company, humbly, as something the client allows you to do.",
             "fr": "「弊社で補償させていただきます」 met le coût à la charge de ton entreprise, humblement, comme une chose que le client permet à ton entreprise de faire.",
-            "es": "「弊社で補償させていただきます」 pone el coste a cargo de tu empresa, con humildad, como algo que el cliente le permite hacer."
+            "es": "「弊社で補償させていただきます」 pone el costo a cargo de tu empresa, con humildad, como algo que el cliente le permite hacer."
           },
           "alt": [
             {"jp": "正しい商品をすぐにお納めし、損害につきましては弊社が全額負担いたします。", "kana": "ただしいしょうひんをすぐにおおさめし、そんがいにつきましてはへいしゃがぜんがくふたんいたします。", "romaji": "tadashii shouhin o sugu ni oosame shi, songai ni tsukimashite wa heisha ga zengaku futan itashimasu"}
@@ -1020,12 +1020,12 @@
     "situation": {
       "en": "You are at a client's office to apologise for the wrong goods your company sent them. The purchasing manager has heard your apology, and wants more than words.",
       "fr": "Tu es chez un client pour t'excuser de la mauvaise marchandise que ton entreprise lui a envoyée. Le responsable des achats a entendu tes excuses, mais il attend davantage que des mots.",
-      "es": "Estás en las oficinas de un cliente para disculparte por la mercancía equivocada que le envió tu empresa. La persona responsable de compras ha escuchado tus disculpas, pero quiere algo más que palabras."
+      "es": "Estás en las oficinas de un cliente para disculparte por la mercancía equivocada que le envió tu empresa. La persona responsable de compras ya escuchó tus disculpas, pero quiere algo más que palabras."
     },
     "goal": {
       "en": "Take the client's anger seriously, keep to what is in your authority when he asks for a discount and hints at reviewing your business, offer concrete measures, and commit to an answer by a set date.",
       "fr": "Prends au sérieux la colère du client, tiens-t'en à ce qui relève de toi quand il réclame une remise et laisse planer une remise en cause de vos relations, propose des mesures concrètes et engage-toi à répondre à une date précise.",
-      "es": "Toma en serio el enfado del cliente, limítate a lo que está en tu mano cuando te pida un descuento y deje caer que podrían replantearse la relación comercial, ofrece medidas concretas y comprométete a responder en una fecha determinada."
+      "es": "Toma en serio el enojo del cliente, limítate a lo que está en tu mano cuando te pida un descuento y deje caer que podrían replantearse la relación comercial, ofrece medidas concretas y comprométete a responder en una fecha determinada."
     },
     "steps": [
       {"en": "Apologise once more", "fr": "Excuse-toi une nouvelle fois", "es": "Discúlpate una vez más"},
@@ -1034,7 +1034,7 @@
       {"en": "Promise an answer by a set date", "fr": "Promets une réponse à date fixe", "es": "Promete una respuesta en fecha fija"},
       {"en": "Agree to come back with your manager", "fr": "Accepte de revenir avec ton supérieur", "es": "Acepta volver con tu superior"}
     ],
-    "them": {"en": "Client purchasing manager", "fr": "Responsable des achats", "es": "Responsable de compras del cliente"},
+    "them": {"en": "Client purchasing manager", "fr": "Responsable des achats", "es": "Gerente de compras del cliente"},
     "register": "formal",
     "turns": [
       {
@@ -1043,7 +1043,7 @@
           "kana": "おわびはわかりました。ただ、あやまってもらえばすむというはなしではないんですよ。",
           "en": "I've heard your apology. But this isn't something an apology alone can settle.",
           "fr": "J'ai bien entendu vos excuses. Mais ce n'est pas une affaire que des excuses suffisent à régler.",
-          "es": "Ya he oído sus disculpas. Pero esto no es algo que se arregle solo con pedir perdón."
+          "es": "Ya escuché sus disculpas. Pero esto no es algo que se arregle solo con pedir perdón."
         },
         "me": {
           "jp": "おっしゃるとおりでございます。重ねてお詫び申し上げます。",
@@ -1055,7 +1055,7 @@
           "note": {
             "en": "「おっしゃるとおりでございます」 grants the client's point without a word of defence, and 「重ねて」 renews the apology you have already made.",
             "fr": "「おっしゃるとおりでございます」 donne raison au client sans un mot de défense, et 「重ねて」 renouvelle les excuses déjà présentées.",
-            "es": "「おっしゃるとおりでございます」 da la razón al cliente sin una palabra en tu defensa, y 「重ねて」 renueva la disculpa que ya has presentado."
+            "es": "「おっしゃるとおりでございます」 da la razón al cliente sin una palabra en tu defensa, y 「重ねて」 renueva la disculpa que ya presentaste."
           },
           "alt": [
             {"jp": "ごもっともでございます。このたびは多大なご迷惑をおかけし、重ねてお詫び申し上げます。", "kana": "ごもっともでございます。このたびはただいなごめいわくをおかけし、かさねておわびもうしあげます。", "romaji": "gomottomo de gozaimasu. kono tabi wa tadai na go meiwaku o okake shi, kasanete owabi moushiagemasu"}
@@ -1067,7 +1067,7 @@
             "kana": "ですが、ただしいしょうひんはすでにおとどけしましたので、このけんはかいけつずみかとぞんじます。",
             "en": "But we have already delivered the correct goods, so I believe the matter is settled.",
             "fr": "Mais nous vous avons déjà livré les bons articles : je considère donc l'affaire comme réglée.",
-            "es": "Pero ya les hemos entregado los productos correctos, así que entiendo que el asunto está resuelto.",
+            "es": "Pero ya les entregamos los productos correctos, así que entiendo que el asunto está resuelto.",
             "why": {
               "en": "「解決済み」 declares the matter closed, when the client has just told you it is not.",
               "fr": "「解決済み」 déclare l'affaire close, alors que le client vient de te dire qu'elle ne l'est pas.",
@@ -1153,7 +1153,7 @@
           "romaji": "omoku uketomete orimasu. kongo, onsha muke no shukka ni wa subete watashi ga tachiai, kenpin kekka o maikai go houkoku itashimasu",
           "en": "I take that very seriously. From now on, I will personally attend every shipment to your company and report the inspection results to you each time.",
           "fr": "Je prends cela très au sérieux. Désormais, j'assisterai moi-même à chaque expédition vers votre société et je vous communiquerai à chaque fois le résultat du contrôle.",
-          "es": "Me lo tomo muy en serio. A partir de ahora, estaré presente en todos los envíos a su empresa y le informaré cada vez del resultado de la inspección.",
+          "es": "Me lo tomo muy en serio. A partir de ahora, estaré presente en persona en todos los envíos a su empresa y le informaré cada vez del resultado de la inspección.",
           "note": {
             "en": "「重く受け止めております」 takes the warning without protest, and 「私が立ち会い」 answers it with a measure you can carry out yourself.",
             "fr": "「重く受け止めております」 accueille l'avertissement sans protester, et 「私が立ち会い」 y répond par une mesure que tu peux appliquer toi-même.",
@@ -1196,7 +1196,7 @@
           "kana": "たいさくはわかりました。それで、ねびきのけんはいつおへんじをいただけるんですか。",
           "en": "I understand the measures. So when will you give me an answer on the discount?",
           "fr": "J'ai bien compris les mesures. Mais pour la remise, quand aurai-je votre réponse ?",
-          "es": "Las medidas me han quedado claras. Entonces, ¿cuándo me darán una respuesta sobre el descuento?"
+          "es": "Las medidas me quedaron claras. Entonces, ¿cuándo me darán una respuesta sobre el descuento?"
         },
         "me": {
           "jp": "社に持ち帰って上司と協議し、今週金曜日までに必ずお返事いたします。",
@@ -1255,7 +1255,7 @@
           "romaji": "shouchi itashimashita. kin'youbi ni wa, joushi to tomo ni aratamete ukagaimasu",
           "en": "Certainly. On Friday I will come again, with my manager.",
           "fr": "Bien entendu. Vendredi, je reviendrai avec mon supérieur.",
-          "es": "Por supuesto. El viernes volveré a visitarle junto con mi superior.",
+          "es": "Por supuesto. El viernes volveré a visitarlo junto con mi superior.",
           "note": {
             "en": "「上司とともに」 grants the client's request at once, and 「伺います」 is the humble 「行く」 for your visit.",
             "fr": "「上司とともに」 accède aussitôt à la demande du client, et 「伺います」 est l'humble 「行く」 pour ta visite.",
@@ -1308,12 +1308,12 @@
     "situation": {
       "en": "You are applying for a master's programme, and the professor who runs the lab is interviewing you. Speak formally: he will decide whether you join.",
       "fr": "Tu postules en master, et le professeur qui dirige le laboratoire te fait passer l'entretien. Parle de façon soutenue : c'est lui qui décidera de ton admission.",
-      "es": "Solicitas plaza en un programa de posgrado, y la persona que dirige el laboratorio te hace la entrevista. Habla con formalidad: de ella depende tu admisión."
+      "es": "Solicitas la admisión en un programa de posgrado, y la persona que dirige el laboratorio te hace la entrevista. Habla con formalidad: de ella depende tu admisión."
     },
     "goal": {
       "en": "Present your research plan, explain why you chose this lab and how your work differs from earlier studies, and convince the professor you belong there.",
       "fr": "Présente ton projet de recherche, explique pourquoi tu as choisi ce laboratoire et en quoi ton travail se distingue des études antérieures, et convaincs le professeur que tu y as ta place.",
-      "es": "Presenta tu proyecto de investigación, explica por qué elegiste este laboratorio y en qué se distingue tu trabajo de los estudios anteriores, y convence a quien te entrevista de que tienes un lugar allí."
+      "es": "Presenta tu proyecto de investigación, explica por qué elegiste este laboratorio y en qué se distingue tu trabajo de los estudios anteriores, y convence a quien te entrevista de que encajas en el laboratorio."
     },
     "steps": [
       {"en": "Present your research", "fr": "Présente ton projet de recherche", "es": "Presenta tu investigación"},
@@ -1594,7 +1594,7 @@
           "romaji": "hai. kenkyuushitsu de wa, gakusei doushi ga kenkyuu no susumi guai o happyou shiau kikai wa gozaimasu ka",
           "en": "Yes. In the lab, do students have the chance to present their progress to one another?",
           "fr": "Oui. Au laboratoire, les étudiants ont-ils l'occasion de se présenter mutuellement l'avancement de leurs travaux ?",
-          "es": "Sí. En el laboratorio, ¿tienen los estudiantes ocasión de presentarse mutuamente cómo avanzan sus investigaciones?",
+          "es": "Sí. En el laboratorio, ¿tienen los estudiantes ocasión de presentar ante sus compañeros cómo avanzan sus investigaciones?",
           "note": {
             "en": "「ございますか」 asks formally, and a question about the lab's work shows you already picture yourself in it.",
             "fr": "「ございますか」 pose la question de façon soutenue, et une question sur la vie du laboratoire montre que tu t'y vois déjà.",
@@ -1733,7 +1733,7 @@
           "note": {
             "en": "「とはいえ」 grants that generalising is hard before saying what the study is worth, which answers the objection without dodging it.",
             "fr": "「とはいえ」 admet que généraliser est difficile avant de dire ce que vaut l'étude : tu réponds à l'objection sans l'esquiver.",
-            "es": "「とはいえ」 admite que generalizar es difícil antes de decir qué vale el estudio, con lo que respondes a la objeción sin esquivarla."
+            "es": "「とはいえ」 admite que generalizar es difícil antes de decir cuál es el valor del estudio, con lo que respondes a la objeción sin esquivarla."
           },
           "alt": [
             {"jp": "一般化は難しいと思いますが、一人ひとりの習得過程を深く追う事例研究として意義があると考えております。", "kana": "いっぱんかはむずかしいとおもいますが、ひとりひとりのしゅうとくかていをふかくおうじれいけんきゅうとしていぎがあるとかんがえております。", "romaji": "ippanka wa muzukashii to omoimasu ga, hitori hitori no shuutoku katei o fukaku ou jirei kenkyuu to shite igi ga aru to kangaete orimasu"}
@@ -1745,11 +1745,11 @@
             "kana": "さんしゃとも、すでにきょうりょくのごしょうだくをいただいております。",
             "en": "All three companies have already agreed to take part.",
             "fr": "Les trois entreprises ont déjà accepté de participer.",
-            "es": "Las tres empresas ya han aceptado participar.",
+            "es": "Las tres empresas ya aceptaron participar.",
             "why": {
               "en": "It says the companies have agreed to take part, but the professor asked whether the results can be generalised: 「一般化」.",
               "fr": "Tu dis que les entreprises ont accepté de participer, mais le professeur demandait si les résultats peuvent se généraliser : 「一般化」.",
-              "es": "Dices que las empresas han aceptado participar, pero te preguntaron si los resultados se pueden generalizar: 「一般化」."
+              "es": "Dices que las empresas aceptaron participar, pero te preguntaron si los resultados se pueden generalizar: 「一般化」."
             }
           },
           {
@@ -1859,7 +1859,7 @@
             "kana": "そのばあいは、どういのないかたのはつわを、すでにすべてさくじょいたしました。",
             "en": "In that case, I have already deleted everything said by those who haven't consented.",
             "fr": "Dans ce cas, j'ai déjà supprimé tous les propos des personnes qui n'ont pas donné leur accord.",
-            "es": "En ese caso, ya he eliminado todo lo que dijeron las personas que no dieron su consentimiento.",
+            "es": "En ese caso, ya eliminé todo lo que dijeron las personas que no dieron su consentimiento.",
             "why": {
               "en": "「すでにすべて削除いたしました」 says it is already done, when not a word has been recorded yet: the study has not begun.",
               "fr": "「すでにすべて削除いたしました」 dit que c'est déjà fait, alors que rien n'a encore été enregistré : l'étude n'a pas commencé.",
@@ -1874,7 +1874,7 @@
           "kana": "それに、ろくおんされているとわかっていたら、みなさんふだんどおりにははなさないでしょう。",
           "en": "Besides, if people know they are being recorded, they won't speak as they normally do, will they?",
           "fr": "Et puis, si les gens se savent enregistrés, ils ne parleront pas comme d'habitude, si ?",
-          "es": "Además, si saben que los están grabando, la gente no hablará como de costumbre, ¿no cree?"
+          "es": "Además, si la gente sabe que la están grabando, no hablará como de costumbre, ¿no cree?"
         },
         "me": {
           "jp": "その影響は避けられませんが、録音期間を長めに取り、慣れた後のデータを中心に分析いたします。",
@@ -1882,11 +1882,11 @@
           "romaji": "sono eikyou wa sakeraremasen ga, rokuon kikan o nagame ni tori, nareta ato no deeta o chuushin ni bunseki itashimasu",
           "en": "That effect cannot be avoided, but I will record over a longer period and analyse mainly the data from after people have got used to it.",
           "fr": "On ne peut pas éviter cet effet, mais j'enregistrerai sur une période plus longue et j'analyserai surtout les données recueillies une fois que chacun s'y sera habitué.",
-          "es": "Ese efecto no se puede evitar, pero grabaré durante un periodo más largo y analizaré sobre todo los datos de cuando la gente ya se haya acostumbrado.",
+          "es": "Ese efecto no se puede evitar, pero grabaré durante un período más largo y analizaré sobre todo los datos de cuando la gente ya se haya acostumbrado.",
           "note": {
             "en": "「避けられませんが」 admits the effect honestly, and the rest of the sentence answers it with a method: a longer period, the later data.",
             "fr": "「避けられませんが」 admet l'effet honnêtement, et la suite de la phrase y répond par une méthode : une période plus longue, les données tardives.",
-            "es": "「避けられませんが」 admite el efecto con honestidad, y el resto de la frase responde con un método: un periodo más largo, los datos posteriores."
+            "es": "「避けられませんが」 admite el efecto con honestidad, y el resto de la frase responde con un método: un período más largo, los datos posteriores."
           },
           "alt": [
             {"jp": "その影響はあると思いますが、長期間録音して、録音に慣れてからの会話を主に分析するつもりです。", "kana": "そのえいきょうはあるとおもいますが、ちょうきかんろくおんして、ろくおんになれてからのかいわをおもにぶんせきするつもりです。", "romaji": "sono eikyou wa aru to omoimasu ga, choukikan rokuon shite, rokuon ni narete kara no kaiwa o omo ni bunseki suru tsumori desu"}
@@ -1910,7 +1910,7 @@
             "kana": "そのえいきょうはさけざるをえませんが、ろくおんきかんをながめにとり、なれたあとのデータをちゅうしんにぶんせきいたします。",
             "en": "I have no choice but to avoid that effect, but I will record over a longer period and analyse mainly the data from after people have got used to it.",
             "fr": "Je n'ai pas d'autre choix que d'éviter cet effet, mais j'enregistrerai sur une période plus longue et j'analyserai surtout les données recueillies une fois que chacun s'y sera habitué.",
-            "es": "No me queda más remedio que evitar ese efecto, pero grabaré durante un periodo más largo y analizaré sobre todo los datos de cuando la gente ya se haya acostumbrado.",
+            "es": "No me queda más remedio que evitar ese efecto, pero grabaré durante un período más largo y analizaré sobre todo los datos de cuando la gente ya se haya acostumbrado.",
             "why": {
               "en": "「避けざるを得ません」 says you have no choice but to avoid the effect; what you mean to grant is that it cannot be avoided: 「避けられません」.",
               "fr": "「避けざるを得ません」 dit que tu n'as pas d'autre choix que d'éviter l'effet ; ce que tu veux admettre, c'est qu'on ne peut pas l'éviter : 「避けられません」.",
@@ -1961,7 +1961,7 @@
             "kana": "ごしてきありがとうございます。では、そのてんはせんせいにかきくわえていただけますか。",
             "en": "Thank you for pointing that out. Then could you add that point yourself?",
             "fr": "Merci de me l'avoir fait remarquer. Pourriez-vous alors ajouter ce point vous-même ?",
-            "es": "Gracias por señalarlo. Entonces, ¿podría añadir usted ese punto?",
+            "es": "Gracias por señalarlo. Entonces, ¿podría agregar usted ese punto?",
             "why": {
               "en": "「先生に書き加えていただけますか」 asks the professor to write your plan for you, when it is yours to correct.",
               "fr": "「先生に書き加えていただけますか」 demande au professeur d'écrire ton projet à ta place, alors que c'est à toi de le corriger.",
@@ -1986,7 +1986,7 @@
     "situation": {
       "en": "You are back at the hospital for the results of the tests you had the other day. The doctor has called you into the consulting room.",
       "fr": "Tu reviens à l'hôpital pour les résultats des examens passés l'autre jour. Le médecin t'a fait entrer dans son cabinet.",
-      "es": "Vuelves al hospital para conocer los resultados de las pruebas que te hicieron el otro día. Te han llamado a la consulta."
+      "es": "Vuelves al hospital para conocer los resultados de las pruebas que te hicieron el otro día. Te hacen pasar al consultorio."
     },
     "goal": {
       "en": "Understand your results and the two treatment options, ask about side effects and the hospital stay, and take the time to decide.",
@@ -2009,7 +2009,7 @@
           "kana": "せんじつのけんさのけっかですが、たんのうにいしがみつかりました。",
           "en": "About the results of the other day's tests: we found stones in your gallbladder.",
           "fr": "Pour les résultats des examens de l'autre jour : nous avons trouvé des calculs dans votre vésicule biliaire.",
-          "es": "Sobre los resultados de las pruebas del otro día: hemos encontrado cálculos en la vesícula biliar."
+          "es": "Sobre los resultados de las pruebas del otro día: encontramos cálculos en la vesícula biliar."
         },
         "me": {
           "jp": "そうですか。すぐに治療しなければならないんでしょうか。",
@@ -2190,7 +2190,7 @@
             "why": {
               "en": "「退院」 is leaving hospital, a single moment; a length of stay is asked with 「入院」.",
               "fr": "「退院」, c'est la sortie de l'hôpital, un moment unique ; une durée de séjour se demande avec 「入院」.",
-              "es": "「退院」 es salir del hospital, un solo momento; la duración de la estancia se pregunta con 「入院」."
+              "es": "「退院」 es salir del hospital, un solo momento; la duración de la hospitalización se pregunta con 「入院」."
             }
           },
           {
@@ -2198,7 +2198,7 @@
             "kana": "では、しゅじゅつのばあいは、いっしゅうかんぐらいにゅういんします。",
             "en": "And with surgery, I'll stay in hospital for about a week.",
             "fr": "Et dans le cas de l'opération, mon hospitalisation durera environ une semaine.",
-            "es": "Y en el caso de la operación, me quedaré en el hospital una semana o así.",
+            "es": "Y en el caso de la operación, me quedaré en el hospital más o menos una semana.",
             "why": {
               "en": "「一週間ぐらい入院します」 tells the doctor how long you will stay, which is his to tell you; you meant to ask.",
               "fr": "「一週間ぐらい入院します」 annonce au médecin la durée de ton séjour, alors que c'est à lui de te la dire ; tu voulais la demander.",
@@ -2300,7 +2300,7 @@
             "kana": "ありがとうございます。では、せんせいのごかぞくによろしくおつたえください。",
             "en": "Thank you. Then please give my regards to your family.",
             "fr": "Merci. Alors transmettez mes amitiés à votre famille.",
-            "es": "Gracias. Entonces, dé recuerdos a su familia de mi parte.",
+            "es": "Gracias. Entonces, salude a su familia de mi parte.",
             "why": {
               "en": "The doctor's 「ご家族」 meant your family, the people to consult; greeting his own family answers nothing.",
               "fr": "Le 「ご家族」 du médecin désignait ta famille, celle à consulter ; saluer la sienne ne répond à rien.",
@@ -2325,18 +2325,18 @@
     "situation": {
       "en": "You have returned to the hospital to hear what last week's tests showed. The doctor goes through them with you in the consulting room.",
       "fr": "Te voici de retour à l'hôpital pour savoir ce qu'ont montré les examens de la semaine dernière. Le médecin les passe en revue avec toi dans son cabinet.",
-      "es": "Has vuelto al hospital para saber qué han mostrado las pruebas de la semana pasada. En la consulta, repasan los resultados contigo."
+      "es": "Vuelves al hospital para saber qué mostraron las pruebas de la semana pasada. En el consultorio, repasan los resultados contigo."
     },
     "goal": {
       "en": "Hear why the doctor advises surgery soon, ask about its risks and what waiting would cost, and ask tactfully for a referral letter so that you can get a second opinion.",
       "fr": "Écoute pourquoi le médecin conseille d'opérer bientôt, interroge-le sur les risques et sur ce que coûterait l'attente, puis demande-lui avec tact une lettre d'orientation pour obtenir un second avis.",
-      "es": "Escucha por qué te aconsejan operarte pronto, pregunta por los riesgos y por lo que supondría esperar, y pide con tacto un informe de derivación para poder tener una segunda opinión."
+      "es": "Escucha por qué te aconsejan operarte pronto, pregunta por los riesgos y por lo que supondría esperar, y pide con tacto una carta de referencia para poder tener una segunda opinión."
     },
     "steps": [
       {"en": "Ask about the risks of surgery", "fr": "Interroge sur les risques de l'opération", "es": "Pregunta por los riesgos de la operación"},
       {"en": "Ask what waiting would cost", "fr": "Demande ce que coûterait l'attente", "es": "Pregunta qué supondría esperar"},
       {"en": "Ask for a second opinion, tactfully", "fr": "Demande un second avis avec tact", "es": "Pide con tacto una segunda opinión"},
-      {"en": "Ask for a referral letter", "fr": "Demande une lettre d'orientation", "es": "Pide un informe de derivación"},
+      {"en": "Ask for a referral letter", "fr": "Demande une lettre d'orientation", "es": "Pide una carta de referencia"},
       {"en": "Thank the doctor", "fr": "Remercie le médecin", "es": "Da las gracias a quien te atiende"}
     ],
     "them": {"en": "Doctor", "fr": "Médecin", "es": "Especialista"},
@@ -2458,11 +2458,11 @@
           "romaji": "yoku wakarimashita. tada, daiji na koto na node, hoka no sensei no go iken mo ukagatte mitai no desu ga",
           "en": "I understand. But it's an important decision, so I'd like to hear another doctor's opinion as well, if I may.",
           "fr": "J'ai bien compris. Mais c'est une décision importante, alors j'aimerais aussi entendre l'avis d'un autre médecin, si vous le permettez.",
-          "es": "Lo he entendido bien. Pero, como es una decisión importante, me gustaría escuchar también la opinión de otro especialista, si es posible.",
+          "es": "Me quedó muy claro. Pero, como es una decisión importante, me gustaría escuchar también la opinión de otro especialista, si es posible.",
           "note": {
             "en": "「大事なことなので」 grounds the request in the weight of the decision, not in any doubt of the doctor, and 「伺ってみたいのですが」 leaves it open for him to agree.",
             "fr": "「大事なことなので」 fonde la demande sur le poids de la décision et non sur un doute envers le médecin, et 「伺ってみたいのですが」 la laisse en suspens pour qu'il y consente.",
-            "es": "「大事なことなので」 basa la petición en el peso de la decisión y no en ninguna duda sobre quien te atiende, y 「伺ってみたいのですが」 la deja en suspenso para que pueda dar su conformidad."
+            "es": "「大事なことなので」 basa la petición en el peso de la decisión y no en ninguna duda sobre quien te atiende, y 「伺ってみたいのですが」 la deja abierta para que pueda aceptarla."
           },
           "alt": [
             {"jp": "わかりました。念のため、セカンドオピニオンを受けてみてもよろしいでしょうか。", "kana": "わかりました。ねんのため、セカンドオピニオンをうけてみてもよろしいでしょうか。", "romaji": "wakarimashita. nen no tame, sekando opinion o ukete mite mo yoroshii deshou ka"}
@@ -2486,7 +2486,7 @@
             "kana": "よくわかりました。ただ、だいじなことなので、ほかのせんせいのごいけんももうしあげてみたいのですが。",
             "en": "I understand. But it's an important decision, so I'd like to humbly tell you another doctor's opinion as well, if I may.",
             "fr": "J'ai bien compris. Mais c'est une décision importante, alors j'aimerais aussi vous exposer humblement l'avis d'un autre médecin, si vous le permettez.",
-            "es": "Lo he entendido bien. Pero, como es una decisión importante, me gustaría exponerle humildemente también la opinión de otro especialista, si es posible.",
+            "es": "Me quedó muy claro. Pero, como es una decisión importante, me gustaría exponerle humildemente también la opinión de otro especialista, si es posible.",
             "why": {
               "en": "「申し上げる」 is the humble 「言う」: you offer to tell him another doctor's opinion, when you mean to hear one, 「伺う」.",
               "fr": "「申し上げる」 est l'humble 「言う」 : tu proposes de lui exposer l'avis d'un autre médecin, alors que tu veux en entendre un, 「伺う」.",
@@ -2509,11 +2509,11 @@
           "romaji": "daigaku byouin no geka o kangaete imasu. shoukaijou o kaite itadakemasu ka",
           "en": "I'm thinking of the surgical department at the university hospital. Could you write me a referral letter?",
           "fr": "Je pense au service de chirurgie de l'hôpital universitaire. Pourriez-vous me faire une lettre d'orientation ?",
-          "es": "Estoy pensando en el servicio de cirugía del hospital universitario. ¿Podría hacerme un informe de derivación?",
+          "es": "Estoy pensando en el servicio de cirugía del hospital universitario. ¿Podría hacerme una carta de referencia?",
           "note": {
             "en": "「紹介状」 is the letter the other doctor needs to take up your case, and 「書いていただけますか」 asks for it as a favour.",
             "fr": "「紹介状」 est la lettre dont l'autre médecin a besoin pour reprendre ton dossier, et 「書いていただけますか」 la demande comme une faveur.",
-            "es": "「紹介状」 es el informe que necesita el otro especialista para hacerse cargo de tu caso, y 「書いていただけますか」 lo pide como un favor."
+            "es": "「紹介状」 es la carta que necesita el otro especialista para hacerse cargo de tu caso, y 「書いていただけますか」 la pide como un favor."
           },
           "alt": [
             {"jp": "大学病院に行ってみたいので、紹介状をお願いできますか。", "kana": "だいがくびょういんにいってみたいので、しょうかいじょうをおねがいできますか。", "romaji": "daigaku byouin ni itte mitai node, shoukaijou o onegai dekimasu ka"}
@@ -2552,7 +2552,7 @@
           "kana": "わかりました。しょうかいじょうとけんさのがぞうをごよういしますので、いっしゅうかんほどおまちください。",
           "en": "Very well. I'll prepare the referral letter and your scan images, so please allow about a week.",
           "fr": "Entendu. Je vous prépare la lettre d'orientation et les images de vos examens : comptez environ une semaine.",
-          "es": "Muy bien. Le prepararé el informe de derivación y las imágenes de las pruebas, así que cuente con una semana, más o menos."
+          "es": "Muy bien. Le prepararé la carta de referencia y las imágenes de los estudios, así que cuente con una semana, más o menos."
         },
         "me": {
           "jp": "ありがとうございます。向こうでお話を伺ったら、改めてご相談させてください。",
@@ -2613,7 +2613,7 @@
     "situation": {
       "en": "A supplier's account manager has come to your company to discuss next year's contract. Your company wants a lower unit price.",
       "fr": "Le commercial d'un fournisseur est venu dans ton entreprise pour discuter du contrat de l'an prochain. Ta société veut obtenir un prix unitaire plus bas.",
-      "es": "La persona que lleva la cuenta de tu empresa en un proveedor ha venido a tu empresa para hablar del contrato del año que viene. Tu empresa quiere un precio unitario más bajo."
+      "es": "La persona que lleva la cuenta de tu empresa en un proveedor ha venido a tus oficinas para hablar del contrato del año que viene. Tu empresa quiere un precio unitario más bajo."
     },
     "goal": {
       "en": "Ask for a lower unit price against a larger annual volume, look for a middle ground when the supplier cannot go that low, and take the offer back to your company.",
@@ -2672,7 +2672,7 @@
             "kana": "らいねんはちゅうもんをばいにするから、ねだんをいちわりくらいさげてくれない？",
             "en": "We're doubling our orders next year, so how about knocking ten percent or so off the price?",
             "fr": "L'an prochain, on double les commandes, alors tu nous baisses le prix de dix pour cent, d'accord ?",
-            "es": "El año que viene te doblamos los pedidos, así que, ¿por qué no nos bajas el precio un diez por ciento o así?",
+            "es": "El año que viene te doblamos los pedidos, así que, ¿por qué no nos bajas el precio como un diez por ciento?",
             "why": {
               "en": "「下げてくれない？」 is how you ask a friend for a favour; to a supplier's account manager, in a negotiation, it breaks the formal register.",
               "fr": "「下げてくれない？」, c'est ainsi qu'on demande un service à un ami ; face au commercial d'un fournisseur, en pleine négociation, cela rompt le registre soutenu.",
@@ -2687,7 +2687,7 @@
           "kana": "いちわりですか。しょうじきにもうしあげますと、げんざいりょうひもあがっておりまして、そこまではきびしいです。",
           "en": "Ten percent? To be honest, our raw material costs have risen too, so going that far would be difficult.",
           "fr": "Dix pour cent ? Pour être honnête, le coût des matières premières a augmenté lui aussi : aller jusque-là serait difficile.",
-          "es": "¿Un diez por ciento? Con toda franqueza, el coste de las materias primas también ha subido, así que llegar a tanto sería difícil."
+          "es": "¿Un diez por ciento? Con toda franqueza, el costo de las materias primas también ha subido, así que llegar a tanto sería difícil."
         },
         "me": {
           "jp": "さようでございますか。では、どの程度でしたらご検討いただけますか。",
@@ -2695,7 +2695,7 @@
           "romaji": "sayou de gozaimasu ka. dewa, dono teido deshitara go kentou itadakemasu ka",
           "en": "I see. Then how far would you be willing to consider going?",
           "fr": "Je vois. Jusqu'où pourriez-vous envisager d'aller, alors ?",
-          "es": "Ya veo. Entonces, ¿hasta dónde podrían considerar llegar?",
+          "es": "Ya veo. Entonces, ¿hasta dónde estarían dispuestos a llegar?",
           "note": {
             "en": "「どの程度でしたら」 asks the supplier to name a figure of their own, which turns a no into a how much.",
             "fr": "「どの程度でしたら」 invite le fournisseur à avancer son propre chiffre, ce qui change un non en un « combien ».",
@@ -2961,7 +2961,7 @@
     },
     "steps": [
       {"en": "Ask what the rise is based on", "fr": "Demande ce qui justifie la hausse", "es": "Pregunta qué justifica la subida"},
-      {"en": "Refuse twelve percent in one go", "fr": "Refuse douze pour cent d'un coup", "es": "Rechaza el doce por ciento de golpe"},
+      {"en": "Refuse twelve percent in one go", "fr": "Refuse douze pour cent d'un coup", "es": "No aceptes el doce por ciento de una vez"},
       {"en": "Propose a rise in two stages", "fr": "Propose une hausse en deux temps", "es": "Propón una subida en dos fases"},
       {"en": "Offer a volume commitment", "fr": "Propose un engagement de volume", "es": "Ofrece un compromiso de volumen"},
       {"en": "Take it back to your company", "fr": "Rapporte la proposition à ta société", "es": "Lleva la propuesta a tu empresa"}
@@ -3026,7 +3026,7 @@
           "kana": "げんざいりょうひとぶつりゅうひのこうとうがつづき、へいしゃのどりょくだけではきゅうしゅうしきれず、かいていをよぎなくされたしだいです。",
           "en": "Raw material and logistics costs keep soaring. Our own efforts can no longer absorb it all, and we have been forced to revise our prices.",
           "fr": "Le coût des matières premières et de la logistique ne cesse de flamber : nos seuls efforts ne suffisent plus à l'absorber, et nous voilà contraints de réviser nos prix.",
-          "es": "El coste de las materias primas y de la logística no deja de dispararse; nuestros propios esfuerzos ya no bastan para absorberlo, y nos hemos visto obligados a revisar los precios."
+          "es": "El costo de las materias primas y de la logística no deja de dispararse; nuestros propios esfuerzos ya no bastan para absorberlo, y nos hemos visto obligados a revisar los precios."
         },
         "me": {
           "jp": "ご事情はお察しいたしますが、一度に十二パーセントとなりますと、弊社としてもお受けいたしかねます。",
@@ -3054,7 +3054,7 @@
             "why": {
               "en": "「努力が足りない」 accuses the supplier of not trying, when he has just explained the costs his efforts cannot absorb.",
               "fr": "「努力が足りない」 accuse le fournisseur de ne pas faire d'efforts, alors qu'il vient d'expliquer les coûts que ses efforts ne peuvent plus absorber.",
-              "es": "「努力が足りない」 acusa al proveedor de no esforzarse, cuando acaba de explicar los costes que sus esfuerzos ya no pueden absorber."
+              "es": "「努力が足りない」 acusa al proveedor de no esforzarse, cuando acaba de explicar los costos que sus esfuerzos ya no pueden absorber."
             }
           },
           {
@@ -3191,7 +3191,7 @@
           "note": {
             "en": "「上の者」 speaks of your own superiors humbly before an outsider, and 「今月中に」 tells the supplier when the answer will come.",
             "fr": "「上の者」 désigne humblement ta propre hiérarchie devant un tiers, et 「今月中に」 dit au fournisseur quand viendra la réponse.",
-            "es": "「上の者」 habla con humildad de tus propios superiores ante alguien de fuera, y 「今月中に」 le dice al proveedor cuándo llegará la respuesta."
+            "es": "「上の者」 habla con humildad de tus propios superiores ante alguien de afuera, y 「今月中に」 le dice al proveedor cuándo llegará la respuesta."
           },
           "alt": [
             {"jp": "かしこまりました。本日のお話を社内で検討いたしまして、今月中にご回答いたします。", "kana": "かしこまりました。ほんじつのおはなしをしゃないでけんとういたしまして、こんげつちゅうにごかいとういたします。", "romaji": "kashikomarimashita. honjitsu no ohanashi o shanai de kentou itashimashite, kongetsuchuu ni go kaitou itashimasu"}
@@ -3207,7 +3207,7 @@
             "why": {
               "en": "「上の方々」 honours your own superiors before an outsider; before a supplier they are 「上の者」.",
               "fr": "「上の方々」 honore ta propre hiérarchie devant un tiers ; devant un fournisseur, ce sont 「上の者」.",
-              "es": "「上の方々」 honra a tus propios superiores ante alguien de fuera; ante un proveedor son 「上の者」."
+              "es": "「上の方々」 honra a tus propios superiores ante alguien de afuera; ante un proveedor son 「上の者」."
             }
           },
           {
@@ -3286,7 +3286,7 @@
             "kana": "いや、それはまずいでしょ。ぜんかいだって、さいごのほうでバグがいっぱいでたじゃん。",
             "en": "Nah, that's a bad idea. Last time loads of bugs turned up near the end, didn't they?",
             "fr": "Non mais, c'est une mauvaise idée, ça. La dernière fois, plein de bugs sont sortis vers la fin, non ?",
-            "es": "Uf, no, eso es mala idea. La última vez salieron un montón de fallos al final, ¿o no?",
+            "es": "Uf, no, eso es mala idea. La última vez salieron un montón de errores al final, ¿o no?",
             "why": {
               "en": "「まずいでしょ」 and 「じゃん」 are how you talk to a friend; in a meeting, to the head of department, they are rude, whatever the point.",
               "fr": "「まずいでしょ」 et 「じゃん」, c'est le ton entre amis ; en réunion, face au directeur, c'est impoli, quel que soit le fond.",
@@ -3298,7 +3298,7 @@
             "kana": "さんせいでございます。ただ、テストきかんだけはいちにちたりともちぢめるべきではないとぞんじます。",
             "en": "I am in favour. However, the testing period, of all things, should not be cut by a single day.",
             "fr": "J'y suis favorable. Cependant, la phase de tests, elle, ne doit pas être raccourcie d'un seul jour.",
-            "es": "Estoy a favor. No obstante, el periodo de pruebas, precisamente, no debería acortarse ni un solo día.",
+            "es": "Estoy a favor. No obstante, el período de pruebas, precisamente, no debería acortarse ni un solo día.",
             "why": {
               "en": "「賛成でございます」 backs the cut, then 「縮めるべきではない」 rejects it: the reply contradicts itself.",
               "fr": "「賛成でございます」 approuve la réduction, puis 「縮めるべきではない」 la rejette : la réponse se contredit.",
@@ -3321,7 +3321,7 @@
           "romaji": "zenkai no ririisu de wa, tesuto no nishuume ni juudai na fuguai ga sanken mitsukatte orimasu",
           "en": "In the last release, three serious bugs were found in the second week of testing.",
           "fr": "Lors de la dernière version, trois anomalies graves ont été découvertes pendant la deuxième semaine de tests.",
-          "es": "En el último lanzamiento, se encontraron tres fallos graves en la segunda semana de pruebas.",
+          "es": "En el último lanzamiento, se encontraron tres errores graves en la segunda semana de pruebas.",
           "note": {
             "en": "「二週目に」 points to the very week the plan would cut, so the concern rests on a fact rather than a feeling.",
             "fr": "「二週目に」 désigne justement la semaine que le plan supprimerait : ta réserve repose sur un fait, pas sur une impression.",
@@ -3337,7 +3337,7 @@
             "kana": "ぜんかいのリリースでは、テストのいっしゅうめですべてのふぐあいがみつかっております。",
             "en": "In the last release, every bug was found in the first week of testing.",
             "fr": "Lors de la dernière version, toutes les anomalies ont été découvertes dès la première semaine de tests.",
-            "es": "En el último lanzamiento, todos los fallos se encontraron en la primera semana de pruebas.",
+            "es": "En el último lanzamiento, todos los errores se encontraron en la primera semana de pruebas.",
             "why": {
               "en": "「一週目ですべての不具合が」 says one week found everything, which argues for the cut you have just questioned.",
               "fr": "「一週目ですべての不具合が」 dit qu'une semaine a suffi à tout trouver, ce qui plaide pour la réduction que tu viens de contester.",
@@ -3349,7 +3349,7 @@
             "kana": "テストきかんは、もともとにしゅうかんのよていでございました。",
             "en": "The testing period was originally planned to last two weeks.",
             "fr": "La phase de tests devait durer deux semaines, à l'origine.",
-            "es": "En un principio, estaba previsto que el periodo de pruebas durara dos semanas.",
+            "es": "En un principio, estaba previsto que el período de pruebas durara dos semanas.",
             "why": {
               "en": "「もともと二週間の予定でございました」 tells the head of department what he has just said himself, when he asked what your 「懸念」 is.",
               "fr": "「もともと二週間の予定でございました」 répète au directeur ce qu'il vient de dire lui-même, alors qu'il te demandait quel est ton 「懸念」.",
@@ -3364,7 +3364,7 @@
           "kana": "それはわかる。でも、リリースびはもうおきゃくさまにやくそくしているんだ。なにかあんはあるのか。",
           "en": "I see that. But we've already promised the release date to our customers. Do you have a proposal?",
           "fr": "Je comprends. Mais la date de sortie, on l'a déjà promise aux clients. Tu as une proposition ?",
-          "es": "Lo entiendo. Pero ya hemos prometido la fecha de lanzamiento a los clientes. ¿Tienes alguna propuesta?"
+          "es": "Lo entiendo. Pero ya les prometimos la fecha de lanzamiento a los clientes. ¿Tienes alguna propuesta?"
         },
         "me": {
           "jp": "でしたら、主要な機能だけを予定どおりリリースし、残りは二週間後に出すのはいかがでしょうか。",
@@ -3490,7 +3490,7 @@
             "kana": "はい。ぶちょうがもうしあげたとおり、わたしからえいぎょうぶにそうだんいたします。",
             "en": "Yes. As you humbly said, I will take it up with the sales department myself.",
             "fr": "Oui. Comme vous l'avez humblement dit, je vais en parler moi-même au service commercial.",
-            "es": "Sí. Como usted ha dicho humildemente, yo me encargo de hablarlo con el departamento de ventas.",
+            "es": "Sí. Como usted dijo humildemente, yo me encargo de hablarlo con el departamento de ventas.",
             "why": {
               "en": "「申し上げた」 is humble and lowers the head of department, whose words take the honorific 「おっしゃった」.",
               "fr": "「申し上げた」 est humble et abaisse le directeur, dont les paroles veulent l'honorifique 「おっしゃった」.",
@@ -3517,7 +3517,7 @@
       "kana": "たのむよ。いいていあんだった。",
       "en": "I'm counting on you. That was a good proposal.",
       "fr": "Je compte sur toi. C'était une bonne proposition.",
-      "es": "Cuento contigo. Ha sido una buena propuesta."
+      "es": "Cuento contigo. Fue una buena propuesta."
     }
   },
   {
@@ -3527,7 +3527,7 @@
     "situation": {
       "en": "A colleague's father has died, and you have come to the wake at the funeral hall. It is a small wake with no reception desk, and your colleague greets the guests at the door.",
       "fr": "Le père d'un collègue est décédé, et tu te rends à la veillée funèbre, au funérarium. La veillée se tient dans l'intimité, sans table d'accueil : ton collègue reçoit lui-même les visiteurs à l'entrée.",
-      "es": "Ha fallecido el padre de tu colega, y vas al velatorio en la funeraria. Es un velatorio íntimo, sin mesa de recepción, y tu colega recibe en persona a quienes llegan a la puerta."
+      "es": "Falleció el padre de tu colega, y vas al velatorio en la funeraria. Es un velatorio íntimo, sin mesa de recepción, y tu colega recibe en persona a quienes llegan a la puerta."
     },
     "goal": {
       "en": "Offer your condolences, hand over your condolence money, say a few words of comfort to your colleague and take your leave without lingering.",
@@ -3536,7 +3536,7 @@
     },
     "steps": [
       {"en": "Offer your condolences", "fr": "Présente tes condoléances", "es": "Da el pésame"},
-      {"en": "Hand over your offering", "fr": "Remets ton enveloppe", "es": "Entrega tu sobre de ofrenda"},
+      {"en": "Hand over your offering", "fr": "Remets ton enveloppe", "es": "Entrega tu sobre de condolencias"},
       {"en": "Comfort your colleague", "fr": "Réconforte ton collègue", "es": "Consuela a tu colega"},
       {"en": "Take a little of the meal", "fr": "Goûte un peu au repas", "es": "Toma un poco de la comida"},
       {"en": "Take your leave", "fr": "Prends congé", "es": "Despídete"}
@@ -3562,7 +3562,7 @@
           "note": {
             "en": "「ご愁傷様でございます」 is the set phrase of condolence, said quietly and left at that: at a wake, few words are the respectful ones.",
             "fr": "「ご愁傷様でございます」 est la formule de condoléances consacrée, dite à voix basse et sans rien ajouter : à une veillée, le respect tient en peu de mots.",
-            "es": "「ご愁傷様でございます」 es la fórmula fija de pésame, dicha en voz baja y sin añadir nada: en un velatorio, el respeto cabe en pocas palabras."
+            "es": "「ご愁傷様でございます」 es la fórmula fija de pésame, dicha en voz baja y sin agregar nada: en un velatorio, el respeto cabe en pocas palabras."
           },
           "alt": [
             {"jp": "このたびは、心よりお悔やみ申し上げます。", "kana": "このたびは、こころよりおくやみもうしあげます。", "romaji": "kono tabi wa, kokoro yori okuyami moushiagemasu"}
@@ -3625,7 +3625,7 @@
             "kana": "つまらないものですが、みなさんでめしあがってください。",
             "en": "It's nothing much, but please do all enjoy eating it.",
             "fr": "Ce n'est pas grand-chose, mais régalez-vous tous ensemble.",
-            "es": "No es gran cosa, pero cómanlo entre todos, que aproveche.",
+            "es": "No es gran cosa, pero cómanlo entre todos, buen provecho.",
             "why": {
               "en": "「皆さんで召し上がってください」 is how a box of sweets is handed over on a visit; condolence money is offered to the departed.",
               "fr": "「皆さんで召し上がってください」, c'est ainsi qu'on offre une boîte de gâteaux en visite ; l'enveloppe de condoléances s'offre au défunt.",
@@ -3727,7 +3727,7 @@
             "kana": "そうですね。では、なるべくはやくかいしゃにでてきていただけると、みんなもたすかります。",
             "en": "Yes, well. It would help everyone if you could come back to the office as soon as possible.",
             "fr": "C'est vrai. Ce serait bien pour tout le monde que vous reveniez au bureau le plus tôt possible.",
-            "es": "Ya, bueno. Si pudiera volver a la oficina cuanto antes, a todos nos vendría bien.",
+            "es": "Sí, bueno. Si pudiera volver a la oficina cuanto antes, a todos nos vendría bien.",
             "why": {
               "en": "「なるべく早く会社に出てきて」 presses a grieving colleague back to work, when what they need now is time with their family.",
               "fr": "「なるべく早く会社に出てきて」 presse un collègue en deuil de revenir travailler, alors qu'il a besoin de temps auprès des siens.",
@@ -3829,7 +3829,7 @@
             "kana": "きょうはおあいできて、うれしかったです。それではしつれいいたします。",
             "en": "It was lovely to see you today. I'll be going now.",
             "fr": "Ça m'a fait plaisir de vous voir aujourd'hui. Je vous laisse.",
-            "es": "Me ha encantado que nos viéramos hoy. Bueno, me voy.",
+            "es": "Me encantó que nos viéramos hoy. Bueno, me voy.",
             "why": {
               "en": "「うれしかったです」 says goodbye on a happy note, glad of the evening, which has no place before a grieving family.",
               "fr": "「うれしかったです」 dit au revoir sur une note joyeuse, ce qui n'a pas sa place devant une famille en deuil.",
@@ -3866,7 +3866,7 @@
     "situation": {
       "en": "It is your annual review, and your section manager has called you into the interview room. He has praise for your year, and one criticism.",
       "fr": "C'est ton entretien annuel, et ton chef de service t'a fait venir dans la salle d'entretien. Il a des compliments sur ton année, et une critique.",
-      "es": "Es tu evaluación anual, y la persona responsable de tu sección te ha llamado a la sala de entrevistas. Tiene elogios para tu año, y una crítica."
+      "es": "Es tu evaluación anual, y tu jefe de sección te ha llamado a la sala de entrevistas. Elogia tu trabajo de este año, pero también tiene una crítica."
     },
     "goal": {
       "en": "Take the praise and the criticism of your late reports well, propose a remedy, ask what you need for the next grade and agree on your goals for next year.",
@@ -3880,7 +3880,7 @@
       {"en": "Ask about the next grade", "fr": "Demande ce qu'il faut pour monter", "es": "Pregunta por el siguiente nivel"},
       {"en": "Agree on your goals", "fr": "Fixe tes objectifs avec lui", "es": "Acuerda tus objetivos"}
     ],
-    "them": {"en": "Section manager", "fr": "Chef de service", "es": "Responsable de sección"},
+    "them": {"en": "Section manager", "fr": "Chef de service", "es": "Jefe de sección"},
     "register": "formal",
     "turns": [
       {
@@ -3889,7 +3889,7 @@
           "kana": "じゃあ、はじめようか。まず、ことしのしんシステムのどうにゅうは、ほんとうによくやってくれたね。おきゃくさまのひょうばんもいいよ。",
           "en": "Right, let's begin. First, you did a really good job bringing in the new system this year. The customers think highly of it, too.",
           "fr": "Bon, commençons. D'abord, la mise en place du nouveau système cette année, tu as vraiment fait du bon travail. Les clients en sont très contents.",
-          "es": "Bueno, empecemos. Primero, con la implantación del nuevo sistema este año hiciste un trabajo excelente. Los clientes también lo valoran mucho."
+          "es": "Bueno, empecemos. Primero, con la implementación del nuevo sistema este año hiciste un trabajo excelente. Los clientes también lo valoran mucho."
         },
         "me": {
           "jp": "ありがとうございます。課長をはじめ、チームの皆さんに支えていただいたおかげです。",
@@ -3897,11 +3897,11 @@
           "romaji": "arigatou gozaimasu. kachou o hajime, chiimu no minasan ni sasaete itadaita okage desu",
           "en": "Thank you. It is thanks to the support of the whole team, starting with you.",
           "fr": "Merci beaucoup. C'est grâce au soutien de toute l'équipe, à commencer par vous.",
-          "es": "Muchas gracias. Ha sido gracias al apoyo de todo el equipo, empezando por usted.",
+          "es": "Muchas gracias. Fue gracias al apoyo de todo el equipo, empezando por usted.",
           "note": {
             "en": "「おかげです」 passes the credit on to others, and 「課長をはじめ」 names your manager first among them, as modesty before praise asks.",
             "fr": "「おかげです」 reporte le mérite sur les autres, et 「課長をはじめ」 nomme ton chef en premier, comme le veut la modestie face aux compliments.",
-            "es": "「おかげです」 traslada el mérito a los demás, y 「課長をはじめ」 nombra en primer lugar a tu responsable, como pide la modestia ante un elogio."
+            "es": "「おかげです」 traslada el mérito a los demás, y 「課長をはじめ」 nombra en primer lugar a tu jefe, como pide la modestia ante un elogio."
           },
           "alt": [
             {"jp": "ありがとうございます。チームの皆さんのご協力があったからこそです。", "kana": "ありがとうございます。チームのみなさんのごきょうりょくがあったからこそです。", "romaji": "arigatou gozaimasu. chiimu no minasan no go kyouryoku ga atta kara koso desu"}
@@ -3917,7 +3917,7 @@
             "why": {
               "en": "「申し訳ございません」 and 「二度とこのようなことのないよう」 answer a reproach, and your manager has just praised you.",
               "fr": "「申し訳ございません」 et 「二度とこのようなことのないよう」 répondent à un reproche, alors que ton chef vient de te féliciter.",
-              "es": "「申し訳ございません」 y 「二度とこのようなことのないよう」 responden a un reproche, y tu responsable acaba de elogiarte."
+              "es": "「申し訳ございません」 y 「二度とこのようなことのないよう」 responden a un reproche, y tu jefe acaba de elogiarte."
             }
           },
           {
@@ -3991,7 +3991,7 @@
           "kana": "うん。で、どうしたらかいぜんできるとおもう？",
           "en": "Mm. So how do you think you could improve?",
           "fr": "Hmm. Et comment penses-tu pouvoir t'améliorer ?",
-          "es": "Ya. ¿Y cómo crees que podrías mejorar?"
+          "es": "Bien. ¿Y cómo crees que podrías mejorar?"
         },
         "me": {
           "jp": "今後は、締め切りの二日前に下書きをお送りし、遅れそうなときは早めにご相談いたします。",
@@ -4019,7 +4019,7 @@
             "why": {
               "en": "「課長から私にご連絡いただけますか」 hands your deadlines to your manager, when the remedy he asked for is yours to find.",
               "fr": "「課長から私にご連絡いただけますか」 confie tes échéances à ton chef, alors que la solution qu'il demande dépend de toi.",
-              "es": "「課長から私にご連絡いただけますか」 deja tus plazos en manos de tu responsable, cuando la solución que te piden depende de ti."
+              "es": "「課長から私にご連絡いただけますか」 deja tus plazos en manos de tu jefe, cuando la solución que te piden depende de ti."
             }
           },
           {
@@ -4054,7 +4054,7 @@
           "note": {
             "en": "「何が足りないでしょうか」 asks what you lack rather than what you are owed, the modest way to raise promotion with your manager.",
             "fr": "「何が足りないでしょうか」 demande ce qui te manque plutôt que ce qu'on te doit, la façon modeste d'aborder une promotion avec ton chef.",
-            "es": "「何が足りないでしょうか」 pregunta qué te falta y no qué se te debe, la forma modesta de plantear un ascenso a tu responsable."
+            "es": "「何が足りないでしょうか」 pregunta qué te falta y no qué se te debe, la forma modesta de plantear un ascenso a tu jefe."
           },
           "alt": [
             {"jp": "はい。次の等級に上がるためには、どのような点が求められるのでしょうか。", "kana": "はい。つぎのとうきゅうにあがるためには、どのようなてんがもとめられるのでしょうか。", "romaji": "hai. tsugi no toukyuu ni agaru tame ni wa, dono you na ten ga motomerareru no deshou ka"}
@@ -4070,7 +4070,7 @@
             "why": {
               "en": "「課長に何が足りない」 asks what your manager lacks, an insult, when the grade in question is yours.",
               "fr": "「課長に何が足りない」 demande ce qui manque à ton chef, une insulte, alors que l'échelon en question est le tien.",
-              "es": "「課長に何が足りない」 pregunta qué le falta a tu responsable, un insulto, cuando el nivel en cuestión es el tuyo."
+              "es": "「課長に何が足りない」 pregunta qué le falta a tu jefe, un insulto, cuando el nivel en cuestión es el tuyo."
             }
           },
           {
@@ -4093,7 +4093,7 @@
           "kana": "そうだな。つぎのとうきゅうでは、こうはいのいくせいがもとめられる。らいきはしんじんをひとりまかせようとおもうんだけど、どうかな。",
           "en": "Let me see. At the next grade, you're expected to train the juniors. Next term I'm thinking of putting a new hire in your care. How does that sound?",
           "fr": "Voyons. À l'échelon suivant, on attend de toi que tu formes les plus jeunes. L'an prochain, je pense te confier un nouvel arrivant. Qu'en dis-tu ?",
-          "es": "Veamos. En el siguiente nivel, se espera que formes a los más jóvenes. El próximo periodo pienso dejar a tu cargo a una persona recién incorporada. ¿Qué te parece?"
+          "es": "Veamos. En el siguiente nivel, se espera que formes a los más jóvenes. El próximo período pienso dejar a tu cargo a una persona recién incorporada. ¿Qué te parece?"
         },
         "me": {
           "jp": "ありがとうございます。ぜひやらせていただきます。",
@@ -4117,7 +4117,7 @@
             "kana": "では、らいきはわたしのしごとをしんじんのかたにおまかせしてよろしいのですね。",
             "en": "So next term I can leave my work to the new hire, then?",
             "fr": "L'an prochain, je pourrai donc confier mon travail au nouvel arrivant, c'est bien cela ?",
-            "es": "Entonces, el próximo periodo puedo dejar mi trabajo en manos de la persona recién incorporada, ¿verdad?",
+            "es": "Entonces, el próximo período puedo dejar mi trabajo en manos de la persona recién incorporada, ¿verdad?",
             "why": {
               "en": "「新人を一人任せよう」 puts a new hire in your care, not your work in the new hire's hands.",
               "fr": "「新人を一人任せよう」 te confie un nouvel arrivant, et non ton travail à ce nouvel arrivant.",
@@ -4144,7 +4144,7 @@
           "kana": "よし。じゃあらいきのもくひょうは、しんじんのいくせいと、ほうこくしょをきげんないにだすこと。このふたつでいいかな。",
           "en": "Good. So next term's goals are training the new hire and handing your reports in on time. Are you happy with those two?",
           "fr": "Bien. Alors tes objectifs de l'an prochain : former le nouvel arrivant, et rendre tes rapports dans les délais. Ces deux-là, ça te va ?",
-          "es": "Bien. Entonces, los objetivos del próximo periodo son formar a la persona nueva y entregar los informes a tiempo. ¿Te parecen bien estos dos?"
+          "es": "Bien. Entonces, los objetivos del próximo período son formar a la persona nueva y entregar los informes a tiempo. ¿Te parecen bien estos dos?"
         },
         "me": {
           "jp": "はい、異存はございません。来週の月曜日までに、目標シートにまとめて提出いたします。",
@@ -4152,7 +4152,7 @@
           "romaji": "hai, izon wa gozaimasen. raishuu no getsuyoubi made ni, mokuhyou shiito ni matomete teishutsu itashimasu",
           "en": "Yes, I have no objection. I will set them out in my goal sheet and hand it in by next Monday.",
           "fr": "Oui, je n'y vois aucune objection. Je les reporterai sur ma fiche d'objectifs et je vous la remettrai d'ici lundi prochain.",
-          "es": "Sí, no tengo ninguna objeción. Los recogeré en la hoja de objetivos y se la entregaré a más tardar el lunes que viene.",
+          "es": "Sí, no tengo ninguna objeción. Los anotaré en la hoja de objetivos y se la entregaré a más tardar el lunes que viene.",
           "note": {
             "en": "「異存はございません」 agrees formally, and 「来週の月曜日までに」 puts a date on the goal sheet, the first deadline to keep.",
             "fr": "「異存はございません」 donne ton accord dans les formes, et 「来週の月曜日までに」 fixe une date à la fiche d'objectifs, la première échéance à tenir.",
@@ -4180,11 +4180,11 @@
             "kana": "うん、いいよ。じゃあ、らいしゅうまでにシートにまとめてだしとくね。",
             "en": "Yeah, fine. I'll put it in the sheet and get it to you by next week, then.",
             "fr": "Ouais, ça marche. Je mets ça sur la fiche et je te la rends d'ici la semaine prochaine.",
-            "es": "Sí, vale. Pues lo pongo en la hoja y te la paso la semana que viene.",
+            "es": "Sí, está bien. Pues lo pongo en la hoja y te la paso para la semana que viene.",
             "why": {
               "en": "「いいよ」 and 「出しとくね」 are how you talk to a friend; in your review, to your manager, they break the formal register.",
               "fr": "「いいよ」 et 「出しとくね」, c'est le ton entre amis ; en entretien, face à ton chef, cela rompt le registre soutenu.",
-              "es": "「いいよ」 y 「出しとくね」 son el tono entre amigos; en tu evaluación, ante tu responsable, rompen el registro formal."
+              "es": "「いいよ」 y 「出しとくね」 son el tono entre amigos; en tu evaluación, ante tu jefe, rompen el registro formal."
             }
           }
         ]
@@ -4205,7 +4205,7 @@
     "situation": {
       "en": "You have decided to leave your company at the end of next month, and you have asked your department head for a word in a meeting room. He has just sat down.",
       "fr": "Tu as décidé de quitter ton entreprise à la fin du mois prochain, et tu as demandé à ton directeur de te recevoir en salle de réunion. Il vient de s'asseoir.",
-      "es": "Has decidido dejar tu empresa a finales del mes que viene, y has pedido a la persona que dirige tu departamento que te reciba en una sala de reuniones. Acaba de sentarse."
+      "es": "Decidiste dejar tu empresa a finales del mes que viene, y le pediste a la persona que dirige tu departamento que te recibiera en una sala de reuniones. Acaba de sentarse."
     },
     "goal": {
       "en": "Tell your department head you are leaving at the end of next month, give a reason that blames no one, turn down his offer of a transfer or a raise gracefully, and offer a full handover.",
@@ -4472,7 +4472,7 @@
             "why": {
               "en": "「退職したあとで」 sends the plan once you have gone, when the handover has to happen while you are still here.",
               "fr": "「退職したあとで」 envoie le planning après ton départ, alors que la passation doit se faire pendant que tu es encore là.",
-              "es": "「退職したあとで」 envía el calendario cuando ya te has ido, cuando el traspaso tiene que hacerse mientras sigues aquí."
+              "es": "「退職したあとで」 envía el calendario una vez que te hayas ido, cuando el traspaso tiene que hacerse mientras sigues aquí."
             }
           }
         ]
@@ -4483,7 +4483,7 @@
       "kana": "わかった。しょうじき、さびしくなるよ。",
       "en": "All right. Honestly, we'll miss you.",
       "fr": "D'accord. Franchement, tu vas nous manquer.",
-      "es": "De acuerdo. Sinceramente, te vamos a echar de menos."
+      "es": "De acuerdo. Sinceramente, te vamos a extrañar."
     }
   },
   {
@@ -4493,12 +4493,12 @@
     "situation": {
       "en": "A company has offered you a job, but you have accepted another one. You call its HR department to decline, and the HR manager who handled your application picks up.",
       "fr": "Une entreprise t'a fait une offre d'embauche, mais tu en as accepté une autre. Tu appelles ses ressources humaines pour la décliner, et le responsable qui a suivi ta candidature décroche.",
-      "es": "Una empresa te ha hecho una oferta de empleo, pero has aceptado otra. Llamas a su departamento de recursos humanos para rechazarla, y contesta la persona que llevó tu candidatura."
+      "es": "Una empresa te hizo una oferta de empleo, pero aceptaste otra. Llamas a su departamento de recursos humanos para rechazarla, y contesta la persona que llevó tu candidatura."
     },
     "goal": {
       "en": "Decline the offer with a sincere apology, give a reason that disparages no one, hold firm when you are asked whether anything could change your mind, and thank them for their time.",
       "fr": "Décline l'offre en t'excusant sincèrement, donne une raison qui ne dénigre personne, maintiens ta décision quand on te demande si quelque chose pourrait te faire changer d'avis, et remercie pour le temps qu'on t'a consacré.",
-      "es": "Rechaza la oferta con una disculpa sincera, da un motivo que no desprestigie a nadie, mantén tu decisión cuando te pregunten si algo podría hacerte cambiar de opinión, y agradece el tiempo que te han dedicado."
+      "es": "Rechaza la oferta con una disculpa sincera, da un motivo que no desprestigie a nadie, mantén tu decisión cuando te pregunten si algo podría hacerte cambiar de opinión, y agradece el tiempo que te dedicaron."
     },
     "steps": [
       {"en": "Say who you are", "fr": "Présente-toi", "es": "Preséntate"},
@@ -4507,7 +4507,7 @@
       {"en": "Hold firm", "fr": "Maintiens ta décision", "es": "Mantén tu decisión"},
       {"en": "Thank them for their time", "fr": "Remercie pour le temps accordé", "es": "Agradece el tiempo dedicado"}
     ],
-    "them": {"en": "HR manager", "fr": "Responsable RH", "es": "Responsable de Recursos Humanos"},
+    "them": {"en": "HR manager", "fr": "Responsable RH", "es": "Gerente de Recursos Humanos"},
     "register": "formal",
     "turns": [
       {
@@ -4626,7 +4626,7 @@
           "romaji": "jibun no tekisei o yoku kangaeta kekka, betsu no kaisha ni nyuusha suru koto o kimemashita",
           "en": "After thinking carefully about where my strengths lie, I have decided to join another company.",
           "fr": "Après avoir bien réfléchi à mes aptitudes, j'ai décidé d'entrer dans une autre entreprise.",
-          "es": "Después de pensar bien en mis aptitudes, he decidido entrar en otra empresa.",
+          "es": "Después de pensar bien en mis aptitudes, decidí entrar en otra empresa.",
           "note": {
             "en": "「自分の適性」 grounds the choice in yourself, so the reason says nothing against the company you are turning down.",
             "fr": "「自分の適性」 fonde le choix sur toi-même, si bien que la raison ne dit rien contre l'entreprise que tu refuses.",
@@ -4654,7 +4654,7 @@
             "kana": "おんしゃがずっとだいいちしぼうでしたので、べつのかいしゃににゅうしゃすることをきめました。",
             "en": "Your company was always my first choice, so I have decided to join another one.",
             "fr": "Votre entreprise a toujours été mon premier choix, alors j'ai décidé d'entrer dans une autre.",
-            "es": "Su empresa siempre fue mi primera opción, así que he decidido entrar en otra.",
+            "es": "Su empresa siempre fue mi primera opción, así que decidí entrar en otra.",
             "why": {
               "en": "「第一志望でしたので」 gives your first choice as the reason for choosing another: the reason argues against what it explains.",
               "fr": "「第一志望でしたので」 donne ton premier choix pour raison d'en choisir un autre : la raison contredit ce qu'elle explique.",
@@ -4697,7 +4697,7 @@
             "why": {
               "en": "「条件次第では、考え直しても」 reopens a choice already made, when you have accepted another company's offer.",
               "fr": "「条件次第では、考え直しても」 rouvre un choix déjà fait, alors que tu as accepté l'offre d'une autre entreprise.",
-              "es": "「条件次第では、考え直しても」 reabre una elección ya hecha, cuando has aceptado la oferta de otra empresa."
+              "es": "「条件次第では、考え直しても」 reabre una elección ya hecha, cuando ya aceptaste la oferta de otra empresa."
             }
           },
           {
@@ -4705,7 +4705,7 @@
             "kana": "もうきめたことですので、なんどきかれてもこたえはおなじだともうしあげております。",
             "en": "I've already made up my mind, so however many times you ask, I'm telling you the answer is the same.",
             "fr": "C'est décidé : vous pouvez me le demander autant de fois que vous voudrez, je vous dis que la réponse est la même.",
-            "es": "Ya lo he decidido, así que, por muchas veces que me lo pregunten, le digo que la respuesta es la misma.",
+            "es": "Ya lo decidí, así que, por muchas veces que me lo pregunten, le digo que la respuesta es la misma.",
             "why": {
               "en": "「何度聞かれても」 treats one courteous question as badgering, when holding firm still owes the offer thanks.",
               "fr": "「何度聞かれても」 traite une question courtoise comme du harcèlement, alors que maintenir sa décision n'empêche pas de remercier de l'offre.",
@@ -4781,7 +4781,7 @@
     "situation": {
       "en": "You work in your company's press office, and a newspaper reporter calls about a merger reported this morning. Talks are in fact under way, but nothing has been announced: you may neither confirm nor deny.",
       "fr": "Tu travailles au service de presse de ton entreprise, et un journaliste appelle au sujet d'une fusion évoquée ce matin dans la presse. Des discussions sont bel et bien en cours, mais rien n'a été annoncé : tu ne peux ni confirmer ni démentir.",
-      "es": "Trabajas en el departamento de prensa de tu empresa, y te llaman de un periódico por una fusión que ha salido esta mañana en los medios. De hecho hay negociaciones en curso, pero no se ha anunciado nada: no puedes ni confirmar ni desmentir."
+      "es": "Trabajas en el departamento de prensa de tu empresa, y te llaman de un periódico por una fusión que salió esta mañana en los medios. De hecho hay negociaciones en curso, pero no se ha anunciado nada: no puedes ni confirmar ni desmentir."
     },
     "goal": {
       "en": "Keep a courteous tone while the reporter presses: neither confirm nor deny the merger, point to the official announcement, decline to speculate and offer to pass questions on.",
@@ -4804,7 +4804,7 @@
           "kana": "まいあさしんぶんのやまもとともうします。けさ、おんしゃとやまだしょうじのがっぺいがいちぶでほうじられましたが、じじつでしょうか。",
           "en": "This is Yamamoto from the Maiasa Shimbun. This morning some outlets reported a merger between your company and Yamada Trading. Is it true?",
           "fr": "Yamamoto, du Maiasa Shimbun. Ce matin, certains médias ont annoncé une fusion entre votre société et Yamada Trading. Est-ce exact ?",
-          "es": "Le habla Yamamoto, del Maiasa Shimbun. Esta mañana, algunos medios han informado de una fusión entre su empresa y Yamada Trading. ¿Es cierto?"
+          "es": "Le habla Yamamoto, del Maiasa Shimbun. Esta mañana, algunos medios informaron sobre una fusión entre su empresa y Yamada Trading. ¿Es cierto?"
         },
         "me": {
           "jp": "お問い合わせありがとうございます。その件につきましては、弊社から発表したものではございません。",
@@ -4883,7 +4883,7 @@
             "why": {
               "en": "「協議していることは事実です」 confirms the talks, the very thing the reporter was fishing for.",
               "fr": "「協議していることは事実です」 confirme les discussions, cela même que le journaliste cherchait à te faire dire.",
-              "es": "「協議していることは事実です」 confirma las negociaciones, justo lo que se buscaba sonsacarte."
+              "es": "「協議していることは事実です」 confirma las negociaciones, justo lo que intentaban sonsacarte."
             }
           },
           {
@@ -4942,7 +4942,7 @@
             "kana": "そんなでたらめ、いったいだれがいってるんですか。",
             "en": "Who on earth is spreading rubbish like that?",
             "fr": "Mais qui donc raconte des âneries pareilles ?",
-            "es": "¿Pero quién demonios va diciendo semejantes tonterías?",
+            "es": "¿Pero quién demonios anda diciendo semejantes tonterías?",
             "why": {
               "en": "「でたらめ」 and 「いったい誰が」 snap at the reporter; however hard he presses, a press officer stays courteous.",
               "fr": "「でたらめ」 et 「いったい誰が」 rabrouent le journaliste ; si fort qu'il insiste, un chargé de presse garde un ton courtois.",
@@ -4965,7 +4965,7 @@
           "romaji": "moushiwake gozaimasen. go shitsumon deshitara, watashi ga uketamawatte tantou no mono ni moushitsutaemasu",
           "en": "I am sorry. If you have questions, I will take them myself and pass them on to the people concerned.",
           "fr": "Je regrette. Si vous avez des questions, je les prends moi-même et je les transmets aux personnes concernées.",
-          "es": "Lo siento mucho. Si tiene alguna pregunta, me encargo de recogerla y transmitírsela a quien corresponda.",
+          "es": "Lo siento mucho. Si tiene alguna pregunta, yo la anoto y se la transmito a quien corresponda.",
           "note": {
             "en": "「申し訳ございません」 turns down the comment without a blunt no, and 「承って…申し伝えます」 humbly offers to pass the questions on.",
             "fr": "「申し訳ございません」 refuse le commentaire sans un non abrupt, et 「承って…申し伝えます」 propose humblement de transmettre les questions.",
@@ -4985,7 +4985,7 @@
             "why": {
               "en": "「おっしゃらない」 raises your own president before an outsider, when people of your own company take no honorific before a reporter.",
               "fr": "「おっしゃらない」 élève ton propre président devant un tiers, alors que devant un journaliste, les gens de ta maison ne reçoivent aucun honorifique.",
-              "es": "「おっしゃらない」 eleva a tu propia presidencia ante alguien de fuera, cuando ante la prensa la gente de tu empresa no lleva honorífico."
+              "es": "「おっしゃらない」 eleva a tu propia presidencia ante alguien de afuera, cuando ante la prensa la gente de tu empresa no lleva honorífico."
             }
           },
           {

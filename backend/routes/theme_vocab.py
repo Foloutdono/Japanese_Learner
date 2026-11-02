@@ -58,8 +58,8 @@ GLOSSES = VOCAB_GLOSSES
 
 def _entry_meaning(entry: dict, lang: str) -> str:
     """The theme's own gloss: content/theme_lists.py writes every word's
-    meaning in the sense it has in the theme, in English and in French,
-    and a pool word's in Spanish too (plan 291). The theme's own line
+    meaning in the sense it has in the theme, in English, French and
+    Spanish (plan 291). The theme's own line
     matters most for a JMdict-pool word, which VOCAB_FR and VOCAB_ES (the
     course's tables, keyed by written form) do not cover and which used
     to fall back to JMdict's English. A row without the learner's gloss
