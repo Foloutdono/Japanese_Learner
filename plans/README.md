@@ -7374,5 +7374,7 @@ Found while writing plan 298's seeds: the level gate counted 何でも, "anythin
 | Phase | What | Status |
 |---|---|---|
 | 299 | **The merge stops where で belongs to what follows** (`card_lookup._de_belongs_after`): the segments a sentence is graded on (`find_segments_in_text`, read by `level_mix`, `difficulty.estimate_level` and the breakdown's level) no longer merge a word across the で of でも or the copula's で. Diffed over the 8,472 sentences the app teaches: 10 move, all misreadings put right (eight 何でも, 何であれ, and 下りた所でございます, which read ところで, "by the way"); no "why" moves. `LOCAL_REV` 32 | DONE |
+| 299 | **One rule for 何で, both paths** (the owner: fix the gaps): `card_lookup._why` decides whether 何 + the particle で is なんで, "why", and the breakdown (`_what_word`) and the segments both ask it. A way of going said in the negative asks why (`_negated`: 何で来なかったの？, 何で連絡しなかったの？), where 何で来ましたか still asks "by what", now in the segments too; the segments read kana なんで as "why", not 何 "what". Diffed over the 8,472 sentences: one moves (なんで急に上がるわけ？'s segment; no level) | DONE |
 
-Open: the breakdown's own `_what_word` reads a kanji 何で before a way of going as "by what", so 何で来なかったの？ ("why didn't you come?") shows 何 + で there while the gate reads "why"; the legacy substring scan, used only without a tokenizer (when `level_mix` gives no verdict anyway), still finds 何で inside 何でも.
+The second gap named here was not one: without a tokenizer the scan takes the longest word, and the deck's 何でも ("anything", N3) has always matched before 何で; a test now holds it. Open: the deck files the word 何でも at N3 and the catalogue teaches 何でも／誰でも at N4; the breakdown keeps the point in its pieces (plan 272), so no count reads that card.
+

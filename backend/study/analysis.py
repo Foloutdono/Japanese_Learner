@@ -2140,6 +2140,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 32: the level read off the segments no longer takes 何でも, "anything",
 # or 何であれ for the N3 何で, "why", nor 所 + the copula's で for ところで
 # (plan 299): 兄は何でも食べます is graded N4, its point's level, not N3.
+# The breakdown and the segments read 何で by one rule (card_lookup._why):
+# a way of going said in the negative asks why (何で来なかったの？), and
+# 何で行きますか's "by what" is no N3 word in the segments either.
 LOCAL_REV = 32
 
 
