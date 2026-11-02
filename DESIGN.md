@@ -168,7 +168,8 @@ nothing else — any other part of the chrome stays sumi and its two inks.
 
 **The language flags carry their countries' colours** (plan 291, the owner's
 choice, for clarity). Where a learner picks a language (Réglages › Affichage,
-the landing page's switch and its phone menu), a small flag stands before the
+the landing page's switch and its phone menu, the privacy policy's and the
+account-deletion page's switches), a small flag stands before the
 language's name or code: drawn from `components/ui/flags.js`, never an emoji
 (Windows has none and prints the letters), the height of the text beside it
 and ringed in `--surface-line`. It licenses no other picture of a country, and
