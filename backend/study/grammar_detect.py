@@ -383,6 +383,8 @@ _SHORT_FORMS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
     "〜を通じて": (("を通じ", ("を通し", "をとおし")), ("をつうじ", ("をとおし",))),
     "〜に限って": (("に限って", ("に限り", "にかぎり")),),
     "〜通りに": (("どおりに", ("どおり",)),),
+    # (何だろう: the same "what", spelled in its kanji, plan 296)
+    "〜でなくてなんだろう": (("なんだろう", ("何だろう",)),),
     "〜とあれば": (("とあれば", ("とあらば",)),),
     "〜じゃないか": (("じゃないか", ("ではないか", "じゃありませんか", "ではありませんか")),),
     "〜ことがある": (("ことがあ", ("ことはあ", "こともあ")), ("事があ", ("事はあ", "事もあ"))),
@@ -6230,8 +6232,13 @@ def _asks_no_invitation(tokens, s: int) -> bool:
     for j in range(head, k):
         u = tokens[j]
         nxt = tokens[j + 1] if j + 1 < len(tokens) else None
-        if (u.lemma in _QUESTION_LEMMAS or u.surface in ("どこ", "だれ", "誰", "いつ", "どれ", "なぜ", "どうして")) \
-                and not (nxt is not None and nxt.surface == "か"):
+        if u.surface in ("まだ", "未だ") and u.pos == "adverb":
+            return True                     # (まだ届きませんか: "hasn't it come yet?")
+        if (u.lemma in _QUESTION_LEMMAS or u.surface in ("どこ", "だれ", "誰", "いつ", "どれ", "なぜ", "どうして", "どの",
+                                                         "どんな", "どちら", "どっち", "いくつ", "いくら")) \
+                and not (nxt is not None and nxt.surface in ("か", "とか", "なり", "でも", "も", "かしら", "やら")) \
+                and not (nxt is not None and nxt.surface == "と" and j + 2 < len(tokens) and tokens[j + 2].surface == "か"):
+            # (何とか, 何なり, 誰でも: no question, the any- of a request)
             return True
     return False
 
@@ -7326,6 +7333,8 @@ def _pattern_refusals():
             or ((x.lemma in _QUESTION_LEMMAS or x.surface in ("だれ", "どれ", "どちら", "どっち", "どこ", "なに", "何"))
                 and k + 1 < len(rest) and rest[k + 1].surface in ("が", "は"))
             or (x.surface in ("特に", "とりわけ") and _followed_by(t, e, "も"))
+            # (国々の中で、私が何よりも忘れがたいのは: 何より, 誰より pick one)
+            or (x.surface in ("何", "なに", "誰", "だれ") and k + 1 < len(rest) and rest[k + 1].surface == "より")
             for rest in (_sentence_after(t, e),) for k, x in enumerate(rest)),
         "〜かねる": lambda t, s, e, g: _followed_by(t, e, "ない", "ませ", "ず", "なかっ"),
         "〜ことに": lambda t, s, e, g: ((n := _next_word(t, e)) is not None and n.pos == "verb")
@@ -7773,7 +7782,11 @@ _REFUSALS = {
     # (技術だけではない。: the copula's plain negative, "is not (only)" --
     # 〜ではなく goes on to the B it sets against A, plan 296)
     "〜ではなく": lambda t, s, e, g: (k := _tok_ending(t, e)) is not None and t[k].surface in ("ない", "ありません")
-        or ((k := _tok_ending(t, e)) is not None and t[k].lemma in ("無い", "ない") and t[k].cform.startswith("終止")),
+        or ((k := _tok_ending(t, e)) is not None and t[k].lemma in ("無い", "ない") and t[k].cform.startswith("終止"))
+        # (この地域ではなくてはならない: で of the place, は, and
+        # なくてはならない, "indispensable")
+        or ((k := _tok_ending(t, e)) is not None and k + 3 < len(t) and t[k + 1].surface == "て"
+            and t[k + 2].surface == "は" and t[k + 3].lemma in ("成る", "なる", "いける", "行ける")),
     # (例にとって, 本を手にとって: 取る itself, "take as an example",
     # "take in hand", plan 296)
     "〜にとって": lambda t, s, e, g: (k := _index_at(t, s)) is not None and t[k].surface == "に"

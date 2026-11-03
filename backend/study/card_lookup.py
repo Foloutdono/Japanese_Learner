@@ -4728,7 +4728,7 @@ def _from_not_than(morphemes, i: int) -> bool:
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     prev = morphemes[i - 1] if i > 0 else None
     if prev is not None and (nxt is None or (nxt.pos == "symbol" and nxt.surface in ("。", "\n"))) \
-            and (prev.proper or prev.name_kind or prev.surface in _PEOPLE
+            and (prev.proper or prev.name_kind or prev.surface in _PEOPLE or prev.surface in ("一同", "一同様")
                  or prev.surface.endswith(("さん", "様", "ちゃん", "くん"))
                  or (prev.pos == "suffix" and prev.surface in ("さん", "様", "ちゃん", "くん"))):
         return True                     # (アナより: a letter's sender, its "from", plan 296)

@@ -3602,3 +3602,26 @@ class WhatElseIsItTests(unittest.TestCase):
         for sentence in ("好きなんだろう。", "静かなんです。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("〜んです／〜のです", found_in(sentence))
+
+
+class WhatTheBatchsLookalikesAskTests(unittest.TestCase):
+    """Plan 296, the stress set's lookalikes: 何より picks one among
+    (国々の中で、私が何よりも); まだ and どの ask, never invite (まだ届きま
+    せんか, どの漢字が読めませんか), where 何とか and 何なり ask nothing
+    (何とかできませんか); なくてはならない is no 〜ではなく; 何だろう is
+    〜でなくてなんだろう's own spelling."""
+
+    def test_lookalikes(self) -> None:
+        self.assertIn("〜の中で", found_in("これまで訪れた国々の中で、私が何よりも忘れがたいのは、港町である。"))
+        for sentence in ("先週注文した荷物は、まだ届きませんか。", "このページで、どの漢字が読めませんか。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜ませんか", found_in(sentence))
+        for sentence in ("何とか前倒しにはできませんか。", "電話するなり何なりしてくれませんか。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ませんか", found_in(sentence))
+        self.assertNotIn("〜ではなく", found_in("この地域ではなくてはならない交通手段となっている。"))
+        self.assertIn("〜ではなく", found_in("今朝はバスではなく自転車で会社に来た。"))
+        self.assertIn("〜でなくてなんだろう", found_in("これが恋でなくて何だろう。"))
+        for sentence in ("あの白い建物は、いったいなんだろう。", "これはなんだろう。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜んです／〜のです", found_in(sentence))

@@ -4637,3 +4637,21 @@ class WhatElseIsItTests(unittest.TestCase):
         self.assertEqual(card_of("これが愛でなくてなんだろう。", "愛"), "vocab_N3_愛_あい")
         self.assertEqual(token_of("これが愛でなくてなんだろう。", "愛")["reading"], "あい")
         self.assertEqual(token_of("花を愛でなくて何をする。", "愛で")["reading"], "めで")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WhatTheBatchsLookalikesReadTests(unittest.TestCase):
+    """Plan 296, the stress set's lookalikes: ある after a season's or a
+    district's の is 或る (夏のある夕方, 都内のある病院), after a thing one
+    may have the verb (学校のある日); 一同より is a letter's "from"; the
+    で before なき出す is the means particle; いったいなんだろう's なん is
+    何."""
+
+    def test_its_words(self) -> None:
+        for sentence in ("去年の夏のある夕方、私は初めて彼に会った。", "都内のある病院で、新しい治療法が試されている。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "ある"), "vocab_N3_或る_ある")
+        self.assertEqual(card_of("学校のある日は早く起きる。", "ある"), "vocab_N5__ある")
+        self.assertTrue(gloss_of("三年間、ありがとうございました。三年二組一同より", "より").startswith("(formal) from"))
+        self.assertEqual(token_of("大きな声でなき出した。", "で")["pos"], "particle")
+        self.assertEqual(token_of("あの白い建物は、いったいなんだろう。", "なん")["reading"], "なん")

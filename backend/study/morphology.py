@@ -864,9 +864,10 @@ _AFTER_A_CRY = frozenset({"出す", "続ける", "止む", "やむ", "叫ぶ", "
                           "明かす", "暮らす", "つく", "付く", "寝入る", "濡れる"})
 
 
-# What a の before 或る names: an age, a time, a place, a group (plan 296).
-_FRAME_ENDINGS = ("代", "歳", "才", "年", "時代", "世紀", "土地", "町", "村", "国", "市", "県", "地方", "会社", "学校",
-                  "家", "日", "月", "夜", "朝", "クラス", "グループ", "チーム", "店")
+# What a の before 或る names: an age, a time, a place (plan 296) -- never
+# a thing one may have, 学校のある日 being a day with school.
+_FRAME_ENDINGS = ("代", "歳", "才", "年", "時代", "世紀", "土地", "町", "村", "国", "市", "県", "地方", "日", "月", "夜",
+                  "朝", "春", "夏", "秋", "冬", "頃", "都内", "県内", "市内", "国内", "町内", "社内", "地域", "都市")
 
 
 def _a_frame(m) -> bool:
@@ -4991,6 +4992,8 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "な" and m.pos == "auxiliary" and m.lemma == "だ" and nxt is not None and nxt.surface == "ん"
                 and nxt.pos == "particle" and _glued(m, nxt) and after is not None and after.lemma in ("だ", "です")
                 and prev is not None and ((prev.pos == "symbol" and prev.surface in ("、", "「", "『", "（"))
+                                          or (prev.pos == "particle" and prev.surface in ("は", "も", "って"))
+                                          or prev.surface in ("いったい", "一体")
                                           or (prev.surface == "て" and prev.pos == "particle" and i >= 2
                                               and morphemes[i - 2].lemma in ("無い", "ない")))):
             # これが愛でなくてなんだろう, 「なんだろう: 何, "what" -- no copula
@@ -5010,7 +5013,12 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "なき" and m.lemma in ("無い", "ない") and nxt is not None and nxt.pos == "verb"
                 and nxt.lemma in _AFTER_A_CRY):
             # 母はなき出しました: 泣く's stem and 出す, "burst into tears" --
-            # no 無い (plan 296)
+            # no 無い (plan 296); and 大きな声でなき出した's で is the means
+            # particle, no copula before a negative
+            if out_m and prev is not None and prev.surface == "で" and prev.pos == "auxiliary":
+                out_m[-1] = replace(prev, lemma="で", lemma_reading="で", pos="particle", ctype="", cform="",
+                                    written="で", written_reading="で")
+                out_t[-1] = ("助詞", "格助詞", "*")
             out_m.append(replace(m, pos="verb", lemma="泣く", lemma_reading="なく", ctype="五段-カ行",
                                  cform="連用形-一般", written="泣く", written_reading="なく"))
             out_t.append(("動詞", "一般", "*"))
