@@ -5962,6 +5962,38 @@ def _counter_refused(tokens, s, e, _g) -> bool:
     return not _is_numeral(_prev_word(tokens, s))
 
 
+def _toru_itself(tokens, k: int) -> bool:
+    """Whether the とって after the に at tokens[k] is 取る itself --
+    例にとって, 本を手にとって, "take as an example", "take in hand" --
+    never 〜にとって's "for": its noun is 例, or an object marked by を
+    stands right before that noun (plan 296)."""
+    if k < 1 or k + 1 >= len(tokens) or tokens[k + 1].lemma != "取る":
+        return False
+    if tokens[k - 1].lemma == "例":
+        return True
+    j = k - 1
+    while j >= 0 and (tokens[j].pos in ("noun", "pronoun", "suffix", "prefix", "adnominal")
+                      or (tokens[j].pos == "particle" and tokens[j].surface == "の")):
+        j -= 1
+    return j >= 0 and tokens[j].pos == "particle" and tokens[j].surface == "を"
+
+
+def _a_particles_te(tokens, k: int) -> bool:
+    """Whether the て at tokens[k] is a compound particle's -- にわたって,
+    について, にとって -- its particle written or hidden by a blank (plan
+    296)."""
+    if k < 2:
+        return False
+    verb, before = tokens[k - 1], tokens[k - 2]
+    # (Not 例にとって, 例に取る "take as an example", nor にしてみれば,
+    # 〜にしたら said whole: both try a verb, plan 296.)
+    if verb.lemma == "為る" or (before.surface == "に" and _toru_itself(tokens, k - 2)):
+        return False
+    particles = (before.surface,) if before.pos == "particle" else ("に", "を", "と") if before.surface == "＿" else ()
+    joined = {p + verb.surface + tokens[k].surface for p in particles}
+    return any(j in alt for pattern in compound_particles() for alt in alternatives(pattern) for j in joined)
+
+
 def _look_look(tokens, k: int) -> bool:
     """Whether tokens[k:k + 4] is みてみて called out, "look, look!" --
     in kana, opening what is said and closed by a mark (plan 272): ママー、
@@ -7335,7 +7367,18 @@ _REFUSALS = {
             or ((n := _next_word(t, u.end)) is not None and n.surface == "の" and n.pos == "particle"))
         for u in t),
     # (plan 272) みてみて！: 見て, said twice, "look, look!", no "try seeing"
-    "〜てみる": lambda t, s, e, g: (k := _index_at(t, s)) is not None and _look_look(t, k - 1),
+    "〜てみる": lambda t, s, e, g: (k := _index_at(t, s)) is not None and (_look_look(t, k - 1)
+        # (日本全国にわたって見られる: 〜にわたって's て, and 見られる "is seen",
+        # with its に hidden by a blank too, plan 296)
+        or _a_particles_te(t, k)),
+    # (例にとって, 本を手にとって: 取る itself, "take as an example",
+    # "take in hand", plan 296)
+    "〜にとって": lambda t, s, e, g: (k := _index_at(t, s)) is not None and t[k].surface == "に"
+        and _toru_itself(t, k),
+    # (だからといって: 〜からといって's から, "but that does not mean", no
+    # "so", plan 296)
+    "だから": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.surface == "と"
+        and (a := _next_word(t, n.end)) is not None and a.lemma == "言う",
     # (plan 272) 公人としてあるまじき: として's "as", no 〜てある -- but
     # 金曜日としてあります, "has been set as", is one
     "〜てある": lambda t, s, e, g: (k := _index_at(t, s)) is not None and k >= 2 and t[k - 1].surface == "し"

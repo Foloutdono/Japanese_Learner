@@ -3368,3 +3368,30 @@ class AWordOfItsOwnTests(unittest.TestCase):
                                 ("この駅は便利になった一方で、古い店が消えた。", "〜一方で")):
             with self.subTest(sentence=sentence):
                 self.assertIn(point, found_in(sentence))
+
+
+class AConstructionOwnsItsPieceTests(unittest.TestCase):
+    """Plan 296: a construction's piece lights no smaller point -- だから
+    of だからといって is 〜からといって's, the て of にわたって (its に hidden
+    by a blank or not) is no 〜てみる."""
+
+    def test_the_piece_is_the_constructions(self) -> None:
+        found = found_in("だからといって、数字を捨ててしまえばそれまでだ。")
+        self.assertIn("〜からといって", found)
+        self.assertNotIn("だから", found)
+        for sentence in ("その習慣は、日本全国＿＿＿わたって見られる。", "その習慣は、日本全国にわたって見られる。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜てみる", found_in(sentence))
+        for sentence, point in (("だから、行かない。", "だから"), ("食べてみる。", "〜てみる"),
+                                ("この問題について考えてみる。", "〜てみる"), ("ちょっと見てみて。", "〜てみる"),
+                                ("イギリスを例にとって見よう。", "〜てみる"),
+                                ("この写真は私にとって大切な思い出です。", "〜にとって"),
+                                ("日本語を使う人にとって、漢字は大切だ。", "〜にとって")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))
+
+    def test_toru_itself(self) -> None:
+        """例にとって, 本を手にとって: 取る itself, no 〜にとって."""
+        for sentence in ("イギリスを例にとって見よう。", "本を手にとって、じっくり読んだ。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜にとって", found_in(sentence))

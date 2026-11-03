@@ -1126,6 +1126,9 @@ def resolve_morpheme(morphemes, i: int):
     auxiliary admission needs: whether this token hangs off a
     conjunctive て/で."""
     m0 = morphemes[i]
+    if m0.surface == "だから" and i + 2 < len(morphemes) and morphemes[i + 1].surface == "と" \
+            and morphemes[i + 2].lemma == "言う":
+        return None                         # だからといって: 〜からといって's, no "so, therefore" (plan 296)
     if m0.lemma in ("驕る", "傲る", "奢る") and not _has_kanji(m0.surface):
         return None                         # おごる in kana treats (奢る, the pool's), plan 272
     if m0.surface == "あれ" and m0.pos == "interjection":
@@ -1873,6 +1876,14 @@ _TRADE = frozenset({"働く", "はたらく", "生産", "発注", "受注", "援
 _TE_AUXILIARIES = morphology.TE_AUXILIARIES
 
 
+def _a_compound_particles_te(morphemes, k: int) -> bool:
+    """Whether the て at morphemes[k] is a compound particle's --
+    日本全国にわたって見られる, whose 見る is the verb "be seen", no
+    〜てみる (plan 296)."""
+    from study.grammar_detect import _a_particles_te
+    return _a_particles_te(morphemes, k)
+
+
 _WEEKDAYS = {"月": ("月曜日", "げつようび"), "火": ("火曜日", "かようび"), "水": ("水曜日", "すいようび"),
              "木": ("木曜日", "もくようび"), "金": ("金曜日", "きんようび"), "土": ("土曜日", "どようび"),
              "日": ("日曜日", "にちようび")}
@@ -1980,7 +1991,7 @@ def _resolve_morpheme(morphemes, i: int):
     # (Only the て/で: 足掻くがいい's いい, after the conjunctive が, is
     # the word "good", plan 272.)
     after_te = after_conjunctive and previous.surface in ("て", "で")
-    if m.auxiliary_use and after_te and m.lemma in _TE_AUXILIARIES:
+    if m.auxiliary_use and after_te and m.lemma in _TE_AUXILIARIES and not _a_compound_particles_te(morphemes, i - 1):
         # A verb hanging off a conjunctive て/で in its auxiliary use is
         # the grammar point's, not a word's (plan 106): ている, てくる,
         # てみる, ておく, てしまう are all catalogue points, and the row

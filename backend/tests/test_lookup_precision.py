@@ -4347,3 +4347,19 @@ class AWordOfItsOwnCardTests(unittest.TestCase):
                          "vocab_N3_通り過ぎる_とおりすぎる")
         gloss = token_of("しかし、あの二時間にはそれだけのお金を払う意味があると思う。", "だけ")["gloss"]
         self.assertTrue(gloss["en"].startswith("(after それ") and gloss["fr"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AConstructionsPieceCardTests(unittest.TestCase):
+    """Plan 296: だから of だからといって is no "so, therefore", and
+    the 見る after a compound particle's て is the verb, no 〜てみる."""
+
+    def test_its_card(self) -> None:
+        surfaces = [t["surface"] for t in analysis.analyze_local("だからといって、数字を捨ててしまえばそれまでだ。")["tokens"]]
+        self.assertNotIn("だから", surfaces)
+        self.assertEqual(card_of("だから、行かない。", "だから"), "vocab_N4__だから")
+        # (見られる after にわたって is "be seen", the verb's own card)
+        for sentence in ("その習慣は、日本全国にわたって見られる。", "その習慣は、日本全国＿＿＿わたって見られる。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "見"), "vocab_N5_見る_みる")
+        self.assertIsNone(card_of("この問題について考えてみる。", "みる"))
