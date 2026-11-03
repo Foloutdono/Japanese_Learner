@@ -15,7 +15,9 @@ wrong, and where a learner cannot tell:
               九時 きゅう|じ: the numeral and the counter each in their
               citation form, where Japanese joins them -- いっぽん,
               さんぼん, よっか, くじ. The table below is the textbook's.
-  何          なん before a particle, where it is なに: 何を, 何が, 何も.
+  何          なん before a particle, where it is なに: 何を, 何が, 何も,
+              何やら, 何はさておき; before one, 何一つ; and 何に, which
+              UniDic reads as the なんに of なんにも, in 何にもまして.
   〜中        ちゅう where it is じゅう, "all through": 世界中, 一日中.
   曜日        日曜|日 with 日 read ひ: にちようび.
   and a few   日本 にっぽん (the school reading is にほん), 明日 あす
@@ -520,10 +522,42 @@ _WHOLE = {
 _HEADS = (("言", "ゆ", "い"), ("丸", "まり", "まる"), ("込", "ご", "こ"))
 
 # 何 before one of these is なに: 何を, 何が, 何も, 何か, 何に, 何へ,
-# 何から, 何まで, 何より, 何や. Not で (なんで "why" is a word), the
-# copula (何だ, 何です are なん) or の (何の is なんの).
+# 何から, 何まで, 何より, 何や, 何やら, 何は (何はさておき, 何はともあれ).
+# Not で (なんで "why" is a word), the copula (何だ, 何です are なん)
+# or の (何の is なんの): 何 is なん before a t-, d- or n- sound and a
+# counter, なに before the rest (plan 304).
 _NANI_BEFORE = {"を", "が", "も", "か", "に", "へ", "から", "まで", "より",
-                "や", "とか", "しか", "でも"}
+                "や", "やら", "は", "とか", "しか", "でも"}
+
+# One, after 何 in "not a single one": 何一つ, 何ひとつ, 何一人, 何1つ
+# (plan 304). 何十, 何百 are one token (なんじゅう, なんびゃく).
+_ONE_HEADS = ("一", "ひと")
+_ONE_DIGITS = ("1", "１")
+
+# A word said in the negative, as UniDic gives its lemma (plan 304): the
+# auxiliary ない, the adjective 無い (ない, ねえ), 無し, and ず (which ぬ
+# and ません's ん are).
+_SAID_IN_NEGATIVE = frozenset({"ない", "無い", "無し", "ず", "ぬ"})
+_SENTENCE_END = frozenset("。！？!?")
+
+# まして, 増して: "more than", which takes the に before it as what it
+# surpasses (何にもまして, plan 304).
+_SURPASSES = frozenset({"況して", "増す", "まして"})
+
+
+def _affirmed_ahead(tokens: list[dict], j: int) -> bool:
+    """Whether the sentence from tokens[j] to its end says something
+    (a verb or an adjective) and says none of it in the negative (plan
+    304). 何にも。, the answer, says nothing: no."""
+    said = False
+    for t in tokens[j:]:
+        if t["surface"] in _SENTENCE_END:
+            break
+        if t.get("lemma") in _SAID_IN_NEGATIVE and t.get("pos") in ("auxiliary", "adjective", "noun"):
+            return False
+        said = said or t.get("pos") in ("verb", "adjective")
+    return said
+
 
 # 〜中 read じゅう, "all through": after these it is never ちゅう.
 _JUU_AFTER = {
@@ -878,10 +912,23 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = _FAMILY[s]
             continue
 
-        # 何 before a particle.
+        # 何にもまして: UniDic reads 何に as the なんに of なんにも,
+        # "(not) anything at all", which stands only with a negative (何にも
+        # ない, 何にも知らない, 何にもすることがない). With none after it, the
+        # に is the one its verb takes and 何 is なに: 何にもなれる, 何にも代え
+        # がたい; and まして takes it as what it surpasses whatever follows,
+        # 何にもまして、遅れないことが大切だ (plan 304).
+        if s == "何に" and r == "なんに" and nxt(i) == "も" and (
+                (i + 2 < n and (tokens[i + 2].get("lemma") in _SURPASSES or surf[i + 2] in _SURPASSES))
+                or _affirmed_ahead(tokens, i + 2)):
+            out[i] = "なにに"
+            continue
+
+        # 何 before a particle, and before one: 何一つ, 何ひとつ (plan 304).
         if s == "何" and r == "なん":
             after = nxt(i)
-            if after in _NANI_BEFORE or after == "" or after in _PUNCT:
+            if after in _NANI_BEFORE or after == "" or after in _PUNCT \
+                    or after.startswith(_ONE_HEADS) or after in _ONE_DIGITS:
                 out[i] = "なに"
             continue
 
