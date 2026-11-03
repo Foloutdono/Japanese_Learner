@@ -651,6 +651,21 @@ def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tupl
                               written="から", written_reading="から")]
             out_t += [("助動詞", "*", "*"), ("助詞", "接続助詞", "*")]
             continue
+        if m.pos == "adjective" and m.lemma in _HODO_ADJECTIVES and m.surface.startswith(("ほど", "程")) \
+                and prev is not None and prev.pos != "particle" and prev.pos != "symbol":
+            # それほどとおくもありません, 前ほどちかく感じない: ほど and the
+            # adjective -- 程遠い, 程近い follow a particle (完成には程遠い,
+            # 駅から程近い), plan 296
+            cut = 2 if m.surface.startswith("ほど") else 1
+            lemma, said = _HODO_ADJECTIVES[m.lemma]
+            out_m += [replace(m, surface=m.surface[:cut], end=m.start + cut, lemma="程", reading="ほど",
+                              lemma_reading="ほど", kana="ホド", pos="particle", ctype="", cform="", conjunctive=False,
+                              written=m.surface[:cut], written_reading="ほど"),
+                      replace(m, surface=m.surface[cut:], start=m.start + cut, lemma=lemma,
+                              reading=kata_to_hira(m.reading)[2:], lemma_reading=said,
+                              kana=m.kana[2:], written=lemma, written_reading=said)]
+            out_t += [("助詞", "副助詞", "*"), tags[i]]
+            continue
         if m.surface == "かえって" and m.pos == "adverb" and prev is not None and prev.surface == "が" \
                 and prev.pos == "particle" and nxt is not None and nxt.surface in ("、", "，"):
             out_m += [replace(m, surface="かえっ", end=m.start + 3, lemma="帰る", reading="かえっ",
@@ -2266,6 +2281,9 @@ def _copula_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
 # An adjective's く form after の is the noun it makes: おおさかのちかく,
 # "near Osaka" -- no adjective follows の.
 _KU_NOUNS = {"近い": ("近く", "ちかく"), "遠い": ("遠く", "とおく")}
+# 程遠い and 程近い, read as ほど and the adjective where no particle
+# stands before them (plan 296).
+_HODO_ADJECTIVES = {"程遠い": ("遠い", "とおい"), "程近い": ("近い", "ちかい")}
 _KU_ADJECTIVES = {noun: (adjective, reading[:-1] + "い") for adjective, (noun, reading) in _KU_NOUNS.items()}
 # The case particles a noun takes and a く form never does (plan 296).
 _KU_NOUN_CASES = frozenset({"に", "で", "へ", "まで", "から", "を", "が"})
@@ -2852,6 +2870,12 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
             lemma, reading = _KU_NOUNS[m.lemma]
             m = replace(m, pos="noun", lemma=lemma, lemma_reading=reading, ctype="", cform="")
             tags = tags[:i] + [("名詞", "普通名詞", "副詞可能")] + tags[i + 1:]
+        elif (m.pos == "adverb" and m.surface in ("よく", "良く") and nxt is not None and nxt.pos == "particle"
+              and nxt.surface in ("は", "も") and _negated_at(morphemes, i + 2)):
+            # 体によくはない: 良い's く form denied, "not good" -- よくはわから
+            # ない keeps the adverb, "not well" (plan 296)
+            m = replace(m, pos="adjective", lemma="良い", lemma_reading="よい", ctype="形容詞", cform="連用形-一般")
+            tags = tags[:i] + [("形容詞", "非自立可能", "*")] + tags[i + 1:]
         elif (m.pos == "noun" and m.lemma in _KU_ADJECTIVES and nxt is not None and nxt.pos == "particle"
               and nxt.surface in ("は", "も") and after is not None and _negated_at(morphemes, i + 2)):
             # 近くはない, 遠くもありません: the adjective's く form denied --

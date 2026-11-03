@@ -3434,7 +3434,8 @@ class AKuFormsPointTests(unittest.TestCase):
 
     def test_no_adverbial_form(self) -> None:
         for sentence in ("お母さんもお父さんも、ちかくにいませんでした。", "危うく転ぶところだった。", "近くはない。",
-                         "高くもありません。"):
+                         "高くもありません。", "この子犬は大人になっても、あまり大きくはなりません。",
+                         "このコートは重くはあるが、とても暖かい。"):
             with self.subTest(sentence=sentence):
                 self.assertNotIn("〜く／〜に（副詞形）", found_in(sentence))
         for sentence in ("早く起きる。", "高くは飛べない。"):

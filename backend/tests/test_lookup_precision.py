@@ -4426,7 +4426,9 @@ class AKanjiVerbByWhatGoesWithItTests(unittest.TestCase):
 class AKuFormByWhatFollowsTests(unittest.TestCase):
     """Plan 296: a く form is the noun 近く／遠く before a case particle,
     the adverb 危うく "nearly" before its clause, and the adjective where
-    it is denied (近くはない) or becomes so (危うくなった)."""
+    it is denied (近くはない) or becomes so (危うくなった); and ほど before it
+    is a particle of its own where no particle stands before (それほど
+    とおくもない), 程遠い only after one (完成にはほどとおい)."""
 
     def test_its_word(self) -> None:
         for sentence, surface, pos, raw_id in (
@@ -4436,8 +4438,15 @@ class AKuFormByWhatFollowsTests(unittest.TestCase):
                 ("近くはない。", "近く", "adjective", "vocab_N5_近い_ちかい"),
                 ("駅から遠くもありません。", "遠く", "adjective", None),
                 ("会社の経営が危うくなった。", "危うく", "adjective", None),
-                ("駅に近くて便利だ。", "近く", "adjective", None)):
+                ("駅に近くて便利だ。", "近く", "adjective", None),
+                ("駅からそれほどとおくもありませんし。", "とおく", "adjective", "vocab_N5_遠い_とおい"),
+                ("昔の友達を前ほどちかく感じなくなった。", "ちかく", "adjective", "vocab_N5_近い_ちかい"),
+                ("夜ふかしは体によくはないと分かっている。", "よく", "adjective", None),
+                ("よくはわからない。", "よく", "adverb", None)):
             with self.subTest(sentence=sentence):
                 self.assertEqual(token_of(sentence, surface)["pos"], pos)
                 if raw_id:
                     self.assertEqual(card_of(sentence, surface), raw_id)
+
+    def test_hodo_tooi_after_a_particle(self) -> None:
+        self.assertEqual(token_of("完成にはほどとおい。", "ほどとおい")["pos"], "adjective")

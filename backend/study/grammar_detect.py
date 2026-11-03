@@ -7014,10 +7014,12 @@ def _pattern_refusals():
             # (薄暗く落ち着いた雰囲気, 美しく優しい人: the continuative, two
             # descriptions joined -- no "dimly", plan 272)
             or ((k := _tok_ending(t, e)) is not None and _joins_two_descriptions(t, k))
-            # (高くはない, 近くもありません: the negative with は or も in it,
+            # (高くはない, 近くもありません, 大きくはならない, 重くはあるが:
+            # the negative, くなる or the く form's ある with は or も in it,
             # no adverb, plan 296)
             or ((k := _tok_ending(t, e)) is not None and t[k].pos == "adjective" and k + 2 < len(t)
-                and t[k + 1].pos == "particle" and t[k + 1].surface in ("は", "も") and _denies_at(t, k + 2)),
+                and t[k + 1].pos == "particle" and t[k + 1].surface in ("は", "も")
+                and (_denies_at(t, k + 2) or t[k + 2].lemma in ("成る", "なる", "有る", "ある"))),
         # そう after a plain form is hearsay, whatever the tagger calls
         # it: できるそうです is "I hear it can", no look (plan 152)
         "〜そうです": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and _plain_before_sou(p)
