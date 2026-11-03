@@ -6097,12 +6097,6 @@ def _grounds_a_finding(tokens, e: int) -> bool:
     return True
 
 
-# Where one looks from, its から a place (plan 296): 窓から見ると.
-_VANTAGES = frozenset({"窓", "屋上", "ベランダ", "上", "高台", "展望台", "橋", "頂上", "外", "ここ", "そこ", "あそこ",
-                       "部屋", "車窓", "飛行機", "遠く", "近く", "横", "後ろ", "前", "下", "正面", "席", "外側", "内側",
-                       "空", "窓際", "車", "電車", "船", "屋根", "舞台", "客席"})
-
-
 def _toru_itself(tokens, k: int) -> bool:
     """Whether the とって after the に at tokens[k] is 取る itself --
     例にとって, 本を手にとって, "take as an example", "take in hand" --
@@ -7530,12 +7524,11 @@ _REFUSALS = {
     # (互いに見えるようにすることから始める: "start by", and 確実さを装う
     # ことからではなく: "not from" -- no fact a finding rests on, plan 296)
     "〜ことから": lambda t, s, e, g: not _grounds_a_finding(t, e),
-    # (宿の窓から見るともなく眺めた: 〜ともなく, a window looked from --
-    # no standpoint judged from, plan 296)
-    "〜から見ると": lambda t, s, e, g: (_followed_by(t, e, "も") and (n := _next_word(t, e)) is not None
-                                   and (a := _next_word(t, n.end)) is not None and a.lemma in ("無い", "ない"))
-        or ((k := _index_at(t, s)) is not None and (_noun_run_before(t, k) in _VANTAGES
-                                                    or _noun_run_before(t, k)[-1:] in _VANTAGES)),
+    # (宿の窓から見るともなく眺めた: 〜ともなく, "without meaning to look"
+    # -- no standpoint, plan 296. A place looked from is one: 窓から見ると,
+    # "seen from the window", its lesson's "seen from".)
+    "〜から見ると": lambda t, s, e, g: _followed_by(t, e, "も") and (n := _next_word(t, e)) is not None
+        and (a := _next_word(t, n.end)) is not None and a.lemma in ("無い", "ない"),
     # (例にとって, 本を手にとって: 取る itself, "take as an example",
     # "take in hand", plan 296)
     "〜にとって": lambda t, s, e, g: (k := _index_at(t, s)) is not None and t[k].surface == "に"

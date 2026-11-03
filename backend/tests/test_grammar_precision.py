@@ -3446,7 +3446,7 @@ class AKuFormsPointTests(unittest.TestCase):
 class AFromBySourceTests(unittest.TestCase):
     """Plan 296: から read by what governs it -- a feeling acted out of is
     a cause (焦りから), こと + から before 始める or ではなく is "from", and
-    a window looked from no standpoint (窓から見るともなく)."""
+    見るともなく no standpoint (窓から見ると keeps it, "seen from")."""
 
     def test_no_construction(self) -> None:
         for sentence, point in (
@@ -3460,8 +3460,7 @@ class AFromBySourceTests(unittest.TestCase):
                 ("失敗したことから学べることは多い。", "〜ことから"),
                 ("彼は面倒なことから逃げてばかりいる。", "〜ことから"),
                 ("つらいことから目をそらさずに、正面から向き合いたい。", "〜ことから"),
-                ("飛行機から見ると、雲が海のように広がっていた。", "〜から見ると"),
-                ("ここから見ると、あの建物は少し傾いているように見える。", "〜から見ると")):
+                ):
             with self.subTest(sentence=sentence):
                 self.assertNotIn(point, found_in(sentence))
         # (責任感から、…最後まで: the から is the cause, the まで "until" alone)
@@ -3479,6 +3478,8 @@ class AFromBySourceTests(unittest.TestCase):
                                 ("この町は温泉が多く湧くことから、「湯の町」と呼ばれている。", "〜ことから"),
                                 ("川が近いことから", "〜ことから"),
                                 ("父は器用なことから、近所の人によく戸棚や椅子の修繕を頼まれる。", "〜ことから"),
-                                ("東京から見ると、地方の家賃はずいぶん安く感じる。", "〜から見ると")):
+                                ("東京から見ると、地方の家賃はずいぶん安く感じる。", "〜から見ると"),
+                                # (a place looked from: "seen from", the lesson's own)
+                                ("飛行機から見ると、小さな丘陵は平地のように見える。", "〜から見ると")):
             with self.subTest(sentence=sentence):
                 self.assertIn(point, found_in(sentence))
