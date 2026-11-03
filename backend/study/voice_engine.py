@@ -63,7 +63,7 @@ logger = logging.getLogger(__name__)
 # replay a clip in the old voice. Bump it whenever DEFAULT_VOICES, the
 # engine or the synthesis settings change what a clip sounds like;
 # tests/test_kana_audio.py fails if the two sides disagree.
-VOICE_REV = "nemo3"
+VOICE_REV = "nemo4"
 
 # One name per slot, in slot order (study/exam_tts.py maps speaker
 # labels onto slots). The owner's choice, by ear, from the audition
@@ -462,12 +462,40 @@ def say(text: str, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGU
             return say_kana(notation, style, speed=speed, sample_rate=sample_rate, hold=LONE_KANA_HOLD_S, tone=extra)
         except _NotationRefused:
             logger.info("Voice engine refused the notation %r; reading %r as text", notation, text)
-    query = _json(_request("POST", "/audio_query", params={"text": text, "speaker": style}), "/audio_query")
+    query = _json(_request("POST", "/audio_query", params={"text": read_nan(text), "speaker": style}), "/audio_query")
     if not isinstance(query, dict):
         raise TTSFailed("the voice engine returned an audio query that is not an object")
     _read_leading_ha(text, query)
     query.update(speedScale=speed, outputSamplingRate=sample_rate, outputStereo=False, **extra)
     return _synthesize(query, style, sample_rate)
+
+
+# 何 is なん before the copula, a quote, の and な, but Open JTalk's
+# dictionary says なに there: それは何ですか was "sore wa nani desu
+# ka" under furigana that says なん. Of the 21,762 lines the server
+# says (the catalogue's examples and tours, the conversation bank,
+# dictation, the exam seeds' scripts), 650 hold 何, and 94 of them were
+# said なに under なん: 何ですか, 何でしょう, 何だ(か), 何て, 何と(か),
+# 何の, 何なの, 何なりと, 何でも, 何であれ, 何まい (枚 in kana).
+#
+# Before those endings 何 is handed to the engine as ナン, in katakana,
+# which it reads as a word of its own and phrases as it phrased 何: the
+# reading moves from ナニ to ナン and nothing else does. In hiragana it
+# ran into what follows (なんと|かお for 何とかお応え, なんと|かつ for
+# 何とかつなげて) and merged accent phrases. Everywhere else the engine
+# reads 何 right and keeps the kanji: 何が, 何を, 何か, 何も, 何に, a
+# counter in kanji (何人, 何時), 何一つ, 何やら, 何気なく, 何故, and
+# 何とぞ and 何となく, which are words of their own (なにとぞ, なんとなく
+# said whole). 何で alone is "why" (なんで) or "by what" (なにで), which
+# only the sentence tells apart, so it is left to the engine; 如何 is
+# いかが. tests/test_voice_engine.py pins both sides.
+_NAN = re.compile(r"(?<![如幾誰])何(?=で(?:す|し|も|あれ|あろ|あっ|ござ)|だ|じゃ|て|と(?!ぞ|なく)|の|な|まい)")
+
+
+def read_nan(text: str) -> str:
+    """`text` as Open JTalk is asked to read it: 何 as ナン where it
+    reads なん and the engine would say なに."""
+    return _NAN.sub("ナン", text)
 
 
 # A word or a line cannot begin with the particle は / へ, but Open JTalk,
