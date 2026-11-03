@@ -30,7 +30,10 @@ ONCE and every learner-facing string carried as an {en, fr} pair:
     {"id": "n5-01", "level": "N5", "title": "...",
      "grammar": ["<pattern>", ...],           the catalogue points it uses
      "text": "...",                           220-280 characters
-     "questions": [{"type", "question": {en, fr}, "options": {en, fr}, "correct"}],
+     "questions": [{"type", "question": {en, fr}, "options": {en, fr}, "correct",
+                    "at": [i, ...],                the breakdown sentence(s) it rests on
+                    "why": {en, fr}}],             one line on why the right option is
+                                                   (plan 301b)
      "breakdown": [{"jp", "translation": {en, fr}, "note": {en, fr},
                     "words": [{"surface", "meaning": {en, fr}}]}]}
 
@@ -55,6 +58,9 @@ a model answer must pass (routes/reading._check_comprehension):
   * the paper has exactly COMPREHENSION_SPECS[level] questions, four
     options each, with every question type represented
   * both languages are present on every string
+  * every question names the sentence(s) its right option rests on
+    (`at`, indices into `breakdown`) and says why in one line (`why`),
+    quoting the text verbatim, never an option by its letter (plan 301b)
 
 NOT one of the rules: which slot the right answer is written in. Every
 exercise's options are re-ordered per serving, seeds and model answers
@@ -208,13 +214,20 @@ def render(entry: dict, lang: str) -> dict:
 
 
 def render_question(question: dict, lang: str) -> dict:
-    """One of a seed's questions in one language, as render() puts it."""
-    return {
+    """One of a seed's questions in one language, as render() puts it:
+    with `at` and `why` where the seed has them (plan 301b), as a model
+    answer carries them."""
+    out = {
         "type": question["type"],
         "question": _pick(question["question"], lang),
         "options": [_pick(o, lang) for o in _pick_list(question["options"], lang)],
         "correct": question["correct"],
     }
+    if question.get("at"):
+        out["at"] = list(question["at"])
+    if question.get("why"):
+        out["why"] = _pick(question["why"], lang)
+    return out
 
 
 def _pick_list(options, lang: str) -> list:

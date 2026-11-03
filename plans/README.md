@@ -7389,3 +7389,17 @@ The owner: fix the profile holder flake. `test_profile_holder`'s `test_profile_r
 | 300 | **A card counts its answers** (the owner: fix the card accuracy too): `_state_row` serves `answers` and `correct_answers` beside `total_reviews`, the untouched assumption's virtual check left out (`SRSEngine._virtual_checks`, which `is_assumed` now reads), and `card_stats` and the statistics' deck grid (`routes/stats.py`) sum them; a check passed takes the virtual one's place in the row (`SRSEngine.review`), unless the pass grew no repetition and the row would read untouched again. The dictionary's record shows by the card's stage, so an assumption keeps its schedule and its door at 0/0 and —. `scripts/recount_known_checks.py` (report; `--yes`) sets the rows answered before to their log's count: exactly one check of one over a whole logged history, never a row folded into the rollup. Before: the N5 kanji deck of a learner boarded at N4 read 103 reviews at 100% | DONE |
 
 Open: a row whose history was folded into the rollup before the recount keeps its virtual check, if it had one; with 180 days kept, none of plan 224's checks had been folded when it shipped. The weakest cards (`get_weakest_by_source`) read `card_modes` directly and never list an untouched assumption (it was never missed); after the recount their figures are the rows' answers.
+
+
+## Plan 301 — 理解, a comprehension question answers on its text (2026-11-02)
+
+The owner: improve the comprehension mode and give it a promotion story; then point every question at the text, say in one line why on each miss, open a phone's results on the first miss as the computer does, and show the text rolling. Written as 298 and 298b on its branch; main took 298 first, so it was renumbered at the merge.
+
+| Phase | What | Status |
+|---|---|---|
+| 301 | **The review on the text**: a phone's opened question shows the line of the text it quotes (`.qrow__source`), as the desk's breakdown does; a text served again past the day's ceiling on new ones says so while it is read (`repeat`, `compReadBefore`) | DONE |
+| 301 | **The promo story**, "Read a whole text" (`promo.js`'s seventh, `app.js`'s comprehension run): a seed passage on its card under the run's clock, one of its own vocabulary or grammar questions, answered on the line it quotes, and the board. The bank carries each sentence's translation (`tr`) and the run's clock per level (`read`) | DONE |
+| 301b | **Every question points at its text**: `at` (the breakdown sentence(s) its right option rests on) and `why` (`{en, fr}`, one line quoting those sentences verbatim, never an option by its letter or place) on every seed question, 2,170 with plan 298's fifty passages, held by `test_every_question_points_at_its_sentence_and_says_why`. The generator is asked for both and keeps them only when well formed (`reading._clean_answer_line`), so a pool row without them still serves; `_POOL_VERSION` unmoved | DONE |
+| 301b | **The miss answered**: every question opens on its sentence(s) (`quotedFragments.answerSentences`: `at`, else the sentence its quote is from), a miss says why in one line, and a phone opens the results on the first miss | DONE |
+| 301b | **The roll shown**: the story's second frame rolls the same text a sentence a line at the stepper's own speeds, and the story plays whole as one clip (`clips.story`) | DONE |
+| 301b | **Six seed questions say only what their text says** (found while writing the whys): n2-01, n1-15, n3-11, n4-13, n4-01, n5-24 | DONE |

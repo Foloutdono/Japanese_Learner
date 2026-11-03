@@ -7,6 +7,7 @@
 # The content half needs no model; the pool half needs the database,
 # like test_comprehension_pool.py.
 import json
+import re
 
 import pytest
 
@@ -98,6 +99,50 @@ def test_every_string_is_in_both_languages():
             assert set(part["note"]) >= set(seed.LANGS), entry["id"]
             for w in part["words"]:
                 assert set(w["meaning"]) >= set(seed.LANGS), entry["id"]
+
+
+_QUOTE = re.compile(r"「([^」]+)」")
+_BY_LETTER = re.compile(
+    r"\b(option|answer|choice|réponse|choix|proposition)s?\s+[A-D1-4]\b|\([A-D]\)|\b[A-D]\)"
+    r"|\b(first|second|third|fourth|last) (option|answer|choice)"
+    r"|(premi[eè]re?|deuxi[eè]me|troisi[eè]me|quatri[eè]me|derni[eè]re?) (option|réponse|proposition)",
+    re.I,
+)
+
+
+def _bare(s: str) -> str:
+    return re.sub(r"[\s　]", "", s).lstrip("〜~")
+
+
+@pytest.mark.parametrize("entry", seed.entries(), ids=lambda e: e["id"])
+def test_every_question_points_at_its_sentence_and_says_why(entry):
+    """Plan 301b: a missed question opens on the sentence(s) its right
+    option rests on (`at`) and one line on why (`why`), in both
+    languages. The line quotes the text verbatim, from those sentences,
+    the two languages the same Japanese; it never names an option by
+    its letter or place, since the options are shuffled for every
+    learner; and a question that quotes the text points at where."""
+    text = _bare(entry["text"])
+    sentences = [_bare(p["jp"]) for p in entry["breakdown"]]
+    for n, q in enumerate(entry["questions"], 1):
+        at = q.get("at")
+        assert isinstance(at, list) and 1 <= len(at) <= 3 and len(set(at)) == len(at), f"Q{n} at {at!r}"
+        assert all(isinstance(i, int) and 0 <= i < len(sentences) for i in at), f"Q{n} at {at!r}"
+        span = "".join(sentences[i] for i in at)
+        why = q.get("why") or {}
+        quoted = {}
+        for lang in seed.LANGS:
+            line = why.get(lang, "")
+            assert line.strip() and "\n" not in line and len(line) <= 210, f"Q{n} why.{lang}"
+            assert not _BY_LETTER.search(line), f"Q{n} why.{lang} names an option by its place"
+            quoted[lang] = sorted(_bare(x) for x in _QUOTE.findall(line))
+            for frag in quoted[lang]:
+                assert frag in text, f"Q{n} why.{lang} quotes 「{frag}」, not in the text"
+                assert frag in span, f"Q{n} why.{lang} quotes 「{frag}」 outside its sentences {at}"
+        assert quoted["en"] == quoted["fr"], f"Q{n}: the two languages quote different Japanese"
+        if q["type"] in ("vocabulary", "grammar"):
+            frags = [f for f in (_bare(x) for x in _QUOTE.findall(q["question"]["en"])) if len(f) >= 2 and f in text]
+            assert not frags or any(f in span for f in frags), f"Q{n} quotes {frags} outside its sentences {at}"
 
 
 def test_every_level_has_its_floor_and_no_id_repeats():

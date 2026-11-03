@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **301**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **302**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -393,6 +393,15 @@ runtime purpose.
   the backend reads as the tables' owner, which RLS leaves alone, and
   nothing reads them through the Data API. A table made by hand in
   `public` is closed by hand (`scripts/sql/close_data_api.sql`).
+- **A comprehension question answers its own miss (plan 301b).** Every
+  seed question names the breakdown sentence(s) its right option rests
+  on (`at`) and says in one line why (`why`, `{en, fr}`), quoting the
+  text verbatim from those sentences and never naming an option by its
+  letter or place, since the options are shuffled for every serving
+  (`tests/test_comprehension_seed.py`). The generator is asked for both
+  and keeps them only when well formed (`reading._clean_answer_line`), so
+  a pool row without them still serves and the screen falls back to the
+  sentence the question quotes (`domain/quotedFragments.answerSentences`).
 - **The reading bank is held at its level from both sides.** A row of
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level
