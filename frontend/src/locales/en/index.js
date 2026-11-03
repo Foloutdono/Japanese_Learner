@@ -2068,6 +2068,10 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Theme',
   language:          'Language',
+  // Each language's row in the picker shows a sample in that language, the
+  // words that tell it from its neighbours: the two Spanishes say add
+  // differently, so theirs is that word (plan 303).
+  languageSample:    'Today · Dictionary',
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
   // A guest holds no key: signing out ends the journey for good. The

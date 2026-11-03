@@ -2019,6 +2019,7 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Thème',
   language:          'Langue',
+  languageSample:    'Aujourd’hui · Dictionnaire',
   account:           'Compte',
   signOutDesc:       'Te déconnecter de ton compte sur cet appareil.',
   // Un invité n'a pas de clé : se déconnecter efface le trajet pour

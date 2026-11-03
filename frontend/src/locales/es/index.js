@@ -2072,6 +2072,8 @@ const settings = {
   ambiance:          'Ambiente',
   theme:             'Tema',
   language:          'Idioma',
+  // Spain's says Añadir (locales/es-ES): the word that tells the two apart.
+  languageSample:    'Agregar',
   account:           'Cuenta',
   signOutDesc:       'Cierra la sesión de tu cuenta en este dispositivo.',
   // A guest holds no key: signing out ends the journey for good. The

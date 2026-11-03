@@ -14,9 +14,10 @@ import './index.css'
 //      first draw printed four ticks over each other and cut the dates
 //      off at the screen's edge);
 //   3. the themes stand three across, drawn;
-//   4. the languages stand one per row, each name and its two words on
+//   4. the languages stand one per row, each name and its sample on
 //      one line, its flag before it (plan 302: two across left the third
-//      alone, and three across broke the words in two).
+//      alone, and three across broke the words in two), each sample
+//      its own (plan 303: the two Spanishes said Hoy · Diccionario alike).
 
 const JOURNEY = {
   goalStartLevel: 'N4', goalLevel: 'N3', goalTargetDate: '2027-03-12', goalSetAt: '2026-09-01T00:00:00+00:00',
@@ -175,13 +176,35 @@ describe('Settings at phone width', () => {
       expect(words.top).toBeLessThan(name.bottom)
       expect(words.height).toBeLessThan(name.height * 1.5)
     })
+    // A sample tells its language from the others: Agregar beside Añadir.
+    const samples = picks.map(pick => pick.querySelector('.lang-pick__sample').textContent)
+    expect(new Set(samples).size, samples.join(' / ')).toBe(picks.length)
   })
 
   // A container query, which a mid-test resize does reach (the lane's
-  // note is about matchMedia). Español (Latinoamérica) and its two words
-  // need 335px (plan 303): a 320px phone drops the words and keeps every
-  // name on its one line, never broken in two.
-  it('keeps every language on one line on a 320px phone, without its two words', async () => {
+  // note is about matchMedia). Español (Latinoamérica) and Agregar need
+  // about 286px (plan 303), which a 360px phone's row holds: every
+  // sample stands whole beside its name, never cut short.
+  it('keeps every sample whole on a 360px phone', async () => {
+    await page.viewport(360, 740)
+    try {
+      await mount('/profile/settings/display')
+      const picks = [...document.querySelectorAll('.lang-pick')]
+      expect(picks).toHaveLength(4)
+      for (const pick of picks) {
+        const [name, words] = [pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')]
+        expect(getComputedStyle(words).display, name.textContent).not.toBe('none')
+        expect(words.scrollWidth, words.textContent).toBeLessThanOrEqual(words.clientWidth)
+        expect(box(words).left).toBeGreaterThan(box(name).right)
+      }
+    } finally {
+      await page.viewport(390, 844)
+    }
+  })
+
+  // A 320px phone's row (278px) does not: it drops the samples and keeps
+  // every name on its one line, never broken in two.
+  it('keeps every language on one line on a 320px phone, without its sample', async () => {
     await page.viewport(320, 640)
     try {
       await mount('/profile/settings/display')

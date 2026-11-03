@@ -11,6 +11,8 @@
 // (locales.test.js); a new screen string needs a line here only when one
 // of those words is in it.
 export default {
+  // The picker's sample: the one word that tells this Spanish from the other.
+  languageSample: 'Añadir',
   gateModeAdd: mode => `Añadir «${mode}» a Hoy`,
   deskKeyAddReading: 'añade una lectura',
   readingsAdd: 'añadir una lectura',
