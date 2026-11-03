@@ -6069,32 +6069,34 @@ def _counter_refused(tokens, s, e, _g) -> bool:
     return not _is_numeral(_prev_word(tokens, s))
 
 
-# What 〜ことから grounds (plan 296): a name, a finding, a conclusion --
-# 呼ばれる, 名前がつく, 分かる, 考えられる, と見られる, にちがいない.
-# (思う, 考える, 見る after a quoting と: と見られる, と考えられる -- never
-# 始めてみる's みる)
-_FOUND_AFTER_TO = frozenset({"思う", "考える", "見る", "みる"})
-_FOUND = frozenset({"呼ぶ", "名付ける", "名づける", "付く", "つく", "分かる", "判る", "わかる",
-                    "判断", "断定", "推測", "推定", "判明", "言う", "知る", "由来", "明らか", "違う", "ちがう", "気付く",
-                    "気づく", "結論", "疑う", "認める", "確認", "証明", "示す", "推理", "想像", "予想", "見なす", "見做す",
-                    "名", "名前", "愛称", "あだ名", "呼び名"})
+# What こと + から is the "from" of, never 〜ことから's "from the fact
+# that" (plan 296): ことから始める, 学ぶ, 逃げる, 生まれる, 目をそらす.
+_FROM_VERBS = frozenset({"始める", "始まる", "生まれる", "学ぶ", "逃げる", "離れる", "逸らす", "そらす", "練習", "出発",
+                         "スタート", "解放", "抜け出す", "逃れる", "教わる", "習う", "得る", "作る", "成る", "出来る"})
 
 
 def _grounds_a_finding(tokens, e: int) -> bool:
-    """Whether what follows 〜ことから at `e` in its sentence names, finds
-    or concludes (_FOUND): 花の町と呼ばれる, 泥棒が入ったと分かった -- never
-    ことから始める, ことから学ぶ, ことから逃げる, ことからではなく."""
+    """Whether 〜ことから at `e` grounds what follows -- a name, a finding,
+    a cause (花の町と呼ばれる, 泥棒が入ったと分かった, 器用なことから、修繕を
+    頼まれる), or stands alone as the lesson's own piece (川が近いことから)
+    -- and is no "from" its clause's verb takes: ことから始める, ことから学ぶ,
+    ことから逃げる, ことから目をそらす, ことからではなく."""
     rest = []
     for u in (t for t in tokens if t.start >= e):
-        if u.pos == "symbol" and u.surface in "。！？!?":
+        if u.pos == "symbol" and u.surface in "。！？!?、，,":
             break
         rest.append(u)
     words = [u for u in rest if u.pos != "symbol"]
     if words and (words[0].surface in ("では", "じゃ") or (len(words) > 1 and words[0].surface == "で"
                                                          and words[1].surface == "は")):
         return False
-    return any(u.lemma in _FOUND or u.surface in _FOUND or (
-        u.lemma in _FOUND_AFTER_TO and k > 0 and rest[k - 1].surface == "と") for k, u in enumerate(rest))
+    for k, u in enumerate(words):
+        if u.pos == "verb" or u.pos == "adjective":
+            verb = words[k - 1] if u.lemma in ("為る", "する") and k > 0 and words[k - 1].pos == "noun" else u
+            return not (verb.lemma in _FROM_VERBS or verb.surface in _FROM_VERBS)
+    return True
+
+
 # Where one looks from, its から a place (plan 296): 窓から見ると.
 _VANTAGES = frozenset({"窓", "屋上", "ベランダ", "上", "高台", "展望台", "橋", "頂上", "外", "ここ", "そこ", "あそこ",
                        "部屋", "車窓", "飛行機", "遠く", "近く", "横", "後ろ", "前", "下", "正面", "席", "外側", "内側",
