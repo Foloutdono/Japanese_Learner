@@ -3625,3 +3625,21 @@ class WhatTheBatchsLookalikesAskTests(unittest.TestCase):
         for sentence in ("あの白い建物は、いったいなんだろう。", "これはなんだろう。"):
             with self.subTest(sentence=sentence):
                 self.assertNotIn("〜んです／〜のです", found_in(sentence))
+
+
+class TheCopulasDenialTests(unittest.TestCase):
+    """Plan 296, the judges' rows: the で of ではない is the copula's,
+    never a place's or a means' (紳士などではない, ではないか said bare),
+    and この地域ではなくてはならない is a place's で, は and なくては
+    ならない -- no copula and no 〜ではなく."""
+
+    def test_the_copula(self) -> None:
+        self.assertIn("です／だ", found_in("彼は断じて紳士などではない。"))
+        for sentence in ("彼は断じて紳士などではない。", "ではないか", "だけではない"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("で", found_in(sentence))
+        place = found_in("この地域ではなくてはならない交通手段となっている。")
+        self.assertIn("で", place)
+        self.assertNotIn("です／だ", place)
+        self.assertNotIn("〜ではなく", place)
+        self.assertIn("で", found_in("東京では雪が降らない。"))

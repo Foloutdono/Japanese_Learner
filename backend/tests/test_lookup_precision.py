@@ -4655,3 +4655,14 @@ class WhatTheBatchsLookalikesReadTests(unittest.TestCase):
         self.assertTrue(gloss_of("三年間、ありがとうございました。三年二組一同より", "より").startswith("(formal) from"))
         self.assertEqual(token_of("大きな声でなき出した。", "で")["pos"], "particle")
         self.assertEqual(token_of("あの白い建物は、いったいなんだろう。", "なん")["reading"], "なん")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ABareDenialsCopulaTests(unittest.TestCase):
+    """Plan 296: ではない said bare, as a lesson prints it, glosses its で
+    as the copula's."""
+
+    def test_its_gloss(self) -> None:
+        for sentence in ("ではない", "だけではない", "ではないか"):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(gloss_of(sentence, "で").startswith("(the copula) で of ではない"))

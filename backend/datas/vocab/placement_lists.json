@@ -540,6 +540,13 @@
    "rank": 2591
   },
   {
+   "key": "園::えん",
+   "level": "N1",
+   "lists_say": "N2",
+   "meaning": "garden (esp. man-made)",
+   "rank": 2610
+  },
+  {
    "key": "票::ひょう",
    "level": "N1",
    "lists_say": "N3",
@@ -3449,13 +3456,6 @@
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to get strong, to gain strength",
-   "rank": null
-  },
-  {
-   "key": "園::えん",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "garden (esp. man-made)",
    "rank": null
   },
   {

@@ -2554,6 +2554,25 @@ def _is_copula(t) -> bool:
     return t.pos == "auxiliary" and t.lemma in ("だ", "です")
 
 
+def _cannot_do_without(tokens, k: int) -> bool:
+    """Whether the なく at tokens[k] opens なくてはならない or なくては
+    いけない, "cannot do without" (plan 296)."""
+    return tokens[k].surface == "なく" and k + 3 < len(tokens) and tokens[k + 1].surface == "て" \
+        and tokens[k + 2].surface == "は" and tokens[k + 3].lemma in ("成る", "なる", "いける", "行ける")
+
+
+def _the_copulas_denial(tokens, s: int) -> bool:
+    """Whether the で at `s` is the copula's, denied: で, は or も, and
+    ない or ありません (学校ではない, 紳士などではない), never a place's で
+    before なくてはならない (plan 296)."""
+    k = _index_at(tokens, s)
+    if k is None or k + 2 >= len(tokens) or tokens[k + 1].surface not in ("は", "も") or _cannot_do_without(tokens, k + 2):
+        return False
+    neg = tokens[k + 2]
+    return neg.surface in ("ない", "ねえ", "ねー") or (
+        neg.lemma in ("有る", "ある") and k + 3 < len(tokens) and tokens[k + 3].lemma == "ます")
+
+
 def _copula_spans(tokens):
     """です／だ in the forms its lesson teaches and the letters です and
     だ never showed: the past (だった, でした), the plain and polite
@@ -2582,9 +2601,13 @@ def _copula_spans(tokens):
                   i > 0 and tokens[i - 1].pos == "particle" and tokens[i - 1].surface in ("の", "ん"))
                    # (技術だけではない, そればかりではない: a noun and its だけ,
                    # plan 296)
-                   or (i > 1 and tokens[i - 1].pos == "particle" and tokens[i - 1].surface in ("だけ", "ばかり", "のみ")
+                   or (i > 1 and tokens[i - 1].pos == "particle"
+                       and tokens[i - 1].surface in ("だけ", "ばかり", "のみ", "など", "なんか")
                        and _prev_kind(tokens, i - 1) == "nominal"))
-              and nxt is not None and nxt.surface in ("は", "も") and i + 2 < len(tokens)):
+              and nxt is not None and nxt.surface in ("は", "も") and i + 2 < len(tokens)
+              # (この地域ではなくてはならない: で of the place, は, and
+              # なくてはならない, "indispensable" -- no copula, plan 296)
+              and not _cannot_do_without(tokens, i + 2)):
             neg = tokens[i + 2]
             if neg.lemma in ("無い", "ない") or (neg.lemma in ("御座る", "ござる") and i + 3 < len(tokens)
                                                and tokens[i + 3].lemma in ("ます", "ず")) or (neg.lemma in ("有る", "ある") and (
@@ -7785,8 +7808,7 @@ _REFUSALS = {
         or ((k := _tok_ending(t, e)) is not None and t[k].lemma in ("無い", "ない") and t[k].cform.startswith("終止"))
         # (この地域ではなくてはならない: で of the place, は, and
         # なくてはならない, "indispensable")
-        or ((k := _tok_ending(t, e)) is not None and k + 3 < len(t) and t[k + 1].surface == "て"
-            and t[k + 2].surface == "は" and t[k + 3].lemma in ("成る", "なる", "いける", "行ける")),
+        or ((k := _tok_ending(t, e)) is not None and _cannot_do_without(t, k)),
     # (例にとって, 本を手にとって: 取る itself, "take as an example",
     # "take in hand", plan 296)
     "〜にとって": lambda t, s, e, g: (k := _index_at(t, s)) is not None and t[k].surface == "に"
@@ -7863,7 +7885,9 @@ _REFUSALS = {
                                                      or _in_kadouka(tokens, i) or _in_kamo(tokens, i))),
     "も": _mo_refused,
     # (千円やで, あかんで: the west's よ, no place or means, plan 272)
-    "で": lambda tokens, s, e, _g: _in_set_phrase(tokens, s) or (
+    # (ではない, ではありません: the copula's negative, no place or means,
+    # plan 296 -- the 地域 of 地域ではなくてはならない keeps its place)
+    "で": lambda tokens, s, e, _g: _in_set_phrase(tokens, s) or _the_copulas_denial(tokens, s) or (
         (k := _index_at(tokens, s)) is not None and k >= 1 and ((tokens[k - 1].surface in ("や", "あかん")
                                                                 and (_ends_its_sentence(tokens, e) or (
                                                                     k + 1 < len(tokens)
