@@ -6660,6 +6660,10 @@ def _a_person_by_gloss(w) -> bool:
     return bool(_PERSON_GLOSS.search(first.lower()))
 
 
+# What one is regarded or thought as, with と, whose (ら)れる is the
+# passive (plan 296) -- never 言う, which a teacher's と言われた says up.
+_REGARDED = frozenset({"思う", "考える", "見なす", "見做す", "みなす", "見る", "呼ぶ", "認める", "評する", "予想",
+                       "期待", "予測", "推測", "推定", "感じる", "信じる", "噂"})
 # Who the honorific (ら)れる is said of (plan 296): a person the sentence
 # raises.
 _RESPECTED = frozenset({"先生", "社長", "部長", "課長", "教授", "校長", "会長", "お客様", "お客さま", "客様", "御客様",
@@ -6679,6 +6683,9 @@ def _said_up(tokens, i: int) -> bool:
     doer and its に (先生に叱られた, the passive)."""
     if _suffered_by(tokens, i) or _done_by_a_person(tokens, i):
         return False
+    if tokens[i - 1].lemma in _REGARDED and i >= 2 and any(
+            t.pos == "particle" and t.surface in ("と", "って") for t in tokens[_sentence_start(tokens, i):i - 1]):
+        return False                    # (上手とみなされている, 知っていると思われがち: regarded, the passive)
     if i >= 2 and tokens[i - 1].surface in ("させ", "せ") and tokens[i - 1].pos == "auxiliary":
         return False                    # (けがをさせられた方: the causative's passive)
     after = tokens[i + 1:i + 3]

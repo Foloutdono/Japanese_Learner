@@ -3541,6 +3541,8 @@ class AnHonorificReruTests(unittest.TestCase):
                 self.assertNotIn("受身形 〜られる", found_in(sentence))
 
     def test_the_passive(self) -> None:
-        for sentence in ("先生に叱られた。", "財布を盗まれた。", "この本は多くの人に読まれている。", "社長が部下に辞められた。"):
+        for sentence in ("先生に叱られた。", "財布を盗まれた。", "この本は多くの人に読まれている。", "社長が部下に辞められた。",
+                         "その先生は私たちの学校で一番の着こなし上手とみなされている。",
+                         "先生は何でも知っていると思われがちだが、先生とて人間である。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("受身形 〜られる", found_in(sentence))
