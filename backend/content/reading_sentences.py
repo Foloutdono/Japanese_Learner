@@ -952,7 +952,7 @@ N2 = [
     {"jp": "家族と過ごす時間を削ってまでして、休みの日に出勤する必要はないと思う。", "en": "I don't think there's any need to go so far as to cut into time with your family to go to work on your days off.", "fr": "Je ne pense pas qu'il faille aller jusqu'à sacrifier le temps passé en famille pour aller travailler les jours de repos.", "grammar": "〜までして", "focus": "削る"},
     {"jp": "明け方から行列までして、発売当日に新製品を手に入れたいとは思わない。", "en": "I don't want a new product on its release day badly enough to go so far as queuing from dawn.", "fr": "Je ne tiens pas à me procurer un nouveau produit le jour de sa sortie au point de faire la queue dès l'aube.", "grammar": "〜までして", "focus": "行列"},
     {"jp": "うっかりして、期限の切れた定期券で改札を通るところだった。", "en": "Without thinking, I nearly went through the ticket gate on an expired commuter pass.", "fr": "Par étourderie, j'ai failli passer le portillon avec un abonnement expiré.", "grammar": "〜ところだった", "focus": "定期券"},
-    {"jp": "凍った道で足を滑らせて、危うく自転車にぶつかるところだった。", "en": "I slipped on the icy road and very nearly crashed into a bicycle.", "fr": "J'ai glissé sur la route verglacée et j'ai failli percuter un vélo.", "grammar": "〜ところだった", "focus": "ぶつかる"},
+    {"jp": "凍った道で足を滑らせて姿勢をくずし、もう少しで自転車にぶつかるところだった。", "en": "I slipped on the icy road, lost my balance and very nearly crashed into a bicycle.", "fr": "J'ai glissé sur la route verglacée, perdu l'équilibre et j'ai failli percuter un vélo.", "grammar": "〜ところだった", "focus": "ぶつかる"},
 ]
 
 # ── N1 ────────────────────────────────────────────────────────
