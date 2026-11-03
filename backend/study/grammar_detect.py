@@ -3884,9 +3884,9 @@ def _from_until_spans(tokens):
 
 # What one acts out of (plan 296): 焦りから忘れかけた, 好奇心から開けた --
 # a cause, no "from" of a stretch.
-_FEELINGS = frozenset({"焦り", "不安", "好奇心", "心配", "恐怖", "興味", "親切", "善意", "悪意", "怒り", "嫉妬", "恐れ",
-                       "同情", "遠慮", "寂しさ", "退屈", "義理", "見栄", "意地", "思いやり", "優しさ", "喜び",
-                       "悲しさ", "悔しさ", "恥ずかしさ", "憧れ", "愛情", "責任", "疲れ", "不注意", "油断", "誤解"})
+_ACTED_OUT_OF = frozenset({"焦り", "不安", "好奇心", "心配", "恐怖", "興味", "親切", "善意", "悪意", "怒り", "嫉妬", "恐れ",
+                           "同情", "遠慮", "寂しさ", "退屈", "義理", "見栄", "意地", "思いやり", "優しさ", "喜び",
+                           "悲しさ", "悔しさ", "恥ずかしさ", "憧れ", "愛情", "責任", "疲れ", "不注意", "油断", "誤解"})
 
 
 def _out_of_a_feeling(tokens, i: int) -> bool:
@@ -3894,7 +3894,7 @@ def _out_of_a_feeling(tokens, i: int) -> bool:
     (焦りから, 責任感から、…最後まで残った) -- never one end of a range of
     them, its まで a word or two on (喜びから悲しみまで)."""
     word = _noun_run_before(tokens, i)
-    if not (word in _FEELINGS or word.endswith(("感", "心"))):
+    if not (word in _ACTED_OUT_OF or word.endswith(("感", "心"))):
         return False
     for u in _sentence_after(tokens, tokens[i].end)[:4]:
         if u.pos == "symbol":
