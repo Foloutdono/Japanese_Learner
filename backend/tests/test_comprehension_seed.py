@@ -106,7 +106,8 @@ _BY_LETTER = re.compile(
     r"\b(option|answer|choice|réponse|choix|proposition)s?\s+[A-D1-4]\b|\([A-D]\)|\b[A-D]\)"
     r"|\b(first|second|third|fourth|last) (option|answer|choice)"
     r"|(premi[eè]re?|deuxi[eè]me|troisi[eè]me|quatri[eè]me|derni[eè]re?) (option|réponse|proposition)"
-    r"|\b(opci[oó]n|respuesta)(es)?\s+[A-D1-4]\b"
+    # A Spanish option's letter is a capital: «en respuesta a» is no option.
+    r"|\b(opci[oó]n|respuesta)(es)?\s+(?-i:[A-D1-4])\b"
     r"|\b(primer[ao]?|segund[ao]|tercer[ao]?|cuart[ao]|[uú]ltim[ao]) (opci[oó]n|respuesta)",
     re.I,
 )
