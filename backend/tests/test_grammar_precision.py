@@ -3662,9 +3662,16 @@ class TheAuditsSingletonPointsTests(unittest.TestCase):
         for sentence, pattern in (("その服を着ると、元気に見えるよ。", "〜に見える"),
                                   ("先生に言われた通りにやってみました。", "〜通りに"),
                                   ("思った通りになった。", "〜通りに"),
-                                  ("会う前に、へやをきれいにする。", "〜くする／〜にする")):
+                                  ("会う前に、へやをきれいにする。", "〜くする／〜にする"),
+                                  # (丁寧 of a thing makes it so: the tour's own question)
+                                  ("先生にはなすときは、ことばをもっとていねいにしたほうがいいですよ。", "〜くする／〜にする"),
+                                  ("態度をまじめにしなさい。", "〜くする／〜にする")):
             with self.subTest(sentence=sentence):
                 self.assertIn(pattern, found_in(sentence))
+        for sentence in ("道具の手入れを毎日丁寧にする職人ほど、仕上がりも美しい。",
+                         "小さいことでも、ていねいにしないといけないと思います。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜くする／〜にする", found_in(sentence))
 
 
 class TheSingletonsLookalikesTests(unittest.TestCase):

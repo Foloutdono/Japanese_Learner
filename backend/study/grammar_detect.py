@@ -6810,12 +6810,14 @@ def _suffered_by(tokens, i: int) -> bool:
 # Nouns whose に makes an adverb of them (plan 296): 互いに, 共に.
 _NI_MAKES_AN_ADVERB = frozenset({"互い", "お互い", "共", "一緒", "同時", "次", "次々", "順", "順番", "最初", "最後"})
 # What says how a deed is done, never what a thing is made (plan 296):
-# そうじだけはまめにしている, 勉強を真面目にする.
-_MANNERS = frozenset({"まめ", "忠実", "真面目", "まじめ", "丁寧", "ていねい", "熱心", "真剣", "一生懸命", "いっしょうけんめい",
-                      "地道", "着実", "慎重", "丹念", "念入り", "懸命", "必死",
-                      # (片付けを適当にしたら: done sloppily -- "made
-                      # suitable" is said 適当な温度にする)
-                      "適当", "てきとう", "いい加減", "大雑把", "おおざっぱ"})
+# そうじだけはまめにしている, 雑用も真剣にしてくれる.
+_MANNERS = frozenset({"まめ", "忠実", "熱心", "真剣", "一生懸命", "いっしょうけんめい", "地道", "着実", "丹念", "念入り",
+                      "懸命", "必死"})
+# ...and what may say either: 掃除を丁寧にする does it with care, ことばを
+# ていねいにする makes the words polite (the tour's own question). The
+# deed, or no object at all, decides (片付けを適当にしたら: done sloppily).
+_MANNERS_OR_QUALITIES = frozenset({"丁寧", "ていねい", "真面目", "まじめ", "慎重", "適当", "てきとう", "いい加減",
+                                   "大雑把", "おおざっぱ"})
 
 
 # What a street is said of, never what one follows (plan 296): 人が行き
@@ -6850,7 +6852,37 @@ def _done_in_a_manner(tokens, s: int) -> bool:
     """Whether the に at `s` makes an adverb of a manner (まめに, 丁寧に)
     for a する that does a deed -- no "make it so" (plan 296)."""
     p = _prev_word(tokens, s)
-    return p is not None and p.surface in _MANNERS
+    if p is None:
+        return False
+    if p.surface in _MANNERS:
+        return True
+    if p.surface not in _MANNERS_OR_QUALITIES:
+        return False
+    k = _index_at(tokens, p.start)
+    head = _sentence_start(tokens, k) if k is not None else 0
+    for j in range(k - 1 if k else -1, head - 1, -1):
+        u = tokens[j]
+        if u.pos == "symbol":
+            break
+        if u.pos == "particle" and u.surface in ("を", "は", "も") and j > head:
+            noun = tokens[j - 1]
+            if noun.surface in ("だけ", "ばかり", "こそ") and j - 1 > head:
+                noun = tokens[j - 2]
+            return _a_deed(noun)
+    return True                          # (ていねいにしないといけない: no object, a manner)
+
+
+def _a_deed(noun) -> bool:
+    """Whether a noun names a deed, which a manner says how is done: a
+    する noun (掃除, 連絡) or a verb's stem (片付け, 手入れ)."""
+    if noun.verbal:
+        return True
+    if not noun.surface or noun.pos != "noun" or not noun.surface[-1] in "えけげせぜてでねべぺめれ":
+        return False
+    from study.morphology import tokenize
+
+    verb = tokenize(noun.surface + "る") or []
+    return len(verb) == 1 and verb[0].pos == "verb" and verb[0].lemma.endswith("る")
 
 
 def _acts_on_nothing(tokens, s, e, _g) -> bool:
@@ -7337,7 +7369,7 @@ def _pattern_refusals():
         # (片付けを適当にしたら: a manner and する, no one's point of view;
         # 切符にしたらいかがですか: what one picks, plan 296)
         "〜にしたら": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None and (
-            p.surface in _MANNERS or p.adjectival
+            p.surface in _MANNERS or p.surface in _MANNERS_OR_QUALITIES or p.adjectival
             or p.pos in ("verb", "adjective", "auxiliary")))
             or ((n := _next_word(t, e)) is not None and n.surface in ("いかが", "どう", "いい")),
         # しかたがない, しかたありません: "it can't be helped", no way of doing
