@@ -666,6 +666,16 @@ def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tupl
                               kana=m.kana[2:], written=lemma, written_reading=said)]
             out_t += [("助詞", "副助詞", "*"), tags[i]]
             continue
+        if m.surface == "別に" and m.pos == "adverb" and apart(morphemes, i):
+            # お茶は、別にはらいます: 別 and に, "separately" -- 別に何も言わ
+            # なかった, 別にいいよ keep the adverb, "not particularly" (plan 296)
+            out_m += [replace(m, surface="別", end=m.start + 1, lemma="別", reading="べつ", lemma_reading="べつ",
+                              kana="ベツ", pos="noun", ctype="", cform="", written="別", written_reading="べつ"),
+                      replace(m, surface="に", start=m.start + 1, lemma="に", reading="に", lemma_reading="に",
+                              kana="ニ", pos="particle", ctype="", cform="", conjunctive=False,
+                              written="に", written_reading="に")]
+            out_t += [("名詞", "普通名詞", "一般"), ("助詞", "格助詞", "*")]
+            continue
         if m.surface == "かえって" and m.pos == "adverb" and prev is not None and prev.surface == "が" \
                 and prev.pos == "particle" and nxt is not None and nxt.surface in ("、", "，"):
             out_m += [replace(m, surface="かえっ", end=m.start + 3, lemma="帰る", reading="かえっ",
@@ -859,6 +869,30 @@ def _sent_somewhere(morphemes, i: int) -> bool:
         if u.pos == "particle" and u.surface == "に" and morphemes[k - 1].pos in ("noun", "pronoun"):
             return True
     return False
+
+
+def apart(morphemes, i: int) -> bool:
+    """Whether 別に, ending at morphemes[i], is 別 and に, "separately": no
+    comma after it, the first predicate after it a verb (払う, 用意する), and
+    nothing denied to its sentence's end -- 別に何も言わなかった and
+    別にいい, 別に、 are the adverb, "not particularly"."""
+    at = i if morphemes[i].surface == "別に" else i - 1
+    before = morphemes[at - 1] if at >= 1 else None
+    if before is not None and before.pos == "particle" and (
+            before.surface == "と" or (before.surface == "は" and at >= 2 and morphemes[at - 2].surface == "と")):
+        return True                         # (それとは別に、, 財布と別に: "apart from", plan 296)
+    if i + 1 >= len(morphemes) or morphemes[i + 1].pos == "symbol":
+        return False
+    first = None
+    for u in morphemes[i + 1:]:
+        if u.pos == "symbol" and u.surface in "。！？!?":
+            break
+        if first is None and u.pos in ("verb", "adjective", "auxiliary"):
+            first = u
+        if (u.lemma in ("無い", "ない") and u.pos in ("adjective", "auxiliary")) or u.lemma in ("ぬ", "ず") \
+                or (u.lemma == "ます" and u.surface == "ませ"):
+            return False
+    return first is not None and first.pos == "verb"
 
 
 def _hiragana_only(text: str) -> bool:

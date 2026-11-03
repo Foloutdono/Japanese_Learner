@@ -589,6 +589,7 @@ _ADVERBS = {
     "特": ("especially", "surtout"), "とく": ("especially", "surtout"),
     "主": ("mainly", "principalement"), "おも": ("mainly", "principalement"),
     "互い": ("each other", "l'un l'autre"), "お互い": ("each other", "l'un l'autre"),
+    "別": ("separately, apart", "séparément, à part"),
     "たがい": ("each other", "l'un l'autre"), "同時": ("at the same time", "en même temps"),
     "一斉": ("all at once", "tous en même temps"), "交互": ("in turns", "en alternance"),
     "一度": ("at one time", "en une seule fois"), "いちど": ("at one time", "en une seule fois"),
@@ -1077,6 +1078,12 @@ def gloss(morphemes, i: int) -> dict | None:
     elif m.pos == "auxiliary" and m.surface == "に" and m.lemma == "だ" and i > 0 \
             and (morphemes[i - 1].lemma in ("様", "みたい") or morphemes[i - 1].surface in ("よう", "みたい")):
         key = "に_you"                     # 同じように, 春みたいに, 話しやすいように (plan 296)
+    elif m.pos == "auxiliary" and m.surface == "に" and m.lemma == "だ" and i > 0 \
+            and morphemes[i - 1].surface in _ADVERBS:
+        # (お茶は別にはらいます: an adverb of 別, "separately", plan 296)
+        noun = morphemes[i - 1].surface
+        en, fr = _ADVERBS[noun]
+        return {"en": f"makes an adverb of {noun}: {noun}に, {en}", "fr": f"fait un adverbe de {noun} : {noun}に, {fr}"}
     elif m.pos == "auxiliary" and m.surface == "に" and m.lemma == "だ" and i > 0 \
             and morphemes[i - 1].pos == "noun" and morphemes[i - 1].adjectival:
         # 安全に泳げます, 平和に役立つ: the letters do not say which; the

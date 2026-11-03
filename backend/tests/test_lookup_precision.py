@@ -4450,3 +4450,42 @@ class AKuFormByWhatFollowsTests(unittest.TestCase):
 
     def test_hodo_tooi_after_a_particle(self) -> None:
         self.assertEqual(token_of("完成にはほどとおい。", "ほどとおい")["pos"], "adjective")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AnAdverbsSenseTests(unittest.TestCase):
+    """Plan 296: an adverb's sense by what it says of -- ここ before a span
+    of time "these past", まず before a denial the N3 先ず's "hardly", 別に
+    before a verb with nothing denied 別 and に, "separately"."""
+
+    def test_its_sense(self) -> None:
+        for sentence in ("スマートフォンだけで代金を払える店が、ここ数年で急に増えた。", "ここ二、三日、雨が続いている。",
+                         "ここ半年の売り上げを見れば、効果ははっきりしている。"):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, "ここ")
+                self.assertIsNone(token.get("vocab_match"))
+                self.assertTrue(token["gloss"]["en"].startswith("(before a span of time)") and token["gloss"]["fr"])
+        for sentence in ("ここに置いてください。", "ここで二日間も足止めされた。", "ここに引っ越してきて、もう三年になる。"):
+            with self.subTest(sentence=sentence):
+                self.assertIsNotNone(token_of(sentence, "ここ").get("vocab_match"))
+        for sentence in ("初めての町でも道に迷うことはまずない。",
+                         "街灯の少ない山奥ならいざ知らず、都市部で天の川を目にすることは、今ではまず不可能だ。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "まず"), "vocab_N3_先ず_まず")
+        for sentence in ("この程度の熱なら、まず大丈夫でしょう。", "あの部長が賛成することは、まずないと思う。",
+                         "心配しなくていいよ。まずそんなことは起こらないから。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "まず"), "vocab_N3_先ず_まず")
+        for sentence in ("まず手を洗いましょう。", "まずご飯を食べない？", "契約する前に、まず条件をよく確認しないといけない。",
+                         "何事もまずやってみないと分からないよ。", "引っ越しが決まったけど、まず何から始めればいいんだろう。",
+                         "新しい職場では、まず焦らないことが大切だ。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "まず"), "vocab_N4__まず")
+        for sentence in ("おべんとうとお茶は、別にはらいます。", "パスポートは別に保管してください。",
+                         "それとは別に、もう一つお伝えしたい問題があります。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "別"), "vocab_N4_別_べつ")
+                self.assertIn("separately", token_of(sentence, "に")["gloss"]["en"])
+        for sentence in ("別に何も言わなかった。", "別に、いいよ。", "別にいいよ。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "別に"), "vocab_N3_別に_べつに")

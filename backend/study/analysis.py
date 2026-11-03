@@ -955,6 +955,31 @@ _COUNTER_SENSES = {
     for surface in ("本", "ほん", "ぽん", "ぼん")
 }
 
+# ここ before a span of time is no place (plan 296): ここ数年, ここ二、三日.
+_HERE_SPAN = {"en": "(before a span of time) these past …, the last …: ここ数年, the last few years",
+              "fr": "(devant une durée) ces derniers … : ここ数年, ces dernières années"}
+# What a span of time is counted in, after ここ.
+_SPAN_UNITS = ("年", "年間", "日", "日間", "週", "週間", "か月", "ヶ月", "カ月", "ケ月", "月", "時間", "分")
+_SPANS_WHOLE = ("半年", "数日", "数年", "数か月", "数ヶ月", "しばらく", "最近")
+
+
+def _a_span_after(morphemes: list, i: int) -> bool:
+    """Whether a span of time follows the ここ at morphemes[i]: a count
+    and its unit (数年, 二、三日, 一週間, 十年) or しばらく, 最近."""
+    rest = morphemes[i + 1:i + 6]
+    if rest and rest[0].surface in _SPANS_WHOLE:
+        return True
+    counted = False
+    for u in rest:
+        if u.surface and all(c in "〇一二三四五六七八九十百千数何半0123456789０１２３４５６７８９" for c in u.surface):
+            counted = True
+            continue
+        if counted and u.surface in ("、", "，"):
+            continue
+        return counted and u.surface in _SPAN_UNITS
+    return False
+
+
 _AFFIX_SENSES = {
     "余り": {"en": "(after an amount) just over, a little more than: 三割余り, just over 30%",
            "fr": "(après une quantité) un peu plus de : 三割余り, un peu plus de 30 %"},
@@ -2000,6 +2025,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
                 and "counter" not in (deck[1].get("meaning") or "").lower():
             # (一本も's 本 counts: no "book", whatever point holds it, plan 296)
             sense = _COUNTER_SENSES[morphemes[i].surface]
+        if sense is None and morphemes[i].surface in ("ここ", "此処") and _a_span_after(morphemes, i):
+            # (ここ数年で急に増えた: "these past few years", no place, plan 296)
+            sense = _HERE_SPAN
         affix = sense is not None
         if affix:
             deck, said = None, None
@@ -2279,7 +2307,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # never before a blank; and a kanji verb read by what goes with it
 # (注文が通って とおる, 行った調査 おこなう, 放っておく ほうる, 開いてる あく);
 # and a く form read by what follows (ちかくに the noun, 危うく the adverb,
-# 近くはない, よくはない the adjective denied, それほどとおく ほど and 遠い).
+# 近くはない, よくはない the adjective denied, それほどとおく ほど and 遠い);
+# and an adverb's sense by what it says of (ここ数年 "these past", まずない
+# the N3 先ず's "hardly", 別にはらう 別 and に, "separately").
 LOCAL_REV = 33
 
 

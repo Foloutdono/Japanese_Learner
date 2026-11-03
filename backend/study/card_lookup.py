@@ -1129,6 +1129,10 @@ def resolve_morpheme(morphemes, i: int):
     if m0.surface == "だから" and i + 2 < len(morphemes) and morphemes[i + 1].surface == "と" \
             and morphemes[i + 2].lemma == "言う":
         return None                         # だからといって: 〜からといって's, no "so, therefore" (plan 296)
+    if m0.surface in ("まず", "先ず") and m0.pos == "adverb" and _all_but_denied(morphemes, i):
+        # (道に迷うことはまずない, まず不可能だ: "hardly", the N3 先ず's
+        # sense -- the N4 まず is "first of all", plan 296)
+        return resolve_lemma("先ず", "まず", "先ず")
     if m0.lemma in ("驕る", "傲る", "奢る") and not _has_kanji(m0.surface):
         return None                         # おごる in kana treats (奢る, the pool's), plan 272
     if m0.surface == "あれ" and m0.pos == "interjection":
@@ -1874,6 +1878,69 @@ _TRADE = frozenset({"働く", "はたらく", "生産", "発注", "受注", "援
 
 
 _TE_AUXILIARIES = morphology.TE_AUXILIARIES
+
+# What says a thing can hardly be, or is all but certain, after まず (plan
+# 296).
+_ALL_BUT_NONE = frozenset({"不可能", "無理", "ありえない", "あり得ない", "確実"})
+# What may close a clause after its denial, which then stands: 。, だろう,
+# と思う, という, から -- never ないと's "unless" (確認しないといけない) or
+# ないこと, a thing named (焦らないことが大切).
+_DENIAL_CLOSES = frozenset({"だろう", "でしょう", "かも", "から", "よ", "ね", "し", "けど", "が", "ん", "の", "です",
+                            "はず", "わ", "さ", "な", "よね"})
+_SAID_OR_THOUGHT = frozenset({"思う", "言う", "考える", "見る", "聞く", "言える", "感じる"})
+_QUESTION_WORDS = frozenset({"何", "どう", "どこ", "誰", "いつ", "どれ", "どちら", "なぜ"})
+
+
+def _all_but_denied(morphemes, i: int) -> bool:
+    """Whether the まず at morphemes[i] says "hardly", or "almost
+    certainly": no comma after it, and its clause ends on a denial
+    (まずない, まず不可能だ, 起こらないから, まずないと思う) or a guess
+    (まず大丈夫でしょう, まず確実だ) -- never a question (まずご飯を食べ
+    ない？, まず何から始めればいいんだろう) nor a denial inside an unless
+    or a thing named (確認しないといけない, 焦らないことが大切)."""
+    k = i + 1
+    if k < len(morphemes) and morphemes[k].pos == "symbol":
+        return False
+    said = False
+    for j in range(k, len(morphemes)):
+        u = morphemes[j]
+        if u.pos == "symbol" and u.surface in "？?":
+            return False
+        if u.pos == "symbol" and u.surface in "。！!、，,":
+            break
+        if (u.pos == "particle" and u.surface == "か") or u.lemma in _QUESTION_WORDS or u.surface in _QUESTION_WORDS:
+            return False
+        if u.surface in _ALL_BUT_NONE or (u.surface == "可能" and j > 0 and morphemes[j - 1].surface == "不") \
+                or u.surface in ("だろう", "でしょう"):
+            said = True
+        elif (u.lemma in ("無い", "ない") and u.pos in ("adjective", "auxiliary")) or u.lemma in ("ぬ", "ず"):
+            said = _a_denial_stands(morphemes, j) or said
+        elif u.pos == "particle" and u.surface in _CLAUSE_ENDS and j > 0 \
+                and morphemes[j - 1].pos in ("verb", "auxiliary", "adjective"):
+            break                           # (まずやってみないと分からない: the denial is the next clause's)
+    return said
+
+
+# What ends まず's clause after its predicate: an if, a reason, a but.
+_CLAUSE_ENDS = frozenset({"と", "ば", "ても", "たら", "なら", "ので", "のに", "けど", "けれど", "が"})
+
+
+def _a_denial_stands(morphemes, j: int) -> bool:
+    """Whether the denial at morphemes[j] closes its clause (_DENIAL_CLOSES,
+    と + a verb of saying or thinking, the end of the sentence)."""
+    if j > 0 and morphemes[j - 1].surface in ("いけ", "なら", "行け", "なけれ"):
+        return False                        # (確認しないといけない: what must be done, no denial)
+    nxt = morphemes[j + 1] if j + 1 < len(morphemes) else None
+    if nxt is None or (nxt.pos == "symbol" and nxt.surface in "。！!、，,"):
+        return True
+    if nxt.pos == "auxiliary" and nxt.lemma in ("ます", "た"):
+        return _a_denial_stands(morphemes, j + 1)
+    if nxt.surface == "と":
+        after = morphemes[j + 2] if j + 2 < len(morphemes) else None
+        return after is not None and after.lemma in _SAID_OR_THOUGHT
+    if nxt.surface in ("いう", "言う"):
+        return True
+    return nxt.surface in _DENIAL_CLOSES
 
 
 def _a_compound_particles_te(morphemes, k: int) -> bool:
@@ -5200,6 +5267,9 @@ def resolve_whole_word(morphemes, i: int):
     (_NOT_WHOLE, _OPENING_ONLY, and いつか, どうか, ともに where the
     sentence asks for another)."""
     m = morphemes[i]
+    if m.surface == "別" and i + 1 < len(morphemes) and morphemes[i + 1].surface == "に" \
+            and morphology.apart(morphemes, i + 1):
+        return None                         # お茶は別にはらいます: 別 and に, "separately" (plan 296)
     what = _what_word(morphemes, i) or _polite_set_phrase(morphemes, i)
     if what:
         return what
