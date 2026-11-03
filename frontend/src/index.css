@@ -25447,12 +25447,14 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
    (DESIGN.md, "The language flags"). The ring keeps a white stripe
    from melting into a light ground. */
 .lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
-.lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
+.lang-pick__sample { min-width: 0; overflow: hidden; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
-/* Español (Latinoamérica) and its two words need 335px, measured: the
-   row a 390px phone gives them (plan 303). Narrower (375, 360, 320), the
-   words go, since the name already says the language, and the name
-   keeps its one line (nowrap, above). */
+/* Español (Latinoamérica) and its two words need about 335px, as
+   measured here: the row a 390px phone gives them (plan 303). The words
+   never break onto a second line (nowrap, above): where a font sets the
+   row a little wider, they end in an ellipsis. Narrower (375, 360, 320)
+   they go, since the name already says the language, and the name keeps
+   its one line. */
 @container (max-width: 334px) {
   .lang-pick__sample { display: none; }
 }
