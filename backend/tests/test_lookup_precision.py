@@ -4324,3 +4324,14 @@ class APersonsKataBySentenceTests(unittest.TestCase):
                          "拾った方が早い。", "安い方をください。", "上の方にお置きください。", "大きい方は、あとで食べます。"):
             with self.subTest(sentence=sentence):
                 self.assertEqual(self.readings(sentence), ["ほう"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class MadeGlossTests(unittest.TestCase):
+    """Plan 296: まで's gloss by what it does -- "even" in its verb's
+    object's place, no "until" before the copula of 〜までのことだ."""
+
+    def test_its_gloss(self) -> None:
+        self.assertTrue(gloss_of("畑で農薬を使い過ぎると、近くの井戸の水まで汚しかねない。", "まで").startswith("even"))
+        self.assertNotEqual(gloss_of("駅員として、するべきことをしたまでです。", "まで"), "until (it happens)")
+        self.assertEqual(gloss_of("子どもが大人になるまで見守る。", "まで"), "until (it happens)")

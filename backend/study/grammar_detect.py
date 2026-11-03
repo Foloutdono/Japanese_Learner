@@ -343,7 +343,7 @@ _CONTRACTIONS = (("では", "じゃ"), ("ている", "てる"))
 # with a particle inside: 〜までのことだ's までだ (当然のことをしたまでだ),
 # 〜に至る's には／にも (大事には至らない).
 _SHORT_FORMS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
-    "〜までのことだ": (("までのことだ", ("までだ",)),),
+    "〜までのことだ": (("までのことだ", ("までだ", "までです")),),       # (するべきことをしたまでです, plan 296)
     # (said short, as speech says it: 高すぎるっしょ, plan 272)
     "〜でしょう": (("でしょう", ("っしょ",)), ("でしょ", ("っしょ",))),
     # (the comma a list's last と takes before the question: お茶とコーヒー
@@ -3899,7 +3899,73 @@ def _even_made(tokens, i: int) -> bool:
             or _a_place_or_tool(prev) or any(u.surface == "から" and u.pos == "particle" and not u.conjunctive
                                              for u in tokens):
         return False
-    return _added_to_before(tokens, i - 1)
+    return _added_to_before(tokens, i - 1) or _in_place_of_its_object(tokens, i)
+
+
+# What まで after it ends a stretch at, never "even" (plan 296): a time,
+# an end, an event -- 最後まで読む, 明日まで待つ, 完成まで見守る.
+_ENDS_AND_TIMES = frozenset({"最後", "終わり", "おわり", "最初", "初め", "明日", "あした", "あす", "今日", "きょう", "今",
+                             "いま", "朝", "昼", "夜", "夕方", "夜中", "深夜", "今夜", "週末", "来週", "来月", "来年",
+                             "春", "夏", "秋", "冬", "期限", "締め切り", "当日", "翌日", "前日", "年末", "月末", "時間",
+                             "端", "奥", "底", "隅", "先", "上", "下", "頂上", "限界", "死"})
+
+
+def _in_place_of_its_object(tokens, i: int) -> bool:
+    """Whether the まで at tokens[i] stands where its verb's を would --
+    "even" (plan 296): 見る人の心まで温かくする, 井戸の水まで汚しかねない.
+    The verb after it takes an object (its first sense transitive, or an
+    adjective's く before する, "to make"), no を stands between, and the
+    noun is no time, end or event, whose まで ends a stretch: 最後まで
+    読む, 明日まで待つ, 完成まで見守る."""
+    prev = tokens[i - 1]
+    if prev.surface in _ENDS_AND_TIMES or (prev.verbal and prev.goshu == "漢"):
+        return False                   # (an event, 完成, 到着 -- never 心, which UniDic lets take する)
+    if prev.pos != "noun":
+        return False                   # (何冊まで, バスていまで: a count, a word made with a suffix)
+    from study.morphology import _noun_meaning, kata_to_hira
+    first = re.split(r"[,;(]", _noun_meaning(prev.surface, kata_to_hira(prev.reading)) or "", maxsplit=1)[0].lower()
+    if not first or first.startswith("to ") or _A_PLACE_OR_A_TIME.search(first):
+        return False                   # (駅前までお迎え, 翌週まで延ばす, 程度まで, さいごまで: an end)
+    for k in range(i + 1, min(len(tokens), i + 6)):
+        t = tokens[k]
+        if t.surface == "を" and t.pos == "particle" or (t.pos == "symbol" and (t.surface in _UTTERANCE_ENDS
+                                                                                 or t.surface in _COMMAS)):
+            return False
+        if t.pos == "adjective" and t.cform.startswith("連用形") and k + 1 < len(tokens) \
+                and tokens[k + 1].lemma in ("為る", "する"):
+            return True                # (心まで温かくする: "make it warm")
+        if t.pos == "verb":
+            # (ひまわりまでお願いします: where a ride goes, asked)
+            return _transitive(t.lemma, t.lemma_reading) and t.lemma not in ("願う", "頼む", "下さる")
+        if t.pos == "noun" and t.surface in ("願い", "お願い"):
+            return False
+    return False
+
+
+# What a noun's first gloss says of an end, a place, a time, a degree or
+# an amount, whose まで ends a stretch (plan 296).
+_A_PLACE_OR_A_TIME = re.compile(
+    r"\b(station|house|home|residence|office|desk|table|exit|entrance|gate|platform|reception|counter|front|area|"
+    r"vicinity|neighbou?rhood|inside|interior|inner|depths?|back|bottom|top|end|ending|goal|finish|degree|extent|"
+    r"level|limit|point|week|month|year|day|days|date|time|hour|o'clock|evening|morning|noon|afternoon|night|"
+    r"tomorrow|today|yesterday|weekend|period|term|season|spring|summer|autumn|winter|stop|place|spot|room|floor|"
+    r"city|town|village|country|prefecture|road|street|corner|side|edge|shore|coast|park|school|shop|store|"
+    r"restaurant|hospital|airport|port|bridge|river|mountain|sea|first|last|beginning|start|third|half|amount|"
+    r"number|stage|step|age|distance|far|near|"
+    # (骨まで切る: how far a cut goes, plan 296)
+    r"bone|bones|skin|flesh|marrow|core|root|roots|surface|tip|middle|center|centre)\b")
+
+
+@lru_cache(maxsize=2048)
+def _transitive(lemma: str, lemma_reading: str) -> bool:
+    """Whether the dictionary's first sense of a verb takes an object."""
+    from content import vocab_jmdict_data, vocab_meanings_data
+    from study.morphology import kata_to_hira
+
+    reading = kata_to_hira(lemma_reading)
+    senses = vocab_meanings_data.get(f"{lemma}::{reading}") or vocab_jmdict_data.get_senses(lemma, reading) or []
+    first = set(senses[0].get("tags") or ()) if senses else set()
+    return "vt" in first
 
 
 def _numeral_token(t) -> bool:
@@ -6846,6 +6912,9 @@ def _pattern_refusals():
         # (…偉業を成し遂げた、というものだ: what a story says, set off by its
         # comma -- "it is one that goes", no verdict on what a thing is, plan 296)
         "〜というものだ": lambda t, s, e, g: any(x.end == s and x.pos == "symbol" and x.surface in _COMMAS for x in t),
+        # (土曜日も十時までになってしまいます: まで and 〜になる's に, what the
+        # hours become -- no deadline, plan 296)
+        "〜までに": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.lemma in ("成る", "なる"),
         "〜たら": lambda t, s, e, g: (n := _next_word(t, e)) is None or (n.pos == "symbol" and n.surface in _UTTERANCE_ENDS)
             # (あの日の＿＿＿といったらなかった: 〜といったらない's たら, plan 296)
             or (n.lemma in ("無い", "ない") or n.surface.startswith("ありゃ")) and (p := _prev_word(t, s)) is not None

@@ -3318,3 +3318,27 @@ class TheLongestToIuFrameTests(unittest.TestCase):
                                 ("昔はよくここで遊んだものだ。", "〜ものだ"), ("東京から大阪までは遠い。", "から〜まで")):
             with self.subTest(sentence=sentence):
                 self.assertIn(point, found_in(sentence))
+
+
+class MadeOfExtentTests(unittest.TestCase):
+    """Plan 296: まで "even" where it stands for its verb's を (心まで温かく
+    する, 井戸の水まで汚し), no から〜まで; まで + 〜になる's に no 〜までに;
+    したまでです 〜までのことだ, said politely."""
+
+    def test_even(self) -> None:
+        for sentence in ("参加者の明るい表情には、見る人の心まで温かくするものがある。",
+                         "畑で農薬を使い過ぎると、近くの井戸の水まで汚しかねない。",
+                         "カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("から〜まで", found_in(sentence))
+        for sentence in ("駅から家まで歩きます。", "五時まで待ちます。", "最後まで読みました。", "明日まで待ってください。",
+                         "完成まで見守る。", "駅まで送ります。", "店は十時から七時までです。",
+                         "ほうちょうを強く押して、一気に骨まで切ること", "ホームまでお送りします。", "何冊まで借りられますか。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("から〜まで", found_in(sentence))
+
+    def test_until_and_only(self) -> None:
+        self.assertNotIn("〜までに", found_in("あいにく土曜日も十時までになってしまいますが、日曜日も入れません。"))
+        self.assertIn("〜までに", found_in("十時までに来てください。"))
+        self.assertEqual(found_in("駅員として、するべきことをしたまでです。").get("〜までのことだ"), "までです")
+        self.assertNotIn("〜までのことだ", found_in("店は十時から七時までです。"))

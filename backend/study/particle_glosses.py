@@ -1153,8 +1153,10 @@ def gloss(morphemes, i: int) -> dict | None:
                 and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("、", "，"):
             key = "は_after_te"              # そんな運転をしていては、大けがをする
         elif m.surface == "まで" and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary") \
-                and morphemes[i - 1].cform.startswith(("終止形", "連体形")):
-            key = "まで_until"               # 亡くなるまで, "until he died"
+                and morphemes[i - 1].cform.startswith(("終止形", "連体形")) \
+                and not (i + 1 < len(morphemes) and morphemes[i + 1].lemma in ("だ", "です")
+                         and morphemes[i + 1].pos == "auxiliary"):
+            key = "まで_until"               # 亡くなるまで, "until he died" -- したまでです is 〜までのことだ's (plan 296)
         elif m.surface == "と" and i > 0 and (morphemes[i - 1].pos == "adverb" or (
                 morphemes[i - 1].pos == "other" and (morphemes[i - 1].surface.endswith("々")
                                                      or morphemes[i - 1].surface in _TO_MANNER))) \
