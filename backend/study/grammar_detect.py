@@ -3876,9 +3876,41 @@ def _from_until_spans(tokens):
     return [(t.start, t.end) for i, t in enumerate(tokens)
             if t.pos == "particle" and t.surface in ("から", "まで") and not t.conjunctive
             and not (t.surface == "まで" and _even_made(tokens, i))
+            and not (t.surface == "から" and _out_of_a_feeling(tokens, i))
             and (_prev_kind(tokens, i) == "nominal"
                  or (tokens[i - 1].pos == "adjective" and tokens[i - 1].cform.startswith("連用形")
                      and tokens[i - 1].surface.endswith("く")))]
+
+
+# What one acts out of (plan 296): 焦りから忘れかけた, 好奇心から開けた --
+# a cause, no "from" of a stretch.
+_FEELINGS = frozenset({"焦り", "不安", "好奇心", "心配", "恐怖", "興味", "親切", "善意", "悪意", "怒り", "嫉妬", "恐れ",
+                       "同情", "遠慮", "寂しさ", "退屈", "義理", "見栄", "意地", "思いやり", "優しさ", "喜び",
+                       "悲しさ", "悔しさ", "恥ずかしさ", "憧れ", "愛情", "責任", "疲れ", "不注意", "油断", "誤解"})
+
+
+def _out_of_a_feeling(tokens, i: int) -> bool:
+    """Whether the から at tokens[i] says what was done out of a feeling
+    (焦りから, 責任感から、…最後まで残った) -- never one end of a range of
+    them, its まで a word or two on (喜びから悲しみまで)."""
+    word = _noun_run_before(tokens, i)
+    if not (word in _FEELINGS or word.endswith(("感", "心"))):
+        return False
+    for u in _sentence_after(tokens, tokens[i].end)[:4]:
+        if u.pos == "symbol":
+            return True
+        if u.surface == "まで" and u.pos == "particle":
+            return False
+    return True
+
+
+def _noun_run_before(tokens, i: int) -> str:
+    """The noun the tokenizer cut before tokens[i], whole: 好奇 + 心 is 好奇心,
+    不 + 注意 不注意, 飛行 + 機 飛行機."""
+    k = i
+    while k > 0 and tokens[k - 1].pos in ("noun", "pronoun", "prefix", "suffix") and not tokens[k - 1].proper:
+        k -= 1
+    return "".join(t.surface for t in tokens[k:i])
 
 
 def _even_made(tokens, i: int) -> bool:
@@ -6037,6 +6069,38 @@ def _counter_refused(tokens, s, e, _g) -> bool:
     return not _is_numeral(_prev_word(tokens, s))
 
 
+# What 〜ことから grounds (plan 296): a name, a finding, a conclusion --
+# 呼ばれる, 名前がつく, 分かる, 考えられる, と見られる, にちがいない.
+# (思う, 考える, 見る after a quoting と: と見られる, と考えられる -- never
+# 始めてみる's みる)
+_FOUND_AFTER_TO = frozenset({"思う", "考える", "見る", "みる"})
+_FOUND = frozenset({"呼ぶ", "名付ける", "名づける", "付く", "つく", "分かる", "判る", "わかる",
+                    "判断", "断定", "推測", "推定", "判明", "言う", "知る", "由来", "明らか", "違う", "ちがう", "気付く",
+                    "気づく", "結論", "疑う", "認める", "確認", "証明", "示す", "推理", "想像", "予想", "見なす", "見做す",
+                    "名", "名前", "愛称", "あだ名", "呼び名"})
+
+
+def _grounds_a_finding(tokens, e: int) -> bool:
+    """Whether what follows 〜ことから at `e` in its sentence names, finds
+    or concludes (_FOUND): 花の町と呼ばれる, 泥棒が入ったと分かった -- never
+    ことから始める, ことから学ぶ, ことから逃げる, ことからではなく."""
+    rest = []
+    for u in (t for t in tokens if t.start >= e):
+        if u.pos == "symbol" and u.surface in "。！？!?":
+            break
+        rest.append(u)
+    words = [u for u in rest if u.pos != "symbol"]
+    if words and (words[0].surface in ("では", "じゃ") or (len(words) > 1 and words[0].surface == "で"
+                                                         and words[1].surface == "は")):
+        return False
+    return any(u.lemma in _FOUND or u.surface in _FOUND or (
+        u.lemma in _FOUND_AFTER_TO and k > 0 and rest[k - 1].surface == "と") for k, u in enumerate(rest))
+# Where one looks from, its から a place (plan 296): 窓から見ると.
+_VANTAGES = frozenset({"窓", "屋上", "ベランダ", "上", "高台", "展望台", "橋", "頂上", "外", "ここ", "そこ", "あそこ",
+                       "部屋", "車窓", "飛行機", "遠く", "近く", "横", "後ろ", "前", "下", "正面", "席", "外側", "内側",
+                       "空", "窓際", "車", "電車", "船", "屋根", "舞台", "客席"})
+
+
 def _toru_itself(tokens, k: int) -> bool:
     """Whether the とって after the に at tokens[k] is 取る itself --
     例にとって, 本を手にとって, "take as an example", "take in hand" --
@@ -7461,6 +7525,15 @@ _REFUSALS = {
         # (日本全国にわたって見られる: 〜にわたって's て, and 見られる "is seen",
         # with its に hidden by a blank too, plan 296)
         or _a_particles_te(t, k)),
+    # (互いに見えるようにすることから始める: "start by", and 確実さを装う
+    # ことからではなく: "not from" -- no fact a finding rests on, plan 296)
+    "〜ことから": lambda t, s, e, g: not _grounds_a_finding(t, e),
+    # (宿の窓から見るともなく眺めた: 〜ともなく, a window looked from --
+    # no standpoint judged from, plan 296)
+    "〜から見ると": lambda t, s, e, g: (_followed_by(t, e, "も") and (n := _next_word(t, e)) is not None
+                                   and (a := _next_word(t, n.end)) is not None and a.lemma in ("無い", "ない"))
+        or ((k := _index_at(t, s)) is not None and (_noun_run_before(t, k) in _VANTAGES
+                                                    or _noun_run_before(t, k)[-1:] in _VANTAGES)),
     # (例にとって, 本を手にとって: 取る itself, "take as an example",
     # "take in hand", plan 296)
     "〜にとって": lambda t, s, e, g: (k := _index_at(t, s)) is not None and t[k].surface == "に"

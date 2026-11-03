@@ -3441,3 +3441,40 @@ class AKuFormsPointTests(unittest.TestCase):
         for sentence in ("早く起きる。", "高くは飛べない。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("〜く／〜に（副詞形）", found_in(sentence))
+
+
+class AFromBySourceTests(unittest.TestCase):
+    """Plan 296: から read by what governs it -- a feeling acted out of is
+    a cause (焦りから), こと + から before 始める or ではなく is "from", and
+    a window looked from no standpoint (窓から見るともなく)."""
+
+    def test_no_construction(self) -> None:
+        for sentence, point in (
+                ("独立してからというもの、売れる器を作らねばという焦りから、あの言葉を忘れかけていた時期もありました。", "から〜まで"),
+                ("家事を分け合うには、まず見えない仕事に名前をつけ、互いに見えるようにすることから始めるほかない。", "〜ことから"),
+                ("信頼は、確実さを装うことからではなく、率直に語る姿勢から生まれるのではないか。", "〜ことから"),
+                ("宿の窓から見るともなく夕暮れの川を眺めた。", "〜から見ると"),
+                ("好奇心から始めた料理が、今では仕事になった。", "から〜まで"),
+                ("運転手の不注意から、交差点で事故が起きたそうです。", "から〜まで"),
+                ("まずは自分の部屋を片付けることから始めてみたらどう？", "〜ことから"),
+                ("失敗したことから学べることは多い。", "〜ことから"),
+                ("飛行機から見ると、雲が海のように広がっていた。", "〜から見ると"),
+                ("ここから見ると、あの建物は少し傾いているように見える。", "〜から見ると")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(point, found_in(sentence))
+        # (責任感から、…最後まで: the から is the cause, the まで "until" alone)
+        self.assertNotEqual(found_in("責任感から、彼は最後まで一人で会社に残った。").get("から〜まで"), "から")
+        self.assertIn("〜ともなく", found_in("宿の窓から見るともなく夕暮れの川を眺めた。"))
+
+    def test_the_constructions_keep_theirs(self) -> None:
+        for sentence, point in (("形が富士山に似ていることから、この名前がついた。", "〜ことから"),
+                                ("窓が開いていたことから、泥棒が入ったと分かった。", "〜ことから"),
+                                ("子どもから見ると、大人はずるい。", "〜から見ると"),
+                                ("日本から見ると、この習慣は不思議だ。", "〜から見ると"),
+                                ("この字から見ると、彼は急いで書いたようだ。", "〜から見ると"),
+                                ("朝から晩まで働く。", "から〜まで"),
+                                ("この映画は、喜びから悲しみまで、人間のあらゆる感情を描いている。", "から〜まで"),
+                                ("この町は温泉が多く湧くことから、「湯の町」と呼ばれている。", "〜ことから"),
+                                ("東京から見ると、地方の家賃はずいぶん安く感じる。", "〜から見ると")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))

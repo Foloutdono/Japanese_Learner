@@ -2309,7 +2309,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # and a く form read by what follows (ちかくに the noun, 危うく the adverb,
 # 近くはない, よくはない the adjective denied, それほどとおく ほど and 遠い);
 # and an adverb's sense by what it says of (ここ数年 "these past", まずない
-# the N3 先ず's "hardly", 別にはらう 別 and に, "separately").
+# the N3 先ず's "hardly", 別にはらう 別 and に, "separately"); and から
+# read by what governs it (焦りから a cause, ことから始める no 〜ことから,
+# 窓から見るともなく no 〜から見ると).
 LOCAL_REV = 33
 
 
