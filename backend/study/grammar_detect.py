@@ -4285,9 +4285,9 @@ def _casual_request_spans(tokens):
     return out
 
 
-# Who is asked: 今日はあなたが決めて asks the listener, its が and all
-# (plan 296).
-_YOU = frozenset({"あなた", "貴方", "あんた", "君", "きみ", "お前", "おまえ"})
+# Who is asked: 今日はあなたが決めて, あとかたづけはそっちがやってね ask the
+# listener, its が and all (plan 296).
+_YOU = frozenset({"あなた", "貴方", "あんた", "君", "きみ", "お前", "おまえ", "そっち", "そちら"})
 # Words of a day gone by: a request asks for what is still to be done,
 # so 先週、腰を痛めてね tells what happened, "…, you see" (plan 296).
 _PAST_DAYS = frozenset({"昨日", "きのう", "先週", "せんしゅう", "先月", "せんげつ", "去年", "きょねん", "昨年",
