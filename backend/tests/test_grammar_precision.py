@@ -3665,3 +3665,26 @@ class TheAuditsSingletonPointsTests(unittest.TestCase):
                                   ("会う前に、へやをきれいにする。", "〜くする／〜にする")):
             with self.subTest(sentence=sentence):
                 self.assertIn(pattern, found_in(sentence))
+
+
+class TheSingletonsLookalikesTests(unittest.TestCase):
+    """Plan 296, the singletons' stress set: a street its clause
+    describes is no 〜通りに (人が行き交う通り, 一本入った通り, 前の通り);
+    適当にしたら is a manner and する and 切符にしたらいかが a pick, no
+    〜にしたら (親にしたら is); 右手に見えます is "visible on the right"."""
+
+    def test_lookalikes(self) -> None:
+        for sentence, pattern in (("人が行き交う通りに、小さな花屋が店を開いた。", "〜通りに"),
+                                  ("市役所の前の通りに、桜の木が植えられた。", "〜通りに"),
+                                  ("大通りから一本入った通りに、古い喫茶店がある。", "〜通りに"),
+                                  ("部屋の片付けを適当にしたら、母に叱られた。", "〜にしたら"),
+                                  ("きっぷにしたらいかがですか。", "〜にしたら"),
+                                  ("皆様、バスの右手に見えますのが、旧県庁舎でございます。", "〜に見える")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(pattern, found_in(sentence))
+        for sentence, pattern in (("説明書に書いてある通りに組み立てた。", "〜通りに"),
+                                  ("地図の通りに歩いたら、駅に着いた。", "〜通りに"),
+                                  ("親にしたら、子どもの帰りが遅いのは心配だ。", "〜にしたら"),
+                                  ("店にしたら、客が多いほうがうれしい。", "〜にしたら")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))

@@ -2330,7 +2330,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 〜の中で, 開けてもかまいませんか no 〜ませんか, 安いだけではない), and a
 # word in kana as spelled (つづら, 〜でなくてなんだろう's なん); and the
 # audit's singletons (幸多かれ, よる、, 全部やった, 助けんがため, 互いに
-# 見える, 灯らない通り, まめにしている, 引き受け手).
+# 見える, 灯らない通り, まめにしている, 引き受け手) and their lookalikes
+# (人が行き交う通り, 適当にしたら, 右手に見えます).
 LOCAL_REV = 33
 
 

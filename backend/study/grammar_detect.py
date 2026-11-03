@@ -6815,6 +6815,34 @@ _MANNERS = frozenset({"まめ", "忠実", "真面目", "まじめ", "丁寧", "�
                       "地道", "着実", "慎重", "丹念", "念入り", "懸命", "必死"})
 
 
+# What a street is said of, never what one follows (plan 296): 人が行き
+# 交う通り, 一本入った通り, 前の通り -- 言われた通りに, 地図の通りに are
+# the point's.
+_STREET_VERBS = frozenset({"行き交う", "入る", "続く", "並ぶ", "抜ける", "曲がる", "交わる", "延びる", "伸びる", "通じる",
+                           "面する", "賑わう", "にぎわう", "走る"})
+_STREET_SIDES = frozenset({"前", "駅前", "裏", "横", "向かい", "正面", "近く", "隣", "表", "家の前", "店の前"})
+
+
+def _a_street(tokens, s: int) -> bool:
+    """Whether the 通り at `s` is a street its clause describes: a verb
+    of where a street goes or what fills it (行き交う, 入った), or a side
+    and の (前の通り) -- never what was said or planned (plan 296)."""
+    p = _prev_word(tokens, s)
+    if p is None:
+        return False
+    if p.pos == "auxiliary" and p.lemma == "た":
+        k = _index_at(tokens, p.start)
+        p = tokens[k - 1] if k else None
+        if p is None:
+            return False
+    if p.pos == "verb" and p.lemma in _STREET_VERBS:
+        return True
+    if p.surface == "の" and p.pos == "particle":
+        k = _index_at(tokens, p.start)
+        return bool(k) and tokens[k - 1].surface in _STREET_SIDES
+    return False
+
+
 def _done_in_a_manner(tokens, s: int) -> bool:
     """Whether the に at `s` makes an adverb of a manner (まめに, 丁寧に)
     for a する that does a deed -- no "make it so" (plan 296)."""
@@ -7234,7 +7262,7 @@ _SPANS = frozenset({"全国", "全体", "全域", "全土", "各地", "長年", 
 # 見える, "visible on the right"), and who is honoured (先生が見えた,
 # "has come").
 _BODY = frozenset({"体", "身", "身体", "骨身", "胃", "腰", "胸", "心身", "肌", "足", "目", "耳"})
-_WHERE = frozenset({"右", "左", "前", "後ろ", "遠く", "近く", "向こう", "奥", "上", "下", "正面", "前方",
+_WHERE = frozenset({"右", "左", "右手", "左手", "右側", "左側", "前", "後ろ", "遠く", "近く", "向こう", "奥", "上", "下", "正面", "前方",
                     "後方", "眼下", "足元", "窓", "そこ", "ここ", "あそこ", "手前", "横", "隣", "外", "中",
                     "間", "先", "彼方", "東", "西", "南", "北", "空"})
 _HONORED = frozenset({"先生", "社長", "部長", "課長", "先輩", "お客", "客", "教授", "会長", "院長", "校長"})
@@ -7303,6 +7331,12 @@ def _pattern_refusals():
         # reason, plan 296)
         "〜もので": lambda t, s, e, g: _followed_by(t, e, "は", "も", "ない", "なかっ", "なく", "無い"),
         "〜くする／〜にする": lambda t, s, e, g: _acts_on_nothing(t, s, e, g) or _done_in_a_manner(t, s),
+        # (片付けを適当にしたら: a manner and する, no one's point of view;
+        # 切符にしたらいかがですか: what one picks, plan 296)
+        "〜にしたら": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None and (
+            p.surface in _MANNERS or p.surface in ("適当", "いい加減") or p.adjectival
+            or p.pos in ("verb", "adjective", "auxiliary")))
+            or ((n := _next_word(t, e)) is not None and n.surface in ("いかが", "どう", "いい")),
         # しかたがない, しかたありません: "it can't be helped", no way of doing
         "〜方": lambda t, s, e, g: (k := _tok_ending(t, e)) is not None and t[k].lemma == "仕方" and (
             _negative_at(t, k + 1) or (k + 1 < len(t) and t[k + 1].surface in ("が", "も") and _negative_at(t, k + 2))),
@@ -7578,7 +7612,7 @@ def _pattern_refusals():
         # planned or done, plan 296)
         "〜通りに": lambda t, s, e, g: _is_numeral(_prev_word(t, s)) or ((p := _prev_word(t, s)) is not None and (
             p.pos == "adjective" or (p.pos == "auxiliary" and p.lemma in ("ない", "無い", "ぬ", "ず"))
-            or (p.surface == "な" and p.pos == "auxiliary"))) or ((n := _next_word(t, e)) is not None
+            or (p.surface == "な" and p.pos == "auxiliary"))) or _a_street(t, s) or ((n := _next_word(t, e)) is not None
             and n.lemma in ("有る", "ある", "居る", "いる", "面する", "出る", "沿う", "並ぶ", "建つ", "立つ")),
         "〜とき": _toki_refused,
         # 時間を過ぎる, 三時過ぎ: 過ぎる itself, passing a time -- where
