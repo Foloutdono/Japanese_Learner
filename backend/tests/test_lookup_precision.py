@@ -4363,3 +4363,17 @@ class AConstructionsPieceCardTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertEqual(card_of(sentence, "見"), "vocab_N5_見る_みる")
         self.assertIsNone(card_of("この問題について考えてみる。", "みる"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ATeAtTheEndGlossTests(unittest.TestCase):
+    """Plan 296: a て left at the end, ね or よ after it, trails off; one
+    before a blank joins what the blank holds."""
+
+    def test_its_gloss(self) -> None:
+        trailing = token_of("この駅は小さいがゆえに、皆が顔見知りでしてね。", "て")["gloss"]["en"]
+        self.assertTrue(trailing.startswith("(at the end)"))
+        self.assertTrue(token_of("電車が遅れてね。", "て")["gloss"]["en"].startswith("(at the end)"))
+        self.assertTrue(token_of("去年、会社を辞めてね。今はフリーランスなんだ。", "て")["gloss"]["en"]
+                        .startswith("(at the end)"))
+        self.assertTrue(token_of("社長、この手紙を読んで＿＿＿。", "で")["gloss"]["en"].startswith("the て form"))

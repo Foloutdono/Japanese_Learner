@@ -4187,8 +4187,45 @@ def _asks_and_ends(tokens, i: int) -> bool:
     opening a sentence before one, "wait" (待って、この猫ちゃんの…)."""
     if _sentence_final(tokens, i) or _then_a_call(tokens, i) or _then_a_plea(tokens, i):
         return True
-    return (i >= 1 and tokens[i - 1].lemma == "待つ" and i + 1 < len(tokens)
-            and tokens[i + 1].surface in _COMMAS and _sentence_start(tokens, i) >= i - 2)
+    # (心配しないでよ、すぐ戻るから: よ before the comma closes what is
+    # asked, plan 296)
+    if i + 2 < len(tokens) and tokens[i + 1].pos == "particle" and tokens[i + 1].surface.rstrip("〜ー～") == "よ" \
+            and tokens[i + 2].surface in _COMMAS:
+        return True
+    comma = i + 1 + (i + 1 < len(tokens) and tokens[i + 1].pos == "particle" and tokens[i + 1].surface == "ね")
+    opens = i >= 1 and comma < len(tokens) and tokens[comma].surface in _COMMAS and _sentence_start(tokens, i) >= i - 2
+    # (見て、あの子、…: "look!", and what to look at is said next, a
+    # scene of its own -- never 見て、わかった or 見て、彼は笑った。, the
+    # looker's own next step, plan 296)
+    return opens and (tokens[i - 1].lemma == "待つ" or (tokens[i - 1].lemma in ("見る", "聞く")
+                                                      and _then_a_scene(tokens, comma + 1)))
+
+
+_PLACE_DEMONSTRATIVES = frozenset({"ここ", "そこ", "あそこ", "こっち", "そっち", "あっち", "こちら", "そちら", "あちら"})
+
+
+def _then_a_scene(tokens, k: int) -> bool:
+    """Whether the sentence from tokens[k] on is a scene of its own --
+    a subject or a topic of its own (あの子、, 空が, 私ね, あの人転んだ,
+    虹だよ, あそこに), and no story told in the past (見て、彼はにっこり
+    笑った。, 聞いて、空が暗くなったのに気づいた。): what a "look!" or a
+    "listen!" points at, never the looker's next step (plan 296)."""
+    end = _sentence_end(tokens, k - 1)
+    last = next((tokens[j] for j in range(end - 1, k - 1, -1) if tokens[j].pos != "symbol"), None)
+    if last is None or ((end >= len(tokens) or tokens[end].surface == "。") and last.pos == "auxiliary"
+                        and last.lemma == "た"):
+        return False
+    for j in range(k, end - 1):
+        u, after = tokens[j], tokens[j + 1]
+        if u.pos not in ("noun", "pronoun") or u.verbal or after.pos in ("noun", "suffix"):
+            continue
+        if (after.pos == "particle" and after.surface in ("が", "は", "も", "ね", "って")) \
+                or (after.pos == "symbol" and after.surface in _COMMAS) or after.pos in ("adverb", "adjective") \
+                or (after.pos == "verb" and after.lemma != "為る") \
+                or (after.pos == "auxiliary" and after.lemma in ("だ", "です")) \
+                or (u.surface in _PLACE_DEMONSTRATIVES and after.surface == "に"):
+            return True
+    return False
 
 
 def _sentence_end(tokens, i: int) -> int:
@@ -4237,11 +4274,49 @@ def _casual_request_spans(tokens):
         if not (prev.pos == "verb" or negative or kept) or not (_asks_and_ends(tokens, i) or twice or hold or (
                 again and i + 1 < len(tokens) and tokens[i + 1].pos == "symbol")):
             continue
-        if any(u.pos == "particle" and u.surface == "が" and not u.conjunctive
-               for u in tokens[_clause_start_of(tokens, i):i]):
+        start = _clause_start_of(tokens, i)
+        if any(u.pos == "particle" and u.surface == "が" and not u.conjunctive and not _ga_of_a_noun(tokens, k, i)
+               and not (k >= 1 and tokens[k - 1].surface in _YOU)
+               for k, u in enumerate(tokens[start:i], start=start)):
+            continue
+        if _told_of_the_past(tokens, i):
             continue
         out.append((prev.start if negative else t.start, t.end))
     return out
+
+
+# Who is asked: 今日はあなたが決めて asks the listener, its が and all
+# (plan 296).
+_YOU = frozenset({"あなた", "貴方", "あんた", "君", "きみ", "お前", "おまえ"})
+# Words of a day gone by: a request asks for what is still to be done,
+# so 先週、腰を痛めてね tells what happened, "…, you see" (plan 296).
+_PAST_DAYS = frozenset({"昨日", "きのう", "先週", "せんしゅう", "先月", "せんげつ", "去年", "きょねん", "昨年",
+                        "さくねん", "おととい", "一昨日", "この間", "こないだ", "先日", "せんじつ", "昨夜", "ゆうべ",
+                        "さっき", "先ほど", "さきほど"})
+
+
+def _told_of_the_past(tokens, i: int) -> bool:
+    """Whether the sentence of the て at tokens[i] says a day gone by
+    of its own verb -- 昨日、駅で財布を落としてな -- and not inside a
+    clause that modifies a noun (昨日買った本を読んで asks), nor in a
+    clause of its own before it (昨日休んだから、今日は早く来てね)."""
+    start = _sentence_start(tokens, i)
+    start = next((k + 1 for k in range(i - 1, start - 1, -1)
+                  if tokens[k].pos == "particle" and tokens[k].surface in _CLAUSE_CLOSERS), start)
+    for k in range(start, i):
+        u = tokens[k]
+        if u.pos in ("noun", "adverb") and (u.surface in _PAST_DAYS or (u.surface == "間" and k > 0 and tokens[k - 1].surface == "この")):
+            if not _ga_of_a_noun(tokens, k - 1, i):
+                return True
+    return False
+
+
+def _ga_of_a_noun(tokens, k: int, i: int) -> bool:
+    """Whether the が at tokens[k] is the subject of a clause that
+    modifies a noun before tokens[i]: お父さんが作った電車を運転してね
+    asks the listener, whoever made the train (plan 296)."""
+    return any(tokens[j].pos in ("verb", "auxiliary", "adjective") and tokens[j].cform.startswith(("連体形", "終止形"))
+               and tokens[j + 1].pos in ("noun", "pronoun") for j in range(k + 1, i - 1))
 
 
 # What closes a clause that gives a reason or a condition before the one

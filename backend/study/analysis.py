@@ -2273,7 +2273,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 〜までに, したまでです 〜までのことだ; and a word of its own taking no
 # point (向き合う, 通り過ぎる, 一方の, それだけの, 責任をもって, どうやって行く);
 # and a construction's piece lighting no smaller point (だからといって,
-# 日本全国にわたって見られる), nor 取る itself 〜にとって (例にとって).
+# 日本全国にわたって見られる), nor 取る itself 〜にとって (例にとって);
+# and a て ending what is said, asked (運転してね after お父さんが作った,
+# 見て、あの子, あなたが決めて) or trailing (でしてね, 先週、腰を痛めてね),
+# never before a blank.
 LOCAL_REV = 33
 
 

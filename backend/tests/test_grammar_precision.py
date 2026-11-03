@@ -3395,3 +3395,33 @@ class AConstructionOwnsItsPieceTests(unittest.TestCase):
         for sentence in ("イギリスを例にとって見よう。", "本を手にとって、じっくり読んだ。"):
             with self.subTest(sentence=sentence):
                 self.assertNotIn("〜にとって", found_in(sentence))
+
+
+class ATeEndingItsUtteranceTests(unittest.TestCase):
+    """Plan 296: a て that ends what is said is a request where nothing
+    says otherwise -- a が inside a clause that modifies a noun is not
+    its subject, nor the listener's (あなたが), and 見て or 聞いて opening
+    a line before a scene of its own is "look!", "listen!" -- and a link
+    where the looker's next step follows, or a story where its clause
+    names a day gone by (先週、腰を痛めてね)."""
+
+    def test_a_request(self) -> None:
+        for sentence in ("私は「じゃあ、お父さんが作った電車を運転してね」と答えました。",
+                         "雨が降る日は家にいてね。", "見て、あの子、ずっと電車を見て、うれしそうだね。",
+                         "聞いて、私ね、合格したの！", "ちょっと待って。", "ほら見て、虹だよ！", "見て、あの人転んだ！",
+                         "今日はあなたが決めて。", "心配しないでよ、すぐ戻るから。", "昨日休んだから、今日は早く来てね。",
+                         "昨日買った本を読んで。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜て／〜ないで（依頼）", found_in(sentence))
+        self.assertNotIn("〜て、〜て", found_in("見て、あの子、うれしそうだね。"))
+
+    def test_a_link_or_a_reason(self) -> None:
+        for sentence in ("ずっと電車を見て、うれしそうだね。", "見て、わかった。", "見て、本を買った。",
+                         "電車が遅れて。", "母が作った料理が冷めて。", "見て、彼はにっこり笑った。",
+                         "聞いて、娘は急に黙り込んだ。", "見て、空が暗くなったのに気づいた。", "実は先週、腰を痛めてね。",
+                         "昨日、駅で財布を落としてな。", "聞いて、安心しました。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜て／〜ないで（依頼）", found_in(sentence))
+        for sentence in ("ずっと電車を見て、うれしそうだね。", "見て、わかった。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜て、〜て", found_in(sentence))

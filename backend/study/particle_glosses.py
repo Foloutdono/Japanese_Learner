@@ -1177,9 +1177,11 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "と_naru"
         elif m.surface in ("て", "で") and m.conjunctive and i > 0 \
                 and morphemes[i - 1].pos in ("verb", "auxiliary", "adjective") \
-                and all(u.pos == "symbol" or laughter_typed(morphemes, k) for k, u in _rest_at(morphemes, i)) \
-                and (_closes(morphemes, i) or any(laughter_typed(morphemes, k) for k, _u in _rest_at(morphemes, i))):
-            key = "て_trailing"                # (and before a typed laugh: あくびしてて草, plan 272)
+                and _trails(morphemes, i):
+            # (and before a typed laugh: あくびしてて草, plan 272; before ね
+            # or よ: 顔見知りでしてね -- but a blank after it is what it joins
+            # to, 読んで＿＿＿, plan 296)
+            key = "て_trailing"
         elif m.surface == "に":
             from study.grammar_detect import adverbial_ni
             if adverbial_ni(morphemes, i):
@@ -1212,6 +1214,27 @@ def gloss(morphemes, i: int) -> dict | None:
                      or (morphemes[i - 1].pos == "suffix" and morphemes[i - 1].surface.endswith("く"))):
             key = "て_form"                   # 借りてまでして, 水っぽくて
     return dict(_GLOSSES[key]) if key else None
+
+
+def _trails(morphemes, i: int) -> bool:
+    """Whether the sentence of the て at morphemes[i] stops on it: no
+    word after it but ね or よ, a typed laugh or a mark, to its end (。,
+    ！, 」, a post's emoji) -- never a comma, a blank it joins to, or a
+    word of its own."""
+    for k, u in _rest_at(morphemes, i):
+        if laughter_typed(morphemes, k) or _softens(u):
+            continue
+        if u.pos != "symbol" or u.surface == "＿" or u.surface in "、，,":
+            return False
+        if u.surface in "。！？!?」』#＃" or any(ord(c) >= 0x1F000 for c in u.surface):
+            return True
+    return True
+
+
+def _softens(m) -> bool:
+    """Whether m is a softening particle that may end a sentence after a
+    て: ね, よ, な."""
+    return m.pos == "particle" and m.surface.rstrip("〜ー～") in ("ね", "よ", "な", "ねえ", "よね")
 
 
 def _even_made(morphemes, i: int) -> bool:
