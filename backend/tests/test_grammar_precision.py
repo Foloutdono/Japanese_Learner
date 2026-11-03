@@ -3342,3 +3342,29 @@ class MadeOfExtentTests(unittest.TestCase):
         self.assertIn("〜までに", found_in("十時までに来てください。"))
         self.assertEqual(found_in("駅員として、するべきことをしたまでです。").get("〜までのことだ"), "までです")
         self.assertNotIn("〜までのことだ", found_in("店は十時から七時までです。"))
+
+
+class AWordOfItsOwnTests(unittest.TestCase):
+    """Plan 296: a dictionary word or collocation that only looks like a
+    point takes none -- 向き合う, 通り過ぎる, 一方の, それだけの, 責任を
+    もって, どうやって行く -- and the point's own forms keep it."""
+
+    def test_no_point(self) -> None:
+        for sentence, point in (
+                ("だが、社会に出て向き合う問題の多くは、そもそも何が問われているのかさえはっきりしない。", "〜あう"),
+                ("まわりの人はみんな、見ないふりをして通りすぎていく。", "〜すぎる"),
+                ("一方のグループはその後すぐに眠り、もう一方は朝まで起きていた。", "〜一方だ"),
+                ("しかし、あの二時間にはそれだけのお金を払う意味があると思う。", "〜だけ"),
+                ("社長に選ばれたからには、あの人も責任をもってしっかり働くべきだ。", "〜をもって"),
+                ("駅からホテルまで、どうやって行く？", "〜ていく／〜てくる")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(point, found_in(sentence))
+
+    def test_the_points_own_forms(self) -> None:
+        for sentence, point in (("ケーキを食べすぎた。", "〜すぎる"), ("みんなで話し合う。", "〜あう"),
+                                ("物価は上がる一方だ。", "〜一方だ"), ("水だけ飲む。", "〜だけ"), ("それだけです。", "〜だけ"),
+                                ("書面をもってお知らせします。", "〜をもって"), ("彼は実力をもって、周囲を認めさせた。", "〜をもって"),
+                                ("だんだん寒くなっていく。", "〜ていく／〜てくる"),
+                                ("この駅は便利になった一方で、古い店が消えた。", "〜一方で")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))

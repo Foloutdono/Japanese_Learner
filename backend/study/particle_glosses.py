@@ -298,6 +298,8 @@ _GLOSSES = {
     # (plan 296)
     "に_you": {"en": "(after よう, みたい) says how, the adverbial form: like, as (同じように, in the same way); so that",
               "fr": "(après よう, みたい) dit comment, la forme adverbiale : comme (同じように, de la même façon) ; pour que"},
+    "だけ_that_much": {"en": "(after それ, これ, before の) that much, so much: それだけのお金, that much money",
+                       "fr": "(après それ, これ, devant の) autant, tant : それだけのお金, autant d'argent"},
     "と_regarded": {"en": "(before 感じる, 思う, 考える) as: what a thing is felt or thought to be (当然と感じる, to find it natural)",
                     "fr": "(devant 感じる, 思う, 考える) comme : ce qu'on ressent ou pense qu'une chose est (当然と感じる, trouver cela naturel)"},
     "と_as": {"en": "(before する, formal) as, to be: 休業とさせていただきます, we will close; …ものとする, shall …",
@@ -1166,6 +1168,9 @@ def gloss(morphemes, i: int) -> dict | None:
         elif m.surface == "と" and i > 0 and morphemes[i - 1].pos in ("adverb", "other") \
                 and i + 1 < len(morphemes) and morphemes[i + 1].lemma in _REGARDED_AS:
             key = "と_regarded"              # それを当然と感じる: what it is felt as, no manner (plan 296)
+        elif m.surface == "だけ" and i > 0 and morphemes[i - 1].surface in ("それ", "これ", "あれ", "どれ") \
+                and i + 1 < len(morphemes) and morphemes[i + 1].surface == "の":
+            key = "だけ_that_much"            # それだけのお金を払う意味: "that much", no "only" (plan 296)
         elif m.surface == "と" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix") \
                 and i + 1 < len(morphemes) and morphemes[i + 1].pos == "verb" \
                 and morphemes[i + 1].lemma in ("成る", "なる"):

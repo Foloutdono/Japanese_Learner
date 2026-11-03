@@ -55,7 +55,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 20  # 20: したまでです lit as 〜までのことだ (plan 296)
+TOUR_REV = 21  # 21: どうやって one word in four scenes (plan 296)
 # 12: 〜ような's scene reply wrong by meaning (だけ), no のように, now read as the point (plan 272)
 # 11: 〜にして's meaning question on 一夜にして, no にする lookalike, now the point is read (plan 272)
 # 10: 〜をおいて's use question, its wrong line written with the point; 〜の's form question on a

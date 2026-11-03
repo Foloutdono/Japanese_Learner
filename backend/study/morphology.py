@@ -1920,6 +1920,41 @@ def _verb_stems(morphemes: list[Morpheme], tags: list[tuple]) -> None:
                 tags[i] = ("動詞", "一般", "*")
 
 
+def _how_one_goes(morphemes: list[Morpheme]) -> None:
+    """行く and 来る after どうやって, こうやって are the verbs themselves
+    (plan 296): どうやって行く is "how do I go", どうやって + 行く, no going
+    on -- UniDic marks a verb after て as its auxiliary use, which takes
+    its card away."""
+    for i, m in enumerate(morphemes[3:], start=3):
+        if m.pos == "verb" and m.lemma in ("行く", "来る") and morphemes[i - 1].surface == "て" \
+                and morphemes[i - 2].lemma in ("遣る", "やる") and morphemes[i - 3].surface in ("どう", "こう", "そう", "ああ"):
+            m.auxiliary_use = False
+
+
+def _how_by_doing(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
+    """どうやって, こうやって, そうやって, ああやって: the one adverb the
+    dictionary holds, "how", "like this" (plan 296) -- never どう, やる's
+    て form and a clause the て joins to the next."""
+    out_m, out_t = [], []
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+        if i + 2 < len(morphemes) and m.surface in ("どう", "こう", "そう", "ああ") \
+                and morphemes[i + 1].lemma in ("遣る", "やる") and morphemes[i + 1].surface == "やっ" \
+                and morphemes[i + 2].surface == "て" and _glued(m, morphemes[i + 1]) and _glued(morphemes[i + 1], morphemes[i + 2]):
+            surface = m.surface + "やって"
+            out_m.append(replace(m, surface=surface, end=morphemes[i + 2].end, lemma=surface, reading=surface,
+                                 lemma_reading=surface, kana=m.kana + "ヤッテ", pos="adverb", ctype="", cform="",
+                                 auxiliary_use=False, conjunctive=False, written=surface, written_reading=surface))
+            out_t.append(("副詞", "*", "*"))
+            i += 3
+            continue
+        out_m.append(m)
+        out_t.append(tags[i])
+        i += 1
+    return out_m, out_t
+
+
 def _toii_toii(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """Two nouns each followed by と + いい are 〜といい〜といい, and both
     いい are 言う's 連用形 (plan 296): 重さといい手ざわりといい is "be it
@@ -6227,6 +6262,8 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         _first_time(morphemes)
         _verb_stems(morphemes, tags)
         _toii_toii(morphemes, tags)
+        _how_one_goes(morphemes)
+        morphemes, tags = _how_by_doing(morphemes, tags)
         _copula_de(morphemes, tags)
         morphemes, tags = _spoken_kana(morphemes, tags)
         morphemes, tags = _katakana_adjectives(morphemes, tags)

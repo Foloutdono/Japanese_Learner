@@ -2270,7 +2270,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # says of a person (同意のない方の発話, 拾った方のもの, 上の方にもお越し,
 # 足の悪い方で…お知らせください, 車いすの方); and まで "even" in its verb's
 # object's place (心まで温かくする, 井戸の水まで汚し), 十時までになって no
-# 〜までに, したまでです 〜までのことだ.
+# 〜までに, したまでです 〜までのことだ; and a word of its own taking no
+# point (向き合う, 通り過ぎる, 一方の, それだけの, 責任をもって, どうやって行く).
 LOCAL_REV = 33
 
 

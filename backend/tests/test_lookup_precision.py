@@ -4335,3 +4335,15 @@ class MadeGlossTests(unittest.TestCase):
         self.assertTrue(gloss_of("畑で農薬を使い過ぎると、近くの井戸の水まで汚しかねない。", "まで").startswith("even"))
         self.assertNotEqual(gloss_of("駅員として、するべきことをしたまでです。", "まで"), "until (it happens)")
         self.assertEqual(gloss_of("子どもが大人になるまで見守る。", "まで"), "until (it happens)")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AWordOfItsOwnCardTests(unittest.TestCase):
+    """Plan 296: the words a point no longer owns say what they are."""
+
+    def test_their_cards_and_glosses(self) -> None:
+        self.assertEqual(card_of("駅からホテルまで、どうやって行く？", "行く"), "vocab_N5_行く_いく")
+        self.assertEqual(card_of("まわりの人はみんな、見ないふりをして通りすぎていく。", "通りすぎ"),
+                         "vocab_N3_通り過ぎる_とおりすぎる")
+        gloss = token_of("しかし、あの二時間にはそれだけのお金を払う意味があると思う。", "だけ")["gloss"]
+        self.assertTrue(gloss["en"].startswith("(after それ") and gloss["fr"])

@@ -6636,9 +6636,41 @@ def _as_one_should(tokens, e: int) -> bool:
 def _te_aux_refused(tokens, s, e, _g) -> bool:
     """A compound particle in て (にあたって, をもって, として) followed
     by an auxiliary verb is the verb itself: 接待にあたっている is "be in
-    charge of", 興味をもっている "have an interest"."""
+    charge of", 興味をもっている "have an interest" -- and をもって after
+    what one holds in mind is 持つ, "with" it (責任をもって働く, 自信を
+    もって答える, plan 296), where 実力をもって, 書面をもって are the means."""
     nxt = _next_word(tokens, e)
-    return nxt is not None and nxt.pos == "verb" and (nxt.lemma in _AUX_AFTER_TE or nxt.surface in _AUX_AFTER_TE)
+    if nxt is not None and nxt.pos == "verb" and (nxt.lemma in _AUX_AFTER_TE or nxt.surface in _AUX_AFTER_TE):
+        return True
+    k = _index_at(tokens, s)
+    return k is not None and k >= 1 and tokens[k].surface == "を" and tokens[k - 1].surface in _HELD_IN_MIND
+
+
+# What one holds in mind, whose をもって is 持つ, "with it" (plan 296).
+_HELD_IN_MIND = frozenset({"責任", "自信", "誇り", "興味", "関心", "勇気", "希望", "責任感", "愛情", "熱意", "疑問", "夢",
+                           "目標", "目的", "意識", "余裕", "覚悟", "信念", "プライド", "情熱", "好奇心", "思いやり"})
+
+
+@lru_cache(maxsize=512)
+def _passes_by_word(stem: str) -> bool:
+    """Whether the dictionary's stem + 過ぎる means passing by: 通り過ぎる
+    "to pass, to go past" -- never 食べ過ぎる "to overeat"."""
+    from content import vocab_jmdict_data as jmdict
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    word = stem + "過ぎる"
+    meanings = [e.get("meaning") or "" for entries in VOCAB_BY_LEVEL.values() for e in entries
+                if (e.get("kanji") or "") == word]
+    meanings += [row.get("meaning") or "" for row in jmdict.by_kanji(word, limit=3) if row.get("kanji") == word]
+    for meaning in meanings:
+        first = re.split(r"[,;]", meaning, maxsplit=1)[0].lower()
+        if "pass" in first or "go past" in first:
+            return True
+    return False
+
+
+def _passes_by(verb) -> bool:
+    return verb.cform.startswith("連用形") and _passes_by_word(verb.surface)
 
 
 _STEM_ENDINGS = frozenset("いきぎしじちにひびみりえけげせぜてでねへべめれ")
@@ -6915,6 +6947,13 @@ def _pattern_refusals():
         # (土曜日も十時までになってしまいます: まで and 〜になる's に, what the
         # hours become -- no deadline, plan 296)
         "〜までに": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.lemma in ("成る", "なる"),
+        # (一方のグループ…もう一方は: 一方, "one of two", no trend -- the point
+        # follows a verb, 減る一方だ, plan 296)
+        "〜一方だ": lambda t, s, e, g: ((n := _next_word(t, e)) is not None and n.surface == "の")
+            or ((p := _prev_word(t, s)) is not None and p.pos not in ("verb", "auxiliary", "adjective", "symbol")),
+        # (どうやって行く: どうやって, "how", and 行く -- no going on, plan 296)
+        "〜ていく／〜てくる": lambda t, s, e, g: (k := _index_at(t, s)) is not None and k >= 2
+            and t[k - 1].lemma in ("遣る", "やる") and t[k - 2].surface in ("どう", "こう", "そう", "ああ"),
         "〜たら": lambda t, s, e, g: (n := _next_word(t, e)) is None or (n.pos == "symbol" and n.surface in _UTTERANCE_ENDS)
             # (あの日の＿＿＿といったらなかった: 〜といったらない's たら, plan 296)
             or (n.lemma in ("無い", "ない") or n.surface.startswith("ありゃ")) and (p := _prev_word(t, s)) is not None
@@ -7087,7 +7126,9 @@ def _pattern_refusals():
         # 時間を過ぎる, 三時過ぎ: 過ぎる itself, passing a time -- where
         # 親切すぎる and いい人すぎる, the tagger's nouns, are too much
         "〜すぎる": lambda t, s, e, g: (p := _prev_word(t, s)) is None or p.pos in ("symbol", "particle")
-            or (p.pos in ("noun", "suffix") and _counted_before(t, t.index(p) + 1) is not None),
+            or (p.pos in ("noun", "suffix") and _counted_before(t, t.index(p) + 1) is not None)
+            # (通りすぎていく: 通り過ぎる, "to go past", a word of its own, plan 296)
+            or (p.pos == "verb" and _passes_by(p)),
         # 子供を公園に連れて出かけた: 連れる itself, a person taken to a
         # place, where 年を取るにつれて follows a verb (plan 152)
         "〜につれて": lambda t, s, e, g: ((n := _next_word(t, e)) is not None and n.pos == "verb"
@@ -7328,7 +7369,9 @@ _REFUSALS = {
     # felt quality is said of a topic, この町の景色には, plan 272)
     "〜ものがある": lambda t, s, e, g: not any(u.pos == "particle" and u.surface == "は" and u.end <= s for u in t),
     # (星の数だけ is "as many as the stars", no "only", plan 272)
-    "〜だけ": lambda t, s, e, g: (k := _index_at(t, s)) is not None and _as_many_as(t, k),
+    "〜だけ": lambda t, s, e, g: (k := _index_at(t, s)) is not None and (_as_many_as(t, k) or (
+        # (それだけのお金を払う意味: "that much", no "only", plan 296)
+        k >= 1 and t[k - 1].surface in ("それ", "これ", "あれ", "どれ") and k + 1 < len(t) and t[k + 1].surface == "の")),
     # (簡単なことではない, 楽しいこと: こと is "a thing" after what describes
     # it -- the nominalizer follows a verb, plan 272)
     "〜こと": lambda t, s, e, g: (p := _before_token(s, t)) is not None and (
@@ -7611,7 +7654,9 @@ _COMPOUNDS: dict[str, tuple] = {
     "〜こむ": ((("込む", "こむ"),), frozenset({"verb"}), "verb", "", frozenset({"申し込む", "落ち込む", "見込む"})),
     "〜あう": ((("合う", "あう"),), frozenset({"verb"}), "verb", "",
              # (付き合う, "to go out with", 間に合う: words of their own, plan 272)
-             frozenset({"似合う", "見合う", "掛け合う", "付き合う", "付合う", "間に合う", "釣り合う"})),
+             # (向き合う, "to face": 社会に出て向き合う問題, plan 296)
+             frozenset({"似合う", "見合う", "掛け合う", "付き合う", "付合う", "間に合う", "釣り合う", "向き合う",
+                        "向かい合う"})),
     "〜直す": ((("直す", "なおす"),), frozenset({"verb"}), "verb", "", frozenset()),
     "〜通す": ((("通す", "とおす"),), frozenset({"verb"}), "verb", "", frozenset()),
     "〜出す": ((("出す", "だす"),), frozenset({"verb"}), "verb", "", frozenset({"思い出す"})),
@@ -9142,6 +9187,8 @@ _QUESTION_WORDS = frozenset({
     "どれ", "どちら", "どっち", "どう", "どなた", "なぜ",
     # (どんな物か, どの道か, どうして来ないのか: a question word too, plan 272)
     "どんな", "どの", "どうして", "どういう",
+    # (どうやって…確立するか: one word now, still "how", plan 296)
+    "どうやって",
 })
 
 
