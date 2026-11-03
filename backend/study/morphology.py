@@ -859,6 +859,11 @@ def _gets_through(morphemes, i: int) -> bool:
     return False
 
 
+# What is done whole, before やった with no を (plan 296): 全部やった.
+_DONE_WHOLE = frozenset({"全部", "全て", "すべて", "何もかも", "宿題", "仕事", "一通り", "いろいろ", "色々", "ゲーム",
+                         "スポーツ", "テニス", "サッカー", "野球"})
+
+
 # What follows 泣き in its compounds (plan 296): 泣き出す, 泣き続ける.
 _AFTER_A_CRY = frozenset({"出す", "続ける", "止む", "やむ", "叫ぶ", "崩れる", "じゃくる", "始める", "疲れる", "わめく",
                           "明かす", "暮らす", "つく", "付く", "寝入る", "濡れる"})
@@ -5002,6 +5007,45 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                  kana="ナン", pos="pronoun", ctype="", cform="", written="何", written_reading="なに"))
             out_t.append(("代名詞", "*", "*"))
             skip.add(i + 1)
+            continue
+        if (m.surface == "幸多" and m.pos == "noun" and nxt is not None and nxt.surface == "かれ" and _glued(m, nxt)
+                and (after is None or after.pos in ("particle", "symbol"))):
+            # 幸多かれと祈り: 幸 さち, "happiness", and 多かれ, 多い's old
+            # imperative, "may it be full of" -- no name and no 彼 (plan 296)
+            cut = m.start + 1
+            out_m.append(replace(m, surface="幸", end=cut, lemma="幸", reading="さち", lemma_reading="さち", kana="サチ",
+                                 proper=False, name_kind="", written="幸", written_reading="さち"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            out_m.append(replace(nxt, surface="多かれ", start=cut, lemma="多い", reading="おおかれ", lemma_reading="おおい",
+                                 kana="オオカレ", pos="adjective", ctype="形容詞", cform="命令形", written="多い",
+                                 written_reading="おおい"))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "よる" and m.pos == "verb" and m.lemma in ("因る", "寄る", "依る", "拠る") and nxt is not None
+                and nxt.surface in ("、", "，") and (prev is None or prev.pos == "symbol")):
+            # よる、母が…: 夜, "at night", heading the sentence -- no verb
+            # stands alone before a comma there (plan 296)
+            out_m.append(replace(m, pos="noun", lemma="夜", lemma_reading="よる", ctype="", cform="", written="夜",
+                                 written_reading="よる"))
+            out_t.append(("名詞", "普通名詞", "副詞可能"))
+            continue
+        if (m.surface == "やっ" and m.pos == "auxiliary" and m.lemma == "や" and nxt is not None
+                and nxt.surface in ("た", "て", "たら", "たり") and prev is not None
+                and (prev.pos in ("particle", "symbol", "adverb", "pronoun") or prev.verbal
+                     or prev.surface in _DONE_WHOLE)):
+            # 全部やった, 宿題やった？: やる, "to do" -- no Kansai copula や
+            # after what is done (plan 296)
+            out_m.append(replace(m, pos="verb", lemma="遣る", lemma_reading="やる", ctype="五段-ラ行", cform="連用形-促音便",
+                                 written="やる", written_reading="やる"))
+            out_t.append(("動詞", "非自立可能", "*"))
+            continue
+        if (m.surface == "ん" and m.pos == "auxiliary" and m.lemma == "ず" and nxt is not None and nxt.surface == "が"
+                and after is not None and after.surface in ("ため", "為")):
+            # 助けんがため: む, the old volitional, "in order to" -- no
+            # negative (plan 296)
+            out_m.append(replace(m, lemma="む", lemma_reading="む", ctype="助動詞-ム", written="む", written_reading="む"))
+            out_t.append(tags[i])
             continue
         if m.surface == "亡き" and m.lemma in ("無い", "ない"):
             # 亡き姉, 亡き父: "the late", a word of its own -- no 無い, "not"

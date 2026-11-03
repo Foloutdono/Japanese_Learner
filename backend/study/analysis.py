@@ -1003,6 +1003,8 @@ _AFFIX_SENSES = {
     "殿": {"en": "(after a name or a title, old or formal) Lord, Sir: 家老殿", "fr": "(après un nom ou un titre, ancien ou formel) seigneur, monsieur : 家老殿"},
     "超": {"en": "(after a number) over, more than: 500円超, over 500 yen",
           "fr": "(après un nombre) plus de : 500円超, plus de 500 yens"},
+    "手_agent": {"en": "(after a verb's stem) the one who does it: 書き手, a writer; 引き受け手, someone to take it on",
+                "fr": "(après le radical d'un verbe) celui qui le fait : 書き手, l'auteur ; 引き受け手, quelqu'un qui s'en charge"},
     "先": {"en": "(suffix) where or to whom one …: 連絡先, contact details; 勤務先, workplace; 行き先, destination",
           "fr": "(suffixe) le lieu ou la personne où l'on … : 連絡先, coordonnées ; 勤務先, lieu de travail ; 行き先, destination"},
 }
@@ -1036,6 +1038,11 @@ def _affix_sense(morphemes: list, i: int, numbers: dict) -> dict | None:
         # (連絡先, 勤務先, 取引先: the place or person a deed goes to,
         # never the tip or the way ahead, plan 272)
         return _AFFIX_SENSES["先"]
+    if m.surface == "手" and m.reading == "て" and prev.pos == "verb" and prev.cform.startswith("連用形") \
+            and _glued_to(prev, m):
+        # (引き受け手, 担い手: the one who takes it on, never a hand,
+        # plan 296)
+        return _AFFIX_SENSES["手_agent"]
     if m.surface in _SUFFIX_GLOSSES and m.pos == "suffix" and prev.pos in ("noun", "other") \
             and (m.surface != "生" or m.reading == "せい"):
         return _SUFFIX_GLOSSES[m.surface]
@@ -2321,7 +2328,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # and words read by their neighbours (何一つ なに, 亡き姉, なき出す, 名もなき,
 # 園 えん, 七十代のある女性, アナより), points by what they ask (どれが of
 # 〜の中で, 開けてもかまいませんか no 〜ませんか, 安いだけではない), and a
-# word in kana as spelled (つづら, 〜でなくてなんだろう's なん).
+# word in kana as spelled (つづら, 〜でなくてなんだろう's なん); and the
+# audit's singletons (幸多かれ, よる、, 全部やった, 助けんがため, 互いに
+# 見える, 灯らない通り, まめにしている, 引き受け手).
 LOCAL_REV = 33
 
 

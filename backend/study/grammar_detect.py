@@ -6807,6 +6807,21 @@ def _suffered_by(tokens, i: int) -> bool:
     return False
 
 
+# Nouns whose に makes an adverb of them (plan 296): 互いに, 共に.
+_NI_MAKES_AN_ADVERB = frozenset({"互い", "お互い", "共", "一緒", "同時", "次", "次々", "順", "順番", "最初", "最後"})
+# What says how a deed is done, never what a thing is made (plan 296):
+# そうじだけはまめにしている, 勉強を真面目にする.
+_MANNERS = frozenset({"まめ", "忠実", "真面目", "まじめ", "丁寧", "ていねい", "熱心", "真剣", "一生懸命", "いっしょうけんめい",
+                      "地道", "着実", "慎重", "丹念", "念入り", "懸命", "必死"})
+
+
+def _done_in_a_manner(tokens, s: int) -> bool:
+    """Whether the に at `s` makes an adverb of a manner (まめに, 丁寧に)
+    for a する that does a deed -- no "make it so" (plan 296)."""
+    p = _prev_word(tokens, s)
+    return p is not None and p.surface in _MANNERS
+
+
 def _acts_on_nothing(tokens, s, e, _g) -> bool:
     """〜くする／〜にする acts on a thing (部屋をきれいにする, テレビの音、
     小さくする -- the を dropped as speech drops it). An adjective + する
@@ -7287,7 +7302,7 @@ def _pattern_refusals():
         # (町のものでない: the copula denied, "is not the town's", no
         # reason, plan 296)
         "〜もので": lambda t, s, e, g: _followed_by(t, e, "は", "も", "ない", "なかっ", "なく", "無い"),
-        "〜くする／〜にする": _acts_on_nothing,
+        "〜くする／〜にする": lambda t, s, e, g: _acts_on_nothing(t, s, e, g) or _done_in_a_manner(t, s),
         # しかたがない, しかたありません: "it can't be helped", no way of doing
         "〜方": lambda t, s, e, g: (k := _tok_ending(t, e)) is not None and t[k].lemma == "仕方" and (
             _negative_at(t, k + 1) or (k + 1 < len(t) and t[k + 1].surface in ("が", "も") and _negative_at(t, k + 2))),
@@ -7550,12 +7565,20 @@ def _pattern_refusals():
         "〜にひきかえ": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.pos in ("auxiliary", "particle")
             and n.surface in ("て", "た", "ます", "まし", "られ", "る"),
         # 右に見える is "visible on the right"
-        "〜に見える": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (p.surface in _WHERE or p.surface == "目"),
+        # (互いに見えるようにする: 互いに, "to each other", and 見える,
+        # "visible" -- an adverb's に, no "looks", plan 296)
+        "〜に見える": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
+            p.surface in _WHERE or p.surface == "目" or p.surface in _NI_MAKES_AN_ADVERB),
         # 先生が見えました is the honorific "has come"
         "〜が見える／〜が聞こえる": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
             p.surface in _HONORED or p.surface.endswith(("様", "さん"))),
         # 駅前の通りにある店 is a street
-        "〜通りに": lambda t, s, e, g: _is_numeral(_prev_word(t, s)) or ((n := _next_word(t, e)) is not None
+        # (明かり一つ灯らない通りになった, 静かな通り: a street, which a
+        # negative or a quality describes -- 〜通り follows what was said,
+        # planned or done, plan 296)
+        "〜通りに": lambda t, s, e, g: _is_numeral(_prev_word(t, s)) or ((p := _prev_word(t, s)) is not None and (
+            p.pos == "adjective" or (p.pos == "auxiliary" and p.lemma in ("ない", "無い", "ぬ", "ず"))
+            or (p.surface == "な" and p.pos == "auxiliary"))) or ((n := _next_word(t, e)) is not None
             and n.lemma in ("有る", "ある", "居る", "いる", "面する", "出る", "沿う", "並ぶ", "建つ", "立つ")),
         "〜とき": _toki_refused,
         # 時間を過ぎる, 三時過ぎ: 過ぎる itself, passing a time -- where

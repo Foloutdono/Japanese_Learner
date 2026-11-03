@@ -4668,3 +4668,24 @@ class ABareDenialsCopulaTests(unittest.TestCase):
                 self.assertTrue(gloss_of(sentence, "で").startswith("(the copula) で of ではない"))
         # (までもない said bare, cut ま + で by the tokenizer: no copula)
         self.assertFalse(gloss_of("までもない", "で").startswith("(the copula)"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TheAuditsSingletonWordsTests(unittest.TestCase):
+    """Plan 296, the audit's singletons: 幸多かれ is 幸 さち and 多い's old
+    imperative; よる heading a sentence before its comma is 夜; 全部やった
+    is やる (雨やった keeps the west's copula); 〜んがため's ん is む; 手
+    after a verb's stem is the one who does it (手を洗った keeps the hand)."""
+
+    def test_its_words(self) -> None:
+        self.assertEqual(token_of("皆さんの前途に幸多かれと祈り、式辞といたします。", "幸")["reading"], "さち")
+        self.assertEqual(token_of("皆さんの前途に幸多かれと祈り、式辞といたします。", "多かれ")["lemma"], "多い")
+        self.assertEqual(token_of("よる、母がやさいのスープをつくりました。", "よる")["pos"], "noun")
+        self.assertEqual(token_of("店によると、休みだそうだ。", "よる")["pos"], "verb")
+        for sentence in ("やれることは全部やった。", "宿題やった？"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "やっ")["pos"], "verb")
+        self.assertEqual(token_of("雨やった。", "やっ")["pos"], "auxiliary")
+        self.assertEqual(token_of("母を助けんがため、働いた。", "ん")["lemma"], "む")
+        self.assertTrue(gloss_of("引き受け手を見つけるのが難しい。", "手").startswith("(after a verb's stem)"))
+        self.assertEqual(card_of("彼は手を洗った。", "手"), "vocab_N5_手_て")

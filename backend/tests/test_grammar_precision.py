@@ -3643,3 +3643,25 @@ class TheCopulasDenialTests(unittest.TestCase):
         self.assertNotIn("です／だ", place)
         self.assertNotIn("〜ではなく", place)
         self.assertIn("で", found_in("東京では雪が降らない。"))
+
+
+class TheAuditsSingletonPointsTests(unittest.TestCase):
+    """Plan 296, the audit's singletons: 互いに見える is an adverb and
+    "visible" (元気に見える looks); a street a negative describes is no
+    〜通りに (言われた通りに is); まめにしている does a deed diligently
+    (へやをきれいにする makes it so)."""
+
+    def test_points(self) -> None:
+        for sentence, pattern in (("互いに見えるようにすることから始めるほかない。", "〜に見える"),
+                                  ("夜は明かり一つ灯らない通りになった。", "〜通りに"),
+                                  ("静かな通りに出た。", "〜通りに"),
+                                  ("庭のそうじだけはまめにしている。", "〜くする／〜にする"),
+                                  ("勉強を真面目にする。", "〜くする／〜にする")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(pattern, found_in(sentence))
+        for sentence, pattern in (("その服を着ると、元気に見えるよ。", "〜に見える"),
+                                  ("先生に言われた通りにやってみました。", "〜通りに"),
+                                  ("思った通りになった。", "〜通りに"),
+                                  ("会う前に、へやをきれいにする。", "〜くする／〜にする")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(pattern, found_in(sentence))
