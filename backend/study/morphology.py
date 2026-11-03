@@ -859,6 +859,20 @@ def _gets_through(morphemes, i: int) -> bool:
     return False
 
 
+# What follows 泣き in its compounds (plan 296): 泣き出す, 泣き続ける.
+_AFTER_A_CRY = frozenset({"出す", "続ける", "止む", "やむ", "叫ぶ", "崩れる", "じゃくる", "始める", "疲れる", "わめく",
+                          "明かす", "暮らす", "つく", "付く", "寝入る", "濡れる"})
+
+
+# What a の before 或る names: an age, a time, a place, a group (plan 296).
+_FRAME_ENDINGS = ("代", "歳", "才", "年", "時代", "世紀", "土地", "町", "村", "国", "市", "県", "地方", "会社", "学校",
+                  "家", "日", "月", "夜", "朝", "クラス", "グループ", "チーム", "店")
+
+
+def _a_frame(m) -> bool:
+    return m.pos in ("noun", "suffix") and m.surface.endswith(_FRAME_ENDINGS) and not m.verbal
+
+
 def _sent_somewhere(morphemes, i: int) -> bool:
     """Whether 放っ's own clause names where it sends something, a noun
     and に: 敵の城に間者を放っておいた."""
@@ -4934,6 +4948,79 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                  ctype="五段-ラ行", written="通る", written_reading="とおる"))
             out_t.append(tags[i])
             continue
+        if m.surface == "園" and m.pos == "noun" and kata_to_hira(m.reading or "") == "その" \
+                and not (prev is not None and prev.surface == "の"):
+            # 園は…考えている, 園の子どもたち: えん, the zoo or the nursery
+            # itself -- その is the garden of 学びの園, エデンの園 (plan 296)
+            out_m.append(replace(m, reading="えん", lemma_reading="えん", kana="エン", written_reading="えん"))
+            out_t.append(tags[i])
+            continue
+        if (m.surface == "ある" and m.pos == "verb" and m.lemma in ("有る", "ある") and m.cform.startswith("連体形")
+                and nxt is not None and nxt.pos == "noun" and prev is not None and prev.surface == "の"
+                and prev.pos == "particle" and i >= 2 and _a_frame(morphemes[i - 2])):
+            # 七十代のある女性, ある時代のある土地: 或る, "a certain" -- the
+            # の before it names an age, a time, a place, nothing one has
+            # (問題のある人 is "with problems", the verb, plan 296)
+            out_m.append(replace(m, pos="adnominal", lemma="或る", lemma_reading="ある", ctype="", cform="",
+                                 written="或る", written_reading="ある"))
+            out_t.append(("連体詞", "*", "*"))
+            continue
+        if (m.pos == "verb" and len(m.surface) >= 2 and m.surface.endswith("で") and m.cform.startswith("未然形")
+                and nxt is not None and nxt.surface == "なく" and nxt.lemma in ("ない", "無い") and after is not None
+                and after.surface == "て" and not (prev is not None and prev.surface == "を")
+                and i + 4 < len(morphemes) and morphemes[i + 3].surface in ("なん", "何", "な")
+                and any(x.lemma in ("だ", "です") for x in morphemes[i + 4:i + 6])):
+            # これが愛でなくてなんだろう: 愛 and the copula's で, "if this is
+            # not love, what is?" -- no 愛でる, "to admire" (plan 296)
+            noun = m.surface[:-1]
+            alone = _tag(noun)[0] if _tagger is not None else []
+            if len(alone) == 1 and alone[0].pos == "noun" and alone[0].reading:
+                said = alone[0].reading
+                cut = m.start + len(noun)
+                out_m.append(replace(m, surface=noun, end=cut, lemma=noun, reading=said, lemma_reading=said,
+                                     kana=alone[0].kana, pos="noun", ctype="", cform="", written=noun, written_reading=said))
+                out_t.append(("名詞", "普通名詞", "一般"))
+                out_m.append(replace(m, surface="で", start=cut, lemma="だ", reading="で", lemma_reading="だ", kana="デ",
+                                     pos="auxiliary", ctype="助動詞-ダ", cform="連用形-一般", written="だ",
+                                     written_reading="だ"))
+                out_t.append(("助動詞", "*", "*"))
+                out_m.append(replace(nxt, lemma="無い", pos="adjective", auxiliary_use=True, ctype="形容詞"))
+                out_t.append(("形容詞", "非自立可能", "*"))
+                skip.add(i + 1)
+                continue
+        if (m.surface == "な" and m.pos == "auxiliary" and m.lemma == "だ" and nxt is not None and nxt.surface == "ん"
+                and nxt.pos == "particle" and _glued(m, nxt) and after is not None and after.lemma in ("だ", "です")
+                and prev is not None and ((prev.pos == "symbol" and prev.surface in ("、", "「", "『", "（"))
+                                          or (prev.surface == "て" and prev.pos == "particle" and i >= 2
+                                              and morphemes[i - 2].lemma in ("無い", "ない")))):
+            # これが愛でなくてなんだろう, 「なんだろう: 何, "what" -- no copula
+            # stands after a clause's て or a mark (plan 296)
+            out_m.append(replace(m, surface="なん", end=nxt.end, lemma="何", reading="なん", lemma_reading="なに",
+                                 kana="ナン", pos="pronoun", ctype="", cform="", written="何", written_reading="なに"))
+            out_t.append(("代名詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        if m.surface == "亡き" and m.lemma in ("無い", "ない"):
+            # 亡き姉, 亡き父: "the late", a word of its own -- no 無い, "not"
+            # (plan 296)
+            out_m.append(replace(m, pos="adnominal", lemma="亡き", lemma_reading="なき", ctype="", cform="",
+                                 written="亡き", written_reading="なき"))
+            out_t.append(("連体詞", "*", "*"))
+            continue
+        if (m.surface == "なき" and m.lemma in ("無い", "ない") and nxt is not None and nxt.pos == "verb"
+                and nxt.lemma in _AFTER_A_CRY):
+            # 母はなき出しました: 泣く's stem and 出す, "burst into tears" --
+            # no 無い (plan 296)
+            out_m.append(replace(m, pos="verb", lemma="泣く", lemma_reading="なく", ctype="五段-カ行",
+                                 cform="連用形-一般", written="泣く", written_reading="なく"))
+            out_t.append(("動詞", "一般", "*"))
+            continue
+        if (m.surface == "名" and prev is not None and nxt is not None and nxt.surface == "も" and after is not None
+                and after.lemma in ("無い", "ない")):
+            # 名もなき家事, 名もない花: な, "a name" -- no めい, a counter (plan 296)
+            out_m.append(replace(m, reading="な", lemma_reading="な", kana="ナ", written_reading="な"))
+            out_t.append(tags[i])
+            continue
         if (m.surface == "放っ" and m.lemma == "放つ" and nxt is not None
                 and ((nxt.surface == "て" and after is not None and after.lemma == "置く")
                      or (nxt.pos == "auxiliary" and nxt.lemma in ("とく", "どく")))
@@ -5264,7 +5351,14 @@ def _reading_of(surface: str, kana: str, pron: str) -> str:
     if all("\u3041" <= c <= "\u309f" or c in "\u30fc〜～" for c in surface) and (
             any(c in "\u30fc〜～" for c in surface) or ("\u30fc" in pron and spelled == surface)):
         return surface
-    return kata_to_hira(pron) or surface
+    sound = kata_to_hira(pron)
+    if spelled and len(sound) == len(spelled) and sound != spelled and all(
+            a == b or (a, b) in (("\u305a", "\u3065"), ("\u3058", "\u3062")) for a, b in zip(sound, spelled)):
+        # The sound merged づ into ず and ぢ into じ, the spelling keeps
+        # them (plan 296): つづら is pronounced ツズラ, and the reading
+        # printed over 働きつづけ was はたらきつずけ, a spelling no page has.
+        return spelled
+    return sound or surface
 
 
 def _in_context(morphemes: list[Morpheme], tags: list[tuple]) -> list[Morpheme]:

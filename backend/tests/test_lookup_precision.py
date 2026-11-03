@@ -1883,7 +1883,8 @@ class ThirdReviewWordTests(unittest.TestCase):
         self.assertEqual(card_of("通学路に車突っ込み、児童2人けが", "突っ込み"), "vocab_N2_突っ込む_つっこむ")
         self.assertEqual(token_of("卵を溶きほぐし、混ぜる。", "溶きほぐし")["vocab_match"]["entry"]["kanji"], "溶きほぐす")
         self.assertNotEqual(card_of("名前が聞き取れず、聞き返した。", "聞き取れ"), "vocab_N1_聞き取り_ききとり")
-        self.assertEqual(token_of("亡き姉の日記。", "亡き")["vocab_match"]["entry"]["kanji"], "亡い")
+        # 亡き姉 is the pool's 亡き, "the late" (plan 296), never 無い.
+        self.assertEqual(token_of("亡き姉の日記。", "亡き")["vocab_match"]["entry"]["kanji"], "亡き")
         # A lemma's row read as the page reads it stands: 生まれつき, "by
         # nature", the noun.
         self.assertEqual(token_of("誰にも生まれつきそなわっている。", "生まれつき")["vocab_match"]["entry"]["kanji"],
@@ -4535,3 +4536,104 @@ class AnHonorificReruGlossTests(unittest.TestCase):
         for sentence in ("どうされますか。", "来館された方に説明する。", "先生が本を書かれた。"):
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, "れ").startswith("(honorific)"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class NaniInItsSetPhrasesTests(unittest.TestCase):
+    """Plan 296: 何 is なに in 何にもまして and 何一つ; 何にも alone keeps
+    なんにも."""
+
+    def test_its_reading(self) -> None:
+        for sentence, surface, reading in (("その時間が、何にもまして気楽なのだ。", "何に", "なにに"),
+                                           ("急いで出てきたので、何一つ持ってこなかった。", "何", "なに"),
+                                           ("何ひとつ分からない。", "何", "なに"), ("何にも知らない。", "何に", "なんに")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class NakiAndALoneKanjiTests(unittest.TestCase):
+    """Plan 296: 亡き is "the late", なき出す 泣く's, 名もなき's 名 な, and
+    園 alone えん (エデンの園 keeps その)."""
+
+    def test_its_word(self) -> None:
+        for sentence, surface, reading, raw_id in (
+                ("都会に暮らす妹が亡き姉の日記をたどる形で描いている。", "亡き", "なき", None),
+                ("その話を聞いたとたんに、母はなき出しました。", "なき", "なき", "vocab_N4_泣く_なく"),
+                ("「名もなき家事」という言葉がある。", "名", "な", "vocab_N3_名_な"),
+                ("しかし園は、のびのびと動く様子こそが自然の大切さを伝えると考えている。", "園", "えん", "vocab_N1_園_えん"),
+                ("エデンの園", "園", "その", "vocab_N1_園_その"),
+                ("三名の参加者。", "名", "めい", None)):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+                if raw_id:
+                    self.assertEqual(card_of(sentence, surface), raw_id)
+        self.assertEqual(token_of("都会に暮らす妹が亡き姉の日記をたどる形で描いている。", "亡き")["vocab_match"]["entry"]["kanji"],
+                         "亡き")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class NoAfterAPredicateTests(unittest.TestCase):
+    """Plan 296: どうの…どうのと is "this and that", no noun's の; わたしの
+    keeps it, and so does 新しいのを, "the one" (the の point's own わたしの
+    です, pinned by EighthReviewPointTests)."""
+
+    def test_its_gloss(self) -> None:
+        self.assertEqual([g["pattern"] for g in token_of("新しいのを買うしかないと思っていた。", "の").get("grammar") or []],
+                         ["の"])
+        self.assertTrue(gloss_of("猫がどうのと、話は尽きない。", "の").startswith("どうの"))
+        self.assertEqual([g["pattern"] for g in token_of("わたしの本です。", "の").get("grammar") or []], ["の"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class YoriThanOrFromTests(unittest.TestCase):
+    """Plan 296: より after a time before a quality compares (前より元気),
+    and a letter's sender's より is "from" (アナより, 母より)."""
+
+    def test_its_gloss(self) -> None:
+        self.assertNotIn("(formal) from", gloss_of("今は前より元気で、仕事もがんばることができます。", "より"))
+        for sentence in ("アナより", "母より"):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(gloss_of(sentence, "より").startswith("(formal) from"))
+        self.assertNotIn("(formal) from", gloss_of("母より背が高い。", "より"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ACertainAruTests(unittest.TestCase):
+    """Plan 296: ある after an age's, a time's or a place's の is 或る, "a
+    certain"; after a thing one has (問題のある人) it is the verb."""
+
+    def test_its_card(self) -> None:
+        for sentence in ("七十代のある女性は話す。", "ある時代のある土地の習慣だ。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "ある"), "vocab_N3_或る_ある")
+        for sentence in ("問題のある人", "自信のある人は強い。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "ある"), "vocab_N5__ある")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AKanaWordReadsAsSpelledTests(unittest.TestCase):
+    """Plan 296: a word in kana reads as it is spelled, づ and ぢ kept
+    (つづら, 働きつづけ), never as the sound merges them (つずら)."""
+
+    def test_its_reading(self) -> None:
+        for sentence, surface, reading in (("秘密がつづられている。", "つづら", "つづら"),
+                                           ("彼は働きつづけた。", "働きつづけ", "はたらきつづけ"),
+                                           ("ツヅラを開けた。", "ツヅラ", "つづら"),
+                                           ("気づいた。", "気づい", "きづい"),
+                                           ("それは本だ。", "は", "わ")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["reading"], reading)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WhatElseIsItTests(unittest.TestCase):
+    """Plan 296: 〜でなくてなんだろう's なん is 何, and 愛 there is the noun,
+    no 愛でる ("admire"); 花を愛でなくて keeps the verb."""
+
+    def test_its_words(self) -> None:
+        self.assertEqual(token_of("これが私たちの誇りでなくてなんだろう。", "なん")["reading"], "なん")
+        self.assertEqual(card_of("これが愛でなくてなんだろう。", "愛"), "vocab_N3_愛_あい")
+        self.assertEqual(token_of("これが愛でなくてなんだろう。", "愛")["reading"], "あい")
+        self.assertEqual(token_of("花を愛でなくて何をする。", "愛で")["reading"], "めで")

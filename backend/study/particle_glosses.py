@@ -192,6 +192,8 @@ _GLOSSES = {
                    "fr": "(après une forme en て) si, tant que : la suite est souvent fâcheuse"},
     "と_naru": {"en": "(with なる) becomes: the written form of 〜になる",
                "fr": "(avec なる) devient : la forme écrite de 〜になる"},
+    "の_this_and_that": {"en": "どうの…どうのと: this and that, one thing and another (said of talk that goes on)",
+                         "fr": "どうの…どうのと : ceci et cela, une chose et une autre (de propos sans fin)"},
     "から_cause": {"en": "out of, because of (a feeling, a cause): 焦りから, out of impatience",
                  "fr": "par, sous l'effet de (un sentiment, une cause) : 焦りから, par impatience"},
     "から_heart": {"en": "心から: from the heart, sincerely", "fr": "心から : du fond du cœur, sincèrement"},
@@ -1229,6 +1231,9 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "の_subject"                # 花粉の飛ぶ量, 持ち主のわからない荷物
         elif m.surface == "の" and _predicate_named(morphemes, i):
             key = "の_nominal"                # 重いのが難点だ, 赤いのがほしい (plan 272)
+        elif m.surface == "の" and m.pos == "particle" and i > 0 and morphemes[i - 1].surface in ("どう", "こう") \
+                and morphemes[i - 1].pos == "adverb":
+            key = "の_this_and_that"          # 庭の花がどうの、近所の猫がどうのと (plan 296)
         elif m.surface == "から" and m.pos == "particle" and i > 0 and _out_of(morphemes, i):
             # (焦りから忘れかけた, 安心感から手放す, 心から願う: a cause, no
             # "from", plan 296)

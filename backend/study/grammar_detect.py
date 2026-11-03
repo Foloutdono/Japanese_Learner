@@ -2577,7 +2577,11 @@ def _copula_spans(tokens):
         # (After a clause's の too: 違うのではありませんか, plan 272.)
         if ((t.pos == "particle" and t.surface == "で" or _is_copula(t) and t.cform == "連用形-一般")
               and (_prev_kind(tokens, i) == "nominal" or (
-                  i > 0 and tokens[i - 1].pos == "particle" and tokens[i - 1].surface in ("の", "ん")))
+                  i > 0 and tokens[i - 1].pos == "particle" and tokens[i - 1].surface in ("の", "ん"))
+                   # (技術だけではない, そればかりではない: a noun and its だけ,
+                   # plan 296)
+                   or (i > 1 and tokens[i - 1].pos == "particle" and tokens[i - 1].surface in ("だけ", "ばかり", "のみ")
+                       and _prev_kind(tokens, i - 1) == "nominal"))
               and nxt is not None and nxt.surface in ("は", "も") and i + 2 < len(tokens)):
             neg = tokens[i + 2]
             if neg.lemma in ("無い", "ない") or (neg.lemma in ("御座る", "ござる") and i + 3 < len(tokens)
@@ -6212,6 +6216,33 @@ def _asks_what_kind(tokens, s: int) -> bool:
     return before.endswith(tuple(_WHAT_KIND))
 
 
+def _asks_no_invitation(tokens, s: int) -> bool:
+    """Whether the ませんか at `s` asks leave (〜てもかまいませんか) or asks
+    a question its own word asks (どこが, 何を) -- never 何か, 誰か, the
+    some- of an invitation (何か飲みませんか)."""
+    p = _prev_word(tokens, s)
+    if p is not None and p.lemma in ("構う", "かまう"):
+        return True
+    k = _index_at(tokens, s)
+    if k is None:
+        return False
+    head = _sentence_start(tokens, k)
+    for j in range(head, k):
+        u = tokens[j]
+        nxt = tokens[j + 1] if j + 1 < len(tokens) else None
+        if (u.lemma in _QUESTION_LEMMAS or u.surface in ("どこ", "だれ", "誰", "いつ", "どれ", "なぜ", "どうして")) \
+                and not (nxt is not None and nxt.surface == "か"):
+            return True
+    return False
+
+
+def _this_and_that(tokens, s: int) -> bool:
+    """Whether the の at `s` is one of どうの…どうのと, "this and that"
+    (plan 296)."""
+    k = _index_at(tokens, s)
+    return k is not None and k >= 1 and tokens[k - 1].surface in ("どう", "こう") and tokens[k - 1].pos == "adverb"
+
+
 def _toru_itself(tokens, k: int) -> bool:
     """Whether the とって after the に at tokens[k] is 取る itself --
     例にとって, 本を手にとって, "take as an example", "take in hand" --
@@ -6295,6 +6326,8 @@ def _nai_form_refused(tokens, s, e, _g) -> bool:
     if t is not None and t.surface == "ん" and i >= 1 and tokens[i - 1].pos in ("verb", "auxiliary") \
             and tokens[i - 1].cform.startswith(("終止形", "連体形")):
         return True
+    if t is not None and t.surface in ("なき", "無き"):
+        return True                     # (名もなき家事: the old attributive of ない, "-less", no verb's negative)
     return (t is not None and t.surface == "ない" and i + 1 < len(tokens) and tokens[i + 1].lemma == "た"
             and tokens[i + 1].surface == "た")
 
@@ -7286,11 +7319,14 @@ def _pattern_refusals():
         # one (四人の中で、わたしがいちばん小さい; かぞくの中で、だれが…):
         # 電車の中でねた is "inside the train"; with も too, 家の中でもセー
         # ターを着る, where 中でも's "especially" says 特に (plan 296)
+        # (...and its question asks which one, its word marked by が: どれが,
+        # だれが -- 電車の中で何をしますか asks what one does there, plan 296)
         "〜の中で": lambda t, s, e, g: not any(
             x.surface in ("いちばん", "一番", "最も", "もっとも", "好き", "すき") or x.surface.startswith("最")
-            or x.lemma in _QUESTION_LEMMAS or x.surface in ("だれ", "どれ", "どちら", "どっち", "どこ", "なに", "何")
+            or ((x.lemma in _QUESTION_LEMMAS or x.surface in ("だれ", "どれ", "どちら", "どっち", "どこ", "なに", "何"))
+                and k + 1 < len(rest) and rest[k + 1].surface in ("が", "は"))
             or (x.surface in ("特に", "とりわけ") and _followed_by(t, e, "も"))
-            for x in _sentence_after(t, e)),
+            for rest in (_sentence_after(t, e),) for k, x in enumerate(rest)),
         "〜かねる": lambda t, s, e, g: _followed_by(t, e, "ない", "ませ", "ず", "なかっ"),
         "〜ことに": lambda t, s, e, g: ((n := _next_word(t, e)) is not None and n.pos == "verb")
             or not _felt_before_koto(t, s),
@@ -7335,11 +7371,14 @@ def _pattern_refusals():
         "それに": _soreni_refused,
         # (好きだったの。, 気が済むの？: the の that ends what is said
         # explains, the casual のです, never the nominaliser, plan 272.)
-        "〜の": lambda t, s, e, g: _explaining_no(t, e) or _asks_why_no(t, s),
+        "〜の": lambda t, s, e, g: _explaining_no(t, e) or _asks_why_no(t, s) or _this_and_that(t, s),
         # (ところがある, "there is a side of": 〜ところがある's.)
         "ところが": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.lemma in (
             "有る", "ある", "無い", "ない", "多い", "少ない"),
-        "〜ませんか": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (p.lemma in ("有る", "ある") or (
+        # (開けてもかまいませんか: asking leave, no invitation; どこが分かり
+        # ませんか: a question its word asks, plan 296)
+        "〜ませんか": lambda t, s, e, g: _asks_no_invitation(t, s) or (p := _prev_word(t, s)) is not None and (
+            p.lemma in ("有る", "ある") or (
             # (だれか いませんか, "is anyone there?": a question, no
             # invitation, plan 272)
             p.lemma in ("居る", "いる") and any(u.surface in ("誰か", "だれか", "どなたか", "何か", "なにか")
@@ -7731,6 +7770,10 @@ _REFUSALS = {
         or _followed_by(t, e, "どう", "を")
         or ((n := _next_word(t, e)) is not None and (n.lemma in _KNOWING or (
             n.surface == "と" and (a := _next_word(t, n.end)) is not None and a.lemma in ("存じる", "存ずる")))),
+    # (技術だけではない。: the copula's plain negative, "is not (only)" --
+    # 〜ではなく goes on to the B it sets against A, plan 296)
+    "〜ではなく": lambda t, s, e, g: (k := _tok_ending(t, e)) is not None and t[k].surface in ("ない", "ありません")
+        or ((k := _tok_ending(t, e)) is not None and t[k].lemma in ("無い", "ない") and t[k].cform.startswith("終止")),
     # (例にとって, 本を手にとって: 取る itself, "take as an example",
     # "take in hand", plan 296)
     "〜にとって": lambda t, s, e, g: (k := _index_at(t, s)) is not None and t[k].surface == "に"
@@ -7767,7 +7810,7 @@ _REFUSALS = {
         and k + 1 < len(t) and t[k + 1].surface in ("！", "!", "、", "，", "\u3000", " "),
     # (花粉の飛ぶ量, 持ち主のわからない荷物: the の of who does it in a
     # clause before a noun, = が -- no "of", plan 272)
-    "の": lambda t, s, e, g: subject_no(t, s),
+    "の": lambda t, s, e, g: subject_no(t, s) or _this_and_that(t, s),
     # (変わらないものがある is "there are things that do not change": the
     # felt quality is said of a topic, この町の景色には, plan 272)
     "〜ものがある": lambda t, s, e, g: not any(u.pos == "particle" and u.surface == "は" and u.end <= s for u in t),

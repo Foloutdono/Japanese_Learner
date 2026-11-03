@@ -1068,6 +1068,16 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             after = nxt(i)
             if after in _NANI_BEFORE or after == "" or after in _PUNCT:
                 out[i] = "なに"
+            # (何一つ, 何ひとつ: なにひとつ, "not a single thing", plan 296)
+            elif after in ("一", "ひと") and i + 2 < n and surf[i + 2] in ("つ",):
+                out[i] = "なに"
+            elif after == "一つ" or after == "ひとつ":
+                out[i] = "なに"
+            continue
+        # (何にもまして: なににもまして, "above all else" -- 何にも alone is
+        # なんにも, "nothing at all", plan 296)
+        if s == "何に" and r == "なんに" and nxt(i) == "も" and i + 2 < n and surf[i + 2] in ("まして", "増して"):
+            out[i] = "なにに"
             continue
 
         # 四月一日: the first of a month is ついたち, never いちにち, "one

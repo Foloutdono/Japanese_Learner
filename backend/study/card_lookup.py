@@ -4727,6 +4727,11 @@ def _from_not_than(morphemes, i: int) -> bool:
     が are "than"."""
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     prev = morphemes[i - 1] if i > 0 else None
+    if prev is not None and (nxt is None or (nxt.pos == "symbol" and nxt.surface in ("。", "\n"))) \
+            and (prev.proper or prev.name_kind or prev.surface in _PEOPLE
+                 or prev.surface.endswith(("さん", "様", "ちゃん", "くん"))
+                 or (prev.pos == "suffix" and prev.surface in ("さん", "様", "ちゃん", "くん"))):
+        return True                     # (アナより: a letter's sender, its "from", plan 296)
     if nxt is None or prev is None:
         return False
     if nxt.lemma in _FROM_DEEDS or nxt.surface in _FROM_DEEDS:
@@ -4755,7 +4760,10 @@ def _from_not_than(morphemes, i: int) -> bool:
         if u.pos == "symbol" and u.surface in stops:
             break                      # (the clause it heads; past its comma, the sentence's)
         rest.append(u)
-    return not any(u.surface in _COMPARING or u.lemma in _COMPARING or u.pos == "adjective" for u in rest)
+    # (前より元気で: a quality, a な-adjective the tokenizer calls a noun,
+    # compares, plan 296)
+    return not any(u.surface in _COMPARING or u.lemma in _COMPARING or u.pos == "adjective" or u.adjectival
+                   for u in rest)
 
 
 # What says a より compares (plan 272): ほうが, もっと, a change.

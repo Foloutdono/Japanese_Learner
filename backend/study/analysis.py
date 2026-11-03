@@ -2317,7 +2317,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # read by what governs it (焦りから a cause, ことから始める no 〜ことから,
 # 窓から見るともなく no 〜から見ると); and もの's constructions by what the
 # sentence says (町のものでない, 市が決めたものだ, ＿＿＿ものの、, もんで);
-# and the honorific (ら)れる no passive (来館された方, どうされますか).
+# and the honorific (ら)れる no passive (来館された方, どうされますか);
+# and words read by their neighbours (何一つ なに, 亡き姉, なき出す, 名もなき,
+# 園 えん, 七十代のある女性, アナより), points by what they ask (どれが of
+# 〜の中で, 開けてもかまいませんか no 〜ませんか, 安いだけではない), and a
+# word in kana as spelled (つづら, 〜でなくてなんだろう's なん).
 LOCAL_REV = 33
 
 

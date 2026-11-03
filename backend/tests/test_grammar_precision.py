@@ -3546,3 +3546,59 @@ class AnHonorificReruTests(unittest.TestCase):
                          "先生は何でも知っていると思われがちだが、先生とて人間である。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("受身形 〜られる", found_in(sentence))
+
+
+class NakiIsNoNegativeTests(unittest.TestCase):
+    """Plan 296: 亡き, 泣き and the old attributive なき light no ない形."""
+
+    def test_no_negative(self) -> None:
+        for sentence in ("都会に暮らす妹が亡き姉の日記をたどる形で描いている。", "その話を聞いたとたんに、母はなき出しました。",
+                         "「名もなき家事」という言葉がある。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("ない形 〜ない", found_in(sentence))
+        for sentence in ("お金がない。", "雨がやまない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("ない形 〜ない", found_in(sentence))
+
+
+class AmongAsksWhichTests(unittest.TestCase):
+    """Plan 296: 〜の中で is "among" where its question asks which one --
+    its word marked by が (どれが, だれが) -- never what one does in a place
+    (電車の中で何をしますか)."""
+
+    def test_among(self) -> None:
+        self.assertNotIn("〜の中で", found_in("電車の中で何をしますか。"))
+        for sentence in ("この三つの中で、どれがすきですか。", "かぞくの中で、だれがりょうりをしますか。", "四人の中で、わたしがいちばん小さいです。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜の中で", found_in(sentence))
+
+
+class AnInvitationInvitesTests(unittest.TestCase):
+    """Plan 296: 〜ませんか invites -- never asks leave (開けてもかまいま
+    せんか) or a question its own word asks (どこが分かりませんか)."""
+
+    def test_invitation(self) -> None:
+        for sentence in ("まどを開けてもかまいませんか。", "この本のどこが分かりませんか。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜ませんか", found_in(sentence))
+        for sentence in ("いっしょにごはんを食べませんか。", "何か飲みませんか。", "どこかへ行きませんか。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ませんか", found_in(sentence))
+
+
+class WhatElseIsItTests(unittest.TestCase):
+    """Plan 296: the なん of 〜でなくてなんだろう is 何, "what", and lights
+    no 〜んです (no copula stands after a clause's て); 好きなんだろう
+    keeps it."""
+
+    def test_what(self) -> None:
+        for sentence in ("これが＿＿＿でなくてなんだろう。", "これが私たちの誇りでなくてなんだろう。",
+                         "これが愛でなくてなんだろう。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜んです／〜のです", found_in(sentence))
+        for sentence in ("これが私たちの誇りでなくてなんだろう。", "これが愛でなくてなんだろう。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜でなくてなんだろう", found_in(sentence))
+        for sentence in ("好きなんだろう。", "静かなんです。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜んです／〜のです", found_in(sentence))
