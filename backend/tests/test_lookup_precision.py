@@ -4490,3 +4490,13 @@ class AnAdverbsSenseTests(unittest.TestCase):
         for sentence in ("別に何も言わなかった。", "別に、いいよ。", "別にいいよ。"):
             with self.subTest(sentence=sentence):
                 self.assertEqual(card_of(sentence, "別に"), "vocab_N3_別に_べつに")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FromAFeelingGlossTests(unittest.TestCase):
+    """Plan 296: a から of a cause says so -- 焦りから "out of", 心から
+    "from the heart" -- where no point holds it."""
+
+    def test_its_gloss(self) -> None:
+        self.assertTrue(gloss_of("焦りから、簡単な計算をまちがえてしまった。", "から").startswith("out of"))
+        self.assertTrue(gloss_of("皆さんあっての私です。心から感謝します。", "から").startswith("心から"))

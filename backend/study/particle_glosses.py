@@ -190,6 +190,9 @@ _GLOSSES = {
                    "fr": "(après une forme en て) si, tant que : la suite est souvent fâcheuse"},
     "と_naru": {"en": "(with なる) becomes: the written form of 〜になる",
                "fr": "(avec なる) devient : la forme écrite de 〜になる"},
+    "から_cause": {"en": "out of, because of (a feeling, a cause): 焦りから, out of impatience",
+                 "fr": "par, sous l'effet de (un sentiment, une cause) : 焦りから, par impatience"},
+    "から_heart": {"en": "心から: from the heart, sincerely", "fr": "心から : du fond du cœur, sincèrement"},
     "て_trailing": {"en": "(at the end) leaves the sentence open on what happened or why: …, you see",
                    "fr": "(en fin de phrase) laisse la phrase en suspens sur ce qui s'est passé ou pourquoi : …, tu vois"},
     "に_adjectival": {"en": "makes an adverb of the word before it (安全に, safely), or marks a goal (平和に役立つ, to peace)",
@@ -1212,6 +1215,11 @@ def gloss(morphemes, i: int) -> dict | None:
             key = "の_subject"                # 花粉の飛ぶ量, 持ち主のわからない荷物
         elif m.surface == "の" and _predicate_named(morphemes, i):
             key = "の_nominal"                # 重いのが難点だ, 赤いのがほしい (plan 272)
+        elif m.surface == "から" and m.pos == "particle" and i > 0 and _out_of(morphemes, i):
+            # (焦りから忘れかけた, 安心感から手放す, 心から願う: a cause, no
+            # "from", plan 296)
+            key = "から_heart" if morphemes[i - 1].surface == "心" and (
+                i < 2 or morphemes[i - 2].pos not in ("noun", "prefix")) else "から_cause"
         elif m.surface == "まで" and i > 0 and _even_made(morphemes, i):
             key = "まで_even"                 # 親の預金にまで手をつける, 老舗までもが, 電気代やガス代まで
         elif m.surface == "まで" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun", "suffix", "adverb"):
@@ -1242,6 +1250,11 @@ def _softens(m) -> bool:
     """Whether m is a softening particle that may end a sentence after a
     て: ね, よ, な."""
     return m.pos == "particle" and m.surface.rstrip("〜ー～") in ("ね", "よ", "な", "ねえ", "よね")
+
+
+def _out_of(morphemes, i: int) -> bool:
+    from study.grammar_detect import _out_of_a_feeling
+    return _out_of_a_feeling(morphemes, i)
 
 
 def _even_made(morphemes, i: int) -> bool:
