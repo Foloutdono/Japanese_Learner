@@ -4478,7 +4478,8 @@ class AnAdverbsSenseTests(unittest.TestCase):
                 self.assertEqual(card_of(sentence, "まず"), "vocab_N3_先ず_まず")
         for sentence in ("まず手を洗いましょう。", "まずご飯を食べない？", "契約する前に、まず条件をよく確認しないといけない。",
                          "何事もまずやってみないと分からないよ。", "引っ越しが決まったけど、まず何から始めればいいんだろう。",
-                         "新しい職場では、まず焦らないことが大切だ。"):
+                         "新しい職場では、まず焦らないことが大切だ。",
+                         "私たちは写真家が子供をまず助け出さなかったといって非難した。"):
             with self.subTest(sentence=sentence):
                 self.assertEqual(card_of(sentence, "まず"), "vocab_N4__まず")
         for sentence in ("おべんとうとお茶は、別にはらいます。", "パスポートは別に保管してください。",

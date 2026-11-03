@@ -1933,6 +1933,9 @@ def _a_denial_stands(morphemes, j: int) -> bool:
     nxt = morphemes[j + 1] if j + 1 < len(morphemes) else None
     if nxt is None or (nxt.pos == "symbol" and nxt.surface in "。！!、，,"):
         return True
+    if nxt.pos == "auxiliary" and nxt.lemma == "た" and j > 0 and morphemes[j - 1].pos == "verb" \
+            and morphemes[j - 1].lemma not in ("有る", "ある", "居る", "いる", "出来る", "できる"):
+        return False                        # (子供をまず助け出さなかった: what was not done first, plan 296)
     if nxt.pos == "auxiliary" and nxt.lemma in ("ます", "た"):
         return _a_denial_stands(morphemes, j + 1)
     if nxt.surface == "と":
