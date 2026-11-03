@@ -175,7 +175,8 @@ language's name or code: drawn from `components/ui/flags.js`, never an emoji
 and ringed in `--surface-line`. It licenses no other picture of a country, and
 a flag never stands for a language alone: the name or the code is always
 beside it. Latin-American Spanish, the app's one Spanish, stands for no
-single country and takes a globe instead; Spain's Spanish, an interface
+single country and takes a globe instead (the owner's choice, kept over
+Mexico's flag); Spain's Spanish, an interface
 over it, takes Spain's flag (plan 303).
 
 **One standing exception, decided deliberately**: the **console's action

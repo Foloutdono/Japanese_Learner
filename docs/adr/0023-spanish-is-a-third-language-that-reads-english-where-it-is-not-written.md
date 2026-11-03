@@ -224,8 +224,9 @@ included). Decided instead:
   (2.000; 3,5), and a device set to Spain starts on it. The account keeps
   the locale (`ui_lang`); every request and every cache keys by the
   language (`es`), so the server and the content do not fork. The
-  picker shows Español (Latinoamérica), under a globe, and Español
-  (España), under Spain's flag; the landing page and the legal pages
+  picker shows Español (Latinoamérica), under a globe (the owner's
+  choice, kept over Mexico's flag, which stands for one country of
+  many), and Español (España), under Spain's flag; the landing page and the legal pages
   keep their one Spanish, under the globe.
 - **Search reads Spain's words**: a query that is, or holds, one of
   Spain's words also asks the Latin-American word the glosses use
