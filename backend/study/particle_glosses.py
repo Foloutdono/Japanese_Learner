@@ -399,8 +399,8 @@ _GLOSSES = {
                  "fr": "(Tōhoku) = てくれ, fais-le pour moi : 見ででけろ, surveille-le pour moi"},
     "っから_kuru": {"en": "(spoken) = くるから: 行ってくっから, since I'm off (and will be back)",
                    "fr": "(parlé) = くるから : 行ってくっから, puisque j'y vais (et je reviens)"},
-    "れ_up": {"en": "(honorific) the respect of れる, said of what the other person does: ご希望されますか, would you like",
-             "fr": "(honorifique) le respect de れる, dit de ce que fait l'autre : ご希望されますか, souhaitez-vous"},
+    "れ_up": {"en": "(honorific) the respect of れる, said of what the other person does: ご希望されますか, would you like; 先生が書かれた, the teacher wrote",
+             "fr": "(honorifique) le respect de れる, dit de ce que fait l'autre : ご希望されますか, souhaitez-vous ; 先生が書かれた, le professeur a écrit"},
     "って_teyo": {"en": "(a lady's speech, of old) = て before よ: 百年早くってよ, it's a hundred years too soon",
                  "fr": "(parler de dame, d'autrefois) = て devant よ : 百年早くってよ, c'est cent ans trop tôt"},
     "っから": {"en": "from, since (= から, said with force): 昔っから, since way back",
@@ -622,6 +622,11 @@ def gives_a_reason(morphemes, i: int) -> bool:
     return m.surface == "もん" and _after_a_predicate(morphemes, i) and closes_sentence(morphemes, i)
 
 
+def _raised(morphemes, i: int) -> bool:
+    from study import grammar_detect
+    return grammar_detect._said_up(morphemes, i)
+
+
 def _done_by_someone(morphemes, i: int) -> bool:
     """Whether a doer and its に stand in the clause before morphemes[i]
     (祖母にお説教された): the passive's, no honorific."""
@@ -786,6 +791,8 @@ def gloss(morphemes, i: int) -> dict | None:
             and not _done_by_someone(morphemes, i):
         key = "れ_up"                        # ご希望されますか, ご参加される方 -- never 祖母にお説教
         # された, the passive (plan 272)
+    elif m.surface in ("れ", "れる", "られ", "られる") and m.pos == "auxiliary" and i > 0 and _raised(morphemes, i):
+        key = "れ_up"                        # 来館された方, 先生が本を書かれた, どうされますか (plan 296)
     elif m.surface == "って" and i > 0 and morphemes[i - 1].pos == "adjective" and morphemes[i - 1].surface.endswith("く") \
             and i + 1 < len(morphemes) and morphemes[i + 1].surface in ("よ", "ね"):
         key = "って_teyo"                    # 百年早くってよ (plan 272)

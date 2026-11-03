@@ -2316,7 +2316,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # the N3 先ず's "hardly", 別にはらう 別 and に, "separately"); and から
 # read by what governs it (焦りから a cause, ことから始める no 〜ことから,
 # 窓から見るともなく no 〜から見ると); and もの's constructions by what the
-# sentence says (町のものでない, 市が決めたものだ, ＿＿＿ものの、, もんで).
+# sentence says (町のものでない, 市が決めたものだ, ＿＿＿ものの、, もんで);
+# and the honorific (ら)れる no passive (来館された方, どうされますか).
 LOCAL_REV = 33
 
 

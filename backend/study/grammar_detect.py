@@ -6348,6 +6348,8 @@ def _passive_refused(tokens, s, e, _g) -> bool:
         # 祖母にお説教された, the passive (plan 272)
     if i is None or i == 0:
         return False
+    if _said_up(tokens, i):
+        return True                     # 来館された方, お客さまは…されている, どうされますか (plan 296)
     verb = tokens[i - 1]
     if verb.surface == "なら" and verb.lemma == "成る" and i >= 2 and tokens[i - 2].surface == "に":
         return True
@@ -6656,6 +6658,67 @@ def _a_person_by_gloss(w) -> bool:
 
     first = re.split(r"[,;]", _noun_meaning(w.surface, kata_to_hira(w.reading)) or "", maxsplit=1)[0]
     return bool(_PERSON_GLOSS.search(first.lower()))
+
+
+# Who the honorific (ら)れる is said of (plan 296): a person the sentence
+# raises.
+_RESPECTED = frozenset({"先生", "社長", "部長", "課長", "教授", "校長", "会長", "お客様", "お客さま", "客様", "御客様",
+                        "皆様", "皆さま", "みなさま", "医師", "監督", "先輩"})
+
+
+def _respected(t) -> bool:
+    return t.surface in _RESPECTED or t.surface.endswith(("様", "さま")) or (
+        t.surface == "方" and morphology.kata_to_hira(t.reading or "") == "かた")
+
+
+def _said_up(tokens, i: int) -> bool:
+    """Whether the (ら)れる at tokens[i] raises its doer, the honorific,
+    no passive (plan 296): it says of a respected person what they do
+    (来館された方, お客さまは、…お仕事をされている, 先生が本を書かれた), or
+    asks the listener what they will do (どうされますか) -- never with a
+    doer and its に (先生に叱られた, the passive)."""
+    if _suffered_by(tokens, i) or _done_by_a_person(tokens, i):
+        return False
+    if i >= 2 and tokens[i - 1].surface in ("させ", "せ") and tokens[i - 1].pos == "auxiliary":
+        return False                    # (けがをさせられた方: the causative's passive)
+    after = tokens[i + 1:i + 3]
+    if len(after) == 2 and after[0].pos == "auxiliary" and after[0].surface in ("た", "る") and _respected(after[1]) \
+            and tokens[i - 1].lemma not in _HARMS:
+        return True
+    if tokens[i - 1].lemma in ("為る", "する") and i + 2 < len(tokens) and tokens[i + 1].lemma == "ます" \
+            and any(t.surface in ("どう", "何", "なに", "いかが") for t in tokens[_sentence_start(tokens, i):i]) \
+            and any(t.surface in ("か", "？", "?") for t in tokens[i + 1:i + 5]):
+        return True
+    head = _sentence_start(tokens, i)
+    for k in range(head, i - 1):
+        if tokens[k + 1].pos == "particle" and tokens[k + 1].surface in ("は", "が") and _respected(tokens[k]) \
+                and not _ga_of_a_noun(tokens, k + 1, i) and tokens[i - 1].lemma not in _HARMS:
+            return True
+    return False
+
+
+# What one suffers, whose (ら)れる is the passive whoever undergoes it
+# (plan 296): 自転車を盗まれた方, 男に襲われる.
+_HARMS = frozenset({"盗む", "襲う", "騙す", "だます", "叱る", "殴る", "刺す", "奪う", "踏む", "噛む", "叩く", "壊す",
+                    "捕まえる", "怒る", "ぶつ", "蹴る", "笑う", "疑う", "嫌う", "邪魔", "批判", "非難", "攻撃", "誘拐",
+                    "逮捕", "解雇", "無視", "拒否", "反対"})
+
+
+def _done_by_a_person(tokens, i: int) -> bool:
+    """Whether a person or a title marked by に or から stands in the
+    clause before the (ら)れる at tokens[i] -- its doer: 専務に辞められた,
+    生徒たちから慕われている, 株主から浴びせられた (plan 296)."""
+    for k in range(i - 1, 0, -1):
+        t = tokens[k]
+        if t.pos == "symbol" or (t.pos == "particle" and t.conjunctive):
+            return False
+        if t.pos == "particle" and t.surface in ("に", "から") and not t.conjunctive:
+            w = tokens[k - 1]
+            if _respected(w) or w.surface in _DOERS or w.surface.endswith(
+                    ("さん", "くん", "ちゃん", "様", "たち", "達", "者", "長", "務", "生", "員", "家", "客")) \
+                    or (w.pos == "noun" and _a_person_by_gloss(w)):
+                return True
+    return False
 
 
 def _suffered_by(tokens, i: int) -> bool:

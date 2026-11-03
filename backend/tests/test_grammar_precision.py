@@ -3526,3 +3526,21 @@ class MonosConstructionsTests(unittest.TestCase):
                                 ("ねぼうしたもんだから、遅れちゃった。", "〜ものだから")):
             with self.subTest(sentence=sentence):
                 self.assertIn(point, found_in(sentence))
+
+
+class AnHonorificReruTests(unittest.TestCase):
+    """Plan 296: the honorific (ら)れる raises its doer -- a respected
+    person it is said of, or the listener asked -- and is no passive;
+    with a doer and its に it is the passive."""
+
+    def test_no_passive(self) -> None:
+        for sentence in ("わかりました。拾った方には、お礼を受け取る権利などがありますが、どうされますか。",
+                         "市立歴史資料館では、来館された方に見どころを説明するボランティアガイドを募集します。",
+                         "お客さまは、どんなお仕事をされているんですか。", "先生が本を書かれた。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("受身形 〜られる", found_in(sentence))
+
+    def test_the_passive(self) -> None:
+        for sentence in ("先生に叱られた。", "財布を盗まれた。", "この本は多くの人に読まれている。", "社長が部下に辞められた。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("受身形 〜られる", found_in(sentence))

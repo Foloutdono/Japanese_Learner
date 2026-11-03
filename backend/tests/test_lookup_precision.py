@@ -4525,3 +4525,13 @@ class TheCopulaDeniedGlossTests(unittest.TestCase):
         for sentence in ("これは本でない。", "彼は学生でなく、先生だ。", "町のものでないことは明らかだ。"):
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, "で").startswith("(the copula) で before ない"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AnHonorificReruGlossTests(unittest.TestCase):
+    """Plan 296: the honorific れ says so."""
+
+    def test_its_gloss(self) -> None:
+        for sentence in ("どうされますか。", "来館された方に説明する。", "先生が本を書かれた。"):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(gloss_of(sentence, "れ").startswith("(honorific)"))
