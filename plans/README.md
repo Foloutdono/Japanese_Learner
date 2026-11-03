@@ -7403,3 +7403,17 @@ The owner: improve the comprehension mode and give it a promotion story; then po
 | 301b | **The miss answered**: every question opens on its sentence(s) (`quotedFragments.answerSentences`: `at`, else the sentence its quote is from), a miss says why in one line, and a phone opens the results on the first miss | DONE |
 | 301b | **The roll shown**: the story's second frame rolls the same text a sentence a line at the stepper's own speeds, and the story plays whole as one clip (`clips.story`) | DONE |
 | 301b | **Six seed questions say only what their text says** (found while writing the whys): n2-01, n1-15, n3-11, n4-13, n4-01, n5-24 | DONE |
+
+
+## Plan 304 — 何, read by what follows it (2026-11-03)
+
+Found while looking into why the VOICEVOX engine says なに where the furigana says なん: in four catalogue lines the engine is right. UniDic read 何 なん in 何一つ, 何やら and 何はさておき, and read 何に as the なんに of なんにも ("(not) anything at all") in 何にもまして. `study/reading_context.correct_readings` now decides by what follows 何, never by a list of the lines.
+
+| Phase | What | Status |
+|---|---|---|
+| 304 | **なに before やら and は**: both join `_NANI_BEFORE` (何やら, 何はさておき, 何はともあれ); 何 stays なん before a t-, d- or n- sound and a counter (何です, 何の, 何でも, 何と, 何人) | DONE |
+| 304 | **なに before one** (`_ONE_HEADS`, `_ONE_DIGITS`): 何一つ, 何ひとつ, 何一人, 何1つ, "not a single one"; 何十, 何百 are one token and keep なん | DONE |
+| 304 | **何に + も**: なんにも stands only with a negative, so UniDic's 何に (なんに) reads なにに where まして or 増して takes the に as what it surpasses (`_SURPASSES`, whatever follows: 何にもまして、遅れないことが大切だ), or where the sentence goes on to say something with no negative in it (`_affirmed_ahead`: 何にもなれる, 何にも代えがたい). 何にもない, 何にも知らない, 何にもすることがない and the bare answer 何にも。 keep なん | DONE |
+| 304 | **Pinned** in `tests/test_furigana_context.py`: each rule on hand-made tokens with its lookalikes, the lines through the tokenizer and through the breakdown (`analyze_local`); every new subtest on the fix's side fails on the old rules. Diffed over 108,802 Japanese strings in the content (every sentence the app teaches, the tours, the choose questions, the notes): 73 move, all 何 in the four shapes (32 何にもまして, 18 何一つ, 16 何は, 7 何やら), no token and no other furigana; over the 8,472 the breakdown gap report reads, 2 (何にもまして). `LOCAL_REV` 37; the carousel bank rebuilt (five rows' furigana and romaji); `TOUR_REV` unmoved, since a tour is cached in process only and the rev seeds its shuffles | DONE |
+
+Open: 何にも before a negative where the に is a verb's (何にも代えられない, 何にも負けない) is read なんにも, UniDic's reading, since a negative cannot tell the two apart.

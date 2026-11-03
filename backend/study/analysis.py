@@ -2234,7 +2234,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # The breakdown and the segments read 何で by one rule (card_lookup._why):
 # a way of going said in the negative asks why (何で来なかったの？), and
 # 何で行きますか's "by what" is no N3 word in the segments either.
-LOCAL_REV = 36
+# 37: 何 read なに by what follows it (plan 304): before one (何一つ),
+# やら (何やら), は (何はさておき), and the 何に of 何にもまして, which
+# UniDic read なんに, as in なんにも with a negative.
+LOCAL_REV = 37
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
