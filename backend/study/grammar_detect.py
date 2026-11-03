@@ -3384,13 +3384,14 @@ def _not_even_one_spans(tokens):
 
 
 def _blank_although_spans(tokens):
-    """〜ものの after a blank, a comma after it (plan 296): ダイエットを
-    ＿＿＿ものの、三日でやめた -- the blank holds the verb, and もの + の
-    before a comma can be nothing else."""
+    """〜ものの before a comma, after a predicate or a blank (plan 296):
+    大学は出たものの、 and ダイエットを＿＿＿ものの、三日でやめた -- the
+    blank holds the verb, and もの + の before a comma can be nothing else."""
     out = []
     for i in range(1, len(tokens) - 2):
-        if tokens[i - 1].surface.startswith("＿") and tokens[i].surface == "もの" and tokens[i + 1].surface == "の" \
-                and tokens[i + 2].surface in _COMMAS:
+        before = tokens[i - 1]
+        if (before.surface.startswith("＿") or before.pos in ("verb", "adjective", "auxiliary")) \
+                and tokens[i].surface == "もの" and tokens[i + 1].surface == "の" and tokens[i + 2].surface in _COMMAS:
             out.append((tokens[i].start, tokens[i + 1].end))
     return out
 
