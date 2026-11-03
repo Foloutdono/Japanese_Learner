@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **303**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **304**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -464,6 +464,17 @@ runtime purpose.
   closing one, figures as es-419 writes them. A deck kanji's Spanish is
   KANJIDIC2's unless `kanji_meanings_es.json` has the line, which then
   wins (`build_kanji_db --spanish-only`): correct a kanji there.
+  Spain's Spanish is an interface over that one Spanish, not a fourth
+  table (plan 303): `locales/es-ES` holds only the screen strings Spain
+  says otherwise (añadir, billete, ordenador, vídeo, pulsar, en
+  directo), merged over the Spanish one, and its figures are es-ES
+  (`lib/locale.js`); the account keeps `es-ES` in `ui_lang` while every
+  request and every content lookup asks for `es` (`contentLang`), so
+  nothing on the server forks. A new screen string with one of those
+  words gains its line there (`locales.test.js`), and a query typed in
+  one of Spain's words asks the Latin-American one too
+  (`search_match.SPAIN_WORDS`: móvil finds 携帯, whose gloss says
+  celular).
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
@@ -644,7 +655,7 @@ runtime purpose.
 - **The interface language is the account's, and only the learner moves it.**
   A choice made in Réglages › Affichage is kept in `user_profiles.ui_lang`
   (NULL = never chosen: French on a French device, Spanish on a Spanish one,
-  English otherwise) as well as in
+  Spain's on one set to Spain, English otherwise) as well as in
   localStorage `lang`, which stays because the first paint reads it
   synchronously. `lib/langChoice.js` writes both (`rememberLang`) and, at
   boot, copies the account's answer onto the device (`syncLang`, from

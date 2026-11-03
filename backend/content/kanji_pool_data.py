@@ -114,7 +114,7 @@ def _is_latin(q: str) -> bool:
 
 
 def _match(q: str, kana_forms: tuple[str, ...] = (), match: str = "any",
-           field: str = "all") -> tuple[str, tuple]:
+           field: str = "all", alts: tuple[str, ...] = ()) -> tuple[str, tuple]:
     """(SQL predicate, parameters) for one query in all its forms.
 
     `match` and `field` as vocab_jmdict_data._match takes them: "any" is
@@ -136,6 +136,15 @@ def _match(q: str, kana_forms: tuple[str, ...] = (), match: str = "any",
                         " OR (meaning_fr LIKE ? AND sm_text(meaning_fr, ?, ?))"
                         " OR (meaning_es LIKE ? AND sm_text(meaning_es, ?, ?)))")
                     params += [f"%{q}%", q, match, f"%{q}%", q, match, f"%{q}%", q, match]
+                # Spain's word asked the Latin-American way too (plan 303):
+                # the Spanish meanings hold it.
+                for alt in alts:
+                    if match == "any":
+                        clauses.append("meaning_es LIKE ?")
+                        params.append(f"%{alt}%")
+                    else:
+                        clauses.append("(meaning_es LIKE ? AND sm_text(meaning_es, ?, ?))")
+                        params += [f"%{alt}%", alt, match]
         elif field != "meaning":
             if match == "start":
                 # Typed as Japanese, a character is itself, and a
@@ -176,7 +185,7 @@ def _order(q: str, kana_forms: tuple[str, ...], then: str = "sort_rank") -> tupl
 
 
 def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = (),
-                   match: str = "any", field: str = "all") -> int:
+                   match: str = "any", field: str = "all", alts: tuple[str, ...] = ()) -> int:
     """How many POOL characters match, without paying for a page.
 
     The dictionary needs the pool's total on every request (it is most of
@@ -184,7 +193,7 @@ def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = (),
     the deck. `lang` is accepted and ignored — both languages are searched
     now — and kept so the call sites read the same either way.
     """
-    where, params = _match(q, kana_forms, match, field)
+    where, params = _match(q, kana_forms, match, field, alts)
     if not where:
         return _conn().execute(
             "SELECT COUNT(*) FROM kanji WHERE in_deck = 0").fetchone()[0]
@@ -195,7 +204,7 @@ def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = (),
 
 def search(q: str, limit: int, offset: int, lang: str = "en",
            kana_forms: tuple[str, ...] = (), match: str = "any",
-           field: str = "all") -> tuple[list[dict], int]:
+           field: str = "all", alts: tuple[str, ...] = ()) -> tuple[list[dict], int]:
     """One page of the pool, ordered by sort_rank. Returns (rows, total).
 
     sort_rank is computed offline (see build_kanji_db.py's _sort_key): the
@@ -204,15 +213,15 @@ def search(q: str, limit: int, offset: int, lang: str = "en",
     than computed so idx_kanji_pool_sort covers the ORDER BY and paging
     never sorts.
     """
-    return (page(q, limit, offset, kana_forms, match, field),
-            count_matching(q, lang, kana_forms, match, field))
+    return (page(q, limit, offset, kana_forms, match, field, alts),
+            count_matching(q, lang, kana_forms, match, field, alts))
 
 
 def page(q: str, limit: int, offset: int,
          kana_forms: tuple[str, ...] = (), match: str = "any",
-         field: str = "all") -> list[dict]:
+         field: str = "all", alts: tuple[str, ...] = ()) -> list[dict]:
     """search()'s rows without its count — see vocab_jmdict_data.page."""
-    where, params = _match(q, kana_forms, match, field)
+    where, params = _match(q, kana_forms, match, field, alts)
     if not where:
         rows = _conn().execute(
             f"{_SELECT} WHERE in_deck = 0 ORDER BY sort_rank LIMIT ? OFFSET ?",
@@ -230,7 +239,7 @@ def page(q: str, limit: int, offset: int,
 def by_radical(radical: int, q: str, limit: int, offset: int,
                lang: str = "en",
                kana_forms: tuple[str, ...] = (), match: str = "any",
-               field: str = "all") -> tuple[list[dict], int]:
+               field: str = "all", alts: tuple[str, ...] = ()) -> tuple[list[dict], int]:
     """One page of EVERY character filed under `radical`, deck and pool
     together, in stroke order — the order a paper 漢和辞典 uses.
 
@@ -242,7 +251,7 @@ def by_radical(radical: int, q: str, limit: int, offset: int,
     """
     where = "radical = ?"
     params: tuple = (radical,)
-    predicate, match_params = _match(q, kana_forms, match, field)
+    predicate, match_params = _match(q, kana_forms, match, field, alts)
     if predicate:
         where += f" AND ({predicate})"
         params += match_params

@@ -23,7 +23,8 @@ import { SettingsPage, Slip, SlipRow } from './SettingsPage'
 // standalone the row is gone. Anywhere else the row does not exist,
 // so nothing on this page is a dead control.
 export function DisplayPage() {
-  const { t, lang, switchLang } = useLang()
+  // The picker picks a locale: Spain's Spanish is one (plan 303).
+  const { t, locale, switchLang } = useLang()
   const [choice, setChoice] = useThemeChoice()
   // One tab stop a group on the desk, walked with the arrows (plan 123).
   const desk = useDesk()
@@ -76,11 +77,11 @@ export function DisplayPage() {
                   key={l.code}
                   type="button"
                   role="radio"
-                  aria-checked={lang === l.code}
-                  tabIndex={radioTab(desk, i, LANGUAGES.findIndex(o => o.code === lang))}
+                  aria-checked={locale === l.code}
+                  tabIndex={radioTab(desk, i, LANGUAGES.findIndex(o => o.code === locale))}
                   lang={l.code}
-                  className={`lang-pick${lang === l.code ? ' lang-pick--on' : ''}`}
-                  onClick={() => { if (lang !== l.code) { switchLang(l.code); playClick() } }}
+                  className={`lang-pick${locale === l.code ? ' lang-pick--on' : ''}`}
+                  onClick={() => { if (locale !== l.code) { switchLang(l.code); playClick() } }}
                 >
                   <span className="lang-pick__name"><Flag code={l.code} />{l.label}</span>
                   <span className="lang-pick__sample">{own.tabToday} · {own.tabDictionary}</span>

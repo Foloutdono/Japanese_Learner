@@ -25418,7 +25418,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* The languages one per row (plan 302, the owner's pick B): the name,
    then its own two words on the same line, so a third language never
    stands alone under two and a phone never breaks the words in two. */
-.lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+.lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); container-type: inline-size; }
 .lang-pick {
   display: flex;
   align-items: center;
@@ -25441,7 +25441,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   box-shadow: inset 0 0 0 1px var(--accent2);
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
-.lang-pick__name { display: inline-flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
+.lang-pick__name { display: inline-flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; white-space: nowrap; }
 /* A language's flag (plan 302, the owner's choice): a country's own
    colours, at the size of the name it stands before, and nowhere else
    (DESIGN.md, "The language flags"). The ring keeps a white stripe
@@ -25449,6 +25449,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
 .lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
+/* Español (Latinoamérica) and its two words need 335px, measured: the
+   row a 390px phone gives them (plan 303). Narrower (375, 360, 320), the
+   words go, since the name already says the language, and the name
+   keeps its one line (nowrap, above). */
+@container (max-width: 334px) {
+  .lang-pick__sample { display: none; }
+}
 
 /* ── Notation: the three bars themselves (plan 139) ──
    Each scale is offered as the rating bar it is (RatingBar's specimen),

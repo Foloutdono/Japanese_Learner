@@ -384,7 +384,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",
                               "notifications", "level", "lines", "daily_target",
                               "main_mode", "today_mode"}),
-        "value":   frozenset({"light", "dark", "auto", "fr", "en", "es",
+        "value":   frozenset({"light", "dark", "auto", "fr", "en", "es", "es-ES",
                               "binary", "simple", "full",
                               "standard", "relaxed", "slow", "untimed",
                               "on", "off", "N5", "N4", "N3", "N2", "N1", "changed"}),

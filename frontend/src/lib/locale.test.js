@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pickInitialLang, intlLocale } from './locale'
+import { pickInitialLang, intlLocale, contentLang, setInterfaceLocale } from './locale'
 
 describe('pickInitialLang', () => {
   it('honours a saved choice over the device', () => {
@@ -23,6 +23,27 @@ describe('pickInitialLang', () => {
   it('ignores a saved value that is not a supported language', () => {
     expect(pickInitialLang('de', 'fr-FR')).toBe('fr')
     expect(pickInitialLang('', 'de')).toBe('en')
+    expect(pickInitialLang('es-MX', 'de')).toBe('en')
+  })
+  // Plan 303: Spain's Spanish, an interface over the one Spanish content.
+  it('reads a device set to Spain as Spain\'s Spanish, every other Spanish one as Latin America\'s', () => {
+    expect(pickInitialLang(null, 'es-ES')).toBe('es-ES')
+    expect(pickInitialLang(null, 'es-es')).toBe('es-ES')
+    expect(pickInitialLang(null, 'es-AR')).toBe('es')
+    expect(pickInitialLang(null, 'es-419')).toBe('es')
+  })
+  it('honours a saved variety over the device', () => {
+    expect(pickInitialLang('es-ES', 'es-MX')).toBe('es-ES')
+    expect(pickInitialLang('es', 'es-ES')).toBe('es')
+  })
+})
+
+describe('contentLang', () => {
+  it('reads Spain\'s Spanish as the Spanish content, and anything unknown as English', () => {
+    expect(contentLang('es-ES')).toBe('es')
+    expect(contentLang('es')).toBe('es')
+    expect(contentLang('fr')).toBe('fr')
+    expect(contentLang('de')).toBe('en')
   })
 })
 
@@ -33,5 +54,14 @@ describe('intlLocale', () => {
     expect(intlLocale('en')).toBe('en-US')
     expect(intlLocale('en', 'en-GB')).toBe('en-GB')
     expect(intlLocale('de')).toBe('en-US')
+  })
+  it('writes Spanish figures as the interface\'s Spanish does (plan 303)', () => {
+    setInterfaceLocale('es-ES')
+    expect(intlLocale('es')).toBe('es-ES')
+    expect((12000).toLocaleString(intlLocale('es'))).toBe('12.000')
+    setInterfaceLocale('es')
+    expect(intlLocale('es')).toBe('es-419')
+    expect((12000).toLocaleString(intlLocale('es'))).toBe('12,000')
+    expect(intlLocale('fr')).toBe('fr-FR')
   })
 })

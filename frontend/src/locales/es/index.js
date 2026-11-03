@@ -1,3 +1,7 @@
+// Figures follow the interface's Spanish: Latin America's, or Spain's
+// for Español (España) (lib/locale.js, plan 303).
+import { intlLocale } from '../../lib/locale.js'
+
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
   appTitle:          '辻',
@@ -1404,7 +1408,7 @@ const reading = {
   // The play button a phrase arrives behind (ReadingPieces' PlayButton).
   readingPlay:          'Mostrar la frase e iniciar el cronómetro',
   // The reading's clock (ReadingTimer): "4.5s".
-  timerSeconds:         s => `${s.toLocaleString('es-419', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}\u00a0s`,
+  timerSeconds:         s => `${s.toLocaleString(intlLocale('es'), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}\u00a0s`,
   correct:              '¡Correcto!',
   incorrect:            'No del todo',
   correctRomaji:        'Romaji correcto',
@@ -1776,7 +1780,7 @@ const dictionary = {
   readingsScopeHintCourse: (n) => `Proporción de las ${n} palabras del curso que usan cada lectura.`,
   readingsScopeHintAll:    (n) => `Proporción de las ${n} palabras de JMdict que usan cada lectura.`,
   readingsTier:      { core: 'Común', usual: 'Habitual', rare: 'Rara' },
-  readingsOfWords:   (n, total) => `${n} de ${total.toLocaleString('es-419')} palabra${total > 1 ? 's' : ''}`,
+  readingsOfWords:   (n, total) => `${n} de ${total.toLocaleString(intlLocale('es'))} palabra${total > 1 ? 's' : ''}`,
   readingsExamples:  (n) => `${n} ejemplo${n > 1 ? 's' : ''}`,
   readingsWholeShare: 'Palabra leída en bloque',
   readingsShareLoading: 'Contando…',
@@ -3470,7 +3474,7 @@ const reviewPlan = {
 // key, what the course finds, the stamp, and the way back while the
 // imported cards wait for their first answer; and the sheet over Today
 // that asks a new learner, once.
-const trCount = n => n.toLocaleString('es-419')
+const trCount = n => n.toLocaleString(intlLocale('es'))
 const transfer = {
   settingsTransfer: 'Transbordo',
   trRowValue: 'Anki, WaniKani, Renshuu',
@@ -3629,8 +3633,8 @@ const pvp = {
   pvpLines:        { speed: 'Velocidad', combo: 'Combo', rush: 'Recta final', accuracy: 'Precisión', flashes: 'Relámpagos' },
   pvpInARow:       (a, b) => `${a} / ${b} seguidas`,
   pvpVerdict:      { win: '¡Victoria!', loss: 'Derrota', draw: 'Empate' },
-  pvpAhead:        n => `${n.toLocaleString('es-419')} punto${n === 1 ? '' : 's'} de ventaja`,
-  pvpBehind:       n => `a ${n.toLocaleString('es-419')} punto${n === 1 ? '' : 's'}`,
+  pvpAhead:        n => `${n.toLocaleString(intlLocale('es'))} punto${n === 1 ? '' : 's'} de ventaja`,
+  pvpBehind:       n => `a ${n.toLocaleString(intlLocale('es'))} punto${n === 1 ? '' : 's'}`,
   pvpGrade:        g => `Nota ${g}`,
   pvpBy:           n => `por ${n} punto${n === 1 ? '' : 's'}`,
   pvpWaitingFor:   who => `Esperando a ${who}`,

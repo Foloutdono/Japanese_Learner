@@ -10,7 +10,7 @@
 // holds every one of these to its enum (backend/core/events.py VALUES)
 // and drops anything else.
 import { DESK_QUERY } from '../hooks/useDesk'
-import { SUPPORTED_LANGS, pickInitialLang } from './locale'
+import { UI_LOCALES, contentLang, pickInitialLang } from './locale'
 
 const media = query => {
   try {
@@ -54,11 +54,12 @@ function themeChoice() {
 
 function langCode() {
   try {
+    // The language, not the locale: Spain's Spanish is counted as Spanish.
     const saved = window.localStorage.getItem('lang')
-    if (SUPPORTED_LANGS.includes(saved)) return saved
+    if (UI_LOCALES.includes(saved)) return contentLang(saved)
   } catch { /* the document's own language below */ }
   const doc = typeof document !== 'undefined' ? document.documentElement.lang : ''
-  return pickInitialLang(null, doc)
+  return contentLang(pickInitialLang(null, doc))
 }
 
 /** The visit's context, as session_start carries it. */

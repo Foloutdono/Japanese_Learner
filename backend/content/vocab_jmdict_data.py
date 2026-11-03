@@ -368,7 +368,7 @@ def count() -> int:
 
 
 def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
-           field: str = "all") -> tuple[str, tuple]:
+           field: str = "all", alts: tuple[str, ...] = ()) -> tuple[str, tuple]:
     """(SQL predicate, parameters) for one query in all its forms.
 
     `match` and `field` are study/search_match's: how strictly, and
@@ -405,6 +405,13 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
             clause, extra = _layer_clause(q, match, lang)
             clauses.append(clause)
             params += extra
+        # Spain's word asked the Latin-American way too (plan 303,
+        # study/search_match.spain_alternatives): the Spanish lines hold it.
+        if "es" in layers:
+            for alt in alts:
+                clause, extra = _layer_clause(alt, match, "es")
+                clauses.append(clause)
+                params += extra
     if field != "meaning":
         for form in kana_forms:
             # The READING column alone. A kana form is a reading, and the
@@ -449,7 +456,7 @@ def _order(q: str, kana_forms: tuple[str, ...]) -> tuple[str, tuple]:
 
 
 def count_matching(q: str, kana_forms: tuple[str, ...] = (),
-                   match: str = "any", field: str = "all") -> int:
+                   match: str = "any", field: str = "all", alts: tuple[str, ...] = ()) -> int:
     """How many pool entries match — the same predicate search() pages
     through, without paying for a page of rows.
 
@@ -457,7 +464,7 @@ def count_matching(q: str, kana_forms: tuple[str, ...] = (),
     on every request (it is half the collection's count) but only needs
     pool ROWS once a page runs past the curated deck.
     """
-    where, params = _match(q, kana_forms, match, field)
+    where, params = _match(q, kana_forms, match, field, alts)
     if not where:
         return count()
     return _conn().execute(
@@ -467,7 +474,7 @@ def count_matching(q: str, kana_forms: tuple[str, ...] = (),
 
 def search(q: str, limit: int, offset: int,
            kana_forms: tuple[str, ...] = (), match: str = "any",
-           field: str = "all") -> tuple[list[dict], int]:
+           field: str = "all", alts: tuple[str, ...] = ()) -> tuple[list[dict], int]:
     """Substring search over kanji/kana/meaning, same semantics as the
     old `for w in VOCAB_JMDICT: if q in ... ` loop in dictionary.py, but
     as an indexed-where-possible SQL query instead of a 292k-row Python
@@ -481,13 +488,13 @@ def search(q: str, limit: int, offset: int,
     query matches is the one the reader almost certainly means.
     idx_entries_freq_rank covers the ORDER BY, so paging never sorts.
     """
-    return (page(q, limit, offset, kana_forms, match, field),
-            count_matching(q, kana_forms, match, field))
+    return (page(q, limit, offset, kana_forms, match, field, alts),
+            count_matching(q, kana_forms, match, field, alts))
 
 
 def page(q: str, limit: int, offset: int,
          kana_forms: tuple[str, ...] = (), match: str = "any",
-         field: str = "all") -> list[dict]:
+         field: str = "all", alts: tuple[str, ...] = ()) -> list[dict]:
     """search()'s rows without its count.
 
     A `%…%` LIKE over 212k rows is a full scan, and the count is one of
@@ -496,7 +503,7 @@ def page(q: str, limit: int, offset: int,
     so the two halves are separable and the caller that needs one should
     not pay for both.
     """
-    where, params = _match(q, kana_forms, match, field)
+    where, params = _match(q, kana_forms, match, field, alts)
     order, order_params = _order(q if where else "", kana_forms)
     sql = "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
     if where:

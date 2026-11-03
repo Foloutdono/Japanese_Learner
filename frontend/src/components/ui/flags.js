@@ -1,6 +1,7 @@
 // The flag beside each language where a learner picks one (plan 302,
 // the owner's choice "for clarity"): the conventional country for each
-// of the app's languages. A flag stands for a country, not a language,
+// of the app's languages, and a globe for Latin-American Spanish (plan
+// 303). A flag stands for a country, not a language,
 // and it is drawn here rather than as an emoji because Windows has no
 // flag emoji: it prints the two letters instead.
 //
@@ -30,7 +31,19 @@ export const FLAGS = {
       ['path', { d: 'M30 0v40M0 20h60', stroke: '#c8102e', 'stroke-width': 8 }],
     ],
   },
+  // Latin-American Spanish (plan 303) has no one country to stand for
+  // it: a globe, the Americas' Spanish of the app's content. Spain's
+  // Spanish, an interface over the same content, has Spain's flag.
   es: {
+    viewBox: '0 0 30 20',
+    shapes: [
+      ['rect', { width: 30, height: 20, fill: '#1f5fa6' }],
+      ['circle', { cx: 15, cy: 10, r: 7, fill: 'none', stroke: '#ffffff', 'stroke-width': 1.3 }],
+      ['ellipse', { cx: 15, cy: 10, rx: 3, ry: 7, fill: 'none', stroke: '#ffffff', 'stroke-width': 1.1 }],
+      ['path', { d: 'M8 10h14M9 6.5h12M9 13.5h12', stroke: '#ffffff', 'stroke-width': 1.1 }],
+    ],
+  },
+  'es-ES': {
     viewBox: '0 0 3 2',
     shapes: [
       ['rect', { width: 3, height: 2, fill: '#aa151b' }],

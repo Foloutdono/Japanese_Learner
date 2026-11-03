@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 import fr from './fr/index.js'
 import en from './en/index.js'
 import es from './es/index.js'
+import esES from './es-ES/index.js'
+import { translations } from '../i18n.jsx'
 
 // ── One key, one value ─────────────────────────────────────────
 // Each table is a row of groups spread into one object, so a key written
@@ -172,3 +174,35 @@ describe('locale tables (nested)', () => {
     })
   }
 })
+
+// ── Spain's Spanish (plan 303) ──────────────────────────────────
+// An interface over the Spanish table, not a fourth table: each entry
+// replaces one of Spanish's with the words Spain says otherwise, of the
+// same kind, and says something else; every other entry is Spanish's.
+describe('locale overlay (es-ES over es)', () => {
+  // A function's text is its source: the literals it writes are there.
+  const sample = v => (typeof v === 'function' ? String(v) : v)
+  it('replaces only Spanish entries, each of its own kind and saying something else', () => {
+    for (const [key, value] of Object.entries(esES)) {
+      expect(key in es, `es-ES: ${key} is no Spanish entry`).toBe(true)
+      expect(typeof value, `es-ES: ${key}`).toBe(typeof es[key])
+      if (typeof value === 'function') expect(value.length, `es-ES: ${key} takes other arguments`).toBe(es[key].length)
+      if (value && typeof value === 'object') {
+        for (const k of Object.keys(value)) expect(k in es[key], `es-ES: ${key}.${k}`).toBe(true)
+      }
+      expect(JSON.stringify(sample(value)), `es-ES: ${key} says what Spanish says`).not.toBe(JSON.stringify(sample(es[key])))
+    }
+  })
+  it('says none of the Latin-American words it is there to replace', () => {
+    const latam = /\b(agreg\w*|Agreg\w*|boletos?|Boletos?|computadora|Computadora|videos?|Videos?|presion\w+|Presion\w+|en vivo|En vivo)\b/
+    for (const [key, value] of Object.entries(translations['es-ES'])) {
+      const said = typeof value === 'function' ? String(value) : JSON.stringify(value ?? '')
+      expect(latam.test(said), `es-ES: ${key} still says ${said.match(latam)?.[0]}`).toBe(false)
+    }
+  })
+  it('is the whole Spanish table otherwise', () => {
+    expect(Object.keys(translations['es-ES']).sort()).toEqual(Object.keys(es).sort())
+    expect(translations['es-ES'].tabToday).toBe(es.tabToday)
+  })
+})
+

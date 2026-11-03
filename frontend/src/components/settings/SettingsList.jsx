@@ -49,7 +49,7 @@ import { intlLocale } from '../../lib/locale'
 const THEATRE = ['ambiance', 'jingle', 'announcement']
 
 function useGroups(session) {
-  const { t, lang } = useLang()
+  const { t, lang, locale } = useLang()
   const [theme] = useThemeChoice()
   const scale = useRatingScale()
   const pace = useReadingPace()
@@ -59,7 +59,7 @@ function useGroups(session) {
   const { blocks } = useAgenda()
   const review = useTodaySummary().data?.review
 
-  const langLabel = LANGUAGES.find(l => l.code === lang)?.label ?? lang
+  const langLabel = LANGUAGES.find(l => l.code === locale)?.label ?? locale
   const themeLabel = { auto: t.themeAuto, dark: t.themeDark, light: t.themeLight }[theme]
   const quiet = THEATRE.every(k => volumes[k] === 0)
   const full = THEATRE.every(k => volumes[k] === DEFAULT_VOLUMES[k])

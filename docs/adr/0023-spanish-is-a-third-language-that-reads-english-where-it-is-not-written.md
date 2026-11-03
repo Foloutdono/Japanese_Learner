@@ -206,3 +206,30 @@ not yet written in Spanish reads English**, never French and never blank.
   the 512 MB budget takes without an overlay read on demand.
 - Every new learner-facing text now carries three languages in the UI table
   and two, plus Spanish where its area is whole, in content.
+
+## Addendum: Spain's Spanish as an interface (plan 303)
+
+The owner asked whether Spain and Latin America should each have their
+own version. Measured, the two differ in about 3% of the screens'
+strings and 2.8% of the course's, and a second full Spanish would double
+every future change and every per-language cost (the generated pool
+included). Decided instead:
+
+- **One Spanish content, Latin-American neutral**, as above: decks,
+  grammar, banks, seeds and the JMdict layer are written once.
+- **Español (España) is an interface locale over it** (`es-ES`):
+  `frontend/src/locales/es-ES` carries only the screen strings Spain
+  says otherwise (añadir for agregar, billete for boleto, ordenador for
+  computadora, vídeo, pulsar, en directo), its figures are Spain's
+  (2.000; 3,5), and a device set to Spain starts on it. The account keeps
+  the locale (`ui_lang`); every request and every cache keys by the
+  language (`es`), so the server and the content do not fork. The
+  picker shows Español (Latinoamérica), under a globe, and Español
+  (España), under Spain's flag; the landing page and the legal pages
+  keep their one Spanish, under the globe.
+- **Search reads Spain's words**: a query that is, or holds, one of
+  Spain's words also asks the Latin-American word the glosses use
+  (`study/search_match.SPAIN_WORDS`), beside itself, in the decks and
+  both pools. Only words Spain alone says this way, whose Latin-American
+  word the glosses hold, and none whose other senses would bring noise.
+

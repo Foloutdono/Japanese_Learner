@@ -444,7 +444,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
     if radical is not None:
         rows, total = kanji_db.by_radical(
             radical, query.sql_text, limit, start, lang, query.sql_kana,
-            query.match, query.field)
+            query.match, query.field, query.alts)
         states = srs.get_user_states(user_id) if rows else {}
         results = []
         for row in rows:
@@ -470,14 +470,14 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
 
     def found(cand):
         return bool(_kanji_deck_matches(cand, lang, level)) or (
-            not levelled and kanji_db.count_matching(cand.sql_text, lang, cand.sql_kana, cand.match, cand.field))
+            not levelled and kanji_db.count_matching(cand.sql_text, lang, cand.sql_kana, cand.match, cand.field, cand.alts))
 
     deck       = _kanji_deck_matches(query, lang, level)
     # The pool's total is needed on every request — it is most of the
     # collection's count — and its ROWS only once a page runs past the
     # deck, so the two are asked for separately (kanji_pool_data.page).
     pool_total = 0 if levelled else kanji_db.count_matching(
-        query.sql_text, lang, query.sql_kana, query.match, query.field)
+        query.sql_text, lang, query.sql_kana, query.match, query.field, query.alts)
 
     if not deck and not pool_total:
         corrected = _corrected(query, _kanji_lexicon, found)
@@ -485,7 +485,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
             query      = corrected
             deck       = _kanji_deck_matches(query, lang, level)
             pool_total = 0 if levelled else kanji_db.count_matching(
-                query.sql_text, lang, query.sql_kana, query.match, query.field)
+                query.sql_text, lang, query.sql_kana, query.match, query.field, query.alts)
 
     deck_total = len(deck)
     deck_page  = deck[start:start + limit]
@@ -497,7 +497,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
     pool_page = (
         kanji_db.page(query.sql_text, limit=limit - len(deck_page),
                       offset=max(0, start - deck_total), kana_forms=query.sql_kana,
-                      match=query.match, field=query.field)
+                      match=query.match, field=query.field, alts=query.alts)
         if pool_total and len(deck_page) < limit else []
     )
 
@@ -760,14 +760,14 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
 
     def found(cand):
         return bool(_deck_matches(cand, lang, level)) or (
-            not levelled and jmdict_db.count_matching(cand.sql_text, cand.sql_kana, cand.match, cand.field))
+            not levelled and jmdict_db.count_matching(cand.sql_text, cand.sql_kana, cand.match, cand.field, cand.alts))
 
     deck = _deck_matches(query, lang, level)
     # The pool's total is needed on every request — it is half the
     # collection's count — and its ROWS only once a page runs past the
     # deck, so the two are asked for separately (vocab_jmdict_data.page).
     pool_total = 0 if levelled else jmdict_db.count_matching(
-        query.sql_text, query.sql_kana, query.match, query.field)
+        query.sql_text, query.sql_kana, query.match, query.field, query.alts)
 
     if not deck and not pool_total:
         corrected = _corrected(query, _vocab_lexicon, found)
@@ -775,7 +775,7 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
             query      = corrected
             deck       = _deck_matches(query, lang, level)
             pool_total = 0 if levelled else jmdict_db.count_matching(
-                query.sql_text, query.sql_kana, query.match, query.field)
+                query.sql_text, query.sql_kana, query.match, query.field, query.alts)
 
     deck_total = len(deck)
     start      = page * limit
@@ -788,7 +788,7 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
     pool_page = (
         jmdict_db.page(query.sql_text, limit=limit - len(deck_page),
                        offset=max(0, start - deck_total), kana_forms=query.sql_kana,
-                       match=query.match, field=query.field)
+                       match=query.match, field=query.field, alts=query.alts)
         if pool_total and len(deck_page) < limit else []
     )
 
