@@ -801,7 +801,9 @@ _SHOP_PARTICLES = frozenset({"格助詞", "係助詞"})
 _VOICED_KANA = frozenset("がぎぐげござじずぜぞだぢづでどばびぶべぼ")
 # What passes through, whose 通っ is 通る (plan 272): 火が通る, 車が通る.
 _PASSING = frozenset({"火", "車", "電車", "バス", "道", "声", "風", "光", "列車", "船", "話", "意見", "法案", "電気",
-                      "電流", "空気", "鼻", "筋", "線路", "トラック", "人", "車両"})
+                      "電流", "空気", "鼻", "筋", "線路", "トラック", "人", "車両",
+                      # (鉄道が通っていない: a line runs there, plan 296)
+                      "鉄道", "道路", "地下鉄", "新幹線", "路線", "水道", "国道"})
 
 
 # What gets through, its が said anywhere in 通っ's clause (plan 296): an
@@ -812,14 +814,34 @@ _GETS_THROUGH = frozenset({"注文", "要求", "要望", "希望", "願い", "�
                            "法案", "意味", "理屈", "主張", "予算", "案", "計画"})
 
 
+# What is passed, an exam (試験に通った, plan 296).
+_EXAMS = ("試験", "テスト", "面接", "審査", "選考", "予選", "オーディション", "検定")
+# What one passes over or through, said of by 通った (さっき車で通った橋, plan
+# 296) -- never a school or a shop, which one attends (通っていた小学校).
+_PASSAGES = frozenset({"橋", "道", "道路", "トンネル", "門", "改札", "交差点", "廊下", "踏切", "路地", "通路", "峠"})
+
+
 def _gets_through(morphemes, i: int) -> bool:
-    """Whether 通っ's own clause marks with が a thing that gets through
-    (_GETS_THROUGH)."""
+    """Whether 通っ's own clause sets a thing that gets through
+    (_GETS_THROUGH) as its subject or topic: 注文が, 注文は, ご注文、."""
+    for k in range(i - 1, 0, -1):
+        u = morphemes[k]
+        if u.pos in ("verb", "adjective", "auxiliary") or (u.pos == "symbol" and u.surface in "。！？!?「」"):
+            return False
+        if ((u.pos == "particle" and u.surface in ("が", "は", "も")) or (u.pos == "symbol" and u.surface in "、，,")) \
+                and morphemes[k - 1].surface in _GETS_THROUGH:
+            return True
+    return False
+
+
+def _sent_somewhere(morphemes, i: int) -> bool:
+    """Whether 放っ's own clause names where it sends something, a noun
+    and に: 敵の城に間者を放っておいた."""
     for k in range(i - 1, 0, -1):
         u = morphemes[k]
         if u.pos in ("verb", "adjective", "auxiliary") or (u.pos == "symbol" and u.surface in "、。！？!?「」"):
             return False
-        if u.pos == "particle" and u.surface == "が" and morphemes[k - 1].surface in _GETS_THROUGH:
+        if u.pos == "particle" and u.surface == "に" and morphemes[k - 1].pos in ("noun", "pronoun"):
             return True
     return False
 
@@ -1154,6 +1176,12 @@ def _opens_of_itself(morphemes: list[Morpheme], tags: list[tuple]) -> None:
             continue
         subjects = [own[q + 1] for q, u in enumerate(own) if u.surface in ("が", "は", "も") and u.pos == "particle"
                     and q + 1 < len(own) and own[q + 1].pos in ("noun", "pronoun")]
+        if not subjects:
+            # (ジャムの瓶のふたが固くて、どうしても開かない: the clause before
+            # names what it says of, plan 296)
+            head = _sentence_head(morphemes, i)
+            subjects = [morphemes[k - 1] for k in range(head + 1, i) if morphemes[k].pos == "particle"
+                        and morphemes[k].surface in ("が", "は", "も") and morphemes[k - 1].surface in _SHUTS]
         if any(u.lemma in _OPENS_OUT or u.surface.endswith(_EVENTS) for u in subjects):
             continue
         if m.cform.startswith("連用") and nxt is not None and nxt.surface in ("た", "だ") \
@@ -1169,7 +1197,11 @@ def _opens_of_itself(morphemes: list[Morpheme], tags: list[tuple]) -> None:
         again = any((u.lemma == "開く" and u.lemma_reading == "あく") or (u.lemma == "開ける" and u.pos == "verb")
                     for u in morphemes[_sentence_head(morphemes, i):i])
         shuts = any(u.surface in _SHUTS for u in subjects)
-        if not (standing or closes or again or shuts):
+        # (開いた口がふさがらない, 開いた窓: what stands open, said of it,
+        # plan 296 -- never 店, 先月開いた店 is founded)
+        held = m.cform.startswith("連用") and nxt is not None and nxt.surface == "た" and i + 2 < len(morphemes) \
+            and morphemes[i + 2].surface in _SHUTS - {"店", "窓口"}
+        if not (standing or closes or again or shuts or held):
             continue
         said = kata_to_hira(m.reading)
         m.reading = "あ" + said[2:]
@@ -1489,12 +1521,18 @@ def _went(morphemes: list[Morpheme]) -> list[Morpheme]:
 
     out = list(morphemes)
     for i, m in enumerate(out):
-        if m.surface == "行っ" and m.lemma == "行く" and i + 2 < len(out) and out[i + 1].surface == "た" \
-                and out[i + 2].surface in _CARRIED_OUT:
+        if i > 0 and out[i - 1].surface in ("うまく", "上手く", "旨く") and m.surface == "行っ":
+            # (交渉は思ったよりうまく行った: うまくいく, "go well", whatever
+            # is the topic, plan 296)
+            if m.lemma == "行う":
+                out[i] = replace(m, lemma="行く", reading="いっ", lemma_reading="いく", kana="イッ", ctype="五段-カ行")
+            continue
+        if m.surface == "行っ" and _a_deed_said_of(out, i):
             # (三年前に行った調査: the clause says what the survey is, one
             # carried out -- nobody goes to a survey, plan 296)
-            out[i] = replace(m, lemma="行う", reading="おこなっ", lemma_reading="おこなう", kana="オコナッ",
-                             ctype="五段-ワア行")
+            if m.lemma == "行く":
+                out[i] = replace(m, lemma="行う", reading="おこなっ", lemma_reading="おこなう", kana="オコナッ",
+                                 ctype="五段-ワア行")
             continue
         if m.surface == "行っ" and m.lemma == "行く" and _a_deed_as_topic(out, i):
             # (返品の手続きは、マイページから行っていただけます: what is
@@ -1530,6 +1568,31 @@ _DEEDS = frozenset({"手続き", "手続", "会議", "式", "試験", "検査", 
 _CARRIED_OUT = frozenset({"調査", "実験", "研究", "検査", "点検", "工事", "処理", "分析", "審査", "評価", "アンケート",
                           "改革", "手術", "治療", "抽選", "作業", "取引", "交渉", "手続き", "訓練", "修理", "測定",
                           "観測", "調整", "検証", "改修", "実施"})
+
+
+# What is given or held, said of by 行った as a deed is (plan 296):
+# 会議で行った説明, 毎年行っている清掃活動.
+_DONE_AS_WELL = frozenset({"説明", "発表", "清掃", "講演", "会見", "撮影"})
+
+
+def _a_deed_said_of(morphemes, i: int) -> bool:
+    """Whether 行っ at morphemes[i], as 行った or 行っている, says of a deed
+    carried out: the nouns it modifies hold one (調査, 清掃活動)."""
+    after = [u.surface for u in morphemes[i + 1:i + 4]]
+    if after[:1] == ["た"]:
+        k = i + 2
+    elif after[:2] == ["て", "いる"]:
+        k = i + 3
+    elif after[:3] == ["て", "い", "た"]:
+        k = i + 4
+    else:
+        return False
+    run = []
+    for u in morphemes[k:]:
+        if u.pos not in ("noun", "suffix"):
+            break
+        run.append(u.surface)
+    return any(w in _CARRIED_OUT or w in _DONE_AS_WELL for w in run)
 
 
 def _a_deed_as_topic(morphemes, i: int) -> bool:
@@ -4774,6 +4837,8 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "通っ" and m.lemma == "通う" and prev is not None
                 and ((prev.surface == "を" and prev.pos == "particle")
                      or (prev.surface == "が" and i >= 2 and morphemes[i - 2].surface in _PASSING)
+                     or (prev.surface == "に" and i >= 2 and morphemes[i - 2].surface.endswith(_EXAMS))
+                     or (nxt is not None and nxt.surface == "た" and after is not None and after.surface in _PASSAGES)
                      or _gets_through(morphemes, i))):
             # 火が通っている, 公園を通って: 通る, とおる -- no 通う, "commute"
             # (and ご注文がキッチンに通っていなかった: an order gets through, plan 296)
@@ -4783,7 +4848,9 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             continue
         if (m.surface == "放っ" and m.lemma == "放つ" and nxt is not None
                 and ((nxt.surface == "て" and after is not None and after.lemma == "置く")
-                     or (nxt.pos == "auxiliary" and nxt.lemma in ("とく", "どく")))):
+                     or (nxt.pos == "auxiliary" and nxt.lemma in ("とく", "どく")))
+                # (敵の城に間者を放っておいた: sent in, 放つ, plan 296)
+                and not _sent_somewhere(morphemes, i)):
             # 放っておく, 放っとけ: 放る, ほうる, "leave alone" -- 放つ, "to
             # fire, to release", takes no おく (矢を放った, plan 296)
             out_m.append(replace(m, lemma="放る", reading="ほうっ", lemma_reading="ほうる", kana="ホウッ",
