@@ -259,7 +259,7 @@ _NOUN_POS_CODES = {"n", "n-suf", "n-pref", "pn", "ctr", "num"}
 
 
 def _short_label(code: str, lang: str) -> str:
-    table = _SHORT_LABELS_FR if lang == "fr" else _SHORT_LABELS_EN
+    table = {"fr": _SHORT_LABELS_FR, "es": _SHORT_LABELS_ES}.get(lang, _SHORT_LABELS_EN)
     if code in table:
         return table[code]
     m = _NEWS_RANK_RE.match(code)
@@ -395,19 +395,164 @@ _TOOLTIPS_FR = {
 _NEWS_TOOLTIP_FR = "classé entre les rangs {lo} et {hi} d'une analyse de fréquence du Mainichi Shimbun (années 1990)"
 
 
+# The same chips and tooltips in Spanish (plan 302), every code the
+# French tables name: a Spanish learner reads neither French nor
+# JMdict's English notes.
+_SHORT_LABELS_ES = {
+    "n": "sust.", "n-suf": "sufijo", "n-pref": "prefijo", "pn": "pron.", "adj-i": "adj. en -i",
+    "adj-ix": "adj. en -i", "adj-na": "adj. en -na", "adj-no": "adj. en -no",
+    "adj-t": "adj. en -taru", "adj-f": "adj.", "adv": "adv.", "adv-to": "adv. con -to",
+    "aux": "aux.", "aux-v": "v. aux.", "aux-adj": "adj. aux.", "conj": "conj.", "cop": "cópula",
+    "ctr": "contador", "exp": "expresión", "int": "interj.", "num": "numeral", "pref": "prefijo",
+    "prt": "partícula", "suf": "sufijo", "v1": "verbo ichidan", "v1-s": "verbo ichidan",
+    "v5aru": "verbo godan", "v5b": "verbo godan", "v5g": "verbo godan", "v5k": "verbo godan",
+    "v5k-s": "verbo godan", "v5m": "verbo godan", "v5n": "verbo godan", "v5r": "verbo godan",
+    "v5r-i": "verbo godan", "v5s": "verbo godan", "v5t": "verbo godan", "v5u": "verbo godan",
+    "v5u-s": "verbo godan", "v5uru": "verbo godan", "vk": "verbo irr. (来る)", "vn": "verbo irr. (ぬ)",
+    "vr": "verbo irr. (り)", "vs": "verbo suru", "vs-c": "verbo suru", "vs-i": "verbo suru",
+    "vs-s": "verbo suru", "vz": "verbo ichidan (ずる)", "vt": "transitivo", "vi": "intransitivo",
+    "uk": "kana", "abbr": "abrev.", "col": "coloq.", "hon": "honorífico", "hum": "humilde",
+    "pol": "cortés", "arch": "arcaico", "obs": "obsoleto", "dated": "anticuado", "rare": "inusual",
+    "on-mim": "onomatopeya", "id": "modismo", "proverb": "proverbio", "derog": "despectivo",
+    "⭐": "⭐", "ichi": "frecuente", "spec": "frecuente", "gai": "préstamo", "comp": "informática",
+    "ling": "lingüística", "med": "medicina", "math": "matemáticas", "physics": "física",
+    "biol": "biología", "chem": "química", "music": "música", "sports": "deporte", "law": "derecho",
+    "econ": "economía", "food": "cocina", "MA": "artes marciales", "Buddh": "budismo",
+    "Shinto": "sintoísmo", "geol": "geología", "astron": "astronomía", "bot": "botánica",
+    "zool": "zoología", "anat": "anatomía", "mil": "militar", "photo": "fotografía",
+    "internet": "internet", "baseb": "béisbol", "go": "go (juego)", "shogi": "shogi",
+    "sumo": "sumo", "politics": "política", "psych": "psicología", "archit": "arquitectura",
+    "art": "arte", "bus": "negocios", "finc": "finanzas",
+}
+_TOOLTIPS_ES = {
+    "abbr": "abreviatura",
+    "adj-f": "sustantivo o verbo usado en posición prenominal (delante del sustantivo que modifica)",
+    "adj-i": "adjetivo en い (keiyōshi)",
+    "adj-ix": "adjetivo en い (keiyōshi) del tipo よい / いい",
+    "adj-na": "adjetivo en な (keiyōdōshi): sustantivo adjetival o cuasiadjetivo",
+    "adj-no": "sustantivo que puede llevar la partícula del genitivo の",
+    "adj-t": "adjetivo en たる",
+    "adv": "adverbio (fukushi)",
+    "adv-to": "adverbio que puede llevar la partícula と",
+    "anat": "término de anatomía",
+    "arch": "arcaico",
+    "archit": "término de arquitectura",
+    "art": "término de arte o de estética",
+    "astron": "término de astronomía",
+    "aux": "auxiliar",
+    "aux-adj": "adjetivo auxiliar",
+    "aux-v": "verbo auxiliar",
+    "baseb": "término de béisbol",
+    "biol": "término de biología",
+    "bot": "término de botánica",
+    "Buddh": "término del budismo",
+    "bus": "término de negocios",
+    "chem": "término de química",
+    "col": "coloquial",
+    "comp": "término de informática",
+    "conj": "conjunción",
+    "cop": "cópula",
+    "ctr": "contador (clasificador numeral)",
+    "dated": "término anticuado",
+    "derog": "despectivo",
+    "econ": "término de economía",
+    "exp": "expresión (locución, oración, etc.)",
+    "finc": "término de finanzas",
+    "food": "término de cocina o de alimentación",
+    "gai": "préstamo habitual de una lengua extranjera (gairaigo・外来語)",
+    "geol": "término de geología",
+    "go": "término del juego de go",
+    "hon": "lenguaje honorífico o respetuoso (sonkeigo)",
+    "hum": "lenguaje humilde (kenjōgo)",
+    "ichi": "incluido en el Ichimango Goi Bunruishū (１万語語彙分類集), léxico clasificado de 10 000 palabras",
+    "id": "expresión idiomática",
+    "int": "interjección (kandōshi)",
+    "internet": "término de internet",
+    "law": "término de derecho",
+    "ling": "término de lingüística",
+    "MA": "término de artes marciales",
+    "math": "término de matemáticas",
+    "med": "término de medicina",
+    "mil": "término militar",
+    "music": "término de música",
+    "n": "sustantivo común (futsū meishi)",
+    "n-pref": "sustantivo usado como prefijo",
+    "n-suf": "sustantivo usado como sufijo",
+    "num": "numeral",
+    "obs": "término obsoleto",
+    "on-mim": "onomatopeya o palabra mimética (giongo, gitaigo)",
+    "photo": "término de fotografía",
+    "physics": "término de física",
+    "pn": "pronombre",
+    "pol": "lenguaje cortés (teineigo)",
+    "politics": "término de política",
+    "pref": "prefijo",
+    "proverb": "proverbio",
+    "prt": "partícula",
+    "psych": "término de psicología",
+    "rare": "término poco usado",
+    "Shinto": "término del sintoísmo",
+    "shogi": "término de shogi",
+    "spec": "señalado como frecuente por los editores de JMdict",
+    "sports": "término deportivo",
+    "suf": "sufijo",
+    "sumo": "término de sumo",
+    "uk": "palabra que suele escribirse solo en kana",
+    "v1": "verbo ichidan",
+    "v1-s": "verbo ichidan, clase especial de くれる",
+    "v5aru": "verbo godan, clase especial en -aru (くださる, なさる…)",
+    "v5b": "verbo godan en -bu",
+    "v5g": "verbo godan en -gu",
+    "v5k": "verbo godan en -ku",
+    "v5k-s": "verbo godan, clase especial de いく / ゆく",
+    "v5m": "verbo godan en -mu",
+    "v5n": "verbo godan en -nu",
+    "v5r": "verbo godan en -ru",
+    "v5r-i": "verbo godan en -ru (verbo irregular)",
+    "v5s": "verbo godan en -su",
+    "v5t": "verbo godan en -tsu",
+    "v5u": "verbo godan en -u",
+    "v5u-s": "verbo godan en -u (clase especial)",
+    "v5uru": "verbo godan, antigua clase en -uru (forma antigua de える)",
+    "vi": "verbo intransitivo",
+    "vk": "verbo くる (来る), clase especial",
+    "vn": "verbo irregular en -nu",
+    "vr": "verbo irregular en -ru, cuya forma llana termina en -ri",
+    "vs": "sustantivo o participio que se usa con el auxiliar する",
+    "vs-c": "verbo en -su, antecesor del する moderno",
+    "vs-i": "verbo en する (する forma parte de la palabra)",
+    "vs-s": "verbo en する, clase especial",
+    "vt": "verbo transitivo",
+    "vz": "verbo ichidan en ずる (variante de los verbos en じる)",
+    "zool": "término de zoología",
+    "⭐": "término de alta prioridad (palabra común)",
+}
+_NEWS_TOOLTIP_ES = "situado entre los puestos {lo} y {hi} de un análisis de frecuencia del Mainichi Shimbun (década de 1990)"
+
+
 def _tooltip(code: str, info: dict, lang: str) -> str:
     english = info.get("notes") or code
-    if lang != "fr":
+    tables = {"fr": (_TOOLTIPS_FR, _NEWS_TOOLTIP_FR), "es": (_TOOLTIPS_ES, _NEWS_TOOLTIP_ES)}
+    if lang not in tables:
         return english
-    if code in _TOOLTIPS_FR:
-        return _TOOLTIPS_FR[code]
+    tips, news = tables[lang]
+    if code in tips:
+        return tips[code]
     m = _NEWS_RANK_RE.match(code)
     if m:
         n = int(m.group(1))
         lo = 1 if n == 1 else (n - 1) * 1000
-        sep = "\u202f"  # French thousands: a narrow no-break space
-        return _NEWS_TOOLTIP_FR.format(lo=f"{lo:,}".replace(",", sep), hi=f"{n * 1000:,}".replace(",", sep))
+        return news.format(lo=_figure(lo, lang), hi=_figure(n * 1000, lang))
     return english
+
+
+def _figure(value: int, lang: str) -> str:
+    """A rank as each language writes it: French puts a narrow no-break
+    space between thousands (12 000), Spanish the same but never in four
+    digits (2000, the RAE's rule)."""
+    if lang == "es" and value < 10_000:
+        return str(value)
+    return f"{value:,}".replace(",", "\u202f")
 
 
 def _build_tag(code: str, is_term_tag: bool, lang: str) -> dict:
@@ -1438,8 +1583,8 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     all_senses = _find_senses(kanji, kana)
     if not all_senses:
         examples = _written(kanji, kana, set(), None, meaning_hint, _MAX_EXAMPLES)
-        if examples and lang == "fr":
-            _in_french([], examples)
+        if examples and lang != "en":
+            _in_layer([], examples, lang)
         return {"tags": [], "senses": [], "examples": examples}
 
     senses = all_senses[:_MAX_SENSES]
@@ -1510,8 +1655,8 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     # it with the word rather than under a sense.
     examples += _written(kanji, kana, seen_jp, None, meaning_hint, _MAX_EXAMPLES - len(examples))
 
-    if lang == "fr":
-        _in_french(senses_out, examples)
+    if lang != "en":
+        _in_layer(senses_out, examples, lang)
 
     return {
         "tags": _collect_word_tags(senses, lang),
@@ -1520,29 +1665,32 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     }
 
 
-def _in_french(senses_out: list[dict], examples: list[dict]) -> None:
-    """The French layer over an entry (content/jmdict_fr.py, plan 215),
-    in place: a sense's glossary where its English line has French, and
-    each example's translation as `tr` -- the field ExampleSentence
-    already prefers to `en`. What has no French keeps its English, and
-    says so in `glossary_lang` / `tr_lang`, so the page can mark it
-    rather than pass it off as French. `sense_glossary` and `en` stay
-    English: they are what the primary-sense scoring and the practice
-    screens read."""
+def _in_layer(senses_out: list[dict], examples: list[dict], lang: str) -> None:
+    """The learner's layer over an entry (content/jmdict_fr.py: French
+    since plan 215, Spanish since plan 302), in place: a sense's
+    glossary where its English line has a line in `lang`, and each
+    example's translation as `tr` -- the field ExampleSentence already
+    prefers to `en`. What has none keeps its English, and says so in
+    `glossary_lang` / `tr_lang`, so the page can mark it rather than
+    pass it off as the learner's language. `sense_glossary` and `en`
+    stay English: they are what the primary-sense scoring and the
+    practice screens read."""
     from content import jmdict_fr
-    glosses = jmdict_fr.senses(s["glossary"] for s in senses_out)
+    if lang not in jmdict_fr.LANGS:
+        return
+    glosses = jmdict_fr.senses((s["glossary"] for s in senses_out), lang)
     for sense in senses_out:
-        fr = glosses.get(sense["glossary"])
-        if fr:
-            sense["glossary"] = fr
-            sense["glossary_lang"] = "fr"
+        line = glosses.get(sense["glossary"])
+        if line:
+            sense["glossary"] = line
+            sense["glossary_lang"] = lang
         else:
             sense["glossary_lang"] = "en"
-    sentences = jmdict_fr.examples(ex["jp"] for ex in examples)
+    sentences = jmdict_fr.examples((ex["jp"] for ex in examples), lang)
     for ex in examples:
-        fr = sentences.get(ex["jp"])
-        if fr:
-            ex["tr"] = fr
-            ex["tr_lang"] = "fr"
+        tr = sentences.get(ex["jp"])
+        if tr:
+            ex["tr"] = tr
+            ex["tr_lang"] = lang
         else:
             ex["tr_lang"] = "en"

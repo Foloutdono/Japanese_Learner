@@ -187,7 +187,7 @@ def translate_block(user_id: str, lines: list[dict], index: int, lang_name: str,
 
 # The languages a learner reads the app in: a video's track is looked
 # for in each, so a learner who switches finds theirs too.
-TRACK_LANGS = ("fr", "en")
+TRACK_LANGS = ("fr", "en", "es")
 
 # The share of a translated line's time that must fall inside one cue
 # for it to be that cue's.

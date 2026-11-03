@@ -43,7 +43,7 @@ import re
 from functools import lru_cache
 
 from content.grammar_points_data import (
-    find, get_grammar_points, gloss, grammar_to_id, localise,
+    find, get_grammar_points, gloss, grammar_to_id, localise, texts,
 )
 from content.grammar_sentences_data import translation
 from study.furigana import align_sentence, mark_spans
@@ -69,13 +69,13 @@ GUESS_COUNT = 4
 # already is, each drawn as a station plate with its plain-language caption
 # (a place is what gets a pair, DESIGN.md). A scene's `place` is one key.
 SCENE_PLACES: dict[str, dict] = {
-    "窓口":   {"reading": "まどぐち",     "en": "Ticket window",           "fr": "Guichet"},
-    "売店":   {"reading": "ばいてん",     "en": "Kiosk",                   "fr": "Kiosque"},
-    "ホーム": {"reading": None,          "en": "Platform",                "fr": "Quai"},
-    "車内":   {"reading": "しゃない",     "en": "On the train",            "fr": "Dans le train"},
-    "改札":   {"reading": "かいさつ",     "en": "Ticket gates",            "fr": "Portillons"},
-    "待合室": {"reading": "まちあいしつ", "en": "Waiting room",            "fr": "Salle d'attente"},
-    "駅前":   {"reading": "えきまえ",     "en": "In front of the station", "fr": "Devant la gare"},
+    "窓口":   {"reading": "まどぐち",     "en": "Ticket window",           "fr": "Guichet",         "es": "Ventanilla"},
+    "売店":   {"reading": "ばいてん",     "en": "Kiosk",                   "fr": "Kiosque",         "es": "Quiosco"},
+    "ホーム": {"reading": None,          "en": "Platform",                "fr": "Quai",            "es": "Andén"},
+    "車内":   {"reading": "しゃない",     "en": "On the train",            "fr": "Dans le train",   "es": "En el tren"},
+    "改札":   {"reading": "かいさつ",     "en": "Ticket gates",            "fr": "Portillons",      "es": "Torniquetes"},
+    "待合室": {"reading": "まちあいしつ", "en": "Waiting room",            "fr": "Salle d'attente", "es": "Sala de espera"},
+    "駅前":   {"reading": "えきまえ",     "en": "In front of the station", "fr": "Devant la gare",  "es": "Frente a la estación"},
 }
 # The two voices of a scene: the other person, whom the scene names
 # (`them`: the agent, the vendor, a traveller), and the learner.
@@ -113,7 +113,7 @@ def _look(level: str, entry: dict, lang: str) -> list[dict]:
             continue
         out.append({
             "jp": jp,
-            "tr": translation({"en": example.get("en", ""), "fr": example.get("fr", "")}, lang),
+            "tr": translation(example, lang),
             "furigana": _parts(jp, spans),
             "spans": [list(s) for s in spans],
         })
@@ -170,7 +170,7 @@ def _guesses(level: str, entry: dict, look: list[dict], lang: str) -> list[dict]
             "correct": False,
             "pattern": r_entry["pattern"],
             "furigana": pattern_furigana(r_entry["pattern"], r_entry.get("reading")),
-            "answer": localise({"en": rival["en"], "fr": rival["fr"]}, lang),
+            "answer": localise(texts(rival), lang),
         })
         if len(options) == GUESS_COUNT:
             break
@@ -214,7 +214,7 @@ def _rival(entry: dict, lang: str) -> dict | None:
         return {
             "pattern": r_entry["pattern"],
             "furigana": pattern_furigana(r_entry["pattern"], r_entry.get("reading")),
-            "text": localise({"en": rival["en"], "fr": rival["fr"]}, lang),
+            "text": localise(texts(rival), lang),
         }
     return None
 
@@ -266,7 +266,7 @@ def _spoken(line: dict, pattern: str, level: str, lang: str) -> dict:
     return {
         "who": line["who"],
         "jp": line["jp"],
-        "tr": localise({"en": line["en"], "fr": line["fr"]}, lang),
+        "tr": localise(texts(line), lang),
         "furigana": _lit(line["jp"], pattern, level),
     }
 
@@ -335,7 +335,7 @@ _RANK = {level: n for n, level in enumerate(("N5", "N4", "N3", "N2", "N1"))}
 def _compare_line(entry: dict, rival: str, lang: str) -> str | None:
     for r in entry.get("compare", []):
         if r["pattern"] == rival:
-            return localise({"en": r["en"], "fr": r["fr"]}, lang)
+            return localise(texts(r), lang)
     return None
 
 
@@ -530,7 +530,7 @@ def _tour(level: str, pattern: str, lang: str) -> dict | None:
         "rev": TOUR_REV,
         "look": look,
         "guesses": guesses,
-        "rule": localise({"en": rule["en"], "fr": rule["fr"]}, lang) if rule else None,
+        "rule": localise(texts(rule), lang) if rule else None,
         "structure": structure_text(entry, lang),
         "structure_furigana": structure_furigana(entry, lang),
         "chain": _chain(entry, look),

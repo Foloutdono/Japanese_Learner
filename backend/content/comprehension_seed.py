@@ -25,17 +25,18 @@ accumulated -- are read.
 
 ── Shape ─────────────────────────────────────────────────────
 One JSON list per level, one object per exercise, the Japanese written
-ONCE and every learner-facing string carried as an {en, fr} pair:
+ONCE and every learner-facing string carried in each of LANGS, {en, fr, es}
+(Spanish since plan 302):
 
     {"id": "n5-01", "level": "N5", "title": "...",
      "grammar": ["<pattern>", ...],           the catalogue points it uses
      "text": "...",                           220-280 characters
-     "questions": [{"type", "question": {en, fr}, "options": {en, fr}, "correct",
+     "questions": [{"type", "question": {en, fr, es}, "options": {en, fr, es}, "correct",
                     "at": [i, ...],                the breakdown sentence(s) it rests on
-                    "why": {en, fr}}],             one line on why the right option is
+                    "why": {en, fr, es}}],             one line on why the right option is
                                                    (plan 301b)
-     "breakdown": [{"jp", "translation": {en, fr}, "note": {en, fr},
-                    "words": [{"surface", "meaning": {en, fr}}]}]}
+     "breakdown": [{"jp", "translation": {en, fr, es}, "note": {en, fr, es},
+                    "words": [{"surface", "meaning": {en, fr, es}}]}]}
 
 render() flattens one language out of that into exactly the dict
 routes/reading._call_llm_comprehension returns for a model answer --
@@ -57,7 +58,7 @@ a model answer must pass (routes/reading._check_comprehension):
     sentence's word list reproduces the sentence
   * the paper has exactly COMPREHENSION_SPECS[level] questions, four
     options each, with every question type represented
-  * both languages are present on every string
+  * every language of LANGS is present on every string
   * every question names the sentence(s) its right option rests on
     (`at`, indices into `breakdown`) and says why in one line (`why`),
     quoting the text verbatim, never an option by its letter (plan 301b)
@@ -82,9 +83,11 @@ _BASE_DIR = os.path.join(os.path.dirname(__file__), "comprehension")
 LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 
 # The languages the app's UI ships (frontend/src/locales), and so the
-# ones every seed carries. routes/reading.LANG_NAMES accepts more; a
-# learner on another language is generated for, as before.
-LANGS: tuple[str, ...] = ("en", "fr")
+# ones every seed carries: Spanish since plan 302, so a Spanish learner's
+# first exercises are the seeds too, not model calls. routes/reading.
+# LANG_NAMES accepts more; a learner on another language is generated
+# for, as before.
+LANGS: tuple[str, ...] = ("en", "fr", "es")
 
 # The smallest number of exercises each level's file may carry. A first
 # request at a level needs one; thirty (plan 259, from ten in plan 258,

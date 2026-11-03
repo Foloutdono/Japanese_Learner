@@ -146,10 +146,15 @@ export default function VocabRun({ session }) {
       updateCurrent(cur => ({ ...cur, lang: targetLang }))
       return
     }
-    const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
-    const unique = [...new Set(words.filter(Boolean))]
-    Promise.all(unique.map(word =>
-      apiJson(`/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
+    // Each word with its kana: a written form several cards share (後 is
+    // あと and うしろ) is answered by the card itself, not the form's map.
+    const kanaOf = new Map()
+    for (const entry of [cardToTranslate, ...(cardToTranslate.hints?.indice_1 ?? [])]) {
+      const word = wordForm(entry)
+      if (word && !kanaOf.has(word)) kanaOf.set(word, entry.kana || '')
+    }
+    Promise.all([...kanaOf].map(([word, kana]) =>
+      apiJson(`/api/translation/vocab?word=${encodeURIComponent(word)}&kana=${encodeURIComponent(kana)}&lang=${targetLang}`, session)
         .then(data => [word, data.translation || ''])
     )).then(entries => {
       // The learner may have moved on while this was out: the card in

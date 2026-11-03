@@ -105,7 +105,10 @@ _QUOTE = re.compile(r"「([^」]+)」")
 _BY_LETTER = re.compile(
     r"\b(option|answer|choice|réponse|choix|proposition)s?\s+[A-D1-4]\b|\([A-D]\)|\b[A-D]\)"
     r"|\b(first|second|third|fourth|last) (option|answer|choice)"
-    r"|(premi[eè]re?|deuxi[eè]me|troisi[eè]me|quatri[eè]me|derni[eè]re?) (option|réponse|proposition)",
+    r"|(premi[eè]re?|deuxi[eè]me|troisi[eè]me|quatri[eè]me|derni[eè]re?) (option|réponse|proposition)"
+    # A Spanish option's letter is a capital: «en respuesta a» is no option.
+    r"|\b(opci[oó]n|respuesta)(es)?\s+(?-i:[A-D1-4])\b"
+    r"|\b(primer[ao]?|segund[ao]|tercer[ao]?|cuart[ao]|[uú]ltim[ao]) (opci[oó]n|respuesta)",
     re.I,
 )
 
@@ -117,9 +120,9 @@ def _bare(s: str) -> str:
 @pytest.mark.parametrize("entry", seed.entries(), ids=lambda e: e["id"])
 def test_every_question_points_at_its_sentence_and_says_why(entry):
     """Plan 301b: a missed question opens on the sentence(s) its right
-    option rests on (`at`) and one line on why (`why`), in both
-    languages. The line quotes the text verbatim, from those sentences,
-    the two languages the same Japanese; it never names an option by
+    option rests on (`at`) and one line on why (`why`), in every
+    language (Spanish since plan 302). The line quotes the text verbatim,
+    from those sentences, every language the same Japanese; it never names an option by
     its letter or place, since the options are shuffled for every
     learner; and a question that quotes the text points at where."""
     text = _bare(entry["text"])
@@ -139,7 +142,8 @@ def test_every_question_points_at_its_sentence_and_says_why(entry):
             for frag in quoted[lang]:
                 assert frag in text, f"Q{n} why.{lang} quotes 「{frag}」, not in the text"
                 assert frag in span, f"Q{n} why.{lang} quotes 「{frag}」 outside its sentences {at}"
-        assert quoted["en"] == quoted["fr"], f"Q{n}: the two languages quote different Japanese"
+        for lang in seed.LANGS[1:]:
+            assert quoted[lang] == quoted["en"], f"Q{n}: why.{lang} quotes other Japanese than the English"
         if q["type"] in ("vocabulary", "grammar"):
             frags = [f for f in (_bare(x) for x in _QUOTE.findall(q["question"]["en"])) if len(f) >= 2 and f in text]
             assert not frags or any(f in span for f in frags), f"Q{n} quotes {frags} outside its sentences {at}"

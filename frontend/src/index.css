@@ -25415,12 +25415,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .theme-mini__line { height: var(--sp-1); margin: var(--sp-2) var(--sp-3) 0; border-radius: var(--r-pill); background: currentcolor; opacity: 0.2; }
 .theme-mini__line--short { width: 50%; }
-.lang-picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+/* The languages one per row (plan 302, the owner's pick B): the name,
+   then its own two words on the same line, so a third language never
+   stands alone under two and a phone never breaks the words in two. */
+.lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); container-type: inline-size; }
 .lang-pick {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-1);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -25438,9 +25441,23 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   box-shadow: inset 0 0 0 1px var(--accent2);
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
-.lang-pick__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
-.lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); }
+.lang-pick__name { display: inline-flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; white-space: nowrap; }
+/* A language's flag (plan 302, the owner's choice): a country's own
+   colours, at the size of the name it stands before, and nowhere else
+   (DESIGN.md, "The language flags"). The ring keeps a white stripe
+   from melting into a light ground. */
+.lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
+.lang-pick__sample { min-width: 0; overflow: hidden; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
+/* Español (Latinoamérica) and its two words need about 335px, as
+   measured here: the row a 390px phone gives them (plan 303). The words
+   never break onto a second line (nowrap, above): where a font sets the
+   row a little wider, they end in an ellipsis. Narrower (375, 360, 320)
+   they go, since the name already says the language, and the name keeps
+   its one line. */
+@container (max-width: 334px) {
+  .lang-pick__sample { display: none; }
+}
 
 /* ── Notation: the three bars themselves (plan 139) ──
    Each scale is offered as the rating bar it is (RatingBar's specimen),
@@ -36755,15 +36772,13 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .desk-settings__page--two .slip--ways > .slip__label { grid-column: 1 / -1; }
   .desk-settings__page--two .slip--ways > .slip__way { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* What a row's taller card lends the shorter (plan 145): the two
-     languages stand one over the other down the theme screens' height,
+     languages stand one over another down the theme screens' height,
      each an equal share of it, rather than two short cards at the top
      of a card twice their height. */
   .desk-settings__page--two .lang-picks {
     flex: 1;
-    grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: 1fr;
   }
-  .desk-settings__page--two .lang-pick { justify-content: center; }
   /* The mixer across the page (SoundPage, plan 145): its names in one
      column as wide as the longest, each on one line -- the phone's 132px
      broke VOLUME PRINCIPAL in two -- and every track starting where the

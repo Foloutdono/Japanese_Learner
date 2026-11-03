@@ -82,8 +82,8 @@ MAX_BATCH = 25
 # daily queue must be indistinguishable from the same card met in its own
 # section, or the queue becomes a second, subtly different app.
 from routes.kana import _build_kana_card              # noqa: E402
-from routes.kanji import _build_kanji_card, FR_MAP as KANJI_FR_MAP     # noqa: E402
-from routes.vocab import _build_vocab_card, FR_MAP as VOCAB_FR_MAP     # noqa: E402
+from routes.kanji import _build_kanji_card, GLOSSES as KANJI_GLOSSES     # noqa: E402
+from routes.vocab import _build_vocab_card, GLOSSES as VOCAB_GLOSSES     # noqa: E402
 from translations import get_meaning                  # noqa: E402
 from routes.grammar import _build_grammar_card, ladder_positions, mark_tutorials   # noqa: E402
 from study.glyph_tour import mark_glyph_tours                  # noqa: E402
@@ -1024,12 +1024,12 @@ def _settled_word(source: str, raw_id: str, lang: str) -> dict | None:
         kanji = entry.get("kanji") or ""
         kana = (entry.get("kana") or "").split("/")[0].strip()
         jp, reading = (kanji, kana) if kanji else (kana, "")
-        meaning = get_meaning(entry, lang, VOCAB_FR_MAP)
+        meaning = get_meaning(entry, lang, VOCAB_GLOSSES)
     elif source == KANJI:
         jp = entry.get("kanji") or ""
         # "ド・ト・つち": the character's readings, the first three.
         reading = "・".join((entry.get("kana") or "").split("・")[:3])
-        meaning = get_meaning(entry, lang, KANJI_FR_MAP)
+        meaning = get_meaning(entry, lang, KANJI_GLOSSES)
     else:
         return None
     if not jp or not meaning:

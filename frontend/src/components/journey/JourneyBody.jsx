@@ -9,6 +9,7 @@ import { addDays, journeyPositions, nextStop } from '../../domain/goalMath'
 import { MAX_PACE } from '../onboarding/paces'
 import { GhostTrack } from './GhostTrack'
 import { journeyStations } from './stations'
+import { intlLocale } from '../../lib/locale'
 
 // ── 運行状況 — the pass's back, wherever it is drawn ─────────────────
 // The body of the status sheet (components/journey/StatusSheet.jsx):
@@ -48,7 +49,7 @@ function Cmp({ label, value, unit, promised, delta }) {
 export function JourneyBody({ status, model, now, volumes, summary, session, onLeave = () => {}, resume = true }) {
   const { t, lang } = useLang()
 
-  const loc = lang === 'fr' ? 'fr' : 'en'
+  const loc = intlLocale(lang, 'en')
   // The year rides on every date now. Without it a projection that
   // crossed a year end printed "3 Jan" beside a promised "15 Feb" and
   // read as EARLY, while the sheet's own word said late.
@@ -130,7 +131,7 @@ export function JourneyMoves({ model, session, onLeave = () => {}, resume = true
   const navigate = useNavigate()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
-  const fmt = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'short', year: 'numeric' })
+  const fmt = new Intl.DateTimeFormat(intlLocale(lang, 'en'), { day: 'numeric', month: 'short', year: 'numeric' })
   const behind = model.status === 'delayed' || model.status === 'slightlyBehind'
   const canRecover = behind && model.recovery != null && model.recovery <= MAX_PACE
 

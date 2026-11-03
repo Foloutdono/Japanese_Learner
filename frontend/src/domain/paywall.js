@@ -1,4 +1,5 @@
 import { PASS_DECKS, PASS_CARDS } from './credits'
+import { intlLocale } from '../lib/locale'
 
 // ── 定期券 — the offer, as the client knows it ─────────────────
 // The pass, shown before it can be bought. This is deliberately a
@@ -149,7 +150,7 @@ export function yearlySaving(plan) {
  */
 export function formatPrice(amount, lang) {
   const whole = Number.isInteger(cents(amount))
-  return new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-US', {
+  return new Intl.NumberFormat(intlLocale(lang), {
     style: 'currency',
     currency: CURRENCY,
     minimumFractionDigits: whole ? 0 : 2,
@@ -159,7 +160,7 @@ export function formatPrice(amount, lang) {
 
 /** A whole percent in the learner's language: "44 %" / "44%". */
 export function formatPercent(n, lang) {
-  return new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-US', {
+  return new Intl.NumberFormat(intlLocale(lang), {
     style: 'percent',
     maximumFractionDigits: 0,
   }).format(n / 100)

@@ -8,7 +8,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 from study.modes import (
     VOCAB, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_FURIGANA, WORD_READING,
     Mode, eligible_for, require_mode, resolve_for_source,
@@ -59,7 +59,7 @@ def _stage_demotion(prev_stage: str | None, new_stage: str | None) -> str | None
         return None
     return STAGE_DEMOTIONS.get((prev_stage, new_stage))
 
-FR_MAP = VOCAB_FR
+GLOSSES = VOCAB_GLOSSES
 MAX_BATCH = 25
 
 
@@ -106,7 +106,7 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
     # how a meaning is resolved keeps that right for the prompt AND for
     # the distractors, which a post-hoc correction of the payload could
     # not.
-    resolve_meaning = meaning_of or (lambda e: get_meaning(e, lang, FR_MAP))
+    resolve_meaning = meaning_of or (lambda e: get_meaning(e, lang, GLOSSES))
     meaning = resolve_meaning(word)
 
     payload = {
@@ -314,7 +314,7 @@ def get_vocab_review_cards(level: str, lang: str = "fr", user_id: str = Depends(
             "card_id": vocab_to_id(word, level),
             "kanji":   word.get("kanji", ""),
             "kana":    word.get("kana", ""),
-            "meaning": get_meaning(word, lang, FR_MAP),
+            "meaning": get_meaning(word, lang, GLOSSES),
             "stage":   stage,
         })
 

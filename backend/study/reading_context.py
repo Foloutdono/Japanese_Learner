@@ -402,18 +402,18 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
 # reading and what they measure. One letter alone is a unit only after
 # a figure (600W, 2L); read without one it is a size or a letter.
 LATIN_UNITS = {
-    "W": ("わっと", "watt(s)", "watt(s)"), "kW": ("きろわっと", "kilowatt(s)", "kilowatt(s)"),
-    "ml": ("みりりっとる", "millilitre(s)", "millilitre(s)"), "mL": ("みりりっとる", "millilitre(s)", "millilitre(s)"),
-    "L": ("りっとる", "litre(s)", "litre(s)"), "l": ("りっとる", "litre(s)", "litre(s)"),
-    "cc": ("しーしー", "cc, cubic centimetre(s)", "cm³, centimètre(s) cube(s)"),
-    "mm": ("みり", "millimetre(s)", "millimètre(s)"), "cm": ("せんち", "centimetre(s)", "centimètre(s)"),
-    "m": ("めーとる", "metre(s)", "mètre(s)"), "km": ("きろ", "kilometre(s)", "kilomètre(s)"),
-    "mg": ("みりぐらむ", "milligram(s)", "milligramme(s)"), "g": ("ぐらむ", "gram(s)", "gramme(s)"),
-    "kg": ("きろ", "kilogram(s)", "kilogramme(s)"), "kcal": ("きろかろりー", "kilocalorie(s)", "kilocalorie(s)"),
-    "KB": ("きろばいと", "kilobyte(s)", "kilo-octet(s)"), "MB": ("めがばいと", "megabyte(s)", "mégaoctet(s)"),
-    "GB": ("ぎがばいと", "gigabyte(s)", "gigaoctet(s)"), "TB": ("てらばいと", "terabyte(s)", "téraoctet(s)"),
-    "Hz": ("へるつ", "hertz", "hertz"), "GHz": ("ぎがへるつ", "gigahertz", "gigahertz"),
-    "mAh": ("みりあんぺああわー", "milliampere-hour(s)", "milliampère-heure(s)"),
+    "W": ("わっと", "watt(s)", "watt(s)", "vatio(s)"), "kW": ("きろわっと", "kilowatt(s)", "kilowatt(s)", "kilovatio(s)"),
+    "ml": ("みりりっとる", "millilitre(s)", "millilitre(s)", "mililitro(s)"), "mL": ("みりりっとる", "millilitre(s)", "millilitre(s)", "mililitro(s)"),
+    "L": ("りっとる", "litre(s)", "litre(s)", "litro(s)"), "l": ("りっとる", "litre(s)", "litre(s)", "litro(s)"),
+    "cc": ("しーしー", "cc, cubic centimetre(s)", "cm³, centimètre(s) cube(s)", "cc, centímetro(s) cúbico(s)"),
+    "mm": ("みり", "millimetre(s)", "millimètre(s)", "milímetro(s)"), "cm": ("せんち", "centimetre(s)", "centimètre(s)", "centímetro(s)"),
+    "m": ("めーとる", "metre(s)", "mètre(s)", "metro(s)"), "km": ("きろ", "kilometre(s)", "kilomètre(s)", "kilómetro(s)"),
+    "mg": ("みりぐらむ", "milligram(s)", "milligramme(s)", "miligramo(s)"), "g": ("ぐらむ", "gram(s)", "gramme(s)", "gramo(s)"),
+    "kg": ("きろ", "kilogram(s)", "kilogramme(s)", "kilogramo(s)"), "kcal": ("きろかろりー", "kilocalorie(s)", "kilocalorie(s)", "kilocaloría(s)"),
+    "KB": ("きろばいと", "kilobyte(s)", "kilo-octet(s)", "kilobyte(s)"), "MB": ("めがばいと", "megabyte(s)", "mégaoctet(s)", "megabyte(s)"),
+    "GB": ("ぎがばいと", "gigabyte(s)", "gigaoctet(s)", "gigabyte(s)"), "TB": ("てらばいと", "terabyte(s)", "téraoctet(s)", "terabyte(s)"),
+    "Hz": ("へるつ", "hertz", "hertz", "hercio(s)"), "GHz": ("ぎがへるつ", "gigahertz", "gigahertz", "gigahercio(s)"),
+    "mAh": ("みりあんぺああわー", "milliampere-hour(s)", "milliampère-heure(s)", "miliamperio(s)-hora"),
 }
 
 
