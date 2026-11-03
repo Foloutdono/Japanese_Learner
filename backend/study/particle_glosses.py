@@ -163,6 +163,8 @@ _GLOSSES = {
                    "fr": "(en fin de phrase) explique, ou demande une explication : のです familier (〜んです)"},
     "に_gozaru": {"en": "(with ござる) is: でございます as it was said of old, very polite",
                  "fr": "(avec ござる) est : でございます à l'ancienne, très poli"},
+    "で_not": {"en": "(the copula) で before ない: is not, isn't (written: 本でない, it is not a book)",
+               "fr": "(la copule) で devant ない : n'est pas (écrit : 本でない, ce n'est pas un livre)"},
     "で_copula": {"en": "is ..., and: です／だ joined to what follows (its て form), often giving the reason",
                   "fr": "est …, et : です／だ relié à la suite (sa forme en て), souvent pour donner la raison"},
     "は_after_particle": {"en": "(after a particle) makes that part the topic, or sets it against others: 仕事では, "
@@ -1100,6 +1102,11 @@ def gloss(morphemes, i: int) -> dict | None:
     elif m.pos == "auxiliary" and m.surface == "に" and i + 1 < len(morphemes) \
             and morphemes[i + 1].surface.startswith("ござ"):
         key = "に_gozaru"                   # 一大事にございます
+    elif m.pos == "auxiliary" and m.surface == "で" and m.lemma == "だ" and i > 0 and i + 1 < len(morphemes) \
+            and morphemes[i + 1].lemma in ("無い", "ない") and morphemes[i + 1].pos in ("adjective", "auxiliary") \
+            and not (i + 2 < len(morphemes) and morphemes[i + 2].lemma in ("為る", "する")):
+        # (never なく + する, 無くす cut in two: どちらでなくされたか, "lost")
+        key = "で_not"                      # 本でない, 町のものでない, 学生でなく (plan 296)
     elif m.pos == "auxiliary" and m.surface == "で" and m.lemma == "だ" and m.cform.startswith("連用形") \
             and i > 0 and (i + 1 >= len(morphemes) or morphemes[i + 1].surface in ("、", "，", ",", "\u3000", " ")
                            # (before a filler said on it: 反抗期でさ、, plan 272)

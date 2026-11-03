@@ -4515,3 +4515,13 @@ class MonoInItsConstructionTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertIsNone(card_of(sentence, surface))
         self.assertIsNotNone(card_of("この箱の中のものを出して。", "もの"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TheCopulaDeniedGlossTests(unittest.TestCase):
+    """Plan 296: the copula's で before ない says "is not"."""
+
+    def test_its_gloss(self) -> None:
+        for sentence in ("これは本でない。", "彼は学生でなく、先生だ。", "町のものでないことは明らかだ。"):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(gloss_of(sentence, "で").startswith("(the copula) で before ない"))
