@@ -4500,3 +4500,17 @@ class FromAFeelingGlossTests(unittest.TestCase):
     def test_its_gloss(self) -> None:
         self.assertTrue(gloss_of("焦りから、簡単な計算をまちがえてしまった。", "から").startswith("out of"))
         self.assertTrue(gloss_of("皆さんあっての私です。心から感謝します。", "から").startswith("心から"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class MonoInItsConstructionTests(unittest.TestCase):
+    """Plan 296: the もの of 〜ものの, 〜もので, 〜ものだ is the
+    construction's, no 物 "thing"; a もの said of a thing keeps it."""
+
+    def test_its_card(self) -> None:
+        for sentence, surface in (("先週、ダイエットを＿＿＿ものの、三日でやめてしまった。", "もの"),
+                                  ("ちょっと用があるもんで、先に帰るね。", "もん"),
+                                  ("大学は出たものの、まだ仕事が見つからない。", "もの")):
+            with self.subTest(sentence=sentence):
+                self.assertIsNone(card_of(sentence, surface))
+        self.assertIsNotNone(card_of("この箱の中のものを出して。", "もの"))

@@ -3483,3 +3483,28 @@ class AFromBySourceTests(unittest.TestCase):
                                 ("飛行機から見ると、小さな丘陵は平地のように見える。", "〜から見ると")):
             with self.subTest(sentence=sentence):
                 self.assertIn(point, found_in(sentence))
+
+
+class MonosConstructionsTests(unittest.TestCase):
+    """Plan 296: もの's constructions by what the sentence says --
+    〜もので no copula denied (町のものでない), 〜たものだ a past recalled
+    (よく, 昔, ころ), 〜ものの after a blank, もんで 〜もので said short."""
+
+    def test_no_construction(self) -> None:
+        for sentence, point in (
+                ("地震の起きた町のものでないことは明らかだった。", "〜もので"),
+                ("昨年、大人の事故が増えたことを受けて、市が決めたものだ。", "〜ものだ")):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(point, found_in(sentence))
+
+    def test_the_construction(self) -> None:
+        for sentence, point in (("先週、ダイエットを＿＿＿ものの、三日でやめてしまった。", "〜ものの"),
+                                ("ちょっと用があるもんで、先に帰るね。", "〜もので"),
+                                ("昔はよく川で遊んだものだ。", "〜ものだ"),
+                                ("子どものころ、よくこの川で泳いだものだ。", "〜ものだ"),
+                                ("人の話は最後まで聞くものだ。", "〜ものだ"),
+                                ("雨が降ったもので、遅れました。", "〜もので"),
+                                ("初めてのもので、よく分かりません。", "〜もので"),
+                                ("大学は出たものの、まだ仕事が見つからない。", "〜ものの")):
+            with self.subTest(sentence=sentence):
+                self.assertIn(point, found_in(sentence))

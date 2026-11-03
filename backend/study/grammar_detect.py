@@ -367,6 +367,8 @@ _SHORT_FORMS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
     "〜に伴って": (("に伴って", ("に伴い", "にともない")), ("にともなって", ("にともない",))),
     "〜わりに": (("わりに", ("割に", "わりには", "割には")),),
     "〜ものだ": (("ものだ", ("もんだ", "もんじゃ", "ものじゃ", "もんです")),),
+    # (用があるもんで、先に帰るね: もので said short, plan 296)
+    "〜もので": (("もので", ("もんで",)),),
     "〜はずがない": (("はずがない", ("はずがなかろう", "はずはなかろう", "はずもない", "はずがありません")),),
     "〜くなる／〜になる": (("くなる", ("くなれ",)), ("になる", ("になれ",))),
     # (ご + a する-noun, as the lesson's own 足元にご注意ください; and the
@@ -3380,6 +3382,18 @@ def _not_even_one_spans(tokens):
     return out
 
 
+def _blank_although_spans(tokens):
+    """〜ものの after a blank, a comma after it (plan 296): ダイエットを
+    ＿＿＿ものの、三日でやめた -- the blank holds the verb, and もの + の
+    before a comma can be nothing else."""
+    out = []
+    for i in range(1, len(tokens) - 2):
+        if tokens[i - 1].surface.startswith("＿") and tokens[i].surface == "もの" and tokens[i + 1].surface == "の" \
+                and tokens[i + 2].surface in _COMMAS:
+            out.append((tokens[i].start, tokens[i + 1].end))
+    return out
+
+
 def _although_spans(tokens):
     """〜ながらも with its も dropped (plan 272): after a state -- ある,
     an adjective -- ながら is "although", never two actions at once:
@@ -6097,6 +6111,35 @@ def _grounds_a_finding(tokens, e: int) -> bool:
     return True
 
 
+# What frames a past recalled, before 〜たものだ (plan 296): 子どものころ、
+# よく泳いだものだ.
+_RECALLED = frozenset({"よく", "良く", "昔", "ころ", "頃", "時代", "かつて", "当時", "毎日", "毎晩", "毎年", "しばしば",
+                       "何度", "いつも", "以前"})
+
+
+def _a_past_recalled(tokens, s: int) -> bool:
+    """Whether the sentence before `s` frames a past it recalls -- よく,
+    昔, ころ, 時代, or a habit's condition (夏になると, 雨の日には, 会うたびに)
+    -- and sets no thing as its topic for もの to name (この写真は,
+    それは: the photo is what was taken, nothing recalled)."""
+    head = _sentence_start(tokens, _index_at(tokens, s) or 0)
+    before = [t for t in tokens[head:] if t.start < s]
+    for k, t in enumerate(before):
+        nxt = before[k + 1] if k + 1 < len(before) else None
+        if t.surface in ("これ", "それ", "あれ") and nxt is not None and nxt.surface in ("は", "こそ"):
+            return False
+        if t.surface in ("この", "その", "あの") and any(u.surface in ("は", "こそ") and u.pos == "particle"
+                                                         for u in before[k + 1:k + 4]):
+            return False
+    if any(t.surface in _RECALLED or t.lemma in _RECALLED for t in before):
+        return True
+    return any((t.surface == "と" and k > 0 and before[k - 1].lemma in ("成る", "なる"))
+               or (t.surface == "たび")
+               or (t.surface == "に" and k + 1 < len(before) and before[k + 1].surface == "は" and k > 0
+                   and before[k - 1].surface in ("日", "時", "とき", "朝", "夜", "夏", "冬", "春", "秋", "週末"))
+               for k, t in enumerate(before))
+
+
 def _toru_itself(tokens, k: int) -> bool:
     """Whether the とって after the に at tokens[k] is 取る itself --
     例にとって, 本を手にとって, "take as an example", "take in hand" --
@@ -7036,7 +7079,9 @@ def _pattern_refusals():
         "〜のは〜だ": _noha_da_refused,
         # 〜もので is "because"; もので + は／も is the copula's negative of
         # もの (笑うものではない, というものでもない), never a reason (plan 188)
-        "〜もので": lambda t, s, e, g: _followed_by(t, e, "は", "も"),
+        # (町のものでない: the copula denied, "is not the town's", no
+        # reason, plan 296)
+        "〜もので": lambda t, s, e, g: _followed_by(t, e, "は", "も", "ない", "なかっ", "なく", "無い"),
         "〜くする／〜にする": _acts_on_nothing,
         # しかたがない, しかたありません: "it can't be helped", no way of doing
         "〜方": lambda t, s, e, g: (k := _tok_ending(t, e)) is not None and t[k].lemma == "仕方" and (
@@ -7201,7 +7246,11 @@ def _pattern_refusals():
         # no "should" nor "used to", plan 296)
         "〜ものだ": lambda t, s, e, g: _after_copula_na(t, s, e, g) or (
             (p := _prev_word(t, s)) is not None and p.lemma == "言う" and (q := _prev_word(t, p.start)) is not None
-            and q.surface == "と"),
+            and q.surface == "と")
+            # (市が決めたものだ: "it is what the city decided" -- a past
+            # recalled has its frame, よく, 昔, ころ, 時代, plan 296)
+            or ((p := _prev_word(t, s)) is not None and p.lemma == "た" and p.pos == "auxiliary"
+                and not _a_past_recalled(t, s)),
         "〜じゃないか": lambda t, s, e, g: _followed_by(t, e, "って", "と"),
         # (and never after a noun: また明日な, "see you tomorrow", plan 272)
         "〜な（禁止）": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
@@ -9055,7 +9104,7 @@ _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans, _with
                            _the_moment_spans, _risk_spans, _settled_to_be_spans, _not_even_one_spans,
                            _likeness_spans, _too_much_spans, _humbly_said_spans, _formally_asked_spans,
                            _asked_politely_ne, _asked_politely_yo,
-                           _although_spans, _regardless_spans,
+                           _although_spans, _regardless_spans, _blank_although_spans,
                            _ask_for_spans, _nothing_spans, _rather_than_spans, _quoted_said_spans,
                            _because_of_spans, _must_neba_spans, _indefinite_spans, _until_spans,
                            # (plan 272: the lessons write the が beside its
@@ -9107,6 +9156,7 @@ _CLASS_RULES = {
     "〜に行きます": _purpose_spans,
     "〜て、〜て": _te_link_spans,
     "から〜まで": _from_until_spans,
+    "〜ものの": _blank_although_spans,
     "い形容詞／な形容詞": _adjective_spans,
     "受身形 〜られる": _passive_spans,
     "可能形 〜(ら)れる": _potential_spans,

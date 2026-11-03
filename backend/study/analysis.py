@@ -1332,6 +1332,10 @@ _POINT_HOMOGRAPHS = {
     "〜かける": (frozenset({"掛ける"}), None),
     "〜と相まって": (frozenset({"待つ", "相"}), None),
     "〜にかたくない": (frozenset({"固い", "堅い", "硬い"}), ("難い", "かたい")),
+    # (出たものの, 用があるもんで, 遊んだものだ: もの is the construction's,
+    # no 物 "thing", plan 296)
+    **{pattern: (frozenset({"物"}), None) for pattern in ("〜ものの", "〜もので", "〜ものだから", "〜ものだ", "〜ものを",
+                                                         "〜ものなら", "〜ものか")},
 }
 
 # The points that are a word's own forms, not a construction around it.
@@ -2311,7 +2315,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # and an adverb's sense by what it says of (ここ数年 "these past", まずない
 # the N3 先ず's "hardly", 別にはらう 別 and に, "separately"); and から
 # read by what governs it (焦りから a cause, ことから始める no 〜ことから,
-# 窓から見るともなく no 〜から見ると).
+# 窓から見るともなく no 〜から見ると); and もの's constructions by what the
+# sentence says (町のものでない, 市が決めたものだ, ＿＿＿ものの、, もんで).
 LOCAL_REV = 33
 
 
