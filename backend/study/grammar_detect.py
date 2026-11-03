@@ -369,6 +369,7 @@ _SHORT_FORMS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
     "〜ものだ": (("ものだ", ("もんだ", "もんじゃ", "ものじゃ", "もんです")),),
     # (用があるもんで、先に帰るね: もので said short, plan 296)
     "〜もので": (("もので", ("もんで",)),),
+    "〜ものだから": (("ものだから", ("もんだから",)),),
     "〜はずがない": (("はずがない", ("はずがなかろう", "はずはなかろう", "はずもない", "はずがありません")),),
     "〜くなる／〜になる": (("くなる", ("くなれ",)), ("になる", ("になれ",))),
     # (ご + a する-noun, as the lesson's own 足元にご注意ください; and the
@@ -6119,18 +6120,10 @@ _RECALLED = frozenset({"よく", "良く", "昔", "ころ", "頃", "時代", "�
 
 def _a_past_recalled(tokens, s: int) -> bool:
     """Whether the sentence before `s` frames a past it recalls -- よく,
-    昔, ころ, 時代, or a habit's condition (夏になると, 雨の日には, 会うたびに)
-    -- and sets no thing as its topic for もの to name (この写真は,
-    それは: the photo is what was taken, nothing recalled)."""
+    昔, ころ, 時代, かつて, 定期的に, or a habit's condition (夏になると,
+    雨の日には, 会うたびに)."""
     head = _sentence_start(tokens, _index_at(tokens, s) or 0)
     before = [t for t in tokens[head:] if t.start < s]
-    for k, t in enumerate(before):
-        nxt = before[k + 1] if k + 1 < len(before) else None
-        if t.surface in ("これ", "それ", "あれ") and nxt is not None and nxt.surface in ("は", "こそ"):
-            return False
-        if t.surface in ("この", "その", "あの") and any(u.surface in ("は", "こそ") and u.pos == "particle"
-                                                         for u in before[k + 1:k + 4]):
-            return False
     if any(t.surface in _RECALLED or t.lemma in _RECALLED for t in before):
         return True
     return any((t.surface == "と" and k > 0 and before[k - 1].lemma in ("成る", "なる"))
@@ -6138,6 +6131,84 @@ def _a_past_recalled(tokens, s: int) -> bool:
                or (t.surface == "に" and k + 1 < len(before) and before[k + 1].surface == "は" and k > 0
                    and before[k - 1].surface in ("日", "時", "とき", "朝", "夜", "夏", "冬", "春", "秋", "週末"))
                for k, t in enumerate(before))
+
+
+def _mono_names_a_thing(tokens, s: int) -> bool:
+    """Whether the もの of 〜たものだ at `s` is a thing its sentence names
+    (plan 296): a thing set as the topic (この歌は…伝わったものだ, これは…
+    欲しかったものだ, 取締役会は…目的としたものだ) -- unless a past recalled
+    frames a verb with its own object (この油田はかつて…石油を産出したも
+    のだ) -- or, with no topic, a subject marked by が whose verb takes no
+    object of its own (市が決めたものだ). 困ったものだ, みんなで集まった
+    ものだ, 定期的に私をたずねてきたものだった keep "used to" and its kin."""
+    k = _index_at(tokens, s)
+    if k is None:
+        return False
+    head = _sentence_start(tokens, k)
+    before = tokens[head:k]
+    topic = None
+    for j, t in enumerate(before):
+        nxt = before[j + 1] if j + 1 < len(before) else None
+        if nxt is not None and nxt.pos == "particle" and nxt.surface in ("は", "こそ") and _a_thing_named(before, j):
+            topic = j
+            break
+    clause = len(before)
+    while clause > 0 and not (before[clause - 1].pos == "symbol" or (before[clause - 1].pos == "particle"
+                                                                      and before[clause - 1].conjunctive)):
+        clause -= 1
+    has_object = any(t.pos == "particle" and t.surface == "を" for t in before[max(clause, topic or 0):])
+    if topic is not None:
+        return not (_a_past_recalled(tokens, s) and has_object)
+    return not has_object and any(t.pos == "particle" and t.surface == "が" and j > 0 and not
+                                  _a_person_by_gloss(before[j - 1]) for j, t in enumerate(before) if j >= clause)
+
+
+# What a topic may be that is no thing もの could name: a time (休みの日は).
+_TIMES = frozenset({"日", "時", "とき", "朝", "夜", "昼", "夏", "冬", "春", "秋", "週末", "昔", "ころ", "頃", "年",
+                    "今", "今日", "毎日", "以前", "当時", "かつて", "うち", "内", "間", "あいだ", "時代"})
+
+
+def _a_thing_named(tokens, j: int) -> bool:
+    """Whether tokens[j], before は or こそ, names a thing: これ, それ, あれ,
+    a noun after この, その, あの, or a noun that is no person and no time."""
+    t = tokens[j]
+    if t.surface in ("これ", "それ", "あれ"):
+        return True
+    if t.pos not in ("noun", "suffix") or t.surface in _TIMES or t.proper or t.name_kind:
+        return False
+    return not (_a_person_by_gloss(t) or t.surface in _DOERS or t.surface.endswith(("さん", "様", "たち", "達")))
+
+
+
+# What asks what kind of thing, before もの (plan 296).
+_WHAT_KIND = frozenset({"どういう", "どのような", "どんな", "こういう", "そういう", "ああいう", "こんな", "そんな",
+                        "あんな"})
+# What knows or forgets, after an embedded question (plan 296).
+_KNOWING = frozenset({"忘れる", "分かる", "わかる", "判る", "知る", "覚える", "調べる", "聞く", "尋ねる", "思い出す"})
+
+
+def _a_noun_after(tokens, e: int) -> bool:
+    """Whether a noun follows at `e`: 言い方, よさ, たとえ, 一つ, 妥当性 --
+    a verb's stem or an adjective's made a noun (言い + 方, よ + さ)."""
+    k = _index_from(tokens, e)
+    if k >= len(tokens):
+        return False
+    n = tokens[k]
+    if n.pos in ("noun", "pronoun") or n.surface in ("たとえ", "例え"):
+        return True                     # (もののたとえ: "a figure of speech", no "even if")
+    nxt = tokens[k + 1] if k + 1 < len(tokens) else None
+    return nxt is not None and nxt.pos == "suffix" and n.pos in ("verb", "adjective") and nxt.surface in (
+        "方", "かた", "さ", "み")
+
+
+def _asks_what_kind(tokens, s: int) -> bool:
+    """Whether what stands before the もの at `s` asks what kind of thing
+    it is: どういう, どのような, どんな (cut どの + よう + な or not)."""
+    k = _index_at(tokens, s)
+    if k is None:
+        return False
+    before = "".join(t.surface for t in tokens[max(0, k - 3):k])
+    return before.endswith(tuple(_WHAT_KIND))
 
 
 def _toru_itself(tokens, k: int) -> bool:
@@ -7247,10 +7318,10 @@ def _pattern_refusals():
         "〜ものだ": lambda t, s, e, g: _after_copula_na(t, s, e, g) or (
             (p := _prev_word(t, s)) is not None and p.lemma == "言う" and (q := _prev_word(t, p.start)) is not None
             and q.surface == "と")
-            # (市が決めたものだ: "it is what the city decided" -- a past
-            # recalled has its frame, よく, 昔, ころ, 時代, plan 296)
+            # (この歌は…伝わったものだ, 市が決めたものだ: もの is the thing
+            # its sentence names, no "used to", plan 296)
             or ((p := _prev_word(t, s)) is not None and p.lemma == "た" and p.pos == "auxiliary"
-                and not _a_past_recalled(t, s)),
+                and _mono_names_a_thing(t, s)),
         "〜じゃないか": lambda t, s, e, g: _followed_by(t, e, "って", "と"),
         # (and never after a noun: また明日な, "see you tomorrow", plan 272)
         "〜な（禁止）": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and (
@@ -7578,6 +7649,17 @@ _REFUSALS = {
     # "seen from the window", its lesson's "seen from".)
     "〜から見ると": lambda t, s, e, g: _followed_by(t, e, "も") and (n := _next_word(t, e)) is not None
         and (a := _next_word(t, n.end)) is not None and a.lemma in ("無い", "ない"),
+    # (慇懃無礼なものの言い方, もののたとえ, ものの一つ: もの and the の
+    # of a noun after it, no "although" -- which a comma or the end
+    # follows, plan 296)
+    "〜ものの": lambda t, s, e, g: _a_noun_after(t, e),
+    # (どういうものか, どのようなものか: "what kind of thing"; どこでとった
+    # ものか忘れた, ものかどうか: a question inside the sentence; …による
+    # ものかと存じます: a guess -- never "as if I would!", plan 296)
+    "〜ものか": lambda t, s, e, g: _asks_what_kind(t, s)
+        or _followed_by(t, e, "どう", "を")
+        or ((n := _next_word(t, e)) is not None and (n.lemma in _KNOWING or (
+            n.surface == "と" and (a := _next_word(t, n.end)) is not None and a.lemma in ("存じる", "存ずる")))),
     # (例にとって, 本を手にとって: 取る itself, "take as an example",
     # "take in hand", plan 296)
     "〜にとって": lambda t, s, e, g: (k := _index_at(t, s)) is not None and t[k].surface == "に"
