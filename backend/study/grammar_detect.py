@@ -6812,7 +6812,10 @@ _NI_MAKES_AN_ADVERB = frozenset({"互い", "お互い", "共", "一緒", "同時
 # What says how a deed is done, never what a thing is made (plan 296):
 # そうじだけはまめにしている, 勉強を真面目にする.
 _MANNERS = frozenset({"まめ", "忠実", "真面目", "まじめ", "丁寧", "ていねい", "熱心", "真剣", "一生懸命", "いっしょうけんめい",
-                      "地道", "着実", "慎重", "丹念", "念入り", "懸命", "必死"})
+                      "地道", "着実", "慎重", "丹念", "念入り", "懸命", "必死",
+                      # (片付けを適当にしたら: done sloppily -- "made
+                      # suitable" is said 適当な温度にする)
+                      "適当", "てきとう", "いい加減", "大雑把", "おおざっぱ"})
 
 
 # What a street is said of, never what one follows (plan 296): 人が行き
@@ -7334,7 +7337,7 @@ def _pattern_refusals():
         # (片付けを適当にしたら: a manner and する, no one's point of view;
         # 切符にしたらいかがですか: what one picks, plan 296)
         "〜にしたら": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None and (
-            p.surface in _MANNERS or p.surface in ("適当", "いい加減") or p.adjectival
+            p.surface in _MANNERS or p.adjectival
             or p.pos in ("verb", "adjective", "auxiliary")))
             or ((n := _next_word(t, e)) is not None and n.surface in ("いかが", "どう", "いい")),
         # しかたがない, しかたありません: "it can't be helped", no way of doing
