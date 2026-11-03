@@ -90,7 +90,7 @@ describe('the landing page', () => {
       expect(html).toContain('hreflang="x-default"')
     })
 
-    // Plan 291: three languages, so the phone's header lists them all in
+    // Plan 302: three languages, so the phone's header lists them all in
     // a menu (the desktop's switch never fitted there), each beside its
     // flag; the one read is lit and links nowhere.
     it('offers every language in the header, each beside its flag', () => {

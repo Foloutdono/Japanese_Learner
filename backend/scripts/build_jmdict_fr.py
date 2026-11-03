@@ -21,7 +21,7 @@ rebuild:
 glosses in French (the theme cards' meaning_fr) to pool_lines.json before
 building, without overwriting a line already there.
 
-`--lang es` does all of it for the Spanish layer (plan 291):
+`--lang es` does all of it for the Spanish layer (plan 302):
 datas/vocab/jmdict_es.sqlite3 from datas/vocab/es_source/, the same three
 tables with an `es` column for `fr`.
 

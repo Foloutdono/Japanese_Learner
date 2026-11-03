@@ -4,7 +4,7 @@ its four levels and in order inside each level, easiest first.
 
 One line a word: `漢字 かな | english | français | español`, or
 `かな | english | français | español` for a word written in kana; every
-gloss is the sense the word has in the theme (plan 291 gave every line
+gloss is the sense the word has in the theme (plan 302 gave every line
 its Spanish, which the build refuses a line without). scripts/build_theme_db.py resolves
 every line to the card the app already has for that word — the deck's
 first, else the JMdict pool's — and writes datas/vocab/theme_words.json,

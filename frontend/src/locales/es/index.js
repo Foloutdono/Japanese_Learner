@@ -947,6 +947,8 @@ const stats = {
   destMovesTo:        date => `pasa al ${date} al ritmo de hoy`,
   destReprint:        'Reimprimir',
   compNote: (you, right) => `Tú · ${you} — correcto · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Ya leído',
   examPart: (n) => `Parte ${n}`,
   serviceName: {
     local:   'Local',
@@ -1689,7 +1691,14 @@ const dictionary = {
   bldRight: 'Correcto.',
   bldClose: 'Casi.',
   bldWrong: 'No del todo.',
-  bldOther: (said, register) => `La frase dice ${said}: lo mismo, en registro ${register === 'plain' ? 'llano' : 'cortés'}.`,
+  // How the sentence says the hole when another form was taken as right:
+  // its register (plan 241), or では in full or contracted (plan 295).
+  bldOther: (said, register) => `La frase dice ${said}: lo mismo, ${({
+    plain: 'en registro llano',
+    polite: 'en registro cortés',
+    full: 'con では completo',
+    contracted: 'con では contraído, como se dice al hablar',
+  })[register] ?? 'en registro cortés'}.`,
   mapAria: 'La línea del punto',
   mapTutorial: 'Tutorial',
   mapNow: 'ahora',
@@ -2579,7 +2588,7 @@ const boarding = {
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
   // Settings › Notifications (plan 156). The nudge's title and body are
   // written from what the gate will hold at the learner's hour.
-  nudgeTitle: (time, n) => `Tu tren de las ${time} · ${n} ${n === 1 ? 'tarjeta' : 'tarjetas'}`,
+  nudgeTitle: (time, n) => `${time} · ${n} ${n === 1 ? 'tarjeta' : 'tarjetas'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'Cerca de un minuto' : `Unos ${m} min`),
   nudgeNew: (n) => `${n} ${n === 1 ? 'nueva' : 'nuevas'}`,
   // The reminders' channel, as Android's settings name it (lib/native.js).
@@ -2724,6 +2733,12 @@ const boarding = {
   brdPasswordMismatch: 'Las dos contraseñas no coinciden.',
   brdAccountSentNote: (email) => `Casi: confirma ${email} desde el enlace que acabamos de enviarte.`,
   brdRemindAt: (time) => `Recuérdamelo a las **${time}**`,
+  // Plan 294: the reminder, a step after the card (in the app alone).
+  brdRemindQ: '¿Te avisamos de tu tren?',
+  brdRemindHint: 'Todos los días, a la hora de tu pase.',
+  brdRemindYes: (time) => `Sí, a las ${time}`,
+  brdRemindLater: 'Ahora no',
+  brdRemindNow: 'ahora',
   brdAgendaAdd: 'Agregar a mi calendario',
   brdAgendaTitle: 'Tsuji · tu tren de japonés',
   brdAgendaBody: (min) => `${min} min de japonés, cada día.`,
@@ -2767,9 +2782,6 @@ const ride = {
   // Plan 133. On a phone: the known card is not graded until its entry
   // has been opened from the 🔍 and closed again.
   rideKnownDict: 'Cada tarjeta tiene su entrada de diccionario. Toca 🔍 para abrir esta y luego ciérrala.',
-  ridePlateCap: 'El pase',
-  ridePlateBody: 'Estos modos de práctica vienen con el pase.',
-  ridePlateOpen: 'Por ahora son gratis para todos.',
 }
 
 const guide = {
@@ -2787,7 +2799,7 @@ const guide = {
   guideTabBar: 'Tus cinco pestañas: Aprender, Práctica, Hoy, Diccionario y tu perfil.',
   guideTodayDuels: 'Duelos: dos minutos contra un amigo o un viajero de tu nivel. Un número dorado indica que te espera un desafío.',
   guideLearnPlate: 'Una línea. Tócala para abrirla. El indicador muestra lo pendiente de hoy.',
-  guideLearnStops: 'Dónde estás en la línea, y las paradas a tu alrededor.',
+  guideLearnStops: 'Tu parada en la línea, y cuánto ya conoces de ella.',
   guideLearnShelf: 'Tus propios mazos y una biblioteca de mazos compartidos por otros estudiantes.',
   guidePracticePass: 'Estos modos vienen con el pase.',
   // Practice's plates (plan 254): a platform, its foot (your level,
@@ -2893,6 +2905,13 @@ const onboarding = {
   practicePct: pct => `${pct}%`,
   practiceAllPapers: 'Todas las pruebas',
   practiceAllScenes: 'Todas las escenas',
+  // The phone's Learn gate (plan 291): the sheet a line raises, a page
+  // a line -- the stop and the mode chosen before departing -- and the
+  // shelf of decks under the lines.
+  learnSheet: 'Líneas',
+  learnStop: 'Parada',
+  learnMode: 'Modo',
+  learnAllDecks: n => `Todos mis mazos (${n})`,
   // ── A practice station, on the desk (plan 159) ────────────────
   // The source as a switch at the list's head (the JLPT grades, word
   // frequency, your own cards), then the open stop's page: what the

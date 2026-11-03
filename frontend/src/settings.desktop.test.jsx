@@ -330,7 +330,7 @@ describe('settings on the desk', () => {
   })
 
   // The themes beside the language (plan 139), the languages one over
-  // the other down the screens' height (plan 145; three since plan 291):
+  // the other down the screens' height (plan 145; three since plan 302):
   // the row's two cards end level, and neither holds a short stack of
   // cards at its top.
   it('stands the languages down the theme screens\' height', async () => {

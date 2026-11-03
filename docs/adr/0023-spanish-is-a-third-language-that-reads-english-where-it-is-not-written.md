@@ -1,6 +1,6 @@
 # 0023 — Spanish is a third language, and reads English where it is not written yet
 
-- **Status**: accepted (plan 291). Extends the French end to end of plan 215;
+- **Status**: accepted (plan 302). Extends the French end to end of plan 215;
   [0016](0016-grammar-is-taught-not-glossed.md) still stands.
 - **Date**: 2026-10-30
 
@@ -146,7 +146,7 @@ not yet written in Spanish reads English**, never French and never blank.
   `localise(pair, lang)`; a number or a date is `intlLocale(lang)`
   (`lib/locale.js`). Each already falls back to English.
 - **Latin-American neutral Spanish, tú** (the owner's choice at the
-  review that closed plan 291): what an international app writes for
+  review that closed plan 302): what an international app writes for
   Latin America, which Spain also reads without trouble. Where the two
   name an everyday thing differently, the Latin-American word, alone
   (boleto, auto, celular, computadora, jugo, estacionar, departamento,
@@ -202,7 +202,7 @@ not yet written in Spanish reads English**, never French and never blank.
 - The catalogue is held in memory. Loaded, its five files held 19.7 MB
   before Spanish, 20.9 MB with the glosses and the lessons, and 24.6 MB
   with the tours and Choisir questions too (measured with tracemalloc,
-  plan 291): 4.9 MB for the whole catalogue in a third language, which
+  plan 302): 4.9 MB for the whole catalogue in a third language, which
   the 512 MB budget takes without an overlay read on demand.
 - Every new learner-facing text now carries three languages in the UI table
   and two, plus Spanish where its area is whole, in content.

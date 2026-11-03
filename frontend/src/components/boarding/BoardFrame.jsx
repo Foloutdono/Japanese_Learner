@@ -24,6 +24,17 @@ export function BoardHead({ index, total, onBack }) {
   // the first on the left edge and the last on the right (the rail
   // has total-1 legs), and the filled run ends under your stop.
   const at = n => (total > 1 ? ((n - 1) / (total - 1)) * 100 : 0)
+  // No total: a screen off the line (the reminder, plan 294) keeps the
+  // way back and draws no track.
+  if (!total) {
+    return (
+      <div className="brd__head">
+        <button type="button" className="brd__back" onClick={() => { playClick(); onBack() }} aria-label={t.back}>
+          <BackChevron />
+        </button>
+      </div>
+    )
+  }
   return (
     <div className="brd__head">
       {onBack

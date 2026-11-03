@@ -1,9 +1,9 @@
 """
 The seed pool: hand-written reading-comprehension exercises, one file
 per JLPT level, in both of the app's languages (plan 111; six per level
-since plan 230, ten since plan 258, thirty since plan 259, and sixty at
-N5 since plan 274, drafted and reviewed with
-scripts/comprehension_seed_report).
+since plan 230, ten since plan 258, thirty since plan 259, sixty at N5
+since plan 274, and sixty at N4 and eighty at N5 since plan 298,
+drafted and reviewed with scripts/comprehension_seed_report).
 
 ── Why this exists ───────────────────────────────────────────
 理解 (reading comprehension, routes/reading.py) is the most expensive
@@ -25,14 +25,18 @@ accumulated -- are read.
 
 ── Shape ─────────────────────────────────────────────────────
 One JSON list per level, one object per exercise, the Japanese written
-ONCE and every learner-facing string carried as an {en, fr} pair:
+ONCE and every learner-facing string carried in each of LANGS, {en, fr, es}
+(Spanish since plan 302):
 
     {"id": "n5-01", "level": "N5", "title": "...",
      "grammar": ["<pattern>", ...],           the catalogue points it uses
      "text": "...",                           220-280 characters
-     "questions": [{"type", "question": {en, fr}, "options": {en, fr}, "correct"}],
-     "breakdown": [{"jp", "translation": {en, fr}, "note": {en, fr},
-                    "words": [{"surface", "meaning": {en, fr}}]}]}
+     "questions": [{"type", "question": {en, fr, es}, "options": {en, fr, es}, "correct",
+                    "at": [i, ...],                the breakdown sentence(s) it rests on
+                    "why": {en, fr, es}}],             one line on why the right option is
+                                                   (plan 301b)
+     "breakdown": [{"jp", "translation": {en, fr, es}, "note": {en, fr, es},
+                    "words": [{"surface", "meaning": {en, fr, es}}]}]}
 
 render() flattens one language out of that into exactly the dict
 routes/reading._call_llm_comprehension returns for a model answer --
@@ -54,7 +58,10 @@ a model answer must pass (routes/reading._check_comprehension):
     sentence's word list reproduces the sentence
   * the paper has exactly COMPREHENSION_SPECS[level] questions, four
     options each, with every question type represented
-  * both languages are present on every string
+  * every language of LANGS is present on every string
+  * every question names the sentence(s) its right option rests on
+    (`at`, indices into `breakdown`) and says why in one line (`why`),
+    quoting the text verbatim, never an option by its letter (plan 301b)
 
 NOT one of the rules: which slot the right answer is written in. Every
 exercise's options are re-ordered per serving, seeds and model answers
@@ -76,7 +83,7 @@ _BASE_DIR = os.path.join(os.path.dirname(__file__), "comprehension")
 LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 
 # The languages the app's UI ships (frontend/src/locales), and so the
-# ones every seed carries: Spanish since plan 291, so a Spanish learner's
+# ones every seed carries: Spanish since plan 302, so a Spanish learner's
 # first exercises are the seeds too, not model calls. routes/reading.
 # LANG_NAMES accepts more; a learner on another language is generated
 # for, as before.
@@ -102,7 +109,7 @@ def _load(level: str, object_hook=None) -> list[dict]:
 def entries() -> tuple[dict, ...]:
     """Every seed exercise, every level, in file order, read from the
     files at each call. Never cache it: parsed, the seeds weigh some
-    86 KB each in dicts and strings (15 MB at 180 seeds), which a
+    85 KB each in dicts and strings (20 MB at 230 seeds), which a
     process that kept them would carry for its whole life inside the
     backend's 512 MB. Only the pool's upsert at import (rows) needs
     them whole; what a request reads of them is index()."""
@@ -128,10 +135,10 @@ def index() -> dict[str, tuple[dict, ...]]:
     and grammar, and the questions of each level's first seed besides,
     which the station's card asks the first of. The breakdowns and the
     other questions, most of a seed's weight, stay in the files: at
-    180 seeds this keeps 311 KB of the 15 MB entries() reads.
+    230 seeds this keeps 343 KB of the 20 MB entries() reads.
 
     Cut as the files are parsed, never out of by_level(): read whole,
-    the seeds grow the process by their 15 MB, and the strings kept,
+    the seeds grow the process by their 20 MB, and the strings kept,
     spread through all of it, hold that memory from going back, so the
     process stays as large as if it had kept everything."""
     out: dict[str, list[dict]] = {level: [] for level in LEVELS}
@@ -210,13 +217,20 @@ def render(entry: dict, lang: str) -> dict:
 
 
 def render_question(question: dict, lang: str) -> dict:
-    """One of a seed's questions in one language, as render() puts it."""
-    return {
+    """One of a seed's questions in one language, as render() puts it:
+    with `at` and `why` where the seed has them (plan 301b), as a model
+    answer carries them."""
+    out = {
         "type": question["type"],
         "question": _pick(question["question"], lang),
         "options": [_pick(o, lang) for o in _pick_list(question["options"], lang)],
         "correct": question["correct"],
     }
+    if question.get("at"):
+        out["at"] = list(question["at"])
+    if question.get("why"):
+        out["why"] = _pick(question["why"], lang)
+    return out
 
 
 def _pick_list(options, lang: str) -> list:

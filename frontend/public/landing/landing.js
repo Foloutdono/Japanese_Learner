@@ -107,7 +107,7 @@ const top = $('[data-top]')
 const topBoard = $('[data-top-board]')
 let ticking = false
 
-// The phone's language menu (plan 291) opens as a <details> on its own;
+// The phone's language menu (plan 302) opens as a <details> on its own;
 // a tap outside it, or Escape, closes it again.
 const langMenu = $('[data-lmenu]')
 if (langMenu) {

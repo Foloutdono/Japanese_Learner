@@ -186,7 +186,7 @@ def build(check: bool = False) -> tuple[dict[str, list[dict]], list[str]]:
                 surfaces.add(surface)
                 glosses.add(head)
                 # Every word has its Spanish in the theme's own sense
-                # (plan 291), as it has its English and its French: a
+                # (plan 302), as it has its English and its French: a
                 # deck card's gloss is one sense of the word, the theme's
                 # line the one it has there (丸 a shape, not "round").
                 if not es:

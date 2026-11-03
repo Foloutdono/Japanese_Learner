@@ -249,7 +249,7 @@ class AnalyzeLocalTests(unittest.TestCase):
     def test_a_point_carries_its_gloss_in_both_languages(self) -> None:
         """Plan 095: a chip says what its rule does without the sheet
         being opened. The gloss is the catalogue's {en, fr} pair (and its
-        Spanish since plan 291) rather than one language, because this
+        Spanish since plan 302) rather than one language, because this
         result is pure and shared across every learner -- the screen picks
         the language (frontend grammarGloss.js), and the copy a token
         carries is the same one, so a particle's row can print it too."""
@@ -465,6 +465,7 @@ class AttachUserStateTests(unittest.TestCase):
         def states(state):
             return {("u:" + raw_id, "vocab.flashcard.f2b"): {
                 "state": state, "total_reviews": 0, "correct_reviews": 0,
+                "answers": 0, "correct_answers": 0,
                 "due": False, "interval_days": None, "next_review": None,
             }}
 

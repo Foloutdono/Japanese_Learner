@@ -67,7 +67,7 @@ describe('locale parity (fr <-> en)', () => {
     expect(mismatched, `type mismatch: ${mismatched.join(', ')}`).toEqual([])
   })
 
-  // Spanish (plan 291) is held to the same parity: a key the Spanish
+  // Spanish (plan 302) is held to the same parity: a key the Spanish
   // table lacks renders nothing, exactly the silent blank above.
   it('has every English key present in Spanish, and no other', () => {
     const missing = Object.keys(en).filter(k => !(k in es))

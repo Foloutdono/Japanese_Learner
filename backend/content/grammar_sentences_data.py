@@ -40,7 +40,7 @@ def has_sentences(level: str, pattern: str) -> bool:
 
 def translation(example: dict, lang: str) -> str:
     """The sentence's translation in the learner's language, English
-    where that language's is not written yet (Spanish, plan 291)."""
+    where that language's is not written yet (Spanish, plan 302)."""
     return localise(texts(example), lang)
 
 

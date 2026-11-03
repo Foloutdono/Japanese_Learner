@@ -39,13 +39,13 @@ from pathlib import Path
 from content.grammar_points_data import find, texts
 from content.grammar_sentences_data import translation
 from srs import ladder as steps
-from study.furigana import align_sentence, mark_spans
+from study.furigana import align_sentence, hold_word, mark_spans
 from study.grammar_examples import blank_span
 from study.grammar_detect import can_find
 from study.grammar_match import verifiable
 from study.grammar_tour import _dictionary_form, lit_spans
 from study.morphology import kata_to_hira, tokenize
-from study.plain_polite import other_register
+from study.plain_polite import contracted, other_register
 from study.romaji import kana_of
 
 # The exercise each step kind asks, by the mode's base, and what stands
@@ -136,21 +136,91 @@ def _sources(entry: dict) -> list[tuple[str, str, dict]]:
 MAX_GAPS = 2
 
 
+_INFLECTING = ("verb", "adjective", "suffix")
+
+
+def _ends_in_inflection(t, cut: int) -> bool:
+    """Whether the cut at `cut` letters into the token falls in the part
+    that inflects -- the ませ of ます past its ま, the っ of 思っ, the かっ
+    of ほしかっ -- and not inside the word itself. An auxiliary is all
+    ending (で|す, だ|った); a verb, adjective or suffix inflects past the
+    letters its dictionary form shares (おもっ and おもう share おも); a
+    noun never does. So ごろ|つき, まま|ね and がい|が, where the tokenizer
+    read ごろつく, まねる and 衣蛾 across the point, are no word cut."""
+    rest = t.surface[cut:]
+    if not rest or _KANJI.search(rest):
+        return False
+    if t.pos == "auxiliary":
+        return True
+    if t.pos not in _INFLECTING or not t.cform or not t.reading or not t.lemma_reading:
+        return False
+    reading, lemma = kata_to_hira(t.reading), kata_to_hira(t.lemma_reading)
+    at = len(reading) - len(kata_to_hira(rest))
+    shared = 0
+    while shared < min(len(reading), len(lemma)) and reading[shared] == lemma[shared]:
+        shared += 1
+    return at >= shared
+
+
+def _word_kept(jp: str, spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Each gap carried to the end of a word it would cut (plan 295).
+
+    A hole may stop where a word's ending begins -- てしまい + ました,
+    なかっ + た: what the point is stays inside it and the sentence's
+    inflection outside. Not inside the ending itself: the stems lit
+    ことがあ|ります, が分かりま|せん, おかげで|す, and a learner who typed
+    the word was one kana or two off. Nor inside ありません, which is ない
+    said politely, one word (grammar_detect's _tail reads it so): the
+    detector lights the copula's negative to its あり (これはわたしのかさ
+    ではあり|ません) and a negative ない to its ませ (もうお金がありませ|ん),
+    and the hole held the word without its negation -- ありません typed
+    in it was one kana too many, and あり typed in the first was
+    corrected to ではあり, which is no form of です. So a gap that ends
+    inside a word's ending takes the rest of that token
+    (_ends_in_inflection), and one that then ends on that あり, or on the
+    ませ of any ません, takes the rest of the negative: ことがあり,
+    ができません, ではありません. Where the rest belongs to the point's
+    next piece the gap is left as it is. A gap's start is never moved:
+    a point's piece is often an ending (大き + く, 書き + 直す)."""
+    tokens = tokenize(jp) or []
+    if not tokens:
+        return spans
+    out = []
+    for a, b in spans:
+        end = b
+        inside = next((t for t in tokens if t.start < end < t.end), None)
+        if inside is not None and inside.start >= a and _ends_in_inflection(inside, end - inside.start):
+            end = inside.end
+        k = next((i for i, t in enumerate(tokens) if t.end == end), None)
+        if k is not None:
+            t, after = tokens[k], tokens[k + 1:k + 3]
+            if t.lemma == "ます" and t.surface == "ませ" and after and after[0].lemma == "ず":
+                end = after[0].end                                   # ありませ|ん
+            elif (t.lemma in ("有る", "ある") and len(after) == 2 and after[0].lemma == "ます"
+                  and after[0].surface == "ませ" and after[1].lemma == "ず"):
+                end = after[1].end                                   # ではあり|ません
+        if any(b <= a2 < end for a2, _ in spans):
+            end = b
+        out.append((a, end))
+    return out
+
+
 @lru_cache(maxsize=1024)
 def _build_items(level: str, pattern: str) -> tuple:
     """The point's sentences a Construire can be cut from, each as (key,
     jp, spans, tr): the point lit in one stretch, or two for a point
     written in two pieces (あまり〜ない), never the whole sentence, every
-    edge between ruby parts. Cached: the tokenizer reads each sentence
-    once. `tr` is the translation as (lang, text) pairs, every language
-    it is written in (Spanish where it is, plan 291), frozen with the rest
-    of the cached item."""
+    edge between ruby parts, no word's ending cut in two (_word_kept).
+    Cached: the tokenizer reads each sentence once. `tr` is the
+    translation as (lang, text) pairs, every language it is written in
+    (Spanish where it is, plan 302), frozen with the rest of the cached
+    item."""
     found = find(pattern)
     if found is None or found[0] != level:
         return ()
     out = []
     for key, jp, tr in _sources(found[1]):
-        spans = [tuple(sp) for sp in lit_spans(jp, pattern, level)]
+        spans = _word_kept(jp, [tuple(sp) for sp in lit_spans(jp, pattern, level)])
         if not 1 <= len(spans) <= MAX_GAPS:
             continue
         body = jp.rstrip("。！？!?")
@@ -189,7 +259,9 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
     width gives nothing away. `turn` picks the sentence, so each review
     asks another one (the review count); the order is shuffled once per
     point. The answer stays here: the client sends what was typed to
-    check_build with the `key`."""
+    check_build with the `key`. The word before a gap is a part of its
+    own (hold_word), so the client holds the gap to that word and not to
+    the whole run of kana before it."""
     item = _build_item(level, entry["pattern"], turn)
     if item is None:
         return None
@@ -198,7 +270,7 @@ def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | N
     pieces, pos = [], 0
     for n, (a, b) in enumerate(spans):
         if a > pos:
-            pieces.append({"furigana": _slice(parts, pos, a)})
+            pieces.append({"furigana": hold_word(_slice(parts, pos, a), jp, a)})
         pieces.append({"gap": n, "size": len(_reading(_slice(parts, a, b)))})
         pos = b
     if pos < len(jp):
@@ -279,17 +351,44 @@ def _gap_verdict(typed: str, forms: list[tuple[str, str]]) -> tuple[str, int, st
     return "wrong", 0, heard
 
 
+def _gap_forms(jp: str, a: int, b: int, written: str, reading: str, pattern: str) -> list[tuple]:
+    """Every (written, read, how) the hole jp[a:b] is right as: the
+    sentence's own first (how None), then the other register (how the
+    sentence's register), then では or じゃ said the other way, in each of
+    those (how the sentence's: full or contracted, but the register where
+    that differs too). かさではありません takes じゃありません, ではない and
+    じゃない."""
+    forms = [(written, reading, None)]
+    other = other_register(jp, a, b, reading, pattern)
+    if other:
+        forms += [(w, r, other[0]) for w, r in other[1]]
+    spoken = contracted(jp, a, b, reading)
+    if spoken:
+        said, old, new = spoken
+        forms += [(w.replace(old, new, 1), r.replace(old, new, 1), how or said)
+                  for w, r, how in list(forms) if old in w and old in r]
+    out, seen = [], set()
+    for form in forms:
+        if form[1] not in seen:
+            seen.add(form[1])
+            out.append(form)
+    return out
+
+
 def check_build(level: str, pattern: str, key: str, answers: list[str], lang: str) -> dict | None:
     """The verdict on a Construire, gap by gap: `right` when what was typed
     is the point as written or as read, `close` when one kana is off (書い
     で for 書いて), else `wrong`; the whole is right when every gap is,
     close when none is wrong. A gap that closes its sentence is right in
     either register too (plan 241): the translation does not say which,
-    so です answers あしたはテストだ (study/plain_polite.py). Each gap
-    carries its answer, its reading and the runs that draw the correction,
-    and, where it was judged in the other register, what the sentence
-    `said` and in which `register`; the whole sentence comes back lit.
-    None for a key the point has no sentence under. Nothing typed is kept."""
+    so です answers あしたはテストだ (study/plain_polite.py), and では
+    before a negative is right said じゃ, and じゃ said では (plan 295):
+    the translation says neither. Each gap carries its answer, its
+    reading and the runs that draw the correction, and, where it was
+    judged in another form, what the sentence `said` and how
+    (`register`: plain or polite, else full or contracted); the whole
+    sentence comes back lit. None for a key the point has no sentence
+    under. Nothing typed is kept."""
     item = next((i for i in _build_items(level, pattern) if i[0] == key), None)
     if item is None:
         return None
@@ -299,15 +398,14 @@ def check_build(level: str, pattern: str, key: str, answers: list[str], lang: st
     for n, (a, b) in enumerate(spans):
         written = jp[a:b]
         reading = _reading(_slice(parts, a, b))
-        other = other_register(jp, a, b, reading, pattern)
-        forms = [(written, reading), *(other[1] if other else ())]
-        verdict, form, heard = _gap_verdict(answers[n] if n < len(answers) else "", forms)
+        forms = _gap_forms(jp, a, b, written, reading, pattern)
+        verdict, form, heard = _gap_verdict(answers[n] if n < len(answers) else "", [f[:2] for f in forms])
         gap = {
             "verdict": verdict, "answer": forms[form][0], "reading": reading,
             "marks": [] if verdict == "right" else _marks(heard, forms[form][1]),
         }
         if form:
-            gap.update(said=written, register=other[0])
+            gap.update(said=written, register=forms[form][2])
         gaps.append(gap)
     verdicts = {g["verdict"] for g in gaps}
     whole = "right" if verdicts == {"right"} else "wrong" if "wrong" in verdicts else "close"

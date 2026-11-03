@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import PRINT from './print.json'
+import { printHour, printName } from '../../../domain/printHour'
 
 // ── 浮世絵 — the print behind Today's gate (plan 205) ─────────────
 // The owner's pick of the canvas "Tsuji — Today, the visit card"
@@ -70,6 +71,19 @@ const LIFT = { phone: 56, desk: 64 }
 // that width, would swell the dial and lose its foreground under the
 // gate.
 const WIDE = 0.7
+
+/** The print the gate will stand on at this hour, fetched before Today
+ *  is opened (lib/warm.js, plan 292) with the two papers laid over it.
+ *  Which device's print the frame takes is decided once it is measured;
+ *  this guesses it the same way from the window, Today's frame being the
+ *  window less the chrome. A wrong guess costs the fetch it would have
+ *  made anyway. */
+export function preloadHourPrint(desk, now = new Date()) {
+  if (typeof window === 'undefined') return
+  const device = desk || window.innerWidth / window.innerHeight > WIDE ? 'desk' : 'phone'
+  preloadPrint(printName(now, printHour(now)), device)
+  for (const paper of ['grain', 'paper']) new Image().src = `/today/print/${PRINT.rev}/${paper}.png`
+}
 
 // Where the lines stand under the dial's rings, in the print's units:
 // the minutes and the hour they end (or, on a cleared day, what the day

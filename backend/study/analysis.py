@@ -115,7 +115,7 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
             "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
             "structure": entry.get("structure", ""),
             # The formation line in French (plan 215) and Spanish (plan
-            # 291), beside the English, as `meaning` carries them all: the
+            # 302), beside the English, as `meaning` carries them all: the
             # analysis is shared across learners and the screen reads its
             # own.
             "structure_fr": entry.get("structure_fr", ""),
@@ -214,7 +214,7 @@ def _pool_match(entry: dict) -> dict:
         "pool": True,
     }
     # Its French and Spanish lines beside the English, where the pool's
-    # layers have them (plans 215, 291) -- the same fields a deck word
+    # layers have them (plans 215, 302) -- the same fields a deck word
     # carries (_deck_match), so tokens.js's wordGloss reads them
     # unchanged. An affix row keeps the one sense it was chosen for, in
     # English: a layer's line is the word's, not that sense's.
@@ -330,7 +330,7 @@ def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
     (frontend tokens.js's wordGloss). The French is the card's own line
     (plan 107's per-card key, then the form's), and absent where the
     card has none, so a screen falls back to the English. The Spanish
-    (plan 291) rides the same way, as `meaning_es`."""
+    (plan 302) rides the same way, as `meaning_es`."""
     out = {"level": level, "raw_id": raw_id, "entry": serializable_entry(entry)}
     french = fr_gloss(entry, VOCAB_FR)
     if french:
@@ -566,7 +566,7 @@ def _ordinal(value: int, lang: str) -> str:
         return "1er" if value == 1 else f"{value:,}".replace(",", " ") + "e"
     if lang == "es":
         # (n.º 3, "number 3": 3.º and 3.ª would give the counted noun a
-        # gender, plan 291)
+        # gender, plan 302)
         return f"n.º {_es_figure(value)}"
     suffix = "th" if 10 <= value % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(value % 10, "th")
     return f"{value:,}{suffix}"
@@ -869,7 +869,7 @@ _MYRIAD_VALUE = {"万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12}
 
 
 def _es_figure(value, fraction: str = "") -> str:
-    """A figure as Latin-American Spanish writes it (plan 291, the owner's
+    """A figure as Latin-American Spanish writes it (plan 302, the owner's
     choice of variety): a comma between thousands (2,000; 10,000), a point
     before the decimals (3.5) -- what Intl's es-419 prints on the screens
     (lib/locale.js), so the breakdown and the app agree."""
@@ -2217,18 +2217,24 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # that writes them; none of the app's own sentences does.
 # 31: sixteen cards the course's sentences use (体重, 主人, もしもし,
 # ただいま...) and ten usually-kana words as kana cards (#360, #439).
-# 32: a point's gloss and formation line in Spanish (plan 291): `meaning`
+# 32: a point's gloss and formation line in Spanish (plan 302): `meaning`
 # gains its `es` and the point its `structure_es`, and a deck card's
 # match its `meaning_es`.
-# 33: every gloss the breakdown writes itself gains its `es` (plan 291):
+# 33: every gloss the breakdown writes itself gains its `es` (plan 302):
 # a word of speech, a prefix or suffix, a name's kind, a unit, a size, a
 # figure, a time, a date, an ordinal, an age.
 # 34: a pool word, a chosen sense and an idiom gain their `meaning_es`
-# from the Spanish layer over JMdict (plan 291), as `meaning_fr`.
-# 35: the Spanish reviewed into Latin-American neutral (plan 291): the
+# from the Spanish layer over JMdict (plan 302), as `meaning_fr`.
+# 35: the Spanish reviewed into Latin-American neutral (plan 302): the
 # deck's and the pool's glosses, the senses, the breakdown's own lines,
 # and its figures written es-419 (2,000; 3.5).
-LOCAL_REV = 35
+# 36: the level read off the segments no longer takes 何でも, "anything",
+# or 何であれ for the N3 何で, "why", nor 所 + the copula's で for ところで
+# (plan 299): 兄は何でも食べます is graded N4, its point's level, not N3.
+# The breakdown and the segments read 何で by one rule (card_lookup._why):
+# a way of going said in the negative asks why (何で来なかったの？), and
+# 何で行きますか's "by what" is no N3 word in the segments either.
+LOCAL_REV = 36
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

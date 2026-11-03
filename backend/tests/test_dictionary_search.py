@@ -164,7 +164,7 @@ def test_a_term_answers_in_either_language(client):
 
 
 def test_a_spanish_term_finds_the_course_in_any_session(client):
-    """Spanish is the third (plan 291): a word, a kanji and a point are
+    """Spanish is the third (plan 302): a word, a kanji and a point are
     found by their Spanish gloss, folded like the others ("cancion"
     finds canción), whichever language is on screen."""
     for lang in ("es", "fr", "en"):

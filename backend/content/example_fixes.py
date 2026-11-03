@@ -20,7 +20,7 @@ the sentence as JMdict has it:
 
 `jp` is the sentence to show instead (the same one when only a
 translation was wrong), `en`, `fr` and `es` its translations (the
-Spanish since plan 291), `why` the reviewer's reason, for the content
+Spanish since plan 302), `why` the reviewer's reason, for the content
 audit. The layer is read where every sentence is read --
 get_vocab_extras for the text, content/jmdict_fr.py for the
 translations -- so nothing downstream knows it exists.
@@ -44,6 +44,26 @@ were written by Claude and read again by a second reviewer, and are
 held to what tests/test_vocab_examples.py asks of them: the word in its
 course spelling, no kanji above its level, every translation.
 
+A sentence is shown under the sense JMdict files it under, and JMdict
+files a Tatoeba sentence whose link names no sense under the first: 渡す
+"to ferry across" showed a baton passed in a relay, ママ "as it is" a
+mother cooking. A correction can move a sentence off its sense too (渡す's
+"take me over to the other side" became a ticket handed to a friend).
+Plan 296 had every sentence filed under a sense read against the word's
+senses, and datas/vocab/example_senses.json files the ones that were
+wrong under the sense they use, per word and by the sentence as shown:
+
+    {"senses": {"<kanji>::<kana>": {"<sentence>": {"sense": 3, "gloss": ..., "why": ...}}}}
+
+`sense` is the number of the sense the sentence uses, `gloss` that
+sense's English (so a sense list that moves under it is caught,
+tests/test_example_senses.py), `why` the reviewer's reason. A sentence
+that uses the word in no sense listed has `"sense": null` and is shown
+with the word, under none; one that is not this word at all (another
+word written alike: 方 read かた under ほう; or read alike and written
+otherwise, plan 297: 開く's door under 空く) has `"drop": true` and is
+not shown under it.
+
 Loaded once, on first use: a few thousand short lines.
 """
 import json
@@ -56,6 +76,7 @@ ADDED_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "example_added.json")
 # The languages a correction or a written sentence is translated into
 # besides English, each answered by the sentence shown (`translated`).
 LANGS = ("fr", "es")
+SENSES_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "example_senses.json")
 
 
 @lru_cache(maxsize=1)
@@ -79,6 +100,23 @@ def written() -> dict[str, list[dict]]:
 def added(kanji: str, kana: str) -> list[dict]:
     """The sentences written for this deck word ({jp, en, fr, es}), or []."""
     return written().get(f"{kanji}::{kana}", [])
+
+
+@lru_cache(maxsize=1)
+def refiled_all() -> dict[str, dict[str, dict]]:
+    """"{kanji}::{kana}" -> {sentence shown: {sense, gloss, why} or
+    {drop, why}}: the sentences JMdict files under the wrong sense of
+    a deck word (plan 296)."""
+    if not os.path.exists(SENSES_PATH):
+        return {}
+    with open(SENSES_PATH, encoding="utf-8") as f:
+        return json.load(f).get("senses") or {}
+
+
+def refiled(kanji: str, kana: str) -> dict[str, dict]:
+    """This deck word's sentences filed under another sense, by the
+    sentence as shown, or {}."""
+    return refiled_all().get(f"{kanji}::{kana}", {})
 
 
 @lru_cache(maxsize=4)

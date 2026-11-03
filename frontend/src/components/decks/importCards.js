@@ -92,7 +92,7 @@ export function columnsFor(structure) {
 
 // Header names, per field (and per part of a pair), beside each field's
 // label in the learner's language (t.field_*): English, French and, since
-// plan 291, Spanish. Compared folded: lower case, no accents, no digits
+// plan 302, Spanish. Compared folded: lower case, no accents, no digits
 // (Exemple 2), no punctuation.
 const ALIASES = {
   front: ['front', 'recto', 'question', 'term', 'terme', 'anverso', 'pregunta', 'termino'],

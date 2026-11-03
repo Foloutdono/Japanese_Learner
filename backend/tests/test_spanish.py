@@ -1,4 +1,4 @@
-"""Spanish is the app's third language (plan 291): the decks, the
+"""Spanish is the app's third language (plan 302): the decks, the
 sentences their cards show and the grammar catalogue (glosses, lessons,
 tours and Choisir questions) read it whole, and every other text reads
 English until its Spanish is written (scripts/spanish_coverage.py counts
@@ -86,7 +86,7 @@ def test_every_grammar_point_has_its_spanish_gloss_and_formation(level):
 
 @pytest.mark.parametrize("level", list(GRAMMAR_POINTS_BY_LEVEL))
 def test_every_grammar_lesson_is_written_in_spanish(level):
-    """The lesson, whole (plan 291's second wave): every step, every
+    """The lesson, whole (plan 302's second wave): every step, every
     neighbour's line and every example's translation. Their form is
     grammar_check's; a point the catalogue gains is written in Spanish in
     the same change, as it is in French."""
@@ -125,7 +125,7 @@ def _drill_texts(point: dict):
 
 @pytest.mark.parametrize("level", list(GRAMMAR_POINTS_BY_LEVEL))
 def test_every_tour_and_choisir_question_is_written_in_spanish(level):
-    """The tours and the points' own Choisir questions, whole (plan 291's
+    """The tours and the points' own Choisir questions, whole (plan 302's
     third wave), as the lessons are."""
     missing = [f"{p['pattern']} {path}" for p in GRAMMAR_POINTS_BY_LEVEL[level]
                for path, text in _drill_texts(p) if not (text.get("es") or "").strip()]
@@ -228,7 +228,7 @@ def test_every_chip_has_its_spanish_label_and_tooltip():
 
 def test_the_spanish_layer_holds_every_line_the_french_one_does():
     """Senses, sentences and pool lines: the Spanish layer is the French
-    one's twin (plan 291), so nothing a French learner reads in their
+    one's twin (plan 302), so nothing a French learner reads in their
     language reaches a Spanish learner in English."""
     import sqlite3
     with sqlite3.connect(jmdict_fr.DB_PATHS["fr"]) as fr, sqlite3.connect(jmdict_fr.DB_PATHS["es"]) as es:
@@ -289,7 +289,7 @@ def test_a_card_switched_to_spanish_mid_run_keeps_its_own_gloss():
 def test_no_table_in_the_code_says_a_text_in_english_and_french_alone():
     """A literal {"en": "...", "fr": "..."} in the server's code is a text a
     learner reads, and one without its "es" reaches a Spanish learner in
-    English (the tours' scene places did until plan 291's review)."""
+    English (the tours' scene places did until plan 302's review)."""
     import ast
     import glob
     import os

@@ -116,7 +116,7 @@ class RevealTests(unittest.TestCase):
         self.assertEqual(revealed["translation_lang"], "en")
 
     def test_the_reveal_speaks_the_learners_language(self) -> None:
-        """Every line carries French (plan 215) and Spanish (plan 291),
+        """Every line carries French (plan 215) and Spanish (plan 302),
         and their learners read them; a language the bank does not hold
         falls back to the English and says so."""
         revealed = dictation.reveal(N5, "fr")

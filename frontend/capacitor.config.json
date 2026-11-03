@@ -27,7 +27,8 @@
       "resizeOnFullScreen": true
     },
     "LocalNotifications": {
-      "iconColor": "#c9a24a"
+      "smallIcon": "ic_stat_tsuji",
+      "iconColor": "#c99a3e"
     }
   }
 }

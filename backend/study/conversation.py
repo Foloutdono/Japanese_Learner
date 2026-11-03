@@ -38,7 +38,7 @@ from study.dictation import bank_words, measure_forms
 from study.furigana import align_deck, align_sentence
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-# Every text around the Japanese is written in each: Spanish since plan 291.
+# Every text around the Japanese is written in each: Spanish since plan 302.
 LANGS = ("en", "fr", "es")
 MODES = ("choose", "translate", "free")
 REGISTERS = ("casual", "polite", "formal")

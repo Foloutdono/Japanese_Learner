@@ -30,7 +30,7 @@ A reviewer writes DIR/fixes_NN.json:
 
 `orig` the sentence as the batch has it; `jp` what to show instead (the
 same sentence when only a translation was wrong); `en`, `fr`, `es` its
-translations (the Spanish since plan 291); `why` one line. `glosses` lists deck glosses found wrong
+translations (the Spanish since plan 302); `why` one line. `glosses` lists deck glosses found wrong
 on the way ({"key", "level", "lang", "now", "should", "why"}); they are
 not applied here.
 
@@ -54,7 +54,7 @@ import os
 import re
 import sys
 
-from content import example_fixes, jmdict_fr
+from content import example_fixes, jmdict_fr, vocab_extras
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import _find_senses, _target_span, get_vocab_extras
 from study.llm_shared import kanji_set_for_level
@@ -63,7 +63,7 @@ from translations.course import VOCAB_GLOSSES
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 # What a correction and a written sentence carry, every field required:
-# the sentence and its translations, Spanish among them since plan 291.
+# the sentence and its translations, Spanish among them since plan 302.
 FIX_FIELDS = ("jp", "en", "fr", "es", "why")
 ADDED_FIELDS = ("jp", "en", "fr", "es")
 
@@ -71,8 +71,14 @@ ADDED_FIELDS = ("jp", "en", "fr", "es")
 def _originals() -> dict[str, dict]:
     """jp -> {en, fr, es, words}: every sentence the deck shows, uncorrected."""
     saved, saved_written = example_fixes.fixes, example_fixes.written
+    saved_own = vocab_extras._OWN_ENTRY
     example_fixes.fixes = lambda: {}
     example_fixes.written = lambda: {}
+    # A card that keeps its own entry of a row two words share (plan 297,
+    # ママ beside まま) shows the other's sentences only where a correction
+    # made them its own: uncorrected, they are the row's, as plan 227 read
+    # them, or those corrections would read as stale.
+    vocab_extras._OWN_ENTRY = {}
     # The translations' index is cached from fixes(): built while it is
     # patched out, it would stay empty for the rest of the process.
     example_fixes._own.cache_clear()
@@ -95,6 +101,7 @@ def _originals() -> dict[str, dict]:
         return out
     finally:
         example_fixes.fixes, example_fixes.written = saved, saved_written
+        vocab_extras._OWN_ENTRY = saved_own
         example_fixes._own.cache_clear()
 
 
@@ -267,9 +274,17 @@ def _key(word: dict) -> str:
 
 
 def gap_words() -> list[tuple[str, dict]]:
-    """(level, card) for every deck word that shows no sentence of JMdict's."""
-    originals = _originals()
-    shown = {w["key"] for item in originals.values() for w in item["words"]}
+    """(level, card) for every deck word that shows no sentence of JMdict's:
+    none filed under it, or every one taken off it (plan 297: a drop is
+    keyed by the sentence as shown, a correction's, so the uncorrected
+    originals cannot tell)."""
+    saved = example_fixes.written
+    example_fixes.written = lambda: {}
+    try:
+        shown = {_key(w) for level in LEVELS for w in VOCAB_BY_LEVEL[level]
+                 if get_vocab_extras(w.get("kanji") or "", w["kana"], w.get("meaning", ""), "en")["examples"]}
+    finally:
+        example_fixes.written = saved
     return [(level, w) for level in LEVELS for w in VOCAB_BY_LEVEL[level] if _key(w) not in shown]
 
 

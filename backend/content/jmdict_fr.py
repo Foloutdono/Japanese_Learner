@@ -41,7 +41,7 @@ it) is the same case, everywhere.
 Text drafted with an AI model, from the Japanese, and audited like the
 rest of the taught content (docs/content-audit/PLAYBOOK.md).
 
-Spanish (plan 291, ADR 0023) is the same layer in a file of its own,
+Spanish (plan 302, ADR 0023) is the same layer in a file of its own,
 datas/vocab/jmdict_es.sqlite3, its three tables the same with an `es`
 column for `fr`, built by the same script (`--lang es`), and holding
 what the French one does: every lookup here takes the language. What

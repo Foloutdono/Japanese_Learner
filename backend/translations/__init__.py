@@ -1,6 +1,6 @@
 def fr_gloss(entry: dict, fr_map: dict) -> str | None:
     """The French gloss for one deck card, or None. Any language's map
-    keyed the same way reads through it (vocab_es.json, plan 291).
+    keyed the same way reads through it (vocab_es.json, plan 302).
 
     vocab_fr.json has always been keyed by the written form alone, so
     the 266 forms the deck teaches as several cards (後 is あと, うしろ,
@@ -29,7 +29,7 @@ def get_meaning(entry: dict, lang: str, glosses: dict[str, dict]) -> str:
     `glosses` is the course's own maps of one deck, by language
     (translations.course: VOCAB_GLOSSES, KANJI_GLOSSES); English is the
     entry's own `meaning`, and a language with no map, or a card its map
-    has no line for, reads English (plan 291: Spanish is written card by
+    has no line for, reads English (plan 302: Spanish is written card by
     card, and a card not yet written is never blank).
 
     A JMdict pool row (it carries its pool `seq`; a deck entry never

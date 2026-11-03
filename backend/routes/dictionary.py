@@ -56,7 +56,7 @@ VOCAB_ES_MAP = VOCAB_GLOSSES["es"]
 # ── What a query MEANS, before any collection answers it ─────
 # study/search_match.py: a term is matched folded (case and accents off,
 # so "eleve" finds élève), against EVERY app language rather than the one
-# on screen (Spanish since plan 291: "agua" finds 水), and — when it is
+# on screen (Spanish since plan 302: "agua" finds 水), and — when it is
 # romaji — against the kana it spells as
 # well ("mizu" finds みず). A query that finds nothing at all is retried
 # once against the nearest word the collection actually holds, so a typo

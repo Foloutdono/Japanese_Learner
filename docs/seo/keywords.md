@@ -115,7 +115,7 @@ English page leans harder on the specific terms:
 | spaced repetition Japanese, Anki alternative for Japanese | The method |
 | Japanese dictation practice, Japanese reading practice by level | Practice |
 
-## Spanish, at `/es/` (plan 291)
+## Spanish, at `/es/` (plan 302)
 
 A translation of the French page, as the English one is. The Spanish
 results are held by the same names (Duolingo, Busuu) and by Spanish

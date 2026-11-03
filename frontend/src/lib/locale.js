@@ -5,7 +5,7 @@
 // choice made in Settings is saved under localStorage 'lang' and always
 // wins (and is kept on the account too, lib/langChoice.js); before any
 // choice, a French-speaking device gets French, a Spanish-speaking one
-// Spanish (plan 291), and everything else gets English — the default for
+// Spanish (plan 302), and everything else gets English — the default for
 // a learner whose device language the app does not speak.
 export const SUPPORTED_LANGS = ['fr', 'en', 'es']
 
@@ -20,7 +20,7 @@ export function pickInitialLang(saved, deviceLang) {
 // 'en-GB' on a card, 'en-US' on a price). One table, so a third language
 // is one line here rather than a ternary at every Intl call. Spanish is
 // Latin America's (es-419: 3.5, 12,000), the variety the app writes (plan
-// 291), and the breakdown's own figures agree (study/analysis._es_figure).
+// 302), and the breakdown's own figures agree (study/analysis._es_figure).
 const INTL = { fr: 'fr-FR', es: 'es-419' }
 
 export function intlLocale(lang, english = 'en-US') {

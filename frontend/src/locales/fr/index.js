@@ -908,6 +908,8 @@ const stats = {
   destMovesTo:        date => `glisse au ${date} au rythme actuel`,
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Toi · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Déjà lu',
   examPart: (n) => `Partie ${n}`,
   serviceName: {
     local:   'Omnibus',
@@ -1655,7 +1657,14 @@ const dictionary = {
   bldRight: 'Juste.',
   bldClose: 'Presque.',
   bldWrong: 'Pas tout à fait.',
-  bldOther: (said, register) => `La phrase dit ${said} : la même chose, en style ${register === 'plain' ? 'neutre' : 'poli'}.`,
+  // Comment la phrase dit le trou quand une autre forme est jugée juste :
+  // son registre (plan 241), ou では en entier ou contracté (plan 295).
+  bldOther: (said, register) => `La phrase dit ${said} : la même chose, ${({
+    plain: 'en style neutre',
+    polite: 'en style poli',
+    full: 'avec では en entier',
+    contracted: 'avec では contracté, comme à l’oral',
+  })[register] ?? 'en style poli'}.`,
   mapAria: 'La ligne du point',
   mapTutorial: 'Tutoriel',
   mapNow: 'maintenant',
@@ -2516,8 +2525,10 @@ const boarding = {
   brdNotifText: 'Tes cartes t’attendent au portillon.',
   // ── 発車案内 — le rappel du jour tiré de la file, le widget et
   // Réglages › Notifications (plan 156). Le titre et le texte du rappel
-  // disent ce que le portillon tiendra à l’heure de l’apprenant.
-  nudgeTitle: (time, n) => `Ton train de ${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
+  // disent ce que le portillon tiendra à l’heure de l’apprenant ; le
+  // titre commence par l’heure, comme une ligne du tableau des départs
+  // (plan 293).
+  nudgeTitle: (time, n) => `${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'Environ une minute' : `Environ ${m} min`),
   nudgeNew: (n) => `${n} ${n > 1 ? 'nouvelles' : 'nouvelle'}`,
   // Le nom du canal des rappels dans les réglages d'Android (lib/native.js).
@@ -2661,6 +2672,12 @@ const boarding = {
   brdPasswordMismatch: 'Les deux mots de passe ne sont pas les mêmes.',
   brdAccountSentNote: (email) => `Presque : confirme ${email} depuis le lien que nous venons de t’envoyer.`,
   brdRemindAt: (time) => `Me rappeler à **${time}**`,
+  // Plan 294 : le rappel, une étape après la carte (sur l'appli seule).
+  brdRemindQ: 'On t’annonce ton train ?',
+  brdRemindHint: 'Chaque jour, à l’heure de ta carte.',
+  brdRemindYes: (time) => `Oui, à ${time}`,
+  brdRemindLater: 'Pas maintenant',
+  brdRemindNow: 'maintenant',
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',
   brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
@@ -2694,8 +2711,8 @@ const ride = {
   rideGuessed: 'Tu as trouvé la nouvelle ? Si c’était au hasard, choisis « Raté » la prochaine fois. Sinon, elle ne reviendra pas avant plusieurs jours.',
   rideDoneBody: n => `C’est tout ! **${n} nouveaux mots par jour**, chacun de retour juste avant que tu l’oublies.`,
   rideContinue: 'Continuer',
-  // L'essai de lecture (plan 099) : la phrase, le champ, la mesure,
-  // puis la plaque qui dit quels quais sont sur l'abonnement.
+  // L'essai de lecture (plan 099) : la phrase, le champ, la mesure ;
+  // la note fait entrer en gare (sa plaque est partie, plan 292).
   rideReadFront: 'Lis vite, elle disparaît dans un instant !',
   rideReadFrontUntimed: 'Lis-la, puis écris-la en rōmaji ou en kana.',
   rideReadType: 'Écris ce que tu as lu, en rōmaji ou en kana.',
@@ -2704,9 +2721,6 @@ const ride = {
   // Plan 133. Sur un téléphone : la carte connue ne se note qu'une fois
   // sa fiche ouverte depuis la 🔍, puis refermée.
   rideKnownDict: 'Chaque carte a sa fiche de dictionnaire. Touche 🔍 pour ouvrir celle-ci, puis referme-la.',
-  ridePlateCap: 'L\'abonnement',
-  ridePlateBody: 'Ces exercices font partie de l’abonnement.',
-  ridePlateOpen: 'Pour l’instant, ils sont ouverts à tous.',
 }
 
 const guide = {
@@ -2724,7 +2738,7 @@ const guide = {
   guideTabBar: 'Tes cinq onglets : Apprendre, Pratique, Aujourd’hui, Dictionnaire et ton profil.',
   guideTodayDuels: 'Les duels : deux minutes contre un ami ou un voyageur de ton niveau. Un chiffre d’or dit qu’un défi t’attend.',
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
+  guideLearnStops: 'Ton arrêt sur la ligne, et ce que tu en sais déjà.',
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
   // Les plaques de Pratique (plan 254) : un quai, son pied (ton niveau,
@@ -2828,6 +2842,13 @@ const onboarding = {
   practicePct: pct => `${pct}\u00a0%`,
   practiceAllPapers: 'Toutes les épreuves',
   practiceAllScenes: 'Toutes les scènes',
+  // Le portique d'Apprendre au téléphone (plan 291) : la feuille qu'une
+  // ligne lève, une page par ligne -- l'arrêt et le mode choisis avant
+  // d'embarquer -- et l'étagère des decks sous les lignes.
+  learnSheet: 'Lignes',
+  learnStop: 'Arrêt',
+  learnMode: 'Mode',
+  learnAllDecks: n => `Tous mes decks (${n})`,
   // ── La station de pratique, au bureau (plan 159) ─────────────
   // La source en interrupteur en tête de la liste (les grades JLPT, la
   // fréquence, tes cartes), puis la page de l'arrêt ouvert : ce que

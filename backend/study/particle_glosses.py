@@ -12,7 +12,7 @@ negative that says nothing is the sentence read backwards: 許さぬ without
 its ぬ is "I forgive".
 
 Each is glossed here by what it does where it stands, in every language
-the app speaks (Spanish since plan 291).
+the app speaks (Spanish since plan 302).
 Where the sentence does not say which of two uses it is, the gloss names
 both -- never a guess between them. A token a point is written on is the
 point's, and is never glossed here (study/analysis._tokens asks only for

@@ -297,7 +297,7 @@ def test_a_pool_word_reads_in_french(client):
 
 
 def test_a_pool_word_reads_in_spanish(client):
-    """The same for a Spanish learner (plan 291): every pool word of a
+    """The same for a Spanish learner (plan 302): every pool word of a
     theme carries its Spanish, the build refusing one without, and it is
     what the card shows."""
     rows = [r for t in theme_data.list_themes() for r in theme_data.theme_entries(t["key"])]

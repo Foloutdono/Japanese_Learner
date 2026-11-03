@@ -27,7 +27,7 @@ Inputs (datas/kanji/, the shipped KANJIDIC2 export):
     kanji_meanings_fr.json  the French KANJIDIC2 lacks for 219 deck
                             characters (plan 215), tracked: it fills
                             meaning_fr where the export has none
-    kanji_meanings_es.json  the same for the Spanish of 71 (plan 291),
+    kanji_meanings_es.json  the same for the Spanish of 71 (plan 302),
                             over meaning_es
     ../../kanjivg/*.svg     which characters have a stroke diagram
 
@@ -42,7 +42,7 @@ Usage:
         # kanji_meanings_fr.json into the shipped database, in place,
         # without the KANJIDIC2 export (which is not in a fresh clone)
     cd backend && python -m scripts.build_kanji_db --spanish-only
-        # kanji_meanings_es.json the same way (plan 291)
+        # kanji_meanings_es.json the same way (plan 302)
     cd backend && python -m scripts.build_kanji_db --deck-only
         # ... and kanji_deck.json's membership (in_deck) with both: what
         # adding a character to the deck needs (plan 226)
@@ -271,7 +271,7 @@ def apply_own(conn: sqlite3.Connection, data_dir: str, lang: str, name: str,
 
 
 def apply_spanish(conn: sqlite3.Connection, data_dir: str) -> int:
-    """kanji_meanings_es.json over meaning_es (plan 291): KANJIDIC2's
+    """kanji_meanings_es.json over meaning_es (plan 302): KANJIDIC2's
     Spanish stops short of 71 of the deck's characters, and the file is
     the app's own Spanish for them, as kanji_meanings_fr.json is the
     French (apply_french). Unlike the French, it also wins where the

@@ -10,7 +10,7 @@ import { BOARD_PARAM, SIGNIN_PARAM } from '../src/lib/frontEntry.js'
 export const SITE_ORIGIN = 'https://tsuji.app'
 
 // Where each language's page is served: the French page is the site's
-// `/`, the English one `/en`, the Spanish one `/es` (plan 291). The files
+// `/`, the English one `/en`, the Spanish one `/es` (plan 302). The files
 // stay under public/landing/ and vercel.json rewrites the addresses to
 // them, since a file named public/index.html would stand in the app's way
 // in `npm run dev`.
@@ -86,7 +86,7 @@ export const PRESENTATION = {
   // `presentation.chapters`: the player's bar and Google's key moments.
   chapters: [0, 15, 30, 45, 60, 75],
   // The subtitle files in the bucket (presentation.<lang>.vtt). A page
-  // whose language has none plays the English (plan 291: no Spanish file
+  // whose language has none plays the English (plan 302: no Spanish file
   // yet; add 'es' here once presentation.es.vtt is uploaded).
   captions: ['fr', 'en'],
 }

@@ -1205,7 +1205,7 @@ def patterns_for(level: str) -> set[str]:
 
 
 # The languages every row carries a translation in (plan 192; Spanish
-# since plan 291).
+# since plan 302).
 LANGS = ("en", "fr", "es")
 
 

@@ -1,5 +1,5 @@
 """
-The course's own glosses of its two decks, by language (plan 291): the
+The course's own glosses of its two decks, by language (plan 302): the
 maps translations.get_meaning reads a deck card's meaning from. English
 is the deck entry's own `meaning` and has no map here.
 

@@ -7367,7 +7367,12 @@ textarea:focus-visible {
   padding: var(--sp-3) var(--sp-4);
   color: var(--text-secondary);
 }
-.console__well { flex: 1 1 0; }
+/* min-width: 0, or the well cannot shrink below its input's own width
+   -- twenty characters of whatever face is drawing it -- and a wide
+   fallback face, before the app's has arrived, pushed the keys out of
+   the row's end (14px at 390px under Inter). The input already gives
+   way (.field--search > input); the well has to let it. */
+.console__well { flex: 1 1 0; min-width: 0; }
 .console__well > .console__field { font-size: 1rem; }
 .console__clear {
   position: relative;
@@ -9915,16 +9920,6 @@ textarea:focus-visible {
   .plate:has(.plate__head:focus-visible) { transform: none; }
   .plate__stripe i { transition: none; }
 }
-/* ── The plates take the gate ──
-   A gate is a bar and a column of plates, and on a phone the column
-   takes the room the page has and the plates share it equally: each
-   head grows, and its roundel, name and chip sit centred in the room
-   they get, instead of the air pooling under the last plate. Every
-   plate is a plate, so every plate gets one share — the shelf too. */
-@media (max-width: 768px) {
-  .learn > .plates { flex: 1; }
-  .learn > .plates > .plate { flex: 1 1 auto; }
-}
 
 /* ── 実践の改札 — the phone's Practice gate, folded (plan 290) ──────
    The owner's pick D4 of the canvas "Tsuji — the practice gate",
@@ -9947,13 +9942,16 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.prc-group > .plates { gap: var(--sp-2); }
+.prc-group > .plates,
+.lrn-folds { gap: var(--sp-2); }
 .plate--fold .plate__head { padding-block: var(--sp-3); }
 .plate--fold .plate__title { font-size: var(--fs-lead); }
 /* The record: the grade in the line's ink, the figures in the quiet
    one, as the old foot printed them either side of it. */
-.prc-record { font-variant-numeric: tabular-nums; }
-.prc-record__grade {
+.prc-record,
+.lrn-record { font-variant-numeric: tabular-nums; }
+.prc-record__grade,
+.lrn-record__stop {
   font-weight: 700;
   color: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
 }
@@ -10010,7 +10008,8 @@ textarea:focus-visible {
    sheet's own touch-action is pan-y (its drag shut, useSheetDrag); the
    pager and a page's row of departures pan sideways too, each holding
    its own sideways scroll rather than handing it on. */
-.prc-sheet { gap: var(--sp-4); }
+.prc-sheet,
+.lrn-sheet { gap: var(--sp-4); }
 .prc-sheet__strip { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); }
 .prc-sheet__stop {
   display: inline-flex;
@@ -10028,10 +10027,24 @@ textarea:focus-visible {
   background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent);
 }
 .prc-sheet__sep { width: 1px; align-self: stretch; margin-block: var(--sp-1); background: var(--surface-line); }
-.prc-sheet__pager {
+/* No bar under the pages on any pointer: they scroll inside a clip, as
+   .stroke-rail's counts do. The pager runs on below the pages, first
+   the room Embarquer's glow needs (the pager cut it flat at the
+   button's foot), then the room a touch browser draws its overlay bar
+   in, along the pager's bottom edge; the clip keeps the one and cuts
+   the other. Both are pulled back up, so the sheet's layout is the
+   pages' own. */
+.prc-sheet__deck {
   flex: none;
-  display: flex;
   margin-inline: calc(-1 * var(--sp-5));
+  padding-bottom: var(--sp-4);
+  margin-bottom: calc(-1 * var(--sp-4));
+  overflow: hidden;
+}
+.prc-sheet__pager {
+  display: flex;
+  padding-bottom: var(--sp-6);
+  margin-bottom: calc(-1 * var(--sp-6));
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
@@ -10069,14 +10082,37 @@ textarea:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.prc-page__row {
+/* A page's row of departures runs to the sheet's edges on both sides
+   and fades out under them. A ticket the row cannot fit passes under
+   the edge, where it was cut short of it on the left once the row was
+   scrolled; and no page holds a ticket at full ink at its own edge, the
+   strip of it a neighbouring page showed beside the one in view. No bar
+   under the row either: the room below the tickets is where a touch
+   browser draws its overlay bar, and the clip takes it away. */
+.prc-page__row,
+.lrn-page__modes {
   display: flex;
   gap: var(--sp-2);
-  margin-inline-end: calc(-1 * var(--sp-5));
-  padding-inline-end: var(--sp-5);
+  margin-inline: calc(-1 * var(--sp-5));
+  padding: 0 var(--sp-5) var(--sp-3);
+  margin-bottom: calc(-1 * var(--sp-3));
+  scroll-padding-inline: var(--sp-5);
   overflow-x: auto;
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
+  mask-image: linear-gradient(to right, transparent var(--sp-1), #000 var(--sp-5), #000 calc(100% - var(--sp-5)), transparent calc(100% - var(--sp-1)));
+  clip-path: inset(0 0 var(--sp-3));
+}
+/* A cursor's bar is a classic one, which the clips above would only
+   hide: it is not drawn at all, and takes no room (see "Themed
+   scrollbar"). */
+@media (pointer: fine) {
+  .prc-sheet__pager,
+  .prc-page__row,
+  .lrn-page__modes { scrollbar-width: none; }
+  .prc-sheet__pager::-webkit-scrollbar,
+  .prc-page__row::-webkit-scrollbar,
+  .lrn-page__modes::-webkit-scrollbar { display: none; }
 }
 .prc-page__go { width: 100%; }
 /* A departure: the grade or the source over what was done there. */
@@ -10157,6 +10193,165 @@ textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .prc-resume,
   .prc-tk { transition: none; }
+}
+
+/* ── 学習の改札 — the phone's Learn gate, folded (plan 291) ──────────
+   The owner's pick B of the canvas "Tsuji — Learn on the phone", the
+   shape the Practice gate took (plan 290): the last ride over the lines
+   (.prc-resume, components/station/GateResume), each line folded to one
+   row with its stop and that stop's figure under its name (.plate--fold,
+   .lrn-record above), the decks folded under them, one row each, and a
+   row of two doors. The plates keep their own height, so the gate
+   scrolls past what a phone holds and leaves the rest of it bare rather
+   than stretching five plates over it. Drawn by screens/LearnScreen.jsx
+   under the desk's 1100px: the desk keeps its lines across. */
+.lrn-shelf { display: flex; flex-direction: column; gap: var(--sp-2); }
+.lrn-shelf__doors { display: flex; justify-content: space-between; gap: var(--sp-4); }
+.lrn-shelf__door,
+.lrn-page__door {
+  min-height: 44px;
+  padding: 0 var(--sp-1);
+  background: none;
+  border: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.lrn-shelf__door:hover,
+.lrn-shelf__door:focus-visible,
+.lrn-page__door:hover,
+.lrn-page__door:focus-visible { color: var(--text-primary); filter: none; }
+
+/* ── 引き上げ — the line's sheet (plan 291) ──
+   Every line a page, the one raised in view, the next a swipe away, on
+   Practice's pager and strip (.prc-sheet__*, hooks/useSheetPager). A
+   page is the plate that was tapped, risen whole: its head and its
+   stripe, bled to the sheet's edges; then the line, every stop a ring
+   on the rail filled to its share, its figure under its name, the one
+   chosen in the selection's gold and the one the learner stands at
+   ringed in the line's; the line's other sources; the run's card at
+   that stop in that mode; the modes as chips; Embarquer pinned to the
+   foot (.btn-depart's own margin-top). components/learn/LineSheet.jsx. */
+.lrn-page__head { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: var(--sp-4); align-items: center; }
+.lrn-page__edge { flex: none; margin: calc(-1 * var(--sp-2)) calc(-1 * var(--sp-5)) 0; }
+.lrn-line { display: grid; grid-template-columns: repeat(var(--stops, 5), minmax(0, 1fr)); }
+.lrn-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  min-width: 0;
+  padding: var(--sp-2) 0;
+  background: none;
+  border: 0;
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+/* The rail: each stop draws its stretch, the first and the last only
+   the half toward the others; ridden in the raw pigment where the stop
+   is finished. Through the ring's middle: the pad over the ring and
+   half its height. */
+.lrn-stop::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--sp-2) + 10px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 30%, transparent);
+}
+.lrn-stop:first-child::before { left: 50%; }
+.lrn-stop:last-child::before { right: 50%; }
+.lrn-stop--done::before { background: var(--line-color, var(--accent2)); }
+.lrn-stop__ring {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  margin-bottom: var(--sp-1);
+  border: 2px solid var(--line-color, var(--accent2));
+  border-radius: var(--r-pill);
+  background: conic-gradient(var(--line-color, var(--accent2)) var(--share, 0%), var(--surface) 0);
+}
+.lrn-stop[aria-current] .lrn-stop__ring { box-shadow: 0 0 0 4px color-mix(in srgb, var(--line-color, var(--accent2)) 28%, transparent); }
+.lrn-stop__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.lrn-stop__name:lang(ja) { font-family: var(--font-jp); font-weight: 500; }
+.lrn-stop__fig {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lrn-stop:hover,
+.lrn-stop:focus-visible { background: color-mix(in srgb, var(--line-color, var(--accent2)) 10%, transparent); filter: none; }
+.lrn-stop[aria-pressed="true"] { background: var(--sel-wash); box-shadow: inset 0 0 0 1px var(--sel-line); }
+.lrn-stop[aria-pressed="true"] .lrn-stop__name { color: var(--sel-ink); }
+.lrn-page__doors { display: flex; justify-content: flex-end; gap: var(--sp-5); margin-block: calc(-1 * var(--sp-3)); }
+/* The run's card: the prompt and what is asked of it, centred, a rung
+   under the run's own size. Decorative (aria-hidden). */
+.lrn-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 150px;
+  padding: var(--sp-5);
+  background: var(--bg-card);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  text-align: center;
+}
+.lrn-card__q { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1.25; }
+.lrn-card__q--jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-display);
+  font-weight: 500;
+  letter-spacing: var(--tr-term);
+  line-height: 1.15;
+}
+.lrn-card__a { font-family: var(--font-display); font-size: var(--fs-body); color: var(--text-secondary); line-height: 1.4; }
+.lrn-card__a:lang(ja) { font-family: var(--font-jp); letter-spacing: var(--tr-term); }
+.lrn-card__fold { display: block; width: var(--sp-8); border-top: 1px solid var(--surface-line); }
+.lrn-card__field {
+  min-width: 50%;
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+.lrn-card__ghost { font-family: var(--font-jp); font-size: var(--fs-heading); color: var(--text-secondary); opacity: 0.5; }
+.lrn-card__sentence { font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.6; letter-spacing: var(--tr-term); }
+.lrn-card__hole {
+  display: inline-block;
+  width: 2.5em;
+  height: 1em;
+  vertical-align: -0.1em;
+  border-bottom: 2px solid var(--line-color, var(--accent2));
+}
+.lrn-card__choices { font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); }
+/* The row of modes is a page's row of departures (.prc-page__row,
+   above): to the sheet's edges, faded under them, no bar. */
+.lrn-page__mode { flex: none; }
+@media (prefers-reduced-motion: reduce) {
+  .lrn-stop,
+  .lrn-shelf__door,
+  .lrn-page__door { transition: none; }
 }
 
 /* 駅ナンバリング — the roundel on the panel's ink, kept for the doors
@@ -13363,6 +13558,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   gap: var(--sp-3);
   padding: 0 var(--sp-4) var(--sp-4);
+}
+/* The line of the text an opened question quotes (plan 301): the
+   sentence over its translation on the breakdown's open rail
+   (.bkd-passage__item--open), under the options it decides between. */
+.qrow__source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-left: var(--sp-3);
+  box-shadow: inset 3px 0 0 var(--line-color, var(--accent));
 }
 /* ── 解析 — the word-by-word breakdown, as rows (plan 084) ──
    One shape for every practice mode (SentenceBreakdown's 'rows'
@@ -20584,6 +20789,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
   overflow: hidden;
   transition: background 0.16s ease, border-color 0.16s ease;
+  /* 予熱 (plan 292, the owner's call): a page is fifty cards and a
+     phone shows ten, so a card below the fold is not laid out until it
+     nears it -- the Dictionary's first frame was most of its tab
+     switch. It stands in at the height a card is wherever one is drawn
+     -- inside its padding, which the browser adds: the headword's box
+     of two --sp-8, the gap, one line of --fs-sm at the body's leading
+     -- and keeps its real height once drawn (`auto`). */
+  content-visibility: auto;
+  contain-intrinsic-size: auto calc(2 * var(--sp-8) + var(--sp-1) + var(--fs-sm) * 1.6);
 }
 .dict-entry-card::after {
   content: '';
@@ -20610,6 +20824,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    nothing on its gauge. In progress and mastered are the state inks
    themselves, vermillion and gold, the same two the study card's own
    seal and the deck's progress rule wear. */
+/* A card's place before it is drawn (plan 292, DictionaryScreen's
+   useScreenfulFirst): a frame at most, at a card's own height (its
+   stand-in, above), and nothing of it seen. */
+.dict-entry-card--pending { content-visibility: hidden; visibility: hidden; }
 .dict-entry-card--new       { --stage-edge: var(--surface-line); }
 .dict-entry-card--learning  { --stage-edge: var(--state-learning); }
 .dict-entry-card--mastered  { --stage-edge: var(--state-mastered); }
@@ -25197,7 +25415,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .theme-mini__line { height: var(--sp-1); margin: var(--sp-2) var(--sp-3) 0; border-radius: var(--r-pill); background: currentcolor; opacity: 0.2; }
 .theme-mini__line--short { width: 50%; }
-/* The languages one per row (plan 291, the owner's pick B): the name,
+/* The languages one per row (plan 302, the owner's pick B): the name,
    then its own two words on the same line, so a third language never
    stands alone under two and a phone never breaks the words in two. */
 .lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
@@ -25224,7 +25442,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
 .lang-pick__name { display: inline-flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
-/* A language's flag (plan 291, the owner's choice): a country's own
+/* A language's flag (plan 302, the owner's choice): a country's own
    colours, at the size of the name it stands before, and nowhere else
    (DESIGN.md, "The language flags"). The ring keeps a white stripe
    from melting into a light ground. */
@@ -25766,6 +25984,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
 .brd-notif__text { font-size: var(--fs-body); color: var(--text-secondary); }
+/* The train's Depart (plan 293), under the notification as the phone
+   lays its actions: a word in the gate's gold, the selection's ink so it
+   holds 4.5:1 on the surface in both themes. */
+.brd-notif__action { margin-top: var(--sp-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
 
 /* ══ 辻 on a phone — the boarding drawn as maps (plan 168) ═════════
    The owner's pick A of the canvas "Onboarding on the phone", direction
@@ -26239,6 +26461,49 @@ button.brd-stn { cursor: pointer; }
 .brd-hour[aria-pressed="true"] .brd-hour__name { color: var(--text-primary); }
 .brd-clock__when { margin: 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; }
 .brd-clock__when strong { font-weight: 700; color: var(--brd-ink); }
+
+/* ── 案内 the reminder, after the card (plan 294, the owner's pick A of
+   the canvas "Tsuji — le rappel à l'embarquement") ──
+   The hour's board without its steps, and hung under its flaps the
+   notification as the phone will show it: a slip of paper on the sumi,
+   the mark on its own tile as the home screen draws it. A drawing, not
+   a control: nothing in it is pressed. */
+.brd-board.brd-annonce { gap: var(--sp-6); padding: var(--sp-6) var(--sp-5) var(--sp-5); }
+.brd-annonce__note {
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  background: var(--paper);
+  color: var(--text-on-fill);
+  border-radius: var(--r-identity);
+}
+.brd-annonce__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-radius: var(--r-panel);
+  font-size: var(--fs-title);
+}
+.brd-annonce__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.brd-annonce__app {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--paper-ink-soft);
+}
+.brd-annonce__app > :last-child { letter-spacing: normal; text-transform: none; }
+.brd-annonce__title { font-size: var(--fs-body); font-weight: 600; line-height: 1.3; }
+.brd-annonce__body { font-size: var(--fs-sm); line-height: 1.4; color: var(--paper-ink-soft); }
 
 /* ── Compte: the account's sheet, Google over the address ── */
 .auth-provider.brd-provider { min-height: 52px; }
@@ -27280,7 +27545,12 @@ button.brd-stn { cursor: pointer; }
 .gl-sent rt { color: var(--text-secondary); }
 .gl-tr { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: balance; }
 .gl-tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-primary); }
-.gl-hold { white-space: nowrap; }
+/* A hole held to the word before it (GrammarPlate's holdGaps): one unit
+   wherever a line holds it, so the line breaks before the word rather
+   than between it and its hole; wrapped inside the card where it is
+   wider than a line, never past it. A nowrap here drew a sentence in
+   kana, its whole clause held, off both edges of the card. */
+.gl-hold { display: inline-block; }
 
 /* The hole: a sunk well with a dashed rule in the line's pigment; once
    answered, the well holds the answer and the rule goes. */
@@ -27344,6 +27614,15 @@ button.brd-stn { cursor: pointer; }
   text-decoration: none;
   white-space: nowrap;
   color: color-mix(in srgb, var(--success) 70%, var(--text-primary));
+}
+/* A kana left out: nothing to strike, so the right one stands in the
+   line where it was missing, underlined as written in. */
+.gl-fix--missing ins {
+  position: static;
+  font-size: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 /* Choisir's forms as the mock exam's answer tiles (.exam-tile): docked
@@ -28482,8 +28761,7 @@ button.brd-stn { cursor: pointer; }
    with two grow-only spacers in it cannot be headed by a caption. So
    the line takes the ambient ink at the title rung, and the term it
    was written to carry -- the pace, through Emphasized -- takes the
-   pigment the call had. The plate below keeps the smaller reading:
-   there the heading is .ride__plate-cap. */
+   pigment the call had. */
 .ride__done-text {
   margin: 0;
   max-width: 28em;
@@ -28501,8 +28779,8 @@ button.brd-stn { cursor: pointer; }
 .ride__done-foot {
   width: 100%;
   max-width: var(--card-w);
-  /* The quiet offer over the one filled action (plan 099's plate),
-     the boarding's own order; the card ride's foot holds the action alone. */
+  /* The one filled action (the reading ride's plate held the quiet
+     offer over it until plan 292). */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28515,62 +28793,6 @@ button.brd-stn { cursor: pointer; }
   padding-bottom: var(--sp-5);
 }
 .ride__done-foot .btn-depart { width: 100%; }
-
-/* ── The reading ride's plate (plan 099) ──
-   The done screen's own room (.ride__done): the pair over a sentence,
-   the platforms as a lattice of roundel-and-name in each line's own
-   pigment (a line colour is a section's name, never decoration), the
-   open-for-now note, and the foot with the quiet offer over the one
-   filled action -- the boarding's own order. */
-/* The plate's heading: it captioned 定期券 above it until 2026-09-21
-   and stands alone now, so it takes the rung and the ink the term had
-   (and loses the negative margin that tucked it under it). */
-.ride__plate-cap {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  color: var(--line-color, var(--accent));
-}
-/* Under that heading the sentence is a sentence again, not the call
-   the card ride's is. */
-.ride__plate .ride__done-text {
-  font-size: var(--fs-lead);
-  color: var(--text-secondary);
-}
-.ride__plate-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-width: var(--card-w);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sp-2);
-}
-.ride__plate-item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  text-align: left;
-}
-.ride__plate-icon {
-  flex: none;
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  color: var(--line-color, var(--text-primary));
-}
-.ride__plate-title {
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
 
 /* ── 案内 — the guide over a gate (plan 100) ──
    One element over the anchor whose shadow IS the scrim, wearing the
@@ -38393,6 +38615,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   /* The test (plan 224): the stage as wide as its choices, so the word
      asked stands over them rather than at the paper's edge. */
   .desk-brd .brd__car[data-car="test"] { --desk-brd-w: var(--card-w); }
+  /* The reminder (plan 294): the board and its notification at the
+     width of a phone's, not the paper's. */
+  .desk-brd .brd__car[data-car="remind"] { --desk-brd-w: var(--desk-entry-w); }
   /* The card (plan 247): its fields in words beside it rather than under
      it, the card at its back's width and the rows at the side column's,
      and the line of where it lives under both. */
@@ -40023,6 +40248,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     border-width: 0 0 1px;
     border-radius: 0;
     text-align: left;
+    /* A row stands in at a row's height until drawn (plan 292), inside
+       its padding: the word's line, the gap, the meaning's. */
+    contain-intrinsic-size: auto calc(var(--fs-title) * 1.3 + var(--sp-1) + var(--fs-sm) * 1.6);
   }
   .desk-dict--page .dict-entry-card:last-child { border-bottom-width: 0; }
   .desk-dict--page .dict-entry-card:is(:hover, :focus-visible, .dict-entry-card--selected) { border-color: var(--surface-line); }

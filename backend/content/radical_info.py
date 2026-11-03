@@ -257,7 +257,7 @@ RADICAL_INFO: dict[int, tuple[str, str, tuple[str, ...], tuple[str, ...], str | 
 }
 
 
-# Each radical's meaning in Spanish (plan 291), by its number: a
+# Each radical's meaning in Spanish (plan 302), by its number: a
 # third column the rows above would only widen.
 RADICAL_ES: dict[int, str] = {
     1: "uno", 2: "trazo vertical", 3: "punto", 4: "trazo oblicuo", 5: "segundo, gancho",

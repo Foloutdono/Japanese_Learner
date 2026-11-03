@@ -1,4 +1,4 @@
-// The flag beside each language where a learner picks one (plan 291,
+// The flag beside each language where a learner picks one (plan 302,
 // the owner's choice "for clarity"): the conventional country for each
 // of the app's languages. A flag stands for a country, not a language,
 // and it is drawn here rather than as an emoji because Windows has no

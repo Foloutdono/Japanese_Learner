@@ -304,7 +304,11 @@ CREATE TABLE user_profiles (
     -- The interface language the learner chose ('fr' | 'en'); NULL = never
     -- chosen, the device's language applies. Copied back onto the device
     -- on boot (frontend/src/lib/langChoice.js).
-    ui_lang TEXT
+    ui_lang TEXT,
+    -- 前回 (plan 291): the last ride a Learn station boarded, {path, at},
+    -- a line's stop in a graded mode; the phone's Learn gate offers it
+    -- again. NULL = none yet. routes/profile.py (clean_ride).
+    learn_ride JSONB
 );
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 

@@ -86,7 +86,7 @@ def meaning_of(entry: dict, lang: str = "en") -> str:
 # half answers in both languages now: a learner thinks vocabulary in
 # whichever language taught it to them, and being made to guess which
 # one the app filed a character under is a worse half-answer than the
-# one that reasoning avoided. Spanish is searched too since plan 291
+# one that reasoning avoided. Spanish is searched too since plan 302
 # made it the app's third language (frontend/src/locales/es); pt is
 # not — that column is data KANJIDIC shipped, not a language anybody
 # reads the app in.

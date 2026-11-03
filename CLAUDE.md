@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **292**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **303**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -168,9 +168,15 @@ runtime purpose.
   たい for たいです), and a kanji the keyboard put in is read before it is
   judged. Never inside the sentence (学生だと思います), never before か
   polite to plain, never where the point is the polite ending or a form.
+  Nor does it say では or じゃ: before a negative each is right for the
+  other (`plain_polite.contracted`, plan 295), and never the voiced ては.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
-  diffed over every sentence Construire asks.
+  diffed over every sentence Construire asks. A hole may stop where a
+  word's ending begins (てしまい + ました), never inside the ending
+  (せいで|す, が分かりま|せん) nor inside ありません, which is ない said
+  politely (`grammar_ladder._word_kept`, plan 295): typed whole, the
+  word was marked a kana off.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's
@@ -388,6 +394,15 @@ runtime purpose.
   the backend reads as the tables' owner, which RLS leaves alone, and
   nothing reads them through the Data API. A table made by hand in
   `public` is closed by hand (`scripts/sql/close_data_api.sql`).
+- **A comprehension question answers its own miss (plan 301b).** Every
+  seed question names the breakdown sentence(s) its right option rests
+  on (`at`) and says in one line why (`why`, `{en, fr}`), quoting the
+  text verbatim from those sentences and never naming an option by its
+  letter or place, since the options are shuffled for every serving
+  (`tests/test_comprehension_seed.py`). The generator is asked for both
+  and keeps them only when well formed (`reading._clean_answer_line`), so
+  a pool row without them still serves and the screen falls back to the
+  sentence the question quotes (`domain/quotedFragments.answerSentences`).
 - **The reading bank is held at its level from both sides.** A row of
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level
@@ -404,7 +419,7 @@ runtime purpose.
   (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
 - **A Spanish learner reads Spanish where it is written, English where it
-  is not yet (plan 291, ADR 0023).** Never French, never blank. The
+  is not yet (plan 302, ADR 0023).** Never French, never blank. The
   interface is whole: a screen string is written in `es` too
   (`locales.test.js`). The decks and the grammar points' glosses are whole:
   a deck card gains its line in `datas/vocab/vocab_es.json` (keyed
@@ -466,8 +481,29 @@ runtime purpose.
   `python -m scripts.vocab_examples check`. A word JMdict gives no
   sentence has two written for it (`datas/vocab/example_added.json`,
   `check-added`: its course spelling, no kanji above its level, its three
-  translations), so every card shows one; a word the deck gains is
-  written for in the same change.
+  translations), so every card shows one; a word the deck gains is written for in the same change.
+  A sentence sits under the sense it uses (plan 296): JMdict files one
+  whose link names no sense under the first (渡す "to ferry across"
+  showed a relay's baton), so a sentence under the wrong sense is filed
+  under its own in the same layer (`datas/vocab/example_senses.json`, per
+  word and by the sentence shown, with the sense's gloss), drafted and
+  checked with `python -m scripts.example_senses check`. A correction
+  that rewrites a sentence keeps the sense it is filed under, or files it
+  anew: the rewritten sentence's old move no longer matches, and
+  `tests/test_example_senses.py` fails on it. A card shows only
+  sentences its word is in, where the page marks it (plan 297,
+  `test_every_sentence_a_card_shows_carries_its_word`): one in another
+  spelling of the same word is corrected to the card's (どちら's beside
+  どっち), one of another word read alike is dropped (開く under 空く),
+  and a kana card whose curated row holds another word's entry before
+  its own keeps its own (`vocab_extras._OWN_ENTRY`, ママ behind まま).
+  The word marked is the card's, not a card read alike: written with
+  the card's kanji (速い under 早い, 作る under 造る were dropped,
+  `test_no_card_marks_another_cards_spelling`), read its way (一日 read
+  いちにち under いちじつ), or in kana where the card's kanji is the
+  usual one (値段をつける is 付ける's, not 着ける's); a card the drops
+  leave bare is written for, and one whose gloss reaches a second JMdict
+  entry lists its senses (`_SENSES_ALSO`, 回り's surroundings).
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
@@ -492,7 +528,15 @@ runtime purpose.
   (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
-  read as an assumption.
+  read as an assumption. `KNOWN_STATE`'s one check of one is a
+  `card_modes` count only: a learner's total of answers (the review
+  total, retention, XP) reads `review_log` and its rollup, never a sum
+  of `card_modes`' counters, or every assumption is an answer (plan
+  300: a learner who boarded at N4 read 100% retention before answering
+  once). A card's and a deck's figures read `_state_row`'s `answers`,
+  which leave an untouched assumption's check out, and a check passed
+  takes the virtual one's place in the row (`SRSEngine.review`), so the
+  row counts what was answered; `total_reviews` still says met or new.
 - **An import is an assumption the level does not give back (plans
   243, 243b).** `SRSEngine.seed_imported` writes `KNOWN_STATE`'s
   signature with the source's interval and ease and `IMPORTED_STEP` in
@@ -520,6 +564,28 @@ runtime purpose.
   `/api/today` put the day's queue ahead of the first ride's card. A
   store's fetch shares the one in flight (`stores/remote.js`,
   `profileSummary`'s `fetchIfStale`).
+- **A gate is drawn on its first frame (plan 292).** What Today and
+  the four other gates open on is asked before they are opened, by
+  `lib/warm.js`: Today by the first ride once its sentence is up
+  (`warmToday`), the others by Today once the day has come, once a
+  visit, two at a time when idle (`warmGates`), never ahead of the
+  screen in front of the learner. A gate reads a store, or asks for
+  itself, keeps the answer (`keepCachedJson`) and draws the last one
+  kept (`lastCachedJson`) while it asks again, never a spinner over an
+  answer in hand. A new gate, or a new request one opens on, goes in
+  `GATE_PATHS` and `warmGates` in the same change. A tab tap lights its
+  gate at once and moves a frame later (`TabBar`): the router renders
+  as a transition, but nothing paints until it commits. What a gate
+  builds at great cost is kept between visits, not rebuilt: Today's
+  print layers are put back as they stood, their loops paused while
+  away (`TodayPrint`). A page of cards taller than the screen leaves
+  the ones below the fold unlaid (`content-visibility: auto`), each
+  standing in at its own content height written from its tokens (the
+  Dictionary's `.dict-entry-card`), so nothing moves when one is drawn;
+  and React draws a screenful of them first, the rest a frame later as
+  unseen places of the same size (`useScreenfulFirst`).
+  Measure a switch on the production build at phone width with the
+  CPU slowed 4×, before and after.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
@@ -595,6 +661,7 @@ cp .env.example .env          # then fill in DATABASE_URL / DEV_USER_ID
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 pytest                        # run all tests
+pytest -n auto --dist loadfile            # the same as CI runs it, a worker per core (pip install pytest-xdist)
 pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
@@ -763,8 +830,9 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-thirty hand-written exercises per level since plan 259, sixty at N5
-since plan 274, in each of the app's languages (Spanish since plan 291),
+thirty hand-written exercises per level since plan 259, sixty at N4
+and eighty at N5 since plan 298, in each of the app's languages
+(Spanish since plan 302),
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -854,6 +922,16 @@ those learners typed the name for their card, so read the report before
 python -m scripts.migrate_handles      # report; --yes to apply, --user to scope (repeatable)
 ```
 
+And one after the deploy that carries plan 300: a check passed before it
+counted on top of the level rule's virtual one, so those cards read 2 of
+2 for one answer. It sets every row that is exactly one check of one over
+its logged history to the log's count, and leaves alone a row whose
+history was folded into the rollup.
+
+```bash
+python -m scripts.recount_known_checks  # report; --yes to apply, --user to scope
+```
+
 And one after any deploy that changes the voice (plan 121 did, from edge-tts
 to VOICEVOX Nemo). Run it from the backend's Render Shell, since it needs the
 database and the disk the clips live on. It remakes every dictation clip and
@@ -892,7 +970,7 @@ reading/translation practice serve, and a one-line gloss for the ~20k
 commonest pool words and for every compound of the deck's nouns JMdict
 holds, which is what lets the breakdown fold it (plan 280). It sits
 beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
-re-commits the 76 MB pool. The Spanish layer (plan 291) is the same, in
+re-commits the 76 MB pool. The Spanish layer (plan 302) is the same, in
 `datas/vocab/jmdict_es.sqlite3`: every line the French one has, its
 senses, its sentences and its pool lines. To correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
@@ -903,7 +981,7 @@ python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
 python -m scripts.build_jmdict_fr --lang es --export  # -> datas/vocab/es_source/
 python -m scripts.build_jmdict_fr --lang es           # -> datas/vocab/jmdict_es.sqlite3
 python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
-python -m scripts.build_kanji_db --spanish-only # kanji_meanings_es.json into kanji.sqlite3 (plan 291)
+python -m scripts.build_kanji_db --spanish-only # kanji_meanings_es.json into kanji.sqlite3 (plan 302)
 python -m scripts.spanish_coverage              # what reads Spanish, and what still reads English
 ```
 
@@ -1169,7 +1247,7 @@ npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
+npm test          # vitest's eight lanes in CI's three groups, one after another (scripts/test-lanes.mjs)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt

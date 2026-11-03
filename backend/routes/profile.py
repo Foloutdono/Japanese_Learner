@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 from psycopg2 import errors as pg_errors
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from core.db import db_conn
 from core.rls import enable_rls
@@ -19,8 +19,10 @@ from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
 from core import credits, events, learner_modes, review_plan
 from core.lines import clean_lines
+from content.kana_data import KANA_SETS
 from srs.xp import level_progress, next_milestone
 from study import banzuke, level_fit, level_rule, main_modes
+from study import modes as study_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
 
@@ -204,6 +206,13 @@ def _init_db() -> None:
                 # but the learner's own choice writes it. See
                 # frontend/src/lib/langChoice.js.
                 ("ui_lang", "TEXT"),
+                # 前回 — the last ride a Learn station boarded (plan
+                # 291): {"path": "/learn/vocab/N4/vocab.flashcard.f2b",
+                # "at": ISO}, a line's stop in one of its graded modes.
+                # The phone's Learn gate offers it again in one tap.
+                # NULL = none yet. POST /api/profile/ride writes it,
+                # GET /api/profile reads it (clean_ride both ways).
+                ("learn_ride", "JSONB"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -491,6 +500,52 @@ def _ui_lang(user_id: str) -> str | None:
         conn.close()
     value = (row["ui_lang"] if isinstance(row, dict) else row[0]) if row else None
     return value if value in UI_LANGS else None
+
+
+# ── 前回 — the last ride (plan 291) ──
+# The phone's Learn gate offers the last run a station boarded again,
+# in one tap. A path the client sends is kept only if it is one: a
+# line's stop (a JLPT level, or a kana set) and one of that line's
+# graded modes, so the row always names a stop of a line, as a plate
+# does. The browse (fast review) is no ride, and a tier, a theme or a
+# radical is not a stop of the line: the row keeps the last one that is.
+RIDE_STOPS = {
+    "kana": tuple(KANA_SETS),
+    "vocab": LEVELS,
+    "kanji": LEVELS,
+    "grammar": LEVELS,
+}
+_RIDE = re.compile(r"/learn/([a-z]+)/([A-Za-z0-9_]+)/([a-z0-9_.]+)")
+
+
+def clean_ride(path: str | None) -> str | None:
+    """`path` if it names a line's stop in one of its graded modes,
+    else None."""
+    match = _RIDE.fullmatch(path or "")
+    if not match:
+        return None
+    line, stop, mode = match.groups()
+    if stop not in RIDE_STOPS.get(line, ()):
+        return None
+    if mode not in study_modes.GRADED_FOR_SOURCE.get(line, ()):
+        return None
+    return path
+
+
+def _learn_ride(user_id: str) -> dict | None:
+    """The last ride, or None: never one, or one whose stop or mode the
+    app no longer offers (read through clean_ride again)."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT learn_ride FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    ride = (row["learn_ride"] if isinstance(row, dict) else row[0]) if row else None
+    if not isinstance(ride, dict) or clean_ride(ride.get("path")) is None:
+        return None
+    return {"path": ride["path"], "at": ride.get("at")}
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -929,6 +984,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # The interface language the learner chose, null if never: the
         # app copies it onto the device on boot (lib/langChoice.js).
         "uiLang": _ui_lang(user_id),
+        # 前回 (plan 291): the last ride a Learn station boarded,
+        # {path, at}, or null; the phone's Learn gate offers it again.
+        "learnRide": _learn_ride(user_id),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -1196,6 +1254,34 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
         raise HTTPException(status_code=422, detail=f"jlptLevel must be one of {', '.join(LEVELS)}")
     current = _profile_row(user_id)[1]
     return level_rule_preview(user_id, current, jlptLevel)
+
+
+class RidePayload(BaseModel):
+    """The run a Learn station just boarded, as its path."""
+    path: str = Field(max_length=96)
+
+
+@router.post("/api/profile/ride")
+def note_ride(payload: RidePayload, user_id: str = Depends(get_user_id)):
+    """前回 (plan 291): a Learn station boarded a run; it becomes the
+    last ride, the one the phone's gate offers again. Anything but a
+    line's stop in a graded mode is refused (clean_ride)."""
+    path = clean_ride(payload.path)
+    if path is None:
+        raise HTTPException(status_code=422, detail="not a ride")
+    ensure_profile_row(user_id)
+    ride = {"path": path, "at": datetime.now(timezone.utc).isoformat()}
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE user_profiles SET learn_ride = %s::jsonb WHERE user_id = %s",
+                (json.dumps(ride), user_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"learnRide": ride}
 
 
 @router.get("/api/profile/modes")

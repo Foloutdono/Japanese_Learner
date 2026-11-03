@@ -91,7 +91,7 @@ def theme_entries(theme: str, level: str | None = None) -> list[dict]:
     `meaning`, `meaning_fr` and `meaning_es` are the theme's own glosses,
     the sense the word has IN the theme (羽 is a feather in `birds`, not a
     counter), and the French and Spanish ones are what a pool word has no
-    other source for; every line has all three (plan 291).
+    other source for; every line has all three (plan 302).
 
     `level` filters to one band; None returns the whole theme.
 

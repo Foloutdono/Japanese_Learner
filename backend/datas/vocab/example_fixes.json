@@ -449,6 +449,13 @@
    "es": "«¿Te duele la espalda?» «No, estoy bien». «Ah, qué bien».",
    "why": "too hard for N4 (不幸中の幸い)"
   },
+  "「花子と太郎のどちらが若いですか」「太郎です」": {
+   "jp": "「花子と太郎のどちらが若いですか。」「えっ、どっちだろう。太郎かな。」",
+   "en": "\"Which is younger, Hanako or Taro?\" \"Hmm, which one? Taro, I think.\"",
+   "fr": "« Qui est le plus jeune, Hanako ou Taro ? » « Euh, lequel des deux ? Taro, je crois. »",
+   "why": "どっち absent from the どっち card's sentence; a casual reply beside the polite question, as the other どっち sentence",
+   "es": "«¿Quién es más joven, Hanako o Taro?» «Eh, ¿cuál de los dos será? Supongo que Taro»."
+  },
   "「行った」というのが適切な言葉だ。": {
    "jp": "先生は、私の質問に適切な答えをくれた。",
    "en": "The teacher gave an appropriate answer to my question.",
@@ -3169,7 +3176,7 @@
    "jp": "レジで１０００円払った。",
    "en": "I paid 1,000 yen at the register.",
    "fr": "J'ai payé 1 000 yens à la caisse.",
-   "es": "Pagué 1000 yenes en la caja.",
+   "es": "Pagué 1,000 yenes en la caja.",
    "why": "too hard for N4 (くしくも)"
   },
   "くたくたに煮る。": {
@@ -5873,6 +5880,13 @@
    "fr": "Il y a beaucoup de boutiques au sous-sol de la gare.",
    "es": "En la planta subterránea de la estación hay muchas tiendas.",
    "why": "fragment; EN mismatch"
+  },
+  "そちらの条件を受け入れましょう。": {
+   "jp": "「そっちの条件は？」「そちらに合わせますよ。」",
+   "en": "\"What are your conditions?\" \"I'll go along with yours.\"",
+   "fr": "« C'est quoi, tes conditions ? » « Je m'aligne sur les vôtres. »",
+   "why": "そっち absent from the そっち card's sentence; a casual question beside the polite reply, as the other そっち sentences",
+   "es": "«¿Y cuáles son tus condiciones?» «Me ajusto a las suyas»."
   },
   "そちらはセントラル自動車学校ではないんですか。": {
    "jp": "「そっちは出口？」「いいえ、そちらは入口です。」",
@@ -9406,7 +9420,7 @@
    "jp": "この店では、五千円以上買うと送料が無料になる。",
    "en": "At this shop, shipping is free if you spend 5,000 yen or more.",
    "fr": "Dans cette boutique, les frais de port sont offerts à partir de 5 000 yens d'achat.",
-   "es": "En esta tienda, si compras por 5000 yenes o más, los gastos de envío son gratis.",
+   "es": "En esta tienda, si compras por 5,000 yenes o más, los gastos de envío son gratis.",
    "why": "long, awkward"
   },
   "もしコーヒーが濃すぎれば、いくらかお湯を足して下さい。": {
@@ -10169,7 +10183,7 @@
    "jp": "富士山は海抜３７７６メートルだ。",
    "en": "Mount Fuji is 3,776 meters above sea level.",
    "fr": "Le mont Fuji culmine à 3 776 mètres au-dessus du niveau de la mer.",
-   "es": "El monte Fuji tiene 3776 metros de altitud sobre el nivel del mar.",
+   "es": "El monte Fuji tiene 3,776 metros de altitud sobre el nivel del mar.",
    "why": "outdated figure for Everest"
   },
   "オランダを訪問するまで、風車を見たことがなかった。": {
@@ -11205,7 +11219,7 @@
    "jp": "電気代の請求が来た。",
    "en": "The electricity bill has arrived.",
    "fr": "La facture d'électricité est arrivée.",
-   "es": "Llegó la recibo de la luz.",
+   "es": "Llegó el recibo de la luz.",
    "why": "legal jargon, hard"
   },
   "スージーは真夜中までおきていた。すると奇妙な物音が聞こえた。": {
@@ -14607,7 +14621,7 @@
    "jp": "千円札、くずれますか。",
    "en": "Can you break a 1,000-yen note?",
    "fr": "Vous pouvez me faire la monnaie sur un billet de 1 000 yens ?",
-   "es": "¿Me puede cambiar un billete de 1000 yenes?",
+   "es": "¿Me puede cambiar un billete de 1,000 yenes?",
    "why": "verify: the original was right: くずれる has the filed sense 'to be broken into change' (千円札がくずれる); the replacement's 長年の雨で is also off (長年の風雨). Restored, with a comma"
   },
   "半時間したら彼はここに来るでしょう。": {
@@ -15573,7 +15587,7 @@
    "jp": "大人は千円、子どもは五百円です。",
    "en": "It's 1,000 yen for adults and 500 yen for children.",
    "fr": "C'est mille yens pour les adultes et cinq cents yens pour les enfants.",
-   "es": "Son 1000 yenes para los adultos y 500 yenes para los niños.",
+   "es": "Son 1,000 yenes para los adultos y 500 yenes para los niños.",
    "why": "ungrammatical 見える; adult-film reading"
   },
   "大人はしばしば変化を恐れる。": {
@@ -22877,6 +22891,13 @@
    "es": "En el contrato, al vendedor se le denomina parte A y al comprador, parte B.",
    "why": "fixed saying, unclear sense"
   },
+  "申し訳ありませんが、ただ今満室になっています。": {
+   "jp": "申し訳ありませんが、ただいま満室になっています。",
+   "en": "I'm afraid we're quite full at the moment.",
+   "fr": "Toutes nos excuses, mais nous sommes complets pour le moment.",
+   "why": "ただ今 hides the ただいま card's word from its page; the kana spelling is as usual in this phrase",
+   "es": "Lo sentimos mucho, pero en este momento estamos completos."
+  },
   "男の子たちが、私の柿の木になっている熟した実を全部持ち去ってしまった。": {
    "jp": "庭の木にたくさんの実がなった。",
    "en": "Lots of fruit grew on the tree in the garden.",
@@ -23966,7 +23987,7 @@
    "jp": "そのレコードを買うのに3000円かかった。",
    "en": "It cost me 3,000 yen to buy the record.",
    "fr": "Ce disque m'a coûté 3 000 yens.",
-   "es": "Comprar ese disco me costó 3000 yenes.",
+   "es": "Comprar ese disco me costó 3,000 yenes.",
    "why": "translationese 私は"
   },
   "私はその他の計画を思い付かない。": {
@@ -27027,6 +27048,13 @@
    "fr": "Mettez votre sac sous le siège, s'il vous plaît.",
    "es": "Por favor, ponga su bolso debajo del asiento.",
    "why": "EN unnatural"
+  },
+  "音楽が好きで、毎日聴いています。": {
+   "jp": "音楽が好きで、毎日聞いています。",
+   "en": "I like music, and I listen to it every day.",
+   "fr": "J'aime la musique, et j'en écoute tous les jours.",
+   "why": "聴く has no card, so the 聞く card's page marked the き of 好き; 聞く for listening to music is the card's own spelling",
+   "es": "Me gusta la música y la escucho todos los días."
   },
   "音楽の好みは人によって好きずきです。": {
    "jp": "服の色なんて好き好きだから、好きなのを選べばいい。",

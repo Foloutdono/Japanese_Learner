@@ -14,7 +14,7 @@ import './index.css'
 //      off at the screen's edge);
 //   3. the themes stand three across, drawn;
 //   4. the languages stand one per row, each name and its two words on
-//      one line, its flag before it (plan 291: two across left the third
+//      one line, its flag before it (plan 302: two across left the third
 //      alone, and three across broke the words in two).
 
 const JOURNEY = {

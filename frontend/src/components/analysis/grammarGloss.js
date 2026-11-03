@@ -20,7 +20,7 @@ export function grammarGloss(point, lang) {
 
 // The formation line the same way: the analysis carries the English
 // `structure` and, since plan 215, the French `structure_fr` beside it,
-// since plan 291 the Spanish `structure_es` (study/analysis._grammar_entries)
+// since plan 302 the Spanish `structure_es` (study/analysis._grammar_entries)
 // -- a stored breakdown from before that has the English alone, and reads
 // as it did.
 export function grammarStructure(point, lang) {

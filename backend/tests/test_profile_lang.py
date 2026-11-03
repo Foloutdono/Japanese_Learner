@@ -37,7 +37,7 @@ def test_the_choice_is_kept_on_the_account(client):
     assert client.get("/api/profile").json()["uiLang"] == "en"
     client.patch("/api/profile/learning", json={"uiLang": "fr"})
     assert client.get("/api/profile").json()["uiLang"] == "fr"
-    client.patch("/api/profile/learning", json={"uiLang": "es"})      # plan 291
+    client.patch("/api/profile/learning", json={"uiLang": "es"})      # plan 302
     assert client.get("/api/profile").json()["uiLang"] == "es"
 
 

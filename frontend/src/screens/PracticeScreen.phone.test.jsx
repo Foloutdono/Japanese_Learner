@@ -268,6 +268,24 @@ describe('the platform\'s sheet (plan 290)', () => {
     expect(asked.map(path => path.split('/')[3]).sort()).toEqual(['comprehension', 'dictation', 'translation'])
   })
 
+  it('opens with the focus on the page in view\'s roundel, and keeps Tab to it and its page', async () => {
+    // Not the first platform: the strip's first roundel is a button too,
+    // at tabindex -1, and was where the focus landed.
+    await raise('/practice/dictation')
+    const stop = sheet().querySelector('.prc-sheet__stop[aria-current]')
+    expect(stop.getAttribute('aria-label')).toBe(fr.dictationTitle)
+    expect(document.activeElement).toBe(stop)
+    // The trap's stops are that roundel and the page in view's controls,
+    // the inert pages' none of them: Tab past Embarquer comes back to
+    // the roundel, and Shift+Tab from it goes back to Embarquer.
+    const go = page().querySelector('.prc-page__go')
+    go.focus()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
+    expect(document.activeElement).toBe(stop)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }))
+    expect(document.activeElement).toBe(go)
+  })
+
   it('slides to another platform from its roundel, and follows a swipe', async () => {
     await raise('/practice/reading')
     const pager = sheet().querySelector('.prc-sheet__pager')

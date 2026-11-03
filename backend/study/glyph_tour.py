@@ -57,7 +57,7 @@ _PATH = re.compile(r'<path\b[^>]*?\bid="kvg:[0-9a-f]+-s(\d+)"[^>]*?\bd="([^"]+)"
 
 
 def _lang(lang: str | None) -> str:
-    """The languages a meaning is served in: French, Spanish (plan 291),
+    """The languages a meaning is served in: French, Spanish (plan 302),
     else English. The payloads are cached by it, so nothing else may key
     them."""
     code = str(lang or "").lower()[:2]

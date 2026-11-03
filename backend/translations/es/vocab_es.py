@@ -1,5 +1,5 @@
 """
-The Spanish glosses of the vocab deck (plan 291): datas/vocab/vocab_es.json,
+The Spanish glosses of the vocab deck (plan 302): datas/vocab/vocab_es.json,
 one line per card under its own key, "{kanji}::{kana}" (the kana alone
 for a kana-only word), the key translations.fr_gloss reads first.
 

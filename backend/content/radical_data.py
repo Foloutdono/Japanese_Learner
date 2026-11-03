@@ -177,7 +177,7 @@ def info_for(number: int, lang: str = "fr") -> dict | None:
     learner meets it. They differ for the two dozen radicals KANJIDIC2
     files under a form nobody writes (才 for hand, 邗 for city).
     `meaning` is in the learner's language: English, French or Spanish
-    (RADICAL_ES, plan 291), English for any other."""
+    (RADICAL_ES, plan 302), English for any other."""
     r = RADICAL_BY_NUMBER.get(number)
     if r is None:
         return None

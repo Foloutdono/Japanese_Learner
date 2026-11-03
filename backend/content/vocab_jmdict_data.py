@@ -82,7 +82,7 @@ _local = threading.local()
 
 _FR_PATH = os.path.join(_DATA_DIR, "jmdict_fr.sqlite3")
 # The layers over the pool a gloss query also reads, by the alias each is
-# attached under: French (plan 215) and Spanish (plan 291).
+# attached under: French (plan 215) and Spanish (plan 302).
 _LAYER_PATHS = {"fr": _FR_PATH, "es": os.path.join(_DATA_DIR, "jmdict_es.sqlite3")}
 
 
@@ -93,7 +93,7 @@ def _conn() -> sqlite3.Connection:
         conn = sqlite3.connect(f"file:{_DB_PATH}?mode=ro", uri=True)
         search_match.register_sql(conn)
         # The French and Spanish layers (content/jmdict_fr.py, plans 215
-        # and 291), attached so a gloss query in either can be one
+        # and 302), attached so a gloss query in either can be one
         # predicate over the pool. A layer's absence only means a query
         # in its language matches the other glosses alone, as it did
         # before it existed.
@@ -113,7 +113,7 @@ def _layers() -> list[str]:
 
 
 def _layer_clause(q: str, match: str, lang: str) -> tuple[str, list]:
-    """The pool words whose line in `lang` (plans 215, 291) holds `q` --
+    """The pool words whose line in `lang` (plans 215, 302) holds `q` --
     one subquery over the layer's lines, run once per query rather than
     per pool row, on the line folded at build time (lowercase, no
     accents), so « epee » finds « épée » without a Python call per row.
@@ -383,7 +383,7 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
     """
     clauses, params = [], []
     # A gloss query also reads the pool's French and Spanish lines
-    # (plans 215, 291), in any session language, as the deck half matches
+    # (plans 215, 302), in any session language, as the deck half matches
     # every gloss whichever is displayed (routes/dictionary._deck_matches).
     # They are Latin script whether or not they are ASCII: « épée » and
     # «canción» are glosses, never a kanji or a reading.

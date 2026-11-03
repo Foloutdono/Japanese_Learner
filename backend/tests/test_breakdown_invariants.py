@@ -133,7 +133,7 @@ class GlossTableTests(unittest.TestCase):
                         self.assertTrue((gloss.get(lang) or "").strip(), lang)
 
     def test_every_row_of_a_tuple_table_has_its_spanish(self) -> None:
-        # (reading,) English, French, Spanish: the Spanish last (plan 291).
+        # (reading,) English, French, Spanish: the Spanish last (plan 302).
         from study.reading_context import LATIN_UNITS
         tables = {"units": (LATIN_UNITS, 4), "sizes": (analysis._SIZES, 4), "latin": (analysis._LATIN_WORDS, 4),
                   "adverbs": (particle_glosses._ADVERBS, 3), "ordinal": (analysis._ORDINAL_SENSE, 3)}
@@ -146,7 +146,7 @@ class GlossTableTests(unittest.TestCase):
     def test_every_gloss_a_breakdown_prints_has_its_spanish(self) -> None:
         # The tables and the glosses made on the spot: a figure, a time,
         # a score, a fraction, an age, a date, an ordinal, a unit, a size,
-        # a JLPT level, an adverb made with に (plan 291).
+        # a JLPT level, an adverb made with に (plan 302).
         made = ("九千三百五十円", "1,500円です", "１００万人", "３．５キロ走った", "19:30に会おう", "26-24でセットを取った",
                 "大さじ1と1/2を入れる", "20代の女性", "10/24（土）の飲み会", "3曲目は新曲です", "何年目ですか",
                 "600Wで温める", "普段はMですが、ワンサイズ上のLにした", "N3に合格した", "本当に楽しかった",

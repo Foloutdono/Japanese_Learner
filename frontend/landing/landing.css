@@ -126,7 +126,7 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .nav a[aria-current="true"]::after { transform: scaleX(1); }
 .top__end { display: flex; align-items: center; gap: var(--sp-5); }
 .langs { display: none; }
-/* A language's flag (plan 291): its country's colours, the height of
+/* A language's flag (plan 302): its country's colours, the height of
    the code or name beside it, ringed so a white stripe holds its edge. */
 .lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
 /* The phone's languages: the one read now, and a tap opens the three by
@@ -2078,7 +2078,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 }
 
 /* The section links, once the header holds them beside the flagged
-   switch and, scrolled, both Se connecter and Embarquer (plan 291:
+   switch and, scrolled, both Se connecter and Embarquer (plan 302:
    at 1240px the three flags pushed them past the gutter). */
 @media (min-width: 1280px) {
   .nav { display: flex; gap: var(--sp-6); }

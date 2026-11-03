@@ -68,7 +68,7 @@ _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
 _MULTIPART_OVERHEAD_BYTES = 64 * 1024
 # Files an upload may carry: the track, the recognised one it is timed
 # by, and the video's own translation in each of
-# study/line_translate.TRACK_LANGS (plan 242; three since plan 291).
+# study/line_translate.TRACK_LANGS (plan 242; three since plan 302).
 _MAX_UPLOAD_FILES = 2 + len(line_translate.TRACK_LANGS)
 
 # Same reasoning and same values as routes/exams.py's own constants --

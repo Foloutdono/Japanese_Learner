@@ -97,20 +97,22 @@ describe('the canvas and the lattices (P1)', () => {
 })
 
 describe('the gates (P2)', () => {
-  it('keeps the Learn plate\'s three-stop foot', async () => {
-    const { Plate, StopsFoot } = await import('./components/station/LinePlate')
-    const stops = ['N5', 'N4', 'N3', 'N2', 'N1'].map((k, i) => ({ key: k, label: k, jp: false, score: i === 0 ? 0.4 : 0 }))
+  // Since plan 291 the phone's Learn plate folds to one line, its stop
+  // and figure under the name: no foot, and never the desk's line.
+  it('folds the Learn plate to one line, with no foot and no desk line', async () => {
+    const { Plate } = await import('./components/station/LinePlate')
     await render(
       <LangProvider>
         <main className="learn">
-          <div className="plates">
-            <Plate section={{ path: '/learn/vocab', title: 'Vocab', color: 'var(--line-vocab)' }} foot={<StopsFoot stops={stops} />} />
+          <div className="plates lrn-folds">
+            <Plate section={{ path: '/learn/vocab', title: 'Vocab', color: 'var(--line-vocab)' }} className="plate--line plate--fold" meta="N4 · 260 / 640" />
           </div>
         </main>
       </LangProvider>
     )
     await settle()
-    expect(document.querySelector('.plate__foot--stops')).not.toBeNull()
+    expect(document.querySelector('.plate--fold .plate__meta').textContent).toBe('N4 · 260 / 640')
+    expect(document.querySelector('.plate__foot')).toBeNull()
     expect(document.querySelector('.desk-line')).toBeNull()
   })
 })

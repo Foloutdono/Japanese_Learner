@@ -395,7 +395,7 @@ _TOOLTIPS_FR = {
 _NEWS_TOOLTIP_FR = "classé entre les rangs {lo} et {hi} d'une analyse de fréquence du Mainichi Shimbun (années 1990)"
 
 
-# The same chips and tooltips in Spanish (plan 291), every code the
+# The same chips and tooltips in Spanish (plan 302), every code the
 # French tables name: a Spanish learner reads neither French nor
 # JMdict's English notes.
 _SHORT_LABELS_ES = {
@@ -642,6 +642,63 @@ def _senses_of_own_word(key: str, own: list[dict] | None) -> list[dict] | None:
     return senses
 
 
+# Kana cards whose curated row holds two words read alike, another's
+# entry before the card's own (plan 297): ママ "mom" came behind まま
+# "as it is", and the card listed まま's four senses and nested まま's
+# sentences under them. The card keeps its own entry, by its place in
+# the row (JMdict numbers each word's senses from 1, so an entry starts
+# where the numbering does). The other entry's sentences go with it,
+# save those a correction made the card's own (plan 227 rewrote まま's
+# into ママ's): they are borrowed, and get_vocab_extras shows one only
+# where it carries the card's word.
+_OWN_ENTRY: dict[str, int] = {
+    "::ママ": 1,
+}
+
+
+def _entries(senses: list[dict]) -> list[list[dict]]:
+    out: list[list[dict]] = []
+    for sense in senses:
+        number = (sense.get("tags") or [""])[0]
+        if not out or number == "1":
+            out.append([])
+        out[-1].append(sense)
+    return out
+
+
+def _own_entry(key: str, senses: list[dict] | None) -> list[dict] | None:
+    entries = _entries(senses or [])
+    index = _OWN_ENTRY[key]
+    if index >= len(entries):
+        return senses
+    own = [{**sense, "examples": list(sense.get("examples", []))} for sense in entries[index]]
+    own[0]["examples"] += [{**ex, "borrowed": True}
+                           for i, entry in enumerate(entries) if i != index
+                           for sense in entry for ex in sense.get("examples", [])]
+    return own
+
+
+# A card whose gloss reaches into a second JMdict entry the curated row
+# left out (plan 297): 回り teaches "circumference, surroundings,
+# circulation", and JMdict files the first two under 周り;回り, apart
+# from 回り's rotations, so 「家のまわりに花を植えた。」 had no sense to
+# stand under. The card lists that entry's senses before its own, as its
+# gloss does, without the sentences of the card that row is.
+_SENSES_ALSO: dict[str, tuple[str, str]] = {
+    "回り::まわり": ("周り", "まわり"),
+}
+
+
+def _with_senses_of(key: str, own: list[dict] | None) -> list[dict] | None:
+    src_kanji, src_kana = _SENSES_ALSO[key]
+    other = vocab_meanings_data.get(f"{src_kanji}::{src_kana}")
+    if not other and _jmdict_db is not None:
+        other = _jmdict_db.get_senses(src_kanji, src_kana)
+    if not other:
+        return own
+    return [{**sense, "examples": []} for sense in other] + list(own or [])
+
+
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     # Fast path: curated_senses keys its rows with the exact same
     # packed kana string vocab_deck.json uses (see module docstring),
@@ -650,6 +707,10 @@ def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     senses = vocab_meanings_data.get(f"{kanji}::{kana}")
     if f"{kanji}::{kana}" in _SENSES_OF:
         return _senses_of_own_word(f"{kanji}::{kana}", senses)
+    if f"{kanji}::{kana}" in _OWN_ENTRY:
+        return _own_entry(f"{kanji}::{kana}", senses)
+    if f"{kanji}::{kana}" in _SENSES_ALSO:
+        return _with_senses_of(f"{kanji}::{kana}", senses)
     if senses:
         return senses
     # Fallback for any mismatch in reading order/subset between the two
@@ -1543,11 +1604,11 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
     # Examples: primary sense(s) first, then the rest in their original
     # order, so the sentence matching the app's own gloss shows up first.
     ordered = [s for s in senses if id(s) in primary_ids] + [s for s in senses if id(s) not in primary_ids]
+    glosses = {numbers[id(s)]: "; ".join(s.get("glossary", [])) for s in senses}
+    refiled = example_fixes.refiled(kanji, kana)
     examples = []
     seen_jp = set()
     for sense in ordered:
-        num = numbers[id(sense)]
-        gloss = "; ".join(sense.get("glossary", []))
         for ex in sense.get("examples", []):
             # The course's correction of the sentence, where it has one
             # and it still carries this word (content/example_fixes.py).
@@ -1555,7 +1616,24 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
             jp = ex.get("jp")
             if not jp or jp in seen_jp:
                 continue
+            # Another word's sentence, kept where a correction made it
+            # this card's (_OWN_ENTRY).
+            if ex.get("borrowed") and _target_span(jp, kanji, kana) is None:
+                continue
             seen_jp.add(jp)
+            num, gloss = numbers[id(sense)], glosses[numbers[id(sense)]]
+            # JMdict files a sentence whose link names no sense under the
+            # first: the course files it under the sense it uses (plan
+            # 296), with the word under none, or not at all where it is
+            # another word written alike. A sense number the list no
+            # longer has leaves JMdict's (tests/test_example_senses.py).
+            refile = refiled.get(jp)
+            if refile and refile.get("drop"):
+                continue
+            if refile and "sense" in refile and refile["sense"] is None:
+                num, gloss = None, meaning_hint
+            elif refile and refile.get("sense") in glosses:
+                num, gloss = refile["sense"], glosses[refile["sense"]]
             examples.append({
                 "jp": jp,
                 "en": ex.get("en", ""),
@@ -1567,6 +1645,9 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
                 break
         if len(examples) >= _MAX_EXAMPLES:
             break
+    # A sentence filed under another sense keeps the primary's first.
+    primary_numbers = {numbers[id(s)] for s in senses if id(s) in primary_ids}
+    examples.sort(key=lambda ex: ex["sense_number"] not in primary_numbers)
     # Where JMdict's sentences run short, the course's own follow them.
     # Under no sense of JMdict's: a kana card can draw its senses from
     # another word read alike (だんだん's are the dialect "thank you"),
@@ -1586,7 +1667,7 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = 
 
 def _in_layer(senses_out: list[dict], examples: list[dict], lang: str) -> None:
     """The learner's layer over an entry (content/jmdict_fr.py: French
-    since plan 215, Spanish since plan 291), in place: a sense's
+    since plan 215, Spanish since plan 302), in place: a sense's
     glossary where its English line has a line in `lang`, and each
     example's translation as `tr` -- the field ExampleSentence already
     prefers to `en`. What has none keeps its English, and says so in

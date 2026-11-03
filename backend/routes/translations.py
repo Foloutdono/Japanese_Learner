@@ -19,7 +19,7 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
             from translations.fr.vocab_fr import VOCAB_FR
             return VOCAB_FR
 
-    # English, and Spanish (plan 291) walked the same way: a card Spanish
+    # English, and Spanish (plan 302) walked the same way: a card Spanish
     # has no line for yet carries its English, as get_meaning serves it,
     # so the map the client swaps meanings from never blanks a card.
     if lang in ("en", "es"):
@@ -82,7 +82,7 @@ def get_kanji_translation(word: str, lang: str = "fr"):
 # Each deck card's own gloss, keyed by its written form and its kana:
 # 148 written forms are several cards (後 is あと, うしろ, ご and のち), and
 # the map by written form holds one of them, so a run switching language
-# mid-card would hand the card another card's gloss (plan 291's review).
+# mid-card would hand the card another card's gloss (plan 302's review).
 @lru_cache(maxsize=3)
 def _card_glosses(lang: str) -> dict:
     from content.vocab_data import VOCAB_BY_LEVEL

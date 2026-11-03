@@ -3,7 +3,7 @@
 The public page for search and the stores: 辻 the crossroads (the owner's
 pick A on the canvas "Tsuji — landing page", improved with the others' best
 ideas). It is the site's `/` in French, `/en` in English and `/es` in Spanish
-(plan 291); the files live under `public/landing/` and `vercel.json`
+(plan 302); the files live under `public/landing/` and `vercel.json`
 rewrites the three addresses to them (the old `/landing/` addresses redirect there for good).
 
 It is a **static page**, not a screen of the app: plain HTML that search

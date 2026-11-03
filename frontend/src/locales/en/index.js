@@ -947,6 +947,8 @@ const stats = {
   destMovesTo:        date => `moves to ${date} at today's pace`,
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Read before',
   examPart: (n) => `Part ${n}`,
   serviceName: {
     local:   'Local',
@@ -1689,7 +1691,14 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
-  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
+  // How the sentence says the hole when another form was taken as right:
+  // its register (plan 241), or では in full or contracted (plan 295).
+  bldOther: (said, register) => `The sentence says ${said}: the same, ${({
+    plain: 'in plain speech',
+    polite: 'in polite speech',
+    full: 'with では in full',
+    contracted: 'with では contracted, as speech says it',
+  })[register] ?? 'in polite speech'}.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',
@@ -2578,8 +2587,9 @@ const boarding = {
   brdNotifText: 'Your cards are waiting at the gate.',
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
   // Settings › Notifications (plan 156). The nudge's title and body are
-  // written from what the gate will hold at the learner's hour.
-  nudgeTitle: (time, n) => `Your ${time} train · ${n} ${n === 1 ? 'card' : 'cards'}`,
+  // written from what the gate will hold at the learner's hour; the
+  // title leads with the hour, as a departure board's row (plan 293).
+  nudgeTitle: (time, n) => `${time} · ${n} ${n === 1 ? 'card' : 'cards'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'About a minute' : `About ${m} min`),
   nudgeNew: (n) => `${n} new`,
   // The reminders' channel, as Android's settings name it (lib/native.js).
@@ -2724,6 +2734,12 @@ const boarding = {
   brdPasswordMismatch: 'The two passwords are not the same.',
   brdAccountSentNote: (email) => `Almost: confirm ${email} from the link we just sent you.`,
   brdRemindAt: (time) => `Remind me at **${time}**`,
+  // Plan 294: the reminder, a step after the card (in the app alone).
+  brdRemindQ: 'Shall we announce your train?',
+  brdRemindHint: 'Every day, at the hour on your card.',
+  brdRemindYes: (time) => `Yes, at ${time}`,
+  brdRemindLater: 'Not now',
+  brdRemindNow: 'now',
   brdAgendaAdd: 'Add to my calendar',
   brdAgendaTitle: 'Tsuji · your Japanese train',
   brdAgendaBody: (min) => `${min} min of Japanese, every day.`,
@@ -2757,8 +2773,8 @@ const ride = {
   rideGuessed: 'Got the new one right? If it was a guess, choose Wrong next time, or it won’t come back for days.',
   rideDoneBody: n => `That’s it! **${n} new words a day**, each one back right before you’d forget it.`,
   rideContinue: 'Continue',
-  // The reading ride (plan 099): the sentence, the field, the measure,
-  // then the plate that says which platforms ride on the pass.
+  // The reading ride (plan 099): the sentence, the field, the measure;
+  // the grade enters the station (its plate went in plan 292).
   rideReadFront: 'Read it quick! It disappears in a moment.',
   rideReadFrontUntimed: 'Read it, then type it out in romaji or kana.',
   rideReadType: 'Type what you read, in romaji or kana.',
@@ -2767,9 +2783,6 @@ const ride = {
   // Plan 133. On a phone: the known card is not graded until its entry
   // has been opened from the 🔍 and closed again.
   rideKnownDict: 'Every card has a dictionary entry. Tap 🔍 to open this one, then close it.',
-  ridePlateCap: 'The pass',
-  ridePlateBody: 'These practice modes come with the pass.',
-  ridePlateOpen: 'For now, they’re free for everyone.',
 }
 
 const guide = {
@@ -2787,7 +2800,7 @@ const guide = {
   guideTabBar: 'Your five tabs: Learn, Practice, Today, Dictionary and your profile.',
   guideTodayDuels: 'Duels: two minutes against a friend or a traveller at your level. A gold number means a challenge is waiting.',
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
-  guideLearnStops: 'Where you are on the line, and the stops around you.',
+  guideLearnStops: 'Your stop on the line, and how much of it you already know.',
   guideLearnShelf: 'Your own decks, plus a library of decks shared by other learners.',
   guidePracticePass: 'These modes come with the pass.',
   // Practice's plates (plan 254): a platform, its foot (your level,
@@ -2893,6 +2906,13 @@ const onboarding = {
   practicePct: pct => `${pct}%`,
   practiceAllPapers: 'All papers',
   practiceAllScenes: 'All scenes',
+  // The phone's Learn gate (plan 291): the sheet a line raises, a page
+  // a line -- the stop and the mode chosen before departing -- and the
+  // shelf of decks under the lines.
+  learnSheet: 'Lines',
+  learnStop: 'Stop',
+  learnMode: 'Mode',
+  learnAllDecks: n => `All my decks (${n})`,
   // ── A practice station, on the desk (plan 159) ────────────────
   // The source as a switch at the list's head (the JLPT grades, word
   // frequency, your own cards), then the open stop's page: what the

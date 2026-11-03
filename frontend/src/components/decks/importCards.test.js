@@ -133,7 +133,7 @@ describe('the example', () => {
     }
   })
 
-  it('reads back in Spanish too, under its Spanish headers (plan 291)', () => {
+  it('reads back in Spanish too, under its Spanish headers (plan 302)', () => {
     const text = exampleText(GRAMMAR, '\t', es, 'es')
     expect(text).toContain('Lee este libro, por favor.')
     const { cards, header, ignored } = readCards(text, '\t', '\n', GRAMMAR, es)

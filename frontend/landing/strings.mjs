@@ -1,6 +1,6 @@
 // ── The landing page's words, in each language (plan 167) ──
 // French first, as the app is: the English page, and the Spanish one
-// (plan 291), are translations of this one, never pages of their own. The titles and descriptions are
+// (plan 302), are translations of this one, never pages of their own. The titles and descriptions are
 // docs/seo/keywords.md's, character for character; change them there
 // first. French typography (the space before : ; ? !) is set by the
 // renderer, so the strings below are written with plain spaces.
@@ -11,7 +11,7 @@ import { arrivals, spanOf } from './content.mjs'
 
 const FR_NUM = new Intl.NumberFormat('fr-FR')
 const EN_NUM = new Intl.NumberFormat('en-GB')
-// Latin-American Spanish (plan 291, the owner's choice of variety): a
+// Latin-American Spanish (plan 302, the owner's choice of variety): a
 // comma between thousands, as the app writes them (lib/locale.js, es-419).
 const ES_NUM = new Intl.NumberFormat('es-419')
 

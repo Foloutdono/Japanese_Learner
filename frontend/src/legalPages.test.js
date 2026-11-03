@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { flagSvg } from './components/ui/flags.js'
 
-// ── The privacy policy and the account-deletion page (plan 291) ──
+// ── The privacy policy and the account-deletion page (plan 302) ──
 // Two static pages in public/, written by hand, each with its switch
 // between the three languages. Their flags are copies of the app's
 // (components/ui/flags.js), pasted as SVG because nothing builds these

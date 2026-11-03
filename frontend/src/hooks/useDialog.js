@@ -18,11 +18,22 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 // approach: `inert` would be cleaner but needs every sibling of the
 // portal root enumerated, and these dialogs mount in several different
 // places in the tree.
+//
+// Tab's stops, not every control. A roving tab stop (the paged sheets'
+// roundels, plans 290 and 291; a radio group on the desk) leaves its
+// other members as buttons at tabindex -1, and a page out of view is
+// inert: both match a bare `button`. Counted, they opened a sheet with
+// the ring on the first roundel rather than the page in view's, and
+// made the trap's first and last stops ones Tab never reaches, so it
+// did not wrap.
 const FOCUSABLE = [
   'a[href]', 'button:not([disabled])', 'input:not([disabled])',
-  'select:not([disabled])', 'textarea:not([disabled])',
-  '[tabindex]:not([tabindex="-1"])',
-].join(',')
+  'select:not([disabled])', 'textarea:not([disabled])', '[tabindex]',
+].map(sel => `${sel}:not([tabindex="-1"])`).join(',')
+
+function stops(node) {
+  return [...node.querySelectorAll(FOCUSABLE)].filter(el => !el.closest('[inert]'))
+}
 
 // `capture`: for a dialog opened over another dialog — the dictionary's
 // readings sheet over its lookup sheet, or over the dictionary screen's
@@ -62,7 +73,7 @@ export function useDialog(onClose, { capture = false, focus = 'first' } = {}) {
       // confirm's Cancel on the desk, where Enter is under the hand and
       // a second press should not act (Sheet's `initialFocus`, plan 123).
       const named = focus !== 'panel' && focus !== 'first' ? node.querySelector(focus) : null
-      const first = focus === 'panel' ? null : named ?? node.querySelector(FOCUSABLE)
+      const first = focus === 'panel' ? null : named ?? stops(node)[0]
       // Fall back to the panel itself so focus lands *somewhere* inside
       // even in a dialog that is still loading and has no controls yet.
       if (first) {
@@ -81,8 +92,7 @@ export function useDialog(onClose, { capture = false, focus = 'first' } = {}) {
       }
       if (e.key !== 'Tab' || !ref.current) return
 
-      const items = [...ref.current.querySelectorAll(FOCUSABLE)]
-        .filter(el => el.offsetParent !== null)
+      const items = stops(ref.current).filter(el => el.offsetParent !== null)
       if (items.length === 0) return
 
       const first = items[0]

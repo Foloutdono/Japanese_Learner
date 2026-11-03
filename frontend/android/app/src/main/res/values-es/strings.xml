@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- 発車案内 — el widget como lo muestra el selector (plans 156, 291). -->
+    <!-- 発車案内 — el widget como lo muestra el selector (plans 156, 302). -->
     <string name="widget_label">Tu tren del día</string>
     <string name="widget_description">Las tarjetas del día, el tiempo que te llevan y una palabra que conoces.</string>
 </resources>

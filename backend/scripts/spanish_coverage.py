@@ -1,5 +1,5 @@
 """
-How much of what the app teaches reads Spanish (plan 291).
+How much of what the app teaches reads Spanish (plan 302).
 
 Spanish is the app's third language, written beside English and French a
 part at a time; whatever has no Spanish yet reads English (the learner is
@@ -181,7 +181,7 @@ def main() -> None:
         json.dump(figures, sys.stdout, ensure_ascii=False, indent=2)
         print()
         return
-    print("Spanish, written / to write (plan 291). Anything not written reads English.\n")
+    print("Spanish, written / to write (plan 302). Anything not written reads English.\n")
     print("Interface (frontend/src/locales/es): whole, held by locales.test.js\n")
     for deck in ("vocab", "kanji"):
         print(f"{deck} deck glosses")

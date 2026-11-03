@@ -77,7 +77,7 @@ describe('the iOS shell', () => {
   // The WebView's navigator.language follows the languages the shell
   // declares, so a language the app speaks but the shell does not reaches
   // the web app as the fallback: a Spanish iPhone opened in French until
-  // plan 291's review. Each language is declared, bundled and asked in.
+  // plan 302's review. Each language is declared, bundled and asked in.
   it('speaks every language the web app does, and falls back as it does', () => {
     const plist = read('ios/App/App/Info.plist')
     const declared = [...plist.match(/<key>CFBundleLocalizations<\/key>\s*<array>([\s\S]*?)<\/array>/)[1]

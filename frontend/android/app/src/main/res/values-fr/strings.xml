@@ -3,4 +3,8 @@
     <!-- 発車案内 — le widget tel que le sélecteur le présente (plan 156). -->
     <string name="widget_label">Ton train du jour</string>
     <string name="widget_description">Les cartes du jour, le temps qu’elles prennent, et un mot que tu connais.</string>
+    <string name="widget_preview_unit">cartes</string>
+    <string name="widget_preview_meta">12 min · 5 nouvelles</string>
+    <string name="widget_preview_meaning">train</string>
+    <string name="widget_preview_depart">Embarquer</string>
 </resources>

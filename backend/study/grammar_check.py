@@ -82,7 +82,7 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
     return out
 
 
-# ── Spanish (plan 291) ──
+# ── Spanish (plan 302) ──
 # Every text of the catalogue carries its Spanish now, and
 # tests/test_spanish.py requires it of each point (its gloss, its
 # lesson, its tour, its own Choisir questions). This check holds a side
@@ -140,7 +140,7 @@ def _japanese_skeleton(text: str) -> str:
 
 
 def _structure_fr_problems(entry: dict, lang: str = "fr") -> list[str]:
-    """`structure_fr`, or (plan 291) `structure_es`, held to the same
+    """`structure_fr`, or (plan 302) `structure_es`, held to the same
     rule: the English line's Japanese, in order, and no English left."""
     key = f"structure_{lang}"
     fr = entry.get(key)

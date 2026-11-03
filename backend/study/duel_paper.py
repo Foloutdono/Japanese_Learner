@@ -67,8 +67,8 @@ rev it was built under. The duel's rules go with the rev too
 a streak and the last seconds more (plan 285); sprint-3's papers are
 mixes (plan 286), sprint-4's ask three choices (plan 288), sprint-5's
 start at the beginner's stop (plan 289), sprint-6's word choices are
-written in Spanish too (plan 291), sprint-7's in the reviewed
-Latin-American Spanish (plan 291's review), with the same rules.
+written in Spanish too (plan 302), sprint-7's in the reviewed
+Latin-American Spanish (plan 302's review), with the same rules.
 """
 from __future__ import annotations
 

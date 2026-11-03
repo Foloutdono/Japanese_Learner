@@ -12,7 +12,7 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
         <string>Tsuji</string>
-	<!-- The languages the shell speaks (plans 215, 291), lib/locale.js's
+	<!-- The languages the shell speaks (plans 215, 302), lib/locale.js's
 	     SUPPORTED_LANGS: the usage prompts below are said in each through
 	     its lproj's InfoPlist.strings (native.shells.test.js holds them). -->
 	<key>CFBundleLocalizations</key>

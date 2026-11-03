@@ -158,7 +158,7 @@ function crossroads(t) {
 
 // ── Sections ──
 
-// The languages, each beside its flag (plan 291): the desktop's switch
+// The languages, each beside its flag (plan 302): the desktop's switch
 // FR · EN · ES, and on a phone, where three do not fit beside the sign-in,
 // a menu of them by name. A <details>, so it opens without the script,
 // which only closes it on a tap outside or Escape.

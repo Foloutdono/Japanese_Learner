@@ -4104,7 +4104,7 @@
           "ask": {
             "en": "How many points does a 3,000-yen purchase give?",
             "fr": "Combien de points un achat de 3 000 yens rapporte-t-il ?",
-            "es": "¿Cuántos puntos da una compra de 3000 yenes?"
+            "es": "¿Cuántos puntos da una compra de 3,000 yenes?"
           },
           "jp": "この店では、千円に対して、十ポイントがつきます。",
           "tr": {
@@ -4132,7 +4132,7 @@
           "why": {
             "en": "With an amount, に対して is « per »: ten points for each thousand yen, so 3,000 yen gives thirty. It is not a flat ten-point bonus, and nothing is divided.",
             "fr": "Avec une quantité, に対して veut dire « pour » : dix points pour chaque tranche de mille yens, donc 3 000 yens donnent trente points. Ce n'est pas un bonus fixe de dix points, et rien n'est divisé.",
-            "es": "Con una cantidad, に対して es «por cada»: diez puntos por cada mil yenes, así que 3000 yenes dan treinta. No es un bono fijo de diez puntos, y no se divide nada."
+            "es": "Con una cantidad, に対して es «por cada»: diez puntos por cada mil yenes, así que 3,000 yenes dan treinta. No es un bono fijo de diez puntos, y no se divide nada."
           }
         },
         {
@@ -15109,7 +15109,7 @@
           "tr": {
             "en": "The 3,000-yen book is 1,000 yen cheaper, so that means I can buy it for 2,000 yen.",
             "fr": "Le livre à 3 000 yens est 1 000 yens moins cher : cela veut dire que je peux l'avoir pour 2 000 yens.",
-            "es": "El libro de 3000 yenes tiene 1000 de descuento, así que puedo comprarlo por 2000."
+            "es": "El libro de 3,000 yenes tiene 1000 de descuento, así que puedo comprarlo por 2000."
           },
           "choices": [
             {
@@ -15131,7 +15131,7 @@
           "why": {
             "en": "わけだ also says « so that works out as »: from the known figures it reaches the result, 2,000 yen. It does not give a reason for the sale, and it predicts nothing.",
             "fr": "わけだ dit aussi « ça revient donc à » : des chiffres connus, il tire le résultat, 2 000 yens. Il ne donne pas la raison de la promotion et ne prévoit rien.",
-            "es": "わけだ también dice «así que sale a»: de las cifras conocidas llega al resultado, 2000 yenes. No da la razón de la rebaja y no predice nada."
+            "es": "わけだ también dice «así que sale a»: de las cifras conocidas llega al resultado, 2,000 yenes. No da la razón de la rebaja y no predice nada."
           }
         },
         {
@@ -22594,7 +22594,7 @@
           "tr": {
             "en": "If five of us went, it would come to 3,000 yen each.",
             "fr": "Si nous y allions à cinq, ça ferait 3 000 yens chacun.",
-            "es": "Si fuéramos cinco, saldría a 3000 yenes por cabeza."
+            "es": "Si fuéramos cinco, saldría a 3,000 yenes por cabeza."
           },
           "choices": [
             {
@@ -22610,7 +22610,7 @@
             {
               "en": "Reporting a trip: five went and each paid 3,000 yen.",
               "fr": "Raconter un voyage : cinq personnes y sont allées et chacune a payé 3 000 yens.",
-              "es": "Cuenta un viaje: fueron cinco y cada uno pagó 3000 yenes."
+              "es": "Cuenta un viaje: fueron cinco y cada uno pagó 3,000 yenes."
             }
           ],
           "why": {
