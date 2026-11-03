@@ -1128,11 +1128,11 @@ class PrintedNumberTests(unittest.TestCase):
                 self.assertEqual(token["gloss"]["en"], figure)
                 self.assertEqual(token["furigana"], [{"text": number, "reading": reading}])
         self.assertEqual(token_of("３．５キロ走った", "３．５")["gloss"]["fr"], "3,5")
-        # The RAE's figure: a point before the decimals, no mark in four
-        # digits, a narrow space from five (plan 291).
+        # Latin-American Spanish's figure, as Intl's es-419 prints it: a
+        # point before the decimals, a comma between thousands (plan 291).
         self.assertEqual(token_of("３．５キロ走った", "３．５")["gloss"]["es"], "3.5")
-        self.assertEqual(token_of("1,500円です", "1,500")["gloss"]["es"], "1500")
-        self.assertEqual(token_of("12,000円です", "12,000")["gloss"]["es"], "12\u202f000")
+        self.assertEqual(token_of("1,500円です", "1,500")["gloss"]["es"], "1,500")
+        self.assertEqual(token_of("12,000円です", "12,000")["gloss"]["es"], "12,000")
 
     def test_what_is_no_quantity_is_left_bare(self) -> None:
         # A code and a telephone's number are not read as one; a time of
