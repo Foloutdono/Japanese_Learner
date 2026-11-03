@@ -2266,6 +2266,20 @@ def _copula_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
 # An adjective's く form after の is the noun it makes: おおさかのちかく,
 # "near Osaka" -- no adjective follows の.
 _KU_NOUNS = {"近い": ("近く", "ちかく"), "遠い": ("遠く", "とおく")}
+_KU_ADJECTIVES = {noun: (adjective, reading[:-1] + "い") for adjective, (noun, reading) in _KU_NOUNS.items()}
+# The case particles a noun takes and a く form never does (plan 296).
+_KU_NOUN_CASES = frozenset({"に", "で", "へ", "まで", "から", "を", "が"})
+
+
+def _negated_at(morphemes, k: int) -> bool:
+    """Whether a denial stands at morphemes[k]: ない, なかった, ありません."""
+    if k >= len(morphemes):
+        return False
+    u = morphemes[k]
+    if u.lemma in ("無い", "ない") and u.pos in ("adjective", "auxiliary"):
+        return True
+    return (u.lemma in ("有る", "ある") and k + 2 < len(morphemes) and morphemes[k + 1].lemma == "ます"
+            and morphemes[k + 2].surface in ("ん", "ず"))
 _UTTERANCE_MARKS = frozenset("。！？!?「『（(…‥")
 
 
@@ -2831,10 +2845,26 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
         if (m.pos == "adjective" and m.lemma in _KU_NOUNS and m.surface.endswith("く")
                 and ((prev is not None and prev.surface == "の" and prev.pos == "particle")
                      # (...and before one: ちかくのこうえん, the park nearby, plan 272)
-                     or (nxt is not None and nxt.surface == "の" and nxt.pos == "particle"))):
+                     or (nxt is not None and nxt.surface == "の" and nxt.pos == "particle")
+                     # (...and before a case particle, which no く form takes:
+                     # ちかくにいませんでした, the vicinity, plan 296)
+                     or (nxt is not None and nxt.pos == "particle" and nxt.surface in _KU_NOUN_CASES))):
             lemma, reading = _KU_NOUNS[m.lemma]
             m = replace(m, pos="noun", lemma=lemma, lemma_reading=reading, ctype="", cform="")
             tags = tags[:i] + [("名詞", "普通名詞", "副詞可能")] + tags[i + 1:]
+        elif (m.pos == "noun" and m.lemma in _KU_ADJECTIVES and nxt is not None and nxt.pos == "particle"
+              and nxt.surface in ("は", "も") and after is not None and _negated_at(morphemes, i + 2)):
+            # 近くはない, 遠くもありません: the adjective's く form denied --
+            # "not near", no "the vicinity" (plan 296)
+            lemma, reading = _KU_ADJECTIVES[m.lemma]
+            m = replace(m, pos="adjective", lemma=lemma, lemma_reading=reading, ctype="形容詞", cform="連用形-一般")
+            tags = tags[:i] + [("形容詞", "一般", "*")] + tags[i + 1:]
+        elif (m.pos == "adjective" and m.lemma == "危うい" and m.surface in ("危うく", "あやうく") and nxt is not None
+              and not (nxt.lemma in ("成る", "なる", "為る", "する") or nxt.surface in ("て", "も", "は", "ない", "なく"))):
+            # 危うく自転車にぶつかるところだった: the adverb, "nearly" -- 危うい
+            # becomes or is made so (危うくなった) only before なる, する (plan 296)
+            m = replace(m, pos="adverb", lemma="危うく", lemma_reading="あやうく", ctype="", cform="")
+            tags = tags[:i] + [("副詞", "*", "*")] + tags[i + 1:]
         elif m.surface == "ま" and m.pos == "noun" and opens and nxt is not None and nxt.surface in ("、", "，", ","):
             m = replace(m, pos="interjection", lemma="まあ", lemma_reading="まあ")
             tags = tags[:i] + [("感動詞", "一般", "*")] + tags[i + 1:]

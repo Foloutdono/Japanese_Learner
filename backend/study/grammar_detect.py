@@ -7013,7 +7013,11 @@ def _pattern_refusals():
                 and t[k + 1].surface in _COMMAS and _says_of_its_subject(t, k))
             # (薄暗く落ち着いた雰囲気, 美しく優しい人: the continuative, two
             # descriptions joined -- no "dimly", plan 272)
-            or ((k := _tok_ending(t, e)) is not None and _joins_two_descriptions(t, k)),
+            or ((k := _tok_ending(t, e)) is not None and _joins_two_descriptions(t, k))
+            # (高くはない, 近くもありません: the negative with は or も in it,
+            # no adverb, plan 296)
+            or ((k := _tok_ending(t, e)) is not None and t[k].pos == "adjective" and k + 2 < len(t)
+                and t[k + 1].pos == "particle" and t[k + 1].surface in ("は", "も") and _denies_at(t, k + 2)),
         # そう after a plain form is hearsay, whatever the tagger calls
         # it: できるそうです is "I hear it can", no look (plan 152)
         "〜そうです": lambda t, s, e, g: (p := _prev_word(t, s)) is not None and _plain_before_sou(p)
@@ -7285,6 +7289,15 @@ def tokens_after(tokens, t, surfaces) -> bool:
     k = tokens.index(t)
     rest = [x.surface for x in tokens[k + 1:k + 1 + len(surfaces)]]
     return tuple(rest) == tuple(surfaces)
+
+
+def _denies_at(tokens, k: int) -> bool:
+    """Whether a denial stands at tokens[k]: ない, なかった, ありません."""
+    u = tokens[k]
+    if u.lemma in ("無い", "ない") and u.pos in ("adjective", "auxiliary"):
+        return True
+    return (u.lemma in ("有る", "ある") and k + 1 < len(tokens) and tokens[k + 1].lemma == "ます"
+            and tokens[k + 1].surface.startswith("ませ"))
 
 
 # The な-adjective's adverbial form: 静かに, 非常に.

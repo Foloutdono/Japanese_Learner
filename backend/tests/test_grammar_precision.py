@@ -3426,3 +3426,17 @@ class ATeEndingItsUtteranceTests(unittest.TestCase):
         for sentence in ("ずっと電車を見て、うれしそうだね。", "見て、わかった。"):
             with self.subTest(sentence=sentence):
                 self.assertIn("〜て、〜て", found_in(sentence))
+
+
+class AKuFormsPointTests(unittest.TestCase):
+    """Plan 296: no adverbial form on the noun 近く, the adverb 危うく or a
+    denied く form (高くはない); 早く起きる and 高くは飛べない keep theirs."""
+
+    def test_no_adverbial_form(self) -> None:
+        for sentence in ("お母さんもお父さんも、ちかくにいませんでした。", "危うく転ぶところだった。", "近くはない。",
+                         "高くもありません。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("〜く／〜に（副詞形）", found_in(sentence))
+        for sentence in ("早く起きる。", "高くは飛べない。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜く／〜に（副詞形）", found_in(sentence))

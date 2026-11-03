@@ -4420,3 +4420,24 @@ class AKanjiVerbByWhatGoesWithItTests(unittest.TestCase):
                 self.assertEqual(token["reading"], reading)
                 if raw_id:
                     self.assertEqual(card_of(sentence, surface), raw_id)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AKuFormByWhatFollowsTests(unittest.TestCase):
+    """Plan 296: a く form is the noun 近く／遠く before a case particle,
+    the adverb 危うく "nearly" before its clause, and the adjective where
+    it is denied (近くはない) or becomes so (危うくなった)."""
+
+    def test_its_word(self) -> None:
+        for sentence, surface, pos, raw_id in (
+                ("お母さんもお父さんも、ちかくにいませんでした。", "ちかく", "noun", None),
+                ("もう少し近くまで来て。", "近く", "noun", None),
+                ("凍った道で足を滑らせて、危うく自転車にぶつかるところだった。", "危うく", "adverb", None),
+                ("近くはない。", "近く", "adjective", "vocab_N5_近い_ちかい"),
+                ("駅から遠くもありません。", "遠く", "adjective", None),
+                ("会社の経営が危うくなった。", "危うく", "adjective", None),
+                ("駅に近くて便利だ。", "近く", "adjective", None)):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, surface)["pos"], pos)
+                if raw_id:
+                    self.assertEqual(card_of(sentence, surface), raw_id)

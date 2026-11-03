@@ -2277,7 +2277,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # and a て ending what is said, asked (運転してね after お父さんが作った,
 # 見て、あの子, あなたが決めて) or trailing (でしてね, 先週、腰を痛めてね),
 # never before a blank; and a kanji verb read by what goes with it
-# (注文が通って とおる, 行った調査 おこなう, 放っておく ほうる, 開いてる あく).
+# (注文が通って とおる, 行った調査 おこなう, 放っておく ほうる, 開いてる あく);
+# and a く form read by what follows (ちかくに the noun, 危うく the adverb,
+# 近くはない the adjective denied).
 LOCAL_REV = 33
 
 
