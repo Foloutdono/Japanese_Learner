@@ -4666,3 +4666,5 @@ class ABareDenialsCopulaTests(unittest.TestCase):
         for sentence in ("ではない", "だけではない", "ではないか"):
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, "で").startswith("(the copula) で of ではない"))
+        # (までもない said bare, cut ま + で by the tokenizer: no copula)
+        self.assertFalse(gloss_of("までもない", "で").startswith("(the copula)"))

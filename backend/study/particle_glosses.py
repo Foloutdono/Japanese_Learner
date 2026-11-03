@@ -1119,6 +1119,7 @@ def gloss(morphemes, i: int) -> dict | None:
         # (never なく + する, 無くす cut in two: どちらでなくされたか, "lost")
         key = "で_not"                      # 本でない, 町のものでない, 学生でなく (plan 296)
     elif m.surface == "で" and m.pos in ("particle", "auxiliary") and i + 2 < len(morphemes) \
+            and not (i > 0 and morphemes[i - 1].surface == "ま") \
             and morphemes[i + 1].surface in ("は", "も") and not (
                 morphemes[i + 2].surface == "なく" and i + 4 < len(morphemes) and morphemes[i + 3].surface == "て"
                 and morphemes[i + 4].surface == "は") \
