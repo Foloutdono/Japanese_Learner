@@ -4377,3 +4377,32 @@ class ATeAtTheEndGlossTests(unittest.TestCase):
         self.assertTrue(token_of("去年、会社を辞めてね。今はフリーランスなんだ。", "て")["gloss"]["en"]
                         .startswith("(at the end)"))
         self.assertTrue(token_of("社長、この手紙を読んで＿＿＿。", "で")["gloss"]["en"].startswith("the て form"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AKanjiVerbByWhatGoesWithItTests(unittest.TestCase):
+    """Plan 296: a kanji verb whose written form fits two verbs is read
+    by what its sentence gives it -- what gets through 通る, a deed carried
+    out 行う, おく after 放っ 放る, 開ける before 開く あく -- and keeps
+    UniDic's reading where nothing says otherwise."""
+
+    def test_its_reading(self) -> None:
+        for sentence, surface, reading, raw_id in (
+                ("大変申し訳ございません。確認しましたら、ご注文がキッチンに通っていなかったようです。", "通っ", "とおっ",
+                 "vocab_N4_通る_とおる"),
+                ("ある市は、三年前に行った調査をもとに制度を始めた。", "行っ", "おこなっ", "vocab_N4_行う_おこなう"),
+                ("十年以上にわたって放っておかれる家も少なくない。", "放っ", "ほうっ", "vocab_N2_放る_ほうる"),
+                ("そんなの放っとけばいい。", "放っ", "ほうっ", "vocab_N2_放る_ほうる"),
+                ("まどを開けようとしたが、開かなかった。", "開か", "あか", "vocab_N5_開く_あく"),
+                ("月末って、三十一日のこと？その日は開いてるの？", "開い", "あい", "vocab_N5_開く_あく"),
+                # (UniDic's reading where nothing says otherwise)
+                ("毎日学校に通っている。", "通っ", "かよっ", None),
+                ("人が毎日学校に通っている。", "通っ", "かよっ", None),
+                ("三年前に行った国", "行っ", "いっ", None),
+                ("本を開いてる。", "開い", "ひらい", None),
+                ("花が開いてる。", "開い", "ひらい", None)):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertEqual(token["reading"], reading)
+                if raw_id:
+                    self.assertEqual(card_of(sentence, surface), raw_id)
