@@ -695,7 +695,10 @@ describe('explaining a point in its own sentence', () => {
     expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBeUndefined()
     // A form of だ that makes an adverb of the word (真剣に), and one the tokenizer gave a particle: bare.
     expect(glossOf('経験が少ない人だって、真剣に練習を続ければ必ず上達する。', 'に')).toBe('makes an adverb')
-    expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('')
+    // (秘密に気付く's に is the particle 気付く takes since plan 306, and
+    // has its role's line; 多忙に紛れて's is still given the copula.)
+    expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('time · goal · to')
+    expect(glossOf('多忙に紛れて、旧知の友人への返事は結局書かずじまいになった。', 'に')).toBe('')
     // The copula で is never named a place: the tokenizer gave it to the
     // particle too often. Since plan 272 the breakdown reads 店で、 as the
     // particle it is, "where", and 大ざっぱで、 as 〜くて／〜で.

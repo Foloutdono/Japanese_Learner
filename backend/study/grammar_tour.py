@@ -55,7 +55,10 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 14  # 14: the quiz's gap rivals are seeded too: the same-level fillers that top a
+TOUR_REV = 26  # 26: plan 306's breakdown over main's 14 (plans 305 and 306 bumped their own
+#   branch to 25: 何にもまして and 何一つ なに, 愛でなくて 愛, 若く見えます lit as
+#   〜に見える, せんがため and 何にもまして cut anew, もんで and もんだから lit)
+# 14: the quiz's gap rivals are seeded too: the same-level fillers that top a
 #   gap's choices up were drawn by the module's random (mcq.pick_distractors), so 483 of
 #   1,626 tours (en, fr, es) asked other rivals in another process
 # 13: で's and を通じて's scene cues no longer lit 何で as なんで, "why" (#439)
@@ -182,8 +185,12 @@ def _guesses(level: str, entry: dict, look: list[dict], lang: str) -> list[dict]
 
     rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}")
     # A point the examples themselves use could honestly be "what it
-    # does" -- は and です in 学生ですか -- so it is never offered.
+    # does" -- は and です in 学生ですか -- so it is never offered: any of
+    # the lesson's examples, shown here or not (この本は高くて's 〜くて／〜で
+    # beside 〜て（理由）'s 天気がよくて, plan 306).
     present = {h["pattern"] for item in look for h in hits(item["jp"])}
+    present |= {h["pattern"] for example in entry.get("examples", []) if example.get("jp")
+                for h in hits(example["jp"])}
     fillers = [
         g for g in get_grammar_points(level)
         if g["pattern"] not in named and g["pattern"] not in present

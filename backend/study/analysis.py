@@ -26,6 +26,7 @@ from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_poin
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content import jmdict_fr
 import content.vocab_jmdict_data as jmdict_db
+from study.card_lookup import _card  # noqa: E402  (the deck card spelled so, plan 306)
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
@@ -270,6 +271,25 @@ def _of_another_field(joined: tuple[str, str], morphemes) -> bool:
     return not any(words & _FIELDS[f] for tags in owned for f in tags)
 
 
+# What one does to or from a place (plan 306).
+_GONE_TO = frozenset({"来る", "行く", "帰る", "戻る", "出る", "着く", "住む", "引っ越す", "旅行", "留学", "出発", "到着",
+                      "移る", "渡る"})
+
+
+def _a_place_gone_to(tokens: list[dict], k: int) -> bool:
+    """Whether tokens[k] is where one comes from, goes to or lives: before
+    から, へ or に, with a verb of going, coming or living in its clause."""
+    nxt = tokens[k + 1] if k + 1 < len(tokens) else None
+    if nxt is None or nxt["surface"] not in ("から", "へ", "に") or nxt.get("pos") != "particle":
+        return False
+    for t in tokens[k + 2:k + 8]:
+        if t.get("pos") == "symbol" and t["surface"] in ("。", "！", "？"):
+            return False
+        if t.get("lemma") in _GONE_TO or t["surface"] in _GONE_TO:
+            return True
+    return False
+
+
 def _senses_by_sentence(tokens: list[dict]) -> None:
     """A pool word's line by what its sentence says (plan 272): the
     sense of the sentence's field first (読み込む in a sentence about an
@@ -300,6 +320,11 @@ def _senses_by_sentence(tokens: list[dict]) -> None:
             # gives way to the word's plain one: 家計は火の車だ is "dire
             # straits", no Buddhist "fiery chariot")
             chosen = next((sense for sense in found[1:] if not set(sense.get("tags") or ()) & set(_FIELDS)), None)
+        if chosen is None and _a_place_gone_to(tokens, k):
+            # (...and where it is a place one comes from, goes to or lives
+            # in, its sense named as a place: タイから日本に来て is
+            # Thailand, never "tie" -- タイを締める keeps it, plan 306)
+            chosen = next((sense for sense in found[1:] if (sense.get("glossary") or [""])[0][:1].isupper()), None)
         if chosen is None and fields & set(_FIELD_GLOSSES):
             wanted = [g for f in fields & set(_FIELD_GLOSSES) for g in _FIELD_GLOSSES[f]]
             for sense in found:
@@ -980,7 +1005,44 @@ _SUFFIX_GLOSSES = {
 
 # What a noun means as the second half of what it is said with, where
 # its card leads with another sense (plan 272).
+# A counter whose card is another word (plan 306): 本 is "book".
+_COUNTER_SENSES = {
+    surface: {"en": "counter for long, thin things (pens, bottles, trees, cigarettes)",
+              "fr": "classificateur des objets longs et fins (stylos, bouteilles, arbres, cigarettes)",
+              "es": "contador de objetos largos y delgados (bolígrafos, botellas, árboles, cigarrillos)"}
+    for surface in ("本", "ほん", "ぽん", "ぼん")
+}
+
+# ここ before a span of time is no place (plan 306): ここ数年, ここ二、三日.
+_HERE_SPAN = {"en": "(before a span of time) these past …, the last …: ここ数年, the last few years",
+              "fr": "(devant une durée) ces derniers … : ここ数年, ces dernières années",
+              "es": "(delante de un lapso de tiempo) estos últimos …: ここ数年, los últimos años"}
+# What a span of time is counted in, after ここ.
+_SPAN_UNITS = ("年", "年間", "日", "日間", "週", "週間", "か月", "ヶ月", "カ月", "ケ月", "月", "時間", "分")
+_SPANS_WHOLE = ("半年", "数日", "数年", "数か月", "数ヶ月", "しばらく", "最近")
+
+
+def _a_span_after(morphemes: list, i: int) -> bool:
+    """Whether a span of time follows the ここ at morphemes[i]: a count
+    and its unit (数年, 二、三日, 一週間, 十年) or しばらく, 最近."""
+    rest = morphemes[i + 1:i + 6]
+    if rest and rest[0].surface in _SPANS_WHOLE:
+        return True
+    counted = False
+    for u in rest:
+        if u.surface and all(c in "〇一二三四五六七八九十百千数何半0123456789０１２３４５６７８９" for c in u.surface):
+            counted = True
+            continue
+        if counted and u.surface in ("、", "，"):
+            continue
+        return counted and u.surface in _SPAN_UNITS
+    return False
+
+
 _AFFIX_SENSES = {
+    "余り": {"en": "(after an amount) just over, a little more than: 三割余り, just over 30%",
+           "fr": "(après une quantité) un peu plus de : 三割余り, un peu plus de 30 %",
+           "es": "(tras una cantidad) poco más de: 三割余り, poco más del 30 %"},
     "時": {"en": "(suffix) at the time of, when: 混雑時, at busy times",
           "fr": "(suffixe) au moment de, lors de : 混雑時, aux heures d'affluence",
           "es": "(sufijo) en el momento de, cuando: 混雑時, en horas de mucha afluencia"},
@@ -1014,6 +1076,9 @@ _AFFIX_SENSES = {
     "超": {"en": "(after a number) over, more than: 500円超, over 500 yen",
           "fr": "(après un nombre) plus de : 500円超, plus de 500 yens",
           "es": "(tras un número) más de: 500円超, más de 500 yenes"},
+    "手_agent": {"en": "(after a verb's stem) the one who does it: 書き手, a writer; 引き受け手, someone to take it on",
+                "fr": "(après le radical d'un verbe) celui qui le fait : 書き手, l'auteur ; 引き受け手, quelqu'un qui s'en charge",
+                "es": "(tras la raíz de un verbo) quien lo hace: 書き手, el autor; 引き受け手, alguien que se haga cargo"},
     "先": {"en": "(suffix) where or to whom one …: 連絡先, contact details; 勤務先, workplace; 行き先, destination",
           "fr": "(suffixe) le lieu ou la personne où l'on … : 連絡先, coordonnées ; 勤務先, lieu de travail ; 行き先, destination",
           "es": "(sufijo) dónde o a quién uno …: 連絡先, datos de contacto; 勤務先, lugar de trabajo; 行き先, destino"},
@@ -1048,6 +1113,11 @@ def _affix_sense(morphemes: list, i: int, numbers: dict) -> dict | None:
         # (連絡先, 勤務先, 取引先: the place or person a deed goes to,
         # never the tip or the way ahead, plan 272)
         return _AFFIX_SENSES["先"]
+    if m.surface == "手" and m.reading == "て" and prev.pos == "verb" and prev.cform.startswith("連用形") \
+            and _glued_to(prev, m):
+        # (引き受け手, 担い手: the one who takes it on, never a hand,
+        # plan 306)
+        return _AFFIX_SENSES["手_agent"]
     if m.surface in _SUFFIX_GLOSSES and m.pos == "suffix" and prev.pos in ("noun", "other") \
             and (m.surface != "生" or m.reading == "せい"):
         return _SUFFIX_GLOSSES[m.surface]
@@ -1341,9 +1411,25 @@ def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
 
 _COUNTERS = "助数詞 〜つ／〜人／〜枚"
 
+# A point's piece and the cards of the homographs it is not (plan 306),
+# with the point's own word where the deck holds it.
+_POINT_HOMOGRAPHS = {
+    "〜きる": (frozenset({"切る"}), None),
+    "〜かける": (frozenset({"掛ける"}), None),
+    "〜と相まって": (frozenset({"待つ", "相"}), None),
+    "〜にかたくない": (frozenset({"固い", "堅い", "硬い"}), ("難い", "かたい")),
+    # (出たものの, 用があるもんで, 遊んだものだ: もの is the construction's,
+    # no 物 "thing", plan 306)
+    **{pattern: (frozenset({"物"}), None) for pattern in ("〜ものの", "〜もので", "〜ものだから", "〜ものだ", "〜ものを",
+                                                         "〜ものなら", "〜ものか")},
+}
+
 # The points that are a word's own forms, not a construction around it.
 _OWN_FORM_POINTS = frozenset({"い形容詞／な形容詞", "〜く／〜に（副詞形）", "ない形 〜ない", "た形 〜た", "可能形 〜(ら)れる",
                               "意向形 〜(よ)う", "命令形 〜ろ／〜え", "〜ます／〜ません", "〜ました／〜ませんでした",
+                              # (one verb said twice in two forms: 伏せようが
+                              # 伏せまいが is 伏せる's, plan 306)
+                              "〜ようが〜まいが",
                               # (a compound verb the pool holds whole is its word
                               # too: もつれ込む, 振り込む, 駆け出す, plan 272)
                               "〜こむ", "〜出す", "〜かける", "〜きる", "〜直す", "〜かねる",
@@ -1462,7 +1548,7 @@ def _adverbs_to(morphemes: list, i: int) -> bool:
             # it becomes.)
             and not (after is not None and after.pos == "verb" and after.lemma not in ("為る", "する")
                      and (after.lemma in grammar_detect._SAYING_VERBS
-                          or after.lemma in ("感ずる", "成る", "なる", "見なす", "見做す"))))
+                          or after.lemma in ("感ずる", "感じる", "成る", "なる", "見なす", "見做す"))))
 
 
 def _adverb_to_length(morphemes: list, i: int) -> int:
@@ -1621,6 +1707,15 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     held = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") in no_good_points()])
     deck_hits = [None if j in held and morphemes[j].pos == "verb" and morphemes[j].lemma in NO_GOOD_VERBS else hit
                  for j, hit in enumerate(deck_hits)]
+    # And a piece of a point that shows another word's card is the point's
+    # (plan 306): 食べきる's きり is no 切る "to cut", はさまりかける's かけ
+    # no 掛ける "to hang", 相まって's まっ no 待つ "to wait" -- or the
+    # point's own word where the deck has it: 察するにかたくない's かたく is
+    # 難い, "difficult", never 固い "hard".
+    for pattern, (others, own) in _POINT_HOMOGRAPHS.items():
+        inside = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") == pattern])
+        deck_hits = [(_card(*own) if own else None) if j in inside and hit and (hit[1].get("kanji") or "") in others
+                     else hit for j, hit in enumerate(deck_hits)]
     # A name before an honorific is the name, never the card its letters
     # spell (plan 266): ゆきさん is no "snow".
     deck_hits = [None if _named(morphemes, j) else hit for j, hit in enumerate(deck_hits)]
@@ -1887,11 +1982,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         if pooled and not any(j in ruled for j in range(i, i + pooled[1])):
             entry, n = pooled
             token = _pool_compound_dict(morphemes[i:i + n], entry)
-            nouns = [k for k in range(i, i + n) if morphemes[k].pos == "noun"]
+            nouns = [k for k in range(i, i + n) if morphemes[k].pos in ("noun", "other")]
             if nouns and all(deck_hits[k] for k in nouns):
                 # A pool word folded over the deck's own nouns (観光地,
                 # 取引先, plan 272) keeps them, as an idiom does: a
-                # sentence written for a level still counts its cards.
+                # sentence written for a level still counts its cards
+                # -- an adjectival noun's too, 不 + 可能 (plan 306).
                 token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma,
                                    "pos": morphemes[k].pos,
                                    "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
@@ -2014,6 +2110,19 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             # うち, "home", where the deck's うち is "inside, while" (plan 272).
             deck, said = None, ("pool", home)
         sense = _affix_sense(morphemes, i, numbers) if i not in ruled else None
+        if sense is None and morphemes[i].surface in ("余り", "あまり") and i > 0 and _glued_to(morphemes[i - 1], morphemes[i]) \
+                and (morphemes[i - 1].counter or _after_a_number(morphemes, i, numbers)):
+            # (三割余り, 二十人あまり: just over an amount, no あまり〜ない, plan 306)
+            sense = _AFFIX_SENSES["余り"]
+        if sense is None and deck is not None and morphemes[i].surface in _COUNTER_SENSES \
+                and (_after_a_number(morphemes, i, numbers) or (i > 0 and morphemes[i - 1].surface[:1] in ("何", "数")
+                                                                and all(c in "何数十百千" for c in morphemes[i - 1].surface))) \
+                and "counter" not in (deck[1].get("meaning") or "").lower():
+            # (一本も's 本 counts: no "book", whatever point holds it, plan 306)
+            sense = _COUNTER_SENSES[morphemes[i].surface]
+        if sense is None and morphemes[i].surface in ("ここ", "此処") and _a_span_after(morphemes, i):
+            # (ここ数年で急に増えた: "these past few years", no place, plan 306)
+            sense = _HERE_SPAN
         affix = sense is not None
         if affix:
             deck, said = None, None
@@ -2242,7 +2351,99 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 39: 何にも before a word that sets its subject against the に reads
 # なににも, negative or not: 何にも代えられない, 何にも劣らない,
 # 何にも負けない (plan 304b).
-LOCAL_REV = 39
+# 40: (plans 305 and 306, merged after main's 32-39) a kana word whose first letter is also a particle is read whole
+# where no particle can stand (plan 305): はいしゃ after a comma or an
+# adverb (the kana lexicon's, now that a compound is counted by its
+# rarest part), a は opening what is said (はこ + の, never は + この),
+# and no bare 子 after the topic (二人で + はこ, never では + こ).
+# Then what the sentence says, against the banks' hand-written answers
+# (plan 306): 入れる as 入る's potential where someone can enter and
+# nothing is put in (日曜日なら入れる, 人しか入れない), 方 かた after a person
+# (学生の方, 後任の方), 末 まつ after a period, 〜引き びき after an amount,
+# 度/割 + 分 ぶ, and a letter MeCab left alone in kana read inside its word
+# (こうえん, あかい + ふく, まど) or a phrase of particles that spells one
+# (かさ、); then, from the breakdown audit, 〜も〜も refused where a も is
+# another construction's (〜ても, 誰にも, こともある), その間、 あいだ,
+# and a pet named in katakana (ポチは…走りはじめました, クロ) read as a name,
+# and kana homographs by what they are said of (あつい 暑い/熱い/厚い,
+# やさしい 易しい/優しい, せき 席, のる 載る); a card read as none of its
+# readings giving way (中 じゅう, 等 ら, 見どころ; ぶちょう 部長), 皆 みな, 一日中
+# + さいふ; 〜でも on a で of where (家の中でも) and a copula pair (学者でも
+# 辞書でもなく), 〜の中で with も held to "among", まで "even" after an
+# addition (ガス代まで), 〜ものを's を and 〜や否や's や, 〜ても on にとって's
+# て, 〜ば〜ほど and 〜も〜ば〜も held to their shape, a quotation's と across
+# a comma, and 〜ないといけない said short (帰らないと。); で read as the
+# case particle or the copula by what follows it (仕事で忙しい, 教えあうこと
+# で, 置くだけで, 三人で、…行きました; 千九百円で、ことばは少ない); and a
+# word in kana read whole where its cut cannot be meant (きょうと + へ 京都,
+# せいと + に, には + かさない, 足が少しいたい, もったいない, 足もうでも);
+# numbers read with their counters, in kanji or in kana (一割 いちわり,
+# 二十箱 にじゅっぱこ, 一ぴき いっぴき), かい 回 or 階 by what is done on
+# a floor, 何かい, a counter's own sense (一本も), 十分の一, 三割余り,
+# 一駅前 and 二、三日 さんにち; and a verb in kana by what it takes (雨が
+# ふり出す 降り出す, 実がなる 生る, 手がはなせない 離す, のどがかわく 渇く,
+# 窓口はあく 開く, 写真…とった 撮る, あの子は、おこった 怒る, うそをつかれた);
+# and the card the page spelled (温かく, 架ける, 抑え; あたたかい by what is
+# warm; 信じれば 信じる; 数百万トンにのぼる 上る; きんぎょすくい; 報いる),
+# with 〜ように言う for any instruction (命じる, 注意する); and a て by
+# what its clauses say: the cause of what befell (電車が遅れて、間に合い
+# ませんでした 〜て（理由）), a manner inside the phrase it closes (子どもを
+# 連れて登るのは), a frame (言われて久しい, 任せて差し支えない), and を通して
+# as 〜を通じて; and a る-verb's られる read from its clause, passive or
+# potential (伝えられてきた, 機会すら与えられず; 答えられる, 少し待てば…見られる);
+# and a kana noun by its clause (まどがわのせき 席, このきかいの使い方 機械,
+# せんを引く 線, このへん 辺, へんな味 変, くちへん 偏, あぶら 油, 色のむら 斑);
+# and the audit's small classes: そこで, すると, どうしても one word where
+# they open, their pieces inside a clause (＿＿＿ですから, 母がかえって); a
+# point's piece without a homograph's card (相まって, 食べきる, 察するに
+# かたくない 難い); 大けが おおけが, 不器用, 資料作り づくり, みなと通り どおり;
+# 〜ようが〜まいが one verb twice; 気がきく 気が利く, 眉をひそめる 顰める;
+# and a name where the sentence names someone (森様、 a letter's addressee,
+# アナより its signature, ゆうたとけんた two names), a common word where it
+# says one (まえのせき 前 + 席, 高いへい 塀, はしのせき 端), タイから来て
+# Thailand, and 「ミナモ」 one word, not three marks; and the verb an え-row
+# stem belongs to (お風呂に入れますか はいれる, すぐになれる 慣れる, 制度を
+# 近づけられる 近付ける, 減らせっこない 減らす's potential, 済ませた 済ませる,
+# ピアノがひけない 弾く, 写真はとれません 撮る, 思えてならない, 気が引ける);
+# and だ's に the case particle where its word is a noun (命の危険につながる,
+# 多くの困難に耐え, このへんに, 春めく陽気に誘われて), ように's に no
+# adjective's, and 当然と感じる no manner; and a piece its construction
+# owns (たとえ日曜日でも's でも, ともなると's も, もう一度's もう), and
+# はじめてでも 〜でも's "even"; and a verb's stem or a noun by what follows
+# (おのりになる 乗る, 寄せ…返しつ 返す, ひっこしの日 引越し, さしつかえ
+# ありません 差し支え, さくらも…さくかな 咲く, このやり方 やる, これで
+# おしまいになります おしまい); and the longest frame on と + 言う owning its
+# pieces (〜といい〜といい's 言う, あの事故からというもの, といったらなかった,
+# ＿＿＿とはいえ, a plot's 、というものだ); and 方 かた by what its sentence
+# says of a person (同意のない方の発話, 拾った方のもの, 上の方にもお越し,
+# 足の悪い方で…お知らせください, 車いすの方); and まで "even" in its verb's
+# object's place (心まで温かくする, 井戸の水まで汚し), 十時までになって no
+# 〜までに, したまでです 〜までのことだ; and a word of its own taking no
+# point (向き合う, 通り過ぎる, 一方の, それだけの, 責任をもって, どうやって行く);
+# and a construction's piece lighting no smaller point (だからといって,
+# 日本全国にわたって見られる), nor 取る itself 〜にとって (例にとって);
+# and a て ending what is said, asked (運転してね after お父さんが作った,
+# 見て、あの子, あなたが決めて) or trailing (でしてね, 先週、腰を痛めてね),
+# never before a blank; and a kanji verb read by what goes with it
+# (注文が通って とおる, 行った調査 おこなう, 放っておく ほうる, 開いてる あく);
+# and a く form read by what follows (ちかくに the noun, 危うく the adverb,
+# 近くはない, よくはない the adjective denied, それほどとおく ほど and 遠い);
+# and an adverb's sense by what it says of (ここ数年 "these past", まずない
+# the N3 先ず's "hardly", 別にはらう 別 and に, "separately"); and から
+# read by what governs it (焦りから a cause, ことから始める no 〜ことから,
+# 窓から見るともなく no 〜から見ると); and もの's constructions by what the
+# sentence says (町のものでない, 市が決めたものだ, ＿＿＿ものの、, もんで);
+# and the honorific (ら)れる no passive (来館された方, どうされますか);
+# and words read by their neighbours (何一つ なに, 亡き姉, なき出す, 名もなき,
+# 園 えん, 七十代のある女性, アナより), points by what they ask (どれが of
+# 〜の中で, 開けてもかまいませんか no 〜ませんか, 安いだけではない), and a
+# word in kana as spelled (つづら, 〜でなくてなんだろう's なん); and the
+# audit's singletons (幸多かれ, よる、, 全部やった, 助けんがため, 互いに
+# 見える, 灯らない通り, まめにしている, 引き受け手) and their lookalikes
+# (人が行き交う通り, 適当にしたら, 右手に見えます); and what their stress
+# sentences found before them (本屋によると 寄る, 泣き虫やった, せんがため,
+# なんのかんの, 多かれ少なかれ, じしん, 何にもまして, 幼く見える).
+LOCAL_REV = 40
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

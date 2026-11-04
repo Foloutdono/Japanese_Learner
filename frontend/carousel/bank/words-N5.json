@@ -261,7 +261,7 @@
 {"t":"黄色い","r":"きいろい","ro":"kiiroi","en":["yellow (adjective)"],"fr":["jaune (adjectif)"],"fu":[["黄","き"],["色","いろ"],["い",""]],"hy":["気色い","帰色い","起色い"]},
 {"t":"お手洗い","r":"おてあらい","ro":"otearai","en":["bathroom, toilet (polite word)"],"fr":["toilettes (mot poli)"],"fu":[["お",""],["手","て"],["洗","あら"],["い",""]],"hy":["お稲洗い"]},
 {"t":"今週","r":"こんしゅう","ro":"konshuu","en":["this week"],"fr":["cette semaine"],"fu":[["今","こん"],["週","しゅう"]],"hy":["金週","今主","建週"]},
-{"t":"物","r":"もの","ro":"mono","en":["thing"],"fr":["chose"],"fu":[["物","もの"]],"ex":["N3.31","N3.32"]},
+{"t":"物","r":"もの","ro":"mono","en":["thing"],"fr":["chose"],"fu":[["物","もの"]],"ex":["N3.58","N3.122"]},
 {"t":"弾く","r":"ひく","ro":"hiku","en":["to play (piano, guitar, string instruments)"],"fr":["jouer (piano, guitare, instrument à cordes)"],"fu":[["弾","ひ"],["く",""]],"hy":["否く","彼く","悲く"]},
 {"t":"図書館","r":"としょかん","ro":"toshokan","en":["library"],"fr":["bibliothèque"],"fu":[["図","と"],["書","しょ"],["館","かん"]],"hy":["土書館","図野館","図書間"],"ex":["N5.122","N5.125"]},
 {"t":"外国人","r":"がいこくじん","ro":"gaikokujin","en":["foreigner"],"fr":["étranger"],"fu":[["外","がい"],["国","こく"],["人","じん"]],"hy":["害国人","外黒人","外国神"]},

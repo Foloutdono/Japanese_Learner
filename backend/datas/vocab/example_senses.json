@@ -1983,7 +1983,7 @@
    }
   },
   "空く::あく": {
-   "ぐいと押すとドアは開いた。": {
+   "強く押すと、ドアが開いた。": {
     "drop": true,
     "why": "a door that opens is 開く, its own card; 空く is to be empty"
    }

@@ -63,6 +63,18 @@ class OutsideLinesTests(unittest.TestCase):
                 with self.subTest(sentence=s, surface=t["surface"]):
                     self.assertIsNone(_KANJI.search(t.get("reading") or ""), t.get("reading"))
 
+    def test_a_kana_spelling_is_kept(self) -> None:
+        """A word written in kana reads as spelled: the sound's ず for a
+        づ, じ for a ぢ, is no spelling (つずら for つづら, plan 306)."""
+        for s, result in self.read.items():
+            for t in result["tokens"]:
+                surface, reading = t["surface"], t.get("reading") or ""
+                if not any(c in "づぢヅヂ" for c in surface) or len(reading) != len(surface):
+                    continue
+                with self.subTest(sentence=s, surface=surface):
+                    for a, b in zip(surface, reading):
+                        self.assertFalse(a in "づヅ" and b == "ず" or a in "ぢヂ" and b == "じ", reading)
+
     def test_the_final_mark_changes_no_card(self) -> None:
         for s, result in self.read.items():
             if s.endswith("。"):
