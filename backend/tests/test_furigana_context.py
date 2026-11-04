@@ -156,6 +156,42 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(ni(), _particle("も"), _tok("。", "。", "補助記号"))[0], "なんに")
         self.assertEqual(_read(ni(), _particle("も"))[0], "なんに")
 
+    def test_nani_ni_mo_against_what_it_is_measured(self) -> None:
+        # A verb that sets its subject against the に takes 何にも as that
+        # に, negative or not: なににも (plan 304b).
+        def ni():
+            return _tok("何に", "なんに", "代名詞", "*", "*", "pronoun")
+
+        def verb(surface, lemma):
+            return dict(_tok(surface, surface, "動詞", "一般", "*", "verb"), lemma=lemma)
+
+        def aux(surface, lemma):
+            return dict(_tok(surface, surface, "助動詞", "*", "*", "auxiliary"), lemma=lemma)
+
+        for surface, lemma in (("代え", "変える"), ("替え", "変える"), ("換え", "変える"), ("負け", "負ける"),
+                               ("劣ら", "劣る"), ("比べ", "比べる"), ("勝ら", "勝る")):
+            with self.subTest(surface):
+                self.assertEqual(_read(ni(), _particle("も"), verb(surface, lemma), aux("ない", "ない"))[0],
+                                 "なにに")
+        self.assertEqual(_read(ni(), _particle("も"), verb("代え", "変える"), aux("られ", "られる"),
+                               aux("ない", "ない"))[0], "なにに")
+        # Past an adverb: 何にも決して負けない.
+        self.assertEqual(_read(ni(), _particle("も"), dict(_tok("決して", "けっして", "副詞", "*", "*", "adverb")),
+                               verb("負け", "負ける"), aux("ない", "ない"))[0], "なにに")
+        # 変える written 変 or in kana is "change" too, which takes を:
+        # UniDic's reading. So are a verb whose を or が なんにも stands for
+        # (何にも食べられない, 何にも知らない) and 何にもならない, "lead
+        # nowhere" (JMdict's なんにもならない).
+        for surface, lemma in (("変え", "変える"), ("かえ", "変える"), ("食べ", "食べる"), ("知ら", "知る"),
+                               ("なら", "成る")):
+            with self.subTest(surface):
+                self.assertEqual(_read(ni(), _particle("も"), verb(surface, lemma), aux("ない", "ない"))[0],
+                                 "なんに")
+        # A noun between: 何にも興味がない is the tokenizer's.
+        self.assertEqual(_read(ni(), _particle("も"), _tok("興味", "きょうみ"), _particle("が"),
+                               dict(_tok("ない", "ない", "形容詞", "非自立可能", "*", "adjective"), lemma="無い"))[0],
+                         "なんに")
+
     def test_youbi(self) -> None:
         self.assertEqual(_read(_tok("日曜", "にちよう"), _tok("日", "ひ"))[1], "び")
         self.assertEqual(_read(_tok("何よう", "なによう"), _tok("日", "ひ"))[1], "び")
@@ -720,6 +756,12 @@ class SentenceReadingTests(unittest.TestCase):
         "旅では、何にもまして時間を守ることが大切だ。": "なに",
         "何にもまして、遅れないことが大切だ。": "なに",
         "家族は何にも代えがたい宝物だ。": "なに",
+        # (and what the に is measured against, negative or not, plan 304b)
+        "家族は何にも代えられない。": "なに",
+        "健康は何にも替えられない宝だ。": "なに",
+        "この店の味は何にも劣らない。": "なに",
+        "彼の努力は何にも負けない。": "なに",
+        "あの景色は何にも比べられない。": "なに",
         "駅に着いたら、何はさておき切符を買おう。": "なに",
         "何はともあれ、無事でよかった。": "なに",
         # The lookalikes.
@@ -732,6 +774,8 @@ class SentenceReadingTests(unittest.TestCase):
         "冷蔵庫には何にもない。": "なん",
         "彼は何にも知らない。": "なん",
         "週末は何にもすることがない。": "なん",
+        "熱があって、何にも食べられない。": "なん",
+        "今さら謝っても、何にもならない。": "なん",
     }
 
     def test_nani_by_what_follows(self) -> None:
@@ -752,6 +796,7 @@ class SentenceReadingTests(unittest.TestCase):
                                         ("何にもまして大切なのは、健康だ。", "何に", "なにに"),
                                         ("駅に着いたら、何はさておき切符を買おう。", "何", "なに"),
                                         ("これは何ですか。", "何", "なん"),
+                                        ("家族は何にも代えられない。", "何に", "なにに"),
                                         ("彼は何にも知らない。", "何に", "なんに")):
             with self.subTest(sentence):
                 tokens = {t["surface"]: t for t in analyze_local(sentence)["tokens"]}

@@ -2237,7 +2237,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 37: 何 read なに by what follows it (plan 304): before one (何一つ),
 # やら (何やら), は (何はさておき), and the 何に of 何にもまして, which
 # UniDic read なんに, as in なんにも with a negative.
-LOCAL_REV = 37
+# 38: 何にも before a word that sets its subject against the に reads
+# なににも, negative or not: 何にも代えられない, 何にも劣らない,
+# 何にも負けない (plan 304b).
+LOCAL_REV = 38
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
