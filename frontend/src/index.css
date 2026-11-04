@@ -7367,7 +7367,12 @@ textarea:focus-visible {
   padding: var(--sp-3) var(--sp-4);
   color: var(--text-secondary);
 }
-.console__well { flex: 1 1 0; }
+/* min-width: 0, or the well cannot shrink below its input's own width
+   -- twenty characters of whatever face is drawing it -- and a wide
+   fallback face, before the app's has arrived, pushed the keys out of
+   the row's end (14px at 390px under Inter). The input already gives
+   way (.field--search > input); the well has to let it. */
+.console__well { flex: 1 1 0; min-width: 0; }
 .console__well > .console__field { font-size: 1rem; }
 .console__clear {
   position: relative;
@@ -13553,6 +13558,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   gap: var(--sp-3);
   padding: 0 var(--sp-4) var(--sp-4);
+}
+/* The line of the text an opened question quotes (plan 301): the
+   sentence over its translation on the breakdown's open rail
+   (.bkd-passage__item--open), under the options it decides between. */
+.qrow__source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-left: var(--sp-3);
+  box-shadow: inset 3px 0 0 var(--line-color, var(--accent));
 }
 /* ── 解析 — the word-by-word breakdown, as rows (plan 084) ──
    One shape for every practice mode (SentenceBreakdown's 'rows'
@@ -25400,12 +25415,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .theme-mini__line { height: var(--sp-1); margin: var(--sp-2) var(--sp-3) 0; border-radius: var(--r-pill); background: currentcolor; opacity: 0.2; }
 .theme-mini__line--short { width: 50%; }
-.lang-picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+/* The languages one per row (plan 302, the owner's pick B): the name,
+   then its own two words on the same line, so a third language never
+   stands alone under two and a phone never breaks the words in two. */
+.lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); container-type: inline-size; }
 .lang-pick {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-1);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -25423,9 +25441,25 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   box-shadow: inset 0 0 0 1px var(--accent2);
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
-.lang-pick__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
-.lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); }
+.lang-pick__name { display: inline-flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; white-space: nowrap; }
+/* A language's flag (plan 302, the owner's choice): a country's own
+   colours, at the size of the name it stands before, and nowhere else
+   (DESIGN.md, "The language flags"). The ring keeps a white stripe
+   from melting into a light ground. */
+.lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
+.lang-pick__sample { min-width: 0; overflow: hidden; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
+/* A row's sample is the words that tell its language from the others
+   (`languageSample`: Agregar beside Spain's Añadir, plan 303). The
+   widest row, Español (Latinoamérica) and Agregar, needs about 286px, as
+   measured here: a 360px phone's row (318) holds it, a 320px phone's
+   (278) does not. The words never break onto a second line (nowrap,
+   above); below 300, a few percent over the measure so that a font set
+   a little wider never cuts a word short, they go, since the name
+   already says the language, and the name keeps its one line. */
+@container (max-width: 299px) {
+  .lang-pick__sample { display: none; }
+}
 
 /* ── Notation: the three bars themselves (plan 139) ──
    Each scale is offered as the rating bar it is (RatingBar's specimen),
@@ -27591,6 +27625,15 @@ button.brd-stn { cursor: pointer; }
   text-decoration: none;
   white-space: nowrap;
   color: color-mix(in srgb, var(--success) 70%, var(--text-primary));
+}
+/* A kana left out: nothing to strike, so the right one stands in the
+   line where it was missing, underlined as written in. */
+.gl-fix--missing ins {
+  position: static;
+  font-size: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 /* Choisir's forms as the mock exam's answer tiles (.exam-tile): docked
@@ -36731,15 +36774,13 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .desk-settings__page--two .slip--ways > .slip__label { grid-column: 1 / -1; }
   .desk-settings__page--two .slip--ways > .slip__way { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* What a row's taller card lends the shorter (plan 145): the two
-     languages stand one over the other down the theme screens' height,
+     languages stand one over another down the theme screens' height,
      each an equal share of it, rather than two short cards at the top
      of a card twice their height. */
   .desk-settings__page--two .lang-picks {
     flex: 1;
-    grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: 1fr;
   }
-  .desk-settings__page--two .lang-pick { justify-content: center; }
   /* The mixer across the page (SoundPage, plan 145): its names in one
      column as wide as the longest, each on one line -- the phone's 132px
      broke VOLUME PRINCIPAL in two -- and every track starting where the

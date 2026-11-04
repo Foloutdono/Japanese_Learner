@@ -15,7 +15,10 @@ wrong, and where a learner cannot tell:
               九時 きゅう|じ: the numeral and the counter each in their
               citation form, where Japanese joins them -- いっぽん,
               さんぼん, よっか, くじ. The table below is the textbook's.
-  何          なん before a particle, where it is なに: 何を, 何が, 何も.
+  何          なん before a particle, where it is なに: 何を, 何が, 何も,
+              何やら, 何はさておき; before one, 何一つ; and 何に, which
+              UniDic reads as the なんに of なんにも, in 何にもまして and
+              何にも代えられない.
   〜中        ちゅう where it is じゅう, "all through": 世界中, 一日中.
   曜日        日曜|日 with 日 read ひ: にちようび.
   and a few   日本 にっぽん (the school reading is にほん), 明日 あす
@@ -420,18 +423,18 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
 # reading and what they measure. One letter alone is a unit only after
 # a figure (600W, 2L); read without one it is a size or a letter.
 LATIN_UNITS = {
-    "W": ("わっと", "watt(s)", "watt(s)"), "kW": ("きろわっと", "kilowatt(s)", "kilowatt(s)"),
-    "ml": ("みりりっとる", "millilitre(s)", "millilitre(s)"), "mL": ("みりりっとる", "millilitre(s)", "millilitre(s)"),
-    "L": ("りっとる", "litre(s)", "litre(s)"), "l": ("りっとる", "litre(s)", "litre(s)"),
-    "cc": ("しーしー", "cc, cubic centimetre(s)", "cm³, centimètre(s) cube(s)"),
-    "mm": ("みり", "millimetre(s)", "millimètre(s)"), "cm": ("せんち", "centimetre(s)", "centimètre(s)"),
-    "m": ("めーとる", "metre(s)", "mètre(s)"), "km": ("きろ", "kilometre(s)", "kilomètre(s)"),
-    "mg": ("みりぐらむ", "milligram(s)", "milligramme(s)"), "g": ("ぐらむ", "gram(s)", "gramme(s)"),
-    "kg": ("きろ", "kilogram(s)", "kilogramme(s)"), "kcal": ("きろかろりー", "kilocalorie(s)", "kilocalorie(s)"),
-    "KB": ("きろばいと", "kilobyte(s)", "kilo-octet(s)"), "MB": ("めがばいと", "megabyte(s)", "mégaoctet(s)"),
-    "GB": ("ぎがばいと", "gigabyte(s)", "gigaoctet(s)"), "TB": ("てらばいと", "terabyte(s)", "téraoctet(s)"),
-    "Hz": ("へるつ", "hertz", "hertz"), "GHz": ("ぎがへるつ", "gigahertz", "gigahertz"),
-    "mAh": ("みりあんぺああわー", "milliampere-hour(s)", "milliampère-heure(s)"),
+    "W": ("わっと", "watt(s)", "watt(s)", "vatio(s)"), "kW": ("きろわっと", "kilowatt(s)", "kilowatt(s)", "kilovatio(s)"),
+    "ml": ("みりりっとる", "millilitre(s)", "millilitre(s)", "mililitro(s)"), "mL": ("みりりっとる", "millilitre(s)", "millilitre(s)", "mililitro(s)"),
+    "L": ("りっとる", "litre(s)", "litre(s)", "litro(s)"), "l": ("りっとる", "litre(s)", "litre(s)", "litro(s)"),
+    "cc": ("しーしー", "cc, cubic centimetre(s)", "cm³, centimètre(s) cube(s)", "cc, centímetro(s) cúbico(s)"),
+    "mm": ("みり", "millimetre(s)", "millimètre(s)", "milímetro(s)"), "cm": ("せんち", "centimetre(s)", "centimètre(s)", "centímetro(s)"),
+    "m": ("めーとる", "metre(s)", "mètre(s)", "metro(s)"), "km": ("きろ", "kilometre(s)", "kilomètre(s)", "kilómetro(s)"),
+    "mg": ("みりぐらむ", "milligram(s)", "milligramme(s)", "miligramo(s)"), "g": ("ぐらむ", "gram(s)", "gramme(s)", "gramo(s)"),
+    "kg": ("きろ", "kilogram(s)", "kilogramme(s)", "kilogramo(s)"), "kcal": ("きろかろりー", "kilocalorie(s)", "kilocalorie(s)", "kilocaloría(s)"),
+    "KB": ("きろばいと", "kilobyte(s)", "kilo-octet(s)", "kilobyte(s)"), "MB": ("めがばいと", "megabyte(s)", "mégaoctet(s)", "megabyte(s)"),
+    "GB": ("ぎがばいと", "gigabyte(s)", "gigaoctet(s)", "gigabyte(s)"), "TB": ("てらばいと", "terabyte(s)", "téraoctet(s)", "terabyte(s)"),
+    "Hz": ("へるつ", "hertz", "hertz", "hercio(s)"), "GHz": ("ぎがへるつ", "gigahertz", "gigahertz", "gigahercio(s)"),
+    "mAh": ("みりあんぺああわー", "milliampere-hour(s)", "milliampère-heure(s)", "miliamperio(s)-hora"),
 }
 
 
@@ -538,10 +541,64 @@ _WHOLE = {
 _HEADS = (("言", "ゆ", "い"), ("丸", "まり", "まる"), ("込", "ご", "こ"))
 
 # 何 before one of these is なに: 何を, 何が, 何も, 何か, 何に, 何へ,
-# 何から, 何まで, 何より, 何や. Not で (なんで "why" is a word), the
-# copula (何だ, 何です are なん) or の (何の is なんの).
+# 何から, 何まで, 何より, 何や, 何やら, 何かしら, 何は (何はさておき,
+# 何はともあれ). Not で (なんで "why" is a word), the copula (何だ, 何です
+# are なん) or の (何の is なんの): 何 is なん before a t-, d- or n- sound
+# and a counter, なに before the rest (plan 304).
 _NANI_BEFORE = {"を", "が", "も", "か", "に", "へ", "から", "まで", "より",
-                "や", "とか", "しか", "でも"}
+                "や", "やら", "かしら", "は", "とか", "しか", "でも"}
+
+# One, after 何 in "not a single one": 何一つ, 何ひとつ, 何一人, 何1つ
+# (plan 304). 何十, 何百 are one token (なんじゅう, なんびゃく).
+_ONE_HEADS = ("一", "ひと")
+_ONE_DIGITS = ("1", "１")
+
+# A word said in the negative, as UniDic gives its lemma (plan 304): the
+# auxiliary ない, the adjective 無い (ない, ねえ), 無し, and ず (which ぬ
+# and ません's ん are).
+_SAID_IN_NEGATIVE = frozenset({"ない", "無い", "無し", "ず", "ぬ"})
+_SENTENCE_END = frozenset("。！？!?")
+
+# What sets its subject against the に before it, as UniDic gives the
+# lemma: what it surpasses or falls short of -- まして, 増して (plan 304),
+# 勝る, 劣る, 負ける, 比べる -- or what it is given in exchange for, 代える,
+# 替える, 換える (plan 304b). Before one, 何にも is that に, "than
+# anything", "for anything", and never the "not a thing" of なんにも,
+# which stands where a を or a が would (何にも知らない, 何にも食べられ
+# ない): なににも, negative or not -- 何にも代えられない, 何にも劣らない.
+_MEASURED_AGAINST = frozenset({"況して", "まして", "増す", "勝る", "劣る", "負ける", "比べる"})
+# UniDic files 代える, 替える and 換える under 変える, which is "change"
+# too and takes を (何にも変えられない): the exchange is told by its kanji.
+_EXCHANGED_FOR = ("代", "替", "換")
+
+
+def _measured_against(tokens: list[dict], j: int) -> bool:
+    """Whether the word tokens[j] leads to -- past an adverb, 何にも決して
+    負けない -- sets its subject against a に (_MEASURED_AGAINST, plan
+    304b)."""
+    for t in tokens[j:]:
+        lemma, surface = t.get("lemma"), t["surface"]
+        if lemma in _MEASURED_AGAINST or surface in _MEASURED_AGAINST \
+                or (lemma == "変える" and surface.startswith(_EXCHANGED_FOR)):
+            return True
+        if t.get("pos") != "adverb":
+            return False
+    return False
+
+
+def _affirmed_ahead(tokens: list[dict], j: int) -> bool:
+    """Whether the sentence from tokens[j] to its end says something
+    (a verb or an adjective) and says none of it in the negative (plan
+    304). 何にも。, the answer, says nothing: no."""
+    said = False
+    for t in tokens[j:]:
+        if t["surface"] in _SENTENCE_END:
+            break
+        if t.get("lemma") in _SAID_IN_NEGATIVE and t.get("pos") in ("auxiliary", "adjective", "noun"):
+            return False
+        said = said or t.get("pos") in ("verb", "adjective")
+    return said
+
 
 # 〜中 read じゅう, "all through": after these it is never ちゅう.
 _JUU_AFTER = {
@@ -1063,21 +1120,28 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 out[i] = _FAMILY[s]
             continue
 
-        # 何 before a particle.
+        # 何にもまして: UniDic reads 何に as the なんに of なんにも,
+        # "(not) anything at all", which stands only with a negative (何にも
+        # ない, 何にも知らない, 何にもすることがない). With none after it, the
+        # に is the one its verb takes and 何 is なに: 何にもなれる, 何にも代え
+        # がたい (plan 304). A word that sets its subject against the に
+        # takes it whatever follows: 何にもまして、遅れないことが大切だ,
+        # 何にも代えられない, 何にも劣らない (plan 304b).
+        if s == "何に" and r == "なんに" and nxt(i) == "も" and (
+                _measured_against(tokens, i + 2) or _affirmed_ahead(tokens, i + 2)):
+            out[i] = "なにに"
+            continue
+
+        # 何 before a particle, and before one: 何一つ, 何ひとつ (plan 304).
+        # And before the げ of 何気ない: UniDic cuts it 何 + 気 (げ), the
+        # suffix of a manner; 何の気なしに keeps なん, its の between and
+        # its 気 the き of a mind.
         if s == "何" and r == "なん":
             after = nxt(i)
-            if after in _NANI_BEFORE or after == "" or after in _PUNCT:
+            if after in _NANI_BEFORE or after == "" or after in _PUNCT \
+                    or after.startswith(_ONE_HEADS) or after in _ONE_DIGITS \
+                    or (after == "気" and out[i + 1] == "げ"):
                 out[i] = "なに"
-            # (何一つ, 何ひとつ: なにひとつ, "not a single thing", plan 306)
-            elif after in ("一", "ひと") and i + 2 < n and surf[i + 2] in ("つ",):
-                out[i] = "なに"
-            elif after == "一つ" or after == "ひとつ":
-                out[i] = "なに"
-            continue
-        # (何にもまして: なににもまして, "above all else" -- 何にも alone is
-        # なんにも, "nothing at all", plan 306)
-        if s == "何に" and r == "なんに" and nxt(i) == "も" and i + 2 < n and surf[i + 2] in ("まして", "増して"):
-            out[i] = "なにに"
             continue
 
         # 四月一日: the first of a month is ついたち, never いちにち, "one

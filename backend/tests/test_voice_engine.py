@@ -232,6 +232,45 @@ def test_a_particle_read_inside_a_word_is_left_alone(fake):
     assert fake.calls[-1][2]["accent_phrases"][0]["moras"][1]["text"] == "ワ"
 
 
+# 何 before the copula, a quote, の or な is なん, which Open JTalk reads
+# なに; each line here is one the app says, and the engine said it なに
+# until it was handed ナン (voice_engine.read_nan).
+@pytest.mark.parametrize("text, asked", [
+    ("それは何ですか。", "それはナンですか。"),
+    ("はい、何でしょうか。", "はい、ナンでしょうか。"),
+    ("原因は何だったんですか。", "原因はナンだったんですか。"),
+    ("アナウンスは何て言ってた？", "アナウンスはナンて言ってた？"),
+    ("あの人は何と言いましたか。", "あの人はナンと言いましたか。"),
+    ("何とか彼を助けられないものか。", "ナンとか彼を助けられないものか。"),
+    ("それ、何の本？", "それ、ナンの本？"),
+    ("ご用があれば、何なりとお申しつけください。", "ご用があれば、ナンなりとお申しつけください。"),
+    ("兄は何でも食べます。", "兄はナンでも食べます。"),
+    ("理由が何であれ、暴力は許されない。", "理由がナンであれ、暴力は許されない。"),
+    ("おさらを何まい買いますか。", "おさらをナンまい買いますか。"),
+])
+def test_nan_is_handed_to_the_engine_as_nan(text, asked):
+    assert engine.read_nan(text) == asked
+
+
+# What the engine already reads right keeps its kanji: なに before a
+# particle, a word of its own, a counter in kanji, 如何, and 何で, whose
+# なんで / なにで only the sentence tells apart.
+@pytest.mark.parametrize("text", [
+    "何がほしいですか。", "何を食べますか。", "何か飲みますか。", "何もない。",
+    "何にもまして大切なのは、健康だ。", "何一つ持ってこなかった。", "何やら話している。",
+    "何気なく見た。", "何人いますか。", "何時ですか。", "何故ですか。",
+    "何とぞご理解ください。", "何となく植えてみた。", "如何ですか。",
+    "何で来ましたか。", "何でできていますか。", "何",
+])
+def test_what_the_engine_reads_right_keeps_its_kanji(text):
+    assert engine.read_nan(text) == text
+
+
+def test_a_line_is_asked_of_the_engine_with_nan(fake):
+    engine.say("それは何ですか。", 10005)
+    assert [params["text"] for path, params, _ in fake.calls if path == "/audio_query"] == ["それはナンですか。"]
+
+
 def test_a_voice_as_it_is_takes_no_tone(fake):
     engine.say("まいげつ", 10005)
     query = fake.calls[-1][2]

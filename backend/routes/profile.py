@@ -611,7 +611,9 @@ DEFAULT_READING_PACE = "standard"
 
 
 # The interface languages (frontend/src/lib/locale.js SUPPORTED_LANGS).
-UI_LANGS = ("fr", "en")
+# The interface locales: es-ES is Spain's Spanish, an interface over the
+# Spanish content (plan 303).
+UI_LANGS = ("fr", "en", "es", "es-ES")
 
 
 class LearningPayload(BaseModel):

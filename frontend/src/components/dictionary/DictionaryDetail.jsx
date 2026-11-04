@@ -28,6 +28,7 @@ import { composing } from '../../lib/keyGuards'
 import { useDesk } from '../../hooks/useDesk'
 import { holdEsc } from '../../stores/escHold'
 import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
+import { intlLocale } from '../../lib/locale'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
 // The catalogue already draws every entry as a small 駅名標: the
@@ -696,7 +697,7 @@ function ReadingsByShare({ entry, groups, onClose, jump }) {
   const shown = openOn ? onRows : kunRows
   const pills = idle.filter(r => isOnyomiToken(r) === openOn)
   const hint = shares
-    ? (scope === SCOPE_ALL ? t.readingsScopeHintAll : t.readingsScopeHintCourse)(total.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US'))
+    ? (scope === SCOPE_ALL ? t.readingsScopeHintAll : t.readingsScopeHintCourse)(total.toLocaleString(intlLocale(lang)))
     : ''
   const courseEmpty = scope === SCOPE_COURSE && total === 0
   return (
@@ -1110,7 +1111,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   }
 
   const status = entry.status
-  const record = status?.total_reviews > 0
+  // On the record once met, by its stage: a card the level rule marked
+  // known is mastered with no answer yet (plan 300), and keeps its
+  // schedule and its board here, its figures at 0/0 and —.
+  const record = status?.status === 'learning' || status?.status === 'mastered'
 
   // ── Readings ──
   // The plate shows two: the first on'yomi and the first kun'yomi when

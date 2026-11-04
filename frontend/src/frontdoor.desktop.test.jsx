@@ -68,6 +68,16 @@ const VOLUMES = {
 }
 
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
+// Every entrance landed -- the clock's finite animations and
+// transitions finished -- before a measure that a pixel decides: a
+// fixed wait is outrun when the machine is busy (every lane at once on
+// four cores read the strip a pixel off the question's edge). Only the
+// document's clock: the body's scrim runs on the scroll (brd-scrim),
+// and a scroll that never moves never finishes it.
+const entrancesDone = () => Promise.all(document.getAnimations()
+  .filter(a => a.timeline === document.timeline
+    && a.effect?.getComputedTiming().iterations !== Infinity)
+  .map(a => a.finished.catch(() => {})))
 const $ = s => document.querySelector(s)
 const live = () => $('.brd__car:not(.brd__car--out)')
 const inCar = s => live()?.querySelector(s)
@@ -254,6 +264,7 @@ describe('the boarding frame on the desk (P9, plans 140, 163, 247)', () => {
     await toLevel()
     expect(stops()).toEqual(['kana', 'level', 'card'])
     await settle(600)
+    await entrancesDone()
     // On the floor's line, at its left end, clear of the way back.
     const at = box(strip())
     expect(Math.abs(cy(at) - cy(box(inCar('[data-action="continue"]'))))).toBeLessThan(1.5)

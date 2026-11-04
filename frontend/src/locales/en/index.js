@@ -947,6 +947,8 @@ const stats = {
   destMovesTo:        date => `moves to ${date} at today's pace`,
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Read before',
   examPart: (n) => `Part ${n}`,
   serviceName: {
     local:   'Local',
@@ -1689,7 +1691,14 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
-  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
+  // How the sentence says the hole when another form was taken as right:
+  // its register (plan 241), or では in full or contracted (plan 295).
+  bldOther: (said, register) => `The sentence says ${said}: the same, ${({
+    plain: 'in plain speech',
+    polite: 'in polite speech',
+    full: 'with では in full',
+    contracted: 'with では contracted, as speech says it',
+  })[register] ?? 'in polite speech'}.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',
@@ -2059,6 +2068,10 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Theme',
   language:          'Language',
+  // Each language's row in the picker shows a sample in that language, the
+  // words that tell it from its neighbours: the two Spanishes say add
+  // differently, so theirs is that word (plan 303).
+  languageSample:    'Today · Dictionary',
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
   // A guest holds no key: signing out ends the journey for good. The

@@ -23,8 +23,7 @@ from content.grammar_points_data import (
 )
 from translations import get_meaning
 from content.jmdict_fr import pool_meaning
-from translations.fr.vocab_fr import VOCAB_FR
-from content.kanji_meanings import KANJI_FR
+from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
 from content.kanji_readings import display_reading
 from study import card_index
@@ -363,11 +362,11 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         # own catalogue does for a kana: it is the plain-language name
         # of the character, and there is nothing else to translate.
         return {"front": entry["kana"], "kana": entry["kana"], "meaning": entry["romaji"]}
-    fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
+    glosses = KANJI_GLOSSES if source == "kanji" else VOCAB_GLOSSES
     # A JMdict pool word (plan 148, an entry carrying its pool `seq`)
     # has no line in VOCAB_FR; get_meaning answers it from the pool's
     # own French layer (plan 215) -- see _wrap_vocab.
-    meaning = get_meaning(entry, lang, fr_map)
+    meaning = get_meaning(entry, lang, glosses)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
 
 

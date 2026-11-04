@@ -1,6 +1,7 @@
 import { NOVICE_GOAL } from '../../domain/goalMath'
 import { PACES } from '../onboarding/paces'
 import { DEPART_TIMES } from '../onboarding/departures'
+import { intlLocale } from '../../lib/locale'
 
 // ── The pass's contract, as words (plan 139) ─────────────────────
 // Settings prints the learner's contract on the card's back at its head
@@ -12,7 +13,7 @@ import { DEPART_TIMES } from '../onboarding/departures'
 /** The day, the month and the year: a promise a year out printed
  *  without its year reads as the wrong one. */
 export function dateFormat(lang) {
-  return new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Intl.DateTimeFormat(intlLocale(lang, 'en'), { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 /** A pace by its service's name where it is one of the three, else the
@@ -57,7 +58,7 @@ export function timeAxis(now, dates, lang) {
       marks.push({ at: new Date(y, 0, 1), label: String(y) })
     }
   } else {
-    const month = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { month: 'short' })
+    const month = new Intl.DateTimeFormat(intlLocale(lang, 'en'), { month: 'short' })
     for (const m = new Date(now.getFullYear(), now.getMonth() + 1, 1); m.getTime() <= start + span; m.setMonth(m.getMonth() + 1)) {
       marks.push({ at: new Date(m), label: m.getMonth() === 0 ? String(m.getFullYear()) : month.format(m) })
     }

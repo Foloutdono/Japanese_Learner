@@ -8,7 +8,7 @@ import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS, DUEL_INKS } from '../carousel/app.js'
-import { CLIP, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { CLIP, COMP_BEATS, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, ROLL_DEMO, STORIES, STORY_FILES, arrivals, askable, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
@@ -695,7 +695,10 @@ describe('explaining a point in its own sentence', () => {
     expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBeUndefined()
     // A form of だ that makes an adverb of the word (真剣に), and one the tokenizer gave a particle: bare.
     expect(glossOf('経験が少ない人だって、真剣に練習を続ければ必ず上達する。', 'に')).toBe('makes an adverb')
-    expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('')
+    // (秘密に気付く's に is the particle 気付く takes since plan 306, and
+    // has its role's line; 多忙に紛れて's is still given the copula.)
+    expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('time · goal · to')
+    expect(glossOf('多忙に紛れて、旧知の友人への返事は結局書かずじまいになった。', 'に')).toBe('')
     // The copula で is never named a place: the tokenizer gave it to the
     // particle too often. Since plan 272 the breakdown reads 店で、 as the
     // particle it is, "where", and 大ざっぱで、 as 〜くて／〜で.
@@ -746,6 +749,16 @@ describe('explaining a point in its own sentence', () => {
       expect(P.depart, lang).toBe(t.depart)
       expect(P.unit, lang).toBe(t.dueUnit)
       expect(P.doneBy('08:14'), lang).toBe(t.gateEndsAt('08:14'))
+      // Reading comprehension's story (plan 301): the run's clock, its
+      // name on the card's foot, the question and its type's badge.
+      expect(P.comp.timeLeft, lang).toBe(t.timeRemaining)
+      expect(P.comp.title, lang).toBe(t.comprehensionTitle)
+      expect(P.comp.question, lang).toBe(t.question)
+      for (const n of [6, 8, 10]) expect(P.comp.speed(n), lang).toBe(t.rollSpeed(n))
+      expect(P.comp.types, lang).toEqual({
+        comprehension: t.questionTypeComprehension, vocabulary: t.questionTypeVocabulary,
+        grammar: t.questionTypeGrammar, inference: t.questionTypeInference,
+      })
     }
   })
 
@@ -781,6 +794,94 @@ describe('explaining a point in its own sentence', () => {
           }
         }
       }
+    }
+  })
+
+  // ── 理解, reading comprehension's story (plan 301) ────────────
+  it('asks a seed passage its own question and answers it on the line it quotes (plan 301)', () => {
+    const data = bank('comprehension.json')
+    for (const lang of ['en', 'fr']) {
+      const items = promoItems('comprehension', data, lang)
+      expect(items.length, lang).toBeGreaterThan(100)
+      for (const { id } of items) {
+        const [pid, n] = id.split(':q')
+        const ps = data.passages.find(x => x.id === pid)
+        const q = ps.questions[Number(n) - 1]
+        // Only a question whose quote is in one sentence, as the run opens it.
+        expect(['vocabulary', 'grammar'], id).toContain(q.type)
+        const a = askable(ps, lang).find(x => x.q === Number(n) - 1)
+        const sentence = ps.sents[a.at].map(r => r[0]).join('')
+        expect(sentence, id).toContain(a.quote)
+        const pl = promoPlan('comprehension', data, id, { ...OPTS, lang, story: 'comprehension' })
+        expect(pl.id, id).toBe(id)
+        expect(pl.level, id).toBe(ps.lv)
+        const { promo } = pl
+        expect(promo.text, id).toBe(ps.sents.flat().map(r => r[0]).join(''))
+        expect(promo.read, id).toBeGreaterThan(0)
+        expect(new Set(promo.choices).size, id).toBe(4)
+        expect(promo.choices[promo.right], id).toBeTruthy()
+        expect(promo.n, id).toBe(Number(n))
+        expect(promo.total, id).toBe(ps.questions.length)
+        // The line it rests on, whole, its translation in the reader's
+        // language, the words it quotes lit (none when it quotes it whole).
+        expect(promo.quote.toks.map(x => x.t).join(''), id).toBe(sentence)
+        expect(promo.quote.tr.length, id).toBeGreaterThan(0)
+        const lit = promo.quote.toks.filter(x => x.lit).map(x => x.t).join('')
+        if (lit) expect(lit, id).toContain(a.quote)
+        else expect(sentence.replace(/[。！？、]/g, ''), id).toBe(a.quote.replace(/[。！？、]/g, ''))
+      }
+    }
+    // A sentence the seed's breakdown cuts alike carries its translation.
+    const seeds = Object.fromEntries(['N5', 'N4', 'N3', 'N2', 'N1'].flatMap(lv => JSON.parse(read(`../backend/content/comprehension/${lv}.json`))).map(x => [x.id, x]))
+    for (const ps of data.passages) {
+      expect(ps.tr, ps.id).toHaveLength(ps.sents.length)
+      const said = Object.fromEntries(seeds[ps.id].breakdown.map(b => [b.jp.trim(), b.translation]))
+      ps.sents.forEach((rows, i) => expect(ps.tr[i], `${ps.id} ${i}`).toEqual(said[rows.map(r => r[0]).join('').trim()] ?? null))
+    }
+  })
+
+  it('rolls the text at the stepper’s own speeds, and plays the story whole (plan 301b)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+    const data = bank('comprehension.json')
+    // The demo's speeds are the stepper's: its default's neighbour, then a press each.
+    const steps = [1, 2, 3, 4, 5, 6, 8, 10]
+    ROLL_DEMO.speeds.forEach(([, cps], i) => {
+      expect(steps, String(cps)).toContain(cps)
+      if (i) expect(steps.indexOf(cps), String(cps)).toBe(steps.indexOf(ROLL_DEMO.speeds[i - 1][1]) + 1)
+    })
+    for (const lang of ['en', 'fr']) {
+      const [{ id }] = promoItems('comprehension', data, lang)
+      const pl = promoPlan('comprehension', data, id, { ...OPTS, lang, story: 'comprehension' })
+      expect(pl.promo.roll.map(rows => rows.map(r => r.t).join('')).join(''), id).toBe(pl.promo.text)
+      expect(pl.promo.chars).toBe([...pl.promo.text].length)
+      const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+      expect(frames.map(f => f.key)).toEqual(COMP_BEATS.map(([key]) => key))
+      // The roll still: the demo's last moment, at its last speed, the readings on.
+      const still = stubContext()
+      frames[1].draw(still.ctx)
+      expect(still.texts, lang).toContain(PROMO[lang].comp.speed(ROLL_DEMO.speeds.at(-1)[1]))
+      const { story } = frames.clips
+      expect(story.seconds).toBeCloseTo(COMP_BEATS.reduce((sum, [, len]) => sum + len, 0), 5)
+      expect(story.fps).toBe(CLIP.fps)
+      expect(story.print).toBe(false)
+      const said = new Set()
+      for (let t = 0; t < story.seconds; t += 0.25) {
+        const { ctx, texts } = stubContext()
+        expect(() => story.draw(ctx, t), `${lang} at ${t}s`).not.toThrow()
+        texts.forEach(x => said.add(x))
+      }
+      // Every speed it rolls at is shown, and it ends on the board.
+      for (const [, cps] of ROLL_DEMO.speeds) expect([...said], `${lang} ${cps}`).toContain(PROMO[lang].comp.speed(cps))
+      const end = stubContext()
+      story.draw(end.ctx, story.seconds - 0.01)
+      const last = stubContext()
+      frames.at(-1).draw(last.ctx)
+      for (const w of last.texts.filter(x => /[A-Za-z]{4}/.test(x))) expect(end.texts, `${lang}: ${w}`).toContain(w)
+    }
+    } finally {
+      globalThis.Path2D = had
     }
   })
 

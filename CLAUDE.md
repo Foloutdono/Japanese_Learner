@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **297**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **307**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -168,13 +168,19 @@ runtime purpose.
   たい for たいです), and a kanji the keyboard put in is read before it is
   judged. Never inside the sentence (学生だと思います), never before か
   polite to plain, never where the point is the polite ending or a form.
+  Nor does it say では or じゃ: before a negative each is right for the
+  other (`plain_polite.contracted`, plan 295), and never the voiced ては.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
-  diffed over every sentence Construire asks.
+  diffed over every sentence Construire asks. A hole may stop where a
+  word's ending begins (てしまい + ました), never inside the ending
+  (せいで|す, が分かりま|せん) nor inside ありません, which is ない said
+  politely (`grammar_ladder._word_kept`, plan 295): typed whole, the
+  word was marked a kana off.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's
-  `gloss`, `{en, fr}`); a part with none of these is a gap, and
+  `gloss`, `{en, fr, es}`); a part with none of these is a gap, and
   `python -m scripts.breakdown_gaps` lists them over every sentence the
   app teaches. A function word reaches the deck's kana card through
   `card_lookup`'s breakdown-only resolvers ("the words that hold a
@@ -195,8 +201,9 @@ runtime purpose.
   outside lines (Tatoeba's) and odd input: the parts cover the text, a
   reading is kana, a final or half-width mark and a subtitle's spaces
   change no card, the same line reads the same twice, every gloss has its
-  French. A rule the catalogue's own tour contradicts is wrong, however
-  right it looks (〜のに's "for (doing)" is its second use). A word or a
+  French and its Spanish. A rule the catalogue's own tour contradicts is
+  wrong, however right it looks (〜のに's "for (doing)" is its second
+  use). A word or a
   saying read whole takes the particles and the forms inside it, never a
   construction the catalogue teaches: 昼夜を問わず and 若気の至り are
   〜を問わず's and 〜の至り's own examples, and stay in their pieces.
@@ -387,11 +394,20 @@ runtime purpose.
   the backend reads as the tables' owner, which RLS leaves alone, and
   nothing reads them through the Data API. A table made by hand in
   `public` is closed by hand (`scripts/sql/close_data_api.sql`).
+- **A comprehension question answers its own miss (plan 301b).** Every
+  seed question names the breakdown sentence(s) its right option rests
+  on (`at`) and says in one line why (`why`, `{en, fr}`), quoting the
+  text verbatim from those sentences and never naming an option by its
+  letter or place, since the options are shuffled for every serving
+  (`tests/test_comprehension_seed.py`). The generator is asked for both
+  and keeps them only when well formed (`reading._clean_answer_line`), so
+  a pool row without them still serves and the screen falls back to the
+  sentence the question quotes (`domain/quotedFragments.answerSentences`).
 - **The reading bank is held at its level from both sides.** A row of
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level
   besides its grammar point, its focus one of them, its point found by the
-  detector and a French translation (`row_problems`). Draft new rows
+  detector and a French and a Spanish translation (`row_problems`). Draft new rows
   through `python -m scripts.reading_bank_report --check FILE.json`.
 - **A French learner reads French end to end.** Every new learner-facing
   text carries its French beside its English: a content field has its
@@ -402,6 +418,63 @@ runtime purpose.
   JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
   (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
+- **A Spanish learner reads Spanish where it is written, English where it
+  is not yet (plan 302, ADR 0023).** Never French, never blank. The
+  interface is whole: a screen string is written in `es` too
+  (`locales.test.js`). The decks and the grammar points' glosses are whole:
+  a deck card gains its line in `datas/vocab/vocab_es.json` (keyed
+  `"{kanji}::{kana}"`, moved with the card on a rename), a kanji its
+  Spanish (`kanji_meanings_es.json`, then `build_kanji_db --spanish-only`),
+  a grammar point every text it has (`meaning.es`, `structure_es`, its
+  lesson, its tour and its own Choisir questions), in the same change
+  (`tests/test_spanish.py`); a reading-bank row its `es` (`row_problems`),
+  a dictation line its `es` (`listening_clips.problems`), a comprehension
+  seed every string (its `LANGS`, so the pool serves a Spanish learner
+  the seeds before any model call), a conversation scenario every text
+  (`conversation.LANGS`, `check_conversation`) and a sentence a deck card
+  shows its Spanish: a correction's or a written sentence's `es`
+  (`vocab_examples check`, `check-added`), a Tatoeba sentence's line in
+  `datas/vocab/jmdict_es.sqlite3` (`build_jmdict_fr --lang es`), so a card
+  the deck gains has its sentences in Spanish too; a basics unit its
+  title's `es` (`test_basics`); a gloss the breakdown writes itself (a
+  word of speech, an affix, a unit, a figure, a date) its `es`, a tuple
+  table's row its Spanish last (`test_breakdown_invariants`); a
+  dictionary chip its label and tooltip (`_SHORT_LABELS_ES`,
+  `_TOOLTIPS_ES`), a radical its meaning (`RADICAL_ES`), every theme
+  word its `| español` in `content/theme_lists.py`, in the theme's own
+  sense (the build refuses one without), a duel's word item its choices in every language
+  (`duel_paper.CHOICE_LANGS`, a `PAPER_REV` move), and search matches
+  every gloss in each (`routes/dictionary.py`), and the JMdict layer is
+  the French one's twin: a line `jmdict_fr.sqlite3` gains (a sense, a
+  sentence, a pool word's gloss) has its Spanish in `jmdict_es.sqlite3`
+  in the same change
+  (`test_the_spanish_layer_holds_every_line_the_french_one_does`).
+  Nothing is left to a later wave: `python -m scripts.spanish_coverage`
+  shows every part whole, and a part that grows takes its Spanish with
+  it. A catalogue text is read through
+  `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES)` for a
+  word and `KANJI_GLOSSES` for a kanji (`translations/course.py`; never
+  the two merged, which keeps only the kanji maps), a date or a number is
+  written in `intlLocale(lang)` (`lib/locale.js`, es-419 for Spanish): never a
+  `lang === 'fr' ? … : …` that sends a third language to English or French
+  by accident. Latin-American neutral Spanish (the owner's choice, ADR
+  0023): the Latin-American word where the two differ (boleto, auto,
+  celular, computadora, jugo, estacionar; never coger), the preterite for
+  a finished past, no leísmo, tú, «…» quotes with the period after the
+  closing one, figures as es-419 writes them. A deck kanji's Spanish is
+  KANJIDIC2's unless `kanji_meanings_es.json` has the line, which then
+  wins (`build_kanji_db --spanish-only`): correct a kanji there.
+  Spain's Spanish is an interface over that one Spanish, not a fourth
+  table (plan 303): `locales/es-ES` holds only the screen strings Spain
+  says otherwise (añadir, billete, ordenador, vídeo, pulsar, en
+  directo), merged over the Spanish one, and its figures are es-ES
+  (`lib/locale.js`); the account keeps `es-ES` in `ui_lang` while every
+  request and every content lookup asks for `es` (`contentLang`), so
+  nothing on the server forks. A new screen string with one of those
+  words gains its line there (`locales.test.js`), and a query typed in
+  one of Spain's words asks the Latin-American one too
+  (`search_match.SPAIN_WORDS`: móvil finds 携帯, whose gloss says
+  celular).
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
@@ -415,11 +488,33 @@ runtime purpose.
   227).** The deck's Tatoeba sentences are read through
   `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
   correction keeps every course word the sentence showed, carries its
-  `en`, `fr` and `why`, and is drafted and checked with
+  `en`, `fr`, `es` and `why`, and is drafted and checked with
   `python -m scripts.vocab_examples check`. A word JMdict gives no
   sentence has two written for it (`datas/vocab/example_added.json`,
-  `check-added`: its course spelling, no kanji above its level), so every
-  card shows one; a word the deck gains is written for in the same change.
+  `check-added`: its course spelling, no kanji above its level, its three
+  translations), so every card shows one; a word the deck gains is written for in the same change.
+  A sentence sits under the sense it uses (plan 296): JMdict files one
+  whose link names no sense under the first (渡す "to ferry across"
+  showed a relay's baton), so a sentence under the wrong sense is filed
+  under its own in the same layer (`datas/vocab/example_senses.json`, per
+  word and by the sentence shown, with the sense's gloss), drafted and
+  checked with `python -m scripts.example_senses check`. A correction
+  that rewrites a sentence keeps the sense it is filed under, or files it
+  anew: the rewritten sentence's old move no longer matches, and
+  `tests/test_example_senses.py` fails on it. A card shows only
+  sentences its word is in, where the page marks it (plan 297,
+  `test_every_sentence_a_card_shows_carries_its_word`): one in another
+  spelling of the same word is corrected to the card's (どちら's beside
+  どっち), one of another word read alike is dropped (開く under 空く),
+  and a kana card whose curated row holds another word's entry before
+  its own keeps its own (`vocab_extras._OWN_ENTRY`, ママ behind まま).
+  The word marked is the card's, not a card read alike: written with
+  the card's kanji (速い under 早い, 作る under 造る were dropped,
+  `test_no_card_marks_another_cards_spelling`), read its way (一日 read
+  いちにち under いちじつ), or in kana where the card's kanji is the
+  usual one (値段をつける is 付ける's, not 着ける's); a card the drops
+  leave bare is written for, and one whose gloss reaches a second JMdict
+  entry lists its senses (`_SENSES_ALSO`, 回り's surroundings).
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
@@ -444,7 +539,15 @@ runtime purpose.
   (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
-  read as an assumption.
+  read as an assumption. `KNOWN_STATE`'s one check of one is a
+  `card_modes` count only: a learner's total of answers (the review
+  total, retention, XP) reads `review_log` and its rollup, never a sum
+  of `card_modes`' counters, or every assumption is an answer (plan
+  300: a learner who boarded at N4 read 100% retention before answering
+  once). A card's and a deck's figures read `_state_row`'s `answers`,
+  which leave an untouched assumption's check out, and a check passed
+  takes the virtual one's place in the row (`SRSEngine.review`), so the
+  row counts what was answered; `total_reviews` still says met or new.
 - **An import is an assumption the level does not give back (plans
   243, 243b).** `SRSEngine.seed_imported` writes `KNOWN_STATE`'s
   signature with the source's interval and ease and `IMPORTED_STEP` in
@@ -551,7 +654,8 @@ runtime purpose.
 
 - **The interface language is the account's, and only the learner moves it.**
   A choice made in Réglages › Affichage is kept in `user_profiles.ui_lang`
-  (NULL = never chosen: French on a French device, English otherwise) as well as in
+  (NULL = never chosen: French on a French device, Spanish on a Spanish one,
+  Spain's on one set to Spain, English otherwise) as well as in
   localStorage `lang`, which stays because the first paint reads it
   synchronously. `lib/langChoice.js` writes both (`rememberLang`) and, at
   boot, copies the account's answer onto the device (`syncLang`, from
@@ -737,8 +841,9 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-thirty hand-written exercises per level since plan 259, sixty at N5
-since plan 274, in both languages,
+thirty hand-written exercises per level since plan 259, sixty at N4
+and eighty at N5 since plan 298, in each of the app's languages
+(Spanish since plan 302),
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -828,6 +933,16 @@ those learners typed the name for their card, so read the report before
 python -m scripts.migrate_handles      # report; --yes to apply, --user to scope (repeatable)
 ```
 
+And one after the deploy that carries plan 300: a check passed before it
+counted on top of the level rule's virtual one, so those cards read 2 of
+2 for one answer. It sets every row that is exactly one check of one over
+its logged history to the log's count, and leaves alone a row whose
+history was folded into the rollup.
+
+```bash
+python -m scripts.recount_known_checks  # report; --yes to apply, --user to scope
+```
+
 And one after any deploy that changes the voice (plan 121 did, from edge-tts
 to VOICEVOX Nemo). Run it from the backend's Render Shell, since it needs the
 database and the disk the clips live on. It remakes every dictation clip and
@@ -866,13 +981,19 @@ reading/translation practice serve, and a one-line gloss for the ~20k
 commonest pool words and for every compound of the deck's nouns JMdict
 holds, which is what lets the breakdown fold it (plan 280). It sits
 beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
-re-commits the 76 MB pool. To correct a
+re-commits the 76 MB pool. The Spanish layer (plan 302) is the same, in
+`datas/vocab/jmdict_es.sqlite3`: every line the French one has, its
+senses, its sentences and its pool lines. To correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 
 ```bash
 python -m scripts.build_jmdict_fr --export   # -> datas/vocab/fr_source/
 python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
+python -m scripts.build_jmdict_fr --lang es --export  # -> datas/vocab/es_source/
+python -m scripts.build_jmdict_fr --lang es           # -> datas/vocab/jmdict_es.sqlite3
 python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
+python -m scripts.build_kanji_db --spanish-only # kanji_meanings_es.json into kanji.sqlite3 (plan 302)
+python -m scripts.spanish_coverage              # what reads Spanish, and what still reads English
 ```
 
 Two things are worth knowing before reaching for any of them:
@@ -1137,11 +1258,11 @@ npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
+npm test          # vitest's eight lanes in CI's three groups, one after another (scripts/test-lanes.mjs)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
-npm run landing:og  # its two share cards, rendered in Chromium
+npm run landing:og  # its three share cards, rendered in Chromium
 npm run landing:footage  # its sixteen feature clips, filmed on a seeded learner (plan 283)
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
@@ -1168,7 +1289,7 @@ result's sounds. `scripts/duel-music/` renders them in Chromium into
 and one more: the render is not byte-deterministic, so rebuild only with
 a change to the score, under a new `REV` (`scripts/duel-music/README.md`).
 
-The landing page is the site's **`/`** (and `/en`), and the app's front
+The landing page is the site's **`/`** (and `/en`, `/es`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`
 (`appShell.js`) so that `vercel.json` can rewrite `/` to the page, and the
 page sends a signed-in learner and every sign-in's return on to `/app`

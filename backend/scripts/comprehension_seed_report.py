@@ -53,7 +53,8 @@ from study.grammar_match import verifiable
 QUOTE = re.compile(r"「([^」]+)」")
 SENTENCE = re.compile(r"[^。！？!?]+[。！？!?]?")
 WORDS = re.compile(r"[a-zà-ÿ]{4,}", re.I)
-STOP = set("what does this that with from have which mean meaning text sentence writer author dans texte phrase quel quelle quoi avec pour est-ce sont".split())
+STOP = set("what does this that with from have which mean meaning text sentence writer author dans texte phrase quel quelle quoi avec pour est-ce sont "
+           "significa este esta esto texto frase autor autora según dice para cuál cómo".split())
 
 
 def _squash_words(part: dict) -> str:

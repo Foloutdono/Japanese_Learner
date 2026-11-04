@@ -135,6 +135,8 @@ export function palette(ground) {
     border: t['--border'],
     success: t['--success'],
     danger: t['--danger'],
+    // A clock's ink (.timer__fill) and the grammar question's badge.
+    warning: t['--warning'],
     // The simple bar, worst first, as the rating bar draws it.
     rating: [t['--rating-wrong'], t['--rust'], t['--warning'], RATING_INKS['--rating-correct']],
     hang: t['--elev-hang'] || DARK['--elev-hang'],

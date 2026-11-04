@@ -242,8 +242,11 @@ def card_stats(states: dict, user_id: str, raw_id: str, modes) -> dict:
             "progress": 0.0,
         }
 
-    total = sum(i["total_reviews"] for i in items)
-    correct = sum(i["correct_reviews"] for i in items)
+    # The answers, not the row's counts: a card the level rule marked
+    # known carries one virtual check of one until it is answered (plan
+    # 300), and a learner who never met it read "1 review, 100%".
+    total = sum(i["answers"] for i in items)
+    correct = sum(i["correct_answers"] for i in items)
     intervals = [i["interval_days"] for i in items if i["interval_days"] is not None]
     next_reviews = [i["next_review"] for i in items if i["next_review"] is not None]
 
@@ -5367,19 +5370,61 @@ def resolve_whole_word(morphemes, i: int):
 _BY_WHAT = frozenset({"行く", "来る", "帰る", "通う", "送る", "運ぶ", "書く", "払う", "作る", "切る", "食べる",
                       "洗う", "拭く", "描く", "撮る", "連絡"})
 
+# The auxiliaries that say a verb in the negative: 来なかった's ない,
+# 行きません's ん (UniDic's ず).
+_NEGATIVE = frozenset({"ない", "ず", "ぬ"})
+
+
+def _negated(morphemes, j: int) -> bool:
+    """Whether the verb at j -- or the する after a noun there, 連絡
+    しなかった -- is said in the negative, by the auxiliaries that follow
+    it (来なかった, 行きません, 作ってない)."""
+    k = j + 1
+    if morphemes[j].pos == "noun" and k < len(morphemes) and morphemes[k].pos == "verb" \
+            and morphemes[k].lemma == "為る":
+        k += 1
+    while k < len(morphemes) and morphemes[k].pos == "auxiliary":
+        if morphemes[k].lemma in _NEGATIVE:
+            return True
+        k += 1
+    return False
+
+
+def _why(morphemes, i: int) -> bool:
+    """Whether 何 + the particle で at i is なんで, "why" (plans 272, 299):
+    never before も (何でも, "anything"), nor where 何で, in kanji, asks
+    "by what" of a way of going (何で行きますか) -- unless that way is
+    said in the negative, which no means is asked of: 何で来なかったの？
+    is "why didn't you come?". The breakdown's reading (_what_word) and
+    the segments a sentence is graded on (_find_segments_morphological)
+    both ask it, so the two read 何で alike."""
+    m = morphemes[i]
+    if m.pos != "pronoun" or m.lemma != "何" or m.reading != "なん" or i + 1 >= len(morphemes):
+        return False
+    nxt = morphemes[i + 1]
+    if nxt.surface != "で" or nxt.pos != "particle":
+        return False
+    after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+    if after is None:
+        return True
+    if after.surface == "も":
+        return False
+    return not (_has_kanji(m.surface) and after.lemma in _BY_WHAT and not _negated(morphemes, i + 2))
+
 
 def _what_word(morphemes, i: int):
     """(level, entry, raw_id, n) for the deck word 何 opens and UniDic
-    cut (plan 272), or None: なん + で is なんで, "why" -- never 何で
-    行きますか's "by what", asked of a way of going in kanji, nor
-    なんでも's "anything" -- and なん + と + なく なんとなく, "somehow"."""
+    cut (plan 272), or None: なん + で is なんで, "why", where _why says
+    so -- never 何で行きますか's "by what", asked of a way of going in
+    kanji, nor なんでも's "anything" -- and なん + と + なく なんとなく,
+    "somehow"."""
     m = morphemes[i]
     if m.pos != "pronoun" or m.lemma != "何" or m.reading != "なん" or i + 1 >= len(morphemes):
         return None
     nxt = morphemes[i + 1]
     after = morphemes[i + 2] if i + 2 < len(morphemes) else None
     if nxt.surface == "で" and nxt.pos == "particle":
-        if after is not None and (after.surface == "も" or (_has_kanji(m.surface) and after.lemma in _BY_WHAT)):
+        if not _why(morphemes, i):
             return None
         card = _card("何で", "なんで")
         return card + (2,) if card else None
@@ -5965,6 +6010,27 @@ def numeral_value(text: str) -> int | None:
     return total + section + (digits or 0)
 
 
+def _de_belongs_after(morphemes, i: int) -> bool:
+    """Whether the で after morphemes[i] belongs to what follows it rather
+    than ending a word there (plan 299): the で of でも, which a question
+    word opens into "any-" (何でも "anything", the N4 point 何でも／誰でも／
+    いつでも／どこでも; 何でもない, いくら何でも), and the copula's で,
+    UniDic's だ (何であれ "whatever it is", 何でございますか "what is it").
+    Merged with 何, either read as the deck's 何で, "why": every 何でも
+    graded its sentence N3, and the level gate counted a word the text
+    did not say. "Why" is 何 + the particle で, the word ending there
+    (何で泣いてるの？, 何でだろう), where _why says so."""
+    if i + 1 >= len(morphemes):
+        return False
+    de = morphemes[i + 1]
+    if de.surface != "で":
+        return False
+    if de.pos == "auxiliary" and de.lemma == "だ":
+        return True
+    after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+    return de.pos == "particle" and after is not None and after.surface == "も" and after.pos == "particle"
+
+
 def _find_segments_morphological(text: str):
     """Preferred scan path (see find_segments_in_text): tokenize with a
     real morphological analyzer instead of guessing word boundaries by
@@ -6001,12 +6067,20 @@ def _find_segments_morphological(text: str):
         # 年 is さ来年; 何 + 時 read なんじ is not いつ). Across a particle
         # there is no reading, so no fold merges there: 彼 + の and 所 +
         # で spell folds (あの, ところで), and are "his" and "at the
-        # place" far more often than either.
-        if i + 1 < len(morphemes):
+        # place" far more often than either. Nor does a word end on a で
+        # that belongs to what follows (_de_belongs_after): 何 + で + も is
+        # 何でも, never 何で. And 何 + the particle で is なんで, "why",
+        # where the breakdown reads it so and nowhere else (_why, plan
+        # 299): not 何で行きますか's "by what"; in kana too (なんで泣いて
+        # いるの), which no written-form lookup finds across a particle.
+        if i + 1 < len(morphemes) and not _de_belongs_after(morphemes, i):
             m2 = morphemes[i + 1]
-            merged = m.surface + m2.surface
-            crosses = "particle" in (m.pos, m2.pos)
-            hit = resolve_lemma(merged, "" if crosses else m.reading + m2.reading)
+            if m.lemma == "何" and m2.surface == "で" and m2.pos == "particle":
+                hit = _card("何で", "なんで") if _why(morphemes, i) else None
+            else:
+                merged = m.surface + m2.surface
+                crosses = "particle" in (m.pos, m2.pos)
+                hit = resolve_lemma(merged, "" if crosses else m.reading + m2.reading)
             if hit:
                 level, entry, raw_id = hit
                 vocab_hits.append((m.start, m2.end, level, entry, raw_id))

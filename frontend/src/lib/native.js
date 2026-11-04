@@ -254,11 +254,21 @@ export async function updateWidget(payload) {
   } catch { /* no widget in this build */ }
 }
 
+// The link the app was started with is read once a run, whoever binds.
+// getLaunchUrl answers with it for the life of the process (Android
+// keeps the starting intent's data, iOS the last link opened), so a
+// second read took the learner back through the door they came in by:
+// boarded from the widget's Depart, every way out of the run boarded
+// it again.
+let launchRead = false
+// The last link taken, across binds: a cold start can bring the same
+// link both ways, and a bind can be made again between the two.
+let last = null
+
 /** A tap on a nudge, and a link from the widget -- while the app runs,
  *  or the one it was started with. The same link can arrive both ways
- *  on a cold start; it is taken once. */
+ *  on a cold start; it is taken once, and the start's link once a run. */
 export function onOpenings(handler) {
-  let last = null
   const take = (to, via, key) => {
     const now = Date.now()
     if (last && last.key === key && now - last.at < 3000) return
@@ -281,12 +291,15 @@ export function onOpenings(handler) {
       if (to) take(to, 'widget', url)
     }),
   ]
-  App.getLaunchUrl()
-    .then(launch => {
-      const to = openPath(launch?.url)
-      if (to) take(to, 'widget', launch.url)
-    })
-    .catch(() => {})
+  if (!launchRead) {
+    launchRead = true
+    App.getLaunchUrl()
+      .then(launch => {
+        const to = openPath(launch?.url)
+        if (to) take(to, 'widget', launch.url)
+      })
+      .catch(() => {})
+  }
   return () => { for (const p of pending) p.then(h => h.remove()).catch(() => {}) }
 }
 

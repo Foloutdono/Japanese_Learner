@@ -15,6 +15,7 @@ import { useLearningSave } from './learningSave'
 import { dateFormat, stopParts, timeAxis } from './contract'
 import { useDesk } from '../../hooks/useDesk'
 import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
+import { intlLocale } from '../../lib/locale'
 
 const iso = d => d.toISOString().slice(0, 10)
 
@@ -90,7 +91,7 @@ export function ServicePage({ session }) {
   const fmt = dateFormat(lang)
   const printedDate = status?.goalTargetDate ? new Date(status.goalTargetDate) : null
   const chosenDate = dirty ? arrive(chosen) : printedDate
-  const fraction = new Intl.NumberFormat(lang === 'fr' ? 'fr' : 'en', { maximumFractionDigits: 1 })
+  const fraction = new Intl.NumberFormat(intlLocale(lang, 'en'), { maximumFractionDigits: 1 })
 
   function choose(perDay) {
     if (isOn(perDay) && !withDest) return

@@ -52,6 +52,12 @@ def _clean_onboarding_state(user_id: str):
                     """,
                     (handle, user_id),
                 )
+                # A declared level seeded the levels below it known (plan
+                # 224): give the untouched assumptions back, as a move down
+                # does (forget_assumed), or the next file on this worker
+                # finds no new N5 card to serve (test_kanji_card_shares).
+                cur.execute(f"DELETE FROM card_modes WHERE card_id LIKE %s AND {srs._ASSUMED_SQL}",
+                            (f"{user_id}:%",))
             conn.commit()
         finally:
             conn.close()
