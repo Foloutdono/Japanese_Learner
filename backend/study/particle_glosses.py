@@ -967,7 +967,7 @@ def gloss(morphemes, i: int) -> dict | None:
         key = "で_almost"                   # もう少しで勝てた, あと一歩で -- never あとちょっとで
         # いい, "a little is enough" (plan 272)
     elif m.pos == "auxiliary" and m.lemma == "や" and m.surface == "やっ" and i + 1 < len(morphemes) \
-            and morphemes[i + 1].lemma == "た":
+            and morphemes[i + 1].lemma == "た" and not (i > 0 and morphemes[i - 1].pos == "verb"):
         key = "や_was"                      # 泣き虫やった, 休みやったら (plan 296)
     elif m.pos == "auxiliary" and m.lemma == "や" and m.surface in ("やろ", "やろう") and m.cform.startswith("意志推量形"):
         key = "やろ"                        # ちゃうやろ？ (plan 272)

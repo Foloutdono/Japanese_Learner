@@ -3725,7 +3725,6 @@ class TheStressSetsOlderPointsTests(unittest.TestCase):
                                   ("執念でなくてなんであろうか。", "〜でなくてなんだろう"),
                                   ("眼鏡を外すと、兄はずいぶん幼く見える。", "〜に見える"),
                                   ("先生がおっしゃった通り、試験には同じ問題が出た。", "〜通りに"),
-                                  ("予定通り、会議は始まった。", "〜通りに"),
                                   ("少子化の影響は学校の統廃合だけではない。", "〜だけでなく"),
                                   ("それだけではなく、値段も安い。", "〜だけでなく"),
                                   ("彼は何一つ文句を言わずに最後まで働いた。", "〜一つ〜ない"),
@@ -3752,5 +3751,29 @@ class TheOlderFixesLookalikesTests(unittest.TestCase):
                                   ("彼の証言はおそらく事実であろう。", "〜だろう"),
                                   ("彼女は誰にもまして努力を惜しまない人だ。", "〜にもまして"),
                                   ("りんごを一つ買った。", "助数詞 〜つ／〜人／〜枚")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertIn(pattern, found_in(sentence))
+
+
+class TheOlderFixesJudgesRowsTests(unittest.TestCase):
+    """Plan 296, the judges' rows on the older misreadings: a noun's
+    どおり stands with anything after it (いつもどおり出社する); であろうと
+    is "whether", no guess; だけじゃないの asks "isn't it just"; 店によっては
+    and …によって…ところもある are "depending on", no 寄る."""
+
+    def test_points(self) -> None:
+        for sentence, pattern in (("どうであろうと", "〜だろう"),
+                                  ("たとえ雨であろうと雪であろうと、試合は行います。", "〜だろう"),
+                                  ("自分の意見を持っていないだけじゃないの。", "〜だけでなく"),
+                                  ("銀座通りを歩いた。", "〜通りに"),
+                                  ("昔ここに銀行があったことから、銀行通りと呼ばれています。", "〜通りに"),
+                                  ("市役所へ行く人は、「中央通り」でバスを降りることになる。", "〜通りに")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+        for sentence, pattern in (("では、十八日もいつもどおり出社いたします。", "〜通りに"),
+                                  ("これまでどおり", "〜通りに"),
+                                  ("それだけじゃない。", "〜だけでなく"),
+                                  ("国立公園によって、シャワーまで提供してくれるところもある。", "〜によって"),
+                                  ("店によっては、カードが使えない。", "〜によって")):
             with self.subTest(sentence=sentence, pattern=pattern):
                 self.assertIn(pattern, found_in(sentence))

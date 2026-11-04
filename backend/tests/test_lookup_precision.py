@@ -4544,7 +4544,7 @@ class NaniInItsSetPhrasesTests(unittest.TestCase):
     なんにも."""
 
     def test_its_reading(self) -> None:
-        for sentence, surface, reading in (("その時間が、何にもまして気楽なのだ。", "何に", "なにに"),
+        for sentence, surface, reading in (("その時間が、何にもまして気楽なのだ。", "何", "なに"),   # (何 + 〜にもまして's に)
                                            ("急いで出てきたので、何一つ持ってこなかった。", "何", "なに"),
                                            ("何ひとつ分からない。", "何", "なに"), ("何にも知らない。", "何に", "なんに")):
             with self.subTest(sentence=sentence):
@@ -4663,7 +4663,7 @@ class ABareDenialsCopulaTests(unittest.TestCase):
     as the copula's."""
 
     def test_its_gloss(self) -> None:
-        for sentence in ("ではない", "だけではない", "ではないか"):
+        for sentence in ("ではない", "ではないか"):    # (だけではない is 〜だけでなく's, plan 296)
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, "で").startswith("(the copula) で of ではない"))
         # (までもない said bare, cut ま + で by the tokenizer: no copula)
@@ -4755,3 +4755,13 @@ class TheOlderFixesLookalikeWordsTests(unittest.TestCase):
         self.assertTrue(gloss_of("レポートを適当に書いて出した。", "に").startswith("makes an adverb"))
         self.assertTrue(gloss_of("あの店、休みやったら別のとこ行こか。", "やっ").startswith("(Kansai) was"))
         self.assertEqual(token_of("宿題やった？", "やっ")["pos"], "verb")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ACompoundWithYaruTests(unittest.TestCase):
+    """Plan 296, the judges' row: 追いやった is one verb, 追いやる, no
+    west's copula after a verb's stem (休みやったら keeps it)."""
+
+    def test_its_gloss(self) -> None:
+        self.assertFalse(gloss_of("朝日が霧をおいやった。", "やっ").startswith("(Kansai)"))
+        self.assertTrue(gloss_of("明日が休みやったら、行かへん？", "やっ").startswith("(Kansai) was"))

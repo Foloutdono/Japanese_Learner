@@ -6889,9 +6889,16 @@ def _a_bare_street(tokens, s: int, e: int) -> bool:
     if p is None or p.surface in ("この", "その", "あの", "どの", "こんな", "そんな", "あんな") or p.pos == "adnominal":
         return True
     voiced = morphology.kata_to_hira(tokens[k].reading or "").startswith("どおり") and p.end == tokens[k].start
-    if not (p.pos in ("verb", "auxiliary") or (p.surface == "の" and p.pos == "particle") or voiced):
-        return True                     # (予定通り、, いつも通り: a noun's どおり stands too)
     n = tokens[k + 1] if k + 1 < len(tokens) else None
+    if voiced:
+        # (いつもどおり出社する, これまでどおり: a noun's どおり in kana stands
+        # with anything after it, as before plan 296; in kanji after a noun
+        # it is the dictionary's word, 平常通り, or a street, 銀行通り,
+        # 「中央通り」で)
+        return tokens[k].surface != "どおり" or p.proper or bool(p.name_kind) \
+            or (n is not None and n.surface in ("を", "で"))
+    if not (p.pos in ("verb", "auxiliary") or (p.surface == "の" and p.pos == "particle")):
+        return True
     return not (n is not None and (n.surface in ("、", "，") or n.pos == "verb" or _is_copula(n)))
 
 
@@ -7413,6 +7420,12 @@ def _pattern_refusals():
         # reason, plan 296)
         "〜もので": lambda t, s, e, g: _followed_by(t, e, "は", "も", "ない", "なかっ", "なく", "無い"),
         "〜くする／〜にする": lambda t, s, e, g: _acts_on_nothing(t, s, e, g) or _done_in_a_manner(t, s),
+        # (雨であろうと雪であろうと: "whether", no guess, plan 296)
+        "〜だろう": lambda t, s, e, g: sentence_text(t, s, e).endswith("であろう")
+            and (n := _next_word(t, e)) is not None and n.surface in ("と", "とも", "が"),
+        # (意見を持っていないだけじゃないの: "isn't it just that", plan 296)
+        "〜だけでなく": lambda t, s, e, g: sentence_text(t, s, e).endswith(("ない", "なかっ"))
+            and (n := _next_word(t, e)) is not None and n.surface in ("の", "ん", "か", "？", "?"),
         # (片付けを適当にしたら: a manner and する, no one's point of view;
         # 切符にしたらいかがですか: what one picks, plan 296)
         "〜にしたら": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None and (

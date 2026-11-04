@@ -895,6 +895,13 @@ _HEARSAY = frozenset({"そう", "らしい", "という", "とのこと", "っ�
 _DIFFERS = ("違", "ちが", "異な", "変わ", "かわ", "様々", "さまざま", "まちまち", "差", "決ま", "きま")
 
 
+def _a_compound_with_yaru(stem) -> bool:
+    """Whether a verb's stem and やる make one verb: 追いやる, 思いやる,
+    見やる (plan 296) -- 休み + やる makes none."""
+    alone = tokenize(stem.surface + "やる") or []
+    return len(alone) == 1 and alone[0].pos == "verb"
+
+
 def _spells(morphemes, i: int, word: str) -> int:
     """How many glued morphemes from morphemes[i] spell exactly `word`,
     or 0."""
@@ -930,7 +937,13 @@ def _drops_in(morphemes, i: int) -> bool:
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     rest = morphemes[i + 1:]
     differs = any(u.surface.startswith(_DIFFERS) or (u.pos == "auxiliary" and u.lemma in ("れる", "られる"))
-                  for u in rest)
+                  # (公園によって…ところもある, 人もいる: some, depending on
+                  # which -- 〜によって, plan 296)
+                  or (u.surface == "も" and k2 + 1 < len(rest) and rest[k2 + 1].lemma in ("有る", "ある", "居る", "いる"))
+                  or u.surface in ("場合", "ところ", "所", "中には", "なかには")
+                  for k2, u in enumerate(rest))
+    if nxt is not None and nxt.surface == "て" and i + 2 < len(morphemes) and morphemes[i + 2].surface == "は":
+        return False                    # (店によっては: "depending on the shop")
     if m.surface == "よろう" or m.cform.startswith("意志推量形"):
         return True                     # (神社によろうか)
     if nxt is None or nxt.pos == "symbol" or nxt.surface in ("か", "よ", "ね", "の", "ん"):
@@ -5197,7 +5210,8 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and _glued(prev, m) and ((prev.pos in ("noun", "pronoun", "suffix") and _said_in_the_west(morphemes, i))
                                          # (休みやったら: a verb's stem takes no やる after it --
                                          # the noun it spells and the west's copula, plan 296)
-                                         or (prev.pos == "verb" and prev.cform == "連用形-一般"))):
+                                         or (prev.pos == "verb" and prev.cform == "連用形-一般"
+                                             and not _a_compound_with_yaru(prev)))):
             # 泣き虫やったんやで, 休みやったら…行かへん: the west's copula や,
             # "was" -- no やる after a noun where the sentence speaks the
             # west's Japanese (plan 296)
