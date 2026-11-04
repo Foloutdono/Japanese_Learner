@@ -2076,6 +2076,10 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'Not connected',
   linkGoogleDesc:    'Add Google to this account, and “Continue with Google” will open it rather than a new, empty one.',
+  // The same offer for Apple, on the iPhone alone (plan 295).
+  linkAppleLabel:    'Apple',
+  linkAppleCap:      'Not connected',
+  linkAppleDesc:     'Add Apple to this account, and “Continue with Apple” will open it rather than a new, empty one.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -2487,6 +2491,8 @@ const boarding = {
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continue with Google',
+  // Apple's own title for its button, in its own words (plan 295).
+  continueWithApple: 'Continue with Apple',
   orWithEmail: 'or with an email address',
   // 改札 — a round trip that came back refused (lib/authRedirect.js).
   // Both name what happened rather than "something went wrong": on the
@@ -2495,6 +2501,8 @@ const boarding = {
   // reason, not a shrug.
   oauthAlreadyLinked: 'That Google account already belongs to another pass.',
   oauthSignInInstead: 'Sign in with that Google account',
+  oauthAlreadyLinkedApple: 'That Apple Account already belongs to another pass.',
+  oauthLinkingOffApple: 'Apple cannot be added to this pass right now. An email address can.',
   nativeReturnNote:  'Signed in. Returning to the app…',
   nativeReturnOpen:  'Open Tsuji',
   oauthLinkingOff: 'Google cannot be added to this pass right now. An email address can.',
@@ -2693,6 +2701,7 @@ const boarding = {
   brdKeepSent: (email) => `Link sent to ${email}`,
   brdKeepChange: 'Change',
   brdKeptGoogle: 'Kept on your Google account',
+  brdKeptApple: 'Kept on your Apple Account',
   brdKeptEmail: (email) => `Kept · ${email}`,
   brdKeptAccount: 'Kept on your account',
   brdKeptSwitch: 'Switch account',

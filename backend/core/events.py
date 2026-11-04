@@ -350,7 +350,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "boarding_done": {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
-        "kept":      frozenset({"google", "password", "link", "already", "none"}),
+        "kept":      frozenset({"google", "apple", "password", "link", "already", "none"}),
     },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},

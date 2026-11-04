@@ -34,6 +34,14 @@ export function nativePlatform() {
   }
 }
 
+/** Sign in with Apple, on the system's own sheet: the iPhone's shell
+ *  alone (plan 295). Apple's guideline 4.8 asks for it wherever Google
+ *  is offered on iOS; the web and Android have no such sheet, and the
+ *  web's redirect would need a secret renewed every six months. */
+export function canSignInWithApple() {
+  return isNative() && nativePlatform() === 'ios'
+}
+
 const native = () => import('./native')
 
 // ── The seams ─────────────────────────────────────────────────

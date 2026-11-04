@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useLang } from '../../LangContext'
 import { Seg } from '../chrome/Console'
 import { ProviderButton } from './ProviderButton'
+import { providersHere } from '../../lib/oauth'
 import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 import { authErrorMessage } from '../../lib/authErrors'
 import { emailRedirectTarget } from '../../lib/oauth'
@@ -105,7 +106,8 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
 
   const head = (
     <>
-      <ProviderButton onError={setError} />
+      {/* Apple beside Google on the iPhone (plan 295). */}
+      {providersHere().map(p => <ProviderButton key={p} provider={p} onError={setError} />)}
       <p className="auth-or">{t.orWithEmail}</p>
       {seg && (
         <Seg

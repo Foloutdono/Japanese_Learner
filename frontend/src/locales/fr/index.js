@@ -2027,6 +2027,10 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'Non connecté',
   linkGoogleDesc:    'Ajoute Google à ce compte, et « Continuer avec Google » ouvrira celui-ci plutôt qu\'une nouvelle carte vide.',
+  // La même offre pour Apple, sur l'iPhone seulement (plan 295).
+  linkAppleLabel:    'Apple',
+  linkAppleCap:      'Non connecté',
+  linkAppleDesc:     'Ajoute Apple à ce compte, et « Continuer avec Apple » ouvrira celui-ci plutôt qu\'une nouvelle carte vide.',
 
   // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
   // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
@@ -2422,6 +2426,8 @@ const boarding = {
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
   continueWithGoogle: 'Continuer avec Google',
+  // Le titre qu'Apple donne à son bouton, dans ses mots (plan 295).
+  continueWithApple: 'Continuer avec Apple',
   orWithEmail: 'ou avec une adresse e-mail',
   // 改札 — un aller-retour revenu refusé (lib/authRedirect.js). Les
   // deux nomment ce qui s'est passé plutôt qu'« une erreur est
@@ -2430,6 +2436,8 @@ const boarding = {
   // raison, pas un haussement d'épaules.
   oauthAlreadyLinked: 'Ce compte Google appartient déjà à une autre carte.',
   oauthSignInInstead: 'Se connecter avec ce compte Google',
+  oauthAlreadyLinkedApple: 'Ce compte Apple appartient déjà à une autre carte.',
+  oauthLinkingOffApple: 'Apple ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
   nativeReturnNote:  'Connecté. Retour vers l’application…',
   nativeReturnOpen:  'Ouvrir Tsuji',
   oauthLinkingOff: 'Google ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
@@ -2631,6 +2639,7 @@ const boarding = {
   brdKeepSent: (email) => `Lien envoyé à ${email}`,
   brdKeepChange: 'Changer',
   brdKeptGoogle: 'Gardée sur ton compte Google',
+  brdKeptApple: 'Gardée sur ton compte Apple',
   brdKeptEmail: (email) => `Gardée · ${email}`,
   brdKeptAccount: 'Gardée sur ton compte',
   brdKeptSwitch: 'Changer de compte',

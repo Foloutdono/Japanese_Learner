@@ -157,6 +157,14 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
 - App Store Connect: the privacy labels, an **account-deletion note** for
   the reviewer (Settings › Account), a **test account**, the support and
   privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group.
+- **Sign in with Apple** (plan 295), which guideline 4.8 asks for beside
+  Google: the App ID `app.tsuji` with *Sign In with Apple* enabled (not the
+  widget's), a Sign in with Apple key whose `.p8` and Key ID go on Render as
+  `APPLE_*`, the Apple provider enabled in Supabase with `app.tsuji` as its
+  Client ID, and Supabase's mail sender registered for Apple's private relay.
+  The steps are in `docs/oauth.md`, "Sign in with Apple". Without the App ID
+  capability the tag's `ios` job fails at signing, since `App.entitlements`
+  asks for it.
 
 ## The widget and its App Group (plan 156)
 

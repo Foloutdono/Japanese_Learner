@@ -234,6 +234,76 @@ it off, both report the refusal and change nothing — no progress is lost
 either way, but neither offer works, and the second one is the only remedy
 for a learner who already has a duplicate account.
 
+## 林檎 — Sign in with Apple, on the iPhone (plan 295)
+
+App Review's guideline 4.8: an app that signs people in with Google must
+offer, beside it, a login that collects only a name and an address, lets the
+learner keep the address private and tracks nothing. Neither the email
+account (the address is the learner's own) nor the guest pass (it is not a
+sign-in) is one, and in practice only Sign in with Apple is. So on the iPhone
+**wherever Google is offered, Apple is offered first, beside it**
+(`lib/oauth.js`'s `providersHere`): the Welcome's sign-in, the boarding's
+account sheet, and Settings › Account (the guest's offer, and a slip per
+identity a pass lacks, as Google's). Nowhere else: the web and Android keep
+Google alone, which the guideline does not touch.
+
+None of Google's round trip applies. The system's own sheet is drawn over the
+app (`ios/App/App/TsujiAppleSignInPlugin.swift`, called through
+`lib/native.js`'s `signInWithApple`) and answers in-process with an
+**identity token**, which Supabase checks against the bundle id:
+`signInWithIdToken` to sign in, `linkIdentity` with the token to put Apple on
+a guest's pass (the guest is still linked, never signed in afresh, as with
+Google). No browser, no redirect, nothing to allowlist, no fragment to read.
+A random **nonce** ties the token to this sign-in: the plugin hands Apple its
+SHA-256 and Supabase hashes the raw value to compare. Only the address is
+asked for; the card's name is the boarding's question.
+
+**The server's half is the account's deletion.** Apple asks an app that
+offers Sign in with Apple to revoke the learner's grant when the account is
+deleted, and revoking needs a refresh token only the server can get. The
+sheet's answer carries a one-use **authorization code** beside the token;
+the app posts it to `POST /api/account/apple` straight after the sign-in
+(never awaited), the server exchanges it with a client secret signed by the
+team's key and keeps the refresh token in `apple_grants`, and
+`DELETE /api/account` revokes it before erasing the rows
+(`backend/core/apple_signin.py`). Apple unreachable is logged, and the
+deletion goes on.
+
+"The failure with no error" above holds for Apple too: Apple on the sign-in
+screen opens the pass that carries that Apple identity, or a new, empty one.
+The remedy is the same, from inside the account: Settings › Account › Apple.
+
+An account made with Apple can be opened **only on the iPhone** until it has
+another key. Settings › Account offers it Google, and an address is the
+other way; a learner who chose *Hide My Email* has an
+`@privaterelay.appleid.com` address, which forwards only mail from senders
+registered with Apple (below).
+
+### Apple Developer → Certificates, Identifiers & Profiles
+
+1. **Identifiers → `app.tsuji`**: *Sign In with Apple* enabled, "Enable as a
+   primary App ID". Not on `app.tsuji.widget`. A capability added to an App ID
+   that already has a profile invalidates the profile; `match` makes it again
+   on the next tag (`readonly: false`).
+2. **Keys → +**: *Sign in with Apple*, configured with `app.tsuji` as its
+   primary App ID. Download the `.p8` (Apple lets you once) and note its Key ID.
+3. **Services → Sign in with Apple for Email Communication**: register the
+   domain or address Supabase's mails are sent from (with its SPF), or a mail
+   to a private relay address is dropped.
+
+### Render → the backend → Environment
+
+`APPLE_TEAM_ID` (`MS25NAPKZ6`), `APPLE_KEY_ID` and `APPLE_PRIVATE_KEY` (the
+`.p8`, whole, or on one line with `\n`): see `backend/.env.example`. The
+sign-in does not read them; without them no grant is kept and none revoked.
+
+### Supabase → Authentication → Providers → Apple
+
+Enabled, **Client IDs** `app.tsuji` (the bundle id, the identity token's
+audience). The *Secret Key (for OAuth)* stays empty: it is for the web's
+redirect, which this app does not use, and it would expire every six months.
+Manual Linking (below) is what the guest's link needs, as for Google.
+
 ## Worth doing later: PKCE
 
 `src/lib/supabase.js` does not set `flowType`, so supabase-js's default —

@@ -17,26 +17,35 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const auth = {
   signInWithOAuth: vi.fn(),
+  signInWithIdToken: vi.fn(),
   linkIdentity: vi.fn(),
   exchangeCodeForSession: vi.fn(),
   setSession: vi.fn(),
 }
 const isNative = vi.fn(() => false)
+const onIPhone = vi.fn(() => false)
 const openAuthTab = vi.fn()
+const signInWithApple = vi.fn()
+const apiFetch = vi.fn()
 
 vi.mock('./supabase', () => ({ supabase: { auth } }))
-vi.mock('./platform', () => ({ isNative: () => isNative() }))
-vi.mock('./native', () => ({ openAuthTab: (...a) => openAuthTab(...a) }))
+vi.mock('./platform', () => ({ isNative: () => isNative(), canSignInWithApple: () => onIPhone() }))
+vi.mock('./native', () => ({
+  openAuthTab: (...a) => openAuthTab(...a),
+  signInWithApple: (...a) => signInWithApple(...a),
+}))
+vi.mock('./api', () => ({ apiFetch: (...a) => apiFetch(...a) }))
 
 // The shell's build carries the Vercel origin (.env.native, ADR 0008);
 // stubbed before the import because lib/origin.js reads it as it loads.
 vi.stubEnv('VITE_API_ORIGIN', 'https://web.test')
 
-const { connectProvider, hasProvider, redirectTarget, emailRedirectTarget, NATIVE_REDIRECT } = await import('./oauth')
+const { connectProvider, hasProvider, providersHere, redirectTarget, emailRedirectTarget, NATIVE_REDIRECT } = await import('./oauth')
 
 beforeEach(() => {
-  for (const m of [auth.signInWithOAuth, auth.linkIdentity, auth.exchangeCodeForSession, auth.setSession, openAuthTab]) m.mockReset()
+  for (const m of [auth.signInWithOAuth, auth.signInWithIdToken, auth.linkIdentity, auth.exchangeCodeForSession, auth.setSession, openAuthTab, signInWithApple, apiFetch]) m.mockReset()
   isNative.mockReturnValue(false)
+  onIPhone.mockReturnValue(false)
   // A known origin, so the assertion names the value rather than
   // restating whatever the lane happens to be served from.
   vi.stubGlobal('window', { location: { origin: 'https://app.test' } })
@@ -240,5 +249,100 @@ describe('reading the identities a pass carries', () => {
     expect(hasProvider(null)).toBe(false)
     expect(hasProvider({})).toBe(false)
     expect(hasProvider(session({ app_metadata: { providers: ['anonymous'] } }))).toBe(false)
+  })
+})
+
+// ── 林檎 — Sign in with Apple, the iPhone's alone (plan 295) ─────────
+// Guideline 4.8: an iPhone app offering Google offers Apple beside it.
+// None of Google's round trip applies -- the system's sheet answers in
+// the page with an identity token -- so what is pinned is what Supabase
+// is handed, that a guest is still LINKED, and that the one-use code
+// reaches the server without the sign-in waiting on it.
+describe('Sign in with Apple', () => {
+  const answer = { identityToken: 'id.token', authorizationCode: 'c.1' }
+  const session = { access_token: 'at' }
+
+  beforeEach(() => {
+    isNative.mockReturnValue(true)
+    onIPhone.mockReturnValue(true)
+    signInWithApple.mockResolvedValue(answer)
+    auth.signInWithIdToken.mockResolvedValue({ data: { session }, error: null })
+    auth.linkIdentity.mockResolvedValue({ data: { session }, error: null })
+    apiFetch.mockResolvedValue({ ok: true })
+  })
+
+  it('is offered first on the iPhone, and nowhere else', () => {
+    expect(providersHere()).toEqual(['apple', 'google'])
+    onIPhone.mockReturnValue(false)
+    expect(providersHere()).toEqual(['google'])
+  })
+
+  it('hands Supabase the token with the nonce the sheet was asked with', async () => {
+    expect(await connectProvider({ provider: 'apple' })).toEqual({ ok: true })
+    const [[nonce]] = signInWithApple.mock.calls
+    expect(nonce).toMatch(/^[0-9a-f]{64}$/)
+    expect(auth.signInWithIdToken).toHaveBeenCalledWith({ provider: 'apple', token: 'id.token', nonce })
+    // Never Google's road: no redirect, no browser.
+    expect(auth.signInWithOAuth).not.toHaveBeenCalled()
+    expect(openAuthTab).not.toHaveBeenCalled()
+  })
+
+  it('asks with a fresh nonce each time', async () => {
+    await connectProvider({ provider: 'apple' })
+    await connectProvider({ provider: 'apple' })
+    const [[first], [second]] = signInWithApple.mock.calls
+    expect(first).not.toBe(second)
+  })
+
+  it('LINKS Apple onto a guest\'s pass rather than signing in as somebody new', async () => {
+    expect(await connectProvider({ provider: 'apple', link: true })).toEqual({ ok: true })
+    expect(auth.linkIdentity).toHaveBeenCalledWith(expect.objectContaining({ provider: 'apple', token: 'id.token' }))
+    expect(auth.signInWithIdToken).not.toHaveBeenCalled()
+  })
+
+  it('posts the one-use code to the server, with the new session', async () => {
+    await connectProvider({ provider: 'apple' })
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalled())
+    const [path, sent, options] = apiFetch.mock.calls[0]
+    expect(path).toBe('/api/account/apple')
+    expect(sent).toBe(session)
+    expect(options.method).toBe('POST')
+    expect(JSON.parse(options.body)).toEqual({ code: 'c.1' })
+  })
+
+  it('stands even when the server cannot keep the code', async () => {
+    apiFetch.mockRejectedValue(new Error('offline'))
+    expect(await connectProvider({ provider: 'apple' })).toEqual({ ok: true })
+  })
+
+  it('treats closing the sheet as an answer, not a fault', async () => {
+    signInWithApple.mockResolvedValue(null)
+    expect(await connectProvider({ provider: 'apple' })).toEqual({ ok: false, cancelled: true })
+    expect(auth.signInWithIdToken).not.toHaveBeenCalled()
+    expect(apiFetch).not.toHaveBeenCalled()
+  })
+
+  it('carries Supabase\'s refusal out, naming Apple', async () => {
+    auth.linkIdentity.mockResolvedValue({ data: {}, error: { code: 'identity_already_exists', message: 'Identity is already linked' } })
+    expect(await connectProvider({ provider: 'apple', link: true }))
+      .toEqual({ ok: false, provider: 'apple', code: 'identity_already_exists', message: 'Identity is already linked' })
+    expect(apiFetch).not.toHaveBeenCalled()
+  })
+
+  it('reports the sheet failing rather than throwing', async () => {
+    signInWithApple.mockRejectedValue(new Error('apple: no identity token'))
+    expect(await connectProvider({ provider: 'apple' })).toEqual({ ok: false, provider: 'apple', message: 'apple: no identity token' })
+  })
+
+  it('is refused off the iPhone without reaching for a sheet that is not there', async () => {
+    onIPhone.mockReturnValue(false)
+    const r = await connectProvider({ provider: 'apple' })
+    expect(r).toMatchObject({ ok: false, provider: 'apple', code: 'provider_unavailable' })
+    expect(signInWithApple).not.toHaveBeenCalled()
+  })
+
+  it('reads an Apple identity on a pass', () => {
+    expect(hasProvider({ user: { identities: [{ provider: 'apple' }] } }, 'apple')).toBe(true)
+    expect(hasProvider({ user: { app_metadata: { providers: ['google'] } } }, 'apple')).toBe(false)
   })
 })

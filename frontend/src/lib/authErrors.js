@@ -33,9 +33,11 @@
 // lib/supabase.js builds the client. Nothing here may gain an import
 // with a side effect, or that ordering breaks.
 const NAMED = {
-  // The provider round trip.
-  identity_already_exists: t => t.oauthAlreadyLinked,
-  manual_linking_disabled: t => t.oauthLinkingOff,
+  // The provider round trip. Apple's refusals (plan 295) come back from
+  // lib/oauth.js with `provider: 'apple'`, and name Apple; a refusal on
+  // the URL is always Google's, the one provider that leaves the page.
+  identity_already_exists: (t, err) => (err.provider === 'apple' ? t.oauthAlreadyLinkedApple : t.oauthAlreadyLinked),
+  manual_linking_disabled: (t, err) => (err.provider === 'apple' ? t.oauthLinkingOffApple : t.oauthLinkingOff),
   // Putting an address on the pass — and, the same refusals, signing
   // up with one.
   email_exists: t => t.claimEmailTaken,

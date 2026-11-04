@@ -24,6 +24,17 @@ describe('authErrorMessage', () => {
     expect(en.oauthLinkingOff).toBeTruthy()
   })
 
+  // Plan 295: the same two refusals from the iPhone's Apple sheet name
+  // Apple, not Google, in both languages.
+  it('names Apple when Apple was refused', () => {
+    for (const t of [en, fr]) {
+      expect(authErrorMessage({ code: 'identity_already_exists', provider: 'apple' }, t)).toBe(t.oauthAlreadyLinkedApple)
+      expect(authErrorMessage({ code: 'manual_linking_disabled', provider: 'apple' }, t)).toBe(t.oauthLinkingOffApple)
+      expect(t.oauthAlreadyLinkedApple).toMatch(/Apple/)
+      expect(t.oauthLinkingOffApple).toMatch(/Apple/)
+    }
+  })
+
   it('names the refusals a learner meets while claiming the pass', () => {
     expect(authErrorMessage({ code: 'email_exists' }, en)).toBe(en.claimEmailTaken)
     expect(authErrorMessage({ code: 'user_already_exists' }, en)).toBe(en.claimEmailTaken)
