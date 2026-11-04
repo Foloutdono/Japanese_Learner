@@ -4,6 +4,12 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
+// The app's own face (main.jsx loads it), so a width measured here is the
+// learner's, not the machine's fallback: a runner whose fallback is
+// DejaVu Sans set Español (Latinoamérica) 31px wider and cut Agregar
+// short at 360px, where Space Grotesk leaves room to spare.
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/space-grotesk/latin-700.css'
 
 // ── Settings on a phone (plan 139) ───────────────────────────────
 // The pass printed with its contract over the list, and the pages they
@@ -70,6 +76,9 @@ async function mount(path) {
       </MemoryRouter>
     </LangProvider>
   )
+  await document.fonts.load('700 16px "Space Grotesk"', 'Español')
+  await document.fonts.load('400 13px "Space Grotesk"', 'Agregar')
+  await document.fonts.ready
   await settle()
 }
 
