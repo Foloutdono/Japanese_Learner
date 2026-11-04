@@ -7,17 +7,20 @@ import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
-import { APP_INKS, DUEL_INKS } from '../carousel/app.js'
-import { CLIP, COMP_BEATS, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, ROLL_DEMO, STORIES, STORY_FILES, arrivals, askable, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { APP_INKS, DUEL_INKS, NOTIF_INKS, PLAY_MARK, WIDGET_INKS } from '../carousel/app.js'
+import { CLIP, COMP_BEATS, DUEL_BEATS, DUEL_RUN, LEVEL, PLAY_BEATS, PLAY_DAY, PLAY_TAP, PLAY_URL, PROMO, ROLL_DEMO, STORIES, STORY_FILES, arrivals, askable, duelRun, kanjiNumber, playDay, promoDeck, promoItems, promoPlan, spanOf, widgetWord } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
-import { SITE_ORIGIN } from '../landing/config.mjs'
+import { SITE_ORIGIN, STORES } from '../landing/config.mjs'
+import { STRINGS as LANDING } from '../landing/strings.mjs'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { SPRINT_MS, points } from './domain/duel.js'
+import { kanaSetLabel } from './domain/kanaSets.js'
+import { planNudges, widgetPayload } from './lib/ahead.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
@@ -905,7 +908,8 @@ describe('explaining a point in its own sentence', () => {
         const pl = promoPlan(story, data, id, { ...OPTS, story })
         const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
         expect(frames.clip, story).toBeTruthy()
-        expect(frames.clip.print, story).toBe(story === 'pitch')
+        // The two covers that stand on Today's print (the pitch's, the release's, plan 307).
+        expect(frames.clip.print, story).toBe(story === 'pitch' || story === 'play')
         for (const t of [0, 1, 3.5, 4.3, 6.99]) {
           const { ctx } = stubContext()
           expect(() => frames.clip.draw(ctx, t), `${story} at ${t}s`).not.toThrow()
@@ -948,6 +952,115 @@ describe('explaining a point in its own sentence', () => {
           expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(clip.seconds)
         }
       }
+    }
+  })
+
+  // ── Google Play, the release's story (plan 307) ──────────────────
+  it('prints the day on the widget and in the reminder as the app writes them (plan 307)', () => {
+    for (const [lang, t] of [['en', EN], ['fr', FR]]) {
+      const P = PROMO[lang]
+      const day = playDay(P.play)
+      const now = new Date(2026, 10, 4, 7, 0)
+      const at = new Date(2026, 10, 4, 8, 0)
+      const spr = (PLAY_DAY.minutes * 60) / day.count
+      // The gate's lanes: reviews and new cards, the new ones dealt from the first lanes.
+      let left = PLAY_DAY.fresh
+      const lanes = PLAY_DAY.lanes.map(l => {
+        const fresh = Math.min(left, l.n)
+        left -= fresh
+        return { source: l.line, deck: l.deck, due: l.n - fresh, new: fresh, count: l.n }
+      })
+      // The widget: lib/ahead.js's payload, the same day.
+      const widget = widgetPayload({ today: { total: day.count, lanes, seconds_per_review: spr }, ahead: null, t, now, time: PLAY_DAY.hour })
+      expect(widget.hour, lang).toBe(day.hour)
+      expect(widget.points[0], lang).toMatchObject({ total: day.count, unit: day.unit, meta: day.meta })
+      expect(widget.lanes, lang).toEqual(day.lanes)
+      expect(widget.labels.depart, lang).toBe(P.depart)
+      // The reminder: lib/ahead.js's day's train, as Android lists it.
+      const busiest = [...lanes].sort((a, b) => b.count - a.count)
+      const [nudge] = planNudges({
+        ahead: { points: [{ at: at.toISOString(), total: day.count, new: PLAY_DAY.fresh, lanes: busiest }], seconds_per_review: spr },
+        time: PLAY_DAY.hour, t, kanaSetLabel, now, platform: 'android',
+      })
+      expect(nudge.title, lang).toBe(day.title)
+      expect(nudge.summary, lang).toBe(day.summary)
+      expect(nudge.lines, lang).toEqual(day.lines)
+      expect(P.play.app, lang).toBe(t.brdAppName)
+      // The store's badge and its link, as the landing page has them.
+      expect(P.play.badge, lang).toEqual(LANDING[lang](readFacts()).badges.googlePlay)
+    }
+    expect(PLAY_URL).toBe(STORES.googlePlay)
+  })
+
+  it('prints the widget’s word as the server writes it (plan 307)', () => {
+    const words = bank(STORY_FILES.play).words
+    const w = words.find(x => x.t === '友達')
+    expect(widgetWord(w, 'en')).toEqual({ jp: '友達', reading: 'ともだち', meaning: 'friend' })
+    expect(widgetWord(w, 'fr').meaning).toBe('ami')
+    // A word in kana has no reading over it (routes/today.py's _settled_word).
+    const kana = words.find(x => !/[\u3400-\u9fff々]/.test(x.t))
+    expect(widgetWord(kana, 'en').reading).toBe('')
+    // A meaning stays short enough for the widget's one line.
+    for (const x of words) for (const lang of ['en', 'fr']) {
+      const m = widgetWord(x, lang).meaning
+      const first = ((lang === 'fr' && x.fr?.length ? x.fr : x.en) || [])[0] || ''
+      expect(m.length <= 32 || m === first, `${x.t} ${lang}`).toBe(true)
+    }
+  })
+
+  it('draws the widget and the reminder in the inks the Android app draws them in (plan 307)', () => {
+    const res = path => read(`android/app/src/main/${path}`).toLowerCase()
+    const has = (path, ...values) => { for (const v of values) expect(res(path), `${path} ${v}`).toContain(`"${v.toLowerCase()}"`) }
+    has('res/drawable/widget_bg.xml', WIDGET_INKS.bg)
+    has('res/layout/widget_train.xml', WIDGET_INKS.ink, WIDGET_INKS.soft, WIDGET_INKS.label)
+    has('res/drawable/widget_line.xml', WIDGET_INKS.line)
+    has('res/drawable/widget_mark.xml', WIDGET_INKS.road, WIDGET_INKS.ink)
+    has('res/drawable/widget_gate.xml', ...WIDGET_INKS.gate, WIDGET_INKS.crest)
+    has('res/drawable/widget_reader.xml', ...WIDGET_INKS.reader)
+    has('res/drawable/widget_scan.xml', WIDGET_INKS.scan)
+    has('res/drawable/widget_gate_line.xml', WIDGET_INKS.gateLine)
+    for (const [line, ink] of Object.entries(WIDGET_INKS.lines)) {
+      expect(res('java/app/tsuji/TrainWidget.java'), line).toContain(`case "${line}": return color.parsecolor("${ink}")`)
+    }
+    expect(JSON.parse(read('capacitor.config.json')).plugins.LocalNotifications.iconColor).toBe(NOTIF_INKS.icon)
+    // The store's mark is the landing page's, facet for facet.
+    const page = read('landing/page.mjs')
+    for (const [d, ink] of PLAY_MARK) expect(page, d).toContain(`<path d="${d}" fill="${ink}"/>`)
+  })
+
+  it('plays the Play Store release whole, Depart tapped on the widget and the reminder (plan 307)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      const data = bank(STORY_FILES.play)
+      for (const lang of ['en', 'fr']) {
+        const [{ id }] = promoItems('play', data, lang)
+        const pl = promoPlan('play', data, id, { ...OPTS, lang, story: 'play' })
+        expect([...pl.title].length, lang).toBeLessThanOrEqual(TITLE_MAX)
+        expect(pl.caption.link, lang).toBe(PLAY_URL)
+        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+        expect(frames.map(f => f.key), lang).toEqual(PLAY_BEATS.map(([key]) => key))
+        // Each frame says what the app says there.
+        const P = PROMO[lang]
+        const said = i => { const { ctx, texts } = stubContext(); frames[i].draw(ctx); return texts }
+        expect(said(1), lang).toEqual(expect.arrayContaining([String(pl.promo.count), pl.promo.unit, pl.promo.meta, pl.promo.word.jp, P.depart]))
+        expect(said(2), lang).toEqual(expect.arrayContaining([pl.promo.title, ...pl.promo.lines, P.depart]))
+        expect(said(3), lang).toEqual(expect.arrayContaining(P.play.badge))
+        const { story } = frames.clips
+        expect(story.seconds).toBeCloseTo(PLAY_BEATS.reduce((sum, [, len]) => sum + len, 0), 5)
+        expect(story.fps).toBe(CLIP.fps)
+        // Its cover stands on Today's print, as the cover clip does.
+        expect(story.print).toBe(true)
+        for (let t = 0; t < story.seconds; t += 0.25) expect(() => story.draw(stubContext().ctx, t), `${lang} at ${t}s`).not.toThrow()
+        // Every tap lands inside its frame, and is heard.
+        const starts = PLAY_BEATS.map((_, i) => PLAY_BEATS.slice(0, i).reduce((sum, [, len]) => sum + len, 0))
+        for (const [i, key] of [[1, 'widget'], [2, 'reminder'], [3, 'badge']]) {
+          expect(PLAY_TAP[key], key).toBeLessThan(PLAY_BEATS[i][1])
+          expect(story.sounds.some(s => Math.abs(s.at - (starts[i] + PLAY_TAP[key])) < 1e-6), key).toBe(true)
+        }
+      }
+    } finally {
+      globalThis.Path2D = had
     }
   })
 

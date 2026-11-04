@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231, 232, 233, 234, 301)
+# The carousel studio (plans 229–229n, 231, 232, 233, 234, 301, 307)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -498,7 +498,7 @@ the Japanese as written, with furigana, or in kana.
 ## The promo stories (plan 231)
 
 宣伝, the last source, draws the app itself rather than what it teaches:
-seven 9:16 stories, picked by the segments over the list (`promo.js`).
+eight 9:16 stories, picked by the segments over the list (`promo.js`).
 Each frame is drawn with the app's own parts (`app.js`): the review card
 with its stage and band, the rating bar's four keys, a question's choice
 rows, the white pass, the Depart button, the analyser's boxed sentence
@@ -514,6 +514,7 @@ comprehension's clock, passage card, question card and lettered options.
 | Read a whole text (plans 301, 301b) | a comprehension seed's vocabulary or grammar question, N5 to N1 | the passage on its card under the run's clock, the same text rolling (its speed stepped up, ふ pressed, the readings over the kanji), the question with its type and its four options, the answer folded and the line of the text it quotes (its readings, the quoted words lit, its translation), the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
 | Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the sprint run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
+| On Google Play (plan 307) | a word of the N5 deck, the widget's | Today on its print with the news on its plate and the store's badge under it, the home screen's widget with Depart tapped, the reminder at 08:00 opening to its lines with Depart tapped, the app's icon over the store's badge |
 
 **The parts are measured, not imagined.** Every figure in `app.js` is a
 CSS pixel of the running app on a 400px phone (the review card, the
@@ -628,6 +629,31 @@ moment. The story also plays whole (`clips.story`, `COMP_BEATS`, about
 25 seconds): each frame on its own clock, the cover's text, the roll,
 the question, the answer, the gate, scored with the app's sounds;
 "Download the whole story" encodes it.
+
+**The Play Store release plays whole too (plan 307).** It shows what
+the Android app does while it is shut, as the shell draws it: the
+widget (`app.trainWidget`, measured in dp from
+`android/…/res/layout/widget_train.xml`, its inks the `widget_*`
+drawables' and `TrainWidget.lineColor`'s, `WIDGET_INKS`) and the day's
+reminder as Android 12 expands it (`app.reminder`: the mark in the
+reminders' gold circle, the minutes and the new cards in its header,
+the title led by the hour, a line a lane busiest first, Depart). Both
+print the day the other stories show (Today's 42 cards, ≈ 14 min, done
+by 08:14: `PLAY_DAY`, at 08:00), and a test writes that day through the
+app's own `widgetPayload` and `planNudges` (`lib/ahead.js`) and holds
+every word the widget and the reminder print to theirs; the widget's
+word is the picked one, as `routes/today.py` writes it (`widgetWord`).
+The cover is Today on its print, the news on its plate and the store's
+badge in Depart's place; the call to action is the app's icon
+(`brand/icon.svg`, `app.appIcon`) over the badge, which is the landing
+page's (`app.storeBadge`, `PLAY_MARK` held to `page.mjs`, its words to
+`landing/strings.mjs`), and the caption carries the listing
+(`PLAY_URL`, held to `config.mjs`'s `STORES`). In motion
+(`clips.story`, `PLAY_BEATS`, about 20 seconds) each frame comes in on
+its own clock: the widget's Depart is tapped (a ring, as a screen
+recording shows a tap, and the gate's chime), the reminder comes in
+shut and opens to its lines before its Depart is, and the badge is
+tapped last. "Download the whole story" encodes it.
 
 **A story promises what the app does today.** Its figures are the
 bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
@@ -833,8 +859,8 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `funnel.js` | the carousel that converts: each type's hook, answer, detail and key points, the three looks, the feature pictures (plan 234) |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
-| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281); reading comprehension's (plan 301) |
-| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281); the comprehension run's (plan 301) |
+| `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281); reading comprehension's (plan 301); the Play Store release's (plan 307) |
+| `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281); the comprehension run's (plan 301); the Android widget, the reminder, the icon and the store's badge (plan 307) |
 | `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |

@@ -1862,3 +1862,352 @@ export function boardRows(ctx, p, x, y, w, u, rows, { foot = '', footShow = 1 } 
   }
   return h
 }
+
+// ── 発車案内 and the store: the app on Android (plan 307) ─────────────
+// The Play Store release's story shows what the Android app does while
+// it is shut, as the shell draws it: the home screen's widget
+// (android/…/res/layout/widget_train.xml, its widget_* drawables and
+// TrainWidget.java, redrawn in plan 293) and the day's reminder with
+// Depart (lib/native.js, lib/ahead.js); then the app's icon
+// (brand/icon.svg) and the store's badge as the landing page draws it
+// (landing/page.mjs's badge, landing.css's .badge). The widget is
+// measured in dp from its layout and the reminder is Android 12's
+// expanded template: every figure below is a dp, times `u`, the slide's
+// pixels per dp.
+
+/** The widget's inks, by value from its drawables and its layout, which
+ *  copy the dark theme's (DESIGN.md, "The widget and the reminder"): the
+ *  board is sumi on every phone. Held equal by src/carousel.test.js. */
+export const WIDGET_INKS = {
+  bg: '#100e13', // widget_bg
+  ink: '#f3ecdf', // the count, the word, the meaning
+  soft: '#b3a488', // the hour, the unit, the meta, the reading
+  line: '#2d2b2e', // widget_line, the hairline before the word
+  road: '#c99a3e', // widget_mark's road (its ink is `ink`)
+  gate: ['#f3cb68', '#e6bd62', '#c99a3e'], // widget_gate, lit from above
+  crest: '#8cfff4d6', // its light along the top, ARGB
+  reader: ['#2e271e', '#100e13'], // widget_reader
+  scan: '#e0b04f', // widget_scan
+  gateLine: '#bf9238', // widget_gate_line
+  label: '#1c1811', // Depart's word
+  lines: { kana: '#b84f3c', vocab: '#3e7ba6', kanji: '#7b68a3', grammar: '#608045' }, // TrainWidget.lineColor
+}
+// Android's #AARRGGBB as the canvas reads it.
+const argb = hex => `rgba(${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},${parseInt(hex.slice(7, 9), 16)},${(parseInt(hex.slice(1, 3), 16) / 255).toFixed(3)})`
+// Android's own face is Roboto; Noto Sans, which the studio loads, is its
+// nearest kin (the Latin of Noto Sans JP).
+const sys = (weight, size) => font(weight, size, 'jp')
+// The reader's mark (GateButton's ScanMark, widget_scan), on 24 units.
+const SCAN = 'M3 8V5.5A2.5 2.5 0 0 1 5.5 3H8M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8M21 16v2.5a2.5 2.5 0 0 1-2.5 2.5H16M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16M8.2 8.5h7.6a1.2 1.2 0 0 1 1.2 1.2v4.6a1.2 1.2 0 0 1-1.2 1.2H8.2a1.2 1.2 0 0 1-1.2-1.2V9.7a1.2 1.2 0 0 1 1.2-1.2zM7 11h10'
+
+/** The mark at `size` from (x, y), its road and its ink. */
+function markAt(ctx, x, y, size, ink, road) {
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.scale(size / 1000, size / 1000)
+  ctx.fillStyle = road
+  ctx.fill(new Path2D(MARK_ROAD))
+  ctx.fillStyle = ink
+  ctx.fill(new Path2D(MARK_INK))
+  ctx.restore()
+}
+
+/** A tap as a screen recording shows one: a ring that opens and fades
+ *  over half a second, `s` seconds after the finger lands. */
+export function tapRing(ctx, cx, cy, u, s) {
+  if (s < 0 || s > 0.5) return
+  const e = EASE_OUT(s / 0.5)
+  ctx.save()
+  ctx.globalAlpha *= 0.55 * (1 - e)
+  ctx.fillStyle = '#ffffff'
+  ctx.beginPath()
+  ctx.arc(cx, cy, (14 + 18 * e) * u, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+}
+
+/** The home screen's widget, wide and tall enough for Depart (the
+ *  launcher's 4×2): the mark and the hour at its head, the count over its
+ *  minutes and new cards, a word the learner knows past a hairline, the
+ *  lines' stripe (a share a line), Depart as the gate. `press` (0 to 1)
+ *  darkens Depart under a finger. Returns its height. */
+export function trainWidget(ctx, x, y, w, u, { hour, count, unit, meta, word, lanes, depart, h: hDp = 176, press = 0, edge = null }) {
+  const c = WIDGET_INKS
+  const h = hDp * u
+  const pad = 18 * u
+  ctx.save()
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.28)'
+  ctx.shadowBlur = 24 * u
+  ctx.shadowOffsetY = 6 * u
+  ctx.fillStyle = c.bg
+  rrect(ctx, x, y, w, h, 24 * u)
+  ctx.fill()
+  ctx.restore()
+  // On a sumi page its edge is a hairline of the page's own light, or the board melts into it.
+  if (edge) {
+    ctx.strokeStyle = edge
+    ctx.lineWidth = u
+    rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 24 * u)
+    ctx.stroke()
+  }
+  // The head: the mark, 16dp, and the hour beside it.
+  const top = y + 12 * u
+  markAt(ctx, x + pad, top, 16 * u, c.ink, c.road)
+  text(ctx, hour, x + pad + 22 * u, top + 8 * u + 13 * u * 0.36, { f: sys(700, 13 * u), color: c.soft })
+  // The word, against the right edge: its column at least 88dp, the meaning at most 120dp.
+  const rf = sys(400, 12 * u)
+  const jf = font(700, 30 * u, 'serif')
+  let mf = sys(700, 13 * u)
+  let meaning = word?.meaning || ''
+  while (meaning.length > 1 && measure(ctx, meaning, mf) > 120 * u) meaning = `${meaning.slice(0, -2)}…`
+  const colW = word ? Math.max(88 * u, measure(ctx, word.reading || '', rf, 0.12), measure(ctx, word.jp, jf), measure(ctx, meaning, mf)) : 0
+  const rowTop = top
+  const rowBottom = top + 16 * u + 3 * u + 42 * u + 1 * u + 17 * u
+  if (word) {
+    const colX = x + w - pad - colW
+    ctx.fillStyle = c.line
+    ctx.fillRect(colX - 16 * u - u, rowTop, u, rowBottom - rowTop)
+    const blockH = (word.reading ? 17 * u : 0) + 35 * u + 2 * u + 17 * u
+    let by = rowTop + (rowBottom - rowTop - blockH) / 2
+    if (word.reading) {
+      text(ctx, word.reading, colX, by + 13 * u, { f: rf, color: c.soft, tr: 0.12 })
+      by += 17 * u
+    }
+    text(ctx, word.jp, colX, by + 30 * u * 0.88, { f: jf, color: c.ink })
+    by += 35 * u + 2 * u
+    text(ctx, meaning, colX, by + 13 * u, { f: mf, color: c.ink })
+  }
+  // The count, its unit on its baseline, the minutes and new cards under them.
+  const base = top + 16 * u + 3 * u + 36 * u * 0.93
+  const cw = text(ctx, String(count), x + pad, base, { f: sys(700, 36 * u), color: c.ink })
+  text(ctx, unit, x + pad + cw + 8 * u, base, { f: sys(400, 16 * u), color: c.soft })
+  if (meta) text(ctx, meta, x + pad, base + 9 * u + 1 * u + 13 * u * 1.06, { f: sys(400, 13 * u), color: c.soft })
+  // The stripe: a bar a line, its share of the run, 3dp apart.
+  const dy = y + h - 12 * u - 36 * u - 8 * u - 6 * u
+  const live = (lanes || []).filter(l => l.n > 0)
+  const sum = live.reduce((s, l) => s + l.n, 0)
+  if (sum) {
+    const room = w - 2 * pad - 3 * u * (live.length - 1)
+    let bx = x + pad
+    for (const l of live) {
+      const bw = room * (l.n / sum)
+      ctx.fillStyle = c.lines[l.line] || '#575060'
+      rrect(ctx, bx, dy, bw, 6 * u, 3 * u)
+      ctx.fill()
+      bx += bw + 3 * u
+    }
+  }
+  // Depart, the gate: the gold pill lit from above, the reader at its left end.
+  const gx = x + pad
+  const gy = y + h - 12 * u - 36 * u
+  const gw = w - 2 * pad
+  const gh = 36 * u
+  const g = ctx.createLinearGradient(0, gy, 0, gy + gh)
+  g.addColorStop(0, c.gate[0])
+  g.addColorStop(0.45, c.gate[1])
+  g.addColorStop(1, c.gate[2])
+  ctx.fillStyle = g
+  rrect(ctx, gx, gy, gw, gh, gh / 2)
+  ctx.fill()
+  ctx.fillStyle = argb(c.crest)
+  ctx.fillRect(gx + 12 * u, gy + u, gw - 24 * u, u)
+  const rx = gx + 3 * u + 15 * u
+  const ry = gy + gh / 2
+  const rg = ctx.createRadialGradient(rx - 3 * u, ry - 4.5 * u, 0, rx - 3 * u, ry - 4.5 * u, 21 * u)
+  rg.addColorStop(0, c.reader[0])
+  rg.addColorStop(1, c.reader[1])
+  ctx.fillStyle = rg
+  ctx.beginPath()
+  ctx.arc(rx, ry, 15 * u, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.save()
+  ctx.translate(rx - 8 * u, ry - 8 * u)
+  ctx.scale((16 * u) / 24, (16 * u) / 24)
+  ctx.strokeStyle = c.scan
+  ctx.lineWidth = 2
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.stroke(new Path2D(SCAN))
+  ctx.restore()
+  ctx.fillStyle = c.gateLine
+  rrect(ctx, gx + 3 * u + 30 * u + 10 * u, ry - 8 * u, 2 * u, 16 * u, u)
+  ctx.fill()
+  text(ctx, depart, gx + gw / 2, ry + 15 * u * 0.36, { f: sys(700, 15 * u), color: c.label, align: 'center' })
+  if (press > 0) {
+    ctx.save()
+    ctx.globalAlpha *= 0.18 * press
+    ctx.fillStyle = '#000000'
+    rrect(ctx, gx, gy, gw, gh, gh / 2)
+    ctx.fill()
+    ctx.restore()
+  }
+  return h
+}
+
+/** The reminder's inks per ground: Android 12's notification on a dark
+ *  or a light shade (Material 3's neutral surfaces), its circle the
+ *  reminders' iconColor (capacitor.config.json). */
+export const NOTIF_INKS = {
+  dark: { bg: '#2b2930', title: '#e6e1e5', text: '#cac4d0', chip: '#3a3740' },
+  light: { bg: '#fdfbff', title: '#1d1b20', text: '#49454f', chip: '#ece6f0' },
+  icon: '#c99a3e',
+}
+
+/** The reminder's height expanded, with `n` lines: its header, its
+ *  title, a line each and the actions' row. */
+export const reminderHeight = (u, n) => (112 + 20 * n) * u
+
+/** The day's train as Android shows it expanded (plan 293): the mark in
+ *  its circle, the app's name, the minutes and the new cards in the
+ *  header, the title led by the hour, a line a lane, and Depart. `open`
+ *  (0 to 1) unfolds the lines from the collapsed reminder. `press` (0 to
+ *  1) darkens Depart under a finger. Returns [its height, Depart's centre]. */
+export function reminder(ctx, p, x, y, w, u, { app, when, summary, title, lines, action, open = 1, press = 0 }) {
+  const c = NOTIF_INKS[p.paper ? 'light' : 'dark']
+  const pad = 16 * u
+  const left = x + pad + 40 * u + 16 * u
+  const lineH = 20 * u
+  const shut = 96 * u
+  const h = shut + (reminderHeight(u, lines.length) - shut) * open
+  ctx.save()
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.22)'
+  ctx.shadowBlur = 18 * u
+  ctx.shadowOffsetY = 4 * u
+  ctx.fillStyle = c.bg
+  rrect(ctx, x, y, w, h, 24 * u)
+  ctx.fill()
+  ctx.restore()
+  // The small icon in its circle, the mark in one ink.
+  const cx = x + pad + 20 * u
+  const cy = y + pad + 20 * u
+  ctx.fillStyle = NOTIF_INKS.icon
+  ctx.beginPath()
+  ctx.arc(cx, cy, 20 * u, 0, Math.PI * 2)
+  ctx.fill()
+  markAt(ctx, cx - 11 * u, cy - 11 * u, 22 * u, '#ffffff', '#ffffff')
+  // The expand button at the right.
+  const bw = 32 * u
+  const bh = 20 * u
+  const bx = x + w - pad - bw
+  const by = y + pad
+  ctx.fillStyle = c.chip
+  rrect(ctx, bx, by, bw, bh, bh / 2)
+  ctx.fill()
+  ctx.save()
+  ctx.strokeStyle = c.title
+  ctx.lineWidth = 1.6 * u
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  const flip = 1 - 2 * open
+  ctx.beginPath()
+  ctx.moveTo(bx + bw / 2 - 4 * u, by + bh / 2 - 2 * u * flip)
+  ctx.lineTo(bx + bw / 2, by + bh / 2 + 2 * u * flip)
+  ctx.lineTo(bx + bw / 2 + 4 * u, by + bh / 2 - 2 * u * flip)
+  ctx.stroke()
+  ctx.restore()
+  // The header: the app, what the train takes, when; one line, the middle cut first.
+  const hf = sys(400, 12 * u)
+  const room = bx - 8 * u - left
+  const sep = ' • '
+  // Too long, the summary keeps its first part (the minutes), then goes.
+  const parts = summary.split(' · ')
+  let mid = summary
+  const head = () => [app, mid, when].filter(Boolean).join(sep)
+  if (measure(ctx, head(), hf) > room) mid = parts[0]
+  if (measure(ctx, head(), hf) > room) mid = ''
+  const hy = y + pad + 13 * u
+  const aw = text(ctx, app, left, hy, { f: hf, color: c.title })
+  text(ctx, [mid, when].filter(Boolean).map(s => `${sep}${s}`).join(''), left + aw, hy, { f: hf, color: c.text })
+  // The title, then the body: the collapsed one says the minutes, the open one a line a lane.
+  const ty = y + pad + 18 * u + 4 * u + 16 * u
+  text(ctx, title, left, ty, { f: sys(500, 16 * u), color: c.title })
+  if (open < 1) {
+    ctx.save()
+    ctx.globalAlpha *= 1 - open
+    text(ctx, summary, left, ty + 20 * u, { f: sys(400, 14 * u), color: c.text })
+    ctx.restore()
+  }
+  let dep = null
+  if (open > 0) {
+    ctx.save()
+    ctx.globalAlpha *= open
+    lines.forEach((l, i) => text(ctx, l, left, ty + 22 * u + i * lineH * open, { f: sys(400, 14 * u), color: c.text }))
+    // Depart, as Android sets an action: its word in the notification's colour.
+    const ay = y + h - 16 * u - 10 * u
+    const af = sys(500, 14 * u)
+    const aw2 = measure(ctx, action, af)
+    dep = { x: left + aw2 / 2, y: ay - 5 * u }
+    if (press > 0) {
+      ctx.save()
+      ctx.globalAlpha *= 0.12 * press
+      ctx.fillStyle = c.title
+      rrect(ctx, left - 12 * u, ay - 24 * u, aw2 + 24 * u, 36 * u, 18 * u)
+      ctx.fill()
+      ctx.restore()
+    }
+    text(ctx, action, left, ay, { f: af, color: p.paper ? '#8a6418' : NOTIF_INKS.icon })
+    ctx.restore()
+  }
+  return [h, dep]
+}
+
+/** The app's icon (brand/icon.svg): the mark on the icon's blue, its
+ *  corners rounded as the store rounds an icon (a fifth of its side). */
+export function appIcon(ctx, x, y, size) {
+  ctx.save()
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.25)'
+  ctx.shadowBlur = size * 0.06
+  ctx.shadowOffsetY = size * 0.02
+  const g = ctx.createLinearGradient(x, y, x + size * 0.35, y + size)
+  g.addColorStop(0, '#1f8fd0')
+  g.addColorStop(1, '#1b2f68')
+  ctx.fillStyle = g
+  rrect(ctx, x, y, size, size, size * 0.2)
+  ctx.fill()
+  ctx.restore()
+  // brand/icon.svg sets the mark at 183.9, 185.9 on 1024, 647 across.
+  markAt(ctx, x + size * (183.9 / 1024), y + size * (185.9 / 1024), size * (647.06 / 1024), '#f3ecdf', '#e6bd62')
+}
+
+// The store's mark as the landing page draws it (page.mjs's PLAY_STORE),
+// on 24 units: its four facets, each its ink.
+export const PLAY_MARK = [
+  ['M3.6 2.2 13.4 12 3.6 21.8c-.4-.2-.6-.6-.6-1.1V3.3c0-.5.2-.9.6-1.1z', '#00d2ff'],
+  ['m16.8 8.6-3.4 3.4-9.8-9.8c.3-.2.8-.2 1.2 0z', '#00f076'],
+  ['m16.8 15.4-12 6.4c-.4.2-.9.2-1.2 0l9.8-9.8z', '#ff3a44'],
+  ['m20.3 10.5c.9.5.9 1.8 0 2.4l-3.5 2.5-3.4-3.4 3.4-3.4z', '#ffd400'],
+]
+const BADGE_FACE = "-apple-system, 'Helvetica Neue', Arial, sans-serif"
+
+/** The store's badge as the landing page draws it (.badge): black in
+ *  every theme, as the stores draw theirs, its mark, its two lines (the
+ *  small one over the store's name), at `h` tall (the page's is 48px).
+ *  `cx` is its centre. Returns its width. */
+export function storeBadge(ctx, cx, y, h, [small, name]) {
+  const s = h / 48
+  const sf = `400 ${9.92 * s}px ${BADGE_FACE}`
+  const nf = `600 ${20 * s}px ${BADGE_FACE}`
+  const tw = Math.max(measure(ctx, small, sf), measure(ctx, name, nf))
+  const w = (8 + 22 + 8 + 12) * s + tw
+  const x = cx - w / 2
+  ctx.fillStyle = '#000000'
+  rrect(ctx, x, y, w, h, 10 * s)
+  ctx.fill()
+  ctx.strokeStyle = '#a6a6a6'
+  ctx.lineWidth = s
+  rrect(ctx, x + s / 2, y + s / 2, w - s, h - s, 10 * s)
+  ctx.stroke()
+  // The mark: 22 by 24, its 24 units fitted to 22 and set in the middle.
+  ctx.save()
+  ctx.translate(x + 8 * s, y + (h - 22 * s) / 2)
+  ctx.scale((22 * s) / 24, (22 * s) / 24)
+  for (const [d, ink] of PLAY_MARK) {
+    ctx.fillStyle = ink
+    ctx.fill(new Path2D(d))
+  }
+  ctx.restore()
+  const tx = x + (8 + 22 + 8) * s
+  text(ctx, small, tx, y + 15.8 * s, { f: sf, color: '#ffffff' })
+  text(ctx, name, tx, y + 35 * s, { f: nf, color: '#ffffff' })
+  return w
+}

@@ -37,7 +37,7 @@ const T = STRINGS.en
 const LIST_NAME = { long: 'Video', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
-  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20', 'promo:comprehension': 'n5-33:q5' },
+  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20', 'promo:comprehension': 'n5-33:q5', 'promo:play': '友達::ともだち' },
   view: 'compare', type: 'plates', format: 'post', fit: 'tiktok', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
@@ -944,7 +944,8 @@ function captionOf(pl) {
   // A spelling quiz never prints the kanji it asks for: the word in kana.
   const spelling = state.type === 'spelling'
   const jp = spelling ? /（(.+)）/.exec(c.jp)?.[1] || c.jp : c.jp
-  const head = [jp, c.romaji, tr].filter(Boolean).join('\n')
+  // A story that sends the reader somewhere names it (the store's listing, plan 307).
+  const head = [jp, c.romaji, tr, c.link].filter(Boolean).join('\n')
   // The point once: a lesson's ask names it already.
   const ask = spelling ? pl.t.spellingAsk
     : state.type === 'impostor' && pl.impostor ? pl.t.modes.impostorAsk(pl.impostor.name)

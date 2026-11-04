@@ -13,7 +13,11 @@
 // plan 301 a seventh, reading comprehension: a seed passage under the
 // run's clock, the same text rolling (plan 301b), one of its own
 // questions, answered on the line of the text it quotes, and the board;
-// it plays whole as one clip too.
+// it plays whole as one clip too. Since plan 307 an eighth, the Play
+// Store release: Tsuji is on Google Play, and what the Android app does
+// while it is shut -- the day's train on the home screen, the reminder
+// at the learner's hour with Depart -- then the store's badge; it plays
+// whole too.
 import { EDGE, FS, SP, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, text } from './draw.js'
 import * as A from './app.js'
 import { STRINGS, count, weldIf } from './strings.js'
@@ -22,16 +26,18 @@ import { sentenceQuizzes } from './quizzes.js'
 import { LIMIT_MS, SPRINT_MS, points } from '../src/domain/duel.js'
 import { quotedFragments, sentenceFor } from '../src/domain/quotedFragments.js'
 
-export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'comprehension', 'pass', 'duel']
-export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', comprehension: 'comprehension.json', pass: 'index.json', duel: 'duel.json' }
+export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'comprehension', 'pass', 'duel', 'play']
+export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', comprehension: 'comprehension.json', pass: 'index.json', duel: 'duel.json', play: 'words-N5.json' }
+// The Play Store listing (landing/config.mjs's STORES.googlePlay, held equal by a test).
+export const PLAY_URL = 'https://play.google.com/store/apps/details?id=app.tsuji'
 
 // The words, in the two languages: the app's own where the app says it
 // (locales/*: the ratings, the stages, Today's unit, Depart), the landing
 // page's where the page says it (landing/strings.mjs).
 export const PROMO = {
   en: {
-    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', comprehension: 'Read a whole text', pass: 'Your pass', duel: 'Duels' },
-    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', comprehension: 'Passage', pass: 'The pass', duel: 'Duels' },
+    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', comprehension: 'Read a whole text', pass: 'Your pass', duel: 'Duels', play: 'On Google Play' },
+    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', comprehension: 'Passage', pass: 'The pass', duel: 'Duels', play: 'The widget’s word' },
     blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free', duel: 'A two-minute sprint against another learner, and the Elo' },
     hours: { dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' },
     hook: 'Learn Japanese, from your first kana to JLPT N1.',
@@ -88,8 +94,9 @@ export const PROMO = {
       comprehension: (c, lv) => `Can you read a whole text in Japanese? ${c}, a JLPT ${lv} reading`,
       pass: () => 'Your Japanese pass is waiting: start free on tsuji.app',
       duel: () => 'Japanese duels: 2 minutes against another learner, your Elo at stake',
+      play: () => 'Tsuji is on Google Play: learn Japanese on Android, from your first kana to N1',
     },
-    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', comprehension: 'A, B, C or D?', pass: 'Board today?', duel: 'Who would you challenge first?' },
+    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', comprehension: 'A, B, C or D?', pass: 'Board today?', duel: 'Who would you challenge first?', play: 'Widget on your home screen: yes or no?' },
     tags: ['japaneseapp', 'jlpt'],
     // Reading comprehension's story (plan 301): its own lines, then the
     // app's words on its parts (locales/: the clock, the exercise's
@@ -139,10 +146,33 @@ export const PROMO = {
       peak: n => `peak ${n}`,
       gapTo: (n, r) => `${n} Elo points from #${r}`,
     },
+    // The Play Store release's story (plan 307): its own lines, then the
+    // app's words on its parts (locales/: the widget's and the reminder's,
+    // lib/ahead.js), the store's badge as the landing page says it
+    // (landing/strings.mjs) and the system's own word for the moment.
+    play: {
+      hook: 'Tsuji is now on Google Play.',
+      widgetHead: 'The day’s train, on your home screen.',
+      widgetNote: 'The day’s cards and a word you know. Depart opens the run.',
+      remindHead: 'One reminder, at your hour.',
+      remindNote: 'Never more than one a day, only on a day with cards due. Depart, right from it.',
+      head: 'Every line, now on Android.',
+      sync: 'One account, on the web and on Android.',
+      badge: ['Get it on', 'Google Play'],
+      app: 'Tsuji',
+      unit: n => (n === 1 ? 'card' : 'cards'),
+      minutes: m => `${m} min`,
+      fresh: n => `${n} new`,
+      title: (time, n) => `${time} · ${n} ${n === 1 ? 'card' : 'cards'}`,
+      about: m => (m <= 1 ? 'About a minute' : `About ${m} min`),
+      line: { kana: 'Kana', vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar' },
+      hiragana: 'Hiragana (basic)',
+      now: 'now',
+    },
   },
   fr: {
-    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', comprehension: 'Lis un texte entier', pass: 'Ton pass', duel: 'Les duels' },
-    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', comprehension: 'Texte', pass: 'Le pass', duel: 'Duels' },
+    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', comprehension: 'Lis un texte entier', pass: 'Ton pass', duel: 'Les duels', play: 'Sur Google Play' },
+    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', comprehension: 'Texte', pass: 'Le pass', duel: 'Duels', play: 'Le mot du widget' },
     blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 2 minutes contre un autre apprenant, et l’Elo' },
     hours: { dawn: 'Aube', day: 'Jour', dusk: 'Soir', night: 'Nuit' },
     hook: 'Apprendre le japonais, du premier kana au JLPT N1.',
@@ -197,8 +227,9 @@ export const PROMO = {
       comprehension: (c, lv) => `Tu lirais un texte entier en japonais ? ${c}, une lecture du JLPT ${lv}`,
       pass: () => 'Ton pass pour le japonais t’attend : commence gratuitement sur tsuji.app',
       duel: () => 'Duels de japonais : 2 minutes contre un autre apprenant, ton Elo en jeu',
+      play: () => 'Tsuji est sur Google Play : le japonais sur Android, du premier kana au N1',
     },
-    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', comprehension: 'A, B, C ou D ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
+    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', comprehension: 'A, B, C ou D ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?', play: 'Un widget sur ton écran d’accueil : oui ou non ?' },
     tags: ['applijaponais', 'jlpt'],
     comp: {
       kind: lv => `JLPT ${lv} · Compréhension écrite`,
@@ -242,6 +273,25 @@ export const PROMO = {
       peak: n => `pic ${n}`,
       gapTo: (n, r) => `${n} points d’Elo de la ${r === 1 ? '1re' : `${r}ᵉ`} place`,
     },
+    play: {
+      hook: 'Tsuji est maintenant sur Google Play.',
+      widgetHead: 'Ton train du jour, sur l’écran d’accueil.',
+      widgetNote: 'Les cartes du jour et un mot que tu connais. Embarquer ouvre le trajet.',
+      remindHead: 'Un rappel, à\u00a0ton heure.',
+      remindNote: 'Jamais plus d’un par jour, seulement s’il y a des cartes. Embarquer, depuis le rappel même.',
+      head: 'Toutes les lignes, maintenant sur Android.',
+      sync: 'Un seul compte, sur le web et sur Android.',
+      badge: ['Disponible sur', 'Google Play'],
+      app: 'Tsuji',
+      unit: n => (n > 1 ? 'cartes' : 'carte'),
+      minutes: m => `${m} min`,
+      fresh: n => `${n} ${n > 1 ? 'nouvelles' : 'nouvelle'}`,
+      title: (time, n) => `${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
+      about: m => (m <= 1 ? 'Environ une minute' : `Environ ${m} min`),
+      line: { kana: 'Kana', vocab: 'Vocabulaire', kanji: 'Kanji', grammar: 'Grammaire' },
+      hiragana: 'Hiragana (de base)',
+      now: 'maintenant',
+    },
   },
 }
 
@@ -280,6 +330,8 @@ export function promoItems(story, data, lang) {
   const P = PROMO[lang] || PROMO.en
   switch (story) {
     case 'card':
+    case 'play':
+      // The play story's word is the one its widget prints (plan 307).
       return data.words.filter(w => gloss(w, lang).length).map(w => ({ id: wordKey(w), jp: w.t, sub: gloss(w, lang)[0], tag: w.r }))
     case 'analyser':
       return data.sentences.filter(s => s.gram.some(g => data.points[g.p])).map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.p }))
@@ -454,6 +506,40 @@ const EXIT = 0.12
 // When « Partir » is pressed on the ticket.
 const DUEL_PRESS = 2.05
 
+// ── Google Play, the release's story (plan 307) ─────────────────────
+// The day the other stories show (Today's dial: 42 cards, ≈ 14 min,
+// done by 08:14), as the Android app says it while shut: on the widget
+// and in the reminder at the learner's hour, 08:00. `lanes` in the lines'
+// order (the widget's stripe, lineShares'), each with its deck; the
+// reminder lists them busiest first.
+export const PLAY_DAY = {
+  hour: '08:00', minutes: 14, fresh: 8,
+  lanes: [{ line: 'kana', n: 4, deck: 'hiragana_basic' }, { line: 'vocab', n: 20, deck: 'N5' }, { line: 'kanji', n: 10, deck: 'N5' }, { line: 'grammar', n: 8, deck: 'N5' }],
+}
+/** The widget's word as the server writes it (routes/today.py's
+ *  _settled_word and _short_gloss): its kanji over its reading, or its
+ *  kana alone; its first sense or two, short enough for one line. */
+export function widgetWord(w, lang) {
+  const senses = ((lang === 'fr' && w.fr?.length ? w.fr : w.en) || []).filter(Boolean)
+  const two = senses.slice(0, 2).join('; ')
+  return { jp: w.t, reading: hasKanji(w.t) ? w.r : '', meaning: two.length <= 32 || senses.length < 2 ? two : senses[0] }
+}
+/** The day's train as the widget and the reminder print it, in the
+ *  app's own words (lib/ahead.js's widgetPayload and planNudges). */
+export function playDay(G) {
+  const D = PLAY_DAY
+  const total = D.lanes.reduce((n, l) => n + l.n, 0)
+  const laneName = l => (l.line === 'kana' ? G.hiragana : `${G.line[l.line]} ${l.deck}`)
+  return {
+    hour: D.hour, count: total, unit: G.unit(total),
+    meta: [G.minutes(D.minutes), G.fresh(D.fresh)].join(' · '),
+    lanes: D.lanes.map(({ line, n }) => ({ line, n })),
+    title: G.title(D.hour, total),
+    summary: [G.about(D.minutes), G.fresh(D.fresh)].join(' · '),
+    lines: [...D.lanes].sort((a, b) => b.n - a.n).map(l => `${laneName(l)} · ${l.n}`),
+  }
+}
+
 /** A story's plan: what its frames say, from the bank. */
 export function promoPlan(story, data, id, opts) {
   const lang = opts.lang === 'fr' ? 'fr' : 'en'
@@ -512,6 +598,15 @@ export function promoPlan(story, data, id, opts) {
     }
     case 'duel':
       return { ...base, id: story, level: data.level, promo: duelRun(data, lang), title: P.titles.duel(), caption: { jp: '対戦', romaji: '', tr: P.names.duel, ask, tags, name: P.names.duel } }
+    case 'play': {
+      const w = data.words.find(x => wordKey(x) === id) ?? data.words.find(x => gloss(x, lang).length)
+      return {
+        ...base, id: wordKey(w),
+        promo: { ...playDay(P.play), word: widgetWord(w, lang) },
+        title: P.titles.play(),
+        caption: { jp: '辻', romaji: '', tr: P.play.hook, ask, tags: [...P.tags, 'android', 'googleplay'], name: P.names.play, link: PLAY_URL },
+      }
+    }
     default:
       return { ...base, id: story, promo: {}, title: P.titles[story](), caption: { jp: '辻', romaji: '', tr: P.names[story], ask, tags, name: P.names[story] } }
   }
@@ -551,6 +646,7 @@ export function promoDeck(plan, fmt, opts) {
   let shownPoints = () => 0
   let duelStory = null
   let compStory = null
+  let playStory = null
   const ease = x => 1 - (1 - x) ** 3
   const k = (start, dur) => (clock ? ease(Math.min(1, Math.max(0, (clock.t - start) / dur))) : 1)
   const part = (c, prog, fn) => {
@@ -619,9 +715,14 @@ export function promoDeck(plan, fmt, opts) {
     }, FOOT)
     depart(ctx, P.board, END.gate)
   }
+  // The store's badge (plan 307): the landing page's 48px, a size up for
+  // a story, standing where Depart stands.
+  const BADGE_H = 64 * U
+  const badgeAt = (ctx, badge) => A.storeBadge(ctx, fr.cx, fr.bottom - BADGE_H - 4 * U, BADGE_H, badge)
   // Today on its print, full-bleed: the hour's sun as the dial, its time
-  // under it, the words in the open sky, the print's own ink.
-  const today = (ctx, headline, label) => {
+  // under it, the words in the open sky, the print's own ink. With a
+  // `badge` (the store's two lines) the badge stands in Depart's place.
+  const today = (ctx, headline, label, badge = null) => {
     const pr = opts.print
     const PU = fmt.w / (pr?.scene.w || 390)
     if (pr) {
@@ -638,7 +739,7 @@ export function promoDeck(plan, fmt, opts) {
       const pad = SP[5]
       const b = fit(ctx, say(headline), { sizes: [FS.title, FS.lead], maxW: fr.w - 2 * pad, maxLines: 2 })
       const plateH = pad + 64 + SP[3] + paragraphH(b) + pad
-      const bottom = label ? fr.bottom - DEP - 8 * U - SP[5] : fr.bottom
+      const bottom = label ? fr.bottom - DEP - 8 * U - SP[5] : badge ? fr.bottom - BADGE_H - 4 * U - SP[6] : fr.bottom
       const top = bottom - plateH
       part(ctx, k(1.1, 1.0), () => {
         const { ink } = A.printPlate(ctx, p, fr.x, top, fr.w, plateH, U)
@@ -651,6 +752,7 @@ export function promoDeck(plan, fmt, opts) {
       lead(ctx, headline, fr.y + 400, p.ink, [FS.title], { maxLines: 2 })
     }
     if (label) part(ctx, k(1.6, 0.8), () => depart(ctx, label))
+    if (badge) part(ctx, k(1.8, 0.8), () => badgeAt(ctx, badge))
   }
   const F = A.faceOf(p)
   const panel = (ctx, x, y, w, h, r = 6 * U) => {
@@ -1525,6 +1627,114 @@ export function promoDeck(plan, fmt, opts) {
       }
       break
     }
+    case 'play': {
+      // The Play Store release (plan 307): the news on Today's print, the
+      // widget and the reminder as the Android app draws them while shut,
+      // each tapped on Depart, then the icon and the store's badge.
+      const pr = plan.promo
+      const G = P.play
+      const clamp = x => Math.min(1, Math.max(0, x))
+      const io = x => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2)
+      const pressAt = at => (clock ? (clock.t >= at && clock.t < at + 0.28 ? 1 : 0) : 0)
+      const ring = (c, x, y, uu, at) => { if (clock) A.tapRing(c, x, y, uu, clock.t - at) }
+      add('cover', ctx => today(ctx, G.hook, null, G.badge))
+      add('widget', ctx => {
+        page(ctx, 2, 4)
+        centred(ctx, (c, y) => {
+          y = part(c, k(0, 0.8), () => lead(c, G.widgetHead, y, p.ink, [FS.display * 0.62, FS.heading]))
+          y += SP[7]
+          // The launcher's 4×2, as wide as the frame: dp to the slide.
+          const wu = fr.w / 340
+          const h = part(c, k(0.4, 1.0), () => A.trainWidget(c, fr.x, y, fr.w, wu, { ...pr, depart: P.depart, press: pressAt(PLAY_TAP.widget), edge: p.paper ? null : F.line }))
+          ring(c, fr.cx, y + h - 30 * wu, wu, PLAY_TAP.widget)
+          y += h + SP[7]
+          return part(c, k(1.0, 0.8), () => lead(c, G.widgetNote, y, p.ink2, [FS.lead, FS.body], { maxLines: 3, weight: 500 }))
+        })
+      })
+      add('reminder', ctx => {
+        page(ctx, 3, 4)
+        centred(ctx, (c, y) => {
+          y = part(c, k(0, 0.8), () => lead(c, G.remindHead, y, p.ink, [FS.display * 0.62, FS.heading]))
+          y += SP[7]
+          const nu = fr.w / 360
+          // It comes in shut, then opens to its lines (Android's expanded reminder).
+          const open = clock ? io(clamp((clock.t - PLAY_OPEN) / 0.45)) : 1
+          let dep = null
+          part(c, k(0.5, 0.7), () => {
+            dep = A.reminder(c, p, fr.x, y, fr.w, nu, { app: G.app, when: G.now, summary: pr.summary, title: pr.title, lines: pr.lines, action: P.depart, open, press: pressAt(PLAY_TAP.reminder) })[1]
+          })
+          if (dep) ring(c, dep.x, dep.y, nu, PLAY_TAP.reminder)
+          // Room for it open, so nothing moves as it opens.
+          y += A.reminderHeight(nu, pr.lines.length) + SP[7]
+          return part(c, k(1.0, 0.8), () => lead(c, G.remindNote, y, p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 }))
+        })
+      })
+      // The call to action: the icon, its words, the store's badge, tapped.
+      add('board', ctx => {
+        page(ctx, 4, 4)
+        centred(ctx, (c, y) => {
+          const size = 260
+          part(c, k(END.mark, 0.9), () => A.appIcon(c, fr.cx - size / 2, y, size))
+          y += size + SP[7]
+          y = part(c, k(END.head, 0.8), () => lead(c, G.head, y, p.ink, [FS.display * 0.62, FS.heading], { align: 'center' }))
+          // What is free, on one line or a line a promise (never a line
+          // that starts on its ·), then that the account is the same everywhere.
+          const free = measure(c, say(P.start), font(500, FS.body, 'latin')) <= fr.w ? [P.start] : P.start.split(' · ')
+          y += SP[5]
+          for (const line of free) y = part(c, k(END.note, 0.8), () => lead(c, line, y, p.ink2, [FS.lead, FS.body], { align: 'center', weight: 500, maxLines: 2 }))
+          y = part(c, k(END.note + 0.3, 0.8), () => lead(c, G.sync, y + SP[3], p.ink2, [FS.lead, FS.body], { align: 'center', weight: 500, maxLines: 2 }))
+          return part(c, k(END.note + 0.6, 0.8), () => handle(c, y))
+        }, BADGE_H + 4 * U + SP[8])
+        part(ctx, k(END.gate, GATE_RISE), () => badgeAt(ctx, G.badge))
+        if (clock && pressAt(PLAY_TAP.badge)) {
+          ctx.save()
+          ctx.globalAlpha *= 0.25
+          badgeAt(ctx, G.badge)
+          ctx.restore()
+        }
+        ring(ctx, fr.cx, fr.bottom - BADGE_H / 2 - 4 * U, U, PLAY_TAP.badge)
+      })
+      // The story whole, as reading comprehension's plays: each frame on
+      // its own clock, one after another, a frame leaving as the next comes.
+      const total = PLAY_BEATS.reduce((sum, [, len]) => sum + len, 0)
+      const starts = PLAY_BEATS.map((_, i) => PLAY_BEATS.slice(0, i).reduce((sum, [, len]) => sum + len, 0))
+      playStory = {
+        seconds: total,
+        fps: CLIP.fps,
+        print: true,
+        sounds: [
+          ...scoreOf(plan),
+          { at: starts[1] + 0.4, key: 'card-transition' },
+          { at: starts[1] + PLAY_TAP.widget, key: 'gate-chime' },
+          { at: starts[2] + 0.5, key: 'board-flap' },
+          { at: starts[2] + PLAY_OPEN, key: 'toggle', gain: 0.6 },
+          { at: starts[2] + PLAY_TAP.reminder, key: 'gate-chime' },
+          ...endScoreOf(plan).map(x => ({ ...x, at: starts[3] + x.at })),
+        ],
+        draw: (ctx, t, moving = null) => {
+          let i = PLAY_BEATS.findIndex((_, j) => t < starts[j] + PLAY_BEATS[j][1])
+          if (i < 0) i = PLAY_BEATS.length - 1
+          const s = t - starts[i]
+          const last = i === PLAY_BEATS.length - 1
+          ctx.save()
+          // The print moves under the cover alone, on the story's own clock.
+          clock = { t: s, moving: i === 0 ? moving : null }
+          try {
+            const exit = last ? 0 : clamp((s - (PLAY_BEATS[i][1] - COMP_EXIT)) / COMP_EXIT)
+            if (exit > 0) {
+              ground(ctx, p, fr)
+              ctx.globalAlpha *= 1 - exit
+              ctx.translate(0, -28 * exit)
+            }
+            out[i].draw(ctx)
+          } finally {
+            clock = null
+            ctx.restore()
+          }
+        },
+      }
+      break
+    }
     default:
   }
   // The cover and the call to action in motion: CLIP.seconds of each,
@@ -1539,12 +1749,14 @@ export function promoDeck(plan, fmt, opts) {
     },
   })
   out.clips = {
-    cover: inMotion(out[0], plan.story === 'pitch', () => scoreOf(plan, shownPoints())),
+    cover: inMotion(out[0], plan.story === 'pitch' || plan.story === 'play', () => scoreOf(plan, shownPoints())),
     end: inMotion(out[out.length - 1], false, () => endScoreOf(plan)),
     // The duels' story whole (plan 281): every beat, one after another;
     // reading comprehension's (plan 301b).
     ...(duelStory ? { story: duelStory } : {}),
     ...(compStory ? { story: compStory } : {}),
+    // The Play Store release's (plan 307).
+    ...(playStory ? { story: playStory } : {}),
   }
   out.clip = out.clips.cover
   return out
@@ -1563,6 +1775,12 @@ export const ROLL_DEMO = { card: 0.3, speeds: [[0, 6], [2.4, 8], [3.0, 10]], fur
 // The story whole: each frame's beat, in seconds, and the exit between two.
 export const COMP_BEATS = [['text', 3.6], ['roll', ROLL_DEMO.seconds], ['question', 4.0], ['answer', 4.5], ['board', 3.5]]
 const COMP_EXIT = 0.12
+// The Play Store release's story (plan 307): how long each frame holds,
+// when Depart is tapped on the widget and on the reminder and the badge
+// at the end (seconds into its frame), and when the reminder opens.
+export const PLAY_BEATS = [['cover', 4.2], ['widget', 4.6], ['reminder', 5.2], ['board', 5.6]]
+export const PLAY_TAP = { widget: 3.2, reminder: 3.8, badge: 4.4 }
+const PLAY_OPEN = 1.5
 
 // The call to action's clock: the mark, the ask, its note, then the
 // gate at GATE, risen GATE_RISE later and waiting from then on, so its
@@ -1609,6 +1827,9 @@ function scoreOf(plan, points = 0) {
     case 'duel':
       // « Partir » pressed: the stage's one sound (DuelRun's playClick).
       return [{ at: DUEL_PRESS, key: 'click' }]
+    case 'play':
+      // Today's, as the pitch's: the platform's sign as the dial rises, the board as the plate comes in.
+      return [{ at: 0.1, key: 'platform-chime' }, { at: 1.1, key: 'board-flap' }]
     default:
       return []
   }
@@ -1620,7 +1841,9 @@ function endScoreOf(plan) {
   const lead = plan.story === 'pass'
     ? plan.P.promises.map((_, i) => ({ at: END.promise(i) + 0.1, key: 'toggle', gain: 0.7 }))
     : [{ at: END.head + 0.1, key: 'board-flap' }]
-  return [...lead, { at: END.gate + 0.1, key: 'platform-chime' }]
+  // The store's badge, tapped as a pass is read at the gate (plan 307).
+  const tap = plan.story === 'play' ? [{ at: PLAY_TAP.badge, key: 'gate-chime' }] : []
+  return [...lead, { at: END.gate + 0.1, key: 'platform-chime' }, ...tap]
 }
 
 let pad = null
