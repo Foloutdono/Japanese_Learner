@@ -1096,7 +1096,7 @@ GOLD = {
     "これは何ですか。": {("これ／それ／あれ／どれ", "これ"), ("は", "は"), ("です／だ", "です"), ("か", "か")},
     "誰か来ましたよ。": {("何か／誰か／どこか", "誰か"), ("〜ました／〜ませんでした", "ました"), ("よ", "よ")},
     "だれでも入れます。": {(ANY, "だれでも"), ("〜ます／〜ません", "ます"),
-                         ("可能形 〜(ら)れる", "入れ")},       # 入る's potential, はいれます (plan 296)
+                         ("可能形 〜(ら)れる", "入れ")},       # 入る's potential, はいれます (plan 306)
     "いつでも来てください。": {(ANY, "いつでも"), ("〜てください", "てください")},
     "お茶でも飲みませんか。": {("〜でも", "でも"), ("〜ませんか", "ませんか"), ("か", "か")},
     "子どもでも分かる。": {("〜でも", "でも")},
@@ -2825,7 +2825,7 @@ class SegmentationRoundPointTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ParticleLetterPointTests(unittest.TestCase):
-    """Plan 295: a は that is the first letter of a word written in kana
+    """Plan 305: a は that is the first letter of a word written in kana
     (はいしゃ, はこ) lights no topic, and no 〜は〜が over it; the topic
     before a kana word stays lit."""
 
@@ -2850,7 +2850,7 @@ class ParticleLetterPointTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class CanEnterPointTests(unittest.TestCase):
-    """Plan 296: 入る's potential, はいれる, lights 可能形 -- read as 入る
+    """Plan 306: 入る's potential, はいれる, lights 可能形 -- read as 入る
     conjugating as 下一段 -- and 入れる, to put in, never does."""
 
     def test_the_potential_of_entering(self) -> None:
@@ -2864,7 +2864,7 @@ class CanEnterPointTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AnotherConstructionsMoTests(unittest.TestCase):
-    """Plan 296: 〜も〜も lists two things alike -- never with a も another
+    """Plan 306: 〜も〜も lists two things alike -- never with a も another
     construction owns, as the breakdown audit found it lit."""
 
     def test_a_mo_owned_elsewhere_lists_nothing(self) -> None:
@@ -2882,7 +2882,7 @@ class AnotherConstructionsMoTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AGuessIsNoWillTests(unittest.TestCase):
-    """Plan 296: 〜ようと思う is a will (起きようと思う); the copula's だろう
+    """Plan 306: 〜ようと思う is a will (起きようと思う); the copula's だろう
     before と思う is a guess, and lights 〜だろう alone."""
 
     def test_the_copulas_guess(self) -> None:
@@ -2898,7 +2898,7 @@ class AGuessIsNoWillTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class SaidAndSufferedTests(unittest.TestCase):
-    """Plan 296: the られる of what is said or thought after と, and of
+    """Plan 306: the られる of what is said or thought after と, and of
     what someone the dictionary calls a person did to one, is the passive
     alone -- never the potential beside it."""
 
@@ -2931,7 +2931,7 @@ _PASSIVE, _POTENTIAL = "受身形 〜られる", "可能形 〜(ら)れる"
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ThePassiveOrThePotentialTests(unittest.TestCase):
-    """Plan 296: a る-verb's られる is read from its clause. The passive
+    """Plan 306: a る-verb's られる is read from its clause. The passive
     where something goes on, comes about or is done for good (伝えられて
     きた, 忘れられてしまう), where it says how a thing strikes one (重く
     感じられ), where a gift is kept (機会すら与えられず), where it befalls
@@ -2995,7 +2995,7 @@ class ThePassiveOrThePotentialTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheTeOfACauseTests(unittest.TestCase):
-    """Plan 296: a て whose clause is what a thing went through, or what
+    """Plan 306: a て whose clause is what a thing went through, or what
     one could do, before what befell (a deed not done, what it became,
     what one had to do) gives the cause -- 〜て（理由）, never 〜て、〜て.
     Someone's deed before it, a deed after it, a condition, a question
@@ -3045,7 +3045,7 @@ class TheTeOfACauseTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ThroughWrittenToushiteTests(unittest.TestCase):
-    """Plan 296: 〜を通じて's lesson says "Also を通して": a channel or a
+    """Plan 306: 〜を通じて's lesson says "Also を通して": a channel or a
     span (画面を通して, 一年を通して, 機械を通した会話) -- never the verb
     通す, passing a thing through (目を通す, 針に糸を通す, 手を通してない)
     or letting someone by (彼らを通した。)."""
@@ -3065,7 +3065,7 @@ class ThroughWrittenToushiteTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AGaOfItsOwnClauseTests(unittest.TestCase):
-    """Plan 296: 〜は〜が's が is the subject of what is said of the topic
+    """Plan 306: 〜は〜が's が is the subject of what is said of the topic
     -- never one inside a quotation opened after it, a clause the
     nominaliser の makes into what is said, asked or done, or a purpose
     said of a noun (〜ための)."""
@@ -3085,7 +3085,7 @@ class AGaOfItsOwnClauseTests(unittest.TestCase):
 
 
 class AWhereWithEvenTests(unittest.TestCase):
-    """Plan 296: 〜でも is a noun + でも offered (お茶でも) or "even" in
+    """Plan 306: 〜でも is a noun + でも offered (お茶でも) or "even" in
     place of が (子どもでも) -- never a で of where or of in what respect
     after a noun and its の, with も (家の中でも, お金の面でも), nor the
     first of a pair the copula closes (学者でも辞書でもなく, 恥でも何でも
@@ -3121,7 +3121,7 @@ class AWhereWithEvenTests(unittest.TestCase):
 
 
 class AnEvenMadeTests(unittest.TestCase):
-    """Plan 296: まで after a thing added to what its sentence listed or
+    """Plan 306: まで after a thing added to what its sentence listed or
     said before it is "even", no から〜まで: 電気代やガス代まで上がって
     いる, 強い風に加えて、雨まで降り出した -- never after a place, a count
     or a time, which a list may hold as an end (駅や空港まで送ります)."""
@@ -3141,7 +3141,7 @@ class AnEvenMadeTests(unittest.TestCase):
 
 
 class APieceAnotherConstructionOwnsTests(unittest.TestCase):
-    """Plan 296: a particle a construction has fused (〜ものを's を, 〜や
+    """Plan 306: a particle a construction has fused (〜ものを's を, 〜や
     否や's や) is no marker of its own; 〜ても is never the て of a
     particle made of a verb (にとっても is にとって and "too"); 〜にします
     is never ように's に."""
@@ -3164,7 +3164,7 @@ class APieceAnotherConstructionOwnsTests(unittest.TestCase):
 
 
 class TwoPartsOfOnePointTests(unittest.TestCase):
-    """Plan 296: 〜ば〜ほど says one word twice (読めば読むほど), never a
+    """Plan 306: 〜ば〜ほど says one word twice (読めば読むほど), never a
     ば and a later これほど or どれほど; 〜も〜ば〜も lists two things
     alike, never an amount's も (数年もすれば) or a question word's."""
 
@@ -3189,7 +3189,7 @@ class TwoPartsOfOnePointTests(unittest.TestCase):
 
 
 class WhatIsSaidIsNoConditionTests(unittest.TestCase):
-    """Plan 296: the と of what is said or realised is the quotation's,
+    """Plan 306: the と of what is said or realised is the quotation's,
     never 〜と's "whenever" -- after a stated clause and before a verb of
     knowing (すぎないと気づかされる), or across a comma to the one verb of
     saying or showing that follows (いけないと、母が言った). And ないと at
@@ -3218,7 +3218,7 @@ class WhatIsSaidIsNoConditionTests(unittest.TestCase):
 
 
 class TheCopulasDeTests(unittest.TestCase):
-    """Plan 296: the で of 〜ではあるまいし is the copula's, no place; で
+    """Plan 306: the で of 〜ではあるまいし is the copula's, no place; で
     + すら + ある is no 〜くて／〜で; and 〜は〜が never pairs a topic with a
     が inside a clause こと makes a noun of, or one that describes a noun
     past an adverb (効果が実際より大きく見える危険)."""
@@ -3243,7 +3243,7 @@ class TheCopulasDeTests(unittest.TestCase):
 
 
 class AnInstructionReportedTests(unittest.TestCase):
-    """Plan 296: 〜ように言う reports any instruction -- 命じる, 注意する,
+    """Plan 306: 〜ように言う reports any instruction -- 命じる, 注意する,
     求める as 頼む -- never a purpose its comma sets apart."""
 
     def test_instructions(self) -> None:
@@ -3256,7 +3256,7 @@ class AnInstructionReportedTests(unittest.TestCase):
 
 
 class APiecesOwnerTests(unittest.TestCase):
-    """Plan 296: a point's piece another construction owns lights nothing
+    """Plan 306: a point's piece another construction owns lights nothing
     of its own -- たとえ日曜日でも's でも is たとえ〜ても's, ともなると's も
     lists nothing, もう before an amount is "more" -- and はじめてでも is
     〜でも's "even", as 子どもでも is."""
@@ -3289,7 +3289,7 @@ class APiecesOwnerTests(unittest.TestCase):
 
 
 class TheLongestToIuFrameTests(unittest.TestCase):
-    """Plan 296: the longest frame on と + 言う owns its pieces --
+    """Plan 306: the longest frame on と + 言う owns its pieces --
     〜といい〜といい no 〜という, Nからというもの 〜てからというもの, the
     たら of といったらない and the いえ of とはいえ no 〜たら and no order --
     and a story's plot after a comma is no 〜というものだ."""
@@ -3321,7 +3321,7 @@ class TheLongestToIuFrameTests(unittest.TestCase):
 
 
 class MadeOfExtentTests(unittest.TestCase):
-    """Plan 296: まで "even" where it stands for its verb's を (心まで温かく
+    """Plan 306: まで "even" where it stands for its verb's を (心まで温かく
     する, 井戸の水まで汚し), no から〜まで; まで + 〜になる's に no 〜までに;
     したまでです 〜までのことだ, said politely."""
 
@@ -3345,7 +3345,7 @@ class MadeOfExtentTests(unittest.TestCase):
 
 
 class AWordOfItsOwnTests(unittest.TestCase):
-    """Plan 296: a dictionary word or collocation that only looks like a
+    """Plan 306: a dictionary word or collocation that only looks like a
     point takes none -- 向き合う, 通り過ぎる, 一方の, それだけの, 責任を
     もって, どうやって行く -- and the point's own forms keep it."""
 
@@ -3371,7 +3371,7 @@ class AWordOfItsOwnTests(unittest.TestCase):
 
 
 class AConstructionOwnsItsPieceTests(unittest.TestCase):
-    """Plan 296: a construction's piece lights no smaller point -- だから
+    """Plan 306: a construction's piece lights no smaller point -- だから
     of だからといって is 〜からといって's, the て of にわたって (its に hidden
     by a blank or not) is no 〜てみる."""
 
@@ -3398,7 +3398,7 @@ class AConstructionOwnsItsPieceTests(unittest.TestCase):
 
 
 class ATeEndingItsUtteranceTests(unittest.TestCase):
-    """Plan 296: a て that ends what is said is a request where nothing
+    """Plan 306: a て that ends what is said is a request where nothing
     says otherwise -- a が inside a clause that modifies a noun is not
     its subject, nor the listener's (あなたが), and 見て or 聞いて opening
     a line before a scene of its own is "look!", "listen!" -- and a link
@@ -3429,7 +3429,7 @@ class ATeEndingItsUtteranceTests(unittest.TestCase):
 
 
 class AKuFormsPointTests(unittest.TestCase):
-    """Plan 296: no adverbial form on the noun 近く, the adverb 危うく or a
+    """Plan 306: no adverbial form on the noun 近く, the adverb 危うく or a
     denied く form (高くはない); 早く起きる and 高くは飛べない keep theirs."""
 
     def test_no_adverbial_form(self) -> None:
@@ -3444,7 +3444,7 @@ class AKuFormsPointTests(unittest.TestCase):
 
 
 class AFromBySourceTests(unittest.TestCase):
-    """Plan 296: から read by what governs it -- a feeling acted out of is
+    """Plan 306: から read by what governs it -- a feeling acted out of is
     a cause (焦りから), こと + から before 始める or ではなく is "from", and
     見るともなく no standpoint (窓から見ると keeps it, "seen from")."""
 
@@ -3486,7 +3486,7 @@ class AFromBySourceTests(unittest.TestCase):
 
 
 class MonosConstructionsTests(unittest.TestCase):
-    """Plan 296: もの's constructions by what the sentence says --
+    """Plan 306: もの's constructions by what the sentence says --
     〜もので no copula denied (町のものでない), 〜たものだ a past recalled
     (よく, 昔, ころ), 〜ものの after a blank, もんで 〜もので said short."""
 
@@ -3529,7 +3529,7 @@ class MonosConstructionsTests(unittest.TestCase):
 
 
 class AnHonorificReruTests(unittest.TestCase):
-    """Plan 296: the honorific (ら)れる raises its doer -- a respected
+    """Plan 306: the honorific (ら)れる raises its doer -- a respected
     person it is said of, or the listener asked -- and is no passive;
     with a doer and its に it is the passive."""
 
@@ -3549,7 +3549,7 @@ class AnHonorificReruTests(unittest.TestCase):
 
 
 class NakiIsNoNegativeTests(unittest.TestCase):
-    """Plan 296: 亡き, 泣き and the old attributive なき light no ない形."""
+    """Plan 306: 亡き, 泣き and the old attributive なき light no ない形."""
 
     def test_no_negative(self) -> None:
         for sentence in ("都会に暮らす妹が亡き姉の日記をたどる形で描いている。", "その話を聞いたとたんに、母はなき出しました。",
@@ -3562,7 +3562,7 @@ class NakiIsNoNegativeTests(unittest.TestCase):
 
 
 class AmongAsksWhichTests(unittest.TestCase):
-    """Plan 296: 〜の中で is "among" where its question asks which one --
+    """Plan 306: 〜の中で is "among" where its question asks which one --
     its word marked by が (どれが, だれが) -- never what one does in a place
     (電車の中で何をしますか)."""
 
@@ -3574,7 +3574,7 @@ class AmongAsksWhichTests(unittest.TestCase):
 
 
 class AnInvitationInvitesTests(unittest.TestCase):
-    """Plan 296: 〜ませんか invites -- never asks leave (開けてもかまいま
+    """Plan 306: 〜ませんか invites -- never asks leave (開けてもかまいま
     せんか) or a question its own word asks (どこが分かりませんか)."""
 
     def test_invitation(self) -> None:
@@ -3587,7 +3587,7 @@ class AnInvitationInvitesTests(unittest.TestCase):
 
 
 class WhatElseIsItTests(unittest.TestCase):
-    """Plan 296: the なん of 〜でなくてなんだろう is 何, "what", and lights
+    """Plan 306: the なん of 〜でなくてなんだろう is 何, "what", and lights
     no 〜んです (no copula stands after a clause's て); 好きなんだろう
     keeps it."""
 
@@ -3605,7 +3605,7 @@ class WhatElseIsItTests(unittest.TestCase):
 
 
 class WhatTheBatchsLookalikesAskTests(unittest.TestCase):
-    """Plan 296, the stress set's lookalikes: 何より picks one among
+    """Plan 306, the stress set's lookalikes: 何より picks one among
     (国々の中で、私が何よりも); まだ and どの ask, never invite (まだ届きま
     せんか, どの漢字が読めませんか), where 何とか and 何なり ask nothing
     (何とかできませんか); なくてはならない is no 〜ではなく; 何だろう is
@@ -3628,7 +3628,7 @@ class WhatTheBatchsLookalikesAskTests(unittest.TestCase):
 
 
 class TheCopulasDenialTests(unittest.TestCase):
-    """Plan 296, the judges' rows: the で of ではない is the copula's,
+    """Plan 306, the judges' rows: the で of ではない is the copula's,
     never a place's or a means' (紳士などではない, ではないか said bare),
     and この地域ではなくてはならない is a place's で, は and なくては
     ならない -- no copula and no 〜ではなく."""
@@ -3646,7 +3646,7 @@ class TheCopulasDenialTests(unittest.TestCase):
 
 
 class TheAuditsSingletonPointsTests(unittest.TestCase):
-    """Plan 296, the audit's singletons: 互いに見える is an adverb and
+    """Plan 306, the audit's singletons: 互いに見える is an adverb and
     "visible" (元気に見える looks); a street a negative describes is no
     〜通りに (言われた通りに is); まめにしている does a deed diligently
     (へやをきれいにする makes it so)."""
@@ -3675,7 +3675,7 @@ class TheAuditsSingletonPointsTests(unittest.TestCase):
 
 
 class TheSingletonsLookalikesTests(unittest.TestCase):
-    """Plan 296, the singletons' stress set: a street its clause
+    """Plan 306, the singletons' stress set: a street its clause
     describes is no 〜通りに (人が行き交う通り, 一本入った通り, 前の通り);
     適当にしたら is a manner and する and 切符にしたらいかが a pick, no
     〜にしたら (親にしたら is); 右手に見えます is "visible on the right"."""
@@ -3699,7 +3699,7 @@ class TheSingletonsLookalikesTests(unittest.TestCase):
 
 
 class TheStressSetsOlderPointsTests(unittest.TestCase):
-    """Plan 296, what the stress sentences found that predated them: a
+    """Plan 306, what the stress sentences found that predated them: a
     place one drops in at (本屋によると、画集が並んでいた) is 寄る, no
     〜によると or 〜によって; せんがため, 何にもまして, 何であろう, 幼く
     見える, おっしゃった通り、, だけではない and 何一つ…ず light their
@@ -3735,7 +3735,7 @@ class TheStressSetsOlderPointsTests(unittest.TestCase):
 
 
 class TheOlderFixesLookalikesTests(unittest.TestCase):
-    """Plan 296, the second stress set: 寄る in every form after a place
+    """Plan 306, the second stress set: 寄る in every form after a place
     lights no 〜によって (家によりました, 町によることにした, よらないで,
     神社によろうか); 誰にもまして is no 誰も〜ない; であろう is 〜だろう's;
     何一つ…ない counts nothing."""
@@ -3756,7 +3756,7 @@ class TheOlderFixesLookalikesTests(unittest.TestCase):
 
 
 class TheOlderFixesJudgesRowsTests(unittest.TestCase):
-    """Plan 296, the judges' rows on the older misreadings: a noun's
+    """Plan 306, the judges' rows on the older misreadings: a noun's
     どおり stands with anything after it (いつもどおり出社する); であろうと
     is "whether", no guess; だけじゃないの asks "isn't it just"; 店によっては
     and …によって…ところもある are "depending on", no 寄る."""

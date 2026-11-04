@@ -272,13 +272,13 @@ _DAYS = {
 }
 
 
-# A counter a page writes in kana, by the counter it spells (plan 296):
+# A counter a page writes in kana, by the counter it spells (plan 306):
 # 一ぴき いっぴき, 一かい いっかい. The kana is the page's and keeps its
 # own reading; only the number before it is read with the counter.
 _KANA_COUNTERS = {"ぴき": "匹", "ひき": "匹", "びき": "匹", "ほん": "本", "ぽん": "本", "ぼん": "本",
                   "はい": "杯", "ぱい": "杯", "ばい": "杯", "かい": "回", "こ": "個", "さつ": "冊", "さい": "歳"}
 # Counters that take the Sino-Japanese number, never ひと or ふた (plan
-# 296): 一割 いちわり, 一度 いちど, 一番 いちばん.
+# 306): 一割 いちわり, 一度 いちど, 一番 いちばん.
 _SINO_NUMBER = frozenset({"割", "度", "番", "位", "枚", "台", "倍", "割引"})
 
 
@@ -301,7 +301,7 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
     if ctr_surface in _SINO_NUMBER and whole and _to_hira(num_reading) in ("ひと", "ふた"):
         return ("いち" if _to_hira(num_reading) == "ひと" else "に"), ctr_reading
     if ctr_surface == "箱" and cls in (6, 8, 10, 100) and _to_hira(ctr_reading) == "はこ":
-        return _geminate(num_reading), "ぱこ"            # 二十箱 にじゅっぱこ, 六箱 ろっぱこ (plan 296)
+        return _geminate(num_reading), "ぱこ"            # 二十箱 にじゅっぱこ, 六箱 ろっぱこ (plan 306)
     n_read, c_read = num_reading, ctr_reading
     # Digits whose reading is already kana (plan 177, numeral_furigana):
     # the tokenizer's pass leaves a digit as itself, and the two rules
@@ -592,7 +592,7 @@ def _stands_alone(tokens: list[dict], i: int, after_adjectival: bool = False, be
     `after_adjectival` counts a na-adjective's stem (一生懸命) as a
     word a noun can stand after; a suffix can, so it is off by default
     (積極|的). `before_a_mark` lets a mark follow it as a particle would
-    (その間、: plan 296), for the nouns of _NOUN_ALONE alone -- a suffix
+    (その間、: plan 306), for the nouns of _NOUN_ALONE alone -- a suffix
     before a comma (今月中、) stays the suffix it is."""
     after = tokens[i + 1]["surface"] if i + 1 < len(tokens) else ""
     if not (after in _PARTICLE_AFTER or (before_a_mark and after in _PUNCT)):
@@ -660,11 +660,11 @@ _SAID_UP = frozenset({"れる", "られる", "為さる", "なさる", "いら�
 # What a notice says of a person's state (plan 272): 妊娠中の方.
 _STATES_OF_PEOPLE = ("車椅子", "車いす", "車イス", "妊娠中", "授乳中", "治療中", "通院中", "服用中", "入院中", "在学中", "障害",
                      "障がい")
-# What only a person has, whose 方 before it and の is かた (plan 296):
+# What only a person has, whose 方 before it and の is かた (plan 306):
 # 同意のない方の発話, 拾った方のもの (the finder's).
 _A_PERSONS = frozenset({"発話", "声", "名前", "お名前", "意見", "ご意見", "話", "お話", "気持ち", "顔", "連絡先", "住所",
                         "電話番号", "署名", "サイン", "荷物", "お荷物", "同意", "希望", "ご希望", "体調", "家族", "ご家族"})
-# What a person is asked or said up to do, whose 方 is かた (plan 296):
+# What a person is asked or said up to do, whose 方 is かた (plan 306):
 # 上の方にもお越しいただけますか, 難しい方は…お知らせください.
 _DONE_BY_PEOPLE = ("越し", "いらっしゃ", "おいで", "見え", "来場", "来店", "来社", "会い", "連絡", "知らせ", "申し出",
                    "申し込", "利用", "参加", "相談")
@@ -679,7 +679,7 @@ _SORTS_PEOPLE = ("付近", "周辺", "沿岸", "沿い", "地域", "在住", "�
 
 
 # What a dictionary says of a person, whose 方 after it and の is かた
-# (plan 296): 学生 "student", 後任 "successor", 落とし主 "owner".
+# (plan 306): 学生 "student", 後任 "successor", 落とし主 "owner".
 _PERSON_GLOSS = re.compile(r"\b(person|people|man|woman|men|women|child|children|boy|girl|student|pupil|teacher|"
                            r"employee|staff|worker|member|owner|successor|newcomer|new face|recruit|customer|"
                            r"guest|client|patient|visitor|participant|resident|user|applicant|passenger|parent|"
@@ -722,7 +722,7 @@ def _asked_of_people(tokens: list[dict], k: int) -> bool:
 
 def _a_person_by_the_sentence(tokens: list[dict], i: int) -> bool:
     """Whether 方 at tokens[i] is a person by what its sentence says of it
-    (plan 296; see the rule in correct_readings)."""
+    (plan 306; see the rule in correct_readings)."""
     n = len(tokens)
     prev, nxt = tokens[i - 1], (tokens[i + 1]["surface"] if i + 1 < n else "")
     after = tokens[i + 2]["surface"] if i + 2 < n else ""
@@ -829,7 +829,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
 
         # 学生が皆法律家に, 選手は皆天国に: 皆 before a noun is みな, "all
         # of them" -- the prefix かい- makes words UniDic reads whole (皆勤,
-        # 皆無, 皆既, 皆伝), so one cut off is みな (plan 296).
+        # 皆無, 皆既, 皆伝), so one cut off is みな (plan 306).
         if s == "皆" and r == "かい" and t.get("pos") == "prefix":
             out[i] = "みな"
             continue
@@ -901,7 +901,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # asks of them -- 大きく見える方を選んだ is ほう, the one)
         if s == "方" and r == "ほう" and i > 0 and tokens[i - 1].get("pos") in ("verb", "auxiliary") \
                 and (nxt(i) in ("は", "には", "へ", "も")
-                     or (nxt(i) == "に" and i + 2 < n and surf[i + 2] == "は")  # (拾った方には, plan 296)
+                     or (nxt(i) == "に" and i + 2 < n and surf[i + 2] == "は")  # (拾った方には, plan 306)
                      or (nxt(i) in ("に", "を", "の") and (
                     any(t.get("lemma") in _SAID_UP for t in tokens[max(0, i - 3):i])
                     or any(u in ("ください", "下さい", "願い", "遠慮") for u in surf[i + 1:])))):
@@ -923,7 +923,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "かた"
             continue
         # 学生の方は, 社員の方の同意, 後任の方に: かた, a person said
-        # politely, after a noun the dictionary calls a person (plan 296)
+        # politely, after a noun the dictionary calls a person (plan 306)
         # -- never where the sentence compares, 学生の方が多い, AよりBの方が
         # (the side), nor toward them, 先生の方を見た, 母の方へ歩いた.
         if s == "方" and r == "ほう" and prev(i) == "の" and i >= 2 and tokens[i - 2].get("pos") == "noun" \
@@ -931,7 +931,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 and not (nxt(i) in ("を", "に", "へ") and any(t.get("lemma") in _TOWARD for t in tokens[i + 1:])):
             out[i] = "かた"
             continue
-        # (plan 296) 方 of a person by what the sentence says of it, past
+        # (plan 306) 方 of a person by what the sentence says of it, past
         # the rules above: before の and what only a person has (同意の
         # ない方の発話, 拾った方のもの, the finder's); before what a person
         # is asked or said up to do (上の方にもお越しいただけますか, 車いすの
@@ -957,7 +957,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             continue
 
         # 先月末, 翌月末, 年度末: まつ, the end of the period named right
-        # before it (plan 296), whatever UniDic read -- it reads まつ, and
+        # before it (plan 306), whatever UniDic read -- it reads まつ, and
         # the rule for a suffix standing alone (来月|国) below took the
         # period for no host and gave it the deck's すえ. 三月の末, 末っ子
         # and 悩んだ末に keep すえ: nothing names a period glued to them.
@@ -966,7 +966,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "まつ"
             continue
         # 八パーセント引き, 五百円引き, 二割引き: びき, so much off, after the
-        # amount it takes off (plan 296) -- 線を引き, 綱引き and くじ引き
+        # amount it takes off (plan 306) -- 線を引き, 綱引き and くじ引き
         # are no discount.
         if s == "引き" and r == "ひき" and tokens[i].get("pos") == "noun" \
                 and prev(i) in ("パーセント", "％", "%", "割", "円", "ドル", "ユーロ"):
@@ -991,7 +991,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
 
         # 大けが, 大雨: 大 before a noun reads as JMdict reads the word the
         # two spell (大怪我 おおけが, 大問題 だいもんだい), whatever UniDic
-        # read -- it read だい before けが (plan 296).
+        # read -- it read だい before けが (plan 306).
         if s == "大" and tokens[i].get("pos") == "prefix" and i + 1 < n and tokens[i + 1].get("pos") == "noun":
             said = _prefix_reading(s, tokens[i + 1].get("lemma") or nxt(i), out[i + 1])
             if said and said != r:
@@ -1001,7 +1001,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # 通り glued to a name or a noun どおり (みなと通り, 予定通り, 人通り)
         # -- never after a number (二通り ふたとおり), a demonstrative (その
         # 通り) or a verb (言った通り), which take it apart, nor 作り the
-        # verb's stem (一財産作りたがる, plan 296).
+        # verb's stem (一財産作りたがる, plan 306).
         if s in ("作り", "造り") and r == "つくり" and tokens[i].get("pos") != "verb" and i > 0 \
                 and tokens[i - 1].get("pos") == "noun" \
                 and not _is_numeral(prev(i)) and tokens[i - 1].get("end") == t.get("start"):
@@ -1068,14 +1068,14 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             after = nxt(i)
             if after in _NANI_BEFORE or after == "" or after in _PUNCT:
                 out[i] = "なに"
-            # (何一つ, 何ひとつ: なにひとつ, "not a single thing", plan 296)
+            # (何一つ, 何ひとつ: なにひとつ, "not a single thing", plan 306)
             elif after in ("一", "ひと") and i + 2 < n and surf[i + 2] in ("つ",):
                 out[i] = "なに"
             elif after == "一つ" or after == "ひとつ":
                 out[i] = "なに"
             continue
         # (何にもまして: なににもまして, "above all else" -- 何にも alone is
-        # なんにも, "nothing at all", plan 296)
+        # なんにも, "nothing at all", plan 306)
         if s == "何に" and r == "なんに" and nxt(i) == "も" and i + 2 < n and surf[i + 2] in ("まして", "増して"):
             out[i] = "なにに"
             continue
@@ -1245,19 +1245,19 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             start -= 1
         # 三割一分, 三十七度八分: a tenth of the unit before, ぶ, and the
         # numeral its own reading -- numeral_furigana's rule for figures,
-        # for a numeral in kanji (plan 296). No minute: はっぷん was one.
+        # for a numeral in kanji (plan 306). No minute: はっぷん was one.
         if surf[i] == "分" and start > 0 and surf[start - 1] in ("割", "度"):
             out[i - 1] = read_numeral(surf[i - 1]) or out[i - 1]
             out[i] = "ぶ"
             continue
         # 二、三日, 四、五日: "two or three days", a span read さんにち, ごにち
-        # -- never みっか, the third of the month (plan 296).
+        # -- never みっか, the third of the month (plan 306).
         if surf[i] == "日" and start == i - 1 and surf[i - 1] in ("三", "五") and start >= 2 \
                 and surf[start - 1] in ("、", "，", "・") and _numeral_value(surf[start - 2]) == _numeral_value(surf[i - 1]) - 1:
             out[i - 1], out[i] = ("さん" if surf[i - 1] == "三" else "ご"), "にち"
             continue
         # 三年二組, a class: にくみ, the grade's own number -- ふたくみ is
-        # "two sets" (plan 296).
+        # "two sets" (plan 306).
         if surf[i] == "組" and start >= 1 and surf[start - 1] in ("年", "年生") and start == i - 1 \
                 and surf[i - 1] in _KANJI_DIGIT:
             out[i - 1] = read_numeral(surf[i - 1]) or out[i - 1]

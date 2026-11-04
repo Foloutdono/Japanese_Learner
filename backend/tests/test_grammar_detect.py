@@ -495,7 +495,7 @@ class EveryKeyTests(unittest.TestCase):
     def test_a_lone_te_links_two_clauses(self) -> None:
         self.assertEqual(found_in("駅まであるいて、電車にのります。")["〜て、〜て"], "て")
         # (rain that keeps one home is the cause, as 〜て（理由）'s own lesson
-        # says it: 雨がふって、行きませんでした, plan 296)
+        # says it: 雨がふって、行きませんでした, plan 306)
         self.assertEqual(found_in("雨がふって、行けません。")["〜て（理由）"], "て")
         self.assertIn("〜て、〜て", found_in("手をあらって、ごはんを食べました。"))
         self.assertNotIn("〜て、〜て", found_in("ちょっと待って！"))

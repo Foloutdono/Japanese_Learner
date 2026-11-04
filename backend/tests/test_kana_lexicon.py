@@ -37,7 +37,7 @@ class KanaLexiconTests(unittest.TestCase):
             ("まず、れいぞうこを見ました。", "れいぞうこ", "冷蔵庫"),
             ("去年、けつあつが高いと言われた。", "けつあつ", "血圧"),
             ("でも、むずかしいのははつおんです。", "はつおん", "発音"),
-            # (after an adverb: no topic, plan 295)
+            # (after an adverb: no topic, plan 305)
             ("やっとはいしゃへ行きました。", "はいしゃ", "歯医者"),
         ):
             with self.subTest(word=word):
@@ -85,7 +85,7 @@ class KanaLexiconTests(unittest.TestCase):
     def test_a_compound_is_said_as_often_as_its_rarest_part(self) -> None:
         # The subtitles' segmenter cut 歯医者 into 歯 + 医者, as UniDic does:
         # read as never said, it lost to 敗者 "loser", said 55 times (plan
-        # 295). A word with a line of its own keeps its count (何時, 263).
+        # 305). A word with a line of its own keeps its count (何時, 263).
         spoken = kana_lexicon._spoken_counts()
         plain = morphology._plain_tagger
         self.assertNotIn("歯医者", spoken)

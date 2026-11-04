@@ -633,7 +633,7 @@ class KanaStemTests(unittest.TestCase):
     def test_the_refusal_never_trades_one_card_for_another(self) -> None:
         # Only what stands beside the word may name another card (plan
         # 272): the verb's partner, the neighbours of a kana noun -- and
-        # what a kana adjective is said of (plan 296).
+        # what a kana adjective is said of (plan 306).
         for sentence in _corpus()[::7]:
             morphemes = morphology.tokenize(sentence)
             for i, m in enumerate(morphemes):
@@ -1755,7 +1755,7 @@ class ChatAndStreamWordTests(unittest.TestCase):
         self.assertIn("命令形 〜ろ／〜え", {g["pattern"] for g in token["grammar"]})
         # Before an ending it is no imperative: ベルを鳴らせない is 鳴らす's
         # potential, "can't ring" -- a bell made to ring is 鳴らす itself,
-        # never 鳴る's causative (plan 296).
+        # never 鳴る's causative (plan 306).
         token = token_of("ここではベルを鳴らせない。", "鳴らせ")
         self.assertEqual(token["vocab_match"]["entry"]["kanji"], "鳴らす")
         self.assertEqual({g["pattern"] for g in token["grammar"]}, {"可能形 〜(ら)れる"})
@@ -1883,7 +1883,7 @@ class ThirdReviewWordTests(unittest.TestCase):
         self.assertEqual(card_of("通学路に車突っ込み、児童2人けが", "突っ込み"), "vocab_N2_突っ込む_つっこむ")
         self.assertEqual(token_of("卵を溶きほぐし、混ぜる。", "溶きほぐし")["vocab_match"]["entry"]["kanji"], "溶きほぐす")
         self.assertNotEqual(card_of("名前が聞き取れず、聞き返した。", "聞き取れ"), "vocab_N1_聞き取り_ききとり")
-        # 亡き姉 is the pool's 亡き, "the late" (plan 296), never 無い.
+        # 亡き姉 is the pool's 亡き, "the late" (plan 306), never 無い.
         self.assertEqual(token_of("亡き姉の日記。", "亡き")["vocab_match"]["entry"]["kanji"], "亡き")
         # A lemma's row read as the page reads it stands: 生まれつき, "by
         # nature", the noun.
@@ -2929,7 +2929,7 @@ class NinthReviewWordTests(unittest.TestCase):
             ("ねこをかっています。", "かっ", "飼う", "犬のえさをかってきた。", "かっ", "買う"),
             ("次に使うときは6時間以上あけてください。", "あけ", "空ける", "ドアをあけてください。", "あけ", "開ける"),
             ("夜があけた。", "あけ", "明ける", "窓をあけた。", "あけ", "開ける"),
-            # (そういうもんだ is 〜ものだ's own もの since plan 296, no card)
+            # (そういうもんだ is 〜ものだ's own もの since plan 306, no card)
             ("近頃の若いもんはせっかちだ。", "もん", "者", "いいもんを見つけた。", "もん", "物"),
             ("このたび担当が替わりました。", "替わり", "代わる", "天気が変わりました。", "変わり", "変わる"),
             ("待合室でおかけになってお待ちください。", "かけ", "掛ける", "賭けに勝った。", "賭け", "賭け"),
@@ -3440,7 +3440,7 @@ def cut(sentence: str) -> list[str]:
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ParticleLetterWordTests(unittest.TestCase):
-    """Plan 295. A word written in kana whose first letter is also a
+    """Plan 305. A word written in kana whose first letter is also a
     particle is read whole where no particle can stand, never cut into
     the particle and a shorter word: はいしゃ is no topic は + いしゃ, the
     doctor. Each on sentences written for the rule, beside the topic は
@@ -3518,7 +3518,7 @@ class ParticleLetterWordTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatTheSentenceSaysTests(unittest.TestCase):
-    """Plan 296: readings and cards the hand-written answers of the
+    """Plan 306: readings and cards the hand-written answers of the
     conversation, dictation and comprehension banks disagreed with, each
     decided by what the sentence says and pinned beside the lookalike it
     must leave alone."""
@@ -3723,7 +3723,7 @@ class WhatTheSentenceSaysTests(unittest.TestCase):
 
 
 class ParticleOrCopulaDeTests(unittest.TestCase):
-    """Plan 296: で is the case particle or the copula's て form by what
+    """Plan 306: で is the case particle or the copula's て form by what
     follows it. The particle where its noun is an argument of what goes
     on in its own clause (仕事で忙しい, 仕事ではメールしか, 窓口でのみ,
     教えあうことで, 一台置くだけで, 父と母と三人で); the copula where a topic,
@@ -3767,7 +3767,7 @@ class ParticleOrCopulaDeTests(unittest.TestCase):
 
 
 class AKanaWordCutTests(unittest.TestCase):
-    """Plan 296: a word written in kana that MeCab cut into pieces, read
+    """Plan 306: a word written in kana that MeCab cut into pieces, read
     whole where the cut is one no sentence can mean: a と before a case
     particle (きょうと + へ), a particle swallowed into a verb the deck
     has no card for (はかさない), いたい after a が, もったいない in all
@@ -3815,7 +3815,7 @@ class AKanaWordCutTests(unittest.TestCase):
 
 
 class NumbersAndCountersTests(unittest.TestCase):
-    """Plan 296: a number takes the reading its counter asks for, in kanji
+    """Plan 306: a number takes the reading its counter asks for, in kanji
     or in kana (一割 いちわり, 二十箱 にじゅっぱこ, 一ぴき いっぴき); かい in
     kana is 回 unless something is or is done on the floor; a counter keeps
     its number and gives no common noun's card (一本も, no "book"); 十分の一
@@ -3871,7 +3871,7 @@ class NumbersAndCountersTests(unittest.TestCase):
 
 
 class AKanaVerbByWhatItTakesTests(unittest.TestCase):
-    """Plan 296: a verb in kana another deck verb could be is read by what
+    """Plan 306: a verb in kana another deck verb could be is read by what
     it takes in its own clause -- the subject (雨がふり出す, 実がなる,
     のどがかわく, 窓口はあく, あの子は、おこった), the object (手がはなせない,
     写真…とった), and a passive's object (うそをつかれた, no 疲れる)."""
@@ -3911,7 +3911,7 @@ class AKanaVerbByWhatItTakesTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AKanaNounByItsClauseTests(unittest.TestCase):
-    """Plan 296: a noun written in kana is the homophone its clause says
+    """Plan 306: a noun written in kana is the homophone its clause says
     -- where it is and whose it is (まどがわのせき, そのせきはわたしのです),
     what it is used for (このきかいの使い方), what draws or runs it (せんを
     引く, となりのせん), what comes before and after it (このへんに; へんな
@@ -3959,7 +3959,7 @@ class AKanaNounByItsClauseTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheAuditsSmallClassesTests(unittest.TestCase):
-    """Plan 296: a conjunction where it opens its sentence and its pieces
+    """Plan 306: a conjunction where it opens its sentence and its pieces
     inside a clause; a point's piece without a homograph's card; a prefix
     read as its compound and a suffix voiced in it; 〜ようが〜まいが one
     verb said twice; an idiom whose verb the page writes in kana."""
@@ -4000,7 +4000,7 @@ class TheAuditsSmallClassesTests(unittest.TestCase):
         self.assertEqual(token_of("彼は不器用ゆえに、損をすることが多い。", "不器用")["reading"], "ぶきよう")
         self.assertEqual(token_of("営業部では、資料作りはもとより、打ち合わせにも同席した。", "作り")["reading"], "づくり")
         self.assertEqual(token_of("ここは昔、「みなと通り」という名前がついた。", "通り")["reading"], "どおり")
-        self.assertEqual(token_of("その通りです。", "その通り")["reading"], "そのとおり")   # (one word, plan 296)
+        self.assertEqual(token_of("その通りです。", "その通り")["reading"], "そのとおり")   # (one word, plan 306)
         self.assertEqual(token_of("二通りの方法がある。", "通り")["reading"], "とおり")
         self.assertEqual(token_of("彼はしきりと一財産作りたがっている。", "作り")["reading"], "つくり")
 
@@ -4025,7 +4025,7 @@ class TheAuditsSmallClassesTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ARadicalsHenTests(unittest.TestCase):
-    """Plan 296: a へん glued to a noun is a kanji's left-hand radical, 偏
+    """Plan 306: a へん glued to a noun is a kanji's left-hand radical, 偏
     (いしへん, あしへん); the west's negative へん follows a verb."""
 
     def test_the_radical(self) -> None:
@@ -4038,7 +4038,7 @@ class ARadicalsHenTests(unittest.TestCase):
 
 
 class TheWordThePageSpelledTests(unittest.TestCase):
-    """Plan 296: the card is the word the page spelled -- in its own kanji
+    """Plan 306: the card is the word the page spelled -- in its own kanji
     where JMdict holds them as a word of their own (温かく, 架ける, 抑え),
     never where JMdict's one word is written two ways (充分, 眼); by what is
     warm in kana (あたたかいおでん 温かい, あたたかい部屋 暖かい); by the
@@ -4079,7 +4079,7 @@ class TheWordThePageSpelledTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NamesAndCommonWordsTests(unittest.TestCase):
-    """Plan 296: a name where the sentence names someone (a letter's
+    """Plan 306: a name where the sentence names someone (a letter's
     addressee, its signature, two names joined), a common word where it
     says one (まえのせき is no 前野 Seki), a place's sense where one comes
     from it, and katakana letters MeCab read as marks one word."""
@@ -4134,7 +4134,7 @@ class NamesAndCommonWordsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhichVerbAnEStemIsTests(unittest.TestCase):
-    """Plan 296: the verb an え-row stem belongs to, read off its clause:
+    """Plan 306: the verb an え-row stem belongs to, read off its clause:
     入る's potential where a person goes in, 慣れる where nothing is
     become, the ichidan verb a られる or a を shows, 思える and 気が引ける
     of themselves, a kana stem's godan verb by its object, and a す verb's
@@ -4196,7 +4196,7 @@ class WhichVerbAnEStemIsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ANounsNiOrAnAdverbsTests(unittest.TestCase):
-    """Plan 296: だ's に after a word that may be a な-adjective is the case
+    """Plan 306: だ's に after a word that may be a な-adjective is the case
     particle where the sentence makes the word a noun (modified by の, an
     adnominal or a clause); よう's に is never an adjective's; と after a
     word said "as" what is felt is no manner."""
@@ -4250,7 +4250,7 @@ class ANounsNiOrAnAdverbsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AVerbsStemOrANounTests(unittest.TestCase):
-    """Plan 296: a verb's stem or a noun, by what follows it -- お〜になる
+    """Plan 306: a verb's stem or a noun, by what follows it -- お〜になる
     and 〜つ〜つ take a stem, の, が, を and ある a noun, and a flower's
     さく is 咲く."""
 
@@ -4288,7 +4288,7 @@ class AVerbsStemOrANounTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ToIiToIiTests(unittest.TestCase):
-    """Plan 296: both いい of 〜といい〜といい are 言う, no 良い."""
+    """Plan 306: both いい of 〜といい〜といい are 言う, no 良い."""
 
     def test_both_are_said(self) -> None:
         tokens = analysis.analyze_local("重さといい手ざわりといい、これは本物ではなさそうだ。")["tokens"]
@@ -4301,7 +4301,7 @@ class ToIiToIiTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class APersonsKataBySentenceTests(unittest.TestCase):
-    """Plan 296: 方 is かた, a person said politely, where its sentence
+    """Plan 306: 方 is かた, a person said politely, where its sentence
     says so -- before の and what only a person has, before what a person
     is asked or said up to do, after a description before an honorific
     request -- and ほう where it compares, goes toward or places a thing."""
@@ -4330,7 +4330,7 @@ class APersonsKataBySentenceTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class MadeGlossTests(unittest.TestCase):
-    """Plan 296: まで's gloss by what it does -- "even" in its verb's
+    """Plan 306: まで's gloss by what it does -- "even" in its verb's
     object's place, no "until" before the copula of 〜までのことだ."""
 
     def test_its_gloss(self) -> None:
@@ -4341,7 +4341,7 @@ class MadeGlossTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AWordOfItsOwnCardTests(unittest.TestCase):
-    """Plan 296: the words a point no longer owns say what they are."""
+    """Plan 306: the words a point no longer owns say what they are."""
 
     def test_their_cards_and_glosses(self) -> None:
         self.assertEqual(card_of("駅からホテルまで、どうやって行く？", "行く"), "vocab_N5_行く_いく")
@@ -4353,7 +4353,7 @@ class AWordOfItsOwnCardTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AConstructionsPieceCardTests(unittest.TestCase):
-    """Plan 296: だから of だからといって is no "so, therefore", and
+    """Plan 306: だから of だからといって is no "so, therefore", and
     the 見る after a compound particle's て is the verb, no 〜てみる."""
 
     def test_its_card(self) -> None:
@@ -4369,7 +4369,7 @@ class AConstructionsPieceCardTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ATeAtTheEndGlossTests(unittest.TestCase):
-    """Plan 296: a て left at the end, ね or よ after it, trails off; one
+    """Plan 306: a て left at the end, ね or よ after it, trails off; one
     before a blank joins what the blank holds."""
 
     def test_its_gloss(self) -> None:
@@ -4383,7 +4383,7 @@ class ATeAtTheEndGlossTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AKanjiVerbByWhatGoesWithItTests(unittest.TestCase):
-    """Plan 296: a kanji verb whose written form fits two verbs is read
+    """Plan 306: a kanji verb whose written form fits two verbs is read
     by what its sentence gives it -- what gets through 通る, a deed carried
     out 行う, おく after 放っ 放る, 開ける before 開く あく -- and keeps
     UniDic's reading where nothing says otherwise."""
@@ -4426,7 +4426,7 @@ class AKanjiVerbByWhatGoesWithItTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AKuFormByWhatFollowsTests(unittest.TestCase):
-    """Plan 296: a く form is the noun 近く／遠く before a case particle,
+    """Plan 306: a く form is the noun 近く／遠く before a case particle,
     the adverb 危うく "nearly" before its clause, and the adjective where
     it is denied (近くはない) or becomes so (危うくなった); and ほど before it
     is a particle of its own where no particle stands before (それほど
@@ -4456,7 +4456,7 @@ class AKuFormByWhatFollowsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AnAdverbsSenseTests(unittest.TestCase):
-    """Plan 296: an adverb's sense by what it says of -- ここ before a span
+    """Plan 306: an adverb's sense by what it says of -- ここ before a span
     of time "these past", まず before a denial the N3 先ず's "hardly", 別に
     before a verb with nothing denied 別 and に, "separately"."""
 
@@ -4496,7 +4496,7 @@ class AnAdverbsSenseTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class FromAFeelingGlossTests(unittest.TestCase):
-    """Plan 296: a から of a cause says so -- 焦りから "out of", 心から
+    """Plan 306: a から of a cause says so -- 焦りから "out of", 心から
     "from the heart" -- where no point holds it."""
 
     def test_its_gloss(self) -> None:
@@ -4506,7 +4506,7 @@ class FromAFeelingGlossTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class MonoInItsConstructionTests(unittest.TestCase):
-    """Plan 296: the もの of 〜ものの, 〜もので, 〜ものだ is the
+    """Plan 306: the もの of 〜ものの, 〜もので, 〜ものだ is the
     construction's, no 物 "thing"; a もの said of a thing keeps it."""
 
     def test_its_card(self) -> None:
@@ -4520,7 +4520,7 @@ class MonoInItsConstructionTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheCopulaDeniedGlossTests(unittest.TestCase):
-    """Plan 296: the copula's で before ない says "is not"."""
+    """Plan 306: the copula's で before ない says "is not"."""
 
     def test_its_gloss(self) -> None:
         for sentence in ("これは本でない。", "彼は学生でなく、先生だ。", "町のものでないことは明らかだ。"):
@@ -4530,7 +4530,7 @@ class TheCopulaDeniedGlossTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AnHonorificReruGlossTests(unittest.TestCase):
-    """Plan 296: the honorific れ says so."""
+    """Plan 306: the honorific れ says so."""
 
     def test_its_gloss(self) -> None:
         for sentence in ("どうされますか。", "来館された方に説明する。", "先生が本を書かれた。"):
@@ -4540,7 +4540,7 @@ class AnHonorificReruGlossTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NaniInItsSetPhrasesTests(unittest.TestCase):
-    """Plan 296: 何 is なに in 何にもまして and 何一つ; 何にも alone keeps
+    """Plan 306: 何 is なに in 何にもまして and 何一つ; 何にも alone keeps
     なんにも."""
 
     def test_its_reading(self) -> None:
@@ -4553,7 +4553,7 @@ class NaniInItsSetPhrasesTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NakiAndALoneKanjiTests(unittest.TestCase):
-    """Plan 296: 亡き is "the late", なき出す 泣く's, 名もなき's 名 な, and
+    """Plan 306: 亡き is "the late", なき出す 泣く's, 名もなき's 名 な, and
     園 alone えん (エデンの園 keeps その)."""
 
     def test_its_word(self) -> None:
@@ -4574,7 +4574,7 @@ class NakiAndALoneKanjiTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NoAfterAPredicateTests(unittest.TestCase):
-    """Plan 296: どうの…どうのと is "this and that", no noun's の; わたしの
+    """Plan 306: どうの…どうのと is "this and that", no noun's の; わたしの
     keeps it, and so does 新しいのを, "the one" (the の point's own わたしの
     です, pinned by EighthReviewPointTests)."""
 
@@ -4587,7 +4587,7 @@ class NoAfterAPredicateTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class YoriThanOrFromTests(unittest.TestCase):
-    """Plan 296: より after a time before a quality compares (前より元気),
+    """Plan 306: より after a time before a quality compares (前より元気),
     and a letter's sender's より is "from" (アナより, 母より)."""
 
     def test_its_gloss(self) -> None:
@@ -4600,7 +4600,7 @@ class YoriThanOrFromTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ACertainAruTests(unittest.TestCase):
-    """Plan 296: ある after an age's, a time's or a place's の is 或る, "a
+    """Plan 306: ある after an age's, a time's or a place's の is 或る, "a
     certain"; after a thing one has (問題のある人) it is the verb."""
 
     def test_its_card(self) -> None:
@@ -4614,7 +4614,7 @@ class ACertainAruTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AKanaWordReadsAsSpelledTests(unittest.TestCase):
-    """Plan 296: a word in kana reads as it is spelled, づ and ぢ kept
+    """Plan 306: a word in kana reads as it is spelled, づ and ぢ kept
     (つづら, 働きつづけ), never as the sound merges them (つずら)."""
 
     def test_its_reading(self) -> None:
@@ -4629,7 +4629,7 @@ class AKanaWordReadsAsSpelledTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatElseIsItTests(unittest.TestCase):
-    """Plan 296: 〜でなくてなんだろう's なん is 何, and 愛 there is the noun,
+    """Plan 306: 〜でなくてなんだろう's なん is 何, and 愛 there is the noun,
     no 愛でる ("admire"); 花を愛でなくて keeps the verb."""
 
     def test_its_words(self) -> None:
@@ -4641,7 +4641,7 @@ class WhatElseIsItTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatTheBatchsLookalikesReadTests(unittest.TestCase):
-    """Plan 296, the stress set's lookalikes: ある after a season's or a
+    """Plan 306, the stress set's lookalikes: ある after a season's or a
     district's の is 或る (夏のある夕方, 都内のある病院), after a thing one
     may have the verb (学校のある日); 一同より is a letter's "from"; the
     で before なき出す is the means particle; いったいなんだろう's なん is
@@ -4659,11 +4659,11 @@ class WhatTheBatchsLookalikesReadTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ABareDenialsCopulaTests(unittest.TestCase):
-    """Plan 296: ではない said bare, as a lesson prints it, glosses its で
+    """Plan 306: ではない said bare, as a lesson prints it, glosses its で
     as the copula's."""
 
     def test_its_gloss(self) -> None:
-        for sentence in ("ではない", "ではないか"):    # (だけではない is 〜だけでなく's, plan 296)
+        for sentence in ("ではない", "ではないか"):    # (だけではない is 〜だけでなく's, plan 306)
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, "で").startswith("(the copula) で of ではない"))
         # (までもない said bare, cut ま + で by the tokenizer: no copula)
@@ -4672,7 +4672,7 @@ class ABareDenialsCopulaTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheAuditsSingletonWordsTests(unittest.TestCase):
-    """Plan 296, the audit's singletons: 幸多かれ is 幸 さち and 多い's old
+    """Plan 306, the audit's singletons: 幸多かれ is 幸 さち and 多い's old
     imperative; よる heading a sentence before its comma is 夜; 全部やった
     is やる (雨やった keeps the west's copula); 〜んがため's ん is む; 手
     after a verb's stem is the one who does it (手を洗った keeps the hand)."""
@@ -4693,7 +4693,7 @@ class TheAuditsSingletonWordsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheStressSetsOlderWordsTests(unittest.TestCase):
-    """Plan 296, what the stress sentences found that predated them:
+    """Plan 306, what the stress sentences found that predated them:
     なんのかんの, 多かれ少なかれ and なくてはならない read whole; やった、
     is "hooray"; the west's 泣き虫やった is the copula's past; 本屋によると
     is 寄る; よるにしか is 夜; 何にもまして's まして is 増す; 三年二組 にくみ;
@@ -4728,7 +4728,7 @@ class TheStressSetsOlderWordsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheOlderFixesLookalikeWordsTests(unittest.TestCase):
-    """Plan 296, the second stress set: 寄る in every form after a place
+    """Plan 306, the second stress set: 寄る in every form after a place
     (家によりました, よらないで, 神社によろうか -- no 鎧う), 店によらず and
     町による違い keep 因る; なんだかんだ, おおかれすくなかれ and その通り。
     read whole; かんちゃん is a name; まめをまいた is 豆; 適当に書いて is the
@@ -4759,7 +4759,7 @@ class TheOlderFixesLookalikeWordsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ACompoundWithYaruTests(unittest.TestCase):
-    """Plan 296, the judges' row: 追いやった is one verb, 追いやる, no
+    """Plan 306, the judges' row: 追いやった is one verb, 追いやる, no
     west's copula after a verb's stem (休みやったら keeps it)."""
 
     def test_its_gloss(self) -> None:

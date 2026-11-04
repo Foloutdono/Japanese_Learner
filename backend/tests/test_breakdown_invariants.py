@@ -65,7 +65,7 @@ class OutsideLinesTests(unittest.TestCase):
 
     def test_a_kana_spelling_is_kept(self) -> None:
         """A word written in kana reads as spelled: the sound's ず for a
-        づ, じ for a ぢ, is no spelling (つずら for つづら, plan 296)."""
+        づ, じ for a ぢ, is no spelling (つずら for つづら, plan 306)."""
         for s, result in self.read.items():
             for t in result["tokens"]:
                 surface, reading = t["surface"], t.get("reading") or ""

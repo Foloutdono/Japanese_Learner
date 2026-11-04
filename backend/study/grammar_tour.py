@@ -55,7 +55,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 25  # 25: 若く見えます lit as 〜に見える, せんがため and 何にもまして cut anew (plan 296)
+TOUR_REV = 25  # 25: 若く見えます lit as 〜に見える, せんがため and 何にもまして cut anew (plan 306)
 # 12: 〜ような's scene reply wrong by meaning (だけ), no のように, now read as the point (plan 272)
 # 11: 〜にして's meaning question on 一夜にして, no にする lookalike, now the point is read (plan 272)
 # 10: 〜をおいて's use question, its wrong line written with the point; 〜の's form question on a
@@ -181,7 +181,7 @@ def _guesses(level: str, entry: dict, look: list[dict], lang: str) -> list[dict]
     # A point the examples themselves use could honestly be "what it
     # does" -- は and です in 学生ですか -- so it is never offered: any of
     # the lesson's examples, shown here or not (この本は高くて's 〜くて／〜で
-    # beside 〜て（理由）'s 天気がよくて, plan 296).
+    # beside 〜て（理由）'s 天気がよくて, plan 306).
     present = {h["pattern"] for item in look for h in hits(item["jp"])}
     present |= {h["pattern"] for example in entry.get("examples", []) if example.get("jp")
                 for h in hits(example["jp"])}

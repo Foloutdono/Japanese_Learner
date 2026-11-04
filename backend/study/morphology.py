@@ -373,7 +373,7 @@ def _all_through(morphemes: list[Morpheme], tags: list) -> None:
     """中 glued after a span of time (a noun UniDic files as countable or
     adverbial: 日, 年, 晩) is the suffix じゅう, "all through", wherever
     UniDic took it for the prefix of the noun after it: 一日中さいふを is
-    一日 + 中 + さいふ, no 中- of さいふ; 一晩中勤務 (plan 296). A prefix 中
+    一日 + 中 + さいふ, no 中- of さいふ; 一晩中勤務 (plan 306). A prefix 中
     opens its word (中学年, 中・高一貫校, 中１), after a place too: 東中学校
     is a school."""
     for k, m in enumerate(morphemes):
@@ -383,7 +383,7 @@ def _all_through(morphemes: list[Morpheme], tags: list) -> None:
             tags[k] = ("接尾辞", "名詞的", "副詞可能")
 
 
-# What a floor is said of (plan 296): its places, a motion to it, what is
+# What a floor is said of (plan 306): its places, a motion to it, what is
 # done or found on it.
 _ON_A_FLOOR = frozenset({"入り口", "入口", "出口", "売り場", "部屋", "へや", "教室", "トイレ", "ロビー", "受付",
                          "フロア", "窓", "まど", "ベランダ", "店", "みせ", "レストラン", "会議室", "事務所"})
@@ -393,7 +393,7 @@ _TO_A_FLOOR = frozenset({"行く", "来る", "上がる", "下りる", "降り�
 
 def _jiru_not_zuru(morphemes: list[Morpheme]) -> None:
     """A verb UniDic files under its literary ずる, written without a ず,
-    is the じる verb the page conjugates (plan 296): 信じ, 信じれば and
+    is the じる verb the page conjugates (plan 306): 信じ, 信じれば and
     信じる are 信じる -- 信ずる's are 信ずれば, 信ずる; 感じる, 通じる."""
     for m in morphemes:
         if m.pos == "verb" and m.lemma.endswith("ずる") and m.lemma_reading.endswith("ずる") and "ず" not in m.surface:
@@ -405,15 +405,15 @@ def _jiru_not_zuru(morphemes: list[Morpheme]) -> None:
 
 # How soon or how gradually one gets used to a thing, the one word
 # before 慣れる where なれる of becoming would need what it becomes (plan
-# 296): すぐになれる, もうなれた, だんだんなれて.
+# 306): すぐになれる, もうなれた, だんだんなれて.
 _SOON = frozenset({"直ぐ", "すぐ", "じき", "次第", "段々", "だんだん", "徐々", "ずつ", "もう", "早く", "すっかり",
                    "やっと", "ようやく"})
-# What follows a feeling one cannot help (plan 296): 思えてならない is 思える,
+# What follows a feeling one cannot help (plan 306): 思えてならない is 思える,
 # "it seems", said of itself -- no "can think".
 _CANNOT_HELP = ("ならない", "ならぬ", "たまらない", "しかたがない", "仕方がない", "しかたない", "仕方ない",
                 "しょうがない", "しようがない")
 # The ichidan verbs UniDic files a kana stem under where the godan verb
-# beside them takes an object (plan 296): ピアノがひけない is 弾く's
+# beside them takes an object (plan 306): ピアノがひけない is 弾く's
 # potential, no 引ける "to close early"; 写真はとれません 撮る's, no 取れる
 # "to come off". Each godan verb with what it is done to.
 _E_STEM_OF = {
@@ -460,7 +460,7 @@ def _own_clause(morphemes: list[Morpheme], i: int) -> list[Morpheme]:
 
 
 def _which_verb(morphemes: list[Morpheme]) -> None:
-    """The verb an え-row stem belongs to, read off its clause (plan 296).
+    """The verb an え-row stem belongs to, read off its clause (plan 306).
 
     - なれる in kana with nothing it becomes, only how soon, is 慣れる:
       ポチは…すぐになれると思っていました (先生になれる keeps 成る's).
@@ -540,7 +540,7 @@ _VEHICLES = re.compile(r"\b(train|bus|car|ship|boat|plane|aircraft|vehicle|autom
 
 def _the_transitive_can(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """A godan verb's 未然形 + せ(る), where its す verb is the deck's and
-    what is acted on is a thing, as that す verb's potential (plan 296):
+    what is acted on is a thing, as that す verb's potential (plan 306):
     食費は減らせっこない is 減らす's "can't reduce", never 減る + the
     causative -- a thing made to decrease is 減らした, and the causative of
     an intransitive verb is said of someone made to do it (子どもを泣かせる
@@ -585,7 +585,7 @@ def _the_transitive_can(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[l
 
 
 def _whether_or_not(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
-    """〜ようが〜まいが, one verb said twice (plan 296): 伏せようが伏せ
+    """〜ようが〜まいが, one verb said twice (plan 306): 伏せようが伏せ
     まいが, 参加しようがしまいが, 食べようが食べまいが. UniDic reads the
     first half's よう as 様, "way", after an ichidan verb's stem or する's
     し (and 伏せ as the noun "lying down"), and the second half's しまい
@@ -632,7 +632,7 @@ def _whether_or_not(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list,
 
 def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """Two words UniDic writes as one conjunction or adverb, where the
-    clause shows them apart (plan 296): ですから after a word or a blank
+    clause shows them apart (plan 306): ですから after a word or a blank
     is the copula and から, "because" -- ＿＿＿ですから、…てください; the
     conjunction "therefore" opens its sentence -- and かえって after a
     subject and its が, closing its clause with a comma, is 帰る's て form
@@ -655,7 +655,7 @@ def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tupl
                 and prev is not None and prev.pos != "particle" and prev.pos != "symbol":
             # それほどとおくもありません, 前ほどちかく感じない: ほど and the
             # adjective -- 程遠い, 程近い follow a particle (完成には程遠い,
-            # 駅から程近い), plan 296
+            # 駅から程近い), plan 306
             cut = 2 if m.surface.startswith("ほど") else 1
             lemma, said = _HODO_ADJECTIVES[m.lemma]
             out_m += [replace(m, surface=m.surface[:cut], end=m.start + cut, lemma="程", reading="ほど",
@@ -668,7 +668,7 @@ def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tupl
             continue
         if m.surface == "別に" and m.pos == "adverb" and apart(morphemes, i):
             # お茶は、別にはらいます: 別 and に, "separately" -- 別に何も言わ
-            # なかった, 別にいいよ keep the adverb, "not particularly" (plan 296)
+            # なかった, 別にいいよ keep the adverb, "not particularly" (plan 306)
             out_m += [replace(m, surface="別", end=m.start + 1, lemma="別", reading="べつ", lemma_reading="べつ",
                               kana="ベツ", pos="noun", ctype="", cform="", written="別", written_reading="べつ"),
                       replace(m, surface="に", start=m.start + 1, lemma="に", reading="に", lemma_reading="に",
@@ -693,7 +693,7 @@ def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tupl
 
 def _soko_de_aru(morphemes: list[Morpheme]) -> None:
     """そこである町は, opening a sentence, is そこで, "so", and ある, "a
-    certain", before its noun (plan 296) -- never そこ and the copula
+    certain", before its noun (plan 306) -- never そこ and the copula
     である, "it is there", which UniDic read: a copula takes no noun
     after it."""
     for i in range(len(morphemes) - 3):
@@ -709,7 +709,7 @@ def _soko_de_aru(morphemes: list[Morpheme]) -> None:
 
 def _radical_hen(morphemes: list[Morpheme]) -> None:
     """A へん glued to a noun is a kanji's left-hand radical, 偏 (plan
-    296): いしへん, くちへん, ふねへん -- the west's negative へん, which
+    306): いしへん, くちへん, ふねへん -- the west's negative へん, which
     UniDic reads after some, follows a verb (行かへん), and the area, 辺,
     which it reads after others, a demonstrative (このへん, ここらへん)."""
     for i, m in enumerate(morphemes):
@@ -722,7 +722,7 @@ def _radical_hen(morphemes: list[Morpheme]) -> None:
 
 def _times_or_floor(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """かい written in kana after a number is 回, "times", which UniDic
-    files under 階, "floor" (plan 296): 三かいしましたが, 二かいかぞえます,
+    files under 階, "floor" (plan 306): 三かいしましたが, 二かいかぞえます,
     会が二かいになって, 一日三かい, 一かい三百円. It is the floor only where
     something is or is done on it -- ビルの三かい, 一かいの入り口, 二かいで
     待つ, おてあらいは二かいです, 二かいには…へやがあります, 三かいに行く,
@@ -747,7 +747,7 @@ def _times_or_floor(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list,
         if (m.surface == "十分" and nxt is not None and nxt.surface == "の" and after is not None
                 and all(c in "一二三四五六七八九十百千0123456789０１２３４５６７８９" for c in after.surface)):
             # 十分の一, a tenth: 十 and the 分 of a share, never 十分, "enough"
-            # -- a number of parts, の, and how many (plan 296)
+            # -- a number of parts, の, and how many (plan 306)
             out_m += [replace(m, surface="十", end=m.start + 1, lemma="十", reading="じゅう", lemma_reading="じゅう",
                               kana="ジュウ", pos="noun", ctype="", cform="", adjectival=False),
                       replace(m, surface="分", start=m.start + 1, lemma="分", reading="ぶん", lemma_reading="ぶん",
@@ -757,7 +757,7 @@ def _times_or_floor(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list,
         if (m.surface == "駅前" and i > 0 and _glued(morphemes[i - 1], m)
                 and all(c in "一二三四五六七八九十何0123456789０１２３４５６７８９" for c in morphemes[i - 1].surface)):
             # 一駅前で降りる: one station before, 一駅 and 前 -- no 駅前, the
-            # station square, after a number (plan 296)
+            # station square, after a number (plan 306)
             out_m += [replace(m, surface="駅", end=m.start + 1, lemma="駅", reading="えき", lemma_reading="えき",
                               kana="エキ", pos="suffix", counter=True),
                       replace(m, surface="前", start=m.start + 1, lemma="前", reading="まえ", lemma_reading="まえ",
@@ -827,11 +827,11 @@ _VOICED_KANA = frozenset("がぎぐげござじずぜぞだぢづでどばびぶ
 # What passes through, whose 通っ is 通る (plan 272): 火が通る, 車が通る.
 _PASSING = frozenset({"火", "車", "電車", "バス", "道", "声", "風", "光", "列車", "船", "話", "意見", "法案", "電気",
                       "電流", "空気", "鼻", "筋", "線路", "トラック", "人", "車両",
-                      # (鉄道が通っていない: a line runs there, plan 296)
+                      # (鉄道が通っていない: a line runs there, plan 306)
                       "鉄道", "道路", "地下鉄", "新幹線", "路線", "水道", "国道"})
 
 
-# What gets through, its が said anywhere in 通っ's clause (plan 296): an
+# What gets through, its が said anywhere in 通っ's clause (plan 306): an
 # order, a request or a plan reaches where it goes, or is accepted
 # (ご注文がキッチンに通っていなかった, 意見が会議で通った) -- never a person,
 # who commutes (人が毎日学校に通っている).
@@ -839,10 +839,10 @@ _GETS_THROUGH = frozenset({"注文", "要求", "要望", "希望", "願い", "�
                            "法案", "意味", "理屈", "主張", "予算", "案", "計画"})
 
 
-# What is passed, an exam (試験に通った, plan 296).
+# What is passed, an exam (試験に通った, plan 306).
 _EXAMS = ("試験", "テスト", "面接", "審査", "選考", "予選", "オーディション", "検定")
 # What one passes over or through, said of by 通った (さっき車で通った橋, plan
-# 296) -- never a school or a shop, which one attends (通っていた小学校).
+# 306) -- never a school or a shop, which one attends (通っていた小学校).
 _PASSAGES = frozenset({"橋", "道", "道路", "トンネル", "門", "改札", "交差点", "廊下", "踏切", "路地", "通路", "峠"})
 
 
@@ -860,7 +860,7 @@ def _gets_through(morphemes, i: int) -> bool:
 
 
 # What marks a sentence as said in the west, where や after a noun is
-# the copula (plan 296): 泣き虫やったんやで, 休みやったら…行かへん.
+# the copula (plan 306): 泣き虫やったんやで, 休みやったら…行かへん.
 _KANSAI_SURFACES = frozenset({"ほんま", "ほんまに", "ホンマ", "めっちゃ", "あかん", "ちゃう", "ちゃうちゃう", "おおきに",
                               "ええ", "なんぼ", "せや", "そや", "かまへん", "あかへん", "やん", "ねん", "へん", "ひん",
                               "やろ", "やで", "やねん", "わい", "うち"})
@@ -881,7 +881,7 @@ def _said_in_the_west(morphemes, skip: int) -> bool:
     return False
 
 
-# Where one drops in on the way, 寄る, never what one goes by (plan 296):
+# Where one drops in on the way, 寄る, never what one goes by (plan 306):
 # 本屋によると, としょかんによって -- 天気予報によると, 国によって.
 _STOPS = frozenset({"本屋", "ほんや", "店", "みせ", "お店", "おみせ", "図書館", "としょかん", "銀行", "ぎんこう",
                     "郵便局", "ゆうびんきょく", "コンビニ", "スーパー", "喫茶店", "きっさてん", "カフェ", "病院",
@@ -897,7 +897,7 @@ _DIFFERS = ("違", "ちが", "異な", "変わ", "かわ", "様々", "さまざ�
 
 def _a_compound_with_yaru(stem) -> bool:
     """Whether a verb's stem and やる make one verb: 追いやる, 思いやる,
-    見やる (plan 296) -- 休み + やる makes none."""
+    見やる (plan 306) -- 休み + やる makes none."""
     alone = tokenize(stem.surface + "やる") or []
     return len(alone) == 1 and alone[0].pos == "verb"
 
@@ -938,7 +938,7 @@ def _drops_in(morphemes, i: int) -> bool:
     rest = morphemes[i + 1:]
     differs = any(u.surface.startswith(_DIFFERS) or (u.pos == "auxiliary" and u.lemma in ("れる", "られる"))
                   # (公園によって…ところもある, 人もいる: some, depending on
-                  # which -- 〜によって, plan 296)
+                  # which -- 〜によって, plan 306)
                   or (u.surface == "も" and k2 + 1 < len(rest) and rest[k2 + 1].lemma in ("有る", "ある", "居る", "いる"))
                   or u.surface in ("場合", "ところ", "所", "中には", "なかには")
                   for k2, u in enumerate(rest))
@@ -961,17 +961,17 @@ def _drops_in(morphemes, i: int) -> bool:
     return False
 
 
-# What is done whole, before やった with no を (plan 296): 全部やった.
+# What is done whole, before やった with no を (plan 306): 全部やった.
 _DONE_WHOLE = frozenset({"全部", "全て", "すべて", "何もかも", "宿題", "仕事", "一通り", "いろいろ", "色々", "ゲーム",
                          "スポーツ", "テニス", "サッカー", "野球"})
 
 
-# What follows 泣き in its compounds (plan 296): 泣き出す, 泣き続ける.
+# What follows 泣き in its compounds (plan 306): 泣き出す, 泣き続ける.
 _AFTER_A_CRY = frozenset({"出す", "続ける", "止む", "やむ", "叫ぶ", "崩れる", "じゃくる", "始める", "疲れる", "わめく",
                           "明かす", "暮らす", "つく", "付く", "寝入る", "濡れる"})
 
 
-# What a の before 或る names: an age, a time, a place (plan 296) -- never
+# What a の before 或る names: an age, a time, a place (plan 306) -- never
 # a thing one may have, 学校のある日 being a day with school.
 _FRAME_ENDINGS = ("代", "歳", "才", "年", "時代", "世紀", "土地", "町", "村", "国", "市", "県", "地方", "日", "月", "夜",
                   "朝", "春", "夏", "秋", "冬", "頃", "都内", "県内", "市内", "国内", "町内", "社内", "地域", "都市")
@@ -1002,7 +1002,7 @@ def apart(morphemes, i: int) -> bool:
     before = morphemes[at - 1] if at >= 1 else None
     if before is not None and before.pos == "particle" and (
             before.surface == "と" or (before.surface == "は" and at >= 2 and morphemes[at - 2].surface == "と")):
-        return True                         # (それとは別に、, 財布と別に: "apart from", plan 296)
+        return True                         # (それとは別に、, 財布と別に: "apart from", plan 306)
     if i + 1 >= len(morphemes) or morphemes[i + 1].pos == "symbol":
         return False
     first = None
@@ -1194,7 +1194,7 @@ def named_alone(morphemes, i: int) -> bool:
     """Whether morphemes[i], a word in hiragana, is a given name UniDic
     reads alone, opening what is said of the one it names (plan 272):
     あおいが今日来れないって, where the deck's あおい is the adjective 青い.
-    Or a name a letter is signed with, alone before より (plan 296):
+    Or a name a letter is signed with, alone before より (plan 306):
     アナより."""
     m = morphemes[i]
     words = [u for u in morphemes if u.pos != "symbol"]
@@ -1207,7 +1207,7 @@ def named_alone(morphemes, i: int) -> bool:
         # (実はあおいが入院した: a sentence's own adverb before, plan 272)
         prev.surface == "は" and i >= 2 and morphemes[i - 2].surface == "実") or (
         # (ゆうたとけんたは友だちです: a name joined to a name read as one,
-        # never the pool's けんた, "KFC", plan 296)
+        # never the pool's けんた, "KFC", plan 306)
         prev.surface in ("と", "や") and prev.pos == "particle" and i >= 2 and morphemes[i - 2].proper
         and morphemes[i - 2].name_kind == "given" and _hiragana_only(morphemes[i - 2].surface)
         and named_alone(morphemes, i - 2))
@@ -1309,13 +1309,13 @@ def _deck_spelled_half_in_kana(head: str, tail: str):
 
 
 # What opens out rather than open (開く ひらく with no object): a flower,
-# a bud, an umbrella, a gap (plan 296).
+# a bud, an umbrella, a gap (plan 306).
 _OPENS_OUT = frozenset({"花", "はな", "つぼみ", "蕾", "傘", "かさ", "差", "心", "扇", "翼", "羽"})
 
 
 def _opens_of_itself(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """開く read あく, "to open (by itself)", where the sentence says so
-    (plan 296): UniDic reads every 開く ひらく, the deck's "to open (a book,
+    (plan 306): UniDic reads every 開く ひらく, the deck's "to open (a book,
     a shop), to hold (an event)", and ドアが開いた, 店は九時まで開いています,
     銀行は何時に開きますか were taught as opening something. With no object
     in its own clause and no passive, it is あく where it stands open
@@ -1349,7 +1349,7 @@ def _opens_of_itself(morphemes: list[Morpheme], tags: list[tuple]) -> None:
                     and q + 1 < len(own) and own[q + 1].pos in ("noun", "pronoun")]
         if not subjects:
             # (ジャムの瓶のふたが固くて、どうしても開かない: the clause before
-            # names what it says of, plan 296)
+            # names what it says of, plan 306)
             head = _sentence_head(morphemes, i)
             subjects = [morphemes[k - 1] for k in range(head + 1, i) if morphemes[k].pos == "particle"
                         and morphemes[k].surface in ("が", "は", "も") and morphemes[k - 1].surface in _SHUTS]
@@ -1360,16 +1360,16 @@ def _opens_of_itself(morphemes: list[Morpheme], tags: list[tuple]) -> None:
             continue                    # (この店は先月開いたばかり: founded)
         standing = (nxt is not None and nxt.surface in ("て", "で") and i + 2 < len(morphemes)
                     and morphemes[i + 2].lemma in ("居る", "いる", "おる", "る")) \
-            or (nxt is not None and nxt.pos == "auxiliary" and nxt.lemma in ("てる", "でる"))  # (開いてる, plan 296)
+            or (nxt is not None and nxt.pos == "auxiliary" and nxt.lemma in ("てる", "でる"))  # (開いてる, plan 306)
         closes = any(u.surface.startswith(("閉ま", "しま")) and u.pos == "verb" and u.lemma in ("閉まる", "締まる")
                      for u in morphemes)
         # (店が開くか開かないか: the sentence's own reading of the first; and
-        # まどを開けようとしたが、開かなかった: 開ける's own, plan 296)
+        # まどを開けようとしたが、開かなかった: 開ける's own, plan 306)
         again = any((u.lemma == "開く" and u.lemma_reading == "あく") or (u.lemma == "開ける" and u.pos == "verb")
                     for u in morphemes[_sentence_head(morphemes, i):i])
         shuts = any(u.surface in _SHUTS for u in subjects)
         # (開いた口がふさがらない, 開いた窓: what stands open, said of it,
-        # plan 296 -- never 店, 先月開いた店 is founded)
+        # plan 306 -- never 店, 先月開いた店 is founded)
         held = m.cform.startswith("連用") and nxt is not None and nxt.surface == "た" and i + 2 < len(morphemes) \
             and morphemes[i + 2].surface in _SHUTS - {"店", "窓口"}
         if not (standing or closes or again or shuts or held):
@@ -1386,18 +1386,18 @@ def _sentence_head(morphemes, i: int) -> int:
                  if morphemes[k].pos == "symbol" and morphemes[k].surface in "。！？!?"), 0)
 
 
-# What opens and shuts of itself, whose 開く is あく (plan 296) -- never a
+# What opens and shuts of itself, whose 開く is あく (plan 306) -- never a
 # bank or an office at its hour, 銀行は何時に開きますか, which the dictation
 # bank reads ひらきます and either is.
 _SHUTS = _OPENS_AND_SHUTS | {"シャッター", "改札", "窓口", "ゲート", "障子", "ふすま"}
-# An event, which is held (ひらく), never opens by itself (plan 296): 会
+# An event, which is held (ひらく), never opens by itself (plan 306): 会
 # ends 大会, 説明会, 食事会.
 _EVENTS = ("会", "パーティー", "祭り", "まつり", "マーケット", "市", "市場", "教室", "式", "コンサート", "試合")
 # The dates a shop opened on, once: 開いた after them is its founding.
 _PAST_DATES = frozenset({"先月", "先週", "去年", "昨年", "先日", "先年", "昨日"})
 
 
-# What follows a verb's stem in the forms a potential takes (plan 296):
+# What follows a verb's stem in the forms a potential takes (plan 306):
 # the polite and negative endings and そう -- never a て, a たい, a past
 # (入れた says either), a volitional or a request.
 _CAN_ENDINGS = frozenset({"ます", "ない", "ん", "ず", "ぬ", "そう"})
@@ -1442,7 +1442,7 @@ def _enters(morphemes, i: int, tags=None) -> bool:
     is put in (no を in its clause), and someone or somewhere is (誰でも,
     中には, 一日から) -- この店は誰でも入れます (plan 272).
 
-    Plan 296 holds it to what any sentence says: the を that rules it out
+    Plan 306 holds it to what any sentence says: the を that rules it out
     is its own clause's (きっぷを持っている人しか入れない: the ticket is held,
     no one puts it in), it stands in a form a potential takes (no 入れて
     ください, 入れすぎ, 入れたい, 入れないようにする, 入れなくてもいい), and its
@@ -1457,7 +1457,7 @@ def _enters(morphemes, i: int, tags=None) -> bool:
     if m.cform.startswith(("終止形", "連体形")):
         if nxt is not None and (nxt.pos == "verb" or nxt.lemma in ("過ぎる", "すぎる") or (
                 # (入れる方がいい compares putting in; 時間に入れる方を探して
-                # is who can come in, plan 296)
+                # is who can come in, plan 306)
                 nxt.lemma == "方" and i + 2 < len(morphemes) and morphemes[i + 2].surface == "が")):
             return False
     elif m.cform.startswith(("未然形", "連用形")):
@@ -1472,7 +1472,7 @@ def _enters(morphemes, i: int, tags=None) -> bool:
         k -= 1
     phrase_at = k + 1
     if k >= 1 and morphemes[k].surface == "、" and morphemes[k - 1].surface == "を" and morphemes[k - 1].pos == "particle":
-        return False                    # (言葉を、…一つは入れること: what is put in, past its comma, plan 296)
+        return False                    # (言葉を、…一つは入れること: what is put in, past its comma, plan 306)
     # Its own clause: back to the verb, adjective or ending before it.
     own = []
     for u in clause:
@@ -1481,19 +1481,19 @@ def _enters(morphemes, i: int, tags=None) -> bool:
         own.append(u)
     if any(u.surface == "を" and u.pos == "particle" for u in own):
         return False
-    # (お風呂に入れますか: a place one goes into, no を, plan 296)
+    # (お風呂に入れますか: a place one goes into, no を, plan 306)
     gone_into = any(u.surface == "に" and u.pos == "particle" and q + 1 < len(own) and own[q + 1].lemma in _ENTERED
                     and own[q + 1].lemma not in ("中", "なか", "車", "電車", "バス") for q, u in enumerate(own))
     if not gone_into and any(
             u.surface in ("に", "へ") and u.pos == "particle" and q + 1 < len(own)
             and (own[q + 1].pos == "noun" or (own[q + 1].pos == "pronoun" and not _a_person(own[q + 1])))
-            # (代わりに, "instead", says where nothing goes, plan 296)
+            # (代わりに, "instead", says where nothing goes, plan 306)
             and own[q + 1].lemma not in ("代わり", "代り", "かわり")
             and not _a_time_word(own[q + 1], tags[i - q - 2]) for q, u in enumerate(own)):
         if not (len(clause) >= 2 and clause[0].surface == "は" and clause[1].surface == "に"):
             return False                # (コーヒーに砂糖、誰が入れたの？: what it goes in, plan 272)
     # (a thing said as the topic is what goes in, 砂糖は毎日入れます -- where
-    # no one is said to enter: この店は誰でも入れます, plan 296)
+    # no one is said to enter: この店は誰でも入れます, plan 306)
     thing_topic = any(u.surface in ("は", "も") and q + 1 < len(own) and own[q + 1].pos == "noun"
                       and not _a_time_word(own[q + 1], tags[i - q - 2]) and not _a_person(own[q + 1])
                       and not _alive_or_moving(own[q + 1]) and tags[i - q - 2][1] != "数詞"
@@ -1511,7 +1511,7 @@ def _enters(morphemes, i: int, tags=None) -> bool:
                   for q in range(len(phrase)))
     when = any(_a_time_word(u, tags[phrase_at + q]) for q, u in enumerate(phrase)) and not thing_topic
     # (日曜日に入る予定だった田中さんが…。代わりに入れない？: the text has
-    # said 入る already, of the same shift, plan 296)
+    # said 入る already, of the same shift, plan 306)
     said_before = not thing_topic and any(u.lemma == "入る" and u.lemma_reading == "はいる" and u.pos == "verb"
                                           for u in morphemes[:phrase_at])
     return anyone or a_person or who or without or when or (gone_into and not thing_topic) or said_before \
@@ -1694,13 +1694,13 @@ def _went(morphemes: list[Morpheme]) -> list[Morpheme]:
     for i, m in enumerate(out):
         if i > 0 and out[i - 1].surface in ("うまく", "上手く", "旨く") and m.surface == "行っ":
             # (交渉は思ったよりうまく行った: うまくいく, "go well", whatever
-            # is the topic, plan 296)
+            # is the topic, plan 306)
             if m.lemma == "行う":
                 out[i] = replace(m, lemma="行く", reading="いっ", lemma_reading="いく", kana="イッ", ctype="五段-カ行")
             continue
         if m.surface == "行っ" and _a_deed_said_of(out, i):
             # (三年前に行った調査: the clause says what the survey is, one
-            # carried out -- nobody goes to a survey, plan 296)
+            # carried out -- nobody goes to a survey, plan 306)
             if m.lemma == "行く":
                 out[i] = replace(m, lemma="行う", reading="おこなっ", lemma_reading="おこなう", kana="オコナッ",
                                  ctype="五段-ワア行")
@@ -1734,14 +1734,14 @@ _DEEDS = frozenset({"手続き", "手続", "会議", "式", "試験", "検査", 
 
 
 # What is carried out and never gone to, whose 行った before it is 行う's
-# (plan 296): not a meeting, a test, a class or an election, which one
+# (plan 306): not a meeting, a test, a class or an election, which one
 # goes to as well (先週行った面接).
 _CARRIED_OUT = frozenset({"調査", "実験", "研究", "検査", "点検", "工事", "処理", "分析", "審査", "評価", "アンケート",
                           "改革", "手術", "治療", "抽選", "作業", "取引", "交渉", "手続き", "訓練", "修理", "測定",
                           "観測", "調整", "検証", "改修", "実施"})
 
 
-# What is given or held, said of by 行った as a deed is (plan 296):
+# What is given or held, said of by 行った as a deed is (plan 306):
 # 会議で行った説明, 毎年行っている清掃活動.
 _DONE_AS_WELL = frozenset({"説明", "発表", "清掃", "講演", "会見", "撮影"})
 
@@ -1995,7 +1995,7 @@ def _not_a_passive(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, 
         m = morphemes[i]
         nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
         # (...never after a を: the verbs it reads whole take none, so うそを
-        # つかれた is つく's passive, "was lied to", plan 296)
+        # つかれた is つく's passive, "was lied to", plan 306)
         taken = i > 0 and morphemes[i - 1].pos == "particle" and morphemes[i - 1].surface == "を"
         if (nxt is not None and m.pos == "verb" and m.cform.startswith("未然形") and m.ctype.startswith("五段")
                 and all("\u3041" <= c <= "\u309f" for c in m.surface) and nxt.pos == "auxiliary"
@@ -2065,7 +2065,7 @@ def _place_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
         tags[i] = ("助詞", "格助詞", "*")
 
 
-# What carries a copula's て form on (plan 296): 元気でいる, 学生である,
+# What carries a copula's て form on (plan 306): 元気でいる, 学生である,
 # 件でいらっしゃいます, 不安でならない -- the で before them is the copula's.
 _COPULA_GOES_ON = frozenset({"居る", "いる", "おる", "有る", "ある", "御座る", "ござる", "いらっしゃる", "成る", "なる",
                              "無い", "ない"})
@@ -2094,7 +2094,7 @@ _KANA_ROW = {**{c: "ア行" for c in "あいうえお"}, **{c: "カ行" for c in
              **{c: "サ行" for c in "さしすせそ"}, **{c: "ザ行" for c in "ざじずぜぞ"}, **{c: "タ行" for c in "たちつてと"},
              **{c: "ダ行" for c in "だぢづでど"}, **{c: "ナ行" for c in "なにぬねの"}, **{c: "ハ行" for c in "はひふへほ"},
              **{c: "バ行" for c in "ばびぶべぼ"}, **{c: "マ行" for c in "まみむめも"}, **{c: "ラ行" for c in "らりるれろ"}}
-# A flower, whose kana さく is 咲く, never the noun 柵 (plan 296).
+# A flower, whose kana さく is 咲く, never the noun 柵 (plan 306).
 _FLOWERS = frozenset({"花", "はな", "さくら", "桜", "梅", "うめ", "ばら", "バラ", "ひまわり", "チューリップ", "つぼみ",
                       "あじさい", "菊", "きく", "たんぽぽ", "ゆり", "百合"})
 
@@ -2138,12 +2138,12 @@ def _an_o_word(said: str) -> bool:
 
 def an_o_noun(prefix: Morpheme, stem: Morpheme) -> bool:
     """Whether お + a stem written in kana is the dictionary's word of its
-    own (おしまい): no verb said up (plan 296)."""
+    own (おしまい): no verb said up (plan 306)."""
     return prefix.surface == "お" and _hiragana_only(stem.surface) and _an_o_word("お" + kata_to_hira(stem.reading))
 
 
 def _verb_stems(morphemes: list[Morpheme], tags: list[tuple]) -> None:
-    """A verb's stem or a noun, by what follows it (plan 296).
+    """A verb's stem or a noun, by what follows it (plan 306).
 
     - A noun after お or ご and before に + なる is a verb's stem, お〜になる
       said up: おのりになりますか is 乗る, no 糊; お並びになる 並ぶ.
@@ -2200,7 +2200,7 @@ def _verb_stems(morphemes: list[Morpheme], tags: list[tuple]) -> None:
 
 def _how_one_goes(morphemes: list[Morpheme]) -> None:
     """行く and 来る after どうやって, こうやって are the verbs themselves
-    (plan 296): どうやって行く is "how do I go", どうやって + 行く, no going
+    (plan 306): どうやって行く is "how do I go", どうやって + 行く, no going
     on -- UniDic marks a verb after て as its auxiliary use, which takes
     its card away."""
     for i, m in enumerate(morphemes[3:], start=3):
@@ -2211,7 +2211,7 @@ def _how_one_goes(morphemes: list[Morpheme]) -> None:
 
 def _how_by_doing(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """どうやって, こうやって, そうやって, ああやって: the one adverb the
-    dictionary holds, "how", "like this" (plan 296) -- never どう, やる's
+    dictionary holds, "how", "like this" (plan 306) -- never どう, やる's
     て form and a clause the て joins to the next."""
     out_m, out_t = [], []
     i = 0
@@ -2235,7 +2235,7 @@ def _how_by_doing(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, l
 
 def _toii_toii(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """Two nouns each followed by と + いい are 〜といい〜といい, and both
-    いい are 言う's 連用形 (plan 296): 重さといい手ざわりといい is "be it
+    いい are 言う's 連用形 (plan 306): 重さといい手ざわりといい is "be it
     the weight or the feel", no 良い, "good"."""
     pairs = [i for i, m in enumerate(morphemes)
              if m.surface in ("いい", "言い") and i >= 2 and morphemes[i - 1].surface == "と"
@@ -2250,7 +2250,7 @@ def _toii_toii(morphemes: list[Morpheme], tags: list[tuple]) -> None:
 
 
 def _first_time(morphemes: list[Morpheme]) -> None:
-    """初めて before でも is a noun, "the first time" (plan 296): はじめて
+    """初めて before でも is a noun, "the first time" (plan 306): はじめて
     でもだいじょうぶ is "even a first time is fine", 〜でも's "even" as in
     子どもでも -- no adverb and も "also"."""
     for i, m in enumerate(morphemes[:-2]):
@@ -2262,7 +2262,7 @@ def _first_time(morphemes: list[Morpheme]) -> None:
 def _ni_of_a_noun(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """だ's に after a word UniDic files as a な-adjective, or a noun that
     may be one, read as the case particle where the sentence makes the
-    word a noun (plan 296): modified as only a noun is -- by の (命の危険に
+    word a noun (plan 306): modified as only a noun is -- by の (命の危険に
     つながる, お客様の安全に), an adnominal (このへんにコンビニが) or a
     clause before it (春めく陽気に誘われて, 大きく見える危険にまで及ぶ).
     An adjective said adverbially takes none of them: 安全に運転する, 静かに
@@ -2291,7 +2291,7 @@ def _ni_of_a_noun(morphemes: list[Morpheme], tags: list[tuple]) -> None:
 
 def _case_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """で read back as the case particle where UniDic took it for the
-    copula's て form and what follows says it is one (plan 296): a plain
+    copula's て form and what follows says it is one (plan 306): a plain
     noun's で before a word that goes on with its own clause (仕事で忙しい,
     一杯で千円, 旅でぐったり, ホットでお願いします); で before は, のみ or しか
     with no negative after it (仕事ではメールしか使わない, 窓口でのみ行う,
@@ -2366,7 +2366,7 @@ def _case_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
                 particle(i)               # 父と母と三人で、 -- never 人口は三百万人で、
 
 
-# A means or a medium a で after it takes (plan 296): 電話で、, バスで、.
+# A means or a medium a で after it takes (plan 306): 電話で、, バスで、.
 _MEANS = frozenset({"電話", "メール", "手紙", "車", "バス", "電車", "自転車", "飛行機", "船", "タクシー", "地下鉄",
                     "徒歩", "歩き", "声", "大声", "口", "手", "ペン", "鉛筆", "はし", "箸", "ネット", "テレビ", "ラジオ"})
 _PLACE_ENDINGS = tuple("機店館局駅室所場港院園器国町市村県区校社屋")
@@ -2381,7 +2381,7 @@ _PLACE_WORDS = frozenset({"家", "うち", "いえ", "海", "山", "川", "庭",
 
 def _copula_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
     """で read back as the copula's て form where UniDic took it for the
-    particle and the sentence joins two things said (plan 296): a topic,
+    particle and the sentence joins two things said (plan 306): a topic,
     the noun said of it and its で, a comma, then a clause with a topic
     or a subject of its own -- 小さいじしょは千九百円で、ことばは少ない,
     私もその一人で、ひまがあると, 針は止まったままで、ガラスには, のは
@@ -2438,10 +2438,10 @@ def _copula_de(morphemes: list[Morpheme], tags: list[tuple]) -> None:
 # "near Osaka" -- no adjective follows の.
 _KU_NOUNS = {"近い": ("近く", "ちかく"), "遠い": ("遠く", "とおく")}
 # 程遠い and 程近い, read as ほど and the adjective where no particle
-# stands before them (plan 296).
+# stands before them (plan 306).
 _HODO_ADJECTIVES = {"程遠い": ("遠い", "とおい"), "程近い": ("近い", "ちかい")}
 _KU_ADJECTIVES = {noun: (adjective, reading[:-1] + "い") for adjective, (noun, reading) in _KU_NOUNS.items()}
-# The case particles a noun takes and a く form never does (plan 296).
+# The case particles a noun takes and a く form never does (plan 306).
 _KU_NOUN_CASES = frozenset({"に", "で", "へ", "まで", "から", "を", "が"})
 
 
@@ -2809,7 +2809,7 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
             out_t.append(("感動詞", "一般", "*"))
             skip.add(i + 1)
             continue
-        joined = m.surface == "ガチ" and m.unknown      # (the two marks _katakana_marks joined, plan 296)
+        joined = m.surface == "ガチ" and m.unknown      # (the two marks _katakana_marks joined, plan 306)
         if joined or (m.surface == "ガ" and m.pos == "symbol" and nxt is not None and nxt.surface == "チ"
                       and _glued(m, nxt)):
             # ガチ, "for real" (slang), which UniDic cuts into two marks;
@@ -3021,7 +3021,7 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
                      # (...and before one: ちかくのこうえん, the park nearby, plan 272)
                      or (nxt is not None and nxt.surface == "の" and nxt.pos == "particle")
                      # (...and before a case particle, which no く form takes:
-                     # ちかくにいませんでした, the vicinity, plan 296)
+                     # ちかくにいませんでした, the vicinity, plan 306)
                      or (nxt is not None and nxt.pos == "particle" and nxt.surface in _KU_NOUN_CASES))):
             lemma, reading = _KU_NOUNS[m.lemma]
             m = replace(m, pos="noun", lemma=lemma, lemma_reading=reading, ctype="", cform="")
@@ -3029,20 +3029,20 @@ def _spoken_kana(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, li
         elif (m.pos == "adverb" and m.surface in ("よく", "良く") and nxt is not None and nxt.pos == "particle"
               and nxt.surface in ("は", "も") and _negated_at(morphemes, i + 2)):
             # 体によくはない: 良い's く form denied, "not good" -- よくはわから
-            # ない keeps the adverb, "not well" (plan 296)
+            # ない keeps the adverb, "not well" (plan 306)
             m = replace(m, pos="adjective", lemma="良い", lemma_reading="よい", ctype="形容詞", cform="連用形-一般")
             tags = tags[:i] + [("形容詞", "非自立可能", "*")] + tags[i + 1:]
         elif (m.pos == "noun" and m.lemma in _KU_ADJECTIVES and nxt is not None and nxt.pos == "particle"
               and nxt.surface in ("は", "も") and after is not None and _negated_at(morphemes, i + 2)):
             # 近くはない, 遠くもありません: the adjective's く form denied --
-            # "not near", no "the vicinity" (plan 296)
+            # "not near", no "the vicinity" (plan 306)
             lemma, reading = _KU_ADJECTIVES[m.lemma]
             m = replace(m, pos="adjective", lemma=lemma, lemma_reading=reading, ctype="形容詞", cform="連用形-一般")
             tags = tags[:i] + [("形容詞", "一般", "*")] + tags[i + 1:]
         elif (m.pos == "adjective" and m.lemma == "危うい" and m.surface in ("危うく", "あやうく") and nxt is not None
               and not (nxt.lemma in ("成る", "なる", "為る", "する") or nxt.surface in ("て", "も", "は", "ない", "なく"))):
             # 危うく自転車にぶつかるところだった: the adverb, "nearly" -- 危うい
-            # becomes or is made so (危うくなった) only before なる, する (plan 296)
+            # becomes or is made so (危うくなった) only before なる, する (plan 306)
             m = replace(m, pos="adverb", lemma="危うく", lemma_reading="あやうく", ctype="", cform="")
             tags = tags[:i] + [("副詞", "*", "*")] + tags[i + 1:]
         elif m.surface == "ま" and m.pos == "noun" and opens and nxt is not None and nxt.surface in ("、", "，", ","):
@@ -3243,7 +3243,7 @@ def named_animal(morphemes, i: int) -> bool:
         return True
     if katakana:
         # (犬のポチを: a word in katakana the deck does not teach is its
-        # name -- 犬のエサ is its food, plan 296)
+        # name -- 犬のエサ is its food, plan 306)
         return nxt is not None and nxt.pos == "particle" and nxt.surface in _NAME_PARTICLES \
             and kata_to_hira(m.surface) not in _deck_kana()
     # (Without an honorific only a word no noun could be: いぬの はなが is
@@ -3269,7 +3269,7 @@ def _named_animals(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, 
 # The colours a pet is named by (クロ, シロ, チャ).
 _COLOURS = frozenset({"黒", "白", "茶", "赤", "灰", "金", "銀", "三毛"})
 # What a person or an animal does, which a colour or a dot never does
-# (plan 296): クロは…ねていました is the cat, ポチは…走りはじめました the dog.
+# (plan 306): クロは…ねていました is the cat, ポチは…走りはじめました the dog.
 _AN_ANIMAL_DOES = _A_PERSON_DOES | {"鳴く", "吠える", "ほえる", "飛ぶ", "泳ぐ", "逃げる", "眠る", "なれる", "慣れる",
                                    "喜ぶ", "隠れる", "噛む", "かむ", "なく", "はしる", "ねる"}
 
@@ -3280,7 +3280,7 @@ def _pet_names(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
     nor place (ポチ, タマ) -- and stands as the topic or the subject of
     what only a person or an animal does is a name, the way a page names its pet:
     ポチは急に元気になって、にわを走りはじめました is Pochi, no ぽち "a dot";
-    クロはベッドの上でねていました the cat, no 黒 (plan 296). クロは好きな色
+    クロはベッドの上でねていました the cat, no 黒 (plan 306). クロは好きな色
     です does nothing; カラスが鳴く is the crow, its name in katakana as
     animals' are; ロボットは歩く, ペンギンが泳ぐ are loanwords."""
     from dataclasses import replace
@@ -4570,7 +4570,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             continue
         if m.surface == "もったい" and nxt is not None and nxt.lemma in ("無い", "ない") and nxt.pos == "adjective" \
                 and _glued(m, nxt):
-            # もったいない, もったいなく: one adjective, no 勿体 and ない (plan 296)
+            # もったいない, もったいなく: one adjective, no 勿体 and ない (plan 306)
             out_m.append(replace(m, surface=m.surface + nxt.surface, end=nxt.end, lemma="勿体無い",
                                  reading="もったい" + nxt.reading, lemma_reading="もったいない",
                                  kana="モッタイ" + nxt.kana, pos="adjective", ctype="形容詞", cform=nxt.cform,
@@ -4961,7 +4961,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and _enters(morphemes, i, tags)):
             # この店は誰でも入れます, 中には入れません: 入る's はいれる, "can
             # enter", no 入れる "to put in" -- 入る conjugating as 下一段,
-            # the potential's own shape, so 可能形 is lit (plan 296)
+            # the potential's own shape, so 可能形 is lit (plan 306)
             out_m.append(replace(m, lemma="入る", reading="はい" + kata_to_hira(m.reading)[1:], lemma_reading="はいる",
                                  kana="ハイ" + m.kana[1:] if m.kana else m.kana, written="入る",
                                  written_reading="はいる"))
@@ -5051,7 +5051,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                      or (nxt is not None and nxt.surface == "た" and after is not None and after.surface in _PASSAGES)
                      or _gets_through(morphemes, i))):
             # 火が通っている, 公園を通って: 通る, とおる -- no 通う, "commute"
-            # (and ご注文がキッチンに通っていなかった: an order gets through, plan 296)
+            # (and ご注文がキッチンに通っていなかった: an order gets through, plan 306)
             out_m.append(replace(m, lemma="通る", reading="とおっ", lemma_reading="とおる", kana="トオッ",
                                  ctype="五段-ラ行", written="通る", written_reading="とおる"))
             out_t.append(tags[i])
@@ -5059,7 +5059,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if m.surface == "園" and m.pos == "noun" and kata_to_hira(m.reading or "") == "その" \
                 and not (prev is not None and prev.surface == "の"):
             # 園は…考えている, 園の子どもたち: えん, the zoo or the nursery
-            # itself -- その is the garden of 学びの園, エデンの園 (plan 296)
+            # itself -- その is the garden of 学びの園, エデンの園 (plan 306)
             out_m.append(replace(m, reading="えん", lemma_reading="えん", kana="エン", written_reading="えん"))
             out_t.append(tags[i])
             continue
@@ -5068,7 +5068,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and prev.pos == "particle" and i >= 2 and _a_frame(morphemes[i - 2])):
             # 七十代のある女性, ある時代のある土地: 或る, "a certain" -- the
             # の before it names an age, a time, a place, nothing one has
-            # (問題のある人 is "with problems", the verb, plan 296)
+            # (問題のある人 is "with problems", the verb, plan 306)
             out_m.append(replace(m, pos="adnominal", lemma="或る", lemma_reading="ある", ctype="", cform="",
                                  written="或る", written_reading="ある"))
             out_t.append(("連体詞", "*", "*"))
@@ -5079,7 +5079,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and i + 4 < len(morphemes) and morphemes[i + 3].surface in ("なん", "何", "な")
                 and any(x.lemma in ("だ", "です") for x in morphemes[i + 4:i + 6])):
             # これが愛でなくてなんだろう: 愛 and the copula's で, "if this is
-            # not love, what is?" -- no 愛でる, "to admire" (plan 296)
+            # not love, what is?" -- no 愛でる, "to admire" (plan 306)
             noun = m.surface[:-1]
             alone = _tag(noun)[0] if _tagger is not None else []
             if len(alone) == 1 and alone[0].pos == "noun" and alone[0].reading:
@@ -5104,7 +5104,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                           or (prev.surface == "て" and prev.pos == "particle" and i >= 2
                                               and morphemes[i - 2].lemma in ("無い", "ない")))):
             # これが愛でなくてなんだろう, 「なんだろう: 何, "what" -- no copula
-            # stands after a clause's て or a mark (plan 296)
+            # stands after a clause's て or a mark (plan 306)
             out_m.append(replace(m, surface="なん", end=nxt.end, lemma="何", reading="なん", lemma_reading="なに",
                                  kana="ナン", pos="pronoun", ctype="", cform="", written="何", written_reading="なに"))
             out_t.append(("代名詞", "*", "*"))
@@ -5115,7 +5115,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and morphemes[i + 3].surface == "だ" and _glued(m, nxt) and _glued(nxt, after)
                 and _glued(after, morphemes[i + 3])):
             # なんだかんだ言っても: 何だかんだ, "one thing or another", one
-            # word -- no copula twice and no 彼 (plan 296)
+            # word -- no copula twice and no 彼 (plan 306)
             last = morphemes[i + 3]
             out_m.append(replace(m, surface=m.surface + "だかんだ", end=last.end, lemma="何だかんだ",
                                  reading="なんだかんだ", lemma_reading="なんだかんだ", kana="ナンダカンダ", pos="adverb",
@@ -5124,7 +5124,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             skip.update({i + 1, i + 2, i + 3})
             continue
         if m.surface == "お" and _spells(morphemes, i, "おおかれすくなかれ"):
-            # おおかれすくなかれ in kana: 多かれ少なかれ, one word (plan 296)
+            # おおかれすくなかれ in kana: 多かれ少なかれ, one word (plan 306)
             n = _spells(morphemes, i, "おおかれすくなかれ")
             last = morphemes[i + n - 1]
             out_m.append(replace(m, surface="おおかれすくなかれ", end=last.end, lemma="多かれ少なかれ",
@@ -5138,7 +5138,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and (after is None or (after.pos == "symbol" and after.surface in ("。", "！", "!", "？", "」", "、", "…"))
                      or after.lemma in ("だ", "です"))):
             # 「その通り。」, その通りです: "exactly", the reply -- no street
-            # (plan 296)
+            # (plan 306)
             out_m.append(replace(m, surface="その通り", end=nxt.end, lemma="その通り", reading="そのとおり",
                                  lemma_reading="そのとおり", kana="ソノトオリ", pos="noun", ctype="", cform="",
                                  written="その通り", written_reading="そのとおり"))
@@ -5147,13 +5147,13 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             continue
         if (m.surface == "かん" and m.pos == "pronoun" and nxt is not None and nxt.pos == "suffix"
                 and nxt.surface in ("ちゃん", "くん", "さん", "君") and _glued(m, nxt)):
-            # かんちゃん: a name before its honorific -- no 彼 (plan 296)
+            # かんちゃん: a name before its honorific -- no 彼 (plan 306)
             out_m.append(replace(m, pos="noun", proper=True, name_kind="given", lemma=m.surface, written=m.surface))
             out_t.append(("名詞", "固有名詞", "人名"))
             continue
         if m.surface == "まめ" and m.pos == "other" and nxt is not None and nxt.surface in ("を", "が", "は", "も", "の"):
             # 鬼に向かってまめをまいた: 豆, "beans", a thing -- まめに, まめな
-            # are 忠実 (plan 296)
+            # are 忠実 (plan 306)
             out_m.append(replace(m, pos="noun", lemma="豆", written="豆", written_reading="まめ"))
             out_t.append(("名詞", "普通名詞", "一般"))
             continue
@@ -5162,7 +5162,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and morphemes[i + 3].surface == "の" and _glued(m, nxt) and _glued(nxt, after)
                 and _glued(after, morphemes[i + 3])):
             # なんのかんのと: 何のかんの, "this and that", one phrase -- no
-            # 何, 彼 and two の (plan 296)
+            # 何, 彼 and two の (plan 306)
             last = morphemes[i + 3]
             out_m.append(replace(m, surface=m.surface + "のかんの", end=last.end, lemma="何のかんの",
                                  reading="なんのかんの", lemma_reading="なんのかんの", kana="ナンノカンノ", pos="noun",
@@ -5171,7 +5171,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             skip.update({i + 1, i + 2, i + 3})
             continue
         if (m.surface == "多かれ" and nxt is not None and nxt.surface == "少なかれ" and _glued(m, nxt)):
-            # 多かれ少なかれ: "more or less", one phrase (plan 296)
+            # 多かれ少なかれ: "more or less", one phrase (plan 306)
             out_m.append(replace(m, surface="多かれ少なかれ", end=nxt.end, lemma="多かれ少なかれ",
                                  reading="おおかれすくなかれ", lemma_reading="おおかれすくなかれ", kana="オオカレスクナカレ",
                                  pos="adverb", ctype="", cform="", written="多かれ少なかれ",
@@ -5185,7 +5185,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and not (prev is not None and prev.pos in ("verb", "auxiliary", "adjective"))):
             # この地域ではなくてはならない, 生活になくてはならない: 無くては
             # ならない, "indispensable", one word -- the verb's own
-            # 行かなくてはならない keeps its point (plan 296)
+            # 行かなくてはならない keeps its point (plan 306)
             last = morphemes[i + 4]
             out_m.append(replace(m, surface="なくてはならない", end=last.end, lemma="無くてはならない",
                                  reading="なくてはならない", lemma_reading="なくてはならない", kana="ナクテハナラナイ",
@@ -5198,7 +5198,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and nxt.surface == "た" and nxt.pos == "auxiliary" and (prev is None or (prev.pos == "symbol"
                                                                                    and prev.surface in ("「", "『", "（")))
                 and (after is None or (after.pos == "symbol" and after.surface in ("、", "！", "!", "。", "」", "…", "ー")))):
-            # やった、ついに合格だ！: "hooray", the cry -- no やる (plan 296)
+            # やった、ついに合格だ！: "hooray", the cry -- no やる (plan 306)
             out_m.append(replace(m, surface="やった", end=nxt.end, lemma="やった", reading="やった", lemma_reading="やった",
                                  kana="ヤッタ", pos="interjection", ctype="", cform="", written="やった",
                                  written_reading="やった"))
@@ -5209,12 +5209,12 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and nxt is not None and nxt.pos == "auxiliary" and nxt.lemma == "た" and prev is not None
                 and _glued(prev, m) and ((prev.pos in ("noun", "pronoun", "suffix") and _said_in_the_west(morphemes, i))
                                          # (休みやったら: a verb's stem takes no やる after it --
-                                         # the noun it spells and the west's copula, plan 296)
+                                         # the noun it spells and the west's copula, plan 306)
                                          or (prev.pos == "verb" and prev.cform == "連用形-一般"
                                              and not _a_compound_with_yaru(prev)))):
             # 泣き虫やったんやで, 休みやったら…行かへん: the west's copula や,
             # "was" -- no やる after a noun where the sentence speaks the
-            # west's Japanese (plan 296)
+            # west's Japanese (plan 306)
             if prev.pos == "verb" and out_m:
                 said = kata_to_hira(prev.reading or "")
                 out_m[-1] = replace(prev, pos="noun", lemma=prev.surface, lemma_reading=said, ctype="", cform="",
@@ -5228,7 +5228,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and after is not None and after.surface in ("ため", "為") and prev is not None
                 and (prev.pos == "particle" or (prev.pos == "auxiliary" and prev.surface == "に") or prev.verbal)):
             # 明らかにせんがため: せ, する's old stem, and ん, the old
-            # volitional む, "in order to" -- no 千 (plan 296)
+            # volitional む, "in order to" -- no 千 (plan 306)
             cut = m.start + 1
             out_m.append(replace(m, surface="せ", end=cut, lemma="為る", reading="せ", lemma_reading="する", kana="セ",
                                  pos="verb", ctype="サ行変格", cform="未然形-セ", written="する", written_reading="する"))
@@ -5243,7 +5243,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                  or (m.lemma == "鎧う" and m.surface == "よろう"))
                 and _drops_in(morphemes, i)):
             # 本屋によると、画集が並んでいた, 神社によろうか: 寄る, "drop in"
-            # (plan 296)
+            # (plan 306)
             if m.surface == "よろう":
                 out_m.append(replace(m, lemma="寄る", lemma_reading="よる", ctype="五段-ラ行", cform="意志推量形",
                                      written="寄る", written_reading="よる"))
@@ -5255,14 +5255,14 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and not (prev is not None and prev.surface in ("に", "には", "にも")) and nxt is not None
                 and nxt.pos == "particle" and nxt.surface in ("に", "は", "も", "が", "の", "まで", "から")):
             # おばけはよるにしか出てこない: 夜, "night" -- no 因る or 寄る
-            # takes no に before it (plan 296)
+            # takes no に before it (plan 306)
             out_m.append(replace(m, pos="noun", lemma="夜", lemma_reading="よる", ctype="", cform="", written="夜",
                                  written_reading="よる"))
             out_t.append(("名詞", "普通名詞", "副詞可能"))
             continue
         if (m.surface == "何に" and m.pos == "pronoun" and nxt is not None and nxt.surface == "も"
                 and after is not None and after.surface in ("まして", "増して")):
-            # 何にもまして: 何 and 〜にもまして's に, "above all" (plan 296)
+            # 何にもまして: 何 and 〜にもまして's に, "above all" (plan 306)
             cut = m.start + 1
             out_m.append(replace(m, surface="何", end=cut, reading="なに", kana="ナニ", written_reading="なに"))
             out_t.append(tags[i])
@@ -5273,7 +5273,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "まして" and m.pos == "adverb" and prev is not None and prev.surface == "も" and i >= 2
                 and morphemes[i - 2].surface in ("に", "何に")):
             # 去年にもまして: 増す's て form, "more than" -- no 況して,
-            # "let alone" (plan 296)
+            # "let alone" (plan 306)
             out_m.append(replace(m, lemma="増す", lemma_reading="ます", pos="verb", ctype="五段-サ行",
                                  cform="連用形-一般", written="増す", written_reading="ます"))
             out_t.append(("動詞", "一般", "*"))
@@ -5284,7 +5284,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                       and morphemes[i - 2].surface == "で" and morphemes[i - 2].pos == "auxiliary")
                      or (prev.pos in ("adjective", "auxiliary") and prev.surface.endswith("く")))):
             # 楽ではなくなってきた: ない's く and なる, "stopped being (easy)"
-            # -- no 無くなる, "be lost", after the copula's では (plan 296)
+            # -- no 無くなる, "be lost", after the copula's では (plan 306)
             cut = m.start + 2
             out_m.append(replace(m, surface="なく", end=cut, lemma="無い", reading="なく", lemma_reading="ない",
                                  kana="ナク", pos="adjective", auxiliary_use=True, ctype="形容詞", cform="連用形-一般",
@@ -5297,7 +5297,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             continue
         if m.surface == "まめ" and m.pos == "other" and nxt is not None and nxt.surface in ("に", "な", "だ", "で", "さ"):
             # 連絡をまめにする: 忠実, "diligent", the 形状詞 -- no 豆, "beans"
-            # (plan 296)
+            # (plan 306)
             out_m.append(replace(m, lemma="忠実", written="忠実"))
             out_t.append(tags[i])
             continue
@@ -5306,7 +5306,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                      "まじめ", "慎重", "熱心", "真剣", "必死", "懸命")
                 and nxt is not None and (nxt.lemma in ("為る", "する") or (nxt.pos == "verb" and prev.pos == "noun"))):
             # 片付けを適当にした, 適当に書いて: the な-adjective's に, "sloppily" -- no case
-            # particle (plan 296)
+            # particle (plan 306)
             if out_m and out_m[-1] is prev and prev.pos == "noun":
                 out_m[-1] = replace(prev, adjectival=True)
             out_m.append(replace(m, lemma="だ", lemma_reading="だ", pos="auxiliary", ctype="助動詞-ダ", cform="連用形-ニ",
@@ -5316,7 +5316,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "幸多" and m.pos == "noun" and nxt is not None and nxt.surface == "かれ" and _glued(m, nxt)
                 and (after is None or after.pos in ("particle", "symbol"))):
             # 幸多かれと祈り: 幸 さち, "happiness", and 多かれ, 多い's old
-            # imperative, "may it be full of" -- no name and no 彼 (plan 296)
+            # imperative, "may it be full of" -- no name and no 彼 (plan 306)
             cut = m.start + 1
             out_m.append(replace(m, surface="幸", end=cut, lemma="幸", reading="さち", lemma_reading="さち", kana="サチ",
                                  proper=False, name_kind="", written="幸", written_reading="さち"))
@@ -5330,7 +5330,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "よる" and m.pos == "verb" and m.lemma in ("因る", "寄る", "依る", "拠る") and nxt is not None
                 and nxt.surface in ("、", "，") and (prev is None or prev.pos == "symbol")):
             # よる、母が…: 夜, "at night", heading the sentence -- no verb
-            # stands alone before a comma there (plan 296)
+            # stands alone before a comma there (plan 306)
             out_m.append(replace(m, pos="noun", lemma="夜", lemma_reading="よる", ctype="", cform="", written="夜",
                                  written_reading="よる"))
             out_t.append(("名詞", "普通名詞", "副詞可能"))
@@ -5340,7 +5340,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                 and (prev.pos in ("particle", "symbol", "adverb", "pronoun") or prev.verbal
                      or prev.surface in _DONE_WHOLE)):
             # 全部やった, 宿題やった？: やる, "to do" -- no Kansai copula や
-            # after what is done (plan 296)
+            # after what is done (plan 306)
             out_m.append(replace(m, pos="verb", lemma="遣る", lemma_reading="やる", ctype="五段-ラ行", cform="連用形-促音便",
                                  written="やる", written_reading="やる"))
             out_t.append(("動詞", "非自立可能", "*"))
@@ -5348,13 +5348,13 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "ん" and m.pos == "auxiliary" and m.lemma == "ず" and nxt is not None and nxt.surface == "が"
                 and after is not None and after.surface in ("ため", "為")):
             # 助けんがため: む, the old volitional, "in order to" -- no
-            # negative (plan 296)
+            # negative (plan 306)
             out_m.append(replace(m, lemma="む", lemma_reading="む", ctype="助動詞-ム", written="む", written_reading="む"))
             out_t.append(tags[i])
             continue
         if m.surface == "亡き" and m.lemma in ("無い", "ない"):
             # 亡き姉, 亡き父: "the late", a word of its own -- no 無い, "not"
-            # (plan 296)
+            # (plan 306)
             out_m.append(replace(m, pos="adnominal", lemma="亡き", lemma_reading="なき", ctype="", cform="",
                                  written="亡き", written_reading="なき"))
             out_t.append(("連体詞", "*", "*"))
@@ -5362,7 +5362,7 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "なき" and m.lemma in ("無い", "ない") and nxt is not None and nxt.pos == "verb"
                 and nxt.lemma in _AFTER_A_CRY):
             # 母はなき出しました: 泣く's stem and 出す, "burst into tears" --
-            # no 無い (plan 296); and 大きな声でなき出した's で is the means
+            # no 無い (plan 306); and 大きな声でなき出した's で is the means
             # particle, no copula before a negative
             if out_m and prev is not None and prev.surface == "で" and prev.pos == "auxiliary":
                 out_m[-1] = replace(prev, lemma="で", lemma_reading="で", pos="particle", ctype="", cform="",
@@ -5374,17 +5374,17 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             continue
         if (m.surface == "名" and prev is not None and nxt is not None and nxt.surface == "も" and after is not None
                 and after.lemma in ("無い", "ない")):
-            # 名もなき家事, 名もない花: な, "a name" -- no めい, a counter (plan 296)
+            # 名もなき家事, 名もない花: な, "a name" -- no めい, a counter (plan 306)
             out_m.append(replace(m, reading="な", lemma_reading="な", kana="ナ", written_reading="な"))
             out_t.append(tags[i])
             continue
         if (m.surface == "放っ" and m.lemma == "放つ" and nxt is not None
                 and ((nxt.surface == "て" and after is not None and after.lemma == "置く")
                      or (nxt.pos == "auxiliary" and nxt.lemma in ("とく", "どく")))
-                # (敵の城に間者を放っておいた: sent in, 放つ, plan 296)
+                # (敵の城に間者を放っておいた: sent in, 放つ, plan 306)
                 and not _sent_somewhere(morphemes, i)):
             # 放っておく, 放っとけ: 放る, ほうる, "leave alone" -- 放つ, "to
-            # fire, to release", takes no おく (矢を放った, plan 296)
+            # fire, to release", takes no おく (矢を放った, plan 306)
             out_m.append(replace(m, lemma="放る", reading="ほうっ", lemma_reading="ほうる", kana="ホウッ",
                                  ctype="五段-ラ行", written="放る", written_reading="ほうる"))
             out_t.append(tags[i])
@@ -5712,7 +5712,7 @@ def _reading_of(surface: str, kana: str, pron: str) -> str:
     if spelled and len(sound) == len(spelled) and sound != spelled and all(
             a == b or (a, b) in (("\u305a", "\u3065"), ("\u3058", "\u3062")) for a, b in zip(sound, spelled)):
         # The sound merged づ into ず and ぢ into じ, the spelling keeps
-        # them (plan 296): つづら is pronounced ツズラ, and the reading
+        # them (plan 306): つづら is pronounced ツズラ, and the reading
         # printed over 働きつづけ was はたらきつずけ, a spelling no page has.
         return spelled
     return sound or surface
@@ -5997,7 +5997,7 @@ def _compound_verb(first: str, first_reading: str, second: str, second_reading: 
     if _kana_letters(first):
         # (A first verb in kana is any verb read so: the deck's one card of
         # the whole reading that ends on the second, 雨がふり出した 降り出す,
-        # before JMdict's commonest row, 振り出す, plan 296.)
+        # before JMdict's commonest row, 振り出す, plan 306.)
         mine = {entry.get("kanji") for entries in VOCAB_BY_LEVEL.values() for entry in entries
                 if (entry.get("kanji") or "").endswith(second) and len(entry.get("kanji") or "") > len(second)
                 and reading in kata_to_hira(entry.get("kana") or "").replace(";", "/").split("/")}
@@ -6096,7 +6096,7 @@ def _next_best(text: str, morphemes: list[Morpheme], i: int, tagger, wanted):
     """MeCab's best reading of the phrase morpheme i stands in, among
     its _NBEST, where `wanted` finds the word a rule is looking for --
     what MeCab itself reads next when its first reading is one the page
-    cannot mean (plan 295). `wanted(alt)` is the (start, end) of that
+    cannot mean (plan 305). `wanted(alt)` is the (start, end) of that
     word in a reading, or None. Returns (k, j, morphemes, tags): what
     replaces morphemes[k:j], the stretch where the two readings differ;
     None where no reading has the word.
@@ -6157,7 +6157,7 @@ def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple], text: st
     word of the deck or of JMdict (_known) and ends before a particle or
     a mark is read as that word. Where no run of whole words spells one
     after a は, MeCab's next reading that begins a noun of the deck on it
-    is taken (plan 295): はこの中には is はこ + の, the box, never は + この."""
+    is taken (plan 305): はこの中には is はこ + の, the box, never は + この."""
     from dataclasses import replace
 
     out_m, out_t = [], []
@@ -6169,7 +6169,7 @@ def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple], text: st
         if opens and m.pos == "particle":
             # A phrase of particles alone, closed by a mark, says nothing:
             # its letters are a word the deck writes in kanji where they
-            # spell one -- かさ、持ってきた？ is 傘, never か + さ (plan 296).
+            # spell one -- かさ、持ってきた？ is 傘, never か + さ (plan 306).
             # (では、 and でも、 are the deck's conjunctions, written in kana
             # and read as MeCab reads them; a pattern the catalogue writes
             # from its particle, にしか, stands alone, with no mark.)
@@ -6223,7 +6223,7 @@ def _opened_on_a_particle(morphemes: list[Morpheme], tags: list[tuple], text: st
 def _no_word_after_the_topic(morphemes: list[Morpheme], tags: list[tuple], text: str,
                              tagger=None) -> tuple[list, list]:
     """What no word can be after the topic は, read as the end of a word
-    the は begins (plan 295). Written こ, a child stands after what says
+    the は begins (plan 305). Written こ, a child stands after what says
     whose or which -- このこ, うちのこ, いいこ -- and a topic marker says
     neither, so UniDic's 子 standing bare after it is the last letter of
     that word: 二人ではこを運んだ is 二人で + はこ, the box, where MeCab
@@ -6266,7 +6266,7 @@ def _a_letter_alone(m: Morpheme, tag: tuple) -> bool:
 def _no_letter_alone(morphemes: list[Morpheme], tags: list[tuple], text: str,
                      tagger=None) -> tuple[list, list]:
     """A letter MeCab left standing alone between two words, read inside
-    the word it belongs to (plan 296). Where a page writes in kana, MeCab
+    the word it belongs to (plan 306). Where a page writes in kana, MeCab
     can find no word for a stretch and strands one letter as an
     interjection or a mark, cutting the words on either side wrongly:
     こうえんで as こう + え + んで, このあかいふく as この + あ + かいふく
@@ -6334,13 +6334,13 @@ def _no_letter_alone(morphemes: list[Morpheme], tags: list[tuple], text: str,
     return morphemes, tags
 
 
-# What a case particle is: after one, a と is a word's last letter (plan 296).
+# What a case particle is: after one, a と is a word's last letter (plan 306).
 _CASE_AFTER_TO = frozenset({"へ", "まで", "を", "が", "に", "で", "から", "より"})
 
 
 def _a_word_before_its_particle(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """A word in kana MeCab cut on its last letter と, read whole where a
-    case particle follows (plan 296): きょう + と + へ is きょうと, 京都,
+    case particle follows (plan 306): きょう + と + へ is きょうと, 京都,
     then へ; せい + と + に is せいと, 生徒, then に. A と that joins, goes
     with or quotes takes no case particle after it -- nobody says 友だちと
     へ -- so it is the last letter of what the deck, or JMdict's commonest
@@ -6385,7 +6385,7 @@ def _particle_in_a_verb(morphemes: list[Morpheme], tags: list[tuple], text: str,
     """A は or も MeCab took for the first letter of a verb, read back as
     the particle where its next reading leaves a verb the deck teaches,
     where the one it read has none, or after a noun one three levels
-    above it (plan 296): 友だちには + かさない, 貸す (N5) where it read はかさ,
+    above it (plan 306): 友だちには + かさない, 貸す (N5) where it read はかさ,
     穿かす, which the deck has no card for; どこにも + とまらずに, 止まる
     over もとまら, 求まる; 今夜は + ねない, 寝る (N5) over はね, 跳ねる (N2).
     Only where a particle can stand: after a noun or a case particle."""
@@ -6438,13 +6438,13 @@ def _particle_in_a_verb(morphemes: list[Morpheme], tags: list[tuple], text: str,
     return morphemes, tags
 
 
-# What follows a name and keeps it one (plan 296).
+# What follows a name and keeps it one (plan 306).
 _HONORIFICS_AFTER = frozenset({"さん", "くん", "君", "ちゃん", "様", "さま", "先生", "せんせい", "殿", "氏", "選手"})
 
 
 def _not_a_full_name(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
     """A family name and a given name MeCab read in a learner's kana where
-    the letters are common words (plan 296): まえのせきが高い is 前の席,
+    the letters are common words (plan 306): まえのせきが高い is 前の席,
     はしのせき 端の席, 高いへいの上 高い and 塀 -- a full name, partly in
     hiragana, no honorific after it, read again as MeCab's next reading
     that names no one, knows every word and leaves no letter alone.
@@ -6483,7 +6483,7 @@ def _not_a_full_name(morphemes: list[Morpheme], tags: list[tuple], text: str, ta
 
 
 def _addressee(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
-    """The name a letter opens on (plan 296): 森様、二週間の…では is Mr
+    """The name a letter opens on (plan 306): 森様、二週間の…では is Mr
     Mori, never "forest" -- a noun with 様 or さん and a comma, opening the
     text or a quotation, read as MeCab's next reading of it as a family
     name, where it has one. (Not in running text, where a title follows
@@ -6507,7 +6507,7 @@ def _addressee(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=N
 
 
 def _signature(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
-    """The name a letter is signed with (plan 296): アナより, alone on its
+    """The name a letter is signed with (plan 306): アナより, alone on its
     line, is from Ana, never "announcer" -- a noun and より and nothing
     else, read as MeCab's next reading of the noun as a name, where it has
     one (コーヒーより, an exam's "than coffee", has none) and the course
@@ -6536,7 +6536,7 @@ def _signature(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=N
 
 def _it_hurts(morphemes: list[Morpheme], tags: list[tuple], text: str, tagger=None) -> tuple[list, list]:
     """いたい after a が is 痛い, "it hurts", where MeCab read 居る's い and
-    たい, "want to be" (plan 296): 足が少しいたい. 居たい is said of who
+    たい, "want to be" (plan 306): 足が少しいたい. 居たい is said of who
     wants to stay somewhere (ここにいたい), never of a thing that has a が
     and no place. Before なる, いたく is 痛い's く form, never the adverb
     痛く, "deeply" (うでもいたくなりました; いたく感動した keeps it)."""
@@ -6605,7 +6605,7 @@ def _as_the_deck_spells_it(u: Morpheme) -> bool:
     reading, spelled as one of the deck's commonest cards read so spells
     it (こうえん is 公園, あかい 赤い, ふく 服 or 吹く). MeCab's other readings of kana take any word read
     so -- ごふん as 御 + 糞, えん as 園, かえさ as 孵す -- and a missing
-    meaning beats a guessed one (plan 296)."""
+    meaning beats a guessed one (plan 306)."""
     if u.pos in ("particle", "auxiliary"):
         return not u.unknown
     # (a suffix or a prefix too: えん as the suffix 園, ご as 御 before
@@ -6819,7 +6819,7 @@ def _kana_names(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, lis
 
 def _katakana_marks(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """Katakana letters MeCab read as marks, one by one, as the one word
-    they spell (plan 296): the kettle 「ミナモ」 came out ミ, ナ, モ, three
+    they spell (plan 306): the kettle 「ミナモ」 came out ミ, ナ, モ, three
     symbols the breakdown dropped. The katakana twin of _unknown_words,
     which reads hiragana alone: a glued run of two or more one-letter
     katakana UniDic files as 記号, a word no dictionary has, most often a

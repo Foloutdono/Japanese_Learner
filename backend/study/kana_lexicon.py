@@ -216,7 +216,7 @@ _UNVOICE = str.maketrans("ガギグゲゴザジズゼゾダヂヅデドバビブ
 
 def _voiced_otherwise(kana: str, node) -> bool:
     """Whether MeCab's one word for the letters is a noun said otherwise
-    than its own reading by a letter's voicing alone (plan 296): ぶちょう
+    than its own reading by a letter's voicing alone (plan 306): ぶちょう
     is 不調 there, whose reading is ふちょう; じたく 支度 (したく), ごうり
     行李 (こうり). A spelling that names its word outright is never that
     word misheard: such a word is entered like one MeCab reads nothing

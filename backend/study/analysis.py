@@ -26,7 +26,7 @@ from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_poin
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content import jmdict_fr
 import content.vocab_jmdict_data as jmdict_db
-from study.card_lookup import _card  # noqa: E402  (the deck card spelled so, plan 296)
+from study.card_lookup import _card  # noqa: E402  (the deck card spelled so, plan 306)
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
@@ -267,7 +267,7 @@ def _of_another_field(joined: tuple[str, str], morphemes) -> bool:
     return not any(words & _FIELDS[f] for tags in owned for f in tags)
 
 
-# What one does to or from a place (plan 296).
+# What one does to or from a place (plan 306).
 _GONE_TO = frozenset({"来る", "行く", "帰る", "戻る", "出る", "着く", "住む", "引っ越す", "旅行", "留学", "出発", "到着",
                       "移る", "渡る"})
 
@@ -319,7 +319,7 @@ def _senses_by_sentence(tokens: list[dict]) -> None:
         if chosen is None and _a_place_gone_to(tokens, k):
             # (...and where it is a place one comes from, goes to or lives
             # in, its sense named as a place: タイから日本に来て is
-            # Thailand, never "tie" -- タイを締める keeps it, plan 296)
+            # Thailand, never "tie" -- タイを締める keeps it, plan 306)
             chosen = next((sense for sense in found[1:] if (sense.get("glossary") or [""])[0][:1].isupper()), None)
         if chosen is None and fields & set(_FIELD_GLOSSES):
             wanted = [g for f in fields & set(_FIELD_GLOSSES) for g in _FIELD_GLOSSES[f]]
@@ -948,14 +948,14 @@ _SUFFIX_GLOSSES = {
 
 # What a noun means as the second half of what it is said with, where
 # its card leads with another sense (plan 272).
-# A counter whose card is another word (plan 296): 本 is "book".
+# A counter whose card is another word (plan 306): 本 is "book".
 _COUNTER_SENSES = {
     surface: {"en": "counter for long, thin things (pens, bottles, trees, cigarettes)",
               "fr": "classificateur des objets longs et fins (stylos, bouteilles, arbres, cigarettes)"}
     for surface in ("本", "ほん", "ぽん", "ぼん")
 }
 
-# ここ before a span of time is no place (plan 296): ここ数年, ここ二、三日.
+# ここ before a span of time is no place (plan 306): ここ数年, ここ二、三日.
 _HERE_SPAN = {"en": "(before a span of time) these past …, the last …: ここ数年, the last few years",
               "fr": "(devant une durée) ces derniers … : ここ数年, ces dernières années"}
 # What a span of time is counted in, after ここ.
@@ -1041,7 +1041,7 @@ def _affix_sense(morphemes: list, i: int, numbers: dict) -> dict | None:
     if m.surface == "手" and m.reading == "て" and prev.pos == "verb" and prev.cform.startswith("連用形") \
             and _glued_to(prev, m):
         # (引き受け手, 担い手: the one who takes it on, never a hand,
-        # plan 296)
+        # plan 306)
         return _AFFIX_SENSES["手_agent"]
     if m.surface in _SUFFIX_GLOSSES and m.pos == "suffix" and prev.pos in ("noun", "other") \
             and (m.surface != "生" or m.reading == "せい"):
@@ -1332,7 +1332,7 @@ def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
 
 _COUNTERS = "助数詞 〜つ／〜人／〜枚"
 
-# A point's piece and the cards of the homographs it is not (plan 296),
+# A point's piece and the cards of the homographs it is not (plan 306),
 # with the point's own word where the deck holds it.
 _POINT_HOMOGRAPHS = {
     "〜きる": (frozenset({"切る"}), None),
@@ -1340,7 +1340,7 @@ _POINT_HOMOGRAPHS = {
     "〜と相まって": (frozenset({"待つ", "相"}), None),
     "〜にかたくない": (frozenset({"固い", "堅い", "硬い"}), ("難い", "かたい")),
     # (出たものの, 用があるもんで, 遊んだものだ: もの is the construction's,
-    # no 物 "thing", plan 296)
+    # no 物 "thing", plan 306)
     **{pattern: (frozenset({"物"}), None) for pattern in ("〜ものの", "〜もので", "〜ものだから", "〜ものだ", "〜ものを",
                                                          "〜ものなら", "〜ものか")},
 }
@@ -1349,7 +1349,7 @@ _POINT_HOMOGRAPHS = {
 _OWN_FORM_POINTS = frozenset({"い形容詞／な形容詞", "〜く／〜に（副詞形）", "ない形 〜ない", "た形 〜た", "可能形 〜(ら)れる",
                               "意向形 〜(よ)う", "命令形 〜ろ／〜え", "〜ます／〜ません", "〜ました／〜ませんでした",
                               # (one verb said twice in two forms: 伏せようが
-                              # 伏せまいが is 伏せる's, plan 296)
+                              # 伏せまいが is 伏せる's, plan 306)
                               "〜ようが〜まいが",
                               # (a compound verb the pool holds whole is its word
                               # too: もつれ込む, 振り込む, 駆け出す, plan 272)
@@ -1624,7 +1624,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     deck_hits = [None if j in held and morphemes[j].pos == "verb" and morphemes[j].lemma in NO_GOOD_VERBS else hit
                  for j, hit in enumerate(deck_hits)]
     # And a piece of a point that shows another word's card is the point's
-    # (plan 296): 食べきる's きり is no 切る "to cut", はさまりかける's かけ
+    # (plan 306): 食べきる's きり is no 切る "to cut", はさまりかける's かけ
     # no 掛ける "to hang", 相まって's まっ no 待つ "to wait" -- or the
     # point's own word where the deck has it: 察するにかたくない's かたく is
     # 難い, "difficult", never 固い "hard".
@@ -1903,7 +1903,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
                 # A pool word folded over the deck's own nouns (観光地,
                 # 取引先, plan 272) keeps them, as an idiom does: a
                 # sentence written for a level still counts its cards
-                # -- an adjectival noun's too, 不 + 可能 (plan 296).
+                # -- an adjectival noun's too, 不 + 可能 (plan 306).
                 token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma,
                                    "pos": morphemes[k].pos,
                                    "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
@@ -2028,16 +2028,16 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
         sense = _affix_sense(morphemes, i, numbers) if i not in ruled else None
         if sense is None and morphemes[i].surface in ("余り", "あまり") and i > 0 and _glued_to(morphemes[i - 1], morphemes[i]) \
                 and (morphemes[i - 1].counter or _after_a_number(morphemes, i, numbers)):
-            # (三割余り, 二十人あまり: just over an amount, no あまり〜ない, plan 296)
+            # (三割余り, 二十人あまり: just over an amount, no あまり〜ない, plan 306)
             sense = _AFFIX_SENSES["余り"]
         if sense is None and deck is not None and morphemes[i].surface in _COUNTER_SENSES \
                 and (_after_a_number(morphemes, i, numbers) or (i > 0 and morphemes[i - 1].surface[:1] in ("何", "数")
                                                                 and all(c in "何数十百千" for c in morphemes[i - 1].surface))) \
                 and "counter" not in (deck[1].get("meaning") or "").lower():
-            # (一本も's 本 counts: no "book", whatever point holds it, plan 296)
+            # (一本も's 本 counts: no "book", whatever point holds it, plan 306)
             sense = _COUNTER_SENSES[morphemes[i].surface]
         if sense is None and morphemes[i].surface in ("ここ", "此処") and _a_span_after(morphemes, i):
-            # (ここ数年で急に増えた: "these past few years", no place, plan 296)
+            # (ここ数年で急に増えた: "these past few years", no place, plan 306)
             sense = _HERE_SPAN
         affix = sense is not None
         if affix:
@@ -2243,12 +2243,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 31: sixteen cards the course's sentences use (体重, 主人, もしもし,
 # ただいま...) and ten usually-kana words as kana cards (#360, #439).
 # 32: a kana word whose first letter is also a particle is read whole
-# where no particle can stand (plan 295): はいしゃ after a comma or an
+# where no particle can stand (plan 305): はいしゃ after a comma or an
 # adverb (the kana lexicon's, now that a compound is counted by its
 # rarest part), a は opening what is said (はこ + の, never は + この),
 # and no bare 子 after the topic (二人で + はこ, never では + こ).
 # 33: what the sentence says, against the banks' hand-written answers
-# (plan 296): 入れる as 入る's potential where someone can enter and
+# (plan 306): 入れる as 入る's potential where someone can enter and
 # nothing is put in (日曜日なら入れる, 人しか入れない), 方 かた after a person
 # (学生の方, 後任の方), 末 まつ after a period, 〜引き びき after an amount,
 # 度/割 + 分 ぶ, and a letter MeCab left alone in kana read inside its word
