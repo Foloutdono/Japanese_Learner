@@ -888,34 +888,63 @@ _STOPS = frozenset({"本屋", "ほんや", "店", "みせ", "お店", "おみせ
                     "びょういん", "薬局", "やっきょく", "デパート", "公園", "こうえん", "交番", "こうばん", "実家",
                     "じっか", "友達の家", "パン屋", "ぱんや", "花屋", "はなや", "八百屋", "やおや", "本屋さん",
                     "美術館", "びじゅつかん", "博物館", "はくぶつかん", "神社", "じんじゃ", "お寺", "おてら",
-                    "寺", "てら", "ホテル", "旅館", "りょかん", "市役所", "しやくしょ", "区役所", "くやくしょ"})
+                    "寺", "てら", "ホテル", "旅館", "りょかん", "市役所", "しやくしょ", "区役所", "くやくしょ",
+                    "家", "いえ", "うち", "お宅", "おたく", "町", "まち", "村", "むら", "スーパー", "本屋さん",
+                    "店", "コンビニ", "ファミレス", "ドラッグストア", "画廊", "がろう", "古本屋", "ふるほんや"})
 _HEARSAY = frozenset({"そう", "らしい", "という", "とのこと", "って", "ようだ", "みたい", "とか"})
 _DIFFERS = ("違", "ちが", "異な", "変わ", "かわ", "様々", "さまざま", "まちまち", "差", "決ま", "きま")
 
 
+def _spells(morphemes, i: int, word: str) -> int:
+    """How many glued morphemes from morphemes[i] spell exactly `word`,
+    or 0."""
+    text, n = "", 0
+    while i + n < len(morphemes) and len(text) < len(word):
+        if n and not _glued(morphemes[i + n - 1], morphemes[i + n]):
+            return 0
+        text += morphemes[i + n].surface
+        n += 1
+    return n if text == word else 0
+
+
 def _drops_in(morphemes, i: int) -> bool:
-    """Whether the よる at morphemes[i], after に and a place one stops
-    at, is 寄る, "drop in": its と finds something (本屋によると、画集が
-    並んでいた) where no word of hearsay closes the sentence, its て goes
-    on to a deed where nothing differs or is done by it (としょかんによって
-    ほんをかりた, never 銀行によって手数料が違う), and its past is a visit
-    (帰りに本屋によった)."""
-    if i < 2 or morphemes[i - 1].surface != "に" or morphemes[i - 1].pos != "particle":
+    """Whether the よる at morphemes[i], after に (or には, にも) and a
+    place one stops at, is 寄る, "drop in": its と finds something
+    (本屋によると、画集が並んでいた) where no word of hearsay closes the
+    sentence, its て goes on to a deed where nothing differs or is done
+    by it (としょかんによってほんをかりた, never 銀行によって手数料が違う),
+    its past, its polite stem, its negative and its will are visits
+    (家によりました, よらないで, 神社によろうか), and it ends what is said
+    or meets a こと (町によることにした) -- never before a noun it says
+    the cause of (町による違い)."""
+    k = i - 1
+    if k >= 1 and morphemes[k].surface in ("は", "も") and morphemes[k].pos == "particle":
+        k -= 1
+    if k < 1 or morphemes[k].surface != "に" or morphemes[k].pos != "particle":
         return False
-    place = morphemes[i - 2]
-    if not (place.surface in _STOPS or (place.pos == "noun" and place.surface.endswith(("屋", "屋さん")))):
+    place = morphemes[k - 1]
+    if not (place.surface in _STOPS or (place.pos in ("noun", "suffix")
+                                         and place.surface.endswith(("屋", "屋さん", "店")))):
         return False
+    m = morphemes[i]
     nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
     rest = morphemes[i + 1:]
-    if nxt is None:
-        return False
-    if nxt.pos == "auxiliary" and nxt.lemma == "た":
-        return True                     # (帰りに本屋によった)
+    differs = any(u.surface.startswith(_DIFFERS) or (u.pos == "auxiliary" and u.lemma in ("れる", "られる"))
+                  for u in rest)
+    if m.surface == "よろう" or m.cform.startswith("意志推量形"):
+        return True                     # (神社によろうか)
+    if nxt is None or nxt.pos == "symbol" or nxt.surface in ("か", "よ", "ね", "の", "ん"):
+        return m.surface == "よる"        # (帰りに本屋による。)
+    if nxt.pos == "auxiliary" and nxt.lemma in ("た", "ます", "たい"):
+        return True                     # (帰りに本屋によった, 家によりました)
     if nxt.surface == "と":
         return not any(u.surface in _HEARSAY or (u.lemma == "そう" and u.pos != "adverb") for u in rest)
     if nxt.surface == "て":
-        return not any(u.surface.startswith(_DIFFERS) or (u.pos == "auxiliary" and u.lemma in ("れる", "られる"))
-                       for u in rest)
+        return not differs
+    if nxt.pos == "auxiliary" and nxt.lemma in ("ない", "ず") and m.surface == "よら":
+        return nxt.lemma == "ない" and not differs     # (コンビニにはよらないで; 店によらず is "regardless")
+    if m.surface == "よる" and nxt.surface in ("こと", "事", "つもり", "予定", "ところ"):
+        return True                     # (町によることにした)
     return False
 
 
@@ -5068,6 +5097,53 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             out_t.append(("代名詞", "*", "*"))
             skip.add(i + 1)
             continue
+        if (m.surface in ("なん", "何") and m.pos == "pronoun" and nxt is not None and nxt.surface == "だ"
+                and after is not None and after.surface in ("かん", "彼") and i + 3 < len(morphemes)
+                and morphemes[i + 3].surface == "だ" and _glued(m, nxt) and _glued(nxt, after)
+                and _glued(after, morphemes[i + 3])):
+            # なんだかんだ言っても: 何だかんだ, "one thing or another", one
+            # word -- no copula twice and no 彼 (plan 296)
+            last = morphemes[i + 3]
+            out_m.append(replace(m, surface=m.surface + "だかんだ", end=last.end, lemma="何だかんだ",
+                                 reading="なんだかんだ", lemma_reading="なんだかんだ", kana="ナンダカンダ", pos="adverb",
+                                 ctype="", cform="", written="何だかんだ", written_reading="なんだかんだ"))
+            out_t.append(("副詞", "*", "*"))
+            skip.update({i + 1, i + 2, i + 3})
+            continue
+        if m.surface == "お" and _spells(morphemes, i, "おおかれすくなかれ"):
+            # おおかれすくなかれ in kana: 多かれ少なかれ, one word (plan 296)
+            n = _spells(morphemes, i, "おおかれすくなかれ")
+            last = morphemes[i + n - 1]
+            out_m.append(replace(m, surface="おおかれすくなかれ", end=last.end, lemma="多かれ少なかれ",
+                                 reading="おおかれすくなかれ", lemma_reading="おおかれすくなかれ", kana="オオカレスクナカレ",
+                                 pos="adverb", ctype="", cform="", written="多かれ少なかれ",
+                                 written_reading="おおかれすくなかれ"))
+            out_t.append(("副詞", "*", "*"))
+            skip.update(range(i + 1, i + n))
+            continue
+        if (m.surface == "その" and nxt is not None and nxt.surface == "通り" and _glued(m, nxt)
+                and (after is None or (after.pos == "symbol" and after.surface in ("。", "！", "!", "？", "」", "、", "…"))
+                     or after.lemma in ("だ", "です"))):
+            # 「その通り。」, その通りです: "exactly", the reply -- no street
+            # (plan 296)
+            out_m.append(replace(m, surface="その通り", end=nxt.end, lemma="その通り", reading="そのとおり",
+                                 lemma_reading="そのとおり", kana="ソノトオリ", pos="noun", ctype="", cform="",
+                                 written="その通り", written_reading="そのとおり"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "かん" and m.pos == "pronoun" and nxt is not None and nxt.pos == "suffix"
+                and nxt.surface in ("ちゃん", "くん", "さん", "君") and _glued(m, nxt)):
+            # かんちゃん: a name before its honorific -- no 彼 (plan 296)
+            out_m.append(replace(m, pos="noun", proper=True, name_kind="given", lemma=m.surface, written=m.surface))
+            out_t.append(("名詞", "固有名詞", "人名"))
+            continue
+        if m.surface == "まめ" and m.pos == "other" and nxt is not None and nxt.surface in ("を", "が", "は", "も", "の"):
+            # 鬼に向かってまめをまいた: 豆, "beans", a thing -- まめに, まめな
+            # are 忠実 (plan 296)
+            out_m.append(replace(m, pos="noun", lemma="豆", written="豆", written_reading="まめ"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            continue
         if (m.surface in ("なん", "何") and m.pos == "pronoun" and nxt is not None and nxt.surface == "の"
                 and after is not None and after.surface in ("かん", "彼") and i + 3 < len(morphemes)
                 and morphemes[i + 3].surface == "の" and _glued(m, nxt) and _glued(nxt, after)
@@ -5118,9 +5194,10 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
             continue
         if (m.surface == "やっ" and m.pos in ("verb", "auxiliary") and m.lemma in ("遣る", "やる", "や")
                 and nxt is not None and nxt.pos == "auxiliary" and nxt.lemma == "た" and prev is not None
-                and _glued(prev, m) and (prev.pos in ("noun", "pronoun", "suffix")
-                                         or (prev.pos == "verb" and prev.cform == "連用形-一般"))
-                and _said_in_the_west(morphemes, i)):
+                and _glued(prev, m) and ((prev.pos in ("noun", "pronoun", "suffix") and _said_in_the_west(morphemes, i))
+                                         # (休みやったら: a verb's stem takes no やる after it --
+                                         # the noun it spells and the west's copula, plan 296)
+                                         or (prev.pos == "verb" and prev.cform == "連用形-一般"))):
             # 泣き虫やったんやで, 休みやったら…行かへん: the west's copula や,
             # "was" -- no やる after a noun where the sentence speaks the
             # west's Japanese (plan 296)
@@ -5147,10 +5224,17 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                  written_reading="む"))
             out_t.append(("助動詞", "*", "*"))
             continue
-        if (m.pos == "verb" and m.lemma in ("因る", "依る", "拠る", "由る") and m.surface in ("よる", "よっ")
+        if (m.pos == "verb" and ((m.lemma in ("因る", "依る", "拠る", "由る")
+                                  and m.surface in ("よる", "よっ", "より", "よら"))
+                                 or (m.lemma == "鎧う" and m.surface == "よろう"))
                 and _drops_in(morphemes, i)):
-            # 本屋によると、画集が並んでいた: 寄る, "drop in" (plan 296)
-            out_m.append(replace(m, lemma="寄る", written="寄る", written_reading="よる"))
+            # 本屋によると、画集が並んでいた, 神社によろうか: 寄る, "drop in"
+            # (plan 296)
+            if m.surface == "よろう":
+                out_m.append(replace(m, lemma="寄る", lemma_reading="よる", ctype="五段-ラ行", cform="意志推量形",
+                                     written="寄る", written_reading="よる"))
+            else:
+                out_m.append(replace(m, lemma="寄る", written="寄る", written_reading="よる"))
             out_t.append(tags[i])
             continue
         if (m.surface == "よる" and m.pos == "verb" and m.lemma in ("因る", "寄る", "依る", "拠る")
@@ -5206,8 +5290,8 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
         if (m.surface == "に" and m.pos == "particle" and prev is not None
                 and prev.surface in ("適当", "てきとう", "いい加減", "大雑把", "おおざっぱ", "丁寧", "ていねい", "真面目",
                                      "まじめ", "慎重", "熱心", "真剣", "必死", "懸命")
-                and nxt is not None and nxt.lemma in ("為る", "する")):
-            # 片付けを適当にした: the な-adjective's に, "sloppily" -- no case
+                and nxt is not None and (nxt.lemma in ("為る", "する") or (nxt.pos == "verb" and prev.pos == "noun"))):
+            # 片付けを適当にした, 適当に書いて: the な-adjective's に, "sloppily" -- no case
             # particle (plan 296)
             if out_m and out_m[-1] is prev and prev.pos == "noun":
                 out_m[-1] = replace(prev, adjectival=True)

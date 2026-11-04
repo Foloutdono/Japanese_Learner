@@ -3733,3 +3733,24 @@ class TheStressSetsOlderPointsTests(unittest.TestCase):
                                   ("最近、日本語の勉強が楽ではなくなってきた。", "〜くなる／〜になる")):
             with self.subTest(sentence=sentence, pattern=pattern):
                 self.assertIn(pattern, found_in(sentence))
+
+
+class TheOlderFixesLookalikesTests(unittest.TestCase):
+    """Plan 296, the second stress set: 寄る in every form after a place
+    lights no 〜によって (家によりました, 町によることにした, よらないで,
+    神社によろうか); 誰にもまして is no 誰も〜ない; であろう is 〜だろう's;
+    何一つ…ない counts nothing."""
+
+    def test_points(self) -> None:
+        for sentence, pattern in (("旅の途中で、祖母が住んでいる町によることにした。", "〜によって"),
+                                  ("彼女は誰にもまして努力を惜しまない人だ。", "何も／誰も〜ない"),
+                                  ("引っ越したばかりで、部屋にはまだ何一つ家具がない。", "助数詞 〜つ／〜人／〜枚")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+        for sentence, pattern in (("店によって値段が違う。", "〜によって"),
+                                  ("誰にも言わない。", "何も／誰も〜ない"),
+                                  ("彼の証言はおそらく事実であろう。", "〜だろう"),
+                                  ("彼女は誰にもまして努力を惜しまない人だ。", "〜にもまして"),
+                                  ("りんごを一つ買った。", "助数詞 〜つ／〜人／〜枚")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertIn(pattern, found_in(sentence))

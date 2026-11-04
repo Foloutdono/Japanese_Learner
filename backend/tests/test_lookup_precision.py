@@ -4000,7 +4000,7 @@ class TheAuditsSmallClassesTests(unittest.TestCase):
         self.assertEqual(token_of("彼は不器用ゆえに、損をすることが多い。", "不器用")["reading"], "ぶきよう")
         self.assertEqual(token_of("営業部では、資料作りはもとより、打ち合わせにも同席した。", "作り")["reading"], "づくり")
         self.assertEqual(token_of("ここは昔、「みなと通り」という名前がついた。", "通り")["reading"], "どおり")
-        self.assertEqual(token_of("その通りです。", "通り")["reading"], "とおり")
+        self.assertEqual(token_of("その通りです。", "その通り")["reading"], "そのとおり")   # (one word, plan 296)
         self.assertEqual(token_of("二通りの方法がある。", "通り")["reading"], "とおり")
         self.assertEqual(token_of("彼はしきりと一財産作りたがっている。", "作り")["reading"], "つくり")
 
@@ -4724,3 +4724,34 @@ class TheStressSetsOlderWordsTests(unittest.TestCase):
         self.assertEqual(token_of("二組の手袋。", "二")["reading"], "ふた")
         self.assertTrue(gloss_of("部屋の片付けを適当にしたら、母に叱られた。", "に").startswith("makes an adverb"))
         self.assertIn("kindergarten", token_of("娘の通う園では体操をします。", "園")["vocab_match"]["entry"]["meaning"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TheOlderFixesLookalikeWordsTests(unittest.TestCase):
+    """Plan 296, the second stress set: 寄る in every form after a place
+    (家によりました, よらないで, 神社によろうか -- no 鎧う), 店によらず and
+    町による違い keep 因る; なんだかんだ, おおかれすくなかれ and その通り。
+    read whole; かんちゃん is a name; まめをまいた is 豆; 適当に書いて is the
+    adverb; 休みやったら is the noun and the west's copula even with no
+    other word of the west; じしんがあったら、机の下に is 地震."""
+
+    def test_its_words(self) -> None:
+        for sentence, surface, kanji in (("友だちの家によりました。", "より", "寄る"),
+                                         ("コンビニにはよらないで帰った。", "よら", "寄る"),
+                                         ("神社によろうか。", "よろう", "寄る"),
+                                         ("うちにもよってください。", "よっ", "寄る"),
+                                         ("店によらず同じ値段だ。", "よら", "因る"),
+                                         ("なんだかんだ言っても、実家がいい。", "なんだかんだ", ""),
+                                         ("どこの家庭にも、おおかれすくなかれ問題はある。", "おおかれすくなかれ", "多かれ少なかれ"),
+                                         ("「その通り。」", "その通り", "その通り"),
+                                         ("鬼に向かってまめをまいた。", "まめ", "豆"),
+                                         ("じしんがあったら、まず机の下に入りましょう。", "じしん", "地震")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"].get("kanji") or "", kanji)
+        # (町による違い: 〜によって's, whose verb is the point's, plan 152)
+        self.assertEqual(token_of("町による違いがある。", "よる")["lemma"], "因る")
+        self.assertEqual(token_of("その通りを渡った。", "通り")["surface"], "通り")
+        self.assertEqual(gloss_of("なんだ、かんちゃんか。", "かん"), "given name")
+        self.assertTrue(gloss_of("レポートを適当に書いて出した。", "に").startswith("makes an adverb"))
+        self.assertTrue(gloss_of("あの店、休みやったら別のとこ行こか。", "やっ").startswith("(Kansai) was"))
+        self.assertEqual(token_of("宿題やった？", "やっ")["pos"], "verb")

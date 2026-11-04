@@ -398,7 +398,8 @@ _SHORT_FORMS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
     # てまう, plan 272)
     "〜ます／〜ません": (("ません", ("ませぬ",)), ("ます", ("まする",))),
     # (said short too: 嘘だろ, うまいんだろ, plan 272)
-    "〜だろう": (("だろう", ("じゃろう", "だろ")),),
+    # (事実であろう: だろう written, plan 296)
+    "〜だろう": (("だろう", ("じゃろう", "だろ", "であろう")),),
     # (before の and ん: 停めたはずなんだけど, 来るはずなのに, plan 272)
     "〜はずです": (("はずです", ("はずな",)),),
     # (plan 272, the sixth review: ご来社の際は; 見逃してはなるまい; 笑うたび;
@@ -6133,6 +6134,11 @@ def _counter_refused(tokens, s, e, _g) -> bool:
         return False
     if _cut_above(tokens, e):
         return True                     # 一枚上手, "a cut above": nothing flat is counted (plan 272)
+    k = next((j for j, u in enumerate(tokens) if u.start <= s < u.end), None)
+    if k is not None and k >= 1 and tokens[k - 1].surface == "何" and tokens[k].surface in ("一つ", "ひとつ") \
+            or (k is not None and k >= 2 and tokens[k].surface == "つ" and tokens[k - 1].surface in ("一", "ひと")
+                and tokens[k - 2].surface == "何"):
+        return True                     # 何一つ…ない: "not a single thing", nothing counted (plan 296)
     return not _is_numeral(_prev_word(tokens, s))
 
 
@@ -8629,6 +8635,8 @@ def _nothing_spans(tokens):
             k += 1
         if k >= len(tokens) or tokens[k].surface != "も" or tokens[k].pos != "particle":
             continue
+        if k + 1 < len(tokens) and tokens[k + 1].surface in ("まして", "増して"):
+            continue                   # (誰にもまして: 〜にもまして, "more than anyone", plan 296)
         if k == i + 1 and t.surface in ("何", "誰"):
             continue                   # (side by side in kanji, the letters' to read)
         neg = None

@@ -1612,7 +1612,10 @@ _NOUN_PARTNERS = {
     "じしん": (("地震", {"起きる", "おきる", "起こる", "おこる", "揺れる", "ゆれる", "揺れ", "ゆれ", "震度", "しんど",
                         "夜中", "よなか", "割れる", "われる", "倒れる", "たおれる", "津波", "つなみ", "被害", "ひがい",
                         "避難", "ひなん", "怖い", "こわい", "大きな", "おおきな", "大きい", "おおきい", "強い", "つよい",
-                        "多い", "おおい", "壊れる", "こわれる", "火事", "かじ", "台風", "たいふう", "来る", "くる"}),
+                        "多い", "おおい", "壊れる", "こわれる", "火事", "かじ", "台風", "たいふう", "来る", "くる",
+                        # (what one does in one: じしんがあったら、机の下に入る)
+                        "机", "つくえ", "逃げる", "にげる", "落ちる", "おちる", "備える", "そなえる", "訓練",
+                        "くんれん", "停電", "ていでん"}),
                ("自信", {"持つ", "もつ", "付ける", "つける", "付く", "つく", "失う", "うしなう", "なくす", "無くす",
                         "満ちる", "みちる", "満々", "まんまん", "過剰", "かじょう", "ありげ", "たっぷり"})),
     "せん": (("線", {"引く", "ひく", "白い", "しろい", "赤い", "あかい", "黄色い", "きいろい", "青い", "あおい",
@@ -1701,6 +1704,13 @@ def _kana_noun(morphemes, i: int, hit):
         return hit                      # せんえん, せんにん: a thousand, counted (plan 296)
     if m.surface == "じしん" and prev is not None and prev.pos in ("noun", "pronoun", "suffix") and prev.end == m.start:
         return _card("自身", "じしん") or hit    # 彼じしん, 自分じしん: oneself (plan 296)
+    if m.surface == "じしん" and _by_noun_partner(morphemes, i, _NOUN_PARTNERS["じしん"], _named_only=True) is None:
+        # (じしんがあったら、机の下に入る: where its own clause names
+        # neither, what the sentence does in one says the earthquake,
+        # plan 296)
+        quake = _NOUN_PARTNERS["じしん"][0][1]
+        if any((t.surface in quake or t.lemma in quake) for k, t in enumerate(morphemes) if k != i):
+            return _card("地震", "じしん") or hit
     if m.surface == "せき" and prev is not None and prev.pos == "prefix" and prev.surface in ("お", "ご", "御"):
         return _card("席", "せき") or hit    # おきゃくさまのおせき: a seat, said up (plan 296)
     if m.surface in _NOUN_PARTNERS and not each_time:
