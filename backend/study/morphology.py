@@ -859,6 +859,66 @@ def _gets_through(morphemes, i: int) -> bool:
     return False
 
 
+# What marks a sentence as said in the west, where や after a noun is
+# the copula (plan 296): 泣き虫やったんやで, 休みやったら…行かへん.
+_KANSAI_SURFACES = frozenset({"ほんま", "ほんまに", "ホンマ", "めっちゃ", "あかん", "ちゃう", "ちゃうちゃう", "おおきに",
+                              "ええ", "なんぼ", "せや", "そや", "かまへん", "あかへん", "やん", "ねん", "へん", "ひん",
+                              "やろ", "やで", "やねん", "わい", "うち"})
+
+
+def _said_in_the_west(morphemes, skip: int) -> bool:
+    """Whether a sentence speaks the west's Japanese: a word only it says
+    (ほんま, へん, ねん), or its copula や elsewhere (んやで)."""
+    for k, u in enumerate(morphemes):
+        if k == skip:
+            continue
+        if u.surface in _KANSAI_SURFACES and u.surface not in ("ええ", "うち"):
+            return True
+        if u.surface == "ええ" and u.pos == "adjective":
+            return True                 # (ええのに, ええ天気: 良い said ええ, never the "yes")
+        if u.pos == "auxiliary" and u.lemma in ("や", "へん", "ひん") and k != skip + 1:
+            return True
+    return False
+
+
+# Where one drops in on the way, 寄る, never what one goes by (plan 296):
+# 本屋によると, としょかんによって -- 天気予報によると, 国によって.
+_STOPS = frozenset({"本屋", "ほんや", "店", "みせ", "お店", "おみせ", "図書館", "としょかん", "銀行", "ぎんこう",
+                    "郵便局", "ゆうびんきょく", "コンビニ", "スーパー", "喫茶店", "きっさてん", "カフェ", "病院",
+                    "びょういん", "薬局", "やっきょく", "デパート", "公園", "こうえん", "交番", "こうばん", "実家",
+                    "じっか", "友達の家", "パン屋", "ぱんや", "花屋", "はなや", "八百屋", "やおや", "本屋さん",
+                    "美術館", "びじゅつかん", "博物館", "はくぶつかん", "神社", "じんじゃ", "お寺", "おてら",
+                    "寺", "てら", "ホテル", "旅館", "りょかん", "市役所", "しやくしょ", "区役所", "くやくしょ"})
+_HEARSAY = frozenset({"そう", "らしい", "という", "とのこと", "って", "ようだ", "みたい", "とか"})
+_DIFFERS = ("違", "ちが", "異な", "変わ", "かわ", "様々", "さまざま", "まちまち", "差", "決ま", "きま")
+
+
+def _drops_in(morphemes, i: int) -> bool:
+    """Whether the よる at morphemes[i], after に and a place one stops
+    at, is 寄る, "drop in": its と finds something (本屋によると、画集が
+    並んでいた) where no word of hearsay closes the sentence, its て goes
+    on to a deed where nothing differs or is done by it (としょかんによって
+    ほんをかりた, never 銀行によって手数料が違う), and its past is a visit
+    (帰りに本屋によった)."""
+    if i < 2 or morphemes[i - 1].surface != "に" or morphemes[i - 1].pos != "particle":
+        return False
+    place = morphemes[i - 2]
+    if not (place.surface in _STOPS or (place.pos == "noun" and place.surface.endswith(("屋", "屋さん")))):
+        return False
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    rest = morphemes[i + 1:]
+    if nxt is None:
+        return False
+    if nxt.pos == "auxiliary" and nxt.lemma == "た":
+        return True                     # (帰りに本屋によった)
+    if nxt.surface == "と":
+        return not any(u.surface in _HEARSAY or (u.lemma == "そう" and u.pos != "adverb") for u in rest)
+    if nxt.surface == "て":
+        return not any(u.surface.startswith(_DIFFERS) or (u.pos == "auxiliary" and u.lemma in ("れる", "られる"))
+                       for u in rest)
+    return False
+
+
 # What is done whole, before やった with no を (plan 296): 全部やった.
 _DONE_WHOLE = frozenset({"全部", "全て", "すべて", "何もかも", "宿題", "仕事", "一通り", "いろいろ", "色々", "ゲーム",
                          "スポーツ", "テニス", "サッカー", "野球"})
@@ -5007,6 +5067,153 @@ def _cut_words(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list
                                  kana="ナン", pos="pronoun", ctype="", cform="", written="何", written_reading="なに"))
             out_t.append(("代名詞", "*", "*"))
             skip.add(i + 1)
+            continue
+        if (m.surface in ("なん", "何") and m.pos == "pronoun" and nxt is not None and nxt.surface == "の"
+                and after is not None and after.surface in ("かん", "彼") and i + 3 < len(morphemes)
+                and morphemes[i + 3].surface == "の" and _glued(m, nxt) and _glued(nxt, after)
+                and _glued(after, morphemes[i + 3])):
+            # なんのかんのと: 何のかんの, "this and that", one phrase -- no
+            # 何, 彼 and two の (plan 296)
+            last = morphemes[i + 3]
+            out_m.append(replace(m, surface=m.surface + "のかんの", end=last.end, lemma="何のかんの",
+                                 reading="なんのかんの", lemma_reading="なんのかんの", kana="ナンノカンノ", pos="noun",
+                                 ctype="", cform="", written="何のかんの", written_reading="なんのかんの"))
+            out_t.append(("名詞", "普通名詞", "一般"))
+            skip.update({i + 1, i + 2, i + 3})
+            continue
+        if (m.surface == "多かれ" and nxt is not None and nxt.surface == "少なかれ" and _glued(m, nxt)):
+            # 多かれ少なかれ: "more or less", one phrase (plan 296)
+            out_m.append(replace(m, surface="多かれ少なかれ", end=nxt.end, lemma="多かれ少なかれ",
+                                 reading="おおかれすくなかれ", lemma_reading="おおかれすくなかれ", kana="オオカレスクナカレ",
+                                 pos="adverb", ctype="", cform="", written="多かれ少なかれ",
+                                 written_reading="おおかれすくなかれ"))
+            out_t.append(("副詞", "*", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "なく" and m.pos == "adjective" and m.lemma in ("無い", "ない") and i + 4 < len(morphemes)
+                and [u.surface for u in morphemes[i + 1:i + 5]] == ["て", "は", "なら", "ない"]
+                and all(_glued(morphemes[k], morphemes[k + 1]) for k in range(i, i + 4))
+                and not (prev is not None and prev.pos in ("verb", "auxiliary", "adjective"))):
+            # この地域ではなくてはならない, 生活になくてはならない: 無くては
+            # ならない, "indispensable", one word -- the verb's own
+            # 行かなくてはならない keeps its point (plan 296)
+            last = morphemes[i + 4]
+            out_m.append(replace(m, surface="なくてはならない", end=last.end, lemma="無くてはならない",
+                                 reading="なくてはならない", lemma_reading="なくてはならない", kana="ナクテハナラナイ",
+                                 ctype="形容詞", cform=last.cform, written="無くてはならない",
+                                 written_reading="なくてはならない"))
+            out_t.append(("形容詞", "一般", "*"))
+            skip.update({i + 1, i + 2, i + 3, i + 4})
+            continue
+        if (m.surface == "やっ" and m.pos == "verb" and m.lemma in ("遣る", "やる") and nxt is not None
+                and nxt.surface == "た" and nxt.pos == "auxiliary" and (prev is None or (prev.pos == "symbol"
+                                                                                   and prev.surface in ("「", "『", "（")))
+                and (after is None or (after.pos == "symbol" and after.surface in ("、", "！", "!", "。", "」", "…", "ー")))):
+            # やった、ついに合格だ！: "hooray", the cry -- no やる (plan 296)
+            out_m.append(replace(m, surface="やった", end=nxt.end, lemma="やった", reading="やった", lemma_reading="やった",
+                                 kana="ヤッタ", pos="interjection", ctype="", cform="", written="やった",
+                                 written_reading="やった"))
+            out_t.append(("感動詞", "一般", "*"))
+            skip.add(i + 1)
+            continue
+        if (m.surface == "やっ" and m.pos in ("verb", "auxiliary") and m.lemma in ("遣る", "やる", "や")
+                and nxt is not None and nxt.pos == "auxiliary" and nxt.lemma == "た" and prev is not None
+                and _glued(prev, m) and (prev.pos in ("noun", "pronoun", "suffix")
+                                         or (prev.pos == "verb" and prev.cform == "連用形-一般"))
+                and _said_in_the_west(morphemes, i)):
+            # 泣き虫やったんやで, 休みやったら…行かへん: the west's copula や,
+            # "was" -- no やる after a noun where the sentence speaks the
+            # west's Japanese (plan 296)
+            if prev.pos == "verb" and out_m:
+                said = kata_to_hira(prev.reading or "")
+                out_m[-1] = replace(prev, pos="noun", lemma=prev.surface, lemma_reading=said, ctype="", cform="",
+                                    written=prev.surface, written_reading=said)
+                out_t[-1] = ("名詞", "普通名詞", "一般")
+            out_m.append(replace(m, pos="auxiliary", lemma="や", lemma_reading="や", ctype="助動詞-ヤ",
+                                 cform="連用形-促音便", written="や", written_reading="や"))
+            out_t.append(("助動詞", "*", "*"))
+            continue
+        if (m.surface == "せん" and m.pos == "noun" and nxt is not None and nxt.surface == "が"
+                and after is not None and after.surface in ("ため", "為") and prev is not None
+                and (prev.pos == "particle" or (prev.pos == "auxiliary" and prev.surface == "に") or prev.verbal)):
+            # 明らかにせんがため: せ, する's old stem, and ん, the old
+            # volitional む, "in order to" -- no 千 (plan 296)
+            cut = m.start + 1
+            out_m.append(replace(m, surface="せ", end=cut, lemma="為る", reading="せ", lemma_reading="する", kana="セ",
+                                 pos="verb", ctype="サ行変格", cform="未然形-セ", written="する", written_reading="する"))
+            out_t.append(("動詞", "非自立可能", "*"))
+            out_m.append(replace(m, surface="ん", start=cut, lemma="む", reading="ん", lemma_reading="む", kana="ン",
+                                 pos="auxiliary", ctype="助動詞-ム", cform="終止形-撥音便", written="む",
+                                 written_reading="む"))
+            out_t.append(("助動詞", "*", "*"))
+            continue
+        if (m.pos == "verb" and m.lemma in ("因る", "依る", "拠る", "由る") and m.surface in ("よる", "よっ")
+                and _drops_in(morphemes, i)):
+            # 本屋によると、画集が並んでいた: 寄る, "drop in" (plan 296)
+            out_m.append(replace(m, lemma="寄る", written="寄る", written_reading="よる"))
+            out_t.append(tags[i])
+            continue
+        if (m.surface == "よる" and m.pos == "verb" and m.lemma in ("因る", "寄る", "依る", "拠る")
+                and not (prev is not None and prev.surface in ("に", "には", "にも")) and nxt is not None
+                and nxt.pos == "particle" and nxt.surface in ("に", "は", "も", "が", "の", "まで", "から")):
+            # おばけはよるにしか出てこない: 夜, "night" -- no 因る or 寄る
+            # takes no に before it (plan 296)
+            out_m.append(replace(m, pos="noun", lemma="夜", lemma_reading="よる", ctype="", cform="", written="夜",
+                                 written_reading="よる"))
+            out_t.append(("名詞", "普通名詞", "副詞可能"))
+            continue
+        if (m.surface == "何に" and m.pos == "pronoun" and nxt is not None and nxt.surface == "も"
+                and after is not None and after.surface in ("まして", "増して")):
+            # 何にもまして: 何 and 〜にもまして's に, "above all" (plan 296)
+            cut = m.start + 1
+            out_m.append(replace(m, surface="何", end=cut, reading="なに", kana="ナニ", written_reading="なに"))
+            out_t.append(tags[i])
+            out_m.append(replace(m, surface="に", start=cut, lemma="に", reading="に", lemma_reading="に", kana="ニ",
+                                 pos="particle", ctype="", cform="", written="に", written_reading="に"))
+            out_t.append(("助詞", "格助詞", "*"))
+            continue
+        if (m.surface == "まして" and m.pos == "adverb" and prev is not None and prev.surface == "も" and i >= 2
+                and morphemes[i - 2].surface in ("に", "何に")):
+            # 去年にもまして: 増す's て form, "more than" -- no 況して,
+            # "let alone" (plan 296)
+            out_m.append(replace(m, lemma="増す", lemma_reading="ます", pos="verb", ctype="五段-サ行",
+                                 cform="連用形-一般", written="増す", written_reading="ます"))
+            out_t.append(("動詞", "一般", "*"))
+            continue
+        if (m.surface in ("なくなる", "なくなっ", "なくなり", "なくなら", "なくなれ") and m.pos == "verb"
+                and m.lemma in ("無くなる", "なくなる") and prev is not None
+                and ((prev.pos == "particle" and prev.surface in ("は", "も") and i >= 2
+                      and morphemes[i - 2].surface == "で" and morphemes[i - 2].pos == "auxiliary")
+                     or (prev.pos in ("adjective", "auxiliary") and prev.surface.endswith("く")))):
+            # 楽ではなくなってきた: ない's く and なる, "stopped being (easy)"
+            # -- no 無くなる, "be lost", after the copula's では (plan 296)
+            cut = m.start + 2
+            out_m.append(replace(m, surface="なく", end=cut, lemma="無い", reading="なく", lemma_reading="ない",
+                                 kana="ナク", pos="adjective", auxiliary_use=True, ctype="形容詞", cform="連用形-一般",
+                                 written="ない", written_reading="ない"))
+            out_t.append(("形容詞", "非自立可能", "*"))
+            rest = m.surface[2:]
+            out_m.append(replace(m, surface=rest, start=cut, lemma="成る", reading=rest, lemma_reading="なる",
+                                 kana="".join(chr(ord(c) + 0x60) for c in rest), written="なる", written_reading="なる"))
+            out_t.append(("動詞", "非自立可能", "*"))
+            continue
+        if m.surface == "まめ" and m.pos == "other" and nxt is not None and nxt.surface in ("に", "な", "だ", "で", "さ"):
+            # 連絡をまめにする: 忠実, "diligent", the 形状詞 -- no 豆, "beans"
+            # (plan 296)
+            out_m.append(replace(m, lemma="忠実", written="忠実"))
+            out_t.append(tags[i])
+            continue
+        if (m.surface == "に" and m.pos == "particle" and prev is not None
+                and prev.surface in ("適当", "てきとう", "いい加減", "大雑把", "おおざっぱ", "丁寧", "ていねい", "真面目",
+                                     "まじめ", "慎重", "熱心", "真剣", "必死", "懸命")
+                and nxt is not None and nxt.lemma in ("為る", "する")):
+            # 片付けを適当にした: the な-adjective's に, "sloppily" -- no case
+            # particle (plan 296)
+            if out_m and out_m[-1] is prev and prev.pos == "noun":
+                out_m[-1] = replace(prev, adjectival=True)
+            out_m.append(replace(m, lemma="だ", lemma_reading="だ", pos="auxiliary", ctype="助動詞-ダ", cform="連用形-ニ",
+                                 written="だ", written_reading="だ"))
+            out_t.append(("助動詞", "*", "*"))
             continue
         if (m.surface == "幸多" and m.pos == "noun" and nxt is not None and nxt.surface == "かれ" and _glued(m, nxt)
                 and (after is None or after.pos in ("particle", "symbol"))):

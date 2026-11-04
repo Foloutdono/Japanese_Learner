@@ -3696,3 +3696,40 @@ class TheSingletonsLookalikesTests(unittest.TestCase):
                                   ("店にしたら、客が多いほうがうれしい。", "〜にしたら")):
             with self.subTest(sentence=sentence):
                 self.assertIn(pattern, found_in(sentence))
+
+
+class TheStressSetsOlderPointsTests(unittest.TestCase):
+    """Plan 296, what the stress sentences found that predated them: a
+    place one drops in at (本屋によると、画集が並んでいた) is 寄る, no
+    〜によると or 〜によって; せんがため, 何にもまして, 何であろう, 幼く
+    見える, おっしゃった通り、, だけではない and 何一つ…ず light their
+    points; 楽ではなくなった is 〜くなる."""
+
+    def test_points(self) -> None:
+        for sentence, pattern in (("会社の帰りに駅前の本屋によると、画集が並んでいた。", "〜によると"),
+                                  ("がっこうのかえりに、としょかんによってほんをかりた。", "〜によって"),
+                                  ("うまく見えない。", "〜に見える"),
+                                  ("おかげさまで、この通りすっかり元気になりました。", "〜通りに"),
+                                  ("その通りです。", "〜通りに"),
+                                  ("通りを歩いた。", "〜通りに"),
+                                  ("車が通る通りを渡った。", "〜通りに"),
+                                  ("これは本であろう。", "〜でなくてなんだろう")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertNotIn(pattern, found_in(sentence))
+        for sentence, pattern in (("新聞によると、雨だそうだ。", "〜によると"),
+                                  ("銀行によって手数料が違う。", "〜によって"),
+                                  ("真実を明らかにせんがため、取材を続けた。", "〜んがため"),
+                                  ("子どもの安全は何にもまして優先される。", "〜にもまして"),
+                                  ("今年は去年にもまして、暑い。", "〜にもまして"),
+                                  ("あれが希望でなくて何であろう。", "〜でなくてなんだろう"),
+                                  ("執念でなくてなんであろうか。", "〜でなくてなんだろう"),
+                                  ("眼鏡を外すと、兄はずいぶん幼く見える。", "〜に見える"),
+                                  ("先生がおっしゃった通り、試験には同じ問題が出た。", "〜通りに"),
+                                  ("予定通り、会議は始まった。", "〜通りに"),
+                                  ("少子化の影響は学校の統廃合だけではない。", "〜だけでなく"),
+                                  ("それだけではなく、値段も安い。", "〜だけでなく"),
+                                  ("彼は何一つ文句を言わずに最後まで働いた。", "〜一つ〜ない"),
+                                  ("おかげさまで、何ひとつ不自由なく暮らしております。", "〜一つ〜ない"),
+                                  ("最近、日本語の勉強が楽ではなくなってきた。", "〜くなる／〜になる")):
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertIn(pattern, found_in(sentence))

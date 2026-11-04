@@ -382,9 +382,15 @@ _SHORT_FORMS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
     # whose 通じる it stands for here, is held apart by _threaded, plan 296)
     "〜を通じて": (("を通じ", ("を通し", "をとおし")), ("をつうじ", ("をとおし",))),
     "〜に限って": (("に限って", ("に限り", "にかぎり")),),
-    "〜通りに": (("どおりに", ("どおり",)),),
+    "〜通りに": (("どおりに", ("どおり",)), ("通りに", ("通り", "とおり"))),
+    # (幼く見える: an い-adjective's く, as the point's structure writes
+    # it, plan 296)
+    "〜に見える": (("に見え", ("く見え",)),),
+    # (技術だけではない, それだけではなく: "not only", the copula's では
+    # written out, plan 296)
+    "〜だけでなく": (("だけでなく", ("だけではなく", "だけではない", "だけじゃなく", "だけじゃない")),),
     # (何だろう: the same "what", spelled in its kanji, plan 296)
-    "〜でなくてなんだろう": (("なんだろう", ("何だろう",)),),
+    "〜でなくてなんだろう": (("なんだろう", ("何だろう", "なんであろう", "何であろう")),),
     "〜とあれば": (("とあれば", ("とあらば",)),),
     "〜じゃないか": (("じゃないか", ("ではないか", "じゃありませんか", "ではありませんか")),),
     "〜ことがある": (("ことがあ", ("ことはあ", "こともあ")), ("事があ", ("事はあ", "事もあ"))),
@@ -1776,6 +1782,15 @@ def _hits(sentence: str, tokens, parts):
     return out
 
 
+def _ku_of_an_adjective(tokens, start: int) -> bool:
+    """Whether `start` is the く that ends an い-adjective's 連用形 (幼く,
+    広く), where 〜に見える is written く見える (plan 296)."""
+    t = next((t for t in tokens if t.start <= start < t.end), None)
+    return t is not None and t.pos == "adjective" and t.cform.startswith("連用形") and t.surface.endswith("く") \
+        and start == t.end - 1 and t.lemma not in ("無い", "ない", "良い", "よい", "いい", "上手い", "うまい", "旨い",
+                                                   "早い", "速い", "はやい")   # (うまく見えない: can't see well)
+
+
 def _shaped(sentence, tokens, level, pattern, parts):
     """`_hits`, then each hit held to the shape its own lessons show for
     the spelling it matched.
@@ -1824,9 +1839,12 @@ def _shaped(sentence, tokens, level, pattern, parts):
         # A spelling its lessons always show on a word of its own is not
         # half a word here either: the し of なくして is not the 〜し
         # that lists reasons.
-        if stands and start not in starts:
+        # (幼く見える: 〜に見える's い-adjective + く見える, as its
+        # structure writes it, the く the adjective's own, plan 296)
+        ku = pattern == "〜に見える" and _ku_of_an_adjective(tokens, start)
+        if stands and start not in starts and not ku:
             continue
-        if pos not in heads and not (pos == "auxiliary" and "particle" in heads and (
+        if pos not in heads and not ku and not (pos == "auxiliary" and "particle" in heads and (
                 _copula_ni(tokens, start, end) or _copula_de_after_no(tokens, start, end)
                 or _copula_de_mo(pattern, tokens, start, end))) \
                 and not (pattern == "〜くする／〜にする" and pos == "particle" and _made_into(tokens, start)) \
@@ -1881,7 +1899,9 @@ def _shaped(sentence, tokens, level, pattern, parts):
                 # 〜わけではない's (plan 188)
                 continue
         cited = end in ends and len(sentence[start:end]) >= 5 and sentence[start:end] == parts[spelling][-1][0]
-        if tails and not cited and not own and not (_ends_in_da(pattern) and _is_copula(_tail_token(end, tokens) or tokens[0])) and (
+        # (であろう is だろう written: 執念でなくてなんであろうか, plan 296)
+        if tails and not cited and not own and not sentence[start:end].endswith("であろう") \
+                and not (_ends_in_da(pattern) and _is_copula(_tail_token(end, tokens) or tokens[0])) and (
                 _tail(end, tokens) not in tails if end not in ends
                 else _coarse_kind(_tail(end, tokens)) not in {_coarse_kind(k) for k in tails}
                 or (_tail(end, tokens) in ("verb", "adjective") and tails <= {"verb", "adjective"}
@@ -1934,7 +1954,7 @@ def _shaped(sentence, tokens, level, pattern, parts):
                 # (なるとあれば: after a plain form the structure line names,
                 # the tokenizer reads と as the conditional; plan 188)
                 continue
-        if not (copula_te or _attaches(start, tokens, befores, heads, exact)
+        if not (copula_te or ku or _attaches(start, tokens, befores, heads, exact)
                 # A point that opens on the honorific prefix (お〜ください)
                 # stands after anything: 少々お待ちください -- and so does
                 # a point that is a verb word itself: 明日いらっしゃいます
@@ -1967,7 +1987,7 @@ def _shaped(sentence, tokens, level, pattern, parts):
         if _wrong_form(start, tokens, pattern):
             continue
         if not proposed and not own and _ending(end, tokens) not in endings \
-                and _ending(end, tokens, by_mase=True) not in endings:
+                and _ending(end, tokens, by_mase=True) not in endings and not sentence[start:end].endswith("であろう"):
             continue
         out.append(hit)
     return out
@@ -3394,7 +3414,9 @@ def _not_even_one_spans(tokens):
     negative that closes its clause."""
     out = []
     for i, t in enumerate(tokens):
-        if i == 0 or tokens[i - 1].pos not in ("noun", "suffix"):
+        # (何一つ, 誰一人's 何: a pronoun before it too -- 何一つ文句を言わず
+        # に, 何ひとつ不自由なく, plan 296)
+        if i == 0 or tokens[i - 1].pos not in ("noun", "suffix", "pronoun"):
             continue
         last = i
         if t.surface in ("ひと", "一") and i + 1 < len(tokens) and tokens[i + 1].surface == "つ":
@@ -6848,6 +6870,25 @@ def _a_street(tokens, s: int) -> bool:
     return False
 
 
+def _a_bare_street(tokens, s: int, e: int) -> bool:
+    """Whether a 通り with no に is no 〜通りに: the point stands bare only
+    after what was said, done or planned, a verb or a noun's の, and
+    before a comma or the deed (おっしゃった通り、, 思ったとおりだった) --
+    never この通り or その通り, "like this", "exactly", nor a street
+    named by what it takes (通りを, 通りは, plan 296)."""
+    k = next((j for j, t in enumerate(tokens) if t.start < e <= t.end), None)
+    if k is None or tokens[k].surface.endswith("に"):
+        return False
+    p = _prev_word(tokens, s)
+    if p is None or p.surface in ("この", "その", "あの", "どの", "こんな", "そんな", "あんな") or p.pos == "adnominal":
+        return True
+    voiced = morphology.kata_to_hira(tokens[k].reading or "").startswith("どおり") and p.end == tokens[k].start
+    if not (p.pos in ("verb", "auxiliary") or (p.surface == "の" and p.pos == "particle") or voiced):
+        return True                     # (予定通り、, いつも通り: a noun's どおり stands too)
+    n = tokens[k + 1] if k + 1 < len(tokens) else None
+    return not (n is not None and (n.surface in ("、", "，") or n.pos == "verb" or _is_copula(n)))
+
+
 def _done_in_a_manner(tokens, s: int) -> bool:
     """Whether the に at `s` makes an adverb of a manner (まめに, 丁寧に)
     for a する that does a deed -- no "make it so" (plan 296)."""
@@ -7633,6 +7674,10 @@ def _pattern_refusals():
         # 現金に引き換えてもらった is exchanging, no "in contrast"
         "〜にひきかえ": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.pos in ("auxiliary", "particle")
             and n.surface in ("て", "た", "ます", "まし", "られ", "る"),
+        # (本屋によると、画集が並んでいた, としょかんによってほんをかりた:
+        # 寄る, "drop in", the tokenizer's reading, plan 296)
+        "〜によって": lambda t, s, e, g: any(x.lemma == "寄る" and s <= x.start < e for x in t),
+        "〜によると": lambda t, s, e, g: any(x.lemma == "寄る" and s <= x.start < e for x in t),
         # 右に見える is "visible on the right"
         # (互いに見えるようにする: 互いに, "to each other", and 見える,
         # "visible" -- an adverb's に, no "looks", plan 296)
@@ -7647,7 +7692,8 @@ def _pattern_refusals():
         # planned or done, plan 296)
         "〜通りに": lambda t, s, e, g: _is_numeral(_prev_word(t, s)) or ((p := _prev_word(t, s)) is not None and (
             p.pos == "adjective" or (p.pos == "auxiliary" and p.lemma in ("ない", "無い", "ぬ", "ず"))
-            or (p.surface == "な" and p.pos == "auxiliary"))) or _a_street(t, s) or ((n := _next_word(t, e)) is not None
+            or (p.surface == "な" and p.pos == "auxiliary"))) or _a_street(t, s) or _a_bare_street(t, s, e) \
+            or ((n := _next_word(t, e)) is not None
             and n.lemma in ("有る", "ある", "居る", "いる", "面する", "出る", "沿う", "並ぶ", "建つ", "立つ")),
         "〜とき": _toki_refused,
         # 時間を過ぎる, 三時過ぎ: 過ぎる itself, passing a time -- where

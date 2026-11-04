@@ -324,6 +324,8 @@ _GLOSSES = {
     "だけ_as_many": {"en": "(after 数) as many as: 星の数だけ, as many times as there are stars",
                     "fr": "(après 数) autant que : 星の数だけ, autant de fois qu'il y a d'étoiles"},
     "ああ_yes": {"en": "(answering) yeah, right: a casual yes", "fr": "(en réponse) ouais, oui : un oui familier"},
+    "や_was": {"en": "(Kansai) was (= だった): 泣き虫やった, was a crybaby; 休みやったら, if it's a day off",
+               "fr": "(Kansai) était (= だった) : 泣き虫やった, était un pleurnichard ; 休みやったら, si c'est un jour de congé"},
     "や_da": {"en": "(Kansai) is (= だ): なんでやねん, why on earth?",
              "fr": "(Kansai) est (= だ) : なんでやねん, mais enfin pourquoi ?"},
     "ねん": {"en": "(Kansai) explains or insists (= のだ, んだ)", "fr": "(Kansai) explique ou insiste (= のだ, んだ)"},
@@ -964,6 +966,9 @@ def gloss(morphemes, i: int) -> dict | None:
     elif m.pos == "particle" and m.surface == "で" and _almost_at(morphemes, i):
         key = "で_almost"                   # もう少しで勝てた, あと一歩で -- never あとちょっとで
         # いい, "a little is enough" (plan 272)
+    elif m.pos == "auxiliary" and m.lemma == "や" and m.surface == "やっ" and i + 1 < len(morphemes) \
+            and morphemes[i + 1].lemma == "た":
+        key = "や_was"                      # 泣き虫やった, 休みやったら (plan 296)
     elif m.pos == "auxiliary" and m.lemma == "や" and m.surface in ("やろ", "やろう") and m.cform.startswith("意志推量形"):
         key = "やろ"                        # ちゃうやろ？ (plan 272)
     elif m.pos == "auxiliary" and m.surface == "や" and m.lemma == "や" and i > 0 \
@@ -1334,7 +1339,10 @@ def _kansai_chau(morphemes, i: int) -> bool:
 def _kansai_yo(morphemes, i: int) -> bool:
     """Whether で closes what is said after the west's や or あかん, its
     よ (plan 272): 千円やで, あかんで."""
-    return morphemes[i - 1].surface in ("や", "あかん") and _ends_or_breaks(morphemes, i)
+    return (morphemes[i - 1].surface in ("や", "あかん")
+            # (同じ味やったで: after the west's past, plan 296)
+            or (i >= 2 and morphemes[i - 1].surface == "た" and morphemes[i - 2].surface == "やっ"
+                and morphemes[i - 2].lemma == "や")) and _ends_or_breaks(morphemes, i)
 
 
 def _ends_or_breaks(morphemes, i: int) -> bool:

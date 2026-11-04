@@ -1256,6 +1256,12 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 and surf[start - 1] in ("、", "，", "・") and _numeral_value(surf[start - 2]) == _numeral_value(surf[i - 1]) - 1:
             out[i - 1], out[i] = ("さん" if surf[i - 1] == "三" else "ご"), "にち"
             continue
+        # 三年二組, a class: にくみ, the grade's own number -- ふたくみ is
+        # "two sets" (plan 296).
+        if surf[i] == "組" and start >= 1 and surf[start - 1] in ("年", "年生") and start == i - 1 \
+                and surf[i - 1] in _KANJI_DIGIT:
+            out[i - 1] = read_numeral(surf[i - 1]) or out[i - 1]
+            continue
         fixed = _counter_readings("".join(surf[start:i]), out[i - 1], surf[i], out[i],
                                   tokens[i].get("pos", ""), whole=start == i - 1,
                                   after=surf[i + 1:i + 3])

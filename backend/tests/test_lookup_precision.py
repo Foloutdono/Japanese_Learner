@@ -4689,3 +4689,38 @@ class TheAuditsSingletonWordsTests(unittest.TestCase):
         self.assertEqual(token_of("母を助けんがため、働いた。", "ん")["lemma"], "む")
         self.assertTrue(gloss_of("引き受け手を見つけるのが難しい。", "手").startswith("(after a verb's stem)"))
         self.assertEqual(card_of("彼は手を洗った。", "手"), "vocab_N5_手_て")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TheStressSetsOlderWordsTests(unittest.TestCase):
+    """Plan 296, what the stress sentences found that predated them:
+    なんのかんの, 多かれ少なかれ and なくてはならない read whole; やった、
+    is "hooray"; the west's 泣き虫やった is the copula's past; 本屋によると
+    is 寄る; よるにしか is 夜; 何にもまして's まして is 増す; 三年二組 にくみ;
+    じしん by its clause; まめ is 忠実; 園 alone is the kindergarten too."""
+
+    def test_its_words(self) -> None:
+        for sentence, surface, kanji in (("弟はなんのかんのと言い訳をした。", "なんのかんの", "何のかんの"),
+                                         ("多かれ少なかれ、誰でも緊張する。", "多かれ少なかれ", "多かれ少なかれ"),
+                                         ("この地域ではなくてはならない交通手段だ。", "なくてはならない", "無くてはならない"),
+                                         ("会社の帰りに駅前の本屋によると、画集が並んでいた。", "よる", "寄る"),
+                                         ("新聞によると、雨だそうだ。", "よる", "因る"),
+                                         ("おばけはよるにしか出てこない。", "よる", "夜"),
+                                         ("子どもの安全は何にもまして優先される。", "まして", "増す"),
+                                         ("夜中に大きなじしんがあって、皿が割れた。", "じしん", "地震"),
+                                         ("じしんがない。", "じしん", "自信"),
+                                         ("彼じしんの問題だ。", "じしん", "自身"),
+                                         ("親への連絡をまめにする。", "まめ", "忠実")):
+            with self.subTest(sentence=sentence, surface=surface):
+                self.assertEqual(token_of(sentence, surface)["vocab_match"]["entry"]["kanji"], kanji)
+        self.assertEqual(token_of("やった、ついに合格だ！", "やった")["pos"], "interjection")
+        self.assertEqual(token_of("宿題やった？", "やっ")["pos"], "verb")
+        self.assertEqual(token_of("行かなくてはならない。", "なら")["pos"], "verb")
+        for sentence in ("子どもの頃は、ほんまに泣き虫やったんやで。", "明日が休みやったら、一緒に映画でも行かへん？"):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(gloss_of(sentence, "やっ").startswith("(Kansai) was"))
+        self.assertEqual(card_of("明日が休みやったら、一緒に映画でも行かへん？", "休み"), "vocab_N5_休み_やすみ")
+        self.assertEqual(token_of("三年間ありがとうございました。三年二組一同より", "二")["reading"], "に")
+        self.assertEqual(token_of("二組の手袋。", "二")["reading"], "ふた")
+        self.assertTrue(gloss_of("部屋の片付けを適当にしたら、母に叱られた。", "に").startswith("makes an adverb"))
+        self.assertIn("kindergarten", token_of("娘の通う園では体操をします。", "園")["vocab_match"]["entry"]["meaning"])

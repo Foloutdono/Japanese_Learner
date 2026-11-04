@@ -1607,6 +1607,14 @@ _NOUN_PARTNERS = {
     # (plan 296: a line is drawn, white or red, and a railway line runs
     # late or stops; a thousand counts -- what it counts glued to it,
     # せんえん, never 人 elsewhere in the clause: となりのせんの人が乗る)
+    # (plan 296: an earthquake comes, shakes and breaks things; one's
+    # confidence is had, gained or lost -- じしんがある says neither)
+    "じしん": (("地震", {"起きる", "おきる", "起こる", "おこる", "揺れる", "ゆれる", "揺れ", "ゆれ", "震度", "しんど",
+                        "夜中", "よなか", "割れる", "われる", "倒れる", "たおれる", "津波", "つなみ", "被害", "ひがい",
+                        "避難", "ひなん", "怖い", "こわい", "大きな", "おおきな", "大きい", "おおきい", "強い", "つよい",
+                        "多い", "おおい", "壊れる", "こわれる", "火事", "かじ", "台風", "たいふう", "来る", "くる"}),
+               ("自信", {"持つ", "もつ", "付ける", "つける", "付く", "つく", "失う", "うしなう", "なくす", "無くす",
+                        "満ちる", "みちる", "満々", "まんまん", "過剰", "かじょう", "ありげ", "たっぷり"})),
     "せん": (("線", {"引く", "ひく", "白い", "しろい", "赤い", "あかい", "黄色い", "きいろい", "青い", "あおい",
                     "太い", "ふとい", "細い", "ほそい", "地図", "ちず", "電車", "でんしゃ", "遅れる", "おくれる",
                     "止まる", "とまる", "乗る", "のる", "駅", "えき", "乗り換え", "のりかえ", "内側", "うちがわ",
@@ -1641,7 +1649,11 @@ _COUNTED_AFTER = frozenset({"円", "えん", "人", "にん", "本", "ほん", "
 # The card a kana noun is where nothing beside it names one (plan 296):
 # あぶら is oil, the general word, and 脂 only where meat or skin says so
 # (あぶらっぽい, チェーンにあぶらがない, あぶらが多い).
-_NOUN_DEFAULTS = {"あぶら": "油"}
+_NOUN_DEFAULTS = {"あぶら": "油",
+                  # (じしんがない: confidence, where no word of an
+                  # earthquake stands beside it; 自身 only after its noun,
+                  # 彼じしん, plan 296)
+                  "じしん": "自信"}
 
 
 def _kana_noun(morphemes, i: int, hit):
@@ -1687,6 +1699,8 @@ def _kana_noun(morphemes, i: int, hit):
     if m.surface == "せん" and nxt is not None and nxt.start == m.end and (nxt.pos == "suffix" or nxt.counter
                                                                            or nxt.surface in _COUNTED_AFTER):
         return hit                      # せんえん, せんにん: a thousand, counted (plan 296)
+    if m.surface == "じしん" and prev is not None and prev.pos in ("noun", "pronoun", "suffix") and prev.end == m.start:
+        return _card("自身", "じしん") or hit    # 彼じしん, 自分じしん: oneself (plan 296)
     if m.surface == "せき" and prev is not None and prev.pos == "prefix" and prev.surface in ("お", "ご", "御"):
         return _card("席", "せき") or hit    # おきゃくさまのおせき: a seat, said up (plan 296)
     if m.surface in _NOUN_PARTNERS and not each_time:
