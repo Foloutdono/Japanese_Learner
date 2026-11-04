@@ -84,7 +84,7 @@ export function DisplayPage() {
                   onClick={() => { if (locale !== l.code) { switchLang(l.code); playClick() } }}
                 >
                   <span className="lang-pick__name"><Flag code={l.code} />{l.label}</span>
-                  <span className="lang-pick__sample">{own.tabToday} · {own.tabDictionary}</span>
+                  <span className="lang-pick__sample">{own.languageSample}</span>
                 </button>
               )
             })}

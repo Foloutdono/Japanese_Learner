@@ -25449,13 +25449,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
 .lang-pick__sample { min-width: 0; overflow: hidden; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
-/* Español (Latinoamérica) and its two words need about 335px, as
-   measured here: the row a 390px phone gives them (plan 303). The words
-   never break onto a second line (nowrap, above): where a font sets the
-   row a little wider, they end in an ellipsis. Narrower (375, 360, 320)
-   they go, since the name already says the language, and the name keeps
-   its one line. */
-@container (max-width: 334px) {
+/* A row's sample is the words that tell its language from the others
+   (`languageSample`: Agregar beside Spain's Añadir, plan 303). The
+   widest row, Español (Latinoamérica) and Agregar, needs about 286px, as
+   measured here: a 360px phone's row (318) holds it, a 320px phone's
+   (278) does not. The words never break onto a second line (nowrap,
+   above); below 300, a few percent over the measure so that a font set
+   a little wider never cuts a word short, they go, since the name
+   already says the language, and the name keeps its one line. */
+@container (max-width: 299px) {
   .lang-pick__sample { display: none; }
 }
 
