@@ -96,8 +96,8 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(_tok("お姉さん", "おあねさん")), ["おねえさん"])
 
     def test_nani_before_a_particle(self) -> None:
-        # (やら and は since plan 304: 何やら, 何はさておき)
-        for after in ("を", "が", "も", "か", "に", "へ", "から", "まで", "やら", "は"):
+        # (やら and は since plan 304: 何やら, 何はさておき; かしら: 何かしら)
+        for after in ("を", "が", "も", "か", "に", "へ", "から", "まで", "やら", "は", "かしら"):
             with self.subTest(after):
                 self.assertEqual(_read(_tok("何", "なん", "代名詞", "*", "*"), _particle(after))[0], "なに")
         # At the end of a question too: 何？
@@ -121,6 +121,14 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(_tok("何十", "なんじゅう", "名詞", "数詞"), _tok("人", "にん", "接尾辞"))[0],
                          "なんじゅう")
         self.assertEqual(_read(_tok("何", "なん", "名詞", "数詞"), _tok("人", "にん", "接尾辞"))[0], "なん")
+
+    def test_nani_before_the_ge_of_nanige(self) -> None:
+        # 何気ない, 何気なく: UniDic cuts 何 + 気 read げ, a manner.
+        self.assertEqual(_read(_tok("何", "なん"), _tok("気", "げ", "接尾辞", "形状詞的", "*", "suffix"),
+                               _tok("なく", "なく", "形容詞"))[0], "なに")
+        # 何の気なしに: の between, and its 気 is き, a mind.
+        self.assertEqual(_read(_tok("何", "なん"), _particle("の"), _tok("気", "き"), _tok("なし", "なし"))[0], "なん")
+        self.assertEqual(_read(_tok("何", "なん"), _tok("気", "き"))[0], "なん")
 
     def test_nani_ni_mo(self) -> None:
         # UniDic reads 何に as the なんに of なんにも, "(not) anything at
@@ -764,7 +772,12 @@ class SentenceReadingTests(unittest.TestCase):
         "あの景色は何にも比べられない。": "なに",
         "駅に着いたら、何はさておき切符を買おう。": "なに",
         "何はともあれ、無事でよかった。": "なに",
+        # かしら and the げ of 何気ない, which the scan found beside them.
+        "毎日何かしら新しい発見がある。": "なに",
+        "何気なく窓の外を見た。": "なに",
+        "何気ない一言に傷ついた。": "なに",
         # The lookalikes.
+        "何の気なしに言った。": "なん",
         "これは何ですか。": "なん",
         "それは何の本ですか。": "なん",
         "兄は何でも食べます。": "なん",
@@ -795,6 +808,8 @@ class SentenceReadingTests(unittest.TestCase):
                                         ("ホームで駅員さんが何やら話している。", "何", "なに"),
                                         ("何にもまして大切なのは、健康だ。", "何に", "なにに"),
                                         ("駅に着いたら、何はさておき切符を買おう。", "何", "なに"),
+                                        ("毎日何かしら新しい発見がある。", "何", "なに"),
+                                        ("何気なく窓の外を見た。", "何", "なに"),
                                         ("これは何ですか。", "何", "なん"),
                                         ("家族は何にも代えられない。", "何に", "なにに"),
                                         ("彼は何にも知らない。", "何に", "なんに")):

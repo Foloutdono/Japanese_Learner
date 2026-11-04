@@ -523,12 +523,12 @@ _WHOLE = {
 _HEADS = (("言", "ゆ", "い"), ("丸", "まり", "まる"), ("込", "ご", "こ"))
 
 # 何 before one of these is なに: 何を, 何が, 何も, 何か, 何に, 何へ,
-# 何から, 何まで, 何より, 何や, 何やら, 何は (何はさておき, 何はともあれ).
-# Not で (なんで "why" is a word), the copula (何だ, 何です are なん)
-# or の (何の is なんの): 何 is なん before a t-, d- or n- sound and a
-# counter, なに before the rest (plan 304).
+# 何から, 何まで, 何より, 何や, 何やら, 何かしら, 何は (何はさておき,
+# 何はともあれ). Not で (なんで "why" is a word), the copula (何だ, 何です
+# are なん) or の (何の is なんの): 何 is なん before a t-, d- or n- sound
+# and a counter, なに before the rest (plan 304).
 _NANI_BEFORE = {"を", "が", "も", "か", "に", "へ", "から", "まで", "より",
-                "や", "やら", "は", "とか", "しか", "でも"}
+                "や", "やら", "かしら", "は", "とか", "しか", "でも"}
 
 # One, after 何 in "not a single one": 何一つ, 何ひとつ, 何一人, 何1つ
 # (plan 304). 何十, 何百 are one token (なんじゅう, なんびゃく).
@@ -948,10 +948,14 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             continue
 
         # 何 before a particle, and before one: 何一つ, 何ひとつ (plan 304).
+        # And before the げ of 何気ない: UniDic cuts it 何 + 気 (げ), the
+        # suffix of a manner; 何の気なしに keeps なん, its の between and
+        # its 気 the き of a mind.
         if s == "何" and r == "なん":
             after = nxt(i)
             if after in _NANI_BEFORE or after == "" or after in _PUNCT \
-                    or after.startswith(_ONE_HEADS) or after in _ONE_DIGITS:
+                    or after.startswith(_ONE_HEADS) or after in _ONE_DIGITS \
+                    or (after == "気" and out[i + 1] == "げ"):
                 out[i] = "なに"
             continue
 
