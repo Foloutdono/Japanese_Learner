@@ -39,7 +39,8 @@ def meaning_key(meaning: str) -> str:
     return " ".join((meaning or "").split()).casefold()
 
 
-def pick_distractors(candidates, meaning_of, correct_meaning: str, count: int = 3) -> list:
+def pick_distractors(candidates, meaning_of, correct_meaning: str, count: int = 3,
+                     rng: random.Random | None = None) -> list:
     """Up to `count` entries from `candidates` whose meaning differs from
     `correct_meaning` and from each other, compared via meaning_key.
 
@@ -47,6 +48,12 @@ def pick_distractors(candidates, meaning_of, correct_meaning: str, count: int = 
     candidates already *are* meanings, as in grammar.py). Order within the
     returned list is random, same as the random.sample it replaces; the
     caller still appends the correct answer and shuffles.
+
+    `rng` draws the sample, the module's `random` where none is given. A
+    caller whose output is a function of its seed (the grammar tour's
+    quiz, through grammar_lesson.contrast_payload) passes its own, so the
+    draw is too: `candidates` must then come in a fixed order, never a
+    set's.
     """
     seen = {meaning_key(correct_meaning)}
     pool = []
@@ -56,4 +63,4 @@ def pick_distractors(candidates, meaning_of, correct_meaning: str, count: int = 
             continue
         seen.add(key)
         pool.append(candidate)
-    return random.sample(pool, min(count, len(pool)))
+    return (rng or random).sample(pool, min(count, len(pool)))
