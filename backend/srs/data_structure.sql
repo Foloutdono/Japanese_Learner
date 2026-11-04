@@ -283,6 +283,9 @@ CREATE TABLE user_profiles (
     -- Early access (plan 269): when Today asked how the learner finds the
     -- app, once 400 XP were earned. routes/feedback.py.
     feedback_asked_at TIMESTAMPTZ,
+    -- Google Play (plan 307): when the Android shell's sheet asked for a
+    -- rating on the store, its own question. routes/feedback.py.
+    store_asked_at TIMESTAMPTZ,
     -- 新しい (plan 287): when the learner was told the duels' key stands
     -- beside Today's gate, by its sheet or Today's guide.
     -- routes/onboarding.py writes it, routes/profile.py reads it.

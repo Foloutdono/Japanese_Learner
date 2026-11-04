@@ -3090,6 +3090,11 @@ const onboarding = {
   ratePlaceholder: 'Ce que tu changerais, s’il y a quelque chose.',
   rateTextLabel: 'Ce que tu changerais',
   rateLater: 'Plus tard',
+  // Google Play (plan 307) : la feuille de note, sur Android.
+  storeQ: 'Une note sur Google Play ?',
+  storeLead: 'Ta note aide d’autres apprenants à trouver Tsuji.',
+  storeGo: 'Noter sur Google Play',
+  storeWrite: 'Plutôt nous dire ce que tu changerais',
   cardReport: 'Signaler cette carte',
   cardReportReasons: 'Ce qui ne va pas',
   cardReason: { reading: 'Lecture', meaning: 'Sens', audio: 'Audio', example: 'Exemple', other: 'Autre' },

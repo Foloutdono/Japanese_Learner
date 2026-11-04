@@ -52,6 +52,18 @@ is asked: the XP earned and never asked before
 (user_profiles.feedback_asked_at), stamped by an answer, a rating sent
 or the sheet shut, so it is asked once and on one device only.
 
+── Google Play (plan 307) ───────────────────────────────────
+In the Android shell the same sheet asks for a rating on the store
+first: its gold door opens the app's page on Google Play, and a link
+under it leads to the form above. It is a question of its own,
+stamped in user_profiles.store_asked_at, so every Android learner past
+OFFER_XP is asked it once, those who answered or shut the sheet above
+included. The server cannot tell the shell from a browser, so
+`offers_open` answers both questions and the client reads the one its
+platform asks. The Android sheet shut, whichever way, stamps both: a
+learner asked on the store is not asked again on the web. Nobody is
+sent to the store, or kept from it, by their stars.
+
 Nothing is answered automatically and nothing is hidden: the rows are
 a queue for a person (scripts/read_feedback.py), counted in Metabase
 (docs/analytics/metabase/10-messages.sql) and in the weekly digest.
@@ -324,21 +336,37 @@ def _stamp_offer(cur, user_id: str) -> None:
     )
 
 
-def offer_open(user_id: str, xp: int) -> bool:
-    """Whether Today asks this learner, once, how they find the app (see
-    the module's note): GET /api/profile's `feedbackOffer`. `xp` is the
-    lifetime figure the profile already holds, so a learner short of it
-    costs no query."""
+def offers_open(user_id: str, xp: int) -> tuple[bool, bool]:
+    """Whether Today asks this learner, once, how they find the app, and
+    whether the Android shell asks them, once, for a rating on Google Play
+    (see the module's notes): GET /api/profile's `feedbackOffer` and
+    `storeOffer`, in one query. `xp` is the lifetime figure the profile
+    already holds, so a learner short of it costs no query."""
     if xp < OFFER_XP:
-        return False
+        return False, False
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT feedback_asked_at FROM user_profiles WHERE user_id = %s", (user_id,))
+            cur.execute(
+                "SELECT feedback_asked_at, store_asked_at FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
             row = cur.fetchone()
     finally:
         conn.close()
-    return row is not None and row[0] is None
+    if row is None:
+        return False, False
+    return row[0] is None, row[1] is None
+
+
+def offer_open(user_id: str, xp: int) -> bool:
+    """The web's and iOS's question: `feedbackOffer`."""
+    return offers_open(user_id, xp)[0]
+
+
+def store_offer_open(user_id: str, xp: int) -> bool:
+    """The Android shell's question: `storeOffer` (plan 307)."""
+    return offers_open(user_id, xp)[1]
 
 
 @router.post("/api/feedback/offer")
@@ -352,3 +380,22 @@ def post_feedback_offer(user_id: str = Depends(get_user_id)):
     finally:
         conn.close()
     return {"feedbackOffer": False}
+
+
+@router.post("/api/feedback/store-offer")
+def post_store_offer(user_id: str = Depends(get_user_id)):
+    """The Android sheet is behind the learner (plan 307): the store
+    opened, the form sent or the sheet shut. Asked on the store, and not
+    again on any device; the first stamps stand."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            _stamp_offer(cur, user_id)
+            cur.execute(
+                "UPDATE user_profiles SET store_asked_at = COALESCE(store_asked_at, NOW()) WHERE user_id = %s",
+                (user_id,),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"feedbackOffer": False, "storeOffer": False}

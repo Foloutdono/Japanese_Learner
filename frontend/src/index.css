@@ -33754,6 +33754,10 @@ button.brd-stn { cursor: pointer; }
 .fb-rate__star:hover,
 .fb-rate__star:focus-visible { color: var(--sel-ink); filter: none; }
 
+/* Google Play (plan 307): on Android the sheet asks for the store first,
+   its door the gold button; the stars and the words behind a link. */
+.fb-store__write { align-self: center; }
+
 /* Settings' page on the desk: the form at a card's width, the send at
    its own. */
 .fb-page { max-width: var(--card-w); }

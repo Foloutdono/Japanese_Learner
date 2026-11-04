@@ -175,6 +175,12 @@ def _init_db() -> None:
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
+                # Google Play (plan 307): when the Android shell's sheet
+                # asked for a rating on the store, answered (the store
+                # opened, the form sent) or shut. A question of its own,
+                # so a learner who answered the sheet above is asked it
+                # too. NULL is not asked yet; routes/feedback.py.
+                ("store_asked_at", "TIMESTAMPTZ"),
                 # 新しい (plan 287): when the learner was told the duels'
                 # key stands beside Today's gate -- the sheet that says
                 # so put away, or Today's guide ended with the key's stop
@@ -923,6 +929,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
         srs.get_rest_days(user_id, days=CALENDAR_DAYS),
     )
     week_from = (datetime.now(timezone.utc).date() - timedelta(days=6)).isoformat()
+    feedback_offer, store_offer = feedback_routes.offers_open(user_id, xp)
 
     return {
         "username": username,
@@ -970,8 +977,11 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # studied elsewhere (routes/transfer.offer_open).
         "transferOffer": transfer_routes.offer_open(user_id, tutorial_at),
         # Early access (plan 269): whether Today asks, once, how the
-        # learner finds the app (routes/feedback.offer_open).
-        "feedbackOffer": feedback_routes.offer_open(user_id, xp),
+        # learner finds the app; in the Android shell, for a rating on
+        # Google Play (plan 307). Both are sent, the client reads the
+        # one its platform asks (routes/feedback.offers_open).
+        "feedbackOffer": feedback_offer,
+        "storeOffer": store_offer,
         # 新しい (plan 287): whether Today tells the learner, once, that
         # the duels' key stands beside its gate (duels_news_open).
         "duelsNews": duels_news_open(user_id, guided),

@@ -17,6 +17,8 @@ vi.mock('../../lib/api', async (o) => ({ ...(await o()), apiJson: (...a) => apiJ
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playClick: vi.fn() }))
 const refreshSummary = vi.fn(async () => {})
 vi.mock('../../stores/profileSummary', async (o) => ({ ...(await o()), refreshSummary: (...a) => refreshSummary(...a) }))
+const openStore = vi.fn(async () => {})
+vi.mock('../../lib/platform', async (o) => ({ ...(await o()), openStore: (...a) => openStore(...a) }))
 
 const { RatingSheet } = await import('./RatingSheet')
 
@@ -31,6 +33,7 @@ beforeEach(() => {
   apiJson.mockReset()
   apiJson.mockResolvedValue({ ok: true, at: '2026-10-21T09:30:00+00:00' })
   refreshSummary.mockClear()
+  openStore.mockClear()
 })
 
 describe('the early-access sheet', () => {
@@ -151,6 +154,79 @@ describe('the early-access sheet', () => {
       const box = star.getBoundingClientRect()
       expect(box.width).toBeGreaterThanOrEqual(44)
       expect(box.height).toBeGreaterThanOrEqual(44)
+    }
+  })
+})
+
+// ── Google Play (plan 307) ───────────────────────────────────────────
+// In the Android shell the store comes first: one gold door to the app's
+// page, "Plus tard", and the stars and the words behind a link. However
+// the sheet is left -- the store opened, the form sent, shut -- the
+// server is told once, on the store's own route, which answers both
+// questions; nothing is sent to the store by the stars.
+describe('the Android shell’s sheet', () => {
+  const store = path => posted(path)
+
+  it('asks for Google Play in the table’s words, with no stars', async () => {
+    await render(<RatingSheet session={LEARNER} onClose={() => {}} store />)
+    expect($('.sheet__cap').textContent).toBe(fr.rateCap)
+    expect($('h2').textContent).toBe(fr.storeQ)
+    expect($('.fb-rate__lead').textContent).toBe(fr.storeLead)
+    expect($('[data-action="rating-store"]').textContent).toBe(fr.storeGo)
+    expect($('[data-action="rating-store"]').classList.contains('btn-primary')).toBe(true)
+    expect($('[data-action="rating-write"]').textContent).toBe(fr.storeWrite)
+    expect(stars()).toHaveLength(0)
+    expect(apiJson).not.toHaveBeenCalled()
+  })
+
+  it('opens the store and tells the server, once, that the sheet is behind the learner', async () => {
+    const onClose = vi.fn()
+    await render(<RatingSheet session={LEARNER} onClose={onClose} store />)
+    await userEvent.click($('[data-action="rating-store"]'))
+    await settle()
+    expect(openStore).toHaveBeenCalledTimes(1)
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(store('/api/feedback/store-offer')).toHaveLength(1)
+    expect(store('/api/feedback/store-offer')[0][2].method).toBe('POST')
+    expect(store('/api/feedback/offer')).toHaveLength(0)
+    expect(store('/api/feedback')).toHaveLength(0)
+  })
+
+  it('"Plus tard" answers the store’s question and opens nothing', async () => {
+    const onClose = vi.fn()
+    await render(<RatingSheet session={LEARNER} onClose={onClose} store />)
+    await userEvent.click($('[data-action="rating-later"]'))
+    await settle()
+    expect(openStore).not.toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(store('/api/feedback/store-offer')).toHaveLength(1)
+  })
+
+  it('leads to the stars and the words, and a rating sent still answers the store’s question', async () => {
+    const onClose = vi.fn()
+    await render(<RatingSheet session={LEARNER} onClose={onClose} store />)
+    await userEvent.click($('[data-action="rating-write"]'))
+    expect($('h2').textContent).toBe(fr.rateQ)
+    expect(stars()).toHaveLength(5)
+    await userEvent.click(stars()[4])
+    await userEvent.click($('.fb-form__send'))
+    await settle()
+    expect(body(store('/api/feedback')[0])).toEqual({ kind: 'rating', rating: 5, text: '' })
+    expect(store('/api/feedback/store-offer')).toHaveLength(0)
+    await userEvent.click($('.fb-sent__close'))
+    await settle()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(store('/api/feedback/store-offer')).toHaveLength(1)
+    expect(openStore).not.toHaveBeenCalled()
+  })
+
+  it('fits a phone: the door a thumb’s target, nothing past the screen', async () => {
+    await render(<RatingSheet session={LEARNER} onClose={() => {}} store />)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    for (const sel of ['[data-action="rating-store"]', '[data-action="rating-later"]', '[data-action="rating-write"]']) {
+      const box = $(sel).getBoundingClientRect()
+      expect(box.height).toBeGreaterThanOrEqual(44)
+      expect(box.right).toBeLessThanOrEqual(window.innerWidth)
     }
   })
 })
