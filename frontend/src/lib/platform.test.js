@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { backAction, isNative, nudgeAt, openPath, TAB_ROOTS } from './platform'
+import { describe, it, expect, vi } from 'vitest'
+import { backAction, isNative, nudgeAt, openPath, openStore, PLAY_URL, TAB_ROOTS } from './platform'
+import { STORES } from '../../landing/config.mjs'
 
 // ── Where the app is running (plan 076) ───────────────────────
 // The seams themselves are thin calls into plugins a browser does not
@@ -56,5 +57,36 @@ describe('openPath', () => {
     expect(openPath('app.tsuji://auth-callback#access_token=x')).toBeNull()
     expect(openPath('https://example.com/open/today')).toBeNull()
     expect(openPath(null)).toBeNull()
+  })
+})
+
+// Google Play (plan 307): the Android shell goes to the Play Store app
+// through a market:// page the WebView hands to the OS; anywhere else,
+// the app's page on the web, which the landing page links to as well.
+describe('openStore', () => {
+  it('is the landing page’s address', () => {
+    expect(PLAY_URL).toBe(STORES.googlePlay)
+  })
+  it('hands the Android shell a market:// page', async () => {
+    const location = { href: 'https://localhost/today' }
+    globalThis.window = { Capacitor: { getPlatform: () => 'android' }, location, open: vi.fn() }
+    try {
+      await openStore()
+      expect(location.href).toBe('market://details?id=app.tsuji')
+      expect(window.open).not.toHaveBeenCalled()
+    } finally {
+      delete globalThis.window
+    }
+  })
+  it('opens the web page in a new tab anywhere else', async () => {
+    const location = { href: 'https://tsuji.app/app/today' }
+    globalThis.window = { location, open: vi.fn() }
+    try {
+      await openStore()
+      expect(window.open).toHaveBeenCalledWith(PLAY_URL, '_blank', 'noopener,noreferrer')
+      expect(location.href).toBe('https://tsuji.app/app/today')
+    } finally {
+      delete globalThis.window
+    }
   })
 })

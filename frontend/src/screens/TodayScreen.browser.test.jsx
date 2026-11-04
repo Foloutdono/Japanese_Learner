@@ -451,6 +451,47 @@ describe('TodayScreen — the early-access sheet', () => {
     await screen.unmount()
     summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
   })
+
+  // Google Play (plan 307): in the Android shell the sheet asks for the
+  // store first, while the profile's own `storeOffer` says so -- a learner
+  // who answered the web's question is asked it all the same. The shell is
+  // named by its platform alone, so no plugin is loaded under the test.
+  describe('in the Android shell', () => {
+    beforeEach(() => { window.Capacitor = { getPlatform: () => 'android' } })
+    const away = () => { delete window.Capacitor }
+
+    it('asks for Google Play on `storeOffer`, the web’s question answered or not', async () => {
+      try {
+        summaryRef.current = offered({ feedbackOffer: false, storeOffer: true })
+        const screen = await mount()
+        await arrives(sheet)
+        expect(sheet().querySelector('[data-action="rating-store"]')).toBeTruthy()
+        expect(sheet().querySelectorAll('.fb-rate__star')).toHaveLength(0)
+        sheet().querySelector('[data-action="rating-later"]').click()
+        await settle()
+        expect(sheet()).toBeNull()
+        expect(apiJson.mock.calls.filter(([u]) => u === '/api/feedback/store-offer')).toHaveLength(1)
+        expect(apiJson.mock.calls.filter(([u]) => u === '/api/feedback/offer')).toHaveLength(0)
+        await screen.unmount()
+      } finally {
+        away()
+        summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+      }
+    })
+
+    it('does not ask on the web’s `feedbackOffer` alone', async () => {
+      try {
+        summaryRef.current = offered({ feedbackOffer: true, storeOffer: false })
+        const screen = await mount()
+        await settle(200)
+        expect(sheet()).toBeNull()
+        await screen.unmount()
+      } finally {
+        away()
+        summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+      }
+    })
+  })
 })
 
 // 新しい (plan 287): the duels' key announced, once, to a learner who met

@@ -7,21 +7,21 @@ import { InkFilters } from '../components/dayclear/kit'
 import { RatingSheet } from '../components/feedback/RatingSheet'
 import { SUMMARY, TODAY_PARTIAL } from '../components/dayclear/fixtures'
 
-// ── /dev/rating — the rating sheet's options on Android (plan 307) ──
-// The early-access sheet (plan 269) drawn over Today's gate as the app
-// renders it, for the owner's pick of how it sends an Android learner to
-// Google Play. No backend: the sheet's answers go nowhere that matters
-// (the dev branch has no session), and "Rejouer" opens it again.
+// ── /dev/rating — the early-access sheet, both of it (plan 307) ────
+// The sheet (plan 269) over Today's gate as the app renders it: the
+// web's and iOS's stars and words, and the Android shell's question for
+// Google Play (the owner's pick A of the canvas "Note sur Google Play").
+// No backend: the sheet's answers go nowhere that matters (the dev branch
+// has no session), and "Rejouer" opens it again.
 //
-//   ?v=web   the sheet as it is (the web, iOS)
-//   ?v=A     the store first, the form behind a link
-//   ?v=B     the form, then the stamp offers the store
-//   &bare=1  no option bar (for the screenshots)
-const OPTIONS = ['web', 'A', 'B']
+//   ?v=android  the store first, the form behind a link (default)
+//   ?v=web      the stars and the words
+//   &bare=1     no bar (for the screenshots)
+const OPTIONS = ['android', 'web']
 
 export default function RatingPreview() {
   const [params] = useSearchParams()
-  const v = OPTIONS.includes(params.get('v')) ? params.get('v') : 'A'
+  const v = OPTIONS.includes(params.get('v')) ? params.get('v') : 'android'
   const bare = params.get('bare') === '1'
   const [take, setTake] = useState(0)
   const [open, setOpen] = useState(true)
@@ -34,7 +34,7 @@ export default function RatingPreview() {
   return (
     <>
       {!bare && (
-        <nav className="clrdev-bar" aria-label="Options">
+        <nav className="clrdev-bar" aria-label="Sheets">
           {OPTIONS.map(o => (
             <Link key={o} className="clrdev-bar__item" to={`/dev/rating?v=${o}`} aria-current={o === v ? 'page' : undefined} onClick={() => { setOpen(true); setTake(n => n + 1) }}>{o}</Link>
           ))}
@@ -46,7 +46,7 @@ export default function RatingPreview() {
         <GateCard today={TODAY_PARTIAL} />
       </main>
       {open && (
-        <RatingSheet key={`${v}:${take}`} session={null} store={v === 'web' ? null : v} onClose={() => setOpen(false)} />
+        <RatingSheet key={`${v}:${take}`} session={null} store={v === 'android'} onClose={() => setOpen(false)} />
       )}
     </>
   )

@@ -627,7 +627,7 @@ export default function App({ front = NO_FRONT }) {
                 real rail beside it on the desk. */}
             <Route element={<Shell />}>
               <Route path="/dev/dayclear" element={<DayClearPreview />} />
-              {/* The rating sheet's options on Android (plan 307). */}
+              {/* The early-access sheet, the web's and Android's (plan 307). */}
               <Route path="/dev/rating" element={<RatingPreview />} />
             </Route>
           </Routes>

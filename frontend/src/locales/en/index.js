@@ -3159,7 +3159,6 @@ const onboarding = {
   storeLead: 'Your rating helps other learners find Tsuji.',
   storeGo: 'Rate on Google Play',
   storeWrite: 'Tell us what you would change instead',
-  storeAfter: 'Would you say so on Google Play too? Your rating helps other learners find Tsuji.',
   cardReport: 'Report this card',
   cardReportReasons: 'What is wrong',
   cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', other: 'Other' },

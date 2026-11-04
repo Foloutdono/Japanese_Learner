@@ -23,35 +23,44 @@ import { Sent } from './FeedbackSheet'
 // on the same 受付 stamp; shut any other way (the scrim, Escape, a push down,
 // "Not now"), it counts as the second.
 //
-// Google Play (plan 307, drawn for the owner's pick at /dev/rating): on
-// Android the sheet sends the learner to the store's page.
-//   store 'A'  the store first: the question, the gold door to Google
-//              Play, "Not now", and a link to the stars-and-words form
-//   store 'B'  the form as before, then the 受付 stamp offers the store
+// Google Play (plan 307, the owner's pick A of the canvas "Note sur
+// Google Play"): in the Android shell the sheet asks for a rating on the
+// store first -- the question, the gold door to the app's page on Google
+// Play (lib/platform.openStore), "Not now", and under them a link to the
+// stars and the words above, for a learner who would rather write to us.
+// It is asked while the profile says `storeOffer`, a question of its own
+// (routes/feedback.py), so a learner who answered the sheet on the web is
+// asked it too; whichever way it is left -- the store opened, the form
+// sent, shut -- the server is told once (POST /api/feedback/store-offer),
+// which answers both questions. Nobody is sent to the store, or kept from
+// it, by their stars.
 //
 // Props:
 //   session
 //   onClose()  the sheet is gone; Today stops drawing it at once
-//   store      null (the web, iOS), 'A' or 'B'
+//   store      the Android shell's sheet: the store first
 
-export function RatingSheet({ session, onClose, store = null }) {
+export function RatingSheet({ session, onClose, store = false }) {
   const { t } = useLang()
   const [rating, setRating] = useState(0)
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [sent, setSent] = useState(null)
-  const [writing, setWriting] = useState(store !== 'A')
+  const [writing, setWriting] = useState(!store)
   // A second press before the first one's render, as every send guards
   // (CLAUDE.md, plan 211); and whether the server already knows the sheet
-  // was answered, so shutting it after a rating posts nothing.
+  // was answered, so shutting it after a rating posts nothing. A rating
+  // answers the web's question alone: the store's is answered on the way
+  // out, whichever it is.
   const inFlight = useRef(false)
   const answered = useRef(false)
 
   function leave() {
     if (!answered.current) {
       answered.current = true
-      apiJson('/api/feedback/offer', session, { method: 'POST' })
+      const path = store ? '/api/feedback/store-offer' : '/api/feedback/offer'
+      apiJson(path, session, { method: 'POST' })
         .then(() => refreshSummary())
         .catch(() => {})
     } else {
@@ -60,10 +69,12 @@ export function RatingSheet({ session, onClose, store = null }) {
     onClose()
   }
 
+  // The server is told before the app goes to the background: the store
+  // opens over it, and the shell may pause the page before a later call.
   function toStore() {
     playClick()
-    openStore()
     leave()
+    openStore()
   }
 
   function submit(e) {
@@ -74,7 +85,7 @@ export function RatingSheet({ session, onClose, store = null }) {
     setError(null)
     sendFeedback(session, { kind: 'rating', rating, text })
       .then(res => {
-        answered.current = true
+        if (!store) answered.current = true
         setSent(res?.at ? new Date(res.at) : new Date())
       })
       .catch(err => {
@@ -84,28 +95,20 @@ export function RatingSheet({ session, onClose, store = null }) {
       })
   }
 
-  const storeDoor = (
-    <button type="button" className="btn-primary fb-form__send fb-store__go" data-action="rating-store" onClick={toStore}>
-      {t.storeGo}
-      <ArrowIcon direction="right" size={16} />
-    </button>
-  )
-
   let body
   if (sent) {
-    body = store === 'B' ? (
-      <Sent at={sent} reply={false} sub={t.storeAfter} onClose={leave}>{storeDoor}</Sent>
-    ) : (
-      <Sent at={sent} reply={false} onClose={leave} />
-    )
+    body = <Sent at={sent} reply={false} onClose={leave} />
   } else if (!writing) {
     body = (
       <div className="fb-form">
         <h2 className="sheet__jp fb-rate__q">{t.storeQ}</h2>
         <p className="fb-rate__lead">{t.storeLead}</p>
-        {storeDoor}
+        <button type="button" className="btn-primary fb-form__send" data-action="rating-store" onClick={toStore}>
+          {t.storeGo}
+          <ArrowIcon direction="right" size={16} />
+        </button>
         <button type="button" className="btn-secondary" data-action="rating-later" onClick={leave}>{t.rateLater}</button>
-        <button type="button" className="fb-link fb-store__write" onClick={() => { playClick(); setWriting(true) }}>{t.storeWrite}</button>
+        <button type="button" className="fb-link fb-store__write" data-action="rating-write" onClick={() => { playClick(); setWriting(true) }}>{t.storeWrite}</button>
       </div>
     )
   } else {

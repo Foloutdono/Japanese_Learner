@@ -33754,9 +33754,8 @@ button.brd-stn { cursor: pointer; }
 .fb-rate__star:hover,
 .fb-rate__star:focus-visible { color: var(--sel-ink); filter: none; }
 
-/* Google Play (plan 307): the store's door in the metal, on the
-   question (A) and under the 受付 stamp (B); the form behind a link. */
-.fb-store__go { align-self: stretch; }
+/* Google Play (plan 307): on Android the sheet asks for the store first,
+   its door the gold button; the stars and the words behind a link. */
 .fb-store__write { align-self: center; }
 
 /* Settings' page on the desk: the form at a card's width, the send at

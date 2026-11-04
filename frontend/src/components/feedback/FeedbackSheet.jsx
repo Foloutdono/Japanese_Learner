@@ -31,7 +31,7 @@ function stampDate(at) {
   return `${two(d.getDate())}.${two(d.getMonth() + 1)}.${two(d.getFullYear() % 100)}`
 }
 
-export function Sent({ at, reply, onClose, sub = null, children = null }) {
+export function Sent({ at, reply, onClose }) {
   const { t } = useLang()
   return (
     <div className="fb-sent" role="status">
@@ -40,8 +40,7 @@ export function Sent({ at, reply, onClose, sub = null, children = null }) {
         <span className="fb-stamp__date">{stampDate(at)}</span>
       </span>
       <p className="fb-sent__say">{t.fbSent}</p>
-      <p className="fb-sent__sub">{sub ?? (reply ? t.fbSentReply : t.fbSentNote)}</p>
-      {children}
+      <p className="fb-sent__sub">{reply ? t.fbSentReply : t.fbSentNote}</p>
       {onClose && (
         <button type="button" className="btn-secondary fb-sent__close" onClick={onClose}>{t.close}</button>
       )}

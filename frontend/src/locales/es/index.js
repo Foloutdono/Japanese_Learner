@@ -3160,7 +3160,6 @@ const onboarding = {
   storeLead: 'Tu calificación ayuda a otros estudiantes a encontrar Tsuji.',
   storeGo: 'Calificar en Google Play',
   storeWrite: 'Mejor dinos qué cambiarías',
-  storeAfter: '¿Quieres decirlo también en Google Play? Tu calificación ayuda a otros estudiantes a encontrar Tsuji.',
   cardReport: 'Reportar esta tarjeta',
   cardReportReasons: 'Qué está mal',
   cardReason: { reading: 'Lectura', meaning: 'Significado', audio: 'Audio', example: 'Ejemplo', other: 'Otro' },
