@@ -17,7 +17,8 @@ wrong, and where a learner cannot tell:
               さんぼん, よっか, くじ. The table below is the textbook's.
   何          なん before a particle, where it is なに: 何を, 何が, 何も,
               何やら, 何はさておき; before one, 何一つ; and 何に, which
-              UniDic reads as the なんに of なんにも, in 何にもまして.
+              UniDic reads as the なんに of なんにも, in 何にもまして and
+              何にも代えられない.
   〜中        ちゅう where it is じゅう, "all through": 世界中, 一日中.
   曜日        日曜|日 with 日 read ひ: にちようび.
   and a few   日本 にっぽん (the school reading is にほん), 明日 あす
@@ -540,9 +541,31 @@ _ONE_DIGITS = ("1", "１")
 _SAID_IN_NEGATIVE = frozenset({"ない", "無い", "無し", "ず", "ぬ"})
 _SENTENCE_END = frozenset("。！？!?")
 
-# まして, 増して: "more than", which takes the に before it as what it
-# surpasses (何にもまして, plan 304).
-_SURPASSES = frozenset({"況して", "増す", "まして"})
+# What sets its subject against the に before it, as UniDic gives the
+# lemma: what it surpasses or falls short of -- まして, 増して (plan 304),
+# 勝る, 劣る, 負ける, 比べる -- or what it is given in exchange for, 代える,
+# 替える, 換える (plan 304b). Before one, 何にも is that に, "than
+# anything", "for anything", and never the "not a thing" of なんにも,
+# which stands where a を or a が would (何にも知らない, 何にも食べられ
+# ない): なににも, negative or not -- 何にも代えられない, 何にも劣らない.
+_MEASURED_AGAINST = frozenset({"況して", "まして", "増す", "勝る", "劣る", "負ける", "比べる"})
+# UniDic files 代える, 替える and 換える under 変える, which is "change"
+# too and takes を (何にも変えられない): the exchange is told by its kanji.
+_EXCHANGED_FOR = ("代", "替", "換")
+
+
+def _measured_against(tokens: list[dict], j: int) -> bool:
+    """Whether the word tokens[j] leads to -- past an adverb, 何にも決して
+    負けない -- sets its subject against a に (_MEASURED_AGAINST, plan
+    304b)."""
+    for t in tokens[j:]:
+        lemma, surface = t.get("lemma"), t["surface"]
+        if lemma in _MEASURED_AGAINST or surface in _MEASURED_AGAINST \
+                or (lemma == "変える" and surface.startswith(_EXCHANGED_FOR)):
+            return True
+        if t.get("pos") != "adverb":
+            return False
+    return False
 
 
 def _affirmed_ahead(tokens: list[dict], j: int) -> bool:
@@ -916,11 +939,11 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # "(not) anything at all", which stands only with a negative (何にも
         # ない, 何にも知らない, 何にもすることがない). With none after it, the
         # に is the one its verb takes and 何 is なに: 何にもなれる, 何にも代え
-        # がたい; and まして takes it as what it surpasses whatever follows,
-        # 何にもまして、遅れないことが大切だ (plan 304).
+        # がたい (plan 304). A word that sets its subject against the に
+        # takes it whatever follows: 何にもまして、遅れないことが大切だ,
+        # 何にも代えられない, 何にも劣らない (plan 304b).
         if s == "何に" and r == "なんに" and nxt(i) == "も" and (
-                (i + 2 < n and (tokens[i + 2].get("lemma") in _SURPASSES or surf[i + 2] in _SURPASSES))
-                or _affirmed_ahead(tokens, i + 2)):
+                _measured_against(tokens, i + 2) or _affirmed_ahead(tokens, i + 2)):
             out[i] = "なにに"
             continue
 
