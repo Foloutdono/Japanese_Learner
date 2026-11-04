@@ -2237,7 +2237,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 37: 何 read なに by what follows it (plan 304): before one (何一つ),
 # やら (何やら), は (何はさておき), and the 何に of 何にもまして, which
 # UniDic read なんに, as in なんにも with a negative.
-LOCAL_REV = 37
+# 38: and before かしら (何かしら) and the げ of 何気ない, the two the
+# voice engine's scan found besides those four.
+LOCAL_REV = 38
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
