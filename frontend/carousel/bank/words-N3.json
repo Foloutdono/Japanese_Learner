@@ -1513,7 +1513,7 @@
 {"t":"最高","r":"さいこう","ro":"saikou","en":["best, wonderful, supreme","highest, maximum"],"fr":["le meilleur, génial, suprême","le plus haut, maximum"],"fu":[["最","さい"],["高","こう"]],"hy":["西高","最口","切高"]},
 {"t":"しきりに","r":"しきりに","ro":"shikirini","en":["frequently, repeatedly, incessantly, eagerly"],"fr":["fréquemment, à plusieurs reprises, sans cesse, avec empressement"]},
 {"t":"陸","r":"りく","ro":"riku","en":["land, shore (as opposed to sea)"],"fr":["terre ferme, rivage (par opposition à la mer)"],"fu":[["陸","りく"]]},
-{"t":"増す","r":"ます","ro":"masu","en":["to increase (something or itself, formal), to grow"],"fr":["augmenter (transitif ou non, soutenu), croître"],"fu":[["増","ま"],["す",""]],"hy":["磨す","摩す","茉す"]},
+{"t":"増す","r":"ます","ro":"masu","en":["to increase (something or itself, formal), to grow"],"fr":["augmenter (transitif ou non, soutenu), croître"],"fu":[["増","ま"],["す",""]],"hy":["磨す","摩す","茉す"],"ex":["N1.163","N1.164"]},
 {"t":"慎重","r":"しんちょう","ro":"shinchou","en":["prudence (careful, cautious)"],"fr":["prudence (prudent, circonspect)"],"fu":[["慎","しん"],["重","ちょう"]],"hy":["新重","慎長","心重"],"ex":["N3.8","N3.101"]},
 {"t":"既に","r":"すでに","ro":"sudeni","en":["already, previously"],"fr":["déjà, auparavant"],"fu":[["既","すで"],["に",""]]},
 {"t":"やや","r":"やや","ro":"yaya","en":["a little, partially, somewhat, a short time, a while"],"fr":["un peu, partiellement, quelque peu, un court moment, un certain temps"]},
