@@ -3,9 +3,10 @@ import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
 import { playClick } from '../../lib/audio'
 import { RATINGS, TEXT_MAX, sendFeedback } from '../../lib/feedback'
+import { openStore } from '../../lib/platform'
 import { refreshSummary } from '../../stores/profileSummary'
 import { Sheet } from '../chrome/Sheet'
-import { StarIcon } from '../ui/Icons'
+import { ArrowIcon, StarIcon } from '../ui/Icons'
 import { Sent } from './FeedbackSheet'
 
 // ── Early access: how the learner finds the app (plan 269) ─────────
@@ -22,17 +23,25 @@ import { Sent } from './FeedbackSheet'
 // on the same 受付 stamp; shut any other way (the scrim, Escape, a push down,
 // "Not now"), it counts as the second.
 //
+// Google Play (plan 307, drawn for the owner's pick at /dev/rating): on
+// Android the sheet sends the learner to the store's page.
+//   store 'A'  the store first: the question, the gold door to Google
+//              Play, "Not now", and a link to the stars-and-words form
+//   store 'B'  the form as before, then the 受付 stamp offers the store
+//
 // Props:
 //   session
 //   onClose()  the sheet is gone; Today stops drawing it at once
+//   store      null (the web, iOS), 'A' or 'B'
 
-export function RatingSheet({ session, onClose }) {
+export function RatingSheet({ session, onClose, store = null }) {
   const { t } = useLang()
   const [rating, setRating] = useState(0)
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [sent, setSent] = useState(null)
+  const [writing, setWriting] = useState(store !== 'A')
   // A second press before the first one's render, as every send guards
   // (CLAUDE.md, plan 211); and whether the server already knows the sheet
   // was answered, so shutting it after a rating posts nothing.
@@ -49,6 +58,12 @@ export function RatingSheet({ session, onClose }) {
       refreshSummary()
     }
     onClose()
+  }
+
+  function toStore() {
+    playClick()
+    openStore()
+    leave()
   }
 
   function submit(e) {
@@ -69,43 +84,69 @@ export function RatingSheet({ session, onClose }) {
       })
   }
 
+  const storeDoor = (
+    <button type="button" className="btn-primary fb-form__send fb-store__go" data-action="rating-store" onClick={toStore}>
+      {t.storeGo}
+      <ArrowIcon direction="right" size={16} />
+    </button>
+  )
+
+  let body
+  if (sent) {
+    body = store === 'B' ? (
+      <Sent at={sent} reply={false} sub={t.storeAfter} onClose={leave}>{storeDoor}</Sent>
+    ) : (
+      <Sent at={sent} reply={false} onClose={leave} />
+    )
+  } else if (!writing) {
+    body = (
+      <div className="fb-form">
+        <h2 className="sheet__jp fb-rate__q">{t.storeQ}</h2>
+        <p className="fb-rate__lead">{t.storeLead}</p>
+        {storeDoor}
+        <button type="button" className="btn-secondary" data-action="rating-later" onClick={leave}>{t.rateLater}</button>
+        <button type="button" className="fb-link fb-store__write" onClick={() => { playClick(); setWriting(true) }}>{t.storeWrite}</button>
+      </div>
+    )
+  } else {
+    body = (
+      <form className="fb-form" onSubmit={submit}>
+        <h2 className="sheet__jp fb-rate__q">{t.rateQ}</h2>
+        <p className="fb-rate__lead">{t.rateLead}</p>
+        <div className="fb-rate" role="group" aria-label={t.rateLabel}>
+          {RATINGS.map(n => (
+            <button
+              key={n}
+              type="button"
+              className={n <= rating ? 'fb-rate__star fb-rate__star--on' : 'fb-rate__star'}
+              aria-pressed={n === rating}
+              aria-label={t.rateStar(n)}
+              onClick={() => { playClick(); setRating(n) }}
+            >
+              <StarIcon size={28} filled={n <= rating} />
+            </button>
+          ))}
+        </div>
+        <textarea
+          className="field fb-form__text"
+          rows={4}
+          maxLength={TEXT_MAX}
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder={t.ratePlaceholder}
+          aria-label={t.rateTextLabel}
+        />
+        {error && <p className="fb-form__error" role="alert">{error === 'limit' ? t.fbErrLimit : t.fbErrSend}</p>}
+        <button type="submit" className="btn-primary fb-form__send" disabled={rating === 0 || busy}>{t.fbSend}</button>
+        <button type="button" className="btn-secondary" data-action="rating-later" onClick={leave}>{t.rateLater}</button>
+      </form>
+    )
+  }
+
   return (
-    <Sheet open onClose={leave} label={t.rateQ} className="tdy-sheet fb-sheet" dismiss>
+    <Sheet open onClose={leave} label={writing ? t.rateQ : t.storeQ} className="tdy-sheet fb-sheet" dismiss>
       <span className="sheet__cap">{t.rateCap}</span>
-      {sent ? (
-        <Sent at={sent} reply={false} onClose={leave} />
-      ) : (
-        <form className="fb-form" onSubmit={submit}>
-          <h2 className="sheet__jp fb-rate__q">{t.rateQ}</h2>
-          <p className="fb-rate__lead">{t.rateLead}</p>
-          <div className="fb-rate" role="group" aria-label={t.rateLabel}>
-            {RATINGS.map(n => (
-              <button
-                key={n}
-                type="button"
-                className={n <= rating ? 'fb-rate__star fb-rate__star--on' : 'fb-rate__star'}
-                aria-pressed={n === rating}
-                aria-label={t.rateStar(n)}
-                onClick={() => { playClick(); setRating(n) }}
-              >
-                <StarIcon size={28} filled={n <= rating} />
-              </button>
-            ))}
-          </div>
-          <textarea
-            className="field fb-form__text"
-            rows={4}
-            maxLength={TEXT_MAX}
-            value={text}
-            onChange={e => setText(e.target.value)}
-            placeholder={t.ratePlaceholder}
-            aria-label={t.rateTextLabel}
-          />
-          {error && <p className="fb-form__error" role="alert">{error === 'limit' ? t.fbErrLimit : t.fbErrSend}</p>}
-          <button type="submit" className="btn-primary fb-form__send" disabled={rating === 0 || busy}>{t.fbSend}</button>
-          <button type="button" className="btn-secondary" data-action="rating-later" onClick={leave}>{t.rateLater}</button>
-        </form>
-      )}
+      {body}
     </Sheet>
   )
 }
