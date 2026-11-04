@@ -149,9 +149,10 @@ def _grammar_card(level: str, entry: dict, points: list[dict], lang: str) -> dic
     parts = contrast["furigana"]
     cut = next(i for i, p in enumerate(parts) if p.get("blank"))
     # The rivals the lesson names, then the point: the card pads a short
-    # list with random same-level fillers, which would change the
-    # specimen from one process to the next. Those fillers only when the
-    # lesson names no rival at all.
+    # list with same-level fillers (drawn by the seed above, so the same
+    # in every process), which the specimen leaves out, since it shows what
+    # the lesson sets beside the point. Those fillers only when the lesson
+    # names no rival at all.
     pattern = entry["pattern"]
     rivals = list(dict.fromkeys(r["pattern"] for r in entry.get("compare", []) if r["pattern"] != pattern))
     rules = contrast["rules"]

@@ -329,6 +329,52 @@ def test_the_naive_quiz_is_gone():
         assert not tour or all(q["kind"] != "which" for q in tour["quiz"] or []), entry["pattern"]
 
 
+# Points, one a level, whose quiz tops a gap's choices up with same-level
+# fillers (a rival's lesson names fewer than three rivals): the draw that
+# went through the module's random before TOUR_REV 14.
+FILLED = (("N5", "〜あとで"), ("N4", "〜すぎる"), ("N3", "〜せいで"), ("N2", "〜かねない"), ("N1", "〜がてら"))
+
+
+def test_the_quiz_is_the_same_in_every_process():
+    """A tour is a function of TOUR_REV and the point: the quiz's gaps
+    draw their filler rivals from the tour's seeded rng, never the
+    module's random (mcq.pick_distractors), and from the catalogue's
+    order, never a set's. Built in two processes under two hash seeds,
+    the module's random seeded apart, as test_placement holds the climb."""
+    import json
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    code = (
+        "import json, random, sys; random.seed(sys.argv[1]); "
+        "from content.grammar_points_data import find; from study.grammar_tour import tour_payload; "
+        f"print(json.dumps([tour_payload(*find(p), 'en')['quiz'] for _, p in {FILLED!r}], ensure_ascii=False))"
+    )
+    backend = Path(__file__).resolve().parent.parent
+    runs = []
+    for hash_seed in ("1", "2"):
+        env = {**os.environ, "PYTHONHASHSEED": hash_seed}
+        out = subprocess.run([sys.executable, "-c", code, hash_seed], cwd=backend, env=env,
+                             capture_output=True, text=True, check=True).stdout
+        runs.append(json.loads(out.strip().splitlines()[-1]))
+    assert runs[0] == runs[1]
+    # Each point still draws a filler, or the test holds nothing: a
+    # choice the right rule's lesson does not name. Pick another point
+    # if the catalogue moved this one's rivals.
+    for (level, pattern), quiz in zip(FILLED, runs[0], strict=True):
+        assert find(pattern)[0] == level, pattern
+        fillers = []
+        for q in quiz:
+            if q["kind"] != "gap":
+                continue
+            right = next(c["pattern"] for c in q["choices"] if c["correct"])
+            named = {right} | {r["pattern"] for r in find(right)[1].get("compare", [])}
+            fillers += [c["pattern"] for c in q["choices"] if c["pattern"] not in named]
+        assert fillers, pattern
+
+
 def _sentences(tour):
     """Every sentence a tour shows, in the order it shows them."""
     out = [x["jp"] for x in tour["look"]] + [x["jp"] for x in tour["twists"]]

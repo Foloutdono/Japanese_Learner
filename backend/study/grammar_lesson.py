@@ -154,9 +154,11 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
         ]
         # Drawn in a random order, each kept only where it prints as no
         # option before it does (plan 254): もう〜ました is ました, which
-        # 〜ました／〜ませんでした already says beside 〜ています.
+        # 〜ました／〜ませんでした already says beside 〜ています. The order is
+        # `rng`'s, so a seeded caller (the tour's quiz) draws the same
+        # fillers in every process: `fillers` is in the catalogue's order.
         taken = {f.text for f in choice_forms(pattern, fill, [pattern] + choices, lines).values()}
-        for filler in pick_distractors(fillers, lambda p: p, pattern, len(fillers)):
+        for filler in pick_distractors(fillers, lambda p: p, pattern, len(fillers), rng=rng):
             if len(choices) == CONTRAST_CHOICES - 1:
                 break
             form = form_text(pattern, fill, filler)
