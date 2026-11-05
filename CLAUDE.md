@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **308**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **309**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -1267,6 +1267,7 @@ npm run landing:footage  # its sixteen feature clips, filmed on a seeded learner
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
 node scripts/duel-music/build.mjs     # a duel's music and sounds (plan 285; Chromium, ffmpeg)
+python3 scripts/store-header/build.py OUT autumn-day  # the App Store header, 3840 × 1646 (plan 308; Chromium)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -1288,6 +1289,13 @@ result's sounds. `scripts/duel-music/` renders them in Chromium into
 `public/sounds/duel/<REV>/` and `src/lib/audio/duel.json`. Same rules,
 and one more: the render is not byte-deterministic, so rebuild only with
 a change to the score, under a new `REV` (`scripts/duel-music/README.md`).
+
+The App Store's product page header is the print too (plan 308):
+`scripts/store-header/` draws a print through a 21:9 window, Fuji and the
+train inside the art safe area of Apple's template, and writes the PNG to
+a folder outside the repository, for App Store Connect. It reads the
+print's modules, so a print redrawn there is a header to make again;
+its README has what it changes on the desk's frame and the upload.
 
 The landing page is the site's **`/`** (and `/en`, `/es`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`

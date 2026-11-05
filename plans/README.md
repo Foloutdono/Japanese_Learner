@@ -7418,3 +7418,15 @@ Found while looking into why the VOICEVOX engine says なに where the furigana 
 | 304b | **何にも before what it is measured against** (the owner: fix 何にも代えられない too): a verb that sets its subject against the に (`_MEASURED_AGAINST`: まして, 増して, 勝る, 劣る, 負ける, 比べる; and 代える, 替える, 換える, which UniDic files under 変える and are told by their kanji, `_EXCHANGED_FOR`) takes 何にも as that に, "than anything", "for anything", negative or not, past an adverb (何にも決して負けない): 何にも代えられない, 何にも劣らない, 何にも負けない read なににも. 変える written 変 or in kana, "change", which takes を, keeps UniDic's reading, as do 何にも食べられない, 何にも知らない and 何にもならない (JMdict's なんにもならない). Pinned on both sides in `tests/test_furigana_context.py`; every new subtest on the fix's side fails on plan 304's rules. Over the same 108,802 strings, nothing moves (the content's one 何にも is 何にもまして, read since 304), so the carousel bank stands; `LOCAL_REV` 39 for the lines learners bring (38 went to 何かしら and 何気ない on main, #523) | DONE |
 
 Open: a passive's agent (何にも縛られない, 何にも邪魔されない) is read なんにも, UniDic's reading: UniDic gives the passive and the potential the same られる, and 何にも食べられない is なんにも.
+
+
+## Plan 308 — 看板, the App Store header (2026-11-05)
+
+iOS 27's product page opens on a header, a 21:9 picture App Store Connect asks for under *Informations de la page produit › En-tête* (3840 × 1646, or a 5244 × 2950 universal file). The owner sent the empty slot.
+
+| Phase | What | Status |
+|---|---|---|
+| 308 | **The print, wide** (`frontend/scripts/store-header/build.py`, its README): Today's print on the desk's frame seen through a 21:9 window, shot in Chromium under reduced motion at the scale that puts the desk's 1184 units across 3840 pixels, so a print redrawn in `scripts/today-print/` is a header made again. Fuji in the middle and a train of six cars under it, both inside the art safe area of Apple's Sketch template (1646 × 661 at (1097, 493); `held()` refuses a layout that leaves it); the bay shallower to give Fuji the box's height, the sky's gradient laid over the window, the sun without the dial's rings. No text, so one file serves every localization. The PNGs are written outside the repository | DONE |
+| 308 | **The canvas** "Tsuji — the App Store header" (https://claude.ai/artifact/LEZDooPrdeKfPKYpunN4Tp): eight prints (the four seasons by day; autumn's and summer's dusk, spring's dawn, winter's night), with the safe area and a phone-width crop to lay over them; 帰帆 (autumn, by day) proposed while Today shows it | the owner's pick |
+
+Left out: the 5244 × 2950 universal file, whose safe area (1402 × 962, above the centre) is too small for Fuji and the train at a size that reads; the search results slot, where the screenshots say more; August's night, whose largest firework stands on Fuji's summit.
