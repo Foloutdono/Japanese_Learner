@@ -1,18 +1,21 @@
 """駅 the station, under the eaves (plan 309).
 
 We stand on a small station's platform with the bay beyond. Overhead the
-eaves (0-100): the soffit's boards and the rafters under them receding
-to the beam, the beam with its lower edge planed and lit, beyond it the
-fascia at the eave's edge; a lamp hangs from the beam at x 300, lit at
-dawn, dusk and night, its light pooled on the stone under it and caught
-by the post beside it, its brace and its bracket, as far up as the
-shade lets it. Two posts stand in the margins (x 12-24 and 366-378),
-from their brackets (舟肘木) under the beam to their stones on the
-platform at 600, grained, their inner faces turned to the light, each
-braced to the beam (方杖), the brace's head housed in the beam's
-underside. Each piece is laid over what lies beyond it: the eave's edge
-first, then the posts with their brackets and braces, then the beam
-over their heads. Framed between them the bay: Fuji's summit at
+eaves (0-102): the soffit's boards and the rafters under them receding
+to the beam, the beam (two timbers lapped right of the middle) with its
+lower edge planed and lit, beyond it the fascia at the eave's edge; a
+lamp hangs from the beam at x 300, its shade from the fitting at the
+rod's foot, lit at dawn, dusk and night, its light pooled on the stone
+under it and caught by the post beside it, its brace and its bracket,
+as far up as the shade lets it. Two posts stand in the margins (x 12-24
+and 366-378), from their brackets (舟肘木) under the beam to their
+stones on the platform at 600, grained, their inner faces turned to the
+light, each braced to the beam (方杖), the brace's head housed in the
+beam's underside. Each piece is laid over what lies beyond it: what
+falls beyond the eaves (the snow, the petals, the leaves) first, then
+the eave's edge, then the posts with their brackets and braces, then the
+beam over their heads; only a petal or a leaf close to the eye passes in
+front of them all. Framed between them the bay: Fuji's summit at
 (195, 352), its foot at 455; the far shore's embankment with the line
 along it and the train at half size (455-462); the water and its boats
 (462-512) and the sea wall (512-518); the season's tree on the bank at
@@ -21,8 +24,9 @@ catching the light) and the platform's stone (560-746): its coping, the
 white line (白線) at 572, the slabs laid in courses, the eaves' shade
 across them, the planters at the corners with the season's flowers. The
 timber is the pine's (el7.PINE), the stone the sea wall's
-(scene_f6.SEA), lit by the sky; in winter icicles hang from the fascia
-and snow lies on the rails and on the platform out to the eaves' drip.
+(scene_f6.SEA), lit by the sky; in winter icicles hang in clusters from
+the fascia by the posts, and snow lies on the gutter's lip, on the rails
+and on the platform out to the eaves' drip.
 August's fireworks open beyond, right of the tree.
 
 Everything that recedes runs to one vanishing point under the summit
@@ -41,7 +45,7 @@ import math
 import random
 
 import common
-from common import UID, f
+from common import COLUMN, UID, f
 import s1_air
 import s1_scene
 import s2_air
@@ -257,6 +261,8 @@ def soffit(W, w, rng):
 
 BEAM = (79, 95.5, 97.6)   # the beam's face, its lit bevel down to its underside, its foot
 FASCIA = 102              # the eave's edge beyond it, its foot
+SPLICE = (214, 26, 7.5)   # the splice: its upper cut, the lap's length, its shoulder under the beam's top
+PEG_OFF = 3.1             # its pegs' middles over and under the shoulder
 
 
 def fascia(W, w):
@@ -272,28 +278,58 @@ def fascia(W, w):
 def beam(W, w, rng):
     """The beam (桁) over the posts: its face grained along its length,
     a knot or two, the rafters' shadow along its top, its lower edge
-    planed off and catching the light (面取り), its underside; spliced
-    (継手) and pinned right of the middle. Laid after the posts, their
-    brackets and braces, whose heads it covers; each band runs a little
-    under the next, so no sky shows along their seams."""
+    planed off and catching the light (面取り), its underside. It is two
+    timbers spliced right of the middle (継手, a lap pinned with two
+    pegs): each grained on its own, its grain stopping at the cut, the
+    second a shade apart, within its own outline and nowhere past it;
+    the lap's shoulder lit along its upper lip as the beam's own lower
+    edge is, its shadow under it, the cuts across the grain hairlines,
+    the joint running on through the lit edge; a peg through each
+    timber's lapped end, in the face a little off the shoulder, the one
+    above it near the right timber's end, the one under it near the
+    left's. Laid after the posts, their brackets and braces, whose heads
+    it covers; each band runs a little under the next, so no sky shows
+    along their seams."""
     y0, y1, y2 = BEAM
+    sx, lap, sh = SPLICE
+    ym = y0 + sh
     knots = [(rng.uniform(70, 120), rng.uniform(84, 90), 2.2, 1.5), (rng.uniform(250, 280), rng.uniform(84, 90), 1.8, 1.3)]
-    grain = grain_lines(-10, W + 10, y0 + 1.4, y1 - 1.6, rng, 7, [(x, y, ry) for x, y, _, ry in knots], wave=0.45, step=7, vertical=False)
+    parting = [(x, y, ry) for x, y, _, ry in knots]
+    # each timber's own outline, from the beam's top to its foot: the left
+    # runs on under the shoulder to the lap's far end, the right back over
+    # it to the lap's near end; each one's grain runs on past its cut, and
+    # the cut ends it there, and the right one's shade lies on it alone,
+    # never on the soffit over the beam or the fascia under it
+    left = poly([(-10, y0), (sx, y0), (sx, ym), (sx + lap, ym), (sx + lap, y2), (-10, y2)])
+    right = poly([(sx, y0), (W + 10, y0), (W + 10, y2), (sx + lap, y2), (sx + lap, ym), (sx, ym)])
+    grain = grain_lines(-10, sx + lap + 10, y0 + 1.4, y1 - 1.6, rng, 7, parting[:1], wave=0.45, step=7, vertical=False)
     grain += flame((y0 + y1) / 2, rng.uniform(140, 170), 3.0, 64, rng, up=False, across=True)
-    fine = grain_lines(-10, W + 10, y0 + 1.2, y1 - 1.4, rng, 5, [(x, y, ry) for x, y, _, ry in knots], wave=0.3, step=8, vertical=False)
-    sx = 222
-    splice = f'M{sx} {f(y0)}L{sx} {f(y0 + 7.5)}L{sx + 15} {f(y0 + 7.5)}L{sx + 15} {f(y1)}'
-    pegs = ''.join(f'<circle cx="{f(x)}" cy="{f(y0 + 4.2)}" r="1.15" fill="{w["dark"]}"></circle>'
-                   f'<path d="M{f(x - 0.9)} {f(y0 + 3.5)}a1.15 1.15 0 0 1 1.6 -0.2" fill="none" stroke="{w["fleck"]}" stroke-width="0.4" stroke-opacity="0.7"></path>'
-                   for x in (sx + 4.5, sx + 10.5))
-    return (f'<rect x="-10" y="{f(y0)}" width="{W + 20}" height="{f(y1 - y0)}" fill="url(#ekBeam)"></rect>'
-            f'<path d="{fine}" fill="none" stroke="{w["grain"]}" stroke-width="0.4" stroke-opacity="0.5"></path>'
-            f'<path d="{grain}" fill="none" stroke="{w["dark"]}" stroke-width="0.45" stroke-opacity="0.55"></path>'
+    fine = grain_lines(-10, sx + lap + 10, y0 + 1.2, y1 - 1.4, rng, 5, parting[:1], wave=0.3, step=8, vertical=False)
+    grain_r = grain_lines(sx - 10, W + 10, y0 + 1.4, y1 - 1.6, rng, 7, parting[1:], wave=0.45, step=7, vertical=False)
+    fine_r = grain_lines(sx - 10, W + 10, y0 + 1.2, y1 - 1.4, rng, 5, parting[1:], wave=0.3, step=8, vertical=False)
+    cut = f'M{sx} {f(y0)}L{sx} {f(ym)}L{sx + lap} {f(ym)}L{sx + lap} {f(y1)}'
+    # the pegs pin each lapped end, in the overlap's face and off its
+    # seam: one over the shoulder near the right timber's end, one under
+    # it near the left's, each nearly its own width clear of the shoulder,
+    # in the face between the rafters' shadow and the lit edge
+    pegs = ''.join(f'<circle cx="{f(x)}" cy="{f(y)}" r="1.15" fill="{w["dark"]}"></circle>'
+                   f'<path d="M{f(x - 0.9)} {f(y - 0.7)}a1.15 1.15 0 0 1 1.6 -0.2" fill="none" stroke="{w["fleck"]}" stroke-width="0.4" stroke-opacity="0.7"></path>'
+                   for x, y in ((sx + lap * 0.3, ym - PEG_OFF), (sx + lap * 0.7, ym + PEG_OFF)))
+    timbers = ''.join(f'<path d="{fn}" fill="none" stroke="{w["grain"]}" stroke-width="0.4" stroke-opacity="0.5" clip-path="url(#{cid})"></path>'
+                      f'<path d="{gr}" fill="none" stroke="{w["dark"]}" stroke-width="0.45" stroke-opacity="0.55" clip-path="url(#{cid})"></path>'
+                      for fn, gr, cid in ((fine, grain, 'ekBeamL'), (fine_r, grain_r, 'ekBeamR')))
+    return (f'<defs><clipPath id="ekBeamL"><path d="{left}"></path></clipPath><clipPath id="ekBeamR"><path d="{right}"></path></clipPath></defs>'
+            f'<rect x="-10" y="{f(y0)}" width="{W + 20}" height="{f(y1 - y0)}" fill="url(#ekBeam)"></rect>'
+            f'<path d="{right}" fill="{w["fleck"]}" fill-opacity="0.06"></path>'
+            + timbers
             + ''.join(knot(x, y, rx, ry, w) for x, y, rx, ry in knots)
-            + f'<path d="{splice}" fill="none" stroke="{w["dark"]}" stroke-width="0.75"></path>{pegs}'
+            + f'<path d="{cut}" fill="none" stroke="{w["dark"]}" stroke-width="0.5" stroke-opacity="0.85"></path>'
+            f'<path d="M{f(sx + 0.3)} {f(ym - 0.55)}L{f(sx + lap - 0.25)} {f(ym - 0.55)}" fill="none" stroke="{w["lit"]}" stroke-width="0.6" '
+            f'stroke-opacity="0.7"></path>{pegs}'
             f'<rect x="-10" y="{f(y0)}" width="{W + 20}" height="1.7" fill="{w["dark"]}" fill-opacity="0.75"></rect>'
             f'<rect x="-10" y="{f(y1 - 0.4)}" width="{W + 20}" height="{f(y2 - y1 + 0.4)}" fill="{w["dark"]}"></rect>'
-            f'<rect x="-10" y="{f(y1 - 1.5)}" width="{W + 20}" height="1.5" fill="{w["lit"]}" fill-opacity="0.85"></rect>')
+            f'<rect x="-10" y="{f(y1 - 1.5)}" width="{W + 20}" height="1.5" fill="{w["lit"]}" fill-opacity="0.85"></rect>'
+            f'<path d="M{sx + lap} {f(y1 - 1.5)}L{sx + lap} {f(y2)}" stroke="{w["dark"]}" stroke-width="0.5" stroke-opacity="0.85"></path>')
 
 
 POSTS = ((12, 1), (366, -1))   # each post's face's left edge, and the way its inner face looks
@@ -440,49 +476,90 @@ def brace(x0, side, w):
 def footing(x0, side, st):
     """The post's stone (礎石), squat under it, its top lit."""
     x1 = x0 + POST_W
-    l, r = (x0 - 3, x1 + POST_SIDE + 3) if side > 0 else (x0 - POST_SIDE - 3, x1 + 3)
+    lo, hi = (x0 - 3, x1 + POST_SIDE + 3) if side > 0 else (x0 - POST_SIDE - 3, x1 + 3)
     y = POST_FOOT
-    return (f'<path d="M{f(l)} {y + 7}L{f(l + 1.4)} {y - 4}L{f(r - 1.4)} {y - 4}L{f(r)} {y + 7}Z" fill="{st["block"]}"></path>'
-            f'<path d="M{f(l + 1.4)} {y - 4}L{f(r - 1.4)} {y - 4}L{f(r - 0.8)} {y - 1.4}L{f(l + 0.8)} {y - 1.4}Z" fill="{st["arris"]}"></path>'
-            f'<rect x="{f(l)}" y="{y + 6}" width="{f(r - l)}" height="1.6" fill="{st["joint"]}" fill-opacity="0.7"></rect>')
+    return (f'<path d="M{f(lo)} {y + 7}L{f(lo + 1.4)} {y - 4}L{f(hi - 1.4)} {y - 4}L{f(hi)} {y + 7}Z" fill="{st["block"]}"></path>'
+            f'<path d="M{f(lo + 1.4)} {y - 4}L{f(hi - 1.4)} {y - 4}L{f(hi - 0.8)} {y - 1.4}L{f(lo + 0.8)} {y - 1.4}Z" fill="{st["arris"]}"></path>'
+            f'<rect x="{f(lo)}" y="{y + 6}" width="{f(hi - lo)}" height="1.6" fill="{st["joint"]}" fill-opacity="0.7"></rect>')
 
 
 LAMP = (300, BEAM[2])   # where the lamp hangs from the beam
 SHADE = (10, 23)        # the shade's half-width at its rim, the rim's drop under the beam
+FITTING = (13, 15, 2)   # the fitting under the rod: its top and its foot under the beam, its foot's half-width
+# the dome's control point under the beam: its crown (at 11.5 + CROWN / 2,
+# 14.65) a little up into the fitting's foot, and the dome still over
+# the foot's corners (14.98), so the shade hangs from the fitting with no
+# sky between them
+CROWN = 6.3
 BULB = (300, BEAM[2] + 24.4)
 BULB_R = 2.3
 
 
+def part_of(p0, p1, p2, a, b):
+    """The part of the quadratic curve p0 p1 p2 between a and b of its
+    parameter, as a quadratic of its own (its blossoms)."""
+    def at(u, v):
+        return tuple((1 - u) * (1 - v) * i + ((1 - u) * v + u * (1 - v)) * j + u * v * k for i, j, k in zip(p0, p1, p2))
+    return at(a, a), at(a, b), at(b, b)
+
+
 def lamp(w, lit):
-    """The platform's lamp (外灯): a rod from the beam, an enamel shade,
-    green without and white within, the bulb under it; lit at dawn, at
-    dusk and at night."""
+    """The platform's lamp (外灯): a rod from the beam, the fitting at its
+    foot, an enamel shade hung from it, green without and white within,
+    the light's sheen along its shoulder, the bulb under it; lit at dawn,
+    at dusk and at night."""
     x, y = LAMP
     hw, drop = SHADE
+    top, foot, half = FITTING
     shade = mix(w['dark'], '#2f5a44', 0.55)
     inside = '#f6efd8' if lit else mix(w['side'], '#d8d2c2', 0.6)
     bulb = '#fff4cf' if lit else mix(w['lit'], '#ffffff', 0.45)
     glow = (f'<g class="f4-lamp" style="{anim(4.2, 1.3)}"><circle cx="{x}" cy="{f(BULB[1])}" r="26" fill="url(#f4Lamp)"></circle>'
             f'<circle cx="{x}" cy="{f(BULB[1])}" r="10" fill="url(#f4Lamp)"></circle></g>') if lit else ''
-    return (f'{glow}<path d="M{x} {f(y)}L{x} {f(y + 13)}" stroke="{w["dark"]}" stroke-width="0.9"></path>'
-            f'<path d="M{x - 2.4} {f(y + 13)}L{x + 2.4} {f(y + 13)}L{x + 2} {f(y + 15)}L{x - 2} {f(y + 15)}Z" fill="{w["dark"]}"></path>'
-            f'<path d="M{x - hw} {f(y + drop)}Q{x} {f(y + 11)} {x + hw} {f(y + drop)}Z" fill="{shade}"></path>'
+    dome = ((x - hw, y + drop), (x, y + CROWN), (x + hw, y + drop))
+    # the sheen: the dome's own curve from near its rim up to its crown,
+    # laid half a unit in from its edge, so it lies on the enamel
+    (ax, ay), (bx, by), (cx, cy) = ((px + 0.3, py + 0.45) for px, py in part_of(*dome, 0.06, 0.5))
+    return (f'{glow}<path d="M{x} {f(y)}L{x} {f(y + top)}" stroke="{w["dark"]}" stroke-width="0.9"></path>'
+            f'<path d="M{f(x - half - 0.4)} {f(y + top)}L{f(x + half + 0.4)} {f(y + top)}L{f(x + half)} {f(y + foot)}L{f(x - half)} {f(y + foot)}Z" '
+            f'fill="{w["dark"]}"></path>'
+            f'<path d="M{x - hw} {f(y + drop)}Q{x} {f(y + CROWN)} {x + hw} {f(y + drop)}Z" fill="{shade}"></path>'
             f'<path d="M{x - hw} {f(y + drop)}Q{x} {f(y + drop - 2.4)} {x + hw} {f(y + drop)}Q{x} {f(y + drop - 1.2)} {x - hw} {f(y + drop)}Z" fill="{inside}"></path>'
             f'<circle cx="{x}" cy="{f(BULB[1])}" r="{BULB_R}" fill="{bulb}"></circle>'
-            f'<path d="M{x - 9.4} {f(y + 22.4)}Q{x - 4} {f(y + 16)} {x + 1} {f(y + 14.6)}" fill="none" stroke="{w["lit"]}" stroke-width="0.5" stroke-opacity="0.6"></path>')
+            f'<path d="M{f(ax)} {f(ay)}Q{f(bx)} {f(by)} {f(cx)} {f(cy)}" fill="none" stroke="{w["lit"]}" stroke-width="0.5" stroke-opacity="0.6"></path>')
 
 
 def icicles(W, o, rng):
-    """氷柱 along the fascia's foot, and the snow lying on the gutter's
-    lip above them."""
-    d = []
-    x = -4
-    while x < W + 4:
-        ln = rng.uniform(1.5, 9) if rng.random() < 0.78 else rng.uniform(9, 16)
-        wd = rng.uniform(1.0, 2.2)
-        d.append(f'M{f(x)} {FASCIA - 0.3}L{f(x + wd * 0.55)} {f(FASCIA + ln)}L{f(x + wd)} {FASCIA - 0.3}Z')
-        x += rng.uniform(2.6, 8)
-    return (f'<path d="{"".join(d)}" fill="{o["cap"]}" fill-opacity="0.92"></path>'
+    """氷柱 under the gutter at the fascia's foot, grouped where the melt
+    drips: a cluster at a rafter's foot (the rafters run on under the
+    beam to the fascia, toward VP), its longest in its middle and the
+    rest shorter toward its ends, the gutter bare between. None hangs
+    over the text's column (common.COLUMN), where a row of them would
+    bead the sky over the masthead and the disc: they hang by the posts,
+    half behind the brackets and the braces, and the snow lies along the
+    gutter's lip the whole way."""
+    teeth, shade = [], []
+    for i in range(-2, 13):
+        cx = toward(7 + 38.4 * i, 79, BEAM[1])
+        n = rng.randint(3, 6)
+        half = (2.4 + 1.25 * n) * rng.uniform(0.85, 1.15)
+        longest = rng.uniform(9, 16)
+        if cx + half < -4 or cx - half > W + 4 or COLUMN[0] - half < cx < COLUMN[1] + half:
+            continue
+        for k in range(n):
+            u = -1 + 2 * (k + rng.uniform(0.3, 0.7)) / n
+            x = cx + u * half
+            ln = longest * (1 - 0.72 * u * u) * rng.uniform(0.72, 1.0)
+            wd = min(2.4, 0.8 + 0.1 * ln) * rng.uniform(0.85, 1.15)
+            tip = x + wd * rng.uniform(-0.08, 0.08)
+            # a taper pinched in toward its tip, as ice runs thin
+            a, b, y = x - wd / 2, x + wd / 2, FASCIA - 0.3
+            teeth.append(f'M{f(a)} {f(y)}Q{f(a + wd * 0.3)} {f(y + ln * 0.45)} {f(tip)} {f(FASCIA + ln)}'
+                         f'Q{f(b - wd * 0.3)} {f(y + ln * 0.45)} {f(b)} {f(y)}Z')
+            if ln > 5:
+                shade.append(f'M{f(x + wd * 0.1)} {f(y)}L{f(b)} {f(y)}Q{f(b - wd * 0.3)} {f(y + ln * 0.45)} {f(tip)} {f(FASCIA + ln)}Z')
+    return (f'<path d="{"".join(teeth)}" fill="{o["cap"]}" fill-opacity="0.92"></path>'
+            f'<path d="{"".join(shade)}" fill="{o["cap_shade"]}" fill-opacity="0.45"></path>'
             f'<path d="M-10 {FASCIA - 0.7}L{W + 10} {FASCIA - 0.7}" stroke="{o["cap"]}" stroke-width="0.9" stroke-opacity="0.9"></path>')
 
 
@@ -772,33 +849,58 @@ def lamp_light(x0, side):
             f'{bracket_outline(x0, side)[2]}"></path>')
 
 
-def penumbra(steps=5):
+def seen(d):
+    """The share of the bulb's disc a line across it leaves under it, the
+    line d of its radius below its middle (-1 over its top: all of it; 1
+    under its foot: none)."""
+    return (math.acos(d) - d * math.sqrt(1 - d * d)) / math.pi
+
+
+# the penumbra's steps, and the share of the light each lays: eight at
+# 0.16 stack to what five at a quarter did where the light falls on the
+# timber (within half a level); the bay's own blur (f5Blur, its smoke's,
+# 1.6 units) runs each step into the next
+STEPS, STEP_LIGHT = 8, 0.16
+
+
+def penumbra(steps=STEPS):
     """The shade's shadow, from its rim outward, in steps: full light
-    under the line over the rim from the bulb's top (it rises 0.09 a
-    unit), none over the line from its foot (0.37), and between them the
-    less the more of the bulb the rim hides; each step's rise, the
-    darkest first. Laid at a quarter each, five stack to about the whole
-    light under them all."""
+    under the line from the bulb's top over the rim (the bulb's top hangs
+    above the rim, so this line falls outward, 0.09 a unit), none over the
+    line from its foot (which rises, 0.37 a unit), and between them the
+    less the more of the bulb the rim hides. Each step's line runs from
+    the rim through the bulb where the rim leaves (k + 1/2) / steps of its
+    disc showing, so each step brings the same share of the light, the
+    steps closer where the rim crosses the bulb's middle and farther apart
+    at its top and foot; each one's rise (a fall where it is negative),
+    the darkest first: 0.32 to -0.04."""
     (_, by), (hw, drop) = BULB, SHADE
     rim = LAMP[1] + drop
-    lit, dark = (rim - by + BULB_R) / hw, (by + BULB_R - rim) / hw
-    return [dark - (dark - lit) * (k + 0.5) / steps for k in range(steps)]
+    out = []
+    for k in range(steps):
+        share, lo, hi = (k + 0.5) / steps, -1.0, 1.0
+        for _ in range(48):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if seen(mid) > share else (lo, mid)
+        out.append((by + (lo + hi) / 2 * BULB_R - rim) / hw)
+    return out
 
 
 PENUMBRA = penumbra()
 
 
-def cone(rise, reach=150):
-    """What the shade lets the bulb light, to one step of its shadow: all
-    that lies under the lines from the shade's rim rising outward by
-    `rise` a unit. Over them lies the shade's own shadow: the beam's
-    underside over the lamp, the brace's head, the bracket's inner end;
-    under them the post, the brace's foot and the stone."""
+def cone(rise, reach=95, foot=320):
+    """What the shade lets the bulb light toward the post beside it, to
+    one step of its shadow: all that lies under the line from the shade's
+    rim rising outward by `rise` a unit (falling where it is negative),
+    out past the bracket's end and down past where the lamp's light gives
+    out (ekLampLight, 190 from the bulb), a blur's breadth clear of both.
+    Over it lies the shade's own shadow: the beam's underside over the
+    lamp, the brace's head, the bracket's inner end; under it the post
+    and the brace's foot."""
     (bx, _), (hw, drop) = BULB, SHADE
     y = LAMP[1] + drop
-    top, foot = y - rise * reach, POST_FOOT + 20
-    return poly([(bx - hw, y), (bx + hw, y), (bx + hw + reach, top), (bx + hw + reach, foot),
-                 (bx - hw - reach, foot), (bx - hw - reach, top)])
+    return poly([(bx - hw, y), (bx + hw, y), (bx + hw + reach, y - rise * reach), (bx + hw + reach, foot), (bx - hw, foot)])
 
 
 # ── the bay beyond ─────────────────────────────────────────────────
@@ -881,25 +983,33 @@ def station(season, hour, variant=None):
         # fall carried the other way, as on the lake
         tree = flora.tree(L, h, o, hour, gust, UID)
         tree = common.turned(tree, TREE_FOOT, TREE_AT, TREE_K.get(o.get('tree'), 0.62))
-        falls = f'<g transform="matrix(-1 0 0 1 {L.W} 0)">{air.falls(L, h, o, hour)}{s2_air.close(L, h, o, hour, UID)}</g>'
+        # what falls out beyond the eaves (the snow, the petals, the
+        # leaves) is laid before them, so the posts, their braces and the
+        # beam stand in front of it and no flake falls under the roof; what
+        # falls close to the eye (s2_air.close) stays in front of
+        # everything, at the lens; both carried the tree's way
+        falls, close = air.falls(L, h, o, hour), s2_air.close(L, h, o, hour, UID)
+        falls, close = (f'<g transform="matrix(-1 0 0 1 {L.W} 0)">{svg}</g>' if svg else '' for svg in (falls, close))
         timber = ''.join(post(x0, side, w, random.Random(L.seed + 973 + j)) for j, (x0, side) in enumerate(POSTS))
         timber += ''.join(brace(x0, side, w) for x0, side in POSTS)
         timber += ''.join(bracket(x0, side, w, random.Random(L.seed + 995 + j)) for j, (x0, side) in enumerate(POSTS))
         warm = ''
         if lit:
             # the lamp's light caught by the post beside it, the brace and
-            # the bracket over it, as far up as the shade lets it, its
-            # shadow's edge soft
-            warm = (f'<defs><clipPath id="ekWarm">{lamp_light(*POSTS[1])}</clipPath>'
-                    + ''.join(f'<clipPath id="ekCone{j}"><path d="{cone(r)}"></path></clipPath>' for j, r in enumerate(PENUMBRA))
-                    + '</defs>'
-                    + ''.join(f'<g clip-path="url(#ekCone{j})"><rect x="250" y="96" width="140" height="{POST_FOOT - 96}" '
-                              f'fill="url(#ekLampLight)" fill-opacity="0.25" clip-path="url(#ekWarm)"></rect></g>'
-                              for j in range(len(PENUMBRA))))
-        # the eaves from the farthest in: the soffit and the eave's edge
-        # beyond the beam (its icicles with it), then what stands under the
-        # beam, the posts with their brackets and braces, then the beam
-        # laid over their heads, and the lamp hung from it
+            # the bracket over it, as far up as the shade lets it: each
+            # step of the shade's shadow a cone of the light, stacked and
+            # run together by the bay's blur, so its edge comes in as
+            # softly as the rim hides the bulb; the timber's own outline
+            # cuts it, sharp
+            warm = (f'<defs><clipPath id="ekWarm">{lamp_light(*POSTS[1])}</clipPath></defs>'
+                    f'<g clip-path="url(#ekWarm)"><g filter="url(#f5Blur)" fill="url(#ekLampLight)" fill-opacity="{f(STEP_LIGHT)}">'
+                    + ''.join(f'<path d="{cone(r)}"></path>' for r in PENUMBRA)
+                    + '</g></g>')
+        # the eaves from the farthest in: what falls beyond them, the
+        # soffit and the eave's edge beyond the beam (its icicles with it),
+        # then what stands under the beam, the posts with their brackets
+        # and braces, then the beam laid over their heads, and the lamp
+        # hung from it
         front = (f'<defs>{defs(st, w, o, hour, lit)}</defs>'
                  + verge(L, h, o, hour)
                  + tree
@@ -908,6 +1018,7 @@ def station(season, hour, variant=None):
                  + ''.join(footing(x0, side, st) for x0, side in POSTS)
                  + ('' if w['snow'] else weeds([(9, POST_FOOT + 7, 1.0), (34, POST_FOOT + 6.5, 0.8), (357, POST_FOOT + 7, 0.9)],
                                                h, o, hour, random.Random(L.seed + 989)))
+                 + falls
                  + soffit(L.W, w, random.Random(L.seed + 981))
                  + fascia(L.W, w)
                  + (icicles(L.W, o, random.Random(L.seed + 985)) if w['snow'] else '')
@@ -917,6 +1028,6 @@ def station(season, hour, variant=None):
                  + ''.join(planter_back(a, b, w) for a, b in PLANTERS)
                  + flora.bank(L, h, o, hour, gust, anim)
                  + ''.join(planter_front(a, b, w, o, random.Random(L.seed + 987 + j)) for j, (a, b) in enumerate(PLANTERS))
-                 + falls
+                 + close
                  + air.fireflies(L, h, o, hour, 'near'))
     return dict(layers=(sky, back, train, front), run=run, band=band, L=L)
