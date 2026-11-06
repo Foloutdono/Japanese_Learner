@@ -127,8 +127,11 @@ const NIGHT = '#0c0a16'
 // stood on (rgba(0,0,0,0.55), 16 px, 2 down). Its rings are quieter than
 // the paper's: at 0.7 the light ink stood in a black outline on the day's
 // sky (a sticker's, never a shadow's); at 0.25 it is the shadow made firm,
-// the worst pixel within 2 px of it 4.92:1 under the cover and 4.68 as it
-// is cut away, over every print of the six sceneries.
+// the worst pixel within 2 px of it 4.92:1 under the cover over the dawn,
+// day and dusk prints of the six sceneries, and no less as it is cut away
+// where the print is raised (half of it kept, challenge.js, raisedGlow).
+// The glow is what holds it there: the rings alone read 3.90 on the
+// river's spring day (carouselCover.test.js pins both).
 const RIMS = {
   paper: { rim: PAPER.bg, rings: 0.7, glow: alpha(PAPER.bg, 0.9), blur: 18, dy: 0 },
   sumi: { rim: NIGHT, rings: 0.25, glow: 'rgba(0,0,0,0.55)', blur: 16, dy: 2 },

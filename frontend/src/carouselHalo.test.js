@@ -170,5 +170,18 @@ describe('the paper round the scroll’s words (plan 309)', () => {
     frame(on, at)
     expect(made).toHaveLength(12)
     expect(made[11].calls.at(-1)).toMatchObject({ op: 'fillRect', ink: RIM_INK, mode: 'source-in' })
+
+    // A photo washed with paper has no hour (its wash is the same at every
+    // one): at night its rim is the day's, and the day's strip is its own.
+    const photo = hour => pl({ 'challenge.halo': 1, 'challenge.ruby': 0 }, { photo: 'carousel/mine.jpg', photoLook: 'paper', hour })
+    frame(photo('night'), at)
+    expect(made).toHaveLength(12)
+    frame(pl({ 'challenge.halo': 1, 'challenge.ruby': 0 }, { hour: 'night' }), at)
+    expect(made).toHaveLength(14)
+    frame(photo('night'), at)
+    expect(made).toHaveLength(16)
+    expect(made[15].calls.at(-1)).toMatchObject({ op: 'fillRect', ink: RIM_INK, mode: 'source-in' })
+    for (const hour of ['dawn', 'day', 'dusk']) frame(photo(hour), at)
+    expect(made).toHaveLength(16)
   })))
 })

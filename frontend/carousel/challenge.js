@@ -23,11 +23,11 @@
 // video (on the voice's own lengths and syllables where it is voiced,
 // else on a close guess), `drawChallenge` draws any second of it.
 import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, measure, mix, palette, reading, rrect, text } from './draw.js'
-import { PRINT_SEASONS } from './app.js'
+import { PRINT_SEASONS, printOf } from './app.js'
 import { backdrop, canvasOf, liftAt } from './backdrop.js'
 import { MASTHEAD, coverOn, drawCover, drawMasthead, glowMasthead } from './cover.js'
 import { haloStrip } from './halo.js'
-import { SCENERY_IDS } from './sceneries.js'
+import { SCENERY_IDS, sceneryOf } from './sceneries.js'
 import { seeded, shuffle, unpack } from './common.js'
 import { SITE } from './strings.js'
 import { tuneFlag, tuned } from './tune.js'
@@ -202,6 +202,25 @@ export function challengePrintOpts(plan) {
   return { season: plan.season, scenery: plan.scenery, falls: tuned(plan.tune, 'challenge.falls') > 0, bursts: tuned(plan.tune, 'challenge.bursts') > 0 }
 }
 
+// The print a plan stands on, by its name: the one loaded (`name`, a B
+// print read as its A), else the season's at the hour where a season is
+// asked; none for the date's, which only the print loaded can say.
+const printNamed = (plan, name) => (name ? name.replace(/-b$/, '') : plan.season ? printOf(plan.season, plan.hour) : null)
+/** Whether the hour's sun or moon stands over the print (plan 309,
+ *  `challenge.disc`; backdrop.js draws it): over a print, never a photo,
+ *  of a scenery that has one (sceneries.js: not the long view), and not
+ *  where the print has a light of its own up there: August's night its
+ *  fireworks, the bay's spring night (the app's own print) its hazy moon,
+ *  which backdrop.js reads off the sky's markup (carouselAlong.test.js
+ *  holds the two to one answer on every print). `name` is the print
+ *  drawn, read as alongPanel reads it. */
+export function discDrawn(plan, name = null) {
+  const view = sceneryOf(plan.scenery)
+  if (!(tuned(plan.tune, 'challenge.disc') > 0) || plan.photo || !view.disc) return false
+  const print = printNamed(plan, name)
+  return print !== 'summer-hanabi' && !(view.source === 'app' && print === 'spring-night')
+}
+
 /** The lines the reader says: one a sentence, read along. */
 export function challengeCues(plan) {
   return plan.style === 'along' ? plan.sents.map(rows => ({ text: sentenceText(rows), who: 'reader', slow: plan.slow, marks: true })) : []
@@ -339,6 +358,24 @@ function masthead(ctx, T, glow = 0) {
   if (!(glow > 0.001)) return drawMasthead(ctx, T.ink, T.road)
   glowMasthead(ctx, Math.min(1, glow), T)
 }
+// Read along over the print raised (plan 309, challenge.lift), the
+// masthead stands on the sky the print carries up, by day brighter than
+// what stood there: its light ink fell to 4.0:1 at its worst on the
+// river's spring day once the print was up (4.9 with it down). Raised, it
+// keeps half its glow by day (its rim and shadow of night, glowMasthead),
+// come in as the print rises, held from the cut where a cover hands it
+// the whole glow: then 5.57 at its worst over every day print of the
+// raised sceneries (the worst pixel within 2 px). At night the sky needs
+// none.
+const RAISED_GLOW = 0.5
+/** The glow the masthead keeps over the print raised, at a moment (`seg`,
+ *  `into` seconds in): none unless read along over a print, by day or at
+ *  dawn or dusk, on a scenery raised with the dial on. */
+export function raisedGlow(plan, T, seg, into) {
+  const lift = tuned(plan.tune, 'challenge.lift')
+  if (T.ground !== 'sumi' || plan.photo || plan.hour === 'night' || !sceneryOf(plan.scenery).lift || !(lift > 0)) return 0
+  return RAISED_GLOW * (coverOn(plan) && seg === 'reading' ? 1 : liftAt(seg, into, lift))
+}
 function chip(ctx, T, label, x, y, { align = 'left', z = FS.sm } = {}) {
   const f = font(700, z, 'latin')
   const w = measure(ctx, label, f) + SP[5] * 2
@@ -400,23 +437,26 @@ export function hookWords(plan, tl) {
 // `challenge.along`): a band of night behind them, across the frame,
 // thinning into the print above and below.
 const BAND = { top: 540, foot: 1230, feather: 130, a: 0.72 }
-// With the hour's sun or moon shown (challenge.disc), its foot at y 482
-// under the hook (cover.js, TOP), the band thins in from under the disc
-// rather than over its lower half, which it dulled: whole from 615, the
-// hook's first line, from 583, standing in the last of its thinning (the
-// brightest of the ground under the words measured as with no disc).
+// With the hour's sun or moon over the print (discDrawn), its foot at y
+// 482 under the hook (a scenery's own disc, 24 units under its middle at
+// 150, carouselAlong.test.js reads it off their meta), the band thins in
+// from under the disc rather than over its lower half, which it dulled:
+// whole from 615, the hook's first line, from 583, standing in the last
+// of its thinning (the brightest of the ground under the words measured
+// as with no disc). Where none is drawn it stands where it always did.
 const DISC_FOOT = 485
 /** Whether the hook stands on that band: read along, over a print (a
  *  photo is darkened its own way), with no cover and the dial on. */
 export const hookBand = plan => !coverOn(plan) && !plan.photo && plan.style === 'along' && tuned(plan.tune, 'challenge.along') > 0
-/** The band's rows: from `y0` to `y1`, whole from `top` to `foot`, thinning
- *  over `feather` either side, `a` its night at its whole. */
-export function bandOf(plan) {
-  const top = tuned(plan.tune, 'challenge.disc') > 0 ? DISC_FOOT + BAND.feather : BAND.top
+/** The band's rows over the print `name` (discDrawn): from `y0` to `y1`,
+ *  whole from `top` to `foot`, thinning over `feather` either side, `a`
+ *  its night at its whole. */
+export function bandOf(plan, name = null) {
+  const top = discDrawn(plan, name) ? DISC_FOOT + BAND.feather : BAND.top
   return { ...BAND, top, y0: top - BAND.feather, y1: BAND.foot + BAND.feather }
 }
-function nightBand(ctx, plan) {
-  const { a: dark, feather, y0, y1 } = bandOf(plan)
+function nightBand(ctx, plan, name) {
+  const { a: dark, feather, y0, y1 } = bandOf(plan, name)
   const g = ctx.createLinearGradient(0, y0, 0, y1)
   // Eased in and out, so neither end of the band shows as a line.
   for (let i = 0; i <= 8; i++) {
@@ -432,7 +472,7 @@ function hook(ctx, plan, tl, t, into, P, T) {
   const words = hookWords(plan, tl)
   const cover = coverOn(plan)
   const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'hook', cover })
-  if (hookBand(plan)) nightBand(ctx, plan)
+  if (hookBand(plan)) nightBand(ctx, plan, P?.name)
   // Under the cover, the cover stands the masthead on its own paper
   // (cover.js): the hook's own, under it, is plain.
   masthead(ctx, T, cover ? 0 : 1 - laid)
@@ -493,9 +533,11 @@ function stripOf(ctx, plan, rows, length, T) {
   // Its inks and its rim are its own (plan 309): a strip written in
   // another ink, or with another rim (another width, another hour's ink,
   // halo.js), is written again. The rim is the paper's, round ink: light
-  // words over a photo have none.
+  // words over a photo have none, and a photo washed with paper has no
+  // hour (its wash is the same at every one): its rim is the day's.
   const halo = T.ground === 'paper' ? tuned(plan.tune, 'challenge.halo') : 0
-  const key = `${plan.id}|${plan.lang}|${T.ink}|${T.ruby}|${halo}|${plan.hour}`
+  const hour = plan.photo ? 'day' : plan.hour
+  const key = `${plan.id}|${plan.lang}|${T.ink}|${T.ruby}|${halo}|${hour}`
   if (strip?.key === key) return strip.c
   const c = canvasOf(Math.ceil(fr.w + BLEED * 2), Math.ceil(length + BLEED * 2))
   if (!c) return null
@@ -506,7 +548,7 @@ function stripOf(ctx, plan, rows, length, T) {
     y += row.h
   }
   // A rim of the page's paper round every glyph, grown from the strip.
-  haloStrip(c, canvasOf, halo, plan.hour)
+  haloStrip(c, canvasOf, halo, hour)
   strip = { key, c }
   return c
 }
@@ -523,11 +565,13 @@ function fades(x) {
 // After a cover (plan 309) the text waits for the paper: it and its chip
 // come in once the wash has begun to, this long into the reading.
 const COVER_WAIT = 0.35
-// After a cover, the print raised and its sun or moon shown (plan 309:
-// challenge.lift, challenge.disc), the disc rises through where the
-// reading's chip stands, from under the hook's slip to above the chip:
-// the chip waits in either style until the print is raised whole, read
-// off the lift itself (backdrop.js, liftAt), then comes in over CHIP_IN.
+// With the print raised and its sun or moon over it (plan 309:
+// challenge.lift, discDrawn), the disc rises through where the reading's
+// chip stands, from under the hook to above the chip, the cover on or
+// off: the chip waits in either style until the print is raised whole,
+// read off the lift itself (backdrop.js, liftAt), then comes in over
+// CHIP_IN. Where nothing rises (the long view, which stays down and has
+// no disc; August's night; the bay's spring night) it comes as it did.
 function risen() {
   let lo = 0
   let hi = 8
@@ -540,10 +584,11 @@ function risen() {
 }
 export const RISEN = risen()
 const CHIP_IN = 0.3
-/** How much of the reading's chip shows `into` seconds into the reading:
- *  all of it, unless it waits for the disc to rise past it. */
-export function chipShown(plan, into) {
-  const waits = coverOn(plan) && tuned(plan.tune, 'challenge.lift') > 0 && tuned(plan.tune, 'challenge.disc') > 0
+/** How much of the reading's chip shows `into` seconds into the reading,
+ *  over the print `name` (discDrawn): all of it, unless it waits for the
+ *  disc to rise past it. */
+export function chipShown(plan, into, name = null) {
+  const waits = sceneryOf(plan.scenery).lift && tuned(plan.tune, 'challenge.lift') > 0 && discDrawn(plan, name)
   return waits ? ease((into - RISEN) / CHIP_IN) : 1
 }
 function scroll(ctx, plan, tl, t, P) {
@@ -594,10 +639,14 @@ function scroll(ctx, plan, tl, t, P) {
       y += row.h
     }
   }
+  // The counter: whole from the reading's first frame, as it always came;
+  // after a cover, with the text; and held while the disc rises past it.
   const counter = () => chip(ctx, T, `JLPT ${plan.lv} · ${reading + 1} / ${plan.sents.length}`, fr.right, fr.y + 6, { align: 'right' })
-  if (!wait) return counter()
+  const shown = Math.min(wait ? k : 1, chipShown(plan, t - seg.start, P?.name))
+  if (shown >= 1) return counter()
+  if (!(shown > 0)) return
   ctx.save()
-  ctx.globalAlpha *= Math.min(k, chipShown(plan, t - seg.start))
+  ctx.globalAlpha *= shown
   counter()
   ctx.restore()
 }
@@ -618,7 +667,7 @@ const PANEL_AT = { dawn: 0.74, day: 0.76, dusk: 0.7, night: 0.72, hanabi: 0.74 }
 export function alongPanel(plan, name = null) {
   if (!(tuned(plan.tune, 'challenge.along') > 0) || plan.photo) return 0.62
   // A B print (the date's, with no season asked) is its A print's hour.
-  const fireworks = name ? name.replace(/-b$/, '') === 'summer-hanabi' : plan.season === 'hanabi' && plan.hour === 'night'
+  const fireworks = printNamed(plan, name) === 'summer-hanabi'
   return Math.max(0.62, (fireworks ? PANEL_AT.hanabi : PANEL_AT[plan.hour]) ?? 0.62)
 }
 /** Where the read-along's panel stands: its top and its foot, the foot of
@@ -638,7 +687,8 @@ function along(ctx, plan, tl, t, P) {
   const S = W[plan.lang]
   const T = LOOK.dark
   const { laid } = backdrop(ctx, P, T, { dark: 0.42, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'reading', cover: false })
-  masthead(ctx, T, 1 - laid)
+  const into = t - tl.segs.find(s => s.key === 'reading').start
+  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'reading', into)))
   const tw = fr.w - PAD * 2
   const { top, foot, text: end, credit } = alongBox(plan)
   // Where each sentence stands in the column, and where the column is turned to.
@@ -666,7 +716,7 @@ function along(ctx, plan, tl, t, P) {
   text(ctx, S.voice, fr.cx, credit, { f: font(600, FS.sm, 'latin'), color: alpha(LIGHT, 0.75), align: 'center' })
   ctx.restore()
   // The chip, unless it waits for the disc to rise past it (chipShown).
-  const shown = chipShown(plan, t - tl.segs.find(s => s.key === 'reading').start)
+  const shown = chipShown(plan, into, P?.name)
   ctx.save()
   ctx.globalAlpha *= shown
   if (shown > 0) chip(ctx, T, `JLPT ${plan.lv} · ${now + 1} / ${tl.lines.length}`, fr.right, fr.y + 6, { align: 'right' })
@@ -739,8 +789,9 @@ function questionLayout(ctx, plan) {
 }
 function question(ctx, plan, tl, t, into, answered, P, T) {
   const S = W[plan.lang]
-  const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: answered ? 'answer' : 'question', cover: false })
-  masthead(ctx, T, 1 - laid)
+  const seg = answered ? 'answer' : 'question'
+  const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg, cover: false })
+  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, seg, into)))
   const L = questionLayout(ctx, plan)
   let y = lines(ctx, T, plan.q.ask, TOP + 30, [L.ask.size], { maxLines: L.askLines }) + SP[6]
   plan.q.choices.forEach((c, i) => {
@@ -960,7 +1011,7 @@ function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
   const pace = ctaPace(dur)
   const beats = Object.fromEntries(Object.entries(CTA).map(([k, v]) => [k, v * pace]))
   const { laid } = backdrop(ctx, P, T, { dark: 0.62, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'cta', cover: false })
-  masthead(ctx, T, 1 - laid)
+  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'cta', into)))
   let y = UNDER + SP[5]
   y = lines(ctx, T, S.reader, y, [FS.heading, FS.title], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
   y += SP[4]
