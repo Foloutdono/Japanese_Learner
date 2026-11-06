@@ -82,14 +82,23 @@ const LIFT = 3
 // and goes back to the hour's whole wash this long into the question.
 const LAY = 0.7
 const BACK = 0.6
+// The paper once the text is read, over the moonlit night (challenge.night
+// at 1): 0.64, where the hour's is 0.6. The night's darkest, its trunks
+// and eaves, are lit three times as bright as the print drew them, as
+// before plan 309 (`lifted`, below), and under the hour's wash the way to
+// the app's stops still ahead, in the soft ink, stood on the river's
+// trunk at 4.42:1 and the countdown's track at 1.83; laid so, at 4.87 and
+// 1.87 at worst, where the curve this lift replaced had them.
+const MOONLIT_END = 0.64
 /** The paper over the print at a moment: `alpha`, the wash laid (the
  *  hour's, times the maker's `wash`), and `laid`, the share of it come
  *  in since the cover (0 under the cover, then 1). Under the reading the
  *  wash is lighter (`read`, challenge.read), coming in from the hook's,
- *  and back to the hour's whole wash early in the question. With no
- *  cover and `read` at 1, the look before plan 309, it is the hour's
- *  wash at every moment. */
-export function washAt({ hour = 'day', wash = 1, read = 1, cover = false, seg = null, into = 0 } = {}) {
+ *  and back early in the question to the hour's whole wash, or to `end`
+ *  of it once the text is read (heavier over a moonlit night). With no
+ *  cover, `read` at 1 and `end` at 1, the look before plan 309, it is
+ *  the hour's wash at every moment. */
+export function washAt({ hour = 'day', wash = 1, read = 1, cover = false, seg = null, into = 0, end = 1 } = {}) {
   const base = (WASH[hour] ?? WASH.day) * wash
   if (seg === 'hook' && cover) return { alpha: 0, laid: 0 }
   if (seg === 'reading') {
@@ -98,7 +107,8 @@ export function washAt({ hour = 'day', wash = 1, read = 1, cover = false, seg = 
     const from = cover ? 0 : 1
     return { alpha: Math.min(0.97, base * (from + (read - from) * k)), laid: cover ? k : 1 }
   }
-  if (seg === 'question') return { alpha: Math.min(0.97, base * (read + (1 - read) * ease(into / BACK))), laid: 1 }
+  if (seg === 'question') return { alpha: Math.min(0.97, base * (read + (end - read) * ease(into / BACK))), laid: 1 }
+  if (seg === 'answer' || seg === 'cta') return { alpha: Math.min(0.97, base * end), laid: 1 }
   return { alpha: Math.min(0.97, base), laid: 1 }
 }
 
@@ -420,12 +430,14 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
   const rd = tl?.segs.find(s => s.key === 'reading')
   const into = own ? t - own.start : 0
   const p = rd ? clamp((t - rd.start) / rd.dur) : 0
-  // A video that opens on the cover lays its paper as the text comes in.
-  const opened = cover || (plan ? coverOn(plan) : false)
-  const { alpha: washed, laid } = washAt({ hour, wash, read: dial.read, cover: opened, seg, into })
   // The night's print is lit for the paper laid over it: under a cover,
   // where none is, it stands as it is, and its light comes in with the paper.
   const lit = paper && hour === 'night' ? dial.night : null
+  // A video that opens on the cover lays its paper as the text comes in;
+  // over the moonlit night, a little heavier once the text is read.
+  const opened = cover || (plan ? coverOn(plan) : false)
+  const end = lit > 0 ? 1 + (MOONLIT_END / WASH.night - 1) * lit : 1
+  const { alpha: washed, laid } = washAt({ hour, wash, read: dial.read, cover: opened, seg, into, end })
   // Darkened, its sun or moon is laid over the darkening, in its own light.
   const at = P ? printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, disc: discDrawn(plan, P), apart: !paper }) : null
   if (!P) { ctx.fillStyle = paper ? PAPER.card : '#17151a'; ctx.fillRect(0, 0, FMT.w, FMT.h) }

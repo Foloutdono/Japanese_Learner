@@ -10,6 +10,7 @@ import { backdrop, discAt, liftAt, panAt, trainRun, washAt } from '../carousel/b
 import { drawPrint, loadFailure, loadPrint, standInOpts, standInSays, standsOnFailure } from '../carousel/app.js'
 import { challengePlan, challengePrintOpts, challengeTimeline } from '../carousel/challenge.js'
 import { coverOn } from '../carousel/cover.js'
+import { palette } from '../carousel/draw.js'
 import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
 import { drawn } from './testing/challengeCanvas.js'
 
@@ -218,6 +219,14 @@ describe('what a reading challenge stands on (plan 309)', () => {
         fastest = Math.max(fastest, (a - b) / 0.25)
       }
       expect(fastest, `${dur} s`).toBeLessThanOrEqual(1.5 * ((from - to) / dur) + 0.01)
+      // Eased in and out: over the reading's first and last 2% the
+      // window all but stands, under a fifth of its mean pace.
+      for (const [a, b] of [[0, 0.02], [0.98, 1]]) {
+        for (let t = a * dur; t < b * dur - 1e-9; t += 0.05) {
+          const pace = (panAt('reading', t / dur, { pan: 1, from, to }) - panAt('reading', Math.min(b, (t + 0.05) / dur), { pan: 1, from, to })) / 0.05
+          expect(pace, `${dur} s, ${t.toFixed(2)} s`).toBeLessThan(0.2 * ((from - to) / dur))
+        }
+      }
     }
   })
 
@@ -235,6 +244,43 @@ describe('what a reading challenge stands on (plan 309)', () => {
     expect(washAt({ hour: 'day', read: 0.75, seg: 'question', into: 0 }).alpha).toBeCloseTo(base * 0.75, 12)
     expect(washAt({ hour: 'day', read: 0.75, seg: 'question', into: 0.6 }).alpha).toBe(base)
     for (const seg of ['hook', 'answer', 'cta']) expect(washAt({ hour: 'day', read: 0.75, seg, into: 0.1 }).alpha).toBe(base)
+  })
+
+  it('lays the paper heavier once the text is read over the moonlit night, coming in with the question', () => {
+    // The question comes in from the reading's wash to `end` of the
+    // hour's; the answer and the way to the app stay there; the hook
+    // and the reading are what `end` leaves them.
+    const night = { hour: 'night', read: 0.75 }
+    expect(washAt({ ...night, seg: 'question', into: 0, end: 1.1 }).alpha).toBeCloseTo(0.45, 12)
+    expect(washAt({ ...night, seg: 'question', into: 0.6, end: 1.1 }).alpha).toBeCloseTo(0.66, 12)
+    for (const seg of ['answer', 'cta']) expect(washAt({ ...night, seg, into: 0.1, end: 1.1 }).alpha, seg).toBeCloseTo(0.66, 12)
+    expect(washAt({ ...night, wash: 1.5, seg: 'cta', end: 1.1 }).alpha).toBe(0.97)
+    expect(washAt({ ...night, seg: 'hook', end: 1.1 }).alpha).toBe(0.6)
+    expect(washAt({ ...night, seg: 'reading', into: 30, end: 1.1 }).alpha).toBeCloseTo(0.45, 12)
+    // Through the backdrop: the paper's share of each fill it lays over
+    // the frame, the moonlit night (challenge.night) at 0, 0.5 and 1.
+    const bg = `rgba(${[1, 3, 5].map(k => parseInt(palette('paper').bg.slice(k, k + 2), 16)).join(',')},`
+    const washes = (n, { hour = 'night', T = PAPER, seg, after }) => {
+      const plan = planOf({ ...BEFORE_309, 'challenge.read': 0.75, 'challenge.night': n }, { hour, style: T === PAPER ? 'scroll' : 'along' })
+      const tl = challengeTimeline(plan)
+      const f = at(print(`winter-${hour}`), T, plan, tl, tl.segs.find(s => s.key === seg).start + after)
+      expect(f.seg).toBe(seg)
+      return f.calls.filter(c => c.op === 'fillRect' && String(c.fill).startsWith(bg)).map(c => +c.fill.slice(bg.length, -1))
+    }
+    const moments = [['hook', 1], ['reading', 30], ['question', 0], ['question', 0.6], ['answer', 0.5], ['cta', 3]]
+    const want = { 0: [0.6, 0.45, 0.45, 0.6, 0.6, 0.6], 0.5: [0.6, 0.45, 0.45, 0.62, 0.62, 0.62], 1: [0.6, 0.45, 0.45, 0.64, 0.64, 0.64] }
+    for (const [n, alphas] of Object.entries(want)) {
+      moments.forEach(([seg, after], i) => {
+        const got = washes(+n, { seg, after })
+        expect(got, `${n} ${seg} ${after}`).toHaveLength(1)
+        expect(got[0], `${n} ${seg} ${after}`).toBeCloseTo(alphas[i], 12)
+      })
+    }
+    // By day the hour's wash whatever the dial; under the read-along no paper at all.
+    for (const [seg, after] of moments.slice(3)) {
+      expect(washes(1, { hour: 'day', seg, after }), `day ${seg}`).toEqual([0.72])
+      expect(washes(1, { T: DARK, seg, after }), `along ${seg}`).toEqual([])
+    }
   })
 
   it('shows the sun or moon above the chip once the print is raised, else under the hook alone', () => {
@@ -341,6 +387,10 @@ describe('what a reading challenge stands on (plan 309)', () => {
     // before plan 309 (the pale moonlit page the owner chose); past it
     // less and less, and none of the print's lights lit to 254 or over.
     levels.forEach((v, i) => expect(v, `${i}`).toBe(i <= 52 ? 3 * i : Math.min(v, 3 * i)))
+    // The knee held from above too: from the first level the rounding
+    // leaves apart, under three times, on the shoulder at these levels.
+    levels.forEach((v, i) => { if (i >= 55) expect(v, `${i}`).toBeLessThan(3 * i) })
+    for (const [i, v] of [[60, 174], [80, 198], [100, 211], [150, 231], [200, 243]]) expect(Math.abs(levels[i] - v), `${i}`).toBeLessThanOrEqual(1)
     expect(Math.max(...levels)).toBe(253)
     // Each pixel lifted whole, its channels in the print's own ratio: the
     // night sky, a dark pine, the maple's coral, the myrtle's leaf, the
