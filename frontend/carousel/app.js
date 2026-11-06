@@ -417,14 +417,21 @@ function layerAt(markup, t) {
   return markup.replace(/animation-delay:\s*(-?[\d.]+)s/g, (_, d) => `animation-delay: ${(+d - t).toFixed(3)}s`)
 }
 
+// The August night's fireworks taken apart (plan 309), from the back
+// layer's own markup: the layer without the bursts in its sky (their
+// reflections, inside the water's clip, kept), and those bursts alone,
+// so a reading challenge can lay them over its paper in their colours.
+const SKY_BURSTS_OFF = '\n.tpr-burst { display: none; }\n[clip-path] .tpr-burst { display: inline; }'
+const SKY_BURSTS_ONLY = '\nsvg * { visibility: hidden; }\n.tpr-burst, .tpr-burst * { visibility: visible; }\n[clip-path] .tpr-burst, [clip-path] .tpr-burst * { visibility: hidden; }'
+
 /** The hour's print in today's season, or the one chosen, its layers
  *  decoded: `base` is the frontend's root as the page sees it. A reading
  *  challenge also says what it stands on (plan 309, sceneries.js): the
  *  bay, the app's own print, unless another `scenery` is chosen; the long
  *  view is the desk's print, as a desk asked for is. `falls` hangs the
- *  season's petals and leaves where their fall begins; `bursts` is the
- *  August night's fireworks, apart. */
-// eslint-disable-next-line no-unused-vars -- bursts: the fireworks apart, not drawn apart yet
+ *  season's petals and leaves where their fall begins; `bursts` takes the
+ *  August night's fireworks apart (img.backBare, img.bursts: null on a
+ *  print with none). */
 export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date(), season = null, scenery = 'bay', falls = false, bursts = false } = {}) {
   const get = async (path, as = 'json') => {
     const r = await fetch(base + path)
@@ -448,11 +455,13 @@ export async function loadPrint(hour, { base = '../', device = 'phone', now = ne
   const defs = Object.values(scene.layers).flatMap(l => l.match(/<defs>[\s\S]*?<\/defs>/g) || []).join('')
   // The train waits off the print's left edge until it runs (the page
   // lets it overflow its box): its image spans a print's width either side.
-  const svg = (inner, left = 0) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${css}</style>${defs}${inner}</svg>`)}`
-  const [sky, back, train, front, grain, paper] = await Promise.all([
+  const svg = (inner, left = 0, more = '') => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${css}${more}</style>${defs}${inner}</svg>`)}`
+  const apart = bursts && scene.layers.back.includes('tpr-burst')
+  const [sky, back, train, front, grain, paper, backBare, skyBursts] = await Promise.all([
     picture(svg(scene.layers.sky)), picture(svg(scene.layers.back)), picture(svg(scene.layers.train, scene.w)), picture(svg(scene.layers.front)),
     picture(`${base}public/today/print/${meta.rev}/grain.png`), picture(`${base}public/today/print/${meta.rev}/paper.png`),
+    apart ? picture(svg(scene.layers.back, 0, SKY_BURSTS_OFF)) : null, apart ? picture(svg(scene.layers.back, 0, SKY_BURSTS_ONLY)) : null,
   ])
   const moving = motionCss(cssText)
   const at = (name, t, left = 0) => picture(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(
@@ -464,45 +473,58 @@ export async function loadPrint(hour, { base = '../', device = 'phone', now = ne
   }
   const frame = own ? own.frame : meta.frames[view.device]
   const look = own ? own.prints[name] : meta.prints[name]
-  return { hour, name, scenery: view.id, scene, frame, look, img: { sky, back, train, front, grain, paper }, moment }
+  return { hour, name, scenery: view.id, scene, frame, look, img: { sky, back, train, front, grain, paper, backBare, bursts: skyBursts }, moment }
 }
 
+// The print's three parts, as a reading challenge keeps them (plan 309):
+// what lies under the train (the band, the sky, its grain, the back
+// layer), the train, and what lies over it (the front layer, the paper).
+const WHOLE = { under: true, train: true, over: true }
+
 /** The print with its top-left corner at (x, y), `u` pixels a unit; the
- *  band's ink fills above it, as the gate's frame does. */
-export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canvas.height, moving = null, t = null } = {}) {
+ *  band's ink fills above it, as the gate's frame does. `parts` draws
+ *  only those of its three (the whole by default); `run`, 0 to 1, puts
+ *  the train where that share of its run brings it (plan 309). */
+export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canvas.height, moving = null, t = null, parts = WHOLE, run = null } = {}) {
   const { scene, frame, look } = P
   // A clip's frame: the layers as they stand at `t`, the train where its
   // run has brought it; a still: the print at rest, the train halfway.
   const img = moving ? { ...P.img, ...moving } : P.img
-  const run = t == null ? 0.45 : (((t + scene.train.delay) % scene.train.dur) / scene.train.dur)
+  const at = run ?? (t == null ? 0.45 : (((t + scene.train.delay) % scene.train.dur) / scene.train.dur))
   const w = scene.w * u
   const h = scene.h * u
-  ctx.fillStyle = look.band
-  ctx.fillRect(0, 0, W, H)
+  if (parts.under) {
+    ctx.fillStyle = look.band
+    ctx.fillRect(0, 0, W, H)
+  }
   ctx.save()
   ctx.beginPath()
   ctx.rect(x, y, w, h)
   ctx.clip()
-  const sky = ctx.createLinearGradient(0, y, 0, y + h)
-  for (const [o, col] of look.sky) sky.addColorStop((o * frame.horizon) / scene.h, col)
-  sky.addColorStop(frame.horizon / scene.h, look.ground)
-  sky.addColorStop(1, look.ground)
-  ctx.fillStyle = sky
-  ctx.fillRect(x, y, w, h)
-  ctx.drawImage(img.sky, x, y, w, h)
   const tile = (pic, tw, th, hh) => {
     for (let ty = 0; ty < hh; ty += th) for (let tx = 0; tx < w; tx += tw) ctx.drawImage(pic, x + tx, y + ty, tw, Math.min(th, hh - ty))
   }
-  ctx.save()
-  ctx.beginPath()
-  ctx.rect(x, y, w, (frame.horizon + 12) * u)
-  ctx.clip()
-  tile(img.grain, 640 * u, 120 * u, (frame.horizon + 12) * u)
-  ctx.restore()
-  ctx.drawImage(img.back, x, y, w, h)
-  ctx.drawImage(img.train, x - w + w * (scene.train.run / 100) * run, y, 2 * w, h)
-  ctx.drawImage(img.front, x, y, w, h)
-  tile(img.paper, 128 * u, 128 * u, h)
+  if (parts.under) {
+    const sky = ctx.createLinearGradient(0, y, 0, y + h)
+    for (const [o, col] of look.sky) sky.addColorStop((o * frame.horizon) / scene.h, col)
+    sky.addColorStop(frame.horizon / scene.h, look.ground)
+    sky.addColorStop(1, look.ground)
+    ctx.fillStyle = sky
+    ctx.fillRect(x, y, w, h)
+    ctx.drawImage(img.sky, x, y, w, h)
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(x, y, w, (frame.horizon + 12) * u)
+    ctx.clip()
+    tile(img.grain, 640 * u, 120 * u, (frame.horizon + 12) * u)
+    ctx.restore()
+    ctx.drawImage(img.back, x, y, w, h)
+  }
+  if (parts.train) ctx.drawImage(img.train, x - w + w * (scene.train.run / 100) * at, y, 2 * w, h)
+  if (parts.over) {
+    ctx.drawImage(img.front, x, y, w, h)
+    tile(img.paper, 128 * u, 128 * u, h)
+  }
   ctx.restore()
 }
 
