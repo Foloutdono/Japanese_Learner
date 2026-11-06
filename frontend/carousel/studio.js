@@ -12,12 +12,12 @@ import { FITS, FONT_FACES, drawFeedHud, font, formatOf, palette } from './draw.j
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
-import { PRINT_HOURS, PRINT_SEASONS, loadPrint, standInOpts } from './app.js'
+import { PRINT_HOURS, PRINT_SEASONS, loadPrint, standInOpts, standInSays } from './app.js'
 import { printSeason } from '../src/domain/printHour.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
 import { STYLES as CHALLENGE_STYLES, challengeCommand, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
-import { SCENERY_IDS, sceneryOf } from './sceneries.js'
+import { SCENERY_IDS } from './sceneries.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
 import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
@@ -887,8 +887,10 @@ const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer
 // the studio) has the bay stand in, at the hour and season asked for and
 // with the parts its dials bring out (its petals, its fireworks), so the
 // frame is lit as that hour is; else the last print drawn. It says so,
-// rather than leave a blank page (plan 309). A render overtaken by a
-// newer one says nothing: its scenery is no longer the one in view.
+// rather than leave a blank page, in the render's own words (plan 309,
+// app.js standInSays: "has no prints yet" only where its own are not
+// there). A render overtaken by a newer one says nothing: its scenery is
+// no longer the one in view.
 let lastPrint = null
 let standInSaid = ''
 async function challengePrint(pl, mine) {
@@ -900,7 +902,7 @@ async function challengePrint(pl, mine) {
     lastPrint = P
     // Its own print back, the word that another stood in goes.
     if (standInSaid && $('#status').textContent === standInSaid) status('')
-    return { P, standIn: false }
+    return { P, standIn: '' }
   }
   console.warn(`reading challenge: ${failure.message}`)
   // The bay as it would have stood, dialled as asked, unless the bay is what failed.
@@ -909,14 +911,14 @@ async function challengePrint(pl, mine) {
   const bay = instead ? await printFor(state.hour, seasonOf(), instead).catch(e => { bayFailure = e; return null }) : null
   if (mine !== token) return null
   const before = bay ?? lastPrint
-  const view = sceneryOf(pl.scenery)
-  standInSaid = before ? `${view.name} (${view.jp}) did not load (${failure.message}): ${bay ? 'the bay at this hour' : 'the last print drawn'} stands in.`
-    : `Today's print did not load (${bayFailure.message}).`
+  const says = standInSays(pl, failure.message, bay ? 'bay' : lastPrint ? 'last' : null)
+  standInSaid = before ? says.said : standInSays({ ...pl, scenery: 'bay' }, bayFailure.message).said
   status(standInSaid)
   // Nothing is made on a print standing in for the one asked, nor on the
-  // ground for another scenery; Today's print failing with nothing to stand
-  // in still draws on the ground, as it did before plan 309.
-  return { P: before, standIn: !!before || !!instead }
+  // ground for another scenery (its buttons say why, `standIn`); Today's
+  // print failing with nothing to stand in still draws on the ground, as
+  // it did before plan 309.
+  return { P: before, standIn: before || instead ? says.label : '' }
 }
 const QUESTION_KINDS = { comprehension: 'about the text', inference: 'reading between the lines', grammar: 'grammar', vocabulary: 'a word' }
 async function renderChallenge(mine) {
@@ -1034,9 +1036,9 @@ async function renderChallenge(mine) {
   $('#command').textContent = challengeCommand(pl)
   // The scroll is made here, whole; the one read along needs the voice
   // engine; none is made on a print standing in for its scenery's.
-  $('#export-video').disabled = pl.style !== 'scroll' || standIn
-  $('#export-video').textContent = standIn ? `${sceneryOf(pl.scenery).name} did not load`
-    : pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)})` : 'Read along is made by the command (the voice)'
+  $('#export-video').disabled = pl.style !== 'scroll' || !!standIn
+  $('#export-video').textContent = standIn
+    || (pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)})` : 'Read along is made by the command (the voice)')
 }
 // A challenge's file name: its text, what it stands on unless the bay, its print's season and hour, its language.
 const challengeName = (id, plan) => `tsuji-challenge-${safeName(id)}-${plan.scenery !== 'bay' ? `${plan.scenery}-` : ''}${plan.season ? `${plan.season}-` : ''}${plan.hour}-${state.lang}`
@@ -1056,7 +1058,7 @@ async function exportChallenge() {
 async function exportThumb() {
   if (current.challenge) {
     if (current.challenge.standIn) {
-      status(`${sceneryOf(current.plan.scenery).name} did not load: no thumbnail of it is made on another print.`)
+      status(`${current.challenge.standIn}: no thumbnail of it is made on another print.`)
       return
     }
     const c = document.createElement('canvas')

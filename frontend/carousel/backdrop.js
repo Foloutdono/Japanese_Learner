@@ -132,7 +132,18 @@ const discOf = (P, view) => (view.source === 'carousel' && P.frame.disc ? { cx: 
 // a challenge does not draw: a disc at the print's place would sit in the
 // top of that haze, off its middle. It keeps the haze alone, as before.
 const ownMoon = (P, view) => view.source === 'app' && /tpr-s5Oboro/.test(P.scene.layers?.sky ?? '')
-const hasDisc = (P, view) => view.disc && !!P.look?.disc && !/hanabi/.test(P.name) && !ownMoon(P, view)
+/** Whether the hour's sun or moon is drawn over the print `P` (as
+ *  app.loadPrint gives it, or null) under the plan's dial
+ *  (challenge.disc): over a print, never a photo or no print at all, of
+ *  a scenery that has one (sceneries.js: not the long view), where the
+ *  print has no light of its own up there. The one rule: the backdrop
+ *  draws the disc by it, and challenge.js holds the reading's chip and
+ *  thins the read-along hook's band in under the disc by the same answer. */
+export function discDrawn(plan, P) {
+  if (!(dialsOf(plan).disc > 0) || !P || P.photo) return false
+  const view = sceneryOf(P.scenery)
+  return view.disc && !!P.look?.disc && !/hanabi/.test(P.name) && !ownMoon(P, view)
+}
 // The long view's summit, in the desk print's units (today-print's
 // layouts.py, DESK.fuji): the window opens with it in its middle.
 const WIDE_SUMMIT = 650
@@ -375,7 +386,7 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
   // where none is, it stands as it is, and its light comes in with the paper.
   const lit = paper && hour === 'night' ? dial.night : null
   // Darkened, its sun or moon is laid over the darkening, in its own light.
-  const at = P ? printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, apart: !paper }) : null
+  const at = P ? printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, disc: discDrawn(plan, P), apart: !paper }) : null
   if (!P) { ctx.fillStyle = paper ? PAPER.card : '#17151a'; ctx.fillRect(0, 0, FMT.w, FMT.h) }
   if (paper) {
     if (washed > 0) {
@@ -404,12 +415,12 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
   return { laid }
 }
 
-// The print laid for this moment: raised, travelled, its sun or moon and
-// its train between what lies under and over them. Gives where it was
-// laid, and its fireworks, to be laid there over the paper; `apart`, its
-// sun or moon too, to be laid over the darkening (`disc`: the picture,
-// where, how much of it shows).
-function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, apart = false }) {
+// The print laid for this moment: raised, travelled, its sun or moon
+// (`disc`, discDrawn's answer) and its train between what lies under and
+// over them. Gives where it was laid, and its fireworks, to be laid there
+// over the paper; `apart`, its sun or moon too, to be laid over the
+// darkening (`disc`: the picture, where, how much of it shows).
+function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, disc = false, apart = false }) {
   const view = sceneryOf(P.scenery)
   // The long view stands at the frame's height, wider than it; the rest across its width.
   const wide = view.pan
@@ -424,7 +435,6 @@ function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, apart = false 
   const tall = !wide && view.lift && dial.lift > 0
   const W = wide ? Math.ceil(w) : FMT.w
   const H = tall ? Math.ceil(h) : FMT.h
-  const disc = dial.disc > 0 && hasDisc(P, view)
   const split = dial.train > 0 || disc
   const bursts = dial.bursts > 0 && !!P.img.bursts && !!P.img.backBare
   // Raised till its foot is at the frame's: between pixels as it rises, so
