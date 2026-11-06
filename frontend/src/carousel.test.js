@@ -2072,8 +2072,10 @@ describe('the reading challenges (plan 247)', () => {
     expect(challengeCommand(challengePlan(data, 'n5-01', { scenery: 'lake', season: 'winter', hour: 'day' }))).toContain(' --hour day --season winter --scenery lake --lang en')
     expect(challengeCommand(challengePlan(data, 'n5-01', { scenery: 'station' }))).toContain(' --hour day --scenery station --lang en')
     for (const opts of [{}, { scenery: 'bay' }, { scenery: 'moon' }]) expect(challengeCommand(challengePlan(data, 'n5-01', opts)), JSON.stringify(opts)).not.toContain('--scenery')
-    // What the print under it is loaded with: its season, its scenery, the parts the dials bring out.
-    expect(challengePrintOpts(challengePlan(data, 'n5-01', {}))).toEqual({ season: null, scenery: 'bay', falls: false, bursts: false })
+    // What the print under it is loaded with: its season, its scenery, the parts the dials bring out
+    // (each dial named, not left to its default, which plan 309 moves later).
+    const undialled = challengePlan(data, 'n5-01', { tune: { 'challenge.falls': 0, 'challenge.bursts': 0 } })
+    expect(challengePrintOpts(undialled)).toEqual({ season: null, scenery: 'bay', falls: false, bursts: false })
     const dialled = challengePlan(data, 'n5-01', { season: 'hanabi', scenery: 'wide', tune: { 'challenge.falls': 1, 'challenge.bursts': 1 } })
     expect(challengePrintOpts(dialled)).toEqual({ season: 'hanabi', scenery: 'wide', falls: true, bursts: true })
     // Day unless an hour is chosen, as the studio opens on it.
@@ -2123,7 +2125,8 @@ describe('the reading challenges (plan 247)', () => {
     for (const P of data.passages) {
       for (const style of CHALLENGE_STYLES) {
         const [en, fr] = ['en', 'fr'].map(lang => {
-          const pl = challengePlan(data, P.id, { lang, style })
+          // The hook's own lines: the cover named off, not left to its default (the cover has its own test).
+          const pl = challengePlan(data, P.id, { lang, style, tune: { 'challenge.cover': 0 } })
           const tl = challengeTimeline(pl)
           const words = hookWords(pl, tl)
           const where = `${P.id} ${lang} ${style}`
