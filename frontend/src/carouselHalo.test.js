@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { FORMATS } from '../carousel/draw.js'
-import { RIM, RIM_INK, haloStrip } from '../carousel/halo.js'
+import { RIM, RIM_AT, RIM_INK, haloStrip, rimInk } from '../carousel/halo.js'
 import { CH, challengePlan, challengeTimeline, drawChallenge } from '../carousel/challenge.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
 
@@ -91,6 +91,25 @@ describe('the paper round the scroll’s words (plan 309)', () => {
     expect(RIM).toEqual([[2, 1], [3.5, 0.4], [5, 0.15]])
   })
 
+  it('lays the rim as much of the page’s paper as the hour’s page is: quieter on the night’s moonlit page', () => {
+    const inkAt = hour => {
+      const made = []
+      const canvasOf = (w, h) => { const c = recorder(w, h); made.push(c); return c }
+      haloStrip(recorder(812, 2741), canvasOf, 1, hour)
+      return made[0].calls.at(-1).ink
+    }
+    // By day, at dawn and at dusk, as it was first laid; at night, quieter.
+    expect(RIM_AT).toEqual({ dawn: 0.7, day: 0.7, dusk: 0.7, night: 0.45 })
+    for (const hour of ['dawn', 'day', 'dusk']) expect(inkAt(hour), hour).toBe(RIM_INK)
+    expect(inkAt('night')).toBe('rgba(246,241,228,0.45)')
+    expect(rimInk('night')).toBe(inkAt('night'))
+    // An hour it does not know, or none, is the day's.
+    expect(inkAt(undefined)).toBe(RIM_INK)
+    expect(inkAt('noon')).toBe(RIM_INK)
+    // The paper itself every hour, only its strength told apart.
+    for (const hour of Object.keys(RIM_AT)) expect(rimInk(hour)).toBe(`rgba(246,241,228,${RIM_AT[hour]})`)
+  })
+
   it('grows it on the scroll’s strip, after it, and writes the strip again when its rim or its readings change', () => withPath2D(() => canvases(made => {
     const pl = (tune, extra = {}) => challengePlan(bank, 'n4-01', { style: 'scroll', tune, ...extra })
     const frame = (plan, t) => {
@@ -141,5 +160,28 @@ describe('the paper round the scroll’s words (plan 309)', () => {
     frame(pl({ 'challenge.halo': 2 }, { photo: 'carousel/mine.jpg' }), at)
     expect(made).toHaveLength(8)
     expect(made[7].calls.some(c => c.op === 'drawImage')).toBe(false)
+
+    // Another hour: written again, its rim in that hour's ink; the day's (the plan's default) as before.
+    frame(pl({ 'challenge.halo': 1, 'challenge.ruby': 0 }, { hour: 'night' }), at)
+    expect(made).toHaveLength(10)
+    expect(made[9].calls.at(-1)).toMatchObject({ op: 'fillRect', ink: rimInk('night'), mode: 'source-in' })
+    frame(pl({ 'challenge.halo': 1, 'challenge.ruby': 0 }, { hour: 'night' }), at + 1)
+    expect(made).toHaveLength(10)
+    frame(on, at)
+    expect(made).toHaveLength(12)
+    expect(made[11].calls.at(-1)).toMatchObject({ op: 'fillRect', ink: RIM_INK, mode: 'source-in' })
+
+    // A photo washed with paper has no hour (its wash is the same at every
+    // one): at night its rim is the day's, and the day's strip is its own.
+    const photo = hour => pl({ 'challenge.halo': 1, 'challenge.ruby': 0 }, { photo: 'carousel/mine.jpg', photoLook: 'paper', hour })
+    frame(photo('night'), at)
+    expect(made).toHaveLength(12)
+    frame(pl({ 'challenge.halo': 1, 'challenge.ruby': 0 }, { hour: 'night' }), at)
+    expect(made).toHaveLength(14)
+    frame(photo('night'), at)
+    expect(made).toHaveLength(16)
+    expect(made[15].calls.at(-1)).toMatchObject({ op: 'fillRect', ink: RIM_INK, mode: 'source-in' })
+    for (const hour of ['dawn', 'day', 'dusk']) frame(photo(hour), at)
+    expect(made).toHaveLength(16)
   })))
 })

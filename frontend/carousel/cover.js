@@ -59,7 +59,10 @@ function hookLines(ctx, str, sizes, maxW) {
 
 // The slip laid out from the words, on the context that draws them: its
 // words set to the text column, as the hook sets them, the washi wider
-// than the column either side.
+// than the column either side. On whole pixels, its foot as its sides,
+// so its sumi edge and shu rule are drawn sharp all round (a foot
+// between two pixels spread both over three rows); a size steps down
+// on the height it is drawn at.
 function slip(ctx, words) {
   const x = Math.round(fr.x - SP[3])
   const w = Math.round(fr.w + SP[3] * 2)
@@ -67,7 +70,7 @@ function slip(ctx, words) {
   for (const [i, [hookSizes, titleSizes]] of LADDER.entries()) {
     const hook = hookLines(ctx, words.hook, hookSizes, maxW)
     const title = fit(ctx, words.title, { weight: 700, fam: 'serif', sizes: titleSizes.filter(z => z <= hook.size), maxW, maxLines: 2, lh: TITLE_LH })
-    const h = SP[4] + paragraphH(hook, HOOK_LH) + SP[3] + paragraphH(title, TITLE_LH) + SP[4] + CHIP_H + SP[4]
+    const h = Math.ceil(SP[4] + paragraphH(hook, HOOK_LH) + SP[3] + paragraphH(title, TITLE_LH) + SP[4] + CHIP_H + SP[4])
     if (TOP + h <= FOOT || i === LADDER.length - 1) return { box: { x, y: TOP, w, h }, hook, title }
   }
 }
@@ -81,12 +84,13 @@ export function coverBox(ctx, plan, words) {
 
 /** The cover: the hook's `words` (challenge.js, hookWords: its line, the
  *  title and the chip) on the slip's washi, `into` seconds into the hook,
- *  `laid` the share of the wash the backdrop has laid (0 to 1). The
- *  masthead is the hook's, drawn before it: as long as the paper is not
- *  there to read it on, the cover draws it again on the paper's rim and
- *  glow. Nothing comes in: frame 0 is the cover whole. */
+ *  `laid` the share of the wash the backdrop has laid (0 to 1), `T` the
+ *  look the hook is drawn in (challenge.js). The masthead is the hook's,
+ *  drawn before it: as long as the paper is not there to read it on, the
+ *  cover draws it again in its look, on its rim and glow. Nothing comes
+ *  in: frame 0 is the cover whole. */
 export function drawCover(ctx, plan, tl, into, P, T, { laid = 1, words } = {}) {
-  glowMasthead(ctx, 1 - laid)
+  glowMasthead(ctx, 1 - laid, T)
   const { box, hook, title } = slip(ctx, words)
   const { ink } = printPlate(ctx, PAPER, box.x, box.y, box.w, box.h, U)
   let y = box.y + SP[4]
@@ -95,59 +99,94 @@ export function drawCover(ctx, plan, tl, into, P, T, { laid = 1, words } = {}) {
   chip(ctx, words.chip, y)
 }
 
-// The masthead where the hook draws it (challenge.js, masthead), in the
-// paper's inks, or all in the paper: the shape its glow is cast by.
-const MARK = 64
-const TSUJI = { x: fr.x + MARK + SP[4], y: fr.y + MARK * 0.66, f: font(700, FS.caption, 'latin') }
-function masthead(ctx, ink = PAPER.ink, road = PAPER.gold) {
-  mark(ctx, fr.x, fr.y, MARK, ink, road)
-  text(ctx, 'TSUJI', TSUJI.x, TSUJI.y, { f: TSUJI.f, color: ink })
+/** Where the masthead stands, the one place every frame draws it: the
+ *  hook, the reading, the question and the way to the app (challenge.js,
+ *  masthead) and the cover, here. The mark `size` square at the column's
+ *  head, TSUJI beside it. */
+export const MASTHEAD = { x: fr.x, y: fr.y, size: 64, tsuji: { x: fr.x + 64 + SP[4], y: fr.y + 64 * 0.66, f: font(700, FS.caption, 'latin') } }
+/** The masthead as it stands: the mark in `ink`, its road in `road`, TSUJI in `ink`. */
+export function drawMasthead(ctx, ink, road) {
+  const M = MASTHEAD
+  mark(ctx, M.x, M.y, M.size, ink, road)
+  text(ctx, 'TSUJI', M.tsuji.x, M.tsuji.y, { f: M.tsuji.f, color: ink })
 }
-// The rim's rings: how far out, in pixels, and how strongly. Firmer past
-// the first than halo.js's round the reading's words, which stand on a
-// wash: the masthead stands on the print unwashed, and its thin strokes
-// met the night's sky inside 2 px (4.47:1 at its worst, 6.2 with these).
+// The rim's rings: how far out, in pixels, and how strongly. They are not
+// halo.js's (RIM there: [[2, 1], [3.5, 0.4], [5, 0.15]]), and on purpose:
+// the reading's words stand on a wash, a page of paper already round
+// them, where the masthead stands on the print unwashed (the cover, and
+// the moment after it before the paper is laid), its strokes thinner than
+// any word's. On halo.js's rings it met the night's sky inside 2 px
+// (4.47:1 at its worst); on these, 6.2. Tuned as one, the masthead would
+// fall back under 4.5:1 or the words gain an outline: tune each on its own.
 const RIM = [[2, 1], [3.5, 0.6], [5, 0.2]]
+// The night round the read-along's light ink (the backdrop's darkening's own ink).
+const NIGHT = '#0c0a16'
+// Each look's rim and glow, `rings` the rings' strength (× RIM's): the
+// page's paper round the paper's ink, as the reading's words stand; night
+// round the read-along's light ink, its glow the shadow it has always
+// stood on (rgba(0,0,0,0.55), 16 px, 2 down). Its rings are quieter than
+// the paper's: at 0.7 the light ink stood in a black outline on the day's
+// sky (a sticker's, never a shadow's); at 0.25 it is the shadow made firm,
+// the worst pixel within 2 px of it 4.92:1 under the cover over the dawn,
+// day and dusk prints of the six sceneries, and no less as it is cut away
+// where the print is raised (half of it kept, challenge.js, raisedGlow).
+// The glow is what holds it there: the rings alone read 3.90 on the
+// river's spring day (carouselCover.test.js pins both).
+const RIMS = {
+  paper: { rim: PAPER.bg, rings: 0.7, glow: alpha(PAPER.bg, 0.9), blur: 18, dy: 0 },
+  sumi: { rim: NIGHT, rings: 0.25, glow: 'rgba(0,0,0,0.55)', blur: 16, dy: 2 },
+}
+/** The rim and glow round a look's masthead: `T`, the look (challenge.js,
+ *  its ink, its road and its ground), the paper's when none is given. */
+export function rimOf(T) {
+  const L = T?.ground === 'sumi' ? RIMS.sumi : RIMS.paper
+  return { ink: T?.ink ?? PAPER.ink, road: T?.road ?? PAPER.gold, ...L }
+}
 /** The masthead over the print unwashed, standing as the reading's words
- *  stand over theirs (halo.js): on a rim of the page's paper, whole close
- *  to every stroke and thinning out, so no sky runs into one (a glow alone
- *  leaves the night's sky against them), then the paper glowing past it,
- *  drawn twice; all `k` as strong (1 − the share of the wash laid, none
- *  at 0); then its ink, once and whole. In the paper's ink in both styles:
- *  the read-along's light ink would not read on it. The cover draws it
- *  over the hook's own; a moment before the paper is laid may draw it in
- *  the masthead's place, which it becomes as `k` comes to 0. */
-export function glowMasthead(ctx, k) {
+ *  stand over theirs (halo.js): on a rim, whole close to every stroke and
+ *  thinning out, so no sky runs into one (a glow alone leaves the night's
+ *  sky against them), then its glow, drawn twice; all `k` as strong (1 −
+ *  the share of the wash laid, none at 0); then its ink, once and whole.
+ *  In its look `T` (rimOf): the paper's ink on the page's paper (the
+ *  scroll), the read-along's light ink on night, so neither changes ink
+ *  as the cover is cut away. The cover draws it over the hook's own; the
+ *  moment after the cover, before the paper or the dark is laid, draws it
+ *  in the masthead's place (challenge.js, masthead), and it becomes the
+ *  masthead as `k` comes to 0. */
+export function glowMasthead(ctx, k, T = null) {
   if (!(k > 0)) return
+  const L = rimOf(T)
+  const M = MASTHEAD
   ctx.save()
   ctx.lineJoin = 'round'
-  ctx.font = TSUJI.f
+  ctx.font = M.tsuji.f
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
   const outline = new Path2D(`${MARK_ROAD} ${MARK_INK}`)
   // Each ring one stroke of every outline, so it is as even where two meet.
   for (const [r, a] of RIM) {
-    ctx.strokeStyle = alpha(PAPER.bg, 0.7 * a * k)
+    ctx.strokeStyle = alpha(L.rim, L.rings * a * k)
     ctx.lineWidth = r * 2
-    ctx.strokeText('TSUJI', TSUJI.x, TSUJI.y)
+    ctx.strokeText('TSUJI', M.tsuji.x, M.tsuji.y)
     ctx.save()
-    ctx.translate(fr.x, fr.y)
-    ctx.scale(MARK / 1000, MARK / 1000)
-    ctx.lineWidth = (r * 2 * 1000) / MARK
+    ctx.translate(M.x, M.y)
+    ctx.scale(M.size / 1000, M.size / 1000)
+    ctx.lineWidth = (r * 2 * 1000) / M.size
     ctx.stroke(outline)
     ctx.restore()
   }
-  // The glow, twice, cast by the masthead's shape in the paper itself and
-  // laid before any ink: cast by the ink, each glow fell on the ink drawn
-  // before it.
+  // The glow, twice, cast by the masthead's shape in the rim's own colour
+  // and laid before any ink: cast by the ink, each glow fell on the ink
+  // drawn before it.
   ctx.globalAlpha *= k
-  ctx.shadowColor = alpha(PAPER.bg, 0.9)
-  ctx.shadowBlur = 18
-  for (let i = 0; i < 2; i++) masthead(ctx, PAPER.bg, PAPER.bg)
+  ctx.shadowColor = L.glow
+  ctx.shadowBlur = L.blur
+  ctx.shadowOffsetY = L.dy
+  for (let i = 0; i < 2; i++) drawMasthead(ctx, L.rim, L.rim)
   ctx.restore()
   // Then the ink, once, as the hook draws it: as the glow ends it is the
   // masthead's own, not thinned in a frame from two draws to one.
-  masthead(ctx)
+  drawMasthead(ctx, L.ink, L.road)
 }
 
 // The chip as the hook sets it, in the slip's inks: washi on a sumi pill.
