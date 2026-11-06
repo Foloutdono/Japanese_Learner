@@ -22,6 +22,8 @@
 //   --season winter   ... the print's season (plan 267): spring, summer, hanabi
 //                     (summer, its night August's fireworks), autumn or winter;
 //                     the day's own, as the app's gate shows it, when left out
+//   --scenery lake    ... the print it stands on (plan 309): bay (the app's own,
+//                     the default), wide, lake, torii, river or station
 //   --question 4      ... the text's question asked (1-based, as the studio
 //                     lists them; the first about what it says by default)
 //   --show            ... the answer shown on the screen, as the study does it
@@ -160,14 +162,14 @@ let tl, slug, SIZE, pageText, thumbAt
 if (args.music !== undefined) log('no video carries music since plan 273: --music is ignored')
 if (args.challenge) {
   // ── A reading challenge: the text over the hour's print, read along voiced ──
-  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, question: args.question, hide: args.show !== true, photo: typeof args.photo === 'string' ? args.photo : null, photoLook: args['photo-look'], tune })
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, scenery: args.scenery, question: args.question, hide: args.show !== true, photo: typeof args.photo === 'string' ? args.photo : null, photoLook: args['photo-look'], tune })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null
   // A read-along whose voice did not come is no read-along: stop, unless asked for it anyway.
   if (dur && !dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
   tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
   SIZE = TALL
-  slug = ['challenge', plan.id, plan.style, ...(plan.photo ? [`photo-${plan.photo.look}`] : [...(plan.season ? [plan.season] : []), plan.hour]), lang, ...(plan.chosen ? [`q${plan.q.n}`] : []), ...(plan.hidden ? ['comment'] : [])].join('-')
+  slug = ['challenge', plan.id, plan.style, ...(plan.photo ? [`photo-${plan.photo.look}`] : [...(plan.scenery !== 'bay' ? [plan.scenery] : []), ...(plan.season ? [plan.season] : []), plan.hour]), lang, ...(plan.chosen ? [`q${plan.q.n}`] : []), ...(plan.hidden ? ['comment'] : [])].join('-')
   await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
@@ -176,7 +178,7 @@ if (args.challenge) {
     // A photo of the maker's own in place of the print (plan 276), served from the frontend.
     const P = plan.photo
       ? { photo: await new Promise((ok, no) => Object.assign(new Image(), { onload() { ok(this) }, onerror: no, src: `/${plan.photo.src}` })), look: plan.photo.look }
-      : await A.loadPrint(plan.hour, { base: '/', season: plan.season })
+      : await A.loadPrint(plan.hour, { base: '/', ...C.challengePrintOpts(plan) })
     // Every frame drawn: something moves in each (a sentence's clock, a word lit).
     window.__draw = t => { C.drawChallenge(window.__ctx, plan, tl, t, P); return t }
   }, { plan, tl })

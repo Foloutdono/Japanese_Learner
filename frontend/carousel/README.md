@@ -614,7 +614,11 @@ fireworks); or spring, summer, fireworks (the summer, its night August's
 Every season at every hour was drawn under the challenge's three looks
 (the scroll, the read-along, the way to the app) and reads as it did.
 So the studio needs `public/today/print/`, `src/index.css` and the
-print's `print.json` beside it when it is served or published.
+print's `print.json` beside it when it is served or published. A reading
+challenge may stand on another scenery (plan 309, under "The reading
+challenges"): `loadPrint`'s `scenery` reads the app's desk print for the
+long view and the carousel's own prints from `carousel/prints/`, the
+grain and the paper still the app's.
 
 **The cover moves (a clip).** Each story's first frame is also a
 seven-second clip at thirty frames (`promo.CLIP`), drawn by the same
@@ -1294,12 +1298,56 @@ The studio's "The answer" switch sets the same choice ("In the comments", the
 default, or "Shown on screen"), and its Copy the command writes `--show` only
 when the answer is shown.
 
+**What it stands on** (plan 309, `sceneries.js`): Today's print, the bay,
+unless another scenery is chosen, in the studio's "Scenery" (景) or with
+`--scenery`. The long view is the app's own print as a desk draws it,
+wider than the frame, travelled while the text is read; the other four are
+the carousel's own, drawn in the print's hand at every season and hour by
+`frontend/scripts/sceneries/` into `carousel/prints/<rev>/<id>/` (the
+carousel never ships, so neither do they). The command names a scenery
+only off the bay, and the file's name carries it
+(`challenge-n5-12-scroll-lake-winter-day-en-q8-comment`). A scenery whose
+prints do not load is said so in the studio, the last print drawn standing
+in, and nothing is downloaded on it. The hour is day unless one is chosen,
+as the studio opens on it (dusk before plan 309).
+
+| Scenery | `--scenery` | Its prints |
+| --- | --- | --- |
+| The bay 入江 | `bay` | the app's own (`public/today/print/`), the default |
+| The long view 一望 | `wide` | the app's desk print, travelled |
+| Mirror lake 逆さ富士 | `lake` | the carousel's own |
+| Lake gate 鳥居 | `torii` | the carousel's own |
+| The river 川 | `river` | the carousel's own |
+| The station 駅 | `station` | the carousel's own |
+
+Every change plan 309 makes to the look already posted is a dial in the
+Tune panel's "Reading challenge" group, and says what it `was`
+(`tune.js`): that look is one press away ("Look before plan 309", which
+sets every dial back and keeps the rest of the tune), or one
+`--tune challenge.<key>=<was>` at a time.
+
+| Dial | Key | Was |
+| --- | --- | --- |
+| Readings' ink | `challenge.ruby` | 0: the soft ink |
+| Paper round the words | `challenge.halo` | 0: none |
+| Wash under the reading | `challenge.read` | 1: the hour's wash |
+| Hook in colour | `challenge.cover` | 0: off |
+| Print raised | `challenge.lift` | 0: off |
+| Sun and moon | `challenge.disc` | 0: off |
+| Moonlit night | `challenge.night` | 0: three times brighter |
+| Train as the clock | `challenge.train` | 0: parked halfway |
+| Petals in the air | `challenge.falls` | 0: off |
+| Fireworks in colour | `challenge.bursts` | 0: off |
+| Read-along legible | `challenge.along` | 0: off |
+| Long view travel | `challenge.pan` | none: new with the long view (1) |
+
 ```bash
 cd frontend
 node carousel/long/render.mjs --challenge n5-06 --style scroll --hour night --season winter --lang en --question 2
 node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en
 node carousel/long/render.mjs --challenge n5-03 --style scroll --hour dawn --lang en --question 7
 node carousel/long/render.mjs --challenge n5-04 --style scroll --hour night --season hanabi --lang en
+node carousel/long/render.mjs --challenge n5-12 --style scroll --hour day --season winter --scenery lake --lang en --question 8
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```
 
@@ -1313,7 +1361,7 @@ as sliders, grouped:
 
 | Group | Sources | What |
 | --- | --- | --- |
-| Reading challenge | challenge | the reading pace (× each level's characters a minute), the hook, the text's coming in, the last line held, the pause between sentences, the question alone, the countdown, the answer, the app last, the picture's wash |
+| Reading challenge | challenge | the reading pace (× each level's characters a minute), the hook, the text's coming in, the last line held, the pause between sentences, the question alone, the countdown, the answer, the app last, the picture's wash; since plan 309 what the text stands on: the readings' ink, the paper round the words, the wash under the reading, the hook in colour, the print raised, the sun and moon, the moonlit night, the train, the petals, the fireworks, the read-along's panel, the long view's travel |
 | Word echo | echo | how long the word is said, the silence between two sayings, the word kept |
 | Short video | every carousel | each slide's hold (×), the time to answer a question, the longest a short may run |
 | Long video | long | the pauses (×) and the quiz's countdown |
@@ -1328,8 +1376,8 @@ video rendered is the one previewed. A carousel's short carries its tune
 in its recipe. Sizes are not tunable: they stay on the type scale ("Easy
 to read"). A new tunable is a line in `tune.js` and a `tuned()` where the
 number was; `src/carouselTune.test.js` holds every default inside its
-range and on its step, and `src/carousel.test.js` holds each default to
-what its video did before.
+range and on its step, every `was` too (plan 309), and
+`src/carousel.test.js` holds each default to what its video did before.
 
 ## The code
 
@@ -1350,6 +1398,10 @@ what its video did before.
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
 | `challenge.js` | the reading challenges: a comprehension text in a credits scroll or read along, its timing on the voice, each frame, its page (plan 247) |
+| `sceneries.js` | what a reading challenge stands on: the six sceneries, and where each one's prints are (plan 309) |
+| `backdrop.js` | the print under a reading challenge's words, washed or darkened, or a photo in its place (plans 247, 276, 309) |
+| `cover.js` | a reading challenge's hook in colour, on the title slip's washi (plan 309) |
+| `halo.js` | the rim of paper round the scroll's words (plan 309) |
 | `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a feature video recorded and made (plan 270) |
 | `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing and camera on the shots (plan 273), each frame, their page (plan 270) |
 | `long/record.mjs` | the app served by Vite and run in a phone-sized browser, its API answered from `promo.json`, a feature's steps done and shot (plan 270) |

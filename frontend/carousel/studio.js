@@ -16,11 +16,12 @@ import { PRINT_HOURS, PRINT_SEASONS, loadPrint } from './app.js'
 import { printSeason } from '../src/domain/printHour.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
-import { STYLES as CHALLENGE_STYLES, challengeCommand, challengePage, challengePlan, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
+import { STYLES as CHALLENGE_STYLES, challengeCommand, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
+import { SCENERY_IDS, sceneryOf } from './sceneries.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
 import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
-import { TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
+import { BEFORE_309, TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
 import { FEEDS } from './feeds.js'
 import { drawFeature, featureCommand, featureItems, featurePage, featurePlan, featurePreview } from './feature.js'
 import { STYLES as WORDS_STYLES, drawWords, loadPictures, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from './words.js'
@@ -53,6 +54,8 @@ const DEFAULTS = {
   challengeStyle: 'scroll',
   // Plan 275: the answer is left to the comments (the default) or shown on the screen.
   challengeAnswer: 'comments',
+  // Plan 309: what a reading challenge's text stands on (sceneries.js).
+  challengeScenery: 'bay',
   // Plan 260: the question a reading challenge asks, by text (1-based); the default where none is set.
   challengeQ: {},
   // Plan 248: the values tuned in the Tune panel (tune.js), only those changed.
@@ -83,6 +86,7 @@ function load() {
     if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
     if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
     if (saved.challengeAnswer && !['comments', 'shown'].includes(saved.challengeAnswer)) delete saved.challengeAnswer
+    if (saved.challengeScenery && !SCENERY_IDS.includes(saved.challengeScenery)) delete saved.challengeScenery
     if (saved.feed && !FEEDS.includes(saved.feed)) delete saved.feed
     if (saved.wordsStyle && !WORDS_STYLES.includes(saved.wordsStyle)) delete saved.wordsStyle
     // No video carries music since plan 273: a visit saved before it forgets its switch.
@@ -134,13 +138,24 @@ const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.lev
 // Where the app's own files are, as the page sees them: the print, the voices.
 const BASE = '../'
 // Today's print of the hour, for the promo stories and the challenges:
-// fetched once an hour and a season, the day's own unless one is chosen (plan 267).
+// fetched once an hour and a season, the day's own unless one is chosen
+// (plan 267), and once a scenery and the parts its dials bring out (plan
+// 309). A print decoded is large: the four last asked for are kept.
 const prints = new Map()
+const KEPT_PRINTS = 4
 const seasonOf = () => (PRINT_SEASONS.includes(state.season) ? state.season : null)
-function printFor(hour, season = seasonOf()) {
-  const key = `${season || 'now'}|${hour}`
-  if (!prints.has(key)) prints.set(key, loadPrint(hour, { base: BASE, season }).catch(e => { prints.delete(key); throw e }))
-  return prints.get(key)
+function printFor(hour, season = seasonOf(), { scenery = 'bay', falls = false, bursts = false } = {}) {
+  const key = `${scenery}|${season || 'now'}|${hour}|${falls}|${bursts}`
+  const kept = prints.get(key)
+  // Asked for again, it is the last to go.
+  if (kept) prints.delete(key)
+  const P = kept || loadPrint(hour, { base: BASE, season, scenery, falls, bursts }).catch(e => {
+    if (prints.get(key) === P) prints.delete(key)
+    throw e
+  })
+  prints.set(key, P)
+  while (prints.size > KEPT_PRINTS) prints.delete(prints.keys().next().value)
+  return P
 }
 // A word echo's voice (plan 232): voices/index.json names each reading's
 // clip; the clip is decoded once, and where its voice starts and stops
@@ -285,7 +300,9 @@ function currentId(items = listCache) {
 // each, grouped as the registry groups them: kept with the rest of the
 // studio, read by the preview and written into every render command.
 let tuneFor = null
-const shownValue = (t, v) => (t.unit === '×' ? `${v}×` : `${v} ${t.unit}`)
+// A value of 0 or 1 alone is a switch, and says so; one with no unit, its figure.
+const isSwitch = t => t.min === 0 && t.max === 1 && t.step === 1
+const shownValue = (t, v) => (isSwitch(t) ? (v ? 'on' : 'off') : t.unit === '×' ? `${v}×` : t.unit ? `${v} ${t.unit}` : String(v))
 function renderTune() {
   const ts = tunablesFor(state.source)
   tuneFor = state.source
@@ -298,9 +315,21 @@ function renderTune() {
     const legend = document.createElement('legend')
     legend.textContent = name
     set.append(legend, ...ts.filter(t => t.group === name).map(tuneRow))
+    // The look before plan 309, one press away, beside the dials that changed it.
+    if (ts.some(t => t.group === name && t.key in BEFORE_309)) set.append(beforeButton())
     box.append(set)
   }
   syncTune()
+}
+function beforeButton() {
+  const b = document.createElement('button')
+  b.type = 'button'
+  b.className = 'btn btn--quiet'
+  b.id = 'tune-before'
+  b.textContent = 'Look before plan 309'
+  // Every dial back to what it was, the rest of the tune kept.
+  b.addEventListener('click', () => setTune({ ...state.tune, ...BEFORE_309 }))
+  return b
 }
 function tuneRow(t) {
   const id = `tune-${t.key.replace(/\W/g, '-')}`
@@ -849,12 +878,35 @@ async function renderFeature(mine) {
 // the app's sounds, and the voice of the one read along is made where it
 // is rendered (the command below), every word timed on it.
 const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
+// The last print a challenge was drawn on: a scenery whose prints do not
+// load (not drawn yet, or not served with the studio) leaves it standing,
+// and says so, rather than a blank page (plan 309).
+let lastPrint = null
+let standInSaid = ''
+async function challengePrint(pl) {
+  let failure = null
+  const P = await printFor(state.hour, seasonOf(), challengePrintOpts(pl)).catch(e => { failure = e; return null })
+  if (P) {
+    lastPrint = P
+    // Its own print back, the word that another stood in goes.
+    if (standInSaid && $('#status').textContent === standInSaid) status('')
+    return { P, standIn: false }
+  }
+  console.warn(`reading challenge: ${failure.message}`)
+  // None drawn yet (the page just opened on it): the bay at the hour.
+  const last = lastPrint
+  const before = last ?? await printFor(state.hour).catch(() => null)
+  const view = sceneryOf(pl.scenery)
+  standInSaid = before ? `${view.name} (${view.jp}) did not load (${failure.message}): ${last ? 'the last print drawn' : 'the bay'} stands in.` : `Today's print did not load (${failure.message}).`
+  status(standInSaid)
+  return { P: before, standIn: !!before }
+}
 const QUESTION_KINDS = { comprehension: 'about the text', inference: 'reading between the lines', grammar: 'grammar', vocabulary: 'a word' }
 async function renderChallenge(mine) {
   const data = await fetchJson('comprehension.json')
   if (mine !== token) return
   const id = currentId()
-  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), question: state.challengeQ[id], hide: state.challengeAnswer !== 'shown', tune: state.tune })
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), scenery: state.challengeScenery, question: state.challengeQ[id], hide: state.challengeAnswer !== 'shown', tune: state.tune })
   // The text's questions to choose from, the one asked selected (plan 260).
   const pick = $('#challenge-q')
   pick.replaceChildren(...challengeQuestions(data, id, state.lang).map(q => {
@@ -865,11 +917,11 @@ async function renderChallenge(mine) {
   }))
   pick.value = String(pl.q.n)
   const tl = challengeTimeline(pl)
-  const P = await printFor(state.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
+  const { P, standIn } = await challengePrint(pl)
   await fonts(JSON.stringify(pl))
   if (mine !== token) return
   const page = challengePage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE)
-  current = { plan: pl, fmt: FORMATS.story, decks: [], challenge: { id, tl, P, page } }
+  current = { plan: pl, fmt: FORMATS.story, decks: [], challenge: { id, tl, P, page, standIn } }
   const stage = $('#stage')
   stage.replaceChildren()
   stage.dataset.view = 'long'
@@ -922,7 +974,7 @@ async function renderChallenge(mine) {
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.challengeAnswer}|${state.season}|${state.hour}|${pl.q.n}`
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.challengeAnswer}|${pl.scenery}|${state.season}|${state.hour}|${pl.q.n}`
   const reading = tl.segs.find(sg => sg.key === 'reading')
   player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
   const draw = () => {
@@ -961,18 +1013,22 @@ async function renderChallenge(mine) {
   // The post, for the feed chosen: a switch of feed keeps the player where it is.
   if (`${key}|${state.feed}` !== captionFor) fillPost(page, `${key}|${state.feed}`)
   $('#command').textContent = challengeCommand(pl)
-  // The scroll is made here, whole; the one read along needs the voice engine.
-  $('#export-video').disabled = pl.style !== 'scroll'
-  $('#export-video').textContent = pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)})` : 'Read along is made by the command (the voice)'
+  // The scroll is made here, whole; the one read along needs the voice
+  // engine; none is made on a print standing in for its scenery's.
+  $('#export-video').disabled = pl.style !== 'scroll' || standIn
+  $('#export-video').textContent = standIn ? `${sceneryOf(pl.scenery).name} did not load`
+    : pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)})` : 'Read along is made by the command (the voice)'
 }
+// A challenge's file name: its text, what it stands on unless the bay, its print's season and hour, its language.
+const challengeName = (id, plan) => `tsuji-challenge-${safeName(id)}-${plan.scenery !== 'bay' ? `${plan.scenery}-` : ''}${plan.season ? `${plan.season}-` : ''}${plan.hour}-${state.lang}`
 async function exportChallenge() {
   const ch = current.challenge
-  if (!ch || current.plan.style !== 'scroll') return
+  if (!ch || current.plan.style !== 'scroll' || ch.standIn) return
   // What is drawn, captured when it starts: another text picked meanwhile is not mixed in.
   const { tl, P } = ch
   const plan = current.plan
   await encodeClip({
-    btn: '#export-video', name: `tsuji-challenge-${safeName(ch.id)}-${plan.season ? `${plan.season}-` : ''}${plan.hour}-${state.lang}`, said: 'reading challenge',
+    btn: '#export-video', name: challengeName(ch.id, plan), said: 'reading challenge',
     fmt: FORMATS.story, fps: tl.fps, seconds: tl.seconds,
     sounds: tl.sfx,
     frame: (ctx, t) => { drawChallenge(ctx, plan, tl, t, P) },
@@ -980,11 +1036,15 @@ async function exportChallenge() {
 }
 async function exportThumb() {
   if (current.challenge) {
+    if (current.challenge.standIn) {
+      status(`${sceneryOf(current.plan.scenery).name} did not load: no thumbnail of it is made on another print.`)
+      return
+    }
     const c = document.createElement('canvas')
     c.width = FORMATS.story.w
     c.height = FORMATS.story.h
     drawChallenge(c.getContext('2d'), current.plan, current.challenge.tl, 1.6, current.challenge.P)
-    const result = await offer(`tsuji-challenge-${safeName(current.challenge.id)}-${state.lang}.png`, await png(c))
+    const result = await offer(`${challengeName(current.challenge.id, current.plan)}.png`, await png(c))
     status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
     return
   }

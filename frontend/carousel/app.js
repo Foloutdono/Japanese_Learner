@@ -11,6 +11,7 @@
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
 import { K, TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
+import { printPaths, sceneryOf } from './sceneries.js'
 
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
@@ -417,18 +418,31 @@ function layerAt(markup, t) {
 }
 
 /** The hour's print in today's season, or the one chosen, its layers
- *  decoded: `base` is the frontend's root as the page sees it. */
-export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date(), season = null } = {}) {
+ *  decoded: `base` is the frontend's root as the page sees it. A reading
+ *  challenge also says what it stands on (plan 309, sceneries.js): the
+ *  bay, the app's own print, unless another `scenery` is chosen; the long
+ *  view is the desk's print, as a desk asked for is. `falls` hangs the
+ *  season's petals and leaves where their fall begins; `bursts` is the
+ *  August night's fireworks, apart. */
+// eslint-disable-next-line no-unused-vars -- bursts: the fireworks apart, not drawn apart yet
+export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date(), season = null, scenery = 'bay', falls = false, bursts = false } = {}) {
   const get = async (path, as = 'json') => {
     const r = await fetch(base + path)
     if (!r.ok) throw new Error(`print: ${path} ${r.status}`)
     return as === 'json' ? r.json() : r.text()
   }
   const meta = await get('src/components/station/print/print.json')
-  const name = printOf(season, hour, now)
-  const scene = await get(`public/today/print/${meta.rev}/${name}-${device}.json`)
+  const view = sceneryOf(device === 'desk' && scenery === 'bay' ? 'wide' : scenery)
+  const asked = printOf(season, hour, now)
+  const files = printPaths(view.id, asked, meta.rev)
+  // A scenery of the carousel's own has its frame and its looks in its
+  // meta, and no B print: the date's B print is its A.
+  const own = files.meta ? await get(files.meta) : null
+  const name = own ? asked.replace(/-b$/, '') : asked
+  const scene = await get(files.print)
   const cssText = await get('src/index.css', 'text')
-  const css = stillCss(cssText)
+  // The petals and the leaves kept in the air, where their fall begins: still, the app hides them.
+  const css = stillCss(cssText) + (falls ? '\n.tpr-fall { opacity: 0.9; }' : '')
   // On the page the four layers share one document, and a layer fills
   // with a gradient another declares: each image carries them all.
   const defs = Object.values(scene.layers).flatMap(l => l.match(/<defs>[\s\S]*?<\/defs>/g) || []).join('')
@@ -448,7 +462,9 @@ export async function loadPrint(hour, { base = '../', device = 'phone', now = ne
     const [s2, b2, f2] = await Promise.all([at('sky', t), at('back', t), at('front', t)])
     return { sky: s2, back: b2, front: f2 }
   }
-  return { hour, name, scene, frame: meta.frames[device], look: meta.prints[name], img: { sky, back, train, front, grain, paper }, moment }
+  const frame = own ? own.frame : meta.frames[view.device]
+  const look = own ? own.prints[name] : meta.prints[name]
+  return { hour, name, scenery: view.id, scene, frame, look, img: { sky, back, train, front, grain, paper }, moment }
 }
 
 /** The print with its top-left corner at (x, y), `u` pixels a unit; the
@@ -490,7 +506,10 @@ export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canva
   ctx.restore()
 }
 
-const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -0.5, 0.15, 0.8627],
+// The moon's seas as the dial draws them: each one's place and size in
+// shares of the disc's radius, and how round it is (the reading
+// challenge's moon draws them too, plan 309).
+export const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -0.5, 0.15, 0.8627],
   [0.66, 0.34, 0.16, 0.7181], [-0.6, 0.48, 0.13, 0.834], [0.18, 0.72, 0.12, 0.7914]]
 
 /** Today's dial as the hour's sun or moon on its print (PrintDial): its

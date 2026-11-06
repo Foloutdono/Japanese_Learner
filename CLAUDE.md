@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **277**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **310**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -68,6 +68,8 @@ runtime purpose.
   `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
   `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
+  `REV` in `frontend/scripts/sceneries/build.py` (the reading challenge's
+  sceneries, plan 309; `PRINTS_REV` in `carousel/sceneries.js` is held equal),
   `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
   plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
   session's lines are cut into).
@@ -924,6 +926,7 @@ npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, r
 npm run landing:og  # its two share cards, rendered in Chromium
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
+python3 scripts/sceneries/build.py    # the reading challenge's sceneries (plan 309)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):

@@ -9,6 +9,12 @@
 // defaults into every render command (`--tune key=value,…`), so the video
 // rendered is the one previewed. Sizes are not tunable: they stay on the
 // type scale (draw.js), as the README's "Easy to read" asks.
+//
+// A dial that changes a look already posted also says what it `was`
+// (plan 309): the look before it, one press away in the Tune panel
+// ("Look before plan 309", BEFORE_309), whatever its default becomes. A
+// value with no unit is shown as its figure, and a switch (0 or 1,
+// nothing between) as off or on.
 
 export const TUNABLES = []
 
@@ -46,6 +52,19 @@ group('Reading challenge', ['challenge'], [
   { key: 'challenge.answer', label: 'Answer shown', unit: 's', def: 3.6, min: 2, max: 8, step: 0.2 },
   { key: 'challenge.cta', label: 'The app, last', unit: 's', def: 6.5, min: 3, max: 10, step: 0.1 },
   { key: 'challenge.wash', label: 'Picture wash', unit: '×', def: 1, min: 0.6, max: 1.2, step: 0.05, hint: 'how much paper lies over the print (scroll)' },
+  // Plan 309: the sceneries' dials, each at the look before it until the owner has seen them drawn.
+  { key: 'challenge.ruby', label: 'Readings’ ink', def: 0, was: 0, min: 0, max: 1, step: 0.1, hint: 'the readings over the kanji, from the soft ink (0) to the text’s own (1)' },
+  { key: 'challenge.halo', label: 'Paper round the words', unit: '×', def: 0, was: 0, min: 0, max: 2, step: 0.25, hint: 'a rim of the page’s paper round every letter, so the print never runs into it (scroll)' },
+  { key: 'challenge.read', label: 'Wash under the reading', unit: '×', def: 1, was: 1, min: 0.5, max: 1, step: 0.05, hint: 'the wash while the text goes up, times this: keep the paper round the words on below ×1' },
+  { key: 'challenge.cover', label: 'Hook in colour', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the hook on the title slip’s washi over the print unwashed, from the first frame' },
+  { key: 'challenge.lift', label: 'Print raised', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the print raised as the text comes in, its foot above the feed’s caption' },
+  { key: 'challenge.disc', label: 'Sun and moon', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the hour’s sun or moon, where the print has it' },
+  { key: 'challenge.night', label: 'Moonlit night', def: 0, was: 0, min: 0, max: 1, step: 0.25, hint: 'the night print lit on a curve that keeps its colours (1), not three times over (0)' },
+  { key: 'challenge.train', label: 'Train as the clock', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the train crosses as the text is read, gone by its end' },
+  { key: 'challenge.falls', label: 'Petals in the air', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the season’s petals and leaves where their fall begins' },
+  { key: 'challenge.bursts', label: 'Fireworks in colour', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'August’s fireworks over the paper, in their own colours' },
+  { key: 'challenge.along', label: 'Read-along legible', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'read along: the panel set by the hour, the voice’s credit on it' },
+  { key: 'challenge.pan', label: 'Long view travel', unit: '×', def: 1, min: 0, max: 1, step: 0.25, hint: 'the long view: how far the frame travels while the text is read' },
 ])
 group('Word echo', ['echo'], [
   { key: 'echo.seconds', label: 'Saying for', unit: 's', def: 10, min: 5, max: 20, step: 0.5, hint: 'how long the word is said over and over' },
@@ -76,6 +95,9 @@ group('Export', [SLIDES, 'promo', 'echo', 'challenge'], [
   { key: 'export.audio', label: 'Sound quality', unit: 'kb/s', def: 160, min: 96, max: 256, step: 32 },
   { key: 'export.keyframe', label: 'Keyframe every', unit: 's', def: 1, min: 0.5, max: 4, step: 0.5, hint: 'shorter seeks better, longer is smaller' },
 ])
+
+/** The look before plan 309: every dial that says what it was, at that value. */
+export const BEFORE_309 = Object.fromEntries(TUNABLES.filter(t => 'was' in t).map(t => [t.key, t.was]))
 
 /** The value a module uses for `key`: the maker's, held to its range, else the default. */
 export function tuned(tune, key) {

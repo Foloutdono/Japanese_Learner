@@ -16,7 +16,9 @@ import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
-import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { PRINTS_REV, SCENERIES, SCENERY_IDS, printPaths, sceneryOf } from '../carousel/sceneries.js'
+import { drawn, withPath2D } from './testing/challengeCanvas.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
 import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, loadPictures, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
@@ -1703,38 +1705,7 @@ describe('the conversion carousels (plan 234)', () => {
 
 describe('the reading challenges (plan 247)', () => {
   const data = bank('comprehension.json')
-  const withPath2D = fn => {
-    const had = globalThis.Path2D
-    globalThis.Path2D = class {}
-    try { return fn() } finally { globalThis.Path2D = had }
-  }
-  // Every text drawn, where and how large (the stub's measure, a little wide),
-  // through any move or scale: its size is its height on screen.
-  const drawn = () => {
-    const at = []
-    const state = { font: '10px sans-serif', textAlign: 'left', globalAlpha: 1, tx: 0, ty: 0, sx: 1, sy: 1 }
-    const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
-    const width = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
-    const methods = {
-      measureText: t => ({ width: width(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: width(t) }),
-      fillText: (t, x, y) => {
-        const w = width(t)
-        const left = state.textAlign === 'center' ? x - w / 2 : state.textAlign === 'right' ? x - w : x
-        const L = state.tx + state.sx * left
-        at.push({ t: String(t), size: size() * state.sy, left: L, right: L + w * state.sx, y: state.ty + state.sy * y, alpha: state.globalAlpha })
-      },
-      translate: (x, y) => { state.tx += x * state.sx; state.ty += y * state.sy },
-      scale: (a, b) => { state.sx *= a; state.sy *= b },
-      createLinearGradient: () => ({ addColorStop() {} }),
-      getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
-      // What a save keeps: how faint, in what face, from where.
-      save: () => stack.push({ ...state }),
-      restore: () => Object.assign(state, stack.pop() || {}),
-    }
-    const stack = []
-    const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
-    return { ctx, at }
-  }
+  // Every text drawn (drawn) on a canvas stubbed for the lane (testing/challengeCanvas.js).
   const jp = t => /[\u3040-\u30ff\u3400-\u9fff]/.test(t)
   const each = data.passages
 
@@ -2086,6 +2057,67 @@ describe('the reading challenges (plan 247)', () => {
       expect(page.feeds.reels.caption, lang).toContain(`📌 ${ask}`)
     }
   }))
+
+  it('stands on the scenery chosen, the bay unless another, a photo in place of any (plan 309)', () => {
+    // The plan keeps a scenery it knows, as plain data (it crosses into the page as JSON).
+    for (const id of SCENERY_IDS) {
+      const pl = challengePlan(data, 'n5-01', { scenery: id })
+      expect(pl.scenery, id).toBe(id)
+      expect(JSON.parse(JSON.stringify(pl)).scenery, id).toBe(id)
+    }
+    // One it does not know, or none, is the bay; a photo stands where any print would.
+    for (const bad of [undefined, null, '', 'moon', 'Bay', 3, true]) expect(challengePlan(data, 'n5-01', { scenery: bad }).scenery, String(bad)).toBe('bay')
+    expect(challengePlan(data, 'n5-01', { scenery: 'lake', photo: 'carousel/mine.jpg' }).scenery).toBe('bay')
+    // The command names it after the season, and only off the bay.
+    expect(challengeCommand(challengePlan(data, 'n5-01', { scenery: 'lake', season: 'winter', hour: 'day' }))).toContain(' --hour day --season winter --scenery lake --lang en')
+    expect(challengeCommand(challengePlan(data, 'n5-01', { scenery: 'station' }))).toContain(' --hour day --scenery station --lang en')
+    for (const opts of [{}, { scenery: 'bay' }, { scenery: 'moon' }]) expect(challengeCommand(challengePlan(data, 'n5-01', opts)), JSON.stringify(opts)).not.toContain('--scenery')
+    // What the print under it is loaded with: its season, its scenery, the parts the dials bring out.
+    expect(challengePrintOpts(challengePlan(data, 'n5-01', {}))).toEqual({ season: null, scenery: 'bay', falls: false, bursts: false })
+    const dialled = challengePlan(data, 'n5-01', { season: 'hanabi', scenery: 'wide', tune: { 'challenge.falls': 1, 'challenge.bursts': 1 } })
+    expect(challengePrintOpts(dialled)).toEqual({ season: 'hanabi', scenery: 'wide', falls: true, bursts: true })
+    // Day unless an hour is chosen, as the studio opens on it.
+    expect(challengePlan(data, 'n5-01', {}).hour).toBe('day')
+    expect(challengePlan(data, 'n5-01', { hour: 'noon' }).hour).toBe('day')
+    expect(challengePlan(data, 'n5-01', { hour: 'dusk' }).hour).toBe('dusk')
+  })
+
+  it('offers every scenery in the studio, the bay by default, each read from where it lies (plan 309)', () => {
+    // The bay, the app's print; the long view, the desk's, travelled; four of the carousel's own.
+    expect(SCENERIES.map(s => [s.id, s.source, s.device, s.lift, s.disc, s.pan])).toEqual([
+      ['bay', 'app', 'phone', true, true, false],
+      ['wide', 'app', 'desk', false, false, true],
+      ['lake', 'carousel', 'phone', true, true, false],
+      ['torii', 'carousel', 'phone', true, true, false],
+      ['river', 'carousel', 'phone', true, true, false],
+      ['station', 'carousel', 'phone', true, true, false],
+    ])
+    expect(SCENERY_IDS).toEqual(SCENERIES.map(s => s.id))
+    expect(sceneryOf('moon').id).toBe('bay')
+    const html = read('carousel/index.html')
+    for (const s of SCENERIES) expect(html, s.id).toContain(`data-set="challengeScenery:${s.id}">${s.name} ${s.jp}</button>`)
+    expect(html.match(/data-set="challengeScenery:/g)).toHaveLength(SCENERIES.length)
+    expect(read('carousel/studio.js')).toMatch(/challengeScenery: 'bay'/)
+    // The bay and the long view are the app's own files, at every season and hour, the date's own too.
+    const meta = JSON.parse(read('src/components/station/print/print.json'))
+    const names = new Set(PRINT_SEASONS.flatMap(season => PRINT_HOURS.map(hour => printOf(season, hour))))
+    for (let month = 1; month <= 12; month++) for (const day of [15, 16]) for (const hour of PRINT_HOURS) names.add(printOf(null, hour, new Date(2026, month - 1, day, 12)))
+    expect([...names].some(n => n.endsWith('-b')), 'a B print among them').toBe(true)
+    for (const id of ['bay', 'wide']) {
+      for (const name of names) {
+        const at = printPaths(id, name, meta.rev)
+        expect(at.meta, `${id} ${name}`).toBeNull()
+        expect(existsSync(new URL(`../${at.print}`, import.meta.url)), at.print).toBe(true)
+      }
+    }
+    expect(printPaths('bay', 'winter-day', meta.rev).print).toBe(`public/today/print/${meta.rev}/winter-day-phone.json`)
+    expect(printPaths('wide', 'winter-day', meta.rev).print).toBe(`public/today/print/${meta.rev}/winter-day-desk.json`)
+    expect(printPaths('moon', 'winter-day', meta.rev)).toEqual(printPaths('bay', 'winter-day', meta.rev))
+    // One the carousel draws: its own folder at its revision, beside its meta, its B print its A.
+    const own = `carousel/prints/${PRINTS_REV}/lake`
+    expect(printPaths('lake', 'summer-day-b', meta.rev)).toEqual({ print: `${own}/summer-day.json`, meta: `${own}/meta.json` })
+    expect(printPaths('lake', 'summer-hanabi', meta.rev)).toEqual({ print: `${own}/summer-hanabi.json`, meta: `${own}/meta.json` })
+  })
 
   // Last of the block: the strip it leaves behind is the stub's.
   it('draws the scroll’s text once and lays it between pixels, at sixty frames, so it glides', () => withPath2D(() => {

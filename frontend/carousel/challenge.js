@@ -20,7 +20,11 @@
 // video (on the voice's own lengths and syllables where it is voiced,
 // else on a close guess), `drawChallenge` draws any second of it.
 import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, mark, measure, mix, palette, reading, rrect, text } from './draw.js'
-import { PRINT_SEASONS, drawPrint } from './app.js'
+import { PRINT_SEASONS } from './app.js'
+import { backdrop, canvasOf } from './backdrop.js'
+import { coverOn, drawCover } from './cover.js'
+import { haloStrip } from './halo.js'
+import { SCENERY_IDS } from './sceneries.js'
 import { seeded, shuffle, unpack } from './common.js'
 import { SITE } from './strings.js'
 import { tuneFlag, tuned } from './tune.js'
@@ -153,7 +157,8 @@ export function challengePlan(data, id, opts = {}) {
   const lang = opts.lang === 'fr' ? 'fr' : 'en'
   const P = data.passages.find(x => x.id === id) ?? data.passages[0]
   const style = STYLES.includes(opts.style) ? opts.style : 'scroll'
-  const hour = HOURS.includes(opts.hour) ? opts.hour : 'dusk'
+  // Day unless chosen, as the studio opens on it (plan 309; dusk before it).
+  const hour = HOURS.includes(opts.hour) ? opts.hour : 'day'
   // The print's season, if chosen (plan 267); else the date's, as the app's gate.
   const season = PRINT_SEASONS.includes(opts.season) ? opts.season : null
   const sents = P.sents.map(unpack)
@@ -169,8 +174,17 @@ export function challengePlan(data, id, opts = {}) {
   return {
     source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P), hidden: opts.hide !== false,
     photo: opts.photo ? { src: String(opts.photo), look: PHOTO_LOOKS.includes(opts.photoLook) ? opts.photoLook : 'dark' } : null,
+    // The scenery it stands on (plan 309, sceneries.js): the bay unless
+    // another is chosen; a photo stands where any print would.
+    scenery: !opts.photo && SCENERY_IDS.includes(opts.scenery) ? opts.scenery : 'bay',
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), nq: P.questions.length, cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
+}
+
+/** What the print under it is loaded with (app.loadPrint): its season,
+ *  its scenery, and the parts of it the dials bring out (plan 309). */
+export function challengePrintOpts(plan) {
+  return { season: plan.season, scenery: plan.scenery, falls: tuned(plan.tune, 'challenge.falls') > 0, bursts: tuned(plan.tune, 'challenge.bursts') > 0 }
 }
 
 /** The lines the reader says: one a sentence, read along. */
@@ -256,8 +270,10 @@ export function challengeCommand(plan) {
   const question = plan.chosen ? ` --question ${plan.q.n}` : ''
   // The print's season where one is chosen, else the day's the render runs on (plan 267).
   const season = plan.season ? ` --season ${plan.season}` : ''
+  // The scenery where it is not the bay (plan 309).
+  const scenery = plan.scenery && plan.scenery !== 'bay' ? ` --scenery ${plan.scenery}` : ''
   const hide = plan.hidden ? '' : ' --show'
-  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season} --lang ${plan.lang}${question}${hide}${tuneFlag(plan.tune, 'challenge')}`
+  return `${voice}node carousel/long/render.mjs --challenge ${plan.id} --style ${plan.style} --hour ${plan.hour}${season}${scenery} --lang ${plan.lang}${question}${hide}${tuneFlag(plan.tune, 'challenge')}`
 }
 
 /** The video's page: its title, its description, its tags. */
@@ -294,91 +310,6 @@ function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif'
   const key = `${plan.id}|${plan.lang}|${i}|${z}|${w}|${maxLines}|${min}|${fam}`
   if (!layouts.has(key)) layouts.set(key, layoutSentence(ctx, plan.sents[i], { max: z, min, maxW: w, maxLines, fam, script: plan.ruby ? 'furigana' : 'kanji', rules: false, gap: 0.02 }))
   return layouts.get(key)
-}
-
-// The hour's print under it: darkened where the words go (`dark`), or
-// washed whole with the app's paper, the words in ink over it.
-function backdrop(ctx, P, T, dark = 0.5, hour = 'day', wash = 1) {
-  if (P?.photo) return photoBackdrop(ctx, P, dark)
-  const lift = T.ground === 'paper' && P ? liftedPrint(P, LIFT[hour]) : null
-  if (lift) ctx.drawImage(lift, 0, 0)
-  else if (P) drawPrint(ctx, P, 0, 0, FMT.w / P.scene.w, { W: FMT.w, H: FMT.h })
-  else { ctx.fillStyle = T.ground === 'paper' ? PAPER.card : '#17151a'; ctx.fillRect(0, 0, FMT.w, FMT.h) }
-  if (T.ground === 'paper') {
-    ctx.fillStyle = alpha(PAPER.bg, Math.min(0.97, (WASH[hour] ?? WASH.day) * wash))
-    ctx.fillRect(0, 0, FMT.w, FMT.h)
-    return
-  }
-  // The sky darkened where the words go, so they read at every hour.
-  const g = ctx.createLinearGradient(0, 0, 0, FMT.h * 0.72)
-  g.addColorStop(0, `rgba(12,10,22,${dark})`)
-  g.addColorStop(0.7, `rgba(12,10,22,${dark * 0.6})`)
-  g.addColorStop(1, 'rgba(12,10,22,0)')
-  ctx.fillStyle = g
-  ctx.fillRect(0, 0, FMT.w, FMT.h * 0.72)
-}
-// How much of the paper lies over the print at each hour: the picture
-// is still there, the ink reads over all of it, and the page stays
-// paper, never the grey a dark sky washed thin would leave. The night's
-// print is brightened first (LIFT, plan 261): washed as heavily as dusk
-// its dark sky left a blank page; brightened, the moonlit scene stands
-// under a lighter wash, the page a pale moonlit blue (the owner's pick).
-const WASH = { dawn: 0.72, day: 0.72, dusk: 0.82, night: 0.6 }
-const LIFT = { night: 3 }
-// The print brightened once and kept: it stands still under the text, so
-// every frame lays the same picture. Where there is no canvas to draw it
-// on (the tests), it is drawn as it is.
-const lifts = new WeakMap()
-function liftedPrint(P, lift) {
-  if (!lift) return null
-  if (!lifts.has(P)) {
-    const c = canvasOf(FMT.w, FMT.h)
-    if (c) {
-      const x = c.getContext('2d')
-      x.filter = `brightness(${lift})`
-      drawPrint(x, P, 0, 0, FMT.w / P.scene.w, { W: FMT.w, H: FMT.h })
-    }
-    lifts.set(P, c)
-  }
-  return lifts.get(P)
-}
-
-// The photo laid to cover the frame, its middle kept, made once: dark,
-// dimmed whole and darker still where the words go; blur, softened and
-// dimmed so the words read over any of it; paper, washed as the print is.
-const photos = new WeakMap()
-function photoBackdrop(ctx, P, dark) {
-  if (!photos.has(P)) {
-    const c = canvasOf(FMT.w, FMT.h)
-    if (c) {
-      const x = c.getContext('2d')
-      const img = P.photo
-      const k = Math.max(FMT.w / img.width, FMT.h / img.height) * (P.look === 'blur' ? 1.06 : 1)
-      const w = img.width * k
-      const h = img.height * k
-      if (P.look === 'blur') x.filter = 'blur(14px)'
-      x.drawImage(img, (FMT.w - w) / 2, (FMT.h - h) / 2, w, h)
-      x.filter = 'none'
-      if (P.look === 'paper') {
-        x.fillStyle = alpha(PAPER.bg, 0.72)
-        x.fillRect(0, 0, FMT.w, FMT.h)
-      } else {
-        x.fillStyle = `rgba(8,8,16,${P.look === 'blur' ? 0.42 : 0.3})`
-        x.fillRect(0, 0, FMT.w, FMT.h)
-      }
-    }
-    photos.set(P, c)
-  }
-  const c = photos.get(P)
-  if (c) ctx.drawImage(c, 0, 0)
-  if (P.look === 'paper') return
-  // Darker still where the words go, as over the print.
-  const g = ctx.createLinearGradient(0, 0, 0, FMT.h)
-  g.addColorStop(0, `rgba(8,8,16,${dark})`)
-  g.addColorStop(0.75, `rgba(8,8,16,${dark * 0.7})`)
-  g.addColorStop(1, `rgba(8,8,16,${dark * 0.3})`)
-  ctx.fillStyle = g
-  ctx.fillRect(0, 0, FMT.w, FMT.h)
 }
 
 function masthead(ctx, T) {
@@ -423,18 +354,25 @@ export function drawChallenge(ctx, plan, tl, t, P = null) {
   const into = t - s.start
   const T = lookOf(plan)
   ctx.save()
-  if (s.key === 'hook') hook(ctx, plan, tl, into, P, T)
+  // Each part is told the video's own second too: what it stands on moves on that clock (plan 309).
+  if (s.key === 'hook') hook(ctx, plan, tl, t, into, P, T)
   else if (s.key === 'reading') (plan.style === 'scroll' ? scroll : along)(ctx, plan, tl, t, P)
-  else if (s.key === 'question') question(ctx, plan, into, false, P, T)
-  else if (s.key === 'answer') question(ctx, plan, into, true, P, T)
-  else cta(ctx, plan, into, P, T, s.dur)
+  else if (s.key === 'question') question(ctx, plan, tl, t, into, false, P, T)
+  else if (s.key === 'answer') question(ctx, plan, tl, t, into, true, P, T)
+  else cta(ctx, plan, tl, t, into, P, T, s.dur)
   ctx.restore()
 }
 
-function hook(ctx, plan, tl, into, P, T) {
+function hook(ctx, plan, tl, t, into, P, T) {
   const S = W[plan.lang]
-  backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
+  const cover = coverOn(plan)
+  const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'hook', cover })
   masthead(ctx, T)
+  // In colour from the first frame (plan 309): the hook on the title slip's washi.
+  if (cover) {
+    drawCover(ctx, plan, tl, into, P, T, { laid })
+    return
+  }
   const k = ease(into / 0.6)
   let y = TOP + 90
   y = lines(ctx, T, S.hook[plan.style], y, [FS.display * 0.95, FS.display * 0.75], { weight: 900, fam: 'serif', lh: 1.08, k })
@@ -479,14 +417,15 @@ function scrollRows(ctx, plan) {
 // set on whole pixels, so a line climbing 1.5 px a frame steps by one
 // pixel, then two, and shakes; an image is laid between pixels, and
 // glides. Where there is no canvas to draw it on (the tests), it is drawn
-// line by line, in the same places.
-const canvasOf = (w, h) => (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h)
-  : typeof document !== 'undefined' ? Object.assign(document.createElement('canvas'), { width: w, height: h }) : null)
+// line by line, in the same places (backdrop.js, canvasOf).
 const BLEED = SP[6]
 let strip = null
 let layer = null
 function stripOf(ctx, plan, rows, length, T) {
-  const key = `${plan.id}|${plan.lang}`
+  // Its inks and its rim are its own (plan 309): a strip written in
+  // another ink, or with another rim, is written again.
+  const halo = tuned(plan.tune, 'challenge.halo')
+  const key = `${plan.id}|${plan.lang}|${T.ink}|${T.ruby}|${halo}`
   if (strip?.key === key) return strip.c
   const c = canvasOf(Math.ceil(fr.w + BLEED * 2), Math.ceil(length + BLEED * 2))
   if (!c) return null
@@ -496,6 +435,8 @@ function stripOf(ctx, plan, rows, length, T) {
     drawSentence(x, row.L, c.width / 2, y, 'center', () => ({ ink: T.ink, rule: null, ruby: T.ruby }))
     y += row.h
   }
+  // A rim of the page's paper round every glyph, grown from the strip.
+  haloStrip(c, canvasOf, halo)
   strip = { key, c }
   return c
 }
@@ -511,7 +452,7 @@ function fades(x) {
 }
 function scroll(ctx, plan, tl, t, P) {
   const T = plan.photo ? lookOf(plan) : LOOK.paper
-  backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
+  backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'reading', cover: false })
   masthead(ctx, T)
   const seg = tl.segs.find(x => x.key === 'reading')
   const { rows, length } = scrollRows(ctx, plan)
@@ -566,7 +507,7 @@ const ALONG_Z = FS.title * 1.15
 function along(ctx, plan, tl, t, P) {
   const S = W[plan.lang]
   const T = LOOK.dark
-  backdrop(ctx, P, T, 0.42)
+  backdrop(ctx, P, T, { dark: 0.42, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'reading', cover: false })
   masthead(ctx, T)
   const tw = fr.w - PAD * 2
   const top = TOP
@@ -652,9 +593,9 @@ function questionLayout(ctx, plan) {
   questionLayouts.set(key, L)
   return L
 }
-function question(ctx, plan, into, answered, P, T) {
+function question(ctx, plan, tl, t, into, answered, P, T) {
   const S = W[plan.lang]
-  backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
+  backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: answered ? 'answer' : 'question', cover: false })
   masthead(ctx, T)
   const L = questionLayout(ctx, plan)
   let y = lines(ctx, T, plan.q.ask, TOP + 30, [L.ask.size], { maxLines: L.askLines }) + SP[6]
@@ -870,11 +811,11 @@ function readerCard(ctx, plan, box, into, beats) {
   text(ctx, plan.lv, box.x + SP[5], fy + footH / 2 + FS.caption * 0.36, { f: ff, color: PAPER.ink2 })
   text(ctx, S.station, box.x + box.w - SP[5], fy + footH / 2 + FS.caption * 0.36, { f: ff, color: PAPER.ink2, align: 'right' })
 }
-function cta(ctx, plan, into, P, T, dur = CH.cta) {
+function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
   const S = W[plan.lang]
   const pace = ctaPace(dur)
   const beats = Object.fromEntries(Object.entries(CTA).map(([k, v]) => [k, v * pace]))
-  backdrop(ctx, P, T, 0.62, plan.hour, tuned(plan.tune, 'challenge.wash'))
+  backdrop(ctx, P, T, { dark: 0.62, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'cta', cover: false })
   masthead(ctx, T)
   let y = fr.y + 64 + SP[5]
   y = lines(ctx, T, S.reader, y, [FS.heading, FS.title], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
