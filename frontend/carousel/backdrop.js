@@ -126,6 +126,13 @@ const trainBandOf = (P, view) => {
 // clear above the masthead and the reading's chip once the print is raised.
 const DISC = { cx: 195, cy: 150, r: 24 }
 const discOf = (P, view) => (view.source === 'carousel' && P.frame.disc ? { cx: P.frame.cx, cy: P.frame.cy, r: P.frame.disc } : DISC)
+// Drawn where the print has no light of its own up there: none on
+// August's night (its fireworks), none on the bay's spring night (朧月),
+// whose sky draws its moon's haze round the app's dial (195, 182), which
+// a challenge does not draw: a disc at the print's place would sit in the
+// top of that haze, off its middle. It keeps the haze alone, as before.
+const ownMoon = (P, view) => view.source === 'app' && /tpr-s5Oboro/.test(P.scene.layers?.sky ?? '')
+const hasDisc = (P, view) => view.disc && !!P.look?.disc && !/hanabi/.test(P.name) && !ownMoon(P, view)
 // The long view's summit, in the desk print's units (today-print's
 // layouts.py, DESK.fuji): the window opens with it in its middle.
 const WIDE_SUMMIT = 650
@@ -175,43 +182,51 @@ function paint(c, draw, lit) {
 const UNDER = { under: true }
 const OVER = { over: true }
 // Each print's canvases, by the look they were drawn for: its night, kept
-// tall to be raised, split at the train, its fireworks apart. A video
-// asks for one look throughout (two, a night under a cover); the two
-// last asked are kept, a print's canvases with the print.
-const KEPT = 2
+// tall to be raised, split at the train, its fireworks apart. Only the
+// looks the last frame asked for are kept, with the print: one, or under
+// a night's cover the unlit and the lit until the paper is laid; the
+// unlit night is drawn again if the hook is asked again.
 const kept = new WeakMap()
-function rastersOf(P, look) {
-  const { W, H, u, lit, tall, split, bursts, view } = look
-  let looks = kept.get(P)
-  if (!looks) kept.set(P, (looks = new Map()))
-  const key = `${lit ?? 'raw'}|${tall}|${split}|${bursts}`
-  if (looks.has(key)) {
-    // The last asked, kept last.
-    const R = looks.get(key)
-    looks.delete(key)
-    looks.set(key, R)
-  } else {
-    // With its fireworks apart, the print is drawn with the bursts gone from its sky.
-    const src = bursts ? { ...P, img: { ...P.img, back: P.img.backBare } } : P
-    const layer = parts => {
-      const c = canvasOf(W, H)
-      if (c) paint(c, x => drawPrint(x, src, 0, 0, u, { W, H, parts }), lit)
-      return c
-    }
-    let R = null
-    if (!split) {
-      // The whole print, its train parked: the still print as drawPrint has always drawn it.
-      const whole = layer(undefined)
-      if (whole) R = { whole }
-    } else {
-      const under = layer(UNDER)
-      const over = layer(OVER)
-      if (under && over) R = { under, over, ...stripOf(P, view, u, lit) }
-    }
-    looks.set(key, R)
-    while (looks.size > KEPT) looks.delete(looks.keys().next().value)
+function rastersOf(P, looks) {
+  const had = kept.get(P)
+  const now = new Map()
+  const Rs = looks.map(look => {
+    const key = `${look.lit ?? 'raw'}|${look.tall}|${look.split}|${look.bursts}`
+    if (!now.has(key)) now.set(key, had?.has(key) ? had.get(key) : drawLook(P, look))
+    return now.get(key)
+  })
+  kept.set(P, now)
+  return Rs
+}
+function drawLook(P, { W, H, u, lit, split, bursts, view }) {
+  // With its fireworks apart, the print is drawn with the bursts gone from its sky.
+  const src = bursts ? { ...P, img: { ...P.img, back: P.img.backBare } } : P
+  const layer = parts => {
+    const c = canvasOf(W, H)
+    if (c) paint(c, x => drawPrint(x, src, 0, 0, u, { W, H, parts }), lit)
+    return c
   }
-  return looks.get(key)
+  if (!split) {
+    // The whole print, its train parked: the still print as drawPrint has always drawn it.
+    const whole = layer(undefined)
+    return whole ? { whole } : null
+  }
+  const under = layer(UNDER)
+  const over = layer(OVER)
+  return under && over ? { under, over, ...stripOf(P, view, u, lit) } : null
+}
+// A look coming in over another is put together on a canvas of its own
+// first and laid once, faint: laid part by part, each as faint, its sky
+// would show through its own trees and arches. Kept with the print only
+// while one comes in.
+const fades = new WeakMap()
+function fadeOf(P, coming) {
+  if (!coming) {
+    fades.delete(P)
+    return null
+  }
+  if (!fades.has(P)) fades.set(P, canvasOf(FMT.w, FMT.h))
+  return fades.get(P)
 }
 // The train's rows alone, at twice the print's width (its image waits a
 // print's width off the left edge), to be laid where its run brings it.
@@ -368,7 +383,7 @@ function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p }) {
   const tall = !wide && view.lift && dial.lift > 0
   const W = wide ? Math.ceil(w) : FMT.w
   const H = tall ? Math.ceil(h) : FMT.h
-  const disc = dial.disc > 0 && view.disc && !!P.look?.disc && !/hanabi/.test(P.name)
+  const disc = dial.disc > 0 && hasDisc(P, view)
   const split = dial.train > 0 || disc
   const bursts = dial.bursts > 0 && !!P.img.bursts && !!P.img.backBare
   // Raised by whole pixels, its foot at the frame's.
@@ -378,38 +393,53 @@ function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p }) {
   const summit = Math.min(W - FMT.w, Math.max(0, Math.round(WIDE_SUMMIT * u - FMT.w / 2)))
   const x = wide ? -panAt(seg, p, { pan: dial.pan, from: summit, span: W - FMT.w }) : 0
   const run = trainRun(seg, p, dial.train)
-  // Under a cover the night's print stands unlit, and its light comes in with the paper.
-  const looks = lit != null && opened ? [[null, 1], [lit, laid]] : [[lit, 1]]
-  const Rs = looks.map(([l]) => rastersOf(P, { W, H, u, lit: l, tall, split, bursts, view }))
+  // Under a cover the night's print stands unlit, and its light comes in
+  // with the paper (its lit look drawn with the hook's first frame, so the
+  // reading's does not wait for it). What a whole look laid over it hides
+  // is neither laid nor kept.
+  const all = lit != null && opened ? [[null, 1], [lit, laid]] : [[lit, 1]]
+  const looks = all.slice(Math.max(0, all.findLastIndex(([, a]) => a >= 1)))
+  const Rs = rastersOf(P, looks.map(([l]) => ({ W, H, u, lit: l, tall, split, bursts, view })))
   if (Rs.some(R => !R)) {
     // No canvas to keep it on: drawn as it is, every frame.
     drawPrint(ctx, P, x, y, u, { W: FMT.w, H: FMT.h, run })
     return { bursts: null, x, y }
   }
-  // What a whole look laid over it hides is not laid.
-  const first = Math.max(0, looks.findLastIndex(([, a]) => a >= 1))
+  const shown = disc ? discAt(seg, into, tall) : 0
+  const s = shown > 0 ? discSprite(P, discOf(P, view), u) : null
+  // A look, its parts in their order: the sun or moon over what lies
+  // under the train, the train, what lies over it.
+  const lay = (g, R) => {
+    if (!split) {
+      g.drawImage(R.whole, x, y)
+      return
+    }
+    g.drawImage(R.under, x, y)
+    if (s) {
+      g.save()
+      g.globalAlpha *= shown
+      g.drawImage(s.c, x + s.x, y + s.y)
+      g.restore()
+    }
+    if (R.strip) g.drawImage(R.strip, x + (-w + w * (P.scene.train.run / 100) * run - R.phase), y + R.top)
+    g.drawImage(R.over, x, y)
+  }
+  const fade = fadeOf(P, split && looks.some(([, a]) => a > 0 && a < 1))
   looks.forEach(([, a], i) => {
-    if (a <= 0 || i < first) return
-    const R = Rs[i]
-    if (a < 1) {
-      ctx.save()
-      ctx.globalAlpha *= a
+    if (a <= 0) return
+    if (a >= 1) {
+      lay(ctx, Rs[i])
+      return
     }
-    if (!split) ctx.drawImage(R.whole, x, y)
-    else {
-      ctx.drawImage(R.under, x, y)
-      const shown = disc ? discAt(seg, into, tall) : 0
-      const s = shown > 0 ? discSprite(P, discOf(P, view), u) : null
-      if (s) {
-        ctx.save()
-        ctx.globalAlpha *= shown
-        ctx.drawImage(s.c, x + s.x, y + s.y)
-        ctx.restore()
-      }
-      if (R.strip) ctx.drawImage(R.strip, x + (-w + w * (P.scene.train.run / 100) * run - R.phase), y + R.top)
-      ctx.drawImage(R.over, x, y)
-    }
-    if (a < 1) ctx.restore()
+    ctx.save()
+    ctx.globalAlpha *= a
+    if (fade) {
+      const g = fade.getContext('2d')
+      g.clearRect(0, 0, FMT.w, FMT.h)
+      lay(g, Rs[i])
+      ctx.drawImage(fade, 0, 0)
+    } else lay(ctx, Rs[i])
+    ctx.restore()
   })
   return { bursts: bursts ? burstsOf(P, W, H, u) : null, x, y }
 }

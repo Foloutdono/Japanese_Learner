@@ -34,6 +34,7 @@ function recorder() {
     restore: () => Object.assign(state, stack.pop() || {}),
     drawImage: (img, ...a) => calls.push({ op: 'drawImage', img, a, alpha: state.globalAlpha, filter: state.filter }),
     fillRect: (...a) => calls.push({ op: 'fillRect', a, fill: state.fillStyle, alpha: state.globalAlpha }),
+    clearRect: (...a) => calls.push({ op: 'clearRect', a }),
     createLinearGradient: () => ({ addColorStop() {} }),
     createRadialGradient: () => ({ addColorStop() {} }),
     getImageData: () => ({ data: new Uint8ClampedArray(8) }),
@@ -115,9 +116,6 @@ describe('what a reading challenge stands on (plan 309)', () => {
   })
 
   it('carries the long view’s window from Fuji’s summit toward the tree, gently, and holds it on whole pixels', () => {
-    const plan = planOf({})
-    const tl = challengeTimeline(plan)
-    const rd = reading(tl)
     const span = Math.ceil(1184 * (1920 / 900)) - 1080
     const from = Math.round(650 * (1920 / 900) - 540)
     expect([from, span]).toEqual([847, 1446])
@@ -126,16 +124,19 @@ describe('what a reading challenge stands on (plan 309)', () => {
     expect(panAt('hook', 0.7, { pan: 1, from, span })).toBe(from)
     expect(panAt('reading', 1, { pan: 1, from, span })).toBe(1356)
     for (const seg of ['question', 'answer', 'cta']) expect(panAt(seg, 0, { pan: 1, from, span })).toBe(1356)
-    // Never faster than 6.5 px a second over the owner's text, about 4.3 on the whole.
-    let fastest = 0
-    for (let t = 0; t < rd.dur; t += 0.25) {
-      const a = panAt('reading', t / rd.dur, { pan: 1, from, span })
-      const b = panAt('reading', (t + 0.25) / rd.dur, { pan: 1, from, span })
-      expect(b).toBeGreaterThanOrEqual(a)
-      fastest = Math.max(fastest, (b - a) / 0.25)
+    // However long the reading (the bank's scrolls take 63 to 123 s; the
+    // owner's text 118.1, 4.3 px a second), never more than half again
+    // as fast as its mean, never back.
+    for (const dur of [63, 118.1, 123]) {
+      let fastest = 0
+      for (let t = 0; t < dur; t += 0.25) {
+        const a = panAt('reading', t / dur, { pan: 1, from, span })
+        const b = panAt('reading', Math.min(1, (t + 0.25) / dur), { pan: 1, from, span })
+        expect(b).toBeGreaterThanOrEqual(a)
+        fastest = Math.max(fastest, (b - a) / 0.25)
+      }
+      expect(fastest, `${dur} s`).toBeLessThanOrEqual(1.5 * ((1356 - from) / dur) + 0.01)
     }
-    expect(fastest).toBeLessThanOrEqual(6.5)
-    expect((1356 - from) / rd.dur).toBeCloseTo(4.3, 1)
   })
 
   it('lays the paper as the text comes in after a cover, lighter under the reading, whole again for the question', () => {
@@ -282,6 +283,21 @@ describe('what a reading challenge stands on (plan 309)', () => {
     expect(at(night, PAPER, hanabi, challengeTimeline(hanabi), 1.6).images()).toHaveLength(1)
   }))
 
+  it('leaves the bay’s spring night its own hazy moon, drawn round the app’s dial, and gives every other night its moon', () => withCanvases(() => {
+    const on = season => planOf({ ...BEFORE_309, 'challenge.disc': 1 }, { hour: 'night', season })
+    const spring = print('spring-night')
+    // Its haze stands round the dial's place (195, 182), not the disc's (195, 150).
+    expect(spring.scene.layers.sky).toMatch(/<circle cx="195" cy="182"[^>]*tpr-s5Oboro/)
+    const plan = on('spring')
+    expect(at(spring, PAPER, plan, challengeTimeline(plan), 1.6).images()).toHaveLength(1)
+    for (const season of ['summer', 'autumn', 'winter']) {
+      const P = print(`${season}-night`)
+      expect(P.scene.layers.sky, season).not.toMatch(/tpr-s5Oboro/)
+      // Under, the moon, the train, over.
+      expect(at(P, PAPER, on(season), challengeTimeline(on(season)), 1.6).images(), season).toHaveLength(4)
+    }
+  }))
+
   it('stands the long view at the frame’s height, Fuji’s summit in the middle under the hook, then carried along', () => withCanvases(made => {
     const P = print('winter-day', 'desk')
     const plan = planOf({ ...BEFORE_309, 'challenge.lift': 1, 'challenge.disc': 1 }, { scenery: 'wide' })
@@ -314,6 +330,36 @@ describe('what a reading challenge stands on (plan 309)', () => {
     expect(after.images().map(c => [c.img, c.alpha])).toEqual([[made[0], 1], [made[1], after.laid]])
     expect(at(P, PAPER, plan, tl, 30).images().map(c => c.img)).toEqual([made[1]])
     expect(made).toHaveLength(2)
+    // Once the paper is laid the unlit print is let go, and drawn again if the hook is asked again.
+    expect(at(P, PAPER, plan, tl, 1.6).images().map(c => c.img)).toEqual([made[2]])
+    expect(made).toHaveLength(3)
+  }))
+
+  it('brings a night’s light in after its cover as one picture, put together first, never part by part', () => withCanvases(made => {
+    const P = print('winter-night')
+    const plan = planOf({ ...BEFORE_309, 'challenge.cover': 1, 'challenge.night': 1, 'challenge.train': 1, 'challenge.disc': 1, 'challenge.lift': 1 }, { hour: 'night' })
+    const tl = challengeTimeline(plan)
+    const rd = reading(tl)
+    const pictures = f => f.images().map(c => [c.img, c.alpha])
+    // The hook: the unlit print, its moon and train between its parts; the lit one drawn, not laid.
+    const hook = at(P, PAPER, plan, tl, 1.6)
+    const [under0, over0, strip0, under1, over1, strip1, moon] = made
+    expect(pictures(hook)).toEqual([[under0, 1], [moon, 1], [strip0, 1], [over0, 1]])
+    // Coming in: the lit print put together on a canvas the frame's size, then laid over the unlit one once, as faint as the paper is laid.
+    const f = at(P, PAPER, plan, tl, rd.start + 0.3)
+    expect(f.laid > 0 && f.laid < 1).toBe(true)
+    const fade = made[7]
+    expect([fade.width, fade.height]).toEqual([1080, 1920])
+    expect(pictures(f)).toEqual([[under0, 1], [moon, 1], [strip0, 1], [over0, 1], [fade, f.laid]])
+    expect(pictures(fade.r)).toEqual([[under1, 1], [moon, 1], [strip1, 1], [over1, 1]])
+    // Each frame of it put together afresh on the same canvas, wiped first.
+    const next = at(P, PAPER, plan, tl, rd.start + 0.4)
+    expect(made).toHaveLength(8)
+    expect(next.images().at(-1).img).toBe(fade)
+    expect(fade.r.calls.map(c => (c.op === 'clearRect' ? [c.op, ...c.a] : c.img))).toEqual([['clearRect', 0, 0, 1080, 1920], under1, moon, strip1, over1, ['clearRect', 0, 0, 1080, 1920], under1, moon, strip1, over1])
+    // Laid: the lit print alone, part by part, nothing else kept.
+    expect(pictures(at(P, PAPER, plan, tl, 30))).toEqual([[under1, 1], [moon, 1], [strip1, 1], [over1, 1]])
+    expect(made).toHaveLength(8)
   }))
 
   it('lays August’s fireworks over the paper in their own colours, the print under them without its sky’s', () => withCanvases(made => {
