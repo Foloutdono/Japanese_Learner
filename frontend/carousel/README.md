@@ -1307,9 +1307,11 @@ the carousel's own, drawn in the print's hand at every season and hour by
 carousel never ships, so neither do they). The command names a scenery
 only off the bay, and the file's name carries it
 (`challenge-n5-12-scroll-lake-winter-day-en-q8-comment`). A scenery whose
-prints do not load is said so in the studio, the last print drawn standing
-in, and nothing is downloaded on it. The hour is day unless one is chosen,
-as the studio opens on it (dusk before plan 309).
+prints do not load is said so in the studio, the bay standing in at the
+hour asked for (else the last print drawn), and nothing is downloaded on
+it; `render.mjs` stops on it in one line, naming the file it lacks. The
+hour is day unless one is chosen, as the studio opens on it (dusk before
+plan 309).
 
 | Scenery | `--scenery` | Its prints |
 | --- | --- | --- |
@@ -1400,7 +1402,7 @@ range and on its step, every `was` too (plan 309), and
 | `challenge.js` | the reading challenges: a comprehension text in a credits scroll or read along, its timing on the voice, each frame, its page (plan 247) |
 | `sceneries.js` | what a reading challenge stands on: the six sceneries, and where each one's prints are (plan 309) |
 | `backdrop.js` | the print under a reading challenge's words, washed or darkened, or a photo in its place (plans 247, 276, 309) |
-| `cover.js` | a reading challenge's hook in colour, on the title slip's washi (plan 309) |
+| `cover.js` | a reading challenge's hook in colour, on the title slip's washi: the hook's own words (`challenge.js`, `hookWords`), handed to it (plan 309) |
 | `halo.js` | the rim of paper round the scroll's words (plan 309) |
 | `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a feature video recorded and made (plan 270) |
 | `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing and camera on the shots (plan 273), each frame, their page (plan 270) |

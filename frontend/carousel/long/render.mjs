@@ -67,6 +67,7 @@ import { SITE_ORIGIN } from '../../landing/config.mjs'
 import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, stillAt, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
 import { challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
+import { sceneryOf } from '../sceneries.js'
 import { pageFile } from '../feeds.js'
 import { wordsCues, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from '../words.js'
 import { parseTune } from '../tune.js'
@@ -123,6 +124,14 @@ page.on('pageerror', e => log('page:', e.message))
 await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: css.join('\n') }))
 await page.goto(`${ROOT}/carousel/index.html`)
 await page.addStyleTag({ content: css.join('\n') })
+// A run that cannot go on says why in one line, and leaves nothing behind.
+async function stop(why) {
+  log(why)
+  await browser.close()
+  server.close()
+  rmSync(WORK, { recursive: true, force: true })
+  process.exit(1)
+}
 // ── Lines voiced and measured: how long each lasts ──
 function voiceAll(cues) {
   writeFileSync(join(WORK, 'cues.json'), JSON.stringify(cues))
@@ -177,11 +186,18 @@ if (args.challenge) {
     const A = await import('/carousel/app.js')
     // A photo of the maker's own in place of the print (plan 276), served from the frontend.
     const P = plan.photo
-      ? { photo: await new Promise((ok, no) => Object.assign(new Image(), { onload() { ok(this) }, onerror: no, src: `/${plan.photo.src}` })), look: plan.photo.look }
+      ? { photo: await new Promise((ok, no) => Object.assign(new Image(), { onload() { ok(this) }, onerror: () => no(new Error(`photo: ${plan.photo.src}`)), src: `/${plan.photo.src}` })), look: plan.photo.look }
       : await A.loadPrint(plan.hour, { base: '/', ...C.challengePrintOpts(plan) })
     // Every frame drawn: something moves in each (a sentence's clock, a word lit).
     window.__draw = t => { C.drawChallenge(window.__ctx, plan, tl, t, P); return t }
-  }, { plan, tl })
+  }, { plan, tl }).catch(async e => {
+    // What it stands on did not load: the file named, not the page's stack.
+    const missing = /(?:print|photo): [^\n]*/.exec(e.message)?.[0] ?? e.message.split('\n')[0]
+    const view = sceneryOf(plan.scenery)
+    await stop(plan.photo ? `the photo ${plan.photo.src} did not load: --photo takes a path under frontend/`
+      : view.source === 'carousel' ? `${view.name} (${view.jp}) has no prints yet (${missing}): draw them with python3 scripts/sceneries/build.py`
+        : `Today's print did not load (${missing})`)
+  })
   pageText = challengePage(plan, tl, site)
   thumbAt = 1.6
   log(`${pageText.title}: ${plan.sents.length} sentences, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines voiced`)
@@ -308,6 +324,7 @@ if (args.stills) {
   log(`wrote ${String(args.stills).split(',').length} still(s) to ${OUT}`)
   await browser.close()
   server.close()
+  rmSync(WORK, { recursive: true, force: true })
   process.exit(0)
 }
 

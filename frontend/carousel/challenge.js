@@ -363,25 +363,34 @@ export function drawChallenge(ctx, plan, tl, t, P = null) {
   ctx.restore()
 }
 
-function hook(ctx, plan, tl, t, into, P, T) {
+/** The hook's words (plan 309): its line, the text's title, and the chip
+ *  saying the level, the sentences and the reading's length. Written here
+ *  once, in both languages, for the hook and for the cover (cover.js),
+ *  which lays the same words on its plate. */
+export function hookWords(plan, tl) {
   const S = W[plan.lang]
+  return { hook: S.hook[plan.style], title: plan.title, chip: `JLPT ${plan.lv} · ${S.sentences(plan.sents.length)} · ${clock(tl.reading)}` }
+}
+
+function hook(ctx, plan, tl, t, into, P, T) {
+  const words = hookWords(plan, tl)
   const cover = coverOn(plan)
   const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'hook', cover })
   masthead(ctx, T)
   // In colour from the first frame (plan 309): the hook on the title slip's washi.
   if (cover) {
-    drawCover(ctx, plan, tl, into, P, T, { laid })
+    drawCover(ctx, plan, tl, into, P, T, { laid, words })
     return
   }
   const k = ease(into / 0.6)
   let y = TOP + 90
-  y = lines(ctx, T, S.hook[plan.style], y, [FS.display * 0.95, FS.display * 0.75], { weight: 900, fam: 'serif', lh: 1.08, k })
+  y = lines(ctx, T, words.hook, y, [FS.display * 0.95, FS.display * 0.75], { weight: 900, fam: 'serif', lh: 1.08, k })
   y += SP[6]
-  y = lines(ctx, T, plan.title, y, [FS.heading, FS.title], { weight: 700, fam: 'serif', color: T.title, maxLines: 2, k: ease((into - 0.3) / 0.6) })
+  y = lines(ctx, T, words.title, y, [FS.heading, FS.title], { weight: 700, fam: 'serif', color: T.title, maxLines: 2, k: ease((into - 0.3) / 0.6) })
   y += SP[6]
   ctx.save()
   ctx.globalAlpha *= ease((into - 0.6) / 0.6)
-  chip(ctx, T, `JLPT ${plan.lv} · ${S.sentences(plan.sents.length)} · ${clock(tl.reading)}`, fr.cx, y, { align: 'center', z: FS.body })
+  chip(ctx, T, words.chip, fr.cx, y, { align: 'center', z: FS.body })
   ctx.restore()
 }
 

@@ -309,14 +309,19 @@ function renderTune() {
   $('#tune-field').hidden = !ts.length
   const box = $('#tune')
   box.replaceChildren()
+  let before = false
   for (const name of new Set(ts.map(t => t.group))) {
     const set = document.createElement('fieldset')
     set.className = 'tune__group'
     const legend = document.createElement('legend')
     legend.textContent = name
     set.append(legend, ...ts.filter(t => t.group === name).map(tuneRow))
-    // The look before plan 309, one press away, beside the dials that changed it.
-    if (ts.some(t => t.group === name && t.key in BEFORE_309)) set.append(beforeButton())
+    // The look before plan 309, one press away, beside the dials that
+    // changed it: once in the panel, as it sets every one of them.
+    if (!before && ts.some(t => t.group === name && t.key in BEFORE_309)) {
+      set.append(beforeButton())
+      before = true
+    }
     box.append(set)
   }
   syncTune()
@@ -878,14 +883,18 @@ async function renderFeature(mine) {
 // the app's sounds, and the voice of the one read along is made where it
 // is rendered (the command below), every word timed on it.
 const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
-// The last print a challenge was drawn on: a scenery whose prints do not
-// load (not drawn yet, or not served with the studio) leaves it standing,
-// and says so, rather than a blank page (plan 309).
+// A scenery whose prints do not load (not drawn yet, or not served with
+// the studio) has the bay stand in, at the hour and season asked for, so
+// the frame is lit as that hour is; else the last print drawn. It says
+// so, rather than leave a blank page (plan 309). A render overtaken by a
+// newer one says nothing: its scenery is no longer the one in view.
 let lastPrint = null
 let standInSaid = ''
-async function challengePrint(pl) {
+async function challengePrint(pl, mine) {
+  const asked = challengePrintOpts(pl)
   let failure = null
-  const P = await printFor(state.hour, seasonOf(), challengePrintOpts(pl)).catch(e => { failure = e; return null })
+  const P = await printFor(state.hour, seasonOf(), asked).catch(e => { failure = e; return null })
+  if (mine !== token) return null
   if (P) {
     lastPrint = P
     // Its own print back, the word that another stood in goes.
@@ -893,13 +902,20 @@ async function challengePrint(pl) {
     return { P, standIn: false }
   }
   console.warn(`reading challenge: ${failure.message}`)
-  // None drawn yet (the page just opened on it): the bay at the hour.
-  const last = lastPrint
-  const before = last ?? await printFor(state.hour).catch(() => null)
+  // The bay as it would have stood, unless the bay is what failed.
+  const bayFailed = asked.scenery === 'bay' && !asked.falls && !asked.bursts
+  let bayFailure = bayFailed ? failure : null
+  const bay = bayFailed ? null : await printFor(state.hour).catch(e => { bayFailure = e; return null })
+  if (mine !== token) return null
+  const before = bay ?? lastPrint
   const view = sceneryOf(pl.scenery)
-  standInSaid = before ? `${view.name} (${view.jp}) did not load (${failure.message}): ${last ? 'the last print drawn' : 'the bay'} stands in.` : `Today's print did not load (${failure.message}).`
+  standInSaid = before ? `${view.name} (${view.jp}) did not load (${failure.message}): ${bay ? 'the bay at this hour' : 'the last print drawn'} stands in.`
+    : `Today's print did not load (${bayFailure.message}).`
   status(standInSaid)
-  return { P: before, standIn: !!before }
+  // Nothing is made on a print standing in for the one asked, nor on the
+  // ground for another scenery; Today's print failing with nothing to stand
+  // in still draws on the ground, as it did before plan 309.
+  return { P: before, standIn: !!before || !bayFailed }
 }
 const QUESTION_KINDS = { comprehension: 'about the text', inference: 'reading between the lines', grammar: 'grammar', vocabulary: 'a word' }
 async function renderChallenge(mine) {
@@ -917,7 +933,9 @@ async function renderChallenge(mine) {
   }))
   pick.value = String(pl.q.n)
   const tl = challengeTimeline(pl)
-  const { P, standIn } = await challengePrint(pl)
+  const got = await challengePrint(pl, mine)
+  if (!got) return
+  const { P, standIn } = got
   await fonts(JSON.stringify(pl))
   if (mine !== token) return
   const page = challengePage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE)

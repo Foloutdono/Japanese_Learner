@@ -16,7 +16,7 @@ import { TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
-import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, hookWords, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { PRINTS_REV, SCENERIES, SCENERY_IDS, printPaths, sceneryOf } from '../carousel/sceneries.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
 import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
@@ -2118,6 +2118,34 @@ describe('the reading challenges (plan 247)', () => {
     expect(printPaths('lake', 'summer-day-b', meta.rev)).toEqual({ print: `${own}/summer-day.json`, meta: `${own}/meta.json` })
     expect(printPaths('lake', 'summer-hanabi', meta.rev)).toEqual({ print: `${own}/summer-hanabi.json`, meta: `${own}/meta.json` })
   })
+
+  it('writes the hook’s words once, for the hook and for the cover it may be drawn as (plan 309)', () => withPath2D(() => {
+    for (const P of data.passages) {
+      for (const style of CHALLENGE_STYLES) {
+        const [en, fr] = ['en', 'fr'].map(lang => {
+          const pl = challengePlan(data, P.id, { lang, style })
+          const tl = challengeTimeline(pl)
+          const words = hookWords(pl, tl)
+          const where = `${P.id} ${lang} ${style}`
+          expect(Object.keys(words), where).toEqual(['hook', 'title', 'chip'])
+          expect(words.title, where).toBe(P.title)
+          expect(words.chip, where).toMatch(new RegExp(`^JLPT ${P.lv} · ${pl.sents.length} (sentences|phrases) · \\d+:\\d\\d$`))
+          // What the hook draws under the masthead, once all of it has come in, is those words and no others.
+          const { ctx, at } = drawn()
+          drawChallenge(ctx, pl, tl, 1.6, null)
+          const said = at.filter(x => x.t !== 'TSUJI').map(x => x.t).join('')
+          expect(said.replace(/\s+/g, ''), where).toBe(`${words.hook}${words.title}${words.chip}`.replace(/\s+/g, ''))
+          return words
+        })
+        // Each language its own hook and chip, the text's one title.
+        expect(fr.hook, `${P.id} ${style}`).not.toBe(en.hook)
+        expect(fr.chip, `${P.id} ${style}`).not.toBe(en.chip)
+      }
+    }
+    // The cover is handed the words rather than importing them: challenge.js
+    // reads every one of the modules it stands on, and none of them reads it.
+    for (const f of ['backdrop.js', 'cover.js', 'halo.js', 'sceneries.js']) expect(read(`carousel/${f}`), f).not.toMatch(/from '\.\/challenge\.js'/)
+  }))
 
   // Last of the block: the strip it leaves behind is the stub's.
   it('draws the scroll’s text once and lays it between pixels, at sixty frames, so it glides', () => withPath2D(() => {
