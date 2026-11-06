@@ -67,7 +67,10 @@ const LOOK = {
     panel: alpha(PAPER.card, 0.94), edge: PAPER.surfaceLine, chip: PAPER.ink, chipInk: PAPER.bg, shadow: false, track: alpha(PAPER.ink, 0.14), dot: alpha(PAPER.ink, 0.08),
   },
 }
-const lookOf = plan => (plan.style === 'scroll' ? LOOK.paper : LOOK.dark)
+// A photo of the maker's own in place of the print (plan 276): read in
+// the dark look over it, the paper's wash only where asked for.
+export const PHOTO_LOOKS = ['dark', 'blur', 'paper']
+const lookOf = plan => (plan.photo ? (plan.photo.look === 'paper' ? LOOK.paper : LOOK.dark) : plan.style === 'scroll' ? LOOK.paper : LOOK.dark)
 
 const W = {
   en: {
@@ -165,6 +168,7 @@ export function challengePlan(data, id, opts = {}) {
   const q = { n: qn, ask: Q.question[lang] || Q.question.en, choices: order.map(i => options[i]), right: order.indexOf(Q.correct) }
   return {
     source: 'challenge', id: P.id, lang, lv: P.lv, style, hour, season, title: P.title, sents, q, chosen: qn !== askedFirst(P), hidden: opts.hide !== false,
+    photo: opts.photo ? { src: String(opts.photo), look: PHOTO_LOOKS.includes(opts.photoLook) ? opts.photoLook : 'dark' } : null,
     chars: sents.reduce((n, rows) => n + charsOf(rows), 0), nq: P.questions.length, cpm: Math.round((CPM[P.lv] || CPM.N3) * tuned(opts.tune, 'challenge.pace')), tune: opts.tune || {}, ruby: RUBY.has(P.lv), slow: SLOW.has(P.lv),
   }
 }
@@ -295,6 +299,7 @@ function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif'
 // The hour's print under it: darkened where the words go (`dark`), or
 // washed whole with the app's paper, the words in ink over it.
 function backdrop(ctx, P, T, dark = 0.5, hour = 'day', wash = 1) {
+  if (P?.photo) return photoBackdrop(ctx, P, dark)
   const lift = T.ground === 'paper' && P ? liftedPrint(P, LIFT[hour]) : null
   if (lift) ctx.drawImage(lift, 0, 0)
   else if (P) drawPrint(ctx, P, 0, 0, FMT.w / P.scene.w, { W: FMT.w, H: FMT.h })
@@ -336,6 +341,44 @@ function liftedPrint(P, lift) {
     lifts.set(P, c)
   }
   return lifts.get(P)
+}
+
+// The photo laid to cover the frame, its middle kept, made once: dark,
+// dimmed whole and darker still where the words go; blur, softened and
+// dimmed so the words read over any of it; paper, washed as the print is.
+const photos = new WeakMap()
+function photoBackdrop(ctx, P, dark) {
+  if (!photos.has(P)) {
+    const c = canvasOf(FMT.w, FMT.h)
+    if (c) {
+      const x = c.getContext('2d')
+      const img = P.photo
+      const k = Math.max(FMT.w / img.width, FMT.h / img.height) * (P.look === 'blur' ? 1.06 : 1)
+      const w = img.width * k
+      const h = img.height * k
+      if (P.look === 'blur') x.filter = 'blur(14px)'
+      x.drawImage(img, (FMT.w - w) / 2, (FMT.h - h) / 2, w, h)
+      x.filter = 'none'
+      if (P.look === 'paper') {
+        x.fillStyle = alpha(PAPER.bg, 0.72)
+        x.fillRect(0, 0, FMT.w, FMT.h)
+      } else {
+        x.fillStyle = `rgba(8,8,16,${P.look === 'blur' ? 0.42 : 0.3})`
+        x.fillRect(0, 0, FMT.w, FMT.h)
+      }
+    }
+    photos.set(P, c)
+  }
+  const c = photos.get(P)
+  if (c) ctx.drawImage(c, 0, 0)
+  if (P.look === 'paper') return
+  // Darker still where the words go, as over the print.
+  const g = ctx.createLinearGradient(0, 0, 0, FMT.h)
+  g.addColorStop(0, `rgba(8,8,16,${dark})`)
+  g.addColorStop(0.75, `rgba(8,8,16,${dark * 0.7})`)
+  g.addColorStop(1, `rgba(8,8,16,${dark * 0.3})`)
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, FMT.w, FMT.h)
 }
 
 function masthead(ctx, T) {
@@ -467,7 +510,7 @@ function fades(x) {
   return g
 }
 function scroll(ctx, plan, tl, t, P) {
-  const T = LOOK.paper
+  const T = plan.photo ? lookOf(plan) : LOOK.paper
   backdrop(ctx, P, T, 0.5, plan.hour, tuned(plan.tune, 'challenge.wash'))
   masthead(ctx, T)
   const seg = tl.segs.find(x => x.key === 'reading')

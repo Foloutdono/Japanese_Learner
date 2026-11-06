@@ -28,6 +28,9 @@
 //                     (plan 275 made hiding the default: the viewer asks in the comments)
 //   --hide            ... the default: the answer never shown, the viewer asked for
 //                     theirs in the comments (plan 275)
+//   --photo PATH      ... a photo of the maker's own in place of the print (plan 276),
+//                     a path under frontend/ (the page serves only that)
+//   --photo-look dark ... over it: dark (dimmed, the default), blur or paper (washed)
 //   --words ID        a vocabulary short (plan 252, words.js): nine words, 9:16,
 //                     a level's (N5:3) or a theme's (theme:animals:1)
 //   --style quiz      ... as a card on washi (card, the default) or a quiz on sumi (quiz)
@@ -157,20 +160,23 @@ let tl, slug, SIZE, pageText, thumbAt
 if (args.music !== undefined) log('no video carries music since plan 273: --music is ignored')
 if (args.challenge) {
   // ── A reading challenge: the text over the hour's print, read along voiced ──
-  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, question: args.question, hide: args.show !== true, tune })
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, question: args.question, hide: args.show !== true, photo: typeof args.photo === 'string' ? args.photo : null, photoLook: args['photo-look'], tune })
   const cues = challengeCues(plan)
   const dur = cues.length ? voiceAll(cues) : null
   // A read-along whose voice did not come is no read-along: stop, unless asked for it anyway.
   if (dur && !dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
   tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
   SIZE = TALL
-  slug = ['challenge', plan.id, plan.style, ...(plan.season ? [plan.season] : []), plan.hour, lang, ...(plan.chosen ? [`q${plan.q.n}`] : []), ...(plan.hidden ? ['comment'] : [])].join('-')
+  slug = ['challenge', plan.id, plan.style, ...(plan.photo ? [`photo-${plan.photo.look}`] : [...(plan.season ? [plan.season] : []), plan.hour]), lang, ...(plan.chosen ? [`q${plan.q.n}`] : []), ...(plan.hidden ? ['comment'] : [])].join('-')
   await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
     const C = await import('/carousel/challenge.js')
     const A = await import('/carousel/app.js')
-    const P = await A.loadPrint(plan.hour, { base: '/', season: plan.season })
+    // A photo of the maker's own in place of the print (plan 276), served from the frontend.
+    const P = plan.photo
+      ? { photo: await new Promise((ok, no) => Object.assign(new Image(), { onload() { ok(this) }, onerror: no, src: `/${plan.photo.src}` })), look: plan.photo.look }
+      : await A.loadPrint(plan.hour, { base: '/', season: plan.season })
     // Every frame drawn: something moves in each (a sentence's clock, a word lit).
     window.__draw = t => { C.drawChallenge(window.__ctx, plan, tl, t, P); return t }
   }, { plan, tl })
