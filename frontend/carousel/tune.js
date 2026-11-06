@@ -59,11 +59,11 @@ group('Reading challenge', ['challenge'], [
   { key: 'challenge.cover', label: 'Hook in colour', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the hook on the title slip’s washi over the print unwashed, from the first frame' },
   { key: 'challenge.lift', label: 'Print raised', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the print raised as the text comes in, its foot above the feed’s caption' },
   { key: 'challenge.disc', label: 'Sun and moon', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the hour’s sun or moon, where the print has it' },
-  { key: 'challenge.night', label: 'Moonlit night', def: 0, was: 0, min: 0, max: 1, step: 0.25, hint: 'the night print lit on a curve that keeps its colours (1), not three times over (0)' },
+  { key: 'challenge.night', label: 'Moonlit night', def: 0, was: 0, min: 0, max: 1, step: 0.25, hint: 'the night print lit in its own colours, its paper a little heavier once the text is read (1), or lit three times over (0) (scroll)' },
   { key: 'challenge.train', label: 'Train as the clock', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the train crosses as the text is read, gone by its end' },
   { key: 'challenge.falls', label: 'Petals in the air', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the season’s petals and leaves where their fall begins' },
   { key: 'challenge.bursts', label: 'Fireworks in colour', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'August’s fireworks over the paper, in their own colours' },
-  { key: 'challenge.along', label: 'Read-along legible', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'read along: the panel set by the hour, the voice’s credit on it' },
+  { key: 'challenge.along', label: 'Read-along legible', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'read along: the panel set by the hour, the voice’s credit on it; the hook where no cover stands, the countdown and the way to the app’s stops on a night of their own' },
   { key: 'challenge.pan', label: 'Long view travel', unit: '×', def: 1, min: 0, max: 1, step: 0.25, hint: 'the long view: how far the frame travels while the text is read' },
 ])
 group('Word echo', ['echo'], [

@@ -357,14 +357,18 @@ function masthead(ctx, T, glow = 0) {
 // a pixel or two from its light ink for two or three frames (2.9:1 on the
 // station's nights, 3.1 on the lake's and the gate's, 0.9 s in): it keeps
 // its whole glow through the rise, in and out with it (sin(pi x lift)),
-// dark on the dark sky but round a star, 6.18 at its worst.
+// dark on the dark sky but round a star, 6.18 at its worst. Whether the
+// print is raised is its own scenery's to say, as the backdrop raises
+// it: the bay standing in for the long view (app.js, standInOpts) rises,
+// and the long view standing in for the bay (the last print drawn) does not.
 const RAISED_GLOW = 0.5
 /** The glow the masthead keeps over the print raised, at a moment (`seg`,
- *  `into` seconds in): none unless read along over a print, on a scenery
- *  raised with the dial on; at night only while the print rises. */
-export function raisedGlow(plan, T, seg, into) {
+ *  `into` seconds in) over the print `P` (the one drawn: its scenery; the
+ *  plan's where none is): none unless read along over a print, on a
+ *  scenery raised with the dial on; at night only while the print rises. */
+export function raisedGlow(plan, T, seg, into, P = null) {
   const lift = tuned(plan.tune, 'challenge.lift')
-  if (T.ground !== 'sumi' || plan.photo || !sceneryOf(plan.scenery).lift || !(lift > 0)) return 0
+  if (T.ground !== 'sumi' || plan.photo || !sceneryOf(P?.scenery ?? plan.scenery).lift || !(lift > 0)) return 0
   const k = liftAt(seg, into, lift)
   if (plan.hour === 'night') return Math.sin(Math.PI * k)
   return RAISED_GLOW * (coverOn(plan) && seg === 'reading' ? 1 : k)
@@ -771,7 +775,7 @@ function along(ctx, plan, tl, t, P) {
   const T = LOOK.dark
   const { laid } = backdrop(ctx, P, T, { dark: 0.42, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'reading', cover: false })
   const into = t - tl.segs.find(s => s.key === 'reading').start
-  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'reading', into)))
+  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'reading', into, P)))
   const tw = fr.w - PAD * 2
   const { top, foot, text: end, credit } = alongBox(plan)
   // Where each sentence stands in the column, and where the column is turned to.
@@ -885,7 +889,7 @@ function question(ctx, plan, tl, t, into, answered, P, T) {
   const S = W[plan.lang]
   const seg = answered ? 'answer' : 'question'
   const { laid } = backdrop(ctx, P, T, { dark: footOn(plan, T) ? 0.62 : 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg, cover: false })
-  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, seg, into)))
+  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, seg, into, P)))
   const L = questionLayout(ctx, plan)
   if (footOn(plan, T)) {
     const yRing = TOP + 30 + L.ask.size * 1.15 * L.ask.lines.length + SP[6] + L.hs.reduce((n, h) => n + h + L.gap, 0) + SP[6]
@@ -1111,7 +1115,7 @@ function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
   const pace = ctaPace(dur)
   const beats = Object.fromEntries(Object.entries(CTA).map(([k, v]) => [k, v * pace]))
   const { laid } = backdrop(ctx, P, T, { dark: footOn(plan, T) ? 0.68 : 0.62, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'cta', cover: false })
-  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'cta', into)))
+  masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'cta', into, P)))
   let y = UNDER + SP[5]
   y = lines(ctx, T, S.reader, y, [FS.heading, FS.title], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
   y += SP[4]
