@@ -70,12 +70,25 @@ bursts). The serialisers are today-print's (`tight`, `lighter`,
 - **No `<defs>` inside another**: the carousel's loader gathers every
   layer's `<defs>` with a non-greedy match, which a nested one cuts
   short. A part's own defs are lifted out beside it.
-- **Ids `tpr-`, once each, every reference found.** A part that writes
-  fixed ids (the water's strips, the boats' fire) is drawn once a print.
+- **Ids `tpr-`, once each, every reference found in its layer's own
+  image.** The carousel's loader draws each layer as an image of its
+  own, carrying that layer and every layer's `<defs>` (`app.loadPrint`):
+  a part drawn once and placed again with `<use>` is placed from its
+  own layer, or held in `<defs>`. A part that writes fixed ids (the
+  water's strips, the boats' fire) is drawn once a print.
+- **The train whole in its image.** The loader draws the train layer a
+  print's width either side of the frame and slides it along its run:
+  whatever lies left of −W in it is never drawn, and shows only as a
+  train cut short once it moves. `common.small_train` refuses a lead the
+  run cannot reach from there (under k · length − 0.1 W + 9: 154 at half
+  the bay's size, 103 at 0.36), and `check.py` reads each train back from
+  its layer: in the image, off the print at both ends of its run, its
+  rows and its reflection's inside the meta's `trainBand`.
 - **Each part seeds its own random**, as the generator's do.
 - **At most 12 MB a scenery.**
 
-`check.py` holds the files to all of it.
+`check.py` holds the files to all of it; `src/carouselPrints.test.js`
+holds the committed files to the same in CI.
 
 ## The frame
 
@@ -109,7 +122,16 @@ units − 146). So:
 The bay (入江) stays the challenge's default, and the long view (一望) is
 the app's own desk print: neither is drawn here. A module whose scenery
 is not drawn yet raises `NotImplementedError`, and `build.py` passes it
-by.
+by, unless its folder is on disk: a folder nothing draws is a problem.
+
+On the lake the boats sit nearer than the rows the train's reflection
+takes (the train layer is drawn over the water), the tree lets fall a
+long raft of petals on the water (花筏: `s5_fore.fallen`'s petals
+without the tint it lays on a meadow), and two of August's bursts open
+right of Fuji, where their light lies in open water, left of the feed's
+buttons. The gate's boats ride the open water between the gate and its
+tree; its bursts open over the tree, which hides their light in the
+water.
 
 As built: the lake 9.0 MB raw (1.9 MB gzipped), the gate 8.7 MB (1.9
 MB), about 3 s each; a summer print, with its crape myrtle, is the
@@ -123,5 +145,5 @@ heaviest (about 0.9 MB).
 | `lake.py` | the mirror lake and the lake gate: the lake's layout and meadow, Fuji's reflection in strips, the embankment and its line, the reeds, the torii and its reflection |
 | `river.py` | the river and its avenue |
 | `station.py` | the station under the eaves |
-| `check.py` | the rules above, and `--check` |
+| `check.py` | the rules above (a train read back from its layer among them), and `--check` |
 | `build.py` | `REV`, the registry of the sceneries, the files |

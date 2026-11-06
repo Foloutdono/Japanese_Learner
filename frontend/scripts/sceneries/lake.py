@@ -20,6 +20,7 @@ Units are the phone's (390 x 746); the challenge shows the top 693 at
 2.769 px a unit, then raises the print 52.7 units for the reading."""
 import dataclasses
 import random
+import re
 
 import common
 from common import UID, f
@@ -50,20 +51,29 @@ LAKE = dataclasses.replace(
         'dusk': [(-44, 64, 176, 9), (236, 94, 150, 8)],
         'night': [(-34, 74, 176, 9), (258, 280, 150, 8)],
     },
-    boats=[(236, 494, 0.5), (318, 508, 0.62), (272, 530, 0.78)],
-    lone_boats=[(256, 502, 0.62), (306, 520, 0.72)],
+    # the boats nearer than the train's reflection (its rows end at 494):
+    # the train layer is drawn over the water, so a sail standing in those
+    # rows would have the reflection pass over it
+    boats=[(236, 508, 0.5), (318, 518, 0.62), (272, 540, 0.78)],
+    lone_boats=[(256, 512, 0.62), (306, 528, 0.72)],
     star_box=(0, 40, 390, 446),
     geese_path=((-70, 392), (440, 428), 30), cranes_path=((440, 50), (-170, 30), 40),
 )
+# the gate's lake: its boats in the open water between the gate and the
+# tree on the right bank, whose crown hides the water where the lake's
+# boats sail; the fisher on the light's road
+GATE_LAKE = dataclasses.replace(
+    LAKE, boats=[(146, 504, 0.5), (230, 514, 0.6), (172, 538, 0.74)], lone_boats=[(188, 516, 0.62), (226, 528, 0.7)])
 # the near shore's meadow (s5_fore.FORE's layout): the gate's is the
 # bay's own, its tree where the bay's stands, less the far patches (the
 # lake is where they lay); the lake's is the bay's turned over with its
 # tree, the drift under the tree at the left, and what the tree lets fall
-# lying on the water under its crown (花筏)
+# afloat on the water under its crown, drawn out by the water into a long
+# shallow raft (花筏)
 FIELD = s5_fore.FIELD_ONLY
 TORII_FORE = {**s5_fore.FORE[390], 'far': []}
 LAKE_FORE = dict(
-    base=1.0, front=714, shade=[(30, 736, 70, 11, -8)], carpet=(66, 614, 50, 11), foot=(2, 714, 8), foot_kacho=(4, 716, 10),
+    base=1.0, front=714, shade=[(30, 736, 70, 11, -8)], carpet=(92, 606, 78, 5), foot=(2, 714, 8), foot_kacho=(4, 716, 10),
     flowers=[(316, 749, 1.05, 7), (256, 752, 0.85, 4, FIELD), (-2, 748, 0.95, 5), (90, 752, 0.8, 4, FIELD),
              (214, 702, 0.85, 3, FIELD), (128, 688, 0.8, 3)],
     pampas=[(6, 750, 1.05, 7), (378, 750, 1.0, 6), (176, 676, 0.85, 3)],
@@ -72,16 +82,22 @@ LAKE_FORE = dict(
 # spring dawn's thin bands (s1_air.THIN), the first drawn short of the
 # disc the challenge sets in the sky
 THIN = [(-40, 94, 176, 6)] + s1_air.THIN[390][1:]
-# August's fireworks over the far shore at the column's edges; for the
-# gate, right of Fuji
+# August's fireworks over the far shore: on the lake one at the column's
+# left edge, over the tree, and two right of Fuji, whose light lies in the
+# open water (the tree hides the water at the left, the feed's buttons at
+# the right); for the gate, right of Fuji
 FIREWORKS = {
-    'lake': [(48, 404, 28, '#ffd27a', 4.6), (346, 418, 20, '#ff8a7a', 5.9), (68, 436, 12, '#bff0a8', 7.3)],
+    'lake': [(48, 404, 28, '#ffd27a', 4.6), (306, 410, 20, '#ff8a7a', 5.9), (270, 438, 12, '#bff0a8', 7.3)],
     'torii': [(334, 396, 26, '#ffd27a', 4.6), (304, 424, 14, '#ff8a7a', 5.9), (362, 428, 11, '#bff0a8', 7.3)],
 }
 MIRROR = 0.78           # Fuji in the water, shortened as still water shows it
 STRIPS = 8              # and broken into this many strips by the ripples
 TREE_FOOT = (370, 712)  # the season's tree stands here on the bay's print
 TRAIN_K = 0.5           # the line's train, far off: half the bay's
+# the lake's tree, turned in from the left, a little under the bay's size;
+# the crape myrtle, whose crown stands the tallest, smaller again, so its
+# crown clears the far shore as the others' do (from about 500)
+TREE_K = {'sarusuberi': 0.8}
 
 
 # ── 逆さ富士 ───────────────────────────────────────────────────────
@@ -130,6 +146,14 @@ def lake_water(L, h, s, o, far, near, hour, under):
     surface = water(L, h, s, far, near, hour, [], grouped=True)
     at = surface.index('<g mask="url(#f6ReflFade)">')
     return surface[:at] + under + surface[at:]
+
+
+def afloat(meadow):
+    """What the tree let fall lying on the water: s5_fore.fallen's petals
+    without the tint it lays under them, which on the meadow is the
+    ground taking their colour and on the water read as a glow."""
+    return re.sub(rf'<defs><radialGradient id="{UID}Carpet">[\s\S]*?</defs><ellipse [^>]*fill="url\(#{UID}Carpet\)"></ellipse>',
+                  '', meadow, count=1)
 
 
 # ── the far shore ───────────────────────────────────────────────────
@@ -223,45 +247,76 @@ GATE_MIRROR = 0.74
 
 def torii(x, base, a, hour, o, uid):
     """鳥居, a myōjin gate: two pillars leaning in a little, shaded from
-    their lit side to the dark; the tie beam (貫) through them, the strut
-    (額束), the lower lintel (島木) and over it the black lintel (笠木),
-    its ends swept up (反り); snow along it in winter. Returns its defs,
-    the gate, the gate without its snow (for the water) and where its
-    pillars stand (x left and right, their width, the lintel's half-span
-    and its top)."""
+    their lit side to the dark and ringed where they meet the lintel (台輪);
+    the tie beam (貫) through them, the strut (額束) and its plaque (額),
+    the lower lintel (島木) and on it the black lintel (笠木), the two
+    swept up toward their ends together (反り), the lower a little the
+    shorter; the beams lit along their tops and shaded under; snow along
+    the top in winter. Returns its defs, the gate, the gate without its
+    snow (for the water) and where its pillars stand (x left and right,
+    their width, the lintel's half-span and its top)."""
     lit, mid, shade, black = TORII_INK[hour]
     hp = 1.22 * a
     span = 0.92 * a
     lean = 0.035 * a
     dw = 0.085 * a
-    top = base - hp
+    top = base - hp             # the lower lintel's foot, at the middle
     xl, xr = x - span / 2, x + span / 2
-
-    def pillar(xb, inward):
-        xt = xb + inward * lean
-        return (f'<path d="M{f(xb - dw / 2)} {f(base)} L{f(xt - dw * 0.42)} {f(top)} L{f(xt + dw * 0.42)} {f(top)} '
-                f'L{f(xb + dw / 2)} {f(base)} Z" fill="url(#{uid}Pil)"></path>')
-    nuki_y = top + 0.26 * a
-    nuki = (f'<rect x="{f(xl - 0.16 * a)}" y="{f(nuki_y)}" width="{f(span + 0.32 * a)}" height="{f(0.065 * a)}" fill="{mid}"></rect>'
-            f'<rect x="{f(xl - 0.16 * a)}" y="{f(nuki_y + 0.05 * a)}" width="{f(span + 0.32 * a)}" height="{f(0.015 * a)}" fill="{shade}"></rect>')
-    strut = f'<rect x="{f(x - 0.05 * a)}" y="{f(top - 0.02 * a)}" width="{f(0.1 * a)}" height="{f(nuki_y - top + 0.02 * a)}" fill="{mid}"></rect>'
-    shim_y = top - 0.075 * a
-    shim = (f'<rect x="{f(xl - 0.2 * a)}" y="{f(shim_y)}" width="{f(span + 0.4 * a)}" height="{f(0.075 * a)}" fill="{lit}"></rect>'
-            f'<rect x="{f(xl - 0.2 * a)}" y="{f(shim_y + 0.055 * a)}" width="{f(span + 0.4 * a)}" height="{f(0.02 * a)}" fill="{shade}"></rect>')
-    kw = span / 2 + 0.36 * a
-    ky = shim_y - 0.012 * a
+    sh = 0.075 * a              # the lower lintel's depth
+    ky = top - sh               # where the two lintels meet, at the middle
+    kw = span / 2 + 0.36 * a    # the black lintel's half-span
     th = 0.085 * a
     rise = 0.11 * a
+    edge = 0.022 * a            # a beam's lit top and its shade under
 
     def sweep(lift):
         # the lintel's top or bottom edge, swept up toward its ends
         return (f'Q{f(x - kw * 0.55)} {f(ky - lift + 0.01 * a)} {f(x)} {f(ky - lift)} '
                 f'Q{f(x + kw * 0.55)} {f(ky - lift + 0.01 * a)} {f(x + kw)} {f(ky - rise - lift)}')
+
+    def at(X):
+        # the black lintel's foot over X: its curve's right half from the
+        # middle reaches x + kw (1.1 t - 0.1 t^2) at t, the left is the
+        # same turned. Returns t and the curve's y there, less ky (up is
+        # less than nought)
+        q = min(1.0, abs(X - x) / kw)
+        t = (1.1 - (1.21 - 0.4 * q) ** 0.5) / 0.2
+        return t, 2 * t * (1 - t) * 0.01 * a - t * t * rise
+    # the lower lintel runs under the black one's own curve, to ks each
+    # way: that curve cut where it reaches x + ks
+    ks = kw - 0.07 * a
+    t, ey = at(x + ks)
+    cx, cy = t * 0.55 * kw, t * 0.01 * a
+
+    def under(dy):
+        # the lower lintel's curve, dy below the black one's, end to end
+        return (f'M{f(x - ks)} {f(ky + ey + dy)} Q{f(x - cx)} {f(ky + cy + dy)} {f(x)} {f(ky + dy)} '
+                f'Q{f(x + cx)} {f(ky + cy + dy)} {f(x + ks)} {f(ky + ey + dy)}')
+    shim = (f'<path d="{under(0)} L{f(x + ks)} {f(ky + ey + sh)} Q{f(x + cx)} {f(ky + cy + sh)} {f(x)} {f(ky + sh)} '
+            f'Q{f(x - cx)} {f(ky + cy + sh)} {f(x - ks)} {f(ky + ey + sh)} Z" fill="{mid}"></path>'
+            f'<path d="{under(edge / 2)}" fill="none" stroke="{lit}" stroke-width="{f(edge)}"></path>'
+            f'<path d="{under(sh - edge / 2)}" fill="none" stroke="{shade}" stroke-width="{f(edge)}"></path>')
+
+    def pillar(xb, inward):
+        # up into the lower lintel, which covers its head; ringed under it
+        xt = xb + inward * lean
+        ring = ky + at(xt)[1] + sh - 0.004 * a
+        return (f'<path d="M{f(xb - dw / 2)} {f(base)} L{f(xt - dw * 0.42)} {f(ky)} L{f(xt + dw * 0.42)} {f(ky)} '
+                f'L{f(xb + dw / 2)} {f(base)} Z" fill="url(#{uid}Pil)"></path>'
+                f'<rect x="{f(xt - dw * 0.62)}" y="{f(ring)}" width="{f(dw * 1.24)}" height="{f(0.05 * a)}" fill="{shade}"></rect>')
+    nuki_y = top + 0.26 * a
+    nuki = f'<rect x="{f(xl - 0.16 * a)}" y="{f(nuki_y)}" width="{f(span + 0.32 * a)}" height="{f(0.065 * a)}" fill="url(#{uid}Beam)"></rect>'
+    strut = f'<rect x="{f(x - 0.05 * a)}" y="{f(top - 0.01 * a)}" width="{f(0.1 * a)}" height="{f(nuki_y - top + 0.01 * a)}" fill="url(#{uid}Pil)"></rect>'
+    pw, ph = 0.12 * a, 0.17 * a
+    plaque = (f'<rect x="{f(x - pw / 2)}" y="{f((top + nuki_y - ph) / 2)}" width="{f(pw)}" height="{f(ph)}" rx="{f(0.01 * a)}" '
+              f'fill="{black}" stroke="{lit}" stroke-width="{f(0.014 * a)}"></rect>')
     kasa = (f'<path d="M{f(x - kw)} {f(ky - rise)} {sweep(0)} L{f(x + kw + 0.02 * a)} {f(ky - rise - th)} '
             f'Q{f(x + kw * 0.55)} {f(ky - th - 0.01 * a)} {f(x)} {f(ky - th)} '
-            f'Q{f(x - kw * 0.55)} {f(ky - th - 0.01 * a)} {f(x - kw - 0.02 * a)} {f(ky - rise - th)} Z" fill="{black}"></path>')
-    under = (f'<path d="M{f(x - kw * 0.96)} {f(ky - rise * 0.8)} Q{f(x - kw * 0.55)} {f(ky + 0.01 * a)} {f(x)} {f(ky)} '
-             f'Q{f(x + kw * 0.55)} {f(ky + 0.01 * a)} {f(x + kw * 0.96)} {f(ky - rise * 0.8)}" fill="none" stroke="{lit}" stroke-width="{f(0.03 * a)}"></path>')
+            f'Q{f(x - kw * 0.55)} {f(ky - th - 0.01 * a)} {f(x - kw - 0.02 * a)} {f(ky - rise - th)} Z" fill="{black}"></path>'
+            # the sky's light along its top
+            f'<path d="M{f(x - kw * 0.98)} {f(ky - rise * 0.96 - th + edge / 2)} Q{f(x - kw * 0.55)} {f(ky - th - 0.01 * a + edge / 2)} '
+            f'{f(x)} {f(ky - th + edge / 2)} Q{f(x + kw * 0.55)} {f(ky - th - 0.01 * a + edge / 2)} {f(x + kw * 0.98)} '
+            f'{f(ky - rise * 0.96 - th + edge / 2)}" fill="none" stroke="{mix(black, "#ffffff", 0.2)}" stroke-width="{f(edge)}"></path>')
     cap = ''
     if o.get('crowns') == 'snow':
         cap = (f'<path d="M{f(x - kw)} {f(ky - rise - th)} Q{f(x - kw * 0.55)} {f(ky - th - 0.01 * a)} {f(x)} {f(ky - th)} '
@@ -270,8 +325,11 @@ def torii(x, base, a, hour, o, uid):
                f'Q{f(x - kw * 0.5)} {f(ky - th - 0.06 * a)} {f(x - kw)} {f(ky - rise - th)} Z" fill="{o["cap"]}"></path>')
     defs = (f'<linearGradient id="{uid}Pil" x1="0" y1="0" x2="1" y2="0">'
             f'<stop offset="0" stop-color="{shade}"></stop><stop offset="0.35" stop-color="{lit}"></stop>'
-            f'<stop offset="0.7" stop-color="{mid}"></stop><stop offset="1" stop-color="{shade}"></stop></linearGradient>')
-    body = f'{pillar(xl, 1)}{pillar(xr, -1)}{nuki}{strut}{shim}{kasa}{under}'
+            f'<stop offset="0.7" stop-color="{mid}"></stop><stop offset="1" stop-color="{shade}"></stop></linearGradient>'
+            f'<linearGradient id="{uid}Beam" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="{lit}"></stop><stop offset="0.45" stop-color="{mid}"></stop>'
+            f'<stop offset="1" stop-color="{shade}"></stop></linearGradient>')
+    body = f'{pillar(xl, 1)}{pillar(xr, -1)}{nuki}{strut}{plaque}{shim}{kasa}'
     return defs, body + cap, body, (xl, xr, dw, kw, ky - rise - th)
 
 
@@ -319,7 +377,7 @@ REEDS = {'lake': [(14, 60), (96, 178), (226, 300), (330, 400)], 'torii': [(-6, 4
 def lake(season, hour, variant=None, gate=False):
     """One print of the lake (or of the gate): its four layers, the
     train's run, and the rows the train layer takes (None: no line)."""
-    L = LAKE
+    L = GATE_LAKE if gate else LAKE
     kind = 'torii' if gate else 'lake'
     sky = common.sky(L, season, hour, variant)
     with common.inside(season, hour, variant) as c, common.fore(TORII_FORE if gate else LAKE_FORE), \
@@ -358,15 +416,15 @@ def lake(season, hour, variant=None, gate=False):
         if not gate:
             # the tree leans in from the left, over the water, and the wind
             # carries what falls off it the other way
-            tree = common.turned(tree, TREE_FOOT, LAKE_FORE['foot'][:2], 0.9)
+            tree = common.turned(tree, TREE_FOOT, LAKE_FORE['foot'][:2], TREE_K.get(o.get('tree'), 0.9))
             falls = f'<g transform="matrix(-1 0 0 1 {L.W} 0)">{falls}</g>'
+        meadow = flora.fore_back(L, h, o, hour, gust, UID)
         front = (shore(L, h, UID)
                  + reeds(L, h, o, hour, REEDS[kind], 851)
-                 + flora.fore_back(L, h, o, hour, gust, UID)
+                 + (meadow if gate else afloat(meadow))
                  + tree
                  + flora.bank(L, h, o, hour, gust, anim)
                  + flora.fore_front(L, h, o, hour, gust, UID)
                  + falls
                  + air.fireflies(L, h, o, hour, 'near'))
     return dict(layers=(sky, back, train, front), run=run, band=band, L=L)
-

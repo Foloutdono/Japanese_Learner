@@ -11,10 +11,13 @@ import { PRINTS_REV, SCENERIES } from '../carousel/sceneries.js'
 // one revision on disk, the build's; a folder only for a scenery the
 // carousel names; each with its meta (the frame, the app's own look of
 // each of the year's prints) and its seventeen prints in the app's
-// shape; every id in the print's namespace and every reference found;
-// every class one index.css already rules; no opacity of its own on a
-// moving part; no <defs> inside another (the loader gathers each
-// layer's with a non-greedy match); and a scenery's weight bounded.
+// shape; every id in the print's namespace, and every reference found
+// in the image the loader makes of its layer (the layer and every
+// layer's <defs>); every class one index.css already rules; no opacity
+// of its own on a moving part; no <defs> inside another (the loader
+// gathers them with a non-greedy match); the train whole in the image
+// the loader draws it in and inside its band; and a scenery's weight
+// bounded.
 
 const APP = JSON.parse(readFileSync(new URL('./components/station/print/print.json', import.meta.url), 'utf8'))
 // the year's prints, as the app's: the summer's -b myrtle is the app's alone
@@ -27,10 +30,20 @@ const CSS = readFileSync(new URL('./index.css', import.meta.url), 'utf8')
 const BUDGET = 12_000_000
 const FRAME = { w: 390, h: 746, cx: 195, cy: 150, disc: 24 }
 
+// the train as small_train lays it (scripts/sceneries/common.py): placed
+// and scaled, then train8's own start a little off the print's edge
+// (CLEAR); in train8's drawing its wheels 99.6 down and nothing of it
+// more than 19.6 above them
+const TRAIN = /<g id="(tpr-\w+Train)" transform="translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+)\)"><g transform="translate\((-?[\d.]+) 0\)">/
+const WHEELS = 99.6
+const TALL = 19.6
+const CLEAR = 20
+
 const folders = existsSync(HERE) ? readdirSync(HERE).filter(name => statSync(new URL(name, HERE)).isDirectory()).sort() : []
 const read = (scenery, file) => readFileSync(new URL(`${scenery}/${file}`, HERE), 'utf8')
 const prints = scenery => NAMES.map(name => [name, JSON.parse(read(scenery, `${name}.json`))])
 const markup = doc => Object.values(doc.layers).join('')
+const idsIn = svg => [...svg.matchAll(/\bid="([^"]+)"/g)].map(m => m[1])
 
 describe('the sceneries on disk (plan 309)', () => {
   it('are at the revision build.py writes, and no other', () => {
@@ -83,17 +96,55 @@ describe('the sceneries on disk (plan 309)', () => {
     }
   })
 
-  it('find every reference inside a print, and name nothing outside its own namespace', () => {
+  it('find every reference in the image the loader makes of its layer, and name nothing outside the print’s namespace', () => {
     for (const scenery of folders) {
       for (const [name, doc] of prints(scenery)) {
-        const text = markup(doc)
-        const ids = [...text.matchAll(/\bid="([^"]+)"/g)].map(m => m[1])
+        const ids = idsIn(markup(doc))
         expect(new Set(ids).size, `${scenery}/${name}: an id twice`).toBe(ids.length)
         for (const id of ids) expect(id).toMatch(/^tpr-/)
-        const known = new Set(ids)
-        for (const m of text.matchAll(/url\(#([^)]+)\)|href="#([^"]+)"/g)) {
-          const ref = m[1] ?? m[2]
-          expect(known.has(ref), `${scenery}/${name}: #${ref} holds nothing`).toBe(true)
+        // app.loadPrint draws each layer as its own image, carrying every
+        // layer's <defs>: a body drawn in one layer is nothing in another
+        const shared = Object.values(doc.layers).flatMap(l => (l.match(/<defs>[\s\S]*?<\/defs>/g) || []).flatMap(idsIn))
+        for (const [layer, svg] of Object.entries(doc.layers)) {
+          const known = new Set([...shared, ...idsIn(svg)])
+          for (const m of svg.matchAll(/url\(#([^)]+)\)|href="#([^"]+)"/g)) {
+            const ref = m[1] ?? m[2]
+            expect(known.has(ref), `${scenery}/${name}: its ${layer} points at #${ref}, which its image will not hold`).toBe(true)
+          }
+        }
+      }
+    }
+  })
+
+  it('lay each train whole in the image the loader draws it in, off the print at both ends of its run, and inside its band', () => {
+    for (const scenery of folders) {
+      const band = JSON.parse(read(scenery, 'meta.json')).frame.trainBand
+      for (const [name, doc] of prints(scenery)) {
+        const at = `${scenery}/${name}`
+        const layer = doc.layers.train
+        if (!layer) {
+          expect(band, `${at}: a trainBand over an empty train layer`).toBeNull()
+          continue
+        }
+        const m = TRAIN.exec(layer)
+        expect(m, `${at}: a train small_train did not lay`).not.toBeNull()
+        expect(band, `${at}: a train with no trainBand`).not.toBeNull()
+        const [tx, ty, k, start] = m.slice(2).map(Number)
+        const nose = tx - CLEAR * k
+        const tail = tx + k * start
+        const travel = (doc.train.run / 100) * doc.w
+        // the layer's image spans a print's width either side of the frame
+        expect(tail, `${at}: the train's tail past the image's left edge`).toBeGreaterThanOrEqual(-doc.w)
+        expect(nose, `${at}: the train on the print as its run begins`).toBeLessThanOrEqual(0)
+        expect(tail + travel, `${at}: the train still on the print as its run ends`).toBeGreaterThanOrEqual(doc.w)
+        const wheels = ty + k * WHEELS
+        const rows = [[wheels - k * TALL, wheels]]
+        for (const r of layer.matchAll(new RegExp(`<use href="#${m[1]}" transform="matrix\\(1 0 0 -1 0 (-?[\\d.]+)\\)">`, 'g'))) {
+          rows.push([Number(r[1]) - wheels, Number(r[1]) - wheels + k * TALL])
+        }
+        for (const [y0, y1] of rows) {
+          expect(y0, `${at}: the train above its band`).toBeGreaterThanOrEqual(band[0])
+          expect(y1, `${at}: the train below its band`).toBeLessThanOrEqual(band[1])
         }
       }
     }

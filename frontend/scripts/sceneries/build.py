@@ -83,7 +83,11 @@ def main():
         t0 = time.time()
         files, seen = draw(scenery)
         if files is None:
-            print(f'{scenery}: not drawn yet')
+            # a folder its module no longer (or not yet) draws is not this
+            # build's: nothing would hold it to the rules or rebuild it
+            stale = check.committed(REV, scenery) is not None
+            print(f'{scenery}: not drawn yet' + ('; but its folder is on disk' if stale else ''))
+            bad += stale
             continue
         problems = check.rules(files)
         if args.check:

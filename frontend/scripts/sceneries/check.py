@@ -3,12 +3,18 @@ by src/todayPrint.test.js and as src/carouselPrints.test.js holds them:
 
 - each print in the app's shape: its revision and name, the phone's
   frame, the train's run and its time, the four layers in order;
-- every id in the print's namespace (tpr-), once, and every reference
-  inside it finding its id; no <defs> inside another (the carousel's
-  loader gathers each layer's <defs> with a non-greedy match, which a
-  nested one would cut short);
+- every id in the print's namespace (tpr-), once; every reference found
+  in the image the carousel's loader makes of its layer, which is that
+  layer and every layer's <defs> (app.loadPrint), so a part drawn in one
+  layer cannot be placed again from another; no <defs> inside another
+  (the loader gathers them with a non-greedy match, which a nested one
+  would cut short);
 - every class the app's own, with its one-line rule in index.css (no new
   class), and no opacity attribute on a moving part;
+- the train small_train laid, read back from its layer: whole inside the
+  image the loader draws it in (a print's width either side), off the
+  left as its run begins and off the right as it ends, its rows and its
+  reflection's inside the meta's trainBand; no band without a train;
 - the meta: the generator's revision, the frame, the year's seventeen
   prints each with the app's own look;
 - at most 12 MB a scenery;
@@ -29,6 +35,15 @@ import common  # noqa: E402
 
 BUDGET = 12_000_000
 CSS = os.path.join(common.FRONTEND, 'src', 'index.css')
+ID = re.compile(r'\bid="([^"]+)"')
+REF = re.compile(r'url\(#([^)]+)\)|href="#([^"]+)"')
+# the loader's own match for what every layer's image carries
+DEFS = re.compile(r'<defs>[\s\S]*?</defs>')
+NUM = r'(-?\d+(?:\.\d+)?)'
+# the train as small_train lays it: placed and scaled, then train8's own
+# start off the edge; and its reflection, the same train turned over
+TRAIN = re.compile(rf'<g id="(tpr-\w+Train)" transform="translate\({NUM} {NUM}\) scale\({NUM}\)">'
+                   rf'<g transform="translate\({NUM} 0\)">')
 
 
 def _css():
@@ -45,6 +60,19 @@ def nested_defs(markup):
     return worst - 1 if worst else 0
 
 
+def unresolved(layers):
+    """Each layer's references its image will not hold: the image is the
+    layer itself and every layer's <defs>, as app.loadPrint makes it."""
+    shared = {i for markup in layers.values() for block in DEFS.findall(markup) for i in ID.findall(block)}
+    out = {}
+    for layer, markup in layers.items():
+        have = shared | set(ID.findall(markup))
+        missing = {m.group(1) or m.group(2) for m in REF.finditer(markup)} - have
+        if missing:
+            out[layer] = sorted(missing)
+    return out
+
+
 def print_problems(name, doc, css):
     out = []
     want = {'print': name, 'device': 'phone', 'w': 390, 'h': 746}
@@ -59,17 +87,15 @@ def print_problems(name, doc, css):
     if list(layers) != ['sky', 'back', 'train', 'front']:
         return out + [f'{name}: layers {list(layers)}']
     text = ''.join(layers.values())
-    ids = re.findall(r'\bid="([^"]+)"', text)
+    ids = ID.findall(text)
     if len(set(ids)) != len(ids):
         twice = sorted({i for i in ids if ids.count(i) > 1})
         out.append(f'{name}: an id twice: {", ".join(twice[:5])}')
     stray = [i for i in ids if not i.startswith('tpr-')]
     if stray:
         out.append(f'{name}: ids outside tpr-: {", ".join(stray[:5])}')
-    known = set(ids)
-    refs = {m.group(1) or m.group(2) for m in re.finditer(r'url\(#([^)]+)\)|href="#([^"]+)"', text)}
-    if refs - known:
-        out.append(f'{name}: references nothing holds: {", ".join(sorted(refs - known)[:5])}')
+    for layer, missing in unresolved(layers).items():
+        out.append(f'{name}: its {layer} points at what its image will not hold: {", ".join(missing[:5])}')
     classes = {c for m in re.finditer(r'class="([^"]+)"', text) for c in m.group(1).split()}
     for c in sorted(classes):
         if not c.startswith('tpr-') or not re.search(r'\.' + re.escape(c) + r'(?![\w-])', css):
@@ -81,6 +107,43 @@ def print_problems(name, doc, css):
     for layer, markup in layers.items():
         if nested_defs(markup):
             out.append(f'{name}: a <defs> inside another in its {layer}')
+    return out
+
+
+def train_problems(name, doc, band):
+    """The train small_train laid, read back from the train layer: where
+    its nose and tail stand in the layer (the run's start), where the run
+    takes them, and the rows it and its reflection take."""
+    W = doc.get('w', 390)
+    layer = (doc.get('layers') or {}).get('train', '')
+    run = (doc.get('train') or {}).get('run', 0)
+    m = TRAIN.search(layer)
+    if not m:
+        if not layer and band is None:
+            return []
+        if not layer:
+            return [f'{name}: a trainBand {band} over an empty train layer']
+        return [f'{name}: a train layer small_train did not lay: its train cannot be read back']
+    gid, tx, ty, k, start = m.group(1), *(float(v) for v in m.groups()[1:])
+    if band is None:
+        return [f'{name}: a train with no trainBand to run in']
+    out = []
+    nose, tail = tx - common.TRAIN_CLEAR * k, tx + k * start
+    travel = run / 100 * W
+    if tail < -W:
+        out.append(f'{name}: the train\'s tail lies at {tail:.1f}, past the left edge of the image it is drawn in (-{W}): '
+                   f'{-W - tail:.1f} units of it are never drawn')
+    if nose > 0:
+        out.append(f'{name}: the train\'s nose is on the print ({nose:.1f}) as its run begins')
+    if tail + travel < W:
+        out.append(f'{name}: the train\'s tail is still on the print ({tail + travel:.1f}) as its run ends')
+    wheels = ty + k * common.TRAIN_WHEELS
+    rows = [(wheels - k * common.TRAIN_TALL, wheels)]
+    for y in re.findall(rf'<use href="#{gid}" transform="matrix\(1 0 0 -1 0 {NUM}\)">', layer):
+        rows.append((float(y) - wheels, float(y) - wheels + k * common.TRAIN_TALL))
+    for y0, y1 in rows:
+        if y0 < band[0] or y1 > band[1]:
+            out.append(f'{name}: the train takes rows {y0:.1f}-{y1:.1f}, outside its trainBand {band}')
     return out
 
 
@@ -123,12 +186,14 @@ def rules(files, rev=None):
     meta = json.loads(files['meta.json']) if 'meta.json' in files else {}
     rev = rev if rev is not None else meta.get('rev')
     out += meta_problems(rev, meta)
+    band = (meta.get('frame') or {}).get('trainBand')
     for name in names:
         if f'{name}.json' in files:
             doc = json.loads(files[f'{name}.json'])
             if doc.get('rev') != rev:
                 out.append(f'{name}: rev {doc.get("rev")!r}, not {rev}')
             out += print_problems(name, doc, css)
+            out += train_problems(name, doc, band)
     total = sum(len(t.encode('utf-8')) for t in files.values())
     if total > BUDGET:
         out.append(f'{total / 1e6:.1f} MB, over the {BUDGET / 1e6:.0f} MB a scenery may weigh')
@@ -172,7 +237,7 @@ def main():
         problems = rules(files, build.REV)
         if args.check:
             fresh, _ = build.draw(scenery)
-            problems += same(build.REV, scenery, fresh) if fresh else ['not drawn by its module, but on disk']
+            problems += same(build.REV, scenery, fresh) if fresh else ['on disk, but its module draws nothing yet']
         total = sum(len(t.encode('utf-8')) for t in files.values())
         print(f'{scenery}: {len(files) - 1} prints, {total / 1e6:.2f} MB, {len(problems)} problem(s)')
         for p in problems:
