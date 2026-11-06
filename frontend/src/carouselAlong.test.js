@@ -8,9 +8,11 @@ import { readFileSync } from 'node:fs'
 import { FORMATS, FS, SP, alpha, palette } from '../carousel/draw.js'
 import { PRINT_HOURS, printOf } from '../carousel/app.js'
 import { backdrop, discAt, discDrawn, liftAt } from '../carousel/backdrop.js'
-import { CH, CTA, FADED, RISEN, alongBox, alongPanel, bandOf, challengePlan, challengeTimeline, chipShown, drawChallenge, hookBand, inksOf, lookOf, raisedGlow } from '../carousel/challenge.js'
+import { CH, CTA, CUT, FADED, RISEN, alongBox, alongPanel, bandOf, challengePlan, challengeTimeline, chipShown, cutOf, drawChallenge, hookBand, hookWords, inksOf, lookOf, raisedGlow } from '../carousel/challenge.js'
+import { coverBox, drawSlip } from '../carousel/cover.js'
 import { PRINTS_REV, SCENERIES, sceneryOf } from '../carousel/sceneries.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
+import { BEFORE_309 } from '../carousel/tune.js'
 
 // With no print in the lane the wash always lies whole: a test may say
 // how much of it the backdrop has laid (the moment after a cover), and
@@ -127,6 +129,37 @@ const standIn = (scenery, name) => printFor(scenery, name, sceneryOf(scenery).so
  *  its season at its hour (winter's where the season is the date's), or
  *  the maker's photo. */
 const printUnder = plan => (plan.photo ? { photo: { width: 1080, height: 1920 }, look: plan.photo.look } : standIn(plan.scenery, printOf(plan.season ?? 'winter', plan.hour)))
+// What lays ink on a frame, as against what only asks it (a measure, a save).
+const INKS = new Set(['fillText', 'strokeText', 'fill', 'stroke', 'fillRect', 'strokeRect', 'clearRect', 'drawImage'])
+/** drawn(), keeping every call that lays ink, in order, with what it is
+ *  drawn in (its fill, stroke, strength, face and place): the stub's
+ *  pixels, two frames alike only where every one of them is. */
+function recorded() {
+  const { ctx: base, at } = drawn()
+  const calls = []
+  const round = v => (typeof v === 'number' ? +v.toFixed(4) : typeof v === 'string' ? v : typeof v)
+  const ctx = new Proxy(base, {
+    get: (o, k) => {
+      const v = o[k]
+      if (typeof v !== 'function' || !INKS.has(k)) return v
+      return (...args) => {
+        // A face draws only text: what a measure left set is no ink of a shape's.
+        calls.push({ op: k, args: args.map(round), fill: round(o.fillStyle), stroke: round(o.strokeStyle), alpha: o.globalAlpha, font: /Text$/.test(k) ? o.font : null, at: [o.tx, o.ty] })
+        return v(...args)
+      }
+    },
+    set: (o, k, v) => { o[k] = v; return true },
+  })
+  return { ctx, at, calls }
+}
+/** Whether a text drawn on a frame is the slip's (cover.js, drawSlip): one
+ *  of the words it lays, where it lays them, for the plan's hook words. */
+function slipOf(plan) {
+  const { ctx, at } = drawn()
+  drawSlip(ctx, hookWords(plan, challengeTimeline(plan)))
+  const keys = new Set(at.map(x => `${x.t}|${x.left.toFixed(3)}|${x.y.toFixed(3)}`))
+  return x => keys.has(`${x.t}|${x.left.toFixed(3)}|${x.y.toFixed(3)}`)
+}
 /** drawn(), keeping every shape filled and in what (a panel, a chip). */
 function filled() {
   const { ctx: base, at } = drawn()
@@ -310,6 +343,39 @@ describe('the words over the print (plan 309)', () => {
     expect(s.credit).toMatchObject({ alpha: 1, y: alongBox(off).credit })
   }))
 
+  it('lights each word read along as it is said whichever plan of the text draws it: two plans alike, one frame (plan 247)', () => withPath2D(() => {
+    // The studio makes a plan per setting, each with rows of its own
+    // (common.js, unpack), and a sentence is laid out once, for the plan
+    // drawn first: a word is found by its place in its sentence, never by
+    // the row the layout kept, which a later plan does not hold.
+    const make = () => challengePlan(bank, 'n5-12', { style: 'along', tune: BEFORE_309 })
+    const first = make()
+    const tl = challengeTimeline(first)
+    const GOLD = '#e6bd62'
+    for (const i of [0, 2, 5]) {
+      const line = tl.lines[i]
+      // Halfway through the sentence: some of its words said, one being said, the rest to come.
+      const t = line.voice + line.dur / 2
+      const frameOf = pl => {
+        const r = recorded()
+        drawChallenge(r.ctx, pl, tl, t, null)
+        return r
+      }
+      const a = frameOf(first)
+      const b = frameOf(make())
+      expect(b.calls, `sentence ${i + 1}`).toEqual(a.calls)
+      for (const [name, r] of [['first', a], ['second', b]]) {
+        const where = `sentence ${i + 1}, the ${name} plan`
+        // One word underlined, the one being said; words said in gold, the rest still light.
+        const rule = r.calls.filter(c => c.op === 'fill' && !c.args.length && c.fill === GOLD)
+        expect(rule, where).toHaveLength(1)
+        const inks = r.calls.filter(c => c.op === 'fillText' && jp(c.args[0])).map(c => c.fill)
+        expect(inks, where).toContain(GOLD)
+        expect(inks, where).toContain('#f3ecdf')
+      }
+    }
+  }))
+
   it('lays a band of night behind the read-along’s hook, only where no cover stands', () => withPath2D(() => {
     const plan = (tune, extra = {}) => challengePlan(bank, 'n5-12', { style: 'along', tune, ...extra })
     expect(hookBand(plan({ 'challenge.along': 1, 'challenge.cover': 0 }))).toBe(true)
@@ -452,6 +518,76 @@ describe('the words over the print (plan 309)', () => {
     }
   }))
 
+  it('stands the read-along’s foot on a night of its own, eased in long and out longer; the track firmer, the question and the way to the app darker (plan 309)', () => withPath2D(() => {
+    // The countdown and its line, the hidden answer's two lines and the
+    // stops on the way to the app stand where the print's darkening has
+    // run out (1.0:1 over the snow, today's look as much as the new).
+    const plan = along => challengePlan(bank, 'n5-12', { style: 'along', tune: { ...BEFORE_309, 'challenge.along': along } })
+    const tl = challengeTimeline(plan(1))
+    const seg = k => tl.segs.find(s => s.key === k)
+    // Each moment, and the words that stand at its foot then.
+    const moments = [
+      ['question', seg('question').start + 2.5, x => /^\d$/.test(x.t) || x.t === 'Answer in the comments'],
+      ['answer', seg('answer').start + 2, x => /^A, B, C or D\?$|^Write your answer/.test(x.t)],
+      ['cta', seg('cta').start + 3, x => /^(Read|\d+ questions|Breakdown)$/.test(x.t)],
+    ]
+    for (const [name, t, foot] of moments) {
+      for (const along of [1, 0]) {
+        const pl = plan(along)
+        const r = painted()
+        drawChallenge(r.ctx, pl, tl, t, null)
+        const where = `${name} along ${along}`
+        // The gradients laid below the backdrop's own (that one from the frame's top).
+        const bands = r.rects.filter(x => r.grads.includes(x.style) && x.r[1] > 0)
+        // The backdrop's darkening: the question's as dark as the way to the
+        // app's was (0.62), the way to the app's a little darker (0.68).
+        const dark = r.grads.find(g => g.line[1] === 0 && g.line[3] > 1000)
+        expect(rgbaOf(dark.stops[0][1])[3], where).toBe(along ? (name === 'cta' ? 0.68 : 0.62) : (name === 'cta' ? 0.62 : 0.5))
+        if (!along) {
+          expect(bands, where).toEqual([])
+          continue
+        }
+        expect(bands, where).toHaveLength(1)
+        const [{ r: [x, top, w, h], style }] = bands
+        // Across the frame, its night the day's panel's, none at either end.
+        expect([x, w], where).toEqual([0, FORMATS.story.w])
+        expect(style.line, where).toEqual([0, top, 0, top + h])
+        const stops = [...style.stops].sort((p, q) => p[0] - q[0]).map(([s, c]) => [s, ...rgbaOf(c)])
+        for (const [, R, G, B] of stops) expect([R, G, B], where).toEqual([12, 10, 22])
+        expect([stops[0][4], stops.at(-1)[4]], where).toEqual([0, 0])
+        expect(Math.max(...stops.map(s => s[4])), where).toBe(0.76)
+        // Whole from 150 px under its top to 220 px over its foot, eased either way.
+        const whole = stops.filter(s => s[4] === 0.76)
+        expect(whole[0][0] * h, where).toBeCloseTo(150, 6)
+        expect((1 - whole.at(-1)[0]) * h, where).toBeCloseTo(220, 6)
+        const up = stops.filter(s => s[0] <= whole[0][0]).map(s => s[4])
+        expect(up, where).toEqual([...up].sort((p, q) => p - q))
+        expect(up, where).toHaveLength(9)
+        // What stands at the foot, every word of it on the whole night.
+        const words = r.at.filter(foot)
+        expect(words.length, where).toBeGreaterThanOrEqual(name === 'cta' ? 3 : 2)
+        for (const x of words) {
+          expect(x.y - x.size * 0.85, `${where} ${x.t}`).toBeGreaterThanOrEqual(top + 150)
+          expect(x.y + x.size * 0.25, `${where} ${x.t}`).toBeLessThanOrEqual(top + h - 220)
+        }
+      }
+    }
+    // The countdown's track: light at 30% on its night, 22% as it was.
+    for (const along of [1, 0]) {
+      const r = recorded()
+      drawChallenge(r.ctx, plan(along), tl, seg('question').start + 2.5, null)
+      const track = r.calls.find(c => c.op === 'stroke' && c.stroke.startsWith('rgba(243,236,223,'))
+      expect(rgbaOf(track.stroke)[3], `along ${along}`).toBe(along ? 0.3 : 0.22)
+    }
+    // The answers' panels as dark as the read-along's panel at the hour, as they were (0.62) off.
+    for (const [along, hour, a] of [[1, 'day', 0.76], [1, 'dusk', 0.7], [0, 'day', 0.62]]) {
+      const pl = challengePlan(bank, 'n5-12', { style: 'along', hour, tune: { ...BEFORE_309, 'challenge.along': along } })
+      const r = filled()
+      drawChallenge(r.ctx, pl, tl, seg('question').start + 2.5, null)
+      expect(r.fills.filter(f => /^rgba\(16,14,19,/.test(f)), `${along} ${hour}`).toEqual(Array(4).fill(`rgba(16,14,19,${a})`))
+    }
+  }))
+
   it('reads what the words stand on off the print drawn, not the plan: the chip, the hook’s band, the panel (plan 309)', () => withPath2D(() => {
     // The date's season, at night: the plan cannot say which print it
     // stands on, only the print drawn can (a moon, August's fireworks,
@@ -489,6 +625,27 @@ describe('the words over the print (plan 309)', () => {
     for (const P of [moon, haze]) expect(panel(P), P.name).toEqual(['rgba(16,14,19,0.72)'])
   }))
 
+  it('holds the chip for the print drawn, not the scenery asked: the bay standing in for the long view, its moon rising (plan 309)', () => withPath2D(() => {
+    // Where a scenery's prints fail the studio stands the bay in (app.js,
+    // standInOpts): the plan still says the long view, never raised and
+    // with no disc of its own, but the print drawn is the bay's, raised
+    // by its own scenery (backdrop.js) and its moon rising through the
+    // chip's place. The chip waits for it as over the bay asked.
+    const moon = standIn('bay', 'winter-night')
+    const tune = { ...BEFORE_309, 'challenge.disc': 1, 'challenge.lift': 1 }
+    for (const style of ['scroll', 'along']) {
+      const wide = challengePlan(bank, 'n5-12', { style, hour: 'night', season: 'winter', scenery: 'wide', tune })
+      const bay = challengePlan(bank, 'n5-12', { style, hour: 'night', season: 'winter', tune })
+      expect(wide.scenery, style).toBe('wide')
+      expect(chipShown(wide, 1, moon), style).toBe(0)
+      for (const into of [0, 0.5, 1, 1.5, RISEN + 0.1, RISEN + 0.3]) expect(chipShown(wide, into, moon), `${style} ${into}`).toBe(chipShown(bay, into, moon))
+      expect(chipShown(wide, RISEN + 0.31, moon), style).toBe(1)
+      // Drawn so: no counter a second into the reading.
+      const rd = challengeTimeline(wide).segs.find(s => s.key === 'reading')
+      expect(draw(wide, rd.start + 1, moon).find(x => / \/ \d+$/.test(x.t))?.alpha ?? 0, style).toBe(0)
+    }
+  }))
+
   it('draws the sun or moon by backdrop.js’s one rule, the answer the words read, on every print of every scenery', () => withCanvases(() => {
     // Every print a challenge may stand on, as loadPrint gives it.
     const prints = []
@@ -506,7 +663,7 @@ describe('the words over the print (plan 309)', () => {
     const none = []
     for (const P of prints) {
       const { hour } = P
-      for (const tune of [{ 'challenge.disc': 1 }, { 'challenge.disc': 0 }]) {
+      for (const tune of [{ ...BEFORE_309, 'challenge.disc': 1 }, { ...BEFORE_309, 'challenge.disc': 0 }]) {
         const plan = challengePlan(bank, 'n5-12', { style: 'scroll', hour, scenery: P.scenery, tune })
         const tl = challengeTimeline(plan)
         // Under the hook, where the sun or moon always shows when it is drawn:
@@ -531,7 +688,7 @@ describe('the words over the print (plan 309)', () => {
     expect(none.sort()).toEqual(['bay spring-night', 'bay summer-hanabi', 'bay summer-hanabi-b', ...own.map(id => `${id} summer-hanabi`), ...wide].sort())
   }))
 
-  it('keeps half the masthead’s glow read along over the print raised, by day, come in with the lift; none at night or over a print left down', () => withPath2D(() => {
+  it('keeps half the masthead’s glow read along over the print raised, by day, come in with the lift; at night the whole glow while it rises; none over a print left down', () => withPath2D(() => {
     const masts = (pl, t) => draw(pl, t).filter(x => x.t === 'TSUJI').map(x => x.alpha)
     const plan = (tune, extra = {}) => challengePlan(bank, 'n5-12', { style: 'along', tune: { 'challenge.along': 1, 'challenge.lift': 1, 'challenge.cover': 0, ...tune }, ...extra })
     const pl = plan({})
@@ -563,9 +720,20 @@ describe('the words over the print (plan 309)', () => {
       was = g
     }
     expect(was).toBe(0.5)
-    // At dawn and dusk too; at night the sky needs none.
+    // At dawn and dusk too; at night the sky needs none once raised, but
+    // while it rises its stars pass behind the masthead: the whole glow
+    // then, in and out with the rise.
     for (const hour of ['dawn', 'dusk']) expect(masts(plan({}, { hour }), rd.start + 30), hour).toEqual([0.5, 0.5, 1])
-    for (const season of ['winter', 'hanabi']) for (const t of later) expect(masts(plan({}, { hour: 'night', season }), t), `${season} ${t}`).toEqual([1])
+    for (const season of ['winter', 'hanabi']) {
+      const night = plan({}, { hour: 'night', season })
+      for (const t of later) expect(masts(night, t), `${season} ${t}`).toEqual([1])
+      expect(masts(night, rd.start + 0.8), season).toEqual([1, 1, 1])
+      for (const into of [0.2, 0.5, 1.1, 1.4]) {
+        const [g, again, ink] = masts(night, rd.start + into)
+        expect(g, `${season} ${into}`).toBeCloseTo(Math.sin(Math.PI * liftAt('reading', into, 1)), 9)
+        expect([again, ink], `${season} ${into}`).toEqual([g, 1])
+      }
+    }
     // Over a print left down, none: the lift off, the long view, a photo; nor over the scroll's paper.
     for (const t of later) {
       expect(masts(plan({ 'challenge.lift': 0 }), t), `${t}`).toEqual([1])
@@ -579,12 +747,15 @@ describe('the words over the print (plan 309)', () => {
   }))
 
   it('lets the scroll’s text and its counter wait for the paper after a cover, as they always came without one', () => withPath2D(() => {
-    const plan = cover => challengePlan(bank, 'n4-01', { style: 'scroll', tune: { 'challenge.cover': cover } })
+    const plan = cover => challengePlan(bank, 'n4-01', { style: 'scroll', tune: { ...BEFORE_309, 'challenge.cover': cover } })
     const start = challengeTimeline(plan(0)).segs.find(s => s.key === 'reading').start
     const seen = (cover, t) => {
-      const at = draw(plan(cover), start + t)
+      const pl = plan(cover)
+      const at = draw(pl, start + t)
+      // The text's own words, not the slip's leaving over the cut (its title is in Japanese too).
+      const slip = slipOf(pl)
       // A counter not drawn at all is none of it.
-      return { text: Math.max(0, ...at.filter(x => jp(x.t)).map(x => x.alpha)), counter: at.find(x => / \/ \d+$/.test(x.t))?.alpha ?? 0 }
+      return { text: Math.max(0, ...at.filter(x => jp(x.t) && !slip(x)).map(x => x.alpha)), counter: at.find(x => / \/ \d+$/.test(x.t))?.alpha ?? 0 }
     }
     // Without a cover: the text fading in from the reading's first frame, its counter there whole.
     expect(seen(0, 0.3).text).toBeGreaterThan(0.8)
@@ -597,9 +768,81 @@ describe('the words over the print (plan 309)', () => {
     expect(seen(1, CH.into + 3)).toEqual({ text: 1, counter: 1 })
   }))
 
+  it('cross-fades the cut after a cover: words at half their ink or more at every frame, nothing gone or come in a frame, the words only on a ground they read on (plan 309)', () => withPath2D(() => {
+    const NEW = { ...BEFORE_309, 'challenge.ruby': 0.9, 'challenge.halo': 1, 'challenge.read': 0.75, 'challenge.cover': 1, 'challenge.lift': 1, 'challenge.disc': 1, 'challenge.night': 1, 'challenge.train': 1, 'challenge.falls': 1, 'challenge.bursts': 1, 'challenge.along': 1 }
+    const PANEL = /^rgba\(16,14,19,0\.\d+\)$/
+    for (const style of ['scroll', 'along']) {
+      for (const [name, tune] of [['the cover alone', { ...BEFORE_309, 'challenge.cover': 1 }], ['every dial', NEW]]) {
+        const pl = challengePlan(bank, 'n5-12', { style, tune })
+        const tl = challengeTimeline(pl)
+        const cut = tl.segs.find(s => s.key === 'reading').start
+        const slip = slipOf(pl)
+        const box = coverBox(drawn().ctx, pl, hookWords(pl, tl))
+        const under = x => x.y > box.y && x.y < box.y + box.h
+        const frames = []
+        // Every frame at sixty a second from a little before the cut to a second after it.
+        for (let f = Math.round((cut - 0.2) * 60); f <= Math.round((cut + 1) * 60); f++) {
+          const t = f / 60
+          const r = recorded()
+          drawChallenge(r.ctx, pl, tl, t, null)
+          const texts = r.calls.filter(c => c.op === 'fillText').map((c, i) => ({ ...r.at[i], t: String(c.args[0]) }))
+          const slipA = Math.max(0, ...texts.filter(slip).map(x => x.alpha))
+          const words = texts.filter(x => jp(x.t) && !slip(x))
+          const wordsA = Math.max(0, ...words.map(x => x.alpha))
+          // What shows of the reading's words: under the slip, only what it lets through.
+          const seen = Math.max(0, ...words.map(x => x.alpha * (style === 'along' && under(x) ? 1 - slipA : 1)))
+          const panel = Math.max(0, ...r.calls.filter(c => c.op === 'fill' && !c.args.length && PANEL.test(c.fill)).map(c => c.alpha))
+          frames.push({ t, into: t - cut, slipA, wordsA, seen, panel })
+        }
+        const where = x => `${style}, ${name}, ${x.t.toFixed(3)} s (${x.into.toFixed(3)} into)`
+        for (const x of frames) {
+          // Something to read at every frame: the slip's words, or the reading's, at half their ink or more.
+          expect(Math.max(x.slipA, x.seen), where(x)).toBeGreaterThanOrEqual(0.5)
+          if (x.into < 0) {
+            expect([x.slipA, x.wordsA], where(x)).toEqual([1, 0])
+            continue
+          }
+          // The read-along's words only on their panel, all but come; the scroll's once the paper has begun to.
+          if (x.wordsA > 0) expect(style === 'along' ? x.panel : x.into, where(x)).toBeGreaterThanOrEqual(style === 'along' ? 0.9 : 0.35)
+        }
+        // The slip whole at the cut, gone within a second; the reading's words whole by then.
+        const at = into => frames.find(x => Math.abs(x.into - into) < 1e-6)
+        expect(at(0).slipA, style).toBe(1)
+        expect(at(1).slipA, style).toBe(0)
+        expect(at(1).wordsA, style).toBe(1)
+        // Nothing comes or goes in a frame: at thirty a second, no step of a third or more.
+        for (let i = 2; i < frames.length; i++) {
+          for (const k of ['slipA', 'wordsA', 'panel']) expect(Math.abs(frames[i][k] - frames[i - 2][k]), `${where(frames[i])} ${k}`).toBeLessThan(0.34)
+        }
+        // The cut as cutOf has it.
+        for (const x of frames.filter(f => f.into >= 0)) {
+          const c = cutOf(pl, x.into)
+          expect(x.slipA, where(x)).toBeCloseTo(c.slip, 9)
+          expect(x.wordsA, where(x)).toBeCloseTo(c.words, 9)
+        }
+      }
+      // Without a cover the cut is as it was: no slip in the reading, the scroll's text in from the cut.
+      const off = challengePlan(bank, 'n5-12', { style, tune: { ...BEFORE_309, 'challenge.cover': 0 } })
+      const tl = challengeTimeline(off)
+      expect(cutOf(off, 0.1), style).toBe(null)
+      const rd = tl.segs.find(s => s.key === 'reading').start
+      const slip = slipOf(off)
+      for (const into of [0, 0.1, 0.3]) expect(draw(off, rd + into).filter(slip), `${style} ${into}`).toEqual([])
+    }
+    // Its beats: the scroll's slip stays while the paper comes, then leaves over half a second; the
+    // read-along's is gone, and the sentence whole on its panel, by the time the voice starts.
+    expect(CUT).toEqual({ scroll: { stay: 0.3, leave: 0.5 }, along: { panel: 0.15, words: 0.125, come: 0.15, stay: 0.18, leave: 0.2 } })
+    const along = challengePlan(bank, 'n5-12', { style: 'along', tune: { ...BEFORE_309, 'challenge.cover': 1 } })
+    const voice = challengeTimeline(along).lines[0].voice - challengeTimeline(along).segs.find(s => s.key === 'reading').start
+    expect(voice).toBeCloseTo(CH.lead, 9)
+    expect(cutOf(along, voice)).toMatchObject({ page: 1, words: 1 })
+    expect(cutOf(along, voice).slip).toBeLessThan(0.1)
+    expect(cutOf(along, CUT.along.stay + CUT.along.leave)).toEqual({ slip: 0, page: 1, words: 1 })
+  }))
+
   it('draws the masthead once a frame while the wash lies whole over the print', () => withPath2D(() => {
     for (const style of ['scroll', 'along']) {
-      const pl = challengePlan(bank, 'n5-12', { style, tune: { 'challenge.cover': 0, 'challenge.read': 1, 'challenge.along': 1 } })
+      const pl = challengePlan(bank, 'n5-12', { style, tune: { ...BEFORE_309, 'challenge.cover': 0, 'challenge.read': 1, 'challenge.along': 1 } })
       const tl = challengeTimeline(pl)
       for (const s of tl.segs) {
         const at = draw(pl, s.start + s.dur / 2).filter(x => x.t === 'TSUJI')
@@ -613,7 +856,7 @@ describe('the words over the print (plan 309)', () => {
     const masts = (pl, t) => draw(pl, t).filter(x => x.t === 'TSUJI').map(x => x.alpha)
     try {
       for (const style of ['scroll', 'along']) {
-        const pl = challengePlan(bank, 'n5-12', { style, tune: { 'challenge.cover': 1 } })
+        const pl = challengePlan(bank, 'n5-12', { style, tune: { ...BEFORE_309, 'challenge.cover': 1 } })
         const reading = challengeTimeline(pl).segs.find(s => s.key === 'reading')
         // The wash coming in after the cover: the masthead as the cover
         // stands it (cover.js, glowMasthead), in either style: its glow's two
@@ -639,7 +882,7 @@ describe('the words over the print (plan 309)', () => {
     // Each style's ink and the colour of the rim round it, the cover's and the reading's alike.
     const looks = { scroll: [PAPER.ink, [246, 241, 228]], along: ['#f3ecdf', [12, 10, 22]] }
     for (const [style, [ink, rim]] of Object.entries(looks)) {
-      const pl = challengePlan(bank, 'n5-12', { style, tune: { 'challenge.cover': 1 } })
+      const pl = challengePlan(bank, 'n5-12', { style, tune: { ...BEFORE_309, 'challenge.cover': 1 } })
       const tl = challengeTimeline(pl)
       const cut = tl.segs.find(s => s.key === 'reading').start
       const seen = t => {

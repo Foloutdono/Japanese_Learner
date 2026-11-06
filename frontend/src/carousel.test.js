@@ -12,7 +12,7 @@ import { printName } from './domain/printHour.js'
 import { CLIP, END, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
-import { TUNABLES, tuned } from '../carousel/tune.js'
+import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
@@ -1764,7 +1764,7 @@ describe('the reading challenges (plan 247)', () => {
   })
 
   it('moves the text up at one speed and one size, as credits go', () => withPath2D(() => {
-    const pl = challengePlan(data, 'n4-01')
+    const pl = challengePlan(data, 'n4-01', { tune: BEFORE_309 })
     const tl = challengeTimeline(pl)
     const seg = tl.segs.find(s => s.key === 'reading')
     const first = pl.sents[0][0].t

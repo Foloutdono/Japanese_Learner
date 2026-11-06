@@ -25,7 +25,7 @@
 import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, measure, mix, palette, reading, rrect, text } from './draw.js'
 import { PRINT_SEASONS, printOf } from './app.js'
 import { backdrop, canvasOf, discAt, discDrawn, liftAt } from './backdrop.js'
-import { MASTHEAD, coverOn, drawCover, drawMasthead, glowMasthead } from './cover.js'
+import { MASTHEAD, coverOn, drawCover, drawMasthead, drawSlip, glowMasthead } from './cover.js'
 import { haloStrip } from './halo.js'
 import { SCENERY_IDS, sceneryOf } from './sceneries.js'
 import { seeded, shuffle, unpack } from './common.js'
@@ -145,6 +145,7 @@ const SMALL = new Set([...'ゃゅょぁぃぅぇぉゎャュョァィゥェォ�
 /** A word's syllables (morae) as it is read: small ゃ joins the kana before it. */
 export const moraeOf = row => (row.k === 'punct' || PUNCT.test(row.t) ? 0 : [...reading(row)].filter(c => !SMALL.has(c)).length)
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
+const smooth = x => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k) }
 /** A beat of the video, as tuned (tune.js `challenge.*`). */
 const beat = (plan, key) => tuned(plan.tune, `challenge.${key}`)
 const clock = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`.replace(/:60$/, ':59')
@@ -352,15 +353,21 @@ function masthead(ctx, T, glow = 0) {
 // come in as the print rises, held from the cut where a cover hands it
 // the whole glow: then 5.57 at its worst over every day print of the
 // raised sceneries (the worst pixel within 2 px). At night the sky needs
-// none.
+// none once raised; while it rises, its stars pass behind the masthead,
+// a pixel or two from its light ink for two or three frames (2.9:1 on the
+// station's nights, 3.1 on the lake's and the gate's, 0.9 s in): it keeps
+// its whole glow through the rise, in and out with it (sin(pi x lift)),
+// dark on the dark sky but round a star, 6.18 at its worst.
 const RAISED_GLOW = 0.5
 /** The glow the masthead keeps over the print raised, at a moment (`seg`,
- *  `into` seconds in): none unless read along over a print, by day or at
- *  dawn or dusk, on a scenery raised with the dial on. */
+ *  `into` seconds in): none unless read along over a print, on a scenery
+ *  raised with the dial on; at night only while the print rises. */
 export function raisedGlow(plan, T, seg, into) {
   const lift = tuned(plan.tune, 'challenge.lift')
-  if (T.ground !== 'sumi' || plan.photo || plan.hour === 'night' || !sceneryOf(plan.scenery).lift || !(lift > 0)) return 0
-  return RAISED_GLOW * (coverOn(plan) && seg === 'reading' ? 1 : liftAt(seg, into, lift))
+  if (T.ground !== 'sumi' || plan.photo || !sceneryOf(plan.scenery).lift || !(lift > 0)) return 0
+  const k = liftAt(seg, into, lift)
+  if (plan.hour === 'night') return Math.sin(Math.PI * k)
+  return RAISED_GLOW * (coverOn(plan) && seg === 'reading' ? 1 : k)
 }
 function chip(ctx, T, label, x, y, { align = 'left', z = FS.sm } = {}) {
   const f = font(700, z, 'latin')
@@ -441,6 +448,34 @@ export const hookBand = plan => !coverOn(plan) && !plan.photo && plan.style === 
 export function bandOf(plan, P = null) {
   const top = discDrawn(plan, P) ? DISC_FOOT + BAND.feather : BAND.top
   return { ...BAND, top, y0: top - BAND.feather, y1: BAND.foot + BAND.feather }
+}
+// Read along, what is written at the frame's foot (the countdown and its
+// line, the hidden answer's two lines, the stops on the way to the app)
+// stood where the print's darkening has run out, over snow or a lit
+// viaduct (1.0:1 at its worst, today's look as much as the new): it
+// stands on a night of its own (plan 309, challenge.along), as dark as
+// the day's panel from a little above it to a little below, its track
+// firmer, the question and the way to the app darkened as far as the
+// raised print needs. The night comes in long and goes out longer
+// (150 px above, 220 below, eased), so it deepens the print's own
+// darkening down to the words and thins out over the ground under them:
+// at 60 px it stood as a slab cut across the picture, its foot a line
+// over the snow.
+const FOOT_BAND = { a: 0.76, up: 150, down: 220 }
+const FOOT_TRACK = 0.3
+const footOn = (plan, T) => T.ground === 'sumi' && !plan.photo && tuned(plan.tune, 'challenge.along') > 0
+function footBand(ctx, y0, y1) {
+  const { a: dark, up, down } = FOOT_BAND
+  const top = y0 - up
+  const foot = y1 + down
+  const g = ctx.createLinearGradient(0, top, 0, foot)
+  for (let i = 0; i <= 8; i++) {
+    const a = (dark * (1 - Math.cos((Math.PI * i) / 8))) / 2
+    g.addColorStop((i * up) / 8 / (foot - top), `rgba(12,10,22,${a.toFixed(3)})`)
+    g.addColorStop(1 - (i * down) / 8 / (foot - top), `rgba(12,10,22,${a.toFixed(3)})`)
+  }
+  ctx.fillStyle = g
+  ctx.fillRect(0, top, FMT.w, foot - top)
 }
 function nightBand(ctx, plan, P) {
   const { a: dark, feather, y0, y1 } = bandOf(plan, P)
@@ -552,6 +587,55 @@ function fades(x) {
 // After a cover (plan 309) the text waits for the paper: it and its chip
 // come in once the wash has begun to, this long into the reading.
 const COVER_WAIT = 0.35
+// The cut after a cover (challenge.cover) is a cross-fade, never a frame
+// with nothing to read. It stood cut, the title slip gone in one frame and
+// the page bare until the text came, half a second on. Now the slip stays
+// whole while the page comes, then leaves (from STAY, over LEAVE) as the
+// reading's first lines come in, the words at half their ink or more, the
+// slip's or the reading's, at every frame. The reading's words come only
+// on a ground they read on whole, and never in a frame: the scroll's once
+// the paper has come (COVER_WAIT, then over 0.6 s, as before), the slip
+// staying till they are half in; the read-along's once their panel has
+// all but come (over PANEL), whole (from WORDS, over COME) before the
+// slip, which lies over them, is half gone, and the slip gone by the time
+// the voice starts (CH.lead), as the sentence always stood before it.
+// The slip leaves as one picture (leaving): faded part by part, its own
+// washi would show through its words.
+export const CUT = {
+  scroll: { stay: 0.3, leave: 0.5 },
+  along: { panel: 0.15, words: 0.125, come: 0.15, stay: 0.18, leave: 0.2 },
+}
+/** The cut `into` seconds into the reading after a cover: how much of the
+ *  slip shows (`slip`), of the read-along's panel (`page`) and of the
+ *  reading's words (`words`); null with no cover (a photo has none). */
+export function cutOf(plan, into) {
+  if (!coverOn(plan)) return null
+  if (plan.style !== 'along') {
+    const C = CUT.scroll
+    return { slip: 1 - smooth((into - C.stay) / C.leave), page: 1, words: ease((into - COVER_WAIT) / 0.6) }
+  }
+  const C = CUT.along
+  return { slip: 1 - smooth((into - C.stay) / C.leave), page: smooth(into / C.panel), words: smooth((into - C.words) / C.come) }
+}
+// The slip as it leaves: drawn once on a layer of its own, laid on the
+// frame as faint as the cut has it, so it fades as one picture; where no
+// canvas is (the tests) drawn as it stands, as faint.
+let slipLayer = null
+function leaving(ctx, plan, tl, k) {
+  if (!(k > 0)) return
+  const words = hookWords(plan, tl)
+  const key = JSON.stringify(words)
+  if (slipLayer?.key !== key) {
+    const c = canvasOf(FMT.w, FMT.h)
+    if (c) drawSlip(c.getContext('2d'), words)
+    slipLayer = { key, c }
+  }
+  ctx.save()
+  ctx.globalAlpha *= k
+  if (slipLayer.c) ctx.drawImage(slipLayer.c, 0, 0)
+  else drawSlip(ctx, words)
+  ctx.restore()
+}
 // With the hour's sun or moon over the print (plan 309: backdrop.js,
 // discDrawn), the disc stands where the reading's chip comes at the cut,
 // the cover on or off: the chip waits in either style until the disc is
@@ -596,8 +680,9 @@ function scroll(ctx, plan, tl, t, P) {
   // One speed: the whole text past the reading line in its reading time.
   const speed = length / (plan.chars / (plan.cpm / 60))
   const off = speed * Math.max(0, t - seg.start - beat(plan, 'into'))
-  const wait = coverOn(plan) ? COVER_WAIT : 0
-  const k = ease((t - seg.start - wait) / 0.6)
+  // After a cover, the cut (cutOf): the text in once the paper has come, the slip leaving.
+  const cut = cutOf(plan, t - seg.start)
+  const k = cut ? cut.words : ease((t - seg.start) / 0.6)
   const top = SCROLL.read - off
   // The sentence at the reading line: the last one to have reached it.
   let reading = 0
@@ -635,11 +720,12 @@ function scroll(ctx, plan, tl, t, P) {
       y += row.h
     }
   }
+  if (cut) leaving(ctx, plan, tl, cut.slip)
   // The counter: whole from the reading's first frame, as it always came;
   // after a cover, with the text; and held while the disc rises past it
   // or fades from under it.
   const counter = () => chip(ctx, T, `JLPT ${plan.lv} · ${reading + 1} / ${plan.sents.length}`, fr.right, fr.y + 6, { align: 'right' })
-  const shown = Math.min(wait ? k : 1, chipShown(plan, t - seg.start, P))
+  const shown = Math.min(cut ? k : 1, chipShown(plan, t - seg.start, P))
   if (shown >= 1) return counter()
   if (!(shown > 0)) return
   ctx.save()
@@ -707,13 +793,18 @@ function along(ctx, plan, tl, t, P) {
   const off = prev + (turns[now] - prev) * k
   // The credit going as a tall sentence is turned to, back as it is turned from.
   const gone = (tall[now] ? k : 0) + (turning && tall[now - 1] ? 1 - k : 0)
-  panel(ctx, T, fr.x, top, fr.w, foot - top, `rgba(16,14,19,${alongPanel(plan, P)})`)
+  // After a cover, the cut (cutOf): the panel and its credit come in, the
+  // words over them once they read on it, the slip leaving over them.
+  const cut = cutOf(plan, into)
   ctx.save()
+  if (cut) ctx.globalAlpha *= cut.page
+  panel(ctx, T, fr.x, top, fr.w, foot - top, `rgba(16,14,19,${alongPanel(plan, P)})`)
   ctx.globalAlpha *= 1 - gone
   text(ctx, S.voice, fr.cx, credit, { f: font(600, FS.sm, 'latin'), color: alpha(LIGHT, 0.75), align: 'center' })
   ctx.restore()
-  // The chip, unless it waits for the disc to rise past it or to fade from under it (chipShown).
-  const shown = chipShown(plan, into, P)
+  // The chip, unless it waits for the disc to rise past it or to fade from
+  // under it (chipShown); after a cover, never ahead of the panel.
+  const shown = cut ? Math.min(cut.page, chipShown(plan, into, P)) : chipShown(plan, into, P)
   ctx.save()
   ctx.globalAlpha *= shown
   if (shown > 0) chip(ctx, T, `JLPT ${plan.lv} · ${now + 1} / ${tl.lines.length}`, fr.right, fr.y + 6, { align: 'right' })
@@ -722,14 +813,19 @@ function along(ctx, plan, tl, t, P) {
   ctx.beginPath()
   ctx.rect(fr.x, top + PAD * 0.5, fr.w, foot - top - PAD)
   ctx.clip()
+  if (cut) ctx.globalAlpha *= cut.words
   Ls.forEach((L, i) => {
     const yy = top + PAD + ys[i] - off
     // Only a sentence whole on the panel: the next comes in when it is turned to.
     if (yy + L.h > (tall[i] ? foot : end) - PAD * 0.5 || yy + L.h < top) return
     const line = tl.lines[i]
-    const rows = plan.sents[i]
     drawSentence(ctx, L, fr.x + PAD, yy, 'left', u => {
-      const n = Math.max(0, rows.indexOf(u.row))
+      // Each word by its place in its sentence (draw.js, units: its row's
+      // index), which every plan of the text shares. The layout is kept
+      // from the plan drawn first; another plan (the studio makes one a
+      // setting) has rows of its own, and looked up by its row a word was
+      // never found: the whole sentence lit with its first word.
+      const n = u.i
       const said = t >= line.words[n]
       // Being said until the next word starts, or the voice stops.
       const next = line.words.find((x, j) => j > n && x > line.words[n]) ?? line.voice + line.dur
@@ -738,6 +834,7 @@ function along(ctx, plan, tl, t, P) {
     })
   })
   ctx.restore()
+  if (cut) leaving(ctx, plan, tl, cut.slip)
 }
 
 // The question, its four answers and the countdown under them, at the
@@ -787,9 +884,15 @@ function questionLayout(ctx, plan) {
 function question(ctx, plan, tl, t, into, answered, P, T) {
   const S = W[plan.lang]
   const seg = answered ? 'answer' : 'question'
-  const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg, cover: false })
+  const { laid } = backdrop(ctx, P, T, { dark: footOn(plan, T) ? 0.62 : 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg, cover: false })
   masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, seg, into)))
   const L = questionLayout(ctx, plan)
+  if (footOn(plan, T)) {
+    const yRing = TOP + 30 + L.ask.size * 1.15 * L.ask.lines.length + SP[6] + L.hs.reduce((n, h) => n + h + L.gap, 0) + SP[6]
+    const below = !answered ? L.ring * 2 + (L.quiet ? 0 : SP[4] + FS.body * 1.15)
+      : plan.hidden ? L.yours[0].size * 1.15 + SP[2] + L.yours[1].size * 1.15 * L.yours[1].lines.length : FS.title * 1.15
+    footBand(ctx, yRing - SP[3], yRing + below + SP[3])
+  }
   let y = lines(ctx, T, plan.q.ask, TOP + 30, [L.ask.size], { maxLines: L.askLines }) + SP[6]
   plan.q.choices.forEach((c, i) => {
     const right = answered && !plan.hidden && i === plan.q.right
@@ -798,7 +901,7 @@ function question(ctx, plan, tl, t, into, answered, P, T) {
     const k = answered ? 1 : ease((into - 0.4 - i * 0.18) / 0.4)
     ctx.save()
     ctx.globalAlpha *= k * (answered && !plan.hidden && !right ? 0.45 : 1)
-    panel(ctx, T, fr.x, y, fr.w, h, right ? CORRECT : T.panel)
+    panel(ctx, T, fr.x, y, fr.w, h, right ? CORRECT : footOn(plan, T) ? `rgba(16,14,19,${alongPanel(plan, P)})` : T.panel)
     ctx.fillStyle = right ? '#10201f' : T.dot
     ctx.beginPath()
     ctx.arc(fr.x + 62, y + h / 2, 34, 0, Math.PI * 2)
@@ -814,7 +917,7 @@ function question(ctx, plan, tl, t, into, answered, P, T) {
     const count = beat(plan, 'count')
     const left = Math.max(0, count - Math.max(0, into - beat(plan, 'ask')))
     const r = L.ring
-    ctx.strokeStyle = T.track
+    ctx.strokeStyle = footOn(plan, T) ? alpha(LIGHT, FOOT_TRACK) : T.track
     ctx.lineWidth = 10
     ctx.beginPath()
     ctx.arc(fr.cx, y + r, r, 0, Math.PI * 2)
@@ -1007,7 +1110,7 @@ function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
   const S = W[plan.lang]
   const pace = ctaPace(dur)
   const beats = Object.fromEntries(Object.entries(CTA).map(([k, v]) => [k, v * pace]))
-  const { laid } = backdrop(ctx, P, T, { dark: 0.62, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'cta', cover: false })
+  const { laid } = backdrop(ctx, P, T, { dark: footOn(plan, T) ? 0.68 : 0.62, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'cta', cover: false })
   masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'cta', into)))
   let y = UNDER + SP[5]
   y = lines(ctx, T, S.reader, y, [FS.heading, FS.title], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
@@ -1015,6 +1118,7 @@ function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
   // The run's three stops, named as the app names them: the roll, the questions, the breakdown.
   const labels = S.stops(plan.nq)
   const railY = FLOOR - (34 + SP[3] + FS.body * 1.2)
+  if (footOn(plan, T)) footBand(ctx, railY - SP[3], railY + 17 + 17 + SP[3] + FS.body * 1.2 + SP[3])
   const k = ease((into - 0.3) / 0.6)
   ctx.save()
   ctx.globalAlpha *= k
