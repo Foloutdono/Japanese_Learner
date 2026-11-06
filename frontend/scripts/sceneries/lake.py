@@ -33,7 +33,7 @@ from layouts import PHONE
 from scene_f4 import anim
 from scene_f5 import clouds, gust
 from scene_f6 import fog, fleet, mix, ridges, seawall, smoke6, village, water
-from el7 import boats7, catenary7, reflections7
+from el7 import boats7, catenary7, reflections7, susuki7
 from scene_f9 import ground9
 
 # the lake, in the print's units: Fuji centred over it, its summit under
@@ -66,12 +66,13 @@ GATE_LAKE = dataclasses.replace(
     LAKE, boats=[(146, 504, 0.5), (230, 514, 0.6), (172, 538, 0.74)], lone_boats=[(188, 516, 0.62), (226, 528, 0.7)])
 # the near shore's meadow (s5_fore.FORE's layout): the gate's is the
 # bay's own, its tree where the bay's stands, less the far patches (the
-# lake is where they lay); the lake's is the bay's turned over with its
-# tree, the drift under the tree at the left, and what the tree lets fall
-# afloat on the water under its crown, drawn out by the water into a long
-# shallow raft (花筏)
+# lake is where they lay) and the pine's shade (the bay's second: the
+# gate has no pine to cast it); the lake's is the bay's turned over with
+# its tree, the drift under the tree at the left, and what the tree lets
+# fall afloat on the water under its crown, drawn out by the water into a
+# long shallow raft (花筏)
 FIELD = s5_fore.FIELD_ONLY
-TORII_FORE = {**s5_fore.FORE[390], 'far': []}
+TORII_FORE = {**s5_fore.FORE[390], 'far': [], 'shade': s5_fore.FORE[390]['shade'][:1]}
 LAKE_FORE = dict(
     base=1.0, front=714, shade=[(30, 736, 70, 11, -8)], carpet=(92, 606, 78, 5), foot=(2, 714, 8), foot_kacho=(4, 716, 10),
     flowers=[(316, 749, 1.05, 7), (256, 752, 0.85, 4, FIELD), (-2, 748, 0.95, 5), (90, 752, 0.8, 4, FIELD),
@@ -148,12 +149,17 @@ def lake_water(L, h, s, o, far, near, hour, under):
     return surface[:at] + under + surface[at:]
 
 
-def afloat(meadow):
+def afloat(meadow, o, hour):
     """What the tree let fall lying on the water: s5_fore.fallen's petals
     without the tint it lays under them, which on the meadow is the
-    ground taking their colour and on the water read as a glow."""
-    return re.sub(rf'<defs><radialGradient id="{UID}Carpet">[\s\S]*?</defs><ellipse [^>]*fill="url\(#{UID}Carpet\)"></ellipse>',
-                  '', meadow, count=1)
+    ground taking their colour and on the water read as a glow. A tree
+    that let something fall with no tint found to take out (fallen
+    written otherwise than this reads it) fails the build."""
+    out, n = re.subn(rf'<defs><radialGradient id="{UID}Carpet">[\s\S]*?</defs><ellipse [^>]*fill="url\(#{UID}Carpet\)"></ellipse>',
+                     '', meadow, count=1)
+    if not n and s5_fore.carpet_inks(o, hour)[0]:
+        raise ValueError('lake.afloat: no tint under what fell to take out (s5_fore.fallen no longer lays it as read here)')
+    return out
 
 
 # ── the far shore ───────────────────────────────────────────────────
@@ -181,18 +187,39 @@ def shore(L, h, uid):
             + ground9(L, h, uid))
 
 
-GLOW = {'day': 1.0, 'dawn': 0.95, 'dusk': 0.85, 'night': 0.45}   # how the plumes catch the light (el7.susuki7's)
+# the banks the bay draws its pampas in flower with (s5_fore._plants:
+# autumn's cosmos, winter's camellia): the reeds flower from late summer
+# as they do, and before it, with spring's rape and summer's hydrangea,
+# stand as a bed of young stems
+IN_FLOWER = ('cosmos', 'camellia')
+YOUNG = 0.72    # a young stem's height, of a flowering one's
+
+
+def plume_light(L, h, hour):
+    """How the plumes catch the light at the hour: the opacity the bay's
+    pampas give their racemes, which the reeds' share. el7.susuki7 keeps
+    its table of the hours inline, so a stem of its pampas is drawn here
+    and the opacity read off its plume; a pampas drawn otherwise than
+    this reads it fails the build."""
+    stem = susuki7(dataclasses.replace(L, susuki=[(0, 0, 1, 1)]), h, hour, gust, anim)
+    m = re.search(r'class="f5-flutter"[^>]*><path [^>]*opacity="([\d.]+)"', stem)
+    if not m:
+        raise ValueError('lake.plume_light: el7.susuki7 no longer draws its plume as this reads it')
+    return m.group(1)
 
 
 def reeds(L, h, o, hour, spans, seed):
     """葦: reeds along the shore where the water meets the bank, in
     clumps with bare stretches between, taller toward a clump's middle:
     their blades in the meadow's grass inks (s5_fore's), and over them
-    the stems, each nodding under its plume (穂), a few racemes drooping
-    downwind as the pampas's do (el7.susuki7), smaller; in the snow fewer
-    and shorter, the stems dry, their plumes white with it."""
+    the stems. In flower (IN_FLOWER), each stem nods under its plume
+    (穂), a few racemes drooping downwind as the pampas's do (el7.susuki7),
+    smaller, and lit as theirs are; in the snow fewer and shorter, the
+    stems dry, their plumes white with it. Before they flower, the young
+    stems alone, shorter and green, each with a leaf arching off it."""
     inks = s5_fore._grass_inks(h, o, hour)
     snow = o.get('crowns') == 'snow'
+    flowered = o.get('bank') in IN_FLOWER
     rng = random.Random(L.seed + seed)
     blades = {c: [] for c in inks}
     stems, racemes = [], []
@@ -208,12 +235,23 @@ def reeds(L, h, o, hour, spans, seed):
             for j in range(rng.randint(3, 6)):
                 blades[inks[j % 3]].append(s5_fore._blade(x + rng.uniform(-2.5, 2.5), y + rng.uniform(-0.5, 2.5),
                                                           rng.uniform(6, 13) * tall, rng.uniform(-0.55, 0.45), rng.uniform(0.9, 1.3)))
-            for _ in range(rng.randint(1, 3)):
-                ln = rng.uniform(15, 26) * tall
+            for k in range(rng.randint(1, 3)):
+                ln = rng.uniform(15, 26) * tall * (1 if flowered else YOUNG)
                 lean = rng.uniform(-0.28, 0.12)
                 bx = x + rng.uniform(-2, 2)
                 tx, ty = bx + lean * ln, y - ln
                 stems.append(f'M{f(bx)} {f(y + 1)}Q{f(bx + lean * ln * 0.15)} {f(y - ln * 0.6)} {f(tx)} {f(ty)}')
+                if not flowered:
+                    # a leaf leaving the stem partway up (a point of the
+                    # stem's curve), arching out to one side and the next
+                    # stem's to the other
+                    t = rng.uniform(0.3, 0.55)
+                    lx = bx + lean * ln * (0.3 * t * (1 - t) + t * t)
+                    ly = (1 - t) ** 2 * (y + 1) + 2 * (1 - t) * t * (y - ln * 0.6) + t * t * ty
+                    side = 1 if (k + int(x)) % 2 else -1
+                    blades[inks[1 + k % 2]].append(s5_fore._blade(lx, ly, ln * rng.uniform(0.38, 0.55), side * rng.uniform(0.75, 1.1),
+                                                                  rng.uniform(0.75, 0.95)))
+                    continue
                 # the plume: racemes leaving the stem's last stretch, each
                 # arching out and down the way the wind leans it
                 for m in range(rng.randint(3, 5)):
@@ -223,12 +261,20 @@ def reeds(L, h, o, hour, spans, seed):
                     dx = side * rl * 0.55 + lean * rl * 1.6
                     racemes.append(f'M{f(ax)} {f(ay)}q{f(dx * 0.6)} {f(-rl * 0.25)} {f(dx)} {f(rl * 0.7)}')
             x += rng.uniform(3, 9)
-    stem_ink = inks[2] if snow else mix(inks[1], h['stem'], 0.5)
-    plume = o['cap'] if snow else h['plume']
+    if snow:
+        stem_ink = inks[2]                          # dry
+    elif flowered:
+        stem_ink = mix(inks[1], h['stem'], 0.5)
+    else:
+        stem_ink = mix(inks[1], inks[2], 0.5)       # young: the greener
+    plumes = ''
+    if racemes:
+        # white with the snow, they are lit as the day's plumes at any hour
+        plumes = (f'<path d="{"".join(racemes)}" fill="none" stroke="{o["cap"] if snow else h["plume"]}" stroke-width="0.7" '
+                  f'stroke-linecap="round" opacity="{plume_light(L, h, "day" if snow else hour)}"></path>')
     return (''.join(f'<path d="{"".join(ds)}" fill="{c}"></path>' for c, ds in blades.items() if ds)
             + f'<path d="{"".join(stems)}" fill="none" stroke="{stem_ink}" stroke-width="0.6" stroke-linecap="round"></path>'
-            + f'<path d="{"".join(racemes)}" fill="none" stroke="{plume}" stroke-width="0.7" stroke-linecap="round" '
-              f'opacity="{f(0.9 * (1 if snow else GLOW[hour]))}"></path>')
+            + plumes)
 
 
 # ── 鳥居 ───────────────────────────────────────────────────────────
@@ -421,7 +467,7 @@ def lake(season, hour, variant=None, gate=False):
         meadow = flora.fore_back(L, h, o, hour, gust, UID)
         front = (shore(L, h, UID)
                  + reeds(L, h, o, hour, REEDS[kind], 851)
-                 + (meadow if gate else afloat(meadow))
+                 + (meadow if gate else afloat(meadow, o, hour))
                  + tree
                  + flora.bank(L, h, o, hour, gust, anim)
                  + flora.fore_front(L, h, o, hour, gust, UID)

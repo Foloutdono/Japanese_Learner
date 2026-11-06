@@ -4,8 +4,9 @@ The river comes down from under Fuji to the viewer's feet, winding and
 widening as it comes, between two levees (土手); far up it the line
 crosses on the bay's own stone bridge (el7.bridge7) at 0.36 of its size,
 its train on it, the river going on through the arch it runs under,
-narrowing away (at night in the arch's shade). Fuji is small and far,
-its summit at (195, 358), its foot at 430, the horizon at 432.
+narrowing away into the arch's shade, never brighter there than under
+the bridge. Fuji is small and far, its summit at (195, 358), its foot
+at 430, the horizon at 432.
 
 The water is the bay's (scene_f6.water) clipped to the river's course,
 its rows as close under the bridge as the bay's under its far shore,
@@ -26,7 +27,7 @@ Down each bank the season's tree stands five times (桜堤), from about
 0.12 to 0.78 of its size, as far off as perspective puts each, the two
 banks out of step but for the nearest pair (the crape myrtle's, one
 tree for both banks, out of step too): each bank's tree drawn once with
-the bay's tuft at its foot (the snow banked there in winter) and placed
+the bay's tuft at its foot (the snow drifted there in winter) and placed
 again with <use>, sharing the print's uid, so the night's lanterns keep
 their gradients; the nearest pair's crowns at the column's two edges,
 above the feed's caption; the farthest stand in the haze over the
@@ -120,15 +121,26 @@ COURSE = [(446, 195, 16), (472, 204, 26), (502, 210, 40), (534, 200, 58), (566, 
 # the far line's bridge: the bay's, 0.36 of its size, its top at 434
 BRIDGE_K = 0.36
 DECK = 434
+# how far the river seen on through the bridge's arch lies in the
+# arch's shade (its foot's ink), by the hour: the river under the
+# bridge holds the hills turned over at its head, the water through the
+# arch the sky alone, so taken this far it meets the river under the
+# bridge at the arch's foot, never the brighter; in the snow the hills
+# held are white, and it needs little or none of it
+THROUGH = {'dawn': 0.46, 'day': 0.34, 'dusk': 0.38, 'night': 0.5}
+THROUGH_SNOW = {'dawn': 0.28, 'day': 0.19, 'dusk': 0.0, 'night': 0.5}
 # the avenue: the season's tree five times down each bank, each as large
 # as its depth makes it (its foot 362 units under the horizon at full
 # size), the two banks out of step but for the nearest pair; the crape
 # myrtle, whose crown stands the tallest, smaller again, and cut once for
 # both banks: its nearest pair stand out of step too, the left one
 # nearer, larger and further into the corner, or the one tree turned over
-# reads as a stage's two wings
+# reads as a stage's two wings; and down the right bank, where it runs
+# straight at the viewer, its third tree a little nearer, its round crown
+# half behind the fourth's, where it sat on top of it, a ball on a ball
+# on the fourth's bare stems
 AVENUE = {'L': (0.16, 0.25, 0.39, 0.6, 0.78), 'R': (0.12, 0.2, 0.32, 0.5, 0.78)}
-AVENUE_SHARED = {'L': (0.16, 0.25, 0.39, 0.6, 0.88), 'R': AVENUE['R']}
+AVENUE_SHARED = {'L': (0.16, 0.25, 0.39, 0.6, 0.88), 'R': (0.12, 0.2, 0.34, 0.5, 0.78)}
 DEPTH = 362
 TREE_K = {'sarusuberi': 0.82}
 SHARED = ('sarusuberi',)
@@ -414,8 +426,8 @@ def far_bridge(L, s, h, o, air, hour, uid, beyond):
     """The line far up the river: the bay's stone bridge across the
     valley, 0.36 of its size, its top at DECK, its parapet's snow in
     winter, and through the arch the river runs under, the river going
-    on beyond it (`beyond`, its ink), a glint on it; and the masts and
-    wires over it (behind the train). Returns the bridge's defs, the
+    on beyond it (`beyond`, its ink), two glints on it; and the masts
+    and wires over it (behind the train). Returns the bridge's defs, the
     bridge and the masts."""
     k = BRIDGE_K
     Lb = dataclasses.replace(L, W=int(L.W / k) + 40, viaduct=(100, 140))
@@ -430,10 +442,13 @@ def far_bridge(L, s, h, o, air, hour, uid, beyond):
     c, w = course_at(L.water[0])
     x0, x1 = (c - w / 2 + 6) / k, (c + w / 2 + 6) / k
     xm, xw = (x0 + x1) / 2, (x1 - x0) * 0.3
+    # two short glints on it, one beyond the other, as the bay breaks its
+    # far rows' light: drawn across the water whole, a glint is a line
+    # of light under a door
+    glints = f'M{f(xm - 0.7 * xw)} 137.4L{f(xm - 0.15 * xw)} 137.4M{f(xm + 0.05 * xw)} 140.2L{f(xm + 0.6 * xw)} 140.2'
     through = (f'<g clip-path="url(#{uid}Arches)">'
                f'<path d="M{f(x0)} 143L{f(xm - xw)} 129L{f(xm + xw)} 129L{f(x1)} 143Z" fill="url(#{uid}Through)"></path>'
-               f'<path d="M{f(xm - xw)} 139.2L{f(xm + xw)} 139.2" stroke="{s["wave"]}" stroke-opacity="0.4" '
-               f'stroke-width="0.8"></path></g>')
+               f'<path d="{glints}" stroke="{s["wave"]}" stroke-opacity="0.4" stroke-width="0.8" stroke-linecap="round"></path></g>')
     fade = (f'<linearGradient id="{uid}Through" x1="0" y1="0" x2="0" y2="1">'
             f'<stop offset="0" stop-color="{beyond}" stop-opacity="0"></stop>'
             f'<stop offset="0.8" stop-color="{beyond}" stop-opacity="0.8"></stop><stop offset="1" stop-color="{beyond}"></stop>'
@@ -445,22 +460,36 @@ def far_bridge(L, s, h, o, air, hour, uid, beyond):
 
 # ── the avenue ─────────────────────────────────────────────────────
 
+# the snow banked about a tree's foot, as the woods' caps lie on their
+# crowns (s1_scene.woods): low drifts of uneven width overlapping, the
+# highest against the trunk and over its foot, each rounded over its
+# back and its near edge curving over the ground, so the edge they
+# share with the crest's snow is uneven: (its middle off the foot, its
+# half-width, its height, how far its edge lies under the foot), in
+# the foot's half-widths (RIVER_FORE's); and their ink, the snow's lit
+# cap taken this far toward the ground's: no brighter than the snow lit
+# along the levee's top, and only a little over the plain's
+DRIFTS = [(-0.05, 0.87, 0.28, 0.04), (-0.85, 0.6, 0.15, 0.09), (0.77, 0.53, 0.17, 0.01)]
+DRIFT_INK = 0.7
+
+
 def foot(L, h, o, hour):
     """What a tree of the avenue stands in on the crest, drawn with it so
     that every place it is set down carries it: the bay's tuft over its
     foot (s5_fore.foot_tuft, at the meadow's foot), so the trunk rises
-    from the grass as the bay's does; in the snow the snow banked against
-    the trunk, the dry blades through it, so it rises from the snow."""
+    from the grass as the bay's does; in the snow the snow drifted
+    against the trunk (DRIFTS), the dry blades through it, so it rises
+    from the snow."""
     tuft = s5_fore.foot_tuft(L, h, o, hour)
     if o.get('crowns') != 'snow':
         return tuft
     x, y, w = RIVER_FORE['foot']
-    # a low skirt of snow, flat over the trunk's foot and tapering away
-    # either side: higher, it stands on the crest as a cap would
-    a, b = 1.2 * w, 0.2 * w
-    return (tuft + f'<path d="M{f(x - a)} {f(y + 1)}C{f(x - 0.6 * a)} {f(y + 1)} {f(x - 0.55 * a)} {f(y - b)} {f(x - 0.3 * a)} {f(y - b)}'
-            f'L{f(x + 0.3 * a)} {f(y - b)}C{f(x + 0.55 * a)} {f(y - b)} {f(x + 0.6 * a)} {f(y + 1)} {f(x + a)} {f(y + 1)}Z" '
-            f'fill="{o["cap"]}"></path>')
+    drifts = []
+    for dx, rx, ry, dy in DRIFTS:
+        cx, base, rx, ry = x + dx * w, y + dy * w, rx * w, ry * w
+        drifts.append(f'M{f(cx - rx)} {f(base)}C{f(cx - rx * 0.45)} {f(base - ry * 1.33)} {f(cx + rx * 0.45)} {f(base - ry * 1.33)} '
+                      f'{f(cx + rx)} {f(base)}Q{f(cx)} {f(base + ry * 0.35)} {f(cx - rx)} {f(base)}Z')
+    return tuft + f'<path d="{"".join(drifts)}" fill="{mix(o["cap"], h["ground"], DRIFT_INK)}"></path>'
 
 
 def avenue(L, h, o, hour, flora, uid, haze):
@@ -501,6 +530,10 @@ def avenue(L, h, o, hour, flora, uid, haze):
     return trees, ''.join(mirrored)
 
 
+# a number as the build writes it, read back out of a part's markup
+NUM = r'(-?[\d.]+)'
+
+
 def raft_at(rng, L):
     """Where a fallen petal floats (s5_fore._spot's place, on the river):
     in one of the raft's gatherings along the left bank, drawn out down
@@ -515,9 +548,38 @@ def afloat(meadow):
     """What the trees let fall lying on the water: s5_fore.fallen's
     petals without the tint it lays under them, which on the meadow is
     the ground taking their colour and on the water would read as a glow
-    (lake.afloat's, written here for the reason THIN is)."""
-    return re.sub(rf'<defs><radialGradient id="{UID}Carpet">[\s\S]*?</defs><ellipse [^>]*fill="url\(#{UID}Carpet\)"></ellipse>',
-                  '', meadow, count=1)
+    (lake.afloat's, written here for the reason THIN is). Petals with no
+    tint found to take out (fallen written otherwise than this reads it)
+    fail the build."""
+    out, n = re.subn(rf'<defs><radialGradient id="{UID}Carpet">[\s\S]*?</defs><ellipse [^>]*fill="url\(#{UID}Carpet\)"></ellipse>',
+                     '', meadow, count=1)
+    if meadow and not n:
+        raise ValueError('river.afloat: no tint under what fell to take out (s5_fore.fallen no longer lays it as read here)')
+    return out
+
+
+def rafted(L, h, o, hour):
+    """花筏: what the avenue let fall (s5_fore.fallen, the bay's petals in
+    its inks), laid where the river gathers it: fallen's place for each
+    petal (s5_fore._spot) given the raft's (raft_at) while it is drawn,
+    and given back, the tint under them taken out (afloat). Every petal
+    drawn must be one raft_at laid, on the river: a fallen that stopped
+    asking _spot where would leave its petals on the meadow's carpet,
+    clipped to the river and shown nowhere but in the bytes, so it fails
+    the build instead."""
+    laid = []
+
+    def spot(rng, L_):
+        laid.append(raft_at(rng, L_))
+        return laid[-1]
+    with common.swapped((vars(s5_fore), '_spot', spot)):
+        raft = afloat(s5_fore.fallen(L, h, o, hour, UID))
+    petals = [(float(x), float(y)) for x, y in re.findall(rf'M{NUM} {NUM}', raft)]
+    off = [(x, y) for x, y in petals if abs(x - course_at(y)[0]) > course_at(y)[1] / 2 + 4]
+    if len(petals) != len(laid) or off:
+        raise ValueError(f'river.rafted: {len(petals)} petals drawn, {len(laid)} laid on the river by raft_at, '
+                         f'{len(off)} off it: s5_fore.fallen no longer places them through _spot')
+    return raft
 
 
 # ── the print ──────────────────────────────────────────────────────
@@ -563,23 +625,25 @@ def held_less(L, uid):
 
 def beyond_ink(L, h, s, o, hour):
     """The river's ink far up it, where it goes under the bridge: the
-    bay's far water with the horizon's sky held in it; at night half in
-    the arch's shade, which the night sky held would otherwise outshine."""
+    bay's far water with the horizon's sky held in it, and taken into
+    the arch's shade (THROUGH), so the water seen through the arch is
+    never brighter than the river under the bridge."""
     snow = o.get('crowns') == 'snow'
     far = (HELD_SNOW if snow else HELD)[hour][0]
     water_ = mix(s['far'], s['near'], DEEP_SNOW) if snow else s['far']
     ink = mix(water_, sky_at(h['sky'], 2 - L.water[0] / L.horizon), far)
-    return mix(ink, s['shade'][1], 0.5) if hour == 'night' else ink
-
-
-NUM = r'(-?[\d.]+)'
+    return mix(ink, s['shade'][1], (THROUGH_SNOW if snow else THROUGH)[hour])
 
 
 def unseen(svg):
     """The bay's surface without the marks the river's course hides: a
     wave, a trough, a glint or a spark wholly off the river on its row
     is clipped away unseen and only weighs, so it is left out, and the
-    rows it leaves empty with it."""
+    rows it leaves empty with it. The marks are read as scene_f6.water
+    writes them (its troughs and the road's glints as lines, its crests
+    as arcs, its grouped glints and sparks as paths): a surface where any
+    of the three is not found is not the one this reads, and fails the
+    build rather than keep, unseen, every mark the river hides."""
     def on(xs, y):
         c, w = course_at(y)
         return max(xs) >= c - w / 2 - 2 and min(xs) <= c + w / 2 + 2
@@ -591,11 +655,16 @@ def unseen(svg):
             if on(nums[0::2], sum(nums[1::2]) / len(nums[1::2])):
                 kept.append(part)
         return f'<path d="{"".join(kept)}"></path>'
-    svg = re.sub(rf'<line x1="{NUM}" y1="{NUM}" x2="{NUM}" y2="{NUM}"[^>]*></line>',
-                 lambda m: m[0] if on((float(m[1]), float(m[3])), float(m[2])) else '', svg)
-    svg = re.sub(rf'<path d="M{NUM} {NUM} q{NUM} {NUM} {NUM} 0"[^>]*></path>',
-                 lambda m: m[0] if on((float(m[1]), float(m[1]) + float(m[5])), float(m[2])) else '', svg)
-    svg = re.sub(r'<path d="(M[-\d.\sLMZ]*)"></path>', marks, svg)
+    found = {}
+    svg, found['lines'] = re.subn(rf'<line x1="{NUM}" y1="{NUM}" x2="{NUM}" y2="{NUM}"[^>]*></line>',
+                                  lambda m: m[0] if on((float(m[1]), float(m[3])), float(m[2])) else '', svg)
+    svg, found['crests'] = re.subn(rf'<path d="M{NUM} {NUM} q{NUM} {NUM} {NUM} 0"[^>]*></path>',
+                                   lambda m: m[0] if on((float(m[1]), float(m[1]) + float(m[5])), float(m[2])) else '', svg)
+    svg, found['glints'] = re.subn(r'<path d="(M[-\d.\sLMZ]*)"></path>', marks, svg)
+    missing = [what for what, n in found.items() if not n]
+    if missing:
+        raise ValueError(f'river.unseen: no {", no ".join(missing)} in the bay\'s surface: scene_f6.water no longer '
+                         f'writes them as read here')
     for empty in (r'<g class="(f6-glint|f9-glitter)" style="[^"]*"><path d=""></path></g>',
                   r'<g class="f6-twinkle" style="[^"]*"></g>',
                   r'<g class="f6-(row|road)" style="[^"]*"( stroke-[a-z]+="[^"]*")*></g>'):
@@ -617,6 +686,8 @@ def river_water(L, h, s, o, far, near_, hour, uid):
         held = (f'<rect y="{f(y0)}" width="{L.W}" height="{f(y1 - y0)}" fill="{s["near"]}" opacity="{f(DEEP_SNOW)}"></rect>'
                 + held)
     surface = unseen(surface[:at] + held + surface[at:])
+    if 'clip-path="url(#f6Bay)"' not in surface:
+        raise ValueError('river.river_water: the bay\'s surface is no longer clipped to its bay (f6Bay) as read here')
     return surface.replace('clip-path="url(#f6Bay)"', f'clip-path="url(#{uid}River)"', 1)
 
 
@@ -658,11 +729,7 @@ def river(season, hour, variant=None):
                 f'{air.fireflies(dataclasses.replace(L, hills=(L.hills[0], 444), water=(446, 540)), h, o, hour, "far")}')
         train, run, band_ = common.small_train(L, h, s, hour, BRIDGE_K, DECK - 0.4 * BRIDGE_K, uid=uid)
         trees, mirrored = avenue(L, h, o, hour, flora, uid, fog(dataclasses.replace(L, fog=HAZE), s, 4))
-        # what the avenue let fall (s5_fore.fallen, the bay's petals in
-        # its inks), laid where the river gathers it: fallen's place for
-        # each (_spot) given the raft's while it is drawn, and given back
-        with common.swapped((vars(s5_fore), '_spot', raft_at)):
-            raft = afloat(s5_fore.fallen(L, h, o, hour, UID))
+        raft = rafted(L, h, o, hour)
         front = (bridge
                  + f'<g clip-path="url(#{uid}River)"><g mask="url(#{uid}MMask)">'
                  f'<g opacity="{f(HELD_TREES[hour])}" filter="url(#f6Smear)">{mirrored}</g></g></g>'
