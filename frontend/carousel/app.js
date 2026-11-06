@@ -11,7 +11,7 @@
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
 import { K, TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
-import { printPaths, sceneryOf } from './sceneries.js'
+import { PRINTS_REV, printPaths, sceneryOf } from './sceneries.js'
 
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
@@ -395,24 +395,36 @@ const picture = (src, what) => new Promise((resolve, reject) => {
 
 /** What a print or a photo that did not load says, read from the error
  *  a page gives back (plan 309): the line naming the file and how it
- *  failed, and whether the file is not there at all (`missing`, a 404:
- *  a scenery whose prints are not drawn yet). Null for any other error
- *  (a module that does not link, a bug), which is no file missing and is
- *  thrown on as it is. */
+ *  failed, which opens the error's message, and whether the file is not
+ *  there at all (`missing`, a 404). Null for any other error (a module
+ *  that does not link, a bug), which is no file missing and is thrown on
+ *  as it is. */
 export function loadFailure(message) {
   const line = /(?:^|\n|Error: )((?:print|photo): [^\n]*)/.exec(String(message ?? ''))?.[1]
   return line ? { line, missing: / 404$/.test(line) } : null
 }
 /** The one line a render stops on when what a challenge stands on did
  *  not load (`failed`, as loadFailure reads it): the maker's photo; a
- *  scenery of the carousel's own whose prints are not there (not drawn
- *  yet) or did not load; or Today's print, the bay's and the long view's. */
+ *  scenery of the carousel's own that has no prints yet (a file of its
+ *  own folder, where printPaths puts them, answered 404) or that did not
+ *  load (any other failure, a file of the app's own answered 404 among
+ *  them: drawing the scenery again would not bring it); or Today's
+ *  print, the bay's and the long view's. */
 export function standsOnFailure(plan, failed) {
   if (plan.photo) return `the photo ${plan.photo.src} did not load: --photo takes a path under frontend/`
   const view = sceneryOf(plan.scenery)
   if (view.source !== 'carousel') return `Today's print did not load (${failed.line})`
-  return failed.missing ? `${view.name} (${view.jp}) has no prints yet (${failed.line}): draw them with python3 scripts/sceneries/build.py`
+  const notDrawn = failed.missing && failed.line.startsWith(`print: carousel/prints/${PRINTS_REV}/${view.id}/`)
+  return notDrawn ? `${view.name} (${view.jp}) has no prints yet (${failed.line}): draw them with python3 scripts/sceneries/build.py`
     : `${view.name} (${view.jp}) did not load (${failed.line})`
+}
+/** What the studio loads in place of a scenery whose prints did not load
+ *  (`asked`, its print's options as challengePrintOpts gives them): the
+ *  bay as it would have stood, at the season asked for and with the
+ *  parts the dials bring out (its petals, its fireworks). Null where the
+ *  bay is what failed: the last print drawn stands in then. */
+export function standInOpts(asked) {
+  return asked.scenery === 'bay' ? null : { ...asked, scenery: 'bay' }
 }
 
 // The print in motion, for a clip (plan 231): index.css's .tpr- rules and

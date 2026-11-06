@@ -53,7 +53,7 @@ group('Reading challenge', ['challenge'], [
   { key: 'challenge.cta', label: 'The app, last', unit: 's', def: 6.5, min: 3, max: 10, step: 0.1 },
   { key: 'challenge.wash', label: 'Picture wash', unit: '×', def: 1, min: 0.6, max: 1.2, step: 0.05, hint: 'how much paper lies over the print (scroll)' },
   // Plan 309: the sceneries' dials, each at the look before it until the owner has seen them drawn.
-  { key: 'challenge.ruby', label: 'Readings’ ink', def: 0, was: 0, min: 0, max: 1, step: 0.1, hint: 'the readings over the kanji, from the soft ink (0) to the text’s own (1); the way to the app’s stops still ahead and the countdown’s ring darken with it' },
+  { key: 'challenge.ruby', label: 'Readings’ ink', def: 0, was: 0, min: 0, max: 1, step: 0.1, hint: 'the readings over the kanji, from the soft ink (0) to the text’s own (1); the stops still ahead on the way to the app and the countdown ring’s track darken with it (scroll)' },
   { key: 'challenge.halo', label: 'Paper round the words', unit: '×', def: 0, was: 0, min: 0, max: 2, step: 0.25, hint: 'a rim of the page’s paper round every letter, so the print never runs into it (scroll)' },
   { key: 'challenge.read', label: 'Wash under the reading', unit: '×', def: 1, was: 1, min: 0.5, max: 1, step: 0.05, hint: 'the wash while the text goes up, times this: keep the paper round the words on below ×1' },
   { key: 'challenge.cover', label: 'Hook in colour', def: 0, was: 0, min: 0, max: 1, step: 1, hint: 'the hook on the title slip’s washi over the print unwashed, from the first frame' },

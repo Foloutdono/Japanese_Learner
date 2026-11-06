@@ -7,8 +7,8 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { backdrop, discAt, liftAt, panAt, trainRun, washAt } from '../carousel/backdrop.js'
-import { drawPrint, loadFailure, loadPrint, standsOnFailure } from '../carousel/app.js'
-import { challengePlan, challengeTimeline } from '../carousel/challenge.js'
+import { drawPrint, loadFailure, loadPrint, standInOpts, standsOnFailure } from '../carousel/app.js'
+import { challengePlan, challengePrintOpts, challengeTimeline } from '../carousel/challenge.js'
 import { coverOn } from '../carousel/cover.js'
 import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
 import { drawn } from './testing/challengeCanvas.js'
@@ -502,27 +502,36 @@ describe('what a reading challenge stands on, when it does not load (plan 309)',
     expect(await loading({})).toBeNull()
   })
 
-  it('names the file that failed and how, and says a scenery has no prints yet only where they are not there', async () => {
+  it('names the file that failed and how, and says a scenery has no prints yet only where its own are not there', async () => {
+    // Each: the print asked for, how it fails, what is said, whether the
+    // file is not there (a 404), and whether that file is the scenery's own.
     const cases = [
-      // Not drawn yet: its meta is not there.
-      [{ scenery: 'lake' }, { fail: { [`${own}/meta.json`]: 404 } }, `print: ${own}/meta.json 404`, true],
-      [{ scenery: 'lake' }, { fail: { [`${own}/winter-day.json`]: 404 } }, `print: ${own}/winter-day.json 404`, true],
+      // Not drawn yet: a file of its own folder is not there.
+      [{ scenery: 'lake' }, { fail: { [`${own}/meta.json`]: 404 } }, `print: ${own}/meta.json 404`, true, true],
+      [{ scenery: 'lake' }, { fail: { [`${own}/winter-day.json`]: 404 } }, `print: ${own}/winter-day.json 404`, true, true],
+      // Not there, but a file of the app's own: drawing the lake again would not bring it.
+      [{ scenery: 'lake' }, { fail: { 'src/components/station/print/print.json': 404 } }, 'print: src/components/station/print/print.json 404', true, false],
+      [{ scenery: 'lake' }, { fail: { 'src/index.css': 404 } }, 'print: src/index.css 404', true, false],
       // There, but broken: served wrong, not JSON, a layer that does not decode, a file of the app's own.
-      [{ scenery: 'lake' }, { fail: { [`${own}/winter-day.json`]: 500 } }, `print: ${own}/winter-day.json 500`, false],
-      [{ scenery: 'lake' }, { fail: { [`${own}/meta.json`]: 'html' } }, `print: ${own}/meta.json is not JSON (`, false],
-      [{ scenery: 'lake' }, { mark: { path: `${own}/winter-day.json`, layer: 'sky' } }, `print: ${own}/winter-day.json, its sky layer, did not decode`, false],
-      [{ scenery: 'lake' }, { broken: 'grain.png' }, `print: public/today/print/${meta.rev}/grain.png did not load`, false],
-      [{ scenery: 'lake' }, { fail: { 'src/index.css': 'net' } }, 'print: src/index.css could not be fetched (Failed to fetch)', false],
+      [{ scenery: 'lake' }, { fail: { [`${own}/winter-day.json`]: 500 } }, `print: ${own}/winter-day.json 500`, false, false],
+      [{ scenery: 'lake' }, { fail: { [`${own}/meta.json`]: 'html' } }, `print: ${own}/meta.json is not JSON (`, false, false],
+      [{ scenery: 'lake' }, { mark: { path: `${own}/winter-day.json`, layer: 'sky' } }, `print: ${own}/winter-day.json, its sky layer, did not decode`, false, false],
+      [{ scenery: 'lake' }, { broken: 'grain.png' }, `print: public/today/print/${meta.rev}/grain.png did not load`, false, false],
+      [{ scenery: 'lake' }, { fail: { 'src/index.css': 'net' } }, 'print: src/index.css could not be fetched (Failed to fetch)', false, false],
     ]
-    for (const [opts, how, said, missing] of cases) {
+    for (const [opts, how, said, missing, notDrawn] of cases) {
       const message = await loading(opts, how)
       expect(message, said).toMatch(new RegExp(`^${said.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`))
       // As the render reads it back from the page: Playwright's prefix, then the page's stack.
       const failed = loadFailure(`page.evaluate: Error: ${message}\n    at get (http://127.0.0.1:1/carousel/app.js:440:11)`)
       expect(failed, said).toEqual({ line: message, missing })
-      expect(standsOnFailure(lake, failed), said).toBe(missing
+      expect(standsOnFailure(lake, failed), said).toBe(notDrawn
         ? `Mirror lake (逆さ富士) has no prints yet (${message}): draw them with python3 scripts/sceneries/build.py`
         : `Mirror lake (逆さ富士) did not load (${message})`)
+    }
+    // Its own folder only: another scenery's, or a revision drawn before, is no print of the lake's.
+    for (const path of ['carousel/prints/1/torii/meta.json', 'carousel/prints/0/lake/meta.json', 'carousel/prints/1/lakes/meta.json']) {
+      expect(standsOnFailure(lake, loadFailure(`print: ${path} 404`)), path).toBe(`Mirror lake (逆さ富士) did not load (print: ${path} 404)`)
     }
     // Today's print, the bay's and the long view's, whatever failed.
     const gone = await loading({}, { fail: { 'src/components/station/print/print.json': 404 } })
@@ -540,10 +549,33 @@ describe('what a reading challenge stands on, when it does not load (plan 309)',
       "page.evaluate: SyntaxError: The requested module './backdrop.js' does not provide an export named 'nope'",
       'page.evaluate: TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:1/carousel/challenge.js',
       "page.evaluate: TypeError: Cannot read properties of undefined (reading 'layers')\n    at loadPrint (http://127.0.0.1:1/carousel/app.js:469:5)",
+      // A line about a print is one that opens the message, never words met halfway along another.
+      'page.evaluate: Error: unexpected (print: nothing)\n    at x (y:1:1)',
+      'page.evaluate: Error: the photo: no\n    at x (y:1:1)',
       '', undefined,
     ]) expect(loadFailure(message), String(message)).toBeNull()
     // The render stops on what loadFailure reads and throws the rest on.
     const render = read('carousel/long/render.mjs')
     expect(render).toMatch(/const failed = loadFailure\(e\.message\)\n\s*if \(!failed\) \{\n\s*await closeAll\(\)\n\s*throw e\n\s*\}\n\s*await stop\(standsOnFailure\(plan, failed\)\)/)
+  })
+
+  it('has the bay stand in, in the studio, as it would have stood: its season, its petals, its fireworks; none for the bay', () => {
+    const dials = { 'challenge.falls': 1, 'challenge.bursts': 1 }
+    const asked = (opts, tune = dials) => challengePrintOpts(challengePlan(data, 'n5-12', { ...opts, tune }))
+    for (const scenery of ['lake', 'torii', 'river', 'station', 'wide']) {
+      expect(standInOpts(asked({ scenery, season: 'spring' })), scenery).toEqual({ season: 'spring', scenery: 'bay', falls: true, bursts: true })
+    }
+    // Each dial's part as it was asked, and the date's season where none was chosen.
+    expect(standInOpts(asked({ scenery: 'lake', season: 'hanabi' }, { 'challenge.falls': 1, 'challenge.bursts': 0 }))).toEqual({ season: 'hanabi', scenery: 'bay', falls: true, bursts: false })
+    expect(standInOpts(asked({ scenery: 'river' }, { 'challenge.falls': 0, 'challenge.bursts': 1 }))).toEqual({ season: null, scenery: 'bay', falls: false, bursts: true })
+    expect(standInOpts(asked({ scenery: 'station', season: 'winter' }, BEFORE_309))).toEqual({ season: 'winter', scenery: 'bay', falls: false, bursts: false })
+    // The bay is what failed, dialled or not: the last print drawn stands in.
+    expect(standInOpts(asked({ season: 'spring' }))).toBeNull()
+    expect(standInOpts(asked({}, BEFORE_309))).toBeNull()
+    // The studio loads the stand-in so, at the hour and season the print asked for was loaded at,
+    // and its loader hands every dial's part on to loadPrint.
+    const studio = read('carousel/studio.js')
+    expect(studio).toMatch(/const asked = challengePrintOpts\(pl\)\n[\s\S]*?await printFor\(state\.hour, seasonOf\(\), asked\)[\s\S]*?const instead = standInOpts\(asked\)\n\s*let bayFailure = instead \? null : failure\n\s*const bay = instead \? await printFor\(state\.hour, seasonOf\(\), instead\)/)
+    expect(studio).toMatch(/function printFor\(hour, season = seasonOf\(\), \{ scenery = 'bay', falls = false, bursts = false \} = \{\}\) \{\n[\s\S]*?loadPrint\(hour, \{ base: BASE, season, scenery, falls, bursts \}\)/)
   })
 })
