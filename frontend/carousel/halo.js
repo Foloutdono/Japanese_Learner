@@ -17,13 +17,23 @@ const PAPER = palette('paper')
 export const RIM = [[2, 1], [3.5, 0.4], [5, 0.15]]
 // The ways round a glyph each ring is laid: enough that no corner of a stroke shows between two.
 const WAYS = 16
-// The page's paper, as the wash lays it, with a little of the print through it.
-export const RIM_INK = alpha(PAPER.bg, 0.7)
+// The page's paper, as the wash lays it, with a little of the print
+// through it: as much of it at each hour as reads as the page. By day the
+// page is paper all but whole and the rim is all but unseen; at night the
+// page is a moonlit blue, the print brightened under a lighter wash
+// (backdrop.js, WASH), and the rim as strong as by day stood round every
+// glyph as a pale cream outline, a sticker's, never ink on paper. Quieter
+// there, it keeps the sky out of the strokes and reads as the page.
+export const RIM_AT = { dawn: 0.7, day: 0.7, dusk: 0.7, night: 0.45 }
+/** The rim's ink at an hour of the print (the day's at an hour it does not know). */
+export const rimInk = hour => alpha(PAPER.bg, RIM_AT[hour] ?? RIM_AT.day)
+// By day, as the rim was first laid.
+export const RIM_INK = rimInk('day')
 
 /** Grows the rim on the strip `c`, `k` its width (0, the look before
- *  plan 309: none), on the one canvas `canvasOf` makes for it, made after
- *  the strip and the strip's size. */
-export function haloStrip(c, canvasOf, k) {
+ *  plan 309: none), at the print's `hour`, on the one canvas `canvasOf`
+ *  makes for it, made after the strip and the strip's size. */
+export function haloStrip(c, canvasOf, k, hour = 'day') {
   // Off, or no strip to grow it on: the strip is left as it is.
   if (!c || !(k > 0)) return
   const rim = canvasOf(c.width, c.height)
@@ -38,7 +48,7 @@ export function haloStrip(c, canvasOf, k) {
   x.drawImage(c, 0, 0)
   // All of it the paper's colour, then laid under the ink.
   x.globalCompositeOperation = 'source-in'
-  x.fillStyle = RIM_INK
+  x.fillStyle = rimInk(hour)
   x.fillRect(0, 0, rim.width, rim.height)
   const s = c.getContext('2d')
   s.save()

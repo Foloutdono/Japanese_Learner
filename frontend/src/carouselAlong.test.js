@@ -5,9 +5,10 @@
 // plan 309 moves last (tune.js).
 import { describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { FS, SP, alpha, palette } from '../carousel/draw.js'
+import { FORMATS, FS, SP, alpha, palette } from '../carousel/draw.js'
 import { PRINT_HOURS } from '../carousel/app.js'
-import { CH, alongBox, alongPanel, challengePlan, challengeTimeline, drawChallenge, hookBand, inksOf } from '../carousel/challenge.js'
+import { liftAt } from '../carousel/backdrop.js'
+import { CH, CTA, RISEN, alongBox, alongPanel, bandOf, challengePlan, challengeTimeline, chipShown, drawChallenge, hookBand, inksOf } from '../carousel/challenge.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
 
 // With no print in the lane the wash always lies whole: a test may say
@@ -39,6 +40,46 @@ const draw = (plan, t) => {
   drawChallenge(ctx, plan, challengeTimeline(plan), t, null)
   return at
 }
+/** drawn(), keeping each text's ink and face and the masthead's rim: its
+ *  rings round TSUJI and round the mark, their ink and their width on the frame. */
+function traced() {
+  const { ctx: base, at } = drawn()
+  const texts = []
+  const rings = []
+  const ctx = new Proxy(base, {
+    get: (o, k) => {
+      if (k === 'fillText') return (t, x, y) => { o.fillText(t, x, y); texts.push({ ...at.at(-1), ink: o.fillStyle, font: o.font }) }
+      if (k === 'strokeText') return t => rings.push({ of: t, w: o.lineWidth * o.sx, ink: o.strokeStyle })
+      if (k === 'stroke') return path => { if (path) rings.push({ of: 'mark', w: o.lineWidth * o.sx, ink: o.strokeStyle }) }
+      return o[k]
+    },
+    set: (o, k, v) => { o[k] = v; return true },
+  })
+  return { ctx, at, texts, rings }
+}
+const rgbaOf = s => s.match(/[\d.]+/g).map(Number)
+/** drawn(), keeping every linear gradient made (its line, its stops) and
+ *  every rectangle filled, in what. */
+function painted() {
+  const { ctx: base, at } = drawn()
+  const grads = []
+  const rects = []
+  const ctx = new Proxy(base, {
+    get: (o, k) => {
+      if (k === 'createLinearGradient') {
+        return (...line) => {
+          const g = { line, stops: [], addColorStop: (s, c) => g.stops.push([s, c]) }
+          grads.push(g)
+          return g
+        }
+      }
+      if (k === 'fillRect') return (...r) => rects.push({ r, style: o.fillStyle })
+      return o[k]
+    },
+    set: (o, k, v) => { o[k] = v; return true },
+  })
+  return { ctx, at, grads, rects }
+}
 
 describe('the words over the print (plan 309)', () => {
   it('inks the paper look as before at ×0, the readings in the text’s own ink toward ×1', () => {
@@ -67,6 +108,31 @@ describe('the words over the print (plan 309)', () => {
     expect(on(0)).toBeLessThan(6)
     expect(on(0.9)).toBeGreaterThan(13.5)
   })
+
+  it('sets the stops still ahead a weight lighter where the readings are in the text’s ink, so the stop reached stands apart', () => withPath2D(() => {
+    const STOP = /^(Read|\d+ questions|Breakdown)$/
+    for (const style of ['scroll', 'along']) {
+      for (const ruby of [0, 0.9]) {
+        const pl = challengePlan(bank, 'n5-12', { style, tune: { 'challenge.ruby': ruby } })
+        const tl = challengeTimeline(pl)
+        const cta = tl.segs.find(s => s.key === 'cta')
+        const T = style === 'scroll' ? inksOf(pl) : { ink: '#f3ecdf', soft: alpha('#f3ecdf', 0.75) }
+        // Each stop's ink and weight: before the reader's dot leaves the first, and once at the second.
+        const stops = into => {
+          const r = traced()
+          drawChallenge(r.ctx, pl, tl, cta.start + into, null)
+          return r.texts.filter(x => STOP.test(x.t)).map(x => [x.ink, Number(/^(\d+) /.exec(x.font)[1])])
+        }
+        // Ahead in the soft ink, a weight lighter only on the paper with the readings darkened.
+        const ahead = [T.soft, style === 'scroll' && ruby > 0 ? 500 : 700]
+        const reached = [T.ink, 700]
+        const where = `${style} ×${ruby}`
+        expect(stops(CTA.rail - 0.5), where).toEqual([reached, ahead, ahead])
+        expect(stops(CTA.rail + 0.6), where).toEqual([reached, reached, ahead])
+        expect(stops(CH.cta - 0.05), where).toEqual([reached, reached, reached])
+      }
+    }
+  }))
 
   it('darkens the read-along’s panel by the hour of its print, never lighter than it was', () => {
     const plan = (along, extra = {}) => challengePlan(bank, 'n5-12', { style: 'along', tune: { 'challenge.along': along }, ...extra })
@@ -197,6 +263,70 @@ describe('the words over the print (plan 309)', () => {
     expect(words({ 'challenge.along': 1, 'challenge.cover': 0 })).toEqual(words({ 'challenge.along': 0, 'challenge.cover': 0 }))
   }))
 
+  it('lays the band whole from 540 to 1230, thinning over 130 px either side, across the frame; under the sun or moon, from below it', () => withPath2D(() => {
+    const band = tune => {
+      const pl = challengePlan(bank, 'n5-12', { style: 'along', tune: { 'challenge.along': 1, 'challenge.cover': 0, ...tune } })
+      const r = painted()
+      drawChallenge(r.ctx, pl, challengeTimeline(pl), 1.6, null)
+      // The backdrop darkens from the frame's top; the band is the gradient laid lower.
+      const laid = r.rects.filter(x => r.grads.includes(x.style) && x.r[1] > 0)
+      expect(laid, JSON.stringify(tune)).toHaveLength(1)
+      return { ...laid[0], at: bandOf(pl) }
+    }
+    for (const [tune, top, y0] of [[{ 'challenge.disc': 0 }, 540, 410], [{ 'challenge.disc': 1 }, 615, 485]]) {
+      const { r, style, at } = band(tune)
+      const where = JSON.stringify(tune)
+      const y1 = 1360
+      expect(at, where).toMatchObject({ top, foot: 1230, feather: 130, a: 0.72, y0, y1 })
+      // Across the whole width, from where it begins to thin in to where it has thinned out.
+      expect(style.line, where).toEqual([0, y0, 0, y1])
+      expect(r, where).toEqual([0, y0, FORMATS.story.w, y1 - y0])
+      // Night at 0.72 from its top to its foot, none at either end, eased between.
+      const stops = [...style.stops].sort((p, q) => p[0] - q[0]).map(([s, c]) => [s, ...rgbaOf(c)])
+      for (const [, R, G, B] of stops) expect([R, G, B], where).toEqual([12, 10, 22])
+      expect(stops[0], where).toEqual([0, 12, 10, 22, 0])
+      expect(stops.at(-1), where).toEqual([1, 12, 10, 22, 0])
+      const whole = [(top - y0) / (y1 - y0), 1 - 130 / (y1 - y0)]
+      expect(whole[0], where).toBeCloseTo(130 / (y1 - y0), 9)
+      for (const [s, , , , a] of stops) {
+        if (s >= whole[0] - 1e-9 && s <= whole[1] + 1e-9) expect(a, `${where} ${s}`).toBe(0.72)
+        else expect(a, `${where} ${s}`).toBeLessThan(0.72)
+      }
+      const rising = stops.filter(([s]) => s <= whole[0] + 1e-9).map(x => x[4])
+      expect(rising, where).toEqual([...rising].sort((p, q) => p - q))
+      expect(rising, where).toHaveLength(9)
+    }
+    // Under the sun or moon (its foot at y 482 under the hook), none of the band.
+    expect(band({ 'challenge.disc': 1 }).r[1]).toBeGreaterThanOrEqual(482)
+  }))
+
+  it('holds the reading’s chip after a cover, the print raised under the sun or moon, until the lift is done (plan 309)', () => withPath2D(() => {
+    // The lift is whole RISEN seconds into the reading, as backdrop.js's liftAt reads it.
+    expect(liftAt('reading', RISEN, 1)).toBe(1)
+    expect(liftAt('reading', RISEN - 0.01, 1)).toBeLessThan(1)
+    const ON = { 'challenge.cover': 1, 'challenge.lift': 1, 'challenge.disc': 1 }
+    for (const style of ['scroll', 'along']) {
+      const counter = (tune, into) => {
+        const pl = challengePlan(bank, 'n5-12', { style, tune })
+        const tl = challengeTimeline(pl)
+        const at = draw(pl, tl.segs.find(s => s.key === 'reading').start + into)
+        return at.find(x => / \/ \d+$/.test(x.t))?.alpha ?? 0
+      }
+      // Held while the disc rises through its place, then in over 0.3 s.
+      for (const into of [0, 0.3, 0.6, 1, 1.3, RISEN - 0.01]) expect(counter(ON, into), `${style} ${into}`).toBe(0)
+      expect(counter(ON, RISEN + 0.1), style).toBeGreaterThan(0)
+      expect(counter(ON, RISEN + 0.1), style).toBeLessThan(1)
+      for (const into of [RISEN + 0.3, RISEN + 3]) expect(counter(ON, into), `${style} ${into}`).toBe(1)
+      // Not raised, no disc, or no cover: it comes as it always did.
+      for (const off of Object.keys(ON)) {
+        const tune = { ...ON, [off]: 0 }
+        expect(chipShown(challengePlan(bank, 'n5-12', { style, tune }), 0.5), `${style} ${off}`).toBe(1)
+        expect(counter(tune, 1), `${style} ${off}`).toBe(1)
+        if (style === 'along') expect(counter(tune, 0), `${style} ${off}`).toBe(1)
+      }
+    }
+  }))
+
   it('lets the scroll’s text and its counter wait for the paper after a cover, as they always came without one', () => withPath2D(() => {
     const plan = cover => challengePlan(bank, 'n4-01', { style: 'scroll', tune: { 'challenge.cover': cover } })
     const start = challengeTimeline(plan(0)).segs.find(s => s.key === 'reading').start
@@ -233,10 +363,11 @@ describe('the words over the print (plan 309)', () => {
       for (const style of ['scroll', 'along']) {
         const pl = challengePlan(bank, 'n5-12', { style, tune: { 'challenge.cover': 1 } })
         const reading = challengeTimeline(pl).segs.find(s => s.key === 'reading')
-        // The wash coming in after the cover: the masthead on its glow, drawn
-        // again as strong as the wash still to come, then once.
+        // The wash coming in after the cover: the masthead as the cover
+        // stands it (cover.js, glowMasthead), in either style: its glow's two
+        // shapes as strong as the wash still to come, then its ink once, whole.
         seam.laid = 0.25
-        expect(masts(pl, reading.start + 0.2), style).toEqual([1, 0.75])
+        expect(masts(pl, reading.start + 0.2), style).toEqual([0.75, 0.75, 1])
         seam.laid = 1
         expect(masts(pl, reading.start + 2), style).toEqual([1])
         // Under the cover none of it is laid: the cover stands the masthead on
@@ -249,6 +380,41 @@ describe('the words over the print (plan 309)', () => {
     } finally {
       seam.laid = null
       seam.cover = true
+    }
+  }))
+
+  it('keeps the masthead in one ink across the cut: the paper’s on paper, the read-along’s light on night from the cover’s first frame', () => withPath2D(() => {
+    // Each style's ink and the colour of the rim round it, the cover's and the reading's alike.
+    const looks = { scroll: [PAPER.ink, [246, 241, 228]], along: ['#f3ecdf', [12, 10, 22]] }
+    for (const [style, [ink, rim]] of Object.entries(looks)) {
+      const pl = challengePlan(bank, 'n5-12', { style, tune: { 'challenge.cover': 1 } })
+      const tl = challengeTimeline(pl)
+      const cut = tl.segs.find(s => s.key === 'reading').start
+      const seen = t => {
+        const r = traced()
+        drawChallenge(r.ctx, pl, tl, t, null)
+        return { mast: r.texts.filter(x => x.t === 'TSUJI'), rings: r.rings.filter(x => x.of === 'TSUJI') }
+      }
+      let was = Infinity
+      // Under the cover, at its last frame, and as the cover is cut away.
+      for (const t of [0, 1.6, cut - 1 / 60, cut, cut + 1 / 30, cut + 0.1, cut + 0.3, cut + 0.6]) {
+        const { mast, rings } = seen(t)
+        const where = `${style} ${t.toFixed(3)}`
+        // Its ink laid last, whole, and never another: no colour changes at the cut.
+        expect(mast.at(-1), where).toMatchObject({ ink, alpha: 1 })
+        // On its rim, its three rings in the rim's colour, as strong as the
+        // paper (or the dark) still to come: never stronger than a frame before.
+        expect(rings.map(x => x.w), where).toEqual([4, 7, 10])
+        for (const x of rings) expect(rgbaOf(x.ink).slice(0, 3), where).toEqual(rim)
+        const strength = rgbaOf(rings[0].ink)[3]
+        expect(strength, where).toBeGreaterThan(0)
+        expect(strength, where).toBeLessThanOrEqual(was)
+        was = strength
+      }
+      // Once the wash is laid, the masthead as it stands, in the same ink, on no rim.
+      const after = seen(cut + 2)
+      expect(after.rings, style).toEqual([])
+      expect(after.mast, style).toEqual([expect.objectContaining({ ink, alpha: 1 })])
     }
   }))
 })

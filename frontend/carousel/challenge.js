@@ -22,10 +22,10 @@
 // Pure but for the canvas it draws on: `challengeTimeline` times the
 // video (on the voice's own lengths and syllables where it is voiced,
 // else on a close guess), `drawChallenge` draws any second of it.
-import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, mark, measure, mix, palette, reading, rrect, text } from './draw.js'
+import { FS, SP, R, METAL_H, RATING_INKS, FORMATS, address, alpha, drawSentence, fit, font, frame, layoutSentence, measure, mix, palette, reading, rrect, text } from './draw.js'
 import { PRINT_SEASONS } from './app.js'
-import { backdrop, canvasOf } from './backdrop.js'
-import { coverOn, drawCover } from './cover.js'
+import { backdrop, canvasOf, liftAt } from './backdrop.js'
+import { MASTHEAD, coverOn, drawCover, drawMasthead, glowMasthead } from './cover.js'
 import { haloStrip } from './halo.js'
 import { SCENERY_IDS } from './sceneries.js'
 import { seeded, shuffle, unpack } from './common.js'
@@ -87,7 +87,9 @@ export function inksOf(plan) {
 // A photo of the maker's own in place of the print (plan 276): read in
 // the dark look over it, the paper's wash only where asked for.
 export const PHOTO_LOOKS = ['dark', 'blur', 'paper']
-const lookOf = plan => (plan.photo ? (plan.photo.look === 'paper' ? inksOf(plan) : LOOK.dark) : plan.style === 'scroll' ? inksOf(plan) : LOOK.dark)
+/** The look a plan's words are drawn in: the paper's inks (the scroll,
+ *  or a photo washed with paper), else light on the dark. */
+export const lookOf = plan => (plan.photo ? (plan.photo.look === 'paper' ? inksOf(plan) : LOOK.dark) : plan.style === 'scroll' ? inksOf(plan) : LOOK.dark)
 
 const W = {
   en: {
@@ -316,7 +318,9 @@ export function challengePage(plan, tl, site) {
 // ── Drawing ──────────────────────────────────────────────────────
 const FMT = FORMATS.story
 const fr = frame(FMT)
-const TOP = fr.y + 64 + SP[7]
+// The masthead's foot: what stands under it stands from there.
+const UNDER = MASTHEAD.y + MASTHEAD.size
+const TOP = UNDER + SP[7]
 // Laid out once a plan and a size, on the context that draws them.
 const layouts = new Map()
 function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif' } = {}) {
@@ -325,32 +329,15 @@ function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif'
   return layouts.get(key)
 }
 
-// The masthead. Over the print with the wash still to come (a cover, and
-// the moment after it, plan 309) it stands on a glow of the page's paper,
-// or of night where its ink is light, as strong as the wash still to come
-// (`glow`, 1 − the share the backdrop has laid): none once the wash is in.
+// The masthead (cover.js, MASTHEAD). Over the print with the wash still to
+// come (the moment after a cover, plan 309) it stands as the cover stands
+// it (cover.js, glowMasthead), in the same ink: on a rim and a glow of the
+// page's paper round the paper's ink, of night round the read-along's
+// light ink, as strong as the wash still to come (`glow`, 1 − the share
+// the backdrop has laid): none once the wash is in.
 function masthead(ctx, T, glow = 0) {
-  const draw = () => {
-    mark(ctx, fr.x, fr.y, 64, T.ink, T.road)
-    text(ctx, 'TSUJI', fr.x + 64 + SP[4], fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: T.ink })
-  }
-  if (!(glow > 0.001)) return draw()
-  const k = Math.min(1, glow)
-  ctx.save()
-  if (T.ground === 'paper') {
-    ctx.shadowColor = alpha(PAPER.bg, 0.9 * k)
-    ctx.shadowBlur = 18
-  } else {
-    ctx.shadowColor = `rgba(0,0,0,${0.55 * k})`
-    ctx.shadowBlur = 16
-    ctx.shadowOffsetY = 2
-  }
-  draw()
-  // Twice, a glow being faint behind strokes this thin; the second fades
-  // with the glow, so the masthead is itself again once the wash is in.
-  ctx.globalAlpha *= k
-  draw()
-  ctx.restore()
+  if (!(glow > 0.001)) return drawMasthead(ctx, T.ink, T.road)
+  glowMasthead(ctx, Math.min(1, glow), T)
 }
 function chip(ctx, T, label, x, y, { align = 'left', z = FS.sm } = {}) {
   const f = font(700, z, 'latin')
@@ -413,18 +400,29 @@ export function hookWords(plan, tl) {
 // `challenge.along`): a band of night behind them, across the frame,
 // thinning into the print above and below.
 const BAND = { top: 540, foot: 1230, feather: 130, a: 0.72 }
+// With the hour's sun or moon shown (challenge.disc), its foot at y 482
+// under the hook (cover.js, TOP), the band thins in from under the disc
+// rather than over its lower half, which it dulled: whole from 615, the
+// hook's first line, from 583, standing in the last of its thinning (the
+// brightest of the ground under the words measured as with no disc).
+const DISC_FOOT = 485
 /** Whether the hook stands on that band: read along, over a print (a
  *  photo is darkened its own way), with no cover and the dial on. */
 export const hookBand = plan => !coverOn(plan) && !plan.photo && plan.style === 'along' && tuned(plan.tune, 'challenge.along') > 0
-function nightBand(ctx) {
-  const y0 = BAND.top - BAND.feather
-  const y1 = BAND.foot + BAND.feather
+/** The band's rows: from `y0` to `y1`, whole from `top` to `foot`, thinning
+ *  over `feather` either side, `a` its night at its whole. */
+export function bandOf(plan) {
+  const top = tuned(plan.tune, 'challenge.disc') > 0 ? DISC_FOOT + BAND.feather : BAND.top
+  return { ...BAND, top, y0: top - BAND.feather, y1: BAND.foot + BAND.feather }
+}
+function nightBand(ctx, plan) {
+  const { a: dark, feather, y0, y1 } = bandOf(plan)
   const g = ctx.createLinearGradient(0, y0, 0, y1)
   // Eased in and out, so neither end of the band shows as a line.
   for (let i = 0; i <= 8; i++) {
-    const a = (BAND.a * (1 - Math.cos((Math.PI * i) / 8))) / 2
-    g.addColorStop((i * BAND.feather) / 8 / (y1 - y0), `rgba(12,10,22,${a.toFixed(3)})`)
-    g.addColorStop(1 - (i * BAND.feather) / 8 / (y1 - y0), `rgba(12,10,22,${a.toFixed(3)})`)
+    const a = (dark * (1 - Math.cos((Math.PI * i) / 8))) / 2
+    g.addColorStop((i * feather) / 8 / (y1 - y0), `rgba(12,10,22,${a.toFixed(3)})`)
+    g.addColorStop(1 - (i * feather) / 8 / (y1 - y0), `rgba(12,10,22,${a.toFixed(3)})`)
   }
   ctx.fillStyle = g
   ctx.fillRect(0, y0, FMT.w, y1 - y0)
@@ -434,7 +432,7 @@ function hook(ctx, plan, tl, t, into, P, T) {
   const words = hookWords(plan, tl)
   const cover = coverOn(plan)
   const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'hook', cover })
-  if (hookBand(plan)) nightBand(ctx)
+  if (hookBand(plan)) nightBand(ctx, plan)
   // Under the cover, the cover stands the masthead on its own paper
   // (cover.js): the hook's own, under it, is plain.
   masthead(ctx, T, cover ? 0 : 1 - laid)
@@ -466,7 +464,7 @@ const PAD = SP[5]
 // reading line (READ) and moves at one speed, the whole text past that
 // line in the time a learner of its level reads it; it fades under the
 // masthead (HEAD) and at the frame's foot (FOOT).
-export const SCROLL = { z: FS.title, head: fr.y + 64 + SP[6], foot: fr.bottom, fade: 140, read: fr.y + 640 }
+export const SCROLL = { z: FS.title, head: UNDER + SP[6], foot: fr.bottom, fade: 140, read: fr.y + 640 }
 // The scroll's rows, laid out once: each sentence's lines, a pause between two sentences.
 const rowsOf = new Map()
 function scrollRows(ctx, plan) {
@@ -493,10 +491,11 @@ let strip = null
 let layer = null
 function stripOf(ctx, plan, rows, length, T) {
   // Its inks and its rim are its own (plan 309): a strip written in
-  // another ink, or with another rim, is written again. The rim is the
-  // paper's, round ink: light words over a photo have none.
+  // another ink, or with another rim (another width, another hour's ink,
+  // halo.js), is written again. The rim is the paper's, round ink: light
+  // words over a photo have none.
   const halo = T.ground === 'paper' ? tuned(plan.tune, 'challenge.halo') : 0
-  const key = `${plan.id}|${plan.lang}|${T.ink}|${T.ruby}|${halo}`
+  const key = `${plan.id}|${plan.lang}|${T.ink}|${T.ruby}|${halo}|${plan.hour}`
   if (strip?.key === key) return strip.c
   const c = canvasOf(Math.ceil(fr.w + BLEED * 2), Math.ceil(length + BLEED * 2))
   if (!c) return null
@@ -507,7 +506,7 @@ function stripOf(ctx, plan, rows, length, T) {
     y += row.h
   }
   // A rim of the page's paper round every glyph, grown from the strip.
-  haloStrip(c, canvasOf, halo)
+  haloStrip(c, canvasOf, halo, plan.hour)
   strip = { key, c }
   return c
 }
@@ -524,6 +523,29 @@ function fades(x) {
 // After a cover (plan 309) the text waits for the paper: it and its chip
 // come in once the wash has begun to, this long into the reading.
 const COVER_WAIT = 0.35
+// After a cover, the print raised and its sun or moon shown (plan 309:
+// challenge.lift, challenge.disc), the disc rises through where the
+// reading's chip stands, from under the hook's slip to above the chip:
+// the chip waits in either style until the print is raised whole, read
+// off the lift itself (backdrop.js, liftAt), then comes in over CHIP_IN.
+function risen() {
+  let lo = 0
+  let hi = 8
+  while (hi - lo > 1e-4) {
+    const mid = (lo + hi) / 2
+    if (liftAt('reading', mid, 1) >= 1) hi = mid
+    else lo = mid
+  }
+  return hi
+}
+export const RISEN = risen()
+const CHIP_IN = 0.3
+/** How much of the reading's chip shows `into` seconds into the reading:
+ *  all of it, unless it waits for the disc to rise past it. */
+export function chipShown(plan, into) {
+  const waits = coverOn(plan) && tuned(plan.tune, 'challenge.lift') > 0 && tuned(plan.tune, 'challenge.disc') > 0
+  return waits ? ease((into - RISEN) / CHIP_IN) : 1
+}
 function scroll(ctx, plan, tl, t, P) {
   const T = lookOf(plan)
   const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'reading', cover: false })
@@ -575,7 +597,7 @@ function scroll(ctx, plan, tl, t, P) {
   const counter = () => chip(ctx, T, `JLPT ${plan.lv} · ${reading + 1} / ${plan.sents.length}`, fr.right, fr.y + 6, { align: 'right' })
   if (!wait) return counter()
   ctx.save()
-  ctx.globalAlpha *= k
+  ctx.globalAlpha *= Math.min(k, chipShown(plan, t - seg.start))
   counter()
   ctx.restore()
 }
@@ -643,7 +665,12 @@ function along(ctx, plan, tl, t, P) {
   ctx.globalAlpha *= 1 - gone
   text(ctx, S.voice, fr.cx, credit, { f: font(600, FS.sm, 'latin'), color: alpha(LIGHT, 0.75), align: 'center' })
   ctx.restore()
-  chip(ctx, T, `JLPT ${plan.lv} · ${now + 1} / ${tl.lines.length}`, fr.right, fr.y + 6, { align: 'right' })
+  // The chip, unless it waits for the disc to rise past it (chipShown).
+  const shown = chipShown(plan, t - tl.segs.find(s => s.key === 'reading').start)
+  ctx.save()
+  ctx.globalAlpha *= shown
+  if (shown > 0) chip(ctx, T, `JLPT ${plan.lv} · ${now + 1} / ${tl.lines.length}`, fr.right, fr.y + 6, { align: 'right' })
+  ctx.restore()
   ctx.save()
   ctx.beginPath()
   ctx.rect(fr.x, top + PAD * 0.5, fr.w, foot - top - PAD)
@@ -934,7 +961,7 @@ function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
   const beats = Object.fromEntries(Object.entries(CTA).map(([k, v]) => [k, v * pace]))
   const { laid } = backdrop(ctx, P, T, { dark: 0.62, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'cta', cover: false })
   masthead(ctx, T, 1 - laid)
-  let y = fr.y + 64 + SP[5]
+  let y = UNDER + SP[5]
   y = lines(ctx, T, S.reader, y, [FS.heading, FS.title], { weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
   y += SP[4]
   // The run's three stops, named as the app names them: the roll, the questions, the breakdown.
@@ -959,6 +986,13 @@ function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
   ctx.fillStyle = RIKAI
   rrect(ctx, xs[0], cy - 5, (xs[2] - xs[0]) * go, 10, 5)
   ctx.fill()
+  // With the readings in the text's own ink (plan 309, challenge.ruby), the
+  // stops still ahead are set in a soft ink all but as dark as the ink of
+  // the one reached (inksOf: the night's paper leaves them no lighter one
+  // that reads), and in the line's rikai a stop reached would not read on
+  // it: those ahead are set a weight lighter instead, the face's 500 to its
+  // 700, so the stop reached stands apart in its weight as in its dot.
+  const ahead = T.ground === 'paper' && tuned(plan.tune, 'challenge.ruby') > 0
   labels.forEach((label, i) => {
     const on = i === 0 || go >= i / 2 - 0.01
     ctx.save()
@@ -971,7 +1005,8 @@ function cta(ctx, plan, tl, t, into, P, T, dur = CH.cta) {
     ctx.lineWidth = 6
     ctx.stroke()
     const b = fit(ctx, label, { weight: 700, sizes: [FS.body, FS.sm, FS.caption], maxW: fr.w / 3 - SP[1], maxLines: 1 })
-    text(ctx, b.lines[0], xs[i], cy + 17 + SP[3] + b.size * 0.85, { f: b.f, color: on ? T.ink : T.soft, align: 'center' })
+    const f = !on && ahead ? font(500, b.size, 'latin') : b.f
+    text(ctx, b.lines[0], xs[i], cy + 17 + SP[3] + b.size * 0.85, { f, color: on ? T.ink : T.soft, align: 'center' })
     ctx.restore()
   })
   ctx.fillStyle = PAPER.gold
