@@ -97,6 +97,14 @@ const WORK = join(OUT, '.work', `${process.pid}-${Date.now()}`)
 // Anything else this run made to work with, removed with it (a feature's shots, plan 270).
 const CLEAN = []
 if (spawnSync('ffmpeg', ['-version']).status !== 0) throw new Error('ffmpeg is needed, and is not on the PATH')
+// They go however the run ends (plan 309): done, stopped on a print that
+// did not load, a bug thrown in the page or here (a still that cannot be
+// drawn or written), or Ctrl-C (Playwright closes its browser, and the
+// run exits on the call that finds it gone). Node runs this on each of
+// those exits.
+process.on('exit', () => {
+  for (const d of [WORK, ...CLEAN]) rmSync(d, { recursive: true, force: true })
+})
 for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive: true })
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
@@ -124,11 +132,11 @@ page.on('pageerror', e => log('page:', e.message))
 await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: css.join('\n') }))
 await page.goto(`${ROOT}/carousel/index.html`)
 await page.addStyleTag({ content: css.join('\n') })
-// A run that cannot go on says why in one line, and leaves nothing behind.
+// A run that cannot go on says why in one line, and leaves nothing behind
+// (its work folder goes as it exits, above).
 async function closeAll() {
   await browser.close()
   server.close()
-  rmSync(WORK, { recursive: true, force: true })
 }
 async function stop(why) {
   log(why)
@@ -195,8 +203,10 @@ if (args.challenge) {
     window.__draw = t => { C.drawChallenge(window.__ctx, plan, tl, t, P); return t }
   }, { plan, tl }).catch(async e => {
     // What it stands on did not load: the file named, not the page's
-    // stack. Anything else (a module that does not link, a bug) is thrown
-    // as it is, its stack whole, once the run has put away what it made.
+    // stack. Anything else thrown in the page (a bug) is thrown as it is,
+    // its stack whole, once the run has closed its browser. (A module
+    // that does not link never gets this far: the render imports
+    // challenge.js and app.js itself, and Node's own import fails first.)
     const failed = loadFailure(e.message)
     if (!failed) {
       await closeAll()
@@ -328,9 +338,7 @@ if (args.stills) {
     writeFileSync(join(OUT, `${slug}-${t}.png`), Buffer.from(url.split(',')[1], 'base64'))
   }
   log(`wrote ${String(args.stills).split(',').length} still(s) to ${OUT}`)
-  await browser.close()
-  server.close()
-  rmSync(WORK, { recursive: true, force: true })
+  await closeAll()
   process.exit(0)
 }
 
@@ -435,8 +443,5 @@ await new Promise((r, j) => ff.on('close', code => (code === 0 ? r() : j(new Err
 const thumb = await page.evaluate(t => { window.__draw(t); return window.__canvas.toDataURL('image/jpeg', 0.92) }, thumbAt)
 writeFileSync(join(OUT, `${slug}.jpg`), Buffer.from(thumb.split(',')[1], 'base64'))
 writeFileSync(join(OUT, `${slug}.txt`), pageFile(pageText))
-await browser.close()
-server.close()
-rmSync(WORK, { recursive: true, force: true })
-for (const d of CLEAN) rmSync(d, { recursive: true, force: true })
+await closeAll()
 log(`wrote ${mp4} (${(seconds / 60).toFixed(1)} min, ${drawn} of ${frames} frames drawn)`)

@@ -396,27 +396,44 @@ const picture = (src, what) => new Promise((resolve, reject) => {
 /** What a print or a photo that did not load says, read from the error
  *  a page gives back (plan 309): the line naming the file and how it
  *  failed, which opens the error's message, and whether the file is not
- *  there at all (`missing`, a 404). Null for any other error (a module
- *  that does not link, a bug), which is no file missing and is thrown on
- *  as it is. */
+ *  there at all (`missing`, a 404). Null for any other error (a bug
+ *  thrown in the page), which is no file missing and is thrown on as it
+ *  is. */
 export function loadFailure(message) {
   const line = /(?:^|\n|Error: )((?:print|photo): [^\n]*)/.exec(String(message ?? ''))?.[1]
   return line ? { line, missing: / 404$/.test(line) } : null
 }
+// A scenery of the carousel's own with no prints yet: a file of its own
+// folder, where printPaths puts them, answered 404 (`failed`, as
+// loadFailure reads it). Any other failure, a file of the app's own
+// answered 404 among them, is one drawing the scenery again would not mend.
+const notDrawn = (plan, failed) => {
+  const view = sceneryOf(plan.scenery)
+  return !plan.photo && view.source === 'carousel' && !!failed.missing && failed.line.startsWith(`print: carousel/prints/${PRINTS_REV}/${view.id}/`)
+}
 /** The one line a render stops on when what a challenge stands on did
  *  not load (`failed`, as loadFailure reads it): the maker's photo; a
- *  scenery of the carousel's own that has no prints yet (a file of its
- *  own folder, where printPaths puts them, answered 404) or that did not
- *  load (any other failure, a file of the app's own answered 404 among
- *  them: drawing the scenery again would not bring it); or Today's
- *  print, the bay's and the long view's. */
+ *  scenery of the carousel's own that has no prints yet or that did not
+ *  load (any other failure); or Today's print, the bay's and the long
+ *  view's. The studio says the same (standInSays). */
 export function standsOnFailure(plan, failed) {
   if (plan.photo) return `the photo ${plan.photo.src} did not load: --photo takes a path under frontend/`
   const view = sceneryOf(plan.scenery)
   if (view.source !== 'carousel') return `Today's print did not load (${failed.line})`
-  const notDrawn = failed.missing && failed.line.startsWith(`print: carousel/prints/${PRINTS_REV}/${view.id}/`)
-  return notDrawn ? `${view.name} (${view.jp}) has no prints yet (${failed.line}): draw them with python3 scripts/sceneries/build.py`
+  return notDrawn(plan, failed) ? `${view.name} (${view.jp}) has no prints yet (${failed.line}): draw them with python3 scripts/sceneries/build.py`
     : `${view.name} (${view.jp}) did not load (${failed.line})`
+}
+const STANDS = { bay: 'The bay at this hour stands in.', last: 'The last print drawn stands in.' }
+/** What the studio says when a challenge's print did not load (plan
+ *  309), by the render's own rule (standsOnFailure), from the error's
+ *  `message` (one naming no file is said as it is): `said`, its status
+ *  line, what failed and then what stands in for it (`by`: 'bay', the
+ *  bay at this hour; 'last', the last print drawn; else nothing), and
+ *  `label`, the few words its buttons say instead of what they make. */
+export function standInSays(plan, message, by = null) {
+  const failed = loadFailure(message) ?? { line: String(message ?? ''), missing: false }
+  const said = [`${standsOnFailure(plan, failed)}.`, STANDS[by]].filter(Boolean).join(' ')
+  return { said, label: `${sceneryOf(plan.scenery).name} ${notDrawn(plan, failed) ? 'has no prints yet' : 'did not load'}` }
 }
 /** What the studio loads in place of a scenery whose prints did not load
  *  (`asked`, its print's options as challengePrintOpts gives them): the

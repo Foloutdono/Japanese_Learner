@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { backdrop, discAt, liftAt, panAt, trainRun, washAt } from '../carousel/backdrop.js'
-import { drawPrint, loadFailure, loadPrint, standInOpts, standsOnFailure } from '../carousel/app.js'
+import { drawPrint, loadFailure, loadPrint, standInOpts, standInSays, standsOnFailure } from '../carousel/app.js'
 import { challengePlan, challengePrintOpts, challengeTimeline } from '../carousel/challenge.js'
 import { coverOn } from '../carousel/cover.js'
 import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
@@ -295,12 +295,21 @@ describe('what a reading challenge stands on (plan 309)', () => {
     const drawn = alone.r.images()
     expect(drawn.slice(0, 2).map(c => [c.img === sun ? 'sun' : c.img.k, c.gco])).toEqual([['sun', 'source-over'], ['front', 'destination-out']])
     expect(drawn[1].a).toEqual([-Math.floor(195 * u) + sun.width / 2, -Math.floor(150 * u) + sun.height / 2, 390 * u, 746 * u])
+    // Every tile drawPrint lays the paper's grain in across the print and
+    // down it, each at its place against the front layer's (across and
+    // down alike), the last row cut at the print's foot.
+    const [fx, fy, pw, ph] = drawn[1].a
+    const T = 128 * u
+    const tiles = []
+    for (let ty = 0; ty < ph; ty += T) for (let tx = 0; tx < pw; tx += T) tiles.push([tx, ty, T, Math.min(T, ph - ty)])
     const grain = drawn.slice(2)
-    expect(grain.length).toBeGreaterThan(0)
-    for (const c of grain) {
+    expect(grain).toHaveLength(tiles.length)
+    expect(new Set(tiles.map(([, ty]) => ty)).size).toBeGreaterThan(1)
+    grain.forEach((c, i) => {
       expect([c.img.k, c.gco]).toEqual(['paper', 'source-atop'])
-      expect((c.a[0] - drawn[1].a[0]) / (128 * u)).toBeCloseTo(Math.round((c.a[0] - drawn[1].a[0]) / (128 * u)), 9)
-    }
+      const at = [c.a[0] - fx, c.a[1] - fy, c.a[2], c.a[3]]
+      at.forEach((v, j) => expect(v, `tile ${i}, ${'xywh'[j]}`).toBeCloseTo(tiles[i][j], 6))
+    })
     // On the paper the sun stays in the print, under its train (the scroll's look).
     const scroll = planOf(plan.tune)
     expect(at(P, PAPER, scroll, challengeTimeline(scroll), 30).images().map(c => c.img)).toEqual([under, sun, strip, over])
@@ -525,9 +534,15 @@ describe('what a reading challenge stands on, when it does not load (plan 309)',
       // As the render reads it back from the page: Playwright's prefix, then the page's stack.
       const failed = loadFailure(`page.evaluate: Error: ${message}\n    at get (http://127.0.0.1:1/carousel/app.js:440:11)`)
       expect(failed, said).toEqual({ line: message, missing })
-      expect(standsOnFailure(lake, failed), said).toBe(notDrawn
+      const line = notDrawn
         ? `Mirror lake (逆さ富士) has no prints yet (${message}): draw them with python3 scripts/sceneries/build.py`
-        : `Mirror lake (逆さ富士) did not load (${message})`)
+        : `Mirror lake (逆さ富士) did not load (${message})`
+      expect(standsOnFailure(lake, failed), said).toBe(line)
+      // The studio says the same of the error loadPrint gives it, then what stands in.
+      expect(standInSays(lake, message, 'bay'), said).toEqual({
+        said: `${line}. The bay at this hour stands in.`,
+        label: `Mirror lake ${notDrawn ? 'has no prints yet' : 'did not load'}`,
+      })
     }
     // Its own folder only: another scenery's, or a revision drawn before, is no print of the lake's.
     for (const path of ['carousel/prints/1/torii/meta.json', 'carousel/prints/0/lake/meta.json', 'carousel/prints/1/lakes/meta.json']) {
@@ -557,6 +572,35 @@ describe('what a reading challenge stands on, when it does not load (plan 309)',
     // The render stops on what loadFailure reads and throws the rest on.
     const render = read('carousel/long/render.mjs')
     expect(render).toMatch(/const failed = loadFailure\(e\.message\)\n\s*if \(!failed\) \{\n\s*await closeAll\(\)\n\s*throw e\n\s*\}\n\s*await stop\(standsOnFailure\(plan, failed\)\)/)
+    // However the run ends (done, stopped, a bug thrown anywhere, Ctrl-C),
+    // its work folder goes with it: on Node's exit, set before it is made.
+    expect(render).toMatch(/process\.on\('exit', \(\) => \{\n\s*for \(const d of \[WORK, \.\.\.CLEAN\]\) rmSync\(d, \{ recursive: true, force: true \}\)\n\s*\}\)/)
+    expect(render.indexOf("process.on('exit'")).toBeLessThan(render.indexOf('mkdirSync(d, { recursive: true })'))
+  })
+
+  it('says in the studio what the render says of a print that did not load, then what stands in for it', () => {
+    const lake = challengePlan(data, 'n5-12', { scenery: 'lake' })
+    const bay = challengePlan(data, 'n5-12', {})
+    const own = 'print: carousel/prints/1/lake/meta.json 404'
+    expect(standInSays(lake, own, 'last')).toEqual({
+      said: `Mirror lake (逆さ富士) has no prints yet (${own}): draw them with python3 scripts/sceneries/build.py. The last print drawn stands in.`,
+      label: 'Mirror lake has no prints yet',
+    })
+    // Nothing stands in: what failed alone.
+    expect(standInSays(lake, own).said).toBe(`Mirror lake (逆さ富士) has no prints yet (${own}): draw them with python3 scripts/sceneries/build.py.`)
+    // An error that names no file (a bug in the page) is said as it is, never as prints missing.
+    const bug = "Cannot read properties of undefined (reading 'layers')"
+    expect(standInSays(lake, bug, 'bay')).toEqual({ said: `Mirror lake (逆さ富士) did not load (${bug}). The bay at this hour stands in.`, label: 'Mirror lake did not load' })
+    // Today's print, with the last print drawn in its place, or nothing.
+    const gone = `print: public/today/print/${meta.rev}/winter-day-phone.json 404`
+    expect(standInSays(bay, gone, 'last')).toEqual({ said: `Today's print did not load (${gone}). The last print drawn stands in.`, label: 'The bay did not load' })
+    expect(standInSays(bay, gone).said).toBe(`Today's print did not load (${gone}).`)
+    // The studio's status line and its buttons say it so, never in words of their own.
+    const studio = read('carousel/studio.js')
+    expect(studio).toMatch(/const says = standInSays\(pl, failure\.message, bay \? 'bay' : lastPrint \? 'last' : null\)\n\s*standInSaid = before \? says\.said : standInSays\(\{ \.\.\.pl, scenery: 'bay' \}, bayFailure\.message\)\.said\n\s*status\(standInSaid\)/)
+    expect(studio).toMatch(/return \{ P: before, standIn: before \|\| instead \? says\.label : '' \}/)
+    const challengePrint = /\nasync function challengePrint\(pl, mine\) \{\n[\s\S]*?\n\}\n/.exec(studio)[0]
+    expect(challengePrint).not.toMatch(/did not load|stands in\./)
   })
 
   it('has the bay stand in, in the studio, as it would have stood: its season, its petals, its fireworks; none for the bay', () => {
