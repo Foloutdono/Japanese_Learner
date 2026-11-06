@@ -3,9 +3,9 @@
 The river comes down from under Fuji to the viewer's feet, winding and
 widening as it comes, between two levees (土手); far up it the line
 crosses on the bay's own stone bridge (el7.bridge7) at 0.36 of its size,
-its train on it, the river going on through the arch it runs under.
-Fuji is small and far, its summit at (195, 358), its foot at 430, the
-horizon at 432.
+its train on it, the river going on through the arch it runs under,
+narrowing away (at night in the arch's shade). Fuji is small and far,
+its summit at (195, 358), its foot at 430, the horizon at 432.
 
 The water is the bay's (scene_f6.water) clipped to the river's course,
 its rows as close under the bridge as the bay's under its far shore,
@@ -19,23 +19,29 @@ under the disc, broken as the bay's. Each levee runs down to a ragged
 edge, the light along its slope, the wet at its foot and its lit crest
 in stretches, in the snow the drifts with the earth showing at the
 water; the water laps it in short strokes and holds it, and the trees
-on it, faintly, the less as it nears.
+on it, faintly, the less as it nears and by day, their reflections the
+shorter as the trees near.
 
 Down each bank the season's tree stands five times (桜堤), from about
 0.12 to 0.78 of its size, as far off as perspective puts each, the two
-banks out of step but for the nearest pair: each bank's tree drawn once
-and placed again with <use>, sharing the print's uid, so the night's
-lanterns keep their gradients; the nearest pair's crowns at the
-column's two edges, above the feed's caption. What the trees let fall
-lies afloat by the left bank (花筏, the lake's raft); the season's
-flowers grow at their feet and in the corners, wooded knolls stand on
-the plain in the margins, and boats ride the river. In spring the
-cherries, their lanterns lit at night (夜桜); in summer the crape myrtle
-and the fireflies over the water; the maples in autumn; the plums on
-white banks in winter, with the evening snow at dusk. August's
-fireworks open above the far banks on both sides of Fuji, the small
-ones outside the text's column; no water lies under any of them, so the
-river holds none.
+banks out of step but for the nearest pair (the crape myrtle's, one
+tree for both banks, out of step too): each bank's tree drawn once with
+the bay's tuft at its foot (the snow banked there in winter) and placed
+again with <use>, sharing the print's uid, so the night's lanterns keep
+their gradients; the nearest pair's crowns at the column's two edges,
+above the feed's caption; the farthest stand in the haze over the
+river's head, as the bay's far shore stands in its fog. What the trees
+let fall gathers in the slack water along the left bank, drawn out down
+it (花筏); the season's flowers grow at their feet and in the corners,
+and boats ride the river. Wooded knolls stand on the plain in the
+margins, their feet lost in its mist, a tree only where a knoll stands
+taller than it; in the snow they keep the blue the snowy woods give the
+hills. In spring the cherries, their lanterns lit at night (夜桜); in
+summer the crape myrtle and the fireflies over the water; the maples in
+autumn; the plums on white banks in winter, with the evening snow at
+dusk. August's fireworks open above the far banks on both sides of
+Fuji, the small ones outside the text's column; no water lies under any
+of them, so the river holds none.
 
     river(season, hour, variant=None) -> dict(layers, run, band, L)
 
@@ -54,13 +60,19 @@ import s1_scene
 import s2_air
 import s5_fore
 from fuji import Fuji
-from lake import THIN, TREE_FOOT, afloat
 from layouts import PHONE
 from scene_f3 import smooth
 from scene_f4 import anim
 from scene_f5 import clouds, gust
-from scene_f6 import fog, fleet, mix, ridges, water
+from scene_f6 import fog, fleet, mix, ridge_y, ridges, water
 from el7 import boats7, bridge7, bridge_defs, catenary7, reflections7
+
+# what the river shares with the lake (lake.py), written here rather than
+# taken from it, so a change to the lake never moves the river: spring
+# dawn's thin bands, the first drawn short of the disc the challenge sets
+# in the sky, and where the season's tree stands on the bay's print
+THIN = [(-40, 94, 176, 6)] + s1_air.THIN[390][1:]
+TREE_FOOT = (370, 712)
 
 # the river's country, in the print's units: Fuji small and far over the
 # middle, its summit under the hook's plate (991 px), the far hills over
@@ -111,31 +123,56 @@ DECK = 434
 # the avenue: the season's tree five times down each bank, each as large
 # as its depth makes it (its foot 362 units under the horizon at full
 # size), the two banks out of step but for the nearest pair; the crape
-# myrtle, whose crown stands the tallest, smaller again
+# myrtle, whose crown stands the tallest, smaller again, and cut once for
+# both banks: its nearest pair stand out of step too, the left one
+# nearer, larger and further into the corner, or the one tree turned over
+# reads as a stage's two wings
 AVENUE = {'L': (0.16, 0.25, 0.39, 0.6, 0.78), 'R': (0.12, 0.2, 0.32, 0.5, 0.78)}
+AVENUE_SHARED = {'L': (0.16, 0.25, 0.39, 0.6, 0.88), 'R': AVENUE['R']}
 DEPTH = 362
 TREE_K = {'sarusuberi': 0.82}
 SHARED = ('sarusuberi',)
-# the water shortens what it holds, as still water does
+# the water shortens what it holds, as still water does, and the more as
+# the tree nears and its trunk would lie across the river
 MIRROR = 0.8
+MIRROR_NEAR = (0.5, 0.55)
+# how strongly the water holds the trees: by day the bright water lets
+# their trunks through as streaks, and holds them less
+HELD_TREES = {'dawn': 0.42, 'day': 0.3, 'dusk': 0.42, 'night': 0.42}
 # mist lying on the plain beside the river, banks of the bay's fog (x, y,
 # width, height, ink, opacity, layer)
 MIST = [(-60, 452, 210, 7, 0, 0.42, 3), (236, 456, 220, 7, 1, 0.38, 3), (-80, 482, 190, 9, 1, 0.3, 3),
         (276, 488, 170, 9, 0, 0.28, 3)]
+# and the haze far up the river, over its head and the avenue's farthest
+# trees (those whose feet lie above HAZE_AT), which stand in it as the
+# bay's far shore stands in its fog; the nearer trees in front of it
+HAZE = [(118, 468, 168, 12, 0, 0.42, 4), (134, 490, 136, 10, 1, 0.36, 4), (150, 452, 104, 7, 1, 0.3, 4)]
+HAZE_AT = 506
 # the meadow (s5_fore.FORE's layout): the flowers and the pampas in the
 # corners, on the levees' slopes; the season's flowers far off across
-# the plain, beyond the levees; and what the avenue lets fall, afloat on
-# the river along its left bank (花筏, the lake's raft)
+# the plain, beyond the levees; the bay's tree's foot, whose tuft each
+# tree of the avenue carries; and the carpet, which here places only the
+# tint fallen lays under what fell (afloat leaves it out: raft_at lays
+# the petals on the river)
 RIVER_FORE = dict(
-    base=1.0, front=680, shade=[], carpet=(138, 664, 48, 5), foot=None, foot_kacho=None,
+    base=1.0, front=680, shade=[], carpet=(138, 664, 48, 5), foot=(370, 713, 15), foot_kacho=None,
     flowers=[(14, 716, 1.0, 6), (380, 712, 1.0, 6)],
     pampas=[(2, 734, 1.05, 6), (390, 730, 1.0, 6)],
     far=[(30, 612, 44), (356, 620, 40), (48, 656, 30), (322, 662, 32)],
 )
+# 花筏: what the avenue lets fall gathers in the slack water along the
+# left bank, drawn out down it by the current: where along the bank it
+# gathers, and how far up and down each gathering runs
+RAFT = [(584, 9), (626, 13), (672, 17)]
 # knolls on the plain in the margins, either side of the text's column,
 # each wooded along its back as the hills are: (x, y, width, rise), the
 # nearer the larger
 KNOLLS = [(-16, 463, 84, 9), (322, 461, 84, 8), (-12, 508, 70, 13), (330, 514, 72, 12)]
+# how far down a knoll its ink holds before it fades into the plain; in
+# the snow, how far its ink is taken from the hills' toward the snow, and
+# its woods' dark toward its own blue
+KNOLL_FOOT = 0.45
+KNOLL_SNOW = (0.25, 0.35)
 # August's fireworks above the far banks, either side of Fuji, the small
 # ones outside the text's column; no water lies under any of them, so
 # none is held in the river
@@ -329,24 +366,46 @@ def bank_grass(L, h, o, hour, seed):
     return ''.join(f'<path d="{"".join(ds)}" fill="{c}"></path>' for c, ds in blades.items() if ds)
 
 
-def knolls(L, h, s, o, hour):
+def knolls(L, h, s, o, hour, uid):
     """Low knolls on the plain in the margins, wooded along their backs
     as the near hills are (s1_scene.crowns and woods: the season's tint
     and its snow), in the near hills' ink taken toward the plain's as
-    they near; in the snow, the snow in their shade."""
+    they near, their feet lost in the plain's mist as the hills' are in
+    the bay's (a bokashi, the crowns in it too); a tree only where the
+    knoll stands taller than it, so none hangs off its ends. In the snow
+    the knoll keeps the blue the snowy woods give the hills, which the
+    white plain tells apart, and its trees are its own woods under the
+    snow, the knoll's blue deepened, not the far hills' dark. Returns
+    their defs and the knolls."""
     snow = o.get('crowns') == 'snow'
-    out = []
+    defs, out = [], []
     for j, (x, y, w, rise) in enumerate(KNOLLS):
         rng = random.Random(L.seed + 941 + j)
-        ink = mix(h['ground'], '#3c4a74', 0.2) if snow else mix(h['hill_near'], h['ground'], 0.2 + 1.2 * near(y))
+        ink = mix(h['hill_near'], h['ground'], KNOLL_SNOW[0] if snow else 0.2 + 1.2 * near(y))
         back = [(w * i / 6, y - rise * math.sin(math.pi * i / 6) ** 0.8 * rng.uniform(0.85, 1.1)) for i in range(7)]
+        top = min(py for _, py in back)
+        gid = f'{uid}Knoll{j}'
+        defs.append(f'<linearGradient id="{gid}" x1="0" y1="{f(top)}" x2="0" y2="{f(y + 2)}" gradientUnits="userSpaceOnUse">'
+                    f'<stop offset="0" stop-color="{ink}"></stop><stop offset="{f(KNOLL_FOOT)}" stop-color="{ink}"></stop>'
+                    f'<stop offset="1" stop-color="{ink}" stop-opacity="0"></stop></linearGradient>')
         k = 0.8 + 3.5 * near(y)
-        cs = [c for c in s1_scene.crowns(back, w, rng, 1.2 * k, 2.6 * k, 4.2 * k, cedars=0.08)
-              if 2 <= (c[1] if c[0] == 'c' else c[2]) <= w - 2]
+
+        def stands(c):
+            # a tree only where the knoll is the taller: a round crown sits
+            # 0.3-0.7 of its radius under the ridge, so where the knoll
+            # stands 1.8 radii its foot is inside it; a cedar, 0.8 of its
+            # width
+            at = c[1] if c[0] == 'c' else c[2]
+            if not 0 <= at <= w:
+                return False
+            tall = y - ridge_y(back, at)
+            return tall >= (1.8 * c[3] if c[0] == 'c' else 0.8 * c[4])
+        cs = [c for c in s1_scene.crowns(back, w, rng, 1.2 * k, 2.6 * k, 4.2 * k, cedars=0.08) if stands(c)]
+        dressed = {**o, 'crown_ink': mix(ink, o['crown_ink'], KNOLL_SNOW[1])} if snow else o
         out.append(f'<g transform="translate({f(x)} 0)">'
-                   f'<path d="{smooth(back)} L{f(w)} {f(y + 2)} L0 {f(y + 2)} Z" fill="{ink}"></path>'
-                   f'{s1_scene.woods(cs, o, hour, L.seed + 951 + j, ink)}</g>')
-    return ''.join(out)
+                   f'<path d="{smooth(back)} L{f(w)} {f(y + 2)} L0 {f(y + 2)} Z" fill="url(#{gid})"></path>'
+                   f'{s1_scene.woods(cs, dressed, hour, L.seed + 951 + j, f"url(#{gid})")}</g>')
+    return ''.join(defs), ''.join(out)
 
 
 # ── the far line ───────────────────────────────────────────────────
@@ -366,15 +425,18 @@ def far_bridge(L, s, h, o, air, hour, uid, beyond):
     arches = re.search(rf'<path d="([^"]+)" fill="url\(#{uid}Arch\)"', stone).group(1)
     # the river's head, in the bridge's own units: the water beyond fills
     # the foot of the arch over it, as the lit ground beyond fills the
-    # others' (fading up into the arch's shade, as theirs does)
+    # others' (fading up into the arch's shade, as theirs does), narrowing
+    # as it goes away under the arch
     c, w = course_at(L.water[0])
     x0, x1 = (c - w / 2 + 6) / k, (c + w / 2 + 6) / k
+    xm, xw = (x0 + x1) / 2, (x1 - x0) * 0.3
     through = (f'<g clip-path="url(#{uid}Arches)">'
-               f'<rect x="{f(x0)}" y="129" width="{f(x1 - x0)}" height="14" fill="url(#{uid}Through)"></rect>'
-               f'<path d="M{f(x0)} 139.2L{f(x1)} 139.2" stroke="{s["wave"]}" stroke-opacity="0.4" stroke-width="0.8"></path></g>')
+               f'<path d="M{f(x0)} 143L{f(xm - xw)} 129L{f(xm + xw)} 129L{f(x1)} 143Z" fill="url(#{uid}Through)"></path>'
+               f'<path d="M{f(xm - xw)} 139.2L{f(xm + xw)} 139.2" stroke="{s["wave"]}" stroke-opacity="0.4" '
+               f'stroke-width="0.8"></path></g>')
     fade = (f'<linearGradient id="{uid}Through" x1="0" y1="0" x2="0" y2="1">'
             f'<stop offset="0" stop-color="{beyond}" stop-opacity="0"></stop>'
-            f'<stop offset="0.55" stop-color="{beyond}" stop-opacity="0.8"></stop><stop offset="1" stop-color="{beyond}"></stop>'
+            f'<stop offset="0.8" stop-color="{beyond}" stop-opacity="0.8"></stop><stop offset="1" stop-color="{beyond}"></stop>'
             f'</linearGradient>')
     return (bridge_defs(Lb, s, h, hour, uid) + f'<clipPath id="{uid}Arches"><path d="{arches}"></path></clipPath>' + fade,
             f'<g transform="{at}">{stone}{through}{air.snow_line(Lb, o, "bridge")}</g>',
@@ -383,36 +445,79 @@ def far_bridge(L, s, h, o, air, hour, uid, beyond):
 
 # ── the avenue ─────────────────────────────────────────────────────
 
-def avenue(L, h, o, hour, flora, uid):
+def foot(L, h, o, hour):
+    """What a tree of the avenue stands in on the crest, drawn with it so
+    that every place it is set down carries it: the bay's tuft over its
+    foot (s5_fore.foot_tuft, at the meadow's foot), so the trunk rises
+    from the grass as the bay's does; in the snow the snow banked against
+    the trunk, the dry blades through it, so it rises from the snow."""
+    tuft = s5_fore.foot_tuft(L, h, o, hour)
+    if o.get('crowns') != 'snow':
+        return tuft
+    x, y, w = RIVER_FORE['foot']
+    # a low skirt of snow, flat over the trunk's foot and tapering away
+    # either side: higher, it stands on the crest as a cap would
+    a, b = 1.2 * w, 0.2 * w
+    return (tuft + f'<path d="M{f(x - a)} {f(y + 1)}C{f(x - 0.6 * a)} {f(y + 1)} {f(x - 0.55 * a)} {f(y - b)} {f(x - 0.3 * a)} {f(y - b)}'
+            f'L{f(x + 0.3 * a)} {f(y - b)}C{f(x + 0.55 * a)} {f(y - b)} {f(x + 0.6 * a)} {f(y + 1)} {f(x + a)} {f(y + 1)}Z" '
+            f'fill="{o["cap"]}"></path>')
+
+
+def avenue(L, h, o, hour, flora, uid, haze):
     """桜堤: the season's tree down each levee's crest, five times a bank,
     the farthest first: each bank's tree drawn once (the nearest), at
-    the bay's place, and placed again down the bank with <use>, turned
-    on the left bank to lean over the water as the right's does; drawn
-    with the print's uid, so whatever it points into (the lanterns'
-    glow) is the shared defs'. The crape myrtle, the heaviest of the
-    trees, is cut once for both banks. Returns the avenue, and its
+    the bay's place, with its foot's grass, and placed again down the
+    bank with <use>, turned on the left bank to lean over the water as
+    the right's does; drawn with the print's uid, so whatever it points
+    into (the lanterns' glow) is the shared defs'. The crape myrtle, the
+    heaviest of the trees, is cut once for both banks. `haze` stands in
+    front of the farthest (HAZE_AT). Returns the avenue, and its
     reflection in the river: each tree again, turned over at the water
-    under its foot and shortened (the river's mask fades it as the water
-    nears, holding less)."""
+    under its foot and shortened, the more as it nears (the river's mask
+    fades it as the water nears, holding less)."""
     k0 = TREE_K.get(o.get('tree'), 1.0)
     shared = o.get('tree') in SHARED
-    placed, mirrored = [], []
+    rows = AVENUE_SHARED if shared else AVENUE
+    placed, mirrored = [(HAZE_AT, haze)], []
     for side, seed, flip in (('L', 13, True), ('R', 34, False)):
         cut = 'R' if shared else side
-        body = '' if cut != side else flora.tree(dataclasses.replace(L, seed=L.seed + seed), h, o, hour, gust, UID)
+        Lt = dataclasses.replace(L, seed=L.seed + seed)
+        body = '' if cut != side else flora.tree(Lt, h, o, hour, gust, UID) + foot(Lt, h, o, hour)
         crest = bank(-1 if flip else 1, slope)
-        for j, kk in enumerate(AVENUE[side]):
+        for j, kk in enumerate(rows[side]):
             y = L.horizon + DEPTH * kk
             at = (crest(y), y)
             again = f'<use href="#{uid}Tree{cut}"></use>'
-            part = f'<g id="{uid}Tree{side}">{body}</g>' if body and j == len(AVENUE[side]) - 1 else again
+            part = f'<g id="{uid}Tree{side}">{body}</g>' if body and j == len(rows[side]) - 1 else again
             placed.append((y + (0.5 if side == 'R' else 0), common.turned(part, TREE_FOOT, at, kk * k0, flip=flip)))
             # the water under the foot: the levee's height below it
             yw = y + 1 + 0.5 * slope(y)
-            mirrored.append(f'<g transform="matrix(1 0 0 {f(-MIRROR)} 0 {f((1 + MIRROR) * yw)})">'
+            if yw >= L.H:
+                continue
+            m = MIRROR_NEAR[1] if kk >= MIRROR_NEAR[0] else MIRROR
+            mirrored.append(f'<g transform="matrix(1 0 0 {f(-m)} 0 {f((1 + m) * yw)})">'
                             f'{common.turned(again, TREE_FOOT, at, kk * k0, flip=flip)}</g>')
     trees = ''.join(svg for _, svg in sorted(placed, key=lambda p: p[0]))
     return trees, ''.join(mirrored)
+
+
+def raft_at(rng, L):
+    """Where a fallen petal floats (s5_fore._spot's place, on the river):
+    in one of the raft's gatherings along the left bank, drawn out down
+    it, the most close in by the bank, thinning toward the middle."""
+    y0, run = RAFT[rng.randrange(len(RAFT))]
+    y = y0 + rng.gauss(0, run)
+    n = near(y)
+    return bank(-1)(y) + 0.4 + 3.2 * n + abs(rng.gauss(0, 1)) * (1.2 + 8 * n), y
+
+
+def afloat(meadow):
+    """What the trees let fall lying on the water: s5_fore.fallen's
+    petals without the tint it lays under them, which on the meadow is
+    the ground taking their colour and on the water would read as a glow
+    (lake.afloat's, written here for the reason THIN is)."""
+    return re.sub(rf'<defs><radialGradient id="{UID}Carpet">[\s\S]*?</defs><ellipse [^>]*fill="url\(#{UID}Carpet\)"></ellipse>',
+                  '', meadow, count=1)
 
 
 # ── the print ──────────────────────────────────────────────────────
@@ -458,11 +563,13 @@ def held_less(L, uid):
 
 def beyond_ink(L, h, s, o, hour):
     """The river's ink far up it, where it goes under the bridge: the
-    bay's far water with the horizon's sky held in it."""
+    bay's far water with the horizon's sky held in it; at night half in
+    the arch's shade, which the night sky held would otherwise outshine."""
     snow = o.get('crowns') == 'snow'
     far = (HELD_SNOW if snow else HELD)[hour][0]
     water_ = mix(s['far'], s['near'], DEEP_SNOW) if snow else s['far']
-    return mix(water_, sky_at(h['sky'], 2 - L.water[0] / L.horizon), far)
+    ink = mix(water_, sky_at(h['sky'], 2 - L.water[0] / L.horizon), far)
+    return mix(ink, s['shade'][1], 0.5) if hour == 'night' else ink
 
 
 NUM = r'(-?[\d.]+)'
@@ -528,7 +635,8 @@ def river(season, hour, variant=None):
         birds = air.flight(L, h, o, hour)
         fleet_ = fleet(L, h)
         ldefs, plain, levees, shore = land(L, h, s, o, hour, uid)
-        ldefs += held_sky(L, h, o, hour, uid) + held_less(L, uid)
+        kdefs, knolls_ = knolls(L, h, s, o, hour, uid)
+        ldefs += held_sky(L, h, o, hour, uid) + held_less(L, uid) + kdefs
         bdefs, bridge, masts = far_bridge(L, s, h, o, air, hour, uid, beyond_ink(L, h, s, o, hour))
         # the hills close just under the horizon, on the plain
         Lh = dataclasses.replace(L, water=(L.horizon + 6, L.water[1]))
@@ -540,7 +648,7 @@ def river(season, hour, variant=None):
                 f'{plain}'
                 f'{fog(L, s, 0)}{s1_scene.hills_far_s(Lh, h, s, far, o, hour)}{fog(L, s, 1)}'
                 f'{s1_scene.hills_near_s(Lh, h, s, near_, o, hour)}{fog(L, s, 2)}'
-                f'{knolls(L, h, s, o, hour)}'
+                f'{knolls_}'
                 f'{air.fireworks(L, h, o, hour, UID)}'
                 f'{river_water(L, h, s, o, far, near_, hour, uid)}'
                 f'<g clip-path="url(#{uid}River)">{reflections7(fleet_, hour, UID, anim, grouped=True)}</g>'
@@ -549,11 +657,16 @@ def river(season, hour, variant=None):
                 f'{birds if h["birds"] not in ("cranes", None) else ""}'
                 f'{air.fireflies(dataclasses.replace(L, hills=(L.hills[0], 444), water=(446, 540)), h, o, hour, "far")}')
         train, run, band_ = common.small_train(L, h, s, hour, BRIDGE_K, DECK - 0.4 * BRIDGE_K, uid=uid)
-        trees, mirrored = avenue(L, h, o, hour, flora, uid)
+        trees, mirrored = avenue(L, h, o, hour, flora, uid, fog(dataclasses.replace(L, fog=HAZE), s, 4))
+        # what the avenue let fall (s5_fore.fallen, the bay's petals in
+        # its inks), laid where the river gathers it: fallen's place for
+        # each (_spot) given the raft's while it is drawn, and given back
+        with common.swapped((vars(s5_fore), '_spot', raft_at)):
+            raft = afloat(s5_fore.fallen(L, h, o, hour, UID))
         front = (bridge
-                 + f'<g clip-path="url(#{uid}River)"><g mask="url(#{uid}MMask)"><g opacity="0.42" filter="url(#f6Smear)">'
-                 f'{mirrored}</g></g></g>'
-                 + afloat(s5_fore.fallen(L, h, o, hour, UID))
+                 + f'<g clip-path="url(#{uid}River)"><g mask="url(#{uid}MMask)">'
+                 f'<g opacity="{f(HELD_TREES[hour])}" filter="url(#f6Smear)">{mirrored}</g></g></g>'
+                 + f'<g clip-path="url(#{uid}River)">{raft}</g>'
                  + boats7(fleet_, s, hour, UID, anim)
                  + f'<g clip-path="url(#{uid}Plain)">{s5_fore.tufts(L, h, o, hour, L.horizon + 30, L.H, 70, 761)}</g>'
                  + bank_grass(L, h, o, hour, 931)
