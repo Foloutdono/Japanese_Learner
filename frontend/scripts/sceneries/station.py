@@ -262,6 +262,7 @@ def soffit(W, w, rng):
 BEAM = (79, 95.5, 97.6)   # the beam's face, its lit bevel down to its underside, its foot
 FASCIA = 102              # the eave's edge beyond it, its foot
 SPLICE = (214, 26, 7.5)   # the splice: its upper cut, the lap's length, its shoulder under the beam's top
+PEG_OFF = 3.1             # its pegs' middles over and under the shoulder
 
 
 def fascia(W, w):
@@ -280,31 +281,40 @@ def beam(W, w, rng):
     planed off and catching the light (面取り), its underside. It is two
     timbers spliced right of the middle (継手, a lap pinned with two
     pegs): each grained on its own, its grain stopping at the cut, the
-    second a shade apart; the lap's shoulder lit along its upper lip as
-    the beam's own lower edge is, its shadow under it, the cuts across
-    the grain hairlines, the joint running on through the lit edge. Laid
-    after the posts, their brackets and braces, whose heads it covers;
-    each band runs a little under the next, so no sky shows along their
-    seams."""
+    second a shade apart, within its own outline and nowhere past it;
+    the lap's shoulder lit along its upper lip as the beam's own lower
+    edge is, its shadow under it, the cuts across the grain hairlines,
+    the joint running on through the lit edge; a peg through each
+    timber's lapped end, in the face a little off the shoulder, the one
+    above it near the right timber's end, the one under it near the
+    left's. Laid after the posts, their brackets and braces, whose heads
+    it covers; each band runs a little under the next, so no sky shows
+    along their seams."""
     y0, y1, y2 = BEAM
     sx, lap, sh = SPLICE
     ym = y0 + sh
     knots = [(rng.uniform(70, 120), rng.uniform(84, 90), 2.2, 1.5), (rng.uniform(250, 280), rng.uniform(84, 90), 1.8, 1.3)]
     parting = [(x, y, ry) for x, y, _, ry in knots]
-    # the left timber runs on under the shoulder to the lap's far end, the
-    # right one back over it to the lap's near end; each one's grain runs
-    # on past its cut, and the cut ends it there
-    left = poly([(-10, y0 - 1), (sx, y0 - 1), (sx, ym), (sx + lap, ym), (sx + lap, y2 + 1), (-10, y2 + 1)])
-    right = poly([(sx, y0 - 1), (W + 10, y0 - 1), (W + 10, y2 + 1), (sx + lap, y2 + 1), (sx + lap, ym), (sx, ym)])
+    # each timber's own outline, from the beam's top to its foot: the left
+    # runs on under the shoulder to the lap's far end, the right back over
+    # it to the lap's near end; each one's grain runs on past its cut, and
+    # the cut ends it there, and the right one's shade lies on it alone,
+    # never on the soffit over the beam or the fascia under it
+    left = poly([(-10, y0), (sx, y0), (sx, ym), (sx + lap, ym), (sx + lap, y2), (-10, y2)])
+    right = poly([(sx, y0), (W + 10, y0), (W + 10, y2), (sx + lap, y2), (sx + lap, ym), (sx, ym)])
     grain = grain_lines(-10, sx + lap + 10, y0 + 1.4, y1 - 1.6, rng, 7, parting[:1], wave=0.45, step=7, vertical=False)
     grain += flame((y0 + y1) / 2, rng.uniform(140, 170), 3.0, 64, rng, up=False, across=True)
     fine = grain_lines(-10, sx + lap + 10, y0 + 1.2, y1 - 1.4, rng, 5, parting[:1], wave=0.3, step=8, vertical=False)
     grain_r = grain_lines(sx - 10, W + 10, y0 + 1.4, y1 - 1.6, rng, 7, parting[1:], wave=0.45, step=7, vertical=False)
     fine_r = grain_lines(sx - 10, W + 10, y0 + 1.2, y1 - 1.4, rng, 5, parting[1:], wave=0.3, step=8, vertical=False)
     cut = f'M{sx} {f(y0)}L{sx} {f(ym)}L{sx + lap} {f(ym)}L{sx + lap} {f(y1)}'
-    pegs = ''.join(f'<circle cx="{f(x)}" cy="{f(ym)}" r="1.15" fill="{w["dark"]}"></circle>'
-                   f'<path d="M{f(x - 0.9)} {f(ym - 0.7)}a1.15 1.15 0 0 1 1.6 -0.2" fill="none" stroke="{w["fleck"]}" stroke-width="0.4" stroke-opacity="0.7"></path>'
-                   for x in (sx + lap * 0.28, sx + lap * 0.72))
+    # the pegs pin each lapped end, in the overlap's face and off its
+    # seam: one over the shoulder near the right timber's end, one under
+    # it near the left's, each nearly its own width clear of the shoulder,
+    # in the face between the rafters' shadow and the lit edge
+    pegs = ''.join(f'<circle cx="{f(x)}" cy="{f(y)}" r="1.15" fill="{w["dark"]}"></circle>'
+                   f'<path d="M{f(x - 0.9)} {f(y - 0.7)}a1.15 1.15 0 0 1 1.6 -0.2" fill="none" stroke="{w["fleck"]}" stroke-width="0.4" stroke-opacity="0.7"></path>'
+                   for x, y in ((sx + lap * 0.3, ym - PEG_OFF), (sx + lap * 0.7, ym + PEG_OFF)))
     timbers = ''.join(f'<path d="{fn}" fill="none" stroke="{w["grain"]}" stroke-width="0.4" stroke-opacity="0.5" clip-path="url(#{cid})"></path>'
                       f'<path d="{gr}" fill="none" stroke="{w["dark"]}" stroke-width="0.45" stroke-opacity="0.55" clip-path="url(#{cid})"></path>'
                       for fn, gr, cid in ((fine, grain, 'ekBeamL'), (fine_r, grain_r, 'ekBeamR')))
@@ -839,36 +849,58 @@ def lamp_light(x0, side):
             f'{bracket_outline(x0, side)[2]}"></path>')
 
 
-def penumbra(steps=5):
+def seen(d):
+    """The share of the bulb's disc a line across it leaves under it, the
+    line d of its radius below its middle (-1 over its top: all of it; 1
+    under its foot: none)."""
+    return (math.acos(d) - d * math.sqrt(1 - d * d)) / math.pi
+
+
+# the penumbra's steps, and the share of the light each lays: eight at
+# 0.16 stack to what five at a quarter did where the light falls on the
+# timber (within half a level); the bay's own blur (f5Blur, its smoke's,
+# 1.6 units) runs each step into the next
+STEPS, STEP_LIGHT = 8, 0.16
+
+
+def penumbra(steps=STEPS):
     """The shade's shadow, from its rim outward, in steps: full light
     under the line from the bulb's top over the rim (the bulb's top hangs
     above the rim, so this line falls outward, 0.09 a unit), none over the
     line from its foot (which rises, 0.37 a unit), and between them the
-    less the more of the bulb the rim hides; each step's rise (a fall
-    where it is negative), the darkest first: 0.324, 0.232, 0.14, 0.048,
-    -0.044. Laid at a quarter each, five stack to about the whole light
-    under them all."""
+    less the more of the bulb the rim hides. Each step's line runs from
+    the rim through the bulb where the rim leaves (k + 1/2) / steps of its
+    disc showing, so each step brings the same share of the light, the
+    steps closer where the rim crosses the bulb's middle and farther apart
+    at its top and foot; each one's rise (a fall where it is negative),
+    the darkest first: 0.32 to -0.04."""
     (_, by), (hw, drop) = BULB, SHADE
     rim = LAMP[1] + drop
-    lit, dark = (by - BULB_R - rim) / hw, (by + BULB_R - rim) / hw
-    return [dark - (dark - lit) * (k + 0.5) / steps for k in range(steps)]
+    out = []
+    for k in range(steps):
+        share, lo, hi = (k + 0.5) / steps, -1.0, 1.0
+        for _ in range(48):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if seen(mid) > share else (lo, mid)
+        out.append((by + (lo + hi) / 2 * BULB_R - rim) / hw)
+    return out
 
 
 PENUMBRA = penumbra()
 
 
-def cone(rise, reach=150):
-    """What the shade lets the bulb light, to one step of its shadow: all
-    that lies under the lines from the shade's rim rising outward by
-    `rise` a unit (falling where it is negative). Over them lies the
-    shade's own shadow: the beam's underside over the lamp, the brace's
-    head, the bracket's inner end; under them the post, the brace's foot
-    and the stone."""
+def cone(rise, reach=95, foot=320):
+    """What the shade lets the bulb light toward the post beside it, to
+    one step of its shadow: all that lies under the line from the shade's
+    rim rising outward by `rise` a unit (falling where it is negative),
+    out past the bracket's end and down past where the lamp's light gives
+    out (ekLampLight, 190 from the bulb), a blur's breadth clear of both.
+    Over it lies the shade's own shadow: the beam's underside over the
+    lamp, the brace's head, the bracket's inner end; under it the post
+    and the brace's foot."""
     (bx, _), (hw, drop) = BULB, SHADE
     y = LAMP[1] + drop
-    top, foot = y - rise * reach, POST_FOOT + 20
-    return poly([(bx - hw, y), (bx + hw, y), (bx + hw + reach, top), (bx + hw + reach, foot),
-                 (bx - hw - reach, foot), (bx - hw - reach, top)])
+    return poly([(bx - hw, y), (bx + hw, y), (bx + hw + reach, y - rise * reach), (bx + hw + reach, foot), (bx - hw, foot)])
 
 
 # ── the bay beyond ─────────────────────────────────────────────────
@@ -964,14 +996,15 @@ def station(season, hour, variant=None):
         warm = ''
         if lit:
             # the lamp's light caught by the post beside it, the brace and
-            # the bracket over it, as far up as the shade lets it, its
-            # shadow's edge soft
-            warm = (f'<defs><clipPath id="ekWarm">{lamp_light(*POSTS[1])}</clipPath>'
-                    + ''.join(f'<clipPath id="ekCone{j}"><path d="{cone(r)}"></path></clipPath>' for j, r in enumerate(PENUMBRA))
-                    + '</defs>'
-                    + ''.join(f'<g clip-path="url(#ekCone{j})"><rect x="250" y="96" width="140" height="{POST_FOOT - 96}" '
-                              f'fill="url(#ekLampLight)" fill-opacity="0.25" clip-path="url(#ekWarm)"></rect></g>'
-                              for j in range(len(PENUMBRA))))
+            # the bracket over it, as far up as the shade lets it: each
+            # step of the shade's shadow a cone of the light, stacked and
+            # run together by the bay's blur, so its edge comes in as
+            # softly as the rim hides the bulb; the timber's own outline
+            # cuts it, sharp
+            warm = (f'<defs><clipPath id="ekWarm">{lamp_light(*POSTS[1])}</clipPath></defs>'
+                    f'<g clip-path="url(#ekWarm)"><g filter="url(#f5Blur)" fill="url(#ekLampLight)" fill-opacity="{f(STEP_LIGHT)}">'
+                    + ''.join(f'<path d="{cone(r)}"></path>' for r in PENUMBRA)
+                    + '</g></g>')
         # the eaves from the farthest in: what falls beyond them, the
         # soffit and the eave's edge beyond the beam (its icicles with it),
         # then what stands under the beam, the posts with their brackets
