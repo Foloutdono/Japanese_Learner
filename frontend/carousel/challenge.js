@@ -82,7 +82,7 @@ const LOOK = {
  *  lighter than the stops already reached. */
 export function inksOf(plan) {
   const r = tuned(plan.tune, 'challenge.ruby')
-  return { ...LOOK.paper, ruby: mix(PAPER.ink, PAPER.ink2, r), soft: mix(PAPER.ink, PAPER.ink2, 0.7 * r), track: alpha(PAPER.ink, +(0.14 + 0.2 * r).toFixed(3)) }
+  return { ...LOOK.paper, ruby: mix(PAPER.ink, PAPER.ink2, r), soft: mix(PAPER.ink, PAPER.ink2, 0.7 * r), track: alpha(PAPER.ink, +(0.14 + 0.24 * r).toFixed(3)) }
 }
 // A photo of the maker's own in place of the print (plan 276): read in
 // the dark look over it, the paper's wash only where asked for.
@@ -435,7 +435,9 @@ function hook(ctx, plan, tl, t, into, P, T) {
   const cover = coverOn(plan)
   const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'hook', cover })
   if (hookBand(plan)) nightBand(ctx)
-  masthead(ctx, T, 1 - laid)
+  // Under the cover, the cover stands the masthead on its own paper
+  // (cover.js): the hook's own, under it, is plain.
+  masthead(ctx, T, cover ? 0 : 1 - laid)
   // In colour from the first frame (plan 309): the hook on the title slip's washi.
   if (cover) {
     drawCover(ctx, plan, tl, into, P, T, { laid, words })
@@ -593,14 +595,16 @@ const PANEL_AT = { dawn: 0.74, day: 0.76, dusk: 0.7, night: 0.72, hanabi: 0.74 }
  *  hour, keeps the look before. */
 export function alongPanel(plan, name = null) {
   if (!(tuned(plan.tune, 'challenge.along') > 0) || plan.photo) return 0.62
-  const fireworks = name ? name === 'summer-hanabi' : plan.season === 'hanabi' && plan.hour === 'night'
+  // A B print (the date's, with no season asked) is its A print's hour.
+  const fireworks = name ? name.replace(/-b$/, '') === 'summer-hanabi' : plan.season === 'hanabi' && plan.hour === 'night'
   return Math.max(0.62, (fireworks ? PANEL_AT.hanabi : PANEL_AT[plan.hour]) ?? 0.62)
 }
 /** Where the read-along's panel stands: its top and its foot, the foot of
  *  the text in it, and the voice's credit's line. With
  *  `challenge.along` (plan 309) the credit stands in the panel's foot,
  *  under the text, rather than under the panel on the print, where it
- *  was lost over a bright foreground. */
+ *  was lost over a bright foreground; a sentence too tall for the room
+ *  above it takes the credit's room while it is read (along). */
 export function alongBox(plan) {
   const foot = fr.bottom - FS.sm * 2.4
   if (!(tuned(plan.tune, 'challenge.along') > 0)) return { top: TOP, foot, text: foot, credit: fr.bottom - FS.sm * 0.6 }
@@ -615,10 +619,12 @@ function along(ctx, plan, tl, t, P) {
   masthead(ctx, T, 1 - laid)
   const tw = fr.w - PAD * 2
   const { top, foot, text: end, credit } = alongBox(plan)
-  panel(ctx, T, fr.x, top, fr.w, foot - top, `rgba(16,14,19,${alongPanel(plan, P?.name)})`)
-  text(ctx, S.voice, fr.cx, credit, { f: font(600, FS.sm, 'latin'), color: alpha(LIGHT, 0.75), align: 'center' })
   // Where each sentence stands in the column, and where the column is turned to.
   const Ls = plan.sents.map((_, i) => layOf(ctx, plan, i, ALONG_Z, tw))
+  // Never set under the title's size, a sentence too tall to stand whole
+  // above the credit (eight lines with their readings) reaches into the
+  // panel's foot while it is read, the credit giving way to it.
+  const tall = Ls.map(L => end < foot && top + PAD + L.h > end - PAD * 0.5)
   const ys = []
   let y = 0
   for (const L of Ls) { ys.push(y); y += L.h + SP[5] }
@@ -626,18 +632,26 @@ function along(ctx, plan, tl, t, P) {
   const turns = [0]
   Ls.forEach((L, i) => { if (i) turns.push(ys[i] + L.h - turns[i - 1] > room ? ys[i] : turns[i - 1]) })
   const now = tl.lines.reduce((n, l, i) => (t >= l.at ? i : n), 0)
-  chip(ctx, T, `JLPT ${plan.lv} · ${now + 1} / ${tl.lines.length}`, fr.right, fr.y + 6, { align: 'right' })
   const prev = turns[Math.max(0, now - 1)]
-  const k = now && turns[now] !== prev ? ease((t - tl.lines[now].at) / CH.turn) : 1
+  const turning = now > 0 && turns[now] !== prev
+  const k = turning ? ease((t - tl.lines[now].at) / CH.turn) : 1
   const off = prev + (turns[now] - prev) * k
+  // The credit going as a tall sentence is turned to, back as it is turned from.
+  const gone = (tall[now] ? k : 0) + (turning && tall[now - 1] ? 1 - k : 0)
+  panel(ctx, T, fr.x, top, fr.w, foot - top, `rgba(16,14,19,${alongPanel(plan, P?.name)})`)
+  ctx.save()
+  ctx.globalAlpha *= 1 - gone
+  text(ctx, S.voice, fr.cx, credit, { f: font(600, FS.sm, 'latin'), color: alpha(LIGHT, 0.75), align: 'center' })
+  ctx.restore()
+  chip(ctx, T, `JLPT ${plan.lv} · ${now + 1} / ${tl.lines.length}`, fr.right, fr.y + 6, { align: 'right' })
   ctx.save()
   ctx.beginPath()
-  ctx.rect(fr.x, top + PAD * 0.5, fr.w, end - top - PAD)
+  ctx.rect(fr.x, top + PAD * 0.5, fr.w, foot - top - PAD)
   ctx.clip()
   Ls.forEach((L, i) => {
     const yy = top + PAD + ys[i] - off
     // Only a sentence whole on the panel: the next comes in when it is turned to.
-    if (yy + L.h > end - PAD * 0.5 || yy + L.h < top) return
+    if (yy + L.h > (tall[i] ? foot : end) - PAD * 0.5 || yy + L.h < top) return
     const line = tl.lines[i]
     const rows = plan.sents[i]
     drawSentence(ctx, L, fr.x + PAD, yy, 'left', u => {

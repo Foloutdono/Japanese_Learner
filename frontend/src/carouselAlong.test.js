@@ -3,12 +3,25 @@
 // panel, its credit and its hook, and the scroll's text after a cover.
 // Every dial is named as it is read, never left to its default, which
 // plan 309 moves last (tune.js).
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { FS, SP, alpha, palette } from '../carousel/draw.js'
 import { PRINT_HOURS } from '../carousel/app.js'
 import { CH, alongBox, alongPanel, challengePlan, challengeTimeline, drawChallenge, hookBand, inksOf } from '../carousel/challenge.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
+
+// With no print in the lane the wash always lies whole: a test may say
+// how much of it the backdrop has laid (the moment after a cover), and
+// keep the cover from drawing, to see the hook's own masthead alone.
+const seam = vi.hoisted(() => ({ laid: null, cover: true }))
+vi.mock('../carousel/backdrop.js', async o => {
+  const real = await o()
+  return { ...real, backdrop: (...args) => ({ ...real.backdrop(...args), ...(seam.laid == null ? {} : { laid: seam.laid }) }) }
+})
+vi.mock('../carousel/cover.js', async o => {
+  const real = await o()
+  return { ...real, drawCover: (...args) => (seam.cover ? real.drawCover(...args) : undefined) }
+})
 
 const bank = JSON.parse(readFileSync(new URL('../carousel/bank/comprehension.json', import.meta.url), 'utf8'))
 const jp = t => /[぀-ヿ㐀-鿿]/.test(t)
@@ -40,7 +53,7 @@ describe('the words over the print (plan 309)', () => {
     }
     // ×0.9: the readings all but the text's ink; the labels and the
     // countdown's track dark enough for the night's print, measured.
-    expect(at(0.9)).toMatchObject({ ruby: '#29231a', soft: '#3b3429', track: 'rgba(34,29,21,0.32)' })
+    expect(at(0.9)).toMatchObject({ ruby: '#29231a', soft: '#3b3429', track: 'rgba(34,29,21,0.356)' })
     expect(at(1).ruby).toBe(PAPER.ink)
     // Darker the further it is turned: on the page's paper, the readings
     // go from the soft ink's 5.8:1 toward the text's own 14.8:1; the soft
@@ -71,6 +84,9 @@ describe('the words over the print (plan 309)', () => {
     }
     expect(alongPanel(plan(1, { hour: 'night', season: 'hanabi' }))).toBe(0.74)
     expect(alongPanel(plan(1, { hour: 'night' }), 'summer-hanabi')).toBe(0.74)
+    // The date's B print, with no season asked, as its A print.
+    expect(alongPanel(plan(1, { hour: 'night' }), 'summer-hanabi-b')).toBe(0.74)
+    expect(alongPanel(plan(1, { hour: 'night' }), 'summer-night-b')).toBe(ON.night)
     for (const hour of ['dawn', 'day', 'dusk']) expect(alongPanel(plan(1, { hour, season: 'hanabi' })), hour).toBe(ON[hour])
     // Never under the darkness it had before, whatever the print.
     for (const hour of PRINT_HOURS) for (const season of seasons) expect(alongPanel(plan(1, { hour, season })), `${season} ${hour}`).toBeGreaterThanOrEqual(0.62)
@@ -78,37 +94,96 @@ describe('the words over the print (plan 309)', () => {
     expect(alongPanel(plan(1, { hour: 'day', photo: 'carousel/mine.jpg' }))).toBe(0.62)
   })
 
-  it('stands the voice’s credit inside the panel’s foot, under every word read, the text’s room the credit’s less', () => withPath2D(() => {
+  it('reads every sentence whole as it is said, at the title’s size, the voice’s credit in the panel’s foot under it', () => withPath2D(() => {
     const plan = (id, along, lang = 'en') => challengePlan(bank, id, { style: 'along', lang, tune: { 'challenge.along': along } })
     // Off, where it always was: under the panel, on the print.
     const was = alongBox(plan('n5-12', 0))
     expect(was.text).toBe(was.foot)
     expect(was.credit - FS.sm * 0.72).toBeGreaterThan(was.foot)
-    // On, the panel stands where it did, its text's room the credit's line less.
+    // On, the panel stands where it did, its text's room the credit's line
+    // less, the credit's letters inside its foot, under that room.
     const box = alongBox(plan('n5-12', 1))
     expect([box.top, box.foot]).toEqual([was.top, was.foot])
     expect(box.foot - box.text).toBeCloseTo(FS.sm * 1.4, 6)
+    expect(box.credit - FS.sm * 0.72).toBeGreaterThan(box.text - SP[5] * 0.5)
+    expect(box.credit + FS.sm * 0.12).toBeLessThan(box.foot)
     for (const P of bank.passages) {
       for (const lang of ['en', 'fr']) {
-        const pl = plan(P.id, 1, lang)
-        const tl = challengeTimeline(pl)
-        for (const line of new Set([tl.lines[0], tl.lines[Math.floor(tl.lines.length / 2)], tl.lines.at(-1)])) {
-          const { ctx, at } = drawn()
-          drawChallenge(ctx, pl, tl, line.voice + 0.2, null)
-          const where = `${P.id} ${lang} ${line.i}`
-          const credit = at.filter(x => /VOICEVOX Nemo/.test(x.t))
-          expect(credit, where).toHaveLength(1)
-          const [c] = credit
-          expect(c.y, where).toBeCloseTo(box.credit, 6)
-          // Its letters inside the panel's foot, under the room the text is read in.
-          expect(c.y - c.size * 0.72, where).toBeGreaterThan(box.text - SP[5] * 0.5)
-          expect(c.y + c.size * 0.12, where).toBeLessThan(box.foot)
-          // Every word read stands above it.
-          for (const x of at.filter(x => jp(x.t) && x.alpha > 0.01)) expect(x.y + x.size * 0.12, `${where} ${x.t}`).toBeLessThanOrEqual(box.text)
+        for (const along of [0, 1]) {
+          const pl = plan(P.id, along, lang)
+          const tl = challengeTimeline(pl)
+          const B = alongBox(pl)
+          for (const line of tl.lines) {
+            const { ctx, at } = drawn()
+            drawChallenge(ctx, pl, tl, line.voice + 0.2, null)
+            const where = `${P.id} ${lang} along ${along}, sentence ${line.i + 1}`
+            // The sentence said, every word of it, at the title's size at least.
+            const words = at.filter(x => x.size >= FS.title - 0.5 && x.alpha > 0.99)
+            expect(words.map(x => x.t).join(''), where).toContain(pl.sents[line.i].map(r => r.t).join(''))
+            const [credit, ...more] = at.filter(x => /VOICEVOX Nemo/.test(x.t))
+            expect(more, where).toEqual([])
+            expect(credit.y, where).toBeCloseTo(B.credit, 6)
+            if (credit.alpha > 0.99) {
+              for (const x of words) expect(x.y + x.size * 0.12, `${where} ${x.t}`).toBeLessThanOrEqual(B.text)
+            } else {
+              // Gone only while a sentence too tall for the room above it is
+              // read, that sentence reaching into its room, inside the panel.
+              expect([along, credit.alpha], where).toEqual([1, 0])
+              const low = Math.max(...words.map(x => x.y + x.size * 0.12))
+              expect(low, where).toBeGreaterThan(B.text - SP[5] * 0.5)
+              expect(low, where).toBeLessThan(B.foot - SP[5] * 0.5)
+            }
+          }
         }
       }
     }
-  }), 120000)
+  }), 240000)
+
+  it('gives a sentence too tall to stand above the credit the panel’s foot while it is read, never a smaller size', () => withPath2D(() => {
+    // Fifty-eight words of one kanji under its reading: eight lines at the
+    // title's size, too tall for the room above the credit, not for the panel.
+    const yoru = { t: '夜', k: 'word', ro: 'yoru', fu: [['夜', 'よる']] }
+    const tall = [...Array(58).fill(yoru), { t: '。', k: 'punct' }]
+    const base = challengePlan(bank, 'n4-01', { style: 'along' })
+    const plan = along => ({ ...base, id: 'eight-lines', tune: { 'challenge.along': along }, sents: [base.sents[0], tall, base.sents[1]] })
+    const said = rows => rows.map(r => r.t).join('')
+    const seen = (pl, t) => {
+      const at = draw(pl, t)
+      return { words: at.filter(x => x.size >= FS.title - 0.5 && x.alpha > 0.99), credit: at.find(x => /VOICEVOX Nemo/.test(x.t)) }
+    }
+    const on = plan(1)
+    const tl = challengeTimeline(on)
+    const box = alongBox(on)
+    // Before it, the credit under the sentence said.
+    let s = seen(on, tl.lines[0].voice + 0.2)
+    expect(s.credit.alpha).toBe(1)
+    expect(s.words.map(x => x.t).join('')).toContain(said(base.sents[0]))
+    // Turned to, the credit going as the column turns.
+    s = seen(on, tl.lines[1].at + CH.turn / 2)
+    expect(s.credit.alpha).toBeGreaterThan(0)
+    expect(s.credit.alpha).toBeLessThan(1)
+    // Said: whole, at the title's size, down into the credit's room, the credit gone.
+    s = seen(on, tl.lines[1].voice + 0.2)
+    expect(s.credit.alpha).toBe(0)
+    expect(s.words.map(x => x.t).join('')).toContain(said(tall))
+    expect(Math.min(...s.words.filter(x => x.t === '夜').map(x => x.size))).toBeGreaterThanOrEqual(FS.title)
+    const low = Math.max(...s.words.map(x => x.y + x.size * 0.12))
+    expect(low).toBeGreaterThan(box.text - SP[5] * 0.5)
+    expect(low).toBeLessThan(box.foot - SP[5] * 0.5)
+    // Turned from, the credit back under the next.
+    s = seen(on, tl.lines[2].at + CH.turn / 2)
+    expect(s.credit.alpha).toBeGreaterThan(0)
+    expect(s.credit.alpha).toBeLessThan(1)
+    s = seen(on, tl.lines[2].voice + 0.2)
+    expect(s.credit.alpha).toBe(1)
+    expect(s.words.map(x => x.t).join('')).toContain(said(base.sents[1]))
+    for (const x of s.words) expect(x.y + x.size * 0.12, x.t).toBeLessThanOrEqual(box.text)
+    // Off, it stood whole on the panel as it always did, the credit under the panel.
+    const off = plan(0)
+    s = seen(off, challengeTimeline(off).lines[1].voice + 0.2)
+    expect(s.words.map(x => x.t).join('')).toContain(said(tall))
+    expect(s.credit).toMatchObject({ alpha: 1, y: alongBox(off).credit })
+  }))
 
   it('lays a band of night behind the read-along’s hook, only where no cover stands', () => withPath2D(() => {
     const plan = (tune, extra = {}) => challengePlan(bank, 'n5-12', { style: 'along', tune, ...extra })
@@ -149,6 +224,31 @@ describe('the words over the print (plan 309)', () => {
         expect(at, `${style} ${s.key}`).toHaveLength(1)
         expect(at[0].alpha, `${style} ${s.key}`).toBe(1)
       }
+    }
+  }))
+
+  it('stands the masthead on a glow as strong as the wash still to come, and leaves it to the cover under the cover', () => withPath2D(() => {
+    const masts = (pl, t) => draw(pl, t).filter(x => x.t === 'TSUJI').map(x => x.alpha)
+    try {
+      for (const style of ['scroll', 'along']) {
+        const pl = challengePlan(bank, 'n5-12', { style, tune: { 'challenge.cover': 1 } })
+        const reading = challengeTimeline(pl).segs.find(s => s.key === 'reading')
+        // The wash coming in after the cover: the masthead on its glow, drawn
+        // again as strong as the wash still to come, then once.
+        seam.laid = 0.25
+        expect(masts(pl, reading.start + 0.2), style).toEqual([1, 0.75])
+        seam.laid = 1
+        expect(masts(pl, reading.start + 2), style).toEqual([1])
+        // Under the cover none of it is laid: the cover stands the masthead on
+        // its own paper (cover.js), and the hook's own under it is plain.
+        seam.laid = 0
+        seam.cover = false
+        expect(masts(pl, 1.6), style).toEqual([1])
+        seam.cover = true
+      }
+    } finally {
+      seam.laid = null
+      seam.cover = true
     }
   }))
 })
