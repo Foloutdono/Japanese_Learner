@@ -884,9 +884,10 @@ async function renderFeature(mine) {
 // is rendered (the command below), every word timed on it.
 const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
 // A scenery whose prints do not load (not drawn yet, or not served with
-// the studio) has the bay stand in, at the hour and season asked for, so
-// the frame is lit as that hour is; else the last print drawn. It says
-// so, rather than leave a blank page (plan 309). A render overtaken by a
+// the studio) has the bay stand in, at the hour and season asked for and
+// with the parts its dials bring out (its petals, its fireworks), so the
+// frame is lit as that hour is; else the last print drawn. It says so,
+// rather than leave a blank page (plan 309). A render overtaken by a
 // newer one says nothing: its scenery is no longer the one in view.
 let lastPrint = null
 let standInSaid = ''
@@ -902,10 +903,10 @@ async function challengePrint(pl, mine) {
     return { P, standIn: false }
   }
   console.warn(`reading challenge: ${failure.message}`)
-  // The bay as it would have stood, unless the bay is what failed.
-  const bayFailed = asked.scenery === 'bay' && !asked.falls && !asked.bursts
+  // The bay as it would have stood, dialled as asked, unless the bay is what failed.
+  const bayFailed = asked.scenery === 'bay'
   let bayFailure = bayFailed ? failure : null
-  const bay = bayFailed ? null : await printFor(state.hour).catch(e => { bayFailure = e; return null })
+  const bay = bayFailed ? null : await printFor(state.hour, seasonOf(), { ...asked, scenery: 'bay' }).catch(e => { bayFailure = e; return null })
   if (mine !== token) return null
   const before = bay ?? lastPrint
   const view = sceneryOf(pl.scenery)

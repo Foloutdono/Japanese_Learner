@@ -182,10 +182,13 @@ function paint(c, draw, lit) {
 const UNDER = { under: true }
 const OVER = { over: true }
 // Each print's canvases, by the look they were drawn for: its night, kept
-// tall to be raised, split at the train, its fireworks apart. Only the
-// looks the last frame asked for are kept, with the print: one, or under
-// a night's cover the unlit and the lit until the paper is laid; the
-// unlit night is drawn again if the hook is asked again.
+// tall to be raised, split at the train, its fireworks apart. Kept with
+// the print: the looks this frame asks for (one, or under a night's cover
+// the unlit and the lit until the paper is laid), and one more, a look the
+// frame before had and this one does not (its own before any it carried),
+// so two players drawing one print in turn (the studio's while it encodes
+// the video) draw neither's look again; the unlit night is drawn again
+// only once a third look has come between.
 const kept = new WeakMap()
 function rastersOf(P, looks) {
   const had = kept.get(P)
@@ -195,6 +198,8 @@ function rastersOf(P, looks) {
     if (!now.has(key)) now.set(key, had?.has(key) ? had.get(key) : drawLook(P, look))
     return now.get(key)
   })
+  const other = had ? [...had.keys()].find(key => !now.has(key)) : undefined
+  if (other !== undefined) now.set(other, had.get(other))
   kept.set(P, now)
   return Rs
 }
@@ -318,6 +323,29 @@ function discSprite(P, D, u) {
   discs.set(P, out)
   return out
 }
+// The same for the read-along, laid over its darkening rather than under
+// it, where it came out a dull grey moon or a beige sun: put together once
+// as the print would lay it, behind what the print's front layer stands in
+// front of (the station's eaves cross its glow), under the print's paper.
+const lone = new WeakMap()
+function loneSprite(P, s, u) {
+  if (lone.has(P)) return lone.get(P)
+  const c = canvasOf(s.c.width, s.c.height)
+  if (c) {
+    const x = c.getContext('2d')
+    const w = P.scene.w * u
+    const h = P.scene.h * u
+    const T = 128 * u
+    x.drawImage(s.c, 0, 0)
+    x.globalCompositeOperation = 'destination-out'
+    x.drawImage(P.img.front, -s.x, -s.y, w, h)
+    // The paper's grain over it, its tiles where drawPrint lays them.
+    x.globalCompositeOperation = 'source-atop'
+    for (let ty = 0; ty < h; ty += T) for (let tx = 0; tx < w; tx += T) x.drawImage(P.img.paper, tx - s.x, ty - s.y, T, Math.min(T, h - ty))
+  }
+  lone.set(P, c)
+  return c
+}
 
 /** The dials as a plan sets them: each at its default where there is no
  *  plan, as the look the studio opens on. */
@@ -346,7 +374,8 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
   // The night's print is lit for the paper laid over it: under a cover,
   // where none is, it stands as it is, and its light comes in with the paper.
   const lit = paper && hour === 'night' ? dial.night : null
-  const at = P ? printAt(ctx, P, { lit, opened, laid, dial, seg, into, p }) : null
+  // Darkened, its sun or moon is laid over the darkening, in its own light.
+  const at = P ? printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, apart: !paper }) : null
   if (!P) { ctx.fillStyle = paper ? PAPER.card : '#17151a'; ctx.fillRect(0, 0, FMT.w, FMT.h) }
   if (paper) {
     if (washed > 0) {
@@ -363,6 +392,13 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
     ctx.fillStyle = g
     ctx.fillRect(0, 0, FMT.w, FMT.h * 0.72)
   }
+  // The sun or moon over the darkened sky, where the print has it.
+  if (at?.disc) {
+    ctx.save()
+    ctx.globalAlpha *= at.disc.a
+    ctx.drawImage(at.disc.c, at.disc.x, at.disc.y)
+    ctx.restore()
+  }
   // The fireworks over it all, in their own colours.
   if (at?.bursts) ctx.drawImage(at.bursts, at.x, at.y)
   return { laid }
@@ -370,23 +406,29 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
 
 // The print laid for this moment: raised, travelled, its sun or moon and
 // its train between what lies under and over them. Gives where it was
-// laid, and its fireworks, to be laid there over the paper.
-function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p }) {
+// laid, and its fireworks, to be laid there over the paper; `apart`, its
+// sun or moon too, to be laid over the darkening (`disc`: the picture,
+// where, how much of it shows).
+function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, apart = false }) {
   const view = sceneryOf(P.scenery)
   // The long view stands at the frame's height, wider than it; the rest across its width.
   const wide = view.pan
   const u = wide ? FMT.h / P.scene.h : FMT.w / P.scene.w
   const w = P.scene.w * u
   const h = P.scene.h * u
-  // Kept tall only to be raised (drawn taller, a few edge pixels fall a
-  // level or two apart: unraised, the frame stays the one it was).
+  // Kept tall only to be raised. Drawn taller it is resampled a little
+  // otherwise even before it rises (at the hook, thousands of pixels a
+  // level or so apart and some, mostly in the last rows, where the frame's
+  // foot cut it, up to 43), so a print the dial leaves down is drawn at
+  // the frame's height, the frame the one it was.
   const tall = !wide && view.lift && dial.lift > 0
   const W = wide ? Math.ceil(w) : FMT.w
   const H = tall ? Math.ceil(h) : FMT.h
   const disc = dial.disc > 0 && hasDisc(P, view)
   const split = dial.train > 0 || disc
   const bursts = dial.bursts > 0 && !!P.img.bursts && !!P.img.backBare
-  // Raised by whole pixels, its foot at the frame's.
+  // Raised till its foot is at the frame's: between pixels as it rises, so
+  // it glides, and on whole pixels once raised, so the held print is sharp.
   const rise = tall ? liftAt(seg, into, dial.lift) : 0
   const y = rise > 0 ? (FMT.h - Math.floor(h)) * rise : 0
   // The long view's window opens on Fuji's summit, in its middle.
@@ -407,15 +449,16 @@ function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p }) {
   }
   const shown = disc ? discAt(seg, into, tall) : 0
   const s = shown > 0 ? discSprite(P, discOf(P, view), u) : null
+  const alone = s && apart ? loneSprite(P, s, u) : null
   // A look, its parts in their order: the sun or moon over what lies
-  // under the train, the train, what lies over it.
+  // under the train (unless it is laid apart), the train, what lies over it.
   const lay = (g, R) => {
     if (!split) {
       g.drawImage(R.whole, x, y)
       return
     }
     g.drawImage(R.under, x, y)
-    if (s) {
+    if (s && !alone) {
       g.save()
       g.globalAlpha *= shown
       g.drawImage(s.c, x + s.x, y + s.y)
@@ -441,7 +484,7 @@ function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p }) {
     } else lay(ctx, Rs[i])
     ctx.restore()
   })
-  return { bursts: bursts ? burstsOf(P, W, H, u) : null, x, y }
+  return { bursts: bursts ? burstsOf(P, W, H, u) : null, x, y, disc: alone ? { c: alone, x: x + s.x, y: y + s.y, a: shown } : null }
 }
 
 // The photo laid to cover the frame, its middle kept, made once: dark,

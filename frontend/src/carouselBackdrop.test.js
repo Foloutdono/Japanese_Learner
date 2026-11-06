@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { backdrop, discAt, liftAt, panAt, trainRun, washAt } from '../carousel/backdrop.js'
-import { drawPrint } from '../carousel/app.js'
+import { drawPrint, loadFailure, loadPrint, standsOnFailure } from '../carousel/app.js'
 import { challengePlan, challengeTimeline } from '../carousel/challenge.js'
 import { coverOn } from '../carousel/cover.js'
 import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
@@ -32,7 +32,7 @@ function recorder() {
   const methods = {
     save: () => stack.push({ ...state }),
     restore: () => Object.assign(state, stack.pop() || {}),
-    drawImage: (img, ...a) => calls.push({ op: 'drawImage', img, a, alpha: state.globalAlpha, filter: state.filter }),
+    drawImage: (img, ...a) => calls.push({ op: 'drawImage', img, a, alpha: state.globalAlpha, filter: state.filter, gco: state.globalCompositeOperation }),
     fillRect: (...a) => calls.push({ op: 'fillRect', a, fill: state.fillStyle, alpha: state.globalAlpha }),
     clearRect: (...a) => calls.push({ op: 'clearRect', a }),
     createLinearGradient: () => ({ addColorStop() {} }),
@@ -224,7 +224,7 @@ describe('what a reading challenge stands on (plan 309)', () => {
     }
   }))
 
-  it('raises the print by whole pixels as the text comes in, its foot at the frame’s', () => withCanvases(made => {
+  it('raises the print as the text comes in, between pixels as it rises and on whole ones once raised, its foot at the frame’s', () => withCanvases(made => {
     const P = print('winter-day')
     const plan = planOf({ ...BEFORE_309, 'challenge.lift': 1 })
     const tl = challengeTimeline(plan)
@@ -236,6 +236,8 @@ describe('what a reading challenge stands on (plan 309)', () => {
     const rising = y(rd.start + 0.8)
     expect(rising).toBeLessThan(0)
     expect(rising).toBeGreaterThan(-145)
+    // Halfway up, half a pixel along: it glides.
+    expect(rising).toBeCloseTo(-72.5, 9)
     for (const t of [rd.start + 1.6, 60, tl.segs.at(-1).start + 1]) expect(y(t)).toBe(-145)
     expect(made).toHaveLength(1)
   }))
@@ -266,6 +268,48 @@ describe('what a reading challenge stands on (plan 309)', () => {
     }
     // Under, over, the train's rows at twice the print's width, the sun: each made once.
     expect(made.map(c => [c.width, c.height])).toEqual([[1080, 2066], [1080, 2066], [Math.ceil(2 * w + phase), 89], [made[3].width, made[3].width]])
+  }))
+
+  it('lays the read-along’s sun or moon over its darkening, in its own light, behind what stands in front of it', () => withCanvases(made => {
+    // Under the darkening it came out a dull grey moon or a beige sun (plan 309).
+    const P = print('winter-day')
+    const u = 1080 / 390
+    const plan = planOf({ ...BEFORE_309, 'challenge.train': 1, 'challenge.disc': 1, 'challenge.lift': 1 }, { style: 'along' })
+    const tl = challengeTimeline(plan)
+    const rd = reading(tl)
+    for (const t of [1.6, rd.start + 0.5, 30, tl.segs.at(-1).start + 1]) {
+      const f = at(P, DARK, plan, tl, t)
+      const [under, over, strip, sun, alone] = made
+      // The print, its train between its parts, the darkening, then the sun, at the print's place, raised with it.
+      expect(f.calls.filter(c => c.op === 'drawImage' || c.op === 'fillRect').map(c => (c.op === 'fillRect' ? 'dark' : c.img)), `${t}`).toEqual([under, strip, over, 'dark', alone])
+      const lift = f.images()[0].a[1]
+      const mine = f.images().at(-1)
+      expect(mine.a[0] + alone.width / 2).toBeCloseTo(195 * u, 0)
+      expect(mine.a[1] + alone.height / 2 - lift).toBeCloseTo(150 * u, 0)
+      expect(mine.alpha).toBe(1)
+      expect([alone.width, alone.height]).toEqual([sun.width, sun.height])
+    }
+    expect(made).toHaveLength(5)
+    // Put together once: the sun, the front layer taken out of it, the paper's grain over what is left, its tiles where the print's lie.
+    const [under, over, strip, sun, alone] = made
+    const drawn = alone.r.images()
+    expect(drawn.slice(0, 2).map(c => [c.img === sun ? 'sun' : c.img.k, c.gco])).toEqual([['sun', 'source-over'], ['front', 'destination-out']])
+    expect(drawn[1].a).toEqual([-Math.floor(195 * u) + sun.width / 2, -Math.floor(150 * u) + sun.height / 2, 390 * u, 746 * u])
+    const grain = drawn.slice(2)
+    expect(grain.length).toBeGreaterThan(0)
+    for (const c of grain) {
+      expect([c.img.k, c.gco]).toEqual(['paper', 'source-atop'])
+      expect((c.a[0] - drawn[1].a[0]) / (128 * u)).toBeCloseTo(Math.round((c.a[0] - drawn[1].a[0]) / (128 * u)), 9)
+    }
+    // On the paper the sun stays in the print, under its train (the scroll's look).
+    const scroll = planOf(plan.tune)
+    expect(at(P, PAPER, scroll, challengeTimeline(scroll), 30).images().map(c => c.img)).toEqual([under, sun, strip, over])
+    // Where the print stays down it goes as the paper comes in, laid as faint.
+    const down = planOf({ ...BEFORE_309, 'challenge.disc': 1 }, { style: 'along' })
+    const dtl = challengeTimeline(down)
+    const g = at(P, DARK, down, dtl, reading(dtl).start + 0.35)
+    expect(g.images().at(-1).img).toBe(alone)
+    expect(g.images().at(-1).alpha).toBeCloseTo(discAt('reading', 0.35, false), 9)
   }))
 
   it('lays the sun or moon under the hook alone where the print stays down, and none on August’s night', () => withCanvases(() => {
@@ -330,9 +374,42 @@ describe('what a reading challenge stands on (plan 309)', () => {
     expect(after.images().map(c => [c.img, c.alpha])).toEqual([[made[0], 1], [made[1], after.laid]])
     expect(at(P, PAPER, plan, tl, 30).images().map(c => c.img)).toEqual([made[1]])
     expect(made).toHaveLength(2)
-    // Once the paper is laid the unlit print is let go, and drawn again if the hook is asked again.
-    expect(at(P, PAPER, plan, tl, 1.6).images().map(c => c.img)).toEqual([made[2]])
-    expect(made).toHaveLength(3)
+    // Once the paper is laid the unlit print is kept a frame on, the one look more:
+    // the hook asked again lays it as it was drawn.
+    expect(at(P, PAPER, plan, tl, 1.6).images().map(c => c.img)).toEqual([made[0]])
+    expect(made).toHaveLength(2)
+    // A third look between (the train run, the print split at it) lets it go: drawn again, once.
+    const split = planOf({ ...BEFORE_309, 'challenge.cover': 1, 'challenge.train': 1 }, { hour: 'night' })
+    at(P, PAPER, plan, tl, 30)
+    at(P, PAPER, split, challengeTimeline(split), 30)
+    expect(made).toHaveLength(5)
+    expect(at(P, PAPER, plan, tl, 1.6).images().map(c => c.img)).toEqual([made[5]])
+    expect(made).toHaveLength(6)
+  }))
+
+  it('draws neither look again while two players draw one print in turn (the studio’s, while it encodes)', () => withCanvases(made => {
+    // The player in the reading, the lit night alone; the export under the
+    // cover (the unlit laid, the lit drawn) and as the light comes in.
+    const P = print('winter-night')
+    const plan = planOf({ ...BEFORE_309, 'challenge.cover': 1, 'challenge.night': 1, 'challenge.train': 1, 'challenge.disc': 1, 'challenge.lift': 1 }, { hour: 'night' })
+    const tl = challengeTimeline(plan)
+    const rd = reading(tl)
+    at(P, PAPER, plan, tl, 1.6)
+    // Each look kept tall, its under and over: the unlit, then the lit.
+    const tall = () => made.filter(c => c.height === 2066)
+    const [under0, over0, under1, over1] = tall()
+    const looks = f => f.images().map(c => c.img).filter(c => c.height === 2066)
+    for (let i = 0; i < 3; i++) {
+      expect(looks(at(P, PAPER, plan, tl, 30 + i)), `reading ${i}`).toEqual([under1, over1])
+      expect(looks(at(P, PAPER, plan, tl, 1.6 + i / 10)), `hook ${i}`).toEqual([under0, over0])
+      expect(looks(at(P, PAPER, plan, tl, 40 + i)), `reading ${i}`).toEqual([under1, over1])
+      // The light coming in: the unlit laid, the lit put together on the fade's canvas.
+      const f = at(P, PAPER, plan, tl, rd.start + 0.2 + i / 10)
+      expect(f.laid > 0 && f.laid < 1).toBe(true)
+      expect(looks(f), `fade ${i}`).toEqual([under0, over0])
+      expect(looks(f.images().at(-1).img.r), `fade ${i}`).toEqual([under1, over1])
+    }
+    expect(tall()).toHaveLength(4)
   }))
 
   it('brings a night’s light in after its cover as one picture, put together first, never part by part', () => withCanvases(made => {
@@ -382,4 +459,91 @@ describe('what a reading challenge stands on (plan 309)', () => {
     expect(made[0].r.images().map(c => c.img.k)).toContain('back')
     expect(made).toHaveLength(1)
   }))
+})
+
+// The print loaded as the page loads it, its files served from the
+// frontend: `fail` answers a path with a status, a page that is not JSON
+// ('html') or no answer at all ('net'); a picture whose source holds
+// `broken` does not decode, and a print's layer marked (`mark`) holds it.
+async function loading(opts, { fail = {}, mark = null, broken = '@@broken@@' } = {}) {
+  const had = { fetch: globalThis.fetch, Image: globalThis.Image }
+  globalThis.fetch = async url => {
+    const path = url.replace(/^\//, '')
+    const how = fail[path]
+    if (how === 'net') throw new TypeError('Failed to fetch')
+    if (typeof how === 'number') return { ok: false, status: how, text: async () => '' }
+    let body = how === 'html' ? '<!doctype html><title>Not here</title>' : read(path)
+    if (mark?.path === path) {
+      const scene = JSON.parse(body)
+      scene.layers[mark.layer] += `<!--${broken}-->`
+      body = JSON.stringify(scene)
+    }
+    return { ok: true, status: 200, text: async () => body }
+  }
+  globalThis.Image = class {
+    set src(v) { setTimeout(() => (decodeURIComponent(v).includes(broken) ? this.onerror() : this.onload())) }
+  }
+  try {
+    return await loadPrint('day', { base: '/', season: 'winter', ...opts }).then(() => null, e => e.message)
+  } finally {
+    globalThis.fetch = had.fetch
+    if (had.Image === undefined) delete globalThis.Image
+    else globalThis.Image = had.Image
+  }
+}
+
+describe('what a reading challenge stands on, when it does not load (plan 309)', () => {
+  const lake = challengePlan(data, 'n5-12', { scenery: 'lake' })
+  const bay = challengePlan(data, 'n5-12', {})
+  const own = 'carousel/prints/1/lake'
+
+  it('loads the print whole where every file is there', async () => {
+    expect(await loading({ scenery: 'lake' })).toBeNull()
+    expect(await loading({})).toBeNull()
+  })
+
+  it('names the file that failed and how, and says a scenery has no prints yet only where they are not there', async () => {
+    const cases = [
+      // Not drawn yet: its meta is not there.
+      [{ scenery: 'lake' }, { fail: { [`${own}/meta.json`]: 404 } }, `print: ${own}/meta.json 404`, true],
+      [{ scenery: 'lake' }, { fail: { [`${own}/winter-day.json`]: 404 } }, `print: ${own}/winter-day.json 404`, true],
+      // There, but broken: served wrong, not JSON, a layer that does not decode, a file of the app's own.
+      [{ scenery: 'lake' }, { fail: { [`${own}/winter-day.json`]: 500 } }, `print: ${own}/winter-day.json 500`, false],
+      [{ scenery: 'lake' }, { fail: { [`${own}/meta.json`]: 'html' } }, `print: ${own}/meta.json is not JSON (`, false],
+      [{ scenery: 'lake' }, { mark: { path: `${own}/winter-day.json`, layer: 'sky' } }, `print: ${own}/winter-day.json, its sky layer, did not decode`, false],
+      [{ scenery: 'lake' }, { broken: 'grain.png' }, `print: public/today/print/${meta.rev}/grain.png did not load`, false],
+      [{ scenery: 'lake' }, { fail: { 'src/index.css': 'net' } }, 'print: src/index.css could not be fetched (Failed to fetch)', false],
+    ]
+    for (const [opts, how, said, missing] of cases) {
+      const message = await loading(opts, how)
+      expect(message, said).toMatch(new RegExp(`^${said.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`))
+      // As the render reads it back from the page: Playwright's prefix, then the page's stack.
+      const failed = loadFailure(`page.evaluate: Error: ${message}\n    at get (http://127.0.0.1:1/carousel/app.js:440:11)`)
+      expect(failed, said).toEqual({ line: message, missing })
+      expect(standsOnFailure(lake, failed), said).toBe(missing
+        ? `Mirror lake (逆さ富士) has no prints yet (${message}): draw them with python3 scripts/sceneries/build.py`
+        : `Mirror lake (逆さ富士) did not load (${message})`)
+    }
+    // Today's print, the bay's and the long view's, whatever failed.
+    const gone = await loading({}, { fail: { 'src/components/station/print/print.json': 404 } })
+    expect(gone).toBe('print: src/components/station/print/print.json 404')
+    expect(standsOnFailure(bay, loadFailure(gone))).toBe(`Today's print did not load (${gone})`)
+    const wide = challengePlan(data, 'n5-12', { scenery: 'wide' })
+    expect(standsOnFailure(wide, loadFailure('print: public/today/print/3/winter-day-desk.json 404'))).toBe("Today's print did not load (print: public/today/print/3/winter-day-desk.json 404)")
+    // The maker's photo.
+    const photo = challengePlan(data, 'n5-12', { photo: 'carousel/mine.jpg' })
+    expect(standsOnFailure(photo, loadFailure('page.evaluate: Error: photo: carousel/mine.jpg'))).toBe('the photo carousel/mine.jpg did not load: --photo takes a path under frontend/')
+  })
+
+  it('leaves any other failure to be thrown as it is, never said to be a print missing', () => {
+    for (const message of [
+      "page.evaluate: SyntaxError: The requested module './backdrop.js' does not provide an export named 'nope'",
+      'page.evaluate: TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:1/carousel/challenge.js',
+      "page.evaluate: TypeError: Cannot read properties of undefined (reading 'layers')\n    at loadPrint (http://127.0.0.1:1/carousel/app.js:469:5)",
+      '', undefined,
+    ]) expect(loadFailure(message), String(message)).toBeNull()
+    // The render stops on what loadFailure reads and throws the rest on.
+    const render = read('carousel/long/render.mjs')
+    expect(render).toMatch(/const failed = loadFailure\(e\.message\)\n\s*if \(!failed\) \{\n\s*await closeAll\(\)\n\s*throw e\n\s*\}\n\s*await stop\(standsOnFailure\(plan, failed\)\)/)
+  })
 })
