@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { FORMATS, FS, alpha, palette } from '../carousel/draw.js'
 import { STYLES, challengePlan, challengeTimeline, drawChallenge, hookWords, lookOf } from '../carousel/challenge.js'
-import { MASTHEAD, coverBox, coverOn, drawCover, glowMasthead } from '../carousel/cover.js'
+import { MASTHEAD, coverBox, coverOn, drawCover, drawSlip, glowMasthead } from '../carousel/cover.js'
 import { MARK_INK, MARK_ROAD } from './components/ui/markPaths.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
 
@@ -279,6 +279,18 @@ describe('the reading challenge’s cover (plan 309)', () => {
       const r = traced()
       glowMasthead(r.ctx, 0, T)
       expect([r.rings, r.texts, r.marks, r.fills], name).toEqual([[], [], [], []])
+    }
+  }))
+
+  it('lays the slip alone as the cover lays it, for the cut to lay again as it leaves', () => withPath2D(() => {
+    for (const { pl, tl, words, where } of covers()) {
+      // The cover with its paper laid (no masthead glow): the hook's masthead aside, the slip's words, where it lays them.
+      const cover = drawn()
+      drawCover(cover.ctx, pl, tl, 0, null, lookOf(pl), { laid: 1, words })
+      const slip = drawn()
+      drawSlip(slip.ctx, words)
+      expect(slip.at, where).toEqual(cover.at)
+      expect(squeezed(slip.at.map(x => x.t).join('')), where).toBe(squeezed(`${words.hook}${words.title}${words.chip}`))
     }
   }))
 

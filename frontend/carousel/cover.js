@@ -91,6 +91,13 @@ export function coverBox(ctx, plan, words) {
  *  in: frame 0 is the cover whole. */
 export function drawCover(ctx, plan, tl, into, P, T, { laid = 1, words } = {}) {
   glowMasthead(ctx, 1 - laid, T)
+  drawSlip(ctx, words)
+}
+
+/** The title slip with the hook's `words` on it, as the cover stands it;
+ *  the cut after the cover lays it again as it leaves (challenge.js,
+ *  cutOf), faint as one. */
+export function drawSlip(ctx, words) {
   const { box, hook, title } = slip(ctx, words)
   const { ink } = printPlate(ctx, PAPER, box.x, box.y, box.w, box.h, U)
   let y = box.y + SP[4]
