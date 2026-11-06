@@ -60,15 +60,14 @@ export function liftAt(seg, into, on = 1) {
 }
 
 /** The long view's window, its left edge on the print in pixels: `from`
- *  (Fuji's summit in its middle) under the hook, carried toward the
- *  season's tree as the text is read (`p`), `pan` of the way to 85% of
- *  what lies past it (`span`, the print's width less the frame's), and
+ *  (Fuji's summit in its middle) under the hook, carried as the text is
+ *  read (`p`) `pan` of the way to `to` (where the whole travel ends), and
  *  held there for the question and the way to the app. Both ends fall
  *  on whole pixels, so the held frame is laid unblurred. */
-export function panAt(seg, p, { pan = 1, from = 0, span = 0 } = {}) {
-  const to = Math.round(from + (span - from) * 0.85 * pan)
+export function panAt(seg, p, { pan = 1, from = 0, to = from } = {}) {
+  const end = Math.round(from + (to - from) * pan)
   if (before(seg)) return from
-  return from + (to - from) * (seg === 'reading' ? smooth(p) : 1)
+  return from + (end - from) * (seg === 'reading' ? smooth(p) : 1)
 }
 
 // How much of the paper lies over the print at each hour: the picture
@@ -83,14 +82,23 @@ const LIFT = 3
 // and goes back to the hour's whole wash this long into the question.
 const LAY = 0.7
 const BACK = 0.6
+// The paper once the text is read, over the moonlit night (challenge.night
+// at 1): 0.64, where the hour's is 0.6. The night's darkest, its trunks
+// and eaves, are lit three times as bright as the print drew them, as
+// before plan 309 (`lifted`, below), and under the hour's wash the way to
+// the app's stops still ahead, in the soft ink, stood on the river's
+// trunk at 4.42:1 and the countdown's track at 1.83; laid so, at 4.87 and
+// 1.87 at worst, where the curve this lift replaced had them.
+const MOONLIT_END = 0.64
 /** The paper over the print at a moment: `alpha`, the wash laid (the
  *  hour's, times the maker's `wash`), and `laid`, the share of it come
  *  in since the cover (0 under the cover, then 1). Under the reading the
  *  wash is lighter (`read`, challenge.read), coming in from the hook's,
- *  and back to the hour's whole wash early in the question. With no
- *  cover and `read` at 1, the look before plan 309, it is the hour's
- *  wash at every moment. */
-export function washAt({ hour = 'day', wash = 1, read = 1, cover = false, seg = null, into = 0 } = {}) {
+ *  and back early in the question to the hour's whole wash, or to `end`
+ *  of it once the text is read (heavier over a moonlit night). With no
+ *  cover, `read` at 1 and `end` at 1, the look before plan 309, it is
+ *  the hour's wash at every moment. */
+export function washAt({ hour = 'day', wash = 1, read = 1, cover = false, seg = null, into = 0, end = 1 } = {}) {
   const base = (WASH[hour] ?? WASH.day) * wash
   if (seg === 'hook' && cover) return { alpha: 0, laid: 0 }
   if (seg === 'reading') {
@@ -99,7 +107,8 @@ export function washAt({ hour = 'day', wash = 1, read = 1, cover = false, seg = 
     const from = cover ? 0 : 1
     return { alpha: Math.min(0.97, base * (from + (read - from) * k)), laid: cover ? k : 1 }
   }
-  if (seg === 'question') return { alpha: Math.min(0.97, base * (read + (1 - read) * ease(into / BACK))), laid: 1 }
+  if (seg === 'question') return { alpha: Math.min(0.97, base * (read + (end - read) * ease(into / BACK))), laid: 1 }
+  if (seg === 'answer' || seg === 'cta') return { alpha: Math.min(0.97, base * end), laid: 1 }
   return { alpha: Math.min(0.97, base), laid: 1 }
 }
 
@@ -147,20 +156,61 @@ export function discDrawn(plan, P) {
 // The long view's summit, in the desk print's units (today-print's
 // layouts.py, DESK.fuji): the window opens with it in its middle.
 const WIDE_SUMMIT = 650
+// The long view is drawn this many pixels taller than the frame, its foot
+// cut: Fuji's summit, 445.1 units down the desk print, then stands at
+// 957 under the hook, 16 px below the lowest foot the cover's slip has
+// (940), where at the frame's height it stood at 949.
+const WIDE_TALLER = 16
+// Where the window's middle is carried to, at ×1, in the desk print's
+// units: 120 px away from the season's tree, whose leaves already reach
+// into the feed's buttons (x 920-1080, y 1100-1700) under the hook on the
+// spring, summer and autumn prints, so that carried toward it the tree
+// stood behind them. There the tree is out of the frame in those rows on
+// every print, and Fuji's cone where the mist begins (559.4 units down,
+// 485.3 to 814.7 across) stays 65 px inside the frame's right edge, the
+// summit right of the middle.
+const WIDE_END = 594
 
-// The night lit on a curve per channel (challenge.night, `n`): at 0 the
-// print three times as bright (brightness(3), the look before plan 309,
-// which sends every channel over 85 to white); toward 1 a curve that
-// brings the night sky (14, 25, 52) to the same (42, 75, 156) and burns
-// out none of its lights: the moon keeps its face, the blossom its pink.
-const GAMMA = [0.62, 0.53, 0.31]
-const tables = new Map()
-function moonTable(n) {
-  if (!tables.has(n)) tables.set(n, GAMMA.map(g => Uint8ClampedArray.from({ length: 256 }, (_, v) => Math.round((1 - n) * Math.min(255, LIFT * v) + n * 255 * (v / 255) ** g))))
-  return tables.get(n)
+// The night lit for the paper laid over it (challenge.night, `n`): at 0
+// the print three times as bright (brightness(3), the look before plan
+// 309, which sends every channel over 85 to white); toward 1 each pixel
+// lifted whole, its channels kept in the ratio the print gave them, by
+// how bright its brightest channel is: three times, as before, up to the
+// night sky's (52: the sky (14, 25, 52) to (42, 75, 156), the pale
+// moonlit page the owner chose), then less and less, on a shoulder that
+// reaches the top, 253, at 255. Nothing burns and nothing turns: the
+// maple keeps its coral, the myrtle its green, the blossom its pink, the
+// snow its modelling, and no channel comes to the ceiling. (A curve per
+// channel, first drawn here, lifted the blue far more than the red: the
+// page came out greyer, the maple mauve, and the snow's blue, 251 and
+// over in the print, went past 254.)
+const KNEE = 52
+const TOP = 253
+// How soft the shoulder is: found so that it meets TOP at 255, never over.
+const SOFT = (() => {
+  let lo = 1
+  let hi = 255
+  for (let i = 0; i < 60; i++) {
+    const s = (lo + hi) / 2
+    if (LIFT * KNEE + s * Math.log1p((LIFT * (255 - KNEE)) / s) > TOP) hi = s
+    else lo = s
+  }
+  return lo
+})()
+/** How bright a pixel whose brightest channel is `m` comes out, lit. */
+const lifted = m => (m <= KNEE ? LIFT * m : LIFT * KNEE + SOFT * Math.log1p((LIFT * (m - KNEE)) / SOFT))
+// At the dial's `n`, per level: the share of three times as bright kept,
+// and the factor a pixel whose brightest channel stands there is lifted by.
+const lifts = new Map()
+function liftsOf(n) {
+  if (!lifts.has(n)) {
+    lifts.set(n, [Float64Array.from({ length: 256 }, (_, v) => (1 - n) * Math.min(255, LIFT * v)),
+      Float64Array.from({ length: 256 }, (_, m) => n * (m ? lifted(m) / m : LIFT))])
+  }
+  return lifts.get(n)
 }
 // A canvas painted by `draw`, lit for the night (`lit`: none, or the
-// dial's value): the curve read back and written once, or, at 0 and
+// dial's value): read back, lifted and written once, or, at 0 and
 // wherever the canvas cannot be read back, brightness(3) as before.
 function paint(c, draw, lit) {
   const x = c.getContext('2d')
@@ -172,12 +222,13 @@ function paint(c, draw, lit) {
     draw(x)
     try {
       const img = x.getImageData(0, 0, c.width, c.height)
-      const [r, g, b] = moonTable(lit)
+      const [kept, by] = liftsOf(lit)
       const d = img.data
       for (let i = 0; i < d.length; i += 4) {
-        d[i] = r[d[i]]
-        d[i + 1] = g[d[i + 1]]
-        d[i + 2] = b[d[i + 2]]
+        const k = by[Math.max(d[i], d[i + 1], d[i + 2])]
+        d[i] = Math.round(kept[d[i]] + d[i] * k)
+        d[i + 1] = Math.round(kept[d[i + 1]] + d[i + 1] * k)
+        d[i + 2] = Math.round(kept[d[i + 2]] + d[i + 2] * k)
       }
       x.putImageData(img, 0, 0)
       return
@@ -379,12 +430,14 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
   const rd = tl?.segs.find(s => s.key === 'reading')
   const into = own ? t - own.start : 0
   const p = rd ? clamp((t - rd.start) / rd.dur) : 0
-  // A video that opens on the cover lays its paper as the text comes in.
-  const opened = cover || (plan ? coverOn(plan) : false)
-  const { alpha: washed, laid } = washAt({ hour, wash, read: dial.read, cover: opened, seg, into })
   // The night's print is lit for the paper laid over it: under a cover,
   // where none is, it stands as it is, and its light comes in with the paper.
   const lit = paper && hour === 'night' ? dial.night : null
+  // A video that opens on the cover lays its paper as the text comes in;
+  // over the moonlit night, a little heavier once the text is read.
+  const opened = cover || (plan ? coverOn(plan) : false)
+  const end = lit > 0 ? 1 + (MOONLIT_END / WASH.night - 1) * lit : 1
+  const { alpha: washed, laid } = washAt({ hour, wash, read: dial.read, cover: opened, seg, into, end })
   // Darkened, its sun or moon is laid over the darkening, in its own light.
   const at = P ? printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, disc: discDrawn(plan, P), apart: !paper }) : null
   if (!P) { ctx.fillStyle = paper ? PAPER.card : '#17151a'; ctx.fillRect(0, 0, FMT.w, FMT.h) }
@@ -422,9 +475,10 @@ export function backdrop(ctx, P, T, { dark = 0.5, hour = 'day', wash = 1, plan =
 // darkening (`disc`: the picture, where, how much of it shows).
 function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, disc = false, apart = false }) {
   const view = sceneryOf(P.scenery)
-  // The long view stands at the frame's height, wider than it; the rest across its width.
+  // The long view stands a little taller than the frame, its foot cut,
+  // and wider than it; the rest across its width.
   const wide = view.pan
-  const u = wide ? FMT.h / P.scene.h : FMT.w / P.scene.w
+  const u = wide ? (FMT.h + WIDE_TALLER) / P.scene.h : FMT.w / P.scene.w
   const w = P.scene.w * u
   const h = P.scene.h * u
   // Kept tall only to be raised. Drawn taller it is resampled a little
@@ -441,9 +495,10 @@ function printAt(ctx, P, { lit, opened, laid, dial, seg, into, p, disc = false, 
   // it glides, and on whole pixels once raised, so the held print is sharp.
   const rise = tall ? liftAt(seg, into, dial.lift) : 0
   const y = rise > 0 ? (FMT.h - Math.floor(h)) * rise : 0
-  // The long view's window opens on Fuji's summit, in its middle.
-  const summit = Math.min(W - FMT.w, Math.max(0, Math.round(WIDE_SUMMIT * u - FMT.w / 2)))
-  const x = wide ? -panAt(seg, p, { pan: dial.pan, from: summit, span: W - FMT.w }) : 0
+  // The long view's window opens on Fuji's summit, in its middle, and is
+  // carried till WIDE_END is: its left edge with `mid` in its middle, on a whole pixel.
+  const edge = mid => Math.min(W - FMT.w, Math.max(0, Math.round(mid * u - FMT.w / 2)))
+  const x = wide ? -panAt(seg, p, { pan: dial.pan, from: edge(WIDE_SUMMIT), to: edge(WIDE_END) }) : 0
   const run = trainRun(seg, p, dial.train)
   // Under a cover the night's print stands unlit, and its light comes in
   // with the paper (its lit look drawn with the hook's first frame, so the

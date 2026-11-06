@@ -10,6 +10,7 @@ import { backdrop, discAt, liftAt, panAt, trainRun, washAt } from '../carousel/b
 import { drawPrint, loadFailure, loadPrint, standInOpts, standInSays, standsOnFailure } from '../carousel/app.js'
 import { challengePlan, challengePrintOpts, challengeTimeline } from '../carousel/challenge.js'
 import { coverOn } from '../carousel/cover.js'
+import { palette } from '../carousel/draw.js'
 import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
 import { drawn } from './testing/challengeCanvas.js'
 
@@ -58,6 +59,82 @@ function print(name, device = 'phone', scenery = device === 'desk' ? 'wide' : 'b
   const img = Object.fromEntries(['sky', 'back', 'train', 'front', 'grain', 'paper'].map(k => [k, { k }]))
   return { hour: name.split('-')[1], name, scenery, scene, frame: meta.frames[device], look: meta.prints[name], img: { ...img, backBare: null, bursts: null } }
 }
+// Fuji on a desk print: its outline (the clip of its body, lines from its
+// foot round its crater and back), and where the mist over its foot
+// begins (the top of the mist's gradient), in the print's units.
+function fujiOf(scene) {
+  const all = Object.values(scene.layers).join('')
+  const outline = [...(/<clipPath id="tpr-s5FjClip"><path d="([^"]+)"/.exec(all)[1]).matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)].map(m => [+m[1], +m[2]])
+  return { outline, mist: +/<linearGradient id="tpr-s5FjMist" x1="[^"]*" y1="([^"]+)"/.exec(all)[1] }
+}
+/** Where Fuji's outline crosses the height `y`: its left flank and its right. */
+function flanksAt({ outline }, y) {
+  const xs = []
+  outline.forEach(([x0, y0], i) => {
+    const [x1, y1] = outline[(i + 1) % outline.length]
+    if (y0 !== y1 && (y0 - y) * (y1 - y) <= 0) xs.push(x0 + ((y - y0) / (y1 - y0)) * (x1 - x0))
+  })
+  return [Math.min(...xs), Math.max(...xs)]
+}
+// The season's tree on a desk print: the front layer's top-level element
+// holding the gust that sways from lowest (the trunk's, from below the
+// print's foot; the bushes' from on it).
+function treeOf(scene) {
+  const front = scene.layers.front
+  const parts = []
+  let depth = 0
+  let start = 0
+  for (const m of front.matchAll(/<(\/?)([a-zA-Z][\w-]*)[^>]*?(\/?)>/g)) {
+    if (m[1]) {
+      if (--depth === 0) parts.push(front.slice(start, m.index + m[0].length))
+    } else if (m[3]) {
+      if (depth === 0) parts.push(m[0])
+    } else if (depth++ === 0) start = m.index
+  }
+  const low = s => Math.max(-1, ...[...s.matchAll(/transform-origin: [\d.]+px ([\d.]+)px/g)].map(m => +m[1]))
+  return parts.reduce((a, b) => (low(b) > low(a) ? b : a))
+}
+// The leftmost the tree's outline comes in the rows `y0` to `y1` (print
+// units): of every path that reaches into them, each point it passes
+// through or is pulled toward (an arc's end widened by its radii), less
+// half its widest stroke. Read whole or not at all: a shape, a transform,
+// a filter or a command the reading does not know fails it.
+const ARITY = { M: 2, L: 2, C: 6, Q: 4, A: 7 }
+function leftmostIn(tree, [y0, y1]) {
+  expect(tree.match(/<\w+/g).filter(t => t !== '<g' && t !== '<path')).toEqual([])
+  expect(tree).not.toMatch(/transform=|filter/)
+  const half = Math.max(0, ...[...tree.matchAll(/stroke-width="([\d.]+)"/g)].map(m => +m[1])) / 2
+  let left = Infinity
+  for (const [, d] of tree.matchAll(/ d="([^"]*)"/g)) {
+    expect(d).toMatch(/^[MLCQAZmlcqaz\d\s.,-]*$/)
+    const pts = []
+    let at = [0, 0]
+    let open = at
+    for (const [, cmd, body] of d.matchAll(/([a-zA-Z])([^a-zA-Z]*)/g)) {
+      const up = cmd.toUpperCase()
+      if (up === 'Z') {
+        at = open
+        continue
+      }
+      const v = body.match(/-?(?:\d+\.?\d*|\.\d+)/g).map(Number)
+      for (let i = 0; i < v.length; i += ARITY[up]) {
+        const [ox, oy] = cmd === up ? [0, 0] : at
+        if (up === 'A') {
+          const r = Math.max(Math.abs(v[i]), Math.abs(v[i + 1]))
+          at = [v[i + 5] + ox, v[i + 6] + oy]
+          pts.push([at[0] - r, at[1] - r], [at[0] + r, at[1] + r])
+          continue
+        }
+        for (let j = i; j < i + ARITY[up]; j += 2) pts.push([v[j] + ox, v[j + 1] + oy])
+        at = pts.at(-1)
+        if (up === 'M' && i === 0) open = at
+      }
+    }
+    const ys = pts.map(([, y]) => y)
+    if (Math.min(...ys) - half < y1 && Math.max(...ys) + half > y0) left = Math.min(left, ...pts.map(([x]) => x - half))
+  }
+  return left
+}
 // A challenge's frame of the backdrop, as its segment asks for it (challenge.js).
 function at(P, T, plan, tl, t) {
   const s = tl.segs.find(x => t < x.start + x.dur) ?? tl.segs.at(-1)
@@ -86,7 +163,7 @@ describe('what a reading challenge stands on (plan 309)', () => {
 
   it('says each moment the same way twice, whatever came between', () => {
     const moments = SEGS.flatMap(seg => [0, 0.3, 0.8, 2].map(x => [seg, x]))
-    const say = () => moments.map(([seg, x]) => [trainRun(seg, x / 2, 1), liftAt(seg, x, 1), panAt(seg, x / 2, { pan: 1, from: 847, span: 1446 }), washAt({ hour: 'dusk', read: 0.75, cover: true, seg, into: x }), discAt(seg, x, false)])
+    const say = () => moments.map(([seg, x]) => [trainRun(seg, x / 2, 1), liftAt(seg, x, 1), panAt(seg, x / 2, { pan: 1, from: 858, to: 738 }), washAt({ hour: 'dusk', read: 0.75, cover: true, seg, into: x }), discAt(seg, x, false)])
     const first = say()
     say().reverse()
     expect(say()).toEqual(first)
@@ -115,27 +192,41 @@ describe('what a reading challenge stands on (plan 309)', () => {
     for (const seg of ['question', 'answer', 'cta']) expect(liftAt(seg, 0, 1)).toBe(1)
   })
 
-  it('carries the long view’s window from Fuji’s summit toward the tree, gently, and holds it on whole pixels', () => {
-    const span = Math.ceil(1184 * (1920 / 900)) - 1080
-    const from = Math.round(650 * (1920 / 900) - 540)
-    expect([from, span]).toEqual([847, 1446])
+  it('carries the long view’s window from Fuji’s summit away from the season’s tree, gently, and holds it on whole pixels', () => {
+    // The desk print 1936 px tall, its window with Fuji's summit (650
+    // units across) in its middle, then with 594 in its middle at ×1.
+    const u = 1936 / 900
+    const [from, to] = [650, 594].map(mid => Math.round(mid * u - 540))
+    expect([from, to]).toEqual([858, 738])
     // Still: Fuji in the middle throughout.
-    for (const seg of SEGS) for (const p of [0, 0.5, 1]) expect(panAt(seg, p, { pan: 0, from, span })).toBe(from)
-    expect(panAt('hook', 0.7, { pan: 1, from, span })).toBe(from)
-    expect(panAt('reading', 1, { pan: 1, from, span })).toBe(1356)
-    for (const seg of ['question', 'answer', 'cta']) expect(panAt(seg, 0, { pan: 1, from, span })).toBe(1356)
+    for (const seg of SEGS) for (const p of [0, 0.5, 1]) expect(panAt(seg, p, { pan: 0, from, to })).toBe(from)
+    expect(panAt('hook', 0.7, { pan: 1, from, to })).toBe(from)
+    expect(panAt('reading', 1, { pan: 1, from, to })).toBe(to)
+    for (const seg of ['question', 'answer', 'cta']) expect(panAt(seg, 0, { pan: 1, from, to })).toBe(to)
+    // Half the way at ×0.5, a quarter at ×0.25, each end on a whole pixel.
+    for (const [pan, end] of [[0.5, 798], [0.25, 828]]) {
+      for (const seg of ['question', 'answer', 'cta']) expect(panAt(seg, 0, { pan, from, to }), `×${pan}`).toBe(end)
+    }
     // However long the reading (the bank's scrolls take 63 to 123 s; the
-    // owner's text 118.1, 4.3 px a second), never more than half again
+    // owner's text 118.1, a pixel a second), never more than half again
     // as fast as its mean, never back.
     for (const dur of [63, 118.1, 123]) {
       let fastest = 0
       for (let t = 0; t < dur; t += 0.25) {
-        const a = panAt('reading', t / dur, { pan: 1, from, span })
-        const b = panAt('reading', Math.min(1, (t + 0.25) / dur), { pan: 1, from, span })
-        expect(b).toBeGreaterThanOrEqual(a)
-        fastest = Math.max(fastest, (b - a) / 0.25)
+        const a = panAt('reading', t / dur, { pan: 1, from, to })
+        const b = panAt('reading', Math.min(1, (t + 0.25) / dur), { pan: 1, from, to })
+        expect(b).toBeLessThanOrEqual(a)
+        fastest = Math.max(fastest, (a - b) / 0.25)
       }
-      expect(fastest, `${dur} s`).toBeLessThanOrEqual(1.5 * ((1356 - from) / dur) + 0.01)
+      expect(fastest, `${dur} s`).toBeLessThanOrEqual(1.5 * ((from - to) / dur) + 0.01)
+      // Eased in and out: over the reading's first and last 2% the
+      // window all but stands, under a fifth of its mean pace.
+      for (const [a, b] of [[0, 0.02], [0.98, 1]]) {
+        for (let t = a * dur; t < b * dur - 1e-9; t += 0.05) {
+          const pace = (panAt('reading', t / dur, { pan: 1, from, to }) - panAt('reading', Math.min(b, (t + 0.05) / dur), { pan: 1, from, to })) / 0.05
+          expect(pace, `${dur} s, ${t.toFixed(2)} s`).toBeLessThan(0.2 * ((from - to) / dur))
+        }
+      }
     }
   })
 
@@ -153,6 +244,43 @@ describe('what a reading challenge stands on (plan 309)', () => {
     expect(washAt({ hour: 'day', read: 0.75, seg: 'question', into: 0 }).alpha).toBeCloseTo(base * 0.75, 12)
     expect(washAt({ hour: 'day', read: 0.75, seg: 'question', into: 0.6 }).alpha).toBe(base)
     for (const seg of ['hook', 'answer', 'cta']) expect(washAt({ hour: 'day', read: 0.75, seg, into: 0.1 }).alpha).toBe(base)
+  })
+
+  it('lays the paper heavier once the text is read over the moonlit night, coming in with the question', () => {
+    // The question comes in from the reading's wash to `end` of the
+    // hour's; the answer and the way to the app stay there; the hook
+    // and the reading are what `end` leaves them.
+    const night = { hour: 'night', read: 0.75 }
+    expect(washAt({ ...night, seg: 'question', into: 0, end: 1.1 }).alpha).toBeCloseTo(0.45, 12)
+    expect(washAt({ ...night, seg: 'question', into: 0.6, end: 1.1 }).alpha).toBeCloseTo(0.66, 12)
+    for (const seg of ['answer', 'cta']) expect(washAt({ ...night, seg, into: 0.1, end: 1.1 }).alpha, seg).toBeCloseTo(0.66, 12)
+    expect(washAt({ ...night, wash: 1.5, seg: 'cta', end: 1.1 }).alpha).toBe(0.97)
+    expect(washAt({ ...night, seg: 'hook', end: 1.1 }).alpha).toBe(0.6)
+    expect(washAt({ ...night, seg: 'reading', into: 30, end: 1.1 }).alpha).toBeCloseTo(0.45, 12)
+    // Through the backdrop: the paper's share of each fill it lays over
+    // the frame, the moonlit night (challenge.night) at 0, 0.5 and 1.
+    const bg = `rgba(${[1, 3, 5].map(k => parseInt(palette('paper').bg.slice(k, k + 2), 16)).join(',')},`
+    const washes = (n, { hour = 'night', T = PAPER, seg, after }) => {
+      const plan = planOf({ ...BEFORE_309, 'challenge.read': 0.75, 'challenge.night': n }, { hour, style: T === PAPER ? 'scroll' : 'along' })
+      const tl = challengeTimeline(plan)
+      const f = at(print(`winter-${hour}`), T, plan, tl, tl.segs.find(s => s.key === seg).start + after)
+      expect(f.seg).toBe(seg)
+      return f.calls.filter(c => c.op === 'fillRect' && String(c.fill).startsWith(bg)).map(c => +c.fill.slice(bg.length, -1))
+    }
+    const moments = [['hook', 1], ['reading', 30], ['question', 0], ['question', 0.6], ['answer', 0.5], ['cta', 3]]
+    const want = { 0: [0.6, 0.45, 0.45, 0.6, 0.6, 0.6], 0.5: [0.6, 0.45, 0.45, 0.62, 0.62, 0.62], 1: [0.6, 0.45, 0.45, 0.64, 0.64, 0.64] }
+    for (const [n, alphas] of Object.entries(want)) {
+      moments.forEach(([seg, after], i) => {
+        const got = washes(+n, { seg, after })
+        expect(got, `${n} ${seg} ${after}`).toHaveLength(1)
+        expect(got[0], `${n} ${seg} ${after}`).toBeCloseTo(alphas[i], 12)
+      })
+    }
+    // By day the hour's wash whatever the dial; under the read-along no paper at all.
+    for (const [seg, after] of moments.slice(3)) {
+      expect(washes(1, { hour: 'day', seg, after }), `day ${seg}`).toEqual([0.72])
+      expect(washes(1, { T: DARK, seg, after }), `along ${seg}`).toEqual([])
+    }
   })
 
   it('shows the sun or moon above the chip once the print is raised, else under the hook alone', () => {
@@ -223,6 +351,63 @@ describe('what a reading challenge stands on (plan 309)', () => {
       expect([...filters], hour).toEqual([T === PAPER && hour === 'night' ? 'brightness(3)' : 'none'])
     }
   }))
+
+  it('lights the moonlit night in the print’s own colours: three times as bright up to the night sky’s, then less, never to the ceiling', () => {
+    // What the backdrop writes back over a print whose pixels are `pixels`
+    // (each [r, g, b]), lit at the dial's `night`.
+    const lit = (night, pixels) => {
+      const had = globalThis.OffscreenCanvas
+      const written = []
+      globalThis.OffscreenCanvas = class {
+        constructor(w, h) { Object.assign(this, { width: w, height: h }) }
+        getContext() {
+          const { ctx } = recorder()
+          const read = () => ({ data: Uint8ClampedArray.from(pixels.flatMap(p => [...p, 255])) })
+          return new Proxy(ctx, { get: (o, k) => (k === 'getImageData' ? read : k === 'putImageData' ? img => written.push(img.data) : o[k]) })
+        }
+      }
+      try {
+        const plan = planOf({ ...BEFORE_309, 'challenge.night': night }, { hour: 'night' })
+        const tl = challengeTimeline(plan)
+        backdrop(recorder().ctx, print('winter-night'), PAPER, { hour: 'night', plan, tl, t: 30, seg: 'reading' })
+      } finally {
+        globalThis.OffscreenCanvas = had
+      }
+      expect(written).toHaveLength(1)
+      return pixels.map((_, i) => [...written[0].slice(4 * i, 4 * i + 3)])
+    }
+    // Every level, the channels alike: never darker for a lighter one.
+    const grey = Array.from({ length: 256 }, (_, v) => [v, v, v])
+    for (const night of [0.25, 0.5, 0.75, 1]) {
+      const out = lit(night, grey).map(p => p[0])
+      out.forEach((v, i) => expect(v, `${night} ${i}`).toBeGreaterThanOrEqual(out[i - 1] ?? 0))
+    }
+    const levels = lit(1, grey).map(p => p[0])
+    // Up to the night sky's brightest channel, three times as bright, as
+    // before plan 309 (the pale moonlit page the owner chose); past it
+    // less and less, and none of the print's lights lit to 254 or over.
+    levels.forEach((v, i) => expect(v, `${i}`).toBe(i <= 52 ? 3 * i : Math.min(v, 3 * i)))
+    // The knee held from above too: from the first level the rounding
+    // leaves apart, under three times, on the shoulder at these levels.
+    levels.forEach((v, i) => { if (i >= 55) expect(v, `${i}`).toBeLessThan(3 * i) })
+    for (const [i, v] of [[60, 174], [80, 198], [100, 211], [150, 231], [200, 243]]) expect(Math.abs(levels[i] - v), `${i}`).toBeLessThanOrEqual(1)
+    expect(Math.max(...levels)).toBe(253)
+    // Each pixel lifted whole, its channels in the print's own ratio: the
+    // night sky, a dark pine, the maple's coral, the myrtle's leaf, the
+    // blossom, the snow, a lamp; every channel as the brightest is lifted,
+    // to the rounding, whatever the dial short of three times as bright.
+    const colours = [[14, 25, 52], [5, 8, 12], [120, 50, 40], [40, 70, 45], [200, 150, 190], [210, 222, 244], [255, 214, 140], [255, 255, 255]]
+    for (const night of [0.5, 1]) {
+      lit(night, colours).forEach((p, i) => {
+        const c = colours[i]
+        const m = Math.max(...c)
+        const k = (p[c.indexOf(m)] - (1 - night) * Math.min(255, 3 * m)) / m
+        c.forEach((v, j) => expect(Math.abs(p[j] - ((1 - night) * Math.min(255, 3 * v) + v * k)), `${night} ${c} ${'rgb'[j]}`).toBeLessThanOrEqual(1))
+        expect(Math.max(...p), `${night} ${c}`).toBeLessThanOrEqual(night === 1 ? 253 : 255)
+      })
+    }
+    expect(lit(1, colours.slice(0, 2))).toEqual([[42, 75, 156], [15, 24, 36]])
+  })
 
   it('raises the print as the text comes in, between pixels as it rises and on whole ones once raised, its foot at the frame’s', () => withCanvases(made => {
     const P = print('winter-day')
@@ -351,19 +536,60 @@ describe('what a reading challenge stands on (plan 309)', () => {
     }
   }))
 
-  it('stands the long view at the frame’s height, Fuji’s summit in the middle under the hook, then carried along', () => withCanvases(made => {
+  it('stands the long view a little taller than the frame, Fuji’s summit in the middle and under the cover’s slip, then carried along', () => withCanvases(made => {
     const P = print('winter-day', 'desk')
     const plan = planOf({ ...BEFORE_309, 'challenge.lift': 1, 'challenge.disc': 1 }, { scenery: 'wide' })
     const tl = challengeTimeline(plan)
     const rd = reading(tl)
     const x = t => at(P, PAPER, plan, tl, t).images()[0].a[0]
-    expect(x(1.6)).toBe(-847)
-    expect(x(rd.start + rd.dur / 2)).toBeCloseTo(-(847 + 1356) / 2, 6)
-    expect(x(tl.segs.at(-1).start + 1)).toBe(-1356)
-    // Neither raised nor lit by a sun: the desk's own frame, at the frame's height.
-    expect(made.map(c => [c.width, c.height])).toEqual([[2526, 1920]])
+    expect(x(1.6)).toBe(-858)
+    expect(x(rd.start + rd.dur / 2)).toBeCloseTo(-(858 + 738) / 2, 6)
+    expect(x(tl.segs.at(-1).start + 1)).toBe(-738)
+    // Neither raised nor lit by a sun: the desk's own frame, cut at the frame's foot.
+    expect(made.map(c => [c.width, c.height])).toEqual([[2547, 1920]])
+    // Drawn 1936 px tall: Fuji's summit, the top of its outline on every
+    // desk print, stands at 957 under the hook, below the lowest foot the
+    // cover's slip has (940, carouselCover.test.js) by the 16 px the gate
+    // keeps; drawn at the frame's height it stood at 949.
+    const [, , w, h] = made[0].r.images().find(c => c.img.k === 'sky').a
+    expect([w, h]).toEqual([1184 * (1936 / 900), 1936])
+    for (const name of Object.keys(meta.prints)) {
+      const outline = /<clipPath id="tpr-s5FjClip"><path d="([^"]+)"/.exec(Object.values(print(name, 'desk').scene.layers).join(''))[1]
+      const top = Math.min(...[...outline.matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)].map(m => +m[2]))
+      expect(top, name).toBe(445.1)
+      expect(Math.floor((top * h) / 900), name).toBeGreaterThanOrEqual(940 + 16)
+    }
     const still = planOf({ ...BEFORE_309, 'challenge.pan': 0 }, { scenery: 'wide' })
-    expect(at(P, PAPER, still, challengeTimeline(still), 90).images()[0].a[0]).toBe(-847)
+    expect(at(P, PAPER, still, challengeTimeline(still), 90).images()[0].a[0]).toBe(-858)
+  }))
+
+  it('ends the long view’s travel with Fuji whole and the season’s tree out of the feed’s buttons, on every desk print', () => withCanvases(made => {
+    // The feed's buttons stand down the frame's right side, x 920 to 1080, y 1100 to 1700.
+    const plan = planOf(BEFORE_309, { scenery: 'wide' })
+    const tl = challengeTimeline(plan)
+    const reached = []
+    for (const name of Object.keys(meta.prints)) {
+      const P = print(name, 'desk')
+      // Where the window stands under the hook, and once carried (×1), on the print as laid.
+      const [hook, end] = [1.6, tl.segs.at(-1).start + 1].map(t => -at(P, PAPER, plan, tl, t).images()[0].a[0])
+      const u = made.at(-1).r.images().find(c => c.img.k === 'sky').a[3] / P.scene.h
+      expect([hook, end], name).toEqual([858, 738])
+      // Fuji's cone where the mist over its foot begins, 64 px inside either edge at either end of the travel.
+      const fuji = fujiOf(P.scene)
+      const [l, r] = flanksAt(fuji, fuji.mist).map(x => x * u)
+      for (const left of [hook, end]) {
+        expect(l - left, `${name} ${left}`).toBeGreaterThanOrEqual(64)
+        expect(left + 1080 - r, `${name} ${left}`).toBeGreaterThanOrEqual(64)
+      }
+      // The tree in the buttons' rows: out of the frame once carried, where
+      // under the hook its leaves reach in on the spring, summer and autumn
+      // prints, so that carried toward it, it would stand behind the buttons.
+      const tree = leftmostIn(treeOf(P.scene), [1100 / u, 1700 / u]) * u
+      expect(tree - end, name).toBeGreaterThanOrEqual(1080)
+      if (tree - hook < 1080) reached.push(name)
+    }
+    for (const name of ['spring-day', 'summer-day', 'summer-hanabi', 'autumn-night']) expect(reached).toContain(name)
+    for (const name of ['winter-day', 'winter-night']) expect(reached).not.toContain(name)
   }))
 
   it('under a cover, stands the night’s print unlit and brings its light in with the paper', () => withCanvases(made => {
