@@ -12,7 +12,7 @@ import { FITS, FONT_FACES, drawFeedHud, font, formatOf, palette } from './draw.j
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
-import { PRINT_HOURS, PRINT_SEASONS, loadPrint } from './app.js'
+import { PRINT_HOURS, PRINT_SEASONS, loadPrint, standInOpts } from './app.js'
 import { printSeason } from '../src/domain/printHour.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
@@ -884,9 +884,10 @@ async function renderFeature(mine) {
 // is rendered (the command below), every word timed on it.
 const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
 // A scenery whose prints do not load (not drawn yet, or not served with
-// the studio) has the bay stand in, at the hour and season asked for, so
-// the frame is lit as that hour is; else the last print drawn. It says
-// so, rather than leave a blank page (plan 309). A render overtaken by a
+// the studio) has the bay stand in, at the hour and season asked for and
+// with the parts its dials bring out (its petals, its fireworks), so the
+// frame is lit as that hour is; else the last print drawn. It says so,
+// rather than leave a blank page (plan 309). A render overtaken by a
 // newer one says nothing: its scenery is no longer the one in view.
 let lastPrint = null
 let standInSaid = ''
@@ -902,10 +903,10 @@ async function challengePrint(pl, mine) {
     return { P, standIn: false }
   }
   console.warn(`reading challenge: ${failure.message}`)
-  // The bay as it would have stood, unless the bay is what failed.
-  const bayFailed = asked.scenery === 'bay' && !asked.falls && !asked.bursts
-  let bayFailure = bayFailed ? failure : null
-  const bay = bayFailed ? null : await printFor(state.hour).catch(e => { bayFailure = e; return null })
+  // The bay as it would have stood, dialled as asked, unless the bay is what failed.
+  const instead = standInOpts(asked)
+  let bayFailure = instead ? null : failure
+  const bay = instead ? await printFor(state.hour, seasonOf(), instead).catch(e => { bayFailure = e; return null }) : null
   if (mine !== token) return null
   const before = bay ?? lastPrint
   const view = sceneryOf(pl.scenery)
@@ -915,7 +916,7 @@ async function challengePrint(pl, mine) {
   // Nothing is made on a print standing in for the one asked, nor on the
   // ground for another scenery; Today's print failing with nothing to stand
   // in still draws on the ground, as it did before plan 309.
-  return { P: before, standIn: !!before || !bayFailed }
+  return { P: before, standIn: !!before || !!instead }
 }
 const QUESTION_KINDS = { comprehension: 'about the text', inference: 'reading between the lines', grammar: 'grammar', vocabulary: 'a word' }
 async function renderChallenge(mine) {

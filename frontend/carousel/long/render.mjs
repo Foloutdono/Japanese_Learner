@@ -67,7 +67,7 @@ import { SITE_ORIGIN } from '../../landing/config.mjs'
 import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, stillAt, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
 import { challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
-import { sceneryOf } from '../sceneries.js'
+import { loadFailure, standsOnFailure } from '../app.js'
 import { pageFile } from '../feeds.js'
 import { wordsCues, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from '../words.js'
 import { parseTune } from '../tune.js'
@@ -125,11 +125,14 @@ await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType
 await page.goto(`${ROOT}/carousel/index.html`)
 await page.addStyleTag({ content: css.join('\n') })
 // A run that cannot go on says why in one line, and leaves nothing behind.
-async function stop(why) {
-  log(why)
+async function closeAll() {
   await browser.close()
   server.close()
   rmSync(WORK, { recursive: true, force: true })
+}
+async function stop(why) {
+  log(why)
+  await closeAll()
   process.exit(1)
 }
 // ── Lines voiced and measured: how long each lasts ──
@@ -191,12 +194,15 @@ if (args.challenge) {
     // Every frame drawn: something moves in each (a sentence's clock, a word lit).
     window.__draw = t => { C.drawChallenge(window.__ctx, plan, tl, t, P); return t }
   }, { plan, tl }).catch(async e => {
-    // What it stands on did not load: the file named, not the page's stack.
-    const missing = /(?:print|photo): [^\n]*/.exec(e.message)?.[0] ?? e.message.split('\n')[0]
-    const view = sceneryOf(plan.scenery)
-    await stop(plan.photo ? `the photo ${plan.photo.src} did not load: --photo takes a path under frontend/`
-      : view.source === 'carousel' ? `${view.name} (${view.jp}) has no prints yet (${missing}): draw them with python3 scripts/sceneries/build.py`
-        : `Today's print did not load (${missing})`)
+    // What it stands on did not load: the file named, not the page's
+    // stack. Anything else (a module that does not link, a bug) is thrown
+    // as it is, its stack whole, once the run has put away what it made.
+    const failed = loadFailure(e.message)
+    if (!failed) {
+      await closeAll()
+      throw e
+    }
+    await stop(standsOnFailure(plan, failed))
   })
   pageText = challengePage(plan, tl, site)
   thumbAt = 1.6

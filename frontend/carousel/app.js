@@ -11,7 +11,7 @@
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
 import { K, TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
-import { printPaths, sceneryOf } from './sceneries.js'
+import { PRINTS_REV, printPaths, sceneryOf } from './sceneries.js'
 
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
@@ -385,12 +385,47 @@ function stillCss(css) {
   return `${rules.join('\n')}\n${inner.replace(/\.tpr /g, '')}\n[class*="tpr-"] { animation: none !important; }`
 }
 
-const picture = src => new Promise((resolve, reject) => {
+// A picture of the print, decoded; what it is (`what`) names it if it fails.
+const picture = (src, what) => new Promise((resolve, reject) => {
   const img = new Image()
   img.onload = () => resolve(img)
-  img.onerror = () => reject(new Error(`print: ${src.slice(0, 60)}`))
+  img.onerror = () => reject(new Error(`print: ${what}`))
   img.src = src
 })
+
+/** What a print or a photo that did not load says, read from the error
+ *  a page gives back (plan 309): the line naming the file and how it
+ *  failed, which opens the error's message, and whether the file is not
+ *  there at all (`missing`, a 404). Null for any other error (a module
+ *  that does not link, a bug), which is no file missing and is thrown on
+ *  as it is. */
+export function loadFailure(message) {
+  const line = /(?:^|\n|Error: )((?:print|photo): [^\n]*)/.exec(String(message ?? ''))?.[1]
+  return line ? { line, missing: / 404$/.test(line) } : null
+}
+/** The one line a render stops on when what a challenge stands on did
+ *  not load (`failed`, as loadFailure reads it): the maker's photo; a
+ *  scenery of the carousel's own that has no prints yet (a file of its
+ *  own folder, where printPaths puts them, answered 404) or that did not
+ *  load (any other failure, a file of the app's own answered 404 among
+ *  them: drawing the scenery again would not bring it); or Today's
+ *  print, the bay's and the long view's. */
+export function standsOnFailure(plan, failed) {
+  if (plan.photo) return `the photo ${plan.photo.src} did not load: --photo takes a path under frontend/`
+  const view = sceneryOf(plan.scenery)
+  if (view.source !== 'carousel') return `Today's print did not load (${failed.line})`
+  const notDrawn = failed.missing && failed.line.startsWith(`print: carousel/prints/${PRINTS_REV}/${view.id}/`)
+  return notDrawn ? `${view.name} (${view.jp}) has no prints yet (${failed.line}): draw them with python3 scripts/sceneries/build.py`
+    : `${view.name} (${view.jp}) did not load (${failed.line})`
+}
+/** What the studio loads in place of a scenery whose prints did not load
+ *  (`asked`, its print's options as challengePrintOpts gives them): the
+ *  bay as it would have stood, at the season asked for and with the
+ *  parts the dials bring out (its petals, its fireworks). Null where the
+ *  bay is what failed: the last print drawn stands in then. */
+export function standInOpts(asked) {
+  return asked.scenery === 'bay' ? null : { ...asked, scenery: 'bay' }
+}
 
 // The print in motion, for a clip (plan 231): index.css's .tpr- rules and
 // their keyframes, every animation held paused at the clip's moment `t`.
@@ -433,10 +468,17 @@ const SKY_BURSTS_ONLY = '\nsvg * { visibility: hidden; }\n.tpr-burst, .tpr-burst
  *  August night's fireworks apart (img.backBare, img.bursts: null on a
  *  print with none). */
 export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date(), season = null, scenery = 'bay', falls = false, bursts = false } = {}) {
+  // Each failure says its file and how it failed (loadFailure reads it).
   const get = async (path, as = 'json') => {
-    const r = await fetch(base + path)
+    const r = await fetch(base + path).catch(e => { throw new Error(`print: ${path} could not be fetched (${e.message})`, { cause: e }) })
     if (!r.ok) throw new Error(`print: ${path} ${r.status}`)
-    return as === 'json' ? r.json() : r.text()
+    const body = await r.text()
+    if (as !== 'json') return body
+    try {
+      return JSON.parse(body)
+    } catch (e) {
+      throw new Error(`print: ${path} is not JSON (${e.message})`, { cause: e })
+    }
   }
   const meta = await get('src/components/station/print/print.json')
   const view = sceneryOf(device === 'desk' && scenery === 'bay' ? 'wide' : scenery)
@@ -458,14 +500,17 @@ export async function loadPrint(hour, { base = '../', device = 'phone', now = ne
   const svg = (inner, left = 0, more = '') => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${css}${more}</style>${defs}${inner}</svg>`)}`
   const apart = bursts && scene.layers.back.includes('tpr-burst')
+  const layer = (name, left = 0, more = '', as = name) => picture(svg(scene.layers[name], left, more), `${files.print}, its ${as} layer, did not decode`)
+  const file = path => picture(base + path, `${path} did not load`)
   const [sky, back, train, front, grain, paper, backBare, skyBursts] = await Promise.all([
-    picture(svg(scene.layers.sky)), picture(svg(scene.layers.back)), picture(svg(scene.layers.train, scene.w)), picture(svg(scene.layers.front)),
-    picture(`${base}public/today/print/${meta.rev}/grain.png`), picture(`${base}public/today/print/${meta.rev}/paper.png`),
-    apart ? picture(svg(scene.layers.back, 0, SKY_BURSTS_OFF)) : null, apart ? picture(svg(scene.layers.back, 0, SKY_BURSTS_ONLY)) : null,
+    layer('sky'), layer('back'), layer('train', scene.w), layer('front'),
+    file(`public/today/print/${meta.rev}/grain.png`), file(`public/today/print/${meta.rev}/paper.png`),
+    apart ? layer('back', 0, SKY_BURSTS_OFF, 'back (fireworks out)') : null, apart ? layer('back', 0, SKY_BURSTS_ONLY, 'back (fireworks alone)') : null,
   ])
   const moving = motionCss(cssText)
   const at = (name, t, left = 0) => picture(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${moving}\n[class*="tpr-"] { animation-delay: ${(-t).toFixed(3)}s; animation-play-state: paused !important; }</style>${defs}${layerAt(scene.layers[name], t)}</svg>`)}`)
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${moving}\n[class*="tpr-"] { animation-delay: ${(-t).toFixed(3)}s; animation-play-state: paused !important; }</style>${defs}${layerAt(scene.layers[name], t)}</svg>`)}`,
+  `${files.print}, its ${name} layer ${t} s in, did not decode`)
   /** The layers that move, as they stand `t` seconds in. */
   const moment = async t => {
     const [s2, b2, f2] = await Promise.all([at('sky', t), at('back', t), at('front', t)])
