@@ -106,19 +106,22 @@ describe('the reading challenge’s cover (plan 309)', () => {
     for (const style of STYLES) {
       const pl = challengePlan(data, 'n5-12', { style, tune: ON })
       const tl = challengeTimeline(pl)
-      for (const [laid, times] of [[0, 2], [0.5, 2], [1, 0]]) {
+      // The glow's two shapes as strong as the paper is not laid, then the ink.
+      for (const [laid, alphas] of [[0, [1, 1, 1]], [0.5, [0.5, 0.5, 1]], [1, []]]) {
         const { ctx, at } = drawn()
         drawCover(ctx, pl, tl, 0, null, null, { laid, words: hookWords(pl, tl) })
         const masthead = at.filter(x => x.t === 'TSUJI')
-        expect(masthead.length, `${style} ${laid}`).toBe(times)
+        expect(masthead.map(x => x.alpha), `${style} ${laid}`).toEqual(alphas)
         for (const x of masthead) expect([x.left, x.y, x.size], `${style} ${laid}`).toEqual([own.left, own.y, own.size])
       }
     }
-    // Drawn alone, as a moment before the paper is laid may: nothing once it is.
-    for (const [k, times] of [[1, 2], [0, 0]]) {
+    // Drawn in the masthead's place, as a moment before the paper is laid
+    // may: its ink once, last and whole, so as the glow ends it is the
+    // masthead drawn once, as the hook draws it; nothing once laid.
+    for (const [k, alphas] of [[1, [1, 1, 1]], [0.5, [0.5, 0.5, 1]], [0.002, [0.002, 0.002, 1]], [0, []]]) {
       const { ctx, at } = drawn()
       glowMasthead(ctx, k)
-      expect(at.map(x => [x.t, x.left, x.y]), String(k)).toEqual(Array(times).fill(['TSUJI', own.left, own.y]))
+      expect(at.map(x => [x.t, x.left, x.y, x.alpha]), String(k)).toEqual(alphas.map(a => ['TSUJI', own.left, own.y, a]))
     }
   }))
 

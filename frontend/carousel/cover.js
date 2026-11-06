@@ -95,24 +95,28 @@ export function drawCover(ctx, plan, tl, into, P, T, { laid = 1, words } = {}) {
   chip(ctx, words.chip, y)
 }
 
-// The masthead where the hook draws it (challenge.js, masthead).
+// The masthead where the hook draws it (challenge.js, masthead), in the
+// paper's inks, or all in the paper: the shape its glow is cast by.
 const MARK = 64
 const TSUJI = { x: fr.x + MARK + SP[4], y: fr.y + MARK * 0.66, f: font(700, FS.caption, 'latin') }
-function masthead(ctx) {
-  mark(ctx, fr.x, fr.y, MARK, PAPER.ink, PAPER.gold)
-  text(ctx, 'TSUJI', TSUJI.x, TSUJI.y, { f: TSUJI.f, color: PAPER.ink })
+function masthead(ctx, ink = PAPER.ink, road = PAPER.gold) {
+  mark(ctx, fr.x, fr.y, MARK, ink, road)
+  text(ctx, 'TSUJI', TSUJI.x, TSUJI.y, { f: TSUJI.f, color: ink })
 }
-// The rim's rings, as halo.js lays them round the reading's words: how
-// far out, in pixels, and how strongly.
-const RIM = [[2, 1], [3.5, 0.4], [5, 0.15]]
+// The rim's rings: how far out, in pixels, and how strongly. Firmer past
+// the first than halo.js's round the reading's words, which stand on a
+// wash: the masthead stands on the print unwashed, and its thin strokes
+// met the night's sky inside 2 px (4.47:1 at its worst, 6.2 with these).
+const RIM = [[2, 1], [3.5, 0.6], [5, 0.2]]
 /** The masthead over the print unwashed, standing as the reading's words
  *  stand over theirs (halo.js): on a rim of the page's paper, whole close
  *  to every stroke and thinning out, so no sky runs into one (a glow alone
  *  leaves the night's sky against them), then the paper glowing past it,
  *  drawn twice; all `k` as strong (1 − the share of the wash laid, none
- *  at 0). In the paper's ink in both styles: the read-along's light ink
- *  would not read on it. The cover draws it over the hook's own; so may
- *  any moment before the paper is laid. */
+ *  at 0); then its ink, once and whole. In the paper's ink in both styles:
+ *  the read-along's light ink would not read on it. The cover draws it
+ *  over the hook's own; a moment before the paper is laid may draw it in
+ *  the masthead's place, which it becomes as `k` comes to 0. */
 export function glowMasthead(ctx, k) {
   if (!(k > 0)) return
   ctx.save()
@@ -133,12 +137,17 @@ export function glowMasthead(ctx, k) {
     ctx.stroke(outline)
     ctx.restore()
   }
-  ctx.restore()
-  ctx.save()
-  ctx.shadowColor = alpha(PAPER.bg, 0.9 * k)
+  // The glow, twice, cast by the masthead's shape in the paper itself and
+  // laid before any ink: cast by the ink, each glow fell on the ink drawn
+  // before it.
+  ctx.globalAlpha *= k
+  ctx.shadowColor = alpha(PAPER.bg, 0.9)
   ctx.shadowBlur = 18
-  for (let i = 0; i < 2; i++) masthead(ctx)
+  for (let i = 0; i < 2; i++) masthead(ctx, PAPER.bg, PAPER.bg)
   ctx.restore()
+  // Then the ink, once, as the hook draws it: as the glow ends it is the
+  // masthead's own, not thinned in a frame from two draws to one.
+  masthead(ctx)
 }
 
 // The chip as the hook sets it, in the slip's inks: washi on a sumi pill.
