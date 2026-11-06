@@ -4,11 +4,45 @@
 // grown round every glyph on that strip, so the print under it never runs
 // into a stroke, however little paper lies over the picture. It is drawn
 // once a text, and costs no frame anything.
+//
+// The rim is grown from the strip's own ink: the strip laid again sixteen
+// ways round itself, close and whole, then further out and fainter, so the
+// paper thins into the print rather than stopping at an edge (an edge is a
+// sticker's outline, never ink on paper). Coloured the page's paper, a
+// little of the print still showing through it, it is laid under the ink.
+import { alpha, palette } from './draw.js'
+
+const PAPER = palette('paper')
+// The rim's rings: how far out each is laid (pixels at ×1) and how strongly.
+export const RIM = [[2, 1], [3.5, 0.4], [5, 0.15]]
+// The ways round a glyph each ring is laid: enough that no corner of a stroke shows between two.
+const WAYS = 16
+// The page's paper, as the wash lays it, with a little of the print through it.
+export const RIM_INK = alpha(PAPER.bg, 0.7)
 
 /** Grows the rim on the strip `c`, `k` its width (0, the look before
  *  plan 309: none), on the one canvas `canvasOf` makes for it, made after
- *  the strip. Nothing is grown yet. */
+ *  the strip and the strip's size. */
 export function haloStrip(c, canvasOf, k) {
   // Off, or no strip to grow it on: the strip is left as it is.
   if (!c || !(k > 0)) return
+  const rim = canvasOf(c.width, c.height)
+  if (!rim) return
+  const x = rim.getContext('2d')
+  for (const [r, a] of RIM) {
+    x.globalAlpha = a
+    for (let i = 0; i < WAYS; i++) x.drawImage(c, r * k * Math.cos((i * 2 * Math.PI) / WAYS), r * k * Math.sin((i * 2 * Math.PI) / WAYS))
+  }
+  // The glyphs themselves too, so the paper runs on unbroken under every stroke.
+  x.globalAlpha = 1
+  x.drawImage(c, 0, 0)
+  // All of it the paper's colour, then laid under the ink.
+  x.globalCompositeOperation = 'source-in'
+  x.fillStyle = RIM_INK
+  x.fillRect(0, 0, rim.width, rim.height)
+  const s = c.getContext('2d')
+  s.save()
+  s.globalCompositeOperation = 'destination-over'
+  s.drawImage(rim, 0, 0)
+  s.restore()
 }
