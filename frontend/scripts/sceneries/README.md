@@ -94,11 +94,12 @@ holds the committed files to the same in CI.
 
 The phone's frame, 390 × 746 units, at 2.769 px a unit on a 1080 × 1920
 video. Under the hook (H) the print is anchored at its top (px = 2.769 ×
-units); from the reading on (R) it is raised 52.7 units (px = 2.769 ×
-units − 146). So:
+units); from the reading on (R), raised (`challenge.lift`), it stands
+145 px higher, a whole pixel, its foot at the frame's (52.4 units:
+px = 2.769 × units − 145). So:
 
 - nothing that must be seen above px 330 (the feed's top bar);
-- in R the subject above the caption (px < 1490, units < 591), nothing of
+- in R the subject above the caption (px < 1490, units < 590), nothing of
   it under the buttons (px x > 920, y > 1100);
 - the text's column is px x 184-896 (units 66-324): the ground under it
   calm;
@@ -133,8 +134,8 @@ buttons. The gate's boats ride the open water between the gate and its
 tree; its bursts open over the tree, which hides their light in the
 water.
 
-As built: the lake 9.0 MB raw (1.9 MB gzipped), the gate 8.7 MB (1.9
-MB), about 3 s each; a summer print, with its crape myrtle, is the
+As built: the lake 8.9 MB raw (1.9 MB gzipped), the gate 8.6 MB (1.8
+MB), about 4 s each; a summer print, with its crape myrtle, is the
 heaviest (about 0.9 MB).
 
 ## The modules

@@ -8,16 +8,16 @@ import { PRINTS_REV, SCENERIES } from '../carousel/sceneries.js'
 // parts into carousel/prints/<PRINTS_REV>/<scenery>/, for the carousel
 // alone. They are held to what the app's prints are held to
 // (todayPrint.test.js), and to what the carousel's loader asks of them:
-// one revision on disk, the build's; a folder only for a scenery the
-// carousel names; each with its meta (the frame, the app's own look of
-// each of the year's prints) and its seventeen prints in the app's
-// shape; every id in the print's namespace, and every reference found
-// in the image the loader makes of its layer (the layer and every
-// layer's <defs>); every class one index.css already rules; no opacity
-// of its own on a moving part; no <defs> inside another (the loader
-// gathers them with a non-greedy match); the train whole in the image
-// the loader draws it in and inside its band; and a scenery's weight
-// bounded.
+// one revision on disk, the build's; a folder for every scenery the
+// carousel draws from them, and none for another; each with its meta
+// (the frame, the app's own look of each of the year's prints) and its
+// seventeen prints in the app's shape; every id in the print's
+// namespace, and every reference found in the image the loader makes
+// of its layer (the layer and every layer's <defs>); every class one
+// index.css already rules; no opacity of its own on a moving part; no
+// <defs> inside another (the loader gathers them with a non-greedy
+// match); the train whole in the image the loader draws it in and
+// inside its band; and a scenery's weight bounded.
 
 const APP = JSON.parse(readFileSync(new URL('./components/station/print/print.json', import.meta.url), 'utf8'))
 // the year's prints, as the app's: the summer's -b myrtle is the app's alone
@@ -183,11 +183,20 @@ describe('the sceneries on disk (plan 309)', () => {
     }
   })
 
-  it('weigh at most 12 MB a scenery', () => {
-    for (const scenery of folders) {
-      const bytes = readdirSync(new URL(`${scenery}/`, HERE))
-        .reduce((sum, file) => sum + statSync(new URL(`${scenery}/${file}`, HERE)).size, 0)
-      expect(bytes, `${scenery}: ${(bytes / 1e6).toFixed(1)} MB`).toBeLessThanOrEqual(BUDGET)
+  it('keep a folder for every scenery of the carousel’s own, its seventeen prints and its meta, at most 12 MB', () => {
+    // Read from the rows, not from the disk: a scenery offered whose
+    // folder is gone has the bay stand in for it in the studio, and the
+    // render stops on it.
+    expect(NAMES).toHaveLength(17)
+    const own = SCENERIES.filter(row => row.source === 'carousel').map(row => row.id)
+    expect(own.length, 'no scenery of the carousel’s own').toBeGreaterThan(0)
+    for (const id of own) {
+      const dir = new URL(`${id}/`, HERE)
+      expect(existsSync(dir), `carousel/prints/${PRINTS_REV}/${id}/ is missing: draw it with python3 scripts/sceneries/build.py`).toBe(true)
+      const files = readdirSync(dir).sort()
+      expect(files, id).toEqual([...NAMES.map(name => `${name}.json`), 'meta.json'].sort())
+      const bytes = files.reduce((sum, file) => sum + statSync(new URL(file, dir)).size, 0)
+      expect(bytes, `${id}: ${(bytes / 1e6).toFixed(1)} MB`).toBeLessThanOrEqual(BUDGET)
     }
   })
 })

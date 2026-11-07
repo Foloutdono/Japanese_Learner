@@ -1375,7 +1375,7 @@ only off the bay, and the file's name carries it
 (`challenge-n5-12-scroll-lake-winter-day-en-q8-comment`). A scenery whose
 prints do not load is said so in the studio, the bay standing in at the
 hour asked for (else the last print drawn), and nothing is downloaded on
-it; `render.mjs` stops on it in one line, naming the file it lacks. The
+it; `render.mjs` stops on it in one line, naming the file that failed. The
 hour is day unless one is chosen, as the studio opens on it (dusk before
 plan 309).
 
@@ -1392,22 +1392,23 @@ Every change plan 309 makes to the look already posted is a dial in the
 Tune panel's "Reading challenge" group, and says what it `was`
 (`tune.js`): that look is one press away ("Look before plan 309", which
 sets every dial back and keeps the rest of the tune), or one
-`--tune challenge.<key>=<was>` at a time.
+`--tune challenge.<key>=<was>` at a time. The recommended values are
+the look plan 309 was drawn and measured at.
 
-| Dial | Key | Was |
-| --- | --- | --- |
-| Readings' ink | `challenge.ruby` | 0: the soft ink |
-| Paper round the words | `challenge.halo` | 0: none |
-| Wash under the reading | `challenge.read` | 1: the hour's wash |
-| Hook in colour | `challenge.cover` | 0: off |
-| Print raised | `challenge.lift` | 0: off |
-| Sun and moon | `challenge.disc` | 0: off |
-| Moonlit night | `challenge.night` | 0: three times brighter |
-| Train as the clock | `challenge.train` | 0: parked halfway |
-| Petals in the air | `challenge.falls` | 0: off |
-| Fireworks in colour | `challenge.bursts` | 0: off |
-| Read-along legible | `challenge.along` | 0: off |
-| Long view travel | `challenge.pan` | none: new with the long view (1) |
+| Dial | Key | Before plan 309 | Recommended |
+| --- | --- | --- | --- |
+| Readings' ink | `challenge.ruby` | 0: the soft ink | 0.9 |
+| Paper round the words | `challenge.halo` | 0: none | 1 |
+| Wash under the reading | `challenge.read` | 1: the hour's wash | 0.75 |
+| Hook in colour | `challenge.cover` | 0: off | 1: on |
+| Print raised | `challenge.lift` | 0: off | 1: on |
+| Sun and moon | `challenge.disc` | 0: off | 1: on |
+| Moonlit night | `challenge.night` | 0: three times brighter | 1: lit in its own colours |
+| Train as the clock | `challenge.train` | 0: parked halfway | 1: on |
+| Petals in the air | `challenge.falls` | 0: off | 1: on |
+| Fireworks in colour | `challenge.bursts` | 0: off | 1: on |
+| Read-along legible | `challenge.along` | 0: off | 1: on |
+| Long view travel | `challenge.pan` | none: new with the long view | 1 |
 
 ```bash
 cd frontend
@@ -1429,7 +1430,7 @@ as sliders, grouped:
 
 | Group | Sources | What |
 | --- | --- | --- |
-| Reading challenge | challenge | the reading pace (× each level's characters a minute), the hook, the text's coming in, the last line held, the pause between sentences, the question alone, the countdown, the answer, the app last, the picture's wash; since plan 309 what the text stands on: the readings' ink, the paper round the words, the wash under the reading, the hook in colour, the print raised, the sun and moon, the moonlit night, the train, the petals, the fireworks, the read-along's panel, the long view's travel |
+| Reading challenge | challenge | the reading pace (× each level's characters a minute), the hook, the text's coming in, the last line held, the pause between sentences, the question alone, the countdown, the answer, the app last, the picture's wash; since plan 309 what the text stands on: the readings' ink, the paper round the words, the wash under the reading, the hook in colour, the print raised, the sun and moon, the moonlit night, the train, the petals, the fireworks, the read-along's panel, hook and foot, the long view's travel |
 | Word echo | echo | how long the word is said, the silence between two sayings, the word kept |
 | Short video | every carousel | each slide's hold (×), the time to answer a question, the longest a short may run |
 | Long video | long | the pauses (×) and the quiz's countdown |
