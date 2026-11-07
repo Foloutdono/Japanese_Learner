@@ -23,8 +23,9 @@ import { END, gateClip } from './promo.js'
 import { feedPosts } from './feeds.js'
 import { weldIf } from './strings.js'
 
-// The Practice tab's platforms, in its order (src/config/tabs.js).
-export const FEATURE_IDS = ['reading', 'comprehension', 'translation', 'dictation', 'composition', 'exam', 'conversation']
+// The Practice tab's platforms, in its order (src/config/tabs.js; its
+// three groups since plan 290: understand, express, the exam).
+export const FEATURE_IDS = ['reading', 'comprehension', 'dictation', 'translation', 'composition', 'conversation', 'exam']
 export const FEATURE_FPS = 30
 // A shot: the 400 CSS px phone at 4 (record.mjs PHONE), so the camera
 // can come in on a part of it and still draw it sharp (plan 273).

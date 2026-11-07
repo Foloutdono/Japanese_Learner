@@ -39,8 +39,8 @@
 //   --unvoiced        ... a read-along made even when the voice engine fails (silent lines)
 //   --feature ID      a practice feature's video (plan 270, feature.js): the app
 //                     itself, recorded doing one exercise (record.mjs), 9:16:
-//                     reading, comprehension, translation, dictation, composition,
-//                     exam or conversation
+//                     reading, comprehension, dictation, translation, composition,
+//                     conversation or exam
 //   --app URL         ... record the app already running there (npm run dev),
 //                     rather than starting Vite here
 //   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the

@@ -741,8 +741,8 @@ never prices a mode nor says "early access", and a test fails if it does.
 
 実践 shows the app itself doing what the Practice tab's features do: one
 9:16 video per feature, in the tab's order (読書 reading, 理解
-comprehension, 翻訳 translation, 書取 dictation, 作文 composition, 模試 the
-mock exam, 会話 conversation). It is the owner's pick of three drawn (the
+comprehension, 書取 dictation, 翻訳 translation, 作文 composition, 会話
+conversation, 模試 the mock exam: its three groups since plan 290). It is the owner's pick of three drawn (the
 real screen, over a play-along and a pitch). Nothing in these videos is
 drawn to look like the app. **The app is recorded as it runs**
 (`long/record.mjs`):
