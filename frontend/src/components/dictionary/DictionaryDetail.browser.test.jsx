@@ -51,6 +51,8 @@ globalThis.fetch = vi.fn(async url => ({
 const { DictionaryDetail, DictionaryLookupSheet } = await import('./DictionaryDetail')
 const { speakJapanese, playKana } = await import('../../lib/audio')
 const { apiFetch, apiJson } = await import('../../lib/api')
+const { forgetCachedJson } = await import('../../lib/cachedJson')
+const { clearLookupCache } = await import('../../lib/dictionaryLookup')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
@@ -188,6 +190,12 @@ async function renderEntry(entry, handlers = NAV(), { width = 400 } = {}) {
 
 beforeEach(async () => {
   holdStill()
+  // Both caches are module state and keep an answer for the file: a
+  // kanji's share of JMdict (cachedJson, kept forever) and a looked-up
+  // entry (dictionaryLookup). Without this, a test that asks the backend
+  // for 木 is answered by whichever test asked first.
+  forgetCachedJson()
+  clearLookupCache()
   localStorage.setItem('lang', 'en')
   document.documentElement.setAttribute('data-theme', 'dark')
   await page.viewport(1300, 900)
@@ -659,6 +667,21 @@ describe('the body — blocks that name themselves', () => {
     expect(cells[3].tagName).toBe('DIV')
     expect(cells[3].querySelector('.record__value--due').textContent).toBe('Now')
     expect(cells[3].querySelector('.record__label').textContent).toBe('Next review')
+  })
+
+  it('keeps the record of a card the level marked known, answered nowhere, its check on the schedule', async () => {
+    // Plan 300: the level rule's card is mastered with no answer -- its
+    // figures say so, and its check keeps its schedule and its door.
+    const assumed = {
+      ...KANJI,
+      status: { ...KANJI.status, status: 'mastered', total_reviews: 0, correct_reviews: 0, accuracy: null, interval_days: 21 },
+    }
+    const { root, onReview, screen } = await renderEntry(assumed)
+    const cells = [...root.querySelectorAll('.dict-record .record')]
+    expect(cells.map(c => c.querySelector('.record__value').textContent)).toEqual(['—', '0/0', '21days', 'Now'])
+    root.querySelector('.record--due').click()
+    expect(onReview).toHaveBeenCalledWith('kanji_N5_木')
+    await screen.unmount()
   })
 })
 

@@ -11,6 +11,7 @@ from content import vocab_extras as vx
 from content.vocab_data import VOCAB_BY_LEVEL
 import content.vocab_jmdict_data as jmdict_db
 from translations import get_meaning
+from translations.course import VOCAB_GLOSSES
 from translations.fr.vocab_fr import VOCAB_FR
 
 
@@ -68,10 +69,10 @@ class PoolWordTests(unittest.TestCase):
         word's "arrière-garde"."""
         row = jmdict_db.get_by_key("殿", "どの")
         self.assertIsNotNone(row)
-        french = get_meaning(row, "fr", VOCAB_FR)
+        french = get_meaning(row, "fr", VOCAB_GLOSSES)
         self.assertNotEqual(french, VOCAB_FR.get("殿"))
         self.assertEqual(french, jmdict_fr.pool_line("殿", "どの"))
-        self.assertEqual(get_meaning(row, "en", VOCAB_FR), row["meaning"])
+        self.assertEqual(get_meaning(row, "en", VOCAB_GLOSSES), row["meaning"])
 
     def test_a_pool_word_with_no_french_keeps_its_english(self) -> None:
         self.assertEqual(jmdict_fr.pool_meaning({"kanji": "", "kana": "ぬぬぬぬ", "meaning": "x"}, "fr"), "x")

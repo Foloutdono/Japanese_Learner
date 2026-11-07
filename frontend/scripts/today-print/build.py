@@ -48,7 +48,7 @@ from layouts import PHONE, DESK  # noqa: E402
 import s3_inks  # noqa: E402
 import s5_scene  # noqa: E402
 
-REV = 3
+REV = 4
 FRONTEND = os.path.normpath(os.path.join(HERE, '..', '..'))
 OUT = os.path.join(FRONTEND, 'public', 'today', 'print', str(REV))
 SRC = os.path.join(FRONTEND, 'src', 'components', 'station', 'print', 'print.json')

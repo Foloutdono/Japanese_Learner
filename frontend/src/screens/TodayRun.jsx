@@ -179,7 +179,7 @@ export default function TodayRun({ session }) {
   // here even though they share an id. See useCardSession's cardKey.
   const cardKey = useCallback(c => `${c.card_id}|${c.mode}`, [])
 
-  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+  const fetchBatch = useCallback(async (count, excludeIds, signal, answered) => {
     let quotaPart = ''
     if (capped) {
       // Each lane's share, less what it has answered and what it holds
@@ -187,7 +187,7 @@ export default function TodayRun({ session }) {
       const left = new Map(quota)
       for (const [id, n] of answeredRef.current) if (left.has(id)) left.set(id, left.get(id) - n)
       for (const key of excludeIds) {
-        if (recentlyReviewedRef.current.has(key)) continue
+        if (recentlyReviewedRef.current.has(key) || answered?.has(key)) continue
         const id = laneOfRef.current.get(key)
         if (id && left.has(id)) left.set(id, left.get(id) - 1)
       }

@@ -1,8 +1,20 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { StageFrame } from '../components/chrome/Shell'
+// The real faces, as main.jsx loads them: whether a passage fits its
+// card is a question of the metrics the card is drawn in, not of the
+// fallback the runner happens to have (see below).
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/space-grotesk/latin-500.css'
+import '@fontsource/space-grotesk/latin-600.css'
+import '@fontsource/space-grotesk/latin-700.css'
+import '@fontsource/noto-serif-jp/600.css'
+import '@fontsource/noto-serif-jp/700.css'
+import '@fontsource/noto-sans-jp/400.css'
+import '@fontsource/noto-sans-jp/500.css'
+import '@fontsource/noto-sans-jp/700.css'
 import '../index.css'
 
 // ── 読解 — the passage band, measured on the smallest phone ──────
@@ -20,14 +32,15 @@ import '../index.css'
 //
 // ONE DIRECTION ONLY, and deliberately. This asserts that the ceiling
 // fits; it does not assert that a character more would not. Where the
-// line actually breaks depends on the Japanese font the machine has,
-// and CI has none — a headless Linux runner falls back to a narrower
-// glyph and packs noticeably more per line than any real device does
-// (a text of CEILING + 80 overflows on a developer machine and fits in
-// CI, which is what retired the assertion that used to be here). The
-// fit is therefore measured where the metrics are worst and asserted
-// where they can only be better: a pass in CI is weaker evidence than
-// a pass locally, and a FAILURE anywhere is real.
+// line actually breaks depends on the face the card is drawn in, so the
+// card is drawn in the app's own (Noto Sans JP, Space Grotesk, loaded
+// as main.jsx loads them and waited for before anything is measured):
+// left to the machine's fallback, the same 280 characters fitted in
+// CI, whose runner has no Japanese face and packs more per line, and
+// overflowed by a line in a container whose system-ui is Inter, where
+// the glyphs falling back past it set the lines taller -- neither of
+// them the card a learner reads. What still differs between machines
+// is the rasteriser, so a FAILURE anywhere is still real.
 
 // The ceiling of COMPREHENSION_CHARS. Written here as a number because
 // the two halves of the app do not share a language; the backend test
@@ -53,6 +66,16 @@ vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false
 
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
 const { setRollMode, setRollFurigana } = await import('../stores/readingRoll')
+
+// The roll's choices are module state and this browser's localStorage
+// (stores/readingRoll), shared with every later file in the lane: each
+// test starts on the whole text, whatever the last one left, and the
+// file leaves no roll behind it.
+beforeEach(() => {
+  setRollMode('whole')
+  setRollFurigana(false)
+})
+afterAll(() => { window.localStorage.removeItem('jl.readingRoll') })
 
 // A real mix — kanji, kana and punctuation. The marks matter: 。and 、
 // each take a full em, so a text measured without them measures short.
@@ -94,6 +117,10 @@ async function reading(text, sentences = null) {
       </MemoryRouter>
     </LangProvider>
   )
+  // The faces before the entrance: a slice of Noto Sans JP arriving
+  // after the measure would move every line under it.
+  await document.fonts.load('500 16px "Noto Sans JP"', text)
+  await document.fonts.ready
   await settle()
   return screen.container
 }
@@ -182,8 +209,6 @@ describe('the rolling text at 390×667', () => {
     const pb = play.getBoundingClientRect()
     const ib = play.querySelector('svg').getBoundingClientRect()
     expect(Math.abs((ib.left + ib.width / 2) - (pb.left + pb.width / 2))).toBeLessThan(2)
-    setRollMode('whole')
-    setRollFurigana(false)
   })
 })
 

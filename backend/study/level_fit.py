@@ -99,12 +99,14 @@ def tally_checks(rows, level: str) -> dict[str, tuple[int, int]]:
     return {stop: (p, n) for stop, (p, n) in out.items()}
 
 
-def level_fit(srs, user_id: str, level: str) -> dict:
+def level_fit(srs, user_id: str, level: str, modes=None) -> dict:
     """The verdict for one learner, with the evidence it stands on, in
-    the shape GET /api/profile/level-fit answers."""
+    the shape GET /api/profile/level-fit answers. `modes` is the
+    learner's (plan 273): the words are read in their main mode, the one
+    the level rule marked them known in."""
     checks = tally_checks(srs.get_level_checks(user_id, WINDOW_DAYS), level) if level in LEVELS else {}
     grades = (
-        srs.get_first_answers(user_id, primary_mode(WORD_SOURCE), f"{WORD_SOURCE}_{level}_", WINDOW_DAYS)
+        srs.get_first_answers(user_id, primary_mode(WORD_SOURCE, modes), f"{WORD_SOURCE}_{level}_", WINDOW_DAYS)
         if level in LEVELS else []
     )
     words = (sum(1 for q in grades if q >= KNOWN_GRADE), len(grades))

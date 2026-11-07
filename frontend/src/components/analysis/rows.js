@@ -11,7 +11,10 @@
 // adjective before it (食べ + ます, 新しかっ + た). A particle or a
 // copula ends any run before it and is a row of its own (standsAlone).
 // An auxiliary the model glossed on its own is a word the model named,
-// and keeps its row. Punctuation is no row at all.
+// and keeps its row; so does one the server glossed (plan 272): the
+// written negative ず of せず, the rude やがる, Kyoto's はる -- a part
+// with no rule of its own, whose line folded into its verb was read
+// nowhere. Punctuation is no row at all.
 //
 // The head token carries the row's state, level and gloss; the
 // surface and the reading are the run's own, joined.
@@ -53,7 +56,7 @@ export function rowsOf(tokens) {
       }
     } else if (FOLDS_AUXILIARY.has(tok.pos)) {
       while (end + 1 < tokens.length && tokens[end + 1].pos === 'auxiliary'
-        && !tokens[end + 1].meaning && !standsAlone(tokens[end + 1])) end += 1
+        && !tokens[end + 1].meaning && !tokens[end + 1].gloss && !standsAlone(tokens[end + 1])) end += 1
     }
     const group = tokens.slice(i, end + 1)
     rows.push({
@@ -74,13 +77,16 @@ export function rowsOf(tokens) {
 // with no card of its own (〜てはいけません's いけません, which read
 // "to go"): those are the rule's, and its numbered card says what they
 // do. Each carries the endings written on it (isEnding: 作ります is 作る
-// + ます), which ride it as tags rather than taking a number.
+// + ます), which ride it as tags rather than taking a number. A word of
+// speech the course has no rule for -- ぞ, かしら, the negative ん --
+// carries the line the server wrote for it (`gloss`, plan 272), and a
+// row is the one place that line is read.
 export function wordRowsOf(analysis) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   const grammar = analysis?.grammar ?? []
   const endings = grammar.filter(isEnding)
   return rowsOf(tokens)
-    .filter(row => row.head.vocab_match || lineState(row.head, grammar) !== 'particle')
+    .filter(row => row.head.vocab_match || row.head.gloss || lineState(row.head, grammar) !== 'particle')
     .map(row => ({
       ...row,
       endings: endings.filter(p => row.tokens.some(tok => coversToken(p, tok))),

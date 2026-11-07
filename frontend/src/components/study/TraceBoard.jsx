@@ -40,11 +40,13 @@ const WALK_MS = 1000
 // The share of the stroke at which the ring is seen reached.
 const REACHED = 0.9
 
-function strokeClass(i, { at, given, shownFrom }) {
+function strokeClass(i, { at, given, shownFrom, help }) {
   if (shownFrom != null && i >= shownFrom) return 'shown'
   if (given.includes(i)) return 'given'
   if (i < at) return 'done'
-  if (i === at) return 'here'
+  // Without help the stroke asked is not picked out: it stands faint
+  // among the ones ahead, as on tracing paper.
+  if (i === at) return help ? 'here' : 'ahead'
   return 'ahead'
 }
 
@@ -67,8 +69,11 @@ function chevron({ x, y, ang }, size) {
   return `M${f(bx - s * size * 0.7)},${f(by + c * size * 0.7)}L${f(x + c * size * 0.5)},${f(y + s * size * 0.5)}L${f(bx + s * size * 0.7)},${f(by - c * size * 0.7)}`
 }
 
-export function TraceBoard({ strokes, at, given = [], shownFrom = null, label, onVerdict }) {
+export function TraceBoard({ strokes, at, given = [], shownFrom = null, help = true, label, onVerdict }) {
   const live = at < strokes.length && shownFrom == null
+  // What the board points out (the hollow, the dot and ring, the
+  // chevrons) is the help; the ink and the judging stay without it.
+  const guided = live && help
   const guide = useMemo(() => (live ? sampleStroke(strokes[at]) : []), [strokes, at, live])
   const lengths = useMemo(() => runLengths(guide), [guide])
   const still = useMediaQuery('(prefers-reduced-motion: reduce)')
@@ -105,7 +110,7 @@ export function TraceBoard({ strokes, at, given = [], shownFrom = null, label, o
   // The chevrons stand ahead of the ink, once the hollow is drawn in,
   // and walk its way while the hand waits (in place, if motion is off).
   useEffect(() => {
-    if (!live || guide.length < 2) return undefined
+    if (!guided || guide.length < 2) return undefined
     const total = lengths[lengths.length - 1]
     const start = performance.now()
     let frame = 0
@@ -126,7 +131,7 @@ export function TraceBoard({ strokes, at, given = [], shownFrom = null, label, o
     }
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
-  }, [live, guide, lengths, still])
+  }, [guided, guide, lengths, still])
 
   function unitsOf(e) {
     const r = e.currentTarget.getBoundingClientRect()
@@ -192,7 +197,7 @@ export function TraceBoard({ strokes, at, given = [], shownFrom = null, label, o
     paint(0, true)
   }
 
-  const state = { at, given, shownFrom }
+  const state = { at, given, shownFrom, help }
   const classes = strokes.map((_, i) => strokeClass(i, state))
   const stroke = i => (
     <path
@@ -213,14 +218,14 @@ export function TraceBoard({ strokes, at, given = [], shownFrom = null, label, o
         {strokes.map((_, i) => (classes[i] === 'ahead' ? stroke(i) : null))}
         {/* The stroke asked: its hollow, drawn in along its way. Keyed by
             the stroke, so each new one draws itself in, its ink empty. */}
-        {live && (
+        {guided && (
           <g key={`hollow:${at}`} className="gt-hollow">
             <path className="gt-hollow__edge" d={strokes[at]} pathLength={1} />
             <path className="gt-hollow__in" d={strokes[at]} pathLength={1} />
           </g>
         )}
         {strokes.map((_, i) => (classes[i] === 'done' || classes[i] === 'given' || classes[i] === 'shown' ? stroke(i) : null))}
-        {live && Array.from({ length: CHEVRON.count }, (_, k) => (
+        {guided && Array.from({ length: CHEVRON.count }, (_, k) => (
           <path key={k} className="gt-chevron" ref={el => { chevrons.current[k] = el }} d="" />
         ))}
         {live && (
@@ -233,8 +238,8 @@ export function TraceBoard({ strokes, at, given = [], shownFrom = null, label, o
             style={{ strokeDasharray: '0 2', opacity: 0 }}
           />
         )}
-        {live && end && <circle key={`end:${at}`} ref={endRef} className="gt-end" cx={end[0]} cy={end[1]} r="5.2" />}
-        {live && start && (
+        {guided && end && <circle key={`end:${at}`} ref={endRef} className="gt-end" cx={end[0]} cy={end[1]} r="5.2" />}
+        {guided && start && (
           <g className={`gt-start${called === at ? ' gt-start--call' : ''}`}>
             <circle cx={start[0]} cy={start[1]} r="5" />
             {/* Sized in the board's own units, as the strokes are: the

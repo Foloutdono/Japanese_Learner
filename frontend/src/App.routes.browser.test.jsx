@@ -52,7 +52,7 @@ async function landing(from) {
   const screen = await render(<App />)
   await settle()
   const where = window.location.pathname + window.location.search
-  screen.unmount()
+  await screen.unmount()
   return where
 }
 
@@ -95,7 +95,7 @@ describe('the moved paths', () => {
     expect(document.querySelector('.hud')).toBeTruthy()
     expect(document.querySelectorAll('.tab')).toHaveLength(5)
     expect(document.querySelector('.tab--on').dataset.tab).toBe('learn')
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('mounts the shell on a station (plan 071)', async () => {
@@ -108,7 +108,7 @@ describe('the moved paths', () => {
     // number has changed once already (the long vowels made it six) and
     // a literal here only ever records how many there used to be.
     expect(document.querySelectorAll('.route-stop')).toHaveLength(kanaSets({}).length)
-    screen.unmount()
+    await screen.unmount()
   })
 
   // Practice's three sentence sections were each ONE route that began
@@ -125,7 +125,7 @@ describe('the moved paths', () => {
     // The three sources, and the section's own roundel over them.
     expect(document.querySelectorAll('.platform-card')).toHaveLength(3)
     expect(document.querySelector('.bar__roundel').textContent).toBe('DS')
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('mounts the stage on a practice run', async () => {
@@ -135,7 +135,7 @@ describe('the moved paths', () => {
     expect(document.querySelector('.tabbar')).toBeNull()
     expect(document.querySelector('.hud')).toBeNull()
     expect(document.documentElement.dataset.chrome).toBe('stage')
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('mounts the stage on a run', async () => {
@@ -145,6 +145,6 @@ describe('the moved paths', () => {
     expect(document.querySelector('.tabbar')).toBeNull()
     expect(document.documentElement.dataset.chrome).toBe('stage')
     expect(document.querySelector('.stage__leave').textContent).toContain('Kana')
-    screen.unmount()
+    await screen.unmount()
   })
 })

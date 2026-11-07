@@ -72,7 +72,10 @@ runtime purpose.
   sceneries, plan 309; `PRINTS_REV` in `carousel/sceneries.js` is held equal),
   `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
   plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
-  session's lines are cut into).
+  session's lines are cut into), `PAPER_REV` in `study/duel_paper.py`
+  (a duel's sprint, plan 279: a duel keeps the paper it was dealt),
+  `REV` in `frontend/scripts/duel-music/build.mjs` (a duel's music and
+  sounds, plan 285).
   An exam id's `generator_version` (`study/exam_catalogue.py`) is one too: a bump
   retires the papers it made without deleting them (plan 257 bumped `vocab-gen`).
   A change to what any of them produces bumps it, or learners keep the old.
@@ -167,9 +170,59 @@ runtime purpose.
   たい for たいです), and a kanji the keyboard put in is read before it is
   judged. Never inside the sentence (学生だと思います), never before か
   polite to plain, never where the point is the polite ending or a form.
+  Nor does it say では or じゃ: before a negative each is right for the
+  other (`plain_polite.contracted`, plan 295), and never the voiced ては.
   A new rule or refusal there is pinned in `tests/test_plain_polite.py`
   with the sentence it reads both ways and the one it must not, and
-  diffed over every sentence Construire asks.
+  diffed over every sentence Construire asks. A hole may stop where a
+  word's ending begins (てしまい + ました), never inside the ending
+  (せいで|す, が分かりま|せん) nor inside ありません, which is ない said
+  politely (`grammar_ladder._word_kept`, plan 295): typed whole, the
+  word was marked a kana off.
+- **Every part of a breakdown says what it is (plan 266).** A word row
+  carries its card's meaning, a particle or an ending the point written
+  on it, a number its figure and a name the word "name" (the token's
+  `gloss`, `{en, fr, es}`); a part with none of these is a gap, and
+  `python -m scripts.breakdown_gaps` lists them over every sentence the
+  app teaches. A function word reaches the deck's kana card through
+  `card_lookup`'s breakdown-only resolvers ("the words that hold a
+  sentence together"), never through `resolve_morpheme`, so no card a
+  particle or a suffix gains grades a sentence's level; a set phrase is
+  folded only where it is a whole utterance and a part of it said
+  nothing, and a marker read inside a folded word is dropped. A missing
+  meaning still beats a guessed one: the copula's に after a noun and
+  〜らしい after one stay unlit (`test_grammar_precision.py` pins both).
+- **A breakdown rule is held to text it was not written for (plan
+  272).** A rule found on one sentence is decided by what any sentence
+  says (its clause, the verb that governs it, the word it modifies),
+  never by one neighbour that happened to be there; it is pinned on
+  sentences written for it, beside the lookalike it must leave alone, and
+  never only on the line that showed the gap. A list of words is the
+  last resort and is tried on its variants before it ships.
+  `tests/test_breakdown_invariants.py` holds what no line may break, over
+  outside lines (Tatoeba's) and odd input: the parts cover the text, a
+  reading is kana, a final or half-width mark and a subtitle's spaces
+  change no card, the same line reads the same twice, every gloss has its
+  French and its Spanish. A rule the catalogue's own tour contradicts is
+  wrong, however right it looks (〜のに's "for (doing)" is its second
+  use). A word or a
+  saying read whole takes the particles and the forms inside it, never a
+  construction the catalogue teaches: 昼夜を問わず and 若気の至り are
+  〜を問わず's and 〜の至り's own examples, and stay in their pieces.
+- **A run of the deck's nouns is the dictionary's word (plan 280).**
+  Where JMdict writes a run of deck nouns as one word (電話番号, 観光客,
+  記者会見), the breakdown reads that word, as the dictionary reads it
+  (腕時計 うでどけい), and keeps its cards as the token's `parts`, which
+  every count reads (`level_mix`, the reading bank): a fold moves no
+  level. It folds only where the French layer has the word
+  (`jmdict_fr.pool_line`), so a word to fold is first a line in
+  `fr_source/pool_lines.json`; never over a point written on one of the
+  nouns (仕事中; a shorter word may stand before it: 数年 + 〜まえに's 前),
+  a counter after its number or 何 (五年後, 何分), a person said of
+  several or politely (人たち, 弟さん), nor in a spelling the page did not
+  write (三社とも is no 社共), nor cutting a commoner word its last noun
+  makes with what follows (最終 + 報告書, where 原材料 + 費 keeps 原材料).
+  `DeckNounCompoundTests` holds both sides.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
@@ -207,6 +260,19 @@ runtime purpose.
   or serves the ration does too. A tour can always be skipped for its
   card; a run the learner boards on purpose (a grammar run, a unit) is
   not capped.
+- **A line's main mode is the learner's (plan 273).** Réglages › Modes
+  principaux chooses the mode kana, words and kanji are ridden in
+  (`user_profiles.main_modes`, `study/main_modes.py`), and Today's
+  services add a line's other modes beside it (`extra_modes`). Whatever
+  deals a new card or marks one known reads `level_rule.primary_mode(source,
+  modes)` with `core/learner_modes.read(user_id)`, never the bare default;
+  an added mode deals only cards its line's main mode has taught, and
+  its first answers spend the pace (`srs.get_mode_firsts_today`). A new
+  main mode marks what the old one mastered known in it, the level
+  rule's way, unless the learner starts it from zero (`carryKnown`), and
+  deletes nothing either way; a chosen main mode deals its new cards
+  from the lowest stop that has any, the default one from the level.
+  Grammar rides its ladder.
 - **A place on the 番付 is read off one list (plan 262).** `study/banzuke.py`
   ranks each board (all time, the calendar week from Monday 00:00 UTC, a
   division) from one sum, `srs.xp_totals`, a minute old at most, a tie
@@ -218,6 +284,72 @@ runtime purpose.
   learner reads and still sees their own place; a row's card shows what
   the board already does (XP, level, places, division) and published
   decks, never the streak, the JLPT level or the card's name.
+- **A duel is timed by the server and told by its replies (plan 279).**
+  `study/duels.py` serves a sprint one question at a time, notes when,
+  and scores each answer as it arrives; a reply says right or wrong and
+  never which choice was right, and the corrections open only once the
+  duel is settled, or the first player could hand the second the keys
+  (a paper whose corrections were sold is never dealt again as a ghost).
+  A ranked run's score to beat is the player's once their own run has
+  started (`duels._score_kept`): before, an unstarted seat is free to give
+  back, so whatever another learner's figures reach (the cover, the hall,
+  the live read) keeps them until « Partir ».
+  Nothing runs in the background: `settle()` brings a duel up to date
+  from its stored instants on every read (a run past its sprint paid, a
+  duel resolved, expired and its ranked fare refunded, a seat left
+  unstarted given back), so anything new that reads a duel settles it
+  first. A sprint is two minutes, and a duel keeps the length its paper
+  was dealt with (`duels.sprint_ms`, by `paper_rev`, plan 284), so a duel
+  dealt before a change runs and is raced at its own. Its scoring goes by
+  `paper_rev` too (plan 285, `duels.combo_on`): a sprint-2 answer pays
+  its speed, the combo of right answers in a row (`COMBO_TIERS`: ×1.5 from
+  five, ×2 from ten, ×3 from twenty) and the rush (the last `RUSH_MS` pay
+  a right answer twice), a sprint-1 answer its speed alone. The server
+  scores and the client draws: a reply carries the streak and the
+  multiplier, the cover the rules, the result each run's lines and grade
+  (`duels.lines`, `duels.grade`), and the timeline the points as scored,
+  so a recorded run sums to its score. A paper stands where the Elo does
+  (plan 286, the owner's B): built at a mix (`duel_paper.mix_of`, tenths
+  of a level, each level's starting Elo a whole one) that asks the two
+  levels it stands between in their share, at the lower Elo of two
+  friends and at a ranked player's own, whose stranger is met on a paper
+  whose mix is near (half the Elo window, `duels._reach`); the declared
+  level keeps everything else in the app. A sprint question has three
+  choices (plan 288, `duel_paper.CHOICES`): a 漢字読み or 表記 item is
+  the exam's symmetric four with one wrong choice left out, the cut
+  chosen so that over a paper the key is the centre, the outlier, the
+  longest and the shortest as often as a blind pick of three
+  (`_left_out`), and `tests/test_duel_paper.py` holds the exam's margins
+  over that blind pick. A third of a paper is kanji, and each level it
+  asks brings the levels below it, in their share of the words from
+  there down, the duel's level (`level_of`) never under `OWN_FLOOR`,
+  30% (`duel_paper.shares`). The line starts a stop before N5 (plan
+  289): the beginner's (`duel_elo.NOVICE`, 800 Elo, mix -10, so a mix
+  stored before keeps its meaning), a learner riding to the kana
+  (`goal_level` the novice's, `duels.duel_level`), asked the basics
+  course's words in kana and the kana for their romaji where the others
+  ask kanji; N5 brings it below it by its kana alone (its words are
+  N5's), and the client names it in words (`levelName`). The hall's platform leads to that platform
+  alone: the ranked one to its departure, the duel's ticket before it is
+  bought, read off the hall's `ranked` (`duels.departure`: the mix, the
+  first Elo window, the stake against an equal); a friend's to its sheet. The music and the sounds are scored
+  to the same clock (`scripts/duel-music/`, plan 285: its 80 bars are
+  sprint-2's two minutes, its rush is `RUSH_MS`, its layers turn on at the
+  tiers, and `src/duelAudio.test.js` holds them to the server). A run started has
+  its sprint: nothing expires or is declined
+  under it, and whatever closes a duel (a block, a friendship ended, an
+  account erased: `duels.close_between`, `leave_all`) finishes and pays
+  the runs under way. The Elo (`study/duel_elo.py`) is apart from the
+  番付: it starts from the learner's level at their first ranked sprint
+  (`duel_elo.start`, written then and once; no test is asked first, plan
+  282), and only a ranked duel moves it. A duel's fare goes through
+  `credits.pay` with its own reason (`duel`, `duel_review`), a refund is
+  a positive row of the same reason, both on the duel's own cursor
+  (`cur=`), so no fare is taken for a run that failed to start and no
+  refund lost after its expiry; a duel's XP is practice XP
+  (`source = 'duel'`), dated when the run ended (`award_xp(at=)`) and
+  capped that local day (`duels.XP_CAP`). Who reported whom is read with
+  `scripts/read_reports`, never on a dashboard.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -244,7 +376,13 @@ runtime purpose.
   alone (`tests/test_metabase_sync.py` refuses a question that selects
   them). The context beside it is the trail's closed classes, shown to
   the learner before sending, and a reply's address is read from the
-  account, never taken from the request.
+  account, never taken from the request. Each message rings the owner's
+  private Discord forum (`core/bell.py`, plan 278), tagged by its kind:
+  the post carries the kind, the row's number and the closed classes,
+  and is handed the count of characters, never the words, the address
+  or the author (`tests/test_bell.py`, and `privacy.html` says so).
+  Whether a message is handled is its `triage` (new, seen, done,
+  dropped), set by `read_feedback --done ID`, never in Discord.
 - **A new per-learner table is erased with the account.** Add it to
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
@@ -258,11 +396,20 @@ runtime purpose.
   the backend reads as the tables' owner, which RLS leaves alone, and
   nothing reads them through the Data API. A table made by hand in
   `public` is closed by hand (`scripts/sql/close_data_api.sql`).
+- **A comprehension question answers its own miss (plan 301b).** Every
+  seed question names the breakdown sentence(s) its right option rests
+  on (`at`) and says in one line why (`why`, `{en, fr}`), quoting the
+  text verbatim from those sentences and never naming an option by its
+  letter or place, since the options are shuffled for every serving
+  (`tests/test_comprehension_seed.py`). The generator is asked for both
+  and keeps them only when well formed (`reading._clean_answer_line`), so
+  a pool row without them still serves and the screen falls back to the
+  sentence the question quotes (`domain/quotedFragments.answerSentences`).
 - **The reading bank is held at its level from both sides.** A row of
   `content/reading_sentences.py` (which reading and translation share) has
   nothing above its level and, at N4–N1, two deck words of its own level
   besides its grammar point, its focus one of them, its point found by the
-  detector and a French translation (`row_problems`). Draft new rows
+  detector and a French and a Spanish translation (`row_problems`). Draft new rows
   through `python -m scripts.reading_bank_report --check FILE.json`.
 - **A French learner reads French end to end.** Every new learner-facing
   text carries its French beside its English: a content field has its
@@ -273,6 +420,63 @@ runtime purpose.
   JMdict and Tatoeba text has its French in `datas/vocab/jmdict_fr.sqlite3`
   (plan 215); a pool word is glossed from it (`jmdict_fr.pool_meaning`),
   never from `VOCAB_FR`, which is the course's and keyed by written form.
+- **A Spanish learner reads Spanish where it is written, English where it
+  is not yet (plan 302, ADR 0023).** Never French, never blank. The
+  interface is whole: a screen string is written in `es` too
+  (`locales.test.js`). The decks and the grammar points' glosses are whole:
+  a deck card gains its line in `datas/vocab/vocab_es.json` (keyed
+  `"{kanji}::{kana}"`, moved with the card on a rename), a kanji its
+  Spanish (`kanji_meanings_es.json`, then `build_kanji_db --spanish-only`),
+  a grammar point every text it has (`meaning.es`, `structure_es`, its
+  lesson, its tour and its own Choisir questions), in the same change
+  (`tests/test_spanish.py`); a reading-bank row its `es` (`row_problems`),
+  a dictation line its `es` (`listening_clips.problems`), a comprehension
+  seed every string (its `LANGS`, so the pool serves a Spanish learner
+  the seeds before any model call), a conversation scenario every text
+  (`conversation.LANGS`, `check_conversation`) and a sentence a deck card
+  shows its Spanish: a correction's or a written sentence's `es`
+  (`vocab_examples check`, `check-added`), a Tatoeba sentence's line in
+  `datas/vocab/jmdict_es.sqlite3` (`build_jmdict_fr --lang es`), so a card
+  the deck gains has its sentences in Spanish too; a basics unit its
+  title's `es` (`test_basics`); a gloss the breakdown writes itself (a
+  word of speech, an affix, a unit, a figure, a date) its `es`, a tuple
+  table's row its Spanish last (`test_breakdown_invariants`); a
+  dictionary chip its label and tooltip (`_SHORT_LABELS_ES`,
+  `_TOOLTIPS_ES`), a radical its meaning (`RADICAL_ES`), every theme
+  word its `| español` in `content/theme_lists.py`, in the theme's own
+  sense (the build refuses one without), a duel's word item its choices in every language
+  (`duel_paper.CHOICE_LANGS`, a `PAPER_REV` move), and search matches
+  every gloss in each (`routes/dictionary.py`), and the JMdict layer is
+  the French one's twin: a line `jmdict_fr.sqlite3` gains (a sense, a
+  sentence, a pool word's gloss) has its Spanish in `jmdict_es.sqlite3`
+  in the same change
+  (`test_the_spanish_layer_holds_every_line_the_french_one_does`).
+  Nothing is left to a later wave: `python -m scripts.spanish_coverage`
+  shows every part whole, and a part that grows takes its Spanish with
+  it. A catalogue text is read through
+  `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES)` for a
+  word and `KANJI_GLOSSES` for a kanji (`translations/course.py`; never
+  the two merged, which keeps only the kanji maps), a date or a number is
+  written in `intlLocale(lang)` (`lib/locale.js`, es-419 for Spanish): never a
+  `lang === 'fr' ? … : …` that sends a third language to English or French
+  by accident. Latin-American neutral Spanish (the owner's choice, ADR
+  0023): the Latin-American word where the two differ (boleto, auto,
+  celular, computadora, jugo, estacionar; never coger), the preterite for
+  a finished past, no leísmo, tú, «…» quotes with the period after the
+  closing one, figures as es-419 writes them. A deck kanji's Spanish is
+  KANJIDIC2's unless `kanji_meanings_es.json` has the line, which then
+  wins (`build_kanji_db --spanish-only`): correct a kanji there.
+  Spain's Spanish is an interface over that one Spanish, not a fourth
+  table (plan 303): `locales/es-ES` holds only the screen strings Spain
+  says otherwise (añadir, billete, ordenador, vídeo, pulsar, en
+  directo), merged over the Spanish one, and its figures are es-ES
+  (`lib/locale.js`); the account keeps `es-ES` in `ui_lang` while every
+  request and every content lookup asks for `es` (`contentLang`), so
+  nothing on the server forks. A new screen string with one of those
+  words gains its line there (`locales.test.js`), and a query typed in
+  one of Spain's words asks the Latin-American one too
+  (`search_match.SPAIN_WORDS`: móvil finds 携帯, whose gloss says
+  celular).
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
@@ -286,15 +490,48 @@ runtime purpose.
   227).** The deck's Tatoeba sentences are read through
   `content/example_fixes.py` (`datas/vocab/example_fixes.json`): a
   correction keeps every course word the sentence showed, carries its
-  `en`, `fr` and `why`, and is drafted and checked with
+  `en`, `fr`, `es` and `why`, and is drafted and checked with
   `python -m scripts.vocab_examples check`. A word JMdict gives no
   sentence has two written for it (`datas/vocab/example_added.json`,
-  `check-added`: its course spelling, no kanji above its level), so every
-  card shows one; a word the deck gains is written for in the same change.
+  `check-added`: its course spelling, no kanji above its level, its three
+  translations), so every card shows one; a word the deck gains is written for in the same change.
+  A sentence sits under the sense it uses (plan 296): JMdict files one
+  whose link names no sense under the first (渡す "to ferry across"
+  showed a relay's baton), so a sentence under the wrong sense is filed
+  under its own in the same layer (`datas/vocab/example_senses.json`, per
+  word and by the sentence shown, with the sense's gloss), drafted and
+  checked with `python -m scripts.example_senses check`. A correction
+  that rewrites a sentence keeps the sense it is filed under, or files it
+  anew: the rewritten sentence's old move no longer matches, and
+  `tests/test_example_senses.py` fails on it. A card shows only
+  sentences its word is in, where the page marks it (plan 297,
+  `test_every_sentence_a_card_shows_carries_its_word`): one in another
+  spelling of the same word is corrected to the card's (どちら's beside
+  どっち), one of another word read alike is dropped (開く under 空く),
+  and a kana card whose curated row holds another word's entry before
+  its own keeps its own (`vocab_extras._OWN_ENTRY`, ママ behind まま).
+  The word marked is the card's, not a card read alike: written with
+  the card's kanji (速い under 早い, 作る under 造る were dropped,
+  `test_no_card_marks_another_cards_spelling`), read its way (一日 read
+  いちにち under いちじつ), or in kana where the card's kanji is the
+  usual one (値段をつける is 付ける's, not 着ける's); a card the drops
+  leave bare is written for, and one whose gloss reaches a second JMdict
+  entry lists its senses (`_SENSES_ALSO`, 回り's surroundings).
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
   phone test.
+- **The store shells ask for what they use and name what they call.**
+  The Android manifest asks for the network and notifications alone: a
+  photo comes from the system photo picker (`PhotoChromeClient`), a shot
+  from the camera app, a reminder is an inexact alarm
+  (`isExactNotification: false`), and a permission a plugin brings that
+  the app does not need is taken out (`tools:node="remove"`). The release
+  is shrunk and renamed by R8 (`android/app/proguard-rules.pro`): a class
+  reached by its name needs a keep rule, and CI runs R8 on every pull
+  request. An iOS target that calls one of Apple's required-reason APIs
+  (UserDefaults, file dates) names it in its `PrivacyInfo.xcprivacy`.
+  `src/native.shells.test.js` holds all of it.
 - **An assumption is not history (plan 224).** A card the level rule
   marked known and nobody has asked about (`SRSEngine.is_assumed`) is
   the app's guess about a self-declared level. Its first answer is a
@@ -304,7 +541,15 @@ runtime purpose.
   (`srs._NOT_A_KEPT_CHECK`). A move down gives the untouched ones from
   the new level up back as new cards (`forget_assumed`) and deletes no
   answered row; a new seeding path writes `KNOWN_STATE` or it is not
-  read as an assumption.
+  read as an assumption. `KNOWN_STATE`'s one check of one is a
+  `card_modes` count only: a learner's total of answers (the review
+  total, retention, XP) reads `review_log` and its rollup, never a sum
+  of `card_modes`' counters, or every assumption is an answer (plan
+  300: a learner who boarded at N4 read 100% retention before answering
+  once). A card's and a deck's figures read `_state_row`'s `answers`,
+  which leave an untouched assumption's check out, and a check passed
+  takes the virtual one's place in the row (`SRSEngine.review`), so the
+  row counts what was answered; `total_reviews` still says met or new.
 - **An import is an assumption the level does not give back (plans
   243, 243b).** `SRSEngine.seed_imported` writes `KNOWN_STATE`'s
   signature with the source's interval and ease and `IMPORTED_STEP` in
@@ -332,6 +577,28 @@ runtime purpose.
   `/api/today` put the day's queue ahead of the first ride's card. A
   store's fetch shares the one in flight (`stores/remote.js`,
   `profileSummary`'s `fetchIfStale`).
+- **A gate is drawn on its first frame (plan 292).** What Today and
+  the four other gates open on is asked before they are opened, by
+  `lib/warm.js`: Today by the first ride once its sentence is up
+  (`warmToday`), the others by Today once the day has come, once a
+  visit, two at a time when idle (`warmGates`), never ahead of the
+  screen in front of the learner. A gate reads a store, or asks for
+  itself, keeps the answer (`keepCachedJson`) and draws the last one
+  kept (`lastCachedJson`) while it asks again, never a spinner over an
+  answer in hand. A new gate, or a new request one opens on, goes in
+  `GATE_PATHS` and `warmGates` in the same change. A tab tap lights its
+  gate at once and moves a frame later (`TabBar`): the router renders
+  as a transition, but nothing paints until it commits. What a gate
+  builds at great cost is kept between visits, not rebuilt: Today's
+  print layers are put back as they stood, their loops paused while
+  away (`TodayPrint`). A page of cards taller than the screen leaves
+  the ones below the fold unlaid (`content-visibility: auto`), each
+  standing in at its own content height written from its tokens (the
+  Dictionary's `.dict-entry-card`), so nothing moves when one is drawn;
+  and React draws a screenful of them first, the rest a frame later as
+  unseen places of the same size (`useScreenfulFirst`).
+  Measure a switch on the production build at phone width with the
+  CPU slowed 4×, before and after.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s
@@ -339,6 +606,20 @@ runtime purpose.
   ride read CLS 1.3 from the ride's own notes. A tap that changes the
   screen renders it as a transition (`BoardingFlow`'s `go()`), so the tap
   paints before the screen does.
+- **Sound wakes on a lift, and on every one (2026-10-25).** A browser
+  lets a page play on a key, a mouse button going down or a finger
+  lifting (touchend, click), never on a finger landing:
+  `lib/audio/context.js` makes the AudioContext on the first of those
+  and wakes it on every later one, `interrupted` (Safari's, after a call
+  or a locked screen) as well as `suspended`. A sound asked for from a
+  finger's pointerdown is silent on a phone until it lifts, and a fade
+  that waits on `resume()` can wait for good (the lake's did): schedule
+  it on the audio clock instead. On iOS the session is `playback`, the
+  owner's choice: sound plays through the silent switch, and pauses
+  another app's music while it does. A word or line is said through
+  `lib/audio/speech.js`, whose turn is what lets a stop reach a clip
+  still on its way and keeps the app's own cancels from reading as a
+  device that failed.
 - **The placement test is replayed from its seed (plan 224).** The climb
   (`study/placement.walk`) keeps nothing between two answers: it is
   rebuilt from the seed at each one, in whatever process answers it. So
@@ -364,6 +645,27 @@ runtime purpose.
   published deck. Accounts that boarded before it are brought in line by
   `scripts/migrate_handles.py`, once, by hand.
 
+- **A new feature is told once, to whoever met the app without it
+  (plan 287).** An announcement over Today is a `user_profiles` column
+  stamped by `POST /api/onboarding/news/{item}` (`onboarding.NEWS`, a
+  closed set) whichever way its sheet is shut, and the profile says
+  whether to show it (`duelsNews`), only to a learner who met the screen
+  before the feature did. Whatever teaches it to a new learner (Today's
+  guide shows the duels' key) stamps it too, so nobody is told twice,
+  and it waits its turn in Today's queue of sheets.
+
+- **The interface language is the account's, and only the learner moves it.**
+  A choice made in Réglages › Affichage is kept in `user_profiles.ui_lang`
+  (NULL = never chosen: French on a French device, Spanish on a Spanish one,
+  Spain's on one set to Spain, English otherwise) as well as in
+  localStorage `lang`, which stays because the first paint reads it
+  synchronously. `lib/langChoice.js` writes both (`rememberLang`) and, at
+  boot, copies the account's answer onto the device (`syncLang`, from
+  App.jsx) or carries a choice only the device holds up. A browser forgets
+  (Safari's storage cap, a WebView purge, a second device) and English
+  learners were switched back to French; nothing may write `lang` but the
+  learner's click, and no default may be saved as if it were a choice.
+
 ## Commands
 
 ### Backend (`backend/`)
@@ -372,6 +674,7 @@ cp .env.example .env          # then fill in DATABASE_URL / DEV_USER_ID
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 pytest                        # run all tests
+pytest -n auto --dist loadfile            # the same as CI runs it, a worker per core (pip install pytest-xdist)
 pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
@@ -508,11 +811,16 @@ python -m scripts.prune_withdrawn      # decks an author deleted, past their gra
 python -m scripts.drop_legacy_tables   # tables a removed feature left behind
 ```
 
-One more is read-only and needs no flag, so it is safe to run at any time:
+These are read-only and need no flag, so they are safe to run at any time
+(`read_feedback` writes only a message's status, and only the ids named
+after `--seen`, `--done`, `--drop` or `--reopen`):
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
-python -m scripts.read_feedback        # what learners wrote to us (plan 222), newest first
+python -m scripts.read_feedback        # what learners wrote to us (plan 222), the open ones by kind (plan 278)
+python -m scripts.read_feedback --id 412   # one message; --done 412 marks it handled
+python -m scripts.discord_bell         # the Discord bell's webhook and forum tags: report; --yes creates the tags, --test rings
+python -m scripts.read_reports         # the duels' reports, who reported whom (plan 279)
 python -m scripts.learner_trail <user_id>  # one learner's visits, where they left, and why it may have been (plan 249)
 ```
 
@@ -535,7 +843,9 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-thirty hand-written exercises per level since plan 259 (N5 has thirty-one), in both languages,
+thirty hand-written exercises per level since plan 259, sixty at N4
+and eighty at N5 since plan 298 (N5 has eighty-one), in each of the
+app's languages (Spanish since plan 302),
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -625,6 +935,16 @@ those learners typed the name for their card, so read the report before
 python -m scripts.migrate_handles      # report; --yes to apply, --user to scope (repeatable)
 ```
 
+And one after the deploy that carries plan 300: a check passed before it
+counted on top of the level rule's virtual one, so those cards read 2 of
+2 for one answer. It sets every row that is exactly one check of one over
+its logged history to the log's count, and leaves alone a row whose
+history was folded into the rollup.
+
+```bash
+python -m scripts.recount_known_checks  # report; --yes to apply, --user to scope
+```
+
 And one after any deploy that changes the voice (plan 121 did, from edge-tts
 to VOICEVOX Nemo). Run it from the backend's Render Shell, since it needs the
 database and the disk the clips live on. It remakes every dictation clip and
@@ -660,14 +980,22 @@ The French layer over JMdict (plan 215, `content/jmdict_fr.py`) is its
 own small SQLite file, `datas/vocab/jmdict_fr.sqlite3`: the French of the
 deck's dictionary senses, of the Tatoeba sentences the dictionary and
 reading/translation practice serve, and a one-line gloss for the ~20k
-commonest pool words. It sits beside `vocab_jmdict.sqlite3` rather than
-in it, so a correction never re-commits the 76 MB pool. To correct a
+commonest pool words and for every compound of the deck's nouns JMdict
+holds, which is what lets the breakdown fold it (plan 280). It sits
+beside `vocab_jmdict.sqlite3` rather than in it, so a correction never
+re-commits the 76 MB pool. The Spanish layer (plan 302) is the same, in
+`datas/vocab/jmdict_es.sqlite3`: every line the French one has, its
+senses, its sentences and its pool lines. To correct a
 line, dump it to JSON, edit, rebuild (the JSON is gitignored):
 
 ```bash
 python -m scripts.build_jmdict_fr --export   # -> datas/vocab/fr_source/
 python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
+python -m scripts.build_jmdict_fr --lang es --export  # -> datas/vocab/es_source/
+python -m scripts.build_jmdict_fr --lang es           # -> datas/vocab/jmdict_es.sqlite3
 python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
+python -m scripts.build_kanji_db --spanish-only # kanji_meanings_es.json into kanji.sqlite3 (plan 302)
+python -m scripts.spanish_coverage              # what reads Spanish, and what still reads English
 ```
 
 Two things are worth knowing before reaching for any of them:
@@ -865,6 +1193,19 @@ python -m scripts.check_conversation            # every level; exit 1 on a probl
 python -m scripts.check_conversation --level N4
 ```
 
+The breakdown has one too (plan 266): every part of the app's own
+sentences that says nothing -- a word row with no meaning, a particle no
+point is written on -- grouped by kind, each with a sentence that shows
+it. A reason to look; a gap is closed in the lookups or the detector by
+counter-case:
+
+```bash
+cd backend
+python -m scripts.breakdown_gaps                          # the gaps, by kind
+python -m scripts.breakdown_gaps --kind silent_particle   # one kind, longer
+python -m scripts.breakdown_gaps --json                   # every gap, as JSON
+```
+
 One more read-only report measures the vocab deck itself (plan 103) —
 its shape, duplicates, readings, glosses, and every content word in the
 taught sentences that resolves to no card, split into the present cards
@@ -908,7 +1249,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 7,965 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,980 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
@@ -919,14 +1260,16 @@ npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
+npm test          # vitest's eight lanes in CI's three groups, one after another (scripts/test-lanes.mjs)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
-npm run landing:og  # its two share cards, rendered in Chromium
+npm run landing:og  # its three share cards, rendered in Chromium
+npm run landing:footage  # its sixteen feature clips, filmed on a seeded learner (plan 283)
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
 python3 scripts/sceneries/build.py    # the reading challenge's sceneries (plan 309)
+node scripts/duel-music/build.mjs     # a duel's music and sounds (plan 285; Chromium, ffmpeg)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -940,7 +1283,16 @@ generated by `scripts/ambiance/` into `public/sounds/ambiant/<REV>/`
 and `src/lib/audio/ambiance.json`. Same rules: never by hand, and
 `scripts/ambiance/README.md` has them. Keep it sparse.
 
-The landing page is the site's **`/`** (and `/en`), and the app's front
+A duel's race is the one other place with music (plan 285, the owner's
+pick of the canvas "C1, le son retenu"): four layers the combo turns on,
+the rush and the last chord, scored to sprint-2's eighty bars and played
+on the server's clock (`src/lib/audio/duel.js`), with the race's and the
+result's sounds. `scripts/duel-music/` renders them in Chromium into
+`public/sounds/duel/<REV>/` and `src/lib/audio/duel.json`. Same rules,
+and one more: the render is not byte-deterministic, so rebuild only with
+a change to the score, under a new `REV` (`scripts/duel-music/README.md`).
+
+The landing page is the site's **`/`** (and `/en`, `/es`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`
 (`appShell.js`) so that `vercel.json` can rewrite `/` to the page, and the
 page sends a signed-in learner and every sign-in's return on to `/app`
@@ -971,7 +1323,9 @@ that, build it, a top five, a conversation, kanji spelling, find the
 impostor), and exports the PNGs. Since plan 231 it also draws the app
 itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
-the hour, each story's cover and its call to action also a seven-second MP4 clip;
+the hour, each story's cover and its call to action also a seven-second MP4 clip,
+and since plan 281 the duels' story played whole as one clip (a real N5
+paper's opening raced, the result, the Elo, the board: `bank/duel.json`);
 since plan 232 the word echo (`echo.js`), a pictured word said over and
 over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice
@@ -1068,7 +1422,8 @@ is a static page outside `src/` and never ships. Its data is `frontend/carousel/
 `python -m scripts.carousel_bank` (backend, needs the tokenizer and the
 JMdict database): rerun it after a change to the reading bank, the deck,
 the kanji, the catalogue or its tours, the comprehension seeds, the
-theme decks or `frontend/carousel/content/`, and commit the files.
+theme decks, the duels' paper (`duel_paper.PAPER_REV`) or
+`frontend/carousel/content/`, and commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a
@@ -1102,7 +1457,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 
 ### Backend layout
 - `main.py` — FastAPI app setup: loads `backend/.env`, mounts routers, CORS (deployed frontend origin + `CORS_ORIGINS` env list), static mounts for `kanjivg` (stroke-order diagrams) and `datas/exam_audio` (generated TTS).
-- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station, transfer). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
+- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station, transfer, pvp). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
 - `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), a point's own Choisir questions (`grammar_choose.py`, plan 201), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.

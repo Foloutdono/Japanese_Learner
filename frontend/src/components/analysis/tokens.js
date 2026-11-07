@@ -62,9 +62,15 @@ export function tokFurigana(tok) {
 // (は wa, へ e); a mark or a word in Latin letters has no rōmaji.
 const SPOKEN_PARTICLE = { は: 'wa', へ: 'e' }
 const HAS_KANA = /[ぁ-ゖァ-ヺー]/
+const HAS_KATAKANA = /[ァ-ヺ]/
 export function tokRomaji(tok) {
   if (tok.pos === 'particle' && SPOKEN_PARTICLE[tok.surface]) return SPOKEN_PARTICLE[tok.surface]
-  const sound = tok.reading || tok.surface || ''
+  // A katakana word spells its own long vowels (コーヒー koohii); its
+  // reading, the sound in hiragana, draws them as the row's usual vowel
+  // (こうひい kouhii).
+  const surface = tok.surface ?? ''
+  const spelled = HAS_KATAKANA.test(surface) && !HAS_KANJI.test(surface)
+  const sound = (spelled ? surface : tok.reading) || surface
   if (!HAS_KANA.test(sound)) return ''
   return kanaToRomaji(sound)
 }
@@ -85,9 +91,13 @@ export function lineState(tok, grammar) {
 // carries both (study/analysis._deck_match) -- else nothing. A pool word
 // carries the same pair where the pool's French layer has its line
 // (plan 215, study/analysis._pool_match), its English alone otherwise.
+// A number or a name the course has no card for carries the local tier's
+// own line instead (plan 266, study/analysis._number_dict and
+// _NAME_GLOSS): 三十 is 30, 田中 a family name -- a row that said nothing.
 export function wordGloss(tok, lang) {
   if (tok?.meaning) return tok.meaning
   const entry = tok?.vocab_match?.entry
-  if (!entry) return ''
-  return (lang === 'fr' && entry.meaning_fr) || entry.meaning || ''
+  if (entry) return (lang !== 'en' && entry[`meaning_${lang}`]) || entry.meaning || ''
+  const own = tok?.gloss
+  return (own && ((lang !== 'en' && own[lang]) || own.en)) || ''
 }

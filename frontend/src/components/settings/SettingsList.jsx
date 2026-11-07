@@ -17,10 +17,11 @@ import { ATTRIBUTIONS } from '../../domain/attributions'
 import { SOURCES } from '../../domain/paywall'
 import {
   ChevronIcon, MonitorIcon, SpeakerIcon, BellIcon, StarIcon, HourglassIcon,
-  InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon, MessageIcon, ImportIcon,
+  InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon, MessageIcon, ImportIcon, SlidersIcon,
 } from '../ui/Icons'
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
+import { intlLocale } from '../../lib/locale'
 
 // ── The list under the pass (plans 139, 182) ─────────────────────
 // Every row is one shape: a glyph for what it is, its name over what it
@@ -36,8 +37,8 @@ import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
 // a heading to be legible is not finished):
 //
 //   the app     display, sound, reminders (a shell's only)
-//   the study   the agenda, the reviews, the rating bar, the reading
-//               pace, help
+//   the study   the agenda, the reviews, the main modes (plan 273),
+//               the rating bar, the reading pace, help
 //   the learner the account, what Anki taught them (plan 243), the
 //               credits
 //
@@ -48,7 +49,7 @@ import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
 const THEATRE = ['ambiance', 'jingle', 'announcement']
 
 function useGroups(session) {
-  const { t, lang } = useLang()
+  const { t, lang, locale } = useLang()
   const [theme] = useThemeChoice()
   const scale = useRatingScale()
   const pace = useReadingPace()
@@ -58,7 +59,7 @@ function useGroups(session) {
   const { blocks } = useAgenda()
   const review = useTodaySummary().data?.review
 
-  const langLabel = LANGUAGES.find(l => l.code === lang)?.label ?? lang
+  const langLabel = LANGUAGES.find(l => l.code === locale)?.label ?? locale
   const themeLabel = { auto: t.themeAuto, dark: t.themeDark, light: t.themeLight }[theme]
   const quiet = THEATRE.every(k => volumes[k] === 0)
   const full = THEATRE.every(k => volumes[k] === DEFAULT_VOLUMES[k])
@@ -80,6 +81,7 @@ function useGroups(session) {
     [
       { id: 'agenda', Icon: CalendarIcon, label: t.settingsAgenda, value: blocks?.length ? t.agdRowValue(blocks.length) : t.agdRowEmpty },
       { id: 'reviews', Icon: CardIcon, label: t.settingsReviews, value: reviewsValue(review, t, lang) },
+      { id: 'modes', Icon: SlidersIcon, label: t.settingsModes, value: t.settingsModesValue },
       { id: 'rating', Icon: StarIcon, iconProps: { filled: false }, label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
       { id: 'reading', Icon: HourglassIcon, label: t.settingsReadingPace, value: t.readingPaceOption[pace], spec: <PaceLine factor={paceFactor(pace)} /> },
       { id: 'help', Icon: InfoIcon, label: t.settingsHelp, value: t.settingsHelpValue },
@@ -97,7 +99,7 @@ function useGroups(session) {
 // catch-up under way, the ceiling, or none -- the first that holds.
 function reviewsValue(review, t, lang) {
   if (review?.away) {
-    const from = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'long' })
+    const from = new Intl.DateTimeFormat(intlLocale(lang, 'en'), { day: 'numeric', month: 'long' })
       .format(new Date(`${review.away.from}T12:00:00`))
     return t.rvRowAway(from)
   }

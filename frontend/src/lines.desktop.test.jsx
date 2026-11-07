@@ -266,7 +266,7 @@ describe('a practice run on three panels', () => {
     // The row on the stage now names its sentence, in its verdict's ink.
     const now = $('.desk-sentence--now')
     expect(now.textContent).toContain(FIRST.phrase)
-    expect(now.querySelector('.desk-sentence__dot--q4')).not.toBeNull()
+    expect(now.querySelector('.desk-sentence__dot--q5')).not.toBeNull()
   })
 })
 
@@ -288,7 +288,7 @@ describe('the run\'s lines', () => {
     const rows = lineRows()
     expect(rows).toHaveLength(2)
     expect(rows[0].textContent).toContain(FIRST.phrase)
-    expect(rows[0].querySelector('.desk-sentence__dot--q4')).not.toBeNull()
+    expect(rows[0].querySelector('.desk-sentence__dot--q5')).not.toBeNull()
     expect(rows[1].classList.contains('desk-sentence--lit')).toBe(true)
     // The sentence being written keeps its column sealed...
     expect($('.desk-run__side > .desk-sealed')).not.toBeNull()

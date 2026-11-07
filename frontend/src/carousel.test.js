@@ -7,9 +7,9 @@ import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
-import { APP_INKS, PRINT_HOURS, PRINT_SEASONS, printOf } from '../carousel/app.js'
+import { APP_INKS, DUEL_INKS, PRINT_HOURS, PRINT_SEASONS, printOf } from '../carousel/app.js'
 import { printName } from './domain/printHour.js'
-import { CLIP, END, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { CLIP, COMP_BEATS, DUEL_BEATS, DUEL_RUN, END, LEVEL, PROMO, ROLL_DEMO, STORIES, STORY_FILES, arrivals, askable, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
 import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
@@ -24,6 +24,7 @@ import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, dra
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
+import { SPRINT_MS, points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import { APP as FEATURE_APP, FEATURE_FPS, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, camFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
 import EN from './locales/en/index.js'
@@ -731,24 +732,32 @@ describe('explaining a point in its own sentence', () => {
     expect(glossOf('息子は注射を怖がるから、病院には行きたくないと言う。', 'と', 'fr')).toBe('que (citation)')
     expect(glossOf('発車のベルが鳴ると、乗客が次々と列車に乗りこむ。', 'と')).not.toBe('that (quoting)')
     // が before a comma after a clause is “but”; after a noun, the subject.
-    expect(glossOf('都会に引っ越してだいぶ経つが、夜の騒音にはなかなか慣れない。', 'が')).toBe('but')
-    expect(glossOf('この机は一人で持ち上げられないことはないが、腰を悪くしそうで心配だ。', 'が')).toBe('but')
+    // (Since plan 272 the point 〜が（逆接） is written on it, and says so.)
+    expect(glossOf('都会に引っ越してだいぶ経つが、夜の騒音にはなかなか慣れない。', 'が')).toMatch(/^but/)
+    expect(glossOf('この机は一人で持ち上げられないことはないが、腰を悪くしそうで心配だ。', 'が')).toMatch(/^but/)
     expect(glossOf('規模が小さいがゆえに、その企業は景気の変動に柔軟に対応できた。', 'が')).not.toBe('but')
     // ほど after これ, それ, あれ is “so”, after a number “about”.
     expect(glossOf('あれほど努力したのだから、彼女は試験に合格するに違いない。', 'ほど')).toBe('so (much)')
     expect(glossOf('医師の説明によると、手術の後は二週間ほど入院が必要らしい。', 'ほど')).toBe('about')
-    // できるだけ is “as … as possible”, never “only”.
-    expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBe('as … as possible')
-    // A form of だ that makes an adverb of the word (急に), and one the tokenizer gave a particle: bare.
-    expect(glossOf('急に寒くなると、体の具合が悪くなります。', 'に')).toBe('makes an adverb')
-    expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('')
-    // The copula で is the particle too often (この店で): always bare.
-    expect(glossOf('この店で、この本がいちばん高いです。', 'で')).toBe('')
+    // できるだけ is “as … as possible”, never “only”: one word since plan 272.
+    expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'できるだけ')).toMatch(/as much as possible/)
+    expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBeUndefined()
+    // A form of だ that makes an adverb of the word (真剣に), and one the tokenizer gave a particle: bare.
+    expect(glossOf('経験が少ない人だって、真剣に練習を続ければ必ず上達する。', 'に')).toBe('makes an adverb')
+    // (秘密に気付く's に is the particle 気付く takes since plan 306, and
+    // has its role's line; 多忙に紛れて's is still given the copula.)
+    expect(glossOf('本当は二人の秘密に気付いていたが、私はわざと知らないふりをした。', 'に')).toBe('time · goal · to')
+    expect(glossOf('多忙に紛れて、旧知の友人への返事は結局書かずじまいになった。', 'に')).toBe('')
+    // The copula で is never named a place: the tokenizer gave it to the
+    // particle too often. Since plan 272 the breakdown reads 店で、 as the
+    // particle it is, "where", and 大ざっぱで、 as 〜くて／〜で.
+    expect(glossOf('この店で、この本がいちばん高いです。', 'で')).toBe('place')
+    expect(glossOf('倹約を心掛ける几帳面な兄にひきかえ、弟は大ざっぱで、無駄遣いばかりしている。', 'で')).toMatch(/^joins/)
   })
 
   it('gives no stacked slide to a pair that is no two particles (plan 229l)', () => {
     const keys = jp => stacksIn(sentence(jp).rows, 'en', glossEn).map(x => x.key)
-    expect(keys('この棚は古くて、今にも壊れそうです。')).not.toContain('にも')
+    expect(keys('判定に不服な監督は、今にも怒鳴らんばかりに審判に抗議した。')).not.toContain('にも')
     expect(keys('定期券を家に忘れたばかりに、往復とも切符を買わなければならなかった。')).not.toContain('とも')
     expect(keys('専門家とは言わないまでも、彼の考古学の知識はかなりのものだ。')).not.toContain('とは')
     expect(keys('住民への事前の説明なしに、会社は工場の建設に着工した。')).not.toContain('への')
@@ -782,13 +791,23 @@ describe('explaining a point in its own sentence', () => {
   it('says the app’s own words on its own parts, in both languages', () => {
     for (const [lang, t] of [['en', EN], ['fr', FR]]) {
       const P = PROMO[lang]
-      expect(P.ratings, lang).toEqual([t.wrongRated, t.wrongSeen, t.difficult, t.correctHesit])
+      expect(P.ratings, lang).toEqual([t.wrongRated, t.wrongSeen, t.correctHesit, t.easy])
       expect(P.mastered, lang).toBe(t.mastered)
       expect(P.tap, lang).toBe(t.tapToReveal)
       expect(P.mode, lang).toBe(t.mode_vocab_flashcard_f2b)
       expect(P.depart, lang).toBe(t.depart)
       expect(P.unit, lang).toBe(t.dueUnit)
       expect(P.doneBy('08:14'), lang).toBe(t.gateEndsAt('08:14'))
+      // Reading comprehension's story (plan 301): the run's clock, its
+      // name on the card's foot, the question and its type's badge.
+      expect(P.comp.timeLeft, lang).toBe(t.timeRemaining)
+      expect(P.comp.title, lang).toBe(t.comprehensionTitle)
+      expect(P.comp.question, lang).toBe(t.question)
+      for (const n of [6, 8, 10]) expect(P.comp.speed(n), lang).toBe(t.rollSpeed(n))
+      expect(P.comp.types, lang).toEqual({
+        comprehension: t.questionTypeComprehension, vocabulary: t.questionTypeVocabulary,
+        grammar: t.questionTypeGrammar, inference: t.questionTypeInference,
+      })
     }
   })
 
@@ -824,6 +843,94 @@ describe('explaining a point in its own sentence', () => {
           }
         }
       }
+    }
+  })
+
+  // ── 理解, reading comprehension's story (plan 301) ────────────
+  it('asks a seed passage its own question and answers it on the line it quotes (plan 301)', () => {
+    const data = bank('comprehension.json')
+    for (const lang of ['en', 'fr']) {
+      const items = promoItems('comprehension', data, lang)
+      expect(items.length, lang).toBeGreaterThan(100)
+      for (const { id } of items) {
+        const [pid, n] = id.split(':q')
+        const ps = data.passages.find(x => x.id === pid)
+        const q = ps.questions[Number(n) - 1]
+        // Only a question whose quote is in one sentence, as the run opens it.
+        expect(['vocabulary', 'grammar'], id).toContain(q.type)
+        const a = askable(ps, lang).find(x => x.q === Number(n) - 1)
+        const sentence = ps.sents[a.at].map(r => r[0]).join('')
+        expect(sentence, id).toContain(a.quote)
+        const pl = promoPlan('comprehension', data, id, { ...OPTS, lang, story: 'comprehension' })
+        expect(pl.id, id).toBe(id)
+        expect(pl.level, id).toBe(ps.lv)
+        const { promo } = pl
+        expect(promo.text, id).toBe(ps.sents.flat().map(r => r[0]).join(''))
+        expect(promo.read, id).toBeGreaterThan(0)
+        expect(new Set(promo.choices).size, id).toBe(4)
+        expect(promo.choices[promo.right], id).toBeTruthy()
+        expect(promo.n, id).toBe(Number(n))
+        expect(promo.total, id).toBe(ps.questions.length)
+        // The line it rests on, whole, its translation in the reader's
+        // language, the words it quotes lit (none when it quotes it whole).
+        expect(promo.quote.toks.map(x => x.t).join(''), id).toBe(sentence)
+        expect(promo.quote.tr.length, id).toBeGreaterThan(0)
+        const lit = promo.quote.toks.filter(x => x.lit).map(x => x.t).join('')
+        if (lit) expect(lit, id).toContain(a.quote)
+        else expect(sentence.replace(/[。！？、]/g, ''), id).toBe(a.quote.replace(/[。！？、]/g, ''))
+      }
+    }
+    // A sentence the seed's breakdown cuts alike carries its translation.
+    const seeds = Object.fromEntries(['N5', 'N4', 'N3', 'N2', 'N1'].flatMap(lv => JSON.parse(read(`../backend/content/comprehension/${lv}.json`))).map(x => [x.id, x]))
+    for (const ps of data.passages) {
+      expect(ps.tr, ps.id).toHaveLength(ps.sents.length)
+      const said = Object.fromEntries(seeds[ps.id].breakdown.map(b => [b.jp.trim(), b.translation]))
+      ps.sents.forEach((rows, i) => expect(ps.tr[i], `${ps.id} ${i}`).toEqual(said[rows.map(r => r[0]).join('').trim()] ?? null))
+    }
+  })
+
+  it('rolls the text at the stepper’s own speeds, and plays the story whole (plan 301b)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+    const data = bank('comprehension.json')
+    // The demo's speeds are the stepper's: its default's neighbour, then a press each.
+    const steps = [1, 2, 3, 4, 5, 6, 8, 10]
+    ROLL_DEMO.speeds.forEach(([, cps], i) => {
+      expect(steps, String(cps)).toContain(cps)
+      if (i) expect(steps.indexOf(cps), String(cps)).toBe(steps.indexOf(ROLL_DEMO.speeds[i - 1][1]) + 1)
+    })
+    for (const lang of ['en', 'fr']) {
+      const [{ id }] = promoItems('comprehension', data, lang)
+      const pl = promoPlan('comprehension', data, id, { ...OPTS, lang, story: 'comprehension' })
+      expect(pl.promo.roll.map(rows => rows.map(r => r.t).join('')).join(''), id).toBe(pl.promo.text)
+      expect(pl.promo.chars).toBe([...pl.promo.text].length)
+      const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+      expect(frames.map(f => f.key)).toEqual(COMP_BEATS.map(([key]) => key))
+      // The roll still: the demo's last moment, at its last speed, the readings on.
+      const still = stubContext()
+      frames[1].draw(still.ctx)
+      expect(still.texts, lang).toContain(PROMO[lang].comp.speed(ROLL_DEMO.speeds.at(-1)[1]))
+      const { story } = frames.clips
+      expect(story.seconds).toBeCloseTo(COMP_BEATS.reduce((sum, [, len]) => sum + len, 0), 5)
+      expect(story.fps).toBe(CLIP.fps)
+      expect(story.print).toBe(false)
+      const said = new Set()
+      for (let t = 0; t < story.seconds; t += 0.25) {
+        const { ctx, texts } = stubContext()
+        expect(() => story.draw(ctx, t), `${lang} at ${t}s`).not.toThrow()
+        texts.forEach(x => said.add(x))
+      }
+      // Every speed it rolls at is shown, and it ends on the board.
+      for (const [, cps] of ROLL_DEMO.speeds) expect([...said], `${lang} ${cps}`).toContain(PROMO[lang].comp.speed(cps))
+      const end = stubContext()
+      story.draw(end.ctx, story.seconds - 0.01)
+      const last = stubContext()
+      frames.at(-1).draw(last.ctx)
+      for (const w of last.texts.filter(x => /[A-Za-z]{4}/.test(x))) expect(end.texts, `${lang}: ${w}`).toContain(w)
+    }
+    } finally {
+      globalThis.Path2D = had
     }
   })
 
@@ -888,9 +995,148 @@ describe('explaining a point in its own sentence', () => {
         for (const s of clip.sounds) {
           expect(keys.has(s.key), `${story} ${which}: ${s.key}`).toBe(true)
           expect(s.at, `${story} ${which}: ${s.key}`).toBeGreaterThanOrEqual(0)
-          expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(CLIP.seconds)
+          expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(clip.seconds)
         }
       }
+    }
+  })
+
+  // ── 対戦, the duels' story (plan 281) ──────────────────────────────
+  const duelBank = bank('duel.json')
+  const constant = (file, name) => read(`../backend/${file}`).match(new RegExp(`^${name} = (.+)$`, 'm'))?.[1]
+  const int = v => Number(String(v).replace(/_/g, ''))
+
+  it('plays the opening of a paper the duels still deal, on the backend’s own figures (plan 281)', () => {
+    // A paper made under another revision is a paper no duel deals any
+    // more: run python -m scripts.carousel_bank again.
+    expect(duelBank.paper).toBe(JSON.parse(constant('study/duel_paper.py', 'PAPER_REV')))
+    expect(duelBank.level).toBe('N5')
+    expect(duelBank.elo.start).toEqual(JSON.parse(constant('study/duel_elo.py', 'START')))
+    expect(duelBank.elo.k).toBe(int(constant('study/duel_elo.py', 'K_SETTLED')))
+    expect(duelBank.xp.cap).toBe(int(constant('study/duels.py', 'XP_CAP')))
+    expect(duelBank.hold).toEqual({ right: int(constant('study/duels.py', 'RIGHT_HOLD_MS')), wrong: int(constant('study/duels.py', 'LOCK_MS')) })
+    const xp = read('../backend/srs/xp.py')
+    const paid = q => Number(xp.match(new RegExp(`^\\s+${q}: (\\d+),`, 'm'))[1])
+    expect(duelBank.xp).toMatchObject({ right: paid(4), wrong: paid(1) })
+    // A sprint asks the server's count of choices (three since plan 288).
+    const count = int(constant('study/duel_paper.py', 'CHOICES'))
+    expect(count).toBe(3)
+    for (const q of duelBank.items) {
+      expect(['word', 'reading', 'writing'], `${q.n}`).toContain(q.kind)
+      const choices = Array.isArray(q.choices) ? [q.choices] : [q.choices.en, q.choices.fr]
+      for (const c of choices) {
+        expect(c.length, `${q.n}`).toBe(count)
+        expect(new Set(c).size, `${q.n}`).toBe(count)
+        expect(c[q.answer], `${q.n}`).toBeTruthy()
+      }
+    }
+  })
+
+  it('scores the story’s run as the duels score one (plan 281)', () => {
+    for (const lang of ['en', 'fr']) {
+      const run = duelRun(duelBank, lang)
+      // Each answer pays what its speed is worth, a wrong one nothing,
+      // and the next question waits the server's hold.
+      let served = 0
+      run.answers.forEach((a, i) => {
+        const q = run.items[i]
+        expect(a.served, `${lang} ${i}`).toBe(served)
+        expect(a.pts, `${lang} ${i}`).toBe(a.right ? points(a.at - a.served) : 0)
+        expect(a.pick === q.answer, `${lang} ${i}`).toBe(a.right)
+        expect(q.choices[a.pick], `${lang} ${i}`).toBeTruthy()
+        served = a.at + (a.right ? duelBank.hold.right : duelBank.hold.wrong)
+      })
+      expect(run.next).toBe(served)
+      // The other's recorded run keeps the same rules: served after each
+      // hold, paid what its speed is worth.
+      let theirs = 0
+      for (const x of run.their) {
+        expect(x.pts, `${lang} their ${x.at}`).toBe(points(x.at - theirs))
+        theirs = x.at + duelBank.hold.right
+      }
+      // The lead changes hands on the way (the race's line has a gap to show).
+      const lead = m => run.answers.filter(a => a.at <= m).reduce((t, a) => t + a.pts, 0) - run.their.filter(x => x.at <= m).reduce((t, x) => t + x.pts, 0)
+      const leads = [...run.answers.map(a => a.at), ...run.their.map(x => x.at)].sort((a, b) => a - b).map(lead)
+      expect(leads.some(v => v > 0) && leads.some(v => v < 0)).toBe(true)
+      // The result: the XP the answers pay, the Elo by the classic
+      // expectation at the settled K, the board climbed a place.
+      const { final, you, them } = DUEL_RUN
+      expect(final.mine).toBeGreaterThan(final.theirs)
+      expect(run.xp.paid).toBe(final.rights * duelBank.xp.right + (final.answered - final.rights) * duelBank.xp.wrong)
+      expect(run.xp.paid).toBeLessThanOrEqual(duelBank.xp.cap)
+      expect(run.elo.delta).toBe(Math.round(duelBank.elo.k * (1 - 1 / (1 + 10 ** ((them.elo - you.elo) / 400)))))
+      expect(run.elo.trend.at(-1)).toBe(run.elo.after)
+      expect(run.elo.trend.length).toBe(20)
+      expect(run.elo.start).toBe(duelBank.elo.start[you.level])
+      const place = list => list.find(r => r.me).rank
+      expect(place(run.board.after)).toBe(place(run.board.before) - 1)
+    }
+  })
+
+  it('says the app’s own words on the duel’s parts, in both languages (plan 281)', () => {
+    for (const [lang, t] of [['en', EN], ['fr', FR]]) {
+      const D = PROMO[lang].duel
+      expect(D.you, lang).toBe(t.pvpYou)
+      expect(D.go, lang).toBe(t.pvpGo)
+      expect(D.kinds, lang).toEqual(t.pvpKind)
+      expect(D.duelLevel, lang).toBe(t.pvpDuelLevel)
+      expect(D.questions, lang).toBe(t.pvpQuestions)
+      expect(D.wordsKanji, lang).toBe(t.pvpWordsKanji)
+      expect(D.sprint, lang).toBe(t.pvpSprintOf(SPRINT_MS))
+      expect(D.win, lang).toBe(t.pvpWin)
+      expect(D.elo, lang).toBe(t.pvpElo)
+      for (const n of [1, 135]) expect(D.by(n), lang).toBe(t.pvpBy(n))
+      expect(D.rightsOf(14, 15), lang).toBe(t.pvpRightsOf(14, 15))
+      expect(D.xpLeft(51), lang).toBe(t.pvpXpLeft(51))
+      expect(D.startAt('1 000'), lang).toBe(t.pvpStartAt('1 000'))
+      expect(D.peak('1 224'), lang).toBe(t.pvpPeak('1 224'))
+      for (const r of [1, 3]) expect(D.gapTo(27, r), lang).toBe(t.pvpGapTo(27, r))
+    }
+  })
+
+  it('draws the duels’ parts in the inks index.css gives each theme (plan 281)', () => {
+    const css = read('src/index.css')
+    const escape = v => v.replace(/[()[\].]/g, '\\$&')
+    for (const [theme, inks] of Object.entries(DUEL_INKS)) {
+      for (const [name, value] of Object.entries(inks)) expect(css, `${theme} ${name}`).toMatch(new RegExp(`${name}:\\s*${escape(value)};`))
+    }
+  })
+
+  it('plays the duels’ story whole, beat after beat, ending at the gate (plan 281)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      for (const lang of ['en', 'fr']) {
+        const pl = promoPlan('duel', duelBank, 'duel', { ...OPTS, lang, story: 'duel' })
+        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+        expect(frames.map(f => f.key)).toEqual(DUEL_BEATS.map(([key]) => key))
+        const { story } = frames.clips
+        const race = 1.3 + pl.promo.next / 1000 + 1.0
+        expect(story.seconds).toBeCloseTo(DUEL_BEATS.reduce((t, [, len]) => t + (len ?? race), 0), 5)
+        expect(story.fps).toBe(CLIP.fps)
+        expect(story.print).toBe(false)
+        for (let t = 0; t < story.seconds; t += 0.37) expect(() => story.draw(stubContext().ctx, t), `${lang} at ${t}s`).not.toThrow()
+        // Every beat's words are said in the story, and it ends on the
+        // call to action's.
+        // A beat's headline lands word by word, its other lines whole.
+        const said = new Set()
+        for (let t = 0; t < story.seconds; t += 0.1) {
+          const { ctx, texts } = stubContext()
+          story.draw(ctx, t)
+          texts.forEach(x => x.split(' ').forEach(w => said.add(w)))
+        }
+        const D = PROMO[lang].duel
+        for (const line of [...D.hook(SPRINT_MS / 1000), D.versus, D.same, D.fast(100), D.ahead, D.winElo, D.eloIs, D.climb]) {
+          for (const word of weldIf(lang, line).split(' ')) expect(said, `${lang}: ${word}`).toContain(word)
+        }
+        const last = stubContext()
+        frames.at(-1).draw(last.ctx)
+        const end = stubContext()
+        story.draw(end.ctx, story.seconds - 0.01)
+        for (const w of last.texts.filter(x => /[A-Za-z]{4}/.test(x))) expect(end.texts, `${lang} end: ${w}`).toContain(w)
+      }
+    } finally {
+      globalThis.Path2D = had
     }
   })
 })
@@ -1142,14 +1388,18 @@ describe('the long videos (plan 233)', () => {
     expect(dictionaryForms('ふったら')).toContain('ふる')
     expect(shortGloss('please (give me, please do)')).toBe('please')
     expect(shortGloss('to be, to have (used for inanimate objects)')).toBe('to be, to have')
+    // (a later sense that needs its note is left out: no bare "to take")
+    expect(shortGloss('to drink, to take (medicine)')).toBe('to drink')
     const chips = longPlan('grammar', files, { level: 'N5', point: '〜たいです' }).items.filter(x => x.type === 'gex').flatMap(x => x.chips)
     const of = t => chips.find(c => c.t === t)?.gloss
     expect(of('飲みたい')).toBe('to drink')
     expect(of('行きたい')).toBe('to go')
     expect(of('したい')).toMatch(/^to do/)
-    // しゅうまつ cut in two by the tokenizer: neither half is a word of its own.
-    expect(of('しゅう')).toBe('')
-    expect(of('まつ')).toBe('')
+    // しゅうまつ, which the tokenizer cuts into two names, is one word
+    // (plan 272), and no half of it a chip of its own.
+    expect(chips.find(c => c.t === 'しゅうまつ')).toBeDefined()
+    expect(of('しゅう')).toBeUndefined()
+    expect(of('まつ')).toBeUndefined()
     // Every chip is said, a particle as it sounds: the topic は is "wa".
     const wa = longPlan('grammar', files, { level: 'N5', point: 'は' }).items.filter(x => x.type === 'gex').flatMap(x => x.chips)
     expect(wa.find(c => c.t === 'は').voice).toBe('わ')

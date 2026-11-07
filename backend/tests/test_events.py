@@ -271,6 +271,27 @@ def test_the_frontend_and_backend_agree_on_the_names():
     )
 
 
+def test_the_frontend_and_backend_agree_on_the_keys():
+    """Each name carries the same keys on both sides: a key only one side
+    lists is dropped by the other without a word. track.js has no cap of
+    its own and keeps every key it lists, so MAX_PROPS is the one cut."""
+    import re
+    from pathlib import Path
+    track = Path(__file__).resolve().parents[2] / "frontend" / "src" / "lib" / "track.js"
+    source = track.read_text(encoding="utf-8")
+    block = source.split("export const EVENTS = {", 1)[1].split("\n}", 1)[0]
+    block = re.sub(r"//[^\n]*", "", block)
+    declared = {
+        name: frozenset(re.findall(r"'(\w+)'", keys))
+        for name, keys in re.findall(r"(\w+)\s*:\s*\[([^\]]*)\]", block)
+    }
+    assert declared == events.EVENTS, {
+        name: sorted(declared.get(name, set()) ^ events.EVENTS.get(name, set()))
+        for name in set(declared) | set(events.EVENTS)
+        if declared.get(name) != events.EVENTS.get(name)
+    }
+
+
 def test_deleting_the_account_takes_the_trail_with_it():
     """event_log and event_daily are in routes/account.py's PLAN.
 
@@ -446,6 +467,28 @@ def test_a_run_carries_how_it_went(client):
     kept = [props for _, props, _ in rows()]
     assert kept[0]["card_p50"] == 21000 and kept[0]["right"] == 7 and kept[0]["where"] == "practice"
     assert kept[1] == {"kind": "vocab", "done": 4, "ms": 50000}
+
+
+def test_no_event_allows_more_keys_than_it_can_keep():
+    # clean() stops at MAX_PROPS in the order the keys arrive, so a set
+    # past it loses its last keys without a word: a cap of 12 cut
+    # boarding_done's `named` and `kept` for every placement test.
+    over = {name: len(keys) for name, keys in events.EVENTS.items() if len(keys) > events.MAX_PROPS}
+    assert not over, (events.MAX_PROPS, over)
+
+
+def test_a_full_boarding_done_keeps_every_key():
+    # What BoardingFlow sends a learner who took the placement test, in
+    # the order lib/track.js sends it: fourteen keys, `named` and `kept`
+    # (plans 269/270) last.
+    sent = {
+        "kana_known": "both", "level": "N4", "pace": 10, "notifications": True,
+        "lines": "vocab,kanji,grammar", "ms": 182000, "level_how": "test", "placed": "N4",
+        "edited_goal": False, "edited_rhythm": True, "edited_hour": False, "edited_lines": False,
+        "named": True, "kept": "password",
+    }
+    assert len(sent) == 14
+    assert events.clean("boarding_done", sent) == sent
 
 
 def test_every_enum_names_a_declared_key():

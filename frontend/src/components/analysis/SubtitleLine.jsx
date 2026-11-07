@@ -14,7 +14,8 @@ import { tokenTimes, sungAt } from './wordTimes'
 // A grammar point -- a construction or a particle's marker, the rows of
 // GrammarPoints `numbered` -- is framed on the words it sits on, its
 // number at the frame's corner, so the card in the left column and its
-// place in the sentence are found from either (the owner's G2). A word two points cover is framed once, by the
+// place in the sentence are found from either (the owner's G2). The
+// words inside a frame stand together, as the one word they make. A word two points cover is framed once, by the
 // first; the frame then carries every number whose point begins in it.
 //
 // 字幕の流れ (2026-09-27): while the video is inside the line, its words
@@ -75,10 +76,13 @@ export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhea
       .filter(Boolean)
     const run = []
     for (let k = i; k <= j; k += 1) run.push(word(k))
+    // The point's words read as the one word they make (plan 272): て +
+    // くれる is てくれる, の + で is ので, each still a word of its own to
+    // press, but no gap between them.
     out.push(
       <span key={`pt-${i}`} className="anl-subs__pt">
         {numbers.length > 0 && <span className="anl-subs__n" aria-hidden="true">{numbers.join('·')}</span>}
-        {run}
+        <span className="anl-subs__words">{run}</span>
       </span>,
     )
     i = j + 1

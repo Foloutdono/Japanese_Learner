@@ -6,7 +6,8 @@
 // step outside the list would record its errors with no step.
 
 // みどりの窓口 — the boarding (screens/BoardingFlow.jsx).
-export const BOARDING_STEPS = ['kana', 'reveal', 'level', 'test', 'card']
+// `remind` stands after the card, on a native shell alone (plan 294).
+export const BOARDING_STEPS = ['kana', 'reveal', 'level', 'test', 'card', 'remind']
 
 // 試乗 — the cards ride (screens/RideRun.jsx): known, known-back,
 // unknown, unknown-back, done; on a phone known-dict between the known
@@ -19,9 +20,9 @@ export function stepFor(index, answered, lookFirst = false) {
   return `${index === 0 ? 'known' : 'unknown'}${answered ? '-back' : ''}`
 }
 
-// The reading ride (screens/RideReading.jsx): read, type, measure, pass;
-// on the desk graded between measure and pass.
-export const READING_STEPS = ['read', 'type', 'measure', 'graded', 'pass']
+// The reading ride (screens/RideReading.jsx): read, type, measure; on
+// the desk graded after measure. `pass` was its plate's, until plan 292.
+export const READING_STEPS = ['read', 'type', 'measure', 'graded']
 
 // 入門 (screens/RideIntro.jsx) names its steps intro-<step>, over
 // domain/nyumon's INTRO_STEPS.

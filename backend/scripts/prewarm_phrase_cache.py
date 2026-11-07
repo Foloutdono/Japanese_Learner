@@ -57,7 +57,7 @@ def main() -> int:
                         help="report what is missing without calling the model")
     # The cache is keyed by (phrase, lang): a breakdown bought in one
     # language is a miss in the other.
-    parser.add_argument("--lang", default="en", choices=("en", "fr"),
+    parser.add_argument("--lang", default="en", choices=("en", "fr", "es"),
                         help="the language of the glosses and notes (default: en)")
     args = parser.parse_args()
 

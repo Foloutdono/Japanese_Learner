@@ -62,7 +62,7 @@ logger = logging.getLogger("prewarm-comprehension")
 # gloss in it are in the wrong language. routes/reading.LANG_NAMES
 # accepts more than these two; a learner on one of them still gets an
 # exercise, generated on demand as before.
-LANGS = ("en", "fr")
+LANGS = ("en", "fr", "es")
 
 # Enough that a daily learner meets a fresh text for a month before the
 # pool has to grow, and small enough that a first run is affordable.

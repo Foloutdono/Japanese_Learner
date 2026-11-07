@@ -130,14 +130,14 @@ describe('the point’s roundel', () => {
     const rows = [...stop.querySelectorAll(':scope > .gl-outs > .gl-out')]
     expect(rows.map(r => r.className)).toEqual(['gl-out gl-out--stay', 'gl-out gl-out--next gl-out--pass'])
     expect(rows.map(r => [...r.querySelectorAll('.gl-out__key')].map(k => k.textContent))).toEqual([
-      ['4Wrong', '3Almost'], ['2Difficult', '1Correct'],
+      ['4Missed', '3Almost'], ['2Correct', '1Easy'],
     ])
     expect(rows.map(r => r.querySelector('.gl-out__when').textContent)).toEqual(['10min', '1h'])
     // The keys and the wait are drawn; a screen reader hears each row whole.
     expect(rows.every(r => r.querySelector('.gl-out__keys').getAttribute('aria-hidden') === 'true')).toBe(true)
     expect(rows.map(r => r.querySelector(':scope > .sr-only').textContent)).toEqual([
-      'Wrong, Almost: try again, in 10 min',
-      'Difficult, Correct: next step, in 1 h',
+      'Missed, Almost: try again, in 10 min',
+      'Correct, Easy: next step, in 1 h',
     ])
     expect(stop.querySelector('.gl-outs').getAttribute('aria-label')).toBe('What each rating does')
   })
@@ -147,12 +147,12 @@ describe('the point’s roundel', () => {
     const root = (await mount(<LadderMap card={cards.mastered} outcomes={outcomesOf(cards.mastered, verdicts, en)} />)).container
     const rows = [...root.querySelectorAll('.gl-out')]
     expect(rows.map(r => r.className)).toEqual([
-      'gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass', 'gl-out gl-out--stay gl-out--pass',
+      'gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass',
     ])
     expect(rows[0].querySelector('.gl-out__note').textContent).toBe('Relapse')
     expect(rows.slice(1).every(r => !r.querySelector('.gl-out__note'))).toBe(true)
-    expect(rows[0].querySelector(':scope > .sr-only').textContent).toBe('Wrong, Almost: relapse, in 10 min')
-    expect(rows[2].querySelector(':scope > .sr-only').textContent).toMatch(/^Correct: stays mastered, in /)
+    expect(rows[0].querySelector(':scope > .sr-only').textContent).toBe('Missed, Almost: relapse, in 10 min')
+    expect(rows[1].querySelector(':scope > .sr-only').textContent).toMatch(/^Correct, Easy: stays mastered, in /)
   })
 })
 
@@ -387,6 +387,77 @@ describe('Construire', () => {
     expect(root.querySelector('.gl-echo .gl-gap--filled').textContent).toBe('です')
     expect(root.querySelector('.gl-back__why').textContent).toBe('The sentence says だ: the same, in plain speech.')
     expect(root.querySelector('.gl-ring__arc--miss')).toBeNull()
+  })
+
+  // Plan 295, the owner's screenshot: あり typed for ではありません. The
+  // kana left out were written over nothing, stood on no width and were
+  // never seen, and the card read これはわたしのかさありません.
+  it('writes a kana left out in the line, where it was missing', async () => {
+    const copula = {
+      ...card,
+      card_id: 'grammar_N5_です／だ',
+      raw_id: 'grammar_N5_です／だ',
+      grammar: 'です／だ',
+      build: {
+        key: 'ex:2',
+        tr: 'This is not my umbrella.',
+        pieces: [{ furigana: [{ text: 'これはわたしの' }, { text: 'かさ' }] }, { gap: 0, size: 7 }, { furigana: [{ text: '。' }] }],
+      },
+    }
+    // What the backend answers (study/grammar_ladder.check_build).
+    apiJson.mockResolvedValue({
+      verdict: 'wrong',
+      gaps: [{
+        verdict: 'wrong', answer: 'ではありません', reading: 'ではありません',
+        marks: [{ wrong: '', fix: 'では' }, { ok: 'あり' }, { wrong: '', fix: 'ません' }],
+      }],
+      jp: 'これはわたしのかさではありません。',
+      tr: 'This is not my umbrella.',
+      furigana: [],
+    })
+    const screen = await mount(<Run card={copula} onDone={() => {}} />)
+    const root = screen.container
+    await screen.getByLabelText('Your answer').fill('あり')
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--no').textContent).toBe('Not quite.')
+    const hole = root.querySelector('.gl-echo .gl-gap--filled')
+    // The hole reads the whole answer, in order, and nothing is struck.
+    expect(hole.textContent).toBe('ではありません')
+    expect(hole.querySelector('s')).toBeNull()
+    const added = [...hole.querySelectorAll('.gl-fix--missing ins')]
+    expect(added.map(n => n.textContent)).toEqual(['では', 'ません'])
+    // Written in the line, at the hole's own size, and seen: never
+    // stacked over nothing.
+    const line = hole.getBoundingClientRect()
+    for (const ins of added) {
+      const box = ins.getBoundingClientRect()
+      expect(getComputedStyle(ins).position).toBe('static')
+      expect(box.width).toBeGreaterThan(0)
+      expect(box.top).toBeGreaterThanOrEqual(line.top - 1)
+      expect(box.bottom).toBeLessThanOrEqual(line.bottom + 1)
+      expect(getComputedStyle(ins).fontSize).toBe(getComputedStyle(hole).fontSize)
+    }
+  })
+
+  // Plan 295: では typed where the sentence says じゃ is right, and the
+  // card says how the sentence says it.
+  it('takes では for the sentence’s じゃ, and says the sentence contracts it', async () => {
+    apiJson.mockResolvedValue({
+      verdict: 'right',
+      gaps: [{ verdict: 'right', answer: 'では', reading: 'じゃ', marks: [], said: 'じゃ', register: 'contracted' }],
+      jp: 'あの人は先生じゃありません。',
+      tr: 'That person is not a teacher.',
+      furigana: [],
+    })
+    const screen = await mount(<Run card={card} onDone={() => {}} />)
+    const root = screen.container
+    await screen.getByLabelText('Your answer').fill('dewa')
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--ok').textContent).toBe('Right.')
+    expect(root.querySelector('.gl-back__why').textContent)
+      .toBe('The sentence says じゃ: the same, with では contracted, as speech says it.')
   })
 
   it('says nothing more when the answer is the sentence’s own', async () => {

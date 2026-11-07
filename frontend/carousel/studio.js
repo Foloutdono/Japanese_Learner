@@ -44,7 +44,7 @@ const T = STRINGS.en
 const LIST_NAME = { long: 'Video', words: 'Short', feature: 'Feature', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', short: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
-  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', season: 'now', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
+  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', season: 'now', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20', 'promo:comprehension': 'n5-33:q5' },
   view: 'compare', type: 'plates', format: 'post', fit: 'tiktok', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
@@ -600,6 +600,8 @@ async function renderNow() {
   }
   $('#export-short').hidden = clipped
   $('#copy-short').hidden = clipped
+  // A story that plays whole has its own download (plan 281).
+  $('#export-story-clip').hidden = !current.decks[0]?.slides.clips?.story
   const typeName = id => (promo ? PROMO.en.names[state.story] : T.types[id].name)
   $('#export-name').textContent = typeName(shown)
   const stage = $('#stage')
@@ -1269,10 +1271,15 @@ async function exportOne() {
 }
 // ── The clips (plan 231) ──────────────────────────────────────
 // A promo story's cover, or its call to action, in motion, seven
-// seconds, encoded here as the feeds take a video: H.264 in an MP4
-// (WebCodecs, muxed by mp4-muxer).
+// seconds, or a story played whole (plan 281), encoded here as the feeds
+// take a video: H.264 in an MP4 (WebCodecs, muxed by mp4-muxer).
 const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm'
-const CLIPS = { cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' }, end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' } }
+const CLIPS = {
+  cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' },
+  end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' },
+  // A story played whole, beat after beat (the duels', plan 281).
+  story: { btn: '#export-story-clip', name: 'story', said: 'story' },
+}
 async function exportClip(which = 'cover') {
   const d = current.decks[0]
   const clip = d?.slides.clips?.[which]
@@ -1572,6 +1579,7 @@ function wire() {
   $('#export').addEventListener('click', exportZip)
   $('#export-clip').addEventListener('click', () => exportClip('cover'))
   $('#export-end-clip').addEventListener('click', () => exportClip('end'))
+  $('#export-story-clip').addEventListener('click', () => exportClip('story'))
   $('#copy').addEventListener('click', () => copyField('#caption', videoSource() && document.body.dataset.post !== 'caption' ? 'Description' : 'Caption'))
   $('#copy-tags').addEventListener('click', () => copyField('#tags', 'Tags'))
   $('#copy-command').addEventListener('click', async () => {

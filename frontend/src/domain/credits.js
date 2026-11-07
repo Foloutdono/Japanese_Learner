@@ -6,7 +6,7 @@ export const DAILY_REFILL = 30
 // 補充 — the refill fills through the day (plan 141): one credit every
 // 48 minutes, the day's thirty spread over it, up to CAP. What has
 // landed waits to be claimed (`pending`); see stores/credits.js and
-// components/credits/ClaimSheet.jsx.
+// components/credits/RefillMoment.jsx.
 export const REFILL_EVERY_MIN = (24 * 60) / DAILY_REFILL
 export const CAP = 50
 // 開通祝い — what a new account is handed on its first read, once. Well

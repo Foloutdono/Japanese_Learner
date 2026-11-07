@@ -41,8 +41,9 @@ import { APP_SHELL } from './appShell.js'
 // the precache.
 export const navigation = {
   // The listed paths are not app routes: three are proxied to the
-  // backend by vercel.json, two are static pages (the privacy policy and
-  // the landing page, plan 167). A top-level navigation to any
+  // backend by vercel.json, three are static pages (the privacy policy,
+  // the account-deletion page Google Play asks for, plan 271, and the
+  // landing page, plan 167). A top-level navigation to any
   // of them is the browser fetching that thing, not the app booting, so
   // they are left alone -- and must be, or an offline hit on one would
   // be answered with the app shell. This is the list navigateFallback
@@ -52,7 +53,7 @@ export const navigation = {
   urlPattern: ({ request, url, sameOrigin }) =>
     sameOrigin &&
     request.mode === 'navigate' &&
-    !['/api/', '/kanjivg/', '/exam-audio/', '/privacy', '/landing'].some(p => url.pathname.startsWith(p)),
+    !['/api/', '/kanjivg/', '/exam-audio/', '/privacy', '/delete-account', '/landing'].some(p => url.pathname.startsWith(p)),
   handler: 'NetworkOnly',
   // The app's document, which the web build names app.html so that `/`
   // can be the landing page (appShell.js, plan 167).

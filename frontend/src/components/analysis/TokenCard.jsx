@@ -3,6 +3,7 @@ import { StatusBadge } from './StatusBadge'
 import { MineButton } from './MineButton'
 import { MineControls } from './MineControls'
 import { buildCloze } from './useMining'
+import { tokFurigana } from './tokens'
 
 // Content-word POS classes -- matches study/analysis.py's _CONTENT_POS,
 // so the "can't mine, not in the app deck" control shows up on exactly
@@ -41,11 +42,12 @@ export function TokenCard({
       <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
         {word.surface}
       </span>
-      {word.reading && (
+      {tokFurigana(word) && (
         // The parentheses are CSS (::before/::after on the base rule):
         // presentation for the inline layouts; screen readers needn't
-        // announce punctuation.
-        <span className="phrase-word-card__reading">{word.reading}</span>
+        // announce punctuation. Over a kanji only: a kana word spells
+        // its own sound.
+        <span className="phrase-word-card__reading">{tokFurigana(word)}</span>
       )}
       {word.pos && (
         <span className="phrase-word-card__pos">

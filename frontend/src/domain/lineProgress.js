@@ -75,6 +75,13 @@ export const KANA_STOPS = [
   { key: 'katakana_combos', label: 'キャ', jp: true },
 ]
 
+/** A stop's name on one line: a level's code, or a kana set's specimen
+ *  glyph (the Learn gate's folded plates and their sheet, plan 291). */
+export function stopLabel(source, key) {
+  if (source === 'kana') return KANA_STOPS.find(s => s.key === key)?.label ?? key
+  return key
+}
+
 /** One deck's `items` entry, defended against every shape that isn't
  *  one: a failed fetch, an older backend that predates the block, a
  *  test's today-shaped mock. The map must still draw.

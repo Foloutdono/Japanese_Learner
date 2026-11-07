@@ -9,6 +9,24 @@ export function laneTypeOf(lane) {
   return lane.kind === 'personal' ? 'personal' : lane.source
 }
 
+/** The lines in their order, as the gate groups its lanes and the dial
+ *  and the widget's stripe lay their pigments: the backend's order
+ *  interleaves them, and the pigment is what tells one from another. */
+export const LINE_ORDER = Object.freeze(['kana', 'vocab', 'kanji', 'grammar', 'personal'])
+
+/** A day's lanes as one share a line, in LINE_ORDER: [{ line, n }],
+ *  the lines with nothing left out. A line ridden at several levels or
+ *  in several modes is one share, never a bar or an arc a lane. */
+export function lineShares(lanes) {
+  const by = new Map()
+  for (const lane of lanes ?? []) {
+    const n = laneCount(lane)
+    if (n > 0) by.set(laneTypeOf(lane), (by.get(laneTypeOf(lane)) ?? 0) + n)
+  }
+  const rank = line => { const i = LINE_ORDER.indexOf(line); return i < 0 ? LINE_ORDER.length : i }
+  return [...by.keys()].sort((a, b) => rank(a) - rank(b)).map(line => ({ line, n: by.get(line) }))
+}
+
 /** Where a card came from, in words a person would use: a deck name,
  *  a JLPT level, or a kana set's label rather than its stored slug.
  *  `kanaSetLabel` is passed in rather than imported so this module
@@ -19,13 +37,14 @@ export function laneWhere(lane, t, kanaSetLabel) {
   return lane.source === 'kana' ? kanaSetLabel(t, lane.deck) : lane.deck
 }
 
-/** A line's main flashcard: the recognition card (kana → romaji, word
- *  → sense, kanji → sense, structure → sense), `<source>.flashcard.f2b`.
- *  The desk's gate can board these alone (domain/studyModes' RAPID
- *  service), leaving the recall, typing, drawing and fill modes. */
+/** A lane ridden in one of the learner's own modes: its line's main
+ *  mode, or a mode added to Today beside it (plan 273). The gate's 主
+ *  filter boards these alone. The server says which (`main`, from the
+ *  learner's choice); a lane without the flag falls back to the modes
+ *  the app always rode -- the recognition card, `<source>.flashcard.f2b`,
+ *  and grammar's ladder (plan 187e). */
 export function isMainLane(lane) {
-  // Grammar's main track is the ladder (plan 187e), every other source's
-  // the recognition flashcard.
+  if (typeof lane?.main === 'boolean') return lane.main
   return typeof lane?.mode === 'string' && (lane.mode.endsWith('.flashcard.f2b') || lane.mode === 'grammar.ladder')
 }
 

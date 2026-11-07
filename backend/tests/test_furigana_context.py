@@ -96,7 +96,8 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(_tok("お姉さん", "おあねさん")), ["おねえさん"])
 
     def test_nani_before_a_particle(self) -> None:
-        for after in ("を", "が", "も", "か", "に", "へ", "から", "まで"):
+        # (やら and は since plan 304: 何やら, 何はさておき; かしら: 何かしら)
+        for after in ("を", "が", "も", "か", "に", "へ", "から", "まで", "やら", "は", "かしら"):
             with self.subTest(after):
                 self.assertEqual(_read(_tok("何", "なん", "代名詞", "*", "*"), _particle(after))[0], "なに")
         # At the end of a question too: 何？
@@ -107,6 +108,97 @@ class ContextRuleTests(unittest.TestCase):
         for after in ("の", "で", "です", "だ", "と", "本", "時", "人"):
             with self.subTest(after):
                 self.assertEqual(_read(_tok("何", "なん"), _tok(after, "x"))[0], "なん")
+
+    def test_nani_before_one(self) -> None:
+        # 何一つ, 何ひとつ, 何一人, 何1つ: "not a single one" (plan 304).
+        for one, counter in (("一", "つ"), ("ひと", "つ"), ("1", "つ"), ("１", "つ"), ("一人", "")):
+            with self.subTest(one):
+                tokens = [_tok("何", "なん", "代名詞", "*", "*", "pronoun"), _tok(one, "ひと", "名詞", "数詞")]
+                if counter:
+                    tokens.append(_tok(counter, counter, "接尾辞", "名詞的", "助数詞", "suffix"))
+                self.assertEqual(_read(*tokens)[0], "なに")
+        # 何十, 何百 are one token and keep なん; a counter after 何 too.
+        self.assertEqual(_read(_tok("何十", "なんじゅう", "名詞", "数詞"), _tok("人", "にん", "接尾辞"))[0],
+                         "なんじゅう")
+        self.assertEqual(_read(_tok("何", "なん", "名詞", "数詞"), _tok("人", "にん", "接尾辞"))[0], "なん")
+
+    def test_nani_before_the_ge_of_nanige(self) -> None:
+        # 何気ない, 何気なく: UniDic cuts 何 + 気 read げ, a manner.
+        self.assertEqual(_read(_tok("何", "なん"), _tok("気", "げ", "接尾辞", "形状詞的", "*", "suffix"),
+                               _tok("なく", "なく", "形容詞"))[0], "なに")
+        # 何の気なしに: の between, and its 気 is き, a mind.
+        self.assertEqual(_read(_tok("何", "なん"), _particle("の"), _tok("気", "き"), _tok("なし", "なし"))[0], "なん")
+        self.assertEqual(_read(_tok("何", "なん"), _tok("気", "き"))[0], "なん")
+
+    def test_nani_ni_mo(self) -> None:
+        # UniDic reads 何に as the なんに of なんにも, "(not) anything at
+        # all", which only a negative goes with (plan 304).
+        def ni():
+            return _tok("何に", "なんに", "代名詞", "*", "*", "pronoun")
+
+        def word(surface, reading, lemma, pos, pos1, pos2="一般"):
+            return dict(_tok(surface, reading, pos1, pos2, "*", pos), lemma=lemma)
+
+        mashite = word("まして", "まして", "況して", "adverb", "副詞")
+        # まして takes the に as what it surpasses: なに, whatever follows.
+        self.assertEqual(_read(ni(), _particle("も"), mashite, word("大切", "たいせつ", "大切", "noun", "形状詞"))[0],
+                         "なにに")
+        self.assertEqual(_read(ni(), _particle("も"), mashite, _tok("、", "、", "補助記号"),
+                               word("遅れ", "おくれ", "遅れる", "verb", "動詞"),
+                               word("ない", "ない", "ない", "auxiliary", "助動詞"))[0], "なにに")
+        # 増して, and a verb said with nothing negative after it.
+        self.assertEqual(_read(ni(), _particle("も"), word("増し", "まし", "増す", "verb", "動詞"),
+                               _particle("て"))[0], "なにに")
+        self.assertEqual(_read(ni(), _particle("も"), word("なれる", "なれる", "成る", "verb", "動詞"))[0], "なにに")
+        # なんにも where a negative follows: 何にもない, 何にも知らない,
+        # 何にもすることがない, 何にもせずに.
+        self.assertEqual(_read(ni(), _particle("も"), word("ない", "ない", "無い", "adjective", "形容詞"))[0], "なんに")
+        self.assertEqual(_read(ni(), _particle("も"), word("知ら", "しら", "知る", "verb", "動詞"),
+                               word("ない", "ない", "ない", "auxiliary", "助動詞"))[0], "なんに")
+        self.assertEqual(_read(ni(), _particle("も"), word("する", "する", "為る", "verb", "動詞"),
+                               word("こと", "こと", "事", "noun", "名詞"), _particle("が"),
+                               word("ない", "ない", "無い", "adjective", "形容詞"))[0], "なんに")
+        self.assertEqual(_read(ni(), _particle("も"), word("せ", "せ", "為る", "verb", "動詞"),
+                               word("ず", "ず", "ず", "auxiliary", "助動詞"))[0], "なんに")
+        # 何にも。, the answer, says nothing either way: UniDic's reading.
+        self.assertEqual(_read(ni(), _particle("も"), _tok("。", "。", "補助記号"))[0], "なんに")
+        self.assertEqual(_read(ni(), _particle("も"))[0], "なんに")
+
+    def test_nani_ni_mo_against_what_it_is_measured(self) -> None:
+        # A verb that sets its subject against the に takes 何にも as that
+        # に, negative or not: なににも (plan 304b).
+        def ni():
+            return _tok("何に", "なんに", "代名詞", "*", "*", "pronoun")
+
+        def verb(surface, lemma):
+            return dict(_tok(surface, surface, "動詞", "一般", "*", "verb"), lemma=lemma)
+
+        def aux(surface, lemma):
+            return dict(_tok(surface, surface, "助動詞", "*", "*", "auxiliary"), lemma=lemma)
+
+        for surface, lemma in (("代え", "変える"), ("替え", "変える"), ("換え", "変える"), ("負け", "負ける"),
+                               ("劣ら", "劣る"), ("比べ", "比べる"), ("勝ら", "勝る")):
+            with self.subTest(surface):
+                self.assertEqual(_read(ni(), _particle("も"), verb(surface, lemma), aux("ない", "ない"))[0],
+                                 "なにに")
+        self.assertEqual(_read(ni(), _particle("も"), verb("代え", "変える"), aux("られ", "られる"),
+                               aux("ない", "ない"))[0], "なにに")
+        # Past an adverb: 何にも決して負けない.
+        self.assertEqual(_read(ni(), _particle("も"), dict(_tok("決して", "けっして", "副詞", "*", "*", "adverb")),
+                               verb("負け", "負ける"), aux("ない", "ない"))[0], "なにに")
+        # 変える written 変 or in kana is "change" too, which takes を:
+        # UniDic's reading. So are a verb whose を or が なんにも stands for
+        # (何にも食べられない, 何にも知らない) and 何にもならない, "lead
+        # nowhere" (JMdict's なんにもならない).
+        for surface, lemma in (("変え", "変える"), ("かえ", "変える"), ("食べ", "食べる"), ("知ら", "知る"),
+                               ("なら", "成る")):
+            with self.subTest(surface):
+                self.assertEqual(_read(ni(), _particle("も"), verb(surface, lemma), aux("ない", "ない"))[0],
+                                 "なんに")
+        # A noun between: 何にも興味がない is the tokenizer's.
+        self.assertEqual(_read(ni(), _particle("も"), _tok("興味", "きょうみ"), _particle("が"),
+                               dict(_tok("ない", "ない", "形容詞", "非自立可能", "*", "adjective"), lemma="無い"))[0],
+                         "なんに")
 
     def test_youbi(self) -> None:
         self.assertEqual(_read(_tok("日曜", "にちよう"), _tok("日", "ひ"))[1], "び")
@@ -162,6 +254,11 @@ class ContextRuleTests(unittest.TestCase):
         # 実の母, 実は: じつ.
         self.assertEqual(_read(_tok("実", "じつ"), _particle("の"))[0], "じつ")
         self.assertEqual(_read(_tok("実", "じつ"), _particle("は"))[0], "じつ")
+        # 実を言うと, "to tell the truth", and 実を取る, "the substance".
+        self.assertEqual(_read(_tok("実", "じつ"), _particle("を"), _tok("言う", "いう", "動詞"))[0], "じつ")
+        self.assertEqual(_read(_tok("実", "じつ"), _particle("を"), _tok("取る", "とる", "動詞"))[0], "じつ")
+        # By the verb, not its first letter: 実がいっぱいなった is the fruit.
+        self.assertEqual(_read(_tok("実", "じつ"), _particle("が"), _tok("いっぱい", "いっぱい"))[0], "み")
 
     def test_gimi_a_touch_of(self) -> None:
         """〜気味 after a noun or a verb's stem is ぎみ; 気味 alone is きみ
@@ -560,11 +657,16 @@ class NumberFuriganaTests(unittest.TestCase):
         self.assertEqual(_ruby("りんごを1つください。"), "1[ひと]")
 
     def test_what_is_not_a_quantity_stays_bare(self) -> None:
-        for sentence in ("2024/10/04", "10:30", "3-5人", "5G", "100m走", "A4", "電話は0312345678"):
+        for sentence in ("2024/10/04", "10:30", "3-5人", "5G", "MP3", "A4", "電話は0312345678"):
             with self.subTest(sentence):
                 digits = [p for p in align_sentence(sentence)
                           if p.get("reading") and any(c.isdigit() for c in p["text"])]
                 self.assertEqual(digits, [])
+        # ...where a unit after a figure makes it one (plan 272): 100m走 is
+        # ひゃくメートル走, 600W ろっぴゃくワット.
+        for sentence, reading in (("100m走", "ひゃく"), ("600Wで加熱", "ろっぴゃく")):
+            with self.subTest(sentence):
+                self.assertIn(reading, [p.get("reading") for p in align_sentence(sentence)])
 
     def test_the_parts_still_spell_the_sentence(self) -> None:
         for sentence in self.CASES:
@@ -649,6 +751,73 @@ class SentenceReadingTests(unittest.TestCase):
                 wrong.append((row["jp"], plain(said), plain(row["kana"])))
         self.assertGreater(len(rows), 100, "the bank would pass vacuously")
         self.assertEqual(wrong, [])
+
+    # 何 read by what follows it (plan 304): なに before one, やら, は
+    # and the にも of まして, which the voice engine said and the furigana
+    # did not; なん where it is なん.
+    NANI = {
+        "急いで出てきたので、何一つ持ってこなかった。": "なに",
+        "部屋には何ひとつ残っていなかった。": "なに",
+        "ホームで駅員さんが何やら話している。": "なに",
+        "何やら変な音がする。": "なに",
+        "何にもまして大切なのは、健康だ。": "なに",
+        "旅では、何にもまして時間を守ることが大切だ。": "なに",
+        "何にもまして、遅れないことが大切だ。": "なに",
+        "家族は何にも代えがたい宝物だ。": "なに",
+        # (and what the に is measured against, negative or not, plan 304b)
+        "家族は何にも代えられない。": "なに",
+        "健康は何にも替えられない宝だ。": "なに",
+        "この店の味は何にも劣らない。": "なに",
+        "彼の努力は何にも負けない。": "なに",
+        "あの景色は何にも比べられない。": "なに",
+        "駅に着いたら、何はさておき切符を買おう。": "なに",
+        "何はともあれ、無事でよかった。": "なに",
+        # かしら and the げ of 何気ない, which the scan found beside them.
+        "毎日何かしら新しい発見がある。": "なに",
+        "何気なく窓の外を見た。": "なに",
+        "何気ない一言に傷ついた。": "なに",
+        # The lookalikes.
+        "何の気なしに言った。": "なん",
+        "これは何ですか。": "なん",
+        "それは何の本ですか。": "なん",
+        "兄は何でも食べます。": "なん",
+        "何と言いましたか。": "なん",
+        "教室に学生は何人いますか。": "なん",
+        "何十人も来た。": "なん",
+        "冷蔵庫には何にもない。": "なん",
+        "彼は何にも知らない。": "なん",
+        "週末は何にもすることがない。": "なん",
+        "熱があって、何にも食べられない。": "なん",
+        "今さら謝っても、何にもならない。": "なん",
+    }
+
+    def test_nani_by_what_follows(self) -> None:
+        for sentence, reading in self.NANI.items():
+            with self.subTest(sentence):
+                parts = [p for p in align_sentence(sentence) if p["text"].startswith("何")]
+                self.assertEqual(len(parts), 1, parts)
+                self.assertTrue(parts[0].get("reading", "").startswith(reading), parts)
+        # 何人 is なんにん whole.
+        self.assertIn("何[なん]人[にん]", _ruby("教室に学生は何人いますか。"))
+
+    def test_the_breakdown_reads_nani_by_what_follows(self) -> None:
+        # The rows a breakdown prints carry the same reading.
+        from study.analysis import analyze_local
+
+        for sentence, word, reading in (("急いで出てきたので、何一つ持ってこなかった。", "何", "なに"),
+                                        ("ホームで駅員さんが何やら話している。", "何", "なに"),
+                                        # (cut 何 + 〜にもまして's に since plan 306)
+                                        ("何にもまして大切なのは、健康だ。", "何", "なに"),
+                                        ("駅に着いたら、何はさておき切符を買おう。", "何", "なに"),
+                                        ("毎日何かしら新しい発見がある。", "何", "なに"),
+                                        ("何気なく窓の外を見た。", "何", "なに"),
+                                        ("これは何ですか。", "何", "なん"),
+                                        ("家族は何にも代えられない。", "何に", "なにに"),
+                                        ("彼は何にも知らない。", "何に", "なんに")):
+            with self.subTest(sentence):
+                tokens = {t["surface"]: t for t in analyze_local(sentence)["tokens"]}
+                self.assertEqual(tokens[word]["reading"], reading)
+                self.assertEqual(tokens[word]["furigana"][0], {"text": "何", "reading": reading[:2]})
 
     def test_the_analyser_reads_as_spelled(self) -> None:
         # The breakdown's rows print a word's reading beside it.

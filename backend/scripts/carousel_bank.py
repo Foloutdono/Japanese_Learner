@@ -19,7 +19,8 @@ be drawn from too: the grammar lessons with their tours, the deck's
 words and kanji, the kana and the comprehension passages; since plan
 229c the wrong spellings the 表記 question deals (each checked against
 the deck and JMdict, so no wrong answer is a word) and index.json, the
-figures a carousel's last slide may quote.
+figures a carousel's last slide may quote; since plan 281 duel.json, the
+opening of a real N5 duel paper for the duels' promo story.
 
     python -m scripts.carousel_bank            # writes frontend/carousel/bank/*.json
     python -m scripts.carousel_bank --check    # exits 1 when a file is stale
@@ -28,6 +29,7 @@ Run it after a change to content/reading_sentences.py, or to anything
 the breakdown reads (the deck, the catalogue), and commit the files.
 """
 import argparse
+import ast
 import json
 import re
 import sys
@@ -973,7 +975,12 @@ def kana_cards() -> dict:
 
 def passages() -> dict:
     """The comprehension seeds (content/comprehension/*.json): each text
-    cut into its sentences, each sentence into words, and its questions."""
+    cut into its sentences, each sentence into words, and its questions.
+    Since plan 301 each sentence's translation too (`tr`, beside `sents`,
+    {en, fr} or None), the seed's breakdown's own for the sentence it
+    cuts alike: what the run's breakdown prints under it, and what the
+    comprehension story's answer prints under the line a question quotes.
+    A sentence the breakdown cuts otherwise (a quotation over a 。) has none."""
     out = []
     for level in LEVELS:
         path = BACKEND / "content" / "comprehension" / f"{level}.json"
@@ -981,13 +988,19 @@ def passages() -> dict:
             continue
         for ex in json.loads(path.read_text(encoding="utf-8")):
             parts = [x for x in re.split(r"(?<=[。！？])(?!」)", ex["text"]) if x.strip()]
+            said = {b["jp"].strip(): b.get("translation") for b in ex.get("breakdown", [])}
             out.append({
                 "id": ex["id"], "lv": level, "title": ex.get("title", ""), "grammar": ex.get("grammar", []),
                 "sents": [text_rows(x, level) for x in parts],
+                "tr": [said.get(x.strip()) or None for x in parts],
                 "words": _passage_words(parts, level),
                 "questions": ex.get("questions", []),
             })
-    return {"rev": REV, "passages": out}
+    # The reading window at each level, as the run's clock counts it (the
+    # comprehension story's clock, plan 301). routes/reading.py opens the
+    # database when it is imported, so it is read from its source.
+    read = _module_constant(BACKEND / "routes" / "reading.py", "READ_SECONDS_BY_LEVEL")
+    return {"rev": REV, "read": read, "passages": out}
 
 
 def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:
@@ -1067,6 +1080,7 @@ def files(deck: dict):
     yield "promo.json", promo()
     trap_file = traps()
     yield "traps.json", trap_file
+    yield "duel.json", duel_story()
     yield "index.json", figures(sentences, kana, comprehension, {
         "themes": len(theme_file["themes"]),
         "themeWords": sum(len(t["words"]) for t in theme_file["themes"].values()),
@@ -1074,6 +1088,43 @@ def files(deck: dict):
         "dialogues": len(dialogue_file["dialogues"]),
         "traps": len(trap_file["traps"]),
     })
+
+
+# ── The duels' story (plan 281) ───────────────────────────────────
+# The promo story of the duels plays a real sprint: the first questions
+# of an N5 paper as the duels' own generator builds it from a fixed seed
+# (study/duel_paper.py), and what the story's figures are made of --
+# where the Elo starts at each level and its K once settled
+# (study/duel_elo.py), what an answer pays in XP (srs/xp.py) and the
+# day's cap, and how long the next question waits after a right or a
+# wrong answer (study/duels.py). study/duels.py opens the database when
+# it is imported, so its two figures are read from its source.
+DUEL_SEED = 1330
+DUEL_ITEMS = 16
+
+
+def _module_constant(path: Path, name: str):
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+            return ast.literal_eval(node.value)
+    raise KeyError(f"{name} not in {path.name}")
+
+
+def duel_story() -> dict:
+    from srs.xp import BASE_XP_BY_QUALITY
+    from study import duel_elo, duel_paper
+
+    duels_py = BACKEND / "study" / "duels.py"
+    paper = duel_paper.build_paper(DUEL_SEED, "N5")
+    items = [{**duel_paper.served(item, n), "answer": item["answer"]} for n, item in enumerate(paper["items"][:DUEL_ITEMS])]
+    return {
+        "rev": REV, "paper": paper["rev"], "level": paper["level"], "seed": DUEL_SEED,
+        "elo": {"start": duel_elo.START, "k": duel_elo.K_SETTLED},
+        "xp": {"right": BASE_XP_BY_QUALITY[4], "wrong": BASE_XP_BY_QUALITY[1], "cap": _module_constant(duels_py, "XP_CAP")},
+        "hold": {"right": _module_constant(duels_py, "RIGHT_HOLD_MS"), "wrong": _module_constant(duels_py, "LOCK_MS")},
+        "items": items,
+    }
 
 
 # ── Four more modes (plan 229m) ───────────────────────────────────

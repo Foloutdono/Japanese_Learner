@@ -163,6 +163,59 @@ def test_a_term_answers_in_either_language(client):
            _page(client, category="vocab", q="eau", lang="en", limit=5)["total"]
 
 
+def test_a_spanish_term_finds_the_course_in_any_session(client):
+    """Spanish is the third (plan 302): a word, a kanji and a point are
+    found by their Spanish gloss, folded like the others ("cancion"
+    finds canción), whichever language is on screen."""
+    for lang in ("es", "fr", "en"):
+        assert "水" in _surfaces(_page(client, category="vocab", q="agua", lang=lang, limit=50)), lang
+        assert "水" in _surfaces(_page(client, category="kanji", q="agua", lang=lang, limit=50)), lang
+        assert "の" in _surfaces(_page(client, category="grammar", q="posesivo", lang=lang, limit=50)), lang
+    assert "歌" in _surfaces(_page(client, category="vocab", q="cancion", lang="es", limit=50))
+    # Shown in Spanish to a Spanish session.
+    water = next(e for e in _page(client, category="vocab", q="agua", lang="es", limit=50)["results"]
+                 if e.get("kanji") == "水")
+    assert water["meaning"] == "agua"
+
+
+# ── Spain's words (plan 303) ──────────────────────────────────
+
+
+@pytest.mark.parametrize("typed, asked", [
+    ("móvil", ("celular",)),
+    ("Ordenador", ("computadora",)),
+    ("teléfono móvil", ("telefono celular",)),       # a word inside a phrase
+    ("echar de menos", ("extrañar",)),                # a phrase of its own
+    ("coche", ("auto", "carro")),
+    ("agua", ()),                                     # a word both say
+    ("conducir", ()),
+])
+def test_a_spain_word_is_asked_the_latin_american_way_too(typed, asked):
+    assert parse(typed).alts == asked
+
+
+@pytest.mark.parametrize("category, typed, found", [
+    ("vocab", "ordenador", "コンピュータ/コンピューター"),   # a word Spain says, the deck's card
+    ("vocab", "coche", "車"),
+    ("vocab", "gafas", "眼鏡"),
+    ("vocab", "zumo", "ジュース"),
+    ("vocab", "móvil", "携帯"),                         # the pool's word, by its Spanish line
+    ("kanji", "coche", "車"),                           # a kanji, by its Spanish meaning
+])
+def test_a_spain_word_finds_the_word_its_gloss_says_otherwise(client, category, typed, found):
+    """The glosses are Latin-American (plan 302): móvil, ordenador and
+    coche found nothing but what those words mean besides."""
+    assert found in _surfaces(_page(client, category=category, q=typed, lang="es", limit=50))
+
+
+def test_a_spain_word_still_finds_what_it_means_itself(client):
+    """piso is a floor in both, and a flat in Spain: it finds both, and
+    no department (the Latin-American departamento's other sense)."""
+    found = _surfaces(_page(client, category="vocab", q="piso", lang="es", limit=100))
+    assert "階" in found and "アパート" in found
+    assert "局" not in found
+
+
 # ── Accents ───────────────────────────────────────────────────
 
 

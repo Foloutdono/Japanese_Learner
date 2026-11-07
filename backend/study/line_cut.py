@@ -196,6 +196,13 @@ def _cuts(text: str, tokens) -> list[tuple[int, int, float]]:
     return cuts
 
 
+# The frames a sentence's subject or object hangs in (plan 272): their が
+# or を and the predicate are kept whole each, but a line breathes
+# between them -- …みなさんが | いてくれるので.
+_FRAMES = frozenset({"〜があります／います", "〜が好きです", "〜がきらいです", "〜が上手です／下手です",
+                     "〜が分かります", "〜をください"})
+
+
 def _clean_cuts(text: str, tokens, cuts: list[tuple[int, int, float]]) -> list[tuple[int, int, float]]:
     """The cuts that lose nothing: no dearer than _CLEAN, and through no
     grammar point -- the whole stretch it reaches over where one line
@@ -204,7 +211,7 @@ def _clean_cuts(text: str, tokens, cuts: list[tuple[int, int, float]]) -> list[t
     line's head to its foot was never going to stay on one line)."""
     spans = []
     for hit in grammar_detect.hits(text, tokens) if tokens else []:
-        if line_width(text[hit["start"]:hit["end"]]) <= TARGET_LINE_WIDTH:
+        if line_width(text[hit["start"]:hit["end"]]) <= TARGET_LINE_WIDTH and hit["pattern"] not in _FRAMES:
             spans.append((hit["start"], hit["end"]))
         else:
             spans += [tuple(segment) for segment in hit["segments"]]

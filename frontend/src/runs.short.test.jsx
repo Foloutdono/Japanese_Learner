@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
@@ -203,6 +203,13 @@ describe('the mock exam\'s paper on a short window', () => {
       ],
     }],
   }
+  // ExamRunner keeps the sitting as a draft in this browser's
+  // localStorage, by exam and revision: a test that moved on to the
+  // second question would hand the next one the paper open at it.
+  const DRAFT = 'jp-exam-draft:e1:1'
+  beforeEach(() => { localStorage.removeItem(DRAFT) })
+  afterAll(() => { localStorage.removeItem(DRAFT) })
+
   async function sit() {
     getExam.mockResolvedValue(PAPER)
     await render(

@@ -2,7 +2,9 @@
 <!-- 発車案内 (plan 156). Redrawn every three hours by the system, which
      is when the word changes and a day ahead's count takes over once
      its midnight has passed (TrainWidget.java); the app redraws it
-     whenever it plans the day. -->
+     whenever it plans the day. The picker shows a train in it (plan 293,
+     widget_train_preview.xml): previewLayout from Android 12, and the
+     app's icon before. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_description"
     android:initialLayout="@layout/widget_train"
@@ -10,7 +12,7 @@
     android:minHeight="110dp"
     android:minResizeWidth="180dp"
     android:minResizeHeight="110dp"
-    android:previewLayout="@layout/widget_train"
+    android:previewLayout="@layout/widget_train_preview"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="4"
     android:targetCellHeight="2"

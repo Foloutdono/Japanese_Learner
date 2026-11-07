@@ -7,7 +7,7 @@
 -- size: 12x6
 -- viz: {"stackable.stack_type": "stacked"}
 -- dims: 2
--- description: problem, idea, fault (Nous écrire) et card (le drapeau d’une carte répondue) et question (le drapeau d’une question de modèle d’examen).
+-- description: problem, idea, fault (Nous écrire), card (le drapeau d’une carte répondue), question (le drapeau d’une question de modèle d’examen) et rating (la note de l’accès anticipé, plan 269).
 SELECT date_trunc('week', created_at AT TIME ZONE 'Europe/Paris')::date AS "Semaine", kind AS "Sorte",
        count(*) AS "Messages"
 FROM feedback
@@ -34,6 +34,27 @@ FROM feedback
 WHERE created_at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
+-- title: Note moyenne
+-- display: scalar
+-- size: 6x6
+-- description: La note sur 5 donnée à l’accès anticipé (plan 269), demandée une fois à partir de 400 XP. Les mots qui l’accompagnent se lisent avec read_feedback --kind rating.
+SELECT round(avg(rating), 2) AS "Note moyenne"
+FROM feedback
+WHERE kind = 'rating' AND created_at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}};
+
+-- ==== question
+-- title: Notes données
+-- display: bar
+-- size: 6x6
+-- description: Combien d’apprenants ont donné chaque note, de 1 à 5.
+SELECT rating AS "Note", count(*) AS "Apprenants"
+FROM feedback
+WHERE kind = 'rating' AND created_at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 1;
 
 -- ==== question
 -- title: Cartes les plus signalées

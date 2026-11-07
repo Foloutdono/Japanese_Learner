@@ -98,6 +98,13 @@ jobs:
           name: app-debug-apk
           path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 3
+      # The release's R8 pass (minifyEnabled, android/app/proguard-rules.pro)
+      # otherwise runs only in a tag's bundleRelease, so a class R8 cannot
+      # find or a rule it refuses would first fail on the day of a release.
+      - name: Shrink the release code (R8)
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        working-directory: frontend/android
+        run: ./gradlew minifyReleaseWithR8 --no-daemon
       # The upload key is decoded from a secret onto the runner's disk for
       # the length of the build and named to Gradle through the four
       # variables android/app/build.gradle reads. Never committed.

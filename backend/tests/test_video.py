@@ -983,3 +983,19 @@ def test_a_failure_after_the_track_is_read_fails_the_session(client, monkeypatch
     body = settled.json()
     assert body["code"] == "transcript_failed"
     assert "driver repr" not in body["error"]
+
+
+# ── A line read in its context (plan 272) ────────────────────────
+def test_a_line_s_neighbours_are_the_japanese_lines_either_side():
+    lines = [
+        {"text": "バンドメンバーとそして", "japanese": True},
+        {"text": "ぷらそにかの合唱のみなさんが", "japanese": True},
+        {"text": "Oh yeah", "japanese": False},
+        {"text": "いてくれるので、", "foreign": False},
+    ]
+    assert video_module._neighbours(lines, 1) == {"before": "バンドメンバーとそして", "after": ""}
+    assert video_module._neighbours(lines, 0) == {"before": "", "after": "ぷらそにかの合唱のみなさんが"}
+    # A stored line says `foreign`, a fresh one `japanese`.
+    assert video_module._neighbours(lines, 3) == {"before": "", "after": ""}
+    assert video_module._neighbours([{"text": "a", "foreign": True}, {"text": "いてくれるので、"}], 1) == \
+        {"before": "", "after": ""}

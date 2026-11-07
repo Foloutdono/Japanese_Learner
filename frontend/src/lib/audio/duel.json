@@ -1,0 +1,39 @@
+{
+  "rev": "duel1",
+  "bpm": 160,
+  "bar": 1.5,
+  "bars": 80,
+  "rushFrom": 71,
+  "cycle": 24,
+  "resultLoop": 3,
+  "pad": 1,
+  "lead": 0.25,
+  "layers": [
+    "base",
+    "chords",
+    "arp",
+    "melody"
+  ],
+  "sounds": [
+    "count",
+    "go",
+    "right",
+    "flash",
+    "wrong",
+    "tier",
+    "tier3",
+    "broke",
+    "pass",
+    "passed",
+    "rush",
+    "arrival",
+    "vs",
+    "barMe",
+    "barThem",
+    "win",
+    "loss",
+    "stamp",
+    "xp"
+  ],
+  "onset": 0.2508
+}

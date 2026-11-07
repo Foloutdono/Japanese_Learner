@@ -16,6 +16,7 @@ import { SentenceFrame } from './SentenceFrame'
 import { tokenLookup } from '../analysis/lookup'
 import { GrammarLesson } from '../study/GrammarLesson'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
+import { StrokeZoom } from '../study/StrokeStudy'
 import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
 import { GlossList, firstGloss, mergeSenses } from '../study/gloss'
@@ -27,6 +28,7 @@ import { composing } from '../../lib/keyGuards'
 import { useDesk } from '../../hooks/useDesk'
 import { holdEsc } from '../../stores/escHold'
 import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
+import { intlLocale } from '../../lib/locale'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
 // The catalogue already draws every entry as a small 駅名標: the
@@ -375,20 +377,24 @@ function StrokeSheet({ src, notAvailableLabel }) {
   const [failed, setFailed] = useState(false)
   // Stable, or StrokeOrderAnimation's parse effect re-runs every render.
   const onError = useCallback(() => setFailed(true), [])
-  return (
-    <div className="dict-form__sheet">
-      {!failed && (
-        <StrokeOrderAnimation
-          src={src}
-          loop
-          className="dict-form__glyph"
-          onError={onError}
-        />
-      )}
-      {failed && (
+  // Tapped, the drawing opens big, with the calque to trace it on
+  // (plan 268). A failed one has nothing to open.
+  if (failed) {
+    return (
+      <div className="dict-form__sheet">
         <div className="dict-form__fallback">{notAvailableLabel}</div>
-      )}
-    </div>
+      </div>
+    )
+  }
+  return (
+    <StrokeZoom src={src} className="dict-form__sheet">
+      <StrokeOrderAnimation
+        src={src}
+        loop
+        className="dict-form__glyph"
+        onError={onError}
+      />
+    </StrokeZoom>
   )
 }
 
@@ -691,7 +697,7 @@ function ReadingsByShare({ entry, groups, onClose, jump }) {
   const shown = openOn ? onRows : kunRows
   const pills = idle.filter(r => isOnyomiToken(r) === openOn)
   const hint = shares
-    ? (scope === SCOPE_ALL ? t.readingsScopeHintAll : t.readingsScopeHintCourse)(total.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US'))
+    ? (scope === SCOPE_ALL ? t.readingsScopeHintAll : t.readingsScopeHintCourse)(total.toLocaleString(intlLocale(lang)))
     : ''
   const courseEmpty = scope === SCOPE_COURSE && total === 0
   return (
@@ -807,6 +813,8 @@ function ReadingsList({ entry, groups, onClose, onVocabClick }) {
       <header className="dict-plate">
         <div className="dict-plate__row">
           <div className="dict-plate__marks">
+            {/* The kanji in the sheets' small ring, then the title in
+                words (plan 277, the owner's pick C5). */}
             <span className="dict-readings__glyph" lang="ja">{entry.kanji}</span>
             <span className="dict-readings__title">{t.allReadings}</span>
           </div>
@@ -1103,7 +1111,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   }
 
   const status = entry.status
-  const record = status?.total_reviews > 0
+  // On the record once met, by its stage: a card the level rule marked
+  // known is mastered with no answer yet (plan 300), and keeps its
+  // schedule and its board here, its figures at 0/0 and —.
+  const record = status?.status === 'learning' || status?.status === 'mastered'
 
   // ── Readings ──
   // The plate shows two: the first on'yomi and the first kun'yomi when

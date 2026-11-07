@@ -16,7 +16,7 @@ const SHARES = {
   total: 55, whole: 3,
   readings: { 'セイ': 27, 'ショウ': 8, 'い.きる': 4, 'い.かす': 1, 'う.まれる': 1, 'き': 2, 'なま': 4 },
 }
-const T = { onyomi: '音読み', kunyomi: '訓読み', readingsMore: n => `${n} de plus` }
+const T = { readingsOnName: '音読み', readingsKunName: '訓読み', readingsMore: n => `${n} de plus` }
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 const $$ = s => [...document.querySelectorAll(s)]
 const text = el => el.textContent

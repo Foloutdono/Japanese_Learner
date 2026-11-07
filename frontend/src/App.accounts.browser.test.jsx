@@ -166,3 +166,40 @@ describe('the boarding reached on a stale address', () => {
     expect(window.location.pathname).toBe('/ride/cards')
   })
 })
+
+describe('a card kept at the boarding\'s gate', () => {
+  // Keeping the card (lib/guest.js claimAccount) delivers USER_UPDATED,
+  // a new session for the same user, a second before the card issues.
+  // The gate used to ask for the profile again then; the answer left
+  // before onboarded_at was stamped, landed after the boarding closed,
+  // and put the learner back at its first question.
+  it('does not ask the gate again, so a stale answer cannot reopen the boarding', async () => {
+    let answerStale = null
+    let profileAsks = 0
+    apiJsonWithTimeout.mockImplementation(async path => {
+      if (path === '/api/onboarding/complete') return { onboardedAt: '2026-10-25T14:08:14Z' }
+      if (path !== '/api/profile') return {}
+      profileAsks += 1
+      if (profileAsks === 1) return { username: 'Tester', onboardedAt: null, jlptLevel: null, guided: {} }
+      return new Promise(resolve => { answerStale = resolve })
+    })
+
+    const screen = await render(<App />)
+    await settle(300)
+    await click(screen, '[data-kana="both"]')
+    await click(screen, '[data-level="N5"]')
+    await click(screen, '[data-action="continue"]')
+    await settle(120)
+
+    authListener('USER_UPDATED', { ...session, access_token: 'tok2' })
+    await settle()
+    await click(screen, '[data-action="issue"]')
+    await settle(400)
+    answerStale?.({ username: 'Tester', onboardedAt: null, jlptLevel: null, guided: {} })
+    await settle(300)
+
+    expect(screen.container.querySelector('.brd')).toBeNull()
+    expect(window.location.pathname).toBe('/ride/cards')
+    expect(profileAsks).toBe(1)
+  })
+})

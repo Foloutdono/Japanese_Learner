@@ -97,20 +97,22 @@ describe('the canvas and the lattices (P1)', () => {
 })
 
 describe('the gates (P2)', () => {
-  it('keeps the Learn plate\'s three-stop foot', async () => {
-    const { Plate, StopsFoot } = await import('./components/station/LinePlate')
-    const stops = ['N5', 'N4', 'N3', 'N2', 'N1'].map((k, i) => ({ key: k, label: k, jp: false, score: i === 0 ? 0.4 : 0 }))
+  // Since plan 291 the phone's Learn plate folds to one line, its stop
+  // and figure under the name: no foot, and never the desk's line.
+  it('folds the Learn plate to one line, with no foot and no desk line', async () => {
+    const { Plate } = await import('./components/station/LinePlate')
     await render(
       <LangProvider>
         <main className="learn">
-          <div className="plates">
-            <Plate section={{ path: '/learn/vocab', title: 'Vocab', color: 'var(--line-vocab)' }} foot={<StopsFoot stops={stops} />} />
+          <div className="plates lrn-folds">
+            <Plate section={{ path: '/learn/vocab', title: 'Vocab', color: 'var(--line-vocab)' }} className="plate--line plate--fold" meta="N4 · 260 / 640" />
           </div>
         </main>
       </LangProvider>
     )
     await settle()
-    expect(document.querySelector('.plate__foot--stops')).not.toBeNull()
+    expect(document.querySelector('.plate--fold .plate__meta').textContent).toBe('N4 · 260 / 640')
+    expect(document.querySelector('.plate__foot')).toBeNull()
     expect(document.querySelector('.desk-line')).toBeNull()
   })
 })
@@ -1250,7 +1252,7 @@ describe('the kept dialogs (plan 123, P14)', () => {
     const { Sheet } = await import('./components/chrome/Sheet')
     await render(
       <LangProvider>
-        <Sheet open onClose={() => {}} jp="Voyage" cap="Delete" initialFocus=".btn-secondary" dismiss>
+        <Sheet open onClose={() => {}} title="Voyage" sub="Delete" initialFocus=".btn-secondary" dismiss>
           <button type="button" className="btn-primary">Delete</button>
           <button type="button" className="btn-secondary">Cancel</button>
         </Sheet>
@@ -1805,7 +1807,7 @@ describe('the run\'s lines (plan 129)', () => {
     // one sentence rated, in its verdict's ink.
     expect(document.querySelector('.stage__head .today-remaining')).toBeNull()
     expect(document.querySelector('.run-meter__n').textContent).toBe('1 / 1')
-    expect(document.querySelector('.run-meter__s--done.run-meter__s--q4')).not.toBeNull()
+    expect(document.querySelector('.run-meter__s--done.run-meter__s--q5')).not.toBeNull()
     expect(document.querySelector('.screen > .run-floor')).not.toBeNull()
     expect(document.querySelector('.stage .prose__breakdown button')).not.toBeNull()
     expect(document.querySelector('kbd')).toBeNull()
@@ -1817,11 +1819,12 @@ describe('the run\'s lines (plan 129)', () => {
 // ── plan 130 — the gates a phone keeps ──
 // On the desk the plates take the window, Learn's line stands upright
 // and Practice's plates hold each platform's exercise in a well (plan
-// 165, seven since plan 254). A phone keeps its own: Practice's are
-// Learn's plates (plan 254), each foot the learner's grade and their
-// record there, and no request for a sample it has nowhere to draw.
+// 165, seven since plan 254). A phone keeps its own: Practice's plates
+// folded in their groups (plan 290), each with the learner's grade and
+// their record there, and no request for a sample until a plate raises
+// its sheet.
 describe('the gates taking the window (plan 130)', () => {
-  it('keeps Practice\'s plates, a foot each, and never asks for a sample', async () => {
+  it('keeps Practice\'s folded plates, and asks for no sample while no sheet is up', async () => {
     apiFetch.mockReset()
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
     const { MemoryRouter } = await import('react-router-dom')
@@ -1831,9 +1834,12 @@ describe('the gates taking the window (plan 130)', () => {
     const { getSections } = await import('./config/tabs')
     await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
     await settle(250)
-    const plates = [...document.querySelectorAll('.practice > .plates > .plate')]
+    const plates = [...document.querySelectorAll('.practice .prc-group .plate')]
     expect(plates).toHaveLength(getSections('practice', {}).length)
-    for (const plate of plates) expect(plate.querySelector('.plate__foot--stops')).not.toBeNull()
+    for (const plate of plates) {
+      expect(plate.classList.contains('plate--fold')).toBe(true)
+      expect(plate.querySelector('.plate__meta .prc-record')).not.toBeNull()
+    }
     // Nor the desk's specimens, and no request for the samples their
     // wells draw from.
     expect(document.querySelector('.plate__body, .prc-spec')).toBeNull()

@@ -17,7 +17,7 @@ function mount({ sumi = false, onClose = vi.fn() } = {}) {
   return render(
     <LangProvider>
       <button type="button" id="opener">open</button>
-      <Sheet open onClose={onClose} jp="残高" cap="Balance" sumi={sumi}>
+      <Sheet open onClose={onClose} title="残高" sub="Balance" sumi={sumi}>
         <button type="button" id="first">one</button>
         <button type="button" id="last">two</button>
       </Sheet>
@@ -88,7 +88,7 @@ const token = n => parseFloat(getComputedStyle(document.documentElement).getProp
 function Confirm({ onClose = () => {}, labels = ['Delete', 'Cancel'], ...rest }) {
   return (
     <LangProvider>
-      <Sheet open onClose={onClose} jp="Voyage" cap="Delete deck" {...rest}>
+      <Sheet open onClose={onClose} title="Voyage" sub="Delete deck" {...rest}>
         <span className="sheet__q">Delete this deck?</span>
         <button type="button" className="btn-primary btn-primary--danger">{labels[0]}</button>
         {labels.slice(1, -1).map(l => <button key={l} type="button" className="btn-secondary">{l}</button>)}
@@ -127,7 +127,7 @@ describe('the kept dialogs on the desk (plan 123)', () => {
     const onClose = vi.fn()
     await render(
       <LangProvider>
-        <Sheet open onClose={onClose} jp="駅" cap="Choose a deck" dismiss>
+        <Sheet open onClose={onClose} title="Choose a deck" sub="駅" dismiss>
           <button type="button" className="probe-row">Voyage</button>
         </Sheet>
       </LangProvider>
@@ -138,7 +138,7 @@ describe('the kept dialogs on the desk (plan 123)', () => {
     expect(document.activeElement.className).toBe('probe-row')
     const buttons = [...document.querySelectorAll('.sheet button')]
     expect(buttons.at(-1)).toBe(x)
-    expect(box(x).right).toBeGreaterThan(box(document.querySelector('.sheet__cap')).right)
+    expect(box(x).right).toBeGreaterThan(box(document.querySelector('.sheet__title')).right)
     x.click()
     expect(onClose).toHaveBeenCalledTimes(1)
   })

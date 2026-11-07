@@ -15,7 +15,7 @@ import { Share } from '@capacitor/share'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { nativePlatform, openPath } from './platform'
-import { LEGACY_NUDGE_ID, NUDGE_IDS } from './ahead'
+import { DEPART_ACTION, LEGACY_NUDGE_ID, NUDGE_IDS, TRAIN_ACTIONS } from './ahead'
 import { AGENDA_IDS } from './agenda'
 import { OPENABLE_PATHS } from '../domain/agenda'
 
@@ -165,24 +165,55 @@ async function remindersChannel(name) {
   }
 }
 
+// ── Depart, on the day's train (plan 293) ──────────────────────
+// The train's notification carries the gate's own action: Depart opens
+// the run, where a tap on the notification opens the gate. Registered
+// in the learner's language each time the train is planned -- the type
+// registered again replaces the last, so a change of language renames
+// it. The reminder's look is otherwise the system's: the icon is the
+// mark (res/drawable/ic_stat_tsuji.xml, capacitor.config.json's
+// smallIcon) in the gate's gold.
+async function trainActions(depart) {
+  if (!depart) return {}
+  try {
+    await LocalNotifications.registerActionTypes({
+      types: [{ id: TRAIN_ACTIONS, actions: [{ id: DEPART_ACTION, title: depart, foreground: true }] }],
+    })
+    return { actionTypeId: TRAIN_ACTIONS }
+  } catch {
+    return {}
+  }
+}
+
 /** The day's notifications (lib/ahead.js), replacing whatever was
  *  scheduled; nothing when the OS has not allowed them. Android lists
- *  the lanes in the expanded notification (its inbox style); iOS has
- *  them in the body already. `channel` is the reminders' channel's name. */
-export async function scheduleNudges(nudges, channel) {
+ *  the lanes in the expanded notification (its inbox style), the
+ *  minutes in its header where the body was; iOS has them in the body
+ *  already. `channel` is the reminders' channel's name, `depart` the
+ *  train's action's. */
+export async function scheduleNudges(nudges, channel, depart) {
   await cancelNudges()
   if (!nudges.length) return []
   const { display } = await LocalNotifications.checkPermissions()
   if (display !== 'granted') return []
   const onChannel = await remindersChannel(channel)
+  const withDepart = await trainActions(depart)
+  const android = nativePlatform() === 'android'
   await LocalNotifications.schedule({
     notifications: nudges.map(n => ({
       id: n.id,
       title: n.title,
       body: n.body,
-      ...(n.lines.length ? { inboxList: n.lines } : {}),
+      ...(n.lines.length ? { inboxList: n.lines, ...(android ? { summaryText: n.summary } : {}) } : {}),
+      ...(n.actionType === TRAIN_ACTIONS ? withDepart : {}),
       ...onChannel,
       schedule: { at: n.at, allowWhileIdle: true },
+      // Inexact. The plugin's default is an exact alarm, and where Android
+      // has not granted one (it grants none to a new install from Android
+      // 14) it opened the "Alarms & reminders" settings at every schedule.
+      // A reminder a few minutes late is no harm, and Google Play keeps
+      // exact alarms for alarm clocks: the manifest drops the permission.
+      isExactNotification: false,
       extra: n.extra,
     })),
   })
@@ -207,6 +238,7 @@ export async function scheduleAgenda(items, channel) {
       body: n.body,
       ...onChannel,
       schedule: { at: n.at, allowWhileIdle: true },
+      isExactNotification: false,   // as scheduleNudges's
       extra: n.extra,
     })),
   })
@@ -222,11 +254,21 @@ export async function updateWidget(payload) {
   } catch { /* no widget in this build */ }
 }
 
+// The link the app was started with is read once a run, whoever binds.
+// getLaunchUrl answers with it for the life of the process (Android
+// keeps the starting intent's data, iOS the last link opened), so a
+// second read took the learner back through the door they came in by:
+// boarded from the widget's Depart, every way out of the run boarded
+// it again.
+let launchRead = false
+// The last link taken, across binds: a cold start can bring the same
+// link both ways, and a bind can be made again between the two.
+let last = null
+
 /** A tap on a nudge, and a link from the widget -- while the app runs,
  *  or the one it was started with. The same link can arrive both ways
- *  on a cold start; it is taken once. */
+ *  on a cold start; it is taken once, and the start's link once a run. */
 export function onOpenings(handler) {
-  let last = null
   const take = (to, via, key) => {
     const now = Date.now()
     if (last && last.key === key && now - last.at < 3000) return
@@ -234,7 +276,12 @@ export function onOpenings(handler) {
     handler({ to, via })
   }
   const pending = [
-    LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
+    LocalNotifications.addListener('localNotificationActionPerformed', ({ actionId, notification }) => {
+      // Depart boards the day's run, as the gate's does (plan 293).
+      if (actionId === DEPART_ACTION) {
+        take('/today/run', 'depart', `n${notification?.id}`)
+        return
+      }
       const to = notification?.extra?.to
       // The day's train opens the gate; an agenda block opens its subject.
       if (OPENABLE_PATHS.has(to)) take(to, 'notification', `n${notification.id}`)
@@ -244,12 +291,15 @@ export function onOpenings(handler) {
       if (to) take(to, 'widget', url)
     }),
   ]
-  App.getLaunchUrl()
-    .then(launch => {
-      const to = openPath(launch?.url)
-      if (to) take(to, 'widget', launch.url)
-    })
-    .catch(() => {})
+  if (!launchRead) {
+    launchRead = true
+    App.getLaunchUrl()
+      .then(launch => {
+        const to = openPath(launch?.url)
+        if (to) take(to, 'widget', launch.url)
+      })
+      .catch(() => {})
+  }
   return () => { for (const p of pending) p.then(h => h.remove()).catch(() => {}) }
 }
 

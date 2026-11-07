@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
-import { getDeskTabs, getDeskSections, inSection, tabFor, dueBadge } from '../../config/tabs'
+import { getDeskGates, getDeskSections, getDeskPlaces, deskPlaceFor, deskGateFor, inSection, dueBadge } from '../../config/tabs'
 import { useTodaySummary } from '../../stores/today'
 import { playClick } from '../../lib/audio'
 import { GateIcon } from './GateIcon'
@@ -23,13 +23,25 @@ import { GUIDES } from '../guide/guides'
 //                  pictogram AND its word: the phone captions only the
 //                  lit gate because five words do not fit in 390px
 //                  (DESIGN.md, "A gate is a pictogram"), and a column
-//                  has the room for all five;
+//                  has the room for all five -- and for the duels' after
+//                  Practice (plan 279), the desk's alone;
 //   the stations   under the lit gate, the sections behind it on a
 //                  drawn line — a stop per station, the one you are
 //                  standing in filled. The line is the station
 //                  metaphor's own drawing, in the panel's inks: the rail
 //                  is chrome, and a section's pigment never goes on
 //                  chrome;
+//   the places     past a hairline, the analyser, the library, the
+//                  statistics and the settings (plan 269): screens of
+//                  their own on the desk, each a pictogram and its word
+//                  like a gate. Their paths are behind gates (the phone's
+//                  routes), and while one is lit the gate it stands
+//                  behind is not: on the desk the place is where you are.
+//                  On a window too short to hold them as rows beside the
+//                  lit gate's stations they stand as one row of four
+//                  pictograms (index.css, the 机 section), and a lit
+//                  gate's stations scroll in their line before a gate or
+//                  a place goes under the pass;
 //   the foot       the learner's pass (DeskPass, plan 127): the HUD's
 //                  three instruments as one card — the level and its
 //                  climb (the fare is paid into it), the balance, the
@@ -71,9 +83,14 @@ export function DeskRail() {
   const { t } = useLang()
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const active = tabFor(pathname)
+  // A place (plan 269) lights itself, and the gate behind its path
+  // stays dark: on the desk the analyser is not a station of 辞書. The
+  // duels' gate (plan 279) does the same to the pass's.
+  const place = deskPlaceFor(pathname, t)
+  const active = place ? null : deskGateFor(pathname)
   const due = useTodaySummary().data?.total ?? 0
-  const tabs = getDeskTabs(t)
+  const tabs = getDeskGates(t)
+  const places = getDeskPlaces(t)
   const activeLabel = tabs.find(tab => tab.id === active)?.label ?? ''
 
   const guided = Boolean(active && GUIDES[active])
@@ -114,11 +131,14 @@ export function DeskRail() {
     <header className="desk-rail">
       <div className="desk-rail__head">
         <DeskMast />
-        {guided && (
+        {/* A place (plan 269) has no gate's guide to play: the pill keeps
+            its slot, unseen and out of the tab order, so the gates under
+            the head stand where they stand on every other screen. */}
+        {(guided || place) && (
           <button
             type="button"
-            className="desk-rail__help"
-            data-action="guide"
+            className={guided ? 'desk-rail__help' : 'desk-rail__help desk-rail__help--idle'}
+            data-action={guided ? 'guide' : undefined}
             aria-label={`${t.guideHelp} — ${t.guideHelpTour(activeLabel)}`}
             title={t.guideHelpTour(activeLabel)}
             aria-keyshortcuts="?"
@@ -144,7 +164,7 @@ export function DeskRail() {
               .filter(s => inSection(pathname, s.path))
               .sort((a, b) => b.path.length - a.path.length)[0]
             return (
-              <li key={tab.id} className="desk-rail__item">
+              <li key={tab.id} className={stations.length > 0 ? 'desk-rail__item desk-rail__item--lined' : 'desk-rail__item'}>
                 <Link
                   to={tab.path}
                   data-tab={tab.id}
@@ -182,6 +202,31 @@ export function DeskRail() {
                     })}
                   </ul>
                 )}
+              </li>
+            )
+          })}
+        </ul>
+        <hr className="desk-rail__rule" />
+        <ul className="desk-rail__list desk-rail__places" aria-label={t.deskPlacesLabel}>
+          {places.map(p => {
+            const on = p.id === place?.id
+            return (
+              <li key={p.id} className="desk-rail__item desk-rail__place">
+                <Link
+                  to={p.path}
+                  data-place={p.id}
+                  data-guide={p.guide}
+                  className={`desk-gate${on ? ' desk-gate--on' : ''}`}
+                  aria-current={on ? 'page' : undefined}
+                  // The word, again, for the pointer: on a window too short
+                  // for the places' rows they stand as a row of pictograms.
+                  title={p.title}
+                  aria-label={p.title}
+                  onClick={() => playClick()}
+                >
+                  <span className="desk-gate__ico"><GateIcon id={p.id} size={GLYPH} /></span>
+                  <span className="desk-gate__label">{p.title}</span>
+                </Link>
               </li>
             )
           })}

@@ -141,7 +141,7 @@ describe('the plate’s two ghosts', () => {
     expect(screen.container.querySelector('[data-action="replay"]')).toBeTruthy()
     expect(screen.container.querySelector('[data-action="replay-scene"]')).toBeNull()
     expect(screen.container.querySelector('.gl-tour__record')).toBeNull()
-    screen.unmount()
+    await screen.unmount()
     screen = await mount(<GrammarLesson point={{ ...point, tour: null }} variant="sheet" />)
     expect(screen.container.querySelector('.gl-tour')).toBeNull()
   })

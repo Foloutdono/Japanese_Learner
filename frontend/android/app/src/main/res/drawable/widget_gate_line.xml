@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The hairline between the reader and the word: the gate's gold sunk
+     toward its deep (GateButton's .btn-depart__reader::after). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#bf9238" />
+    <corners android:radius="1dp" />
+</shape>

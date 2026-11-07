@@ -1,4 +1,5 @@
 import { forgetCachedJson } from '../lib/cachedJson'
+import { forgetWarm } from '../lib/warm'
 import { clearAhead } from '../lib/platform'
 import { forgetAheadPlan } from './ahead'
 import { forgetAgenda } from './agenda'
@@ -12,6 +13,7 @@ import { forgetPracticeStops } from './practiceStop'
 import { forgetSummary } from './profileSummary'
 import { forgetStats } from './stats'
 import { forgetToday } from './today'
+import { forgetModes } from './learnerModes'
 
 // ── 改札を出る — what the leaving learner takes with them ─────────
 // Signing out does NOT reload the page. Welcome, the sign-in and the
@@ -52,6 +54,7 @@ export function forgetAccount() {
   forgetSummary()
   forgetCredits()
   forgetToday()
+  forgetModes()
   forgetBasics()
   forgetStats()
   forgetJourney()
@@ -62,5 +65,6 @@ export function forgetAccount() {
   forgetAheadPlan()
   forgetAgenda()
   forgetCachedJson()
+  forgetWarm()
   clearAhead()
 }

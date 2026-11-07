@@ -12,7 +12,7 @@ choices.
 import logging
 import random
 
-from content.grammar_points_data import find, gloss, grammar_to_id, localise
+from content.grammar_points_data import find, gloss, grammar_to_id, localise, texts
 from study.grammar_choose import choose_items, choose_payload
 from study.grammar_examples import (
     blank_span, blanked_payload, example_payload, pattern_furigana, structure_furigana,
@@ -57,14 +57,14 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
             "raw_id": grammar_to_id(r_entry, r_level),
             "level": r_level,
             "meaning": gloss(r_entry, lang),
-            "text": localise({"en": rival["en"], "fr": rival["fr"]}, lang),
+            "text": localise(texts(rival), lang),
         })
     return {
         "pattern_furigana": pattern_furigana(pattern, entry.get("reading")),
         "structure_furigana": structure_furigana(entry, lang),
         "register": entry.get("register"),
         "steps": [
-            {"kind": step["kind"], "text": localise({"en": step["en"], "fr": step["fr"]}, lang)}
+            {"kind": step["kind"], "text": localise(texts(step), lang)}
             for step in entry.get("steps", [])
         ],
         "compare": compare,
@@ -154,9 +154,11 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
         ]
         # Drawn in a random order, each kept only where it prints as no
         # option before it does (plan 254): もう〜ました is ました, which
-        # 〜ました／〜ませんでした already says beside 〜ています.
+        # 〜ました／〜ませんでした already says beside 〜ています. The order is
+        # `rng`'s, so a seeded caller (the tour's quiz) draws the same
+        # fillers in every process: `fillers` is in the catalogue's order.
         taken = {f.text for f in choice_forms(pattern, fill, [pattern] + choices, lines).values()}
-        for filler in pick_distractors(fillers, lambda p: p, pattern, len(fillers)):
+        for filler in pick_distractors(fillers, lambda p: p, pattern, len(fillers), rng=rng):
             if len(choices) == CONTRAST_CHOICES - 1:
                 break
             form = form_text(pattern, fill, filler)
@@ -175,7 +177,7 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     # What each named rival is not (plan 194): the lesson's own line on it,
     # said when that rival is the choice taken -- the trap explained.
     why = {
-        forms[r["pattern"]].text: localise({"en": r["en"], "fr": r["fr"]}, lang)
+        forms[r["pattern"]].text: localise(texts(r), lang)
         for r in entry.get("compare", []) if r["pattern"] != pattern and r["pattern"] in forms
     }
     return {

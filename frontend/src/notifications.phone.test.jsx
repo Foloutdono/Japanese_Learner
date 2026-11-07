@@ -112,8 +112,8 @@ describe('Settings › Notifications at phone width', () => {
   it('prints the switch, the hour’s door and the next reminder as it will read', async () => {
     const at = new Date(Date.now() + 26 * 3600_000)
     setAheadPlan({ nudges: [{
-      id: 101, at, title: 'Your 19:00 train · 42 cards', summary: 'About 7 min · 3 new',
-      lines: ['Vocabulary N5 · 30', 'Kanji N5 · 12'], body: '', extra: { to: '/today' },
+      id: 101, at, title: '19:00 · 42 cards', summary: 'About 7 min · 3 new',
+      lines: ['Vocabulary N5 · 30', 'Kanji N5 · 12'], body: '', actionType: 'train', extra: { to: '/today' },
     }], failed: false })
     await mount('/profile/settings/notifications')
 
@@ -125,8 +125,10 @@ describe('Settings › Notifications at phone width', () => {
       expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }
     const next = document.querySelector('[data-next]')
-    expect(next.textContent).toContain('Your 19:00 train · 42 cards')
+    expect(next.textContent).toContain('19:00 · 42 cards')
     expect(next.textContent).toContain('Kanji N5 · 12')
+    // The train's Depart, under it as the phone lays its actions (plan 293).
+    expect(next.querySelector('.brd-notif__action').textContent).toBe(t.depart)
     expect(hint()).toBe(t.notifRule)
     // Nothing wider than the phone.
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)

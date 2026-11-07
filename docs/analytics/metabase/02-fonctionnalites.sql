@@ -43,6 +43,8 @@ WITH routes(route) AS (VALUES
     ('/today'),
     ('/today/run'),
     ('/today/clear'),
+    ('/duel/new'),
+    ('/duel/:id'),
     ('/ride'),
     ('/ride/intro'),
     ('/ride/cards'),
@@ -116,6 +118,9 @@ WITH routes(route) AS (VALUES
     ('/profile/stats'),
     ('/profile/tickets'),
     ('/profile/banzuke'),
+    ('/profile/duels'),
+    ('/profile/duels/friends'),
+    ('/profile/duels/board'),
     ('/profile/settings'),
     ('/profile/settings/:page')
 ), vues AS (
@@ -165,7 +170,8 @@ WITH gestes(feature, action) AS (VALUES
   ('speech', 'play'), ('analyzer', 'text'), ('analyzer', 'photo'), ('analyzer', 'video'),
   ('ocr', 'scan'), ('ask', 'send'), ('explain', 'open'), ('dictionary', 'search'), ('export', 'progress'),
   ('level_fit', 'open'), ('level_fit', 'move'), ('level_fit', 'stay'), ('conversation', 'search'),
-  ('comeback', 'open'), ('comeback', 'hide')
+  ('comeback', 'open'), ('comeback', 'hide'), ('readings', 'open'),
+  ('duels_key', 'open'), ('duels_board', 'open'), ('duels_news', 'open'), ('duels_news', 'hide')
 ), used AS (
   SELECT props->>'feature' AS feature, props->>'action' AS action,
          count(DISTINCT user_id) AS apprenants, sum((props->>'n')::int) AS n

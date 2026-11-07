@@ -51,7 +51,7 @@ import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 import { heldTooSoon } from '../lib/keyRepeat'
-import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon, SlidersIcon } from '../components/ui/Icons'
+import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon, SlidersIcon, SlotsIcon, BooksIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
@@ -1843,7 +1843,7 @@ export default function AnalyzerScreen({ session }) {
 
       {/* The line's two lists, each a sheet over the stage; a row pressed
           in either opens the dictionary's sheet in its place. */}
-      <Sheet open={dock === 'grammar'} onClose={closeDock} jp={t.grammarSpotted} className="anl-m__sheet">
+      <Sheet open={dock === 'grammar'} onClose={closeDock} title={t.grammarSpotted} icon={SlotsIcon} line={KAISEKI} className="anl-m__sheet">
         <section className="anl-m__points anl-points" style={{ '--line-color': KAISEKI }}>
           <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight}
             onOpen={g => { closeDock(); openPoint(g) }} />
@@ -1853,8 +1853,10 @@ export default function AnalyzerScreen({ session }) {
       <Sheet
         open={dock === 'words'}
         onClose={closeDock}
-        jp={t.wordsSheetTitle}
-        cap={t.wordsSheetCount(wordRows.length, wordRows.filter(isFreshWord).length)}
+        title={t.wordsSheetTitle}
+        sub={t.wordsSheetCount(wordRows.length, wordRows.filter(isFreshWord).length)}
+        icon={BooksIcon}
+        line={KAISEKI}
         label={t.wordsInSentence}
         className="anl-m__sheet"
       >
@@ -1926,6 +1928,7 @@ export default function AnalyzerScreen({ session }) {
             onAnalyze={analyzeDraft}
             busy={busy}
             onPhoto={() => openSheet('photo')}
+            onVideo={() => openSheet('video')}
             onFile={file => startVideoFromFile(file, { url: videoUrl })}
           />
         </>
@@ -1945,10 +1948,10 @@ export default function AnalyzerScreen({ session }) {
         <>
           {/* A sheet is portalled to the body, out of <main>: the
               station's pigment is set again on what it holds. */}
-          <Sheet open={sheet === 'video'} onClose={closeSheet} jp={t.sourceVideo} className="anl-sheet">
+          <Sheet open={sheet === 'video'} onClose={closeSheet} title={t.sourceVideo} icon={VideoIcon} line={KAISEKI} className="anl-sheet">
             <div id="anl-panel-video" className="anl-panel" style={{ '--line-color': KAISEKI }}>{videoIntake}</div>
           </Sheet>
-          <Sheet open={sheet === 'photo'} onClose={closeSheet} jp={t.sourcePhoto} className="anl-sheet">
+          <Sheet open={sheet === 'photo'} onClose={closeSheet} title={t.sourcePhoto} icon={CameraIcon} line={KAISEKI} className="anl-sheet">
             <div id="anl-panel-photo" className="anl-panel" style={{ '--line-color': KAISEKI }}>
               <IntakePhoto
                 t={t}
@@ -1987,8 +1990,10 @@ export default function AnalyzerScreen({ session }) {
         <Sheet
           open={wordsOpen}
           onClose={closeWords}
-          jp={t.wordsSheetTitle}
-          cap={t.wordsSheetCount(foldRows.length, foldRows.filter(isFreshWord).length)}
+          title={t.wordsSheetTitle}
+          sub={t.wordsSheetCount(foldRows.length, foldRows.filter(isFreshWord).length)}
+          icon={BooksIcon}
+          line={KAISEKI}
           label={t.wordsInSentence}
           className="anl-wordsheet"
           dismiss

@@ -77,11 +77,20 @@ describe('401 recovery', () => {
   // microtasks a beat to run before asserting.
   const flush = () => new Promise(r => setTimeout(r, 0))
 
+  // When api.js last refreshed is its own module state, and outlives a
+  // test: a minute on the clock between two of them puts any earlier
+  // refresh outside the 15 s window, so each starts from "no refresh
+  // lately" whichever ran before it. Date alone: flush's setTimeout
+  // stays real.
+  let clock = Date.now()
   beforeEach(() => {
     refreshSession.mockReset()
     signOut.mockReset()
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(clock += 60_000)
   })
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
@@ -119,15 +128,20 @@ describe('401 recovery', () => {
   })
 
   it('gives up on a session the backend rejects even freshly refreshed', async () => {
-    // The test above left a successful refresh moments ago; a 401 on
-    // the very next requests means the backend refuses fresh tokens
-    // too, and another refresh would just loop. Module state carries
-    // between these two tests on purpose — this IS the sequence a real
-    // rejection plays out in.
+    // A refresh that worked, then a 401 on the very next request: the
+    // backend refuses fresh tokens too, and another refresh would just
+    // loop. The whole sequence a real rejection plays out in, here.
     mockFetchOnce(401, { detail: 'Invalid token' })
+    refreshSession.mockResolvedValue({ data: { session: { access_token: 'fresh' } }, error: null })
+    await expect(apiJson('/api/today', { access_token: 'old' })).rejects.toThrow(ApiError)
+    await flush()
+    expect(refreshSession).toHaveBeenCalledTimes(1)
+    expect(signOut).not.toHaveBeenCalled()
+
+    vi.setSystemTime(Date.now() + 5_000)
     await expect(apiJson('/api/today', { access_token: 'fresh' })).rejects.toThrow(ApiError)
     await flush()
-    expect(refreshSession).not.toHaveBeenCalled()
+    expect(refreshSession).toHaveBeenCalledTimes(1)
     expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
   })
 })

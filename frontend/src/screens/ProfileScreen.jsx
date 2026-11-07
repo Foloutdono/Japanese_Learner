@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { keepCachedJson, lastCachedJson } from '../lib/cachedJson'
+import { GATE_PATHS, STORE_PATHS } from '../lib/warm'
+import { peekSummary } from '../stores/profileSummary'
+import { peekStore } from '../stores/remote'
 import { useLang } from '../LangContext'
 import { Loading } from '../components/ui/Loading'
 import { WarningIcon } from '../components/ui/Icons'
@@ -12,6 +16,7 @@ import { StampBook, Records, ProfileDoors, TicketsDoor, AgendaDoor, HolderDoors 
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
 import { useAgenda } from '../stores/agenda'
+import { DuelsInsert } from '../components/pvp/DuelsInsert'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
@@ -42,8 +47,8 @@ import { useAgenda } from '../stores/agenda'
 // Kept in sync with profile.py's real response shape so a backend
 // hiccup degrades to a believable screen instead of a blank one.
 // Still a function, not a constant: the calendar below is relative to
-// today and would otherwise freeze at module load.
-const LEADERBOARD_LIMIT = 5
+// today and would otherwise freeze at module load. The boards ask for
+// five (lib/warm.js's GATE_PATHS).
 
 function buildMockProfile() {
   const counts = [24, 31, 18, 40, 12, 0, 22, 27, 35, 19, 0, 41, 26, 0, 0, 33, 0, 21, 29, 38, 17, 25, 30, 44, 12, 36, 28, 24, 9, 31, 18, 40, 12, 7]
@@ -98,10 +103,13 @@ const MOCK_WEEK_LEADERBOARD = {
 export default function ProfileScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
-  const [profile, setProfile]         = useState(null)
-  const [leaderboard, setLeaderboard] = useState(null)
-  const [weekBoard, setWeekBoard]     = useState(null)
-  const [stats, setStats]             = useState(null)
+  // 予熱 (plan 292): the gate is drawn at once on the last answers kept
+  // -- the HUD's /api/profile, the boards lib/warm.js asked behind Today
+  // or the last visit kept, the map's stats -- and asks again behind them.
+  const [profile, setProfile]         = useState(peekSummary)
+  const [leaderboard, setLeaderboard] = useState(() => lastCachedJson(GATE_PATHS.board, session) ?? null)
+  const [weekBoard, setWeekBoard]     = useState(() => lastCachedJson(GATE_PATHS.week, session) ?? null)
+  const [stats, setStats]             = useState(() => peekStore(STORE_PATHS.stats))
   const [stale, setStale]             = useState(false)
   // The week Settings › Agenda keeps (plan 181), shared with Today's
   // figure and the native reminders.
@@ -111,24 +119,30 @@ export default function ProfileScreen({ session }) {
     apiFetch('/api/profile', session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setProfile)
-      .catch(() => { setProfile(buildMockProfile()); setStale(true) })
+      // An answer kept is a truer picture than the mock.
+      .catch(() => { setProfile(p => p ?? buildMockProfile()); setStale(true) })
 
-    apiFetch(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}&around=1`, session)
+    apiFetch(GATE_PATHS.board, session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
-      .then(setLeaderboard)
-      .catch(() => { setLeaderboard(MOCK_LEADERBOARD); setWeekBoard(MOCK_WEEK_LEADERBOARD); setStale(true) })
+      .then(board => { keepCachedJson(GATE_PATHS.board, session, board); setLeaderboard(board) })
+      .catch(() => {
+        setLeaderboard(b => b ?? MOCK_LEADERBOARD)
+        setWeekBoard(b => b ?? MOCK_WEEK_LEADERBOARD)
+        setStale(true)
+      })
 
     // The week side of the board is optional: without it the board
     // simply has no toggle, so its failure never marks the screen stale.
-    apiJson(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}&around=1&period=week`, session)
-      .then(setWeekBoard)
+    apiJson(GATE_PATHS.week, session)
+      .then(board => { keepCachedJson(GATE_PATHS.week, session, board); setWeekBoard(board) })
       .catch(() => {})
 
     // The ride ledger reads the same stats the map does; a failed
-    // fetch leaves the ledger out, never the profile.
-    apiJson('/api/stats', session)
+    // fetch leaves the ledger as it was (out, with none kept), never
+    // the profile.
+    apiJson(STORE_PATHS.stats, session)
       .then(setStats)
-      .catch(() => setStats(null))
+      .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -185,6 +199,9 @@ export default function ProfileScreen({ session }) {
     // the desk's (plan 248).
     holderDoors: <HolderDoors t={t} navigate={navigate} count={profile.tickets?.length ?? 0} blocks={agenda} />,
     board: <Banzuke all={leaderboard} week={weekBoard} t={t} lang={lang} both={desk} session={session} />,
+    // 対戦 (plan 279): the door to the duels under the holder's own
+    // (E1), the Elo laid out under it once there is one (L1).
+    duels: <DuelsInsert t={t} lang={lang} navigate={navigate} />,
   }
 
   return (
@@ -198,8 +215,8 @@ export default function ProfileScreen({ session }) {
         // 115 (--desk-side-w), the record taking the rest on the right. The
         // phone's inserts, split after the stamps — so a screen reader, the
         // Tab key and the guide walk the card, the stamps and the record in
-        // the phone's order — less the two doors the rail already holds
-        // (plan 143). Since plan 248 the tickets' and the agenda's doors
+        // the phone's order — less the doors the rail already holds
+        // (plan 143; the duels', plan 279). Since plan 248 the tickets' and the agenda's doors
         // stand straight under the card, one lattice of two slim rows, and
         // the two columns end together, whole in the window.
         <>
@@ -222,6 +239,7 @@ export default function ProfileScreen({ session }) {
           {inserts.stale}
           {inserts.pass}
           {inserts.doors}
+          {inserts.duels}
           {inserts.stamps}
           {inserts.tickets}
           {inserts.agenda}

@@ -65,7 +65,7 @@ describe('the fare\'s beat', () => {
 
   it('lands the fare a beat after a rating\'s answer, and at once elsewhere', () => {
     // After a rating (XpToast) the coin waits FARE_BEAT behind the
-    // answer; a claimed refill (ClaimSheet) has no answer to wait for.
+    // answer; a refill's count (RefillCard) has no answer to wait for.
     playFareTick(FARE_BEAT)
     now += 60
     playFareTick()

@@ -23,18 +23,27 @@ const PLAN_DELAY_MS = 800
 // this often (a return to the front, the Today store's own TTL).
 const REPLAN_MS = 10 * 60_000
 
+// The value of this render, in a ref that keeps its identity: a
+// listener bound once reads the latest through it.
+function useLatest(value) {
+  const ref = useRef(value)
+  useEffect(() => { ref.current = value }, [value])
+  return ref
+}
+
 // ── The shell's habits (plan 076) ─────────────────────────────
 // Renders nothing but the planner, and that on a shell only. Inside the
 // router because all of it needs the router: Android's back button
 // closes an open sheet, else steps back through the history, else --
 // at a gate's root -- leaves the app; and the day ahead (plan 156).
 export function NativeBridge() {
-  const navigate = useNavigate()
+  const navigate = useLatest(useNavigate())
   const { pathname } = useLocation()
   const { summary } = useProfileSummaryState()
-  const pathRef = useRef(pathname)
-  useEffect(() => { pathRef.current = pathname }, [pathname])
+  const pathRef = useLatest(pathname)
 
+  // Bound once, as the openings are: re-bound at every path, the button
+  // had no listener between the old one's removal and the new one's.
   useEffect(() => {
     if (!isNative()) return
     let unbind = () => {}
@@ -50,13 +59,13 @@ export function NativeBridge() {
         // closes every sheet, whoever mounted it.
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
       } else if (action === 'back') {
-        navigate(-1)
+        navigate.current(-1)
       } else {
         exitApp()
       }
     }).then(fn => { if (gone) fn(); else unbind = fn })
     return () => { gone = true; unbind() }
-  }, [navigate])
+  }, [navigate, pathRef])
 
   if (!isNative() || !summary) return null
   return (
@@ -76,19 +85,22 @@ export function NativeBridge() {
 // handed its figures from the same answer. Both are planned again
 // whenever something they read moves -- the profile's two answers, the
 // language, a run landing (the Today store refreshes) -- and when the
-// app comes back to the front. A tap on either opens the gate.
+// app comes back to the front. A tap on either opens the gate; the
+// train's Depart (plan 293) opens the run itself, as the gate's does.
 function AheadPlanner({ enabled, time }) {
-  const navigate = useNavigate()
+  const navigate = useLatest(useNavigate())
   const { t, lang } = useLang()
   const { data: today, at } = useTodaySummary()
   const last = useRef({ key: null, at: 0 })
 
+  // Bound once: `navigate` is a new function at every path, and each
+  // new binding read the link the app was started with again.
   useEffect(() => {
     let unbind = () => {}
     let gone = false
     bindOpenings(({ to, via }) => {
       track('nudge_opened', { via })
-      navigate(to)
+      navigate.current(to)
     }).then(fn => { if (gone) fn(); else unbind = fn })
     return () => { gone = true; unbind() }
   }, [navigate])
@@ -113,7 +125,7 @@ function AheadPlanner({ enabled, time }) {
         .catch(() => null)
       if (cancelled) return
       last.current = { key, at: Date.now() }
-      await updateWidget(widgetPayload({ today, ahead, t, now }))
+      await updateWidget(widgetPayload({ today, ahead, t, now, time }))
       // No answer: whatever was scheduled before stays scheduled -- a
       // stale reminder is better than a silent phone.
       if (!ahead) {
@@ -123,7 +135,7 @@ function AheadPlanner({ enabled, time }) {
       const planned = hour
         ? planNudges({ ahead, time, t, kanaSetLabel, now, platform: nativePlatform() })
         : []
-      await syncNudges(enabled ? planned : [], t.nudgeChannel)
+      await syncNudges(enabled ? planned : [], t.nudgeChannel, t.depart)
       if (!cancelled) setAheadPlan({ nudges: planned, failed: false })
     }, PLAN_DELAY_MS)
     return () => { cancelled = true; clearTimeout(handle) }

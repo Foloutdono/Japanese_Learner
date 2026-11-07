@@ -10,7 +10,7 @@
 // equal to index.css by src/carousel.test.js.
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
-import { K, TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
+import { K, RATING_INKS, TR, alpha, fit, font, measure, mix, rrect, shadow, text } from './draw.js'
 import { PRINTS_REV, printPaths, sceneryOf } from './sceneries.js'
 
 export const APP_INKS = {
@@ -26,6 +26,9 @@ export const APP_INKS = {
   '--tpr-washi': '#efe3bf',
   '--tpr-sumi': '#1d1a16',
   '--tpr-shu': '#a8382a',
+  // The cleared day's 硬券, which the duel's ticket is printed on, and its soft ink.
+  '--paper': '#f3ecdf',
+  '--paper-ink-soft': '#665c4a',
 }
 
 // The phone the parts were measured on: its column, inside its 16px gutters.
@@ -115,20 +118,25 @@ export function cardWord(ctx, p, str, cx, cy, maxW, u, size = 72) {
 
 // ── The rating bar (.rating-bar, the simple scale) ─────────────────
 /** The bar a review is rated on: four keys, each lifted on its 3px foot,
- *  the three misses on the panel's ink with their lamp, Correct filled
- *  with its verdict ink and its check. `labels` worst first; `pressed`
- *  the index pressed, if any (it sinks onto its foot). Returns its height
- *  and each key's centre. */
+ *  the two misses (Missed, Almost) on the panel's ink with their lamp,
+ *  the two passes (Correct, Easy) with a check, each a fifth wider than a
+ *  miss (index.css's 2 : 2.4): Correct a plain key, Easy filled with its
+ *  blue. `labels`
+ *  worst first; `pressed` the index pressed, if any (it sinks onto its
+ *  foot). Returns its height and each key's centre. */
 export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
   const c = inks(p)
   const foot = 3 * u // --key-foot
   const h = 61 * u
   const gap = 8 * u // --sp-3 between the keys
-  const missW = (w - gap) * 3 / 4.5
-  const keyW = (missW - 2 * gap) / 3
+  const missW = (w - gap) * 2 / 4.4
+  const keyW = (missW - gap) / 2
+  const passW = (w - missW - 2 * gap) / 2
   const r = 8 * u
   const sole = mix(c.panel, '#000000', 0.4)
   const ls = 13.12 * u
+  const missInks = [p.rating[0], p.rating[1]]
+  const easy = RATING_INKS['--rating-correct']
   const key = (kx, kw, face, footInk, light, isPressed) => {
     const ky = y + (isPressed ? foot : 0)
     if (!isPressed) {
@@ -148,7 +156,7 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
     return ky
   }
   const centres = []
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     const kx = x + i * (keyW + gap)
     const isP = pressed === i
     const ky = key(kx, keyW, ky0 => {
@@ -157,7 +165,7 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
       g.addColorStop(1, mix(c.onPanel, c.panel, isP ? 0.09 : 0.06))
       return g
     }, sole, alpha(c.onPanel, 0.08), isP)
-    const ink = p.rating[i]
+    const ink = missInks[i]
     const cx = kx + keyW / 2
     ctx.fillStyle = mix(ink, c.panel, isP ? 1 : 0.55)
     ctx.beginPath()
@@ -171,36 +179,47 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
     text(ctx, labels[i], cx, ky + 32 * u + ls * 0.8, { f: font(700, ls, 'latin'), color: c.onPanel, align: 'center' })
     centres.push(cx)
   }
-  // The pass: the verdict's ink, lit from the top, on a foot of its own ink.
-  const correct = p.rating[3]
-  const kx = x + missW + gap
-  const kw = w - missW - gap
-  const isP = pressed === 3
-  const ky = key(kx, kw, ky0 => {
-    const g = ctx.createLinearGradient(0, ky0, 0, ky0 + h)
-    g.addColorStop(0, mix(correct, c.onPanel, 0.85))
-    g.addColorStop(1, correct)
-    return g
-  }, mix(correct, sole, 0.4), alpha(c.onPanel, 0.35), isP)
-  const ccx = kx + kw / 2
-  ctx.save()
-  ctx.strokeStyle = c.onFill
-  ctx.lineWidth = 2 * u
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
-  ctx.beginPath()
-  ctx.moveTo(ccx - 6 * u, ky + 22 * u)
-  ctx.lineTo(ccx - 2 * u, ky + 26 * u)
-  ctx.lineTo(ccx + 6 * u, ky + 18 * u)
-  ctx.stroke()
-  ctx.restore()
-  text(ctx, labels[3], ccx, ky + 35 * u + ls * 0.8, { f: font(700, ls, 'latin'), color: c.onFill, align: 'center' })
-  centres.push(ccx)
-  if (isP) {
-    ctx.strokeStyle = c.onPanel
+  // The passes: Correct the dark key a miss is, Easy its blue, lit from
+  // the top, on a foot of its own ink; each with its check.
+  for (let i = 0; i < 2; i++) {
+    const filled = i === 1
+    const kx = x + missW + gap + i * (passW + gap)
+    const kw = passW
+    const isP = pressed === 2 + i
+    const ky = filled
+      ? key(kx, kw, ky0 => {
+        const g = ctx.createLinearGradient(0, ky0, 0, ky0 + h)
+        g.addColorStop(0, mix(easy, c.onPanel, 0.85))
+        g.addColorStop(1, easy)
+        return g
+      }, mix(easy, sole, 0.4), alpha(c.onPanel, 0.35), isP)
+      : key(kx, kw, ky0 => {
+        const g = ctx.createLinearGradient(0, ky0, 0, ky0 + h)
+        g.addColorStop(0, mix(c.onPanel, c.panel, isP ? 0.14 : 0.1))
+        g.addColorStop(1, mix(c.onPanel, c.panel, isP ? 0.09 : 0.06))
+        return g
+      }, sole, alpha(c.onPanel, 0.08), isP)
+    const ink = filled ? c.onFill : c.onPanel
+    const ccx = kx + kw / 2
+    ctx.save()
+    ctx.strokeStyle = ink
     ctx.lineWidth = 2 * u
-    rrect(ctx, kx + u, ky + u, kw - 2 * u, h - 2 * u, r)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    ctx.moveTo(ccx - 6 * u, ky + 22 * u)
+    ctx.lineTo(ccx - 2 * u, ky + 26 * u)
+    ctx.lineTo(ccx + 6 * u, ky + 18 * u)
     ctx.stroke()
+    ctx.restore()
+    text(ctx, labels[2 + i], ccx, ky + 35 * u + ls * 0.8, { f: font(700, ls, 'latin'), color: ink, align: 'center' })
+    centres.push(ccx)
+    if (isP) {
+      ctx.strokeStyle = c.onPanel
+      ctx.lineWidth = 2 * u
+      rrect(ctx, kx + u, ky + u, kw - 2 * u, h - 2 * u, r)
+      ctx.stroke()
+    }
   }
   return { h: h + foot, centres }
 }
@@ -264,6 +283,416 @@ export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answ
     ctx.restore()
   })
   return rows.length * rowH + (rows.length - 1) * gap
+}
+
+// ── The comprehension run (plan 301) ─────────────────────────────
+// ComprehensionRun's own parts: the reading clock over the passage on
+// its bounded card, a question on its card with its type's badge, and
+// its four options lettered A to D, in the learner's language.
+
+/** The reading clock (.timer, ReadingPieces' Clock): a 4px hairline that
+ *  empties in the warning ink (the danger's under the last minute), and
+ *  what is left centred under it. Returns the height. */
+export function readClock(ctx, p, x, y, w, u, { fill, label, low = false }) {
+  const c = inks(p)
+  const h = 4 * u
+  ctx.fillStyle = p.surfaceLine
+  rrect(ctx, x, y, w, h, h / 2)
+  ctx.fill()
+  const f = Math.max(0, Math.min(1, fill))
+  if (f > 0) {
+    ctx.save()
+    rrect(ctx, x, y, w, h, h / 2)
+    ctx.clip()
+    ctx.fillStyle = low ? p.danger : p.warning
+    ctx.fillRect(x, y, w * f, h)
+    ctx.restore()
+  }
+  const lz = 11.52 * u
+  text(ctx, label, x + w / 2, y + h + 6 * u + lz * 0.9, { f: font(700, lz, 'latin'), color: c.ink2, align: 'center' })
+  return h + 6 * u + lz * 1.2
+}
+
+// A line of the learner's language that quotes the text (「電車の中で…」):
+// a browser breaks it between Latin words and between any two Japanese
+// characters, never before a closing mark or after an opening one.
+const NO_START = /^[、。，．・：；？！」』）】〕］｝ゝゞー々ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ,.;:!?)\]}»…’”]/
+const NO_END = /[「『（【〔［｛〈《([{«‘“]$/
+export function mixedLines(ctx, str, f, maxW) {
+  const units = String(str).match(/\s+|[\u3000-\u30ff\u3400-\u9fff\uff00-\uffef]|[^\s\u3000-\u30ff\u3400-\u9fff\uff00-\uffef]+/g) || []
+  const lines = []
+  let cur = ''
+  for (const unit of units) {
+    if (/^\s+$/.test(unit)) {
+      if (cur) cur += ' '
+      continue
+    }
+    const test = cur + unit
+    if (!cur.trim() || measure(ctx, test.trimEnd(), f) <= maxW || NO_START.test(unit) || NO_END.test(cur.trimEnd())) {
+      cur = test
+      continue
+    }
+    lines.push(cur.trimEnd())
+    cur = unit
+  }
+  if (cur.trim()) lines.push(cur.trimEnd())
+  return lines
+}
+/** The largest of `sizes` (CSS px, times `u`) at which `str` sets in
+ *  `maxLines` mixed lines. */
+export function mixedFit(ctx, str, { weight, sizes, maxW, maxLines, u }) {
+  for (const z of sizes) {
+    const f = font(weight, z * u, 'latin')
+    const lines = mixedLines(ctx, str, f, maxW)
+    if (lines.length <= maxLines || z === sizes[sizes.length - 1]) return { size: z * u, f, lines }
+  }
+}
+
+// The passage's body (.prose__jp--passage): the reading rung, a page's
+// leading; a passage the stage cannot hold whole steps down to the small
+// rung (--fs-sm) before it is bounded.
+export const PASSAGE = { size: 15.2, small: 13.12, lh: 1.75, pad: 16, foot: 13.12 }
+
+/** The passage on its card (.prompt-card--footed.prompt-card--passage):
+ *  the text top-down in its 16px padding, bounded to `h` and scrolled
+ *  `scroll` CSS pixels inside the body, as the run's card scrolls, under
+ *  the foot strip's two facts (the level, the exercise). `lines` are the
+ *  text set at PASSAGE.size (see passageLines). */
+export function passageCard(ctx, p, x, y, w, h, u, { lines, foot = [], scroll = 0, size = PASSAGE.size }) {
+  const c = inks(p)
+  ctx.save()
+  shadow(ctx, p.hang)
+  ctx.fillStyle = c.card
+  rrect(ctx, x, y, w, h, 8 * u)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = c.border
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 8 * u)
+  ctx.stroke()
+  const fz = PASSAGE.foot * u
+  const footH = 2 * 12 * u + fz * 1.35
+  const fy = y + h - footH
+  ctx.fillStyle = c.border
+  ctx.fillRect(x + u, fy, w - 2 * u, u)
+  if (foot[0]) text(ctx, foot[0], x + 22 * u, fy + footH / 2 + fz * 0.36, { f: font(400, fz, 'latin'), color: c.ink2 })
+  if (foot[1]) text(ctx, foot[1], x + w - 22 * u, fy + footH / 2 + fz * 0.36, { f: font(400, fz, 'latin'), color: c.ink2, align: 'right' })
+  const z = size * u
+  const step = z * PASSAGE.lh
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(x + u, y + u, w - 2 * u, fy - y - u)
+  ctx.clip()
+  const top = y + PASSAGE.pad * u - scroll * u
+  lines.forEach((l, i) => {
+    const by = top + i * step + z * (PASSAGE.lh - 1) / 2 + z * 0.88
+    if (by + z * 0.3 < y || by - z > fy) return
+    text(ctx, l, x + PASSAGE.pad * u, by, { f: font(500, z, 'jp'), color: c.ink })
+  })
+  // A text longer than its card goes on under the foot, as the run's
+  // scrolls: the line the strip cuts fades into the card.
+  if (top + lines.length * step > fy - PASSAGE.pad * u) {
+    const g = ctx.createLinearGradient(0, fy - PASSAGE.pad * u - step * 0.6, 0, fy)
+    g.addColorStop(0, alpha(c.card, 0))
+    g.addColorStop(1, c.card)
+    ctx.fillStyle = g
+    ctx.fillRect(x + u, fy - PASSAGE.pad * u - step * 0.6, w - 2 * u, PASSAGE.pad * u + step * 0.6)
+  }
+  ctx.restore()
+  return { footH, step, body: fy - y }
+}
+
+/** A passage cut into the card's lines at `size` (CSS px): the inner
+ *  width, Japanese broken between characters as a page breaks it (kinsoku). */
+export function passageLines(ctx, str, w, u, size = PASSAGE.size) {
+  const inner = w - 2 * PASSAGE.pad * u - 2 * u
+  return fit(ctx, str, { weight: 500, fam: 'jp', sizes: [size * u], maxW: inner, balanced: false, lh: PASSAGE.lh }).lines
+}
+
+/** A question on its card (.prompt-card--ask): the type's badge
+ *  (QuestionTypeBadge, its ink a tint on the hairline and the letters),
+ *  then the question in the title rung, both in the card's 16px padding.
+ *  Returns the height. */
+export function askCard(ctx, p, x, y, w, u, { badge, color, question }) {
+  const c = inks(p)
+  const pad = 16 * u
+  const qz = 20 * u
+  const qb = mixedFit(ctx, question, { weight: 500, sizes: [qz / u, 17.92, 15.2], maxW: w - 2 * pad, maxLines: 3, u })
+  const bh = 20 * u
+  const h = pad + bh + 8 * u + qb.size * (0.3 + qb.lines.length * 1.3) + pad
+  ctx.save()
+  shadow(ctx, p.hang)
+  ctx.fillStyle = c.card
+  rrect(ctx, x, y, w, h, 8 * u)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = c.border
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 8 * u)
+  ctx.stroke()
+  const bz = 9.92 * u
+  const label = badge.toLocaleUpperCase()
+  const bw = measure(ctx, label, font(700, bz, 'latin'), TR.caption) + 2 * 6 * u
+  ctx.strokeStyle = alpha(color, 0.55)
+  rrect(ctx, x + pad + u / 2, y + pad + u / 2, bw - u, bh - u, 4 * u)
+  ctx.stroke()
+  text(ctx, label, x + pad + 6 * u, y + pad + bh / 2 + bz * 0.36, { f: font(700, bz, 'latin'), color: mix(color, c.ink, 0.6), tr: TR.caption })
+  const qy = y + pad + bh + 8 * u
+  qb.lines.forEach((l, i) => text(ctx, l, x + pad, qy + qb.size * (0.95 + i * 1.3), { f: qb.f, color: c.ink }))
+  return h
+}
+
+/** A comprehension question's options (.mcq-row with .mcq-row__text--latin):
+ *  a row each, A to D in a ring of the line's pigment, the option in the
+ *  learner's language over up to two lines. Answered, the run keeps the
+ *  right one (the fillers fold away), in the success ink, ring filled.
+ *  `reveal` brings the rows in one by one in a clip. Returns the height. */
+export function letterRows(ctx, p, x, y, w, u, choices, { line, right = -1, answered = false, reveal = null } = {}) {
+  const c = inks(p)
+  const pad = 16 * u
+  const ring = 16 * u
+  const gap = 12 * u
+  const success = p.paper ? '#4d7639' : '#74a15f'
+  const tx = x + pad + 2 * ring + 16 * u
+  const room = x + w - pad - tx
+  const rows = answered ? [right] : choices.map((_, i) => i)
+  let ry = y
+  rows.forEach((i, at) => {
+    const b = mixedFit(ctx, choices[i], { weight: 500, sizes: [15.2, 13.12], maxW: room, maxLines: 2, u })
+    const th = b.size * (0.3 + b.lines.length * 1.3)
+    const rowH = Math.max(2 * ring, th) + 2 * pad
+    const r = reveal ? reveal[at] ?? 1 : 1
+    ctx.save()
+    ctx.globalAlpha *= r
+    ctx.translate(0, (1 - r) * 16 * u)
+    const ok = answered && i === right
+    const ink = ok ? success : line
+    ctx.fillStyle = ok ? mix(success, c.card, 0.12) : c.face
+    rrect(ctx, x, ry, w, rowH, 6 * u)
+    ctx.fill()
+    ctx.strokeStyle = ok ? success : c.faceLine
+    ctx.lineWidth = u
+    rrect(ctx, x + u / 2, ry + u / 2, w - u, rowH - u, 6 * u)
+    ctx.stroke()
+    if (ok) {
+      ctx.save()
+      rrect(ctx, x, ry, w, rowH, 6 * u)
+      ctx.clip()
+      ctx.fillStyle = success
+      ctx.fillRect(x, ry, 3 * u, rowH)
+      ctx.restore()
+    }
+    const cx = x + pad + ring
+    const cy = ry + rowH / 2
+    ctx.beginPath()
+    ctx.arc(cx, cy, ring - u, 0, Math.PI * 2)
+    if (ok) {
+      ctx.fillStyle = success
+      ctx.fill()
+    } else {
+      ctx.strokeStyle = alpha(ink, 0.55)
+      ctx.lineWidth = 2 * u
+      ctx.stroke()
+    }
+    const nz = 12.8 * u
+    text(ctx, String.fromCharCode(65 + i), cx, cy + nz * 0.36, { f: font(700, nz, 'latin'), color: ok ? p.bg : c.faceSoft, align: 'center' })
+    const ty = cy - th / 2
+    b.lines.forEach((l, k) => text(ctx, l, tx, ty + b.size * (0.95 + k * 1.3), { f: b.f, color: ok ? success : c.faceInk }))
+    ctx.restore()
+    ry += rowH + (at < rows.length - 1 ? gap : 0)
+  })
+  return ry - y
+}
+
+// ── The passage rolling (.prompt-card--roll, RollingPassage, plan 258) ──
+// The text a sentence a line, centred, up a viewport that fades it out
+// at its top and bottom, the line at the middle lit and the others
+// stepped back by their distance from it; under it the roll's controls:
+// pause, the speed's stepper, and ふ for the furigana.
+export const ROLL = { size: 21.6, lh: 1.7, lhFuri: 2, gap: 22, fu: 11.52, ctl: 36, lead: 1.5, tail: 1.5 }
+
+/** The roll's column laid out at the card's width: each sentence its
+ *  tokens ([{ t, fu: [[base, reading]...] }]) wrapped into balanced
+ *  lines, a token never broken (a ruby does not break inside a word).
+ *  Returns { blocks: [{ lines: [[tok...]], y, h }], mids, height }. */
+export function rollLayout(ctx, sentences, w, u, { furigana = false } = {}) {
+  const z = ROLL.size * u
+  const f = font(500, z, 'jp')
+  const lineH = z * (furigana ? ROLL.lhFuri : ROLL.lh)
+  const inner = w - 2 * 16 * u - 2 * u
+  const wrapAt = (toks, maxW) => {
+    const lines = [[]]
+    let lw = 0
+    for (const tk of toks) {
+      const tw = measure(ctx, tk.t, f)
+      const mark = /^[、。！？」』）]/.test(tk.t)
+      if (lw + tw > maxW && lines[lines.length - 1].length && !mark) { lines.push([]); lw = 0 }
+      lines[lines.length - 1].push(tk)
+      lw += tw
+    }
+    return lines
+  }
+  let y = 0
+  const blocks = sentences.map(toks => {
+    let lines = wrapAt(toks, inner)
+    // text-wrap: balance -- the narrowest width that keeps the count.
+    if (lines.length > 1) {
+      let lo = inner * 0.4
+      let hi = inner
+      for (let k = 0; k < 12; k++) {
+        const mid = (lo + hi) / 2
+        if (wrapAt(toks, mid).length > lines.length) lo = mid
+        else hi = mid
+      }
+      lines = wrapAt(toks, hi)
+    }
+    const h = lines.length * lineH
+    const b = { lines, y, h, mid: y + h / 2 }
+    y += h + ROLL.gap * u
+    return b
+  })
+  return { blocks, mids: blocks.map(b => b.mid), height: y - ROLL.gap * u, f, z, lineH }
+}
+
+/** Where the roll stands after `read` of its `chars` characters: the
+ *  column's middle, moving from the first line's middle to the last's
+ *  as the characters go by (RollingPassage's linear timeline, which a
+ *  change of speed keeps its place on), and the line nearest it. */
+export function rollAt(layout, read, chars) {
+  const { mids } = layout
+  const r = chars ? Math.min(1, Math.max(0, read / chars)) : 0
+  const y = mids[0] + r * (mids[mids.length - 1] - mids[0])
+  let near = 0
+  mids.forEach((m, i) => { if (Math.abs(m - y) < Math.abs(mids[near] - y)) near = i })
+  return { y, near }
+}
+
+/** The rolling card: the column at `y` (rollAt), its lines' ink stepped
+ *  by their distance from the middle (`lit`, fractional in a clip: the
+ *  app eases it over 0.45s), the readings over the kanji at `furi` (0 to
+ *  1, the chip's fade), the controls with the speed's label and the
+ *  presses (`press`: { pause, slower, faster, furi } 0 to 1). */
+export function rollCard(ctx, p, x, y, w, h, u, { layout, at, lit, furi = 0, speed, foot = [], press = {} }) {
+  const c = inks(p)
+  ctx.save()
+  shadow(ctx, p.hang)
+  ctx.fillStyle = c.card
+  rrect(ctx, x, y, w, h, 8 * u)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = c.border
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 8 * u)
+  ctx.stroke()
+  const fz = PASSAGE.foot * u
+  const footH = 2 * 12 * u + fz * 1.35
+  const fy = y + h - footH
+  ctx.fillStyle = c.border
+  ctx.fillRect(x + u, fy, w - 2 * u, u)
+  if (foot[0]) text(ctx, foot[0], x + 22 * u, fy + footH / 2 + fz * 0.36, { f: font(400, fz, 'latin'), color: c.ink2 })
+  if (foot[1]) text(ctx, foot[1], x + w - 22 * u, fy + footH / 2 + fz * 0.36, { f: font(400, fz, 'latin'), color: c.ink2, align: 'right' })
+  const pad = 16 * u
+  const ctlH = ROLL.ctl * u
+  const vy = y + pad
+  const vh = fy - pad - ctlH - 8 * u - vy
+  // The viewport: the column centred on `at`, each line's ink by its distance.
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(x + u, vy, w - 2 * u, vh)
+  ctx.clip()
+  const top = vy + vh / 2 - at
+  const { blocks, f, z, lineH } = layout
+  const fuF = font(400, ROLL.fu * u, 'jp')
+  blocks.forEach((b, i) => {
+    const by = top + b.y
+    if (by + b.h < vy - lineH || by > vy + vh + lineH) return
+    const d = Math.min(3, Math.abs(i - lit))
+    ctx.save()
+    ctx.globalAlpha *= Math.max(0.12, 1 - d * 0.35)
+    b.lines.forEach((ln, li) => {
+      const lw = ln.reduce((sum, tk) => sum + measure(ctx, tk.t, f), 0)
+      let tx = x + w / 2 - lw / 2
+      const base = by + li * lineH + lineH / 2 + z * 0.36
+      for (const tk of ln) {
+        const tw = measure(ctx, tk.t, f)
+        text(ctx, tk.t, tx, base, { f, color: c.ink })
+        if (furi > 0 && tk.fu) {
+          ctx.save()
+          ctx.globalAlpha *= furi
+          let px = tx
+          for (const [part, rd] of tk.fu) {
+            const pw = measure(ctx, part, f)
+            if (rd) text(ctx, rd, px + pw / 2, base - z * 1.02, { f: fuF, color: c.ink2, align: 'center' })
+            px += pw
+          }
+          ctx.restore()
+        }
+        tx += tw
+      }
+    })
+    ctx.restore()
+  })
+  ctx.restore()
+  // The mask: the lines fade out at the viewport's top and bottom quarter.
+  for (const [from, to] of [[vy, vy + vh * 0.24], [vy + vh, vy + vh * 0.76]]) {
+    const g = ctx.createLinearGradient(0, from, 0, to)
+    g.addColorStop(0, c.card)
+    g.addColorStop(1, alpha(c.card, 0))
+    ctx.fillStyle = g
+    ctx.fillRect(x + u, Math.min(from, to), w - 2 * u, Math.abs(to - from))
+  }
+  // The controls (.roll-ctl): pause, − speed +, ふ.
+  const cy = fy - pad - ctlH / 2
+  const chip = (cx, on, pressed, glyph) => {
+    const r = ctlH / 2
+    ctx.fillStyle = on ? alpha(p.gold, 0.14) : 'rgba(0,0,0,0)'
+    ctx.beginPath()
+    ctx.arc(cx, cy, r - u / 2, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.strokeStyle = on ? alpha(p.gold, 0.55) : c.border
+    ctx.lineWidth = u
+    ctx.stroke()
+    if (pressed > 0) {
+      ctx.fillStyle = alpha(c.ink, 0.12 * pressed)
+      ctx.beginPath()
+      ctx.arc(cx, cy, r - u / 2, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    glyph(cx, on ? p.selInk : c.ink2)
+  }
+  const bar = (cx, ink) => {
+    ctx.fillStyle = ink
+    ctx.fillRect(cx - 4 * u, cy - 5 * u, 2.5 * u, 10 * u)
+    ctx.fillRect(cx + 1.5 * u, cy - 5 * u, 2.5 * u, 10 * u)
+  }
+  const sign = plus => (cx, ink) => {
+    ctx.fillStyle = ink
+    ctx.fillRect(cx - 5 * u, cy - 0.9 * u, 10 * u, 1.8 * u)
+    if (plus) ctx.fillRect(cx - 0.9 * u, cy - 5 * u, 1.8 * u, 10 * u)
+  }
+  const vz = 11.52 * u
+  const vf = font(700, vz, 'latin')
+  const label = speed
+  const lw = Math.max(measure(ctx, label, vf), measure(ctx, '10 car./s', vf))
+  const gap = 12 * u
+  const inGap = 8 * u
+  const row = ctlH + gap + (ctlH + inGap + lw + inGap + ctlH) + gap + ctlH
+  let cx = x + w / 2 - row / 2 + ctlH / 2
+  const chips = {}
+  chips.pause = [cx, cy]
+  chip(cx, false, press.pause || 0, bar)
+  cx += ctlH + gap
+  chips.slower = [cx, cy]
+  chip(cx, false, press.slower || 0, sign(false))
+  cx += ctlH / 2 + inGap
+  text(ctx, label, cx + lw / 2, cy + vz * 0.36, { f: vf, color: c.ink2, align: 'center' })
+  cx += lw + inGap + ctlH / 2
+  chips.faster = [cx, cy]
+  chip(cx, false, press.faster || 0, sign(true))
+  cx += ctlH + gap
+  chips.furi = [cx, cy]
+  chip(cx, furi >= 0.5, press.furi || 0, (gx, ink) => text(ctx, 'ふ', gx, cy + 13.12 * u * 0.36, { f: font(500, 13.12 * u, 'jp'), color: ink, align: 'center' }))
+  return { footH, chips }
 }
 
 // ── The pass (.pcard--free: the profile's card) ────────────────────
@@ -882,7 +1311,10 @@ function NUDGE(s) {
  *  over it and its stage's rule under it, each grammar point's words in
  *  a box of the grammar line's ink with its number on the box's corner.
  *  `toks`: [{ t, fu, point }] (point from 1, 0 for none). Lines wrap
- *  inside `w`; returns the height. */
+ *  inside `w`; returns the height. Since plan 301 a token may be `lit`
+ *  (.bkd-tok--lit: the grammar ink at 22% behind it, what a breakdown's
+ *  chip lights) or `bare` (a particle or an ending with no card: the
+ *  breakdown draws it in the ink with no rule under it). */
 export function analyserLine(ctx, p, x, y, w, u, toks, { center = true } = {}) {
   const c = inks(p)
   const wz = 20 * u
@@ -925,9 +1357,13 @@ export function analyserLine(ctx, p, x, y, w, u, toks, { center = true } = {}) {
         const tw = tokW(tk)
         const gram = !!g.point || tk.k === 'punct'
         const base = ly + 4 * u + 15 * u + wz * 0.82
+        if (tk.lit) {
+          ctx.fillStyle = alpha(green, 0.22)
+          ctx.fillRect(tx, ly, tw, 47 * u)
+        }
         if (tk.fu && !gram) text(ctx, tk.fu, tx + tw / 2, ly + 4 * u + fz * 0.9, { f: font(500, fz, 'jp'), color: c.ink2, align: 'center' })
         text(ctx, tk.t, tx + tw / 2, base, { f: font(600, wz, 'jp'), color: gram ? c.ink2 : c.ink, align: 'center' })
-        if (!gram) {
+        if (!gram && !tk.bare) {
           ctx.fillStyle = c.stateNew
           ctx.fillRect(tx + u, base + 8 * u, tw - 2 * u, 2 * u)
         }
@@ -1025,3 +1461,568 @@ export const faceOf = p => {
 
 /** A hex ink at an opacity, for a halo or a scrim over the print. */
 export const inkAlpha = alpha
+
+// ── 対戦, the duels (plan 281) ──────────────────────────────────────
+// The duels' screens (plan 279, index.css's .pvp-*) as a sprint draws
+// them, measured on the same 400px phone, dark and light: the duel's
+// ticket and the stage's gold button, the race on its line, the
+// question's page and the answers docked under it, the result face to
+// face over the finish, the records under it, the Elo over its curve and
+// the Elo board's rows. Where index.css gives a theme its own ink the
+// palette does not carry, DUEL_INKS holds it, held equal to index.css by
+// src/carousel.test.js.
+export const DUEL_INKS = {
+  sumi: { '--medal-gold': '#c99a3e', '--medal-silver': '#a8adb4', '--medal-bronze': '#a8703f', '--overlay-hover': 'rgba(255, 255, 255, 0.035)' },
+  paper: { '--medal-gold': '#a97a25', '--medal-silver': '#8d939b', '--medal-bronze': '#8a5527', '--overlay-hover': 'rgba(28, 24, 17, 0.045)' },
+}
+
+function duelInks(p) {
+  const d = DUEL_INKS[p.paper ? 'paper' : 'sumi']
+  return {
+    ...inks(p),
+    surface: p.surface,
+    line: p.surfaceLine,
+    pass: p.pass,
+    sel: p.selInk,
+    gold: p.goldMid,
+    right: RATING_INKS['--rating-correct'],
+    wrong: p.rating[0],
+    soft: p.onPanelSoft,
+    medal: { 1: d['--medal-gold'], 2: d['--medal-silver'], 3: d['--medal-bronze'] },
+    hover: d['--overlay-hover'],
+  }
+}
+
+/** A panel of the app: its fill, its 1px rule inside its edge. */
+function panelBox(ctx, x, y, w, h, r, fill, rule, u) {
+  ctx.fillStyle = fill
+  rrect(ctx, x, y, w, h, r)
+  ctx.fill()
+  ctx.strokeStyle = rule
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, r)
+  ctx.stroke()
+}
+
+/** Stripes `period` apart, `width` wide, across the box, at a CSS
+ *  gradient's angle (repeating-linear-gradient's stripes). */
+function stripes(ctx, x, y, w, h, deg, period, width, color) {
+  const a = (deg * Math.PI) / 180
+  const dx = Math.sin(a)
+  const dy = -Math.cos(a)
+  const R = Math.hypot(w, h)
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(x, y, w, h)
+  ctx.clip()
+  ctx.strokeStyle = color
+  ctx.lineWidth = width
+  const n = Math.ceil(R / period) + 1
+  for (let k = -n; k <= n; k++) {
+    const off = k * period + width / 2
+    const cx = x + w / 2 + dx * off
+    const cy = y + h / 2 + dy * off
+    ctx.beginPath()
+    ctx.moveTo(cx + dy * R, cy - dx * R)
+    ctx.lineTo(cx - dy * R, cy + dx * R)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+/** The duel's ticket (.clrk-tk--paper.pvp-ticket): the cleared day's
+ *  硬券 printed for two -- 対戦券 and its number, the two names and their
+ *  levels either side of ⇄, the facts, the station that issued it and
+ *  the sprint. `pulse` (0 to 1) swells the ⇄. Returns its height. */
+export function duelTicket(ctx, p, x, y, w, u, { no, you, them, facts, foot, pulse = 0 }) {
+  const { '--paper': paper, '--paper-ink-soft': soft } = APP_INKS
+  const ink = p.onFill
+  const factsH = facts.length * 21 + (facts.length - 1) * 6
+  const h = (22 + 13.81 + 12 + 1 + 12 + 46.42 + 12 + factsH + 12 + 11.9 + 22) * u
+  ctx.save()
+  rrect(ctx, x, y, w, h, 10 * u)
+  ctx.fillStyle = paper
+  ctx.fill()
+  // The paper's lattice: hairlines at ±60°, 7px apart, in the stamp's ink.
+  stripes(ctx, x, y, w, h, 60, 7 * u, u, alpha(p.stamp, 0.055))
+  stripes(ctx, x, y, w, h, -60, 7 * u, u, alpha(p.stamp, 0.055))
+  ctx.restore()
+  // Its double rule, 6px in: two hairlines a pixel apart.
+  ctx.strokeStyle = alpha(p.stamp, 0.72)
+  ctx.lineWidth = u
+  rrect(ctx, x + 6.5 * u, y + 6.5 * u, w - 13 * u, h - 13 * u, 4 * u)
+  ctx.stroke()
+  rrect(ctx, x + 8.5 * u, y + 8.5 * u, w - 17 * u, h - 17 * u, 2 * u)
+  ctx.stroke()
+  const L = x + 28 * u
+  const R = x + w - 28 * u
+  const at = v => y + v * u
+  // 対戦券 and its number, on one baseline.
+  text(ctx, '対戦券', L, at(33.3), { f: font(700, 11.52 * u, 'jp'), color: ink, tr: 0.3 })
+  text(ctx, `N° ${String(no).padStart(4, '0')}`, R, at(33.3), { f: font(700, 9.92 * u, 'latin'), color: soft, align: 'right', tr: TR_NAME })
+  ctx.fillStyle = alpha(ink, 0.28)
+  ctx.fillRect(L, at(47.81), R - L, u)
+  // Who: the two names in the serif, their levels under them, ⇄ between.
+  const nf = font(700, 20 * u, 'serif')
+  const lf = font(700, 11.52 * u, 'latin')
+  text(ctx, you.name, L, at(79.6), { f: nf, color: ink })
+  text(ctx, you.level, L, at(102.1), { f: lf, color: soft })
+  text(ctx, them.name, R, at(79.6), { f: nf, color: ink, align: 'right' })
+  text(ctx, them.level, R, at(102.1), { f: lf, color: soft, align: 'right' })
+  ctx.save()
+  const vx = x + w / 2
+  const vy = at(87.2)
+  ctx.translate(vx, vy)
+  ctx.scale(1 + 0.35 * pulse, 1 + 0.35 * pulse)
+  text(ctx, '⇄', 0, 7.2 * u, { f: font(700, 20 * u, 'latin'), color: mix(p.stamp, ink, 0.7), align: 'center' })
+  ctx.restore()
+  // The facts, a term and its value a line.
+  const ff = font(400, 13.12 * u, 'latin')
+  const fb = font(700, 13.12 * u, 'latin')
+  facts.forEach(([dt, dd], i) => {
+    const by = at(119.23 + i * 27 + 15.2)
+    text(ctx, dt, L, by, { f: ff, color: soft })
+    text(ctx, dd, R, by, { f: fb, color: ink, align: 'right' })
+  })
+  const fy = at(119.23 + factsH + 12 + 9.55)
+  text(ctx, foot[0], L, fy, { f: font(700, 9.92 * u, 'jp'), color: soft, tr: TR_NAME })
+  text(ctx, foot[1], R, fy, { f: font(700, 9.92 * u, 'latin'), color: soft, align: 'right', tr: TR_NAME })
+  return h
+}
+
+/** The stage's gold button (.btn-primary.exam-cover__go, 52px): the
+ *  metal lit from the top, its word centred. `press` (0 to 1) sinks it. */
+export function stageButton(ctx, p, x, y, w, u, label, { press = 0 } = {}) {
+  const h = 52 * u
+  const yy = y + press * u
+  const g = ctx.createLinearGradient(0, yy, 0, yy + h)
+  g.addColorStop(0, p.goldLit)
+  g.addColorStop(1, p.goldMid)
+  ctx.fillStyle = g
+  rrect(ctx, x, yy, w, h, 6 * u)
+  ctx.fill()
+  if (press > 0) {
+    ctx.fillStyle = `rgba(0, 0, 0, ${0.14 * press})`
+    rrect(ctx, x, yy, w, h, 6 * u)
+    ctx.fill()
+  }
+  text(ctx, label, x + w / 2, yy + h / 2 + 15.2 * u * 0.36, { f: font(600, 15.2 * u, 'latin'), color: p.onFill, align: 'center' })
+  return h
+}
+
+/** The race (.pvp-line-race, the owner's P2c): the minute as a bar, then
+ *  the two trains on their line, the other's above. `rows`: [{ who, n,
+ *  me, at }], `at` the train's share of its rail; `gap`, on the trailing
+ *  train's rail, hatched from its nose to the leader's in the leader's
+ *  ink, what it is worth over it: { row, from, span, fig, mine }.
+ *  Returns its height. */
+export function raceLine(ctx, p, x, y, w, u, { clock, rows, gap = null }) {
+  const c = duelInks(p)
+  ctx.fillStyle = c.line
+  rrect(ctx, x, y, w, 6 * u, 3 * u)
+  ctx.fill()
+  if (clock > 0) {
+    ctx.fillStyle = c.pass
+    rrect(ctx, x, y, w * Math.min(1, clock), 6 * u, 3 * u)
+    ctx.fill()
+  }
+  const py = y + 14 * u
+  const ph = (16 + rows.length * 40 + (rows.length - 1) * 6 + 2) * u
+  panelBox(ctx, x, py, w, ph, 8 * u, c.surface, c.line, u)
+  const inner = w - 26 * u
+  const rx = x + 13 * u + 68.39 * u + 8 * u
+  const rw = inner - 68.39 * u - 8 * u - 36 * u
+  const figF = font(700, 13.12 * u, 'latin')
+  rows.forEach((r, i) => {
+    const bottom = py + (9 + i * 46 + 40) * u
+    caps(ctx, r.who, x + 13 * u, bottom - 8.4 * u, 9.92 * u, r.me ? c.ink : c.ink2)
+    ctx.fillStyle = c.line
+    ctx.fillRect(rx, bottom - 7 * u, rw + 36 * u, 2 * u)
+    if (gap && gap.row === i && gap.span > 0) {
+      const gx = rx + gap.from * rw + 36 * u
+      const gw = gap.span * rw
+      stripes(ctx, gx, bottom - 12 * u, gw, 12 * u, 135, 8 * u, 4 * u, alpha(gap.mine ? c.pass : c.ink2, 0.3))
+      text(ctx, gap.fig, gx + 6 * u, bottom - 17.84 * u, { f: figF, color: gap.mine ? c.pass : c.ink2 })
+    }
+    const tx = rx + Math.max(0, Math.min(1, r.at)) * rw
+    ctx.fillStyle = r.me ? c.pass : c.ink2
+    ctx.beginPath()
+    ctx.roundRect(tx, bottom - 12 * u, 36 * u, 12 * u, [0, 6 * u, 6 * u, 0])
+    ctx.fill()
+    text(ctx, r.fig, tx + 18 * u, bottom - 17.85 * u, { f: figF, color: r.me ? c.ink : c.ink2, align: 'center' })
+  })
+  return 14 * u + ph
+}
+
+/** The question's page (.exam-page.pvp-page): its kind, what it is worth
+ *  now over the gold that runs out, the prompt (a word's reading over
+ *  it); once answered, its edge in the verdict's ink. With `count` it is
+ *  the count before the start. */
+export function duelPage(ctx, p, x, y, w, h, u, { kind, worth, share = 0, prompt, reading, verdict = null, count = null, pop = 0 }) {
+  // `pop` swells the count, or what the answer paid, as it lands.
+  const c = duelInks(p)
+  panelBox(ctx, x, y, w, h, 8 * u, c.card, verdict === 'right' ? c.right : verdict === 'wrong' ? c.wrong : c.border, u)
+  if (count != null) {
+    ctx.save()
+    ctx.translate(x + w / 2, y + h / 2)
+    ctx.scale(1 + pop, 1 + pop)
+    text(ctx, String(count), 0, 40 * u * 0.36, { f: font(700, 40 * u, 'latin'), color: c.ink, align: 'center' })
+    ctx.restore()
+    return
+  }
+  ctx.fillStyle = c.border
+  ctx.fillRect(x + u, y + 52 * u, w - 2 * u, u)
+  const kw = caps(ctx, kind, x + 17 * u, y + 30.07 * u, 9.92 * u, c.ink2)
+  const worthW = 44.8 * u
+  const d0 = x + 17 * u + kw + 12 * u
+  const d1 = x + w - 17 * u - worthW - 12 * u
+  ctx.fillStyle = c.line
+  rrect(ctx, d0, y + 24.5 * u, d1 - d0, 4 * u, 2 * u)
+  ctx.fill()
+  if (share > 0) {
+    ctx.fillStyle = c.gold
+    rrect(ctx, d0, y + 24.5 * u, (d1 - d0) * share, 4 * u, 2 * u)
+    ctx.fill()
+  }
+  ctx.save()
+  ctx.translate(x + w - 17 * u, y + 26.5 * u)
+  ctx.scale(1 + pop, 1 + pop)
+  text(ctx, String(worth), 0, 6.44 * u, { f: font(700, 17.92 * u, 'latin'), color: c.sel, align: 'right' })
+  ctx.restore()
+  // The body: the reading over the prompt, the two centred in what is left.
+  const top = y + 53 * u
+  const room = y + h - u - top
+  const block = (reading ? 24.32 + 6 : 0) + 48
+  const by = top + (room - block * u) / 2
+  if (reading) text(ctx, reading, x + w / 2, by + 17.9 * u, { f: font(400, 15.2 * u, 'jp'), color: c.ink2, align: 'center', tr: 0.3 })
+  let z = 40 * u
+  while (z > 20 * u && measure(ctx, prompt, font(500, z, 'jp')) > w - 34 * u) z -= u
+  text(ctx, prompt, x + w / 2, by + ((reading ? 30.32 : 0) + 24) * u + z * 0.38, { f: font(500, z, 'jp'), color: c.ink, align: 'center' })
+}
+
+/** The answers docked under the thumb (.exam-tiles in .pvp-dock): a word's
+ *  meanings one under another, a reading or a spelling two by two; the
+ *  picked one, once answered, in the verdict's ink, never the right one
+ *  shown. Each tile's centre is returned with the height. */
+export function duelTiles(ctx, p, x, y, w, u, { choices, two, picked = null, verdict = null }) {
+  const c = duelInks(p)
+  const cols = two ? 2 : 1
+  const gap = (two ? 8 : 6) * u
+  const tw = (w - gap * (cols - 1)) / cols
+  const th = 56 * u
+  const centres = []
+  choices.forEach((label, i) => {
+    const tx = x + (i % cols) * (tw + gap)
+    const ty = y + Math.floor(i / cols) * (th + gap)
+    const mine = verdict && i === picked
+    const ink = mine ? (verdict === 'right' ? c.right : c.wrong) : null
+    ctx.strokeStyle = ink || alpha(c.onPanel, 0.18)
+    ctx.lineWidth = u
+    rrect(ctx, tx + u / 2, ty + u / 2, tw - u, th - u, 8 * u)
+    ctx.stroke()
+    const cx = tx + 23 * u
+    const cy = ty + th / 2
+    ctx.beginPath()
+    if (ink) {
+      ctx.fillStyle = ink
+      ctx.arc(cx, cy, 16 * u, 0, Math.PI * 2)
+      ctx.fill()
+    } else {
+      ctx.strokeStyle = c.soft
+      ctx.lineWidth = 2 * u
+      ctx.arc(cx, cy, 15 * u, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+    text(ctx, String(i + 1), cx, cy + 15.2 * u * 0.36, { f: font(700, 15.2 * u, 'latin'), color: ink ? c.panel : c.soft, align: 'center' })
+    const room = tw - 47 * u - 8 * u
+    if (two) {
+      let z = 17.92 * u
+      while (z > 11 * u && measure(ctx, label, font(600, z, 'jp')) > room) z -= 0.5 * u
+      text(ctx, label, tx + 47 * u, cy + z * 0.38, { f: font(600, z, 'jp'), color: c.onPanel })
+    } else {
+      let z = 13.12 * u
+      while (z > 10 * u && measure(ctx, label, font(500, z, 'latin')) > room) z -= 0.5 * u
+      text(ctx, label, tx + 47 * u, cy + z * 0.36, { f: font(500, z, 'latin'), color: c.onPanel })
+    }
+    centres.push([cx + (tw - 46 * u) / 2, cy])
+  })
+  const rows = Math.ceil(choices.length / cols)
+  return { h: rows * th + (rows - 1) * gap, centres }
+}
+
+/** The tiles' height for a question of `two` columns, as duelTiles sets them. */
+export const tilesHeight = (n, two) => (two ? Math.ceil(n / 2) * 56 + (Math.ceil(n / 2) - 1) * 8 : n * 56 + (n - 1) * 6)
+
+/** The result face to face (.pvp-face, the owner's R1a): the verdict and
+ *  by how much, the two totals (the learner's underlined in the pass's
+ *  ink) with who and how many right, the finish under them. `show`:
+ *  { word, figs, finish } shares (0 to 1) of each part's entrance.
+ *  Returns its height. */
+export function faceOff(ctx, p, x, y, w, u, { word, win = true, by, sides, finish, show = {} }) {
+  const c = duelInks(p)
+  const h = 287.27 * u
+  panelBox(ctx, x, y, w, h, 8 * u, c.surface, c.line, u)
+  const ix = x + 23 * u
+  const iw = w - 46 * u
+  const fade = (k, fn) => {
+    const f = show[k] ?? 1
+    if (f <= 0) return
+    ctx.save()
+    ctx.globalAlpha *= f
+    fn(f)
+    ctx.restore()
+  }
+  fade('word', f => {
+    ctx.save()
+    ctx.translate(x + w / 2, y + 48.6 * u)
+    const s = 1 + 0.3 * (1 - f)
+    ctx.scale(s, s)
+    text(ctx, word, 0, 0, { f: font(700, 27.2 * u, 'serif'), color: win ? c.ink : c.ink2, align: 'center' })
+    ctx.restore()
+    text(ctx, by, x + w / 2, y + 74.86 * u, { f: font(400, 13.12 * u, 'latin'), color: c.ink2, align: 'center' })
+  })
+  const pt = y + 102.64 * u
+  ctx.fillStyle = c.line
+  ctx.fillRect(ix + iw / 2, pt, u, 88.88 * u)
+  fade('figs', () => {
+    sides.forEach((s, i) => {
+      const cx = ix + (iw / 2) * i + iw / 4
+      const fw = text(ctx, s.fig, cx, pt + 34.4 * u, { f: font(700, 40 * u, 'latin'), color: c.ink, align: 'center' })
+      if (s.me) {
+        ctx.fillStyle = c.pass
+        ctx.fillRect(cx - fw / 2, pt + 34.4 * u + 6.5 * u, fw, 3 * u)
+      }
+      caps(ctx, s.who, cx, pt + 57.5 * u, 9.92 * u, c.ink2, 'center')
+      text(ctx, s.rights, cx, pt + 83.1 * u, { f: font(400, 13.12 * u, 'latin'), color: c.ink2, align: 'center' })
+    })
+  })
+  const ft = y + 213.52 * u
+  ctx.fillStyle = c.line
+  ctx.fillRect(ix, ft, iw, u)
+  const railX = ix + 76.39 * u
+  const railW = iw - 76.39 * u - 32 * u
+  finish.forEach((r, i) => {
+    const top = ft + (13 + i * 21.88) * u
+    caps(ctx, r.who, ix, top + 11.5 * u, 9.92 * u, r.me ? c.ink : c.ink2)
+    ctx.fillStyle = c.line
+    ctx.fillRect(railX, top + 6.94 * u, railW + 32 * u, 2 * u)
+    const at = (show.finish ?? 1) * r.at
+    ctx.fillStyle = r.me ? c.pass : c.ink2
+    ctx.beginPath()
+    ctx.roundRect(railX + at * railW, top + 0.94 * u, 32 * u, 14 * u, [0, 7 * u, 7 * u, 0])
+    ctx.fill()
+  })
+  return h
+}
+
+/** The records under a result (.records.pvp-two): each a figure (its unit,
+ *  or the Elo's move in its verdict's ink, after it) over its caption.
+ *  `cells`: [{ value, unit, move: { text, up, pop }, label }]. Returns its height. */
+export function recordsRow(ctx, p, x, y, w, u, cells) {
+  const c = duelInks(p)
+  const cw = (w - 2 * u - u * (cells.length - 1)) / cells.length
+  const lf = font(700, 9.92 * u, 'latin')
+  const labelLines = cells.map(cell => wrapCaps(ctx, cell.label, lf, cw - 24 * u))
+  const blocks = labelLines.map(ls => 20 + 4 + ls.length * 15.87)
+  const h = (Math.max(...blocks) + 24 + 2) * u
+  ctx.save()
+  rrect(ctx, x, y, w, h, 8 * u)
+  ctx.fillStyle = c.line
+  ctx.fill()
+  ctx.clip()
+  cells.forEach((cell, i) => {
+    const cx = x + u + i * (cw + u)
+    ctx.fillStyle = c.surface
+    ctx.fillRect(cx, y + u, cw, h - 2 * u)
+    const top = y + (h - blocks[i] * u) / 2
+    const vx = cx + 12 * u
+    const vb = top + 17.2 * u
+    const vw = text(ctx, cell.value, vx, vb, { f: font(700, 20 * u, 'latin'), color: c.ink })
+    if (cell.unit) text(ctx, cell.unit, vx + vw + 8 * u, vb, { f: font(600, 13.12 * u, 'latin'), color: c.ink2 })
+    if (cell.move) {
+      const mx = vx + vw + 8 * u
+      const s = 1 + 0.6 * (cell.move.pop ?? 0)
+      ctx.save()
+      ctx.translate(mx, vb)
+      ctx.scale(s, s)
+      text(ctx, cell.move.text, 0, 0, { f: font(700, 13.12 * u, 'latin'), color: cell.move.up ? p.success : p.danger })
+      ctx.restore()
+    }
+    labelLines[i].forEach((l, j) => text(ctx, l, vx, top + (24 + j * 15.87 + 11.5) * u, { f: lf, color: c.ink2, tr: TR.caption }))
+  })
+  ctx.restore()
+  ctx.strokeStyle = c.line
+  ctx.lineWidth = u
+  rrect(ctx, x + u / 2, y + u / 2, w - u, h - u, 8 * u)
+  ctx.stroke()
+  return h
+}
+
+/** A caption's words in caps, wrapped to `maxW` at its tracking. */
+function wrapCaps(ctx, str, f, maxW) {
+  const words = str.toLocaleUpperCase().split(' ')
+  const lines = []
+  let cur = ''
+  for (const word of words) {
+    const test = cur ? `${cur} ${word}` : word
+    if (!cur || measure(ctx, test, f, TR.caption) <= maxW) cur = test
+    else { lines.push(cur); cur = word }
+  }
+  if (cur) lines.push(cur)
+  return lines
+}
+
+// The curve's drawing box (components/pvp/parts.jsx's EloCurve): its
+// viewBox, stretched to the card's width at its own height.
+const CURVE_W = 320
+const CURVE_H = 72
+
+/** The Elo at the hall's head (.pvp-curve, the owner's G1): the figure
+ *  over its curve, the last ranked duels, the level's start dashed
+ *  under the line, the last duel a dot; where it started and its peak
+ *  at the foot. `drawn` (0 to 1) is how much of the line is drawn, the
+ *  dot at its head. Returns its height. */
+export function eloCard(ctx, p, x, y, w, u, { cap, fig, trend, start, drawn = 1, foot = ['', ''], footShow = 1 }) {
+  const c = duelInks(p)
+  const h = 209.42 * u
+  panelBox(ctx, x, y, w, h, 8 * u, c.surface, c.line, u)
+  const ix = x + 17 * u
+  const iw = w - 34 * u
+  caps(ctx, cap, ix, y + 31.07 * u, 9.92 * u, c.ink2)
+  text(ctx, fig, ix, y + 80.4 * u, { f: font(700, 40 * u, 'latin'), color: c.ink })
+  // The curve, as EloCurve plots it in its viewBox (-4 -4, 328 x 80).
+  const sy = y + 94 * u
+  const all = start != null ? [...trend, start] : trend
+  const lo = Math.min(...all)
+  const hi = Math.max(...all)
+  const pad = Math.max(8, (hi - lo) * 0.15)
+  const min = lo - pad
+  const span = hi + pad - min
+  const kx = iw / (CURVE_W + 8)
+  const ky = (72 * u) / (CURVE_H + 8)
+  const px = vx => ix + (vx + 4) * kx
+  const py = vy => sy + (vy + 4) * ky
+  const vxOf = i => (trend.length === 1 ? CURVE_W : (i / (trend.length - 1)) * CURVE_W)
+  const vyOf = v => CURVE_H - ((v - min) / span) * CURVE_H
+  if (start != null) {
+    ctx.save()
+    ctx.strokeStyle = c.border
+    ctx.lineWidth = 1.5 * u
+    ctx.setLineDash([4 * u, 4 * u])
+    ctx.beginPath()
+    ctx.moveTo(px(0), py(vyOf(start)))
+    ctx.lineTo(px(CURVE_W), py(vyOf(start)))
+    ctx.stroke()
+    ctx.restore()
+  }
+  const pts = trend.map((v, i) => [px(vxOf(i)), py(vyOf(v))])
+  const seg = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1]))
+  let left = seg.reduce((a, b) => a + b, 0) * Math.max(0, Math.min(1, drawn))
+  ctx.save()
+  ctx.strokeStyle = c.pass
+  ctx.lineWidth = 2.5 * u
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.beginPath()
+  ctx.moveTo(...pts[0])
+  let head = pts[0]
+  for (let i = 0; i < seg.length && left > 0; i++) {
+    const f = Math.min(1, left / seg[i])
+    head = [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f]
+    ctx.lineTo(...head)
+    left -= seg[i]
+  }
+  ctx.stroke()
+  ctx.restore()
+  if (drawn > 0) {
+    ctx.fillStyle = c.pass
+    ctx.beginPath()
+    ctx.arc(head[0], head[1], 4 * u, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  if (footShow > 0) {
+    ctx.save()
+    ctx.globalAlpha *= footShow
+    const fb = y + 187.36 * u
+    ctx.strokeStyle = c.border
+    ctx.lineWidth = 1.5 * u
+    ctx.setLineDash([3 * u, 3 * u])
+    ctx.beginPath()
+    ctx.moveTo(ix, y + 183.45 * u)
+    ctx.lineTo(ix + 16 * u, y + 183.45 * u)
+    ctx.stroke()
+    ctx.setLineDash([])
+    text(ctx, foot[0], ix + 22 * u, fb, { f: font(400, 11.52 * u, 'latin'), color: c.ink2 })
+    text(ctx, foot[1], ix + iw, fb, { f: font(400, 11.52 * u, 'latin'), color: c.ink2, align: 'right' })
+    ctx.restore()
+  }
+  return h
+}
+
+/** The Elo board's rows (.banzuke, .leaderboard-row): the rank in its
+ *  roundel (the three medals ringed), the name, the Elo at the edge; the
+ *  learner's row lit with the pass's ink along its edge; the gap to the
+ *  next place at the foot. `rows`: [{ rank, name, elo, me, dy }], `dy`
+ *  moving a row by CSS pixels. Returns its height. */
+export function boardRows(ctx, p, x, y, w, u, rows, { foot = '', footShow = 1 } = {}) {
+  const c = duelInks(p)
+  const rowH = 55 * u
+  const h = rows.length * rowH + 18.42 * u + u
+  panelBox(ctx, x, y, w, h, 6 * u, c.surface, c.line, u)
+  ctx.save()
+  rrect(ctx, x + u, y + u, w - 2 * u, h - 2 * u, 5 * u)
+  ctx.clip()
+  // The separators stand where the rows stand, the last over the foot; a
+  // moving row is drawn over them.
+  for (let i = 1; i <= rows.length; i++) {
+    ctx.fillStyle = c.line
+    ctx.fillRect(x + u, y + u + i * rowH - u, w - 2 * u, u)
+  }
+  const order = [...rows].sort((a, b) => (a.me ? 1 : 0) - (b.me ? 1 : 0))
+  for (const r of order) {
+    const i = rows.indexOf(r)
+    const top = y + u + i * rowH + (r.dy || 0) * u
+    if (r.me) {
+      // A row on its way to another place rides over the rows it passes.
+      if (r.dy) {
+        ctx.save()
+        shadow(ctx, p.hang)
+        ctx.fillStyle = c.surface
+        ctx.fillRect(x + u, top, w - 2 * u, rowH - u)
+        ctx.restore()
+      }
+      ctx.fillStyle = c.surface
+      ctx.fillRect(x + u, top, w - 2 * u, rowH - u)
+      ctx.fillStyle = c.hover
+      ctx.fillRect(x + u, top, w - 2 * u, rowH - u)
+      ctx.fillStyle = c.pass
+      ctx.fillRect(x + u, top, 3 * u, rowH - u)
+    }
+    const cy = top + 27 * u
+    const rx = x + 32 * u
+    ctx.fillStyle = c.panel
+    ctx.beginPath()
+    ctx.arc(rx, cy, 15 * u, 0, Math.PI * 2)
+    ctx.fill()
+    const medal = c.medal[r.rank]
+    if (medal) {
+      ctx.strokeStyle = medal
+      ctx.lineWidth = 1.5 * u
+      ctx.beginPath()
+      ctx.arc(rx, cy, 14.25 * u, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+    const rankInk = medal ? mix(medal, c.onPanel, r.rank === 3 ? 0.55 : 0.7) : c.soft
+    text(ctx, String(r.rank), rx, cy + 13.12 * u * 0.36, { f: font(700, 13.12 * u, 'latin'), color: rankInk, align: 'center' })
+    text(ctx, r.name, x + 59 * u, cy + 15.2 * u * 0.36, { f: font(700, 15.2 * u, 'latin'), color: c.ink })
+    text(ctx, r.elo, x + w - 17 * u, cy + 13.12 * u * 0.36, { f: font(700, 13.12 * u, 'latin'), color: c.ink, align: 'right' })
+  }
+  ctx.restore()
+  if (foot && footShow > 0) {
+    ctx.save()
+    ctx.globalAlpha *= footShow
+    text(ctx, foot, x + 17 * u, y + u + rows.length * rowH + 13.36 * u, { f: font(400, 11.52 * u, 'latin'), color: c.ink2 })
+    ctx.restore()
+  }
+  return h
+}

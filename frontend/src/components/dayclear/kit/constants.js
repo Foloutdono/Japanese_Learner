@@ -6,5 +6,7 @@
 // each stamp of the week landed.
 export const WEEK_TILTS = Object.freeze([-5, 3, -2, 6, -4, 2, -7])
 
-/** The verdict inks, wrong / correct / perfect, by a face's `verdict`. */
-export const VERDICT_INK = Object.freeze(['var(--rating-wrong)', 'var(--rating-correct)', 'var(--rating-perfect)'])
+/** The verdict inks, wrong / correct / easy, by a face's `verdict`: the
+ *  passes wear the inks their keys do on the learner's bar (index.css,
+ *  --verdict-q4 / --verdict-q5). */
+export const VERDICT_INK = Object.freeze(['var(--rating-wrong)', 'var(--verdict-q4)', 'var(--verdict-q5)'])

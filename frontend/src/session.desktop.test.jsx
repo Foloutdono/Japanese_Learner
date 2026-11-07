@@ -107,7 +107,7 @@ describe('Enter and Esc on the desk', () => {
     press('Escape')
     await settle()
     expect(onLeave).toHaveBeenCalledTimes(1)
-    screen.unmount()
+    await screen.unmount()
   })
 
   it('takes a finished run\'s way back on Enter', async () => {

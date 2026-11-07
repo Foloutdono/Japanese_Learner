@@ -3,13 +3,52 @@
 // language question and the mobile canvas's rule is that the interface
 // speaks the learner's own language while Japanese stays content. A
 // choice made in Settings is saved under localStorage 'lang' and always
-// wins; before any choice, an English-speaking device gets English and
-// everything else gets French — the app's home language and its default
-// since the first build, so no existing learner sees a change.
-export const SUPPORTED_LANGS = ['fr', 'en']
+// wins (and is kept on the account too, lib/langChoice.js); before any
+// choice, a French-speaking device gets French, a Spanish-speaking one
+// Spanish (plan 302), and everything else gets English — the default for
+// a learner whose device language the app does not speak.
+export const SUPPORTED_LANGS = ['fr', 'en', 'es']
 
+// The interface's locales: the three languages, and Spain's Spanish
+// (plan 303), an interface over the one Spanish content (`es`): the
+// screens' words Spain says otherwise (locales/es-ES) and Spain's
+// figures. What is stored as the choice (localStorage, the account's
+// ui_lang) is a locale; what the app asks the server for, and keys its
+// content by, is the locale's language (contentLang).
+export const UI_LOCALES = ['fr', 'en', 'es', 'es-ES']
+
+/** The content language a locale reads: es-ES reads Spanish. */
+export function contentLang(locale) {
+  return UI_LOCALES.includes(locale) ? locale.slice(0, 2) : 'en'
+}
+
+/** The locale a first launch speaks: the saved choice, else the
+ *  device's, Spain's Spanish on a device set to Spain. */
 export function pickInitialLang(saved, deviceLang) {
-  if (SUPPORTED_LANGS.includes(saved)) return saved
+  if (UI_LOCALES.includes(saved)) return saved
   const device = String(deviceLang || '').toLowerCase()
-  return device.startsWith('en') ? 'en' : 'fr'
+  if (device.startsWith('es-es')) return 'es-ES'
+  const base = device.slice(0, 2)
+  return SUPPORTED_LANGS.includes(base) ? base : 'en'
+}
+
+// ── The locale a number or a date is written in ──────────────
+// Each language's own, and English's as the screen asks (a decimal is
+// 'en-GB' on a card, 'en-US' on a price). One table, so a third language
+// is one line here rather than a ternary at every Intl call. Spanish is
+// Latin America's (es-419: 3.5, 12,000), the variety the app writes (plan
+// 302), and the breakdown's own figures agree (study/analysis._es_figure);
+// a learner on Spain's Spanish reads Spain's (2.000; 3,5, plan 303). The
+// screens pass the content language, so which Spanish is the interface's
+// is held here, set by the language context (setInterfaceLocale).
+const INTL = { fr: 'fr-FR', es: 'es-419', 'es-ES': 'es-ES' }
+let spanish = 'es-419'
+
+export function setInterfaceLocale(locale) {
+  spanish = locale === 'es-ES' ? 'es-ES' : 'es-419'
+}
+
+export function intlLocale(lang, english = 'en-US') {
+  if (lang === 'es') return spanish
+  return INTL[lang] ?? english
 }

@@ -8,7 +8,7 @@ import '../../index.css'
 // ── 初見 — a kana or a kanji met before it is drilled (plan 216) ──
 // Read, write, use: the glyph and what it reads, its strokes traced in
 // turn from the dot to the ring, the ink filling each as the hand goes
-// (plan 263) -- a miss answered by what to fix, the
+// (plan 263) -- a miss shown on the board and never in words, the
 // stroke drawn for the learner after three, « Show me » drawing the rest
 // -- and a few words, each voiced. The fixture is the payload the
 // backend serves for あ and 日 in English (study/glyph_tour.py;
@@ -95,11 +95,16 @@ describe('a kana met for the first time', () => {
     expect(t.gate().disabled).toBe(true)
     expect(t.board().dataset.stroke).toBe('1')
     // The track names the stop and how far it is (plan 264); the card
-    // says only which stroke, never the stop's name again.
+    // draws no head over the board, the stroke's number on its dot and
+    // the instruction and how far said to a screen reader alone.
     expect(t.root().querySelector('.tour__track-name').textContent).toBe('Write')
     expect(t.root().querySelector('.tour__track-count').textContent).toBe('2 / 3')
     expect(t.root().querySelector('.tour__stop-fill').style.width).toBe('0%')
-    expect(t.root().querySelector('.tour-leaf__head .tour__notion').textContent).toBe('Stroke 1 of 3')
+    expect(t.root().querySelector('.tour-leaf__head')).toBeNull()
+    expect(t.root().querySelector('.tour__notion')).toBeNull()
+    expect(t.root().querySelector('.tour__q').classList.contains('sr-only')).toBe(true)
+    expect(t.root().querySelector('.tour__q').textContent).toBe('Trace each stroke from the dot to the ring.')
+    expect(t.board().getAttribute('aria-label')).toBe('Trace あ, stroke 1 of 3')
     // The stroke asked: its hollow, its dot with its number, its ring,
     // the chevrons inside it and its ink, empty; the others faint.
     expect(t.board().querySelector('.gt-hollow')).not.toBeNull()
@@ -153,7 +158,7 @@ describe('a kana met for the first time', () => {
     await settle(30)
     expect(ink.classList.contains('gt-ink--drain')).toBe(true)
     expect(ink.style.opacity).toBe('0')
-    expect(t.root().querySelector('.tour-said--no').textContent).toContain('Follow the stroke.')
+    expect(t.root().querySelector('.tour-said--no')).toBeNull()
     expect(t.board().dataset.stroke).toBe('1')
   })
 
@@ -170,19 +175,21 @@ describe('a kana met for the first time', () => {
     expect(t.board().querySelector('.gt-start').textContent).toBe('2')
   })
 
-  it('answers a miss with what to fix, and draws the stroke after three', async () => {
+  it('shows a miss on the board alone, and draws the stroke after three', async () => {
     const t = await mount()
     t.gate().click()
     await settle()
     draw(t.board(), backwards(tours.kana.strokes[0]))
     await settle(30)
     expect(t.board().dataset.stroke).toBe('1')
-    expect(t.root().querySelector('.tour-said--no').textContent).toContain('Start on the full dot.')
-    // The missed line, a moment in the miss's ink.
+    // The missed line, a moment in the miss's ink, and no words under the
+    // board: the instruction already says from the dot to the ring.
     expect(t.board().querySelector('.gt-missed polyline')).not.toBeNull()
+    expect(t.root().querySelector('.tour-said--no')).toBeNull()
     draw(t.board(), along(tours.kana.strokes[0]).slice(0, 10))
     await settle(30)
-    expect(t.root().querySelector('.tour-said--no').textContent).toContain('Go all the way to the ring.')
+    expect(t.board().dataset.stroke).toBe('1')
+    expect(t.root().querySelector('.tour-said--no')).toBeNull()
     draw(t.board(), backwards(tours.kana.strokes[0]))
     await settle(30)
     // Three misses on one stroke: drawn for the learner, the next asked.
@@ -209,7 +216,7 @@ describe('a kana met for the first time', () => {
     draw(t.board(), [bowl[0], bowl[bowl.length - 1]])
     await settle(30)
     expect(t.board().dataset.stroke).toBe('3')
-    expect(t.root().querySelector('.tour-said--no').textContent).toContain('Follow the stroke.')
+    expect(t.root().querySelector('.tour-said--no')).toBeNull()
   })
 
   it('draws the rest on « Show me »', async () => {
@@ -267,7 +274,7 @@ describe('a kanji met for the first time', () => {
     const t = await mount(tours.kanji)
     t.gate().click()
     await settle()
-    expect(t.root().querySelector('.tour-leaf__head .tour__notion').textContent).toBe('Stroke 1 of 4')
+    expect(t.board().getAttribute('aria-label')).toBe('Trace 日, stroke 1 of 4')
     t.root().querySelector('[data-action="show"]').click()
     await settle()
     t.gate().click()

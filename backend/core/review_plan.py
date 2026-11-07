@@ -224,17 +224,23 @@ def daily_load(user_id: str) -> float:
 def spent_today(user_id: str, lanes) -> tuple[int, set]:
     """(spent, exempt): the pairs reviewed today that the ceiling counts,
     and the (raw_id, mode) pairs of `lanes` it never counts -- reviewed
-    today already, or a card first met today."""
+    today already, or a card first met today. A card first met today in
+    a mode the learner added to Today (plan 273) is the pace's too, and
+    the ceiling does not count it either."""
+    from core import learner_modes
     from core.srs_instance import srs
     try:
         pairs, met = srs.get_reviewed_today(user_id)
+        spending = learner_modes.read(user_id).spending()
+        firsts = srs.get_mode_firsts_today(user_id, spending) if spending else set()
     except Exception:
         logger.exception("today's reviews failed")
         return 0, set()
     cut = len(user_id) + 1
     met_raw = {cid[cut:] for cid in met}
+    met_pairs = {(cid[cut:], mode) for cid, mode in firsts}
     reviewed = {(cid[cut:], mode) for cid, mode in pairs}
-    spent = sum(1 for raw_id, _ in reviewed if raw_id not in met_raw)
+    spent = sum(1 for raw_id, mode in reviewed if raw_id not in met_raw and (raw_id, mode) not in met_pairs)
     exempt = set(reviewed)
     for key, ids in lanes.items():
         exempt.update((raw_id, key[-1]) for raw_id in ids if raw_id in met_raw)
