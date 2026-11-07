@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import { FORMATS, FS, SP, alpha, palette } from '../carousel/draw.js'
 import { PRINT_HOURS, printOf } from '../carousel/app.js'
 import { backdrop, discAt, discDrawn, liftAt } from '../carousel/backdrop.js'
-import { CH, CTA, CUT, FADED, RISEN, alongBox, alongPanel, bandOf, challengePlan, challengeTimeline, chipShown, cutOf, drawChallenge, hookBand, hookWords, inksOf, lookOf, raisedGlow } from '../carousel/challenge.js'
+import { CH, CTA, CUT, FADED, RISEN, alongBox, alongLayout, alongPanel, bandOf, challengePlan, challengeTimeline, chipShown, cutOf, drawChallenge, hookBand, hookWords, inksOf, lookOf, raisedGlow } from '../carousel/challenge.js'
 import { coverBox, drawSlip } from '../carousel/cover.js'
 import { PRINTS_REV, SCENERIES, sceneryOf } from '../carousel/sceneries.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
@@ -280,8 +280,17 @@ describe('the words over the print (plan 309)', () => {
             const { ctx, at } = drawn()
             drawChallenge(ctx, pl, tl, line.voice + 0.2, null)
             const where = `${P.id} ${lang} along ${along}, sentence ${line.i + 1}`
-            // The sentence said, every word of it, at the title's size at least.
-            const words = at.filter(x => x.size >= FS.title - 0.5 && x.alpha > 0.99)
+            // The sentence said, every word of it, at the title's size at
+            // least; one the panel cannot hold whole there smaller, as a
+            // whole, never under the body's size (n4-21's fourth, nine lines
+            // at the title's size since the analyser reads 十一時 as one
+            // word: main's c1214cb35, plan 266).
+            const L = alongLayout(ctx, pl, line.i)
+            if (L.size < FS.title - 0.5) {
+              expect(alongLayout(ctx, pl, line.i, { fit: false }).h, where).toBeGreaterThan(B.foot - B.top - SP[5] * 1.5)
+              expect(L.size, where).toBeGreaterThanOrEqual(FS.body)
+            }
+            const words = at.filter(x => x.size >= Math.min(FS.title, L.size) - 0.5 && x.alpha > 0.99)
             expect(words.map(x => x.t).join(''), where).toContain(pl.sents[line.i].map(r => r.t).join(''))
             const [credit, ...more] = at.filter(x => /VOICEVOX Nemo/.test(x.t))
             expect(more, where).toEqual([])
@@ -346,6 +355,48 @@ describe('the words over the print (plan 309)', () => {
     s = seen(off, challengeTimeline(off).lines[1].voice + 0.2)
     expect(s.words.map(x => x.t).join('')).toContain(said(tall))
     expect(s.credit).toMatchObject({ alpha: 1, y: alongBox(off).credit })
+  }))
+
+  it('sets a sentence the panel cannot hold whole at the title’s size smaller, as a whole, rather than leave the panel empty while it is said', () => withPath2D(() => {
+    // Seventy-two words of one kanji under its reading: nine lines at the
+    // title's size, more than the panel holds from under its top down into
+    // its foot. Drawn only where it stood whole on the panel, it was never
+    // drawn at all, and the voice read it over an empty panel (n4-21's
+    // fourth sentence once the analyser read 十一時 as one word, plan 266).
+    const yoru = { t: '夜', k: 'word', ro: 'yoru', fu: [['夜', 'よる']] }
+    const long = [...Array(72).fill(yoru), { t: '。', k: 'punct' }]
+    const base = challengePlan(bank, 'n4-01', { style: 'along' })
+    const plan = along => ({ ...base, id: `nine-lines-${along}`, tune: { 'challenge.along': along }, sents: [base.sents[0], long, base.sents[1]] })
+    const { ctx } = drawn()
+    for (const along of [0, 1]) {
+      const pl = plan(along)
+      const box = alongBox(pl)
+      const room = box.foot - box.top - SP[5] * 1.5
+      // Taller than the panel at the title's size; set as large as the
+      // panel holds it, never under the body's size. The sentences either
+      // side keep their sizes.
+      expect(alongLayout(ctx, pl, 1, { fit: false }).h).toBeGreaterThan(room)
+      const L = alongLayout(ctx, pl, 1)
+      expect(L.h).toBeLessThanOrEqual(room)
+      expect(L.size).toBeLessThan(FS.title)
+      expect(L.size).toBeGreaterThanOrEqual(FS.body)
+      for (const i of [0, 2]) expect(alongLayout(ctx, pl, i).size, `sentence ${i + 1}`).toBeGreaterThanOrEqual(FS.title)
+      // Said: whole, at that size, on the panel; the credit giving way to it
+      // only where it is too tall for the room above the credit (the dial on).
+      const at = draw(pl, challengeTimeline(pl).lines[1].voice + 0.2)
+      const words = at.filter(x => x.size >= L.size - 0.5 && x.alpha > 0.99)
+      expect(words.map(x => x.t).join(''), `along ${along}`).toContain(long.map(r => r.t).join(''))
+      // (The sentence before it, turned from, is drawn above the panel's
+      // clip on its way out: only the one said is measured.)
+      const its = words.filter(x => x.t === '夜')
+      expect(its).toHaveLength(72)
+      for (const x of its) expect(x.size).toBeCloseTo(L.size, 6)
+      expect(Math.min(...its.map(x => x.y - x.size * 0.72))).toBeGreaterThan(box.top)
+      expect(Math.max(...its.map(x => x.y + x.size * 0.12))).toBeLessThan(box.foot - SP[5] * 0.5)
+      const credit = at.find(x => /VOICEVOX Nemo/.test(x.t))
+      const tall = box.top + SP[5] + L.h > box.text - SP[5] * 0.5
+      expect(credit.alpha, `along ${along}`).toBe(along && tall ? 0 : 1)
+    }
   }))
 
   it('lights each word read along as it is said whichever plan of the text draws it: two plans alike, one frame (plan 247)', () => withPath2D(() => {

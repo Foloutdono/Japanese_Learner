@@ -1286,7 +1286,10 @@ over Today's print of the hour, in one of two ways:
 - **Read along** (`along`, 声): the text stands on one panel while the
   app's reader says it (slowed at N5 and N4, as a card's slow line), each
   word gold once said and underlined while it is said; the panel turns
-  to the next sentence when it would run past its foot. The words are
+  to the next sentence when it would run past its foot. A sentence the
+  panel cannot hold whole at the title's size is set smaller as a whole,
+  as large as the panel holds it (`alongLayout`), never left off it while
+  it is said (n4-21's fourth, once the analyser read 十一時 as one word). The words are
   lit on the engine's own syllables (`long_video_audio.mora_marks`, from
   its audio query, within a frame of the clip it makes) wherever their
   count is the text's, else in proportion to each word's.

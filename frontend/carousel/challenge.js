@@ -329,9 +329,9 @@ const UNDER = MASTHEAD.y + MASTHEAD.size
 const TOP = UNDER + SP[7]
 // Laid out once a plan and a size, on the context that draws them.
 const layouts = new Map()
-function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif' } = {}) {
-  const key = `${plan.id}|${plan.lang}|${i}|${z}|${w}|${maxLines}|${min}|${fam}`
-  if (!layouts.has(key)) layouts.set(key, layoutSentence(ctx, plan.sents[i], { max: z, min, maxW: w, maxLines, fam, script: plan.ruby ? 'furigana' : 'kanji', rules: false, gap: 0.02 }))
+function layOf(ctx, plan, i, z, w, { maxLines = 6, min = FS.title, fam = 'serif', maxH = Infinity } = {}) {
+  const key = `${plan.id}|${plan.lang}|${i}|${z}|${w}|${maxLines}|${min}|${fam}|${maxH}`
+  if (!layouts.has(key)) layouts.set(key, layoutSentence(ctx, plan.sents[i], { max: z, min, maxW: w, maxLines, maxH, fam, script: plan.ruby ? 'furigana' : 'kanji', rules: false, gap: 0.02 }))
   return layouts.get(key)
 }
 
@@ -770,19 +770,37 @@ export function alongBox(plan) {
   // Its letters centred in the room between the text's foot and the panel's.
   return { top: TOP, foot, text: end, credit: (end - PAD * 0.5 + foot) / 2 + FS.sm * 0.36 }
 }
+/** A sentence read along, laid out: at the title's size or a little over
+ *  it (ALONG_Z) wherever the panel holds it whole, from under its top
+ *  down into its foot. One the panel cannot hold whole at the title's
+ *  size is set smaller, as a whole, as large as the panel holds it (and
+ *  never under the body's size), as a carousel's block too tall at its
+ *  smallest rung is: drawn only where it stood whole on the panel, it
+ *  was left off it while it was said. n4-21's fourth sentence is one
+ *  since the analyser reads 十一時 as one word (plan 266): nine lines
+ *  at the title's size. `fit: false` gives the layout at the title's
+ *  size however tall, the one it was. */
+export function alongLayout(ctx, plan, i, { fit = true } = {}) {
+  const w = fr.w - PAD * 2
+  const L = layOf(ctx, plan, i, ALONG_Z, w)
+  const { top, foot } = alongBox(plan)
+  const room = foot - top - PAD * 1.5
+  if (!fit || L.h <= room) return L
+  return layOf(ctx, plan, i, ALONG_Z, w, { min: FS.body, maxLines: Infinity, maxH: room })
+}
 function along(ctx, plan, tl, t, P) {
   const S = W[plan.lang]
   const T = LOOK.dark
   const { laid } = backdrop(ctx, P, T, { dark: 0.42, hour: plan.hour, wash: tuned(plan.tune, 'challenge.wash'), plan, tl, t, seg: 'reading', cover: false })
   const into = t - tl.segs.find(s => s.key === 'reading').start
   masthead(ctx, T, Math.max(1 - laid, raisedGlow(plan, T, 'reading', into, P)))
-  const tw = fr.w - PAD * 2
   const { top, foot, text: end, credit } = alongBox(plan)
   // Where each sentence stands in the column, and where the column is turned to.
-  const Ls = plan.sents.map((_, i) => layOf(ctx, plan, i, ALONG_Z, tw))
-  // Never set under the title's size, a sentence too tall to stand whole
-  // above the credit (eight lines with their readings) reaches into the
-  // panel's foot while it is read, the credit giving way to it.
+  const Ls = plan.sents.map((_, i) => alongLayout(ctx, plan, i))
+  // Never set under the title's size where the panel holds it, a sentence
+  // too tall to stand whole above the credit (eight lines with their
+  // readings) reaches into the panel's foot while it is read, the credit
+  // giving way to it.
   const tall = Ls.map(L => end < foot && top + PAD + L.h > end - PAD * 0.5)
   const ys = []
   let y = 0
