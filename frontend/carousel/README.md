@@ -1252,7 +1252,8 @@ does not come leaves its card as it was. After adding pictures, run
 
 ## The reading challenges (plan 247)
 
-A comprehension text (the 150 of `comprehension.json`, thirty a level) read
+A comprehension text (the 231 of `comprehension.json`: thirty a level, sixty
+at N4 and eighty-one at N5) read
 as a 9:16 video (`challenge.js`, the source 速読 "Reading challenge"),
 over Today's print of the hour, in one of two ways:
 
