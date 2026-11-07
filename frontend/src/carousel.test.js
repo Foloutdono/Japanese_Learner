@@ -934,6 +934,71 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
+  it('plays reading comprehension’s story whole on the print, each frame leaving over its own washed print (plans 271, 301b)', () => {
+    // Faded and moved whole as on the ground, a frame took its washed sky
+    // with it: the bare print flashed between two frames of the story.
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      const data = bank('comprehension.json')
+      const [{ id }] = promoItems('comprehension', data, 'en')
+      const pl = promoPlan('comprehension', data, id, { ...OPTS, story: 'comprehension' })
+      const { story } = promoDeck(pl, FORMATS.story, { ground: 'sumi', print: stillPrint() }).clips
+      expect(story.print).toBe(true)
+      // What a frame draws: the print's layers, the rects (the wash among
+      // them) and the words, each with its alpha and how far it was moved.
+      const record = () => {
+        const calls = []
+        const state = { font: '10px sans-serif', globalAlpha: 1, ty: 0 }
+        const stack = []
+        const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+        const methods = {
+          measureText: t => ({ width: [...String(t)].length * size() * 0.8, actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12 }),
+          createLinearGradient: () => ({ addColorStop() {} }),
+          createRadialGradient: () => ({ addColorStop() {} }),
+          getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+          save: () => stack.push({ ...state }),
+          restore: () => Object.assign(state, stack.pop() || {}),
+          translate: (x, y) => { state.ty += y },
+          drawImage: () => calls.push({ kind: 'image', alpha: state.globalAlpha, ty: state.ty }),
+          fillRect: (x, y, w, h) => calls.push({ kind: 'rect', alpha: state.globalAlpha, ty: state.ty, y, h }),
+          fillText: t => calls.push({ kind: 'text', t: String(t), alpha: state.globalAlpha, ty: state.ty }),
+        }
+        const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+        return { ctx, calls }
+      }
+      let start = 0
+      let n = 1
+      for (const [key, len] of COMP_BEATS.slice(0, -1)) {
+        // Before it leaves: its print, then its wash, the first rect after the print's last layer.
+        const wash = calls => calls.slice(calls.findLastIndex(c => c.kind === 'image') + 1).find(c => c.kind === 'rect')
+        const before = record()
+        story.draw(before.ctx, start + len - 0.2)
+        const sky = wash(before.calls)
+        expect(sky, key).toBeTruthy()
+        for (const at of [0.08, 0.04, 0.01]) {
+          const { ctx, calls } = record()
+          story.draw(ctx, start + len - at)
+          const gone = 1 - (at / 0.12)
+          // The print and its wash stay whole and in place, the same wash as before it left.
+          for (const c of calls.filter(c => c.kind === 'image')) expect([key, at, c.alpha, c.ty]).toEqual([key, at, 1, 0])
+          expect({ ...wash(calls), key }).toEqual({ ...sky, key })
+          // Its words fade and rise, its page's count with them (those drawn
+          // on the print: off a browser a block's measure is drawn first,
+          // on the same context, under it).
+          const words = calls.slice(calls.findLastIndex(c => c.kind === 'image') + 1).filter(c => c.kind === 'text')
+          expect(Math.max(...words.map(c => c.alpha)), key).toBeCloseTo(1 - gone, 6)
+          const count = words.find(c => c.t === `${n} / ${COMP_BEATS.length}`)
+          expect([count.alpha, count.ty].map(v => Math.round(v * 1e6) / 1e6), key).toEqual([1 - gone, -28 * gone].map(v => Math.round(v * 1e6) / 1e6))
+        }
+        start += len
+        n += 1
+      }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
+
   it('promises nothing the app does not do today (plan 231)', () => {
     // No mode is priced and nothing is free "during early access": the
     // free pass, the kana line and the privacy are what a story may say.

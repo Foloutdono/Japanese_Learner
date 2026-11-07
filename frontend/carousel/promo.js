@@ -611,6 +611,16 @@ export function promoDeck(plan, fmt, opts) {
   const page = (ctx, i, of) => {
     pending = { i, of }
   }
+  // A frame leaving a story played whole (the share of it gone, set by
+  // the story's clip): on the print its print and its washed sky stay as
+  // they were and what stands on them fades and rises, as a frame on the
+  // ground leaves over the ground; the next frame washes its own.
+  let leaving = 0
+  const leave = ctx => {
+    if (!leaving) return
+    ctx.globalAlpha *= 1 - leaving
+    ctx.translate(0, -28 * leaving)
+  }
   // A frame that lays itself out rather than in a block (reading
   // comprehension's text and roll, plan 301) opens its page at once, the
   // sky washed down to `to`, where its card ends.
@@ -618,6 +628,7 @@ export function promoDeck(plan, fmt, opts) {
     pending = null
     view(ctx)
     wash(ctx, 0, to)
+    leave(ctx)
     chrome(ctx, i, of)
   }
   // A block under the masthead: drawn once off the page to measure it,
@@ -635,6 +646,7 @@ export function promoDeck(plan, fmt, opts) {
       pending = null
       view(ctx)
       wash(ctx, 0, y0 + h * s)
+      leave(ctx)
       chrome(ctx, i, of)
     }
     if (s === 1) return body(ctx, y0)
@@ -1244,13 +1256,18 @@ export function promoDeck(plan, fmt, opts) {
           clock = { t: s, moving }
           try {
             const exit = last ? 0 : Math.min(1, Math.max(0, (s - (beats[i][1] - COMP_EXIT)) / COMP_EXIT))
-            if (exit > 0) {
+            // On the print the frame keeps its print and its wash as it
+            // leaves (leave, above): faded and moved whole, its washed sky
+            // went with it and the bare print flashed between two frames.
+            if (exit > 0 && PR) leaving = exit
+            else if (exit > 0) {
               view(ctx)
               ctx.globalAlpha *= 1 - exit
               ctx.translate(0, -28 * exit)
             }
             out[beats[i][0]].draw(ctx)
           } finally {
+            leaving = 0
             clock = null
             ctx.restore()
           }
