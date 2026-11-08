@@ -40,6 +40,7 @@ const SEAM = 0.5
 const PART = 3                      // seconds a part
 const RATE = 48000
 const LIFT = 2 // +6 dB
+const BT709 = ['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv']
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => {
@@ -82,7 +83,11 @@ const { LOOP, WINDOW, SOUNDS } = await page.evaluate(() => ({
   LOOP: window.LOOP, WINDOW: window.WINDOW,
   SOUNDS: window.SOUNDS ?? [['card-stamp', window.BEATS.HIT], ['day-clear', window.BEATS.RECAP]],
 }))
-const clip = { x: 0, y: WINDOW.top, width: WINDOW.width, height: WINDOW.height }
+// The clip on whole device pixels, `height` rows of them: one starting on a fractional pixel comes out
+// two rows short, and stretched back it reads as non-square pixels, which App Store Connect refuses as a
+// file of the wrong size.
+const dpr = width / 1184
+const clip = { x: 0, y: Math.floor(WINDOW.top * dpr) / dpr, width: WINDOW.width, height: height / dpr }
 const frames = Math.round((LOOP + SEAM) * FPS)
 const per = PART * FPS
 mkdirSync(parts, { recursive: true })
@@ -91,7 +96,8 @@ for (let p = 0; p * per < frames; p++) {
   const part = path.join(parts, `${String(p).padStart(3, '0')}.mp4`)
   if (existsSync(part)) continue
   const enc = spawn('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-vf', `scale=${width}:${height}:flags=lanczos,format=yuv420p`, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '10', '-f', 'mp4', part + '.tmp'],
+    '-vf', `scale=${width}:${height}:flags=lanczos:in_range=full:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709,setsar=1,format=yuv420p`,
+    ...BT709, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '10', '-f', 'mp4', part + '.tmp'],
   { stdio: ['pipe', 'inherit', 'inherit'] })
   for (let i = p * per; i < Math.min(frames, (p + 1) * per); i++) {
     await page.evaluate((t) => window.render(t), i / FPS)
@@ -151,12 +157,17 @@ const raw = file(`.${name}.raw.mp4`), mix = file(`.${name}.mix.wav`)
 run('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-i', raw, '-i', mix, '-i', mix,
   '-filter_complex',
   `[0:v]trim=start=${SEAM}:end=${end},setpts=PTS-STARTPTS[va];[1:v]trim=start=0:end=${SEAM},setpts=PTS-STARTPTS[vb];` +
-  `[va][vb]xfade=transition=fade:duration=${SEAM}:offset=${LOOP - SEAM},format=yuv420p[v];` +
+  `[va][vb]xfade=transition=fade:duration=${SEAM}:offset=${LOOP - SEAM},format=yuv420p,setsar=1[v];` +
   `[2:a]atrim=start=${SEAM}:end=${end},asetpts=PTS-STARTPTS[aa];[3:a]atrim=start=0:end=${SEAM},asetpts=PTS-STARTPTS[ab];` +
   `[aa][ab]acrossfade=d=${SEAM}:c1=tri:c2=tri,volume=${LIFT}[a]`,
-  '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-preset', 'slow', '-crf', crf, '-profile:v', 'high', '-level', '5.1', '-pix_fmt', 'yuv420p',
+  '-map', '[v]', '-map', '[a]', ...BT709, '-c:v', 'libx264', '-preset', 'slow', '-crf', crf, '-profile:v', 'high', '-level', '5.1', '-pix_fmt', 'yuv420p',
   '-r', String(FPS), '-c:a', 'aac', '-b:a', '256k', '-ar', String(RATE), '-ac', '2', '-movflags', '+faststart', '-t', String(LOOP),
   file(`${name}.mp4`)])
+// what App Store Connect reads: the size, in square pixels
+const probe = JSON.parse(run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height,sample_aspect_ratio', '-of', 'json', file(`${name}.mp4`)])).streams[0]
+if (probe.width !== width || probe.height !== height || !['1:1', undefined, 'N/A', '0:1'].includes(probe.sample_aspect_ratio)) {
+  throw new Error(`the film is ${probe.width} x ${probe.height} at ${probe.sample_aspect_ratio}, not ${width} x ${height} in square pixels`)
+}
 for (const n of [raw, mix, file(`.${name}.sfx.wav`), file(`${which}.html`)]) rmSync(n, { force: true })
 rmSync(parts, { recursive: true, force: true })
 console.log(file(`${name}.mp4`), `${width} x ${height}, ${LOOP} s`)

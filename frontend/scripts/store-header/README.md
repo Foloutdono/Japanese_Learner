@@ -124,6 +124,12 @@ crossfaded into its start. The frames are filmed in parts of three
 seconds, each kept on disk once whole (`OUT/.parts-*`), so a run cut
 short goes on from its last whole part when it is started again.
 
+The file is checked before it is kept: exactly the size asked, in square
+pixels, its colours tagged BT.709. App Store Connect reads a video's size
+through its pixel shape, and refused a first film whose frames had come
+out two rows short and been stretched back ("les dimensions du fichier ne
+sont pas valides"), so the frames are shot on whole device pixels.
+
 ## The captioned header: the day's queue
 
 The owner then asked for more of Today on the header: the modes its
