@@ -1270,6 +1270,7 @@ node scripts/duel-music/build.mjs     # a duel's music and sounds (plan 285; Chr
 python3 scripts/store-header/build.py OUT autumn-day  # the App Store header, 3840 × 1646 (plan 308; Chromium)
 node scripts/store-header/film.mjs OUT autumn-day     # the moving header, its 12 s video (plan 308; Python, Chromium, ffmpeg)
 node scripts/store-header/film.mjs OUT autumn-day --page queue --lang en  # the captioned header, 24 s, one per language (plan 308)
+node scripts/store-header/film.mjs OUT autumn-day --page queue --frame search --lang en  # the same, 3:2, for search results (plan 308)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -1305,7 +1306,7 @@ recipes' sounds). I, the owner's pick of the captioned rounds
 Today deals (Kana → romaji, Word → meaning, Draw the kanji, the ladder's
 Choose and Build), each card set as the run sets it (its computed styles,
 its locale's words) with its caption as its header, so one film per
-localization. Both read those files, so a print, a dial, a finish or a
+localization, and cut again at 3:2 for search results (`--frame search`). Both read those files, so a print, a dial, a finish or a
 run card redrawn there is a header to film again; the README has the
 beats.
 

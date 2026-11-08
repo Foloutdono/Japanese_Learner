@@ -1,14 +1,16 @@
 // ── 動く看板 — the moving header (plan 308) ───────────────────────────
 //
 //   cd frontend && node scripts/store-header/film.mjs OUT [print] [--page today|queue] [--lang en|fr|es]
-//                                                     [--date YYYY-MM-DD] [--width 3840] [--crf 17]
+//                                                     [--frame header|search] [--date YYYY-MM-DD] [--width 3840] [--crf 17]
 //
 // Films one of the header's pages for App Store Connect: today.py's (the day's
 // run, the owner's pick E: OUT/today-<print>.mp4) or queue.py's (the day's
 // queue card by card with its captions, the owner's pick I of round 7:
 // OUT/queue-<print>-<lang>.mp4, one per localization since its captions are
 // words). 3840 x 1646 (21:9), LOOP seconds that loop without a seam, 30 fps,
-// H.264 and AAC. Needs Python (the print's modules), Chromium and ffmpeg.
+// H.264 and AAC; or, with --frame search, the queue cut for App Store
+// Connect's search results, 3840 x 2560 (3:2: OUT/queue-search-<print>-<lang>.mp4).
+// Needs Python (the print's modules), Chromium and ffmpeg.
 //
 // - The frames are stills, one at a time: the page's render(t) sets the
 //   print's own animations and its own keyframes to t, so a frame never
@@ -52,14 +54,14 @@ const width = Number(flag('--width', '3840'))
 const crf = flag('--crf', '17')
 const which = flag('--page', 'today')
 const lang = flag('--lang', 'en')
+const frame = flag('--frame', 'header')
 const [out, print = 'autumn-day'] = args
-if (!out || !['today', 'queue'].includes(which) || !['en', 'fr', 'es'].includes(lang)) {
-  console.error('usage: node scripts/store-header/film.mjs OUT [print] [--page today|queue] [--lang en|fr|es] [--date YYYY-MM-DD] [--width 3840]')
+if (!out || !['today', 'queue'].includes(which) || !['en', 'fr', 'es'].includes(lang) || !['header', 'search'].includes(frame) || (frame !== 'header' && which !== 'queue')) {
+  console.error('usage: node scripts/store-header/film.mjs OUT [print] [--page today|queue] [--lang en|fr|es] [--frame header|search] [--date YYYY-MM-DD] [--width 3840]')
   process.exit(2)
 }
-const height = Math.round((width * 1646) / 3840 / 2) * 2
 const hour = print.split('-')[1] === 'hanabi' ? 'night' : print.split('-')[1]
-const name = which === 'today' ? `today-${print}` : `queue-${print}-${lang}`
+const name = which === 'today' ? `today-${print}` : `queue-${frame === 'header' ? '' : frame + '-'}${print}-${lang}`
 const file = (n) => path.join(out, n)
 const parts = file(`.parts-${name}-${width}`)
 
@@ -69,7 +71,7 @@ function run(cmd, argv) {
   return r.stdout
 }
 
-run('python3', [path.join(HERE, `${which}.py`), out, print, '--date', date])
+run('python3', [path.join(HERE, `${which}.py`), out, print, '--date', date, ...(which === 'queue' ? ['--frame', frame] : [])])
 const url = 'file://' + file(`${which}.html`) + (which === 'queue' ? `?lang=${lang}&view=film&live=0` : '')
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {})
 
@@ -87,6 +89,7 @@ const { LOOP, WINDOW, SOUNDS } = await page.evaluate(() => ({
 // two rows short, and stretched back it reads as non-square pixels, which App Store Connect refuses as a
 // file of the wrong size.
 const dpr = width / 1184
+const height = Math.round((width * WINDOW.height) / WINDOW.width / 2) * 2   // the frame's: 1646 for the header, 2560 for search results
 const clip = { x: 0, y: Math.floor(WINDOW.top * dpr) / dpr, width: WINDOW.width, height: height / dpr }
 const frames = Math.round((LOOP + SEAM) * FPS)
 const per = PART * FPS

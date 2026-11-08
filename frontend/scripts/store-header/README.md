@@ -173,3 +173,22 @@ is about 15 points and the captions about 11. A card redrawn in the app
 is a card to set again here. The sounds are the app's, where it plays
 them (`window.SOUNDS`): the card turning, the next card coming, a choice
 picked, the rating, the stamp and the 終着 chord.
+
+### Search results
+
+App Store Connect's second slot, *Résultats de recherche*, takes a 3:2
+asset (3840 × 2560 at most, 1920 × 1280 at least; a video of 5 to 30
+seconds, always muted there). Without one, search results keep showing
+the screenshots. The same queue is cut for it:
+
+```bash
+cd frontend && node scripts/store-header/film.mjs OUT autumn-day --page queue --frame search --lang en   # OUT/queue-search-autumn-day-en.mp4
+```
+
+The window onto the print is as tall as the print allows (from 110 to its
+foot, so the sky's gradient is laid over it again), and the queue, the
+dial and their cards are the header's, scaled up by 1.32 into the
+centred 2168 × 1030 safe area of Apple's search results template
+(`queue.py`'s `FRAMES`). Fuji stands where that area centres the cards,
+so it shows only between them; the viaduct, its train and the meadow
+show below.

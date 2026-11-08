@@ -169,6 +169,7 @@ html, body { overflow: hidden; }
 .dc .wk { height: 30px; position: relative; margin: 4px 0 2px; }
 .dc .wk .week { position: static; translate: none; left: auto; top: auto; }
 #dialbox { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform, opacity; }
+#stage { position: absolute; inset: 0; transform-origin: 0 0; }
 '''
 
 JS = r'''
@@ -282,6 +283,9 @@ function build() {
   el('p', '', fin, TX.finS);
   const DB = el('div', ''); DB.id = 'dialbox'; window.DIALBOX = DB;
   tpr.insertBefore(DB, OV);                    // behind the cards: they slide on and off it
+  // the frame's safe area: the header's box (x 338-846, y 452-656) as it stands, or scaled into another's
+  const ST = el('div', ''); ST.id = 'stage'; tpr.insertBefore(ST, DB); ST.appendChild(DB); ST.appendChild(OV);
+  ST.style.transform = `translate(${STAGE.to[0]}px, ${STAGE.to[1]}px) scale(${STAGE.k}) translate(${-STAGE.from[0]}px, ${-STAGE.from[1]}px)`;
   DB.appendChild(document.getElementById('dial'));
 }
 
@@ -325,13 +329,13 @@ function renderV(ta) {
 function fit() {
   const tpr = document.querySelector('.tpr');
   if (VIEW === 'film') { tpr.style.transform = 'none'; return; }
-  const x0 = VIEW === 'phone' ? 211.2 : 0, w = VIEW === 'phone' ? 761.3 : 1184;
+  const x0 = VIEW === 'phone' ? (1184 - WIN_H * 1.5) / 2 : 0, w = VIEW === 'phone' ? WIN_H * 1.5 : 1184;
   tpr.style.transform = `scale(${innerWidth / w}) translate(${-x0}px, ${-TOP_PX}px)`;
 }
 document.fonts.ready.then(() => {
   setup(); build(); fit(); renderV(Number(QS.get('t')) || 0);
   addEventListener('resize', fit);
-  window.render = renderV; window.LOOP = L2; window.WINDOW = { top: TOP_PX, width: 1184, height: 507.52 }; window.SOUNDS = SOUNDS; window.READY = true;
+  window.render = renderV; window.LOOP = L2; window.WINDOW = { top: TOP_PX, width: 1184, height: WIN_H }; window.SOUNDS = SOUNDS; window.READY = true;
   if (QS.get('live') !== '0' && VIEW !== 'film') {
     let on = true, last = 0;
     document.addEventListener('visibilitychange', () => { on = !document.hidden; });
@@ -343,8 +347,36 @@ document.fonts.ready.then(() => {
 '''
 
 
-def page(name, day):
-    html = today.page(name, day)
+# The frames a film is cut for, each a window onto the print and a box the queue is laid into:
+# App Store Connect's header (21:9, 3840 x 1646, today.py's window and layout as they stand) and its
+# search results (3:2, 3840 x 2560 at most: the window from 110, as tall as the print allows, and
+# the header's box scaled into the centred 2168 x 1030 safe area of Apple's search results template,
+# with the sky's gradient laid over the taller window).
+FRAMES = {
+    'header': {'size': (3840, 1646), 'top': today.TOP, 'safe': (1097, 493, 1646, 661)},
+    'search': {'size': (3840, 2560), 'top': 110, 'safe': (836, 765, 2168, 1030)},
+}
+BOX = (338, 452, 846, 656)      # where the header's layout keeps the queue: its safe area, in the print's units
+
+
+def page(name, day, frame='header'):
+    fr = FRAMES[frame]
+    scale = fr['size'][0] / today.header.DESK.W
+    win_h = today.header.DESK.W * fr['size'][1] / fr['size'][0]
+    if fr['top'] + win_h > today.header.DESK.H + 0.5:
+        raise SystemExit(f'the {frame} window runs past the print\'s foot')
+    sx, sy, sw, sh = (v / scale for v in fr['safe'])
+    k = min(sw / (BOX[2] - BOX[0]), sh / (BOX[3] - BOX[1]))
+    stage = {'k': round(min(k, 1.0) if frame == 'header' else k, 4), 'from': [(BOX[0] + BOX[2]) / 2, (BOX[1] + BOX[3]) / 2],
+             'to': [sx + sw / 2, fr['top'] + sy + sh / 2]}
+    if frame == 'header':
+        stage = {'k': 1, 'from': [0, 0], 'to': [0, 0]}
+    size, top = today.header.SIZE, today.TOP
+    today.header.SIZE, today.TOP = fr['size'], fr['top']
+    try:
+        html = today.page(name, day)
+    finally:
+        today.header.SIZE, today.TOP = size, top
     html = html.replace('family=Noto+Sans+JP:wght@700', 'family=Noto+Sans+JP:wght@400;500;600;700')
     html = html.replace('family=Space+Grotesk:wght@700', 'family=Space+Grotesk:wght@400;500;600;700')
     html = html.replace('</style>', CSS + '</style>', 1)
@@ -354,7 +386,8 @@ def page(name, day):
         html = html.replace(old, new)
     tail = html[html.index('window.render = render;'):html.index('</script></body></html>')]
     js = (f'const TEXTS = {json.dumps(TEXT, ensure_ascii=False)};\nconst TILE_ORDER = {json.dumps(TILES, ensure_ascii=False)};\n'
-          f'const NICHI_PATHS = {json.dumps(NICHI)};\nconst TOP_PX = {today.TOP};\nconst CX = {today.CX}, CY = {today.CY};\n' + JS)
+          f'const NICHI_PATHS = {json.dumps(NICHI)};\nconst TOP_PX = {fr["top"]};\nconst WIN_H = {win_h:.4f};\n'
+          f'const STAGE = {json.dumps(stage)};\nconst CX = {today.CX}, CY = {today.CY};\n' + JS)
     return html.replace(tail, '').replace('</script></body></html>', js + '</script></body></html>')
 
 
@@ -363,11 +396,12 @@ def main():
     ap.add_argument('out')
     ap.add_argument('print', nargs='?', default='autumn-day', choices=sorted(today.header.PRINTS))
     ap.add_argument('--date', default='2026-10-06', help="the seal's date (its weekday and the week end on it)")
+    ap.add_argument('--frame', default='header', choices=sorted(FRAMES), help="the header's 21:9, or search results' 3:2")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     path = os.path.join(a.out, 'queue.html')
     with open(path, 'w') as fh:
-        fh.write(page(a.print, datetime.date.fromisoformat(a.date)))
+        fh.write(page(a.print, datetime.date.fromisoformat(a.date), a.frame))
     print(path)
 
 
