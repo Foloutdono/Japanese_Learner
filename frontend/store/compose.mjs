@@ -21,13 +21,18 @@ const list = () => (variants ? VARIANTS : SLIDES)
 const COPY = JSON.parse(readFileSync(join(here, 'copy.json'), 'utf8'))
 
 const TABLET = args.includes('--tablet')
-const W = 1080, H = 1920
-const PHONE = TABLET ? { w: 820, top: 484, bezel: 26 } : { w: 800, top: 500, bezel: 16 }
+// --iphone: the App Store's iPhone set (6.3"), 1206×2622, the screens captured at 393×852 into
+// raw/<lang>-iphone/; drawn on a 1080-wide page as tall as that ratio and saved at 1206 wide.
+const IPHONE = args.includes('--iphone')
+const W = 1080, H = IPHONE ? 2348 : 1920
+const SCALE = IPHONE ? 1206 / 1080 : 1
+const SUFFIX = TABLET ? '-tablet' : IPHONE ? '-iphone' : ''
+const PHONE = TABLET ? { w: 820, top: 484, bezel: 26 } : IPHONE ? { w: 800, top: 560, bezel: 16 } : { w: 800, top: 500, bezel: 16 }
 const SCREEN_W = PHONE.w - 2 * PHONE.bezel
-const VW = TABLET ? 540 : 393, VH = TABLET ? 960 : 740 // the captured screen's size, css px
+const VW = TABLET ? 540 : 393, VH = TABLET ? 960 : IPHONE ? 852 : 740 // the captured screen's size, css px
 const K = SCREEN_W / VW // css px of the app → canvas px
 const R = SCREEN_W / 768 // the phone layout's canvas positions, mapped onto a tablet's screen
-const mapAt = (at, atT) => (TABLET && atT ? atT : TABLET ? { left: SX + (at.left - 156) * R, top: SY + (at.top - 516) * R, width: at.width * R } : at)
+const mapAt = (at, atT) => (IPHONE ? { ...at, top: at.top + 60 } : TABLET && atT ? atT : TABLET ? { left: SX + (at.left - 156) * R, top: SY + (at.top - 516) * R, width: at.width * R } : at)
 const RAD = TABLET ? 34 : 100
 const SX = (W - PHONE.w) / 2 + PHONE.bezel, SY = PHONE.top + PHONE.bezel // the screen's corner on the canvas
 
@@ -120,7 +125,7 @@ const pngSize = f => { const b = readFileSync(f); return [b.readUInt32BE(16), b.
 
 function slideHtml(slide, lang) {
   const c = COPY[lang][slide.id]
-  const rawDir = join(here, 'raw', lang + (TABLET ? '-tablet' : ''))
+  const rawDir = join(here, 'raw', lang + SUFFIX)
   const raw = name => `file://${join(rawDir, name + '.png')}`
   const rects = JSON.parse(readFileSync(join(rawDir, 'rects.json'), 'utf8'))
   const lifts = (slide.lift || []).map(k => {
@@ -210,7 +215,7 @@ h1 em{font-style:normal;color:#ffe08f}
 }
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox', '--allow-file-access-from-files'] })
-const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 })
+const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: SCALE })
 if (args.includes('--feature')) {
   const fp = await browser.newPage({ viewport: { width: 1024, height: 500 }, deviceScaleFactor: 1 })
   for (const lang of langs.length ? langs : ['fr', 'en']) {
@@ -227,11 +232,11 @@ if (args.includes('--feature')) {
   await browser.close(); process.exit(0)
 }
 for (const lang of langs.length ? langs : ['fr', 'en']) {
-  const out = join(here, 'out', lang + (TABLET ? '-tablet' : '')); mkdirSync(out, { recursive: true })
+  const out = join(here, 'out', lang + SUFFIX); mkdirSync(out, { recursive: true })
   const tmp = join(here, '.tmp'); mkdirSync(tmp, { recursive: true })
   for (const [i, s] of list().entries()) {
     if (only && !only.includes(s.id)) continue
-    const file = join(tmp, `${lang}${TABLET ? '-tablet' : ''}-${s.file || s.id}.html`)
+    const file = join(tmp, `${lang}${SUFFIX}-${s.file || s.id}.html`)
     writeFileSync(file, slideHtml(s, lang))
     await page.goto('file://' + file)
     await page.waitForSelector('body[data-ready]', { timeout: 20000 })

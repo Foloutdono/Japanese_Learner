@@ -1,13 +1,16 @@
 // Store screenshots, tablet (7-inch, landscape 16:9): the app's own screens at a tablet's
 // width, 1280×720 css px at 2x, where it draws its wide layout (the rail, the side panels),
 // into raw/<lang>-tablet7/, with the pieces a slide lifts or enlarges (rects.json, css px).
-//   node store/capture_tablet.mjs <fr|en> <main|kanji>
+//   node store/capture_tablet.mjs <fr|en> <main|kanji> [ipad]
+// ipad: an iPad Pro 13" in landscape, 1376×1032 at 2x (2752×2064, the App Store's size), into raw/<lang>-ipad/.
 import { chromium } from 'playwright'
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { SESSION, KEY } from './session.mjs'
 
-const [lang = 'fr', stage = 'main'] = process.argv.slice(2)
-const OUT = new URL(`./raw/${lang}-tablet7/`, import.meta.url).pathname
+const [lang = 'fr', stage = 'main', device = 'tablet7'] = process.argv.slice(2)
+const IPAD = device === 'ipad'
+const VW = IPAD ? 1376 : 1280, VH = IPAD ? 1032 : 720
+const OUT = new URL(`./raw/${lang}-${IPAD ? 'ipad' : 'tablet7'}/`, import.meta.url).pathname
 mkdirSync(OUT, { recursive: true })
 const RECTS = OUT + 'rects.json'
 const rects = existsSync(RECTS) ? JSON.parse(readFileSync(RECTS, 'utf8')) : {}
@@ -19,7 +22,7 @@ const L = {
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] })
 const page = async () => {
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 2, hasTouch: true, locale: lang, colorScheme: 'light' })
+  const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: 2, hasTouch: true, locale: lang, colorScheme: 'light' })
   await ctx.addInitScript(([l, k, v]) => { try { localStorage.setItem('lang', l); localStorage.setItem(k, v) } catch {} }, [lang, KEY, JSON.stringify(SESSION)])
   return ctx.newPage()
 }
@@ -37,7 +40,7 @@ const piece = async (name, rect, sel) => {
 }
 const cut = async (name, sel, [dy0, maxH] = [0, Infinity]) => {
   const [x, y, w, h] = await box(p.locator(sel))
-  const top = Math.max(0, y + dy0), bottom = Math.min(720, y + h, top + maxH)
+  const top = Math.max(0, y + dy0), bottom = Math.min(VH, y + h, top + maxH)
   await piece(name, [x, top, w, bottom - top], sel)
 }
 
@@ -53,8 +56,10 @@ if (stage === 'main') {
   await cut('today_board', '.btn-depart')
   // 2 A grammar answer: the card, and the fiche that opens beside it.
   p = await page()
-  await go('/learn/grammar/N5/grammar.contrast'); await p.keyboard.press('1'); await p.waitForTimeout(1800); await shot('grammar')
-  await cut('grammar_fiche', '.desk-entry', [0, 688])
+  await go('/learn/grammar/N5/grammar.contrast')
+  await p.waitForFunction(() => /\S/.test(document.querySelector('.prompt-card')?.textContent || ''), null, { timeout: 30000 }); await p.waitForTimeout(800)
+  await p.keyboard.press('1'); await p.waitForTimeout(1800); await shot('grammar')
+  await cut('grammar_fiche', '.desk-entry', [0, VH - 32])
   // the callout: the fiche from its head to the end of its rule, never cut mid-sentence
   const ruleEnd = await p.evaluate(() => {
     const head = [...document.querySelectorAll('.desk-entry *')].find(e => !e.children.length && /^(Règle|Rule)$/.test(e.textContent.trim()))
@@ -75,7 +80,7 @@ if (stage === 'main') {
   await p.getByRole('button', { name: L.start }).first().click(); await p.waitForTimeout(2500)
   for (let k = 1; k < 9; k++) { await p.getByRole('button', { name: L.next }).first().click(); await p.waitForTimeout(300) }
   await p.waitForTimeout(600); await shot('exam')
-  await cut('exam_sheet', '.desk-run__side', [0, 520])
+  await cut('exam_sheet', '.desk-run__side', [0, Math.round(VH * 0.72)])
   // 7 A flashcard answered: what each rating schedules, and the goal card.
   await go('/learn/vocab/N5/vocab.flashcard.f2b', 5500)
   await p.locator('.prompt-card').first().click(); await p.waitForTimeout(1200); await shot('flash')
@@ -116,7 +121,8 @@ if (stage === 'kanji') {
   await p.locator('.prompt-card').first().click(); await p.waitForTimeout(1200)
   await p.addStyleTag({ content: '.reading-share__pct{background:#ffe08f !important;color:#3a2a00 !important;padding:2px 10px !important;border-radius:12px !important;font-weight:700 !important}' })
   await p.waitForTimeout(300); await shot('kanji_card')
-  await piece('kanji_readings', [448, 240, 384, 200], '.prompt-card')
+  const ir = await box(p.locator('.prompt-card .inline-reveal'))
+  await piece('kanji_readings', [ir[0] - 28, ir[1] - 24, ir[2] + 56, ir[3] + 48], '.prompt-card')
 }
 writeFileSync(RECTS, JSON.stringify(rects, null, 1))
 await browser.close()

@@ -64,6 +64,19 @@
         "défile pour toi"
       ],
       "hi": "défile"
+    },
+    "banner": {
+      "h": [
+        "Le japonais,",
+        "du kana au JLPT N1"
+      ],
+      "hi": "JLPT N1",
+      "chips": [
+        "Répétition espacée",
+        "Kanji",
+        "Examens JLPT",
+        "Duels"
+      ]
     }
   },
   "en": {
@@ -131,6 +144,19 @@
         "at your pace"
       ],
       "hi": "scrolls"
+    },
+    "banner": {
+      "h": [
+        "Japanese,",
+        "from kana to JLPT N1"
+      ],
+      "hi": "JLPT N1",
+      "chips": [
+        "Spaced repetition",
+        "Kanji",
+        "JLPT mock exams",
+        "Duels"
+      ]
     }
   }
 }

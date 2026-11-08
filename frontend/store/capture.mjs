@@ -4,17 +4,18 @@
 // it does in the native shell. Besides each whole screen it keeps the pieces
 // a slide lifts or floats (a card, a control bar, a sheet), cut exactly to
 // their element, and their place on the screen (rects.json, in css px).
-//   node store/capture.mjs <fr|en> <main|kanji|today|todaybig> [tablet]
+//   node store/capture.mjs <fr|en> <main|kanji|today|todaybig> [tablet|iphone]
+// The iphone is an iPhone 16 Pro, 393×852 at 3x with its Dynamic Island's insets, in raw/<lang>-iphone/.
 // The tablet is a 7-inch one in portrait, 540×960 at 2x (9:16), in raw/<lang>-tablet/.
 import { chromium } from 'playwright'
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { SESSION, KEY } from './session.mjs'
 
 const [lang = 'fr', stage = 'main', device = 'phone'] = process.argv.slice(2)
-const TABLET = device === 'tablet'
+const TABLET = device === 'tablet', IPHONE = device === 'iphone'
 const px = n => Math.round(n * (TABLET ? 540 / 393 : 1))
-const VW = TABLET ? 540 : 393, VH = TABLET ? 960 : 740, DPR = TABLET ? 2 : 3, F = VW / 393
-const OUT = new URL(`./raw/${lang}${TABLET ? '-tablet' : ''}/`, import.meta.url).pathname
+const VW = TABLET ? 540 : 393, VH = TABLET ? 960 : IPHONE ? 852 : 740, DPR = TABLET ? 2 : 3, F = VW / 393
+const OUT = new URL(`./raw/${lang}${TABLET ? '-tablet' : IPHONE ? '-iphone' : ''}/`, import.meta.url).pathname
 mkdirSync(OUT, { recursive: true })
 const RECTS = OUT + 'rects.json'
 const rects = existsSync(RECTS) ? JSON.parse(readFileSync(RECTS, 'utf8')) : {}
@@ -27,12 +28,12 @@ const L = {
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] })
 async function page(safe = true) {
   const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: DPR, isMobile: !TABLET, hasTouch: true, locale: lang, colorScheme: 'light' })
-  await ctx.addInitScript(([l, k, v, safe, TABLET]) => {
+  await ctx.addInitScript(([l, k, v, safe, TABLET, IPHONE]) => {
     try { localStorage.setItem('lang', l); localStorage.setItem(k, v) } catch {}
     if (!safe) return
-    const add = () => { const st = document.createElement('style'); st.textContent = TABLET ? ':root{--safe-top:30px !important;--safe-bottom:0px !important}' : ':root{--safe-top:54px !important;--safe-bottom:30px !important}'; document.head.appendChild(st) }
+    const add = () => { const st = document.createElement('style'); st.textContent = TABLET ? ':root{--safe-top:30px !important;--safe-bottom:0px !important}' : IPHONE ? ':root{--safe-top:59px !important;--safe-bottom:34px !important}' : ':root{--safe-top:54px !important;--safe-bottom:30px !important}'; document.head.appendChild(st) }
     if (document.head) add(); else document.addEventListener('DOMContentLoaded', add)
-  }, [lang, KEY, JSON.stringify(SESSION), safe, TABLET])
+  }, [lang, KEY, JSON.stringify(SESSION), safe, TABLET, IPHONE])
   return ctx.newPage()
 }
 let p
@@ -62,7 +63,10 @@ if (stage === 'main') {
   await piece('goal_card', await box(p.locator('.jcard')), 3)
   // 2: a grammar question.
   p = await page()
-  await go('/learn/grammar/N5/grammar.contrast'); await shot('grammar')
+  // the question is shown once its card has text, never on the loading dots
+  await go('/learn/grammar/N5/grammar.contrast')
+  await p.waitForFunction(() => /\S/.test(document.querySelector('.prompt-card')?.textContent || ''), null, { timeout: 30000 }); await p.waitForTimeout(1200)
+  await shot('grammar')
   // 3: the dictionary, its results and the first one lifted.
   await go('/dictionary', 3000)
   await p.getByRole('button', { name: L.vocab }).first().click(); await p.waitForTimeout(800)
@@ -75,7 +79,9 @@ if (stage === 'main') {
   // 5: a mock exam, the ★ ordering item lifted, and the paper's cover.
   await go('/practice/exam/n5-grammar-01', 3500)
   await p.getByRole('button', { name: L.start }).first().click(); await p.waitForTimeout(2500)
-  for (let k = 1; k < 9; k++) { await p.getByRole('button', { name: L.next }).first().click(); await p.waitForTimeout(300) }
+  // the iPhone asks question 7, whose sentence wraps cleanly at its width; the others question 9
+  for (let k = 1; k < (IPHONE ? 7 : 9); k++) { await p.getByRole('button', { name: L.next }).first().click(); await p.waitForTimeout(300) }
+  if (IPHONE) { await p.addStyleTag({ content: '.exam-page{flex:none !important;height:360px !important;min-height:0 !important}' }) }
   await p.waitForTimeout(600); await shot('exam')
   // on a tablet the question card is a tall empty slab: the piece lifted is the card squeezed to its stem
   if (TABLET) { await p.addStyleTag({ content: '.exam-page{flex:none !important;height:360px !important;min-height:0 !important}' }); await p.waitForTimeout(600) }
@@ -131,9 +137,11 @@ if (stage === 'todaybig') {
   for (const [name, hour] of [['today_big', 17], ['today_big_night', 22]]) {
     p = await page()
     await p.clock.install({ time: new Date(2026, 9, 22, hour, 20) })
-    await p.goto(BASE + '/today'); await p.waitForTimeout(1500)
+    await p.goto(BASE + '/today'); await p.waitForTimeout(IPHONE ? 7000 : 1500)
     const def = (await box(p.locator('.tdy-dial')))[2]
-    const dw = TABLET ? Math.round(def * 1.2) : 376, mt = TABLET ? 18 : -62
+    const hudB = (await box(p.locator('.hud')))[1] + (await box(p.locator('.hud')))[3], defTop = (await box(p.locator('.tdy-dial')))[1]
+    // the iPhone's header is taller (the gear): the moon starts just under it, never behind it
+    const dw = TABLET ? Math.round(def * 1.2) : IPHONE ? 350 : 376, mt = TABLET ? 18 : IPHONE ? Math.round(hudB + 14 - defTop) : -62
     await p.addStyleTag({ content: `
       .tdy-dial--print{width:${dw}px !important;margin:${mt}px 0 ${px(40)}px}
       .tdy-dial--print .tdy-dial__count{font-size:${px(104)}px !important}
@@ -191,8 +199,9 @@ if (stage === 'kanji') {
   await p.locator('.prompt-card').first().click(); await p.waitForTimeout(1200)
   await p.addStyleTag({ content: '.reading-share__pct{background:#ffe08f !important;color:#3a2a00 !important;padding:2px 10px !important;border-radius:12px !important;font-weight:700 !important}' })
   await p.waitForTimeout(300); await shot('kanji_card')
-  const kc = await box(p.locator('.prompt-card').first())
-  await piece('kanji_readings', [kc[0], kc[1], kc[2], Math.round(kc[2] * 0.83)], 0)
+  // the card from its head to the last reading's share, never cut through a reading
+  const kc = await box(p.locator('.prompt-card').first()), ir = await box(p.locator('.prompt-card .inline-reveal'))
+  await piece('kanji_readings', [kc[0], kc[1], kc[2], ir[1] + ir[3] + 24 - kc[1]], 0)
 }
 writeFileSync(RECTS, JSON.stringify(rects, null, 1))
 await browser.close()

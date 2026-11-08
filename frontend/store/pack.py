@@ -31,3 +31,27 @@ for lang in ('fr', 'en'):
         z.write(os.path.join(OUT, lang, 'feature-graphic-1024x500.png'),
                 ('0-image-de-presentation' if lang == 'fr' else '0-feature-graphic') + '/feature-graphic-1024x500.png')
     print(path, round(os.path.getsize(path) / 1e6, 1), 'MB')
+
+# App Store Connect: the iPhone (6.3") and 13" iPad screenshots, and the product page's header
+# and search-results artwork, one zip per language. Apple refuses an image with an alpha channel,
+# so each one goes in as RGB.
+APPLE = [
+    ('-iphone', '1-iphone-6.3-pouces', '1-iphone-6.3-inch', {(1206, 2622), (1179, 2556)}, None),
+    ('-ipad', '2-ipad-13-pouces', '2-ipad-13-inch', {(2752, 2064), (2064, 2752), (2732, 2048), (2048, 2732)}, None),
+    ('-appstore', '3-en-tete', '3-header', {(5244, 2950), (3840, 2560), (1920, 1280)}, 'header-5244x2950.png'),
+    ('-appstore', '4-resultats-de-recherche', '4-search-results', {(5244, 2950), (3840, 2560), (1920, 1280)}, 'search-3840x2560.png'),
+]
+import io
+for lang in ('fr', 'en'):
+    path = os.path.join(OUT, f'tsuji-appstore-{lang}.zip')
+    with zipfile.ZipFile(path, 'w', zipfile.ZIP_STORED) as z:
+        for suffix, fr, en, sizes, only in APPLE:
+            src = os.path.join(OUT, lang + suffix)
+            shots = [only] if only else sorted(f for f in os.listdir(src) if f[:2].isdigit() and f.endswith('.png'))
+            assert only or len(shots) == 8, (src, shots)
+            for f in shots:
+                im = Image.open(os.path.join(src, f))
+                assert im.size in sizes, (src, f, im.size)
+                buf = io.BytesIO(); im.convert('RGB').save(buf, 'PNG', optimize=True)
+                z.writestr(f'{fr if lang == "fr" else en}/{f}', buf.getvalue())
+    print(path, round(os.path.getsize(path) / 1e6, 1), 'MB')

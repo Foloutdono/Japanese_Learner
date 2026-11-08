@@ -19,19 +19,25 @@ const COPY = JSON.parse(readFileSync(join(here, 'copy.json'), 'utf8'))
 
 const devAt = args.indexOf('--device')
 const DEVICE = devAt >= 0 ? args[devAt + 1] : 'tablet7'
-const OUT_SCALE = DEVICE === 'tablet7' ? 1 : 4 / 3 // drawn on the same 1920×1080 page, saved larger
-const W = 1920, H = 1080
+// ipad: the App Store's 13" iPad, 4:3 landscape (2752×2064): its own captures (raw/<lang>-ipad/,
+// 1376×1032), the title across the top, the iPad below it, the enlarged piece at the bottom left
+const IPAD = DEVICE === 'ipad'
+const OUT_SCALE = IPAD ? 2 : DEVICE === 'tablet7' ? 1 : 4 / 3 // drawn on one page, saved larger
+const W = IPAD ? 1376 : 1920, H = IPAD ? 1032 : 1080
+const AW = IPAD ? 1376 : 1280, AH = IPAD ? 1032 : 720 // the app's captured screen, css px
 const FRAME = {
   tablet7: { FL: 650, FW: 1240, BZ: 22, FT: 190 },
   tablet10: { FL: 640, FW: 1250, BZ: 16, FT: 196 },
   chromebook: { FL: 660, FW: 1220, BZ: 14, FT: 150 },
   xr: { FL: 660, FW: 1220, BZ: 0, FT: 200 },
+  ipad: { FL: 430, FW: 900, BZ: 18, FT: 332 },
 }[DEVICE]
 const { FL, FW, BZ, FT } = FRAME // the device: left, width, bezel, top
-const K = (FW - 2 * BZ) / 1280 // css px of the app → canvas px
+const K = (FW - 2 * BZ) / AW // css px of the app → canvas px
 const SX = FL + BZ, SY = FT + BZ
-const SH = Math.round(720 * K)
-const COL = { left: 78, width: 540 } // the title's column
+const SH = Math.round(AH * K)
+const COL = IPAD ? { left: 44, width: 500 } : { left: 78, width: 540 } // the callout's column (and the title's, but on the iPad)
+const TITLE = IPAD ? { left: 70, top: 92, width: W - 140, maxH: 226, fs: 104 } : { left: COL.left, top: 112, width: COL.width, maxH: 330, fs: 100 }
 
 // `lift`: pieces cut from this very screen (rects.json), left in place in a gold ring over the
 // dimmed rest; `callout`: the piece enlarged in the left column; `shape: 'btn'` the glowing button.
@@ -62,9 +68,9 @@ html,body{width:${W}px;height:${H}px;overflow:hidden}
 .slide{position:relative;width:${W}px;height:${H}px;overflow:hidden;font-family:'Space Grotesk',system-ui,sans-serif;color:#fff}
 .mark{position:absolute;left:-60px;bottom:-250px;font:900 900px/1 'Noto Serif JP',serif;opacity:.075}
 .shade{position:absolute;inset:0;background:radial-gradient(1100px 800px at 10% 0%,rgba(255,255,255,.18),transparent 70%)}
-.brand{position:absolute;left:${COL.left}px;top:58px;font:700 26px 'Space Grotesk';letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.brand{position:absolute;left:${TITLE.left}px;top:${IPAD ? 40 : 58}px;font:700 26px 'Space Grotesk';letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.85)}
 .brand b{font:900 36px 'Noto Serif JP';letter-spacing:0;margin-right:12px;color:#ffe08f}
-h1{position:absolute;left:${COL.left}px;top:112px;width:${COL.width}px;font:900 100px/1.08 'Noto Serif JP',serif;letter-spacing:-.01em;text-shadow:0 7px 0 rgba(0,0,0,.22),0 16px 36px rgba(0,0,0,.25)}
+h1{position:absolute;left:${TITLE.left}px;top:${TITLE.top}px;width:${TITLE.width}px;font:900 ${TITLE.fs}px/1.08 'Noto Serif JP',serif;letter-spacing:-.01em;text-shadow:0 7px 0 rgba(0,0,0,.22),0 16px 36px rgba(0,0,0,.25)}
 h1 em{font-style:normal;color:#ffe08f}
 .tablet{position:absolute;left:${FL}px;top:${FT}px;width:${FW}px;padding:${BZ}px;border-radius:${BZ + 34}px;background:linear-gradient(145deg,#4a4650,#15131a 30%,#0c0b10 70%,#3a363f);box-shadow:0 50px 110px rgba(0,0,0,.55),inset 0 0 0 3px rgba(255,255,255,.18)}
 .tablet .cam{position:absolute;left:${BZ / 2 - 5}px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:#1d1b22;box-shadow:inset 0 0 0 2px #35323b}
@@ -84,8 +90,8 @@ ${DEVICE === 'xr' ? `.tablet{background:none;box-shadow:none;padding:0;border-ra
 .lift img,.call img{display:block;width:100%;height:100%}
 .call{position:absolute;overflow:hidden;box-shadow:0 0 0 6px #fff,0 0 0 18px rgba(255,255,255,.2),0 40px 90px rgba(0,0,0,.55)}
 .call img.ghost{position:absolute;left:0;mix-blend-mode:multiply;filter:url(#vb)}
-.chips{position:absolute;left:${COL.left}px;width:${COL.width}px;display:flex;flex-wrap:wrap;gap:14px}
-.chips span{font:700 31px 'Space Grotesk';padding:13px 26px;border-radius:999px;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
+.chips{position:absolute;left:${COL.left}px;width:${IPAD ? 310 : COL.width}px;display:flex;flex-wrap:wrap;gap:14px}
+.chips span{font:700 ${IPAD ? 24 : 31}px 'Space Grotesk';padding:${IPAD ? '10px 20px' : '13px 26px'};border-radius:999px;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
 .chev{position:absolute;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
 `
 const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
@@ -94,7 +100,7 @@ const chev = (left, top) => `<svg class="chev" style="left:${left}px;top:${top}p
 
 function slideHtml(slide, lang) {
   const c = COPY[lang][slide.id]
-  const rawDir = join(here, 'raw', `${lang}-tablet7`)
+  const rawDir = join(here, 'raw', `${lang}-${IPAD ? 'ipad' : 'tablet7'}`)
   const raw = n => `file://${join(rawDir, n + '.png')}`
   const rects = JSON.parse(readFileSync(join(rawDir, 'rects.json'), 'utf8'))
   // numbers keep their groups, a word of three letters at most stays with the next one
@@ -103,7 +109,9 @@ function slideHtml(slide, lang) {
   // two versions of the title: short words held to the next one, and, where that leaves a block
   // too wide for the column, numbers alone held together (the page picks the first that fits)
   const titleOf = f => esc(f(c.h.join(' '))).replace(esc(f(c.hi)), `<em>${esc(f(c.hi))}</em>`)
-  const title = titleOf(t => nbNum(nb(t))), titleLoose = titleOf(nbNum)
+  // the iPad's title runs across the page: it keeps the copy's own two lines
+  const lines = f => c.h.map(l => `<span style="display:block">${esc(f(l)).replace(esc(f(c.hi)), `<em>${esc(f(c.hi))}</em>`)}</span>`).join('')
+  const title = IPAD ? lines(nbNum) : titleOf(t => nbNum(nb(t))), titleLoose = IPAD ? title : titleOf(nbNum)
   const lifts = (slide.lift || []).map(k => {
     const [x, y, w, h, r = 0] = rects[k.piece]
     const rad = k.shape === 'btn' ? '' : `border-radius:${Math.max(r, 6) * K}px;`
@@ -115,9 +123,9 @@ function slideHtml(slide, lang) {
     const [pw, ph] = pngSize(join(rawDir, k.piece + '.png'))
     const [cx, cy, cw, ch] = k.crop || [0, 0, 1, 1]
     const sw = pw * cw, sh = ph * ch
-    const maxH = (k.maxH || 470) - (k.trail ? 30 : 0)
+    const maxH = (IPAD ? Math.min(k.maxH || 470, 560) : k.maxH || 470) - (k.trail ? 30 : 0)
     const bw = Math.min(COL.width - 20, maxH * sw / sh), bh = bw * sh / sw
-    const left = COL.left + 8, top = H - 76 - bh
+    const left = COL.left + 8, top = H - (IPAD ? 44 : 76) - bh
     const scale = bw / sw
     const r = Math.max(rects[k.piece]?.[4] || 0, 8) * scale * 2
     const img = (extra = '') => `<img ${extra} src="${raw(k.piece)}" style="position:absolute;width:${pw * scale}px;height:${ph * scale}px;left:${-cx * pw * scale}px;top:${-cy * ph * scale}px">`
@@ -130,7 +138,7 @@ function slideHtml(slide, lang) {
 <div class="slide" style="background:linear-gradient(165deg,${slide.bg[0]},${slide.bg[1]})">
   <div class="mark">${slide.mark}</div><div class="shade"></div>
   <div class="brand"><b>辻</b>Tsuji</div>
-  <h1 data-loose="${esc(titleLoose)}">${title}</h1>
+  <h1 data-loose="${esc(titleLoose).replace(/"/g, '&quot;')}">${title}</h1>
   ${chips}
   <svg width="0" height="0" style="position:absolute"><filter id="vb" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="0 5"/></filter></svg>
   ${DEVICE === 'xr' ? '<div class="floor"></div>' : ''}<div class="tablet"><div class="cam"></div><div class="screen"><img class="s" src="${raw(slide.shot)}"><div class="dim" style="opacity:${slide.dim}"></div></div></div>${DEVICE === 'chromebook' ? '<div class="base"><i></i></div>' : ''}${DEVICE === 'xr' ? '<div class="xrbar"></div>' : ''}
@@ -138,13 +146,13 @@ function slideHtml(slide, lang) {
 </div>
 <script>document.fonts.ready.then(() => {
   const h = document.querySelector('h1'), tight = h.innerHTML, loose = h.dataset.loose
-  const fits = () => h.scrollHeight <= 330 && h.scrollWidth <= h.clientWidth + 1
+  const fits = () => h.scrollHeight <= ${TITLE.maxH} && h.scrollWidth <= h.clientWidth + 1
   let done = false
-  for (let fs = 100; fs >= 60 && !done; fs -= 2) {
+  for (let fs = ${TITLE.fs}; fs >= 56 && !done; fs -= 2) {
     h.style.fontSize = fs + 'px'
     for (const html of [tight, loose]) { h.innerHTML = html; if (fits()) { done = true; break } }
   }
-  const c = document.querySelector('.chips'); if (c) c.style.top = (h.offsetTop + h.scrollHeight + 36) + 'px'
+  const c = document.querySelector('.chips'); if (c) c.style.top = ${IPAD ? "'470px'" : "(h.offsetTop + h.scrollHeight + 36) + 'px'"}
   document.body.dataset.ready = '1' })</script>`
 }
 

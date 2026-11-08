@@ -26,6 +26,11 @@ where it draws its own wide layout (the rail, the side panels); each slide enlar
 The same layout serves the 10-inch tablet, Chromebook and Android XR slots (2560×1440):
 `node store/compose_tablet.mjs --device tablet10|chromebook|xr`. `python3 store/pack.py` then checks every
 image against its slot's limits and writes `out/tsuji-store-<lang>.zip`, one folder per size.
+The App Store set: the iPhone (6.3", 1206×2622) from `node store/capture.mjs <lang> main iphone`
+(then `todaybig iphone` and `kanji iphone`) and `node store/compose.mjs --iphone`; the 13" iPad
+(2752×2064) from `node store/capture_tablet.mjs <lang> main ipad` (and `kanji ipad`) and
+`node store/compose_tablet.mjs --device ipad`; the header and search-results artwork from
+`node store/compose_banner.mjs`. `pack.py` writes `out/tsuji-appstore-<lang>.zip` beside the Play ones.
 The older portrait `tablet` mode of `capture.mjs`/`compose.mjs` is superseded by it.
 
 ```bash
