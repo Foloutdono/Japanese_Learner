@@ -13,6 +13,7 @@ const auth = {
   signOut:           'Sign out',
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
+  usernameRefused:   'This username is not allowed.',
   // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
   // rather than by Supabase's English sentence (plan 215). The ones the
   // guest claim shares (address taken, weak password, too many tries)
@@ -2308,6 +2309,14 @@ const decks = {
   libraryPublish:        'Publish to the library',
   libraryPublishHint:    'Other learners can find and follow it.',
   libraryPublished:      'This deck is in the library.',
+  // Plan 310: the library reads a deck before it takes it in. The
+  // refusal names the field, never the word.
+  libraryRefusedName:        'The name has a word the library does not accept.',
+  libraryRefusedDescription: 'The description has a word the library does not accept.',
+  libraryRefusedCard:        front => (front ? `A card has a word the library does not accept: ${front}.` : 'A card has a word the library does not accept.'),
+  libraryOpenCard:           'Open the card',
+  libraryRename:             'Rename and publish',
+  cardRefused:               'This card has a word the library does not accept.',
   libraryUnpublish:      'Remove from the library',
   libraryMakeMine:       'Make it mine',
   libraryMakeMineConfirm: 'This makes your own editable copy of the deck, keeping the progress you have already made. You stop following the original.',
@@ -2321,6 +2330,12 @@ const decks = {
     ? '1 learner follows this deck. Deleting it takes it off their shelf too — they will be told, and given a while to copy it.'
     : `${n} learners follow this deck. Deleting it takes it off their shelves too — they will be told, and given a while to copy it.`),
   libraryReport:         'Report',
+  // Plan 310: blocking a deck's author, from its page (the pick C).
+  libraryReportDeck:     'Report the deck',
+  libraryBlockAuthor:    name => `Block ${name}`,
+  libraryBlockHint:      name => `You won't see their decks, and ${name} won't see yours.`,
+  libraryBlockConfirm:   name => `Block ${name}? You won't see their decks, ${name} won't see yours, and the follows between you end.`,
+  libraryUnfollowBlock:  name => `Unfollow and block ${name}`,
   libraryReported:       'Reported',
   libraryReportNote:     'This flags the deck for review. Nothing is hidden automatically.',
   libraryReasonSpam:      'Spam or advertising',

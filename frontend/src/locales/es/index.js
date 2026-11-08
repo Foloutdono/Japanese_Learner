@@ -17,6 +17,7 @@ const auth = {
   signOut:           'Cerrar sesión',
   usernameInvalid:   'El nombre de usuario debe tener de 3 a 20 caracteres (letras, números, guion bajo).',
   usernameTaken:     'Este nombre de usuario ya está en uso.',
+  usernameRefused:   'Este nombre de usuario no está permitido.',
   // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
   // rather than by Supabase's English sentence (plan 215). The ones the
   // guest claim shares (address taken, weak password, too many tries)
@@ -2310,6 +2311,14 @@ const decks = {
   libraryPublish:        'Publicar en la biblioteca',
   libraryPublishHint:    'Otros estudiantes podrán encontrarlo y seguirlo.',
   libraryPublished:      'Este mazo está en la biblioteca.',
+  // Plan 310: la biblioteca lee un mazo antes de aceptarlo. El rechazo
+  // nombra el campo, nunca la palabra.
+  libraryRefusedName:        'El nombre tiene una palabra que la biblioteca no acepta.',
+  libraryRefusedDescription: 'La descripción tiene una palabra que la biblioteca no acepta.',
+  libraryRefusedCard:        front => (front ? `Una tarjeta tiene una palabra que la biblioteca no acepta: ${front}.` : 'Una tarjeta tiene una palabra que la biblioteca no acepta.'),
+  libraryOpenCard:           'Abrir la tarjeta',
+  libraryRename:             'Cambiar el nombre y publicar',
+  cardRefused:               'Esta tarjeta tiene una palabra que la biblioteca no acepta.',
   libraryUnpublish:      'Quitar de la biblioteca',
   libraryMakeMine:       'Hacerlo mío',
   libraryMakeMineConfirm: 'Esto crea tu propia copia editable del mazo, con el progreso que ya llevas. Dejas de seguir el original.',
@@ -2323,6 +2332,12 @@ const decks = {
     ? '1 estudiante sigue este mazo. Eliminarlo también lo quita de su estante: se le avisará y tendrá un tiempo para copiarlo.'
     : `${n} estudiantes siguen este mazo. Eliminarlo también lo quita de sus estantes: se les avisará y tendrán un tiempo para copiarlo.`),
   libraryReport:         'Reportar',
+  // Plan 310: bloquear al autor de un mazo, desde su página (la opción C).
+  libraryReportDeck:     'Reportar el mazo',
+  libraryBlockAuthor:    name => `Bloquear a ${name}`,
+  libraryBlockHint:      name => `Ya no verás sus mazos, ni ${name} los tuyos.`,
+  libraryBlockConfirm:   name => `¿Bloquear a ${name}? Ya no verás sus mazos, ni ${name} los tuyos, y los seguimientos entre ustedes terminan.`,
+  libraryUnfollowBlock:  name => `Dejar de seguir y bloquear a ${name}`,
   libraryReported:       'Reportado',
   libraryReportNote:     'Esto marca el mazo para su revisión. No se oculta nada automáticamente.',
   libraryReasonSpam:      'Spam o publicidad',

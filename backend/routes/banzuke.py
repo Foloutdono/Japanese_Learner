@@ -22,6 +22,7 @@ from core.srs_instance import srs
 from routes.profile import _get_or_create_username, usernames_for
 from srs.xp import level_progress
 from study import banzuke
+from study.duel_friends import blocked_between
 
 router = APIRouter()
 
@@ -98,16 +99,21 @@ def get_learner(
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT id, name, type FROM decks
-                WHERE user_id = %s AND visibility = 'public' AND withdrawn_at IS NULL
-                ORDER BY published_at DESC NULLS LAST, id DESC
-                LIMIT %s
-                """,
-                (uid, CARD_DECKS),
-            )
-            decks = [{"id": i, "name": n, "type": t} for i, n, t in cur.fetchall()]
+            # Across a block the card shows no deck, as the library shows
+            # none (plan 310, routes/decks._APART).
+            if uid != user_id and blocked_between(cur, user_id, uid):
+                decks = []
+            else:
+                cur.execute(
+                    """
+                    SELECT id, name, type FROM decks
+                    WHERE user_id = %s AND visibility = 'public' AND withdrawn_at IS NULL
+                    ORDER BY published_at DESC NULLS LAST, id DESC
+                    LIMIT %s
+                    """,
+                    (uid, CARD_DECKS),
+                )
+                decks = [{"id": i, "name": n, "type": t} for i, n, t in cur.fetchall()]
     finally:
         conn.close()
 

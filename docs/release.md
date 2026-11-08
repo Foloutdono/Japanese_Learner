@@ -156,7 +156,54 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
   (a new personal developer account's rule).
 - App Store Connect: the privacy labels, an **account-deletion note** for
   the reviewer (Settings › Account), a **test account**, the support and
-  privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group.
+  privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group,
+  and the **guideline 1.2 note** below in the review notes.
+
+## Guideline 1.2 — what learners publish (plan 310)
+
+Tsuji has user-generated content: the decks learners publish to the
+library, and the usernames on the 番付, the duels and under every
+published deck. Guideline 1.2 asks such an app for four things. The note
+for App Review, ready to paste:
+
+> Learners can publish study decks to a shared library and have a public
+> username. We meet guideline 1.2 as follows.
+>
+> 1. **Filtering before posting.** A deck's name, description and card
+>    text are checked against a list of slurs and vulgar terms (English,
+>    French, Spanish and Japanese) when the deck is published, and again
+>    on every later edit to a deck other learners can read. A username is
+>    checked whenever it is set. Refused text cannot be published; the
+>    learner is told which field to change.
+> 2. **Reporting.** Every published deck has a Report action in its
+>    ··· menu (spam, offensive, wrong, copyright, other), and every
+>    learner in the duels can be reported from their profile. Each report notifies the
+>    developer at once and is reviewed within 24 hours; offending decks
+>    are unpublished and offending accounts removed.
+> 3. **Blocking.** A learner can block a deck's author from the deck's
+>    page (its ··· menu, or when unfollowing it; both ask for
+>    confirmation), and any learner from the duels (Duels › Friends, or
+>    a player's card). A block hides each learner's published decks from
+>    the other everywhere in the library, ends any deck follows,
+>    friendships and duels between them, and stops either from finding
+>    or challenging the other.
+> 4. **Contact.** contact.tsujijapanese@gmail.com, published in the
+>    privacy policy (https://<web origin>/privacy.html#en-contact), and
+>    in the app at Settings › Write to us.
+
+Two promises in it are the owner's to keep, not the code's: the reports
+are read within 24 hours (the Discord bell rings for each deck report;
+`python -m scripts.read_reports` reads the duels'), and an offending deck
+is unpublished and an offending account removed by hand. Change the
+figure in the note if 24 hours is not what you can hold.
+
+What the filter is and is not (`backend/core/content_filter.py`): a
+closed list in two tiers, slurs refused everywhere others read and
+vulgarity refused only in a name or a description, matched whole-word
+after folding so that Japanese, romaji, French and Spanish learning
+content passes (`tests/test_content_filter.py` runs it over every text
+the app teaches). It is the door, not the moderation: what passes it can
+still be reported.
 
 ## The widget and its App Group (plan 156)
 

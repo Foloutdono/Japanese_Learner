@@ -15,6 +15,7 @@ const auth = {
   signOut:           'Déconnexion',
   usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, tiret bas).",
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
+  usernameRefused:   "Ce nom d'utilisateur n'est pas accepté.",
   // 改札 — les refus de la connexion, nommés par leur code
   // (lib/authErrors.js) plutôt que par la phrase anglaise de Supabase
   // (plan 215). Les refus partagés avec la carte invité (adresse déjà
@@ -2236,6 +2237,14 @@ const decks = {
   libraryPublish:        'Publier dans la bibliothèque',
   libraryPublishHint:    'Les autres pourront le trouver et le suivre.',
   libraryPublished:      'Ce deck est dans la bibliothèque.',
+  // Plan 310 : la bibliothèque lit un deck avant de l'accueillir. Le
+  // refus nomme le champ, jamais le mot.
+  libraryRefusedName:        'Le nom contient un mot que la bibliothèque refuse.',
+  libraryRefusedDescription: 'La description contient un mot que la bibliothèque refuse.',
+  libraryRefusedCard:        front => (front ? `Une carte contient un mot que la bibliothèque refuse : ${front}.` : 'Une carte contient un mot que la bibliothèque refuse.'),
+  libraryOpenCard:           'Ouvrir la carte',
+  libraryRename:             'Renommer et publier',
+  cardRefused:               'Cette carte contient un mot que la bibliothèque refuse.',
   libraryUnpublish:      'Retirer de la bibliothèque',
   libraryMakeMine:       'En faire ma copie',
   libraryMakeMineConfirm: 'Cela crée ta propre copie modifiable du deck, en gardant la progression déjà faite. Tu cesses de suivre l’original.',
@@ -2249,6 +2258,12 @@ const decks = {
     ? '1 apprenant suit ce deck. Le supprimer le retire aussi de son étagère — il sera prévenu et disposera d’un délai pour le copier.'
     : `${n} apprenants suivent ce deck. Le supprimer le retire aussi de leurs étagères — ils seront prévenus et disposeront d’un délai pour le copier.`),
   libraryReport:         'Signaler',
+  // Plan 310 : bloquer l'auteur d'un deck, depuis sa page (le choix C).
+  libraryReportDeck:     'Signaler le deck',
+  libraryBlockAuthor:    name => `Bloquer ${name}`,
+  libraryBlockHint:      name => `Tu ne verras plus ses decks, ni ${name} les tiens.`,
+  libraryBlockConfirm:   name => `Bloquer ${name} ? Tu ne verras plus ses decks, ni ${name} les tiens, et les abonnements entre vous prennent fin.`,
+  libraryUnfollowBlock:  name => `Ne plus suivre et bloquer ${name}`,
   libraryReported:       'Signalé',
   libraryReportNote:     'Cela signale le deck pour examen. Rien n’est masqué automatiquement.',
   libraryReasonSpam:      'Spam ou publicité',

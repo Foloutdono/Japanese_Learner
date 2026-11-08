@@ -12612,27 +12612,19 @@ textarea:focus-visible {
    the word's width. */
 .deck-identity__study.btn-depart--gate { flex: 0 0 40%; margin: 0; }
 
-/* ── 通報 — the report, in the identity's corner ──
-   Reporting a deck is not one of this page's offers. As a labelled
-   pill under the cards it read as the third thing on the menu, after
-   Follow and the preview — a learner scanning the page met "Report"
-   at the end of it as if it were a way of using the deck. In the
-   card's top-right corner it is where a complaint belongs: attached
-   to the thing complained about, and out of the reading line. The
-   word goes with the move; the mark carries it, and `title` and the
-   accessible name carry the word for anyone who needs it.
-
-   Quiet at rest, --danger only under the cursor. The screen has ONE
-   action (DESIGN.md, "The primary button"), and a permanently red
-   mark two inches from the filled button argues with it. The hover
-   ink and ring are .chip--danger's own values, so this is the same
-   control family seen from closer in, not a second reading of the
-   pigment.
+/* ── More, in the identity's corner (plan 310, the owner's pick C) ──
+   What a learner does against another learner's deck is not one of
+   this page's offers, so it stands in the card's top-right corner,
+   attached to the thing it is about and out of the reading line: the
+   ··· of the deck's own page, opening the report and the author's
+   block. It was the report alone (通報), a warning mark quiet at rest
+   and in the danger's ink under the cursor; as More it is the chip
+   family's own, the danger kept for the block row inside.
 
    Square at --r-pill and glyph-only, the construction .console__toggle
    takes for the same reason: the button IS the target, so a border
    round a label's worth of empty pill would be drawn twice. */
-.deck-identity__report {
+.deck-identity__more {
   flex: none;
   /* The corner, not the middle: the row is as tall as the filled
      action beside it, and centred this would sit level with the
@@ -12642,21 +12634,6 @@ textarea:focus-visible {
   height: 34px;
   padding: 0;
   justify-content: center;
-}
-.deck-identity__report:hover,
-.deck-identity__report:focus-visible {
-  color: color-mix(in srgb, var(--danger) 35%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--danger) 70%, transparent);
-}
-/* Reported is spent, not forbidden, so it does not take the chip
-   family's 0.45: the state is the only thing the corner still has to
-   say, and it says it in the 50% mix 057 settled on for danger as
-   TEXT. Disabled because there is nothing left to press. */
-.deck-identity__report:disabled {
-  opacity: 1;
-  cursor: default;
-  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
 }
 
 /* ── The identity block on a phone ──
@@ -12690,14 +12667,14 @@ textarea:focus-visible {
   .deck-identity__meta { grid-column: 1 / -1; }
   .deck-identity__study { grid-column: 1 / -1; }
   /* The corner is a third track, and only where something stands in
-     it: the deck's own page carries no report, and an empty `auto`
+     it: the deck's own page carries no More here, and an empty `auto`
      column would still cost that card one gap of trailing air.
      Placed explicitly because the button is last in the DOM -- it is
      read after the action, and drawn beside the name. */
-  .deck-identity:has(.deck-identity__report) {
+  .deck-identity:has(.deck-identity__more) {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
-  .deck-identity__report { grid-row: 1; grid-column: 3; align-self: center; }
+  .deck-identity__more { grid-row: 1; grid-column: 3; align-self: center; }
 }
 
 .chip__dots { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; }
@@ -12995,6 +12972,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .btn-secondary--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
 .sheet__q { font-size: var(--fs-sm); color: var(--text-primary); }
+/* A sheet's sentence in the danger's ink (plan 310): the library's
+   refusal, said under the row that was tapped (the owner's pick B), or
+   a block that did not go through. */
+.sheet__q--danger { color: var(--danger); }
 
 /* Like a console's chips, the deck's chip row is a SET — everything
    the screen can do to the deck — so it takes the whole width rather
@@ -18397,6 +18378,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   scroll-margin-top: calc(var(--safe-top) + var(--hud-h) + var(--sp-4));
 }
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
+/* C's line (plan 310): a card the library refuses, said on the card,
+   above its fields. The form's own gap spaces it. */
+.deckdetail-form__refused { margin: 0; font-size: var(--fs-sm); color: var(--danger); }
 /* DeckDetail.dc.html's `.field`: 12/16 and a 44px floor. It was
    `10px 14px` with no floor, which put the inputs at ~40px — two rungs
    off the scale and under the minimum on the one screen where a learner
