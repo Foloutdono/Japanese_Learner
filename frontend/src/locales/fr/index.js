@@ -2258,6 +2258,12 @@ const decks = {
     ? '1 apprenant suit ce deck. Le supprimer le retire aussi de son étagère — il sera prévenu et disposera d’un délai pour le copier.'
     : `${n} apprenants suivent ce deck. Le supprimer le retire aussi de leurs étagères — ils seront prévenus et disposeront d’un délai pour le copier.`),
   libraryReport:         'Signaler',
+  // Plan 310 : bloquer l'auteur d'un deck, depuis sa page (le choix C).
+  libraryReportDeck:     'Signaler le deck',
+  libraryBlockAuthor:    name => `Bloquer ${name}`,
+  libraryBlockHint:      name => `Tu ne verras plus ses decks, ni ${name} les tiens.`,
+  libraryBlockConfirm:   name => `Bloquer ${name} ? Tu ne verras plus ses decks, ni ${name} les tiens, et les abonnements entre vous prennent fin.`,
+  libraryUnfollowBlock:  name => `Ne plus suivre et bloquer ${name}`,
   libraryReported:       'Signalé',
   libraryReportNote:     'Cela signale le deck pour examen. Rien n’est masqué automatiquement.',
   libraryReasonSpam:      'Spam ou publicité',

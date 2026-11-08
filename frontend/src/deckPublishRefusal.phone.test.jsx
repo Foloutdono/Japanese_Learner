@@ -92,14 +92,14 @@ describe('a refused publish, on a phone', () => {
     answers['POST /api/decks/1/publish'] = [refused({ field: 'card', card_id: 102 })]
     await mount()
     await publish()
-    expect($('.sheet__q--refused').textContent).toBe(fr.libraryRefusedCard('改札'))
-    expect($('.sheet__q--refused').getAttribute('role')).toBe('alert')
+    expect($('.sheet__q--danger').textContent).toBe(fr.libraryRefusedCard('改札'))
+    expect($('.sheet__q--danger').getAttribute('role')).toBe('alert')
     // Still in the sheet, under the row that was tapped.
     expect($$('.more-row').some(b => b.textContent.includes(fr.libraryPublish))).toBe(true)
 
     button(fr.libraryOpenCard).click()
     await settle(200)
-    expect($('.sheet__q--refused')).toBeNull()
+    expect($('.sheet__q--danger')).toBeNull()
     const form = $('.deckdetail-form')
     expect(form).not.toBeNull()
     expect(form.querySelector('.deckdetail-form__refused').textContent).toBe(fr.cardRefused)
@@ -111,7 +111,7 @@ describe('a refused publish, on a phone', () => {
     answers['PATCH /api/decks/1'] = [json({ ...deck, name: 'Voyage en train' })]
     await mount()
     await publish()
-    expect($('.sheet__q--refused').textContent).toBe(fr.libraryRefusedName)
+    expect($('.sheet__q--danger').textContent).toBe(fr.libraryRefusedName)
     const field = $$('input').find(i => i.placeholder === fr.deckNamePlaceholder)
     expect(field.value).toBe('Voyage au Japon')
 
@@ -129,7 +129,7 @@ describe('a refused publish, on a phone', () => {
     ])
     expect(JSON.parse(sent[1][2])).toEqual({ name: 'Voyage en train' })
     // Published: the sheet is closed and nothing is refused.
-    expect($('.sheet__q--refused')).toBeNull()
+    expect($('.sheet__q--danger')).toBeNull()
     expect($('.more-list')).toBeNull()
   })
 
@@ -137,7 +137,7 @@ describe('a refused publish, on a phone', () => {
     answers['POST /api/decks/1/publish'] = [refused({ field: 'description' })]
     await mount()
     await publish()
-    expect($('.sheet__q--refused').textContent).toBe(fr.libraryRefusedDescription)
+    expect($('.sheet__q--danger').textContent).toBe(fr.libraryRefusedDescription)
     expect(button(fr.libraryOpenCard)).toBeUndefined()
     expect(button(fr.libraryRename)).toBeUndefined()
   })
@@ -152,14 +152,14 @@ describe('a refused publish, on a phone', () => {
     expect($('.more-list')).toBeNull()
     button(fr.deckMore).click()
     await settle(150)
-    expect($('.sheet__q--refused')).toBeNull()
+    expect($('.sheet__q--danger')).toBeNull()
   })
 
   it('closes on a publish that passes, saying nothing', async () => {
     answers['POST /api/decks/1/publish'] = [json({ ...deck, visibility: 'public' })]
     await mount()
     await publish()
-    expect($('.sheet__q--refused')).toBeNull()
+    expect($('.sheet__q--danger')).toBeNull()
     expect($('.more-list')).toBeNull()
   })
 })

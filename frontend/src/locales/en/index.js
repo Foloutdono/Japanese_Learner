@@ -2330,6 +2330,12 @@ const decks = {
     ? '1 learner follows this deck. Deleting it takes it off their shelf too — they will be told, and given a while to copy it.'
     : `${n} learners follow this deck. Deleting it takes it off their shelves too — they will be told, and given a while to copy it.`),
   libraryReport:         'Report',
+  // Plan 310: blocking a deck's author, from its page (the pick C).
+  libraryReportDeck:     'Report the deck',
+  libraryBlockAuthor:    name => `Block ${name}`,
+  libraryBlockHint:      name => `You won't see their decks, and ${name} won't see yours.`,
+  libraryBlockConfirm:   name => `Block ${name}? You won't see their decks, ${name} won't see yours, and the follows between you end.`,
+  libraryUnfollowBlock:  name => `Unfollow and block ${name}`,
   libraryReported:       'Reported',
   libraryReportNote:     'This flags the deck for review. Nothing is hidden automatically.',
   libraryReasonSpam:      'Spam or advertising',

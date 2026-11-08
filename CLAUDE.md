@@ -371,7 +371,11 @@ runtime purpose.
   them: `pique-nique`, `kike` for 聞け and 把's gloss "faggot" each
   removed a rule). A new place another learner reads learner text is
   read the same way, and a new place that lists another learner's
-  content reads the blocks (`routes/decks._APART`, both ways).
+  content reads the blocks (`routes/decks._APART`, both ways). A deck's
+  author is blocked from the deck's page (the owner's pick C): the
+  library's page carries ··· in its corner (`PublicDeckPage`, report
+  and block), a followed deck's unfollow sheet the second way out
+  (`DeckDetailScreen`), and both ask first, since a block ends follows.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

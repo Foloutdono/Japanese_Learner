@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { saveBlob } from '../lib/platform'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -23,9 +23,11 @@ import { ChoiceField, LongField, PairsField, ReadingOfField } from '../component
 import { pairRows } from '../components/decks/importCards'
 import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
+import { MoreRow } from '../components/decks/MoreRow'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
 import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PencilIcon, PlusIcon, SearchIcon, BooksIcon, FollowIcon } from '../components/ui/Icons'
 import { composing } from '../lib/keyGuards'
+import { errorKey } from '../domain/duel'
 
 // The name the export endpoint chose, out of its Content-Disposition.
 // Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
@@ -464,6 +466,20 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       .catch(() => { setBusy(false); setConfirmingUnfollow(false) })
   }
 
+  // The unfollow's second way out (plan 310, the owner's pick): a
+  // follower meets the author here, not in the library, and a block ends
+  // the follow anyway (study/duel_friends.block), so it stands beside it.
+  const [blockFailed, setBlockFailed] = useState(null)
+  function unfollowAndBlock() {
+    if (busy || !deck?.author) return
+    setBusy(true)
+    setBlockFailed(null)
+    playUi('click-screen-selection')
+    apiJson('/api/pvp/blocks', session, { method: 'POST', body: JSON.stringify({ username: deck.author }) })
+      .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
+      .catch(e => { setBusy(false); setBlockFailed(errorKey(e)) })
+  }
+
   function makeItMine() {
     if (busy) return
     setBusy(true)
@@ -500,6 +516,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     setConfirmingDeck(false)
     setConfirmingMine(false)
     setConfirmingUnfollow(false)
+    setBlockFailed(null)
     setConfirmingDelete(false)
     setConfirmingCard(false)
     setSelectMode(false)
@@ -997,15 +1014,8 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // cards in and out. One list of rows, each a glyph and its word, the
   // library's saying where the deck stands; the deletion a list of its
   // own at the end, in the danger's ink, arming the question that fills.
-  const moreRow = (key, icon, label, onClick, { hint, danger = false, disabled = false } = {}) => (
-    <button key={key} type="button" className={`more-row${danger ? ' more-row--danger' : ''}`}
-      onClick={onClick} disabled={disabled} aria-haspopup={danger ? 'dialog' : undefined}>
-      <span className="more-row__icon" aria-hidden="true">{icon}</span>
-      <span className="more-row__text">
-        <span className="more-row__label">{label}</span>
-        {hint && <span className="more-row__hint">{hint}</span>}
-      </span>
-    </button>
+  const moreRow = (key, icon, label, onClick, opts = {}) => (
+    <MoreRow key={key} icon={icon} label={label} onClick={onClick} {...opts} />
   )
   const libraryRow = cards.length > 0 && deck?.visibility !== 'public'
     ? moreRow('publish', <BooksIcon size={16} />, t.libraryPublish, () => publish(true), { hint: t.libraryPublishHint, disabled: busy })
@@ -1017,7 +1027,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const refusalRows = refusal && (
     refusal.field === 'name' ? (
       <>
-        <span className="sheet__q sheet__q--refused" role="alert">{t.libraryRefusedName}</span>
+        <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedName}</span>
         <input value={renameTo} onChange={e => setRenameTo(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !composing(e) && renameAndPublish()}
           placeholder={t.deckNamePlaceholder} aria-label={t.deckNamePlaceholder}
@@ -1028,13 +1038,13 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       </>
     ) : refusal.field === 'card' ? (
       <>
-        <span className="sheet__q sheet__q--refused" role="alert">{t.libraryRefusedCard(refusedDeckCard?.front)}</span>
+        <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedCard(refusedDeckCard?.front)}</span>
         {refusedDeckCard && (
           <button type="button" className="btn-secondary" onClick={openRefusedCard}>{t.libraryOpenCard}</button>
         )}
       </>
     ) : (
-      <span className="sheet__q sheet__q--refused" role="alert">{t.libraryRefusedDescription}</span>
+      <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedDescription}</span>
     )
   )
   const moreRows = withCards => {
@@ -1571,17 +1581,24 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         </button>
       </Sheet>
 
-      <Sheet open={confirmingUnfollow} onClose={() => setConfirmingUnfollow(false)}
+      <Sheet open={confirmingUnfollow} onClose={() => { setConfirmingUnfollow(false); setBlockFailed(null) }}
         title={withdrawn ? t.libraryRemove : t.libraryUnfollow} sub={deck?.name ?? t.deckFallbackTitle}
         icon={FollowIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">
           {withdrawn ? t.libraryRemoveConfirm : t.libraryUnfollowConfirm}
         </span>
+        {blockFailed && <span className="sheet__q sheet__q--danger" role="alert">{t[blockFailed]}</span>}
         <button type="button" className="btn-primary btn-primary--danger" disabled={busy}
           onClick={unfollow}>
           {withdrawn ? t.libraryRemove : t.libraryUnfollow}
         </button>
-        <button type="button" className="btn-secondary" onClick={() => setConfirmingUnfollow(false)}>
+        {!withdrawn && deck?.author && (
+          <button type="button" className="btn-secondary btn-secondary--danger" disabled={busy}
+            onClick={unfollowAndBlock}>
+            {t.libraryUnfollowBlock(deck.author)}
+          </button>
+        )}
+        <button type="button" className="btn-secondary" onClick={() => { setConfirmingUnfollow(false); setBlockFailed(null) }}>
           {t.cancel}
         </button>
       </Sheet>

@@ -63,7 +63,7 @@ describe('a refused publish, on the desk', () => {
     expect(column).not.toBeNull()
     $$('.desk-more .more-row').find(b => b.textContent.includes(fr.libraryPublish)).click()
     await settle(200)
-    expect(column.querySelector('.sheet__q--refused').textContent).toBe(fr.libraryRefusedCard('改札'))
+    expect(column.querySelector('.sheet__q--danger').textContent).toBe(fr.libraryRefusedCard('改札'))
 
     $$('.desk-more button').find(b => b.textContent.trim() === fr.libraryOpenCard).click()
     await settle(200)

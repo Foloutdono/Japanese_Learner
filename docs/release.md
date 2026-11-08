@@ -175,16 +175,18 @@ for App Review, ready to paste:
 >    on every later edit to a deck other learners can read. A username is
 >    checked whenever it is set. Refused text cannot be published; the
 >    learner is told which field to change.
-> 2. **Reporting.** Every published deck has a Report action (spam,
->    offensive, wrong, copyright, other), and every learner in the duels
->    can be reported from their profile. Each report notifies the
+> 2. **Reporting.** Every published deck has a Report action in its
+>    ··· menu (spam, offensive, wrong, copyright, other), and every
+>    learner in the duels can be reported from their profile. Each report notifies the
 >    developer at once and is reviewed within 24 hours; offending decks
 >    are unpublished and offending accounts removed.
-> 3. **Blocking.** A learner can block another from the duels (Duels ›
->    Friends, or a player's card). A block hides each learner's
->    published decks from the other everywhere in the library, ends any
->    deck follows, friendships and duels between them, and stops either
->    from finding or challenging the other.
+> 3. **Blocking.** A learner can block a deck's author from the deck's
+>    page (its ··· menu, or when unfollowing it; both ask for
+>    confirmation), and any learner from the duels (Duels › Friends, or
+>    a player's card). A block hides each learner's published decks from
+>    the other everywhere in the library, ends any deck follows,
+>    friendships and duels between them, and stops either from finding
+>    or challenging the other.
 > 4. **Contact.** contact.tsujijapanese@gmail.com, published in the
 >    privacy policy (https://<web origin>/privacy.html#en-contact), and
 >    in the app at Settings › Write to us.

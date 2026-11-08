@@ -2332,6 +2332,12 @@ const decks = {
     ? '1 estudiante sigue este mazo. Eliminarlo también lo quita de su estante: se le avisará y tendrá un tiempo para copiarlo.'
     : `${n} estudiantes siguen este mazo. Eliminarlo también lo quita de sus estantes: se les avisará y tendrán un tiempo para copiarlo.`),
   libraryReport:         'Reportar',
+  // Plan 310: bloquear al autor de un mazo, desde su página (la opción C).
+  libraryReportDeck:     'Reportar el mazo',
+  libraryBlockAuthor:    name => `Bloquear a ${name}`,
+  libraryBlockHint:      name => `Ya no verás sus mazos, ni ${name} los tuyos.`,
+  libraryBlockConfirm:   name => `¿Bloquear a ${name}? Ya no verás sus mazos, ni ${name} los tuyos, y los seguimientos entre ustedes terminan.`,
+  libraryUnfollowBlock:  name => `Dejar de seguir y bloquear a ${name}`,
   libraryReported:       'Reportado',
   libraryReportNote:     'Esto marca el mazo para su revisión. No se oculta nada automáticamente.',
   libraryReasonSpam:      'Spam o publicidad',
