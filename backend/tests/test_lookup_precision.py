@@ -1105,6 +1105,54 @@ class CountedTests(unittest.TestCase):
         tokens = [t["surface"] for t in analysis.analyze_local("この一回のテイクで")["tokens"]]
         self.assertEqual(tokens[1:3], ["一", "回"])
 
+    def test_an_age_written_in_kana_is_no_hatachi(self) -> None:
+        # 二十 + さい spells 二十歳's lemmas, but the page says さい: the
+        # number and the counter, にじゅっさい, "20 years old" -- never
+        # はたち over a さい the furigana then cannot say.
+        for sentence in ("あには二十さいの大学生で、今は一人でおおさかにすんでいます。",
+                         "あには大学生で、二十さいです。",
+                         "来年、二十さいになります。",
+                         "父は四十さいで、あには二十さいです。"):
+            with self.subTest(sentence=sentence):
+                tokens = analysis.analyze_local(sentence)["tokens"]
+                self.assertNotIn("vocab_N5_二十歳_はたち", [(t.get("vocab_match") or {}).get("raw_id") for t in tokens])
+                k = next(k for k, t in enumerate(tokens) if t["surface"] == "二十")
+                self.assertEqual((tokens[k]["reading"], tokens[k]["number"]), ("にじゅっ", 20))
+                self.assertEqual(tokens[k + 1]["surface"], "さい")
+                self.assertEqual(tokens[k + 1]["vocab_match"]["raw_id"], "vocab_N5_歳_さい")
+        # ...and where the page writes the word, it is the word.
+        for sentence, word in (("あには二十歳です。", "二十歳"),
+                               ("来年、二十歳になります。", "二十歳"),
+                               ("二十才のお祝いをした。", "二十才"),
+                               ("あにははたちです。", "はたち")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], "vocab_N5_二十歳_はたち")
+                self.assertEqual(token_of(sentence, word)["reading"], "はたち")
+
+    def test_a_run_spelled_partly_in_kana_keeps_the_card_that_says_its_kana(self) -> None:
+        # The kana a page writes inside a word are said: 日よう日 reads
+        # its よう in にちようび, お母さん its お and さん; a form's own
+        # ending is the form's, so 面倒くさがって's くさ, 臭い's stem, is
+        # said by めんどうくさい.
+        for sentence, word, raw_id in (
+            ("日よう日に行きます。", "日よう日", "vocab_N5_日曜日_にちようび"),
+            ("お母さんは先生です。", "お母さん", "vocab_N5_お母さん_おかあさん"),
+            ("面倒くさがって、すぐに遊びに行ってしまった", "面倒くさ", "vocab_N2_面倒臭い_めんどうくさい"),
+        ):
+            with self.subTest(word=word):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_the_kana_a_card_must_say(self) -> None:
+        def run(text):
+            return morphology.tokenize(text)
+        hatachi = {"kanji": "二十歳", "kana": "はたち"}
+        self.assertFalse(card_lookup.says_its_kana(run("二十さい"), hatachi))
+        self.assertTrue(card_lookup.says_its_kana(run("二十歳"), hatachi))      # no kana to say
+        self.assertTrue(card_lookup.says_its_kana(run("はたち"), hatachi))      # all kana, read as written
+        self.assertTrue(card_lookup.says_its_kana(run("二十さい"), {"kanji": "二十歳", "kana": "はたち/にじゅっさい"}))
+        # A mark is said by nothing: the catalogue's 一つ〜 is 一つ.
+        self.assertTrue(card_lookup.says_its_kana(run("一つ〜"), {"kanji": "一つ", "kana": "ひとつ"}))
+
 
 def token_of(sentence: str, surface: str) -> dict:
     return next(t for t in analysis.analyze_local(sentence)["tokens"] if t["surface"] == surface)

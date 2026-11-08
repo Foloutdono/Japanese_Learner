@@ -2443,7 +2443,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # (人が行き交う通り, 適当にしたら, 右手に見えます); and what their stress
 # sentences found before them (本屋によると 寄る, 泣き虫やった, せんがため,
 # なんのかんの, 多かれ少なかれ, じしん, 何にもまして, 幼く見える).
-LOCAL_REV = 40
+# 41: a word the page writes partly in kana takes no card whose reading
+# does not say those kana (card_lookup.says_its_kana): 二十さい spells the
+# lemmas of 二十歳, but its さい is said, so it is 二十 + さい, にじゅっさい,
+# never はたち; 二十歳 and はたち keep the card.
+LOCAL_REV = 41
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
