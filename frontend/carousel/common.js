@@ -90,12 +90,18 @@ const PUNCT_ROMAJI = { '。': '.', '、': ',', '？': '?', '！': '!', '「': '�
 /** The sentence in romaji, word by word as the slides cut it. */
 export function lineRomaji(rows) {
   let out = ''
+  let held = false
   for (const row of rows) {
     if (row.k === 'punct') {
       const p = PUNCT_ROMAJI[row.t] ?? ''
       out += p === '“' ? ` ${p}` : p
+      held = false
     } else {
-      out += (out && !out.endsWith('“') ? ' ' : '') + row.ro
+      // A row that ends on っ is said into the next (二十 + さい nijus +
+      // sai, だっ + た dat + ta), so the line reads nijussai, datta.
+      out += (out && !out.endsWith('“') && !held ? ' ' : '') + row.ro
+      const said = row.fu?.length ? row.fu.at(-1)[1] || row.fu.at(-1)[0] : row.t
+      held = /[っッ]$/.test(said)
     }
   }
   // A capital at the start of the line and after each stop inside it.

@@ -205,13 +205,18 @@ def _romaji(reading: str, kind: str, surface: str, after: dict | None = None) ->
     # A word in katakana is romanised as it is written: its reading spells
     # ー as a vowel (コーヒー こうひい), which gave "kouhii" (plan 248).
     said = surface if _KATAKANA.match(surface) else reading
+    return _row_romaji(said, (after.get("reading") or after["surface"]) if after else "")
+
+
+def _row_romaji(said: str, after: str = "") -> str:
+    """A row's romaji from what it says, `after` what the next row says.
+    A row that ends on っ is no "tsu" (二十 にじゅっ was "nijutsu"): the っ
+    doubles what the next row opens with, so the rows read on into the
+    sentence's romaji (二十 + さい nijus + sai, 一 + ぴき ip + piki), and
+    before nothing it is not written (あっ a), as the app's own romaji
+    has it (frontend lib/romaji.js)."""
     if len(said) > 1 and said[-1] in "っッ":
-        # A row that ends on っ is no "tsu" (二十 にじゅっ was "nijutsu"):
-        # the っ doubles what the next row opens with, so the rows read
-        # on into the sentence's romaji (二十 + さい nijus + sai, 一 + ぴき
-        # ip + piki), and before nothing it is not written (あっ a), as the
-        # app's own romaji has it (frontend lib/romaji.js).
-        nxt = to_romaji(after.get("reading") or after["surface"]) if after else ""
+        nxt = to_romaji(after) if after else ""
         double = "t" if nxt.startswith("ch") else nxt[:1] if nxt[:1] in _CONSONANTS else ""
         return to_romaji(said[:-1]) + double
     return to_romaji(said)
@@ -880,7 +885,7 @@ def words(level: str, index: dict) -> dict:
         written = e["kanji"] or kana
         hits = [h for h in index.get(written, []) if h[2] == kana or not h[2]]
         hits.sort(key=lambda h: (h[1] != level, abs(rank[h[1]] - rank[level]), rank[h[1]] > rank[level]))
-        w = {"t": written, "r": kana, "ro": to_romaji(kana), "en": _senses(e.get("meaning", ""))}
+        w = {"t": written, "r": kana, "ro": _row_romaji(kana), "en": _senses(e.get("meaning", ""))}
         fr = _senses(fr_gloss(e, VOCAB_FR) or "")
         if fr:
             w["fr"] = fr
@@ -923,7 +928,7 @@ def kanji_cards(level: str, deck: dict) -> dict:
         ws = []
         for _, _, lv, e in sorted(by_char.get(c, []), key=lambda x: (x[0], x[1]))[:5]:
             kana = (e.get("kana") or "").split("/")[0]
-            w = {"t": e["kanji"], "r": kana, "ro": to_romaji(kana), "lv": lv, "en": _senses(e.get("meaning", ""), 1)}
+            w = {"t": e["kanji"], "r": kana, "ro": _row_romaji(kana), "lv": lv, "en": _senses(e.get("meaning", ""), 1)}
             fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
             if fr:
                 w["fr"] = fr
@@ -971,7 +976,7 @@ def kana_cards() -> dict:
                 written = v["kanji"] or kana
                 in_script = re.fullmatch(r"[ァ-ヿ]+", kana) if script == "katakana" else re.fullmatch(r"[ぁ-ゟ]+", kana)
                 if kana.startswith(k) and in_script and len(kana) <= 5:
-                    w = {"t": written, "r": kana, "ro": to_romaji(kana), "en": _senses(v.get("meaning", ""), 1)}
+                    w = {"t": written, "r": kana, "ro": _row_romaji(kana), "en": _senses(v.get("meaning", ""), 1)}
                     fr = _senses(fr_gloss(v, VOCAB_FR) or "", 1)
                     if fr:
                         w["fr"] = fr
@@ -1031,7 +1036,7 @@ def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:
                 continue
             seen.add(written)
             kana = (r.get("lemma") or [None, None])[1] or "".join(rd or t for t, rd in r["fu"])
-            w = {"t": written, "r": kana, "ro": to_romaji(kana), "lv": r["lv"], "en": r["en"][:1]}
+            w = {"t": written, "r": kana, "ro": _row_romaji(kana), "lv": r["lv"], "en": r["en"][:1]}
             if r.get("fr"):
                 w["fr"] = r["fr"][:1]
             fu = _furigana_of(written, kana)
@@ -1179,7 +1184,7 @@ def themes() -> dict:
                 continue
             seen.add(written)
             kana = e.get("kana") or written
-            w = {"t": written, "r": kana, "ro": to_romaji(kana), "band": e.get("theme_level"),
+            w = {"t": written, "r": kana, "ro": _row_romaji(kana), "band": e.get("theme_level"),
                  "en": _senses(e.get("meaning", ""), 2), "fr": _senses(e.get("meaning_fr", ""), 2)}
             if e.get("level"):
                 w["lv"] = e["level"]
@@ -1544,7 +1549,6 @@ def _by_kana(rows: list[list], line: dict) -> list[list]:
     Words a reading runs across are joined into one; a word's romaji is
     made again from its reading only where that reading changed."""
     from study.furigana import align_deck
-    from study.romaji import to_romaji
 
     jp = line["jp"]
     parts = align_deck(jp, line["kana"])
@@ -1579,7 +1583,8 @@ def _by_kana(rows: list[list], line: dict) -> list[list]:
                 fu.append([text, reading] if reading else [jp[lo:hi], ""])
         said = "".join(r or t for t, r in fu)
         was = "".join(_said([rows[i]]) for i in g)
-        ro = first[2] if len(g) == 1 and said == was else to_romaji(said)
+        after = "".join(r or t for a, _, t, r in spans if a >= end)
+        ro = first[2] if len(g) == 1 and said == was else _row_romaji(said, after)
         row = [jp[start:end], first[1], ro, fu if any(r for _, r in fu) else 0]
         while row[-1] == 0:
             row.pop()
