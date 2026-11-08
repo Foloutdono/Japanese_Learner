@@ -80,7 +80,7 @@ const LOCALE_KEYS = { reading: 'reading', comprehension: 'readingComprehension',
 export const localeKeys = id => ({ title: `${LOCALE_KEYS[id]}Title`, desc: `${LOCALE_KEYS[id]}Desc` })
 
 // Where a step taps, by what the app names (record.mjs reads these off the page).
-const plate = line => `.plate--platform[style*="--line-${line}"]`
+const plate = line => `.plate--fold[style*="--line-${line}"]`
 const stop = code => `.route-stop:has(.route-stop__code:text-is("${code}"))`
 const FIELD = '.stage__foot .field'
 const SUBMIT = '.stage__foot .btn-primary'
@@ -132,7 +132,7 @@ const LESSON = '.prompt-card .prose__breakdown > .btn-secondary'
 // The opening every feature shares: the Practice gate, the feature's
 // plate tapped; then its level list, the level tapped.
 const gateSteps = (line, levels, level) => [
-  { go: '/practice', ready: '.plate--platform' },
+  { go: '/practice', ready: '.plate--fold' },
   { shot: 'gate', focus: plate(line), tap: `${plate(line)} .plate__head` },
   { go: levels, ready: '.route-stop' },
   { shot: 'levels', focus: stop(level), tap: stop(level) },
@@ -181,7 +181,7 @@ export const FEATURES = {
   conversation: {
     jp: '会話', line: 'kaiwa',
     steps: d => [
-      { go: '/practice', ready: '.plate--platform' },
+      { go: '/practice', ready: '.plate--fold' },
       { shot: 'gate', focus: plate('kaiwa'), tap: `${plate('kaiwa')} .plate__head` },
       { go: '/practice/conversation', ready: '.platform-card' },
       { shot: 'scenes', focus: ['.console', SCENE], tap: SCENE },
@@ -335,7 +335,7 @@ export const FEATURES = {
   exam: {
     jp: '模試', line: 'exam',
     steps: d => [
-      { go: '/practice', ready: '.plate--platform' },
+      { go: '/practice', ready: '.plate--fold' },
       { shot: 'gate', focus: plate('exam'), tap: `${plate('exam')} .plate__head` },
       { go: '/practice/exam', ready: '.exam-st__go' },
       // The grade's papers, one of each kind, then the next one started.
