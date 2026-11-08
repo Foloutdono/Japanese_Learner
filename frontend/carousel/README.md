@@ -1392,10 +1392,10 @@ Every change plan 309 makes to the look already posted is a dial in the
 Tune panel's "Reading challenge" group, and says what it `was`
 (`tune.js`): that look is one press away ("Look before plan 309", which
 sets every dial back and keeps the rest of the tune), or one
-`--tune challenge.<key>=<was>` at a time. The recommended values are
-the look plan 309 was drawn and measured at.
+`--tune challenge.<key>=<was>` at a time. The defaults are the look
+plan 309 was drawn and measured at, on since the owner saw it drawn.
 
-| Dial | Key | Before plan 309 | Recommended |
+| Dial | Key | Before plan 309 | Default |
 | --- | --- | --- | --- |
 | Readings' ink | `challenge.ruby` | 0: the soft ink | 0.9 |
 | Paper round the words | `challenge.halo` | 0: none | 1 |

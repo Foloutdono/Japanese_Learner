@@ -13,9 +13,9 @@
 // the text, so a frame lays the same picture, raised or carried along,
 // and draws nothing of the print's own. What moves is said by the
 // moment alone (trainRun, liftAt, panAt, washAt), so a second always
-// draws the same frame. Each dial stands at what it was before plan 309
-// until the owner has seen it drawn (tune.js, BEFORE_309), and there the
-// frame is the one it was, pixel for pixel.
+// draws the same frame. Each dial is on by default; set back to what it
+// was before plan 309 (tune.js, BEFORE_309), the frame is the one it was,
+// pixel for pixel.
 import { FORMATS, alpha, palette } from './draw.js'
 import { MARIA, drawPrint } from './app.js'
 import { coverOn } from './cover.js'

@@ -17,7 +17,7 @@
 // hour of the print. Since plan 309 the scroll's words may stand on a rim
 // of the page's paper (halo.js), their readings in the text's own ink, and
 // the read-along's panel is as dark as its hour needs, the voice's credit
-// on it: each a dial of tune.js, at the look before until the owner turns it.
+// on it: each a dial of tune.js, on by default, BEFORE_309 the look before.
 //
 // Pure but for the canvas it draws on: `challengeTimeline` times the
 // video (on the voice's own lengths and syllables where it is voiced,
