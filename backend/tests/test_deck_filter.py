@@ -56,6 +56,18 @@ def test_a_name_the_filter_refuses_is_not_published(client, clean_decks):
     assert client.get(f"/api/decks/{deck_id}").json()["visibility"] == "private"
 
 
+def test_a_refused_name_renamed_is_published(client, clean_decks):
+    """The deck page's way out (plan 310, the owner's pick): the name's
+    field in the sheet renames the deck, then publishes it again."""
+    deck_id = _deck(client, name=f"{VULGAR} kanji")
+    _refused(client.post(f"/api/decks/{deck_id}/publish"), "name", VULGAR)
+    renamed = client.patch(f"/api/decks/{deck_id}", json={"name": "Kanji du quai"})
+    assert renamed.status_code == 200 and renamed.json()["name"] == "Kanji du quai"
+    out = client.post(f"/api/decks/{deck_id}/publish")
+    assert out.status_code == 200, out.text
+    assert out.json()["name"] == "Kanji du quai"
+
+
 def test_a_description_the_filter_refuses_is_not_published(client, clean_decks):
     deck_id = _deck(client)
     # Private, so the learner may write it; publishing reads it.

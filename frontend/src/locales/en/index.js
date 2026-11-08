@@ -2309,6 +2309,14 @@ const decks = {
   libraryPublish:        'Publish to the library',
   libraryPublishHint:    'Other learners can find and follow it.',
   libraryPublished:      'This deck is in the library.',
+  // Plan 310: the library reads a deck before it takes it in. The
+  // refusal names the field, never the word.
+  libraryRefusedName:        'The name has a word the library does not accept.',
+  libraryRefusedDescription: 'The description has a word the library does not accept.',
+  libraryRefusedCard:        front => (front ? `A card has a word the library does not accept: ${front}.` : 'A card has a word the library does not accept.'),
+  libraryOpenCard:           'Open the card',
+  libraryRename:             'Rename and publish',
+  cardRefused:               'This card has a word the library does not accept.',
   libraryUnpublish:      'Remove from the library',
   libraryMakeMine:       'Make it mine',
   libraryMakeMineConfirm: 'This makes your own editable copy of the deck, keeping the progress you have already made. You stop following the original.',

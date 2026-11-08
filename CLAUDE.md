@@ -359,7 +359,11 @@ runtime purpose.
   everywhere (`refused(text)`), vulgarity only in a name or a
   description (`name=True`): a card may say what くそ means. A refusal is
   the code `content_refused` and the field, never the text, and nothing
-  it reads is kept. A word is matched whole after folding, a Japanese
+  it reads is kept. The deck page says it where it was asked (the
+  owner's pick B, `DeckDetailScreen`): the More sheet stays open with
+  the reason, a refused name brings its field (no other screen renames
+  a deck), a refused card opens in its editor, which says so, as does
+  a refused save. A word is matched whole after folding, a Japanese
   term in katakana or kanji with its lookalike guarded; a new rule is
   pinned in `tests/test_content_filter.py` with the text it refuses and
   the lookalike it leaves, and every text the app teaches, and every

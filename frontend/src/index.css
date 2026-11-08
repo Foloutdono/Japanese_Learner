@@ -12995,6 +12995,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .btn-secondary--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
 .sheet__q { font-size: var(--fs-sm); color: var(--text-primary); }
+/* The library's refusal (plan 310, the owner's pick B): why a deck
+   stays out, said under the row that was tapped, in the danger's ink. */
+.sheet__q--refused { color: var(--danger); }
 
 /* Like a console's chips, the deck's chip row is a SET — everything
    the screen can do to the deck — so it takes the whole width rather
@@ -18397,6 +18400,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   scroll-margin-top: calc(var(--safe-top) + var(--hud-h) + var(--sp-4));
 }
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
+/* C's line (plan 310): a card the library refuses, said on the card,
+   above its fields. The form's own gap spaces it. */
+.deckdetail-form__refused { margin: 0; font-size: var(--fs-sm); color: var(--danger); }
 /* DeckDetail.dc.html's `.field`: 12/16 and a 44px floor. It was
    `10px 14px` with no floor, which put the inputs at ~40px — two rungs
    off the scale and under the minimum on the one screen where a learner

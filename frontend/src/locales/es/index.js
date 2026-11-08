@@ -2311,6 +2311,14 @@ const decks = {
   libraryPublish:        'Publicar en la biblioteca',
   libraryPublishHint:    'Otros estudiantes podrán encontrarlo y seguirlo.',
   libraryPublished:      'Este mazo está en la biblioteca.',
+  // Plan 310: la biblioteca lee un mazo antes de aceptarlo. El rechazo
+  // nombra el campo, nunca la palabra.
+  libraryRefusedName:        'El nombre tiene una palabra que la biblioteca no acepta.',
+  libraryRefusedDescription: 'La descripción tiene una palabra que la biblioteca no acepta.',
+  libraryRefusedCard:        front => (front ? `Una tarjeta tiene una palabra que la biblioteca no acepta: ${front}.` : 'Una tarjeta tiene una palabra que la biblioteca no acepta.'),
+  libraryOpenCard:           'Abrir la tarjeta',
+  libraryRename:             'Cambiar el nombre y publicar',
+  cardRefused:               'Esta tarjeta tiene una palabra que la biblioteca no acepta.',
   libraryUnpublish:      'Quitar de la biblioteca',
   libraryMakeMine:       'Hacerlo mío',
   libraryMakeMineConfirm: 'Esto crea tu propia copia editable del mazo, con el progreso que ya llevas. Dejas de seguir el original.',

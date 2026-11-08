@@ -2237,6 +2237,14 @@ const decks = {
   libraryPublish:        'Publier dans la bibliothèque',
   libraryPublishHint:    'Les autres pourront le trouver et le suivre.',
   libraryPublished:      'Ce deck est dans la bibliothèque.',
+  // Plan 310 : la bibliothèque lit un deck avant de l'accueillir. Le
+  // refus nomme le champ, jamais le mot.
+  libraryRefusedName:        'Le nom contient un mot que la bibliothèque refuse.',
+  libraryRefusedDescription: 'La description contient un mot que la bibliothèque refuse.',
+  libraryRefusedCard:        front => (front ? `Une carte contient un mot que la bibliothèque refuse : ${front}.` : 'Une carte contient un mot que la bibliothèque refuse.'),
+  libraryOpenCard:           'Ouvrir la carte',
+  libraryRename:             'Renommer et publier',
+  cardRefused:               'Cette carte contient un mot que la bibliothèque refuse.',
   libraryUnpublish:      'Retirer de la bibliothèque',
   libraryMakeMine:       'En faire ma copie',
   libraryMakeMineConfirm: 'Cela crée ta propre copie modifiable du deck, en gardant la progression déjà faite. Tu cesses de suivre l’original.',
