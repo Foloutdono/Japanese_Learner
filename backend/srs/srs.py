@@ -751,6 +751,21 @@ class SRSEngine:
         if assumed and quality < CHECK_PASS:
             state = CardState(card_id=card_id, mode=mode)
         updated = self._schedule(state, quality)
+        if assumed and quality >= CHECK_PASS:
+            # The check passed: the real answer takes the virtual one's
+            # place (plan 300), so the row counts what was answered and a
+            # card's accuracy reads 1 of 1, not 2 of 2. Taken out after
+            # the scheduling, which reads a row with no reviews as new
+            # (the ladder's step_of). The pass grew repetitions past
+            # KNOWN_STATE's, which is what tells the row from an untouched
+            # one now that the count is back at one; a pass that grew
+            # none (a ladder step short of mastered, under an interval
+            # moved by hand) keeps the virtual check rather than read as
+            # never answered and be asked again.
+            if not self._virtual_checks(updated.total_reviews - 1, updated.repetitions,
+                                        updated.lapses, updated.is_learning):
+                updated.total_reviews -= 1
+                updated.correct_reviews -= 1
         self._save_state(updated)
         xp_info = self._log_review(card_id, mode, quality, assumed=assumed)
         result = self._to_dict(updated)
@@ -1336,7 +1351,9 @@ class SRSEngine:
                         next_review,
                         correct_reviews,
                         is_learning,
-                        learning_step
+                        learning_step,
+                        repetitions,
+                        lapses
                     FROM card_modes
                     WHERE card_id LIKE %s{mode_sql}
                 """
@@ -1365,7 +1382,7 @@ class SRSEngine:
         with self.storage.cursor() as cur:
             sql = """
                 SELECT card_id, mode, total_reviews, interval_days, next_review,
-                       correct_reviews, is_learning, learning_step
+                       correct_reviews, is_learning, learning_step, repetitions, lapses
                 FROM card_modes
                 WHERE card_id = ANY(%s) AND mode = ANY(%s)
             """
@@ -1376,12 +1393,14 @@ class SRSEngine:
             (row['card_id'], row['mode']): self._state_row(
                 row['total_reviews'], row['interval_days'], row['next_review'],
                 row['correct_reviews'], row['is_learning'], row['learning_step'],
+                row['repetitions'], row['lapses'],
             )
             for row in rows
         }
 
     def _state_row(self, total_reviews, interval_days, next_review,
-                   correct_reviews, is_learning, learning_step) -> dict:
+                   correct_reviews, is_learning, learning_step,
+                   repetitions, lapses) -> dict:
         """One (card, mode) row as get_user_states serves it."""
         if total_reviews == 0:
             state = "new"
@@ -1389,12 +1408,19 @@ class SRSEngine:
             state = "mastered"
         else:
             state = "learning"
+        # An untouched assumption's one check of one (KNOWN_STATE, plan
+        # 224) is what makes it read met and mastered here, and no answer
+        # (plan 300): a figure of answers -- a card's reviews and
+        # accuracy, a deck's -- reads `answers`, never `total_reviews`.
+        virtual = self._virtual_checks(total_reviews, repetitions, lapses, is_learning)
 
         return {
             "state": state,
             "due": total_reviews > 0 and next_review is not None and next_review <= datetime.now(timezone.utc),
             "total_reviews": total_reviews,
             "correct_reviews": correct_reviews,
+            "answers": total_reviews - virtual,
+            "correct_answers": correct_reviews - virtual,
             "interval_days": interval_days,
             # interval_days is 0 for the whole of the learning
             # steps — it is only written on graduation — so a
@@ -2132,22 +2158,34 @@ class SRSEngine:
         return int(row[0]) if row else 0
 
     def get_retention(self, user_id: str) -> float | None:
-        """Correct answers over all answers, across every (card, mode)
-        the learner has reviewed — the profile's 正答率. None until the
-        first review, so the screen can leave the figure out rather than
-        print 0%. Same servable-mode scope as the mastered count, so the
-        two figures describe the same set of cards."""
+        """Correct answers over all answers -- the profile's 正答率, a
+        grade of 3 or more being correct as the scheduler counts it. None
+        until the first answer, so the screen can leave the figure out
+        rather than print 0%.
+
+        Read off the answers themselves, review_log and its rollup, as
+        the review total printed beside it is and as the statistics
+        screen's retention by week is (get_daily_quality). Never off
+        card_modes' counters: every card the level rule marks known
+        carries KNOWN_STATE's virtual check, one of one (plan 224), so a
+        learner who declared N4 at boarding and had answered nothing
+        read 100%, and every check they passed counted twice (plan 300)."""
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                mode_sql, mode_params = self._servable_filter()
-                sql = f"""
-                    SELECT COALESCE(SUM(correct_reviews), 0), COALESCE(SUM(total_reviews), 0)
-                    FROM card_modes
-                    WHERE card_id LIKE %s{mode_sql}
+                sql = """
+                    SELECT COALESCE(SUM(good), 0), COALESCE(SUM(n), 0) FROM (
+                        SELECT COUNT(*) FILTER (WHERE quality >= 3) AS good, COUNT(*) AS n
+                        FROM review_log
+                        WHERE card_id LIKE %s
+                        UNION ALL
+                        SELECT SUM(q3 + q4 + q5), SUM(reviews)
+                        FROM review_daily
+                        WHERE user_id = %s
+                    ) both_halves
                 """
-                self._log_sql("get_retention", sql, (pattern,) + mode_params)
-                cur.execute(sql, (pattern,) + mode_params)
+                self._log_sql("get_retention", sql, (pattern, user_id))
+                cur.execute(sql, (pattern, user_id))
                 row = cur.fetchone()
         correct, total = (int(row[0]), int(row[1])) if row else (0, 0)
         return (correct / total) if total else None
@@ -2653,13 +2691,23 @@ class SRSEngine:
         new has no graduated repetition after its first review, and
         KNOWN_STATE has three after one. The first answer, pass or miss,
         changes both."""
+        return cls._virtual_checks(state.total_reviews, state.repetitions, state.lapses,
+                                   state.is_learning) > 0
+
+    @classmethod
+    def _virtual_checks(cls, total_reviews, repetitions, lapses, is_learning) -> int:
+        """How many of a row's counted reviews are KNOWN_STATE's virtual
+        check: one on an untouched assumption, none on anything else. A
+        check passed takes it out as it is answered (review), so an
+        answered row counts only its answers (plan 300)."""
         k = cls.KNOWN_STATE
-        return (
-            state.total_reviews == k["total_reviews"]
-            and state.repetitions == k["repetitions"]
-            and state.lapses == 0
-            and not state.is_learning
+        untouched = (
+            total_reviews == k["total_reviews"]
+            and repetitions == k["repetitions"]
+            and lapses == 0
+            and not is_learning
         )
+        return k["total_reviews"] if untouched else 0
 
     # The same signature as a SQL condition over card_modes, `{t}` the
     # table's name where a statement needs it: any untouched assumption,

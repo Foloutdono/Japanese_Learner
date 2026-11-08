@@ -48,6 +48,12 @@ describe('a choice', () => {
     rememberLang('de', session)
     expect(savedLang()).toBeNull()
   })
+
+  it('keeps Spain\'s Spanish as the locale it is (plan 303)', async () => {
+    rememberLang('es-ES', null)
+    await Promise.resolve()
+    expect(savedLang()).toBe('es-ES')
+  })
 })
 
 describe('the boot', () => {

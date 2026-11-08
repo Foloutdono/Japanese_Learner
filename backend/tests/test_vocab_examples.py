@@ -117,3 +117,71 @@ def test_a_kana_card_reads_the_senses_of_its_own_word():
         first = "; ".join(_find_senses(kanji, kana)[0]["glossary"])
         assert words(first) & words(cards[key]["meaning"]), (key, first)
     assert "thank" not in "; ".join(_find_senses("", "だんだん")[0]["glossary"])
+
+
+def test_every_sentence_a_card_shows_carries_its_word():
+    """Plan 297: a card showed sentences its word is not in -- どっち's
+    and そっち's in どちら and そちら, ママ's in まま, 空く's in 開く --
+    which the page cannot mark. A sentence is a card's when the page
+    marks the word in it."""
+    missing = []
+    for level, words in VOCAB_BY_LEVEL.items():
+        for w in words:
+            for ex in get_vocab_extras(w.get("kanji") or "", w["kana"], w.get("meaning", ""), "en")["examples"]:
+                if not any(seg["highlight"] for seg in ex["segments"]):
+                    missing.append(f"{level} {w.get('kanji') or ''}::{w['kana']}: {ex['jp']}")
+    assert not missing, "\n".join(missing[:40])
+
+
+def test_a_kana_card_keeps_its_own_word_of_a_row_two_words_share():
+    """Plan 297: ママ's row held まま's entry before its own, so the card
+    listed "as (it is)" and showed 「足の向くままに歩いた。」. It keeps
+    its own entry, and of まま's sentences the ones plan 227 rewrote into
+    ママ's."""
+    extras = get_vocab_extras("", "ママ", "Mama", "en")
+    assert [s["glossary"].split(";")[0] for s in extras["senses"]] == ["mom", "female proprietress (of a bar, etc.)"]
+    shown = [ex["jp"] for ex in extras["examples"]]
+    assert "足の向くままに歩いた。" not in shown
+    assert "ママは台所で料理をしている。" in shown
+    assert all(ex["sense_number"] == 1 for ex in extras["examples"])
+
+
+def test_a_card_lists_the_senses_its_gloss_reaches():
+    """Plan 297: 回り teaches "circumference, surroundings, circulation",
+    and its row held only 回り's rotations, so 「家のまわりに花を植えた。」
+    stood under no sense. It lists 周り;回り's senses first."""
+    extras = get_vocab_extras("回り", "まわり", "circumference, surroundings, circulation", "en")
+    glosses = {s["number"]: s["glossary"] for s in extras["senses"]}
+    assert "surroundings" in glosses[2] and "rotation" in glosses.values()
+    ex = next(ex for ex in extras["examples"] if ex["jp"] == "家のまわりに花を植えた。")
+    assert ex["sense_number"] == 2
+
+
+def test_no_card_marks_another_cards_spelling():
+    """Plan 297: a card showed sentences of another card read alike, its
+    word marked in the other card's kanji -- 速い under 早い, 跳べ under
+    飛ぶ, 作る under 造る, 延ばし under 伸ばす. A marked kanji the card's
+    spelling lacks may be a variant with no card of its own (包丁 under
+    庖丁, 5日 under 五日), never the spelling of a card read alike."""
+    import re
+    from content.vocab_extras import _readings
+    kanji_of = lambda text: set(re.findall(r"[一-鿿々]", text))
+    spellings: dict[str, set] = {}
+    for words in VOCAB_BY_LEVEL.values():
+        for w in words:
+            for reading in _readings(w["kana"]):
+                spellings.setdefault(reading, set()).add(w.get("kanji") or "")
+    found = []
+    for level, words in VOCAB_BY_LEVEL.items():
+        for w in words:
+            kanji = w.get("kanji") or ""
+            if not kanji:
+                continue
+            others = {s for r in _readings(w["kana"]) for s in spellings[r]} - {kanji, ""}
+            for ex in get_vocab_extras(kanji, w["kana"], w.get("meaning", ""), "en")["examples"]:
+                marked = "".join(seg["text"] for seg in ex["segments"] if seg["highlight"])
+                alien = kanji_of(marked) - set(kanji)
+                hit = sorted(o for o in others if alien and alien <= kanji_of(o))
+                if hit:
+                    found.append(f"{level} {kanji}::{w['kana']}: {marked} is {hit}'s: {ex['jp']}")
+    assert not found, "\n".join(found[:40])

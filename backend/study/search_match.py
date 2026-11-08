@@ -412,6 +412,66 @@ def sense_starts(text: str | None, needle: str) -> bool:
 
 
 # ── The query ─────────────────────────────────────────────────
+# ── Spain's word for what the glosses say the Latin-American way ──
+# The app's Spanish is Latin-American neutral (plan 302): a gloss says
+# celular, computadora, auto. A learner in Spain types móvil, ordenador,
+# coche, and found nothing but what those words happen to mean besides
+# (plan 303). So a query that is one of Spain's words, or holds one, is
+# asked as the Latin-American word too, beside itself: piso still finds
+# a floor, and finds a flat (departamento) as well. Only words Spain
+# alone says this way, whose Latin-American word the glosses do hold;
+# never a word both say (conducir, piscina), nor one whose other senses
+# would bring noise (cola, a tail; renta, an income).
+SPAIN_WORDS: dict[str, tuple[str, ...]] = {
+    "ordenador": ("computadora",), "ordenadores": ("computadoras",),
+    "movil": ("celular",), "moviles": ("celulares",),
+    "coche": ("auto", "carro"), "coches": ("autos",),
+    "zumo": ("jugo",), "zumos": ("jugos",),
+    "patata": ("papa",), "patatas": ("papas",),
+    "melocoton": ("durazno",), "albaricoque": ("chabacano", "damasco"),
+    "billete": ("boleto",), "billetes": ("boletos",),
+    "gafas": ("lentes",), "nevera": ("refrigerador",), "frigorifico": ("refrigerador",),
+    "aparcar": ("estacionar",), "aparcamiento": ("estacionamiento",),
+    "piso": ("apartamento",),
+    "enfadarse": ("enojarse",), "enfadado": ("enojado",), "enfado": ("enojo",),
+    "camarero": ("mesero",), "camarera": ("mesera",),
+    "cacahuete": ("maní",), "bocadillo": ("sándwich",), "tarta": ("pastel",),
+    "jersey": ("suéter",), "grifo": ("llave",), "gamba": ("camarón",),
+    "judias": ("frijoles",), "guisantes": ("arvejas", "chícharos"),
+    "vaqueros": ("jeans",), "banador": ("traje de baño",),
+    "coger": ("tomar", "agarrar"), "bombilla": ("foco",),
+    "mechero": ("encendedor",), "cerilla": ("fósforo",),
+    "rotulador": ("marcador",), "grapadora": ("engrapadora",),
+    "cubo": ("balde", "cubeta"), "fontanero": ("plomero",), "tirita": ("curita",),
+    "pegatina": ("calcomanía",), "cartera": ("billetera",),
+    "deberes": ("tarea",), "asignatura": ("materia",),
+    "instituto": ("preparatoria", "secundaria"),
+    "suspender": ("reprobar",), "suspenso": ("reprobado",),
+    "ascensor": ("elevador",),
+    "echar de menos": ("extrañar",), "darse prisa": ("apurarse",),
+    "hacer cola": ("hacer fila",), "mando a distancia": ("control remoto",),
+}
+_SPAIN_PHRASES = sorted((k for k in SPAIN_WORDS if " " in k), key=len, reverse=True)
+
+
+def spain_alternatives(folded: str) -> tuple[str, ...]:
+    """The Latin-American askings of a folded query that is, or holds,
+    one of Spain's words: the whole query with each such word replaced
+    (its first Latin-American word, and the whole of a word's list where
+    the query is that word alone), written with their accents, since a
+    pool's column is matched as written. () for any other query."""
+    if not folded:
+        return ()
+    if folded in SPAIN_WORDS:
+        return SPAIN_WORDS[folded]
+    text = folded
+    for phrase in _SPAIN_PHRASES:
+        text = re.sub(rf"\b{re.escape(phrase)}\b", SPAIN_WORDS[phrase][0], text)
+    words = [SPAIN_WORDS.get(w, (w,))[0] for w in text.split()]
+    alt = " ".join(words)
+    return (alt,) if alt != folded else ()
+
+
 class Query:
     """One search term, in every form the catalogue might hold it.
 
@@ -425,12 +485,14 @@ class Query:
     short-circuits on it rather than asking this object anything.
     """
 
-    __slots__ = ("raw", "latin", "jp", "original", "match", "field")
+    __slots__ = ("raw", "latin", "alts", "jp", "original", "match", "field")
 
     def __init__(self, raw: str, original: str | None = None,
                  match: str = "word", field: str = "all"):
         self.raw = raw
         self.latin = fold(raw)
+        # Spain's word asked the Latin-American way too (plan 303).
+        self.alts = spain_alternatives(self.latin)
         # Anything unrecognised is the default: the client narrowed, it
         # did not ask a trick question (the level's rule too).
         self.match = match if match in MATCHES else "word"
@@ -541,13 +603,14 @@ class Query:
                                  or any(t.startswith(form) for t in tokens)) else 2
                     best = rank if best is None else min(best, rank)
         if self.latin and self.wants_meaning:
-            for field in latin_fields:
-                if not text_matches(field, self.latin, self.match):
-                    continue
-                if sense_is(field, self.latin):
-                    return 0
-                rank = 1 if sense_starts(field, self.latin) else 2
-                best = rank if best is None else min(best, rank)
+            for needle in (self.latin, *(fold(a) for a in self.alts)):
+                for field in latin_fields:
+                    if not text_matches(field, needle, self.match):
+                        continue
+                    if sense_is(field, needle):
+                        return 0
+                    rank = 1 if sense_starts(field, needle) else 2
+                    best = rank if best is None else min(best, rank)
         return best
 
     def hits(self, jp_fields=(), latin_fields=()) -> bool:

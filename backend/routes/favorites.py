@@ -43,7 +43,7 @@ from content.grammar_points_data import entry_by_id
 from content.kana_data import get_syllabary
 from content.kanji_data import DECK_BY_CHAR
 import content.kanji_pool_data as kanji_db
-from content.kanji_meanings import KANJI_FR
+from translations.course import KANJI_GLOSSES
 from core.auth import get_user_id
 from core.db import db_conn
 from core.rls import enable_rls
@@ -107,7 +107,7 @@ def _resolve(kind: str, key: str, lang: str, states: dict, user_id: str) -> dict
         if deck_hit is not None:
             level, entry = deck_hit
             return _deck_kanji_result(
-                level, entry, get_meaning(entry, lang, KANJI_FR), lang, states, user_id,
+                level, entry, get_meaning(entry, lang, KANJI_GLOSSES), lang, states, user_id,
             )
         row = kanji_db.get(key)
         return _pool_kanji_result(row, lang, states, user_id) if row else None

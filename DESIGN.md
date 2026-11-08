@@ -166,6 +166,19 @@ the chrome, and it is not a line's pigment there: it is the mark's material,
 the pass's `--accent2`, drawn the same on every ground (plan 158). It licenses
 nothing else — any other part of the chrome stays sumi and its two inks.
 
+**The language flags carry their countries' colours** (plan 302, the owner's
+choice, for clarity). Where a learner picks a language (Réglages › Affichage,
+the landing page's switch and its phone menu, the privacy policy's and the
+account-deletion page's switches), a small flag stands before the
+language's name or code: drawn from `components/ui/flags.js`, never an emoji
+(Windows has none and prints the letters), the height of the text beside it
+and ringed in `--surface-line`. It licenses no other picture of a country, and
+a flag never stands for a language alone: the name or the code is always
+beside it. Latin-American Spanish, the app's one Spanish, stands for no
+single country and takes a globe instead (the owner's choice, kept over
+Mexico's flag); Spain's Spanish, an interface
+over it, takes Spain's flag (plan 303).
+
 **One standing exception, decided deliberately**: the **console's action
 pill** (`ConsoleAction`, `.console__action` — "+ Créer un deck" on the
 shelf) is a filled use of a line pigment. It is not precedent for filling a card, a row, a chip, a
@@ -962,7 +975,10 @@ screen, A on the lock screen, reminder 2, its Depart the gate.
   end with the scanner's mark, the hairline. Depart opens the run (the
   whole day, as the gate's with every line on); a tap anywhere else
   opens the gate. Where the size has no room, the word goes first (the
-  2×2, the small), then Depart; the count never does.
+  2×2, the small), then Depart; the count never does. **The stripe and
+  the ring are a share a line**, in the lines' order, as Today's dial is
+  an arc a line (`lineShares` in `domain/lanes.js`): never a bar a lane,
+  which cut the stripe into a dozen pieces of the same few pigments.
 - **The lock screen is A's**: the count in a ring cut into the lines'
   shares, the word alone in the rectangle, the hour and the count on
   the inline line — in the lock screen's one ink.

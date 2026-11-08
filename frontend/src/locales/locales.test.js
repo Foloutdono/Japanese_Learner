@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import fr from './fr/index.js'
 import en from './en/index.js'
+import es from './es/index.js'
+import esES from './es-ES/index.js'
+import { translations } from '../i18n.jsx'
 
 // ── One key, one value ─────────────────────────────────────────
 // Each table is a row of groups spread into one object, so a key written
@@ -27,7 +30,7 @@ function groupKeys(lang) {
 }
 
 describe('locale keys (each table)', () => {
-  for (const [lang, table] of [['fr', fr], ['en', en]]) {
+  for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {
     it(`defines every ${lang} key once`, () => {
       const keys = groupKeys(lang)
       expect([...new Set(keys.map(k => k.key))].sort(), `${lang}/index.js: a key the reader cannot see (indented off the group's two spaces?)`)
@@ -66,6 +69,19 @@ describe('locale parity (fr <-> en)', () => {
     expect(mismatched, `type mismatch: ${mismatched.join(', ')}`).toEqual([])
   })
 
+  // Spanish (plan 302) is held to the same parity: a key the Spanish
+  // table lacks renders nothing, exactly the silent blank above.
+  it('has every English key present in Spanish, and no other', () => {
+    const missing = Object.keys(en).filter(k => !(k in es))
+    const extra = Object.keys(es).filter(k => !(k in en))
+    expect(missing, `missing in es/index.js: ${missing.join(', ')}`).toEqual([])
+    expect(extra, `in es/index.js but not en/index.js: ${extra.join(', ')}`).toEqual([])
+    const mismatched = Object.keys(en)
+      .filter(k => k in es && typeof en[k] !== typeof es[k])
+      .map(k => `${k} (en: ${typeof en[k]}, es: ${typeof es[k]})`)
+    expect(mismatched, `type mismatch: ${mismatched.join(', ')}`).toEqual([])
+  })
+
   // ── **…** ────────────────────────────────────────────────────
   // The emphasis marker (components/ui/Emphasized.jsx) is the one
   // piece of markup the string tables carry, and an unclosed run is
@@ -74,7 +90,7 @@ describe('locale parity (fr <-> en)', () => {
   // catch here, in both tables at once.
   it('closes every emphasis run it opens', () => {
     const unbalanced = []
-    for (const [lang, table] of [['fr', fr], ['en', en]]) {
+    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {
       for (const [key, value] of Object.entries(table)) {
         // Interpolated copy is a function; the arguments only have to
         // be enough to build the string, not to be right.
@@ -100,9 +116,10 @@ describe('locale parity (fr <-> en)', () => {
   // the orphan back.
   it('never leaves a breakable space against high punctuation', () => {
     const loose = []
-    // Both tables: French because the space is its own, English
-    // because a guillemet that strays in brings the same break with it.
-    for (const [lang, table] of [['fr', fr], ['en', en]]) walk(table, lang, loose)
+    // Every table: French because the space is its own, English and
+    // Spanish because a guillemet that strays in brings the same break
+    // with it (Spanish quotes «…» tight, as the RAE writes them).
+    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) walk(table, lang, loose)
     expect(loose, `breakable space before : ; ! ? » (or after «) in: ${loose.join(', ')}`).toEqual([])
   })
 })
@@ -127,3 +144,65 @@ function walk(value, path, out) {
     for (const [k, v] of Object.entries(value)) walk(v, `${path}.${k}`, out)
   }
 }
+
+// ── Nested groups, key for key ─────────────────────────────────
+// A value may be a group of its own (pvpLines, examMondai…), and the
+// tables' parity above reads the top level only: a nested key English
+// has and Spanish lacks would print undefined on a Spanish screen.
+// Every nested object is held key for key and every list to its length,
+// against the English (a function's arity is not: a default parameter
+// changes it without changing what the function says).
+function shape(value) {
+  if (typeof value === 'function') return 'ƒ'
+  if (Array.isArray(value)) return value.map(shape)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(k => [k, shape(value[k])]))
+  }
+  return typeof value
+}
+
+// One group is each language's own by design: nyuSoundsLike says what a
+// vowel sounds like in the reader's language, so French names the two
+// that differ from its spelling and Spanish, whose vowels are Japan's, none.
+const OWN_BY_LANGUAGE = new Set(['nyuSoundsLike'])
+
+describe('locale tables (nested)', () => {
+  for (const [lang, table] of [['fr', fr], ['es', es]]) {
+    it(`gives ${lang} every nested key and list English has`, () => {
+      const nested = Object.keys(en).filter(k => en[k] && typeof en[k] === 'object' && !OWN_BY_LANGUAGE.has(k))
+      for (const key of nested) expect(shape(table[key]), `${lang}: ${key}`).toEqual(shape(en[key]))
+    })
+  }
+})
+
+// ── Spain's Spanish (plan 303) ──────────────────────────────────
+// An interface over the Spanish table, not a fourth table: each entry
+// replaces one of Spanish's with the words Spain says otherwise, of the
+// same kind, and says something else; every other entry is Spanish's.
+describe('locale overlay (es-ES over es)', () => {
+  // A function's text is its source: the literals it writes are there.
+  const sample = v => (typeof v === 'function' ? String(v) : v)
+  it('replaces only Spanish entries, each of its own kind and saying something else', () => {
+    for (const [key, value] of Object.entries(esES)) {
+      expect(key in es, `es-ES: ${key} is no Spanish entry`).toBe(true)
+      expect(typeof value, `es-ES: ${key}`).toBe(typeof es[key])
+      if (typeof value === 'function') expect(value.length, `es-ES: ${key} takes other arguments`).toBe(es[key].length)
+      if (value && typeof value === 'object') {
+        for (const k of Object.keys(value)) expect(k in es[key], `es-ES: ${key}.${k}`).toBe(true)
+      }
+      expect(JSON.stringify(sample(value)), `es-ES: ${key} says what Spanish says`).not.toBe(JSON.stringify(sample(es[key])))
+    }
+  })
+  it('says none of the Latin-American words it is there to replace', () => {
+    const latam = /\b(agreg\w*|Agreg\w*|boletos?|Boletos?|computadora|Computadora|videos?|Videos?|presion\w+|Presion\w+|en vivo|En vivo)\b/
+    for (const [key, value] of Object.entries(translations['es-ES'])) {
+      const said = typeof value === 'function' ? String(value) : JSON.stringify(value ?? '')
+      expect(latam.test(said), `es-ES: ${key} still says ${said.match(latam)?.[0]}`).toBe(false)
+    }
+  })
+  it('is the whole Spanish table otherwise', () => {
+    expect(Object.keys(translations['es-ES']).sort()).toEqual(Object.keys(es).sort())
+    expect(translations['es-ES'].tabToday).toBe(es.tabToday)
+  })
+})
+

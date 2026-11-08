@@ -25,6 +25,7 @@ import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
 import { LevelStep } from '../components/boarding/LevelStep'
 import { TestStep } from '../components/boarding/TestStep'
 import CardStep from '../components/boarding/CardStep'
+import { RemindStep } from '../components/boarding/RemindStep'
 import { AccountSheet, GoalSheet, HourSheet, LinesSheet, NameSheet, RhythmSheet } from '../components/boarding/CardSheets'
 import { DeskStrip } from '../components/boarding/DeskStrip'
 import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
@@ -180,6 +181,10 @@ export default function BoardingFlow({
     rhythm: RECOMMENDED_RHYTHM,
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
+    // Whether the reminder has been answered -- its switch in the hour's
+    // sheet, or the step after the card (plan 294), which is shown until
+    // it has.
+    reminderAnswered: false,
     cardName: '',
     ...(resumed?.answers ?? {}),
   })
@@ -216,6 +221,9 @@ export default function BoardingFlow({
   // On a native shell, the OS's own answer when it will not ask again:
   // the reminder's switch says why it stays off (plan 247).
   const [nudgeDenied, setNudgeDenied] = useState(false)
+  // How the card's issue was reached ('google', 'guest', ...: complete's
+  // `by`), carried over the reminder's step to the issue it ends in.
+  const [issuedBy, setIssuedBy] = useState(null)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
   // 辻 (plan 163): the strip at the floor's left end, measured so the
@@ -276,7 +284,8 @@ export default function BoardingFlow({
       // How long `from` actually held them, then reset for the next
       // question.
       ms: watches.current?.step.lap() ?? 0,
-      index: trackStops(answers).indexOf(stopOf(from)) + 1,
+      // The reminder stands after the card, past the line's last stop.
+      index: from === 'remind' ? trackStops(answers).length + 1 : trackStops(answers).indexOf(stopOf(from)) + 1,
     })
   }
 
@@ -466,6 +475,7 @@ export default function BoardingFlow({
   // (it will not ask a second time) is said under the switch, which
   // would otherwise do nothing at every press (plan 247).
   function remind() {
+    set({ reminderAnswered: true })
     if (answers.notifications) { set({ notifications: false }); return }
     requestNudgePermission()
       .then(granted => {
@@ -566,6 +576,44 @@ export default function BoardingFlow({
       if (!dryRun) noteAskedToKeep(session?.user?.id)
       return
     }
+    if (answers.reminderAnswered || !canNudge()) { issue(answers.notifications, by); return }
+    // The reminder's own step (plan 294), while the OS has not been
+    // asked: one that has decided -- allowed, or refused for good -- is
+    // not asked again, and its answer is the answer.
+    setBusy(true)
+    nudgePermission()
+      .catch(() => 'denied')
+      .then(state => {
+        if (state !== 'prompt') {
+          set({ notifications: state === 'granted', reminderAnswered: true })
+          issue(state === 'granted', by)
+          return
+        }
+        setBusy(false)
+        setIssuedBy(by)
+        go('remind')
+      })
+  }
+
+  // The reminder's gate: the OS's own prompt, then the card.
+  function allowReminder() {
+    if (busy) return
+    setBusy(true)
+    requestNudgePermission()
+      .catch(() => false)
+      .then(granted => {
+        set({ notifications: granted, reminderAnswered: true })
+        issue(granted, issuedBy)
+      })
+  }
+
+  function declineReminder() {
+    if (busy) return
+    set({ notifications: false, reminderAnswered: true })
+    issue(false, issuedBy)
+  }
+
+  function issue(notifications, by) {
     if (dryRun) { onComplete(); return }
     setBusy(true)
     setSaveError(null)
@@ -585,7 +633,7 @@ export default function BoardingFlow({
       lines: answers.lines,
       rhythmMin: answers.rhythm,
       reminderTime: time,
-      notifications: answers.notifications,
+      notifications,
       tzOffsetMin: -new Date().getTimezoneOffset(),
       // The name the card prints, '' for none (routes/profile.py card_name).
       cardName: answers.cardName,
@@ -606,7 +654,7 @@ export default function BoardingFlow({
           pace: perDay,
           // The chosen names joined, never text a learner typed.
           lines: answers.lines.join(','),
-          notifications: answers.notifications,
+          notifications,
           // How the level was found (plan 224), and where the test placed
           // the learner when they took it.
           ...(answers.kana === 'both' ? { level_how: answers.placed ? 'test' : 'pick' } : {}),
@@ -715,6 +763,17 @@ export default function BoardingFlow({
     </>
   )
 
+  // « Signaler ce problème » under a refused issue, on the card or the
+  // reminder's step, whichever the issue failed on.
+  const feedback = (
+    <FeedbackSheet
+      open={reporting}
+      onClose={() => setReporting(false)}
+      session={session}
+      failure={failureOf('/api/onboarding/complete', refusedWith)}
+    />
+  )
+
   // `leaving`: the car pulling out, drawn for the pull and dropped -- a
   // screen that fetches as it mounts (the test) is drawn still there, and
   // the card pulling out takes no sheet with it.
@@ -756,15 +815,23 @@ export default function BoardingFlow({
             error={saveError}
           >
             {!leaving && sheets}
-            {!leaving && (
-              <FeedbackSheet
-                open={reporting}
-                onClose={() => setReporting(false)}
-                session={session}
-                failure={failureOf('/api/onboarding/complete', refusedWith)}
-              />
-            )}
+            {!leaving && feedback}
           </CardStep>
+        )
+      case 'remind':
+        return (
+          <RemindStep
+            time={time}
+            title={t.nudgeTitle(time, perDay)}
+            summary={`${t.nudgeMinutes(answers.rhythm)} · ${t.nudgeNew(perDay)}`}
+            onAllow={allowReminder}
+            onLater={declineReminder}
+            onReport={() => setReporting(true)}
+            busy={busy}
+            error={saveError}
+          >
+            {!leaving && feedback}
+          </RemindStep>
         )
       default:
         return null
@@ -793,12 +860,13 @@ export default function BoardingFlow({
   })
   // The way back the floor draws beside Continue (BoardBack): the
   // question before, or out of the flow from the first.
-  const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : null
+  const atRemind = step === 'remind'
+  const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : desk && atRemind ? back : null
 
   return (
     <main
       // The card stands with no head, as an arrival screen (plan 168).
-      className={desk ? 'brd desk-brd' : onTrack ? 'brd' : 'brd brd--arrival'}
+      className={desk ? 'brd desk-brd' : onTrack || atRemind ? 'brd' : 'brd brd--arrival'}
       id="main-content"
       data-step={step}
       ref={frameRef}
@@ -807,6 +875,8 @@ export default function BoardingFlow({
       style={desk && stripW ? { '--desk-strip-w': stripW } : undefined}
     >
       {onTrack && !desk && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
+      {/* Off the line, after the card: the way back to it, no track. */}
+      {atRemind && !desk && <BoardHead index={0} total={0} onBack={back} />}
       <BoardBack.Provider value={floorBack}>
         <div className="brd__cars">
           {leaving && (

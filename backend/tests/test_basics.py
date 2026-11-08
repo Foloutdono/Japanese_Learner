@@ -38,11 +38,11 @@ def test_no_card_is_taught_twice():
                 seen[raw_id] = unit["id"]
 
 
-def test_every_unit_is_named_in_both_languages_and_teaches_words():
+def test_every_unit_is_named_in_every_language_and_teaches_words():
     ids = [u["id"] for u in _raw_units()]
     assert len(ids) == len(set(ids)) == 14
     for unit in basics.units():
-        assert unit["jp"] and unit["title"]["en"] and unit["title"]["fr"], unit["id"]
+        assert unit["jp"] and all(unit["title"].get(lang) for lang in ("en", "fr", "es")), unit["id"]
         assert unit["cards"][VOCAB], unit["id"]
         assert unit["sentences"], unit["id"]
 

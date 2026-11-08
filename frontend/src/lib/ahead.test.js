@@ -178,6 +178,31 @@ describe('widgetPayload', () => {
     expect(w.labels).toEqual({ title: t.widgetTitle, clear: t.widgetClear, depart: t.depart })
   })
 
+  it('draws the stripe a bar a line, in the lines’ order, never a bar a lane', () => {
+    // The backend's order interleaves the lines; a line rides at several
+    // levels and in several modes. The board showed a dozen bars, the
+    // same pigment again and again, a lane of one card a dot.
+    const busy = { total: 261, seconds_per_review: 10, lanes: [
+      { kind: 'section', source: 'kanji', deck: 'N5', due: 40, new: 0 },
+      { kind: 'section', source: 'vocab', deck: 'N5', due: 60, new: 5 },
+      { kind: 'section', source: 'kana', deck: 'hiragana', due: 2, new: 0 },
+      { kind: 'section', source: 'kanji', deck: 'N4', due: 30, new: 1 },
+      { kind: 'personal', source: 'personal', deck_name: 'Mine', due: 3, new: 0 },
+      { kind: 'section', source: 'vocab', deck: 'N4', due: 90, new: 10 },
+      { kind: 'section', source: 'grammar', deck: 'N5', due: 0, new: 0 },
+      { kind: 'section', source: 'kanji', deck: 'N3', due: 1, new: 0 },
+      { kind: 'section', source: 'grammar', deck: 'N4', due: 12, new: 2 },
+      { kind: 'section', source: 'kana', deck: 'katakana', due: 5, new: 0 },
+    ] }
+    expect(widgetPayload({ today: busy, ahead: null, t, now: NOW }).lanes).toEqual([
+      { line: 'kana', n: 7 },
+      { line: 'vocab', n: 165 },
+      { line: 'kanji', n: 72 },
+      { line: 'grammar', n: 14 },
+      { line: 'personal', n: 3 },
+    ])
+  })
+
   it('still counts when the plan could not be fetched', () => {
     const w = widgetPayload({ today, ahead: null, t, now: NOW })
     expect(w.points).toEqual([{ from: NOW.getTime(), total: 24, unit: 'cards', minutes: '4 min', meta: '4 min · 2 new' }])

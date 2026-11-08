@@ -908,6 +908,8 @@ const stats = {
   destMovesTo:        date => `glisse au ${date} au rythme actuel`,
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Toi · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Déjà lu',
   examPart: (n) => `Partie ${n}`,
   serviceName: {
     local:   'Omnibus',
@@ -1655,7 +1657,14 @@ const dictionary = {
   bldRight: 'Juste.',
   bldClose: 'Presque.',
   bldWrong: 'Pas tout à fait.',
-  bldOther: (said, register) => `La phrase dit ${said} : la même chose, en style ${register === 'plain' ? 'neutre' : 'poli'}.`,
+  // Comment la phrase dit le trou quand une autre forme est jugée juste :
+  // son registre (plan 241), ou では en entier ou contracté (plan 295).
+  bldOther: (said, register) => `La phrase dit ${said} : la même chose, ${({
+    plain: 'en style neutre',
+    polite: 'en style poli',
+    full: 'avec では en entier',
+    contracted: 'avec では contracté, comme à l’oral',
+  })[register] ?? 'en style poli'}.`,
   mapAria: 'La ligne du point',
   mapTutorial: 'Tutoriel',
   mapNow: 'maintenant',
@@ -2010,6 +2019,7 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Thème',
   language:          'Langue',
+  languageSample:    'Aujourd’hui · Dictionnaire',
   account:           'Compte',
   signOutDesc:       'Te déconnecter de ton compte sur cet appareil.',
   // Un invité n'a pas de clé : se déconnecter efface le trajet pour
@@ -2663,6 +2673,12 @@ const boarding = {
   brdPasswordMismatch: 'Les deux mots de passe ne sont pas les mêmes.',
   brdAccountSentNote: (email) => `Presque : confirme ${email} depuis le lien que nous venons de t’envoyer.`,
   brdRemindAt: (time) => `Me rappeler à **${time}**`,
+  // Plan 294 : le rappel, une étape après la carte (sur l'appli seule).
+  brdRemindQ: 'On t’annonce ton train ?',
+  brdRemindHint: 'Chaque jour, à l’heure de ta carte.',
+  brdRemindYes: (time) => `Oui, à ${time}`,
+  brdRemindLater: 'Pas maintenant',
+  brdRemindNow: 'maintenant',
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',
   brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
@@ -3074,6 +3090,11 @@ const onboarding = {
   ratePlaceholder: 'Ce que tu changerais, s’il y a quelque chose.',
   rateTextLabel: 'Ce que tu changerais',
   rateLater: 'Plus tard',
+  // Google Play (plan 307) : la feuille de note, sur Android.
+  storeQ: 'Une note sur Google Play ?',
+  storeLead: 'Ta note aide d’autres apprenants à trouver Tsuji.',
+  storeGo: 'Noter sur Google Play',
+  storeWrite: 'Plutôt nous dire ce que tu changerais',
   cardReport: 'Signaler cette carte',
   cardReportReasons: 'Ce qui ne va pas',
   cardReason: { reading: 'Lecture', meaning: 'Sens', audio: 'Audio', example: 'Exemple', other: 'Autre' },

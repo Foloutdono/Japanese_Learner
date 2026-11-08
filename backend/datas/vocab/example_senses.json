@@ -1,0 +1,2680 @@
+{
+ "_meta": "The course's sentences filed under the sense they use (plan 296): content/example_fixes.py.",
+ "senses": {
+  "::ああ": {
+   "ああ、やっと家に着いた。": {
+    "sense": 1,
+    "gloss": "ah!; oh!; alas!",
+    "why": "a sigh of relief on getting home is \"ah\", not calling out \"hey!\""
+   }
+  },
+  "::あそこ": {
+   "あそこに座っている人は誰ですか。": {
+    "sense": 1,
+    "gloss": "there; over there; that place; yonder; you-know-where",
+    "why": "the person sitting over there: a place, not the genitals"
+   }
+  },
+  "::あっち": {
+   "「あちらが田中さんです。」「え、あっちの背の高い人？」": {
+    "sense": 1,
+    "gloss": "that way; that direction; over there; yonder",
+    "why": "あっちの...人 points to where he stands (over there); the person is 人"
+   }
+  },
+  "::あれ": {
+   "「あれは何ですか。」「新しい駅です。」": {
+    "sense": 1,
+    "gloss": "that; that thing",
+    "why": "'what's that?' about a new station, not the genitals"
+   }
+  },
+  "::うん": {
+   "「宿題は終わった？」「うん、もう終わったよ。」": {
+    "sense": 1,
+    "gloss": "yes; yeah; uh huh",
+    "why": "answering \"yeah, done already\" is yes, not \"some\""
+   }
+  },
+  "::ええ": {
+   "「これ、あなたの傘ですか。」「ええ、そうです。ありがとう。」": {
+    "sense": 1,
+    "gloss": "yes; that is correct; right",
+    "why": "a plain 'yes, it is' in reply, not a grudging 'grrr; must I?'"
+   },
+   "「明日も来ますか。」「ええ、また来ます。」": {
+    "sense": 1,
+    "gloss": "yes; that is correct; right",
+    "why": "a plain 'yes' in reply, not the interjection 'good'"
+   }
+  },
+  "::ここ": {
+   "この町の人口は、ここ10年ほとんど変わっていません。": {
+    "sense": 3,
+    "gloss": "these past ... (e.g. three years); these last ...",
+    "why": "ここ10年 is 'these past ten years'"
+   }
+  },
+  "::さあ": {
+   "さあ東京駅に着きました。": {
+    "sense": 4,
+    "gloss": "here; now; there (we go); ah; oh",
+    "why": "announcing arrival ('here we are'), not urging someone on"
+   }
+  },
+  "::しまう": {
+   "買い物を済ませてしまったら電話します。": {
+    "sense": 4,
+    "gloss": "to do completely; to finish",
+    "why": "済ませてしまう is the auxiliary 'do completely', not the verb 'to end; to close'"
+   }
+  },
+  "::じっと": {
+   "子どもは箸を持ったまま、じっと座っていた。": {
+    "sense": 1,
+    "gloss": "motionlessly (e.g. stand, wait); (be) still",
+    "why": "sitting still is motionless, not holding firmly"
+   }
+  },
+  "::すっきり": {
+   "今日はすっきりしない天気だ。": {
+    "sense": 4,
+    "gloss": "clearly; plainly; distinctly",
+    "why": "weather that is not clear (すっきり negated), not 'not at all'"
+   }
+  },
+  "::では": {
+   "では、これで失礼します。": {
+    "sense": 1,
+    "gloss": "then; well; so; well then",
+    "why": "sentence-initial 'well then', not the particle 'at; in; by'"
+   }
+  },
+  "::でも": {
+   "「明日、晴れるかな。」「でも、天気予報は雨だって。」": {
+    "sense": 1,
+    "gloss": "but; however; though; nevertheless; still; yet; even so; also; as well",
+    "why": "sentence-initial でも is 'but', not 'no matter how; even if'"
+   },
+   "雨が降っていました。でも、公園で遊びました。": {
+    "sense": 1,
+    "gloss": "but; however; though; nevertheless; still; yet; even so; also; as well",
+    "why": "sentence-initial でも is 'but', not 'even'"
+   }
+  },
+  "::とんだ": {
+   "旅行先で財布をなくして、とんだ目にあった。": {
+    "sense": 2,
+    "gloss": "terrible; awful; horrible; serious; outrageous",
+    "why": "とんだ目にあう is a terrible experience, not a strange one"
+   }
+  },
+  "::どうも": {
+   "どうも風邪をひいたようです。": {
+    "sense": 4,
+    "gloss": "somehow",
+    "why": "どうも...ようだ is 'somehow, it seems', not 'quite; really'"
+   }
+  },
+  "::ね": {
+   "ねぇ、お願い。": {
+    "sense": 2,
+    "gloss": "hey; say; listen; look; come on",
+    "why": "ねぇ, お願い is the call 'hey; come on', not the negative 'not'"
+   }
+  },
+  "::ばったり": {
+   "駅でばったり昔の友達に会った。": {
+    "sense": 2,
+    "gloss": "unexpectedly (meeting someone)",
+    "why": "ばったり会う is meeting unexpectedly, not 'with a thud'"
+   }
+  },
+  "::ぴったり": {
+   "二人は息がぴったり合っている。": {
+    "sense": 2,
+    "gloss": "exactly; precisely",
+    "why": "being perfectly in sync is matching exactly, not fitting tightly"
+   }
+  },
+  "::やはり/やっぱり": {
+   "欠点があるけどやはり彼が好きです。": {
+    "sense": 5,
+    "gloss": "all the same; even so; still; nonetheless",
+    "why": "liking him despite his faults is \"all the same; still\", not \"as expected\""
+   }
+  },
+  "::ゆっくり/ゆっくりと": {
+   "ゆっくりしてお茶でも飲んでいきませんか。": {
+    "sense": 1,
+    "gloss": "slowly; unhurriedly; without haste; leisurely; at one's leisure",
+    "why": "ゆっくりする is staying at one's leisure, not 'easily (in time); amply'"
+   }
+  },
+  "::ガム": {
+   "授業中にガムをかんではいけません。": {
+    "sense": 1,
+    "gloss": "chewing gum",
+    "why": "chewing gum in class, not Guam"
+   }
+  },
+  "::キロ/キログラム": {
+   "この車は時速６０キロで走っている。": {
+    "sense": 3,
+    "gloss": "kilometre; kilometer",
+    "why": "60 km an hour: kilometres, not the bare prefix"
+   }
+  },
+  "::キロ/キロメートル": {
+   "この車は時速６０キロで走っている。": {
+    "sense": 3,
+    "gloss": "kilometre; kilometer",
+    "why": "60 km an hour: kilometres, not the bare prefix"
+   }
+  },
+  "::ゴール": {
+   "マラソンの選手たちが次々とゴールした。": {
+    "sense": 3,
+    "gloss": "reaching the finish line; finishing (a race)",
+    "why": "runners crossing the line is finishing a race, not Gaul"
+   }
+  },
+  "::ソフト": {
+   "このパソコンには新しいソフトが入っている。": {
+    "sense": 2,
+    "gloss": "software",
+    "why": "software installed on a computer, not a felt hat"
+   }
+  },
+  "::タイプ": {
+   "このタイプのかばんが人気です。": {
+    "sense": 1,
+    "gloss": "type; kind; sort; style",
+    "why": "a type of bag is a kind, not a typewriter"
+   },
+   "どんなタイプの音楽が好きですか。": {
+    "sense": 1,
+    "gloss": "type; kind; sort; style",
+    "why": "a type of music is a kind, not typing"
+   }
+  },
+  "::ダイヤ": {
+   "ダイヤが乱れていた。": {
+    "sense": 2,
+    "gloss": "(railway) schedule; timetable",
+    "why": "a disrupted ダイヤ is the train timetable, not a diagram"
+   }
+  },
+  "::トラック": {
+   "今朝、学校のトラックを三周走った。": {
+    "sense": 2,
+    "gloss": "(running) track",
+    "why": "running laps of the school track is a running track, not a CD track"
+   }
+  },
+  "::ドライブ": {
+   "週末は海までドライブした。": {
+    "sense": 2,
+    "gloss": "to (go for a) drive; to go on a trip by car",
+    "why": "driving to the sea at the weekend is going for a drive, not driving innovation"
+   }
+  },
+  "::ノート": {
+   "このノートに名前を書いてください。": {
+    "sense": 1,
+    "gloss": "notebook; copy-book; exercise book",
+    "why": "writing one's name in a notebook, not a laptop"
+   }
+  },
+  "::ハンガー": {
+   "上着をハンガーに掛けてください。": {
+    "sense": 1,
+    "gloss": "(coat) hanger",
+    "why": "hanging a jacket on a coat hanger, not a hangar"
+   }
+  },
+  "::バス": {
+   "学校へは毎朝バスで行きます。": {
+    "sense": 1,
+    "gloss": "bus",
+    "why": "going to school by bus, not the fish bass"
+   },
+   "駅までバスで十分ぐらいです。": {
+    "sense": 1,
+    "gloss": "bus",
+    "why": "travelling by bus, not a bath"
+   }
+  },
+  "::パス": {
+   "カードが出せないときは、パスしてもいい。": {
+    "sense": 4,
+    "gloss": "pass (ceding one's turn); giving (something) a pass",
+    "why": "passing when you cannot play a card is ceding one's turn, not a vector path"
+   }
+  },
+  "::ビデオ": {
+   "旅行のビデオを家族に見せた。": {
+    "sense": 4,
+    "gloss": "video (short film)",
+    "why": "the video of our trip is a recorded film, not a VCR"
+   }
+  },
+  "::フォーク": {
+   "スプーンとフォークを並べてください。": {
+    "sense": 1,
+    "gloss": "fork",
+    "why": "setting out spoons and forks: the cutlery, not folk music"
+   }
+  },
+  "::プロ": {
+   "プロのガイドといっしょに山をおりた。": {
+    "sense": 1,
+    "gloss": "professional; pro",
+    "why": "a professional guide, not 'percent'"
+   }
+  },
+  "::ホース": {
+   "彼はホースを使って庭に水を撒いていました。": {
+    "sense": 1,
+    "gloss": "hose",
+    "why": "watering the garden with a hose, not a horse"
+   }
+  },
+  "::ボール": {
+   "子どもたちが公園でボールを投げて遊んでいる。": {
+    "sense": 1,
+    "gloss": "ball",
+    "why": "children throwing a ball, not a pitch outside the strike zone"
+   }
+  },
+  "::メール": {
+   "写真をメールで送ります。": {
+    "sense": 1,
+    "gloss": "email",
+    "why": "sending photos by メール is email, not postal mail"
+   }
+  },
+  "その上::そのうえ": {
+   "道に迷い、その上雨まで降ってきた。": {
+    "sense": 1,
+    "gloss": "in addition; furthermore",
+    "why": "conjunction 'on top of that, moreover', not physically above"
+   }
+  },
+  "一::いち": {
+   "卵を一つ割ってください。": {
+    "drop": true,
+    "why": "一つ is read ひとつ, a different word from いち"
+   }
+  },
+  "一方::いっぽう": {
+   "床は緑色だったが、一方、壁は黄色だった。": {
+    "sense": 2,
+    "gloss": "on the one hand; on the other hand",
+    "why": "standalone 一方、 is the conjunction 'on the other hand', not 'one side'"
+   }
+  },
+  "一日::いちじつ": {
+   "この金の時計は一日に一分遅れる。": {
+    "drop": true,
+    "why": "一日に (a day) is read いちにち: 一日::いちにち is its own card"
+   }
+  },
+  "一面::いちめん": {
+   "彼の意外な一面を見た。": {
+    "sense": 3,
+    "gloss": "one aspect; one side",
+    "why": "an unexpected side of a person is an aspect, not a surface"
+   }
+  },
+  "三::み": {
+   "彼は荷物を三個持っていた。": {
+    "drop": true,
+    "why": "三個 is read さんこ: 三::さん is its own card"
+   }
+  },
+  "上がる::あがる": {
+   "来月、タクシー料金が上がります。": {
+    "sense": 6,
+    "gloss": "to increase; to be raised (e.g. of a salary); to rise",
+    "why": "fares going up is an increase, not something surfacing from the sea"
+   },
+   "４月から、弟は中学に上がる。": {
+    "sense": 3,
+    "gloss": "to enter (a school); to advance to the next grade",
+    "why": "starting junior high is entering a school, not a promotion in rank"
+   }
+  },
+  "上る::のぼる": {
+   "そのとき太陽がのぼるところだった。": {
+    "drop": true,
+    "why": "昇る (to rise, of the sun) is its own card; 上る is to go up"
+   }
+  },
+  "上陸::じょうりく": {
+   "毎年、日本には台風が上陸します。": {
+    "sense": 2,
+    "gloss": "making landfall (of a typhoon); striking land; hitting land",
+    "why": "a typhoon making landfall, not people going ashore"
+   }
+  },
+  "下::した": {
+   "妹は私より三つ下です。": {
+    "sense": 1,
+    "gloss": "below; down; under; younger (e.g. daughter)",
+    "why": "three years younger is sense 1's 'younger', not 'one's inferior'"
+   }
+  },
+  "下がる::さがる": {
+   "ランプは天井から下がっていた。": {
+    "sense": 2,
+    "gloss": "to hang; to dangle",
+    "why": "a lamp hanging from the ceiling dangles, it does not fall"
+   }
+  },
+  "下りる::おりる": {
+   "ここで降りましょう。": {
+    "drop": true,
+    "why": "降りる (to get off; dew forms) is its own card; 下りる is to go down"
+   },
+   "今朝は露が降りた。": {
+    "drop": true,
+    "why": "降りる (to get off; dew forms) is its own card; 下りる is to go down"
+   }
+  },
+  "下ろす::おろす": {
+   "あの信号の手前で降ろしてください。": {
+    "drop": true,
+    "why": "降ろす (to take down, let off) is its own card"
+   },
+   "２階からトランクを降ろしてきてくれませんか。": {
+    "drop": true,
+    "why": "降ろす (to take down, let off) is its own card"
+   }
+  },
+  "下手::へた": {
+   "兄は料理が下手です。": {
+    "sense": 1,
+    "gloss": "unskillful; poor; awkward",
+    "why": "bad at cooking is 'unskillful', not 'imprudent; untactful'"
+   }
+  },
+  "世::よ": {
+   "彼の作品は死後に初めて世に知られた。": {
+    "sense": 1,
+    "gloss": "world; society; public",
+    "why": "known to the world/public, not 'life; lifetime'"
+   }
+  },
+  "並ぶ::ならぶ": {
+   "子どもたちは背の順に並びました。": {
+    "sense": 1,
+    "gloss": "to line up; to stand in a line",
+    "why": "lining up by height, not rivalling"
+   }
+  },
+  "並べる::ならべる": {
+   "机の上に写真を並べて、みんなで見ました。": {
+    "sense": 1,
+    "gloss": "to line up; to set up; to arrange in a line",
+    "why": "laying photos out on a desk, not enumerating"
+   }
+  },
+  "中味::なかみ": {
+   "財布の中身をこの袋に空けなさい。": {
+    "drop": true,
+    "why": "中身 (contents) is its own card"
+   }
+  },
+  "主人::しゅじん": {
+   "主人は料理がとても上手です。": {
+    "sense": 2,
+    "gloss": "one's husband",
+    "why": "'my husband is a good cook', not head of household/proprietor"
+   }
+  },
+  "乗っ取る::のっとる": {
+   "その会社はライバル企業に乗っ取られた。": {
+    "sense": 2,
+    "gloss": "to take possession of (forcibly); to take over (a company, account, etc.); to capture (a castle, enemy position, etc.); to seize; to occupy; to usurp",
+    "why": "a company taken over by a rival, not following a rule (則る)"
+   },
+   "猫にソファーを乗っ取られた。": {
+    "sense": 2,
+    "gloss": "to take possession of (forcibly); to take over (a company, account, etc.); to capture (a castle, enemy position, etc.); to seize; to occupy; to usurp",
+    "why": "a cat taking over the sofa is taking possession, not hijacking a plane"
+   }
+  },
+  "乗り物::のりもの": {
+   "この遊園地の乗り物は子供向けだ。": {
+    "sense": 2,
+    "gloss": "ride (at a fair, amusement park, etc.); attraction",
+    "why": "an amusement park's 乗り物 are rides, not vehicles"
+   }
+  },
+  "乗る::のる": {
+   "毎朝、自転車に乗って学校へ行きます。": {
+    "sense": 1,
+    "gloss": "to get on (train, plane, bus, ship, etc.); to get in; to board; to take; to embark",
+    "why": "riding a bike to school is getting on/riding, not 'to reach; to pass'"
+   }
+  },
+  "交じる::まじる": {
+   "トムは知らない人に混じって居心地が悪かった。": {
+    "drop": true,
+    "why": "混じる (to mingle with) is its own card"
+   }
+  },
+  "交ぜる::まぜる": {
+   "卵と砂糖をよく混ぜてください。": {
+    "drop": true,
+    "why": "混ぜる (to mix) is its own card"
+   }
+  },
+  "交際::こうさい": {
+   "二人は大学時代から交際している。": {
+    "sense": 2,
+    "gloss": "(romantic) involvement; dating",
+    "why": "two people 交際している since university are dating, not just acquainted"
+   }
+  },
+  "今日::こんにち": {
+   "その事故は去年の今日、起きたのだ。": {
+    "drop": true,
+    "why": "去年の今日 is read きょねんのきょう, the きょう card, not こんにち"
+   },
+   "今日は何をしたいですか。": {
+    "drop": true,
+    "why": "this is 今日 read きょう (today, the N5 card), not formal こんにち"
+   }
+  },
+  "付く::つく": {
+   "お風呂はついてますか。": {
+    "sense": 1,
+    "gloss": "to be attached; to be connected with; to adhere; to stick; to cling",
+    "why": "a room that comes with a bath has it attached, not a person accompanying"
+   }
+  },
+  "付ける::つける": {
+   "マスクをつけて出かけた。": {
+    "drop": true,
+    "why": "wearing a mask (マスクをつける) is 着ける, its own card"
+   },
+   "警官はその男をつけた。": {
+    "sense": null,
+    "why": "tailing someone is 付ける's 'to follow', a sense past the eight the page lists, not 'to place under guard'"
+   }
+  },
+  "付属::ふぞく": {
+   "この大学には附属の高校がある。": {
+    "drop": true,
+    "why": "附属 (attached) is its own card"
+   }
+  },
+  "代える::かえる": {
+   "お花の水を替えましょう。": {
+    "drop": true,
+    "why": "替える (to replace) is its own card"
+   },
+   "空港で円をドルに換えた。": {
+    "drop": true,
+    "why": "換える (to exchange) is its own card"
+   }
+  },
+  "会う::あう": {
+   "駅へ行く途中でにわか雨に遭った。": {
+    "drop": true,
+    "why": "遭う (to meet with something unpleasant) is its own card; 会う is to meet"
+   }
+  },
+  "伯母さん::おばさん": {
+   "叔母さんを訪ねた時はすごいごちそうだったね。": {
+    "drop": true,
+    "why": "叔母さん is the younger aunt, its own card; 伯母さん is the elder"
+   }
+  },
+  "伸ばす::のばす": {
+   "その仕事を明日まで延ばすな。": {
+    "drop": true,
+    "why": "延ばす (to postpone) is its own card"
+   },
+   "もう１日滞在を延ばしたいのですが、泊まれますか。": {
+    "drop": true,
+    "why": "extending a stay is 延ばす, its own card; 伸ばす is to stretch"
+   }
+  },
+  "低い::ひくい": {
+   "この机は私にはちょっと低い。": {
+    "sense": 2,
+    "gloss": "low (position); close to the ground",
+    "why": "a desk too low is physical height off the ground, not rank or degree"
+   }
+  },
+  "体::からだ": {
+   "父は体が大きくて、力が強い。": {
+    "sense": 3,
+    "gloss": "build; physique; frame; figure",
+    "why": "体が大きい is a big build, not the torso"
+   }
+  },
+  "何::なん/なに": {
+   "「朝ご飯に何を食べましたか。」「パンを食べました。」": {
+    "sense": 1,
+    "gloss": "what",
+    "why": "plain question word 'what', not the slang for penis"
+   }
+  },
+  "何と::なんと": {
+   "何と賢い生徒だろう。": {
+    "sense": 2,
+    "gloss": "what (a) ...!; how ...!",
+    "why": "exclamatory 'what a clever student!', not the question word"
+   }
+  },
+  "何とも::なんとも": {
+   "何とも言いようがないなあ。": {
+    "sense": 2,
+    "gloss": "(not) anything; (not) at all; (not) a bit",
+    "why": "with a negative: 'cannot say anything at all', not 'extremely'"
+   }
+  },
+  "作り::つくり": {
+   "あの家は煉瓦造りだ。": {
+    "drop": true,
+    "why": "造り (construction, structure) is its own card"
+   }
+  },
+  "例え::たとえ": {
+   "「陸に上がった河童」とは環境が変わったために能力を発揮できずにいることのたとえです。": {
+    "sense": 2,
+    "gloss": "simile; metaphor; allegory; fable; parable",
+    "why": "a saying that is a 'たとえ' for something is a metaphor, not an example"
+   }
+  },
+  "保障::ほしょう": {
+   "彼女の誠実さは私が保証します。": {
+    "drop": true,
+    "why": "保証 (guarantee) is its own card; 保障 is security of rights"
+   }
+  },
+  "個所::かしょ": {
+   "この湖はこの箇所が一番深い。": {
+    "drop": true,
+    "why": "箇所 (place, part) is its own card"
+   },
+   "私はスキー中に２箇所も骨折した。": {
+    "drop": true,
+    "why": "箇所 (place, part) is its own card"
+   }
+  },
+  "倒れる::たおれる": {
+   "彼は過労で倒れた。": {
+    "sense": 3,
+    "gloss": "to be confined to bed (with an illness); to come down with; to break down (e.g. from overwork)",
+    "why": "a person collapsing from overwork is breaking down, not a building caving in"
+   }
+  },
+  "傷::きず": {
+   "その一言は彼女の心に深い傷を残した。": {
+    "sense": 5,
+    "gloss": "(emotional) hurt; hurt feelings",
+    "why": "a deep wound left in the heart is emotional hurt, not a stain on one's reputation"
+   },
+   "彼の額の傷は目立つ。": {
+    "sense": 1,
+    "gloss": "wound; injury; cut; gash; bruise; scratch; scrape; scar",
+    "why": "a mark on a forehead is a wound or scar, not a chip or nick in an object"
+   }
+  },
+  "元::もと": {
+   "事実を基に考えると、彼の話はおかしい。": {
+    "drop": true,
+    "why": "基 (basis) is its own card"
+   }
+  },
+  "兎角::とかく": {
+   "あの人にはとかくのうわさがあった。": {
+    "sense": 4,
+    "gloss": "all sorts of (negative things); various",
+    "why": "とかくのうわさ is all sorts of unsavoury rumours"
+   }
+  },
+  "児::こ": {
+   "あの店の子は、いつも元気にあいさつしてくれる。": {
+    "drop": true,
+    "why": "子 (child) is its own card"
+   },
+   "その子は母親に甘えた。": {
+    "drop": true,
+    "why": "子 (child) is its own card"
+   },
+   "猫が子を三匹産んだ。": {
+    "drop": true,
+    "why": "子 (child) is its own card"
+   }
+  },
+  "六::む": {
+   "私は毎朝六時に起きます。": {
+    "drop": true,
+    "why": "六時 is read ろくじ: 六::ろく is its own card"
+   }
+  },
+  "具える::そなえる": {
+   "このビルは非常階段を備えている。": {
+    "drop": true,
+    "why": "備える (to equip, prepare) is its own card"
+   },
+   "地震に備えて、水と食べ物を用意している。": {
+    "drop": true,
+    "why": "備える (to equip, prepare) is its own card"
+   },
+   "彼は優れた才能を備えている。": {
+    "drop": true,
+    "why": "備える (to equip, prepare) is its own card"
+   }
+  },
+  "内::うち": {
+   "若いうちに、いろいろな国へ行ってみたい。": {
+    "sense": 2,
+    "gloss": "while (e.g. one is young); during; within (e.g. a day); in the course of",
+    "why": "若いうちに is 'while (young)', not 'inside'"
+   }
+  },
+  "円::まる": {
+   "彼はそのテレビ番組に丸一年出演していた。": {
+    "drop": true,
+    "why": "丸 (circle; whole) is its own card"
+   },
+   "正しい答えに丸をつけてください。": {
+    "drop": true,
+    "why": "丸 (circle; whole) is its own card"
+   }
+  },
+  "円い::まるい": {
+   "彼が間に入って、その場を丸く収めた。": {
+    "drop": true,
+    "why": "丸い (round) is its own card"
+   },
+   "月が丸くてきれいですね。": {
+    "drop": true,
+    "why": "丸い (round) is its own card"
+   }
+  },
+  "再現::さいげん": {
+   "その映画は当時の町並みを見事に再現している。": {
+    "sense": 2,
+    "gloss": "reproduction; reenactment; recreation",
+    "why": "a film recreating old streets is reproduction, not reappearance"
+   }
+  },
+  "冠::かん": {
+   "絵の中の少女は黄金ではなくて花のかんむりをかぶっています。": {
+    "drop": true,
+    "why": "the sentence has かんむり, not the word read かん"
+   }
+  },
+  "冠::かんむり": {
+   "絵の中の少女は黄金ではなくて花のかんむりをかぶっています。": {
+    "sense": 2,
+    "gloss": "crown; diadem; coronet",
+    "why": "a crown of flowers is a crown, not a Shinto courtier's cap"
+   }
+  },
+  "冷める::さめる": {
+   "「いいえ、違います」とイギリス人は冷めた返事をしました。": {
+    "sense": 3,
+    "gloss": "to be cold (eyes, expression, etc.); to be composed",
+    "why": "a cold, detached reply is 'to be cold (expression)', not excitement subsiding"
+   }
+  },
+  "切れ::きれ": {
+   "肉は何切れにしましょうか。": {
+    "sense": 5,
+    "gloss": "counter for scraps, pieces, etc.",
+    "why": "何切れ counts slices of meat, not agility"
+   }
+  },
+  "初め::はじめ": {
+   "この語学センターでは、英語をはじめ世界１５か国の外国語が学べる。": {
+    "drop": true,
+    "why": "〜をはじめ (such as) is written 始め, its own card"
+   },
+   "会うは別れの始め。": {
+    "drop": true,
+    "why": "始め (beginning, start) is its own card; the saying writes 始め"
+   }
+  },
+  "刺す::さす": {
+   "蚊にたくさん刺されました。": {
+    "sense": 2,
+    "gloss": "to sting; to bite",
+    "why": "mosquito bites are 'to sting; to bite', not stabbing"
+   },
+   "蚊に頭を刺された。": {
+    "sense": 2,
+    "gloss": "to sting; to bite",
+    "why": "a mosquito bite is 'to sting; to bite', not stabbing"
+   }
+  },
+  "削る::けずる": {
+   "彼の名前はリストから削られた。": {
+    "sense": 3,
+    "gloss": "to delete; to erase; to remove; to cross out; to strike out",
+    "why": "struck off a list is deleting, not cutting down a budget"
+   }
+  },
+  "力::ちから": {
+   "大した力にはならないかもしれませんけど、応援します。": {
+    "sense": 6,
+    "gloss": "support; help; aid; assistance",
+    "why": "being of little help is support/aid, not stress or emphasis"
+   }
+  },
+  "効く::きく": {
+   "この薬は飲んでから三十分ほどで効いてくる。": {
+    "sense": 1,
+    "gloss": "to be effective; to take effect; to be good (for)",
+    "why": "medicine kicking in is taking effect, not being possible to do"
+   }
+  },
+  "勘定::かんじょう": {
+   "勘定は合計５００ドルになる。": {
+    "sense": 2,
+    "gloss": "bill; check; account; payment (of a bill); settlement (of an account)",
+    "why": "a total of 500 dollars to pay is the bill, not the act of calculating"
+   }
+  },
+  "務め::つとめ": {
+   "お勤めはどちらですか。": {
+    "drop": true,
+    "why": "勤め (work, service) is its own card"
+   }
+  },
+  "勤める::つとめる": {
+   "兄は東京の会社に勤めています。": {
+    "sense": 1,
+    "gloss": "to work (for, at, in); to be employed (at); to serve (as)",
+    "why": "working for a company, not serving out a term"
+   }
+  },
+  "単位::たんい": {
+   "この科目は何単位ですか。": {
+    "sense": 3,
+    "gloss": "credit (in school, university, etc.); point",
+    "why": "how many 単位 a course is worth are credits, not a group"
+   }
+  },
+  "印::しるし": {
+   "進んで責任を取るということは成熟の印である。": {
+    "sense": 1,
+    "gloss": "mark; sign",
+    "why": "a sign of maturity, not a badge or crest"
+   }
+  },
+  "原始::げんし": {
+   "その人類学者は原始文化に関する講演をした。": {
+    "sense": 2,
+    "gloss": "primeval; primordial; primitive",
+    "why": "primitive cultures: the adjectival 'primitive', not 'origin; genesis'"
+   }
+  },
+  "取り締まる::とりしまる": {
+   "市は飲酒運転を非常に厳しく取り締まって、罰金を課している。": {
+    "sense": 2,
+    "gloss": "to crack down on; to keep under strict control; to enforce; to regulate",
+    "why": "cracking down on drunk driving, not managing or supervising"
+   }
+  },
+  "取れる::とれる": {
+   "ちょっと手を休めれば、肩のこりも取れるよ。": {
+    "sense": 2,
+    "gloss": "to go away (of a fever, pain, swelling, etc.); to disappear; to come out (of a stain); to come off (e.g. of dust); to be removed (e.g. of wrinkles)",
+    "why": "stiff shoulders easing is pain going away, not balance being attained"
+   }
+  },
+  "口::くち": {
+   "この料理はお口に合いますか。": {
+    "sense": 6,
+    "gloss": "taste; palate",
+    "why": "口に合う is about taste/palate, not a mouth to feed"
+   }
+  },
+  "合わす::あわす": {
+   "彼は割れた花瓶の破片を一つずつ合わしていった。": {
+    "sense": 2,
+    "gloss": "to join together; to unite; to combine; to add up",
+    "why": "fitting the broken pieces together is joining, not matching a rhythm"
+   }
+  },
+  "吐く::つく": {
+   "父は新聞を読みながら、大きなため息を吐いた。": {
+    "sense": 1,
+    "gloss": "to breathe out; to breathe",
+    "why": "letting out a sigh is breathing out, not vomiting"
+   }
+  },
+  "周::しゅう": {
+   "その衛星は軌道に乗り、地球を１０周した。": {
+    "sense": 1,
+    "gloss": "counter for laps or circuits",
+    "why": "circling the earth ten times is a counter for laps, not the Zhou dynasty"
+   }
+  },
+  "嘘::うそ": {
+   "えっ、嘘でしょ？": {
+    "sense": 4,
+    "gloss": "no way!; unbelievable!; really?!",
+    "why": "the exclamation 'no way!', not 'mistake; error'"
+   }
+  },
+  "器械::きかい": {
+   "今日はこの機械を試してみるつもりです。": {
+    "drop": true,
+    "why": "機械 (machine) is its own card; 器械 is instrument"
+   }
+  },
+  "回り::まわり": {
+   "家のまわりに花を植えた。": {
+    "sense": 2,
+    "gloss": "surroundings; neighbourhood; neighborhood; vicinity",
+    "why": "家のまわり is the surroundings of the house, the sense the card now lists from 周り;回り"
+   }
+  },
+  "因る::よる": {
+   "今回の失敗は、準備不足に因るところが大きい。": {
+    "sense": 1,
+    "gloss": "to be due to; to be caused by",
+    "why": "a failure owed largely to poor preparation is cause, not dependence"
+   }
+  },
+  "固い::かたい": {
+   "卵は硬くゆでてください。": {
+    "drop": true,
+    "why": "硬い (hard, solid) is its own card; 固い is firm"
+   }
+  },
+  "地下::ちか": {
+   "この建物の地下に駐車場がある。": {
+    "sense": 1,
+    "gloss": "underground; below the ground",
+    "why": "a car park under the building is literally underground, not secret or illegal"
+   }
+  },
+  "地味::じみ": {
+   "彼女は地味な色を好む。": {
+    "sense": 1,
+    "gloss": "plain; simple; subdued; sober",
+    "why": "plain, subdued colours, not reserved behaviour"
+   }
+  },
+  "地方::ちほう": {
+   "その地方は大規模に開発されるだろう。": {
+    "sense": 1,
+    "gloss": "district; region; area; locality",
+    "why": "'that region' is a district/area, not 'the countryside'"
+   }
+  },
+  "基::もと": {
+   "このうわさのもとは、いったい誰だろう。": {
+    "drop": true,
+    "why": "元 (origin, source: うわさの元) is its own card; 基 is basis"
+   },
+   "この制度のもとでは、生徒が交代で教え合う。": {
+    "drop": true,
+    "why": "下 (under rules/a system) is its own card; 基 is basis"
+   },
+   "やってしまったことは元に戻らない。": {
+    "drop": true,
+    "why": "元 (origin, source) is its own card"
+   },
+   "風邪がもとで、肺炎になった。": {
+    "drop": true,
+    "why": "元 (cause: 風邪が元で) is its own card; 基 is basis"
+   }
+  },
+  "堅い::かたい": {
+   "このふたは固くて取れないよ。": {
+    "drop": true,
+    "why": "固い (hard, firm) is its own card"
+   },
+   "この肉は固くて食べにくい。": {
+    "drop": true,
+    "why": "固い (hard, firm) is its own card"
+   },
+   "卵は硬くゆでてください。": {
+    "drop": true,
+    "why": "硬い (hard, solid) is its own card"
+   },
+   "固いこと言うなよ。": {
+    "drop": true,
+    "why": "固い (hard, firm) is its own card"
+   }
+  },
+  "堪える::たえる": {
+   "あの騒音には耐えられないよ。": {
+    "drop": true,
+    "why": "耐える (to bear, endure) is its own card"
+   },
+   "この家は地震に耐えられますか。": {
+    "drop": true,
+    "why": "耐える (to bear, endure) is its own card"
+   }
+  },
+  "場所::ばしょ": {
+   "このソファーは場所を取りすぎる。": {
+    "sense": 2,
+    "gloss": "room; space",
+    "why": "場所を取る is taking up room/space, not a location"
+   }
+  },
+  "外::ほか": {
+   "この店はほかの店より安い。": {
+    "drop": true,
+    "why": "他 (other, another thing) is its own card; 外 is other place"
+   },
+   "他の人には私のやっていることはできないだろう。": {
+    "drop": true,
+    "why": "他 (other, another) is its own card; 外 is the other place"
+   }
+  },
+  "外部::がいぶ": {
+   "秘密が外部に漏れた。": {
+    "sense": 2,
+    "gloss": "outside (of a group, company, etc.); outside world",
+    "why": "a secret leaking out reaches the outside world, not the exterior of a building"
+   }
+  },
+  "大分::だいぶん": {
+   "だいぶ痛みがなくなりました。": {
+    "drop": true,
+    "why": "the sentence says だいぶ, its own card; the card teaches the reading だいぶん"
+   }
+  },
+  "大学::だいがく": {
+   "合格者の過半数は大学出身者であった。": {
+    "sense": 1,
+    "gloss": "university; college",
+    "why": "university graduates today, not the ritsuryō-era imperial university"
+   }
+  },
+  "大部::たいぶ": {
+   "彼は三年かけて大部の研究書を書き上げた。": {
+    "sense": 1,
+    "gloss": "lengthy (of a book, etc.); voluminous",
+    "why": "a voluminous research book, not 'most; greater part'"
+   }
+  },
+  "妙::みょう": {
+   "夜中に台所から妙な音がした。": {
+    "sense": 1,
+    "gloss": "strange; weird; odd; curious",
+    "why": "a strange noise is 'strange', not a wonder or miracle"
+   }
+  },
+  "始め::はじめ": {
+   "旅行の初めの二日間は雨降りだった。": {
+    "drop": true,
+    "why": "初め (beginning of a period) is its own card"
+   }
+  },
+  "学年::がくねん": {
+   "第１学年には５つのクラスがあった。": {
+    "sense": 2,
+    "gloss": "year in school; grade in school",
+    "why": "the first year is a grade in school, not an academic year"
+   }
+  },
+  "宛::あて": {
+   "あの人たちの助けはあてにできないよ。": {
+    "drop": true,
+    "why": "当て (あてにする, rely on) is its own card; 宛 is addressed to"
+   }
+  },
+  "寄る::よる": {
+   "ちょっと寄って行きませんか。": {
+    "sense": 3,
+    "gloss": "to stop by (while on one's way to another place); to drop by; to make a short visit",
+    "why": "dropping in for a moment is stopping by, not approaching"
+   }
+  },
+  "小銭::こぜに": {
+   "彼は就寝前にポケットから小銭を取り出して、テーブルの上にどさっと置く。": {
+    "sense": 1,
+    "gloss": "small change; pocket change; coins",
+    "why": "coins taken out of a pocket are small change, not a small sum"
+   }
+  },
+  "尖る::とがる": {
+   "彼はとがった声を出した。": {
+    "sense": 3,
+    "gloss": "to be sharp (of a voice, words, etc.); to be harsh; to be angry; to look displeased; to look sour",
+    "why": "a sharp voice is sense 3 (of a voice), not being nervous"
+   }
+  },
+  "尚::なお": {
+   "あとで起こったことはなお悪かった。": {
+    "sense": 2,
+    "gloss": "more; still more; greater; further",
+    "why": "なお before a comparative (なお悪い) is 'still more', not 'still; yet' (continuing)"
+   }
+  },
+  "尤も::もっとも": {
+   "君の言うことはもっともだが、最も大切なのは安全だ。": {
+    "sense": 2,
+    "gloss": "reasonable; natural; just",
+    "why": "君の言うことはもっともだ is 'reasonable'; 'most' is the separate 最も later in the sentence"
+   }
+  },
+  "尻尾::しっぽ": {
+   "彼は尻尾を巻いて逃げた。": {
+    "sense": 1,
+    "gloss": "tail (of an animal)",
+    "why": "tucking one's tail (an animal's tail), not a tail end or tip"
+   }
+  },
+  "局::きょく": {
+   "この地区では三局受信できます。": {
+    "sense": 2,
+    "gloss": "office (e.g. post, telephone); broadcasting station (e.g. television, radio); channel; exchange",
+    "why": "receiving three stations is broadcasting stations, not an affair"
+   }
+  },
+  "届く::とどく": {
+   "ここからでも声は届くよ。": {
+    "sense": 1,
+    "gloss": "to reach; to touch; to get to; to carry (of sound)",
+    "why": "a voice that carries from here reaches, not 'being attentive'"
+   }
+  },
+  "差し上げる::さしあげる": {
+   "先生に京都のお土産を差し上げました。": {
+    "sense": 2,
+    "gloss": "to give; to present; to offer",
+    "why": "giving a teacher a souvenir is humble giving, not lifting up"
+   }
+  },
+  "差す::さす": {
+   "窓から日が差している。": {
+    "sense": 1,
+    "gloss": "to shine",
+    "why": "sunlight shining in through the window, not 'to be tinged with'"
+   }
+  },
+  "帳::とばり": {
+   "夜のとばりが下りつつある。": {
+    "sense": 2,
+    "gloss": "veil (of darkness, mystery, etc.); mantle",
+    "why": "夜のとばり is the veil of darkness, not a literal curtain"
+   }
+  },
+  "幾分::いくぶん": {
+   "そのケーキは幾分レモンの味がした。": {
+    "sense": 1,
+    "gloss": "somewhat; to some extent; to some degree",
+    "why": "adverb 'somewhat' modifying the taste, not the noun 'part; portion'"
+   }
+  },
+  "延ばす::のばす": {
+   "右腕を伸ばせません。": {
+    "drop": true,
+    "why": "stretching an arm is 伸ばす, its own card; 延ばす is to extend in time"
+   },
+   "姉は髪を伸ばしている。": {
+    "drop": true,
+    "why": "伸ばす (to stretch, grow long) is its own card; 延ばす is to prolong"
+   },
+   "彼は手を伸ばして、革の表紙の小さな本を取った。": {
+    "drop": true,
+    "why": "伸ばす (to stretch, grow long) is its own card; 延ばす is to prolong"
+   },
+   "朝起きて、両手を上に伸ばした。": {
+    "drop": true,
+    "why": "伸ばす (to stretch, grow long) is its own card; 延ばす is to prolong"
+   }
+  },
+  "延びる::のびる": {
+   "洗濯したら、セーターが伸びてしまった。": {
+    "drop": true,
+    "why": "伸びる (to stretch) is its own card; 延びる is to be prolonged"
+   }
+  },
+  "式::しき": {
+   "彼は事故でその式に出席できなかった。": {
+    "sense": 2,
+    "gloss": "ceremony; rite; ritual; celebration",
+    "why": "attending a ceremony, not a style or method"
+   }
+  },
+  "引っ繰り返る::ひっくりかえる": {
+   "彼はバランスを崩して、ひっくり返った。": {
+    "sense": 2,
+    "gloss": "to fall down; to tumble down; to topple over; to lie on one's back",
+    "why": "a person losing balance and falling over, not something capsizing"
+   }
+  },
+  "張る::はる": {
+   "願書には最近の写真を貼ってください。": {
+    "drop": true,
+    "why": "貼る (to stick, paste) is its own card; 張る is to stretch"
+   }
+  },
+  "弾::たま": {
+   "彼の額には玉のような汗が浮かんでいた。": {
+    "drop": true,
+    "why": "玉 (ball, bead) is its own card"
+   }
+  },
+  "当たり::あたり": {
+   "何回か当たりはあったが針にはかからなかった。": {
+    "sense": 8,
+    "gloss": "bite (of a fish on a hook); strike",
+    "why": "a fish's bite on the hook, not a hit"
+   }
+  },
+  "形::かたち": {
+   "この芸術家は、自然の形から新しい作品を創造している。": {
+    "sense": 1,
+    "gloss": "(physical) form; shape; figure",
+    "why": "the shapes of nature are physical forms, not a person's facial features"
+   }
+  },
+  "後退::こうたい": {
+   "自動車の売れ行きは年度末に後退しました。": {
+    "sense": 2,
+    "gloss": "recession; waning",
+    "why": "sales falling off is a decline, not physical retreat or reversing"
+   }
+  },
+  "得る::える": {
+   "これらのガスは地球規模の温暖化をもたらし得る。": {
+    "drop": true,
+    "why": "〜得る after a verb (can) is read うる: 得る::うる is its own card"
+   }
+  },
+  "心配::しんぱい": {
+   "心配してくれる人がいて幸せだ。": {
+    "sense": 1,
+    "gloss": "worry; concern; anxiety; uneasiness; fear",
+    "why": "someone who worries about me is concern, not practical help or aid"
+   }
+  },
+  "性::せい": {
+   "この病気は性や年齢に関係なく起こる。": {
+    "sense": 2,
+    "gloss": "sex; gender",
+    "why": "an illness regardless of sex or age is biological sex, not sexual activity"
+   },
+   "フランス語の名詞には、男性と女性の二つの性がある。": {
+    "sense": 4,
+    "gloss": "gender",
+    "why": "masculine and feminine nouns are grammatical gender, not a person's nature"
+   }
+  },
+  "悩ましい::なやましい": {
+   "彼女は窓の外を見ながら、悩ましげな目つきでため息をついた。": {
+    "sense": 3,
+    "gloss": "anxious; uneasy",
+    "why": "a troubled look with a sigh is uneasiness, not seductiveness"
+   }
+  },
+  "惜しむ::おしむ": {
+   "彼の死は惜しんでも余りあるものだ。": {
+    "sense": 2,
+    "gloss": "to regret; to lament",
+    "why": "grieving over a death is lamenting, not being reluctant"
+   }
+  },
+  "慣れる::なれる": {
+   "このらくだは人によくなれているからだれが乗っても大丈夫です。": {
+    "drop": true,
+    "why": "an animal that is tame (なれる) is 馴れる, its own card; 慣れる is to grow accustomed"
+   }
+  },
+  "慶び::よろこび": {
+   "優勝の喜びをチームのみんなと分かち合った。": {
+    "drop": true,
+    "why": "喜び (joy) is its own card"
+   }
+  },
+  "戦力::せんりょく": {
+   "けがをしていた選手が戻って、チームの戦力が上がった。": {
+    "sense": 2,
+    "gloss": "ability (to compete); capabilities; valuable asset",
+    "why": "a sports team's strength, not military strength"
+   }
+  },
+  "所::ところ": {
+   "おじを見送りに駅に行ってきたところだ。": {
+    "sense": null,
+    "why": "〜たところだ is 'have just done'; no listed sense (place...thing; matter) gives it"
+   }
+  },
+  "手::て": {
+   "熱い鍋をここに置きます。手で触らないでください。": {
+    "sense": 1,
+    "gloss": "hand; arm",
+    "why": "touching with one's hands, not a handle"
+   }
+  },
+  "手入れ::ていれ": {
+   "この自転車はよく手入れされている。": {
+    "sense": 1,
+    "gloss": "care; looking after; repair; maintenance; tending; trimming; grooming",
+    "why": "a well-kept bicycle is maintenance, not a police raid"
+   }
+  },
+  "扱う::あつかう": {
+   "心理学は人間の感情を扱う。": {
+    "sense": 5,
+    "gloss": "to cover (a topic); to treat; to discuss; to take up",
+    "why": "psychology dealing with emotions is covering a topic, not handling a person"
+   }
+  },
+  "担う::になう": {
+   "若い世代が日本の将来を担っている。": {
+    "sense": 2,
+    "gloss": "to bear (a burden, responsibility, etc.); to take upon oneself",
+    "why": "bearing the country's future is a responsibility, not a load on the shoulder"
+   }
+  },
+  "担ぐ::かつぐ": {
+   "重い荷物を担いで山を登った。": {
+    "sense": 1,
+    "gloss": "to shoulder; to carry on one's shoulder",
+    "why": "carrying a load on one's shoulders, not deceiving someone"
+   }
+  },
+  "拐う::さらう": {
+   "彼女は全部の賞をさらって行った。": {
+    "sense": 2,
+    "gloss": "to take entirely for oneself; to monopolize",
+    "why": "sweeping all the prizes is taking everything for oneself, not kidnapping"
+   }
+  },
+  "持てる::もてる": {
+   "彼は優しいので、女性にもてる。": {
+    "sense": 2,
+    "gloss": "to be well liked; to be popular; to be pampered (spoiled, doted upon, etc.); to be welcomed",
+    "why": "being popular with women, not 'possessed; held'"
+   }
+  },
+  "挑む::いどむ": {
+   "冬の富士山に挑むのは危険だ。": {
+    "sense": 2,
+    "gloss": "to tackle (e.g. a problem); to attempt; to go after (a prize, record, etc.)",
+    "why": "taking on Mt Fuji in winter is tackling a feat, not making sexual advances"
+   }
+  },
+  "挨拶::あいさつ": {
+   "朝、近所の人に挨拶をした。": {
+    "sense": 1,
+    "gloss": "greeting; greetings; salutation; salute",
+    "why": "saying hello to a neighbour is a greeting, not a reply"
+   }
+  },
+  "捜す::さがす": {
+   "私は寝る場所を探した。": {
+    "drop": true,
+    "why": "探す (to look for) is its own card"
+   },
+   "鍵が見つからなくて、引き出しの中を探した。": {
+    "drop": true,
+    "why": "探す (to look for) is its own card"
+   }
+  },
+  "捧げる::ささげる": {
+   "彼は平和のために一生を捧げた。": {
+    "sense": 3,
+    "gloss": "to devote; to sacrifice; to dedicate",
+    "why": "devoting one's life, not lifting something up"
+   }
+  },
+  "掛け::かけ": {
+   "昔は近所の店で、掛けで米を買っていた。": {
+    "sense": 1,
+    "gloss": "credit",
+    "why": "buying on credit, not a hanger or rack"
+   }
+  },
+  "探す::さがす": {
+   "警察は行方不明の少年を捜した。": {
+    "drop": true,
+    "why": "捜す (to search for someone missing) is its own card; 探す is to look for"
+   }
+  },
+  "探る::さぐる": {
+   "遠まわしに彼の意見を探った。": {
+    "sense": 2,
+    "gloss": "to investigate; to probe into; to spy on; to sound out",
+    "why": "sounding out someone's views is probing, not groping for an object"
+   }
+  },
+  "推理::すいり": {
+   "彼女は推理作家として有名になった。": {
+    "sense": 2,
+    "gloss": "mystery genre; detective genre",
+    "why": "推理作家 is a mystery writer: the genre, not reasoning"
+   }
+  },
+  "揉む::もむ": {
+   "疲れている父の肩を揉んであげた。": {
+    "sense": 2,
+    "gloss": "to massage",
+    "why": "rubbing tired shoulders is massaging, not crumpling"
+   }
+  },
+  "換える::かえる": {
+   "お花の水を替えましょう。": {
+    "drop": true,
+    "why": "替える (to replace) is its own card"
+   }
+  },
+  "操作::そうさ": {
+   "私はこのＣＤプレイヤーの操作のしかたが分からない。": {
+    "sense": 1,
+    "gloss": "operation; management; handling",
+    "why": "operating a CD player is handling a machine, not manipulation for one's benefit"
+   }
+  },
+  "支える::ささえる": {
+   "何本もの柱が重い屋根を支えている。": {
+    "sense": 1,
+    "gloss": "to support; to prop; to sustain; to underlay; to hold up; to defend",
+    "why": "pillars holding up a roof is supporting it, not holding at bay"
+   }
+  },
+  "改札::かいさつ": {
+   "駅の改札で友達と待ち合わせた。": {
+    "sense": 2,
+    "gloss": "ticket gate; ticket barrier",
+    "why": "meeting at the station's ticket gates is the gate, not the inspection"
+   }
+  },
+  "故::ゆえ": {
+   "その起源ゆえに、カナダ英語にはアメリカ英語とイギリス英語の両方の特徴がある。": {
+    "sense": 2,
+    "gloss": "because of; as a result of",
+    "why": "〜ゆえに is 'because of', not the noun 'reason; cause'"
+   }
+  },
+  "救い::すくい": {
+   "彼の優しい言葉が、私にとって唯一の救いだった。": {
+    "sense": 2,
+    "gloss": "salvation; solace; (source of) comfort; saving grace",
+    "why": "kind words as one's only comfort, not religious salvation"
+   }
+  },
+  "教室::きょうしつ": {
+   "昼休みに教室を使ってもいいですか。": {
+    "sense": 1,
+    "gloss": "classroom; lecture room",
+    "why": "using the classroom at lunchtime, not a university department"
+   }
+  },
+  "敷く::しく": {
+   "公園の芝生にシートを敷いて、お弁当を食べた。": {
+    "sense": 1,
+    "gloss": "to spread out (e.g. a futon); to lay out",
+    "why": "spreading a sheet on the lawn is laying out, not pinning down"
+   }
+  },
+  "文::ぶん": {
+   "次の文を日本語に訳しなさい。": {
+    "sense": 1,
+    "gloss": "sentence",
+    "why": "sentences to translate are sentences, not the literary arts"
+   }
+  },
+  "料::りょう": {
+   "楽しい思い出になるなら、この入場料は安いものだ。": {
+    "sense": 1,
+    "gloss": "fee; charge; rate",
+    "why": "an admission fee is a charge, not material"
+   }
+  },
+  "料理::りょうり": {
+   "父は料理がとても上手です。": {
+    "sense": 1,
+    "gloss": "cooking; cookery; cuisine; food; dish",
+    "why": "being good at cooking, not at handling matters"
+   }
+  },
+  "方::ほう": {
+   "二人のうちでは、ジョンの方が背が高い。": {
+    "sense": 5,
+    "gloss": "indicates one side of a comparison",
+    "why": "ジョンの方が背が高い marks one side of a comparison, not a direction"
+   }
+  },
+  "早い::はやい": {
+   "新幹線はとても速い。": {
+    "drop": true,
+    "why": "速い (fast) is its own card; 早い is early"
+   }
+  },
+  "明き::あき": {
+   "うちの会社には空きがない。": {
+    "drop": true,
+    "why": "空き (space, vacancy) is its own card"
+   },
+   "字と字の間の空きをもっと広くしなさい。": {
+    "drop": true,
+    "why": "空き (space, vacancy) is its own card"
+   }
+  },
+  "明ける::あける": {
+   "夜が明けるまで、友だちと話していた。": {
+    "sense": 4,
+    "gloss": "to dawn; to grow light",
+    "why": "the night ending at daybreak is dawning, not making time in a schedule"
+   },
+   "財布の中身をこの袋に空けなさい。": {
+    "drop": true,
+    "why": "空ける (to empty) is another word, not this card; 明ける is to dawn"
+   }
+  },
+  "暇::ひま": {
+   "今晩暇かな？": {
+    "sense": 5,
+    "gloss": "free; not busy; unoccupied; idle",
+    "why": "'are you free tonight?' is the adjective 'free; not busy', not the noun 'spare time'"
+   }
+  },
+  "書留::かきとめ": {
+   "銀行から書留が届いた。": {
+    "sense": 1,
+    "gloss": "registered mail; registered post; registration (of mail)",
+    "why": "a registered letter that arrived is registered mail, not noting down"
+   }
+  },
+  "替える::かえる": {
+   "空港で円をドルに換えた。": {
+    "drop": true,
+    "why": "換える (to exchange) is its own card"
+   }
+  },
+  "最早::もはや": {
+   "もはや言うことはない。": {
+    "sense": 2,
+    "gloss": "no longer; not any more",
+    "why": "with a negative, もはや is 'no longer', not 'already'"
+   }
+  },
+  "未開::みかい": {
+   "その島には、今も未開のジャングルが広がっている。": {
+    "sense": 2,
+    "gloss": "undeveloped (land); unexplored (territory, field, etc.)",
+    "why": "untouched jungle is undeveloped land, not an uncivilized people"
+   }
+  },
+  "本::ほん": {
+   "図書館で本を三冊借りた。": {
+    "sense": 1,
+    "gloss": "book; volume; script",
+    "why": "three books borrowed from the library, not 'this; present'"
+   }
+  },
+  "札::ふだ": {
+   "彼は店の入り口に閉店の札をかけた。": {
+    "sense": 3,
+    "gloss": "sign; card; plate",
+    "why": "a 'Closed' sign hung at the door, not a ticket or receipt"
+   }
+  },
+  "杯::はい": {
+   "ご飯をもう一杯いかがですか。": {
+    "sense": 2,
+    "gloss": "counter for cupfuls, bowlfuls, spoonfuls, etc.",
+    "why": "counter for a bowlful of rice, not a sake cup"
+   }
+  },
+  "染みる::しみる": {
+   "彼の忠告が骨身に染みた。": {
+    "sense": 4,
+    "gloss": "to feel keenly; to make a deep impression; to sink into (e.g. one's mind); to be moved",
+    "why": "advice sinking in deeply is being keenly felt, not a liquid soaking in"
+   }
+  },
+  "核::かく": {
+   "この細胞の核は、顕微鏡ではっきり見える。": {
+    "sense": 5,
+    "gloss": "nucleus (of a cell)",
+    "why": "a cell's nucleus, not nuclear weapons"
+   }
+  },
+  "桁::けた": {
+   "最後の二桁は省いてかまいません。": {
+    "sense": 2,
+    "gloss": "digit; decade; order of magnitude",
+    "why": "the last two digits, not a beam or girder"
+   }
+  },
+  "梅雨::ばいう": {
+   "天気予報によれば、まもなく梅雨に入るそうだ。": {
+    "drop": true,
+    "why": "梅雨に入る is read つゆ: 梅雨::つゆ is its own card"
+   }
+  },
+  "植民地::しょくみんち": {
+   "この町には、植民地時代の建物が多く残っている。": {
+    "sense": 1,
+    "gloss": "colony",
+    "why": "colonial-era buildings, not a Japanese settlement in Brazil"
+   }
+  },
+  "機械::きかい": {
+   "血圧計は大切な検査器械です。": {
+    "drop": true,
+    "why": "器械 (instrument) is its own card; 機械 is machine"
+   }
+  },
+  "欄::らん": {
+   "注は各ページの下の欄にまとめてあります。": {
+    "sense": 1,
+    "gloss": "section (e.g. in a newspaper); column; page",
+    "why": "the notes sit in a section of the page, not in a form field"
+   }
+  },
+  "止める::とめる": {
+   "この文書はホッチキスで留めておいてください。": {
+    "drop": true,
+    "why": "留める (to fasten, pin) is its own card; 止める is to stop"
+   },
+   "写真をピンで壁に留めた。": {
+    "drop": true,
+    "why": "留める (to fasten, pin) is its own card; 止める is to stop"
+   }
+  },
+  "殖える::ふえる": {
+   "この辺りは交通量が増えた。": {
+    "drop": true,
+    "why": "増える (to increase) is its own card"
+   }
+  },
+  "殖やす::ふやす": {
+   "将来のために、貯金を少しずつ増やしたい。": {
+    "drop": true,
+    "why": "増やす (to increase) is its own card"
+   }
+  },
+  "氏::し": {
+   "新しい社長には鈴木氏が選ばれた。": {
+    "sense": 1,
+    "gloss": "Mr; Mrs; Ms; Miss",
+    "why": "鈴木氏 is the title Mr, not a clan"
+   }
+  },
+  "永い::ながい": {
+   "だんだん日が長くなっています。": {
+    "drop": true,
+    "why": "長い (long) is its own card"
+   },
+   "長い間、お待たせしました。": {
+    "drop": true,
+    "why": "長い (long) is its own card"
+   }
+  },
+  "求める::もとめる": {
+   "いつでも彼の援助を求められます。": {
+    "sense": 2,
+    "gloss": "to request; to demand; to require; to ask for",
+    "why": "援助を求める is asking for help, a request, not merely wanting it"
+   }
+  },
+  "汚す::けがす": {
+   "その本を汚さないように扱ってくれるなら、貸してあげるよ。": {
+    "drop": true,
+    "why": "keeping a book clean is よごす, not けがす"
+   }
+  },
+  "汚れる::よごれる": {
+   "雨の中を歩いたら、靴が汚れた。": {
+    "sense": 1,
+    "gloss": "to get dirty; to become dirty",
+    "why": "shoes getting dirty in the rain is literal dirt, not moral corruption"
+   }
+  },
+  "決勝::けっしょう": {
+   "決勝まで残った走者は５人だった。": {
+    "sense": 2,
+    "gloss": "finals",
+    "why": "reaching the finals, not the decision of a contest"
+   }
+  },
+  "河::かわ": {
+   "この川はあの川の３倍長い。": {
+    "drop": true,
+    "why": "川 (river) is its own card; 河 is a large river"
+   },
+   "信濃川と阿賀野川ではどちらが長いですか。": {
+    "drop": true,
+    "why": "川 (river) is its own card; 河 is a large river"
+   }
+  },
+  "沸かす::わかす": {
+   "お風呂を沸かしておいてくれる？": {
+    "sense": 1,
+    "gloss": "to boil; to heat (a liquid); to prepare (a bath, hot drink)",
+    "why": "heating the bath, not exciting or rousing someone"
+   }
+  },
+  "流し::ながし": {
+   "使ったお皿は流しに置いておいてね。": {
+    "sense": 1,
+    "gloss": "sink (e.g. in a kitchen)",
+    "why": "plates left in the kitchen sink, not a cruising taxi"
+   }
+  },
+  "消す::けす": {
+   "黒板の字を消してください。": {
+    "sense": 1,
+    "gloss": "to erase; to rub out; to rub off; to cross out; to delete",
+    "why": "erasing the blackboard, not killing"
+   }
+  },
+  "済ます::すます": {
+   "電話で済まそうと思いました。": {
+    "sense": 3,
+    "gloss": "to get along (without something); to make do with (without)",
+    "why": "making do with a phone call, not paying back"
+   }
+  },
+  "渡す::わたす": {
+   "リレーでは、次の人にバトンを渡します。": {
+    "sense": 3,
+    "gloss": "to hand over; to hand in; to pass; to give; to transfer",
+    "why": "passing the baton is handing over, not ferrying across"
+   },
+   "駅で友だちに切符を渡した。": {
+    "sense": 3,
+    "gloss": "to hand over; to hand in; to pass; to give; to transfer",
+    "why": "handing a friend a ticket is handing over, not ferrying across"
+   }
+  },
+  "滞る::とどこおる": {
+   "家賃の支払いが一か月滞っている。": {
+    "sense": 2,
+    "gloss": "to be overdue (of a payment); to fall into arrears; to be outstanding",
+    "why": "an overdue rent payment is being in arrears"
+   }
+  },
+  "無くなる::なくなる": {
+   "これで、疑う余地はなくなった。": {
+    "sense": 3,
+    "gloss": "to disappear (e.g. pain); to be lost (e.g. a dream, confidence)",
+    "why": "room for doubt disappearing, not a lost object going missing"
+   }
+  },
+  "焼く::やく": {
+   "このお肉をもうすこし焼いてくださいませんか。": {
+    "sense": 2,
+    "gloss": "to roast; to broil; to grill; to bake; to toast; to barbecue",
+    "why": "cooking meat a little more is grilling it, not burning it"
+   },
+   "ケーキを焼く手順を、母に教えてもらった。": {
+    "sense": 2,
+    "gloss": "to roast; to broil; to grill; to bake; to toast; to barbecue",
+    "why": "baking a cake, not printing a photo or burning a disc"
+   },
+   "魚を焼くと、いいにおいがする。": {
+    "sense": 2,
+    "gloss": "to roast; to broil; to grill; to bake; to toast; to barbecue",
+    "why": "grilling fish, not printing a photo or burning a disc"
+   }
+  },
+  "焼ける::やける": {
+   "このトーストはよく焼けていません。": {
+    "sense": 2,
+    "gloss": "to be roasted; to be thoroughly cooked",
+    "why": "toast being done (cooked), not burning down in flames"
+   }
+  },
+  "片寄る::かたよる": {
+   "この記事は意見が偏っていて、公平ではない。": {
+    "drop": true,
+    "why": "偏る (to be biased, unbalanced) is its own card"
+   },
+   "ハンバーガーばかり食べていると、栄養が偏るよ。": {
+    "drop": true,
+    "why": "偏る (to be biased, unbalanced) is its own card"
+   }
+  },
+  "犬::いぬ": {
+   "うちの犬は散歩が大好きです。": {
+    "sense": 1,
+    "gloss": "dog (Canis (lupus) familiaris); canine",
+    "why": "a pet dog that loves walks, not a snitch"
+   }
+  },
+  "独り::ひとり": {
+   "日曜日は一人で家にいました。": {
+    "drop": true,
+    "why": "一人 (one person) is its own card; 独り is alone"
+   },
+   "私には弟が一人います。": {
+    "drop": true,
+    "why": "一人 (one person) is its own card; 独り is alone"
+   }
+  },
+  "玉::ぎょく": {
+   "相手の玉を詰ませて、ついに勝った。": {
+    "sense": 7,
+    "gloss": "king (of the junior player)",
+    "why": "checkmating the shogi king, not a precious stone"
+   }
+  },
+  "玉::たま": {
+   "ピッチャーの投げた球は、まるで弾のように速かった。": {
+    "drop": true,
+    "why": "球 (ball) is its own card, and 弾 (bullet) another; 玉 is not in the sentence"
+   }
+  },
+  "現す::あらわす": {
+   "「＆」という記号は英語の「and」を表す。": {
+    "drop": true,
+    "why": "表す (to express, represent) is its own card; 現す is to reveal"
+   },
+   "あなたのご親切に対し深く感謝の意を表します。": {
+    "drop": true,
+    "why": "表す (to express, represent) is its own card; 現す is to reveal"
+   }
+  },
+  "球::たま": {
+   "ピッチャーの投げた球は、まるで弾のように速かった。": {
+    "sense": 3,
+    "gloss": "ball (in sports); pitch (e.g. in baseball)",
+    "why": "the pitcher's ball is a ball in sports; 弾 is the bullet it is compared to"
+   },
+   "彼の額には玉のような汗が浮かんでいた。": {
+    "drop": true,
+    "why": "玉 (ball, bead) is its own card"
+   }
+  },
+  "生::なま": {
+   "日本では、卵を生で食べることがある。": {
+    "sense": 1,
+    "gloss": "raw; uncooked; fresh",
+    "why": "eating eggs raw is uncooked food, not unprotected sex"
+   }
+  },
+  "生きる::いきる": {
+   "祖母は百歳まで生きた。": {
+    "sense": 1,
+    "gloss": "to live; to exist",
+    "why": "living to 100 is living, not being in effect or functioning"
+   }
+  },
+  "生じる::しょうじる": {
+   "事故は不注意から生じる。": {
+    "sense": 2,
+    "gloss": "to result from; to arise; to be generated",
+    "why": "accidents 生じる from carelessness is intransitive 'arise from', not 'produce'"
+   }
+  },
+  "生ずる::しょうずる": {
+   "二つの部屋は広さが類似しているが、一方は長方形なので、家具の置き方に違いが生ずる。": {
+    "sense": 2,
+    "gloss": "to result from; to arise; to be generated",
+    "why": "a difference arises (intransitive), not producing something"
+   }
+  },
+  "生活::せいかつ": {
+   "田舎の生活にすぐ慣れるでしょう。": {
+    "sense": 1,
+    "gloss": "life; living",
+    "why": "country life is a way of living, not a livelihood"
+   }
+  },
+  "留まる::とまる": {
+   "そして、電車はキーッという音を立てて止まった。": {
+    "drop": true,
+    "why": "止まる (to stop) is its own card; 留まる is to be fixed"
+   },
+   "地震で電気が止まりました。": {
+    "drop": true,
+    "why": "止まる (to stop) is its own card; 留まる is to be fixed"
+   }
+  },
+  "留める::とめる": {
+   "ここに車を止めてはいけません。": {
+    "drop": true,
+    "why": "止める (to stop, to park) is its own card; 留める is to fasten"
+   },
+   "この文書はホッチキスで留めておいてください。": {
+    "sense": 6,
+    "gloss": "to fix (in place); to fasten; to tack; to pin; to nail; to button; to staple",
+    "why": "stapling pages together is fastening, not stopping someone"
+   },
+   "エンジンを止めてください。": {
+    "drop": true,
+    "why": "止める (to stop, to park) is its own card; 留める is to fasten"
+   }
+  },
+  "痛み::いたみ": {
+   "薬を飲んだら、痛みがなくなった。": {
+    "sense": 1,
+    "gloss": "pain; ache; soreness; grief; distress",
+    "why": "pain that goes away after medicine is pain, not damage or wear"
+   }
+  },
+  "痛む::いたむ": {
+   "雨の日になると、古傷が痛む。": {
+    "sense": 1,
+    "gloss": "to hurt; to ache; to feel a pain",
+    "why": "an old wound aching is pain, not being damaged"
+   }
+  },
+  "直す::なおす": {
+   "次の文章を日本語に直しなさい。": {
+    "sense": 2,
+    "gloss": "to change; to alter; to convert; to translate",
+    "why": "putting a passage into Japanese is translating, not promoting"
+   },
+   "間違えたところを直してください。": {
+    "sense": 1,
+    "gloss": "to repair; to mend; to fix; to correct (a mistake, bad habit, etc.); to put right; to restore; to straighten (e.g. a tie); to tidy up (one's hair, make-up, etc.); to revive (one's spirits)",
+    "why": "correcting mistakes, not putting something away"
+   }
+  },
+  "相当::そうとう": {
+   "アメリカへの旅は彼女にとって２年間の給与に相当した。": {
+    "sense": 1,
+    "gloss": "corresponding to (in meaning, function, etc.); being equivalent to",
+    "why": "costing two years' salary is being equivalent to it, not being worthy of it"
+   }
+  },
+  "真剣::しんけん": {
+   "彼は真剣な顔で私の話を聞いていた。": {
+    "sense": 1,
+    "gloss": "serious; earnest",
+    "why": "a serious face is the adjective 'serious', not a real sword"
+   }
+  },
+  "着ける::つける": {
+   "かばんに名札をつけた。": {
+    "drop": true,
+    "why": "付ける (to attach: 名札を付ける) is its own card; 着ける is to wear"
+   },
+   "店長が新しい商品に値段をつけた。": {
+    "drop": true,
+    "why": "付ける (値段を付ける, set a price) is its own card; 着ける is to wear"
+   },
+   "彼女は昔、日記を付けていたが今はつけていない。": {
+    "drop": true,
+    "why": "付ける (日記を付ける, keep a diary) is its own card; 着ける is to wear"
+   },
+   "自宅を改築する際に、この部屋にだけ防音設備と内鍵を付けたんだ。": {
+    "drop": true,
+    "why": "fitting a lock is 付ける, its own card, not 着ける (to put on, to wear)"
+   },
+   "警官はその男をつけた。": {
+    "drop": true,
+    "why": "tailing a man is 付ける (or 尾ける), not 着ける (to wear)"
+   }
+  },
+  "着る::きる": {
+   "寒いので、コートを着て出かけた。": {
+    "sense": 1,
+    "gloss": "to wear (from the shoulders down); to put on",
+    "why": "putting on a coat is wearing, not taking the blame"
+   }
+  },
+  "着物::きもの": {
+   "姉は成人式で着物を着た。": {
+    "sense": 1,
+    "gloss": "kimono; Japanese traditional clothing (esp. full-length)",
+    "why": "a kimono worn at the coming-of-age ceremony, not clothes in general"
+   }
+  },
+  "知る::しる": {
+   "テレビで地震のことを知った。": {
+    "sense": 1,
+    "gloss": "to know; to be aware (of); to be conscious (of); to learn (of); to find out; to discover",
+    "why": "learning of the earthquake from TV is 'to find out', not sensing or feeling it"
+   }
+  },
+  "硬い::かたい": {
+   "このふたは固くて取れないよ。": {
+    "drop": true,
+    "why": "固い (hard, firm) is its own card"
+   },
+   "この肉は固くて食べにくい。": {
+    "drop": true,
+    "why": "固い (hard, firm) is its own card"
+   },
+   "固いこと言うなよ。": {
+    "drop": true,
+    "why": "固い (hard, firm) is its own card"
+   }
+  },
+  "神経::しんけい": {
+   "彼女は細かいところまで神経を使う人だ。": {
+    "sense": 2,
+    "gloss": "nerves; sensitivity",
+    "why": "taking care over details is figurative sensitivity, not the anatomical nerve"
+   }
+  },
+  "禁煙::きんえん": {
+   "禁煙すると、短期的にも体にいい変化がある。": {
+    "sense": 1,
+    "gloss": "abstaining from smoking; quitting smoking",
+    "why": "giving up smoking yourself is quitting, not a prohibition of smoking"
+   }
+  },
+  "移る::うつる": {
+   "では、次の話題に移りましょう。": {
+    "sense": 1,
+    "gloss": "to move (to another place or state); to change (e.g. of state, affiliation, scenery, etc.); to be transferred",
+    "why": "moving on to the next topic, not a fire or illness spreading"
+   }
+  },
+  "移民::いみん": {
+   "合衆国は長い間「るつぼ」として知られているが、それは国民のほとんどが移民の子孫だからである。": {
+    "sense": 2,
+    "gloss": "immigrant; emigrant",
+    "why": "descendants of immigrants (people), not the act of immigration"
+   }
+  },
+  "穴::あな": {
+   "道路に大きな穴があいていて危ない。": {
+    "sense": 2,
+    "gloss": "pit; hollow; cavity; hole (e.g. in the ground)",
+    "why": "a hole in the road surface, not a gap left by a missing team member"
+   }
+  },
+  "空く::あく": {
+   "強く押すと、ドアが開いた。": {
+    "drop": true,
+    "why": "a door that opens is 開く, its own card; 空く is to be empty"
+   }
+  },
+  "競争::きょうそう": {
+   "ジェーンとメアリーはいつも人の気を引こうと競争している。": {
+    "sense": 1,
+    "gloss": "competition; contest; rivalry; race",
+    "why": "two people competing for attention, not competition between species"
+   }
+  },
+  "笑い::わらい": {
+   "店員はぎこちない笑いを浮かべて答えた。": {
+    "sense": 2,
+    "gloss": "smile",
+    "why": "an awkward smile from a clerk is a smile, not a sneer"
+   }
+  },
+  "箇箇::ここ": {
+   "そのクラスの個々のメンバーは数学のあまり得意でない生徒によって足を引っ張られたくないと思っているのです。": {
+    "drop": true,
+    "why": "個々 (individual) is its own card"
+   }
+  },
+  "節::ふし": {
+   "この歌の節はどこかで聞いたことがある。": {
+    "sense": 2,
+    "gloss": "tune; melody",
+    "why": "the tune of a song, not a notable point"
+   }
+  },
+  "精々::せいぜい": {
+   "ここから駅まで、せいぜい５分ぐらいだ。": {
+    "sense": 1,
+    "gloss": "at the most; at best",
+    "why": "'five minutes at most' is 'at the most', not 'to the utmost'"
+   }
+  },
+  "納まる::おさまる": {
+   "スーツケースに荷物が全部収まった。": {
+    "drop": true,
+    "why": "収まる (to fit into, settle into) is its own card"
+   },
+   "彼は結局、父の会社の社長に収まった。": {
+    "drop": true,
+    "why": "収まる (to fit into, settle into) is its own card"
+   }
+  },
+  "納める::おさめる": {
+   "彼が間に入って、その場を丸く収めた。": {
+    "drop": true,
+    "why": "収める (to settle) is its own card"
+   }
+  },
+  "級::きゅう": {
+   "漢字検定の２級に合格した。": {
+    "sense": 2,
+    "gloss": "class; grade; rank; level",
+    "why": "Kanji Test level 2 is a rank or level, not a school year"
+   }
+  },
+  "素::もと": {
+   "このうわさのもとは、いったい誰だろう。": {
+    "drop": true,
+    "why": "元 (origin, source: うわさの元) is its own card; 素 is base, ingredient"
+   },
+   "この制度のもとでは、生徒が交代で教え合う。": {
+    "drop": true,
+    "why": "下 (under rules/a system) is its own card; 素 is base, ingredient"
+   },
+   "やってしまったことは元に戻らない。": {
+    "drop": true,
+    "why": "元 (origin, source) is its own card"
+   },
+   "事実を基に考えると、彼の話はおかしい。": {
+    "drop": true,
+    "why": "基 (basis) is its own card"
+   },
+   "風邪がもとで、肺炎になった。": {
+    "drop": true,
+    "why": "元 (cause: 風邪が元で) is its own card; 素 is base, ingredient"
+   }
+  },
+  "細かい::こまかい": {
+   "彼女は細かいところまで神経を使う人だ。": {
+    "sense": 2,
+    "gloss": "fine; minute",
+    "why": "細かい modifies ところ: the finest details, not \"attentive\" (that is 神経を使う)"
+   }
+  },
+  "終始::しゅうし": {
+   "前の会社では何でも屋に終始したので今度は専門職に就きたい。": {
+    "sense": 2,
+    "gloss": "doing something from beginning to end; being unchanged from beginning to end",
+    "why": "終始する: doing one thing throughout, not the noun 'beginning and end'"
+   }
+  },
+  "組織::そしき": {
+   "彼女は大きな組織で働いている。": {
+    "sense": 1,
+    "gloss": "organization; organisation; formation",
+    "why": "working for a large 組織 is an organization, not a transport or party system"
+   }
+  },
+  "結び付く::むすびつく": {
+   "彼の努力が好成績に結びついた。": {
+    "sense": 2,
+    "gloss": "to result in; to lead to; to bring about",
+    "why": "efforts leading to good results is 'to result in', not 'to be connected'"
+   }
+  },
+  "線::せん": {
+   "この線の終点はどこですか。": {
+    "sense": 4,
+    "gloss": "line (e.g. of a railroad); track; route; lane",
+    "why": "the end of this line is a railway line's terminus, not a drawn line or stripe"
+   }
+  },
+  "締め切る::しめきる": {
+   "ラスト・オーダーは締め切らせていただきました。": {
+    "sense": 2,
+    "gloss": "to cut off (e.g. because a deadline has expired); to close off (e.g. subscription list)",
+    "why": "last orders being closed is a cut-off, not shutting doors"
+   }
+  },
+  "編::へん": {
+   "彼は一ヶ月の間に３編の詩を書いた。": {
+    "sense": 3,
+    "gloss": "completed literary work",
+    "why": "three poems are three literary works, not volumes"
+   }
+  },
+  "緩める::ゆるめる": {
+   "その規則は最近緩められた。": {
+    "sense": 3,
+    "gloss": "to relax (a rule); to ease (e.g. restrictions); to loosen (control)",
+    "why": "relaxing a rule, not loosening a knot"
+   }
+  },
+  "縁::えん": {
+   "金の切れ目が縁の切れ目。": {
+    "sense": 2,
+    "gloss": "relationship (e.g. between two people); bond; link; connection",
+    "why": "the proverb is about a relationship ending, not fate"
+   }
+  },
+  "考える::かんがえる": {
+   "大勢の人のために献立を考えるのは難しい。": {
+    "sense": 6,
+    "gloss": "to come up with; to think up; to contrive; to devise",
+    "why": "献立を考える is thinking up a menu, not intending to do something"
+   }
+  },
+  "肉::にく": {
+   "今晩は肉と野菜を焼きましょう。": {
+    "sense": 2,
+    "gloss": "meat",
+    "why": "grilling meat for dinner, not the body as opposed to the spirit"
+   }
+  },
+  "育ち::そだち": {
+   "私は生まれも育ちも東京だ。": {
+    "sense": 2,
+    "gloss": "growing up (in, as); upbringing",
+    "why": "born and raised in Tokyo is upbringing, not growth or breeding"
+   }
+  },
+  "脇::わき": {
+   "彼がブリーフケースを脇に抱えてやってくるのが見えた。": {
+    "sense": 1,
+    "gloss": "armpit; under one's arm; side; flank",
+    "why": "carried under one's arm, not 'beside'"
+   }
+  },
+  "至る::いたる": {
+   "子どもから大人に至るまで、みんなこの歌を知っている。": {
+    "sense": 1,
+    "gloss": "to arrive at (e.g. a decision); to reach (a stage); to attain",
+    "why": "から…に至るまで is reaching as far as, not 'in the extreme case of'"
+   }
+  },
+  "至急::しきゅう": {
+   "至急、部長に連絡してください。": {
+    "sense": 2,
+    "gloss": "urgently; promptly; at once; right away; without delay; as soon as possible",
+    "why": "used as an adverb: contact him urgently"
+   }
+  },
+  "舟::ふね": {
+   "船で島へ行きました。": {
+    "drop": true,
+    "why": "船 (ship, boat) is its own card; 舟 is a small rowed boat"
+   }
+  },
+  "苦しめる::くるしめる": {
+   "その事実が彼女の心を苦しめている。": {
+    "sense": 2,
+    "gloss": "to harass; to cause (emotional) pain; to afflict; to distress; to bother; to trouble; to stump; to baffle",
+    "why": "a fact weighing on her mind is emotional pain, not physical"
+   }
+  },
+  "虫::むし": {
+   "秋の夜は虫の声がきれいですね。": {
+    "sense": 1,
+    "gloss": "insect; bug; cricket; moth",
+    "why": "the voices of insects on autumn nights are crickets, not the inner \"bug\" of one's feelings"
+   }
+  },
+  "蛍光灯::けいこうとう": {
+   "この部屋の蛍光灯をLEDに替えた。": {
+    "sense": 1,
+    "gloss": "fluorescent lamp; fluorescent light",
+    "why": "the room's fluorescent lights are the lamps, not a person slow on the uptake"
+   }
+  },
+  "行く::ゆく": {
+   "あなたのおかげで仕事がうまく行きました。": {
+    "drop": true,
+    "why": "read いく here (うまくいく): 行く::いく is its own card"
+   },
+   "お母さん、泳ぎに行ってもいい？": {
+    "drop": true,
+    "why": "read いく here: 行く::いく is its own card"
+   },
+   "この道をまっすぐ行くと、駅があります。": {
+    "drop": true,
+    "why": "read いく here: 行く::いく is its own card"
+   }
+  },
+  "街::まち": {
+   "町が雪で真っ白になった。": {
+    "drop": true,
+    "why": "町 (town) is its own card; 街 is lively streets"
+   }
+  },
+  "表す::あらわす": {
+   "雲の間から富士山が姿を現した。": {
+    "drop": true,
+    "why": "現す (to reveal, show) is its own card; 表す is to express"
+   }
+  },
+  "覆す::くつがえす": {
+   "最高裁は原判決をくつがえしました。": {
+    "sense": 3,
+    "gloss": "to reverse (decision etc.); to disprove (an established theory etc.); to overrule",
+    "why": "the court reversed a decision, not a physical overturning"
+   }
+  },
+  "見る::みる": {
+   "映画を見に行かない？": {
+    "sense": 1,
+    "gloss": "to see; to look; to watch; to view; to observe",
+    "why": "going to see a film is seeing/watching, not experiencing misfortune"
+   }
+  },
+  "規準::きじゅん": {
+   "彼は会社の中で力があるので、新しい基準も彼が決めた。": {
+    "drop": true,
+    "why": "基準 (standard) is its own card"
+   }
+  },
+  "角::すみ": {
+   "すみに誰かが隠れている。": {
+    "drop": true,
+    "why": "すみ (corner of a room) is written 隅, its own card"
+   }
+  },
+  "解く::とく": {
+   "荷物のひもを解いて、箱を開けた。": {
+    "sense": 1,
+    "gloss": "to untie; to unfasten; to unwrap; to undo; to unbind; to unpack",
+    "why": "untying the string on a parcel is untying, not combing out hair"
+   }
+  },
+  "解ける::とける": {
+   "氷が溶けると液体になる。": {
+    "drop": true,
+    "why": "溶ける (to melt, dissolve) is its own card; 解ける is to come untied"
+   },
+   "砂糖は水に溶ける。": {
+    "drop": true,
+    "why": "溶ける (to melt, dissolve) is its own card; 解ける is to come untied"
+   }
+  },
+  "言う::ゆう": {
+   "「みんなひと休みしようぜ」とジョンは言った。": {
+    "drop": true,
+    "why": "言った is read いった: 言う::いう is its own card"
+   },
+   "この動物は日本語で何と言いますか。": {
+    "drop": true,
+    "why": "言います is read いいます: 言う::いう is its own card"
+   }
+  },
+  "認める::みとめる": {
+   "レントゲン写真に異常が認められます。": {
+    "sense": 1,
+    "gloss": "to recognize; to recognise; to observe; to notice",
+    "why": "an abnormality 認められる on an X-ray is observed, not deemed or assessed"
+   }
+  },
+  "誕生::たんじょう": {
+   "生命はいつ誕生したのですか。": {
+    "sense": 2,
+    "gloss": "creation; formation; birth; origin; making",
+    "why": "life coming into being is the birth of something, not of a person"
+   }
+  },
+  "貸し::かし": {
+   "でも、これで一つ貸しだね。": {
+    "sense": 2,
+    "gloss": "favor; favour; debt; obligation",
+    "why": "これで一つ貸し is a favour owed, not a loan or rental"
+   }
+  },
+  "貼る::はる": {
+   "クモが巣を張るところを見たことがありますか。": {
+    "drop": true,
+    "why": "張る (to stretch, spread a web) is its own card; 貼る is to stick"
+   }
+  },
+  "赤::あか": {
+   "赤は私の好きな色です。": {
+    "sense": 1,
+    "gloss": "red; crimson; scarlet",
+    "why": "red as a colour, not 'Red' the communist"
+   }
+  },
+  "超える::こえる": {
+   "音楽は言葉や文化の壁を越える。": {
+    "drop": true,
+    "why": "越える (to cross over) is its own card"
+   }
+  },
+  "超す::こす": {
+   "あのテントで、どうやって寒い冬を越すのだろう。": {
+    "drop": true,
+    "why": "越す (to cross, to pass, to move) is its own card; 超す is to exceed"
+   },
+   "おばあさんが隣に越してきた。": {
+    "drop": true,
+    "why": "越す (to cross, to pass, to move) is its own card; 超す is to exceed"
+   },
+   "またお越しください。": {
+    "drop": true,
+    "why": "越す (to cross, to pass, to move) is its own card; 超す is to exceed"
+   },
+   "船は今夜赤道を越すだろう。": {
+    "drop": true,
+    "why": "越す (to cross, to pass, to move) is its own card; 超す is to exceed"
+   }
+  },
+  "越える::こえる": {
+   "今日は気温が35度を超えるそうだ。": {
+    "drop": true,
+    "why": "超える (to exceed) is its own card"
+   }
+  },
+  "越す::こす": {
+   "祖父は90歳を超しても、毎日散歩をしている。": {
+    "drop": true,
+    "why": "超す (to exceed) is its own card"
+   }
+  },
+  "趣::おもむき": {
+   "一見ナンセンスな詩だが、読み返すと不思議な趣がある。": {
+    "sense": 4,
+    "gloss": "grace; charm; refinement; taste; elegance",
+    "why": "a poem with a strange charm, not its gist or meaning"
+   }
+  },
+  "趣旨::しゅし": {
+   "医者は私の父がまもなくよくなるだろうという趣旨のことを言った。": {
+    "sense": 1,
+    "gloss": "meaning; point (e.g. of a statement); gist; effect",
+    "why": "'to the effect that' is the gist of what was said, not an aim"
+   }
+  },
+  "足る::たる": {
+   "彼の話は信じるに足るものだ。": {
+    "sense": 2,
+    "gloss": "to be worth doing; to be worthy of; to deserve",
+    "why": "信じるに足る is worth believing, not merely sufficient"
+   }
+  },
+  "跳ぶ::とぶ": {
+   "いいニュースを聞いて、家へとんで帰った。": {
+    "drop": true,
+    "why": "飛ぶ (飛んで帰る, rush home) is its own card; 跳ぶ is to jump"
+   },
+   "ヒューズが飛んだ。": {
+    "drop": true,
+    "why": "飛ぶ (to fly) is its own card; 跳ぶ is to jump"
+   },
+   "変なうわさが飛んでいる。": {
+    "drop": true,
+    "why": "飛ぶ (to fly) is its own card; 跳ぶ is to jump"
+   },
+   "飛行機は山の上を飛んだ。": {
+    "drop": true,
+    "why": "飛ぶ (to fly) is its own card; 跳ぶ is to jump"
+   }
+  },
+  "軍::いくさ": {
+   "腹が減っては戦ができぬ。": {
+    "drop": true,
+    "why": "戦 (war, battle) is its own card"
+   }
+  },
+  "軟らかい::やわらかい": {
+   "春になって、風が柔らかくなった。": {
+    "drop": true,
+    "why": "柔らかい (soft) is its own card"
+   },
+   "私は柔らかいベッドで眠るのが好きです。": {
+    "drop": true,
+    "why": "柔らかい (soft) is its own card"
+   }
+  },
+  "載せる::のせる": {
+   "車に乗せてください。": {
+    "drop": true,
+    "why": "乗せる (to give a ride) is its own card; 載せる is to place on"
+   }
+  },
+  "辛い::からい": {
+   "あの先生は点が辛い。": {
+    "sense": 3,
+    "gloss": "harsh (criticism); severe (punishment); strict",
+    "why": "a strict marker is 'harsh; severe; strict', not 'painful; bitter'"
+   }
+  },
+  "辺::へん": {
+   "この辺に郵便局はありますか。": {
+    "sense": 1,
+    "gloss": "area; vicinity; region",
+    "why": "この辺 is 'this area, around here', not 'side; edge'"
+   }
+  },
+  "込める::こめる": {
+   "合格の願いを込めて、友達にお守りを贈った。": {
+    "sense": 2,
+    "gloss": "to put into (e.g. emotion, effort)",
+    "why": "putting one's wishes into a gift is emotion, not loading a gun"
+   },
+   "新憲法には、王権を弱める意図が込められていました。": {
+    "sense": 2,
+    "gloss": "to put into (e.g. emotion, effort)",
+    "why": "an intention put into a constitution, not tax included in a price"
+   }
+  },
+  "近い::ちかい": {
+   "クリスマスが近くなってきた。": {
+    "sense": 2,
+    "gloss": "close (in time); soon",
+    "why": "Christmas approaching is closeness in time, not distance"
+   }
+  },
+  "追い込む::おいこむ": {
+   "僕は追い込まれると一番仕事をする。": {
+    "sense": 2,
+    "gloss": "to corner; to force someone into doing",
+    "why": "passive 追い込まれる is being cornered/pressed, not pushing oneself"
+   }
+  },
+  "通訳::つうやく": {
+   "彼は彼女を通訳として雇った。": {
+    "sense": 2,
+    "gloss": "interpreter",
+    "why": "hired as an interpreter: the person, not the act of interpreting"
+   }
+  },
+  "速い::はやい": {
+   "子供は成長が早い。": {
+    "drop": true,
+    "why": "早い (early, quick) is its own card; 速い is fast in speed"
+   }
+  },
+  "造る::つくる": {
+   "この言葉を使って、文を作ってください。": {
+    "drop": true,
+    "why": "作る (to make) is its own card; 造る is to build, manufacture"
+   },
+   "どこへ行っても、彼は必ず友達を作る。": {
+    "drop": true,
+    "why": "作る (to make) is its own card; 造る is to build, manufacture"
+   },
+   "姉は歌を作るのが好きです。": {
+    "drop": true,
+    "why": "作る (to make) is its own card; 造る is to build, manufacture"
+   },
+   "日曜日の朝は、父がオムレツを作ってくれます。": {
+    "drop": true,
+    "why": "作る (to make) is its own card; 造る is to build, manufacture"
+   },
+   "祖父は畑で野菜や穀物を作っています。": {
+    "drop": true,
+    "why": "作る (to make) is its own card; 造る is to build, manufacture"
+   }
+  },
+  "運転::うんてん": {
+   "事故で電車の運転が止まっている。": {
+    "sense": 1,
+    "gloss": "operation (of a machine); running; working",
+    "why": "train service stopping is the running of a machine, not use of capital"
+   }
+  },
+  "違う::ちがう": {
+   "駅に行くなら、方向が違いますよ。": {
+    "sense": 2,
+    "gloss": "to be wrong; to be incorrect; to be mistaken",
+    "why": "heading the wrong way is 'to be wrong', not 'to become abnormal'"
+   }
+  },
+  "遠慮::えんりょ": {
+   "ここでのおタバコはご遠慮願います。": {
+    "sense": 2,
+    "gloss": "declining; refraining",
+    "why": "ご遠慮願います asks one to refrain, not modesty or reserve"
+   }
+  },
+  "遭う::あう": {
+   "前に彼に会ったのを覚えている。": {
+    "drop": true,
+    "why": "会う (to meet) is its own card; 遭う is to meet with misfortune"
+   }
+  },
+  "金::きん": {
+   "この金の時計は一日に一分遅れる。": {
+    "sense": 1,
+    "gloss": "gold (metal)",
+    "why": "a gold watch is gold the metal, not Friday"
+   }
+  },
+  "針::はり": {
+   "彼女は時計の針を10分進めた。": {
+    "sense": 4,
+    "gloss": "hand (e.g. clock, etc.); pointer",
+    "why": "clock hands, not stinger/thorn"
+   },
+   "針と糸でボタンをつけた。": {
+    "sense": 1,
+    "gloss": "needle; pin",
+    "why": "a needle used with thread, not malice"
+   }
+  },
+  "鈍い::のろい": {
+   "弟は無口で、何をするのものろい。": {
+    "sense": 2,
+    "gloss": "slow; sluggish; inert; lethargic",
+    "why": "slow at everything he does is sluggish, not stupid"
+   }
+  },
+  "銅::あかがね": {
+   "銅はよく電気を通す。": {
+    "drop": true,
+    "why": "read どう here: 銅::どう is its own card"
+   }
+  },
+  "開く::あく": {
+   "放課後は空いてますか？": {
+    "drop": true,
+    "why": "空く (to be free, vacant) is its own card; 開く is to open"
+   },
+   "電車の席があいていたので、座った。": {
+    "drop": true,
+    "why": "a seat that is free (あく) is 空く, its own card; 開く is to open"
+   }
+  },
+  "開ける::あける": {
+   "財布の中身をこの袋に空けなさい。": {
+    "drop": true,
+    "why": "空ける (to empty) is another word, not this card; 開ける is to open (something)"
+   }
+  },
+  "間も無く::まもなく": {
+   "まもなく一番線に電車が参ります。": {
+    "sense": 1,
+    "gloss": "soon; shortly; before long; in a short time; in a little while",
+    "why": "a train arriving shortly is 'soon', not 'having no time to'"
+   }
+  },
+  "降りる::おりる": {
+   "プロのガイドといっしょに山をおりた。": {
+    "drop": true,
+    "why": "descending a mountain (山をおりる) is 下りる, its own card; 降りる is to get off"
+   }
+  },
+  "降ろす::おろす": {
+   "銀行で１０万円下ろしてください。": {
+    "drop": true,
+    "why": "下ろす (to withdraw money) is its own card"
+   }
+  },
+  "限る::かぎる": {
+   "金持ちが必ずしも幸福とは限らない。": {
+    "sense": 2,
+    "gloss": "to be restricted to; to be limited to; to be confined to",
+    "why": "とは限らない is intransitive 'not limited to (always)', not 'to restrict'"
+   }
+  },
+  "階::かい": {
+   "私の部屋は４階にあります。": {
+    "sense": 4,
+    "gloss": "counter for storeys and floors of a building",
+    "why": "the fourth floor is the counter for floors, not stairs"
+   }
+  },
+  "難しい::むずかしい": {
+   "老人には、この階段を上るのは難しい。": {
+    "sense": 1,
+    "gloss": "difficult; hard; troublesome; complicated; serious (disease, problem, etc.)",
+    "why": "stairs that are hard to climb: difficult, not fussy"
+   }
+  },
+  "頭::あたま": {
+   "蚊に頭を刺された。": {
+    "sense": 1,
+    "gloss": "head",
+    "why": "a mosquito bit the head itself, not the hair"
+   }
+  },
+  "風車::かざぐるま": {
+   "子どもが風車を持って、楽しそうに走り回っている。": {
+    "sense": 2,
+    "gloss": "pinwheel (toy); windmill (toy)",
+    "why": "a child running with a pinwheel, not a windmill"
+   }
+  },
+  "飛ぶ::とぶ": {
+   "どのくらい高く跳べますか。": {
+    "drop": true,
+    "why": "跳ぶ (to jump) is its own card; 飛ぶ is to fly"
+   }
+  },
+  "飲み込む::のみこむ": {
+   "洪水がその村を飲み込んでしまった。": {
+    "sense": 3,
+    "gloss": "to engulf; to swallow up",
+    "why": "a flood swallowing a village is engulfing, not gulping food down"
+   }
+  },
+  "養う::やしなう": {
+   "スポーツは強い精神を養うのに役立つ。": {
+    "sense": 4,
+    "gloss": "to cultivate (a habit, a quality, etc.); to develop; to build up; to foster",
+    "why": "building a strong spirit is cultivating a quality, not supporting a family"
+   }
+  },
+  "馴らす::ならす": {
+   "調教師は時間をかけて馬を馴らし、人を乗せることに慣らしていった。": {
+    "sense": 2,
+    "gloss": "to tame; to domesticate; to train (an animal)",
+    "why": "a trainer taming a horse, not accustoming oneself"
+   },
+   "野生の鳥を馴らすには、まず人の声に慣らすことから始める。": {
+    "sense": 2,
+    "gloss": "to tame; to domesticate; to train (an animal)",
+    "why": "taming a wild bird, not training one's ear"
+   }
+  },
+  "馴れる::なれる": {
+   "このらくだは人によくなれているからだれが乗っても大丈夫です。": {
+    "sense": 3,
+    "gloss": "to become tame; to become domesticated",
+    "why": "a camel used to people is tame, not skilled"
+   },
+   "新しい仕事にも、だいぶなれてきました。": {
+    "drop": true,
+    "why": "慣れる (get used to a job) is its own card; 馴れる is to become tame"
+   }
+  },
+  "鬱陶しい::うっとうしい": {
+   "梅雨に入って、毎日うっとうしい天気が続いている。": {
+    "sense": 3,
+    "gloss": "heavy (weather); cloudy",
+    "why": "gloomy rainy-season weather is the weather sense"
+   }
+  },
+  "魚::うお": {
+   "私はいつもこうやって魚を料理します。": {
+    "drop": true,
+    "why": "read さかな here: 魚::さかな is its own card"
+   }
+  },
+  "麻痺::まひ": {
+   "ゼネストで国中の機能が麻痺した。": {
+    "sense": 3,
+    "gloss": "standstill; state of paralysis; inability to take action",
+    "why": "a strike paralysing a country is a standstill, not medical paralysis"
+   }
+  }
+ }
+}

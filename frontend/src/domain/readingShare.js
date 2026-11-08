@@ -10,6 +10,8 @@
 //
 // Pure, so the thresholds and the ordering are testable without a DOM.
 
+import { intlLocale } from '../lib/locale'
+
 export const SCOPE_COURSE = 'course'
 export const SCOPE_ALL = 'all'
 
@@ -69,7 +71,7 @@ export function readingRows(groups, shares, scope) {
 
 /** "49,1" / "49.1": one decimal, in the learner's language. */
 export function formatPct(pct, lang) {
-  return new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-US', {
+  return new Intl.NumberFormat(intlLocale(lang), {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   }).format(pct)

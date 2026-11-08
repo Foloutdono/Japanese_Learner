@@ -380,13 +380,17 @@ export function BuildEntry({ entry, t: tProp }) {
 }
 
 /** What a hole holds once the verdict is in: the answer, or what was
- *  typed with each wrong kana struck and the right one written over it. */
+ *  typed with each wrong kana struck and the right one written over it.
+ *  A kana left out has nothing to be written over, so it is written in
+ *  the line, where it was missing: written over nothing it stood on no
+ *  width and was never seen, and あり typed for ではあり read back as
+ *  これはわたしのかさありません. */
 function Marked({ gap }) {
   if (!gap?.marks?.length) return gap?.answer ?? null
   return gap.marks.map((m, i) => (m.ok != null
     ? <span key={i}>{m.ok}</span>
     : (
-      <span key={i} className="gl-fix">
+      <span key={i} className={`gl-fix${m.wrong ? '' : ' gl-fix--missing'}`}>
         {m.wrong && <s>{m.wrong}</s>}
         {m.fix && <ins>{m.fix}</ins>}
       </span>

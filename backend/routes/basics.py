@@ -20,7 +20,6 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from content.kanji_meanings import KANJI_FR
 from content import reading_sentences
 from content.reading_sentences import N5 as READING_N5
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
@@ -35,7 +34,7 @@ from study import basics
 from study.level_rule import primary_mode
 from study.modes import GRAMMAR, KANJI, VOCAB
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -151,7 +150,7 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
     if found is None:
         raise HTTPException(status_code=404, detail="no such unit")
     n, unit = found
-    lang = "en" if lang == "en" else "fr"
+    lang = lang if lang in ("en", "es") else "fr"
     grammar, vocab, kanji = _entries()
     sources = _sources(user_id)
     progress = _progress(user_id, sources)
@@ -167,11 +166,11 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
     ]
     words = [
         card(VOCAB, raw_id, kanji=vocab[raw_id].get("kanji", ""), kana=vocab[raw_id].get("kana", ""),
-             meaning=get_meaning(vocab[raw_id], lang, VOCAB_FR))
+             meaning=get_meaning(vocab[raw_id], lang, VOCAB_GLOSSES))
         for raw_id in unit["cards"][VOCAB] if VOCAB in sources
     ]
     chars = [
-        card(KANJI, raw_id, kanji=kanji[raw_id]["kanji"], meaning=get_meaning(kanji[raw_id], lang, KANJI_FR))
+        card(KANJI, raw_id, kanji=kanji[raw_id]["kanji"], meaning=get_meaning(kanji[raw_id], lang, KANJI_GLOSSES))
         for raw_id in unit["cards"][KANJI] if KANJI in sources
     ]
     sentences = [

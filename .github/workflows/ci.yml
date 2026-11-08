@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
 
+# A new push to a pull request cancels the run it replaces. A push to
+# main is a group of its own (its sha), so main's runs neither wait on
+# nor cancel one another: promote.yml reads every main commit's result.
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -29,20 +36,26 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      # pytest-xdist is CI's alone (requirements.txt is Render's image).
+      # No numpy or ffmpeg: they are scripts/long_video_audio.py's, an
+      # operator's tool for the YouTube videos, and installing ffmpeg
+      # cost every run 40 s; tests/test_long_video_audio.py skips without
+      # numpy and runs where the script does.
       - name: Install backend dependencies
         working-directory: backend
-        # numpy and ffmpeg are not the app's (requirements.txt is Render's
-        # image): scripts/long_video_audio.py imports numpy inside its
-        # functions and decodes the kana clips with ffmpeg, and
-        # tests/test_long_video_audio.py checks its mix with both.
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-          pip install -r requirements.txt numpy
+        run: pip install -r requirements.txt pytest-xdist
       - name: Load schema
         run: psql "$DATABASE_URL" -f backend/srs/data_structure.sql
+      # One worker per core, each on a database of its own
+      # (tests/conftest.py). --dist loadfile keeps a file's tests on one
+      # worker, so what a file builds once (every grammar tour, the
+      # subtitle ranking) is built once, not once per worker. 23 minutes
+      # in one process, about 5 in four.
       - name: Run backend tests
         working-directory: backend
-        run: python -m pytest -q
+        run: python -m pytest -q -n auto --dist loadfile
 
   frontend:
     runs-on: ubuntu-latest

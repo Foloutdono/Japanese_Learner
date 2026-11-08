@@ -23,6 +23,7 @@ from translations import get_meaning, fr_gloss
 from content.jmdict_fr import pool_meaning
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 from core.auth import get_user_id
 from core.srs_instance import srs
 from study.card_lookup import (
@@ -40,6 +41,8 @@ router = APIRouter()
 
 KANJI_FR_MAP = KANJI_FR
 VOCAB_FR_MAP = VOCAB_FR
+KANJI_ES_MAP = KANJI_GLOSSES["es"]
+VOCAB_ES_MAP = VOCAB_GLOSSES["es"]
 
 # The radical tiles used to be scoped to the app's own deck -- a tile
 # leading to zero results a learner could study was worth hiding. Now that
@@ -52,8 +55,9 @@ VOCAB_FR_MAP = VOCAB_FR
 
 # ── What a query MEANS, before any collection answers it ─────
 # study/search_match.py: a term is matched folded (case and accents off,
-# so "eleve" finds élève), against BOTH app languages rather than the one
-# on screen, and — when it is romaji — against the kana it spells as
+# so "eleve" finds élève), against EVERY app language rather than the one
+# on screen (Spanish since plan 302: "agua" finds 水), and — when it is
+# romaji — against the kana it spells as
 # well ("mizu" finds みず). A query that finds nothing at all is retried
 # once against the nearest word the collection actually holds, so a typo
 # is answered rather than reported as an empty catalogue.
@@ -183,16 +187,17 @@ def _kanji_deck_matches(query, lang: str, level: str | None = None) -> list[tupl
     matches, in deck order — N5 first, N1 last. 2,383 rows, filtered in
     memory.
 
-    Matched against BOTH glosses; SHOWN in the session's language. The
+    Matched against every gloss; SHOWN in the session's language. The
     displayed meaning is now built for the matches alone rather than for
     all 2,383 rows on the way past.
     """
     rows = [(lvl, k) for lvl, kanji_list in _levels_of(KANJI_BY_LEVEL, level) for k in kanji_list]
     hits = search_match.ranked(query, rows, lambda row: (
         (row[1].get("kanji", ""), row[1].get("kana", "")),
-        (row[1].get("meaning", ""), KANJI_FR_MAP.get(row[1].get("kanji", ""), "")),
+        (row[1].get("meaning", ""), KANJI_FR_MAP.get(row[1].get("kanji", ""), ""),
+         KANJI_ES_MAP.get(row[1].get("kanji", ""), "")),
     ))
-    return [(lvl, k, get_meaning(k, lang, KANJI_FR_MAP)) for lvl, k in hits]
+    return [(lvl, k, get_meaning(k, lang, KANJI_GLOSSES)) for lvl, k in hits]
 
 
 @lru_cache(maxsize=1)
@@ -201,7 +206,8 @@ def _kanji_lexicon() -> tuple[str, ...]:
         gloss
         for kanji_list in KANJI_BY_LEVEL.values()
         for k in kanji_list
-        for gloss in (k.get("meaning", ""), KANJI_FR_MAP.get(k.get("kanji", ""), ""))
+        for gloss in (k.get("meaning", ""), KANJI_FR_MAP.get(k.get("kanji", ""), ""),
+                      KANJI_ES_MAP.get(k.get("kanji", ""), ""))
     )
 
 
@@ -295,7 +301,7 @@ def _word_kanji(word: str, furigana: list[dict], lang: str,
     out = []
     for char in chars:
         deck = DECK_BY_CHAR.get(char)
-        meaning = get_meaning(deck[1], lang, KANJI_FR_MAP) if deck else pool.get(char, "")
+        meaning = get_meaning(deck[1], lang, KANJI_GLOSSES) if deck else pool.get(char, "")
         out.append({
             "char": char,
             "reading": reading_of(char, furigana),
@@ -438,7 +444,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
     if radical is not None:
         rows, total = kanji_db.by_radical(
             radical, query.sql_text, limit, start, lang, query.sql_kana,
-            query.match, query.field)
+            query.match, query.field, query.alts)
         states = srs.get_user_states(user_id) if rows else {}
         results = []
         for row in rows:
@@ -451,7 +457,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
             # index that found it, not a second source of truth for it.
             deck_level, entry = deck_hit
             results.append(_deck_kanji_result(
-                deck_level, entry, get_meaning(entry, lang, KANJI_FR_MAP),
+                deck_level, entry, get_meaning(entry, lang, KANJI_GLOSSES),
                 lang, states, user_id,
             ))
         return {
@@ -464,14 +470,14 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
 
     def found(cand):
         return bool(_kanji_deck_matches(cand, lang, level)) or (
-            not levelled and kanji_db.count_matching(cand.sql_text, lang, cand.sql_kana, cand.match, cand.field))
+            not levelled and kanji_db.count_matching(cand.sql_text, lang, cand.sql_kana, cand.match, cand.field, cand.alts))
 
     deck       = _kanji_deck_matches(query, lang, level)
     # The pool's total is needed on every request — it is most of the
     # collection's count — and its ROWS only once a page runs past the
     # deck, so the two are asked for separately (kanji_pool_data.page).
     pool_total = 0 if levelled else kanji_db.count_matching(
-        query.sql_text, lang, query.sql_kana, query.match, query.field)
+        query.sql_text, lang, query.sql_kana, query.match, query.field, query.alts)
 
     if not deck and not pool_total:
         corrected = _corrected(query, _kanji_lexicon, found)
@@ -479,7 +485,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
             query      = corrected
             deck       = _kanji_deck_matches(query, lang, level)
             pool_total = 0 if levelled else kanji_db.count_matching(
-                query.sql_text, lang, query.sql_kana, query.match, query.field)
+                query.sql_text, lang, query.sql_kana, query.match, query.field, query.alts)
 
     deck_total = len(deck)
     deck_page  = deck[start:start + limit]
@@ -491,7 +497,7 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
     pool_page = (
         kanji_db.page(query.sql_text, limit=limit - len(deck_page),
                       offset=max(0, start - deck_total), kana_forms=query.sql_kana,
-                      match=query.match, field=query.field)
+                      match=query.match, field=query.field, alts=query.alts)
         if pool_total and len(deck_page) < limit else []
     )
 
@@ -561,7 +567,7 @@ def _deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str,
     """(level, entry, display meaning) for every curated-deck word the
     query matches, in deck order — N5 first, N1 last.
 
-    Matched against BOTH glosses; SHOWN in the session's language. See
+    Matched against every gloss; SHOWN in the session's language. See
     the leniency note at the top of this module. The Japanese side also
     matches a spelling folded into the card (_folded_fields).
     """
@@ -572,11 +578,11 @@ def _deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str,
         kanji, kana = w.get("kanji", ""), w.get("kana", "")
         return (
             (kanji, kana, *folded.get((lvl, kanji, kana), ())),
-            (w.get("meaning", ""), (fr_gloss(w, VOCAB_FR_MAP) or "")),
+            (w.get("meaning", ""), (fr_gloss(w, VOCAB_FR_MAP) or ""), (fr_gloss(w, VOCAB_ES_MAP) or "")),
         )
 
     rows = [(lvl, w) for lvl, vocab_list in _levels_of(VOCAB_BY_LEVEL, level) for w in vocab_list]
-    return [(lvl, w, get_meaning(w, lang, VOCAB_FR_MAP))
+    return [(lvl, w, get_meaning(w, lang, VOCAB_GLOSSES))
             for lvl, w in search_match.ranked(query, rows, fields)]
 
 
@@ -589,6 +595,7 @@ def _vocab_lexicon() -> tuple[str, ...]:
         for gloss in (
             w.get("meaning", ""),
             (fr_gloss(w, VOCAB_FR_MAP) or ""),
+            (fr_gloss(w, VOCAB_ES_MAP) or ""),
         )
     )
 
@@ -707,7 +714,7 @@ def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> di
         if hit is not None:
             level, w = hit
             raw_id = vocab_to_id(w, level)
-            return _vocab_result(w, level, get_meaning(w, lang, VOCAB_FR_MAP),
+            return _vocab_result(w, level, get_meaning(w, lang, VOCAB_GLOSSES),
                                  lang, own(raw_id), user_id, raw_id)
     for kanji, reading in pairs:
         entry = jmdict_db.get_by_key(kanji, reading)
@@ -753,14 +760,14 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
 
     def found(cand):
         return bool(_deck_matches(cand, lang, level)) or (
-            not levelled and jmdict_db.count_matching(cand.sql_text, cand.sql_kana, cand.match, cand.field))
+            not levelled and jmdict_db.count_matching(cand.sql_text, cand.sql_kana, cand.match, cand.field, cand.alts))
 
     deck = _deck_matches(query, lang, level)
     # The pool's total is needed on every request — it is half the
     # collection's count — and its ROWS only once a page runs past the
     # deck, so the two are asked for separately (vocab_jmdict_data.page).
     pool_total = 0 if levelled else jmdict_db.count_matching(
-        query.sql_text, query.sql_kana, query.match, query.field)
+        query.sql_text, query.sql_kana, query.match, query.field, query.alts)
 
     if not deck and not pool_total:
         corrected = _corrected(query, _vocab_lexicon, found)
@@ -768,7 +775,7 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
             query      = corrected
             deck       = _deck_matches(query, lang, level)
             pool_total = 0 if levelled else jmdict_db.count_matching(
-                query.sql_text, query.sql_kana, query.match, query.field)
+                query.sql_text, query.sql_kana, query.match, query.field, query.alts)
 
     deck_total = len(deck)
     start      = page * limit
@@ -781,7 +788,7 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
     pool_page = (
         jmdict_db.page(query.sql_text, limit=limit - len(deck_page),
                        offset=max(0, start - deck_total), kana_forms=query.sql_kana,
-                       match=query.match, field=query.field)
+                       match=query.match, field=query.field, alts=query.alts)
         if pool_total and len(deck_page) < limit else []
     )
 
@@ -843,7 +850,7 @@ def _grammar_matches(query, level: str | None) -> list[tuple[str, dict]]:
     """(level, entry) for every point the query matches, catalogue order.
 
     The pattern is matched as typed (〜, ／ and all); the structure and
-    both glosses folded, as _deck_matches folds a word's meaning. The
+    every gloss folded, as _deck_matches folds a word's meaning. The
     structure is offered to both halves of the query because it is
     itself both — "動詞てform + から" is Japanese and English in one
     string. An unknown `level` is no level at all — the whole catalogue —
@@ -854,7 +861,7 @@ def _grammar_matches(query, level: str | None) -> list[tuple[str, dict]]:
     rows = [(lvl, entry) for lvl in levels for entry in GRAMMAR_POINTS_BY_LEVEL.get(lvl, [])]
     return search_match.ranked(query, rows, lambda row: (
         (row[1]["pattern"], row[1].get("structure", "")),
-        (row[1].get("structure", ""), gloss(row[1], "en"), gloss(row[1], "fr")),
+        (row[1].get("structure", ""), gloss(row[1], "en"), gloss(row[1], "fr"), gloss(row[1], "es")),
     ))
 
 
@@ -864,7 +871,7 @@ def _grammar_lexicon() -> tuple[str, ...]:
         text
         for points in GRAMMAR_POINTS_BY_LEVEL.values()
         for entry in points
-        for text in (gloss(entry, "en"), gloss(entry, "fr"), entry.get("structure", ""))
+        for text in (gloss(entry, "en"), gloss(entry, "fr"), gloss(entry, "es"), entry.get("structure", ""))
     )
 
 

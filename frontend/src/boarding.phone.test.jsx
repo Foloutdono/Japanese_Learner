@@ -34,6 +34,16 @@ const { default: BoardingFlow } = await import('./screens/BoardingFlow')
 const { default: Welcome } = await import('./components/boarding/Welcome')
 
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
+// Every entrance landed -- the clock's finite animations and
+// transitions finished -- before a measure that a pixel decides: a
+// fixed wait is outrun when the machine is busy (four lanes on four
+// cores read the gate a pixel high). Only the document's clock: the
+// body's scrim runs on the scroll (brd-scrim), and a scroll that never
+// moves never finishes it.
+const entrancesDone = () => Promise.all(document.getAnimations()
+  .filter(a => a.timeline === document.timeline
+    && a.effect?.getComputedTiming().iterations !== Infinity)
+  .map(a => a.finished.catch(() => {})))
 const rect = el => el.getBoundingClientRect()
 async function click(root, sel) {
   // The next screen comes a frame after the tap (a transition, go()).
@@ -452,7 +462,7 @@ describe('the boarding at 390×844', () => {
       }
       // Each step measured once its car has landed and a pick's wake (the
       // pill's one overshoot, 540 ms) has let go.
-      const on = async sel => { await click(screen.container, sel); await settle(700) }
+      const on = async sel => { await click(screen.container, sel); await settle(700); await entrancesDone() }
 
       await on('[data-kana="both"]')
       await on('[data-level="N4"]')

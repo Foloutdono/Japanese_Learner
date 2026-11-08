@@ -27,7 +27,7 @@ import { askTarget } from '../domain/ask'
 import { useDesk } from '../hooks/useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
 import { CHOICE_KEY_INDEX, LETTER_KEY_INDEX } from '../domain/choiceKeys'
-import { quotedFragments, sentenceFor } from '../domain/quotedFragments'
+import { answerSentences } from '../domain/quotedFragments'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { paceFactor } from '../domain/readingPace'
@@ -300,15 +300,16 @@ export default function ComprehensionRun({ session }) {
         // its fare was paid at (reading.py: 4 right, 1 wrong).
         data.results?.forEach(r => countReview({ quality: r.is_correct ? 4 : 1 }))
         fare.pay(data)
-        // On the desk the review opens on the first miss, its question
-        // in the middle and the sentence it quotes in the breakdown.
-        if (desk) {
-          const first = data.results?.findIndex(r => !r.is_correct) ?? -1
-          const at = first >= 0 ? first : 0
+        // The review opens on the first miss, its question in the middle
+        // and the sentence it rests on in the breakdown: on the desk, and
+        // on a phone since plan 301b, where a paper with no miss opens on
+        // nothing (the desk's middle always stands one question).
+        const first = data.results?.findIndex(r => !r.is_correct) ?? -1
+        const at = first >= 0 ? first : desk ? 0 : null
+        if (at != null && data.results?.[at]) {
           setOpenRow(at)
-          const r = data.results?.[at]
-          const k = r ? sentenceFor(breakdownOf(exercise), quotedFragments(r.question)) : -1
-          if (k >= 0) setOpenIndex(k)
+          const [k] = answerSentences(exercise.questions?.[at] ?? data.results[at], breakdownOf(exercise))
+          if (k != null) setOpenIndex(k)
         }
       })
       .catch(() => {
@@ -391,9 +392,13 @@ export default function ComprehensionRun({ session }) {
 
   // One frame for the whole exercise, one way out, and a sub that says
   // where in it you are.
+  // A text handed back past the day's ceiling on new ones (the
+  // server's `repeat`) says so while it is read (plan 301): the same
+  // text again with no word on it read as the app stuck on one text.
   const sub =
     stage === 'questions' || stage === 'submitting' ? `${level} · ${t.question} ${currentQ + 1} / ${total}` :
     stage === 'results' ? `${level} · ${t.practiceResult}` :
+    stage === 'reading' && exercise?.repeat ? `${level} · ${t.compReadBefore}` :
     level
 
   // The desk's side column (plan 115). While the questions are asked
@@ -469,11 +474,15 @@ export default function ComprehensionRun({ session }) {
   // learner's, and the words of the sentence it quotes. Sealed until
   // the results (plan 131).
   const reviewed = stage === 'results' && results ? results.results[openRow ?? 0] : null
-  // On the desk opening a row opens the sentence the question quotes, and
-  // its words are the thread's (openResultRow). A phone opens the row only,
-  // so the words are those of the sentence the question quotes, found the
-  // same way, rather than of whichever the breakdown last stood on (plan 197).
-  const quoted = !desk && reviewed ? sentenceFor(breakdown, quotedFragments(reviewed.question)) : -1
+  // The question as it was served: its `at` and `why` (plan 301b) ride
+  // on the exercise, not on the graded rows the server sends back.
+  const servedQ = i => exercise?.questions?.[i] ?? results?.results?.[i]
+  // On the desk opening a row opens the sentence the question rests on,
+  // and its words are the thread's (openResultRow). A phone opens the row
+  // only, so the words are those of the sentence the question rests on,
+  // found the same way, rather than of whichever the breakdown last stood
+  // on (plan 197).
+  const quoted = !desk && reviewed ? (answerSentences(servedQ(openRow ?? 0), breakdown)[0] ?? -1) : -1
   const target = askTarget(null, reviewed ? {
     key: `q${openRow ?? 0}`,
     base: {
@@ -490,22 +499,23 @@ export default function ComprehensionRun({ session }) {
     open: true,
   } : { key: 'sealed', open: false })
 
-  // A result row opens its question; on the desk it also opens the
-  // sentence the question quotes, in the breakdown beside it. From the
-  // run's lines (plan 129) a row is only ever opened, never folded: the
-  // middle always stands one question.
+  // A result row opens its question, and the sentence it rests on opens
+  // in the breakdown: beside it on the desk, under the rows on a phone
+  // once Show breakdown is pressed (plans 301, 301b). From the run's
+  // lines (plan 129) a row is only ever opened, never folded: the middle
+  // always stands one question.
   function openLine(i) {
     const r = results?.results?.[i]
     if (!r || i === openRow) return
-    openResultRow(i, false, r)
+    openResultRow(i, false)
   }
-  function openResultRow(i, isOpen, r) {
+  function openResultRow(i, isOpen) {
     playUi('click-mode-selection')
     setOpenRow(isOpen ? null : i)
-    if (!desk || isOpen) return
-    const k = sentenceFor(breakdown, quotedFragments(r.question))
-    if (k >= 0) {
-      setLookup(null)
+    if (isOpen) return
+    const [k] = answerSentences(servedQ(i), breakdown)
+    if (k != null) {
+      if (desk) setLookup(null)
       setOpenIndex(k)
     }
   }
@@ -743,6 +753,11 @@ export default function ComprehensionRun({ session }) {
                 )
               })}
             </div>
+            {/* A miss says why, in one line (plan 301b); the sentence it
+                rests on is open in the breakdown beside it. */}
+            {!r.is_correct && servedQ(openRow ?? 0)?.why && (
+              <span className="prose__ai comp-why">{servedQ(openRow ?? 0).why}</span>
+            )}
             <div className="stage__foot btn-row">
               <button type="button" className="btn-secondary" onClick={leave}>
                 {t.changeLevel}
@@ -774,13 +789,19 @@ export default function ComprehensionRun({ session }) {
           <div className="surface qrows">
             {results.results.map((r, i) => {
               const isOpen = openRow === i
+              // The line(s) of the text the right option rests on, under
+              // its options (plans 301, 301b): what the desk's breakdown
+              // opens beside the question, here where the phone opens it,
+              // and on a miss the one line on why.
+              const source = isOpen ? answerSentences(servedQ(i), breakdown).map(k => breakdown[k]) : []
+              const why = isOpen && !r.is_correct ? servedQ(i)?.why : null
               return (
                 <div key={i} className="qrow-item">
                   <button
                     type="button"
                     className="qrow"
                     aria-expanded={isOpen}
-                    onClick={() => openResultRow(i, isOpen, r)}
+                    onClick={() => openResultRow(i, isOpen)}
                   >
                     <span className={`exam-review-row__mark exam-review-row__mark--${r.is_correct ? 'ok' : 'x'}`} aria-hidden="true">
                       {r.is_correct ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
@@ -813,6 +834,13 @@ export default function ComprehensionRun({ session }) {
                           )
                         })}
                       </div>
+                      {why && <span className="prose__ai comp-why">{why}</span>}
+                      {source.map((part, k) => (
+                        <div key={k} className="qrow__source">
+                          <SentenceLine analysis={part.analysis} text={part.jp} t={t} onTokenClick={w => setLookup(vocabLookup(w))} />
+                          {part.translation && <span className="bkd__en">{part.translation}</span>}
+                        </div>
+                      ))}
                       {/* The open question is the asking's thread (plan 197):
                           the page opens on it, not on the whole text. */}
                       <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.comprehensionTitle} text />

@@ -197,7 +197,7 @@ def test_the_list_is_every_scenario_in_the_learners_language(client):
     konbini = next(s for s in body["scenarios"] if s["id"] == KONBINI)
     assert konbini["title"] == "Le déjeuner à la supérette"
     assert konbini["opener"] == "いらっしゃいませ。お弁当は温めますか。"
-    assert konbini["level"] == "N5" and konbini["turns"] == 5
+    assert konbini["level"] == "N5" and konbini["turns"] == 6
     # Nothing ridden yet: no record, not a zero.
     assert body["record"] == {}
 
@@ -504,7 +504,7 @@ def test_a_grade_needs_its_own_kind_and_a_real_turn(client):
     assert client.post("/api/conversation/result", json={**base, "mode": "translate", "correct": True}).status_code == 422
     assert client.post("/api/conversation/result", json={**base, "mode": "talk", "quality": 4}).status_code == 422
     assert client.post("/api/conversation/result", json={**base, "mode": "free", "quality": 6}).status_code == 422
-    assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "translate", "turn": 5, "quality": 4}).status_code == 400
+    assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "translate", "turn": 6, "quality": 4}).status_code == 400
     assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "free", "turn": 8, "quality": 4}).status_code == 400
     assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "free", "turn": 9, "quality": 4}).status_code == 422
     assert client.post("/api/conversation/result", json={"scenario": "nope", "mode": "free", "turn": 0, "quality": 4}).status_code == 404

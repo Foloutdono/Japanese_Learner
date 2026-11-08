@@ -22,13 +22,13 @@ import {
   fit, wrap, paragraph, paragraphH, roundel, mark, metal, chevron, layoutSentence, drawSentence, lineOf, frame,
   ground, masthead, heading, pageMark, pages, strokeBox, marked, stamp, METAL_H,
 } from './draw.js'
-import { SELF_CHECK_JP, SITE, formOf, tr, weldIf } from './strings.js'
+import { SELF_CHECK_JP, SITE, formOf, quoted, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 import { furiganaOf } from './common.js'
 import { promoDeck } from './promo.js'
 import { echoDeck } from './echo.js'
-import { DESIGNS, funnelDeck } from './funnel.js'
+import { DESIGNS, funnelDeck, readable } from './funnel.js'
 
 export { FORMATS }
 
@@ -1224,7 +1224,7 @@ const KINDS = {
     const b = s.build
     const st = b.steps[s.n - 1]
     let y = title(c, c.plan.t.step(s.n, b.steps.length))
-    const goal = fit(ctx, `“${b.translation}”`, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2, balanced: false })
+    const goal = fit(ctx, quoted(c.plan.lang, b.translation), { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2, balanced: false })
     y += paragraph(ctx, goal, f.x, y, ink2) + SP[7]
     // The whole sentence sets the size, so it grows the same on every step,
     // in the room the pieces under it leave; the pieces step down before
@@ -2330,7 +2330,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // stem and the circled answer are the slide.
   // A quoted translation keeps the room it takes at the body rung: it is
   // the question, and is never cut (plan 229l).
-  const quoteMin = st?.text ? paragraphH(fit(ctx, `“${st.text}”`, { sizes: [FS.sm], maxW: f.w, lh: 1.15 }), 1.15) : 0
+  const quoteMin = st?.text ? paragraphH(fit(ctx, quoted(c.plan?.lang, st.text), { sizes: [FS.sm], maxW: f.w, lh: 1.15 }), 1.15) : 0
   const stemMin = st ? (st.cue ? FS.display * 2.4 : st.rows ? FS.display * 1.5 : Math.max(FS.display, quoteMin)) : 0
   if (exWhy && f.bottom - y - SP[7] * 2 - foot - stemMin < rowsN * FS.body * 1.6) { exWhy = null; foot = footOf() }
   // Answers that are sentences take a taller row each.
@@ -2435,7 +2435,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   } else if (st?.emoji) {
     picture(ctx, st.emoji, f.cx, y + room / 2, Math.min(FS.glyph * 1.2, room * 0.8))
   } else if (st?.text) {
-    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm, ...(quoteYields ? [FS.caption] : [])], maxW: f.w, maxH: room + 1, lh: 1.15 })
+    const b = fit(ctx, quoted(c.plan?.lang, st.text), { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm, ...(quoteYields ? [FS.caption] : [])], maxW: f.w, maxH: room + 1, lh: 1.15 })
     // Cut short on the answer, it is left out: it was read whole on the question.
     if (!(quoteYields && b.cut)) paragraph(ctx, b, f.x, y + Math.max(0, (room - paragraphH(b, 1.15)) / 2), ink, 'left', 1.15)
   } else if (st?.cue && cue.alone) {
@@ -2693,7 +2693,7 @@ function hookContent(c, plan, maxW, maxH, fam, align, hook = plan.hook) {
   }
   if (h.kind === 'prompt') {
     // What to say, in the reader's language (plan 229k: the shuffled tiles under it are gone).
-    const b = fit(ctx, `“${h.text}”`, { sizes: [FS.display, FS.heading, FS.title], maxW, maxH, lh: 1.15 })
+    const b = fit(ctx, quoted(plan.lang, h.text), { sizes: [FS.display, FS.heading, FS.title], maxW, maxH, lh: 1.15 })
     return { h: paragraphH(b, 1.15), draw: (x, y) => paragraph(ctx, b, x, y, ink, align, 1.15) }
   }
   return { h: 0, draw() {} }
@@ -2793,6 +2793,8 @@ export function endingSlide(id, type, plan, fmt, opts) {
 // ── The carousel types and their decks ────────────────────────
 export const TYPES = [
   { id: 'plates', jp: '駅名標' },
+  // Plan 253: a sentence to read, its words a card each, the answer and a bonus.
+  { id: 'read', jp: '一読' },
   { id: 'exam', jp: '模試' },
   { id: 'compare', jp: '乗換' },
   { id: 'build', jp: '組立' },
@@ -2816,7 +2818,10 @@ export function available(type, pl) {
   if (pl.source === 'promo' || type === 'story') return pl.source === 'promo' && type === 'story'
   // And a word echo as the clip it is (plan 232).
   if (pl.source === 'echo' || type === 'echo') return pl.source === 'echo' && type === 'echo'
+  // And a short sentence is read (plan 254).
+  if (pl.source === 'short') return type === 'read'
   switch (type) {
+    case 'read': return readable(pl)
     case 'exam': return pl.quizzes.length > 0
     case 'compare': return !!pl.compare
     case 'build': return !!pl.build
@@ -2869,6 +2874,15 @@ export function deck(type, plan, fmt, opts) {
     const frames = echoDeck(plan, FORMATS.story, opts)
     return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip, clips: frames.clips })
   }
+  // Read it is drawn in a look whatever the studio's: Clarté where it says Classic (plan 253).
+  if (type === 'read') return funnelDeck(type, plan, fmt, { ...opts, design: DESIGNS.includes(opts.design) ? opts.design : 'clarte' })
+  // So is a 会話 scene (plan 268): its lines, longer than the carousel's
+  // own conversations and in furigana that never goes under a caption,
+  // stand on a Classic question slide at N2 and N1 no more.
+  if (plan.kaiwa && !DESIGNS.includes(opts.design)) {
+    const slides = funnelDeck(type, plan, fmt, { ...opts, design: 'clarte' })
+    if (slides.length) return slides
+  }
   // Plan 234: hook, answer, the feature, the detail, the key points.
   if (DESIGNS.includes(opts.design)) {
     const slides = funnelDeck(type, plan, fmt, opts)
@@ -2915,7 +2929,8 @@ export function deck(type, plan, fmt, opts) {
       if (o.cover) add('cover', ctx => KINDS.cover(ctxOf(ctx, fr), { quizzes: qs }))
       if (plan.source === 'passage') plan.slides.filter(s => s.kind === 'passage').forEach(passage)
       qs.forEach(q => ask(q))
-      if (o.sheet && qs.length) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: qs }))
+      // One question's answer is its own slide: no sheet to repeat it (plan 248).
+      if (o.sheet && qs.length > 1) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: qs }))
       outro(t.cta.exam(qs.length))
       break
     }

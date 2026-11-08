@@ -15,22 +15,62 @@
 //   --format short    the short: 9:16, under a minute (YouTube Shorts, Reels, TikTok)
 //   --carousel RECIPE a carousel of the studio as a short video, voiced: the
 //                     studio's "Copy the command" writes the recipe (short.js)
+//   --challenge ID    a reading challenge (plan 247, challenge.js): a
+//                     comprehension text, 9:16, over Today's print
+//   --style scroll    ... going up the screen as credits do (scroll), or read along by the voice (along)
+//   --hour night      ... the print's hour: dawn, day, dusk or night
+//   --season winter   ... the print's season (plan 267): spring, summer, hanabi
+//                     (summer, its night August's fireworks), autumn or winter;
+//                     the day's own, as the app's gate shows it, when left out
+//   --scenery lake    ... the print it stands on (plan 309): bay (the app's own,
+//                     the default), wide, lake, torii, river or station
+//   --question 4      ... the text's question asked (1-based, as the studio
+//                     lists them; the first about what it says by default)
+//   --show            ... the answer shown on the screen, as the study does it
+//                     (plan 275 made hiding the default: the viewer asks in the comments)
+//   --hide            ... the default: the answer never shown, the viewer asked for
+//                     theirs in the comments (plan 275)
+//   --photo PATH      ... a photo of the maker's own in place of the print (plan 276),
+//                     a path under frontend/ (the page serves only that)
+//   --photo-look dark ... over it: dark (dimmed, the default), blur or paper (washed)
+//   --words ID        a vocabulary short (plan 252, words.js): nine words, 9:16,
+//                     a level's (N5:3) or a theme's (theme:animals:1)
+//   --style quiz      ... as a card on washi (card, the default) or a quiz on sumi (quiz)
+//   --unvoiced        ... a read-along made even when the voice engine fails (silent lines)
+//   --feature ID      a practice feature's video (plan 270, feature.js): the app
+//                     itself, recorded doing one exercise (record.mjs), 9:16:
+//                     reading, comprehension, dictation, translation, composition,
+//                     conversation or exam
+//   --app URL         ... record the app already running there (npm run dev),
+//                     rather than starting Vite here
+//   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the
+//                     command" writes the values changed, so the render is the preview
+//
+// No video carries music (plan 273): its voices and the app's sounds are
+// the whole of its sound.
 //
 // Writes <name>.mp4, <name>.txt (the title, then the description with
-// its chapters and the voice's credit) and <name>.jpg (a thumbnail).
+// its chapters and the voice's credit; for a 9:16 video, its post for
+// each feed: YouTube Shorts, Instagram Reels, TikTok, plan 251) and
+// <name>.jpg (a thumbnail).
 // It needs the voice engine (VOICEVOX_URL, CLAUDE.md "Speech"), the
 // backend's Python (numpy), ffmpeg, and Playwright's Chromium; the
 // voices are kept in carousel/long/cache/, so making a video again, or
 // one that shares lines with another, waits only for what is new.
 import { spawn, spawnSync } from 'node:child_process'
-import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
-import { dirname, extname, join, resolve } from 'node:path'
+import { dirname, extname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { SITE_ORIGIN } from '../../landing/config.mjs'
-import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, timeline } from '../long.js'
+import { FPS, TALL, WIDE, cueKey, describe, fitShort, longPlan, stillAt, timeline } from '../long.js'
 import { fromRecipe, shortTimeline } from '../short.js'
+import { challengeCues, challengePage, challengePlan, challengeTimeline } from '../challenge.js'
+import { loadFailure, standsOnFailure } from '../app.js'
+import { pageFile } from '../feeds.js'
+import { wordsCues, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from '../words.js'
+import { parseTune } from '../tune.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FRONT = resolve(HERE, '../..')
@@ -45,16 +85,32 @@ const opts = {
   lang, level: args.level || 'N5', part: Number(args.part || 1), theme: args.theme || null, point: args.point || null,
   ids: args.ids ? String(args.ids).split(',') : null, count: args.count ? Number(args.count) : null,
   format: args.format === 'short' ? 'short' : 'long',
+  // The feed a short stands in (plan 239): TikTok's, Instagram's or none.
+  fit: ['instagram', 'normal'].includes(args.fit) ? args.fit : 'tiktok',
 }
+// The values tuned in the studio (plan 248), unknown keys and bad numbers dropped.
+const tune = parseTune(typeof args.tune === 'string' ? args.tune : '')
 const OUT = resolve(args.out || join(HERE, 'out'))
 const CACHE = join(HERE, 'cache')
-const WORK = join(OUT, '.work')
+// A work folder of this run's own: two renders into one --out never share a mix (plan 248).
+const WORK = join(OUT, '.work', `${process.pid}-${Date.now()}`)
+// Anything else this run made to work with, removed with it (a feature's shots, plan 270).
+const CLEAN = []
+if (spawnSync('ffmpeg', ['-version']).status !== 0) throw new Error('ffmpeg is needed, and is not on the PATH')
+// They go however the run ends (plan 309): done, stopped on a print that
+// did not load, a bug thrown in the page or here (a still that cannot be
+// drawn or written), or Ctrl-C (Playwright closes its browser, and the
+// run exits on the call that finds it gone). Node runs this on each of
+// those exits.
+process.on('exit', () => {
+  for (const d of [WORK, ...CLEAN]) rmSync(d, { recursive: true, force: true })
+})
 for (const d of [OUT, CACHE, WORK, join(WORK, 'sfx')]) mkdirSync(d, { recursive: true })
 const python = existsSync(join(BACKEND, '.venv/bin/python')) ? join(BACKEND, '.venv/bin/python') : 'python3'
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a)
 
 // ── A page to draw on: the frontend served as the studio is ──
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml' }
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg' }
 const server = createServer((req, res) => {
   const path = join(FRONT, decodeURIComponent(new URL(req.url, 'http://x').pathname))
   if (!path.startsWith(FRONT) || !existsSync(path) || statSync(path).isDirectory()) { res.writeHead(404); res.end(); return }
@@ -76,17 +132,38 @@ page.on('pageerror', e => log('page:', e.message))
 await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: css.join('\n') }))
 await page.goto(`${ROOT}/carousel/index.html`)
 await page.addStyleTag({ content: css.join('\n') })
+// A run that cannot go on says why in one line, and leaves nothing behind
+// (its work folder goes as it exits, above).
+async function closeAll() {
+  await browser.close()
+  server.close()
+}
+async function stop(why) {
+  log(why)
+  await closeAll()
+  process.exit(1)
+}
 // ── Lines voiced and measured: how long each lasts ──
 function voiceAll(cues) {
   writeFileSync(join(WORK, 'cues.json'), JSON.stringify(cues))
   const voiced = spawnSync(python, ['-m', 'scripts.long_video_audio', 'voice', join(WORK, 'cues.json'), '--cache', CACHE, '--out', join(WORK, 'durs.json')], { cwd: BACKEND, stdio: 'inherit' })
   if (voiced.status !== 0) log('some lines could not be voiced: they are timed by a guess and left unsaid')
-  const { durs } = JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8'))
-  return c => durs[cueKey(c)]
+  const { durs, marks = {}, files = {} } = existsSync(join(WORK, 'durs.json')) ? JSON.parse(readFileSync(join(WORK, 'durs.json'), 'utf8')) : { durs: {} }
+  const dur = c => durs[cueKey(c)]
+  // Where a line's voice is: a feature's video plays it in the app it records (plan 270).
+  dur.file = c => files[cueKey(c)] || null
+  dur.ok = voiced.status === 0
+  // A line read along is also known syllable by syllable (plan 247).
+  dur.marks = c => marks[cueKey(c)] || null
+  return dur
 }
 const site = lang === 'en' ? `${SITE_ORIGIN}/en` : SITE_ORIGIN
 const banks = {}
 for (const f of readdirSync(BANK)) if (f.endsWith('.json')) banks[f] = JSON.parse(readFileSync(join(BANK, f), 'utf8'))
+// Every character the plan draws, once each: a long plan's text runs past
+// any cut, and a glyph whose font never loaded is drawn in a fallback face
+// for as long as its still lasts (plan 248).
+const glyphs = value => [...new Set(JSON.stringify(value))].join('')
 const fontsFor = async text => page.evaluate(async text => {
   const W = await import('/carousel/draw.js')
   await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), text)))
@@ -101,7 +178,98 @@ const canvasOf = size => page.evaluate(size => {
 }, size)
 
 let tl, slug, SIZE, pageText, thumbAt
-if (recipe) {
+// An older command's --music is said to be gone, not taken for something else.
+if (args.music !== undefined) log('no video carries music since plan 273: --music is ignored')
+if (args.challenge) {
+  // ── A reading challenge: the text over the hour's print, read along voiced ──
+  const plan = challengePlan(banks['comprehension.json'], String(args.challenge), { lang, style: args.style, hour: args.hour, season: args.season, scenery: args.scenery, question: args.question, hide: args.show !== true, photo: typeof args.photo === 'string' ? args.photo : null, photoLook: args['photo-look'], tune })
+  const cues = challengeCues(plan)
+  const dur = cues.length ? voiceAll(cues) : null
+  // A read-along whose voice did not come is no read-along: stop, unless asked for it anyway.
+  if (dur && !dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
+  tl = challengeTimeline(plan, dur ? c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null) : null)
+  SIZE = TALL
+  slug = ['challenge', plan.id, plan.style, ...(plan.photo ? [`photo-${plan.photo.look}`] : [...(plan.scenery !== 'bay' ? [plan.scenery] : []), ...(plan.season ? [plan.season] : []), plan.hour]), lang, ...(plan.chosen ? [`q${plan.q.n}`] : []), ...(plan.hidden ? ['comment'] : [])].join('-')
+  await fontsFor(glyphs(plan))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl }) => {
+    const C = await import('/carousel/challenge.js')
+    const A = await import('/carousel/app.js')
+    // A photo of the maker's own in place of the print (plan 276), served from the frontend.
+    const P = plan.photo
+      ? { photo: await new Promise((ok, no) => Object.assign(new Image(), { onload() { ok(this) }, onerror: () => no(new Error(`photo: ${plan.photo.src}`)), src: `/${plan.photo.src}` })), look: plan.photo.look }
+      : await A.loadPrint(plan.hour, { base: '/', ...C.challengePrintOpts(plan) })
+    // Every frame drawn: something moves in each (a sentence's clock, a word lit).
+    window.__draw = t => { C.drawChallenge(window.__ctx, plan, tl, t, P); return t }
+  }, { plan, tl }).catch(async e => {
+    // What it stands on did not load: the file named, not the page's
+    // stack. Anything else thrown in the page (a bug) is thrown as it is,
+    // its stack whole, once the run has closed its browser. (A module
+    // that does not link never gets this far: the render imports
+    // challenge.js and app.js itself, and Node's own import fails first.)
+    const failed = loadFailure(e.message)
+    if (!failed) {
+      await closeAll()
+      throw e
+    }
+    await stop(standsOnFailure(plan, failed))
+  })
+  pageText = challengePage(plan, tl, site)
+  thumbAt = 1.6
+  log(`${pageText.title}: ${plan.sents.length} sentences, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines voiced`)
+} else if (args.words) {
+  // ── A vocabulary short (plan 252): nine words, as a card or a quiz ──
+  const id = String(args.words)
+  const plan = wordsPlan(banks, id, { lang, style: args.style, tune, fit: opts.fit })
+  const dur = voiceAll(wordsCues(plan))
+  tl = wordsTimeline(plan, dur)
+  SIZE = TALL
+  slug = ['words', id.replace(/:/g, '-'), plan.style, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  await fontsFor(glyphs(plan))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl }) => {
+    const Wd = await import('/carousel/words.js')
+    // A word's picture (plan 257), loaded before the first frame is drawn.
+    await Wd.loadPictures(plan, '/carousel/')
+    window.__draw = t => Wd.drawWords(window.__ctx, plan, tl, t)
+  }, { plan, tl })
+  pageText = wordsPage(plan, tl, site, banks['index.json']?.figures)
+  thumbAt = wordsStillAt(plan, tl)
+  log(`${pageText.title}: ${plan.items.length} words, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines`)
+} else if (args.feature) {
+  // ── A practice feature (plan 270): the app itself, recorded doing one exercise ──
+  const { featurePage, featurePlan, featureStillAt, featureSteps, featureTimeline } = await import('../feature.js')
+  const { appServer, record } = await import('./record.mjs')
+  const plan = featurePlan(banks, String(args.feature), { lang, fit: opts.fit, handle: typeof args.handle === 'string' ? args.handle : '', hour: typeof args.hour === 'string' ? args.hour : 'day' })
+  const dur = plan.cues.length ? voiceAll(plan.cues) : null
+  // The clip the app plays is the first line voiced, so the player runs as long as the voice.
+  const said = plan.cues.length ? dur(plan.cues[0]) : null
+  const app = await appServer(FRONT, typeof args.app === 'string' ? args.app : null)
+  // The shots under the front end, where this page can load them.
+  const shotDir = join(FRONT, 'carousel/long/out/.shots', `${process.pid}-${Date.now()}`)
+  CLEAN.push(shotDir)
+  log(`recording ${plan.name} (${lang}) in the app at ${app.url}`)
+  let shots
+  try {
+    shots = await record(browser, { url: app.url, steps: featureSteps(plan, said || 2.5), mocks: plan.data.mocks, lang, audio: plan.cues.length ? dur.file(plan.cues[0]) : null, dir: shotDir, log })
+  } finally { await app.close() }
+  tl = featureTimeline(plan, shots, dur)
+  SIZE = TALL
+  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.hour !== 'day' ? [plan.hour] : [])].join('-')
+  await fontsFor(glyphs({ plan: { ...plan, data: null }, tl }))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl, srcs }) => {
+    const F = await import('/carousel/feature.js')
+    const A = await import('/carousel/app.js')
+    const imgs = await Promise.all(srcs.map(src => new Promise(done => { const i = new Image(); i.onload = () => done(i); i.onerror = () => done(null); i.src = src })))
+    // The gate at the end stands on Today's print of the plan's hour (plan 271).
+    const P = await A.loadPrint(plan.hour, { base: '/' })
+    window.__draw = t => F.drawFeature(window.__ctx, plan, tl, t, imgs, P)
+  }, { plan: { ...plan, data: null }, tl, srcs: shots.map(x => '/' + x.file.slice(FRONT.length + 1)) })
+  pageText = featurePage(plan, tl, site)
+  thumbAt = featureStillAt()
+  log(`${pageText.title}: ${shots.length} shots, ${tl.seconds.toFixed(1)} s`)
+} else if (recipe) {
   // ── A carousel of the studio, standing, its line voiced ──
   const made = await page.evaluate(async st => {
     const S = await import('/carousel/short.js')
@@ -122,11 +290,13 @@ if (recipe) {
     return { counts, keys: slides.map(sl => sl.key), spoken: S.spokenLine(pl), page: null, id: pl.id }
   }, recipe)
   const slides = made.keys.map(key => ({ key }))
-  const draft = shortTimeline(slides, made.counts, made.spoken)
+  // The studio's tune rides in the recipe; a --tune flag overrides it.
+  const shortTune = { ...(recipe.tune || {}), ...tune }
+  const draft = shortTimeline(slides, made.counts, made.spoken, null, shortTune)
   const dur = voiceAll(draft.cues)
-  tl = shortTimeline(slides, made.counts, made.spoken, dur)
+  tl = shortTimeline(slides, made.counts, made.spoken, dur, shortTune)
   SIZE = TALL
-  slug = ['short', recipe.source, recipe.id, recipe.type, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  slug = ['short', recipe.source, recipe.id, recipe.type, lang, ...(recipe.fit && recipe.fit !== 'tiktok' ? [recipe.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   pageText = await page.evaluate(async ({ st, site, voiced }) => {
     const S = window.__short
     const fetchJson = name => fetch(`/carousel/bank/${name}`).then(r => r.json())
@@ -138,25 +308,29 @@ if (recipe) {
   log(`${pageText.title}: ${made.keys.length} slides, ${tl.seconds.toFixed(1)} s${made.spoken ? `, says ${made.spoken}` : ''}`)
 } else {
   // ── A long video, or its short: the plan, its lines voiced, the timeline ──
-  let plan = longPlan(kind, banks, opts)
-  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
+  let plan = longPlan(kind, banks, { ...opts, tune })
+  slug = [...(opts.format === 'short' ? ['short'] : []), kind, opts.theme || opts.level, kind === 'grammar' ? plan.point : opts.ids ? 'pick' : `part${opts.part}`, lang, ...(opts.format === 'short' && opts.fit !== 'tiktok' ? [opts.fit] : [])].join('-').replace(/[^\p{L}\p{N}-]+/gu, '')
   log(`${plan.title}: ${plan.items.length} items`)
   const dur = voiceAll(timeline(plan).cues)
   // A short holds under its minute on the lines as they are said.
   if (opts.format === 'short') plan = fitShort(plan, dur)
   tl = timeline(plan, dur)
   SIZE = opts.format === 'short' ? TALL : WIDE
-  await fontsFor(JSON.stringify(plan).slice(0, 20000))
+  await fontsFor(glyphs(plan))
   await canvasOf(SIZE)
   await page.evaluate(async ({ plan, tl }) => {
     const L = await import('/carousel/long.js')
+    // A pictured scene's pictures (plan 269), loaded before the first frame is drawn.
+    await L.loadScenePictures(plan, '/carousel/')
     window.__draw = t => L.drawLong(window.__ctx, plan, tl, t)
   }, { plan, tl })
   pageText = describe(plan, tl, site, banks['index.json']?.figures)
-  thumbAt = opts.format === 'short' ? 3.4 : 4.5
+  thumbAt = stillAt(plan, tl)
   log(`${(tl.seconds / 60).toFixed(1)} min, ${tl.cues.length} lines, ${tl.sfx.length} sounds`)
 }
 const seconds = Math.min(tl.seconds, Number(args.seconds) || Infinity)
+// A draft is named so: it never overwrites the finished video (plan 248).
+if (seconds < tl.seconds) slug += `-draft${Math.round(seconds)}s`
 
 if (args.stills) {
   for (const t of String(args.stills).split(',').map(Number)) {
@@ -164,8 +338,7 @@ if (args.stills) {
     writeFileSync(join(OUT, `${slug}-${t}.png`), Buffer.from(url.split(',')[1], 'base64'))
   }
   log(`wrote ${String(args.stills).split(',').length} still(s) to ${OUT}`)
-  await browser.close()
-  server.close()
+  await closeAll()
   process.exit(0)
 }
 
@@ -190,33 +363,72 @@ const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(W
 if (mixed.status !== 0) throw new Error('the mix failed')
 
 // ── YouTube's loudness, by one gain for the whole: a dynamic leveller would
-// lift the bed of music back up to the voice between two lines ──
-const probe = spawnSync('ffmpeg', ['-hide_banner', '-i', join(WORK, 'mix.wav'), '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' })
-const loud = JSON.parse(probe.stderr.slice(probe.stderr.lastIndexOf('{')))
-const gain = Math.min(-16 - Number(loud.input_i), -1.5 - Number(loud.input_tp))
+// lift the app's quiet sounds up to the voice between two lines ──
+const probe = spawnSync(
+  'ffmpeg',
+  [
+    '-hide_banner',
+    '-i', join(WORK, 'mix.wav'),
+    '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json',
+    '-f', 'null', '-'
+  ],
+  { encoding: 'utf8' }
+)
+
+// FFmpeg writes its JSON and diagnostic messages to stderr.
+// Extract the loudnorm JSON object rather than parsing all trailing output.
+const loudMatch = probe.stderr.match(/\{\s*"input_i"\s*:[\s\S]*?\n\}/)
+
+if (probe.error) throw probe.error
+if (!loudMatch) {
+  throw new Error(`Could not find loudnorm JSON in FFmpeg output:\n${probe.stderr}`)
+}
+
+const loud = JSON.parse(loudMatch[0])
+
+// A challenge read in silence is kept calmer (its timeline says how loud).
+// A silent draft measures -inf: it is left as it is rather than turned up by NaN.
+const measured = Number(loud.input_i)
+const gain = Number.isFinite(measured)
+  ? Math.min((tl.loudness ?? -16) - measured, -1.5 - Number(loud.input_tp))
+  : 0
+
 log(`loudness ${loud.input_i} LUFS, peak ${loud.input_tp} dBTP: ${gain.toFixed(1)} dB`)
 
 // ── The frames, each still drawn once, into ffmpeg ──
+// A timeline may set its own rate (a challenge's scroll glides at sixty)
+// and a moving text is passed near-lossless, or each frame's JPEG blocks
+// fall on its letters differently and their edges shimmer as they climb.
+const fps = tl.fps || FPS
+const quality = args.challenge ? 0.98 : 0.93
 const mp4 = join(OUT, `${slug}.mp4`)
-const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', join(WORK, 'mix.wav'),
-  '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-af', `volume=${gain.toFixed(2)}dB`, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', mp4], { stdio: ['pipe', 'inherit', 'inherit'] })
-const write = buf => new Promise(r => (ff.stdin.write(buf) ? r() : ff.stdin.once('drain', r)))
-const frames = Math.round(seconds * FPS)
+const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-', '-i', join(WORK, 'mix.wav'),
+  '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(fps), '-af', `volume=${gain.toFixed(2)}dB`, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', mp4], { stdio: ['pipe', 'inherit', 'inherit'] })
+// ffmpeg failing midway is said, not left to crash the pipe (plan 248).
+let ffFailed = null
+ff.on('error', e => { ffFailed = e })
+ff.stdin.on('error', e => { ffFailed = e })
+const write = buf => new Promise((r, j) => {
+  if (ffFailed) { j(ffFailed); return }
+  if (ff.stdin.write(buf)) r()
+  else ff.stdin.once('drain', r)
+})
+const frames = Math.round(seconds * fps)
 let last = null
 let drawn = 0
 const BATCH = 60
 for (let f = 0; f < frames; f += BATCH) {
-  const out = await page.evaluate(({ from, to, fps, prev }) => {
+  const out = await page.evaluate(({ from, to, fps, prev, quality }) => {
     const res = []
     let key = prev
     for (let i = from; i < to; i++) {
       const k = window.__draw(i / fps)
       if (k === key) { res.push(null); continue }
       key = k
-      res.push(window.__canvas.toDataURL('image/jpeg', 0.93))
+      res.push(window.__canvas.toDataURL('image/jpeg', quality))
     }
     return { res, key }
-  }, { from: f, to: Math.min(frames, f + BATCH), fps: FPS, prev: last?.key ?? null })
+  }, { from: f, to: Math.min(frames, f + BATCH), fps, prev: last?.key ?? null, quality })
   for (const url of out.res) {
     if (url) { last = { buf: Buffer.from(url.split(',')[1], 'base64'), key: out.key }; drawn++ }
     await write(last.buf)
@@ -230,8 +442,6 @@ await new Promise((r, j) => ff.on('close', code => (code === 0 ? r() : j(new Err
 // ── The thumbnail, the title and the description ──
 const thumb = await page.evaluate(t => { window.__draw(t); return window.__canvas.toDataURL('image/jpeg', 0.92) }, thumbAt)
 writeFileSync(join(OUT, `${slug}.jpg`), Buffer.from(thumb.split(',')[1], 'base64'))
-const { title, description, tags } = pageText
-writeFileSync(join(OUT, `${slug}.txt`), `TITLE\n${title}\n\nDESCRIPTION\n${description}\n\nTAGS\n${tags}\n`)
-await browser.close()
-server.close()
+writeFileSync(join(OUT, `${slug}.txt`), pageFile(pageText))
+await closeAll()
 log(`wrote ${mp4} (${(seconds / 60).toFixed(1)} min, ${drawn} of ${frames} frames drawn)`)

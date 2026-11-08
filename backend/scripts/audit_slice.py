@@ -159,7 +159,10 @@ def _literal(module: str, name: str):
     raise KeyError(f"{module} has no top-level {name}")
 
 
+@functools.lru_cache(maxsize=None)
 def _json(path: str):
+    # Once a process: find_slice() rebuilds every area's slices, and the
+    # tests ask it of every slice. Nothing here writes to what it reads.
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 

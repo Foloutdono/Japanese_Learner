@@ -947,6 +947,8 @@ const stats = {
   destMovesTo:        date => `moves to ${date} at today's pace`,
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Read before',
   examPart: (n) => `Part ${n}`,
   serviceName: {
     local:   'Local',
@@ -1689,7 +1691,14 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
-  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
+  // How the sentence says the hole when another form was taken as right:
+  // its register (plan 241), or では in full or contracted (plan 295).
+  bldOther: (said, register) => `The sentence says ${said}: the same, ${({
+    plain: 'in plain speech',
+    polite: 'in polite speech',
+    full: 'with では in full',
+    contracted: 'with では contracted, as speech says it',
+  })[register] ?? 'in polite speech'}.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',
@@ -2059,6 +2068,10 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Theme',
   language:          'Language',
+  // Each language's row in the picker shows a sample in that language, the
+  // words that tell it from its neighbours: the two Spanishes say add
+  // differently, so theirs is that word (plan 303).
+  languageSample:    'Today · Dictionary',
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
   // A guest holds no key: signing out ends the journey for good. The
@@ -2725,6 +2738,12 @@ const boarding = {
   brdPasswordMismatch: 'The two passwords are not the same.',
   brdAccountSentNote: (email) => `Almost: confirm ${email} from the link we just sent you.`,
   brdRemindAt: (time) => `Remind me at **${time}**`,
+  // Plan 294: the reminder, a step after the card (in the app alone).
+  brdRemindQ: 'Shall we announce your train?',
+  brdRemindHint: 'Every day, at the hour on your card.',
+  brdRemindYes: (time) => `Yes, at ${time}`,
+  brdRemindLater: 'Not now',
+  brdRemindNow: 'now',
   brdAgendaAdd: 'Add to my calendar',
   brdAgendaTitle: 'Tsuji · your Japanese train',
   brdAgendaBody: (min) => `${min} min of Japanese, every day.`,
@@ -3135,6 +3154,11 @@ const onboarding = {
   ratePlaceholder: 'What you would change, if anything.',
   rateTextLabel: 'What you would change',
   rateLater: 'Not now',
+  // Google Play (plan 307): the rating sheet, on Android.
+  storeQ: 'A rating on Google Play?',
+  storeLead: 'Your rating helps other learners find Tsuji.',
+  storeGo: 'Rate on Google Play',
+  storeWrite: 'Tell us what you would change instead',
   cardReport: 'Report this card',
   cardReportReasons: 'What is wrong',
   cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', other: 'Other' },

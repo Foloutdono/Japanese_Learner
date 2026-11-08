@@ -2,14 +2,15 @@
 The same ending in the other register (plan 241): what Construire also
 takes where its hole closes the sentence, and where it takes nothing
 else -- each rule pinned with the sentence it reads both ways and the
-one it must not.
+one it must not. Then では said in full or contracted (plan 295), the
+same way.
 """
 import pytest
 
 from study.furigana import align_sentence
 from study.grammar_ladder import _reading, _slice
 from study.morphology import MORPHOLOGY_AVAILABLE
-from study.plain_polite import PLAIN, POLITE, other_register
+from study.plain_polite import CONTRACTED, FULL, PLAIN, POLITE, contracted, other_register
 
 pytestmark = pytest.mark.skipif(not MORPHOLOGY_AVAILABLE, reason="needs the tokenizer")
 
@@ -97,3 +98,45 @@ def test_each_other_reading_is_read_in_hiragana():
     assert forms == (("と思う", "とおもう"),)
     register, forms = _other("ともだちは来なかった。", "来なかった")
     assert forms == (("来ませんでした", "きませんでした"), ("来なかったです", "こなかったです"))
+
+
+# ── では in full or contracted (plan 295) ──────────────────────
+
+def _swap(jp: str, hole: str) -> tuple | None:
+    """contracted for the first `hole` in `jp`, read as Construire reads
+    it."""
+    a = jp.index(hole)
+    b = a + len(hole)
+    return contracted(jp, a, b, _reading(_slice(align_sentence(jp), a, b)))
+
+
+@pytest.mark.parametrize("jp, hole, said", [
+    # The copula's negative, both ways: the screenshot's card first.
+    ("これはわたしのかさではありません。", "ではありません", FULL),
+    ("あの人は先生じゃありません。", "じゃ", CONTRACTED),
+    ("あの人は先生じゃありません。", "じゃありません", CONTRACTED),
+    ("学生ではない。", "ではない", FULL),
+    ("学生じゃない。", "じゃない", CONTRACTED),
+    ("このへやはしずかではありませんでした。", "ではありません", FULL),
+    # The negative after it may be outside the hole.
+    ("これはわたしのかさではありません。", "では", FULL),
+    # Inside another point's words, and after a clause or an adjective.
+    ("いつも家にいるわけではありません。", "わけではありません", FULL),
+    ("旅行どころじゃないよ。", "どころじゃない", CONTRACTED),
+    ("この料理、おいしいじゃないか。", "じゃないか", CONTRACTED),
+    ("行くのは明日ではなく、明後日だ。", "ではなく", FULL),
+])
+def test_de_wa_before_a_negative_is_read_in_full_and_contracted(jp, hole, said):
+    old, new = ("では", "じゃ") if said == FULL else ("じゃ", "では")
+    assert _swap(jp, hole) == (said, old, new)
+
+
+@pytest.mark.parametrize("jp, hole, why", [
+    ("名前を読んではいけない。", "ではいけない", "the voiced ては of 読んでは is no では"),
+    ("学校では話しません。", "では", "学校では is « at school »: no negative follows it"),
+    ("じゃあ、またあした。", "じゃあ", "the じゃあ that opens a reply is no copula"),
+    ("学生ではありません。", "学生", "the hole holds no では"),
+    ("これは日本語ではありません。", "日本語", "nor here, though the sentence does"),
+])
+def test_no_other_de_wa_is_read_the_other_way(jp, hole, why):
+    assert _swap(jp, hole) is None, why

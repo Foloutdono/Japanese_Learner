@@ -17,7 +17,8 @@
 //   - a write that did not reach the account (offline) is kept as
 //     pending and wins over the account's older answer at the next boot;
 //   - nothing but the learner's own click ever changes it.
-import { SUPPORTED_LANGS } from './locale'
+// A choice is an interface locale (es-ES among them, plan 303).
+import { UI_LOCALES } from './locale'
 
 const KEY = 'lang'
 // Set while the last choice has not reached the account.
@@ -47,7 +48,7 @@ function drop(key) {
 /** The language the learner chose on this device, or null if never. */
 export function savedLang() {
   const saved = typeof window === 'undefined' ? null : get(KEY)
-  return SUPPORTED_LANGS.includes(saved) ? saved : null
+  return UI_LOCALES.includes(saved) ? saved : null
 }
 
 function writeAccount(code, session) {
@@ -68,7 +69,7 @@ function writeAccount(code, session) {
  * language context holds none and asks for one).
  */
 export function rememberLang(code, session) {
-  if (!SUPPORTED_LANGS.includes(code)) return
+  if (!UI_LOCALES.includes(code)) return
   set(KEY, code)
   set(PENDING_KEY, '1')
   emit()
@@ -81,7 +82,7 @@ export function rememberLang(code, session) {
  * asked, or a write that failed): that one is carried up instead.
  */
 export function syncLang(accountLang, session) {
-  if (accountLang !== null && !SUPPORTED_LANGS.includes(accountLang)) return
+  if (accountLang !== null && !UI_LOCALES.includes(accountLang)) return
   const local = savedLang()
   if (local && (accountLang === null || get(PENDING_KEY) === '1')) {
     if (local !== accountLang) writeAccount(local, session)

@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { ChevronIcon } from '../ui/Icons'
 import { kanjiNumber } from '../../domain/dayClear'
 import { Ticket, Clipper, ClipperChip, Slot, CLIP_BITE_MS, CLIP_PART_MS } from './kit'
+import { intlLocale } from '../../lib/locale'
 
 // ── 終着 — what the finish adds to Today's cleared gate (plan 250) ────
 // The rows the board over the shut gate takes on a finish (the board's
@@ -71,7 +72,7 @@ export function ShareRow({ onShare }) {
  */
 export function MonthTicket({ days, date, jackpot, rest, clip = null, glow = false, style, ref }) {
   const { t, lang } = useLang()
-  const pay = Number(jackpot).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US')
+  const pay = Number(jackpot).toLocaleString(intlLocale(lang))
   return (
     <div className="tdy-mtkt" style={style} ref={ref}>
       {glow && <span className="tdy-mtkt__glow" aria-hidden="true" />}
