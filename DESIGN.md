@@ -1159,19 +1159,32 @@ built and shot in the run screen (https://claude.ai/artifact/UvcN4n5xuFrN1JzEDY2
 
 - **The card** (`components/study/GrammarPlate.jsx`) asks the sentence:
   its hole, **its translation right under it**. The answer **turns it
-  once** (`playFlip`, the flashcard's turn) to the answer: what happened
-  (« Juste. », « Presque. », « X, le piège »), the sentence echoed a
-  size down and dimmed with the answer in its hole in full ink (the
-  right form; or what was typed, each wrong kana struck in the miss's
-  ink with the right one over it in the success ink), the point at the
-  flashcard's answer size, and under it, for a rival taken, the
-  lesson's own line on that rival. Nothing is left on the other side,
-  so the card does not turn back: no tap, no key, no switch.
+  once** (`playFlip`, the flashcard's turn) to the answer, as the owner
+  picked it (plan 310, option C of the canvas "Tsuji — Construire's
+  answer, readable", https://claude.ai/artifact/FgbvxQHbsQDEhDqtFhgfQA):
+  what happened (« Juste. », « Presque. », « X, le piège ») and, on the
+  same line where Construire missed, **what was typed** after a cross,
+  each wrong kana struck in the miss's ink and the rest in the quiet ink
+  (`.gl-typed`); then **the sentence as the front set it**, its size, its
+  ink and its translation's, **the right form in its hole** in the
+  success ink, whatever was typed, so the card reads as the sentence is
+  to be learnt; then, **under a hairline**, the point a step under the
+  flashcard's answer size (its structure at `--fs-sm`), and under it,
+  for a rival taken, the lesson's own line on that rival. On the desk
+  the sentence holds the size it was drawn at (`--fs-sentence-fluid`,
+  24px), since the card's column is a phone's width. Nothing is left on
+  the other side, so the card does not turn back: no tap, no key, no
+  switch. The correction is never written over the struck kana: at a
+  caption's size, seven kana over two ran into the line's readings and
+  were the smallest text on the card.
 - **The hole** is the card sunk a step with a dashed rule in the line's
   pigment at its foot, as wide as the kana it holds; answered, the well
-  holds the answer in bold and the rule goes. It is held to the word
-  before it (its kana and the kanji they end), so a line breaks between
-  words, never inside one.
+  holds the right form in bold and the rule goes. Where the answer was
+  partly right, the kana it lacked or got wrong are underlined in it
+  (`.gl-fixed`: あり typed for ではありません reads ではありません, では
+  and ません underlined); a hole missed whole reads plain. It is held to
+  the word before it (its kana and the kanji they end), so a line breaks
+  between words, never inside one.
 - **The point's roundel** (`PointLine`, `.gl-ring`) stands in **the
   card's top-right corner, in the stage word's place**: a ladder card
   prints neither « En cours » / « Maîtrisé » nor the foot's band

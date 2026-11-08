@@ -27573,17 +27573,58 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
 }
 
-/* The answer's sentence: the front echoed a size down, dimmed, the
-   answer in its hole in full ink. */
+/* The answer's sentence (plan 310, the owner's pick C of "Construire's
+   answer, readable"): the front as it stood, its size, its ink and its
+   translation's, now answered, the hole holding the right form in the
+   success ink. Echoed a size down and dimmed, its readings fell to 9px
+   and the translation to a grey 13px. */
 .gl-echo { width: 100%; }
 .gl-echo .gl-front { gap: var(--sp-1); padding-block: 0; }
-.gl-echo .gl-sent { font-size: var(--fs-lead); color: var(--text-secondary); }
-.gl-echo .gl-gap--filled { color: var(--text-primary); }
-.gl-echo .gl-tr { font-size: var(--fs-sm); font-weight: 400; color: var(--text-secondary); }
+.gl-echo .gl-gap--filled { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+/* A kana a partly right answer lacked or got wrong, underlined where it
+   stands in the right form (GrammarPlate's Answered). */
+.gl-fixed {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
 
-/* The answer: what happened, the sentence, the point, the lesson's line
-   on a rival. */
+/* The answer: what happened, and what was typed beside it; the
+   sentence; the point under a hairline; the lesson's line on a rival. */
+.gl-back__verdict {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-4);
+}
 .gl-back__head { margin: 0; font-size: var(--fs-lead); font-weight: 700; }
+/* What was typed, where Construire missed: a cross and the answer at the
+   verdict's size, each wrong kana struck in the miss's ink, the rest in
+   the quiet ink -- the right form is the sentence's. */
+.gl-typed {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.gl-typed__x { flex: none; color: var(--rating-wrong); }
+.gl-typed s { color: var(--rating-wrong); text-decoration-thickness: 2px; }
+/* The point a step under the sentence it answers (GrammarAnswer at 32,
+   not the flashcard's 40), on a hairline across the card. */
+.gl-back > .grammar-answer {
+  align-self: stretch;
+  margin-top: var(--sp-1);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.gl-back .grammar-structure { font-size: var(--fs-sm); }
+.gl-back .grammar-answer .meaning-display { margin-top: var(--sp-3); }
 .gl-back__head--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
 .gl-back__head--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
 /* keep-all: a form named in the line (ないでください) never breaks inside. */
@@ -27597,29 +27638,6 @@ button.brd-stn { cursor: pointer; }
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
-/* A wrong kana in the hole struck, the right one written over it. */
-.gl-fix { position: relative; display: inline-block; }
-.gl-fix s { color: var(--rating-wrong); text-decoration-thickness: 2px; }
-.gl-fix ins {
-  position: absolute;
-  inset: auto 0 100%;
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-  color: color-mix(in srgb, var(--success) 70%, var(--text-primary));
-}
-/* A kana left out: nothing to strike, so the right one stands in the
-   line where it was missing, underlined as written in. */
-.gl-fix--missing ins {
-  position: static;
-  font-size: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
-}
-
 /* Choisir's forms as the mock exam's answer tiles (.exam-tile): docked
    under the thumb in sumi on a phone, where the rating bar comes up once
    one is taken. */
@@ -42764,6 +42782,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
      crossed once answered; Construire's entry the practice runs' floor
      (form.stage__foot above); the walk's map in the card panel. */
   .gl-front, .gl-back { padding-block: var(--sp-4); }
+  /* The answer's sentence at the size it was drawn at (plan 310, 24px,
+     which --fs-sentence-fluid is at every desk width), a step under the
+     front's: the card's column is a phone's width, and at the front's
+     32px the sentence took a second line the run has no room for. */
+  .gl-echo .gl-sent { font-size: var(--fs-sentence-fluid); }
   .gl-dock {
     position: static;
     margin: 0;

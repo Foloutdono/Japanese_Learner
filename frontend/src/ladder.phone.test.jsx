@@ -45,7 +45,7 @@ const LANE = { id: 's~grammar~N5~grammar.ladder', kind: 'section', source: 'gram
 const card = over => ({ ...over, source: 'grammar', lane: LANE, stage: 'learning', lesson: null })
 const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
 
-async function mount(cards) {
+async function mount(cards, check = ladder.checks.right) {
   let batch = 0
   apiJson.mockImplementation(async (url) => {
     if (String(url).startsWith('/api/today/cards')) {
@@ -53,7 +53,7 @@ async function mount(cards) {
       return { cards: batch === 1 ? cards : [] }
     }
     if (url === '/api/composition/check') return { found: true, japanese: null }
-    if (String(url).startsWith('/api/grammar/build/check')) return ladder.checks.right
+    if (String(url).startsWith('/api/grammar/build/check')) return check
     return {}
   })
   return render(
@@ -124,6 +124,34 @@ describe('the ladder in the day’s queue, on a phone', () => {
     const sent = postReview.mock.calls.find(c => c[0] === '/api/today/review')
     expect(sent[2].mode).toBe('grammar.ladder')
     expect(sent[2].card_id).toBe(ladder.build.card_id)
+  }, 20000)
+
+  // Plan 310: a miss turns to the sentence as the front set it, the right
+  // form in its hole, what was typed struck beside the verdict and the
+  // point under its hairline, every piece inside the 390px card.
+  it('answers a near miss inside the screen, the typed answer on the verdict’s line', async () => {
+    const screen = await mount([card(ladder.build)], ladder.checks.close)
+    await settle()
+    const root = screen.container
+    await screen.getByLabelText('Your answer').fill(ladder.checks.typed.close)
+    await settle(120)
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--no')).toBeTruthy()
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    const box = root.querySelector('.prompt-card').getBoundingClientRect()
+    const pieces = root.querySelectorAll('.gl-back__verdict, .gl-typed, .gl-echo .gl-sent, .gl-gap--filled, .gl-back > .grammar-answer')
+    expect(pieces).toHaveLength(5)
+    for (const el of pieces) {
+      const r = el.getBoundingClientRect()
+      expect(r.left).toBeGreaterThanOrEqual(box.left)
+      expect(r.right).toBeLessThanOrEqual(box.right)
+    }
+    const head = root.querySelector('.gl-back__head').getBoundingClientRect()
+    const typed = root.querySelector('.gl-typed').getBoundingClientRect()
+    expect(Math.abs((head.top + head.bottom) / 2 - (typed.top + typed.bottom) / 2)).toBeLessThan(4)
+    expect(root.querySelector('.gl-typed s').textContent).toBe('で')
+    expect(root.querySelector('.gl-gap--filled .gl-fixed').textContent).toBe('て')
   }, 20000)
 
   // すみません、わたしはさかな＿＿＿。 at 390px: the kana before the hole
