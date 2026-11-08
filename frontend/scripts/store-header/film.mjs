@@ -91,6 +91,9 @@ const { LOOP, WINDOW, SOUNDS } = await page.evaluate(() => ({
 const dpr = width / 1184
 const height = Math.round((width * WINDOW.height) / WINDOW.width / 2) * 2   // the frame's: 1646 for the header, 2560 for search results
 const clip = { x: 0, y: Math.floor(WINDOW.top * dpr) / dpr, width: WINDOW.width, height: height / dpr }
+// H.264's level by the frame's size: 5.1 holds 36,864 macroblocks a frame, the header's 24,720; search
+// results' 3840 x 2560 is 38,400 and needs 6.0, or the stream claims a level its frames exceed.
+const level = Math.ceil(width / 16) * Math.ceil(height / 16) > 36864 ? '6.0' : '5.1'
 const frames = Math.round((LOOP + SEAM) * FPS)
 const per = PART * FPS
 mkdirSync(parts, { recursive: true })
@@ -163,14 +166,15 @@ run('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-i', raw, '-i', mix, '-i'
   `[va][vb]xfade=transition=fade:duration=${SEAM}:offset=${LOOP - SEAM},format=yuv420p,setsar=1[v];` +
   `[2:a]atrim=start=${SEAM}:end=${end},asetpts=PTS-STARTPTS[aa];[3:a]atrim=start=0:end=${SEAM},asetpts=PTS-STARTPTS[ab];` +
   `[aa][ab]acrossfade=d=${SEAM}:c1=tri:c2=tri,volume=${LIFT}[a]`,
-  '-map', '[v]', '-map', '[a]', ...BT709, '-c:v', 'libx264', '-preset', 'slow', '-crf', crf, '-profile:v', 'high', '-level', '5.1', '-pix_fmt', 'yuv420p',
+  '-map', '[v]', '-map', '[a]', ...BT709, '-c:v', 'libx264', '-preset', 'slow', '-crf', crf, '-profile:v', 'high', '-level', level, '-pix_fmt', 'yuv420p',
   '-r', String(FPS), '-c:a', 'aac', '-b:a', '256k', '-ar', String(RATE), '-ac', '2', '-movflags', '+faststart', '-t', String(LOOP),
   file(`${name}.mp4`)])
 // what App Store Connect reads: the size, in square pixels
-const probe = JSON.parse(run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height,sample_aspect_ratio', '-of', 'json', file(`${name}.mp4`)])).streams[0]
+const probe = JSON.parse(run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height,sample_aspect_ratio,level', '-of', 'json', file(`${name}.mp4`)])).streams[0]
 if (probe.width !== width || probe.height !== height || !['1:1', undefined, 'N/A', '0:1'].includes(probe.sample_aspect_ratio)) {
   throw new Error(`the film is ${probe.width} x ${probe.height} at ${probe.sample_aspect_ratio}, not ${width} x ${height} in square pixels`)
 }
+if (probe.level !== Math.round(Number(level) * 10)) throw new Error(`the film says H.264 level ${probe.level}, not ${level}`)
 for (const n of [raw, mix, file(`.${name}.sfx.wav`), file(`${which}.html`)]) rmSync(n, { force: true })
 rmSync(parts, { recursive: true, force: true })
 console.log(file(`${name}.mp4`), `${width} x ${height}, ${LOOP} s`)
