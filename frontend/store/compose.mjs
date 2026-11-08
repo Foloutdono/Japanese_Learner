@@ -130,7 +130,8 @@ function slideHtml(slide, lang) {
   const rects = JSON.parse(readFileSync(join(rawDir, 'rects.json'), 'utf8'))
   const lifts = (slide.lift || []).map(k => {
     const [x, y, w, h] = rects[k.piece]
-    const zm = slide.zoom && (TABLET && slide.zoomT ? slide.zoomT : slide.zoom)
+    // the iPhone's own capture already draws the moon large: no zoom, every lift where it stands
+    const zm = !IPHONE && slide.zoom && (TABLET && slide.zoomT ? slide.zoomT : slide.zoom)
     const zx = zm ? zm.x + (x + w / 2 - zm.x) * zm.z : x + w / 2, zy = zm ? zm.y + (y + h / 2 - zm.y) * zm.z : y + h / 2
     const sc = (k.s || 1) * (zm ? zm.z : 1)
     let cw = w * K * sc, ch = h * K * sc
@@ -148,7 +149,7 @@ function slideHtml(slide, lang) {
 <div class="slide" style="background:linear-gradient(170deg,${slide.bg[0]},${slide.bg[1]})">
   <div class="mark">${slide.mark}</div><div class="shade"></div>
   <h1>${heading(c.h, c.hi)}</h1>
-  <div class="phone">${TABLET ? '<div class="cam"></div>' : ''}<div class="screen"><img class="s" src="${raw(slide.shot)}"${slide.zoom ? (() => { const z = TABLET && slide.zoomT ? slide.zoomT : slide.zoom; return ` style="transform-origin:${z.x * K}px ${z.y * K}px;transform:scale(${z.z})"` })() : ''}>
+  <div class="phone">${TABLET ? '<div class="cam"></div>' : ''}<div class="screen"><img class="s" src="${raw(slide.shot)}"${slide.zoom && !IPHONE ? (() => { const z = TABLET && slide.zoomT ? slide.zoomT : slide.zoom; return ` style="transform-origin:${z.x * K}px ${z.y * K}px;transform:scale(${z.z})"` })() : ''}>
     ${slide.vignette ? '<div class="vig"></div>' : ''}
     <div class="dim" style="opacity:${slide.dim}"></div>
     ${TABLET ? '' : '<div class="island"></div>'}

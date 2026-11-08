@@ -143,11 +143,12 @@ if (stage === 'todaybig') {
     // the iPhone's header is taller (the gear): the moon starts just under it, never behind it
     const dw = TABLET ? Math.round(def * 1.2) : IPHONE ? 350 : 376, mt = TABLET ? 18 : IPHONE ? Math.round(hudB + 14 - defTop) : -62
     await p.addStyleTag({ content: `
-      .tdy-dial--print{width:${dw}px !important;margin:${mt}px 0 ${px(40)}px}
+      .tdy-dial--print{width:${dw}px !important;margin:${mt}px 0 ${IPHONE ? 78 : px(40)}px}
       .tdy-dial--print .tdy-dial__count{font-size:${px(104)}px !important}
       .tdy-dial--print .tdy-dial__unit{font-size:${px(lang === 'fr' ? 27 : 38)}px !important;font-weight:800 !important;letter-spacing:.06em !important;text-indent:.06em !important;margin-top:2px}
       .tdy-dial--print .tdy-dial__disc{filter:drop-shadow(0 0 ${px(16)}px rgba(255,240,205,.75))}
       .tpr-title{display:none !important}
+      ${IPHONE ? '.tdy-dial__line{translate:-50% calc(-50% + 34px) !important}.tdy-key--lines{translate:0 34px !important}' : ''}
       .tdy-dial--print .tdy-dial__line{background:rgba(10,14,40,.62);padding:7px ${px(18)}px;border-radius:${px(999)}px;white-space:nowrap;backdrop-filter:blur(8px);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
       .tdy-dial__time{font-size:${px(24)}px !important;color:#fff !important}
       .tdy-dial__end{font-size:${px(15)}px !important;color:rgba(255,255,255,.82) !important}
