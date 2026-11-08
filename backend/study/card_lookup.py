@@ -5,7 +5,9 @@ phrase analyzer and the reading-practice mode.
 """
 
 import re
+import unicodedata
 from functools import lru_cache
+from os.path import commonprefix
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.vocab_renames import FOLDED_FORMS
@@ -3481,6 +3483,11 @@ def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):
                 # or なんぶん (何分の一), is not the N2 何分 read なにぶん,
                 # "anyway" (plan 272).
                 continue
+            if hit and not says_its_kana(run, hit[1]):
+                # The lemmas spell the card, the page another word: 二十 +
+                # さい is 二十歳's lemmas, and the page says さい, so it is
+                # the number and the counter, にじゅっさい, never はたち.
+                continue
             if hit:
                 written = "".join(m.surface for m in run)
                 level, entry, raw_id = _plainer_same_word(written, hit) if _hiragana(written) else hit
@@ -3506,6 +3513,37 @@ def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):
                 level, entry = min(cards, key=lambda c: (bool(c[1].get("kanji")), _level_rank(c[0])))
                 return level, entry, vocab_to_id(entry, level), n
     return None
+
+
+def says_its_kana(run, entry: dict) -> bool:
+    """Whether a reading of the card `entry` says the kana a page writes
+    in a run of morphemes it spells partly in kanji. The page says how
+    its kana are said, so a card that reads them otherwise is another
+    word, however its lemmas spell it: 二十 + さい is 二十 + 歳's lemmas,
+    the card 二十歳, but はたち has no さい in it, and the page's word is
+    the number and the counter, にじゅっさい, "20 years old"; 日よう日
+    reads its よう in にちようび. Only the hiragana are held to it: a
+    kanji, a katakana or ヶ says something a reading spells but not
+    which, a mark (〜) nothing, and a word written all in kana is read
+    as written already (すいません, whatever its card's すみません). A
+    form's own ending is the form's, not the word's: 面倒くさがって's
+    くさ is 臭い's stem, and めんどうくさい need only say くさ."""
+    written = "".join(m.surface for m in run)
+    if not _has_kanji(written) or not any(_HIRAGANA.fullmatch(c) for c in written):
+        return True
+    readings = _reading_variants(entry.get("kana") or "")
+    last = run[-1]
+    tail = ""
+    if last.cform and not last.cform.startswith("終止形"):
+        stem = max(commonprefix([last.surface, last.lemma]), commonprefix([last.surface, last.lemma_reading]), key=len)
+        written, tail = written[:len(written) - len(last.surface) + len(stem)], ".*"
+    pattern = "".join(re.escape(part) if _HIRAGANA.fullmatch(part[0])
+                      else ".*" if all(unicodedata.category(c)[0] in "PS" for c in part) else ".+"
+                      for part in re.findall(r"[ぁ-ゖ]+|[^ぁ-ゖ]+", written)) + tail
+    return not readings or any(re.fullmatch(pattern, morphology.kata_to_hira(r)) for r in readings)
+
+
+_HIRAGANA = re.compile(r"[ぁ-ゖ]")
 
 
 def _kanji_stem(m) -> bool:

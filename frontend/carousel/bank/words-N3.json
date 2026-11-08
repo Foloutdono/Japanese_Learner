@@ -1004,7 +1004,7 @@
 {"t":"羽","r":"はね","ro":"hane","en":["feather, wing"],"fr":["plume, aile"],"fu":[["羽","はね"]]},
 {"t":"刑事","r":"けいじ","ro":"keiji","en":["(police) detective","criminal case"],"fr":["inspecteur de police","affaire criminelle"],"fu":[["刑","けい"],["事","じ"]],"hy":["京事","刑二","計事"]},
 {"t":"順番","r":"じゅんばん","ro":"junban","en":["turn (in line), order"],"fr":["tour (dans une file), ordre"],"fu":[["順","じゅん"],["番","ばん"]],"hy":["準番","順万","純番"]},
-{"t":"あっ","r":"あっ","ro":"atsu","en":["Ah!, Oh!"],"fr":["Ah !, Oh !"]},
+{"t":"あっ","r":"あっ","ro":"a","en":["Ah!, Oh!"],"fr":["Ah !, Oh !"]},
 {"t":"無","r":"ぶ","ro":"bu","en":["un-, non-, ill- (prefix)"],"fr":["non-, in-, mal- (préfixe)"],"fu":[["無","ぶ"]],"hy":["奉"]},
 {"t":"受け取る","r":"うけとる","ro":"uketoru","en":["to receive, to get, to accept, to take"],"fr":["recevoir, obtenir, accepter, prendre"],"fu":[["受","う"],["け",""],["取","と"],["る",""]],"hy":["右け取る","受け土る","雨け取る"]},
 {"t":"元","r":"もと","ro":"moto","en":["origin, source, basis","former, ex-"],"fr":["origine, source, fondement","ancien, ex-"],"fu":[["元","もと"]],"ex":["N2.67","N2.68"]},

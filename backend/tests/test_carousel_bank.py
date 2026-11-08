@@ -48,6 +48,22 @@ def test_a_katakana_word_is_romanised_as_written():
     assert row("コーヒーを飲みます。", "コーヒー")["ro"] == "koohii"
 
 
+def test_a_row_that_ends_on_its_small_tsu_is_said_into_the_next():
+    # にじゅっ + さい was "nijutsu" + "sai": the っ doubles what follows.
+    assert [(r["t"], r.get("ro")) for r in rows("あには二十さいの大学生です。")][2:4] == [("二十", "nijus"), ("さい", "sai")]
+    assert row("ねこが一ぴきいます。", "一")["ro"] == "ip"
+    assert row("雨だった。", "だっ")["ro"] == "dat"
+    assert row("まっちゃを飲みます。", "まっちゃ")["ro"] == "matcha"   # inside a row, as before
+    # Before nothing, or a stop, the っ is not written, as the app has it.
+    assert row("あっ、雨だ。", "あっ")["ro"] == "a"
+    assert cb._row_romaji("いっ", "ちょう") == "it"
+    assert cb._row_romaji("あっ") == "a"
+    # A line read over its own kana (the conversations) is held the same.
+    rows_ = cb._by_kana([["十", "w", "juu", [["十", "じゅう"]]], ["パーセント", "w", "paasento"]],
+                        {"jp": "十パーセント", "kana": "じゅっパーセント"})
+    assert rows_[0][2] == "jup"
+
+
 # ── Read it's bonus and its own sentences (plan 254) ──────────────
 
 

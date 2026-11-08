@@ -565,6 +565,11 @@ describe('the carousel studio', () => {
     expect(lineRomaji(sentence('外は雨です。今日は出ません。').rows)).toMatch(/\. Kyou/)
     // A stray kana the tokenizer packed as punctuation is still read (あには).
     expect(lineRomaji(unpack([['あ'], ['に', 'p', 'ni'], ['は', 'p', 'wa'], ['けっこん', 'w', 'kekkon'], ['。']]))).toBe('A ni wa kekkon.')
+    // A row that ends on っ is said into the next: no "nijutsu sai".
+    expect(lineRomaji(unpack([['あに', 'w', 'ani'], ['は', 'p', 'wa'], ['二十', 'w', 'nijus', [['二', 'に'], ['十', 'じゅっ']]],
+      ['さい', 'w', 'sai'], ['です', 'c', 'desu'], ['。']]))).toBe('Ani wa nijussai desu.')
+    expect(lineRomaji(unpack([['雨', 'w', 'ame', [['雨', 'あめ']]], ['だっ', 'c', 'dat'], ['た', 'c', 'ta'], ['。']]))).toBe('Ame datta.')
+    expect(lineRomaji(unpack([['あっ', 'w', 'a'], ['、'], ['雨', 'w', 'ame', [['雨', 'あめ']]], ['だ', 'c', 'da'], ['。']]))).toBe('A, ame da.')
   })
 
   it('welds French punctuation to the word before it', () => {
