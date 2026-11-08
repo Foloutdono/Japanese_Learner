@@ -199,14 +199,25 @@ def _analyze(jp: str, level: str | None = None) -> dict:
 _KATAKANA = re.compile(r"^[\u30a0-\u30ffー]+$")
 
 
-def _romaji(reading: str, kind: str, surface: str) -> str:
+def _romaji(reading: str, kind: str, surface: str, after: dict | None = None) -> str:
     if kind == "particle" and surface in PARTICLE_ROMAJI:
         return PARTICLE_ROMAJI[surface]
     # A word in katakana is romanised as it is written: its reading spells
     # ー as a vowel (コーヒー こうひい), which gave "kouhii" (plan 248).
-    if _KATAKANA.match(surface):
-        return to_romaji(surface)
-    return to_romaji(reading)
+    said = surface if _KATAKANA.match(surface) else reading
+    if len(said) > 1 and said[-1] in "っッ":
+        # A row that ends on っ is no "tsu" (二十 にじゅっ was "nijutsu"):
+        # the っ doubles what the next row opens with, so the rows read
+        # on into the sentence's romaji (二十 + さい nijus + sai, 一 + ぴき
+        # ip + piki), and before nothing it is not written (あっ a), as the
+        # app's own romaji has it (frontend lib/romaji.js).
+        nxt = to_romaji(after.get("reading") or after["surface"]) if after else ""
+        double = "t" if nxt.startswith("ch") else nxt[:1] if nxt[:1] in _CONSONANTS else ""
+        return to_romaji(said[:-1]) + double
+    return to_romaji(said)
+
+
+_CONSONANTS = frozenset("bcdfghjkmpqrstvwz")
 
 
 def _furigana(tokens: list[dict]) -> list[list[str]]:
@@ -322,7 +333,7 @@ def _counted_row(group: list[dict], after: dict | None) -> dict | None:
         gloss = (f"many {forms[1]}", "maintes fois" if forms[3] == "fois" else f"beaucoup de {forms[3]}")
     if not gloss:
         return None
-    row = _row(group)
+    row = _row(group, after)
     row.pop("lv", None)
     row["pos"] = "noun"
     row["en"], row["fr"] = [gloss[0]], [gloss[1]]
@@ -387,12 +398,12 @@ def rows_of(tokens: list[dict]) -> list[dict]:
             while end + 1 < len(tokens) and _joins(tokens[end + 1]):
                 end += 1
         group = tokens[i:end + 1]
-        rows.append(_row(group))
+        rows.append(_row(group, tokens[end + 1] if end + 1 < len(tokens) else None))
         i = end + 1
     return rows
 
 
-def _row(group: list[dict]) -> dict:
+def _row(group: list[dict], after: dict | None = None) -> dict:
     head = group[0]
     surface = "".join(t["surface"] for t in group)
     reading = "".join(t.get("reading") or t["surface"] for t in group)
@@ -403,7 +414,7 @@ def _row(group: list[dict]) -> dict:
     # The reading a page prints is the furigana's (は, not the わ the
     # tokenizer hears), so it is not written twice: a page reads it off
     # `fu`, which is left out where nothing in the word takes furigana.
-    row = {"t": surface, "ro": _romaji(reading, kind, surface), "k": kind, "pos": head["pos"]}
+    row = {"t": surface, "ro": _romaji(reading, kind, surface, after), "k": kind, "pos": head["pos"]}
     furigana = _furigana(group)
     if any(r for _, r in furigana):
         row["fu"] = furigana
