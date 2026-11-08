@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **310**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **311**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -350,6 +350,24 @@ runtime purpose.
   (`source = 'duel'`), dated when the run ended (`award_xp(at=)`) and
   capped that local day (`duels.XP_CAP`). Who reported whom is read with
   `scripts/read_reports`, never on a dashboard.
+- **What a learner posts to another is read first (plan 310).** A
+  username, a deck's name and description and a written card's text go
+  through `core/content_filter.py` before another learner can read them:
+  a deck at `publish_deck` and at every write while others read it
+  (published, or followed since), a username at `PATCH /api/profile` and
+  at `claim_handle`. A private deck is never read. Slurs are refused
+  everywhere (`refused(text)`), vulgarity only in a name or a
+  description (`name=True`): a card may say what くそ means. A refusal is
+  the code `content_refused` and the field, never the text, and nothing
+  it reads is kept. A word is matched whole after folding, a Japanese
+  term in katakana or kanji with its lookalike guarded; a new rule is
+  pinned in `tests/test_content_filter.py` with the text it refuses and
+  the lookalike it leaves, and every text the app teaches, and every
+  deck reading's romaji as a handle, must still pass (the test runs
+  them: `pique-nique`, `kike` for 聞け and 把's gloss "faggot" each
+  removed a rule). A new place another learner reads learner text is
+  read the same way, and a new place that lists another learner's
+  content reads the blocks (`routes/decks._APART`, both ways).
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

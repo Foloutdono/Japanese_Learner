@@ -13,6 +13,7 @@ const auth = {
   signOut:           'Sign out',
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
+  usernameRefused:   'This username is not allowed.',
   // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
   // rather than by Supabase's English sentence (plan 215). The ones the
   // guest claim shares (address taken, weak password, too many tries)

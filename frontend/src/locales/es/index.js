@@ -17,6 +17,7 @@ const auth = {
   signOut:           'Cerrar sesión',
   usernameInvalid:   'El nombre de usuario debe tener de 3 a 20 caracteres (letras, números, guion bajo).',
   usernameTaken:     'Este nombre de usuario ya está en uso.',
+  usernameRefused:   'Este nombre de usuario no está permitido.',
   // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
   // rather than by Supabase's English sentence (plan 215). The ones the
   // guest claim shares (address taken, weak password, too many tries)

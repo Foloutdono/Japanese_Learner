@@ -15,6 +15,7 @@ const auth = {
   signOut:           'Déconnexion',
   usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, tiret bas).",
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
+  usernameRefused:   "Ce nom d'utilisateur n'est pas accepté.",
   // 改札 — les refus de la connexion, nommés par leur code
   // (lib/authErrors.js) plutôt que par la phrase anglaise de Supabase
   // (plan 215). Les refus partagés avec la carte invité (adresse déjà

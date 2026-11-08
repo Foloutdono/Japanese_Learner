@@ -39,6 +39,18 @@ describe('EditableUsername', () => {
     expect(await rename('voyageur')).toBe(fr.usernameTaken)
   })
 
+  // Plan 310: a handle is public, and the server's filter refuses some.
+  // Its refusal is a code, and the field says the table's sentence.
+  it('names a name the filter refuses', async () => {
+    answer = async () => ({ ok: false, status: 422, json: async () => ({ detail: { code: 'content_refused', field: 'username' } }) })
+    expect(await rename('voyageur')).toBe(fr.usernameRefused)
+  })
+
+  it('says the generic line for a 422 that is no refusal', async () => {
+    answer = async () => ({ ok: false, status: 422, json: async () => ({ detail: [{ msg: 'invalid' }] }) })
+    expect(await rename('voyageur')).toBe(fr.genericError)
+  })
+
   it('says the generic line for any other refusal', async () => {
     answer = async () => ({ ok: false, status: 500, json: async () => ({}) })
     expect(await rename('voyageur')).toBe(fr.genericError)

@@ -17,7 +17,7 @@ from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits, events, learner_modes, review_plan
+from core import content_filter, credits, events, learner_modes, review_plan
 from core.lines import clean_lines
 from content.kana_data import KANA_SETS
 from srs.xp import level_progress, next_milestone
@@ -354,13 +354,17 @@ def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
     taken). A name is taken whatever its case: "tifa" is not offered
     beside "Tifa"."""
     base = handle_from_name(card_name)
-    if not base:
+    # A name the filter refuses as a handle (plan 310) is printed on the
+    # learner's own card, and the drawn handle stays the public one.
+    if not base or content_filter.refused(base, name=True):
         return None
     cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
     row = cur.fetchone()
     if not row or not _GENERATED_RE.match(row[0]):
         return None
     for candidate in _handle_candidates(base):
+        if content_filter.refused(candidate, name=True):
+            continue
         cur.execute(
             "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
             (candidate, user_id),
@@ -1125,6 +1129,13 @@ def export_trail(user_id: str = Depends(get_user_id)):
 def update_profile(payload: ProfilePayload, user_id: str = Depends(get_user_id)):
     if payload.username is None and payload.cardName is None:
         raise HTTPException(status_code=422, detail="Nothing to update")
+    # The handle is public (the 番付, the duels, under every published
+    # deck), so it is held to the filter's names (plan 310). The card's
+    # name is printed on the learner's own card alone and is not.
+    if payload.username is not None and content_filter.refused(payload.username, name=True):
+        raise HTTPException(status_code=422, detail={
+            "code": content_filter.REFUSED, "message": content_filter.REFUSED, "field": "username",
+        })
     username = _get_or_create_username(user_id)  # ensure a row exists to update
     conn = db_conn()
     try:

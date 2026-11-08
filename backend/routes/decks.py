@@ -8,7 +8,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
 from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
-from core import bell, credits
+from core import bell, content_filter, credits
 from core.db import db_conn
 from core.pace import new_card_limit, resolve_pace
 from core.rls import enable_rls
@@ -27,6 +27,7 @@ from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
 from content.kanji_readings import display_reading
 from study import card_index
+from study.duel_friends import blocked_between
 from study.card_lookup import card_stats
 from study.furigana import align_deck as align_furigana, align_sentence
 
@@ -1051,6 +1052,25 @@ LIBRARY_SORTS = {
 }
 
 
+# Nobody a block stands between (plan 310): a learner who blocked
+# another, or was blocked by them, finds none of the other's decks in
+# the library, as the duels' _APART (study/duels.py) deals them no
+# duel. Both ways, because the block says so ("you will no longer find
+# each other"), and on `d`, the deck, against %(me)s.
+_APART = """NOT EXISTS (
+    SELECT 1 FROM pvp_blocks b
+     WHERE (b.user_id = %(me)s AND b.blocked_id = d.user_id)
+        OR (b.user_id = d.user_id AND b.blocked_id = %(me)s))"""
+
+
+def _apart(conn, access: DeckAccess) -> bool:
+    """Whether a block stands between the reader and the deck's author."""
+    if access.owned:
+        return False
+    with conn.cursor() as cur:
+        return blocked_between(cur, access.viewer_id, access.owner_id)
+
+
 def _like(term: str) -> str:
     r"""`term` as a LIKE pattern, with LIKE's own punctuation neutralised.
 
@@ -1134,6 +1154,7 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
                       SELECT 1 FROM deck_subscriptions s
                       WHERE s.deck_id = d.id AND s.user_id = %(me)s
                   )
+                  AND {_APART}
                   {narrow}
             """, params)
             total = cur.fetchone()["n"]
@@ -1150,13 +1171,14 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
                   AND d.user_id <> %(me)s
                   AND mine.user_id IS NULL
+                  AND {_APART}
                   {narrow}
                 ORDER BY {order}
                 LIMIT %(limit)s OFFSET %(offset)s
             """, params)
             rows = [dict(r) for r in cur.fetchall()]
 
-            cur.execute("""
+            cur.execute(f"""
                 SELECT DISTINCT d.type FROM decks d
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
                   AND d.user_id <> %(me)s
@@ -1164,6 +1186,7 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
                       SELECT 1 FROM deck_subscriptions s
                       WHERE s.deck_id = d.id AND s.user_id = %(me)s
                   )
+                  AND {_APART}
             """, {"me": user_id})
             present = {r["type"] for r in cur.fetchall()}
     finally:
@@ -1234,6 +1257,7 @@ def get_library_home(user_id: str = Depends(get_user_id)):
                       SELECT 1 FROM deck_subscriptions s
                       WHERE s.deck_id = d.id AND s.user_id = %(me)s
                   )
+                  AND {_APART}
                 ORDER BY f.lately DESC, f.followers DESC,
                          d.published_at DESC NULLS LAST, d.id DESC
                 LIMIT 1
@@ -1241,7 +1265,9 @@ def get_library_home(user_id: str = Depends(get_user_id)):
             row = cur.fetchone()
             featured = dict(row) if row else None
 
-            cur.execute("""
+            # A block ends the follows between the two (study/duel_friends.
+            # block); _APART here keeps out one a block made before it did.
+            cur.execute(f"""
                 SELECT d.id, d.name, d.type, d.user_id AS owner_id,
                        (d.withdrawn_at IS NOT NULL) AS withdrawn,
                        (SELECT COUNT(*) FROM custom_cards cc WHERE cc.deck_id = d.id)
@@ -1260,6 +1286,7 @@ def get_library_home(user_id: str = Depends(get_user_id)):
                 FROM deck_subscriptions s
                 JOIN decks d ON d.id = s.deck_id
                 WHERE s.user_id = %(me)s
+                  AND {_APART}
                 ORDER BY new_cards DESC, updated_at DESC NULLS LAST, d.id DESC
             """, {"me": user_id})
             following = [dict(r) for r in cur.fetchall()]
@@ -1310,6 +1337,8 @@ def get_library_deck(deck_id: str, lang: str = "fr", user_id: str = Depends(get_
     conn = db_conn()
     try:
         access = deck_access(conn, deck_id, user_id, need=PUBLIC)
+        if _apart(conn, access):
+            raise HTTPException(status_code=404, detail="Deck not found")
         payload = _deck_payload(conn, access)
         payload["followed"] = access.role == "follower"
         # Sliced from the same listing the deck screen uses rather than
@@ -1320,6 +1349,48 @@ def get_library_deck(deck_id: str, lang: str = "fr", user_id: str = Depends(get_
         return payload
     finally:
         conn.close()
+
+
+# ── What the library refuses (plan 310) ──────────────────────
+#
+# Guideline 1.2's filter, in front of the report queue: a deck's name,
+# its description and its written cards are read by
+# core/content_filter.py before another learner can read them. That is
+# when the deck is published, and any write to a deck another learner
+# already reads (published, or followed since: a deck taken back out of
+# the library is still read by its followers). A private deck is the
+# learner's own notebook and is never read. The refusal is a code the
+# screens map to their own words, with the field it was found in and,
+# for a card, its id; never what in it.
+
+def _refuse(field: str, **extra) -> None:
+    raise HTTPException(status_code=422, detail={
+        "code": content_filter.REFUSED, "message": content_filter.REFUSED,
+        "field": field, **extra,
+    })
+
+
+def _read_by_others(cur, access: DeckAccess) -> bool:
+    """Whether another learner reads this deck's text now."""
+    if access.visibility == "public":
+        return True
+    cur.execute("SELECT 1 FROM deck_subscriptions WHERE deck_id = %s LIMIT 1",
+                (access.deck_id,))
+    return cur.fetchone() is not None
+
+
+def _check_deck_text(cur, access: DeckAccess) -> None:
+    """The deck's name and description, then every written card in its
+    order, on a RealDictCursor: the first refused is the one named."""
+    if content_filter.refused(access.name, name=True):
+        _refuse("name")
+    if content_filter.refused(access.description, name=True):
+        _refuse("description")
+    cur.execute("SELECT id, fields, notes FROM custom_cards WHERE deck_id = %s ORDER BY id",
+                (access.deck_id,))
+    for row in cur.fetchall():
+        if content_filter.card_refused(row["fields"], row["notes"]):
+            _refuse("card", card_id=row["id"])
 
 
 @router.patch("/api/decks/{deck_id}")
@@ -1335,6 +1406,7 @@ def edit_deck(deck_id: str, payload: DeckEditPayload,
     access = resolve_deck(deck_id, user_id, need=OWNER)
 
     sets, params = [], []
+    name = description = None
     if payload.name is not None:
         name = payload.name.strip()
         if not name:
@@ -1342,14 +1414,21 @@ def edit_deck(deck_id: str, payload: DeckEditPayload,
         sets.append("name = %s")
         params.append(name)
     if payload.description is not None:
+        description = payload.description.strip()[:DESCRIPTION_MAX]
         sets.append("description = %s")
-        params.append(payload.description.strip()[:DESCRIPTION_MAX])
+        params.append(description)
     if not sets:
         raise HTTPException(status_code=400, detail="Nothing to change")
 
     conn = db_conn()
     try:
         with conn.cursor() as cur:
+            # Renaming a deck others read is posting it again (plan 310).
+            if _read_by_others(cur, access):
+                if content_filter.refused(name, name=True):
+                    _refuse("name")
+                if content_filter.refused(description, name=True):
+                    _refuse("description")
             cur.execute(
                 f"UPDATE decks SET {', '.join(sets)} WHERE id = %s AND user_id = %s",
                 (*params, access.deck_id, access.owner_id),
@@ -1381,6 +1460,8 @@ def publish_deck(deck_id: str, user_id: str = Depends(get_user_id)):
             if cur.fetchone()["n"] == 0:
                 raise HTTPException(status_code=400,
                                     detail="An empty deck cannot be published")
+            # The filter reads the whole deck at the door (plan 310).
+            _check_deck_text(cur, access)
             # published_at is set once and kept: it is the library's
             # ordering, and re-publishing a deck should not jump it back
             # to the top of the shelf.
@@ -1434,7 +1515,7 @@ def follow_deck(deck_id: str, user_id: str = Depends(get_user_id)):
             raise HTTPException(status_code=409, detail="This deck is already yours")
         if access.role == "follower":
             return {"ok": True, "followed": True}
-        if access.visibility != "public" or access.withdrawn:
+        if access.visibility != "public" or access.withdrawn or _apart(conn, access):
             raise HTTPException(status_code=404, detail="Deck not found")
         with conn.cursor() as cur:
             cur.execute("""
@@ -1948,6 +2029,9 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
                     status_code=400,
                     detail=f"A {structure} card needs: {', '.join(missing)}",
                 )
+            if (content_filter.card_refused(fields, payload.notes)
+                    and _read_by_others(cur, access)):
+                _refuse("card")
             # FREE_CARDS / PASS_CARDS (plan 069); a no-op until enforcement.
             credits.check_card_limit(cur, user_id)
             cur.execute("""
@@ -1984,11 +2068,15 @@ def add_cards(deck_id: str, payload: CardBatchPayload, user_id: str = Depends(ge
         structure = access.type if access.type in STRUCTURE_KEYS else "standard"
         inserted, errors = [], []
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            others = _read_by_others(cur, access)
             for i, card in enumerate(payload.cards):
                 fields = normalise_fields(structure, card.resolved())
                 missing = missing_required(structure, fields)
                 if missing:
                     errors.append({"index": i, "missing": missing})
+                    continue
+                if others and content_filter.card_refused(fields, card.notes):
+                    errors.append({"index": i, "code": content_filter.REFUSED})
                     continue
                 try:
                     credits.check_card_limit(cur, user_id)
@@ -2063,6 +2151,9 @@ def update_card(deck_id: str, card_id: str, payload: CardPayload,
                     status_code=400,
                     detail=f"A {structure} card needs: {', '.join(missing)}",
                 )
+            if (content_filter.card_refused(fields, payload.notes)
+                    and _read_by_others(cur, access)):
+                _refuse("card", card_id=int(card_id))
             # Editing does NOT reset anyone's scheduler state, the
             # author's or a follower's: the raw id is unchanged, so a
             # mature card quietly starts asking a different question.
@@ -2813,6 +2904,15 @@ def import_cards(deck_id: str, file: UploadFile = File(...),
     conn     = db_conn()
     try:
         with conn.cursor() as cur:
+            if _read_by_others(cur, access):
+                kept = []
+                for row in rows:
+                    i, front, back, notes = row
+                    if content_filter.card_refused({"front": front, "back": back}, notes):
+                        errors.append(f"Row {i}: refused by the library's filter — skipped")
+                    else:
+                        kept.append(row)
+                rows = kept
             # The whole file against the free tier at once (plan 069);
             # only a file that overruns it is checked row by row, so it
             # lands what fits and reports the rest.
