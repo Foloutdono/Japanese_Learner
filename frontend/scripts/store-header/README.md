@@ -71,3 +71,53 @@ dedicated 21:9 header only.
 
 Changing the season of the header is a run of this script and an upload;
 the app's own print changes by itself.
+
+## The moving header
+
+The header also takes a video (3840 × 1646, 5 to 30 seconds, 30 or 60
+fps, looping, muted until someone turns the sound on). The owner found the
+still print said nothing about the app, and picked E of four directions
+drawn from Today on the canvas "Tsuji — the moving header"
+(https://claude.ai/artifact/NJruRGMvqqhjtVCXWAP6ca): **the day's run**.
+
+```bash
+cd frontend && node scripts/store-header/film.mjs OUT                         # autumn-day, 3840 × 1646
+cd frontend && node scripts/store-header/film.mjs OUT winter-day --date 2026-12-08
+cd frontend && node scripts/store-header/film.mjs OUT --width 1920            # a quicker preview
+```
+
+It writes `OUT/today-<print>.mp4`: twelve seconds that loop without a
+seam, H.264 and AAC, about twenty minutes of filming at full size.
+`today.py` builds the page and `film.mjs` films it; they need Python (the
+print's modules), Chromium and ffmpeg.
+
+What plays, each part drawn as the app draws it:
+
+- **The run** (0.8 to 6.9 s). Today's dial stands on the sun of the print,
+  left of Fuji as on the desk's Today: PrintDial's geometry
+  (`components/station/TodayDial.jsx`, `domain/dial.js`), the print's
+  inks (`print.json`). The count, in the hour's two golds, rolls down
+  from the day's cards to 0 while the day's thread closes round it with
+  its stop, and the train crosses the bay.
+- **The day's finish** (from 6.95 s), at the app's own beats
+  (`components/dayclear/useFinish.js`, `BEATS.day`). The ring turns in;
+  the day's seal (TodayDial's `CutSeal`, its ink grain and its tilt) is
+  slammed, with its flash, its bloom and the 3px shake, and the sun's
+  glow gives way to the seal's. The week's seven stamps come in under the
+  dial, today's is pressed, and a full week's gold rings ring in. The
+  keyframes are `index.css`'s (`clr-slam`, `tdy-fin-ring`,
+  `tdy-fin-flash`, `clr-bloom`, `clr-shake`, `clr-press`, `tdy-fin-pop`).
+- **The next day** comes back over the last 0.8 s.
+
+Nothing on it is a word: the count, 辻駅, the date and the days. So one
+file serves every localization. The date is the seal's and the week's
+(`--date`, in the print's season). The sound is the hour's lake at its
+trim, with the stamp at the seal's hit and the 終着 chord at the recap:
+the app's own recipes and levels, rendered as `scripts/measure-voices.mjs`
+renders them.
+
+A frame is a still taken alone: `render(t)` sets the print's own
+animations and the finish's keyframes to `t`, so the film is the same
+however fast the machine shoots. The print's motion has periods of its
+own, so the film runs half a second past the loop and its end is
+crossfaded into its start.
