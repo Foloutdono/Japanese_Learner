@@ -1,7 +1,7 @@
 """The long videos' mix (plan 233, scripts/long_video_audio.py): a line
-lands where the timeline says, the bed of music stays well under it, and
-the file is as long as the video. No voice engine: the cache is written
-here by hand."""
+lands where the timeline says, nothing plays under it (no video carries
+music since plan 273), and the file is as long as the video. No voice
+engine: the cache is written here by hand."""
 import json
 import wave
 
@@ -76,7 +76,7 @@ def test_a_sung_syllable_is_said():
     assert lva.TUNE in f"kana|{lva.TUNE}|"
 
 
-def test_a_line_lands_on_its_time_over_a_quiet_bed(tmp_path):
+def test_a_line_lands_on_its_time_over_silence(tmp_path):
     cache, sfx = tmp_path / "cache", tmp_path / "sfx"
     cache.mkdir()
     sfx.mkdir()
@@ -92,7 +92,47 @@ def test_a_line_lands_on_its_time_over_a_quiet_bed(tmp_path):
         data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
     left = data[0::2]
     rate = lva.RATE
-    voice = left[int(4.2 * rate):int(4.8 * rate)]
-    bed = left[int(6.5 * rate):int(9.5 * rate)]
-    assert _rms_db(voice) - _rms_db(bed) > 12
-    assert _rms_db(bed) > -60  # the bed is there, under it
+    assert _rms_db(left[int(4.2 * rate):int(4.8 * rate)]) > -40
+    # No music: between the sounds and the lines, silence.
+    assert np.abs(left[int(6.5 * rate):int(9.5 * rate)]).max() == 0
+
+
+def test_a_lines_syllables_start_where_the_engine_lays_them():
+    # A reading challenge read along (plan 247) lights each word as the
+    # voice reaches it: the lead-in, each mora's consonant and vowel and
+    # each pause, all at the speed the line is said.
+    query = {"prePhonemeLength": 0.1, "accent_phrases": [
+        {"moras": [{"text": "マ", "consonant_length": 0.05, "vowel_length": 0.1}, {"text": "イ", "vowel_length": 0.1}],
+         "pause_mora": {"text": "、", "vowel_length": 0.3}},
+        {"moras": [{"text": "ニ", "consonant_length": 0.04, "vowel_length": 0.08}]},
+    ]}
+    marks = lva.mora_marks(query, 1.0)
+    assert [m["k"] for m in marks] == ["マ", "イ", "、", "ニ"]
+    assert [m["t"] for m in marks] == [0.1, 0.25, 0.35, 0.65]
+    assert [m.get("p") for m in marks] == [None, None, 1, None]
+    # Said slower, every syllable later, in proportion.
+    assert [m["t"] for m in lva.mora_marks(query, 0.5)] == [0.2, 0.5, 0.7, 1.3]
+
+
+def test_the_mix_closes_on_a_fade(tmp_path):
+    # A sound still ringing as the video ends is faded out, never cut.
+    cache, sfx = tmp_path / "cache", tmp_path / "sfx"
+    cache.mkdir()
+    sfx.mkdir()
+    _tone(sfx / "chime.wav", 8.0, lva.RATE, hz=440.0, amp=0.9)
+    (tmp_path / "tl.json").write_text(json.dumps({"seconds": 8.0, "cues": [], "sfx": [{"at": 0.0, "key": "chime"}]}), encoding="utf-8")
+    out = tmp_path / "mix.wav"
+    assert lva.mix(tmp_path / "tl.json", cache, sfx, out) == 0
+    with wave.open(str(out)) as w:
+        assert abs(w.getnframes() / w.getframerate() - 8.0) < 0.01
+        data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float64) / 32768
+    left = data[0::2]
+    assert _rms_db(left[int(7.0 * lva.RATE):int(7.5 * lva.RATE)]) > -40
+    assert abs(left[-20:]).max() < 0.01
+
+
+def test_no_video_carries_music():
+    # Plan 273: no bed made up, no track laid under, no flag for either.
+    assert not hasattr(lva, "bed") and not hasattr(lva, "recorded_bed")
+    import inspect
+    assert list(inspect.signature(lva.mix).parameters) == ["tl_path", "cache", "sfx", "out"]

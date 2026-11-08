@@ -68,6 +68,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg[hidden] { display: none; }
+.seg + .seg { margin-top: 6px; }
 .btn[hidden] { display: none; }
 .seg button, .chip { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 7px 14px; cursor: pointer; min-height: 36px; }
 .seg button[aria-pressed="true"], .chip[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
@@ -114,7 +115,23 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 .btn { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 8px 16px; cursor: pointer; min-height: 40px; font-weight: 700; }
 .btn--quiet { min-height: 34px; padding: 5px 14px; font-weight: 500; }
 .btn--metal { border: 0; background: linear-gradient(180deg, var(--gold-lit), var(--gold-mid)); color: var(--on-fill); box-shadow: 0 4px 16px color-mix(in srgb, var(--gold-mid) 30%, transparent); padding: 10px 22px; min-height: 44px; }
-.btn:disabled { opacity: 0.55; cursor: progress; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.tune summary { cursor: pointer; list-style: none; justify-content: flex-start; }
+.tune summary::-webkit-details-marker { display: none; }
+.tune summary::before { content: "▸"; letter-spacing: 0; transition: transform 0.15s; }
+.tune[open] summary::before { transform: rotate(90deg); }
+.tune summary span { margin-left: auto; }
+.tune__groups { display: flex; flex-direction: column; gap: 18px; }
+.tune__group { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.tune__group legend { padding: 0; margin-bottom: 4px; font-size: 13px; font-weight: 700; }
+.tune__row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 2px 8px; }
+.tune__row label { font-size: 13px; }
+.tune__row output { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink2); }
+.tune__row.is-changed output { color: var(--sel-ink); font-weight: 700; }
+.tune__row input { grid-column: 1 / -1; width: 100%; margin: 0; accent-color: var(--gold); }
+.tune__row small { grid-column: 1 / -1; color: var(--ink2); font-size: 12px; }
+.tune__reset { border: 0; background: transparent; color: var(--ink2); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 2px 4px; }
+.tune__reset[hidden] { display: none; }
 
 .stage { display: flex; flex-direction: column; gap: 28px; }
 .deck { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -159,6 +176,19 @@ body:not([data-mode="long"]) [data-long="only"] { display: none !important; }
 body[data-design="funnel"] [data-funnel="hide"] { display: none !important; }
 body:not([data-design="funnel"]) [data-funnel="only"] { display: none !important; }
 body[data-mode="long"] [data-long="hide"] { display: none !important; }
+/* The reading challenges (plan 247): a video, with its own controls. */
+body:not([data-video="challenge"]) [data-challenge="only"] { display: none !important; }
+body[data-video="challenge"] [data-challenge="hide"] { display: none !important; }
+/* The vocabulary shorts (plan 252): a look and a feed of their own. */
+body:not([data-video="words"]) [data-words="only"] { display: none !important; }
+body[data-video="words"] [data-words="hide"] { display: none !important; }
+/* The feature videos (plan 270): recorded in the app, posted to any feed. */
+body:not([data-video="feature"]) [data-feature="only"] { display: none !important; }
+body[data-video="feature"] [data-feature="hide"] { display: none !important; }
+/* A 9:16 video's post per feed (plan 251): Reels and TikTok take a caption alone. */
+body:not([data-feeds="on"]) [data-feeds="only"] { display: none !important; }
+body[data-post="caption"] [data-caption="hide"] { display: none !important; }
+body:not([data-post="caption"]) [data-caption="only"] { display: none !important; }
 .player canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .player__bar { display: flex; align-items: center; gap: 12px; }
 .player__bar input { flex: 1; min-width: 0; accent-color: var(--gold); }
@@ -194,13 +224,54 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <ul id="items" class="sentences"></ul>
     </div>
 
-    <div class="field" data-promo="only">
-      <div class="label">Today’s print <span>the hour it is drawn at</span></div>
+    <div class="field" data-challenge="only">
+      <div class="label">How the text moves <span>a reading challenge</span></div>
+      <div class="seg" role="group" aria-label="How the text moves">
+        <button type="button" data-set="challengeStyle:scroll">Credits scroll 流れ</button>
+        <button type="button" data-set="challengeStyle:along">Read along 声</button>
+      </div>
+    </div>
+
+    <div class="field" data-challenge="only">
+      <div class="label">The answer <span>left to the comments, where the viewer writes theirs (the default), or shown on the screen</span></div>
+      <div class="seg" role="group" aria-label="The answer">
+        <button type="button" data-set="challengeAnswer:comments">In the comments 答えはコメントで</button>
+        <button type="button" data-set="challengeAnswer:shown">Shown on screen 画面に出す</button>
+      </div>
+    </div>
+
+    <div class="field" data-challenge="only">
+      <label class="label" for="challenge-q">Question <span>asked after the text, its answers in a shuffled order</span></label>
+      <select id="challenge-q" class="text-input"></select>
+    </div>
+
+    <div class="field" id="hour-field" hidden>
+      <div class="label">Today’s print <span>the hour and the season it is drawn at</span></div>
       <div class="seg" role="group" aria-label="Hour">
         <button type="button" data-set="hour:dawn">Dawn 曙</button>
         <button type="button" data-set="hour:day">Day 帰帆</button>
         <button type="button" data-set="hour:dusk">Dusk 落雁</button>
         <button type="button" data-set="hour:night">Night 秋月</button>
+      </div>
+      <div class="seg" role="group" aria-label="Season">
+        <button type="button" data-set="season:now" id="season-now">As today</button>
+        <button type="button" data-set="season:spring">Spring 春</button>
+        <button type="button" data-set="season:summer">Summer 夏</button>
+        <button type="button" data-set="season:hanabi">Fireworks 花火</button>
+        <button type="button" data-set="season:autumn">Autumn 秋</button>
+        <button type="button" data-set="season:winter">Winter 冬</button>
+      </div>
+    </div>
+
+    <div class="field" data-challenge="only">
+      <div class="label">Scenery 景 <span>what the text stands on</span></div>
+      <div class="seg" role="group" aria-label="Scenery">
+        <button type="button" data-set="challengeScenery:bay">The bay 入江</button>
+        <button type="button" data-set="challengeScenery:wide">The long view 一望</button>
+        <button type="button" data-set="challengeScenery:lake">Mirror lake 逆さ富士</button>
+        <button type="button" data-set="challengeScenery:torii">Lake gate 鳥居</button>
+        <button type="button" data-set="challengeScenery:river">The river 川</button>
+        <button type="button" data-set="challengeScenery:station">The station 駅</button>
       </div>
     </div>
 
@@ -228,6 +299,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <button type="button" data-set="length:6">6</button>
         <button type="button" data-set="length:7">7</button>
         <button type="button" data-set="length:8">8</button>
+        <button type="button" data-set="length:9">9</button>
       </div>
     </div>
 
@@ -240,6 +312,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <button type="button" class="chip" data-set="feature:translation">Translation</button>
         <button type="button" class="chip" data-set="feature:listen">Dictation</button>
         <button type="button" class="chip" data-set="feature:composition">Composition</button>
+        <button type="button" class="chip" data-set="feature:conversation">Conversation</button>
         <button type="button" class="chip" data-set="feature:exam">Mock exams</button>
         <button type="button" class="chip" data-set="feature:analyser">Analyser</button>
         <button type="button" class="chip" data-set="feature:ask">Ask a question</button>
@@ -261,11 +334,38 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <div id="questions" class="chips" role="group" aria-label="Questions"></div>
     </div>
 
-    <div class="field" data-long="only">
+    <div class="field" data-words="only">
+      <div class="label">Look <span>nine words a short</span></div>
+      <div class="seg" role="group" aria-label="Word short look">
+        <button type="button" data-set="wordsStyle:card">Card <span lang="ja">札</span></button>
+        <button type="button" data-set="wordsStyle:quiz">Quiz <span lang="ja">挑</span></button>
+      </div>
+      <div class="seg" role="group" aria-label="Where the word short is posted">
+        <button type="button" data-set="fit:tiktok">For TikTok</button>
+        <button type="button" data-set="fit:instagram">For Instagram</button>
+        <button type="button" data-set="fit:normal">Normal</button>
+      </div>
+    </div>
+
+    <div class="field" data-feature="only">
+      <div class="label">Where it is posted <span>the feed’s margins around the screen</span></div>
+      <div class="seg" role="group" aria-label="Where the feature video is posted">
+        <button type="button" data-set="fit:tiktok">For TikTok</button>
+        <button type="button" data-set="fit:instagram">For Instagram</button>
+        <button type="button" data-set="fit:normal">Normal</button>
+      </div>
+    </div>
+
+    <div class="field" data-long="only" data-challenge="hide" data-words="hide" data-feature="hide">
       <div class="label">Format <span>YouTube, or a short for any feed</span></div>
       <div class="seg" role="group" aria-label="Video format">
         <button type="button" data-set="longFormat:long">16:9 video</button>
         <button type="button" data-set="longFormat:short">9:16 short, under a minute</button>
+      </div>
+      <div class="seg" role="group" aria-label="Where the short is posted" data-short="only" hidden>
+        <button type="button" data-set="fit:tiktok">For TikTok</button>
+        <button type="button" data-set="fit:instagram">For Instagram</button>
+        <button type="button" data-set="fit:normal">Normal</button>
       </div>
     </div>
     <div class="field">
@@ -313,6 +413,12 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       <label class="label" for="handle">On the last slide</label>
       <input id="handle" class="text-input" type="text" maxlength="40" placeholder="@yourhandle or a link (optional)">
     </div>
+
+    <details class="field tune" id="tune-field">
+      <summary class="label">Tune <span id="tune-count">defaults</span></summary>
+      <div id="tune" class="tune__groups"></div>
+      <button id="tune-reset" type="button" class="btn btn--quiet" hidden>Reset all</button>
+    </details>
   </aside>
 
   <section class="work" aria-label="Slides">
@@ -328,6 +434,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       </div>
       <div class="seg" role="group" aria-label="Margins" data-promo="hide" data-long="hide">
         <button type="button" data-set="fit:tiktok">For TikTok</button>
+        <button type="button" data-set="fit:instagram">For Instagram</button>
         <button type="button" data-set="fit:normal">Normal</button>
       </div>
       <div class="seg" role="group" aria-label="Ground" data-long="hide" data-funnel="hide">
@@ -341,17 +448,23 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
 
     <div class="export">
       <div class="export__text">
-        <div class="title-field">
+        <div class="seg" role="group" aria-label="The post, for" data-feeds="only">
+          <button type="button" data-set="feed:shorts">YouTube Shorts</button>
+          <button type="button" data-set="feed:reels">Instagram Reels</button>
+          <button type="button" data-set="feed:tiktok">TikTok</button>
+        </div>
+        <div class="title-field" data-caption="hide">
           <input id="title" type="text" maxlength="90" aria-label="Title to post with the slides" spellcheck="false">
           <span id="title-count" class="title-count" aria-hidden="true"></span>
         </div>
         <textarea id="caption" aria-label="Caption to post with the slides" spellcheck="false"></textarea>
-        <input id="tags" class="text-input" type="text" data-long="only" aria-label="Tags for the video" spellcheck="false">
+        <input id="tags" class="text-input" type="text" data-long="only" data-caption="hide" aria-label="Tags for the video" spellcheck="false">
         <p class="label" data-long="only">Make it <span>from frontend/, with the voice engine running</span></p>
         <pre id="command" class="command" data-long="only"></pre>
       </div>
       <div class="export__actions">
-        <button id="export-thumb" type="button" class="btn btn--metal" data-long="only">Download the thumbnail (.png)</button>
+        <button id="export-thumb" type="button" class="btn btn--metal" data-long="only" data-feature="hide">Download the thumbnail (.png)</button>
+        <button id="export-video" type="button" class="btn btn--metal" data-challenge="only">Download the video (.mp4)</button>
         <button id="copy-command" type="button" class="btn" data-long="only">Copy the command</button>
         <button id="export" type="button" class="btn btn--metal" data-long="hide" disabled>Download <span id="export-name"></span> (.zip)</button>
         <button id="export-short" type="button" class="btn btn--metal" data-long="hide" hidden>Download as a short video (.mp4, 9:16)</button>
@@ -359,9 +472,9 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
         <button id="export-clip" type="button" class="btn btn--metal" data-long="hide" hidden>Download the cover clip (.mp4, 7 s, with sound)</button>
         <button id="export-end-clip" type="button" class="btn btn--metal" data-promo="only" data-long="hide" hidden>Download the call-to-action clip (.mp4, 7 s, with sound)</button>
         <button id="export-story-clip" type="button" class="btn btn--metal" data-long="hide" hidden>Download the whole story (.mp4, with sound)</button>
-        <button id="copy-title" type="button" class="btn">Copy title</button>
-        <button id="copy" type="button" class="btn">Copy <span data-long="hide">caption</span><span data-long="only">description</span></button>
-        <button id="copy-tags" type="button" class="btn" data-long="only">Copy tags</button>
+        <button id="copy-title" type="button" class="btn" data-caption="hide">Copy title</button>
+        <button id="copy" type="button" class="btn">Copy <span data-long="hide">caption</span><span data-long="only" data-caption="hide">description</span><span data-long="only" data-caption="only">caption</span></button>
+        <button id="copy-tags" type="button" class="btn" data-long="only" data-caption="hide">Copy tags</button>
       </div>
       <p id="status" class="status" role="status"></p>
     </div>

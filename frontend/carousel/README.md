@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231, 232, 233, 234, 301)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–256, 301)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -20,8 +20,9 @@ Each source is one of the app's own lines, and wears its pigment:
 | 理解 | Comprehension | a comprehension passage | the passage page by page, then its questions and their answers |
 | 単語帳 | Theme words | a post of a theme of the app's theme decks (fruits, the body, jobs …): its pictured words, easiest first, cut evenly into posts of four to eight (Fruits (1), (2), (3)) | each word with a picture (an emoji, `content/emoji.json`), its reading over it, its romaji, its meaning, then all of them on one slide |
 | 似た字 | Lookalike kanji | one of 63 sets of kanji that look alike (大 太 犬 天 夫, 晴 清 情 精 請, `content/lookalikes.json`) | each kanji with its readings, its meaning, what sets it apart and a word it writes, then the set side by side, then "which kanji means this?" |
-| 返事 | Your reply | one of 36 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner |
+| 返事 | Your reply | one of the carousel's 57 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`), or, since plan 268, one of the 会話 station's 111 scenes of four to six turns, the ones the reply videos ask, listed beside them level by level and tagged `N5 · 会話` (search 会話 for them alone): `carousel_bank.with_scenes` writes them into `bank/dialogues.json` as the station has them, under ids of their own (`kaiwa-…`). A scene's key points are its three shortest whys, in the order said; asked in Classic it is drawn in Clarté, as Read it is (a Classic question cannot stand an N2 or N1 scene's lines in furigana that never goes under a caption) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner. A turn's line is set as large as the frame lets it (plan 240, `turnBlock`): every rung from the display's down is tried, the replies to choose from (never above the line) and the why sized into what is left, the smaller of the line and the replies (a third up) made as large as it goes, and a bubble keeps its romaji and its sense only while they cost under 3% and 10% of the size; the reply said is set at the line's size, and both bubbles stand wider and leaner (`snug`) |
 | 落とし穴 | Traps | a catalogue tour's trap: a sentence that reads one way to the eye and means another | the sentence and what it says (three readings, its translation never printed over it), the answer and why, the two forms side by side, watch out |
+| 短文 | Short sentences | one of 47 sentences of three words, a noun, a particle and a verb or adjective (頭が痛い。水を飲む。, `content/short.json`, plan 254) | drawn as Read it and nothing else, in kana (ふりがな gives the kanji with their furigana): the sentence, its words a card each with "Literally" under them where it reads otherwise, the answer with the sentence said politely, then the app |
 
 The four of plan 229m stop at the station the app teaches them on (a
 theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at
@@ -40,9 +41,9 @@ read:
 
 | Slide | Key | Shows |
 | --- | --- | --- |
-| The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it |
+| The hook | `ask` | the item and the question it asks (can you read it? what does it mean? which one is the odd one out?); a text, with the question asked of it under it; in Fiche, "The answer is on the next slide" at its foot (plan 245: it said "Save it for later", which sent the reader away before the answer) |
 | The answer | `answer` | the item answered as the app shows it: the analyser's line and its numbered points, the review card's word, a kanji's readings; a question's solution alone (its sentence completed, or the word asked about, the right answer large, why), never the question again nor its other choices |
-| The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, the button to the site |
+| The call to action | `cta` | "Want more like this?": the feature the item comes from in one card, its picture (a schema of what it does) over its name and what it does; two more features beside it, and the way to the site: its address in a browser's bar, a padlock before it and Go, the gate's gold, at its end, inside the safe area where the card above reaches past it, so Go is never under the feed's buttons (plan 245, `draw.address`, as high as the metal it replaced) |
 | The detail | `more` | the item further: word by word, in sentences, the words a kanji writes; or "Your turn" (`question-2`): the next question, turn or round, asked and left to the reader, answered on the next slide (`answer-2`); a sentence's: its words glossed, every one of them (`more`, `more-2`…) |
 | The key points | `keys` | the answer to "Your turn" where no slide was left for it, up to three points the catalogue, the deck or the explainers already say, a card each, marked with its kind (how it works, form, watch out, don't mix up, reading, in a word…), and "Save it for your next review" beside the save glyph, a short arrow down from it |
 
@@ -108,11 +109,12 @@ analyser, the question asked after an exercise and Today:
 | Translation | a translation, a "build it" | the sentence in the reader's language, the Japanese typed, the tutor's read |
 | Dictation | | headphones, the rōmaji typed and checked, on its line of three stops |
 | Composition | | the point given, a sentence with it, the tutor's read |
+| Conversation (plan 235) | a reply | the talk as the run draws it (`ConversationRun.jsx`, plan 223's bubbles): their line at the left on the 会話 line's rail, the reply picked at the right on the learner's gold, ticked, each with its voice; under it the three replies, the one picked sent up into the talk. The carousel's own exchange, its most compact one, every reply whole (a reply too long for the panel beside the arrow takes the board's width); any other carousel borrows the restaurant's opening |
 | Mock exams | a mock exam, a spelling quiz | the paper in its four sections, its clock, its score |
 | Analyser | | text, YouTube and photo into one analysed sentence |
 | Questions | | the exercise graded, a question (問) and its short answer (答): the bank's own line on the item's point, else one the bank teaches too |
 | Today | | the day's dial and its lines' arcs, the lines it deals from, and Depart |
-| Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a reply, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row, the kana lit in it and being written, stroke by stroke from its stroke data, the pencil's point where the last stroke has got to and its body leaning where it hides the least of the kana; its sound in a bubble over it, the Free tag under the row: drawn alike wherever the kana stands in its row |
+| Vocabulary, Kanji, Grammar, Kana | a word or a theme; a kanji or lookalikes; a lesson, a trap; a kana | the forgetting curve; a kanji stroke by stroke; rule, scene, quiz; the kana's row, the kana lit in it and being written, stroke by stroke from its stroke data, the pencil's point where the last stroke has got to and its body leaning where it hides the least of the kana; its sound in a bubble over it, the Free tag under the row: drawn alike wherever the kana stands in its row |
 
 The impostor is drawn in pictures in these looks, so its rounds there are
 dealt from a theme's pictured words alone (`impostorOf(…, pictured)`, the
@@ -156,6 +158,7 @@ the content for (the studio greys out the others).
 | 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
 | 表記 | Kanji spelling | the word and up to four words of its level that share a kanji with it, each heard in kana and asked how it is written (among spellings that are no word), then the sheet | a word with a kanji spelling to ask |
 | 仲間外れ | Find the impostor | three rounds of six words: five of the theme and one from another theme no word of it could be mistaken for (fruits and vegetables, birds and insects), each asked, then answered with every word's meaning and the impostor circled | a theme |
+| 一読 | Read it | four slides, always (plan 253, after a reading challenge the owner saw in a feed): the sentence alone, "Can you read it?" and the way to swipe; its words, a card each (the line's bar, the word with its furigana and romaji, what it says from the deck or bare); the answer, its romaji under each word, what it says in the line's colour, and a bonus card; then the app's call to action. Drawn in the look picked (Clarté where the studio says Classic), never on an ending. Since plan 254 it is set to be read at a glance: the question a headline, the sentence as large as it fits (on two lines where they set it a third larger) and, since plan 255, without its closing 。 (a question keeps its ？), the cards' words a display size, "Literally" under them where the sentence has a literal reading; and the bonus is the sentence said the other way, politely where it is plain, among friends where it is polite, its romaji and what changed in a line (頭が痛いです。 "Just add です to sound polite — at the doctor's, say."). The other way is `study/plain_polite.other_register`'s, the module Construire judges by, never written here; a sentence it reads one way only (a question, a clause inside) keeps the catalogue's own line on its point (the mistake to avoid where it is short, else what it means, never the breakdown's own line). Its caption never gives the answer away: the hook, the sentence as the post sets it, the question | a reading-bank sentence of seven words at most, or a short sentence (短文) |
 
 ## The last slide
 
@@ -282,15 +285,31 @@ Every slide is drawn from the app's own data, written once into
 | `kana.json` | each kana: romaji, strokes, its twin, words written with it | the kana sets |
 | `comprehension.json` | the passages, their questions and the words worth learning first | `content/comprehension/*.json` |
 | `themes.json` | each theme's name, its word for itself, its words easiest first, each with its picture where it has one | `content/theme_data.py`, `frontend/carousel/content/emoji.json`, the app's theme names |
+| `pictures.json` | the words a vocabulary short turns over on a picture, each a word's key and its file (plan 257); since plan 269 the 会話 scenes a reply short draws over pictures, each turn's two (`scenes`) | `frontend/carousel/content/pictures/pictures.json`, `frontend/carousel/content/pictures/scenes/scenes.json` |
 | `lookalikes.json` | each set's kanji: readings, meanings, what sets it apart, a deck word it writes | `frontend/carousel/content/lookalikes.json`, KANJIDIC2, the deck |
-| `dialogues.json` | each conversation's turns, every line split into words with its furigana and romaji (お and ご joined to their word) | `frontend/carousel/content/dialogues.json` |
+| `dialogues.json` | each conversation's turns, every line split into words with its furigana and romaji (お and ご joined to their word); since plan 268 the 会話 station's scenes after the carousel's own at each level, marked `kaiwa` | `frontend/carousel/content/dialogues.json`, `backend/content/conversation/` |
 | `traps.json` | every tour twist of kind "trap": its sentence, question, three readings, why, the pair, the point's "careful" step | `content/grammar/*.json` |
+| `short.json` | Read it's own sentences: each word's row, its card's gloss in both languages (the deck's sense the sentence picked, the particle's role written beside it), the sentence said politely and where | `frontend/carousel/content/short.json`, the deck, `study/plain_polite` |
+| `promo.json` | per practice feature and language, what the app's API answers in its video: the boot, and the feature's own routes, made by the backend's functions (plan 270) | `frontend/carousel/content/promo.json`, the reading, dictation and 会話 banks, the comprehension and exam seeds, `study/tutor_review` |
 | `index.json` | the figures the last slide quotes: sentences, points, words, kanji, kana, passages, themes, traps | all of the above |
 
 `frontend/carousel/content/` is the studio's own hand-written content:
 the picture for each theme word (keyed by the theme's English gloss), the
 lookalike sets with what tells each kanji apart, and the conversations,
 each turn's right reply first (the studio deals them in a seeded order).
+Since plan 254 it also holds Read it's short sentences (`short.json`):
+a noun, a particle and a verb or adjective, every word an N5 deck word,
+each with its translation, a literal reading where it reads otherwise
+(“Head is painful.”, never the translation again, its dropped subject
+in brackets so a plain form never reads as an order), the particle's role
+in this sentence and a situation where the polite version is said
+(`when`). A card's gloss is the deck's: `sense` picks which of the deck's
+glosses the sentence means (電車 is a “train”, not an “electric train”)
+and `carousel_bank` refuses a pick the deck does not say, a word outside
+N5, a sentence of any other shape and one `plain_polite` cannot make
+polite. The translation's tense is the situation's: a habit in the
+present (I drink water), what one is about to do as “I'll” (I'll open the
+window). An independent reviewer read the first batch before it shipped.
 They teach, so they are held as the catalogue is: a reply is wrong only
 where it cannot be right too (a particle, a tense, a counter, humble
 speech used of the other person), its why says what makes it wrong, and
@@ -305,7 +324,15 @@ committing it.
 A word wears the vocabulary line's pigment, a particle or an ending the
 grammar line's, a kanji the kanji line's: DESIGN.md's "one line, one
 colour", so a colour on a post means what it means in the app. The gold is
-the action (the metal), and nothing else.
+the action (the metal), and nothing else. Read it is the one exception,
+the owner's pick of five schemes drawn (plan 256): there each word wears
+an ink of its own, the stamp's vermilion first, then the vocabulary's
+indigo, the gate's gold, the grammar's green, the kanji's violet, the
+reading's teal and the comprehension's brown (`readInks`), and keeps it on
+every slide (its rule under the sentence, its card's bar, its romaji under
+the answer), so the eye follows a word from the question to what it
+means; the translation is set in the stamp's vermilion. The inks are the
+app's tokens on either ground, never a colour of its own.
 
 A question is one only understanding answers: its right answer is the
 catalogue's (a scene's, a quiz's, a comprehension question's), never a
@@ -449,11 +476,32 @@ on a post. At normal margins the guide reads "Show the margins" and
 tints them alone, never TikTok's photo view, and an exported file's name
 ends in `-normal`. A format keeps its ratio's id at either margin, so
 whatever a slide reads from the ratio (a heading's size, the words to a
-slide) holds. A promo story, a word echo and a short stay at TikTok's
-margins: they are made for a feed's video view. Drawn over a sample of
+slide) holds. A promo story and a word echo stay at TikTok's margins:
+they are made for a feed's video view. Drawn over a sample of
 every source, type and look in both ratios, what passes the normal box
 is what passes TikTok's (the Fiche band, a glyph's top), and a card's
 shadow at the foot where the wider box lets the card reach it.
+
+A third, **For Instagram** (plan 239), because Instagram's feed crops a
+9:16 post: it shows a reel's (and a 9:16 carousel's) middle 4:5, 1080 ×
+1350 with 285 cut at the top and the foot, and on the web lays the
+author's header (their picture, name, the reel's progress and sound)
+over that crop's top ~110px and its sound switch at the crop's corner.
+A short laid out for TikTok put its masthead and its page counter under
+that header. Full screen, a reel's caption stands over the foot from
+y ~1450 and its buttons down the right. So a 9:16 slide for Instagram
+keeps to 400 … 1450, 144 a side: inside the crop, under its header,
+above the caption, clear of the buttons and of the profile grid's 3:4.
+A 4:5 post is shown whole, nothing over it but a counter that fades, so
+its Instagram margins are the normal ones. The guide reads "Show
+Instagram's crop" and darkens what the crop cuts, with the header and
+the sound switch (`INSTAGRAM_HUD`); an exported file ends in
+`-instagram`. A short follows the choice too: a carousel's short is
+laid out at its margins (`carouselShort`), and a long video's short,
+whose parts stand at fixed places, is drawn for TikTok's box and moved
+whole into the one chosen, scaled to fit and centred (`drawTall`; the
+studio's video panel has the same choice and its command carries
+`--fit`).
 
 Both keep clear of what TikTok lays over a photo post, as measured on a
 phone (plan 232): a 4:5 post is shown at full width, its top ~70px above
@@ -465,7 +513,11 @@ full width with its top ~110px under the status bar: the status and
 search bars cover its first ~330px and the page counter stands at the
 top right, the column of buttons stands from x ~920 below y ~1100, the
 author's picture at the bottom left and the caption from y ~1710. Its
-safe box is 350 at the top, 430 at the foot and 184 a side, and a card
+safe box is 350 at the top, 330 at the foot and 184 a side. The foot was
+430 until plan 240 measured it again on a posted conversation: the
+caption's panel stands from y ~1660 and the page dots at y ~1600-1625,
+centred, so a slide reaches down to 1590 rather than leave 170px bare
+over the dots. A card
 reaches past its sides by half what it does on a post (16 against 32),
 so it stops clear of the buttons.
 A change to the safe box is checked by drawing every slide of every
@@ -515,6 +567,32 @@ comprehension's clock, passage card, question card and lettered options.
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
 | Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the sprint run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
+**Every frame stands on the print (plan 271, the owner's pick B of four
+directions drawn).** Not only Today: each frame is drawn over Today's
+print of the studio's hour, its sky washed toward the paper down to
+where the frame's words end (`wash`, fading out over 160px under them),
+so the landscape shows below the words. A frame's title is set in the
+serif, centred (`title`), its body centred under it (`body`), and each
+part (a card, a question, a choice row, a panel, a point card) is lifted
+off the print on its own shadow (`lift`). A middle dot keeps to the end of
+its line, never opens the next. Without a print (node's tests, or a print
+that did not load) a frame stands on the ground alone, its block centred
+as before. Reading comprehension's text and roll (plan 301) lay
+themselves out rather than in a block, so they open their page at once
+(`pageTo`), the sky washed down to the foot of their card; the duels'
+beats (plan 281) stand on the ground as the duel's stage does, and only
+the gate they end on is the print's sun.
+
+**The ending is the print's sun (B2, the owner's pick of two drawn).**
+Every story's last frame is the hour's sun (or moon) as Today draws it,
+ringed by the four lines' arcs (`app.printDial` with no count), the
+mark 辻 in the disc, the ask in the washed sky under it, its note, the
+gate at the foot; no masthead, the page's count at the top right. The
+pass story's last frame draws the sun smaller (0.62 of Today's dial) for
+its three promises. A long ask takes its room from the sun, never from
+the gate: the sun is drawn smaller until the words end above the gate's
+band. The cover and inside frames have no sun.
+
 **The parts are measured, not imagined.** Every figure in `app.js` is a
 CSS pixel of the running app on a 400px phone (the review card, the
 rating keys, the choice rows, the pass, the Depart button, the
@@ -524,21 +602,36 @@ colours come through `palette` and `APP_INKS`, which
 `src/carousel.test.js` holds to `index.css`.
 
 **Today's print is the app's own file.** `app.loadPrint` reads
-`public/today/print/<rev>/<hour>-phone.json`, its grain and its paper,
+`public/today/print/<rev>/<print>-phone.json`, its grain and its paper,
 and draws the layers still, as the app draws them with motion reduced
 (index.css's `.tpr-` rules and its reduced-motion block go into each
 layer): the train halfway across, the clouds at rest. The words on a Today
 frame stand on a plate of the title slip's washi, framed as the slip is,
 at the print's foot: the sky, the mountain and the birds behind them
 leave no ground to read on at every hour. The studio's
-"Today's print" picks the hour (曙 dawn, 帰帆 day, 落雁 dusk, 秋月 night).
+"Today's print" picks the hour (曙 dawn, 帰帆 day, 落雁 dusk, 秋月 night)
+and, since the app's print has its seasons (main's plan 261), the season
+(plan 267): "As today", the default, is the print the app's gate shows on
+the day it is drawn (`domain/printHour`'s `printName`: the season by the
+month, the summer's two crape myrtles a day each, August's night the
+fireworks); or spring, summer, fireworks (the summer, its night August's
+花火), autumn or winter, the app's print of that season at the hour
+(`app.printOf`). A reading challenge's command names a chosen season
+(`--season winter`) and, without one, is drawn on the day it is rendered.
+Every season at every hour was drawn under the challenge's three looks
+(the scroll, the read-along, the way to the app) and reads as it did.
 So the studio needs `public/today/print/`, `src/index.css` and the
-print's `print.json` beside it when it is served or published.
+print's `print.json` beside it when it is served or published. A reading
+challenge may stand on another scenery (plan 309, under "The reading
+challenges"): `loadPrint`'s `scenery` reads the app's desk print for the
+long view and the carousel's own prints from `carousel/prints/`, the
+grain and the paper still the app's.
 
 **The cover moves (a clip).** Each story's first frame is also a
 seven-second clip at thirty frames (`promo.CLIP`), drawn by the same
 code as the still at each moment: its parts come in as the app brings
-its own in (`tpr-rise`), the print moves as the print moves (its layers
+its own in (`tpr-rise`), the print moves as the print moves, every
+story's since plan 271 (`clip.print`; its layers
 held at the clip's moment with index.css's own keyframes, the train on
 its run, the sun's glow breathing), the card turns as a tap turns it,
 the sentence is typed and comes back cut, the four readings come in one
@@ -548,14 +641,21 @@ mp4-muxer from jsDelivr): Chrome, Edge and Safari can, Firefox cannot
 yet, and the studio says so.
 
 **So does the call to action.** Each story's last frame is a clip too
-(`promo.clips.end`; `clips.cover` is the cover's, also `clip`): the mark,
-the ask and its note come in one after another (on the pass story the
-three promises, one at a time), then the Depart button rises in and
-waits as the app's gate waits (`app.departButton` given `ready`): its
-halo breathes (`btn-gate-breathe`), two ripples leave the reader 1.1s
-apart (`btn-gate-rip`) and, four seconds untaken, the reader steps
-toward the way on twice (`btn-gate-nudge`), inside the seven seconds
-(`promo.END`). "Download the call-to-action clip" encodes it as the
+(`promo.clips.end`; `clips.cover` is the cover's, also `clip`): on the
+print (plan 271) the sun rises in, its ring is drawn round from the top
+(`printDial`'s `sweep`, over `END.ring`), the mark settles into the disc
+as the sky pales behind the words, its glow breathing over the seven
+seconds; then the ask and its note come in one after another (on the
+pass story the three promises, one at a time), then the Depart button rises in and
+waits as the app's gate waits (`app.departButton` given `ready`): four
+seconds untaken, the reader steps toward the way on twice
+(`btn-gate-nudge`), inside the seven seconds (`promo.END`). The button is
+the app's gate button as `GateButton` draws it since its redraw (plan
+225): the gold pill lit from its crest, the sumi reader holding the card
+scanner's mark in the lamp's gold, the hairline, the word centred; its
+golds are `APP_INKS`, held to `index.css`. It ends the stories, the
+feature videos (plan 270), the long videos and the funnel's pictures,
+so when the app redraws it, it is redrawn here once. "Download the call-to-action clip" encodes it as the
 cover's is encoded. A part drawn inside a fading one multiplies its own
 shade into the fade (`globalAlpha *=`), never sets it, or it shows
 before the part around it.
@@ -637,6 +737,152 @@ the stages, "due", Depart, a test holds them to `locales/`). It says
 "start free", the kana line free for good, no ads and no trackers; it
 never prices a mode nor says "early access", and a test fails if it does.
 
+## The feature videos (plan 270)
+
+実践 shows the app itself doing what the Practice tab's features do: one
+9:16 video per feature, in the tab's order (読書 reading, 理解
+comprehension, 書取 dictation, 翻訳 translation, 作文 composition, 会話
+conversation, 模試 the mock exam: its three groups since plan 290). It is the owner's pick of three drawn (the
+real screen, over a play-along and a pitch). Nothing in these videos is
+drawn to look like the app. **The app is recorded as it runs**
+(`long/record.mjs`):
+
+- Vite serves `frontend/` in the render's own process.
+- A phone-sized browser (400 CSS px at 4 since plan 273, so a shot is
+  1600 × 3440, sharp under the camera's zoom) signs in as a learner who
+  has boarded, on the free plan.
+- Each step of the feature's script is done as a learner does it: the
+  gate's plate tapped, the level, the run, the answer typed or picked.
+  A `scroll` step brings an element into view as a thumb would.
+- A shot is taken where the video needs one. The box of what it shows,
+  the box of what a finger taps and how far the page is scrolled are
+  read off the page.
+- A clip that moves by itself (comprehension's roll, plan 273) is filmed
+  frame by frame (`play` with `step`): the page's animations are held
+  once it is tapped and stepped 1/30 s at a time, a shot at each, so the
+  text glides at the shot's full size however long a shot takes.
+
+**Its API answers are the backend's own.** `bank/promo.json`, written by
+`python -m scripts.carousel_bank --only promo.json`, is what each route
+would answer, made by the functions the route calls on the banks' own
+content:
+
+| Feature | Source | How it is made |
+| --- | --- | --- |
+| 読書 | a reading-bank row | `_finish_phrase`'s fields, measured by `measure_forms` |
+| 理解 | an N5 seed | `comprehension_seed.render`, dealt by `balance_answers`, each sentence analysed |
+| 翻訳, 作文 | tutor replies | `tutor_review` |
+| 書取 | a line of the dictation bank | `dictation.measure` |
+| 模試 | the catalogue's first seed paper per exam id | `score_attempt` |
+| 会話 | a 会話 scene | `conversation.scenario_payload` |
+| 作文's lesson | the point | `lesson_payload`, `tour_payload`, as `GET /api/grammar/point` serves them |
+
+The boot is the profile, the free plan's credits from
+`credits._summary_of`, and Today, so no boarding or guide stands over the
+screen. Only a model's words are written by hand: the tutor's raw replies
+for translation and composition, and since plan 273 the answer Ask gives
+to the one question a video asks (`ask`), written as `routes/ask`'s
+prompt asks: three short sentences at most, the answer first, a word in
+kanji quoted with its reading after it, 「花（はな）」. They are in
+`content/promo.json`, with each feature's sentence, the answer typed,
+the slips the video makes and a question it types rather than taps
+(`asked`).
+`backend/tests/test_carousel_bank.py` holds the file to what `promo()`
+writes. It also checks that each exercise ends as its script says: the
+reading right, the dictation one slip short, the comprehension one
+question wrong, the exam's slips its own and the conversation's picks
+the right replies.
+
+**What each shows (plan 273).** Past the exercise, the parts of a
+feature a learner would not find on a first run:
+
+| Feature | After the answer |
+| --- | --- |
+| 読書, 翻訳, 書取 | the rating, the sentence's breakdown read down, then Ask: an offered question tapped (reading's point, translation's 〜てください), or dictation's own typed, "Why に and not が?", the slip it just made |
+| 理解 | before the questions, the clock and the roll, sped up and stopped; after, the score, the miss opened, Ask's "Where does the text say it?", then the whole text's breakdown on the missed sentence, and since plan 274 a word of it and a point of it opened in the dictionary (`content/promo.json`'s `dictionary`, answered by `routes/dictionary.get_dictionary`; a mock key may name query parameters, `GET /api/dictionary?category=vocab`) |
+| 作文 | before writing, the point's lesson, its sheet rising over the card and going |
+| 模試 | the station's four papers, a question flagged, the answer sheet, the score by part, a miss opened again |
+| 会話 | the line's translation shown, a wrong reply struck with why, the scene's score |
+
+**A video is beats** (`feature.js`, `FEATURES[id]`):
+
+- **The screen, full.** Since plan 272 (the owner's pick B of three
+  drawn: a phone on the print, the app full screen, cards on the print)
+  the screen fills the video as a phone shows it, at its own pixels
+  (the 1080-wide shot at 1:1), as a screen recording does in the feed.
+- **The caption, on a slip.** Each beat's caption stands on a slip of
+  the print's washi (`--tpr-washi`) at the foot of the feed's safe box,
+  the feature's line its edge, lifted off the screen on its shadow: the
+  caption alone, the serif sentence, two lines at most (the owner took
+  the kicker off it). The slip comes in with the first beat and stays;
+  its words change at each. It is as tall as the plan's tallest caption,
+  so it never moves, a shorter one standing in its middle. A caption says
+  what the screen shows and the app's own description says (`APP`, held
+  to the locales). It carries no figure, no price and no promise.
+- **Parts.** Each beat is made of parts: a shot held, or a typed or
+  played run of them.
+- **The camera (plan 273).** The app is filmed as a camera films a phone
+  held still: it stays where it is until a part gives it something new
+  to look at, then goes there in one eased move, and every move has a
+  point. A camera is a point of the page and a zoom (`camFor`): a shot
+  stands at its own scroll on the page, so the app scrolling between two
+  shots is the camera going down it. Its kinds:
+  - `auto` (the default) frames what the part shows whole, between the
+    feed's head and the slip, coming in on it where it is small (up to
+    ×1.6), the finger's target always in view;
+  - `wide` keeps the screen's width; a number is that zoom;
+  - `read` frames a text from its top and reads it down to its last
+    line at a skimming pace (520 px a second, 3.2 s at most), once the
+    camera is there; a part taller than the view is read without asking.
+
+  What is already in view keeps the camera still, and so does a new
+  state of the box the part before showed (a choice picked). A move takes
+  0.5 to 1.1 s by the way it goes (`moveTime`), eased in and out, and a
+  finger waits for the camera to arrive. The screen never leaves a hole:
+  its sides stay beyond the video's, its head and foot beyond the view,
+  where its own colour goes on. `src/carousel.test.js` holds every move
+  to a small step from frame to frame.
+- **Transitions.** A part's `enter`: by default the new state cross-fades
+  through the camera as it moves; `push` slides a new page in from the
+  right over the one it leaves, which goes a third of the way left and
+  darkens, and `back` slides it away again; `rise` brings a sheet up over
+  the screen and `sink` takes it down. The camera pans only over what the
+  shot it goes to shows: from a part of the page it does not (a sentence
+  far down a long breakdown), it dissolves there instead. A tap that opens something in
+  place (`click` with `keep`) scrolls the page by what it moved, so a
+  sentence opened in an accordion stays under the finger. The video's
+  end dissolves into the gate.
+- **Taps.** A finger shows before each tap and a ring follows it. A
+  `click` sound plays, and a softer one on each typed key.
+- **Voices.** The engine's voices speak where the app speaks: the clip
+  dictation plays, and in a conversation the clerk's line (`hear`, as it
+  appears) and the reply picked (`voice`, from the tap). Nothing taps or
+  moves on over a line still being said.
+- **The ending.** The video ends on the promo stories' gate
+  (`promo.gateClip`), its ask in the feature's words, on the print's
+  sun since plan 271: Today's print of the day (`--hour` for another;
+  the studio's hour, written into its command), scored on the
+  stories' clock (`promo.END`).
+
+Its page and its posts for Shorts, Reels and TikTok name the feature and
+quote the app's three lines about it. They credit VOICEVOX Nemo only
+where a voice speaks.
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --feature dictation --lang fr
+node carousel/long/render.mjs --feature exam --lang en --fit instagram
+node carousel/long/render.mjs --feature reading --stills 1,5,9   # frames, no video
+```
+
+The studio lists the seven under 実践 with each video's page, posts and
+command. Its preview is the gate the video ends on: the rest is recorded
+where the command runs. When a screen of the app changes, its script's
+selectors are what to check (`plate`, `stop`, `.stage__foot`, the run's
+own classes, Ask's offers by their words). A step that finds nothing to tap says so in the render's
+log, and an API the app asks for and the bank does not answer gets `{}`,
+which is logged too.
+
 ## The word echo (plan 232)
 
 A ten-second 9:16 clip that says one word over and over (`echo.js`,
@@ -669,7 +915,11 @@ owner's pick by ear from three takes, `ENERGY` in
 touch higher and louder, through `voice_engine.say`'s `tone`; the app's
 own voices take none). `voices/index.json` names each clip, the voice's
 revision, which a test holds equal to the app's `VOICE_REV`, and the
-energy; a clip's name carries the energy, so a new take is a new file. Its licence's one condition is the credit "VOICEVOX Nemo",
+energy; a clip's name carries the energy, so a new take is a new file.
+Published as a claude.ai artifact, which holds at most 511 files, the
+clips travel in one file instead (plan 248): the index's `pack` names
+it, and it holds each clip as a data URI under its name; the studio
+reads either. Its licence's one condition is the credit "VOICEVOX Nemo",
 printed on the card's foot and in the caption; it also forbids using
 the audio for machine learning, so never publish the clips as a
 dataset. After a change of voice or of the themes:
@@ -685,16 +935,33 @@ length and when each saying starts): the readings land on its sayings
 and it plays whole under them. The sayings are found by ear or from the
 sound's loudness, each voiced rise a saying (plan 232's いたい clip).
 
-"Download the clip" encodes the ten seconds as the promo clips are
-encoded (H.264, the voice as AAC or Opus), the voice mixed by
+**Then the word is kept (plan 246).** The owner picked this ending from
+four drawn (the promo stories' board, the theme's words listed, the
+review's rating bar): `ECHO.after` (0.35s) after the last saying has
+been said (or the recording has played whole), the readings fall back
+under the ground, the card rises to the head of the frame at five
+sixths of its size, and under it come "Want to keep it?", then its line
+("Tsuji asks you again just before you'd forget it, with the 46 other
+words of the theme": the count is the theme deck's, from
+`themes.json`), then the site's address in its bar (`draw.address`, the
+call to action's since plan 245), each a little after the one before
+(`KEEP`). The ask lands on the board's flap and the address with the
+platform's chime, the app's own sounds. It holds `ECHO.keep` (3.5s), so
+a clip runs about thirteen and a half seconds; the studio shows the
+ending as the echo's second frame (`keep`), which is also the clip's
+last.
+
+"Download the clip" encodes the sayings and the ending as the promo
+clips are encoded (H.264, the sound as AAC or Opus), the voice mixed by
 `sound.clipAudio`, which takes a recorded clip (`src`) beside the app's
 own sounds (`key`).
 
 ## The long videos (plan 233)
 
 Ten-minute 16:9 videos for YouTube (`long.js`, made by
-`long/render.mjs`), four kinds: a vocabulary drill, a kanji drill, one
-grammar point explained whole, and a quiz. The owner picked the look
+`long/render.mjs`), five kinds: a vocabulary drill, a kanji drill, one
+grammar point explained whole, a quiz, and (plan 249) conversations to
+answer. The owner picked the look
 from two drawn directions, "platform board": the sumi ground, the app's
 card in the middle, the line of stations along the foot, one station a
 word, a kanji, a section or a question, the line's pigment the kind's
@@ -718,6 +985,88 @@ the screen.
   ring, then the answer, why, and its sentence said; a kanji asked in a
   word only in a word of the level or easier. A score check every ten,
   40 a part.
+
+- **Reply** (返事, plans 249, 249b, 250): the 会話 station's own
+  scenes (`backend/content/conversation`, exported as
+  `bank/conversation.json` by `scripts/carousel_bank.py`), four to
+  seven turns a scene (the first 31 six each since plan 250, the
+  bank's later scenes as they were written), the right reply first in the file and dealt in
+  the carousel's own order. Each line is cut into words as the studio's
+  conversations are, its furigana taken from the bank's hand-written
+  kana (the reading the app teaches: 何時 なんじ, 十分 じゅっぷん, never
+  the cut's guess), and the export fails on a line that would read
+  otherwise. Two scenes to a 16:9 video; one to a short, asked whole,
+  and the studio's list holds a short a scene when the 9:16 format is
+  picked. A short past Shorts' three minutes (N1's six long turns) gives
+  each question a second less on its timer, four at the least
+  (`fitShort`), and a line long in both languages, theirs or your
+  reply, takes a last layout, what it means on a fifth line, the
+  bubbles drawn closer. Drawn as the thread the owner picked from three
+  (plan 249b): the carousel's Fiche look on washi, the 会話 line's band
+  carrying the scene's title and the question's number. A scene's card
+  is the chat's head (a disc, the place, said, the scene's title, who
+  speaks to you), under "What would you answer?" where it opens a
+  short, which has no title card before it (its thumbnail is taken
+  there, `stillAt`). Then each turn: their line in a bubble on the
+  left, said by speaker A, its words ruled in their line's colour, its
+  readings, its romaji at N5 and N4, and what it means; your three
+  replies down the right as dashed drafts, numbered; a timer of seven
+  seconds on a ring in the band, a tick a second (`reply.count` in the
+  Tune panel); the right one sent (green, ticked) and said by speaker
+  B, the others fading; then their line as a reminder, yours in a
+  bubble of its own with what it means, and the bank's note of why it
+  is right (under the thread standing, beside it wide). The next
+  question scrolls the thread up, the foot of your last reply left
+  showing under the band. Japanese is never set under 34 px
+  (`READABLE`): the furigana keep their least size, and a word under
+  them would read smaller than its reading. So short of room the foot
+  goes first, then the replies widen, then every size steps down to
+  that floor, then a long line is set lean (a tighter bubble, no name
+  over it), a beginner's replies lose their romaji, and at N2 and N1
+  the replies, then their line, lose their furigana before anything
+  shrinks further; a test holds every question of every level, in
+  both formats and both languages, inside the safe area and whole. It
+  ends asking the viewer's score (? / 6), then on the carousel's own
+  call to action for the conversation station (`funnel.drawCta`).
+  Speaker A is the app's woman's voice and B its man's, as the 会話
+  station and the tours set them.
+
+- **A pictured scene** (plan 269, the owner's pick of four drawn: a
+  visual novel, over a comic strip, a film and a frosted story): a
+  scene can carry the owner's illustrations, two a turn, the one shown
+  while it is asked and the one shown once it is answered
+  (`content/pictures/scenes/`: the pictures, and `scenes.json`, a
+  scene's id and its turns' `ask` and `answer` files). Its short draws
+  each turn as a game's screen, on the dark ground: the question's
+  picture across the frame under the band (960 px tall, a square-ish
+  picture whole, its upper part kept where it is cut), its foot falling
+  into the ground; their line in a box at the bottom of the safe area,
+  named on a plate in the 会話 line's colour; while you choose, the
+  three replies a menu of dark bars over the picture, numbered, the
+  right one sent in green. The answer's picture comes over the asked
+  one only once your reply is said (`replyAt`: before, it would
+  answer), then your line takes the box, its plate yours in green, and
+  why stands over it. The next turn's picture comes up through the last
+  answer's. The scene's card, the score and the call to action are
+  drawn as before, and so is the 16:9 video, which was not drawn with
+  pictures. `carousel_bank.py` checks each id is a scene of the 会話 bank,
+  every turn pictured asked and answered and every file there, and
+  writes them into `bank/pictures.json` (`scenes`); the studio and
+  `render.mjs` load them before the first frame (`loadScenePictures`),
+  and a turn whose two pictures have not both come is drawn as the
+  thread. A test draws every frame of a pictured short in both
+  languages inside the safe area, the answer's picture never before
+  your reply. A picture made for it asks for a square (1024×1024), no
+  text in it, the faces in its upper half: the bottom is where the box
+  stands. After adding a scene's pictures, run
+  `python -m scripts.carousel_bank` (backend) and commit both.
+
+**No music (plan 273).** No video carries music, the owner's call: a
+long video, a short, a reading challenge, a word short and a feature
+video are their voices and the app's sounds, and nothing is credited
+for music. The studio has no music switch, track or level, the render
+no `--music` (an old command's is noted and ignored), and the mix no bed
+(`long_video_audio mix`).
 
 **Pick per video.** A level's `--part` walks the deck in its order (a
 quiz's part is a seeded deal), and two parts never share an item;
@@ -757,8 +1106,7 @@ is tuned to be said (`long_video_audio.spoken`, `TUNE`): let go after
 level decaying, then brought to the engine's level; the timeline is laid on
 those lengths, so a reveal lands on its voice. It then mixes the lines
 with the app's sounds (`sound.eventAudio`, the shipped recipes at the
-app's level) and a bed of music it plays itself, soft chords and a slow
-pluck, nothing recorded, stepping back while a line is said. The voice's
+app's level), and nothing else: no video carries music (plan 273). The voice's
 credit "VOICEVOX Nemo" ends every description; never publish the clips
 or a video's sound as a dataset.
 
@@ -812,7 +1160,7 @@ The studio encodes it at once, with the app's sounds and no voice
 ("Download as a short video", Chrome, Edge or Safari); "Copy the
 command: the short, voiced" gives the render command with the carousel
 as a recipe (`--carousel`, `short.recipeOf`), which makes it with the
-voice and the music bed and writes its page (the carousel's own title,
+voice and writes its page (the carousel's own title,
 its caption, `#shorts`).
 
 ```bash
@@ -820,6 +1168,285 @@ cd frontend
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --format short --kind kanji --level N5
 node carousel/long/render.mjs --carousel <recipe from the studio>
 ```
+
+**A post for each feed (plan 251).** A 9:16 video (a long video's
+short, a carousel's, a reading challenge) is posted to three feeds, and
+its page carries a post for each (`feeds.feedPosts`): YouTube Shorts,
+the title, description and tags above; Instagram Reels and TikTok, one
+caption each. A caption opens on the hook, what a feed shows before its
+"more"; a reply short names its scene under it. It asks for what the
+feed rewards (a save on Instagram, a comment on TikTok), says the app
+with "Link in bio." since a link in a caption is not one, keeps every
+credit the description has (VOICEVOX Nemo, the kana's voice), and
+ends on five hashtags at most, never `#shorts`: Instagram has kept five
+since December 2025, and TikTok's reach falls past about as many. The
+render's text file holds the three, one under the other; the studio
+shows the one picked under the video ("YouTube Shorts", "Instagram
+Reels", "TikTok"), where Reels and TikTok take the caption alone. A
+16:9 video's page stays YouTube's.
+
+## Vocabulary shorts (plan 252)
+
+A level's deck, or a theme's words, nine at a time as a 9:16 short
+(`words.js`, the studio's source 語彙 "Word shorts"), in the two looks
+the owner picked from three drawn:
+
+- **Card** (`card`, 札): washi and the vocabulary line, as the reply
+  shorts. The band names the level (or the theme) with a ring that
+  counts the seconds to read the word; nine stops under it, one a word.
+  The word stands on a card, asked first ("How do you read it?"), then
+  turned over: its furigana, its romaji, its meaning (its first three
+  parts, `cardSense`), its reading said; then its sentence under the
+  card, the word underlined, said too. The first word opens on the hook
+  ("Can you read these 9 words?").
+- **Quiz** (`quiz`, 挑): sumi and gold, as the Défi look. The word, four
+  meanings against a gold fuse that burns a tick a second; at the answer
+  the wrong ones go, the right one rises with a tick, the reading is said
+  and the sentence comes under it. A score asked for at the end ("? / 9").
+
+A wrong meaning is another word's first sense, cut short as the right
+one is (`shortSense`), that shares no word with any sense of the word
+wherever the banks write it (a theme's 地下鉄 is "subway", the deck's
+"underground train") nor with each other (`quizzes.overlaps`), a verb's
+among verbs, and near the right one's length (`wrongMeanings`): a test
+holds the right one to the longest less than a third of the time. A
+theme's words are asked among the theme's own (a cat among a dog and a
+horse), never its name. Both end on the carousel's call to action for
+the words station, in their look. A theme's words carry their picture.
+A short runs past the minute (about 1:15 as a card, 1:40 as a quiz) and
+under Shorts' three (`LIMIT`); the Tune panel's "Word short" sets its
+beats. Every frame is fitted to the feed's safe area, the word a size
+down before anything is cut, and its page is the three feeds' (plan 251).
+The long videos' 9:16 list no longer carries words or themes: they are
+these.
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words N5:3 --style quiz
+node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr
+```
+
+### A word's picture (plan 257)
+
+A word can carry an illustration of its own (`content/pictures/`: the
+picture, and `pictures.json`, the word's key `written::kana` and its
+file). On the card, a word that has one turns over at the reveal, on
+the card-flip the short already plays, onto its back as the owner's
+sheet draws a word (the owner's pick of three drawn): the picture across
+the card's top, the word with a rule and its reading and romaji beside
+it, its meaning under them. The picture is as large as the room allows
+while the word is said, and gives way as its sentence comes, the
+sentence a size down before the picture goes under half the card's
+width; a picture whose shape is not the box's stands whole over itself
+blurred and washed with the paper, never cut to fit. A word without
+one, and the quiz, are drawn as before.
+
+The pictures are the owner's, drawn for the words they name; one of a
+square-ish shape gives the largest picture. `carousel_bank.py` checks
+each key is a deck or theme word and its file is there, and writes
+`bank/pictures.json`; a test holds the same and draws every frame of a
+pictured short inside the safe area. The studio and `render.mjs` load
+the pictures before the first frame (`loadPictures`): a picture that
+does not come leaves its card as it was. After adding pictures, run
+`python -m scripts.carousel_bank` (backend) and commit both.
+
+## The reading challenges (plan 247)
+
+A comprehension text (the 231 of `comprehension.json`: thirty a level, sixty
+at N4 and eighty-one at N5) read
+as a 9:16 video (`challenge.js`, the source 速読 "Reading challenge"),
+over Today's print of the hour, in one of two ways:
+
+- **Credits scroll** (`scroll`, 流れ; built to the owner's reference, a
+  reading challenge seen on TikTok, in place of the falling lines first
+  drawn and a perspective crawl after them): the whole text goes slowly
+  up the screen as a film's credits do, flat and at one size, in the
+  app's ink on the print of the hour washed with its paper (`WASH`,
+  heavier at dusk so the page stays paper; at night the print is
+  brightened first, `LIFT`, and washed lighter, so the moonlit scene
+  shows under a pale blue page: plan 261, the owner's pick of three
+  drawn, made lighter still), on short airy
+  lines broken between phrases, each sentence on a line of its own
+  (`SCROLL`). It comes in with its first line at the reading line and
+  moves at one speed, worked out from its own laid-out length, so the
+  whole text passes that line at the pace a learner of its level reads
+  (`CPM`: 130 characters a minute at N5 up to 230 at N1, two notches
+  under the first pace, which the owner found quick), after a moment
+  to come in (`CH.into`) and before the last line's read (`CH.out`); the
+  counter at the head says which sentence is there. The reference also
+  leaves a space between phrases; the bank's words are not cut surely
+  enough for that (としょかん written in kana comes out as はと・しょ・か・ん),
+  so the scroll leaves none.
+
+  It glides: text written straight on a frame is set on whole pixels, so
+  a line climbing under a pixel a frame stood still, then jumped, and
+  shook. The scroll writes its text once on a strip of its own and lays
+  the strip between pixels each frame, at 60 frames a second
+  (`tl.fps`; read along keeps 30), and the render passes its frames to
+  the encoder near-lossless, so their edges do not shimmer as they climb.
+- **Read along** (`along`, 声): the text stands on one panel while the
+  app's reader says it (slowed at N5 and N4, as a card's slow line), each
+  word gold once said and underlined while it is said; the panel turns
+  to the next sentence when it would run past its foot. A sentence the
+  panel cannot hold whole at the title's size is set smaller as a whole,
+  as large as the panel holds it (`alongLayout`), never left off it while
+  it is said (n4-21's fourth, once the analyser read 十一時 as one word). The words are
+  lit on the engine's own syllables (`long_video_audio.mora_marks`, from
+  its audio query, within a frame of the clip it makes) wherever their
+  count is the text's, else in proportion to each word's.
+
+Either way it opens on the hook ("Can you read this?", the title, the
+level, its sentences and its reading time) and goes straight into the
+text (the three of its words first shown before it are gone, at the
+owner's word); it ends on one of
+its questions (the one about what the text says, never its grammar),
+five seconds counted by the app's clicks and "Answer in the comments",
+its answer, then the way to the app (plan 266, the owner's pick of
+the drafts drawn): "Read it at your pace in the app" over the app's own
+reader (`RollingPassage`, plan 258) as the comprehension draws it, the
+text just read rolling up its card a sentence lit at its middle, its
+controls (pause, − speed +, ふ) and its foot (the level, "Reading
+comprehension"). At 2.2 s a tap on − slows it from the app's 3 char/s to
+2, at 3.2 s a tap on ふ shows its furigana, each heard as the app's
+button tick; under the card the run's three stops, Read, its N questions
+and Breakdown (the app's own words, `showBreakdown`; Japanese names for
+them were drawn and taken out at the owner's word), lit by the reader's
+dot from 4.2 s; and the site's address in its bar (plan 245). The card
+lasts 6.5 s (`challenge.cta`); tuned shorter, its beats (`CTA`) close up
+in proportion. It promises what the app does: the roll is a chip on the
+reading screen, its speeds 1 to 10 characters a second, its furigana a
+switch. The old card's "Free · in your browser" went with it, a claim
+nothing checked.
+
+**Easy to read** is its first rule: everything a viewer reads is light
+in ink on the washed print (the scroll, its hook, question and way to
+the app with it) or light on a dark panel or the sky darkened under it
+(read along), so it reads at every hour of the print; a sentence is set
+at the title's size (the scroll) or a little over it (read along), with
+its readings at N5 to N3. The tests hold every text whole inside the frame, at every
+level, in both languages.
+
+**The sound** carries no music (plan 273): the board's flap on the hook,
+the clicks of the countdown, the answer's chime and the platform's on
+the way out, and the reader's voice where it reads along, kept calm
+(-20 LUFS) when nobody speaks. The
+scroll, which nobody says, can be downloaded from the studio as it is,
+its sounds mixed in the browser; the one read along is made by the
+command, which voices each sentence.
+
+The question asked after the text is the maker's to choose (plan 260):
+the studio's "Question" lists the text's eight to twelve, each with its
+kind (about the text, reading between the lines, grammar, a word), and
+the command takes it as `--question N` (1-based, named only where it is
+not the default: the first about what the text says). Its four answers
+are dealt in an order seeded by the text and the question, the same in
+both languages and the same in the studio and the render: the bank
+writes the right one first two times in five, and a viewer would learn
+to answer A. Over the bank the right one stands at A, B, C and D a
+quarter of the time each (a test holds each between 20% and 30%).
+The question's frame fits itself to the safe area whatever is chosen
+(plan 262): the question, its four answers and the countdown are laid
+out at the largest sizes at which the countdown, or "Did you get it?",
+stands above the feed's foot and nothing is cut, a step down at a time
+(the panels closer, the question a fifth line), the longest (a quote
+and four answers of three lines, in French at N2) with a smaller ring
+and the ask for the comments left to the post's caption. A test draws
+every question of the bank, in both languages, at its countdown and
+its answer.
+
+The answer is never given by default (plan 275): where the right answer
+would light, "A, B, C or D? / Write your answer in the comments" stands
+under the four answers, all as bright as each other, the chime that says
+right is a plain card's sound, and the post's captions ask for the
+comments too (Reels with 📌, TikTok with 👇). The file's name ends in
+`-comment`. `--show` gives the answer on the screen, as the study does it.
+The studio's "The answer" switch sets the same choice ("In the comments", the
+default, or "Shown on screen"), and its Copy the command writes `--show` only
+when the answer is shown.
+
+**What it stands on** (plan 309, `sceneries.js`): Today's print, the bay,
+unless another scenery is chosen, in the studio's "Scenery" (景) or with
+`--scenery`. The long view is the app's own print as a desk draws it,
+wider than the frame, travelled while the text is read; the other four are
+the carousel's own, drawn in the print's hand at every season and hour by
+`frontend/scripts/sceneries/` into `carousel/prints/<rev>/<id>/` (the
+carousel never ships, so neither do they). The command names a scenery
+only off the bay, and the file's name carries it
+(`challenge-n5-12-scroll-lake-winter-day-en-q8-comment`). A scenery whose
+prints do not load is said so in the studio, the bay standing in at the
+hour asked for (else the last print drawn), and nothing is downloaded on
+it; `render.mjs` stops on it in one line, naming the file that failed. The
+hour is day unless one is chosen, as the studio opens on it (dusk before
+plan 309).
+
+| Scenery | `--scenery` | Its prints |
+| --- | --- | --- |
+| The bay 入江 | `bay` | the app's own (`public/today/print/`), the default |
+| The long view 一望 | `wide` | the app's desk print, travelled |
+| Mirror lake 逆さ富士 | `lake` | the carousel's own |
+| Lake gate 鳥居 | `torii` | the carousel's own |
+| The river 川 | `river` | the carousel's own |
+| The station 駅 | `station` | the carousel's own |
+
+Every change plan 309 makes to the look already posted is a dial in the
+Tune panel's "Reading challenge" group, and says what it `was`
+(`tune.js`): that look is one press away ("Look before plan 309", which
+sets every dial back and keeps the rest of the tune), or one
+`--tune challenge.<key>=<was>` at a time. The recommended values are
+the look plan 309 was drawn and measured at.
+
+| Dial | Key | Before plan 309 | Recommended |
+| --- | --- | --- | --- |
+| Readings' ink | `challenge.ruby` | 0: the soft ink | 0.9 |
+| Paper round the words | `challenge.halo` | 0: none | 1 |
+| Wash under the reading | `challenge.read` | 1: the hour's wash | 0.75 |
+| Hook in colour | `challenge.cover` | 0: off | 1: on |
+| Print raised | `challenge.lift` | 0: off | 1: on |
+| Sun and moon | `challenge.disc` | 0: off | 1: on |
+| Moonlit night | `challenge.night` | 0: three times brighter | 1: lit in its own colours |
+| Train as the clock | `challenge.train` | 0: parked halfway | 1: on |
+| Petals in the air | `challenge.falls` | 0: off | 1: on |
+| Fireworks in colour | `challenge.bursts` | 0: off | 1: on |
+| Read-along legible | `challenge.along` | 0: off | 1: on |
+| Long view travel | `challenge.pan` | none: new with the long view | 1 |
+
+```bash
+cd frontend
+node carousel/long/render.mjs --challenge n5-06 --style scroll --hour night --season winter --lang en --question 2
+node carousel/long/render.mjs --challenge n5-01 --style scroll --hour day --lang en
+node carousel/long/render.mjs --challenge n5-03 --style scroll --hour dawn --lang en --question 7
+node carousel/long/render.mjs --challenge n5-04 --style scroll --hour night --season hanabi --lang en
+node carousel/long/render.mjs --challenge n5-12 --style scroll --hour day --season winter --scenery lake --lang en --question 8
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
+```
+
+## Tuning (plan 248)
+
+Every number a maker may want to set per post is declared once, in
+`tune.js`: its default (what the studio did before it could be tuned),
+its range, its step, its label and the sources it acts on. The studio's
+**Tune** panel, under the settings, shows the ones of the source in view
+as sliders, grouped:
+
+| Group | Sources | What |
+| --- | --- | --- |
+| Reading challenge | challenge | the reading pace (× each level's characters a minute), the hook, the text's coming in, the last line held, the pause between sentences, the question alone, the countdown, the answer, the app last, the picture's wash; since plan 309 what the text stands on: the readings' ink, the paper round the words, the wash under the reading, the hook in colour, the print raised, the sun and moon, the moonlit night, the train, the petals, the fireworks, the read-along's panel, hook and foot, the long view's travel |
+| Word echo | echo | how long the word is said, the silence between two sayings, the word kept |
+| Short video | every carousel | each slide's hold (×), the time to answer a question, the longest a short may run |
+| Long video | long | the pauses (×) and the quiz's countdown |
+| Export | every clip | the video's and the sound's bitrates, a keyframe every so many seconds |
+
+A module reads a value with `tuned(tune, key)`, which falls back to the
+default and holds a stale or hand-edited value to its range, so a tune
+never breaks a drawing. The studio keeps only the values changed, per
+viewer, and writes them into every render command as `--tune k=v,…`
+(`tuneFlag`), which `long/render.mjs` reads back (`parseTune`): the
+video rendered is the one previewed. A carousel's short carries its tune
+in its recipe. Sizes are not tunable: they stay on the type scale ("Easy
+to read"). A new tunable is a line in `tune.js` and a `tuned()` where the
+number was; `src/carouselTune.test.js` holds every default inside its
+range and on its step, every `was` too (plan 309), and
+`src/carousel.test.js` holds each default to what its video did before.
 
 ## The code
 
@@ -835,11 +1462,19 @@ node carousel/long/render.mjs --carousel <recipe from the studio>
 | `strings.js` | every label a slide prints, in English and French |
 | `promo.js` | the promo stories: their plans from the bank, their frames (plan 231); the duels' story played whole (plan 281); reading comprehension's (plan 301) |
 | `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 231); the duels' screens (plan 281); the comprehension run's (plan 301) |
-| `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 232) |
+| `echo.js` | the word echo: its plan, its rhythm, its scatter, its clip and the word kept at its end (plans 232, 246) |
 | `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 231, 232); one event alone for a long video (plan 233) |
 | `long.js` | the long videos: what each says, when, each frame, their page, and the studio's list of them (plan 233) |
 | `short.js` | a carousel as a short video: its timing, its swipes, its line and page (plan 233) |
-| `long/render.mjs` | a long video, its short or a carousel's short made: voiced, mixed, drawn and encoded (plan 233) |
+| `challenge.js` | the reading challenges: a comprehension text in a credits scroll or read along, its timing on the voice, each frame, its page (plan 247) |
+| `sceneries.js` | what a reading challenge stands on: the six sceneries, and where each one's prints are (plan 309) |
+| `backdrop.js` | the print under a reading challenge's words, washed or darkened, or a photo in its place (plans 247, 276, 309) |
+| `cover.js` | a reading challenge's hook in colour, on the title slip's washi: the hook's own words (`challenge.js`, `hookWords`), handed to it (plan 309) |
+| `halo.js` | the rim of paper round the scroll's words (plan 309) |
+| `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a feature video recorded and made (plan 270) |
+| `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing and camera on the shots (plan 273), each frame, their page (plan 270) |
+| `long/record.mjs` | the app served by Vite and run in a phone-sized browser, its API answered from `promo.json`, a feature's steps done and shot (plan 270) |
+| `tune.js` | what the Tune panel can set: each value's default, range, step and label, read by every module through `tuned()` (plan 248) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it
@@ -878,3 +1513,42 @@ needs: every sentence spelled back by its words, every item of every
 source drawn as every type it can be, a question that never deals its
 answer twice nor a wrong answer that could be right, ★ only where the
 order is fixed, the figures the bank's own.
+
+### Hand-written content (plan 248)
+
+`content/dialogues.json`, `content/lookalikes.json` and `content/emoji.json`
+are written by hand and held by `src/carousel.test.js`:
+
+- **A conversation** is in both languages (its place, its speaker, each
+  line, the right reply's translation and the why), deals three distinct
+  replies a turn, and lets no length answer: across a level, the right
+  reply is the longest, or the shortest, between 25% and 42% of the
+  time, ties shared, the bound the app's own conversations keep
+  (`study/conversation.LENGTH_TELL`). Its why accounts for every wrong
+  reply and never overstates a rule, and a wrong reply is one a native
+  speaker would not say there.
+- **A lookalike set** tells each kanji apart in both languages, every
+  kanji one the deck teaches. A set's `m` leads its slide with the sense
+  its note is about. Each kanji's example word is the easiest one a
+  learner at the set's level reads (`carousel_bank.lookalikes`): a deck
+  word at or below the level, every kanji in it at or below too, else
+  none; `"w"` pins one (or `null`, none). The dictionary's notes
+  ("(kokuji)", "radical (no. 12)") are no meaning and never shown.
+- **A theme's picture** names its word and nothing beside it: an emoji
+  whose Japanese name is another word of the theme (📚 本 for 図書館,
+  🍫 for ココア) is left out, and no two words of a theme share one. A
+  theme added here needs its impostor theme in `sources.IMPOSTOR_FROM`,
+  and its new pictured words their voices
+  (`python -m scripts.carousel_voices --yes`, with the voice engine).
+- **A feature video's exercise** (`content/promo.json`, plan 270) uses
+  the banks' own sentence, scene, seed or paper, named by its text or
+  id, so the bank refuses one that left them. The answer typed is a slip
+  a beginner makes. A tutor's reply is in the model's own shape, in both
+  languages, and is run through `study/tutor_review` as the route runs
+  it.
+
+The bank cuts every line through the analyser and mends what it gets
+wrong (plan 248): a word the page writes in kana (としょかん) is read as
+the word it spells (`_RESPELL`, reviewed by hand), a number (二十五歳),
+でも opening a clause and お or ご with their word stay whole, and a word
+in katakana is romanised as it is written (コーヒー koohii).

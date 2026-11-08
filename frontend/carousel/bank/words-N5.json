@@ -719,7 +719,7 @@
 {"t":"番","r":"ばん","ro":"ban","en":["number, turn, watch, guard, order of things"],"fr":["numéro, tour, garde, ordre des choses"],"fu":[["番","ばん"]],"hy":["伴","蛮"]},
 {"t":"回","r":"かい","ro":"kai","en":["counter for times, occurrences, round (one of a series)"],"fr":["compteur de fois (occurrences), tour (séance)"],"fu":[["回","かい"]],"hy":["掛","械","潰"]},
 {"t":"中","r":"ちゅう","ro":"chuu","en":["inside, middle, among, during (suffix, in progress)"],"fr":["intérieur, milieu, parmi, pendant (suffixe, en cours)"],"fu":[["中","ちゅう"]],"hy":["抽","衷","鋳"],"ex":["N4.53","N4.183"]},
-{"t":"御","r":"お","ro":"o","en":["honourable (polite prefix)"],"fr":["honorifique (préfixe de politesse)"],"fu":[["御","お"]],"hy":["於"],"ex":["N4.5","N4.23"]},
+{"t":"御","r":"お","ro":"o","en":["honourable (polite prefix)"],"fr":["honorifique (préfixe de politesse)"],"fu":[["御","お"]],"hy":["於"]},
 {"t":"頃","r":"ころ","ro":"koro","en":["time, about, around (after a time or date)"],"fr":["moment, époque, vers (après une heure ou une date)"],"fu":[["頃","ころ"]],"ex":["N5.64","N5.113"]},
 {"t":"どんな","r":"どんな","ro":"donna","en":["what ... (+ noun), what kind of"],"fr":["quel ... (+ nom), quel genre de"],"ex":["N4.208","N3.81"]},
 {"t":"平仮名","r":"ひらがな","ro":"hiragana","en":["hiragana, 47 syllables, the cursive syllabary"],"fr":["hiragana, 47 syllabes, le syllabaire cursif"],"fu":[["平","ひら"],["仮","が"],["名","な"]],"hy":["平夏名","平仮南","平画名"]},

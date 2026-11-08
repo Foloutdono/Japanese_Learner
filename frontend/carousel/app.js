@@ -10,11 +10,18 @@
 // equal to index.css by src/carousel.test.js.
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { printName } from '../src/domain/printHour.js'
-import { RATING_INKS, TR, alpha, fit, font, measure, mix, rrect, shadow, text } from './draw.js'
+import { K, RATING_INKS, TR, alpha, fit, font, measure, mix, rrect, shadow, text } from './draw.js'
+import { PRINTS_REV, printPaths, sceneryOf } from './sceneries.js'
 
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
   '--pass-band': '#3f6d8e',
+  // The gate button's golds and its reader's lamp (GateButton, plan 225).
+  '--gate-gold-crest': '#f3cb68',
+  '--gate-gold-lit': '#e6bd62',
+  '--gate-gold': '#c99a3e',
+  '--gate-gold-deep': '#b0852f',
+  '--gate-lamp': '#e0b04f',
   // The print's paper, its ink and its seal red: the title slip's (TodayPrint).
   '--tpr-washi': '#efe3bf',
   '--tpr-sumi': '#1d1a16',
@@ -788,8 +795,17 @@ export function passCard(ctx, x, y, w, { name, level, meta, cls, brand = 'Pass',
 // moving parts at rest, the train halfway across. index.css's own .tpr-
 // rules and its reduced-motion block ride into each layer, so nothing of
 // the print is copied here. The hour picks it in today's season, as the
-// app's gate does (domain/printHour's printName, plan 261).
+// app's gate does (domain/printHour's printName, plan 261), unless a
+// season is chosen (plan 267): the app's print of that season at the
+// hour, `hanabi` the summer whose night is August's fireworks.
 export const PRINT_HOURS = ['dawn', 'day', 'dusk', 'night']
+export const PRINT_SEASONS = ['spring', 'summer', 'hanabi', 'autumn', 'winter']
+/** The print's name: the season's at the hour, or the date's as the app's gate picks it. */
+export function printOf(season, hour, now = new Date()) {
+  if (!PRINT_SEASONS.includes(season)) return printName(now, hour)
+  if (season === 'hanabi') return hour === 'night' ? 'summer-hanabi' : `summer-${hour}`
+  return `${season}-${hour}`
+}
 
 function stillCss(css) {
   const rules = css.match(/^\.tpr-[a-z-]+(?:\s*,\s*\.tpr-[a-z-]+)*\s*\{[^}\n]*\}$/gm) || []
@@ -798,12 +814,64 @@ function stillCss(css) {
   return `${rules.join('\n')}\n${inner.replace(/\.tpr /g, '')}\n[class*="tpr-"] { animation: none !important; }`
 }
 
-const picture = src => new Promise((resolve, reject) => {
+// A picture of the print, decoded; what it is (`what`) names it if it fails.
+const picture = (src, what) => new Promise((resolve, reject) => {
   const img = new Image()
   img.onload = () => resolve(img)
-  img.onerror = () => reject(new Error(`print: ${src.slice(0, 60)}`))
+  img.onerror = () => reject(new Error(`print: ${what}`))
   img.src = src
 })
+
+/** What a print or a photo that did not load says, read from the error
+ *  a page gives back (plan 309): the line naming the file and how it
+ *  failed, which opens the error's message, and whether the file is not
+ *  there at all (`missing`, a 404). Null for any other error (a bug
+ *  thrown in the page), which is no file missing and is thrown on as it
+ *  is. */
+export function loadFailure(message) {
+  const line = /(?:^|\n|Error: )((?:print|photo): [^\n]*)/.exec(String(message ?? ''))?.[1]
+  return line ? { line, missing: / 404$/.test(line) } : null
+}
+// A scenery of the carousel's own with no prints yet: a file of its own
+// folder, where printPaths puts them, answered 404 (`failed`, as
+// loadFailure reads it). Any other failure, a file of the app's own
+// answered 404 among them, is one drawing the scenery again would not mend.
+const notDrawn = (plan, failed) => {
+  const view = sceneryOf(plan.scenery)
+  return !plan.photo && view.source === 'carousel' && !!failed.missing && failed.line.startsWith(`print: carousel/prints/${PRINTS_REV}/${view.id}/`)
+}
+/** The one line a render stops on when what a challenge stands on did
+ *  not load (`failed`, as loadFailure reads it): the maker's photo; a
+ *  scenery of the carousel's own that has no prints yet or that did not
+ *  load (any other failure); or Today's print, the bay's and the long
+ *  view's. The studio says the same (standInSays). */
+export function standsOnFailure(plan, failed) {
+  if (plan.photo) return `the photo ${plan.photo.src} did not load: --photo takes a path under frontend/`
+  const view = sceneryOf(plan.scenery)
+  if (view.source !== 'carousel') return `Today's print did not load (${failed.line})`
+  return notDrawn(plan, failed) ? `${view.name} (${view.jp}) has no prints yet (${failed.line}): draw them with python3 scripts/sceneries/build.py`
+    : `${view.name} (${view.jp}) did not load (${failed.line})`
+}
+const STANDS = { bay: 'The bay at this hour stands in.', last: 'The last print drawn stands in.' }
+/** What the studio says when a challenge's print did not load (plan
+ *  309), by the render's own rule (standsOnFailure), from the error's
+ *  `message` (one naming no file is said as it is): `said`, its status
+ *  line, what failed and then what stands in for it (`by`: 'bay', the
+ *  bay at this hour; 'last', the last print drawn; else nothing), and
+ *  `label`, the few words its buttons say instead of what they make. */
+export function standInSays(plan, message, by = null) {
+  const failed = loadFailure(message) ?? { line: String(message ?? ''), missing: false }
+  const said = [`${standsOnFailure(plan, failed)}.`, STANDS[by]].filter(Boolean).join(' ')
+  return { said, label: `${sceneryOf(plan.scenery).name} ${notDrawn(plan, failed) ? 'has no prints yet' : 'did not load'}` }
+}
+/** What the studio loads in place of a scenery whose prints did not load
+ *  (`asked`, its print's options as challengePrintOpts gives them): the
+ *  bay as it would have stood, at the season asked for and with the
+ *  parts the dials bring out (its petals, its fireworks). Null where the
+ *  bay is what failed: the last print drawn stands in then. */
+export function standInOpts(asked) {
+  return asked.scenery === 'bay' ? null : { ...asked, scenery: 'bay' }
+}
 
 // The print in motion, for a clip (plan 231): index.css's .tpr- rules and
 // their keyframes, every animation held paused at the clip's moment `t`.
@@ -830,88 +898,140 @@ function layerAt(markup, t) {
   return markup.replace(/animation-delay:\s*(-?[\d.]+)s/g, (_, d) => `animation-delay: ${(+d - t).toFixed(3)}s`)
 }
 
-/** The hour's print in today's season, its layers decoded: `base` is the
- *  frontend's root as the page sees it. */
-export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date() } = {}) {
+// The August night's fireworks taken apart (plan 309), from the back
+// layer's own markup: the layer without the bursts in its sky (their
+// reflections, inside the water's clip, kept), and those bursts alone,
+// so a reading challenge can lay them over its paper in their colours.
+const SKY_BURSTS_OFF = '\n.tpr-burst { display: none; }\n[clip-path] .tpr-burst { display: inline; }'
+const SKY_BURSTS_ONLY = '\nsvg * { visibility: hidden; }\n.tpr-burst, .tpr-burst * { visibility: visible; }\n[clip-path] .tpr-burst, [clip-path] .tpr-burst * { visibility: hidden; }'
+
+/** The hour's print in today's season, or the one chosen, its layers
+ *  decoded: `base` is the frontend's root as the page sees it. A reading
+ *  challenge also says what it stands on (plan 309, sceneries.js): the
+ *  bay, the app's own print, unless another `scenery` is chosen; the long
+ *  view is the desk's print, as a desk asked for is. `falls` hangs the
+ *  season's petals and leaves where their fall begins; `bursts` takes the
+ *  August night's fireworks apart (img.backBare, img.bursts: null on a
+ *  print with none). */
+export async function loadPrint(hour, { base = '../', device = 'phone', now = new Date(), season = null, scenery = 'bay', falls = false, bursts = false } = {}) {
+  // Each failure says its file and how it failed (loadFailure reads it).
   const get = async (path, as = 'json') => {
-    const r = await fetch(base + path)
+    const r = await fetch(base + path).catch(e => { throw new Error(`print: ${path} could not be fetched (${e.message})`, { cause: e }) })
     if (!r.ok) throw new Error(`print: ${path} ${r.status}`)
-    return as === 'json' ? r.json() : r.text()
+    const body = await r.text()
+    if (as !== 'json') return body
+    try {
+      return JSON.parse(body)
+    } catch (e) {
+      throw new Error(`print: ${path} is not JSON (${e.message})`, { cause: e })
+    }
   }
   const meta = await get('src/components/station/print/print.json')
-  const name = printName(now, hour)
-  const scene = await get(`public/today/print/${meta.rev}/${name}-${device}.json`)
+  const view = sceneryOf(device === 'desk' && scenery === 'bay' ? 'wide' : scenery)
+  const asked = printOf(season, hour, now)
+  const files = printPaths(view.id, asked, meta.rev)
+  // A scenery of the carousel's own has its frame and its looks in its
+  // meta, and no B print: the date's B print is its A.
+  const own = files.meta ? await get(files.meta) : null
+  const name = own ? asked.replace(/-b$/, '') : asked
+  const scene = await get(files.print)
   const cssText = await get('src/index.css', 'text')
-  const css = stillCss(cssText)
+  // The petals and the leaves kept in the air, where their fall begins: still, the app hides them.
+  const css = stillCss(cssText) + (falls ? '\n.tpr-fall { opacity: 0.9; }' : '')
   // On the page the four layers share one document, and a layer fills
   // with a gradient another declares: each image carries them all.
   const defs = Object.values(scene.layers).flatMap(l => l.match(/<defs>[\s\S]*?<\/defs>/g) || []).join('')
   // The train waits off the print's left edge until it runs (the page
   // lets it overflow its box): its image spans a print's width either side.
-  const svg = (inner, left = 0) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${css}</style>${defs}${inner}</svg>`)}`
-  const [sky, back, train, front, grain, paper] = await Promise.all([
-    picture(svg(scene.layers.sky)), picture(svg(scene.layers.back)), picture(svg(scene.layers.train, scene.w)), picture(svg(scene.layers.front)),
-    picture(`${base}public/today/print/${meta.rev}/grain.png`), picture(`${base}public/today/print/${meta.rev}/paper.png`),
+  const svg = (inner, left = 0, more = '') => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${css}${more}</style>${defs}${inner}</svg>`)}`
+  const apart = bursts && scene.layers.back.includes('tpr-burst')
+  const layer = (name, left = 0, more = '', as = name) => picture(svg(scene.layers[name], left, more), `${files.print}, its ${as} layer, did not decode`)
+  const file = path => picture(base + path, `${path} did not load`)
+  const [sky, back, train, front, grain, paper, backBare, skyBursts] = await Promise.all([
+    layer('sky'), layer('back'), layer('train', scene.w), layer('front'),
+    file(`public/today/print/${meta.rev}/grain.png`), file(`public/today/print/${meta.rev}/paper.png`),
+    apart ? layer('back', 0, SKY_BURSTS_OFF, 'back (fireworks out)') : null, apart ? layer('back', 0, SKY_BURSTS_ONLY, 'back (fireworks alone)') : null,
   ])
   const moving = motionCss(cssText)
   const at = (name, t, left = 0) => picture(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${moving}\n[class*="tpr-"] { animation-delay: ${(-t).toFixed(3)}s; animation-play-state: paused !important; }</style>${defs}${layerAt(scene.layers[name], t)}</svg>`)}`)
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${moving}\n[class*="tpr-"] { animation-delay: ${(-t).toFixed(3)}s; animation-play-state: paused !important; }</style>${defs}${layerAt(scene.layers[name], t)}</svg>`)}`,
+  `${files.print}, its ${name} layer ${t} s in, did not decode`)
   /** The layers that move, as they stand `t` seconds in. */
   const moment = async t => {
     const [s2, b2, f2] = await Promise.all([at('sky', t), at('back', t), at('front', t)])
     return { sky: s2, back: b2, front: f2 }
   }
-  return { hour, scene, frame: meta.frames[device], look: meta.prints[name], img: { sky, back, train, front, grain, paper }, moment }
+  const frame = own ? own.frame : meta.frames[view.device]
+  const look = own ? own.prints[name] : meta.prints[name]
+  return { hour, name, scenery: view.id, scene, frame, look, img: { sky, back, train, front, grain, paper, backBare, bursts: skyBursts }, moment }
 }
 
+// The print's three parts, as a reading challenge keeps them (plan 309):
+// what lies under the train (the band, the sky, its grain, the back
+// layer), the train, and what lies over it (the front layer, the paper).
+const WHOLE = { under: true, train: true, over: true }
+
 /** The print with its top-left corner at (x, y), `u` pixels a unit; the
- *  band's ink fills above it, as the gate's frame does. */
-export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canvas.height, moving = null, t = null } = {}) {
+ *  band's ink fills above it, as the gate's frame does. `parts` draws
+ *  only those of its three (the whole by default); `run`, 0 to 1, puts
+ *  the train where that share of its run brings it (plan 309). */
+export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canvas.height, moving = null, t = null, parts = WHOLE, run = null } = {}) {
   const { scene, frame, look } = P
   // A clip's frame: the layers as they stand at `t`, the train where its
   // run has brought it; a still: the print at rest, the train halfway.
   const img = moving ? { ...P.img, ...moving } : P.img
-  const run = t == null ? 0.45 : (((t + scene.train.delay) % scene.train.dur) / scene.train.dur)
+  const at = run ?? (t == null ? 0.45 : (((t + scene.train.delay) % scene.train.dur) / scene.train.dur))
   const w = scene.w * u
   const h = scene.h * u
-  ctx.fillStyle = look.band
-  ctx.fillRect(0, 0, W, H)
+  if (parts.under) {
+    ctx.fillStyle = look.band
+    ctx.fillRect(0, 0, W, H)
+  }
   ctx.save()
   ctx.beginPath()
   ctx.rect(x, y, w, h)
   ctx.clip()
-  const sky = ctx.createLinearGradient(0, y, 0, y + h)
-  for (const [o, col] of look.sky) sky.addColorStop((o * frame.horizon) / scene.h, col)
-  sky.addColorStop(frame.horizon / scene.h, look.ground)
-  sky.addColorStop(1, look.ground)
-  ctx.fillStyle = sky
-  ctx.fillRect(x, y, w, h)
-  ctx.drawImage(img.sky, x, y, w, h)
   const tile = (pic, tw, th, hh) => {
     for (let ty = 0; ty < hh; ty += th) for (let tx = 0; tx < w; tx += tw) ctx.drawImage(pic, x + tx, y + ty, tw, Math.min(th, hh - ty))
   }
-  ctx.save()
-  ctx.beginPath()
-  ctx.rect(x, y, w, (frame.horizon + 12) * u)
-  ctx.clip()
-  tile(img.grain, 640 * u, 120 * u, (frame.horizon + 12) * u)
-  ctx.restore()
-  ctx.drawImage(img.back, x, y, w, h)
-  ctx.drawImage(img.train, x - w + w * (scene.train.run / 100) * run, y, 2 * w, h)
-  ctx.drawImage(img.front, x, y, w, h)
-  tile(img.paper, 128 * u, 128 * u, h)
+  if (parts.under) {
+    const sky = ctx.createLinearGradient(0, y, 0, y + h)
+    for (const [o, col] of look.sky) sky.addColorStop((o * frame.horizon) / scene.h, col)
+    sky.addColorStop(frame.horizon / scene.h, look.ground)
+    sky.addColorStop(1, look.ground)
+    ctx.fillStyle = sky
+    ctx.fillRect(x, y, w, h)
+    ctx.drawImage(img.sky, x, y, w, h)
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(x, y, w, (frame.horizon + 12) * u)
+    ctx.clip()
+    tile(img.grain, 640 * u, 120 * u, (frame.horizon + 12) * u)
+    ctx.restore()
+    ctx.drawImage(img.back, x, y, w, h)
+  }
+  if (parts.train) ctx.drawImage(img.train, x - w + w * (scene.train.run / 100) * at, y, 2 * w, h)
+  if (parts.over) {
+    ctx.drawImage(img.front, x, y, w, h)
+    tile(img.paper, 128 * u, 128 * u, h)
+  }
   ctx.restore()
 }
 
-const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -0.5, 0.15, 0.8627],
+// The moon's seas as the dial draws them: each one's place and size in
+// shares of the disc's radius, and how round it is (the reading
+// challenge's moon draws them too, plan 309).
+export const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -0.5, 0.15, 0.8627],
   [0.66, 0.34, 0.16, 0.7181], [-0.6, 0.48, 0.13, 0.834], [0.18, 0.72, 0.12, 0.7914]]
 
 /** Today's dial as the hour's sun or moon on its print (PrintDial): its
  *  glow, the halo of its lines at dusk and night, the disc, an arc per
  *  line round it, the count in the disc's inks; then the time under it.
- *  (cx, cy) the disc's centre, `u` the print's unit. */
-export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end, breath = null }) {
+ *  (cx, cy) the disc's centre, `u` the print's unit. `sweep` (0 to 1,
+ *  plan 271): the share of the ring drawn so far, clockwise from the top,
+ *  as a story's last frame draws it in. */
+export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end, breath = null, sweep = 1 }) {
   const { frame, look } = P
   const disc = look.disc
   const r = frame.disc * u
@@ -945,15 +1065,19 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end,
         return { color: q.color, a0, a1: a0 + Math.max(0, span - 2 * cap) / halo }
       })
     })()
+  // How far round the ring is drawn: an arc stops there, one not reached is not drawn.
+  const upTo = -Math.PI / 2 + Math.min(1, Math.max(0, sweep)) * Math.PI * 2
   const stroke = (lw, filter) => {
     ctx.save()
     ctx.lineCap = parts.length === 1 ? 'butt' : 'round'
     ctx.lineWidth = lw
     if (filter) ctx.filter = filter
     for (const a of arcs) {
+      const a1 = Math.min(a.a1, upTo)
+      if (a1 <= a.a0) continue
       ctx.strokeStyle = a.color
       ctx.beginPath()
-      ctx.arc(cx, cy, halo, a.a0, a.a1)
+      ctx.arc(cx, cy, halo, a.a0, a1)
       ctx.stroke()
     }
     ctx.restore()
@@ -1032,88 +1156,129 @@ export function printTitle(ctx, x, y, u, { date, view }) {
   return { w, h }
 }
 
-/** The gate's Depart button: the gold pill, the reader's dark roundel at
- *  its left with the contactless mark in gold, the word centred. Still,
- *  its two ripples stand where they pass; with `ready` (seconds since the
- *  button came to rest) it moves as .btn-depart--gate does: the halo
- *  breathes (btn-gate-breathe, 2.8s), two ripples leave the reader 1.1s
- *  apart (btn-gate-rip, 2.2s), and after four seconds untaken the reader
- *  steps toward the way on twice (btn-gate-nudge, 720ms). */
+/** The gate button (components/ui/GateButton.jsx, .btn-depart--gate,
+ *  plan 225's): the gold pill lit from above, the sumi reader at its left
+ *  end holding the card scanner's mark in the lamp's gold, a hairline a
+ *  rung off the reader, the word centred on the pill. With `ready`
+ *  (seconds since the button came to rest) it moves as the app's does:
+ *  after four seconds untaken the reader steps toward the way on twice
+ *  (btn-gate-nudge, 720ms), its hairline with it. Its measures are CSS
+ *  pixels times `u`. */
 export function departButton(ctx, p, x, y, w, u, label, ready = null) {
   const h = 66 * u
-  const moving = ready != null
-  // Its own shades are of what it is given: a button coming in is faint whole.
-  const base = ctx.globalAlpha
-  if (moving) {
-    // The breath's peak, a layer under the fill: a 9px ring and a glow.
-    const b = 0.5 - 0.5 * Math.cos((2 * Math.PI * ready) / 2.8)
-    ctx.save()
-    ctx.globalAlpha *= b
-    shadow(ctx, `0px ${8 * u}px ${28 * u}px ${alpha(p.goldMid, 0.4)}`)
-    ctx.fillStyle = alpha(p.goldMid, 0.16)
-    rrect(ctx, x - 9 * u, y - 9 * u, w + 18 * u, h + 18 * u, h / 2 + 9 * u)
-    ctx.fill()
-    ctx.restore()
-  }
+  const css = v => v * u / K
+  // Each shape adds its own closed outline to the path in hand (insetShade cuts it from another).
+  const pill = () => ctx.roundRect(x, y, w, h, h / 2)
+  // The fill, under its two drops (--gate-drop): the gold from its crest.
   ctx.save()
-  shadow(ctx, `0px 4px 18px ${alpha(p.goldMid, 0.35)}`)
   const g = ctx.createLinearGradient(0, y, 0, y + h)
-  g.addColorStop(0, p.goldLit)
-  g.addColorStop(1, p.goldMid)
+  g.addColorStop(0, APP_INKS['--gate-gold-crest'])
+  g.addColorStop(0.45, APP_INKS['--gate-gold-lit'])
+  g.addColorStop(1, APP_INKS['--gate-gold'])
   ctx.fillStyle = g
-  rrect(ctx, x, y, w, h, h / 2)
-  ctx.fill()
-  ctx.restore()
-  const nudge = moving ? NUDGE(ready - 4) : 0
-  const rx = x + 8 * u + 24 * u + nudge * 6 * u
-  const ry = y + h / 2
-  ctx.fillStyle = '#100e13'
-  ctx.beginPath()
-  ctx.arc(rx, ry, 24 * u, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.save()
-  ctx.strokeStyle = alpha('#100e13', 0.55)
-  ctx.lineWidth = 2 * u
-  const rips = moving
-    ? [0, 1.1].filter(d => ready >= d).map(d => EASE_OUT(((ready - d) % 2.2) / 2.2)).map(e => [23 * (1 + 0.75 * e), 0.8 * (1 - e)])
-    : [[28.5, 1], [39, 1]]
-  for (const [rr, a] of rips) {
-    ctx.globalAlpha = base * a
+  for (const drop of [`0px ${css(6)}px ${css(14)}px rgba(90, 64, 20, 0.32)`, `0px ${css(1)}px ${css(2)}px rgba(60, 40, 10, 0.3)`]) {
+    shadow(ctx, drop)
     ctx.beginPath()
-    ctx.arc(rx, ry, rr * u, 0, Math.PI * 2)
-    ctx.stroke()
+    pill()
+    ctx.fill()
   }
-  ctx.globalAlpha = base
-  passWave(ctx, rx - 24 * u, ry, u)
   ctx.restore()
-  // The word centred on the pill, or in what the reader leaves of it
-  // when it is long, a size down rather than past its end.
-  const free = x + 8 * u + 48 * u + 16 * u
-  const room = x + w - 24 * u - free
+  // Its light and its weight, inside: a pale line along the top, a shade along the foot.
+  insetShade(ctx, pill, 0, u, 0, 'rgba(255, 244, 214, 0.55)')
+  insetShade(ctx, pill, 0, -2 * u, 3 * u, 'rgba(120, 80, 20, 0.25)')
+  // The reader, 48px across, 8px in; the nudge moves it and its hairline.
+  const nudge = ready != null ? NUDGE(ready - 4) : 0
+  const r = 24 * u
+  const rx = x + 8 * u + r + nudge * 6 * u
+  const ry = y + h / 2
+  const disc = () => { ctx.moveTo(rx + r, ry); ctx.arc(rx, ry, r, 0, Math.PI * 2) }
+  ctx.save()
+  const lit = ctx.createRadialGradient(rx - 4.8 * u, ry - 7.2 * u, 0, rx - 4.8 * u, ry - 7.2 * u, 42.5 * u)
+  lit.addColorStop(0, mix(p.panel, APP_INKS['--gate-gold-lit'], 0.86))
+  lit.addColorStop(0.7, p.panel)
+  lit.addColorStop(1, p.panel)
+  ctx.fillStyle = lit
+  ctx.beginPath()
+  disc()
+  ctx.fill()
+  ctx.restore()
+  insetShade(ctx, disc, 0, u, 2 * u, 'rgba(0, 0, 0, 0.5)')
+  scanMark(ctx, rx, ry, 26.88 * u, APP_INKS['--gate-lamp'])
+  // The hairline, a rung (12px) off the reader, half its height.
+  ctx.save()
+  ctx.strokeStyle = mix(APP_INKS['--gate-gold'], APP_INKS['--gate-gold-deep'], 0.6)
+  ctx.lineWidth = 1.3 * u
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.moveTo(rx + r + 12 * u, ry - 12.24 * u)
+  ctx.lineTo(rx + r + 12 * u, ry + 12.24 * u)
+  ctx.stroke()
+  ctx.restore()
+  // The word in the middle column (minmax(48px, 1fr) auto minmax(48px, 1fr),
+  // 12px gaps, 8px in): centred on the pill while both sides keep their
+  // 48px, a size down rather than past them when it is long.
+  const room = w - 2 * 8 * u - 2 * 48 * u - 2 * 12 * u
   let lz = 17.92 * u
   while (lz > 13 * u && measure(ctx, label, font(700, lz, 'latin')) > room) lz -= 0.5 * u
-  const lw = measure(ctx, label, font(700, lz, 'latin'))
-  const cx = Math.max(x + w / 2, free + lw / 2)
-  text(ctx, label, cx, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
+  text(ctx, label, x + w / 2, ry + lz * 0.36, { f: font(700, lz, 'latin'), color: '#1c1811', align: 'center' })
   return h
 }
 
-/** The pass's contactless mark as the reader wears it (.pass__wave.
- *  btn-depart__wave): three circles 8, 15 and 22px across, their left
- *  edges together 10px into the reader, each showing only its right
- *  border, 2px of the lamp's gold, cut where the box's diagonals cut it
- *  (±45°): a crescent, then two arcs. `x` is the reader's left, `y` its middle. */
-function passWave(ctx, x, y, u) {
-  ctx.fillStyle = '#dcad4e'
-  for (const d of [8, 15, 22]) {
-    const r = (d / 2) * u
-    const cx = x + (10 + d / 2) * u
+/** A box-shadow set inside a shape (inset dx dy blur color): the shape's
+ *  outside casts it, clipped to the shape. The outside is drawn a long way
+ *  off and its shadow sent back, so its own edge never shows. */
+function insetShade(ctx, shape, dx, dy, blur, color) {
+  const FAR = 2e4
+  ctx.save()
+  ctx.beginPath()
+  shape()
+  ctx.clip()
+  ctx.shadowOffsetX = dx + FAR
+  ctx.shadowOffsetY = dy
+  ctx.shadowBlur = blur
+  ctx.shadowColor = color
+  ctx.translate(-FAR, 0)
+  ctx.beginPath()
+  ctx.rect(-1e4, -1e4, 3e4, 3e4)
+  shape()
+  ctx.fillStyle = '#000'
+  ctx.fill('evenodd')
+  ctx.restore()
+}
+
+/** The card scanner's mark (GateButton's ScanMark, 24 units square): the
+ *  scanner's four corners, a card in it and its stripe, stroked 2 units
+ *  with round ends, `size` across, centred on (cx, cy). */
+function scanMark(ctx, cx, cy, size, color) {
+  const k = size / 24
+  const X = v => cx + (v - 12) * k
+  const Y = v => cy + (v - 12) * k
+  ctx.save()
+  ctx.strokeStyle = color
+  ctx.lineWidth = 2 * k
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  // Each corner (its path's own points): an arm, its quarter turn of 2.5, the other arm.
+  for (const [sx, sy, ox, oy, a0, ex, ey] of [
+    [3, 8, 5.5, 5.5, Math.PI, 8, 3],
+    [16, 3, 18.5, 5.5, -Math.PI / 2, 21, 8],
+    [21, 16, 18.5, 18.5, 0, 16, 21],
+    [8, 21, 5.5, 18.5, Math.PI / 2, 3, 16],
+  ]) {
     ctx.beginPath()
-    ctx.arc(cx, y, r, -Math.PI / 4, Math.PI / 4)
-    ctx.arc(cx, y, r - 2 * u, Math.PI / 4, -Math.PI / 4, true)
-    ctx.closePath()
-    ctx.fill()
+    ctx.moveTo(X(sx), Y(sy))
+    ctx.arc(X(ox), Y(oy), 2.5 * k, a0, a0 + Math.PI / 2)
+    ctx.lineTo(X(ex), Y(ey))
+    ctx.stroke()
   }
+  ctx.beginPath()
+  rrect(ctx, X(7), Y(8.5), 10 * k, 7 * k, 1.2 * k)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(X(7), Y(11))
+  ctx.lineTo(X(17), Y(11))
+  ctx.stroke()
+  ctx.restore()
 }
 
 /** A CSS timing function (cubic-bezier(x1, y1, x2, y2)) as a function of
@@ -1132,7 +1297,6 @@ export function cssEase(x1, y1, x2, y2) {
     return at(y1, y2, (lo + hi) / 2)
   }
 }
-const EASE_OUT = cssEase(0, 0, 0.58, 1)
 const EASE_IN_OUT = cssEase(0.42, 0, 0.58, 1)
 // btn-gate-nudge over 720ms: out at 25% and 75%, home at 0, 50% and 100%.
 function NUDGE(s) {

@@ -646,7 +646,7 @@
 {"t":"寒気","r":"さむけ","ro":"samuke","en":["chill, the shivers"],"fr":["frissons, coup de froid"],"fu":[["寒","さむ"],["気","け"]],"hy":["寒花","寒家","寒化"]},
 {"t":"階","r":"かい","ro":"kai","en":["floor, story (of a building)","(counter for floors)"],"fr":["étage","(compteur pour les étages)"],"fu":[["階","かい"]],"hy":["掛","械","潰"]},
 {"t":"様","r":"さま","ro":"sama","en":["Mr. or Mrs., manner, kind, appearance"],"fr":["M., Mme (honorifique)","manière"],"fu":[["様","さま"]],"ex":["N1.100","N1.166"]},
-{"t":"御","r":"ご","ro":"go","en":["go-, honourable"],"fr":["honorifique (préfixe ご〜)"],"fu":[["御","ご"]],"hy":["互","降","伍"],"ex":["N4.161","N4.196"]},
+{"t":"御","r":"ご","ro":"go","en":["go-, honourable"],"fr":["honorifique (préfixe ご〜)"],"fu":[["御","ご"]],"hy":["互","降","伍"]},
 {"t":"がる","r":"がる","ro":"garu","en":["to feel, to show signs of (suffix, as in 寒がる)","to act as if"],"fr":["ressentir, manifester (suffixe, comme dans 寒がる)","faire comme si"],"ex":["N4.151","N4.152"]},
 {"t":"日","r":"にち","ro":"nichi","en":["day (suffix for dates, counting days)"],"fr":["jour (suffixe pour les dates, compter les jours)"],"fu":[["日","にち"]]},
 {"t":"度","r":"ど","ro":"do","en":["degree (temperature, angle), counter for occurrences"],"fr":["degré (température, angle), compteur d'occurrences"],"fu":[["度","ど"]],"hy":["怒"]},

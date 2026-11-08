@@ -1,24 +1,32 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
-import { FORMATS, FS, RATING_INKS, drawFeedHud, formatOf, layoutSentence } from '../carousel/draw.js'
+import { existsSync, readFileSync } from 'node:fs'
+import { FORMATS, FS, METAL_H, RATING_INKS, drawFeedHud, formatOf, layoutSentence, palette, reading } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
-import { APP_INKS, DUEL_INKS } from '../carousel/app.js'
-import { CLIP, COMP_BEATS, DUEL_BEATS, DUEL_RUN, LEVEL, PROMO, ROLL_DEMO, STORIES, STORY_FILES, arrivals, askable, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { APP_INKS, DUEL_INKS, PRINT_HOURS, PRINT_SEASONS, printOf } from '../carousel/app.js'
+import { printName } from './domain/printHour.js'
+import { CLIP, COMP_BEATS, DUEL_BEATS, DUEL_RUN, END, LEVEL, PROMO, ROLL_DEMO, STORIES, STORY_FILES, arrivals, askable, duelRun, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
-import { SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
-import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf } from '../carousel/funnel.js'
-import { KINDS, LONG_SITE, PART, SHORT, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, timeline } from '../carousel/long.js'
+import { LIMIT, SWIPE, chars, drawShortFrame, fromRecipe, recipeOf, shortPage, shortTimeline, slideSeconds, spokenLine } from '../carousel/short.js'
+import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
+import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
+import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
+import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, hookWords, moraeOf, wordTimes } from '../carousel/challenge.js'
+import { PRINTS_REV, SCENERIES, SCENERY_IDS, printPaths, sceneryOf } from '../carousel/sceneries.js'
+import { drawn, withPath2D } from './testing/challengeCanvas.js'
+import { CAPTION_MAX, FEEDS, HASHTAGS, pageFile } from '../carousel/feeds.js'
+import { COUNT as WORDS_COUNT, LIMIT as WORDS_LIMIT, STYLES as WORDS_STYLES, drawWords, loadPictures, shortSense, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsTimeline } from '../carousel/words.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { SPRINT_MS, points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
+import { APP as FEATURE_APP, FEATURE_FPS, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, camFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
 
@@ -41,8 +49,32 @@ const glossEn = r => (r.en || [])[0] || ''
 // The sources a carousel's last slide stands on: a promo story ends on
 // its own gate, a word echo is one frame and its clip, a long video is a
 // player of its own (plan 233).
-const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo' && s.id !== 'long')
-const LAST = { promo: id => (id === 'pass' ? 'free' : 'board'), echo: () => 'echo' }
+const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo' && !s.video)
+
+/** A 9:16 video's three posts (plan 251): YouTube's page as it is, and a
+ *  caption each for Reels and TikTok that opens on the hook, links to
+ *  nothing of ours ("in bio"), keeps every credit, carries five hashtags
+ *  at most and never #shorts, and fits Instagram's 2,200 characters. */
+function expectFeeds(page, site, label) {
+  expect(Object.keys(page.feeds), label).toEqual(FEEDS)
+  expect(page.feeds.shorts, label).toEqual({ title: page.title, description: page.description, tags: page.tags })
+  const credits = page.description.split('\n').filter(l => /VOICEVOX|波音リツ/.test(l))
+  for (const f of ['reels', 'tiktok']) {
+    const c = page.feeds[f].caption
+    const at = `${label} ${f}`
+    expect(c.split('\n')[0], at).toBe(page.title.replace(/\s*#shorts$/i, ''))
+    expect([...c].length, at).toBeLessThanOrEqual(CAPTION_MAX)
+    expect(c, at).not.toContain(new URL(site).host)
+    expect(c, at).toMatch(/(Link in|Lien en) bio\./)
+    const tags = c.match(/#[^\s#]+/g) || []
+    expect(tags.length, at).toBeGreaterThanOrEqual(3)
+    expect(tags.length, at).toBeLessThanOrEqual(HASHTAGS)
+    expect(tags.map(t => t.toLowerCase()), at).not.toContain('#shorts')
+    for (const line of credits) for (const part of line.split(/(?<=\.) /)) expect(c, at).toContain(part.replace(/^▸.*$/, '').trim())
+  }
+  expect(page.feeds.reels.caption, label).not.toBe(page.feeds.tiktok.caption)
+}
+const LAST = { promo: id => (id === 'pass' ? 'free' : 'board'), echo: () => 'keep' }
 
 /** Every file a source reads: one per level, one per kana set, or one. */
 function filesOf(src) {
@@ -87,6 +119,14 @@ function stubContext() {
   return { ctx, texts }
 }
 
+// Today's print as loadPrint makes it, its pictures left blank (the stub
+// draws none): the scene, the frame and the look a deck reads (plan 271).
+function stillPrint(name = 'autumn-day') {
+  const meta = JSON.parse(read('src/components/station/print/print.json'))
+  const scene = JSON.parse(read(`public/today/print/${meta.rev}/${name}-phone.json`))
+  return { hour: name.split('-')[1], name, scene, frame: meta.frames.phone, look: meta.prints[name], img: { sky: {}, back: {}, train: {}, front: {}, grain: {}, paper: {} } }
+}
+
 describe('the carousel studio', () => {
   it('draws the verdict inks index.css declares', () => {
     const css = read('src/index.css')
@@ -119,9 +159,10 @@ describe('the carousel studio', () => {
     }
   })
 
-  // Every plan of every source, built once for the tests below.
+  // Every plan of every source, built once for the tests below (a video,
+  // long or a reading challenge, is drawn by tests of its own).
   const every = []
-  for (const src of SOURCES) {
+  for (const src of SOURCES.filter(x => !x.video)) {
     for (const { data, filter } of filesOf(src)) {
       // A promo story is picked by its set, the story (plan 231).
       const opts = src.id === 'promo' ? { ...OPTS, story: filter } : OPTS
@@ -136,8 +177,11 @@ describe('the carousel studio', () => {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const slides = deck(type, p, FORMATS.post, { ground: 'paper' })
         expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan({ promo: 1, echo: 0 }[src.id] ?? 2)
-        // A promo story ends on its own gate, not on a station (plan 231).
-        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(LAST[src.id]?.(id) ?? 'outro')
+        // A promo story ends on its own gate, not on a station (plan 231);
+        // Read it on the app's call to action, in any look (plan 253).
+        // A 会話 scene asked in Classic is drawn in Clarté (plan 268), and ends as it does.
+        const last = p.kaiwa ? deck(type, p, FORMATS.post, { ground: 'paper', design: 'clarte' }).at(-1).key : null
+        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(last ?? (type === 'read' ? 'cta' : LAST[src.id]?.(id) ?? 'outro'))
         expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
       }
     }
@@ -147,9 +191,11 @@ describe('the carousel studio', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
     try {
-      for (const src of STATIONED) {
+      // Read it's own sentences are read and nothing else (plan 254).
+      for (const src of STATIONED.filter(x => x.id !== 'short')) {
         const { p } = every.find(x => x.src === src)
-        const type = TYPES.map(x => x.id).find(x => x !== 'plates' && available(x, p)) || 'plates'
+        // Read it ends on the app's call to action, never an ending (plan 253).
+        const type = TYPES.map(x => x.id).find(x => x !== 'plates' && x !== 'read' && available(x, p)) || 'plates'
         for (const fmt of Object.values(FORMATS)) {
           for (const ground of ['paper', 'sumi']) {
             for (const id of ENDING_IDS) {
@@ -233,7 +279,7 @@ describe('the carousel studio', () => {
       const seen = {}
       for (const [n, { src, id, p }] of every.entries()) {
         if ((seen[src.id] = (seen[src.id] || 0) + 1) % 90 !== 2) continue
-        const fmt = formatOf(n % 2 ? 'post' : 'story', 'normal')
+        const fmt = formatOf(n % 2 ? 'post' : 'story', Math.floor(n / 2) % 2 ? 'instagram' : 'normal')
         for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
           for (const design of [...DESIGNS, 'classic']) {
             for (const sl of deck(type, p, fmt, { ground: n % 3 ? 'paper' : 'sumi', design }).filter(x => !x.key.startsWith('passage-'))) {
@@ -496,6 +542,9 @@ describe('the carousel studio', () => {
     const rows = ps.flatMap(p => p.slides.filter(s => s.kind === 'turn').flatMap(s => [s.turn.them.rows, ...s.turn.choices]).flat())
     const read = t => rows.filter(r => r.t === t).map(r => r.fu.map(([, x]) => x).join(''))
     expect(new Set(read('船便'))).toEqual(new Set(['ふなびん']))
+    // 何とか is one word, never 何 と 叶った (plan 248).
+    expect(new Set(read('何とか'))).toEqual(new Set(['なん']))
+    expect(rows.some(r => r.t === 'かなった')).toBe(false)
     expect(new Set(read('御社'))).toEqual(new Set(['おんしゃ']))
     expect(rows.some(r => r.t === '御')).toBe(false)
   })
@@ -730,7 +779,7 @@ describe('explaining a point in its own sentence', () => {
   })
 
   // ── 宣伝, the promo stories (plan 231) ──────────────────────
-  it('draws the pass in the band index.css prints it in', () => {
+  it('draws the pass and the gate in the inks index.css prints them in', () => {
     const css = read('src/index.css')
     for (const [name, value] of Object.entries(APP_INKS)) expect(css, name).toMatch(new RegExp(`${name}:\\s*${value};`))
   })
@@ -885,6 +934,71 @@ describe('explaining a point in its own sentence', () => {
     }
   })
 
+  it('plays reading comprehension’s story whole on the print, each frame leaving over its own washed print (plans 271, 301b)', () => {
+    // Faded and moved whole as on the ground, a frame took its washed sky
+    // with it: the bare print flashed between two frames of the story.
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      const data = bank('comprehension.json')
+      const [{ id }] = promoItems('comprehension', data, 'en')
+      const pl = promoPlan('comprehension', data, id, { ...OPTS, story: 'comprehension' })
+      const { story } = promoDeck(pl, FORMATS.story, { ground: 'sumi', print: stillPrint() }).clips
+      expect(story.print).toBe(true)
+      // What a frame draws: the print's layers, the rects (the wash among
+      // them) and the words, each with its alpha and how far it was moved.
+      const record = () => {
+        const calls = []
+        const state = { font: '10px sans-serif', globalAlpha: 1, ty: 0 }
+        const stack = []
+        const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+        const methods = {
+          measureText: t => ({ width: [...String(t)].length * size() * 0.8, actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12 }),
+          createLinearGradient: () => ({ addColorStop() {} }),
+          createRadialGradient: () => ({ addColorStop() {} }),
+          getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+          save: () => stack.push({ ...state }),
+          restore: () => Object.assign(state, stack.pop() || {}),
+          translate: (x, y) => { state.ty += y },
+          drawImage: () => calls.push({ kind: 'image', alpha: state.globalAlpha, ty: state.ty }),
+          fillRect: (x, y, w, h) => calls.push({ kind: 'rect', alpha: state.globalAlpha, ty: state.ty, y, h }),
+          fillText: t => calls.push({ kind: 'text', t: String(t), alpha: state.globalAlpha, ty: state.ty }),
+        }
+        const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+        return { ctx, calls }
+      }
+      let start = 0
+      let n = 1
+      for (const [key, len] of COMP_BEATS.slice(0, -1)) {
+        // Before it leaves: its print, then its wash, the first rect after the print's last layer.
+        const wash = calls => calls.slice(calls.findLastIndex(c => c.kind === 'image') + 1).find(c => c.kind === 'rect')
+        const before = record()
+        story.draw(before.ctx, start + len - 0.2)
+        const sky = wash(before.calls)
+        expect(sky, key).toBeTruthy()
+        for (const at of [0.08, 0.04, 0.01]) {
+          const { ctx, calls } = record()
+          story.draw(ctx, start + len - at)
+          const gone = 1 - (at / 0.12)
+          // The print and its wash stay whole and in place, the same wash as before it left.
+          for (const c of calls.filter(c => c.kind === 'image')) expect([key, at, c.alpha, c.ty]).toEqual([key, at, 1, 0])
+          expect({ ...wash(calls), key }).toEqual({ ...sky, key })
+          // Its words fade and rise, its page's count with them (those drawn
+          // on the print: off a browser a block's measure is drawn first,
+          // on the same context, under it).
+          const words = calls.slice(calls.findLastIndex(c => c.kind === 'image') + 1).filter(c => c.kind === 'text')
+          expect(Math.max(...words.map(c => c.alpha)), key).toBeCloseTo(1 - gone, 6)
+          const count = words.find(c => c.t === `${n} / ${COMP_BEATS.length}`)
+          expect([count.alpha, count.ty].map(v => Math.round(v * 1e6) / 1e6), key).toEqual([1 - gone, -28 * gone].map(v => Math.round(v * 1e6) / 1e6))
+        }
+        start += len
+        n += 1
+      }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
+
   it('promises nothing the app does not do today (plan 231)', () => {
     // No mode is priced and nothing is free "during early access": the
     // free pass, the kana line and the privacy are what a story may say.
@@ -899,13 +1013,14 @@ describe('explaining a point in its own sentence', () => {
     const had = globalThis.Path2D
     globalThis.Path2D = class {}
     try {
-      for (const story of STORIES) {
+      // On Today's print (plan 271), every frame, and so every clip, stands on it and moves with it.
+      for (const [story, print] of STORIES.flatMap(s => [[s, null], [s, stillPrint()]])) {
         const data = bank(STORY_FILES[story])
         const [{ id }] = promoItems(story, data, 'en')
         const pl = promoPlan(story, data, id, { ...OPTS, story })
-        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi', print })
         expect(frames.clip, story).toBeTruthy()
-        expect(frames.clip.print, story).toBe(story === 'pitch')
+        expect(frames.clip.print, story).toBe(!!print)
         for (const t of [0, 1, 3.5, 4.3, 6.99]) {
           const { ctx } = stubContext()
           expect(() => frames.clip.draw(ctx, t), `${story} at ${t}s`).not.toThrow()
@@ -919,7 +1034,7 @@ describe('explaining a point in its own sentence', () => {
         for (const w of still.texts.filter(x => /[A-Za-z]{4}/.test(x) && !/Tap to/i.test(x))) expect(end.texts, `${story}: ${w}`).toContain(w)
         // The call to action too, its gate waiting to the end.
         const { end: cta } = frames.clips
-        expect(cta.print, story).toBe(false)
+        expect(cta.print, story).toBe(!!print)
         for (const t of [0, 0.5, 2, 4, 6.4]) expect(() => cta.draw(stubContext().ctx, t), `${story} end at ${t}s`).not.toThrow()
         const last = stubContext()
         frames[frames.length - 1].draw(last.ctx)
@@ -1147,14 +1262,16 @@ describe('the word echo (plan 232)', () => {
     }
   })
 
-  it('lands its readings on a recording of its own, which plays whole under it', () => {
+  it('lands its readings on a recording of its own, which plays whole under it, then keeps the word', () => {
     const pl = echoPlan(themes, '人参::にんじん', { lang: 'en' })
     const beatsAt = [0.46, 1.04, 1.54, 2.11, 2.78]
     const { clip, spots } = echoDeck(pl, FORMATS.story, { ground: 'sumi', track: { src: 'sound.mp3', seconds: 15.384, beats: beatsAt } })
-    expect(clip.seconds).toBe(15.384)
+    expect(clip.keepAt).toBe(15.384)
+    expect(clip.seconds).toBeCloseTo(15.384 + ECHO.keep, 3)
     expect(clip.beats).toEqual(beatsAt)
     expect(spots.length).toBe(beatsAt.length)
-    expect(clip.sounds).toEqual([{ at: 0, src: 'sound.mp3' }])
+    expect(clip.sounds.filter(x => x.src)).toEqual([{ at: 0, src: 'sound.mp3' }])
+    expect(clip.sounds.filter(x => x.key).every(x => x.at > 15.384)).toBe(true)
   })
 
   it('finds where the voice starts and stops in its clip', () => {
@@ -1179,16 +1296,23 @@ describe('the word echo (plan 232)', () => {
         const voice = { src: 'x.mp3', on: 0.14, off: 0.14 + 0.11 * [...pl.echo.word.r].length }
         const frames = echoDeck(pl, FORMATS.story, { ground: 'sumi', voice })
         const { clip } = frames
-        expect(clip.seconds).toBe(10)
-        expect(clip.sounds.map(x => x.at), id).toEqual(clip.beats.map(a => Math.max(0, a - voice.on)))
-        expect(clip.sounds.every(x => x.src === 'x.mp3'), id).toBe(true)
+        // Ten seconds of sayings, then the word kept once the last has been said.
+        const voiced = voice.off - voice.on
+        expect(clip.keepAt, id).toBeCloseTo(clip.beats.at(-1) + voiced + ECHO.after, 3)
+        expect(clip.keepAt, id).toBeLessThanOrEqual(ECHO.seconds + ECHO.after)
+        expect(clip.seconds, id).toBeCloseTo(clip.keepAt + ECHO.keep, 3)
+        const said = clip.sounds.filter(x => x.src)
+        expect(said.map(x => x.at), id).toEqual(clip.beats.map(a => Math.max(0, a - voice.on)))
+        expect(said.every(x => x.src === 'x.mp3'), id).toBe(true)
+        // The ending's own sounds are the app's, after the last saying.
+        expect(clip.sounds.filter(x => x.key).map(x => x.key), id).toEqual(['board-flap', 'platform-chime'])
         // Before the first saying, the card alone; at the end, every saying on the screen.
         const first = stubContext()
         clip.draw(first.ctx, 0.3)
         expect(first.texts.filter(x => x === pl.echo.word.r).length, id).toBe(1)
-        for (const t of [1, 4.5, 9.99]) expect(() => clip.draw(stubContext().ctx, t)).not.toThrow()
+        for (const t of [1, 4.5, clip.keepAt - 0.01, clip.keepAt + 0.3, clip.seconds - 0.01]) expect(() => clip.draw(stubContext().ctx, t)).not.toThrow()
         const end = stubContext()
-        clip.draw(end.ctx, 9.99)
+        clip.draw(end.ctx, clip.keepAt - 0.01)
         expect(end.texts.filter(x => x === pl.echo.word.r).length, id).toBe(clip.beats.length + 1)
         expect(end.texts.some(x => /VOICEVOX Nemo/.test(x)), id).toBe(true)
         const still = stubContext()
@@ -1200,12 +1324,41 @@ describe('the word echo (plan 232)', () => {
       globalThis.Path2D = had
     }
   })
+
+  it('ends on the word kept: the ask, the review that brings it back, the theme and the way to the app (plan 246)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      for (const lang of ['en', 'fr']) {
+        for (const { id } of echoItems(themes, lang).filter((_, i) => i % 23 === 0)) {
+          const pl = echoPlan(themes, id, { lang })
+          const theme = Object.values(themes.themes).find(th => th.words.some(w => `${w.t}::${w.r}` === id))
+          expect(pl.echo.keepLine, id).toContain(` ${theme.words.length - 1} `)
+          const frames = echoDeck(pl, FORMATS.story, { ground: 'paper', voice: { src: 'x.mp3', on: 0.14, off: 0.6 } })
+          expect(frames.map(f => f.key), id).toEqual(['echo', 'keep'])
+          const kept = stubContext()
+          frames[1].draw(kept.ctx)
+          // The ask and its line whole, the site's address in its bar.
+          expect(kept.texts.join(' '), id).toContain(pl.echo.keep)
+          expect(kept.texts.join(' ').replace(/\s+/g, ' '), id).toContain(pl.echo.keepLine)
+          expect(kept.texts, id).toContain('tsuji.app')
+          // The clip's last frame is the ending, as it stands still.
+          const last = stubContext()
+          frames.clip.draw(last.ctx, frames.clip.seconds - 0.01)
+          expect(last.texts.sort(), id).toEqual(kept.texts.sort())
+        }
+      }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
 })
 
 describe('the long videos (plan 233)', () => {
   const files = {}
   for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
   files['themes.json'] = bank('themes.json')
+  files['conversation.json'] = bank('conversation.json')
   const withPath2D = fn => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
@@ -1226,7 +1379,8 @@ describe('the long videos (plan 233)', () => {
       for (const kind of KINDS) {
         const pl = longPlan(kind, files, { lang, level: 'N5', point: '〜てください' })
         const tl = timeline(pl)
-        expect(pl.items.length, kind).toBeGreaterThan(kind === 'grammar' ? 10 : 20)
+        // A reply video: two scenes and six questions (plan 249).
+        expect(pl.items.length, kind).toBeGreaterThan(kind === 'grammar' ? 10 : kind === 'reply' ? 7 : 20)
         expect(tl.segs[0].type).toBe('intro')
         expect(tl.segs.at(-1).type).toBe('outro')
         drawsWhole(pl, tl)
@@ -1360,11 +1514,11 @@ describe('the long videos (plan 233)', () => {
       const listed = Object.fromEntries(longListFiles(level).map(f => [f, files[f]]))
       const items = longItems(listed, level, 'en')
       const kinds = new Set(items.map(x => x.kind))
-      expect([...kinds].sort(), level).toEqual(['grammar', 'kanji', 'quiz', 'theme', 'vocab'])
+      expect([...kinds].sort(), level).toEqual(['grammar', 'kanji', 'quiz', 'reply', 'theme', 'vocab'])
       expect(new Set(items.map(x => x.id)).size, level).toBe(items.length)
       expect(items.filter(x => x.kind === 'grammar').length, level).toBe(bank(`grammar-${level}.json`).lessons.length)
       // Every listed video is drawn from the files it says it reads, the last part of each kind too.
-      const sample = ['vocab', 'kanji', 'quiz', 'grammar', 'theme'].flatMap(k => { const of = items.filter(x => x.kind === k); return [of[0], of.at(-1)] })
+      const sample = ['vocab', 'kanji', 'quiz', 'grammar', 'theme', 'reply'].flatMap(k => { const of = items.filter(x => x.kind === k); return [of[0], of.at(-1)] })
       for (const it of sample) {
         const own = Object.fromEntries([...longListFiles(level), ...longFiles(it.id, level)].map(f => [f, files[f]]))
         const { kind, opts } = longPick(it.id, level, 'en')
@@ -1395,6 +1549,7 @@ describe('the short formats (plan 233)', () => {
   const files = {}
   for (const lv of LEVELS) for (const f of [`${lv}.json`, `words-${lv}.json`, `kanji-${lv}.json`, `grammar-${lv}.json`]) files[f] = bank(f)
   files['themes.json'] = bank('themes.json')
+  files['conversation.json'] = bank('conversation.json')
   const withPath2D = fn => {
     const had = globalThis.Path2D
     globalThis.Path2D = class { constructor(d) { this.d = d } }
@@ -1408,9 +1563,10 @@ describe('the short formats (plan 233)', () => {
           const pl = fitShort(longPlan(kind, files, { lang, level, format: 'short', point: bank(`grammar-${level}.json`).lessons[1].p }))
           const tl = timeline(pl)
           expect(pl.format, kind).toBe('short')
-          expect(tl.seconds, `${kind} ${level}`).toBeLessThanOrEqual(SHORT.seconds)
+          // A reply short is one scene whole, past the minute, under Shorts' three (plan 249b).
+          expect(tl.seconds, `${kind} ${level}`).toBeLessThanOrEqual(kind === 'reply' ? REPLY_SHORT : SHORT.seconds)
           expect(tl.seconds, `${kind} ${level}`).toBeGreaterThan(20)
-          if (kind !== 'grammar') expect(pl.items.length, kind).toBeLessThanOrEqual(SHORT[kind])
+          if (kind !== 'grammar' && kind !== 'reply') expect(pl.items.length, kind).toBeLessThanOrEqual(SHORT[kind])
           for (const sg of tl.segs) {
             for (const u of [0, sg.dur / 2, ...Object.values(sg.marks).flat().filter(x => typeof x === 'number'), sg.dur - 0.01]) {
               expect(() => drawLong(stubContext().ctx, pl, tl, sg.start + Math.min(u, sg.dur - 0.01)), `${kind} ${sg.type} ${u}`).not.toThrow()
@@ -1421,6 +1577,7 @@ describe('the short formats (plan 233)', () => {
           expect(page.title, kind).toMatch(/#shorts$/)
           expect(page.description, kind).toMatch(/VOICEVOX Nemo/)
           expect(page.description, kind).toMatch(/#Shorts/)
+          expectFeeds(page, 'https://example.org', `${kind} ${level} ${lang}`)
         }
       }
     }
@@ -1429,6 +1586,46 @@ describe('the short formats (plan 233)', () => {
     expect(g.items.map(x => x.type)).toEqual(['gtitle', 'gex', 'gex', 'q'])
     expect(timeline(g).cues.filter(c => c.slow)).toEqual([])
   }), 120000)
+
+  it('keeps a 9:16 slide and a short inside Instagram’s feed crop, clear of its header, caption and buttons (plan 239)', () => withPath2D(() => {
+    const ig = formatOf('story', 'instagram')
+    expect([ig.id, ig.w, ig.h, ig.fit]).toEqual(['story', 1080, 1920, 'instagram'])
+    // The feed shows the middle 4:5, 285 cut at the top and the foot, its header over the crop's top 110.
+    const crop = (1920 - 1350) / 2
+    expect(ig.safe.t).toBeGreaterThanOrEqual(crop + 110)
+    // Full screen, a reel's caption stands from ~1450 and its buttons down the right.
+    expect(ig.h - ig.safe.b).toBeLessThanOrEqual(1450)
+    expect(ig.safe.r).toBeGreaterThanOrEqual(140)
+    expect(ig.safe.l).toBe(ig.safe.r)
+    // A 4:5 post is shown whole: Instagram's are the normal margins.
+    expect(formatOf('post', 'instagram').safe).toEqual(formatOf('post', 'normal').safe)
+    // The guide draws Instagram's feed over a 9:16 slide, never over a post.
+    const drawn = fmt => {
+      const calls = []
+      const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : () => calls.push(k)), set: (o, k, v) => { o[k] = v; return true } })
+      drawFeedHud(ctx, fmt)
+      return calls.filter(k => k === 'fillRect' || k === 'fill').length
+    }
+    expect(drawn(ig)).toBeGreaterThan(0)
+    expect(drawn(formatOf('post', 'instagram'))).toBe(0)
+    // A long video's short: TikTok's moved whole into Instagram's box, and said so on its command.
+    const { kind, opts } = longPick('vocab:1', 'N5', 'en', 'short')
+    const pl = fitShort(longPlan(kind, files, { ...opts, fit: 'instagram' }))
+    expect(pl.fit).toBe('instagram')
+    expect(fitShort(longPlan(kind, files, opts)).fit).toBe('tiktok')
+    const tl = timeline(pl)
+    const scales = []
+    const { ctx: base } = stubContext()
+    const ctx = new Proxy(base, { get: (o, k) => (k === 'scale' ? (x, y) => scales.push([x, y]) : o[k]), set: (o, k, v) => { o[k] = v; return true } })
+    drawLong(ctx, pl, tl, tl.segs[1].start + 1)
+    const box = s => [1080 - s.l - s.r, 1920 - s.t - s.b]
+    const [tw, th] = box({ t: 250, r: 144, b: 430, l: 144 })
+    const [iw, ih] = box(ig.safe)
+    expect(scales[0][0]).toBeCloseTo(Math.min(iw / tw, ih / th), 5)
+    expect(longCommand('vocab:1', 'N5', 'en', 'short', 'instagram')).toContain('--format short --fit instagram')
+    expect(longCommand('vocab:1', 'N5', 'en', 'short')).not.toContain('--fit')
+    expect(longCommand('vocab:1', 'N5', 'en', 'long', 'instagram')).not.toContain('--fit')
+  }))
 
   it('times a carousel as a short: each slide read, a question answered, its line said at the reveal', () => {
     expect(slideSeconds(0, 'cover').hold).toBe(2.4)
@@ -1474,7 +1671,7 @@ describe('the short formats (plan 233)', () => {
       // Counted as each draws in the studio and the renderer (a browser's measure); here a fixed count.
       const counts = slides.map(() => 40)
       const line = spokenLine(pl)
-      if (['sentence', 'word', 'kana', 'translation', 'lesson', 'theme'].includes(src.id)) expect(line, src.id).toMatch(/[ぁ-んァ-ン一-龯]/)
+      if (['sentence', 'short', 'word', 'kana', 'translation', 'lesson', 'theme'].includes(src.id)) expect(line, src.id).toMatch(/[ぁ-んァ-ン一-龯]/)
       if (line) expect(line, src.id).not.toMatch(/[（）a-z]/i)
       const tl = shortTimeline(slides, counts, line)
       expect(tl.segs).toHaveLength(slides.length)
@@ -1482,6 +1679,7 @@ describe('the short formats (plan 233)', () => {
       expect(page.title.length, src.id).toBeLessThanOrEqual(100)
       expect(page.title, src.id).toMatch(/#shorts$/)
       expect(page.description.includes('VOICEVOX Nemo'), src.id).toBe(!!line)
+      expectFeeds(page, 'https://example.org', src.id)
     }
     // What a slide writes, each character once.
     expect(chars({ draw: ctx => { ctx.fillText('駅で', 0, 0); ctx.fillText('station', 0, 0) } }, { fillText() {} })).toBe(9)
@@ -1502,13 +1700,15 @@ describe('the conversion carousels (plan 234)', () => {
   // The first item of every file of every source, in English; of each
   // source's first file, in French too.
   const some = []
-  for (const src of STATIONED) {
+  // Read it's own sentences have tests of their own (plan 254).
+  for (const src of STATIONED.filter(x => x.id !== 'short')) {
     filesOf(src).forEach(({ data, filter }, n) => {
       const { id } = itemsOf(src.id, data, 'en', filter)[0]
       for (const lang of n ? ['en'] : ['en', 'fr']) some.push({ src, id, lang, p: plan(src.id, data, id, { ...OPTS, lang }, depsFor(src, data, id)) })
     })
   }
-  const types = p => TYPES.map(x => x.id).filter(x => available(x, p))
+  // Read it deals its own four slides in its own order (plan 253): its test is its own.
+  const types = p => TYPES.map(x => x.id).filter(x => x !== 'read' && available(x, p))
 
   it('walks every type of every source: the hook, the answer, the app, then the detail and the key points', { timeout: 120000 }, () => withPath2D(() => {
     for (const { src, id, lang, p } of some) {
@@ -1567,7 +1767,7 @@ describe('the conversion carousels (plan 234)', () => {
     expect(funnelOf('build', sentencePlan).feature).toBe('translation')
     const studied = {
       translation: 'translation', passage: 'comprehension', lesson: 'grammar', word: 'words', kanji: 'kanji', kana: 'kana',
-      theme: 'words', lookalike: 'kanji', dialogue: 'grammar', trap: 'grammar',
+      theme: 'words', lookalike: 'kanji', dialogue: 'conversation', trap: 'grammar',
     }
     for (const { src, p } of some) if (studied[src.id]) expect(funnelOf('plates', p).feature, src.id).toBe(studied[src.id])
     // Any feature can stand in any carousel's call to action, on either ground.
@@ -1581,6 +1781,124 @@ describe('the conversion carousels (plan 234)', () => {
         }
       }
     }
+  }))
+
+  it('sets a turn’s line as large as the 9:16 frame lets it, down to the page dots (plan 240)', () => withPath2D(() => {
+    // TikTok's photo view: its caption's panel from y ~1660, the page dots at ~1600.
+    expect(FORMATS.story.h - FORMATS.story.safe.b).toBe(1590)
+    const dialogue = some.find(x => x.src.id === 'dialogue' && x.lang === 'en')
+    const { p } = dialogue
+    // The size each text is set at, read off the font as it is drawn.
+    const sizes = ctx0 => {
+      const at = []
+      const ctx = new Proxy(ctx0, { get: (o, k) => (k === 'fillText' ? (t, ...a) => { at.push([String(t), parseFloat(/([\d.]+)px/.exec(o.font)?.[1] || '0')]); return o.fillText(t, ...a) } : o[k]), set: (o, k, v) => { o[k] = v; return true } })
+      return { ctx, at }
+    }
+    for (const design of DESIGNS) {
+      const slides = deck('plates', p, FORMATS.story, { design })
+      for (const key of ['ask', 'answer']) {
+        const sl = slides.find(x => x.key === key)
+        const { ctx, at } = sizes(stubContext().ctx)
+        sl.draw(ctx)
+        const turn = p.funnel.turns.find(tu => tu.them.rows.every(r => r.k === 'punct' || at.some(([t]) => t === r.t)))
+        expect(turn, `${design} ${key}`).toBeTruthy()
+        // Their line, at the title's size at least: it was set at the body's before.
+        const line = turn.them.rows.filter(r => r.k !== 'punct').map(r => Math.max(...at.filter(([t]) => t === r.t).map(([, z]) => z)))
+        expect(Math.min(...line), `${design} ${key}`).toBeGreaterThanOrEqual(FS.title - 0.5)
+      }
+    }
+  }))
+
+  it('sends the Fiche hook on to the answer and the call to action on to the site’s address (plan 245)', () => withPath2D(() => {
+    for (const { src, id, lang, p } of some) {
+      const where = `${src.id} ${id} ${lang}`
+      const slides = deck('plates', p, FORMATS.story, { design: 'fiche' })
+      const hook = stubContext()
+      slides[0].draw(hook.ctx)
+      // Its foot says where the answer is (the stub measures wider than the font: it may be cut).
+      const foot = hook.texts.at(-1)
+      expect(foot.length, where).toBeGreaterThan(8)
+      expect(FUNNEL[lang].yoursFoot.startsWith(foot.replace(/…$/, '')), `${where}: ${foot}`).toBe(true)
+      // The address, set alone in its bar: no "Go to" before it.
+      const cta = stubContext()
+      slides.find(x => x.key === 'cta').draw(cta.ctx)
+      expect(cta.texts, where).toContain('tsuji.app')
+      expect(cta.texts.join(' '), where).not.toMatch(/Go to|Va sur/)
+    }
+  }))
+
+  it('answers the 会話 station’s own scenes beside the carousel’s conversations, every turn inside the frame (plan 268)', () => withPath2D(() => {
+    const D = bank('dialogues.json').dialogues
+    const scenes = bank('conversation.json').scenes
+    // Each scene the reply videos ask, whole, under an id of its own and marked as the station's.
+    for (const sc of scenes) {
+      const d = D.find(x => x.id === `kaiwa-${sc.id}`)
+      expect(d?.kaiwa, sc.id).toBe(true)
+      expect([d.lv, d.place, d.them, d.turns], sc.id).toEqual([sc.lv, sc.place, sc.them, sc.turns])
+    }
+    expect(D.filter(d => !d.kaiwa).length).toBe(JSON.parse(read('carousel/content/dialogues.json')).length)
+    expect(new Set(D.map(d => d.id)).size).toBe(D.length)
+    // Level by level, as one list; the station's named in it.
+    const LV = ['N5', 'N4', 'N3', 'N2', 'N1']
+    const order = D.map(d => LV.indexOf(d.lv))
+    expect(order).toEqual([...order].sort((a, b) => a - b))
+    const items = itemsOf('dialogue', { dialogues: D }, 'en')
+    for (const d of D) expect(items.find(x => x.id === d.id).tag, d.id).toBe(d.kaiwa ? `${d.lv} · 会話` : d.lv)
+    // The carousel's own conversations keep their Classic turns.
+    const own = plan('dialogue', { dialogues: D }, D.find(d => !d.kaiwa).id, OPTS)
+    expect(deck('plates', own, FORMATS.story, { design: 'classic' }).some(x => x.key.startsWith('turn')), own.id).toBe(true)
+    // The longest scene of each level: every turn asked, every line inside the 9:16 frame, uncut.
+    const fmt = FORMATS.story
+    for (const lv of LV) {
+      const sc = D.filter(d => d.kaiwa && d.lv === lv).reduce((a, b) => (b.turns.length > a.turns.length ? b : a))
+      for (const lang of ['en', 'fr']) {
+        const p = plan('dialogue', { dialogues: D }, sc.id, { ...OPTS, lang })
+        // The scene's own words, none cut (a label of the studio's is fitted by its own tests).
+        const words = sc.turns.flatMap(tu => [tu.them[lang], tu.reply[lang], tu.why[lang]])
+        const cut = t => t.endsWith('…') && words.some(w => w.includes(t.slice(0, -1).replace(/[\s,;:.]+$/, '')))
+        expect(p.slides.filter(s => s.kind === 'turn').length, sc.id).toBe(sc.turns.length * 2)
+        expect(p.funnel.turns.length, sc.id).toBe(sc.turns.length)
+        // Asked in Classic, a scene is drawn in Clarté, as Read it is: its N1 lines stand on no Classic question.
+        expect(deck('plates', p, fmt, { design: 'classic' }).map(x => x.key), sc.id).toEqual(deck('plates', p, fmt, { design: 'clarte' }).map(x => x.key))
+        for (const design of [...DESIGNS, 'classic']) {
+          // The call to action is every carousel's, its own test fits it (its cards' lines trimmed to their box).
+          for (const sl of deck('plates', p, fmt, { design }).filter(x => x.key !== 'cta')) {
+            const { ctx, texts } = placedTexts()
+            sl.draw(ctx)
+            for (const x of texts) {
+              const where = `${sc.id} ${lang} ${design} ${sl.key} ${x.t}`
+              expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(fmt.safe.t - 1)
+              expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(fmt.h - fmt.safe.b + 1)
+              expect(cut(x.t), where).toBe(false)
+            }
+          }
+        }
+      }
+    }
+  }), 120000)
+
+  it('draws a conversation’s call to action as its run: one of its exchanges, every reply whole (plan 235)', () => withPath2D(() => {
+    const joined = rows => rows.map(r => r.t).join('')
+    const dialogues = some.filter(x => x.src.id === 'dialogue')
+    expect(dialogues.length).toBeGreaterThan(0)
+    for (const { p, lang } of dialogues) {
+      expect(funnelOf('plates', p).feature, lang).toBe('conversation')
+      const exchanges = p.funnel.turns.map(tu => [joined(tu.them.rows), ...tu.choices.map(joined)])
+      for (const fmt of [FORMATS.post, FORMATS.story]) {
+        const { ctx, texts } = stubContext()
+        deck('plates', p, fmt, { design: 'clarte' }).find(x => x.key === 'cta').draw(ctx)
+        // Their line (whole, or cut between its sentences) and the three replies, uncut.
+        const drawn = exchanges.find(ex => ex.slice(1).every(jp => texts.includes(jp)))
+        expect(drawn, `${lang} ${fmt.id}`).toBeTruthy()
+        expect(drawn[0].split(/(?<=[。？！])/).every(s => texts.some(t => t.includes(s))), drawn[0]).toBe(true)
+        expect(texts, lang).toContain(FUNNEL[lang].features.conversation.name)
+      }
+    }
+    // Another carousel promoting it borrows a conversation's opening.
+    const { p } = some.find(x => x.src.id === 'sentence' && x.lang === 'en')
+    const { ctx, texts } = stubContext()
+    deck('plates', p, FORMATS.post, { design: 'fiche', feature: 'conversation' }).find(x => x.key === 'cta').draw(ctx)
+    expect(texts).toContain('二人です。')
   }))
 
   it('has a call to action for every practice mode, the questions after them and Today', () => {
@@ -1696,5 +2014,1488 @@ describe('the conversion carousels (plan 234)', () => {
   it('holds a hook as long as a question in a short', () => {
     expect(slideSeconds(40, 'ask').ask).toBe(true)
     expect(slideSeconds(40, 'answer').ask).toBe(false)
+  })
+})
+
+
+describe('the reading challenges (plan 247)', () => {
+  const data = bank('comprehension.json')
+  // Every text drawn (drawn) on a canvas stubbed for the lane (testing/challengeCanvas.js).
+  const jp = t => /[\u3040-\u30ff\u3400-\u9fff]/.test(t)
+  const each = data.passages
+
+  it('lays no music under it, its one credit the voice where it reads aloud (plan 273)', () => {
+    expect(() => read('carousel/music/cool-vibes.mp3')).toThrow()
+    for (const style of CHALLENGE_STYLES) {
+      const pl = challengePlan(data, 'n5-01', { style, music: 'cool-vibes' })
+      const tl = challengeTimeline(pl)
+      expect('music' in pl, style).toBe(false)
+      expect('bed' in tl, style).toBe(false)
+      // Read in silence it is kept calmer than read aloud.
+      expect(tl.loudness, style).toBe(style === 'along' ? -16 : -20)
+      expect(challengeCommand(pl), style).not.toMatch(/--music/)
+      for (const lang of ['en', 'fr']) {
+        const page = challengePage({ ...pl, lang }, tl, 'x').description
+        expect(page, `${style} ${lang}`).not.toMatch(/MacLeod|Music|Musique/)
+        expect(/VOICEVOX Nemo/.test(page), `${style} ${lang}`).toBe(style === 'along')
+      }
+    }
+    expect(challengePlan(data, 'n5-01').style).toBe('scroll')
+    expect(Object.keys(CPM).sort()).toEqual([...LEVELS].sort())
+    expect(SOURCES.find(s => s.id === 'challenge')).toMatchObject({ video: true, byLevel: true })
+    expect(challengeItems(data).length).toBe(data.passages.length)
+  })
+
+  it('reads every text, and one of its questions after', () => {
+    for (const P of data.passages) {
+      for (const lang of ['en', 'fr']) {
+        const pl = challengePlan(data, P.id, { lang })
+        // A question about what the text says, its answer among its four choices.
+        const Q = P.questions.find(q => q.type === 'comprehension')
+        if (Q) expect(pl.q.ask, P.id).toBe(Q.question[lang])
+        expect(pl.q.choices.length, P.id).toBe(4)
+        expect(pl.q.right >= 0 && pl.q.right < 4, P.id).toBe(true)
+      }
+    }
+  })
+
+  it('scrolls the whole text up past the reading line at the pace its level reads', () => {
+    for (const P of data.passages) {
+      const pl = challengePlan(data, P.id, { style: 'scroll' })
+      const tl = challengeTimeline(pl)
+      const chars = pl.sents.flat().filter(r => r.k !== 'punct').reduce((n, r) => n + [...r.t].length, 0)
+      expect(pl.chars, P.id).toBe(chars)
+      const seg = tl.segs.find(s => s.key === 'reading')
+      expect(seg.dur, P.id).toBeCloseTo(CHALLENGE.into + chars / (CPM[P.lv] / 60) + CHALLENGE.out, 2)
+      expect(tl.lines, P.id).toEqual([])
+      // The hook, the reading, the question, its answer, the app: end to end.
+      expect(tl.segs.map(s => s.key)).toEqual(['hook', 'reading', 'question', 'answer', 'cta'])
+      tl.segs.forEach((s, i) => { if (i) expect(s.start, P.id).toBeCloseTo(tl.segs[i - 1].start + tl.segs[i - 1].dur, 2) })
+      expect(tl.seconds, P.id).toBeCloseTo(tl.segs.at(-1).start + tl.segs.at(-1).dur, 2)
+      expect(tl.cues, P.id).toEqual([])
+      // The countdown's ticks, the answer, the chime, and the two taps on the reader's card (plan 266).
+      expect(tl.sfx.map(x => x.key), P.id).toEqual(['board-flap', ...Array(CHALLENGE.count).fill('click'), pl.hidden ? 'card-transition' : 'correct', 'platform-chime', 'click', 'click'])
+    }
+  })
+
+  it('moves the text up at one speed and one size, as credits go', () => withPath2D(() => {
+    const pl = challengePlan(data, 'n4-01', { tune: BEFORE_309 })
+    const tl = challengeTimeline(pl)
+    const seg = tl.segs.find(s => s.key === 'reading')
+    const first = pl.sents[0][0].t
+    const where = t => {
+      const { ctx, at } = drawn()
+      drawChallenge(ctx, pl, tl, t, null)
+      return at
+    }
+    // The first sentence's first word, drawn top down.
+    const word = t => where(t).find(x => x.t === first)
+    // The text comes in with its first line at the reading line, the rest under it.
+    const opens = word(seg.start + CHALLENGE.into)
+    expect(opens.y).toBeGreaterThan(SCROLL.read)
+    expect(opens.y).toBeLessThan(SCROLL.read + SCROLL.z * 2.5)
+    const rises = [0.1, 0.2, 0.3].map(f => word(seg.start + CHALLENGE.into + 12 * f))
+    for (let i = 1; i < rises.length; i++) {
+      expect(rises[i].y).toBeLessThan(rises[i - 1].y)
+      expect(rises[i].size).toBe(rises[0].size)
+    }
+    expect(rises[0].y - rises[1].y).toBeCloseTo(rises[1].y - rises[2].y, 3)
+    // Every sentence read on the way: the counter climbs to the last.
+    const n = pl.sents.length
+    const count = t => where(t).find(x => / \/ \d+$/.test(x.t))?.t
+    expect(count(seg.start + 0.1)).toMatch(new RegExp(` 1 / ${n}$`))
+    expect(count(seg.start + seg.dur - 0.05)).toMatch(new RegExp(` ${n} / ${n}$`))
+    // The last line past the reading line, and still on screen, as the question comes.
+    const end = where(seg.start + seg.dur - 0.05).filter(x => jp(x.t) && x.alpha > 0.5)
+    expect(end.length).toBeGreaterThan(0)
+    expect(Math.max(...end.map(x => x.y))).toBeLessThan(SCROLL.read)
+  }))
+
+  it('lights each word read along as the voice reaches it, on the engine’s own syllables', () => {
+    const pl = challengePlan(data, 'n5-01', { style: 'along' })
+    const cues = challengeCues(pl)
+    expect(cues.length).toBe(pl.sents.length)
+    expect(cues.every(c => c.who === 'reader' && c.slow && c.marks)).toBe(true)
+    expect(cues[0].text).toBe('わたしは大学の学生です。')
+    expect(moraeOf({ t: '学生', fu: [['学', 'がく'], ['生', 'せい']] })).toBe(4)
+    expect(moraeOf({ t: 'じゅぎょう' })).toBe(3)
+    expect(moraeOf({ t: '。', k: 'punct' })).toBe(0)
+    // わたし は 大学 の 学生 です 。: 3 1 4 1 4 2 syllables, voiced at the engine's times.
+    const rows = pl.sents[0]
+    const marks = Array.from({ length: 15 }, (_, i) => ({ t: 0.1 + i * 0.12, k: 'ア' }))
+    const at = wordTimes(rows, 10, 2.0, marks)
+    expect(at.slice(0, 6).map(x => +(x - 10).toFixed(2))).toEqual([0.1, 0.46, 0.58, 1.06, 1.18, 1.66])
+    // The engine's syllables not the text's: in proportion, in order, inside the line.
+    const guessed = wordTimes(rows, 10, 2.0, marks.slice(0, 9))
+    for (let i = 1; i < guessed.length; i++) expect(guessed[i]).toBeGreaterThanOrEqual(guessed[i - 1])
+    expect(guessed[0] >= 10 && guessed.at(-1) <= 12).toBe(true)
+    // Timed on the voice when it has been made: each sentence as long as it is said.
+    const voiced = c => ({ dur: 1 + [...c.text].length * 0.1, marks: null })
+    const tl = challengeTimeline(pl, voiced)
+    tl.lines.forEach((l, i) => {
+      expect(l.dur).toBeCloseTo(voiced(cues[i]).dur, 3)
+      expect(tl.cues[i].at).toBeCloseTo(l.voice, 3)
+      expect(challengeKey(tl.cues[i])).toBe(`reader|slow|${cues[i].text}`)
+      if (i) expect(l.at).toBeCloseTo(tl.lines[i - 1].voice + tl.lines[i - 1].dur + CHALLENGE.gap, 2)
+    })
+  })
+
+  it('asks the question chosen, its answers dealt across A to D, the right one kept (plan 260)', () => {
+    const at = [0, 0, 0, 0]
+    for (const P of each) {
+      const qs = challengeQuestions(data, P.id)
+      expect(qs.map(q => q.n), P.id).toEqual(P.questions.map((_, i) => i + 1))
+      // Unless chosen, the first about what the text says, never one about its grammar.
+      const first = qs.find(q => q.first)
+      expect(P.questions[first.n - 1].type, P.id).toBe('comprehension')
+      expect(challengePlan(data, P.id, {}).q.n, P.id).toBe(first.n)
+      for (const bad of [0, P.questions.length + 1, 'x']) expect(challengePlan(data, P.id, { question: bad }).q.n, `${P.id} ${bad}`).toBe(first.n)
+      for (const q of qs) {
+        const Q = P.questions[q.n - 1]
+        const en = challengePlan(data, P.id, { question: q.n })
+        const fr = challengePlan(data, P.id, { question: q.n, lang: 'fr' })
+        // The same four, the right one still right, in the same place in both languages.
+        expect([...en.q.choices].sort(), `${P.id} ${q.n}`).toEqual([...Q.options.en].sort())
+        expect(en.q.choices[en.q.right], `${P.id} ${q.n}`).toBe(Q.options.en[Q.correct])
+        expect(fr.q.choices[fr.q.right], `${P.id} ${q.n}`).toBe(Q.options.fr[Q.correct])
+        expect(fr.q.right, `${P.id} ${q.n}`).toBe(en.q.right)
+        at[en.q.right] += 1
+      }
+    }
+    // The right answer stands at A, B, C and D alike, where the bank writes it first most often.
+    const n = at.reduce((a, b) => a + b, 0)
+    for (const k of at) expect(k / n).toBeGreaterThan(0.2)
+    for (const k of at) expect(k / n).toBeLessThan(0.3)
+    // The command names the question only where it is not the default.
+    expect(challengeCommand(challengePlan(data, 'n5-03', { question: 7 }))).toContain(' --question 7')
+    expect(challengeCommand(challengePlan(data, 'n5-03', {}))).not.toContain('--question')
+  })
+
+  it('stands every question and its answers above the safe foot, the countdown too (plan 262)', () => withPath2D(() => {
+    const foot = FORMATS.story.h - FORMATS.story.safe.b
+    for (const P of each) {
+      for (const n of P.questions.map((_, i) => i + 1)) {
+        for (const lang of ['en', 'fr']) {
+          const pl = challengePlan(data, P.id, { question: n, lang })
+          const tl = challengeTimeline(pl)
+          const ask = tl.segs.find(s => s.key === 'question')
+          const answer = tl.segs.find(s => s.key === 'answer')
+          for (const t of [ask.start + ask.dur - 0.5, answer.start + answer.dur - 0.05]) {
+            const { ctx, at } = drawn()
+            drawChallenge(ctx, pl, tl, t, null)
+            for (const x of at.filter(x => x.alpha > 0.01)) {
+              const where = `${P.id} q${n} ${lang} ${t.toFixed(1)} ${x.t}`
+              expect(x.y + x.size * 0.25, where).toBeLessThanOrEqual(foot + 1)
+              // Cut, unless the text itself trails off ("If it's a bike shop you need, …").
+              expect(x.t.endsWith('…') && ![pl.q.ask, ...pl.q.choices].some(o => o.endsWith(x.t)), where).toBe(false)
+            }
+          }
+        }
+      }
+    }
+  }), 240000)
+
+  it('sets what a viewer reads large, inside the frame, whole', () => withPath2D(() => {
+    const fr = { x: FORMATS.story.safe.l, right: FORMATS.story.w - FORMATS.story.safe.r }
+    for (const P of each) {
+      for (const style of CHALLENGE_STYLES) {
+        for (const lang of ['en', 'fr']) {
+          const pl = challengePlan(data, P.id, { style, lang })
+          const tl = challengeTimeline(pl)
+          const where = `${P.id} ${style} ${lang}`
+          const seg = tl.segs.find(s => s.key === 'reading')
+          const reading = style === 'scroll' ? [0.25, 0.5, 0.75].map(f => seg.start + seg.dur * f) : tl.lines.slice(0, 3).map(l => l.voice + 0.5)
+          const moments = [1.6, ...reading, ...tl.segs.slice(3).map(s => s.start + s.dur - 0.05)]
+          for (const t of moments) {
+            const { ctx, at } = drawn()
+            drawChallenge(ctx, pl, tl, t, null)
+            for (const x of at.filter(x => x.alpha > 0.99)) {
+              expect(x.left, `${where} ${t} ${x.t}`).toBeGreaterThanOrEqual(fr.x - 2)
+              expect(x.right, `${where} ${t} ${x.t}`).toBeLessThanOrEqual(fr.right + 2)
+              expect(x.t.endsWith('…'), `${where} ${t} ${x.t}`).toBe(false)
+            }
+          }
+          // The sentence being read, at the title's size at least, its readings over it.
+          const { ctx, at } = drawn()
+          drawChallenge(ctx, pl, tl, style === 'scroll' ? seg.start + seg.dur * 0.5 : tl.lines[1].voice + 0.2, null)
+          const words = at.filter(x => jp(x.t) && x.alpha > 0.99)
+          const body = Math.max(...words.map(x => x.size))
+          expect(body, where).toBeGreaterThanOrEqual(FS.title)
+          if (pl.ruby) expect(words.some(x => x.size < body * 0.6), where).toBe(true)
+        }
+      }
+    }
+  }), 240000)
+
+  it('ends on the way to the app, and writes the video’s page', () => withPath2D(() => {
+    for (const lang of ['en', 'fr']) {
+      const pl = challengePlan(data, 'n4-01', { lang, style: 'along' })
+      const tl = challengeTimeline(pl)
+      const { ctx, at } = drawn()
+      drawChallenge(ctx, pl, tl, tl.seconds - 0.05, null)
+      expect(at.map(x => x.t)).toContain('tsuji.app')
+      const page = challengePage(pl, tl, 'https://tsuji.app')
+      expect(page.title.length).toBeLessThanOrEqual(100)
+      expect(page.description).toContain('https://tsuji.app')
+      expect(page.description).toMatch(/VOICEVOX Nemo/)
+      expect(challengeCommand(pl)).toMatch(/^VOICEVOX_URL=.* --challenge n4-01 --style along/)
+      expect(challengeCommand({ ...pl, style: 'scroll' })).not.toMatch(/VOICEVOX/)
+      expect(challengePage({ ...pl, style: 'scroll' }, tl, 'x').description).not.toMatch(/VOICEVOX/)
+    }
+    expect(challengePage(challengePlan(data, 'n4-01', { lang: 'fr' }), challengeTimeline(challengePlan(data, 'n4-01', { lang: 'fr' })), 'x').title).toMatch(/^Tu arrives/)
+  }))
+
+  it('ends on the app’s reader, the text rolling, slowed with −, its furigana shown with ふ, over the run’s three stops (plan 266)', () => withPath2D(() => {
+    const had = globalThis.OffscreenCanvas
+    const rolls = []
+    globalThis.OffscreenCanvas = class {
+      constructor(w, h) {
+        Object.assign(this, { width: w, height: h, d: drawn() })
+        rolls.push(this)
+      }
+      getContext() { return this.d.ctx }
+    }
+    try {
+      const foot = FORMATS.story.h - FORMATS.story.safe.b - METAL_H
+      for (const lang of ['en', 'fr']) {
+        const pl = challengePlan(data, 'n5-04', { lang })
+        const tl = challengeTimeline(pl)
+        const seg = tl.segs.find(s => s.key === 'cta')
+        expect(seg.dur).toBe(CHALLENGE.cta)
+        const frame = into => {
+          rolls.length = 0
+          const { ctx, at } = drawn()
+          drawChallenge(ctx, pl, tl, seg.start + into, null)
+          return { at, roll: rolls.at(-1)?.d.at || [] }
+        }
+        // The speed the app starts at, one step down at the tap on −, heard as a button.
+        const speed = lang === 'fr' ? v => `${v} car./s` : v => `${v} char/s`
+        expect(frame(CHALLENGE_CTA.minus - 0.1).at.map(x => x.t)).toContain(speed(3))
+        expect(frame(CHALLENGE_CTA.minus + 0.5).at.map(x => x.t)).toContain(speed(2))
+        const taps = tl.sfx.filter(x => x.at >= seg.start && x.key === 'click')
+        expect(taps.map(x => x.at)).toEqual([CHALLENGE_CTA.minus, CHALLENGE_CTA.furi].map(b => +(seg.start + b).toFixed(3)))
+        // The text rolls up its card at the app's pace: the characters over the speed, slower after the tap.
+        const first = pl.sents[2][0].t
+        const yOf = into => frame(into).roll.find(x => x.t === first).y
+        const before = (yOf(1.2) - yOf(2.0)) / 0.8
+        const after = (yOf(2.6) - yOf(3.0)) / 0.4
+        expect(before).toBeGreaterThan(0)
+        expect(after / before).toBeCloseTo(2 / 3, 1)
+        // The readings only once ふ is pressed.
+        const small = into => frame(into).roll.filter(x => x.alpha > 0.01 && x.size < FS.body * 0.8)
+        expect(small(CHALLENGE_CTA.furi - 0.1)).toEqual([])
+        expect(small(CHALLENGE_CTA.furi + 0.8).length).toBeGreaterThan(0)
+        // The run's stops, in the app's words, every one lit by the end; no Japanese names for them.
+        const end = frame(seg.dur - 0.05).at
+        const stops = lang === 'fr' ? ['Lire', `${pl.nq} questions`, 'Décomposition'] : ['Read', `${pl.nq} questions`, 'Breakdown']
+        for (const s of stops) expect(end.find(x => x.t === s)?.alpha, `${lang} ${s}`).toBeGreaterThan(0.99)
+        expect(end.filter(x => jp(x.t)).map(x => x.t)).toEqual(['ふ'])
+        expect(end.map(x => x.t)).toContain(lang === 'fr' ? 'Compréhension écrite' : 'Reading comprehension')
+      }
+      // Every text's card and stops above the address bar, for every text and either language.
+      for (const P of each) {
+        for (const lang of ['en', 'fr']) {
+          const pl = challengePlan(data, P.id, { lang })
+          const tl = challengeTimeline(pl)
+          const { ctx, at } = drawn()
+          drawChallenge(ctx, pl, tl, tl.seconds - 0.05, null)
+          for (const x of at.filter(x => x.alpha > 0.01 && x.t !== 'tsuji.app')) expect(x.y + x.size * 0.25, `${P.id} ${lang} ${x.t}`).toBeLessThanOrEqual(foot)
+        }
+      }
+      // Tuned shorter, the beats close up and the card still ends on the whole run.
+      const pl = challengePlan(data, 'n3-02', { tune: { 'challenge.cta': 3 } })
+      const tl = challengeTimeline(pl)
+      const seg = tl.segs.find(s => s.key === 'cta')
+      expect(seg.dur).toBe(3)
+      expect(tl.sfx.at(-1).at).toBeLessThan(seg.start + seg.dur)
+      const { ctx, at } = drawn()
+      drawChallenge(ctx, pl, tl, tl.seconds - 0.05, null)
+      expect(at.find(x => x.t === 'Breakdown')?.alpha).toBeGreaterThan(0.99)
+    } finally {
+      globalThis.OffscreenCanvas = had
+    }
+  }), 120000)
+
+  it('stands on the print of the season chosen, else the day’s, as the app’s gate does (plan 267)', () => {
+    const meta = JSON.parse(read('src/components/station/print/print.json'))
+    // Every season the studio offers, at every hour, is a print the app ships.
+    for (const season of PRINT_SEASONS) {
+      for (const hour of PRINT_HOURS) {
+        const name = printOf(season, hour)
+        expect(meta.prints[name], `${season} ${hour}`).toBeTruthy()
+        expect(existsSync(new URL(`../public/today/print/${meta.rev}/${name}-phone.json`, import.meta.url)), name).toBe(true)
+      }
+    }
+    expect(printOf('hanabi', 'night')).toBe('summer-hanabi')
+    expect(printOf('hanabi', 'dawn')).toBe('summer-dawn')
+    expect(printOf('winter', 'dusk')).toBe('winter-dusk')
+    // None chosen: the date's own print, the one the gate shows that day.
+    for (const at of [new Date(2026, 7, 15, 21), new Date(2026, 0, 10, 7), new Date(2026, 9, 20, 13)]) {
+      for (const hour of PRINT_HOURS) expect(printOf(null, hour, at)).toBe(printName(at, hour))
+    }
+    // The plan keeps a season it knows, and the command names it; none is the day's.
+    expect(challengePlan(data, 'n5-01', { season: 'winter' }).season).toBe('winter')
+    expect(challengePlan(data, 'n5-01', { season: 'monsoon' }).season).toBeNull()
+    expect(challengeCommand(challengePlan(data, 'n5-01', { season: 'hanabi', hour: 'night' }))).toContain('--hour night --season hanabi')
+    expect(challengeCommand(challengePlan(data, 'n5-01', {}))).not.toContain('--season')
+    // The studio offers each one, and the day's.
+    const html = read('carousel/index.html')
+    for (const season of ['now', ...PRINT_SEASONS]) expect(html, season).toContain(`data-set="season:${season}"`)
+  })
+
+  it('offers the answer switch in the studio, the comments by default (plan 275b)', () => {
+    const html = read('carousel/index.html')
+    for (const v of ['comments', 'shown']) expect(html, v).toContain(`data-set="challengeAnswer:${v}"`)
+    expect(read('carousel/studio.js')).toMatch(/challengeAnswer: 'comments'/)
+  })
+
+  it('keeps the answer to itself when hidden, the comments asked for it (plan 275)', () => withPath2D(() => {
+    for (const lang of ['en', 'fr']) {
+      const shown = challengePlan(data, 'n5-06', { question: 2, lang, hide: false })
+      const pl = challengePlan(data, 'n5-06', { question: 2, lang })
+      expect(shown.hidden).toBe(false)
+      expect(pl.hidden).toBe(true)
+      const tl = challengeTimeline(pl)
+      const answer = tl.segs.find(s => s.key === 'answer')
+      const { ctx, at } = drawn()
+      drawChallenge(ctx, pl, tl, answer.start + answer.dur - 0.05, null)
+      const seen = at.filter(x => x.alpha > 0.01).map(x => x.t).join(' ')
+      expect(seen, lang).toMatch(lang === 'en' ? /comments/ : /commentaire/)
+      // No chime that says it was right, and every choice as bright as the others.
+      expect(tl.sfx.some(x => x.key === 'correct'), lang).toBe(false)
+      expect(challengeCommand(pl)).not.toContain('--show')
+      expect(challengeCommand(shown)).toContain(' --show')
+      const page = challengePage(pl, tl, 'x')
+      expect(page.description).toMatch(lang === 'en' ? /Write your answer in the comments/ : /Écris ta réponse en commentaire/)
+      const ask = lang === 'en' ? 'A, B, C or D? Write' : 'A, B, C ou D ? Écris'
+      expect(page.feeds.tiktok.caption, lang).toContain(`👇 ${ask}`)
+      expect(page.feeds.reels.caption, lang).toContain(`📌 ${ask}`)
+    }
+  }))
+
+  it('stands on the scenery chosen, the bay unless another, a photo in place of any (plan 309)', () => {
+    // The plan keeps a scenery it knows, as plain data (it crosses into the page as JSON).
+    for (const id of SCENERY_IDS) {
+      const pl = challengePlan(data, 'n5-01', { scenery: id })
+      expect(pl.scenery, id).toBe(id)
+      expect(JSON.parse(JSON.stringify(pl)).scenery, id).toBe(id)
+    }
+    // One it does not know, or none, is the bay; a photo stands where any print would.
+    for (const bad of [undefined, null, '', 'moon', 'Bay', 3, true]) expect(challengePlan(data, 'n5-01', { scenery: bad }).scenery, String(bad)).toBe('bay')
+    expect(challengePlan(data, 'n5-01', { scenery: 'lake', photo: 'carousel/mine.jpg' }).scenery).toBe('bay')
+    // The command names it after the season, and only off the bay.
+    expect(challengeCommand(challengePlan(data, 'n5-01', { scenery: 'lake', season: 'winter', hour: 'day' }))).toContain(' --hour day --season winter --scenery lake --lang en')
+    expect(challengeCommand(challengePlan(data, 'n5-01', { scenery: 'station' }))).toContain(' --hour day --scenery station --lang en')
+    for (const opts of [{}, { scenery: 'bay' }, { scenery: 'moon' }]) expect(challengeCommand(challengePlan(data, 'n5-01', opts)), JSON.stringify(opts)).not.toContain('--scenery')
+    // What the print under it is loaded with: its season, its scenery, the parts the dials bring out
+    // (each dial named, not left to its default, which plan 309 moves later).
+    const undialled = challengePlan(data, 'n5-01', { tune: { 'challenge.falls': 0, 'challenge.bursts': 0 } })
+    expect(challengePrintOpts(undialled)).toEqual({ season: null, scenery: 'bay', falls: false, bursts: false })
+    const dialled = challengePlan(data, 'n5-01', { season: 'hanabi', scenery: 'wide', tune: { 'challenge.falls': 1, 'challenge.bursts': 1 } })
+    expect(challengePrintOpts(dialled)).toEqual({ season: 'hanabi', scenery: 'wide', falls: true, bursts: true })
+    // Day unless an hour is chosen, as the studio opens on it.
+    expect(challengePlan(data, 'n5-01', {}).hour).toBe('day')
+    expect(challengePlan(data, 'n5-01', { hour: 'noon' }).hour).toBe('day')
+    expect(challengePlan(data, 'n5-01', { hour: 'dusk' }).hour).toBe('dusk')
+  })
+
+  it('offers every scenery in the studio, the bay by default, each read from where it lies (plan 309)', () => {
+    // The bay, the app's print; the long view, the desk's, travelled; four of the carousel's own.
+    expect(SCENERIES.map(s => [s.id, s.source, s.device, s.lift, s.disc, s.pan])).toEqual([
+      ['bay', 'app', 'phone', true, true, false],
+      ['wide', 'app', 'desk', false, false, true],
+      ['lake', 'carousel', 'phone', true, true, false],
+      ['torii', 'carousel', 'phone', true, true, false],
+      ['river', 'carousel', 'phone', true, true, false],
+      ['station', 'carousel', 'phone', true, true, false],
+    ])
+    expect(SCENERY_IDS).toEqual(SCENERIES.map(s => s.id))
+    expect(sceneryOf('moon').id).toBe('bay')
+    const html = read('carousel/index.html')
+    for (const s of SCENERIES) expect(html, s.id).toContain(`data-set="challengeScenery:${s.id}">${s.name} ${s.jp}</button>`)
+    expect(html.match(/data-set="challengeScenery:/g)).toHaveLength(SCENERIES.length)
+    expect(read('carousel/studio.js')).toMatch(/challengeScenery: 'bay'/)
+    // The bay and the long view are the app's own files, at every season and hour, the date's own too.
+    const meta = JSON.parse(read('src/components/station/print/print.json'))
+    const names = new Set(PRINT_SEASONS.flatMap(season => PRINT_HOURS.map(hour => printOf(season, hour))))
+    for (let month = 1; month <= 12; month++) for (const day of [15, 16]) for (const hour of PRINT_HOURS) names.add(printOf(null, hour, new Date(2026, month - 1, day, 12)))
+    expect([...names].some(n => n.endsWith('-b')), 'a B print among them').toBe(true)
+    for (const id of ['bay', 'wide']) {
+      for (const name of names) {
+        const at = printPaths(id, name, meta.rev)
+        expect(at.meta, `${id} ${name}`).toBeNull()
+        expect(existsSync(new URL(`../${at.print}`, import.meta.url)), at.print).toBe(true)
+      }
+    }
+    expect(printPaths('bay', 'winter-day', meta.rev).print).toBe(`public/today/print/${meta.rev}/winter-day-phone.json`)
+    expect(printPaths('wide', 'winter-day', meta.rev).print).toBe(`public/today/print/${meta.rev}/winter-day-desk.json`)
+    expect(printPaths('moon', 'winter-day', meta.rev)).toEqual(printPaths('bay', 'winter-day', meta.rev))
+    // One the carousel draws: its own folder at its revision, beside its meta, its B print its A.
+    const own = `carousel/prints/${PRINTS_REV}/lake`
+    expect(printPaths('lake', 'summer-day-b', meta.rev)).toEqual({ print: `${own}/summer-day.json`, meta: `${own}/meta.json` })
+    expect(printPaths('lake', 'summer-hanabi', meta.rev)).toEqual({ print: `${own}/summer-hanabi.json`, meta: `${own}/meta.json` })
+  })
+
+  it('writes the hook’s words once, for the hook and for the cover it may be drawn as (plan 309)', () => withPath2D(() => {
+    for (const P of data.passages) {
+      for (const style of CHALLENGE_STYLES) {
+        const [en, fr] = ['en', 'fr'].map(lang => {
+          // The hook's own lines: the cover named off, not left to its default (the cover has its own test).
+          const pl = challengePlan(data, P.id, { lang, style, tune: { 'challenge.cover': 0 } })
+          const tl = challengeTimeline(pl)
+          const words = hookWords(pl, tl)
+          const where = `${P.id} ${lang} ${style}`
+          expect(Object.keys(words), where).toEqual(['hook', 'title', 'chip'])
+          expect(words.title, where).toBe(P.title)
+          expect(words.chip, where).toMatch(new RegExp(`^JLPT ${P.lv} · ${pl.sents.length} (sentences|phrases) · \\d+:\\d\\d$`))
+          // What the hook draws under the masthead, once all of it has come in, is those words and no others.
+          const { ctx, at } = drawn()
+          drawChallenge(ctx, pl, tl, 1.6, null)
+          const said = at.filter(x => x.t !== 'TSUJI').map(x => x.t).join('')
+          expect(said.replace(/\s+/g, ''), where).toBe(`${words.hook}${words.title}${words.chip}`.replace(/\s+/g, ''))
+          return words
+        })
+        // Each language its own hook and chip, the text's one title.
+        expect(fr.hook, `${P.id} ${style}`).not.toBe(en.hook)
+        expect(fr.chip, `${P.id} ${style}`).not.toBe(en.chip)
+      }
+    }
+    // The cover is handed the words rather than importing them: challenge.js
+    // reads every one of the modules it stands on, and none of them reads it.
+    for (const f of ['backdrop.js', 'cover.js', 'halo.js', 'sceneries.js']) expect(read(`carousel/${f}`), f).not.toMatch(/from '\.\/challenge\.js'/)
+  }))
+
+  // Last of the block: the strip it leaves behind is the stub's.
+  it('draws the scroll’s text once and lays it between pixels, at sixty frames, so it glides', () => withPath2D(() => {
+    const had = globalThis.OffscreenCanvas
+    const made = []
+    globalThis.OffscreenCanvas = class {
+      constructor(w, h) {
+        Object.assign(this, { width: w, height: h, d: drawn(), laid: [] })
+        this.d.ctx.drawImage = (img, x, y) => this.laid.push({ img, y })
+        made.push(this)
+      }
+      getContext() { return this.d.ctx }
+    }
+    try {
+      const pl = challengePlan(data, 'n3-02', { lang: 'fr' })
+      const tl = challengeTimeline(pl)
+      expect(tl.fps).toBe(60)
+      expect(challengeTimeline(challengePlan(data, 'n3-02', { style: 'along' })).fps).toBe(30)
+      const seg = tl.segs.find(s => s.key === 'reading')
+      const frameAt = t => {
+        const { ctx, at } = drawn()
+        const laid = []
+        ctx.drawImage = img => laid.push(img)
+        drawChallenge(ctx, pl, tl, t, null)
+        return { at, laid }
+      }
+      const t1 = seg.start + CHALLENGE.into + 10.004
+      const one = frameAt(t1)
+      const strip = made.find(c => c.height !== FORMATS.story.h)
+      const layer = made.find(c => c.height === FORMATS.story.h)
+      const written = strip.d.at.length
+      expect(written).toBeGreaterThan(0)
+      // The frame shows the layer; no line of the text is written on the frame itself.
+      expect(one.laid).toContain(layer)
+      expect(one.at.some(x => jp(x.t) && x.t !== pl.title)).toBe(false)
+      frameAt(t1 + 1 / 60)
+      // Written once, laid twice: a sixtieth of a second apart, less than a pixel, between pixels.
+      expect(strip.d.at.length).toBe(written)
+      const [a, b] = layer.laid.filter(x => x.img === strip).map(x => x.y)
+      expect(a - b).toBeGreaterThan(0.2)
+      expect(a - b).toBeLessThan(1.2)
+      expect(Number.isInteger(a) && Number.isInteger(b)).toBe(false)
+    } finally {
+      globalThis.OffscreenCanvas = had
+    }
+  }))
+})
+
+describe('the hand-written content, held to its rules (plan 248)', () => {
+  const LANGS = ['en', 'fr']
+  const both = (o, where) => LANGS.forEach(l => expect(String(o?.[l] || '').trim(), `${where} ${l}`).not.toBe(''))
+
+  it('writes every conversation in both languages, three replies a turn, and lets no length answer', () => {
+    const dialogues = JSON.parse(read('carousel/content/dialogues.json'))
+    expect(new Set(dialogues.map(d => d.id)).size).toBe(dialogues.length)
+    const tells = {}
+    for (const d of dialogues) {
+      expect(LEVELS, d.id).toContain(d.lv)
+      both(d.place, `${d.id} place`)
+      both(d.them, `${d.id} them`)
+      expect(d.turns.length, d.id).toBeGreaterThanOrEqual(3)
+      d.turns.forEach((t, i) => {
+        const at = `${d.id} ${i + 1}`
+        both(t.them, `${at} line`)
+        both(t.reply, `${at} reply`)
+        both(t.why, `${at} why`)
+        expect(t.choices, at).toHaveLength(3)
+        expect(new Set(t.choices).size, at).toBe(3)
+        expect([0, 1, 2], at).toContain(t.right)
+        // How often the longest reply, or the shortest, is the right one, ties shared.
+        const sizes = t.choices.map(c => [...c].length)
+        const n = (tells[d.lv] ||= { turns: 0, longest: 0, shortest: 0 })
+        n.turns++
+        const max = Math.max(...sizes)
+        const min = Math.min(...sizes)
+        if (sizes[t.right] === max) n.longest += 1 / sizes.filter(x => x === max).length
+        if (sizes[t.right] === min) n.shortest += 1 / sizes.filter(x => x === min).length
+      })
+    }
+    // The bound the app's own conversations keep (study/conversation.py, LENGTH_TELL).
+    for (const [lv, n] of Object.entries(tells)) {
+      for (const k of ['longest', 'shortest']) {
+        expect(n[k] / n.turns, `${lv} ${k}`).toBeGreaterThanOrEqual(0.25)
+        expect(n[k] / n.turns, `${lv} ${k}`).toBeLessThanOrEqual(0.42)
+      }
+    }
+  })
+
+  it('tells each lookalike apart in both languages, every kanji one the deck teaches', () => {
+    const sets = JSON.parse(read('carousel/content/lookalikes.json'))
+    const index = bank('kanji-index.json')
+    const known = new Set(Object.keys(index.kanji || index))
+    expect(new Set(sets.map(s => s.id)).size).toBe(sets.length)
+    for (const s of sets) {
+      expect(s.chars.length, s.id).toBeGreaterThanOrEqual(2)
+      expect(new Set(s.chars.map(c => c.c)).size, s.id).toBe(s.chars.length)
+      for (const c of s.chars) {
+        both(c, `${s.id} ${c.c}`)
+        expect(known.has(c.c), `${s.id} ${c.c}`).toBe(true)
+        if (c.m) for (const l of LANGS) expect(c.m[l]?.length, `${s.id} ${c.c} m.${l}`).toBeGreaterThan(0)
+      }
+    }
+    // An example word is no harder than its set: every kanji it writes is at or below the set's level.
+    const rank = lv => LEVELS.indexOf(lv)
+    const levelOf = ch => index.kanji?.[ch]?.lv ?? index[ch]?.lv
+    for (const s of bank('lookalikes.json').sets) {
+      for (const c of s.chars.filter(x => x.word)) {
+        for (const ch of [...c.word.t].filter(x => /[㐀-鿿]/.test(x) && x !== '々')) {
+          expect(rank(levelOf(ch)), `${s.id} ${c.word.t}`).toBeLessThanOrEqual(rank(s.lv))
+        }
+      }
+    }
+  })
+})
+
+describe('tuned from the studio (plan 248)', () => {
+  const def = key => TUNABLES.find(t => t.key === key).def
+
+  it('defaults to what each video did before it was tunable', () => {
+    for (const k of ['hook', 'into', 'out', 'gap', 'ask', 'count', 'answer', 'cta']) expect(def(`challenge.${k}`), k).toBe(CHALLENGE[k])
+    expect([def('echo.seconds'), def('echo.gap'), def('echo.keep')]).toEqual([ECHO.seconds, ECHO.gap, ECHO.keep])
+    expect(def('short.limit')).toBe(LIMIT)
+  })
+
+  it('times a short by its pace, its time to answer and its limit, a voiced line still said whole', () => {
+    expect(slideSeconds(40, 'point', { 'short.pace': 1.5 }).hold).toBeCloseTo(slideSeconds(40, 'point').hold * 1.5, 2)
+    const slides = ['hook', 'question-1', 'answer-1', 'outro'].map(key => ({ key }))
+    const six = shortTimeline(slides, [30, 40, 40, 20], null, null, { 'short.answer': 6 })
+    const ask = six.segs[1]
+    const ticks = six.sfx.filter(x => x.key === 'click')
+    expect(ticks).toHaveLength(6)
+    expect(ask.start + ask.dur - ticks[0].at).toBeCloseTo(6, 2)
+    const exam = ['cover', 'question-1', 'answer-1', 'question-2', 'answer-2', 'question-3', 'answer-3', 'sheet', 'outro'].map(key => ({ key }))
+    const counts = [60, 120, 160, 120, 160, 120, 160, 200, 80]
+    const free = shortTimeline(exam, counts, null, null, { 'short.limit': 90 })
+    expect(free.seconds).toBeGreaterThan(LIMIT)
+    expect(shortTimeline(exam, counts).seconds).toBeLessThanOrEqual(LIMIT + 0.01)
+    // A line eight seconds long keeps its slide long enough to be heard to its end.
+    const said = shortTimeline(exam, counts, 'まいげつ', () => 8, { 'short.limit': 30 })
+    const reveal = said.segs.find(x => x.key === 'answer-3')
+    expect(reveal.start + reveal.dur).toBeGreaterThanOrEqual(said.cues[0].at + 8 + 0.5)
+  })
+
+  it('says a word as often as its tuned clip and silence allow, and keeps it as long', () => {
+    const span = { on: 0.14, off: 0.6 }
+    const voiced = span.off - span.on
+    const wide = beats(span, { 'echo.gap': 0.6 })
+    for (let i = 1; i < wide.length; i++) expect(wide[i] - wide[i - 1]).toBeCloseTo(voiced + 0.6, 2)
+    expect(beats(span, { 'echo.seconds': 16 }).length).toBeGreaterThan(beats(span).length)
+    const themes = bank('themes.json')
+    const pl = echoPlan(themes, echoItems(themes, 'en')[0].id, { lang: 'en' })
+    const { clip } = echoDeck(pl, FORMATS.story, { ground: 'sumi', tune: { 'echo.keep': 6 } })
+    expect(clip.seconds).toBeCloseTo(clip.keepAt + 6, 3)
+  })
+
+  it('reads a challenge at its tuned pace and writes the tune into its command', () => {
+    const data = bank('comprehension.json')
+    const id = data.passages[0].id
+    const base = challengePlan(data, id, { lang: 'en' })
+    const slow = challengePlan(data, id, { lang: 'en', tune: { 'challenge.pace': 0.5, 'challenge.hook': 5 } })
+    expect(slow.cpm).toBe(Math.round(base.cpm * 0.5))
+    expect(challengeTimeline(slow).seconds).toBeGreaterThan(challengeTimeline(base).seconds + 1.8)
+    expect(challengeCommand(slow)).toContain('--tune challenge.pace=0.5,challenge.hook=5')
+    expect(challengeCommand(base)).not.toContain('--tune')
+    expect(tuned(slow.tune, 'challenge.pace')).toBe(0.5)
+  })
+
+  it('stretches a long video’s pauses and its quiz countdown', () => {
+    const files = {}
+    for (const f of ['N5.json', 'words-N5.json', 'kanji-N5.json', 'grammar-N5.json', 'themes.json']) files[f] = bank(f)
+    const base = timeline(longPlan('vocab', files, { level: 'N5', part: 1 }))
+    const slow = timeline(longPlan('vocab', files, { level: 'N5', part: 1, tune: { 'long.pause': 1.5 } }))
+    expect(slow.seconds).toBeGreaterThan(base.seconds * 1.1)
+    const quiz = timeline(longPlan('quiz', files, { level: 'N5', tune: { 'long.count': 8 } }))
+    const quiz5 = timeline(longPlan('quiz', files, { level: 'N5' }))
+    expect(quiz.seconds).toBeGreaterThan(quiz5.seconds)
+  })
+})
+
+describe('the reply videos (plan 249)', () => {
+  // The 会話 station's own scenes, six turns each (plan 250).
+  const scenes = bank('conversation.json').scenes
+  const files = { 'conversation.json': bank('conversation.json') }
+  const parts = (lv, format = 'long') => longItems(files, lv, 'en', format).filter(x => x.kind === 'reply')
+  const planFor = (lv, id, format = 'long', lang = 'en') => { const { kind, opts } = longPick(id, lv, lang, format); return longPlan(kind, files, opts) }
+  // A font's size and a text's width in ems, worked out once: a
+  // question's layout measures the same words at every size it tries.
+  const sizes = new Map()
+  const sizeOf = f => { if (!sizes.has(f)) sizes.set(f, parseFloat(/([\d.]+)px/.exec(f)?.[1] || '10')); return sizes.get(f) }
+  const ems = new Map()
+  const emsOf = t => { if (!ems.has(t)) ems.set(t, [...t].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0)); return ems.get(t) }
+  // Every text drawn, where: its baseline and its size.
+  const placed = () => {
+    const at = []
+    const state = { font: '10px sans-serif' }
+    const size = () => sizeOf(state.font)
+    let dy = 0
+    const stack = []
+    const methods = {
+      measureText: t => { const z = size(); const w = emsOf(String(t)) * z; return { width: w, actualBoundingBoxAscent: z * 0.72, actualBoundingBoxDescent: z * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: w } },
+      fillText: (t, x, y) => at.push({ t: String(t), y: y + dy, z: size() }),
+      save: () => stack.push(dy), restore: () => { dy = stack.pop() ?? 0 }, translate: (x, y) => { dy += y },
+      createLinearGradient: () => ({ addColorStop() {} }), createRadialGradient: () => ({ addColorStop() {} }),
+      getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+    }
+    const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+    return { ctx, at }
+  }
+
+  it('deals every conversation of a level once, six questions a video at least', () => {
+    for (const lv of LEVELS) {
+      const seen = []
+      for (const it of parts(lv)) {
+        const pl = planFor(lv, it.id)
+        expect(pl.items.filter(x => x.type === 'reply').length, it.id).toBeGreaterThanOrEqual(6)
+        seen.push(...pl.items.filter(x => x.type === 'scene').map(x => x.id))
+      }
+      expect(seen.sort(), lv).toEqual(scenes.filter(d => d.lv === lv).map(d => d.id).sort())
+    }
+    expect(longFiles('reply:1', 'N5')).toEqual(['conversation.json', 'pictures.json'])
+    expect(longListFiles('N5')).toContain('conversation.json')
+    expect(longCommand('reply:2', 'N3', 'fr', 'short')).toContain('--kind reply --level N3 --part 2 --lang fr --format short')
+  })
+
+  it('draws a pictured scene’s turns over its pictures, the answer’s only once yours is said (plan 269)', { timeout: 120000 }, async () => {
+    const pics = bank('pictures.json').scenes
+    const withPics = { ...files, 'pictures.json': bank('pictures.json') }
+    expect(Object.keys(pics).length).toBeGreaterThan(0)
+    // Every text drawn and every picture, where and how seen.
+    const traced = () => {
+      const at = []
+      const images = []
+      const state = { font: '10px sans-serif', globalAlpha: 1 }
+      const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+      const widthOf = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
+      let dy = 0
+      const stack = []
+      const methods = {
+        measureText: t => ({ width: widthOf(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: widthOf(t) }),
+        fillText: (t, x, y) => at.push({ t: String(t), y: y + dy, z: size(), a: state.globalAlpha }),
+        drawImage: img => images.push({ src: img.src, a: state.globalAlpha }),
+        save: () => stack.push([dy, state.globalAlpha]),
+        restore: () => { [dy, state.globalAlpha] = stack.pop() ?? [0, 1] },
+        translate: (x, y) => { dy += y },
+        createLinearGradient: () => ({ addColorStop() {} }), createRadialGradient: () => ({ addColorStop() {} }),
+        getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+      }
+      const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+      return { ctx, at, images }
+    }
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      for (const [sid, rows] of Object.entries(pics)) {
+        const d = scenes.find(x => x.id === sid)
+        expect(d, sid).toBeTruthy()
+        expect(rows, sid).toHaveLength(d.turns.length)
+        for (const row of rows) for (const src of [row.ask, row.answer]) expect(existsSync(new URL(`../carousel/${src}`, import.meta.url)), src).toBe(true)
+        const part = scenes.filter(x => x.lv === d.lv).indexOf(d) + 1
+        for (const lang of ['en', 'fr']) {
+          const { kind, opts } = longPick(`reply:${part}`, d.lv, lang, 'short')
+          const pl = fitShort(longPlan(kind, withPics, opts))
+          expect(pl.items.filter(x => x.type === 'reply').map(x => x.pic), sid).toEqual(rows)
+          // Loaded as a page loads them, each picture its own image.
+          expect(await loadScenePictures(pl, '/carousel/', async src => ({ width: 375, height: 331, src }))).toBe(rows.length)
+          const tl = timeline(pl)
+          const turns = tl.segs.filter(x => x.type === 'reply')
+          turns.forEach((sg, ti) => {
+            const it = sg.data
+            const m = sg.marks
+            for (const u of [0.1, 0.3, m.lineAt + 0.5, m.choicesAt + 0.5, m.choicesAt + 2, m.reveal + 0.2, m.replyAt - 0.05, m.replyAt + 0.3, m.replyAt + 1, m.why + 0.3, m.why + 1.5, sg.dur - 0.05]) {
+              const { ctx, at, images } = traced()
+              drawLong(ctx, pl, tl, sg.start + u)
+              const where = `${sid} ${lang} turn ${ti + 1} at ${u.toFixed(2)}`
+              const seen = images.filter(x => x.a > 0).map(x => x.src)
+              // The question's picture throughout; the answer's never before your reply is said.
+              expect(seen, where).toContain(`/carousel/${rows[ti].ask}`)
+              if (u < m.replyAt) expect(seen, where).not.toContain(`/carousel/${rows[ti].answer}`)
+              if (u > m.replyAt + 0.7) expect(seen, where).toContain(`/carousel/${rows[ti].answer}`)
+              // Every text inside the feed's safe area.
+              for (const x of at.filter(x => x.a > 0)) {
+                expect(x.y - x.z * 0.85, `${where} ${x.t}`).toBeGreaterThanOrEqual(TALL.safe.t - 1)
+                expect(x.y + x.z * 0.25, `${where} ${x.t}`).toBeLessThanOrEqual(TALL.h - TALL.safe.b + 1)
+              }
+              const said = at.filter(x => x.a > 0.5).map(x => x.t).join('')
+              // Who speaks on the line's plate; yours on the answer's, with why.
+              if (u > m.lineAt + 0.4 && u < m.why) expect(said, where).toContain(it.who.toLocaleUpperCase())
+              if (u > m.why + 1) expect(said, where).toContain((lang === 'fr' ? 'Toi' : 'You').toLocaleUpperCase())
+            }
+          })
+          // The 16:9 video of the same scene stays the thread it was: no picture there.
+          const wide = longPlan('reply', withPics, { level: d.lv, lang, ids: [sid] })
+          const wtl = timeline(wide)
+          const sg = wtl.segs.find(x => x.type === 'reply')
+          const { ctx, images } = traced()
+          drawLong(ctx, wide, wtl, sg.start + sg.marks.why + 1)
+          expect(images, `${sid} ${lang} 16:9`).toHaveLength(0)
+        }
+      }
+    } finally { globalThis.Path2D = had }
+  })
+
+  it('makes a short of each scene, six questions a short (plans 249b, 250)', () => {
+    for (const lv of LEVELS) {
+      const talks = scenes.filter(d => d.lv === lv)
+      const shorts = parts(lv, 'short')
+      expect(shorts.map(x => x.sub), lv).toEqual(talks.map(d => `${d.place.jp} · ${d.place.en}`))
+      shorts.forEach((it, i) => {
+        const pl = planFor(lv, it.id, 'short')
+        expect(pl.items.filter(x => x.type === 'scene').map(x => x.id), it.id).toEqual([talks[i].id])
+        // The scene asked whole: its four to seven turns (the first 31 six each, plan 250).
+        expect(pl.items.filter(x => x.type === 'reply'), it.id).toHaveLength(talks[i].turns.length)
+        expect(talks[i].turns.length, it.id).toBeGreaterThanOrEqual(4)
+        expect(talks[i].turns.length, it.id).toBeLessThanOrEqual(7)
+        expect(pl.title, it.id).toBe(`${talks[i].place.en} · JLPT ${lv}`)
+      })
+    }
+    // A short opens on its scene: no title card before the question, its still taken there.
+    const pl = planFor('N5', 'reply:1', 'short')
+    const tl = timeline(pl)
+    expect(tl.segs[0].type).toBe('scene')
+    expect(stillAt(pl, tl)).toBeLessThan(tl.segs[0].dur)
+    expect(tl.segs.at(-1).type).toBe('outro')
+  })
+
+  it('says their line, then yours once the timer is out, a tick a second', () => {
+    const pl = longPlan('reply', files, { level: 'N5', part: 1, tune: { 'reply.count': 6 } })
+    const tl = timeline(pl)
+    expect(tl.of).toBe(pl.items.filter(x => x.type === 'scene').reduce((n, d) => n + scenes.find(x => x.id === d.id).turns.length, 0))
+    for (const sg of tl.segs.filter(x => x.type === 'reply')) {
+      const it = sg.data
+      const inSeg = x => x.at >= sg.start && x.at < sg.start + sg.dur
+      const said = tl.cues.filter(inSeg)
+      expect(said.map(c => c.who)).toEqual(['them', 'me'])
+      expect(said[0].text).toBe(it.them.rows.map(r => r.t).join(''))
+      expect(said[1].text).toBe(it.choices[it.right].map(r => r.t).join(''))
+      expect(tl.sfx.filter(x => x.key === 'click' && inSeg(x))).toHaveLength(6)
+      expect(sg.marks.reveal - sg.marks.show).toBeCloseTo(6, 6)
+      expect(tl.sfx.some(x => x.key === 'correct' && Math.abs(x.at - (sg.start + sg.marks.reveal)) < 0.01)).toBe(true)
+      expect(said[1].at).toBeGreaterThan(sg.start + sg.marks.reveal)
+    }
+    // The right reply is dealt in the carousel's order, never always in one place.
+    expect(new Set(pl.items.filter(x => x.type === 'reply').map(x => x.right)).size).toBeGreaterThan(1)
+    // It ends asking the viewer's own score.
+    expect(tl.segs.at(-2).type).toBe('score')
+    expect(tl.chapters.map(c => c.title)).toContain(pl.items[0].place.tr)
+  })
+
+  it('stands every question inside the frame, in both formats, nothing cut', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      // Under the band (plan 249b): the band's own words stand above `head`.
+      const box = { long: { top: 160, bottom: 1010, head: 140, foot: 1075 }, short: { top: 346, bottom: 1490, head: 325, foot: 1600 } }
+      for (const lv of LEVELS) {
+        for (const format of ['long', 'short']) {
+          for (const it of parts(lv, format)) {
+            for (const lang of ['en', 'fr']) {
+              const pl = planFor(lv, it.id, format, lang)
+              const tl = timeline(pl)
+              const b = box[format]
+              for (const sg of tl.segs.filter(x => x.type === 'reply')) {
+                for (const u of [sg.marks.show + 1, sg.marks.reveal + 0.8, sg.dur - 0.05]) {
+                  const { ctx, at } = placed()
+                  drawLong(ctx, pl, tl, sg.start + u)
+                  // The frame holds its own bubbles: their line while you choose, yours once said.
+                  const means = u < sg.marks.why ? sg.data.them.tr : sg.data.reply
+                  expect(at.some(x => x.t.length > 1 && means.startsWith(x.t)), `${lv} ${it.id} ${format} ${lang} ${sg.data.id}#${sg.data.k} ${u.toFixed(1)}`).toBe(true)
+                  for (const x of at.filter(x => x.y > b.head && x.y < b.foot)) {
+                    const where = `${lv} ${it.id} ${format} ${lang} ${sg.data.id}#${sg.data.k} ${u.toFixed(1)} ${x.t}`
+                    expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(b.top - 1)
+                    expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(b.bottom + 1)
+                    // Cut, unless the text itself trails off ("At night, it's a bit loud…").
+                    expect(x.t.endsWith('…') && ![sg.data.them.tr, sg.data.reply, sg.data.why].some(o => o.endsWith(x.t)), where).toBe(false)
+                  }
+                }
+              }
+              // The scene's card and the score, whole and inside too (plan 249b).
+              for (const sg of tl.segs.filter(x => x.type === 'scene' || x.type === 'score' || x.type === 'intro')) {
+                const { ctx, at } = placed()
+                drawLong(ctx, pl, tl, sg.start + sg.dur - 0.05)
+                for (const x of at.filter(x => x.y > b.head && x.y < b.foot)) {
+                  const where = `${lv} ${it.id} ${format} ${lang} ${sg.type} ${x.t}`
+                  expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(b.top - 1)
+                  expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(b.bottom + 1)
+                  expect(x.t.endsWith('…'), where).toBe(false)
+                }
+              }
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+  }, 120000)
+
+  it('credits no music: no video carries any (plan 273)', () => {
+    for (const format of ['long', 'short']) {
+      for (const lang of ['en', 'fr']) {
+        const { kind, opts } = longPick('reply:1', 'N5', lang, format)
+        const pl = longPlan(kind, files, { ...opts, music: true })
+        expect('music' in pl, format).toBe(false)
+        expect(describeVideo(pl, timeline(pl), LONG_SITE).description, `${format} ${lang}`).not.toMatch(/Music|Musique/)
+      }
+    }
+  })
+
+  it('holds a short under three minutes, its scene whole', () => {
+    for (const lv of LEVELS) {
+      for (const it of parts(lv, 'short')) {
+        const pl0 = planFor(lv, it.id, 'short')
+        const pl = fitShort(pl0)
+        expect(pl.items, it.id).toEqual(pl0.items)
+        expect(timeline(pl).seconds, it.id).toBeLessThanOrEqual(REPLY_SHORT)
+        // Fitted by its timer alone, never under four seconds to answer.
+        expect(pl.tune?.['reply.count'] ?? 7, it.id).toBeGreaterThanOrEqual(4)
+      }
+    }
+  })
+})
+
+describe('a post for each feed (plan 251)', () => {
+  const data = bank('comprehension.json')
+  it('writes a reading challenge’s three posts, read or read along', () => {
+    for (const style of CHALLENGE_STYLES) {
+      for (const lang of ['en', 'fr']) {
+        const pl = challengePlan(data, 'n5-02', { style, lang })
+        const page = challengePage(pl, challengeTimeline(pl), 'https://tsuji.app')
+        expectFeeds(page, 'https://tsuji.app', `${style} ${lang}`)
+        expect(page.feeds.tiktok.caption, `${style} ${lang}`).not.toMatch(/MacLeod|Music|Musique/)
+      }
+    }
+  })
+
+  it('names a reply short’s scene under its hook', () => {
+    const files = { 'conversation.json': bank('conversation.json'), 'index.json': bank('index.json') }
+    const pl = longPlan('reply', files, { level: 'N5', part: 1, format: 'short' })
+    const page = describeVideo(pl, timeline(pl), LONG_SITE, FIGURES)
+    const scene = pl.items[0]
+    expect(page.feeds.tiktok.caption.split('\n\n')[1]).toBe(`${scene.place.jp} · ${scene.place.tr}`)
+  })
+
+  it('keeps a 16:9 video’s page YouTube’s alone, and writes a 9:16 one’s three in its text file', () => {
+    const files = { 'conversation.json': bank('conversation.json') }
+    const wide = longPlan('reply', files, { level: 'N5', part: 1 })
+    const page = describeVideo(wide, timeline(wide), LONG_SITE, FIGURES)
+    expect(page.feeds).toBeUndefined()
+    expect(pageFile(page)).toBe(`TITLE\n${page.title}\n\nDESCRIPTION\n${page.description}\n\nTAGS\n${page.tags}\n`)
+    const pl = challengePlan(data, 'n5-02', {})
+    const text = pageFile(challengePage(pl, challengeTimeline(pl), LONG_SITE))
+    expect(text.match(/^(YOUTUBE SHORTS|INSTAGRAM REELS|TIKTOK)$/gm)).toEqual(['YOUTUBE SHORTS', 'INSTAGRAM REELS', 'TIKTOK'])
+    expect(text.match(/^CAPTION$/gm)).toHaveLength(2)
+    expect(text.match(/^TITLE$/gm)).toHaveLength(1)
+  })
+})
+
+describe('the vocabulary shorts (plan 252)', () => {
+  const banksFor = lv => Object.fromEntries(wordsFiles(lv).map(n => [n, bank(n)]))
+  const B = Object.fromEntries(LEVELS.map(lv => [lv, banksFor(lv)]))
+  const deckIds = lv => wordsItems(B[lv], lv).filter(x => !x.id.startsWith('theme:')).map(x => x.id)
+  const themeIds = () => wordsItems(B.N5, 'N5').filter(x => x.id.startsWith('theme:')).map(x => x.id)
+  // Every N5 short, and a spread of the others: each tenth part, every theme.
+  const sample = () => [...LEVELS.flatMap(lv => deckIds(lv).filter((_, i) => lv === 'N5' || i % 10 === 0).map(id => [lv, id])), ...themeIds().map(id => ['N5', id])]
+
+  it('deals a level’s deck nine words a short, every word once, and each theme the same', () => {
+    for (const lv of LEVELS) {
+      const words = bank(`words-${lv}.json`).words.filter(w => w.en?.[0])
+      const seen = deckIds(lv).flatMap(id => wordsPlan(B[lv], id).items.map(x => `${x.t}::${x.r}`))
+      expect(seen.length, lv).toBe(words.length)
+      expect(new Set(seen).size, lv).toBe(new Set(words.map(w => `${w.t}::${w.r}`)).size)
+    }
+    for (const id of themeIds()) expect(wordsPlan(B.N5, id).items.length, id).toBeLessThanOrEqual(WORDS_COUNT)
+    expect(new Set(wordsItems(B.N5, 'N5').map(x => x.id)).size).toBe(wordsItems(B.N5, 'N5').length)
+  })
+
+  it('asks each word’s meaning among three that cannot be right too, and lets no length answer', () => {
+    let longest = 0
+    let asked = 0
+    const at = [0, 0, 0, 0]
+    for (const [lv, id] of sample()) {
+      for (const lang of ['en', 'fr']) {
+        const pl = wordsPlan(B[lv], id, { style: 'quiz', lang })
+        const card = wordsPlan(B[lv], id, { style: 'card', lang })
+        // No word is dropped for want of wrong meanings.
+        expect(pl.items.length, `${id} ${lang}`).toBe(card.items.length)
+        for (const it of pl.items) {
+          const where = `${id} ${lang} ${it.t}`
+          expect(it.choices, where).toHaveLength(4)
+          expect(new Set(it.choices.map(c => c.toLowerCase())).size, where).toBe(4)
+          const right = it.choices[it.right]
+          expect(right, where).toBe(weldIf(lang, shortSense(it.gloss)))
+          const w = [...bank(`words-${lv}.json`).words, ...Object.values(bank('themes.json').themes).flatMap(th => th.words)].find(x => x.t === it.t && x.r === it.r)
+          const senses = [...(w[lang] || []), ...(w.en || [])]
+          for (const c of it.choices.filter((_, k) => k !== it.right)) {
+            expect(senses.some(s => overlaps(s, c)), `${where}: ${c}`).toBe(false)
+            expect(c.endsWith('…') && c.length < 4, `${where}: ${c}`).toBe(false)
+          }
+          asked += 1
+          at[it.right] += 1
+          if (it.choices.every((c, k) => k === it.right || c.length < right.length)) longest += 1
+        }
+      }
+    }
+    // The longest is the right one about as often as a blind pick would be (plan 217's LENGTH_TELL).
+    expect(longest / asked).toBeLessThan(0.35)
+    for (const n of at) expect(n / asked).toBeGreaterThan(0.18)
+  }, 120000)
+
+  it('stays under Shorts’ three minutes, every reading and sentence said', () => {
+    for (const [lv, id] of sample()) {
+      for (const style of WORDS_STYLES) {
+        const pl = wordsPlan(B[lv], id, { style })
+        const tl = wordsTimeline(pl)
+        expect(tl.seconds, `${id} ${style}`).toBeLessThanOrEqual(WORDS_LIMIT)
+        const said = tl.cues.map(c => c.text)
+        for (const it of pl.items) {
+          expect(said, `${id} ${it.t}`).toContain(it.r)
+          if (it.ex) expect(said, `${id} ${it.t}`).toContain(it.ex.jp)
+        }
+        expect(tl.segs.at(-1).type).toBe('cta')
+        expect(tl.segs.some(s => s.type === 'score'), style).toBe(style === 'quiz')
+      }
+    }
+  }, 120000)
+
+  it('stands every frame inside the feed’s safe area, nothing cut', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      for (const [lv, id] of sample()) {
+        for (const style of WORDS_STYLES) {
+          for (const lang of ['en', 'fr']) {
+            const pl = wordsPlan(B[lv], id, { style, lang })
+            const tl = wordsTimeline(pl)
+            const own = new Set(pl.items.flatMap(it => [it.gloss, ...(it.choices || []), it.ex?.tr].filter(Boolean)))
+            for (const sg of tl.segs.filter(x => x.type !== 'cta')) {
+              const m = sg.marks
+              for (const u of [0.05, (m.reveal ?? 1) - 0.1, (m.reveal ?? 1) + 1, (m.ex ?? m.reveal ?? 1) + 0.6, sg.dur - 0.05]) {
+                const { ctx, texts } = placedTexts()
+                drawWords(ctx, pl, tl, sg.start + Math.min(u, sg.dur - 0.01))
+                for (const x of texts) {
+                  const where = `${id} ${style} ${lang} ${sg.type}#${sg.i ?? ''} ${u.toFixed(1)} ${x.t}`
+                  expect(x.y - x.z * 0.85, where).toBeGreaterThanOrEqual(TALL.safe.t - 1)
+                  expect(x.y + x.z * 0.25, where).toBeLessThanOrEqual(TALL.h - TALL.safe.b + 1)
+                  expect(x.t.endsWith('…') && ![...own].some(o => o.endsWith(x.t)), where).toBe(false)
+                }
+              }
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+  }, 240000)
+
+  it('writes its page for three feeds, crediting no music, and its command', () => {
+    const pl = wordsPlan(B.N5, 'N5:2', { style: 'quiz' })
+    const tl = wordsTimeline(pl)
+    const page = wordsPage(pl, tl, 'https://tsuji.app/en', FIGURES)
+    expect(Object.keys(page.feeds)).toEqual(FEEDS)
+    expect(page.title).toMatch(/^JLPT N5 word quiz: .* 9 .*#shorts$/)
+    expect(page.description).not.toMatch(/Music|Musique/)
+    expect(page.feeds.tiktok.caption).not.toContain('tsuji.app')
+    expect(wordsCommand(pl)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words N5:2 --style quiz --lang en')
+    const quiet = wordsPlan(B.N5, 'theme:animals:1', { style: 'card', lang: 'fr', fit: 'instagram' })
+    const qp = wordsPage(quiet, wordsTimeline(quiet), 'https://tsuji.app', FIGURES)
+    expect(qp.description).not.toMatch(/Musique/)
+    expect(qp.title).toMatch(/^9 mots de japonais : Animaux #shorts$/)
+    expect(qp.description).not.toMatch(/JLPT/)
+    expect(wordsCommand(quiet)).toBe('VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --words theme:animals:1 --style card --lang fr --fit instagram')
+    // A long video's own short no longer lists words or themes: they are the word shorts'.
+    expect(longItems({ ...B.N5, 'kanji-N5.json': bank('kanji-N5.json'), 'grammar-N5.json': bank('grammar-N5.json') }, 'N5', 'en', 'short').some(x => x.kind === 'vocab' || x.kind === 'theme')).toBe(false)
+  })
+
+  it('turns a word over onto its picture, every picture a word’s, inside the frame (plan 257)', async () => {
+    const pics = bank('pictures.json').pictures
+    const known = new Set([...LEVELS.flatMap(lv => bank(`words-${lv}.json`).words), ...Object.values(bank('themes.json').themes).flatMap(th => th.words)].map(w => `${w.t}::${w.r}`))
+    expect(Object.keys(pics).length).toBeGreaterThan(0)
+    for (const [key, src] of Object.entries(pics)) {
+      expect(known.has(key), key).toBe(true)
+      expect(existsSync(new URL(`../carousel/${src}`, import.meta.url)), src).toBe(true)
+    }
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    try {
+      for (const lang of ['en', 'fr']) {
+        const pl = wordsPlan(B.N5, 'N5:2', { style: 'card', lang })
+        expect(pl.items.every(it => it.pic === pics[`${it.t}::${it.r}`]), lang).toBe(true)
+        // Loaded as a page loads them; a wide one and a square one.
+        expect(await loadPictures(pl, '/carousel/', async src => ({ width: src.includes('doa') ? 820 : 405, height: 374 }))).toBe(pl.items.length)
+        const tl = wordsTimeline(pl)
+        for (const sg of tl.segs.filter(x => x.type === 'word')) {
+          const it = pl.items[sg.i]
+          const m = sg.marks
+          for (const u of [m.reveal - 0.1, m.reveal + 0.1, m.reveal + 1, (m.ex ?? m.reveal + 1) + 0.6, sg.dur - 0.05]) {
+            const { ctx, texts } = placedTexts()
+            drawWords(ctx, pl, tl, sg.start + u)
+            const where = `${lang} ${it.t} ${u.toFixed(1)}`
+            for (const x of texts) {
+              expect(x.y - x.z * 0.85, `${where} ${x.t}`).toBeGreaterThanOrEqual(TALL.safe.t - 1)
+              expect(x.y + x.z * 0.25, `${where} ${x.t}`).toBeLessThanOrEqual(TALL.h - TALL.safe.b + 1)
+            }
+            const said = texts.map(x => x.t)
+            // Asked, the front; turned over, the back: the word with its romaji beside it, and its sentence once said.
+            if (u < m.reveal) expect(said, where).not.toContain(it.ro)
+            if (u > m.reveal + 0.5) {
+              expect(said, where).toContain(it.t)
+              expect(said, where).toContain(it.ro)
+              if (it.r !== it.t) expect(said, where).toContain(it.r)
+            }
+            if (it.ex && u > m.ex + 0.5) expect(said.join(''), where).toContain(it.ex.tr.split(' ')[0])
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+  })
+})
+
+describe('Read it (plan 253)', () => {
+  const firstSense = str => (String(str || '').split(/[;,]\s*/)[0] || '').replace(/\s*[([（][^)\]）]*[)\]）]/g, '').trim()
+  // Every N5 sentence, and every fifth of the others.
+  const sentences = LEVELS.flatMap(lv => banks[lv].sentences.filter((_, i) => lv === 'N5' || i % 5 === 0).map(s => [lv, s.id]))
+
+  it('asks a short sentence of the reading bank alone, its words, the answer and a bonus, then the app', { timeout: 240000 }, () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    let drawn = 0
+    try {
+      for (const [lv, id] of sentences) {
+        for (const lang of ['en', 'fr']) {
+          const p = plan('sentence', banks[lv], id, { ...OPTS, lang })
+          const words = p.funnel.breakdown
+          expect(available('read', p), `${id}`).toBe(readable(p))
+          expect(readable(p), `${id}`).toBe(words.length > 0 && words.length <= 7 && !!p.funnel.translation)
+          if (!readable(p)) continue
+          // The bonus is the sentence said the other way where the app reads
+          // its ending both ways (plan 254), else the catalogue's line on the
+          // point, never the breakdown's own.
+          const bonus = funnelOf('read', p).solution.bonus
+          const s = banks[lv].sentences.find(x => x.id === id)
+          if (s.v) expect(bonus, id).toEqual({ kind: 'version', ...s.v, rows: unstopped(s.v.rows) })
+          else if (bonus) expect(['careful', 'mean'], id).toContain(bonus.kind)
+          for (const design of [...DESIGNS, 'classic']) {
+            for (const fmt of [FORMATS.post, FORMATS.story]) {
+              const slides = deck('read', p, fmt, { design, length: '8', ending: 'pass' })
+              const where = `${id} ${lang} ${design} ${fmt.id}`
+              expect(slides.map(x => x.key), where).toEqual(['ask', 'words', 'answer', 'cta'])
+              const own = [p.funnel.translation, bonus?.text, ...words.flatMap(w => [w.main, w.sub, w.pos])].filter(Boolean)
+              slides.forEach((sl, k) => {
+                const { ctx, texts } = placedTexts()
+                sl.draw(ctx)
+                const all = texts.map(x => x.t)
+                if (sl.key === 'words') {
+                  for (const w of words) {
+                    if (w.ro) expect(all, `${where} ${w.t}`).toContain(w.ro)
+                    if (firstSense(w.main)) expect(all.join(' '), `${where} ${w.t}`).toContain(firstSense(w.main).split(' ')[0])
+                  }
+                }
+                if (sl.key === 'answer') expect(all.join(' '), where).toContain(p.funnel.translation.split(' ')[0])
+                if (sl.key === 'answer' && bonus?.kind === 'version') expect(all.join(' '), where).toContain(lineRomaji(bonus.rows).split(' ')[0])
+                if (k === 3) return
+                for (const x of texts) {
+                  const at = `${where} ${sl.key} ${x.t}`
+                  expect(x.y - x.z * 0.85, at).toBeGreaterThanOrEqual(fmt.safe.t - 1)
+                  expect(x.y + x.z * 0.25, at).toBeLessThanOrEqual(fmt.h - fmt.safe.b + 1)
+                  expect(x.t.endsWith('…') && !own.some(o => o.includes(x.t)), at).toBe(false)
+                }
+              })
+              drawn += 1
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+    expect(drawn).toBeGreaterThan(500)
+    // Only a sentence of the reading bank is read so.
+    const data = bank('words-N5.json')
+    const wp = plan('word', data, itemsOf('word', data, 'en')[0].id, OPTS, depsFor(SOURCES.find(x => x.id === 'word'), data, itemsOf('word', data, 'en')[0].id))
+    expect(available('read', wp)).toBe(false)
+  })
+})
+
+describe('Read it’s own short sentences (plan 254)', () => {
+  const content = JSON.parse(read('carousel/content/short.json'))
+  const data = bank('short.json')
+  const both = (o, at) => { expect(o?.en, at).toBeTruthy(); expect(o?.fr, at).toBeTruthy() }
+
+  it('writes every sentence in both languages: its role, its situation, its literal reading', () => {
+    expect(new Set(content.map(x => x.id)).size).toBe(content.length)
+    expect(data.sentences.map(s => s.id)).toEqual(content.map(x => x.id))
+    for (const x of content) {
+      both(x, x.id)
+      expect(x.e, x.id).toBeTruthy()
+      for (const lang of ['en', 'fr']) expect(x.role[lang], x.id).toHaveLength(2)
+      both(x.when, `${x.id} when`)
+      if (x.lit) both(x.lit, `${x.id} lit`)
+      // A literal reading is a reading, never the translation again.
+      if (x.lit) expect(x.lit.en, x.id).not.toBe(x.en)
+    }
+  })
+
+  it('reads each as a noun, a particle and a word, said politely, and nothing but Read it', { timeout: 240000 }, () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class { constructor(d) { this.d = d } }
+    let drawn = 0
+    try {
+      for (const s of data.sentences) {
+        const words = s.rows.filter(r => r.k !== 'punct')
+        expect(words.map(r => r.k), s.id).toEqual(['word', 'particle', 'word'])
+        expect(s.v.to, s.id).toBe('polite')
+        for (const lang of ['en', 'fr']) {
+          // Set in kana unless the studio asks for the furigana.
+          const p = plan('short', data, s.id, { ...OPTS, lang })
+          expect(p.script, s.id).toBe('kana')
+          expect(plan('short', data, s.id, { ...OPTS, lang, script: 'furigana' }).script).toBe('furigana')
+          expect(TYPES.filter(ty => available(ty.id, p)).map(ty => ty.id), s.id).toEqual(['read'])
+          expect(titleOf(p, 'read').length, s.id).toBeLessThanOrEqual(TITLE_MAX)
+          const spec = funnelOf('read', p)
+          expect(spec.solution.bonus.kind, s.id).toBe('version')
+          for (const design of DESIGNS) {
+            for (const fmt of [FORMATS.post, FORMATS.story]) {
+              const where = `${s.id} ${lang} ${design} ${fmt.id}`
+              const slides = deck('read', p, fmt, { design, length: '5', ending: 'pass' })
+              expect(slides.map(x => x.key), where).toEqual(['ask', 'words', 'answer', 'cta'])
+              const own = [p.funnel.translation, p.funnel.lit, ...p.funnel.breakdown.flatMap(w => [w.main, w.sub, w.pos])].filter(Boolean)
+              slides.slice(0, 3).forEach(sl => {
+                const { ctx, texts } = placedTexts()
+                sl.draw(ctx)
+                const all = texts.map(x => x.t).join(' ')
+                if (sl.key === 'ask') for (const w of words) expect(all, `${where} ${w.t}`).toContain(reading(w))
+                // A line to read at a glance, never closed by a full stop (plan 255).
+                expect(all, `${where} ${sl.key}`).not.toContain('。')
+                if (sl.key === 'words') {
+                  for (const w of p.funnel.breakdown) expect(all, `${where} ${w.t}`).toContain(w.main.split(' ')[0])
+                  // French sets a narrow space before its colon.
+                  if (p.funnel.lit) expect(all.replace(/[\u00a0\u202f]/g, ' '), where).toContain(FUNNEL[lang].literally)
+                }
+                if (sl.key === 'answer') {
+                  expect(all, where).toContain(p.funnel.translation.split(' ')[0])
+                  // The bonus: the polite sentence, its romaji, and its situation.
+                  expect(all, where).toContain(lineRomaji(s.v.rows).split(' ')[0])
+                  // Its kind is set tracked, a letter at a time.
+                  expect(all.replace(/\s+/g, ''), where).toContain(FUNNEL[lang].version.polite.toLocaleUpperCase().replace(/\s+/g, ''))
+                  expect(all.replace(/\s+/g, ' '), where).toContain(s.v.when[lang].split(' ')[0])
+                }
+                for (const x of texts) {
+                  const at = `${where} ${sl.key} ${x.t}`
+                  expect(x.y - x.z * 0.85, at).toBeGreaterThanOrEqual(fmt.safe.t - 1)
+                  expect(x.y + x.z * 0.25, at).toBeLessThanOrEqual(fmt.h - fmt.safe.b + 1)
+                  expect(x.t.endsWith('…') && !own.some(o => o.includes(x.t)), at).toBe(false)
+                }
+              })
+              drawn += 1
+            }
+          }
+        }
+      }
+    } finally { globalThis.Path2D = had }
+    expect(drawn).toBe(data.sentences.length * 2 * DESIGNS.length * 2)
+  })
+
+  it('gives each word an ink of its own, the app’s, on every row it spans (plan 256)', () => {
+    const sentences = [
+      ...data.sentences.map(s => plan('short', data, s.id, OPTS)),
+      ...LEVELS.flatMap(lv => banks[lv].sentences.map(s => plan('sentence', banks[lv], s.id, OPTS))).filter(readable),
+    ]
+    expect(sentences.length).toBeGreaterThan(100)
+    for (const ground of ['paper', 'sumi']) {
+      const p = palette(ground)
+      const tokens = new Set([p.stamp, p.goldMid, p.goldLit, ...Object.values(p.line)])
+      for (const pl of sentences) {
+        const items = pl.funnel.breakdown
+        const inks = readInks(p, items)
+        const at = `${pl.source} ${pl.id} ${ground}`
+        // Every word of the sentence wears one, no two words the same.
+        pl.funnel.rows.forEach((r, i) => expect(inks.has(i), `${at} ${r.t}`).toBe(r.k !== 'punct'))
+        const worn = items.map(it => inks.get(it.i))
+        expect(new Set(worn).size, at).toBe(items.length)
+        for (const it of items) for (let i = it.i; i <= it.j; i++) expect(inks.get(i), at).toBe(inks.get(it.i))
+        for (const ink of worn) expect(tokens.has(ink), `${at} ${ink}`).toBe(true)
+      }
+    }
+  })
+
+  it('says what changed in the line the reader reads, in kana where the post is', () => {
+    const W = FUNNEL.en
+    expect(W.versionRule('polite', '', 'です')).toBe('Just add です to sound polite')
+    expect(W.versionRule('polite', 'のむ', 'のみます')).toBe('のむ becomes のみます to sound polite')
+    expect(W.versionRule('plain', 'です', '')).toBe('Among friends, just drop です')
+    expect(FUNNEL.fr.versionRule('plain', '飲みます', '飲む')).toBe('飲みます devient 飲む entre amis')
+  })
+})
+
+/** Every text drawn, where: its baseline, moved by translate and scale, and its size. */
+function placedTexts() {
+  const texts = []
+  const state = { font: '10px sans-serif' }
+  const size = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+  const widthOf = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * size()
+  let m = { dy: 0, k: 1 }
+  const stack = []
+  const methods = {
+    measureText: t => ({ width: widthOf(t), actualBoundingBoxAscent: size() * 0.72, actualBoundingBoxDescent: size() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: widthOf(t) }),
+    fillText: (t, x, y) => { if (String(t).trim()) texts.push({ t: String(t), y: m.dy + y * m.k, z: size() * m.k }) },
+    save: () => stack.push({ ...m }), restore: () => { m = stack.pop() ?? { dy: 0, k: 1 } },
+    translate: (x, y) => { m.dy += y * m.k }, scale: (a, b) => { m.k *= b },
+    createLinearGradient: () => ({ addColorStop() {} }), createRadialGradient: () => ({ addColorStop() {} }),
+    getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+  }
+  const ctx = new Proxy(state, { get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true } })
+  return { ctx, texts }
+}
+
+describe('the practice features, recorded in the app (plan 270)', () => {
+  const B = { 'promo.json': bank('promo.json') }
+  const LANGS = ['en', 'fr']
+  const LOCALES = { en: EN, fr: FR }
+  // record.mjs's shots for a script, without a browser: where a step shoots, a
+  // box for what it shows and one for what it taps, a typed run a shot a chunk,
+  // a clip a shot every 0.15 s of it.
+  const FOCUS = { x: 40, y: 600, w: 1000, h: 520 }
+  const TAP = { x: 120, y: 980, w: 300, h: 110 }
+  function shotsOf(steps) {
+    const shots = []
+    for (const st of steps) {
+      if (st.type) {
+        const n = [...st.text].length
+        for (let c = st.chunk || 3, i = 0; c - (st.chunk || 3) < n; c += st.chunk || 3, i++) shots.push({ name: st.shot, i, chars: Math.min(n, c), focus: FOCUS, tap: null })
+      } else if (st.play) {
+        for (let at = 0, i = 0; at < st.seconds + 0.3; at += 0.15, i++) shots.push({ name: st.shot, i, at, focus: FOCUS, tap: null })
+      } else if (st.shot) shots.push({ name: st.shot, i: 0, focus: FOCUS, tap: st.tap ? TAP : null })
+    }
+    return shots
+  }
+  const each = fn => { for (const id of FEATURE_IDS) for (const lang of LANGS) fn(id, lang, featurePlan(B, id, { lang })) }
+
+  it('films every feature of the Practice tab, in its order, named as the app names it', () => {
+    const tabs = read('src/config/tabs.js')
+    const order = [...tabs.matchAll(/path: '\/practice\/(\w+)'[^\n]*tab: 'practice'/g)].map(m => m[1])
+    expect(FEATURE_IDS).toEqual(order)
+    expect(Object.keys(FEATURE_SCRIPTS).sort()).toEqual([...FEATURE_IDS].sort())
+    for (const lang of LANGS) {
+      const A = FEATURE_APP[lang]
+      const T = LOCALES[lang]
+      expect(A.tab, lang).toBe(T.tabPractice)
+      for (const id of FEATURE_IDS) {
+        expect(weldIf(lang, A.title[id]), `${id} ${lang}`).toBe(T[localeKeys(id).title])
+        expect(weldIf(lang, A.desc[id]), `${id} ${lang}`).toBe(T[localeKeys(id).desc])
+      }
+      expect(featureItems(lang).map(x => x.id)).toEqual(FEATURE_IDS)
+    }
+  })
+
+  it('times every beat from the shots its script takes, its lines voiced in turn', () => {
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const steps = featureSteps(plan)
+      // Every part a beat shows is a shot its script takes.
+      const names = new Set(steps.map(st => st.shot).filter(Boolean))
+      for (const b of plan.beats) for (const p of b.parts) expect(names.has(p.shot || p.seq), `${at}: ${p.shot || p.seq}`).toBe(true)
+      const tl = featureTimeline(plan, shotsOf(steps))
+      expect(tl.segs.length, at).toBe(plan.beats.length + 1)
+      expect(tl.segs.at(-1).kind, at).toBe('end')
+      // A short: long enough to show the exercise, never past a Short's minute.
+      expect(tl.seconds, at).toBeGreaterThan(14)
+      expect(tl.seconds, at).toBeLessThan(60)
+      // Each line the video says is said once, and never two at once.
+      const voiced = plan.beats.flatMap(b => b.parts.flatMap(p => [p.hear, p.voice].filter(v => v != null)))
+      expect(tl.cues.length, at).toBe(voiced.length)
+      expect(new Set(voiced.map(v => (v === true ? 0 : v))).size, at).toBe(plan.cues.length)
+      const sorted = [...tl.cues].sort((a, b) => a.at - b.at)
+      for (let k = 1; k < sorted.length; k++) expect(sorted[k].at, at).toBeGreaterThan(sorted[k - 1].at + 0.5 + 0.13 * [...sorted[k - 1].text].length - 0.01)
+      // Beats follow each other, and every tap falls inside its beat.
+      for (const sg of tl.segs.filter(x => x.kind === 'beat')) for (const t of sg.taps) {
+        expect(t.t, at).toBeGreaterThan(sg.start)
+        expect(t.t, at).toBeLessThan(sg.start + sg.dur)
+      }
+    })
+  })
+
+  it('frames what a part shows, and where the finger taps, between the feed’s head and the slip (plans 272, 273)', () => {
+    for (const fit of ['tiktok', 'instagram']) {
+      const L = layoutOf(fit)
+      // Where a box of the page stands on the video, through a camera.
+      const on = (box, c) => {
+        const k = L.s * c.z
+        return { x: L.w / 2 + (box.x - c.cx) * k, y: L.yc + (box.y - c.cy) * k, w: box.w * k, h: box.h * k }
+      }
+      const fits = (box, c) => {
+        const b = on(box, c)
+        return b.x >= -1 && b.x + b.w <= L.w + 1 && b.y >= L.view.top - 1 && b.y + b.h <= L.view.bottom + 1
+      }
+      // Never a hole beside or above the screen: its sides beyond the video's, its head and foot beyond the view.
+      const covers = (c, sy = 0) => {
+        const s = on({ x: 0, y: sy, w: SHOT.w, h: SHOT.h }, c)
+        return s.x <= 0.5 && s.x + s.w >= L.w - 0.5 && s.y <= L.view.top + 0.5 && s.y + s.h >= L.view.bottom - 0.5
+      }
+      // The screen fills the frame at its width; the view stands between the feed's head and the slip.
+      expect(L.w).toBe(L.fmt.w)
+      expect(L.s * SHOT.w).toBe(L.fmt.w)
+      expect(L.view.top).toBe(L.fr.y)
+      expect(L.view.bottom).toBeLessThan(L.fr.bottom - L.slipH)
+      expect(L.view.bottom - L.view.top).toBeGreaterThan(600)
+      // What a part is about is shown whole, and come in on where it is small.
+      const small = camFor(FOCUS, L)
+      expect(fits(FOCUS, small)).toBe(true)
+      expect(small.z).toBeGreaterThan(1)
+      expect(small.z).toBeLessThanOrEqual(1.6)
+      expect(covers(small)).toBe(true)
+      // 'wide' keeps the screen's width; a number is the zoom asked.
+      expect(camFor(FOCUS, L, { kind: 'wide' }).z).toBe(1)
+      expect(camFor(FOCUS, L, { kind: 1.2 }).z).toBe(1.2)
+      // At the screen's foot, a box is still above the slip, the screen's foot never inside the view.
+      const foot = { x: 40, y: SHOT.h - 122, w: 1520, h: 110 }
+      expect(fits(foot, camFor(foot, L))).toBe(true)
+      expect(covers(camFor(foot, L))).toBe(true)
+      // A shot scrolled down the page is framed where it stands on it.
+      const down = { ...FOCUS, y: FOCUS.y + 3000 }
+      expect(fits(down, camFor(down, L, { sy: 3000 }))).toBe(true)
+      expect(covers(camFor(down, L, { sy: 3000 }), 3000)).toBe(true)
+      // A tap is never out of sight, however tall the rest; else the tall is framed from its top.
+      const tall = { x: 40, y: 200, w: 1520, h: 3000 }
+      const tap = { x: 120, y: 3000, w: 300, h: 110 }
+      expect(fits(tap, camFor(tall, L, { tap }))).toBe(true)
+      const top = on(tall, camFor(tall, L))
+      expect(top.y).toBeGreaterThanOrEqual(L.view.top - 1)
+      expect(top.y).toBeLessThan(L.view.top + 60)
+    }
+  })
+
+  it('moves the camera only in eased, unbroken moves, a new screen sliding in (plan 273)', () => {
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const L = layoutOf(plan.fit)
+      const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+      const beats = tl.segs.filter(x => x.kind === 'beat')
+      const parts = beats.flatMap(sg => sg.parts)
+      expect(parts[0].enter, at).toBe('cut')
+      for (const p of parts.slice(1)) expect(['fade', 'dissolve', 'push', 'back', 'rise', 'sink'], at).toContain(p.enter)
+      // A move takes between half a second and a little over one; a read, no more than its cap.
+      for (const p of parts) {
+        if (p.enter === 'fade' && p.move > 0) {
+          expect(p.move, at).toBeGreaterThanOrEqual(0.5)
+          expect(p.move, at).toBeLessThanOrEqual(1.1)
+        }
+        if (p.read) expect(p.read.dur, at).toBeLessThanOrEqual(3.2)
+      }
+      // Frame to frame, the camera never jumps: a cut only where a new screen slides in over the last.
+      const camAt = t => {
+        const { ctx } = stubContext()
+        const [, , , cx, cy, z] = drawFeature(ctx, plan, tl, t, []).split('|').map(Number)
+        return { cx, cy, z }
+      }
+      const slides = parts.filter(p => p.enter !== 'fade').map(p => p.start)
+      const end = tl.segs.at(-1).start
+      let was = camAt(0)
+      for (let f = 1; f / FEATURE_FPS < end; f++) {
+        const t = f / FEATURE_FPS
+        const c = camAt(t)
+        if (!slides.some(s => s > t - 1 / FEATURE_FPS - 1e-6 && s <= t + 1e-6)) {
+          const k = L.s * Math.max(c.z, was.z)
+          expect(Math.hypot(c.cx - was.cx, c.cy - was.cy) * k, `${at} at ${t.toFixed(2)}`).toBeLessThan(90)
+          expect(Math.abs(Math.log(c.z / was.z)), `${at} at ${t.toFixed(2)}`).toBeLessThan(0.08)
+        }
+        was = c
+      }
+    })
+  })
+
+  it('pans only over what a shot shows, and dissolves across what none does (plan 273)', () => {
+    const plan = featurePlan(B, 'comprehension', { lang: 'en' })
+    // The breakdown read near its foot, then a sentence far below it.
+    const shots = shotsOf(featureSteps(plan)).map(s => ({ ...s, scrollY: { breakdown: 3248, 'bd-pick': 7768, 'bd-open': 7768 }[s.name] ?? 0 }))
+    const parts = Object.fromEntries(featureTimeline(plan, shots).segs.filter(x => x.kind === 'beat').flatMap(sg => sg.parts.map((p, i) => [`${sg.beat}:${i}`, p])))
+    const bi = plan.beats.findIndex(b => b.parts.some(p => p.shot === 'bd-pick'))
+    expect(parts[`${bi}:2`].enter).toBe('dissolve')
+    expect(parts[`${bi}:3`].enter).not.toBe('dissolve')
+    // Without the gap, the same move is a pan.
+    const flat = featureTimeline(plan, shotsOf(featureSteps(plan))).segs.filter(x => x.kind === 'beat')[bi].parts
+    expect(flat[2].enter).toBe('fade')
+  })
+
+  it('ends on the stories’ gate, on the print of its hour (plan 271)', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      each((id, lang, plan) => {
+        const at = `${id} ${lang}`
+        expect(plan.hour, at).toBe('day')
+        const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+        const end = tl.segs.at(-1)
+        // The ask lands on the board's flap and the gate opens on the chime, as the stories' do.
+        expect(tl.sfx.filter(x => x.at >= end.start).map(x => [x.key, +(x.at - end.start).toFixed(3)]), at).toEqual([['board-flap', +(END.head + 0.1).toFixed(3)], ['platform-chime', +(END.gate + 0.1).toFixed(3)]])
+        for (const print of [null, stillPrint()]) {
+          const { ctx, texts } = stubContext()
+          drawFeature(ctx, plan, tl, end.start + end.dur - 0.01, [], print)
+          for (const w of plan.end.split(/\s+/)) expect(texts.join(' '), `${at}: ${w}`).toContain(w)
+        }
+        // The app dissolves into the gate, frame by frame, from the gate's first.
+        for (let f = 0; f <= 18; f++) drawFeature(stubContext().ctx, plan, tl, end.start + f / 30, [], null)
+      })
+    } finally {
+      globalThis.Path2D = had
+    }
+    expect(featureCommand('dictation', 'en', 'tiktok', 'night')).toContain('--hour night')
+    expect(featureCommand('dictation', 'en')).not.toContain('--hour')
+  })
+
+  it('says every caption whole, and nothing the app does not', () => {
+    const SALES = /€|\$|£|\d+ ?%|\bfree\b|gratuit|best\b|meilleur|#1|guarantee|garanti|fluent|couramment|in \d+ days|en \d+ jours/i
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      for (const line of [plan.title, plan.end, ...plan.beats.map(b => b.say)]) expect(line, at).not.toMatch(SALES)
+      const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+      for (const sg of tl.segs.filter(x => x.kind === 'beat')) {
+        const { ctx, texts } = stubContext()
+        drawFeature(ctx, plan, tl, sg.start + sg.dur / 2, [])
+        expect(texts.join(' '), `${at}: ${sg.say}`).not.toContain('…')
+        expect(texts.some(t => sg.say.includes(t.trim()) && t.trim().length > 2), `${at}: ${sg.say}`).toBe(true)
+      }
+    })
+  })
+
+  it('posts each video to the three feeds, credited where the app’s voices speak', () => {
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+      const page = featurePage(plan, tl, SITE_ORIGIN)
+      expect([...page.title].length, at).toBeLessThanOrEqual(100)
+      expect(page.title, at).toMatch(/#shorts$/)
+      for (const line of weldIf(lang, FEATURE_APP[lang].desc[id]).split('\n')) expect(page.description, at).toContain(line)
+      expect(/VOICEVOX Nemo/.test(page.description), at).toBe(plan.cues.length > 0)
+      expectFeeds(page, SITE_ORIGIN, at)
+      expect(featureCommand(id, lang), at).toContain(`--feature ${id} --lang ${lang}`)
+    })
   })
 })

@@ -38,42 +38,67 @@ const RING = 2.5 * K // a roundel's ring
 // image's top runs under the status bar), the page counter at the top
 // right, the column of buttons from x 920 down from y 1100, the
 // author's picture at the bottom left and the caption from y 1710.
-// Instagram's story and Reels chrome sits inside the same margins.
+// Its foot was measured again on a posted conversation (plan 240): the
+// caption's panel stands from y ~1660 and the page dots at y ~1600-1625,
+// centred, so a slide reaches down to 1590 rather than leave 170px bare.
+// Instagram crops a 9:16 post in its feed, so it has margins of its own
+// (INSTAGRAM, below).
 export const FORMATS = {
   post: { id: 'post', fit: 'tiktok', w: 1080, h: 1350, safe: { t: 170, r: 144, b: 112, l: 144 } },
-  story: { id: 'story', fit: 'tiktok', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 430, l: 184 } },
+  story: { id: 'story', fit: 'tiktok', w: 1080, h: 1920, safe: { t: 350, r: 184, b: 330, l: 184 } },
 }
 // Normal margins (plan 234f): a slide for anywhere that lays nothing over
 // it (an Instagram post, a site, a message), on either ratio. The margins
 // are the post's own before plan 232 fitted it to TikTok.
 const NORMAL = { t: 104, r: 92, b: 112, l: 92 }
-export const FITS = ['tiktok', 'normal']
-/** A format at its margins: TikTok's (FORMATS), or the normal ones. The id
- *  stays the ratio's, so whatever a slide reads from the ratio holds. */
+// Instagram's margins (plan 239), measured on a reel in its feed: the
+// feed shows a 9:16 post's middle 4:5 (1080 × 1350, 285 cut at the top
+// and the foot) with, on the web, the author's header laid over that
+// crop's top 110 and its sound switch at the crop's corner; full
+// screen, a reel's caption stands over the foot from y ~1450 and its
+// buttons down the right. A 9:16 slide keeps to 400 … 1450, clear of
+// all of them, and of the profile grid's 3:4 too. A 4:5 post is shown
+// whole, nothing over it but a counter that fades: the normal margins.
+const INSTAGRAM = { post: NORMAL, story: { t: 400, r: 144, b: 470, l: 144 } }
+export const FITS = ['tiktok', 'instagram', 'normal']
+/** A format at its margins: TikTok's (FORMATS), Instagram's or the normal
+ *  ones. The id stays the ratio's, so whatever a slide reads from the
+ *  ratio holds. */
 export function formatOf(id, fit = 'tiktok') {
   const f = FORMATS[id]
-  return fit === 'normal' ? { ...f, fit, safe: NORMAL } : f
+  if (fit === 'normal') return { ...f, fit, safe: NORMAL }
+  if (fit === 'instagram') return { ...f, fit, safe: INSTAGRAM[id] }
+  return f
 }
 /** Where TikTok's photo view lays its own chrome over a 9:16 slide, in the
  *  slide's pixels: the studio draws it over a slide on request, never on
  *  an export. */
 export const FEED_HUD = {
   bars: [{ x: 0, y: 0, w: 1080, h: 330 }, { x: 0, y: 1710, w: 1080, h: 210 }],
-  pills: [{ x: 160, y: 213, w: 862, h: 104 }, { x: 921, y: 397, w: 113, h: 60 }],
+  pills: [{ x: 160, y: 213, w: 862, h: 104 }, { x: 921, y: 397, w: 113, h: 60 }, { x: 446, y: 1601, w: 178, h: 24 }],
   dots: [{ x: 995, y: 1180, r: 58 }, { x: 995, y: 1335, r: 46 }, { x: 995, y: 1500, r: 44 }, { x: 995, y: 1665, r: 40 }, { x: 100, y: 1612, r: 64 }],
 }
+/** Instagram's over a 9:16 post in its feed (plan 239): what the 4:5
+ *  crop cuts, the author's header over the crop (their picture, name,
+ *  the reel's progress, its sound) and the sound switch at its corner. */
+export const INSTAGRAM_HUD = {
+  bars: [{ x: 0, y: 0, w: 1080, h: 285 }, { x: 0, y: 1635, w: 1080, h: 285 }],
+  pills: [{ x: 138, y: 306, w: 330, h: 34 }, { x: 138, y: 346, w: 900, h: 8 }, { x: 138, y: 364, w: 200, h: 24 }],
+  dots: [{ x: 70, y: 340, r: 38 }, { x: 1016, y: 1572, r: 30 }],
+}
 export function drawFeedHud(ctx, fmt) {
-  if (fmt.h !== 1920 || fmt.fit !== 'tiktok') return
+  if (fmt.h !== 1920 || fmt.fit === 'normal') return
+  const hud = fmt.fit === 'instagram' ? INSTAGRAM_HUD : FEED_HUD
   ctx.save()
   ctx.fillStyle = 'rgba(16, 14, 19, 0.55)'
-  for (const r of FEED_HUD.bars) ctx.fillRect(r.x, r.y, r.w, r.h)
+  for (const r of hud.bars) ctx.fillRect(r.x, r.y, r.w, r.h)
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
-  for (const r of FEED_HUD.pills) {
+  for (const r of hud.pills) {
     rrect(ctx, r.x, r.y, r.w, r.h, r.h / 2)
     ctx.fill()
   }
   ctx.fillStyle = 'rgba(16, 14, 19, 0.5)'
-  for (const d of FEED_HUD.dots) {
+  for (const d of hud.dots) {
     ctx.beginPath()
     ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2)
     ctx.fill()
@@ -126,6 +151,7 @@ export function palette(ground) {
       vocab: t['--line-vocab'], grammar: t['--line-grammar'], kanji: t['--line-kanji'],
       reading: t['--line-reading'], exam: t['--line-exam'], kana: t['--line-kana'],
       honyaku: t['--line-honyaku'], rikai: t['--line-rikai'], sakubun: t['--line-sakubun'], kakitori: t['--line-kakitori'],
+      kaiwa: t['--line-kaiwa'],
     },
     // The People family: what is the learner's own (their line in a scene).
     pass: t['--pass-ink'],
@@ -350,6 +376,52 @@ function metal(ctx, p, cx, y, label, maxW = Infinity) {
   chevron(ctx, x + SP[7] + tw + SP[4], y + h / 2, arrow, p.onFill)
   return h
 }
+/** The way to the site (plan 245): its address as a browser's bar shows
+ *  it, a padlock before it and Go, the gate's gold, at its end; as high as
+ *  the metal, so a layout that keeps room for one keeps it for the other. */
+function address(ctx, p, x, y, w, site) {
+  const h = METAL_H
+  const cy = y + h / 2
+  ctx.save()
+  shadow(ctx, `0 6px 18px ${alpha(p.paper ? p.ink : '#000000', 0.18)}`)
+  // The field is lit above its ground, as a browser's is.
+  ctx.fillStyle = p.paper ? mix('#ffffff', p.bg, 0.7) : mix(p.ink, p.bg, 0.08)
+  rrect(ctx, x, y, w, h, h / 2)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = alpha(p.ink, 0.18)
+  ctx.lineWidth = 3
+  rrect(ctx, x + 1.5, y + 1.5, w - 3, h - 3, h / 2 - 1.5)
+  ctx.stroke()
+  // The padlock: its shackle, then its body.
+  const lx = x + SP[6]
+  ctx.strokeStyle = p.ink2
+  ctx.lineWidth = 6
+  ctx.beginPath()
+  ctx.arc(lx, cy - 6, 13, Math.PI, 0)
+  ctx.stroke()
+  ctx.fillStyle = p.ink2
+  rrect(ctx, lx - 19, cy - 6, 38, 30, 6)
+  ctx.fill()
+  // Go: a gold disc inside the bar's end.
+  const r = h / 2 - SP[1]
+  const gx = x + w - SP[1] - r
+  const room = gx - r - SP[4] - (lx + SP[5])
+  const size = [FS.title, FS.lead, FS.body].find(z => measure(ctx, site, font(700, z, 'latin')) <= room) || FS.body
+  text(ctx, site, lx + SP[5], cy + size * 0.36, { f: font(700, size, 'latin'), color: p.ink })
+  const g = ctx.createLinearGradient(0, cy - r, 0, cy + r)
+  g.addColorStop(0, p.goldLit)
+  g.addColorStop(1, p.goldMid)
+  ctx.save()
+  shadow(ctx, `0 4px 16px ${alpha(p.goldMid, 0.3)}`)
+  ctx.fillStyle = g
+  ctx.beginPath()
+  ctx.arc(gx, cy, r, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+  chevron(ctx, gx - r * 0.42, cy, r * 0.84, p.onFill)
+  return h
+}
 function chevron(ctx, x, cy, w, color) {
   ctx.save()
   ctx.strokeStyle = color
@@ -460,7 +532,7 @@ function layoutSentence(ctx, rows, o) {
       // Furigana at 0.4 of the word, never under the scale's smallest caption.
       const rs = Math.max(size * 0.4, RUBY_MIN)
       const rf = font(500, rs, 'jp')
-      const romF = font(500, Math.max(size * 0.3, FS.sm * 0.9), 'latin')
+      const romF = font(500, Math.max(size * (opts.romajiK || 0.3), FS.sm * 0.9), 'latin')
       for (const u of list) {
         let x = measure(ctx, u.prefix, f)
         u.segX = u.segs.map(([t, r], k) => {
@@ -534,7 +606,7 @@ function layoutSentence(ctx, rows, o) {
       const rubyH = ruby ? rs * 1.3 : 0
       // The room under the word: its rule's, or (`under`) as the caller sets it.
       const ruleGap = size * (opts.under ?? (opts.rules ? 0.22 : 0.12))
-      const romH = opts.romaji ? Math.max(size * 0.3, FS.sm * 0.9) * 1.5 : 0
+      const romH = opts.romaji ? Math.max(size * (opts.romajiK || 0.3), FS.sm * 0.9) * 1.5 : 0
       const lineH = rubyH + size + ruleGap + romH
       const lineGap = size * 0.32
       if (lines.length * lineH + (lines.length - 1) * lineGap > opts.maxH && !last) continue
@@ -680,6 +752,6 @@ export const hasKanji = text => /[\u3400-\u9fff々]/.test(text)
 
 export {
   FS, SP, R, TR, EDGE, RING, ASC, FAMILY, alpha, shadow, noShadow, rrect, measure, text, caption, wrap, balance, fit,
-  paragraph, paragraphH, roundel, mark, metal, METAL_H, chevron, units, layoutSentence, drawSentence, lineOf, frame, ground,
+  paragraph, paragraphH, roundel, mark, metal, METAL_H, address, chevron, units, layoutSentence, drawSentence, lineOf, frame, ground,
   masthead, heading, pageMark, pages, strokeBox, marked, stamp,
 }

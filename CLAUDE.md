@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **308**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **310**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -68,6 +68,8 @@ runtime purpose.
   `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
   `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205),
   `REV` in `frontend/scripts/ambiance/build.py` (the ambiance, plan 219),
+  `REV` in `frontend/scripts/sceneries/build.py` (the reading challenge's
+  sceneries, plan 309; `PRINTS_REV` in `carousel/sceneries.js` is held equal),
   `SORT_REV` in `study/lyrics_sort.py` (which lines of a song are sung,
   plan 264), `CUT_REV` in `study/line_cut.py` (what a stored video
   session's lines are cut into), `PAPER_REV` in `study/duel_paper.py`
@@ -842,8 +844,8 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
 thirty hand-written exercises per level since plan 259, sixty at N4
-and eighty at N5 since plan 298, in each of the app's languages
-(Spanish since plan 302),
+and eighty at N5 since plan 298 (N5 has eighty-one), in each of the
+app's languages (Spanish since plan 302),
 held to the same checks as a model answer by
 `tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
@@ -1266,6 +1268,7 @@ npm run landing:og  # its three share cards, rendered in Chromium
 npm run landing:footage  # its sixteen feature clips, filmed on a seeded learner (plan 283)
 python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; numpy, ffmpeg)
+python3 scripts/sceneries/build.py    # the reading challenge's sceneries (plan 309)
 node scripts/duel-music/build.mjs     # a duel's music and sounds (plan 285; Chromium, ffmpeg)
 ```
 
@@ -1330,11 +1333,72 @@ engine: rerun it after a change of voice or of the themes); since plan 233
 ten-minute 16:9 videos for YouTube (`long.js`, made by
 `node carousel/long/render.mjs`: a vocabulary or kanji drill, one grammar
 point whole, a quiz), voiced line by line by the app's voices and mixed
-with the app's sounds and a bed of music it plays itself
-(`scripts/long_video_audio.py`), each also a source in the studio
+with the app's sounds (`scripts/long_video_audio.py`; no video carries
+music since plan 273, the owner's call), each also a source in the studio
 that previews it and gives its page and the command that makes it, and
 each also a 9:16 short under a minute, as any carousel can be too
-(`short.js`: its slides held and swiped, its line voiced). Since plan
+(`short.js`: its slides held and swiped, its line voiced); since plan
+247 reading challenges (`challenge.js`): a comprehension text read as a
+9:16 video over Today's print, going slowly up the screen as a film's
+credits do, in ink on the print washed pale, or read along by the app's
+reader, each word lit on the voice's own syllables; since plan 249 reply videos: the conversations
+answered against a timer, six questions a video at least, every line
+said, drawn since plan 249b as a chat thread in the Fiche look, a
+short one scene whole and ending on the carousel's call to action,
+and asking since plan 250 the 会話 station's own scenes (six turns
+each, `bank/conversation.json`, every reading the bank's own kana). Since plan 251 a 9:16 video's page is three posts,
+YouTube Shorts', Instagram Reels' and TikTok's (`feeds.js`: a caption
+opens on the hook, links "in bio", keeps every credit, five hashtags at
+most). Since plan 252 vocabulary shorts have their own source
+(`words.js`: nine words, as a card on washi or a quiz on sumi, every
+wrong meaning one that shares no word with the word's); since plan 253 a sentence can be
+posted as "Read it" (`funnel.js`: the sentence, its words a card each,
+the answer with a bonus, the app), since plan 254 set large, its bonus
+the sentence said the other way (`plain_polite.other_register`'s, never
+written by hand), with a bank of its own short sentences
+(`content/short.json`, a noun, a particle and a verb, N5 deck words),
+since plan 256 each word an ink of its own on every slide (`readInks`,
+the app's tokens: the one place a line's pigment names a word); since
+plan 257 a vocabulary short's card turns over at the reveal onto the
+word's own picture where `frontend/carousel/content/pictures/` has one
+(the owner's illustrations, keyed by `written::kana`); since plan 260 a
+reading challenge asks the question chosen (`--question`), its answers
+dealt so the right one stands at A, B, C or D alike (or, since plan
+275, never answered by default: the comments are asked, `--show` gives it), and since plan 266
+ends on the app's own reader, the text rolling, slowed and its furigana
+shown, over the run's three stops; since plan 267 the studio's Today's
+print is the season's too, the day's as the app's gate shows it unless
+one is chosen (`--season`); since plan 268 the 会話 station's scenes, the
+ones the reply videos ask, are answered as carousels too (返事, beside the
+carousel's own conversations); since plan 269 a reply short of a scene
+the owner pictured (two pictures a turn, asked and answered,
+`frontend/carousel/content/pictures/scenes/`) draws each turn as a
+game's screen: the picture large, the line in a box, the replies a menu
+over it, the answer's picture only once the reply is said; since plan
+270 each feature of the Practice tab is a 9:16 video of the app itself
+doing one exercise (実践, `feature.js`): the real app recorded as it runs
+(`long/record.mjs`: Vite in the render's process, a phone-sized browser
+signed in, its API answered from `bank/promo.json`, which
+`carousel_bank.promo` makes from the backend's own functions on the
+banks' own content, only a tutor's reply written by hand), a caption a
+beat over it saying what the screen and the app's own description say,
+and the stories' gate at its end; when a screen it records changes, its
+script's selectors are what to check; since plan 271 every promo
+story's frame stands on Today's print of the hour, its sky washed
+behind the words, its title in the serif, its parts lifted on shadows,
+and each story and feature video ends on the print's sun ringed by the
+four lines, the mark in it, drawn round as the clip begins; since plan 272
+a feature video's screen fills the frame as a phone shows it, its
+caption on a slip of the print's washi at the foot of the safe box;
+since plan 273 it is filmed through a camera that moves only to show
+something (`feature.js`, `camFor`: what a part shows framed, a text read
+down, a page pushed in, a sheet risen), and shows past the exercise what
+a first run would not find (the roll, the breakdown, Ask answered from
+`content/promo.json`'s `ask`, a lesson, a flag, a wrong reply's why;
+since plan 274 comprehension's word and point in the dictionary). Since plan 248 every number a maker may set per
+post (a video's timing and pace, the export's quality) is one line of `tune.js`, set in the studio's Tune panel and
+written into the render command, so the video rendered is the one
+previewed. Since plan
 234 a carousel is drawn by default on one path that converts
 (`funnel.js`): the hook, the answer as the app shows it, a call to
 action that draws the feature the item comes from as a schema (never a

@@ -897,6 +897,54 @@
             }
           }
         ]
+      },
+      {
+        "them": {
+          "jp": "北海道か。いいね。戻るのはいつ？",
+          "kana": "ほっかいどうか。いいね。もどるのはいつ？",
+          "en": "Hokkaido, eh? Nice. When are you back?",
+          "fr": "Hokkaidō ? Sympa. Tu reviens quand ?",
+          "es": "Hokkaido, ¿eh? Qué bien. ¿Cuándo vuelves?"
+        },
+        "me": {
+          "jp": "十八日の月曜日から出社いたします。",
+          "kana": "じゅうはちにちのげつようびからしゅっしゃいたします。",
+          "romaji": "juuhachinichi no getsuyoubi kara shussha itashimasu",
+          "en": "I'll be back at the office from Monday the eighteenth.",
+          "fr": "Je serai de retour au bureau à partir du lundi 18.",
+          "es": "Vuelvo a la oficina a partir del lunes dieciocho.",
+          "note": {
+            "en": "「出社いたします」 says, humbly, when you will be back at the office.",
+            "fr": "「出社いたします」 dit, avec modestie, quand tu reviendras au bureau.",
+            "es": "「出社いたします」 dice con humildad cuándo volverás a la oficina."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "十八日の月曜日から出社なさいます。",
+            "kana": "じゅうはちにちのげつようびからしゅっしゃなさいます。",
+            "en": "I shall graciously be back at the office from Monday the eighteenth.",
+            "fr": "Je daignerai revenir au bureau à partir du lundi 18.",
+            "es": "Me dignaré volver a la oficina a partir del lunes dieciocho.",
+            "why": {
+              "en": "「なさいます」 honours the one who acts: it cannot be said of yourself to your manager.",
+              "fr": "「なさいます」 honore celui qui agit : on ne le dit pas de soi devant son supérieur.",
+              "es": "「なさいます」 honra a quien hace la acción: no puedes decirlo de ti ante tu jefe."
+            }
+          },
+          {
+            "jp": "十八日の月曜日に戻ってまいりました。",
+            "kana": "じゅうはちにちのげつようびにもどってまいりました。",
+            "en": "I came back on Monday the eighteenth.",
+            "fr": "Je suis de retour depuis le lundi 18.",
+            "es": "Volví el lunes dieciocho.",
+            "why": {
+              "en": "「戻ってまいりました」 is past: you have not even taken the days off yet.",
+              "fr": "「戻ってまいりました」 est au passé : tu n'as même pas encore pris tes congés.",
+              "es": "「戻ってまいりました」 está en pasado: ni siquiera te has tomado todavía los días libres."
+            }
+          }
+        ]
       }
     ],
     "close": {
@@ -2092,6 +2140,54 @@
               "en": "「どういたしまして」 answers a thank-you, and the neighbour has made a promise, not thanked you.",
               "fr": "「どういたしまして」 répond à un merci, et le voisin vient de promettre, pas de te remercier.",
               "es": "「どういたしまして」 responde a un agradecimiento, y lo que acabas de oír es una promesa, no un agradecimiento."
+            }
+          }
+        ]
+      },
+      {
+        "them": {
+          "jp": "もしまたうるさかったら、遠慮なく言ってくださいね。",
+          "kana": "もしまたうるさかったら、えんりょなくいってくださいね。",
+          "en": "If it's loud again, don't hesitate to tell me.",
+          "fr": "Si c'est de nouveau bruyant, n'hésitez pas à me le dire.",
+          "es": "Si vuelve a haber ruido, no dude en decírmelo."
+        },
+        "me": {
+          "jp": "ありがとうございます。そうさせていただきます。",
+          "kana": "ありがとうございます。そうさせていただきます。",
+          "romaji": "arigatou gozaimasu. sou sasete itadakimasu",
+          "en": "Thank you. I will.",
+          "fr": "Merci. Je n'y manquerai pas.",
+          "es": "Muchas gracias. Así lo haré.",
+          "note": {
+            "en": "「そうさせていただきます」 accepts his offer humbly: you will tell him if it happens again.",
+            "fr": "「そうさせていただきます」 accepte son offre avec modestie : tu le lui diras si ça recommence.",
+            "es": "「そうさせていただきます」 acepta su ofrecimiento con humildad: se lo dirás si vuelve a pasar."
+          }
+        },
+        "wrong": [
+          {
+            "jp": "ありがとうございます。そうしてさしあげます。",
+            "kana": "ありがとうございます。そうしてさしあげます。",
+            "en": "Thank you. I'll do that for you.",
+            "fr": "Merci. Je vous ferai cette faveur.",
+            "es": "Muchas gracias. Le haré ese favor.",
+            "why": {
+              "en": "「さしあげます」 offers it as a favour to him; the offer was his, made to you.",
+              "fr": "「さしあげます」 le présente comme une faveur que tu lui fais ; c'est lui qui t'a fait l'offre.",
+              "es": "「さしあげます」 lo presenta como un favor que tú le haces; el ofrecimiento fue suyo, hacia ti."
+            }
+          },
+          {
+            "jp": "いいえ、うるさくありませんでした。",
+            "kana": "いいえ、うるさくありませんでした。",
+            "en": "No, it wasn't loud.",
+            "fr": "Non, ce n'était pas bruyant.",
+            "es": "No, no hubo ruido.",
+            "why": {
+              "en": "「うるさくありませんでした」 says it was not loud, just after you came to complain about the noise.",
+              "fr": "「うるさくありませんでした」 dit que ce n'était pas bruyant, alors que tu viens de te plaindre du bruit.",
+              "es": "「うるさくありませんでした」 dice que no hubo ruido, justo después de que viniste a quejarte del ruido."
             }
           }
         ]
