@@ -120,4 +120,50 @@ A frame is a still taken alone: `render(t)` sets the print's own
 animations and the finish's keyframes to `t`, so the film is the same
 however fast the machine shoots. The print's motion has periods of its
 own, so the film runs half a second past the loop and its end is
-crossfaded into its start.
+crossfaded into its start. The frames are filmed in parts of three
+seconds, each kept on disk once whole (`OUT/.parts-*`), so a run cut
+short goes on from its last whole part when it is started again.
+
+## The captioned header: the day's queue
+
+The owner then asked for more of Today on the header: the modes its
+queue deals and a caption for each step. Of three captioned versions
+drawn on the same canvas the owner picked **I, the queue**, and kept
+*Draw the kanji* as its kanji mode.
+
+```bash
+cd frontend && node scripts/store-header/film.mjs OUT autumn-day --page queue --lang en   # OUT/queue-autumn-day-en.mp4
+cd frontend && node scripts/store-header/film.mjs OUT autumn-day --page queue --lang fr
+cd frontend && node scripts/store-header/film.mjs OUT autumn-day --page queue --lang es
+```
+
+`queue.py` builds the page (`today.py`'s print, dial and finish with the
+queue laid over it, the language in its query) and `film.mjs` films it:
+24 seconds, so about forty minutes a language at full size. Its captions
+are words, so each localization in App Store Connect gets its own file.
+
+What plays, in the safe area:
+
+- **The day** (0 to 2.9 s): the dial on the day's 24 cards beside a card
+  naming its four lines, kana 2, vocabulary 10, kanji 8, grammar 4.
+- **The queue**: the cards come along the platform one after another, the
+  one at its middle answered in the mode Today deals it: Kana → romaji (ゲ
+  turned over), Word → meaning (毎日), Draw the kanji (日 drawn in
+  KanjiVG's stroke order from its meaning, `backend/kanjivg/065e5.svg`),
+  then the grammar ladder's Choose (これは、友だち＿かさです, three
+  choices, の) and Build (つめたい水＿飲みました, "wo" typed, then the
+  rating, a tap on Easy). Each card's header is its caption: the mode's
+  name in its line's pigment (`--line-*`) and what to do.
+- **The day done** (from 20.6 s): `today.py`'s finish at `useFinish.js`'s
+  beats, the week's stamps in the card beside it, and the seal turning
+  back into the next day's 24.
+
+The cards are set as the run sets them rather than captured: its faces,
+inks and borders, read from the running app's computed styles
+(`.gl-sent`, `.gl-gap`, `.gl-tr`, `.gl-tile`, `.field`, `.btn-primary`,
+`.rating-bar__btn`), and its words (`locales/*/index.js`, the API's
+meanings), at a size made for a phone: on an iPhone the grammar sentence
+is about 15 points and the captions about 11. A card redrawn in the app
+is a card to set again here. The sounds are the app's, where it plays
+them (`window.SOUNDS`): the card turning, the next card coming, a choice
+picked, the rating, the stamp and the 終着 chord.

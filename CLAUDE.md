@@ -1269,6 +1269,7 @@ python3 scripts/ambiance/build.py     # the ambiance of the hour (plan 219; nump
 node scripts/duel-music/build.mjs     # a duel's music and sounds (plan 285; Chromium, ffmpeg)
 python3 scripts/store-header/build.py OUT autumn-day  # the App Store header, 3840 × 1646 (plan 308; Chromium)
 node scripts/store-header/film.mjs OUT autumn-day     # the moving header, its 12 s video (plan 308; Python, Chromium, ffmpeg)
+node scripts/store-header/film.mjs OUT autumn-day --page queue --lang en  # the captioned header, 24 s, one per language (plan 308)
 ```
 
 Today's gate stands on a print drawn ahead of time (plan 205):
@@ -1295,12 +1296,18 @@ The App Store's product page header is the print too (plan 308):
 `scripts/store-header/` draws a print through a 21:9 window, Fuji and the
 train inside the art safe area of Apple's template, and writes the PNG to
 a folder outside the repository, for App Store Connect. The header the
-store shows is its video (`film.mjs`, the owner's pick E): Today's dial
+store shows is its video (`film.mjs`). E, words-free: Today's dial
 counting the day's cards down on the print's sun, then the day's finish
 at `useFinish.js`'s beats, each part drawn by the app's own numbers
 (TodayDial's geometry, `print.json`'s inks, `index.css`'s keyframes, the
-recipes' sounds). It reads those files, so a print, a dial or a finish
-redrawn there is a header to film again; its README has the beats.
+recipes' sounds). I, the owner's pick of the captioned rounds
+(`queue.py`, `--page queue`): the day's queue card by card in the modes
+Today deals (Kana → romaji, Word → meaning, Draw the kanji, the ladder's
+Choose and Build), each card set as the run sets it (its computed styles,
+its locale's words) with its caption as its header, so one film per
+localization. Both read those files, so a print, a dial, a finish or a
+run card redrawn there is a header to film again; the README has the
+beats.
 
 The landing page is the site's **`/`** (and `/en`, `/es`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`
