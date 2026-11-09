@@ -304,8 +304,9 @@ def test_volumes_counts_items_not_cards(client):
     # #360: そして down from the N1 然して; plan 252: 私 わたくし retired;
     # plan 260: 22 down (the counters 枚, 冊, 匹, 歳, the suffix さん,
     # どんな, ひらがな, カタカナ, よろしく, また...); #360: もしもし and
-    # ただいま, which the course's N5 sentences say.
-    assert body["vocab"]["N5"] == 728
+    # ただいま, which the course's N5 sentences say; plan 313: お願いします,
+    # the N1 and N2 cards made one N5 card (the owner's call).
+    assert body["vocab"]["N5"] == 729
     # plan 226: the 93 jōyō characters the deck lacked at N1.
     assert body["kanji"]["N1"] == 1325
     # 238: the gojūon and the yōon of both scripts, and the fourteen
