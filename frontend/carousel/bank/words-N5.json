@@ -501,7 +501,7 @@
 {"t":"では","r":"では","ro":"deha","en":["with that..., then, well, so, well then"],"fr":["alors, eh bien, donc, bon alors"],"ex":["N3.164"]},
 {"t":"お風呂","r":"おふろ","ro":"ofuro","en":["bath"],"fr":["bain"],"fu":[["お",""],["風","ふ"],["呂","ろ"]],"hy":["お父呂","お風路","お不呂"]},
 {"t":"疲れる","r":"つかれる","ro":"tsukareru","en":["to get tired"],"fr":["se fatiguer"],"fu":[["疲","つか"],["れる",""]],"ex":["N3.64","N3.141"]},
-{"t":"悪い","r":"わるい","ro":"warui","en":["bad"],"fr":["mauvais"],"fu":[["悪","わる"],["い",""]],"ex":["N4.48","N3.140"]},
+{"t":"悪い","r":"わるい","ro":"warui","en":["bad"],"fr":["mauvais"],"fu":[["悪","わる"],["い",""]],"ex":["N3.140","N3.142"]},
 {"t":"紙","r":"かみ","ro":"kami","en":["paper"],"fr":["papier"],"fu":[["紙","かみ"]],"ex":["N4.64"]},
 {"t":"おもしろい","r":"おもしろい","ro":"omoshiroi","en":["interesting"],"fr":["intéressant"],"ex":["N5.80","N5.83"]},
 {"t":"紅茶","r":"こうちゃ","ro":"koucha","en":["black tea"],"fr":["thé noir"],"fu":[["紅","こう"],["茶","ちゃ"]],"hy":["後茶","校茶","行茶"]},
