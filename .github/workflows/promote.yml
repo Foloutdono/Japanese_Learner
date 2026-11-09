@@ -22,9 +22,17 @@ name: Promote to production
 
 on:
   schedule:
-    # 03:17 UTC, 05:17 in Paris: the learners are French and asleep. Off
-    # the hour, since GitHub's cron queue is busiest at :00.
-    - cron: '17 3 * * *'
+    # The release belongs in the quiet window below (01:00-05:00 UTC),
+    # but GitHub starts a scheduled run when its queue allows, not at
+    # the minute asked: the one cron at 03:17 started between 08:03 and
+    # 11:36 UTC for weeks (plan 312), so the backend restarted at the
+    # morning's busiest hours, and with its disk attached Render stops
+    # the old instance before the new one is up -- minutes of 502 on
+    # every screen. Seven tries from the afternoon on, each skipped
+    # unless it starts inside the window: whichever lands there first
+    # ships, the rest find production already there. Off the hour, since
+    # the queue is busiest at :00.
+    - cron: '17 16,18,20,22,0,2,4 * * *'
   workflow_dispatch:
     inputs:
       ignore_ci:
@@ -54,13 +62,30 @@ jobs:
       # Through the web origin, as every caller reaches the API (vercel.json).
       NOTICE_URL: https://japanese-learner-seven.vercel.app/api/release/notice
     steps:
+      # 01:00-05:00 UTC holds the fewest app opens of the day (about 45
+      # an hour against 200 at 19:00, October 2026). A scheduled run that
+      # starts outside it ships nothing; a manual run (a hotfix) is never
+      # held.
+      - name: Inside the quiet window?
+        id: window
+        run: |
+          hour=$(date -u +%H)
+          if [ "${{ github.event_name }}" != "schedule" ] || { [ "$hour" -ge 1 ] && [ "$hour" -lt 5 ]; }; then
+            echo "open=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Started at $(date -u +%H:%M) UTC, outside 01:00-05:00: a later try ships tonight."
+            echo "open=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v5
+        if: steps.window.outputs.open == 'true'
         with:
           ref: main
           fetch-depth: 0
 
       - name: Pick the newest commit of main whose CI passed
         id: pick
+        if: steps.window.outputs.open == 'true'
         run: |
           # The newest, not necessarily the head: a push to main whose CI
           # is still running, or flaked, waits for tomorrow (or a manual

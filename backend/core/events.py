@@ -42,7 +42,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # boot_ms is why render.yaml carries `plan: starter`; it is the
     # before/after of that line.
     "app_open":       frozenset({"boot_ms", "cold", "platform", "standalone"}),
-    "boot_timeout":   frozenset({"waited_ms"}),
+    "boot_timeout":   frozenset({"waited_ms", "reason"}),
 
     # ── Where people go ──────────────────────────────────────────
     "screen_view":    frozenset({"route", "tab"}),
@@ -339,6 +339,11 @@ EVENTS: dict[str, frozenset[str]] = {
 # SHAPE instead, on every name, below: `route` and `path`.
 _RUN_DOORS = frozenset({"today", "learn", "practice", "deck", "ride", "exam", "other"})
 VALUES: dict[str, dict[str, frozenset[str]]] = {
+    # Why the gate's first request failed (plan 312): its 45 s ran out,
+    # the server answered 5xx (a restart answers 502), or no answer came.
+    "boot_timeout": {
+        "reason": frozenset({"timeout", "server", "network"}),
+    },
     "session_start": {
         "platform": frozenset({"web", "native"}),
         "vp":       frozenset({"phone", "tablet", "desk", "wide"}),
