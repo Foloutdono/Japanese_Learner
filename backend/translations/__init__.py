@@ -37,7 +37,7 @@ PREVIEW: tuple[str, ...] = ("id",)
 
 WRITTEN: dict[str, tuple[str, ...]] = {
     # A deck card's own line, "{kanji}::{kana}" (datas/vocab/vocab_{lang}.json).
-    "deck": ("es",),
+    "deck": ("es", "id"),
     # A deck kanji's meaning (kanji.sqlite3's meaning_{lang}, the app's own
     # lines in datas/kanji/kanji_meanings_{lang}.json).
     "kanji": ("es", "id"),

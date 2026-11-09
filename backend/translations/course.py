@@ -10,6 +10,7 @@ line for reads English (translations.WRITTEN says which are whole).
 from content.kanji_meanings import KANJI_ES, KANJI_FR, KANJI_ID
 from translations.es.vocab_es import VOCAB_ES
 from translations.fr.vocab_fr import VOCAB_FR
+from translations.id.vocab_id import VOCAB_ID
 
-VOCAB_GLOSSES: dict[str, dict[str, str]] = {"fr": VOCAB_FR, "es": VOCAB_ES}
+VOCAB_GLOSSES: dict[str, dict[str, str]] = {"fr": VOCAB_FR, "es": VOCAB_ES, "id": VOCAB_ID}
 KANJI_GLOSSES: dict[str, dict[str, str]] = {"fr": KANJI_FR, "es": KANJI_ES, "id": KANJI_ID}
