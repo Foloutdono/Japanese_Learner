@@ -32,7 +32,7 @@ reaches a tag.
 Two branches. **`main` is where work lands and is tested; `production` is
 what learners run.** Render (the backend) and Vercel (the frontend) deploy
 `production` only, and `.github/workflows/promote.yml` fast-forwards it to
-`main` once a day at 03:17 UTC (05:17 in Paris), to the newest commit of
+`main` once a day between 01:00 and 05:00 UTC, to the newest commit of
 `main` whose CI passed (the head, or the last one before a red or still
 running head) when that is ahead of it. So:
 
@@ -40,6 +40,10 @@ running head) when that is ahead of it. So:
 - Every deploy restarts the one-worker backend, and a learner opening the
   app meanwhile waits on the boot gate (the `boot_timeout` events in the
   trail). One restart a day, in the small hours, keeps that off the day.
+  GitHub starts a scheduled run late (the old 03:17 cron ran between 08:00
+  and 11:40 UTC), so the workflow is tried seven times from 16:17 UTC on
+  and ships only from a try that starts inside 01:00-05:00 UTC (plan 312).
+  A manual run ships whenever it is pressed.
 - **Learners are warned first (plan 265).** Before it pushes, the
   workflow tells the running backend the minute of the push
   (`POST /api/release/notice`), waits that long (10 minutes; a manual

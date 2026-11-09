@@ -13,7 +13,7 @@ import { getTabs, tabFor } from './config/tabs'
 import { Shell, StageFrame } from './components/chrome/Shell'
 import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
-import { apiJson, apiJsonWithTimeout } from './lib/api'
+import { ApiError, apiJson, apiJsonWithTimeout } from './lib/api'
 // Development-only. Vite statically replaces import.meta.env.DEV with
 // `false` in a production build, so this import and the route below
 // are both dropped by tree-shaking — the screen is not merely
@@ -512,12 +512,25 @@ export default function App({ front = NO_FRONT }) {
         if (p.onboardedAt) rememberOnboarded(userId)
         setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })
       })
-      .catch(() => {
+      .catch(err => {
         // The 45 s ceiling reached, or the network gave out. Either way
         // the learner watched a loading screen and got nothing, which
         // is the worst first impression the app can make -- and until
         // now, the one it could not count.
-        track('boot_timeout', { waited_ms: Date.now() - startedAt })
+        //
+        // Once per boot, on its first failure (plan 312): the gate asks
+        // again every few seconds, and counting each try made 456 rows
+        // of 29 failed boots in October, a share of failed opens no one
+        // could read. Whether the boot recovered is the app_open that
+        // follows; why it failed is `reason`.
+        if (gateAttempt === 0) {
+          track('boot_timeout', {
+            waited_ms: Date.now() - startedAt,
+            reason: err?.name === 'AbortError' ? 'timeout'
+              : err instanceof ApiError && err.status >= 500 ? 'server'
+                : 'network',
+          })
+        }
         if (cancelled) return
         // FAIL OPEN — but only for a learner this device has already
         // seen through the gate. A flaky network must never lock

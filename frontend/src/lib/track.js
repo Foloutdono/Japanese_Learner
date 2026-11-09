@@ -37,7 +37,7 @@ import { runHideHooks } from './pageHide'
 // this against name-for-name and key-for-key.
 export const EVENTS = {
   app_open: ['boot_ms', 'cold', 'platform', 'standalone'],
-  boot_timeout: ['waited_ms'],
+  boot_timeout: ['waited_ms', 'reason'],
   screen_view: ['route', 'tab'],
   // How long the screen was in front of someone (plan 218): engaged
   // time, sent on leaving it and on the page being hidden
@@ -148,6 +148,9 @@ export const EVENTS = {
 // (one name per key, single-quoted strings) and keep the end marker.
 // A value outside its list is dropped here and again on the server.
 export const VALUES = {
+  boot_timeout: {
+    reason: ['timeout', 'server', 'network'],
+  },
   session_start: {
     platform: ['web', 'native'],
     vp: ['phone', 'tablet', 'desk', 'wide'],
