@@ -4195,3 +4195,30 @@ class PleaseIsNoHumbleFormTests(unittest.TestCase):
                          "先生にお願いして、見てもらった。"):
             with self.subTest(sentence=sentence):
                 self.assertEqual(found_in(sentence).get("お〜になる／お〜する"), "お願いし")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FromNowOnTests(unittest.TestCase):
+    """Plan 311: これから, "from now on", is one adverb (grammar_detect.
+    from_now): its これ is no "this one" and its から no half of から〜まで
+    (これから三時まで keeps まで's "until"). "From this" keeps both -- a
+    construction's から (これからすると, これから見ると) or a count picked
+    out of it (これから一つ選んでください)."""
+
+    def test_the_adverb(self) -> None:
+        for sentence in ("わかりました。これからは気をつけます。", "この町の人口は、これからも増えていくでしょう。",
+                         "男の人はこれから何をしますか。", "これからのことについて話しています。", "これから選んでください。"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertNotIn("これ／それ／あれ／どれ", found)
+                self.assertNotIn("から〜まで", found)
+        self.assertEqual(found_in("これから三時まで会議です。").get("から〜まで"), "まで")
+
+    def test_from_this(self) -> None:
+        for sentence, pattern in (("これからすると、彼は来ないだろう。", "〜からすると"),
+                                  ("これから見ると、問題はない。", "〜から見ると"),
+                                  ("これから一つ選んでください。", "から〜まで")):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertEqual(found.get("これ／それ／あれ／どれ"), "これ")
+                self.assertIn(pattern, found)

@@ -4038,6 +4038,51 @@ def _humble_go_come_spans(tokens):
             and tokens[i + 1].pos == "verb" and tokens[i + 1].lemma == "参る"]
 
 
+# The verbs a thing is picked or taken out of something with (from_now:
+# これから一つ選んでください, "choose one of these").
+_PICKING = frozenset({"選ぶ", "選べる", "選び出す", "取る", "取り出す", "抜く", "除く", "引く", "もらう", "貰う"})
+
+
+def from_now(tokens, i: int) -> bool:
+    """Whether これ + から at tokens[i] is the adverb これから, "from now
+    on, after this" (plan 311): これからは気をつけます, これからも増えていく,
+    これからのこと, 男の人はこれから何をしますか -- every これから the app's
+    sentences say. Never "from this": a から a construction opens, the
+    source of a judgement (これからすると, これからして、, これから見ると,
+    これから分かるように -- 〜からすると and 〜から見ると's own), nor a count
+    picked out of it (これから一つ選んでください). card_lookup folds it into
+    the deck's card where this says so, and the points it would have
+    lit (これ "this one", a から of から〜まで) stand down."""
+    if i + 1 >= len(tokens):
+        return False
+    t, kara = tokens[i], tokens[i + 1]
+    if not (t.surface in ("これ", "此れ") and t.pos == "pronoun" and kara.surface == "から"
+            and kara.pos == "particle" and not kara.conjunctive and kara.start == t.end):
+        return False
+    rest = tokens[i + 2:]
+    verb = rest[0] if rest and rest[0].pos == "verb" else None
+    after = rest[1] if len(rest) > 1 else None
+    if verb is not None and after is not None:
+        if verb.lemma in ("為る", "する") and (after.surface in ("と", "ば") or (
+                after.surface == "て" and len(rest) > 2 and rest[2].pos == "symbol")):
+            return False                # (これからすると, これからして、: what it is judged from)
+        if verb.lemma in ("見る", "みる") and after.surface in ("と", "ば"):
+            return False                # (これから見ると, これから見れば)
+        if verb.lemma in ("分かる", "わかる") and after.surface in ("よう", "通り", "とおり"):
+            return False                # (これから分かるように: as this shows)
+    k = 0
+    while k < len(rest) and (_is_numeral(rest[k]) or rest[k].lemma in _ONE_TOKEN_COUNTS
+                             or (k > 0 and rest[k].pos in ("suffix", "noun") and len(rest[k].surface) <= 2
+                                 and _is_numeral(rest[k - 1]))):
+        k += 1
+    if k:
+        while k < len(rest) and rest[k].pos == "particle" and rest[k].surface in ("を", "だけ", "ずつ"):
+            k += 1
+        if k < len(rest) and rest[k].pos == "verb" and rest[k].lemma in _PICKING:
+            return False                # (これから一つ選んでください: one of these)
+    return True
+
+
 def _from_until_spans(tokens):
     """から〜まで with one of its two ends: から after a noun is "from"
     and まで after a noun "until", the two halves of the one lesson
@@ -4048,6 +4093,8 @@ def _from_until_spans(tokens):
             if t.pos == "particle" and t.surface in ("から", "まで") and not t.conjunctive
             and not (t.surface == "まで" and _even_made(tokens, i))
             and not (t.surface == "から" and _out_of_a_feeling(tokens, i))
+            # (これから, "from now on": the adverb's から, no "from", plan 311)
+            and not (t.surface == "から" and i > 0 and from_now(tokens, i - 1))
             and (_prev_kind(tokens, i) == "nominal"
                  or (tokens[i - 1].pos == "adjective" and tokens[i - 1].cform.startswith("連用形")
                      and tokens[i - 1].surface.endswith("く"))
@@ -7597,7 +7644,9 @@ def _pattern_refusals():
         # (それから、…最後まで残れますか: the から of それから, "and then", is
         # no "from" -- the まで stands alone as "until", plan 311)
         "から〜まで": lambda t, s, e, g: len(g) > 1 and (i := _index_at(t, g[0][0])) is not None and i >= 1
-            and t[i].surface == "から" and t[i - 1].surface == "それ" and t[i - 1].end == t[i].start,
+            and t[i].surface == "から" and ((t[i - 1].surface == "それ" and t[i - 1].end == t[i].start)
+                                           # (これから三時まで: "from now on", then until, plan 311)
+                                           or from_now(t, i - 1)),
         "〜たばかり": lambda t, s, e, g: _followed_by(t, e, "に"),
         # 〜ばかりだ is "keeps getting": not the たばかり of just done
         # (来たばかりだ), not the んばかり of 泣かんばかりの, and a ばかり
@@ -7758,7 +7807,7 @@ def _pattern_refusals():
         "この／その／あの／どの": lambda t, s, e, g: (n := _next_word(t, e)) is None or n.pos == "symbol"
             or _filler_ano(t, s, e, g),
         "これ／それ／あれ／どれ": lambda t, s, e, g: _konosoa_refused(t, s, e, g)
-            or ((i := _index_at(t, s)) is not None and _soretomo(t, i)),
+            or ((i := _index_at(t, s)) is not None and (_soretomo(t, i) or from_now(t, i))),
         "や": _ya_refused,
         "助数詞 〜つ／〜人／〜枚": _counter_refused,
         "〜かたわら": lambda t, s, e, g: _followed_by(t, e, "に"),

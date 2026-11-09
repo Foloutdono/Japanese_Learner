@@ -347,7 +347,7 @@
 {"t":"お嬢さん","r":"おじょうさん","ro":"ojousan","en":["young lady, daughter (someone else's, polite)"],"fr":["jeune fille, fille (de quelqu'un d'autre, poli)"],"fu":[["お",""],["嬢","じょう"],["さん",""]],"hy":["お上さん","お場さん","お丈さん"],"ex":["N4.204"]},
 {"t":"心配","r":"しんぱい","ro":"shinpai","en":["worry, concern, anxiety"],"fr":["inquiétude, souci"],"fu":[["心","しん"],["配","ぱい"]],"hy":["新配","真配","親配"],"ex":["N4.73","N4.105"]},
 {"t":"折れる","r":"おれる","ro":"oreru","en":["to break or be folded (by itself, stick, bone)"],"fr":["se casser ou se plier (de soi-même, bâton, os)"],"fu":[["折","お"],["れる",""]],"hy":["悪れる","和れる","於れる"]},
-{"t":"これから","r":"これから","ro":"korekara","en":["from now on, after this"],"fr":["à partir de maintenant"]},
+{"t":"これから","r":"これから","ro":"korekara","en":["from now on, after this"],"fr":["à partir de maintenant"],"ex":["N4.59"]},
 {"t":"準備","r":"じゅんび","ro":"junbi","en":["preparation, arrangements, getting ready"],"fr":["préparation, préparatifs"],"fu":[["準","じゅん"],["備","び"]],"hy":["純備","準未","順備"],"ex":["N4.161","N2.35"]},
 {"t":"招待","r":"しょうたい","ro":"shoutai","en":["invitation"],"fr":["invitation"],"fu":[["招","しょう"],["待","たい"]],"hy":["上待","招大","小待"]},
 {"t":"交通","r":"こうつう","ro":"koutsuu","en":["traffic, transportation"],"fr":["circulation, transport"],"fu":[["交","こう"],["通","つう"]],"hy":["口通","交痛","後通"],"ex":["N3.119","N1.97"]},

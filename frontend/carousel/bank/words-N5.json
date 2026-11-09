@@ -400,7 +400,7 @@
 {"t":"一昨日","r":"おととい","ro":"ototoi","en":["day before yesterday"],"fr":["avant-hier"],"fu":[["一昨日","おととい"]]},
 {"t":"いす","r":"いす","ro":"isu","en":["chair"],"fr":["chaise"]},
 {"t":"初め","r":"はじめ","ro":"hajime","en":["beginning (of a period), first (in line)"],"fr":["début (d'une période), en premier"],"fu":[["初","はじ"],["め",""]],"ex":["N2.65","N2.66"]},
-{"t":"これ","r":"これ","ro":"kore","en":["this one (stands alone, near me)"],"fr":["ceci, celui-ci (seul, près de moi)"],"ex":["N5.7","N4.59"]},
+{"t":"これ","r":"これ","ro":"kore","en":["this one (stands alone, near me)"],"fr":["ceci, celui-ci (seul, près de moi)"],"ex":["N5.7","N3.104"]},
 {"t":"キロ","r":"キロ","ro":"kiro","en":["kilometer"],"fr":["kilomètre"]},
 {"t":"そば","r":"そば","ro":"soba","en":["near, beside"],"fr":["près de, à côté de"],"ex":["N1.39","N1.40"]},
 {"t":"木曜日","r":"もくようび","ro":"mokuyoubi","en":["Thursday"],"fr":["jeudi"],"fu":[["木","もく"],["曜","よう"],["日","び"]],"hy":["目曜日","木洋日","木曜備"]},

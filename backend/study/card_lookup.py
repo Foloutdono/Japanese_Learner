@@ -3386,6 +3386,23 @@ def resolve_phrase(morphemes, i: int, max_len: int = _PHRASE_MAX):
     return None
 
 
+def resolve_from_now(morphemes, i: int):
+    """(level, entry, raw_id, 2) for これ + から that is the deck's adverb
+    これから, "from now on, after this" (plan 311): the tokenizer reads
+    "this one" and a "from", and the breakdown lit これ and から〜まで
+    under これからは気をつけます. grammar_detect.from_now decides, so the
+    card and the points agree; これからすると and これから一つ選んで are
+    "from this", and keep their parts."""
+    from study.grammar_detect import from_now
+    if not from_now(morphemes, i):
+        return None
+    cards = [(level, entry) for level, entry in _kana_cards("これから") if not entry.get("kanji")]
+    if not cards:
+        return None
+    level, entry = min(cards, key=lambda c: _level_rank(c[0]))
+    return level, entry, vocab_to_id(entry, level), 2
+
+
 def resolve_please(morphemes, i: int):
     """(level, entry, raw_id, 4) for お願いします closing what is said: the
     deck's set phrase, "please" (plan 311) -- ケーキをお願いします, よろしく

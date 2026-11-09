@@ -5254,3 +5254,29 @@ class PleaseIsOnePhraseTests(unittest.TestCase):
                 surfaces = [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
                 self.assertNotIn("お願いします", surfaces)
                 self.assertEqual(card_of(sentence, "願い"), "vocab_N3_願う_ねがう")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FromNowOnIsOneWordTests(unittest.TestCase):
+    """Plan 311: これ + から is the deck's これから, "from now on, after
+    this", wherever it says so -- これからは, これからも, これからの, これから
+    何を -- with これ kept as its part, which the counts read as before;
+    "from this" (これからすると, これから一つ選んで) keeps これ, "this one"."""
+
+    def test_its_card(self) -> None:
+        for sentence in ("わかりました。これからは気をつけます。", "この町の人口は、これからも増えていくでしょう。",
+                         "目的に近づけられるかどうかは、これからのルール作り次第だ。", "男の人はこれから何をしますか。",
+                         "これからよろしくお願いします。", "これから三時まで会議です。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "これから"), "vocab_N4__これから")
+        token = token_of("これからは気をつけます。", "これから")
+        self.assertEqual([(p["vocab_match"] or {}).get("raw_id") for p in token["parts"]], ["vocab_N5__これ"])
+        from study.level_mix import words_at_level
+        self.assertNotIn("vocab_N4__これから", [w["raw_id"] for w in words_at_level("これからは気をつけます。", "N4")])
+
+    def test_from_this(self) -> None:
+        for sentence in ("これからすると、彼は来ないだろう。", "これから見ると、問題はない。", "これから一つ選んでください。"):
+            with self.subTest(sentence=sentence):
+                surfaces = [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
+                self.assertNotIn("これから", surfaces)
+                self.assertEqual(card_of(sentence, "これ"), "vocab_N5__これ")
