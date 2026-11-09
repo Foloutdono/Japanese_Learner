@@ -1001,7 +1001,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "かた"
             continue
         # あの方は, この方の, その方が言った: かた, "that person", said up
-        # (plan 312) -- UniDic read ほう. Never where the sentence compares
+        # (plan 313) -- UniDic read ほう. Never where the sentence compares
         # (その方がいい, この方が早い) or goes toward it (あの方へ, あの方を
         # 見た), the side.
         if s == "方" and r == "ほう" and prev(i) in ("この", "その", "あの") and not _compares(tokens, i) \

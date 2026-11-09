@@ -58,7 +58,7 @@ TARGET_LINE_WIDTH = 16
 # A stored line cut by today's rule carries it (`cut_rev`), so a line
 # with nowhere clean to cut is not tried again at every opening
 # (routes/video._current). Bumped when what a line is cut into changes.
-# 3: plan 312's breakdown -- the tokens and the points a line is never
+# 3: plan 313's breakdown -- the tokens and the points a line is never
 # cut through moved (にすぎない, ことがない, とは限らない whole; ほどで; 五、六
 # two numbers, their comma no breath).
 CUT_REV = 3
@@ -204,7 +204,7 @@ def _cuts(text: str, tokens) -> list[tuple[int, int, float]]:
         cost = _cut_cost(prev, nxt, text[prev.end:nxt.start])
         if cost is not None and _mark(prev) and k > 0 and _numeral(tokens[k - 1]) and _numeral(nxt):
             # (一、二回, 五、六さつ: one count, "once or twice" -- its comma is
-            # no breath, plan 312)
+            # no breath, plan 313)
             cost = None
         if cost is not None:
             cuts.append((prev.end, nxt.start, cost))

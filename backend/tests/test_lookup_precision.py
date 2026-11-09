@@ -4887,7 +4887,7 @@ class ACompoundWithYaruTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WordsReadByWhatTheySayOfTests(unittest.TestCase):
-    """Plan 312: a reading the tokenizer takes from the wrong neighbour.
+    """Plan 313: a reading the tokenizer takes from the wrong neighbour.
     一日中 is 一日 and 中, "all through", never 日中, "the daytime", and the
     雨 after it is あめ, no 雷雨's う; 空く is すく of a stomach or a train
     (お腹が空いた, 電車が空いていた), あく of a seat, a room or an hour; 角
@@ -4924,7 +4924,7 @@ class WordsReadByWhatTheySayOfTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WordsCutOrJoinedWrongTests(unittest.TestCase):
-    """Plan 312: 食どう is 食堂, its second kanji in kana, where a case
+    """Plan 313: 食どう is 食堂, its second kanji in kana, where a case
     particle follows (お茶どう？ asks "how about tea"); the で after a noun
     is the case particle, never a sentence's "and so" before a comma
     (会社のちかくで、) or a verb's voiced て (入り口のちかくでつくる), and
@@ -4948,7 +4948,7 @@ class WordsCutOrJoinedWrongTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WholeExpressionsTests(unittest.TestCase):
-    """Plan 312: an expression the dictionary holds whole, read whole --
+    """Plan 313: an expression the dictionary holds whole, read whole --
     生まれて初めて; お疲れさま, the 様 the dictionary writes for the
     page's さま (no "Mr. or Mrs."); 一期一会, a four-kanji saying none of
     its cards says (期's "time" is no word of "lifetime"); an idiom
@@ -4987,7 +4987,7 @@ class WholeExpressionsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AMarketAndOutrageousTests(unittest.TestCase):
-    """Plan 312: 市場 is いちば where goods are bought or sold there (市場で
+    """Plan 313: 市場 is いちば where goods are bought or sold there (市場で
     魚を買った, 毎朝市場へ行く, 魚市場), しじょう where it is the economy's
     (株式市場, 市場経済, 国内の市場は小さい); とんでもない is one adjective,
     the deck's card, never とんでも, "unthinkable", and its denial."""
@@ -5009,7 +5009,7 @@ class AMarketAndOutrageousTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatSaidNothingTests(unittest.TestCase):
-    """Plan 312: parts the gap report found silent -- a name in hiragana
+    """Plan 313: parts the gap report found silent -- a name in hiragana
     a speaker gives themselves (花やのたかはしです, たかはしと申します) or
     says alone in its quote (「まさと。」), never a common noun read so
     (かおりです); つつ, "while" in writing; the も of も同然; もの ending
@@ -5047,7 +5047,7 @@ class WhatSaidNothingTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class SayouTests(unittest.TestCase):
-    """Plan 312: さよう of さようでございます is the dictionary's 左様, "so",
+    """Plan 313: さよう of さようでございます is the dictionary's 左様, "so",
     which UniDic files under 然様; さようなら keeps its own card."""
 
     def test_its_card(self) -> None:
@@ -5061,7 +5061,7 @@ class SayouTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TakenOrComeOffTests(unittest.TestCase):
-    """Plan 312: 取れる in kanji is 取る's potential where what one takes
+    """Plan 313: 取れる in kanji is 取る's potential where what one takes
     is named -- 休みが取れない, 連絡が取れない, 休みさえ取れない -- and
     取れる, "to come off, to be harvested", of a button, a stain, fatigue
     or a catch."""
@@ -5079,7 +5079,7 @@ class TakenOrComeOffTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class APagesWordsInKanaTests(unittest.TestCase):
-    """Plan 312: words a first-year page writes in kana that the tokenizer
+    """Plan 313: words a first-year page writes in kana that the tokenizer
     cut into others -- せんとう, the public bath (せん + とう, "note" +
     "lamp"), never the deck's 先頭 read alike; ふじさん, the mountain (ふじ
     + さん, "wisteria" + "Mr."); and かく by what it takes: a picture or a
@@ -5107,7 +5107,7 @@ class APagesWordsInKanaTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WordsTheDictionarySpellsOtherwiseTests(unittest.TestCase):
-    """Plan 312: a word the pool holds in another cut or spelling than the
+    """Plan 313: a word the pool holds in another cut or spelling than the
     tokenizer's -- 有名 + 人 is 有名人, read ゆうめいじん (有名な人 keeps
     its two cards); 声がけ, UniDic's 声掛け, the row 声かけ; 仕組みづくり, 仕組み
     and a voiced 作り; みだり, the adverb its に makes; 多少なりとも and 何なり
@@ -5136,7 +5136,7 @@ class WordsTheDictionarySpellsOtherwiseTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ThatPersonAndWhatIsMendedTests(unittest.TestCase):
-    """Plan 312: あの方, この方, その方 is a person said up, かた (あの方の
+    """Plan 313: あの方, この方, その方 is a person said up, かた (あの方の
     不安, あの方がうそをつく) -- the side, ほう, where the sentence compares
     (その方がいい) or goes toward it (あの方へ); なおる is 直る or 治る by what
     the sentence names when its clause names nothing (スマホ, かぜ), and
@@ -5162,7 +5162,7 @@ class ThatPersonAndWhatIsMendedTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatTheSecondPassGlossedTests(unittest.TestCase):
-    """Plan 312: parts no point is written on that now say what they do --
+    """Plan 313: parts no point is written on that now say what they do --
     とのこと, "what was said, passed on"; となると and となれば; と before する
     after a limit (正午までとさせていただきます); a ね closing words quoted
     without their brackets (人がね、と); the で of what will do (少しでいい,
@@ -5195,7 +5195,7 @@ class WhatTheSecondPassGlossedTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AStemAfterANounAndItsNoTests(unittest.TestCase):
-    """Plan 312: a verb's stem after a noun and its の, before a particle
+    """Plan 313: a verb's stem after a noun and its の, before a particle
     or the copula, is the noun it names -- うけつけ is 受付, the reception
     desk, no 受け付ける "to accept"; ふりこみ 振り込み, a transfer; ただの言い
     のがれ "evasion" -- while 余儀なくされた keeps its なく (no 無くす, "to
@@ -5217,7 +5217,7 @@ class AStemAfterANounAndItsNoTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class PleaseIsOnePhraseTests(unittest.TestCase):
-    """Plan 312: お願いします closing what is said is the deck's set phrase,
+    """Plan 313: お願いします closing what is said is the deck's set phrase,
     "please" -- after an object, a way, a count or よろしく, in kanji or in
     kana, quoted too -- never 願う "to desire" under a request. Its card is
     the one the page spells (the kanji one, the kana one), and its parts
@@ -5258,7 +5258,7 @@ class PleaseIsOnePhraseTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class FromNowOnIsOneWordTests(unittest.TestCase):
-    """Plan 312: これ + から is the deck's これから, "from now on, after
+    """Plan 313: これ + から is the deck's これから, "from now on, after
     this", wherever it says so -- これからは, これからも, これからの, これから
     何を -- with これ kept as its part, which the counts read as before;
     "from this" (これからすると, これから一つ選んで) keeps これ, "this one"."""
@@ -5284,7 +5284,7 @@ class FromNowOnIsOneWordTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ThePlansFoldsReadInEveryLanguageTests(unittest.TestCase):
-    """Plan 312: every pool word this plan folds or newly reads carries its
+    """Plan 313: every pool word this plan folds or newly reads carries its
     French and its Spanish (a line in jmdict_fr / jmdict_es) -- a fold over
     the deck's cards never trades a card in French for a word in English
     (plan 280's rule, held for the adjectival noun's fold too: 有名 + 人
