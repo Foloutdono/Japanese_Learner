@@ -538,6 +538,19 @@ runtime purpose.
   Indonesian is `id` everywhere (the owner's pick): an `id` beside a
   text's languages is that text's Indonesian, never an identifier
   (`test_no_content_holds_an_identifier_beside_a_texts_languages`).
+  A language spoken to a few accounts while its parts are written is in
+  `translations.PREVIEW` (the client's `PREVIEW_LANGS`, held equal): the
+  picker offers it to the accounts `PREVIEW_LANG_USERS` names on the
+  server (`/api/profile`'s `previewLangs`), no device starts in it, a
+  choice of it is kept, and the store shells declare it only the day it
+  leaves the list (`native.shells.test.js`'s `DECLARED`), since a store
+  prints what a shell declares. Indonesian is in preview, and whole since
+  plan 312b in the interface, the decks, the kanji and the grammar
+  points' glosses and formations (`WRITTEN`, `locales.test.js`): a new
+  screen string, deck card, kanji or point is written in `id` in the same
+  change, in standard Indonesian (EYD, KBBI; never Malay), the learner
+  `kamu`, with the app's words `locales/id`'s head names (an SRS review a
+  *pengulangan*, a mock exam a *tryout*).
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
