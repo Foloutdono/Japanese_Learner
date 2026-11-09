@@ -32,6 +32,18 @@ SELECT step AS "Étape", n AS "Apprenants" FROM (
 ) s ORDER BY o;
 
 -- ==== question
+-- title: Embarqués par source
+-- display: bar
+-- size: 12x6
+-- description: Par où sont arrivés les apprenants qui finissent l'embarquement (plan 313) : le ?src= des liens, sinon le site qui les a envoyés, sinon le store ; « direct » quand rien n'est connu.
+SELECT coalesce(props->>'source', 'avant le plan 313') AS "Source",
+       count(DISTINCT user_id) AS "Apprenants"
+FROM event_log
+WHERE name = 'boarding_done' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
 -- title: Embarquement, étape par étape
 -- display: bar
 -- size: 12x8
