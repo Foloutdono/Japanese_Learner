@@ -7418,3 +7418,25 @@ Found while looking into why the VOICEVOX engine says なに where the furigana 
 | 304b | **何にも before what it is measured against** (the owner: fix 何にも代えられない too): a verb that sets its subject against the に (`_MEASURED_AGAINST`: まして, 増して, 勝る, 劣る, 負ける, 比べる; and 代える, 替える, 換える, which UniDic files under 変える and are told by their kanji, `_EXCHANGED_FOR`) takes 何にも as that に, "than anything", "for anything", negative or not, past an adverb (何にも決して負けない): 何にも代えられない, 何にも劣らない, 何にも負けない read なににも. 変える written 変 or in kana, "change", which takes を, keeps UniDic's reading, as do 何にも食べられない, 何にも知らない and 何にもならない (JMdict's なんにもならない). Pinned on both sides in `tests/test_furigana_context.py`; every new subtest on the fix's side fails on plan 304's rules. Over the same 108,802 strings, nothing moves (the content's one 何にも is 何にもまして, read since 304), so the carousel bank stands; `LOCAL_REV` 39 for the lines learners bring (38 went to 何かしら and 何気ない on main, #523) | DONE |
 
 Open: a passive's agent (何にも縛られない, 何にも邪魔されない) is read なんにも, UniDic's reading: UniDic gives the passive and the potential the same られる, and 何にも食べられない is なんにも.
+
+
+## Plan 312 — インドネシア語, Indonesian as a fourth language (2026-11-09)
+
+The owner: plan the app's translation into Indonesian. Planned at `c0cbaf4` on the model of plan 302 (Spanish, ADR 0023), in `plans/312-indonesian.md`: about 170,000 texts and 1.2 million English words, the same parts as Spanish, with every deck kanji to write (KANJIDIC2 has no Indonesian). Four decisions are the owner's before the first commit: how the app addresses the learner (`kamu`, recommended, or `Anda`); the code inside the code (`id` everywhere, recommended, or an alias such as `ind`); how it ships (behind a preview for named accounts until whole, recommended, or one branch merged whole as Spanish was); and who reads the Indonesian (a paid native reader who reads Japanese, recommended, or AI review alone).
+
+| Phase | What | Status |
+|---|---|---|
+| 312 | **A fourth language is one line**: one list of the spoken languages a side (`translations.SPOKEN`, `SUPPORTED_LANGS`), a part's own tuple gaining a language when the part is whole, one table a side for figures, ordinals and dates, `language_coverage --lang` and the Spanish tests made general, and a test that a language with nothing written reads English on every route (it fails today on `routes/basics.py:153`, which sends anything but en/es to French). Nothing a learner sees moves | PLANNED |
+| 312b | **The interface, the decks, the kanji and the grammar glosses**: `locales/id`, `vocab_id.json`, `kanji_meanings_id.json` (all 2,383), `meaning.id` and `structure_id`; `LANG_NAMES` and the tutor's language check learn Indonesian; behind the preview | PLANNED |
+| 312c | **The grammar lessons** (5,084 texts) | PLANNED |
+| 312d | **The tours and Choisir's own questions** (25,706): Indonesian marks neither tense nor number, so a translation that rules out a wrong filling says them (*sudah*, *akan*, *para*), attacked by an independent reviewer | PLANNED |
+| 312e | **The reading bank and the comprehension seeds** (32,984) | PLANNED |
+| 312f | **The dictation and conversation banks** (5,577) | PLANNED |
+| 312g | **The sentences a deck card shows** (~10,300), `jmdict_id.sqlite3` begun | PLANNED |
+| 312h | **The basics titles and the breakdown's own glosses**, figures as id-ID writes them (1.000; 3,5; ke-3) | PLANNED |
+| 312i | **Everything else the screens print**: search, chips, radicals, theme words, a duel's choices (`PAPER_REV`), the subtitle grab; the content filter's Indonesian with its lookalikes (anjing, babi, monyet are glosses; tai and asu are romaji); `id.lproj` and Android's `values-in` | PLANNED |
+| 312j | **The pages outside the app**: privacy, account deletion, the landing page at `/id`, the store listings | PLANNED |
+| 312k | **The dictionary layer**: 15,092 senses and 40,170 pool words | PLANNED |
+| 312l | **The Tatoeba sentences** only the pool shows (~21,900) | PLANNED |
+| 312m | **The review**: a sweep script (English and Japanese left, Malay forms, non-standard spellings, register), the native reader by tier, the adversarial pass | PLANNED |
+| 312n | **Launch**: the picker and an Indonesian device (`id`, and Java's legacy `in`), the store listings, CLAUDE.md's rule for a language the app writes, ADR 0024 | PLANNED |
