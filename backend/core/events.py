@@ -94,7 +94,7 @@ EVENTS: dict[str, frozenset[str]] = {
     "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
                                  "level_how", "placed",
                                  "edited_goal", "edited_rhythm", "edited_hour", "edited_lines",
-                                 "named", "kept"}),
+                                 "named", "kept", "source"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.
@@ -356,6 +356,10 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
         "kept":      frozenset({"google", "password", "link", "already", "none"}),
+        # The door the learner came in by (plan 313, lib/arrival.js): the
+        # link's ?src=, else the class of the page that sent them, else
+        # the store (the native app), else nothing known.
+        "source":    frozenset({"tiktok", "instagram", "youtube", "reddit", "search", "store", "other", "direct"}),
     },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},
