@@ -58,7 +58,10 @@ TARGET_LINE_WIDTH = 16
 # A stored line cut by today's rule carries it (`cut_rev`), so a line
 # with nowhere clean to cut is not tried again at every opening
 # (routes/video._current). Bumped when what a line is cut into changes.
-CUT_REV = 2
+# 3: plan 312's breakdown -- the tokens and the points a line is never
+# cut through moved (にすぎない, ことがない, とは限らない whole; ほどで; 五、六
+# two numbers, their comma no breath).
+CUT_REV = 3
 # A piece narrower than this is a scrap (a ね！ on its own), dearer
 # than a less even cut.
 MIN_PIECE_WIDTH = 4
@@ -185,12 +188,24 @@ def _breath_cuts(text: str) -> list[tuple[int, int, float]]:
     return cuts
 
 
+# The figures a count is written with (_cuts: the comma of 五、六さつ).
+_NUMERAL_CHARS = frozenset("0123456789０１２３４５６７８９一二三四五六七八九十百千万")
+
+
+def _numeral(m) -> bool:
+    return bool(m.surface) and all(c in _NUMERAL_CHARS for c in m.surface)
+
+
 def _cuts(text: str, tokens) -> list[tuple[int, int, float]]:
     if not tokens:
         return _breath_cuts(text)
     cuts = []
-    for prev, nxt in zip(tokens, tokens[1:]):
+    for k, (prev, nxt) in enumerate(zip(tokens, tokens[1:])):
         cost = _cut_cost(prev, nxt, text[prev.end:nxt.start])
+        if cost is not None and _mark(prev) and k > 0 and _numeral(tokens[k - 1]) and _numeral(nxt):
+            # (一、二回, 五、六さつ: one count, "once or twice" -- its comma is
+            # no breath, plan 312)
+            cost = None
         if cost is not None:
             cuts.append((prev.end, nxt.start, cost))
     return cuts

@@ -81,7 +81,7 @@ class KanaLexiconTests(unittest.TestCase):
         # (...save a page word, read as the page that writes it in kana means
         # it: せんとう is 銭湯, the public bath of a first-year story -- it was
         # せん, "thousand", and a silent とう; the deck's 先頭 and 戦闘 are N2
-        # and N1 words written in kanji at their level, plan 311)
+        # and N1 words written in kanji at their level, plan 312)
         lemmas = {row[0]: row[4 + 7] for row in kana_lexicon.rows(morphology._plain_tagger)}
         self.assertEqual(lemmas.get("せんとう"), "銭湯")
         for kana in ("としょかん", "きっさてん", "しょうひん", "かいがら", "みなさん", "はいしゃ"):

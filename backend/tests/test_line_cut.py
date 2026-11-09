@@ -202,3 +202,15 @@ def test_sentences_from_cues_cuts_a_wide_cue_and_keeps_its_neighbours_whole():
     assert result[1]["cue_start"] == 2.0 and result[4]["cue_end"] == 9.0
     assert all(a["cue_end"] == b["cue_start"] for a, b in zip(result[1:4], result[2:5]))
     assert [s["japanese"] for s in result] == [True, True, True, True, True, False]
+
+
+@needs_tokenizer
+def test_a_count_of_two_numbers_is_never_cut_at_its_comma():
+    # 一、二回, 五、六さつ: "once or twice", "five or six books" -- one
+    # count, two numbers to the breakdown since plan 312, and its comma
+    # no breath; a list's comma still is one.
+    for line in ("水は月に一、二回で十分だと聞いていたので、忙しいわたしにも育てられると思った。",
+                 "私は本を一か月に五、六さつは読む。"):
+        pieces = _texts(cut_line(line, 0.0, 10.0))
+        assert all(not p.endswith(("一、", "五、")) for p in pieces), pieces
+    assert _texts(cut_line("りんご、みかん、ぶどうを買いました。そして家に帰りました。", 0.0, 10.0))[0] == "りんご、みかん、"
