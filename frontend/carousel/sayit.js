@@ -37,6 +37,15 @@ import { SITE } from './strings.js'
 
 export const STYLES = ['blank', 'clues', 'frame', 'steps']
 export const LOOKS = ['dark', 'paper']
+// The cover, the video's first frame and its thumbnail (the owner's note
+// on the first canvas: "I don't like how the first frame looks"): the
+// reading challenge's title slip, or one of four drawn in its place.
+//   slip      the reading challenge's cover, as first drawn
+//   straight  直行  no cover: the first sentence from frame 0, the hook in its empty box
+//   poster    大書  the first sentence large over the print, 日本語で？ under it
+//   board     発車標  the five sentences as a departure board, the fifth ？？？
+//   bubbles   吹き出し  the sentence in a bubble, an empty Japanese one answering it
+export const COVERS = ['slip', 'straight', 'poster', 'board', 'bubbles']
 // Readings over the kanji, and romaji under the words, where a learner of the level still needs them.
 const RUBY = new Set(['N5', 'N4', 'N3'])
 const ROMAJI = new Set(['N5', 'N4'])
@@ -89,6 +98,9 @@ const W = {
     stops: ['Read', 'Say it', 'Tutor'],
     verdict: 'Correct',
     reference: 'Reference',
+    boardHook: 'Can you say these in Japanese?',
+    inComments: 'in the comments',
+    yourLang: 'In English',
   },
   fr: {
     hook: 'Tu sais le dire en japonais ?',
@@ -106,11 +118,15 @@ const W = {
     stops: ['Lis', 'Dis-le', 'Tuteur'],
     verdict: 'Correct',
     reference: 'Référence',
+    boardHook: 'Tu sais les dire en japonais ?',
+    inComments: 'en commentaire',
+    yourLang: 'En français',
   },
 }
 const quoted = (lang, s) => (lang === 'fr' ? `« ${s} »` : `“${s}”`)
 const ease = x => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3
 const clamp = x => Math.min(1, Math.max(0, x))
+const smooth = x => { const k = clamp(x); return k * k * (3 - 2 * k) }
 
 // ── The words a sentence is said with ──
 const KANA = /^[ぁ-ゟ゠-ヿ]+$/u
@@ -149,6 +165,7 @@ export function sayitPlan(bank, ids, opts = {}) {
   const hour = HOURS.includes(opts.hour) ? opts.hour : 'day'
   const season = PRINT_SEASONS.includes(opts.season) ? opts.season : null
   const scenery = SCENERY_IDS.includes(opts.scenery) ? opts.scenery : 'bay'
+  const cover = COVERS.includes(opts.cover) ? opts.cover : 'slip'
   const items = ids.map(id => {
     const s = bank.sentences.find(x => x.id === id)
     if (!s) throw new Error(`sayit: no sentence ${id}`)
@@ -167,7 +184,7 @@ export function sayitPlan(bank, ids, opts = {}) {
   })
   const lv = bank.level || items[0]?.id.split('.')[0] || 'N5'
   return {
-    source: 'sayit', id: ids.join('+'), lang, lv, style, look, hour, season, scenery, photo: null, items,
+    source: 'sayit', id: ids.join('+'), lang, lv, style, look, cover, hour, season, scenery, photo: null, items,
     hidden: opts.show !== true, tune: opts.tune || {},
     ruby: RUBY.has(lv), romaji: ROMAJI.has(lv), slow: SLOW.has(lv),
   }
@@ -180,18 +197,21 @@ export function sayitCues(plan) {
 
 /** How long the countdown runs, in seconds. */
 export const thinkOf = plan => (plan.style === 'steps' ? SY.steps : SY.think)
+/** How long the cover holds before the first sentence: none when the video opens straight on it. */
+export const hookOf = plan => (plan.cover === 'straight' ? 0 : SY.hook)
 
 /** The video, timed. `voiced(cue)` gives a voiced line's { dur, marks }
  *  once the engine has said it; without it a line is timed on a guess. */
 export function sayitTimeline(plan, voiced = null) {
   const segs = []
-  const sfx = [{ at: 0.15, key: 'board-flap' }]
+  const hookDur = hookOf(plan)
+  const sfx = hookDur ? [{ at: 0.15, key: 'board-flap' }] : []
   const cues = []
   const turns = []
   let t = 0
   const seg = (key, start, dur) => segs.push({ key, start: +start.toFixed(3), dur: +dur.toFixed(3) })
-  seg('hook', 0, SY.hook)
-  t = SY.hook
+  if (hookDur) seg('hook', 0, hookDur)
+  t = hookDur
   const think = thinkOf(plan)
   const last = plan.items.length - 1
   let readingEnd = t
@@ -227,7 +247,8 @@ export function sayitTimeline(plan, voiced = null) {
   // The ground's clock, as the reading challenge's: the sentences said are
   // its reading (the train crossing, the print raised); the one left to the
   // comments its question.
-  seg('reading', SY.hook, readingEnd - SY.hook)
+  seg('reading', hookDur, readingEnd - hookDur)
+  segs.sort((a, b) => a.start - b.start)
   if (plan.hidden) seg('question', readingEnd, t - readingEnd)
   sfx.push({ at: +(t + 0.5).toFixed(3), key: 'platform-chime' })
   seg('cta', t, SY.cta)
@@ -369,8 +390,253 @@ function drawSlip(ctx, words) {
 }
 function hook(ctx, plan, tl, t, into, P, T) {
   const { laid } = backdrop(ctx, P, T, { dark: 0.5, hour: plan.hour, wash: 1, plan: coverPlan(plan), tl, t, seg: 'hook', cover: true })
+  coverFg(ctx, plan, t, tl)
   masthead(ctx, T, 1 - laid)
+}
+/** What the cover lays over the print: its words and the parts that carry them. */
+function coverFg(ctx, plan, t, tl) {
+  if (plan.cover === 'poster') return posterCover(ctx, plan)
+  if (plan.cover === 'board') return boardCover(ctx, plan, tl)
+  if (plan.cover === 'bubbles') return bubblesCover(ctx, plan, t)
   drawSlip(ctx, hookWords(plan))
+}
+
+// A band of night across the frame behind light words over the print in
+// its colours, thinning out above and below so no edge shows.
+function nightBand(ctx, y0, y1, a = 0.62, feather = 120) {
+  const top = y0 - feather
+  const foot = y1 + feather
+  const g = ctx.createLinearGradient(0, top, 0, foot)
+  for (let i = 0; i <= 8; i++) {
+    const k = (a * (1 - Math.cos((Math.PI * i) / 8))) / 2
+    g.addColorStop((i * feather) / 8 / (foot - top), `rgba(12,10,22,${k.toFixed(3)})`)
+    g.addColorStop(1 - (i * feather) / 8 / (foot - top), `rgba(12,10,22,${k.toFixed(3)})`)
+  }
+  ctx.fillStyle = g
+  ctx.fillRect(0, top, FMT.w, foot - top)
+}
+// The light words of a cover, on the night they stand on.
+function lightLines(ctx, b, y, color = LIGHT, lh = 1.12) {
+  ctx.save()
+  shade(ctx, true)
+  b.lines.forEach((l, i) => text(ctx, l, fr.cx, y + b.size * (0.85 + i * lh), { f: b.f, color, align: 'center' }))
+  ctx.restore()
+  return y + b.size * lh * b.lines.length
+}
+function coverChip(ctx, label, y, { fill = 'rgba(16,14,19,0.78)', ink = LIGHT } = {}) {
+  const f = font(700, FS.body, 'latin')
+  const w = measure(ctx, label, f) + SP[5] * 2
+  const h = FS.body * 1.9
+  ctx.fillStyle = fill
+  rrect(ctx, fr.cx - w / 2, y, w, h, h / 2)
+  ctx.fill()
+  text(ctx, label, fr.cx, y + h / 2 + FS.body * 0.36, { f, color: ink, align: 'center' })
+  return y + h
+}
+// 日本語で？, its reading over it: what the cover asks for.
+const JA_ROWS = [
+  { t: '日本語', fu: [['日本語', 'にほんご']], k: 'word', pos: 'noun', ro: 'nihongo' },
+  { t: 'で', k: 'particle', pos: 'particle', ro: 'de' },
+  { t: '？', k: 'punct' },
+]
+const SKY = '#8da3e0'
+// Where a cover's words start: under the hour's sun or moon, whose foot
+// stands at y 482 under the hook (the slip stands at 500, cover.js).
+const COVER_TOP = 510
+
+// 大書 — the first sentence large over the print, 日本語で？ under it.
+function posterCover(ctx, plan) {
+  const S = W[plan.lang]
+  const it = plan.items[0]
+  const label = fit(ctx, S.hook.toLocaleUpperCase(plan.lang), { weight: 800, sizes: [FS.body, FS.sm], maxW: fr.w, maxLines: 2, lh: 1.2 })
+  const big = fit(ctx, quoted(plan.lang, it.tr), { weight: 900, fam: 'serif', sizes: [FS.display, FS.display * 0.85, FS.heading], maxW: fr.w, maxLines: 3, lh: 1.04 })
+  const ja = layOf(ctx, plan, 'cover-ja', JA_ROWS, { max: FS.heading, min: FS.title, maxW: fr.w, maxLines: 1, script: 'furigana' })
+  const arrowH = 64
+  const h = label.size * 1.2 * label.lines.length + SP[5] + big.size * 1.04 * big.lines.length + SP[4] + arrowH + SP[3] + ja.h + SP[6] + FS.body * 1.9
+  const y0 = COVER_TOP
+  nightBand(ctx, y0 - SP[2], y0 + h + SP[4], 0.6, 150)
+  let y = lightLines(ctx, label, y0, RUBY_INK, 1.2) + SP[5]
+  y = lightLines(ctx, big, y, LIGHT, 1.04) + SP[4]
+  // The arrow down to the Japanese the viewer is asked for.
+  ctx.save()
+  shade(ctx, true)
+  ctx.strokeStyle = SKY
+  ctx.lineWidth = 7
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.beginPath()
+  ctx.moveTo(fr.cx, y + 6)
+  ctx.lineTo(fr.cx, y + arrowH - 8)
+  ctx.moveTo(fr.cx - 18, y + arrowH - 26)
+  ctx.lineTo(fr.cx, y + arrowH - 8)
+  ctx.lineTo(fr.cx + 18, y + arrowH - 26)
+  ctx.stroke()
+  ctx.restore()
+  y += arrowH + SP[3]
+  ctx.save()
+  shade(ctx, true)
+  drawSentence(ctx, ja, fr.cx, y, 'center', () => ({ ink: SKY, rule: null, ruby: RUBY_INK }))
+  ctx.restore()
+  y += ja.h + SP[6]
+  coverChip(ctx, hookWords(plan).chip, y)
+}
+
+// 発車標 — the five sentences as a departure board, a row a sentence, the
+// fifth ？？？, left to the comments: the ride the video is.
+function boardCover(ctx, plan, tl) {
+  const S = W[plan.lang]
+  const title = fit(ctx, S.boardHook, { weight: 900, fam: 'serif', sizes: [FS.heading, FS.title], maxW: fr.w, maxLines: 2, lh: 1.08 })
+  const y0 = COVER_TOP
+  const x = fr.x - SP[3]
+  const w = fr.w + SP[3] * 2
+  const pad = SP[4]
+  const num = 30
+  const tx = x + pad + num * 2 + SP[3]
+  const right = x + w - pad
+  // Each row departs when its sentence comes in the video, as a board's
+  // time column says when a train leaves.
+  const secF = font(700, FS.sm, 'latin')
+  const at = i => {
+    const s0 = tl?.turns?.[i]?.start ?? 0
+    return `${Math.floor(s0 / 60)}:${String(Math.floor(s0 % 60)).padStart(2, '0')}`
+  }
+  const commentF = font(600, FS.caption, 'latin')
+  const rows = plan.items.map((it, i) => {
+    const last = plan.hidden && i === plan.items.length - 1
+    const side = last ? measure(ctx, S.inComments, commentF) : measure(ctx, at(i), secF)
+    const b = fit(ctx, last ? '？？？' : it.tr, { weight: last ? 900 : 700, fam: last ? 'jp' : 'serif', sizes: [FS.body, FS.sm], maxW: right - side - SP[4] - tx, maxLines: 2, lh: 1.15 })
+    return { b, last, h: Math.max(num * 2 + SP[3], b.size * 1.15 * b.lines.length + SP[4] * 1.1) }
+  })
+  const headH = FS.title * 1.15 + SP[4] * 1.4
+  const boardH = headH + rows.reduce((n, r) => n + r.h, 0)
+  const boardY = y0 + paragraphH(title, 1.08) + SP[5]
+  nightBand(ctx, y0 - SP[2], y0 + paragraphH(title, 1.08), 0.55, 120)
+  lightLines(ctx, title, y0, LIGHT, 1.08)
+  // The board, as Today's departure board stands over the shut gate.
+  ctx.save()
+  ctx.shadowColor = 'rgba(0,0,0,0.34)'
+  ctx.shadowBlur = 60
+  ctx.shadowOffsetY = 24
+  ctx.fillStyle = 'rgba(16,14,19,0.86)'
+  rrect(ctx, x, boardY, w, boardH, R.panel)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = alpha(LIGHT, 0.2)
+  ctx.lineWidth = 2
+  rrect(ctx, x, boardY, w, boardH, R.panel)
+  ctx.stroke()
+  // Its head: the format's name, the level.
+  const hy = boardY + SP[4] * 0.7 + FS.title * 0.88
+  text(ctx, '言ってみて', x + pad, hy, { f: font(900, FS.title, 'serif'), color: LIGHT })
+  text(ctx, `JLPT ${plan.lv}`, right, hy - FS.title * 0.12, { f: font(700, FS.sm, 'latin'), color: RUBY_INK, align: 'right' })
+  let y = boardY + headH
+  rows.forEach((r, i) => {
+    ctx.fillStyle = alpha(LIGHT, 0.16)
+    ctx.fillRect(x + 1, y, w - 2, 2)
+    const cy = y + r.h / 2
+    // The stop's number in its roundel, in the translation line's pigment.
+    ctx.strokeStyle = r.last ? RUBY_INK : SKY
+    ctx.lineWidth = 5
+    ctx.beginPath()
+    ctx.arc(x + pad + num, cy, num - 3, 0, Math.PI * 2)
+    ctx.stroke()
+    text(ctx, String(i + 1), x + pad + num, cy + FS.sm * 0.36, { f: font(700, FS.sm, 'latin'), color: LIGHT, align: 'center' })
+    const top = cy - (r.b.size * 1.15 * r.b.lines.length) / 2
+    r.b.lines.forEach((l, j) => text(ctx, l, tx, top + r.b.size * (0.85 + j * 1.15), { f: r.b.f, color: r.last ? RUBY_INK : LIGHT }))
+    if (r.last) text(ctx, S.inComments, right, cy + FS.caption * 0.36, { f: font(600, FS.caption, 'latin'), color: alpha(LIGHT, 0.72), align: 'right' })
+    else text(ctx, at(i), right, cy + FS.sm * 0.36, { f: secF, color: alpha(LIGHT, 0.72), align: 'right' })
+    y += r.h
+  })
+  // Under it, what the game is: each sentence before the voice, in its seconds.
+  nightBand(ctx, y + SP[5], y + SP[5] + FS.lead * 1.3, 0.5, 110)
+  lightLines(ctx, fit(ctx, `${S.title} · ${thinkOf(plan)} s`, { weight: 800, fam: 'serif', sizes: [FS.lead, FS.body], maxW: fr.w, maxLines: 1 }), y + SP[5], RUBY_INK)
+}
+
+// 吹き出し — the sentence said in the viewer's language, in a bubble, and a
+// Japanese bubble answering it with nothing in it yet.
+function bubblesCover(ctx, plan, t) {
+  const S = W[plan.lang]
+  const it = plan.items[0]
+  const title = fit(ctx, S.hook, { weight: 900, fam: 'serif', sizes: [FS.heading, FS.title], maxW: fr.w, maxLines: 2, lh: 1.08 })
+  const y0 = COVER_TOP
+  nightBand(ctx, y0 - SP[2], y0 + paragraphH(title, 1.08), 0.55, 120)
+  let y = lightLines(ctx, title, y0, LIGHT, 1.08) + SP[6]
+  // Theirs, on washi, from the left.
+  const pad = SP[5]
+  const said = fit(ctx, it.tr, { weight: 800, fam: 'serif', sizes: [FS.display * 0.8, FS.heading, FS.title], maxW: fr.w * 0.9 - pad * 2, maxLines: 3, lh: 1.1 })
+  const tag = fit(ctx, S.yourLang.toLocaleUpperCase(plan.lang), { weight: 800, sizes: [FS.caption], maxW: fr.w, maxLines: 1 })
+  const w1 = Math.max(said.lines.reduce((m, l) => Math.max(m, measure(ctx, l, said.f)), 0), measure(ctx, tag.lines[0], tag.f)) + pad * 2
+  const h1 = pad + tag.size * 1.3 + SP[2] + said.size * 1.1 * said.lines.length + pad * 0.8
+  const x1 = fr.x - SP[3]
+  bubble(ctx, x1, y, w1, h1, 'left', '#f6f1e4', null)
+  text(ctx, tag.lines[0], x1 + pad, y + pad + tag.size * 0.85, { f: tag.f, color: PAPER.line.honyaku })
+  said.lines.forEach((l, i) => text(ctx, l, x1 + pad, y + pad + tag.size * 1.3 + SP[2] + said.size * (0.85 + i * 1.1), { f: said.f, color: PAPER.ink }))
+  y += h1 + 44 + SP[4]
+  // Ours, on the night, from the right: 日本語 over it, nothing said yet.
+  const w2 = Math.min(fr.w * 0.62, 460)
+  const h2 = 200
+  const x2 = fr.right + SP[3] - w2
+  bubble(ctx, x2, y, w2, h2, 'right', 'rgba(16,14,19,0.88)', GOLD)
+  text(ctx, '日本語', x2 + pad, y + pad + FS.caption * 0.85, { f: font(700, FS.caption, 'jp'), color: RUBY_INK })
+  // Three dots, as a voice about to speak, then the question.
+  const cy = y + h2 / 2 + 22
+  for (let i = 0; i < 3; i++) {
+    const a = 0.35 + 0.6 * (0.5 + 0.5 * Math.sin(2 * Math.PI * (t * 0.9) - i * 0.9))
+    ctx.fillStyle = alpha(LIGHT, a)
+    ctx.beginPath()
+    ctx.arc(x2 + pad + 22 + i * 44, cy, 13, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  text(ctx, '？', x2 + w2 - pad - 10, cy + FS.display * 0.36, { f: font(900, FS.display, 'jp'), color: GOLD, align: 'right' })
+  y += h2 + 44 + SP[6]
+  coverChip(ctx, hookWords(plan).chip, y)
+}
+// A speech bubble, its tail at the foot on its side.
+function bubble(ctx, x, y, w, h, side, fill, edge) {
+  const r = 34
+  const tw = 46
+  const th = 40
+  const tx = side === 'left' ? x + 56 : x + w - 56
+  ctx.save()
+  ctx.shadowColor = 'rgba(0,0,0,0.3)'
+  ctx.shadowBlur = 30
+  ctx.shadowOffsetY = 10
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.arcTo(x + w, y, x + w, y + r, r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r)
+  if (side === 'right') { ctx.lineTo(tx + tw / 2, y + h); ctx.lineTo(tx + tw / 2 + 6, y + h + th); ctx.lineTo(tx - tw / 2, y + h) }
+  else { ctx.lineTo(tx + tw / 2, y + h); ctx.lineTo(tx - tw / 2 - 6, y + h + th); ctx.lineTo(tx - tw / 2, y + h) }
+  ctx.lineTo(x + r, y + h)
+  ctx.arcTo(x, y + h, x, y + h - r, r)
+  ctx.lineTo(x, y + r)
+  ctx.arcTo(x, y, x + r, y, r)
+  ctx.closePath()
+  ctx.fillStyle = fill
+  ctx.fill()
+  ctx.restore()
+  if (edge) {
+    ctx.strokeStyle = edge
+    ctx.lineWidth = 4
+    ctx.stroke()
+  }
+}
+
+// 直行 — no cover: in the first sentence's empty box, while nothing helps
+// yet, the hook and the level, so its first frame is the game itself.
+function hookInBox(ctx, plan, T, box, k) {
+  const S = W[plan.lang]
+  const title = fit(ctx, S.title, { weight: 900, fam: 'serif', sizes: [FS.heading, FS.title], maxW: box.w - SP[5] * 2, maxLines: 2, lh: 1.08 })
+  const h = paragraphH(title, 1.08) + SP[5] + FS.body * 1.9
+  let y = box.y + (box.h - h) / 2
+  ctx.save()
+  ctx.globalAlpha *= k
+  title.lines.forEach((l, i) => text(ctx, l, fr.cx, y + title.size * (0.85 + i * 1.08), { f: title.f, color: RUBY_INK, align: 'center' }))
+  y += paragraphH(title, 1.08) + SP[5]
+  coverChip(ctx, hookWords(plan).chip, y, { fill: alpha(LIGHT, 0.12), ink: LIGHT })
+  ctx.restore()
 }
 // The backdrop reads the reading challenge's dials; under the hook it is
 // told the cover is on, as this format always opens on it.
@@ -385,18 +651,25 @@ function turnFrame(ctx, plan, tl, t, seg, P, T) {
   const turn = turnAt(tl, t)
   const it = plan.items[turn.i]
   const segStart = tl.segs.find(x => x.key === seg)?.start ?? 0
-  const { laid } = backdrop(ctx, P, T, { dark: 0.42, hour: plan.hour, wash: 1, plan: coverPlan(plan), tl, t, seg, cover: true })
+  // With no cover the first frame is the game whole: the print already
+  // raised and its night laid, the panel and the sentence there.
+  const straight = plan.cover === 'straight'
+  const tb = straight && seg === 'reading' ? Math.max(t, segStart + 2.4) : t
+  const { laid } = backdrop(ctx, P, T, { dark: 0.42, hour: plan.hour, wash: 1, plan: coverPlan(plan), tl, t: tb, seg, cover: true })
   masthead(ctx, T, 1 - laid)
-  // The cut after the cover: the panel comes in, then the turn over it.
-  const first = turn.i === 0 ? ease((t - segStart) / 0.5) : 1
+  // The cut after the cover, one thing at a time, never words over words:
+  // the cover's words go (COVER_OUT), then the panel comes, then the turn on it.
+  const cut = t - segStart
+  const opening = turn.i === 0 && !straight && seg === 'reading'
+  const first = opening ? ease((cut - COVER_OUT * 0.6) / 0.45) : 1
   panelOf(ctx, plan, T, P, first)
   // Each turn comes in and goes: the whole turn fades out over its last moment.
   const going = turn.hidden ? 1 : 1 - clamp((t - (turn.end - SY.out)) / SY.out)
-  const coming = ease((t - turn.start) / SY.in)
+  const coming = turn.i === 0 && straight ? 1 : opening ? ease((cut - COVER_OUT) / (SY.in - COVER_OUT * 0.5)) : ease((t - turn.start) / SY.in)
   ctx.save()
   ctx.globalAlpha *= first
   // The chip waits, as the reading challenge's does, for the sun or the moon to rise past it.
-  const shown = turn.i === 0 ? chipShown(plan, t - segStart, P) : 1
+  const shown = turn.i === 0 ? chipShown(plan, tb - segStart, P) : 1
   if (shown > 0) {
     ctx.save()
     ctx.globalAlpha *= shown
@@ -431,16 +704,31 @@ function turnFrame(ctx, plan, tl, t, seg, P, T) {
   const boxK = turn.hidden ? coming : coming * (1 - clamp((t - turn.told) / 0.4))
   if (boxK > 0) answerBox(ctx, T, box, boxK)
   if (!turn.hidden || t < turn.told) {
-    if (cluesK <= 0 && frameK <= 0 && !said && t < turn.told) waiting(ctx, T, box, t, coming)
+    if (cluesK <= 0 && frameK <= 0 && !said && t < turn.told) {
+      if (straight && turn.i === 0) hookInBox(ctx, plan, T, box, 1)
+      else waiting(ctx, T, box, t, coming)
+    }
+    // The cover's words fade out over the first sentence's moment of coming in.
+    if (straight && turn.i === 0 && atClues != null && t >= atClues && t < atClues + 0.4) hookInBox(ctx, plan, T, box, 1 - ease((t - atClues) / 0.4))
     if (cluesK > 0 && !said) clueCards(ctx, plan, T, it, box, cluesK * coming)
     if (frameK > 0 || said) sentence(ctx, plan, T, it, L, sayY, turn, t, frameK * coming)
     if (said && O && turn.also != null) other(ctx, plan, T, it, O, sayY + L.h + SP[6], ease((t - turn.also) / 0.5))
   }
   // The countdown, then the voice's credit where it reads.
-  if (t < turn.told + 0.4) ring(ctx, plan, T, turn, t, ringY, labelY, 1 - clamp((t - turn.told) / 0.4))
+  if (t < turn.told + 0.4) ring(ctx, plan, T, turn, t, ringY, labelY, 1 - clamp((t - turn.told) / 0.4), straight && turn.i === 0)
   if (turn.hidden && t >= turn.told) yours(ctx, plan, T, box, ease((t - turn.told) / 0.5))
   ctx.restore()
+  if (opening && cut < COVER_OUT) {
+    ctx.save()
+    ctx.globalAlpha *= 1 - smooth(cut / COVER_OUT)
+    coverFg(ctx, plan, t, tl)
+    ctx.restore()
+  }
+  // The voice's credit, on the panel, as it comes.
+  ctx.save()
+  ctx.globalAlpha *= first
   text(ctx, S.voice, fr.cx, creditY, { f: font(600, FS.sm, 'latin'), color: T.ground === 'paper' ? alpha(PAPER.ink, 0.62) : alpha(LIGHT, 0.6), align: 'center' })
+  ctx.restore()
 }
 
 // Where the answer goes: a dashed box, faint, while the countdown runs.
@@ -466,13 +754,16 @@ function waiting(ctx, T, box, t, k) {
   }
 }
 
+// The cover's words leave over this long, before the first sentence comes.
+const COVER_OUT = 0.35
 const RING_R = 50
-function ring(ctx, plan, T, turn, t, y, labelY, k) {
+function ring(ctx, plan, T, turn, t, y, labelY, k, whole = false) {
   const S = W[plan.lang]
   const think = thinkOf(plan)
   const left = Math.max(0, think - Math.max(0, t - turn.ring))
   ctx.save()
-  ctx.globalAlpha *= k * ease((t - turn.ring + 0.3) / 0.5)
+  // Whole from the first frame where the video opens on its first sentence.
+  ctx.globalAlpha *= k * (whole ? 1 : ease((t - turn.ring + 0.3) / 0.5))
   ctx.lineWidth = 10
   ctx.strokeStyle = T.track
   ctx.beginPath()
