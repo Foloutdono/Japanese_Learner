@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pickInitialLang, intlLocale, contentLang, setInterfaceLocale } from './locale'
+import { pickInitialLang, intlLocale, contentLang, setInterfaceLocale, firstOfMonth } from './locale'
 
 describe('pickInitialLang', () => {
   it('honours a saved choice over the device', () => {
@@ -63,5 +63,16 @@ describe('intlLocale', () => {
     expect(intlLocale('es')).toBe('es-419')
     expect((12000).toLocaleString(intlLocale('es'))).toBe('12,000')
     expect(intlLocale('fr')).toBe('fr-FR')
+  })
+})
+
+describe('firstOfMonth', () => {
+  it('says the first of a month as each language does', () => {
+    expect(firstOfMonth('fr', 'novembre')).toBe('1er novembre')
+    expect(firstOfMonth('es', 'noviembre')).toBe('1 de noviembre')
+    expect(firstOfMonth('en', 'November')).toBe('November 1')
+  })
+  it('says it the English way in a language with no line, never the French (plan 312)', () => {
+    expect(firstOfMonth('de', 'November')).toBe('November 1')
   })
 })

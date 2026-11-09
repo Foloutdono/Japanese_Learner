@@ -52,3 +52,18 @@ export function intlLocale(lang, english = 'en-US') {
   if (lang === 'es') return spanish
   return INTL[lang] ?? english
 }
+
+// ── What a language says its own way (plan 312) ──────────────
+// What Intl leaves to the sentence: the first of a month ("1er novembre",
+// "1 de noviembre", "November 1"). One line a language, so a language the
+// app gains says it by a line here, not by a branch at each screen; one
+// with no line says it the English way, its own month's name in it.
+const FIRST_OF_MONTH = {
+  fr: month => `1er ${month}`,
+  es: month => `1 de ${month}`,
+}
+
+/** The first of `month` (the month's name, as Intl gives it in `lang`). */
+export function firstOfMonth(lang, month) {
+  return (FIRST_OF_MONTH[lang] ?? (m => `${m} 1`))(month)
+}
