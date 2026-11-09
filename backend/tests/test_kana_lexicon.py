@@ -37,6 +37,8 @@ class KanaLexiconTests(unittest.TestCase):
             ("まず、れいぞうこを見ました。", "れいぞうこ", "冷蔵庫"),
             ("去年、けつあつが高いと言われた。", "けつあつ", "血圧"),
             ("でも、むずかしいのははつおんです。", "はつおん", "発音"),
+            # (after an adverb: no topic, plan 305)
+            ("やっとはいしゃへ行きました。", "はいしゃ", "歯医者"),
         ):
             with self.subTest(word=word):
                 self.assertIn(word, cut(sentence))
@@ -58,6 +60,8 @@ class KanaLexiconTests(unittest.TestCase):
             ("いつかよい選手になるでしょう。", ["いつ", "か"]),         # never 五日
             ("だれもいない。", ["い", "ない"]),                        # never 以内
             ("ドアがあいている。", ["あい", "て"]),                    # never 相手
+            ("それはいしゃのかばんです。", ["は", "いしゃ"]),           # never 歯医者
+            ("父はいしゃです。", ["は", "いしゃ"]),
         ):
             with self.subTest(sentence=sentence):
                 tokens = cut(sentence)
@@ -74,9 +78,22 @@ class KanaLexiconTests(unittest.TestCase):
                      "いつか", "ようか", "いない", "あいて", "きって"):
             with self.subTest(kana=kana):
                 self.assertNotIn(kana, entered)
-        for kana in ("としょかん", "きっさてん", "しょうひん", "かいがら", "みなさん"):
+        for kana in ("としょかん", "きっさてん", "しょうひん", "かいがら", "みなさん", "はいしゃ"):
             with self.subTest(kana=kana):
                 self.assertIn(kana, entered)
+
+    def test_a_compound_is_said_as_often_as_its_rarest_part(self) -> None:
+        # The subtitles' segmenter cut 歯医者 into 歯 + 医者, as UniDic does:
+        # read as never said, it lost to 敗者 "loser", said 55 times (plan
+        # 305). A word with a line of its own keeps its count (何時, 263).
+        spoken = kana_lexicon._spoken_counts()
+        plain = morphology._plain_tagger
+        self.assertNotIn("歯医者", spoken)
+        self.assertEqual(kana_lexicon._said("歯医者", list(plain("歯医者")), spoken),
+                         min(spoken["歯"], spoken["医者"]))
+        self.assertEqual(kana_lexicon._said("何時", list(plain("何時")), spoken), spoken["何時"])
+        self.assertEqual(kana_lexicon._said("図書館", list(plain("図書館")), spoken),
+                         min(spoken.get(p.surface, 0) for p in plain("図書館")))
 
     def test_entries_are_the_decks_and_priced_by_length(self) -> None:
         from content.vocab_data import VOCAB_BY_LEVEL
@@ -85,6 +102,10 @@ class KanaLexiconTests(unittest.TestCase):
         for level, entries in VOCAB_BY_LEVEL.items():
             for entry in entries:
                 level_of.setdefault(entry.get("kanji") or "", level)
+        # (and the few words of a picture book's page the deck has no
+        # card for, entered as a first-year word, plan 272)
+        for kanji, _ in kana_lexicon._PAGE_WORDS:
+            level_of.setdefault(kanji, "N4")
         rows = kana_lexicon.rows(morphology._plain_tagger)
         self.assertGreater(len(rows), 500)
         for row in rows:

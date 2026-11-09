@@ -50,10 +50,11 @@ describe('the credits store', () => {
   })
 })
 
-// ── 補充 — the claim (plan 141) ────────────────────────────────
-// The sheet's figure is what it moves: the store takes it into the
-// balance the moment the sheet closes, and the server's answer wins
-// when it arrives -- or puts the store back on a failure.
+// ── 補充 — the claim (plans 141, 278) ──────────────────────────
+// The card's figure is what it moves: the store takes it into the
+// balance the moment the card goes back to its pocket, and the
+// server's answer wins when it arrives -- or puts the store back on a
+// failure.
 describe('the claim', () => {
   const ok = body => ({ ok: true, status: 200, json: async () => body })
 
@@ -62,10 +63,31 @@ describe('the claim', () => {
     credits.offerClaim(0, 20)
     expect(credits.peekClaimOffer()).toBe(null)
     credits.offerClaim(12, 20)
-    expect(credits.peekClaimOffer()).toEqual({ amount: 12, from: 20 })
+    const first = credits.peekClaimOffer()
+    expect(first).toMatchObject({ amount: 12, from: 20 })
+    // Each offer is its own moment: a new one counts from its own start.
+    credits.offerClaim(5, 20)
+    expect(credits.peekClaimOffer().id).not.toBe(first.id)
     // A sign-out takes the offer with the balance.
     credits.forgetCredits()
     expect(credits.peekClaimOffer()).toBe(null)
+  })
+
+  it('says, for a moment, that a claim has landed', async () => {
+    vi.useFakeTimers()
+    try {
+      credits.seedCredits({ ...FREE, balance: 20, pending: 12 })
+      apiFetch.mockResolvedValueOnce(ok({ ...FREE, balance: 32, pending: 0, claimed: 12 }))
+      expect(credits.peekClaimLanded()).toBe(0)
+      credits.offerClaim(12, 20)
+      credits.takeClaim()
+      // The glint's key, until it has had its moment.
+      expect(credits.peekClaimLanded()).toBeGreaterThan(0)
+      vi.advanceTimersByTime(1300)
+      expect(credits.peekClaimLanded()).toBe(0)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('moves the balance at once, then takes the server\'s figure', async () => {

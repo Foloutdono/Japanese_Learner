@@ -580,7 +580,7 @@ describe('the sheet', () => {
     await render(
       <LangProvider>
         <button type="button" id="opener">open</button>
-        <Sheet open onClose={onClose} jp="残高" cap="Balance">
+        <Sheet open onClose={onClose} title="残高" sub="Balance">
           <button type="button" id="first">one</button>
           <button type="button" id="last">two</button>
         </Sheet>

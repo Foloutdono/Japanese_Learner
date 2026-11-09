@@ -15,7 +15,7 @@ import pytest
 
 from content import radical_data
 from content.kanji_data import DECK_BY_CHAR, KANJI_BY_LEVEL, LEVELS, kanji_to_id
-from content.radical_info import POSITIONS, RADICAL_INFO
+from content.radical_info import POSITIONS, RADICAL_ES, RADICAL_INFO
 from core.auth import DEV_USER_ID
 from core.db import db_conn
 
@@ -46,15 +46,16 @@ def _fresh():
 # ---------------------------------------------------------------- the table
 
 
-def test_every_radical_is_described_in_both_languages():
+def test_every_radical_is_described_in_every_language():
     """content/radical_info.py is written by hand, so the thing to pin
     is coverage: every number the index knows has a meaning in each
     language, at least one Japanese name, at least one form, and a
     position the frontend has a word for."""
-    assert set(RADICAL_INFO) == set(radical_data.RADICAL_BY_NUMBER)
+    assert set(RADICAL_INFO) == set(radical_data.RADICAL_BY_NUMBER) == set(RADICAL_ES)
     for number, (en, fr, names, forms, position) in RADICAL_INFO.items():
-        assert en and fr and names and forms, number
+        assert en and fr and RADICAL_ES[number].strip() and names and forms, number
         assert position is None or position in POSITIONS, number
+    assert radical_data.info_for(85, "es")["meaning"] == RADICAL_ES[85] != radical_data.info_for(85, "en")["meaning"]
 
 
 def test_the_glyph_is_the_form_the_learner_meets_first():

@@ -1,11 +1,16 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useProfileSummaryState } from '../stores/profileSummary'
 import { usePracticeRecord } from '../stores/practiceRecord'
-import { getSections } from '../config/tabs'
+import { getSections, PRACTICE_GROUPS } from '../config/tabs'
 import { beginDeparture } from '../stores/departure'
+import { board } from '../stores/boarding'
 import { playAnnouncement } from '../lib/audio'
 import { Plate } from '../components/station/LinePlate'
+import { GateResume } from '../components/station/GateResume'
+import { PracticeSheet, RecordLine } from '../components/practice/PracticeSheet'
+import { UNIT, platformOf, runAt, lastRide } from '../domain/practiceGate'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { useDesk } from '../hooks/useDesk'
@@ -15,13 +20,14 @@ import { PracticeSpecimen } from '../components/practice/PracticeSpecimen'
 import { LEVELS } from '../domain/sentenceSource'
 
 // ── 実践 — the Practice gate: seven platforms (plan 068, plates since 094, 作文 since 125, 会話 since 217) ──
-// Reading practice, reading comprehension, translation, dictation,
-// composition, the mock exam, conversation — the sentence-level
+// Reading practice, reading comprehension, dictation, translation,
+// composition, conversation, the mock exam — the sentence-level
 // sections, which schedule words rather than levels and so have no
 // line on the map. One station plate per platform, the same plate the
 // Learn gate hangs (components/station/LinePlate.jsx), so the two gates
-// are one screen twice. Picking one announces it and departs through
-// the gate, like any other section.
+// are one screen twice. On the desk picking one announces it and
+// departs through the gate, like any other section; on a phone it
+// raises the platform's sheet (plan 290, below).
 //
 // No bar over the plates. The gate opened on the concourse's bar
 // (辻 · Practice · FOUR PLATFORMS) until the owner had the head taken
@@ -36,15 +42,17 @@ import { LEVELS } from '../domain/sentenceSource'
 // use and wanted the plates back. Of the canvas "Tsuji — Practice, new
 // directions" they took B on the phone and A on the desk.
 //
-// ── On the phone, Learn's plate (B) ──
-// A plate opens where the learner is, as Learn's does: the platform's
-// list of grades, the learner's own marked, where a tap boards the run
-// (for reading and translation the JLPT list, past the choice of a
-// source, which is one tap back). The foot prints that grade between
-// what the learner did there and the share of it that was right, read
-// from /api/practice/record; a platform not yet ridden at that grade
-// says so. The stripe is painted raw end to end: a platform has no
-// track behind it.
+// ── On the phone, the plates fold and rise as a sheet (plan 290) ──
+// Every run cost a screen of choices before it (two taps at least, four
+// for a frequency tier), and seven plates sharing the gate left no room
+// for an eighth. The owner took D4 of the canvas "Tsuji — the practice
+// gate", improved: each plate folds to one line, its record under its
+// name (the grade, what was done there, the share right), the seven in
+// three captioned groups (config/tabs.js, PRACTICE_GROUPS); a plate
+// raises a sheet whose pages board the runs themselves, and swipe from
+// platform to platform (components/practice/PracticeSheet). The gate
+// under it never moves. The last grade's ride waits over the groups,
+// boarded in one tap, once there is one to resume.
 //
 // ── On the desk, every platform's specimen (A, plan 165) ──
 // Each plate holds, under its name, a line saying what the run asks
@@ -68,22 +76,14 @@ const PLATFORM = {
   '/practice/exam':          'exam',
   '/practice/conversation':  'conversation',
 }
-// What a platform's record counts (its station's figures), and the
-// caption over its card on the desk.
-const UNIT = {
-  reading: 'sentences', translation: 'sentences', dictation: 'sentences', composition: 'sentences',
-  comprehension: 'texts', exam: 'papers', conversation: 'replies',
-}
+// The caption over a platform's card on the desk.
 const TAG = {
   reading: 'sentence', translation: 'sentence', comprehension: 'text', dictation: 'clip',
   composition: 'point', exam: 'paper', conversation: 'scene',
 }
-// The two platforms whose station asks for a source before a grade
-// (JLPT, frequency, your cards): the phone's plate opens their JLPT list.
-const SOURCED = new Set(['/practice/reading', '/practice/translation'])
 const EXAM = '/practice/exam'
 
-export default function PracticeScreen() {
+export default function PracticeScreen({ session = null }) {
   const { t } = useLang()
   const desk = useDesk()
   const platforms = getSections('practice', t)
@@ -112,44 +112,88 @@ export default function PracticeScreen() {
       {guide.open && <Guide gate="practice" onEnd={guide.onEnd} />}
       {desk
         ? <Specimens platforms={platforms} grade={grade} onDepart={depart} />
-        : <Platforms platforms={platforms} grade={grade} onDepart={depart} />}
+        : <Platforms platforms={platforms} grade={grade} session={session} onDepart={depart} />}
     </main>
   )
 }
 
-/** The phone's plates (plan 254, B): Learn's, opened at the learner's grade. */
-function Platforms({ platforms, grade, onDepart }) {
+/** The phone's gate (plan 290): the plates folded in their groups, the
+ *  last ride over them, and the sheet a plate raises. */
+function Platforms({ platforms, grade, session, onDepart }) {
   const { t } = useLang()
+  const uid = useId()
+  const navigate = useNavigate()
   // Fails quiet, as Learn's feeds do: the plates hang with the grade
   // alone rather than shouting (the run owns up, where the retry lives).
   const records = usePracticeRecord().data
+  const [open, setOpen] = useState(null)
+  const groups = PRACTICE_GROUPS
+    .map(group => [group, platforms.filter(s => s.group === group)])
+    .filter(([, list]) => list.length)
+  const ride = records ? lastRide(records) : null
+  const rideSection = ride && platforms.find(s => platformOf(s.path) === ride.platform)
+
+  // A run is boarded from the gate as from a station; the sheet goes
+  // down first, so the boarding is drawn over the gate and not over it.
+  function boardRun(path, state) {
+    setOpen(null)
+    board(() => navigate(path, state ? { state } : undefined))
+  }
+  function toStation(section, to) {
+    setOpen(null)
+    onDepart(section, to)
+  }
+
   return (
-    <div className="plates">
-      {platforms.map((section, i) => {
-        const platform = PLATFORM[section.path]
-        const rec = grade && records ? records[platform]?.[grade] ?? null : undefined
-        const right = rec?.of > 0 ? t.practiceRight(Math.round((rec.right / rec.of) * 100)) : null
-        return (
-          <Plate
-            key={section.path}
-            section={section}
-            className="plate--platform"
-            // The guide (plan 100) points at the first plate and its
-            // foot, and at the exam, a platform unlike the others: a
-            // paper, not sentences.
-            guide={i === 0 ? 'practice.plate' : section.path === EXAM ? 'practice.exam' : undefined}
-            foot={(
-              <span className="plate__foot plate__foot--stops" data-guide={i === 0 ? 'practice.stops' : undefined}>
-                <span className="plate__prev">{rec === undefined ? null : rec ? t.practiceDone[UNIT[platform]](rec.done) : t.practiceNotYet}</span>
-                <span className="plate__here">{grade}</span>
-                <span className="plate__next">{right}</span>
-              </span>
-            )}
-            onClick={() => onDepart(section, SOURCED.has(section.path) ? `${section.path}/levels` : section.path)}
-          />
-        )
-      })}
-    </div>
+    <>
+      {rideSection && (
+        <GateResume
+          section={rideSection}
+          title={`${rideSection.title} · ${ride.grade}`}
+          at={ride.rec.last}
+          facts={[t.practiceDone[UNIT[ride.platform]](ride.rec.done)]}
+          onClick={() => boardRun(runAt(ride.platform, ride.grade))}
+        />
+      )}
+      {groups.map(([group, list]) => (
+        <section key={group} className="prc-group" aria-labelledby={`${uid}-${group}`}>
+          <h2 className="prc-group__cap" id={`${uid}-${group}`}>{t.practiceGroups[group]}</h2>
+          <div className="plates">
+            {list.map(section => {
+              const platform = platformOf(section.path)
+              const first = section === platforms[0]
+              const rec = grade && records ? records[platform]?.[grade] ?? null : undefined
+              return (
+                <Plate
+                  key={section.path}
+                  section={section}
+                  className="plate--fold"
+                  popup="dialog"
+                  // The guide (plan 100) points at the first plate and
+                  // its record, and at the exam, a platform unlike the
+                  // others: a paper, not sentences.
+                  guide={first ? 'practice.plate' : section.path === EXAM ? 'practice.exam' : undefined}
+                  meta={<RecordLine platform={platform} grade={grade} rec={rec} guide={first ? 'practice.stops' : undefined} />}
+                  onClick={() => setOpen(section.path)}
+                />
+              )
+            })}
+          </div>
+        </section>
+      ))}
+      {open && (
+        <PracticeSheet
+          sections={platforms}
+          start={open}
+          grade={grade}
+          records={records}
+          session={session}
+          onClose={() => setOpen(null)}
+          onBoard={boardRun}
+          onStation={toStation}
+        />
+      )}
+    </>
   )
 }
 

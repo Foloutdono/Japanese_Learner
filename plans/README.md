@@ -7331,3 +7331,90 @@ The owner: verify the analyser's breakdowns, the goal being to explain every par
 | 266d | **The report**: `python -m scripts.breakdown_gaps` (read-only, no database): every part that says nothing, by kind. 979 of 7,625 sentences after 266a–c | DONE |
 
 Open: the copula's に after a noun (安全に, 急に) and 〜らしい after one stay unlit, as the owner pinned (平和に, 春らしい). Left: kana misread by the tokenizer (としょかん as と + しょ + かん, きって as 切って, おつり as お + 吊る), kana verbs two deck verbs share (おります, ふります, つける), the copula で the tokenizer reads for a particle (この店で、), the conjunctive ず (頼らず), 〜となる's と, the nominalising の after an adjective (大きいの).
+
+## Plan 291 — 学習の改札, the Learn gate folded on the phone (2026-10-30)
+
+The owner: redesign the Learn screen on mobile. Drawn first on the canvas "Tsuji — Learn on the phone" (https://claude.ai/artifact/KikNBcw9sLfrTXZsC6Q5kn: today and four directions, A the whole line, B folded as Practice, C you are here, D the gate is the station); the owner picked **B** and asked for the raised plate to look better, redrawn on the canvas before it was built.
+
+| Phase | What | Status |
+|---|---|---|
+| 291 | **Folded, as Practice**: the phone's Learn gate folds each line to one row (the stop it opens and that stop's learned / total, the due, the stripe to the stop's share), the decks under them one row each with two doors, the basics folded above; the last ride over them (`user_profiles.learn_ride`, `POST /api/profile/ride`, `routes/profile.clean_ride`, `stores/learnRide.js`, noted where the four stations board); a row raises `components/learn/LineSheet` on Practice's pager (`hooks/useSheetPager`, PracticeSheet moved onto it): the plate risen whole, the line as rings (stop chosen in gold), the sources, the run's card, the modes as chips (main mode chosen), Embarquer · stop. `GateResume` shared by both gates; the three-stop foot (`StopsFoot`) retired. Tests: `test_learn_ride.py`, `LearnScreen.browser`, `deskfree.phone` | DONE |
+
+Open: `useDialog` focuses the first button even at tabindex -1, so both sheets land focus on the strip's first roundel rather than the page in view's.
+
+## Plan 292 — 予熱, the gates drawn on their first frame (2026-10-30)
+
+The owner: remove the reading ride's subscription plate, and take away the second or two a screen took to load after the ride and on every tab switch. Measured on the production build at 390×844 with the CPU slowed 4× (tap to the new screen's first frame), before and after each change.
+
+| Phase | What | Status |
+|---|---|---|
+| 292 | **The plate goes**: the reading ride's grade enters the station (the desk's breakdown, « Entrer en gare »); a learner with no kana enters from the cards. `ridePlate*`, the `pass` step and the `ride` offer door retired | DONE |
+| 292 | **The answers asked ahead** (`lib/warm.js`): Today by the ride once its sentence is up (`warmToday`: the day, the balance, the journey, the print of the hour); the four other gates by Today, once a visit, two at a time when idle (`warmGates`). Stores warmed by path (`stores/remote`'s `warmStore`/`peekStore`); a gate that asks for itself keeps its answer and draws the last one kept (`keepCachedJson`, `lastCachedJson`) | DONE |
+| 292 | **The switch itself**: Today's print layers kept between visits, their loops paused while away (`TodayPrint`, 825 → 152 ms); the tapped gate lit at once and the move a frame later (`TabBar`); the card's slot width remembered (`cardScale`) | DONE |
+| 292 | **The Dictionary**: its cards below the fold not laid out until near (`content-visibility`, each standing in at its own height from its tokens), and a screenful drawn first, the rest a frame later as unseen places (`useScreenfulFirst`): first frame 492 → 311 ms | DONE |
+
+Open: the Dictionary's first frame is now mostly the page's own style and layout (the console, the chips, the Japanese fonts), not its cards.
+
+## Plan 298 — 読解, sixty N4 and eighty N5 comprehension seeds (2026-11-02)
+
+The owner: write thirty new N4 texts and twenty new N5, every one coherent. Hand-written reading exercises in `content/comprehension/`, held to the same gates as before (`comprehension_seed_report`, `tests/test_comprehension_seed.py`).
+
+| Phase | What | Status |
+|---|---|---|
+| 298 | **The points shared out**: each of N4's ninety checkable points once over n4-31..60; at N5 the fifty-seven points the sixty shipped seeds used least, over n5-61..80. Each text drafted against the gates first (220-280 characters, the level's kanji, nothing filed above the level, each point found); titles in the level's kanji alone, a text's kanji above it only its own points' | DONE |
+| 298 | **Written and attacked**: eight writers; per batch a reviewer, a blind reader and a language editor per entry, a fixer, two rounds of fresh blind readers (every key matched), then a last blind sheet over all fifty (430 questions, no mismatch) and a native-speaker proofread, whose eight fixes were checked again | DONE |
+| 298 | **The figures**: 230/230 clean; the longest or the shortest option wins 21-25% at N4 and N5 in both languages; the carousel bank over 230 passages; the seed module's memory re-measured (20 MB parsed, a 343 KB index) | DONE |
+
+Open: the matcher reads some points narrowly, and the texts bent to it rather than it to them: 何でも is read as 何で (N3), 〜がする is found only plain, 〜くする needs くする written out, 何も／誰も need the kanji, 〜が分かります needs が just before it, and だろうと思いました is read as 〜ようと思う.
+
+## Plan 299 — 何でも, the level gate's 何で (2026-11-02)
+
+Found while writing plan 298's seeds: the level gate counted 何でも, "anything" (the N4 point 何でも／誰でも／いつでも／どこでも), as the N3 card 何で, "why", so every text that said it spent its one hard word in twenty on a word it did not say, and the breakdown graded 兄は何でも食べます N3. The owner: fix this bug.
+
+| Phase | What | Status |
+|---|---|---|
+| 299 | **The merge stops where で belongs to what follows** (`card_lookup._de_belongs_after`): the segments a sentence is graded on (`find_segments_in_text`, read by `level_mix`, `difficulty.estimate_level` and the breakdown's level) no longer merge a word across the で of でも or the copula's で. Diffed over the 8,472 sentences the app teaches: 10 move, all misreadings put right (eight 何でも, 何であれ, and 下りた所でございます, which read ところで, "by the way"); no "why" moves. `LOCAL_REV` 32 | DONE |
+| 299 | **One rule for 何で, both paths** (the owner: fix the gaps): `card_lookup._why` decides whether 何 + the particle で is なんで, "why", and the breakdown (`_what_word`) and the segments both ask it. A way of going said in the negative asks why (`_negated`: 何で来なかったの？, 何で連絡しなかったの？), where 何で来ましたか still asks "by what", now in the segments too; the segments read kana なんで as "why", not 何 "what". Diffed over the 8,472 sentences: one moves (なんで急に上がるわけ？'s segment; no level) | DONE |
+
+The second gap named here was not one: without a tokenizer the scan takes the longest word, and the deck's 何でも ("anything", N3) has always matched before 何で; a test now holds it. Open: the deck files the word 何でも at N3 and the catalogue teaches 何でも／誰でも at N4; the breakdown keeps the point in its pieces (plan 272), so no count reads that card.
+
+
+## Plan 300 — 正答率, retention counts answers (2026-11-02)
+
+The owner: fix the profile holder flake. `test_profile_holder`'s `test_profile_retention_is_a_share_or_absent` failed once in a full run: retention 1.0 with no review. The leak that fed it was `test_onboarding_profile`'s (its reset left the declared level's assumptions, 3f253eb), but what it showed is the product's: `get_retention` summed `card_modes`' counters, and every row the level rule seeds carries `KNOWN_STATE`'s virtual check, one of one.
+
+| Phase | What | Status |
+|---|---|---|
+| 300 | **Retention reads the answers** (`srs.get_retention`): good (3 or more) over all, from `review_log` and its rollup, as the review total beside it and the statistics screen's retention by week (`get_daily_quality`) are. A learner who boarded at N4 read 100% before answering once, and a check passed weighed twice. `test_level_rule.test_an_assumption_is_no_answer_to_the_retention` fails on the old reading (`1.0 is None`); `_wipe` there now calls `forget_history`. CLAUDE.md's plan-224 rule says a learner's total of answers never sums `card_modes`' counters | DONE |
+| 300 | **A card counts its answers** (the owner: fix the card accuracy too): `_state_row` serves `answers` and `correct_answers` beside `total_reviews`, the untouched assumption's virtual check left out (`SRSEngine._virtual_checks`, which `is_assumed` now reads), and `card_stats` and the statistics' deck grid (`routes/stats.py`) sum them; a check passed takes the virtual one's place in the row (`SRSEngine.review`), unless the pass grew no repetition and the row would read untouched again. The dictionary's record shows by the card's stage, so an assumption keeps its schedule and its door at 0/0 and —. `scripts/recount_known_checks.py` (report; `--yes`) sets the rows answered before to their log's count: exactly one check of one over a whole logged history, never a row folded into the rollup. Before: the N5 kanji deck of a learner boarded at N4 read 103 reviews at 100% | DONE |
+
+Open: a row whose history was folded into the rollup before the recount keeps its virtual check, if it had one; with 180 days kept, none of plan 224's checks had been folded when it shipped. The weakest cards (`get_weakest_by_source`) read `card_modes` directly and never list an untouched assumption (it was never missed); after the recount their figures are the rows' answers.
+
+
+## Plan 301 — 理解, a comprehension question answers on its text (2026-11-02)
+
+The owner: improve the comprehension mode and give it a promotion story; then point every question at the text, say in one line why on each miss, open a phone's results on the first miss as the computer does, and show the text rolling. Written as 298 and 298b on its branch; main took 298 first, so it was renumbered at the merge.
+
+| Phase | What | Status |
+|---|---|---|
+| 301 | **The review on the text**: a phone's opened question shows the line of the text it quotes (`.qrow__source`), as the desk's breakdown does; a text served again past the day's ceiling on new ones says so while it is read (`repeat`, `compReadBefore`) | DONE |
+| 301 | **The promo story**, "Read a whole text" (`promo.js`'s seventh, `app.js`'s comprehension run): a seed passage on its card under the run's clock, one of its own vocabulary or grammar questions, answered on the line it quotes, and the board. The bank carries each sentence's translation (`tr`) and the run's clock per level (`read`) | DONE |
+| 301b | **Every question points at its text**: `at` (the breakdown sentence(s) its right option rests on) and `why` (`{en, fr}`, one line quoting those sentences verbatim, never an option by its letter or place) on every seed question, 2,170 with plan 298's fifty passages, held by `test_every_question_points_at_its_sentence_and_says_why`. The generator is asked for both and keeps them only when well formed (`reading._clean_answer_line`), so a pool row without them still serves; `_POOL_VERSION` unmoved | DONE |
+| 301b | **The miss answered**: every question opens on its sentence(s) (`quotedFragments.answerSentences`: `at`, else the sentence its quote is from), a miss says why in one line, and a phone opens the results on the first miss | DONE |
+| 301b | **The roll shown**: the story's second frame rolls the same text a sentence a line at the stepper's own speeds, and the story plays whole as one clip (`clips.story`) | DONE |
+| 301b | **Six seed questions say only what their text says** (found while writing the whys): n2-01, n1-15, n3-11, n4-13, n4-01, n5-24 | DONE |
+
+
+## Plan 304 — 何, read by what follows it (2026-11-03)
+
+Found while looking into why the VOICEVOX engine says なに where the furigana says なん: in four catalogue lines the engine is right. UniDic read 何 なん in 何一つ, 何やら and 何はさておき, and read 何に as the なんに of なんにも ("(not) anything at all") in 何にもまして. `study/reading_context.correct_readings` now decides by what follows 何, never by a list of the lines.
+
+| Phase | What | Status |
+|---|---|---|
+| 304 | **なに before やら and は**: both join `_NANI_BEFORE` (何やら, 何はさておき, 何はともあれ); 何 stays なん before a t-, d- or n- sound and a counter (何です, 何の, 何でも, 何と, 何人) | DONE |
+| 304 | **なに before one** (`_ONE_HEADS`, `_ONE_DIGITS`): 何一つ, 何ひとつ, 何一人, 何1つ, "not a single one"; 何十, 何百 are one token and keep なん | DONE |
+| 304 | **何に + も**: なんにも stands only with a negative, so UniDic's 何に (なんに) reads なにに where まして or 増して takes the に as what it surpasses (`_SURPASSES`, since 304b `_MEASURED_AGAINST`, whatever follows: 何にもまして、遅れないことが大切だ), or where the sentence goes on to say something with no negative in it (`_affirmed_ahead`: 何にもなれる, 何にも代えがたい). 何にもない, 何にも知らない, 何にもすることがない and the bare answer 何にも。 keep なん | DONE |
+| 304 | **Pinned** in `tests/test_furigana_context.py`: each rule on hand-made tokens with its lookalikes, the lines through the tokenizer and through the breakdown (`analyze_local`); every new subtest on the fix's side fails on the old rules. Diffed over 108,802 Japanese strings in the content (every sentence the app teaches, the tours, the choose questions, the notes): 73 move, all 何 in the four shapes (32 何にもまして, 18 何一つ, 16 何は, 7 何やら), no token and no other furigana; over the 8,472 the breakdown gap report reads, 2 (何にもまして). `LOCAL_REV` 37; the carousel bank rebuilt (five rows' furigana and romaji); `TOUR_REV` unmoved, since a tour is cached in process only and the rev seeds its shuffles | DONE |
+| 304b | **何にも before what it is measured against** (the owner: fix 何にも代えられない too): a verb that sets its subject against the に (`_MEASURED_AGAINST`: まして, 増して, 勝る, 劣る, 負ける, 比べる; and 代える, 替える, 換える, which UniDic files under 変える and are told by their kanji, `_EXCHANGED_FOR`) takes 何にも as that に, "than anything", "for anything", negative or not, past an adverb (何にも決して負けない): 何にも代えられない, 何にも劣らない, 何にも負けない read なににも. 変える written 変 or in kana, "change", which takes を, keeps UniDic's reading, as do 何にも食べられない, 何にも知らない and 何にもならない (JMdict's なんにもならない). Pinned on both sides in `tests/test_furigana_context.py`; every new subtest on the fix's side fails on plan 304's rules. Over the same 108,802 strings, nothing moves (the content's one 何にも is 何にもまして, read since 304), so the carousel bank stands; `LOCAL_REV` 39 for the lines learners bring (38 went to 何かしら and 何気ない on main, #523) | DONE |
+
+Open: a passive's agent (何にも縛られない, 何にも邪魔されない) is read なんにも, UniDic's reading: UniDic gives the passive and the potential the same られる, and 何にも食べられない is なんにも.

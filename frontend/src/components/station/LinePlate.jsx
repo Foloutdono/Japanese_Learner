@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
-import { deckItems, lineMarks, stopsAround, stopsTravelled } from '../../domain/lineProgress'
+import { deckItems, lineMarks, stopsTravelled } from '../../domain/lineProgress'
 import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 
 // ── 駅名標 — a line as its own station plate (plan 094) ──────────
@@ -12,6 +12,9 @@ import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 // a FOOT: what a real 駅名標 prints under the name, the stop behind
 // you and the stop ahead -- on a practice platform, the learner's
 // grade between what they did there and how much of it was right.
+// On a phone both gates fold their plates now (plans 290, 291): the
+// foot became the line under the name (`meta`), and only the desk's
+// lines and the basics' plate there still draw one.
 //
 // It replaced the wall map (plan 071): four tracks of five labels
 // each, at the same weight, on a phone whose width gave a label 60px.
@@ -39,12 +42,16 @@ import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 // says what the platform does, so the button's name stays the name.
 // (The painted platforms of plans 225 and 244 stood in the plates'
 // place for a while; plan 254 hung the plates again.)
+//
+// `popup` (plan 290, the phone's Practice gate) says the head opens a
+// sheet rather than a station: its aria-haspopup, so a screen reader
+// hears a dialog coming and not a page.
 
-export function Plate({ section, aside = null, meta = null, foot = null, body = null, describedBy, fill = 1, onClick, className = '', guide }) {
+export function Plate({ section, aside = null, meta = null, foot = null, body = null, describedBy, fill = 1, onClick, className = '', guide, popup }) {
   const code = stationFor(section.path).code
   return (
     <div className={`plate ${className}`.trim()} style={{ '--line-color': section.color }} data-guide={guide}>
-      <button type="button" className="plate__head" onClick={onClick} aria-describedby={describedBy}>
+      <button type="button" className="plate__head" onClick={onClick} aria-describedby={describedBy} aria-haspopup={popup}>
         <span className="pf-line__roundel plate__roundel" aria-hidden="true">{code}</span>
         <span className="plate__names">
           <span className="plate__title">{section.title}</span>
@@ -80,18 +87,6 @@ function Mark({ mark }) {
   const { t } = useLang()
   if (!mark) return null
   return <span lang={mark.jp ? 'ja' : undefined}>{(mark.t && t[mark.t]) || mark.label}</span>
-}
-
-/** The plate's foot on a Learn line: ‹ behind · HERE · ahead ›. */
-export function StopsFoot({ stops, guide }) {
-  const { prev, here, next } = stopsAround(stops)
-  return (
-    <span className="plate__foot plate__foot--stops" data-guide={guide}>
-      <span className="plate__prev">{prev && <>‹ <Mark mark={prev} /></>}</span>
-      <span className="plate__here"><Mark mark={here} /></span>
-      <span className="plate__next">{next && <><Mark mark={next} /> ›</>}</span>
-    </span>
-  )
 }
 
 /**

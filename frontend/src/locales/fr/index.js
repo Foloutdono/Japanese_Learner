@@ -15,6 +15,7 @@ const auth = {
   signOut:           'Déconnexion',
   usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, tiret bas).",
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
+  usernameRefused:   "Ce nom d'utilisateur n'est pas accepté.",
   // 改札 — les refus de la connexion, nommés par leur code
   // (lib/authErrors.js) plutôt que par la phrase anglaise de Supabase
   // (plan 215). Les refus partagés avec la carte invité (adresse déjà
@@ -100,10 +101,9 @@ const nav = {
   runOutCleared:     (n) => `${n} révisée${n > 1 ? 's' : ''}`,
   runOutWaiting:     (n) => `${n} ${n > 1 ? 'attendent' : 'attend'} la recharge`,
   runOutWaits:       'en attente',
-  // 補充 — ce que la recharge a versé, app fermée (plan 141)
-  claimTitle:        'Pendant ton absence',
-  claimButton:       'Récupérer',
-  claimBookLabel:    (n, cap) => `${n} crédit${n > 1 ? 's' : ''} sur ${cap}`,
+  // 補充 — ce que la recharge a versé, app fermée, dit pendant que la
+  // carte se charge (plans 141, 278), à un lecteur d'écran
+  refillLanded:      (n, to, cap) => `${n} crédit${n > 1 ? 's' : ''} arrivé${n > 1 ? 's' : ''} pendant ton absence · ${to} sur ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',
   laneNew:           n => `${n} nouv.`,
@@ -471,6 +471,8 @@ const quiz = {
   typeRomaji:        'Tape le romaji…',
   tapToFlip:          'Touche pour retourner',
   tapToReveal:        'Touche pour révéler',
+  // Le recto d'une carte Kanji → sens dit ce qu'il demande (plan 276).
+  askKanjiMeaning:    'Quel est son sens ?',
   // L'indice du bureau (plan 113) : une touche, puis les mots qui suivent.
   keySpace:           'Espace',
   revealByKey:        'pour révéler',
@@ -907,6 +909,8 @@ const stats = {
   destMovesTo:        date => `glisse au ${date} au rythme actuel`,
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Toi · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Déjà lu',
   examPart: (n) => `Partie ${n}`,
   serviceName: {
     local:   'Omnibus',
@@ -1191,6 +1195,17 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',
+  // 骨組み (plan 311) : la charpente de la ligne -- ce que fait chaque
+  // partie, les rôles de study/frame.ROLES, et ce que la ligne tait.
+  frameLabel:          'Comment la ligne est construite',
+  frameRoles: {
+    topic: 'Thème', subject: 'Sujet', object: 'Objet', target: 'Cible',
+    time: 'Moment', place: 'Lieu', means: 'Moyen', reason: 'Cause',
+    condition: 'Condition', contrast: 'Opposition', purpose: 'But', quote: 'Citation',
+    modifier: 'Modificateur', predicate: 'Prédicat',
+  },
+  frameFrom:           { before: 'de la ligne précédente', after: 'de la ligne suivante' },
+  frameLeftOut:        word => `${word}, sous-entendu`,
   explaining:          'Explication en cours…',
   explainFailed:       'L\'explication n\'est pas arrivée. Réessaie.',
   explainUnavailable:  'Les explications sont indisponibles pour le moment. Réessaie dans un instant.',
@@ -1654,7 +1669,14 @@ const dictionary = {
   bldRight: 'Juste.',
   bldClose: 'Presque.',
   bldWrong: 'Pas tout à fait.',
-  bldOther: (said, register) => `La phrase dit ${said} : la même chose, en style ${register === 'plain' ? 'neutre' : 'poli'}.`,
+  // Comment la phrase dit le trou quand une autre forme est jugée juste :
+  // son registre (plan 241), ou では en entier ou contracté (plan 295).
+  bldOther: (said, register) => `La phrase dit ${said} : la même chose, ${({
+    plain: 'en style neutre',
+    polite: 'en style poli',
+    full: 'avec では en entier',
+    contracted: 'avec では contracté, comme à l’oral',
+  })[register] ?? 'en style poli'}.`,
   mapAria: 'La ligne du point',
   mapTutorial: 'Tutoriel',
   mapNow: 'maintenant',
@@ -1726,6 +1748,14 @@ const dictionary = {
   readingsKunName:   'Lecture japonaise',
   // Voir en/index.js : le 熟 d'un mot qui se lit d'un bloc.
   readingsWhole:     'Se lit d\'un bloc',
+  // Plan 276 : la fiche que les deux noms d'une carte kanji ouvrent
+  // (components/study/ReadingsHelp, domain/readingsHelp).
+  readingsHelpCap:   'Les deux lectures',
+  readingsHelpOn:    'Venue de Chine avec le kanji, elle s’écrit en katakana. C’est surtout celle des mots de plusieurs kanji.',
+  readingsHelpKun:   'Le mot japonais que le kanji est venu écrire, en hiragana. Souvent le kanji seul, ou suivi de kana.',
+  readingsHelpShare: (kanji) => `La part des mots du cours qui lisent ${kanji} ainsi : commence par les plus hautes.`,
+  readingsHelpTilde: (kanji, side, word) => `Une lecture que ${kanji} prend ${side === 'after' ? 'derrière' : 'devant'} un autre élément du mot${word ? ` : ${word.kanji}, ${word.kana}` : ''}.`,
+  readingsHelpDot:   (written) => `Après le point viennent des kana : ${written}.`,
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
@@ -1789,9 +1819,7 @@ const progress = {
 const misc = {
   mute:    'Couper le son',
   unmute:  'Activer le son',
-  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} lecture${n > 1 ? 's' : ''} de plus — la fiche du dictionnaire les donne toutes`,
-  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'mot',
   // Affiché par components/study/SessionError quand une session n'a
@@ -2003,6 +2031,7 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Thème',
   language:          'Langue',
+  languageSample:    'Aujourd’hui · Dictionnaire',
   account:           'Compte',
   signOutDesc:       'Te déconnecter de ton compte sur cet appareil.',
   // Un invité n'a pas de clé : se déconnecter efface le trajet pour
@@ -2123,9 +2152,9 @@ const decks = {
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
   browseBtn:              'Parcourir',
   browseTitle:            'Parcourir les cartes existantes',
-  browseTabKanji:         '漢字 Kanji',
-  browseTabVocab:         '語彙 Vocabulaire',
-  browseTabGrammar:       '文法 Grammaire',
+  browseTabKanji:         'Kanji',
+  browseTabVocab:         'Vocabulaire',
+  browseTabGrammar:       'Grammaire',
   browseAllLevels:        'Tous',
   browseSearchPlaceholder: 'Rechercher (kanji, kana, sens…)',
   browseResults:          'Résultats',
@@ -2219,6 +2248,14 @@ const decks = {
   libraryPublish:        'Publier dans la bibliothèque',
   libraryPublishHint:    'Les autres pourront le trouver et le suivre.',
   libraryPublished:      'Ce deck est dans la bibliothèque.',
+  // Plan 310 : la bibliothèque lit un deck avant de l'accueillir. Le
+  // refus nomme le champ, jamais le mot.
+  libraryRefusedName:        'Le nom contient un mot que la bibliothèque refuse.',
+  libraryRefusedDescription: 'La description contient un mot que la bibliothèque refuse.',
+  libraryRefusedCard:        front => (front ? `Une carte contient un mot que la bibliothèque refuse : ${front}.` : 'Une carte contient un mot que la bibliothèque refuse.'),
+  libraryOpenCard:           'Ouvrir la carte',
+  libraryRename:             'Renommer et publier',
+  cardRefused:               'Cette carte contient un mot que la bibliothèque refuse.',
   libraryUnpublish:      'Retirer de la bibliothèque',
   libraryMakeMine:       'En faire ma copie',
   libraryMakeMineConfirm: 'Cela crée ta propre copie modifiable du deck, en gardant la progression déjà faite. Tu cesses de suivre l’original.',
@@ -2232,6 +2269,12 @@ const decks = {
     ? '1 apprenant suit ce deck. Le supprimer le retire aussi de son étagère — il sera prévenu et disposera d’un délai pour le copier.'
     : `${n} apprenants suivent ce deck. Le supprimer le retire aussi de leurs étagères — ils seront prévenus et disposeront d’un délai pour le copier.`),
   libraryReport:         'Signaler',
+  // Plan 310 : bloquer l'auteur d'un deck, depuis sa page (le choix C).
+  libraryReportDeck:     'Signaler le deck',
+  libraryBlockAuthor:    name => `Bloquer ${name}`,
+  libraryBlockHint:      name => `Tu ne verras plus ses decks, ni ${name} les tiens.`,
+  libraryBlockConfirm:   name => `Bloquer ${name} ? Tu ne verras plus ses decks, ni ${name} les tiens, et les abonnements entre vous prennent fin.`,
+  libraryUnfollowBlock:  name => `Ne plus suivre et bloquer ${name}`,
   libraryReported:       'Signalé',
   libraryReportNote:     'Cela signale le deck pour examen. Rien n’est masqué automatiquement.',
   libraryReasonSpam:      'Spam ou publicité',
@@ -2509,8 +2552,10 @@ const boarding = {
   brdNotifText: 'Tes cartes t’attendent au portillon.',
   // ── 発車案内 — le rappel du jour tiré de la file, le widget et
   // Réglages › Notifications (plan 156). Le titre et le texte du rappel
-  // disent ce que le portillon tiendra à l’heure de l’apprenant.
-  nudgeTitle: (time, n) => `Ton train de ${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
+  // disent ce que le portillon tiendra à l’heure de l’apprenant ; le
+  // titre commence par l’heure, comme une ligne du tableau des départs
+  // (plan 293).
+  nudgeTitle: (time, n) => `${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'Environ une minute' : `Environ ${m} min`),
   nudgeNew: (n) => `${n} ${n > 1 ? 'nouvelles' : 'nouvelle'}`,
   // Le nom du canal des rappels dans les réglages d'Android (lib/native.js).
@@ -2638,7 +2683,7 @@ const boarding = {
   brdRowGoal: (stop, date) => (date ? `${stop} · arrivée le ${date}` : stop),
   brdRowRhythm: (name, min) => `${name} · ${min} min par jour`,
   brdGoalCap: (min) => `à ${min} min par jour`,
-  brdNameOptional: 'facultatif',
+  brdNameOptional: 'Facultatif',
   brdNamePlaceholder: 'Ton prénom',
   brdNameNote: 'Il s’imprime sur ta carte. En lettres latines, c’est aussi ton nom public dans le classement.',
   brdNameSave: 'Valider',
@@ -2654,6 +2699,12 @@ const boarding = {
   brdPasswordMismatch: 'Les deux mots de passe ne sont pas les mêmes.',
   brdAccountSentNote: (email) => `Presque : confirme ${email} depuis le lien que nous venons de t’envoyer.`,
   brdRemindAt: (time) => `Me rappeler à **${time}**`,
+  // Plan 294 : le rappel, une étape après la carte (sur l'appli seule).
+  brdRemindQ: 'On t’annonce ton train ?',
+  brdRemindHint: 'Chaque jour, à l’heure de ta carte.',
+  brdRemindYes: (time) => `Oui, à ${time}`,
+  brdRemindLater: 'Pas maintenant',
+  brdRemindNow: 'maintenant',
   brdAgendaAdd: 'Ajouter à mon agenda',
   brdAgendaTitle: 'Tsuji · ton train de japonais',
   brdAgendaBody: (min) => `${min} min de japonais, chaque jour.`,
@@ -2687,8 +2738,8 @@ const ride = {
   rideGuessed: 'Tu as trouvé la nouvelle ? Si c’était au hasard, choisis « Raté » la prochaine fois. Sinon, elle ne reviendra pas avant plusieurs jours.',
   rideDoneBody: n => `C’est tout ! **${n} nouveaux mots par jour**, chacun de retour juste avant que tu l’oublies.`,
   rideContinue: 'Continuer',
-  // L'essai de lecture (plan 099) : la phrase, le champ, la mesure,
-  // puis la plaque qui dit quels quais sont sur l'abonnement.
+  // L'essai de lecture (plan 099) : la phrase, le champ, la mesure ;
+  // la note fait entrer en gare (sa plaque est partie, plan 292).
   rideReadFront: 'Lis vite, elle disparaît dans un instant !',
   rideReadFrontUntimed: 'Lis-la, puis écris-la en rōmaji ou en kana.',
   rideReadType: 'Écris ce que tu as lu, en rōmaji ou en kana.',
@@ -2697,9 +2748,6 @@ const ride = {
   // Plan 133. Sur un téléphone : la carte connue ne se note qu'une fois
   // sa fiche ouverte depuis la 🔍, puis refermée.
   rideKnownDict: 'Chaque carte a sa fiche de dictionnaire. Touche 🔍 pour ouvrir celle-ci, puis referme-la.',
-  ridePlateCap: 'L\'abonnement',
-  ridePlateBody: 'Ces exercices font partie de l’abonnement.',
-  ridePlateOpen: 'Pour l’instant, ils sont ouverts à tous.',
 }
 
 const guide = {
@@ -2715,8 +2763,9 @@ const guide = {
   guideHelpTour: gate => `Visite guidée : ${gate}`,
   guideTodayGate: 'Tes révisions du jour et le temps qu’elles prennent. Ajuster choisit les cartes et les lignes, puis embarque.',
   guideTabBar: 'Tes cinq onglets : Apprendre, Pratique, Aujourd’hui, Dictionnaire et ton profil.',
+  guideTodayDuels: 'Les duels : deux minutes contre un ami ou un voyageur de ton niveau. Un chiffre d’or dit qu’un défi t’attend.',
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
-  guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
+  guideLearnStops: 'Ton arrêt sur la ligne, et ce que tu en sais déjà.',
   guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
   guidePracticePass: 'Ces exercices font partie de l’abonnement.',
   // Les plaques de Pratique (plan 254) : un quai, son pied (ton niveau,
@@ -2811,6 +2860,22 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}\u00a0% justes`,
   practiceNotYet: 'Pas encore',
+  // Le portique de Pratique au téléphone (plan 290) : les exercices en
+  // trois groupes, le dernier trajet à reprendre, et la feuille qu'une
+  // plaque lève, une page par exercice.
+  practiceGroups: { understand: 'Comprendre', express: 'S’exprimer', test: 'S’évaluer' },
+  practiceResume: 'Reprendre',
+  practiceSheet: 'Exercices',
+  practicePct: pct => `${pct}\u00a0%`,
+  practiceAllPapers: 'Toutes les épreuves',
+  practiceAllScenes: 'Toutes les scènes',
+  // Le portique d'Apprendre au téléphone (plan 291) : la feuille qu'une
+  // ligne lève, une page par ligne -- l'arrêt et le mode choisis avant
+  // d'embarquer -- et l'étagère des decks sous les lignes.
+  learnSheet: 'Lignes',
+  learnStop: 'Arrêt',
+  learnMode: 'Mode',
+  learnAllDecks: n => `Tous mes decks (${n})`,
   // ── La station de pratique, au bureau (plan 159) ─────────────
   // La source en interrupteur en tête de la liste (les grades JLPT, la
   // fréquence, tes cartes), puis la page de l'arrêt ouvert : ce que
@@ -3051,6 +3116,11 @@ const onboarding = {
   ratePlaceholder: 'Ce que tu changerais, s’il y a quelque chose.',
   rateTextLabel: 'Ce que tu changerais',
   rateLater: 'Plus tard',
+  // Google Play (plan 307) : la feuille de note, sur Android.
+  storeQ: 'Une note sur Google Play ?',
+  storeLead: 'Ta note aide d’autres apprenants à trouver Tsuji.',
+  storeGo: 'Noter sur Google Play',
+  storeWrite: 'Plutôt nous dire ce que tu changerais',
   cardReport: 'Signaler cette carte',
   cardReportReasons: 'Ce qui ne va pas',
   cardReason: { reading: 'Lecture', meaning: 'Sens', audio: 'Audio', example: 'Exemple', other: 'Autre' },
@@ -3455,6 +3525,189 @@ const transfer = {
 }
 // ── 243b:transfer end ──
 
+// ── 対戦 — les duels (plan 279) ─────────────────────────────────
+// Le sprint : deux minutes, les mêmes questions pour les deux.
+const pvp = {
+  pvpTitle:        'Duels',
+  pvpChallenges:   n => (n === 1 ? '1 défi à jouer' : `${n} défis à jouer`),
+  pvpFriendsN:     n => (n === 1 ? '1 ami' : `${n} amis`),
+  pvpRequestsN:    n => (n === 1 ? '1 demande' : `${n} demandes`),
+  pvpElo:          'Elo',
+  pvpRecordLong:   (w, d, l) => `${w} victoires · ${d} nuls · ${l} défaites`,
+  pvpRankOf:       (r, n) => `${r === 1 ? '1er' : `${r}ᵉ`} sur ${n}`,
+  pvpSprints:      'sprints',
+  pvpBeat:         s => `${s} à battre`,
+  pvpHoursLeft:    h => `reste ${h} h`,
+  pvpDefies:       who => `${who} te défie`,
+  pvpLiveDefies:   who => `${who} t’attend en direct`,
+  pvpPlay:         'Jouer',
+  pvpBeatUnit:     'à battre',
+  pvpDefy:         'Défier',
+  // 新しい (plan 287) : les duels annoncés une fois, sur Aujourd’hui, à
+  // qui l’a connu avant que leur clé n’y soit.
+  newsCap:         'Nouveau',
+  newsDuelsTitle:  'Les duels arrivent sur Aujourd’hui',
+  newsDuelsLead:   depart => `Deux minutes de questions contre un ami ou un voyageur de ton niveau, et la vitesse compte. La clé ⇄, à côté d’« ${depart} », ouvre les duels.`,
+  newsDuelsGo:     'Voir les duels',
+  newsDuelsLater:  'Plus tard',
+  pvpRanked:       'Sprint classé',
+  pvpRankedDesc:   'Un inconnu d’Elo proche, ou sa partie enregistrée.',
+  pvpFriendDuel:   'Défier un ami',
+  pvpFriendDesc:   'En différé ou en direct. Non classé.',
+  pvpCredits:      n => (n === 1 ? '1 crédit' : `${n} crédits`),
+  pvpFree:         'Gratuit',
+  // The pass pays for everything (the hall's and the ticket's price).
+  pvpIncluded:     'Inclus',
+  pvpTabToPlay:    'À jouer',
+  pvpTabRunning:   'En cours',
+  pvpTabDone:      'Terminés',
+  pvpFriendTag:    'ami',
+  pvpWin:          'Gagné',
+  pvpLoss:         'Perdu',
+  pvpDraw:         'Égalité',
+  pvpTraveller:    'Voyageur',
+  pvpFriendsTitle: 'Amis',
+  pvpSearchCap:    'Son pseudo, exactement',
+  pvpAsk:          'Demander en ami',
+  pvpAccept:       'Accepter',
+  pvpRefuse:       'Refuser',
+  pvpRequest:      'demande d’amitié',
+  pvpYourDuels:    (w, l) => `vos duels : ${w} V · ${l} D`,
+  pvpAddFriend:    'Ajouter un ami par son pseudo',
+  pvpWhom:         'Qui défier',
+  pvpHow:          'Comment',
+  pvpLater:        'En différé · 48 h',
+  pvpLive:         'En direct',
+  pvpLaterHelp:    who => `Même suite pour vous deux ; ${who} a 48 h pour la courir.`,
+  pvpLiveHelp:     who => `Vous partez ensemble, trois secondes après l’arrivée de ${who}.`,
+  pvpChallenge:    who => `Défier ${who}`,
+  pvpInvite:       who => `Inviter ${who}`,
+  pvpSprintOf:     ms => (ms >= 120_000 && ms % 60_000 === 0 ? `Sprint · ${ms / 60_000} minutes` : `Sprint · ${ms / 1000} secondes`),
+  pvpDuelLevel:    'Niveau du duel',
+  pvpQuestions:    'Questions',
+  pvpWordsKanji:   'mots et kanji',
+  pvpWordsKana:    'mots et kana',
+  pvpWordsKanaKanji: 'mots, kana et kanji',
+  pvpEloOf:        n => `Elo ${n}`,
+  pvpEloRange:     (a, b) => `Elo ${a} – ${b}`,
+  pvpChoicesN:     n => `${n} réponses`,
+  pvpLength:       'Durée',
+  pvpMinutes:      n => `${n} min`,
+  pvpStake:        'Enjeu',
+  pvpStakeElo:     n => `± ${n} Elo`,
+  pvpNovice:       'Débutant',
+  pvpPrice:        'Prix',
+  pvpFreeFriends:  'gratuit entre amis',
+  pvpGo:           'Partir',
+  pvpRankedFoot:   'Si personne de ton Elo n’est libre, tu cours contre la partie enregistrée d’un vrai joueur, son pseudo affiché.',
+  pvpGoPaid:       n => `Partir · ${n} crédits`,
+  pvpYou:          'Toi',
+  pvpKind:         { word: 'Mot', reading: 'Lecture', writing: 'Écriture', kana: 'Kana' },
+  pvpQuit:         'Quitter le sprint',
+  pvpReady:        'À vos marques',
+  pvpOver:         'Fini',
+  // The race as a game (plan 285, the owner's C1) and its result (E4).
+  pvpGoBand:       'Partez !',
+  pvpArrival:      'Arrivée !',
+  pvpRush:         'Rush',
+  pvpCombo:        'Combo',
+  pvpComboLost:    n => `${n} perdu`,
+  pvpPassMe:       'Devant !',
+  pvpPassThem:     who => `${who} devant`,
+  pvpNote:         { flash: 'Éclair', quick: 'Rapide' },
+  pvpLines:        { speed: 'Vitesse', combo: 'Combo', rush: 'Rush', accuracy: 'Justesse', flashes: 'Éclairs' },
+  pvpInARow:       (a, b) => `${a} / ${b} d’affilée`,
+  pvpVerdict:      { win: 'Victoire !', loss: 'Défaite', draw: 'Égalité' },
+  pvpAhead:        n => `${n.toLocaleString('fr')} point${n === 1 ? '' : 's'} d’avance`,
+  pvpBehind:       n => `à ${n.toLocaleString('fr')} point${n === 1 ? '' : 's'}`,
+  pvpGrade:        g => `Note ${g}`,
+  pvpBy:           n => `de ${n} point${n === 1 ? '' : 's'}`,
+  pvpWaitingFor:   who => `En attente de ${who}`,
+  pvpRightsOf:     (r, n) => `${r} justes sur ${n}`,
+  pvpCorrections:  'Détail et corrections',
+  pvpNewSprint:    'Nouveau sprint',
+  pvpRematch:      'Revanche',
+  pvpXpLeft:       n => `${n} encore aujourd’hui`,
+  pvpEloBoard:     'Classement Elo',
+  pvpAll:          n => `Tous · ${n}`,
+  pvpFriendsOnly:  n => `Amis · ${n}`,
+  pvpGapTo:        (n, r) => `${n} points d’Elo de la ${r === 1 ? '1re' : `${r}ᵉ`} place`,
+  pvpBilan:        'bilan',
+  pvpOrdinal:      r => (r === 1 ? '1er' : `${r}ᵉ`),
+  pvpOutOf:        n => `sur ${n}`,
+  pvpDuelWith:     who => `Duel · ${who}`,
+  pvpToBeat:       'À battre',
+  pvpNoneToPlay:   'Aucun défi à jouer.',
+  pvpNoneRunning:  'Rien en cours.',
+  pvpNoneDone:     'Aucun duel terminé.',
+  pvpLiveWaits:    'En direct · t’attend',
+  pvpLiveNow:      'En direct',
+  pvpRunning:      'Ton sprint est en cours',
+  pvpResume:       'Reprendre',
+  pvpNobodyYet:    'en attente d’un adversaire',
+  pvpClosedRow:    'fermé',
+  pvpEnter:        'Entrer',
+  pvpOpen:         'Ouvrir',
+  pvpEloFrom:      level => `Il part de ton niveau ${level}, puis bouge à chaque sprint classé.`,
+  pvpNotRanked:    'pas encore classé',
+  pvpProvisional:  'Provisoire : moins de 15 duels classés',
+  pvpCurveLabel:   n => `Ton Elo sur les ${n} derniers duels classés`,
+  pvpStartAt:      n => `départ ${n}`,
+  pvpPeak:         n => `pic ${n}`,
+  pvpRacedLater:   who => `${who} courra contre ton enregistrement.`,
+  pvpVerdictLater: who => `Le verdict tombe quand ${who} aura couru.`,
+  pvpShut:         { expired: 'Expiré', declined: 'Refusé', cancelled: 'Annulé' },
+  pvpRefunded:     'Personne n’est venu : tes crédits sont rendus.',
+  pvpNoVerdict:    'Pas de verdict pour ce duel.',
+  pvpNoVerdictRefunded: 'Pas de verdict pour ce duel : tes crédits sont rendus.',
+  pvpDecline:      'Refuser le défi',
+  pvpCancel:       'Annuler le défi',
+  pvpNotMet:       'pas vue',
+  pvpRightShort:   'juste',
+  pvpWrongShort:   'faux',
+  pvpBetweenYou:   'entre vous',
+  pvpCardStranger: 'Avant d’être amis, on ne voit que le pseudo.',
+  pvpReport:       'Signaler',
+  pvpReasons:      { name: 'Pseudo inapproprié', cheat: 'Triche', spam: 'Demandes ou défis répétés', other: 'Autre chose' },
+  pvpReportSend:   'Envoyer le signalement',
+  pvpReported:     'Signalement envoyé. Une personne le lira.',
+  pvpRemoved:      'Vous n’êtes plus amis.',
+  pvpBlocked:      'Bloqué : vous ne vous trouverez plus.',
+  pvpRemoveFriend: 'Retirer des amis',
+  pvpBlock:        'Bloquer',
+  pvpFind:         'Chercher',
+  pvpRelation:     { me: 'C’est toi', friend: 'Ami', sent: 'Demandé', received: 'T’a demandé', none: '' },
+  pvpChallengeShort: 'Défier',
+  pvpSentN:        n => (n === 1 ? '1 demande envoyée' : `${n} demandes envoyées`),
+  pvpWithdraw:     'Retirer',
+  pvpBlockedN:     n => (n === 1 ? '1 bloqué' : `${n} bloqués`),
+  pvpUnblock:      'Débloquer',
+  pvpNoFriends:    'Pas encore d’ami : cherche un pseudo exact.',
+  // The server's refusals, by their code (domain/duel.js, errorKey).
+  pvpErrNotFound:     'Personne ne porte ce pseudo.',
+  pvpErrSelf:         'C’est ton propre pseudo.',
+  pvpErrNotFriends:   'Vous n’êtes pas amis.',
+  pvpErrCooldown:     'Tu pourras redemander plus tard.',
+  pvpErrFriendLimit:  'Le carnet est plein : 200 amis au plus.',
+  pvpErrPendingLimit: 'Trop de demandes attendent déjà une réponse.',
+  pvpErrRequestLimit: 'Assez de demandes pour aujourd’hui.',
+  pvpErrSearchLimit:  'Trop de recherches d’affilée. Réessaie dans quelques minutes.',
+  pvpErrNoRequest:    'Cette demande n’attend plus.',
+  pvpErrNotBlocked:   'Ce pseudo n’est pas bloqué.',
+  pvpErrTooMany:      'Trop de duels en cours. Termine-en un d’abord.',
+  pvpErrClosed:       'Ce duel est fermé.',
+  pvpErrDuelGone:     'Ce duel n’existe plus.',
+  pvpErrRunning:      'Ton ami court ce duel en ce moment : tu pourras refuser une fois son sprint fini.',
+  pvpErrPlayed:       'Tu as déjà couru ce duel.',
+  pvpErrWaiting:      'Ton ami n’est pas encore entré.',
+  pvpErrNotStarted:   'Le sprint n’a pas commencé.',
+  pvpErrTooEarly:     'Un instant : la question arrive.',
+  pvpErrNotSettled:   'Les corrections s’ouvrent quand le duel est tranché.',
+  pvpErrUnpaid:       'Les corrections coûtent 1 crédit.',
+  pvpErrCredits:      'Plus assez de crédits.',
+  pvpErrFailed:       'Ça n’a pas marché. Réessaie.',
+}
+
 export default welded({
   ...auth,
   ...landing,
@@ -3490,4 +3743,5 @@ export default welded({
   ...clrTickets,
   ...reviewPlan,
   ...transfer,
+  ...pvp,
 })

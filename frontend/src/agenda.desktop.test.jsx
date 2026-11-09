@@ -165,6 +165,6 @@ describe('the agenda on the desk', () => {
     block.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: r.left + 4, clientY: r.top + 4 }))
     await settle()
     // The block's own editor, not a new one.
-    expect($('.sheet__jp').textContent).toBe(fr.agdEdit)
+    expect($('.sheet__title').textContent).toBe(fr.agdEdit)
   })
 })

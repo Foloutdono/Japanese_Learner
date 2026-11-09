@@ -1,4 +1,5 @@
 import { forgetCachedJson } from '../lib/cachedJson'
+import { forgetWarm } from '../lib/warm'
 import { clearAhead } from '../lib/platform'
 import { forgetAheadPlan } from './ahead'
 import { forgetAgenda } from './agenda'
@@ -64,5 +65,6 @@ export function forgetAccount() {
   forgetAheadPlan()
   forgetAgenda()
   forgetCachedJson()
+  forgetWarm()
   clearAhead()
 }

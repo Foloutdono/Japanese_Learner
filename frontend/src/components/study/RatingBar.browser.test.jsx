@@ -94,7 +94,7 @@ describe('RatingBar keyboard contract — six buttons', () => {
 })
 
 describe('RatingBar keyboard contract — four buttons', () => {
-  // Missed / Difficult / Correct / Easy, i.e. qualities 1, 3, 4, 5.
+  // Missed / Almost / Correct / Easy, i.e. qualities 1, 2, 4, 5.
   // Same scale, same words, same digits-from-the-best rule.
   it('"1" rates 5 (Easy) — the best answer this bar can give', async () => {
     const onRate = vi.fn()
@@ -129,10 +129,10 @@ describe('RatingBar keyboard contract — four buttons', () => {
     expect(onRate).not.toHaveBeenCalled()
   })
 
-  it('draws neither forgot nor almost', async () => {
+  it('draws neither forgot nor difficult', async () => {
     const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'simple' })
     expect(screen.container.querySelector('.rating-bar__btn--q0')).toBeNull()
-    expect(screen.container.querySelector('.rating-bar__btn--q2')).toBeNull()
+    expect(screen.container.querySelector('.rating-bar__btn--q3')).toBeNull()
   })
 
   it('tells the stylesheet how many segments to wrap', async () => {
@@ -194,10 +194,10 @@ describe('RatingBar below the desk', () => {
 describe('RatingBar — the passes as keys', () => {
   const qs = nodes => [...nodes].map(b => [...b.classList].find(c => /--q\d$/.test(c)).slice(-1))
 
-  it('keys Correct and Easy on the four, beside Missed and Difficult', async () => {
+  it('keys Correct and Easy on the four, beside Missed and Almost', async () => {
     const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'simple' })
     const c = screen.container
-    expect(qs(c.querySelectorAll('.rating-bar__misses .rating-bar__btn'))).toEqual(['1', '3'])
+    expect(qs(c.querySelectorAll('.rating-bar__misses .rating-bar__btn'))).toEqual(['1', '2'])
     expect(qs(c.querySelectorAll('.rating-bar__keys .rating-bar__btn'))).toEqual(['4', '5'])
     expect(c.querySelector('.rating-bar__btn--best').classList.contains('rating-bar__btn--q5')).toBe(true)
     expect(c.querySelector('.rating-bar__btn--q4').classList.contains('rating-bar__btn--key')).toBe(true)

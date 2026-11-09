@@ -240,8 +240,20 @@ class CardStatsMergeTests(unittest.TestCase):
     def _item(self, state, total, correct, due, interval, nxt):
         return {
             "state": state, "total_reviews": total, "correct_reviews": correct,
+            "answers": total, "correct_answers": correct,
             "due": due, "interval_days": interval, "next_review": nxt,
         }
+
+    def test_an_assumption_is_mastered_with_no_answer(self) -> None:
+        # The level rule's row (plan 224) counts one virtual check, which
+        # makes it mastered and no answer (plan 300): no "1 review, 100%"
+        # on a card the learner never met.
+        item = dict(self._item("mastered", 1, 1, False, 21, "2026-03-01"), answers=0, correct_answers=0)
+        got = card_stats(self._states(**{"vocab.flashcard.f2b": item}), self.USER, self.RAW,
+                         "vocab.flashcard.f2b")
+        self.assertEqual(got["status"], "mastered")
+        self.assertEqual((got["total_reviews"], got["correct_reviews"]), (0, 0))
+        self.assertIsNone(got["accuracy"])
 
     def test_nothing_studied_reads_as_not_started(self) -> None:
         got = card_stats({}, self.USER, self.RAW, ("vocab.flashcard.f2b",))

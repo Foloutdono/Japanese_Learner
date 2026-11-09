@@ -266,6 +266,7 @@ def test_history_round_trip_reflects_live_srs_state_not_anything_stored(client, 
             return {
                 (f"{user_id}:{raw_id}", "vocab.flashcard.f2b"): {
                     "state": "mastered", "total_reviews": 5, "correct_reviews": 5,
+                    "answers": 5, "correct_answers": 5,
                     "interval_days": 30, "due": False, "next_review": None,
                 },
             }
@@ -465,3 +466,76 @@ def test_deep_tier_refuses_json_that_is_not_an_object_and_caches_nothing(client,
 def test_analyze_rejects_an_unknown_source(client):
     response = client.post("/api/phrase/analyze", json={"phrase": "出所の分からない文です。", "source": "pasted"})
     assert response.status_code == 422
+
+
+# ── 骨組み — the construction as a frame (plan 311) ───────────────
+FRAMED_LINE = "雨が降ったので、出かけなかった。"
+FRAME_REPLY = (
+    '{"words": [], "translation": "It rained, so I did not go out.", '
+    '"frame": [{"jp": "雨が降ったので", "role": "reason", "say": "降った, the past of 降る; ので makes it the cause."}, '
+    '{"jp": "出かけなかった", "role": "predicate", "say": "出かける in its past negative."}]}'
+)
+
+
+def _forget(phrase: str) -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM phrase_analysis_cache WHERE phrase = %s", (phrase,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_the_deep_tier_draws_the_frame_and_says_it_as_text(client, monkeypatch):
+    _forget(FRAMED_LINE)
+    seen = {}
+
+    def _fake_chat(messages, **kwargs):
+        seen["accept"] = kwargs.get("accept")
+        return FRAME_REPLY
+
+    monkeypatch.setattr(phrase_module, "chat", _fake_chat)
+    body = client.post("/api/phrase/analyze",
+                       json={"phrase": FRAMED_LINE, "deep": True, "lang": "en", "save": False}).json()
+    sentence = body["sentences"][0]
+    assert [(p["jp"], p["role"], p["start"], p["end"]) for p in sentence["frame"]] == [
+        ("雨が降ったので、", "reason", 0, 8), ("出かけなかった。", "predicate", 8, 16)]
+    assert body["frame"] == sentence["frame"]
+    assert sentence["explanation"].splitlines()[0] == (
+        "雨が降ったので、 — 降った, the past of 降る; ので makes it the cause.")
+    # A reply with no frame of the line is the next model's turn.
+    assert seen["accept"](FRAME_REPLY)
+    assert not seen["accept"]('{"words": [], "explanation": "A paragraph."}')
+    assert not seen["accept"]('{"words": [], "frame": [{"jp": "晴れたので", "role": "reason"}]}')
+
+
+def test_a_frame_under_a_translated_key_is_found():
+    reply = FRAME_REPLY.replace('"frame"', '"cadre"')
+    assert phrase_module._framed(reply, FRAMED_LINE)
+    assert not phrase_module._framed("not json", FRAMED_LINE)
+
+
+def test_a_translation_that_is_the_line_in_romaji_is_none(client, monkeypatch):
+    """Plan 311: 関心はまだ僕ら came back «Kanshin wa mada bokura»."""
+    line = "関心はまだ僕ら"
+    _forget(line)
+
+    def _fake_chat(messages, **kwargs):
+        return ('{"words": [], "translation": "Kanshin wa mada bokura", "frame": ['
+                '{"jp": "関心は", "role": "topic", "say": "The topic."}, '
+                '{"jp": "まだ", "role": "modifier", "say": "Still."}, '
+                '{"jp": "僕ら", "role": "predicate", "dropped": "だ", "say": "A noun predicate, its だ left out."}]}')
+
+    monkeypatch.setattr(phrase_module, "chat", _fake_chat)
+    body = client.post("/api/phrase/analyze",
+                       json={"phrase": line, "deep": True, "lang": "en", "save": False}).json()
+    assert body["translation"] == ""
+    assert body["frame"][-1]["dropped"] == "だ"
+
+
+def test_the_sides_frame_reads_are_the_ones_deep_context_writes():
+    from study.frame import context_sides
+
+    context = phrase_module.deep_context(["From a song."], ["一", "二"], ["三"])
+    assert context_sides(context) == ("一 / 二", "三")

@@ -56,7 +56,7 @@ describe('the rating bar\'s keys on a phone', () => {
     for (const width of ['390px', '360px', '320px']) {
       const c = await dock(width, 'simple')
       expect([...c.querySelectorAll('.rating-bar__btn-label')].map(l => l.textContent))
-        .toEqual(['Raté', 'Difficile', 'Correct', 'Facile'])
+        .toEqual(['Raté', 'Presque', 'Correct', 'Facile'])
       expect(clipped(c), width).toEqual([])
       document.body.innerHTML = ''
     }
@@ -70,7 +70,7 @@ describe('the rating bar\'s keys on a phone', () => {
   it('draws every verdict as a key of one make: a gap apart, a foot under each, 64px with it', async () => {
     const c = await dock('390px', 'simple')
     const keys = [...c.querySelectorAll('.rating-bar__btn')]
-    const [miss, , pass] = keys
+    const [miss, , correct, pass] = keys
     expect(getComputedStyle(c.querySelector('.rating-bar__misses')).columnGap).toBe('8px')
     expect(getComputedStyle(c.querySelector('.rating-bar__misses')).outlineStyle).toBe('none')
     for (const k of keys) {
@@ -88,11 +88,15 @@ describe('the rating bar\'s keys on a phone', () => {
     expect(lamp.width).toBe('8px')
     expect(lamp.height).toBe('8px')
     expect(lamp.borderRadius).toBe('999px')
-    // The pass: moulded in its ink (新橋), the sumi type, no glow, wider than a miss.
+    // Easy: moulded in its ink (新橋), the sumi type, no glow, wider than a miss.
     expect(getComputedStyle(pass).backgroundImage).toContain('rgb(89, 185, 198)')
     expect(getComputedStyle(pass).color).toBe('rgb(28, 24, 17)')
     expect(blurs(getComputedStyle(pass).boxShadow)).toEqual(['0', '0'])
     expect(pass.getBoundingClientRect().width).toBeGreaterThan(miss.getBoundingClientRect().width * 1.15)
+    // Correct on the four: the plain dark key, its check in the panel's ink.
+    expect(getComputedStyle(correct).backgroundImage).toBe(getComputedStyle(miss).backgroundImage)
+    expect(getComputedStyle(correct).color).toBe('rgb(243, 236, 223)')
+    expect(correct.querySelector('.rating-bar__btn-check')).not.toBeNull()
   })
 
   it('sends a pressed key down its foot', async () => {

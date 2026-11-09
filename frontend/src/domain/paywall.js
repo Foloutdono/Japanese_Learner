@@ -1,4 +1,5 @@
 import { PASS_DECKS, PASS_CARDS } from './credits'
+import { intlLocale } from '../lib/locale'
 
 // ── 定期券 — the offer, as the client knows it ─────────────────
 // The pass, shown before it can be bought. This is deliberately a
@@ -44,7 +45,7 @@ export const SOURCES = Object.freeze({
   BALANCE: 'balance',         // the balance sheet, off the HUD
   SETTINGS: 'settings',       // the settings list
   RUNOUT: 'runout',           // the run stopped at a zero balance
-  RIDE: 'ride',               // the reading ride's pass plate (plan 097)
+  // 'ride' was the reading ride's pass plate (plan 097) until plan 292.
   LIMIT: 'limit',             // a Pro learner at one of the plan's ceilings
   UPGRADE: 'upgrade',         // a Pro learner's Settings: "Passer à Max"
 })
@@ -149,7 +150,7 @@ export function yearlySaving(plan) {
  */
 export function formatPrice(amount, lang) {
   const whole = Number.isInteger(cents(amount))
-  return new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-US', {
+  return new Intl.NumberFormat(intlLocale(lang), {
     style: 'currency',
     currency: CURRENCY,
     minimumFractionDigits: whole ? 0 : 2,
@@ -159,7 +160,7 @@ export function formatPrice(amount, lang) {
 
 /** A whole percent in the learner's language: "44 %" / "44%". */
 export function formatPercent(n, lang) {
-  return new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-US', {
+  return new Intl.NumberFormat(intlLocale(lang), {
     style: 'percent',
     maximumFractionDigits: 0,
   }).format(n / 100)
@@ -179,8 +180,9 @@ export function offerable(credits) {
 // (plan 125), conversation (plan 217), the exams, and the analyzer
 // (phrase, ocr and video).
 // backend/tests/test_pass_platforms.py pins this map against the
-// routers, so the reading ride's plate (plan 099) can never promise
-// more or less than the server enforces.
+// routers, so whatever lists the pass's platforms can never promise
+// more or less than the server enforces. The reading ride's plate
+// (plan 099) listed them until plan 292; nothing draws them today.
 export const PASS_PLATFORMS = Object.freeze({
   reading: '/practice/reading',
   comprehension: '/practice/comprehension',

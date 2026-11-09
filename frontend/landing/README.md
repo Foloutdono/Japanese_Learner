@@ -2,9 +2,9 @@
 
 The public page for search and the stores: 辻 the crossroads (the owner's
 pick A on the canvas "Tsuji — landing page", improved with the others' best
-ideas). It is the site's `/` in French and `/en` in English; the files
-live under `public/landing/` and `vercel.json` rewrites the two addresses
-to them (the old `/landing/` addresses redirect there for good).
+ideas). It is the site's `/` in French, `/en` in English and `/es` in Spanish
+(plan 302); the files live under `public/landing/` and `vercel.json`
+rewrites the three addresses to them (the old `/landing/` addresses redirect there for good).
 
 It is a **static page**, not a screen of the app: plain HTML that search
 engines read whole, a stylesheet inlined in it, and one small script
@@ -16,14 +16,15 @@ in. The page works without that script.
 | File | What it is |
 | --- | --- |
 | `config.mjs` | Everything that changes when the page goes live: the origin, the paths, the store links, the contact, the footage. |
-| `strings.mjs` | Every word, French and English. Titles and descriptions come from `docs/seo/keywords.md`. |
+| `strings.mjs` | Every word, in French, English and Spanish. Titles and descriptions come from `docs/seo/keywords.md`. |
 | `content.mjs` | The figures, counted from the decks the app serves. |
 | `tokens.mjs` | The app's tokens, copied. `src/landing.test.js` holds them equal to `index.css`. |
 | `page.mjs` | The renderer: the sections, the SEO head, the JSON-LD. |
 | `landing.css` | The stylesheet, phone first, inlined at build. |
 | `build.mjs` | `npm run landing`: writes `public/landing/` (the demos' `voices.js` too), `public/sitemap.xml` and `public/robots.txt`. |
-| `og.mjs` | `npm run landing:og`: renders the two share cards (`og-fr.png`, `og-en.png`). |
+| `og.mjs` | `npm run landing:og`: renders the three share cards (`og-fr.png`, `og-en.png`, `og-es.png`). |
 | `../public/landing/landing.js` | The client script. Not built; served as written. |
+| `footage/` | `npm run landing:footage`: films the feature clips (plan 283, "Footage" below). |
 
 The built pages are committed, as `public/privacy.html` is: Vite copies
 `public/` as it is, so the deployment needs no step of its own.
@@ -163,7 +164,7 @@ looks for its still, and only a still that loads brings in a player.
 
 | Slot | Files |
 | --- | --- |
-| Overview presentation | `presentation.mp4`, `presentation.jpg`, `presentation.fr.vtt`, `presentation.en.vtt` |
+| Overview presentation | `presentation.mp4`, `presentation.jpg`, `presentation.fr.vtt`, `presentation.en.vtt` (and `presentation.es.vtt` once written: add `'es'` to `PRESENTATION.captions` in `config.mjs`; until then the Spanish page plays the English) |
 | Aujourd'hui | `aujourdhui.mp4`, `aujourdhui.jpg` |
 | Kana | `kana.mp4`, `kana.jpg` |
 | Vocabulaire | `vocabulaire.mp4`, `vocabulaire.jpg` |
@@ -189,6 +190,49 @@ looks for its still, and only a still that loads brings in a player.
 The shot list, with what to film in each slot, is the canvas's "Footage
 slots" board.
 
+### Filming the feature clips (plan 283)
+
+The sixteen feature clips are filmed by a script, so a change to a
+screen they show is one command away from footage that matches it:
+
+```bash
+createdb -h localhost tsuji_footage                 # a local database of its own
+export FOOTAGE_DATABASE_URL=postgresql://postgres@localhost:5432/tsuji_footage
+cd backend && python -m scripts.footage_learner --seed --yes   # once: the learner
+cd ../frontend && npm run landing:footage           # all sixteen, into landing/footage/out/
+npm run landing:footage -- kana --desk              # one scene, one format
+npm run landing:footage -- kana --look              # no film: screenshots, and what can be pressed
+```
+
+- **The learner** is `backend/scripts/footage_learner.py`'s: boarded at
+  N5 with N4 as the goal, a month of days cleared through the app's own
+  routes, part of today answered, so the gate shows 62 cards, a streak
+  of 31 and level 27. It is kept as a dump and put back before every
+  clip, moved on to the hour, so every clip starts from the same gate.
+  The script refuses a database that is not local or holds anyone else:
+  it rewrites every timestamp in it.
+- **The app** is built for the footage (`vite build --mode footage`: no
+  Supabase project, so no sign-in, and no service worker), served by the
+  script, which starts its own API on the learner (`DEV_USER_ID`). The
+  browser's clock starts at 22:30 in Tokyo on the learner's day, so the
+  gate wears the same night in every clip.
+- **The scenes** are `landing/footage/scenes/`, one per slot, named as
+  `CLIPS` names them, each played as a learner would and ending where it
+  started, so the loop is seamless: the phone shows a touch's ring at
+  each tap and the desk its pointer. A scene answers as one who knows: it
+  reads the answer from what the app served (a card's meaning, a paper's
+  key) and draws a kana or a kanji in KanjiVG's stroke order.
+- **The camera** takes Chrome's own frames and lays them on 30 fps with
+  ffmpeg (`capture.mjs`); the still is the clip's first frame. A clip over
+  3 MB says so.
+
+Then upload `landing/footage/out/*.mp4` and `*.jpg` to the bucket by
+their names, replacing the old ones. The bucket serves them with an
+hour's cache, so a replaced clip can take that long to show. A screen
+that moved can break a scene: it fails with a screenshot of where it
+stopped (`out/<clip>-FAILED.png`), and `--look` shows what can be
+pressed there now.
+
 The presentation section stays hidden until `presentation.jpg` is in the
 bucket. Once the video is up, **set `PRESENTATION.uploadDate`** in
 `config.mjs` (e.g. `'2026-10-15'`) and run `npm run landing`. That shows the
@@ -198,10 +242,10 @@ once the file is really there.
 
 ## Later: going live
 
-- **The stores:** put the two listing URLs in `STORES`. The badges then link
-  instead of saying "coming soon". Google Play's is
-  `https://play.google.com/store/apps/details?id=app.tsuji`; the App Store's
-  needs the app's numeric id. For store-ready artwork, Apple and Google
+- **The stores:** put the two listing URLs in `STORES`. A badge then links
+  instead of saying "coming soon". Google Play's is in
+  (`https://play.google.com/store/apps/details?id=app.tsuji`); the App
+  Store's needs the app's numeric id. For store-ready artwork, Apple and Google
   publish their official badges.
 - **Contact:** set `CONTACT` to an address and the footer prints it.
 - **A custom domain:** change `SITE_ORIGIN`, then run `npm run landing` and
@@ -236,5 +280,5 @@ gate). Four things make that work, and each has a test:
   keeping its `id` of `/`, so every existing install stays the same app.
 - **`npm run dev` and `npm run preview` route as the deployment does.**
   `appShell.js`'s `siteRoutes` reads `vercel.json` itself, so the landing
-  page is at `/` and `/en` there too, the old addresses redirect, and the
+  page is at `/`, `/en` and `/es` there too, the old addresses redirect, and the
   app is at `/app` and every app route. Open `/app` for the app.

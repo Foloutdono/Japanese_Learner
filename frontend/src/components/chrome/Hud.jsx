@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus } from '../../stores/journey'
-import { useCredits, openBalance } from '../../stores/credits'
+import { useCredits, useClaimLanded, openBalance } from '../../stores/credits'
 import { useOnline } from '../../hooks/useOnline'
 import { useXpGain } from './useXpGain'
 import { journeyModel } from '../../domain/goalMath'
@@ -15,6 +15,7 @@ import { GearIcon } from '../ui/Icons'
 import { playClick } from '../../lib/audio'
 import { useDesk } from '../../hooks/useDesk'
 import { statusOf, showStatus } from './hudStatus'
+import { StripRefill } from '../credits/RefillCard'
 
 // ── 運行案内 — the HUD (plan 068) ─────────────────────────────
 // The strip across the top of every tab screen: sumi, two registers
@@ -157,6 +158,10 @@ function HudStatus({ onClick }) {
 //                one. The strip's edge goes warning at ≤5 and danger at
 //                0 (plan 069). Tap → the balance sheet.
 //
+// On arrival with credits the refill landed, the card drops out from
+// under the strip, is charged, and goes back (StripRefill, plan 278);
+// the balance it comes back with glints once on its door.
+//
 // The roundel's place went to the station panel, on the strip's left.
 
 /** The balance half: the mark and the figure. */
@@ -164,10 +169,12 @@ function HudBalance({ onClick }) {
   const { t } = useLang()
   const desk = useDesk()
   const credits = useCredits()
+  const landed = useClaimLanded()
   const balance = credits?.unlimited ? null : credits?.balance
   const label = [t.passLabel, credits?.unlimited ? t.cardUnlimited : balance != null ? `${balance} / ${credits.cap}` : null].filter(Boolean).join(' · ')
   return (
     <button type="button" className="hstrip__bal" onClick={onClick} aria-label={label} title={desk ? label : undefined} data-guide="hud.pass">
+      {landed > 0 && <i key={landed} className="hstrip__landed" aria-hidden="true" />}
       <Wave />
       {credits?.unlimited && <span className="hstrip__fig hstrip__fig--inf"><InfinitySign /></span>}
       {balance != null && (
@@ -197,6 +204,7 @@ export function HudPass({ onClick }) {
   return (
     <div className={stripClass(credits, true)}>
       <HudBalance onClick={onClick} />
+      <StripRefill />
     </div>
   )
 }
@@ -227,6 +235,7 @@ function HudStrip() {
       </button>
       <i className="hstrip__perf" aria-hidden="true" />
       <HudBalance onClick={() => { playClick(); openBalance() }} />
+      <StripRefill />
     </div>
   )
 }

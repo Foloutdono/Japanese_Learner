@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The gate's reader (GateButton's .btn-depart__reader): a sumi disc
+     lit faintly from its upper left, holding the scanner's mark. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <gradient
+        android:type="radial"
+        android:centerX="0.4"
+        android:centerY="0.35"
+        android:gradientRadius="70%"
+        android:startColor="#2e271e"
+        android:endColor="#100e13" />
+</shape>

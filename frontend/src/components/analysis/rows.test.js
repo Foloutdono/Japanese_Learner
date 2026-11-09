@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { wordTileRows, isFreshWord } from './rows'
+import { wordTileRows, isFreshWord, rowsOf } from './rows'
 
 // ── The phone's Words sheet (plan 220) ──────────────────────────
 // A line of a song can carry English ("Oh what do you mean"): the sheet
@@ -31,5 +31,24 @@ describe('isFreshWord', () => {
     at = 0
     const rows = wordTileRows({ tokens: [tok('夢', 'noun', 'learning'), tok('底', 'noun', 'not_started'), tok('夜', 'noun', 'mastered')], grammar: [] })
     expect(rows.map(isFreshWord)).toEqual([false, true, false])
+  })
+})
+
+// ── An ending the server glossed keeps its row (plan 272) ─────────
+// せず's ず, the written negative, has no rule of its own: folded into
+// せ, its line was read nowhere. An ending that has a rule (ます) still
+// rides its verb.
+describe('rowsOf', () => {
+  it('gives a glossed ending a row of its own', () => {
+    at = 0
+    const tokens = [tok('無理', 'noun', 'learning'), tok('を', 'particle'), tok('せ', 'verb', 'learning'),
+      { ...tok('ず', 'auxiliary'), gloss: { en: 'not, without', fr: 'ne … pas, sans' } }]
+    expect(rowsOf(tokens).map(r => r.surface)).toEqual(['無理', 'を', 'せ', 'ず'])
+  })
+
+  it('folds an ending with no line of its own into its verb', () => {
+    at = 0
+    const tokens = [tok('食べ', 'verb', 'learning'), tok('ます', 'auxiliary')]
+    expect(rowsOf(tokens).map(r => r.surface)).toEqual(['食べます'])
   })
 })

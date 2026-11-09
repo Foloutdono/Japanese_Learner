@@ -10,17 +10,19 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 from psycopg2 import errors as pg_errors
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from core.db import db_conn
 from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits, events, learner_modes, review_plan
+from core import content_filter, credits, events, learner_modes, review_plan
 from core.lines import clean_lines
+from content.kana_data import KANA_SETS
 from srs.xp import level_progress, next_milestone
 from study import banzuke, level_fit, level_rule, main_modes
+from study import modes as study_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
 
@@ -173,6 +175,18 @@ def _init_db() -> None:
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
+                # Google Play (plan 307): when the Android shell's sheet
+                # asked for a rating on the store, answered (the store
+                # opened, the form sent) or shut. A question of its own,
+                # so a learner who answered the sheet above is asked it
+                # too. NULL is not asked yet; routes/feedback.py.
+                ("store_asked_at", "TIMESTAMPTZ"),
+                # 新しい (plan 287): when the learner was told the duels'
+                # key stands beside Today's gate -- the sheet that says
+                # so put away, or Today's guide ended with the key's stop
+                # in it. NULL is not told yet; routes/onboarding.py
+                # writes it, duels_news_open below reads it.
+                ("duels_news_at", "TIMESTAMPTZ"),
                 # 主 — the mode each line is ridden in, {line: mode},
                 # and the modes added to Today beside it, {line: [mode]}
                 # (plan 273, study/main_modes.py). NULL is never chosen:
@@ -198,6 +212,13 @@ def _init_db() -> None:
                 # but the learner's own choice writes it. See
                 # frontend/src/lib/langChoice.js.
                 ("ui_lang", "TEXT"),
+                # 前回 — the last ride a Learn station boarded (plan
+                # 291): {"path": "/learn/vocab/N4/vocab.flashcard.f2b",
+                # "at": ISO}, a line's stop in one of its graded modes.
+                # The phone's Learn gate offers it again in one tap.
+                # NULL = none yet. POST /api/profile/ride writes it,
+                # GET /api/profile reads it (clean_ride both ways).
+                ("learn_ride", "JSONB"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -333,13 +354,17 @@ def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
     taken). A name is taken whatever its case: "tifa" is not offered
     beside "Tifa"."""
     base = handle_from_name(card_name)
-    if not base:
+    # A name the filter refuses as a handle (plan 310) is printed on the
+    # learner's own card, and the drawn handle stays the public one.
+    if not base or content_filter.refused(base, name=True):
         return None
     cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
     row = cur.fetchone()
     if not row or not _GENERATED_RE.match(row[0]):
         return None
     for candidate in _handle_candidates(base):
+        if content_filter.refused(candidate, name=True):
+            continue
         cur.execute(
             "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
             (candidate, user_id),
@@ -455,6 +480,24 @@ def _profile_row(user_id: str) -> tuple:
     return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None, False, None)
 
 
+def duels_news_open(user_id: str, guided) -> bool:
+    """Whether Today tells this learner, once, that the duels' key now
+    stands beside its gate (plan 287): GET /api/profile's `duelsNews`.
+    Only a learner who met Today before it did -- whose Today guide
+    ended, without the key's stop, since that guide's end now stamps the
+    news too (routes/onboarding.mark_guided) -- and only until told."""
+    if "today" not in (guided or {}):
+        return False
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT duels_news_at FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    return row is not None and row[0] is None
+
+
 def _ui_lang(user_id: str) -> str | None:
     """The interface language the learner chose, or None if never. Read
     apart from _profile_row, whose tuple half the server unpacks."""
@@ -467,6 +510,52 @@ def _ui_lang(user_id: str) -> str | None:
         conn.close()
     value = (row["ui_lang"] if isinstance(row, dict) else row[0]) if row else None
     return value if value in UI_LANGS else None
+
+
+# ── 前回 — the last ride (plan 291) ──
+# The phone's Learn gate offers the last run a station boarded again,
+# in one tap. A path the client sends is kept only if it is one: a
+# line's stop (a JLPT level, or a kana set) and one of that line's
+# graded modes, so the row always names a stop of a line, as a plate
+# does. The browse (fast review) is no ride, and a tier, a theme or a
+# radical is not a stop of the line: the row keeps the last one that is.
+RIDE_STOPS = {
+    "kana": tuple(KANA_SETS),
+    "vocab": LEVELS,
+    "kanji": LEVELS,
+    "grammar": LEVELS,
+}
+_RIDE = re.compile(r"/learn/([a-z]+)/([A-Za-z0-9_]+)/([a-z0-9_.]+)")
+
+
+def clean_ride(path: str | None) -> str | None:
+    """`path` if it names a line's stop in one of its graded modes,
+    else None."""
+    match = _RIDE.fullmatch(path or "")
+    if not match:
+        return None
+    line, stop, mode = match.groups()
+    if stop not in RIDE_STOPS.get(line, ()):
+        return None
+    if mode not in study_modes.GRADED_FOR_SOURCE.get(line, ()):
+        return None
+    return path
+
+
+def _learn_ride(user_id: str) -> dict | None:
+    """The last ride, or None: never one, or one whose stop or mode the
+    app no longer offers (read through clean_ride again)."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT learn_ride FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    ride = (row["learn_ride"] if isinstance(row, dict) else row[0]) if row else None
+    if not isinstance(ride, dict) or clean_ride(ride.get("path")) is None:
+        return None
+    return {"path": ride["path"], "at": ride.get("at")}
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -532,7 +621,9 @@ DEFAULT_READING_PACE = "standard"
 
 
 # The interface languages (frontend/src/lib/locale.js SUPPORTED_LANGS).
-UI_LANGS = ("fr", "en")
+# The interface locales: es-ES is Spain's Spanish, an interface over the
+# Spanish content (plan 303).
+UI_LANGS = ("fr", "en", "es", "es-ES")
 
 
 class LearningPayload(BaseModel):
@@ -842,6 +933,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
         srs.get_rest_days(user_id, days=CALENDAR_DAYS),
     )
     week_from = (datetime.now(timezone.utc).date() - timedelta(days=6)).isoformat()
+    feedback_offer, store_offer = feedback_routes.offers_open(user_id, xp)
 
     return {
         "username": username,
@@ -889,8 +981,14 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # studied elsewhere (routes/transfer.offer_open).
         "transferOffer": transfer_routes.offer_open(user_id, tutorial_at),
         # Early access (plan 269): whether Today asks, once, how the
-        # learner finds the app (routes/feedback.offer_open).
-        "feedbackOffer": feedback_routes.offer_open(user_id, xp),
+        # learner finds the app; in the Android shell, for a rating on
+        # Google Play (plan 307). Both are sent, the client reads the
+        # one its platform asks (routes/feedback.offers_open).
+        "feedbackOffer": feedback_offer,
+        "storeOffer": store_offer,
+        # 新しい (plan 287): whether Today tells the learner, once, that
+        # the duels' key stands beside its gate (duels_news_open).
+        "duelsNews": duels_news_open(user_id, guided),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.
@@ -902,6 +1000,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # The interface language the learner chose, null if never: the
         # app copies it onto the device on boot (lib/langChoice.js).
         "uiLang": _ui_lang(user_id),
+        # 前回 (plan 291): the last ride a Learn station boarded,
+        # {path, at}, or null; the phone's Learn gate offers it again.
+        "learnRide": _learn_ride(user_id),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -1028,6 +1129,13 @@ def export_trail(user_id: str = Depends(get_user_id)):
 def update_profile(payload: ProfilePayload, user_id: str = Depends(get_user_id)):
     if payload.username is None and payload.cardName is None:
         raise HTTPException(status_code=422, detail="Nothing to update")
+    # The handle is public (the 番付, the duels, under every published
+    # deck), so it is held to the filter's names (plan 310). The card's
+    # name is printed on the learner's own card alone and is not.
+    if payload.username is not None and content_filter.refused(payload.username, name=True):
+        raise HTTPException(status_code=422, detail={
+            "code": content_filter.REFUSED, "message": content_filter.REFUSED, "field": "username",
+        })
     username = _get_or_create_username(user_id)  # ensure a row exists to update
     conn = db_conn()
     try:
@@ -1169,6 +1277,34 @@ def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_use
         raise HTTPException(status_code=422, detail=f"jlptLevel must be one of {', '.join(LEVELS)}")
     current = _profile_row(user_id)[1]
     return level_rule_preview(user_id, current, jlptLevel)
+
+
+class RidePayload(BaseModel):
+    """The run a Learn station just boarded, as its path."""
+    path: str = Field(max_length=96)
+
+
+@router.post("/api/profile/ride")
+def note_ride(payload: RidePayload, user_id: str = Depends(get_user_id)):
+    """前回 (plan 291): a Learn station boarded a run; it becomes the
+    last ride, the one the phone's gate offers again. Anything but a
+    line's stop in a graded mode is refused (clean_ride)."""
+    path = clean_ride(payload.path)
+    if path is None:
+        raise HTTPException(status_code=422, detail="not a ride")
+    ensure_profile_row(user_id)
+    ride = {"path": path, "at": datetime.now(timezone.utc).isoformat()}
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE user_profiles SET learn_ride = %s::jsonb WHERE user_id = %s",
+                (json.dumps(ride), user_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"learnRide": ride}
 
 
 @router.get("/api/profile/modes")

@@ -371,7 +371,7 @@ function DecksShelf({ session, open }) {
   )
 
   const createSheet = desk && (
-    <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck} dismiss>
+    <Sheet open={creating} onClose={() => setCreating(false)} title={t.createDeck} icon={PlusIcon} line="var(--line-decks)" label={t.createDeck} dismiss>
       {createForm}
     </Sheet>
   )

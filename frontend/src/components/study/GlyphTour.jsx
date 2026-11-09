@@ -81,7 +81,7 @@ function Read({ tour }) {
       )}
       {!kana && tour.readings && (
         <div className="tour-leaf__foot gt-readings">
-          <Readings kana={tour.readings} onLabel={t.onyomi} kunLabel={t.kunyomi} size={22} center isLarge
+          <Readings kana={tour.readings} onLabel={t.readingsOnName} kunLabel={t.readingsKunName} size={22} center isLarge
                     limit={5} moreLabel={t.readingsMore} />
         </div>
       )}

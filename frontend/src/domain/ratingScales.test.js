@@ -35,15 +35,15 @@ describe('rating scales', () => {
     // middle bar cannot quietly move what a stored quality means.
     const added = (a, b) => RATING_SCALES[b].qualities
       .filter(q => !RATING_SCALES[a].qualities.includes(q)).sort()
-    expect(added('binary', 'simple')).toEqual([3, 5])
-    expect(added('simple', 'full')).toEqual([0, 2])
+    expect(added('binary', 'simple')).toEqual([2, 5])
+    expect(added('simple', 'full')).toEqual([0, 3])
   })
 
   it('gives the same quality the same word on every bar', () => {
     expect(ratingButtons('binary', t).map(b => b.label))
       .toEqual(['Correct', 'Missed'])
     expect(ratingButtons('simple', t).map(b => b.label))
-      .toEqual(['Easy', 'Correct', 'Difficult', 'Missed'])
+      .toEqual(['Easy', 'Correct', 'Almost', 'Missed'])
     expect(ratingButtons('full', t).map(b => b.label))
       .toEqual(['Easy', 'Correct', 'Difficult', 'Almost', 'Missed', 'Forgot'])
     // The shared buttons are the same word AND the same number, which

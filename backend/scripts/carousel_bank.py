@@ -19,7 +19,8 @@ be drawn from too: the grammar lessons with their tours, the deck's
 words and kanji, the kana and the comprehension passages; since plan
 229c the wrong spellings the 表記 question deals (each checked against
 the deck and JMdict, so no wrong answer is a word) and index.json, the
-figures a carousel's last slide may quote.
+figures a carousel's last slide may quote; since plan 281 duel.json, the
+opening of a real N5 duel paper for the duels' promo story.
 
     python -m scripts.carousel_bank            # writes frontend/carousel/bank/*.json
     python -m scripts.carousel_bank --check    # exits 1 when a file is stale
@@ -28,6 +29,7 @@ Run it after a change to content/reading_sentences.py, or to anything
 the breakdown reads (the deck, the catalogue), and commit the files.
 """
 import argparse
+import ast
 import json
 import re
 import sys
@@ -80,15 +82,147 @@ def _senses(meaning: str, limit: int = 3) -> list[str]:
     return parts[:limit]
 
 
+# KANJIDIC's notes among a kanji's meanings, which are no meaning to
+# learn: 働 "work; (kokuji)", 八 "eight; eight radical (no. 12)".
+_NOT_A_SENSE = re.compile(r"^\(.*\)$|\bradical\b.*\(no\.\s*\d+\)", re.I)
+
+
+def _kanji_senses(meaning: str, limit: int = 3) -> list[str]:
+    """A kanji's meanings as _senses cuts them, its dictionary's notes
+    left out before the first `limit` are taken."""
+    return [s for s in _senses(meaning, 99) if not _NOT_A_SENSE.search(s)][:limit]
+
+
 def _plain(text: str) -> str:
     """Catalogue prose without its markdown emphasis."""
     return re.sub(r"\*\*(.+?)\*\*", r"\1", text or "").strip()
 
 
-def _romaji(reading: str, kind: str, surface: str) -> str:
+# ── Words a page spells in kana (plan 248) ──────────────────────────
+# A word whose kanji are above a text's level is written in kana
+# (としょかん), or half in kana (食どう), and the tokenizer, which knows
+# it only in kanji, cuts it into other words: は|と|しょ|か|んで, 食|どう.
+# Each spelling here is read as the word it spells: the line is analysed
+# with the word's kanji in its place, and its tokens are given back the
+# page's own spelling, readings only over the kanji it writes. A list
+# reviewed by hand, not a guess: a guessing pass read ふりそう as ふ理想.
+# A verb's spelling (ねます) is read so only where the plain analysis
+# starts a token at it (はやく|ね|ます, never わかり|かね|ます).
+_RESPELL = {
+    "しんかんせん": "新幹線", "しゅくだい": "宿題", "かいさつ": "改札", "としょかん": "図書館",
+    "食どう": "食堂", "野さい": "野菜", "らい週": "来週", "でんち": "電池", "てんいん": "店員",
+    "ちかてつ": "地下鉄", "れいぞうこ": "冷蔵庫", "きっさてん": "喫茶店", "ゆうびんきょく": "郵便局",
+    "つうろ": "通路", "じしょ": "辞書", "ひこうき": "飛行機", "ていきけん": "定期券",
+    "うんてんしゅ": "運転手", "まどぐち": "窓口", "るすばん": "留守番", "ぶんぽう": "文法",
+    "よやく": "予約", "でぐち": "出口", "ふじさん": "富士山", "ひるごはん": "昼ご飯",
+    "ばんごはん": "晩ご飯", "たんじょうび": "誕生日", "ごぶさた": "ご無沙汰",
+}
+_RESPELL_VERBS = {"ねます": "寝ます", "ねました": "寝ました", "ねましょう": "寝ましょう", "ねません": "寝ません"}
+_RESPELL_RE = re.compile("|".join(re.escape(k) for k in sorted({**_RESPELL, **_RESPELL_VERBS}, key=len, reverse=True)))
+_KANJI_CHAR = re.compile(r"[㐀-鿿々]")
+
+
+def _spelled_back(tokens: list[dict], original: str) -> bool:
+    """The tokens of a respelled word given the page's spelling back: each
+    furigana segment is its kanji where the page writes them, its reading
+    where the page writes that. False where the two do not line up."""
+    at = 0
+    for tok in tokens:
+        segs = tok.get("furigana") or [{"text": tok["surface"]}]
+        out = []
+        for seg in segs:
+            text, reading = seg["text"], seg.get("reading") or ""
+            if original.startswith(text, at):
+                out.append({"text": text, "reading": reading} if reading else {"text": text})
+                at += len(text)
+            elif reading and original.startswith(reading, at):
+                out.append({"text": reading})
+                at += len(reading)
+            else:
+                return False
+        tok["surface"] = "".join(x["text"] for x in out)
+        tok["furigana"] = out
+        written = set(tok["surface"])
+        tok["kanji_matches"] = [m for m in tok.get("kanji_matches") or [] if m.get("kanji") in written]
+    return at == len(original)
+
+
+def _analyze(jp: str, level: str | None = None) -> dict:
+    """analyze_local, with the page's kana spellings read as the words they
+    spell (_RESPELL); positions are the page's own."""
+    plain = analyze_local(jp, level) if level else analyze_local(jp)
+    starts = {t["start"] for t in plain["tokens"]}
+    spans, parts, last, shift = [], [], 0, 0
+    for m in _RESPELL_RE.finditer(jp):
+        if m.group() in _RESPELL_VERBS and m.start() not in starts:
+            continue
+        word = _RESPELL.get(m.group()) or _RESPELL_VERBS[m.group()]
+        parts.append(jp[last:m.start()])
+        parts.append(word)
+        spans.append((m.start() + shift, m.start() + shift + len(word), m.start(), m.group()))
+        shift += len(word) - len(m.group())
+        last = m.end()
+    if not spans:
+        return plain
+    parts.append(jp[last:])
+    analysis = analyze_local("".join(parts), level) if level else analyze_local("".join(parts))
+
+    def back(pos: int) -> int:
+        """A position in the respelled line, in the page's line."""
+        moved = 0
+        for a, b, o, orig in spans:
+            if pos >= b:
+                moved += (b - a) - len(orig)
+            elif pos > a:
+                return o + min(len(orig), pos - a)
+        return pos - moved
+
+    placed = {}
+    for a, b, o, orig in spans:
+        inside = [t for t in analysis["tokens"] if t["start"] < b and a < t["end"]]
+        if not inside or inside[0]["start"] != a or inside[-1]["end"] != b or not _spelled_back(inside, orig):
+            return plain
+        # The word's own tokens laid end to end from where the page writes it.
+        at = o
+        for tok in inside:
+            placed[id(tok)] = (at, at + len(tok["surface"]))
+            at += len(tok["surface"])
+    for tok in analysis["tokens"]:
+        tok["start"], tok["end"] = placed.get(id(tok)) or (back(tok["start"]), back(tok["end"]))
+    for g in analysis.get("grammar") or []:
+        g["start"], g["end"] = back(g["start"]), back(g["end"])
+        g["segments"] = [[back(x), back(y)] for x, y in g.get("segments") or []]
+    analysis["text"] = jp
+    return analysis
+
+
+_KATAKANA = re.compile(r"^[\u30a0-\u30ffー]+$")
+
+
+def _romaji(reading: str, kind: str, surface: str, after: dict | None = None) -> str:
     if kind == "particle" and surface in PARTICLE_ROMAJI:
         return PARTICLE_ROMAJI[surface]
-    return to_romaji(reading)
+    # A word in katakana is romanised as it is written: its reading spells
+    # ー as a vowel (コーヒー こうひい), which gave "kouhii" (plan 248).
+    said = surface if _KATAKANA.match(surface) else reading
+    return _row_romaji(said, (after.get("reading") or after["surface"]) if after else "")
+
+
+def _row_romaji(said: str, after: str = "") -> str:
+    """A row's romaji from what it says, `after` what the next row says.
+    A row that ends on っ is no "tsu" (二十 にじゅっ was "nijutsu"): the っ
+    doubles what the next row opens with, so the rows read on into the
+    sentence's romaji (二十 + さい nijus + sai, 一 + ぴき ip + piki), and
+    before nothing it is not written (あっ a), as the app's own romaji
+    has it (frontend lib/romaji.js)."""
+    if len(said) > 1 and said[-1] in "っッ":
+        nxt = to_romaji(after) if after else ""
+        double = "t" if nxt.startswith("ch") else nxt[:1] if nxt[:1] in _CONSONANTS else ""
+        return to_romaji(said[:-1]) + double
+    return to_romaji(said)
+
+
+_CONSONANTS = frozenset("bcdfghjkmpqrstvwz")
 
 
 def _furigana(tokens: list[dict]) -> list[list[str]]:
@@ -204,14 +338,52 @@ def _counted_row(group: list[dict], after: dict | None) -> dict | None:
         gloss = (f"many {forms[1]}", "maintes fois" if forms[3] == "fois" else f"beaucoup de {forms[3]}")
     if not gloss:
         return None
-    row = _row(group)
+    row = _row(group, after)
     row.pop("lv", None)
     row["pos"] = "noun"
     row["en"], row["fr"] = [gloss[0]], [gloss[1]]
     return row
 
 
+# ── Tokens a beginner reads as one word (plan 248) ──────────────────
+# The analyser cuts a number written in parts (十|五年, which glossed 十 as
+# "ten" beside 五年 "5 years"), でも opening a clause (で|も) and お or ご
+# from the word they honour (お|ちゃ); each is joined back before the rows
+# are made, in every source (お and ご were joined in the conversations only).
+_DIGITS = re.compile(r"^[〇一二三四五六七八九十百千万億0-9０-９]+$")
+_DEMO = next(({"entry": e, "level": lv} for lv, es in __import__("content.vocab_data", fromlist=["VOCAB_BY_LEVEL"]).VOCAB_BY_LEVEL.items()
+              for e in es if e.get("kana") == "でも" and not e.get("kanji")), None)
+
+
+def _joined(tokens: list[dict]) -> list[dict]:
+    out: list[dict] = []
+    for tok in tokens:
+        prev = out[-1] if out else None
+        if prev and _DIGITS.match(prev["surface"]) and _DIGITS.match(tok["surface"]):
+            out[-1] = {**prev, "surface": prev["surface"] + tok["surface"], "end": tok.get("end"),
+                       "reading": (prev.get("reading") or prev["surface"]) + (tok.get("reading") or tok["surface"]),
+                       "furigana": (prev.get("furigana") or []) + (tok.get("furigana") or []),
+                       "kanji_matches": (prev.get("kanji_matches") or []) + (tok.get("kanji_matches") or []),
+                       # 十 is "ten", 十五 is not: a number in parts is left bare unless a counter glosses it.
+                       "vocab_match": None}
+            continue
+        before = out[-2] if len(out) >= 2 else None
+        if (prev and prev["surface"] == "で" and prev["pos"] == "particle" and tok["surface"] == "も" and tok["pos"] == "particle"
+                and (before is None or before["pos"] in SKIP_POS)):
+            out[-1] = {**prev, "surface": "でも", "reading": "でも", "lemma": "でも", "pos": "conjunction", "end": tok.get("end"),
+                       "furigana": [{"text": "でも"}], "vocab_match": _DEMO, "grammar": []}
+            continue
+        if prev and prev["pos"] == "prefix" and prev["surface"] in ("お", "ご") and tok["pos"] in ("noun", "verb"):
+            out[-1] = {**tok, "surface": prev["surface"] + tok["surface"], "start": prev.get("start"),
+                       "reading": (prev.get("reading") or prev["surface"]) + (tok.get("reading") or tok["surface"]),
+                       "furigana": (prev.get("furigana") or [{"text": prev["surface"]}]) + (tok.get("furigana") or [{"text": tok["surface"]}])}
+            continue
+        out.append(tok)
+    return out
+
+
 def rows_of(tokens: list[dict]) -> list[dict]:
+    tokens = _joined(tokens)
     rows: list[dict] = []
     i = 0
     while i < len(tokens):
@@ -231,12 +403,12 @@ def rows_of(tokens: list[dict]) -> list[dict]:
             while end + 1 < len(tokens) and _joins(tokens[end + 1]):
                 end += 1
         group = tokens[i:end + 1]
-        rows.append(_row(group))
+        rows.append(_row(group, tokens[end + 1] if end + 1 < len(tokens) else None))
         i = end + 1
     return rows
 
 
-def _row(group: list[dict]) -> dict:
+def _row(group: list[dict], after: dict | None = None) -> dict:
     head = group[0]
     surface = "".join(t["surface"] for t in group)
     reading = "".join(t.get("reading") or t["surface"] for t in group)
@@ -247,7 +419,7 @@ def _row(group: list[dict]) -> dict:
     # The reading a page prints is the furigana's (は, not the わ the
     # tokenizer hears), so it is not written twice: a page reads it off
     # `fu`, which is left out where nothing in the word takes furigana.
-    row = {"t": surface, "ro": _romaji(reading, kind, surface), "k": kind, "pos": head["pos"]}
+    row = {"t": surface, "ro": _romaji(reading, kind, surface, after), "k": kind, "pos": head["pos"]}
     furigana = _furigana(group)
     if any(r for _, r in furigana):
         row["fu"] = furigana
@@ -287,7 +459,7 @@ def _focus_index(rows: list[dict], focus: str) -> int | None:
 
 
 def sentence(level: str, index: int, row: dict, kanji: set) -> dict:
-    analysis = analyze_local(row["jp"], level)
+    analysis = _analyze(row["jp"], level)
     rows = rows_of(analysis["tokens"])
     grammar = []
     for g in analysis["grammar"]:
@@ -312,6 +484,10 @@ def sentence(level: str, index: int, row: dict, kanji: set) -> dict:
         hy = orthography(rows[fi].get("fu") or [])
         if hy:
             out["hy"] = hy
+    # The sentence said the other way, Read it's bonus (plan 254).
+    other = version(row["jp"], level, rows)
+    if other:
+        out["v"] = other
     return out
 
 
@@ -519,8 +695,8 @@ def kanji_entry(char: str, deck: dict) -> dict:
         "lv": level,
         "on": on,
         "kun": kun,
-        "en": _senses(entry.get("meaning", "")),
-        "fr": _senses(get_kanji_meaning(char, "fr")),
+        "en": _kanji_senses(entry.get("meaning", "")),
+        "fr": _kanji_senses(get_kanji_meaning(char, "fr")),
     }
     s = strokes(char)
     if s:
@@ -566,7 +742,7 @@ def text_rows(jp: str, level: str | None = None, pattern: str | None = None) -> 
     (0 where none), 1 where `pattern` is written on it]; trailing empties
     dropped. No glosses: a lesson's line is read, not taken apart.
     The studio unpacks them (sources.js, unpack)."""
-    analysis = analyze_local(jp, level)
+    analysis = _analyze(jp, level)
     out = []
     for r in rows_of(analysis["tokens"]):
         if r["k"] == "punct":
@@ -709,7 +885,7 @@ def words(level: str, index: dict) -> dict:
         written = e["kanji"] or kana
         hits = [h for h in index.get(written, []) if h[2] == kana or not h[2]]
         hits.sort(key=lambda h: (h[1] != level, abs(rank[h[1]] - rank[level]), rank[h[1]] > rank[level]))
-        w = {"t": written, "r": kana, "ro": to_romaji(kana), "en": _senses(e.get("meaning", ""))}
+        w = {"t": written, "r": kana, "ro": _row_romaji(kana), "en": _senses(e.get("meaning", ""))}
         fr = _senses(fr_gloss(e, VOCAB_FR) or "")
         if fr:
             w["fr"] = fr
@@ -752,7 +928,7 @@ def kanji_cards(level: str, deck: dict) -> dict:
         ws = []
         for _, _, lv, e in sorted(by_char.get(c, []), key=lambda x: (x[0], x[1]))[:5]:
             kana = (e.get("kana") or "").split("/")[0]
-            w = {"t": e["kanji"], "r": kana, "ro": to_romaji(kana), "lv": lv, "en": _senses(e.get("meaning", ""), 1)}
+            w = {"t": e["kanji"], "r": kana, "ro": _row_romaji(kana), "lv": lv, "en": _senses(e.get("meaning", ""), 1)}
             fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
             if fr:
                 w["fr"] = fr
@@ -800,7 +976,7 @@ def kana_cards() -> dict:
                 written = v["kanji"] or kana
                 in_script = re.fullmatch(r"[ァ-ヿ]+", kana) if script == "katakana" else re.fullmatch(r"[ぁ-ゟ]+", kana)
                 if kana.startswith(k) and in_script and len(kana) <= 5:
-                    w = {"t": written, "r": kana, "ro": to_romaji(kana), "en": _senses(v.get("meaning", ""), 1)}
+                    w = {"t": written, "r": kana, "ro": _row_romaji(kana), "en": _senses(v.get("meaning", ""), 1)}
                     fr = _senses(fr_gloss(v, VOCAB_FR) or "", 1)
                     if fr:
                         w["fr"] = fr
@@ -815,7 +991,12 @@ def kana_cards() -> dict:
 
 def passages() -> dict:
     """The comprehension seeds (content/comprehension/*.json): each text
-    cut into its sentences, each sentence into words, and its questions."""
+    cut into its sentences, each sentence into words, and its questions.
+    Since plan 301 each sentence's translation too (`tr`, beside `sents`,
+    {en, fr} or None), the seed's breakdown's own for the sentence it
+    cuts alike: what the run's breakdown prints under it, and what the
+    comprehension story's answer prints under the line a question quotes.
+    A sentence the breakdown cuts otherwise (a quotation over a 。) has none."""
     out = []
     for level in LEVELS:
         path = BACKEND / "content" / "comprehension" / f"{level}.json"
@@ -823,13 +1004,19 @@ def passages() -> dict:
             continue
         for ex in json.loads(path.read_text(encoding="utf-8")):
             parts = [x for x in re.split(r"(?<=[。！？])(?!」)", ex["text"]) if x.strip()]
+            said = {b["jp"].strip(): b.get("translation") for b in ex.get("breakdown", [])}
             out.append({
                 "id": ex["id"], "lv": level, "title": ex.get("title", ""), "grammar": ex.get("grammar", []),
                 "sents": [text_rows(x, level) for x in parts],
+                "tr": [said.get(x.strip()) or None for x in parts],
                 "words": _passage_words(parts, level),
                 "questions": ex.get("questions", []),
             })
-    return {"rev": REV, "passages": out}
+    # The reading window at each level, as the run's clock counts it (the
+    # comprehension story's clock, plan 301). routes/reading.py opens the
+    # database when it is imported, so it is read from its source.
+    read = _module_constant(BACKEND / "routes" / "reading.py", "READ_SECONDS_BY_LEVEL")
+    return {"rev": REV, "read": read, "passages": out}
 
 
 def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:
@@ -839,7 +1026,7 @@ def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:
     rank = {lv: i for i, lv in enumerate(LEVELS)}
     seen, found = set(), []
     for n, part in enumerate(parts):
-        for r in rows_of(analyze_local(part, level)["tokens"]):
+        for r in rows_of(_analyze(part, level)["tokens"]):
             if r["k"] != "word" or not r.get("fu") or not r.get("en") or r.get("pool"):
                 continue
             written = (r.get("lemma") or [r["t"]])[0]
@@ -849,7 +1036,7 @@ def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:
                 continue
             seen.add(written)
             kana = (r.get("lemma") or [None, None])[1] or "".join(rd or t for t, rd in r["fu"])
-            w = {"t": written, "r": kana, "ro": to_romaji(kana), "lv": r["lv"], "en": r["en"][:1]}
+            w = {"t": written, "r": kana, "ro": _row_romaji(kana), "lv": r["lv"], "en": r["en"][:1]}
             if r.get("fr"):
                 w["fr"] = r["fr"][:1]
             fu = _furigana_of(written, kana)
@@ -885,9 +1072,11 @@ def files(deck: dict):
         sentences[level] = build(level, deck)
         yield f"{level}.json", sentences[level]
     index = word_index([s for lv in LEVELS for s in sentences[lv]["sentences"]])
+    word_files = {}
     for level in LEVELS:
         yield f"grammar-{level}.json", lessons(level)
-        yield f"words-{level}.json", words(level, index)
+        word_files[level] = words(level, index)
+        yield f"words-{level}.json", word_files[level]
         yield f"kanji-{level}.json", kanji_cards(level, deck)
     yield "kanji-index.json", kanji_index(deck)
     kana = kana_cards()
@@ -898,10 +1087,16 @@ def files(deck: dict):
     yield "themes.json", theme_file
     lookalike_file = lookalikes(deck)
     yield "lookalikes.json", lookalike_file
-    dialogue_file = dialogues()
+    scenes = conversation()
+    yield "pictures.json", {**pictures(word_files, theme_file), "scenes": scene_pictures(scenes)}
+    dialogue_file = with_scenes(dialogues(), scenes)
     yield "dialogues.json", dialogue_file
+    yield "conversation.json", scenes
+    yield "short.json", shorts()
+    yield "promo.json", promo()
     trap_file = traps()
     yield "traps.json", trap_file
+    yield "duel.json", duel_story()
     yield "index.json", figures(sentences, kana, comprehension, {
         "themes": len(theme_file["themes"]),
         "themeWords": sum(len(t["words"]) for t in theme_file["themes"].values()),
@@ -909,6 +1104,43 @@ def files(deck: dict):
         "dialogues": len(dialogue_file["dialogues"]),
         "traps": len(trap_file["traps"]),
     })
+
+
+# ── The duels' story (plan 281) ───────────────────────────────────
+# The promo story of the duels plays a real sprint: the first questions
+# of an N5 paper as the duels' own generator builds it from a fixed seed
+# (study/duel_paper.py), and what the story's figures are made of --
+# where the Elo starts at each level and its K once settled
+# (study/duel_elo.py), what an answer pays in XP (srs/xp.py) and the
+# day's cap, and how long the next question waits after a right or a
+# wrong answer (study/duels.py). study/duels.py opens the database when
+# it is imported, so its two figures are read from its source.
+DUEL_SEED = 1330
+DUEL_ITEMS = 16
+
+
+def _module_constant(path: Path, name: str):
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+            return ast.literal_eval(node.value)
+    raise KeyError(f"{name} not in {path.name}")
+
+
+def duel_story() -> dict:
+    from srs.xp import BASE_XP_BY_QUALITY
+    from study import duel_elo, duel_paper
+
+    duels_py = BACKEND / "study" / "duels.py"
+    paper = duel_paper.build_paper(DUEL_SEED, "N5")
+    items = [{**duel_paper.served(item, n), "answer": item["answer"]} for n, item in enumerate(paper["items"][:DUEL_ITEMS])]
+    return {
+        "rev": REV, "paper": paper["rev"], "level": paper["level"], "seed": DUEL_SEED,
+        "elo": {"start": duel_elo.START, "k": duel_elo.K_SETTLED},
+        "xp": {"right": BASE_XP_BY_QUALITY[4], "wrong": BASE_XP_BY_QUALITY[1], "cap": _module_constant(duels_py, "XP_CAP")},
+        "hold": {"right": _module_constant(duels_py, "RIGHT_HOLD_MS"), "wrong": _module_constant(duels_py, "LOCK_MS")},
+        "items": items,
+    }
 
 
 # ── Four more modes (plan 229m) ───────────────────────────────────
@@ -952,7 +1184,7 @@ def themes() -> dict:
                 continue
             seen.add(written)
             kana = e.get("kana") or written
-            w = {"t": written, "r": kana, "ro": to_romaji(kana), "band": e.get("theme_level"),
+            w = {"t": written, "r": kana, "ro": _row_romaji(kana), "band": e.get("theme_level"),
                  "en": _senses(e.get("meaning", ""), 2), "fr": _senses(e.get("meaning_fr", ""), 2)}
             if e.get("level"):
                 w["lv"] = e["level"]
@@ -965,27 +1197,106 @@ def themes() -> dict:
     return {"rev": REV, "themes": out}
 
 
+def pictures(word_files: dict, theme_file: dict) -> dict:
+    """The words a vocabulary short turns over on a picture (plan 257):
+    content/pictures/pictures.json, a word's key (written::kana) and its
+    file beside it. A key no deck or theme word has, or a file that is
+    not there, stops the build rather than leave a picture on no word."""
+    spec = json.loads((CONTENT / "pictures" / "pictures.json").read_text(encoding="utf-8"))
+    known = {f"{w['t']}::{w['r']}" for data in word_files.values() for w in data["words"]}
+    known |= {f"{w['t']}::{w['r']}" for th in theme_file["themes"].values() for w in th["words"]}
+    out = {}
+    for key, name in spec.items():
+        if key not in known:
+            raise SystemExit(f"content/pictures/pictures.json: {key} is no deck or theme word")
+        if not (CONTENT / "pictures" / name).is_file():
+            raise SystemExit(f"content/pictures/pictures.json: {name} is not in content/pictures/")
+        out[key] = f"content/pictures/{name}"
+    return {"rev": REV, "pictures": out}
+
+
+def scene_pictures(scenes_file: dict) -> dict:
+    """A 会話 scene's pictures (plan 269): content/pictures/scenes/scenes.json,
+    a scene's id and, for each of its turns, the picture shown while it
+    is asked and the one shown once it is answered. A reply short of a
+    pictured scene draws each turn over them. A scene the bank lacks, a
+    turn without both, or a file that is not there stops the build: a
+    video never shows one turn bare among pictured ones."""
+    spec = json.loads((CONTENT / "pictures" / "scenes" / "scenes.json").read_text(encoding="utf-8"))
+    turns = {sc["id"]: len(sc["turns"]) for sc in scenes_file["scenes"]}
+    out = {}
+    for sid, rows in spec.items():
+        where = f"content/pictures/scenes/scenes.json: {sid}"
+        if sid not in turns:
+            raise SystemExit(f"{where} is no scene of the 会話 bank")
+        if len(rows) != turns[sid]:
+            raise SystemExit(f"{where} has {len(rows)} turns pictured of {turns[sid]}")
+        out[sid] = []
+        for row in rows:
+            if set(row) != {"ask", "answer"}:
+                raise SystemExit(f"{where}: a turn is pictured asked and answered, never one alone")
+            for name in row.values():
+                if not (CONTENT / "pictures" / "scenes" / name).is_file():
+                    raise SystemExit(f"{where}: {name} is not in content/pictures/scenes/")
+            out[sid].append({k: f"content/pictures/scenes/{row[k]}" for k in ("ask", "answer")})
+    return out
+
+
 def lookalikes(deck: dict) -> dict:
     """The lookalike sets (content/lookalikes.json), each kanji with what
-    tells it apart, its meanings, its readings and its first deck word."""
+    tells it apart, its meanings, its readings and a deck word that
+    writes it: the easiest one a learner at the set's level can read."""
     from content.vocab_data import VOCAB_BY_LEVEL
     from translations import fr_gloss
     from translations.fr.vocab_fr import VOCAB_FR
 
-    first_word: dict = {}
+    # Every deck word of up to four characters that writes a kanji (お父さん
+    # is four), the deck's easiest first.
+    words_of: dict = {}
     for lv in LEVELS:
         for e in VOCAB_BY_LEVEL.get(lv, []):
             written = e["kanji"]
-            if len(written) > 3:
+            if len(written) > 4:
                 continue
-            for c in written:
-                if c in DECK_BY_CHAR and c not in first_word and written != c:
-                    kana = (e.get("kana") or "").split("/")[0]
-                    w = {"t": written, "r": kana, "en": _senses(e.get("meaning", ""), 1)}
-                    fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
-                    if fr:
-                        w["fr"] = fr
-                    first_word[c] = w
+            for c in dict.fromkeys(written):
+                if c in DECK_BY_CHAR and written != c:
+                    words_of.setdefault(c, []).append((lv, e))
+
+    def readable(written: str, rank: int) -> bool:
+        """Every kanji of the word is a deck kanji at or below the level."""
+        return all(ch == "々" or not _KANJI_CHAR.match(ch)
+                   or (ch in DECK_BY_CHAR and LEVELS.index(DECK_BY_CHAR[ch][0]) <= rank)
+                   for ch in written)
+
+    def example(c: str, rank: int, used: set, pin) -> dict | None:
+        """A word at or below the set's level written with kanji at or
+        below it; else any word written with kanji at or below it; else
+        none, never 目標 in an N4 set. Within a tier, a word no other kanji
+        of the set shows yet comes first. `pin` is the set's own choice (a
+        word, or None for no word)."""
+        found = words_of.get(c, [])
+        if pin is not False:
+            if pin is None:
+                return None
+            found = [x for x in found if x[1]["kanji"] == pin]
+            if not found:
+                raise SystemExit(f"lookalikes.json: {pin} is no deck word that writes {c}")
+        else:
+            ok = [x for x in found if readable(x[1]["kanji"], rank)]
+            for tier in ([x for x in ok if LEVELS.index(x[0]) <= rank], ok):
+                if tier:
+                    found = [next((x for x in tier if x[1]["kanji"] not in used), tier[0])]
+                    break
+            else:
+                return None
+        e = found[0][1]
+        kana = (e.get("kana") or "").split("/")[0]
+        w = {"t": e["kanji"], "r": kana, "en": _senses(e.get("meaning", ""), 1)}
+        fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
+        if fr:
+            w["fr"] = fr
+        return w
+
     sets = []
     for spec in json.loads((CONTENT / "lookalikes.json").read_text(encoding="utf-8")):
         chars = []
@@ -1000,10 +1311,17 @@ def lookalikes(deck: dict) -> dict:
             # another (校 is “exam” before it is “school”).
             if "m" in ch:
                 card["en"], card["fr"] = ch["m"]["en"], ch["m"]["fr"]
-            if c in first_word:
-                card["word"] = first_word[c]
             chars.append(card)
-        level = min((ch["lv"] for ch in chars), key=lambda lv: LEVELS.index(lv) * -1)
+        level = max((card["lv"] for card in chars), key=LEVELS.index)
+        rank = LEVELS.index(level)
+        used: set = set()
+        for card, ch in zip(chars, spec["chars"]):
+            # "w" pins the word (a deck word that writes the kanji), or
+            # null for none, where the rule's choice reads badly (流石).
+            w = example(card["c"], rank, used, ch.get("w", False))
+            if w:
+                card["word"] = w
+                used.add(w["t"])
         sets.append({"id": spec["id"], "lv": level, "chars": chars})
     return {"rev": REV, "sets": sets}
 
@@ -1031,6 +1349,9 @@ _DIALOGUE_READINGS = [
     (["船便"], [["船便", "w", "funabin", [["船", "ふな"], ["便", "びん"]]]]),
     (["御", "社"], [["御社", "w", "onsha", [["御", "おん"], ["社", "しゃ"]]]]),
     (["担当", "の", "方"], [None, None, ["方", "w", "kata", [["方", "かた"]]]]),
+    # 何とか, "somehow", is one word; before なった the analyser reads かなった as 叶った.
+    (["何", "と", "かなった"], [["何とか", "w", "nantoka", [["何", "なん"], ["とか", ""]]], ["なった", "v", "natta"]]),
+    (["何", "と", "か"], [["何とか", "w", "nantoka", [["何", "なん"], ["とか", ""]]]]),
 ]
 
 
@@ -1065,6 +1386,249 @@ def dialogues() -> dict:
             })
         out.append({"id": d["id"], "lv": d["lv"], "place": d["place"], "them": d["them"], "turns": turns})
     return {"rev": REV, "dialogues": out}
+
+
+def with_scenes(dialogue_file: dict, scenes: dict) -> dict:
+    """The carousel's conversations and the 会話 station's scenes, the
+    ones its reply videos ask (plan 268), as one list a carousel answers:
+    level by level, the hand-written ones first. A scene keeps its turns
+    as the station has them, its id marked as the station's (kaiwa-…,
+    clear of a hand-written id) and `kaiwa` set."""
+    station = [{**sc, "id": f"kaiwa-{sc['id']}", "kaiwa": True} for sc in scenes["scenes"]]
+    both = dialogue_file["dialogues"] + station
+    both.sort(key=lambda d: LEVELS.index(d["lv"]))
+    return {**dialogue_file, "dialogues": both}
+
+
+# ── The other register, and Read it's own sentences (plan 254) ────
+# Read it's bonus is the sentence said the other way: politely where it
+# is plain (頭が痛い → 頭が痛いです), plainly where it is polite. The
+# other way is never written here: it is plain_polite.other_register's,
+# the module Construire judges a typed answer by (plan 241), which reads
+# a sentence's closing ending both ways and refuses everything else (a
+# clause inside, a question, a polite-only verb).
+_CLOSE = "。！？!?"
+
+
+def _kana(row: dict) -> str:
+    return "".join(r or t for t, r in row.get("fu") or [[row["t"], ""]])
+
+
+def version(jp: str, level: str, rows: list[dict]) -> dict | None:
+    """The sentence in its other register: its rows, the register it is
+    in, and the words that changed, written and in kana ([] where only
+    です is added or dropped); None where the ending reads one way only."""
+    from study.morphology import kata_to_hira, tokenize
+    from study.plain_polite import other_register
+
+    body = jp.rstrip(_CLOSE)
+    tokens = tokenize(body)
+    if not tokens:
+        return None
+    reading = "".join(kata_to_hira(t.reading or t.surface) for t in tokens)
+    swapped = other_register(jp, 0, len(body), reading)
+    if not swapped:
+        return None
+    register, forms = swapped
+    other = forms[0][0] + jp[len(body):]
+    them = rows_of(_analyze(other, level)["tokens"])
+    a = [r for r in rows if r["k"] != "punct"]
+    b = [r for r in them if r["k"] != "punct"]
+    if "".join(_kana(r) for r in b) == "".join(_kana(r) for r in a):
+        return None
+    # What changed, the words both share either side of it left out (安いですよ → 安いよ drops です).
+    k = 0
+    while k < min(len(a), len(b)) and a[k]["t"] == b[k]["t"]:
+        k += 1
+    n = 0
+    while n < min(len(a), len(b)) - k and a[-1 - n]["t"] == b[-1 - n]["t"]:
+        n += 1
+
+    def said(part: list[dict]) -> list[str]:
+        return ["".join(r["t"] for r in part), "".join(_kana(r) for r in part)]
+
+    return {"to": "plain" if register == "polite" else "polite", "rows": them,
+            "from": said(a[k:len(a) - n]), "into": said(b[k:len(b) - n])}
+
+
+_PAREN = re.compile(r"\s*\([^)]*\)")
+
+
+def _glosses(sense: str) -> list[str]:
+    """A sense cut at its commas, never inside its brackets."""
+    out, depth, cur = [], 0, ""
+    for ch in sense:
+        depth += ch == "("
+        depth -= ch == ")"
+        if ch == "," and not depth:
+            out.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    return [g for g in out + [cur.strip()] if g]
+
+
+def _card_gloss(senses: list[str], pick: str | None) -> list[str]:
+    """[what the word says here, the rest of that sense]: the deck's own
+    words, never written here. `pick` names the deck's gloss the sentence
+    means (電車, "electric train", is a "train"); else its first."""
+    sense = next((s for s in senses if pick and pick.lower() in s.lower()), senses[0] if senses else "")
+    glosses = _glosses(sense)
+    main = pick or (_PAREN.sub("", glosses[0]).strip() if glosses else "")
+    rest = []
+    for g in glosses:
+        g = _PAREN.sub("", g).strip()
+        if g and main.lower() not in g.lower() and g not in rest:
+            rest.append(g)
+    # One more where the sentence picked its sense: the rest is another sense's.
+    return [main, ", ".join(rest[:1 if pick else 2])]
+
+
+def shorts() -> dict:
+    """Read it's own sentences (content/short.json): a noun, a particle
+    and a verb or adjective, each word an N5 deck word glossed from the
+    deck, the particle's role written beside it, and the sentence said
+    politely."""
+    out = []
+    for x in json.loads((CONTENT / "short.json").read_text(encoding="utf-8")):
+        name = f"short.json: {x['id']}"
+        rows = rows_of(_analyze(x["jp"], "N5")["tokens"])
+        words = [r for r in rows if r["k"] != "punct"]
+        if len(words) != 3 or [r["k"] for r in words] != ["word", "particle", "word"]:
+            raise SystemExit(f"{name} is not a noun, a particle and a verb or adjective: {[r['t'] for r in words]}")
+        picks = x.get("sense") or {}
+        for t in picks:
+            if t not in (words[0]["t"], words[2]["t"]):
+                raise SystemExit(f"{name}: {t} is no word of the sentence")
+        for r in (words[0], words[2]):
+            if r.get("lv") != "N5" or r.get("pool"):
+                raise SystemExit(f"{name}: {r['t']} is no N5 deck word")
+            pick = picks.get(r["t"], {})
+            for lang in ("en", "fr"):
+                if pick.get(lang) and not any(pick[lang].lower() in s.lower() for s in r.get(lang) or []):
+                    raise SystemExit(f"{name}: “{pick[lang]}” is not among {r['t']}'s glosses: {r.get(lang)}")
+                r[f"g{lang}"] = _card_gloss(r.get(lang) or [], pick.get(lang))
+        for lang in ("en", "fr"):
+            words[1][f"g{lang}"] = x["role"][lang]
+        polite = version(x["jp"], "N5", rows)
+        if not polite or polite["to"] != "polite":
+            raise SystemExit(f"{name}: no polite version of a plain sentence")
+        polite["when"] = x["when"]
+        entry = {"id": x["id"], "lv": "N5", "jp": x["jp"], "e": x["e"], "en": x["en"], "fr": x["fr"], "rows": rows, "v": polite}
+        if x.get("lit"):
+            entry["lit"] = x["lit"]
+        out.append(entry)
+    if len({e["id"] for e in out}) != len(out):
+        raise SystemExit("short.json: an id twice")
+    return {"rev": REV, "sentences": out}
+
+
+# ── The station's own conversations (plan 250) ────────────────────
+# The reply videos ask the 会話 station's scenes (content/conversation),
+# six turns each: each line cut into words as the studio's conversations
+# are, its readings held to the hand-written kana the app teaches.
+CONVERSATION = BACKEND / "content" / "conversation"
+_MARKS = set("、。？！…・「」『』（）")
+
+
+def _said(rows: list[list]) -> str:
+    """What a line's rows read: each word's furigana, or its text."""
+    out = []
+    for row in rows:
+        if len(row) > 3 and row[3]:
+            out.append("".join(r or t for t, r in row[3]))
+        else:
+            out.append(row[0])
+    return "".join(c for c in "".join(out) if c not in _MARKS)
+
+
+def _by_kana(rows: list[list], line: dict) -> list[list]:
+    """The rows read as the bank reads the line: each word's furigana
+    taken from the line's own kana (align_deck, the app's furigana), never
+    the cut's guess (何時 is なんじ, 十分 じゅっぷん, 入れます はいれます here).
+    Words a reading runs across are joined into one; a word's romaji is
+    made again from its reading only where that reading changed."""
+    from study.furigana import align_deck
+
+    jp = line["jp"]
+    parts = align_deck(jp, line["kana"])
+    if "".join(p["text"] for p in parts) != jp or "".join(r[0] for r in rows) != jp:
+        return rows
+    spans, at = [], 0
+    for p in parts:
+        spans.append((at, at + len(p["text"]), p["text"], p.get("reading")))
+        at += len(p["text"])
+    bounds, at = [], 0
+    for r in rows:
+        bounds.append((at, at + len(r[0])))
+        at += len(r[0])
+    groups: list[list[int]] = []
+    for i, (start, _) in enumerate(bounds):
+        crossed = any(a < start < b and reading for a, b, _, reading in spans)
+        if groups and crossed:
+            groups[-1].append(i)
+        else:
+            groups.append([i])
+    out = []
+    for g in groups:
+        first = rows[g[0]]
+        if len(g) == 1 and len(first) == 1:
+            out.append(first)
+            continue
+        start, end = bounds[g[0]][0], bounds[g[-1]][1]
+        fu = []
+        for a, b, text, reading in spans:
+            lo, hi = max(a, start), min(b, end)
+            if lo < hi:
+                fu.append([text, reading] if reading else [jp[lo:hi], ""])
+        said = "".join(r or t for t, r in fu)
+        was = "".join(_said([rows[i]]) for i in g)
+        after = "".join(r or t for a, _, t, r in spans if a >= end)
+        ro = first[2] if len(g) == 1 and said == was else _row_romaji(said, after)
+        row = [jp[start:end], first[1], ro, fu if any(r for _, r in fu) else 0]
+        while row[-1] == 0:
+            row.pop()
+        out.append(row)
+    return out
+
+
+def conversation_rows(line: dict, level: str, where: str, misread: list[str]) -> list[list]:
+    """A line's rows; where they still read it otherwise than its kana, the
+    line is reported, never shipped with a reading the app does not teach."""
+    rows = _by_kana(_reread(_honorific(text_rows(line["jp"], level))), line)
+    kana = "".join(c for c in line["kana"] if c not in _MARKS)
+    if _said(rows) != kana:
+        misread.append(f"{where}: {line['jp']} reads {_said(rows)}, the bank says {kana}")
+    return rows
+
+
+def conversation() -> dict:
+    """The station's scenes as a reply video asks them: the place (its
+    title as the name it goes by), who speaks, and each turn's line, the
+    three replies (the right one first, the video deals them), what the
+    right one means and why it is right."""
+    out = []
+    misread: list[str] = []
+    for level in LEVELS:
+        for sc in json.loads((CONVERSATION / f"{level}.json").read_text(encoding="utf-8")):
+            turns = []
+            for n, t in enumerate(sc["turns"], 1):
+                where = f"{sc['id']} turn {n}"
+                turns.append({
+                    "them": {"rows": conversation_rows(t["them"], level, f"{where} them", misread), "en": t["them"]["en"], "fr": t["them"]["fr"]},
+                    "choices": [conversation_rows(r, level, f"{where} reply {k}", misread) for k, r in enumerate([t["me"], *t["wrong"]])],
+                    "right": 0,
+                    "reply": {"en": t["me"]["en"], "fr": t["me"]["fr"]},
+                    "why": {"en": t["me"]["note"]["en"], "fr": t["me"]["note"]["fr"]},
+                })
+            out.append({
+                "id": sc["id"], "lv": level,
+                "place": {"jp": sc["place"]["jp"], "en": sc["title"]["en"], "fr": sc["title"]["fr"]},
+                "them": sc["them"], "turns": turns,
+            })
+    if misread:
+        raise SystemExit("the cut reads these lines otherwise than the bank:\n  " + "\n  ".join(misread))
+    return {"rev": REV, "scenes": out}
 
 
 def traps() -> dict:
@@ -1132,6 +1696,431 @@ def _exam_n5() -> dict:
             "pass": PASS_THRESHOLDS["N5"]["total_min"], "max": PASS_THRESHOLDS["N5"]["total_max"]}
 
 
+# ── 宣伝 — the practice features' videos (plan 270) ─────────────────
+# Each feature's video is the app itself, run in a browser with its API
+# answered from here (frontend/carousel/long/record.mjs). The answers are
+# the backend's own, made by the functions its routes call, for the
+# banks' own content: what the screen shows is what the app would say.
+# A model's answer (a tutor's review) is the one part written by hand,
+# in the shape the tutor returns (frontend/carousel/content/promo.json).
+PROMO_AT = "2026-10-01T09:00:00+00:00"
+
+
+def _promo_analysis(text: str) -> dict:
+    """POST /api/phrase/analyze, save=false, deep=false, for one sentence:
+    the local tier, with no learner state (routes/phrase._analyze_passage)."""
+    from study.analysis import attach_user_state
+
+    only = attach_user_state(analyze_local(text), {}, "promo")
+    return {
+        "passage": text, "sentences": [only], "truncated": 0,
+        "explanation": only.get("explanation", ""), "translation": only.get("translation", ""),
+        "words": only["tokens"], "tokens": only["tokens"], "grammar": only["grammar"],
+        "level": only["level"], "grade": only.get("grade"), "available": only["available"],
+        "unknown_count": only.get("unknown_count"), "off_deck_count": only.get("off_deck_count"),
+        "id": None, "created_at": None,
+    }
+
+
+def _promo_fare(quality: int) -> dict:
+    """A practice answer's fare (SRSEngine.award_practice): the base rate
+    of its quality, no bonus."""
+    from srs.xp import BASE_XP_BY_QUALITY
+
+    return {"xp_earned": BASE_XP_BY_QUALITY.get(quality, 0), "leveled_up": False, "new_level": None, "correct": quality >= 3}
+
+
+def _promo_boot(level: str) -> dict:
+    """What the shell asks for before any screen: a learner who boarded,
+    rode the first ride and saw every gate's guide (else the boarding or
+    a guide would stand over the screen), on the free plan's credits."""
+    from datetime import datetime
+
+    from core import credits
+
+    clock = datetime.fromisoformat(PROMO_AT)
+    seen = "2026-09-01T09:06:00+00:00"
+    return {
+        "GET /api/profile": {
+            "username": "Tsuji", "cardName": None, "level": 4, "xp": 420, "xpPrevLevel": 300, "xpForNext": 600,
+            "jlptLevel": level, "dailyNewTarget": 10, "onboardedAt": "2026-09-01T09:00:00+00:00",
+            "ratingScale": "simple", "readingPace": "standard", "motive": None, "kanaKnown": None,
+            "reminderTime": None, "notifications": False, "lines": None, "tutorialAt": "2026-09-01T09:05:00+00:00",
+            "guided": {k: seen for k in ("learn", "practice", "today", "dictionary", "profile")},
+            "transferOffer": False, "analyticsOff": True, "boardHidden": False, "streak": 3, "streakLongest": 5,
+            "totalReviews": 120, "bestQualityStreak": 8, "retention": 0.88, "week": [], "calendar": [], "tickets": [],
+            "restHeld": 0, "nextMilestone": 7,
+        },
+        "GET /api/credits": credits._summary_of({"unlimited": False, "balance": 42, "pending": 0, "clock": clock, "plan": "free"}),
+        "GET /api/today": {"total": 0},
+    }
+
+
+def _promo_ask(spec: dict, lang: str) -> dict:
+    """POST /api/ask, for the one question a feature's video asks (plan
+    273): answered as routes/ask.post_ask answers, its words written by
+    hand in content/promo.json (`ask`), as its model is told to write
+    them. A feature that asks nothing has no mock."""
+    ask = spec.get("ask")
+    return {"POST /api/ask": {"answer": ask[lang], "off_topic": False, "left": 39}} if ask else {}
+
+
+def _promo_dictionary(spec: dict, lang: str, level: str) -> dict:
+    """GET /api/dictionary for the entries a video opens (plan 274): the
+    word and the grammar point, each as routes/dictionary.get_dictionary
+    answers a learner who has studied neither, keyed by the category the
+    client asks for (record.mjs matches a key's query parameters)."""
+    want = spec.get("dictionary")
+    if not want:
+        return {}
+    import sys
+    import types
+    from unittest import mock
+
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+
+    # The route reads a learner's card states; a learner who has none, so
+    # no database is opened for them.
+    nobody = types.SimpleNamespace(get_user_states=lambda _u: {}, get_states_for=lambda _ids, _modes: {})
+    with mock.patch.dict(sys.modules, {"core.srs_instance": sys.modules.get("core.srs_instance") or types.SimpleNamespace(srs=nobody)}):
+        import routes.dictionary as dictionary
+    entry = next((e for e in GRAMMAR_POINTS_BY_LEVEL[level] if e["pattern"] == want["point"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {want['point']} is no {level} point")
+    raw_id = grammar_to_id(entry, level)
+    term, kana = want["word"]
+    common = {"page": 0, "limit": 50, "lang": lang, "radical": None, "level": None, "match": "word", "field": "all", "user_id": "promo"}
+    with mock.patch.object(dictionary, "srs", nobody):
+        word = dictionary.get_dictionary(q=term, category="vocab", kana=kana, id="", one=True, **common)
+        point = dictionary.get_dictionary(q="", category="grammar", kana="", id=raw_id, one=False, **common)
+    if not word["results"] or (word["results"][0]["kanji"], word["results"][0]["kana"]) != (term, kana):
+        raise SystemExit(f"content/promo.json: {term} ({kana}) is no dictionary word")
+    if not point["results"] or point["results"][0].get("id", point["results"][0].get("raw_id")) != raw_id:
+        raise SystemExit(f"content/promo.json: {want['point']} did not come first in the grammar dictionary")
+    return {"GET /api/dictionary?category=vocab": word, "GET /api/dictionary?category=grammar": point}
+
+
+def _promo_spec() -> dict:
+    """frontend/carousel/content/promo.json: each feature's sentence, the
+    answer typed and the tutor's raw replies (plan 270)."""
+    return json.loads((CONTENT / "promo.json").read_text(encoding="utf-8"))
+
+
+def _reading_constants(*names: str) -> dict:
+    """Constants of routes/reading.py, read from its source (the route
+    opens the database on import)."""
+    import ast
+
+    tree = ast.parse((BACKEND / "routes" / "reading.py").read_text(encoding="utf-8"))
+    v = {n.targets[0].id: ast.literal_eval(n.value) for n in tree.body
+         if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name) and n.targets[0].id in names}
+    if set(v) != set(names):
+        raise SystemExit(f"routes/reading.py: {', '.join(sorted(set(names) - set(v)))} moved")
+    return v
+
+
+def _reading_clock():
+    """routes/reading._display_seconds, from its four numbers."""
+    v = _reading_constants("BASE_SECONDS", "SECONDS_PER_CHAR", "MIN_DISPLAY_SECONDS", "MAX_DISPLAY_SECONDS")
+    return lambda jp: max(v["MIN_DISPLAY_SECONDS"], min(v["MAX_DISPLAY_SECONDS"], round(v["BASE_SECONDS"] + v["SECONDS_PER_CHAR"] * len(jp), 1)))
+
+
+def _promo_phrase(jp: str, level: str, lang: str) -> dict:
+    """A reading-bank row as the reading and translation batches serve it
+    (routes/reading._finish_phrase, a curated row's arguments)."""
+    from content import reading_sentences as rs
+    from content.grammar_points_data import id_for
+    from study.furigana import align_sentence
+    from study.romaji import sentence_romaji, sentence_words
+
+    row = next((r for r in rs.BY_LEVEL[level] if r["jp"] == jp), None)
+    if row is None:
+        raise SystemExit(f"content/promo.json: {jp} is no {level} row of the reading bank")
+    text, text_lang = rs.translation(row, lang)
+    return {
+        "phrase": jp, "romaji": sentence_romaji(jp), "furigana": align_sentence(jp), "words": sentence_words(jp),
+        "translation": text, "translation_lang": text_lang, "display_seconds": _reading_clock()(jp),
+        "key": rs.phrase_key(jp), "source_word": {"kanji": row["focus"], "kana": "", "level": level},
+        "grammar": row["grammar"], "grammar_id": id_for(row["grammar"]),
+    }
+
+
+def _promo_review(reply: dict, answer: str) -> dict:
+    """The tutor's raw reply as the route serves it (study/tutor_review):
+    parsed, its corrected sentence in parts with its romaji, as text."""
+    from study import tutor_review
+
+    review = tutor_review.parse_review(json.dumps(reply, ensure_ascii=False))
+    if review is None:
+        raise SystemExit("content/promo.json: a reply is not the tutor's shape")
+    review.pop("japanese", None)
+    if review["better"]:
+        review.update(tutor_review.corrected(review["better"], answer))
+    return {"review": review, "analysis": tutor_review.review_as_text(review)}
+
+
+def _promo_dictation(spec: dict, lang: str) -> dict:
+    """書取: a line of the bank heard twice, written with a slip, and
+    marked as /api/dictation/check marks it."""
+    from content.listening_clips import all_clips
+    from study import dictation
+
+    row = next((r for r in all_clips() if r["jp"] == spec["line"]), None)
+    if row is None:
+        raise SystemExit(f"content/promo.json: {spec['line']} is no line of the dictation bank")
+    cid = dictation.clip_id(row["jp"])
+    answer = spec["answer"]
+    return {
+        "level": row["level"], "line": row["jp"], "answer": answer,
+        "mocks": {
+            "GET /api/dictation/batch": {"level": row["level"], "max_plays": dictation.MAX_PLAYS, "clips": [{"id": cid, "level": row["level"], "audioSrc": dictation.clip_url(row["jp"])}]},
+            "POST /api/dictation/check": {"id": cid, "level": row["level"], **dictation.reveal(row, lang), **dictation.measure(answer, row)},
+            "POST /api/phrase/analyze": _promo_analysis(row["jp"]),
+            "POST /api/dictation/result": _promo_fare(3),
+        },
+    }
+
+
+def _promo_reading(spec: dict, lang: str) -> dict:
+    """読書: a sentence of the reading bank, read against the clock, its
+    reading typed, measured as /api/reading/check measures it."""
+    from study.dictation import measure_forms
+
+    phrase = _promo_phrase(spec["phrase"], spec["level"], lang)
+    return {
+        "level": spec["level"], "line": phrase["phrase"], "answer": spec["answer"],
+        "mocks": {
+            "GET /api/reading/batch": {"source": "level", "level": spec["level"], "domain": None, "tier": None, "phrases": [phrase]},
+            "POST /api/reading/check": measure_forms(spec["answer"], jp=phrase["phrase"], romaji=phrase["romaji"]),
+            "POST /api/phrase/analyze": _promo_analysis(phrase["phrase"]),
+            "POST /api/reading/result": _promo_fare(4),
+        },
+    }
+
+
+def _promo_translation(spec: dict, lang: str) -> dict:
+    """翻訳: a reading-bank sentence to put into Japanese, the learner's
+    attempt with a slip, and the tutor's read on it."""
+    phrase = _promo_phrase(spec["phrase"], spec["level"], lang)
+    return {
+        "level": spec["level"], "line": phrase["phrase"], "answer": spec["answer"],
+        "mocks": {
+            "GET /api/translation/batch": {"source": "level", "level": spec["level"], "domain": None, "tier": None, "phrases": [phrase]},
+            "POST /api/translation/analyze": _promo_review(spec["reply"][lang], spec["answer"]),
+            "POST /api/phrase/analyze": _promo_analysis(phrase["phrase"]),
+            "POST /api/translation/result": {**_promo_fare(3), "scheduled": None},
+        },
+    }
+
+
+def _promo_composition(spec: dict, lang: str) -> dict:
+    """作文: a point of the level, a sentence written with it, the
+    detector's word and the tutor's (routes/composition)."""
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_to_id
+    from study import grammar_detect
+    from study.grammar_examples import structure_text
+
+    level = spec["level"]
+    entry = next((e for e in GRAMMAR_POINTS_BY_LEVEL[level] if e["pattern"] == spec["point"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {spec['point']} is no {level} point")
+    raw_id = grammar_to_id(entry, level)
+    sentence = spec["answer"]
+    found = any((h["pattern"], h["level"]) == (entry["pattern"], level) for h in grammar_detect.hits(sentence)) if grammar_detect.can_find(entry["pattern"]) else None
+    review = _promo_review(spec["reply"][lang], sentence)
+    # The lesson behind the point, as routes/grammar.get_grammar_point
+    # serves it (plan 273), at the stage the batch below serves the point.
+    from study.card_lookup import GRAMMAR_STATUS_MODES, card_stats
+    from study.grammar_lesson import lesson_payload
+    from study.grammar_tour import tour_payload
+
+    lesson = {
+        "raw_id": raw_id, "level": level, "pattern": entry["pattern"], "structure": structure_text(entry, lang), "meaning": gloss(entry, lang),
+        # The tour without its quiz, which the sheet never opens and which
+        # tour_payload deals differently from one process to the next.
+        **lesson_payload(level, entry, lang), "tour": {**tour_payload(level, entry, lang), "quiz": []}, "tour_record": None,
+        "status": {**card_stats({}, "promo", raw_id, GRAMMAR_STATUS_MODES), "status": "learning"},
+    }
+    return {
+        "level": level, "line": sentence, "answer": sentence, "point": entry["pattern"],
+        "mocks": {
+            "GET /api/grammar/point": lesson,
+            "GET /api/composition/batch": {"level": level, "points": [{"raw_id": raw_id, "level": level, "pattern": entry["pattern"], "structure": structure_text(entry, lang), "meaning": gloss(entry, lang), "register": entry.get("register"), "stage": "learning"}]},
+            "POST /api/composition/check": {"found": found, "japanese": None},
+            "POST /api/composition/review": {**review, "japanese": None, "found": found},
+            "POST /api/phrase/analyze": _promo_analysis(sentence),
+            "POST /api/composition/result": _promo_fare(3),
+        },
+    }
+
+
+def _promo_comprehension(spec: dict, lang: str) -> dict:
+    """理解: a seed passage served as GET /api/reading/comprehension
+    serves it (comprehension_seed.render, its answers dealt by
+    balance_answers, each sentence analysed), and the result of the
+    answers the video gives: every one right but the `wrong` one."""
+    import random
+
+    from content import comprehension_seed
+    from study.analysis import analyze_with_glosses, attach_user_state
+    from study.answer_balance import balance_answers
+
+    level = spec["level"]
+    entry = next((e for e in comprehension_seed.by_level().get(level, []) if e["id"] == spec["seed"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {spec['seed']} is no {level} comprehension seed")
+    data = comprehension_seed.render(entry, lang)
+    # Dealt once, from the seed's id: the video answers the order it was served.
+    balance_answers(data["questions"], random.Random(spec["seed"]))
+    for part in data["breakdown"]:
+        part["analysis"] = attach_user_state(analyze_with_glosses(part["jp"], part.pop("words", None), level), {}, "promo")
+    v = _reading_constants("COMPREHENSION_SPECS", "READ_SECONDS_BY_LEVEL")
+    qs = data["questions"]
+    answers = [q["correct"] if i != spec["wrong"] else (q["correct"] + 1) % len(q["options"]) for i, q in enumerate(qs)]
+    right = [a == q["correct"] for q, a in zip(qs, answers)]
+    from srs.xp import BASE_XP_BY_QUALITY
+
+    # The sentence the missed question is about, its breakdown opened (plan 273).
+    sentence = spec.get("sentence", 0)
+    if not 0 <= sentence < len(data["breakdown"]):
+        raise SystemExit(f"content/promo.json: comprehension's sentence {sentence} is not one of the text's")
+    return {
+        "level": level, "line": data["text"], "answers": answers, "wrong": spec["wrong"], "sentence": sentence,
+        # The word (by its reading) and the point the video opens in the dictionary (plan 274).
+        "word": spec["dictionary"]["word"][1], "point": spec["dictionary"]["point"],
+        "mocks": {
+            **_promo_dictionary(spec, lang, level),
+            "GET /api/reading/comprehension": {
+                "level": level, "text": data["text"], "translation": data["translation"], "breakdown": data["breakdown"],
+                "questions": qs, "grammar_points": data["grammar_points"], "read_seconds": v["READ_SECONDS_BY_LEVEL"][level],
+                "question_count": v["COMPREHENSION_SPECS"][level]["questions"], "repeat": False,
+            },
+            "POST /api/reading/comprehension/result": {
+                "xp_earned": sum(BASE_XP_BY_QUALITY.get(4 if ok else 1, 0) for ok in right), "leveled_up": False, "new_level": None,
+                "id": 1, "score": sum(right), "total": len(qs), "created_at": PROMO_AT,
+                "results": [{"type": q.get("type", "comprehension"), "question": q["question"], "options": q["options"], "correct": q["correct"], "user_answer": a, "is_correct": ok}
+                            for q, a, ok in zip(qs, answers, right)],
+            },
+        },
+    }
+
+
+def _promo_exam(spec: dict, lang: str) -> dict:
+    """模試: the catalogue as list_exams lists it for a learner who has sat
+    nothing (each exam id's first seed paper, at revision 1), the paper
+    opened, and the attempt scored by study/exam_scoring as the route
+    scores it: every answer right but the `wrong` ones."""
+    from study import exam_seed
+    from study.exam_blueprint import name_mondai
+    from study.exam_catalogue import EXAM_GENERATORS, KIND_META
+    from study.exam_scoring import flatten_questions, score_attempt
+    from srs.xp import BASE_XP_BY_QUALITY
+
+    def first(exam_id):
+        seeds = exam_seed.load(exam_id)
+        if not seeds or not seeds.get("papers"):
+            raise SystemExit(f"content/exam_seed/{exam_id}.json: no paper")
+        return seeds["papers"][0]["paper"]
+
+    catalogue = []
+    for exam_id, (_v, kind, level, _gen) in EXAM_GENERATORS.items():
+        paper = name_mondai(first(exam_id))
+        counts, names = {}, {}
+        for q in flatten_questions(paper):
+            counts[q["mondaiId"]] = counts.get(q["mondaiId"], 0) + 1
+        for section in paper.get("sections") or []:
+            for m in section.get("mondai") or []:
+                names.setdefault(m.get("id"), m.get("nameJp"))
+        catalogue.append({
+            "id": exam_id, "kind": kind, "level": paper["level"], "title": paper["title"], "titleJp": paper["titleJp"],
+            "questionCount": sum(counts.values()), "generated": True, "revision": 1,
+            "minutes": int(paper["sections"][0]["timeLimitMin"]),
+            "mondai": [names[m] for m in counts], "parts": [{"nameJp": names.get(m), "count": n} for m, n in counts.items()],
+            "last": None,
+        })
+    exam_id = spec["exam"]
+    paper = name_mondai(first(exam_id))
+    qs = flatten_questions(paper)
+    wrong = set(spec["wrong"])
+    answers = {}
+    for i, q in enumerate(qs):
+        ids = [c["id"] for c in q["choices"]]
+        answers[q["id"]] = q["answer"] if i not in wrong else ids[(ids.index(q["answer"]) + 1) % len(ids)]
+    summary = score_attempt(paper, answers)
+    xp = BASE_XP_BY_QUALITY.get(4, 0) * summary["correct"] + BASE_XP_BY_QUALITY.get(1, 0) * (summary["total"] - summary["correct"])
+    started = 1790845200000  # 2026-10-01 09:00 UTC
+    attempt = {
+        "xp_earned": xp, "leveled_up": False, "new_level": None, "attemptId": 1, "examId": exam_id, "revision": 1,
+        "startedAt": started, "finishedAt": started + spec["minutes_taken"] * 60000, **summary,
+    }
+    return {
+        "level": paper["level"], "line": paper["titleJp"], "exam": exam_id,
+        "answers": [{"id": q["id"], "slot": [c["id"] for c in q["choices"]].index(answers[q["id"]])} for q in qs],
+        "wrong": sorted(wrong),
+        "mocks": {
+            "GET /api/exams": catalogue,
+            f"GET /api/exams/{exam_id}": {**paper, "revision": 1},
+            f"POST /api/exams/{exam_id}/attempts": attempt,
+            f"GET /api/exams/{exam_id}/attempts/1": {
+                **{k: attempt[k] for k in ("attemptId", "examId", "revision", "review", "perSection", "correct", "total", "startedAt", "finishedAt")},
+                "sectionId": paper["sections"][0]["id"], "answers": answers,
+            },
+        },
+    }
+
+
+def _promo_conversation(spec: dict, lang: str) -> dict:
+    """会話: the station's scenarios (a learner who has ridden none) and
+    one scene, ridden in Choose, its choices dealt once from its id as
+    the route deals them per request, every pick the right one."""
+    import random
+
+    from study import conversation
+
+    bank = conversation.bank_lang(lang)
+    payload = conversation.scenario_payload(spec["scenario"], bank)
+    if payload is None:
+        raise SystemExit(f"content/promo.json: {spec['scenario']} is no scenario of the 会話 bank")
+    rng = random.Random(spec["scenario"])
+    turns = []
+    for turn in payload["turns"]:
+        choices = list(turn["choices"])
+        rng.shuffle(choices)
+        turns.append({**turn, "choices": choices})
+    return {
+        "level": payload["level"], "line": turns[0]["them"]["jp"], "scenario": spec["scenario"],
+        "picks": [next(i for i, c in enumerate(t["choices"]) if c.get("right")) for t in turns],
+        # A wrong reply a turn, for the one the video picks to show why (plan 273).
+        "slips": [next(i for i, c in enumerate(t["choices"]) if not c.get("right")) for t in turns],
+        "said": [{"them": t["them"]["jp"], "me": t["me"]["jp"]} for t in turns],
+        "mocks": {
+            "GET /api/conversation/scenarios": {"scenarios": conversation.catalogue(bank), "record": {}},
+            f"GET /api/conversation/scenario/{spec['scenario']}": {**payload, "turns": turns},
+            "POST /api/conversation/result": {"correct": True, "quality": 4, **{k: v for k, v in _promo_fare(4).items() if k != "correct"}},
+        },
+    }
+
+
+PROMO_FEATURES = {"reading": _promo_reading, "comprehension": _promo_comprehension, "translation": _promo_translation, "dictation": _promo_dictation, "composition": _promo_composition, "exam": _promo_exam, "conversation": _promo_conversation}
+
+
+def promo() -> dict:
+    """bank/promo.json: per practice feature and language, what the app's
+    API answers in its video, the shell's boot included."""
+    spec = _promo_spec()
+    out = {}
+    for name, make in PROMO_FEATURES.items():
+        out[name] = {}
+        for lang in ("en", "fr"):
+            f = make(spec[name], lang)
+            f["mocks"] = {**_promo_boot(f["level"]), **_promo_ask(spec[name], lang), **f["mocks"]}
+            # A question the video types rather than taps (plan 273).
+            if spec[name].get("asked"):
+                f["asked"] = spec[name]["asked"][lang]
+            out[name][lang] = f
+    return {"rev": REV, "features": out}
+
+
 def _count(data: dict) -> str:
     return ", ".join(f"{len(v)} {k}" for k, v in data.items() if isinstance(v, (list, dict)))
 
@@ -1139,8 +2128,14 @@ def _count(data: dict) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--check", action="store_true", help="exit 1 when a file is stale")
+    parser.add_argument("--only", help="write this file alone (promo.json: no tokenizer pass over the banks)")
     args = parser.parse_args()
 
+    if args.only == "promo.json":
+        text = dump(promo())
+        (OUT / "promo.json").write_text(text, encoding="utf-8")
+        print(f"wrote frontend/carousel/bank/promo.json: {len(text.encode()) // 1024} KB")
+        return 0
     deck = _deck_words()
     stale = []
     for filename, data in files(deck):

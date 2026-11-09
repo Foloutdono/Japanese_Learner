@@ -57,10 +57,12 @@ MODEL_IDS = {
 # the allowed-kanji list (N5 103 chars ... N1 2,212) is worth caching.
 FEATURES = {
     "reading_comprehension": (
-        34, 2700, 3000,
+        34, 2800, 3400,
         "26 exercises/mo x 1.3 attempts (_COMPREHENSION_ATTEMPTS=3, most "
-        "pass first). In: 6.5k-char template + kanji list + seeds. Out: a "
-        "250-char passage, 10 questions, a per-sentence breakdown. This row "
+        "pass first). In: 7k-char template + kanji list + seeds. Out: a "
+        "250-char passage, 10 questions each with its sentence and a line "
+        "on why (plan 301b, ~40 tokens a question), a per-sentence "
+        "breakdown. This row "
         "is now the COLD-POOL worst case -- one learner alone in their "
         "(level, lang) bucket. Since plan 092 the answer is pooled and "
         "shared, so divide these calls by the learners sharing a bucket: "
@@ -117,12 +119,16 @@ FEATURES = {
         "ASK_DAILY_LIMIT caps it at 40/day, which bounds the abuse row.",
     ),
     "phrase_analysis": (
-        50, 400, 500,
+        50, 650, 580,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "
         "practice draws on ~220 fixed sentences). Only the misses bill. "
         "DEEP_DAILY_LIMIT caps the misses at 150/day (plan 211) -- the "
         "analyzer, the runs' explain and a video line alike -- which bounds "
-        "the abuse row.",
+        "the abuse row. Since plan 311 the construction is a frame, a part "
+        "a line with its role: a longer system block (~650 tokens, stable) "
+        "and a little more out than the paragraph it replaced; a reply "
+        "whose frame is not the line's is the next model's turn, rare "
+        "enough to leave out of the count.",
     ),
     "line_translation": (
         30, 900, 700,

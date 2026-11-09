@@ -78,6 +78,12 @@ def _cost(kana: str, level: str) -> int | None:
         return None
     return 13000 if n == 4 else 12000
 
+# Words of a child's day that a picture book writes in kana and the deck
+# has no card for (the pool's), entered as a first-year word is: MeCab
+# cut ほいくえん into ほいく + え + んで, みずたまり into み + ず + たまり
+# (見る's negative), おえかき into two interjections and a fence (plan 272).
+_PAGE_WORDS = (("保育園", "ほいくえん"), ("水たまり", "みずたまり"), ("お絵かき", "おえかき"))
+
 # A word written from a numeral is its numeral and its counter to the
 # tokenizer, in kana as in kanji (いち + ど), and its spelling is too often
 # something else: いつか is "someday" far more often than 五日, ようか the
@@ -133,7 +139,20 @@ def _spoken_counts() -> dict[str, int]:
     return out
 
 
-def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool = False) -> bool:
+def _said(kanji: str, parts: list, spoken: dict) -> int:
+    """How often the subtitles say a word: its own line's count, or, for
+    a word their segmenter cut into shorter ones (歯医者 is 歯 + 医者 there,
+    as in UniDic; 何時 何 + 時), the count of its rarest part, which it
+    is said at most as often as. Read as 0, such a word had lost to any
+    rival said thirty times: はいしゃ to 敗者 "loser" (55), so a page's
+    はいしゃ was cut は + いしゃ, the topic and "doctor"."""
+    if kanji in spoken or len(parts) < 2:
+        return spoken.get(kanji, 0)
+    return min(spoken.get(p.surface, 0) for p in parts)
+
+
+def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool = False,
+               said: int | None = None) -> bool:
     """Whether the page may well mean another word by `kana` (a missing
     meaning beats a guessed one): a deck card or a JMdict word read so,
     with a gloss that shares nothing with this one's, said at least a
@@ -142,7 +161,8 @@ def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool
     more than 地震, ふくしゅう 復讐 "revenge" more than 復習 "review"; but
     こうえん is 公園, whatever 講演 and 後援, and しょうひん 商品, whatever
     賞品. The same word in another spelling (受け付け beside 受付) shares
-    a gloss word and is no rival.
+    a gloss word and is no rival. `said` is this word's count where its
+    line alone does not give it (_said).
 
     `strict`, for a word past a first-year text's (N2, N1): any rival at
     all. The subtitles' count is a film's -- せんとう is 戦闘 "battle" there
@@ -152,7 +172,8 @@ def _homophone(kana: str, entry: dict, spelled: dict, spoken: dict, strict: bool
 
     kanji = entry.get("kanji") or ""
     mine = _gloss_words(entry.get("meaning") or "")
-    floor = 0 if strict else max(_SPOKEN, spoken.get(kanji, 0) / 3)
+    own = spoken.get(kanji, 0) if said is None else said
+    floor = 0 if strict else max(_SPOKEN, own / 3)
     rivals = [(other.get("kanji") or "", other.get("meaning") or "") for other in spelled.get(kana, ())]
     rivals += [(row.get("kanji") or "", row.get("meaning") or "") for row in jmdict.by_kana(kana, limit=12)]
     return any(written and written != kanji and spoken.get(written, 0) >= floor
@@ -190,6 +211,22 @@ def _conjugated(parts) -> bool:
                     and (p.feature.orthBase or p.surface) in _ENDINGS for p in parts[1:]))
 
 
+_UNVOICE = str.maketrans("ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ", "カキクケコサシスセソタチツテトハヒフヘホハヒフヘホ")
+
+
+def _voiced_otherwise(kana: str, node) -> bool:
+    """Whether MeCab's one word for the letters is a noun said otherwise
+    than its own reading by a letter's voicing alone (plan 306): ぶちょう
+    is 不調 there, whose reading is ふちょう; じたく 支度 (したく), ごうり
+    行李 (こうり). A spelling that names its word outright is never that
+    word misheard: such a word is entered like one MeCab reads nothing
+    for. A word said shorter or longer is itself (ほんと, にほん)."""
+    f = node.feature
+    said, own = _katakana(kana), f.lForm or ""
+    return (f.pos1 == "名詞" and f.cType in (None, "*") and len(own) == len(said) and own != said
+            and own.translate(_UNVOICE) == said.translate(_UNVOICE))
+
+
 def rows(tagger) -> list[list[str]]:
     """The user dictionary's entries, as MeCab's CSV rows (surface, left
     and right context ids left for the compiler to fill in, cost, then
@@ -217,14 +254,15 @@ def rows(tagger) -> list[list[str]]:
                 cost = _cost(kana, level)
                 if cost is None or not _hiragana(kana) or len(kana) < _MIN_KANA or kana in _NOT_ENTERED:
                     continue
-                if _homophone(kana, entry, spelled, spoken, strict=level in ("N2", "N1")):
-                    continue
                 parts = list(tagger(kanji))
+                if _homophone(kana, entry, spelled, spoken, strict=level in ("N2", "N1"),
+                              said=_said(kanji, parts, spoken)):
+                    continue
                 if not parts or any(p.feature.cType not in (None, "*") or p.feature.pos1 not in _ENTERED_POS
                                     for p in parts):
                     continue
                 alone = list(tagger(kana))
-                if len(alone) == 1 and not alone[0].is_unk:
+                if len(alone) == 1 and not alone[0].is_unk and not _voiced_otherwise(kana, alone[0]):
                     # MeCab reads it as a word already (ないしょ, ひらがな,
                     # うるさい), and may read it as that word on the page.
                     continue
@@ -235,6 +273,12 @@ def rows(tagger) -> list[list[str]]:
                 # level, then the deck's order.
                 if held is None or rank < held[0]:
                     chosen[kana] = (rank, kanji, parts, cost)
+    for kanji, kana in _PAGE_WORDS:
+        # (the few a picture book writes in kana that the deck has no
+        # card for: ほいくえんで was ほいく + え + んで, plan 272)
+        parts = list(tagger(kanji))
+        if kana not in chosen and parts and all(p.feature.cType in (None, "*") for p in parts):
+            chosen[kana] = (_LEVEL_RANK["N4"], kanji, parts, _cost(kana, "N4"))
     out = []
     for kana, (_, kanji, parts, cost) in sorted(chosen.items()):
         out.append(_row(kana, kanji, parts, cost))

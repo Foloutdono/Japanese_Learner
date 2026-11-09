@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { supabase } from '../../lib/supabase'
 import { Sheet } from '../chrome/Sheet'
+import { CardIcon } from '../ui/Icons'
 import { DictionaryLookupSheet } from '../dictionary/DictionaryDetail'
 
 // ── 終着 — a pile's cards (plans 191, 250) ───────────────────────────
@@ -55,7 +56,7 @@ export default function PileSheet({ name, count, cards, ink, onClose }) {
 
   return (
     <>
-      <Sheet open={!open} onClose={onClose} jp={name} cap={t.clrPileCount(count)} label={name} className="clr-pile-sheet" dismiss>
+      <Sheet open={!open} onClose={onClose} title={name} sub={t.clrPileCount(count)} icon={CardIcon} label={name} className="clr-pile-sheet" dismiss>
         {rows.length ? (
           <ul className="clr-pile-sheet__list" style={{ '--ink': ink }}>
             {rows.map(c => (

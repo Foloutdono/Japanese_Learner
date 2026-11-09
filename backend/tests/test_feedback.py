@@ -377,6 +377,89 @@ def test_the_profile_says_when_today_asks(client, profile):
         srs.forget_history(DEV_USER_ID)
 
 
+# ── Google Play (plan 307) ──────────────────────────────────────────
+
+def _stamps():
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT feedback_asked_at, store_asked_at FROM user_profiles WHERE user_id = %s",
+                (DEV_USER_ID,),
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
+
+def test_the_store_is_asked_from_four_hundred_xp(profile):
+    assert feedback.store_offer_open(DEV_USER_ID, 399) is False
+    assert feedback.store_offer_open(DEV_USER_ID, 400) is True
+    assert feedback.offers_open(DEV_USER_ID, 400) == (True, True)
+
+
+def test_a_learner_who_answered_the_sheet_is_asked_for_the_store():
+    # The reset the owner asked for: an answer or a shut sheet before the
+    # store's question leaves the store's question open.
+    _profile(asked=True)
+    try:
+        assert feedback.offers_open(DEV_USER_ID, 400) == (False, True)
+    finally:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM user_profiles WHERE user_id = %s", (DEV_USER_ID,))
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def test_the_store_sheet_behind_the_learner_answers_both(client, profile):
+    r = client.post("/api/feedback/store-offer")
+    assert r.status_code == 200 and r.json() == {"feedbackOffer": False, "storeOffer": False}
+    assert feedback.offers_open(DEV_USER_ID, 400) == (False, False)
+    assert _rows() == []   # nothing is said by shutting it
+
+
+def test_the_web_sheet_shut_leaves_the_store_open(client, profile):
+    client.post("/api/feedback/offer")
+    assert feedback.offers_open(DEV_USER_ID, 400) == (False, True)
+    client.post("/api/feedback", json={"kind": "rating", "rating": 4})
+    assert feedback.store_offer_open(DEV_USER_ID, 400) is True
+
+
+def test_the_store_stamps_stand(client, profile):
+    client.post("/api/feedback/offer")
+    asked, _ = _stamps()
+    client.post("/api/feedback/store-offer")
+    first = _stamps()
+    assert first[0] == asked and first[1] is not None
+    client.post("/api/feedback/store-offer")
+    assert _stamps() == first
+
+
+def test_the_profile_says_when_the_store_is_asked(client, profile):
+    from core.srs_instance import srs
+    assert client.get("/api/profile").json()["storeOffer"] is False
+    srs.award_xp(DEV_USER_ID, "test", "fb-store", feedback.OFFER_XP)
+    srs.forget_history(DEV_USER_ID)
+    try:
+        body = client.get("/api/profile").json()
+        assert body["storeOffer"] is True and body["feedbackOffer"] is True
+        client.post("/api/feedback/store-offer")
+        body = client.get("/api/profile").json()
+        assert body["storeOffer"] is False and body["feedbackOffer"] is False
+    finally:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM xp_ledger WHERE user_id = %s AND ref = %s", (DEV_USER_ID, "fb-store"))
+            conn.commit()
+        finally:
+            conn.close()
+        srs.forget_history(DEV_USER_ID)
+
+
 # ── The sheet's half (frontend/src/lib/feedback.js) ─────────────────
 
 def _js_list(source, name):

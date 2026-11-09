@@ -337,6 +337,40 @@ describe('SentenceBreakdown', () => {
     expect(document.body.textContent).not.toContain('long prose')
   })
 
+  it('draws the line\'s frame where it was bought, and a note given outright still wins (plan 311)', async () => {
+    const frameT = {
+      ...T,
+      frameLabel: 'How the line is built',
+      frameRoles: { topic: 'Topic', predicate: 'Predicate' },
+      frameFrom: { before: 'from the line before', after: 'from the line after' },
+      frameLeftOut: w => `${w}, left out`,
+    }
+    const analysis = {
+      available: true,
+      text: '学生は',
+      tokens: [tokenFixture(), particleFixture()],
+      grammar: [{ pattern: 'は', raw_id: 'grammar_N5_wa', kind: 'marker', start: 2, end: 3, segments: [[2, 3]] }],
+      explanation: '学生は — The topic.',
+      frame: [{ jp: '学生は', start: 0, end: 3, role: 'topic', say: 'は makes 学生 the topic.' }],
+    }
+    const onGrammarOpen = vi.fn()
+    const screen = await render(withLang(
+      <SentenceBreakdown analysis={analysis} t={frameT} layout="rows" onGrammarOpen={onGrammarOpen} onTokenClick={() => {}} />
+    ))
+    expect(document.querySelector('.bkd .anl-frame__role').textContent).toBe('Topic')
+    expect(document.querySelector('.bkd .anl-frame__jp').textContent).toBe('学生は')
+    expect(document.querySelector('.bkd .prose__ai')).toBeNull()
+    document.querySelector('.bkd button.anl-frame__pt').click()
+    expect(onGrammarOpen).toHaveBeenCalledWith(analysis.grammar[0])
+    await screen.unmount()
+
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} t={frameT} layout="rows" note="A note." onTokenClick={() => {}} />
+    ))
+    expect(document.querySelector('.bkd .prose__ai').textContent).toBe('A note.')
+    expect(document.querySelector('.bkd .anl-frame')).toBeNull()
+  })
+
   it('without an analysis the sentence prints plain, over its translation', async () => {
     await render(withLang(
       <SentenceBreakdown analysis={{ available: false, tokens: [] }} t={T} layout="rows" translation="Hello." sentenceText="こんにちは。" onTokenClick={() => {}} />

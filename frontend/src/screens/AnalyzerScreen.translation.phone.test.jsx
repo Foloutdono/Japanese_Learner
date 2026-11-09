@@ -191,7 +191,9 @@ describe('a video line\'s translation on a phone', () => {
     screen.container.querySelector('.anl-m__explain').click()
 
     await vi.waitFor(() => expect(document.querySelector('.anl-explainsheet__tr')).not.toBeNull())
-    expect(document.querySelector('.anl-explainsheet__tr').textContent).toBe('« La nuit vient »')
+    // The sheet's sub since plan 311: the meaning under the sentence, in
+    // the head, before the frame is bought as after.
+    expect(document.querySelector('.anl-explainsheet__head .anl-explainsheet__tr').textContent).toBe('La nuit vient')
     const [[, , opts]] = calls('/api/video/session/7/sentence/0/explain')
     expect(JSON.parse(opts.body)).toEqual({
       lang: 'fr', title: 'YOASOBI「夜に駆ける」', channel: 'Ayase / YOASOBI',

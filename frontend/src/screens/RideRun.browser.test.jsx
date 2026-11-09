@@ -21,6 +21,8 @@ vi.mock('../lib/api', () => ({
 }))
 const track = vi.fn()
 vi.mock('../lib/track', () => ({ track: (...a) => track(...a), flush: vi.fn() }))
+const warmToday = vi.fn()
+vi.mock('../lib/warm', async (o) => ({ ...(await o()), warmToday: (...a) => warmToday(...a) }))
 const summaryRef = { current: null }
 vi.mock('../stores/profileSummary', async (o) => ({
   ...(await o()),
@@ -94,6 +96,7 @@ beforeEach(() => {
   apiJson.mockReset()
   track.mockReset()
   speakJapanese.mockReset()
+  warmToday.mockReset()
   localStorage.clear()
   summaryRef.current = { kanaKnown: 'both', dailyNewTarget: 10 }
 })
@@ -164,7 +167,7 @@ describe('RideRun', () => {
     expect(root.querySelector('.today-remaining')).toBeNull()
 
     // Nothing was reviewed and nothing stamped: the lesson's stamp is
-    // the reading ride's plate (plan 099). Continue goes there.
+    // the reading ride's grade (plan 099). Continue goes there.
     expect(posts()).toHaveLength(0)
     root.querySelector('.btn-depart').click()
     await settle(200)
@@ -324,6 +327,40 @@ describe('RideRun', () => {
     root.querySelector('.flashcard').click()
     await settle(80)
     expect(speakJapanese).toHaveBeenCalledWith('こんにちは')
+  })
+
+  // Plan 292: the reading held only its plate for a learner with no
+  // kana, and the plate went, so the cards' end is the lesson's stamp
+  // and the way into the station, warmed while the second card is read.
+  it('a learner with no kana enters the station from the cards, stamped', async () => {
+    serve()
+    summaryRef.current = { kanaKnown: 'none', dailyNewTarget: 5 }
+    const onDone = vi.fn()
+    const screen = await mount({ onDone })
+    await settle(200)
+    const root = screen.container
+    expect(warmToday).not.toHaveBeenCalled()
+    root.querySelector('.flashcard').click()
+    await settle(80)
+    await lookUp(root)
+    rateButton(root, 4).click()
+    await settle(600)
+    expect(warmToday).toHaveBeenCalledTimes(1)
+    root.querySelector('.flashcard').click()
+    await settle(80)
+    rateButton(root, 1).click()
+    await settle(600)
+    const go = root.querySelector('.ride__done-foot .btn-depart')
+    expect(go.textContent).toContain(fr.brdEnter)
+    go.click()
+    await settle(200)
+    expect(root.querySelector('.gate-probe')).toBeTruthy()
+    const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
+    expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
+    expect(onDone).toHaveBeenCalledTimes(1)
+    expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: false, at: 'cards' })
+    const steps = track.mock.calls.filter(([n]) => n === 'ride_step').map(([, p]) => p.to)
+    expect(steps.at(-1)).toBe('today')
   })
 
   it('keeps the note under the cutscene until it lifts', async () => {

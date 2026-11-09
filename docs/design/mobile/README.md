@@ -27,12 +27,16 @@ the widths this canvas covers.
 | `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
 | `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__names--stacked`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header; the canvas set the sub a gap after the title, the app sets the two registers at the row's two ends — see below | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
 | `.stage__head`, `.stage__end`, `.stage__leave` (`--bare`), `.stage__where*` (`-line`), `.today-remaining` | the head of a run: the way out and the controls at the ends, the place centred between | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
-| `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__jp`, `.sheet__cap` | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
+| `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__mark`, `.sheet__title`, `.sheet__sub` (plan 277; `.sheet__jp`/`.sheet__cap` are the stacked heads a few sheets draw themselves) | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
 | `.console`, `.console__top`, `.console__chips`, `.console__action`, `.console__index` (`--bare`), `.console__field`, `.console__clear`, `.console__count`, `.console__toggle` | the console | `components/chrome/Console.jsx` (`Console`, `ConsoleTop`, `Chips`, `ConsoleAction`, `ConsoleIndex`) |
 | `.chip`, `.chip--on`, `.chip__glyph`, `.chip-row` | chips | `Chip` in `Console.jsx` |
 | `.seg`, `.seg__opt`, `.seg__opt--on`, `.seg__opt-jp`, `.seg__opt-latin`, `.seg--full`, `.seg--kaiseki` | the segmented control | `Seg` in `Console.jsx` (the profile's 番付 already drew `.seg`) |
 | `.loading`, `.loading__dot`, `.empty*` | 待合 / 空 (plan 067) | `components/ui/Loading.jsx`, `components/ui/Empty.jsx` |
 | `.platform-card--line`, `.platform-card__title-jp` | the platform card | `screens/PracticeScreen.jsx` |
+| `.prc-group`, `.prc-group__cap`, `.plate--fold`, `.prc-record*`, `.prc-resume*` | 実践の改札 — the phone's Practice gate, folded in its three groups, the last ride over them (plan 290) | `screens/PracticeScreen.jsx` (`Platforms`, `Resume`) |
+| `.prc-sheet*`, `.prc-page*`, `.prc-tk*`, `.prc-card*` | 引き上げ — the sheet a practice plate raises, a page a platform (plan 290) | `components/practice/PracticeSheet.jsx` |
+| `.lrn-folds`, `.lrn-record*`, `.lrn-shelf*` (with Practice's `.plate--fold`, `.prc-resume*`, `.prc-group__cap`) | 学習の改札 — the phone's Learn gate, folded: the last ride, the lines, the decks (plan 291) | `screens/LearnScreen.jsx`, `components/station/GateResume.jsx` |
+| `.lrn-sheet`, `.lrn-page*`, `.lrn-stop*`, `.lrn-card*` (on Practice's `.prc-sheet__*` pager and strip) | 引き上げ — the sheet a line raises, a page a line (plan 291) | `components/learn/LineSheet.jsx`, `hooks/useSheetPager.js` |
 
 Tokens minted for the chrome: `--hud-h` (48px, the HUD's own height —
 it was the retired phone level bar's 36px), `--tabbar-h` (50px), and

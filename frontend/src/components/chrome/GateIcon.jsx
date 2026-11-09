@@ -144,6 +144,20 @@ function SettingsGlyph(props) {
   )
 }
 
+// 対戦 — the duels, the desk's sixth gate (plan 279): the two ways of the
+// duel's ticket (⇄), the sign it already prints between the two players
+// (the owner's pick A of three shot in the rail).
+function DuelsGlyph(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 8h15" />
+      <path d="M15.5 4.5L19 8l-3.5 3.5" />
+      <path d="M20 16H5" />
+      <path d="M8.5 12.5L5 16l3.5 3.5" />
+    </svg>
+  )
+}
+
 const GLYPHS = {
   learn: LearnGlyph,
   practice: PracticeGlyph,
@@ -154,6 +168,7 @@ const GLYPHS = {
   library: LibraryGlyph,
   stats: StatsGlyph,
   settings: SettingsGlyph,
+  duels: DuelsGlyph,
 }
 
 /** One gate's (or one desk place's) pictogram, by its id in config/tabs.js. */

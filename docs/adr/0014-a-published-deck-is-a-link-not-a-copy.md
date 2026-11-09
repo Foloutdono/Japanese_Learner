@@ -111,6 +111,16 @@ content on a path with no way to refuse it. Review is a query against the
 existing Metabase connection; unpublishing is a manual `UPDATE`. That is
 proportionate to a closed test and will not be once the app is open.
 
+Since plan 310 a filter stands in front of the queue, for App Store
+guideline 1.2: `core/content_filter.py` refuses a closed list of slurs in
+anything another learner reads (a deck's name, description and written
+cards, read at publishing and at every later write to a deck others
+read), and vulgarity too in a name or a description. It is a door, not a
+mechanism: it hides nothing already published and counts nothing, and
+what it lets through is reported and read as before. A block made in the
+duels reaches the library the same way: across one, neither learner
+finds the other's decks, and their follows end.
+
 ### What may be measured
 
 Five new names in `core/events.py`, mirrored in `lib/track.js`, carrying

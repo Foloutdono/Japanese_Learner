@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiJson } from '../../lib/api'
 import { usePublicDeck } from '../../hooks/usePublicDeck'
@@ -10,7 +10,9 @@ import Empty from '../ui/Empty'
 import { Loading } from '../ui/Loading'
 import { deckTypeOf } from './deckTypes'
 import { DeckSamples } from './GateShelf'
-import { BooksIcon, WarningIcon } from '../ui/Icons'
+import { MoreRow } from './MoreRow'
+import { errorKey } from '../../domain/duel'
+import { BooksIcon, EyeOffIcon, FlagIcon } from '../ui/Icons'
 
 // ── One published deck, before you commit to it ───────────────
 // The page you read to decide. It shows what the deck is, who wrote it,
@@ -54,6 +56,15 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
   const [busy, setBusy]         = useState(false)
   const [reportOpen, setReport] = useState(false)
   const [reported, setReported] = useState(false)
+  // More in the corner (plan 310, the owner's pick C): the deck
+  // reported, or its author blocked, which asks first, as a deck's own
+  // deletion does, since a block also ends the follows between the two
+  // (study/duel_friends.block). Never on your own deck.
+  const [moreOpen, setMore]       = useState(false)
+  const [blocking, setBlocking]   = useState(false)
+  const [blockFailed, setFailed]  = useState(null)
+  const blockingRef = useRef(false)
+  const author = deck.role !== 'owner' ? deck.author : null
 
   function follow() {
     if (busy) return
@@ -70,6 +81,32 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
         navigate(`/learn/decks/${deckId}`)
       })
       .catch(() => { setBusy(false); onReload() })
+  }
+
+  function closeMore() {
+    setMore(false)
+    setBlocking(false)
+    setFailed(null)
+  }
+
+  function openReport() {
+    playUi('click-mode-selection')
+    closeMore()
+    setReport(true)
+  }
+
+  // Back to the library, which no longer lists the author's decks
+  // (routes/decks._APART); replace, so Back does not land on a deck the
+  // learner can no longer open.
+  function block() {
+    if (!author || blockingRef.current) return
+    blockingRef.current = true
+    setFailed(null)
+    playUi('click-screen-selection')
+    apiJson('/api/pvp/blocks', session, { method: 'POST', body: JSON.stringify({ username: author }) })
+      .then(() => { closeMore(); navigate('/learn/decks/library', { replace: true }) })
+      .catch(e => setFailed(errorKey(e)))
+      .finally(() => { blockingRef.current = false })
   }
 
   function report(reason) {
@@ -109,15 +146,15 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
             {t.libraryFollow}
           </button>
         )}
-        {/* Last in the DOM, first in the corner: the mark is read after
-            the action it does not compete with, and placed by the grid. */}
-        <button type="button" className="chip deck-identity__report"
-          onClick={() => { playUi('click-mode-selection'); setReport(true) }}
-          aria-haspopup="dialog" disabled={reported}
-          title={reported ? t.libraryReported : t.libraryReport}
-          aria-label={reported ? t.libraryReported : t.libraryReport}>
-          <WarningIcon size={16} />
-        </button>
+        {/* Last in the DOM, first in the corner: More is read after the
+            action it does not compete with, and placed by the grid. */}
+        {deck.role !== 'owner' && (
+          <button type="button" className="chip deck-identity__more"
+            onClick={() => { playUi('click-mode-selection'); setMore(true) }}
+            aria-haspopup="dialog" title={t.deckMore} aria-label={t.deckMore}>
+            <span className="chip__dots" aria-hidden="true">···</span>
+          </button>
+        )}
       </div>
 
       {samples && <DeckSamples cards={preview} />}
@@ -148,8 +185,33 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
         </div>
       )}
 
+      <Sheet open={moreOpen} onClose={closeMore} title={deck.name} icon={BooksIcon} line="var(--line-decks)">
+        <div className="more-list">
+          <MoreRow icon={<FlagIcon size={16} />} label={reported ? t.libraryReported : t.libraryReportDeck}
+            onClick={openReport} disabled={reported} />
+        </div>
+        {author && (blocking ? (
+          <>
+            <span className="sheet__q">{t.libraryBlockConfirm(author)}</span>
+            {blockFailed && <span className="sheet__q sheet__q--danger" role="alert">{t[blockFailed]}</span>}
+            <button type="button" className="btn-primary btn-primary--danger" onClick={block}>
+              {t.pvpBlock}
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => { setBlocking(false); setFailed(null) }}>
+              {t.cancel}
+            </button>
+          </>
+        ) : (
+          <div className="more-list">
+            <MoreRow icon={<EyeOffIcon size={16} />} label={t.libraryBlockAuthor(author)}
+              hint={t.libraryBlockHint(author)} danger
+              onClick={() => { playUi('click-mode-selection'); setBlocking(true) }} />
+          </div>
+        ))}
+      </Sheet>
+
       <Sheet open={reportOpen} onClose={() => setReport(false)} label={t.libraryReport}
-        cap={t.libraryReport} dismiss>
+        title={t.libraryReport} icon={FlagIcon} line="var(--line-decks)" dismiss>
         <p className="lib-note">{t.libraryReportNote}</p>
         <div className="type-list" role="group" aria-label={t.libraryReport}>
           {REASONS.map(([reason, key]) => (

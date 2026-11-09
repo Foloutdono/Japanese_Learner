@@ -16,19 +16,20 @@
 // carousel studio): its copy is the app's own descriptions, its pictures
 // are schemas of the feature, never a figure.
 import {
-  ASC, EDGE, FORMATS, FS, SP, R, alpha, fit, font, frame, hasKanji, layoutSentence, drawSentence, mark, measure, metal, METAL_H,
-  mix, palette, paragraph, paragraphH, rrect, strokeBox, text,
+  ASC, EDGE, FORMATS, FS, SP, R, alpha, fit, font, frame, hasKanji, layoutSentence, drawSentence, mark, measure, METAL_H,
+  address, mix, palette, paragraph, paragraphH, rrect, strokeBox, text,
 } from './draw.js'
 import { analyserLine, departButton, pointCard } from './app.js'
-import { SITE } from './strings.js'
+import { SITE, quoted } from './strings.js'
+import { lineRomaji } from './common.js'
 import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 
 export const DESIGNS = ['clarte', 'defi', 'fiche']
-export const LENGTHS = [3, 4, 5, 6, 7, 8]
+export const LENGTHS = [3, 4, 5, 6, 7, 8, 9]
 // The app's features a call to action can show (plan 234b: every practice
 // mode, the analyser, the question after an exercise, Today).
-export const FEATURES = ['reading', 'comprehension', 'translation', 'listen', 'composition', 'exam', 'analyser', 'ask', 'today', 'words', 'kanji', 'grammar', 'kana']
+export const FEATURES = ['reading', 'comprehension', 'translation', 'listen', 'composition', 'conversation', 'exam', 'analyser', 'ask', 'today', 'words', 'kanji', 'grammar', 'kana']
 
 // ── The words ─────────────────────────────────────────────────
 export const WORDS = {
@@ -43,12 +44,17 @@ export const WORDS = {
     seconds: { read: 'seconds to read it', say: 'seconds to say it', answer: 'seconds to answer' },
     count: n => `Count to ${NUM.en[n] || n}, then swipe.`,
     swipe: 'Swipe for the answer',
-    save: 'Save it for later',
     answer: 'The answer',
+    bonus: 'Bonus',
+    // Read it's bonus, the sentence said the other way (plan 254).
+    version: { polite: 'Polite version', plain: 'Casual version' },
+    versionRule: (to, a, b) => (!a ? `Just add ${b} to sound polite` : !b ? `Among friends, just drop ${a}`
+      : to === 'polite' ? `${a} becomes ${b} to sound polite` : `${a} becomes ${b} among friends`),
+    literally: 'Literally:',
     analyser: 'As Tsuji’s analyser cuts it',
     meaning: 'Meaning',
     detail: {
-      words: 'Word by word', sentences: 'In sentences', kanjiWords: 'Words written with it', more: 'More', scene: 'The whole scene',
+      words: 'Word by word', sentences: 'In sentences', kanjiWords: 'Words written with it', lookWords: 'A word for each', more: 'More', scene: 'The whole scene',
       pair: 'Side by side', lookalike: 'Its lookalikes', list: 'The list', next: 'Next turn', round: 'Next round', question: 'One more',
     },
     // A question the carousel leaves to its reader: answered on the slide after.
@@ -64,12 +70,13 @@ export const WORDS = {
     saveFor: 'Save it for your next review',
     or: 'or',
     them: 'Them', you: 'You',
-    cta: { head: 'Want more like this?', also: 'Also', go: `Go to ${SITE}`, band: 'More on Tsuji' },
+    cta: { head: 'Want more like this?', also: 'Also', band: 'More on Tsuji' },
     features: {
       reading: { name: 'Read against the clock', line: 'Read the sentence before the clock covers it, write its reading in rōmaji, then see it cut word by word.', short: 'Reading', steps: ['Read', 'Write', 'Check'], romaji: 'rōmaji' },
       comprehension: { name: 'Read a whole text', line: 'A short text, then its questions: the exam’s reading section, rehearsed.', short: 'Comprehension', steps: ['Read', 'Answer', 'Check'] },
       translation: { name: 'Say it in Japanese', line: 'A sentence to put into Japanese, then a reference answer and the tutor’s read on yours.', short: 'Translation', steps: ['Read', 'Say it', 'Tutor'] },
       composition: { name: 'Write your own sentences', line: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it back.', short: 'Composition', steps: ['Point', 'Write', 'Tutor'] },
+      conversation: { name: 'Answer in Japanese', line: 'Someone talks to you, out loud: pick your reply, write it or talk freely, from a café to a job interview.', short: 'Conversation' },
       analyser: { name: 'Read anything', line: 'Paste a sentence, a YouTube link or a photo: Tsuji cuts it word by word.', short: 'Analyser', inputs: ['Text', 'YouTube', 'Photo'] },
       ask: { name: 'Ask about it', line: 'After an exercise, ask a short question about it: a short, precise answer comes back.', short: 'Questions', ask: p => `What does ${p} do here?`, fallback: ['Why に here, and not で?', 'に marks where something is; で, where an action takes place.'] },
       today: { name: 'Today, in one run', line: 'Every review due, across every section, in one queue: one tap on Depart.', short: 'Today', depart: 'Depart', unit: 'due', lines: ['かな', '単語', '漢字', '文法'] },
@@ -92,12 +99,16 @@ export const WORDS = {
     seconds: { read: 'secondes pour lire', say: 'secondes pour le dire', answer: 'secondes pour répondre' },
     count: n => `Compte jusqu’à ${NUM.fr[n] || n}, puis glisse.`,
     swipe: 'Glisse pour la réponse',
-    save: 'Enregistre-le pour plus tard',
     answer: 'La réponse',
+    bonus: 'Bonus',
+    version: { polite: 'Version polie', plain: 'Version familière' },
+    versionRule: (to, a, b) => (!a ? `Ajoute simplement ${b} pour être poli` : !b ? `Entre amis, enlève simplement ${a}`
+      : to === 'polite' ? `${a} devient ${b} pour être poli` : `${a} devient ${b} entre amis`),
+    literally: 'Littéralement :',
     analyser: 'Découpée par l’analyseur de Tsuji',
     meaning: 'Sens',
     detail: {
-      words: 'Mot à mot', sentences: 'En phrases', kanjiWords: 'Des mots qui l’écrivent', more: 'Encore', scene: 'Toute la scène',
+      words: 'Mot à mot', sentences: 'En phrases', kanjiWords: 'Des mots qui l’écrivent', lookWords: 'Un mot pour chacun', more: 'Encore', scene: 'Toute la scène',
       pair: 'Côte à côte', lookalike: 'Ses sosies', list: 'La liste', next: 'Le tour suivant', round: 'La manche suivante', question: 'Encore une',
     },
     yours: 'À toi',
@@ -112,12 +123,13 @@ export const WORDS = {
     saveFor: 'Enregistre-le pour ta prochaine révision',
     or: 'ou',
     them: 'En face', you: 'Toi',
-    cta: { head: 'Envie d’en voir plus ?', also: 'Et aussi', go: `Va sur ${SITE}`, band: 'Plus sur Tsuji' },
+    cta: { head: 'Envie d’en voir plus ?', also: 'Et aussi', band: 'Plus sur Tsuji' },
     features: {
       reading: { name: 'Lis contre la montre', line: 'Lis la phrase avant que le chrono ne la couvre, écris sa lecture en rōmaji, puis découvre-la mot à mot.', short: 'Lecture', steps: ['Lis', 'Écris', 'Vérifie'], romaji: 'rōmaji' },
       comprehension: { name: 'Lis un texte entier', line: 'Un texte court, puis ses questions : l’épreuve de lecture de l’examen, en répétition.', short: 'Compréhension', steps: ['Lis', 'Réponds', 'Vérifie'] },
       translation: { name: 'Dis-le en japonais', line: 'Une phrase à dire en japonais, puis une réponse de référence et l’avis du tuteur sur la tienne.', short: 'Traduction', steps: ['Lis', 'Dis-le', 'Tuteur'] },
       composition: { name: 'Écris tes propres phrases', line: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur te la relit.', short: 'Rédaction', steps: ['Le point', 'Écris', 'Tuteur'] },
+      conversation: { name: 'Réponds en japonais', line: 'On te parle, à voix haute : choisis ta réponse, écris-la ou parle librement, du café à l’entretien d’embauche.', short: 'Conversation' },
       analyser: { name: 'Tout lire', line: 'Colle une phrase, un lien YouTube ou une photo : Tsuji la découpe mot à mot.', short: 'Analyseur', inputs: ['Texte', 'YouTube', 'Photo'] },
       ask: { name: 'Pose ta question', line: 'Après un exercice, pose une courte question dessus : une réponse courte et précise arrive.', short: 'Questions', ask: p => `Que fait ${p} ici ?`, fallback: ['Pourquoi に ici, et pas で ?', 'に marque où se trouve une chose ; で, où se fait une action.'] },
       today: { name: 'Aujourd’hui, en un trajet', line: 'Toutes les révisions dues, toutes sections confondues, dans une file unique : un geste sur Embarquer.', short: 'Aujourd’hui', depart: 'Embarquer', unit: 'à réviser', lines: ['かな', '単語', '漢字', '文法'] },
@@ -137,11 +149,11 @@ const wordsOf = lang => WORDS[lang === 'fr' ? 'fr' : 'en']
 
 // Each feature's line (config/tabs.js) and its picture in the "also" row.
 const FEATURE_LINE = {
-  reading: 'reading', comprehension: 'rikai', translation: 'honyaku', listen: 'kakitori', composition: 'sakubun', exam: 'exam',
+  reading: 'reading', comprehension: 'rikai', translation: 'honyaku', listen: 'kakitori', composition: 'sakubun', conversation: 'kaiwa', exam: 'exam',
   analyser: 'reading', ask: 'gold', today: 'gold', words: 'vocab', kanji: 'kanji', grammar: 'grammar', kana: 'kana',
 }
 const FEATURE_ICON = {
-  reading: '📖', comprehension: '📰', translation: '🌐', listen: '🎧', composition: '✍️', exam: '⏱️',
+  reading: '📖', comprehension: '📰', translation: '🌐', listen: '🎧', composition: '✍️', conversation: '🗣️', exam: '⏱️',
   analyser: '🔍', ask: '💬', today: '🌅', words: '🔁', kanji: '🖌️', grammar: '🧩', kana: '🔤',
 }
 const featureInk = (p, f) => p.line[FEATURE_LINE[f]] || p.gold
@@ -149,11 +161,11 @@ const featureInk = (p, f) => p.line[FEATURE_LINE[f]] || p.gold
 // dictation and the mock exams first, as the owner asked (plan 234).
 const ALSO = {
   reading: ['listen', 'ask'], comprehension: ['reading', 'exam'], translation: ['composition', 'ask'], listen: ['reading', 'exam'],
-  composition: ['translation', 'ask'], exam: ['comprehension', 'listen'], analyser: ['reading', 'ask'], ask: ['reading', 'translation'],
+  composition: ['translation', 'ask'], conversation: ['listen', 'reading'], exam: ['comprehension', 'listen'], analyser: ['reading', 'ask'], ask: ['reading', 'translation'],
   today: ['words', 'reading'], words: ['today', 'reading'], kanji: ['words', 'listen'], grammar: ['composition', 'exam'], kana: ['listen', 'words'],
 }
 const FEATURE_OF = {
-  sentence: 'reading', translation: 'translation', passage: 'comprehension', lesson: 'grammar', dialogue: 'grammar', trap: 'grammar',
+  sentence: 'reading', short: 'reading', translation: 'translation', passage: 'comprehension', lesson: 'grammar', dialogue: 'conversation', trap: 'grammar',
   word: 'words', theme: 'words', kanji: 'kanji', lookalike: 'kanji', kana: 'kana',
 }
 
@@ -165,7 +177,8 @@ const FEATURE_OF = {
 const whyOf = q => q.explain?.why || (q.explain?.head && q.explain?.sense ? `${q.explain.head}: ${q.explain.sense}` : '')
 export function funnelOf(type, pl, opts = {}) {
   const spec = specOf(type, pl, opts)
-  if (!spec || !SENTENCED.has(pl.source)) return spec
+  // Read it (plan 253) deals its words before its answer, its own way.
+  if (!spec || !SENTENCED.has(pl.source) || type === 'read') return spec
   // A sentence's carousel breaks the sentence down whole after the call
   // to action, word by word, and asks nothing more (plan 234d): the
   // type's own detail follows it where it is not a question nor the same
@@ -190,6 +203,7 @@ function specOf(type, pl, opts) {
     notes: (whys(qs).length ? as('why', whys(qs)) : base.notes).slice(0, 3),
   } : null
   switch (type) {
+    case 'read': return readable(pl) ? readSpec(pl, base) : null
     case 'exam': return asked(withoutGiveaways(picked(pl, opts.picks, 3)))
     case 'spelling': return pl.spelling?.length ? asked(pl.spelling.slice(0, 3)) : null
     case 'compare': {
@@ -242,8 +256,10 @@ function specOf(type, pl, opts) {
       }
     }
     case 'impostor': {
-      // Drawn as pictures: the rounds of pictured words, where the theme has them.
-      const I = f.impostor || pl.impostor
+      // Drawn as pictures: the rounds of pictured words, where the theme has
+      // enough of them; else the classic rounds of words (plan 248: a theme
+      // of four pictures drew empty tiles).
+      const I = f.impostor
       if (!I) return null
       const [r0, r1] = I.rounds
       return {
@@ -301,7 +317,7 @@ function platesOf(pl, f, base) {
       hook: { kind: 'glyph', text: f.kana.k, ask: 'read', seconds: 3 },
       solution: { kind: 'kana', kana: f.kana, strokes: f.strokes },
       detail: f.lookalike?.length > 1 ? { kind: 'kanas', items: f.lookalike, here: f.kana.k, label: 'lookalike' }
-        : f.words?.length ? { kind: 'rows', items: f.words, label: 'sentences' } : null,
+        : f.words?.length ? { kind: 'rows', items: f.words, label: 'kanjiWords' } : null,
     }
     case 'passage': {
       const q = pl.quizzes.find(x => x.kind === 'passage') || pl.quizzes[0]
@@ -317,7 +333,7 @@ function platesOf(pl, f, base) {
       ...base,
       hook: { kind: 'pictures', words: f.pictures, ask: 'pictures', seconds: 10 },
       solution: { kind: 'pictures', words: f.pictures, reveal: true },
-      detail: (f.impostor || pl.impostor) ? (r => ({ kind: 'pictures', words: r.words, odd: r.at, why: r.why, ask: 'odd', yours: true }))((f.impostor || pl.impostor).rounds[0]) : null,
+      detail: f.impostor ? (r => ({ kind: 'pictures', words: r.words, odd: r.at, why: r.why, ask: 'odd', yours: true }))(f.impostor.rounds[0]) : null,
     }
     case 'lookalike': return {
       ...base,
@@ -353,6 +369,15 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
   const n = LENGTHS.includes(+opts.length) ? +opts.length : 5
   const feature = FEATURES.includes(opts.feature) ? opts.feature : spec.feature
   const look = lookOf(design, fmt, pl)
+  // Read it (plan 253): the sentence, its words, the answer, the app; whatever the length.
+  if (type === 'read') {
+    return [
+      { key: 'ask', fn: c => hookSlide(c, spec.hook) },
+      { key: 'words', fn: c => detailSlide(c, spec.words) },
+      { key: 'answer', fn: c => solutionSlide(c, spec.solution) },
+      { key: 'cta', fn: c => ctaSlide(c, feature) },
+    ].map(sl => ({ key: sl.key, draw: ctx => sl.fn(context(ctx, look)) }))
+  }
   const out = [
     { key: 'ask', fn: c => hookSlide(c, spec.hook) },
     { key: 'answer', fn: c => solutionSlide(c, spec.solution) },
@@ -388,6 +413,12 @@ export function funnelDeck(type, pl, fmt, opts = {}) {
   const notes = (spec.notes || spec.keys.map(text => ({ kind: 'note', text }))).filter(x => !answer || x.text !== answer.why)
   if (n >= 4 && (notes.length || answer)) out.push({ key: 'keys', fn: c => keysSlide(c, notes, answer) })
   return out.map(sl => ({ key: sl.key, draw: ctx => sl.fn(context(ctx, look)) }))
+}
+
+/** The call to action alone, on a format of the caller's: a video's
+ *  ending (a reply video's, plan 249b) is the carousel's own slide. */
+export function drawCta(ctx, fmt, { lang = 'en', feature = 'conversation', design = 'fiche', line = 'kaiwa' } = {}) {
+  ctaSlide(context(ctx, lookOf(design, fmt, { lang, line })), FEATURES.includes(feature) ? feature : 'conversation')
 }
 
 // ── The look ──────────────────────────────────────────────────
@@ -518,7 +549,6 @@ function pill(c, label, cx, y, { icon = '→', fill = faceInk(c.p), ink = c.p.in
   ctx.arc(x + h / 2, y + h / 2, h / 2 - 10, 0, Math.PI * 2)
   ctx.fill()
   if (emoji) text(ctx, icon, x + h / 2, y + h / 2 + 15, { f: font(400, 40, 'emoji'), color: p.onLine, align: 'center' })
-  else if (icon === 'save') bookmark(ctx, x + h / 2, y + h / 2, 36, p.onLine, { fill: true })
   else chevronIcon(ctx, x + h / 2, y + h / 2, 18, p.onLine)
   text(ctx, b.lines[0], x + h + SP[3], y + h / 2 + b.size * 0.36, { f: b.f, color: ink })
   return h
@@ -596,12 +626,16 @@ function measured(ctx, fn) {
 }
 /** The longest list that fits: `make(k)` for k from `n` down to one. */
 function fitting(n, maxH, make) {
+  // As many as fit whole; fewer before one is cut, and only where none
+  // fits whole the most that fit at all (plan 248).
   let b = none
+  let fits = null
   for (let k = n; k >= 1; k--) {
     b = make(k)
-    if (b.h <= maxH) return b
+    if (b.h <= maxH && !b.cut) return b
+    if (b.h <= maxH) fits ||= b
   }
-  return b
+  return fits || b
 }
 const textBlock = (c, str, { x, w, sizes, weight = 700, fam = 'latin', color = c.p.ink, align = 'center', maxLines = 3, lh = 1.2, maxH = Infinity }) => {
   if (!str) return none
@@ -613,9 +647,9 @@ const textBlock = (c, str, { x, w, sizes, weight = 700, fam = 'latin', color = c
 // ── The item, as large as it can be read ──────────────────────
 /** A sentence, each word over its line's rule (a word the vocabulary's, a
  *  particle the grammar's), or the lit words alone ruled in gold. */
-function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.title, script = c.pl.script, romaji = false, lines = 3, lit = null, align = 'center', ink = c.p.ink, fam = 'serif', fewest = false }) {
+function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.title, script = c.pl.script, romaji = false, lines = 3, lit = null, align = 'center', ink = c.p.ink, fam = 'serif', fewest = false, gap = 0.08, romajiK, inks = null }) {
   if (!rows?.length) return none
-  const at = k => layoutSentence(c.ctx, rows, { max, min, maxW: w, maxH, maxLines: k, script, romaji, rules: false, under: 0.34, gap: 0.08, fam, weight: 700 })
+  const at = k => layoutSentence(c.ctx, rows, { max, min, maxW: w, maxH, maxLines: k, script, romaji, romajiK, rules: false, under: 0.34, gap, fam, weight: 700 })
   // `fewest`: on as few lines as it sets in, then as large as they hold
   // (plan 234d): これはわたしの本です。 on one line, not three.
   let L = null
@@ -625,10 +659,12 @@ function sentenceBlock(c, rows, { x, w, maxH, max = FS.display * 1.15, min = FS.
   const ruleOf = (u) => {
     if (u.row.k === 'punct') return null
     if (lit) return lit(u.row) ? c.p.gold : null
+    // `inks`: a word's own ink, row by row (Read it, plan 256).
+    if (inks) return inks.get(u.i) || null
     return u.row.k === 'word' ? c.p.line.vocab : c.p.line.grammar
   }
   const ax = align === 'center' ? x + w / 2 : x
-  return { h: L.h, L, draw: y => drawSentence(c.ctx, L, ax, y, align, u => ({ ink, ruby: c.p.ink2, romaji: c.p.ink2, rule: ruleOf(u), ruleW: Math.max(6, L.size * 0.075) })) }
+  return { h: L.h, L, draw: y => drawSentence(c.ctx, L, ax, y, align, u => ({ ink, ruby: c.p.ink2, romaji: inks?.get(u.i) || c.p.ink2, rule: ruleOf(u), ruleW: Math.max(6, L.size * (inks ? 0.09 : 0.075)) })) }
 }
 /** A word, a kanji or a kana alone, as large as the room lets it be. */
 function glyphBlock(c, str, { x, w, maxH, max, fam = 'serif', color = c.p.ink, rule = true }) {
@@ -649,7 +685,7 @@ function glyphBlock(c, str, { x, w, maxH, max, fam = 'serif', color = c.p.ink, r
     },
   }
 }
-const quoteBlock = (c, str, o) => textBlock(c, `“${str}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead], fam: 'serif', weight: 700, maxLines: 5, lh: 1.15, ...o })
+const quoteBlock = (c, str, o) => textBlock(c, quoted(c.lang, str), { sizes: [FS.display, FS.heading, FS.title, FS.lead], fam: 'serif', weight: 700, maxLines: 5, lh: 1.15, ...o })
 
 /** A question's choices as the app's answer rows: a numbered roundel and
  *  the answer, the right one in the success ink once answered. */
@@ -738,6 +774,11 @@ function questionBlock(c, q, { x, w, maxH, revealed = false }) {
   let pick = null
   let firstFit = null
   const whole = L => !L.ask.cut && !L.stem.cut && !L.choices.cut && !L.why.cut
+  // Where something must be cut, the least is: never the question or what
+  // it quotes before a choice, a choice before the why, a size down before
+  // a cut (plan 248: the largest layout that fit was kept, and cut the
+  // quoted translation a translation exam asks about).
+  const cost = L => (L.ask.cut ? 8 : 0) + (L.stem.cut ? 8 : 0) + (L.choices.cut ? 2 : 0) + (L.why.cut ? 1 : 0)
   for (const withWhy of revealed && whyText ? [true, false] : [false]) {
     for (const z of [FS.title, FS.lead, FS.body, FS.sm, FS.caption, FS.xs]) {
       const gap = z >= FS.body ? SP[6] : z >= FS.caption ? SP[5] : SP[4]
@@ -750,8 +791,7 @@ function questionBlock(c, q, { x, w, maxH, revealed = false }) {
       lay = { gap, ask, why, choices, stem, total }
       if (total > maxH || (q.stem && !stem.h)) continue
       if (z >= FS.sm && whole(lay)) { pick = lay; break }
-      firstFit ||= lay
-      if (z < FS.sm) break
+      if (!firstFit || cost(lay) < cost(firstFit)) firstFit = lay
     }
     if (pick) break
   }
@@ -851,18 +891,20 @@ function bubbleBlock(c, line, o) {
   }
   return b
 }
-function bubbleOnce(c, line, { x, w, maxH = Infinity, who, me = false, romaji = false, tr = true }) {
+function bubbleOnce(c, line, { x, w, maxH = Infinity, who, me = false, romaji = false, tr = true, max = FS.heading, snug = false }) {
   const { ctx, p } = c
-  const pad = SP[6]
-  const bw = w * 0.9
+  // Snug (a turn's, plan 240): a wider bubble, a leaner pad, the line larger.
+  const pad = snug ? SP[5] : SP[6]
+  const bw = w * (snug ? 0.95 : 0.9)
   const bx = me ? x + w - bw : x
   const name = who ? textBlock(c, who.toLocaleUpperCase(), { x: bx + pad, w: bw - pad * 2, sizes: [FS.caption], align: me ? 'right' : 'left', color: me ? c.line : p.ink2, maxLines: 1 }) : none
   const t = tr && line.tr ? textBlock(c, line.tr, { x: bx + pad, w: bw - pad * 2, sizes: [FS.body, FS.sm], weight: 500, color: p.ink2, align: me ? 'right' : 'left', maxLines: 3 }) : none
-  const s = sentenceBlock(c, line.rows, { x: bx + pad, w: bw - pad * 2, maxH: maxH - name.h - t.h - pad * 2 - SP[4] * 2, max: FS.heading, min: FS.sm, script: 'furigana', romaji, align: me ? 'right' : 'left', fam: 'jp', lines: 3 })
+  const s = sentenceBlock(c, line.rows, { x: bx + pad, w: bw - pad * 2, maxH: maxH - name.h - t.h - pad * 2 - SP[4] * 2, max, min: FS.sm, script: 'furigana', romaji, align: me ? 'right' : 'left', fam: 'jp', lines: 3 })
   const h = pad * 2 + name.h + (name.h ? SP[3] : 0) + s.h + (t.h ? SP[4] + t.h : 0)
   // Its height counts the tail under it.
   return {
     h: h + 26,
+    size: s.L?.size || 0,
     draw: y => {
       ctx.fillStyle = me ? mix(c.line, cardInk(p), 0.12) : faceInk(p)
       rrect(ctx, bx, y, bw, h, R.card * 2)
@@ -970,7 +1012,7 @@ function answerBlock(c, s, { x, w, maxH }) {
   for (let k = 0; k < 4; k++) {
     const z = i => RUNGS[Math.min(RUNGS.length - 1, i + k)]
     const ro = k < 3 ? textBlock(c, s.romaji, { x, w, sizes: [z(4), z(5)], weight: 500, color: c.p.ink2, maxLines: 3 }) : none
-    const tr = textBlock(c, `“${s.translation}”`, { x, w, sizes: [z(2), z(3), z(4)], maxLines: 4 })
+    const tr = textBlock(c, quoted(c.lang, s.translation), { x, w, sizes: [z(2), z(3), z(4)], maxLines: 4 })
     const gap = k < 2 ? SP[7] : SP[5]
     const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - ro.h - tr.h - gap * 2, max: z(0), min: z(3), script: 'furigana', fewest: true })
     out = stackOf([sent, ro, tr], [SP[5], gap])
@@ -1014,11 +1056,12 @@ function pointBlock(c, s, { x, w, maxH }) {
 /** One sentence on a card: the lit words ruled in gold, its sense under it. */
 function exampleCard(c, item, { x, w, maxH, lit = r => r.lit, head }) {
   const pad = SP[6]
-  const t = textBlock(c, item.tr, { x: x + pad, w: w - pad * 2, sizes: [FS.body, FS.sm, FS.caption], weight: 500, color: c.p.ink2, maxLines: 3 })
+  // Its sense on up to four lines before it is cut (plan 248).
+  const t = textBlock(c, item.tr, { x: x + pad, w: w - pad * 2, sizes: [FS.body, FS.sm, FS.caption], weight: 500, color: c.p.ink2, maxLines: 4 })
   const hd = head ? textBlock(c, head, { x: x + pad, w: w - pad * 2, sizes: [FS.lead, FS.body], fam: 'serif', color: c.p.line.grammar, align: 'left', maxLines: 1 }) : none
   const s = sentenceBlock(c, item.rows, { x: x + pad, w: w - pad * 2, maxH: Math.max(FS.lead * 2, maxH - t.h - hd.h - pad * 2 - SP[4] * 2), max: FS.title * 1.1, min: FS.sm, script: 'furigana', lit, fam: 'jp', lines: 3 })
   const h = pad * 2 + hd.h + (hd.h ? SP[3] : 0) + s.h + SP[4] + t.h
-  return { h, draw: y => { card(c, x, y, w, h); hd.draw(y + pad); s.draw(y + pad + hd.h + (hd.h ? SP[3] : 0)); t.draw(y + pad + hd.h + (hd.h ? SP[3] : 0) + s.h + SP[4]) } }
+  return { h, cut: !!(t.cut || s.cut), draw: y => { card(c, x, y, w, h); hd.draw(y + pad); s.draw(y + pad + hd.h + (hd.h ? SP[3] : 0)); t.draw(y + pad + hd.h + (hd.h ? SP[3] : 0) + s.h + SP[4]) } }
 }
 /** A word answered: its reading over it, its romaji, its sense. */
 function wordBlock(c, word, { x, w, maxH }) {
@@ -1095,7 +1138,237 @@ function kanaBlock(c, s, { x, w, maxH }) {
 function stackOf(blocks, gaps) {
   const list = blocks.map((b, i) => ({ b, gap: i ? gaps[i - 1] ?? gaps.at(-1) : 0 })).filter(x => x.b.h > 0)
   const h = list.reduce((a, x, i) => a + x.b.h + (i ? x.gap : 0), 0)
-  return { h, draw: y => { let at = y; list.forEach((x, i) => { if (i) at += x.gap; x.b.draw(at); at += x.b.h }) } }
+  return { h, cut: list.some(x => x.b.cut), draw: y => { let at = y; list.forEach((x, i) => { if (i) at += x.gap; x.b.draw(at); at += x.b.h }) } }
+}
+
+// ── Read it (plan 253) ────────────────────────────────────────
+// A reading challenge seen in a feed, drawn in the app's looks: the
+// sentence to read; its words, a card each; the answer, its romaji under
+// each word, what it says, and a bonus; then the app. Set large, to be
+// read at a glance (plan 254): the question a headline, the sentence as
+// large as it fits, the cards' words a display size. The bonus is the
+// sentence said the other way, politely or among friends, as the app's
+// plain_polite module reads its ending (the bank's `v`); a sentence it
+// reads one way only has the catalogue's own line on its point (the
+// mistake to avoid, else what it means), never one written here.
+const READ_MAX = 7
+const READ_SOURCES = new Set(['sentence', 'short'])
+/** Whether a sentence can be read word by word on one slide. */
+export const readable = pl => READ_SOURCES.has(pl.source) && !!pl.funnel?.translation && (pl.funnel.breakdown || []).length > 0 && pl.funnel.breakdown.length <= READ_MAX
+function readSpec(pl, base) {
+  const f = pl.funnel
+  // The mistake to avoid where it says it in a few lines, else what the point means.
+  const notes = f.notes || []
+  const bonus = f.version ? { kind: 'version', ...f.version, rows: unstopped(f.version.rows) }
+    : notes.find(n => n.kind === 'careful' && n.text.length <= 180) || notes.find(n => n.kind === 'mean') || notes.find(n => n.kind === 'careful') || null
+  const rows = unstopped(f.rows)
+  return {
+    ...base,
+    hook: { kind: 'readit', rows, items: f.breakdown, ask: 'read', seconds: 5, swipe: true },
+    words: { kind: 'cards', items: f.breakdown, label: 'words', lit: f.lit || '' },
+    solution: { kind: 'reading', rows, items: f.breakdown, translation: f.translation, bonus },
+  }
+}
+/** A sentence without its closing full stop, as Read it sets it (plan
+ *  255): a line to read at a glance, not prose. A question keeps its ？. */
+export const unstopped = rows => (rows?.at(-1)?.k === 'punct' && rows.at(-1).t === '。' ? rows.slice(0, -1) : rows)
+// Read it's words, an ink each (plan 256, the owner's pick of five
+// drawn, after the post that started Read it): a word keeps its ink on
+// every slide, its rule under the sentence, its card's bar and its
+// romaji under the answer, so the eye follows it from the question to
+// what it means. The inks are the app's own, the stamp's vermilion first,
+// on either ground; here, and only here, a line's pigment names a word
+// rather than its line (the README, "One line, one colour").
+const READ_INKS = p => [p.stamp, p.line.vocab, p.paper ? p.goldMid : p.goldLit, p.line.grammar, p.line.kanji, p.line.reading, p.line.rikai]
+/** Each row of a sentence to its word's ink: the breakdown's nth word
+ *  wears the nth ink, on every row it spans (ので is one word). */
+export function readInks(p, items) {
+  const inks = READ_INKS(p)
+  const out = new Map()
+  ;(items || []).forEach((it, n) => {
+    for (let i = it.i; i <= (it.j ?? it.i); i++) out.set(i, inks[n % inks.length])
+  })
+  return out
+}
+/** The script Read it sets a sentence in: kana where the studio asks for
+ *  it, else the kanji with their furigana. */
+const readScript = c => (c.pl.script === 'kana' ? 'kana' : 'furigana')
+/** The sentence to read, alone: on as few lines as it sets in, as large
+ *  as they hold, each word over its line's rule, a space between words. */
+function readitBlock(c, rows, box, items) {
+  const inks = readInks(c.p, items)
+  const at = (lines, fewest) => sentenceBlock(c, rows, { ...box, max: FS.word, min: FS.title, lines, fewest, script: readScript(c), fam: 'jp', gap: 0.2, romaji: c.pl.showRomaji, inks })
+  // One line, unless two set it a third larger (あたまが / いたい。).
+  const one = at(1, true)
+  const two = at(2, false)
+  return two.L && two.h <= box.maxH && (!one.L || one.h > box.maxH || two.L.size > one.L.size * 1.3) ? two : one.L && one.h <= box.maxH ? one : at(3, true)
+}
+/** Read it's labels over its words and its answer: a headline, as its question is. */
+function headline(c, label, y) {
+  const b = textBlock(c, label, { x: c.fr.x, w: c.fr.w, sizes: [FS.heading, FS.title], fam: 'serif', weight: 800, align: 'left', maxLines: 1 })
+  b.draw(y)
+  return b.h
+}
+/** A sentence's words, a card each: a bar in its line's colour, the word
+ *  (in kana, or with its furigana) and its romaji, what it says on the
+ *  right, glossed from the deck or left bare; "Literally" under them where
+ *  the sentence has a literal reading. */
+function cardsBlock(c, items, { x, w, maxH }, lit = '') {
+  const { ctx, p, W } = c
+  if (!items?.length) return none
+  const litB = lit ? textBlock(c, weld(c.lang, `${W.literally} ${quoted(c.lang, lit)}`), { x, w, sizes: [FS.lead, FS.body], weight: 500, color: p.ink2, maxLines: 2 }) : none
+  const litGap = litB.h ? SP[5] : 0
+  const room = maxH - litB.h - litGap
+  // Tighter as the words grow many: five stay at a size read from afar.
+  const gap = items.length > 4 ? SP[3] : SP[4]
+  const pad = items.length > 4 ? SP[3] : SP[4]
+  const bar = EDGE * 2
+  const kana = readScript(c) === 'kana'
+  let lay = null
+  let firstFit = null
+  for (const z of [FS.display, FS.display * 0.85, FS.heading, FS.title, FS.lead, FS.body, FS.sm]) {
+    // The romaji and the gloss a step under the word, the sense under it lighter.
+    const rz = Math.max(FS.caption, Math.min(FS.body, z * 0.38))
+    const mz = Math.max(FS.sm, Math.min(FS.title, z * 0.55))
+    const sz = Math.max(FS.caption, Math.min(FS.sm, z * 0.34))
+    const cards = items.map(it => {
+      const row = { t: it.t, k: 'word', fu: it.fu || null }
+      const L = layoutSentence(ctx, [row], { max: z, min: z * 0.7, maxW: w * 0.5, maxLines: 1, script: kana ? 'kana' : it.kanji ? 'furigana' : 'kanji', rules: false, gap: 0, fam: 'jp', weight: 700 })
+      const lw = Math.max(L.lineW(L.lines[0]), measure(ctx, it.ro || '', font(500, rz, 'latin')))
+      const rightW = Math.max(w * 0.3, w - pad * 2 - bar - SP[5] - lw - SP[6])
+      const main = firstSense(it.main)
+      const sub = it.sub || it.pos || ''
+      // A size down, then a line more, before anything is cut; never a
+      // size its longest word is broken at (comprendr|e): the card's word
+      // steps down instead, and the column widens.
+      const whole = (str, weight) => z => Math.max(...str.split(/\s+/).map(wd => measure(ctx, wd, font(weight, z, 'latin')))) <= rightW
+      const say = (str, weight, tries) => {
+        const ok = whole(str, weight)
+        const b = tries.map(([lines, zs]) => [lines, zs.filter(ok)]).filter(([, zs]) => zs.length)
+          .map(([lines, zs]) => fit(ctx, str, { weight, sizes: zs, maxW: rightW, maxLines: lines, balanced: false })).find(x => !x.cut)
+        return b || { ...fit(ctx, str, { weight, sizes: tries.at(-1)[1], maxW: rightW, maxLines: tries.at(-1)[0], balanced: false }), cut: true }
+      }
+      const m = main ? say(main, 700, [[2, [mz, mz * 0.85]], [3, [mz * 0.85, FS.sm]]]) : null
+      const sb = sub ? say(sub, 500, [[2, [sz, FS.caption]], [3, [FS.caption, FS.xs]]]) : null
+      const left = L.h + SP[1] + rz * 1.1
+      const right = (m ? paragraphH(m) : 0) + (sb ? SP[2] + paragraphH(sb) : 0)
+      return { it, L, rz, m, sb, h: pad * 2 + Math.max(left, right), right }
+    })
+    const total = cards.reduce((a, cd) => a + cd.h, 0) + gap * (cards.length - 1)
+    const cut = cards.some(cd => cd.m?.cut || cd.sb?.cut)
+    lay = { cards, total, cut }
+    if (total <= room && !cut) break
+    if (total <= room) firstFit ||= lay
+  }
+  if (firstFit && (lay.total > room || lay.cut)) lay = firstFit
+  return {
+    h: lay.total + litGap + litB.h,
+    cut: lay.cut || !!litB.cut,
+    draw: y => {
+      let at = y
+      const inks = READ_INKS(p)
+      lay.cards.forEach((cd, n) => {
+        card(c, x, at, w, cd.h)
+        ctx.fillStyle = inks[n % inks.length]
+        rrect(ctx, x + pad, at + pad, bar, cd.h - pad * 2, bar / 2)
+        ctx.fill()
+        const lx = x + pad + bar + SP[5]
+        const ly = at + (cd.h - (cd.L.h + SP[1] + cd.rz * 1.1)) / 2
+        drawSentence(ctx, cd.L, lx, ly, 'left', () => ({ ink: p.ink, ruby: p.ink2, rule: null }))
+        text(ctx, cd.it.ro || '', lx, ly + cd.L.h + SP[1] + cd.rz * 0.85, { f: font(500, cd.rz, 'latin'), color: p.ink2 })
+        let ry = at + (cd.h - cd.right) / 2
+        if (cd.m) ry += paragraph(ctx, cd.m, x + w - pad, ry, p.ink, 'right')
+        if (cd.sb) paragraph(ctx, cd.sb, x + w - pad, ry + SP[2], p.ink2, 'right')
+        at += cd.h + gap
+      })
+      if (litB.h) litB.draw(at - gap + litGap)
+    },
+  }
+}
+/** The answer, read: the sentence with each word's romaji under it, what
+ *  it says in the line's colour, large, and the bonus on a card of its own. */
+function readingBlock(c, s, { x, w, maxH }) {
+  let out = none
+  let firstFit = null
+  const tops = [FS.display * 1.15, FS.display, FS.heading, FS.title]
+  for (let k = 0; k < 4; k++) {
+    const z = i => RUNGS[Math.min(RUNGS.length - 1, i + k)]
+    const bonus = !s.bonus ? none
+      : s.bonus.kind === 'version' ? versionBlock(c, s.bonus, { x, w, step: k })
+        : bonusBlock(c, s.bonus, { x, w, sizes: [z(3), z(4), FS.sm] })
+    const tr = textBlock(c, quoted(c.lang, s.translation), { x, w, sizes: [z(1), z(2), z(3)], weight: 800, color: c.p.stamp, maxLines: 3, lh: 1.15 })
+    const gap = k < 2 ? SP[7] : SP[5]
+    const sent = sentenceBlock(c, s.rows, { x, w, maxH: maxH - tr.h - bonus.h - gap * 2, max: tops[k], min: z(3), script: readScript(c), fam: 'jp', romaji: true, romajiK: 0.36, gap: 0.2, fewest: true, inks: readInks(c.p, s.items) })
+    out = stackOf([sent, tr, bonus], [gap, gap])
+    if (out.h > maxH) continue
+    if (!tr.cut && !bonus.cut) return out
+    firstFit ||= out
+  }
+  return firstFit || out
+}
+/** The bonus's card: dark on either ground, its kind in gold over it. */
+function bonusCard(c, x, w, head, body) {
+  const { ctx, p } = c
+  const S = palette('sumi')
+  const fill = p.paper ? S.panel : cardInk(p)
+  const ink = p.paper ? S.ink : p.ink
+  const ink2 = p.paper ? S.ink2 : p.ink2
+  const gold = p.paper ? S.gold : p.gold
+  const pad = SP[6]
+  const hz = FS.sm
+  const inner = body({ ink, ink2, w: w - pad * 2 })
+  const h = pad * 2 + hz * 1.2 + SP[4] + inner.h
+  return {
+    h,
+    cut: !!inner.cut,
+    draw: y => {
+      card(c, x, y, w, h, R.card * 2, fill)
+      text(ctx, weld(c.lang, head).toLocaleUpperCase(), x + pad, y + pad + hz * 0.85, { f: font(700, hz, 'latin'), color: gold, tr: 0.16 })
+      inner.draw(x + pad, y + pad + hz * 1.2 + SP[4])
+    },
+  }
+}
+/** The bonus: the point's own line on a card. */
+function bonusBlock(c, note, { x, w, sizes }) {
+  const head = `${c.W.bonus} · ${c.W.kinds[note.kind]?.[1] || ''}`
+  return bonusCard(c, x, w, head, ({ ink, w: iw }) => {
+    const say = (lines, zs) => fit(c.ctx, weld(c.lang, note.text), { weight: 500, sizes: zs, maxW: iw, maxLines: lines, lh: 1.25, balanced: false })
+    const five = say(5, sizes)
+    const tb = five.cut ? say(8, [FS.sm, FS.caption]) : five
+    return { h: paragraphH(tb, 1.25), cut: !!tb.cut, draw: (bx, by) => paragraph(c.ctx, tb, bx, by, ink, 'left', 1.25) }
+  })
+}
+/** The bonus as the example's: the sentence said the other way, large,
+ *  its romaji, and what changed, said in a line (plan 254). */
+function versionBlock(c, v, { x, w, step = 0 }) {
+  const { ctx, W } = c
+  const kana = readScript(c) === 'kana'
+  const said = part => part[kana ? 1 : 0]
+  const rule = W.versionRule(v.to, said(v.from), said(v.into))
+  const when = v.when?.[c.lang] || v.when?.en
+  const note = weld(c.lang, when ? `${rule} — ${when}.` : `${rule}.`)
+  const head = `${W.bonus} · ${W.version[v.to]}`
+  return bonusCard(c, x, w, head, ({ ink, ink2, w: iw }) => {
+    const top = [FS.heading, FS.title, FS.lead, FS.body][Math.min(3, step)]
+    const at = (lines, min) => layoutSentence(ctx, v.rows, { max: top, min, maxW: iw, maxLines: lines, script: kana ? 'kana' : 'furigana', rules: false, gap: 0.12, fam: 'jp', weight: 700 })
+    // On one line where it holds at a lead's size, else two.
+    const L1 = at(1, FS.lead)
+    const L = L1 && L1.lines.length === 1 ? L1 : at(2, FS.body)
+    const ro = fit(ctx, lineRomaji(v.rows), { weight: 500, sizes: [FS.body, FS.sm], maxW: iw, maxLines: 2, balanced: false })
+    const nb = fit(ctx, note, { weight: 500, sizes: step < 2 ? [FS.body, FS.sm] : [FS.sm, FS.caption], maxW: iw, maxLines: 3, lh: 1.25, balanced: false })
+    const nb2 = nb.cut ? fit(ctx, note, { weight: 500, sizes: [FS.sm, FS.caption], maxW: iw, maxLines: 5, lh: 1.25, balanced: false }) : nb
+    const h = L.h + SP[3] + paragraphH(ro) + SP[4] + paragraphH(nb2, 1.25)
+    return {
+      h,
+      cut: !!nb2.cut || !!ro.cut,
+      draw: (bx, by) => {
+        drawSentence(ctx, L, bx, by, 'left', () => ({ ink, ruby: ink2, rule: null }))
+        let at = by + L.h + SP[3]
+        at += paragraph(ctx, ro, bx, at, ink2, 'left')
+        paragraph(ctx, nb2, bx, at + SP[4], ink, 'left', 1.25)
+      },
+    }
+  })
 }
 
 // ── The detail ────────────────────────────────────────────────
@@ -1382,27 +1655,47 @@ function chatBlock(c, lines, { x, w, maxH, them }) {
   })
 }
 /** A turn of a conversation: their line, then the three replies, or the right one. */
+// A turn's lines as large as the frame lets them (plan 240): the line said
+// and the reply are tried at every rung from the display's down, the
+// replies to choose from and the why sized into what is left (the replies
+// are the question: the smaller of the line and them, a third up, is what
+// is made as large as it goes), and each
+// bubble keeps its rōmaji and its sense where they still fit. A rung is
+// given up to keep them only when it costs little: a sense is worth 10%
+// of the size, rōmaji 3%.
+const TURN_RUNGS = [FS.display, FS.display * 0.85, FS.heading, FS.title * 1.2, FS.title, FS.lead, FS.body, FS.sm]
+const TURN_SHOWS = [{ romaji: true, tr: true, worth: 1 }, { romaji: false, tr: true, worth: 0.97 }, { romaji: false, tr: false, worth: 0.9 }]
 function turnBlock(c, s, { x, w, maxH }) {
   const turn = s.turn
-  const gap = SP[7]
-  if (!s.revealed) {
-    const q = { choices: turn.choices.map(rows => ({ rows })), right: turn.right }
-    // The replies at the largest rung that leaves their line its bubble.
-    let out = none
-    for (const z of [FS.title, FS.lead, FS.body, FS.sm, FS.caption]) {
-      const ch = choicesBlock(c, q, { x, w, sizes: [z] })
-      const them = bubbleBlock(c, turn.them, { x, w, maxH: maxH - ch.h - gap, who: s.them, romaji: s.romaji })
-      out = stackOf([them, ch], [gap])
-      if (out.h <= maxH) break
-    }
-    return out
+  const gap = SP[6]
+  const shows = TURN_SHOWS.filter(v => s.romaji || !v.romaji)
+  const q = { choices: turn.choices.map(rows => ({ rows })), right: turn.right }
+  let best = null
+  let last = null
+  const keep = (out, score) => {
+    last = out
+    if (out.h <= maxH && (!best || score > best.score)) best = { out, score }
   }
-  const why = textBlock(c, turn.why, { x, w, sizes: [FS.body, FS.sm, FS.caption], weight: 500, color: c.p.ink2, align: 'left', maxLines: 4 })
-  const room = maxH - why.h - gap * 2
-  const mine = bubbleBlock(c, { rows: turn.choices[turn.right], tr: turn.reply }, { x, w, maxH: room * 0.45, who: c.W.you, me: true, romaji: s.romaji })
-  const them = bubbleBlock(c, turn.them, { x, w, maxH: room - mine.h, who: s.them, romaji: s.romaji })
-  const all = stackOf([them, mine, why], [gap, gap])
-  return all.h <= maxH ? all : stackOf([them, mine], [gap])
+  for (const z of TURN_RUNGS) {
+    for (const v of shows) {
+      const them = bubbleOnce(c, turn.them, { x, w, max: z, who: s.them, romaji: v.romaji, tr: v.tr, snug: true })
+      if (!s.revealed) {
+        // The replies never above the line, as large as what is left holds.
+        const room = maxH - them.h - gap
+        const zc = [FS.title, FS.lead, FS.body, FS.sm, FS.caption].filter(r => r <= them.size + 0.5).find(r => choicesBlock(c, q, { x, w, sizes: [r] }).h <= room) ?? FS.caption
+        keep(stackOf([them, choicesBlock(c, q, { x, w, sizes: [zc] })], [gap]), Math.min(them.size, zc * 1.3) * v.worth)
+        continue
+      }
+      // The reply at the line's size: the two bubbles read alike.
+      const mine = bubbleOnce(c, { rows: turn.choices[turn.right], tr: turn.reply }, { x, w, max: Math.min(z, them.size), who: c.W.you, me: true, romaji: v.romaji, tr: v.tr, snug: true })
+      const room = maxH - them.h - mine.h - gap * 2
+      const why = [FS.lead, FS.body, FS.sm].map(z2 => textBlock(c, turn.why, { x, w, sizes: [z2], weight: 500, color: c.p.ink2, align: 'left', maxLines: 5 })).find(b => !b.cut && b.h <= room)
+      const size = Math.min(them.size, mine.size) * v.worth
+      if (why) keep(stackOf([them, mine, why], [gap, gap]), size)
+      else keep(stackOf([them, mine], [gap]), size * 0.8)
+    }
+  }
+  return best ? best.out : last
 }
 /** Pictures in a grid; answered, each with its word, the odd one ringed. */
 function picturesBlock(c, s, { x, w, maxH }) {
@@ -1617,6 +1910,7 @@ function pairHeadsBlock(c, s, { x, w, maxH }) {
 function content(c, s, box) {
   switch (s.kind) {
     case 'sentence': return sentenceBlock(c, s.rows, { ...box, romaji: c.pl.showRomaji, min: FS.lead, lines: 4 })
+    case 'readit': return readitBlock(c, s.rows, box, s.items)
     case 'glyph': return glyphBlock(c, s.text, box)
     case 'quote': return quoteBlock(c, s.text, box)
     case 'pattern': {
@@ -1648,11 +1942,13 @@ function content(c, s, box) {
     case 'chat': return chatBlock(c, s.lines, { ...box, them: s.them })
     case 'apart': return apartBlock(c, s.chars, box)
     case 'kanas': return kanasBlock(c, s, box)
+    case 'cards': return cardsBlock(c, s.items, box, s.lit)
+    case 'reading': return readingBlock(c, s, box)
     default: return none
   }
 }
 // What reads best centred: the item alone; a list or a question reads from the left.
-const CENTRED = new Set(['sentence', 'glyph', 'quote', 'pattern', 'pair', 'chars', 'pictures', 'title', 'word', 'kanji', 'kana', 'answer', 'point', 'kanas'])
+const CENTRED = new Set(['sentence', 'readit', 'glyph', 'quote', 'pattern', 'pair', 'chars', 'pictures', 'title', 'word', 'kanji', 'kana', 'answer', 'point', 'kanas'])
 
 // ── The slides ────────────────────────────────────────────────
 /** The hook: the item and the question it asks, the way on to the answer.
@@ -1675,7 +1971,8 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
     const top = fr.y + 56 + SP[7]
     const nz = compact ? FS.heading : tall(c) ? FS.glyph : FS.word
     const kh = FS.caption * 1.08 * 1.2
-    const q = compact ? none : textBlock(c, ask, { x: fr.x, w: fr.w, sizes: [FS.lead, FS.body], weight: 500, color: p.ink2, maxLines: 2 })
+    // Read it's question is a headline (plan 254).
+    const q = compact ? none : textBlock(c, ask, s.swipe ? { x: fr.x, w: fr.w, sizes: [FS.title, FS.lead], weight: 800, color: p.ink, maxLines: 2 } : { x: fr.x, w: fr.w, sizes: [FS.lead, FS.body], weight: 500, color: p.ink2, maxLines: 2 })
     const y = top + nz * 0.95 + kh + SP[3] + q.h + (compact ? SP[5] : SP[7])
     const foot = FS.body * 1.6
     const bottom = fr.bottom - foot - SP[6]
@@ -1714,15 +2011,18 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
         if (compact) kicker(c, ask, fr.cx, top, 'center')
         else head.draw(top)
         place(c, b, y, bottom)
-        pill(c, weld(c.lang, W.save), fr.cx, fr.bottom - 92, { icon: 'save', dot: p.gold })
+        // The way on to the answer, as the next question says it (plan 245); Read it's, as the feed says it (plan 253).
+        pill(c, weld(c.lang, s.swipe ? W.swipe : W.yoursFoot), fr.cx, fr.bottom - 92, s.swipe ? { dot: p.stamp } : {})
       },
     }
   }
   const top = fr.y + 56 + SP[7]
-  const kh = FS.caption * 1.08 * 1.2
+  // Read it asks its question as a headline, not a kicker (plan 254).
+  const head = s.swipe && !compact ? textBlock(c, ask, { x: fr.x, w: fr.w, sizes: [FS.heading, FS.title], fam: 'serif', weight: 800, maxLines: 2, lh: 1.1 }) : null
+  const kh = head ? head.h : FS.caption * 1.08 * 1.2
   const bottom = fr.bottom - 92 - (compact ? SP[5] : SP[8])
   const level = /^N\d$/.test(c.pl.level) && !compact ? `JLPT ${c.pl.level}` : ''
-  const lv = level ? textBlock(c, level, { x: fr.x, w: fr.w, sizes: [FS.body], weight: 500, color: p.ink2, maxLines: 1 }) : none
+  const lv = level ? textBlock(c, level, { x: fr.x, w: fr.w, sizes: [head ? FS.lead : FS.body], weight: 500, color: p.ink2, maxLines: 1 }) : none
   const gap = compact ? SP[5] : SP[7]
   const room = bottom - top - kh - gap - (lv.h ? lv.h + SP[7] : 0)
   const b = content(c, s, { x: fr.x, w: fr.w, maxH: room, align: centred ? 'center' : 'left' })
@@ -1730,10 +2030,11 @@ function hookLayout(c, s, { ask, secs, compact, centred }) {
     b, room,
     draw() {
       chrome(c)
-      kicker(c, ask, fr.cx, top, 'center')
+      if (head) head.draw(top)
+      else kicker(c, ask, fr.cx, top, 'center')
       if (b.h > room) place(c, b, top + kh + gap, bottom)
       else stack([b, lv], top + kh + gap, bottom, SP[7])
-      pill(c, weld(c.lang, W.swipe), fr.cx, fr.bottom - 92)
+      pill(c, weld(c.lang, W.swipe), fr.cx, fr.bottom - 92, s.swipe ? { dot: p.stamp } : {})
     },
   }
 }
@@ -1742,7 +2043,7 @@ function solutionSlide(c, s) {
   const { fr, W, p } = c
   const top = c.design === 'fiche' ? chrome(c, { jp: '解', label: W.answer }) : chrome(c)
   let y = top
-  if (c.design !== 'fiche') y += kicker(c, s.kind === 'analyser' && c.design === 'clarte' ? W.analyser : W.answer, fr.x, y, 'left', c.design === 'clarte' ? p.ink2 : p.gold) + SP[6]
+  if (c.design !== 'fiche') y += (s.kind === 'reading' ? headline(c, W.answer, y) : kicker(c, s.kind === 'analyser' && c.design === 'clarte' ? W.analyser : W.answer, fr.x, y, 'left', c.design === 'clarte' ? p.ink2 : p.gold)) + SP[6]
   const b = content(c, s, { x: fr.x, w: fr.w, maxH: fr.bottom - y })
   place(c, b, y, fr.bottom)
 }
@@ -1753,7 +2054,7 @@ function detailSlide(c, s) {
   const label = weld(c.lang, s.pages > 1 ? `${named} · ${s.page}/${s.pages}` : named)
   const top = c.design === 'fiche' ? chrome(c, { jp: s.yours ? '問' : '詳', label, band: s.yours ? p.gold : p.line.grammar }) : chrome(c)
   let y = top
-  if (c.design !== 'fiche') y += kicker(c, label, fr.x, y, 'left') + SP[6]
+  if (c.design !== 'fiche') y += (s.kind === 'cards' ? headline(c, label, y) : kicker(c, label, fr.x, y, 'left')) + SP[6]
   // A question left to the reader: asked, never answered here.
   const ask = s.ask ? textBlock(c, weld(c.lang, W.ask[s.ask]), { x: fr.x, w: fr.w, sizes: [FS.title, FS.lead], align: 'left', maxLines: 2 }) : none
   if (ask.h) { ask.draw(y); y += ask.h + SP[6] }
@@ -1781,14 +2082,16 @@ function detailSlide(c, s) {
 function suiteOf(spec, pl) {
   const f = pl.funnel || {}
   const seen = new Set([spec.hook?.q, spec.solution?.q, spec.detail?.q].filter(Boolean))
-  const same = (a, b) => a.kind === b.kind && (a.label || '') === (b.label || '')
+  // The same part twice is the same kind under the same label, or the same
+  // items under any (a kana's words were dealt as its detail and again: plan 248).
+  const same = (a, b) => a.kind === b.kind && ((a.label || '') === (b.label || '') || (a.items && a.items === b.items))
   const rowsOf = list => list.map(x => ({ t: x.t, reading: x.kanji ? x.reading : x.reading || '', ro: x.ro, main: x.main, sub: x.pos, line: x.line || 'vocab' }))
   // A sentence's suite (spec.lead) is its breakdown and more of it, no question.
   const lead = spec.lead || []
   const parts = [
     f.breakdown?.length && !spec.lead ? { kind: 'rows', items: rowsOf(f.breakdown), label: 'words' } : null,
     f.examples?.length ? { kind: 'examples', items: f.examples, label: 'sentences' } : null,
-    f.words?.length ? { kind: 'rows', items: f.words, label: pl.source === 'kanji' || pl.source === 'word' ? 'kanjiWords' : 'words' } : null,
+    f.words?.length ? { kind: 'rows', items: f.words, label: ['kanji', 'word', 'kana'].includes(pl.source) ? 'kanjiWords' : pl.source === 'lookalike' ? 'lookWords' : 'words' } : null,
     f.lookalike?.length > 1 ? { kind: 'kanas', items: f.lookalike, here: f.kana?.k, label: 'lookalike' } : null,
   ].filter(d => d && !(spec.detail && same(spec.detail, d)) && !lead.some(x => same(x, d)))
   const asks = spec.lead ? [] : [
@@ -2071,7 +2374,9 @@ function ctaSlide(c, feature) {
   line.draw(y + edge + room + SP[4] + name.h + SP[2])
   y += ch + gap
   if (showAlso) also(c, ALSO[feature], y)
-  metal(ctx, p, fr.cx, fr.bottom - btn, weld(c.lang, W.cta.go), fr.w)
+  // The way on: the site's address (plan 245), inside the safe area, so Go
+  // is never under the feed's buttons where the card above reaches past it.
+  address(ctx, p, fr.x, fr.bottom - btn, fr.w, SITE)
 }
 /** The two other features, a picture and a name each. */
 function also(c, list, y) {
@@ -2123,7 +2428,7 @@ function illustrate(c, feature, box) {
   ctx.scale(s, s)
   const draw = {
     reading: drawReading, comprehension: drawComprehension, translation: drawTranslation, listen: drawListen, composition: drawComposition,
-    exam: drawExam, analyser: drawRead, ask: drawAsk, today: drawToday, words: drawWords, kanji: drawKanji, grammar: drawGrammar, kana: drawKana,
+    conversation: drawConversation, exam: drawExam, analyser: drawRead, ask: drawAsk, today: drawToday, words: drawWords, kanji: drawKanji, grammar: drawGrammar, kana: drawKana,
   }[feature]
   draw(c)
   ctx.restore()
@@ -2221,7 +2526,8 @@ function itemOf(c) {
   return {
     jp,
     rows: rows ? rows.map(r => r.t) : jp ? [jp] : [],
-    ro: f.romaji || (f.word ? f.word.ro : '') || '',
+    // A conversation's `romaji` is whether its slides print it, not a reading.
+    ro: (typeof f.romaji === 'string' && f.romaji) || (f.word ? f.word.ro : '') || '',
     tr: f.translation || f.examples?.[0]?.tr || f.word?.main || '',
     pattern: f.point?.pattern || f.points?.[0]?.pattern || c.pl.caption?.point || '',
     breakdown: f.breakdown || [],
@@ -2519,7 +2825,7 @@ function drawTranslation(c) {
   const ink = p.line.honyaku
   const it = itemOf(c)
   panels(c, [
-    (x, y, w) => boardText(c, `“${it.tr || '…'}”`, x, y + 4, w, { sizes: [38, 36, 34, 32, 30], lines: 5, fam: 'serif', balanced: true }),
+    (x, y, w) => boardText(c, quoted(c.lang, it.tr || '…'), x, y + 4, w, { sizes: [38, 36, 34, 32, 30], lines: 5, fam: 'serif', balanced: true }),
     (x, y, w) => {
       const b = fit(ctx, it.jp || '日本語', { fam: 'jp', weight: 700, sizes: [42, 38, 34, 32, 30], maxW: w, maxLines: 4, balanced: false })
       b.lines.forEach((ln, i) => {
@@ -2599,6 +2905,125 @@ function drawAsk(c) {
   roundTag(c, '答', 44, ay + ah / 2, success(p))
   paragraph(ctx, ab, 88, ay + 22, p.ink, 'left')
 }
+// 会話: the talk as the run draws it (screens/ConversationRun.jsx, the
+// bubbles of plan 223): the other person's line at the left on the
+// line's rail, the learner's at the right on their gold, ticked, each
+// with its voice beside it; under the talk, the three replies, the one
+// picked sent up into it (plan 235). The exchange is the carousel's own
+// where it is a conversation; any other borrows the restaurant's opening
+// (frontend/carousel/content, the dialogues).
+const TALK_SAMPLE = { them: 'いらっしゃいませ。何名様ですか。', choices: ['二つです。', '二人です。', '二回です。'], right: 1 }
+const said = rows => rows.map(r => r.t).join('')
+function talkOf(c) {
+  const turns = c.pl.funnel?.turns
+  if (!turns?.length) return TALK_SAMPLE
+  const all = turns.map(tu => ({ them: said(tu.them.rows), choices: tu.choices.map(said), right: tu.right }))
+  // The most compact exchange is drawn, so its lines stand whole and large:
+  // the one whose longest line, theirs or a reply, is the shortest.
+  const longest = tu => Math.max([...tu.them].length * 0.75, ...tu.choices.map(ch => [...ch].length))
+  return all.reduce((a, b) => (longest(b) < longest(a) ? b : a))
+}
+function drawConversation(c) {
+  const { ctx, p } = c
+  const ink = p.line.kaiwa
+  const talk = talkOf(c)
+  // A line of two sentences that cannot stand on one breaks between
+  // them, never inside the second (何名様です / か。).
+  const sizes = [44, 40, 36, 34, 32]
+  const lines = (str, maxW) => {
+    const one = fit(ctx, str, { fam: 'jp', weight: 500, sizes, maxW, maxLines: 1 })
+    const parts = str.split(/(?<=[。？！])/).filter(Boolean)
+    if (!one.cut && measure(ctx, one.lines[0], one.f) <= maxW) return one
+    if (parts.length === 2) {
+      const size = sizes.find(z => parts.every(s => measure(ctx, s, font(500, z, 'jp')) <= maxW))
+      if (size) return { size, f: font(500, size, 'jp'), lines: parts }
+    }
+    return fit(ctx, str, { fam: 'jp', weight: 500, sizes, maxW, maxLines: 2, balanced: true })
+  }
+  const widest = b => Math.max(...b.lines.map(l => measure(ctx, l, b.f)))
+  const padX = 26
+  const padY = 18
+  const rail = 7
+  const ring = 26
+  const tb = lines(talk.them, 600)
+  const mb = lines(talk.choices[talk.right], 480)
+  const th = paragraphH(tb) + padY * 2
+  const mh = paragraphH(mb) + padY * 2
+  const gap = 18
+  const under = 24
+  const rowH = Math.max(46, Math.min(60, (420 - th - gap - mh - under) / 3))
+  const total = th + gap + mh + under + rowH * 3
+  let y = Math.max(0, (420 - total) / 2)
+  // The voice's ring, as the run draws it beside a line.
+  const voice = (cx, cy, color) => {
+    ctx.fillStyle = cardInk(p)
+    ctx.beginPath()
+    ctx.arc(cx, cy, ring, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.strokeStyle = color
+    ctx.lineWidth = 3
+    ctx.stroke()
+    speaker(ctx, cx + 2, cy, 24, p.ink2)
+  }
+  // A bubble: square on its rail's side, round on the other.
+  const bubble = (x, top, w, h, mine) => {
+    ctx.fillStyle = cardInk(p)
+    rrect(ctx, x, top, w, h, 24)
+    ctx.fill()
+    ctx.fillRect(mine ? x + w - 24 : x, top, 24, h)
+    ctx.fillStyle = mine ? p.gold : ink
+    ctx.fillRect(mine ? x + w - rail : x, top, rail, h)
+  }
+  // Them, the line just said: its voice ringed in the line's ink.
+  const tw = widest(tb) + padX * 2
+  bubble(0, y, tw, th, false)
+  paragraph(ctx, tb, padX, y + padY, p.ink, 'left')
+  voice(tw + 16 + ring, y + th - ring, ink)
+  y += th + gap
+  // The learner's reply, the one picked: at the right, ticked at its corner.
+  const mw = widest(mb) + padX * 2
+  const mx = 800 - mw
+  bubble(mx, y, mw, mh, true)
+  paragraph(ctx, mb, mx + padX, y + padY, p.ink, 'left')
+  voice(mx - 16 - ring, y + mh - ring, alpha(p.ink2, 0.5))
+  ctx.fillStyle = faceInk(p)
+  ctx.beginPath()
+  ctx.arc(mx + 4, y + 4, 24, 0, Math.PI * 2)
+  ctx.fill()
+  check(ctx, mx + 4, y + 4, 19, success(p), cardInk(p))
+  const mineBottom = y + mh
+  y += mh + under
+  // The replies under the talk, one panel, a row a reply between
+  // hairlines: its number, its Japanese and the arrow that sends it.
+  // Replies too long for the panel beside the pick's arrow take the
+  // board's width, and the row's own arrow says the pick is sent.
+  const rowF = font(500, 32, 'jp')
+  const wide = talk.choices.some(jp => measure(ctx, jp, rowF) > 680 - 150)
+  const pw = wide ? 800 : 680
+  boardCard(c, 0, y, pw, rowH * 3, 20)
+  talk.choices.forEach((jp, i) => {
+    const ry = y + i * rowH
+    const picked = i === talk.right
+    if (picked) {
+      ctx.fillStyle = mix(p.gold, cardInk(p), 0.16)
+      rrect(ctx, 4, ry + 4, pw - 8, rowH - 8, 16)
+      ctx.fill()
+    }
+    if (i) {
+      ctx.fillStyle = p.surfaceLine
+      ctx.fillRect(20, ry, pw - 40, 2)
+    }
+    const mid = ry + rowH / 2
+    text(ctx, String(i + 1), 40, mid + 12, { f: font(700, 32, 'latin'), color: p.ink2, align: 'center' })
+    const b = fit(ctx, jp, { fam: 'jp', weight: 500, sizes: [36, 34, 32], maxW: pw - 150, maxLines: 1 })
+    text(ctx, b.lines[0], 76, mid + b.size * 0.36, { f: b.f, color: picked ? p.ink : p.ink2 })
+    arrow(ctx, pw - 66, mid, pw - 30, mid, picked ? p.gold : alpha(p.ink2, 0.45), 0, 4)
+  })
+  // The pick, sent up into the talk.
+  if (wide) return
+  const py = y + talk.right * rowH + rowH / 2
+  arrow(ctx, pw + 8, py, Math.min(780, mx + mw - 36), mineBottom + 10, p.gold, 0.3, 6)
+}
 function roundTag(c, ch, cx, cy, color) {
   c.ctx.fillStyle = color
   c.ctx.beginPath()
@@ -2675,7 +3100,8 @@ function drawListen(c) {
   }
   ctx.restore()
   // What was heard, written in rōmaji, each word checked.
-  const said = (c.pl.funnel?.romaji || c.pl.caption?.romaji || c.pl.funnel?.word?.ro || 'ohayou gozaimasu').toLowerCase()
+  const ro = typeof c.pl.funnel?.romaji === 'string' ? c.pl.funnel.romaji : ''
+  const said = (ro || c.pl.caption?.romaji || c.pl.funnel?.word?.ro || 'ohayou gozaimasu').toLowerCase()
   tilt(ctx, 580, 160, 0.02, () => {
     boardCard(c, 380, 40, 410, 240, 26)
     label(c, 'rōmaji', 410, 92, { size: 30, color: p.ink2, align: 'left', weight: 500 })

@@ -9,6 +9,24 @@ export function laneTypeOf(lane) {
   return lane.kind === 'personal' ? 'personal' : lane.source
 }
 
+/** The lines in their order, as the gate groups its lanes and the dial
+ *  and the widget's stripe lay their pigments: the backend's order
+ *  interleaves them, and the pigment is what tells one from another. */
+export const LINE_ORDER = Object.freeze(['kana', 'vocab', 'kanji', 'grammar', 'personal'])
+
+/** A day's lanes as one share a line, in LINE_ORDER: [{ line, n }],
+ *  the lines with nothing left out. A line ridden at several levels or
+ *  in several modes is one share, never a bar or an arc a lane. */
+export function lineShares(lanes) {
+  const by = new Map()
+  for (const lane of lanes ?? []) {
+    const n = laneCount(lane)
+    if (n > 0) by.set(laneTypeOf(lane), (by.get(laneTypeOf(lane)) ?? 0) + n)
+  }
+  const rank = line => { const i = LINE_ORDER.indexOf(line); return i < 0 ? LINE_ORDER.length : i }
+  return [...by.keys()].sort((a, b) => rank(a) - rank(b)).map(line => ({ line, n: by.get(line) }))
+}
+
 /** Where a card came from, in words a person would use: a deck name,
  *  a JLPT level, or a kana set's label rather than its stored slug.
  *  `kanaSetLabel` is passed in rather than imported so this module
