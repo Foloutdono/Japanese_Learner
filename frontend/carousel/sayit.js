@@ -652,7 +652,7 @@ function cta(ctx, plan, tl, t, into, P, T) {
   const { laid } = backdrop(ctx, P, T, { dark: 0.62, hour: plan.hour, wash: 1, plan: coverPlan(plan), tl, t, seg: 'cta', cover: true })
   masthead(ctx, T, 1 - laid)
   let y = UNDER + SP[5]
-  y = block(ctx, T, S.cta, y, { sizes: [FS.heading, FS.title], weight: 900, fam: 'serif', maxLines: 2, lh: 1.08, k: ease(into / 0.6) })
+  y = block(ctx, T, S.cta, y, { sizes: [FS.heading, FS.title, FS.lead], weight: 900, fam: 'serif', maxLines: 1, lh: 1.08, k: ease(into / 0.6) })
   y = block(ctx, T, S.ctaLine, y + SP[3], { sizes: [FS.body, FS.sm], weight: 600, color: T.soft, maxLines: 2, k: ease((into - 0.2) / 0.6) })
   y += SP[5]
   // The exercise as the app runs it, on its card: the sentence, the Japanese
@@ -756,12 +756,13 @@ function appCard(ctx, plan, it, box, into) {
     rrect(ctx, x, y, vw, vh, vh / 2)
     ctx.fill()
     text(ctx, label, x + SP[5], y + vh / 2 + FS.body * 0.36, { f: vf, color: p.success || '#4d7639' })
-    // The reference beside it, on the pill's line.
+    // The reference under it, whole.
+    y += vh + SP[3]
     const rf = font(700, FS.caption, 'latin')
-    const rx = x + vw + SP[4]
-    text(ctx, S.reference, rx, y + vh / 2 - FS.caption * 0.25, { f: rf, color: p.ink2 })
-    const jb = fit(ctx, it.jp, { weight: 500, fam: 'jp', sizes: [FS.body, FS.sm, FS.caption], maxW: x + w - rx, maxLines: 1 })
-    text(ctx, jb.lines[0], rx, y + vh / 2 + jb.size * 0.95, { f: jb.f, color: p.ink })
+    text(ctx, S.reference, x, y + FS.caption * 0.85, { f: rf, color: p.ink2 })
+    y += FS.caption * 1.25
+    const jb = fit(ctx, it.jp, { weight: 500, fam: 'jp', sizes: [FS.body, FS.sm, FS.caption], maxW: w, maxLines: 2 })
+    jb.lines.forEach((l, i) => text(ctx, l, x, y + jb.size * (0.9 + i * 1.2), { f: jb.f, color: p.ink }))
     ctx.restore()
   }
 }
