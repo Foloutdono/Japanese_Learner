@@ -190,6 +190,34 @@ describe('Settings at phone width', () => {
     expect(new Set(samples).size, samples.join(' / ')).toBe(picks.length)
   })
 
+  // A language in preview (plan 312): an account the server lists for it
+  // finds it fifth, its flag, its name and its sample on one line beside
+  // the others; no other account sees it (the four above).
+  it('offers Bahasa Indonesia, on one line, to an account listed for it', async () => {
+    const { forgetSummary } = await import('./stores/profileSummary')
+    const before = ANSWERS['/api/profile']
+    ANSWERS['/api/profile'] = { ...before, previewLangs: ['id'] }
+    forgetSummary()
+    try {
+      // At 360px, the narrowest phone that keeps the samples (below).
+      await page.viewport(360, 740)
+      await mount('/profile/settings/display')
+      const picks = [...document.querySelectorAll('.lang-pick')]
+      expect(picks).toHaveLength(5)
+      const indonesian = picks.find(pick => pick.getAttribute('lang') === 'id')
+      expect(indonesian?.textContent).toContain('Bahasa Indonesia')
+      const [name, words] = [indonesian.querySelector('.lang-pick__name'), indonesian.querySelector('.lang-pick__sample')]
+      expect(indonesian.querySelector('.lang-pick__name > svg.lang-flag')).not.toBeNull()
+      expect(box(name).height).toBeLessThan(box(picks[0].querySelector('.lang-pick__name')).height * 1.5)
+      expect(words.scrollWidth, words.textContent).toBeLessThanOrEqual(words.clientWidth)
+      expect(box(words).left).toBeGreaterThan(box(name).right)
+    } finally {
+      ANSWERS['/api/profile'] = before
+      forgetSummary()
+      await page.viewport(390, 844)
+    }
+  })
+
   // A container query, which a mid-test resize does reach (the lane's
   // note is about matchMedia). Español (Latinoamérica) and Agregar need
   // about 286px (plan 303), which a 360px phone's row holds: every
