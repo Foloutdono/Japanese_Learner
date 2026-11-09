@@ -462,11 +462,26 @@ def say(text: str, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGU
             return say_kana(notation, style, speed=speed, sample_rate=sample_rate, hold=LONE_KANA_HOLD_S, tone=extra)
         except _NotationRefused:
             logger.info("Voice engine refused the notation %r; reading %r as text", notation, text)
+    return synthesize(audio_query(text, style), style, speed=speed, sample_rate=sample_rate, tone=extra)
+
+
+def audio_query(text: str, style: int) -> dict:
+    """The engine's reading of `text` (its morae, their lengths and
+    pitches), as say() asks for it: 何 handed as ナン where it reads なん
+    (read_nan), a leading は or へ put back to ha or he. A caller that
+    must know what will be said before it is said (the videos' read
+    along, scripts/long_video_audio.py) reads it, then speaks it."""
     query = _json(_request("POST", "/audio_query", params={"text": read_nan(text), "speaker": style}), "/audio_query")
     if not isinstance(query, dict):
         raise TTSFailed("the voice engine returned an audio query that is not an object")
     _read_leading_ha(text, query)
-    query.update(speedScale=speed, outputSamplingRate=sample_rate, outputStereo=False, **extra)
+    return query
+
+
+def synthesize(query: dict, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGUE_RATE,
+               tone: dict | None = None) -> Pcm:
+    """An audio query (audio_query's) spoken by `style`, at `speed`."""
+    query = dict(query, speedScale=speed, outputSamplingRate=sample_rate, outputStereo=False, **_toned(tone))
     return _synthesize(query, style, sample_rate)
 
 

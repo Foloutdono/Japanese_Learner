@@ -6,7 +6,7 @@
 // in both languages, inside the feed's safe area.
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { FORMATS, FS, frame } from '../carousel/draw.js'
+import { FORMATS, FS, frame, reading } from '../carousel/draw.js'
 import {
   PART, PRINT_LOOK, SAYABLE, dictionaryForm, drawSayit, isClue, posterLayout, sayitCommand, sayitCues, sayitDeal, sayitItems,
   ctaLayout, sayitPage, sayitPlan, sayitSlug, sayitTimeline, shortSense, thinkOf, turnLayout,
@@ -147,6 +147,28 @@ describe('the video, timed', () => {
         expect(at).toBeLessThanOrEqual(turn.voice + turn.dur)
       }
     }
+  })
+  it('says each sentence as the page prints it: its words and their readings go to the engine with it', () => {
+    // Handed the text alone, the engine read 米 べい under こめ, 角 かく
+    // under かど; long_video_audio holds it to the words a line carries.
+    for (const lv of LEVELS) {
+      for (const part of [1, 2]) {
+        const pl = sayitPlan(BANKS[lv], `${lv}:${part}`, { show: true })
+        const said = sayitTimeline(pl)
+        sayitCues(pl).forEach((cue, i) => {
+          const rows = pl.items[i].rows
+          expect(cue.words.map(w => w[0]).join(''), cue.text).toBe(cue.text)
+          expect(cue.words, cue.text).toEqual(rows.map(r => [r.t, r.k === 'punct' ? '' : reading(r), r.k === 'particle' ? 1 : 0]))
+          // The mix files a line under its words: the timeline's line is the one voiced.
+          const { at, ...line } = said.cues[i]
+          expect(at).toBeGreaterThan(0)
+          expect(line).toEqual(cue)
+        })
+      }
+    }
+    const rice = sayitCues(sayitPlan(BANKS.N1, 'N1:7', { show: true })).find(c => c.text.includes('米の産地'))
+    expect(rice.words).toContainEqual(['米', 'こめ', 0])
+    expect(rice.words).toContainEqual(['は', 'は', 1])
   })
   it('the maker’s beats move it, the print it stands on does not', () => {
     const tuned = sayitPlan(BANKS.N5, 'N5:4', { tune: { 'sayit.step': 2, 'sayit.hook': 4, 'challenge.lift': 0 } })

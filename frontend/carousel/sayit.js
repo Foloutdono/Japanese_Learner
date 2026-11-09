@@ -40,7 +40,7 @@ import { ASC, FORMATS, FS, METAL_H, R, SP, address, alpha, drawSentence, fit, fo
 import { PRINT_SEASONS } from './app.js'
 import { backdrop } from './backdrop.js'
 import { MASTHEAD, drawMasthead, glowMasthead } from './cover.js'
-import { HOURS, alongPanel, chipShown, moraeOf, wordTimes } from './challenge.js'
+import { HOURS, alongPanel, chipShown, moraeOf, spokenWords, wordTimes } from './challenge.js'
 import { SCENERY_IDS } from './sceneries.js'
 import { seeded, shuffle } from './common.js'
 import { SITE } from './strings.js'
@@ -281,9 +281,13 @@ export function sayitPlan(bank, id, opts = {}) {
 /** What the print under it is loaded with (app.loadPrint). */
 export const sayitPrintOpts = plan => ({ season: plan.season, scenery: plan.scenery, falls: true, bursts: true })
 
+/** A sentence as the reader says it: as the page prints it, word by
+ *  word (challenge.spokenWords), never as the engine would guess it. */
+const cueOf = (plan, it) => ({ text: it.jp, who: 'reader', slow: plan.slow, marks: true, words: spokenWords(it.rows) })
+
 /** The lines the reader says: each sentence revealed. */
 export function sayitCues(plan) {
-  return plan.items.filter((_, i) => !(plan.hidden && i === plan.items.length - 1)).map(it => ({ text: it.jp, who: 'reader', slow: plan.slow, marks: true }))
+  return plan.items.filter((_, i) => !(plan.hidden && i === plan.items.length - 1)).map(it => cueOf(plan, it))
 }
 
 /** The video, timed. `voiced(cue)` gives a voiced line's { dur, marks }
@@ -318,7 +322,7 @@ export function sayitTimeline(plan, voiced = null) {
       sfx.push({ at: +told.toFixed(3), key: 'card-transition' })
       return
     }
-    const cue = { text: it.jp, who: 'reader', slow: plan.slow, marks: true }
+    const cue = cueOf(plan, it)
     const v = voiced?.(cue)
     // A guess: the engine's pace, about 0.15 s a syllable (0.18 slowed), its pauses and pads.
     const guess = 0.25 + spoken(it.rows) * (plan.slow ? 0.18 : 0.15) + it.rows.filter(r => r.t === '、').length * 0.25

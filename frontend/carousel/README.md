@@ -1293,7 +1293,17 @@ over Today's print of the hour, in one of two ways:
   it is said (n4-21's fourth, once the analyser read 十一時 as one word). The words are
   lit on the engine's own syllables (`long_video_audio.mora_marks`, from
   its audio query, within a frame of the clip it makes) wherever their
-  count is the text's, else in proportion to each word's.
+  count is the text's, else in proportion to each word's. A sentence is
+  said as the page prints it: handed the text alone, the engine read a
+  kanji its own way (方 ほう under かた, 十分 じゅうぶん for ten minutes,
+  日本 にっぽん under にほん: 138 of the 2,245 sentences), so each cue
+  carries its words (`spokenWords`: each part's text, the reading printed
+  over it, whether it is a particle), and `long_video_audio` holds the
+  engine's audio query to them mora by mora, handing a word it reads
+  otherwise over in hiragana, then katakana, and asking again; the clip is
+  filed under the words, so a reading corrected in the bank is said anew.
+  A quotation opens on a pause and closes on none (the engine took 」 for
+  a comma: …来ます、と言いました).
 
 Either way it opens on the hook ("Can you read this?", the title, the
 level, its sentences and its reading time) and goes straight into the
@@ -1442,7 +1452,9 @@ blank for each word with what it means under it. Then the reader says it,
 slowed at N5 and N4, and the words fill the frame's blanks where they
 stand, each gold and ruled while it is said (on the voice's own
 syllables, `long_video_audio.mora_marks`), its furigana over it at N5 to
-N3 and its romaji under it at N5 and N4. Under it the same sentence in
+N3 and its romaji under it at N5 and N4. It is said as printed, as a read
+along is (its cue's words; 20 of the 1,010 sentences were said otherwise:
+米 べい, 角 かく, 辛かった からかった, 上で じょうで, 暇 いとま). Under it the same sentence in
 the other register, the part that changed lit ("Also right, among
 friends: 駅で友だちに会う。", or "politely"): a translation never says
 polite or plain, so either is right, and the line is

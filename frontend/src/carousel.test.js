@@ -2122,6 +2122,9 @@ describe('the reading challenges (plan 247)', () => {
     expect(cues.length).toBe(pl.sents.length)
     expect(cues.every(c => c.who === 'reader' && c.slow && c.marks)).toBe(true)
     expect(cues[0].text).toBe('わたしは大学の学生です。')
+    // Said as the page prints it (long_video_audio holds the engine to its
+    // words): each part with its reading, a particle flagged, said wa.
+    expect(cues[0].words).toEqual([['わたし', 'わたし', 0], ['は', 'は', 1], ['大学', 'だいがく', 0], ['の', 'の', 1], ['学生', 'がくせい', 0], ['です', 'です', 0], ['。', '', 0]])
     expect(moraeOf({ t: '学生', fu: [['学', 'がく'], ['生', 'せい']] })).toBe(4)
     expect(moraeOf({ t: 'じゅぎょう' })).toBe(3)
     expect(moraeOf({ t: '。', k: 'punct' })).toBe(0)
@@ -2141,6 +2144,8 @@ describe('the reading challenges (plan 247)', () => {
       expect(l.dur).toBeCloseTo(voiced(cues[i]).dur, 3)
       expect(tl.cues[i].at).toBeCloseTo(l.voice, 3)
       expect(challengeKey(tl.cues[i])).toBe(`reader|slow|${cues[i].text}`)
+      // The mix files a line under its words: the timeline's line is the one voiced.
+      expect(tl.cues[i].words).toEqual(cues[i].words)
       if (i) expect(l.at).toBeCloseTo(tl.lines[i - 1].voice + tl.lines[i - 1].dur + CHALLENGE.gap, 2)
     })
   })

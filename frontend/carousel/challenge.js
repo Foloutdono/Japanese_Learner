@@ -208,9 +208,16 @@ export function challengePrintOpts(plan) {
 // asked; none for the date's, which only the print drawn can say.
 const printNamed = (plan, P) => (P?.name ? P.name.replace(/-b$/, '') : plan.season ? printOf(plan.season, plan.hour) : null)
 
+/** What a line read along is said as (long_video_audio holds the engine
+ *  to it): each part of it with the reading the page prints over it, a
+ *  particle flagged, since は, へ and を are said wa, e and o. Handed the
+ *  text alone, the engine reads a kanji its own way (米 べい under こめ). */
+export const spokenWords = rows => rows.map(r => [r.t, r.k === 'punct' ? '' : reading(r), r.k === 'particle' ? 1 : 0])
+const lineCue = (plan, rows) => ({ text: sentenceText(rows), who: 'reader', slow: plan.slow, marks: true, words: spokenWords(rows) })
+
 /** The lines the reader says: one a sentence, read along. */
 export function challengeCues(plan) {
-  return plan.style === 'along' ? plan.sents.map(rows => ({ text: sentenceText(rows), who: 'reader', slow: plan.slow, marks: true })) : []
+  return plan.style === 'along' ? plan.sents.map(rows => lineCue(plan, rows)) : []
 }
 export const cueKey = c => `${c.who}|${c.slow ? 'slow' : ''}|${c.text}`
 
@@ -249,7 +256,7 @@ export function challengeTimeline(plan, voiced = null) {
     t += beat(plan, 'into') + plan.chars / (plan.cpm / 60) + beat(plan, 'out')
   } else {
     plan.sents.forEach((rows, i) => {
-      const cue = { text: sentenceText(rows), who: 'reader', slow: plan.slow, marks: true }
+      const cue = lineCue(plan, rows)
       const v = voiced?.(cue)
       // A guess: the engine's pace, about 0.15 s a syllable (0.18 slowed), its pauses and pads.
       const guess = 0.25 + rows.reduce((n, r) => n + moraeOf(r), 0) * (plan.slow ? 0.18 : 0.15) + rows.filter(r => r.t === '、').length * 0.25

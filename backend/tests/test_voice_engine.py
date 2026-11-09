@@ -223,6 +223,25 @@ def test_a_word_beginning_with_ha_or_he_is_not_read_as_the_particle(fake, text, 
     assert first["consonant_length"] > 0
 
 
+def test_a_reading_is_asked_and_then_said_as_say_does(fake):
+    # The videos' read along reads what will be said before it is said
+    # (scripts/long_video_audio.py): the query is say()'s, 何 as ナン and
+    # a leading は put back, and the line is said from it at its speed.
+    phrase = {"moras": [{"text": "ワ", "consonant": "w", "consonant_length": 0.05, "vowel": "a",
+                         "vowel_length": 0.1, "pitch": 5.0}], "accent": 1}
+    fake.audio_phrases = [phrase]
+    query = engine.audio_query("はは何ですか", 10005)
+    assert fake.calls[-1][1]["text"] == "ははナンですか"
+    assert query["accent_phrases"][0]["moras"][0]["text"] == "ハ"
+    engine.synthesize(query, 10005, speed=0.82, sample_rate=24000)
+    _path, _params, said = fake.calls[-1]
+    assert (said["speedScale"], said["outputSamplingRate"], said["outputStereo"]) == (0.82, 24000, False)
+    assert said["accent_phrases"] == query["accent_phrases"]
+    assert fake.paths()[-2:] == ["/audio_query", "/synthesis"]
+    # The query read is not changed by saying it: its syllables' times hold.
+    assert query["speedScale"] == 1.0
+
+
 def test_a_particle_read_inside_a_word_is_left_alone(fake):
     phrase = {"moras": [{"text": "コ", "consonant": "k", "vowel": "o", "vowel_length": 0.1, "pitch": 5.0},
                         {"text": "ワ", "consonant": "w", "vowel": "a", "vowel_length": 0.1, "pitch": 5.0}],

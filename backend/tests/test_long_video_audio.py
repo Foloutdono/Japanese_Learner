@@ -136,3 +136,163 @@ def test_no_video_carries_music():
     assert not hasattr(lva, "bed") and not hasattr(lva, "recorded_bed")
     import inspect
     assert list(inspect.signature(lva.mix).parameters) == ["tl_path", "cache", "sfx", "out"]
+
+
+# ── What the page prints is what is said (plan 311) ──────────────
+# The engine is handed a line as text and reads a kanji word its own
+# way (米 べい under こめ); a line that carries its words is held to the
+# reading the page prints. The engine here is a fake that reads as told.
+
+def _query(*morae):
+    """An audio query saying `morae` (kana_morae's terms), in one phrase."""
+    def mora(m):
+        if m == "N":
+            return {"text": "ン", "consonant": None, "vowel": "N"}
+        if m == "Q":
+            return {"text": "ッ", "consonant": None, "vowel": "cl"}
+        return {"text": "", "consonant": m[:-1] or None, "vowel": m[-1], "consonant_length": 0.05 if m[:-1] else None,
+                "vowel_length": 0.1}
+    return {"prePhonemeLength": 0.1, "accent_phrases": [{"moras": [mora(m) for m in morae]}]}
+
+
+def _heard(kana, unvoiced=()):
+    """The query a fake engine makes of a reading in kana."""
+    morae = lva.kana_morae(kana)
+    return _query(*[m[:-1] + m[-1].upper() if i in unvoiced else m for i, m in enumerate(morae)])
+
+
+RICE = [["この", "この", 0], ["村", "むら", 0], ["は", "は", 1], ["県", "けん", 0], ["きって", "きって", 0],
+        ["の", "の", 1], ["米", "こめ", 0], ["の", "の", 1], ["産地", "さんち", 0], ["です", "です", 0], ["。", "", 0]]
+RICE_TEXT = "この村は県きっての米の産地です。"
+
+
+def test_a_reading_is_held_in_the_engines_own_phonemes():
+    assert lva.kana_morae("きゃく") == ["kya", "ku"]
+    assert lva.kana_morae("がっこう") == ["ga", "Q", "ko", "u"]
+    assert lva.kana_morae("しんぶん") == ["shi", "N", "bu", "N"]
+    assert lva.kana_morae("ファイル") == ["fa", "i", "ru"]
+    assert lva.kana_morae("パーティー") == ["pa", "-", "ti", "-"]
+    assert lva.kana_morae("ぢづ") == ["ji", "zu"]
+    assert lva.kana_morae("CD") is None
+    assert lva.kana_morae("学校") is None
+    # A vowel said without voice (す in です) is the same mora.
+    assert lva.heard_morae(_heard("です", unvoiced={1})) == ["de", "su"]
+
+
+def test_a_word_the_engine_reads_otherwise_is_found():
+    assert lva.misread(RICE, _heard("このむらわけんきってのこめのさんちです")) == set()
+    # 米 read べい, as Open JTalk reads it alone: the word, and only it.
+    assert lva.misread(RICE, _heard("このむらわけんきってのべえのさんちです")) == {6}
+    # は said ha would be the engine's, not a kanji's: never handed over.
+    assert lva.misread(RICE, _heard("このむらはけんきってのこめのさんちです")) == set()
+
+
+def test_what_sounds_alike_reads_alike():
+    # A long vowel however it is spelt, a particle as it is said.
+    words = [["学校", "がっこう", 0], ["へ", "へ", 1], ["行きます", "いきます", 0], ["。", "", 0]]
+    assert lva.misread(words, _heard("がっこおえいきます")) == set()
+    words = [["先生", "せんせい", 0], ["を", "を", 1], ["呼んだ", "よんだ", 0]]
+    assert lva.misread(words, _heard("せんせえおよんだ")) == set()
+    # 実は is printed じつは and said じつわ: the particle grown into the word.
+    words = [["実は", "じつは", 0], ["行かない", "いかない", 0]]
+    assert lva.misread(words, _heard("じつわいかない")) == set()
+    assert lva.misread(words, _heard("じつはいかない")) == {0}
+    # A word in kana is read as written: または is the engine's to say.
+    words = [["黒", "くろ", 0], ["または", "または", 0], ["青", "あお", 0]]
+    assert lva.misread(words, _heard("くろまたわあお")) == set()
+    # A morae run in where none is printed is a word either side's: 眠そう said ねむらそう.
+    words = [["とても", "とても", 0], ["眠", "ねむ", 0], ["そう", "そう", 0], ["です", "です", 0]]
+    assert lva.misread(words, _heard("とてもねむらそうです")) == {1}
+
+
+def test_a_quotation_is_said_as_a_speaker_says_it():
+    # The engine took both marks for commas: …来ます、と言いました.
+    assert lva.said_text("友だちは「また来ます」と言いました。") == "友だちは、また来ますと言いました。"
+    assert lva.said_text("「人込み」というのは、混雑のことだ。") == "人込みというのは、混雑のことだ。"
+    assert lva.said_text("彼は、「はい」と答えた。") == "彼は、はいと答えた。"
+    assert lva.said_text("三千円です。") == "三千円です。"
+
+
+def _reader(misreads):
+    """A fake engine_query: each written form in `misreads` read as its
+    wrong kana, everything else as the page prints it (RICE)."""
+    asked = []
+
+    def query(text, style):
+        asked.append(text)
+        heard = text
+        for written, wrong in misreads.items():
+            heard = heard.replace(written, wrong)
+        for t, r, _ in RICE:
+            heard = heard.replace(t, r) if r else heard.replace(t, "")
+        return _heard(heard.replace("は", "わ", 1))
+    return query, asked
+
+
+def test_a_misread_word_is_handed_over_in_kana(monkeypatch):
+    query, asked = _reader({"米": "べえ"})
+    monkeypatch.setattr(lva, "engine_query", query)
+    said, q, wrong = lva.held_query(RICE_TEXT, RICE, 0)
+    assert said == "この村は県きってのこめの産地です。"
+    assert wrong == set()
+    assert asked == [RICE_TEXT, said]
+    # Said from the query that reads as printed: its syllables are the text's.
+    assert len(lva.heard_morae(q)) == len(lva.kana_morae("このむらわけんきってのこめのさんちです"))
+
+
+def test_katakana_is_tried_where_hiragana_is_misread_too(monkeypatch):
+    query, asked = _reader({"米": "べえ", "この村は県きってのこめ": "この村は県きってのごめ"})
+    monkeypatch.setattr(lva, "engine_query", query)
+    said, _, wrong = lva.held_query(RICE_TEXT, RICE, 0)
+    assert said == "この村は県きってのコメの産地です。"
+    assert wrong == set()
+    assert len(asked) == 3
+
+
+def test_a_line_read_as_printed_is_handed_over_as_written(monkeypatch):
+    query, asked = _reader({})
+    monkeypatch.setattr(lva, "engine_query", query)
+    assert lva.held_query(RICE_TEXT, RICE, 0)[0] == RICE_TEXT
+    assert asked == [RICE_TEXT]
+    # Words that are not the text's are no reading to hold it to.
+    assert lva.held_query("米です。", RICE, 0)[2] == set()
+
+
+def test_a_line_held_to_its_words_is_a_clip_of_its_own():
+    plain = {"who": "reader", "slow": True, "text": RICE_TEXT}
+    held = {**plain, "words": RICE}
+    assert lva.held(held) and not lva.held(plain)
+    assert lva.clip_name(held, "a") != lva.clip_name(plain, "a")
+    # A reading corrected on the page is a new clip, and a new voice too.
+    other = {**plain, "words": [w if w[0] != "米" else ["米", "べい", 0] for w in RICE]}
+    assert lva.clip_name(held, "a") != lva.clip_name(other, "a")
+    assert lva.clip_name(held, "a") != lva.clip_name(held, "b")
+    # The key the video looks a line up by is the line's alone.
+    assert lva.cue_key(held) == lva.cue_key(plain)
+
+
+def test_a_held_line_is_said_and_marked_from_the_query_that_reads_as_printed(tmp_path, monkeypatch):
+    query, _ = _reader({"米": "べえ"})
+    monkeypatch.setattr(lva, "engine_query", query)
+    spoken = []
+
+    def synthesize(q, style, *, speed, sample_rate):
+        spoken.append(q)
+        return voice_engine.Pcm(b"\x00\x00" * int(sample_rate * 1.5), sample_rate)
+
+    def say(*a, **k):
+        raise AssertionError("a held line is said from its query, never re-read from its text")
+
+    monkeypatch.setattr(voice_engine, "style_for_slot", lambda slot: 7)
+    monkeypatch.setattr(voice_engine, "synthesize", synthesize)
+    monkeypatch.setattr(voice_engine, "say", say)
+    cue = {"who": "reader", "slow": True, "text": RICE_TEXT, "marks": True, "words": RICE}
+    (tmp_path / "cues.json").write_text(json.dumps([cue], ensure_ascii=False), encoding="utf-8")
+    assert lva.voice(tmp_path / "cues.json", tmp_path / "cache", tmp_path / "durs.json") == 0
+    out = json.loads((tmp_path / "durs.json").read_text(encoding="utf-8"))
+    assert out["durs"][lva.cue_key(cue)] == 1.5
+    assert (tmp_path / "cache" / lva.clip_name(cue, voice_engine.VOICE_REV)).exists()
+    said = lva.heard_morae(spoken[0])
+    assert said == lva.kana_morae("このむらわけんきってのこめのさんちです")
+    # Each syllable marked is one the voice says, the line's count of them.
+    assert len([m for m in out["marks"][lva.cue_key(cue)] if not m.get("p")]) == len(said)

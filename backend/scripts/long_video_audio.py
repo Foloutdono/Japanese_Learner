@@ -29,8 +29,14 @@ recipes by the page, one WAV a sound) on the timeline.
 
 A line marked `marks` (a challenge read along) is also written down
 syllable by syllable: when each of the engine's morae starts in its
-clip, from the engine's own audio query, so the video lights each word
-as the voice reaches it.
+clip, from the audio query it is said from, so the video lights each
+word as the voice reaches it.
+
+A line that carries its `words` (a read along, a "Say it" sentence:
+each part's text, the reading the page prints over it, whether it is a
+particle) is said as the page prints it: the engine's reading is held
+to the words', and a word it reads otherwise is handed to it in kana
+(see "What the page prints is what is said" below).
 
 It needs the voice engine (VOICEVOX_URL, CLAUDE.md "Speech") for
 `voice`, numpy for `mix`, and no database. The licence's one condition
@@ -39,8 +45,10 @@ it also forbids the audio's use for machine learning: never publish
 these clips, or a video's sound, as a dataset.
 """
 import argparse
+import difflib
 import hashlib
 import json
+import re
 import sys
 import wave
 from pathlib import Path
@@ -126,11 +134,201 @@ def cue_key(cue: dict) -> str:
 
 
 def clip_name(cue: dict, rev: str) -> str:
-    """A line's file in the cache: new with a new voice, or a remade kana clip."""
+    """A line's file in the cache: new with a new voice, a remade kana
+    clip, or a line held to its words (READ, the words themselves)."""
     kana = kana_clip(cue["text"])
     if kana:
         rev = f"kana|{TUNE}|" + hashlib.sha1(kana.read_bytes()).hexdigest()[:12]
+    elif held(cue):
+        rev = f"{rev}|{READ}|" + json.dumps(cue["words"], ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha1(f"{rev}|{cue_key(cue)}".encode()).hexdigest()[:16] + ".wav"
+
+
+# ── What the page prints is what is said ─────────────────────────
+# A line is handed to the engine as text, and Open JTalk's dictionary
+# reads a kanji word one way whatever the sentence means: 米 べい for
+# こめ, 角 かく for かど, 辛かった からかった for つらかった, 上で じょうで
+# for うえで, 方 ほう for かた, 十分 じゅうぶん for "ten minutes", 日本
+# にっぽん. A read along prints the bank's reading over every word and
+# lights each on the engine's syllables, which then no longer count as
+# the text's: of the 1,010 sentences "Say it" (plan 311) can say, 20 were
+# said otherwise than printed, and 138 of the reading challenge's 2,245.
+#
+# Such a line carries its words, and the engine's own reading of it (its
+# audio query) is held to them, mora by mora: a word with a kanji that
+# it reads otherwise is handed over in hiragana (つらかった), in katakana
+# where the engine still errs, and the query is asked and checked again;
+# the line is said from the query that reads as printed, or the nearest.
+# A word written in kana is read as written and never checked: the page
+# prints no reading over it, and は inside one (または) is the engine's to
+# say wa. A quotation's marks are said as a speaker says them: the
+# engine took both for commas (…来ます、と言いました), so the opening one
+# is a pause and the closing one nothing.
+
+# The reading a line is held to: a change of the rule is a new clip.
+READ = "read1"
+
+_KANJI = re.compile(r"[㐀-鿿豈-﫿々〆ヶ]")
+# Each kana as the engine's phonemes write it (consonant and vowel).
+_KANA = dict(zip(
+    "あいうえおかきくけこがぎぐげごさしすせそざじずぜぞたちつてとだぢづでどなにぬねの"
+    "はひふへほばびぶべぼぱぴぷぺぽまみむめもやゆよらりるれろわゐゑをんっゔ",
+    "a i u e o ka ki ku ke ko ga gi gu ge go sa shi su se so za ji zu ze zo ta chi tsu te to "
+    "da ji zu de do na ni nu ne no ha hi fu he ho ba bi bu be bo pa pi pu pe po ma mi mu me mo "
+    "ya yu yo ra ri ru re ro wa i e o N Q vu".split()))
+_SMALL = {"ぁ": "a", "ぃ": "i", "ぅ": "u", "ぇ": "e", "ぉ": "o", "ゃ": "ya", "ゅ": "yu", "ょ": "yo", "ゎ": "wa"}
+# The consonant a kana gives the small ゃゅょ after it (きゃ kya), and a small vowel (ファ fa, ティ ti).
+_BEFORE_YA = {"き": "ky", "ぎ": "gy", "し": "sh", "じ": "j", "ち": "ch", "ぢ": "j", "に": "ny", "ひ": "hy", "び": "by",
+              "ぴ": "py", "み": "my", "り": "ry", "て": "ty", "で": "dy"}
+_BEFORE_SMALL_VOWEL = {"ふ": "f", "て": "t", "で": "d", "と": "t", "ど": "d", "う": "w", "ゔ": "v", "つ": "ts",
+                       "し": "sh", "じ": "j", "ち": "ch", "い": "y", "く": "kw", "ぐ": "gw", "す": "s", "ず": "z",
+                       "き": "ky", "ぎ": "gy"}
+_VOWELS = "aiueo"
+_QUOTE_OPEN = re.compile(r"(?<=[^\s、。，．！？!?「『])[「『]")
+_QUOTES = re.compile(r"[「」『』]")
+
+
+def held(cue: dict) -> bool:
+    """Whether a line carries its words, to be said as printed."""
+    words = cue.get("words")
+    return bool(words) and isinstance(words, list) and all(isinstance(w, list) and len(w) == 3 for w in words)
+
+
+def hiragana(text: str) -> str:
+    return "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in text)
+
+
+def katakana(text: str) -> str:
+    return "".join(chr(ord(c) + 0x60) if "ぁ" <= c <= "ゖ" else c for c in text)
+
+
+def kana_morae(kana: str) -> list[str] | None:
+    """A reading's morae in the engine's own phonemes (きゃ kya, っ Q,
+    ん N, ー -), or None where it is not all kana."""
+    s, out, i = hiragana(kana), [], 0
+    while i < len(s):
+        c, nxt = s[i], s[i + 1] if i + 1 < len(s) else ""
+        if nxt and nxt in "ゃゅょ" and c in _BEFORE_YA:
+            out.append(_BEFORE_YA[c] + _SMALL[nxt][1])
+            i += 2
+        elif nxt and nxt in "ぁぃぅぇぉ" and c in _BEFORE_SMALL_VOWEL:
+            out.append(_BEFORE_SMALL_VOWEL[c] + _SMALL[nxt])
+            i += 2
+        elif c == "ー":
+            out.append("-")
+            i += 1
+        elif c in _KANA or c in _SMALL:
+            out.append(_KANA.get(c) or _SMALL[c])
+            i += 1
+        else:
+            return None
+    return out
+
+
+def heard_morae(query: dict) -> list[str]:
+    """The morae an audio query says, in kana_morae's terms (a vowel said
+    without voice, as す in です, is the same mora)."""
+    out = []
+    for phrase in query.get("accent_phrases", []):
+        for mora in phrase.get("moras", []):
+            vowel = mora.get("vowel") or ""
+            out.append("Q" if vowel == "cl" else "N" if vowel == "N" else (mora.get("consonant") or "") + vowel.lower())
+    return out
+
+
+def _folded(morae: list[tuple[str, int]]) -> list[tuple[str, int]]:
+    """[(mora, word)] with a long vowel as one mark however it is spelt
+    (こう, こお, コー, けい, せえ): two readings that sound alike are equal."""
+    out, last = [], ""
+    for mora, word in morae:
+        if mora == "-" or (mora in _VOWELS and (mora == last or (last + mora) in ("ou", "ei"))):
+            if not out or out[-1][0] != "-":
+                out.append(("-", word))
+            continue
+        out.append((mora, word))
+        last = mora[-1] if mora[-1] in _VOWELS else ""
+    return out
+
+
+def printed_morae(words: list) -> list[tuple[str, int]] | None:
+    """[(mora, word)] as the page prints the line, a particle said as it
+    is (は wa, へ e, を o), or None where a reading is not kana."""
+    out = []
+    for i, (text, reading, particle) in enumerate(words):
+        if not reading:
+            continue
+        if particle:
+            reading = re.sub("^[へを]", lambda m: {"へ": "え", "を": "お"}[m[0]], re.sub("は$", "わ", reading))
+        elif text.endswith("は") and _KANJI.search(text):
+            reading = re.sub("は$", "わ", reading)  # 実は, 又は, 今日は: the particle grown into the word
+        morae = kana_morae(reading)
+        if morae is None:
+            return None
+        out += [(m, i) for m in morae]
+    return out
+
+
+def misread(words: list, query: dict) -> set[int]:
+    """The words written with a kanji that the query reads otherwise
+    than the page prints them."""
+    printed = printed_morae(words)
+    if not printed:
+        return set()
+    want = _folded(printed)
+    heard = _folded([(m, -1) for m in heard_morae(query)])
+    off = set()
+    matcher = difflib.SequenceMatcher(None, [m for m, _ in want], [m for m, _ in heard], autojunk=False)
+    for op, i1, i2, _, _ in matcher.get_opcodes():
+        if op != "equal":
+            # Morae said in place of none are the words either side's.
+            off |= {want[k][1] for k in (range(i1, i2) if i2 > i1 else (i1 - 1, i1)) if 0 <= k < len(want)}
+    return {i for i in off if _KANJI.search(words[i][0])}
+
+
+def said_text(text: str) -> str:
+    """A line as the engine is handed it: a quotation opened with a pause
+    and closed with none."""
+    return _QUOTES.sub("", _QUOTE_OPEN.sub("、", text))
+
+
+def held_query(text: str, words: list, style: int) -> tuple[str, dict, set[int]]:
+    """The audio query a line is said from, held to its words: the text
+    the engine was handed, its query, and the words it still reads
+    otherwise (none, but where neither kana helps)."""
+    said = said_text(text)
+    query = engine_query(said, style)
+    if "".join(w[0] for w in words) != text:
+        return said, query, set()
+    wrong = misread(words, query)
+    best = (said, query, wrong)
+    respelt: dict[int, str] = {}
+    for kana in (hiragana, katakana):
+        if not wrong:
+            break
+        respelt.update({i: kana(words[i][1]) for i in wrong})
+        said = said_text("".join(respelt.get(i, w[0]) for i, w in enumerate(words)))
+        query = engine_query(said, style)
+        wrong = misread(words, query)
+        if len(wrong) < len(best[2]):
+            best = (said, query, wrong)
+    return best
+
+
+def engine_query(text: str, style: int) -> dict:
+    from study import voice_engine as engine
+    return engine.audio_query(text, style)
+
+
+def line_query(cue: dict, style: int, quiet: bool = False) -> dict:
+    """A held line's audio query (held_query), saying where it was
+    handed over otherwise than written, or is still read otherwise."""
+    said, query, wrong = held_query(cue["text"], cue["words"], style)
+    if not quiet and said != cue["text"]:
+        print(f"  {cue['text']}: said as {said}")
+    if wrong:
+        print(f"  {cue['text']}: still read otherwise than printed: {', '.join(cue['words'][i][0] for i in sorted(wrong))}",
+              file=sys.stderr)
+    return query
 
 
 def write_wav(path: Path, frames: bytes, rate: int, channels: int = 1) -> None:
@@ -181,11 +379,18 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
         kana = kana_clip(cue["text"])
         if not path.exists() and kana:
             write_wav(path, from_kana_clip(kana), VOICE_RATE)
+        slot = SLOTS.get(cue["who"], 0)
+        speed = engine.tempo_for_slot(slot) * (SLOW if cue.get("slow") else 1.0)
+        # What the line is said from: as printed where it carries its words.
+        query = None
         if not path.exists():
-            slot = SLOTS.get(cue["who"], 0)
-            speed = engine.tempo_for_slot(slot) * (SLOW if cue.get("slow") else 1.0)
             try:
-                pcm = engine.say(cue["text"], engine.style_for_slot(slot), speed=speed, sample_rate=VOICE_RATE)
+                style = engine.style_for_slot(slot)
+                if held(cue) and engine.lone_kana_notation(cue["text"]) is None:
+                    query = line_query(cue, style)
+                    pcm = engine.synthesize(query, style, speed=speed, sample_rate=VOICE_RATE)
+                else:
+                    pcm = engine.say(cue["text"], style, speed=speed, sample_rate=VOICE_RATE)
             except Exception as e:  # noqa: BLE001 -- reported; the line goes unsaid
                 failed.append(cue["text"])
                 print(f"  {cue['text']}: {type(e).__name__}: {e}", file=sys.stderr)
@@ -196,10 +401,10 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
         # Where it is: a feature's video plays it in the app it records (plan 270).
         files[cue_key(cue)] = str(path)
         if cue.get("marks") and not kana:
-            slot = SLOTS.get(cue["who"], 0)
-            speed = engine.tempo_for_slot(slot) * (SLOW if cue.get("slow") else 1.0)
             try:
-                query = engine._json(engine._request("POST", "/audio_query", params={"text": cue["text"], "speaker": engine.style_for_slot(slot)}), "/audio_query")
+                if query is None:
+                    style = engine.style_for_slot(slot)
+                    query = line_query(cue, style, quiet=True) if held(cue) else engine.audio_query(cue["text"], style)
                 marks[cue_key(cue)] = mora_marks(query, speed)
             except Exception as e:  # noqa: BLE001 -- the words are then lit in proportion
                 print(f"  {cue['text']}: no syllables ({type(e).__name__}: {e})", file=sys.stderr)
