@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { SUPPORTED_LANGS } from './lib/locale'
+import { PREVIEW_LANGS, SUPPORTED_LANGS } from './lib/locale'
 import { readFileSync } from 'node:fs'
 
 // What the store shells may ask for and must declare. Each of these was
@@ -10,6 +10,14 @@ import { readFileSync } from 'node:fs'
 // release shipped with every class name, an iOS binary without the
 // privacy manifest App Store Connect asks for.
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
+
+// The languages a shell declares: every one the app speaks to everyone. A
+// language in preview (plan 312, the owner's pick D3) is declared the day
+// it leaves it, since the stores print what a shell declares (the App
+// Store's Languages line is its CFBundleLocalizations) and would promise
+// it to everyone; until then its device opens on the fallback, which is
+// what lib/locale.js starts that device in anyway.
+const DECLARED = SUPPORTED_LANGS.filter(lang => !PREVIEW_LANGS.includes(lang))
 const manifest = read('android/app/src/main/AndroidManifest.xml')
 
 describe('the Android shell', () => {
@@ -41,7 +49,7 @@ describe('the Android shell', () => {
 
   // The widget as the picker lists it, in each language the app speaks.
   it('names its widget in every language the app speaks', () => {
-    for (const lang of SUPPORTED_LANGS) {
+    for (const lang of DECLARED) {
       const strings = read(`android/app/src/main/res/values${lang === 'en' ? '' : `-${lang}`}/strings.xml`)
       expect(strings, lang).toContain('name="widget_label"')
       expect(strings, lang).toContain('name="widget_description"')
@@ -82,9 +90,9 @@ describe('the iOS shell', () => {
     const plist = read('ios/App/App/Info.plist')
     const declared = [...plist.match(/<key>CFBundleLocalizations<\/key>\s*<array>([\s\S]*?)<\/array>/)[1]
       .matchAll(/<string>(\w+)<\/string>/g)].map(m => m[1])
-    expect([...declared].sort()).toEqual([...SUPPORTED_LANGS].sort())
+    expect([...declared].sort()).toEqual([...DECLARED].sort())
     expect(plist).toMatch(/<key>CFBundleDevelopmentRegion<\/key>\s*<string>en<\/string>/)
-    for (const lang of SUPPORTED_LANGS) {
+    for (const lang of DECLARED) {
       const strings = read(`ios/App/App/${lang}.lproj/InfoPlist.strings`)
       expect(strings, lang).toContain('"NSCameraUsageDescription"')
       expect(strings, lang).toContain('"NSPhotoLibraryUsageDescription"')
