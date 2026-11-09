@@ -49,7 +49,7 @@ export const EVENTS = {
   session_start: ['platform', 'vp', 'os', 'lang', 'theme', 'input', 'standalone', 'reduced'],
   boarding_step: ['step', 'to', 'index', 'dir', 'ms'],
   boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms', 'level_how', 'placed',
-    'edited_goal', 'edited_rhythm', 'edited_hour', 'edited_lines', 'named', 'kept'],
+    'edited_goal', 'edited_rhythm', 'edited_hour', 'edited_lines', 'named', 'kept', 'source'],
   account_claimed: ['from'],
   // The first ride (plan 097): the two lessons after the boarding and
   // the guide over each gate. Step and stop names are the app's own,
@@ -163,6 +163,7 @@ export const VALUES = {
     level_how: ['pick', 'test'],
     placed: ['N5', 'N4', 'N3', 'N2', 'N1'],
     kept: ['google', 'password', 'link', 'already', 'none'],
+    source: ['tiktok', 'instagram', 'youtube', 'reddit', 'search', 'store', 'other', 'direct'],
   },
   run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },

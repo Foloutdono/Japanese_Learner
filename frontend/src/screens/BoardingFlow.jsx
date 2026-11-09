@@ -32,6 +32,8 @@ import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
 import { failureOf } from '../lib/feedback'
 import { BoardBack } from '../components/boarding/boardBack'
 import { noteAskedToKeep } from '../lib/guest'
+import { arrivalSource } from '../lib/arrival'
+import { isNative } from '../lib/platform'
 
 // ── 乗車 — the boarding (plan 075; the card is the form, plan 247) ──
 // The owner's pick C of the boarding's canvas ("Tsuji — the boarding,
@@ -668,6 +670,9 @@ export default function BoardingFlow({
           edited_lines: edited.lines,
           named: answers.cardName.length > 0,
           kept: (by === 'guest' ? null : by) ?? keptBy ?? (guest ? (linkSent ? 'link' : 'none') : 'already'),
+          // The door the learner came in by, a closed class (plan 313,
+          // lib/arrival.js): never the page, never the link.
+          source: arrivalSource({ native: isNative() }),
           // The same measure across the whole line.
           ms: watches.current?.total.read() ?? 0,
         })
