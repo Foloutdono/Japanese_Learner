@@ -40,6 +40,7 @@ from content.grammar_sentences_data import translation
 from study.furigana import align_deck, align_sentence, hold_word, is_kanji, mark_spans
 from study.grammar_detect import hits
 from study.grammar_match import stems, verifiable
+import translations
 
 BLANK = "＿＿＿"
 
@@ -208,7 +209,7 @@ def structure_text(entry: dict, lang: str = "en") -> str:
     `structure` itself stays English and is never localised in place:
     grammar_detect reads what a point attaches to from it, and the tour
     asks whether it starts with "verb"."""
-    if lang in ("fr", "es") and entry.get(f"structure_{lang}"):
+    if lang != "en" and lang in translations.SPOKEN and entry.get(f"structure_{lang}"):
         return entry[f"structure_{lang}"]
     return entry.get("structure") or ""
 

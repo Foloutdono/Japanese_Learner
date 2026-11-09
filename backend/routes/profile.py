@@ -25,6 +25,7 @@ from study import banzuke, level_fit, level_rule, main_modes
 from study import modes as study_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
+from translations import SPOKEN
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -620,10 +621,10 @@ READING_PACES = ("standard", "relaxed", "slow", "untimed")
 DEFAULT_READING_PACE = "standard"
 
 
-# The interface languages (frontend/src/lib/locale.js SUPPORTED_LANGS).
-# The interface locales: es-ES is Spain's Spanish, an interface over the
-# Spanish content (plan 303).
-UI_LANGS = ("fr", "en", "es", "es-ES")
+# The interface locales: the languages the app speaks (translations.SPOKEN,
+# plan 312), and es-ES, Spain's Spanish, an interface over the Spanish
+# content (plan 303).
+UI_LANGS = (*SPOKEN, "es-ES")
 
 
 class LearningPayload(BaseModel):

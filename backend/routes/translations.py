@@ -2,14 +2,16 @@ from functools import lru_cache
 
 from fastapi import APIRouter, HTTPException, Query
 
+import translations
+
 router = APIRouter()
 
 
 # Cached: the English maps are built by walking the whole deck, and the
 # per-word routes below would otherwise rebuild one for every word asked.
-# The content is fixed for the life of the process. An unsupported
-# language raises, so it is never cached.
-@lru_cache(maxsize=6)
+# The content is fixed for the life of the process. A language the app
+# does not speak raises, so it is never cached.
+@lru_cache(maxsize=2 * len(translations.SPOKEN))
 def _load_translation_map(lang: str, item_type: str) -> dict:
     if lang == "fr":
         if item_type == "kanji":
@@ -19,10 +21,11 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
             from translations.fr.vocab_fr import VOCAB_FR
             return VOCAB_FR
 
-    # English, and Spanish (plan 302) walked the same way: a card Spanish
-    # has no line for yet carries its English, as get_meaning serves it,
-    # so the map the client swaps meanings from never blanks a card.
-    if lang in ("en", "es"):
+    # English, and every other language the app speaks (Spanish since plan
+    # 302; any since plan 312) walked the same way: a card a language has
+    # no line for yet carries its English, as get_meaning serves it, so the
+    # map the client swaps meanings from never blanks a card.
+    if lang in translations.SPOKEN:
         from translations import get_meaning
         from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 

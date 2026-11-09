@@ -466,10 +466,10 @@ runtime purpose.
   (`locales.test.js`). The decks and the grammar points' glosses are whole:
   a deck card gains its line in `datas/vocab/vocab_es.json` (keyed
   `"{kanji}::{kana}"`, moved with the card on a rename), a kanji its
-  Spanish (`kanji_meanings_es.json`, then `build_kanji_db --spanish-only`),
+  Spanish (`kanji_meanings_es.json`, then `build_kanji_db --lang es`),
   a grammar point every text it has (`meaning.es`, `structure_es`, its
   lesson, its tour and its own Choisir questions), in the same change
-  (`tests/test_spanish.py`); a reading-bank row its `es` (`row_problems`),
+  (`tests/test_languages.py`); a reading-bank row its `es` (`row_problems`),
   a dictation line its `es` (`listening_clips.problems`), a comprehension
   seed every string (its `LANGS`, so the pool serves a Spanish learner
   the seeds before any model call), a conversation scenario every text
@@ -491,7 +491,7 @@ runtime purpose.
   sentence, a pool word's gloss) has its Spanish in `jmdict_es.sqlite3`
   in the same change
   (`test_the_spanish_layer_holds_every_line_the_french_one_does`).
-  Nothing is left to a later wave: `python -m scripts.spanish_coverage`
+  Nothing is left to a later wave: `python -m scripts.language_coverage --lang es`
   shows every part whole, and a part that grows takes its Spanish with
   it. A catalogue text is read through
   `grammar_points_data.texts()`, never a hand-built `{en, fr}` pair. A deck gloss is read by `get_meaning(entry, lang, VOCAB_GLOSSES)` for a
@@ -505,7 +505,7 @@ runtime purpose.
   a finished past, no leísmo, tú, «…» quotes with the period after the
   closing one, figures as es-419 writes them. A deck kanji's Spanish is
   KANJIDIC2's unless `kanji_meanings_es.json` has the line, which then
-  wins (`build_kanji_db --spanish-only`): correct a kanji there.
+  wins (`build_kanji_db --lang es`): correct a kanji there.
   Spain's Spanish is an interface over that one Spanish, not a fourth
   table (plan 303): `locales/es-ES` holds only the screen strings Spain
   says otherwise (añadir, billete, ordenador, vídeo, pulsar, en
@@ -517,12 +517,33 @@ runtime purpose.
   one of Spain's words asks the Latin-American one too
   (`search_match.SPAIN_WORDS`: móvil finds 携帯, whose gloss says
   celular).
+- **A language is a line (plan 312).** The languages the app speaks are
+  `translations.SPOKEN` (the client's copy is `lib/locale.js`'s
+  `SUPPORTED_LANGS`, held equal by `tests/test_languages.py`), and the
+  parts each is written whole in beside English and French are
+  `translations.WRITTEN` (a part with a list of its own keeps it:
+  `reading_sentences.LANGS`, `comprehension_seed.LANGS`,
+  `conversation.LANGS`, `duel_paper.CHOICE_LANGS`,
+  `line_translate.TRACK_LANGS`). A language joins a part in the commit
+  that writes the part whole, and `tests/test_languages.py` then holds
+  the part whole in it; `python -m scripts.language_coverage --lang LANG`
+  counts what is left. A route reads a language it was handed through
+  `translations.spoken` (`reading.known_lang` where a model answers or a
+  cache is keyed), never `lang if lang in (…) else "fr"`: every route that
+  takes `lang` is held by the test's stand-in, a spoken language with
+  nothing written, to answer as English does, and a new one joins its
+  cases. What a language writes its own way is one line of a table, a
+  figure or an ordinal in `study/figures.py`, the first of a month in
+  `lib/locale.js` (`firstOfMonth`), never `lang === 'es' ? … : …`.
+  Indonesian is `id` everywhere (the owner's pick): an `id` beside a
+  text's languages is that text's Indonesian, never an identifier
+  (`test_no_content_holds_an_identifier_beside_a_texts_languages`).
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
   (plan 226 added the 171 it lacked, 的・無・身・誰 among them). After any
   change to it run `python -m scripts.build_kanji_db --deck-only` (the
-  database's `in_deck` and French) and `python -m scripts.build_frequency_index
+  database's `in_deck` and every `kanji_meanings_*.json`) and `python -m scripts.build_frequency_index
   --kanji-db` (the teaching order); a new character carries its French in
   `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
   moving a character between levels is a migration (`kanji_renames`).
@@ -1033,9 +1054,9 @@ python -m scripts.build_jmdict_fr --export   # -> datas/vocab/fr_source/
 python -m scripts.build_jmdict_fr            # -> datas/vocab/jmdict_fr.sqlite3
 python -m scripts.build_jmdict_fr --lang es --export  # -> datas/vocab/es_source/
 python -m scripts.build_jmdict_fr --lang es           # -> datas/vocab/jmdict_es.sqlite3
-python -m scripts.build_kanji_db --french-only  # kanji_meanings_fr.json into kanji.sqlite3
-python -m scripts.build_kanji_db --spanish-only # kanji_meanings_es.json into kanji.sqlite3 (plan 302)
-python -m scripts.spanish_coverage              # what reads Spanish, and what still reads English
+python -m scripts.build_kanji_db --lang fr      # kanji_meanings_fr.json into kanji.sqlite3
+python -m scripts.build_kanji_db --lang es      # kanji_meanings_es.json into kanji.sqlite3 (plan 302); any LANG (plan 312)
+python -m scripts.language_coverage --lang es   # what reads a language, and what still reads English (plan 312)
 ```
 
 Two things are worth knowing before reaching for any of them:

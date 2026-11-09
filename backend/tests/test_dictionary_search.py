@@ -20,6 +20,7 @@ import pytest
 from content.kanji_data import KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
 from study.search_match import corrections, fold, lexicon, parse, to_kana
+from translations import SPOKEN
 
 
 def _page(client, **params):
@@ -166,8 +167,8 @@ def test_a_term_answers_in_either_language(client):
 def test_a_spanish_term_finds_the_course_in_any_session(client):
     """Spanish is the third (plan 302): a word, a kanji and a point are
     found by their Spanish gloss, folded like the others ("cancion"
-    finds canción), whichever language is on screen."""
-    for lang in ("es", "fr", "en"):
+    finds canción), whichever language the app speaks is on screen."""
+    for lang in SPOKEN:
         assert "水" in _surfaces(_page(client, category="vocab", q="agua", lang=lang, limit=50)), lang
         assert "水" in _surfaces(_page(client, category="kanji", q="agua", lang=lang, limit=50)), lang
         assert "の" in _surfaces(_page(client, category="grammar", q="posesivo", lang=lang, limit=50)), lang

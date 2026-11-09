@@ -54,9 +54,12 @@ def test_every_line_answers_every_stop(client):
             assert stop["card"]["jp"], source
 
 
-def test_an_unknown_line_is_a_404_and_an_unknown_language_is_french(client):
+def test_an_unknown_line_is_a_404_and_an_unknown_language_is_english(client):
+    """A language the app does not speak reads English, never French (ADR
+    0023; plan 312 moved the samples off French)."""
     assert client.get("/api/station/radicals/samples").status_code == 404
-    assert _stops(client, "vocab", lang="xx") == _stops(client, "vocab", lang="fr")
+    assert _stops(client, "vocab", lang="xx") == _stops(client, "vocab", lang="en")
+    assert _stops(client, "vocab", lang="xx") != _stops(client, "vocab", lang="fr")
 
 
 def test_a_vocab_sample_is_the_level_s_own_words_in_frequency_order(client):

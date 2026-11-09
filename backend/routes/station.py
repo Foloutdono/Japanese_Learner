@@ -18,7 +18,7 @@ from study import exam_kanji_choices
 from study.grammar_forms import choice_forms
 from study.grammar_ladder import build_specimen, write_payload
 from study.grammar_lesson import contrast_payload
-from translations import get_meaning
+from translations import SPOKEN, get_meaning, spoken
 from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 
 # ── 見本 — what each stop of a line holds (plan 137) ──────────────
@@ -57,7 +57,7 @@ SOURCES = (
     "reading", "translation", "comprehension", "dictation", "composition", "exam", "conversation",
 )
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-LANGS = ("fr", "en", "es")
+LANGS = SPOKEN
 
 SAMPLE_SIZE = {"kana": 11, "kanji": 10, "vocab": 8, "grammar": 6, "composition": 6}
 
@@ -459,4 +459,4 @@ def station_samples(source: str, lang: str) -> dict:
 def get_station_samples(source: str, lang: str = "fr"):
     if source not in LINES:
         raise HTTPException(status_code=404, detail=f"Unknown line: {source}")
-    return station_samples(source, lang if lang in LANGS else "fr")
+    return station_samples(source, spoken(lang))

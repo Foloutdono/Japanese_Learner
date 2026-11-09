@@ -2277,6 +2277,10 @@ def _decorate_for(data: dict, user_id: str, level: str) -> dict:
 
 @router.get("/api/reading/comprehension")
 def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: str = Depends(get_user_id)):
+    # A pool bucket is (level, lang) and a miss is a model call: taken as
+    # sent, every new spelling of a language was a bucket of its own and a
+    # generation (plan 211's rule; found by plan 312's stand-in language).
+    lang = known_lang(lang)
     level = resolve_level(user_id, level)
     avoid = _recent_grammar_patterns(user_id)
 

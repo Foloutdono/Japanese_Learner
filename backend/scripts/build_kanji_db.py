@@ -29,6 +29,10 @@ Inputs (datas/kanji/, the shipped KANJIDIC2 export):
                             meaning_fr where the export has none
     kanji_meanings_es.json  the same for the Spanish of 71 (plan 302),
                             over meaning_es
+    kanji_meanings_{lang}.json  any language the app writes the deck's
+                            kanji in (plan 312), over meaning_{lang}: the
+                            column is added for a language KANJIDIC2
+                            does not have
     ../../kanjivg/*.svg     which characters have a stroke diagram
 
 Those inputs become untracked once this has run (backend/.gitignore),
@@ -38,14 +42,14 @@ the export into datas/kanji/ and re-run this script.
 
 Usage:
     cd backend && python -m scripts.build_kanji_db [--data-dir DIR] [--out PATH]
-    cd backend && python -m scripts.build_kanji_db --french-only
+    cd backend && python -m scripts.build_kanji_db --lang fr
         # kanji_meanings_fr.json into the shipped database, in place,
-        # without the KANJIDIC2 export (which is not in a fresh clone)
-    cd backend && python -m scripts.build_kanji_db --spanish-only
-        # kanji_meanings_es.json the same way (plan 302)
+        # without the KANJIDIC2 export (which is not in a fresh clone);
+        # --lang es the Spanish (plan 302), and so on (plan 312)
     cd backend && python -m scripts.build_kanji_db --deck-only
-        # ... and kanji_deck.json's membership (in_deck) with both: what
-        # adding a character to the deck needs (plan 226)
+        # kanji_deck.json's membership (in_deck), and every
+        # kanji_meanings_*.json with it: what adding a character to the
+        # deck needs (plan 226)
 """
 import argparse
 import glob
@@ -238,8 +242,8 @@ def build(data_dir: str, out_path: str, kanjivg_dir: str) -> None:
         "INSERT INTO kanji VALUES (" + ",".join("?" * 18) + ")", rows
     )
     conn.executemany("INSERT INTO kanji_refs VALUES (?,?,?)", ref_rows)
-    apply_french(conn, data_dir)
-    apply_spanish(conn, data_dir)
+    for lang in own_langs(data_dir):
+        apply_own(conn, data_dir, lang)
     conn.commit()
     conn.execute("VACUUM")
     conn.close()
@@ -252,48 +256,52 @@ def build(data_dir: str, out_path: str, kanjivg_dir: str) -> None:
         print(f"  ! {len(missing)} deck characters are not in KANJIDIC2: {''.join(sorted(missing))}")
 
 
-def apply_own(conn: sqlite3.Connection, data_dir: str, lang: str, name: str,
-              override: bool = False) -> int:
-    """kanji_meanings_{lang}.json over meaning_{lang}, where KANJIDIC2
-    has none -- or, with `override`, over what the export carries too."""
+# The languages whose own file only fills what KANJIDIC2 leaves empty.
+# French: KANJIDIC2's French stops short of 219 of the deck's characters --
+# name kanji, mostly (蒼, 聡, 鴻, 蓮) -- and a French learner read their
+# cards, their choices and their dictionary plates in English
+# (content/kanji_meanings.py). The file is the app's own French for them
+# (plan 215), written from the character's senses rather than copied from
+# a published list, and never overrides a French meaning the export
+# carries.
+#
+# Every other language's file wins over the export where both have a
+# line. Spanish's (plan 302): KANJIDIC2's Spanish stops short of 71 of the
+# deck's characters, and the review of the deck's Spanish found it missing
+# the sense a learner meets first (来 "next", 本 "true"), reading English
+# words in the wrong sense ("rule" as regla) and describing lookalike
+# characters (憶 given 億's "100 millones"), so the deck's corrected lines
+# live in the file and override it. A language KANJIDIC2 does not have at
+# all is the file's alone, in a column added for it (plan 312).
+FILLS_ONLY = frozenset({"fr"})
+
+
+def own_langs(data_dir: str) -> list[str]:
+    """The languages with a kanji_meanings_{lang}.json, French first."""
+    langs = sorted(name[len("kanji_meanings_"):-len(".json")] for name in os.listdir(data_dir)
+                   if name.startswith("kanji_meanings_") and name.endswith(".json"))
+    return sorted(langs, key=lambda lang: lang != "fr")
+
+
+def apply_own(conn: sqlite3.Connection, data_dir: str, lang: str) -> int:
+    """kanji_meanings_{lang}.json over meaning_{lang}: where KANJIDIC2 has
+    none for a language of FILLS_ONLY, over what the export carries too
+    for any other. The column is added for a language the database does
+    not have yet."""
     path = os.path.join(data_dir, f"kanji_meanings_{lang}.json")
     if not os.path.exists(path):
         return 0
     with open(path, encoding="utf-8") as f:
         own = json.load(f)
-    only_empty = "" if override else f" AND meaning_{lang} = ''"
+    if f"meaning_{lang}" not in {row[1] for row in conn.execute("PRAGMA table_info(kanji)")}:
+        conn.execute(f"ALTER TABLE kanji ADD COLUMN meaning_{lang} TEXT NOT NULL DEFAULT ''")
+    only_empty = f" AND meaning_{lang} = ''" if lang in FILLS_ONLY else ""
     cur = conn.executemany(
         f"UPDATE kanji SET meaning_{lang} = ? WHERE char = ?{only_empty}",
         [(text, char) for char, text in own.items() if text],
     )
-    print(f"  {cur.rowcount} {name} meanings filled from kanji_meanings_{lang}.json")
+    print(f"  {cur.rowcount} meanings ({lang}) filled from kanji_meanings_{lang}.json")
     return cur.rowcount
-
-
-def apply_spanish(conn: sqlite3.Connection, data_dir: str) -> int:
-    """kanji_meanings_es.json over meaning_es (plan 302): KANJIDIC2's
-    Spanish stops short of 71 of the deck's characters, and the file is
-    the app's own Spanish for them, as kanji_meanings_fr.json is the
-    French (apply_french). Unlike the French, it also wins where the
-    export has a line: the review of the deck's Spanish found KANJIDIC2's
-    missing the sense a learner meets first (来 "next", 本 "true"),
-    reading English words in the wrong sense ("rule" as regla) and
-    describing lookalike characters (憶 given 億's "100 millones"), so
-    the deck's corrected lines live in the file and override it."""
-    return apply_own(conn, data_dir, "es", "Spanish", override=True)
-
-
-def apply_french(conn: sqlite3.Connection, data_dir: str) -> int:
-    """kanji_meanings_fr.json over meaning_fr, where KANJIDIC2 has none.
-
-    KANJIDIC2's French stops short of 219 of the deck's characters --
-    name kanji, mostly (蒼, 聡, 鴻, 蓮) -- and a French learner read
-    their cards, their choices and their dictionary plates in English
-    (content/kanji_meanings.py). The file is the app's own French for
-    them (plan 215), written from the character's senses rather than
-    copied from a published list. It never overrides a French meaning
-    the export carries."""
-    return apply_own(conn, data_dir, "fr", "French")
 
 
 def apply_deck(conn: sqlite3.Connection, data_dir: str) -> int:
@@ -318,21 +326,18 @@ def main() -> None:
     p.add_argument("--data-dir", default=_DATA_DIR)
     p.add_argument("--out", default=_OUT_PATH)
     p.add_argument("--kanjivg-dir", default=_KANJIVG_DIR)
-    p.add_argument("--french-only", action="store_true",
-                   help="apply kanji_meanings_fr.json to the existing database and stop")
-    p.add_argument("--spanish-only", action="store_true",
-                   help="apply kanji_meanings_es.json to the existing database and stop")
+    p.add_argument("--lang", action="append", metavar="LANG",
+                   help="apply kanji_meanings_LANG.json to the existing database and stop "
+                        "(repeatable: --lang fr --lang es)")
     p.add_argument("--deck-only", action="store_true",
-                   help="apply kanji_deck.json (in_deck) and both kanji_meanings_*.json to the existing database and stop")
+                   help="apply kanji_deck.json (in_deck) and every kanji_meanings_*.json to the existing database and stop")
     a = p.parse_args()
-    if a.french_only or a.spanish_only or a.deck_only:
+    if a.lang or a.deck_only:
         conn = sqlite3.connect(a.out)
         if a.deck_only:
             apply_deck(conn, a.data_dir)
-        if not a.spanish_only:
-            apply_french(conn, a.data_dir)
-        if not a.french_only:
-            apply_spanish(conn, a.data_dir)
+        for lang in a.lang or own_langs(a.data_dir):
+            apply_own(conn, a.data_dir, lang)
         conn.commit()
         conn.execute("VACUUM")
         conn.close()

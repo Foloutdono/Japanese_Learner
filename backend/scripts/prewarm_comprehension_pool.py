@@ -51,6 +51,7 @@ from routes.reading import (
     _pick_grammar_seeds, _pick_word_seeds,
 )
 from study.llm_shared import llm_configured
+from translations import SPOKEN
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("prewarm-comprehension")
@@ -60,9 +61,10 @@ logger = logging.getLogger("prewarm-comprehension")
 # makes a bucket (level, lang) rather than just a level: an English
 # exercise is not a French one -- its translations, notes and every
 # gloss in it are in the wrong language. routes/reading.LANG_NAMES
-# accepts more than these two; a learner on one of them still gets an
-# exercise, generated on demand as before.
-LANGS = ("en", "fr", "es")
+# accepts more than these; a learner on one of them still gets an
+# exercise, generated on demand as before. The languages are the app's
+# (translations.SPOKEN, plan 312).
+LANGS = SPOKEN
 
 # Enough that a daily learner meets a fresh text for a month before the
 # pool has to grow, and small enough that a first run is affordable.

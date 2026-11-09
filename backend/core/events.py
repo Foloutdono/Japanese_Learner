@@ -28,6 +28,7 @@ from datetime import datetime, timedelta, timezone
 
 from core.db import db_conn
 from core.rls import enable_rls
+from translations import SPOKEN
 
 logger = logging.getLogger(__name__)
 
@@ -343,7 +344,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "platform": frozenset({"web", "native"}),
         "vp":       frozenset({"phone", "tablet", "desk", "wide"}),
         "os":       frozenset({"ios", "android", "windows", "mac", "linux", "chromeos", "other"}),
-        "lang":     frozenset({"fr", "en", "es"}),
+        "lang":     frozenset(SPOKEN),
         "theme":    frozenset({"light", "dark", "auto"}),
         "input":    frozenset({"touch", "mouse"}),
     },

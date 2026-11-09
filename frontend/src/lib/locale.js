@@ -6,7 +6,9 @@
 // wins (and is kept on the account too, lib/langChoice.js); before any
 // choice, a French-speaking device gets French, a Spanish-speaking one
 // Spanish (plan 302), and everything else gets English — the default for
-// a learner whose device language the app does not speak.
+// a learner whose device language the app does not speak. The server's
+// copy is backend/translations SPOKEN, held equal to this list by
+// backend/tests/test_languages.py (plan 312): keep it a literal.
 export const SUPPORTED_LANGS = ['fr', 'en', 'es']
 
 // The interface's locales: the three languages, and Spain's Spanish

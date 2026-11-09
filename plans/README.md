@@ -7422,7 +7422,7 @@ Open: a passive's agent (何にも縛られない, 何にも邪魔されない) 
 
 ## Plan 312 — インドネシア語, Indonesian as a fourth language (2026-11-09)
 
-The owner: plan the app's translation into Indonesian. Planned at `c0cbaf4` on the model of plan 302 (Spanish, ADR 0023), in `plans/312-indonesian.md`: about 170,000 texts and 1.2 million English words, the same parts as Spanish, with every deck kanji to write (KANJIDIC2 has no Indonesian). Four decisions are the owner's before the first commit: how the app addresses the learner (`kamu`, recommended, or `Anda`); the code inside the code (`id` everywhere, recommended, or an alias such as `ind`); how it ships (behind a preview for named accounts until whole, recommended, or one branch merged whole as Spanish was); and who reads the Indonesian (a paid native reader who reads Japanese, recommended, or AI review alone).
+The owner: plan the app's translation into Indonesian. Planned at `c0cbaf4` on the model of plan 302 (Spanish, ADR 0023), in `plans/312-indonesian.md`: about 170,000 texts and 1.2 million English words, the same parts as Spanish, with every deck kanji to write (KANJIDIC2 has no Indonesian). The owner took the plan's four recommendations the same day: the app says `kamu` to the learner; the language is `id` everywhere in the code (`meaning_id`, `vocab_id.json`), an alias such as `ind` declined; it ships behind a preview for named accounts until every part is whole, rather than on one branch merged whole as Spanish was; and a paid native reader who reads Japanese reads it, not AI review alone.
 
 | Phase | What | Status |
 |---|---|---|

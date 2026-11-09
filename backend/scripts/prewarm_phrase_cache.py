@@ -33,6 +33,7 @@ from content.reading_sentences import BY_LEVEL
 from routes.phrase import _cached_analysis, _call_llm, _deep_points, _store_analysis
 from study.analysis import analyze_local
 from study.llm_shared import llm_configured
+from translations import SPOKEN
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("prewarm-phrases")
@@ -57,7 +58,7 @@ def main() -> int:
                         help="report what is missing without calling the model")
     # The cache is keyed by (phrase, lang): a breakdown bought in one
     # language is a miss in the other.
-    parser.add_argument("--lang", default="en", choices=("en", "fr", "es"),
+    parser.add_argument("--lang", default="en", choices=SPOKEN,
                         help="the language of the glosses and notes (default: en)")
     args = parser.parse_args()
 

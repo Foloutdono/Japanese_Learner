@@ -292,11 +292,17 @@ def _fetch_map(chars, columns: str):
     return out
 
 
+# The languages a meaning column is read in (meaning_en, meaning_fr, ...):
+# the column build_kanji_db gives a language, once named in _COLUMNS, is
+# read without another line (plan 312).
+_MEANING_LANGS = frozenset(c[len("meaning_"):] for c in _COLUMNS if c.startswith("meaning_"))
+
+
 def meanings_for(chars, lang: str = "fr") -> dict[str, str]:
     """{char: meaning} for a bounded set, in `lang`, omitting the ones
     that have no entry in that language — the shape KANJI_FR has always
     had, so translations.get_meaning()'s fallback still fires for them."""
-    col = f"meaning_{lang}" if lang in ("en", "fr", "es", "pt") else "meaning_en"
+    col = f"meaning_{lang}" if lang in _MEANING_LANGS else "meaning_en"
     return {c: m for c, m in _fetch_map(chars, col) if m}
 
 

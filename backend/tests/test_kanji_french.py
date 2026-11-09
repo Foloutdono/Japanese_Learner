@@ -26,7 +26,7 @@ class KanjiFrenchTests(unittest.TestCase):
 
     def test_the_database_carries_the_supplement(self) -> None:
         """The file is applied: a supplement edited without re-running
-        `python -m scripts.build_kanji_db --french-only` would ship
+        `python -m scripts.build_kanji_db --lang fr` would ship
         nothing."""
         with open(_FILE, encoding="utf-8") as f:
             supplement = json.load(f)
@@ -36,7 +36,7 @@ class KanjiFrenchTests(unittest.TestCase):
                      if conn.execute("SELECT meaning_fr FROM kanji WHERE char = ?", (c,)).fetchone()[0] != fr]
         finally:
             conn.close()
-        self.assertEqual(stale, [], "re-run python -m scripts.build_kanji_db --french-only")
+        self.assertEqual(stale, [], "re-run python -m scripts.build_kanji_db --lang fr")
 
     def test_the_supplement_is_french_and_deck_only(self) -> None:
         with open(_FILE, encoding="utf-8") as f:

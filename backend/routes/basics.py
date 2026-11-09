@@ -33,7 +33,7 @@ from routes.today import _riding_basics
 from study import basics
 from study.level_rule import primary_mode
 from study.modes import GRAMMAR, KANJI, VOCAB
-from translations import get_meaning
+from translations import get_meaning, spoken
 from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 
 logger = logging.getLogger(__name__)
@@ -150,7 +150,7 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
     if found is None:
         raise HTTPException(status_code=404, detail="no such unit")
     n, unit = found
-    lang = lang if lang in ("en", "es") else "fr"
+    lang = spoken(lang)
     grammar, vocab, kanji = _entries()
     sources = _sources(user_id)
     progress = _progress(user_id, sources)
