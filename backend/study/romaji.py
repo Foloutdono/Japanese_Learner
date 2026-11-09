@@ -398,6 +398,41 @@ def is_romaji(text: str) -> bool:
     return any(c.isalpha() for c in text)
 
 
+# ── A "translation" that is the line in the alphabet (plan 311) ──
+# A model asked for a line's translation sometimes hands the line back
+# spelled out: 関心はまだ僕ら came back «Kanshin wa mada bokura», printed
+# on the explanation sheet as its meaning. Measured the way dictation
+# measures two spellings of one sentence (`fold`), against the line's own
+# romaji. A line of fewer than SPELLED_MIN_WORDS words is left alone:
+# its translation may rightly be its sound (田中さん is Tanaka-san,
+# 東京タワー Tokyo Tower).
+SPELLED_MIN_WORDS = 3
+SPELLED_LIKENESS = 0.8
+
+
+@lru_cache(maxsize=2048)
+def _line_romaji(japanese: str) -> tuple[str, int]:
+    words = sentence_words(japanese)
+    if words is None:
+        romaji = to_romaji(japanese)
+        return fold(romaji), len(romaji.split())
+    return fold(" ".join(w["romaji"] for w in words)), len(words)
+
+
+def spells_out(translation: str, japanese: str) -> bool:
+    """Whether `translation` is only `japanese` written in Latin letters
+    (any romanization, any case or marks), not a translation of it."""
+    if not is_romaji(translation) or not isinstance(japanese, str) or not japanese.strip():
+        return False
+    line, count = _line_romaji(japanese)
+    said = fold(translation)
+    if count < SPELLED_MIN_WORDS or not line or not said:
+        return False
+    from difflib import SequenceMatcher
+
+    return SequenceMatcher(None, said, line, autojunk=False).ratio() >= SPELLED_LIKENESS
+
+
 def _word_kana(word: str) -> str | None:
     from study.search_match import _ROMAJI, fold as latin, to_kana
 

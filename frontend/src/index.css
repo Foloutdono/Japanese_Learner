@@ -29517,10 +29517,11 @@ button.brd-stn { cursor: pointer; }
   background: repeating-linear-gradient(to right, var(--text-secondary) 0 6px, transparent 6px 10px);
 }
 /* 解説 — the explanation's sheet (plan 220): a bottom sheet like the
-   line's other two, as tall as it holds -- the cap and the sentence at
-   its head beside the round ✕, then the explanation under its
-   translation, or the wait, or why it is not there and the way to try
-   again; then the asking, under a rule. */
+   line's other two, as tall as it holds -- the cap, the sentence and
+   its translation at its head beside the round ✕, then the line's frame
+   (plan 311), or the wait, or why it is not there and the way to try
+   again; Explain again a quiet word under the frame, then the asking,
+   under a rule. */
 .anl-explainsheet__head {
   display: flex;
   align-items: flex-start;
@@ -29548,11 +29549,11 @@ button.brd-stn { cursor: pointer; }
   gap: var(--sp-4);
 }
 .anl-explainsheet__tr {
-  margin: 0;
-  font-size: var(--fs-lead);
-  font-style: italic;
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-body);
   line-height: 1.45;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  text-wrap: pretty;
 }
 .anl-explainsheet__fail {
   display: flex;
@@ -29588,6 +29589,112 @@ button.brd-stn { cursor: pointer; }
   align-self: stretch;
   margin-top: var(--sp-3);
 }
+/* Explain again, once there is an explanation: a quiet word under it,
+   never a second button beside the asking (plan 311). The desk's since
+   plan 242, the phone's since. */
+.anl-explainpanel__again {
+  align-self: flex-start;
+  min-height: 44px; /* a hit target, as .btn-secondary's */
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: var(--sp-1);
+  cursor: pointer;
+}
+.anl-explainpanel__again:hover,
+.anl-explainpanel__again:focus-visible { color: var(--text-primary); }
+.anl-explainpanel__again:disabled { cursor: default; text-decoration: none; }
+/* The Japanese an explanation names, in the line's face and weight. */
+.anl-named {
+  font-family: var(--font-jp);
+  font-weight: 700;
+}
+
+/* ── 骨組み — the line's frame (plan 311) ──
+   The owner's pick C of the canvas "Tsuji — Explain, made clear",
+   drawn as built on its board "C · as built" (components/analysis/
+   Frame.jsx): the line's parts in order, a row each under a hairline --
+   what the part does as the one caption, the part at the title's size,
+   one line on how it is built. The predicate's row is the core: its
+   caption in the primary ink, its words bold. A run a grammar point
+   covers is lit in the grammar's ink and underlined in it, a door to
+   the point; what the line does not say (a part carried from the line
+   before, a dropped だ) is a dashed outline, never ink of its own. The
+   phone's sheet, the desk's Construction face and the runs' breakdown
+   draw it alike. */
+.anl-frame {
+  display: flex;
+  align-self: stretch;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.anl-frame__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-block: var(--sp-4);
+}
+.anl-frame__part:first-child { padding-top: 0; }
+.anl-frame__part:last-child { padding-bottom: 0; }
+.anl-frame__part + .anl-frame__part { border-top: 1px solid var(--surface-line); }
+.anl-frame__role {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-frame__jp {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.anl-frame__pt {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--line-grammar) 70%, var(--text-primary));
+  text-decoration: underline;
+  text-decoration-color: var(--line-grammar);
+  text-decoration-thickness: 2px;
+  text-underline-offset: var(--sp-1);
+}
+/* Two points side by side (になる, んだ) are two doors, not one rule:
+   their underlines part. */
+.anl-frame__pt + .anl-frame__pt { margin-inline-start: var(--sp-1); }
+button.anl-frame__pt { cursor: pointer; }
+button.anl-frame__pt:hover,
+button.anl-frame__pt:focus-visible { color: var(--text-primary); }
+.anl-frame__gone {
+  display: inline-block;
+  padding: 0 var(--sp-2);
+  border: 1px dashed var(--text-secondary);
+  border-radius: var(--r-card);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.anl-frame__gone--word { margin-inline-start: var(--sp-1); }
+.anl-frame__say {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+.anl-frame__part--core .anl-frame__role { color: var(--text-primary); }
+.anl-frame__part--core .anl-frame__jp { font-weight: 700; }
 
 /* ── 表示 and 保存 on a phone (plan 263) ──
    The owner's picks of the canvas "Analyser stage — reading options":
@@ -41285,9 +41392,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   /* ── 構造 — the construction face (plan 242, the owner's pick B of
      the canvas's "The Construction face"): the line laid out as its
      blocks at a heading's size, each named under it, a point's run
-     framed in the grammar's ink under its number; the prose under them,
-     the Japanese it names in the line's face and weight, Explain again a
-     quiet word under it, and the asking under that. */
+     framed in the grammar's ink under its number; the line's frame under
+     them (plan 311, .anl-frame), Explain again a quiet word under it,
+     and the asking under that. */
   .anl-blocks {
     display: flex;
     flex: none;
@@ -41366,24 +41473,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     align-items: flex-start;
     gap: var(--sp-4);
   }
-  .anl-explainpanel__jp {
-    font-family: var(--font-jp);
-    font-weight: 700;
-  }
-  .anl-explainpanel__again {
-    padding: 0;
-    background: none;
-    border: 0;
-    font: inherit;
-    font-size: var(--fs-caption);
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-decoration: underline;
-    cursor: pointer;
-  }
-  .anl-explainpanel__again:hover,
-  .anl-explainpanel__again:focus-visible { color: var(--text-primary); }
-  .anl-explainpanel__again:disabled { cursor: default; text-decoration: none; }
   .anl-desk__none {
     flex: none;
     margin: 0;

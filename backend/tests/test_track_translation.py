@@ -309,13 +309,21 @@ def test_the_link_fetch_s_translation_is_kept_on_the_session(client, monkeypatch
 def test_explain_is_asked_how_the_line_is_built_not_what_it_means():
     """The owner: "the explain button is only for the explanation of
     how the sentence is built". The meaning is the translation's, which
-    every line now has under it."""
+    every line now has under it. Since plan 311 the construction is a
+    frame, the line's parts each named by a role the app knows."""
     from routes import phrase
+    from study.frame import ROLES
 
     prompt = phrase.SYSTEM_PROMPT_TEMPLATE.format(lang_name="French")
-    rule = next(line for line in prompt.splitlines() if line.startswith('- "explanation"'))
+    rule = next(line for line in prompt.splitlines() if line.startswith('- "frame"'))
     assert "how the phrase is BUILT" in rule
-    assert "Never restate, summarise or translate" in rule
+    assert "Never a translation of the part or of the phrase" in prompt
+    assert '"explanation"' not in prompt
+    assert ", ".join(ROLES) in prompt
+    # Nothing supplied the line lacks (plan 311: "the unstated negative").
+    assert "no negation" in prompt
     assert "nuance of the whole phrase" not in prompt
+    # The lines around are named only as a part carried from them.
+    assert "Say nothing else about the lines around it." in phrase.CONTEXT_INSTRUCTION
     # An explanation bought under the old prompt is never served again.
-    assert phrase.CACHE_VERSION >= 6
+    assert phrase.CACHE_VERSION >= 7

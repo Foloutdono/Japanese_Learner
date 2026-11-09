@@ -1383,6 +1383,34 @@ adds no idiom of its own: it is the tour's scene made to answer back.
   hold seven.) The pigment is 縹 (`--line-kaiwa`), the dayflower blue
   between 緑青 and 藍.
 
+### The construction (骨組み, plan 311)
+
+Explain says how a line is built, as the line's **frame** (the owner's pick
+C of the canvas "Tsuji — Explain, made clear", built as its board "C · as
+built"): the line's parts in the order they come, a row each under a
+hairline -- what the part does as the one caption (the roles of
+`study/frame.ROLES`, in the learner's words: Reason, Predicate), the part at
+`--fs-title` in `--font-jp`, and one line on how it is put together, the
+Japanese it names in the line's face and weight. The predicate's row is the
+core: its caption in the primary ink, its words bold. Never a paragraph: the
+frame is the explanation on the phone's sheet, on the desk's Construction
+face under the blocks and in the runs' breakdown alike
+(`components/analysis/Frame.jsx`).
+
+- **The grammar is the line's, lit.** A run a numbered point covers is in
+  the grammar's ink, underlined in it, and a door to the point's lesson,
+  read off the local tier (`coversToken`), never off the model's words. Two
+  points side by side part their underlines.
+- **What the line does not say is drawn, never written in.** A part a
+  neighbouring line carries (the topic the line before set) is its own row,
+  its words in a dashed outline and its caption saying where from; a copula
+  or particle the line drops (僕ら(だ)) is the same outline after the words
+  it would follow. A dashed outline is never ink of its own.
+- **The sheet heads with the line and its meaning.** The sentence, then its
+  translation as the sheet's sub (`--fs-body`, the secondary ink, no
+  quotes), whenever the line has one; "Explain again" a quiet word under
+  the frame, never a second button beside the asking.
+
 ### The Learn gate (学習の改札, plans 094, 132, 291)
 
 **On a phone the lines fold, and a line rises as a sheet** (plan 291,
@@ -2658,9 +2686,9 @@ line here says otherwise.
   turned to: the line laid out as its blocks at `--fs-heading`, each
   named under it (a word by its gloss, a point's run framed in the
   grammar's ink under its number) and each a door to its card or its
-  lesson, then the prose, the Japanese it names in the line's face and
-  weight, "Explain again" a quiet word under it and the asking right
-  after (the owner's pick B of the canvas's "The Construction face").
+  lesson, then the line's frame (*The construction*, plan 311),
+  "Explain again" a quiet word under it and the asking right after (the
+  owner's pick B of the canvas's "The Construction face").
   The segment is the way between them: there is no way back to look for,
   and Esc walks one step back. The bar and the segment are measured, not
   queried (`useLabelsFit`): too narrow for their column, the bar puts its
