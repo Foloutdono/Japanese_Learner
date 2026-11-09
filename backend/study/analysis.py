@@ -2664,15 +2664,20 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
         for i in range(start, end + 1):
             used[i] = True
 
-    return {
+    merged = {
         **analysis,
         "tokens": tokens,
         "grammar": grammar,
         "explanation": explanation,
-        "frame": list(frame or []),
         "translation": translation.strip() if isinstance(translation, str) else "",
         "deep_dropped": dropped,
     }
+    # Only the deep tier's Explain has a frame: the glosses a generator
+    # folds on (analyze_with_glosses) carry none, and their payloads
+    # keep the shape they had.
+    if frame is not None:
+        merged["frame"] = list(frame)
+    return merged
 
 
 def _find_run(tokens: list[dict], used: list[bool], surface: str) -> tuple[int, int] | None:
