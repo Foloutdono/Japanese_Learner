@@ -4,7 +4,7 @@ import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
 import { Sheet } from '../chrome/Sheet'
 import { Seg } from '../chrome/Console'
-import { PlusIcon } from '../ui/Icons'
+import { PlusIcon, SwapIcon } from '../ui/Icons'
 import { playClick } from '../../lib/audio'
 import { errorKey } from '../../domain/duel'
 import { refreshDuels } from '../../stores/duels'
@@ -61,7 +61,7 @@ export function FriendSheet({ open, onClose, session, preset = null }) {
   }
 
   return (
-    <Sheet open={open} onClose={onClose} jp={t.pvpFriendDuel} className="pvp-sheet">
+    <Sheet open={open} onClose={onClose} title={t.pvpFriendDuel} icon={SwapIcon} className="pvp-sheet">
       {request && (
         <div className="pvp-request">
           <span className="pvp-request__who"><b className="pvp-request__name">{request.username}</b> · {t.pvpRequest}</span>

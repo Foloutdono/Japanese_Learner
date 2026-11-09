@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { Bar, Leave } from '../components/chrome/Bar'
@@ -7,10 +7,11 @@ import { ChevronIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
 import { stationFor } from '../config/stations'
 import { refreshDuels, useDuels } from '../stores/duels'
+import { apiJson } from '../lib/api'
 import { playClick } from '../lib/audio'
 import { FriendSheet } from '../components/pvp/FriendSheet'
 import { EloCurve, EloMove, Verdict } from '../components/pvp/parts'
-import { hoursLeft, levelName, nameOf } from '../domain/duel'
+import { errorKey, hoursLeft, levelName, nameOf } from '../domain/duel'
 
 // ── 対戦 — the duels' hall (plan 279, H3) ──────────────────────────
 // Behind the holder's door: the two platforms as cards (a ranked sprint
@@ -20,7 +21,10 @@ import { hoursLeft, levelName, nameOf } from '../domain/duel'
 // the head, its curve over the last twenty ranked duels (the owner's G1),
 // and the record in a lattice at the foot. Before a first ranked duel the
 // head is the Elo the learner's level starts them at, and what moves it:
-// no test is asked first (plan 282).
+// no test is asked first (plan 282). Under what waits on the learner, the
+// strangers' runs waiting for an opponent that a ranked sprint could deal
+// them (plan 315), each a seat to take: its cover names the price before
+// « Partir » pays it, and never the score to beat before the run starts.
 const STATION = stationFor('/profile/duels')
 
 export default function DuelsScreen({ session }) {
@@ -28,8 +32,23 @@ export default function DuelsScreen({ session }) {
   const navigate = useNavigate()
   const { data, failed } = useDuels()
   const [sheet, setSheet] = useState(false)
+  const [error, setError] = useState(null)
+  const busy = useRef(false)
   // The hall settles what waits on the learner: read it fresh.
   useEffect(() => { refreshDuels() }, [])
+
+  // A run waiting for an opponent, picked: the seat is taken, then its
+  // cover. Another learner may have sat first: the hall is read again.
+  function take(id) {
+    if (busy.current) return
+    busy.current = true
+    playClick()
+    setError(null)
+    apiJson('/api/pvp/duels', session, { method: 'POST', body: JSON.stringify({ ranked: true, duel: id }) })
+      .then(d => { refreshDuels(); navigate(`/duel/${d.id}`) })
+      .catch(e => { setError(errorKey(e)); refreshDuels() })
+      .finally(() => { busy.current = false })
+  }
 
   const go = {
     ranked: () => { playClick(); navigate('/duel/new') },
@@ -37,22 +56,25 @@ export default function DuelsScreen({ session }) {
     duel: id => { playClick(); navigate(`/duel/${id}`) },
     friends: () => { playClick(); navigate('/profile/duels/friends') },
     board: () => { playClick(); navigate('/profile/duels/board') },
+    take,
   }
 
   return (
     <main id="main-content" className="pvp" style={{ '--line-color': 'var(--pass-ink)' }}>
       <Bar code={STATION.code} title={t.pvpTitle} color="var(--pass-ink)" aside={<Leave to="/profile">{t.profileTitle}</Leave>} />
-      {data ? <Hall data={data} t={t} lang={lang} go={go} /> : failed ? <p className="pvp-run__fail">{t.pvpErrFailed}</p> : <Loading />}
+      {data ? <Hall data={data} t={t} lang={lang} go={go} error={error} /> : failed ? <p className="pvp-run__fail">{t.pvpErrFailed}</p> : <Loading />}
       <FriendSheet open={sheet} onClose={() => setSheet(false)} session={session} />
     </main>
   )
 }
 
-function Hall({ data, t, lang, go }) {
+function Hall({ data, t, lang, go, error }) {
   const [view, setView] = useState('play')
   const fig = n => n.toLocaleString(lang)
   const { rating } = data
   const play = [...data.live, ...data.toPlay]
+  // A hall read before plan 315 has none.
+  const waiting = view === 'play' ? (data.waiting ?? []) : []
   const rows = view === 'play' ? play : view === 'running' ? data.running : data.done
   return (
     <>
@@ -75,13 +97,16 @@ function Hall({ data, t, lang, go }) {
           value={view}
           onChange={setView}
           options={[
-            { key: 'play', label: `${t.pvpTabToPlay} · ${play.length}` },
+            { key: 'play', label: `${t.pvpTabToPlay} · ${play.length + (data.waiting?.length ?? 0)}` },
             { key: 'running', label: `${t.pvpTabRunning} · ${data.running.length}` },
             { key: 'done', label: t.pvpTabDone },
           ]}
         />
-        {rows.length === 0 && <p className="pvp-console__none">{view === 'play' ? t.pvpNoneToPlay : view === 'running' ? t.pvpNoneRunning : t.pvpNoneDone}</p>}
+        {rows.length === 0 && waiting.length === 0 && <p className="pvp-console__none">{view === 'play' ? t.pvpNoneToPlay : view === 'running' ? t.pvpNoneRunning : t.pvpNoneDone}</p>}
         {rows.map(d => <Row key={d.id} d={d} view={view} fig={fig} t={t} go={go} />)}
+        {waiting.length > 0 && <p className="pvp-console__cap">{t.pvpWaitingCap}</p>}
+        {waiting.map(d => <Waiting key={d.id} d={d} fig={fig} t={t} go={go} />)}
+        {error && <p className="pvp-console__none pvp-error" role="alert">{t[error]}</p>}
         <button type="button" className="pvp-console__door" onClick={go.friends}>
           <span className="pvp-console__door-name">{t.pvpFriendsTitle}</span>
           <span className="pvp-console__door-fig">{data.friends.count}{data.friends.requests > 0 && <> · <b className="pvp-console__door-req">{t.pvpRequestsN(data.friends.requests)}</b></>}</span>
@@ -135,6 +160,22 @@ function Row({ d, view, fig, t, go }) {
           <EloMove elo={d.elo} t={t} />
         </button>
       )}
+    </div>
+  )
+}
+
+/** A stranger's run waiting for an opponent (plan 315): who ran it,
+ *  their Elo, how long it waits, and the seat. Never its score. */
+function Waiting({ d, fig, t, go }) {
+  const who = nameOf(d.who, t)
+  return (
+    <div className="pvp-console__row">
+      <span className="pf-line__roundel" aria-hidden="true">{who.slice(0, 1).toUpperCase()}</span>
+      <span className="pvp-console__names">
+        <b className="pvp-console__who">{who}</b>
+        <span className="pvp-console__what">{t.pvpEloOf(fig(d.elo))} · {t.pvpHoursLeft(hoursLeft(d.expiresAt))}</span>
+      </span>
+      <button type="button" className="btn-secondary pvp-console__go" onClick={() => go.take(d.id)}>{t.pvpPlay}</button>
     </div>
   )
 }

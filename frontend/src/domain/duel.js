@@ -128,6 +128,7 @@ export function totalAt(timeline, ms) {
 // reason the screens never send) reads as the plain failure.
 export const ERROR_KEYS = {
   pvp_not_found: 'pvpErrNotFound',
+  pvp_run_gone: 'pvpErrRunGone',
   pvp_self: 'pvpErrSelf',
   pvp_not_friends: 'pvpErrNotFriends',
   pvp_request_cooldown: 'pvpErrCooldown',

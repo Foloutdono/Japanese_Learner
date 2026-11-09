@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **315**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **316**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -294,6 +294,11 @@ runtime purpose.
   started (`duels._score_kept`): before, an unstarted seat is free to give
   back, so whatever another learner's figures reach (the cover, the hall,
   the live read) keeps them until « Partir ».
+  The hall offers only the strangers' runs a ranked sprint could deal
+  (plan 315): `_seek`, the hall's list (`duels.waiting`) and the seat
+  picked there (`duels.take`) read one rule, `duels._SEEKABLE`, so a
+  change to who meets whom is made there, once, and a learner holds
+  one unstarted seat at a time.
   Nothing runs in the background: `settle()` brings a duel up to date
   from its stored instants on every read (a run past its sprint paid, a
   duel resolved, expired and its ranked fare refunded, a seat left

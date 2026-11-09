@@ -18,7 +18,7 @@ path or a body has the profile's shape, and a refusal is a code
   POST   /api/pvp/blocks, DELETE .../{u}   block, unblock
   POST   /api/pvp/reports                  {username | duelId, reason}
   GET    /api/pvp/learner/{u}              a learner's card
-  POST   /api/pvp/duels                    {opponent, mode} or {ranked}
+  POST   /api/pvp/duels                    {opponent, mode} or {ranked[, duel]}
   GET    /api/pvp/duels/{id}               the cover, the result
   POST   /api/pvp/duels/{id}/start         « Partir »
   POST   /api/pvp/duels/{id}/answer        {n, pick}
@@ -73,6 +73,8 @@ class DuelPayload(BaseModel):
     opponent: str | None = Field(default=None, pattern=USERNAME)
     mode: Literal["async", "live"] = "async"
     ranked: bool = False
+    # A ranked run the hall listed, picked there (plan 315).
+    duel: int | None = Field(default=None, ge=1, le=DUEL_ID)
 
 
 class AnswerPayload(BaseModel):
@@ -215,9 +217,11 @@ def report(payload: ReportPayload, user_id: str = Depends(get_user_id)):
 
 @router.get("/api/pvp/learner/{username}")
 def learner(username: str = Path(..., pattern=USERNAME), user_id: str = Depends(get_user_id)):
+    """The card a name opens: friends.card, and what the Elo board says
+    of them while they are on it (`board`, plan 315)."""
     def go(cur, _after):
         other, name = friends.reach(cur, user_id, username)
-        return friends.card(cur, user_id, other, name)
+        return {**friends.card(cur, user_id, other, name), "board": duels.on_board(cur, user_id, other)}
     return _do(go)
 
 
@@ -225,11 +229,12 @@ def learner(username: str = Path(..., pattern=USERNAME), user_id: str = Depends(
 
 @router.post("/api/pvp/duels")
 def create_duel(payload: DuelPayload, user_id: str = Depends(get_user_id)):
-    """A friend challenged (async or live), or a ranked sprint. A second
-    press finds the duel the first one made."""
+    """A friend challenged (async or live), or a ranked sprint: the one
+    the server deals, or a run the hall listed (`duel`). A second press
+    finds the duel the first one made."""
     def go(cur, after):
         if payload.ranked:
-            duel_id, against = duels.ranked(cur, after, user_id)
+            duel_id, against = duels.ranked(cur, after, user_id, payload.duel)
             return {"id": duel_id, "against": against}
         if payload.opponent is None:
             raise Refused(400, "pvp_no_opponent")

@@ -156,7 +156,8 @@ export default function DuelFriendsScreen({ session }) {
           )}
         </>
       )}
-      <PlayerSheet username={card} onClose={() => setCard(null)} onChanged={reload} session={session} />
+      <PlayerSheet username={card} onClose={() => setCard(null)} onChanged={reload} session={session}
+        onChallenge={name => { setCard(null); setChallenge(name) }} />
       <FriendSheet key={challenge ?? ''} open={Boolean(challenge)} preset={challenge} onClose={() => setChallenge(null)} session={session} />
     </main>
   )

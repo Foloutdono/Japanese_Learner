@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { Loading } from '../ui/Loading'
+import { CheckCircleIcon } from '../ui/Icons'
 import { japaneseChoices } from '../../domain/duel'
 
 // ── 対戦 — a duel's detail and corrections (plan 279) ──────────────
@@ -13,7 +14,7 @@ export function CorrectionsSheet({ open, onClose, review, error, them }) {
   const { t, lang } = useLang()
   const secs = ms => (ms / 1000).toLocaleString(lang, { maximumFractionDigits: 1 })
   return (
-    <Sheet open={open} onClose={onClose} jp={t.pvpCorrections} className="pvp-fix">
+    <Sheet open={open} onClose={onClose} title={t.pvpCorrections} icon={CheckCircleIcon} className="pvp-fix">
       {error && <p className="pvp-sheet__help pvp-error" role="alert">{t[error]}</p>}
       {!review && !error && <Loading />}
       {review && (

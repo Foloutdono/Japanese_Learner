@@ -564,6 +564,94 @@ def test_a_ranked_seat_left_unstarted_is_given_back(client, learners, clock):
     assert _ranked(client, B) == {"id": first["id"], "against": "seek"}
 
 
+
+# ── The runs waiting for an opponent (plan 315) ─────────────────────
+
+def test_the_hall_lists_the_runs_a_ranked_sprint_could_deal(client, learners, clock):
+    for uid in (A, B, C):
+        place(uid)
+    first = _ranked(client, A)
+    play(client, clock, A, first["id"], [(1000, True)] * 4)
+    # Not one's own: A's run waits on the others' halls.
+    hall = client.get("/api/pvp").json()
+    assert hall["waiting"] == [] and [d["id"] for d in hall["running"]] == [first["id"]]
+    with acting_as(B):
+        hall = client.get("/api/pvp").json()
+    waiting, = hall["waiting"]
+    assert waiting["id"] == first["id"] and waiting["who"] == learners[A]
+    assert waiting["elo"] == 1000 and waiting["provisional"] is True and waiting["against"] == "seek"
+    assert waiting["mix"] == [{"level": "N5", "share": 1.0}] and waiting["expiresAt"]
+    # Never the score to beat, and never in what the doors count.
+    assert "theirs" not in waiting and "mine" not in waiting and "score" not in waiting
+    assert hall["toPlay"] == [] and hall["live"] == []
+    # Across a block, nothing; nor off the Elo's reach.
+    with acting_as(C):
+        client.post("/api/pvp/blocks", json={"username": learners[A]})
+        assert client.get("/api/pvp").json()["waiting"] == []
+        client.delete(f"/api/pvp/blocks/{learners[A]}")
+    sql("UPDATE pvp_ratings SET rating = 1500 WHERE user_id = %s", (C,))
+    with acting_as(C):
+        assert client.get("/api/pvp").json()["waiting"] == []
+    # A player off the 番付 waits as a traveller.
+    set_profile(A, hidden=True)
+    with acting_as(B):
+        assert client.get("/api/pvp").json()["waiting"][0]["who"] is None
+
+
+def test_a_run_picked_in_the_hall_is_the_pickers_seat(client, learners, clock):
+    for uid in (A, B, C):
+        place(uid)
+    first = _ranked(client, A)
+    play(client, clock, A, first["id"], [(1000, True)] * 4)
+    with acting_as(B):
+        r = client.post("/api/pvp/duels", json={"ranked": True, "duel": first["id"]})
+        assert r.json() == {"id": first["id"], "against": "seek"}
+        # The second press finds the seat; nothing is paid before « Partir ».
+        assert client.post("/api/pvp/duels", json={"ranked": True, "duel": first["id"]}).json()["id"] == first["id"]
+        cover = client.get(f"/api/pvp/duels/{first['id']}").json()
+        assert cover["price"] == duels.RANKED_PRICE and cover["them"]["score"] is None
+        hall = client.get("/api/pvp").json()
+        assert hall["waiting"] == [] and [d["id"] for d in hall["toPlay"]] == [first["id"]]
+    assert _ledger(B, "duel") == []
+    # Taken: gone from C's hall, and refused to C.
+    with acting_as(C):
+        assert client.get("/api/pvp").json()["waiting"] == []
+        r = client.post("/api/pvp/duels", json={"ranked": True, "duel": first["id"]})
+        assert r.status_code == 409 and r.json()["detail"]["code"] == "pvp_run_gone"
+        # Nor a duel that is no run waiting for them.
+        r = client.post("/api/pvp/duels", json={"ranked": True, "duel": 2 ** 40})
+        assert r.status_code == 409 and r.json()["detail"]["code"] == "pvp_run_gone"
+    play(client, clock, B, first["id"], [(1000, True)] * 6)
+    with acting_as(B):
+        assert client.get(f"/api/pvp/duels/{first['id']}").json()["result"]["outcome"] == "win"
+    assert _elo(A) == 980 and _elo(B) == 1020
+    starts = [e["against"] for e in events_of(B, "pvp_duel_start")]
+    assert starts == ["seek"]
+
+
+def test_a_second_run_picked_gives_the_first_seat_back(client, learners, clock):
+    for uid in (A, B, C):
+        place(uid)
+    # Three fresh papers, none of them played yet: B's left unstarted.
+    one, two, own = _ranked(client, A), _ranked(client, C), _ranked(client, B)
+    assert {one["against"], two["against"], own["against"]} == {"open"}
+    play(client, clock, A, one["id"], [(1000, True)] * 3)
+    play(client, clock, C, two["id"], [(1000, True)] * 3)
+    with acting_as(B):
+        assert [d["id"] for d in client.get("/api/pvp").json()["waiting"]] == [one["id"], two["id"]]
+        # One run kept from the others at a time: B's own unplayed paper
+        # is dropped, then the seat in A's run is A's again.
+        client.post("/api/pvp/duels", json={"ranked": True, "duel": one["id"]})
+        assert client.get(f"/api/pvp/duels/{own['id']}").status_code == 404
+        client.post("/api/pvp/duels", json={"ranked": True, "duel": two["id"]})
+        hall = client.get("/api/pvp").json()
+        assert [d["id"] for d in hall["toPlay"]] == [two["id"]]
+        assert [d["id"] for d in hall["waiting"]] == [one["id"]]
+        assert client.get(f"/api/pvp/duels/{one['id']}").status_code == 404
+    assert sql("SELECT 1 FROM pvp_duels WHERE id = %s", (own["id"],), fetch=True) == []
+    assert len(sql("SELECT 1 FROM pvp_entries WHERE duel_id = %s", (one["id"],), fetch=True)) == 1
+    assert _ledger(B, "duel") == []
+
 def test_a_ranked_run_nobody_meets_is_refunded(client, learners, clock):
     place(A)
     first = _ranked(client, A)
@@ -647,6 +735,31 @@ def test_the_board_ranks_those_who_played_and_keeps_the_hidden_off(client, learn
     assert rating["games"] == 1 and rating["losses"] == 1 and rating["trend"] == [980]
     assert rating["start"] == 1000 and "moves" not in rating
 
+
+
+def test_a_name_on_the_board_opens_what_the_board_says(client, learners, clock):
+    # Plan 314: a stranger's card says what the Elo board prints of them
+    # (the Elo, provisional or not, the place) and nothing more; nothing
+    # for a learner off it.
+    for uid in (A, B, C):
+        place(uid)
+    first = _ranked(client, A)
+    play(client, clock, A, first["id"], [(1000, True)] * 3)
+    play(client, clock, B, _ranked(client, B)["id"], [(1000, True)] * 5)
+    with acting_as(C):
+        card = client.get(f"/api/pvp/learner/{learners[B]}").json()
+        assert card["relation"] == "none" and "elo" not in card and "wins" not in card
+        assert card["board"] == {"elo": 1020, "provisional": True, "rank": 1, "of": 2}
+        assert client.get(f"/api/pvp/learner/{learners[A]}").json()["board"]["rank"] == 2
+        # No ranked duel yet: off the board, and so is C's own card.
+        assert client.get(f"/api/pvp/learner/{learners[C]}").json()["board"] is None
+    set_profile(B, hidden=True)
+    with acting_as(C):
+        assert client.get(f"/api/pvp/learner/{learners[B]}").json()["board"] is None
+        assert client.get(f"/api/pvp/learner/{learners[A]}").json()["board"]["rank"] == 1
+    # A learner off the board reads their own place.
+    with acting_as(B):
+        assert client.get(f"/api/pvp/learner/{learners[B]}").json()["board"]["rank"] == 1
 
 def test_the_history_pages_past_duels(client, learners, clock):
     befriend(client, A, B, learners)
