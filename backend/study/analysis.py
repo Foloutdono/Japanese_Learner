@@ -1838,16 +1838,12 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             continue
         please = resolve_please(morphemes, i)
         if please:
-            # お願いします closing what is said, "please" (plan 313): its card,
-            # and the words it is made of as its parts, which every count
-            # reads -- the deck files the phrase at N2 and N1, and the N5
-            # pages that say it count お, 願う and する as before.
+            # お願いします closing what is said, "please" (plan 313): the
+            # deck's N5 card, counted as itself like any set phrase's, so a
+            # page that says it no longer counts 願う "to desire".
             level, entry, raw_id, n = please
             token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
             token["pos"] = "interjection"
-            token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
-                               "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
-                              for k in range(i, i + n) if morphemes[k].pos != "particle"]
             tokens.append(token)
             i += n
             continue
@@ -2565,7 +2561,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # Spanish (有名人, 特別展, 多少なりとも, 何なりと, 生まれて初めて, 一期一会,
 # 口が悪い, 耳が遠い, and 左様, 声かけ, みだりに, づくり: jmdict_fr/es lines),
 # and an errand is no place gone to (練習に、手伝いに来て).
-LOCAL_REV = 46
+# 47: plan 313 -- お願いします is one N5 card (the owner's call): both
+# spellings fold to it, and it is counted as itself, no longer as the
+# お, 願う and する it is made of.
+LOCAL_REV = 47
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

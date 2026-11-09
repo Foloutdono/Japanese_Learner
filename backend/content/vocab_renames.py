@@ -1008,6 +1008,20 @@ MOVES: dict[str, str] = {
     "vocab_N1_填まる_はまる": "vocab_N1__はまる",
     "vocab_N1_嘗て_かつて": "vocab_N1__かつて",
     "vocab_N1_態々_わざわざ": "vocab_N1__わざわざ",
+
+    # ── Plan 313: お願いします at N5, the owner's call ──────────
+    # The breakdown reads a closing お願いします as the deck's "please"
+    # (card_lookup.resolve_please), which the deck held twice: in kanji
+    # at N1 and in kana at N2, a pair plan 112 left open. The N5 lessons
+    # and 391 of the app's lines say it from the first conversation.
+    # The lists put it at N2, so plan 260's two signals stop there; the
+    # owner chose N5. Both cards go onto one N5 card, since two cards of
+    # one word at one level would be met twice (106b, 112), in the
+    # lists' spelling: a card's level is the word's, not its kanji's
+    # (写真 at N5, though 写 is N4), and the pages that keep to N5's
+    # kanji write it in kana, which still finds the card.
+    "vocab_N1_お願いします_おねがいします": "vocab_N5_お願いします_おねがいします",
+    "vocab_N2__おねがいします": "vocab_N5_お願いします_おねがいします",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
