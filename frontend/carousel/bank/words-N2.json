@@ -558,7 +558,6 @@
 {"t":"公衆","r":"こうしゅう","ro":"koushuu","en":["the public"],"fr":["le public"],"fu":[["公","こう"],["衆","しゅう"]],"hy":["口衆","公週","後衆"]},
 {"t":"祖先","r":"そせん","ro":"sosen","en":["ancestor"],"fr":["ancêtre"],"fu":[["祖","そ"],["先","せん"]],"hy":["想先","祖千","組先"]},
 {"t":"羨む","r":"うらやむ","ro":"urayamu","en":["to envy"],"fr":["envier"],"fu":[["羨","うらや"],["む",""]]},
-{"t":"おねがいします","r":"おねがいします","ro":"onegaishimasu","en":["please"],"fr":["s'il vous plaît"]},
 {"t":"売り切れる","r":"うりきれる","ro":"urikireru","en":["to be sold out"],"fr":["être en rupture de stock"],"fu":[["売","う"],["り",""],["切","き"],["れる",""]],"hy":["右り切れる","売り気れる","雨り切れる"],"ex":["N1.101"]},
 {"t":"おやすみ","r":"おやすみ","ro":"oyasumi","en":["good night","holiday, day off, rest"],"fr":["bonne nuit","congé, jour de repos, repos"]},
 {"t":"移転","r":"いてん","ro":"iten","en":["moving, relocation, transfer"],"fr":["déménagement, transfert"],"fu":[["移","い"],["転","てん"]],"hy":["以転","移天","医転"],"ex":["N2.61","N2.83"]},

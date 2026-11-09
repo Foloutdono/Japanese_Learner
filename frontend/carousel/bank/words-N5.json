@@ -728,4 +728,5 @@
 {"t":"よろしく","r":"よろしく","ro":"yoroshiku","en":["well, properly, best regards (set phrase, asks for goodwill), please remember me"],"fr":["bien, correctement, cordialement (formule, demande de bienveillance), je compte sur vous"]},
 {"t":"十分","r":"じゅっぷん","ro":"juppun","en":["10 minutes"],"fr":["dix minutes"],"fu":[["十","じゅっ"],["分","ぷん"]]},
 {"t":"もしもし","r":"もしもし","ro":"moshimoshi","en":["hello (on the phone)"],"fr":["allô (au téléphone)"]},
-{"t":"ただいま","r":"ただいま","ro":"tadaima","en":["I'm home! (on coming home)","right now, at the moment (formal)"],"fr":["me voilà ! (en rentrant à la maison)","en ce moment, tout de suite (soutenu)"]}]}
+{"t":"ただいま","r":"ただいま","ro":"tadaima","en":["I'm home! (on coming home)","right now, at the moment (formal)"],"fr":["me voilà ! (en rentrant à la maison)","en ce moment, tout de suite (soutenu)"]},
+{"t":"お願いします","r":"おねがいします","ro":"onegaishimasu","en":["please (asking for something, or a favour)"],"fr":["s'il vous plaît (pour demander quelque chose, un service)"],"fu":[["お",""],["願","ねが"],["いします",""]]}]}

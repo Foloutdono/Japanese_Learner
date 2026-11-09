@@ -759,7 +759,6 @@
 {"t":"知性","r":"ちせい","ro":"chisei","en":["intelligence"],"fr":["intelligence"],"fu":[["知","ち"],["性","せい"]],"hy":["地性","知生","質性"]},
 {"t":"眩しい","r":"まぶしい","ro":"mabushii","en":["dazzling, radiant"],"fr":["éblouissant, rayonnant"],"fu":[["眩","まぶ"],["しい",""]]},
 {"t":"引き取る","r":"ひきとる","ro":"hikitoru","en":["to take over, to take back, to collect","to take into one's care, to adopt","to withdraw"],"fr":["reprendre, récupérer","prendre en charge, recueillir","se retirer"],"fu":[["引","ひ"],["き",""],["取","と"],["る",""]],"hy":["否き取る","引き土る","彼き取る"]},
-{"t":"お願いします","r":"おねがいします","ro":"onegaishimasu","en":["please"],"fr":["s'il vous plaît"],"fu":[["お",""],["願","ねが"],["いします",""]]},
 {"t":"明かす","r":"あかす","ro":"akasu","en":["to spend (the night)","to reveal, to disclose"],"fr":["passer (la nuit)","révéler, divulguer"],"fu":[["明","あ"],["かす",""]],"hy":["亜かす","阿かす"],"ex":["N1.34"]},
 {"t":"善し悪し","r":"よしあし","ro":"yoshiashi","en":["good or bad, merits or demerits, quality, suitability"],"fr":["bon ou mauvais, avantages ou inconvénients, qualité, pertinence"],"fu":[["善","よ"],["し",""],["悪","あ"],["し",""]],"hy":["与し悪し","善し亜し","予し悪し"]},
 {"t":"所得","r":"しょとく","ro":"shotoku","en":["income, earnings"],"fr":["revenu, gains"],"fu":[["所","しょ"],["得","とく"]],"hy":["書得","所読","野得"]},
