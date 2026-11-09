@@ -25,6 +25,7 @@ import { BEFORE_309, TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './t
 import { FEEDS } from './feeds.js'
 import { drawFeature, featureCommand, featureItems, featurePage, featurePlan, featurePreview } from './feature.js'
 import { STYLES as WORDS_STYLES, drawWords, loadPictures, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from './words.js'
+import { drawSayit, sayitCommand, sayitItems, sayitPage, sayitPlan, sayitSlug, sayitStillAt, sayitTimeline } from './sayit.js'
 
 const STORE = 'tsuji-carousel'
 const $ = sel => document.querySelector(sel)
@@ -41,7 +42,7 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { long: 'Video', words: 'Short', feature: 'Feature', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', short: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { long: 'Video', words: 'Short', feature: 'Feature', challenge: 'Text', sayit: 'Part', promo: 'Story', echo: 'Word', sentence: 'Sentence', short: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', season: 'now', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20', 'promo:comprehension': 'n5-33:q5' },
@@ -64,6 +65,8 @@ const DEFAULTS = {
   feed: 'shorts',
   // Plan 252: a vocabulary short's look.
   wordsStyle: 'card',
+  // Plan 311: say it in Japanese, its fifth sentence left to the comments (the default) or said like the others.
+  sayitAnswer: 'comments',
 }
 const state = load()
 // The type drawn: the one chosen (state.type) where the item can be drawn
@@ -89,6 +92,7 @@ function load() {
     if (saved.challengeScenery && !SCENERY_IDS.includes(saved.challengeScenery)) delete saved.challengeScenery
     if (saved.feed && !FEEDS.includes(saved.feed)) delete saved.feed
     if (saved.wordsStyle && !WORDS_STYLES.includes(saved.wordsStyle)) delete saved.wordsStyle
+    if (saved.sayitAnswer && !['comments', 'shown'].includes(saved.sayitAnswer)) delete saved.sayitAnswer
     // No video carries music since plan 273: a visit saved before it forgets its switch.
     delete saved.bed
     // A source, a format or a view saved before a rename is forgotten, not drawn as a blank stage.
@@ -251,7 +255,7 @@ async function listNow() {
   const data = await dataNow()
   if (mine !== listToken) return
   const src = sourceOf(state.source)
-  let items = state.source === 'long' ? longItems(data, state.level, state.lang, state.longFormat) : state.source === 'words' ? wordsItems(data, state.level, state.lang) : state.source === 'feature' ? featureItems(state.lang) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
+  let items = state.source === 'long' ? longItems(data, state.level, state.lang, state.longFormat) : state.source === 'words' ? wordsItems(data, state.level, state.lang) : state.source === 'feature' ? featureItems(state.lang) : state.source === 'sayit' ? sayitItems(data, state.lang) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
   if (src.byLevel) items = items.filter(x => x.tag === state.level)
   listCache = items
   const q = $('#search').value.trim().toLowerCase()
@@ -526,14 +530,14 @@ async function renderNow() {
   stopPlayer()
   // A video (a long one, a reading challenge) has a page and a command, not slides.
   document.body.dataset.mode = videoSource() ? 'long' : ''
-  document.body.dataset.video = ['challenge', 'words', 'feature'].includes(state.source) ? state.source : ''
+  document.body.dataset.video = ['challenge', 'words', 'feature', 'sayit'].includes(state.source) ? state.source : ''
   // A 9:16 video is posted to three feeds, a post each (plan 251): Reels
   // and TikTok take a caption alone.
-  const feeds = ['challenge', 'words', 'feature'].includes(state.source) || (state.source === 'long' && state.longFormat === 'short')
+  const feeds = ['challenge', 'words', 'feature', 'sayit'].includes(state.source) || (state.source === 'long' && state.longFormat === 'short')
   document.body.dataset.feeds = feeds ? 'on' : ''
   document.body.dataset.post = feeds && state.feed !== 'shorts' ? 'caption' : ''
   if (tuneFor !== state.source) renderTune()
-  $('#hour-field').hidden = !['promo', 'challenge'].includes(state.source)
+  $('#hour-field').hidden = !['promo', 'challenge', 'sayit'].includes(state.source)
   const funnel = DESIGNS.includes(state.design)
   // A promo story and a word echo draw the ground and the handle whatever
   // the look, so they keep those controls (plan 248).
@@ -548,6 +552,7 @@ async function renderNow() {
   if (state.source === 'long') return renderLong(mine)
   if (state.source === 'words') return renderWords(mine)
   if (state.source === 'challenge') return renderChallenge(mine)
+  if (state.source === 'sayit') return renderSayit(mine)
   if (state.source === 'feature') return renderFeature(mine)
   const id = currentId()
   const deps = await depsFor(data, id)
@@ -1042,6 +1047,34 @@ async function renderChallenge(mine) {
   $('#export-video').textContent = standIn
     || (pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)})` : 'Read along is made by the command (the voice)')
 }
+// ── Say it in Japanese (plan 311) ─────────────────────────────
+// Five sentences of a level's reading bank, a part of its deal, over
+// Today's print as the reading challenge stands (the same print, standing
+// in where a scenery's own did not load): its voice is made where it is
+// rendered, so the studio shows it timed on a guess, its page, its posts
+// and the command.
+async function renderSayit(mine) {
+  const data = await fetchJson(fileFor(sourceOf('sayit')))
+  if (mine !== token) return
+  const id = currentId()
+  const pl = sayitPlan(data, id, { lang: state.lang, hour: state.hour, season: seasonOf(), scenery: state.challengeScenery, show: state.sayitAnswer === 'shown', tune: state.tune })
+  const tl = sayitTimeline(pl)
+  const got = await challengePrint(pl, mine)
+  if (!got) return
+  const { P, standIn } = got
+  await fonts(`${JSON.stringify(pl.items)}言ってみて日本語でにほんご`)
+  if (mine !== token) return
+  const page = sayitPage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE)
+  current = { plan: pl, fmt: TALL, decks: [], sayit: { id: pl.id, page, tl, P, standIn } }
+  mountVideo({
+    id: pl.id, jp: '言ってみて', title: `JLPT ${pl.lv} · part ${pl.part} of ${pl.parts}`, label: 'Say it in Japanese', size: TALL, tl, start: sayitStillAt(),
+    count: `about ${clock(tl.seconds)} · ${pl.items.length} sentences · the fifth ${pl.hidden ? 'in the comments' : 'said'} · 9:16`,
+    draw: (ctx, t) => drawSayit(ctx, pl, tl, t, P),
+  })
+  const key = `sayit|${pl.id}|${state.lang}|${state.sayitAnswer}|${pl.scenery}|${state.season}|${state.hour}|${state.feed}`
+  if (key !== captionFor) fillPost(page, key)
+  $('#command').textContent = sayitCommand(pl)
+}
 // A challenge's file name: its text, what it stands on unless the bay, its print's season and hour, its language.
 const challengeName = (id, plan) => `tsuji-challenge-${safeName(id)}-${plan.scenery !== 'bay' ? `${plan.scenery}-` : ''}${plan.season ? `${plan.season}-` : ''}${plan.hour}-${state.lang}`
 async function exportChallenge() {
@@ -1068,6 +1101,19 @@ async function exportThumb() {
     c.height = FORMATS.story.h
     drawChallenge(c.getContext('2d'), current.plan, current.challenge.tl, 1.6, current.challenge.P)
     const result = await offer(`${challengeName(current.challenge.id, current.plan)}.png`, await png(c))
+    status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
+    return
+  }
+  if (current.sayit) {
+    if (current.sayit.standIn) {
+      status(`${current.sayit.standIn}: no thumbnail of it is made on another print.`)
+      return
+    }
+    const c = document.createElement('canvas')
+    c.width = TALL.w
+    c.height = TALL.h
+    drawSayit(c.getContext('2d'), current.plan, current.sayit.tl, sayitStillAt(), current.sayit.P)
+    const result = await offer(`tsuji-${sayitSlug(current.plan)}.png`, await png(c))
     status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
     return
   }
@@ -1324,8 +1370,8 @@ async function exportShort() {
     frame: (ctx, t) => { drawShortFrame(ctx, slides, tl, t, fmt) },
   })
 }
-const clippedSource = () => ['promo', 'echo', 'long', 'challenge', 'words', 'feature'].includes(state.source)
-const videoSource = () => ['long', 'challenge', 'words', 'feature'].includes(state.source)
+const clippedSource = () => ['promo', 'echo', 'long', 'challenge', 'words', 'feature', 'sayit'].includes(state.source)
+const videoSource = () => ['long', 'challenge', 'words', 'feature', 'sayit'].includes(state.source)
 
 /** A clip encoded as the feeds take a video, H.264 in an MP4 with its sounds. */
 // The H.264 level a size and a rate need: 4.0 holds 1080×1920 at 30

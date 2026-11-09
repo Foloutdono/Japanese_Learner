@@ -182,6 +182,10 @@ body[data-video="challenge"] [data-challenge="hide"] { display: none !important;
 /* The vocabulary shorts (plan 252): a look and a feed of their own. */
 body:not([data-video="words"]) [data-words="only"] { display: none !important; }
 body[data-video="words"] [data-words="hide"] { display: none !important; }
+/* Say it in Japanese (plan 311): its fifth sentence's switch; the scenery it shares with the challenges. */
+body:not([data-video="sayit"]) [data-sayit="only"] { display: none !important; }
+body[data-video="sayit"] [data-sayit="hide"] { display: none !important; }
+body:not([data-video="challenge"]):not([data-video="sayit"]) [data-print="only"] { display: none !important; }
 /* The feature videos (plan 270): recorded in the app, posted to any feed. */
 body:not([data-video="feature"]) [data-feature="only"] { display: none !important; }
 body[data-video="feature"] [data-feature="hide"] { display: none !important; }
@@ -263,7 +267,15 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       </div>
     </div>
 
-    <div class="field" data-challenge="only">
+    <div class="field" data-sayit="only">
+      <div class="label">The fifth sentence <span>left to the comments, where the viewer writes theirs (the default), or said like the others</span></div>
+      <div class="seg" role="group" aria-label="The fifth sentence">
+        <button type="button" data-set="sayitAnswer:comments">In the comments 答えはコメントで</button>
+        <button type="button" data-set="sayitAnswer:shown">Said like the others 声で言う</button>
+      </div>
+    </div>
+
+    <div class="field" data-print="only">
       <div class="label">Scenery 景 <span>what the text stands on</span></div>
       <div class="seg" role="group" aria-label="Scenery">
         <button type="button" data-set="challengeScenery:bay">The bay 入江</button>
@@ -356,7 +368,7 @@ body[data-mode="long"] .export textarea { min-height: 300px; }
       </div>
     </div>
 
-    <div class="field" data-long="only" data-challenge="hide" data-words="hide" data-feature="hide">
+    <div class="field" data-long="only" data-challenge="hide" data-words="hide" data-feature="hide" data-sayit="hide">
       <div class="label">Format <span>YouTube, or a short for any feed</span></div>
       <div class="seg" role="group" aria-label="Video format">
         <button type="button" data-set="longFormat:long">16:9 video</button>

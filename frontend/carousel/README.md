@@ -1,4 +1,4 @@
-# The carousel studio (plans 229–229n, 231–235, 237, 247–256, 301)
+# The carousel studio (plans 229–229n, 231–235, 237, 247–256, 301, 311)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -1420,6 +1420,98 @@ node carousel/long/render.mjs --challenge n5-12 --style scroll --hour day --seas
 VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --challenge n5-01 --style along --hour night --lang fr
 ```
 
+## Say it in Japanese (plan 311)
+
+The reading challenge turned round (`sayit.js`, the source 言ってみて
+"Say it in Japanese"), built as the owner picked it on the canvas
+"Tsuji — Say it in Japanese": five sentences of a level's reading bank,
+each in the viewer's own language over Today's print, a countdown to say
+it in Japanese out loud, then the app's reader says it. 9:16, about a
+minute and a half.
+
+**A turn.** The sentence comes in on the read-along's panel under "Say it
+in Japanese", over an empty dashed box where the answer will stand, and a
+ring counts down nine seconds, a tick a second. The countdown helps in
+three steps alike (the owner's pick D of four drawn: none, its words, its
+frame, or all three in turn), three seconds each: the sentence alone ("Out
+loud"); then its words ("Help · its words"), each a card, a verb or an
+adjective in its dictionary form (会う for 会います, its kanji read over
+it) over its first sense, never in the sentence's own order; then its
+frame ("Help · its frame"), the particles and the endings printed and a
+blank for each word with what it means under it. Then the reader says it,
+slowed at N5 and N4, and the words fill the frame's blanks where they
+stand, each gold and ruled while it is said (on the voice's own
+syllables, `long_video_audio.mora_marks`), its furigana over it at N5 to
+N3 and its romaji under it at N5 and N4. Under it the same sentence in
+the other register, the part that changed lit ("Also right, among
+friends: 駅で友だちに会う。", or "politely"): a translation never says
+polite or plain, so either is right, and the line is
+`plain_polite.other_register`'s, the module Construire judges by (the
+bank's `v`); a sentence with none (a question, a 〜ましょう) skips that
+beat. The sentence is "one way to say it", never the only answer.
+
+**The words to find** (`isClue`) are the sentence's words of the deck,
+never a piece of the pattern the sentence was written for (its point's
+ください, a causative's する, 〜ばいい's いい) unless it is the sentence's
+focus (運んで of 運んであげました), never the verb an honorific pattern
+says in its own shape (おかけ of お〜ください, whose deck sense is "to
+hang"), and never the negative ない after a verb, which is the form.
+Five cards at most: a pronoun, then the easiest words, are left out first
+(the frame still blanks them all), and where even the smallest cards do
+not stand in the box, the one needed least goes, down to three.
+
+**The fifth is left to the comments** (as the reading challenge's answer,
+plan 275, the owner's pick): its countdown runs with its help, then "Your
+turn · Write it in the comments · kana, kanji or romaji", unsaid. The
+studio's "The fifth sentence" switch (or `--show`) says it like the
+others.
+
+**The deal** (`sayitDeal`): a level's sentences, sorted by how long they
+are said, cut into five bands, part p taking the p-th of each band, so a
+part climbs from short to long and its fifth, the one asked in the
+comments, is its longest. A sentence whose translation runs past 140
+characters in English or French (`SAYABLE`) is left out, too long to hold
+in mind and say in the countdown (a few of N2's and N1's). N5 has 29
+parts, N4 and N3 43, N2 and N1 46; the studio lists them as `N5:3`.
+
+**The cover** (the owner's pick B of four drawn, over the reading
+challenge's slip): the first sentence set large over the print in its
+colours, on a band of night that thins out above and below, under "Can
+you say it in Japanese?", an arrow down to 日本語で？ with its reading,
+and the chip (the level, five sentences, nine seconds each). Whole from
+frame 0, the thumbnail too. The cut into the first sentence goes one
+thing at a time, never words over words: the cover's words leave (0.35
+s), then the panel comes, then the sentence on it.
+
+**The way to the app** is its own exercise of the same name, Translation
+("Say it in Japanese": read, say it, the tutor), drawn from the app's own
+strings: the sentence, the Japanese typed into its field (a line longer
+than the field showing its end, as a field scrolls to its caret), the
+tutor's verdict and the reference, the run's three stops lit as it goes,
+the site's address. It is typed with the part's shortest said sentence.
+
+**What it stands on** is the reading challenge's ground as plan 309
+recommends it, fixed (`PRINT_LOOK`): the look the owner picked was drawn
+on it, so the challenge's own dials do not move it. Its hour, season and
+scenery are the studio's (the scenery field is the challenge's), the
+command's `--hour`, `--season` and `--scenery`. No music (plan 273): the
+board's flap on the cover, the card's turn as each sentence comes, the
+countdown's ticks, the reader, the platform's chime on the way out; the
+voice's credit on the panel and in every post.
+
+**Every frame fits** (`src/carouselSayit.test.js`): every part of every
+level, in both languages, drawn at the moments that move it, every text
+inside the feed's safe area and no Japanese under the floor (`JP_MIN`).
+A sentence too long to stand with the room under each word for its
+meaning (a long one at N3 and up) is laid out without it: its frame's
+blanks stand bare, their meanings having been on the cards a step before.
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --sayit N5:3 --hour day --lang en
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --sayit N3:12 --hour night --season winter --scenery lake --lang fr --show
+```
+
 ## Tuning (plan 248)
 
 Every number a maker may want to set per post is declared once, in
@@ -1434,6 +1526,7 @@ as sliders, grouped:
 | Word echo | echo | how long the word is said, the silence between two sayings, the word kept |
 | Short video | every carousel | each slide's hold (×), the time to answer a question, the longest a short may run |
 | Long video | long | the pauses (×) and the quiz's countdown |
+| Say it in Japanese | sayit | the cover held, each step of help (the countdown is three), the sentence held once said, the other register held, the fifth's ask held, the app last |
 | Export | every clip | the video's and the sound's bitrates, a keyframe every so many seconds |
 
 A module reads a value with `tuned(tune, key)`, which falls back to the

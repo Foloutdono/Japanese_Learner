@@ -1421,7 +1421,17 @@ something (`feature.js`, `camFor`: what a part shows framed, a text read
 down, a page pushed in, a sheet risen), and shows past the exercise what
 a first run would not find (the roll, the breakdown, Ask answered from
 `content/promo.json`'s `ask`, a lesson, a flag, a wrong reply's why;
-since plan 274 comprehension's word and point in the dictionary). Since plan 248 every number a maker may set per
+since plan 274 comprehension's word and point in the dictionary); since
+plan 311 the reading challenge turned round (`sayit.js`, 言ってみて, the
+owner's picks of the canvas "Tsuji — Say it in Japanese"): five sentences
+of a level's reading bank, dealt in parts that climb from short to long,
+each in the viewer's language over the print and said in Japanese before
+the app's reader does, its countdown helping in three steps (the sentence
+alone, its words on cards, its frame, never a piece of its point's
+pattern), its other register `plain_polite.other_register`'s, the fifth
+left to the comments, opening on the first sentence set large over
+日本語で？ and ending on the app's Translation, on plan 309's recommended
+print, fixed (`PRINT_LOOK`). Since plan 248 every number a maker may set per
 post (a video's timing and pace, the export's quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one
 previewed. Since plan

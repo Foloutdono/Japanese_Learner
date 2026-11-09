@@ -33,6 +33,11 @@
 //   --photo PATH      ... a photo of the maker's own in place of the print (plan 276),
 //                     a path under frontend/ (the page serves only that)
 //   --photo-look dark ... over it: dark (dimmed, the default), blur or paper (washed)
+//   --sayit N5:3      say it in Japanese (plan 311, sayit.js): five sentences of a
+//                     level's reading bank, part 3 of its deal, said before the voice,
+//                     9:16, over Today's print (--hour, --season, --scenery as above)
+//   --show            ... the fifth said like the others (by default it is left to
+//                     the comments)
 //   --words ID        a vocabulary short (plan 252, words.js): nine words, 9:16,
 //                     a level's (N5:3) or a theme's (theme:animals:1)
 //   --style quiz      ... as a card on washi (card, the default) or a quiz on sumi (quiz)
@@ -70,6 +75,7 @@ import { challengeCues, challengePage, challengePlan, challengeTimeline } from '
 import { loadFailure, standsOnFailure } from '../app.js'
 import { pageFile } from '../feeds.js'
 import { wordsCues, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from '../words.js'
+import { sayitCues, sayitPage, sayitPlan, sayitSlug, sayitStillAt, sayitTimeline } from '../sayit.js'
 import { parseTune } from '../tune.js'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -217,6 +223,36 @@ if (args.challenge) {
   pageText = challengePage(plan, tl, site)
   thumbAt = 1.6
   log(`${pageText.title}: ${plan.sents.length} sentences, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines voiced`)
+} else if (args.sayit) {
+  // ── Say it in Japanese (plan 311): a part of a level's reading bank, voiced ──
+  const id = String(args.sayit)
+  const level = /^(N[1-5]):\d+$/.exec(id)?.[1]
+  if (!level) throw new Error(`--sayit takes a level and a part, as N5:3 (got ${id})`)
+  const plan = sayitPlan(banks[`${level}.json`], id, { lang, hour: args.hour, season: args.season, scenery: args.scenery, show: args.show === true, tune })
+  const dur = voiceAll(sayitCues(plan))
+  // Its reveal is the voice: a video whose voice did not come is no video, unless asked for it anyway.
+  if (!dur.ok && !args.unvoiced) throw new Error('the voice engine did not voice every line (VOICEVOX_URL): start it, or pass --unvoiced')
+  tl = sayitTimeline(plan, c => (dur(c) ? { dur: dur(c), marks: dur.marks(c) } : null))
+  SIZE = TALL
+  slug = sayitSlug(plan)
+  await fontsFor(glyphs(plan))
+  await canvasOf(SIZE)
+  await page.evaluate(async ({ plan, tl }) => {
+    const Sy = await import('/carousel/sayit.js')
+    const A = await import('/carousel/app.js')
+    const P = await A.loadPrint(plan.hour, { base: '/', ...Sy.sayitPrintOpts(plan) })
+    window.__draw = t => { Sy.drawSayit(window.__ctx, plan, tl, t, P); return t }
+  }, { plan, tl }).catch(async e => {
+    const failed = loadFailure(e.message)
+    if (!failed) {
+      await closeAll()
+      throw e
+    }
+    await stop(standsOnFailure(plan, failed))
+  })
+  pageText = sayitPage(plan, tl, site)
+  thumbAt = sayitStillAt()
+  log(`${pageText.title}: ${plan.items.length} sentences, ${tl.seconds.toFixed(1)} s, ${tl.cues.length} lines voiced`)
 } else if (args.words) {
   // ── A vocabulary short (plan 252): nine words, as a card or a quiz ──
   const id = String(args.words)

@@ -39,7 +39,7 @@ function hold(t, v) {
 // Every source drawn as slides, and so a short made of one: any source
 // but the clips and the videos, a source added later included.
 const SLIDES = 'carousel'
-const NOT_SLIDES = new Set(['promo', 'echo', 'long', 'challenge', 'words'])
+const NOT_SLIDES = new Set(['promo', 'echo', 'long', 'challenge', 'words', 'sayit'])
 
 group('Reading challenge', ['challenge'], [
   { key: 'challenge.pace', label: 'Reading pace', unit: '×', def: 1, min: 0.5, max: 1.6, step: 0.05, hint: 'the characters a minute of every level, times this' },
@@ -89,6 +89,15 @@ group('Word short', ['words'], [
   { key: 'words.count', label: 'Time to answer', unit: 's', def: 5, min: 2, max: 10, step: 1, hint: 'the quiz: the four meanings against the fuse, a tick a second' },
   { key: 'words.hold', label: 'Meaning held', unit: 's', def: 1.4, min: 0.6, max: 4, step: 0.2, hint: 'after the word is said, before its sentence' },
   { key: 'words.after', label: 'Sentence held', unit: 's', def: 1.6, min: 0.6, max: 4, step: 0.2, hint: 'after the sentence is said, before the next word' },
+])
+// Plan 311: say it in Japanese, the reading challenge turned round: its beats.
+group('Say it in Japanese', ['sayit'], [
+  { key: 'sayit.hook', label: 'Cover held', unit: 's', def: 3.2, min: 2, max: 6, step: 0.2, hint: 'the poster, before the first sentence comes' },
+  { key: 'sayit.step', label: 'Each step of help', unit: 's', def: 3, min: 2, max: 5, step: 0.5, hint: 'the sentence alone, then its words, then its frame: the countdown is three of these' },
+  { key: 'sayit.hold', label: 'Sentence held', unit: 's', def: 0.9, min: 0.4, max: 3, step: 0.1, hint: 'once the voice has said it, before the other register' },
+  { key: 'sayit.also', label: 'Other register held', unit: 's', def: 2.4, min: 1, max: 5, step: 0.2, hint: 'the same sentence said the other way, before the next' },
+  { key: 'sayit.ask', label: 'The fifth’s ask held', unit: 's', def: 3.6, min: 2, max: 7, step: 0.2, hint: 'write it in the comments, once its countdown is out' },
+  { key: 'sayit.cta', label: 'The app last', unit: 's', def: 6.5, min: 4, max: 9, step: 0.5, hint: 'the Translation exercise typed, the tutor’s verdict, the three stops' },
 ])
 group('Export', [SLIDES, 'promo', 'echo', 'challenge'], [
   { key: 'export.mbps', label: 'Video quality', unit: 'Mb/s', def: 8, min: 4, max: 20, step: 1, hint: 'at thirty frames a second; doubled at sixty' },
