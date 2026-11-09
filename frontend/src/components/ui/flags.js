@@ -43,6 +43,14 @@ export const FLAGS = {
       ['path', { d: 'M8 10h14M9 6.5h12M9 13.5h12', stroke: '#ffffff', 'stroke-width': 1.1 }],
     ],
   },
+  // Indonesia's red over white (plan 312).
+  id: {
+    viewBox: '0 0 3 2',
+    shapes: [
+      ['rect', { width: 3, height: 2, fill: '#ffffff' }],
+      ['rect', { width: 3, height: 1, fill: '#e70011' }],
+    ],
+  },
   'es-ES': {
     viewBox: '0 0 3 2',
     shapes: [

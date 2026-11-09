@@ -25,7 +25,15 @@ conversation.LANGS, duel_paper.CHOICE_LANGS, line_translate.TRACK_LANGS),
 held whole by its own checks.
 """
 
-SPOKEN: tuple[str, ...] = ("en", "fr", "es")
+SPOKEN: tuple[str, ...] = ("en", "fr", "es", "id")
+
+# The languages the app speaks to a few accounts only, while their parts
+# are written (plan 312, the owner's pick D3): the picker offers one to the
+# accounts PREVIEW_LANG_USERS names (a comma-separated list of user ids, set
+# on the server) and to no one else, and no device starts in it
+# (lib/locale.js's PREVIEW_LANGS is the client's copy). A language leaves
+# this list the day it is offered to everyone.
+PREVIEW: tuple[str, ...] = ("id",)
 
 WRITTEN: dict[str, tuple[str, ...]] = {
     # A deck card's own line, "{kanji}::{kana}" (datas/vocab/vocab_{lang}.json).
@@ -62,6 +70,14 @@ def spoken(lang) -> str:
     """`lang` if the app speaks it, else English: the language a route
     answers a `lang` it was handed in."""
     return lang if lang in SPOKEN else "en"
+
+
+def preview_langs(user_id: str) -> tuple[str, ...]:
+    """The languages in preview this account may pick: every one of
+    PREVIEW for an account PREVIEW_LANG_USERS names, none for another."""
+    import os
+    named = {u.strip() for u in os.environ.get("PREVIEW_LANG_USERS", "").split(",") if u.strip()}
+    return PREVIEW if user_id in named else ()
 
 
 def fr_gloss(entry: dict, fr_map: dict) -> str | None:

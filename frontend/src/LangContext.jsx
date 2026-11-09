@@ -54,7 +54,9 @@ export function LangProvider({ children }) {
         document.documentElement.lang = locale
     }, [locale])
 
-    const t = translations[locale] ?? translations.fr
+    // A locale is always one of the tables (pickInitialLang); were it
+    // not, English, never French (ADR 0023).
+    const t = translations[locale] ?? translations.en
 
     return (
     <LangContext.Provider value={{ lang, locale, switchLang, t, contentMaps }}>

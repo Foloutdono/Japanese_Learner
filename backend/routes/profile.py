@@ -25,7 +25,7 @@ from study import banzuke, level_fit, level_rule, main_modes
 from study import modes as study_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
-from translations import SPOKEN
+from translations import SPOKEN, preview_langs
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -1001,6 +1001,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # The interface language the learner chose, null if never: the
         # app copies it onto the device on boot (lib/langChoice.js).
         "uiLang": _ui_lang(user_id),
+        # The languages in preview the picker offers this account (plan
+        # 312): Indonesian, to the accounts PREVIEW_LANG_USERS names.
+        "previewLangs": list(preview_langs(user_id)),
         # 前回 (plan 291): the last ride a Learn station boarded,
         # {path, at}, or null; the phone's Learn gate offers it again.
         "learnRide": _learn_ride(user_id),

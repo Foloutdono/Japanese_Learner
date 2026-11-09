@@ -41,8 +41,9 @@ RICH_LEVELS: frozenset[str] = frozenset({"N5", "N4", "N3", "N2", "N1"})
 MIN_PER_LEVEL: dict[str, int] = {"N5": 90, "N4": 100, "N3": 100, "N2": 110, "N1": 110}
 
 # The languages a text of the catalogue is written in: English and French
-# on every one, Spanish (plan 302) where it is written.
-TEXT_LANGS = ("en", "fr", "es")
+# on every one, Spanish (plan 302) and Indonesian (plan 312) where they
+# are written (translations.WRITTEN says which parts are whole in each).
+TEXT_LANGS = ("en", "fr", "es", "id")
 
 
 def _load(level: str) -> list[dict]:

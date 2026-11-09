@@ -28,11 +28,16 @@ from study.grammar_match import contains_pattern, verifiable
 from study.grammar_sentence_gen import check_sentence
 from study.llm_shared import sentence_kanji_ok
 
-ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "structure_fr", "structure_es", "meaning", "register", "steps", "compare", "examples", "choose", "tour"})
+# The catalogue's languages beyond its two (plan 302's Spanish, plan 312's
+# Indonesian): each text may carry them, and is held as the two are where
+# it does (tests/test_languages.py is what requires them, part by part).
+LATER = tuple(lang for lang in TEXT_LANGS if lang not in ("en", "fr"))
+ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "structure_fr", "meaning", "register", "steps", "compare", "examples", "choose", "tour",
+                        *(f"structure_{lang}" for lang in LATER)})
 REQUIRED_KEYS = frozenset({"pattern", "structure", "structure_fr", "meaning", "steps", "compare", "examples"})
 STEP_KINDS = ("rule", "use", "careful")
 REGISTERS = frozenset({"neutral", "casual", "polite", "formal", "written"})
-EXAMPLE_KEYS = frozenset({"jp", "en", "fr", "es", "register", "contrast"})
+EXAMPLE_KEYS = frozenset({"jp", "en", "fr", "register", "contrast", *LATER})
 LANGS = ("en", "fr")
 
 # Caps that keep a step a step and not an essay (README: rule <= 2
@@ -78,43 +83,45 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
                     out.append(f"{what}.{lang}: a bullet line must start with '- '")
     if rich and isinstance(pair.get("en"), str) and pair.get("en") == pair.get("fr"):
         out.append(f"{what}: fr is a copy of en (rich levels are written in both languages)")
-    out += _spanish_problems(what, pair, max_chars, bullets)
+    for lang in LATER:
+        out += _later_problems(what, pair, lang, max_chars, bullets)
     return out
 
 
-# ── Spanish (plan 302) ──
-# Every text of the catalogue carries its Spanish now, and
-# tests/test_spanish.py requires it of each point (its gloss, its
-# lesson, its tour, its own Choisir questions). This check holds a side
-# that is there as the other two are; the test is what fails a missing one.
-def _spanish_problems(what: str, pair: dict, max_chars: int, bullets: bool = False) -> list[str]:
-    if "es" not in pair:
+# ── The later languages (plans 302, 312) ──
+# Every text of the catalogue carries its Spanish, and Indonesian is
+# written a part at a time; tests/test_languages.py requires each part
+# whole in the languages translations.WRITTEN gives it (the gloss, the
+# lesson, the tour and its own Choisir questions). This check holds a
+# side that is there as the two are; the test is what fails a missing one.
+def _later_problems(what: str, pair: dict, lang: str, max_chars: int, bullets: bool = False) -> list[str]:
+    if lang not in pair:
         return []
-    text = pair["es"]
+    text = pair[lang]
     if not isinstance(text, str) or not text.strip():
-        return [f"{what}.es is empty (leave it out rather than blank)"]
+        return [f"{what}.{lang} is empty (leave it out rather than blank)"]
     out = []
     if text != text.strip():
-        out.append(f"{what}.es has surrounding whitespace")
+        out.append(f"{what}.{lang} has surrounding whitespace")
     if not _LATIN.search(text):
-        out.append(f"{what}.es is not prose")
+        out.append(f"{what}.{lang} is not prose")
     if len(text) > max_chars:
-        out.append(f"{what}.es is {len(text)} chars, cap {max_chars}")
+        out.append(f"{what}.{lang} is {len(text)} chars, cap {max_chars}")
     if text.count("**") % 2:
-        out.append(f"{what}.es has an unbalanced ** run")
+        out.append(f"{what}.{lang} has an unbalanced ** run")
     if text in (pair.get("en"), pair.get("fr")):
-        out.append(f"{what}: es is a copy of {'en' if text == pair.get('en') else 'fr'}")
+        out.append(f"{what}: {lang} is a copy of {'en' if text == pair.get('en') else 'fr'}")
     if bullets:
         for line in text.split("\n"):
             if line.startswith("-") and not line.startswith("- "):
-                out.append(f"{what}.es: a bullet line must start with '- '")
+                out.append(f"{what}.{lang}: a bullet line must start with '- '")
     return out
 
 
-def _with_spanish(pair: dict, source: dict) -> dict:
-    """An {en, fr} pair with the source's `es` beside it where it has one,
-    so _text_problems holds a Spanish text that is there."""
-    return {**pair, "es": source["es"]} if "es" in source else pair
+def _with_later(pair: dict, source: dict) -> dict:
+    """An {en, fr} pair with the source's later languages beside it where
+    it has them, so _text_problems holds a text that is there."""
+    return {**pair, **{lang: source[lang] for lang in LATER if lang in source}}
 
 
 # ── The formation line in French (plan 215) ──
@@ -140,7 +147,8 @@ def _japanese_skeleton(text: str) -> str:
 
 
 def _structure_fr_problems(entry: dict, lang: str = "fr") -> list[str]:
-    """`structure_fr`, or (plan 302) `structure_es`, held to the same
+    """`structure_fr`, or a later language's (`structure_es`, plan 302;
+    `structure_id`, plan 312), held to the same
     rule: the English line's Japanese, in order, and no English left."""
     key = f"structure_{lang}"
     fr = entry.get(key)
@@ -261,13 +269,13 @@ def _line_problems(what: str, jp, level: str, pattern: str) -> list[str]:
 def _spoken_problems(what: str, line, level: str, pattern: str, rich: bool) -> list[str]:
     """A line of a scene: who says it, what, and its translation."""
     from study.grammar_tour import SCENE_WHO
-    if not isinstance(line, dict) or not {"who", "jp", "en", "fr"} <= set(line) <= {"who", "jp", "en", "fr", "es"}:
-        return [f"{what} must be {{who, jp, en, fr[, es]}}"]
+    if not isinstance(line, dict) or not {"who", "jp", "en", "fr"} <= set(line) <= {"who", "jp", "en", "fr", *LATER}:
+        return [f"{what} must be {{who, jp, en, fr[, {', '.join(LATER)}]}}"]
     out = []
     if line["who"] not in SCENE_WHO:
         out.append(f"{what} who {line['who']!r} not in {SCENE_WHO}")
     out += _line_problems(f"{what} jp", line["jp"], level, pattern)
-    for lang in LANGS + (("es",) if "es" in line else ()):
+    for lang in LANGS + tuple(lang for lang in LATER if lang in line):
         tr = line[lang]
         if not isinstance(tr, str) or not tr.strip() or tr != tr.strip():
             out.append(f"{what} {lang} is empty or has surrounding whitespace")
@@ -275,8 +283,9 @@ def _spoken_problems(what: str, line, level: str, pattern: str, rich: bool) -> l
             out.append(f"{what} {lang} contains Japanese")
     if rich and line["en"] == line["fr"]:
         out.append(f"{what} fr is a copy of en")
-    if line.get("es") in (line["en"], line["fr"]):
-        out.append(f"{what} es is a copy of {'en' if line['es'] == line['en'] else 'fr'}")
+    for lang in LATER:
+        if lang in line and line[lang] in (line["en"], line["fr"]):
+            out.append(f"{what} {lang} is a copy of {'en' if line[lang] == line['en'] else 'fr'}")
     return out
 
 
@@ -675,8 +684,9 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         out += [f"{tag}: {p}" for p in _reading_problems(
             "structure", "structure_reading", entry["structure"], entry.get("structure_reading"))]
         out += [f"{tag}: {p}" for p in _structure_fr_problems(entry)]
-    if "structure_es" in entry:
-        out += [f"{tag}: {p}" for p in _structure_fr_problems(entry, "es")]
+    for lang in LATER:
+        if f"structure_{lang}" in entry:
+            out += [f"{tag}: {p}" for p in _structure_fr_problems(entry, lang)]
     if isinstance(pattern, str) and ":" in pattern:
         # core.auth splits "{user_id}:{raw_id}" on the first colon.
         out.append(f"{tag}: pattern contains ':'")
@@ -702,14 +712,14 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         steps = []
     kinds = []
     for i, step in enumerate(steps):
-        if not isinstance(step, dict) or not {"kind", "en", "fr"} <= set(step) <= {"kind", "en", "fr", "es"}:
+        if not isinstance(step, dict) or not {"kind", "en", "fr"} <= set(step) <= {"kind", "en", "fr", *LATER}:
             out.append(f"{tag}: step {i} must be {{kind, en, fr[, es]}}")
             continue
         if step["kind"] not in STEP_KINDS:
             out.append(f"{tag}: step {i} kind {step['kind']!r} not in {STEP_KINDS}")
         kinds.append(step["kind"])
         out += [f"{tag}: step {i} {p}" for p in _text_problems(
-            "text", _with_spanish({"en": step["en"], "fr": step["fr"]}, step), rich, MAX_STEP_CHARS, bullets=True)]
+            "text", _with_later({"en": step["en"], "fr": step["fr"]}, step), rich, MAX_STEP_CHARS, bullets=True)]
     if rich and (not kinds or kinds[0] != "rule"):
         out.append(f"{tag}: a rich level's lesson opens with a 'rule' step")
     if len(kinds) != len(set(kinds)):
@@ -722,7 +732,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         compare = []
     rivals: list[str] = []
     for i, rival in enumerate(compare):
-        if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", "es"}:
+        if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", *LATER}:
             out.append(f"{tag}: compare {i} must be {{pattern, en, fr[, es]}}")
             continue
         rp = rival["pattern"]
@@ -736,7 +746,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
             out.append(f"{tag}: compare {rp!r} listed twice")
         rivals.append(rp)
         out += [f"{tag}: compare {rp!r} {p}" for p in _text_problems(
-            "text", _with_spanish({"en": rival["en"], "fr": rival["fr"]}, rival), rich, MAX_COMPARE_CHARS)]
+            "text", _with_later({"en": rival["en"], "fr": rival["fr"]}, rival), rich, MAX_COMPARE_CHARS)]
 
     # ── examples ──
     examples = entry["examples"]
@@ -756,7 +766,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         if jp in seen_jp:
             out.append(f"{tag}: example {i} repeats {jp!r}")
         seen_jp.add(jp)
-        for lang in LANGS + (("es",) if "es" in ex else ()):
+        for lang in LANGS + tuple(lang for lang in LATER if lang in ex):
             why = check_sentence(jp, ex[lang], pattern, level)
             if why:
                 out.append(f"{tag}: example {i} ({lang}) {why}")
@@ -768,8 +778,9 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
                     out.append(f"{tag}: example {i} {lang} is not prose")
         if rich and ex["en"] == ex["fr"]:
             out.append(f"{tag}: example {i} fr is a copy of en")
-        if ex.get("es") in (ex["en"], ex["fr"]):
-            out.append(f"{tag}: example {i} es is a copy of {'en' if ex['es'] == ex['en'] else 'fr'}")
+        for lang in LATER:
+            if lang in ex and ex[lang] in (ex["en"], ex["fr"]):
+                out.append(f"{tag}: example {i} {lang} is a copy of {'en' if ex[lang] == ex['en'] else 'fr'}")
         if ex.get("register") is not None and ex["register"] not in REGISTERS:
             out.append(f"{tag}: example {i} register {ex['register']!r} unknown")
         if ex.get("contrast"):

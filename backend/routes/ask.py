@@ -330,6 +330,9 @@ _FUNCTION_WORDS = {
         "elle ce comme quand dire veut".split()
     ),
     "es": frozenset("el los las pero aquí muy también cuando y es hay oración".split()),
+    # Indonesian (plan 312): no word here is a romaji an answer quotes
+    # (dan, "and", is 段's, so it is left out).
+    "id": frozenset("yang dengan untuk tidak adalah ini itu dalam juga karena kalimat bisa atau".split()),
     "de": frozenset("der die das und ist nicht ein eine mit für auf wird auch den dem zu sich".split()),
     "it": frozenset("gli della di è che per nel sono questo questa anche perché molto dello alla".split()),
     "pt": frozenset("os não um uma com em isso aqui também você é essa esse".split()),

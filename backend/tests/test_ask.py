@@ -77,6 +77,11 @@ ANSWER_FR = (
 )
 # The answer a French learner was given on 2026-09-27: Japanese prose,
 # its example glossed in English.
+# Indonesian (plan 312), as the tutor would answer a learner reading it.
+ANSWER_ID = (
+    "Partikel 「は」 menandai topik kalimat: kalimat ini berbicara tentang bunga itu, yang sedang "
+    "dibicarakan, dan tidak sama dengan 「が」, karena 「が」 menandai subjek yang baru."
+)
 ANSWER_JA = (
     "「は」は主題を示し、ここでは「その白い花」について話していることを示します。「が」は主語を強調しますが、"
     "この文では主題として話題を導入するために「は」が使われます。例: 花がきれいです。(はながきれいです。) → The flower is pretty."
@@ -325,6 +330,15 @@ def test_an_answer_in_the_learners_language_is_served_as_it_came(client, model):
      "schön ist.", "en", "de"),
     # Japanese is every answer's language when it is the learner's.
     (ANSWER_JA, "ja", None),
+    # Indonesian (plan 312): its own answer passes, and either side of it
+    # is told apart from English.
+    (ANSWER_ID, "id", None),
+    (ANSWER_ID, "en", "id"),
+    (ANSWER, "id", "en"),
+    (ANSWER_JA, "id", "ja"),
+    # Romaji an answer quotes is counted for nobody.
+    ("Jawabanmu sono shiroi hana wa kirei desu ne sudah benar: ha atau wa untuk 「は」, o atau wo "
+     "untuk 「を」, to dan de adalah cara menulisnya.", "id", None),
 ])
 def test_the_language_an_answer_is_written_in(text, lang, expected):
     assert ask._off_language(text, lang) == expected

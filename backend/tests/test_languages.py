@@ -78,6 +78,31 @@ def test_a_part_is_written_only_in_languages_the_app_speaks():
         assert set(own) <= set(SPOKEN), own
 
 
+def test_a_language_in_preview_is_spoken_and_kept_from_devices_on_both_sides():
+    """translations.PREVIEW (plan 312, the owner's pick D3) and
+    lib/locale.js's PREVIEW_LANGS, which keeps a device from starting in
+    one and the picker from offering it to an account not listed."""
+    from translations import PREVIEW
+    assert set(PREVIEW) <= set(SPOKEN) - {"en", "fr"}
+    source = (_ROOT / "frontend" / "src" / "lib" / "locale.js").read_text(encoding="utf-8")
+    listed = re.search(r"export const PREVIEW_LANGS = \[([^\]]*)\]", source)
+    assert listed, "lib/locale.js no longer declares PREVIEW_LANGS as a literal list"
+    assert set(re.findall(r"'([a-z-]+)'", listed.group(1))) == set(PREVIEW)
+
+
+def test_the_preview_is_offered_to_the_accounts_named_for_it(client, monkeypatch):
+    from core.auth import DEV_USER_ID
+    from translations import PREVIEW, preview_langs
+    monkeypatch.setenv("PREVIEW_LANG_USERS", " someone ,other")
+    assert preview_langs("someone") == preview_langs("other") == PREVIEW
+    assert preview_langs("nobody") == ()
+    monkeypatch.delenv("PREVIEW_LANG_USERS")
+    assert preview_langs("someone") == ()
+    assert client.get("/api/profile").json()["previewLangs"] == []
+    monkeypatch.setenv("PREVIEW_LANG_USERS", DEV_USER_ID)
+    assert client.get("/api/profile").json()["previewLangs"] == list(PREVIEW)
+
+
 def test_a_language_the_app_does_not_speak_reads_english():
     assert spoken("fr") == "fr" and spoken("es") == "es"
     assert spoken("de") == "en" and spoken("") == "en" and spoken(None) == "en"

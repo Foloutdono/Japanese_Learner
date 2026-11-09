@@ -152,7 +152,7 @@ export const VALUES = {
     platform: ['web', 'native'],
     vp: ['phone', 'tablet', 'desk', 'wide'],
     os: ['ios', 'android', 'windows', 'mac', 'linux', 'chromeos', 'other'],
-    lang: ['fr', 'en', 'es'],
+    lang: ['fr', 'en', 'es', 'id'],
     theme: ['light', 'dark', 'auto'],
     input: ['touch', 'mouse'],
   },

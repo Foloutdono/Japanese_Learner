@@ -42,6 +42,8 @@ from study.furigana import align_deck
 from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
 from translations.es.vocab_es import VOCAB_ES
+from translations.course import VOCAB_GLOSSES
+from content.grammar_points_data import TEXT_LANGS
 from study import difficulty
 from study import figures
 from study import grammar_detect
@@ -57,6 +59,20 @@ logger = logging.getLogger(__name__)
 _CONTENT_POS = frozenset({"noun", "verb", "adjective", "adverb"})
 # The public name, for study/level_mix.py -- one definition, not three.
 CONTENT_POS = _CONTENT_POS
+
+
+# A grammar point's formation line in each language beside the English
+# (structure_fr, structure_es, structure_id), carried whole by every point
+# a breakdown names.
+_STRUCTURES = tuple(f"structure_{lang}" for lang in TEXT_LANGS if lang != "en")
+
+# What a name read as one says before the word's own gloss, by language
+# (a place's, a person's).
+_NAME_OR = {
+    "fr": ("un nom de lieu, ou : ", "un nom de personne, ou : "),
+    "es": ("un nombre de lugar, o: ", "un nombre de persona, o: "),
+    "id": ("nama tempat, atau: ", "nama orang, atau: "),
+}
 
 
 def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
@@ -116,12 +132,11 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
             # able to edit the catalogue through it.
             "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
             "structure": entry.get("structure", ""),
-            # The formation line in French (plan 215) and Spanish (plan
-            # 302), beside the English, as `meaning` carries them all: the
-            # analysis is shared across learners and the screen reads its
-            # own.
-            "structure_fr": entry.get("structure_fr", ""),
-            "structure_es": entry.get("structure_es", ""),
+            # The formation line in French (plan 215), Spanish (plan 302)
+            # and Indonesian (plan 312), beside the English, as `meaning`
+            # carries them all: the analysis is shared across learners and
+            # the screen reads its own.
+            **{key: entry.get(key, "") for key in _STRUCTURES},
         })
     return out
 
@@ -150,7 +165,7 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
             # line above -- the same point twice in a sentence is two
             # lights, not one (frontend grammarSpans.js).
             {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure",
-                               "structure_fr", "structure_es", "start", "end", "segments")}
+                               *_STRUCTURES, "start", "end", "segments")}
             for g in grammar
             if any(s < end and start < e for s, e in g["segments"])
         ]
@@ -355,15 +370,14 @@ def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
     as a grammar point carries its {en, fr}; the screen reads its own
     (frontend tokens.js's wordGloss). The French is the card's own line
     (plan 107's per-card key, then the form's), and absent where the
-    card has none, so a screen falls back to the English. The Spanish
-    (plan 302) rides the same way, as `meaning_es`."""
+    card has none, so a screen falls back to the English. Every other
+    language with a deck map rides the same way (`meaning_es`, plan 302;
+    `meaning_id`, plan 312)."""
     out = {"level": level, "raw_id": raw_id, "entry": serializable_entry(entry)}
-    french = fr_gloss(entry, VOCAB_FR)
-    if french:
-        out["entry"]["meaning_fr"] = french
-    spanish = fr_gloss(entry, VOCAB_ES)
-    if spanish:
-        out["entry"]["meaning_es"] = spanish
+    for lang, glosses in VOCAB_GLOSSES.items():
+        line = fr_gloss(entry, glosses)
+        if line:
+            out["entry"][f"meaning_{lang}"] = line
     return out
 
 
@@ -1574,10 +1588,9 @@ def _name_or_word(token: dict, m, row: dict, called: bool = False) -> None:
     # (A place UniDic names that JMdict holds as a word, as either one:
     # 築地で食べ歩き is Tsukiji, its row "reclaimed land", plan 272.)
     entry["meaning"] = ("a place name, or: " if place else "a person's name, or: ") + entry.get("meaning", "")
-    if entry.get("meaning_fr"):
-        entry["meaning_fr"] = ("un nom de lieu, ou : " if place else "un nom de personne, ou : ") + entry["meaning_fr"]
-    if entry.get("meaning_es"):
-        entry["meaning_es"] = ("un nombre de lugar, o: " if place else "un nombre de persona, o: ") + entry["meaning_es"]
+    for lang, (a_place, a_person) in _NAME_OR.items():
+        if entry.get(f"meaning_{lang}"):
+            entry[f"meaning_{lang}"] = (a_place if place else a_person) + entry[f"meaning_{lang}"]
 
 
 def _called_to(morphemes: list, i: int) -> bool:
@@ -2427,7 +2440,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # does not say those kana (card_lookup.says_its_kana): 二十さい spells the
 # lemmas of 二十歳, but its さい is said, so it is 二十 + さい, にじゅっさい,
 # never はたち; 二十歳 and はたち keep the card.
-LOCAL_REV = 41
+# 42: a grammar point carries its `structure_id` and a deck card's match
+# its `meaning_id` (plan 312b), Indonesian beside the Spanish, and a name
+# read as one says so in Indonesian too.
+LOCAL_REV = 42
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
