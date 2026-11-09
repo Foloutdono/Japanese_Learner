@@ -4,10 +4,12 @@
     "structure": "verb た-form + ら",
     "structure_fr": "verbe forme en た + ら",
     "structure_es": "verbo en forma た + ら",
+    "structure_id": "kata kerja bentuk た + ら",
     "meaning": {
       "en": "conditional: if/when",
       "fr": "conditionnel : si / quand",
-      "es": "condicional: si/cuando"
+      "es": "condicional: si/cuando",
+      "id": "kondisional: jika/ketika"
     },
     "register": "neutral",
     "steps": [
@@ -431,10 +433,12 @@
     "structure": "verb ば-form",
     "structure_fr": "verbe forme en ば",
     "structure_es": "verbo en forma ば",
+    "structure_id": "kata kerja bentuk ば",
     "meaning": {
       "en": "conditional: if",
       "fr": "conditionnel : si",
-      "es": "condicional: si"
+      "es": "condicional: si",
+      "id": "kondisional: jika"
     },
     "register": "neutral",
     "steps": [
@@ -1011,10 +1015,12 @@
     "structure": "noun/plain form + なら",
     "structure_fr": "nom/forme neutre + なら",
     "structure_es": "sustantivo/forma llana + なら",
+    "structure_id": "kata benda/bentuk biasa + なら",
     "meaning": {
       "en": "conditional: if it's the case that",
       "fr": "conditionnel : s'il s'agit de, si c'est le cas",
-      "es": "condicional: si se da el caso de que, si se trata de"
+      "es": "condicional: si se da el caso de que, si se trata de",
+      "id": "kondisional: jika memang demikian halnya"
     },
     "register": "neutral",
     "steps": [
@@ -1386,10 +1392,12 @@
     "structure": "plain form + ので",
     "structure_fr": "forme neutre + ので",
     "structure_es": "forma llana + ので",
+    "structure_id": "bentuk biasa + ので",
     "meaning": {
       "en": "because (more objective/polite than から)",
       "fr": "parce que (plus objectif et poli que から)",
-      "es": "porque (más objetivo/cortés que から)"
+      "es": "porque (más objetivo/cortés que から)",
+      "id": "karena (lebih objektif/sopan daripada から)"
     },
     "register": "polite",
     "steps": [
@@ -1815,10 +1823,12 @@
     "structure": "plain form + のに",
     "structure_fr": "forme neutre + のに",
     "structure_es": "forma llana + のに",
+    "structure_id": "bentuk biasa + のに",
     "meaning": {
       "en": "although, even though (often with surprise/complaint)",
       "fr": "bien que, pourtant (souvent surprise ou reproche)",
-      "es": "aunque, a pesar de que (a menudo con sorpresa/queja)"
+      "es": "aunque, a pesar de que (a menudo con sorpresa/queja)",
+      "id": "padahal, walaupun (sering disertai keheranan/keluhan)"
     },
     "register": "neutral",
     "steps": [
@@ -2294,10 +2304,12 @@
     "structure": "verb て-form + あげる・くれる・もらう",
     "structure_fr": "verbe forme en て + あげる・くれる・もらう",
     "structure_es": "verbo en forma て + あげる・くれる・もらう",
+    "structure_id": "kata kerja bentuk て + あげる・くれる・もらう",
     "meaning": {
       "en": "giving and receiving an action as a favor",
       "fr": "donner et recevoir une action comme une faveur",
-      "es": "dar y recibir una acción como favor"
+      "es": "dar y recibir una acción como favor",
+      "id": "memberi dan menerima tindakan sebagai bantuan"
     },
     "register": "neutral",
     "steps": [
@@ -2708,10 +2720,12 @@
     "structure": "verb stem / adjective stem + そうです",
     "structure_fr": "radical verbal / radical d'adjectif + そうです",
     "structure_es": "raíz verbal / raíz de adjetivo + そうです",
+    "structure_id": "batang kata kerja / batang kata sifat + そうです",
     "meaning": {
       "en": "looks like, appears to be (visual impression)",
       "fr": "avoir l'air, sembler (impression visuelle)",
-      "es": "parece, tiene aspecto de (impresión visual)"
+      "es": "parece, tiene aspecto de (impresión visual)",
+      "id": "kelihatannya, tampak seperti (kesan visual)"
     },
     "register": "polite",
     "steps": [
@@ -3150,10 +3164,12 @@
     "structure": "plain form + ようです",
     "structure_fr": "forme neutre + ようです",
     "structure_es": "forma llana + ようです",
+    "structure_id": "bentuk biasa + ようです",
     "meaning": {
       "en": "seems like, appears that (inference)",
       "fr": "il semble que (déduction)",
-      "es": "parece que (deducción)"
+      "es": "parece que (deducción)",
+      "id": "sepertinya, tampaknya (penyimpulan)"
     },
     "register": "polite",
     "steps": [
@@ -3555,10 +3571,12 @@
     "structure": "verb causative stem + させる",
     "structure_fr": "radical verbal causatif + させる",
     "structure_es": "raíz causativa del verbo + させる",
+    "structure_id": "batang kata kerja kausatif + させる",
     "meaning": {
       "en": "make or let someone do",
       "fr": "faire faire, laisser faire",
-      "es": "hacer o dejar que alguien haga algo"
+      "es": "hacer o dejar que alguien haga algo",
+      "id": "menyuruh atau membiarkan seseorang melakukan"
     },
     "register": "neutral",
     "steps": [
@@ -3990,10 +4008,12 @@
     "structure": "verb passive stem + られる",
     "structure_fr": "radical verbal passif + られる",
     "structure_es": "raíz pasiva del verbo + られる",
+    "structure_id": "batang kata kerja pasif + られる",
     "meaning": {
       "en": "be done to, have something done to oneself",
       "fr": "le passif : subir une action",
-      "es": "ser objeto de una acción, que a uno le hagan algo"
+      "es": "ser objeto de una acción, que a uno le hagan algo",
+      "id": "dikenai tindakan, mengalami perbuatan orang lain"
     },
     "register": "neutral",
     "steps": [
@@ -4459,10 +4479,12 @@
     "structure": "verb て-form + しまう",
     "structure_fr": "verbe forme en て + しまう",
     "structure_es": "verbo en forma て + しまう",
+    "structure_id": "kata kerja bentuk て + しまう",
     "meaning": {
       "en": "completion, or regret at having done",
       "fr": "achèvement, ou regret d'avoir fait",
-      "es": "acción terminada, o pesar por haberla hecho"
+      "es": "acción terminada, o pesar por haberla hecho",
+      "id": "penyelesaian tuntas, atau penyesalan karena telah melakukannya"
     },
     "register": "neutral",
     "steps": [
@@ -4869,10 +4891,12 @@
     "structure": "verb て-form + おく",
     "structure_fr": "verbe forme en て + おく",
     "structure_es": "verbo en forma て + おく",
+    "structure_id": "kata kerja bentuk て + おく",
     "meaning": {
       "en": "do in advance, or leave as is",
       "fr": "faire à l'avance, ou laisser tel quel",
-      "es": "hacer de antemano, o dejar como está"
+      "es": "hacer de antemano, o dejar como está",
+      "id": "melakukan terlebih dahulu, atau membiarkan apa adanya"
     },
     "register": "neutral",
     "steps": [
@@ -5287,10 +5311,12 @@
     "structure": "verb た-form + ことがある",
     "structure_fr": "verbe forme en た + ことがある",
     "structure_es": "verbo en forma た + ことがある",
+    "structure_id": "kata kerja bentuk た + ことがある",
     "meaning": {
       "en": "have done before (experience)",
       "fr": "avoir déjà fait (expérience)",
-      "es": "haber hecho alguna vez (experiencia)"
+      "es": "haber hecho alguna vez (experiencia)",
+      "id": "pernah melakukan (pengalaman)"
     },
     "register": "polite",
     "steps": [
@@ -5705,10 +5731,12 @@
     "structure": "verb dictionary form + ようになる",
     "structure_fr": "verbe forme du dictionnaire + ようになる",
     "structure_es": "verbo en forma de diccionario + ようになる",
+    "structure_id": "kata kerja bentuk kamus + ようになる",
     "meaning": {
       "en": "come to do, reach the point of doing",
       "fr": "en venir à, devenir capable de",
-      "es": "llegar a hacer, llegar al punto de hacer"
+      "es": "llegar a hacer, llegar al punto de hacer",
+      "id": "lambat laun jadi melakukan, sampai pada tahap melakukan"
     },
     "register": "polite",
     "steps": [
@@ -6123,10 +6151,12 @@
     "structure": "verb dictionary/ない form + ことにする",
     "structure_fr": "verbe forme du dictionnaire/en ない + ことにする",
     "structure_es": "verbo en forma de diccionario/ない + ことにする",
+    "structure_id": "kata kerja bentuk kamus/ない + ことにする",
     "meaning": {
       "en": "decide to",
       "fr": "décider de",
-      "es": "decidir (hacer)"
+      "es": "decidir (hacer)",
+      "id": "memutuskan untuk"
     },
     "register": "polite",
     "steps": [
@@ -6581,10 +6611,12 @@
     "structure": "verb dictionary form + つもりです",
     "structure_fr": "verbe forme du dictionnaire + つもりです",
     "structure_es": "verbo en forma de diccionario + つもりです",
+    "structure_id": "kata kerja bentuk kamus + つもりです",
     "meaning": {
       "en": "intend to",
       "fr": "avoir l'intention de",
-      "es": "tener la intención de"
+      "es": "tener la intención de",
+      "id": "berniat untuk"
     },
     "register": "polite",
     "steps": [
@@ -7001,10 +7033,12 @@
     "structure": "noun/plain form + という",
     "structure_fr": "nom/forme neutre + という",
     "structure_es": "sustantivo/forma llana + という",
+    "structure_id": "kata benda/bentuk biasa + という",
     "meaning": {
       "en": "called ..., that is said to be",
       "fr": "appelé..., qu'on dit être",
-      "es": "llamado…, del que se dice que es"
+      "es": "llamado…, del que se dice que es",
+      "id": "yang bernama ..., yang dikatakan sebagai"
     },
     "register": "neutral",
     "steps": [
@@ -7410,10 +7444,12 @@
     "structure": "plain form + はずです",
     "structure_fr": "forme neutre + はずです",
     "structure_es": "forma llana + はずです",
+    "structure_id": "bentuk biasa + はずです",
     "meaning": {
       "en": "should be, expected to be",
       "fr": "devrait, est censé",
-      "es": "debería ser, se supone que es"
+      "es": "debería ser, se supone que es",
+      "id": "seharusnya, semestinya"
     },
     "register": "polite",
     "steps": [
@@ -7785,10 +7821,12 @@
     "structure": "plain form + かもしれません",
     "structure_fr": "forme neutre + かもしれません",
     "structure_es": "forma llana + かもしれません",
+    "structure_id": "bentuk biasa + かもしれません",
     "meaning": {
       "en": "might, maybe",
       "fr": "peut-être, il se peut que",
-      "es": "quizá, puede que"
+      "es": "quizá, puede que",
+      "id": "mungkin, bisa jadi"
     },
     "register": "polite",
     "steps": [
@@ -8196,10 +8234,12 @@
     "structure": "た-form/noun + の + まま",
     "structure_fr": "forme en た/nom + の + まま",
     "structure_es": "forma た/sustantivo + の + まま",
+    "structure_id": "bentuk た/kata benda + の + まま",
     "meaning": {
       "en": "as is, while remaining in a state",
       "fr": "tel quel, en restant dans un état",
-      "es": "tal cual, sin cambiar de estado"
+      "es": "tal cual, sin cambiar de estado",
+      "id": "apa adanya, sambil tetap dalam suatu keadaan"
     },
     "register": "neutral",
     "steps": [
@@ -8622,10 +8662,12 @@
     "structure": "verb potential stem + る・られる",
     "structure_fr": "radical verbal potentiel + る・られる",
     "structure_es": "raíz potencial del verbo + る・られる",
+    "structure_id": "batang kata kerja potensial + る・られる",
     "meaning": {
       "en": "can do, be able to — the conjugated potential",
       "fr": "pouvoir, être capable de : la forme potentielle",
-      "es": "poder hacer, ser capaz de — la forma potencial conjugada"
+      "es": "poder hacer, ser capaz de — la forma potencial conjugada",
+      "id": "bisa melakukan, mampu — bentuk potensial hasil konjugasi"
     },
     "register": "neutral",
     "steps": [
@@ -9174,10 +9216,12 @@
     "structure": "verb volitional form",
     "structure_fr": "verbe forme volitive",
     "structure_es": "verbo en forma volitiva",
+    "structure_id": "kata kerja bentuk ajakan",
     "meaning": {
       "en": "let's, I think I'll — the plain counterpart of ましょう",
       "fr": "allons, je vais... : le pendant neutre de ましょう",
-      "es": "vamos a, creo que voy a — el equivalente llano de ましょう"
+      "es": "vamos a, creo que voy a — el equivalente llano de ましょう",
+      "id": "ayo, aku mau — padanan bentuk biasa dari ましょう"
     },
     "register": "casual",
     "steps": [
@@ -9683,10 +9727,12 @@
     "structure_reading": "verb volitional form + とおもう",
     "structure_fr": "verbe forme volitive + と思う",
     "structure_es": "verbo en forma volitiva + と思う",
+    "structure_id": "kata kerja bentuk ajakan + と思う",
     "meaning": {
       "en": "be thinking of doing, plan to",
       "fr": "penser faire, projeter de",
-      "es": "pensar hacer, tener planeado"
+      "es": "pensar hacer, tener planeado",
+      "id": "berpikir untuk melakukan, berencana"
     },
     "register": "polite",
     "steps": [
@@ -10113,10 +10159,12 @@
     "structure": "plain form + と",
     "structure_fr": "forme neutre + と",
     "structure_es": "forma llana + と",
+    "structure_id": "bentuk biasa + と",
     "meaning": {
       "en": "conditional: whenever A happens, B follows (automatic result)",
       "fr": "conditionnel : chaque fois que A, B suit (résultat automatique)",
-      "es": "condicional: siempre que ocurre A, ocurre B (resultado automático)"
+      "es": "condicional: siempre que ocurre A, ocurre B (resultado automático)",
+      "id": "kondisional: setiap kali A terjadi, B menyusul (akibat otomatis)"
     },
     "register": "neutral",
     "steps": [
@@ -10632,10 +10680,12 @@
     "structure": "verb stem + ながら",
     "structure_fr": "radical verbal + ながら",
     "structure_es": "raíz verbal + ながら",
+    "structure_id": "batang kata kerja + ながら",
     "meaning": {
       "en": "while doing — two actions at once, one subject",
       "fr": "tout en faisant : deux actions à la fois, même sujet",
-      "es": "hacer algo mientras — dos acciones a la vez, un solo sujeto"
+      "es": "hacer algo mientras — dos acciones a la vez, un solo sujeto",
+      "id": "sambil melakukan — dua tindakan sekaligus, subjek yang sama"
     },
     "register": "neutral",
     "steps": [
@@ -11052,10 +11102,12 @@
     "structure": "verb た-form + り + verb た-form + り + する",
     "structure_fr": "verbe forme en た + り + verbe forme en た + り + する",
     "structure_es": "verbo en forma た + り + verbo en forma た + り + する",
+    "structure_id": "kata kerja bentuk た + り + kata kerja bentuk た + り + する",
     "meaning": {
       "en": "doing this and that, alternating between",
       "fr": "faire ceci et cela, alterner",
-      "es": "hacer esto y aquello, alternando"
+      "es": "hacer esto y aquello, alternando",
+      "id": "melakukan ini dan itu, bergantian"
     },
     "register": "polite",
     "steps": [
@@ -11511,10 +11563,12 @@
     "structure": "verb stem / adjective stem + すぎる",
     "structure_fr": "radical verbal / radical d'adjectif + すぎる",
     "structure_es": "raíz verbal / raíz de adjetivo + すぎる",
+    "structure_id": "batang kata kerja / batang kata sifat + すぎる",
     "meaning": {
       "en": "too much, excessively",
       "fr": "trop, excessivement",
-      "es": "demasiado, en exceso"
+      "es": "demasiado, en exceso",
+      "id": "terlalu, berlebihan"
     },
     "register": "polite",
     "steps": [
@@ -11890,10 +11944,12 @@
     "structure": "verb stem + やすい・にくい",
     "structure_fr": "radical verbal + やすい・にくい",
     "structure_es": "raíz verbal + やすい・にくい",
+    "structure_id": "batang kata kerja + やすい・にくい",
     "meaning": {
       "en": "easy to do / hard to do",
       "fr": "facile à / difficile à",
-      "es": "fácil de hacer / difícil de hacer"
+      "es": "fácil de hacer / difícil de hacer",
+      "id": "mudah dilakukan / sulit dilakukan"
     },
     "register": "neutral",
     "steps": [
@@ -12308,10 +12364,12 @@
     "structure": "verb stem + はじめる・おわる・つづける",
     "structure_fr": "radical verbal + はじめる・おわる・つづける",
     "structure_es": "raíz verbal + はじめる・おわる・つづける",
+    "structure_id": "batang kata kerja + はじめる・おわる・つづける",
     "meaning": {
       "en": "start, finish, or keep on doing",
       "fr": "commencer, finir ou continuer à faire",
-      "es": "empezar, terminar o seguir haciendo"
+      "es": "empezar, terminar o seguir haciendo",
+      "id": "mulai, selesai, atau terus melakukan"
     },
     "register": "neutral",
     "steps": [
@@ -12722,10 +12780,12 @@
     "structure": "verb て-form + いく・くる",
     "structure_fr": "verbe forme en て + いく・くる",
     "structure_es": "verbo en forma て + いく・くる",
+    "structure_id": "kata kerja bentuk て + いく・くる",
     "meaning": {
       "en": "movement or change heading away from / toward the speaker",
       "fr": "mouvement ou changement qui s'éloigne / se rapproche du locuteur",
-      "es": "movimiento o cambio que se aleja de / se acerca a quien habla"
+      "es": "movimiento o cambio que se aleja de / se acerca a quien habla",
+      "id": "gerakan atau perubahan yang menjauhi / mendekati pembicara"
     },
     "register": "neutral",
     "steps": [
@@ -13136,10 +13196,12 @@
     "structure": "verb て-form + みる",
     "structure_fr": "verbe forme en て + みる",
     "structure_es": "verbo en forma て + みる",
+    "structure_id": "kata kerja bentuk て + みる",
     "meaning": {
       "en": "try doing and see how it turns out",
       "fr": "essayer de faire pour voir",
-      "es": "hacer algo para ver qué pasa, probar"
+      "es": "hacer algo para ver qué pasa, probar",
+      "id": "mencoba melakukan untuk melihat hasilnya"
     },
     "register": "polite",
     "steps": [
@@ -13523,10 +13585,12 @@
     "structure": "verb て-form + ある",
     "structure_fr": "verbe forme en て + ある",
     "structure_es": "verbo en forma て + ある",
+    "structure_id": "kata kerja bentuk て + ある",
     "meaning": {
       "en": "has been done and stays that way (someone did it deliberately)",
       "fr": "a été fait et le reste (quelqu'un l'a fait exprès)",
-      "es": "está hecho y sigue así (alguien lo hizo a propósito)"
+      "es": "está hecho y sigue así (alguien lo hizo a propósito)",
+      "id": "sudah dilakukan dan tetap begitu (seseorang sengaja melakukannya)"
     },
     "register": "neutral",
     "steps": [
@@ -13941,10 +14005,12 @@
     "structure": "plain form / noun + らしい",
     "structure_fr": "forme neutre / nom + らしい",
     "structure_es": "forma llana / sustantivo + らしい",
+    "structure_id": "bentuk biasa / kata benda + らしい",
     "meaning": {
       "en": "apparently, I gather that (from an outside source)",
       "fr": "apparemment, à ce qu'on dit (source extérieure)",
-      "es": "por lo visto, según parece (de una fuente externa)"
+      "es": "por lo visto, según parece (de una fuente externa)",
+      "id": "rupanya, kabarnya (dari sumber luar)"
     },
     "register": "polite",
     "steps": [
@@ -14361,10 +14427,12 @@
     "structure": "plain form / noun + みたいだ",
     "structure_fr": "forme neutre / nom + みたいだ",
     "structure_es": "forma llana / sustantivo + みたいだ",
+    "structure_id": "bentuk biasa / kata benda + みたいだ",
     "meaning": {
       "en": "seems like, looks like — the colloquial ようだ",
       "fr": "on dirait, ça ressemble à : le ようだ familier",
-      "es": "parece, da la impresión de que — el ようだ coloquial"
+      "es": "parece, da la impresión de que — el ようだ coloquial",
+      "id": "sepertinya, kelihatannya — ようだ ragam percakapan"
     },
     "register": "casual",
     "steps": [
@@ -14778,10 +14846,12 @@
     "structure": "intransitive: noun + が + verb / transitive: noun + を + verb",
     "structure_fr": "intransitif : nom + が + verbe / transitif : nom + を + verbe",
     "structure_es": "intransitivo: sustantivo + が + verbo / transitivo: sustantivo + を + verbo",
+    "structure_id": "intransitif: kata benda + が + kata kerja / transitif: kata benda + を + kata kerja",
     "meaning": {
       "en": "paired verbs: one thing happens, the other is done to something",
       "fr": "verbes en paire : l'un arrive tout seul, l'autre est fait à quelque chose",
-      "es": "pares de verbos: con uno algo ocurre; con el otro, se actúa sobre algo"
+      "es": "pares de verbos: con uno algo ocurre; con el otro, se actúa sobre algo",
+      "id": "pasangan kata kerja: yang satu terjadi sendiri, yang lain dilakukan terhadap sesuatu"
     },
     "register": "neutral",
     "steps": [
@@ -14928,10 +14998,12 @@
     "structure": "verb dictionary/ない form + ことになる",
     "structure_fr": "verbe forme du dictionnaire/en ない + ことになる",
     "structure_es": "verbo en forma de diccionario/ない + ことになる",
+    "structure_id": "kata kerja bentuk kamus/ない + ことになる",
     "meaning": {
       "en": "it has been decided that, it works out that",
       "fr": "il a été décidé que, il se trouve que",
-      "es": "se ha decidido que, resulta que"
+      "es": "se ha decidido que, resulta que",
+      "id": "telah diputuskan bahwa, akhirnya"
     },
     "register": "polite",
     "steps": [
@@ -15324,10 +15396,12 @@
     "structure": "verb dictionary/ない form + ようにする",
     "structure_fr": "verbe forme du dictionnaire/en ない + ようにする",
     "structure_es": "verbo en forma de diccionario/ない + ようにする",
+    "structure_id": "kata kerja bentuk kamus/ない + ようにする",
     "meaning": {
       "en": "make a point of, see to it that",
       "fr": "s'efforcer de, faire en sorte de",
-      "es": "procurar, asegurarse de que"
+      "es": "procurar, asegurarse de que",
+      "id": "berusaha untuk, memastikan agar"
     },
     "register": "polite",
     "steps": [
@@ -15779,10 +15853,12 @@
     "structure": "plain form + かどうか",
     "structure_fr": "forme neutre + かどうか",
     "structure_es": "forma llana + かどうか",
+    "structure_id": "bentuk biasa + かどうか",
     "meaning": {
       "en": "whether or not",
       "fr": "si... ou non",
-      "es": "si… o no (sin saber cuál)"
+      "es": "si… o no (sin saber cuál)",
+      "id": "apakah … atau tidak"
     },
     "register": "polite",
     "steps": [
@@ -16148,10 +16224,12 @@
     "structure": "noun + しか + negative verb",
     "structure_fr": "nom + しか + verbe négatif",
     "structure_es": "sustantivo + しか + verbo negativo",
+    "structure_id": "kata benda + しか + kata kerja negatif",
     "meaning": {
       "en": "only, nothing but",
       "fr": "seulement, rien que",
-      "es": "solo, nada más que"
+      "es": "solo, nada más que",
+      "id": "hanya, semata-mata"
     },
     "register": "neutral",
     "steps": [
@@ -16569,10 +16647,12 @@
     "structure": "verb て-form + も / adjective + ても",
     "structure_fr": "verbe forme en て + も / adjectif + ても",
     "structure_es": "verbo en forma て + も / adjetivo + ても",
+    "structure_id": "kata kerja bentuk て + も / kata sifat + ても",
     "meaning": {
       "en": "even if, no matter",
       "fr": "même si, quoi que",
-      "es": "aunque, por más que"
+      "es": "aunque, por más que",
+      "id": "meskipun, sekalipun"
     },
     "register": "neutral",
     "steps": [
@@ -16995,10 +17075,12 @@
     "structure": "お + verb stem + になる (respectful)・する (humble)",
     "structure_fr": "お + radical verbal + になる (respectueux)・する (humble)",
     "structure_es": "お + raíz verbal + になる (respetuoso)・する (humilde)",
+    "structure_id": "お + batang kata kerja + になる (hormat)・する (merendah)",
     "meaning": {
       "en": "keigo: raises the other person, or lowers oneself",
       "fr": "keigo : élever l'autre, ou s'abaisser soi-même",
-      "es": "keigo: elevar a la otra persona o rebajarse uno mismo"
+      "es": "keigo: elevar a la otra persona o rebajarse uno mismo",
+      "id": "keigo: meninggikan orang lain, atau merendahkan diri sendiri"
     },
     "register": "polite",
     "steps": [
@@ -17475,10 +17557,12 @@
     "structure": "plain form + んです・のです",
     "structure_fr": "forme neutre + んです・のです",
     "structure_es": "forma llana + んです・のです",
+    "structure_id": "bentuk biasa + んです・のです",
     "meaning": {
       "en": "framing a statement as an explanation",
       "fr": "présenter un énoncé comme une explication",
-      "es": "presentar lo que se dice como una explicación"
+      "es": "presentar lo que se dice como una explicación",
+      "id": "menyajikan pernyataan sebagai penjelasan"
     },
     "register": "polite",
     "steps": [
@@ -17926,10 +18010,12 @@
     "structure": "verb て-form + ほしい",
     "structure_fr": "verbe forme en て + ほしい",
     "structure_es": "verbo en forma て + ほしい",
+    "structure_id": "kata kerja bentuk て + ほしい",
     "meaning": {
       "en": "want someone else to do",
       "fr": "vouloir que quelqu'un d'autre fasse",
-      "es": "querer que otra persona haga algo"
+      "es": "querer que otra persona haga algo",
+      "id": "ingin orang lain melakukan"
     },
     "register": "neutral",
     "steps": [
@@ -18387,10 +18473,12 @@
     "structure": "verb stem + たがる",
     "structure_fr": "radical verbal + たがる",
     "structure_es": "raíz verbal + たがる",
+    "structure_id": "batang kata kerja + たがる",
     "meaning": {
       "en": "someone else shows they want to",
       "fr": "quelqu'un d'autre montre qu'il veut",
-      "es": "otra persona muestra que quiere hacer algo"
+      "es": "otra persona muestra que quiere hacer algo",
+      "id": "orang lain menunjukkan bahwa ia ingin"
     },
     "register": "neutral",
     "steps": [
@@ -18805,10 +18893,12 @@
     "structure": "verb stem + そうにない",
     "structure_fr": "radical verbal + そうにない",
     "structure_es": "raíz verbal + そうにない",
+    "structure_id": "batang kata kerja + そうにない",
     "meaning": {
       "en": "shows no sign of happening",
       "fr": "ne montre aucun signe de se produire",
-      "es": "no da señales de que vaya a ocurrir"
+      "es": "no da señales de que vaya a ocurrir",
+      "id": "tidak ada tanda-tanda akan terjadi"
     },
     "register": "neutral",
     "steps": [
@@ -19219,10 +19309,12 @@
     "structure": "verb ない-form (drop い) + くてはいけない",
     "structure_fr": "verbe forme en ない (sans い) + くてはいけない",
     "structure_es": "verbo en forma ない (sin い) + くてはいけない",
+    "structure_id": "kata kerja bentuk ない (tanpa い) + くてはいけない",
     "meaning": {
       "en": "obliged to do",
       "fr": "être obligé de",
-      "es": "estar obligado a hacer"
+      "es": "estar obligado a hacer",
+      "id": "wajib melakukan"
     },
     "register": "neutral",
     "steps": [
@@ -19598,10 +19690,12 @@
     "structure": "verb ない-form (drop い) + きゃ・くちゃ",
     "structure_fr": "verbe forme en ない (sans い) + きゃ・くちゃ",
     "structure_es": "verbo en forma ない (sin い) + きゃ・くちゃ",
+    "structure_id": "kata kerja bentuk ない (tanpa い) + きゃ・くちゃ",
     "meaning": {
       "en": "the spoken short form of must",
       "fr": "la forme courte et parlée de « il faut »",
-      "es": "la forma corta y hablada de «tener que»"
+      "es": "la forma corta y hablada de «tener que»",
+      "id": "bentuk lisan singkat dari “harus”"
     },
     "register": "casual",
     "steps": [
@@ -20018,10 +20112,12 @@
     "structure": "verb ない-form + といけない",
     "structure_fr": "verbe forme en ない + といけない",
     "structure_es": "verbo en forma ない + といけない",
+    "structure_id": "kata kerja bentuk ない + といけない",
     "meaning": {
       "en": "it won't do unless you",
       "fr": "il faut absolument, sinon ça ne va pas",
-      "es": "hay que hacerlo, si no, no vale"
+      "es": "hay que hacerlo, si no, no vale",
+      "id": "tidak boleh tidak"
     },
     "register": "neutral",
     "steps": [
@@ -20394,10 +20490,12 @@
     "structure": "plain form + し",
     "structure_fr": "forme neutre + し",
     "structure_es": "forma llana + し",
+    "structure_id": "bentuk biasa + し",
     "meaning": {
       "en": "listing reasons, with more implied",
       "fr": "énumérer des raisons, d'autres restant sous-entendues",
-      "es": "enumera razones, dando a entender que hay más"
+      "es": "enumera razones, dando a entender que hay más",
+      "id": "menyebutkan alasan, sambil menyiratkan ada yang lain"
     },
     "register": "neutral",
     "steps": [
@@ -20907,10 +21005,12 @@
     "structure": "plain form + だろう",
     "structure_fr": "forme neutre + だろう",
     "structure_es": "forma llana + だろう",
+    "structure_id": "bentuk biasa + だろう",
     "meaning": {
       "en": "the plain counterpart of でしょう",
       "fr": "le pendant neutre de でしょう",
-      "es": "el equivalente llano de でしょう"
+      "es": "el equivalente llano de でしょう",
+      "id": "padanan bentuk biasa dari でしょう"
     },
     "register": "casual",
     "steps": [
@@ -21327,10 +21427,12 @@
     "structure": "plain form + かな",
     "structure_fr": "forme neutre + かな",
     "structure_es": "forma llana + かな",
+    "structure_id": "bentuk biasa + かな",
     "meaning": {
       "en": "wondering to oneself",
       "fr": "se demander à soi-même",
-      "es": "preguntarse uno a sí mismo"
+      "es": "preguntarse uno a sí mismo",
+      "id": "bertanya-tanya dalam hati"
     },
     "register": "casual",
     "steps": [
@@ -21696,10 +21798,12 @@
     "structure": "clause + のは + noun + だ",
     "structure_fr": "proposition + のは + nom + だ",
     "structure_es": "oración + のは + sustantivo + だ",
+    "structure_id": "klausa + のは + kata benda + だ",
     "meaning": {
       "en": "singling one element out as the point",
       "fr": "mettre un élément en relief",
-      "es": "destaca un elemento como lo esencial"
+      "es": "destaca un elemento como lo esencial",
+      "id": "menonjolkan satu unsur sebagai inti"
     },
     "register": "neutral",
     "steps": [
@@ -22020,10 +22124,12 @@
     "structure": "verb dictionary form + こと",
     "structure_fr": "verbe forme du dictionnaire + こと",
     "structure_es": "verbo en forma de diccionario + こと",
+    "structure_id": "kata kerja bentuk kamus + こと",
     "meaning": {
       "en": "turning a verb into a noun",
       "fr": "transformer un verbe en nom",
-      "es": "convierte un verbo en sustantivo"
+      "es": "convierte un verbo en sustantivo",
+      "id": "mengubah kata kerja menjadi kata benda"
     },
     "register": "neutral",
     "steps": [
@@ -22434,10 +22540,12 @@
     "structure": "verb dictionary form + の",
     "structure_fr": "verbe forme du dictionnaire + の",
     "structure_es": "verbo en forma de diccionario + の",
+    "structure_id": "kata kerja bentuk kamus + の",
     "meaning": {
       "en": "the spoken nominaliser",
       "fr": "le nominalisateur de la langue parlée",
-      "es": "el nominalizador de la lengua hablada"
+      "es": "el nominalizador de la lengua hablada",
+      "id": "penanda nominalisasi dalam bahasa lisan"
     },
     "register": "casual",
     "steps": [
@@ -22921,10 +23029,12 @@
     "structure": "verb ば-form + よかった",
     "structure_fr": "verbe forme en ば + よかった",
     "structure_es": "verbo en forma ば + よかった",
+    "structure_id": "kata kerja bentuk ば + よかった",
     "meaning": {
       "en": "regret at not having done",
       "fr": "regret de ne pas avoir fait",
-      "es": "lamentar no haber hecho algo"
+      "es": "lamentar no haber hecho algo",
+      "id": "penyesalan karena tidak melakukannya"
     },
     "register": "neutral",
     "steps": [
@@ -23327,10 +23437,12 @@
     "structure": "verb た-form + らどうですか",
     "structure_fr": "verbe forme en た + らどうですか",
     "structure_es": "verbo en forma た + らどうですか",
+    "structure_id": "kata kerja bentuk た + らどうですか",
     "meaning": {
       "en": "suggesting a course of action",
       "fr": "suggérer une façon de faire",
-      "es": "sugerir qué hacer"
+      "es": "sugerir qué hacer",
+      "id": "menyarankan suatu tindakan"
     },
     "register": "polite",
     "steps": [
@@ -23760,10 +23872,12 @@
     "structure": "verb ない-stem + ずに",
     "structure_fr": "radical en ない + ずに",
     "structure_es": "raíz ない + ずに",
+    "structure_id": "batang ない + ずに",
     "meaning": {
       "en": "the written form of without doing",
       "fr": "la forme écrite de « sans faire »",
-      "es": "la forma escrita de «sin hacer»"
+      "es": "la forma escrita de «sin hacer»",
+      "id": "bentuk tulis dari “tanpa melakukan”"
     },
     "register": "written",
     "steps": [
@@ -24178,10 +24292,12 @@
     "structure": "clause/noun + の + あいだに",
     "structure_fr": "proposition/nom + の + あいだに",
     "structure_es": "oración/sustantivo + の + あいだに",
+    "structure_id": "klausa/kata benda + の + あいだに",
     "meaning": {
       "en": "at some point within a span",
       "fr": "à un moment au cours d'une période",
-      "es": "en algún momento dentro de un período"
+      "es": "en algún momento dentro de un período",
+      "id": "pada suatu saat dalam rentang waktu"
     },
     "register": "neutral",
     "steps": [
@@ -24598,10 +24714,12 @@
     "structure": "clause/noun + の + あいだ",
     "structure_fr": "proposition/nom + の + あいだ",
     "structure_es": "oración/sustantivo + の + あいだ",
+    "structure_id": "klausa/kata benda + の + あいだ",
     "meaning": {
       "en": "throughout a span",
       "fr": "pendant toute une période",
-      "es": "durante todo un período"
+      "es": "durante todo un período",
+      "id": "sepanjang suatu rentang waktu"
     },
     "register": "neutral",
     "steps": [
@@ -25008,10 +25126,12 @@
     "structure": "verb dictionary/た-form + ところだ",
     "structure_fr": "verbe forme du dictionnaire/en た + ところだ",
     "structure_es": "verbo en forma de diccionario/た + ところだ",
+    "structure_id": "kata kerja bentuk kamus/た + ところだ",
     "meaning": {
       "en": "right at that stage of an action",
       "fr": "être précisément à ce stade de l'action",
-      "es": "justo en esa fase de una acción"
+      "es": "justo en esa fase de una acción",
+      "id": "tepat pada tahap itu dalam suatu tindakan"
     },
     "register": "neutral",
     "steps": [
@@ -25469,10 +25589,12 @@
     "structure": "verb た-form + ばかり",
     "structure_fr": "verbe forme en た + ばかり",
     "structure_es": "verbo en forma た + ばかり",
+    "structure_id": "kata kerja bentuk た + ばかり",
     "meaning": {
       "en": "only just finished doing",
       "fr": "venir tout juste de faire",
-      "es": "acabar de hacer algo"
+      "es": "acabar de hacer algo",
+      "id": "baru saja selesai melakukan"
     },
     "register": "polite",
     "steps": [
@@ -25920,10 +26042,12 @@
     "structure": "verb causative stem + せてください",
     "structure_fr": "radical verbal causatif + せてください",
     "structure_es": "raíz causativa del verbo + せてください",
+    "structure_id": "batang kata kerja kausatif + せてください",
     "meaning": {
       "en": "asking to be allowed to do",
       "fr": "demander la permission de faire",
-      "es": "pedir permiso para hacer algo"
+      "es": "pedir permiso para hacer algo",
+      "id": "meminta izin untuk melakukan"
     },
     "register": "polite",
     "steps": [
@@ -26326,10 +26450,12 @@
     "structure": "verb stem + なさい",
     "structure_fr": "radical verbal + なさい",
     "structure_es": "raíz verbal + なさい",
+    "structure_id": "batang kata kerja + なさい",
     "meaning": {
       "en": "a firm but gentle order",
       "fr": "un ordre ferme mais doux",
-      "es": "una orden firme pero amable"
+      "es": "una orden firme pero amable",
+      "id": "perintah yang tegas tetapi lembut"
     },
     "register": "neutral",
     "steps": [
@@ -26794,10 +26920,12 @@
     "structure": "verb て-form ／ ない-form + で, ending the sentence",
     "structure_fr": "verbe forme en て ／ forme en ない + で, en fin de phrase",
     "structure_es": "verbo en forma て ／ forma ない + で, al final de la frase",
+    "structure_id": "kata kerja bentuk て ／ bentuk ない + で, di akhir kalimat",
     "meaning": {
       "en": "a casual request: do this, don't do that",
       "fr": "une demande familière : fais ceci, ne fais pas cela",
-      "es": "una petición coloquial: haz esto, no hagas aquello"
+      "es": "una petición coloquial: haz esto, no hagas aquello",
+      "id": "permintaan santai: lakukan ini, jangan lakukan itu"
     },
     "register": "casual",
     "steps": [
@@ -27297,10 +27425,12 @@
     "structure": "verb dictionary form / noun + の + ために",
     "structure_fr": "verbe forme du dictionnaire / nom + の + ために",
     "structure_es": "verbo en forma de diccionario / sustantivo + の + ために",
+    "structure_id": "kata kerja bentuk kamus / kata benda + の + ために",
     "meaning": {
       "en": "for the sake of, in order to",
       "fr": "pour, afin de",
-      "es": "por el bien de, para"
+      "es": "por el bien de, para",
+      "id": "demi, untuk"
     },
     "register": "neutral",
     "steps": [
@@ -27707,10 +27837,12 @@
     "structure": "verb potential/ない form + ように",
     "structure_fr": "verbe forme potentielle/en ない + ように",
     "structure_es": "verbo en forma potencial/ない + ように",
+    "structure_id": "kata kerja bentuk potensial/ない + ように",
     "meaning": {
       "en": "so that a state comes about",
       "fr": "pour que, de façon à ce que",
-      "es": "para que se dé un estado"
+      "es": "para que se dé un estado",
+      "id": "supaya suatu keadaan terwujud"
     },
     "register": "neutral",
     "steps": [
@@ -28125,10 +28257,12 @@
     "structure_reading": "verb stem + かた",
     "structure_fr": "radical verbal + 方",
     "structure_es": "raíz verbal + 方",
+    "structure_id": "batang kata kerja + 方",
     "meaning": {
       "en": "the way of doing something",
       "fr": "la façon de faire",
-      "es": "la manera de hacer algo"
+      "es": "la manera de hacer algo",
+      "id": "cara melakukan sesuatu"
     },
     "register": "neutral",
     "steps": [
@@ -28545,10 +28679,12 @@
     "structure_reading": "verb stem + だす",
     "structure_fr": "radical verbal + 出す",
     "structure_es": "raíz verbal + 出す",
+    "structure_id": "batang kata kerja + 出す",
     "meaning": {
       "en": "break into an action abruptly",
       "fr": "se mettre brusquement à",
-      "es": "ponerse de golpe a hacer algo"
+      "es": "ponerse de golpe a hacer algo",
+      "id": "tiba-tiba mulai melakukan sesuatu"
     },
     "register": "neutral",
     "steps": [
@@ -28961,10 +29097,12 @@
     "structure_reading": "verb stem + なおす",
     "structure_fr": "radical verbal + 直す",
     "structure_es": "raíz verbal + 直す",
+    "structure_id": "batang kata kerja + 直す",
     "meaning": {
       "en": "do it over again",
       "fr": "refaire, recommencer",
-      "es": "volver a hacerlo, rehacer"
+      "es": "volver a hacerlo, rehacer",
+      "id": "melakukannya ulang dari awal"
     },
     "register": "neutral",
     "steps": [
@@ -29352,10 +29490,12 @@
     "structure": "verb て-form + もらえませんか",
     "structure_fr": "verbe forme en て + もらえませんか",
     "structure_es": "verbo en forma て + もらえませんか",
+    "structure_id": "kata kerja bentuk て + もらえませんか",
     "meaning": {
       "en": "a polite request for a favour",
       "fr": "une demande polie de service",
-      "es": "una petición cortés de un favor"
+      "es": "una petición cortés de un favor",
+      "id": "permintaan bantuan yang sopan"
     },
     "register": "polite",
     "steps": [
@@ -29775,10 +29915,12 @@
     "structure": "sensation noun + がする",
     "structure_fr": "nom de sensation + がする",
     "structure_es": "sustantivo de sensación + がする",
+    "structure_id": "kata benda sensasi + がする",
     "meaning": {
       "en": "a smell, sound or taste is perceived",
       "fr": "percevoir une odeur, un son, un goût",
-      "es": "se percibe un olor, un sonido o un sabor"
+      "es": "se percibe un olor, un sonido o un sabor",
+      "id": "bau, suara, atau rasa tertangkap oleh indra"
     },
     "register": "neutral",
     "steps": [
@@ -30199,10 +30341,12 @@
     "structure": "time/event + までに",
     "structure_fr": "moment/événement + までに",
     "structure_es": "momento/suceso + までに",
+    "structure_id": "waktu/peristiwa + までに",
     "meaning": {
       "en": "no later than that point",
       "fr": "au plus tard à, avant",
-      "es": "no más tarde de ese momento"
+      "es": "no más tarde de ese momento",
+      "id": "paling lambat pada saat itu"
     },
     "register": "neutral",
     "steps": [
@@ -30569,10 +30713,12 @@
     "structure": "plain form + そうだ",
     "structure_fr": "forme neutre + そうだ",
     "structure_es": "forma llana + そうだ",
+    "structure_id": "bentuk biasa + そうだ",
     "meaning": {
       "en": "I hear that, they say that",
       "fr": "il paraît que, on dit que",
-      "es": "oí que, dicen que"
+      "es": "oí que, dicen que",
+      "id": "saya dengar, katanya"
     },
     "register": "neutral",
     "steps": [
@@ -30984,10 +31130,12 @@
     "structure_reading": "verb plain form ／ noun + の + ばあい (+ は)",
     "structure_fr": "verbe forme neutre ／ nom + の + 場合 (+ は)",
     "structure_es": "verbo en forma llana ／ sustantivo + の + 場合 (+ は)",
+    "structure_id": "kata kerja bentuk biasa ／ kata benda + の + 場合 (+ は)",
     "meaning": {
       "en": "in the case that, if it happens that",
       "fr": "au cas où, dans le cas de",
-      "es": "en caso de que, si llegara a pasar"
+      "es": "en caso de que, si llegara a pasar",
+      "id": "dalam hal, jika sampai terjadi"
     },
     "register": "polite",
     "steps": [
@@ -31418,10 +31566,12 @@
     "structure_reading": "verb dictionary form + ひつようがある",
     "structure_fr": "verbe forme du dictionnaire + 必要がある",
     "structure_es": "verbo en forma de diccionario + 必要がある",
+    "structure_id": "kata kerja bentuk kamus + 必要がある",
     "meaning": {
       "en": "it is necessary to, need to",
       "fr": "il faut, il est nécessaire de",
-      "es": "es necesario, hace falta"
+      "es": "es necesario, hace falta",
+      "id": "diperlukan, perlu"
     },
     "register": "polite",
     "steps": [
@@ -31784,10 +31934,12 @@
     "structure": "plain form ／ noun + じゃないか（ではないか）",
     "structure_fr": "forme neutre ／ nom + じゃないか（ではないか）",
     "structure_es": "forma llana ／ sustantivo + じゃないか（ではないか）",
+    "structure_id": "bentuk biasa ／ kata benda + じゃないか（ではないか）",
     "meaning": {
       "en": "isn't it?; I told you so (seeking agreement, or pointing something out)",
       "fr": "n'est-ce pas ? ; je te l'avais dit (chercher l'accord, ou faire remarquer)",
-      "es": "¿no es así?; ya te lo dije (buscar la confirmación del oyente o hacer notar algo)"
+      "es": "¿no es así?; ya te lo dije (buscar la confirmación del oyente o hacer notar algo)",
+      "id": "bukankah begitu?; sudah kukatakan (mencari persetujuan, atau menunjukkan sesuatu)"
     },
     "register": "casual",
     "steps": [
@@ -32194,10 +32346,12 @@
     "structure": "い-adj (drop い) ／ な-adj + がる",
     "structure_fr": "adj. en い (sans い) ／ adj. en な + がる",
     "structure_es": "adj. い (sin い) ／ adj. な + がる",
+    "structure_id": "kata sifat い (tanpa い) ／ kata sifat な + がる",
     "meaning": {
       "en": "shows signs of feeling… (someone else's wants and feelings)",
       "fr": "montrer des signes de… (les envies et sentiments d'autrui)",
-      "es": "muestra señales de sentir… (deseos y sentimientos de otra persona)"
+      "es": "muestra señales de sentir… (deseos y sentimientos de otra persona)",
+      "id": "menunjukkan tanda-tanda merasa… (keinginan dan perasaan orang lain)"
     },
     "register": "neutral",
     "steps": [
@@ -32608,10 +32762,12 @@
     "structure": "い-adj (drop い) + くする ／ な-adj・noun + にする",
     "structure_fr": "adj. en い (sans い) + くする ／ adj. en な・nom + にする",
     "structure_es": "adj. い (sin い) + くする ／ adj. な・sustantivo + にする",
+    "structure_id": "kata sifat い (tanpa い) + くする ／ kata sifat な・kata benda + にする",
     "meaning": {
       "en": "to make something (smaller, quiet…): acting on a thing",
       "fr": "rendre (plus petit, calme…) : agir sur une chose",
-      "es": "hacer algo (más pequeño, tranquilo…): actuar sobre una cosa"
+      "es": "hacer algo (más pequeño, tranquilo…): actuar sobre una cosa",
+      "id": "membuat sesuatu (lebih kecil, tenang…): tindakan terhadap suatu benda"
     },
     "register": "neutral",
     "steps": [
@@ -33070,10 +33226,12 @@
     "structure": "noun + の + ような + noun ／ plain form + ような",
     "structure_fr": "nom + の + ような + nom ／ forme neutre + ような",
     "structure_es": "sustantivo + の + ような + sustantivo ／ forma llana + ような",
+    "structure_id": "kata benda + の + ような + kata benda ／ bentuk biasa + ような",
     "meaning": {
       "en": "like, such as (a likeness before a noun)",
       "fr": "comme, tel que (une ressemblance devant un nom)",
-      "es": "como, tal como (un parecido delante de un sustantivo)"
+      "es": "como, tal como (un parecido delante de un sustantivo)",
+      "id": "seperti, semacam (kemiripan, sebelum kata benda)"
     },
     "register": "neutral",
     "steps": [
@@ -33501,10 +33659,12 @@
     "structure": "noun + でございます (the very polite です)",
     "structure_fr": "nom + でございます (le です très poli)",
     "structure_es": "sustantivo + でございます (el です muy cortés)",
+    "structure_id": "kata benda + でございます (です yang sangat sopan)",
     "meaning": {
       "en": "the very polite 'is' of shops and announcements",
       "fr": "le « est » très poli des magasins et des annonces",
-      "es": "el «es» muy cortés de tiendas y anuncios"
+      "es": "el «es» muy cortés de tiendas y anuncios",
+      "id": "bentuk 'adalah' yang sangat sopan di toko dan pengumuman"
     },
     "register": "formal",
     "steps": [
@@ -33915,10 +34075,12 @@
     "structure": "いらっしゃる (be, come, go) ／ おっしゃる (say) ／ なさる (do): honorific verbs for others",
     "structure_fr": "いらっしゃる (être, venir, aller) ／ おっしゃる (dire) ／ なさる (faire) : verbes de respect pour autrui",
     "structure_es": "いらっしゃる (estar, venir, ir) ／ おっしゃる (decir) ／ なさる (hacer): verbos honoríficos para los demás",
+    "structure_id": "いらっしゃる (ada, datang, pergi) ／ おっしゃる (berkata) ／ なさる (melakukan): kata kerja hormat untuk orang lain",
     "meaning": {
       "en": "the respectful verbs that replace いる・来る・行く, 言う and する",
       "fr": "les verbes de respect qui remplacent いる・来る・行く, 言う et する",
-      "es": "los verbos de respeto que sustituyen a いる・来る・行く, 言う y する"
+      "es": "los verbos de respeto que sustituyen a いる・来る・行く, 言う y する",
+      "id": "kata kerja hormat pengganti いる・来る・行く, 言う, dan する"
     },
     "register": "polite",
     "steps": [
@@ -34347,10 +34509,12 @@
     "structure": "まいる (come, go) ／ もうす (say, be called) ／ いたす (do): humble verbs for oneself",
     "structure_fr": "まいる (venir, aller) ／ もうす (dire, s'appeler) ／ いたす (faire) : verbes de modestie pour soi-même",
     "structure_es": "まいる (venir, ir) ／ もうす (decir, llamarse) ／ いたす (hacer): verbos humildes para uno mismo",
+    "structure_id": "まいる (datang, pergi) ／ もうす (berkata, bernama) ／ いたす (melakukan): kata kerja merendah untuk diri sendiri",
     "meaning": {
       "en": "the humble verbs that lower the speaker's own actions",
       "fr": "les verbes de modestie qui abaissent les actions du locuteur",
-      "es": "los verbos humildes que rebajan las acciones de quien habla"
+      "es": "los verbos humildes que rebajan las acciones de quien habla",
+      "id": "kata kerja merendah untuk tindakan pembicara sendiri"
     },
     "register": "polite",
     "steps": [
@@ -34802,10 +34966,12 @@
     "structure": "verb て-form + くださる (the respectful てくれる); 〜ていただく is the respectful てもらう",
     "structure_fr": "verbe forme en て + くださる (le てくれる respectueux) ; 〜ていただく est le てもらう humble",
     "structure_es": "verbo en forma て + くださる (el てくれる respetuoso); 〜ていただく es el てもらう humilde",
+    "structure_id": "kata kerja bentuk て + くださる (bentuk hormat dari てくれる); 〜ていただく adalah bentuk merendah dari てもらう",
     "meaning": {
       "en": "someone above you does something for you; you receive it, humbly",
       "fr": "un supérieur fait quelque chose pour vous ; vous le recevez avec modestie",
-      "es": "alguien superior hace algo por ti; tú lo recibes con humildad"
+      "es": "alguien superior hace algo por ti; tú lo recibes con humildad",
+      "id": "orang yang kedudukannya lebih tinggi berbuat sesuatu untukmu; kamu menerimanya dengan rendah hati"
     },
     "register": "polite",
     "steps": [
@@ -35216,10 +35382,12 @@
     "structure": "お + verb stem + ください",
     "structure_fr": "お + radical verbal + ください",
     "structure_es": "お + raíz verbal + ください",
+    "structure_id": "お + batang kata kerja + ください",
     "meaning": {
       "en": "please do (a respectful request)",
       "fr": "veuillez… (une demande respectueuse)",
-      "es": "haga…, por favor (una petición respetuosa)"
+      "es": "haga…, por favor (una petición respetuosa)",
+      "id": "silakan, mohon (permintaan dengan hormat)"
     },
     "register": "polite",
     "steps": [
@@ -35647,10 +35815,12 @@
     "structure_reading": "verb dictionary form／ない-form + ようにいう（たのむ・つたえる）",
     "structure_fr": "verbe forme du dictionnaire／forme en ない + ように言う（頼む・伝える）",
     "structure_es": "verbo en forma de diccionario／forma ない + ように言う（頼む・伝える）",
+    "structure_id": "kata kerja bentuk kamus／bentuk ない + ように言う（頼む・伝える）",
     "meaning": {
       "en": "tell someone to do (reporting an instruction)",
       "fr": "dire à quelqu'un de faire (rapporter une consigne)",
-      "es": "decirle a alguien que haga algo (transmitir una instrucción)"
+      "es": "decirle a alguien que haga algo (transmitir una instrucción)",
+      "id": "menyuruh seseorang melakukan (menyampaikan instruksi)"
     },
     "register": "polite",
     "steps": [
@@ -36050,10 +36220,12 @@
     "structure": "verb て-form + いただけませんか",
     "structure_fr": "verbe forme en て + いただけませんか",
     "structure_es": "verbo en forma て + いただけませんか",
+    "structure_id": "kata kerja bentuk て + いただけませんか",
     "meaning": {
       "en": "could you possibly… (the most polite request)",
       "fr": "pourriez-vous… (la demande la plus polie)",
-      "es": "¿podría usted…? (la petición más cortés)"
+      "es": "¿podría usted…? (la petición más cortés)",
+      "id": "sudikah Anda… (permintaan yang paling sopan)"
     },
     "register": "polite",
     "steps": [
@@ -36467,10 +36639,12 @@
     "structure": "verb て-form + よかった",
     "structure_fr": "verbe forme en て + よかった",
     "structure_es": "verbo en forma て + よかった",
+    "structure_id": "kata kerja bentuk て + よかった",
     "meaning": {
       "en": "I'm glad that…, it was good that…",
       "fr": "heureusement que…, j'ai bien fait de…",
-      "es": "me alegro de que…, menos mal que…"
+      "es": "me alegro de que…, menos mal que…",
+      "id": "saya senang…, syukurlah…"
     },
     "register": "neutral",
     "steps": [
@@ -36842,10 +37016,12 @@
     "structure_reading": "verb dictionary form + な（きんし）",
     "structure_fr": "verbe forme du dictionnaire + な（禁止）",
     "structure_es": "verbo en forma de diccionario + な（禁止）",
+    "structure_id": "kata kerja bentuk kamus + な（禁止）",
     "meaning": {
       "en": "don't! (a blunt prohibition)",
       "fr": "ne fais pas ! (une interdiction brutale)",
-      "es": "¡no lo hagas! (una prohibición tajante)"
+      "es": "¡no lo hagas! (una prohibición tajante)",
+      "id": "jangan! (larangan yang keras)"
     },
     "register": "casual",
     "steps": [
@@ -37324,10 +37500,12 @@
     "structure_reading": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (かけ, まて)",
     "structure_fr": "verbe à l'impératif : radical d'un verbe en る + ろ ／ verbe en う, finale au son en え (書け, 待て)",
     "structure_es": "verbo en imperativo: raíz de verbo en る + ろ ／ verbo en う, final en la fila え (書け, 待て)",
+    "structure_id": "kata kerja bentuk perintah: batang kata kerja る + ろ ／ kata kerja う, bunyi akhir ke baris え (書け, 待て)",
     "meaning": {
       "en": "the plain command form",
       "fr": "l'impératif brut",
-      "es": "el imperativo llano"
+      "es": "el imperativo llano",
+      "id": "bentuk perintah biasa"
     },
     "register": "casual",
     "steps": [
@@ -37915,10 +38093,12 @@
     "structure": "verb dictionary form + といい ／ た-form + らいい ／ ば-form + いい",
     "structure_fr": "verbe forme du dictionnaire + といい ／ forme en た + らいい ／ forme en ば + いい",
     "structure_es": "verbo en forma de diccionario + といい ／ forma た + らいい ／ forma ば + いい",
+    "structure_id": "kata kerja bentuk kamus + といい ／ bentuk た + らいい ／ bentuk ば + いい",
     "meaning": {
       "en": "it would be good if…; you should just…; I hope…",
       "fr": "il serait bien que… ; tu n'as qu'à… ; j'espère que…",
-      "es": "estaría bien que…; solo tienes que…; ojalá…"
+      "es": "estaría bien que…; solo tienes que…; ojalá…",
+      "id": "alangkah baiknya jika…; kamu tinggal…; semoga…"
     },
     "register": "neutral",
     "steps": [
@@ -38372,10 +38552,12 @@
     "structure": "verb ない-form + ほうがいい",
     "structure_fr": "verbe forme en ない + ほうがいい",
     "structure_es": "verbo en forma ない + ほうがいい",
+    "structure_id": "kata kerja bentuk ない + ほうがいい",
     "meaning": {
       "en": "you had better not",
       "fr": "il vaut mieux ne pas",
-      "es": "más vale no"
+      "es": "más vale no",
+      "id": "sebaiknya jangan"
     },
     "register": "polite",
     "steps": [
@@ -38745,10 +38927,12 @@
     "structure": "い-adj (drop い) + さ ／ な-adj + さ",
     "structure_fr": "adj. en い (sans い) + さ ／ adj. en な + さ",
     "structure_es": "adj. い (sin い) + さ ／ adj. な + さ",
+    "structure_id": "kata sifat い (tanpa い) + さ ／ kata sifat な + さ",
     "meaning": {
       "en": "turns an adjective into a noun: height, kindness",
       "fr": "transforme un adjectif en nom : la hauteur, la gentillesse",
-      "es": "convierte un adjetivo en sustantivo: altura, amabilidad"
+      "es": "convierte un adjetivo en sustantivo: altura, amabilidad",
+      "id": "mengubah kata sifat menjadi kata benda: ketinggian, kebaikan"
     },
     "register": "neutral",
     "steps": [
@@ -39126,10 +39310,12 @@
     "structure_reading": "noun + ちゅう・じゅう（ちゅう：during ／ じゅう：throughout）",
     "structure_fr": "nom + 中（ちゅう：pendant ／ じゅう：tout au long de）",
     "structure_es": "sustantivo + 中（ちゅう：durante ／ じゅう：a lo largo de）",
+    "structure_id": "kata benda + 中（ちゅう：selama ／ じゅう：sepanjang）",
     "meaning": {
       "en": "during (〜ちゅう) or all through (〜じゅう)",
       "fr": "pendant (〜ちゅう) ou tout au long de (〜じゅう)",
-      "es": "durante (〜ちゅう) o a lo largo de todo (〜じゅう)"
+      "es": "durante (〜ちゅう) o a lo largo de todo (〜じゅう)",
+      "id": "selama (〜ちゅう) atau sepanjang (〜じゅう)"
     },
     "register": "neutral",
     "steps": [
@@ -39561,10 +39747,12 @@
     "structure": "number + counter + おきに",
     "structure_fr": "nombre + classificateur + おきに",
     "structure_es": "número + contador + おきに",
+    "structure_id": "angka + kata bantu bilangan + おきに",
     "meaning": {
       "en": "every other…, at intervals of",
       "fr": "tous les… (à intervalles de)",
-      "es": "cada dos…, a intervalos de"
+      "es": "cada dos…, a intervalos de",
+      "id": "selang…, dengan jarak"
     },
     "register": "neutral",
     "steps": [
@@ -39936,10 +40124,12 @@
     "structure": "verb ない-form (drop い) + なくて ／ い-adj + くなくて ／ noun・な-adj + じゃなくて",
     "structure_fr": "verbe forme en ない (sans い) + なくて ／ adj. en い + くなくて ／ nom・adj. en な + じゃなくて",
     "structure_es": "verbo en forma ない (sin い) + なくて ／ adj. い + くなくて ／ sustantivo・adj. な + じゃなくて",
+    "structure_id": "kata kerja bentuk ない (tanpa い) + なくて ／ kata sifat い + くなくて ／ kata benda・kata sifat な + じゃなくて",
     "meaning": {
       "en": "not … and so (a negative cause), or 'not A but B'",
       "fr": "ne pas… et donc (une cause négative), ou « pas A mais B »",
-      "es": "no… y por eso (una causa negativa), o «no A sino B»"
+      "es": "no… y por eso (una causa negativa), o «no A sino B»",
+      "id": "tidak … sehingga (sebab yang negatif), atau 'bukan A, melainkan B'"
     },
     "register": "neutral",
     "steps": [
@@ -40407,10 +40597,12 @@
     "structure": "verb ます-stem + ますように",
     "structure_fr": "radical en ます + ますように",
     "structure_es": "raíz ます + ますように",
+    "structure_id": "batang ます + ますように",
     "meaning": {
       "en": "may it be that… (a wish or a prayer)",
       "fr": "pourvu que… (un souhait ou une prière)",
-      "es": "ojalá… (un deseo o una plegaria)"
+      "es": "ojalá… (un deseo o una plegaria)",
+      "id": "semoga… (harapan atau doa)"
     },
     "register": "polite",
     "steps": [
@@ -40829,10 +41021,12 @@
     "structure_reading": "question word + plain clause + か（かんせつぎもん） + しっている／わかる／おしえる",
     "structure_fr": "mot interrogatif + proposition neutre + か（間接疑問） + 知っている／分かる／教える",
     "structure_es": "palabra interrogativa + oración en forma llana + か（間接疑問） + 知っている／分かる／教える",
+    "structure_id": "kata tanya + klausa bentuk biasa + か（間接疑問） + 知っている／分かる／教える",
     "meaning": {
       "en": "an embedded question: I know where… / do you know when…",
       "fr": "une question enchâssée : je sais où… / sais-tu quand…",
-      "es": "una pregunta indirecta: sé dónde… / ¿sabes cuándo…?"
+      "es": "una pregunta indirecta: sé dónde… / ¿sabes cuándo…?",
+      "id": "pertanyaan tak langsung: aku tahu di mana… / apakah kamu tahu kapan…"
     },
     "register": "polite",
     "steps": [
@@ -41328,10 +41522,12 @@
     "structure_reading": "なんでも／だれでも／いつでも／どこでも (question word + でも) + predicate",
     "structure_fr": "何でも／誰でも／いつでも／どこでも (mot interrogatif + でも) + prédicat",
     "structure_es": "何でも／誰でも／いつでも／どこでも (palabra interrogativa + でも) + predicado",
+    "structure_id": "何でも／誰でも／いつでも／どこでも (kata tanya + でも) + predikat",
     "meaning": {
       "en": "anything, anyone, any time, anywhere: whichever it is",
       "fr": "n'importe quoi, n'importe qui, n'importe quand, n'importe où",
-      "es": "cualquier cosa, cualquiera, cuando sea, donde sea: sea cual sea"
+      "es": "cualquier cosa, cualquiera, cuando sea, donde sea: sea cual sea",
+      "id": "apa saja, siapa saja, kapan saja, di mana saja: yang mana pun itu"
     },
     "register": "neutral",
     "steps": [
@@ -41796,10 +41992,12 @@
     "structure": "plain form ／ noun + でしょうか",
     "structure_fr": "forme neutre ／ nom + でしょうか",
     "structure_es": "forma llana ／ sustantivo + でしょうか",
+    "structure_id": "bentuk biasa ／ kata benda + でしょうか",
     "meaning": {
       "en": "I wonder if…? (a soft, polite question)",
       "fr": "est-ce que… ? (une question douce et polie)",
-      "es": "¿será que…? (una pregunta suave y cortés)"
+      "es": "¿será que…? (una pregunta suave y cortés)",
+      "id": "apakah kiranya…? (pertanyaan yang lembut dan sopan)"
     },
     "register": "polite",
     "steps": [
@@ -42267,10 +42465,12 @@
     "structure_reading": "number + counter + も（きょうちょう） + predicate",
     "structure_fr": "nombre + classificateur + も（強調） + prédicat",
     "structure_es": "número + contador + も（強調） + predicado",
+    "structure_id": "angka + kata bantu bilangan + も（強調） + predikat",
     "meaning": {
       "en": "as much as, as many as (stressing a large amount)",
       "fr": "pas moins de, jusqu'à (insister sur une grande quantité)",
-      "es": "nada menos que, hasta (recalca una gran cantidad)"
+      "es": "nada menos que, hasta (recalca una gran cantidad)",
+      "id": "sebanyak, sampai (menekankan jumlah yang besar)"
     },
     "register": "neutral",
     "steps": [
@@ -42752,10 +42952,12 @@
     "structure": "sentence。それで + sentence",
     "structure_fr": "phrase。それで + phrase",
     "structure_es": "frase。それで + frase",
+    "structure_id": "kalimat。それで + kalimat",
     "meaning": {
       "en": "and so, that's why; 'and then?'",
       "fr": "et donc, c'est pour ça ; « et alors ? »",
-      "es": "y por eso, por eso es que; «¿y entonces?»"
+      "es": "y por eso, por eso es que; «¿y entonces?»",
+      "id": "jadi, karena itulah; 'lalu?'"
     },
     "register": "neutral",
     "steps": [
@@ -43172,10 +43374,12 @@
     "structure": "sentence。それに + sentence",
     "structure_fr": "phrase。それに + phrase",
     "structure_es": "frase。それに + frase",
+    "structure_id": "kalimat。それに + kalimat",
     "meaning": {
       "en": "besides, what's more",
       "fr": "en plus, de surcroît",
-      "es": "además, encima"
+      "es": "además, encima",
+      "id": "selain itu, lagi pula"
     },
     "register": "neutral",
     "steps": [
@@ -43558,10 +43762,12 @@
     "structure": "sentence。ところで + new topic",
     "structure_fr": "phrase。ところで + nouveau sujet",
     "structure_es": "frase。ところで + tema nuevo",
+    "structure_id": "kalimat。ところで + topik baru",
     "meaning": {
       "en": "by the way (changing the subject)",
       "fr": "au fait (pour changer de sujet)",
-      "es": "por cierto (para cambiar de tema)"
+      "es": "por cierto (para cambiar de tema)",
+      "id": "omong-omong (mengalihkan pembicaraan)"
     },
     "register": "neutral",
     "steps": [
@@ -43923,10 +44129,12 @@
     "structure": "A + または + B",
     "structure_fr": "A + または + B",
     "structure_es": "A + または + B",
+    "structure_id": "A + または + B",
     "meaning": {
       "en": "or (formal, in writing and notices)",
       "fr": "ou (formel, à l'écrit et sur les avis)",
-      "es": "o (formal, por escrito y en avisos)"
+      "es": "o (formal, por escrito y en avisos)",
+      "id": "atau (formal, dalam tulisan dan pengumuman)"
     },
     "register": "written",
     "steps": [
@@ -44314,10 +44522,12 @@
     "structure": "こんな／そんな／あんな／どんな + noun",
     "structure_fr": "こんな／そんな／あんな／どんな + nom",
     "structure_es": "こんな／そんな／あんな／どんな + sustantivo",
+    "structure_id": "こんな／そんな／あんな／どんな + kata benda",
     "meaning": {
       "en": "this kind of, that kind of, what kind of",
       "fr": "ce genre de, quel genre de",
-      "es": "este tipo de, ese tipo de, qué tipo de"
+      "es": "este tipo de, ese tipo de, qué tipo de",
+      "id": "seperti ini, seperti itu, seperti apa"
     },
     "register": "neutral",
     "steps": [
@@ -44734,10 +44944,12 @@
     "structure": "こんなに／そんなに／あんなに + adjective／verb",
     "structure_fr": "こんなに／そんなに／あんなに + adjectif／verbe",
     "structure_es": "こんなに／そんなに／あんなに + adjetivo／verbo",
+    "structure_id": "こんなに／そんなに／あんなに + kata sifat／kata kerja",
     "meaning": {
       "en": "this much, that much (degree)",
       "fr": "autant que ça, à ce point (le degré)",
-      "es": "tanto, hasta ese punto (el grado)"
+      "es": "tanto, hasta ese punto (el grado)",
+      "id": "sebegini, sebegitu (tingkatan)"
     },
     "register": "neutral",
     "steps": [
@@ -45187,10 +45399,12 @@
     "structure_reading": "verb dictionary form ／ noun + の + よていだ",
     "structure_fr": "verbe forme du dictionnaire ／ nom + の + 予定だ",
     "structure_es": "verbo en forma de diccionario ／ sustantivo + の + 予定だ",
+    "structure_id": "kata kerja bentuk kamus ／ kata benda + の + 予定だ",
     "meaning": {
       "en": "it is planned that, I am due to",
       "fr": "il est prévu que, je dois…",
-      "es": "está previsto que, tengo previsto"
+      "es": "está previsto que, tengo previsto",
+      "id": "direncanakan bahwa, saya dijadwalkan untuk"
     },
     "register": "polite",
     "steps": [
@@ -45607,10 +45821,12 @@
     "structure": "verb て-form with て→ちゃ／で→じゃ + いけない (the spoken 〜てはいけない; 〜ではいけない → 〜じゃいけない)",
     "structure_fr": "verbe forme en て avec て→ちゃ／で→じゃ + いけない (le 〜てはいけない parlé ; 〜ではいけない → 〜じゃいけない)",
     "structure_es": "verbo en forma て con て→ちゃ／で→じゃ + いけない (el 〜てはいけない hablado; 〜ではいけない → 〜じゃいけない)",
+    "structure_id": "kata kerja bentuk て dengan て→ちゃ／で→じゃ + いけない (bentuk lisan dari 〜てはいけない; 〜ではいけない → 〜じゃいけない)",
     "meaning": {
       "en": "mustn't (spoken)",
       "fr": "il ne faut pas (à l'oral)",
-      "es": "no se debe (hablado)"
+      "es": "no se debe (hablado)",
+      "id": "tidak boleh (bahasa lisan)"
     },
     "register": "casual",
     "steps": [
@@ -46074,10 +46290,12 @@
     "structure_reading": "noun + がみえる ／ がきこえる",
     "structure_fr": "nom + が見える ／ が聞こえる",
     "structure_es": "sustantivo + が見える ／ が聞こえる",
+    "structure_id": "kata benda + が見える ／ が聞こえる",
     "meaning": {
       "en": "can be seen / can be heard (of itself, no effort)",
       "fr": "on voit / on entend (de soi-même, sans effort)",
-      "es": "se ve / se oye (por sí solo, sin esfuerzo)"
+      "es": "se ve / se oye (por sí solo, sin esfuerzo)",
+      "id": "terlihat / terdengar (dengan sendirinya, tanpa usaha)"
     },
     "register": "neutral",
     "steps": [
@@ -46507,10 +46725,12 @@
     "structure_reading": "noun／な-adj + にみえる ／ い-adj + くみえる",
     "structure_fr": "nom／adj. en な + に見える ／ adj. en い + く見える",
     "structure_es": "sustantivo／adj. な + に見える ／ adj. い + く見える",
+    "structure_id": "kata benda／kata sifat な + に見える ／ kata sifat い + く見える",
     "meaning": {
       "en": "looks (like), appears",
       "fr": "avoir l'air, sembler",
-      "es": "parece, se ve (como)"
+      "es": "parece, se ve (como)",
+      "id": "terlihat (seperti), tampak"
     },
     "register": "neutral",
     "steps": [

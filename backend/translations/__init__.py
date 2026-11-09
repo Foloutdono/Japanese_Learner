@@ -42,7 +42,7 @@ WRITTEN: dict[str, tuple[str, ...]] = {
     # lines in datas/kanji/kanji_meanings_{lang}.json).
     "kanji": ("es",),
     # A grammar point's gloss and formation (meaning.{lang}, structure_{lang}).
-    "grammar.gloss": ("es",),
+    "grammar.gloss": ("es", "id"),
     # Its lesson: every step, neighbour's line and example's translation.
     "grammar.lesson": ("es",),
     # Its tour and its own Choisir questions.

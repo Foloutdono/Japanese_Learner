@@ -4,10 +4,12 @@
     "structure": "verb ない-stem + んばかりに",
     "structure_fr": "radical en ない + んばかりに",
     "structure_es": "raíz ない + んばかりに",
+    "structure_id": "batang ない + んばかりに",
     "meaning": {
       "en": "as if about to, practically doing",
       "fr": "comme sur le point de, pour ainsi dire",
-      "es": "como a punto de, prácticamente haciéndolo"
+      "es": "como a punto de, prácticamente haciéndolo",
+      "id": "seolah hendak, nyaris melakukannya"
     },
     "register": "written",
     "steps": [
@@ -473,10 +475,12 @@
     "structure": "verb dictionary form + べからず",
     "structure_fr": "verbe forme du dictionnaire + べからず",
     "structure_es": "verbo en forma de diccionario + べからず",
+    "structure_id": "kata kerja bentuk kamus + べからず",
     "meaning": {
       "en": "must not (formal, literary/signage)",
       "fr": "interdit de (formel, pancartes)",
-      "es": "no se debe (formal, literario/carteles)"
+      "es": "no se debe (formal, literario/carteles)",
+      "id": "tidak boleh (formal, sastrawi/papan larangan)"
     },
     "register": "formal",
     "steps": [
@@ -859,10 +863,12 @@
     "structure": "plain form/noun + ゆえに",
     "structure_fr": "forme neutre/nom + ゆえに",
     "structure_es": "forma llana/sustantivo + ゆえに",
+    "structure_id": "bentuk biasa/kata benda + ゆえに",
     "meaning": {
       "en": "because of, on account of (formal)",
       "fr": "en raison de, du fait de (formel)",
-      "es": "a causa de, debido a (formal)"
+      "es": "a causa de, debido a (formal)",
+      "id": "karena, disebabkan oleh (formal)"
     },
     "register": "written",
     "steps": [
@@ -1283,10 +1289,12 @@
     "structure": "noun + なくして(は)",
     "structure_fr": "nom + なくして(は)",
     "structure_es": "sustantivo + なくして(は)",
+    "structure_id": "kata benda + なくして(は)",
     "meaning": {
       "en": "without (formal)",
       "fr": "sans (formel)",
-      "es": "sin (formal)"
+      "es": "sin (formal)",
+      "id": "tanpa (formal)"
     },
     "register": "written",
     "steps": [
@@ -1613,10 +1621,12 @@
     "structure_reading": "な-adjective stem + きわまりない",
     "structure_fr": "radical d'adjectif en な + 極まりない",
     "structure_es": "raíz de adjetivo en な + 極まりない",
+    "structure_id": "batang kata sifat な + 極まりない",
     "meaning": {
       "en": "extremely, in the extreme",
       "fr": "extrêmement, au plus haut point",
-      "es": "extremadamente, en grado sumo"
+      "es": "extremadamente, en grado sumo",
+      "id": "sangat, teramat sangat"
     },
     "register": "written",
     "steps": [
@@ -1968,10 +1978,12 @@
     "structure": "verb dictionary form/noun + の + きらいがある",
     "structure_fr": "verbe forme du dictionnaire/nom + の + きらいがある",
     "structure_es": "verbo en forma de diccionario/sustantivo + の + きらいがある",
+    "structure_id": "kata kerja bentuk kamus/kata benda + の + きらいがある",
     "meaning": {
       "en": "tend to (a negative tendency)",
       "fr": "avoir tendance à (fâcheusement)",
-      "es": "tender a (una tendencia negativa)"
+      "es": "tender a (una tendencia negativa)",
+      "id": "cenderung (kecenderungan buruk)"
     },
     "register": "written",
     "steps": [
@@ -2359,10 +2371,12 @@
     "structure": "noun + にたえない",
     "structure_fr": "nom + にたえない",
     "structure_es": "sustantivo + にたえない",
+    "structure_id": "kata benda + にたえない",
     "meaning": {
       "en": "can't bear to, unable to endure",
       "fr": "insupportable à, ne pas pouvoir supporter de",
-      "es": "no poder soportar, no aguantar"
+      "es": "no poder soportar, no aguantar",
+      "id": "tidak tahan, tak sanggup menanggung"
     },
     "register": "written",
     "steps": [
@@ -2738,10 +2752,12 @@
     "structure": "verb て-form + やまない",
     "structure_fr": "verbe forme en て + やまない",
     "structure_es": "verbo en forma て + やまない",
+    "structure_id": "kata kerja bentuk て + やまない",
     "meaning": {
       "en": "never stop doing, deeply and continuously",
       "fr": "ne jamais cesser de, du fond du cœur",
-      "es": "no dejar nunca de, de forma profunda y continua"
+      "es": "no dejar nunca de, de forma profunda y continua",
+      "id": "tak henti-hentinya, sepenuh hati dan terus-menerus"
     },
     "register": "formal",
     "steps": [
@@ -3129,10 +3145,12 @@
     "structure": "noun + まみれ",
     "structure_fr": "nom + まみれ",
     "structure_es": "sustantivo + まみれ",
+    "structure_id": "kata benda + まみれ",
     "meaning": {
       "en": "covered in, smeared with",
       "fr": "couvert de, maculé de",
-      "es": "cubierto de, embadurnado de"
+      "es": "cubierto de, embadurnado de",
+      "id": "berlumuran, berlepotan"
     },
     "register": "neutral",
     "steps": [
@@ -3501,10 +3519,12 @@
     "structure": "verb dictionary form/noun + だに",
     "structure_fr": "verbe forme du dictionnaire/nom + だに",
     "structure_es": "verbo en forma de diccionario/sustantivo + だに",
+    "structure_id": "kata kerja bentuk kamus/kata benda + だに",
     "meaning": {
       "en": "even (emphatic, formal)",
       "fr": "même (emphatique, formel)",
-      "es": "incluso (enfático, formal)"
+      "es": "incluso (enfático, formal)",
+      "id": "bahkan (penekanan, formal)"
     },
     "register": "written",
     "steps": [
@@ -3892,10 +3912,12 @@
     "structure": "noun + あっての + noun",
     "structure_fr": "nom + あっての + nom",
     "structure_es": "sustantivo + あっての + sustantivo",
+    "structure_id": "kata benda + あっての + kata benda",
     "meaning": {
       "en": "exists only thanks to, made possible by",
       "fr": "qui n'existe que grâce à",
-      "es": "que existe solo gracias a, posible gracias a"
+      "es": "que existe solo gracias a, posible gracias a",
+      "id": "hanya ada berkat, dimungkinkan oleh"
     },
     "register": "written",
     "steps": [
@@ -4270,10 +4292,12 @@
     "structure": "noun + なしに",
     "structure_fr": "nom + なしに",
     "structure_es": "sustantivo + なしに",
+    "structure_id": "kata benda + なしに",
     "meaning": {
       "en": "without (formal)",
       "fr": "sans (formel)",
-      "es": "sin (formal)"
+      "es": "sin (formal)",
+      "id": "tanpa (formal)"
     },
     "register": "written",
     "steps": [
@@ -4675,10 +4699,12 @@
     "structure": "noun + いかんによらず",
     "structure_fr": "nom + いかんによらず",
     "structure_es": "sustantivo + いかんによらず",
+    "structure_id": "kata benda + いかんによらず",
     "meaning": {
       "en": "regardless of",
       "fr": "quel que soit, indépendamment de",
-      "es": "independientemente de"
+      "es": "independientemente de",
+      "id": "tanpa memandang"
     },
     "register": "formal",
     "steps": [
@@ -5055,10 +5081,12 @@
     "structure": "noun + をおいて",
     "structure_fr": "nom + をおいて",
     "structure_es": "sustantivo + をおいて",
+    "structure_id": "kata benda + をおいて",
     "meaning": {
       "en": "except for, other than",
       "fr": "à part, en dehors de",
-      "es": "excepto, aparte de"
+      "es": "excepto, aparte de",
+      "id": "kecuali, selain"
     },
     "register": "written",
     "steps": [
@@ -5440,10 +5468,12 @@
     "structure": "counter/noun + たりとも",
     "structure_fr": "classificateur/nom + たりとも",
     "structure_es": "contador/sustantivo + たりとも",
+    "structure_id": "kata bantu bilangan/kata benda + たりとも",
     "meaning": {
       "en": "not even (a single ...)",
       "fr": "pas même un seul",
-      "es": "ni siquiera (un solo…)"
+      "es": "ni siquiera (un solo…)",
+      "id": "bahkan tidak (satu ... pun)"
     },
     "register": "written",
     "steps": [
@@ -5818,10 +5848,12 @@
     "structure": "verb ない-form + までも",
     "structure_fr": "verbe forme en ない + までも",
     "structure_es": "verbo en forma ない + までも",
+    "structure_id": "kata kerja bentuk ない + までも",
     "meaning": {
       "en": "even if not quite, if not necessarily",
       "fr": "même si ce n'est pas, à défaut de",
-      "es": "aunque no del todo, si no necesariamente"
+      "es": "aunque no del todo, si no necesariamente",
+      "id": "meski tidak sepenuhnya, kalaupun tidak sampai"
     },
     "register": "neutral",
     "steps": [
@@ -6187,10 +6219,12 @@
     "structure": "verb ない-stem + ずじまい",
     "structure_fr": "radical en ない + ずじまい",
     "structure_es": "raíz ない + ずじまい",
+    "structure_id": "batang ない + ずじまい",
     "meaning": {
       "en": "ended up never doing (despite intending to)",
       "fr": "finir par ne jamais (malgré l'intention)",
-      "es": "acabar sin hacerlo nunca (pese a la intención)"
+      "es": "acabar sin hacerlo nunca (pese a la intención)",
+      "id": "akhirnya tidak sempat melakukannya (padahal berniat)"
     },
     "register": "neutral",
     "steps": [
@@ -6562,10 +6596,12 @@
     "structure_reading": "verb dictionary form + がはやいか",
     "structure_fr": "verbe forme du dictionnaire + が早いか",
     "structure_es": "verbo en forma de diccionario + が早いか",
+    "structure_id": "kata kerja bentuk kamus + が早いか",
     "meaning": {
       "en": "no sooner than, the instant",
       "fr": "à peine... que, aussitôt",
-      "es": "nada más…, en el instante en que"
+      "es": "nada más…, en el instante en que",
+      "id": "begitu ... langsung, seketika itu juga"
     },
     "register": "written",
     "steps": [
@@ -6955,10 +6991,12 @@
     "structure_reading": "verb dictionary form + やいなや",
     "structure_fr": "verbe forme du dictionnaire + や否や",
     "structure_es": "verbo en forma de diccionario + や否や",
+    "structure_id": "kata kerja bentuk kamus + や否や",
     "meaning": {
       "en": "as soon as, hardly ... when",
       "fr": "dès que, à peine... que",
-      "es": "en cuanto, apenas… cuando"
+      "es": "en cuanto, apenas… cuando",
+      "id": "segera setelah, baru saja ... sudah"
     },
     "register": "written",
     "steps": [
@@ -7328,10 +7366,12 @@
     "structure": "verb dictionary/た form + そばから",
     "structure_fr": "verbe forme du dictionnaire/en た + そばから",
     "structure_es": "verbo en forma de diccionario/た + そばから",
+    "structure_id": "kata kerja bentuk kamus/た + そばから",
     "meaning": {
       "en": "no sooner done than it comes undone again",
       "fr": "à peine fait que c'est déjà défait",
-      "es": "nada más hacerse, se deshace de nuevo"
+      "es": "nada más hacerse, se deshace de nuevo",
+      "id": "baru dikerjakan, sudah kembali seperti semula"
     },
     "register": "neutral",
     "steps": [
@@ -7632,10 +7672,12 @@
     "structure": "verb dictionary form + なり",
     "structure_fr": "verbe forme du dictionnaire + なり",
     "structure_es": "verbo en forma de diccionario + なり",
+    "structure_id": "kata kerja bentuk kamus + なり",
     "meaning": {
       "en": "immediately upon doing (literary)",
       "fr": "aussitôt que (littéraire)",
-      "es": "inmediatamente al hacer (literario)"
+      "es": "inmediatamente al hacer (literario)",
+      "id": "langsung setelah melakukan (sastrawi)"
     },
     "register": "written",
     "steps": [
@@ -8001,10 +8043,12 @@
     "structure": "verb stem / noun + がてら",
     "structure_fr": "radical verbal / nom + がてら",
     "structure_es": "raíz verbal / sustantivo + がてら",
+    "structure_id": "batang kata kerja / kata benda + がてら",
     "meaning": {
       "en": "while also, taking the chance to",
       "fr": "en profitant de, tout en",
-      "es": "de paso, aprovechando para"
+      "es": "de paso, aprovechando para",
+      "id": "sambil juga, memanfaatkan kesempatan untuk"
     },
     "register": "neutral",
     "steps": [
@@ -8376,10 +8420,12 @@
     "structure": "verb dictionary form / noun + の + かたわら",
     "structure_fr": "verbe forme du dictionnaire / nom + の + かたわら",
     "structure_es": "verbo en forma de diccionario / sustantivo + の + かたわら",
+    "structure_id": "kata kerja bentuk kamus / kata benda + の + かたわら",
     "meaning": {
       "en": "alongside one's main occupation",
       "fr": "parallèlement à (son activité principale)",
-      "es": "a la par de su ocupación principal"
+      "es": "a la par de su ocupación principal",
+      "id": "di samping pekerjaan utamanya"
     },
     "register": "written",
     "steps": [
@@ -8745,10 +8791,12 @@
     "structure": "noun + の + ごとき・ごとく",
     "structure_fr": "nom + の + ごとき・ごとく",
     "structure_es": "sustantivo + の + ごとき・ごとく",
+    "structure_id": "kata benda + の + ごとき・ごとく",
     "meaning": {
       "en": "like, as if — an archaic ような・ように",
       "fr": "tel, comme (un ような・ように archaïque)",
-      "es": "como, como si (un ような・ように arcaico)"
+      "es": "como, como si (un ような・ように arcaico)",
+      "id": "seperti, seolah — bentuk kuno ような・ように"
     },
     "register": "written",
     "steps": [
@@ -9163,10 +9211,12 @@
     "structure": "noun + ずくめ",
     "structure_fr": "nom + ずくめ",
     "structure_es": "sustantivo + ずくめ",
+    "structure_id": "kata benda + ずくめ",
     "meaning": {
       "en": "entirely, nothing but",
       "fr": "rien que, tout en",
-      "es": "enteramente, nada más que"
+      "es": "enteramente, nada más que",
+      "id": "serba, melulu"
     },
     "register": "neutral",
     "steps": [
@@ -9548,10 +9598,12 @@
     "structure": "noun + めく",
     "structure_fr": "nom + めく",
     "structure_es": "sustantivo + めく",
+    "structure_id": "kata benda + めく",
     "meaning": {
       "en": "take on the air of, turn ...-like",
       "fr": "prendre un air de",
-      "es": "tomar aire de, volverse como…"
+      "es": "tomar aire de, volverse como…",
+      "id": "mulai bernuansa, menjadi seperti ..."
     },
     "register": "written",
     "steps": [
@@ -9927,10 +9979,12 @@
     "structure": "verb dictionary form + まじき + noun",
     "structure_fr": "verbe forme du dictionnaire + まじき + nom",
     "structure_es": "verbo en forma de diccionario + まじき + sustantivo",
+    "structure_id": "kata kerja bentuk kamus + まじき + kata benda",
     "meaning": {
       "en": "unbecoming, not befitting a role",
       "fr": "indigne de, qui ne sied pas à",
-      "es": "impropio, indigno de un papel"
+      "es": "impropio, indigno de un papel",
+      "id": "tidak pantas, tak layak bagi kedudukannya"
     },
     "register": "formal",
     "steps": [
@@ -10255,10 +10309,12 @@
     "structure": "verb dictionary form + べく",
     "structure_fr": "verbe forme du dictionnaire + べく",
     "structure_es": "verbo en forma de diccionario + べく",
+    "structure_id": "kata kerja bentuk kamus + べく",
     "meaning": {
       "en": "in order to, so as to (formal)",
       "fr": "afin de (formel)",
-      "es": "para, con el fin de (formal)"
+      "es": "para, con el fin de (formal)",
+      "id": "untuk, guna (formal)"
     },
     "register": "formal",
     "steps": [
@@ -10691,10 +10747,12 @@
     "structure": "verb て-form + しかるべきだ",
     "structure_fr": "verbe forme en て + しかるべきだ",
     "structure_es": "verbo en forma て + しかるべきだ",
+    "structure_id": "kata kerja bentuk て + しかるべきだ",
     "meaning": {
       "en": "ought properly to be, only right that",
       "fr": "il est légitime que, il serait normal que",
-      "es": "debería, como es debido; es justo que"
+      "es": "debería, como es debido; es justo que",
+      "id": "semestinya, sudah sepantasnya"
     },
     "register": "formal",
     "steps": [
@@ -11067,10 +11125,12 @@
     "structure": "noun + ならでは",
     "structure_fr": "nom + ならでは",
     "structure_es": "sustantivo + ならでは",
+    "structure_id": "kata benda + ならでは",
     "meaning": {
       "en": "distinctive to, possible only for",
       "fr": "propre à, qu'on ne trouve que",
-      "es": "propio de, posible solo para"
+      "es": "propio de, posible solo para",
+      "id": "khas dari, hanya mungkin bagi"
     },
     "register": "neutral",
     "steps": [
@@ -11457,10 +11517,12 @@
     "structure_reading": "noun / plain form + ならいざしらず",
     "structure_fr": "nom / forme neutre + ならいざ知らず",
     "structure_es": "sustantivo / forma llana + ならいざ知らず",
+    "structure_id": "kata benda / bentuk biasa + ならいざ知らず",
     "meaning": {
       "en": "I couldn't say about that, but ...",
       "fr": "passe encore pour..., mais",
-      "es": "de eso no sabría decir, pero…"
+      "es": "de eso no sabría decir, pero…",
+      "id": "kalau itu entahlah, tetapi ..."
     },
     "register": "neutral",
     "steps": [
@@ -11834,10 +11896,12 @@
     "structure": "plain form / noun + とはいえ",
     "structure_fr": "forme neutre / nom + とはいえ",
     "structure_es": "forma llana / sustantivo + とはいえ",
+    "structure_id": "bentuk biasa / kata benda + とはいえ",
     "meaning": {
       "en": "even so, that said",
       "fr": "cela dit, bien que",
-      "es": "aun así, dicho esto"
+      "es": "aun así, dicho esto",
+      "id": "meski begitu, kendati demikian"
     },
     "register": "written",
     "steps": [
@@ -12170,10 +12234,12 @@
     "structure": "plain form / noun + といえども",
     "structure_fr": "forme neutre / nom + といえども",
     "structure_es": "forma llana / sustantivo + といえども",
+    "structure_id": "bentuk biasa / kata benda + といえども",
     "meaning": {
       "en": "even though, granted that",
       "fr": "même si, quand bien même",
-      "es": "aunque, aun admitiendo que"
+      "es": "aunque, aun admitiendo que",
+      "id": "meskipun, sekalipun"
     },
     "register": "formal",
     "steps": [
@@ -12598,10 +12664,12 @@
     "structure": "quoted phrase / plain form + とばかりに",
     "structure_fr": "phrase citée / forme neutre + とばかりに",
     "structure_es": "frase citada / forma llana + とばかりに",
+    "structure_id": "frasa kutipan / bentuk biasa + とばかりに",
     "meaning": {
       "en": "as if to say, as though declaring",
       "fr": "comme pour dire",
-      "es": "como para decir, como si declarara"
+      "es": "como para decir, como si declarara",
+      "id": "seolah berkata, seakan menyatakan"
     },
     "register": "written",
     "steps": [
@@ -12979,10 +13047,12 @@
     "structure": "noun + をものともせず",
     "structure_fr": "nom + をものともせず",
     "structure_es": "sustantivo + をものともせず",
+    "structure_id": "kata benda + をものともせず",
     "meaning": {
       "en": "undaunted by, in defiance of",
       "fr": "sans se laisser arrêter par, bravant",
-      "es": "sin dejarse amilanar por, desafiando"
+      "es": "sin dejarse amilanar por, desafiando",
+      "id": "tak gentar menghadapi, menantang"
     },
     "register": "written",
     "steps": [
@@ -13368,10 +13438,12 @@
     "structure_reading": "noun + をよぎなくされる",
     "structure_fr": "nom + を余儀なくされる",
     "structure_es": "sustantivo + を余儀なくされる",
+    "structure_id": "kata benda + を余儀なくされる",
     "meaning": {
       "en": "be forced into, left with no other choice",
       "fr": "être contraint de",
-      "es": "verse forzado a, sin otra opción"
+      "es": "verse forzado a, sin otra opción",
+      "id": "terpaksa, tidak punya pilihan lain"
     },
     "register": "formal",
     "steps": [
@@ -13716,10 +13788,12 @@
     "structure_reading": "noun + をかわきりに",
     "structure_fr": "nom + を皮切りに",
     "structure_es": "sustantivo + を皮切りに",
+    "structure_id": "kata benda + を皮切りに",
     "meaning": {
       "en": "starting from, with ... as the opening",
       "fr": "à partir de, en commençant par",
-      "es": "empezando por, con… como inicio"
+      "es": "empezando por, con… como inicio",
+      "id": "dimulai dari, dengan ... sebagai pembuka"
     },
     "register": "formal",
     "steps": [
@@ -14064,10 +14138,12 @@
     "structure_reading": "verb dictionary form / noun + にいたる",
     "structure_fr": "verbe forme du dictionnaire / nom + に至る",
     "structure_es": "verbo en forma de diccionario / sustantivo + に至る",
+    "structure_id": "kata kerja bentuk kamus / kata benda + に至る",
     "meaning": {
       "en": "reach the point of, culminate in",
       "fr": "aboutir à, en arriver à",
-      "es": "llegar al punto de, culminar en"
+      "es": "llegar al punto de, culminar en",
+      "id": "sampai pada titik, berujung pada"
     },
     "register": "formal",
     "steps": [
@@ -14490,10 +14566,12 @@
     "structure_reading": "noun + のきわみ",
     "structure_fr": "nom + の極み",
     "structure_es": "sustantivo + の極み",
+    "structure_id": "kata benda + の極み",
     "meaning": {
       "en": "the height of, the utmost",
       "fr": "le comble de",
-      "es": "el colmo de, lo máximo"
+      "es": "el colmo de, lo máximo",
+      "id": "puncak, yang tertinggi"
     },
     "register": "formal",
     "steps": [
@@ -14836,10 +14914,12 @@
     "structure": "noun + はおろか",
     "structure_fr": "nom + はおろか",
     "structure_es": "sustantivo + はおろか",
+    "structure_id": "kata benda + はおろか",
     "meaning": {
       "en": "let alone, far from even",
       "fr": "sans parler de, encore moins",
-      "es": "por no hablar de, ni siquiera"
+      "es": "por no hablar de, ni siquiera",
+      "id": "jangankan, apalagi"
     },
     "register": "written",
     "steps": [
@@ -15246,10 +15326,12 @@
     "structure": "noun + もさることながら",
     "structure_fr": "nom + もさることながら",
     "structure_es": "sustantivo + もさることながら",
+    "structure_id": "kata benda + もさることながら",
     "meaning": {
       "en": "that goes without saying, but even more so",
       "fr": "certes... mais surtout",
-      "es": "eso no hace falta decirlo, pero más aún"
+      "es": "eso no hace falta decirlo, pero más aún",
+      "id": "itu sudah tentu, tetapi terlebih lagi"
     },
     "register": "formal",
     "steps": [
@@ -15627,10 +15709,12 @@
     "structure": "noun / question word + であれ",
     "structure_fr": "nom / mot interrogatif + であれ",
     "structure_es": "sustantivo / palabra interrogativa + であれ",
+    "structure_id": "kata benda / kata tanya + であれ",
     "meaning": {
       "en": "no matter which it is",
       "fr": "quel que soit",
-      "es": "sea cual sea"
+      "es": "sea cual sea",
+      "id": "apa pun itu"
     },
     "register": "formal",
     "steps": [
@@ -16014,10 +16098,12 @@
     "structure": "noun / い-adj + といったらない",
     "structure_fr": "nom / adj. en い + といったらない",
     "structure_es": "sustantivo / adj. い + といったらない",
+    "structure_id": "kata benda / kata sifat い + といったらない",
     "meaning": {
       "en": "beyond anything one could say",
       "fr": "indescriptible, au-delà des mots",
-      "es": "más de lo que se puede expresar"
+      "es": "más de lo que se puede expresar",
+      "id": "tak terlukiskan dengan kata-kata"
     },
     "register": "casual",
     "steps": [
@@ -16379,10 +16465,12 @@
     "structure": "noun + ともなると",
     "structure_fr": "nom + ともなると",
     "structure_es": "sustantivo + ともなると",
+    "structure_id": "kata benda + ともなると",
     "meaning": {
       "en": "once it reaches that stage, naturally",
       "fr": "une fois qu'on en est là, forcément",
-      "es": "una vez que se llega a ese nivel, naturalmente"
+      "es": "una vez que se llega a ese nivel, naturalmente",
+      "id": "kalau sudah sampai tahap itu, tentu saja"
     },
     "register": "neutral",
     "steps": [
@@ -16760,10 +16848,12 @@
     "structure": "verb dictionary form + ともなく",
     "structure_fr": "verbe forme du dictionnaire + ともなく",
     "structure_es": "verbo en forma de diccionario + ともなく",
+    "structure_id": "kata kerja bentuk kamus + ともなく",
     "meaning": {
       "en": "without meaning to, absently",
       "fr": "sans vraiment, distraitement",
-      "es": "sin proponérselo, distraídamente"
+      "es": "sin proponérselo, distraídamente",
+      "id": "tanpa bermaksud, sambil lalu"
     },
     "register": "written",
     "steps": [
@@ -17125,10 +17215,12 @@
     "structure": "verb stem + つ + opposite verb stem + つ",
     "structure_fr": "radical verbal + つ + radical verbal contraire + つ",
     "structure_es": "raíz verbal + つ + raíz verbal opuesta + つ",
+    "structure_id": "batang kata kerja + つ + batang kata kerja berlawanan + つ",
     "meaning": {
       "en": "alternating back and forth",
       "fr": "tantôt... tantôt...",
-      "es": "alternando de un lado a otro"
+      "es": "alternando de un lado a otro",
+      "id": "bergantian bolak-balik"
     },
     "register": "written",
     "steps": [
@@ -17593,10 +17685,12 @@
     "structure": "verb ない-stem + んがため",
     "structure_fr": "radical en ない + んがため",
     "structure_es": "raíz ない + んがため",
+    "structure_id": "batang ない + んがため",
     "meaning": {
       "en": "with the express aim of",
       "fr": "dans le seul but de",
-      "es": "con el fin expreso de"
+      "es": "con el fin expreso de",
+      "id": "semata-mata demi"
     },
     "register": "written",
     "steps": [
@@ -18010,10 +18104,12 @@
     "structure": "verb dictionary form + べくもない",
     "structure_fr": "verbe forme du dictionnaire + べくもない",
     "structure_es": "verbo en forma de diccionario + べくもない",
+    "structure_id": "kata kerja bentuk kamus + べくもない",
     "meaning": {
       "en": "there is no possibility of it whatever",
       "fr": "aucune possibilité de",
-      "es": "no hay posibilidad alguna de ello"
+      "es": "no hay posibilidad alguna de ello",
+      "id": "sama sekali tidak mungkin"
     },
     "register": "written",
     "steps": [
@@ -18393,10 +18489,12 @@
     "structure": "verb dictionary form + すべがない",
     "structure_fr": "verbe forme du dictionnaire + すべがない",
     "structure_es": "verbo en forma de diccionario + すべがない",
+    "structure_id": "kata kerja bentuk kamus + すべがない",
     "meaning": {
       "en": "no method remains open",
       "fr": "n'avoir aucun moyen de",
-      "es": "no queda ningún medio"
+      "es": "no queda ningún medio",
+      "id": "tidak ada cara yang tersisa"
     },
     "register": "written",
     "steps": [
@@ -18776,10 +18874,12 @@
     "structure": "plain form / noun + の + こととて",
     "structure_fr": "forme neutre / nom + の + こととて",
     "structure_es": "forma llana / sustantivo + の + こととて",
+    "structure_id": "bentuk biasa / kata benda + の + こととて",
     "meaning": {
       "en": "seeing that it is so, formally offered",
       "fr": "étant donné que (excuse formelle)",
-      "es": "dado que es así, como disculpa formal"
+      "es": "dado que es así, como disculpa formal",
+      "id": "berhubung demikian, sebagai alasan formal"
     },
     "register": "formal",
     "steps": [
@@ -19155,10 +19255,12 @@
     "structure": "plain form / noun + とあって",
     "structure_fr": "forme neutre / nom + とあって",
     "structure_es": "forma llana / sustantivo + とあって",
+    "structure_id": "bentuk biasa / kata benda + とあって",
     "meaning": {
       "en": "the situation being what it is",
       "fr": "vu que, la situation étant",
-      "es": "dadas las circunstancias"
+      "es": "dadas las circunstancias",
+      "id": "mengingat keadaannya demikian"
     },
     "register": "written",
     "steps": [
@@ -19501,10 +19603,12 @@
     "structure": "plain form / noun + とあれば",
     "structure_fr": "forme neutre / nom + とあれば",
     "structure_es": "forma llana / sustantivo + とあれば",
+    "structure_id": "bentuk biasa / kata benda + とあれば",
     "meaning": {
       "en": "if that is truly the case, then",
       "fr": "s'il s'agit de, si vraiment",
-      "es": "si de verdad es así, entonces"
+      "es": "si de verdad es así, entonces",
+      "id": "jika memang demikian, maka"
     },
     "register": "written",
     "steps": [
@@ -19847,10 +19951,12 @@
     "structure": "noun + たるもの",
     "structure_fr": "nom + たるもの",
     "structure_es": "sustantivo + たるもの",
+    "structure_id": "kata benda + たるもの",
     "meaning": {
       "en": "one who holds that position ought to",
       "fr": "quiconque occupe cette position doit",
-      "es": "quien ocupa ese puesto debe"
+      "es": "quien ocupa ese puesto debe",
+      "id": "orang yang memegang kedudukan itu semestinya"
     },
     "register": "formal",
     "steps": [
@@ -20193,10 +20299,12 @@
     "structure": "noun + にして",
     "structure_fr": "nom + にして",
     "structure_es": "sustantivo + にして",
+    "structure_id": "kata benda + にして",
     "meaning": {
       "en": "only at that stage; also: being that very thing",
       "fr": "seulement à ce stade ; en étant",
-      "es": "solo al llegar a ese punto; también: siendo eso mismo"
+      "es": "solo al llegar a ese punto; también: siendo eso mismo",
+      "id": "baru pada tahap itu; juga: sekaligus merupakan hal itu"
     },
     "register": "written",
     "steps": [
@@ -20570,10 +20678,12 @@
     "structure": "noun + にあって",
     "structure_fr": "nom + にあって",
     "structure_es": "sustantivo + にあって",
+    "structure_id": "kata benda + にあって",
     "meaning": {
       "en": "placed in that situation",
       "fr": "placé dans (une situation)",
-      "es": "estando en esa situación"
+      "es": "estando en esa situación",
+      "id": "berada dalam situasi itu"
     },
     "register": "formal",
     "steps": [
@@ -20921,10 +21031,12 @@
     "structure": "noun + をよそに",
     "structure_fr": "nom + をよそに",
     "structure_es": "sustantivo + をよそに",
+    "structure_id": "kata benda + をよそに",
     "meaning": {
       "en": "paying it no regard",
       "fr": "sans se soucier de",
-      "es": "sin hacerle ningún caso"
+      "es": "sin hacerle ningún caso",
+      "id": "tanpa menghiraukannya"
     },
     "register": "written",
     "steps": [
@@ -21272,10 +21384,12 @@
     "structure": "noun + かたがた",
     "structure_fr": "nom + かたがた",
     "structure_es": "sustantivo + かたがた",
+    "structure_id": "kata benda + かたがた",
     "meaning": {
       "en": "and taking the occasion to, formally",
       "fr": "et par la même occasion (formel)",
-      "es": "y aprovechando la ocasión para, formalmente"
+      "es": "y aprovechando la ocasión para, formalmente",
+      "id": "dan sekaligus untuk, secara formal"
     },
     "register": "formal",
     "steps": [
@@ -21641,10 +21755,12 @@
     "structure": "plain form + しまつだ",
     "structure_fr": "forme neutre + しまつだ",
     "structure_es": "forma llana + しまつだ",
+    "structure_id": "bentuk biasa + しまつだ",
     "meaning": {
       "en": "and it came to this sorry pass",
       "fr": "et voilà où on en est arrivé",
-      "es": "y se llegó a este triste extremo"
+      "es": "y se llegó a este triste extremo",
+      "id": "dan akhirnya sampai separah ini"
     },
     "register": "casual",
     "steps": [
@@ -21996,10 +22112,12 @@
     "structure": "verb ない-stem + ずにはおかない",
     "structure_fr": "radical en ない + ずにはおかない",
     "structure_es": "raíz ない + ずにはおかない",
+    "structure_id": "batang ない + ずにはおかない",
     "meaning": {
       "en": "it cannot but bring that about",
       "fr": "ne pas pouvoir manquer de provoquer",
-      "es": "no puede sino provocarlo"
+      "es": "no puede sino provocarlo",
+      "id": "tak bisa tidak menimbulkan hal itu"
     },
     "register": "written",
     "steps": [
@@ -22365,10 +22483,12 @@
     "structure": "verb て-form + はばからない",
     "structure_fr": "verbe forme en て + はばからない",
     "structure_es": "verbo en forma て + はばからない",
+    "structure_id": "kata kerja bentuk て + はばからない",
     "meaning": {
       "en": "says or does it without a qualm",
       "fr": "sans la moindre gêne",
-      "es": "lo dice o lo hace sin el menor reparo"
+      "es": "lo dice o lo hace sin el menor reparo",
+      "id": "mengatakan atau melakukannya tanpa sungkan"
     },
     "register": "written",
     "steps": [
@@ -22692,10 +22812,12 @@
     "structure": "noun + なりに",
     "structure_fr": "nom + なりに",
     "structure_es": "sustantivo + なりに",
+    "structure_id": "kata benda + なりに",
     "meaning": {
       "en": "in the way proper to what it is",
       "fr": "à sa manière, dans la mesure de ses moyens",
-      "es": "a la manera propia de lo que es"
+      "es": "a la manera propia de lo que es",
+      "id": "dengan cara yang sesuai dengan dirinya"
     },
     "register": "neutral",
     "steps": [
@@ -23165,10 +23287,12 @@
     "structure": "noun / verb stem + ながらに",
     "structure_fr": "nom / radical verbal + ながらに",
     "structure_es": "sustantivo / raíz verbal + ながらに",
+    "structure_id": "kata benda / batang kata kerja + ながらに",
     "meaning": {
       "en": "staying just as it was",
       "fr": "tout en, tel quel",
-      "es": "tal como estaba, sin cambiar"
+      "es": "tal como estaba, sin cambiar",
+      "id": "tetap seperti keadaan semula"
     },
     "register": "written",
     "steps": [
@@ -23630,10 +23754,12 @@
     "structure": "noun / verb dictionary form + にかたくない",
     "structure_fr": "nom / verbe forme du dictionnaire + にかたくない",
     "structure_es": "sustantivo / verbo en forma de diccionario + にかたくない",
+    "structure_id": "kata benda / kata kerja bentuk kamus + にかたくない",
     "meaning": {
       "en": "one can readily do so",
       "fr": "il n'est pas difficile de",
-      "es": "se puede hacer fácilmente"
+      "es": "se puede hacer fácilmente",
+      "id": "dapat dengan mudah dilakukan"
     },
     "register": "written",
     "steps": [
@@ -24005,10 +24131,12 @@
     "structure": "noun + にとどまらず",
     "structure_fr": "nom + にとどまらず",
     "structure_es": "sustantivo + にとどまらず",
+    "structure_id": "kata benda + にとどまらず",
     "meaning": {
       "en": "and it does not stop there",
       "fr": "ne pas s'arrêter à, au-delà de",
-      "es": "y no se queda ahí"
+      "es": "y no se queda ahí",
+      "id": "dan tidak berhenti sampai di situ"
     },
     "register": "formal",
     "steps": [
@@ -24437,10 +24565,12 @@
     "structure": "noun / plain form + の + にひきかえ",
     "structure_fr": "nom / forme neutre + の + にひきかえ",
     "structure_es": "sustantivo / forma llana + の + にひきかえ",
+    "structure_id": "kata benda / bentuk biasa + の + にひきかえ",
     "meaning": {
       "en": "set against that, by contrast",
       "fr": "à l'inverse de, par contraste avec",
-      "es": "frente a eso, en cambio"
+      "es": "frente a eso, en cambio",
+      "id": "dibandingkan dengan itu, sebaliknya"
     },
     "register": "written",
     "steps": [
@@ -24853,10 +24983,12 @@
     "structure": "plain form + のなんのって",
     "structure_fr": "forme neutre + のなんのって",
     "structure_es": "forma llana + のなんのって",
+    "structure_id": "bentuk biasa + のなんのって",
     "meaning": {
       "en": "to an absurd degree",
       "fr": "à un point incroyable",
-      "es": "hasta un punto absurdo"
+      "es": "hasta un punto absurdo",
+      "id": "sampai tak masuk akal"
     },
     "register": "casual",
     "steps": [
@@ -25265,10 +25397,12 @@
     "structure": "noun + はさておき",
     "structure_fr": "nom + はさておき",
     "structure_es": "sustantivo + はさておき",
+    "structure_id": "kata benda + はさておき",
     "meaning": {
       "en": "setting that aside for now",
       "fr": "laissant de côté",
-      "es": "dejando eso de lado por ahora"
+      "es": "dejando eso de lado por ahora",
+      "id": "mengesampingkan itu untuk sementara"
     },
     "register": "neutral",
     "steps": [
@@ -25671,10 +25805,12 @@
     "structure": "verb dictionary form + までのことだ",
     "structure_fr": "verbe forme du dictionnaire + までのことだ",
     "structure_es": "verbo en forma de diccionario + までのことだ",
+    "structure_id": "kata kerja bentuk kamus + までのことだ",
     "meaning": {
       "en": "then that is all there is to do",
       "fr": "il n'y a qu'à, on n'aura qu'à",
-      "es": "entonces no queda más que hacerlo"
+      "es": "entonces no queda más que hacerlo",
+      "id": "maka tinggal melakukan itu saja"
     },
     "register": "neutral",
     "steps": [
@@ -26132,10 +26268,12 @@
     "structure_reading": "emotion noun + をきんじえない",
     "structure_fr": "nom d'émotion + を禁じ得ない",
     "structure_es": "sustantivo de emoción + を禁じ得ない",
+    "structure_id": "kata benda perasaan + を禁じ得ない",
     "meaning": {
       "en": "one cannot hold the feeling back",
       "fr": "ne pas pouvoir réprimer (un sentiment)",
-      "es": "no poder contener el sentimiento"
+      "es": "no poder contener el sentimiento",
+      "id": "tidak dapat menahan perasaan itu"
     },
     "register": "formal",
     "steps": [
@@ -26552,10 +26690,12 @@
     "structure": "verb ば-form + こそ",
     "structure_fr": "verbe forme en ば + こそ",
     "structure_es": "verbo en forma ば + こそ",
+    "structure_id": "kata kerja bentuk ば + こそ",
     "meaning": {
       "en": "it is only because of that",
       "fr": "c'est précisément parce que",
-      "es": "es solo por eso"
+      "es": "es solo por eso",
+      "id": "justru karena itulah"
     },
     "register": "written",
     "steps": [
@@ -26966,10 +27106,12 @@
     "structure": "verb volitional form + が + verb dictionary form + まいが",
     "structure_fr": "verbe forme volitive + が + verbe forme du dictionnaire + まいが",
     "structure_es": "verbo en forma volitiva + が + verbo en forma de diccionario + まいが",
+    "structure_id": "kata kerja bentuk ajakan + が + kata kerja bentuk kamus + まいが",
     "meaning": {
       "en": "whether it happens or not",
       "fr": "que... ou non",
-      "es": "tanto si ocurre como si no"
+      "es": "tanto si ocurre como si no",
+      "id": "entah terjadi atau tidak"
     },
     "register": "neutral",
     "steps": [
@@ -27380,10 +27522,12 @@
     "structure": "noun (+ particle) + すら",
     "structure_fr": "nom (+ particule) + すら",
     "structure_es": "sustantivo (+ partícula) + すら",
+    "structure_id": "kata benda (+ partikel) + すら",
     "meaning": {
       "en": "even (an extreme example)",
       "fr": "même (exemple extrême)",
-      "es": "incluso (un ejemplo extremo)"
+      "es": "incluso (un ejemplo extremo)",
+      "id": "bahkan (contoh ekstrem)"
     },
     "register": "written",
     "steps": [
@@ -27790,10 +27934,12 @@
     "structure": "noun + といい + noun + といい",
     "structure_fr": "nom + といい + nom + といい",
     "structure_es": "sustantivo + といい + sustantivo + といい",
+    "structure_id": "kata benda + といい + kata benda + といい",
     "meaning": {
       "en": "both... and... (evaluation)",
       "fr": "que ce soit... ou..., aussi bien... que",
-      "es": "tanto… como… (al valorar)"
+      "es": "tanto… como… (al valorar)",
+      "id": "baik... maupun... (penilaian)"
     },
     "register": "neutral",
     "steps": [
@@ -28177,10 +28323,12 @@
     "structure": "noun + といわず + noun + といわず",
     "structure_fr": "nom + といわず + nom + といわず",
     "structure_es": "sustantivo + といわず + sustantivo + といわず",
+    "structure_id": "kata benda + といわず + kata benda + といわず",
     "meaning": {
       "en": "not only... but everywhere, whether... or...",
       "fr": "que ce soit... ou..., partout sans distinction",
-      "es": "no solo… sino en todas partes, ya sea… o…"
+      "es": "no solo… sino en todas partes, ya sea… o…",
+      "id": "tak hanya... tetapi di mana-mana, entah... atau..."
     },
     "register": "written",
     "steps": [
@@ -28557,10 +28705,12 @@
     "structure": "noun / plain form + にしたところで",
     "structure_fr": "nom / forme neutre + にしたところで",
     "structure_es": "sustantivo / forma llana + にしたところで",
+    "structure_id": "kata benda / bentuk biasa + にしたところで",
     "meaning": {
       "en": "even (someone), even if (something)",
       "fr": "même (pour quelqu'un), même en admettant",
-      "es": "incluso (alguien), aun si (algo)"
+      "es": "incluso (alguien), aun si (algo)",
+      "id": "bahkan (seseorang), sekalipun (sesuatu)"
     },
     "register": "neutral",
     "steps": [
@@ -28985,10 +29135,12 @@
     "structure": "verb ない-form + ものでもない",
     "structure_fr": "verbe forme en ない + ものでもない",
     "structure_es": "verbo en forma ない + ものでもない",
+    "structure_id": "kata kerja bentuk ない + ものでもない",
     "meaning": {
       "en": "it's not impossible, might (reluctantly)",
       "fr": "ce n'est pas exclu, il n'est pas impossible que",
-      "es": "no es imposible, podría (a regañadientes)"
+      "es": "no es imposible, podría (a regañadientes)",
+      "id": "bukan tidak mungkin, bisa saja (dengan enggan)"
     },
     "register": "neutral",
     "steps": [
@@ -29394,10 +29546,12 @@
     "structure": "verb ない-stem + ずにはすまない／ないではすまない",
     "structure_fr": "radical en ない + ずにはすまない／ないではすまない",
     "structure_es": "raíz ない + ずにはすまない／ないではすまない",
+    "structure_id": "batang ない + ずにはすまない／ないではすまない",
     "meaning": {
       "en": "can't get away without, will have to",
       "fr": "ne pas pouvoir se dispenser de, devoir absolument",
-      "es": "no poder librarse de, tener que"
+      "es": "no poder librarse de, tener que",
+      "id": "tak bisa lolos tanpa, mau tak mau harus"
     },
     "register": "written",
     "steps": [
@@ -29871,10 +30025,12 @@
     "structure": "noun / verb dictionary form + なり + ... + なり",
     "structure_fr": "nom / verbe forme du dictionnaire + なり + ... + なり",
     "structure_es": "sustantivo / verbo en forma de diccionario + なり + ... + なり",
+    "structure_id": "kata benda / kata kerja bentuk kamus + なり + ... + なり",
     "meaning": {
       "en": "either... or... (for instance)",
       "fr": "soit... soit..., ou bien... ou bien",
-      "es": "o… o… (por ejemplo)"
+      "es": "o… o… (por ejemplo)",
+      "id": "entah... atau... (misalnya)"
     },
     "register": "neutral",
     "steps": [
@@ -30293,10 +30449,12 @@
     "structure": "noun + にかかわる",
     "structure_fr": "nom + にかかわる",
     "structure_es": "sustantivo + にかかわる",
+    "structure_id": "kata benda + にかかわる",
     "meaning": {
       "en": "concerning, affecting (something vital)",
       "fr": "qui touche à, qui engage (quelque chose de vital)",
-      "es": "que concierne o afecta a (algo vital)"
+      "es": "que concierne o afecta a (algo vital)",
+      "id": "menyangkut, memengaruhi (hal yang vital)"
     },
     "register": "formal",
     "steps": [
@@ -30668,10 +30826,12 @@
     "structure_reading": "noun + にそくして／にそくした",
     "structure_fr": "nom + に即して／に即した",
     "structure_es": "sustantivo + に即して／に即した",
+    "structure_id": "kata benda + に即して／に即した",
     "meaning": {
       "en": "in line with, in accordance with (facts, rules)",
       "fr": "conformément à, en fonction de (faits, règles)",
-      "es": "conforme a, de acuerdo con (hechos, normas)"
+      "es": "conforme a, de acuerdo con (hechos, normas)",
+      "id": "selaras dengan, sesuai dengan (fakta, aturan)"
     },
     "register": "formal",
     "steps": [
@@ -31077,10 +31237,12 @@
     "structure_reading": "verb dictionary form / noun + にたる",
     "structure_fr": "verbe forme du dictionnaire / nom + に足る",
     "structure_es": "verbo en forma de diccionario / sustantivo + に足る",
+    "structure_id": "kata kerja bentuk kamus / kata benda + に足る",
     "meaning": {
       "en": "worthy of, enough to",
       "fr": "digne de, qui mérite",
-      "es": "digno de, suficiente para"
+      "es": "digno de, suficiente para",
+      "id": "layak, cukup untuk"
     },
     "register": "formal",
     "steps": [
@@ -31494,10 +31656,12 @@
     "structure": "noun + にもまして",
     "structure_fr": "nom + にもまして",
     "structure_es": "sustantivo + にもまして",
+    "structure_id": "kata benda + にもまして",
     "meaning": {
       "en": "even more than, above all",
       "fr": "plus encore que, davantage que",
-      "es": "aún más que, por encima de"
+      "es": "aún más que, por encima de",
+      "id": "bahkan lebih dari, di atas segalanya"
     },
     "register": "written",
     "steps": [
@@ -31861,10 +32025,12 @@
     "structure_reading": "noun + のいたり",
     "structure_fr": "nom + の至り",
     "structure_es": "sustantivo + の至り",
+    "structure_id": "kata benda + の至り",
     "meaning": {
       "en": "the height of (a feeling), utterly (formal)",
       "fr": "le comble de, extrêmement (formel)",
-      "es": "el colmo de (un sentimiento), sumamente (formal)"
+      "es": "el colmo de (un sentimiento), sumamente (formal)",
+      "id": "puncak (suatu perasaan), teramat (formal)"
     },
     "register": "formal",
     "steps": [
@@ -32240,10 +32406,12 @@
     "structure": "verb ば-form + それまでだ",
     "structure_fr": "verbe forme en ば + それまでだ",
     "structure_es": "verbo en forma ば + それまでだ",
+    "structure_id": "kata kerja bentuk ば + それまでだ",
     "meaning": {
       "en": "if..., then it's all over",
       "fr": "si..., c'en est fini",
-      "es": "si…, se acabó todo"
+      "es": "si…, se acabó todo",
+      "id": "jika..., maka habislah semuanya"
     },
     "register": "neutral",
     "steps": [
@@ -32652,10 +32820,12 @@
     "structure_reading": "noun + ひとつ + verb ない-form",
     "structure_fr": "nom + 一つ + verbe forme en ない",
     "structure_es": "sustantivo + 一つ + verbo en forma ない",
+    "structure_id": "kata benda + 一つ + kata kerja bentuk ない",
     "meaning": {
       "en": "not even a single",
       "fr": "pas même un seul",
-      "es": "ni un solo…, ni siquiera uno"
+      "es": "ni un solo…, ni siquiera uno",
+      "id": "bahkan satu pun tidak"
     },
     "register": "neutral",
     "steps": [
@@ -33015,10 +33185,12 @@
     "structure": "verb dictionary form + までもない",
     "structure_fr": "verbe forme du dictionnaire + までもない",
     "structure_es": "verbo en forma de diccionario + までもない",
+    "structure_id": "kata kerja bentuk kamus + までもない",
     "meaning": {
       "en": "no need to, goes without",
       "fr": "inutile de, pas besoin de",
-      "es": "no hace falta, está de más"
+      "es": "no hace falta, está de más",
+      "id": "tidak perlu, sudah jelas"
     },
     "register": "neutral",
     "steps": [
@@ -33425,10 +33597,12 @@
     "structure": "plain form + ものを",
     "structure_fr": "forme neutre + ものを",
     "structure_es": "forma llana + ものを",
+    "structure_id": "bentuk biasa + ものを",
     "meaning": {
       "en": "if only..., (and yet)",
       "fr": "si seulement..., et pourtant",
-      "es": "si tan solo…, (y sin embargo)"
+      "es": "si tan solo…, (y sin embargo)",
+      "id": "andai saja..., (namun)"
     },
     "register": "written",
     "steps": [
@@ -33851,10 +34025,12 @@
     "structure_reading": "noun (a time) + をかぎりに",
     "structure_fr": "nom (un moment) + を限りに",
     "structure_es": "sustantivo (un momento) + を限りに",
+    "structure_id": "kata benda (waktu) + を限りに",
     "meaning": {
       "en": "as of, from... on (the last time)",
       "fr": "à compter de, (pour la dernière fois) à partir de",
-      "es": "a partir de, desde… (por última vez)"
+      "es": "a partir de, desde… (por última vez)",
+      "id": "terhitung, mulai... (terakhir kalinya)"
     },
     "register": "formal",
     "steps": [
@@ -34239,10 +34415,12 @@
     "structure_reading": "noun + をふまえて",
     "structure_fr": "nom + を踏まえて",
     "structure_es": "sustantivo + を踏まえて",
+    "structure_id": "kata benda + を踏まえて",
     "meaning": {
       "en": "on the basis of, taking into account",
       "fr": "en s'appuyant sur, compte tenu de",
-      "es": "sobre la base de, teniendo en cuenta"
+      "es": "sobre la base de, teniendo en cuenta",
+      "id": "berdasarkan, dengan mempertimbangkan"
     },
     "register": "formal",
     "steps": [
@@ -34620,10 +34798,12 @@
     "structure": "verb て-form + もさしつかえない",
     "structure_fr": "verbe forme en て + もさしつかえない",
     "structure_es": "verbo en forma て + もさしつかえない",
+    "structure_id": "kata kerja bentuk て + もさしつかえない",
     "meaning": {
       "en": "it is all right to, no harm in",
       "fr": "il n'y a pas d'inconvénient à, on peut sans problème",
-      "es": "no hay inconveniente en, no pasa nada si"
+      "es": "no hay inconveniente en, no pasa nada si",
+      "id": "boleh saja, tidak ada salahnya"
     },
     "register": "formal",
     "steps": [
@@ -34982,10 +35162,12 @@
     "structure": "noun (quantity) + といったところだ",
     "structure_fr": "nom (quantité) + といったところだ",
     "structure_es": "sustantivo (cantidad) + といったところだ",
+    "structure_id": "kata benda (jumlah) + といったところだ",
     "meaning": {
       "en": "roughly, about (a modest estimate)",
       "fr": "environ, à peu près (estimation modeste)",
-      "es": "más o menos, unos (un cálculo modesto)"
+      "es": "más o menos, unos (un cálculo modesto)",
+      "id": "kira-kira, sekitar (taksiran yang rendah)"
     },
     "register": "neutral",
     "steps": [
@@ -35347,10 +35529,12 @@
     "structure_reading": "plain form + といってもかごんではない",
     "structure_fr": "forme neutre + といっても過言ではない",
     "structure_es": "forma llana + といっても過言ではない",
+    "structure_id": "bentuk biasa + といっても過言ではない",
     "meaning": {
       "en": "it is no exaggeration to say",
       "fr": "il n'est pas exagéré de dire que",
-      "es": "no es exagerado decir"
+      "es": "no es exagerado decir",
+      "id": "tidak berlebihan jika dikatakan"
     },
     "register": "formal",
     "steps": [
@@ -35693,10 +35877,12 @@
     "structure": "plain form + とは",
     "structure_fr": "forme neutre + とは",
     "structure_es": "forma llana + とは",
+    "structure_id": "bentuk biasa + とは",
     "meaning": {
       "en": "to think that... (surprise)",
       "fr": "dire que..., (surprise) que...",
-      "es": "¡y pensar que…! (sorpresa)"
+      "es": "¡y pensar que…! (sorpresa)",
+      "id": "tak disangka... (rasa terkejut)"
     },
     "register": "neutral",
     "steps": [
@@ -36103,10 +36289,12 @@
     "structure": "verb dictionary form / passive + ままに",
     "structure_fr": "verbe forme du dictionnaire / passif + ままに",
     "structure_es": "verbo en forma de diccionario / pasivo + ままに",
+    "structure_id": "kata kerja bentuk kamus / pasif + ままに",
     "meaning": {
       "en": "as (told), at the mercy of",
       "fr": "comme (on le dit), au gré de",
-      "es": "tal como (se le dice), a merced de"
+      "es": "tal como (se le dice), a merced de",
+      "id": "sesuai (yang disuruh), pasrah pada"
     },
     "register": "written",
     "steps": [
@@ -36531,10 +36719,12 @@
     "structure_reading": "plain form + とおもいきや",
     "structure_fr": "forme neutre + と思いきや",
     "structure_es": "forma llana + と思いきや",
+    "structure_id": "bentuk biasa + と思いきや",
     "meaning": {
       "en": "I thought..., but contrary to expectation",
       "fr": "je croyais que..., mais en fait",
-      "es": "creía que…, pero contra lo esperado"
+      "es": "creía que…, pero contra lo esperado",
+      "id": "saya kira..., tetapi di luar dugaan"
     },
     "register": "written",
     "steps": [
@@ -36915,10 +37105,12 @@
     "structure": "verb volitional + にも + verb potential ない-form",
     "structure_fr": "verbe forme volitive + にも + verbe forme potentielle en ない",
     "structure_es": "verbo en forma volitiva + にも + verbo potencial en forma ない",
+    "structure_id": "kata kerja bentuk ajakan + にも + kata kerja potensial bentuk ない",
     "meaning": {
       "en": "even if I try to, I can't",
       "fr": "même en voulant..., impossible de",
-      "es": "aunque quiera, no puedo"
+      "es": "aunque quiera, no puedo",
+      "id": "walau ingin, tetap tak bisa"
     },
     "register": "neutral",
     "steps": [
@@ -37332,10 +37524,12 @@
     "structure": "verb volitional + ものなら",
     "structure_fr": "verbe forme volitive + ものなら",
     "structure_es": "verbo en forma volitiva + ものなら",
+    "structure_id": "kata kerja bentuk ajakan + ものなら",
     "meaning": {
       "en": "if one were to (dare)..., (dire consequence)",
       "fr": "si jamais on osait..., (conséquence grave)",
-      "es": "si uno se atreviera a…, (consecuencia grave)"
+      "es": "si uno se atreviera a…, (consecuencia grave)",
+      "id": "jika sampai (berani)..., (akibat yang gawat)"
     },
     "register": "neutral",
     "steps": [
@@ -37660,10 +37854,12 @@
     "structure": "noun + でなくてなんだろう",
     "structure_fr": "nom + でなくてなんだろう",
     "structure_es": "sustantivo + でなくてなんだろう",
+    "structure_id": "kata benda + でなくてなんだろう",
     "meaning": {
       "en": "if this is not..., what is?",
       "fr": "si ce n'est pas..., qu'est-ce que c'est ?",
-      "es": "si esto no es…, ¿qué es?"
+      "es": "si esto no es…, ¿qué es?",
+      "id": "kalau ini bukan..., lalu apa?"
     },
     "register": "written",
     "steps": [
@@ -37981,10 +38177,12 @@
     "structure": "noun + ではあるまいし／じゃあるまいし",
     "structure_fr": "nom + ではあるまいし／じゃあるまいし",
     "structure_es": "sustantivo + ではあるまいし／じゃあるまいし",
+    "structure_id": "kata benda + ではあるまいし／じゃあるまいし",
     "meaning": {
       "en": "it's not as if (someone/something were)",
       "fr": "ce n'est pas comme si (c'était)",
-      "es": "ni que (alguien/algo fuera)"
+      "es": "ni que (alguien/algo fuera)",
+      "id": "toh bukan (seseorang/sesuatu itu)"
     },
     "register": "casual",
     "steps": [
@@ -38401,10 +38599,12 @@
     "structure": "verb て-form + からというもの",
     "structure_fr": "verbe forme en て + からというもの",
     "structure_es": "verbo en forma て + からというもの",
+    "structure_id": "kata kerja bentuk て + からというもの",
     "meaning": {
       "en": "ever since (a change began)",
       "fr": "depuis que (un changement s'est installé)",
-      "es": "desde que (empezó un cambio)"
+      "es": "desde que (empezó un cambio)",
+      "id": "semenjak (suatu perubahan dimulai)"
     },
     "register": "written",
     "steps": [
@@ -38817,10 +39017,12 @@
     "structure_reading": "noun + とあいまって",
     "structure_fr": "nom + と相まって",
     "structure_es": "sustantivo + と相まって",
+    "structure_id": "kata benda + と相まって",
     "meaning": {
       "en": "combined with, coupled with",
       "fr": "conjugué à, allié à",
-      "es": "combinado con, unido a"
+      "es": "combinado con, unido a",
+      "id": "berpadu dengan, ditambah dengan"
     },
     "register": "formal",
     "steps": [
@@ -39208,10 +39410,12 @@
     "structure": "noun + ときたら",
     "structure_fr": "nom + ときたら",
     "structure_es": "sustantivo + ときたら",
+    "structure_id": "kata benda + ときたら",
     "meaning": {
       "en": "when it comes to (someone), (criticism)",
       "fr": "quant à (quelqu'un), (reproche)",
-      "es": "en cuanto a (alguien), (crítica)"
+      "es": "en cuanto a (alguien), (crítica)",
+      "id": "kalau soal (seseorang), (kritik)"
     },
     "register": "casual",
     "steps": [
@@ -39554,10 +39758,12 @@
     "structure": "verb ない-form + ものか／ものだろうか (〜ないものか)",
     "structure_fr": "verbe forme en ない + ものか／ものだろうか (〜ないものか)",
     "structure_es": "verbo en forma ない + ものか／ものだろうか (〜ないものか)",
+    "structure_id": "kata kerja bentuk ない + ものか／ものだろうか (〜ないものか)",
     "meaning": {
       "en": "isn't there some way to...? (a wish)",
       "fr": "n'y aurait-il pas moyen de... ? (souhait)",
-      "es": "¿no habrá alguna forma de…? (un deseo)"
+      "es": "¿no habrá alguna forma de…? (un deseo)",
+      "id": "tidak adakah cara untuk...? (harapan)"
     },
     "register": "neutral",
     "steps": [
@@ -39909,10 +40115,12 @@
     "structure": "noun / plain form + の + をいいことに",
     "structure_fr": "nom / forme neutre + の + をいいことに",
     "structure_es": "sustantivo / forma llana + の + をいいことに",
+    "structure_id": "kata benda / bentuk biasa + の + をいいことに",
     "meaning": {
       "en": "taking advantage of (something)",
       "fr": "profitant de (quelque chose), sous prétexte que",
-      "es": "aprovechándose de (algo)"
+      "es": "aprovechándose de (algo)",
+      "id": "memanfaatkan (sesuatu)"
     },
     "register": "written",
     "steps": [
@@ -40239,10 +40447,12 @@
     "structure_reading": "verb た-form + がさいご／らさいご (〜たがさいご／〜たらさいご)",
     "structure_fr": "verbe forme en た + が最後／ら最後 (〜たが最後／〜たら最後)",
     "structure_es": "verbo en forma た + が最後／ら最後 (〜たが最後／〜たら最後)",
+    "structure_id": "kata kerja bentuk た + が最後／ら最後 (〜たが最後／〜たら最後)",
     "meaning": {
       "en": "once (something happens), there's no going back",
       "fr": "une fois que..., c'est irrémédiable",
-      "es": "una vez que (algo pasa), no hay vuelta atrás"
+      "es": "una vez que (algo pasa), no hay vuelta atrás",
+      "id": "begitu (sesuatu terjadi), tak ada jalan kembali"
     },
     "register": "casual",
     "steps": [
@@ -40614,10 +40824,12 @@
     "structure_reading": "verb た-form / noun + の + てまえ",
     "structure_fr": "verbe forme en た / nom + の + 手前",
     "structure_es": "verbo en forma た / sustantivo + の + 手前",
+    "structure_id": "kata kerja bentuk た / kata benda + の + 手前",
     "meaning": {
       "en": "given one's position (I can't back out)",
       "fr": "vu ma position, par égard pour",
-      "es": "dada la propia posición (no puedo echarme atrás)"
+      "es": "dada la propia posición (no puedo echarme atrás)",
+      "id": "mengingat posisi sendiri (tak bisa mundur)"
     },
     "register": "neutral",
     "steps": [
@@ -41001,10 +41213,12 @@
     "structure_reading": "plain form / noun + にこしたことはない",
     "structure_fr": "forme neutre / nom + に越したことはない",
     "structure_es": "forma llana / sustantivo + に越したことはない",
+    "structure_id": "bentuk biasa / kata benda + に越したことはない",
     "meaning": {
       "en": "nothing beats, it's best to",
       "fr": "rien ne vaut, le mieux est de",
-      "es": "nada mejor que, lo mejor es"
+      "es": "nada mejor que, lo mejor es",
+      "id": "tak ada yang lebih baik, sebaiknya"
     },
     "register": "neutral",
     "steps": [
@@ -41372,10 +41586,12 @@
     "structure_reading": "verb ない-form + ともかぎらない",
     "structure_fr": "verbe forme en ない + とも限らない",
     "structure_es": "verbo en forma ない + とも限らない",
+    "structure_id": "kata kerja bentuk ない + とも限らない",
     "meaning": {
       "en": "it's not impossible that, might just",
       "fr": "il n'est pas exclu que, on ne sait jamais",
-      "es": "no es imposible que, podría llegar a"
+      "es": "no es imposible que, podría llegar a",
+      "id": "tidak tertutup kemungkinan, bisa saja"
     },
     "register": "neutral",
     "steps": [
@@ -41745,10 +41961,12 @@
     "structure": "verb dictionary form + にはあたらない",
     "structure_fr": "verbe forme du dictionnaire + にはあたらない",
     "structure_es": "verbo en forma de diccionario + にはあたらない",
+    "structure_id": "kata kerja bentuk kamus + にはあたらない",
     "meaning": {
       "en": "there is no need to (be surprised etc.)",
       "fr": "il n'y a pas lieu de (s'étonner etc.)",
-      "es": "no hay por qué (sorprenderse, etc.)"
+      "es": "no hay por qué (sorprenderse, etc.)",
+      "id": "tidak perlu (terkejut, dsb.)"
     },
     "register": "written",
     "steps": [
@@ -42093,10 +42311,12 @@
     "structure_reading": "verb dictionary form / noun + にはおよばない",
     "structure_fr": "verbe forme du dictionnaire / nom + には及ばない",
     "structure_es": "verbo en forma de diccionario / sustantivo + には及ばない",
+    "structure_id": "kata kerja bentuk kamus / kata benda + には及ばない",
     "meaning": {
       "en": "no need to; not as good as",
       "fr": "inutile de ; ne pas égaler",
-      "es": "no hace falta; no está a la altura de"
+      "es": "no hace falta; no está a la altura de",
+      "id": "tidak perlu; tidak sebaik"
     },
     "register": "polite",
     "steps": [
@@ -42466,10 +42686,12 @@
     "structure": "noun / verb plain form + ではすまない／じゃすまない",
     "structure_fr": "nom / verbe forme neutre + ではすまない／じゃすまない",
     "structure_es": "sustantivo / verbo en forma llana + ではすまない／じゃすまない",
+    "structure_id": "kata benda / kata kerja bentuk biasa + ではすまない／じゃすまない",
     "meaning": {
       "en": "won't get away with just, will not end with",
       "fr": "ne pas s'en tirer avec seulement",
-      "es": "no basta con solo, no se quedará en"
+      "es": "no basta con solo, no se quedará en",
+      "id": "tak cukup hanya dengan, tidak akan selesai begitu saja"
     },
     "register": "neutral",
     "steps": [
@@ -42852,10 +43074,12 @@
     "structure": "verb ない-stem + ずして",
     "structure_fr": "radical en ない + ずして",
     "structure_es": "raíz ない + ずして",
+    "structure_id": "batang ない + ずして",
     "meaning": {
       "en": "without doing (literary)",
       "fr": "sans (faire), (littéraire)",
-      "es": "sin hacer (literario)"
+      "es": "sin hacer (literario)",
+      "id": "tanpa melakukan (sastrawi)"
     },
     "register": "written",
     "steps": [
@@ -43329,10 +43553,12 @@
     "structure": "noun / plain form + ならまだしも",
     "structure_fr": "nom / forme neutre + ならまだしも",
     "structure_es": "sustantivo / forma llana + ならまだしも",
+    "structure_id": "kata benda / bentuk biasa + ならまだしも",
     "meaning": {
       "en": "if it were... that would be one thing, but",
       "fr": "passe encore si..., mais",
-      "es": "si fuera…, sería otra cosa, pero"
+      "es": "si fuera…, sería otra cosa, pero",
+      "id": "kalau... masih bisa dimaklumi, tetapi"
     },
     "register": "casual",
     "steps": [
@@ -43702,10 +43928,12 @@
     "structure": "noun + とて",
     "structure_fr": "nom + とて",
     "structure_es": "sustantivo + とて",
+    "structure_id": "kata benda + とて",
     "meaning": {
       "en": "even (someone), (someone) too",
       "fr": "même (quelqu'un), (quelqu'un) non plus",
-      "es": "incluso (alguien), (alguien) también"
+      "es": "incluso (alguien), (alguien) también",
+      "id": "bahkan (seseorang), (seseorang) juga"
     },
     "register": "written",
     "steps": [
@@ -44134,10 +44362,12 @@
     "structure": "noun / plain form + (の)ではあるまいか",
     "structure_fr": "nom / forme neutre + (の)ではあるまいか",
     "structure_es": "sustantivo / forma llana + (の)ではあるまいか",
+    "structure_id": "kata benda / bentuk biasa + (の)ではあるまいか",
     "meaning": {
       "en": "might it not be that...? (a tentative view)",
       "fr": "ne serait-ce pas que... ? (supposition prudente)",
-      "es": "¿no será que…? (una opinión prudente)"
+      "es": "¿no será que…? (una opinión prudente)",
+      "id": "bukankah mungkin...? (pandangan yang hati-hati)"
     },
     "register": "written",
     "steps": [
@@ -44527,10 +44757,12 @@
     "structure_reading": "noun + にかぎったことではない",
     "structure_fr": "nom + に限ったことではない",
     "structure_es": "sustantivo + に限ったことではない",
+    "structure_id": "kata benda + に限ったことではない",
     "meaning": {
       "en": "not limited to, not just",
       "fr": "ne se limite pas à, pas seulement",
-      "es": "no se limita a, no solo"
+      "es": "no se limita a, no solo",
+      "id": "tidak terbatas pada, bukan hanya"
     },
     "register": "neutral",
     "steps": [
@@ -44953,10 +45185,12 @@
     "structure": "noun (a group) + きっての",
     "structure_fr": "nom (un groupe) + きっての",
     "structure_es": "sustantivo (un grupo) + きっての",
+    "structure_id": "kata benda (kelompok) + きっての",
     "meaning": {
       "en": "the foremost in (a group)",
       "fr": "le plus... de (tout un groupe)",
-      "es": "el más destacado de (un grupo)"
+      "es": "el más destacado de (un grupo)",
+      "id": "yang terunggul di (suatu kelompok)"
     },
     "register": "written",
     "steps": [
