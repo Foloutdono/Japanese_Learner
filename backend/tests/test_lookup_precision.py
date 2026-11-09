@@ -5213,3 +5213,44 @@ class AStemAfterANounAndItsNoTests(unittest.TestCase):
         self.assertEqual(card_of("財布をなくされたそうです。", "なくさ"), "vocab_N5_無くす_なくす")
         counter = token_of("二、三人来た。", "人")
         self.assertIn("助数詞 〜つ／〜人／〜枚", [g["pattern"] for g in counter.get("grammar") or []])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class PleaseIsOnePhraseTests(unittest.TestCase):
+    """Plan 311: お願いします closing what is said is the deck's set phrase,
+    "please" -- after an object, a way, a count or よろしく, in kanji or in
+    kana, quoted too -- never 願う "to desire" under a request. Its card is
+    the one the page spells (the kanji one, the kana one), and its parts
+    keep the cards it is made of, which every count reads: the deck files
+    the phrase at N2 and N1, and an N5 page that says it counts お, 願う
+    and する as before. お願いしました, お願いできますか, お願いしたい, お願い
+    して and the "when I asked" of お願いしますと、 are the humble verb."""
+
+    KANJI, KANA = "vocab_N1_お願いします_おねがいします", "vocab_N2__おねがいします"
+
+    def test_please(self) -> None:
+        for sentence, surface, card in (("お願いします。", "お願いします", self.KANJI),
+                                        ("ケーキをおねがいします。", "おねがいします", self.KANA),
+                                        ("はげんきんまたはカードでおねがいします。", "おねがいします", self.KANA),
+                                        ("はい、お願いします。", "お願いします", self.KANJI),
+                                        ("二つお願いします。", "お願いします", self.KANJI),
+                                        ("これからよろしくお願いしますね。", "お願いします", self.KANJI),
+                                        ("「お支払いは現金以外でお願いします」と書いてあった。", "お願いします", self.KANJI),
+                                        ("お願いしますって言った。", "お願いします", self.KANJI)):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, surface), card)
+        token = token_of("お願いします。", "お願いします")
+        self.assertEqual([(p["vocab_match"] or {}).get("raw_id") for p in token["parts"]],
+                         ["vocab_N5_御_お", "vocab_N3_願う_ねがう", "vocab_N5__する", None])
+        self.assertIn("〜ます／〜ません", [g["pattern"] for g in token.get("grammar") or []])
+        from study.level_mix import words_at_level
+        self.assertEqual(words_at_level("お願いします。", "N1"), [])
+        self.assertEqual([w["raw_id"] for w in words_at_level("お願いします。", "N3")], ["vocab_N3_願う_ねがう"])
+
+    def test_the_humble_verb(self) -> None:
+        for sentence in ("お願いしました。", "お願いできますか。", "お願いしたいのですが。", "先生にお願いして、見てもらった。",
+                         "お願いしますと、すぐ来てくれた。"):
+            with self.subTest(sentence=sentence):
+                surfaces = [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
+                self.assertNotIn("お願いします", surfaces)
+                self.assertEqual(card_of(sentence, "願い"), "vocab_N3_願う_ねがう")

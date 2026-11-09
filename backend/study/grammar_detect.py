@@ -7447,6 +7447,10 @@ def _o_kudasai_refused(tokens, s, e, segments) -> bool:
     if (stem.lemma == "願う" and i + 3 < len(tokens) and tokens[i + 2].lemma == "為る"
             and tokens[i + 3].lemma == "ます" and _sentence_final(tokens, i + 3)):
         return True     # (お願いします closing a sentence: the request "please", a phrase of its own)
+    if stem.lemma == "願う":
+        from study.card_lookup import resolve_please
+        if resolve_please(tokens, i):
+            return True     # (...or quoted, お願いしますって言った: where the breakdown reads it, plan 311)
     k = i + 2
     while k < len(tokens) and tokens[k].start < segments[1][0] and tokens[k].pos == "auxiliary" and as_verb:
         k += 1

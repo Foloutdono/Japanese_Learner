@@ -3386,6 +3386,46 @@ def resolve_phrase(morphemes, i: int, max_len: int = _PHRASE_MAX):
     return None
 
 
+def resolve_please(morphemes, i: int):
+    """(level, entry, raw_id, 4) for お願いします closing what is said: the
+    deck's set phrase, "please" (plan 311) -- ケーキをお願いします, よろしく
+    お願いします, カードでおねがいします, 「お願いします」と. UniDic cuts it into
+    お, 願う's stem, する and ます, and the breakdown read 願う "to desire"
+    under a request (grammar_detect refuses お〜する there: a phrase of its
+    own). Its card as the page spells it, the kanji one or the kana one.
+    Only the polite present that ends its utterance, a closing particle
+    after it at most (お願いしますね), or quoted: お願いしました, お願い
+    できますか and お願いしたい are the humble verb, 願う "to request",
+    お〜する's."""
+    if i + 3 >= len(morphemes):
+        return None
+    o, wish, do, polite = morphemes[i:i + 4]
+    if not (o.pos == "prefix" and o.surface in ("お", "御") and wish.pos == "verb" and wish.lemma == "願う"
+            and wish.surface in ("願い", "ねがい") and do.lemma in ("為る", "する") and do.surface == "し"
+            and polite.lemma == "ます" and polite.surface == "ます"):
+        return None
+    rest = list(morphemes[i + 4:])
+    while rest and rest[0].pos == "particle" and rest[0].surface in _CLOSING:
+        rest = rest[1:]
+    # (...or quoted without its brackets: お願いしますって言った, お願いしますと
+    # 頭を下げた's と only before what says it -- お願いしますと、すぐ来て
+    # くれた is "when I asked")
+    quoted = bool(rest) and rest[0].pos == "particle" and (
+        rest[0].surface == "って" or (rest[0].surface == "と" and len(rest) > 1 and rest[1].pos == "verb"
+                                      and rest[1].lemma in morphology._SAID_OR_HEARD))
+    if rest and rest[0].pos != "symbol" and not quoted:
+        return None
+    spelled = "".join(m.surface for m in morphemes[i:i + 4])
+    cards = list(_VOCAB_BY_KANA.get("おねがいします", ()))
+    for level, entry in cards:
+        if (entry.get("kanji") or "") == (spelled if _has_kanji(spelled) else ""):
+            return level, entry, vocab_to_id(entry, level), 4
+    for level, entry in cards:
+        if entry.get("kanji"):
+            return level, entry, vocab_to_id(entry, level), 4     # (御願いします: the card in kanji)
+    return None
+
+
 # A set phrase as it is said, and the card it is (plan 272).
 _PHRASE_SAID = {"すいません": "すみません", "すいませんでした": "すみませんでした"}
 

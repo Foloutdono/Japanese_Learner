@@ -4178,3 +4178,20 @@ class WhatTheSecondPassDiffCaughtTests(unittest.TestCase):
         self.assertIn("〜あまり", found_in("あまりのあつさに、ホームでたおれた人がいた。"))
         self.assertNotIn(("と", "と"), keys("寂しさの代名詞とされてきた。"))
         self.assertIn(("と", "と"), keys("その人が自分を思っている証だとされた。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class PleaseIsNoHumbleFormTests(unittest.TestCase):
+    """Plan 311: お〜する is refused wherever the breakdown reads お願いします
+    as "please" (card_lookup.resolve_please) -- closing a sentence, and
+    quoted (お願いしますって言った) -- and kept for the humble verb: お願い
+    しました, お願いしたい, お願いしますと、すぐ来てくれた ("when I asked")."""
+
+    def test_please(self) -> None:
+        for sentence in ("お願いします。", "お願いしますね。", "お願いしますって言った。", "お願いしますと言って、頭を下げた。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("お〜になる／お〜する", found_in(sentence))
+        for sentence in ("お願いしました。", "お願いしたいのですが。", "お願いしますと、すぐ来てくれた。",
+                         "先生にお願いして、見てもらった。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("お〜になる／お〜する"), "お願いし")

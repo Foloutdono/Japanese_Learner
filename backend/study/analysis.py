@@ -28,7 +28,7 @@ from content import jmdict_fr
 import content.vocab_jmdict_data as jmdict_db
 from study.card_lookup import _card  # noqa: E402  (the deck card spelled so, plan 306)
 from study.card_lookup import (
-    resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
+    resolve_morpheme, resolve_compound, resolve_phrase, resolve_please, compound_reading, resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
@@ -1822,6 +1822,21 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(_age_dict(morphemes[i:i + aged], numbers, i))
             i += aged
             continue
+        please = resolve_please(morphemes, i)
+        if please:
+            # お願いします closing what is said, "please" (plan 311): its card,
+            # and the words it is made of as its parts, which every count
+            # reads -- the deck files the phrase at N2 and N1, and the N5
+            # pages that say it count お, 願う and する as before.
+            level, entry, raw_id, n = please
+            token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
+            token["pos"] = "interjection"
+            token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
+                               "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                              for k in range(i, i + n) if morphemes[k].pos != "particle"]
+            tokens.append(token)
+            i += n
+            continue
         phrase = resolve_phrase(morphemes, i)
         if phrase:
             level, entry, raw_id, n = phrase
@@ -2526,7 +2541,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 仕組みづくり, みだりに, 多少なりとも, 何なりと, 五、六, 言いたげに, なくされた,
 # かいてある 描く, なおる 直る／治る; a stem after a noun's の as the noun
 # (うけつけ 受付); あの方 かた; 置いてある no 〜において.
-LOCAL_REV = 43
+# 44: plan 311 -- お願いします closing what is said (or quoted) is the deck's
+# set phrase, "please" (card_lookup.resolve_please), its parts the cards
+# it is made of; no 願う "to desire" under a request.
+LOCAL_REV = 44
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
