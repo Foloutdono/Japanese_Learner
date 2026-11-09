@@ -2577,7 +2577,8 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
 
 
 def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
-               llm_grammar: list[dict] | None = None, translation: str = "") -> dict:
+               llm_grammar: list[dict] | None = None, translation: str = "",
+               frame: list[dict] | None = None) -> dict:
     """Fold the deep tier's per-word glosses and prose explanation onto
     Tokens the local tier already verified -- and its per-point notes
     onto the grammar the local tier found (plan 095), and the sentence's
@@ -2615,6 +2616,10 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
     pattern the sentence does not use is dropped, exactly as a word the
     tokenizer does not confirm is. A model may echo the pattern with
     its spaces trimmed; nothing looser is matched.
+
+    `frame` (plan 311) is the line's construction, its parts each named
+    and said in a line, already held to the line by study/frame.py;
+    `explanation` is that frame as text, for what reads it as text.
 
     Returns a NEW dict; does not mutate `analysis` -- the local analysis
     is cacheable and may be shared with a caller that never buys the
@@ -2659,7 +2664,7 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
         for i in range(start, end + 1):
             used[i] = True
 
-    return {
+    merged = {
         **analysis,
         "tokens": tokens,
         "grammar": grammar,
@@ -2667,6 +2672,12 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
         "translation": translation.strip() if isinstance(translation, str) else "",
         "deep_dropped": dropped,
     }
+    # Only the deep tier's Explain has a frame: the glosses a generator
+    # folds on (analyze_with_glosses) carry none, and their payloads
+    # keep the shape they had.
+    if frame is not None:
+        merged["frame"] = list(frame)
+    return merged
 
 
 def _find_run(tokens: list[dict], used: list[bool], surface: str) -> tuple[int, int] | None:

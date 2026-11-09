@@ -1614,6 +1614,7 @@ export default function AnalyzerScreen({ session }) {
         {face === 'explain' ? (
           <ExplainPanel
             explanation={focused.explanation}
+            frame={focused.frame}
             explaining={explainingHere}
             error={explainError[focusIndex]}
             onExplain={explainHere}
@@ -2028,6 +2029,9 @@ export default function AnalyzerScreen({ session }) {
           sentence={focused.text}
           translation={translation}
           explanation={focused.explanation}
+          frame={focused.frame}
+          analysis={focused}
+          onPoint={g => { closeExplain(); openPoint(g) }}
           explaining={explainingHere}
           error={explainError[focusIndex]}
           onExplain={explainHere}

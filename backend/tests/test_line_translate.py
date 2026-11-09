@@ -236,3 +236,34 @@ def test_a_wide_line_stored_before_the_cap_is_cut_on_opening(client, monkeypatch
     body = client.post(f"/api/video/session/{session_id}/sentence/6/explain",
                        json={"lang": "en", "title": uuid.uuid4().hex}).json()
     assert body["text"] == "また明日"
+
+
+# ── A translation that is the line in romaji (plan 311) ──────────
+@needs_tokenizer
+def test_a_line_spelled_out_in_romaji_is_never_shown_nor_kept(monkeypatch):
+    """関心はまだ僕ら came back «Kanshin wa mada bokura» and was printed on
+    the explanation sheet as the line's meaning."""
+    monkeypatch.setattr(line_translate.daily_limit, "claim", lambda *args: 0)
+    asked: list = []
+
+    def chat(messages, **kwargs):
+        asked.append(messages[1]["content"])
+        return json.dumps({"lines": {"1": "Kanshin wa mada bokura", "2": "It is hot today"}})
+
+    monkeypatch.setattr(line_translate, "chat", chat)
+    lines = [{"text": "関心はまだ僕ら"}, {"text": "今日は暑いですね"}]
+    _, out, found = line_translate.translate_block("u", lines, 0, "English", {})
+    assert out == [None, "It is hot today"]
+    assert found == {"今日は暑いですね": "It is hot today"}
+
+    # One kept before the rule is asked again, and alone.
+    def chat_again(messages, **kwargs):
+        asked.append(messages[1]["content"])
+        return json.dumps({"lines": {"1": "Their concern is still us"}})
+
+    monkeypatch.setattr(line_translate, "chat", chat_again)
+    known = {"関心はまだ僕ら": "Kanshin wa mada bokura", "今日は暑いですね": "It is hot today"}
+    _, out, found = line_translate.translate_block("u", lines, 0, "English", known)
+    assert out == ["Their concern is still us", "It is hot today"]
+    assert found == {"関心はまだ僕ら": "Their concern is still us"}
+    assert "1. 関心はまだ僕ら" in asked[-1] and "今日は暑い" not in asked[-1]
