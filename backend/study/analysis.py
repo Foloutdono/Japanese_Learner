@@ -1988,6 +1988,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             token["reading"] = _written_reading(morphemes[i:i + n])     # (なんぼなんでも, as said, plan 272)
             token["furigana"] = align_deck(token["surface"], token["reading"])
             token["pos"] = "adverb"
+            if any(deck_hits[k] for k in range(i, i + n)):
+                # (...keeping the deck's words it is made of, as every fold
+                # does, which a sentence written for a level still counts:
+                # 多少なりとも's 多少, plan 311)
+                token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
+                                   "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                                  for k in range(i, i + n) if morphemes[k].pos != "particle"]
             tokens.append(token)
             i += n
             continue
@@ -2506,7 +2513,20 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # volitional; ねばという; 取れる of what one takes (休みが取れない, 取る's
 # potential); ないでは and ないでもない, no "without"; 幸せとは限らない;
 # そうかもね and のかもね; さようでございます, 左様.
-LOCAL_REV = 42
+# 43: plan 311, the gap report's second pass -- a construction's own
+# particle (愛するがゆえに's が, ですら and でさえ's で, っぱなしで's で,
+# 〜ないとも限らない on ない the adjective, 言いのがれにすぎない); 〜でも on an
+# amount or a time (少しでも, すぐにでも); から／まで after ぐらい and ごろ; ほど
+# で, the time it takes; 〜らしい after how things stand (必要らしい,
+# つもりらしい); だけ after an adjective, こわがって's て, いちばんの's の, は
+# after べき, すきなしずかな's な, 私ごときが, 突然で before an apology; the
+# quotation's と after more verbs and とも cut into と and も; glosses for
+# とのこと, となると, までとする, 人がね、と, 少しでいい, 聞きはしても, ては
+# いかが, 初めてなもの; せんとう 銭湯 and ふじさん 富士山, 有名人, 声がけ,
+# 仕組みづくり, みだりに, 多少なりとも, 何なりと, 五、六, 言いたげに, なくされた,
+# かいてある 描く, なおる 直る／治る; a stem after a noun's の as the noun
+# (うけつけ 受付); あの方 かた; 置いてある no 〜において.
+LOCAL_REV = 43
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

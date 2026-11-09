@@ -653,6 +653,19 @@ def _whether_or_not(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list,
     return morphemes, tags
 
 
+# The verbs a quotation's と goes with, before which UniDic's one particle
+# とも is と and も (_apart_inside_a_clause, plan 311).
+_SAID_OR_HEARD = frozenset({"言う", "云う", "聞く", "思う", "考える", "書く", "伝える", "話す", "伺う", "見る",
+                            "呼ぶ", "噂", "述べる", "語る", "答える", "記す", "報じる", "伝わる", "言える"})
+
+
+# How each numeral is said, its commonest first (_apart_inside_a_clause:
+# 五、六 is ごろく, two numerals said one after the other).
+_NUMERAL_SAID = {"一": ("いち", "いっ"), "二": ("に",), "三": ("さん",), "四": ("し", "よん", "よ"), "五": ("ご",),
+                 "六": ("ろく", "ろっ"), "七": ("しち", "なな"), "八": ("はち", "はっ"), "九": ("く", "きゅう"),
+                 "十": ("じゅう", "じゅっ", "じっ")}
+
+
 def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
     """Two words UniDic writes as one conjunction or adverb, where the
     clause shows them apart (plan 306): ですから after a word or a blank
@@ -709,9 +722,103 @@ def _apart_inside_a_clause(morphemes: list[Morpheme], tags: list[tuple]) -> tupl
                               written="て", written_reading="て")]
             out_t += [("動詞", "一般", "*"), ("助詞", "接続助詞", "*")]
             continue
+        if m.pos == "noun" and len(m.surface) == 3 and m.surface[1] in "、，" \
+                and m.surface[0] in _NUMERAL_SAID and m.surface[2] in _NUMERAL_SAID:
+            # 五、六さつ, 四、五回: "five or six", two numerals and the comma
+            # between them -- UniDic files 五六 as one noun no card is
+            # (plan 311), and 二、三人's counter then counts nothing
+            a, b = m.surface[0], m.surface[2]
+            said = kata_to_hira(m.reading)
+            ra = next((r for r in _NUMERAL_SAID[a] if said.startswith(r) and len(said) > len(r)), _NUMERAL_SAID[a][0])
+            rb = said[len(ra):] if said.startswith(ra) and len(said) > len(ra) else _NUMERAL_SAID[b][0]
+            out_m += [replace(m, surface=a, end=m.start + 1, lemma=a, reading=ra, lemma_reading=ra, kana=kata_of(ra),
+                              written=a, written_reading=ra),
+                      replace(m, surface=m.surface[1], start=m.start + 1, end=m.start + 2, lemma=m.surface[1],
+                              reading=m.surface[1], lemma_reading=m.surface[1], kana=m.surface[1], pos="symbol",
+                              goshu="記号", written=m.surface[1], written_reading=""),
+                      replace(m, surface=b, start=m.start + 2, lemma=b, reading=rb, lemma_reading=rb, kana=kata_of(rb),
+                              written=b, written_reading=rb)]
+            out_t += [("名詞", "数詞", "*"), ("補助記号", "読点", "*"), ("名詞", "数詞", "*")]
+            continue
+        if m.surface == "で" and m.pos == "auxiliary" and m.lemma == "だ" and prev is not None \
+                and prev.pos == "particle" and prev.surface in ("ほど", "程") and nxt is not None \
+                and nxt.pos != "symbol" and nxt.surface not in ("は", "も") \
+                and nxt.lemma not in ("有る", "ある", "無い", "ない", "御座る", "ござる"):
+            # 十分ほどでまいります, 一週間ほどで届く: the time it takes, the で of
+            # 五分で着く -- UniDic reads the copula after ほど; 十分ほどで、痛みも
+            # ほとんどなかった is it, "was about ten minutes, and" (plan 311)
+            out_m.append(replace(m, lemma="で", lemma_reading="で", pos="particle", ctype="", cform="",
+                                 written="で", written_reading="で"))
+            out_t.append(("助詞", "格助詞", "*"))
+            continue
+        if m.surface == "たげ" and m.lemma == "たげる" and m.pos == "auxiliary" and prev is not None \
+                and prev.pos == "verb" and prev.cform.startswith("連用形") \
+                and (nxt is None or nxt.pos == "symbol" or nxt.surface in ("な", "に", "だ", "で")):
+            # 言いたげに, 言いたげな顔: たい's stem and げ, "as if wanting to",
+            # cut as 寂しげに is -- UniDic reads the auxiliary たげる, which
+            # takes て or ます, never な or に (plan 311)
+            out_m += [replace(m, surface="た", end=m.start + 1, lemma="たい", reading="た", lemma_reading="たい",
+                              kana="タ", ctype="助動詞-タイ", cform="語幹-一般", written="たい", written_reading="たい"),
+                      replace(m, surface="げ", start=m.start + 1, lemma="気", reading="げ", lemma_reading="げ",
+                              kana="ゲ", pos="suffix", ctype="", cform="", written="げ", written_reading="げ")]
+            out_t += [("助動詞", "*", "*"), ("接尾辞", "形状詞的", "*")]
+            continue
+        if m.surface == "に" and m.pos == "particle" and prev is not None and prev.surface == "たげ" \
+                and prev.lemma == "たげる" and out_m and out_m[-1].surface == "げ":
+            # (...and its に the adverb's, as 寂しげに's is)
+            out_m.append(replace(m, lemma="だ", lemma_reading="だ", pos="auxiliary", ctype="助動詞-ダ",
+                                 cform="連用形-ニ", written="だ", written_reading="だ"))
+            out_t.append(("助動詞", "*", "*"))
+            continue
+        if m.surface == "とも" and m.pos == "particle" and nxt is not None and nxt.pos == "verb" \
+                and nxt.lemma in _SAID_OR_HEARD and prev is not None and prev.pos != "symbol":
+            # 発表されるとも聞いています, 天才とも言える: the quotation's と and
+            # も, "(it is) also (said) that" -- UniDic files them as one
+            # particle, "even if" (plan 311)
+            out_m += [replace(m, surface="と", end=m.start + 1, lemma="と", reading="と", lemma_reading="と",
+                              kana="ト", conjunctive=False, written="と", written_reading="と"),
+                      replace(m, surface="も", start=m.start + 1, lemma="も", reading="も", lemma_reading="も",
+                              kana="モ", conjunctive=False, written="も", written_reading="も")]
+            out_t += [("助詞", "格助詞", "*"), ("助詞", "係助詞", "*")]
+            continue
+        if m.surface == "が" and m.pos == "particle" and m.conjunctive and prev is not None \
+                and prev.lemma == "ごとし" and prev.surface == "ごとき":
+            # 私ごときが: the subject's が after ごとき standing as a noun, "the
+            # likes of me" -- UniDic reads ごとき's 連体形 as a clause's end and
+            # its が as "but" (plan 311)
+            out_m.append(replace(m, conjunctive=False))
+            out_t.append(("助詞", "格助詞", "*"))
+            continue
         out_m.append(m)
         out_t.append(tags[i])
     return out_m, out_t
+
+
+# A godan verb's 連用形 ending, from its dictionary form's (_stem_after_no).
+_DICT_TO_STEM = {"う": "い", "く": "き", "ぐ": "ぎ", "す": "し", "つ": "ち", "ぬ": "に", "ぶ": "び", "む": "み", "る": "り"}
+
+
+def _stem_after_no(morphemes: list[Morpheme]) -> None:
+    """A verb's stem a noun and its の stand before, and a particle or the
+    copula after, read as the noun it is there (plan 311): ただの言いのがれ
+    にすぎない, "a mere evasion" -- UniDic read 言い逃れる's stem, and a
+    verb takes no の before it. 〜にすぎない's own lesson."""
+    for i in range(2, len(morphemes) - 1):
+        m, prev, before, nxt = morphemes[i], morphemes[i - 1], morphemes[i - 2], morphemes[i + 1]
+        if not (m.pos == "verb" and m.cform == "連用形-一般" and prev.surface == "の" and prev.pos == "particle"
+                and before.pos in ("noun", "pronoun", "suffix") and len(m.surface) >= 3
+                and ((nxt.pos == "particle" and nxt.surface in ("に", "を", "が", "は", "も", "で", "と", "へ", "や"))
+                     or (nxt.pos == "auxiliary" and nxt.lemma in ("だ", "です") and nxt.surface.startswith(("だ", "で"))))):
+            continue
+        lemma, said = m.lemma or "", kata_to_hira(m.lemma_reading or "")
+        if m.ctype.startswith(("上一段", "下一段")) and lemma.endswith("る") and said.endswith("る"):
+            stem, stem_said = lemma[:-1], said[:-1]
+        elif m.ctype.startswith("五段") and lemma[-1:] in _DICT_TO_STEM and said[-1:] in _DICT_TO_STEM:
+            stem, stem_said = lemma[:-1] + _DICT_TO_STEM[lemma[-1]], said[:-1] + _DICT_TO_STEM[said[-1]]
+        else:
+            continue
+        morphemes[i] = replace(m, lemma=stem, lemma_reading=stem_said, pos="noun", ctype="", cform="",
+                               written=stem, written_reading=stem_said)
 
 
 def _soko_de_aru(morphemes: list[Morpheme]) -> None:
@@ -1987,6 +2094,22 @@ def _lost(morphemes: list[Morpheme], tags: list[tuple]) -> tuple[list, list]:
                 surface="なくし", start=m.start, end=run[1].end, lemma="無くす", reading="なくし",
                 lemma_reading="なくす", kana="ナクシ", pos="verb", auxiliary_use=False, conjunctive=False,
                 ctype="五段-サ行", cform="連用形-一般"))
+            out_t.append(("動詞", "一般", ""))
+            i += 2
+            continue
+        if (len(run) >= 3 and m.surface == "なく" and m.pos == "adjective" and run[1].surface == "さ"
+                and run[1].lemma in ("為る", "する") and run[2].pos == "auxiliary" and run[2].lemma in ("れる", "せる")
+                # (after its object's particle, or a place's で UniDic reads as
+                # the copula: 余儀なくされた is 〜を余儀なくされる, its なく the
+                # adjective's, glued to 余儀)
+                and i > 0 and (morphemes[i - 1].pos == "particle" or morphemes[i - 1].surface == "で")):
+            # (...and なくされた, "lost", said up or suffered, plan 311: なく,
+            # さ and れる read 無くす in the passive -- どちらでなくされたか, "where
+            # did you lose it", never "made it not be")
+            out_m.append(Morpheme(
+                surface="なくさ", start=m.start, end=run[1].end, lemma="無くす", reading="なくさ",
+                lemma_reading="なくす", kana="ナクサ", pos="verb", auxiliary_use=False, conjunctive=False,
+                ctype="五段-サ行", cform="未然形-一般"))
             out_t.append(("動詞", "一般", ""))
             i += 2
             continue
@@ -7117,6 +7240,7 @@ def tokenize(text: str, plain: bool = False, before: str = "", after: str = "") 
         morphemes, tags = _the_transitive_can(morphemes, tags)
         _radical_hen(morphemes)
         _soko_de_aru(morphemes)
+        _stem_after_no(morphemes)
         morphemes, tags = _apart_inside_a_clause(morphemes, tags)
         morphemes, tags = _whether_or_not(morphemes, tags)
         _shops(morphemes, tags)

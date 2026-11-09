@@ -1000,6 +1000,17 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         if s == "方" and r == "ほう" and i > 0 and not _compares(tokens, i) and _a_person_by_the_sentence(tokens, i):
             out[i] = "かた"
             continue
+        # あの方は, この方の, その方が言った: かた, "that person", said up
+        # (plan 311) -- UniDic read ほう. Never where the sentence compares
+        # (その方がいい, この方が早い) or goes toward it (あの方へ, あの方を
+        # 見た), the side.
+        if s == "方" and r == "ほう" and prev(i) in ("この", "その", "あの") and not _compares(tokens, i) \
+                and nxt(i) in ("は", "が", "の", "も", "、", "で", "と", "から", "に", "を", "には", "にも") \
+                and not (nxt(i) in ("に", "を", "には", "にも") and any(
+                    t.get("lemma") in _TOWARD or t.get("lemma") in ("置く", "移す", "寄せる", "動かす")
+                    for t in tokens[i + 1:])):
+            out[i] = "かた"
+            continue
         # 何しやがる, 何しに来た: なに before する (plan 272).
         if s == "何" and r == "なん" and i + 1 < n and tokens[i + 1]["lemma"] in ("為る", "する") \
                 and nxt(i)[:1] in ("し", "す"):

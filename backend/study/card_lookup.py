@@ -17,6 +17,7 @@ from content import vocab_extras
 import content.vocab_jmdict_data as jmdict_db
 from content import jmdict_fr
 from study import morphology
+from study import kana_lexicon
 # What "do I already know this?" means for the clickable badges.
 #
 # This used to be ONE representative mode, STATUS_MODE = "qcm-kj-m" --
@@ -1272,6 +1273,11 @@ def split_unknown_compound(m) -> list[tuple[str, str, tuple]] | None:
             if first is None:
                 continue
             second = _card(tail, reading[p:]) or (None if _has_kanji(right) else _card("", reading[p:]))
+            if second is None and _has_kanji(tail) and not _has_kanji(right):
+                # (...its first sound voiced by the compound, as the page
+                # writes it: 仕組みづくり is 仕組み and 作り, read つくり alone,
+                # plan 311)
+                second = _card(tail, reading[p:p + 1].translate(_UNVOICED) + reading[p + 1:])
             if second is not None and (right == tail or morphology.kata_to_hira(right) == reading[p:]):
                 return [(left, reading[:p], first), (right, reading[p:], second)]
     return None
@@ -1679,6 +1685,8 @@ def _kana_noun(morphemes, i: int, hit):
     m = morphemes[i]
     if m.pos not in _UNINFLECTED or not m.surface or not _hiragana(m.surface):
         return hit
+    if hit is not None and m.lemma in kana_lexicon.PAGE_LEMMAS and (hit[1].get("kanji") or "") != m.lemma:
+        return None                    # せんとうへ行った: the page's 銭湯, the pool's -- no 先頭 read alike (plan 311)
     if i > 0 and numeral_value(morphemes[i - 1].surface) is not None:
         return hit                     # 二かい: a counter, the counters' to read
     if hit is not None and m.surface == "すくい" and (hit[1].get("kanji") or "") == "救い" and i > 0 \
@@ -2589,6 +2597,10 @@ _PARTNERS = (
     ("書く", ("を",), frozenset({"手紙", "てがみ", "字", "じ", "名前", "なまえ", "作文", "さくぶん", "日記",
                                   "にっき", "レポート", "メール", "文", "ぶん", "小説", "しょうせつ", "漢字", "かんじ"})),
     ("描く", ("を", "も", "は"), frozenset({"絵", "え", "漫画", "まんが", "マンガ", "イラスト", "似顔絵", "にがおえ"})),
+    # (かべには、大きなふじさんがかいてありました: what is painted, its が
+    # the てある's -- a picture, a mountain, a view, plan 311)
+    ("描く", ("を", "が", "も", "は"), frozenset({"絵", "え", "富士山", "ふじさん", "山", "やま", "景色", "けしき", "風景",
+                                             "ふうけい", "地図", "ちず", "図", "ず"})),
     ("撮る", ("を",), frozenset({"写真", "しゃしん", "ビデオ", "動画", "どうが"})),  # しゃしんをとる
     ("着く", ("に", "へ"), _PLACES),                               # 駅につく
     ("吐く", ("を", "は", "も", ""), frozenset({"嘘", "うそ", "ため息", "ためいき", "溜息", "息", "いき", "ひと息", "一息",
@@ -2935,7 +2947,21 @@ def _by_use(morphemes, i: int, spelled):
             return by_kanji["治る"]
         if _katakana_written(subject[1]) or subject[1] in _MENDED:
             return by_kanji["直る"]
+    if {"直る", "治る"} <= by_kanji.keys() and subject is None:
+        # (...with the thing left unsaid, what the sentence names: スマホを
+        # 見て、「なおるまで一時間ぐらいかかる」, plan 311 -- one of the two
+        # kinds only)
+        named = {t.surface for t in morphemes if t.pos == "noun"}
+        ill, mended = bool(named & _AILMENTS), bool(named & (_MENDED | _DEVICES))
+        if ill != mended:
+            return by_kanji["治る"] if ill else by_kanji["直る"]
     return None
+
+
+# What else is mended, written in katakana (直る with its thing unsaid,
+# plan 311) -- never any katakana word, which a name is as often.
+_DEVICES = frozenset({"スマホ", "パソコン", "エアコン", "ケータイ", "携帯", "けいたい", "コンピューター", "プリンター",
+                      "カメラ", "パソコン", "冷蔵庫", "れいぞうこ", "洗濯機", "せんたくき"})
 
 
 _AILMENTS = frozenset({"風邪", "かぜ", "病気", "びょうき", "けが", "怪我", "ケガ", "傷", "きず", "熱", "ねつ", "頭痛",
@@ -3837,6 +3863,22 @@ def _pool_noun_partner(morphemes, i: int) -> dict | None:
     return jmdict_db.get_by_key(named, m.surface)
 
 
+def _latter_in_kana(lemma: str, said: str) -> dict | None:
+    """The pool row spelling `lemma` with its latter word in kana, read
+    `said`: 声掛け as 声かけ -- where the first word is a deck card read so,
+    which pins where the kana start (plan 311)."""
+    for k in range(1, len(lemma)):
+        head, tail = lemma[:k], lemma[k:]
+        if not _has_kanji(head) or not _has_kanji(tail):
+            continue
+        for p in range(1, len(said)):
+            if _card(head, said[:p]) is not None:
+                row = jmdict_db.get_by_key(head + said[p:], said)
+                if row is not None:
+                    return row
+    return None
+
+
 def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     """The JMdict pool entry morphemes[i] is, by its dictionary form
     first and as written second, or None. Asked only for a token the
@@ -4023,6 +4065,20 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
         # (a loanword's lemma, a variant kanji): the page's own form. A
         # verb's surface is inflected and names no headword.
         hit = _pool_by_form(m.surface, (m.reading,))
+    if hit is None and m.pos == "noun" and not m.proper and _has_kanji(lemma) and m.lemma_reading:
+        # (...or with its latter word in kana, as the pool spells it: 声が
+        # け, UniDic's 声掛け, is the row 声かけ, read as the lemma is, plan
+        # 311)
+        hit = _latter_in_kana(lemma, morphology.kata_to_hira(m.lemma_reading))
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    if hit is None and m.pos == "other" and nxt is not None and nxt.surface == "に" and m.lemma_reading:
+        # (...or a な-adjective's word the pool files only as the adverb its
+        # に makes: みだりに漏らす, "to let out without good reason" -- the
+        # row みだりに, its に still the adverb's, plan 311)
+        said = morphology.kata_to_hira(m.lemma_reading) + "に"
+        adverb = jmdict_db.get_by_key(lemma + "に", said) or jmdict_db.get_by_key("", said)
+        if adverb is not None:
+            return adverb
     if (hit is None and m.pos == "noun" and not m.proper and not m.unknown and _katakana_written(m.surface)
             and _has_kanji(lemma)):
         # A plant or an animal written in katakana, as they are, whose
@@ -4462,7 +4518,13 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         # (...and a prefix on an adjectival noun, which UniDic files apart:
         # 不 + 器用 is 不器用, "clumsy", plan 306)
         adjectival = n == 2 and run[0].pos == "prefix" and run[1].pos == "other" and _has_kanji(run[1].surface)
-        if not saying and not unsaid and any((m.pos not in _COMPOUND_POS and not (adjectival and k == 1))
+        # (...and an adjectival noun with the suffix that makes a noun of it:
+        # 有名 + 人 is 有名人, "celebrity", where UniDic read the 人 にん and
+        # it said nothing; 重要 + 性 is 重要性, as 必要 + 性 was, plan 311)
+        made = n == 2 and run[0].pos == "other" and _has_kanji(run[0].surface) and _word_forming(run[1]) \
+            and _has_kanji(run[1].surface)
+        if not saying and not unsaid and any((m.pos not in _COMPOUND_POS and not (adjectival and k == 1)
+                                              and not (made and k == 0))
                                              or m.auxiliary_use or (_numeral(m.surface) and not ordinal)
                                              for k, m in enumerate(run)):
             continue
@@ -5527,6 +5589,13 @@ def _polite_set_phrase(morphemes, i: int):
     return None
 
 
+# Words and the particles after them the pool holds as one expression
+# (resolve_pool_whole_word, plan 311).
+_POOL_PHRASES = {("多少", "なり", "とも"): ("多少なりとも", "たしょうなりとも"),
+                 ("何", "なり", "と"): ("何なりと", "なんなりと"),
+                 ("なん", "なり", "と"): ("何なりと", "なんなりと")}
+
+
 def resolve_pool_whole_word(morphemes, i: int):
     """(row, n) for the pool word a word and the particles after it spell
     where the deck has none (plan 272): なぜ + か is なぜか, "for some
@@ -5576,6 +5645,13 @@ def resolve_pool_whole_word(morphemes, i: int):
         n = next((k for k in range(1, 5) if "".join(t.surface for t in rest[:k]) in ("なんでも", "何でも")), None)
         row = jmdict_db.get_by_key("いくら何でも", "いくらなんでも")
         return (row, n + 1) if n is not None and row is not None else None
+    for words, (kanji, kana) in _POOL_PHRASES.items():
+        # (多少なりとも, "if only a little", 何なりと, "anything at all": the
+        # old copula's なり and its particle, the pool's own expressions --
+        # no point of the catalogue's is written on them, plan 311)
+        if tuple(t.surface for t in morphemes[i:i + len(words)]) == words:
+            row = jmdict_db.get_by_key(kanji, kana)
+            return (row, len(words)) if row is not None else None
     if m.surface in ("より", "選り") and (i == 0 or morphemes[i - 1].pos != "noun"):
         # (より + によって, "of all (days)": 選りによって, no "more" and a
         # "by means of" -- after a noun, 場合よりによって is no such word)

@@ -115,6 +115,12 @@ _GLOSSES = {
     "ねえ": {"en": "hey, say (calling for attention)",
             "fr": "dis, hé (pour attirer l'attention)",
             "es": "oye, eh (para llamar la atención)"},
+    "と_nokoto": {"en": "(とのこと) that…: what was said, passed on -- とのことです, I hear that, they say",
+                  "fr": "(とのこと) que… : ce qui a été dit, rapporté -- とのことです, il paraît que, on dit que",
+                  "es": "(とのこと) que…: lo que se dijo, transmitido -- とのことです, dicen que, según dicen"},
+    "と_naruto": {"en": "(となると, となれば) if it comes to that, once it is so: 録音するとなると, if it comes to recording",
+                  "fr": "(となると, となれば) s'il s'agit de, dès lors que : 録音するとなると, s'il s'agit d'enregistrer",
+                  "es": "(となると, となれば) si se trata de, una vez que: 録音するとなると, si se trata de grabar"},
     "つつ": {"en": "(written, after a verb's stem) while doing; though (= ながら)",
              "fr": "(écrit, après le radical d'un verbe) tout en faisant ; bien que (= ながら)",
              "es": "(escrito, tras la raíz de un verbo) mientras; aunque (= ながら)"},
@@ -246,6 +252,15 @@ _GLOSSES = {
     "て_form": {"en": "the て form: joins what comes before to what follows (and, so, by doing)",
                "fr": "la forme en て : relie ce qui précède à ce qui suit (et, donc, en faisant)",
                "es": "la forma て: une lo que precede con lo que sigue (y, así que, haciendo)"},
+    "は_concede": {"en": "(between a verb's stem and する, then ても or が) does do it, but…: 聞きはしても, they may ask, but…",
+                   "fr": "(entre le radical d'un verbe et する, puis ても ou が) le fait bien, mais… : 聞きはしても, on demande bien, mais…",
+                   "es": "(entre la raíz de un verbo y する, luego ても o が) sí lo hace, pero…: 聞きはしても, sí preguntan, pero…"},
+    "は_suggest": {"en": "(after a て form, before どう or いかが) what about…?, why not…?: 休んではどうですか, why not take a rest?",
+                   "fr": "(après une forme en て, devant どう ou いかが) et si… ?, pourquoi ne pas… ? : 休んではどうですか, et si vous vous reposiez ?",
+                   "es": "(tras una forma て, delante de どう o いかが) ¿qué tal si…?, ¿por qué no…?: 休んではどうですか, ¿por qué no descansas?"},
+    "な_is": {"en": "(the copula before の or もの) is: 初めてなもので, as it is my first time; すべきなのは, what one should do is",
+              "fr": "(la copule devant の ou もの) est : 初めてなもので, comme c'est la première fois ; すべきなのは, ce qu'il faut faire, c'est",
+              "es": "(la cópula delante de の o もの) es: 初めてなもので, como es la primera vez; すべきなのは, lo que hay que hacer es"},
     "は_after_te": {"en": "(after a て form) if, as long as: what follows is usually unwelcome",
                    "fr": "(après une forme en て) si, tant que : la suite est souvent fâcheuse",
                    "es": "(tras una forma て) si, mientras: lo que sigue suele ser algo no deseado"},
@@ -451,6 +466,9 @@ _GLOSSES = {
     "やがる": {"en": "(rude) has the nerve to…, dares to: 何しやがる！, what do you think you're doing!",
              "fr": "(grossier) ose…, a le culot de : 何しやがる！, qu'est-ce qui te prend !",
              "es": "(grosero) tiene el descaro de…, se atreve a: 何しやがる！, ¡pero qué demonios haces!"},
+    "で_enough": {"en": "(before いい, 十分, 大丈夫) being just that, will do: 少しでいい, a little is enough; ゆっくりでいい, slowly is fine",
+                  "fr": "(devant いい, 十分, 大丈夫) tel quel, ça suffit : 少しでいい, un peu suffit ; ゆっくりでいい, lentement, c'est bien",
+                  "es": "(delante de いい, 十分, 大丈夫) tal cual, basta: 少しでいい, basta con un poco; ゆっくりでいい, despacio está bien"},
     "で_almost": {"en": "(after もう少し) almost, all but: もう少しで勝てた, I almost won",
                  "fr": "(après もう少し) presque : もう少しで勝てた, j'ai failli gagner",
                  "es": "(tras もう少し) casi, por poco: もう少しで勝てた, casi gano"},
@@ -1173,12 +1191,20 @@ def gloss(morphemes, i: int) -> dict | None:
             and not morphemes[i - 1].cform.startswith("連用形"):
         key = "ながら_though"               # 誠に勝手ながら (plan 272)
     elif m.pos == "particle" and m.surface == "と" and i > 0 and i + 1 < len(morphemes) \
-            and morphemes[i - 1].pos == "noun" and morphemes[i + 1].lemma in ("為る", "する"):
+            and (morphemes[i - 1].pos == "noun"
+                 # (...or a limit: 正午までとさせていただきます, plan 311)
+                 or (morphemes[i - 1].pos == "particle" and morphemes[i - 1].surface in ("まで", "から", "限り", "のみ"))) \
+            and morphemes[i + 1].lemma in ("為る", "する"):
         key = "と_as"                       # 休業とさせていただきます, ものとする (plan 272)
     elif m.lemma == "やがる" and m.pos == "auxiliary":
         key = "やがる"
     elif m.pos == "particle" and m.surface == "で" and _almost_at(morphemes, i):
         key = "で_almost"                   # もう少しで勝てた, あと一歩で -- never あとちょっとで
+    elif m.surface == "で" and (m.pos == "particle" or (m.pos == "auxiliary" and m.lemma == "だ")) \
+            and not m.conjunctive and i > 0 and morphemes[i - 1].pos in ("adverb", "noun", "pronoun", "other") \
+            and i + 1 < len(morphemes) and (morphemes[i + 1].surface in _ENOUGH or morphemes[i + 1].lemma in _ENOUGH) \
+            and morphemes[i + 1].pos in ("adjective", "verb", "other", "noun"):
+        key = "で_enough"                   # 少しでいい, ゆっくりでいい, あとちょっとでいい (plan 311)
         # いい, "a little is enough" (plan 272)
     elif m.pos == "auxiliary" and m.lemma == "や" and m.surface == "やっ" and i + 1 < len(morphemes) \
             and morphemes[i + 1].lemma == "た" and not (i > 0 and morphemes[i - 1].pos == "verb"):
@@ -1365,6 +1391,13 @@ def gloss(morphemes, i: int) -> dict | None:
     elif m.surface in ("もん", "もの") and m.pos in ("noun", "particle") and _after_a_predicate(morphemes, i) \
             and closes_sentence(morphemes, i) and (m.surface == "もん" or m.pos == "particle"):
         key = "もん"                         # (だって、時間がなかったんだもの: the same reason, plan 311)
+    elif m.surface == "と" and m.pos == "particle" and i + 2 < len(morphemes) and morphemes[i + 1].surface == "の" \
+            and morphemes[i + 2].surface in ("こと", "事"):
+        key = "と_nokoto"                    # 郵送でもできるとのことだった (plan 311)
+    elif m.surface == "と" and m.pos == "particle" and i > 0 and i + 2 < len(morphemes) \
+            and morphemes[i - 1].pos in ("verb", "auxiliary", "adjective") and morphemes[i + 1].lemma in ("成る", "なる") \
+            and (morphemes[i + 2].surface in ("と", "ば", "たら") or morphemes[i + 1].surface in ("なったら",)):
+        key = "と_naruto"                    # 録音するとなると, 漏れたとなれば (plan 311)
     elif m.surface == "つつ" and m.pos == "particle" and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary") \
             and morphemes[i - 1].cform.startswith("連用形"):
         key = "つつ"                         # 知りつつ, 生かしつつ (plan 311)
@@ -1379,6 +1412,23 @@ def gloss(morphemes, i: int) -> dict | None:
             and morphemes[i - 1].pos in ("verb", "auxiliary") and morphemes[i - 1].cform.startswith("連用形") \
             and morphemes[i + 1].lemma in ("為る", "する") and morphemes[i + 2].lemma in ("ない", "無い", "ぬ", "ず"):
         key = "は_stress"                   # 止められはしない
+    elif m.pos == "particle" and m.surface == "は" and i > 0 and i + 2 < len(morphemes) \
+            and morphemes[i - 1].pos in ("verb", "auxiliary") and morphemes[i - 1].cform.startswith("連用形") \
+            and morphemes[i + 1].lemma in ("為る", "する") and (
+                (morphemes[i + 2].surface == "て" and i + 3 < len(morphemes) and morphemes[i + 3].surface == "も")
+                or morphemes[i + 2].surface in ("が", "けど", "けれど", "けれども", "ものの")
+                or (morphemes[i + 2].lemma == "た" and i + 3 < len(morphemes)
+                    and morphemes[i + 3].surface in ("が", "けど", "けれど", "けれども", "ものの"))):
+        key = "は_concede"                  # 聞きはしても, 読みはしたが (plan 311)
+    elif m.pos == "particle" and m.surface == "は" and i > 0 and morphemes[i - 1].conjunctive \
+            and morphemes[i - 1].surface in ("て", "で") and i + 1 < len(morphemes) \
+            and morphemes[i + 1].surface in ("どう", "いかが", "如何"):
+        key = "は_suggest"                  # 休んではどうですか, リリースしてはいかがでしょうか (plan 311)
+    elif m.surface == "な" and m.pos == "auxiliary" and m.lemma == "だ" and i > 0 and i + 1 < len(morphemes) \
+            and (morphemes[i - 1].surface in ("初めて", "はじめて") or (
+                morphemes[i - 1].pos == "auxiliary" and morphemes[i - 1].surface == "べき")) \
+            and morphemes[i + 1].surface in ("の", "もの", "もん", "ん"):
+        key = "な_is"                       # 初めてなものだから, 優先すべきなのは (plan 311)
     elif m.pos == "particle" and m.surface == "も" and i > 0 and i + 2 < len(morphemes) \
             and morphemes[i - 1].pos == "verb" and morphemes[i - 1].cform.startswith("連用形") \
             and morphemes[i + 1].lemma in ("為る", "する") and morphemes[i + 2].lemma in ("ない", "無い", "ぬ", "ず"):
@@ -1404,7 +1454,11 @@ def gloss(morphemes, i: int) -> dict | None:
             elif prev.pos in ("verb", "adjective", "auxiliary", "particle", "noun", "other", "interjection",
                               "adverb"):
                 key = "な"                  # (参ったな, まあな, ちょっとな: plan 272)
-        elif base == "ね" and i > 0 and _followed_by_a_word(morphemes, i):
+        elif base == "ね" and i > 0 and (_followed_by_a_word(morphemes, i) or (
+                # (...or closing words quoted without their brackets: 人がね、と
+                # 母は笑う, plan 311)
+                i + 2 < len(morphemes) and morphemes[i + 1].surface in ("、", "，")
+                and morphemes[i + 2].surface == "と" and morphemes[i + 2].pos == "particle")):
             key = "ね_mid"
         elif m.surface == "って" and i > 0:
             key = _quoting(morphemes, i)

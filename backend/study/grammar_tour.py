@@ -55,7 +55,11 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 27  # 27: plan 311 -- 一日中雨 reads 一日, 中 and 雨 あめ (no 雷雨's う), 電車は
+TOUR_REV = 28  # 28: plan 311's second pass -- あの方 かた, ふじさん 富士山, がゆえに,
+#   ですら／でさえ and っぱなしで lit whole, 言いたげに cut as 寂しげに (〜すら,
+#   〜さえ, 〜ゆえに, 〜っぱなし, 〜げ, 〜ものか, 〜つ〜つ, 〜にかたくない and
+#   others' furigana)
+# 27: plan 311 -- 一日中雨 reads 一日, 中 and 雨 あめ (no 雷雨's う), 電車は
 #   空いている すいて (〜中 and 〜どころではない's tours)
 # 26: plan 306's breakdown over main's 14 (plans 305 and 306 bumped their own
 #   branch to 25: 何にもまして and 何一つ なに, 愛でなくて 愛, 若く見えます lit as
