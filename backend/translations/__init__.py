@@ -40,7 +40,7 @@ WRITTEN: dict[str, tuple[str, ...]] = {
     "deck": ("es",),
     # A deck kanji's meaning (kanji.sqlite3's meaning_{lang}, the app's own
     # lines in datas/kanji/kanji_meanings_{lang}.json).
-    "kanji": ("es",),
+    "kanji": ("es", "id"),
     # A grammar point's gloss and formation (meaning.{lang}, structure_{lang}).
     "grammar.gloss": ("es", "id"),
     # Its lesson: every step, neighbour's line and example's translation.

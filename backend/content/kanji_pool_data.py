@@ -37,7 +37,7 @@ _DB_PATH = os.path.join(_BASE_DIR, "datas", "kanji", "kanji.sqlite3")
 _COLUMNS = (
     "char", "codepoint", "radical", "stroke_count", "grade", "freq", "jlpt",
     "on_readings", "kun_readings", "readings", "nanori",
-    "meaning_en", "meaning_fr", "meaning_es", "meaning_pt",
+    "meaning_en", "meaning_fr", "meaning_es", "meaning_pt", "meaning_id",
     "in_deck", "has_svg", "sort_rank",
 )
 _SELECT = "SELECT " + ", ".join(_COLUMNS) + " FROM kanji"
