@@ -3781,7 +3781,7 @@ class TheOlderFixesJudgesRowsTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AnAdjectivesKuteTakesNoVerbsTailTests(unittest.TestCase):
-    """Plan 313: a verb's tail (〜ていく／〜てくる, 〜てしまう, 〜ている…)
+    """Plan 314: a verb's tail (〜ていく／〜てくる, 〜てしまう, 〜ている…)
     stands on a verb's て, never on an adjective's くて -- 寒くて行けなかった
     is "too cold to go", its 行け the potential; 寒くてたまらない keeps
     〜てたまらない, and たい's くて joins as an adjective's does."""
@@ -3810,7 +3810,7 @@ class AnAdjectivesKuteTakesNoVerbsTailTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ARequestAfterAConditionTests(unittest.TestCase):
-    """Plan 313: a condition closes its own clause, its が and all --
+    """Plan 314: a condition closes its own clause, its が and all --
     時間があったら来てね asks the listener to come, whoever has the time;
     the clause before a request may end in たら, なら, a conditional と,
     ても or まで after a verb. 電車が遅れて。 still answers why."""
@@ -3830,7 +3830,7 @@ class ARequestAfterAConditionTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class SorekaraIsNoFromTests(unittest.TestCase):
-    """Plan 313: the から of それから, "and then", is no half of から〜まで
+    """Plan 314: the から of それから, "and then", is no half of から〜まで
     -- the まで after it stands as "until" alone, and a real pair later in
     the sentence is found (三ページから五ページまで)."""
 
@@ -3851,7 +3851,7 @@ class SorekaraIsNoFromTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ASuffixThatInflectsEndsItsClauseTests(unittest.TestCase):
-    """Plan 313: a suffix that inflects as a verb or an adjective ends its
+    """Plan 314: a suffix that inflects as a verb or an adjective ends its
     clause as one -- 注射を怖がるから is "because he is scared of it",
     飲みづらいが "but", 怖がるだけ "only", 嫌がるのは the の of a clause --
     while the kana counter UniDic files as 汗ばむ's ばむ (さんばんは, 5ばんで)
@@ -3882,7 +3882,7 @@ class ASuffixThatInflectsEndsItsClauseTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NeverDoneTests(unittest.TestCase):
-    """Plan 313: 〜ことがある in its plain negative -- 嘘をついたことがない,
+    """Plan 314: 〜ことがある in its plain negative -- 嘘をついたことがない,
     行ったことはない, 聞いたこともない, "have never done" -- which no lesson
     writes; never 〜に越したことはない, nor 行かないことはない."""
 
@@ -3901,7 +3901,7 @@ class NeverDoneTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class GoingToDoWithThePlaceBetweenTests(unittest.TestCase):
-    """Plan 313: 〜に行きます with where one goes said between the purpose
+    """Plan 314: 〜に行きます with where one goes said between the purpose
     and the verb -- 手紙を出しに郵便局へ行った, 本を借りに、図書館へ行った,
     彼に会いに駅まで行った -- the place keeping its own particle."""
 
@@ -3923,7 +3923,7 @@ class GoingToDoWithThePlaceBetweenTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NeededIsNoExistenceTests(unittest.TestCase):
-    """Plan 313: いる in kana after what is needed is 要る, the card the
+    """Plan 314: いる in kana after what is needed is 要る, the card the
     breakdown gives it -- お金がいる, 時間がいる -- and no "there is"; a
     person in 家 is someone who is there (専門家さえいる)."""
 
@@ -3938,7 +3938,7 @@ class NeededIsNoExistenceTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class BornForTheFirstTimeTests(unittest.TestCase):
-    """Plan 313: 生まれて初めて is "for the first time in one's life", the
+    """Plan 314: 生まれて初めて is "for the first time in one's life", the
     dictionary's own expression -- no 〜てはじめて, "only after", which
     日本に来てはじめて keeps."""
 
@@ -3949,7 +3949,7 @@ class BornForTheFirstTimeTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatTheLessonsLeftOutTests(unittest.TestCase):
-    """Plan 313: points in the shapes their lessons do not write --
+    """Plan 314: points in the shapes their lessons do not write --
     といっても opening a sentence ("that said"), the written 長き of
     長きにわたって, the と a quote closes on whatever it quotes (「なぜだろう」
     とつぶやいた, 「行こう」とつぶやいた -- だれであろうと and 降ろうと stay
@@ -3983,7 +3983,7 @@ class WhatTheLessonsLeftOutTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NotThatItIsNotTests(unittest.TestCase):
-    """Plan 313: ないでは and ないでもない say "it's not that … not" or "if
+    """Plan 314: ないでは and ないでもない say "it's not that … not" or "if
     one does not" -- 気持ちもわからないではない, 言わないでは困る -- no
     〜ないで, "without doing", which 食べないで学校へ行った keeps; and
     〜とは限らない after a noun, its copula left out as writing leaves it
@@ -4002,7 +4002,7 @@ class NotThatItIsNotTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class KamoSaidShortTests(unittest.TestCase):
-    """Plan 313: かも, 〜かもしれない said short, after the adverb that says
+    """Plan 314: かも, 〜かもしれない said short, after the adverb that says
     so and after the explaining の -- そうかもね, 慣れてないのかもね --
     never the か of a question known (本当かも分からない)."""
 
@@ -4015,7 +4015,7 @@ class KamoSaidShortTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ALettersOwnParticleTests(unittest.TestCase):
-    """Plan 313, the gap report's second pass: a particle or a copula a
+    """Plan 314, the gap report's second pass: a particle or a copula a
     construction writes with its letters, which the letter pass left
     saying nothing -- 愛するがゆえに's が (the subject's が of 規模が stays
     the subject's), 子どもですら and 専門家でさえ's で (〜さえ was never found
@@ -4046,7 +4046,7 @@ class ALettersOwnParticleTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class EvenOrSoAfterNoNounTests(unittest.TestCase):
-    """Plan 313: 〜でも's "even" and "or so" on a word the tokenizer
+    """Plan 314: 〜でも's "even" and "or so" on a word the tokenizer
     makes no noun -- an amount (少しでも) or a time with its particle
     (すぐにでも, 明日にでも) -- never 誰にでも, 何でも／誰でも's, nor the
     copula's それほどでもない; から and まで after an amount said roughly
@@ -4082,7 +4082,7 @@ class EvenOrSoAfterNoNounTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AfterAWordThatIsNoNounTests(unittest.TestCase):
-    """Plan 313: points the letter pass refused for the word before them
+    """Plan 314: points the letter pass refused for the word before them
     -- だけ after an adjective (何もないだけだ); the て of a suffix that
     inflects as a verb (こわがって、); の after an adverb before a noun an
     adjective's stem makes (いちばんの楽しさ); は after べき (注目すべきは);
@@ -4129,7 +4129,7 @@ class AfterAWordThatIsNoNounTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class QuotedAndSorryTests(unittest.TestCase):
-    """Plan 313: the quotation's と and its も, which UniDic writes as one
+    """Plan 314: the quotation's と and its も, which UniDic writes as one
     particle before a verb of saying or hearing (発表されるとも聞いています,
     天才とも言える) -- listing nothing with another も (来月にも); the と
     of what a thing is held to be (証だとされた), of what one is scolded
@@ -4160,7 +4160,7 @@ class QuotedAndSorryTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatTheSecondPassDiffCaughtTests(unittest.TestCase):
-    """Plan 313: what the corpus diff of the second pass found its drafts
+    """Plan 314: what the corpus diff of the second pass found its drafts
     doing to other lines -- 置いてある after a noun read as 〜において (机
     においてあります, うけつけにおいてあります; 会議において keeps it); あまりの
     暑さ given の's point beside 〜あまり's; a bare noun's とされる made a
@@ -4182,7 +4182,7 @@ class WhatTheSecondPassDiffCaughtTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class PleaseIsNoHumbleFormTests(unittest.TestCase):
-    """Plan 313: お〜する is refused wherever the breakdown reads お願いします
+    """Plan 314: お〜する is refused wherever the breakdown reads お願いします
     as "please" (card_lookup.resolve_please) -- closing a sentence, and
     quoted (お願いしますって言った) -- and kept for the humble verb: お願い
     しました, お願いしたい, お願いしますと、すぐ来てくれた ("when I asked")."""
@@ -4199,7 +4199,7 @@ class PleaseIsNoHumbleFormTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class FromNowOnTests(unittest.TestCase):
-    """Plan 313: これから, "from now on", is one adverb (grammar_detect.
+    """Plan 314: これから, "from now on", is one adverb (grammar_detect.
     from_now): its これ is no "this one" and its から no half of から〜まで
     (これから三時まで keeps まで's "until"). "From this" keeps both -- a
     construction's から (これからすると, これから見ると) or a count picked
@@ -4226,7 +4226,7 @@ class FromNowOnTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AnErrandIsNoPlaceGoneToTests(unittest.TestCase):
-    """Plan 313: 〜に行きます across a place takes a place (郵便局へ, 駅の前の
+    """Plan 314: 〜に行きます across a place takes a place (郵便局へ, 駅の前の
     本やさんへ), never a run that is itself what one goes off to do -- a する
     noun, a pastime or a verb's stem the deck keeps as a noun: 運動会の練習
     に、手伝いに来てほしい is "come to help with the practice", no "come to

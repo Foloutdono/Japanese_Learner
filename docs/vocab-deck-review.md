@@ -998,9 +998,9 @@ B4 rest, #439's 菌): 正体, 台詞, 所有, 親父, お袋, 折, 狩り, パ�
 
 Deploy, then `migrate_vocab_ids --yes` and `migrate_pool_cards --yes`.
 
-### 313 — お願いします at N5, the owner's call (2026-11-09)
+### 314 — お願いします at N5, the owner's call (2026-11-09)
 
-Plan 313's breakdown reads a closing お願いします as the deck's "please"
+Plan 314's breakdown reads a closing お願いします as the deck's "please"
 (`card_lookup.resolve_please`), where it had read 願う "to desire". The
 deck held the word twice, in kanji at N1 and in kana at N2: plan 112's
 open pair, a kana card below its kanji card. So the N5 pages, which say
@@ -1008,7 +1008,7 @@ it from the first conversation, showed an N1 or an N2 card.
 
 The owner moved it to N5, over plan 260's rule: the lists put it at N2,
 where two signals would have stopped. Both cards became one N5 card,
-`vocab_N5_お願いします_おねがいします` (two `MOVES` lines, "Plan 313"),
+`vocab_N5_お願いします_おねがいします` (two `MOVES` lines, "Plan 314"),
 since the same word twice at one level is the duplicate 106b and 112
 merged.
 

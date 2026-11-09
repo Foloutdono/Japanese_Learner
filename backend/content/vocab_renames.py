@@ -1009,7 +1009,7 @@ MOVES: dict[str, str] = {
     "vocab_N1_嘗て_かつて": "vocab_N1__かつて",
     "vocab_N1_態々_わざわざ": "vocab_N1__わざわざ",
 
-    # ── Plan 313: お願いします at N5, the owner's call ──────────
+    # ── Plan 314: お願いします at N5, the owner's call ──────────
     # The breakdown reads a closing お願いします as the deck's "please"
     # (card_lookup.resolve_please), which the deck held twice: in kanji
     # at N1 and in kana at N2, a pair plan 112 left open. The N5 lessons

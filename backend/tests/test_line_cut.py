@@ -207,7 +207,7 @@ def test_sentences_from_cues_cuts_a_wide_cue_and_keeps_its_neighbours_whole():
 @needs_tokenizer
 def test_a_count_of_two_numbers_is_never_cut_at_its_comma():
     # 一、二回, 五、六さつ: "once or twice", "five or six books" -- one
-    # count, two numbers to the breakdown since plan 313, and its comma
+    # count, two numbers to the breakdown since plan 314, and its comma
     # no breath; a list's comma still is one.
     for line in ("水は月に一、二回で十分だと聞いていたので、忙しいわたしにも育てられると思った。",
                  "私は本を一か月に五、六さつは読む。"):
