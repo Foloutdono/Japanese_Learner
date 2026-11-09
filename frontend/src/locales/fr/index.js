@@ -1195,6 +1195,17 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',
+  // 骨組み (plan 311) : la charpente de la ligne -- ce que fait chaque
+  // partie, les rôles de study/frame.ROLES, et ce que la ligne tait.
+  frameLabel:          'Comment la ligne est construite',
+  frameRoles: {
+    topic: 'Thème', subject: 'Sujet', object: 'Objet', target: 'Cible',
+    time: 'Moment', place: 'Lieu', means: 'Moyen', reason: 'Cause',
+    condition: 'Condition', contrast: 'Opposition', purpose: 'But', quote: 'Citation',
+    modifier: 'Modificateur', predicate: 'Prédicat',
+  },
+  frameFrom:           { before: 'de la ligne précédente', after: 'de la ligne suivante' },
+  frameLeftOut:        word => `${word}, sous-entendu`,
   explaining:          'Explication en cours…',
   explainFailed:       'L\'explication n\'est pas arrivée. Réessaie.',
   explainUnavailable:  'Les explications sont indisponibles pour le moment. Réessaie dans un instant.',

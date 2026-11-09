@@ -20,6 +20,8 @@ from content.grammar_points_data import localise
 from study import line_translate
 from study.analysis import analyze_local, attach_user_state, merge_deep
 from study.cue_sentences import is_japanese
+from study.frame import ROLES, clean_frame, context_sides, frame_text
+from study.romaji import spells_out
 from study.line_cut import cut_line
 from study.sentences import split_sentences, MAX_SENTENCES
 from routes.reading import LANG_NAMES, known_lang
@@ -45,6 +47,11 @@ logger = logging.getLogger(__name__)
 # a language at all, so "explanation" (and every word's "meaning") came
 # back in whatever language the model defaulted to, in practice English,
 # regardless of what language the learner's UI was in.
+#
+# Since plan 311 the construction is a frame, not a paragraph
+# (study/frame.py has why): the line's parts in order, each a role from
+# frame.ROLES and one line on how it is put together. The roles are
+# spelled out of frame.ROLES, so the prompt and the check never differ.
 SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese phrase, segment it into words and respond with ONLY a single JSON object (no markdown fences, no commentary) matching exactly this schema:
 
 {{
@@ -55,7 +62,9 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
     {{"pattern": "...", "note": "..."}}
   ],
   "translation": "...",
-  "explanation": "..."
+  "frame": [
+    {{"jp": "...", "role": "...", "say": "..."}}
+  ]
 }}
 
 - "surface" is the word exactly as it appears in the phrase.
@@ -64,15 +73,20 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
 - "meaning" is what the word means IN THE CONTEXT of this specific phrase, not just a generic dictionary gloss. Write it in {lang_name}.
 - "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc), in {lang_name}.
 - "grammar" has one entry per grammar point listed under the phrase, in the order listed, with "pattern" copied EXACTLY as listed. "note" is ONE sentence, in {lang_name}, saying what that pattern does in THIS phrase -- what it attaches to here and what it adds to the meaning -- not a general definition. An empty list when no points are listed.
-- "translation" is the whole phrase translated into {lang_name}: one natural sentence, as a subtitle would give it, with no notes or alternatives.
-- "explanation" is 2-4 sentences, in {lang_name}, saying how the phrase is BUILT: what its predicate is and what it is said of, what modifies or completes what, and how each conjugated or combined form is put together and what each of its parts adds. Quote the Japanese pieces you name. Never restate, summarise or translate what the phrase says, and make no general remark on its mood or tone: "translation" carries the meaning, the explanation is the construction, and a nuance is named only where a form carries it.
+- "translation" is the whole phrase translated into {lang_name}: one natural sentence, as a subtitle would give it, with no notes or alternatives. Never the phrase written out in romaji.
+- "frame" says how the phrase is BUILT. Cut the phrase into its parts, in the order they come, 1 to 6 of them, together covering the whole phrase. A part is a clause or a phrase (a noun with its particle, an adverb, a clause with the word that joins it on, the predicate with its endings), never a lone particle or ending.
+  - "jp" is the part copied EXACTLY from the phrase, character for character.
+  - "role" is what the part does in the sentence, exactly one of: {roles}. The predicate is the part that carries the verb, the adjective or the noun the sentence is said with.
+  - "say" is ONE short sentence, in {lang_name}, on how the part is put together and what each of its pieces adds (a form, a particle, a conjugation), quoting the Japanese it names. Never a translation of the part or of the phrase, and no remark on mood or tone: "translation" carries the meaning, the frame is the construction.
+  - Where the phrase leaves out a copula or a particle (a noun ending the phrase with no だ, a topic with no は), add "dropped": the word left out, on the part it would follow. Only だ, です or a particle.
+  - Never supply anything else the phrase does not have: no word, no negation, no meaning it does not say. A phrase with no verb has no verb: say so in the "say" of the part it ends on.
 
 The JSON key names ("words", "surface", "base", "reading", "meaning", "pos",
-"grammar", "pattern", "note", "translation", "explanation") must stay exactly
-as shown, in English, no matter what {lang_name} is -- only the VALUES you
-write for "meaning", "pos", "note", "translation" and "explanation" go in
-{lang_name}.
-"""
+"grammar", "pattern", "note", "translation", "frame", "jp", "role", "say",
+"dropped", "from") and the role names must stay exactly as shown, in English,
+no matter what {lang_name} is -- only the VALUES you write for "meaning",
+"pos", "note", "translation" and "say" go in {lang_name}.
+""".replace("{roles}", ", ".join(ROLES))
 
 
 # ── The points the model is told about (plan 095) ──────────────
@@ -120,11 +134,21 @@ def _user_message(phrase: str, points: list[dict], context: str = "") -> str:
 # is, where in it the line comes, the lines around it -- and it rides
 # in the user block under the phrase, the schema and the system block
 # unchanged. The phrase alone is still what is broken down.
+#
+# Since plan 311 the lines around are named in one way only: a part of
+# the sentence that stands in one of them (the topic the line before
+# set) is a part of the frame `from` that side, which study/frame.py
+# keeps only where the words are in that line. Told to "say so in a
+# sentence" before, the model said so of every line, even where nothing
+# ran across ("the line before and the line after do not complete this
+# construction, so it is self-contained").
 CONTEXT_INSTRUCTION = (
     "This phrase is one line of a longer text. Break down and translate the phrase alone, "
-    "but use what follows to get its meaning right. Where its construction runs across lines "
-    "(a clause the line before leaves open, a subject or object carried over, a sentence the "
-    "next line completes), let the explanation say so in a sentence."
+    "but use what follows to get its meaning right. Where a part of its sentence stands in "
+    "the line before or after it (a topic or a subject carried over, a clause the line before "
+    "leaves open), add that part to \"frame\" as {\"jp\": the words exactly as that line has "
+    "them, \"role\": its role, \"from\": \"before\" or \"after\"}. Say nothing else about the "
+    "lines around it."
 )
 
 
@@ -242,7 +266,11 @@ def passage_context(texts: list[str], index: int, source: str = "typed") -> str:
 # paraphrase of the meaning and closed on its tone -- the translation's
 # job, which every line of a video now has under it -- and an entry
 # bought then would go on saying so.
-CACHE_VERSION = 6
+#
+# v7 (plan 311): the construction is a frame, the line's parts each
+# named and said in a line (study/frame.py), not a paragraph; an entry
+# bought under v6 has none, and the sheet would go on printing prose.
+CACHE_VERSION = 7
 
 
 def _phrase_key(phrase: str, lang: str, context: str = "") -> str:
@@ -475,15 +503,20 @@ def _call_llm(phrase: str, lang: str, points: list[dict] | None = None, context:
     with a note on each of `points` (_deep_points) and, where the caller
     knows it, where the phrase stands (`context`, deep_context).
 
-    max_tokens=1500: a segmentation of one sentence, a line per grammar
-    point, its translation and a 2-4 sentence note. Generous for the longest phrase the
-    app serves (an N1 reading sentence caps at 80 characters) and stops
-    a model that decides to write an essay from billing for it.
+    max_tokens=1800: a segmentation of one sentence, a line per grammar
+    point, its translation and its frame, a short line a part. Generous
+    for the longest phrase the app serves (an N1 reading sentence caps
+    at 80 characters) and stops a model that decides to write an essay
+    from billing for it.
 
     reasoning=False: this is a structured-extraction task over text the
     caller already has, not one that benefits from a thinking pass --
     and llm_shared documents the reasoning budget crowding out the
-    answer when the answer is long."""
+    answer when the answer is long.
+
+    A reply whose frame study/frame.py keeps nothing of (a part that is
+    not the line's, a role list in prose) is the next model's turn
+    (`accept`), never cached: the sheet has nothing else to draw."""
     lang_name = LANG_NAMES.get(lang, lang)
     try:
         content = chat(
@@ -491,7 +524,8 @@ def _call_llm(phrase: str, lang: str, points: list[dict] | None = None, context:
                 {"role": "system", "content": SYSTEM_PROMPT_TEMPLATE.format(lang_name=lang_name)},
                 {"role": "user", "content": _user_message(phrase, points or [], context)},
             ],
-            timeout=30, max_tokens=1500, reasoning=False, task="phrase",
+            timeout=30, max_tokens=1800, reasoning=False, task="phrase",
+            accept=lambda reply: _framed(reply, phrase, context),
         )
     except LLMUnavailable as e:
         logger.error("Phrase analysis has no usable LLM provider: %s", e)
@@ -540,9 +574,28 @@ _TRANSLATION_KEYS = frozenset({
 })
 
 
+def _framed(reply: str, phrase: str, context: str = "") -> bool:
+    """Whether a reply holds a frame of `phrase` study/frame.py keeps a
+    part of: chat()'s `accept` for the deep tier (plan 311)."""
+    try:
+        parsed = _normalize_explanation_key(_parse_llm_json(reply))
+    except HTTPException:
+        return False
+    return bool(clean_frame(parsed.get("frame"), phrase, *context_sides(context)))
+
+
 def _normalize_explanation_key(parsed: dict) -> dict:
     if not isinstance(parsed, dict) or "words" not in parsed:
         return parsed
+    # The frame under a translated key ("cadre", "estructura"): the one
+    # list of parts, each a {"jp": ...}, that is not the words or the
+    # grammar (plan 311).
+    if not isinstance(parsed.get("frame"), list):
+        for key, value in parsed.items():
+            if (key not in ("words", "grammar") and isinstance(value, list) and value
+                    and all(isinstance(item, dict) and "jp" in item for item in value)):
+                parsed["frame"] = value
+                break
     if not parsed.get("translation"):
         for key, value in parsed.items():
             if key.lower() in _TRANSLATION_KEYS and isinstance(value, str) and value:
@@ -607,10 +660,14 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
         # user-independent half; everything from attach_user_state
         # onward is per-user and recomputed every time.
         llm_result = lookup(context)
+        # The context the answer was bought in, which a part carried
+        # from a line around is held to (study/frame.py).
+        bought_in = context
         if llm_result is None and context and not allow_llm_call:
             # Reopened, a sentence explained before it was explained
             # where it stands still finds what was bought for it.
             llm_result = lookup("")
+            bought_in = ""
         if llm_result is None and allow_llm_call:
             if daily_limit.claim(user_id, DEEP_FEATURE, DEEP_DAILY_LIMIT) > DEEP_DAILY_LIMIT:
                 raise HTTPException(
@@ -628,12 +685,28 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
                 cached[_phrase_key(text, lang, context)] = llm_result
         if llm_result is not None:
             llm_result = _normalize_explanation_key(llm_result)
+            # Held to the line every time it is read, not only when it
+            # was bought (plan 311): the rules move, the cache does not.
+            frame = clean_frame(llm_result.get("frame"), text, *context_sides(bought_in))
+            prose = llm_result.get("explanation")
             analysis = merge_deep(
-                analysis, llm_result.get("words", []), llm_result.get("explanation", ""),
-                llm_result.get("grammar"), llm_result.get("translation", ""),
+                analysis, llm_result.get("words", []),
+                frame_text(frame) or (prose.strip() if isinstance(prose, str) else ""),
+                llm_result.get("grammar"), _translation_of(llm_result.get("translation"), text),
+                frame=frame,
             )
 
     return attach_user_state(analysis, states, user_id)
+
+
+def _translation_of(translation, text: str) -> str:
+    """The deep tier's translation of `text`, or "" where it is none:
+    the line spelled out in the alphabet («Kanshin wa mada bokura» for
+    関心はまだ僕ら, plan 311) is no translation, and the sheet shows none
+    rather than that."""
+    if not isinstance(translation, str) or spells_out(translation, text):
+        return ""
+    return translation
 
 
 # The most model calls one `deep` request can buy: the first this many
@@ -687,6 +760,7 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
         only = sentences[0]
         result.update({
             "explanation": only.get("explanation", ""),
+            "frame": only.get("frame", []),
             "translation": only.get("translation", ""),
             # Deprecated alias for the pre-2026-08 "words" shape both
             # PhraseAnalyzerScreen.jsx and ReadingScreen.jsx still read.

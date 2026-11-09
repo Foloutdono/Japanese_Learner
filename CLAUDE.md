@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **311**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **312**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -422,6 +422,20 @@ runtime purpose.
   the backend reads as the tables' owner, which RLS leaves alone, and
   nothing reads them through the Data API. A table made by hand in
   `public` is closed by hand (`scripts/sql/close_data_api.sql`).
+- **Explain is the line's frame, held to the line (plan 311).** The
+  deep tier says how a line is built as `frame`, its parts in order, each a
+  role and one line (`study/frame.py`), never a paragraph: a part is a run
+  of the line and prints the line's own text, a part carried from a line
+  around is kept only where that line holds its words, and a word the line
+  leaves out only from `frame.DROPPED` (a copula or a particle). Nothing
+  else the line lacks is ever supplied ("the unstated negative"), and the
+  lines around are named in no other way. `explanation` is the frame as
+  text (`frame_text`), for what reads it as text. A role is added to
+  `frame.ROLES` and to `frameRoles` in the three locales together, and a
+  change to the prompt or to the frame's rules bumps `CACHE_VERSION`. A
+  translation that is the line spelled out in romaji is none
+  (`romaji.spells_out`): wherever a translation is kept or shown, it is
+  checked (the deep tier's, the per-line blocks').
 - **A comprehension question answers its own miss (plan 301b).** Every
   seed question names the breakdown sentence(s) its right option rests
   on (`at`) and says in one line why (`why`, `{en, fr}`), quoting the

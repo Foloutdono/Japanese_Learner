@@ -525,11 +525,17 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
 // with its points numbered as on the subtitle.
 const faceNamed = name => $$('.anl-faces .seg__opt').find(o => o.textContent.startsWith(name))
 const EXPLANATION = 'Le cœur est 見ている : を fait de 雨 l’objet de 見る.'
-function answering({ translations = null } = {}) {
+// Since plan 311 the construction comes as the line's frame, the
+// prose its text; a reply bought before it is prose alone.
+const FRAME = [
+  { jp: '雨を', start: 0, end: 2, role: 'object', say: 'を fait de 雨 l’objet.' },
+  { jp: '見ている', start: 2, end: 6, role: 'predicate', say: '見る à la forme en て, et いる.' },
+]
+function answering({ translations = null, frame = null } = {}) {
   apiJson.mockImplementation(async url => {
     const u = String(url)
     if (u.includes('/translations')) return translations ?? { start: 0, lines: [] }
-    if (u.includes('/explain')) return { ...session.sentences[0], explanation: EXPLANATION }
+    if (u.includes('/explain')) return { ...session.sentences[0], explanation: EXPLANATION, ...(frame ? { frame } : {}) }
     return session
   })
 }
@@ -599,7 +605,7 @@ describe('the panel\'s three faces (plan 242)', () => {
     // At a heading's size, where the line stood at a lead's.
     expect(parseFloat(getComputedStyle($('.anl-blocks__jp')).fontSize)).toBeGreaterThan(26)
     // The Japanese the prose names, in the line's weight.
-    expect($$('.anl-explainpanel__body .anl-explainpanel__jp').map(j => j.textContent)).toEqual(['見ている', 'を', '雨', '見る'])
+    expect($$('.anl-explainpanel__body .anl-named').map(j => j.textContent)).toEqual(['見ている', 'を', '雨', '見る'])
     // The asking right under the prose, not at the panel's foot.
     expect(box('.anl-explainpanel .desk-ask').top - box('.anl-explainpanel__again').bottom).toBeLessThan(60)
     // The word's face and back: no second call.
@@ -630,6 +636,24 @@ describe('the panel\'s three faces (plan 242)', () => {
     faceNamed('Construction').click()
     await settle()
     $('button.anl-blocks__tile--pt').click()
+    await settle()
+    expect(faceNamed('Grammaire').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('draws the line\'s frame under its blocks, its grammar a door to the point (plan 311)', async () => {
+    answering({ frame: FRAME })
+    await openVideo()
+    faceNamed('Construction').click()
+    await expect.poll(() => $$('.anl-frame__part').length).toBe(2)
+    expect($('.anl-explainpanel__body')).toBeNull()
+    expect($$('.anl-frame__role').map(r => r.textContent)).toEqual(['Objet', 'Prédicat'])
+    expect($$('.anl-frame__jp').map(j => j.textContent)).toEqual(['雨を', '見ている'])
+    // Under the blocks, Explain again under the frame, the asking under that.
+    expect(box('.anl-frame').top).toBeGreaterThan(box('.anl-blocks').bottom)
+    expect(box('.anl-explainpanel__again').top).toBeGreaterThan(box('.anl-frame').bottom)
+    // The grammar the local tier found: を and ている, each a door.
+    expect($$('button.anl-frame__pt').map(b => b.textContent)).toEqual(['を', 'ている'])
+    $$('button.anl-frame__pt')[1].click()
     await settle()
     expect(faceNamed('Grammaire').getAttribute('aria-checked')).toBe('true')
   })

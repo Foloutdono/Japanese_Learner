@@ -119,12 +119,16 @@ FEATURES = {
         "ASK_DAILY_LIMIT caps it at 40/day, which bounds the abuse row.",
     ),
     "phrase_analysis": (
-        50, 400, 500,
+        50, 650, 580,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "
         "practice draws on ~220 fixed sentences). Only the misses bill. "
         "DEEP_DAILY_LIMIT caps the misses at 150/day (plan 211) -- the "
         "analyzer, the runs' explain and a video line alike -- which bounds "
-        "the abuse row.",
+        "the abuse row. Since plan 311 the construction is a frame, a part "
+        "a line with its role: a longer system block (~650 tokens, stable) "
+        "and a little more out than the paragraph it replaced; a reply "
+        "whose frame is not the line's is the next model's turn, rare "
+        "enough to leave out of the count.",
     ),
     "line_translation": (
         30, 900, 700,

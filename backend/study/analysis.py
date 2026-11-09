@@ -2577,7 +2577,8 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
 
 
 def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
-               llm_grammar: list[dict] | None = None, translation: str = "") -> dict:
+               llm_grammar: list[dict] | None = None, translation: str = "",
+               frame: list[dict] | None = None) -> dict:
     """Fold the deep tier's per-word glosses and prose explanation onto
     Tokens the local tier already verified -- and its per-point notes
     onto the grammar the local tier found (plan 095), and the sentence's
@@ -2615,6 +2616,10 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
     pattern the sentence does not use is dropped, exactly as a word the
     tokenizer does not confirm is. A model may echo the pattern with
     its spaces trimmed; nothing looser is matched.
+
+    `frame` (plan 311) is the line's construction, its parts each named
+    and said in a line, already held to the line by study/frame.py;
+    `explanation` is that frame as text, for what reads it as text.
 
     Returns a NEW dict; does not mutate `analysis` -- the local analysis
     is cacheable and may be shared with a caller that never buys the
@@ -2664,6 +2669,7 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
         "tokens": tokens,
         "grammar": grammar,
         "explanation": explanation,
+        "frame": list(frame or []),
         "translation": translation.strip() if isinstance(translation, str) else "",
         "deep_dropped": dropped,
     }
