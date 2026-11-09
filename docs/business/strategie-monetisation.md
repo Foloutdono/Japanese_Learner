@@ -289,17 +289,17 @@ L'objectif du propriétaire est plus ambitieux que la première proposition
 |---|---|---|
 | Ouverture des ventes | vers le 9 novembre 2026 | paiements actifs dès la validation des stores ; crédits en mode fantôme |
 | Premiers revenus | fin 2026 | premiers abonnés fondateurs, mesures calibrées, crédits activés |
-| Coûts fixes couverts | 31 mars 2027 | environ 1 330 actifs, environ 74 payants |
+| Coûts fixes couverts | 31 mars 2027 | environ 1 040 actifs, environ 58 payants |
 
 Partir de 35 actifs (au moins 2 jours d'étude sur 30, mesurés le 27 octobre)
-pour en avoir 1 330 fin mars, c'est **un peu plus que doubler chaque mois**
-(×2,2). En doublant tout juste, le seuil tombe en avril. Le business plan
-détaille les trois rythmes. Cela ne tient que si les vidéos courtes et le parrainage tournent à
+pour en avoir 1 040 fin mars, c'est **doubler chaque mois** : les coûts
+fixes sont de 181 € par mois, sans comptable (la comptabilité est tenue par
+le fondateur). Le business plan détaille les trois rythmes. Cela ne tient que si les vidéos courtes et le parrainage tournent à
 plein : le format « Can you read it? » a déjà dépassé 20 000 vues.
 
 Les outils de développement sont un coût de l'activité. Ils représentent
-environ 45 % des coûts fixes, et leur baisse est prévue fin 2026 : à 20 $ par
-mois au lieu de 100, le seuil tomberait à environ 850 actifs. Le nouveau
+environ 58 % des coûts fixes, et leur baisse est prévue fin 2026 : à 20 $ par
+mois au lieu de 100, le seuil tomberait à environ 560 actifs. Le nouveau
 montant est à saisir dans « Fixed costs » quand il sera connu.
 
 ## Acquisition payante (en attente)
