@@ -2472,12 +2472,29 @@ _ANIMALS = frozenset({"犬", "いぬ", "猫", "ねこ", "鳥", "とり", "虫", 
                       "しか", "やぎ", "山羊", "ひよこ", "はと", "鳩", "かもめ", "ふくろう", "セミ", "ネコ", "イヌ"})
 
 
+# The people a word in 家 names (plan 311): 専門家さえいる -- never 実家,
+# 国家 or 空き家, which a 家 ending also writes.
+_PEOPLE_IN_KA = frozenset({"専門家", "作家", "画家", "音楽家", "政治家", "芸術家", "建築家", "写真家", "小説家",
+                           "評論家", "研究家", "愛好家", "投資家", "資産家", "実業家", "起業家", "冒険家", "漫画家",
+                           "演出家", "作曲家", "批評家", "思想家", "活動家", "法律家", "努力家", "読書家", "勉強家",
+                           "落語家", "書道家", "登山家", "陶芸家", "料理研究家", "評論家たち", "専門家たち"})
+
+
 def _alive(word: str) -> bool:
     """Whether `word` is a person or an animal, or a name with its
     honorific (田中さん)."""
-    return word in _LIVING or word.endswith(("さん", "くん", "ちゃん", "様", "さま", "たち", "達",
-                                             # (plan 272: 初心者, 外国人, 店員, 留学生)
-                                             "者", "人", "員", "学生", "校生", "級生"))
+    return word in _LIVING or word in _PEOPLE_IN_KA or word in ("人々", "人びと", "方々") \
+        or word.endswith(("さん", "くん", "ちゃん", "様", "さま", "たち", "達",
+                          # (plan 272: 初心者, 外国人, 店員, 留学生)
+                          "者", "人", "員", "学生", "校生", "級生"))
+
+
+def needed(word: str) -> bool:
+    """Whether `word`, before が, は or も, is what いる in kana says is
+    needed -- 要る, never 居る (お金がいる, 時間がいる; plan 311): the
+    breakdown's card, which the detector's existence point must agree
+    with."""
+    return any(kanji == "要る" and callable(words) is False and word in words for kanji, _p, words in _PARTNERS)
 
 
 _TIMES = frozenset({"時間", "じかん", "日", "ひ", "年", "とし", "月", "つき", "時", "とき", "分", "ふん", "ぷん",
@@ -3880,6 +3897,11 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
             return row                     # 折り入って, "earnestly": the pool's adverb (plan 272)
     if m.lemma == "泥濘む":
         return jmdict_db.get_by_key("", "ぬかるむ")          # ぬかるんどる, "is muddy" (plan 272)
+    if m.lemma == "然様" and _hiragana(m.surface) and (i == 0 or morphemes[i - 1].pos in ("symbol", "interjection")
+                                                        or morphemes[i - 1].end != m.start):
+        # さようでございますか, "is that so" (plan 311) -- standing alone:
+        # ふくさよう is 副作用 written in kana, no "so"
+        return jmdict_db.get_by_key("左様", "さよう")
     if m.surface in ("あんた", "アンタ", "いかん") or (m.surface == "よう" and m.pos == "adverb" and m.lemma == "良く"):
         return None                        # (あんた, いかん, the west's よう: glossed, plan 272)
     if _a_gap_left(morphemes, i):
@@ -4371,15 +4393,17 @@ def _saying_row(run, hits) -> dict | None:
 
 
 def _parts_say_it(run, hits, row) -> bool:
-    """Whether a card of the run says a word of the row's meaning."""
-    meaning = (row.get("meaning") or "").lower()
+    """Whether a card of the run says a word of the row's meaning -- the
+    start of a word of it, never letters inside one: 期's "time" says
+    nothing of 一期一会's "once-in-a-lifetime encounter" (plan 311)."""
+    meaning = [w for w in re.split(r"[^a-z]+", (row.get("meaning") or "").lower()) if w]
     for m, hit in zip(run, hits):
         gloss = hit[1].get("meaning") if isinstance(hit, tuple) else None
         if gloss is None and m.pos == "noun":
             own = jmdict_db.get_by_key(m.surface, morphology.kata_to_hira(m.reading))
             gloss = own.get("meaning") if own else None
         words = [w for w in re.split(r"[^a-z]+", (gloss or "").lower()) if len(w) > 2 and w not in ("the", "and", "one", "for")]
-        if any(w[:4] in meaning for w in words):
+        if any(said.startswith(w[:4]) for w in words for said in meaning):
             return True
     return False
 
@@ -4486,6 +4510,11 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
             # (a run of cards folds as the page spells it, never through a
             # lemma's kanji it did not write: 三社とも is no 社共, plan 280)
             keys = keys[:1]
+        if honoured and run[2].surface == "さま":
+            # (...and the 様 the dictionary writes for the page's さま: お疲れ
+            # さまです is お疲れ様, "thank you for your hard work" -- no
+            # "Mr. or Mrs.", plan 311)
+            keys.append(keys[0][:-2] + "様")
         if polite:
             keys.append("お" + run[1].surface)          # 御中元, filed as お中元
         joined = "".join(m.surface for m in run)
@@ -5533,6 +5562,12 @@ def resolve_pool_whole_word(morphemes, i: int):
             len(clause) >= 2 and clause[-2].surface in ("もの", "もん") and clause[-1].surface == "か")
         row = jmdict_db.get_by_key("二度と", "にどと") if negative else None
         return (row, 3) if row is not None else None
+    if m.lemma in ("生まれる", "産まれる") and m.cform.startswith("連用形") and nxt.surface == "て" \
+            and i + 2 < len(morphemes) and morphemes[i + 2].surface in ("初めて", "はじめて"):
+        # (生まれて初めて, "for the first time in one's life", the pool's own
+        # expression -- no 〜てはじめて's "only after", plan 311)
+        row = jmdict_db.get_by_key("生まれて初めて", "うまれてはじめて")
+        return (row, 3) if row is not None else None
     if m.surface in ("いくら", "幾ら", "なんぼ") and morphology.kata_to_hira(
             "".join(t.surface for t in morphemes[i + 1:i + 5])).startswith(("なんでも", "何でも")):
         # (いくら + 何でも, "no matter how you put it" -- なんぼ the west's
@@ -5954,7 +5989,8 @@ def idiom_spans(morphemes) -> list[tuple[int, int, int]]:
             out.append((morphemes[i].start, morphemes[i + n - 2].start, morphemes[i + n - 1].end))
             continue
         whole = resolve_pool_whole_word(morphemes, i) if morphemes[i].surface in ("より", "選り", "いくら", "幾ら",
-                                                                                  "なんぼ") else None
+                                                                                  "なんぼ", "生まれ", "うまれ",
+                                                                                  "産まれ") else None
         if whole:
             out.append((morphemes[i].start, morphemes[i].start, morphemes[i + whole[1] - 1].end))
             continue                   # (よりによって's に and て, いくらなんでも's でも, plan 272)
@@ -5995,11 +6031,19 @@ def resolve_split_word(morphemes, i: int):
     if i + 1 >= len(morphemes):
         return None
     stem, ending = morphemes[i], morphemes[i + 1]
-    if (stem.pos == "verb" and ending.pos == "auxiliary" and ending.surface == "ない"
+    # (いけ is 行く's potential after a て, 持っていけない, "can't take it
+    # along", and in the other forms as often as not: いけなくなった, "became
+    # unable to go" -- the deck's いけない, "bad", only as written, plan 311)
+    going = stem.lemma in ("行く", "いく") and (
+        ending.surface != "ない" or (i > 0 and morphemes[i - 1].conjunctive and morphemes[i - 1].surface in ("て", "で")))
+    if (stem.pos == "verb" and ending.pos == "auxiliary" and ending.lemma == "ない"
+            and ending.surface in ("ない", "なかっ", "なく", "なけれ", "な", "なさ") and not going
             and _hiragana(stem.surface) and not (i > 0 and morphemes[i - 1].surface == "が")):
         # たまらない, "irresistible", is a word of its own, the deck's in
         # kana, never 溜まる, "to collect", made negative (plan 272) --
         # except with what collects as its subject: お金がたまらない.
+        # (...in any of its forms: つまらなそう, つまらなかった, くだらなさ,
+        # plan 311)
         cards = _kana_cards(stem.surface + "ない")
         if cards:
             level, entry = min(cards, key=lambda c: _level_rank(c[0]))

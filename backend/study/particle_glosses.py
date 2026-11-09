@@ -115,6 +115,12 @@ _GLOSSES = {
     "ねえ": {"en": "hey, say (calling for attention)",
             "fr": "dis, hé (pour attirer l'attention)",
             "es": "oye, eh (para llamar la atención)"},
+    "つつ": {"en": "(written, after a verb's stem) while doing; though (= ながら)",
+             "fr": "(écrit, après le radical d'un verbe) tout en faisant ; bien que (= ながら)",
+             "es": "(escrito, tras la raíz de un verbo) mientras; aunque (= ながら)"},
+    "も_douzen": {"en": "(も同然) as good as, no different from: 終わったも同然, as good as over",
+                  "fr": "(も同然) pour ainsi dire, autant dire : 終わったも同然, c'est comme si c'était fini",
+                  "es": "(も同然) prácticamente, casi: 終わったも同然, prácticamente terminado"},
     "かしら": {"en": "I wonder (mostly women's speech)",
              "fr": "je me demande (surtout dans la bouche des femmes)",
              "es": "me pregunto si… (sobre todo en boca de mujeres)"},
@@ -1356,9 +1362,15 @@ def gloss(morphemes, i: int) -> dict | None:
     elif m.pos in ("interjection", "particle") and base in ("ね", "ねえ") and m.surface != "ね" and (
             _opens(morphemes, i) or _base(morphemes[i - 1].surface) in ("ね", "ねえ")):
         key = "ねえ"
-    elif m.surface == "もん" and m.pos in ("noun", "particle") and _after_a_predicate(morphemes, i) \
-            and closes_sentence(morphemes, i):
-        key = "もん"
+    elif m.surface in ("もん", "もの") and m.pos in ("noun", "particle") and _after_a_predicate(morphemes, i) \
+            and closes_sentence(morphemes, i) and (m.surface == "もん" or m.pos == "particle"):
+        key = "もん"                         # (だって、時間がなかったんだもの: the same reason, plan 311)
+    elif m.surface == "つつ" and m.pos == "particle" and i > 0 and morphemes[i - 1].pos in ("verb", "auxiliary") \
+            and morphemes[i - 1].cform.startswith("連用形"):
+        key = "つつ"                         # 知りつつ, 生かしつつ (plan 311)
+    elif m.surface == "も" and m.pos == "particle" and i + 1 < len(morphemes) \
+            and morphemes[i + 1].surface.startswith("同然"):
+        key = "も_douzen"                    # 終わったも同然, 家族も同然 (plan 311)
     elif m.pos == "particle" and m.surface == "よ" and i > 0 and morphemes[i - 1].pos in ("noun", "pronoun") \
             and (i + 1 >= len(morphemes) or morphemes[i + 1].surface in ("\u3000", " ", "、", "，", "！", "!")
                  or morphemes[i + 1].start > m.end):

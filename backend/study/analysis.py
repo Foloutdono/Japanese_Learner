@@ -1302,7 +1302,30 @@ def _named(morphemes: list, i: int) -> bool:
         (i + 1 < len(morphemes) and morphemes[i + 1].surface in _HONORIFICS) or morphology.named_animal(morphemes, i)
         or (m.name_kind == "given" and i > 0 and morphemes[i - 1].proper and morphemes[i - 1].name_kind == "family"
             and morphemes[i - 1].end == m.start)
-        or morphology.named_alone(morphemes, i))
+        or morphology.named_alone(morphemes, i)
+        or _introduced_or_called(morphemes, i))
+
+
+def _introduced_or_called(morphemes: list, i: int) -> bool:
+    """Whether the name in hiragana at morphemes[i] is one a speaker gives
+    themselves -- 花やのたかはしです, たかはしと申します -- or one said
+    alone in its quote, 「まさと。」と言いました (plan 311). Never a word
+    the dictionary writes with a kanji (かおりです is 香り as often)."""
+    m = morphemes[i]
+    if not _hiragana(m.surface) or morphology._a_common_noun_in_kana(m.surface):
+        return False
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+    if nxt is not None and nxt.surface == "です" and (after is None or after.surface in ("。", "！", "!", "ね", "よ", "、")):
+        return True
+    if nxt is not None and nxt.surface == "と" and after is not None and after.lemma == "申す":
+        return True
+    if i == 0 or morphemes[i - 1].surface not in ("「", "『"):
+        return False
+    k = i + 1
+    while k < len(morphemes) and morphemes[k].surface in ("。", "！", "!", "？", "?", "…"):
+        k += 1
+    return k < len(morphemes) and morphemes[k].surface in ("」", "』")
 
 
 def _merged_morpheme(run: list) -> morphology.Morpheme:
@@ -1398,6 +1421,21 @@ def _written_reading(run: list) -> str:
     """A run's reading as the page writes it: a particle by its letter
     (気をつけ, きをつけ), never its sound (きおつけ, plan 272)."""
     return "".join(m.surface if m.pos == "particle" else m.reading for m in run)
+
+
+def _on_its_ending(morphemes: list, grammar: list[dict], j: int) -> bool:
+    """Whether every point written on morphemes[j] opens inside it, on
+    its ending -- the く of 悪くて (〜くて／〜で), of 悪くなる (〜くなる) --
+    and so rides on the word whole, folded or not (plan 311)."""
+    m = morphemes[j]
+    found = False
+    for g in grammar:
+        for s, e in g["segments"]:
+            if s < m.end and m.start < e:
+                if not m.start < s < m.end:
+                    return False
+                found = True
+    return found
 
 
 def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
@@ -1914,9 +1952,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             i += n
             continue
         pooled = resolve_pool_idiom(morphemes, i)
-        if pooled and not any(j in strict and j not in own_forms for j in range(i, i + pooled[1])):
+        if pooled and not any(j in strict and j not in own_forms
+                              and not (j == i + pooled[1] - 1 and _on_its_ending(morphemes, grammar or [], j))
+                              for j in range(i, i + pooled[1])):
             # 気になる, "to weigh on one's mind" (plan 272), read as written;
-            # its verb's own form (本題に入ろう) is still the form's point.
+            # its verb's own form (本題に入ろう) is still the form's point,
+            # and so is a point its last word's ending opens: 都合が悪くて,
+            # 口が悪くて嫌われる, 具合が悪くなる (plan 311).
             row, n = pooled
             run = morphemes[i:i + n]
             token = _pool_compound_dict(run, row)
@@ -2447,7 +2489,24 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # does not say those kana (card_lookup.says_its_kana): 二十さい spells the
 # lemmas of 二十歳, but its さい is said, so it is 二十 + さい, にじゅっさい,
 # never はたち; 二十歳 and はたち keep the card.
-LOCAL_REV = 41
+# 42: plan 311, what stress sentences and the gap report found -- an
+# adjective's くて takes no verb's tail (寒くて行けなかった: the potential,
+# no 〜ていく); a request after a condition is one (時間があったら来てね);
+# それから's から is no "from"; a suffix that inflects ends its clause (怖が
+# るから, 飲みづらいが); 〜たことがない; 〜に行きます across a place
+# (出しに郵便局へ行った); 生まれて初めて, お疲れさま, 一期一会 and an idiom
+# with its adjective's ending (都合が悪くて, 口が悪くて) read whole; 一日中
+# and 雨 あめ, 空く すく of a stomach or a train, 角 かど／つの／かく, 市場
+# いちば where goods are sold; 食どう 食堂, ちかくで's で, ようこそ,
+# とんでもない, the counter ばん (5ばん, さんばん) and its ordinal も; 居る
+# of 専門家さえいる and 要る's need, no "there is"; a name in kana given or
+# called (たかはしです, 「まさと。」); つつ, も同然, a closing もの; つまらない
+# in its forms, no negative and no 詰まる; といっても opening a sentence,
+# 長きにわたって, 天才といっても過言ではない; a quote's と after a
+# volitional; ねばという; 取れる of what one takes (休みが取れない, 取る's
+# potential); ないでは and ないでもない, no "without"; 幸せとは限らない;
+# そうかもね and のかもね; さようでございます, 左様.
+LOCAL_REV = 42
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
