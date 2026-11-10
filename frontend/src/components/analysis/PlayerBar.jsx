@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { formatTimecode } from '../../lib/timecode'
 import {
   FoldVideoIcon, FollowIcon, LoopIcon, PauseEachIcon, PauseIcon, PlayIcon, ReplayIcon,
-  SkipIcon, SpeakerIcon, SpeakerOffIcon,
+  SkipIcon, SongIcon, SpeakerIcon, SpeakerOffIcon,
 } from '../ui/Icons'
 
 // ── 操作 — the desk's transport bar (plan 134) ────────────────────
@@ -10,7 +10,8 @@ import {
 // play, the sentence after | the sentence again, on a loop, a stop at
 // each sentence's end | one plain track scaled to the Passage's window
 // (no step per sentence -- the owner's cut) and its clock | the speed,
-// the sound, the line following the clock, and the video folded away.
+// the sound, the line following the clock, and the video folded away,
+// its room given to the Passage as lyrics (plan 316).
 // The keys stay live and are not printed (owner-directed).
 //
 // The track and its clock are the video's own, 0 to its length (`span`,
@@ -126,16 +127,21 @@ export function PlayerBar({
       <button type="button" className={btn(follow ? ' anl-player__btn--on' : '')} onClick={onFollow} aria-pressed={follow} aria-label={t.followPlayback} title={t.followPlayback}>
         <FollowIcon size={16} />
       </button>
-      <button
-        type="button"
-        className={btn(' anl-player__btn--bare')}
-        onClick={onFold}
-        aria-expanded={!folded}
-        aria-label={folded ? t.showVideo : t.hideVideo}
-        title={folded ? t.showVideo : t.hideVideo}
-      >
-        <FoldVideoIcon size={16} />
-      </button>
+      {/* Folded, lit as the bar's other switches are when on: the column
+          is the lyrics' while it is (plan 316). A song has no picture to
+          fold, and no button for it (plan 317). */}
+      {onFold && (
+        <button
+          type="button"
+          className={btn(folded ? ' anl-player__btn--on' : ' anl-player__btn--bare')}
+          onClick={onFold}
+          aria-expanded={!folded}
+          aria-label={folded ? t.showVideo : t.hideVideo}
+          title={folded ? t.showVideo : t.hideVideo}
+        >
+          <FoldVideoIcon size={16} />
+        </button>
+      )}
     </div>
   )
 }
@@ -150,6 +156,25 @@ export function PlayerTrack({ playhead, span, onSeek }) {
     <div className="anl-pbar__track anl-ptrack" onClick={span > 0 ? onSeek : undefined} aria-hidden="true">
       <span className="anl-pbar__fill" style={{ width: `${pct}%` }} />
       <span className="anl-pbar__knob" style={{ left: `${pct}%` }} />
+    </div>
+  )
+}
+
+// 歌 — what is playing, where the picture would be (plan 317b, the
+// owner's pick N1): a song has no picture, so the place the video's
+// frame takes says what plays -- its ring, its name and, where the clock
+// is known and no bar beside it prints one, the clock -- over the track.
+// The clock reads the playhead's poll, as the bars do, so the poll
+// renders this line and not the screen around it.
+export function SongNow({ name, playhead = null, span = 0 }) {
+  const at = usePolled(playhead)
+  return (
+    <div className="anl-now">
+      <span className="anl-now__mark" aria-hidden="true"><SongIcon size={14} /></span>
+      <span className="anl-now__name">{name}</span>
+      {playhead && span > 0 && (
+        <span className="anl-now__clock">{`${formatTimecode(Math.min(at, span))} / ${formatTimecode(span)}`}</span>
+      )}
     </div>
   )
 }

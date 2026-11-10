@@ -11,8 +11,9 @@ choices.
 """
 import logging
 import random
+from functools import lru_cache
 
-from content.grammar_points_data import find, gloss, grammar_to_id, localise, texts
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, find, gloss, grammar_to_id, localise, texts
 from study.grammar_choose import choose_items, choose_payload
 from study.grammar_examples import (
     blank_span, blanked_payload, example_payload, pattern_furigana, structure_furigana,
@@ -72,6 +73,28 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
     }
 
 
+@lru_cache(maxsize=None)
+def _same_family(pattern: str) -> frozenset[str]:
+    """Every point the catalogue's `same` marks join to `pattern`, either
+    way and through one another (plan 319): なきゃ／なくちゃ is the twin of
+    なくてはいけない, which is the twin of ないといけない, so none of them
+    is drawn as a filler in another's hole, where it would say the same."""
+    edges: dict[str, set[str]] = {}
+    for entries in GRAMMAR_POINTS_BY_LEVEL.values():
+        for e in entries:
+            for r in e.get("compare", []):
+                if r.get("same"):
+                    edges.setdefault(e["pattern"], set()).add(r["pattern"])
+                    edges.setdefault(r["pattern"], set()).add(e["pattern"])
+    seen, todo = {pattern}, [pattern]
+    while todo:
+        for nxt in edges.get(todo.pop(), ()):
+            if nxt not in seen:
+                seen.add(nxt)
+                todo.append(nxt)
+    return frozenset(seen - {pattern})
+
+
 def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: str,
                      rng: random.Random | None = None, turn: int | None = None,
                      example: dict | None = None, offer: str | None = None,
@@ -100,7 +123,8 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     patterns. `authored=False` leaves those out, for the one caller that
     draws a specimen from the marked sentence beside it (routes/station).
 
-    Choices are the rivals the lesson names, first; when fewer than
+    Choices are the rivals the lesson names, first -- never one it marks
+    `same` in meaning (plan 319), which is as right in the hole; when fewer than
     CONTRAST_CHOICES - 1 of them exist, same-level verifiable patterns
     that do NOT also occur in the sentence fill the gap (the rule
     study/placement.py uses, so an item never has two right answers).
@@ -137,19 +161,26 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     blanked = blanked_payload(example, pattern, lang, level)
     fill = "".join(p["text"] for p in blanked.get("fill", []))
     lines = {r["pattern"]: r["en"] for r in entry.get("compare", [])}
+    # A rival the lesson calls the same in meaning (`same`, plan 319: だろう
+    # beside でしょう, ずに beside ないで) stands in the point's hole as well
+    # as the point, and no translation tells them apart: it is never a
+    # wrong answer, named or drawn as a filler.
+    same = {r["pattern"] for r in entry.get("compare", []) if r.get("same")}
 
     rivals = [
         r["pattern"] for r in entry.get("compare", [])
-        if r["pattern"] != pattern and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
+        if r["pattern"] != pattern and r["pattern"] not in same
+        and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
     ]
     if offer in rivals:
         rivals.remove(offer)
         rivals.insert(0, offer)
     choices = list(dict.fromkeys(rivals))[: CONTRAST_CHOICES - 1]
     if checkable and len(choices) < CONTRAST_CHOICES - 1:
+        family = same | _same_family(pattern)
         fillers = [
             g["pattern"] for g in grammar_list
-            if g["pattern"] != pattern and g["pattern"] not in choices
+            if g["pattern"] != pattern and g["pattern"] not in choices and g["pattern"] not in family
             and verifiable(g["pattern"]) and not contains_pattern(sentence, g["pattern"])
         ]
         # Drawn in a random order, each kept only where it prints as no

@@ -340,6 +340,16 @@ def test_construire_never_cuts_the_negative_off_its_word():
     assert _hole("N4", "〜ことがある", "その映画は見たことがありません。") == ["ことがありません"]
 
 
+def _kept(level, pattern, jp):
+    """The holes _word_kept makes of where the point is lit in `jp`,
+    whether or not the sentence is one Construire asks (a twist or a
+    scene line is asked only where the detector reads the point, plan
+    318: おくれることがあります, 何時ごろつきますか and 作りがいがない are
+    lit by the stems alone)."""
+    from study.grammar_tour import lit_spans
+    return [jp[a:b] for a, b in grammar_ladder._word_kept(jp, lit_spans(jp, pattern, level))]
+
+
 def test_construire_carries_a_hole_cut_inside_an_ending_to_the_words_end():
     # The stems lit a word to the middle of its ending: ことがあ|ります,
     # が分かりま|せん, せいで|す. The rest of the word goes in the hole...
@@ -351,7 +361,7 @@ def test_construire_carries_a_hole_cut_inside_an_ending_to_the_words_end():
             ("〜と思います", "母は、わたしがまだ子どもだと思っています。", ["と思っ"]),
             ("〜にします", "会うのは日よう日にしましょう。", ["にしましょう"])):
         level, _entry, _ = _point(pattern)
-        assert _hole(level, pattern, jp) == hole, jp
+        assert _kept(level, pattern, jp) == hole, jp
     # ...and the hole still stops where the word's ending begins, the
     # sentence's inflection outside it, as before.
     level, _entry, _ = _point("〜ことがある")
@@ -366,7 +376,7 @@ def test_construire_carries_a_hole_cut_inside_an_ending_to_the_words_end():
             ("〜まま", "電気をつけたままねてしまいました。", ["まま"]),
             ("〜がい", "せっかく作ったのに、だれも食べない。作りがいがないなあ。", ["がい"])):
         level, _entry, _ = _point(pattern)
-        assert _hole(level, pattern, jp) == hole, jp
+        assert _kept(level, pattern, jp) == hole, jp
     # A point's piece at the end of a word keeps its start: 大き + く.
     level, _entry, _ = _point("〜く／〜に（副詞形）")
     assert _hole(level, "〜く／〜に（副詞形）", "大きく書いてください。") == ["く"]
@@ -413,6 +423,61 @@ def test_construire_takes_de_wa_in_full_and_contracted():
     assert gap["verdict"] == "right" and gap["register"] == "polite"
     # The sentence's own answer says nothing more.
     assert "said" not in grammar_ladder.check_build(level, entry["pattern"], key, ["ではありません"], "en")["gaps"][0]
+
+
+def test_construire_takes_the_points_other_spelling():
+    # Plan 319: the translation says neither なきゃ nor なくちゃ, and the
+    # holes of 〜なきゃ／〜なくちゃ held one or the other.
+    level, entry, _ = _point("〜なきゃ／〜なくちゃ")
+    key = _key(level, entry["pattern"], "そろそろ帰らなきゃ。")
+    gap = grammar_ladder.check_build(level, entry["pattern"], key, ["なくちゃ"], "en")["gaps"][0]
+    assert gap["verdict"] == "right" and gap["said"] == "なきゃ" and gap["register"] == grammar_ladder.VARIANT
+    # 〜いかんによらず's rule gives both endings; its twin's sentence takes the point's.
+    level, entry, _ = _point("〜いかんによらず")
+    key = _key(level, entry["pattern"], "運賃は、距離のいかんにかかわらず一律です。")
+    verdict = grammar_ladder.check_build(level, entry["pattern"], key, ["いかん", "によらず"], "en")
+    assert verdict["verdict"] == "right" and verdict["gaps"][1]["said"] == "にかかわらず"
+    # A う-verb's causative passive is as right short (習わされた, the usual
+    # one) as long, both ways; an る-verb's has no short form.
+    level, entry, _ = _point("使役受身形 〜させられる")
+    for jp, typed, said in (("子どものころ、毎日ピアノを習わせられた。", "され", "せられ"),
+                            ("駅で二時間も待たされた。", "せられ", "され")):
+        gap = grammar_ladder.check_build(level, entry["pattern"], _key(level, entry["pattern"], jp), [typed], "en")["gaps"][0]
+        assert gap["verdict"] == "right" and gap["said"] == said, jp
+    key = _key(level, entry["pattern"], "父にきらいな野さいを食べさせられました。")
+    assert grammar_ladder.check_build(level, entry["pattern"], key, ["され"], "en")["verdict"] == "wrong"
+
+
+def test_a_tour_line_is_cut_only_where_the_detector_reads_the_point():
+    # Plan 319: where the detector found nothing, the stems' first match
+    # cut a twist or a scene line on the point's letters, in a rival's
+    # sentence -- 話さ［ないで］ください under 〜ないで, あそ［この］電車
+    # under この／その／あの／どの. The examples keep the stems' match.
+    for pattern, jp in (("〜ないで", "大きいこえで話さないでください。"),
+                        ("この／その／あの／どの", "とうきょうは、あそこの電車ですよ。"),
+                        ("〜ことになる", "日本語の学校に行くことにしました。")):
+        level, entry, _ = _point(pattern)
+        for key, line, *_ in grammar_ladder._build_items(level, pattern):
+            assert not (key.startswith(("tw:", "sc:")) and jp.rstrip("。") in line), (pattern, key, line)
+    # A trap the point itself is written in still is: を against に.
+    level, entry, _ = _point("を")
+    assert _hole(level, "を", "先生にてがみを書きました。") == ["を"]
+
+
+def test_a_counts_mo_holds_mo_alone():
+    # Plan 319: the hole of 〜も（強調） was lit on 三度も, and under « three
+    # whole times » 三回も was refused. The count stays in the sentence.
+    level, entry, _ = _point("〜も（強調）")
+    holes = [jp[a:b] for _k, jp, spans, *_ in grammar_ladder._build_items(level, entry["pattern"]) for a, b in spans]
+    assert holes and set(holes) == {"も"}
+    assert _hole(level, entry["pattern"], "その本は三度も読みました。") == ["も"]
+
+
+def test_the_n_of_masen_is_never_a_hole_alone():
+    # Plan 319: the detector lights a negative's ん (どこへも行きませ|ん|
+    # でした), and the hole held one kana of ません.
+    level, entry, _ = _point("何も／誰も〜ない")
+    assert _hole(level, entry["pattern"], "日よう日は、どこへも行きませんでした。") == ["どこへも", "ません"]
 
 
 def test_construire_asks_another_sentence_each_turn():

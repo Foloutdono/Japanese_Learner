@@ -60,7 +60,7 @@ import { useGridWalk } from '../hooks/useGridWalk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
-import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon, SlidersIcon } from '../components/ui/Icons'
+import { TextLinesIcon, CameraIcon, VideoIcon, SongIcon, StarIcon, SlidersIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
@@ -72,7 +72,7 @@ const ANALYZER_COLOR = 'var(--line-kaiseki)'
 // A platform's glyph on the analyzer's door, keyed by the registry
 // (components/analysis/sources.js) so a fourth intake cannot get a
 // door with nothing drawn on it.
-const INTAKE_GLYPHS = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon }
+const INTAKE_GLYPHS = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon, song: SongIcon }
 
 const LIMIT = 50
 // The whole of one syllabary, in one page. See fetchPage.
@@ -165,7 +165,7 @@ export default function DictionaryScreen({ session }) {
 	const navigate = useNavigate()
 	const analyzerStation = stationFor('/dictionary/analyzer')
 
-	// The door, and its three intakes. `?intake=` is the analyzer's own
+	// The door, and its four intakes. `?intake=` is the analyzer's own
 	// deep link (screens/AnalyzerScreen.jsx reads it once, on mount):
 	// the platform is a mode of one screen, not a page of its own, so it
 	// travels as a query rather than a path.
@@ -757,7 +757,7 @@ export default function DictionaryScreen({ session }) {
 			<DeskDockContext.Provider value={desk ? deskDock : null}>
 			<DeskColumns desk={desk} bare={showingRadicalGrid} page={category === 'grammar'} chart={isSyllabary} dock={dock}>
 			{/* The analyzer, behind its door (canvas Dictionary): one row
-			    naming the section and its three intakes. The pass tag the
+			    naming the section and its four intakes. The pass tag the
 			    canvas draws on it stays out until a purchase flow exists
 			    (plan 069, HAS_STORE). */}
 			<div className="anl-door" data-guide="dict.analyzer">
@@ -768,7 +768,7 @@ export default function DictionaryScreen({ session }) {
 						<span className="anl-door__desc">{t.analyzerDoorSub}</span>
 					</span>
 				</button>
-				{/* The three intakes are the doors they draw: a tap on the
+				{/* The four intakes are the doors they draw: a tap on the
 				    camera opens the analyzer standing on 写真, not on 文字
 				    with the camera one more tap away. Siblings of the
 				    door's own button, never inside it — a button in a

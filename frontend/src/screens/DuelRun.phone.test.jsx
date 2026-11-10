@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
@@ -127,6 +127,8 @@ beforeEach(() => {
   playDuelResult.mockClear()
   Object.values(race).forEach(f => f.mockClear())
 })
+// The lane's files share one origin: leave no language behind for the next.
+afterEach(() => { localStorage.removeItem('lang') })
 
 describe('a duel’s run', () => {
   it('reads a word’s meanings in the learner’s language', async () => {

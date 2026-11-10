@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
@@ -62,6 +62,8 @@ describe('GateCard — a line\'s modes', () => {
     localStorage.removeItem('tsuji.gateMain')
     setExtraModes.mockClear()
   })
+  // The lane's files share one origin: leave no language behind for the next.
+  afterEach(() => { localStorage.removeItem('lang') })
 
   it('boards the lanes the server marks as the learner\'s own under 主', async () => {
     await services()

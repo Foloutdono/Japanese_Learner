@@ -15,9 +15,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.SizeF;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +49,15 @@ import org.json.JSONObject;
  * the wide board, or the 2x2's without the word (widget_train_narrow),
  * each without Depart when too short to hold it. A tap opens the gate,
  * Depart the run.
+ *
+ * Settled and glazed in plan 318 (the owner's A, in the colour 5, glass,
+ * of the canvas "Tsuji — the home-screen widget, again"): the room a tall
+ * launcher gives goes to the middle of the board, the count and the word
+ * centred in it, instead of an empty band over Depart; the stripe sits
+ * under the count it splits, no line shorter than a bar; and the ground
+ * is sumi seen through. Three heights now: the board as drawn (ROOMY_DP
+ * and up), the same set tighter where it only just holds Depart, and
+ * without Depart (fit).
  */
 public class TrainWidget extends AppWidgetProvider {
 
@@ -61,9 +72,33 @@ public class TrainWidget extends AppWidgetProvider {
     // gate).
     private static final float WIDE_DP = 250f;
     private static final float TALL_DP = 160f;
+    // Tall enough for the board as drawn (plan 318): the larger count, the
+    // room round it and the 40dp gate. Between TALL_DP and this, the same
+    // board set tighter.
+    private static final float ROOMY_DP = 190f;
     // The smallest it may be resized to (widget_train_info.xml).
     private static final float LEAST_W_DP = 180f;
     private static final float LEAST_H_DP = 110f;
+
+    /** How much height the launcher gave: none to spare for Depart, just
+     *  enough for it, or enough for the board as drawn. */
+    private enum Height { SHORT, TALL, ROOMY }
+
+    private static Height heightFor(float dp) {
+        if (dp >= ROOMY_DP) return Height.ROOMY;
+        return dp >= TALL_DP ? Height.TALL : Height.SHORT;
+    }
+
+    // The stripe's bitmap, drawn for a column STRIPE_DP wide at
+    // STRIPE_PX_PER_DP and stretched to the column it lands in (fitXY):
+    // near enough that its gaps and round ends keep their size in dp.
+    private static final int STRIPE_DP = 180;
+    private static final int STRIPE_PX_PER_DP = 6;
+    private static final int STRIPE_HEIGHT_DP = 4;
+    private static final int STRIPE_GAP_DP = 2;
+    // A line's shortest bar, two and a half times the stripe's height: a
+    // line of four cards among three hundred is a short bar, never a dot.
+    private static final int STRIPE_LEAST_DP = 10;
 
     /** The lines' pigments, index.css's --line-* in the dark theme: the
      *  widget is drawn on sumi whatever the phone's theme. */
@@ -105,7 +140,7 @@ public class TrainWidget extends AppWidgetProvider {
     }
 
     /** The board for each size it may be drawn at. From Android 12 the
-     *  launcher is handed all four and draws the largest that fits, as
+     *  launcher is handed all six and draws the largest that fits, as
      *  the widget is resized; before, the size it last reported, read in
      *  portrait (the narrowest width, the tallest height). */
     private static RemoteViews viewsFor(Context context, AppWidgetManager manager, int id) {
@@ -114,16 +149,18 @@ public class TrainWidget extends AppWidgetProvider {
         Bitmap stripe = data == null ? null : stripe(data.optJSONArray("lanes"));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             Map<SizeF, RemoteViews> sizes = new HashMap<>();
-            sizes.put(new SizeF(LEAST_W_DP, LEAST_H_DP), render(context, data, stripe, false, false));
-            sizes.put(new SizeF(LEAST_W_DP, TALL_DP), render(context, data, stripe, false, true));
-            sizes.put(new SizeF(WIDE_DP, LEAST_H_DP), render(context, data, stripe, true, false));
-            sizes.put(new SizeF(WIDE_DP, TALL_DP), render(context, data, stripe, true, true));
+            for (boolean wide : new boolean[] {false, true}) {
+                float width = wide ? WIDE_DP : LEAST_W_DP;
+                sizes.put(new SizeF(width, LEAST_H_DP), render(context, data, stripe, wide, Height.SHORT));
+                sizes.put(new SizeF(width, TALL_DP), render(context, data, stripe, wide, Height.TALL));
+                sizes.put(new SizeF(width, ROOMY_DP), render(context, data, stripe, wide, Height.ROOMY));
+            }
             return new RemoteViews(sizes);
         }
         Bundle options = manager.getAppWidgetOptions(id);
         int width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, (int) WIDE_DP);
         int height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, (int) TALL_DP);
-        return render(context, data, stripe, width >= WIDE_DP, height >= TALL_DP);
+        return render(context, data, stripe, width >= WIDE_DP, heightFor(height));
     }
 
     private static JSONObject load(Context context) {
@@ -136,21 +173,20 @@ public class TrainWidget extends AppWidgetProvider {
         }
     }
 
-    private static RemoteViews render(Context context, JSONObject data, Bitmap lanes, boolean wide, boolean tall) {
+    private static RemoteViews render(Context context, JSONObject data, Bitmap lanes, boolean wide, Height height) {
         RemoteViews views = new RemoteViews(
             context.getPackageName(), wide ? R.layout.widget_train : R.layout.widget_train_narrow);
         views.setOnClickPendingIntent(R.id.widget_root, open(context, OPEN_TODAY, 0));
         views.setOnClickPendingIntent(R.id.widget_depart, open(context, OPEN_RUN, 1));
+        fit(context, views, wide, height);
 
         if (data == null) {
             // Signed out, or the app not opened since it was installed:
             // the mark and the name alone, and a tap opens the app.
             views.setTextViewText(R.id.widget_hour, context.getString(R.string.app_name));
             views.setViewVisibility(R.id.widget_figures, View.GONE);
-            if (wide) {
-                views.setViewVisibility(R.id.widget_meta, View.GONE);
-                views.setViewVisibility(R.id.widget_word, View.GONE);
-            }
+            views.setViewVisibility(R.id.widget_meta, View.GONE);
+            if (wide) views.setViewVisibility(R.id.widget_word, View.GONE);
             views.setViewVisibility(R.id.widget_stripe, View.GONE);
             views.setViewVisibility(R.id.widget_depart, View.GONE);
             return views;
@@ -173,20 +209,18 @@ public class TrainWidget extends AppWidgetProvider {
             String meta = point.optString("meta", minutes);
             views.setTextViewText(R.id.widget_count, String.valueOf(total));
             views.setViewVisibility(R.id.widget_count, View.VISIBLE);
-            if (wide) {
-                views.setTextViewText(R.id.widget_unit, unit);
-                views.setTextViewText(R.id.widget_meta, meta);
-                views.setViewVisibility(R.id.widget_meta, meta.isEmpty() ? View.GONE : View.VISIBLE);
-            } else {
-                // The 2x2 has one line for both: "23 · 12 min".
-                views.setTextViewText(R.id.widget_unit, minutes.isEmpty() ? unit : "· " + minutes);
-            }
+            views.setTextViewText(R.id.widget_unit, unit);
+            // Under the count: the minutes and the new cards on the board,
+            // the minutes alone on the 2×2.
+            String line = wide ? meta : minutes;
+            views.setTextViewText(R.id.widget_meta, line);
+            views.setViewVisibility(R.id.widget_meta, line.isEmpty() ? View.GONE : View.VISIBLE);
             views.setTextViewText(R.id.widget_depart_label, labels == null ? "" : labels.optString("depart"));
-            views.setViewVisibility(R.id.widget_depart, tall ? View.VISIBLE : View.GONE);
+            views.setViewVisibility(R.id.widget_depart, height == Height.SHORT ? View.GONE : View.VISIBLE);
         } else {
             views.setViewVisibility(R.id.widget_count, View.GONE);
             views.setTextViewText(R.id.widget_unit, labels == null ? "" : labels.optString("clear"));
-            if (wide) views.setViewVisibility(R.id.widget_meta, View.GONE);
+            views.setViewVisibility(R.id.widget_meta, View.GONE);
             views.setViewVisibility(R.id.widget_depart, View.GONE);
         }
 
@@ -194,7 +228,7 @@ public class TrainWidget extends AppWidgetProvider {
         // the app has not said what it holds line by line.
         Bitmap stripe = at == 0 ? lanes : null;
         if (stripe != null) {
-            views.setImageViewBitmap(R.id.widget_stripe, stripe);
+            views.setImageViewBitmap(R.id.widget_stripe_bars, stripe);
             views.setViewVisibility(R.id.widget_stripe, View.VISIBLE);
         } else {
             views.setViewVisibility(R.id.widget_stripe, View.GONE);
@@ -232,36 +266,99 @@ public class TrainWidget extends AppWidgetProvider {
         return words.optJSONObject(index);
     }
 
-    /** One bar a lane, as long as its share of the run, a gap between:
-     *  drawn at 100 to the stripe's 6dp height, so the gap is half its
-     *  height, as the canvas drew it (3dp under 6dp). */
+    /** The board's measures for the height it was given (plan 318): as
+     *  drawn where the launcher leaves room, set tighter where it only
+     *  just holds Depart, and without Depart's gap where it does not. The
+     *  layouts hold the board as drawn; every gap that changes is a
+     *  padding, which RemoteViews sets on every Android the app runs on
+     *  (a margin only from Android 12). */
+    private static void fit(Context context, RemoteViews views, boolean wide, Height height) {
+        boolean roomy = height == Height.ROOMY;
+        int side = px(context, wide ? 18 : 16);
+        int edge = px(context, roomy ? 16 : 12);
+        views.setViewPadding(R.id.widget_root, side, edge, side, edge);
+        int foot = height == Height.SHORT ? 0 : roomy ? 12 : 8;
+        views.setViewPadding(R.id.widget_body, 0, px(context, roomy ? 4 : 0), 0, px(context, foot));
+        views.setTextViewTextSize(R.id.widget_count, TypedValue.COMPLEX_UNIT_SP, roomy ? (wide ? 42 : 40) : 36);
+        views.setViewPadding(R.id.widget_meta, 0, px(context, roomy ? 4 : 2), 0, 0);
+        views.setViewPadding(R.id.widget_stripe, 0, px(context, roomy ? (wide ? 12 : 10) : 8), 0, 0);
+        int gate = px(context, roomy ? 4 : 2);
+        views.setViewPadding(R.id.widget_depart, 0, gate, 0, gate);
+        if (wide) views.setTextViewTextSize(R.id.widget_jp, TypedValue.COMPLEX_UNIT_SP, roomy ? 32 : 28);
+    }
+
+    private static int px(Context context, float dp) {
+        return Math.round(dp * context.getResources().getDisplayMetrics().density);
+    }
+
+    /** One bar a line, as long as its share of the run, a gap between,
+     *  none shorter than STRIPE_LEAST_DP (plan 318). */
     private static Bitmap stripe(JSONArray lanes) {
         if (lanes == null || lanes.length() == 0) return null;
-        int sum = 0;
+        int[] counts = new int[lanes.length()];
+        String[] lines = new String[lanes.length()];
+        int k = 0;
         for (int i = 0; i < lanes.length(); i++) {
             JSONObject lane = lanes.optJSONObject(i);
-            if (lane != null) sum += Math.max(0, lane.optInt("n", 0));
+            int n = lane == null ? 0 : Math.max(0, lane.optInt("n", 0));
+            if (n == 0) continue;
+            counts[k] = n;
+            lines[k] = lane.optString("line");
+            k++;
         }
-        if (sum == 0) return null;
-        final int width = 1200;
-        final int height = 24;
-        final int gap = 12;
+        if (k == 0) return null;
+        final int width = STRIPE_DP * STRIPE_PX_PER_DP;
+        final int height = STRIPE_HEIGHT_DP * STRIPE_PX_PER_DP;
+        final int gap = STRIPE_GAP_DP * STRIPE_PX_PER_DP;
+        float[] widths = barWidths(
+            Arrays.copyOf(counts, k), width - gap * (k - 1), STRIPE_LEAST_DP * STRIPE_PX_PER_DP);
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        int room = width - gap * (lanes.length() - 1);
         float x = 0;
-        for (int i = 0; i < lanes.length(); i++) {
-            JSONObject lane = lanes.optJSONObject(i);
-            if (lane == null) continue;
-            int n = Math.max(0, lane.optInt("n", 0));
-            if (n == 0) continue;
-            float w = room * (n / (float) sum);
-            paint.setColor(lineColor(lane.optString("line")));
-            canvas.drawRoundRect(x, 0, x + w, height, height / 2f, height / 2f, paint);
-            x += w + gap;
+        for (int i = 0; i < k; i++) {
+            paint.setColor(lineColor(lines[i]));
+            canvas.drawRoundRect(x, 0, x + widths[i], height, height / 2f, height / 2f, paint);
+            x += widths[i] + gap;
         }
         return bitmap;
+    }
+
+    /** Each line's bar: its share of the room, but never under the least.
+     *  A line whose share falls short takes the least, the others share
+     *  what is left, until none falls short; where even the least cannot
+     *  fit every line, each takes an equal part. */
+    static float[] barWidths(int[] counts, float room, float least) {
+        int k = counts.length;
+        float[] widths = new float[k];
+        if (k == 0) return widths;
+        if (least * k >= room) {
+            Arrays.fill(widths, room / k);
+            return widths;
+        }
+        boolean[] held = new boolean[k];
+        boolean moved = true;
+        while (moved) {
+            moved = false;
+            float free = room;
+            long sum = 0;
+            for (int i = 0; i < k; i++) {
+                if (held[i]) free -= least;
+                else sum += counts[i];
+            }
+            for (int i = 0; i < k; i++) {
+                if (held[i]) {
+                    widths[i] = least;
+                    continue;
+                }
+                widths[i] = sum == 0 ? free / k : free * counts[i] / sum;
+                if (widths[i] < least) {
+                    held[i] = true;
+                    moved = true;
+                }
+            }
+        }
+        return widths;
     }
 
     /** A door of the app -- the gate, or the run -- through the same

@@ -30,6 +30,7 @@ GROUP BY 1, 2 ORDER BY 3 DESC;
 -- title: Démarrages réussis et ratés par jour
 -- display: line
 -- size: 12x6
+-- description: Un raté = un démarrage dont la première demande a échoué ; une ligne par démarrage depuis le plan 312, une par tentative avant.
 SELECT (at AT TIME ZONE 'Europe/Paris')::date AS "Jour",
        count(*) FILTER (WHERE name = 'app_open') AS "Démarrages",
        count(*) FILTER (WHERE name = 'boot_timeout') AS "Ratés (45 s)",

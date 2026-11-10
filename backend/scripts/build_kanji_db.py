@@ -26,7 +26,9 @@ Inputs (datas/kanji/, the shipped KANJIDIC2 export):
     kanji_deck.json         the app's own JLPT deck, for in_deck
     kanji_meanings_fr.json  the French KANJIDIC2 lacks for 219 deck
                             characters (plan 215), tracked: it fills
-                            meaning_fr where the export has none
+                            meaning_fr where the export has none, and
+                            corrects it where the export is wrong
+                            (plan 319)
     kanji_meanings_es.json  the same for the Spanish of 71 (plan 302),
                             over meaning_es
     kanji_meanings_{lang}.json  any language the app writes the deck's
@@ -256,24 +258,24 @@ def build(data_dir: str, out_path: str, kanjivg_dir: str) -> None:
         print(f"  ! {len(missing)} deck characters are not in KANJIDIC2: {''.join(sorted(missing))}")
 
 
-# The languages whose own file only fills what KANJIDIC2 leaves empty.
+# Every language's own file wins over the export where both have a line.
 # French: KANJIDIC2's French stops short of 219 of the deck's characters --
 # name kanji, mostly (蒼, 聡, 鴻, 蓮) -- and a French learner read their
 # cards, their choices and their dictionary plates in English
 # (content/kanji_meanings.py). The file is the app's own French for them
 # (plan 215), written from the character's senses rather than copied from
-# a published list, and never overrides a French meaning the export
-# carries.
-#
-# Every other language's file wins over the export where both have a
-# line. Spanish's (plan 302): KANJIDIC2's Spanish stops short of 71 of the
+# a published list; it filled only the empty lines until plan 319 found
+# the export giving some characters the senses of a lookalike -- 誠
+# « avertir » (誡's), 幣 « mauvaise habitude » (弊's), 抑 « pousser »
+# (押's) -- and the deck's corrected lines now live in the file.
+# Spanish's (plan 302): KANJIDIC2's Spanish stops short of 71 of the
 # deck's characters, and the review of the deck's Spanish found it missing
 # the sense a learner meets first (来 "next", 本 "true"), reading English
 # words in the wrong sense ("rule" as regla) and describing lookalike
-# characters (憶 given 億's "100 millones"), so the deck's corrected lines
-# live in the file and override it. A language KANJIDIC2 does not have at
-# all is the file's alone, in a column added for it (plan 312).
-FILLS_ONLY = frozenset({"fr"})
+# characters (憶 given 億's "100 millones"). A language KANJIDIC2 does not
+# have at all is the file's alone, in a column added for it (plan 312).
+# A language listed here would only fill what the export leaves empty.
+FILLS_ONLY: frozenset[str] = frozenset()
 
 
 def own_langs(data_dir: str) -> list[str]:

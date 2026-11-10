@@ -82,7 +82,19 @@ def _cost(kana: str, level: str) -> int | None:
 # has no card for (the pool's), entered as a first-year word is: MeCab
 # cut ほいくえん into ほいく + え + んで, みずたまり into み + ず + たまり
 # (見る's negative), おえかき into two interjections and a fence (plan 272).
-_PAGE_WORDS = (("保育園", "ほいくえん"), ("水たまり", "みずたまり"), ("お絵かき", "おえかき"))
+# (銭湯, the public bath of a beginner's story, plan 314: せんとう was cut
+# into せん + とう, "note" + "lamp"; the deck's 先頭 and 戦闘 read alike, an
+# N2 and an N1 word nobody's first pages write in kana. And 富士山, the
+# mountain every first year climbs in kana: ふじさん was ふじ + さん,
+# "wisteria" + "Mr.".)
+_PAGE_WORDS = (("保育園", "ほいくえん"), ("水たまり", "みずたまり"), ("お絵かき", "おえかき"), ("銭湯", "せんとう"),
+               # (dearer to cut: ふじ + さん is a name and its title, which
+               # MeCab prices low -- ふじさんにのぼりたい, plan 314)
+               ("富士山", "ふじさん", 10000))
+
+# Their lemmas: the word the page meant, which no deck card read alike is
+# (card_lookup._kana_noun).
+PAGE_LEMMAS = frozenset(kanji for kanji, *_rest in _PAGE_WORDS)
 
 # A word written from a numeral is its numeral and its counter to the
 # tokenizer, in kana as in kanji (いち + ど), and its spelling is too often
@@ -273,12 +285,12 @@ def rows(tagger) -> list[list[str]]:
                 # level, then the deck's order.
                 if held is None or rank < held[0]:
                     chosen[kana] = (rank, kanji, parts, cost)
-    for kanji, kana in _PAGE_WORDS:
+    for kanji, kana, *cost in _PAGE_WORDS:
         # (the few a picture book writes in kana that the deck has no
         # card for: ほいくえんで was ほいく + え + んで, plan 272)
         parts = list(tagger(kanji))
         if kana not in chosen and parts and all(p.feature.cType in (None, "*") for p in parts):
-            chosen[kana] = (_LEVEL_RANK["N4"], kanji, parts, _cost(kana, "N4"))
+            chosen[kana] = (_LEVEL_RANK["N4"], kanji, parts, cost[0] if cost else _cost(kana, "N4"))
     out = []
     for kana, (_, kanji, parts, cost) in sorted(chosen.items()):
         out.append(_row(kana, kanji, parts, cost))

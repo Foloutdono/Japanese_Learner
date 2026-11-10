@@ -979,6 +979,26 @@ screen, A on the lock screen, reminder 2, its Depart the gate.
   the ring are a share a line**, in the lines' order, as Today's dial is
   an arc a line (`lineShares` in `domain/lanes.js`): never a bar a lane,
   which cut the stripe into a dozen pieces of the same few pigments.
+- **On Android the board is settled and glass** (plan 318, the owner's
+  A in the colour 5 of the canvas "Tsuji — the home-screen widget,
+  again"). The head stands at the top and Depart at the foot, and the
+  room a tall launcher gives goes to the middle, where the count and
+  the word are centred: never an empty band over the gate. The stripe
+  sits under the count it splits, and **no line's bar is shorter than
+  two and a half times the stripe's height**, so a line of four cards
+  among three hundred is a short bar, never a dot. The word's hairline
+  is as tall as the middle, and its meaning is in the soft ink, under
+  the word rather than as loud as it. The ground is **sumi seen
+  through** (62%, ringed in the paper ink at 10%): a home-screen
+  widget cannot blur what is behind it, so it is glass, not frost,
+  and its soft ink is a step lighter than the panel's (`#cdc0a6`) to
+  hold over a bright wallpaper. The board is drawn at three heights:
+  as drawn from 190dp, set tighter where it only just holds Depart,
+  and without Depart below that (`TrainWidget.fit`). **The iPhone's
+  board is the same layout on sumi**: iOS does not let a home-screen
+  widget be seen through to the wallpaper, so it keeps the opaque
+  ground and the panel's soft ink, and its small, one tap, has no
+  Depart (`TsujiWidget.swift`'s `Board`, `Figures`, `Stripe`).
 - **The lock screen is A's**: the count in a ring cut into the lines'
   shares, the word alone in the rectangle, the hour and the count on
   the inline line — in the lock screen's one ink.
@@ -991,7 +1011,7 @@ screen, A on the lock screen, reminder 2, its Depart the gate.
   its door is the gate's paces.
 - **The native copies follow the tokens.** A widget cannot read
   `index.css`, so its inks are the dark theme's copied by value
-  (`Ink` in `TsujiWidget.swift`, the `widget_*` drawables,
+  (`Ink` in `TsujiWidget.swift`, the `widget_*` drawables and layouts,
   `TrainWidget.lineColor`): a change to a pigment, the panel's inks or
   the gate's gold is a change there too.
 
@@ -2712,6 +2732,49 @@ line here says otherwise.
   and its translation a rung down with it (`useLineFit`). Measured, never
   guessed from the line's length; past the floor the page scrolls behind
   the dock, as a tall card does.
+  **Folded, the picture's room is the Passage as lyrics** (plan 316, the
+  owner's picks V2, C and D2 of the canvas "Tsuji analyser — the video
+  hidden, the lines as lyrics"). The video folds away on both widths --
+  the desk's fold on its bar, lit while it holds; on a phone a pull
+  hanging from the picture's foot, a tab of its sumi, the same button at
+  the top of the lyrics bringing it back -- and the player stays mounted,
+  playing out of sight: a destroyed one cannot report the clock. The room
+  holds every line (`components/analysis/Lyrics`), each over its
+  translation (the Affichage sheet's switch says whether), the one in
+  focus drawn as its subtitle at the heading size, its readings, rules,
+  grammar and sung sweep kept, the others in the panel's soft ink (a rung
+  down on a phone), each a press that plays the video from it. A line
+  walked to there -- pressed, skipped to, stepped to with ↑/↓ -- keeps
+  the lyrics following the song, where with the picture up a stop picked
+  holds the line; the list holds the line in focus a third of the way
+  down its own box.
+  On a phone the sumi grows from the head to the dock, the stage the
+  screen's height; on the desk the lyrics take the route map's column
+  too, each line's time before it, and its search, filters and pins come
+  back with the picture. The reference's coloured ground was not taken (a
+  line's pigment is never a fill), nor a third ink for the lines sung:
+  the lines either side share the soft one.
+  **A song is lyrics from the start** (plan 317, the owner's pick S1 of
+  the canvas "Tsuji analyser — a song from an audio file", and plan
+  317b's picks L2, N1 and E3 of its later rows). It comes in through a
+  sheet of its own -- on a phone the ♪ row of the entry line's ＋; on the
+  desk the fourth platform, and a song dropped on the page: the one
+  button that picks a song and what it takes, then the song as one row
+  (its mark, its name over its length and kind, Changer), the lyrics if
+  the learner has them, three lines tall with what they are for as
+  their placeholder, and Transcrire, with two quiet lines under it
+  saying where the audio goes and where the song stays. While it is
+  heard it waits at the head of the shelf, its file's name over the
+  word and the three dots, a row that opens nothing. It has no
+  picture, so its Passage is the lyrics on both widths, with nothing to
+  fold, and plays from the learner's own file; where the picture would
+  be, the song's name in the station's ring and, on a phone, its clock,
+  over a track that stands in from the edges as the lyrics do (the
+  desk's bar prints the clock). Reopened where that file is not, the
+  transport's place holds the one action that brings the sound back,
+  the file asked for again, and a line saying why; the lyrics stand
+  meanwhile. The desk's four platforms share the column's one width at
+  the term's tracking, as the panel's tight faces do.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its
@@ -2724,12 +2787,16 @@ line here says otherwise.
   Before a Passage, the analyser is the learner's passages (plan 136, the
   owner's pick C of three drawn directions): the one console over a card
   each, and the intake the column beside them at a phone's width -- the
-  three sources on one control, the video's a column with one filled
+  four sources on one control, the video's a column with one filled
   action (the fetch where the server can, else the bookmark's setup until
   it has been used, else the video on YouTube). A file dropped anywhere
   on the page is taken by the intake that reads it. Under the desk it is
-  one line to paste into over a row per passage, the video and photo
-  intakes opening as sheets.
+  one line to paste into over a row per passage, and beside the field
+  one ＋ for every other way in (plan 317b, the owner's pick E3): its
+  sheet names each -- the photo, the video, the song, a subtitle file --
+  over what it takes, a row opening its intake's sheet in its place or,
+  for the subtitle file, the picker. The line's field keeps its own
+  words on one line, which four doors beside it no longer left room for.
   A deck's Browse and More open in the deck page's slot, a
   gate lesson's rival in the run's side, the grab's walkthrough in the
   intake's place, a kanji's readings in the entry's own place, the iOS install

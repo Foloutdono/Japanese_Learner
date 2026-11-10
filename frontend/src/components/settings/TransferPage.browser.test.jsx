@@ -111,7 +111,11 @@ describe('Settings › Correspondance', () => {
     globalThis.fetch.mockClear()
     serve()
   })
-  afterEach(() => cleanup())
+  afterEach(async () => {
+    await cleanup()
+    // The lane's files share one origin: leave no language behind for the next.
+    localStorage.removeItem('lang')
+  })
 
   it('reads an Anki file, prints what the course finds and punches it', async () => {
     await mount()

@@ -28,7 +28,8 @@ from content import jmdict_fr
 import content.vocab_jmdict_data as jmdict_db
 from study.card_lookup import _card  # noqa: E402  (the deck card spelled so, plan 306)
 from study.card_lookup import (
-    resolve_morpheme, resolve_compound, resolve_phrase, compound_reading, resolve_lemma,
+    resolve_morpheme, resolve_compound, resolve_phrase, resolve_please, resolve_from_now, compound_reading,
+    resolve_lemma,
     resolve_pool_morpheme, resolve_pool_compound, resolve_saying, pool_gloss,
     resolve_function_word, resolve_opening, resolve_pool_phrase, resolve_idiom,
     resolve_split_word, resolve_adverb_tail, resolve_adverb_whole, resolve_whole_word, resolve_name_fragments, resolve_polite_noun,
@@ -1296,7 +1297,30 @@ def _named(morphemes: list, i: int) -> bool:
         (i + 1 < len(morphemes) and morphemes[i + 1].surface in _HONORIFICS) or morphology.named_animal(morphemes, i)
         or (m.name_kind == "given" and i > 0 and morphemes[i - 1].proper and morphemes[i - 1].name_kind == "family"
             and morphemes[i - 1].end == m.start)
-        or morphology.named_alone(morphemes, i))
+        or morphology.named_alone(morphemes, i)
+        or _introduced_or_called(morphemes, i))
+
+
+def _introduced_or_called(morphemes: list, i: int) -> bool:
+    """Whether the name in hiragana at morphemes[i] is one a speaker gives
+    themselves -- 花やのたかはしです, たかはしと申します -- or one said
+    alone in its quote, 「まさと。」と言いました (plan 314). Never a word
+    the dictionary writes with a kanji (かおりです is 香り as often)."""
+    m = morphemes[i]
+    if not _hiragana(m.surface) or morphology._a_common_noun_in_kana(m.surface):
+        return False
+    nxt = morphemes[i + 1] if i + 1 < len(morphemes) else None
+    after = morphemes[i + 2] if i + 2 < len(morphemes) else None
+    if nxt is not None and nxt.surface == "です" and (after is None or after.surface in ("。", "！", "!", "ね", "よ", "、")):
+        return True
+    if nxt is not None and nxt.surface == "と" and after is not None and after.lemma == "申す":
+        return True
+    if i == 0 or morphemes[i - 1].surface not in ("「", "『"):
+        return False
+    k = i + 1
+    while k < len(morphemes) and morphemes[k].surface in ("。", "！", "!", "？", "?", "…"):
+        k += 1
+    return k < len(morphemes) and morphemes[k].surface in ("」", "』")
 
 
 def _merged_morpheme(run: list) -> morphology.Morpheme:
@@ -1392,6 +1416,21 @@ def _written_reading(run: list) -> str:
     """A run's reading as the page writes it: a particle by its letter
     (気をつけ, きをつけ), never its sound (きおつけ, plan 272)."""
     return "".join(m.surface if m.pos == "particle" else m.reading for m in run)
+
+
+def _on_its_ending(morphemes: list, grammar: list[dict], j: int) -> bool:
+    """Whether every point written on morphemes[j] opens inside it, on
+    its ending -- the く of 悪くて (〜くて／〜で), of 悪くなる (〜くなる) --
+    and so rides on the word whole, folded or not (plan 314)."""
+    m = morphemes[j]
+    found = False
+    for g in grammar:
+        for s, e in g["segments"]:
+            if s < m.end and m.start < e:
+                if not m.start < s < m.end:
+                    return False
+                found = True
+    return found
 
 
 def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
@@ -1777,6 +1816,30 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             tokens.append(_age_dict(morphemes[i:i + aged], numbers, i))
             i += aged
             continue
+        later = resolve_from_now(morphemes, i)
+        if later:
+            # これから, "from now on" (plan 314): the deck's adverb, its parts
+            # the words it is made of, which every count reads as before.
+            level, entry, raw_id, n = later
+            token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
+            token["pos"] = "adverb"
+            token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
+                               "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                              for k in range(i, i + n) if morphemes[k].pos != "particle"]
+            tokens.append(token)
+            i += n
+            continue
+        please = resolve_please(morphemes, i)
+        if please:
+            # お願いします closing what is said, "please" (plan 314): the
+            # deck's N5 card, counted as itself like any set phrase's, so a
+            # page that says it no longer counts 願う "to desire".
+            level, entry, raw_id, n = please
+            token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
+            token["pos"] = "interjection"
+            tokens.append(token)
+            i += n
+            continue
         phrase = resolve_phrase(morphemes, i)
         if phrase:
             level, entry, raw_id, n = phrase
@@ -1907,9 +1970,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             i += n
             continue
         pooled = resolve_pool_idiom(morphemes, i)
-        if pooled and not any(j in strict and j not in own_forms for j in range(i, i + pooled[1])):
+        if pooled and not any(j in strict and j not in own_forms
+                              and not (j == i + pooled[1] - 1 and _on_its_ending(morphemes, grammar or [], j))
+                              for j in range(i, i + pooled[1])):
             # 気になる, "to weigh on one's mind" (plan 272), read as written;
-            # its verb's own form (本題に入ろう) is still the form's point.
+            # its verb's own form (本題に入ろう) is still the form's point,
+            # and so is a point its last word's ending opens: 都合が悪くて,
+            # 口が悪くて嫌われる, 具合が悪くなる (plan 314).
             row, n = pooled
             run = morphemes[i:i + n]
             token = _pool_compound_dict(run, row)
@@ -1939,6 +2006,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
             token["reading"] = _written_reading(morphemes[i:i + n])     # (なんぼなんでも, as said, plan 272)
             token["furigana"] = align_deck(token["surface"], token["reading"])
             token["pos"] = "adverb"
+            if any(deck_hits[k] for k in range(i, i + n)):
+                # (...keeping the deck's words it is made of, as every fold
+                # does, which a sentence written for a level still counts:
+                # 多少なりとも's 多少, plan 314)
+                token["parts"] = [{"surface": morphemes[k].surface, "lemma": morphemes[k].lemma, "pos": morphemes[k].pos,
+                                   "vocab_match": _deck_match(*deck_hits[k]) if deck_hits[k] else None}
+                                  for k in range(i, i + n) if morphemes[k].pos != "particle"]
             tokens.append(token)
             i += n
             continue
@@ -2440,10 +2514,57 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # does not say those kana (card_lookup.says_its_kana): 二十さい spells the
 # lemmas of 二十歳, but its さい is said, so it is 二十 + さい, にじゅっさい,
 # never はたち; 二十歳 and はたち keep the card.
-# 42: a grammar point carries its `structure_id` and a deck card's match
-# its `meaning_id` (plan 312b), Indonesian beside the Spanish, and a name
-# read as one says so in Indonesian too.
-LOCAL_REV = 42
+# 42: plan 314, what stress sentences and the gap report found -- an
+# adjective's くて takes no verb's tail (寒くて行けなかった: the potential,
+# no 〜ていく); a request after a condition is one (時間があったら来てね);
+# それから's から is no "from"; a suffix that inflects ends its clause (怖が
+# るから, 飲みづらいが); 〜たことがない; 〜に行きます across a place
+# (出しに郵便局へ行った); 生まれて初めて, お疲れさま, 一期一会 and an idiom
+# with its adjective's ending (都合が悪くて, 口が悪くて) read whole; 一日中
+# and 雨 あめ, 空く すく of a stomach or a train, 角 かど／つの／かく, 市場
+# いちば where goods are sold; 食どう 食堂, ちかくで's で, ようこそ,
+# とんでもない, the counter ばん (5ばん, さんばん) and its ordinal も; 居る
+# of 専門家さえいる and 要る's need, no "there is"; a name in kana given or
+# called (たかはしです, 「まさと。」); つつ, も同然, a closing もの; つまらない
+# in its forms, no negative and no 詰まる; といっても opening a sentence,
+# 長きにわたって, 天才といっても過言ではない; a quote's と after a
+# volitional; ねばという; 取れる of what one takes (休みが取れない, 取る's
+# potential); ないでは and ないでもない, no "without"; 幸せとは限らない;
+# そうかもね and のかもね; さようでございます, 左様.
+# 43: plan 314, the gap report's second pass -- a construction's own
+# particle (愛するがゆえに's が, ですら and でさえ's で, っぱなしで's で,
+# 〜ないとも限らない on ない the adjective, 言いのがれにすぎない); 〜でも on an
+# amount or a time (少しでも, すぐにでも); から／まで after ぐらい and ごろ; ほど
+# で, the time it takes; 〜らしい after how things stand (必要らしい,
+# つもりらしい); だけ after an adjective, こわがって's て, いちばんの's の, は
+# after べき, すきなしずかな's な, 私ごときが, 突然で before an apology; the
+# quotation's と after more verbs and とも cut into と and も; glosses for
+# とのこと, となると, までとする, 人がね、と, 少しでいい, 聞きはしても, ては
+# いかが, 初めてなもの; せんとう 銭湯 and ふじさん 富士山, 有名人, 声がけ,
+# 仕組みづくり, みだりに, 多少なりとも, 何なりと, 五、六, 言いたげに, なくされた,
+# かいてある 描く, なおる 直る／治る; a stem after a noun's の as the noun
+# (うけつけ 受付); あの方 かた; 置いてある no 〜において.
+# 44: plan 314 -- お願いします closing what is said (or quoted) is the deck's
+# set phrase, "please" (card_lookup.resolve_please), its parts the cards
+# it is made of; no 願う "to desire" under a request.
+# 45: plan 314 -- これ + から is the deck's これから, "from now on"
+# (grammar_detect.from_now), no "this one" and no から〜まで; "from this"
+# (これからすると, これから一つ選んで) keeps its parts.
+# 46: plan 314's review -- the folds over deck cards read in French and
+# Spanish (有名人, 特別展, 多少なりとも, 何なりと, 生まれて初めて, 一期一会,
+# 口が悪い, 耳が遠い, and 左様, 声かけ, みだりに, づくり: jmdict_fr/es lines),
+# and an errand is no place gone to (練習に、手伝いに来て).
+# 47: plan 314 -- お願いします is one N5 card (the owner's call): both
+# spellings fold to it, and it is counted as itself, no longer as the
+# お, 願う and する it is made of.
+# 48: plan 319 -- 〜ことだ after a とは topic is a definition's こと and だ
+# (「ゆずる」とは、…あげることだ), no advice; 〜に決まっている after a count
+# is 決まる's « set for » (出発は九時に決まっている), no sure guess; and the
+# catalogue's corrected sentences, whose lessons the detector reads.
+# 49: plan 312b, on main's 48 -- a grammar point carries its `structure_id`
+# and a deck card's match its `meaning_id`, Indonesian beside the Spanish,
+# and a name read as one says so in Indonesian too.
+LOCAL_REV = 49
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

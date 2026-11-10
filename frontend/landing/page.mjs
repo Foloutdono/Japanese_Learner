@@ -760,6 +760,21 @@ const FORWARD_QUERY = ['code', 'token_hash', 'error', 'error_code', 'error_descr
 const FORWARD_HASH = ['access_token', 'error', 'error_code', 'error_description']
 const STAY = 'tsuji-landing'
 
+// 入口 (plan 313): the first arrival's ?src= and the HOST of the page
+// that sent the visitor, noted on the device before anything forwards
+// (src/lib/arrival.js reads it and sends only its class). Its own try:
+// a storage that refuses must not keep a sign-in's return from going on.
+export const ARRIVAL_KEY = 'tsuji.arrival'
+
+export function arrivalScript() {
+  return '(function(){try{if(localStorage.getItem(\'' + ARRIVAL_KEY + '\'))return;'
+    + 'var s=new URLSearchParams(location.search).get(\'src\'),r=null;'
+    + 'if(s)s=s.toLowerCase();if(s&&!/^[a-z0-9_-]{1,20}$/.test(s))s=null;'
+    + 'try{r=document.referrer?new URL(document.referrer).hostname:null}catch(e){}'
+    + 'if(r&&/(^|\\.)(tsuji\\.app|vercel\\.app|localhost)$/.test(r))r=null;'
+    + 'if(s||r)localStorage.setItem(\'' + ARRIVAL_KEY + '\',JSON.stringify({src:s,ref:r}))}catch(e){}})()'
+}
+
 export function forwardScript() {
   const any = (list, from) => `${JSON.stringify(list)}.some(function(k){return ${from}.has(k)})`
   return '(function(){try{var l=location,q=new URLSearchParams(l.search),h=new URLSearchParams(l.hash.slice(1));'
@@ -804,7 +819,7 @@ ${Object.values(PAGES).filter(p => p.lang !== lang).map(p => `<meta property="og
 <link rel="icon" href="/pwa-64x64.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png">
 ${fonts}
-<script>${forwardScript()}</script>
+<script>${arrivalScript()}</script><script>${forwardScript()}</script>
 <script>${THEME}</script>
 <style>${faces}${styles()}</style>
 <script type="application/ld+json">${safeJson(jsonLd(t, facts, media, live))}</script>

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { userEvent } from 'vitest/browser'
+import { cdp, userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
@@ -1162,6 +1162,33 @@ describe('first contact, finished (P13, plan 155)', () => {
     await settle(40)
     expect(live().dataset.dir).toBe('back')
     expect($('.brd__car--out').dataset.dir).toBe('back')
+  })
+
+  it('keeps the leaving car on the frames\' clock, however late they come', async () => {
+    await board()
+    // The frames held back from the pick on, as a busy runner holds them
+    // (CI, 2026-11-10): the document's clock stands still while the
+    // wall's runs on, past the 820 ms a timer once gave the pull and
+    // short of the 5 s the car is kept at the longest. The car the pick
+    // sent off waits for them, not a frame of its fade drawn: on the
+    // timer it was gone before it had faded.
+    await cdp().send('Animation.setPlaybackRate', { playbackRate: 0 })
+    try {
+      inCar('[data-kana="both"]').click()
+      await vi.waitFor(() => expect($('.brd__car--out')).not.toBeNull(), { timeout: 2000, interval: 10 })
+      await settle(1500)
+      expect($('.brd__car--out')).not.toBeNull()
+      expect(opacityOf($('.brd__car--out'))).toBe(1)
+    } finally {
+      await cdp().send('Animation.setPlaybackRate', { playbackRate: 1 })
+    }
+    // The frames come: it fades, and goes once the arriving car has landed.
+    await vi.waitFor(() => {
+      const out = $('.brd__car--out')
+      expect(out).not.toBeNull()
+      expect(opacityOf(out)).toBe(0)
+    }, { timeout: 5000, interval: 20 })
+    await vi.waitFor(() => expect($('.brd__car--out')).toBeNull(), { timeout: 5000, interval: 20 })
   })
 })
 

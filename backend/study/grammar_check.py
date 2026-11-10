@@ -227,6 +227,18 @@ QUIZ_QUESTIONS = (4, 6)
 TOUR_CHOICES = 3
 MAX_LINE_CHARS = 60
 MAX_TOUR_CHARS = 220
+# A tour's question is answered by understanding, and length is the eye's
+# first guess: written with care, the right answer drifts to the longest
+# (the conversation bank's LENGTH_TELL, plan 217). Measured over the tours
+# (plan 319), a twist's right reading was the longer of the two shown 64-73%
+# of the time and a meaning question's the longest of three up to half. So
+# no right answer stands out by its size -- half again as long as the
+# longest wrong one shown, and ten characters longer -- and across a level,
+# in each language a learner reads, picking the longest answer (of three,
+# the shortest too) wins about as often as a blind pick, ties shared:
+# within these bounds, by the number of answers shown.
+STANDS_OUT = (1.5, 10)
+TOUR_LENGTH_TELL = {2: (0.40, 0.60), 3: (0.25, 0.42)}
 
 
 def _carries(jp: str, pattern: str, level: str) -> bool | None:
@@ -400,6 +412,7 @@ def _tour_problems(level: str, entry: dict, rich: bool) -> list[str]:
                 out.append(f"tour scene: the wrong answer {jp!r} writes the point too")
     if "quiz" in tour:
         out += _quiz_problems(level, entry, rich)
+    out += _stands_out(entry)
     out += _repeat_problems(entry)
     return out
 
@@ -484,6 +497,91 @@ def _quiz_problems(level: str, entry: dict, rich: bool) -> list[str]:
             # beside a rival that carries it).
             if can_find(pattern) and not any(_carries(line, pattern, level) for line in lines[1:]):
                 out.append(f"{what}: no wrong line writes the point, so finding it answers the question")
+    return out
+
+
+def tour_answers(entry: dict) -> list[tuple[str, str, list[str]]]:
+    """Every set of answers the point's tour shows, the right one first,
+    as (where, language, answers): a twist's two readings (the third is
+    never shown) and a meaning question's three, in each language a
+    learner reads; a form question's fillings, a use question's lines and
+    the scene's replies, in Japanese ("ja")."""
+    tour = entry.get("tour")
+    if not isinstance(tour, dict):
+        return []
+    out: list[tuple[str, str, list[str]]] = []
+
+    def read(where: str, choices, langs) -> None:
+        for lang in langs:
+            texts = [c if lang == "ja" else (c.get(lang) if isinstance(c, dict) else None) for c in choices]
+            if all(isinstance(t, str) for t in texts):
+                out.append((where, lang, texts))
+
+    for n, twist in enumerate(tour.get("twists") or []):
+        choices = twist.get("choices") if isinstance(twist, dict) else None
+        if isinstance(choices, list) and len(choices) == TOUR_CHOICES:
+            read(f"tour twist {n}", choices[:2], TEXT_LANGS)
+    for n, q in enumerate(tour.get("quiz") or []):
+        choices = q.get("choices") if isinstance(q, dict) else None
+        if isinstance(choices, list) and len(choices) == TOUR_CHOICES:
+            read(f"tour quiz {n}", choices, TEXT_LANGS if q.get("kind") == "meaning" else ("ja",))
+    scene = tour.get("scene")
+    ask = scene.get("ask") if isinstance(scene, dict) else None
+    choices = ask.get("choices") if isinstance(ask, dict) else None
+    if isinstance(choices, list) and len(choices) == TOUR_CHOICES:
+        read("tour scene", choices, ("ja",))
+    return out
+
+
+def _stands_out(entry: dict) -> list[str]:
+    """A right answer that stands out by its size among those shown
+    (STANDS_OUT): picked by the eye before the sentence is read."""
+    ratio, chars = STANDS_OUT
+    out = []
+    for where, lang, texts in tour_answers(entry):
+        right, longest = len(texts[0]), max(len(t) for t in texts[1:])
+        if right >= ratio * longest and right - longest >= chars:
+            out.append(f"{where} ({lang}): the right answer stands out by its length, "
+                       f"{right} characters against {longest} at most")
+    return out
+
+
+def _length_kind(where: str, lang: str) -> str:
+    """The set a tour's answers are counted in: a learner meets the
+    twists, the meaning questions, the quiz's Japanese answers and the
+    scenes as four kinds of question."""
+    if where.startswith("tour twist"):
+        return "twists"
+    if where.startswith("tour scene"):
+        return "scenes"
+    return "quiz, Japanese answers" if lang == "ja" else "quiz, meaning questions"
+
+
+def tour_length_tells(level: str, entries: list[dict] | None = None) -> list[str]:
+    """Whether a level's tours can be answered by length (TOUR_LENGTH_TELL):
+    per kind of question and per language, how often picking the longest
+    answer shown (of three, the shortest too) picks the right one, ties
+    shared. An answer is as long as it looks, its characters."""
+    entries = GRAMMAR_POINTS_BY_LEVEL.get(level, []) if entries is None else entries
+    tallies: dict[tuple[str, str, int], list[float]] = {}
+    for entry in entries:
+        for where, lang, texts in tour_answers(entry):
+            sizes = [len(t) for t in texts]
+            tally = tallies.setdefault((_length_kind(where, lang), lang, len(sizes)), [0.0, 0.0, 0])
+            if sizes[0] == max(sizes):
+                tally[0] += 1 / sizes.count(max(sizes))
+            if sizes[0] == min(sizes):
+                tally[1] += 1 / sizes.count(min(sizes))
+            tally[2] += 1
+    out = []
+    for (kind, lang, shown), (longest, shortest, n) in sorted(tallies.items()):
+        low, high = TOUR_LENGTH_TELL[shown]
+        picks = [("the longest", longest)] + ([("the shortest", shortest)] if shown > 2 else [])
+        for name, wins in picks:
+            share = wins / n
+            if not low <= share <= high:
+                out.append(f"{level} tours, {kind} ({lang}): picking {name} answer wins {share:.0%} "
+                           f"({wins:.1f} of {n}); length must say nothing, {low:.0%} to {high:.0%}")
     return out
 
 
@@ -731,11 +829,16 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         out.append(f"{tag}: compare is not a list")
         compare = []
     rivals: list[str] = []
+    offered: list[str] = []     # the rivals Choisir may offer: not `same` (plan 319)
     for i, rival in enumerate(compare):
-        if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", *LATER}:
-            out.append(f"{tag}: compare {i} must be {{pattern, en, fr[, es]}}")
+        if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", "same", *LATER}:
+            out.append(f"{tag}: compare {i} must be {{pattern, en, fr[, es][, id][, same]}}")
             continue
+        if rival.get("same", True) is not True:
+            out.append(f"{tag}: compare {i} same must be true or absent")
         rp = rival["pattern"]
+        if not rival.get("same"):
+            offered.append(rp)
         if rp == pattern:
             out.append(f"{tag}: compares itself")
         elif find(rp) is None and not any(
@@ -788,6 +891,14 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
                 out.append(f"{tag}: example {i} contrast must be true or absent")
             if not rivals:
                 out.append(f"{tag}: example {i} is a contrast example but the point compares nothing")
+            elif not offered:
+                # A `same` rival is as right in the hole, so nothing certainly
+                # wrong is left to offer: a bare particle is offered its named
+                # rivals alone, and anything else would be asked against
+                # fillers from the level, which the eye tells apart. Such a
+                # point is asked from `choose` (plan 319).
+                out.append(f"{tag}: example {i} is a contrast example but every rival is the same in meaning "
+                           "-- write `choose` instead")
             if not verifiable(pattern) and blank_span(jp, pattern, level) is None:
                 # A bare particle is blanked where the detector finds it
                 # (plan 190): once, on one piece, or not at all.
@@ -796,7 +907,11 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
             for rp in checkable_rivals:
                 if contains_pattern(jp, rp):
                     out.append(f"{tag}: example {i} also contains rival {rp!r}, so the drill would have two answers")
-    if rich and rivals and verifiable(pattern) and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict)):
+    if (rich and rivals and verifiable(pattern) and not entry.get("choose")
+            and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict))):
+        # (a point whose rivals take another stem is asked from questions of
+        # its own instead: 雨がふっ＿＿ offered ば asked which option makes a
+        # word, plan 319)
         out.append(f"{tag}: compares {len(rivals)} rival(s) but marks no contrast example")
     # A bare particle or a class label (は, い形容詞／な形容詞) has letters
     # that point at nothing, so only the detector can blank it (plan 190),
@@ -805,7 +920,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
     # its own instead (`choose`, plan 201): every point is asked in
     # Choisir, none is left to fall back to the flashcard.
     if (rich and not verifiable(pattern) and not entry.get("choose")
-            and not (rivals and any(ex.get("contrast") and blank_span(ex["jp"], pattern, level)
+            and not (offered and any(ex.get("contrast") and blank_span(ex["jp"], pattern, level)
                                     for ex in examples if isinstance(ex, dict) and isinstance(ex.get("jp"), str)))):
         out.append(f"{tag}: nothing asks it in Choisir -- mark a contrast sentence the detector can blank, "
                    "or write `choose` (plan 201)")
@@ -827,6 +942,7 @@ def problems(levels=LEVELS) -> list[str]:
     for level in levels:
         for entry in GRAMMAR_POINTS_BY_LEVEL.get(level, []):
             out += check_entry(level, entry)
+        out += tour_length_tells(level)
     return out
 
 

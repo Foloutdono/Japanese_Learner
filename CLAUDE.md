@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **313**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **320**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -94,6 +94,14 @@ runtime purpose.
   right reply drifts to the longest (the conversation bank's first draft
   won 42-75% on "pick the longest"), so across a bank the right one is
   the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
+  The tours are held to it too (plan 319: a twist's right reading was the
+  longer of the two 64-73% of the time): no right answer stands out by
+  its size (`STANDS_OUT`, half again as long as the longest wrong one
+  shown and ten characters longer), and across a level, per kind of
+  question and per language, the longest (of three, the shortest too)
+  wins as a blind pick does (`TOUR_LENGTH_TELL`): a wrong reading says its
+  belief as fully as the right one says its own, and the right one says
+  what the `why` does not.
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **A mock-exam choice is told apart by understanding, never by its look
@@ -151,7 +159,12 @@ runtime purpose.
   commonest defect there: write every wrong filling out in the sentence, let
   the translation printed under it carry what the grammar does not, keep the
   stem outside the hole (悲し＿＿＿ + み), and let an independent reviewer
-  attack the batch before it ships.
+  attack the batch before it ships. A rival the lesson calls the same in
+  meaning (だろう beside でしょう, から beside ので) is marked `"same": true`
+  in the compare entry and is never offered (plan 319); a point whose
+  rivals take another stem (雨がふっ＿＿ offered ば), or are all the same
+  in meaning (につれて, whose fillers the eye told apart), is asked from
+  `choose`.
   Answered, the hole holds what the sentence has there (the payload's
   `fill`, `grammar_examples.span_parts`), never the pattern poured back
   in: a point is blanked on one piece of it (から of から〜まで, ます of
@@ -178,7 +191,11 @@ runtime purpose.
   word's ending begins (てしまい + ました), never inside the ending
   (せいで|す, が分かりま|せん) nor inside ありません, which is ない said
   politely (`grammar_ladder._word_kept`, plan 295): typed whole, the
-  word was marked a kana off.
+  word was marked a kana off. A point's other spelling is right too
+  (なきゃ for なくちゃ, によらず for にかかわらず, a う-verb's され for せられ:
+  `grammar_ladder._variants`, plan 319), and a twist or a scene line is
+  cut only where the detector reads the point: a tour sets the point
+  against its rivals, and the stems' match cut the rival's sentence.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's
@@ -294,6 +311,11 @@ runtime purpose.
   started (`duels._score_kept`): before, an unstarted seat is free to give
   back, so whatever another learner's figures reach (the cover, the hall,
   the live read) keeps them until « Partir ».
+  The hall offers only the strangers' runs a ranked sprint could deal
+  (plan 315): `_seek`, the hall's list (`duels.waiting`) and the seat
+  picked there (`duels.take`) read one rule, `duels._SEEKABLE`, so a
+  change to who meets whom is made there, once, and a learner holds
+  one unstarted seat at a time.
   Nothing runs in the background: `settle()` brings a duel up to date
   from its stored instants on every read (a run past its sprint paid, a
   duel resolved, expired and its ranked fare refunded, a seat left
@@ -376,6 +398,25 @@ runtime purpose.
   library's page carries ··· in its corner (`PublicDeckPage`, report
   and block), a followed deck's unfollow sheet the second way out
   (`DeckDetailScreen`), and both ask first, since a block ends follows.
+- **A learner's song is heard once and forgotten (plan 317).** The
+  analyser's song is decoded on the device to a 16 kHz mono WAV
+  (`lib/songAudio.js`, cut at `MAX_SECONDS`, which
+  `study/song_transcribe.py` holds equal) and sent once to a model that
+  hears (`llm_shared.chat(audio=True)`, a provider's `audio_models`;
+  `hears_audio()` refuses the route up front where none does). A song
+  is megabytes where every other ingest is text, so the songs one
+  process holds, heard or waiting, are bounded (`song_transcribe.hold()`,
+  given back by the worker), and a full house is refused before the
+  body is read or the allowance counted. The server keeps the timed
+  lines it made and the file's name, never the audio, and the lyrics a
+  learner pasted only as the lines they become.
+  What plays is the learner's own file, kept on the device
+  (`lib/songStore.js`, the last five), so a song reopened elsewhere asks
+  for its file again, and anything new that plays a song plays it from
+  there. A song is a session whose `source` is `song`: a closed set of
+  sources (`phrase.KeepRequest`, `video._SOURCE_NAMES`,
+  `passages.kindOf`) takes it in the same change, or a line pinned from
+  a song is refused.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -562,8 +603,13 @@ runtime purpose.
   every language (plan 312d): readings that differ by a tense or a number
   say it, no ask or notion shares a word with the right reading alone
   where the English does not, a why names a choice by what it says, never
-  by its place (every choice is shuffled), and the right reading is the
-  longest shown (a twist shows two) no more often than in English.
+  by its place (every choice is shuffled), and length says nothing in it
+  either: the gate reads every language a learner reads (`STANDS_OUT`,
+  `TOUR_LENGTH_TELL`). A text whose English, French or Spanish changes
+  has its Indonesian read again in the same change, or rewritten where
+  the source's sense moved: an `id` left beside a corrected `en` still
+  says the old one, and no test sees it (plans 318-319 changed 4,899
+  texts; the Indonesian followed them in its own pass).
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
@@ -571,7 +617,9 @@ runtime purpose.
   change to it run `python -m scripts.build_kanji_db --deck-only` (the
   database's `in_deck` and every `kanji_meanings_*.json`) and `python -m scripts.build_frequency_index
   --kanji-db` (the teaching order); a new character carries its French in
-  `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
+  `kanji_meanings_fr.json` where KANJIDIC2 has none, and a French
+  KANJIDIC2 has wrong (誠 given 誡's « avertir ») is corrected there too:
+  the file wins, as the Spanish one does (plan 319). Adding is free;
   moving a character between levels is a migration (`kanji_renames`).
 - **An example sentence is corrected in the layer, not in JMdict (plan
   227).** The deck's Tatoeba sentences are read through
@@ -1336,7 +1384,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 7,980 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,979 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

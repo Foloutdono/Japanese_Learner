@@ -998,6 +998,39 @@ B4 rest, #439's 菌): 正体, 台詞, 所有, 親父, お袋, 折, 狩り, パ�
 
 Deploy, then `migrate_vocab_ids --yes` and `migrate_pool_cards --yes`.
 
+### 314 — お願いします at N5, the owner's call (2026-11-09)
+
+Plan 314's breakdown reads a closing お願いします as the deck's "please"
+(`card_lookup.resolve_please`), where it had read 願う "to desire". The
+deck held the word twice, in kanji at N1 and in kana at N2: plan 112's
+open pair, a kana card below its kanji card. So the N5 pages, which say
+it from the first conversation, showed an N1 or an N2 card.
+
+The owner moved it to N5, over plan 260's rule: the lists put it at N2,
+where two signals would have stopped. Both cards became one N5 card,
+`vocab_N5_お願いします_おねがいします` (two `MOVES` lines, "Plan 314"),
+since the same word twice at one level is the duplicate 106b and 112
+merged.
+
+- **The spelling is the lists'.** Decision 3: a card's level is the
+  word's, not its kanji's (願 is N3, as 写 is N4 under 写真). The N5 and
+  N4 pages that keep to their kanji write it in kana, which finds the
+  card: the fold, and `FOLDED_FORMS` for the dictionary and the kana
+  index.
+- **The gloss tells it from its neighbours.** ください and どうぞ are
+  "please" at N5 too, so the card reads "please (asking for something,
+  or a favour)", in French and Spanish as well.
+- **The written sentences went.** `example_added.json` holds only words
+  JMdict gives none; the kana card had two, and the kanji card has its
+  own.
+- **It counts as itself.** The fold no longer keeps お, 願う and する as
+  its parts, so an N5 page that says お願いします counts the card, and
+  no 願う (`LOCAL_REV` 47).
+
+The deck is 7,979. Deploy, then `migrate_vocab_ids --yes`: it moves both
+cards' rows onto the N5 card, merging where a learner held both, and a
+pin or a favourite kept under the kana card's key (`KEY_MOVES`).
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104

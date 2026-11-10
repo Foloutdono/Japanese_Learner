@@ -55,7 +55,20 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 26  # 26: plan 306's breakdown over main's 14 (plans 305 and 306 bumped their own
+TOUR_REV = 29  # 29: plan 319 -- what translating the catalogue found in its
+#   source (plan 312's notes): whys that named a shuffled choice by its
+#   place, form questions that doubled a word once filled, whys and
+#   translations that taught a rival's sense, a 〜たら／〜なら asked from
+#   its own questions, and a rival the lesson calls the same never offered
+#   in a gap question; then the answers evened so that length says
+#   nothing, and the speaker given no sex in the French and the Spanish
+# 28: plan 314's second pass -- あの方 かた, ふじさん 富士山, がゆえに,
+#   ですら／でさえ and っぱなしで lit whole, 言いたげに cut as 寂しげに (〜すら,
+#   〜さえ, 〜ゆえに, 〜っぱなし, 〜げ, 〜ものか, 〜つ〜つ, 〜にかたくない and
+#   others' furigana)
+# 27: plan 314 -- 一日中雨 reads 一日, 中 and 雨 あめ (no 雷雨's う), 電車は
+#   空いている すいて (〜中 and 〜どころではない's tours)
+# 26: plan 306's breakdown over main's 14 (plans 305 and 306 bumped their own
 #   branch to 25: 何にもまして and 何一つ なに, 愛でなくて 愛, 若く見えます lit as
 #   〜に見える, せんがため and 何にもまして cut anew, もんで and もんだから lit)
 # 14: the quiz's gap rivals are seeded too: the same-level fillers that top a
@@ -98,13 +111,13 @@ def _point_hits(jp: str, pattern: str, level: str) -> list[dict]:
     return [h for h in hits(jp) if (h["pattern"], h["level"]) == (pattern, level)]
 
 
-def lit_spans(jp: str, pattern: str, level: str) -> list[tuple[int, int]]:
+def lit_spans(jp: str, pattern: str, level: str, fallback: bool = True) -> list[tuple[int, int]]:
     """Where the point is written in `jp`: the detector's segments for it,
-    else the stems' first match, else nothing."""
+    else (with `fallback`) the stems' first match, else nothing."""
     found = _point_hits(jp, pattern, level)
     if found:
         return [tuple(seg) for seg in found[0]["segments"]]
-    span = highlight_span(jp, pattern)
+    span = highlight_span(jp, pattern) if fallback else None
     return [span] if span else []
 
 
