@@ -60,7 +60,8 @@ TOUR_REV = 29  # 29: plan 319 -- what translating the catalogue found in its
 #   place, form questions that doubled a word once filled, whys and
 #   translations that taught a rival's sense, a 〜たら／〜なら asked from
 #   its own questions, and a rival the lesson calls the same never offered
-#   in a gap question
+#   in a gap question; then the answers evened so that length says
+#   nothing, and the speaker given no sex in the French and the Spanish
 # 28: plan 314's second pass -- あの方 かた, ふじさん 富士山, がゆえに,
 #   ですら／でさえ and っぱなしで lit whole, 言いたげに cut as 寂しげに (〜すら,
 #   〜さえ, 〜ゆえに, 〜っぱなし, 〜げ, 〜ものか, 〜つ〜つ, 〜にかたくない and
