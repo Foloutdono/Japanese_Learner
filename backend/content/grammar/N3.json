@@ -9122,24 +9122,21 @@
         "en": "As I have got older, my physical strength has declined.",
         "fr": "À mesure que je vieillis, mes forces déclinent.",
         "es": "A medida que envejezco, mi fuerza física ha ido disminuyendo.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "山を登るにつれて、空気が冷たくなった。",
         "en": "As we climbed the mountain, the air grew colder.",
         "fr": "À mesure que nous montions, l'air se faisait plus froid.",
         "es": "A medida que subíamos la montaña, el aire se volvía más frío.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "日本語が上手になるにつれて、友だちが増えた。",
         "en": "As my Japanese improved, I made more friends.",
         "fr": "À mesure que mon japonais s'améliorait, je me suis fait plus d'amis.",
         "es": "A medida que mejoraba mi japonés, fui haciendo más amigos.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "町のはってんにつれて、人口も増えていった。",
@@ -9147,6 +9144,80 @@
         "fr": "Avec le développement de la ville, la population a augmenté aussi.",
         "es": "A medida que la ciudad se desarrollaba, su población también fue aumentando.",
         "register": "neutral"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "日がしずむ＿＿＿、空の色が赤くなっていった。",
+        "tr": {
+          "en": "As the sun went down, the sky turned redder and redder.",
+          "fr": "À mesure que le soleil se couchait, le ciel devenait de plus en plus rouge.",
+          "es": "A medida que se ponía el sol, el cielo se iba poniendo cada vez más rojo."
+        },
+        "choices": [
+          "につれて",
+          "について",
+          "とたん"
+        ],
+        "why": {
+          "en": "につれて ties the two changes: the lower the sun, the redder the sky. について means « about » and needs a noun, and とたん, « the moment », needs a past verb and a sudden event.",
+          "fr": "につれて lie les deux changements : plus le soleil descend, plus le ciel rougit. について veut dire « au sujet de » et demande un nom, et とたん, « au moment où », demande un verbe au passé et un fait soudain.",
+          "es": "につれて une los dos cambios: cuanto más baja el sol, más rojo el cielo. について significa «sobre» y pide un sustantivo, y とたん, «en cuanto», pide un verbo en pasado y un hecho repentino."
+        }
+      },
+      {
+        "jp": "町の人口が増える＿＿＿、駅も少しずつ大きくなっていった。",
+        "tr": {
+          "en": "As the town's population grew, the station gradually got bigger too.",
+          "fr": "À mesure que la population de la ville augmentait, la gare s'est agrandie peu à peu.",
+          "es": "A medida que crecía la población del pueblo, la estación también se fue agrandando poco a poco."
+        },
+        "choices": [
+          "につれて",
+          "のに",
+          "にとって"
+        ],
+        "why": {
+          "en": "につれて ties the two changes: as the population grows, the station grows with it. のに means « even though », which sets them against each other, and にとって, « for », needs a noun.",
+          "fr": "につれて lie les deux changements : la population augmente, la gare grandit avec elle. のに veut dire « alors que » et les oppose, et にとって, « pour », demande un nom.",
+          "es": "につれて une los dos cambios: crece la población y la estación crece con ella. のに significa «aunque» y los opone, y にとって, «para», pide un sustantivo."
+        }
+      },
+      {
+        "jp": "子どもの成長＿＿＿、家族の生活も変わっていく。",
+        "tr": {
+          "en": "As the children grow, the family's life changes too.",
+          "fr": "À mesure que les enfants grandissent, la vie de la famille change aussi.",
+          "es": "A medida que crecen los niños, la vida de la familia también cambia."
+        },
+        "choices": [
+          "につれて",
+          "にとって",
+          "について"
+        ],
+        "why": {
+          "en": "After a noun of change, につれて ties it to the other change: as the children grow, family life moves with it. にとって means « for » and について « about »: neither links two changes.",
+          "fr": "Après un nom de changement, につれて le lie à l'autre : les enfants grandissent, la vie de famille suit. にとって veut dire « pour » et について « au sujet de » : aucun ne lie deux changements.",
+          "es": "Tras un sustantivo de cambio, につれて lo une al otro: los niños crecen y la vida familiar los sigue. にとって significa «para» y について «sobre»: ninguno une dos cambios."
+        }
+      },
+      {
+        "jp": "秋が深まる＿＿＿、山の木の葉が赤くなっていく。",
+        "tr": {
+          "en": "As autumn deepens, the leaves on the mountain trees turn red.",
+          "fr": "À mesure que l'automne avance, les feuilles des arbres de la montagne rougissent.",
+          "es": "A medida que avanza el otoño, las hojas de los árboles del monte se ponen rojas."
+        },
+        "choices": [
+          "につれて",
+          "にもかかわらず",
+          "とたん"
+        ],
+        "why": {
+          "en": "につれて ties the two changes: the deeper the autumn, the redder the leaves. にもかかわらず, « despite », sets them against each other, and とたん, « the moment », needs a past verb and a sudden event.",
+          "fr": "につれて lie les deux changements : plus l'automne avance, plus les feuilles rougissent. にもかかわらず, « malgré », les oppose, et とたん, « au moment où », demande un verbe au passé et un fait soudain.",
+          "es": "につれて une los dos cambios: cuanto más avanza el otoño, más rojas las hojas. にもかかわらず, «a pesar de», los opone, y とたん, «en cuanto», pide un verbo en pasado y un hecho repentino."
+        }
       }
     ],
     "tour": {
@@ -14057,24 +14128,21 @@
         "en": "I am so busy that I do not even have time to eat.",
         "fr": "Je suis si occupé que je n'ai même pas le temps de manger.",
         "es": "Tengo tanto que hacer que ni siquiera tengo tiempo para comer.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "その漢字は子どもさえ読める。",
         "en": "Even a child can read that kanji.",
         "fr": "Même un enfant peut lire ce kanji.",
         "es": "Incluso un niño puede leer ese kanji.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "彼は自分の名前さえ書けなかった。",
         "en": "He couldn't even write his own name.",
         "fr": "Il ne savait même pas écrire son nom.",
         "es": "Él ni siquiera pudo escribir su propio nombre.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "その話は親にさえ言っていません。",
@@ -14082,6 +14150,86 @@
         "fr": "Je n'en ai même pas parlé à mes parents.",
         "es": "Ni siquiera se lo he contado a mis padres.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "この町には、コンビニ＿＿＿ない。",
+        "tr": {
+          "en": "This town doesn't even have a convenience store.",
+          "fr": "Dans cette ville, il n'y a même pas de supérette.",
+          "es": "En este pueblo no hay ni siquiera una tienda de conveniencia."
+        },
+        "choices": [
+          "さえ",
+          "だけ",
+          "しか"
+        ],
+        "why": {
+          "en": "さえ picks the least you would expect: not even a convenience store. だけ would say it is the only thing missing, and しか that it is the only thing there.",
+          "fr": "さえ désigne le minimum qu'on attendrait : pas même une supérette. だけ dirait que c'est la seule chose qui manque, et しか que c'est la seule chose qu'il y a.",
+          "es": "さえ señala lo mínimo que esperarías: ni siquiera una tienda. だけ diría que es lo único que falta, y しか, que es lo único que hay."
+        }
+      },
+      {
+        "jp": "かぜがひどくて、水を飲むこと＿＿＿つらい。",
+        "tr": {
+          "en": "My cold is so bad that even drinking water hurts.",
+          "fr": "Mon rhume est si fort que même boire de l'eau est pénible.",
+          "es": "Tengo un resfriado tan fuerte que hasta tomar agua me cuesta."
+        },
+        "choices": [
+          "さえ",
+          "だけ",
+          "ばかり"
+        ],
+        "why": {
+          "en": "さえ names the extreme case: even something as easy as drinking water hurts, so the cold is bad. だけ would make water the only problem, and ばかり means « nothing but », which does not fit.",
+          "fr": "さえ désigne le cas extrême : même boire de l'eau, si facile, est pénible, donc le rhume est fort. だけ ferait de l'eau le seul problème, et ばかり, « rien que », ne va pas ici.",
+          "es": "さえ marca el caso extremo: hasta algo tan fácil como tomar agua cuesta, así que el resfriado es fuerte. だけ haría del agua el único problema, y ばかり, «nada más que», no encaja."
+        }
+      },
+      {
+        "jp": "プロの選手＿＿＿、このコースは走れないだろう。",
+        "tr": {
+          "en": "Even professional athletes probably couldn't run this course.",
+          "fr": "Même des pros ne pourraient sans doute pas courir ce parcours.",
+          "es": "Ni siquiera los atletas profesionales podrían correr este recorrido."
+        },
+        "choices": [
+          "でさえ",
+          "さえで",
+          "しか"
+        ],
+        "why": {
+          "en": "On the one who acts, さえ comes after で: でさえ, and if even pros can't, nobody can. さえで puts the two the wrong way round, and しか would make pros the only ones who succeed.",
+          "fr": "Sur celui qui agit, さえ vient après で : でさえ, et si même les pros n'y arrivent pas, personne n'y arrive. さえで les met à l'envers, et しか en ferait les seuls à réussir.",
+          "es": "Con quien actúa, さえ va después de で: でさえ, y si ni los profesionales pueden, nadie puede. さえで los pone al revés, y しか los haría los únicos que lo logran."
+        },
+        "slips": [
+          "さえで"
+        ]
+      },
+      {
+        "jp": "急いでいたので、朝ごはん＿＿＿食べずに家を出た。",
+        "tr": {
+          "en": "I was in a hurry, so I left home without even eating breakfast.",
+          "fr": "Comme il fallait se dépêcher, j'ai quitté la maison sans même prendre de petit-déjeuner.",
+          "es": "Como tenía prisa, salí de casa sin desayunar siquiera."
+        },
+        "choices": [
+          "さえ",
+          "さえを",
+          "ばかり"
+        ],
+        "why": {
+          "en": "さえ picks the least you would do before leaving: not even breakfast. さえ takes the place of を, so さえを keeps a particle it has replaced, and ばかり, « nothing but », does not fit.",
+          "fr": "さえ désigne le minimum avant de sortir : pas même le petit-déjeuner. さえ prend la place de を, donc さえを garde une particule déjà remplacée, et ばかり, « rien que », ne va pas ici.",
+          "es": "さえ marca lo mínimo antes de salir: ni siquiera el desayuno. さえ ocupa el lugar de を, así que さえを conserva una partícula ya reemplazada, y ばかり, «nada más que», no encaja."
+        },
+        "slips": [
+          "さえを"
+        ]
       }
     ],
     "tour": {
@@ -18032,24 +18180,21 @@
         "en": "The roads were busy, which is why I was late.",
         "fr": "Les routes étaient encombrées, c'est pour ça que je suis en retard.",
         "es": "Es que había mucho tráfico, por eso llegué tarde.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "急いでいたものだから、かさを忘れた。",
         "en": "I was in a hurry, so I forgot my umbrella.",
         "fr": "J'étais pressé, alors j'ai oublié mon parapluie.",
         "es": "Como iba con prisa, se me olvidó el paraguas.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "あまりにおいしかったものだから、全部食べてしまった。",
         "en": "It was so delicious that I ate the whole thing.",
         "fr": "C'était tellement bon que j'ai tout mangé.",
         "es": "Estaba tan rico que me lo comí todo.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "初めてなものだから、やり方がよく分からなくて。",
@@ -18057,6 +18202,80 @@
         "fr": "C'est la première fois, voyez-vous, je ne sais pas trop comment faire.",
         "es": "Es que es la primera vez, y no sé muy bien cómo hacerlo.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "目ざましが鳴らなかった＿＿＿、会社に遅れてしまいました。",
+        "tr": {
+          "en": "My alarm didn't go off, you see, so I was late for work.",
+          "fr": "C'est que mon réveil n'a pas sonné, alors j'ai été en retard au travail.",
+          "es": "Es que no sonó el despertador, y llegué tarde al trabajo."
+        },
+        "choices": [
+          "ものだから",
+          "ものの",
+          "ものなら"
+        ],
+        "why": {
+          "en": "ものだから gives the alarm as your excuse for being late. ものの means « although », which turns the excuse upside down, and ものなら is « if by any chance », never a reason for what happened.",
+          "fr": "ものだから présente le réveil comme une excuse au retard. ものの veut dire « bien que », ce qui renverse l'excuse, et ものなら, « si jamais », ne donne pas la raison de ce qui s'est passé.",
+          "es": "ものだから presenta el despertador como excusa del retraso. ものの significa «aunque», lo que invierte la excusa, y ものなら, «si acaso», nunca es la razón de lo que pasó."
+        }
+      },
+      {
+        "jp": "となりの部屋がうるさかった＿＿＿、ゆうべはぜんぜん眠れなかった。",
+        "tr": {
+          "en": "The room next door was noisy, you see, so I couldn't sleep at all last night.",
+          "fr": "C'est que la chambre d'à côté était bruyante, alors je n'ai pas pu dormir de la nuit.",
+          "es": "Es que en el cuarto de al lado había mucho ruido, y anoche no pude dormir nada."
+        },
+        "choices": [
+          "ものだから",
+          "とたん",
+          "くせに"
+        ],
+        "why": {
+          "en": "ものだから offers the noise as the reason you could not sleep. とたん, « the moment », follows a verb's past, never an adjective, and くせに reproaches someone: neither makes the noise a reason.",
+          "fr": "ものだから présente le bruit comme la raison de la nuit blanche. とたん, « au moment où », suit le passé d'un verbe, jamais un adjectif, et くせに fait un reproche : aucun n'en fait une raison.",
+          "es": "ものだから presenta el ruido como la razón de no dormir. とたん, «en cuanto», sigue al pasado de un verbo, nunca a un adjetivo, y くせに reprocha algo: ninguno lo da como razón."
+        }
+      },
+      {
+        "jp": "地図を持っていなかった＿＿＿、駅まで三十分もかかってしまった。",
+        "tr": {
+          "en": "I didn't have a map, you see, so it took me a whole thirty minutes to reach the station.",
+          "fr": "C'est que je n'avais pas de plan, alors il m'a fallu trente bonnes minutes pour arriver à la gare.",
+          "es": "Es que no tenía mapa, y tardé nada menos que treinta minutos en llegar a la estación."
+        },
+        "choices": [
+          "ものだから",
+          "ものなら",
+          "からといって"
+        ],
+        "why": {
+          "en": "ものだから gives the missing map as your excuse for the long walk. ものなら, « if by any chance », never gives a reason, and からといって, « just because », needs a denial after it.",
+          "fr": "ものだから présente l'absence de plan comme une excuse au long trajet. ものなら, « si jamais », ne donne jamais de raison, et からといって, « ce n'est pas parce que », demande une négation derrière.",
+          "es": "ものだから presenta la falta de mapa como excusa del largo camino. ものなら, «si acaso», nunca da una razón, y からといって, «que… no quiere decir», pide una negación detrás."
+        }
+      },
+      {
+        "jp": "急に雨がふってきた＿＿＿、服がぬれてしまった。",
+        "tr": {
+          "en": "It suddenly started to rain, you see, so my clothes got wet.",
+          "fr": "C'est qu'il s'est mis à pleuvoir tout d'un coup, alors mes vêtements ont été mouillés.",
+          "es": "Es que de repente empezó a llover, y se me mojó la ropa."
+        },
+        "choices": [
+          "ものだから",
+          "ものの",
+          "というのに"
+        ],
+        "why": {
+          "en": "ものだから gives the sudden rain as the reason the clothes got wet. ものの and というのに both mean « although », which would set the rain against the wet clothes instead.",
+          "fr": "ものだから présente la pluie soudaine comme la raison des vêtements mouillés. ものの et というのに veulent dire « bien que » : ils opposeraient la pluie aux vêtements mouillés.",
+          "es": "ものだから presenta la lluvia repentina como razón de la ropa mojada. ものの y というのに significan «aunque»: opondrían la lluvia a la ropa mojada."
+        }
       }
     ],
     "tour": {
@@ -19271,24 +19490,21 @@
         "en": "Now that I have taken it on, I will see it through.",
         "fr": "Puisque j'ai accepté, j'irai jusqu'au bout.",
         "es": "Ya que lo acepté, lo llevaré a cabo hasta el final.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "約束した以上、守らなければならない。",
         "en": "Having promised, I must keep my word.",
         "fr": "Puisque j'ai promis, je dois tenir parole.",
         "es": "Ya que lo prometí, tengo que cumplir mi palabra.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "学生である以上、勉強が一番だ。",
         "en": "Since you are a student, study comes first.",
         "fr": "Dès lors qu'on est étudiant, les études passent d'abord.",
         "es": "Ya que eres estudiante, lo primero es estudiar.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "日本に住む以上、日本語を学ぶべきだ。",
@@ -19296,6 +19512,80 @@
         "fr": "Puisque je vis au Japon, je dois apprendre le japonais.",
         "es": "Ya que vivo en Japón, debería aprender japonés.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "チームに入った＿＿＿、毎日のれんしゅうには必ず出ます。",
+        "tr": {
+          "en": "Now that I've joined the team, I'll be sure to come to practice every day.",
+          "fr": "Maintenant que je fais partie de l'équipe, je viendrai à l'entraînement tous les jours sans faute.",
+          "es": "Ya que entré al equipo, voy a ir a todos los entrenamientos sin falta."
+        },
+        "choices": [
+          "以上",
+          "たびに",
+          "以外"
+        ],
+        "why": {
+          "en": "以上 takes joining as binding: now that it's done, practice follows. たびに, « every time », follows the dictionary form of something that recurs, and 以外, « apart from », makes no sense here.",
+          "fr": "以上 fait de l'entrée dans l'équipe un engagement : c'est fait, donc l'entraînement suit. たびに, « chaque fois que », suit la forme du dictionnaire d'un fait répété, et 以外, « à part », n'a pas de sens ici.",
+          "es": "以上 toma la entrada al equipo como un compromiso: ya está hecho, así que toca entrenar. たびに, «cada vez que», sigue a la forma de diccionario de algo que se repite, y 以外, «aparte de», no tiene sentido aquí."
+        }
+      },
+      {
+        "jp": "お金をもらっている＿＿＿、いいかげんな仕事はできない。",
+        "tr": {
+          "en": "Since I'm being paid, I can't do a sloppy job.",
+          "fr": "Puisqu'on me paie, je ne peux pas bâcler le travail.",
+          "es": "Ya que me pagan, no puedo hacer un trabajo mal hecho."
+        },
+        "choices": [
+          "以上",
+          "ものの",
+          "とたん"
+        ],
+        "why": {
+          "en": "以上 takes the pay as binding: since you are paid, sloppy work is out. ものの means « although », which works against the conclusion, and とたん, « the moment », needs a past event.",
+          "fr": "以上 fait du salaire un engagement : puisqu'on reçoit un salaire, pas de travail bâclé. ものの veut dire « bien que », à l'opposé de la conclusion, et とたん, « au moment où », demande un fait passé.",
+          "es": "以上 toma el pago como compromiso: si te pagan, nada de trabajo mal hecho. ものの significa «aunque», contra la conclusión, y とたん, «en cuanto», necesita un hecho pasado."
+        }
+      },
+      {
+        "jp": "プロ＿＿＿、言いわけはしない。",
+        "tr": {
+          "en": "Since I'm a pro, I won't make excuses.",
+          "fr": "Puisque je suis pro, je ne me cherche pas d'excuses.",
+          "es": "Ya que soy profesional, no pongo excusas."
+        },
+        "choices": [
+          "である以上",
+          "なのに",
+          "のくせに"
+        ],
+        "why": {
+          "en": "A noun takes である before 以上: being a pro commits you, so no excuses. なのに and のくせに both mean « even though », setting being a pro against the resolve instead of grounding it.",
+          "fr": "Un nom prend である devant 以上 : être pro engage, donc pas d'excuses. なのに et のくせに veulent dire « alors que » : ils opposent le métier à la résolution au lieu de la fonder.",
+          "es": "Un sustantivo toma である antes de 以上: ser profesional compromete, así que nada de excusas. なのに y のくせに significan «aunque»: oponen el oficio a la decisión en vez de fundarla."
+        }
+      },
+      {
+        "jp": "試合に出る＿＿＿、ぜったいに勝つ。",
+        "tr": {
+          "en": "Since I'm playing in the match, I'm going to win it, no matter what.",
+          "fr": "Puisque je joue ce match, je vais le gagner, quoi qu'il arrive.",
+          "es": "Ya que voy a jugar el partido, lo voy a ganar cueste lo que cueste."
+        },
+        "choices": [
+          "以上",
+          "とたん",
+          "以内"
+        ],
+        "why": {
+          "en": "以上 takes playing as binding: since you are in the match, you play to win. とたん, « the moment », needs a past verb, and 以内 means « within », for amounts and times.",
+          "fr": "以上 fait de la participation un engagement : puisqu'on joue, c'est pour gagner. とたん, « au moment où », demande un verbe au passé, et 以内, « dans la limite de », va avec une quantité ou un délai.",
+          "es": "以上 toma el jugar como compromiso: si juegas el partido, es para ganar. とたん, «en cuanto», pide un verbo en pasado, y 以内, «dentro de», va con cantidades o plazos."
+        }
       }
     ],
     "tour": {
@@ -22402,24 +22692,21 @@
         "en": "Supposing we left now, what time would we arrive?",
         "fr": "À supposer qu'on parte maintenant, à quelle heure arriverait-on ?",
         "es": "Suponiendo que saliéramos ahora, ¿a qué hora llegaríamos?",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "この計画を進めるとしたら、お金が必要だ。",
         "en": "If we were to go ahead with this plan, we would need money.",
         "fr": "Si on menait ce projet, il faudrait de l'argent.",
         "es": "Si siguiéramos adelante con este plan, necesitaríamos dinero.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "百万円もらえるとしたら、何を買いますか。",
         "en": "If you were given a million yen, what would you buy?",
         "fr": "Si on vous donnait un million de yens, qu'achèteriez-vous ?",
         "es": "Si le dieran un millón de yenes, ¿qué compraría?",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "その話が本当だとしたら、大変なことだ。",
@@ -22427,6 +22714,80 @@
         "fr": "Si cette histoire est vraie, c'est grave.",
         "es": "Si esa historia es cierta, es algo grave.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "もし一か月仕事を休める＿＿＿、どこに行きたいですか。",
+        "tr": {
+          "en": "If you could take a month off work, where would you like to go?",
+          "fr": "Si vous pouviez prendre un mois de congé, où aimeriez-vous aller ?",
+          "es": "Si pudieras tomarte un mes libre del trabajo, ¿adónde te gustaría ir?"
+        },
+        "choices": [
+          "としたら",
+          "ので",
+          "というのに"
+        ],
+        "why": {
+          "en": "もし … としたら imagines the month off and asks what follows. ので would state it as a fact, and というのに means « even though »: neither fits もし or the question.",
+          "fr": "もし … としたら imagine le mois de congé et demande la suite. ので le poserait comme un fait, et というのに veut dire « alors que » : aucun ne va avec もし ni avec la question.",
+          "es": "もし … としたら imagina el mes libre y pregunta qué seguiría. ので lo daría como un hecho, y というのに significa «aunque»: ninguno encaja con もし ni con la pregunta."
+        }
+      },
+      {
+        "jp": "駅まで十二キロだから、一時間に四キロ歩く＿＿＿、三時間かかる。",
+        "tr": {
+          "en": "It's twelve kilometres to the station, so if we walk four kilometres an hour, it will take three hours.",
+          "fr": "La gare est à douze kilomètres, donc si on marche à quatre kilomètres à l'heure, il faudra trois heures.",
+          "es": "La estación está a doce kilómetros, así que si caminamos cuatro kilómetros por hora, tardaremos tres horas."
+        },
+        "choices": [
+          "としたら",
+          "からといって",
+          "とたん"
+        ],
+        "why": {
+          "en": "としたら supposes the pace and works out the time: twelve by four, three hours. からといって, « just because », needs a denial after it, and とたん, « the moment », needs a past verb.",
+          "fr": "としたら suppose l'allure et calcule le temps : douze divisé par quatre, trois heures. からといって, « ce n'est pas parce que », demande une négation derrière, et とたん, « au moment où », un verbe au passé.",
+          "es": "としたら supone el ritmo y calcula el tiempo: doce entre cuatro, tres horas. からといって, «que… no quiere decir», pide una negación detrás, y とたん, «en cuanto», un verbo en pasado."
+        }
+      },
+      {
+        "jp": "もし、あなたが社長だ＿＿＿、まず何を変えますか。",
+        "tr": {
+          "en": "If you ran the company, what would you change first?",
+          "fr": "Si vous dirigiez l'entreprise, que changeriez-vous en premier ?",
+          "es": "Si dirigieras la empresa, ¿qué cambiarías primero?"
+        },
+        "choices": [
+          "としたら",
+          "から",
+          "としても"
+        ],
+        "why": {
+          "en": "もし … としたら imagines you at the head of the company and asks what would follow. としても, « even if », would ask what you'd change in spite of it, and から would take it as a fact, which もし rules out.",
+          "fr": "もし … としたら vous imagine à la tête de l'entreprise et demande la suite. としても, « même si », demanderait ce que vous changeriez malgré cela, et から le poserait comme un fait, ce que もし exclut.",
+          "es": "もし … としたら te imagina al frente de la empresa y pregunta qué seguiría. としても, «incluso si», preguntaría qué cambiarías a pesar de ello, y から lo daría como un hecho, cosa que もし descarta."
+        }
+      },
+      {
+        "jp": "もし今、大きなじしんが来た＿＿＿、どこへにげればいいですか。",
+        "tr": {
+          "en": "Supposing a big earthquake hit right now, where should we run to?",
+          "fr": "Si un gros tremblement de terre arrivait maintenant, où faudrait-il fuir ?",
+          "es": "Si ahora mismo llegara un terremoto fuerte, ¿adónde habría que huir?"
+        },
+        "choices": [
+          "としたら",
+          "ので",
+          "にもかかわらず"
+        ],
+        "why": {
+          "en": "もし … としたら supposes the earthquake and asks what to do then. ので would report it as happening, and にもかかわらず, « despite », makes no sense before the question.",
+          "fr": "もし … としたら suppose le séisme et demande quoi faire alors. ので le rapporterait comme en train d'arriver, et にもかかわらず, « malgré », n'a pas de sens devant la question.",
+          "es": "もし … としたら supone el terremoto y pregunta qué hacer entonces. ので lo contaría como algo que ya pasa, y にもかかわらず, «a pesar de», no tiene sentido antes de la pregunta."
+        }
       }
     ],
     "tour": {
@@ -22840,24 +23201,21 @@
         "en": "If we take it that he is right, then I am wrong.",
         "fr": "Si l'on admet qu'il a raison, alors c'est moi qui ai tort.",
         "es": "Si damos por hecho que él tiene razón, entonces me equivoco yo.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "全員参加するとすれば、部屋が足りない。",
         "en": "If everyone attends, there won't be enough room.",
         "fr": "Si tout le monde participe, la salle sera trop petite.",
         "es": "Si participan todos, no habrá espacio suficiente.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "電車で行くとすれば、二時間かかります。",
         "en": "If we go by train, it will take two hours.",
         "fr": "Si on y va en train, il faudra deux heures.",
         "es": "Si vamos en tren, tardaremos dos horas.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "そのけいさんが正しいとすれば、答えは十だ。",
@@ -22865,6 +23223,83 @@
         "fr": "Si ce calcul est juste, la réponse est dix.",
         "es": "Si ese cálculo es correcto, la respuesta es diez.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "一日に十ページ読む＿＿＿、三百ページの本は何日かかるだろう。",
+        "tr": {
+          "en": "Say I read ten pages a day: how many days would a three-hundred-page book take?",
+          "fr": "Mettons que je lise dix pages par jour : combien de jours me faudrait-il pour un livre de trois cents pages ?",
+          "es": "Supongamos que leo diez páginas al día: ¿cuántos días me llevaría un libro de trescientas páginas?"
+        },
+        "choices": [
+          "とすれば",
+          "としても",
+          "ので"
+        ],
+        "why": {
+          "en": "とすれば takes ten pages a day as given and asks what follows from it. としても means « even if », which leads to no answer, and ので states the pace as a fact, not as an « if ».",
+          "fr": "とすれば pose dix pages par jour comme hypothèse et demande ce qui en découle. としても veut dire « même si », ce qui ne mène à aucune réponse, et ので affirme le rythme comme un fait, pas comme un « si ».",
+          "es": "とすれば toma diez páginas al día como supuesto y pregunta qué se sigue. としても significa «incluso si», que no lleva a ninguna respuesta, y ので afirma el ritmo como un hecho, no como un «si»."
+        }
+      },
+      {
+        "jp": "あの店がいつもこんでいる＿＿＿、きっと料理がおいしいんだろう。",
+        "tr": {
+          "en": "If that restaurant is always packed, the food must be good.",
+          "fr": "Si ce restaurant est toujours plein, c'est que la cuisine doit être bonne.",
+          "es": "Si ese restaurante siempre está lleno, la comida debe de ser buena."
+        },
+        "choices": [
+          "とすれば",
+          "にもかかわらず",
+          "からといって"
+        ],
+        "why": {
+          "en": "とすれば takes the crowds as given and draws a conclusion: the food must be good. にもかかわらず means « despite », and からといって, « just because », needs a denial after it (とは限らない).",
+          "fr": "とすれば pose l'affluence comme donnée et en tire une conclusion : la cuisine doit être bonne. にもかかわらず veut dire « malgré », et からといって, « ce n'est pas parce que », demande une négation (とは限らない).",
+          "es": "とすれば da el lleno por supuesto y saca una conclusión: la comida debe de ser buena. にもかかわらず significa «a pesar de», y からといって, «que… no quiere decir», pide una negación (とは限らない)."
+        }
+      },
+      {
+        "jp": "この雨が夜まで続く＿＿＿、あしたの試合は中止になるだろう。",
+        "tr": {
+          "en": "If this rain keeps up until tonight, tomorrow's match will probably be called off.",
+          "fr": "Si cette pluie continue jusqu'au soir, le match de demain sera sans doute annulé.",
+          "es": "Si esta lluvia sigue hasta la noche, el partido de mañana seguramente se suspenderá."
+        },
+        "choices": [
+          "とすれば",
+          "というのに",
+          "ものの"
+        ],
+        "why": {
+          "en": "とすれば supposes the rain lasts and draws the likely result. というのに and ものの both mean « although », which would set the rain against the cancellation instead of leading to it.",
+          "fr": "とすれば suppose que la pluie dure et en tire la suite probable. というのに et ものの veulent dire « bien que » : ils opposeraient la pluie à l'annulation au lieu d'y mener.",
+          "es": "とすれば supone que la lluvia sigue y saca la consecuencia probable. というのに y ものの significan «aunque»: opondrían la lluvia a la suspensión en vez de llevar a ella."
+        }
+      },
+      {
+        "jp": "店の人が言ったことが本当＿＿＿、このかばんは半分のねだんで買える。",
+        "tr": {
+          "en": "If what the shop assistant said is true, I can buy this bag at half price.",
+          "fr": "Si ce qu'a dit la personne du magasin est vrai, je peux acheter ce sac à moitié prix.",
+          "es": "Si lo que dijo la persona de la tienda es cierto, puedo comprar este bolso a mitad de precio."
+        },
+        "choices": [
+          "だとすれば",
+          "なとすれば",
+          "だから"
+        ],
+        "why": {
+          "en": "A noun takes だ before とすれば: 本当だとすれば takes the words as true for a moment and draws what follows. なとすれば is a slip, since the plain form is だ, and だから states it as a fact, not an « if ».",
+          "fr": "Un nom prend だ devant とすれば : 本当だとすれば tient les paroles pour vraies le temps d'en tirer la suite. なとすれば est une faute, la forme neutre étant だ, et だから le pose comme un fait, pas comme un « si ».",
+          "es": "Un sustantivo toma だ antes de とすれば: 本当だとすれば da las palabras por ciertas un momento y saca lo que sigue. なとすれば es un error, pues la forma llana es だ, y だから lo da como un hecho, no como un «si»."
+        },
+        "slips": [
+          "なとすれば"
+        ]
       }
     ],
     "tour": {
@@ -37507,24 +37942,21 @@
         "en": "Even a child understands that much.",
         "fr": "Même un enfant comprend ça.",
         "es": "Hasta un niño entiende eso.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "私だって行きたいよ。",
         "en": "I want to go too, you know.",
         "fr": "Moi aussi je veux y aller, tu sais.",
         "es": "Yo también quiero ir, ¿sabes?",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "休みの日だって、六時に起きる。",
         "en": "Even on days off, I get up at six.",
         "fr": "Même les jours de congé, je me lève à six heures.",
         "es": "Incluso los días libres me levanto a las seis.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "だって、時間がなかったんだもの。",
@@ -37532,6 +37964,80 @@
         "fr": "Mais je n'avais pas le temps !",
         "es": "¡Pero es que no tenía tiempo!",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "こんなにかんたんな問題、小学生＿＿＿とけるよ。",
+        "tr": {
+          "en": "A problem this easy? Even a primary school kid could solve it.",
+          "fr": "Un problème aussi facile ? Même un enfant de primaire pourrait le résoudre.",
+          "es": "¿Un problema tan fácil? Hasta un niño de primaria lo resolvería."
+        },
+        "choices": [
+          "だって",
+          "だからこそ",
+          "しか"
+        ],
+        "why": {
+          "en": "だって picks the least likely solver: even a child can do it, so it is easy. だからこそ, « precisely because », makes being a child the reason, and しか needs a negative verb after it.",
+          "fr": "だって choisit le cas le moins probable : même un enfant y arrive, donc c'est facile. だからこそ, « justement parce que », fait de l'âge la raison, et しか demande un verbe négatif.",
+          "es": "だって elige el caso menos probable: hasta un niño puede, así que es fácil. だからこそ, «precisamente porque», hace de ser niño la razón, y しか exige un verbo negativo."
+        }
+      },
+      {
+        "jp": "このパスがあれば、どこ＿＿＿行けるよ。",
+        "tr": {
+          "en": "With this pass, you can go anywhere.",
+          "fr": "Avec ce pass, tu peux aller n'importe où.",
+          "es": "Con este pase, puedes ir a cualquier parte."
+        },
+        "choices": [
+          "だって",
+          "か",
+          "だか"
+        ],
+        "why": {
+          "en": "After どこ, だって opens it to every place: どこだって, « anywhere ». どこか is only « somewhere », and どこだか, « somewhere or other », says you do not know where.",
+          "fr": "Après どこ, だって l'ouvre à tous les lieux : どこだって, « n'importe où ». どこか n'est que « quelque part », et どこだか, « je ne sais où », dit qu'on ignore l'endroit.",
+          "es": "Tras どこ, だって lo abre a todos los lugares: どこだって, «a cualquier parte». どこか es solo «a algún sitio», y どこだか, «no sé dónde», dice que no se sabe el lugar."
+        }
+      },
+      {
+        "jp": "雨の日＿＿＿、兄は毎朝走っている。",
+        "tr": {
+          "en": "My older brother goes running every morning, even on rainy days.",
+          "fr": "Mon grand frère court tous les matins, même les jours de pluie.",
+          "es": "Mi hermano mayor sale a correr todas las mañanas, incluso los días de lluvia."
+        },
+        "choices": [
+          "だって",
+          "だけ",
+          "だったら"
+        ],
+        "why": {
+          "en": "だって adds the least likely case: rainy days too, so every morning means every morning. だけ would leave only the rainy days, and だったら, « if it is », makes rain a condition.",
+          "fr": "だって ajoute le cas le moins probable : même les jours de pluie, donc vraiment tous les matins. だけ ne garderait que les jours de pluie, et だったら, « si c'est », fait de la pluie une condition.",
+          "es": "だって añade el caso menos probable: también los días de lluvia, así que de verdad todas las mañanas. だけ dejaría solo los días de lluvia, y だったら, «si es», hace de la lluvia una condición."
+        }
+      },
+      {
+        "jp": "わたし＿＿＿、たまにはゆっくり休みたいよ。",
+        "tr": {
+          "en": "I'd like to take it easy once in a while too, you know.",
+          "fr": "Moi aussi, j'aimerais bien me reposer tranquillement de temps en temps.",
+          "es": "Yo también quiero descansar tranquilamente de vez en cuando, ¿eh?"
+        },
+        "choices": [
+          "だって",
+          "なら",
+          "だけ"
+        ],
+        "why": {
+          "en": "だって adds the person speaking to the others, with feeling: me too. なら would mean « if it were me », advice to someone else, and だけ « only me », leaving the others out.",
+          "fr": "だって ajoute la personne qui parle aux autres, avec force : moi aussi. なら voudrait dire « à ta place », un conseil, et だけ « moi seulement », en écartant les autres.",
+          "es": "だって suma a quien habla a los demás, con énfasis: yo también. なら significaría «yo que tú», un consejo, y だけ «solo yo», dejando fuera a los demás."
+        }
       }
     ],
     "tour": {
@@ -41657,24 +42163,21 @@
         "en": "Would you like tea or something?",
         "fr": "Voulez-vous du thé ou quelque chose ?",
         "es": "¿Quiere tomar un té o algo?",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "ペンか何か持っていますか。",
         "en": "Do you have a pen or something?",
         "fr": "Avez-vous un stylo ou quelque chose ?",
         "es": "¿Tiene un bolígrafo o algo así?",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "彼は病気か何かで休んだのだろう。",
         "en": "He was probably off with an illness or something.",
         "fr": "Il a sans doute été absent pour maladie ou quelque chose du genre.",
         "es": "Seguramente faltó por estar enfermo o algo así.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "パンか何か買ってきて。",
@@ -41682,6 +42185,80 @@
         "fr": "Achète du pain ou quelque chose.",
         "es": "Ve a comprar pan o algo.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "紙がないなら、ノート＿＿＿に書いておいて。",
+        "tr": {
+          "en": "If there's no paper, write it down in a notebook or something.",
+          "fr": "S'il n'y a pas de papier, note-le dans un cahier ou quelque chose comme ça.",
+          "es": "Si no hay papel, anótalo en un cuaderno o algo así."
+        },
+        "choices": [
+          "か何か",
+          "かだれか",
+          "だけ"
+        ],
+        "why": {
+          "en": "か何か offers the notebook as one idea and leaves the rest open: anything to write on. かだれか is for people, and だけ would allow the notebook and nothing else.",
+          "fr": "か何か propose le cahier comme une idée et laisse le reste ouvert : n'importe quoi pour écrire. かだれか est pour les personnes, et だけ n'autoriserait que le cahier.",
+          "es": "か何か propone el cuaderno como una idea y deja el resto abierto: cualquier cosa donde escribir. かだれか es para personas, y だけ solo admitiría el cuaderno."
+        }
+      },
+      {
+        "jp": "さむいなら、上着＿＿＿着たら？",
+        "tr": {
+          "en": "If you're cold, why not put on a jacket or something?",
+          "fr": "Si tu as froid, pourquoi ne pas mettre une veste ou quelque chose ?",
+          "es": "Si tienes frío, ¿por qué no te pones una chaqueta o algo?"
+        },
+        "choices": [
+          "か何か",
+          "かどこか",
+          "も"
+        ],
+        "why": {
+          "en": "か何か suggests a jacket and leaves the choice open: anything warm will do. かどこか is for places, and も would mean « a jacket too », on top of something else.",
+          "fr": "か何か suggère une veste et laisse le choix ouvert : tout ce qui tient chaud ira. かどこか est pour les lieux, et も voudrait dire « une veste aussi », en plus d'autre chose.",
+          "es": "か何か sugiere una chaqueta y deja abierta la elección: cualquier cosa que abrigue sirve. かどこか es para lugares, y も significaría «también una chaqueta», además de otra cosa."
+        }
+      },
+      {
+        "jp": "となりの家がにぎやかだね。パーティー＿＿＿しているのかな。",
+        "tr": {
+          "en": "It's lively next door. Maybe they're having a party or something.",
+          "fr": "C'est animé chez les voisins. Ils font peut-être une fête ou quelque chose comme ça.",
+          "es": "La casa de al lado está muy animada. ¿Estarán haciendo una fiesta o algo así?"
+        },
+        "choices": [
+          "か何か",
+          "だけ",
+          "しか"
+        ],
+        "why": {
+          "en": "か何か puts a party forward as a guess and leaves it open: a party, or something like it. だけ would mean « only a party », and しか needs a negative verb after it.",
+          "fr": "か何か avance une fête comme supposition et laisse ouvert : une fête, ou quelque chose du genre. だけ voudrait dire « seulement une fête », et しか demande un verbe négatif.",
+          "es": "か何か plantea una fiesta como suposición y deja abierto: una fiesta, o algo parecido. だけ significaría «solo una fiesta», y しか exige un verbo negativo."
+        }
+      },
+      {
+        "jp": "お客さんが来たら、ジュース＿＿＿出してあげてね。",
+        "tr": {
+          "en": "When the guests arrive, give them some juice or something, OK?",
+          "fr": "Quand les invités arriveront, sers-leur un jus ou quelque chose, d'accord ?",
+          "es": "Cuando lleguen las visitas, sírveles un jugo o algo, ¿sí?"
+        },
+        "choices": [
+          "か何か",
+          "も",
+          "かどうか"
+        ],
+        "why": {
+          "en": "か何か offers juice as one idea and leaves the rest open. も would mean « juice too », on top of something else, and かどうか, « whether or not », needs a question to hang on.",
+          "fr": "か何か propose un jus comme une idée et laisse le reste ouvert. も voudrait dire « un jus aussi », en plus d'autre chose, et かどうか, « si oui ou non », demande une question à laquelle se rattacher.",
+          "es": "か何か propone un jugo como una idea y deja el resto abierto. も significaría «también un jugo», además de otra cosa, y かどうか, «si o no», necesita una pregunta de la que depender."
+        }
       }
     ],
     "tour": {

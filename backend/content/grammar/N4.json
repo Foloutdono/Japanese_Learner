@@ -14149,24 +14149,21 @@
         "en": "Apparently a new person has come to the house next door.",
         "fr": "Apparemment, un nouveau voisin est arrivé.",
         "es": "Por lo visto, se mudó alguien nuevo a la casa de al lado.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "あの店の魚は安いらしいです。",
         "en": "I gather the fish at that shop is cheap.",
         "fr": "Il paraît que le poisson de ce magasin est bon marché.",
         "es": "Tengo entendido que el pescado de esa tienda es barato.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "田中さんは来月、会社をやめるらしい。",
         "en": "It seems Tanaka is leaving the company next month.",
         "fr": "Tanaka quitterait l'entreprise le mois prochain, paraît-il.",
         "es": "Según parece, Tanaka deja la empresa el mes que viene.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "今年の冬はさむいらしいですね。",
@@ -14174,6 +14171,89 @@
         "fr": "Il paraît que cet hiver sera froid.",
         "es": "Dicen que este invierno va a hacer frío.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "来年から、電車代が上がる＿＿＿。",
+        "tr": {
+          "en": "I hear train fares are going up from next year.",
+          "fr": "Il paraît que le prix du train augmente à partir de l'année prochaine.",
+          "es": "Dicen que el pasaje de tren sube a partir del año que viene."
+        },
+        "choices": [
+          "らしい",
+          "と思う",
+          "でしょう"
+        ],
+        "why": {
+          "en": "らしい passes on what you have heard: the fares go up, so people say. と思う is your own opinion, and でしょう your own guess, with nothing heard behind them.",
+          "fr": "らしい rapporte ce qu'on a entendu dire : le prix augmente, à ce qu'on dit. と思う est un avis personnel, et でしょう une supposition, sans rien d'entendu derrière.",
+          "es": "らしい transmite lo que oíste: el pasaje sube, según dicen. と思う es tu propia opinión, y でしょう tu propia suposición, sin nada oído detrás."
+        }
+      },
+      {
+        "jp": "きのうの夜、この近くで火事が＿＿＿。",
+        "tr": {
+          "en": "I hear there was a fire near here last night.",
+          "fr": "Il paraît qu'il y a eu un incendie près d'ici hier soir.",
+          "es": "Dicen que anoche hubo un incendio cerca de aquí."
+        },
+        "choices": [
+          "あったらしい",
+          "ありそうだ",
+          "あるらしい"
+        ],
+        "why": {
+          "en": "The fire is past and only heard of: あった + らしい. ありそうだ is how things look to you now, and あるらしい puts the fire still to come, which last night rules out.",
+          "fr": "L'incendie est passé et connu par ouï-dire : あった + らしい. ありそうだ, c'est l'air qu'ont les choses maintenant, et あるらしい place l'incendie dans l'avenir, ce que « hier soir » exclut.",
+          "es": "El incendio ya pasó y solo lo oíste: あった + らしい. ありそうだ es cómo se ven las cosas ahora, y あるらしい lo pone en el futuro, cosa que «anoche» descarta."
+        },
+        "slips": [
+          "あるらしい"
+        ]
+      },
+      {
+        "jp": "あのホテルの人は、みんな親切＿＿＿。",
+        "tr": {
+          "en": "I hear the people at that hotel are all kind.",
+          "fr": "Il paraît que tout le personnel de cet hôtel est aimable.",
+          "es": "Dicen que en ese hotel todo el personal es amable."
+        },
+        "choices": [
+          "らしい",
+          "ならしい",
+          "そうだ"
+        ],
+        "why": {
+          "en": "A な-adjective goes straight before らしい: 親切らしい, what you heard. ならしい keeps the な that ようだ takes, and 親切そうだ is how the staff look to you: what you heard would be 親切だそうだ.",
+          "fr": "Un adjectif en な se place directement devant らしい : 親切らしい, ce qu'on a entendu. ならしい garde le な que prend ようだ, et 親切そうだ décrit l'air qu'a le personnel : entendu dire, ce serait 親切だそうだ.",
+          "es": "Un adjetivo な va directo antes de らしい: 親切らしい, lo que oíste. ならしい conserva el な que lleva ようだ, y 親切そうだ es el aspecto que tiene el personal: lo oído sería 親切だそうだ."
+        },
+        "slips": [
+          "ならしい"
+        ]
+      },
+      {
+        "jp": "あの山の上は、夏でもさむい＿＿＿。",
+        "tr": {
+          "en": "I hear it's cold at the top of that mountain, even in summer.",
+          "fr": "Il paraît qu'il fait froid au sommet de cette montagne, même en été.",
+          "es": "Dicen que en la cima de esa montaña hace frío, incluso en verano."
+        },
+        "choices": [
+          "らしいです",
+          "ですらしい",
+          "かもしれません"
+        ],
+        "why": {
+          "en": "らしい sits on the plain さむい, and です comes after it: らしいです. ですらしい puts the polite form inside, and かもしれません is your own « maybe », not something heard.",
+          "fr": "らしい se pose sur la forme neutre さむい, et です vient après : らしいです. ですらしい met la forme polie à l'intérieur, et かもしれません n'est qu'un « peut-être » à soi, rien d'entendu.",
+          "es": "らしい va sobre la forma llana さむい, y です viene después: らしいです. ですらしい mete la forma cortés dentro, y かもしれません es solo tu propio «quizás», nada oído."
+        },
+        "slips": [
+          "ですらしい"
+        ]
       }
     ],
     "tour": {
@@ -20224,24 +20304,21 @@
         "en": "I have to pay the money.",
         "fr": "Je dois payer.",
         "es": "Tengo que pagar.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "早く起きないといけません。",
         "en": "I have to get up early.",
         "fr": "Je dois me lever tôt.",
         "es": "Tengo que levantarme temprano.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "今日中にこの仕事を終えないといけない。",
         "en": "I have to finish this work today.",
         "fr": "Je dois finir ce travail aujourd'hui.",
         "es": "Tengo que terminar este trabajo hoy mismo.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "そろそろ帰らないといけない。",
@@ -20249,6 +20326,80 @@
         "fr": "Il faut que je rentre bientôt.",
         "es": "Ya tengo que volver a casa.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "あしたは六時の電車にのるから、五時に起き＿＿＿。",
+        "tr": {
+          "en": "I'm catching the six o'clock train tomorrow, so I have to get up at five.",
+          "fr": "Demain, je prends le train de six heures, alors je dois me lever à cinq heures.",
+          "es": "Mañana tomo el tren de las seis, así que tengo que levantarme a las cinco."
+        },
+        "choices": [
+          "ないといけない",
+          "なくてもいい",
+          "ないほうがいい"
+        ],
+        "why": {
+          "en": "ないといけない makes getting up at five a must: it won't do not to. なくてもいい says there is no need, and ないほうがいい that you had better not.",
+          "fr": "ないといけない fait du lever à cinq heures une obligation : ça ne va pas si on ne le fait pas. なくてもいい dit qu'on n'en a pas besoin, et ないほうがいい qu'il vaut mieux ne pas le faire.",
+          "es": "ないといけない hace de levantarse a las cinco una obligación: si no, no vale. なくてもいい dice que no hace falta, y ないほうがいい, que mejor no hacerlo."
+        }
+      },
+      {
+        "jp": "図書館の本は、来週の月曜日までに＿＿＿。",
+        "tr": {
+          "en": "I have to return the library books by next Monday.",
+          "fr": "Je dois rendre les livres de la bibliothèque d'ici lundi prochain.",
+          "es": "Tengo que devolver los libros de la biblioteca a más tardar el próximo lunes."
+        },
+        "choices": [
+          "かえさないといけない",
+          "かえしてはいけない",
+          "かえさなくてもいい"
+        ],
+        "why": {
+          "en": "かえさないといけない is « must return »: the books have to go back by Monday. かえしてはいけない is « must not return », the opposite, and かえさなくてもいい says there is no need.",
+          "fr": "かえさないといけない, c'est « il faut rendre » : les livres doivent revenir d'ici lundi. かえしてはいけない veut dire « il ne faut pas rendre », l'inverse, et かえさなくてもいい qu'il n'y a pas besoin.",
+          "es": "かえさないといけない es «tener que devolver»: los libros deben volver a más tardar el lunes. かえしてはいけない es «no deber devolver», lo contrario, y かえさなくてもいい dice que no hace falta."
+        }
+      },
+      {
+        "jp": "おきゃくさんが来るから、へやをかたづけ＿＿＿。",
+        "tr": {
+          "en": "Guests are coming, so I have to tidy up the room.",
+          "fr": "Des invités vont venir, alors je dois ranger la pièce.",
+          "es": "Vienen visitas, así que tengo que ordenar el cuarto."
+        },
+        "choices": [
+          "ないといけない",
+          "ないといい",
+          "てもいい"
+        ],
+        "why": {
+          "en": "ないといけない makes tidying a must before the guests arrive. ないといい is a wish, « it would be nice not to », and てもいい only allows it: you may tidy, but you need not.",
+          "fr": "ないといけない fait du rangement une obligation avant l'arrivée des invités. ないといい est un souhait, « ce serait bien de ne pas », et てもいい ne fait que le permettre : on peut ranger, sans y être obligé.",
+          "es": "ないといけない hace de ordenar una obligación antes de que lleguen las visitas. ないといい es un deseo, «ojalá no», y てもいい solo lo permite: puedes ordenar, no tienes que hacerlo."
+        }
+      },
+      {
+        "jp": "このくすりは、一日三かい飲ま＿＿＿。",
+        "tr": {
+          "en": "You have to take this medicine three times a day.",
+          "fr": "Il faut prendre ce médicament trois fois par jour.",
+          "es": "Hay que tomar este medicamento tres veces al día."
+        },
+        "choices": [
+          "ないといけません",
+          "ないでください",
+          "ないほうがいいです"
+        ],
+        "why": {
+          "en": "ないといけません makes three times a day a must, said politely. ないでください asks you not to take it, and ないほうがいいです says you had better not.",
+          "fr": "ないといけません fait des trois prises par jour une obligation, dite poliment. ないでください demande de ne pas le prendre, et ないほうがいいです dit qu'il vaut mieux ne pas le faire.",
+          "es": "ないといけません hace de tomarlo tres veces al día una obligación, dicha con cortesía. ないでください pide no tomarlo, y ないほうがいいです dice que mejor no hacerlo."
+        }
       }
     ],
     "tour": {
