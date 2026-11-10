@@ -130,8 +130,22 @@ jobs:
 
   ios:
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: macos-15
+    # App Store Connect takes only builds made with the iOS 26 SDK or
+    # later, which is Xcode 26's. macos-15's default Xcode is 16.4: v1.1.5
+    # was signed, archived and exported there, then refused at the upload.
+    # macos-26's default is Xcode 26.
+    runs-on: macos-26
     steps:
+      # Checked first, so a runner image that moves its default back costs
+      # seconds, not a whole archive.
+      - name: Xcode 26 or later
+        run: |
+          xcodebuild -version
+          major=$(xcodebuild -version | awk 'NR == 1 { split($2, v, "."); print v[1] }')
+          if [ "${major:-0}" -lt 26 ]; then
+            echo "::error::Xcode ${major} is too old: App Store Connect takes only builds made with Xcode 26 or later"
+            exit 1
+          fi
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
