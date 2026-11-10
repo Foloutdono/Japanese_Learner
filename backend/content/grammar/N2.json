@@ -1722,24 +1722,21 @@
         "en": "Along with the increase in population, the housing problem also grew.",
         "fr": "Avec l'augmentation de la population, le problème du logement s'est aggravé.",
         "es": "Con el aumento de la población, el problema de la vivienda también creció.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "気温が上がるに伴って、雪が解け始めた。",
         "en": "As the temperature rose, the snow began to melt.",
         "fr": "À mesure que la température montait, la neige a commencé à fondre.",
         "es": "A medida que subía la temperatura, la nieve empezó a derretirse.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "経済のはってんに伴って、かんきょう問題が深刻になった。",
         "en": "With economic development, environmental problems became serious.",
         "fr": "Avec le développement économique, les problèmes d'environnement se sont aggravés.",
         "es": "Con el desarrollo económico, los problemas ambientales se agravaron.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "引っ越しに伴って、いろいろな手続きが必要になる。",
@@ -1747,6 +1744,80 @@
         "fr": "Un déménagement s'accompagne de toutes sortes de démarches.",
         "es": "Una mudanza conlleva todo tipo de trámites.",
         "register": "neutral"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "駅前の再開発＿＿＿、古い店がなくなった。",
+        "tr": {
+          "en": "With the redevelopment around the station, the old shops disappeared.",
+          "fr": "Avec le réaménagement du quartier de la gare, les vieilles boutiques ont disparu.",
+          "es": "Con la remodelación de la zona de la estación, desaparecieron las tiendas antiguas."
+        },
+        "choices": [
+          "に伴って",
+          "に反して",
+          "に比べて"
+        ],
+        "why": {
+          "en": "に伴って ties a change to the event that brings it: the redevelopment, and the old shops gone. に反して (« contrary to ») would oppose them, and に比べて (« compared with ») sets up a comparison.",
+          "fr": "に伴って relie un changement à l'événement qui l'entraîne : le réaménagement, et les vieilles boutiques disparues. に反して (« contrairement à ») les opposerait, et に比べて (« comparé à ») pose une comparaison.",
+          "es": "に伴って une un cambio al hecho que lo trae: la remodelación, y las tiendas antiguas desaparecidas. に反して («en contra de») los opondría, y に比べて («comparado con») plantea una comparación."
+        }
+      },
+      {
+        "jp": "インターネットのふきゅう＿＿＿、新聞を読む人がへった。",
+        "tr": {
+          "en": "With the spread of the internet, fewer people read newspapers.",
+          "fr": "Avec l'essor d'Internet, on lit de moins en moins le journal.",
+          "es": "Con la expansión de internet, cada vez menos gente lee el periódico."
+        },
+        "choices": [
+          "に伴って",
+          "にもかかわらず",
+          "に比べて"
+        ],
+        "why": {
+          "en": "に伴って: as the internet spread, newspaper reading fell along with it. にもかかわらず (« despite ») would make the fall a surprise, and に比べて (« compared with ») sets up a comparison.",
+          "fr": "に伴って : à mesure qu'Internet s'est répandu, la lecture du journal a baissé avec lui. にもかかわらず (« malgré ») ferait de la baisse une surprise, et に比べて (« comparé à ») pose une comparaison.",
+          "es": "に伴って: a medida que internet se extendió, la lectura del periódico bajó con él. にもかかわらず («a pesar de») haría de la baja una sorpresa, y に比べて («comparado con») plantea una comparación."
+        }
+      },
+      {
+        "jp": "台風の接近＿＿＿、電車が止まるかもしれない。",
+        "tr": {
+          "en": "With the typhoon approaching, the trains may stop running.",
+          "fr": "Avec l'approche du typhon, les trains risquent de s'arrêter.",
+          "es": "Con el acercamiento del tifón, puede que los trenes dejen de circular."
+        },
+        "choices": [
+          "に伴って",
+          "に代わって",
+          "に反して"
+        ],
+        "why": {
+          "en": "に伴って names the event that brings the change: the typhoon's approach, and the trains stopping. に代わって (« in place of ») and に反して (« contrary to ») make no sense with an approach.",
+          "fr": "に伴って nomme l'événement qui entraîne le changement : l'approche du typhon, et les trains arrêtés. に代わって (« à la place de ») et に反して (« contrairement à ») n'ont pas de sens ici.",
+          "es": "に伴って nombra el hecho que trae el cambio: el acercamiento del tifón, y los trenes detenidos. に代わって («en lugar de») y に反して («en contra de») no tienen sentido aquí."
+        }
+      },
+      {
+        "jp": "円安が進む＿＿＿、海外旅行に行く人がへった。",
+        "tr": {
+          "en": "As the yen weakened, fewer people travelled abroad.",
+          "fr": "À mesure que le yen baissait, moins de gens partaient à l'étranger.",
+          "es": "A medida que se debilitaba el yen, menos gente viajaba al extranjero."
+        },
+        "choices": [
+          "に伴って",
+          "のに",
+          "まえに"
+        ],
+        "why": {
+          "en": "Dictionary form + に伴って: two changes that move together. のに (« although ») would set them against each other, and まえに would put the fall in travel before the yen weakened.",
+          "fr": "Forme du dictionnaire + に伴って : deux changements qui vont ensemble. のに (« bien que ») les opposerait, et まえに placerait la baisse des voyages avant celle du yen.",
+          "es": "Forma de diccionario + に伴って: dos cambios que van juntos. のに («aunque») los opondría, y まえに pondría la baja de los viajes antes de la del yen."
+        }
       }
     ],
     "tour": {
@@ -10321,7 +10392,7 @@
           "why": {
             "en": "歌にかけては names the field, and かなわない says one cannot match the other: the sister cannot match the speaker at singing. She comes first in the sentence, but she is not the winner.",
             "fr": "歌にかけては nomme le domaine, et かなわない dit que l'un ne peut égaler l'autre : en chant, la sœur ne peut égaler la personne qui parle. La sœur vient en premier dans la phrase, mais elle n'est pas la gagnante.",
-            "es": "歌にかけては nombra el campo, y かなわない dice que uno no puede igualar al otro: la hermana no puede igualar a quien habla en el canto. Ella va primero en la oración, pero no es quien gana."
+            "es": "歌にかけては nombra el campo, y かなわない dice que una persona no puede igualar a otra: la hermana no puede igualar a quien habla en el canto. Ella va primero en la oración, pero no es quien gana."
           }
         },
         {
@@ -10872,24 +10943,21 @@
         "en": "Prior to the opening, the director gave a greeting.",
         "fr": "Avant l'ouverture, le directeur a prononcé un discours.",
         "es": "Antes de la apertura, el director pronunció unas palabras de saludo.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "旅行に先立って、必要な物を買いそろえた。",
         "en": "Ahead of the trip, I bought all the necessary things.",
         "fr": "Avant le voyage, j'ai acheté tout le nécessaire.",
         "es": "Antes del viaje, compré todo lo necesario.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "新しい商品の発売に先立って、説明会が開かれた。",
         "en": "Ahead of the new product's launch, a briefing was held.",
         "fr": "Avant le lancement du nouveau produit, une réunion d'information a eu lieu.",
         "es": "Antes del lanzamiento del nuevo producto, se realizó una sesión informativa.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "試合に先立って、選手の紹介があった。",
@@ -10897,6 +10965,80 @@
         "fr": "Avant le match, les joueurs ont été présentés.",
         "es": "Antes del partido, se presentó a los jugadores.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "式の開始＿＿＿、全員で国歌を歌った。",
+        "tr": {
+          "en": "Before the ceremony began, everyone sang the national anthem together.",
+          "fr": "Avant le début de la cérémonie, tout le monde a chanté l'hymne national.",
+          "es": "Antes del inicio de la ceremonia, todo el mundo cantó el himno nacional."
+        },
+        "choices": [
+          "に先立って",
+          "に続いて",
+          "に代わって"
+        ],
+        "why": {
+          "en": "に先立って puts the anthem ahead of the start. に続いて would put it after the start, and に代わって would sing it instead of starting the ceremony.",
+          "fr": "に先立って place l'hymne avant le début. に続いて le mettrait après le début, et に代わって le ferait chanter à la place de la cérémonie.",
+          "es": "に先立って pone el himno antes del inicio. に続いて lo pondría después del inicio, y に代わって lo haría cantar en lugar de la ceremonia."
+        }
+      },
+      {
+        "jp": "大会＿＿＿、選手たちが会場を下見した。",
+        "tr": {
+          "en": "Ahead of the tournament, the athletes went to look over the venue.",
+          "fr": "En amont du tournoi, les athlètes ont fait un repérage des lieux.",
+          "es": "Antes del torneo, los atletas fueron a conocer las instalaciones."
+        },
+        "choices": [
+          "に先立って",
+          "と同時に",
+          "にもとづいて"
+        ],
+        "why": {
+          "en": "に先立って marks what comes before the event: the visit, ahead of the tournament. と同時に would put the visit at the same time as the tournament, and にもとづいて would make it « based on » it.",
+          "fr": "に先立って marque ce qui vient avant l'événement : le repérage, avant le tournoi. と同時に le placerait en même temps que le tournoi, et にもとづいて le rendrait « fondé sur » lui.",
+          "es": "に先立って marca lo que va antes del acontecimiento: la visita, antes del torneo. と同時に la pondría al mismo tiempo que el torneo, y にもとづいて la haría «basada en» él."
+        }
+      },
+      {
+        "jp": "映画の上映＿＿＿、出演者たちがあいさつをした。",
+        "tr": {
+          "en": "Before the screening, the cast greeted the audience.",
+          "fr": "Avant la projection, les interprètes ont salué le public.",
+          "es": "Antes de la proyección, el elenco saludó al público."
+        },
+        "choices": [
+          "に先立って",
+          "に続いて",
+          "によって"
+        ],
+        "why": {
+          "en": "に先立って puts the greeting before the screening. に続いて would put it after the screening, and によって (« by, because of ») names no moment at all.",
+          "fr": "に先立って place le salut avant la projection. に続いて le mettrait après la projection, et によって (« par, à cause de ») ne situe rien dans le temps.",
+          "es": "に先立って pone el saludo antes de la proyección. に続いて lo pondría después, y によって («por, debido a») no sitúa nada en el tiempo."
+        }
+      },
+      {
+        "jp": "試合を始める＿＿＿、両チームの選手があくしゅをした。",
+        "tr": {
+          "en": "Before starting the match, the players of both teams shook hands.",
+          "fr": "Avant de commencer le match, les deux équipes se sont serré la main.",
+          "es": "Antes de empezar el partido, los dos equipos se dieron la mano."
+        },
+        "choices": [
+          "に先立って",
+          "にもかかわらず",
+          "かわりに"
+        ],
+        "why": {
+          "en": "After a verb, に先立って takes the dictionary form: the handshake comes before the start. にもかかわらず would mean « despite starting », and かわりに that they shook hands instead of playing.",
+          "fr": "Après un verbe, に先立って prend la forme du dictionnaire : la poignée de main précède le début. にもかかわらず voudrait dire « bien qu'on commence », et かわりに qu'on se serre la main au lieu de jouer.",
+          "es": "Tras un verbo, に先立って va con la forma de diccionario: el saludo va antes del inicio. にもかかわらず significaría «a pesar de empezar», y かわりに que se dan la mano en vez de jugar."
+        }
       }
     ],
     "tour": {
@@ -11903,7 +12045,7 @@
           "tr": {
             "en": "Friendship is nothing other than wishing for the other person's happiness.",
             "fr": "L'amitié n'est rien d'autre que souhaiter le bonheur de l'autre.",
-            "es": "La amistad no es otra cosa que desear la felicidad del otro."
+            "es": "La amistad no es otra cosa que desear la felicidad de la otra persona."
           },
           "choices": [
             "相手の幸せを願うことにほかならない",
@@ -11987,23 +12129,23 @@
           "tr": {
             "en": "Not keeping a promise is nothing other than betraying the other person.",
             "fr": "Ne pas tenir une promesse, ce n'est rien d'autre que trahir l'autre.",
-            "es": "No cumplir una promesa no es otra cosa que traicionar al otro."
+            "es": "No cumplir una promesa no es otra cosa que traicionar a la otra persona."
           },
           "choices": [
             {
               "en": "It is the very same thing as betraying the other person.",
               "fr": "C'est exactement la même chose que trahir l'autre.",
-              "es": "Es exactamente lo mismo que traicionar al otro."
+              "es": "Es exactamente lo mismo que traicionar a la otra persona."
             },
             {
               "en": "It leads to betraying the other person later.",
               "fr": "Cela conduit à trahir l'autre par la suite.",
-              "es": "Lleva a traicionar al otro más adelante."
+              "es": "Lleva a traicionar a la otra persona más adelante."
             },
             {
               "en": "It is a lesser matter than betraying the other person.",
               "fr": "C'est moins grave que de trahir l'autre.",
-              "es": "Es algo menos grave que traicionar al otro."
+              "es": "Es algo menos grave que traicionar a la otra persona."
             }
           ],
           "why": {
@@ -16919,24 +17061,21 @@
         "en": "With the exam coming up, I made a plan.",
         "fr": "À l'approche de l'examen, j'ai établi un plan.",
         "es": "Con el examen a la vista, hice un plan.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "出発にあたって、家族に手紙を書いた。",
         "en": "On the occasion of my departure, I wrote to my family.",
         "fr": "Au moment de partir, j'ai écrit à ma famille.",
         "es": "Con motivo de mi partida, escribí una carta a mi familia.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "新しい仕事を始めるにあたって、計画を立てた。",
         "en": "On starting my new job, I made a plan.",
         "fr": "Au moment de commencer mon nouveau travail, j'ai fait un plan.",
         "es": "Al empezar mi nuevo trabajo, hice un plan.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "開店にあたって、多くの方にお世話になりました。",
@@ -16944,6 +17083,80 @@
         "fr": "Pour l'ouverture du magasin, beaucoup nous ont aidés.",
         "es": "Con motivo de la apertura de la tienda, recibimos la ayuda de muchas personas.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "開業五十周年＿＿＿、記念の切符が売り出された。",
+        "tr": {
+          "en": "On the fiftieth anniversary of the opening, commemorative tickets went on sale.",
+          "fr": "À l'occasion du cinquantenaire de l'ouverture, des billets commémoratifs ont été mis en vente.",
+          "es": "Con motivo del quincuagésimo aniversario de la apertura, salieron a la venta boletos conmemorativos."
+        },
+        "choices": [
+          "にあたって",
+          "にわたって",
+          "によって"
+        ],
+        "why": {
+          "en": "にあたって marks the occasion: the anniversary. にわたって (« over ») needs a stretch of time, and によって (« by, because of ») names no occasion.",
+          "fr": "にあたって marque l'occasion : l'anniversaire. にわたって (« durant ») demande une durée, et によって (« par, à cause de ») ne désigne aucune occasion.",
+          "es": "にあたって marca la ocasión: el aniversario. にわたって («a lo largo de») pide un lapso de tiempo, y によって («por, debido a») no nombra ninguna ocasión."
+        }
+      },
+      {
+        "jp": "店を開く＿＿＿、まず近所の人たちにあいさつをして回った。",
+        "tr": {
+          "en": "As I was about to open my shop, I first went round greeting the neighbours.",
+          "fr": "Au moment d'ouvrir ma boutique, j'ai d'abord fait le tour du voisinage pour saluer tout le monde.",
+          "es": "Al abrir mi tienda, primero recorrí el vecindario para saludar a todo el mundo."
+        },
+        "choices": [
+          "にあたって",
+          "かわりに",
+          "につれて"
+        ],
+        "why": {
+          "en": "にあたって sets you at the moment of opening the shop: the greetings come with it. かわりに would greet instead of opening, and につれて (« as… gradually ») needs a change that grows.",
+          "fr": "にあたって te place au seuil de l'ouverture : les saluts l'accompagnent. かわりに ferait saluer au lieu d'ouvrir, et につれて (« à mesure que ») demande un changement progressif.",
+          "es": "にあたって te sitúa en el momento de abrir la tienda: los saludos acompañan la apertura. かわりに saludaría en vez de abrir, y につれて («a medida que») pide un cambio progresivo."
+        }
+      },
+      {
+        "jp": "けっこん＿＿＿、二人で新しい家をさがした。",
+        "tr": {
+          "en": "As we were getting married, the two of us looked for a new home.",
+          "fr": "Au moment de nous marier, nous avons cherché un nouveau logement à deux.",
+          "es": "Al casarnos, buscamos en pareja una casa nueva."
+        },
+        "choices": [
+          "にあたって",
+          "に比べて",
+          "にもかかわらず"
+        ],
+        "why": {
+          "en": "にあたって marks the step being taken, the wedding, and what it calls for: a home. に比べて (« compared with ») sets up a comparison, and にもかかわらず (« despite ») sets the two against each other.",
+          "fr": "にあたって marque l'étape qu'on aborde, le mariage, et ce qu'elle demande : un logement. に比べて (« comparé à ») pose une comparaison, et にもかかわらず (« malgré ») oppose les deux.",
+          "es": "にあたって marca el paso que se da, la boda, y lo que pide: una casa. に比べて («comparado con») plantea una comparación, y にもかかわらず («a pesar de») opone las dos cosas."
+        }
+      },
+      {
+        "jp": "卒業＿＿＿、先生方に心からお礼を申し上げます。",
+        "tr": {
+          "en": "On the occasion of our graduation, we offer our heartfelt thanks to our teachers.",
+          "fr": "À l'occasion de notre remise de diplômes, nous adressons nos plus sincères remerciements au corps enseignant.",
+          "es": "Con motivo de nuestra graduación, expresamos nuestro más sincero agradecimiento al cuerpo docente."
+        },
+        "choices": [
+          "にあたって",
+          "にわたって",
+          "に代わって"
+        ],
+        "why": {
+          "en": "にあたって marks the occasion of the speech: graduation. にわたって (« over ») needs a stretch of time, and に代わって would give thanks « in place of » graduating.",
+          "fr": "にあたって marque l'occasion du discours : la fin des études. にわたって (« durant ») demande une durée, et に代わって remercierait « à la place » de la remise des diplômes.",
+          "es": "にあたって marca la ocasión del discurso: la graduación. にわたって («a lo largo de») pide un lapso de tiempo, y に代わって daría las gracias «en lugar de» graduarse."
+        }
       }
     ],
     "tour": {
@@ -22184,24 +22397,21 @@
         "en": "As if I would ever go to that shop again!",
         "fr": "Plus jamais je ne remettrai les pieds dans ce magasin !",
         "es": "¡Como si fuera a volver alguna vez a esa tienda!",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "彼の言うことなど、信じるものか。",
         "en": "As if I would believe anything he says!",
         "fr": "Comme si j'allais croire ce qu'il dit !",
         "es": "¡Como si fuera a creerme algo de lo que dice!",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "こんな簡単な問題、間違えるものか。",
         "en": "As if I'd get such an easy question wrong!",
         "fr": "Comme si j'allais me tromper sur une question aussi facile !",
         "es": "¡Como si fuera a fallar una pregunta tan fácil!",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "負けるものか。最後までがんばる。",
@@ -22209,6 +22419,80 @@
         "fr": "Pas question de perdre ! Je tiendrai jusqu'au bout.",
         "es": "¡No pienso perder! Aguantaré hasta el final.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "人のひみつを、だれにでも話す＿＿＿。",
+        "tr": {
+          "en": "As if I'd tell just anyone someone else's secret!",
+          "fr": "Comme si j'allais confier le secret de quelqu'un au premier venu !",
+          "es": "¡Como si yo fuera a contarle a cualquiera el secreto de otra persona!"
+        },
+        "choices": [
+          "ものか",
+          "ものだ",
+          "かもしれない"
+        ],
+        "why": {
+          "en": "ものか refuses flatly: never would I. ものだ would make telling it what people do, and かもしれない would admit that I might.",
+          "fr": "ものか refuse net : jamais je ne le ferais. ものだ en ferait ce qui se fait, et かもしれない admettrait que je pourrais le faire.",
+          "es": "ものか rechaza de plano: jamás lo haría. ものだ lo volvería algo que se suele hacer, y かもしれない admitiría que podría hacerlo."
+        }
+      },
+      {
+        "jp": "あんなにおそいバスで、九時に着ける＿＿＿。",
+        "tr": {
+          "en": "As if we could arrive at nine on a bus that slow!",
+          "fr": "Comme si on pouvait arriver à neuf heures avec un bus aussi lent !",
+          "es": "¡Como si pudiéramos llegar a las nueve en un autobús tan lento!"
+        },
+        "choices": [
+          "ものか",
+          "だろう",
+          "らしい"
+        ],
+        "why": {
+          "en": "ものか denies it outright: no way we'll make it. だろう would guess that we probably can, and らしい would report that we can.",
+          "fr": "ものか le dément sans appel : impossible d'y arriver. だろう supposerait qu'on y arrivera sans doute, et らしい rapporterait qu'on peut y arriver.",
+          "es": "ものか lo niega de plano: imposible llegar. だろう supondría que probablemente lleguemos, y らしい contaría que se puede llegar."
+        }
+      },
+      {
+        "jp": "そんな話が、本当＿＿＿。",
+        "tr": {
+          "en": "As if a story like that were true!",
+          "fr": "Comme si une histoire pareille était vraie !",
+          "es": "¡Como si una historia así fuera cierta!"
+        },
+        "choices": [
+          "なものか",
+          "だそうだ",
+          "らしい"
+        ],
+        "why": {
+          "en": "A noun takes な before ものか: 本当なものか, a scornful denial. 本当だそうだ would pass on that it is true, and 本当らしい would say it seems true.",
+          "fr": "Un nom prend な devant ものか : 本当なものか, un démenti méprisant. 本当だそうだ rapporterait que c'est vrai, et 本当らしい dirait que cela semble vrai.",
+          "es": "Un sustantivo lleva な ante ものか: 本当なものか, una negación despectiva. 本当だそうだ contaría que es cierto, y 本当らしい diría que parece cierto."
+        }
+      },
+      {
+        "jp": "一万円もするこのシャツが、安い＿＿＿。",
+        "tr": {
+          "en": "As if this shirt, at a whole ten thousand yen, were cheap!",
+          "fr": "Comme si cette chemise à dix mille yens était bon marché !",
+          "es": "¡Como si esta camisa de diez mil yenes fuera barata!"
+        },
+        "choices": [
+          "ものか",
+          "ものだ",
+          "にちがいない"
+        ],
+        "why": {
+          "en": "ものか flatly denies that it is cheap. 安いものだ would call it a bargain, and 安いにちがいない would be sure it is cheap: both say the opposite.",
+          "fr": "ものか nie catégoriquement qu'elle soit bon marché. 安いものだ y verrait une bonne affaire, et 安いにちがいない affirmerait qu'elle l'est sûrement : les deux disent le contraire.",
+          "es": "ものか niega de plano que sea barata. 安いものだ la llamaría una ganga, y 安いにちがいない aseguraría que es barata: las dos dicen lo contrario."
+        }
       }
     ],
     "tour": {
@@ -32603,24 +32887,21 @@
         "en": "Now that I have promised, I will see it through.",
         "fr": "Maintenant que j'ai promis, j'irai jusqu'au bout.",
         "es": "Ya que lo he prometido, lo llevaré hasta el final.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "引き受けた上は、責任を持って働きたい。",
         "en": "Having accepted the job, I want to do it responsibly.",
         "fr": "Ayant accepté la tâche, je veux l'accomplir avec sérieux.",
         "es": "Ya que acepté el trabajo, quiero hacerlo con responsabilidad.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "こうなった上は、あきらめるしかない。",
         "en": "Now that it has come to this, there's nothing to do but give up.",
         "fr": "Maintenant que nous en sommes là, il ne reste qu'à renoncer.",
         "es": "Ya que las cosas han llegado a esto, no queda más que rendirse.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "試合に出る上は、勝つつもりです。",
@@ -32628,6 +32909,80 @@
         "fr": "Puisque je participe au match, je compte gagner.",
         "es": "Puesto que voy a participar en el partido, pienso ganar.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "自分で選んだ＿＿＿、人のせいにはできない。",
+        "tr": {
+          "en": "Now that I've made the choice myself, I can't blame anyone else.",
+          "fr": "Puisque c'est moi qui ai choisi, je ne peux m'en prendre à personne d'autre.",
+          "es": "Ya que lo elegí yo, no puedo culpar a nadie más."
+        },
+        "choices": [
+          "上は",
+          "わりに",
+          "のに"
+        ],
+        "why": {
+          "en": "上は: the choice is made, and it binds you. わりに (« considering ») needs an outcome you would not expect, and のに (« although ») would set the two halves against each other.",
+          "fr": "上は : le choix est fait, et il t'engage. わりに (« compte tenu de ») demande un résultat inattendu, et のに (« bien que ») opposerait les deux moitiés.",
+          "es": "上は: la elección está hecha y te compromete. わりに («considerando») pide un resultado inesperado, y のに («aunque») enfrentaría las dos mitades."
+        }
+      },
+      {
+        "jp": "うそが明らかになった＿＿＿、正直に話すしかない。",
+        "tr": {
+          "en": "Now that my lie has come out, there's nothing for it but to tell the truth.",
+          "fr": "Maintenant que mon mensonge est découvert, il ne me reste qu'à dire la vérité.",
+          "es": "Ahora que se descubrió mi mentira, no me queda más que decir la verdad."
+        },
+        "choices": [
+          "上は",
+          "上に",
+          "とたん"
+        ],
+        "why": {
+          "en": "上は: the lie is out, and that settles what must follow. 上に would add « on top of being found out », and とたん (« the moment that ») needs a sudden event that happened, not what you must do.",
+          "fr": "上は : le mensonge est découvert, et cela décide de la suite. 上に ajouterait « en plus de la découverte », et とたん (« au moment même où ») demande un fait soudain qui s'est produit, pas ce qu'on doit faire.",
+          "es": "上は: la mentira salió a la luz, y eso decide lo que sigue. 上に añadiría «además de ser descubierta», y とたん («en el mismo momento en que») pide un hecho repentino ya ocurrido, no lo que hay que hacer."
+        }
+      },
+      {
+        "jp": "大金を借りた＿＿＿、毎月きちんと返さなければならない。",
+        "tr": {
+          "en": "Now that I've borrowed a large sum, I have to pay it back properly every month.",
+          "fr": "Puisque j'ai emprunté une grosse somme, je dois la rembourser sans faute chaque mois.",
+          "es": "Ya que pedí prestada una gran suma, tengo que devolverla sin falta cada mes."
+        },
+        "choices": [
+          "上は",
+          "とたん",
+          "くせに"
+        ],
+        "why": {
+          "en": "上は: having borrowed binds you to repay. とたん (« the moment that ») needs a sudden event that happened, not a duty, and くせに (« even though », with scorn) would set the loan against the repaying.",
+          "fr": "上は : avoir emprunté t'oblige à rembourser. とたん (« au moment même où ») demande un fait soudain, pas un devoir, et くせに (« alors que », avec mépris) opposerait l'emprunt au remboursement.",
+          "es": "上は: haber pedido prestado te obliga a devolver. とたん («en el momento en que») pide un hecho repentino, no un deber, y くせに («aunque», con desprecio) opondría el préstamo a la devolución."
+        }
+      },
+      {
+        "jp": "教師になる＿＿＿、子どもたちの手本にならなければならない。",
+        "tr": {
+          "en": "Since I am going to be a teacher, I must set an example for the children.",
+          "fr": "Puisque je vais enseigner, je dois montrer l'exemple aux enfants.",
+          "es": "Ya que voy a ser docente, tengo que dar el ejemplo a los niños."
+        },
+        "choices": [
+          "上は",
+          "上に",
+          "わりに"
+        ],
+        "why": {
+          "en": "The dictionary form + 上は: the decision to teach commits you. 上に would add « on top of becoming one », and わりに (« considering ») needs an outcome you would not expect.",
+          "fr": "Forme du dictionnaire + 上は : la décision d'enseigner engage. 上に ajouterait « en plus de le devenir », et わりに (« compte tenu de ») demande un résultat inattendu.",
+          "es": "Forma de diccionario + 上は: la decisión de enseñar te compromete. 上に añadiría «además de serlo», y わりに («considerando») pide un resultado inesperado."
+        }
       }
     ],
     "tour": {
@@ -34961,24 +35316,21 @@
         "en": "For a parent, a child coming home late is a worry.",
         "fr": "Pour un parent, un enfant qui rentre tard est un souci.",
         "es": "Para los padres, que su hijo vuelva tarde a casa es motivo de preocupación.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "学生にしたら、テストは少ないほうがいい。",
         "en": "For the students, the fewer tests the better.",
         "fr": "Pour les étudiants, moins il y a de contrôles, mieux c'est.",
         "es": "Para los estudiantes, cuantos menos exámenes, mejor.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "彼にしたら、つらい決定だっただろう。",
         "en": "In his shoes, it must have been a hard decision.",
         "fr": "À sa place, ce devait être une décision pénible.",
         "es": "Para él, debió de ser una decisión dolorosa.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "店の人にしたら、客が多いほうがうれしい。",
@@ -34986,6 +35338,80 @@
         "fr": "Du point de vue des commerçants, plus il y a de clients, mieux c'est.",
         "es": "Para la gente de la tienda, cuantos más clientes, mejor.",
         "register": "neutral"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "急に予定を変えられた客＿＿＿、腹が立つのも無理はない。",
+        "tr": {
+          "en": "For customers whose plans were changed without warning, it's no wonder they're angry.",
+          "fr": "Pour une clientèle dont on a changé le programme sans prévenir, la colère se comprend.",
+          "es": "Para una clientela a la que le cambiaron los planes sin aviso, es lógico enojarse."
+        },
+        "choices": [
+          "にしたら",
+          "にしては",
+          "に対して"
+        ],
+        "why": {
+          "en": "にしたら stands in the customers' shoes: their anger makes sense. にしては would judge against expectations (« surprisingly, for them »), and に対して would make them the ones others are angry at.",
+          "fr": "にしたら se met à la place de la clientèle : sa colère se comprend. にしては jugerait au regard des attentes (« étonnamment, vu sa situation »), et に対して en ferait la cible de la colère.",
+          "es": "にしたら se pone en el lugar de la clientela: su enojo se entiende. にしては juzgaría según lo esperado («sorprendentemente, en su caso»), y に対して la volvería el blanco del enojo."
+        }
+      },
+      {
+        "jp": "初めて日本に来た留学生＿＿＿、電車の乗りかえはむずかしいだろう。",
+        "tr": {
+          "en": "For an international student in Japan for the first time, changing trains must be hard.",
+          "fr": "Pour une personne venue étudier au Japon pour la première fois, changer de train doit être difficile.",
+          "es": "Para una persona que viene por primera vez a Japón a estudiar, hacer transbordo debe de ser difícil."
+        },
+        "choices": [
+          "にしたら",
+          "にしては",
+          "に代わって"
+        ],
+        "why": {
+          "en": "にしたら gives how it feels to the newcomer: hard. にしては would judge against expectations (« surprisingly, for a newcomer »), and に代わって (« in place of ») puts someone else there instead.",
+          "fr": "にしたら dit ce que vit la personne qui arrive : c'est difficile. にしては jugerait au regard des attentes (« étonnamment, vu la situation »), et に代わって (« à la place de ») met quelqu'un d'autre à sa place.",
+          "es": "にしたら dice cómo lo vive quien acaba de llegar: es difícil. にしては juzgaría según lo esperado («sorprendentemente, en su caso»), y に代わって («en lugar de») pone a otra persona en su lugar."
+        }
+      },
+      {
+        "jp": "相手＿＿＿、急に断られて困っただろう。",
+        "tr": {
+          "en": "From the other person's side, being turned down so suddenly must have been awkward.",
+          "fr": "Du côté de l'autre personne, essuyer un refus aussi soudain a dû être embarrassant.",
+          "es": "Desde el lado de la otra persona, recibir una negativa tan repentina debió de ser incómodo."
+        },
+        "choices": [
+          "にしたら",
+          "がしたら",
+          "のくせに"
+        ],
+        "why": {
+          "en": "にしたら takes the other person's side and guesses how it felt. 相手がしたら would mean « if the other person did it », and のくせに (« even though », with scorn) would blame them instead of feeling for them.",
+          "fr": "にしたら se place du côté de l'autre personne et devine ce qu'elle a ressenti. 相手がしたら voudrait dire « si l'autre le faisait », et のくせに (« alors que », avec mépris) la blâmerait au lieu de la comprendre.",
+          "es": "にしたら se pone del lado de la otra persona y adivina lo que sintió. 相手がしたら significaría «si la otra persona lo hiciera», y のくせに («aunque», con desprecio) la culparía en vez de comprenderla."
+        }
+      },
+      {
+        "jp": "毎日家事をしている母＿＿＿、たまには休みがほしいだろう。",
+        "tr": {
+          "en": "My mother does the housework every day; from where she stands, she must want a break now and then.",
+          "fr": "Ma mère fait le ménage tous les jours : de son point de vue, elle doit bien avoir envie d'une pause de temps en temps.",
+          "es": "Mi madre hace las tareas de la casa todos los días: desde su punto de vista, de vez en cuando querrá un descanso."
+        },
+        "choices": [
+          "にしたら",
+          "に代わって",
+          "に対して"
+        ],
+        "why": {
+          "en": "にしたら gives the mother's side: what she must feel. 母に代わって would mean « in her place », as if someone else wanted the break, and 母に対して (« toward her ») gives no view of hers.",
+          "fr": "にしたら donne le point de vue de la mère : ce qu'elle doit ressentir. 母に代わって voudrait dire « à sa place », comme si quelqu'un d'autre voulait la pause, et 母に対して (« envers elle ») ne dit rien de son point de vue.",
+          "es": "にしたら da el punto de vista de la madre: lo que debe de sentir. 母に代わって significaría «en su lugar», como si otra persona quisiera el descanso, y 母に対して («hacia ella») no dice nada de su punto de vista."
+        }
       }
     ],
     "tour": {
@@ -38742,24 +39168,21 @@
         "en": "I can't stop worrying about the exam.",
         "fr": "Je n'arrête pas de penser à l'examen.",
         "es": "No puedo dejar de preocuparme por el examen.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "一人で暮らすと、さびしくてならない。",
         "en": "Living alone, I feel unbearably lonely.",
         "fr": "En vivant seul, je me sens terriblement seul.",
         "es": "Cuando vivo sin compañía, la soledad se me hace insoportable.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "何か悪いことが起きる気がしてならない。",
         "en": "I can't shake the feeling that something bad will happen.",
         "fr": "Je ne peux m'ôter l'idée que quelque chose de mauvais va arriver.",
         "es": "No puedo quitarme la sensación de que va a pasar algo malo.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "試合に負けたのが、残念でならない。",
@@ -38767,6 +39190,80 @@
         "fr": "Je n'arrive pas à me remettre d'avoir perdu le match.",
         "es": "No puedo quitarme la pena de haber perdido el partido.",
         "register": "written"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "父が入院してから、毎日不安＿＿＿。",
+        "tr": {
+          "en": "Since my father went into hospital, I have felt unbearably anxious every day.",
+          "fr": "Depuis que mon père est hospitalisé, je vis chaque jour dans une angoisse insupportable.",
+          "es": "Desde que mi padre está hospitalizado, cada día siento una angustia insoportable."
+        },
+        "choices": [
+          "でならない",
+          "にならない",
+          "ではない"
+        ],
+        "why": {
+          "en": "After a な-adjective, でならない says a feeling you cannot hold back: 不安でならない. 不安にならない (« doesn't get anxious ») and 不安ではない (« isn't anxious ») deny the very feeling.",
+          "fr": "Après un adjectif en な, でならない dit un sentiment qu'on ne peut retenir : 不安でならない. 不安にならない (« l'angoisse ne vient pas ») et 不安ではない (« pas d'angoisse ») nient ce sentiment même.",
+          "es": "Tras un adjetivo な, でならない expresa un sentimiento que no puedes contener: 不安でならない. 不安にならない («no llega la angustia») y 不安ではない («no hay angustia») niegan ese mismo sentimiento."
+        }
+      },
+      {
+        "jp": "子どものころに住んでいた町が、なつかしく＿＿＿。",
+        "tr": {
+          "en": "I feel an aching longing for the town where I lived as a child.",
+          "fr": "La ville où j'ai vécu enfant me manque terriblement.",
+          "es": "Extraño muchísimo la ciudad donde viví en mi infancia."
+        },
+        "choices": [
+          "てならない",
+          "てもいい",
+          "ならない"
+        ],
+        "why": {
+          "en": "The て-form + ならない: a longing you cannot help, なつかしくてならない. なつかしくてもいい only allows the feeling, and なつかしくならない says the town never becomes dear.",
+          "fr": "La forme en て + ならない : une nostalgie irrépressible, なつかしくてならない. なつかしくてもいい ne fait que permettre ce sentiment, et なつかしくならない dit qu'elle ne finit jamais par te manquer.",
+          "es": "La forma て + ならない: una nostalgia que no puedes contener, なつかしくてならない. なつかしくてもいい solo permite el sentimiento, y なつかしくならない dice que nunca llegas a extrañarla."
+        }
+      },
+      {
+        "jp": "あの日のことを思い出すと、腹が立っ＿＿＿。",
+        "tr": {
+          "en": "Whenever I think back to that day, I can't help getting angry.",
+          "fr": "Quand je repense à ce jour-là, je ne peux pas m'empêcher d'être en colère.",
+          "es": "Cuando recuerdo aquel día, no puedo evitar enojarme."
+        },
+        "choices": [
+          "てならない",
+          "てはならない",
+          "ていない"
+        ],
+        "why": {
+          "en": "腹が立ってならない: anger that rises of itself. With は, 腹が立ってはならない forbids getting angry, and 腹が立っていない says you are not angry.",
+          "fr": "腹が立ってならない : une colère qui monte d'elle-même. Avec は, 腹が立ってはならない interdit de se fâcher, et 腹が立っていない dit qu'on n'est pas en colère.",
+          "es": "腹が立ってならない: un enojo que surge solo. Con は, 腹が立ってはならない prohíbe enojarse, y 腹が立っていない dice que no hay enojo."
+        }
+      },
+      {
+        "jp": "この計画は、どこかがまちがっているように思われ＿＿＿。",
+        "tr": {
+          "en": "I can't shake the feeling that something in this plan is wrong.",
+          "fr": "Je ne peux pas me défaire de l'impression que quelque chose cloche dans ce projet.",
+          "es": "No puedo quitarme la impresión de que algo de este plan está mal."
+        },
+        "choices": [
+          "てならない",
+          "なければならない",
+          "てはならない"
+        ],
+        "why": {
+          "en": "思われてならない: an impression that keeps coming back. 思われなければならない says it must seem wrong, and 思われてはならない that it must not.",
+          "fr": "思われてならない : une impression qui revient sans cesse. 思われなければならない dit qu'il faut que cela paraisse faux, et 思われてはならない qu'il ne le faut pas.",
+          "es": "思われてならない: una impresión que vuelve una y otra vez. 思われなければならない dice que debe parecer que está mal, y 思われてはならない que no debe parecerlo."
+        }
       }
     ],
     "tour": {
