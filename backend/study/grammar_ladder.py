@@ -135,6 +135,12 @@ def _sources(entry: dict) -> list[tuple[str, str, dict]]:
 
 MAX_GAPS = 2
 
+# A point the detector lights with the word it follows, whose hole holds
+# its own piece alone (plan 318): 〜も（強調） is lit on 三度も, and the
+# hole asked for the count too -- under « three whole times », 三回も
+# was refused. The count stays in the sentence; the hole holds も.
+_PIECE_ONLY = {"〜も（強調）": "も"}
+
 
 _INFLECTING = ("verb", "adjective", "suffix")
 
@@ -181,12 +187,20 @@ def _word_kept(jp: str, spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
     ませ of any ません, takes the rest of the negative: ことがあり,
     ができません, ではありません. Where the rest belongs to the point's
     next piece the gap is left as it is. A gap's start is never moved:
-    a point's piece is often an ending (大き + く, 書き + 直す)."""
+    a point's piece is often an ending (大き + く, 書き + 直す) -- but
+    for the ん of ません, which the detector lights as a negative's
+    piece (どこへも行きませ|ん|でした, 何も／誰も〜ない): the hole takes
+    its ませ, so it holds the word ません and no kana of it (plan 318)."""
     tokens = tokenize(jp) or []
     if not tokens:
         return spans
     out = []
     for a, b in spans:
+        k = next((i for i, t in enumerate(tokens) if t.start == a), None)
+        if (k and tokens[k].lemma == "ず" and tokens[k].surface == "ん"
+                and tokens[k - 1].lemma == "ます" and tokens[k - 1].surface == "ませ"
+                and not any(b2 > tokens[k - 1].start for _a2, b2 in out)):
+            a = tokens[k - 1].start                                  # ませ|ん
         end = b
         inside = next((t for t in tokens if t.start < end < t.end), None)
         if inside is not None and inside.start >= a and _ends_in_inflection(inside, end - inside.start):
@@ -220,7 +234,19 @@ def _build_items(level: str, pattern: str) -> tuple:
         return ()
     out = []
     for key, jp, tr in _sources(found[1]):
-        spans = _word_kept(jp, [tuple(sp) for sp in lit_spans(jp, pattern, level)])
+        # A twist or a scene line is cut only where the detector reads the
+        # point in it (plan 318). A tour's lines are written to set the
+        # point against its rivals and its lookalikes, and where the
+        # detector finds nothing the stems' first match cut the rival's
+        # sentence on the point's letters: ないで in 話さないでください,
+        # ことに in 行くことにしました under 〜ことになる, そう in
+        # おいしそうです under the hearsay, あそこの's この. The examples
+        # are the point's own, and keep the stems' match.
+        spans = _word_kept(jp, [tuple(sp) for sp in lit_spans(jp, pattern, level,
+                                                              fallback=key.startswith("ex:"))])
+        piece = _PIECE_ONLY.get(pattern)
+        if piece:
+            spans = [(b - len(piece), b) if jp[a:b].endswith(piece) else (a, b) for a, b in spans]
         if not 1 <= len(spans) <= MAX_GAPS:
             continue
         body = jp.rstrip("。！？!?")
@@ -351,13 +377,45 @@ def _gap_verdict(typed: str, forms: list[tuple[str, str]]) -> tuple[str, int, st
     return "wrong", 0, heard
 
 
+# A point written two ways the translation cannot tell apart (plan 318):
+# the hole holds the sentence's, and the other is as right -- なきゃ and
+# なくちゃ, the two contractions 〜なきゃ／〜なくちゃ teaches, and
+# によらず and にかかわらず, which 〜いかんによらず's rule gives both.
+VARIANT = "variant"
+_VARIANTS = {
+    "〜なきゃ／〜なくちゃ": (("なきゃ", "なくちゃ"),),
+    "〜いかんによらず": (("によらず", "にかかわらず"),),
+}
+_CAUSATIVE_PASSIVE = "使役受身形 〜させられる"
+# The あ-row kana a う-verb's stem ends in before せる (習わ, 待た, 働か),
+# less さ: 話させられる has no 話さされる.
+_A_ROW = frozenset("かがたなばまらわ")
+
+
+def _variants(jp: str, a: int, written: str, reading: str, pattern: str) -> list[tuple[str, str]]:
+    """The hole's other spellings of the same point (plan 318): a pair of
+    _VARIANTS, and a う-verb's causative passive, as right short
+    (習わされた, the usual one) as long (習わせられた), both ways."""
+    out = []
+    for x, y in _VARIANTS.get(pattern, ()):
+        for old, new in ((x, y), (y, x)):
+            if old in written and old in reading:
+                out.append((written.replace(old, new, 1), reading.replace(old, new, 1)))
+    if pattern == _CAUSATIVE_PASSIVE and a > 0 and jp[a - 1] in _A_ROW:
+        for old, new in (("せられ", "され"), ("され", "せられ")):
+            if written.startswith(old) and reading.startswith(old):
+                out.append((new + written[len(old):], new + reading[len(old):]))
+                break
+    return out
+
+
 def _gap_forms(jp: str, a: int, b: int, written: str, reading: str, pattern: str) -> list[tuple]:
     """Every (written, read, how) the hole jp[a:b] is right as: the
     sentence's own first (how None), then the other register (how the
     sentence's register), then では or じゃ said the other way, in each of
     those (how the sentence's: full or contracted, but the register where
-    that differs too). かさではありません takes じゃありません, ではない and
-    じゃない."""
+    that differs too), then the point's other spelling (how VARIANT).
+    かさではありません takes じゃありません, ではない and じゃない."""
     forms = [(written, reading, None)]
     other = other_register(jp, a, b, reading, pattern)
     if other:
@@ -367,6 +425,7 @@ def _gap_forms(jp: str, a: int, b: int, written: str, reading: str, pattern: str
         said, old, new = spoken
         forms += [(w.replace(old, new, 1), r.replace(old, new, 1), how or said)
                   for w, r, how in list(forms) if old in w and old in r]
+    forms += [(w, r, VARIANT) for w, r in _variants(jp, a, written, reading, pattern)]
     out, seen = [], set()
     for form in forms:
         if form[1] not in seen:

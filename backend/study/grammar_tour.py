@@ -104,13 +104,13 @@ def _point_hits(jp: str, pattern: str, level: str) -> list[dict]:
     return [h for h in hits(jp) if (h["pattern"], h["level"]) == (pattern, level)]
 
 
-def lit_spans(jp: str, pattern: str, level: str) -> list[tuple[int, int]]:
+def lit_spans(jp: str, pattern: str, level: str, fallback: bool = True) -> list[tuple[int, int]]:
     """Where the point is written in `jp`: the detector's segments for it,
-    else the stems' first match, else nothing."""
+    else (with `fallback`) the stems' first match, else nothing."""
     found = _point_hits(jp, pattern, level)
     if found:
         return [tuple(seg) for seg in found[0]["segments"]]
-    span = highlight_span(jp, pattern)
+    span = highlight_span(jp, pattern) if fallback else None
     return [span] if span else []
 
 

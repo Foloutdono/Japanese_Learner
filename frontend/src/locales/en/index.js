@@ -1740,12 +1740,14 @@ const dictionary = {
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
   // How the sentence says the hole when another form was taken as right:
-  // its register (plan 241), or では in full or contracted (plan 295).
+  // its register (plan 241), では in full or contracted (plan 295), or the
+  // point's other spelling (plan 318: なきゃ for なくちゃ, され for せられ).
   bldOther: (said, register) => `The sentence says ${said}: the same, ${({
     plain: 'in plain speech',
     polite: 'in polite speech',
     full: 'with では in full',
     contracted: 'with では contracted, as speech says it',
+    variant: 'in its other form',
   })[register] ?? 'in polite speech'}.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',

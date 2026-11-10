@@ -1744,12 +1744,14 @@ const dictionary = {
   bldClose: 'Casi.',
   bldWrong: 'No del todo.',
   // How the sentence says the hole when another form was taken as right:
-  // its register (plan 241), or では in full or contracted (plan 295).
+  // its register (plan 241), では in full or contracted (plan 295), or the
+  // point's other spelling (plan 318: なきゃ for なくちゃ, され for せられ).
   bldOther: (said, register) => `La frase dice ${said}: lo mismo, ${({
     plain: 'en registro llano',
     polite: 'en registro cortés',
     full: 'con では completo',
     contracted: 'con では contraído, como se dice al hablar',
+    variant: 'en su otra forma',
   })[register] ?? 'en registro cortés'}.`,
   mapAria: 'La línea del punto',
   mapTutorial: 'Tutorial',
