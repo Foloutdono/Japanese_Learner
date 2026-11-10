@@ -167,7 +167,11 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          MARKETING_VERSION: ${GITHUB_REF_NAME#v}
+          # The tag itself, v1.2.3: the Fastfile drops the v. An env value
+          # is handed over as written, never through a shell, so the
+          # ${GITHUB_REF_NAME#v} that stood here reached fastlane as those
+          # very characters.
+          MARKETING_VERSION: ${{ github.ref_name }}
           BUILD_NUMBER: ${{ github.run_number }}
         run: bundle exec fastlane beta
       - name: Upload the archive

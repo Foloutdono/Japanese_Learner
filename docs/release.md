@@ -121,11 +121,29 @@ Store Connect API, role App Manager) and a private git repository for
 |---|---|
 | `APP_STORE_CONNECT_KEY_ID` | the key's id |
 | `APP_STORE_CONNECT_ISSUER_ID` | the issuer id |
-| `APP_STORE_CONNECT_KEY_P8` | the `.p8` file, base64 |
+| `APP_STORE_CONNECT_KEY_P8` | the `.p8` file: its text pasted whole, or base64 (below) |
 | `APPLE_TEAM_ID` | the team id |
 | `MATCH_GIT_URL` | the certificates repository (private, empty at first) |
 | `MATCH_GIT_BASIC_AUTHORIZATION` | `base64("<github user>:<token with repo scope>")` |
 | `MATCH_PASSWORD` | a passphrase; match encrypts the repository with it |
+
+The key secret is the `.p8` file of the **App Store Connect team key**
+(App Store Connect → Users and Access → Integrations → Team Keys), not
+the Sign in with Apple key of the developer portal. Open the file in a
+text editor and paste all of it, `-----BEGIN PRIVATE KEY-----` to
+`-----END PRIVATE KEY-----`; the lane rewraps a paste that lost its line
+breaks. Base64 of the file works too:
+
+```
+base64 -w0 AuthKey_XXXX.p8      # Linux
+base64 -i AuthKey_XXXX.p8       # macOS
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("AuthKey_XXXX.p8"))   # Windows PowerShell
+```
+
+Empty or anything else, it used to fail as OpenSSL's `invalid curve
+name` (every tag up to v1.1.4); the lane now refuses it first and names
+the secret. These are repository secrets, read by the macOS runner: the
+backend on Render never needs them.
 
 On the first tag, `match` creates the distribution certificate and the App
 Store profile with the API key and commits them, encrypted, to that
