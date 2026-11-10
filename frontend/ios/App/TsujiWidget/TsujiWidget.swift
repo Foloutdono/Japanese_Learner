@@ -12,6 +12,14 @@ import WidgetKit
 // count in a ring split by line, the word on its own in the rectangle,
 // the hour and the count on the inline line.
 //
+// The home screen's board settled in plan 318 (the owner's A of the
+// canvas "Tsuji — the home-screen widget, again", as Android's): the
+// head at the top, Depart at the foot, and the room between given to
+// the count and the word, centred in it, the stripe under the count it
+// splits and no line's bar shorter than a bar. Android's board is glass
+// there; an iPhone widget cannot be seen through to the wallpaper, so
+// this one keeps the sumi.
+//
 // Everything it prints comes from the JSON the app stored in the shared
 // App Group (App/TsujiWidgetPlugin.swift, src/lib/ahead.js's
 // widgetPayload): a count for now and one for the turn of each day
@@ -438,24 +446,68 @@ private struct Inline: View {
     }
 }
 
-// ── The home screen (C) ──────────────────────────────────────
+// ── The home screen (C, settled in plan 318) ─────────────────
+/// A bar a line, as long as its share of the run, 4pt tall and 2pt
+/// apart, under the count it splits.
 private struct Stripe: View {
     let lanes: [Train.Lane]
 
+    static let gap: CGFloat = 2
+    /// A line's shortest bar, two and a half times the stripe's height:
+    /// a line of four cards among three hundred is a short bar, never a
+    /// dot (plan 318).
+    static let least: CGFloat = 10
+
     var body: some View {
         GeometryReader { geo in
-            let sum = max(1, lanes.reduce(0) { $0 + max(0, $1.n) })
-            let gap: CGFloat = 3
-            let room = max(0, geo.size.width - gap * CGFloat(max(0, lanes.count - 1)))
-            HStack(spacing: gap) {
-                ForEach(Array(lanes.enumerated()), id: \.offset) { _, lane in
+            let shown = lanes.filter { $0.n > 0 }
+            let room = max(0, geo.size.width - Stripe.gap * CGFloat(max(0, shown.count - 1)))
+            let widths = Stripe.widths(shown.map { $0.n }, room: room, least: Stripe.least)
+            HStack(spacing: Stripe.gap) {
+                ForEach(Array(shown.enumerated()), id: \.offset) { index, lane in
                     Capsule()
                         .fill(Ink.line(lane.line))
-                        .frame(width: room * CGFloat(max(0, lane.n)) / CGFloat(sum))
+                        .frame(width: widths[index])
                 }
             }
         }
         .accessibilityHidden(true)
+    }
+
+    /// Each line's bar: its share of the room, never under the least. A
+    /// line whose share falls short takes the least and the others share
+    /// what is left, until none falls short; where even the least cannot
+    /// fit every line, each takes an equal part. Android's
+    /// TrainWidget.barWidths is the same rule.
+    static func widths(_ counts: [Int], room: CGFloat, least: CGFloat) -> [CGFloat] {
+        let k = counts.count
+        guard k > 0 else { return [] }
+        if least * CGFloat(k) >= room {
+            return Array(repeating: room / CGFloat(k), count: k)
+        }
+        var held = Array(repeating: false, count: k)
+        var widths = Array(repeating: CGFloat(0), count: k)
+        var moved = true
+        while moved {
+            moved = false
+            var free = room
+            var sum = 0
+            for i in 0..<k {
+                if held[i] { free -= least } else { sum += counts[i] }
+            }
+            for i in 0..<k {
+                if held[i] {
+                    widths[i] = least
+                    continue
+                }
+                widths[i] = sum == 0 ? free / CGFloat(k) : free * CGFloat(counts[i]) / CGFloat(sum)
+                if widths[i] < least {
+                    held[i] = true
+                    moved = true
+                }
+            }
+        }
+        return widths
     }
 }
 
@@ -566,45 +618,45 @@ private struct WordBlock: View {
                 .foregroundColor(Ink.paper)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
-            Text(word.meaning).font(.system(size: 12, weight: .semibold)).foregroundColor(Ink.paper).lineLimit(1)
+            // The meaning under the word in the soft ink, not as loud as
+            // the word (plan 318).
+            Text(word.meaning).font(.system(size: 12)).foregroundColor(Ink.soft).lineLimit(1)
         }
     }
 }
 
-/// The count over its minutes and new cards: the medium's figures. The
-/// small has them on one line under a larger count.
+/// The count over its minutes and new cards (the minutes alone on the
+/// small), and the lines' stripe under the count it splits (plan 318).
 private struct Figures: View {
     let entry: TrainEntry
     let small: Bool
 
     var body: some View {
         if let point = entry.point, point.total > 0 {
-            if small {
-                VStack(alignment: .leading, spacing: 2) {
+            let line = small ? point.minutes : (point.meta ?? point.minutes)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("\(point.total)")
-                        .font(.system(size: 44, weight: .bold).monospacedDigit())
+                        .font(.system(size: small ? 40 : 34, weight: .bold).monospacedDigit())
                         .foregroundColor(Ink.paper)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                    Text(point.minutes.isEmpty ? point.unit : "\(point.unit) · \(point.minutes)")
-                        .font(.system(size: 12))
+                    Text(point.unit)
+                        .font(.system(size: small ? 13 : 15))
                         .foregroundColor(Ink.soft)
                         .lineLimit(1)
                 }
-            } else {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text("\(point.total)")
-                            .font(.system(size: 32, weight: .bold).monospacedDigit())
-                            .foregroundColor(Ink.paper)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                        Text(point.unit).font(.system(size: 15)).foregroundColor(Ink.soft).lineLimit(1)
-                    }
-                    let meta = point.meta ?? point.minutes
-                    if !meta.isEmpty {
-                        Text(meta).font(.system(size: 12)).foregroundColor(Ink.soft).lineLimit(1)
-                    }
+                if !line.isEmpty {
+                    Text(line)
+                        .font(.system(size: 12))
+                        .foregroundColor(Ink.soft)
+                        .lineLimit(1)
+                        .padding(.top, 2)
+                }
+                if !entry.lanes.isEmpty {
+                    Stripe(lanes: entry.lanes)
+                        .frame(height: 4)
+                        .padding(.top, 8)
                 }
             }
         } else if entry.point != nil {
@@ -632,25 +684,25 @@ private struct Board: View {
             Mark().frame(width: 40, height: 40)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if wide {
+            // The head at the top, Depart at the foot, and the room between
+            // given to the count and the word, centred in it (plan 318).
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .center, spacing: 14) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Head(entry: entry)
-                        Figures(entry: entry, small: false)
-                    }
-                    Spacer(minLength: 0)
+                Head(entry: entry)
+                HStack(alignment: .center, spacing: 0) {
+                    Figures(entry: entry, small: false)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     if let word = entry.word {
-                        // The hairline before the word, as tall as the word.
-                        WordBlock(word: word)
-                            .frame(width: 94, alignment: .leading)
-                            .padding(.leading, 14)
-                            .overlay(alignment: .leading) { Rectangle().fill(Ink.line).frame(width: 1) }
+                        // The hairline before the word, as tall as the
+                        // board's middle.
+                        HStack(spacing: 14) {
+                            Rectangle().fill(Ink.line).frame(width: 1).padding(.vertical, 4)
+                            WordBlock(word: word).frame(width: 92, alignment: .leading)
+                        }
+                        .padding(.leading, 14)
                     }
                 }
-                Spacer(minLength: 4)
-                if !entry.lanes.isEmpty {
-                    Stripe(lanes: entry.lanes).frame(height: 6)
-                }
+                .frame(maxHeight: .infinity)
+                .padding(.top, 2)
                 if let point = entry.point, point.total > 0, let depart = entry.labels?.depart {
                     Link(destination: openRun) {
                         Gate(label: depart)
@@ -659,13 +711,11 @@ private struct Board: View {
                 }
             }
         } else {
+            // The small is one tap: the head, and the count centred under it.
             VStack(alignment: .leading, spacing: 0) {
                 Head(entry: entry)
-                Spacer(minLength: 0)
                 Figures(entry: entry, small: true)
-                if !entry.lanes.isEmpty {
-                    Stripe(lanes: entry.lanes).frame(height: 6).padding(.top, 10)
-                }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             }
         }
     }

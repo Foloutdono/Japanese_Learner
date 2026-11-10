@@ -39342,10 +39342,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
      each other, and settles (520ms, easing out -- it is arriving);
      Back runs both the other way (--pull). Its answers follow it in, a
      beat apart, and the question rides the car. BoardingFlow keeps the
-     leaving car until all of that has landed (DESK_PULL_MS), so nothing
-     is cut short, and the same entrance plays for the first question --
-     arriving from the Welcome -- as for every other. (The car's own
-     animation is declared with its widths, above.) */
+     leaving car until all of that has landed, as these animations say on
+     their own clock (`landed`), so nothing is cut short, and the same
+     entrance plays for the first question -- arriving from the Welcome --
+     as for every other. (The car's own animation is declared with its
+     widths, above.) */
   @keyframes desk-brd-pull-in {
     from { opacity: 0; transform: translateX(calc(var(--pull) * var(--sp-9))); }
   }
