@@ -74,10 +74,16 @@ class KanaLexiconTests(unittest.TestCase):
     def test_a_spelling_another_word_shares_is_not_entered(self) -> None:
         # The page may well mean the other word: no card beats a wrong one.
         entered = {row[0] for row in kana_lexicon.rows(morphology._plain_tagger)}
-        for kana in ("がっき", "じしん", "ふくしゅう", "せんとう", "かんじ", "ひろう", "じゅうじ",
+        for kana in ("がっき", "じしん", "ふくしゅう", "かんじ", "ひろう", "じゅうじ",
                      "いつか", "ようか", "いない", "あいて", "きって"):
             with self.subTest(kana=kana):
                 self.assertNotIn(kana, entered)
+        # (...save a page word, read as the page that writes it in kana means
+        # it: せんとう is 銭湯, the public bath of a first-year story -- it was
+        # せん, "thousand", and a silent とう; the deck's 先頭 and 戦闘 are N2
+        # and N1 words written in kanji at their level, plan 314)
+        lemmas = {row[0]: row[4 + 7] for row in kana_lexicon.rows(morphology._plain_tagger)}
+        self.assertEqual(lemmas.get("せんとう"), "銭湯")
         for kana in ("としょかん", "きっさてん", "しょうひん", "かいがら", "みなさん", "はいしゃ"):
             with self.subTest(kana=kana):
                 self.assertIn(kana, entered)
@@ -104,7 +110,7 @@ class KanaLexiconTests(unittest.TestCase):
                 level_of.setdefault(entry.get("kanji") or "", level)
         # (and the few words of a picture book's page the deck has no
         # card for, entered as a first-year word, plan 272)
-        for kanji, _ in kana_lexicon._PAGE_WORDS:
+        for kanji, *_ in kana_lexicon._PAGE_WORDS:
             level_of.setdefault(kanji, "N4")
         rows = kana_lexicon.rows(morphology._plain_tagger)
         self.assertGreater(len(rows), 500)

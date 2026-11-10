@@ -1093,20 +1093,6 @@
     "es": "Me duele el estómago desde ayer."
    }
   ],
-  "::おねがいします": [
-   {
-    "jp": "すみません、コーヒーを一つおねがいします。",
-    "en": "Excuse me, one coffee, please.",
-    "fr": "Excusez-moi, un café, s'il vous plaît.",
-    "es": "Disculpe, un café, por favor."
-   },
-   {
-    "jp": "来週の会議の資料、確認をおねがいします。",
-    "en": "Please check the materials for next week's meeting.",
-    "fr": "Merci de vérifier les documents pour la réunion de la semaine prochaine.",
-    "es": "Por favor, revise los documentos de la reunión de la semana que viene."
-   }
-  ],
   "::おはよう": [
    {
     "jp": "おはよう！今日も雨だね。",
