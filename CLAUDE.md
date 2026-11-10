@@ -546,11 +546,18 @@ runtime purpose.
   leaves the list (`native.shells.test.js`'s `DECLARED`), since a store
   prints what a shell declares. Indonesian is in preview, and whole since
   plan 312b in the interface, the decks, the kanji and the grammar
-  points' glosses and formations (`WRITTEN`, `locales.test.js`): a new
-  screen string, deck card, kanji or point is written in `id` in the same
-  change, in standard Indonesian (EYD, KBBI; never Malay), the learner
-  `kamu`, with the app's words `locales/id`'s head names (an SRS review a
-  *pengulangan*, a mock exam a *tryout*).
+  points' glosses and formations, since 312c in their lessons (`WRITTEN`,
+  `locales.test.js`): a new screen string, deck card, kanji or point (its
+  gloss, formation and lesson) is written in `id` in the same change, in
+  standard Indonesian (EYD, KBBI; never Malay), the learner `kamu`, with
+  the app's words `locales/id`'s head names (an SRS review a
+  *pengulangan*, a mock exam a *tryout*). An example's translation, in any
+  language, is read under its Japanese with the point blanked (Choisir,
+  Construire): it tells what the hole holds (a past, a negative, a form,
+  what rules out each rival printed) and adds nothing the Japanese leaves
+  out, which matters most in a language that marks no tense
+  (`grammar_lesson.contrast_payload` and `grammar_ladder._build_items`
+  show the holes).
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
