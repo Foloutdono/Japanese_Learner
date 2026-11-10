@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -172,6 +173,28 @@ describe('the video folded away on the desk, the lines as lyrics', () => {
     expect(spies.play).toHaveBeenCalled()
     // The bar's follow stays on: the lyrics move on with the song.
     expect($('button[aria-label="Suivre la vidéo"]').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('walks the lyrics from the bar\'s skips and the keys without letting go of the song', async () => {
+    await openVideo()
+    await fold()
+    const follow = () => $('button[aria-label="Suivre la vidéo"]').getAttribute('aria-pressed')
+    $('.anl-pbar button[aria-label="Phrase suivante"]').click()
+    await vi.waitFor(() => expect($('.anl-lyrics__now .anl-subs__line').getAttribute('aria-label')).toBe('駅で待つ'))
+    expect(spies.seekTo).toHaveBeenLastCalledWith(40)
+    expect(follow()).toBe('true')
+
+    await userEvent.keyboard('{ArrowDown}')
+    await vi.waitFor(() => expect($('.anl-lyrics__now .anl-subs__line').getAttribute('aria-label')).toBe('傘を忘れた'))
+    expect(spies.seekTo).toHaveBeenLastCalledWith(64)
+    expect(follow()).toBe('true')
+    expect(spies.play).not.toHaveBeenCalled()
+  })
+
+  it('still lets go of the song from a skip with the picture up', async () => {
+    await openVideo()
+    $('.anl-pbar button[aria-label="Phrase suivante"]').click()
+    await vi.waitFor(() => expect($('button[aria-label="Suivre la vidéo"]').getAttribute('aria-pressed')).toBe('false'))
   })
 
   it('gives the route map back with the picture', async () => {

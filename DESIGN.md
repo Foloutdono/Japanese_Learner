@@ -2723,9 +2723,11 @@ line here says otherwise.
   translation (the Affichage sheet's switch says whether), the one in
   focus drawn as its subtitle at the heading size, its readings, rules,
   grammar and sung sweep kept, the others in the panel's soft ink (a rung
-  down on a phone), each a press that plays the video from it, the lyrics
-  following on;
-  the list holds the line in focus a third of the way down its own box.
+  down on a phone), each a press that plays the video from it. A line
+  walked to there -- pressed, skipped to, stepped to with ↑/↓ -- keeps
+  the lyrics following the song, where with the picture up a stop picked
+  holds the line; the list holds the line in focus a third of the way
+  down its own box.
   On a phone the sumi grows from the head to the dock, the stage the
   screen's height; on the desk the lyrics take the route map's column
   too, each line's time before it, and its search, filters and pins come

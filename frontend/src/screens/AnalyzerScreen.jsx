@@ -432,6 +432,11 @@ export default function AnalyzerScreen({ session }) {
   // has typed right now, fall back to whatever the session was created
   // with. This is what makes a link pasted AFTER an upload work.
   const playerVideoId = parseVideoId(videoUrl) ?? passage?.videoId ?? null
+  // 歌詞 (plan 314): a video's picture folded away, its room the Passage
+  // as lyrics, on either width (components/analysis/Lyrics). While they
+  // are up, a line walked to -- pressed, skipped to, stepped to with
+  // ↑/↓ -- is the song from there, and the lyrics go on following it.
+  const lyrics = Boolean(playerVideoId) && videoFolded
   // 字幕の流れ: what the whole track says about when its words are said
   // (its pace, how early its subtitles come up), for the lines it did
   // not time word by word. Read once a Passage, not once a line.
@@ -634,11 +639,12 @@ export default function AnalyzerScreen({ session }) {
         if (heldTooSoon(e, sentenceStepped)) return
         // Through goToStop, not setFocusIndex: walking the line by
         // key is the same act as clicking a stop, so it breaks 追従
-        // and seeks the player exactly the same way.
+        // and seeks the player exactly the same way -- and in the
+        // lyrics, as a skip does there, keeps 追従 (plan 314).
         const next = e.key === 'ArrowDown'
           ? Math.min(sentences.length - 1, focusIndex + 1)
           : Math.max(0, focusIndex - 1)
-        if (next !== focusIndex) goToStop(next)
+        if (next !== focusIndex) goToStop(next, { follow: lyrics })
       } else if (e.key === ' ' && playerVideoId) {
         e.preventDefault()
         // Through togglePassagePlayback, not a bare play(): Space is
@@ -653,7 +659,7 @@ export default function AnalyzerScreen({ session }) {
     // closure re-binds on every dep change below, which covers every
     // value it reads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, playerVideoId, wide])
+  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, playerVideoId, wide, lyrics])
 
   // Esc gives the dock back: the route map for a longer Passage, the
   // stage's own token for a one-sentence one. Not from a field, not
@@ -984,12 +990,14 @@ export default function AnalyzerScreen({ session }) {
   // marker and seeks; it does NOT start playback, because clicking a
   // Sentence to read it is not a request to watch. `play()` is left to
   // the player's own control.
-  function goToStop(index) {
+  function goToStop(index, { follow = false } = {}) {
     analyzer.setFocusIndex(index)
     // A new stop on the desk: the dock follows its first token.
     if (wide) setLookup(null)
-    // Choosing by hand means the learner has taken the wheel.
-    setFollowPlayback(false)
+    // Choosing by hand means the learner has taken the wheel -- but in
+    // the lyrics (plan 314) a line walked to is the song from there, and
+    // the lyrics go on following it (`follow`).
+    setFollowPlayback(follow)
     heldRef.current = null
     clearHoldTimer()
     const target = sentences[index]
@@ -998,18 +1006,11 @@ export default function AnalyzerScreen({ session }) {
 
   // A line of the lyrics pressed (plan 314): the video plays from it,
   // and the lyrics go on following the clock -- the press asked for the
-  // song from there, not for its words to hold still, which is what a
-  // stop picked on the route map or the transport asks (goToStop).
+  // song from there, not for its words to hold still. A skip or a key
+  // walks the lyrics the same way, without asking for play.
   function playFromStop(index) {
-    analyzer.setFocusIndex(index)
-    if (wide) setLookup(null)
-    setFollowPlayback(true)
-    heldRef.current = null
-    clearHoldTimer()
-    const target = sentences[index]
-    if (target?.cue_start == null || !playerRef.current) return
-    seek(target.cue_start)
-    if (!playing) playerRef.current.play()
+    goToStop(index, { follow: true })
+    if (sentences[index]?.cue_start != null && playerRef.current && !playing) playerRef.current.play()
   }
 
   // ── The filtered line ─────────────────────────────────────
@@ -1437,7 +1438,6 @@ export default function AnalyzerScreen({ session }) {
   // place -- the lines, their translations and their times are the
   // Passage the route map listed. Its search, filters and pins come back
   // with the picture.
-  const lyricsDesk = !textDesk && videoFolded
   const focusWord = pointAt === -1 && stageToken?.vocab_match ? stageToken : null
   const wordAction = textDesk && focusWord && (
     <MineButton
@@ -1516,7 +1516,7 @@ export default function AnalyzerScreen({ session }) {
   const deskResult = focused && (
     <div
       ref={resultsRef}
-      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${textDesk ? ' anl-desk--text' : ' anl-desk--video'}${lyricsDesk ? ' anl-desk--lyrics' : ''}`}
+      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${textDesk ? ' anl-desk--text' : ' anl-desk--video'}${lyrics ? ' anl-desk--lyrics' : ''}`}
       tabIndex={-1}
       role="region"
       aria-label={t.analysisResult}
@@ -1527,7 +1527,7 @@ export default function AnalyzerScreen({ session }) {
           {!several && wordsPanel}
           {pointsPanel}
         </div>
-      ) : !lyricsDesk && railPanel}
+      ) : !lyrics && railPanel}
 
       <div className="anl-desk__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
@@ -1563,7 +1563,7 @@ export default function AnalyzerScreen({ session }) {
             </div>
           </div>
         )}
-        <div className={`anl-subs${lyricsDesk ? ' anl-subs--lyrics' : ''}`} data-furigana={furigana}>
+        <div className={`anl-subs${lyrics ? ' anl-subs--lyrics' : ''}`} data-furigana={furigana}>
           <div className="anl-subs__head">
             <span className="anl-subs__count">
               {focusIndex + 1} / {sentences.length}
@@ -1588,7 +1588,7 @@ export default function AnalyzerScreen({ session }) {
               {(translation || translationDue) && trLine('anl-subs__tr')}
               {readable && explainButton}
             </div>
-          ) : lyricsDesk ? (
+          ) : lyrics ? (
             <Lyrics
               className="anl-desk__lyrics"
               sentences={sentences}
@@ -1614,8 +1614,8 @@ export default function AnalyzerScreen({ session }) {
             t={t}
             playing={playing}
             onToggle={togglePassagePlayback}
-            onPrev={() => goToStop(focusIndex - 1)}
-            onNext={() => goToStop(focusIndex + 1)}
+            onPrev={() => goToStop(focusIndex - 1, { follow: lyrics })}
+            onNext={() => goToStop(focusIndex + 1, { follow: lyrics })}
             canPrev={focusIndex > 0}
             canNext={focusIndex < sentences.length - 1}
             onReplay={replaySentence}
@@ -1759,7 +1759,6 @@ export default function AnalyzerScreen({ session }) {
   // the dock, holding the Passage line under line, each over its
   // translation. The stage is then the screen's height, the lyrics
   // scrolling inside it.
-  const lyrics = Boolean(playerVideoId) && videoFolded
   const mobileResult = focused && (
     <div
       ref={resultsRef}
@@ -1930,8 +1929,8 @@ export default function AnalyzerScreen({ session }) {
           // the learner plays again. A typed Passage has no clock: its
           // dock is the stops alone.
           onToggle={() => { if (!playing) setFollowPlayback(true); togglePassagePlayback() }}
-          onPrev={() => goToStop(focusIndex - 1)}
-          onNext={() => goToStop(focusIndex + 1)}
+          onPrev={() => goToStop(focusIndex - 1, { follow: lyrics })}
+          onNext={() => goToStop(focusIndex + 1, { follow: lyrics })}
           canPrev={focusIndex > 0}
           canNext={focusIndex < sentences.length - 1}
           onReplay={replaySentence}

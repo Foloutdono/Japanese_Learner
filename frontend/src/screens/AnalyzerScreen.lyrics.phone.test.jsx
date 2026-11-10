@@ -50,10 +50,15 @@ vi.mock('../components/video/VideoPlayer', async () => {
     play: vi.fn(), pause: vi.fn(), seekTo: vi.fn(), currentTime: () => 0,
     title: () => '', channel: () => '',
   }
+  // The props it was last drawn with: a test reports the clock through
+  // them, as the player's poll does.
+  const props = { last: null }
   return {
     __playerSpies: spies,
-    VideoPlayer: forwardRef(function MockVideoPlayer(_p, ref) {
+    __playerProps: props,
+    VideoPlayer: forwardRef(function MockVideoPlayer(p, ref) {
       useImperativeHandle(ref, () => spies)
+      props.last = p
       return <div className="video-player__frame" />
     }),
   }
@@ -61,7 +66,7 @@ vi.mock('../components/video/VideoPlayer', async () => {
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: AnalyzerScreen } = await import('./AnalyzerScreen')
-const { __playerSpies: spies } = await import('../components/video/VideoPlayer')
+const { __playerSpies: spies, __playerProps: player } = await import('../components/video/VideoPlayer')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
@@ -182,6 +187,34 @@ describe('the video folded away on a phone, the lines as lyrics', () => {
     expect(spies.seekTo).toHaveBeenCalledWith(5)
     expect(spies.play).toHaveBeenCalled()
     expect($$('.anl-lyrics__line .anl-lyrics__jp').map(el => el.textContent)).toEqual(['夜が来る', '君を呼ぶ'])
+  })
+
+  it('walks the lyrics from the skips without letting go of the song', async () => {
+    await openVideo()
+    await fold()
+    $('.anl-m__dock button[aria-label="Phrase suivante"]').click()
+    await vi.waitFor(() => expect($('.anl-lyrics__now .anl-subs__line').getAttribute('aria-label')).toBe('君を呼ぶ'))
+    expect(spies.seekTo).toHaveBeenCalledWith(3)
+    // The clock goes on into the next line: the lyrics go with it.
+    player.last.onTimeUpdate(5.5)
+    await vi.waitFor(() => expect($('.anl-lyrics__now .anl-subs__line').getAttribute('aria-label')).toBe('星が光る'))
+
+    $('.anl-m__dock button[aria-label="Phrase précédente"]').click()
+    await vi.waitFor(() => expect($('.anl-lyrics__now .anl-subs__line').getAttribute('aria-label')).toBe('君を呼ぶ'))
+    expect(spies.seekTo).toHaveBeenLastCalledWith(3)
+    player.last.onTimeUpdate(5.5)
+    await vi.waitFor(() => expect($('.anl-lyrics__now .anl-subs__line').getAttribute('aria-label')).toBe('星が光る'))
+    // A skip is a walk, not a request to watch: nothing was played.
+    expect(spies.play).not.toHaveBeenCalled()
+  })
+
+  it('still holds the line a skip picks on the stage, the picture up', async () => {
+    await openVideo()
+    $('.anl-m__dock button[aria-label="Phrase suivante"]').click()
+    await vi.waitFor(() => expect($('.anl-m__subs .anl-subs__line').getAttribute('aria-label')).toBe('君を呼ぶ'))
+    player.last.onTimeUpdate(5.5)
+    await settle(100)
+    expect($('.anl-m__subs .anl-subs__line').getAttribute('aria-label')).toBe('君を呼ぶ')
   })
 
   it('holds the line in focus a third of the way down a long song', async () => {
