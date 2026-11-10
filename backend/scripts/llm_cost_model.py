@@ -156,6 +156,19 @@ FEATURES = {
         "asked. Four songs a month. LYRICS_SORT_DAILY_LIMIT caps it at 20 "
         "songs/day, which bounds the abuse row.",
     ),
+    "song_transcription": (
+        4, 8000, 1800,
+        "A song heard (plan 317): a learner adds one as an audio file, "
+        "sent as a 16 kHz WAV of seven minutes at most to a model that "
+        "takes audio (GOOGLE_AUDIO_MODEL). In: the audio at 32 tokens a "
+        "second -- a four-minute song is 7,680 -- and a short prompt, or "
+        "the pasted lyrics numbered. Out: ~40 lines and their times, or "
+        "their numbers and times. Audio input bills above text on most "
+        "models (Gemini 3.1 Flash-Lite: $0.50/1M against $0.25), so the "
+        "input column understates this row by up to half. Four songs a "
+        "month. SONG_DAILY_LIMIT caps it at 5 songs/day, which bounds the "
+        "abuse row.",
+    ),
     "ocr_vision": (
         20, 1400, 400,
         "20 photos/mo. An image is ~1.1k tokens plus OCR_PROMPT. The daily "

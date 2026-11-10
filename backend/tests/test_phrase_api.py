@@ -365,7 +365,7 @@ def test_keep_creates_a_kept_row(client):
 
 
 def test_keep_takes_a_video_sentence_under_its_session_s_source(client):
-    for source in ("youtube", "paste", "upload"):
+    for source in ("youtube", "paste", "upload", "song"):
         sentence = f"{uuid.uuid4().hex[:6]}を保存します。"
         response = client.post("/api/phrase/keep", json={"sentence": sentence, "source": source,
                                                          "source_ref": "abc123@12.5"})

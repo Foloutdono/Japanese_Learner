@@ -1002,10 +1002,10 @@ def delete_phrase_history_entry(entry_id: int, user_id: str = Depends(get_user_i
 class KeepRequest(BaseModel):
     # Bounded (plan 211), as PhraseRequest is. A video Sentence is kept
     # under its session's own source (routes/video.py: youtube, paste,
-    # upload) and a ref of "<ref>@<cue_start>", the ref an upload's
-    # file name at most.
+    # upload, and a song's, plan 317) and a ref of "<ref>@<cue_start>",
+    # the ref an upload's or a song's file name at most.
     sentence: str = Field(max_length=20_000)
-    source: Literal["typed", "image", "video", "youtube", "paste", "upload"] = "typed"
+    source: Literal["typed", "image", "video", "youtube", "paste", "upload", "song"] = "typed"
     source_ref: str = Field("", max_length=1_000)
 
 
