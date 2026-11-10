@@ -4883,3 +4883,432 @@ class ACompoundWithYaruTests(unittest.TestCase):
     def test_its_gloss(self) -> None:
         self.assertFalse(gloss_of("朝日が霧をおいやった。", "やっ").startswith("(Kansai)"))
         self.assertTrue(gloss_of("明日が休みやったら、行かへん？", "やっ").startswith("(Kansai) was"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WordsReadByWhatTheySayOfTests(unittest.TestCase):
+    """Plan 314: a reading the tokenizer takes from the wrong neighbour.
+    一日中 is 一日 and 中, "all through", never 日中, "the daytime", and the
+    雨 after it is あめ, no 雷雨's う; 空く is すく of a stomach or a train
+    (お腹が空いた, 電車が空いていた), あく of a seat, a room or an hour; 角
+    is a street's かど where it is turned at or pointed at, a horn つの on
+    an animal, an angle かく in a figure."""
+
+    def test_all_day(self) -> None:
+        for sentence in ("一日中雨が降っていた。", "昨日は一日中家にいた。", "一日中雨で、少しさむかったです。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "一日"), "vocab_N5_一日_いちにち")
+                self.assertEqual(token_of(sentence, "中")["reading"], "じゅう")
+        self.assertEqual(token_of("一日中雨が降っていた。", "雨")["reading"], "あめ")
+        self.assertEqual(token_of("日中雨が降った。", "雨")["reading"], "あめ")
+        self.assertEqual(token_of("日中雨が降った。", "日中")["reading"], "にっちゅう")
+        self.assertEqual(token_of("暴風雨になった。", "暴風雨")["reading"], "ぼうふうう")
+
+    def test_suku_and_aku(self) -> None:
+        for sentence in ("お腹が空いた。", "おなかが空いた。", "お腹空いた。", "電車が空いていた。", "空いた電車に乗った。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "空い")["reading"], "すい")
+                self.assertEqual(card_of(sentence, "空い"), "vocab_N3_空く_すく")
+        for sentence in ("席が空いている。", "部屋が空いている。", "空いた時間に本を読む。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "空い")["reading"], "あい")
+
+    def test_kado_tsuno_kaku(self) -> None:
+        for sentence, said in (("あの角を右に曲がってください。", "かど"), ("次の角を左に曲がる。", "かど"),
+                               ("角の店でパンを買った。", "かど"), ("牛の角は硬い。", "つの"), ("角が生えた。", "つの"),
+                               ("三角形の角を測る。", "かく"), ("人形の角", "かど")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "角")["reading"], said)
+        self.assertEqual(card_of("あの角を右に曲がってください。", "角"), "vocab_N5_角_かど")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WordsCutOrJoinedWrongTests(unittest.TestCase):
+    """Plan 314: 食どう is 食堂, its second kanji in kana, where a case
+    particle follows (お茶どう？ asks "how about tea"); the で after a noun
+    is the case particle, never a sentence's "and so" before a comma
+    (会社のちかくで、) or a verb's voiced て (入り口のちかくでつくる), and
+    one opening a sentence keeps its "so"; ようこそ is one word."""
+
+    def test_its_words(self) -> None:
+        self.assertEqual(card_of("学校の食どうでごはんを食べます。", "食どう"), "vocab_N5_食堂_しょくどう")
+        self.assertEqual(token_of("お茶どう？", "どう")["pos"], "adverb")
+        for sentence in ("会社のちかくで、パンも買ったよ。", "カードは入り口のちかくでつくることができます。",
+                         "じゃあ、わたしはいえでまってるね。", "じゃあ、5ばんで行きます。"):
+            with self.subTest(sentence=sentence):
+                de = token_of(sentence, "で")
+                self.assertEqual((de["pos"], de["lemma"]), ("particle", "で"))
+                self.assertIn("で", [g["pattern"] for g in de.get("grammar") or []])
+        self.assertNotEqual(token_of("で、どうしたの？", "で")["pos"], "particle")
+        for sentence in ("山川旅館へようこそ。", "ようこそ、日本へ！"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "ようこそ")["pos"], "interjection")
+        self.assertEqual(token_of("今度こそ合格したい。", "こそ")["pos"], "particle")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WholeExpressionsTests(unittest.TestCase):
+    """Plan 314: an expression the dictionary holds whole, read whole --
+    生まれて初めて; お疲れさま, the 様 the dictionary writes for the
+    page's さま (no "Mr. or Mrs."); 一期一会, a four-kanji saying none of
+    its cards says (期's "time" is no word of "lifetime"); an idiom
+    whose adjective carries an ending's point (都合が悪くて, 口が悪くて,
+    具合が悪くなる), the point riding on it; the counter 番 written in
+    kana after a number (5ばん, さんばん, the number three)."""
+
+    def test_its_words(self) -> None:
+        self.assertEqual(token_of("生まれて初めて海を見た。", "生まれて初めて")["vocab_match"]["entry"]["kana"],
+                         "うまれてはじめて")
+        for sentence in ("お疲れさまです。", "今日もお疲れさま。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("hard work", token_of(sentence, "お疲れさま")["vocab_match"]["entry"]["meaning"])
+        yoji = token_of("一期一会を大切にしたい。", "一期一会")
+        self.assertEqual(yoji["reading"], "いちごいちえ")
+        for sentence, surface, meaning in (("すみません、今日はちょっと都合が悪くて。", "都合が悪く", "inconvenient"),
+                                           ("彼は口が悪くて嫌われている。", "口が悪く", "sharp"),
+                                           ("体の具合が悪くなります。", "具合が悪く", "unwell"),
+                                           ("祖父は耳が遠くなり、人の話が聞こえにくかった。", "耳が遠く", "hearing")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertIn(meaning, token["vocab_match"]["entry"]["meaning"])
+                self.assertTrue(token.get("grammar"))
+        self.assertEqual(card_of("じゃあ、5ばんで行きます。", "ばん"), "vocab_N5_番_ばん")
+        self.assertEqual(card_of("そうですか。さんばんはここにきますか。", "さん"), "vocab_N5_三_さん")
+        self.assertEqual(token_of("汗ばんでいる。", "で")["lemma"], "て")
+
+    def test_who_is_there(self) -> None:
+        for sentence in ("頭を下げる角度や秒数にまで作法があり、それを指南する専門家さえいるという。", "専門家もいる。",
+                         "数字の背後にどんな人々がいるのかを想像する。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "いる"), "vocab_N5_居る_いる")
+        self.assertEqual(card_of("お金がいる。", "いる"), "vocab_N5_要る_いる")
+        self.assertIn("lost", token_of("実家がなくなった。", "なくなっ")["vocab_match"]["entry"]["meaning"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AMarketAndOutrageousTests(unittest.TestCase):
+    """Plan 314: 市場 is いちば where goods are bought or sold there (市場で
+    魚を買った, 毎朝市場へ行く, 魚市場), しじょう where it is the economy's
+    (株式市場, 市場経済, 国内の市場は小さい); とんでもない is one adjective,
+    the deck's card, never とんでも, "unthinkable", and its denial."""
+
+    def test_ichiba_and_shijou(self) -> None:
+        for sentence in ("市場で魚を買った。", "毎朝市場へ行く。", "父は毎朝早く起きて、市場へ花を買いに行く。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "市場")["reading"], "いちば")
+                self.assertEqual(card_of(sentence, "市場"), "vocab_N3_市場_いちば")
+        self.assertEqual(token_of("国内の市場は小さい。", "市場")["reading"], "しじょう")
+        self.assertEqual(token_of("株式市場が混乱した。", "株式市場")["reading"], "かぶしきしじょう")
+
+    def test_tondemonai(self) -> None:
+        for sentence, surface in (("とんでもないです。", "とんでもない"), ("とんでもない話だ。", "とんでもない"),
+                                  ("とんでもなく高い。", "とんでもなく")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, surface), "vocab_N3__とんでもない")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WhatSaidNothingTests(unittest.TestCase):
+    """Plan 314: parts the gap report found silent -- a name in hiragana
+    a speaker gives themselves (花やのたかはしです, たかはしと申します) or
+    says alone in its quote (「まさと。」), never a common noun read so
+    (かおりです); つつ, "while" in writing; the も of も同然; もの ending
+    what is said, "because" (時間がなかったんだもの); and an adjective in
+    ない the deck teaches whole, in any of its forms (つまらなそう,
+    つまらなかった, つまらなさ) -- no 詰まる and no negative."""
+
+    def test_names(self) -> None:
+        for sentence, surface, said in (("わたしは、こうえんの前の花やのたかはしです。", "たかはし", "family name"),
+                                        ("男の子は「まさと。」と言いました。", "まさと", "given name"),
+                                        ("たかはしと申します。", "たかはし", "family name")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(gloss_of(sentence, surface), said)
+        self.assertIsNotNone(token_of("かおりです。", "かおり").get("vocab_match"))
+
+    def test_function_words(self) -> None:
+        self.assertTrue(gloss_of("失われるものを知りつつ、言葉を探す。", "つつ").startswith("(written"))
+        self.assertTrue(gloss_of("ここまで来れば、終わったも同然だ。", "も").startswith("(も同然)"))
+        self.assertTrue(gloss_of("だって、時間がなかったんだもの。", "もの").startswith("(sentence end) because"))
+        self.assertIsNotNone(token_of("これは私のものです。", "もの").get("vocab_match"))
+
+    def test_an_adjective_in_nai(self) -> None:
+        for sentence, surface in (("彼はつまらなそうな顔をしていた。", "つまらな"), ("この映画はつまらなかった。", "つまらなかっ"),
+                                  ("この映画のつまらなさに驚いた。", "つまらな"), ("この映画はつまらない。", "つまらない")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                self.assertEqual(token["vocab_match"]["entry"]["kana"], "つまらない")
+                self.assertNotIn("ない形 〜ない", [g["pattern"] for g in token.get("grammar") or []])
+        # (お金がたまらない: money that does not collect, the verb denied)
+        self.assertNotEqual((token_of("お金がたまらない。", "たまら").get("vocab_match") or {}).get("entry", {}).get("kana"),
+                            "たまらない")
+        self.assertIn("ない形 〜ない", [g["pattern"] for g in token_of("お金がたまらない。", "ない").get("grammar") or []])
+        self.assertIn("〜さ", [g["pattern"] for g in token_of("やり方には物足りなさもある。", "さ").get("grammar") or []])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SayouTests(unittest.TestCase):
+    """Plan 314: さよう of さようでございます is the dictionary's 左様, "so",
+    which UniDic files under 然様; さようなら keeps its own card."""
+
+    def test_its_card(self) -> None:
+        for sentence in ("さようでございますか。", "はい、さようでございます。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "さよう")["vocab_match"]["entry"]["kanji"], "左様")
+        self.assertIn("good-bye", token_of("さようなら。", "さようなら")["vocab_match"]["entry"]["meaning"])
+        # (ふくさよう is 副作用 in kana: no "so")
+        self.assertIsNone(token_of("ふくさようのしんぱいはありませんか。", "さよう").get("vocab_match"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TakenOrComeOffTests(unittest.TestCase):
+    """Plan 314: 取れる in kanji is 取る's potential where what one takes
+    is named -- 休みが取れない, 連絡が取れない, 休みさえ取れない -- and
+    取れる, "to come off, to be harvested", of a button, a stain, fatigue
+    or a catch."""
+
+    def test_its_verb(self) -> None:
+        for sentence in ("休みが取れない。", "彼と連絡が取れない。", "時間が取れなかった。", "休みさえ取れない。"):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, "取れ")
+                self.assertEqual(token["vocab_match"]["raw_id"], "vocab_N5_取る_とる")
+                self.assertIn("可能形 〜(ら)れる", [g["pattern"] for g in token.get("grammar") or []])
+        for sentence in ("ボタンが取れた。", "汚れが取れない。", "疲れが取れない。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "取れ"), "vocab_N3_取れる_とれる")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class APagesWordsInKanaTests(unittest.TestCase):
+    """Plan 314: words a first-year page writes in kana that the tokenizer
+    cut into others -- せんとう, the public bath (せん + とう, "note" +
+    "lamp"), never the deck's 先頭 read alike; ふじさん, the mountain (ふじ
+    + さん, "wisteria" + "Mr."); and かく by what it takes: a picture or a
+    mountain painted on a wall (描く), a head scratched (掻く), a letter
+    written (書く)."""
+
+    def test_its_words(self) -> None:
+        for sentence in ("家のおふろがこわれたので、近くのせんとうへ行きました。", "せんとうもいいものじゃないか。",
+                         "私はそれまで、せんとうに行ったことがありませんでした。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("public bath", token_of(sentence, "せんとう")["vocab_match"]["entry"]["meaning"])
+        self.assertEqual(card_of("列の先頭に立つ。", "先頭"), "vocab_N2_先頭_せんとう")
+        for sentence in ("見て、ふじさんがきれいに見えるよ。", "いつか、ふじさんにのぼりたいです。",
+                         "日本の山の中で、ふじさんがいちばん高いです。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("Mount Fuji", token_of(sentence, "ふじさん")["vocab_match"]["entry"]["meaning"])
+
+    def test_kaku(self) -> None:
+        for sentence, card in (("かべには、大きなふじさんがかいてありました。", "vocab_N3_描く_かく"),
+                               ("えがかいてある。", "vocab_N3_描く_かく"), ("地図をかいてください。", "vocab_N3_描く_かく"),
+                               ("頭をかいた。", "vocab_N2_掻く_かく"), ("手紙をかいた。", "vocab_N5_書く_かく")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "かい"), card)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WordsTheDictionarySpellsOtherwiseTests(unittest.TestCase):
+    """Plan 314: a word the pool holds in another cut or spelling than the
+    tokenizer's -- 有名 + 人 is 有名人, read ゆうめいじん (有名な人 keeps
+    its two cards); 声がけ, UniDic's 声掛け, the row 声かけ; 仕組みづくり, 仕組み
+    and a voiced 作り; みだり, the adverb its に makes; 多少なりとも and 何なり
+    と, expressions whole; ただの言いのがれ, a verb's stem after a noun's
+    の, the noun "evasion"; 五、六, two numbers and their comma."""
+
+    def test_its_words(self) -> None:
+        token = token_of("有名人ともなると、外を自由に歩けない。", "有名人")
+        self.assertEqual((token["reading"], token["vocab_match"]["raw_id"]), ("ゆうめいじん", "vocab_jmdict_46331"))
+        self.assertEqual(token_of("彼は有名な人だ。", "人")["reading"], "ひと")
+        self.assertIn("saying something", token_of("受付にお声がけください。", "声がけ")["vocab_match"]["entry"]["meaning"])
+        sentence = "給料が上がる仕組みづくりが求められている。"
+        self.assertEqual(card_of(sentence, "仕組み"), "vocab_N1_仕組み_しくみ")
+        self.assertIn("making", token_of(sentence, "づくり")["vocab_match"]["entry"]["meaning"])
+        self.assertIn("without", token_of("業務上知り得た事柄を、みだりに漏らすべからず。", "みだり")["vocab_match"]["entry"]["meaning"])
+        self.assertIn("a little", token_of("相手が多少なりとも譲歩するなら", "多少なりとも")["vocab_match"]["entry"]["meaning"])
+        self.assertIn("anything", token_of("ご質問があれば、何なりとお聞きください。", "何なりと")["vocab_match"]["entry"]["meaning"])
+        self.assertIn("evasion", token_of("それはただの言いのがれにすぎない。", "言いのがれ")["vocab_match"]["entry"]["meaning"])
+        for surface, said in (("五", "ご"), ("六", "ろく")):
+            with self.subTest(surface=surface):
+                token = token_of("私は本を一か月に五、六さつは読む。", surface)
+                self.assertEqual(token["reading"], said)
+                self.assertIsNotNone(token.get("vocab_match"))
+        self.assertEqual(token_of("四、五回行った。", "四")["reading"], "し")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ThatPersonAndWhatIsMendedTests(unittest.TestCase):
+    """Plan 314: あの方, この方, その方 is a person said up, かた (あの方の
+    不安, あの方がうそをつく) -- the side, ほう, where the sentence compares
+    (その方がいい) or goes toward it (あの方へ); なおる is 直る or 治る by what
+    the sentence names when its clause names nothing (スマホ, かぜ), and
+    nothing where it names neither; なくされた is 無くす said up, never ない
+    made to be."""
+
+    def test_kata_and_hou(self) -> None:
+        for sentence in ("あの方は先生です。", "あの方の不安は、想像にかたくありません。", "あの方がうそをつくものですか。",
+                         "その方は、どんなに忙しくても来る。", "この方にお願いしましょう。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "方")["reading"], "かた")
+        for sentence in ("その方がいい。", "この方が早い。", "あの方へ歩いた。", "荷物はあの方に置いてください。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(token_of(sentence, "方")["reading"], "ほう")
+
+    def test_mended_and_lost(self) -> None:
+        self.assertEqual(card_of("男の人がスマホを見て、「なおるまで一時間ぐらいかかるらしいですよ」と言いました。", "なおる"),
+                         "vocab_N4_直る_なおる")
+        self.assertEqual(card_of("かぜをひいて、なおるまで一週間かかった。", "なおる"), "vocab_N4_治る_なおる")
+        self.assertIsNone(card_of("なおるまで待ちます。", "なおる"))
+        self.assertEqual(card_of("いつ、どちらでなくされたか、お分かりになりますか。", "なくさ"), "vocab_N5_無くす_なくす")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WhatTheSecondPassGlossedTests(unittest.TestCase):
+    """Plan 314: parts no point is written on that now say what they do --
+    とのこと, "what was said, passed on"; となると and となれば; と before する
+    after a limit (正午までとさせていただきます); a ね closing words quoted
+    without their brackets (人がね、と); the で of what will do (少しでいい,
+    これでいい keeping で's point); は between a stem and a concessive する
+    (聞きはしても), after a て before どう or いかが (休んではどうですか); the
+    copula's な before の or もの (初めてなもの, すべきなのは)."""
+
+    def test_glossed(self) -> None:
+        for sentence, surface, opening in (
+                ("申請の手続きは郵送でもできるとのことだった。", "と", "(とのこと)"),
+                ("会員の情報を漏らしたとなれば、処分だけではすまないだろう。", "と", "(となると"),
+                ("職場の会話を録音するとなると、同意の問題も出てきますね。", "と", "(となると"),
+                ("売店の営業は正午までとさせていただきます。", "と", "(before する"),
+                ("あれほど機械を嫌っていた人がね、と母は笑う。", "ね", "(mid-sentence)"),
+                ("きんぎょのごはんは、一日に少しでいいです。", "で", "(before いい"),
+                ("カレーはゆっくりでいいです。", "で", "(before いい"),
+                ("聞きはしても、何もしない。", "は", "(between a verb's stem and する"),
+                ("少し休んではどうですか。", "は", "(after a て form, before どう"),
+                ("残りを後から段階的にリリースしてはいかがでしょうか。", "は", "(after a て form, before どう"),
+                ("初めてなものだから、やり方がよく分からなくて。", "な", "(the copula before の"),
+                ("利益にもまして優先すべきなのは従業員の安全の確保である。", "な", "(the copula before の")):
+            with self.subTest(sentence=sentence):
+                self.assertTrue(gloss_of(sentence, surface).startswith(opening), gloss_of(sentence, surface))
+        self.assertIn("で", [g["pattern"] for g in token_of("これでいい。", "で").get("grammar") or []])
+        self.assertTrue(gloss_of("止められはしない。", "は").startswith("(between a verb's stem and しない)"))
+        # (十時ごろまで ends a stretch: "until", no "even")
+        self.assertIn("から〜まで", [g["pattern"] for g in token_of("十時ごろまで待ちます。", "まで").get("grammar") or []])
+        self.assertTrue(gloss_of("親の預金にまで手をつける。", "まで").startswith("even"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AStemAfterANounAndItsNoTests(unittest.TestCase):
+    """Plan 314: a verb's stem after a noun and its の, before a particle
+    or the copula, is the noun it names -- うけつけ is 受付, the reception
+    desk, no 受け付ける "to accept"; ふりこみ 振り込み, a transfer; ただの言い
+    のがれ "evasion" -- while 余儀なくされた keeps its なく (no 無くす, "to
+    lose", which なくされた after its object's particle is), and 二、三人's
+    counter counts the two numbers before it."""
+
+    def test_its_words(self) -> None:
+        for sentence in ("プールのうけつけで、男の人と女の人が話しています。", "一かいのうけつけに行く"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "うけつけ"), "vocab_N4_受付_うけつけ")
+        self.assertIn("transfer", token_of("きゅうりょうのふりこみにつかいます。", "ふりこみ")["vocab_match"]["entry"]["meaning"])
+        for sentence in ("台風のため、大会は中止を余儀なくされた。", "大雪が、列車の運休を余儀なくさせた。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn("なくさ", [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]])
+        self.assertEqual(card_of("財布をなくされたそうです。", "なくさ"), "vocab_N5_無くす_なくす")
+        counter = token_of("二、三人来た。", "人")
+        self.assertIn("助数詞 〜つ／〜人／〜枚", [g["pattern"] for g in counter.get("grammar") or []])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class PleaseIsOnePhraseTests(unittest.TestCase):
+    """Plan 314: お願いします closing what is said is the deck's set phrase,
+    "please" -- after an object, a way, a count or よろしく, in kanji or in
+    kana, quoted too -- never 願う "to desire" under a request. Its card is
+    the deck's one card, at N5 (the owner's call: the kanji card was N1,
+    the kana one N2), however the page spells it, and it counts as itself:
+    a page that says it counts no 願う. お願いしました, お願いできますか,
+    お願いしたい, お願いして and the "when I asked" of お願いしますと、 are
+    the humble verb."""
+
+    CARD = "vocab_N5_お願いします_おねがいします"
+
+    def test_please(self) -> None:
+        for sentence, surface in (("お願いします。", "お願いします"),
+                                  ("ケーキをおねがいします。", "おねがいします"),
+                                  ("はげんきんまたはカードでおねがいします。", "おねがいします"),
+                                  ("はい、お願いします。", "お願いします"),
+                                  ("二つお願いします。", "お願いします"),
+                                  ("これからよろしくお願いしますね。", "お願いします"),
+                                  ("「お支払いは現金以外でお願いします」と書いてあった。", "お願いします"),
+                                  ("お願いしますって言った。", "お願いします")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, surface), self.CARD)
+        token = token_of("お願いします。", "お願いします")
+        self.assertNotIn("parts", token)
+        self.assertIn("〜ます／〜ません", [g["pattern"] for g in token.get("grammar") or []])
+        from study.level_mix import words_at_level
+        self.assertEqual([w["raw_id"] for w in words_at_level("コーヒーをおねがいします。", "N5")],
+                         ["vocab_N5__コーヒー", self.CARD])
+        self.assertEqual(words_at_level("お願いします。", "N3"), [])
+
+    def test_the_humble_verb(self) -> None:
+        for sentence in ("お願いしました。", "お願いできますか。", "お願いしたいのですが。", "先生にお願いして、見てもらった。",
+                         "お願いしますと、すぐ来てくれた。"):
+            with self.subTest(sentence=sentence):
+                surfaces = [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
+                self.assertNotIn("お願いします", surfaces)
+                self.assertEqual(card_of(sentence, "願い"), "vocab_N3_願う_ねがう")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FromNowOnIsOneWordTests(unittest.TestCase):
+    """Plan 314: これ + から is the deck's これから, "from now on, after
+    this", wherever it says so -- これからは, これからも, これからの, これから
+    何を -- with これ kept as its part, which the counts read as before;
+    "from this" (これからすると, これから一つ選んで) keeps これ, "this one"."""
+
+    def test_its_card(self) -> None:
+        for sentence in ("わかりました。これからは気をつけます。", "この町の人口は、これからも増えていくでしょう。",
+                         "目的に近づけられるかどうかは、これからのルール作り次第だ。", "男の人はこれから何をしますか。",
+                         "これからよろしくお願いします。", "これから三時まで会議です。"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(card_of(sentence, "これから"), "vocab_N4__これから")
+        token = token_of("これからは気をつけます。", "これから")
+        self.assertEqual([(p["vocab_match"] or {}).get("raw_id") for p in token["parts"]], ["vocab_N5__これ"])
+        from study.level_mix import words_at_level
+        self.assertNotIn("vocab_N4__これから", [w["raw_id"] for w in words_at_level("これからは気をつけます。", "N4")])
+
+    def test_from_this(self) -> None:
+        for sentence in ("これからすると、彼は来ないだろう。", "これから見ると、問題はない。", "これから一つ選んでください。"):
+            with self.subTest(sentence=sentence):
+                surfaces = [t["surface"] for t in analysis.analyze_local(sentence)["tokens"]]
+                self.assertNotIn("これから", surfaces)
+                self.assertEqual(card_of(sentence, "これ"), "vocab_N5__これ")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ThePlansFoldsReadInEveryLanguageTests(unittest.TestCase):
+    """Plan 314: every pool word this plan folds or newly reads carries its
+    French and its Spanish (a line in jmdict_fr / jmdict_es) -- a fold over
+    the deck's cards never trades a card in French for a word in English
+    (plan 280's rule, held for the adjectival noun's fold too: 有名 + 人
+    folds only where the layer has 有名人)."""
+
+    def test_every_language(self) -> None:
+        for sentence, surface in (("有名人ともなると、外を自由に歩けない。", "有名人"), ("特別展を見た。", "特別展"),
+                                  ("その計画は実現の可能性を無視した。", "可能性"), ("相手が多少なりとも譲歩するなら", "多少なりとも"),
+                                  ("ご質問があれば、何なりとお聞きください。", "何なりと"), ("生まれて初めて海を見た。", "生まれて初めて"),
+                                  ("一期一会を大切にしたい。", "一期一会"), ("彼は口が悪くて嫌われている。", "口が悪く"),
+                                  ("祖父は耳が遠くなり、人の話が聞こえにくかった。", "耳が遠く"), ("さようでございます。", "さよう"),
+                                  ("受付にお声がけください。", "声がけ"), ("みだりに漏らすべからず。", "みだり"),
+                                  ("給料が上がる仕組みづくりが求められている。", "づくり"), ("近くのせんとうへ行きました。", "せんとう"),
+                                  ("見て、ふじさんがきれいに見えるよ。", "ふじさん"), ("それはただの言いのがれにすぎない。", "言いのがれ")):
+            with self.subTest(sentence=sentence):
+                entry = token_of(sentence, surface)["vocab_match"]["entry"]
+                self.assertTrue(entry.get("meaning_fr"), surface)
+                self.assertTrue(entry.get("meaning_es"), surface)
+
+    def test_no_fold_without_french(self) -> None:
+        from unittest import mock
+        from content import jmdict_fr
+        morphemes = morphology.tokenize("有名人に会った。")
+        hits = [card_lookup.resolve_morpheme(morphemes, k) for k in range(len(morphemes))]
+        self.assertIsNotNone(card_lookup.resolve_pool_compound(morphemes, 0, hits))
+        with mock.patch.object(jmdict_fr, "pool_line", return_value=None):
+            self.assertIsNone(card_lookup.resolve_pool_compound(morphemes, 0, hits))

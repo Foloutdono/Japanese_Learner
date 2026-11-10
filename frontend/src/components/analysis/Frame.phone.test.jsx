@@ -59,11 +59,6 @@ const VERBLESS_LINE = {
   explanation: '関心は — …',
 }
 
-// The sheet is read in English; the language is given back after each
-// case, since the files of a lane share the page's storage, and a file
-// run after this one would otherwise open in English too.
-afterEach(() => { localStorage.removeItem('lang') })
-
 async function sheet(line, props = {}) {
   localStorage.setItem('lang', 'en')
   const onPoint = vi.fn()
@@ -82,6 +77,9 @@ async function sheet(line, props = {}) {
   const all = document.querySelectorAll('.anl-explainsheet')
   return { root: all[all.length - 1], onPoint, onExplain }
 }
+// The lane's files share one origin, so the English sheet() switches to
+// must not carry into a file that reads the French default after this one.
+afterEach(() => { localStorage.removeItem('lang') })
 
 const parts = root => [...root.querySelectorAll('.anl-frame__part')]
 

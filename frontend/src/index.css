@@ -34430,6 +34430,9 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .pvp-console__door-fig { font-size: var(--fs-sm); color: var(--text-secondary); }
 .pvp-console__door-req { color: var(--sel-ink); }
 .pvp-console__none { margin: 0; padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--surface-line); font-size: var(--fs-sm); color: var(--text-secondary); }
+/* The head of the strangers' runs waiting for an opponent (plan 315),
+   under what waits on the learner. */
+.pvp-console__cap { margin: 0; padding: var(--sp-4) var(--sp-5) var(--sp-2); border-top: 1px solid var(--surface-line); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
 /* What a screen says when the server refused (an error's code, mapped). */
 .pvp-error { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
@@ -34513,6 +34516,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-card__legend { padding: var(--sp-3) var(--sp-5); }
 .pvp-card__reason { font-family: inherit; font-size: var(--fs-body); font-weight: 600; }
 .pvp-card__foot { gap: var(--sp-3); }
+/* The way between you (plan 315): ask, accept, or challenge a friend. */
+.pvp-card__way { display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-card__way:empty { display: none; }
 
 /* L1 — the Elo, an insert in the holder: the door, the figure, the line. */
 .pvp-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }

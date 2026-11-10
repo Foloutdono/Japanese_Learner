@@ -294,6 +294,11 @@ runtime purpose.
   started (`duels._score_kept`): before, an unstarted seat is free to give
   back, so whatever another learner's figures reach (the cover, the hall,
   the live read) keeps them until « Partir ».
+  The hall offers only the strangers' runs a ranked sprint could deal
+  (plan 315): `_seek`, the hall's list (`duels.waiting`) and the seat
+  picked there (`duels.take`) read one rule, `duels._SEEKABLE`, so a
+  change to who meets whom is made there, once, and a learner holds
+  one unstarted seat at a time.
   Nothing runs in the background: `settle()` brings a duel up to date
   from its stored instants on every read (a run past its sprint paid, a
   duel resolved, expired and its ranked fare refunded, a seat left
@@ -1308,7 +1313,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 7,980 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,979 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

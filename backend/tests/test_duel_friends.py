@@ -53,7 +53,8 @@ def test_a_request_shows_the_username_alone_on_both_sides(client, learners):
         assert theirs["requests"] == [{"username": learners[A]}]
         assert _search(client, learners[A]).json()["relation"] == "received"
         # The card of a learner who is not a friend: the username alone.
-        assert client.get(f"/api/pvp/learner/{learners[A]}").json() == {"username": learners[A], "relation": "received"}
+        assert client.get(f"/api/pvp/learner/{learners[A]}").json() == {"username": learners[A], "relation": "received",
+                                                                         "board": None}
     assert events_of(A, "pvp_friend") == [{"action": "request"}]
 
 
