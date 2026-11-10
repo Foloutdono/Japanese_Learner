@@ -139,13 +139,13 @@
         },
         "choices": [
           "です",
-          "でした",
+          "ではありません",
           "だ"
         ],
         "why": {
-          "en": "The polite question is です + か. でした is the past, and だ is the plain form, which does not stand before か like this.",
-          "fr": "La question polie, c'est です + か. でした est le passé, et だ est la forme simple, qui ne se met pas ainsi devant か.",
-          "es": "La pregunta cortés es です + か. でした es el pasado, y だ es la forma llana, que no va así delante de か."
+          "en": "The polite question is です + か. ではありません would make it a negative question, « isn't tomorrow a day off? », and だ is the plain form, which does not stand before か like this.",
+          "fr": "La question polie, c'est です + か. ではありません en ferait une question négative, « demain, ce n'est pas un jour de congé ? », et だ est la forme simple, qui ne se met pas ainsi devant か.",
+          "es": "La pregunta cortés es です + か. ではありません la volvería una pregunta negativa, «¿mañana no es día libre?», y だ es la forma llana, que no va así delante de か."
         }
       },
       {
@@ -529,9 +529,9 @@
             "いいえ、わたしのノートではありませんでした。"
           ],
           "why": {
-            "en": "To a teacher you stay polite and in the present: ではありません. じゃない is the plain form, for friends, and ではありませんでした is the past, as if the notebook had stopped being yours.",
-            "fr": "À un professeur, on reste poli et au présent : ではありません. じゃない est la forme neutre, pour les amis, et ではありませんでした est le passé, comme si le cahier avait cessé d'être le tien.",
-            "es": "Con un profesor sigues en cortés y en presente: ではありません. じゃない es la forma llana, para amigos, y ではありませんでした es el pasado, como si el cuaderno hubiera dejado de ser tuyo."
+            "en": "To a teacher you stay polite and in the present: ではありません. じゃない is the plain form, for friends, and ではありませんでした is the past, « it was not mine », when the question is about the present.",
+            "fr": "À un professeur, on parle poliment et au présent : ではありません. じゃない est la forme neutre, pour les amis, et ではありませんでした est le passé, « ce n'était pas le mien », alors que la question porte sur le présent.",
+            "es": "Con un profesor sigues en cortés y en presente: ではありません. じゃない es la forma llana, para amigos, y ではありませんでした es el pasado, «no era mío», cuando la pregunta es sobre el presente."
           }
         },
         {
@@ -1342,9 +1342,9 @@
       "scene": {
         "place": "ホーム",
         "them": {
-          "en": "A traveller",
-          "fr": "Une voyageuse",
-          "es": "Una viajera"
+          "en": "A colleague",
+          "fr": "Une collègue",
+          "es": "Una colega"
         },
         "lines": [
           {
@@ -3245,9 +3245,9 @@
       },
       {
         "kind": "use",
-        "en": "- Adding a second item: わたしも学生です.\n- With a negative, « neither »: 何も食べません (nothing at all).\n- Twice, « both… and »: 本も雑誌も読みます.",
-        "fr": "- Ajouter un second élément : わたしも学生です.\n- Avec un négatif, « non plus, rien » : 何も食べません.\n- Doublé, « et… et » : 本も雑誌も読みます.",
-        "es": "- Para agregar un segundo elemento: わたしも学生です.\n- Con una negación, «tampoco, nada»: 何も食べません (nada en absoluto).\n- Dos veces, «tanto… como»: 本も雑誌も読みます."
+        "en": "- Adding a second item: わたしも学生です.\n- With a negative, « not … either »: わたしも行きません. After a question word, « nothing at all »: 何も食べません.\n- Twice, « both… and »: 本も雑誌も読みます.",
+        "fr": "- Ajouter un second élément : わたしも学生です.\n- Avec un négatif, « non plus » : わたしも行きません. Après un mot interrogatif, « rien du tout » : 何も食べません.\n- Doublé, « et… et » : 本も雑誌も読みます.",
+        "es": "- Para agregar un segundo elemento: わたしも学生です.\n- Con una negación, «tampoco»: わたしも行きません. Tras una palabra interrogativa, «nada en absoluto»: 何も食べません.\n- Dos veces, «tanto… como»: 本も雑誌も読みます."
       },
       {
         "kind": "careful",
@@ -3842,9 +3842,9 @@
           "で"
         ],
         "why": {
-          "en": "の links two nouns, and 英語 is a noun. な is for な-adjectives, and で cannot join a noun to the one it describes.",
-          "fr": "の relie deux noms, et 英語 est un nom. な est réservé aux adjectifs en な, et で ne peut pas relier un nom à celui qu'il décrit.",
-          "es": "の une dos sustantivos, y 英語 es un sustantivo. な es para los adjetivos en な, y で no puede unir un sustantivo al que describe."
+          "en": "の links two nouns, and えいご is a noun. な is for な-adjectives, and で cannot join a noun to the one it describes.",
+          "fr": "の relie deux noms, et えいご est un nom. な est réservé aux adjectifs en な, et で ne peut pas relier un nom à celui qu'il décrit.",
+          "es": "の une dos sustantivos, y えいご es un sustantivo. な es para los adjetivos en な, y で no puede unir un sustantivo al que describe."
         }
       }
     ],
@@ -8661,9 +8661,9 @@
             "えんぴつもペンも、つかってはいけません。"
           ],
           "why": {
-            "en": "もいいです allows and はいけません forbids, so each goes with its own object: pencils もいいです, pens はいけません. The second line swaps them, and the third forbids pencils too.",
-            "fr": "もいいです permet et はいけません interdit, donc chacun va avec son objet : le crayon もいいです, le stylo はいけません. La deuxième phrase les échange, et la troisième interdit aussi le crayon.",
-            "es": "もいいです permite y はいけません prohíbe, así que cada uno va con su objeto: el lápiz もいいです, el bolígrafo はいけません. La segunda frase los intercambia y la tercera prohíbe también el lápiz."
+            "en": "もいいです allows and はいけません forbids, so each goes with its own object: pencils もいいです, pens はいけません. えんぴつはつかってはいけませんが… swaps them, and えんぴつもペンも… forbids pencils too.",
+            "fr": "もいいです permet et はいけません interdit, donc chacun va avec son objet : le crayon もいいです, le stylo はいけません. えんぴつはつかってはいけませんが… les échange, et えんぴつもペンも… interdit aussi le crayon.",
+            "es": "もいいです permite y はいけません prohíbe, así que cada uno va con su objeto: el lápiz もいいです, el bolígrafo はいけません. えんぴつはつかってはいけませんが… los intercambia, y えんぴつもペンも… prohíbe también el lápiz."
           }
         },
         {
@@ -10418,9 +10418,9 @@
             "三時に、駅で行きます。"
           ],
           "why": {
-            "en": "に marks the time and へ the place you head for: 三時に…駅へ. The second line swaps them, so the time becomes a direction. The third puts the trip itself at the station with で.",
-            "fr": "に marque l'heure et へ le lieu vers lequel on va : 三時に…駅へ. La deuxième ligne les échange : l'heure devient une direction. La troisième place le trajet lui-même à la gare avec で.",
-            "es": "に marca la hora y へ el lugar adonde vas: 三時に…駅へ. La segunda frase los intercambia, y la hora pasa a ser una dirección. La tercera sitúa el propio trayecto en la estación, con で."
+            "en": "に marks the time and へ the place you head for: 三時に…駅へ. 三時へ…駅に swaps them, so the time becomes a direction. 駅で行きます puts the trip itself at the station with で.",
+            "fr": "に marque l'heure et へ le lieu vers lequel on va : 三時に…駅へ. 三時へ…駅に les échange : l'heure devient une direction. 駅で行きます place le trajet lui-même à la gare avec で.",
+            "es": "に marca la hora y へ el lugar adonde vas: 三時に…駅へ. 三時へ…駅に los intercambia, y la hora pasa a ser una dirección. 駅で行きます sitúa el propio trayecto en la estación, con で."
           }
         },
         {
@@ -10861,9 +10861,9 @@
             "へやには、ベッドやつくえはありません。"
           ],
           "why": {
-            "en": "や names examples and leaves room for more: ベッドやつくえ. と would say these two are everything, and the third line, with や too, says there is no bed or desk at all.",
-            "fr": "や donne des exemples et laisse de la place pour d'autres : ベッドやつくえ. と dirait que ces deux-là sont tout, et la troisième ligne, avec や aussi, dit qu'il n'y a ni lit ni bureau.",
-            "es": "や da ejemplos y deja lugar para más: ベッドやつくえ. と diría que esas dos son todo, y la tercera frase, también con や, dice que no hay ni cama ni escritorio."
+            "en": "や names examples and leaves room for more: ベッドやつくえ. と would say these two are everything, and ベッドやつくえはありません, with や too, says there is no bed or desk at all.",
+            "fr": "や donne des exemples et laisse de la place pour d'autres : ベッドやつくえ. と dirait que ces deux-là sont tout, et ベッドやつくえはありません, avec や aussi, dit qu'il n'y a ni lit ni bureau.",
+            "es": "や da ejemplos y deja lugar para más: ベッドやつくえ. と diría que esas dos son todo, y ベッドやつくえはありません, también con や, dice que no hay ni cama ni escritorio."
           }
         },
         {
@@ -11196,9 +11196,9 @@
             "駅は、左ですか、右です。"
           ],
           "why": {
-            "en": "To offer a choice between two whole options, each one takes its own か: 左ですか、右ですか. 左か右です has か but states, it does not ask, and the third line leaves the second option without its か.",
-            "fr": "Pour proposer un choix entre deux options complètes, chacune prend son か : 左ですか、右ですか. 左か右です a un か mais affirme au lieu de demander, et la troisième ligne laisse la seconde option sans son か.",
-            "es": "Para ofrecer elegir entre dos opciones completas, cada una lleva su か: 左ですか、右ですか. 左か右です tiene か pero afirma, no pregunta, y la tercera frase deja la segunda opción sin su か."
+            "en": "To offer a choice between two whole options, each one takes its own か: 左ですか、右ですか. 左か右です has か but states, it does not ask, and stopping at 右です leaves the second option without its か.",
+            "fr": "Pour proposer un choix entre deux options complètes, chacune prend son か : 左ですか、右ですか. 左か右です a un か mais affirme au lieu de demander, et s'arrêter à 右です laisse la seconde option sans son か.",
+            "es": "Para ofrecer elegir entre dos opciones completas, cada una lleva su か: 左ですか、右ですか. 左か右です tiene か pero afirma, no pregunta, y terminar en 右です deja la segunda opción sin su か."
           }
         },
         {
@@ -11519,9 +11519,9 @@
           {
             "who": "me",
             "jp": "ええ、さむいですね。",
-            "en": "It is cold.",
-            "fr": "Oui, il fait froid.",
-            "es": "Sí, hace frío."
+            "en": "Yes, it is cold, isn't it?",
+            "fr": "Oui, il fait froid, n'est-ce pas ?",
+            "es": "Sí, hace frío, ¿verdad?"
           }
         ],
         "note": {
@@ -11667,12 +11667,12 @@
           "choices": [
             "だね",
             "だよ",
-            "だったね"
+            "じゃないね"
           ],
           "why": {
-            "en": "You are checking what you were just told, so ね: « seven, right? ». よ would tell your friend what they know better than you, and だったね puts the time in the past.",
-            "fr": "Tu vérifies ce qu'on vient de te dire, donc ね : « sept heures, c'est ça ? ». よ apprendrait à ton ami ce qu'il sait mieux que toi, et だったね mettrait l'heure au passé.",
-            "es": "Compruebas lo que te acaban de decir, así que ね: «a las siete, ¿no?». よ le diría a tu amigo lo que sabe mejor que tú, y だったね pone la hora en pasado."
+            "en": "You are checking what you were just told, so ね: « seven, right? ». よ would tell your friend what they know better than you, and じゃないね would check that it is not at seven.",
+            "fr": "Tu vérifies ce qu'on vient de te dire, donc ね : « sept heures, c'est ça ? ». よ apprendrait à ton ami ce qu'il sait mieux que toi, et じゃないね vérifierait que ce n'est pas à sept heures.",
+            "es": "Compruebas lo que te acaban de decir, así que ね: «a las siete, ¿no?». よ le diría a tu amigo lo que sabe mejor que tú, y じゃないね comprobaría que no es a las siete."
           }
         },
         {
@@ -11907,9 +11907,9 @@
           },
           "jp": "あ、でぐちはあちらですよ。",
           "tr": {
-            "en": "Oh, the exit is over there.",
-            "fr": "Ah, la sortie est par là.",
-            "es": "Ah, la salida está por allí."
+            "en": "Oh, the exit is over there, you know.",
+            "fr": "Ah, la sortie est par là, vous savez.",
+            "es": "Ah, la salida está por allí, ¿sabe?"
           },
           "ask": {
             "en": "Someone is heading the wrong way. What does よ do?",
@@ -12004,9 +12004,9 @@
           {
             "who": "me",
             "jp": "あそこにありますよ。",
-            "en": "They're over there.",
-            "fr": "Elles sont là-bas.",
-            "es": "Está por allí."
+            "en": "They're over there, you know.",
+            "fr": "Elles sont là-bas, vous savez.",
+            "es": "Está por allí, ¿sabe?"
           }
         ],
         "note": {
@@ -12195,9 +12195,9 @@
     "steps": [
       {
         "kind": "rule",
-        "en": "**clause + から** gives a reason: the reason comes first, then what follows from it. 雨がふるから、行きません (it's raining, so I'm not going).",
-        "fr": "**proposition + から** donne une raison : la raison d'abord, puis ce qui en découle. 雨がふるから、行きません (il pleut, donc je n'y vais pas).",
-        "es": "**oración + から** da una razón: primero va la razón, luego lo que se sigue de ella. 雨がふるから、行きません (llueve, así que no voy)."
+        "en": "**clause + から** gives a reason: the reason comes first, then what follows from it. 雨がふるから、行きません (it's going to rain, so I'm not going).",
+        "fr": "**proposition + から** donne une raison : la raison d'abord, puis ce qui en découle. 雨がふるから、行きません (il va pleuvoir, donc je n'y vais pas).",
+        "es": "**oración + から** da una razón: primero va la razón, luego lo que se sigue de ella. 雨がふるから、行きません (va a llover, así que no voy)."
       },
       {
         "kind": "use",
@@ -13777,7 +13777,7 @@
           "jp": "そのカメラで、ふたりのしゃしんを＿＿＿。",
           "tr": {
             "en": "Shall I take a picture of you two with that camera?",
-            "fr": "Je peux prendre une photo de vous deux avec cet appareil ?",
+            "fr": "Voulez-vous que je prenne une photo de vous deux avec cet appareil ?",
             "es": "¿Quieren que les saque una foto a los dos con esa cámara?"
           },
           "choices": [
@@ -14338,9 +14338,9 @@
           "の"
         ],
         "why": {
-          "en": "A な-adjective takes な before a noun: しずかな町. い belongs to い-adjectives, and の links two nouns.",
-          "fr": "Un adjectif en な prend な devant un nom : しずかな町. い appartient aux adjectifs en い, et の relie deux noms.",
-          "es": "Un adjetivo en な lleva な ante un sustantivo: しずかな町. い es de los adjetivo en い, y の une dos sustantivos."
+          "en": "A な-adjective takes な before a noun: しずかなまち. い belongs to い-adjectives, and の links two nouns.",
+          "fr": "Un adjectif en な prend な devant un nom : しずかなまち. い appartient aux adjectifs en い, et の relie deux noms.",
+          "es": "Un adjetivo en な lleva な ante un sustantivo: しずかなまち. い es de los adjetivos en い, y の une dos sustantivos."
         }
       },
       {
@@ -15480,7 +15480,7 @@
               "es": "Me convierto en café."
             },
             {
-              "en": "I go to the coffee.",
+              "en": "I go to the café.",
               "fr": "Je vais au café.",
               "es": "Voy al café."
             }
@@ -16085,9 +16085,9 @@
             "今日より、きのうのほうがあついです。"
           ],
           "why": {
-            "en": "Yesterday wins, so it takes のほうが and today takes より; and since yesterday is over, the adjective goes to the past: あつかったです. The second line reverses the two days, and the third keeps the present あついです.",
-            "fr": "Hier l'emporte, donc c'est lui qui prend のほうが et aujourd'hui prend より ; et comme hier est passé, l'adjectif se met au passé : あつかったです. La deuxième ligne inverse les deux jours, et la troisième garde le présent あついです.",
-            "es": "Gana ayer, así que lleva のほうが y hoy lleva より; y como ayer ya pasó, el adjetivo va en pasado: あつかったです. La segunda frase invierte los días, y la tercera deja el presente あついです."
+            "en": "Yesterday wins, so it takes のほうが and today takes より; and since yesterday is over, the adjective goes to the past: あつかったです. きのうより、今日のほうが reverses the two days, and あついです keeps the present.",
+            "fr": "Hier l'emporte, donc c'est lui qui prend のほうが et aujourd'hui prend より ; et comme hier est passé, l'adjectif se met au passé : あつかったです. きのうより、今日のほうが inverse les deux jours, et あついです garde le présent.",
+            "es": "Gana ayer, así que lleva のほうが y hoy lleva より; y como ayer ya pasó, el adjetivo va en pasado: あつかったです. きのうより、今日のほうが invierte los días, y あついです deja el presente."
           }
         },
         {
@@ -16554,8 +16554,8 @@
             "もっと"
           ],
           "why": {
-            "en": "いちばん puts the shop at the top of the group that で names. とても only says « very », and もっと says « more », which needs something to be compared with.",
-            "fr": "いちばん place le magasin en tête du groupe que nomme で. とても dit seulement « très », et もっと dit « plus », ce qui demande une chose à laquelle comparer.",
+            "en": "いちばん puts the tree at the top of the group that で names. とても only says « very », and もっと says « more », which needs something to be compared with.",
+            "fr": "いちばん place l'arbre en tête du groupe que nomme で. とても dit seulement « très », et もっと dit « plus », ce qui demande une chose à laquelle comparer.",
             "es": "いちばん pone el árbol en lo más alto del grupo que nombra で. とても solo dice «muy», y もっと dice «más», que necesita algo con qué comparar."
           }
         }
@@ -17263,9 +17263,9 @@
             }
           ],
           "why": {
-            "en": "なくてもいい makes the first part optional, and てください asks for the second. Forbidden would be てはいけません, and the third reading swaps the two parts.",
-            "fr": "なくてもいい rend la première partie facultative, et てください demande la seconde. Interdit serait てはいけません, et la troisième lecture intervertit les deux parties.",
-            "es": "なくてもいい hace opcional la primera parte, y てください pide la segunda. Prohibido sería てはいけません, y la tercera lectura invierte las dos partes."
+            "en": "なくてもいい makes the first part optional, and てください asks for the second. Forbidden would be てはいけません, and « a call is wanted » swaps the two parts.",
+            "fr": "なくてもいい rend la première partie facultative, et てください demande la seconde. Interdit serait てはいけません, et « un appel est demandé » intervertit les deux parties.",
+            "es": "なくてもいい hace opcional la primera parte, y てください pide la segunda. Prohibido sería てはいけません, y «pide una llamada» invierte las dos partes."
           }
         },
         {
@@ -17755,9 +17755,9 @@
             }
           ],
           "why": {
-            "en": "て-form + から puts the first action first: arrive, and then call. A call before arriving would use まえに, and the third reading swaps the two actions.",
-            "fr": "Forme en て + から place d'abord l'action nommée en premier : arriver, puis appeler. Un appel avant l'arrivée utiliserait まえに, et la troisième lecture intervertit les deux actions.",
-            "es": "Forma て + から pone primero la primera acción: llegar, y luego llamar. Una llamada antes de llegar usaría まえに, y la tercera lectura invierte las dos acciones."
+            "en": "て-form + から puts the first action first: arrive, and then call. A call before arriving would use まえに, and « a call first » swaps the two actions.",
+            "fr": "Forme en て + から place d'abord l'action nommée en premier : arriver, puis appeler. Un appel avant l'arrivée utiliserait まえに, et « un appel d'abord » intervertit les deux actions.",
+            "es": "Forma て + から pone primero la primera acción: llegar, y luego llamar. Una llamada antes de llegar usaría まえに, y «primero una llamada» invierte las dos acciones."
           }
         }
       ]
@@ -18550,8 +18550,8 @@
       },
       {
         "jp": "日本へ行くとき、この本を買いました。",
-        "en": "When I went to Japan, I bought this book.",
-        "fr": "Quand je suis allé au Japon, j'ai acheté ce livre.",
+        "en": "When I was going to Japan, I bought this book.",
+        "fr": "En partant pour le Japon, j'ai acheté ce livre.",
         "es": "Cuando iba a viajar a Japón, compré este libro.",
         "register": "polite",
         "contrast": true
@@ -18577,8 +18577,8 @@
         {
           "notion": {
             "en": "Noun の, な-adjective な",
-            "fr": "Nom の, adjectif en な な",
-            "es": "Sustantivo の, adjetivo en な な"
+            "fr": "Nom + の, adjectif en な + な",
+            "es": "Sustantivo + の, adjetivo en な + な"
           },
           "jp": "びょうきのとき、学校を休みました。",
           "tr": {
@@ -18804,7 +18804,7 @@
             "fr": "Quelle forme complète la phrase ?",
             "es": "¿Qué forma completa la oración?"
           },
-          "jp": "ねる＿＿＿、電気をけします。",
+          "jp": "＿＿＿、電気をけします。",
           "tr": {
             "en": "I turn off the light when I go to bed.",
             "fr": "J'éteins la lumière quand je vais me coucher.",
@@ -19189,9 +19189,9 @@
             "es": "¿Le gusta el deporte?"
           },
           "task": {
-            "en": "Yes, you like football.",
-            "fr": "Oui, tu aimes le foot.",
-            "es": "Sí, te gusta el fútbol."
+            "en": "Say yes: you like football.",
+            "fr": "Dis que oui, tu aimes le foot.",
+            "es": "Di que sí, que te gusta el fútbol."
           },
           "choices": [
             "はい、サッカーが好きです。",
@@ -19480,9 +19480,9 @@
           },
           "jp": "わたしは、にくがきらいです。",
           "tr": {
-            "en": "I hate meat.",
-            "fr": "Je déteste la viande.",
-            "es": "Odio la carne."
+            "en": "I dislike meat.",
+            "fr": "Je n'aime pas la viande.",
+            "es": "No me gusta la carne."
           },
           "ask": {
             "en": "Said to someone who has just cooked meat for you, how does it sound?",
@@ -19523,11 +19523,11 @@
             "fr": "Un goût, ou une envie (たくない)",
             "es": "Un gusto, o un deseo (たくない)"
           },
-          "jp": "雨の日は出かけたくないです。",
+          "jp": "今日は出かけたくないです。",
           "tr": {
-            "en": "On rainy days, I don't want to go out.",
-            "fr": "Les jours de pluie, je n'ai pas envie de sortir.",
-            "es": "Los días de lluvia no quiero salir."
+            "en": "I don't want to go out today.",
+            "fr": "Aujourd'hui, je n'ai pas envie de sortir.",
+            "es": "Hoy no quiero salir."
           },
           "ask": {
             "en": "Here it is たくない, not きらい. What is the difference?",
@@ -19536,14 +19536,14 @@
           },
           "choices": [
             {
-              "en": "たくない: you don't want to go out, right now.",
-              "fr": "たくない : tu ne veux pas sortir, là.",
-              "es": "たくない: no quieres salir, ahora mismo."
+              "en": "たくない: today, you don't want to go out.",
+              "fr": "たくない : aujourd'hui, tu n'as pas envie de sortir.",
+              "es": "たくない: hoy no quieres salir."
             },
             {
-              "en": "たくない: you hate going out, always.",
-              "fr": "たくない : tu détestes sortir, toujours.",
-              "es": "たくない: odias salir, siempre."
+              "en": "たくない: you dislike going out, in general.",
+              "fr": "たくない : tu n'aimes pas sortir, en général.",
+              "es": "たくない: no te gusta salir, en general."
             },
             {
               "en": "たくない: you can't go out.",
@@ -19683,9 +19683,9 @@
         {
           "kind": "use",
           "ask": {
-            "en": "A visitor sees your cat run away from the bath. You explain that it hates water, as a rule.",
-            "fr": "Un visiteur voit ton chat fuir la salle de bain. Tu lui expliques qu'il déteste l'eau, en général.",
-            "es": "Una visita ve a tu gato huir del baño. Le explicas que, por lo general, odia el agua."
+            "en": "A visitor sees your cat run away from the bath. You explain that it dislikes water, as a rule.",
+            "fr": "Un visiteur voit ton chat fuir la salle de bain. Tu lui expliques qu'il n'aime pas l'eau, en général.",
+            "es": "Una visita ve a tu gato huir del baño. Le explicas que, por lo general, no le gusta el agua."
           },
           "choices": [
             "うちのねこは、水がきらいです。",
@@ -22276,9 +22276,9 @@
             "es": "¿Hacia qué hora llega a Osaka?"
           },
           "task": {
-            "en": "Around five.",
-            "fr": "Vers cinq heures.",
-            "es": "Hacia las cinco."
+            "en": "Say you will get there around five.",
+            "fr": "Dis que tu arrives vers cinq heures.",
+            "es": "Di que llegas hacia las cinco."
           },
           "choices": [
             "五時ごろにつきます。",
@@ -27335,10 +27335,10 @@
         "register": "polite"
       },
       {
-        "jp": "この店の中で、この本がいちばん高いです。",
-        "en": "In this shop, this book is the most expensive.",
-        "fr": "Dans ce magasin, ce livre est le plus cher.",
-        "es": "En esta tienda, este libro es el más caro.",
+        "jp": "この店の本の中で、これがいちばん高いです。",
+        "en": "Of the books in this shop, this one is the most expensive.",
+        "fr": "Parmi les livres de ce magasin, celui-ci est le plus cher.",
+        "es": "De los libros de esta tienda, este es el más caro.",
         "register": "polite"
       },
       {
@@ -27815,9 +27815,9 @@
             }
           ],
           "why": {
-            "en": "Between two qualities, そして only adds: kind, and funny too. A cause would be だから.",
-            "fr": "Entre deux qualités, そして ne fait qu'ajouter : gentil, et drôle aussi. Une cause, ce serait だから.",
-            "es": "Entre dos cualidades, そして solo agrega: amable, y divertido también. Una causa sería だから."
+            "en": "Between two qualities, そして only adds: kind, and funny too. だから would make the second the result of the first.",
+            "fr": "Entre deux qualités, そして ne fait qu'ajouter : gentil, et drôle aussi. だから ferait de la seconde la conséquence de la première.",
+            "es": "Entre dos cualidades, そして solo agrega: amable, y divertido también. だから haría de la segunda una consecuencia de la primera."
           },
           "kind": "usage"
         },
@@ -28376,9 +28376,9 @@
             "あさ、ぎんこうへ行きました。しかし、午後ゆうびんきょくへ行きました。"
           ],
           "why": {
-            "en": "それから gives the next step in time, so the first sentence is what you did first: the bank, then the post office. The second line swaps the order, and しかし in the third makes the afternoon a contrast.",
-            "fr": "それから donne l'étape suivante : la première phrase est ce qui est fait en premier, la banque, puis la poste. La deuxième ligne inverse l'ordre, et しかし fait de l'après-midi un contraste.",
-            "es": "それから da el paso siguiente en el tiempo, así que la primera frase es lo que hiciste primero: el banco, luego correos. La segunda línea invierte el orden, y しかし, en la tercera, hace de la tarde un contraste."
+            "en": "それから gives the next step in time, so the first sentence is what you did first: the bank, then the post office. Starting with 午後ゆうびんきょく… swaps the order, and しかし makes the afternoon a contrast.",
+            "fr": "それから donne l'étape suivante : la première phrase est ce qui est fait en premier, la banque, puis la poste. Commencer par 午後ゆうびんきょく… inverse l'ordre, et しかし fait de l'après-midi un contraste.",
+            "es": "それから da el paso siguiente en el tiempo, así que la primera frase es lo que hiciste primero: el banco, luego correos. Empezar por 午後ゆうびんきょく… invierte el orden, y しかし hace de la tarde un contraste."
           }
         },
         {
@@ -29354,9 +29354,9 @@
           "のに"
         ],
         "why": {
-          "en": "が joins two clauses with “but”, right after です or ます. しかし starts a new sentence, and のに needs the plain form (高いのに).",
-          "fr": "が relie deux propositions par « mais », juste après です ou ます. しかし commence une nouvelle phrase, et のに demande la forme simple (高いのに).",
-          "es": "が une dos oraciones con «pero», justo después de です o ます. しかし empieza una frase nueva, y のに necesita la forma llana (高いのに)."
+          "en": "が joins two clauses with « but », right after です or ます. しかし starts a new sentence, and のに (N4) is no plain « but »: it adds surprise or complaint.",
+          "fr": "が relie deux propositions par « mais », juste après です ou ます. しかし commence une nouvelle phrase, et のに (N4) n'est pas un simple « mais » : il ajoute la surprise ou le reproche.",
+          "es": "が une dos oraciones con «pero», justo después de です o ます. しかし empieza una frase nueva, y のに (N4) no es un simple «pero»: agrega sorpresa o queja."
         }
       },
       {
@@ -29372,9 +29372,9 @@
           "のに"
         ],
         "why": {
-          "en": "が also opens a polite request: しつれいですが…. しかし cannot stand inside the sentence, and のに does not follow です.",
-          "fr": "が ouvre aussi une demande polie : しつれいですが…. しかし ne peut pas se mettre dans la phrase, et のに ne suit pas です.",
-          "es": "が también abre una petición cortés: しつれいですが…. しかし no puede ir dentro de la frase, y のに no va tras です."
+          "en": "が also opens a polite request: しつれいですが…. しかし cannot stand inside the sentence, and のに cannot lead into a question.",
+          "fr": "が ouvre aussi une demande polie : しつれいですが…. しかし ne peut pas se mettre dans la phrase, et のに ne peut pas introduire une question.",
+          "es": "が también abre una petición cortés: しつれいですが…. しかし no puede ir dentro de la frase, y のに no puede introducir una pregunta."
         }
       },
       {
@@ -29390,9 +29390,9 @@
           "のに"
         ],
         "why": {
-          "en": "が joins two clauses that go against each other. しかし starts a new sentence, and のに would need ふっている (the plain form).",
-          "fr": "が relie deux propositions qui s'opposent. しかし commence une nouvelle phrase, et のに demanderait ふっている (la forme simple).",
-          "es": "が une dos oraciones que van una contra otra. しかし empieza una frase nueva, y のに necesitaría ふっている (la forma llana)."
+          "en": "が joins two clauses that go against each other. しかし starts a new sentence, and のに cannot lead into what you yourself mean to do.",
+          "fr": "が relie deux propositions qui s'opposent. しかし commence une nouvelle phrase, et のに ne peut pas introduire ce qu'on a soi-même l'intention de faire.",
+          "es": "が une dos oraciones que van una contra otra. しかし empieza una frase nueva, y のに no puede introducir lo que piensas hacer tú."
         }
       },
       {
@@ -29408,9 +29408,9 @@
           "のに"
         ],
         "why": {
-          "en": "が links the two sides of one thing with “but”. しかし begins a new sentence, and のに does not follow ます.",
-          "fr": "が relie les deux faces d'une même chose par « mais ». しかし commence une nouvelle phrase, et のに ne suit pas ます.",
-          "es": "が une con «pero» las dos caras de una misma cosa. しかし empieza una oración nueva, y のに no va tras ます."
+          "en": "が links the two sides of one thing with « but ». しかし begins a new sentence, and のに (N4) would add surprise or complaint: this is a plain « but ».",
+          "fr": "が relie les deux faces d'une même chose par « mais ». しかし commence une nouvelle phrase, et のに (N4) ajouterait la surprise ou le reproche : ici, c'est un simple « mais ».",
+          "es": "が une con «pero» las dos caras de una misma cosa. しかし empieza una oración nueva, y のに (N4) agregaría sorpresa o queja: aquí es un simple «pero»."
         }
       }
     ],
@@ -29619,8 +29619,8 @@
             }
           ],
           "why": {
-            "en": "が after ですが means « but »: the second half goes against what the first half leads you to expect. It does not say « so » or « because ».",
-            "fr": "が après ですが veut dire « mais » : la seconde moitié va contre ce que la première laisse attendre. Elle ne dit ni « donc » ni « parce que ».",
+            "en": "が after です means « but »: the second half goes against what the first half leads you to expect. It does not say « so » or « because ».",
+            "fr": "が après です veut dire « mais » : la seconde moitié va contre ce que la première laisse attendre. Elle ne dit ni « donc » ni « parce que ».",
             "es": "El が de ですが significa «pero»: la segunda mitad va en contra de lo que la primera hace esperar. No dice «así que» ni «porque»."
           }
         },
@@ -34842,9 +34842,9 @@
       },
       {
         "kind": "use",
-        "en": "- Ordering: りんごを三つください.\n- Existence: 学生が五人います.\n- Tickets, paper: きってを二枚ください. The counter goes after the particle: りんごを三つ, rarely 三つのりんごを.",
-        "fr": "- Commander : りんごを三つください.\n- Existence : 学生が五人います.\n- Billets, papier : きってを二枚ください. Le classificateur suit la particule : りんごを三つ, rarement 三つのりんごを.",
-        "es": "- Pedir: りんごを三つください.\n- Existencia: 学生が五人います.\n- Entradas, papel: きってを二枚ください. El contador va después de la partícula: りんごを三つ, rara vez 三つのりんごを."
+        "en": "- Ordering: りんごを三つください.\n- Existence: 学生が五人います.\n- Stamps, tickets, paper: きってを二枚ください. The counter goes after the particle: りんごを三つ, rarely 三つのりんごを.",
+        "fr": "- Commander : りんごを三つください.\n- Existence : 学生が五人います.\n- Timbres, billets, papier : きってを二枚ください. Le classificateur suit la particule : りんごを三つ, rarement 三つのりんごを.",
+        "es": "- Pedir: りんごを三つください.\n- Existencia: 学生が五人います.\n- Estampillas, boletos, papel: きってを二枚ください. El contador va después de la partícula: りんごを三つ, rara vez 三つのりんごを."
       },
       {
         "kind": "careful",
@@ -35348,10 +35348,10 @@
         "contrast": true
       },
       {
-        "jp": "東と西とどちらが駅ですか。",
-        "en": "Which way is the station, east or west?",
-        "fr": "La gare, c'est à l'est ou à l'ouest ?",
-        "es": "¿Hacia dónde está la estación, al este o al oeste?",
+        "jp": "東口と西口とどちらがちかいですか。",
+        "en": "Which is nearer, the east exit or the west exit?",
+        "fr": "Laquelle est la plus proche, la sortie est ou la sortie ouest ?",
+        "es": "¿Cuál está más cerca, la salida este o la salida oeste?",
         "register": "polite"
       }
     ],
@@ -37136,9 +37136,9 @@
           },
           "jp": "だから、きのう言ったでしょう！",
           "tr": {
-            "en": "I told you so yesterday!",
-            "fr": "Je te l'avais bien dit hier !",
-            "es": "¡Ya te lo dije ayer!"
+            "en": "That's what I told you yesterday!",
+            "fr": "C'est bien ce que je t'ai dit hier !",
+            "es": "¡Eso es lo que te dije ayer!"
           },
           "ask": {
             "en": "No reason has just been given. What does だから do?",
@@ -38087,9 +38087,9 @@
         {
           "kind": "use",
           "ask": {
-            "en": "Your friend asks: 今日は、どこで食べる？ You think of the new restaurant near the station. Suggest it.",
-            "fr": "Ton ami demande : 今日は、どこで食べる？ Tu penses au nouveau restaurant près de la gare. Propose-le.",
-            "es": "Tu amigo pregunta: 今日は、どこで食べる？ Piensas en el restaurante nuevo cerca de la estación. Propónlo."
+            "en": "A colleague asks: 今日は、どこで食べますか。 You think of the new restaurant near the station. Suggest it.",
+            "fr": "Un collègue te demande : 今日は、どこで食べますか。 Tu penses au nouveau restaurant près de la gare. Propose-le.",
+            "es": "Un colega te pregunta: 今日は、どこで食べますか。 Piensas en el restaurante nuevo cerca de la estación. Propónlo."
           },
           "choices": [
             "あの新しいレストランはどうですか。",
