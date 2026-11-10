@@ -2,7 +2,18 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- A pinch zooms no screen of the app, on any platform. The store
+         apps' WebViews have no pinch: Capacitor's zoomEnabled is off in
+         both shells (capacitor.config.json). The web's screens are this
+         document, so it fixes its scale too: without maximum-scale and
+         user-scalable an Android browser let a learner pinch the whole
+         app, the HUD and the tab bar off the screen. Larger text is still
+         there: the browser's text size and Chrome's "Force enable zoom"
+         (both in its accessibility settings), and the system's
+         magnifier. iOS Safari ignores user-scalable and pinches as it did.
+         The pages that are documents (the landing page, privacy.html)
+         keep their pinch. src/viewport.test.js holds both sides. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>辻 Tsuji — Apprendre le japonais</title>
     <!-- The landing page's own description (landing/strings.mjs). -->
     <meta name="description" content="L’application pour apprendre le japonais un peu chaque jour&nbsp;: kana, vocabulaire, kanji et grammaire revus au bon moment, dictées et examens blancs du JLPT." />
