@@ -143,10 +143,44 @@ const PULL_MS = 260
 // 机 (plan 155): the desk's pull is a short one -- a rung sideways and a
 // fade, not the paper's whole width -- and the arriving car's answers
 // follow it in a beat apart (the 机 section of index.css, "the pull on
-// the desk"). The leaving car is kept until all of that has landed.
-const DESK_PULL_MS = 820
+// the desk"). The leaving car is kept until all of that has landed, as
+// the animations themselves say it has (`landed`, below), never a timer
+// of the wall's: an animation starts on the next frame and runs on the
+// frames' clock, so a machine holding its frames back lost the car
+// before it had faded -- 820 ms on the wall, the fade not yet drawn --
+// and the answers still coming in were retimed as their car lost its
+// `--in`. The timer stands only as the longest it is kept, should a
+// frame never come: once faded the car is not seen, so it can be long.
+const DESK_PULL_MAX_MS = 5000
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
+
+// The desk's pull landed: the leaving car's own fade, and the arriving
+// car's entrance -- every animation in it that holds its first frame
+// through its delay, as each entrance in the boarding does (`backwards`).
+// Only what runs on the document's clock and ends: not the body's scrim,
+// which follows its scroll, nor a loop, nor what a car does once it
+// stands (the gate's idle nudge, four seconds on, holds no frame). An
+// animation cancelled on the way, its element gone, has nothing left to
+// land. Read again once what was read has landed: a car draws some parts
+// a render after it arrives (the level's stations, once its climb is
+// measured), and their entrance is its arrival too. `pulling` says the
+// pull is still the one waited on; without the Web Animations API the
+// longest decides.
+async function landed(frame, pulling) {
+  const out = frame?.querySelector('.brd__car--out')
+  if (typeof out?.getAnimations !== 'function') return new Promise(() => {})
+  const timed = a => a.timeline === document.timeline && a.effect.getComputedTiming().iterations !== Infinity
+  const entering = a => timed(a) && ['backwards', 'both'].includes(a.effect.getComputedTiming().fill)
+  while (pulling()) {
+    const into = frame.querySelector('.brd__car:not(.brd__car--out)')
+    const moving = [...out.getAnimations().filter(timed), ...(into?.getAnimations({ subtree: true }).filter(entering) ?? [])]
+      .filter(a => a.playState !== 'finished')
+    if (moving.length === 0) return undefined
+    await Promise.all(moving.map(a => a.finished.catch(() => {})))
+  }
+  return undefined
+}
 
 // The track's stops: the kana, a reader's level, the card -- the reveal
 // is the kana's stop's second half and the test the level's own, never
@@ -262,11 +296,15 @@ export default function BoardingFlow({
     return () => { live = false }
   }, [session])
 
-  // The pull: the leaving car is dropped once it has left.
+  // The pull: the leaving car is dropped once it has left -- on the
+  // phone after the pull's 260 ms, on the desk once the pull has landed.
   useEffect(() => {
-    if (!leaving) return
-    const id = setTimeout(() => setLeaving(null), desk ? DESK_PULL_MS : PULL_MS)
-    return () => clearTimeout(id)
+    if (!leaving) return undefined
+    let pulling = true
+    const drop = () => { if (pulling) setLeaving(null) }
+    const id = setTimeout(drop, desk ? DESK_PULL_MAX_MS : PULL_MS)
+    if (desk) landed(frameRef.current, () => pulling).then(drop)
+    return () => { pulling = false; clearTimeout(id) }
   }, [leaving, desk])
 
   // Focus lands on the new screen's question.
