@@ -216,9 +216,9 @@
         },
         {
           "notion": {
-            "en": "The past",
-            "fr": "Le passé",
-            "es": "El pasado"
+            "en": "Ending with でした",
+            "fr": "Finir par でした",
+            "es": "Terminar en でした"
           },
           "jp": "テストはかんたんでした。",
           "tr": {
@@ -261,9 +261,9 @@
         },
         {
           "notion": {
-            "en": "Plain だ",
-            "fr": "だ, la forme neutre",
-            "es": "だ, la forma llana"
+            "en": "Ending with だ",
+            "fr": "Finir par だ",
+            "es": "Terminar en だ"
           },
           "jp": "あしたはテストだ。",
           "tr": {
@@ -731,9 +731,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Contrast",
-            "fr": "Opposition",
-            "es": "Contraste"
+            "en": "Two は in one sentence",
+            "fr": "Deux は dans une phrase",
+            "es": "Dos は en una oración"
           },
           "jp": "コーヒーは飲みますが、おちゃは飲みません。",
           "tr": {
@@ -862,9 +862,9 @@
         },
         {
           "notion": {
-            "en": "は or が after a question word",
-            "fr": "は ou が après un interrogatif",
-            "es": "は o が tras un interrogativo"
+            "en": "は or が with だれ",
+            "fr": "は ou が avec だれ",
+            "es": "は o が con だれ"
           },
           "jp": "だれが来ますか。",
           "tr": {
@@ -950,7 +950,7 @@
             "es": "¿Y usted?"
           },
           "task": {
-            "en": "Tell her your name: « I'm Camille. »",
+            "en": "Tell the traveller your name: « I'm Camille. »",
             "fr": "Dis-lui ton nom : « Moi, c'est Camille. »",
             "es": "Dile tu nombre: «Soy Camille»."
           },
@@ -987,7 +987,7 @@
               "es": "Del libro: dice quién lo escribió."
             },
             {
-              "en": "A friend: it says what he did.",
+              "en": "A friend: it says what they did.",
               "fr": "Un ami : on dit ce qu'il a fait.",
               "es": "De un amigo: dice lo que hizo."
             },
@@ -1047,14 +1047,14 @@
               "es": "No todos los días: algunos días, sí."
             },
             {
-              "en": "Never.",
-              "fr": "Jamais.",
-              "es": "Nunca."
+              "en": "Never: not on a single day.",
+              "fr": "Jamais : pas un seul jour.",
+              "es": "Nunca: ni un solo día."
             },
             {
-              "en": "Every day.",
-              "fr": "Tous les jours.",
-              "es": "Todos los días."
+              "en": "Every day: without fail.",
+              "fr": "Tous les jours : sans exception.",
+              "es": "Todos los días: sin falta."
             }
           ],
           "why": {
@@ -1213,9 +1213,9 @@
       "twists": [
         {
           "notion": {
-            "en": "News, just noticed",
-            "fr": "Une nouvelle, juste remarquée",
-            "es": "Una novedad, recién vista"
+            "en": "が after バス",
+            "fr": "が après バス",
+            "es": "が tras バス"
           },
           "jp": "あ、バスが来ました。",
           "tr": {
@@ -1235,9 +1235,9 @@
               "es": "Es una novedad: el autobús acaba de llegar."
             },
             {
-              "en": "が is more polite.",
-              "fr": "が est plus poli.",
-              "es": "が es más cortés."
+              "en": "It is politer: が sounds more polite than は.",
+              "fr": "C'est plus poli : が sonne plus poli que は.",
+              "es": "Es más cortés: が suena más cortés que は."
             },
             {
               "en": "が means « too »: the bus came as well.",
@@ -1663,9 +1663,9 @@
         },
         {
           "notion": {
-            "en": "The place passed through",
-            "fr": "Le lieu qu'on traverse",
-            "es": "El lugar por donde se pasa"
+            "en": "を before あるく",
+            "fr": "を devant あるく",
+            "es": "を ante あるく"
           },
           "jp": "毎あさ、こうえんをあるきます。",
           "tr": {
@@ -1715,9 +1715,9 @@
             "es": "Entiendo un poco de japonés."
           },
           "ask": {
-            "en": "What is understood takes が, not を. Why?",
-            "fr": "Ce qu'on comprend prend が, pas を. Pourquoi ?",
-            "es": "Lo que se entiende lleva が, no を. ¿Por qué?"
+            "en": "日本語が, not 日本語を. Why?",
+            "fr": "日本語が, et pas 日本語を. Pourquoi ?",
+            "es": "日本語が, no 日本語を. ¿Por qué?"
           },
           "choices": [
             {
@@ -1983,9 +1983,9 @@
       "twists": [
         {
           "notion": {
-            "en": "A moment in time",
-            "fr": "Un moment",
-            "es": "Un momento en el tiempo"
+            "en": "に after 八時",
+            "fr": "に après 八時",
+            "es": "に tras 八時"
           },
           "jp": "八時にねます。",
           "tr": {
@@ -1994,9 +1994,9 @@
             "es": "Me acuesto a las ocho."
           },
           "ask": {
-            "en": "Here に is not a place. What does it mark?",
-            "fr": "Ici, に n'est pas un lieu. Que marque-t-il ?",
-            "es": "Aquí に no es un lugar. ¿Qué marca?"
+            "en": "What does に mark here?",
+            "fr": "Que marque に ici ?",
+            "es": "¿Qué marca に aquí?"
           },
           "choices": [
             {
@@ -2024,9 +2024,9 @@
         },
         {
           "notion": {
-            "en": "Time words with no に",
+            "en": "No に after あした",
             "fr": "Pas de に après あした",
-            "es": "Palabras de tiempo sin に"
+            "es": "Sin に tras あした"
           },
           "jp": "あした、学校に行きます。",
           "tr": {
@@ -2069,9 +2069,9 @@
         },
         {
           "notion": {
-            "en": "Where a thing is",
-            "fr": "Là où une chose se trouve",
-            "es": "Dónde está una cosa"
+            "en": "に against で",
+            "fr": "に face à で",
+            "es": "に frente a で"
           },
           "jp": "へやにねこがいます。",
           "tr": {
@@ -2114,9 +2114,9 @@
         },
         {
           "notion": {
-            "en": "The receiver",
-            "fr": "Le destinataire",
-            "es": "El destinatario"
+            "en": "に after 母",
+            "fr": "に après 母",
+            "es": "に tras 母"
           },
           "jp": "母に電話をかけました。",
           "tr": {
@@ -2313,8 +2313,8 @@
         {
           "kind": "use",
           "ask": {
-            "en": "A student asks where the teacher is. You saw her in the classroom. What do you say?",
-            "fr": "Un élève demande où est le professeur. Tu l'as vue dans la salle de classe. Que dis-tu ?",
+            "en": "A student asks where the teacher is. You saw the teacher in the classroom. What do you say?",
+            "fr": "Un élève demande où est le professeur, que tu as vu dans la salle de classe. Que dis-tu ?",
             "es": "Un alumno pregunta dónde está la profesora. La viste en el aula. ¿Qué dices?"
           },
           "choices": [
@@ -2323,8 +2323,8 @@
             "せんせいは、きょうしつにいませんでした。"
           ],
           "why": {
-            "en": "Being somewhere is not an action: where someone is takes に. で is for where an action happens, and いませんでした says she was not there.",
-            "fr": "Se trouver quelque part n'est pas une action : le lieu où est quelqu'un prend に. で sert pour le lieu d'une action, et いませんでした dit qu'elle n'y était pas.",
+            "en": "Being somewhere is not an action: where someone is takes に. で is for where an action happens, and いませんでした says the teacher was not there.",
+            "fr": "Se trouver quelque part n'est pas une action : le lieu où est quelqu'un prend に. で sert pour le lieu d'une action, et いませんでした dit que le professeur n'y était pas.",
             "es": "Estar en un lugar no es una acción: dónde está alguien lleva に. で es para donde ocurre una acción, y いませんでした dice que no estaba allí."
           }
         }
@@ -2412,9 +2412,9 @@
       "twists": [
         {
           "notion": {
-            "en": "The means",
-            "fr": "Le moyen",
-            "es": "El medio"
+            "en": "で after ペン",
+            "fr": "で après ペン",
+            "es": "で tras ペン"
           },
           "jp": "ペンで名前を書いてください。",
           "tr": {
@@ -2423,9 +2423,9 @@
             "es": "Escriba su nombre con bolígrafo, por favor."
           },
           "ask": {
-            "en": "Here で is not a place. What does it mark?",
-            "fr": "Ici, で n'est pas un lieu. Que marque-t-il ?",
-            "es": "Aquí で no es un lugar. ¿Qué marca?"
+            "en": "What does で mark here?",
+            "fr": "Que marque で ici ?",
+            "es": "¿Qué marca で aquí?"
           },
           "choices": [
             {
@@ -2494,9 +2494,9 @@
         },
         {
           "notion": {
-            "en": "A total",
-            "fr": "Un total",
-            "es": "En total"
+            "en": "で after ぜんぶ",
+            "fr": "で après ぜんぶ",
+            "es": "で tras ぜんぶ"
           },
           "jp": "ぜんぶで千円です。",
           "tr": {
@@ -2878,9 +2878,9 @@
       {
         "jp": "あの人は、たなかさん＿＿＿けっこんしました。",
         "tr": {
-          "en": "That person married Mr. Tanaka.",
-          "fr": "Cette personne a épousé M. Tanaka.",
-          "es": "Esa persona se casó con el señor Tanaka."
+          "en": "That person married Tanaka.",
+          "fr": "Cette personne a épousé Tanaka.",
+          "es": "Esa persona se casó con Tanaka."
         },
         "choices": [
           "と",
@@ -2898,9 +2898,9 @@
       "twists": [
         {
           "notion": {
-            "en": "With someone",
-            "fr": "Avec quelqu'un",
-            "es": "Con alguien"
+            "en": "と after one noun",
+            "fr": "と après un seul nom",
+            "es": "と tras un solo sustantivo"
           },
           "jp": "友だちとテニスをしました。",
           "tr": {
@@ -2939,9 +2939,9 @@
         },
         {
           "notion": {
-            "en": "What is said",
-            "fr": "Ce qu'on dit",
-            "es": "Lo que se dice"
+            "en": "と after 「…」",
+            "fr": "と après 「…」",
+            "es": "と tras 「…」"
           },
           "jp": "友だちは「すぐ行く」と言いました。",
           "tr": {
@@ -2950,9 +2950,9 @@
             "es": "Mi amigo dijo: «Voy enseguida»."
           },
           "ask": {
-            "en": "Here と follows quotation marks. What does it do?",
-            "fr": "Ici, と suit des guillemets. Que fait-il ?",
-            "es": "Aquí と va tras unas comillas. ¿Qué hace?"
+            "en": "What does と do here?",
+            "fr": "Que fait と ici ?",
+            "es": "¿Qué hace と aquí?"
           },
           "choices": [
             {
@@ -2980,9 +2980,9 @@
         },
         {
           "notion": {
-            "en": "Never between two actions",
-            "fr": "Jamais entre deux actions",
-            "es": "Nunca entre dos acciones"
+            "en": "と against て",
+            "fr": "と face à て",
+            "es": "と frente a て"
           },
           "jp": "あさごはんを食べて、学校へ行きました。",
           "tr": {
@@ -2991,9 +2991,9 @@
             "es": "Desayuné y fui a la escuela."
           },
           "ask": {
-            "en": "Two actions, joined by て and not by と. Why?",
-            "fr": "Deux actions, reliées par て et pas par と. Pourquoi ?",
-            "es": "Dos acciones, unidas por て y no por と. ¿Por qué?"
+            "en": "て here, not と. Why?",
+            "fr": "て ici, et pas と. Pourquoi ?",
+            "es": "Aquí て, no と. ¿Por qué?"
           },
           "choices": [
             {
@@ -3423,9 +3423,9 @@
         },
         {
           "notion": {
-            "en": "Not … either",
-            "fr": "Non plus",
-            "es": "Tampoco"
+            "en": "も with a negative",
+            "fr": "も avec une négation",
+            "es": "も con una negación"
           },
           "jp": "わたしもおさけを飲みません。",
           "tr": {
@@ -3640,19 +3640,19 @@
           },
           "choices": [
             {
-              "en": "Another place was cheap, and this one is cheap as well.",
-              "fr": "Un autre endroit était bon marché, et celui-ci l'est aussi.",
-              "es": "Otro lugar era barato, y este también lo es."
+              "en": "Like another shop, this one is cheap too.",
+              "fr": "Comme un autre magasin, celui-ci est bon marché aussi.",
+              "es": "Como otra tienda, esta también es barata."
             },
             {
-              "en": "It is the only cheap shop.",
-              "fr": "C'est le seul magasin bon marché.",
-              "es": "Es la única tienda barata."
+              "en": "It is the only cheap shop around.",
+              "fr": "C'est le seul magasin bon marché du coin.",
+              "es": "Es la única tienda barata de la zona."
             },
             {
-              "en": "It is very, very cheap.",
-              "fr": "Il est très, très bon marché.",
-              "es": "Es muy, muy barata."
+              "en": "It is very, very cheap indeed.",
+              "fr": "Il est vraiment très, très bon marché.",
+              "es": "Es muy, muy barata, de verdad."
             }
           ],
           "why": {
@@ -3814,9 +3814,9 @@
       {
         "jp": "この本は、たなかさん＿＿＿ですか。",
         "tr": {
-          "en": "Is this book Mr. Tanaka's?",
-          "fr": "Ce livre est-il à M. Tanaka ?",
-          "es": "¿Este libro es del señor Tanaka?"
+          "en": "Is this book Tanaka's?",
+          "fr": "Ce livre est-il à Tanaka ?",
+          "es": "¿Este libro es de Tanaka?"
         },
         "choices": [
           "の",
@@ -3824,9 +3824,9 @@
           "を"
         ],
         "why": {
-          "en": "の alone stands for a noun already known: たなかさんの is “Mr. Tanaka's”. は and を cannot end a phrase before です.",
-          "fr": "の seul remplace un nom déjà connu : たなかさんの veut dire « celui de M. Tanaka ». は et を ne peuvent pas terminer un groupe devant です.",
-          "es": "の por sí solo ocupa el lugar de un sustantivo ya conocido: たなかさんの es «del señor Tanaka». は y を no pueden cerrar un grupo antes de です."
+          "en": "の alone stands for a noun already known: たなかさんの is « Tanaka's ». は and を cannot end a phrase before です.",
+          "fr": "の seul remplace un nom déjà connu : たなかさんの veut dire « celui de Tanaka ». は et を ne peuvent pas terminer un groupe devant です.",
+          "es": "の por sí solo ocupa el lugar de un sustantivo ya conocido: たなかさんの es «de Tanaka». は y を no pueden cerrar un grupo antes de です."
         }
       },
       {
@@ -3852,9 +3852,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Where from, what kind",
-            "fr": "D'où, de quelle sorte",
-            "es": "De dónde, de qué tipo"
+            "en": "の after フランス",
+            "fr": "の après フランス",
+            "es": "の tras フランス"
           },
           "jp": "フランスのワインを買いました。",
           "tr": {
@@ -3893,9 +3893,9 @@
         },
         {
           "notion": {
-            "en": "A place word",
-            "fr": "Un mot de lieu",
-            "es": "Una palabra de lugar"
+            "en": "の with 前",
+            "fr": "の avec 前",
+            "es": "の con 前"
           },
           "jp": "駅の前でまっています。",
           "tr": {
@@ -3975,9 +3975,9 @@
         },
         {
           "notion": {
-            "en": "No の after an adjective",
-            "fr": "Pas de の après un adjectif",
-            "es": "Sin の tras un adjetivo"
+            "en": "Between 新しい and くつ",
+            "fr": "Entre 新しい et くつ",
+            "es": "Entre 新しい y くつ"
           },
           "jp": "新しいくつを買いました。",
           "tr": {
@@ -4468,9 +4468,9 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "You read this on a bus. How far does it go?",
-            "fr": "Tu lis ça sur un bus. Jusqu'où va-t-il ?",
-            "es": "Lees esto en un autobús. ¿Hasta dónde va?"
+            "en": "You read this on a bus. What does it say about the route?",
+            "fr": "Tu lis ça sur un bus. Qu'est-ce que ça dit du trajet ?",
+            "es": "Lees esto en un autobús. ¿Qué dice del recorrido?"
           },
           "jp": "このバスは、駅までです。",
           "tr": {
@@ -4709,9 +4709,9 @@
         },
         {
           "notion": {
-            "en": "The future too",
-            "fr": "Le futur aussi",
-            "es": "También el futuro"
+            "en": "ます with 来週",
+            "fr": "ます avec 来週",
+            "es": "ます con 来週"
           },
           "jp": "来週、きょうとへ行きます。",
           "tr": {
@@ -4750,9 +4750,9 @@
         },
         {
           "notion": {
-            "en": "A habit, not right now",
-            "fr": "Une habitude, pas en ce moment",
-            "es": "Un hábito, no ahora mismo"
+            "en": "ます with 毎ばん",
+            "fr": "ます avec 毎ばん",
+            "es": "ます con 毎ばん"
           },
           "jp": "毎ばん、ラジオを聞きます。",
           "tr": {
@@ -5095,9 +5095,9 @@
       "twists": [
         {
           "notion": {
-            "en": "The past negative",
-            "fr": "Le passé négatif",
-            "es": "El pasado negativo"
+            "en": "The form ませんでした",
+            "fr": "La forme ませんでした",
+            "es": "La forma ませんでした"
           },
           "jp": "きのうはテレビを見ませんでした。",
           "tr": {
@@ -5140,9 +5140,9 @@
         },
         {
           "notion": {
-            "en": "Not for adjectives",
-            "fr": "Pas pour les adjectifs",
-            "es": "No para los adjetivos"
+            "en": "ました with さむい",
+            "fr": "ました avec さむい",
+            "es": "ました con さむい"
           },
           "jp": "きのうはとてもさむかったです。",
           "tr": {
@@ -5151,9 +5151,9 @@
             "es": "Ayer hizo mucho frío."
           },
           "ask": {
-            "en": "A past, but no ました. Why?",
-            "fr": "Un passé, mais pas de ました. Pourquoi ?",
-            "es": "Un pasado, pero sin ました. ¿Por qué?"
+            "en": "さむかったです, with no ました. Why?",
+            "fr": "さむかったです, sans ました. Pourquoi ?",
+            "es": "さむかったです, sin ました. ¿Por qué?"
           },
           "choices": [
             {
@@ -5552,9 +5552,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Verbs in う: 買う → 買わない",
-            "fr": "Les verbes en う : 買う → 買わない",
-            "es": "Verbos en う: 買う → 買わない"
+            "en": "The わ in 買わない",
+            "fr": "Le わ dans 買わない",
+            "es": "La わ dentro de 買わない"
           },
           "jp": "パンは、あの店では買わない。",
           "tr": {
@@ -5597,9 +5597,9 @@
         },
         {
           "notion": {
-            "en": "Irregulars: する and 来る",
-            "fr": "Les irréguliers : する et 来る",
-            "es": "Irregulares: する y 来る"
+            "en": "The verb in こない",
+            "fr": "Le verbe de こない",
+            "es": "El verbo de こない"
           },
           "jp": "あしたは、友だちがここにこない。",
           "tr": {
@@ -5642,9 +5642,9 @@
         },
         {
           "notion": {
-            "en": "ある becomes ない",
-            "fr": "ある devient ない",
-            "es": "ある pasa a ser ない"
+            "en": "ない after 本が",
+            "fr": "ない après 本が",
+            "es": "ない tras 本が"
           },
           "jp": "つくえの上に本がない。",
           "tr": {
@@ -5687,9 +5687,9 @@
         },
         {
           "notion": {
-            "en": "The past: なかった",
-            "fr": "Le passé : なかった",
-            "es": "El pasado: なかった"
+            "en": "The form なかった",
+            "fr": "La forme なかった",
+            "es": "La forma なかった"
           },
           "jp": "きのうは、ばんごはんを食べなかった。",
           "tr": {
@@ -5777,9 +5777,9 @@
         },
         {
           "notion": {
-            "en": "Casual at the end",
-            "fr": "Familier en fin de phrase",
-            "es": "Coloquial al final"
+            "en": "ない at the end of a sentence",
+            "fr": "ない en fin de phrase",
+            "es": "ない al final de la oración"
           },
           "jp": "あしたは、パーティーに行かない。",
           "tr": {
@@ -5788,9 +5788,9 @@
             "es": "Mañana no voy a la fiesta."
           },
           "ask": {
-            "en": "You say this to your teacher. What is wrong?",
-            "fr": "Tu dis cela à ton professeur. Qu'est-ce qui ne va pas ?",
-            "es": "Le dices esto a tu profesor. ¿Qué falla?"
+            "en": "You say this to your teacher. Is anything wrong?",
+            "fr": "Tu dis cela à ton professeur. Y a-t-il un problème ?",
+            "es": "Le dices esto a tu profesor. ¿Hay algún problema?"
           },
           "choices": [
             {
@@ -6229,9 +6229,9 @@
       "twists": [
         {
           "notion": {
-            "en": "行く makes 行った",
-            "fr": "行く donne 行った",
-            "es": "El pasado de 行く: 行った"
+            "en": "The verb in 行った",
+            "fr": "Le verbe de 行った",
+            "es": "El verbo de 行った"
           },
           "jp": "母は先週、きょうとに行った。",
           "tr": {
@@ -6315,9 +6315,9 @@
         },
         {
           "notion": {
-            "en": "Casual or written",
-            "fr": "Familier ou écrit",
-            "es": "Coloquial o escrito"
+            "en": "た at the end of a sentence",
+            "fr": "た en fin de phrase",
+            "es": "た al final de la oración"
           },
           "jp": "その日、わたしははじめてうみを見た。",
           "tr": {
@@ -6451,7 +6451,7 @@
             "es": "¿Ya compraste el boleto?"
           },
           "task": {
-            "en": "Tell her yes, you bought it.",
+            "en": "Tell your friend yes, you bought it.",
             "fr": "Dis-lui que oui, tu l'as acheté.",
             "es": "Dile que sí, que lo compraste."
           },
@@ -6715,9 +6715,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Either が or を",
-            "fr": "が ou を, au choix",
-            "es": "が o を, a elegir"
+            "en": "が before 食べたい",
+            "fr": "が devant 食べたい",
+            "es": "が ante 食べたい"
           },
           "jp": "ラーメンが食べたいです。",
           "tr": {
@@ -6805,9 +6805,9 @@
         },
         {
           "notion": {
-            "en": "Someone else's wish",
-            "fr": "Le souhait d'un autre",
-            "es": "El deseo de otro"
+            "en": "たがる in place of たい",
+            "fr": "たがる au lieu de たい",
+            "es": "たがる en lugar de たい"
           },
           "jp": "おとうとはゲームをしたがっています。",
           "tr": {
@@ -6822,14 +6822,14 @@
           },
           "choices": [
             {
-              "en": "たい speaks for oneself; another's wish is seen from outside: たがる.",
-              "fr": "たい parle pour soi ; le souhait d'un autre se voit du dehors : たがる.",
-              "es": "たい habla por quien lo siente; el deseo de otro se ve desde afuera: たがる."
+              "en": "たい is for one's own wish; for another's, たがる.",
+              "fr": "たい dit son propre souhait ; celui d'un autre, たがる.",
+              "es": "たい expresa el deseo propio; el de otro, たがる."
             },
             {
-              "en": "たがる is the past of たい.",
-              "fr": "たがる est le passé de たい.",
-              "es": "たがる es el pasado de たい."
+              "en": "たがる is the past of たい: he wanted to play.",
+              "fr": "たがる est le passé de たい : il voulait jouer.",
+              "es": "たがる es el pasado de たい: quería jugar."
             },
             {
               "en": "たがる is more polite than たい.",
@@ -7187,9 +7187,9 @@
       "twists": [
         {
           "notion": {
-            "en": "An invitation",
-            "fr": "Une invitation",
-            "es": "Una invitación"
+            "en": "どうぞ before てください",
+            "fr": "どうぞ devant てください",
+            "es": "どうぞ ante てください"
           },
           "jp": "どうぞ、すわってください。",
           "tr": {
@@ -7228,9 +7228,9 @@
         },
         {
           "notion": {
-            "en": "A thing or an action",
-            "fr": "Une chose ou une action",
-            "es": "Una cosa o una acción"
+            "en": "Against をください",
+            "fr": "Face à をください",
+            "es": "Frente a をください"
           },
           "jp": "その水をください。",
           "tr": {
@@ -7273,9 +7273,9 @@
         },
         {
           "notion": {
-            "en": "Asking not to",
-            "fr": "Demander de ne pas faire",
-            "es": "Pedir que no"
+            "en": "Against ないでください",
+            "fr": "Face à ないでください",
+            "es": "Frente a ないでください"
           },
           "jp": "ここに入らないでください。",
           "tr": {
@@ -7361,7 +7361,7 @@
             "es": "Son trece mil seiscientos yenes."
           },
           "task": {
-            "en": "You didn't catch it. Ask him to say it slowly.",
+            "en": "You didn't catch it. Ask the clerk to say it slowly.",
             "fr": "Tu n'as pas compris. Demande-lui de le dire lentement.",
             "es": "No lo has entendido. Pídele que lo diga despacio."
           },
@@ -7371,7 +7371,7 @@
             "すみません、ゆっくり言ってもいいですか。"
           ],
           "why": {
-            "en": "You ask him to do something: the て-form with ください.",
+            "en": "You ask the clerk to do something: the て-form with ください.",
             "fr": "Tu lui demandes de faire quelque chose : la forme en て avec ください.",
             "es": "Le pides que haga algo: la forma て con ください."
           }
@@ -7614,9 +7614,9 @@
       "twists": [
         {
           "notion": {
-            "en": "A state after a change",
-            "fr": "L'état après un changement",
-            "es": "Un estado tras un cambio"
+            "en": "ています after けっこん",
+            "fr": "ています après けっこん",
+            "es": "ています tras けっこん"
           },
           "jp": "あにはけっこんしています。",
           "tr": {
@@ -7655,9 +7655,9 @@
         },
         {
           "notion": {
-            "en": "A job or a habit",
-            "fr": "Un métier ou une habitude",
-            "es": "Un trabajo o un hábito"
+            "en": "ています after はたらく",
+            "fr": "ています après はたらく",
+            "es": "ています tras はたらく"
           },
           "jp": "あねはびょういんではたらいています。",
           "tr": {
@@ -7784,7 +7784,7 @@
             "es": "¿Está lloviendo ahí?"
           },
           "task": {
-            "en": "Tell her yes, it is raining.",
+            "en": "Tell your colleague yes, it is raining.",
             "fr": "Dis-lui que oui, il pleut.",
             "es": "Dile que sí, que está lloviendo."
           },
@@ -8024,9 +8024,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Permission, not an offer",
-            "fr": "Permission, pas une offre",
-            "es": "Permiso, no una oferta"
+            "en": "てもいい as a question",
+            "fr": "てもいい dans une question",
+            "es": "てもいい como pregunta"
           },
           "jp": "ここで電話してもいいですか。",
           "tr": {
@@ -8069,9 +8069,9 @@
         },
         {
           "notion": {
-            "en": "The polite no",
-            "fr": "Le refus poli",
-            "es": "El no cortés"
+            "en": "ちょっと… in reply",
+            "fr": "ちょっと… en réponse",
+            "es": "ちょっと… como respuesta"
           },
           "jp": "すみません、それはちょっと…。",
           "tr": {
@@ -8091,9 +8091,9 @@
               "es": "No, con cortesía: ちょっと… queda en el aire en vez de decir no."
             },
             {
-              "en": "Yes, but only for a moment.",
-              "fr": "Oui, mais juste un instant.",
-              "es": "Sí, pero solo un momento."
+              "en": "Yes, but only for a moment: one quick photo.",
+              "fr": "Oui, mais juste un instant : une photo vite faite.",
+              "es": "Sí, pero solo un momento: una foto rápida."
             },
             {
               "en": "Wait a moment, please.",
@@ -8198,7 +8198,7 @@
             "es": "Hace calor, ¿verdad?"
           },
           "task": {
-            "en": "Ask her whether you may open the window.",
+            "en": "Ask the passenger whether you may open the window.",
             "fr": "Demande-lui si tu peux ouvrir la fenêtre.",
             "es": "Pregúntale si puedes abrir la ventana."
           },
@@ -8438,9 +8438,9 @@
       "twists": [
         {
           "notion": {
-            "en": "The no to « may I? »",
-            "fr": "Le non à « je peux ? »",
-            "es": "El no a «¿puedo?»"
+            "en": "てはいけません in reply",
+            "fr": "てはいけません en réponse",
+            "es": "てはいけません como respuesta"
           },
           "jp": "いいえ、ここでたばこをすってはいけません。",
           "tr": {
@@ -8483,9 +8483,9 @@
         },
         {
           "notion": {
-            "en": "Rule or request",
-            "fr": "Règle ou demande",
-            "es": "Regla o petición"
+            "en": "Against ないでください",
+            "fr": "Face à ないでください",
+            "es": "Frente a ないでください"
           },
           "jp": "ここで電話をしないでください。",
           "tr": {
@@ -8571,7 +8571,7 @@
             "es": "¿Qué es eso de allí?"
           },
           "task": {
-            "en": "It's a sign. Tell her it says you must not smoke here.",
+            "en": "It's a sign. Tell the traveller it says you must not smoke here.",
             "fr": "C'est un panneau. Dis-lui qu'il est interdit de fumer ici.",
             "es": "Es un cartel. Dile que dice que aquí está prohibido fumar."
           },
@@ -8812,9 +8812,9 @@
       "twists": [
         {
           "notion": {
-            "en": "What is allowed",
-            "fr": "Ce qui est permis",
-            "es": "Lo que está permitido"
+            "en": "With このカードで",
+            "fr": "Avec このカードで",
+            "es": "Con このカードで"
           },
           "jp": "このカードで、電車にのることができます。",
           "tr": {
@@ -8853,9 +8853,9 @@
         },
         {
           "notion": {
-            "en": "The dictionary form before こと",
-            "fr": "La forme du dictionnaire devant こと",
-            "es": "La forma de diccionario ante こと"
+            "en": "ひく before こと",
+            "fr": "ひく devant こと",
+            "es": "ひく ante こと"
           },
           "jp": "わたしはピアノをひくことができます。",
           "tr": {
@@ -8898,9 +8898,9 @@
         },
         {
           "notion": {
-            "en": "The short form 話せる",
-            "fr": "La forme courte 話せる",
-            "es": "La forma corta 話せる"
+            "en": "The form 話せる",
+            "fr": "La forme 話せる",
+            "es": "La forma 話せる"
           },
           "jp": "日本語がすこし話せます。",
           "tr": {
@@ -8909,9 +8909,9 @@
             "es": "Sé hablar un poco de japonés."
           },
           "ask": {
-            "en": "No ことができます here, but the same idea. What does it say?",
-            "fr": "Pas de ことができます ici, mais la même idée. Que dit la phrase ?",
-            "es": "Aquí no hay ことができます, pero la idea es la misma. ¿Qué dice?"
+            "en": "No ことができます here. What does 話せます say?",
+            "fr": "Pas de ことができます ici. Que dit 話せます ?",
+            "es": "Aquí no hay ことができます. ¿Qué dice 話せます?"
           },
           "choices": [
             {
@@ -8986,7 +8986,7 @@
             "es": "¿Algo más?"
           },
           "task": {
-            "en": "Ask him whether you can top up your travel card here.",
+            "en": "Ask the vendor whether you can top up your travel card here.",
             "fr": "Demande-lui si tu peux recharger ta carte de transport ici.",
             "es": "Pregúntale si puedes recargar aquí tu tarjeta de transporte."
           },
@@ -9226,9 +9226,9 @@
       "twists": [
         {
           "notion": {
-            "en": "To reassure",
-            "fr": "Pour rassurer",
-            "es": "Para tranquilizar"
+            "en": "With 気にしないで",
+            "fr": "Avec 気にしないで",
+            "es": "Con 気にしないで"
           },
           "jp": "どうぞ、気にしないでください。",
           "tr": {
@@ -9267,9 +9267,9 @@
         },
         {
           "notion": {
-            "en": "Built on the ない-form",
-            "fr": "Bâti sur la forme en ない",
-            "es": "Construido sobre la forma ない"
+            "en": "Inside 言わないでください",
+            "fr": "Dans 言わないでください",
+            "es": "Dentro de 言わないでください"
           },
           "jp": "このことは、だれにも言わないでください。",
           "tr": {
@@ -9312,9 +9312,9 @@
         },
         {
           "notion": {
-            "en": "Not to, or no need",
-            "fr": "Ne pas, ou pas besoin",
-            "es": "No lo hagas, o no hace falta"
+            "en": "Against なくてもいい",
+            "fr": "Face à なくてもいい",
+            "es": "Frente a なくてもいい"
           },
           "jp": "今日はきっぷを見せなくてもいいです。",
           "tr": {
@@ -9400,7 +9400,7 @@
             "es": "¿Abro la ventana?"
           },
           "task": {
-            "en": "It's cold. Ask her, kindly, not to open it.",
+            "en": "It's cold. Ask the passenger, kindly, not to open it.",
             "fr": "Il fait froid. Demande-lui gentiment de ne pas l'ouvrir.",
             "es": "Hace frío. Pídele, con amabilidad, que no la abra."
           },
@@ -9647,9 +9647,9 @@
       "twists": [
         {
           "notion": {
-            "en": "The plain form",
-            "fr": "La forme neutre",
-            "es": "La forma llana"
+            "en": "Ending with ならない",
+            "fr": "Finir par ならない",
+            "es": "Terminar en ならない"
           },
           "jp": "あしたは六時におきなければならない。",
           "tr": {
@@ -9669,9 +9669,9 @@
               "es": "Solo la cortesía: llano, para uno mismo o por escrito."
             },
             {
-              "en": "It turns it into « must not ».",
-              "fr": "Ça devient « ne pas devoir ».",
-              "es": "Pasa a significar «no se debe»."
+              "en": "The sense: it becomes « must not ».",
+              "fr": "Le sens : ça devient « ne pas devoir ».",
+              "es": "El sentido: pasa a significar «no se debe»."
             },
             {
               "en": "It turns it into « need not ».",
@@ -9692,9 +9692,9 @@
         },
         {
           "notion": {
-            "en": "Must, or had better",
-            "fr": "Devoir, ou mieux vaut",
-            "es": "Tener que, o más vale"
+            "en": "Against ほうがいい",
+            "fr": "Face à ほうがいい",
+            "es": "Frente a ほうがいい"
           },
           "jp": "はやくねたほうがいいですよ。",
           "tr": {
@@ -9737,9 +9737,9 @@
         },
         {
           "notion": {
-            "en": "Must, or need not",
-            "fr": "Devoir, ou pas besoin",
-            "es": "Tener que, o no hace falta"
+            "en": "Against なくてもいい",
+            "fr": "Face à なくてもいい",
+            "es": "Frente a なくてもいい"
           },
           "jp": "日よう日は、はたらかなくてもいいです。",
           "tr": {
@@ -9825,7 +9825,7 @@
             "es": "También necesita el boleto de expreso."
           },
           "task": {
-            "en": "Ask him whether you must buy it now.",
+            "en": "Ask the clerk whether you must buy it now.",
             "fr": "Demande-lui si tu dois l'acheter maintenant.",
             "es": "Pregúntale si tienes que comprarlo ahora."
           },
@@ -10127,9 +10127,9 @@
       {
         "jp": "たなかさん＿＿＿のメールを書いています。",
         "tr": {
-          "en": "I am writing an e-mail to Mr. Tanaka.",
-          "fr": "J'écris un e-mail à M. Tanaka.",
-          "es": "Estoy escribiendo un correo al señor Tanaka."
+          "en": "I am writing an e-mail to Tanaka.",
+          "fr": "J'écris un e-mail à Tanaka.",
+          "es": "Estoy escribiendo un correo a Tanaka."
         },
         "choices": [
           "へ",
@@ -10137,9 +10137,9 @@
           "を"
         ],
         "why": {
-          "en": "Of the two destination particles, only へ can stand before の: たなかさんへの (“to Mr. Tanaka”). に cannot, and を marks an object.",
-          "fr": "Des deux particules de destination, seul へ peut se placer devant の : たなかさんへの (« à M. Tanaka »). に ne le peut pas, et を marque un complément.",
-          "es": "De las dos partículas de destino, solo へ puede ir ante の: たなかさんへの («al señor Tanaka»). に no puede, y を marca el objeto directo."
+          "en": "Of the two destination particles, only へ can stand before の: たなかさんへの (« to Tanaka »). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : たなかさんへの (« à Tanaka »). に ne le peut pas, et を marque un complément.",
+          "es": "De las dos partículas de destino, solo へ puede ir ante の: たなかさんへの («a Tanaka»). に no puede, y を marca el objeto directo."
         }
       }
     ],
@@ -10229,9 +10229,9 @@
         },
         {
           "notion": {
-            "en": "No movement, no へ",
-            "fr": "Sans mouvement, pas de へ",
-            "es": "Sin movimiento, no hay へ"
+            "en": "に in place of へ",
+            "fr": "に au lieu de へ",
+            "es": "に en lugar de へ"
           },
           "jp": "駅に店があります。",
           "tr": {
@@ -10251,9 +10251,9 @@
               "es": "Nada se mueve: に dice dónde está la tienda."
             },
             {
-              "en": "に means « toward ».",
-              "fr": "に veut dire « vers ».",
-              "es": "に significa «hacia»."
+              "en": "に means « toward »: the way to the shop.",
+              "fr": "に veut dire « vers » : le chemin du magasin.",
+              "es": "に significa «hacia»: el camino a la tienda."
             },
             {
               "en": "へ would be more polite.",
@@ -10616,9 +10616,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Nouns only",
-            "fr": "Des noms seulement",
-            "es": "Solo sustantivos"
+            "en": "や against たり",
+            "fr": "や face à たり",
+            "es": "や frente a たり"
           },
           "jp": "休みの日は、そうじをしたり、本を読んだりします。",
           "tr": {
@@ -10627,20 +10627,20 @@
             "es": "Los días libres limpio, leo libros y cosas así."
           },
           "ask": {
-            "en": "Two actions given as examples: why たり and not や?",
-            "fr": "Deux actions données en exemple : pourquoi たり et pas や ?",
-            "es": "Dos acciones dadas como ejemplo: ¿por qué たり y no や?"
+            "en": "たり here, not や. Why?",
+            "fr": "たり ici, et pas や. Pourquoi ?",
+            "es": "Aquí たり, no や. ¿Por qué?"
           },
           "choices": [
             {
-              "en": "や joins nouns only; actions given as examples take 〜たり〜たり.",
-              "fr": "や ne relie que des noms ; des actions données en exemple prennent 〜たり〜たり.",
-              "es": "や solo une sustantivos; las acciones de ejemplo llevan 〜たり〜たり."
+              "en": "や joins nouns only; actions take 〜たり〜たり.",
+              "fr": "や ne relie que des noms ; les actions prennent 〜たり〜たり.",
+              "es": "や solo une sustantivos; las acciones llevan 〜たり〜たり."
             },
             {
-              "en": "や would mean « or » here.",
-              "fr": "や voudrait dire « ou » ici.",
-              "es": "Aquí や significaría «o»."
+              "en": "や would mean « or »: cleaning or reading.",
+              "fr": "や voudrait dire « ou » : le ménage ou la lecture.",
+              "es": "や significaría «o»: limpiar o leer."
             },
             {
               "en": "たり is simply more polite than や.",
@@ -10749,7 +10749,7 @@
             "es": "¿Qué está buscando?"
           },
           "task": {
-            "en": "Tell her you're looking for water, tissues, that sort of thing.",
+            "en": "Tell the vendor you're looking for water, tissues, that sort of thing.",
             "fr": "Dis-lui que tu cherches de l'eau, des mouchoirs, ce genre de choses.",
             "es": "Dile que buscas agua, pañuelos, ese tipo de cosas."
           },
@@ -10975,9 +10975,9 @@
       "twists": [
         {
           "notion": {
-            "en": "« Or » between two nouns",
-            "fr": "« Ou » entre deux noms",
-            "es": "«O» entre dos sustantivos"
+            "en": "か between two nouns",
+            "fr": "か entre deux noms",
+            "es": "か entre dos sustantivos"
           },
           "jp": "ペンかえんぴつで書いてください。",
           "tr": {
@@ -11108,7 +11108,7 @@
             "es": "El té está por aquí."
           },
           "task": {
-            "en": "Ask him whether the tea is cold.",
+            "en": "Ask the vendor whether the tea is cold.",
             "fr": "Demande-lui si le thé est froid.",
             "es": "Pregúntale si el té está frío."
           },
@@ -11418,9 +11418,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Checking a detail",
-            "fr": "Vérifier un détail",
-            "es": "Comprobar un detalle"
+            "en": "ね before hanging up",
+            "fr": "ね avant de raccrocher",
+            "es": "ね antes de colgar"
           },
           "jp": "では、三時に駅の前ですね。",
           "tr": {
@@ -11540,8 +11540,8 @@
             "es": "El tren viene con retraso, ¿verdad?"
           },
           "task": {
-            "en": "You can both see the train is late. Agree with her.",
-            "fr": "Vous voyez tous les deux que le train est en retard. Acquiesce.",
+            "en": "You can both see the train is late. Agree with the traveller.",
+            "fr": "Le retard du train se voit bien. Acquiesce.",
             "es": "Tú también ves que el tren se retrasa. Dale la razón."
           },
           "choices": [
@@ -11551,8 +11551,8 @@
           ],
           "why": {
             "en": "You both see it: ね looks for agreement.",
-            "fr": "Vous le voyez tous les deux : ね cherche l'accord.",
-            "es": "Lo ve ella y lo ves tú: ね busca el acuerdo."
+            "fr": "Le retard se voit bien : ね cherche l'accord.",
+            "es": "Lo ven tú y la otra persona: ね busca el acuerdo."
           }
         }
       },
@@ -11620,7 +11620,7 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "Your teacher says this to you. What does she expect?",
+            "en": "Your teacher says this to you. What does the teacher expect?",
             "fr": "Ton enseignante te dit cela. Qu'attend-elle de toi ?",
             "es": "Tu profesora te dice esto. ¿Qué espera?"
           },
@@ -11632,25 +11632,25 @@
           },
           "choices": [
             {
-              "en": "A yes: she thinks the homework is done and wants you to confirm it.",
-              "fr": "Un oui : elle pense que les devoirs sont faits et veut que tu le confirmes.",
+              "en": "A yes: the teacher thinks the homework is done and wants you to confirm it.",
+              "fr": "Un oui : ton enseignante pense que les devoirs sont faits et veut que tu le confirmes.",
               "es": "Un sí: cree que la tarea está hecha y quiere que lo confirmes."
             },
             {
-              "en": "An answer she does not have: she wants to find out whether it is done.",
-              "fr": "Une réponse qu'elle n'a pas : elle veut savoir si c'est fait.",
+              "en": "An answer not yet known: the teacher wants to find out whether it is done.",
+              "fr": "Une réponse encore inconnue : ton enseignante veut savoir si c'est fait.",
               "es": "Una respuesta que no tiene: quiere saber si está hecha."
             },
             {
-              "en": "A nod: she is sharing a feeling about the homework and wants you to agree.",
-              "fr": "Un signe de tête : elle partage une impression sur les devoirs et veut que tu sois d'accord.",
+              "en": "A nod: the teacher is sharing a feeling about the homework and wants you to agree.",
+              "fr": "Un signe de tête : ton enseignante partage une impression sur les devoirs et veut que tu sois d'accord.",
               "es": "Un gesto de acuerdo: comparte una impresión sobre la tarea y quiere que estés de acuerdo."
             }
           ],
           "why": {
-            "en": "ね with ？ checks what she already believes, so she expects a yes. か would be a real question, with no expectation behind it.",
-            "fr": "ね avec ？ vérifie ce qu'elle croit déjà : elle attend un oui. か serait une vraie question, sans attente derrière.",
-            "es": "ね con ？ comprueba lo que ella ya cree, así que espera un sí. か sería una pregunta de verdad, sin ninguna expectativa detrás."
+            "en": "ね with ？ checks what the teacher already believes, so a yes is expected. か would be a real question, with no expectation behind it.",
+            "fr": "ね avec ？ vérifie ce que ton enseignante croit déjà : un oui est attendu. か serait une vraie question, sans attente derrière.",
+            "es": "ね con ？ comprueba lo que tu profesora ya cree, así que espera un sí. か sería una pregunta de verdad, sin ninguna expectativa detrás."
           }
         },
         {
@@ -11862,9 +11862,9 @@
       "twists": [
         {
           "notion": {
-            "en": "A recommendation",
-            "fr": "Une recommandation",
-            "es": "Una recomendación"
+            "en": "よ after おもしろいです",
+            "fr": "よ après おもしろいです",
+            "es": "よ tras おもしろいです"
           },
           "jp": "このえいが、おもしろいですよ。",
           "tr": {
@@ -11903,9 +11903,9 @@
         },
         {
           "notion": {
-            "en": "A gentle correction",
-            "fr": "Une correction en douceur",
-            "es": "Una corrección suave"
+            "en": "よ after あちらです",
+            "fr": "よ après あちらです",
+            "es": "よ tras あちらです"
           },
           "jp": "あ、でぐちはあちらですよ。",
           "tr": {
@@ -11914,9 +11914,9 @@
             "es": "Ah, la salida está por allí, ¿sabe?"
           },
           "ask": {
-            "en": "Someone is heading the wrong way. What does よ do?",
-            "fr": "Quelqu'un part dans le mauvais sens. Que fait よ ?",
-            "es": "Alguien va en la dirección equivocada. ¿Qué hace よ?"
+            "en": "Said to a passer-by. What does よ do?",
+            "fr": "Dit à un passant. Que fait よ ?",
+            "es": "Dicho a alguien que pasa. ¿Qué hace よ?"
           },
           "choices": [
             {
@@ -12025,8 +12025,8 @@
             "es": "¿A qué hora sale el tren a Tokio?"
           },
           "task": {
-            "en": "He doesn't know: tell him it leaves at nine.",
-            "fr": "Il ne le sait pas : apprends-lui qu'il part à neuf heures.",
+            "en": "The traveller doesn't know: tell them it leaves at nine.",
+            "fr": "Le voyageur ne le sait pas : apprends-lui que le train part à neuf heures.",
             "es": "No lo sabe: dile que sale a las nueve."
           },
           "choices": [
@@ -12035,8 +12035,8 @@
             "九時に出ますか。"
           ],
           "why": {
-            "en": "He doesn't know it: you are telling him, よ.",
-            "fr": "Il ne le sait pas : tu le lui apprends, よ.",
+            "en": "The traveller doesn't know it: you are telling them, よ.",
+            "fr": "Le voyageur ne le sait pas : tu le lui apprends, よ.",
             "es": "No lo sabe: se lo estás diciendo, よ."
           }
         }
@@ -12105,7 +12105,7 @@
         {
           "kind": "use",
           "ask": {
-            "en": "Your teacher has forgotten that the test is tomorrow. You are sure of it, and you tell her.",
+            "en": "Your teacher has forgotten that the test is tomorrow. You are sure of it, and you tell your teacher.",
             "fr": "Ton enseignante a oublié que le test est demain. Toi, tu le sais, et tu le lui dis.",
             "es": "Tu profesora ha olvidado que el examen es mañana. Lo sabes con certeza, y se lo dices."
           },
@@ -12115,9 +12115,9 @@
             "先生、あしたはテストですか。"
           ],
           "why": {
-            "en": "What she has forgotten is news to her: よ, and to a teacher the polite ですよ. だよ is the plain style of friends, and ですか would ask her a question instead of telling her.",
-            "fr": "Ce qu'elle a oublié est une nouveauté pour elle : よ, et avec une enseignante, le ですよ poli. だよ est le style neutre des amis, et ですか lui poserait une question au lieu de l'informer.",
-            "es": "Lo que ha olvidado es nuevo para ella: よ, y a una profesora, el ですよ cortés. だよ es el estilo llano entre amigos, y ですか le haría una pregunta en vez de decírselo."
+            "en": "What your teacher has forgotten is news: よ, and to a teacher the polite ですよ. だよ is the plain style of friends, and ですか would ask a question instead of telling.",
+            "fr": "Ce que ton enseignante a oublié est une nouveauté : よ, et avec une enseignante, le ですよ poli. だよ est le style neutre des amis, et ですか lui poserait une question au lieu de l'informer.",
+            "es": "Lo que ha olvidado tu profesora es nuevo: よ, y a una profesora, el ですよ cortés. だよ es el estilo llano entre amigos, y ですか le haría una pregunta en vez de decírselo."
           }
         },
         {
@@ -12265,9 +12265,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Answering « why? »",
-            "fr": "Répondre à « pourquoi ? »",
-            "es": "Responder a «¿por qué?»"
+            "en": "からです at the end",
+            "fr": "からです en fin de phrase",
+            "es": "からです al final"
           },
           "jp": "あたまがいたかったからです。",
           "tr": {
@@ -12439,7 +12439,7 @@
             "es": "¿Tomamos un café allí?"
           },
           "task": {
-            "en": "Turn her down: you have no time, so no.",
+            "en": "Turn your colleague down: you have no time, so no.",
             "fr": "Refuse : tu n'as pas le temps, donc non.",
             "es": "Dile que no: no tienes tiempo, así que no."
           },
@@ -12578,9 +12578,9 @@
               "es": "Porque está bueno: el precio va en contra."
             },
             {
-              "en": "Because it is expensive.",
-              "fr": "Parce que c'est cher.",
-              "es": "Porque es caro."
+              "en": "Because it is expensive: the price is the reason.",
+              "fr": "Parce que c'est cher : le prix en est la raison.",
+              "es": "Porque es caro: el precio es la razón."
             },
             {
               "en": "Because it is both expensive and tasty.",
@@ -12679,9 +12679,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Saying no politely",
-            "fr": "Refuser poliment",
-            "es": "Decir que no con cortesía"
+            "en": "Answering with ちょっと…",
+            "fr": "Répondre par ちょっと…",
+            "es": "Responder con ちょっと…"
           },
           "jp": "すみません、日よう日はちょっと…。",
           "tr": {
@@ -12797,9 +12797,9 @@
             "es": "¿Qué hacemos?"
           },
           "task": {
-            "en": "Invite her to see a film.",
-            "fr": "Invite-la à voir un film.",
-            "es": "Invítala a ver una película."
+            "en": "Invite your friend to see a film.",
+            "fr": "Invite ton amie à voir un film.",
+            "es": "Invita a tu amiga a ver una película."
           },
           "choices": [
             "えいがを見ませんか。",
@@ -12807,9 +12807,9 @@
             "えいがを見ましたか。"
           ],
           "why": {
-            "en": "You invite her and leave her the choice: ませんか.",
+            "en": "You invite your friend and leave them the choice: ませんか.",
             "fr": "Tu l'invites en lui laissant le choix : ませんか.",
-            "es": "La invitas y le dejas elegir: ませんか."
+            "es": "Invitas a tu amiga y le dejas elegir: ませんか."
           }
         }
       },
@@ -13043,9 +13043,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Saying yes",
-            "fr": "Accepter",
-            "es": "Decir que sí"
+            "en": "Answering with ましょう",
+            "fr": "Répondre par ましょう",
+            "es": "Responder con ましょう"
           },
           "jp": "ええ、ぜひ行きましょう。",
           "tr": {
@@ -13084,9 +13084,9 @@
         },
         {
           "notion": {
-            "en": "Guiding a group",
-            "fr": "Guider un groupe",
-            "es": "Guiar a un grupo"
+            "en": "ましょう to a class",
+            "fr": "ましょう à une classe",
+            "es": "ましょう a una clase"
           },
           "jp": "では、二十ページを読みましょう。",
           "tr": {
@@ -13476,9 +13476,9 @@
           },
           "choices": [
             {
-              "en": "What time shall we meet tomorrow? The other's view is asked.",
-              "fr": "À quelle heure se voit-on demain ? On demande l'avis de l'autre.",
-              "es": "¿A qué hora nos vemos mañana? Se pide la opinión del otro."
+              "en": "What time shall we meet tomorrow, in your view?",
+              "fr": "À quelle heure se voit-on demain, à ton avis ?",
+              "es": "¿A qué hora nos vemos mañana, según tú?"
             },
             {
               "en": "What time are we meeting tomorrow, as already agreed?",
@@ -13500,9 +13500,9 @@
         },
         {
           "notion": {
-            "en": "Let's, or shall we?",
-            "fr": "« Allons-y » ou « on y va ? »",
-            "es": "«Vamos» o «¿vamos?»"
+            "en": "Against ましょう",
+            "fr": "Face à ましょう",
+            "es": "Frente a ましょう"
           },
           "jp": "さあ、いっしょに行きましょう。",
           "tr": {
@@ -13545,9 +13545,9 @@
         },
         {
           "notion": {
-            "en": "Offering, or inviting (ませんか)",
-            "fr": "Proposer, ou inviter (ませんか)",
-            "es": "Ofrecer, o invitar (ませんか)"
+            "en": "Against ませんか",
+            "fr": "Face à ませんか",
+            "es": "Frente a ませんか"
           },
           "jp": "いっしょにおちゃを飲みませんか。",
           "tr": {
@@ -13879,9 +13879,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Alive or not",
-            "fr": "Vivant ou non",
-            "es": "Vivo o no"
+            "en": "あります with 魚",
+            "fr": "あります avec 魚",
+            "es": "あります con 魚"
           },
           "jp": "さらの上に魚があります。",
           "tr": {
@@ -13924,9 +13924,9 @@
         },
         {
           "notion": {
-            "en": "Where a known thing is",
-            "fr": "Où est une chose connue",
-            "es": "Dónde está algo conocido"
+            "en": "は with あります",
+            "fr": "は avec あります",
+            "es": "は con あります"
           },
           "jp": "わたしのかさは、ドアの前にあります。",
           "tr": {
@@ -13969,9 +13969,9 @@
         },
         {
           "notion": {
-            "en": "Having: possession",
-            "fr": "Avoir : la possession",
-            "es": "Tener: la posesión"
+            "en": "います with no place",
+            "fr": "います sans lieu",
+            "es": "います sin lugar"
           },
           "jp": "先生は、子どもが三人います。",
           "tr": {
@@ -14010,9 +14010,9 @@
         },
         {
           "notion": {
-            "en": "An event takes place",
-            "fr": "Un événement a lieu",
-            "es": "Un evento tiene lugar"
+            "en": "で with あります",
+            "fr": "で avec あります",
+            "es": "で con あります"
           },
           "jp": "土よう日に、学校でまつりがあります。",
           "tr": {
@@ -14457,9 +14457,9 @@
         },
         {
           "notion": {
-            "en": "The past",
-            "fr": "Le passé",
-            "es": "El pasado"
+            "en": "Between かった and でした",
+            "fr": "Entre かった et でした",
+            "es": "Entre かった y でした"
           },
           "jp": "きのうは、とてもさむかったです。",
           "tr": {
@@ -14502,9 +14502,9 @@
         },
         {
           "notion": {
-            "en": "きれい: a な-adjective ending in い",
-            "fr": "きれい : un adjectif en な finissant par い",
-            "es": "きれい: un adjetivo en な que acaba en い"
+            "en": "きれい before 花",
+            "fr": "きれい devant 花",
+            "es": "きれい ante 花"
           },
           "jp": "友だちに、きれいな花をもらいました。",
           "tr": {
@@ -14547,9 +14547,9 @@
         },
         {
           "notion": {
-            "en": "いい, built on よい",
-            "fr": "いい, construit sur よい",
-            "es": "いい, formado sobre よい"
+            "en": "The past of いい",
+            "fr": "Le passé de いい",
+            "es": "El pasado de いい"
           },
           "jp": "きのうのテストは、よかったです。",
           "tr": {
@@ -14869,9 +14869,9 @@
       "twists": [
         {
           "notion": {
-            "en": "な-adjective: で",
-            "fr": "Adjectif en な : で",
-            "es": "Adj. な: で"
+            "en": "で against くて",
+            "fr": "で face à くて",
+            "es": "で frente a くて"
           },
           "jp": "このへやはしずかで、きれいです。",
           "tr": {
@@ -14891,9 +14891,9 @@
               "es": "しずか es un adjetivo en な: se une con で."
             },
             {
-              "en": "で means « but ».",
-              "fr": "で veut dire « mais ».",
-              "es": "で significa «pero»."
+              "en": "で means « but »: quiet, but clean.",
+              "fr": "で veut dire « mais » : calme, mais propre.",
+              "es": "で significa «pero»: tranquila, pero limpia."
             },
             {
               "en": "で says where the room is.",
@@ -14959,9 +14959,9 @@
         },
         {
           "notion": {
-            "en": "A light reason",
-            "fr": "Une raison légère",
-            "es": "Una razón ligera"
+            "en": "くて between two halves",
+            "fr": "くて entre deux moitiés",
+            "es": "くて entre dos mitades"
           },
           "jp": "このかばんは高くて、買いませんでした。",
           "tr": {
@@ -15000,9 +15000,9 @@
         },
         {
           "notion": {
-            "en": "The tense comes at the end",
-            "fr": "Le temps vient à la fin",
-            "es": "El tiempo va al final"
+            "en": "The tense of 安くて",
+            "fr": "Le temps de 安くて",
+            "es": "El tiempo de 安くて"
           },
           "jp": "きのうの店は、安くておいしかったです。",
           "tr": {
@@ -15084,7 +15084,7 @@
             "es": "¿Qué tal este té?"
           },
           "task": {
-            "en": "Tell him it's cold and delicious.",
+            "en": "Tell the vendor it's cold and delicious.",
             "fr": "Dis-lui qu'il est frais et délicieux.",
             "es": "Dile que está frío y delicioso."
           },
@@ -15329,9 +15329,9 @@
       "twists": [
         {
           "notion": {
-            "en": "な-adjective: に, not く",
-            "fr": "Adjectif en な : に, pas く",
-            "es": "Adj. な: に, no く"
+            "en": "しずか before になる",
+            "fr": "しずか devant になる",
+            "es": "しずか ante になる"
           },
           "jp": "このまちは、とてもしずかになりました。",
           "tr": {
@@ -15374,9 +15374,9 @@
         },
         {
           "notion": {
-            "en": "The hour, an age",
-            "fr": "L'heure, l'âge",
-            "es": "La hora, la edad"
+            "en": "なる after a number",
+            "fr": "なる après un nombre",
+            "es": "なる tras un número"
           },
           "jp": "あっ、もう十時になりました。",
           "tr": {
@@ -15385,9 +15385,9 @@
             "es": "¡Ay, ya son las diez!"
           },
           "ask": {
-            "en": "になりました after a time on the clock. What does it say?",
-            "fr": "になりました après une heure. Que dit la phrase ?",
-            "es": "になりました tras una hora del reloj. ¿Qué dice?"
+            "en": "になりました after 十時. What does it say?",
+            "fr": "になりました après 十時. Que dit la phrase ?",
+            "es": "になりました tras 十時. ¿Qué dice?"
           },
           "choices": [
             {
@@ -15415,9 +15415,9 @@
         },
         {
           "notion": {
-            "en": "いい becomes よくなる",
-            "fr": "いい devient よくなる",
-            "es": "いい pasa a よくなる"
+            "en": "The form よくなる",
+            "fr": "La forme よくなる",
+            "es": "La forma よくなる"
           },
           "jp": "午後から、天気がよくなりました。",
           "tr": {
@@ -15456,9 +15456,9 @@
         },
         {
           "notion": {
-            "en": "Becoming, or choosing (にします)",
-            "fr": "Devenir, ou choisir (にします)",
-            "es": "Volverse, o elegir (にします)"
+            "en": "Against にします",
+            "fr": "Face à にします",
+            "es": "Frente a にします"
           },
           "jp": "わたしはコーヒーにします。",
           "tr": {
@@ -15544,7 +15544,7 @@
             "es": "¿Qué tal después del té caliente?"
           },
           "task": {
-            "en": "Tell her you've warmed up.",
+            "en": "Tell the traveller you've warmed up.",
             "fr": "Dis-lui que tu n'as plus froid.",
             "es": "Dile que ya has entrado en calor."
           },
@@ -15624,7 +15624,7 @@
         {
           "kind": "use",
           "ask": {
-            "en": "You ask a classmate what job he wants to have when he grows up. What do you say?",
+            "en": "You ask a classmate what job they want to have when they grow up. What do you say?",
             "fr": "Tu demandes à un camarade quel métier il veut faire plus tard. Que dis-tu ?",
             "es": "Le preguntas a un compañero de clase qué trabajo quiere tener de mayor. ¿Qué dices?"
           },
@@ -15634,8 +15634,8 @@
             "しょうらいは、何にしたいですか。"
           ],
           "why": {
-            "en": "Becoming a job is なる: 何になりたいですか. 何になりましたか asks what he has already become, and 何にしたいですか is the question of choosing, as from a menu, not of becoming.",
-            "fr": "Devenir quelque chose, c'est なる : 何になりたいですか. 何になりましたか demande ce qu'il est déjà devenu, et 何にしたいですか sert à choisir, comme sur un menu, pas à devenir.",
+            "en": "Becoming a job is なる: 何になりたいですか. 何になりましたか asks what they have already become, and 何にしたいですか is the question of choosing, as from a menu, not of becoming.",
+            "fr": "Devenir quelque chose, c'est なる : 何になりたいですか. 何になりましたか demande ce que ton camarade est déjà devenu, et 何にしたいですか sert à choisir, comme sur un menu, pas à devenir.",
             "es": "Llegar a ser algo es なる: 何になりたいですか. 何になりましたか pregunta qué ha llegado a ser ya, y 何にしたいですか es la pregunta de elegir, como en un menú, no de llegar a ser."
           }
         },
@@ -15869,9 +15869,9 @@
         },
         {
           "notion": {
-            "en": "Answering: のほうが alone",
-            "fr": "Répondre : のほうが seul",
-            "es": "Responder: のほうが a secas"
+            "en": "のほうが without より",
+            "fr": "のほうが sans より",
+            "es": "のほうが sin より"
           },
           "jp": "わたしは、なつのほうがすきです。",
           "tr": {
@@ -15910,9 +15910,9 @@
         },
         {
           "notion": {
-            "en": "The question: どちら",
-            "fr": "La question : どちら",
-            "es": "La pregunta: どちら"
+            "en": "どちら with と〜と",
+            "fr": "どちら avec と〜と",
+            "es": "どちら con と〜と"
           },
           "jp": "電車とバスとどちらがはやいですか。",
           "tr": {
@@ -15921,9 +15921,9 @@
             "es": "¿Qué es más rápido, el tren o el autobús?"
           },
           "ask": {
-            "en": "This one asks. What is it asking?",
-            "fr": "Celle-ci pose une question. Laquelle ?",
-            "es": "Esta frase pregunta. ¿Qué pregunta?"
+            "en": "What does this sentence say?",
+            "fr": "Que dit cette phrase ?",
+            "es": "¿Qué dice esta oración?"
           },
           "choices": [
             {
@@ -15998,7 +15998,7 @@
             "es": "¿Ventanilla o pasillo? ¿Qué prefiere?"
           },
           "task": {
-            "en": "Tell him you prefer the window to the aisle.",
+            "en": "Tell the clerk you prefer the window to the aisle.",
             "fr": "Dis-lui que tu préfères la fenêtre au couloir.",
             "es": "Dile que prefieres la ventanilla al pasillo."
           },
@@ -16237,9 +16237,9 @@
       "twists": [
         {
           "notion": {
-            "en": "The group left unsaid",
-            "fr": "Le groupe sous-entendu",
-            "es": "El grupo que no se dice"
+            "en": "いちばん alone",
+            "fr": "いちばん seul",
+            "es": "いちばん solo"
           },
           "jp": "このかばんがいちばん安いですよ。",
           "tr": {
@@ -16278,9 +16278,9 @@
         },
         {
           "notion": {
-            "en": "Three or more: not どちら",
-            "fr": "Trois ou plus : pas どちら",
-            "es": "Tres o más: no どちら"
+            "en": "何 against どちら",
+            "fr": "何 face à どちら",
+            "es": "何 frente a どちら"
           },
           "jp": "日本の食べもので、何がいちばんすきですか。",
           "tr": {
@@ -16289,20 +16289,20 @@
             "es": "De todas las comidas japonesas, ¿cuál le gusta más?"
           },
           "ask": {
-            "en": "Among many foods, the question word is 何. Why not どちら?",
-            "fr": "Parmi beaucoup de plats, le mot interrogatif est 何. Pourquoi pas どちら ?",
-            "es": "Entre muchas comidas, el interrogativo es 何. ¿Por qué no どちら?"
+            "en": "The question word is 何. Why not どちら?",
+            "fr": "Le mot interrogatif est 何. Pourquoi pas どちら ?",
+            "es": "El interrogativo es 何. ¿Por qué no どちら?"
           },
           "choices": [
             {
-              "en": "どちら picks between two; among three or more, it is 何, どれ or だれ.",
-              "fr": "どちら choisit entre deux ; parmi trois ou plus, c'est 何, どれ ou だれ.",
-              "es": "どちら elige entre dos; entre tres o más, es 何, どれ o だれ."
+              "en": "どちら is for two; among three or more, it is 何.",
+              "fr": "どちら est pour deux ; parmi trois ou plus, c'est 何.",
+              "es": "どちら es para dos; entre tres o más, es 何."
             },
             {
-              "en": "どちら is only used for people.",
-              "fr": "どちら ne s'emploie que pour les personnes.",
-              "es": "どちら solo se usa para personas."
+              "en": "どちら is for people only; for food, it is 何.",
+              "fr": "どちら est réservé aux personnes ; pour un plat, c'est 何.",
+              "es": "どちら es solo para personas; para comidas, es 何."
             },
             {
               "en": "何 is more polite than どちら.",
@@ -16323,9 +16323,9 @@
         },
         {
           "notion": {
-            "en": "The group: で or の中で",
-            "fr": "Le groupe : で ou の中で",
-            "es": "El grupo: で o の中で"
+            "en": "の中で in place of で",
+            "fr": "の中で au lieu de で",
+            "es": "の中で en lugar de で"
           },
           "jp": "この三つの中で、どれがいちばん安いですか。",
           "tr": {
@@ -16407,7 +16407,7 @@
             "es": "También tenemos bebidas."
           },
           "task": {
-            "en": "Ask her which drink is the cheapest in the shop.",
+            "en": "Ask the vendor which drink is the cheapest in the shop.",
             "fr": "Demande-lui quelle boisson est la moins chère du magasin.",
             "es": "Pregúntale qué bebida es la más barata de la tienda."
           },
@@ -16647,9 +16647,9 @@
       "twists": [
         {
           "notion": {
-            "en": "The た-form, for what is to come",
-            "fr": "La forme en た, pour ce qui vient",
-            "es": "La forma た, para lo que viene"
+            "en": "た before ほうがいい",
+            "fr": "た devant ほうがいい",
+            "es": "た ante ほうがいい"
           },
           "jp": "かさを、もって行ったほうがいいですよ。",
           "tr": {
@@ -16658,9 +16658,9 @@
             "es": "Será mejor que se lleve un paraguas."
           },
           "ask": {
-            "en": "もって行った is a past form, yet the advice is for now. Why?",
-            "fr": "もって行った est au passé, et pourtant le conseil vaut pour maintenant. Pourquoi ?",
-            "es": "もって行った es una forma pasada, pero el consejo es para ahora. ¿Por qué?"
+            "en": "Why もって行った before ほうがいい?",
+            "fr": "Pourquoi もって行った devant ほうがいい ?",
+            "es": "¿Por qué もって行った ante ほうがいい?"
           },
           "choices": [
             {
@@ -16692,9 +16692,9 @@
         },
         {
           "notion": {
-            "en": "Advice or duty",
-            "fr": "Conseil ou obligation",
-            "es": "Consejo u obligación"
+            "en": "Against なければならない",
+            "fr": "Face à なければならない",
+            "es": "Frente a なければならない"
           },
           "jp": "このくすりを飲まなければなりません。",
           "tr": {
@@ -16780,8 +16780,8 @@
             "es": "Esta tarde va a llover."
           },
           "task": {
-            "en": "Tell her she'd better take an umbrella.",
-            "fr": "Dis-lui qu'elle ferait mieux de prendre un parapluie.",
+            "en": "Tell your colleague they'd better take an umbrella.",
+            "fr": "Dis-lui qu'il vaudrait mieux prendre un parapluie.",
             "es": "Dile que más vale que se lleve un paraguas."
           },
           "choices": [
@@ -17020,9 +17020,9 @@
       "twists": [
         {
           "notion": {
-            "en": "The « no » to « must I? »",
-            "fr": "Le « non » à « dois-je ? »",
-            "es": "El «no» a «¿tengo que…?»"
+            "en": "なくてもいい in reply",
+            "fr": "なくてもいい en réponse",
+            "es": "なくてもいい como respuesta"
           },
           "jp": "いいえ、ここに名前は書かなくてもいいです。",
           "tr": {
@@ -17061,9 +17061,9 @@
         },
         {
           "notion": {
-            "en": "Need not, or must not",
-            "fr": "Pas besoin, ou interdit",
-            "es": "No hace falta, o no se puede"
+            "en": "Against てはいけません",
+            "fr": "Face à てはいけません",
+            "es": "Frente a てはいけません"
           },
           "jp": "ここでしゃしんをとってはいけません。",
           "tr": {
@@ -17106,9 +17106,9 @@
         },
         {
           "notion": {
-            "en": "Need not, or please don't",
-            "fr": "Pas besoin, ou merci de ne pas",
-            "es": "No hace falta, o por favor no"
+            "en": "Against ないでください",
+            "fr": "Face à ないでください",
+            "es": "Frente a ないでください"
           },
           "jp": "くつをぬがないでください。",
           "tr": {
@@ -17194,7 +17194,7 @@
             "es": "¿Su hijo viene con usted?"
           },
           "task": {
-            "en": "Ask him whether your child doesn't have to buy a ticket.",
+            "en": "Ask the staff whether your child doesn't have to buy a ticket.",
             "fr": "Demande-lui si ton enfant peut se passer de billet.",
             "es": "Pregúntale si tu hijo no tiene que comprar boleto."
           },
@@ -17434,9 +17434,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Since: a length of time",
-            "fr": "Depuis : une durée",
-            "es": "Desde: un período de tiempo"
+            "en": "てから before 一年",
+            "fr": "てから devant 一年",
+            "es": "てから ante 一年"
           },
           "jp": "日本語をはじめてから、一年になります。",
           "tr": {
@@ -17475,9 +17475,9 @@
         },
         {
           "notion": {
-            "en": "« After », not « because »",
-            "fr": "« Après », pas « parce que »",
-            "es": "«Después», no «porque»"
+            "en": "Against ますから",
+            "fr": "Face à ますから",
+            "es": "Frente a ますから"
           },
           "jp": "時間がありますから、本を読みます。",
           "tr": {
@@ -17520,9 +17520,9 @@
         },
         {
           "notion": {
-            "en": "Before or after: まえに",
-            "fr": "Avant ou après : まえに",
-            "es": "Antes o después: まえに"
+            "en": "Against まえに",
+            "fr": "Face à まえに",
+            "es": "Frente a まえに"
           },
           "jp": "電車にのるまえに、水を買います。",
           "tr": {
@@ -17608,7 +17608,7 @@
             "es": "¿Subes al tren enseguida?"
           },
           "task": {
-            "en": "Tell her you'll get on after calling your mother.",
+            "en": "Tell your friend you'll get on after calling your mother.",
             "fr": "Dis-lui que tu monteras après avoir appelé ta mère.",
             "es": "Dile que subirás después de llamar a tu madre."
           },
@@ -17652,9 +17652,9 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "From when does the speaker come home early?",
-            "fr": "À partir de quand la personne qui parle rentre-t-elle tôt ?",
-            "es": "¿Desde cuándo vuelve temprano a casa quien habla?"
+            "en": "When does the speaker come home early?",
+            "fr": "Quand la personne qui parle rentre-t-elle tôt ?",
+            "es": "¿Cuándo vuelve temprano a casa quien habla?"
           },
           "jp": "ねこがうちに来てから、毎日はやくかえります。",
           "tr": {
@@ -17848,9 +17848,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Dictionary form, even in the past",
-            "fr": "Forme du dictionnaire, même au passé",
-            "es": "Forma de diccionario, aun en pasado"
+            "en": "来る before まえに",
+            "fr": "来る devant まえに",
+            "es": "来る ante まえに"
           },
           "jp": "日本へ来るまえに、ひらがなをおぼえました。",
           "tr": {
@@ -17859,9 +17859,9 @@
             "es": "Antes de venir a Japón, aprendí los hiragana."
           },
           "ask": {
-            "en": "来る is not in the past, yet the sentence is. Why?",
-            "fr": "来る n'est pas au passé, et pourtant la phrase l'est. Pourquoi ?",
-            "es": "来る no está en pasado, pero la oración sí. ¿Por qué?"
+            "en": "Why 来る, and not 来た, before まえに?",
+            "fr": "Pourquoi 来る, et pas 来た, devant まえに ?",
+            "es": "¿Por qué 来る, y no 来た, ante まえに?"
           },
           "choices": [
             {
@@ -17893,9 +17893,9 @@
         },
         {
           "notion": {
-            "en": "After a length of time: ago",
-            "fr": "Après une durée : « il y a »",
-            "es": "Tras un período de tiempo: hace"
+            "en": "まえに after 三年",
+            "fr": "まえに après 三年",
+            "es": "まえに tras 三年"
           },
           "jp": "あには、三年まえに日本に来ました。",
           "tr": {
@@ -17970,7 +17970,7 @@
             "es": "Ah, ¿también compras un bento?"
           },
           "task": {
-            "en": "Tell her yes, you'll buy one before getting on.",
+            "en": "Tell your colleague yes, you'll buy one before getting on.",
             "fr": "Dis-lui que oui, tu en achètes un avant de monter.",
             "es": "Dile que sí, que comprarás uno antes de subir."
           },
@@ -18210,9 +18210,9 @@
       "twists": [
         {
           "notion": {
-            "en": "On its own: later",
-            "fr": "Seul : plus tard",
-            "es": "Por sí solo: más tarde"
+            "en": "あとで on its own",
+            "fr": "あとで seul",
+            "es": "あとで por sí solo"
           },
           "jp": "じゃ、あとで電話します。",
           "tr": {
@@ -18251,9 +18251,9 @@
         },
         {
           "notion": {
-            "en": "The た-form, even for tomorrow",
-            "fr": "La forme en た, même pour demain",
-            "es": "La forma た, aun para mañana"
+            "en": "した before あとで",
+            "fr": "した devant あとで",
+            "es": "した ante あとで"
           },
           "jp": "あした、しごとをしたあとで、えいがを見ます。",
           "tr": {
@@ -18578,9 +18578,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Noun の, な-adjective な",
-            "fr": "Nom + の, adjectif en な + な",
-            "es": "Sustantivo + の, adjetivo en な + な"
+            "en": "の before とき",
+            "fr": "の devant とき",
+            "es": "の ante とき"
           },
           "jp": "びょうきのとき、学校を休みました。",
           "tr": {
@@ -18600,9 +18600,9 @@
               "es": "びょうき es un sustantivo: un sustantivo se une a とき con の."
             },
             {
-              "en": "の says whose illness it was.",
-              "fr": "の dit de qui était la maladie.",
-              "es": "の dice de quién era la enfermedad."
+              "en": "の marks an owner: whose illness it was.",
+              "fr": "の marque un possesseur : de qui était la maladie.",
+              "es": "の marca un dueño: de quién era la enfermedad."
             },
             {
               "en": "の puts the sentence in the past.",
@@ -18623,9 +18623,9 @@
         },
         {
           "notion": {
-            "en": "The tense before とき",
-            "fr": "Le temps devant とき",
-            "es": "El tiempo verbal ante とき"
+            "en": "The tense in 行くとき",
+            "fr": "Le temps dans 行くとき",
+            "es": "El tiempo en 行くとき"
           },
           "jp": "きょうとへ行くとき、かさを買いました。",
           "tr": {
@@ -18957,9 +18957,9 @@
             "es": "A mi hermano mayor le gusta el fútbol."
           },
           "ask": {
-            "en": "What is liked takes が, not を. Why?",
-            "fr": "Ce qu'on aime prend が, pas を. Pourquoi ?",
-            "es": "Lo que gusta lleva が, no を. ¿Por qué?"
+            "en": "サッカーが, not サッカーを. Why?",
+            "fr": "サッカーが, et pas サッカーを. Pourquoi ?",
+            "es": "サッカーが, no サッカーを. ¿Por qué?"
           },
           "choices": [
             {
@@ -19032,9 +19032,9 @@
         },
         {
           "notion": {
-            "en": "The gentle no",
-            "fr": "Le « non » en douceur",
-            "es": "El «no» suave"
+            "en": "あまり with 好き",
+            "fr": "あまり avec 好き",
+            "es": "あまり con 好き"
           },
           "jp": "にくは、あまり好きではありません。",
           "tr": {
@@ -19073,9 +19073,9 @@
         },
         {
           "notion": {
-            "en": "大好き: love",
-            "fr": "大好き : adorer",
-            "es": "大好き: encantar"
+            "en": "The 大 before 好き",
+            "fr": "Le 大 devant 好き",
+            "es": "El 大 delante de 好き"
           },
           "jp": "わたしは、ねこが大好きです。",
           "tr": {
@@ -19114,9 +19114,9 @@
         },
         {
           "notion": {
-            "en": "A thing or an action: のが",
-            "fr": "Une chose ou une action : のが",
-            "es": "Una cosa o una acción: のが"
+            "en": "のが with 好き",
+            "fr": "のが avec 好き",
+            "es": "のが con 好き"
           },
           "jp": "日本のうたを聞くのが好きです。",
           "tr": {
@@ -19125,9 +19125,9 @@
             "es": "Me gusta escuchar canciones japonesas."
           },
           "ask": {
-            "en": "Here のが comes after a verb. Why?",
-            "fr": "Ici, のが vient après un verbe. Pourquoi ?",
-            "es": "Aquí のが va tras un verbo. ¿Por qué?"
+            "en": "Why のが after 聞く?",
+            "fr": "Pourquoi のが après 聞く ?",
+            "es": "¿Por qué のが tras 聞く?"
           },
           "choices": [
             {
@@ -19281,8 +19281,8 @@
             "どんなりょうりがほしいですか。"
           ],
           "why": {
-            "en": "好きですか asks about a lasting taste, which is what you want to know. 好きでしたか asks what he liked in the past, and ほしいですか asks what he wants right now, not what he likes.",
-            "fr": "好きですか interroge sur un goût durable, ce que tu veux savoir. 好きでしたか interroge sur le passé, et ほしいですか sur ce qu'il veut en ce moment, pas sur ce qu'il aime.",
+            "en": "好きですか asks about a lasting taste, which is what you want to know. 好きでしたか asks what they liked in the past, and ほしいですか asks what they want right now, not what they like.",
+            "fr": "好きですか interroge sur un goût durable, ce que tu veux savoir. 好きでしたか interroge sur le passé, et ほしいですか sur l'envie du moment, pas sur les goûts.",
             "es": "好きですか pregunta por un gusto duradero, que es lo que quieres saber. 好きでしたか pregunta qué le gustaba antes, y ほしいですか qué quiere ahora, no qué le gusta."
           }
         },
@@ -19431,9 +19431,9 @@
       "twists": [
         {
           "notion": {
-            "en": "きらいな: a な-adjective",
-            "fr": "きらいな : un adjectif en な",
-            "es": "きらいな: un adjetivo en な"
+            "en": "きらい before 食べもの",
+            "fr": "きらい devant 食べもの",
+            "es": "きらい ante 食べもの"
           },
           "jp": "きらいな食べものはありますか。",
           "tr": {
@@ -19476,9 +19476,9 @@
         },
         {
           "notion": {
-            "en": "A strong word",
-            "fr": "Un mot fort",
-            "es": "Una palabra fuerte"
+            "en": "きらい at the table",
+            "fr": "きらい à table",
+            "es": "きらい en la mesa"
           },
           "jp": "わたしは、にくがきらいです。",
           "tr": {
@@ -19498,9 +19498,9 @@
               "es": "Brusco: きらい es muy fuerte."
             },
             {
-              "en": "Polite and gentle.",
-              "fr": "Poli et doux.",
-              "es": "Cortés y suave."
+              "en": "Gentle: きらい is a polite word.",
+              "fr": "Doux : きらい est un mot poli.",
+              "es": "Suave: きらい es muy cortés."
             },
             {
               "en": "Like a joke between friends.",
@@ -19521,9 +19521,9 @@
         },
         {
           "notion": {
-            "en": "A taste, or a wish (たくない)",
-            "fr": "Un goût, ou une envie (たくない)",
-            "es": "Un gusto, o un deseo (たくない)"
+            "en": "Against たくない",
+            "fr": "Face à たくない",
+            "es": "Frente a たくない"
           },
           "jp": "今日は出かけたくないです。",
           "tr": {
@@ -19846,9 +19846,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Not said of yourself",
-            "fr": "Pas pour parler de soi",
-            "es": "No para hablar de ti"
+            "en": "上手 with わたしは",
+            "fr": "上手 avec わたしは",
+            "es": "上手 con わたしは"
           },
           "jp": "先生は、ピアノが上手です。",
           "tr": {
@@ -19932,9 +19932,9 @@
         },
         {
           "notion": {
-            "en": "Able to, or good at (できます)",
-            "fr": "Savoir, ou bien faire (できます)",
-            "es": "Poder, o hacer bien (できます)"
+            "en": "Against できます",
+            "fr": "Face à できます",
+            "es": "Frente a できます"
           },
           "jp": "わたしは日本語ができます。",
           "tr": {
@@ -20316,9 +20316,9 @@
               "es": "Demasiado directo: el personal diría おちゃはいかがですか."
             },
             {
-              "en": "Polite and just right.",
-              "fr": "Poli et tout à fait adapté.",
-              "es": "Cortés y muy adecuado."
+              "en": "Just right: polite enough for a customer.",
+              "fr": "Adapté : assez poli pour un client.",
+              "es": "Adecuado: lo bastante cortés para un cliente."
             },
             {
               "en": "Like an order to drink.",
@@ -20335,9 +20335,9 @@
         },
         {
           "notion": {
-            "en": "A thing, or an action (たい)",
-            "fr": "Une chose, ou une action (たい)",
-            "es": "Una cosa, o una acción (たい)"
+            "en": "Against たい",
+            "fr": "Face à たい",
+            "es": "Frente a たい"
           },
           "jp": "つめたい水が飲みたいです。",
           "tr": {
@@ -20601,9 +20601,9 @@
       },
       {
         "kind": "use",
-        "en": "- Forecasts and guesses: あの店は高いでしょう.\n- Checking politely: 田中さんでしょうか (would you be Mr Tanaka?).\n- Softer with たぶん in front.",
+        "en": "- Forecasts and guesses: あの店は高いでしょう.\n- Checking politely: 田中さんでしょうか (would you be Tanaka?).\n- Softer with たぶん in front.",
         "fr": "- Prévisions et suppositions : あの店は高いでしょう.\n- Vérifier poliment : 田中さんでしょうか.\n- Plus doux avec たぶん devant.",
-        "es": "- Previsiones y suposiciones: あの店は高いでしょう.\n- Comprobar con cortesía: 田中さんでしょうか (¿es usted el señor Tanaka?).\n- Más suave con たぶん delante."
+        "es": "- Previsiones y suposiciones: あの店は高いでしょう.\n- Comprobar con cortesía: 田中さんでしょうか (¿es usted Tanaka?).\n- Más suave con たぶん delante."
       },
       {
         "kind": "careful",
@@ -20715,9 +20715,9 @@
         },
         {
           "notion": {
-            "en": "Rising: « right? »",
-            "fr": "Voix montante : « hein ? »",
-            "es": "Tono ascendente: «¿verdad?»"
+            "en": "でしょう with a rising tone",
+            "fr": "でしょう avec la voix qui monte",
+            "es": "でしょう con tono ascendente"
           },
           "jp": "あなたも行くでしょう？",
           "tr": {
@@ -20879,8 +20879,8 @@
         {
           "kind": "use",
           "ask": {
-            "en": "A classmate asks: 山本さんは、パーティーに来ますか？ You don't know, but you expect he will. What do you answer?",
-            "fr": "Un camarade te demande : 山本さんは、パーティーに来ますか？ Tu ne sais pas, mais tu penses qu'il viendra. Que réponds-tu ?",
+            "en": "A classmate asks: 山本さんは、パーティーに来ますか？ You don't know, but you expect so. What do you answer?",
+            "fr": "Un camarade te demande : 山本さんは、パーティーに来ますか？ Tu ne sais pas, mais tu penses que oui. Que réponds-tu ?",
             "es": "Un compañero de clase pregunta: 山本さんは、パーティーに来ますか？ No lo sabes, pero crees que vendrá. ¿Qué respondes?"
           },
           "choices": [
@@ -20889,8 +20889,8 @@
             "たぶん、来ないでしょう。"
           ],
           "why": {
-            "en": "You are guessing about something still ahead, so the plain present 来る goes before でしょう. 来たでしょう guesses that he already came, and 来ないでしょう guesses the opposite: that he will not.",
-            "fr": "Tu devines quelque chose qui n'a pas encore eu lieu : 来る, la forme neutre du présent, va devant でしょう. 来たでしょう suppose qu'il est déjà venu, et 来ないでしょう suppose le contraire : qu'il ne viendra pas.",
+            "en": "You are guessing about something still ahead, so the plain present 来る goes before でしょう. 来たでしょう guesses that Yamamoto has already come, and 来ないでしょう guesses the opposite: that Yamamoto will not.",
+            "fr": "Tu devines quelque chose qui n'a pas encore eu lieu : 来る, la forme neutre du présent, va devant でしょう. 来たでしょう suppose que la venue a déjà eu lieu, et 来ないでしょう suppose le contraire : que Yamamoto ne viendra pas.",
             "es": "Supones algo que aún no ha pasado, así que el presente llano 来る va ante でしょう. 来たでしょう supone que ya vino, y 来ないでしょう supone lo contrario: que no vendrá."
           }
         },
@@ -21080,9 +21080,9 @@
         },
         {
           "notion": {
-            "en": "まだ with a positive: still",
-            "fr": "まだ à l'affirmatif : encore",
-            "es": "まだ en afirmativo: todavía"
+            "en": "まだ with a positive",
+            "fr": "まだ à l'affirmatif",
+            "es": "まだ en afirmativo"
           },
           "jp": "あには、まだ学生です。",
           "tr": {
@@ -21125,9 +21125,9 @@
         },
         {
           "notion": {
-            "en": "Not yet, or did not",
-            "fr": "Pas encore, ou ne pas avoir fait",
-            "es": "Todavía no, o no lo hizo"
+            "en": "Against ませんでした",
+            "fr": "Face à ませんでした",
+            "es": "Frente a ませんでした"
           },
           "jp": "きのう、その本を読みませんでした。",
           "tr": {
@@ -21537,7 +21537,7 @@
             "es": "¿Ya compró su boleto?"
           },
           "task": {
-            "en": "Yes: tell him you've already bought it.",
+            "en": "Yes: tell the staff you've already bought it.",
             "fr": "Oui : dis-lui que tu l'as déjà acheté.",
             "es": "Sí: dile que ya lo has comprado."
           },
@@ -21783,9 +21783,9 @@
       "twists": [
         {
           "notion": {
-            "en": "くらい or ぐらい: the same",
-            "fr": "くらい ou ぐらい : pareil",
-            "es": "くらい o ぐらい: lo mismo"
+            "en": "Between くらい and ぐらい",
+            "fr": "Entre くらい et ぐらい",
+            "es": "Entre くらい y ぐらい"
           },
           "jp": "うちから学校まで、あるいて二十分ぐらいです。",
           "tr": {
@@ -21828,9 +21828,9 @@
         },
         {
           "notion": {
-            "en": "A length or a moment (ごろ)",
-            "fr": "Une durée ou un moment (ごろ)",
-            "es": "Una duración o un momento (ごろ)"
+            "en": "Against ごろ",
+            "fr": "Face à ごろ",
+            "es": "Frente a ごろ"
           },
           "jp": "三時ごろ、駅に来てください。",
           "tr": {
@@ -21916,7 +21916,7 @@
             "es": "Hay un autobús de la estación al hotel."
           },
           "task": {
-            "en": "Ask him roughly how many minutes the bus takes.",
+            "en": "Ask the clerk roughly how many minutes the bus takes.",
             "fr": "Demande-lui en gros combien de minutes prend le bus.",
             "es": "Pregúntale cuántos minutos tarda el autobús, más o menos."
           },
@@ -22157,9 +22157,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Exact に, or about ごろ",
-            "fr": "に exact, ou ごろ approximatif",
-            "es": "に exacto, o ごろ aproximado"
+            "en": "に without ごろ",
+            "fr": "に sans ごろ",
+            "es": "に sin ごろ"
           },
           "jp": "三時に駅で会いましょう。",
           "tr": {
@@ -22202,9 +22202,9 @@
         },
         {
           "notion": {
-            "en": "A moment or a length (ぐらい)",
-            "fr": "Un moment ou une durée (ぐらい)",
-            "es": "Un momento o una duración (ぐらい)"
+            "en": "Against ぐらい",
+            "fr": "Face à ぐらい",
+            "es": "Frente a ぐらい"
           },
           "jp": "三十分ぐらいかかります。",
           "tr": {
@@ -22224,9 +22224,9 @@
               "es": "ぐらい da una duración; ごろ, un momento."
             },
             {
-              "en": "ぐらい is more polite.",
-              "fr": "ぐらい est plus poli.",
-              "es": "ぐらい es más cortés."
+              "en": "ぐらい is more polite; ごろ is casual.",
+              "fr": "ぐらい est plus poli ; ごろ est familier.",
+              "es": "ぐらい es más cortés; ごろ es coloquial."
             },
             {
               "en": "ぐらい means « exactly ».",
@@ -22537,9 +22537,9 @@
       "twists": [
         {
           "notion": {
-            "en": "At a time: bit by bit",
-            "fr": "À la fois : petit à petit",
-            "es": "Cada vez: poco a poco"
+            "en": "ずつ after 少し",
+            "fr": "ずつ après 少し",
+            "es": "ずつ tras 少し"
           },
           "jp": "少しずつ、さむくなりました。",
           "tr": {
@@ -22578,9 +22578,9 @@
         },
         {
           "notion": {
-            "en": "Each, or only (だけ)",
-            "fr": "Chacun, ou seulement (だけ)",
-            "es": "Cada uno, o solo (だけ)"
+            "en": "Against だけ",
+            "fr": "Face à だけ",
+            "es": "Frente a だけ"
           },
           "jp": "りんごを二つだけ買いました。",
           "tr": {
@@ -23010,9 +23010,9 @@
         },
         {
           "notion": {
-            "en": "Only, or only too little (しか)",
-            "fr": "Seulement, ou rien que (しか)",
-            "es": "Solo, o nada más que (しか)"
+            "en": "Against しか",
+            "fr": "Face à しか",
+            "es": "Frente a しか"
           },
           "jp": "きのうは、水しか飲みませんでした。",
           "tr": {
@@ -23098,7 +23098,7 @@
             "es": "¿Desea algo de beber?"
           },
           "task": {
-            "en": "Tell her no: just this, that's all.",
+            "en": "Tell the vendor no: just this, that's all.",
             "fr": "Dis-lui que non : juste ça, c'est tout.",
             "es": "Dile que no: solo esto, nada más."
           },
@@ -23379,9 +23379,9 @@
         },
         {
           "notion": {
-            "en": "Before the particle",
-            "fr": "Devant la particule",
-            "es": "Antes de la partícula"
+            "en": "Between などを and をなど",
+            "fr": "Entre などを et をなど",
+            "es": "Entre などを y をなど"
           },
           "jp": "スーパーで、くだものなどを買いました。",
           "tr": {
@@ -23396,14 +23396,14 @@
           },
           "choices": [
             {
-              "en": "など closes the list first; the particle comes after it.",
-              "fr": "など ferme d'abord la liste ; la particule vient après.",
-              "es": "など cierra primero la lista; la partícula va después."
+              "en": "など closes the list; the particle follows.",
+              "fr": "など ferme la liste ; la particule suit.",
+              "es": "など cierra la lista; la partícula va detrás."
             },
             {
-              "en": "をなど is the polite order.",
-              "fr": "をなど est l'ordre poli.",
-              "es": "をなど es el orden cortés."
+              "en": "をなど is the polite order; などを is casual.",
+              "fr": "をなど est l'ordre poli ; などを est familier.",
+              "es": "をなど es el orden cortés; などを es coloquial."
             },
             {
               "en": "Either order is fine.",
@@ -23713,9 +23713,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Even",
-            "fr": "Même",
-            "es": "Incluso"
+            "en": "でも after a noun",
+            "fr": "でも après un nom",
+            "es": "でも tras un sustantivo"
           },
           "jp": "この本は、子どもでもわかります。",
           "tr": {
@@ -23754,9 +23754,9 @@
         },
         {
           "notion": {
-            "en": "At the head of a sentence: but",
-            "fr": "En tête de phrase : mais",
-            "es": "Al inicio de la oración: pero"
+            "en": "でも at the head of a sentence",
+            "fr": "でも en tête de phrase",
+            "es": "でも al inicio de la oración"
           },
           "jp": "でも、この店はおいしいですよ。",
           "tr": {
@@ -23976,9 +23976,9 @@
           },
           "choices": [
             {
-              "en": "A film is only one idea; the plan is still open.",
+              "en": "A film is only one idea; nothing is fixed yet.",
               "fr": "Un film n'est qu'une idée : rien n'est encore arrêté.",
-              "es": "Una película es solo una idea; el plan sigue abierto."
+              "es": "Una película es solo una idea; nada está decidido aún."
             },
             {
               "en": "The speaker wants a film in addition to something else.",
@@ -24129,9 +24129,9 @@
         },
         {
           "notion": {
-            "en": "Plain form before と",
-            "fr": "Forme neutre devant と",
-            "es": "Forma llana delante de と"
+            "en": "ふる before と",
+            "fr": "ふる devant と",
+            "es": "ふる delante de と"
           },
           "jp": "あしたは、雨がふると思います。",
           "tr": {
@@ -24151,9 +24151,9 @@
               "es": "El verbo delante de と va en forma llana; la cortesía está en 思います."
             },
             {
-              "en": "ふる is the future of ふります.",
-              "fr": "ふる est le futur de ふります.",
-              "es": "ふる es el futuro de ふります."
+              "en": "ふる is the future of ふります: it will rain.",
+              "fr": "ふる est le futur de ふります : il pleuvra.",
+              "es": "ふる es el futuro de ふります: lloverá."
             },
             {
               "en": "ふる is less sure than ふります.",
@@ -24174,9 +24174,9 @@
         },
         {
           "notion": {
-            "en": "Someone else's thought",
-            "fr": "La pensée d'un autre",
-            "es": "El pensamiento de otra persona"
+            "en": "With と思っています",
+            "fr": "Avec と思っています",
+            "es": "Con と思っています"
           },
           "jp": "母は、わたしがまだ子どもだと思っています。",
           "tr": {
@@ -24191,9 +24191,9 @@
           },
           "choices": [
             {
-              "en": "My mother's: と思っています reports someone else's thought.",
-              "fr": "Celle de ma mère : と思っています rapporte la pensée d'un autre.",
-              "es": "De mi madre: と思っています cuenta lo que piensa otra persona."
+              "en": "My mother's: she thinks I'm still a child.",
+              "fr": "Celle de ma mère : elle pense que je n'ai pas encore grandi.",
+              "es": "De mi madre: piensa que todavía no he crecido."
             },
             {
               "en": "Mine: I think my mother is still a child.",
@@ -24215,15 +24215,15 @@
         },
         {
           "notion": {
-            "en": "A thought, or words (と言います)",
-            "fr": "Une pensée, ou des paroles (と言います)",
-            "es": "Un pensamiento, o palabras (と言います)"
+            "en": "Against と言います",
+            "fr": "Face à と言います",
+            "es": "Frente a と言います"
           },
           "jp": "たなかさんは、あした来ると言いました。",
           "tr": {
-            "en": "Mr Tanaka said he would come tomorrow.",
-            "fr": "M. Tanaka a dit qu'il viendrait demain.",
-            "es": "El señor Tanaka dijo que vendría mañana."
+            "en": "Tanaka said they would come tomorrow.",
+            "fr": "Tanaka a annoncé sa venue pour demain.",
+            "es": "Tanaka dijo que vendría mañana."
           },
           "ask": {
             "en": "Here it is と言いました, not と思います. What does it report?",
@@ -24232,9 +24232,9 @@
           },
           "choices": [
             {
-              "en": "Tanaka's words: he said he would come tomorrow.",
-              "fr": "Les paroles de Tanaka : il a dit qu'il viendrait demain.",
-              "es": "Las palabras de Tanaka: dijo que vendría mañana."
+              "en": "Tanaka's words: « I'll come tomorrow ».",
+              "fr": "Les paroles de Tanaka : « Je viendrai demain ».",
+              "es": "Las palabras de Tanaka: «Vendré mañana»."
             },
             {
               "en": "My guess: I think Tanaka will come tomorrow.",
@@ -24296,7 +24296,7 @@
             "es": "¿Mañana va a llover?"
           },
           "task": {
-            "en": "Tell her you think it will be sunny.",
+            "en": "Tell your friend you think it will be sunny.",
             "fr": "Dis-lui que tu penses qu'il fera beau.",
             "es": "Dile que crees que hará sol."
           },
@@ -24505,7 +24505,7 @@
     "examples": [
       {
         "jp": "先生は来ると言いました。",
-        "en": "The teacher said he would come.",
+        "en": "The teacher said they would come.",
         "fr": "Le professeur a dit qu'il viendrait.",
         "es": "El profesor dijo que vendría.",
         "register": "polite",
@@ -24513,7 +24513,7 @@
       },
       {
         "jp": "あの人は行かないと言います。",
-        "en": "That person says he will not go.",
+        "en": "That person says they will not go.",
         "fr": "Cette personne dit qu'elle n'ira pas.",
         "es": "Esa persona dice que no irá.",
         "register": "polite",
@@ -24539,9 +24539,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Who is told: に",
-            "fr": "À qui l'on parle : に",
-            "es": "A quién se le dice: に"
+            "en": "に with 言いました",
+            "fr": "に avec 言いました",
+            "es": "に con 言いました"
           },
           "jp": "友だちに、あした行くと言いました。",
           "tr": {
@@ -24580,9 +24580,9 @@
         },
         {
           "notion": {
-            "en": "Naming: is called",
-            "fr": "Nommer : s'appeler",
-            "es": "Nombrar: llamarse"
+            "en": "と言います of a flower",
+            "fr": "と言います d'une fleur",
+            "es": "と言います de una flor"
           },
           "jp": "この花は、日本語で「さくら」と言います。",
           "tr": {
@@ -24591,9 +24591,9 @@
             "es": "En japonés, esta flor se llama «sakura»."
           },
           "ask": {
-            "en": "No one is speaking here. What does と言います do?",
-            "fr": "Personne ne parle ici. Que fait と言います ?",
-            "es": "Aquí no habla nadie. ¿Qué hace と言います?"
+            "en": "What does と言います do here?",
+            "fr": "Que fait と言います ici ?",
+            "es": "¿Qué hace と言います aquí?"
           },
           "choices": [
             {
@@ -24638,8 +24638,8 @@
           {
             "who": "me",
             "jp": "電車は三時半に来ると言いました。",
-            "en": "He said the train comes at half past three.",
-            "fr": "Il a dit que le train arrive à trois heures et demie.",
+            "en": "They said the train comes at half past three.",
+            "fr": "L'agent a dit que le train arrive à trois heures et demie.",
             "es": "Dijo que el tren llega a las tres y media."
           },
           {
@@ -24664,7 +24664,7 @@
             "es": "¿Viene tu madre?"
           },
           "task": {
-            "en": "Tell him she said she isn't coming.",
+            "en": "Tell your friend your mother said she isn't coming.",
             "fr": "Dis-lui qu'elle a dit qu'elle ne venait pas.",
             "es": "Dile que ella dijo que no viene."
           },
@@ -24750,30 +24750,30 @@
           },
           "jp": "友だちは、七時に来ると言いましたが、来ませんでした。",
           "tr": {
-            "en": "My friend said he would come at seven, but he didn't come.",
+            "en": "My friend said they would come at seven, but didn't come.",
             "fr": "Mon ami a dit qu'il viendrait à sept heures, mais il n'est pas venu.",
             "es": "Mi amigo dijo que vendría a las siete, pero no vino."
           },
           "choices": [
             {
-              "en": "No: he said he would, but he did not.",
+              "en": "No: they said they would, but they did not.",
               "fr": "Non : il a dit qu'il viendrait, mais il n'est pas venu.",
               "es": "No: dijo que vendría, pero no vino."
             },
             {
-              "en": "Yes, as he had said.",
-              "fr": "Oui, comme il l'avait dit.",
+              "en": "Yes, as they had said.",
+              "fr": "Oui, comme prévu.",
               "es": "Sí, tal como había dicho."
             },
             {
-              "en": "No, and he had said he would not come.",
+              "en": "No, and they had said they would not come.",
               "fr": "Non, et il avait dit qu'il ne viendrait pas.",
               "es": "No, y ya había dicho que no vendría."
             }
           ],
           "why": {
-            "en": "来ると言いました reports what he said he would do: come. が then sets it against what happened, 来ませんでした: he did not, so the promise was not kept.",
-            "fr": "来ると言いました rapporte ce qu'il a dit qu'il ferait : venir. が l'oppose à ce qui s'est passé, 来ませんでした : il n'est pas venu, donc la promesse n'a pas été tenue.",
+            "en": "来ると言いました reports what the friend said they would do: come. が then sets it against what happened, 来ませんでした: they did not, so the promise was not kept.",
+            "fr": "来ると言いました rapporte ce que l'ami a promis : venir. が l'oppose à ce qui s'est passé, 来ませんでした : la promesse n'a pas été tenue.",
             "es": "来ると言いました cuenta lo que dijo que haría: venir. が lo opone después a lo que pasó, 来ませんでした: no vino, así que no cumplió su palabra."
           }
         },
@@ -24804,7 +24804,7 @@
           },
           "jp": "友だちは、あさごはんを＿＿＿と言いました。",
           "tr": {
-            "en": "My friend said he hadn't had breakfast.",
+            "en": "My friend said they hadn't had breakfast.",
             "fr": "Mon ami a dit qu'il n'avait pas pris de petit-déjeuner.",
             "es": "Mi amigo dijo que no había desayunado."
           },
@@ -24906,9 +24906,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Dictionary form before の",
-            "fr": "Forme du dictionnaire devant の",
-            "es": "Forma de diccionario delante de の"
+            "en": "見る before の",
+            "fr": "見る devant の",
+            "es": "見る delante de の"
           },
           "jp": "えいがを見るのが好きです。",
           "tr": {
@@ -24992,9 +24992,9 @@
         },
         {
           "notion": {
-            "en": "A lasting taste, or a wish (たい)",
-            "fr": "Un goût durable, ou une envie (たい)",
-            "es": "Un gusto duradero, o un deseo (たい)"
+            "en": "Against たい",
+            "fr": "Face à たい",
+            "es": "Frente a たい"
           },
           "jp": "今、本が読みたいです。",
           "tr": {
@@ -25321,9 +25321,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Instead of",
-            "fr": "Au lieu de",
-            "es": "En lugar de"
+            "en": "ないで between two actions",
+            "fr": "ないで entre deux actions",
+            "es": "ないで entre dos acciones"
           },
           "jp": "バスにのらないで、あるいてかえりました。",
           "tr": {
@@ -25362,9 +25362,9 @@
         },
         {
           "notion": {
-            "en": "A reason: なくて",
-            "fr": "Une raison : なくて",
-            "es": "Una razón: なくて"
+            "en": "Against なくて",
+            "fr": "Face à なくて",
+            "es": "Frente a なくて"
           },
           "jp": "お金がなくて、何も買いませんでした。",
           "tr": {
@@ -25407,9 +25407,9 @@
         },
         {
           "notion": {
-            "en": "Without, or please don't",
-            "fr": "Sans, ou merci de ne pas",
-            "es": "Sin, o por favor no"
+            "en": "Against ないでください",
+            "fr": "Face à ないでください",
+            "es": "Frente a ないでください"
           },
           "jp": "電車の中で、大きいこえで話さないでください。",
           "tr": {
@@ -25531,8 +25531,8 @@
             "言わなくて"
           ],
           "why": {
-            "en": "言う ends in う, so it takes わ before ない: 言わない, then で for « without saying ». 言ない treats it as a る-verb, and 言わなくて gives a reason (« because he didn't say »), not a manner.",
-            "fr": "言う finit par う : devant ない il prend わ, 言わない, puis で pour « sans dire ». 言ない le traite en verbe en る, et 言わなくて donne une cause (« parce qu'il n'a pas dit »), pas une manière.",
+            "en": "言う ends in う, so it takes わ before ない: 言わない, then で for « without saying ». 言ない treats it as a る-verb, and 言わなくて gives a reason (« because they didn't say »), not a manner.",
+            "fr": "言う finit par う : devant ない il prend わ, 言わない, puis で pour « sans dire ». 言ない le traite en verbe en る, et 言わなくて donne une cause (« parce que rien n'a été dit »), pas une manière.",
             "es": "言う termina en う, así que lleva わ delante de ない: 言わない, y luego で para «sin decir». 言ない lo trata como un verbo en る, y 言わなくて da una causa («porque no dijo»), no una manera."
           }
         },
@@ -25780,9 +25780,9 @@
         },
         {
           "notion": {
-            "en": "Offering: どうぞ",
-            "fr": "Offrir : どうぞ",
-            "es": "Ofrecer: どうぞ"
+            "en": "Against どうぞ",
+            "fr": "Face à どうぞ",
+            "es": "Frente a どうぞ"
           },
           "jp": "おちゃをどうぞ。",
           "tr": {
@@ -25825,9 +25825,9 @@
         },
         {
           "notion": {
-            "en": "A thing or an action",
-            "fr": "Une chose ou une action",
-            "es": "Una cosa o una acción"
+            "en": "Against てください",
+            "fr": "Face à てください",
+            "es": "Frente a てください"
           },
           "jp": "ここに名前を書いてください。",
           "tr": {
@@ -26173,9 +26173,9 @@
       "twists": [
         {
           "notion": {
-            "en": "分かりました: got it",
-            "fr": "分かりました : c'est compris",
-            "es": "分かりました: entendido"
+            "en": "分かりました as an answer",
+            "fr": "分かりました en réponse",
+            "es": "分かりました como respuesta"
           },
           "jp": "はい、分かりました。",
           "tr": {
@@ -26218,9 +26218,9 @@
         },
         {
           "notion": {
-            "en": "分かりません: I don't know",
-            "fr": "分かりません : je ne sais pas",
-            "es": "分かりません: no saber"
+            "en": "分かりません with が",
+            "fr": "分かりません avec が",
+            "es": "分かりません con が"
           },
           "jp": "友だちの電話ばんごうが分かりません。",
           "tr": {
@@ -26276,14 +26276,14 @@
           },
           "choices": [
             {
-              "en": "分かります is a state, not an act done to something: what is understood takes が.",
-              "fr": "分かります est un état, pas un geste fait sur quelque chose : ce qu'on comprend prend が.",
-              "es": "分かります es un estado, no una acción sobre algo: lo que se entiende lleva が."
+              "en": "分かります is a state: what is understood takes が.",
+              "fr": "分かります est un état : ce qu'on comprend prend が.",
+              "es": "分かります es un estado: lo que se entiende lleva が."
             },
             {
-              "en": "が is the polite form of を.",
-              "fr": "が est la forme polie de を.",
-              "es": "が es la forma cortés de を."
+              "en": "が is the polite form of を, used with ます.",
+              "fr": "が est la forme polie de を, avec ます.",
+              "es": "が es la forma cortés de を, con ます."
             },
             {
               "en": "が is needed because of 少し.",
@@ -26445,7 +26445,7 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "A teacher points at a page of your textbook and says this. What does she want to know?",
+            "en": "A teacher points at a page of your textbook and says this. What does the teacher want to know?",
             "fr": "Une professeure montre une page de ton manuel et dit cela. Que veut-elle savoir ?",
             "es": "Una profesora señala una página de tu libro de texto y dice esto. ¿Qué quiere saber?"
           },
@@ -26587,9 +26587,9 @@
       "twists": [
         {
           "notion": {
-            "en": "What a place allows",
-            "fr": "Ce qu'un lieu permet",
-            "es": "Lo que un lugar permite"
+            "en": "できます on a train",
+            "fr": "できます dans un train",
+            "es": "できます en un tren"
           },
           "jp": "この電車の中では、しょくじができます。",
           "tr": {
@@ -26628,9 +26628,9 @@
         },
         {
           "notion": {
-            "en": "Ready, made",
-            "fr": "Prêt, fait",
-            "es": "Listo, hecho"
+            "en": "できました after コーヒーが",
+            "fr": "できました après コーヒーが",
+            "es": "できました tras コーヒーが"
           },
           "jp": "コーヒーができましたよ。",
           "tr": {
@@ -26952,9 +26952,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Past: たくなかったです",
-            "fr": "Passé : たくなかったです",
-            "es": "Pasado: たくなかったです"
+            "en": "The form たくなかったです",
+            "fr": "La forme たくなかったです",
+            "es": "La forma たくなかったです"
           },
           "jp": "子どものとき、学校に行きたくなかったです。",
           "tr": {
@@ -26963,9 +26963,9 @@
             "es": "En mi infancia, no quería ir a la escuela."
           },
           "ask": {
-            "en": "When did the speaker not want to go?",
-            "fr": "Quand la personne ne voulait-elle pas y aller ?",
-            "es": "¿Cuándo no quería ir quien habla?"
+            "en": "Which time is the sentence about?",
+            "fr": "De quel moment parle la phrase ?",
+            "es": "¿De qué momento habla la oración?"
           },
           "choices": [
             {
@@ -26997,9 +26997,9 @@
         },
         {
           "notion": {
-            "en": "Declining gently",
-            "fr": "Refuser en douceur",
-            "es": "Rechazar con suavidad"
+            "en": "Against ちょっと…",
+            "fr": "Face à ちょっと…",
+            "es": "Frente a ちょっと…"
           },
           "jp": "すみません、あしたはちょっと…。",
           "tr": {
@@ -27038,9 +27038,9 @@
         },
         {
           "notion": {
-            "en": "Not now, or never",
-            "fr": "Pas maintenant, ou jamais",
-            "es": "Ahora no, o nunca"
+            "en": "Against きらい",
+            "fr": "Face à きらい",
+            "es": "Frente a きらい"
           },
           "jp": "わたしは魚がきらいです。",
           "tr": {
@@ -27367,9 +27367,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Literally inside",
-            "fr": "Littéralement dedans",
-            "es": "Dentro, literalmente"
+            "en": "の中で after 電車",
+            "fr": "の中で après 電車",
+            "es": "の中で tras 電車"
           },
           "jp": "電車の中で本を読みます。",
           "tr": {
@@ -27408,9 +27408,9 @@
         },
         {
           "notion": {
-            "en": "Three or more: どれ",
-            "fr": "Trois ou plus : どれ",
-            "es": "Tres o más: どれ"
+            "en": "どれ against どちら",
+            "fr": "どれ face à どちら",
+            "es": "どれ frente a どちら"
           },
           "jp": "この四つの中で、どれがいちばん安いですか。",
           "tr": {
@@ -27453,9 +27453,9 @@
         },
         {
           "notion": {
-            "en": "Where a thing is: の中に",
-            "fr": "Où se trouve une chose : の中に",
-            "es": "Dónde está algo: の中に"
+            "en": "Against の中に",
+            "fr": "Face à の中に",
+            "es": "Frente a の中に"
           },
           "jp": "かばんの中に本があります。",
           "tr": {
@@ -27541,7 +27541,7 @@
             "es": "De bebidas, hay té, jugo y café."
           },
           "task": {
-            "en": "Ask him which of the three is the cheapest.",
+            "en": "Ask the vendor which of the three is the cheapest.",
             "fr": "Demande-lui lequel des trois est le moins cher.",
             "es": "Pregúntale cuál de los tres es el más barato."
           },
@@ -27788,9 +27788,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Adding a quality",
-            "fr": "Ajouter une qualité",
-            "es": "Agregar una cualidad"
+            "en": "そして between two adjectives",
+            "fr": "そして entre deux adjectifs",
+            "es": "そして entre dos adjetivos"
           },
           "jp": "この先生はやさしいです。そして、おもしろいです。",
           "tr": {
@@ -27829,9 +27829,9 @@
         },
         {
           "notion": {
-            "en": "Turning against: しかし",
-            "fr": "Aller contre : しかし",
-            "es": "Ir en contra: しかし"
+            "en": "しかし in place of そして",
+            "fr": "しかし au lieu de そして",
+            "es": "しかし en lugar de そして"
           },
           "jp": "このパンはやすいです。しかし、おいしくないです。",
           "tr": {
@@ -28164,9 +28164,9 @@
       "twists": [
         {
           "notion": {
-            "en": "One more item",
-            "fr": "Un élément de plus",
-            "es": "Una cosa más"
+            "en": "それから at the counter",
+            "fr": "それから au comptoir",
+            "es": "それから en el mostrador"
           },
           "jp": "コーヒーを二つ。それから、ケーキも一つください。",
           "tr": {
@@ -28533,9 +28533,9 @@
       "twists": [
         {
           "notion": {
-            "en": "In speech: でも",
-            "fr": "À l'oral : でも",
-            "es": "En el habla: でも"
+            "en": "Against でも",
+            "fr": "Face à でも",
+            "es": "Frente a でも"
           },
           "jp": "行きたいよ。でも、お金がないんだ。",
           "tr": {
@@ -28550,14 +28550,14 @@
           },
           "choices": [
             {
-              "en": "でも is the spoken « but »; しかし is formal, for writing and speeches.",
-              "fr": "でも est le « mais » de l'oral ; しかし est soutenu, pour l'écrit et les discours.",
-              "es": "でも es el «pero» hablado; しかし es formal, para textos y discursos."
+              "en": "でも is the spoken « but »; しかし is for writing and speeches.",
+              "fr": "でも est le « mais » de l'oral ; しかし, celui de l'écrit et des discours.",
+              "es": "でも es el «pero» hablado; しかし, el de los textos y discursos."
             },
             {
-              "en": "でも means « even », not « but ».",
-              "fr": "でも veut dire « même », pas « mais ».",
-              "es": "でも significa «incluso», no «pero»."
+              "en": "でも means « even » here, not « but ».",
+              "fr": "でも veut dire « même » ici, pas « mais ».",
+              "es": "でも significa «incluso» aquí, no «pero»."
             },
             {
               "en": "でも is a stronger « but » than しかし.",
@@ -28578,9 +28578,9 @@
         },
         {
           "notion": {
-            "en": "Inside one sentence: が",
-            "fr": "Dans une seule phrase : が",
-            "es": "Dentro de una frase: が"
+            "en": "Against が",
+            "fr": "Face à が",
+            "es": "Frente a が"
           },
           "jp": "高いですが、おいしいです。",
           "tr": {
@@ -28589,9 +28589,9 @@
             "es": "Es caro, pero está bueno."
           },
           "ask": {
-            "en": "No しかし here, but the same « but ». What does が do?",
-            "fr": "Pas de しかし ici, mais le même « mais ». Que fait が ?",
-            "es": "Aquí no hay しかし, pero sí el mismo «pero». ¿Qué hace が?"
+            "en": "No しかし here. What does が do?",
+            "fr": "Pas de しかし ici. Que fait が ?",
+            "es": "Aquí no hay しかし. ¿Qué hace が?"
           },
           "choices": [
             {
@@ -28666,7 +28666,7 @@
             "es": "También hay autobús."
           },
           "task": {
-            "en": "Tell him: « The bus is cheap. But it is slow. »",
+            "en": "Tell the clerk: « The bus is cheap. But it is slow. »",
             "fr": "Dis-lui : « Le bus est bon marché. Mais il est lent. »",
             "es": "Dile: «El autobús es barato. Pero es lento»."
           },
@@ -28908,9 +28908,9 @@
       "twists": [
         {
           "notion": {
-            "en": "An activity noun",
-            "fr": "Un nom d'activité",
-            "es": "Un sustantivo de actividad"
+            "en": "さんぽに before 行きます",
+            "fr": "さんぽに devant 行きます",
+            "es": "さんぽに ante 行きます"
           },
           "jp": "こうえんへさんぽに行きます。",
           "tr": {
@@ -29082,7 +29082,7 @@
             "es": "¿Qué hace mañana?"
           },
           "task": {
-            "en": "Tell her you are going to Tokyo to see a film.",
+            "en": "Tell your neighbour you are going to Tokyo to see a film.",
             "fr": "Dis-lui que tu vas à Tokyo voir un film.",
             "es": "Dile que vas a Tokio a ver una película."
           },
@@ -29426,9 +29426,9 @@
       "twists": [
         {
           "notion": {
-            "en": "After a noun: the subject",
-            "fr": "Après un nom : le sujet",
-            "es": "Tras un sustantivo: el sujeto"
+            "en": "が with 来ました",
+            "fr": "が avec 来ました",
+            "es": "が con 来ました"
           },
           "jp": "きのう、友だちが来ました。",
           "tr": {
@@ -29471,9 +29471,9 @@
         },
         {
           "notion": {
-            "en": "A soft opening",
-            "fr": "Une entrée en matière",
-            "es": "Una entrada suave"
+            "en": "が after すみません",
+            "fr": "が après すみません",
+            "es": "が tras すみません"
           },
           "jp": "すみませんが、まどをあけてもいいですか。",
           "tr": {
@@ -29555,7 +29555,7 @@
             "es": "¿Necesita también boleto de vuelta?"
           },
           "task": {
-            "en": "Tell her you would like one, but you have no money today.",
+            "en": "Tell the clerk you would like one, but you have no money today.",
             "fr": "Dis-lui que tu en voudrais un, mais que tu n'as pas d'argent aujourd'hui.",
             "es": "Dile que te gustaría uno, pero que hoy no tienes dinero."
           },
@@ -29807,9 +29807,9 @@
       "twists": [
         {
           "notion": {
-            "en": "How it is done",
-            "fr": "La manière",
-            "es": "Cómo se hace"
+            "en": "はしって before 行きました",
+            "fr": "はしって devant 行きました",
+            "es": "はしって ante 行きました"
           },
           "jp": "駅まではしって行きました。",
           "tr": {
@@ -29848,9 +29848,9 @@
         },
         {
           "notion": {
-            "en": "The last verb sets the tense",
-            "fr": "Le dernier verbe donne le temps",
-            "es": "El último verbo da el tiempo"
+            "en": "The tense of 会って",
+            "fr": "Le temps de 会って",
+            "es": "El tiempo de 会って"
           },
           "jp": "きのうは友だちに会って、えいがを見ました。",
           "tr": {
@@ -29889,9 +29889,9 @@
         },
         {
           "notion": {
-            "en": "First finished: てから",
-            "fr": "D'abord fini : てから",
-            "es": "Terminar primero: てから"
+            "en": "Against てから",
+            "fr": "Face à てから",
+            "es": "Frente a てから"
           },
           "jp": "電車をおりてから、電話します。",
           "tr": {
@@ -29977,7 +29977,7 @@
             "es": "¿Qué hace en el tren?"
           },
           "task": {
-            "en": "Tell him: you eat, then you read a book.",
+            "en": "Tell the traveller: you eat, then you read a book.",
             "fr": "Dis-lui : tu manges, puis tu lis un livre.",
             "es": "Dile: comes y luego lees un libro."
           },
@@ -30421,9 +30421,9 @@
         },
         {
           "notion": {
-            "en": "A noun takes だ",
-            "fr": "Un nom prend だ",
-            "es": "Un sustantivo lleva だ"
+            "en": "だ before けど",
+            "fr": "だ devant けど",
+            "es": "だ delante de けど"
           },
           "jp": "今日は休みだけど、学校へ行きます。",
           "tr": {
@@ -30466,9 +30466,9 @@
         },
         {
           "notion": {
-            "en": "Softening a request",
-            "fr": "Adoucir une demande",
-            "es": "Suavizar una petición"
+            "en": "けど after すみません",
+            "fr": "けど après すみません",
+            "es": "けど tras すみません"
           },
           "jp": "すみませんけど、ちょっと見せてください。",
           "tr": {
@@ -30543,7 +30543,7 @@
             "es": "¿Vamos a ver una película hoy?"
           },
           "task": {
-            "en": "Tell him you want to go, but you have work today.",
+            "en": "Tell your friend you want to go, but you have work today.",
             "fr": "Dis-lui que tu veux y aller, mais que tu as du travail aujourd'hui.",
             "es": "Dile que quieres ir, pero que hoy tienes trabajo."
           },
@@ -30653,9 +30653,9 @@
           },
           "choices": [
             {
-              "en": "It is a soft opening: the caller gives a name, then asks for Yamada.",
-              "fr": "C'est une entrée en matière douce : l'appelant donne son nom, puis demande Yamada.",
-              "es": "Es una entrada suave: quien llama dice su nombre y luego pregunta por Yamada."
+              "en": "It is a soft opening before asking for Yamada.",
+              "fr": "C'est une entrée en matière douce, avant de demander Yamada.",
+              "es": "Es una entrada suave antes de preguntar por Yamada."
             },
             {
               "en": "It says « I am Tanaka, but not Yamada »: a contrast.",
@@ -30897,9 +30897,9 @@
         },
         {
           "notion": {
-            "en": "Whether or not",
-            "fr": "Oui ou non",
-            "es": "Si pasa o no"
+            "en": "か〜か with 来る",
+            "fr": "か〜か avec 来る",
+            "es": "か〜か con 来る"
           },
           "jp": "あした来るか来ないか、おしえてください。",
           "tr": {
@@ -30981,7 +30981,7 @@
             "es": "¿A qué hora nos vemos?"
           },
           "task": {
-            "en": "Ask her which suits her, nine or ten.",
+            "en": "Ask your colleague which suits them, nine or ten.",
             "fr": "Demande-lui ce qui lui convient, neuf heures ou dix heures.",
             "es": "Pregúntale qué le va mejor, a las nueve o a las diez."
           },
@@ -31071,7 +31071,7 @@
             "すしとラーメンがいいです。"
           ],
           "why": {
-            "en": "A か B が says that either one will do. すしかラーメンか、どちらが… is a question: it hands the choice back to him. すしと… asks for both.",
+            "en": "A か B が says that either one will do. すしかラーメンか、どちらが… is a question: it hands the choice back to your colleague. すしと… asks for both.",
             "fr": "A か B が dit que l'un ou l'autre ira. すしかラーメンか、どちらが… est une question : elle lui rend le choix. すしと… demande les deux.",
             "es": "A か B が dice que cualquiera de los dos vale. すしかラーメンか、どちらが… es una pregunta: le devuelve la elección. すしと… pide los dos."
           }
@@ -31221,9 +31221,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Not often",
-            "fr": "Pas souvent",
-            "es": "No a menudo"
+            "en": "あまり with a negative",
+            "fr": "あまり avec une négation",
+            "es": "あまり con una negación"
           },
           "jp": "父はあまり電車にのりません。",
           "tr": {
@@ -31262,9 +31262,9 @@
         },
         {
           "notion": {
-            "en": "Not at all: ぜんぜん",
-            "fr": "Pas du tout : ぜんぜん",
-            "es": "Nada en absoluto: ぜんぜん"
+            "en": "Against ぜんぜん",
+            "fr": "Face à ぜんぜん",
+            "es": "Frente a ぜんぜん"
           },
           "jp": "ぜんぜんおもしろくないです。",
           "tr": {
@@ -31608,9 +31608,9 @@
         },
         {
           "notion": {
-            "en": "Not very: あまり",
-            "fr": "Pas très : あまり",
-            "es": "No muy: あまり"
+            "en": "Against あまり",
+            "fr": "Face à あまり",
+            "es": "Frente a あまり"
           },
           "jp": "このパンはあまりおいしくないです。",
           "tr": {
@@ -31696,7 +31696,7 @@
             "es": "¿Tiene hambre?"
           },
           "task": {
-            "en": "Tell him: no, not at all.",
+            "en": "Tell the traveller: no, not at all.",
             "fr": "Dis-lui : non, pas du tout.",
             "es": "Dile: no, en absoluto."
           },
@@ -31938,9 +31938,9 @@
       "twists": [
         {
           "notion": {
-            "en": "同じ before a noun",
-            "fr": "同じ devant un nom",
-            "es": "同じ delante de un sustantivo"
+            "en": "同じ before 電車",
+            "fr": "同じ devant 電車",
+            "es": "同じ delante de 電車"
           },
           "jp": "わたしたちは同じ電車にのります。",
           "tr": {
@@ -31983,9 +31983,9 @@
         },
         {
           "notion": {
-            "en": "と alone: with",
-            "fr": "と seul : avec",
-            "es": "と a secas: con"
+            "en": "と without 同じ",
+            "fr": "と sans 同じ",
+            "es": "と sin 同じ"
           },
           "jp": "友だちと電車にのります。",
           "tr": {
@@ -32384,9 +32384,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Hours, not times",
-            "fr": "Des heures, pas des fois",
-            "es": "Horas, no veces"
+            "en": "時間 in place of 回",
+            "fr": "時間 au lieu de 回",
+            "es": "時間 en lugar de 回"
           },
           "jp": "一日に二時間、日本語をべんきょうします。",
           "tr": {
@@ -32429,9 +32429,9 @@
         },
         {
           "notion": {
-            "en": "Asking how often",
-            "fr": "Demander combien de fois",
-            "es": "Preguntar cuántas veces"
+            "en": "何回 in a question",
+            "fr": "何回 dans une question",
+            "es": "何回 en una pregunta"
           },
           "jp": "一週間に何回、電車にのりますか。",
           "tr": {
@@ -32513,7 +32513,7 @@
             "es": "¿Va a menudo a Tokio?"
           },
           "task": {
-            "en": "Tell him: once a month.",
+            "en": "Tell the clerk: once a month.",
             "fr": "Dis-lui : une fois par mois.",
             "es": "Dile: una vez al mes."
           },
@@ -32628,14 +32628,14 @@
               "es": "Seis: dos, tres veces al día."
             },
             {
-              "en": "Three.",
-              "fr": "Trois.",
-              "es": "Tres."
+              "en": "Three: one, three times a day.",
+              "fr": "Trois : un, trois fois par jour.",
+              "es": "Tres: uno, tres veces al día."
             },
             {
-              "en": "Two.",
-              "fr": "Deux.",
-              "es": "Dos."
+              "en": "Two: two in the whole day.",
+              "fr": "Deux : deux dans la journée.",
+              "es": "Dos: dos en todo el día."
             }
           ],
           "why": {
@@ -32877,9 +32877,9 @@
         },
         {
           "notion": {
-            "en": "A な-adjective takes に",
-            "fr": "Un adjectif en な prend に",
-            "es": "Un adjetivo en な lleva に"
+            "en": "The に after きれい",
+            "fr": "Le に après きれい",
+            "es": "El に tras きれい"
           },
           "jp": "名前をきれいに書いてください。",
           "tr": {
@@ -32958,8 +32958,8 @@
             "es": "Hasta Tokio son nueve mil yenes."
           },
           "task": {
-            "en": "She spoke too softly. Ask her to say it again, loudly.",
-            "fr": "Elle a parlé trop bas. Demande-lui de le redire, fort.",
+            "en": "The clerk spoke too softly. Ask them to say it again, loudly.",
+            "fr": "L'agente a parlé trop bas. Demande-lui de le redire, fort.",
             "es": "Habló demasiado bajo. Pídele que lo repita, en voz alta."
           },
           "choices": [
@@ -32968,8 +32968,8 @@
             "すみません、もういちど大きいに言ってください。"
           ],
           "why": {
-            "en": "To describe how she says it, 大きい drops い and takes く: 大きく.",
-            "fr": "Pour décrire comment elle le dit, 大きい perd son い et prend く : 大きく.",
+            "en": "To describe how it is said, 大きい drops い and takes く: 大きく.",
+            "fr": "Pour décrire la façon de le dire, 大きい perd son い et prend く : 大きく.",
             "es": "Para describir cómo lo dice, 大きい pierde la い y toma く: 大きく."
           }
         }
@@ -33108,7 +33108,7 @@
             "あしたはやく来ないでください。"
           ],
           "why": {
-            "en": "はやい drops い and takes く before a verb: はやく来てください. はやい来て keeps the い-form, which only goes before a noun, and はやく来ないでください asks him not to come early, the opposite.",
+            "en": "はやい drops い and takes く before a verb: はやく来てください. はやい来て keeps the い-form, which only goes before a noun, and はやく来ないでください asks your friend not to come early, the opposite.",
             "fr": "はやい perd い et prend く devant un verbe : はやく来てください. はやい来て garde la forme en い, réservée au nom, et はやく来ないでください lui demande de ne pas venir tôt, le contraire.",
             "es": "はやい pierde la い y toma く delante de un verbo: はやく来てください. はやい来て conserva la forma en い, que solo va delante de un sustantivo, y はやく来ないでください le pide que no venga temprano, lo contrario."
           }
@@ -33239,9 +33239,9 @@
         },
         {
           "notion": {
-            "en": "Choosing or becoming",
-            "fr": "Choisir ou devenir",
-            "es": "Elegir o volverse"
+            "en": "Against になる",
+            "fr": "Face à になる",
+            "es": "Frente a になる"
           },
           "jp": "雨になりました。",
           "tr": {
@@ -33327,7 +33327,7 @@
             "es": "¿Qué pan va a llevar?"
           },
           "task": {
-            "en": "Tell her you'll go with this one.",
+            "en": "Tell the vendor you'll go with this one.",
             "fr": "Dis-lui que tu prends celui-ci.",
             "es": "Dile que te quedas con este."
           },
@@ -33461,7 +33461,7 @@
         {
           "kind": "use",
           "ask": {
-            "en": "You and a friend are planning to meet. She asks what time suits you. You propose six o'clock.",
+            "en": "You and a friend are planning to meet. Your friend asks what time suits you. You propose six o'clock.",
             "fr": "Une amie et toi prévoyez de vous voir. Elle te demande quelle heure te convient. Tu proposes six heures.",
             "es": "Una amiga y tú planean verse. Te pregunta qué hora te viene bien. Propones las seis."
           },
@@ -33612,9 +33612,9 @@
       {
         "jp": "たなかさん＿＿＿やまださんも、きょうは休みです。",
         "tr": {
-          "en": "Both Mr. Tanaka and Ms. Yamada are off today.",
-          "fr": "M. Tanaka et Mme Yamada sont tous les deux en congé aujourd'hui.",
-          "es": "Tanto el Sr. Tanaka como la Sra. Yamada tienen hoy el día libre."
+          "en": "Both Tanaka and Yamada are off today.",
+          "fr": "Tanaka comme Yamada sont en congé aujourd'hui.",
+          "es": "Tanto Tanaka como Yamada tienen hoy el día libre."
         },
         "choices": [
           "も",
@@ -33677,9 +33677,9 @@
         },
         {
           "notion": {
-            "en": "Neither one nor the other",
-            "fr": "Ni l'un ni l'autre",
-            "es": "Ni lo uno ni lo otro"
+            "en": "も〜も with a negative",
+            "fr": "も〜も avec une négation",
+            "es": "も〜も con una negación"
           },
           "jp": "今日は電車もバスもありません。",
           "tr": {
@@ -33758,7 +33758,7 @@
             "es": "Tenemos pan y bolas de arroz."
           },
           "task": {
-            "en": "Tell him you'll have both.",
+            "en": "Tell the vendor you'll have both.",
             "fr": "Dis-lui que tu prends les deux.",
             "es": "Dile que quieres las dos cosas."
           },
@@ -34150,9 +34150,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Two to choose from: どちら",
-            "fr": "Deux au choix : どちら",
-            "es": "Dos para elegir: どちら"
+            "en": "Against どちら",
+            "fr": "Face à どちら",
+            "es": "Frente a どちら"
           },
           "jp": "コーヒーとおちゃと、どちらがいいですか。",
           "tr": {
@@ -34161,15 +34161,15 @@
             "es": "¿Café o té? ¿Qué prefiere?"
           },
           "ask": {
-            "en": "Two drinks. Why どちら, and not どれ?",
-            "fr": "Deux boissons. Pourquoi どちら, et pas どれ ?",
-            "es": "Dos bebidas. ¿Por qué どちら y no どれ?"
+            "en": "Why どちら, and not どれ?",
+            "fr": "Pourquoi どちら, et pas どれ ?",
+            "es": "¿Por qué どちら y no どれ?"
           },
           "choices": [
             {
-              "en": "どちら is for a choice of two; どれ for three or more.",
-              "fr": "どちら sert pour choisir entre deux ; どれ à partir de trois.",
-              "es": "どちら es para elegir entre dos; どれ, entre tres o más."
+              "en": "どちら is for two; どれ for three or more.",
+              "fr": "どちら sert pour deux ; どれ à partir de trois.",
+              "es": "どちら es para dos; どれ, para tres o más."
             },
             {
               "en": "どちら is the casual form of どれ.",
@@ -34195,15 +34195,15 @@
         },
         {
           "notion": {
-            "en": "A person: あの人",
-            "fr": "Une personne : あの人",
-            "es": "Una persona: あの人"
+            "en": "Against あの人",
+            "fr": "Face à あの人",
+            "es": "Frente a あの人"
           },
           "jp": "あの人は山本さんです。",
           "tr": {
-            "en": "That person is Mr Yamamoto.",
-            "fr": "Cette personne-là, c'est M. Yamamoto.",
-            "es": "Aquella persona es el Sr. Yamamoto."
+            "en": "That person is Yamamoto.",
+            "fr": "Cette personne-là, c'est Yamamoto.",
+            "es": "Aquella persona es Yamamoto."
           },
           "ask": {
             "en": "Pointing at someone. Why not あれは山本さんです?",
@@ -34240,9 +34240,9 @@
         },
         {
           "notion": {
-            "en": "Before a noun: この",
-            "fr": "Devant un nom : この",
-            "es": "Delante de un sustantivo: この"
+            "en": "Against この",
+            "fr": "Face à この",
+            "es": "Frente a この"
           },
           "jp": "この本はわたしのです。",
           "tr": {
@@ -34262,9 +34262,9 @@
               "es": "この va delante de un sustantivo: este libro."
             },
             {
-              "en": "この means « here ».",
-              "fr": "この veut dire « ici ».",
-              "es": "この significa «aquí»."
+              "en": "この means « here »: the book here.",
+              "fr": "この veut dire « ici » : le livre d'ici.",
+              "es": "この significa «aquí»: el libro de aquí."
             },
             {
               "en": "この asks « which one ».",
@@ -34556,9 +34556,9 @@
       "twists": [
         {
           "notion": {
-            "en": "あの: shared memory",
-            "fr": "あの : un souvenir commun",
-            "es": "あの: un recuerdo compartido"
+            "en": "あの before 店",
+            "fr": "あの devant 店",
+            "es": "あの ante 店"
           },
           "jp": "あの店、また行きたいですね。",
           "tr": {
@@ -34601,9 +34601,9 @@
         },
         {
           "notion": {
-            "en": "Standing alone: あれ",
-            "fr": "Tout seul : あれ",
-            "es": "Sin sustantivo detrás: あれ"
+            "en": "Against あれ",
+            "fr": "Face à あれ",
+            "es": "Frente a あれ"
           },
           "jp": "あれは何ですか。",
           "tr": {
@@ -34623,9 +34623,9 @@
               "es": "あれ va solo: sin sustantivo detrás."
             },
             {
-              "en": "あれ is only for people.",
-              "fr": "あれ ne sert que pour les personnes.",
-              "es": "あれ es solo para personas."
+              "en": "あれ is for people only, not things.",
+              "fr": "あれ ne sert que pour les personnes, pas les choses.",
+              "es": "あれ es solo para personas, no para cosas."
             },
             {
               "en": "あれ is nearer than あの.",
@@ -34682,8 +34682,8 @@
             "es": "Para Tokio, es el tren de allá."
           },
           "task": {
-            "en": "She points at a train in the distance. Ask: « That train over there? »",
-            "fr": "Elle montre un train au loin. Demande : « Ce train-là ? »",
+            "en": "The traveller points at a train in the distance. Ask: « That train over there? »",
+            "fr": "La voyageuse montre un train au loin. Demande : « Ce train-là ? »",
             "es": "Señala un tren a lo lejos. Pregunta: «¿Aquel tren?»"
           },
           "choices": [
@@ -34804,7 +34804,7 @@
         {
           "kind": "form",
           "ask": {
-            "en": "A shop assistant holds up a bag and tells you the price. Which word does she use?",
+            "en": "A shop assistant holds up a bag and tells you the price. Which word does the assistant use?",
             "fr": "Une vendeuse lève un sac et t'en dit le prix. Quel mot emploie-t-elle ?",
             "es": "Una vendedora levanta un bolso y te dice el precio. ¿Qué palabra usa?"
           },
@@ -34820,7 +34820,7 @@
             "あの"
           ],
           "why": {
-            "en": "The bag is in the assistant's own hand, so she says この. その is how you would name it from your side, as the thing near the listener.",
+            "en": "The bag is in the assistant's own hand, so the assistant says この. その is how you would name it from your side, as the thing near the listener.",
             "fr": "Le sac est dans la main de la vendeuse : elle dit この. その, c'est ainsi que toi tu le désignerais, comme la chose proche de l'interlocuteur.",
             "es": "El bolso está en la mano de la propia dependienta, así que dice この. その es como lo nombrarías tú desde tu lado, como lo que está cerca de quien escucha."
           }
@@ -35001,9 +35001,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Readings of their own",
-            "fr": "Des lectures à part",
-            "es": "Lecturas propias"
+            "en": "The reading of 二人",
+            "fr": "La lecture de 二人",
+            "es": "La lectura de 二人"
           },
           "jp": "きのうは二人で山に行きました。",
           "tr": {
@@ -35018,9 +35018,9 @@
           },
           "choices": [
             {
-              "en": "« Futari »: one and two people have readings of their own.",
-              "fr": "« Futari » : une et deux personnes ont leur propre lecture.",
-              "es": "«Futari»: una y dos personas tienen lectura propia."
+              "en": "« Futari »: a special case, like 一人.",
+              "fr": "« Futari » : un cas à part, comme 一人.",
+              "es": "«Futari»: un caso aparte, como 一人."
             },
             {
               "en": "« Ninin », like the other numbers.",
@@ -35046,9 +35046,9 @@
         },
         {
           "notion": {
-            "en": "People: 人",
-            "fr": "Les personnes : 人",
-            "es": "Personas: 人"
+            "en": "人 against つ",
+            "fr": "人 face à つ",
+            "es": "人 frente a つ"
           },
           "jp": "へやに子どもが三人います。",
           "tr": {
@@ -35367,9 +35367,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Both: どちらも",
-            "fr": "Les deux : どちらも",
-            "es": "Los dos: どちらも"
+            "en": "Answering with どちらも",
+            "fr": "Répondre par どちらも",
+            "es": "Responder con どちらも"
           },
           "jp": "どちらもすきです。",
           "tr": {
@@ -35500,7 +35500,7 @@
             "es": "También tenemos bebidas."
           },
           "task": {
-            "en": "Ask her which is cheaper, the tea or the coffee.",
+            "en": "Ask the vendor which is cheaper, the tea or the coffee.",
             "fr": "Demande-lui lequel est le moins cher, le thé ou le café.",
             "es": "Pregúntale qué es más barato, el té o el café."
           },
@@ -35906,9 +35906,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Some day: いつか",
-            "fr": "Un jour : いつか",
-            "es": "Algún día: いつか"
+            "en": "いつ with か",
+            "fr": "いつ avec か",
+            "es": "いつ con か"
           },
           "jp": "いつか、ふじさんにのぼりたいです。",
           "tr": {
@@ -35951,9 +35951,9 @@
         },
         {
           "notion": {
-            "en": "Something, not what",
-            "fr": "Quelque chose, pas quoi",
-            "es": "Algo, no qué"
+            "en": "何 with か",
+            "fr": "何 avec か",
+            "es": "何 con か"
           },
           "jp": "何か食べますか。",
           "tr": {
@@ -35968,9 +35968,9 @@
           },
           "choices": [
             {
-              "en": "Will you eat something? (yes or no)",
-              "fr": "Tu manges quelque chose ? (oui ou non)",
-              "es": "¿Vas a comer algo? (sí o no)"
+              "en": "Will you eat something?",
+              "fr": "Tu manges quelque chose ?",
+              "es": "¿Vas a comer algo?"
             },
             {
               "en": "What will you eat?",
@@ -36039,7 +36039,7 @@
             "es": "Ah, allí hay una tienda."
           },
           "task": {
-            "en": "Ask him: « Will you buy something? »",
+            "en": "Ask your colleague: « Will you buy something? »",
             "fr": "Demande-lui : « Vous achetez quelque chose ? »",
             "es": "Pregúntale: «¿Va a comprar algo?»"
           },
@@ -36325,9 +36325,9 @@
         },
         {
           "notion": {
-            "en": "Nothing, not something",
-            "fr": "Rien, pas quelque chose",
-            "es": "Nada, no algo"
+            "en": "何も with ありません",
+            "fr": "何も avec ありません",
+            "es": "何も con ありません"
           },
           "jp": "かばんの中に何もありません。",
           "tr": {
@@ -36406,7 +36406,7 @@
             "es": "¿Comió algo esta mañana?"
           },
           "task": {
-            "en": "Tell her: no, you ate nothing.",
+            "en": "Tell the traveller: no, you ate nothing.",
             "fr": "Dis-lui : non, tu n'as rien mangé.",
             "es": "Dile que no, que no comiste nada."
           },
@@ -36496,8 +36496,8 @@
             "うん、何かした。"
           ],
           "why": {
-            "en": "He asks about something already past, so you answer in the past negative: 何もしなかった. 何もしない is the present (what you never do), and 何かした says you did something: 何か is « something », and only 何も goes with a negative.",
-            "fr": "Il parle d'un fait passé : tu réponds au passé négatif, 何もしなかった. 何もしない est le présent (ce que tu ne fais jamais), et 何かした dit que tu as fait quelque chose : 何か veut dire « quelque chose », et seul 何も va avec un négatif.",
+            "en": "Your friend asks about the past, so you answer in the past negative: 何もしなかった. 何もしない is the present (what you never do), and 何かした says you did something: 何か is « something », and only 何も goes with a negative.",
+            "fr": "On parle d'un fait passé : tu réponds au passé négatif, 何もしなかった. 何もしない est le présent (ce que tu ne fais jamais), et 何かした dit que tu as fait quelque chose : 何か veut dire « quelque chose », et seul 何も va avec un négatif.",
             "es": "Pregunta por algo ya pasado, así que respondes en pasado negativo: 何もしなかった. 何もしない es el presente (lo que nunca haces), y 何かした dice que hiciste algo: 何か es «algo», y solo 何も va con una negación."
           }
         },
@@ -36717,9 +36717,9 @@
       "twists": [
         {
           "notion": {
-            "en": "A second は: contrast",
-            "fr": "Un second は : l'opposition",
-            "es": "Un segundo は: contraste"
+            "en": "A second は",
+            "fr": "Un second は",
+            "es": "Un segundo は"
           },
           "jp": "この店は、パンはおいしいです。",
           "tr": {
@@ -36762,9 +36762,9 @@
         },
         {
           "notion": {
-            "en": "Topic, then the part",
-            "fr": "Le thème, puis la partie",
-            "es": "Tema, luego la parte"
+            "en": "は, then が",
+            "fr": "は, puis が",
+            "es": "は, luego が"
           },
           "jp": "この店はパンがおいしいです。",
           "tr": {
@@ -37092,9 +37092,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Polite: ですから",
-            "fr": "Poli : ですから",
-            "es": "Cortés: ですから"
+            "en": "ですから in place of だから",
+            "fr": "ですから au lieu de だから",
+            "es": "ですから en lugar de だから"
           },
           "jp": "この電車はこんでいます。ですから、つぎの電車をおまちください。",
           "tr": {
@@ -37109,14 +37109,14 @@
           },
           "choices": [
             {
-              "en": "ですから is the polite だから, for staff speaking to travellers.",
-              "fr": "ですから est le だから poli, pour le personnel qui parle aux voyageurs.",
-              "es": "ですから es el だから cortés, del personal hacia los viajeros."
+              "en": "ですから is the polite だから, for travellers.",
+              "fr": "ですから est le だから poli, pour les voyageurs.",
+              "es": "ですから es el だから cortés, para los viajeros."
             },
             {
-              "en": "ですから turns it around: but.",
-              "fr": "ですから renverse le sens : mais.",
-              "es": "ですから le da la vuelta: pero."
+              "en": "ですから turns the sense around: « but ».",
+              "fr": "ですから renverse le sens : « mais ».",
+              "es": "ですから le da la vuelta al sentido: «pero»."
             },
             {
               "en": "ですから is the past: so it was.",
@@ -37137,9 +37137,9 @@
         },
         {
           "notion": {
-            "en": "Impatient: I told you",
-            "fr": "Agacement : je te l'avais dit",
-            "es": "Impaciencia: ya te lo dije"
+            "en": "だから with 言ったでしょう",
+            "fr": "だから avec 言ったでしょう",
+            "es": "だから con 言ったでしょう"
           },
           "jp": "だから、きのう言ったでしょう！",
           "tr": {
@@ -37148,9 +37148,9 @@
             "es": "¡Eso es lo que te dije ayer!"
           },
           "ask": {
-            "en": "No reason has just been given. What does だから do?",
-            "fr": "Aucune raison ne vient d'être donnée. Que fait だから ?",
-            "es": "No se acaba de dar ninguna razón. ¿Qué hace だから?"
+            "en": "だから opens the reply. What does it do?",
+            "fr": "だから ouvre la réponse. Que fait-il ?",
+            "es": "だから abre la respuesta. ¿Qué hace?"
           },
           "choices": [
             {
@@ -37178,9 +37178,9 @@
         },
         {
           "notion": {
-            "en": "Only adding: そして",
-            "fr": "Juste ajouter : そして",
-            "es": "Solo agregar: そして"
+            "en": "Against そして",
+            "fr": "Face à そして",
+            "es": "Frente a そして"
           },
           "jp": "雨がふっています。そして、さむいです。",
           "tr": {
@@ -37266,7 +37266,7 @@
             "es": "¿Tiene el día libre mañana?"
           },
           "task": {
-            "en": "Tell her: yes, you are off. So you'll go to the mountains.",
+            "en": "Tell your colleague: yes, you are off. So you'll go to the mountains.",
             "fr": "Dis-lui : oui, tu es en congé. Donc tu vas à la montagne.",
             "es": "Dile: sí, tienes el día libre. Así que irás a la montaña."
           },
@@ -37506,9 +37506,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Not yet: まだ",
-            "fr": "Pas encore : まだ",
-            "es": "Todavía no: まだ"
+            "en": "Against まだ",
+            "fr": "Face à まだ",
+            "es": "Frente a まだ"
           },
           "jp": "まだ食べていません。",
           "tr": {
@@ -37551,9 +37551,9 @@
         },
         {
           "notion": {
-            "en": "Already: もう〜ました",
-            "fr": "Déjà : もう〜ました",
-            "es": "Ya, en pasado: もう〜ました"
+            "en": "Against もう〜ました",
+            "fr": "Face à もう〜ました",
+            "es": "Frente a もう〜ました"
           },
           "jp": "もう食べました。",
           "tr": {
@@ -37639,7 +37639,7 @@
             "es": "¿Va a tomar más té?"
           },
           "task": {
-            "en": "Tell her: no, not any more.",
+            "en": "Tell your colleague: no, not any more.",
             "fr": "Dis-lui : non, plus maintenant.",
             "es": "Dile: no, ya no."
           },
@@ -37885,9 +37885,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Polite: いかがですか",
-            "fr": "Poli : いかがですか",
-            "es": "Cortés: いかがですか"
+            "en": "いかがですか in place of どうですか",
+            "fr": "いかがですか au lieu de どうですか",
+            "es": "いかがですか en lugar de どうですか"
           },
           "jp": "あたたかいおちゃはいかがですか。",
           "tr": {
@@ -37930,9 +37930,9 @@
         },
         {
           "notion": {
-            "en": "Asking an opinion",
-            "fr": "Demander un avis",
-            "es": "Pedir una opinión"
+            "en": "どうですか with 電車",
+            "fr": "どうですか avec 電車",
+            "es": "どうですか con 電車"
           },
           "jp": "日本の電車はどうですか。",
           "tr": {
@@ -37941,9 +37941,9 @@
             "es": "¿Qué le parecen los trenes japoneses?"
           },
           "ask": {
-            "en": "Nothing is offered here. What is asked?",
-            "fr": "Rien n'est proposé ici. Que demande-t-on ?",
-            "es": "Aquí no se ofrece nada. ¿Qué se pregunta?"
+            "en": "What is asked here?",
+            "fr": "Que demande-t-on ici ?",
+            "es": "¿Qué se pregunta aquí?"
           },
           "choices": [
             {
@@ -38024,7 +38024,7 @@
             "五時に行きませんか。"
           ],
           "why": {
-            "en": "The thing offered takes は, then どうですか. ませんか would invite her to go with you.",
+            "en": "The thing offered takes は, then どうですか. ませんか would invite the clerk to go with you.",
             "fr": "Ce qu'on propose prend は, puis どうですか. ませんか l'inviterait à y aller avec toi.",
             "es": "Lo que se ofrece lleva は, y luego どうですか. ませんか sería invitar a esa persona a ir contigo."
           }
@@ -38058,7 +38058,7 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "A manager says this to you a few weeks after you started a new job. What does she want to know?",
+            "en": "A manager says this to you a few weeks after you started a new job. What does the manager want to know?",
             "fr": "Ta responsable te dit cela quelques semaines après ton arrivée dans une entreprise. Que veut-elle savoir ?",
             "es": "Tu jefa te dice esto unas semanas después de que empezaras en un trabajo nuevo. ¿Qué quiere saber?"
           },
@@ -38112,7 +38112,7 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "A friend says this at a café. What does she ask you?",
+            "en": "A friend says this at a café. What does your friend ask you?",
             "fr": "Une amie dit cela dans un café. Que te demande-t-elle ?",
             "es": "Una amiga dice esto en una cafetería. ¿Qué te pregunta?"
           },
