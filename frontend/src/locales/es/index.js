@@ -3122,7 +3122,7 @@ const onboarding = {
   // turns in its foot.
   examQuit:            'Salir',
   examMark:            'Marcar',
-  examToAnswer:        'por responder',
+  examToAnswer:        'para responder',
   examLastQuestion:    'Última pregunta',
   examThisText:        'Este texto',
   examLikeThePaper:    'Como en el examen',

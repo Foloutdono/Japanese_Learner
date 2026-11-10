@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **318**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **319**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -548,7 +548,9 @@ runtime purpose.
   change to it run `python -m scripts.build_kanji_db --deck-only` (the
   database's `in_deck` and French) and `python -m scripts.build_frequency_index
   --kanji-db` (the teaching order); a new character carries its French in
-  `kanji_meanings_fr.json` where KANJIDIC2 has none. Adding is free;
+  `kanji_meanings_fr.json` where KANJIDIC2 has none, and a French
+  KANJIDIC2 has wrong (誠 given 誡's « avertir ») is corrected there too:
+  the file wins, as the Spanish one does (plan 318). Adding is free;
   moving a character between levels is a migration (`kanji_renames`).
 - **An example sentence is corrected in the layer, not in JMdict (plan
   227).** The deck's Tatoeba sentences are read through

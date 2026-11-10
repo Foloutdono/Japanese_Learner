@@ -26,7 +26,9 @@ Inputs (datas/kanji/, the shipped KANJIDIC2 export):
     kanji_deck.json         the app's own JLPT deck, for in_deck
     kanji_meanings_fr.json  the French KANJIDIC2 lacks for 219 deck
                             characters (plan 215), tracked: it fills
-                            meaning_fr where the export has none
+                            meaning_fr where the export has none, and
+                            corrects it where the export is wrong
+                            (plan 318)
     kanji_meanings_es.json  the same for the Spanish of 71 (plan 302),
                             over meaning_es
     ../../kanjivg/*.svg     which characters have a stroke diagram
@@ -284,16 +286,19 @@ def apply_spanish(conn: sqlite3.Connection, data_dir: str) -> int:
 
 
 def apply_french(conn: sqlite3.Connection, data_dir: str) -> int:
-    """kanji_meanings_fr.json over meaning_fr, where KANJIDIC2 has none.
+    """kanji_meanings_fr.json over meaning_fr.
 
     KANJIDIC2's French stops short of 219 of the deck's characters --
     name kanji, mostly (蒼, 聡, 鴻, 蓮) -- and a French learner read
     their cards, their choices and their dictionary plates in English
     (content/kanji_meanings.py). The file is the app's own French for
     them (plan 215), written from the character's senses rather than
-    copied from a published list. It never overrides a French meaning
-    the export carries."""
-    return apply_own(conn, data_dir, "fr", "French")
+    copied from a published list. Like the Spanish (apply_spanish), it
+    also wins where the export has a line (plan 318): KANJIDIC2's French
+    gives some characters the senses of a lookalike -- 誠 « avertir »
+    (誡's), 幣 « mauvaise habitude » (弊's), 抑 « pousser » (押's) --
+    and the deck's corrected lines live in the file."""
+    return apply_own(conn, data_dir, "fr", "French", override=True)
 
 
 def apply_deck(conn: sqlite3.Connection, data_dir: str) -> int:
