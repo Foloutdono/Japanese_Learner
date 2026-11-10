@@ -349,7 +349,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What happened between him and the speaker?",
-            "fr": "Que s'est-il passé entre lui et celui qui parle ?",
+            "fr": "Que s'est-il passé entre lui et la personne qui parle ?",
             "es": "¿Qué pasó entre él y quien habla?"
           },
           "jp": "彼は、飛びかからんばかりの顔で、わたしをにらんだ。",
@@ -361,17 +361,17 @@
           "choices": [
             {
               "en": "He glared, looking ready to pounce, but did not touch the speaker.",
-              "fr": "Il a lancé un regard noir, prêt à bondir, mais n'a pas touché celui qui parle.",
+              "fr": "Il a lancé un regard noir, prêt à bondir, mais n'a pas touché la personne qui parle.",
               "es": "Miró con furia, listo para abalanzarse, pero no tocó a quien habla."
             },
             {
               "en": "He pounced on the speaker and then glared.",
-              "fr": "Il a sauté sur celui qui parle, puis l'a regardé de travers.",
-              "es": "Se abalanzó sobre quien habla y luego lo miró con furia."
+              "fr": "Il a sauté sur la personne qui parle, puis l'a regardée de travers.",
+              "es": "Se abalanzó sobre quien habla y luego le lanzó una mirada furiosa."
             },
             {
               "en": "He glared just because the speaker had pounced on him.",
-              "fr": "Il a lancé un regard noir uniquement parce que celui qui parle lui avait sauté dessus.",
+              "fr": "Il a lancé un regard noir uniquement parce que la personne qui parle lui avait sauté dessus.",
               "es": "Miró con furia solo porque quien habla se le había abalanzado."
             }
           ],
@@ -612,14 +612,14 @@
           },
           "choices": [
             {
-              "en": "The station is something the town cannot do without.",
-              "fr": "La gare est une chose dont la ville ne peut pas se passer.",
-              "es": "La estación es algo de lo que el pueblo no puede prescindir."
+              "en": "The town cannot do without the station.",
+              "fr": "La ville ne peut pas se passer de la gare.",
+              "es": "El pueblo no puede prescindir de la estación."
             },
             {
-              "en": "The station is missing from the town.",
+              "en": "The town is missing its station: it has none.",
               "fr": "La gare manque à la ville : elle n'existe pas.",
-              "es": "El pueblo no tiene estación: le falta."
+              "es": "Al pueblo le falta la estación: no tiene ninguna."
             },
             {
               "en": "Nobody is allowed to enter the station.",
@@ -696,13 +696,13 @@
           },
           "choices": [
             "「ここでたばこを吸うべからず」だって。",
-            "「ここでたばこを吸うべし」だって。",
+            "「ここでたばこを吸うべきである」だって。",
             "「ここでたばこを吸うべく」だって。"
           ],
           "why": {
-            "en": "A posted ban is べからず. べし orders the act; べく means « in order to ».",
-            "fr": "Un interdit affiché, c'est べからず. べし ordonne l'acte ; べく veut dire « afin de ».",
-            "es": "Una prohibición en un cartel es べからず. べし ordena el acto; べく significa «para»."
+            "en": "A posted ban is べからず. べきである orders the act; べく means « in order to ».",
+            "fr": "Un interdit affiché, c'est べからず. べきである ordonne l'acte ; べく veut dire « afin de ».",
+            "es": "Una prohibición en un cartel es べからず. べきである ordena el acto; べく significa «para»."
           }
         }
       },
@@ -795,7 +795,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer think of the act?",
-            "fr": "Que pense l'auteur de cet acte ?",
+            "fr": "Que pense de cet acte la personne qui écrit ?",
             "es": "¿Qué piensa quien escribe de ese acto?"
           },
           "jp": "それは、教師として決して許すべからざる行為だった。",
@@ -1455,7 +1455,7 @@
           "choices": [
             "皆さんの助けなくしては、飛行機に乗れませんでした。",
             "皆さんの助けなしに、飛行機に乗れました。",
-            "皆さんが助けなくても、飛行機に乗れました。"
+            "皆さんが助けてくださらなくても、飛行機に乗れました。"
           ],
           "why": {
             "en": "Their help is what made it possible: なくしては with a negative. なしに and なくても would say you managed without them.",
@@ -1493,7 +1493,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How does the writer see that recession?",
-            "fr": "Comment l'auteur voit-il cette crise ?",
+            "fr": "Comment la personne qui écrit voit-elle cette crise ?",
             "es": "¿Cómo ve quien escribe aquella recesión?"
           },
           "jp": "あの不況なくして、今のこの店はなかった。",
@@ -1868,7 +1868,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of the teacher's lessons?",
-            "fr": "Que pense celui qui parle des cours du professeur ?",
+            "fr": "Que pense la personne qui parle des cours du professeur ?",
             "es": "¿Qué piensa quien habla de las clases de ese profesor?"
           },
           "jp": "わたしには、あの先生の授業は退屈極まりない。",
@@ -1928,7 +1928,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of the idea?",
-            "fr": "Que pense celui qui parle de cette idée ?",
+            "fr": "Que pense la personne qui parle de cette idée ?",
             "es": "¿Qué piensa quien habla de esa idea?"
           },
           "jp": "この考えは、非常識極まりないとは言えない。",
@@ -2199,7 +2199,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What is the speaker saying about the magazine?",
-            "fr": "Que dit celui qui parle de ce magazine ?",
+            "fr": "Que dit la personne qui parle de ce magazine ?",
             "es": "¿Qué dice quien habla de esa revista?"
           },
           "jp": "あの雑誌は、どうも政府の味方をするきらいがある。",
@@ -2210,9 +2210,9 @@
           },
           "choices": [
             {
-              "en": "That it seems to lean towards the government's side, and that is a fault.",
-              "fr": "Qu'il semble pencher du côté du gouvernement, ce qui est un défaut.",
-              "es": "Que parece inclinarse del lado del gobierno, y eso es un defecto."
+              "en": "That it seems to lean, regrettably, to the government.",
+              "fr": "Qu'il semble pencher, hélas, du côté du gouvernement.",
+              "es": "Que parece inclinarse, por desgracia, hacia el gobierno."
             },
             {
               "en": "That it does not like the government.",
@@ -2259,7 +2259,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker mean by this?",
-            "fr": "Que veut dire celui qui parle ?",
+            "fr": "Que veut dire la personne qui parle ?",
             "es": "¿Qué quiere decir quien habla?"
           },
           "jp": "彼は、何でも深刻に考えるきらいがある。",
@@ -2319,7 +2319,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about how he handles his mistakes?",
-            "fr": "Que dit celui qui parle de la façon dont il traite ses erreurs ?",
+            "fr": "Que dit la personne qui parle de la façon dont il traite ses erreurs ?",
             "es": "¿Qué dice quien habla sobre cómo trata él sus errores?"
           },
           "jp": "彼は、自分の失敗を認めないきらいがある。",
@@ -2427,7 +2427,7 @@
       {
         "jp": "ご支援をいただき、感謝の念にたえません。",
         "en": "For your support, I am filled with gratitude.",
-        "fr": "Pour votre soutien, je suis rempli de gratitude.",
+        "fr": "Votre soutien m'emplit de gratitude.",
         "es": "Su apoyo me llena de gratitud.",
         "register": "formal"
       }
@@ -2454,7 +2454,7 @@
           "choices": [
             {
               "en": "The speaker is overwhelmed with gratitude for the staff's kindness.",
-              "fr": "On est submergé de reconnaissance pour la gentillesse du personnel.",
+              "fr": "La reconnaissance déborde devant la gentillesse du personnel.",
               "es": "Quien habla rebosa de gratitud por la amabilidad del personal."
             },
             {
@@ -2464,7 +2464,7 @@
             },
             {
               "en": "The speaker's gratitude has run out.",
-              "fr": "La reconnaissance de celui qui parle s'est épuisée.",
+              "fr": "La reconnaissance qu'on éprouvait s'est épuisée.",
               "es": "La gratitud de quien habla se ha agotado."
             }
           ],
@@ -2614,7 +2614,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How does the speaker feel about the words?",
-            "fr": "Que ressent celui qui parle devant ces paroles ?",
+            "fr": "Que ressent la personne qui parle devant ces paroles ?",
             "es": "¿Qué siente quien habla ante esas palabras?"
           },
           "jp": "皆様のあたたかいお言葉に、感激にたえません。",
@@ -2626,17 +2626,17 @@
           "choices": [
             {
               "en": "Deeply moved, overwhelmed with emotion.",
-              "fr": "Profondément touché, débordant d'émotion.",
+              "fr": "Une émotion profonde, débordante.",
               "es": "Una emoción honda, desbordante."
             },
             {
               "en": "Embarrassed: the speaker cannot bear to hear such praise.",
-              "fr": "Gêné : celui qui parle ne supporte pas d'entendre de tels éloges.",
+              "fr": "De la gêne : elle ne supporte pas d'entendre de tels éloges.",
               "es": "Apuro: quien habla no soporta oír tales elogios."
             },
             {
               "en": "Annoyed: the words are too awful to listen to.",
-              "fr": "Agacé : ces paroles sont trop affreuses pour être écoutées.",
+              "fr": "De l'agacement : ces paroles sont trop affreuses pour être écoutées.",
               "es": "Fastidio: las palabras son demasiado horribles para oírlas."
             }
           ],
@@ -2954,7 +2954,7 @@
           },
           "choices": [
             "皆さんのご健康を、心から願ってやみません。",
-            "皆さんのご健康が、心配でなりません。",
+            "皆さんのご健康が、どうにも心配でなりません。",
             "皆さんのご健康を、願ってもしかたありません。"
           ],
           "why": {
@@ -2985,14 +2985,14 @@
               "es": "Hasta el final, nunca dejó de pensar en él con cariño."
             },
             {
-              "en": "Until the end, he refused to think of it.",
-              "fr": "Jusqu'au bout, il a refusé d'y penser.",
-              "es": "Hasta el final, se negó a pensar en él."
+              "en": "Until the end, he refused even to think of his village.",
+              "fr": "Jusqu'au bout, il a refusé ne serait-ce que de penser à son village.",
+              "es": "Hasta el final, se negó a pensar en su pueblo."
             },
             {
-              "en": "He only thought of it at the very end.",
-              "fr": "Il n'y a pensé qu'à la toute fin.",
-              "es": "Solo pensó en él al final de todo."
+              "en": "He only began to think of it at the very end of his life.",
+              "fr": "Il n'a commencé à y penser qu'à la toute fin de sa vie.",
+              "es": "Solo empezó a pensar en él al final de su vida."
             }
           ],
           "why": {
@@ -3029,7 +3029,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of the story about him?",
-            "fr": "Que pense celui qui parle de l'histoire qu'on raconte sur lui ?",
+            "fr": "Que pense la personne qui parle de l'histoire qu'on raconte sur lui ?",
             "es": "¿Qué piensa quien habla de lo que se cuenta de él?"
           },
           "jp": "彼を信じてやまないわたしには、そんな話は信じられない。",
@@ -3041,17 +3041,17 @@
           "choices": [
             {
               "en": "Having never lost faith in him, the speaker cannot believe it.",
-              "fr": "N'ayant jamais perdu foi en lui, celui qui parle n'arrive pas à y croire.",
+              "fr": "N'ayant jamais perdu foi en lui, la personne n'arrive pas à y croire.",
               "es": "Nunca perdió la fe en él, así que quien habla no puede creerla."
             },
             {
               "en": "The speaker believes the story and has lost faith in him.",
-              "fr": "Celui qui parle croit l'histoire et n'a plus foi en lui.",
+              "fr": "La personne croit l'histoire et n'a plus foi en lui.",
               "es": "Quien habla cree la historia y ha perdido la fe en él."
             },
             {
               "en": "The speaker has never believed in him, and does not believe the story.",
-              "fr": "Celui qui parle n'a jamais cru en lui, et ne croit pas l'histoire.",
+              "fr": "La personne n'a jamais cru en lui, et ne croit pas l'histoire.",
               "es": "Quien habla nunca ha creído en él, y tampoco se cree esa historia."
             }
           ],
@@ -3111,7 +3111,7 @@
             },
             {
               "en": "A wish the writer once had and has now given up.",
-              "fr": "Un souhait que l'auteur a eu autrefois et auquel il a renoncé.",
+              "fr": "Un souhait qu'on a eu autrefois et auquel on a renoncé.",
               "es": "Un deseo que quien escribe tuvo una vez y ya abandonó."
             }
           ],
@@ -3266,14 +3266,14 @@
           },
           "choices": [
             {
-              "en": "Mistakes are many separate things: だらけ is « full of ». まみれ would coat the sign like mud.",
-              "fr": "Les erreurs sont des choses nombreuses et séparées : だらけ, c'est « plein de ». まみれ couvrirait le panneau comme de la boue.",
-              "es": "Los errores son muchas cosas sueltas: だらけ es «lleno de». まみれ cubriría el panel como el barro."
+              "en": "Because mistakes are many separate things, not a coating.",
+              "fr": "Parce que les erreurs sont nombreuses et séparées, pas une couche.",
+              "es": "Porque los errores son muchas cosas sueltas, no una capa."
             },
             {
-              "en": "Because まみれ is said only of people, never of things.",
-              "fr": "Parce que まみれ ne se dit que des personnes, jamais des choses.",
-              "es": "Porque まみれ solo se dice de personas, nunca de cosas."
+              "en": "Because まみれ is said only of people and animals, never of things.",
+              "fr": "Parce que まみれ ne se dit que des personnes et des animaux, jamais des choses.",
+              "es": "Porque まみれ solo se dice de personas y animales, nunca de cosas."
             },
             {
               "en": "Because だらけ is the written form and まみれ the spoken one.",
@@ -3435,7 +3435,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of the politician's life?",
-            "fr": "Que pense celui qui parle de la vie de ce politicien ?",
+            "fr": "Que pense la personne qui parle de la vie de ce politicien ?",
             "es": "¿Qué piensa quien habla de la vida de ese político?"
           },
           "jp": "あの政治家は、金まみれの生活を送っている。",
@@ -3447,17 +3447,17 @@
           "choices": [
             {
               "en": "The speaker disapproves: it is a life tainted by money.",
-              "fr": "Celui qui parle désapprouve : c'est une vie souillée par l'argent.",
+              "fr": "La personne désapprouve : c'est une vie souillée par l'argent.",
               "es": "Quien habla lo reprueba: es una vida manchada de dinero."
             },
             {
               "en": "The speaker admires it: the politician is splendidly rich.",
-              "fr": "Celui qui parle l'admire : le politicien est merveilleusement riche.",
+              "fr": "La personne l'admire : le politicien est merveilleusement riche.",
               "es": "Quien habla la admira: el político es de una riqueza espléndida."
             },
             {
               "en": "The speaker pities the politician, who has no money.",
-              "fr": "Celui qui parle le plaint : le politicien n'a pas d'argent.",
+              "fr": "La personne le plaint : le politicien n'a pas d'argent.",
               "es": "Quien habla lo compadece: el político no tiene dinero."
             }
           ],
@@ -3715,7 +3715,7 @@
           },
           "choices": [
             "こんなことになるとは、夢にだに思いませんでした。",
-            "こんなことになると、ずっと夢見ていました。",
+            "こんなことになるのを、子どものころから夢見ていました。",
             "こんな日を、夢にまで見ていました。"
           ],
           "why": {
@@ -3741,7 +3741,7 @@
           },
           "choices": [
             {
-              "en": "None at all: not even a single word.",
+              "en": "None: not even a single word.",
               "fr": "Aucune : pas même un seul mot.",
               "es": "Nada en absoluto: ni una sola palabra."
             },
@@ -3790,7 +3790,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How does the speaker react to hearing about that day?",
-            "fr": "Comment celui qui parle réagit-il quand on lui parle de ce jour ?",
+            "fr": "Comment la personne qui parle réagit-elle quand on lui parle de ce jour ?",
             "es": "¿Cómo reacciona quien habla al oír hablar de aquel día?"
           },
           "jp": "あの日の出来事は、聞くだに腹が立つ。",
@@ -3802,17 +3802,17 @@
           "choices": [
             {
               "en": "Merely hearing about it makes the speaker angry.",
-              "fr": "Rien que d'en entendre parler, celui qui parle se met en colère.",
+              "fr": "Rien que d'en entendre parler, la personne se met en colère.",
               "es": "Con solo oír hablar de ello, quien habla se enoja."
             },
             {
               "en": "The speaker will not even listen to it.",
-              "fr": "Celui qui parle refuse même de l'écouter.",
+              "fr": "La personne refuse même de l'écouter.",
               "es": "Quien habla ni siquiera quiere escucharlo."
             },
             {
               "en": "The speaker got angry only after hearing the whole story.",
-              "fr": "Celui qui parle ne s'est fâché qu'après avoir entendu toute l'histoire.",
+              "fr": "La personne ne s'est fâchée qu'après avoir entendu toute l'histoire.",
               "es": "Quien habla se enojó solo después de oír toda la historia."
             }
           ],
@@ -4767,14 +4767,14 @@
           },
           "choices": [
             {
-              "en": "The fare is the same, whatever the distance.",
+              "en": "The fare is flat, whatever the distance.",
               "fr": "Le tarif est le même, quelle que soit la distance.",
               "es": "La tarifa es la misma, sea cual sea la distancia."
             },
             {
-              "en": "The fare depends on the distance.",
-              "fr": "Le tarif dépend de la distance.",
-              "es": "La tarifa depende de la distancia."
+              "en": "The fare rises and falls with the distance.",
+              "fr": "Le tarif monte ou descend selon la distance parcourue.",
+              "es": "La tarifa sube o baja según la distancia recorrida."
             },
             {
               "en": "The fare is the same, but only over short distances.",
@@ -4897,7 +4897,7 @@
           "choices": [
             "では、理由のいかんによらず、払い戻しはできないんですね。",
             "では、理由いかんでは、払い戻しができるんですね。",
-            "では、病気のせいで、払い戻しができないんですね。"
+            "では、わたしの病気のせいで、払い戻しができなくなるんですね。"
           ],
           "why": {
             "en": "The reason changes nothing: いかんによらず. いかんでは would make it depend on the reason; せいで blames your illness.",
@@ -5648,7 +5648,7 @@
           "choices": [
             "今年は一日たりとも遅刻していません。",
             "今年は一日だけ遅刻していません。",
-            "今年は一日おきに遅刻しています。"
+            "今年は一日おきに、きまって遅刻しています。"
           ],
           "why": {
             "en": "Not even one day: 一日たりとも〜ない. 一日だけ says one day only; 一日おきに, every other day.",
@@ -5768,7 +5768,7 @@
           ],
           "why": {
             "en": "An order takes the dictionary form plus な: むだにするな. むだにしなかった reports that nothing was wasted, and むだにしません is a promise made by the speaker, not an order to others.",
-            "fr": "Un ordre se dit avec la forme du dictionnaire plus な : むだにするな. むだにしなかった rapporte que rien n'a été gaspillé, et むだにしません est une promesse de celui qui parle, pas un ordre aux autres.",
+            "fr": "Un ordre se dit avec la forme du dictionnaire plus な : むだにするな. むだにしなかった rapporte que rien n'a été gaspillé, et むだにしません est une promesse de la personne qui parle, pas un ordre aux autres.",
             "es": "Una orden lleva la forma de diccionario más な: むだにするな. むだにしなかった cuenta que no se desperdició nada, y むだにしません es una promesa de quien habla, no una orden a otros."
           }
         },
@@ -5792,7 +5792,7 @@
               "es": "No decirle nada de ello a nadie."
             },
             {
-              "en": "To say only one word about it.",
+              "en": "To say just a single word about it, no more.",
               "fr": "N'en dire qu'un seul mot.",
               "es": "Decir solo una palabra sobre ello."
             },
@@ -5905,7 +5905,7 @@
           },
           "ask": {
             "en": "とは言わないまでも. What is the speaker aiming for?",
-            "fr": "とは言わないまでも. Que vise celui qui parle ?",
+            "fr": "とは言わないまでも. Que vise la personne qui parle ?",
             "es": "とは言わないまでも. ¿A qué aspira quien habla?"
           },
           "choices": [
@@ -6319,7 +6319,7 @@
           },
           "ask": {
             "en": "ずに済む here, not ずじまい. How does the speaker feel?",
-            "fr": "Ici ずに済む, et pas ずじまい. Que ressent celui qui parle ?",
+            "fr": "Ici ずに済む, et pas ずじまい. Que ressent la personne qui parle ?",
             "es": "Aquí ずに済む, no ずじまい. ¿Cómo se siente quien habla?"
           },
           "choices": [
@@ -6401,7 +6401,7 @@
           },
           "choices": [
             "いつも閉まっていて、結局買えずじまいだった。",
-            "いつも閉まっていて、結局買わずに済んだ。",
+            "いつも閉まっていて、結局買わずに済んでよかった。",
             "いつも閉まっていたのに、結局買えた。"
           ],
           "why": {
@@ -6428,18 +6428,18 @@
           "choices": [
             {
               "en": "No: the speaker meant to ask but never got to.",
-              "fr": "Non : elle voulait le demander, mais n'en a jamais eu l'occasion.",
-              "es": "No: quería preguntarlo, pero nunca tuvo ocasión."
+              "fr": "Non : elle comptait le demander, mais ne l'a jamais fait.",
+              "es": "No: pensaba preguntarlo, pero nunca lo hizo."
             },
             {
-              "en": "Yes: the speaker asked at last.",
-              "fr": "Oui : elle a fini par le demander.",
-              "es": "Sí: al final lo preguntó."
+              "en": "Yes: after putting it off, the speaker asked at last.",
+              "fr": "Oui : après avoir longtemps hésité, elle a fini par le demander.",
+              "es": "Sí: tras darle muchas vueltas, al final lo preguntó."
             },
             {
-              "en": "No: the speaker never wanted to know.",
-              "fr": "Non : elle n'a jamais voulu le savoir.",
-              "es": "No: nunca quiso saberlo."
+              "en": "No: the speaker never wanted to know it in the first place.",
+              "fr": "Non : elle n'a jamais voulu le savoir, dès le départ.",
+              "es": "No: nunca quiso saberlo, ya desde el principio."
             }
           ],
           "why": {
@@ -6700,13 +6700,13 @@
           "choices": [
             {
               "en": "が早いか only tells what happened; an order takes たらすぐに.",
-              "fr": "が早いか raconte seulement ce qui s'est passé ; un ordre prend たらすぐに.",
+              "fr": "が早いか ne raconte que du passé ; un ordre prend たらすぐに.",
               "es": "が早いか solo cuenta lo que pasó; una orden lleva たらすぐに."
             },
             {
-              "en": "が早いか would make the order too polite.",
-              "fr": "が早いか rendrait l'ordre trop poli.",
-              "es": "が早いか haría la orden demasiado cortés."
+              "en": "が早いか would make the order far too polite, almost a favour asked.",
+              "fr": "が早いか rendrait l'ordre bien trop poli, presque une faveur demandée.",
+              "es": "が早いか haría la orden demasiado cortés, casi un favor pedido."
             },
             {
               "en": "が早いか is only for bells and alarms that ring by themselves.",
@@ -7547,9 +7547,9 @@
           },
           "choices": [
             {
-              "en": "A losing battle: new weeds come up as fast as the old ones are pulled.",
-              "fr": "Un combat perdu d'avance : de nouvelles herbes repoussent aussitôt les anciennes arrachées.",
-              "es": "Una batalla perdida: sale maleza nueva tan rápido como se arranca la vieja."
+              "en": "A losing battle: weeds spring up again at once.",
+              "fr": "Un combat perdu : les herbes repoussent aussitôt.",
+              "es": "Una batalla perdida: la maleza rebrota enseguida."
             },
             {
               "en": "A success: once pulled, the weeds stay gone.",
@@ -7652,8 +7652,8 @@
       {
         "kind": "careful",
         "en": "The second act surprises the observer; not for oneself. Different from なり〜なり (either… or) and なりに (in one's own way).",
-        "fr": "Le second acte surprend l'observateur ; pas pour soi-même. Différent de なり〜なり (soit… soit) et de なりに (à sa manière).",
-        "es": "El segundo acto sorprende al observador; no se usa para uno mismo. Distinto de なり〜なり (o… o) y de なりに (a su manera)."
+        "fr": "Le second acte surprend qui le voit ; pas pour soi-même. Différent de なり〜なり (soit… soit) et de なりに (à sa manière).",
+        "es": "El segundo acto sorprende a quien lo ve; no se usa para uno mismo. Distinto de なり〜なり (o… o) y de なりに (a su manera)."
       }
     ],
     "compare": [
@@ -7725,8 +7725,8 @@
           "choices": [
             {
               "en": "Someone watched: the passenger broke into a run on leaving the gates.",
-              "fr": "D'un autre, qu'on a vu : le voyageur a couru dès la sortie des portiques.",
-              "es": "De alguien observado: el pasajero echó a correr apenas salió por los torniquetes."
+              "fr": "D'une autre personne, sous nos yeux : le voyageur a couru dès les portiques.",
+              "es": "De otra persona a la vista: el pasajero echó a correr apenas salió por los torniquetes."
             },
             {
               "en": "The speaker: on leaving the gates, I ran at once.",
@@ -7741,7 +7741,7 @@
           ],
           "why": {
             "en": "なり reports someone else's sudden act, as it was watched, in the past. It does not describe the speaker, nor a habit.",
-            "fr": "なり rapporte l'acte soudain d'un autre, tel qu'on l'a vu, au passé. Il ne décrit ni celui qui parle, ni une habitude.",
+            "fr": "なり rapporte l'acte soudain d'autrui, tel qu'on l'a vu, au passé. Il ne décrit ni la personne qui parle, ni une habitude.",
             "es": "なり cuenta el acto repentino de otra persona, tal como se vio, en pasado. No describe a quien habla ni un hábito."
           },
           "kind": "usage"
@@ -7909,7 +7909,7 @@
           ],
           "why": {
             "en": "なり ties a second act, unexpected for the onlooker, to the first: the customer sat down and was gone at once. Nothing is said of eating, and the surprise is the leaving, not only that the menu went unread.",
-            "fr": "なり rattache à la première action une seconde, inattendue pour celui qui regarde : le client s'est assis et a aussitôt disparu. Il n'est pas question de repas, et la surprise est son départ, pas seulement le menu non lu.",
+            "fr": "なり rattache à la première action une seconde, inattendue pour qui regarde : le client s'est assis et a aussitôt disparu. Il n'est pas question de repas, et la surprise est son départ, pas seulement le menu non lu.",
             "es": "なり une al primer acto un segundo, inesperado para quien mira: se sentó y se fue al instante. No se habla de comer, y la sorpresa es que se fue, no solo que no leyera el menú."
           }
         },
@@ -8043,7 +8043,7 @@
       {
         "jp": "散歩がてら、駅前の本屋に寄った。",
         "en": "While out for a walk, I dropped by the bookshop at the station.",
-        "fr": "En me promenant, je suis passé à la librairie de la gare.",
+        "fr": "En me promenant, j'ai fait un saut à la librairie de la gare.",
         "es": "Aprovechando el paseo, pasé por la librería frente a la estación.",
         "register": "neutral",
         "contrast": true
@@ -8051,7 +8051,7 @@
       {
         "jp": "買い物がてら、友人の家を訪ねた。",
         "en": "While out shopping, I called on a friend.",
-        "fr": "En faisant les courses, je suis passé chez un ami.",
+        "fr": "En faisant les courses, j'ai fait un saut chez un ami.",
         "es": "Aprovechando que fui de compras, visité a un amigo.",
         "register": "neutral",
         "contrast": true
@@ -8134,13 +8134,13 @@
           },
           "choices": [
             {
-              "en": "Two things at the same moment: listening while waiting. がてら would be one outing serving two ends.",
-              "fr": "Deux choses au même moment : écouter en attendant. がてら, ce serait une sortie qui sert deux buts.",
-              "es": "Dos cosas en el mismo momento: escuchar mientras esperas. がてら sería una salida con dos fines."
+              "en": "Because both acts happen at the same moment.",
+              "fr": "Parce que les deux actes ont lieu au même moment.",
+              "es": "Porque los dos actos ocurren en el mismo momento."
             },
             {
-              "en": "Because がてら only goes after a noun, never a verb.",
-              "fr": "Parce que がてら ne suit qu'un nom, jamais un verbe.",
+              "en": "Because がてら only goes after a noun, never after a verb.",
+              "fr": "Parce que がてら ne se place qu'après un nom, jamais après un verbe.",
               "es": "Porque がてら solo va tras un sustantivo, nunca tras un verbo."
             },
             {
@@ -8468,9 +8468,9 @@
           },
           "choices": [
             {
-              "en": "Because both acts share one moment; かたわら pairs occupations over years.",
-              "fr": "Parce que les deux actes ont lieu au même moment ; かたわら associe des occupations sur des années.",
-              "es": "Porque los dos actos ocurren a la vez; かたわら une ocupaciones a lo largo de años."
+              "en": "Because both acts fill one moment, not years.",
+              "fr": "Parce que les deux actes tiennent dans un même moment.",
+              "es": "Porque los dos actos caben en un mismo momento."
             },
             {
               "en": "Because かたわら must follow a noun with の, as in 仕事のかたわら.",
@@ -9009,7 +9009,7 @@
           ],
           "why": {
             "en": "After « I » with no の, ごとき lowers the speaker: a nobody like me. ような者でよければ accepts the offer, and こそ puts you forward.",
-            "fr": "Après « je », sans の, ごとき rabaisse celui qui parle : quelqu'un comme moi. ような者でよければ accepte, et こそ te met en avant.",
+            "fr": "Après « je », sans の, ごとき rabaisse la personne qui parle : quelqu'un comme moi. ような者でよければ accepte, et こそ te met en avant.",
             "es": "Tras «yo» y sin の, ごとき rebaja a quien habla: alguien como yo. ような者でよければ acepta la invitación, y こそ te pone por delante."
           }
         }
@@ -9089,8 +9089,8 @@
           ],
           "why": {
             "en": "ごとき belittles whoever it follows, so a modest speaker puts it after わたし. The line that puts it after 先生 insults the author, and わたしなら boldly claims the opposite.",
-            "fr": "ごとき rabaisse celui qu'il suit : celui qui est modeste le met après わたし. La ligne qui le met après 先生 insulte l'auteur, et わたしなら affirme avec aplomb le contraire.",
-            "es": "ごとき rebaja a quien sigue, así que quien habla con modestia lo pone tras わたし. La frase que lo pone tras 先生 insulta al autor, y わたしなら afirma con descaro lo contrario."
+            "fr": "ごとき rabaisse ce qu'il suit : par modestie, on le met après わたし. La ligne qui le met après 先生 est une insulte, et わたしなら affirme avec aplomb le contraire.",
+            "es": "ごとき rebaja a quien sigue, así que quien habla con modestia lo pone tras わたし. La frase que lo pone tras 先生 es un insulto, y わたしなら afirma con descaro lo contrario."
           }
         },
         {
@@ -9522,12 +9522,12 @@
               "es": "Pura diversión, con una salida tras otra."
             },
             {
-              "en": "A little fun, but mostly study.",
+              "en": "A little fun, but mostly study at home.",
               "fr": "Un peu de plaisir, mais surtout du travail.",
               "es": "Algo de diversión, pero sobre todo estudio."
             },
             {
-              "en": "Full of trouble that spoiled it.",
+              "en": "Full of troubles that spoiled the whole break.",
               "fr": "Pleines d'ennuis qui les ont gâchées.",
               "es": "Llenas de problemas que las arruinaron."
             }
@@ -9872,7 +9872,7 @@
           },
           "choices": [
             {
-              "en": "It had the air of a joke, without saying for certain that it was one.",
+              "en": "It had the air of a joke, but may not have been one.",
               "fr": "Cela avait l'air d'une plaisanterie, sans dire que c'en était une.",
               "es": "Tenía aire de broma, sin decir con certeza que lo fuera."
             },
@@ -10146,9 +10146,9 @@
           },
           "choices": [
             {
-              "en": "The parent: the treatment does not befit someone in a parent's role.",
+              "en": "The parent, for treatment unworthy of a parent.",
               "fr": "Le parent : ce traitement ne convient pas à quelqu'un qui est parent.",
-              "es": "Al padre: ese trato no corresponde a quien tiene el papel de padre."
+              "es": "Al padre, por un trato indigno de un padre."
             },
             {
               "en": "The child, for treating a parent badly.",
@@ -10699,8 +10699,8 @@
       {
         "kind": "rule",
         "en": "**verb て-form + しかるべきだ** means « it is only right that, ought properly to be ». 報われてしかるべきだ (deserves to be rewarded). The speaker says what is due.",
-        "fr": "**verbe forme て + しかるべきだ** signifie « il est juste que, devrait normalement ». 報われてしかるべきだ (mérite d'être récompensé). Le locuteur dit ce qui est dû.",
-        "es": "**verbo en forma て + しかるべきだ** significa «es justo que, debería como es debido». 報われてしかるべきだ (merece ser recompensado). El hablante dice lo que corresponde."
+        "fr": "**verbe forme て + しかるべきだ** signifie « il est juste que, devrait normalement ». 報われてしかるべきだ (mérite d'être récompensé). La personne qui parle dit ce qui est dû.",
+        "es": "**verbo en forma て + しかるべきだ** significa «es justo que, debería como es debido». 報われてしかるべきだ (merece ser recompensado). Quien habla dice lo que corresponde."
       },
       {
         "kind": "use",
@@ -10778,7 +10778,7 @@
           },
           "ask": {
             "en": "あってしかるべきだ. What does the speaker say?",
-            "fr": "あってしかるべきだ. Que dit celui qui parle ?",
+            "fr": "あってしかるべきだ. Que dit la personne qui parle ?",
             "es": "あってしかるべきだ. ¿Qué dice quien habla?"
           },
           "choices": [
@@ -11310,9 +11310,9 @@
           },
           "choices": [
             {
-              "en": "It drew on a local's knowledge, which an outsider could not have offered.",
-              "fr": "Elle reposait sur ce que sait un habitant, ce qu'un étranger au lieu n'aurait pas pu offrir.",
-              "es": "Se basó en lo que sabe alguien de la zona, algo que un forastero no habría podido ofrecer."
+              "en": "Only a local could have given it.",
+              "fr": "Seul un habitant pouvait la donner.",
+              "es": "Solo alguien de la zona podía darla."
             },
             {
               "en": "It was open to local people only, not to tourists.",
@@ -11370,7 +11370,7 @@
           },
           "choices": [
             {
-              "en": "Have as many as possible of the experiences that only the summer holidays offer.",
+              "en": "Have as many as possible of the experiences only the summer holidays offer.",
               "fr": "Vivre le plus possible des expériences que seules les vacances d'été offrent.",
               "es": "Vivir el máximo de experiencias que solo ofrecen las vacaciones de verano."
             },
@@ -11546,19 +11546,19 @@
           },
           "ask": {
             "en": "Here a whole clause comes before ならいざ知らず. What does the speaker mean?",
-            "fr": "Ici, toute une proposition précède ならいざ知らず. Que veut dire le locuteur ?",
+            "fr": "Ici, toute une proposition précède ならいざ知らず. Que veut dire la personne qui parle ?",
             "es": "Aquí una oración entera va delante de ならいざ知らず. ¿Qué quiere decir quien habla?"
           },
           "choices": [
             {
-              "en": "Not knowing might excuse it, but you knew and said nothing: that is the fault.",
-              "fr": "Ne pas savoir, passe encore ; mais tu savais et tu n'as rien dit, voilà la faute.",
-              "es": "No saberlo podría disculparlo, pero lo sabías y no dijiste nada: esa es la falta."
+              "en": "Not knowing would be excusable, but you knew and kept quiet.",
+              "fr": "Ne pas savoir, passe encore ; mais tu savais et tu t'es tu.",
+              "es": "No saberlo tendría excusa, pero lo sabías y te callaste."
             },
             {
-              "en": "You didn't know, so keeping quiet was the right thing to do.",
-              "fr": "Tu ne savais pas, donc te taire était la bonne chose à faire.",
-              "es": "No lo sabías, así que callarte fue lo correcto."
+              "en": "You didn't know, so keeping quiet was right: nobody can blame you.",
+              "fr": "Tu ne savais pas, donc te taire était juste : on ne peut rien te reprocher.",
+              "es": "No lo sabías, así que callarte fue lo correcto: nadie puede culparte."
             },
             {
               "en": "I don't know whether you knew, so I can't blame you for keeping quiet.",
@@ -11805,18 +11805,18 @@
           },
           "choices": [
             {
-              "en": "At eighty, running every day is beyond them, whatever young people can do.",
-              "fr": "Courir tous les jours lui est impossible à quatre-vingts ans, quoi que les jeunes puissent faire.",
-              "es": "A los ochenta, correr cada día está fuera de su alcance, hagan lo que hagan los jóvenes."
+              "en": "At eighty, running every day is beyond them.",
+              "fr": "À quatre-vingts ans, courir chaque jour lui est impossible.",
+              "es": "A los ochenta, correr cada día está fuera de su alcance."
             },
             {
               "en": "They can run every day, just like young people.",
-              "fr": "Elle peut courir tous les jours, comme les jeunes.",
+              "fr": "Elle peut courir tous les jours, exactement comme les jeunes.",
               "es": "Puede correr cada día, igual que los jóvenes."
             },
             {
               "en": "They would run every day, if they were young.",
-              "fr": "Elle courrait tous les jours, si elle était jeune.",
+              "fr": "Elle courrait tous les jours, si seulement elle était encore jeune.",
               "es": "Correría cada día si fuera joven."
             }
           ],
@@ -11930,14 +11930,14 @@
           },
           "choices": [
             {
-              "en": "It grants what was just said, then qualifies it: « That said, we can still make the last train. »",
-              "fr": "Il admet ce qui vient d'être dit, puis le nuance : « Cela dit, on peut encore attraper le dernier train. »",
-              "es": "Admite lo que se acaba de decir y luego lo matiza: «Dicho esto, aún podemos alcanzar el último tren»."
+              "en": "It grants what was just said, then qualifies it.",
+              "fr": "Il admet ce qui vient d'être dit, puis le nuance.",
+              "es": "Admite lo que se acaba de decir y luego lo matiza."
             },
             {
-              "en": "It draws the conclusion: « So we can still make the last train. »",
-              "fr": "Il tire la conclusion : « Donc on peut encore attraper le dernier train. »",
-              "es": "Saca la conclusión: «Así que aún podemos alcanzar el último tren»."
+              "en": "It draws the conclusion that follows from what was said.",
+              "fr": "Il tire la conclusion qui découle de ce qui vient d'être dit.",
+              "es": "Saca la conclusión que se sigue de lo que se acaba de decir."
             },
             {
               "en": "It reports someone's words: « They say we can still make the last train. »",
@@ -13070,7 +13070,7 @@
           },
           "ask": {
             "en": "How does the speaker see the driver?",
-            "fr": "Comment le locuteur voit-il le conducteur ?",
+            "fr": "Comment la personne qui parle voit-elle le conducteur ?",
             "es": "¿Cómo ve quien habla al maquinista?"
           },
           "choices": [
@@ -13339,9 +13339,9 @@
           },
           "choices": [
             {
-              "en": "He had failed again and again, yet that did not stop him from opening another shop.",
-              "fr": "Il avait échoué maintes fois, mais cela ne l'a pas empêché d'ouvrir une autre boutique.",
-              "es": "Había fracasado una y otra vez, pero eso no le impidió abrir otra tienda."
+              "en": "Failure after failure, he still opened another shop.",
+              "fr": "Malgré ses échecs répétés, il a ouvert une autre boutique.",
+              "es": "Pese a sus fracasos, abrió otra tienda de todos modos."
             },
             {
               "en": "He had never failed, which is why he opened another shop.",
@@ -13813,13 +13813,13 @@
           "choices": [
             {
               "en": "It triggered a change: platform doors were built.",
-              "fr": "Il a déclenché un changement : on a installé des portes palières.",
-              "es": "Desencadenó un cambio: se instalaron puertas de andén."
+              "fr": "Il a déclenché l'installation de portes palières.",
+              "es": "Desencadenó la instalación de puertas de andén."
             },
             {
-              "en": "It was the first in a series of accidents.",
-              "fr": "C'était le premier d'une série d'accidents.",
-              "es": "Fue el primero de una serie de accidentes."
+              "en": "It was the first in a series of accidents still to come.",
+              "fr": "C'était le premier d'une série d'accidents à venir.",
+              "es": "Fue el primero de una serie de accidentes por venir."
             },
             {
               "en": "Platform doors were built in spite of it.",
@@ -13890,7 +13890,7 @@
           "choices": [
             "おおさかを皮切りに、五つの町を回るんだって。",
             "おおさかをきっかけに、五つの町を回るんだって。",
-            "おおさかを最後に、五つの町を回るんだって。"
+            "おおさかを最後にして、五つの町を回るんだって。"
           ],
           "why": {
             "en": "Osaka first, the rest after it: を皮切りに. をきっかけに would make Osaka the reason for the tour, and を最後に would make it the last stop.",
@@ -14585,9 +14585,9 @@
           },
           "choices": [
             {
-              "en": "Yes, extremely: it is rude in the extreme.",
-              "fr": "Oui, au plus haut point : son attitude est d'une impolitesse extrême.",
-              "es": "Sí, muchísimo: su actitud es grosera en extremo."
+              "en": "Yes: it is rude in the extreme.",
+              "fr": "Oui : impolie au plus haut point.",
+              "es": "Sí: es grosera en extremo."
             },
             {
               "en": "No: the ない makes it « not rude at all ».",
@@ -14808,9 +14808,9 @@
           },
           "choices": [
             {
-              "en": "Thanking someone as warmly and formally as possible, in a letter or a speech.",
-              "fr": "Remercier quelqu'un de la façon la plus chaleureuse et la plus formelle, dans une lettre ou un discours.",
-              "es": "Dar las gracias del modo más cálido y formal posible, en una carta o un discurso."
+              "en": "Giving the warmest, most formal thanks.",
+              "fr": "Remercier de la façon la plus chaleureuse et formelle.",
+              "es": "Dar las gracias del modo más cálido y formal posible."
             },
             {
               "en": "Complaining that the support went too far.",
@@ -15116,17 +15116,17 @@
           },
           "choices": [
             {
-              "en": "Addition is the easy one, and even that is shaky: multiplication is worse.",
-              "fr": "L'addition est le plus facile, et même elle est fragile : la multiplication, c'est pire.",
+              "en": "Even addition is shaky, so multiplication is worse.",
+              "fr": "Même l'addition est fragile : la multiplication, c'est pire.",
               "es": "La suma es lo fácil, y hasta eso le falla: la multiplicación, peor."
             },
             {
-              "en": "Multiplication is fine; only addition is shaky.",
-              "fr": "La multiplication va bien ; seule l'addition est fragile.",
+              "en": "Multiplication is fine; only addition is still shaky.",
+              "fr": "La multiplication va bien ; seule l'addition est encore fragile.",
               "es": "La multiplicación va bien; solo le falla la suma."
             },
             {
-              "en": "Addition and multiplication are equally shaky.",
+              "en": "Addition and multiplication are both shaky, equally so.",
               "fr": "L'addition et la multiplication sont aussi fragiles l'une que l'autre.",
               "es": "Le fallan igual la suma y la multiplicación."
             }
@@ -15194,19 +15194,19 @@
           },
           "choices": [
             {
-              "en": "Neither: no thanks, and not even a greeting.",
-              "fr": "Ni l'un ni l'autre : pas de remerciement, pas même un bonjour.",
-              "es": "Ninguna de las dos: ni gracias, ni siquiera un saludo."
+              "en": "Neither: no thanks, not even a hello.",
+              "fr": "Ni l'un ni l'autre : pas même un bonjour.",
+              "es": "Ninguna de las dos: ni siquiera un saludo."
             },
             {
-              "en": "A greeting, but no thanks.",
-              "fr": "Un bonjour, mais pas de remerciement.",
-              "es": "Saludó, pero no dio las gracias."
+              "en": "A greeting at least, but never a word of thanks.",
+              "fr": "Un bonjour au moins, mais jamais un mot de remerciement.",
+              "es": "Saludó al menos, pero nunca dio las gracias."
             },
             {
-              "en": "Thanks, but no greeting.",
-              "fr": "Un remerciement, mais pas de bonjour.",
-              "es": "Dio las gracias, pero no saludó."
+              "en": "Thanks, but without even a greeting first.",
+              "fr": "Un remerciement, mais sans même un bonjour avant.",
+              "es": "Dio las gracias, pero sin saludar antes."
             }
           ],
           "why": {
@@ -15336,7 +15336,7 @@
           },
           "ask": {
             "en": "Two things are praised. Which does the speaker rank higher?",
-            "fr": "Deux choses sont louées. Laquelle le locuteur place-t-il plus haut ?",
+            "fr": "Deux choses sont louées. Laquelle la personne qui parle place-t-elle plus haut ?",
             "es": "Se elogian dos cosas. ¿Cuál pone más alto quien habla?"
           },
           "choices": [
@@ -15381,7 +15381,7 @@
           },
           "ask": {
             "en": "This time it is a problem, not praise. What does the speaker say?",
-            "fr": "Cette fois, un problème et non un éloge. Que dit le locuteur ?",
+            "fr": "Cette fois, un problème et non un éloge. Que dit la personne qui parle ?",
             "es": "Esta vez es un problema, no un elogio. ¿Qué dice quien habla?"
           },
           "choices": [
@@ -15459,7 +15459,7 @@
           },
           "choices": [
             "器もさることながら、お茶の味がすばらしかったです。",
-            "器はともかく、お茶の味がすばらしかったです。",
+            "器のほうはともかくとして、お茶の味がすばらしかったです。",
             "器はよかったものの、お茶の味はふつうでした。"
           ],
           "why": {
@@ -15474,7 +15474,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think about the salary?",
-            "fr": "Que pense le locuteur du salaire ?",
+            "fr": "Que pense la personne qui parle du salaire ?",
             "es": "¿Qué piensa quien habla del sueldo?"
           },
           "jp": "給料もさることながら、働く時間の長さが気になる。",
@@ -15486,7 +15486,7 @@
           "choices": [
             {
               "en": "It matters, but the long hours worry the speaker more.",
-              "fr": "Il compte, mais les longues heures inquiètent davantage celui qui parle.",
+              "fr": "Il compte, mais les longues heures inquiètent davantage.",
               "es": "Importa, pero las largas jornadas le preocupan más."
             },
             {
@@ -15534,7 +15534,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say encouraged them most?",
-            "fr": "Qu'est-ce qui, selon le locuteur, l'a le plus encouragé ?",
+            "fr": "Qu'est-ce qui, selon la personne qui parle, lui a donné le plus de courage ?",
             "es": "Según quien habla, ¿qué le animó más?"
           },
           "jp": "ご支援もさることながら、皆さまの温かいお言葉に励まされました。",
@@ -15588,7 +15588,7 @@
           "kind": "meaning",
           "ask": {
             "en": "Who does the speaker blame more?",
-            "fr": "Qui le locuteur blâme-t-il davantage ?",
+            "fr": "Qui la personne qui parle blâme-t-elle davantage ?",
             "es": "¿A qué atribuye más la culpa quien habla?"
           },
           "jp": "わたしの不注意もさることながら、会社の対応が問題だった。",
@@ -15600,23 +15600,23 @@
           "choices": [
             {
               "en": "The company, though the speaker admits their own carelessness.",
-              "fr": "L'entreprise, même si le locuteur reconnaît sa propre étourderie.",
+              "fr": "L'entreprise, tout en reconnaissant sa propre étourderie.",
               "es": "A la empresa, aunque admite su propio descuido."
             },
             {
               "en": "The speaker, more than the company.",
-              "fr": "Le locuteur lui-même, plus que l'entreprise.",
+              "fr": "Sa propre étourderie, plus que l'entreprise.",
               "es": "A su propio descuido, más que a la empresa."
             },
             {
               "en": "Only the company: the speaker denies any fault.",
-              "fr": "L'entreprise seule : le locuteur nie toute faute.",
+              "fr": "L'entreprise seule : la personne nie toute faute.",
               "es": "Solo a la empresa: niega toda culpa propia."
             }
           ],
           "why": {
             "en": "もさることながら concedes the first item before ranking the second above it: the speaker admits the carelessness and still blames the company's handling more. It is not a denial.",
-            "fr": "もさることながら concède le premier élément avant de placer le second au-dessus : le locuteur admet son étourderie et blâme quand même davantage la réaction de l'entreprise. Ce n'est pas un déni.",
+            "fr": "もさることながら concède le premier élément avant de placer le second au-dessus : la personne qui parle admet son étourderie et blâme quand même davantage la réaction de l'entreprise. Ce n'est pas un déni.",
             "es": "もさることながら concede el primer elemento antes de poner el segundo por encima: quien habla admite su descuido y aun así culpa más a la respuesta de la empresa. No es una negación."
           }
         }
@@ -15688,7 +15688,7 @@
       {
         "jp": "相手がだれであれ、礼儀は忘れてはならない。",
         "en": "Whoever you are dealing with, never forget your manners.",
-        "fr": "Quel que soit l'interlocuteur, il ne faut jamais oublier la politesse.",
+        "fr": "Quelle que soit la personne en face, il ne faut jamais oublier la politesse.",
         "es": "Sea quien sea la otra persona, nunca hay que olvidar los buenos modales.",
         "register": "formal",
         "contrast": true
@@ -15840,7 +15840,7 @@
           },
           "choices": [
             "値段がいくらであれ、それでお願いします。",
-            "値段が安ければ、それでお願いします。",
+            "値段がもう少し安ければ、それでお願いします。",
             "値段がいくらかによって、決めます。"
           ],
           "why": {
@@ -15855,7 +15855,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about the promise?",
-            "fr": "Que dit le locuteur de la promesse ?",
+            "fr": "Que dit la personne qui parle de la promesse ?",
             "es": "¿Qué dice quien habla sobre la promesa?"
           },
           "jp": "相手が友人であれ、約束は約束だ。",
@@ -15915,19 +15915,19 @@
           "kind": "meaning",
           "ask": {
             "en": "What gives it meaning, according to the speaker?",
-            "fr": "Qu'est-ce qui donne du sens, selon le locuteur ?",
+            "fr": "Qu'est-ce qui donne du sens, selon la personne qui parle ?",
             "es": "Según quien habla, ¿qué le da sentido?"
           },
           "jp": "どんな結果であれ、最後までやりぬいたことに意味がある。",
           "tr": {
             "en": "Whatever the result, there is meaning in having seen it through to the end.",
-            "fr": "Quel que soit le résultat, cela a du sens d'être allé jusqu'au bout.",
+            "fr": "Quel que soit le résultat, aller jusqu'au bout a du sens.",
             "es": "Sea cual sea el resultado, haber llegado hasta el final tiene sentido."
           },
           "choices": [
             {
-              "en": "Seeing it through to the end, however it turns out.",
-              "fr": "Être allé jusqu'au bout, quelle que soit l'issue.",
+              "en": "Seeing it through, however it turns out.",
+              "fr": "Aller jusqu'au bout, quelle que soit l'issue.",
               "es": "Llegar hasta el final, salga como salga."
             },
             {
@@ -16075,7 +16075,7 @@
       {
         "jp": "合格した時のうれしさといったらなかった。",
         "en": "The joy when I passed was beyond words.",
-        "fr": "Ma joie en apprenant que j'étais reçu était indescriptible.",
+        "fr": "Ma joie en apprenant ma réussite était indescriptible.",
         "es": "La alegría que sentí al aprobar no se puede expresar con palabras.",
         "register": "casual",
         "contrast": true
@@ -16238,7 +16238,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How long did the speaker find the talk?",
-            "fr": "Comment le locuteur a-t-il trouvé la longueur de l'exposé ?",
+            "fr": "Comment la personne qui parle a-t-elle trouvé la longueur de l'exposé ?",
             "es": "¿Qué le pareció la duración de la charla a quien habla?"
           },
           "jp": "あの先生の話の長さといったらなかった。",
@@ -16249,19 +16249,19 @@
           },
           "choices": [
             {
-              "en": "Endlessly long: beyond words.",
-              "fr": "Interminable : au-delà des mots.",
+              "en": "Endless: beyond words.",
+              "fr": "D'une longueur indescriptible.",
               "es": "Larguísima: indescriptible."
             },
             {
-              "en": "Not long at all.",
-              "fr": "Pas long du tout.",
-              "es": "Nada larga."
+              "en": "Not long at all: over in no time.",
+              "fr": "Pas long du tout : vite terminé.",
+              "es": "Nada larga: se acabó enseguida."
             },
             {
-              "en": "A little long.",
-              "fr": "Un peu long.",
-              "es": "Un poco larga."
+              "en": "A little long, but bearable.",
+              "fr": "Un peu long, mais supportable.",
+              "es": "Un poco larga, pero llevadera."
             }
           ],
           "why": {
@@ -16316,29 +16316,29 @@
           "kind": "meaning",
           "ask": {
             "en": "How did the speaker feel walking alone at night?",
-            "fr": "Comment le locuteur s'est-il senti en marchant seul la nuit ?",
+            "fr": "Qu'a ressenti la personne qui parle en marchant seule la nuit ?",
             "es": "¿Cómo se sintió quien habla al caminar a solas de noche?"
           },
           "jp": "夜道を一人で歩いたときは、こわいといったらなかった。",
           "tr": {
             "en": "Walking alone along the night road, I was terrified beyond words.",
-            "fr": "Quand j'ai marché seul sur la route la nuit, j'ai eu une peur indescriptible.",
+            "fr": "Quand j'ai marché de nuit sur la route, sans personne, j'ai eu une peur indescriptible.",
             "es": "Cuando caminé a solas por la calle de noche, pasé un miedo indescriptible."
           },
           "choices": [
             {
               "en": "Terrified, beyond words.",
-              "fr": "Terrifié, au-delà des mots.",
+              "fr": "Une peur au-delà des mots.",
               "es": "Un miedo indescriptible."
             },
             {
               "en": "Calm: it was not scary.",
-              "fr": "Calme : ce n'était pas effrayant.",
+              "fr": "De la tranquillité : ce n'était pas effrayant.",
               "es": "Tranquilidad: no daba miedo."
             },
             {
               "en": "Scared, but only for a moment.",
-              "fr": "Effrayé, mais un instant seulement.",
+              "fr": "De la peur, mais un instant seulement.",
               "es": "Miedo, pero solo un momento."
             }
           ],
@@ -16850,7 +16850,7 @@
           },
           "ask": {
             "en": "聞く twice, with ともなしに between. How was the speaker listening?",
-            "fr": "聞く deux fois, avec ともなしに entre les deux. Comment le locuteur écoutait-il ?",
+            "fr": "聞く deux fois, avec ともなしに entre les deux. Comment la personne qui parle écoutait-elle ?",
             "es": "聞く dos veces, con ともなしに en medio. ¿Cómo escuchaba quien habla?"
           },
           "choices": [
@@ -16969,7 +16969,7 @@
           },
           "choices": [
             "すみません。お電話の声を、聞くともなく聞いてしまったんです。",
-            "すみません。お電話の声を、聞くつもりで聞いていたんです。",
+            "すみません。お電話の声を、わざと聞くつもりで聞いていたんです。",
             "すみません。お電話の声は、聞いていなかったんです。"
           ],
           "why": {
@@ -17008,7 +17008,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How was the speaker reading the magazine?",
-            "fr": "Comment le locuteur lisait-il le magazine ?",
+            "fr": "Comment la personne qui parle lisait-elle le magazine ?",
             "es": "¿Cómo leía la revista quien habla?"
           },
           "jp": "雑誌を読むともなく読んでいたら、友人の名前が目に入った。",
@@ -17457,13 +17457,13 @@
             {
               "en": "One poured while the other only watched.",
               "fr": "L'un servait pendant que l'autre ne faisait que regarder.",
-              "es": "Uno servía y el otro solo miraba."
+              "es": "Una persona servía y la otra solo miraba."
             }
           ],
           "why": {
             "en": "差しつ差されつ pairs 差す (to pour) with its passive 差される: each pours for the other and is poured for in turn. It is mutual, not a contest, and not one-sided.",
             "fr": "差しつ差されつ associe 差す (verser) et son passif 差される : chacun verse à l'autre et se fait verser à son tour. C'est réciproque, ni un concours, ni à sens unique.",
-            "es": "差しつ差されつ une 差す (servir) con su pasivo 差される: cada uno sirve al otro y es servido por turnos. Es mutuo; ni una competencia, ni en un solo sentido."
+            "es": "差しつ差されつ une 差す (servir) con su pasivo 差される: cada quien sirve y recibe por turnos. Es mutuo; ni una competencia, ni en un solo sentido."
           }
         },
         {
@@ -17565,14 +17565,14 @@
           },
           "choices": [
             {
-              "en": "Both sides attacked in turn: an open, back-and-forth game.",
-              "fr": "Les deux camps ont attaqué tour à tour : un match ouvert, plein d'allers-retours.",
+              "en": "Both sides attacked in turn, back and forth.",
+              "fr": "Les deux camps ont attaqué tour à tour, dans un va-et-vient.",
               "es": "Ambos atacaron por turnos: un partido abierto, de ida y vuelta."
             },
             {
-              "en": "One side attacked the whole time.",
-              "fr": "Un seul camp a attaqué tout le temps.",
-              "es": "Un solo equipo atacó todo el tiempo."
+              "en": "One side attacked the whole time; the other only defended.",
+              "fr": "Un seul camp a attaqué tout le temps ; l'autre n'a fait que défendre.",
+              "es": "Un solo equipo atacó todo el tiempo; el otro solo defendió."
             },
             {
               "en": "Neither side attacked: a cautious, defensive game.",
@@ -17958,19 +17958,19 @@
           },
           "choices": [
             {
-              "en": "The sentence does not say: it gives only his aim.",
-              "fr": "La phrase ne le dit pas : elle donne seulement son but.",
+              "en": "It doesn't say: only his aim is given.",
+              "fr": "On ne le sait pas : seul son but est dit.",
               "es": "La oración no lo dice: solo da su objetivo."
             },
             {
-              "en": "Yes, he reached it.",
-              "fr": "Oui, il l'a atteint.",
-              "es": "Sí, llegó."
+              "en": "Yes: he reached it, by the dangerous route.",
+              "fr": "Oui : il l'a atteint, par le chemin dangereux.",
+              "es": "Sí: llegó, por la ruta peligrosa."
             },
             {
-              "en": "No, he failed.",
-              "fr": "Non, il a échoué.",
-              "es": "No, fracasó."
+              "en": "No: the dangerous route made him turn back.",
+              "fr": "Non : le chemin dangereux l'a fait renoncer.",
+              "es": "No: la ruta peligrosa lo hizo volver."
             }
           ],
           "why": {
@@ -18353,7 +18353,7 @@
           "kind": "meaning",
           "ask": {
             "en": "Why does the speaker not thank the friend?",
-            "fr": "Pourquoi le locuteur ne remercie-t-il pas son ami ?",
+            "fr": "Pourquoi la personne qui parle ne remercie-t-elle pas son ami ?",
             "es": "¿Por qué quien habla no le da las gracias a su amigo?"
           },
           "jp": "今となっては、亡き友に礼を言うべくもない。",
@@ -18370,7 +18370,7 @@
             },
             {
               "en": "The speaker does not feel like it.",
-              "fr": "Le locuteur n'en a pas envie.",
+              "fr": "L'envie lui manque.",
               "es": "Quien habla no tiene ganas."
             },
             {
@@ -18616,7 +18616,7 @@
           "kind": "meaning",
           "ask": {
             "en": "Why can't the speaker repay the kindness?",
-            "fr": "Pourquoi le locuteur ne peut-il pas rendre la gentillesse reçue ?",
+            "fr": "Pourquoi la personne qui parle ne peut-elle pas rendre la gentillesse reçue ?",
             "es": "¿Por qué no puede quien habla devolver el favor?"
           },
           "jp": "受けた恩に報いたくても、その人の行方がわからず、報いるすべがない。",
@@ -18628,17 +18628,17 @@
           "choices": [
             {
               "en": "The speaker wants to, but has no means of doing so.",
-              "fr": "Le locuteur le voudrait, mais n'a aucun moyen de le faire.",
+              "fr": "Elle le voudrait, mais n'a aucun moyen de le faire.",
               "es": "Quiere hacerlo, pero no tiene ningún medio."
             },
             {
               "en": "The speaker could do it but would rather not.",
-              "fr": "Le locuteur le pourrait, mais préfère ne pas le faire.",
+              "fr": "Elle le pourrait, mais préfère ne pas le faire.",
               "es": "Podría hacerlo, pero prefiere no hacerlo."
             },
             {
               "en": "The speaker has already repaid it.",
-              "fr": "Le locuteur l'a déjà fait.",
+              "fr": "Elle l'a déjà fait.",
               "es": "Ya lo ha devuelto."
             }
           ],
@@ -18747,14 +18747,14 @@
           },
           "choices": [
             {
-              "en": "They cannot yet confirm who the victim is, and keep investigating.",
-              "fr": "Ils ne peuvent pas encore confirmer qui est la victime et continuent d'enquêter.",
+              "en": "They can't yet tell who the victim is, so they go on.",
+              "fr": "Sans moyen d'identifier la victime, ils enquêtent encore.",
               "es": "Aún no pueden confirmar quién es la víctima, y siguen investigando."
             },
             {
-              "en": "They refuse to say who the victim is.",
-              "fr": "Ils refusent de dire qui est la victime.",
-              "es": "Se niegan a decir quién es la víctima."
+              "en": "They know who the victim is but refuse to tell anyone.",
+              "fr": "Ils savent qui est la victime, mais refusent de le révéler.",
+              "es": "Saben quién es la víctima, pero se niegan a decirlo."
             },
             {
               "en": "They have found out who the victim is and are finished.",
@@ -19097,29 +19097,29 @@
           "jp": "新人のこととて、至らぬ点も多々ございましょうが、よろしくお願いいたします。",
           "tr": {
             "en": "Being new, there will surely be many shortcomings, but I ask for your guidance.",
-            "fr": "Étant nouveau, il y aura sûrement bien des lacunes, mais je compte sur vos conseils.",
+            "fr": "Comme je viens d'arriver, il y aura sûrement bien des lacunes, mais je compte sur vos conseils.",
             "es": "Como acabo de incorporarme, seguro que tendré muchas carencias, pero les ruego su orientación."
           },
           "choices": [
             {
               "en": "A newcomer asks in advance for patience with their shortcomings.",
-              "fr": "Un nouveau demande d'avance de l'indulgence pour ses lacunes.",
+              "fr": "Une nouvelle recrue demande d'avance de l'indulgence pour ses lacunes.",
               "es": "Una persona recién llegada pide de antemano paciencia con sus carencias."
             },
             {
               "en": "A manager warns that a newcomer's shortcomings will not be tolerated.",
-              "fr": "Un responsable prévient qu'on ne tolérera pas les lacunes d'un nouveau.",
+              "fr": "La direction prévient qu'on ne tolérera pas les lacunes des recrues.",
               "es": "Quien dirige advierte que no se tolerarán las carencias de los nuevos."
             },
             {
               "en": "A newcomer boasts that, though new, there will be no shortcomings.",
-              "fr": "Un nouveau se vante de ce que, tout nouveau qu'il est, il n'aura aucune lacune.",
+              "fr": "Une recrue se vante de ce que, toute nouvelle qu'elle est, elle n'aura aucune lacune.",
               "es": "Una persona recién llegada presume de que, aunque nueva, no tendrá carencias."
             }
           ],
           "why": {
             "en": "新人のこととて gives being new as the reason for the shortcomings to come, and the closing お願いいたします asks for indulgence. It is the speaker's excuse, not a warning or a boast.",
-            "fr": "新人のこととて donne le fait d'être nouveau comme raison des lacunes à venir, et le お願いいたします final demande de l'indulgence. C'est l'excuse de celui qui parle, ni un avertissement ni une vantardise.",
+            "fr": "新人のこととて donne le fait d'être nouveau comme raison des lacunes à venir, et le お願いいたします final demande de l'indulgence. C'est l'excuse de la personne qui parle, ni un avertissement ni une vantardise.",
             "es": "新人のこととて da el ser nuevo como razón de las carencias que vendrán, y el お願いいたします final pide indulgencia. Es la disculpa de quien habla, no una advertencia ni una jactancia."
           }
         },
@@ -19352,13 +19352,13 @@
           },
           "choices": [
             {
-              "en": "It explains them: with a typhoon coming, people stocked up, as one would expect.",
-              "fr": "Il les explique : un typhon arrivant, les gens ont fait des provisions, comme on pouvait s'y attendre.",
-              "es": "Los explica: con un tifón en camino, la gente hizo acopio, como era de esperar."
+              "en": "It explains them: with a typhoon coming, people stocked up.",
+              "fr": "Il les explique : on a fait des provisions avant le typhon.",
+              "es": "Los explica: con un tifón en camino, la gente hizo acopio."
             },
             {
               "en": "It contrasts with them: the shelves were empty in spite of the typhoon.",
-              "fr": "Il s'y oppose : les rayons étaient vides malgré le typhon.",
+              "fr": "Il s'y oppose : les rayons étaient vides bien que le typhon approche.",
               "es": "Contrasta con ellos: los estantes estaban vacíos pese al tifón."
             },
             {
@@ -19595,14 +19595,14 @@
           },
           "choices": [
             {
-              "en": "Yes: the grandchild is coming, so she has been waiting at the station since morning.",
-              "fr": "Oui : son petit-enfant vient, alors elle attend à la gare depuis le matin.",
-              "es": "Sí: viene su nieto, y por eso lleva esperando en la estación desde la mañana."
+              "en": "Yes: that is why she has been waiting since morning.",
+              "fr": "Oui : c'est pourquoi elle attend depuis le matin.",
+              "es": "Sí: por eso lleva esperando desde la mañana."
             },
             {
-              "en": "Only if the grandchild comes will she wait at the station.",
-              "fr": "Elle n'attendra à la gare que si son petit-enfant vient.",
-              "es": "Solo esperará en la estación si viene su nieto."
+              "en": "Not for sure: she will wait only if the grandchild comes.",
+              "fr": "Pas forcément : elle n'attendra que si son petit-enfant vient.",
+              "es": "No es seguro: solo esperará si viene su nieto."
             },
             {
               "en": "No: she waits even though the grandchild is not coming.",
@@ -19823,7 +19823,7 @@
               "es": "Uno que conducía de noche siempre que fuera por su hijo."
             },
             {
-              "en": "One who drove at night only when his son was in the car.",
+              "en": "One who drove at night only when his son was sitting in the car.",
               "fr": "Un père qui ne conduisait la nuit que lorsque son fils était dans la voiture.",
               "es": "Uno que solo conducía de noche si su hijo iba en el auto."
             },
@@ -19941,14 +19941,14 @@
           },
           "choices": [
             {
-              "en": "It only says in what capacity he works, with no duty attached.",
-              "fr": "Il dit seulement en quelle qualité il travaille, sans aucun devoir attaché.",
-              "es": "Solo dice en calidad de qué trabaja, sin ningún deber agregado."
+              "en": "It only names his role, with no duty attached.",
+              "fr": "Il nomme seulement son rôle, sans devoir attaché.",
+              "es": "Solo nombra su papel, sin ningún deber agregado."
             },
             {
-              "en": "It says what any station worker ought to do.",
-              "fr": "Il dit ce que tout agent de gare devrait faire.",
-              "es": "Dice lo que todo empleado de estación debería hacer."
+              "en": "It says what any station worker, as such, ought to do.",
+              "fr": "Il dit ce que tout agent de gare, en tant que tel, devrait faire.",
+              "es": "Dice lo que todo empleado de estación, como tal, debería hacer."
             },
             {
               "en": "として is more solemn than たるもの.",
@@ -20050,7 +20050,7 @@
             },
             {
               "en": "Only the speaker's own parents, whom the speaker is warning.",
-              "fr": "Seulement les propres parents de celui qui parle, qu'il met en garde.",
+              "fr": "Seulement les propres parents de la personne qui parle, qu'elle met en garde.",
               "es": "Solo los propios padres de quien habla, a los que está advirtiendo."
             },
             {
@@ -20530,7 +20530,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer stress about the ten years?",
-            "fr": "Qu'est-ce que l'auteur souligne à propos des dix ans ?",
+            "fr": "Qu'est-ce que la personne qui écrit souligne à propos des dix ans ?",
             "es": "¿Qué subraya quien escribe sobre los diez años?"
           },
           "jp": "入団十年目にして、彼はまだ一度も試合に出ていない。",
@@ -20705,14 +20705,14 @@
           },
           "choices": [
             {
-              "en": "It just names where it took place, with no trying setting.",
-              "fr": "Il nomme seulement le lieu où cela a eu lieu, sans cadre éprouvant.",
-              "es": "Solo nombra dónde tuvo lugar, sin ninguna situación difícil."
+              "en": "It only names the place: no trying setting.",
+              "fr": "Il nomme seulement le lieu, sans cadre éprouvant.",
+              "es": "Solo nombra el lugar, sin ninguna situación difícil."
             },
             {
-              "en": "において is the more solemn of the two.",
-              "fr": "において est le plus solennel des deux.",
-              "es": "において es el más solemne de los dos."
+              "en": "において is the more solemn of the two, as befits a meeting.",
+              "fr": "において est le plus solennel des deux, comme il sied à une réunion.",
+              "es": "において es el más solemne de los dos, como corresponde a una reunión."
             },
             {
               "en": "において is for times, never for places.",
@@ -20808,9 +20808,9 @@
           },
           "choices": [
             {
-              "en": "He was confined to a sickbed, and he still wrote to the end.",
-              "fr": "Il était cloué au lit par la maladie, et il a pourtant écrit jusqu'au bout.",
-              "es": "Estaba postrado en cama, y aun así escribió hasta el final."
+              "en": "Bedridden, he still wrote to the end.",
+              "fr": "Alité, il a pourtant écrit jusqu'au bout.",
+              "es": "Postrado en cama, aun así escribió hasta el final."
             },
             {
               "en": "He went to a sickbed in order to write.",
@@ -20857,7 +20857,7 @@
           "kind": "meaning",
           "ask": {
             "en": "Is the speaker already in that position?",
-            "fr": "Celui qui parle est-il déjà dans cette position ?",
+            "fr": "La personne qui parle est-elle déjà dans cette position ?",
             "es": "¿Ocupa ya quien habla ese puesto?"
           },
           "jp": "現在の立場にあっては、自由に意見を言うことはできません。",
@@ -20869,17 +20869,17 @@
           "choices": [
             {
               "en": "Yes: the speaker holds it now, and it limits what can be said.",
-              "fr": "Oui : il l'occupe maintenant, et cela limite ce qu'il peut dire.",
+              "fr": "Oui : elle l'occupe maintenant, et cela limite ce qu'elle peut dire.",
               "es": "Sí: lo ocupa ahora, y eso limita lo que puede decir."
             },
             {
               "en": "No: it says what would be true if the speaker were in that position.",
-              "fr": "Non : cela dit ce qui serait vrai si le locuteur était dans cette position.",
+              "fr": "Non : cela dit ce qui serait vrai si elle était dans cette position.",
               "es": "No: dice lo que pasaría si quien habla ocupara ese puesto."
             },
             {
               "en": "No: the speaker has left that position and can now speak freely.",
-              "fr": "Non : il a quitté cette position et peut désormais s'exprimer librement.",
+              "fr": "Non : elle a quitté cette position et peut désormais s'exprimer librement.",
               "es": "No: quien habla dejó ese puesto y ya puede hablar libremente."
             }
           ],
@@ -21225,7 +21225,7 @@
             },
             {
               "en": "It suffers like everywhere else, and the writer pities it.",
-              "fr": "Elle souffre comme partout ailleurs, et l'auteur la plaint.",
+              "fr": "Elle souffre comme partout ailleurs, et la personne qui écrit la plaint.",
               "es": "Sufre como en todas partes, y quien escribe se compadece de ella."
             },
             {
@@ -21568,7 +21568,7 @@
           },
           "choices": [
             {
-              "en": "Both are real purposes of the message, with equal weight.",
+              "en": "Both are real purposes, of equal weight.",
               "fr": "Les deux sont de vrais buts du message, d'égale importance.",
               "es": "Ambos son fines reales del mensaje, con el mismo peso."
             },
@@ -21882,17 +21882,17 @@
           "choices": [
             {
               "en": "They now grumble even at customers, and the speaker is fed up.",
-              "fr": "On en est à grogner même contre les clients, et celui qui parle en a assez.",
+              "fr": "On en est à grogner même contre les clients, et la personne qui parle en a assez.",
               "es": "Ahora protesta hasta a los clientes, y quien habla ya no lo aguanta."
             },
             {
               "en": "They are settling the customers' complaints, and the speaker is relieved.",
-              "fr": "Les plaintes des clients sont réglées, et celui qui parle est soulagé.",
+              "fr": "Les plaintes des clients sont réglées, et la personne qui parle est soulagée.",
               "es": "Está resolviendo las quejas de los clientes, y quien habla siente alivio."
             },
             {
               "en": "Customers grumble at them, and the speaker feels sorry for them.",
-              "fr": "Les clients grognent contre cette personne, et celui qui parle la plaint.",
+              "fr": "Les clients grognent contre cette personne, et la personne qui parle la plaint.",
               "es": "Los clientes le protestan a esa persona, y quien habla siente lástima por ella."
             }
           ],
@@ -21930,7 +21930,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of this behaviour?",
-            "fr": "Que pense celui qui parle de ce comportement ?",
+            "fr": "Que pense la personne qui parle de ce comportement ?",
             "es": "¿Qué opina quien habla de este comportamiento?"
           },
           "jp": "あの人は親切すぎて、頼まれもしない他人の仕事まで全部やってあげるしまつだ。",
@@ -21942,17 +21942,17 @@
           "choices": [
             {
               "en": "That it has gone too far, and the speaker is exasperated.",
-              "fr": "Que cela va trop loin, et celui qui parle est exaspéré.",
+              "fr": "Que cela va trop loin, et la personne qui parle est exaspérée.",
               "es": "Que se ha pasado de la raya, y eso exaspera a quien habla."
             },
             {
               "en": "That it is admirable, and the speaker praises that kindness.",
-              "fr": "Que c'est admirable, et celui qui parle loue sa gentillesse.",
+              "fr": "Que c'est admirable, et la personne qui parle loue sa gentillesse.",
               "es": "Que es admirable, y quien habla elogia su amabilidad."
             },
             {
               "en": "That it is a help, and the speaker is grateful for the extra hands.",
-              "fr": "Que c'est une aide, et celui qui parle est reconnaissant de ces bras en plus.",
+              "fr": "Que c'est une aide, et la personne qui parle est reconnaissante de ces bras en plus.",
               "es": "Que es una ayuda, y quien habla agradece esas manos de más."
             }
           ],
@@ -22221,7 +22221,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer say about the novel?",
-            "fr": "Que dit l'auteur du roman ?",
+            "fr": "Que dit du roman la personne qui écrit ?",
             "es": "¿Qué dice quien escribe sobre la novela?"
           },
           "jp": "この小説は、読む人の心に深い印象を残さずにはおかない。",
@@ -22299,7 +22299,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer predict about his health?",
-            "fr": "Que prédit l'auteur à propos de sa santé ?",
+            "fr": "Que prédit la personne qui écrit à propos de la santé de cet homme ?",
             "es": "¿Qué predice quien escribe sobre su salud?"
           },
           "jp": "このまま放っておけば、ストレスは彼の健康をそこなわずにはおかないだろう。",
@@ -22321,13 +22321,13 @@
             },
             {
               "en": "That it might be damaged, though the writer is not sure.",
-              "fr": "Qu'elle pourrait être atteinte, sans que l'auteur en soit sûr.",
+              "fr": "Qu'elle pourrait être atteinte, sans qu'on en ait la certitude.",
               "es": "Que podría resentirse, aunque quien escribe no lo tiene claro."
             }
           ],
           "why": {
             "en": "The effect forced by something need not be good: the stress cannot fail to damage his health. The ずに here is part of ずにはおかない, not « without damaging », and だろう only adds the writer's forecast.",
-            "fr": "L'effet qu'une chose impose n'est pas forcément bon : le stress ne peut manquer de nuire à sa santé. Le ずに est ici une partie de ずにはおかない, pas « sans nuire », et だろう n'ajoute que la prévision de l'auteur.",
+            "fr": "L'effet qu'une chose impose n'est pas forcément bon : le stress ne peut manquer de nuire à sa santé. Le ずに est ici une partie de ずにはおかない, pas « sans nuire », et だろう n'ajoute que la prévision de la personne qui écrit.",
             "es": "El efecto que algo impone no tiene por qué ser bueno: el estrés no puede dejar de dañar su salud. Este ずに forma parte de ずにはおかない, no es «sin dañar», y だろう solo agrega la previsión de quien escribe."
           }
         },
@@ -22462,9 +22462,9 @@
               "es": "El anuncio era tan gracioso que no pude evitar reírme."
             },
             {
-              "en": "I laughed boldly, not caring who heard.",
-              "fr": "J'ai ri hardiment, sans me soucier de qui entendait.",
-              "es": "Me reí con descaro, sin importarme quién lo oyera."
+              "en": "I laughed out loud on purpose, boldly, not caring who heard me.",
+              "fr": "J'ai ri exprès et hardiment, sans me soucier de qui pouvait entendre.",
+              "es": "Me reí a propósito y con descaro, sin importarme quién lo oyera."
             },
             {
               "en": "I managed not to laugh.",
@@ -23003,7 +23003,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about the effort?",
-            "fr": "Que dit celui qui parle de son effort ?",
+            "fr": "Que dit la personne qui parle de son effort ?",
             "es": "¿Qué dice quien habla sobre su esfuerzo?"
           },
           "jp": "結果はよくなかったが、自分なりに最後までやりぬいたと思う。",
@@ -23014,14 +23014,14 @@
           },
           "choices": [
             {
-              "en": "It fell short, but I did what I could, sincerely, to the end.",
-              "fr": "Ça n'a pas suffi, mais j'ai fait ce que je pouvais, sincèrement, jusqu'au bout.",
-              "es": "Se quedó corto, pero hice lo que pude, con sinceridad, hasta el final."
+              "en": "It fell short, but I gave it my all, in my own way.",
+              "fr": "Ça n'a pas suffi, mais j'ai fait de mon mieux, à ma manière.",
+              "es": "Se quedó corto, pero di lo mejor de mí, a mi manera."
             },
             {
-              "en": "I did it just as everyone else did.",
-              "fr": "Je l'ai fait exactement comme tout le monde.",
-              "es": "Lo hice exactamente como todos los demás."
+              "en": "I did it just the way everyone else does, no differently.",
+              "fr": "Je l'ai fait exactement comme tout le monde le fait, ni mieux ni moins bien.",
+              "es": "Lo hice exactamente como lo hacen todos los demás."
             },
             {
               "en": "It was a great success, in a style all my own.",
@@ -23063,7 +23063,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about the countryside?",
-            "fr": "Que dit celui qui parle de la campagne ?",
+            "fr": "Que dit la personne qui parle de la campagne ?",
             "es": "¿Qué dice quien habla sobre el campo?"
           },
           "jp": "不便なことも多いが、田舎は田舎なりにいいところがある。",
@@ -23123,7 +23123,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker conclude about him?",
-            "fr": "Que conclut celui qui parle à son sujet ?",
+            "fr": "Que conclut la personne qui parle à propos de lui ?",
             "es": "¿Qué concluye quien habla sobre él?"
           },
           "jp": "彼は冷たく見えたが、彼なりに悩んでいたのだと思う。",
@@ -23139,8 +23139,8 @@
               "es": "Tras su aire frío, lo pasaba mal a su manera."
             },
             {
-              "en": "He really was cold and did not care.",
-              "fr": "Il était vraiment froid et ça lui était égal.",
+              "en": "He really was as cold as he looked, and did not care at all.",
+              "fr": "Il était vraiment aussi froid qu'il en avait l'air, et s'en moquait.",
               "es": "De verdad era frío y no le importaba."
             },
             {
@@ -23616,7 +23616,7 @@
           ],
           "why": {
             "en": "涙ながらに tells the state of the one it sits beside, 語る: whoever speaks is in tears. The reporter only writes it down, and 涙 is a state, not the topic.",
-            "fr": "涙ながらに donne l'état de celui qui est à côté de 語る : celui qui parle est en larmes. Le journaliste ne fait que noter, et 涙 est un état, pas le sujet.",
+            "fr": "涙ながらに donne l'état de ce qu'il accompagne, 語る : qui parle est en larmes. Le journaliste ne fait que noter, et 涙 est un état, pas le sujet.",
             "es": "涙ながらに da el estado de quien va con él, 語る: quien habla está llorando. El periodista solo lo anota, y 涙 es un estado, no el tema."
           }
         }
@@ -23879,7 +23879,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer say about the players' disappointment?",
-            "fr": "Que dit l'auteur de la déception des joueurs ?",
+            "fr": "Que dit la personne qui écrit de la déception des joueurs ?",
             "es": "¿Qué dice quien escribe sobre la decepción de los jugadores?"
           },
           "jp": "試合に負けた選手たちの悔しさは、想像にかたくない。",
@@ -23907,7 +23907,7 @@
           ],
           "why": {
             "en": "にかたくない is « not hard to »: the writer says the feeling is easy to picture. It is not the opposite, « hard to imagine » (しがたい), and not « mere imagination » (にすぎない).",
-            "fr": "にかたくない, c'est « pas difficile de » : l'auteur dit que le sentiment se devine aisément. Ce n'est pas l'inverse, « difficile à imaginer » (しがたい), ni « simple supposition » (にすぎない).",
+            "fr": "にかたくない, c'est « pas difficile de » : la personne qui écrit dit que le sentiment se devine aisément. Ce n'est pas l'inverse, « difficile à imaginer » (しがたい), ni « simple supposition » (にすぎない).",
             "es": "にかたくない es «no es difícil»: quien escribe dice que el sentimiento es fácil de imaginar. No es lo contrario, «difícil de imaginar» (しがたい), ni «pura imaginación» (にすぎない)."
           }
         },
@@ -24413,14 +24413,14 @@
               "es": "De Japón hacia fuera, hasta llegar a Sudamérica."
             },
             {
-              "en": "From South America back to Japan.",
-              "fr": "De l'Amérique du Sud vers le Japon.",
+              "en": "From South America first, and only later to Japan.",
+              "fr": "D'abord en Amérique du Sud, et seulement ensuite au Japon.",
               "es": "De Sudamérica de vuelta a Japón."
             },
             {
-              "en": "It stayed in Japan.",
-              "fr": "Elle est restée au Japon.",
-              "es": "Se quedó en Japón."
+              "en": "Within Japan only, never beyond it.",
+              "fr": "Au Japon seulement, sans jamais en sortir.",
+              "es": "Solo dentro de Japón, sin salir nunca."
             }
           ],
           "why": {
@@ -24447,8 +24447,8 @@
       {
         "kind": "rule",
         "en": "**noun / plain form + の + にひきかえ** means « in contrast to, whereas ». 兄にひきかえ (unlike his brother). The two sides are opposites, and the speaker judges one better.",
-        "fr": "**nom / forme neutre + の + にひきかえ** signifie « à l'inverse de, alors que ». 兄にひきかえ (contrairement à son frère). Les deux côtés sont opposés, et le locuteur juge l'un meilleur.",
-        "es": "**sustantivo / forma llana + の + にひきかえ** significa «a diferencia de, mientras que». 兄にひきかえ (a diferencia de su hermano mayor). Los dos lados son opuestos, y el hablante considera mejor a uno de ellos."
+        "fr": "**nom / forme neutre + の + にひきかえ** signifie « à l'inverse de, alors que ». 兄にひきかえ (contrairement à son frère). Les deux côtés sont opposés, et la personne qui parle juge l'un meilleur.",
+        "es": "**sustantivo / forma llana + の + にひきかえ** significa «a diferencia de, mientras que». 兄にひきかえ (a diferencia de su hermano mayor). Los dos lados son opuestos, y quien habla considera mejor a uno de ellos."
       },
       {
         "kind": "use",
@@ -24505,8 +24505,8 @@
       {
         "jp": "姉が働き者なのにひきかえ、私はなまけ者だ。",
         "en": "Unlike my hard-working sister, I'm lazy.",
-        "fr": "Contrairement à ma sœur travailleuse, je suis paresseux.",
-        "es": "A diferencia de mi hermana mayor, que es muy trabajadora, yo soy perezoso.",
+        "fr": "Contrairement à ma sœur travailleuse, je suis d'une grande paresse.",
+        "es": "A diferencia de mi hermana mayor, que es muy trabajadora, a mí me puede la pereza.",
         "register": "written"
       }
     ],
@@ -24573,7 +24573,7 @@
           "choices": [
             {
               "en": "It sets the speaker against someone just mentioned, to the speaker's cost.",
-              "fr": "Il oppose celui qui parle à quelqu'un dont on vient de parler, à son propre désavantage.",
+              "fr": "Il oppose la personne qui parle à quelqu'un dont on vient de parler, à son propre désavantage.",
               "es": "Contrapone a quien habla con alguien recién mencionado, en su contra."
             },
             {
@@ -24729,7 +24729,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How does the speaker see themself?",
-            "fr": "Comment celui qui parle se voit-il ?",
+            "fr": "Comment la personne qui parle se voit-elle ?",
             "es": "¿Qué imagen tiene de sí quien habla?"
           },
           "jp": "毎日走って体をきたえている友人にひきかえ、私は階段をのぼるだけでも息が切れる。",
@@ -24741,24 +24741,24 @@
           "choices": [
             {
               "en": "Unfavourably: the speaker falls short of the friend.",
-              "fr": "Défavorablement : l'auteur est loin de valoir son ami.",
+              "fr": "Défavorablement : elle est loin de valoir son ami.",
               "es": "Mala: quien habla no está a la altura de su amigo."
             },
             {
               "en": "Favourably: the speaker is proud of skipping exercise.",
-              "fr": "Favorablement : l'auteur est fier de ne pas faire de sport.",
+              "fr": "Favorablement : elle se flatte de ne pas faire de sport.",
               "es": "Buena: quien habla presume de saltarse el ejercicio."
             },
             {
               "en": "Neutrally: the speaker just lists two facts.",
-              "fr": "Neutralement : l'auteur énonce simplement deux faits.",
+              "fr": "Neutralement : elle énonce simplement deux faits.",
               "es": "Sin juicio: quien habla solo enumera dos hechos."
             }
           ],
           "why": {
             "en": "にひきかえ sets two things sharply against each other and carries a judgement: the friend is the good side, so the speaker is the poor one. It is not a neutral comparison like に比べて.",
-            "fr": "にひきかえ oppose nettement deux choses et porte un jugement : l'ami est le bon côté, donc celui qui parle est le moins bon. Ce n'est pas une comparaison neutre comme に比べて.",
-            "es": "にひきかえ contrapone dos cosas con fuerza y lleva un juicio: el amigo es el lado bueno, así que quien habla es el malo. No es una comparación neutra como に比べて."
+            "fr": "にひきかえ oppose nettement deux choses et porte un jugement : l'ami est le bon côté, la personne qui parle le mauvais. Ce n'est pas une comparaison neutre comme に比べて.",
+            "es": "にひきかえ contrapone dos cosas con fuerza y lleva un juicio: el amigo es el lado bueno, así que quien habla queda del lado malo. No es una comparación neutra como に比べて."
           }
         },
         {
@@ -24789,7 +24789,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How does the writer see this year's results?",
-            "fr": "Comment l'auteur voit-il les résultats de cette année ?",
+            "fr": "Comment la personne qui écrit voit-elle les résultats de cette année ?",
             "es": "¿Cómo ve quien escribe los resultados de este año?"
           },
           "jp": "ここ数年の好調にひきかえ、今年の業績は大きく落ち込んだ。",
@@ -25201,7 +25201,7 @@
           "kind": "meaning",
           "ask": {
             "en": "Why could the speaker not say a word?",
-            "fr": "Pourquoi celui qui parle n'a-t-il pas pu placer un mot ?",
+            "fr": "Pourquoi la personne qui parle n'a-t-elle pas pu placer un mot ?",
             "es": "¿Por qué no pudo decir ni una palabra quien habla?"
           },
           "jp": "あの人のおしゃべりのなんのって、ひとことも言えなかった。",
@@ -25223,7 +25223,7 @@
             },
             {
               "en": "The speaker was too shy to talk.",
-              "fr": "Celui qui parle était trop timide pour parler.",
+              "fr": "La timidité l'empêchait de parler.",
               "es": "A quien habla le daba demasiada vergüenza hablar."
             }
           ],
@@ -25442,13 +25442,13 @@
           "choices": [
             {
               "en": "Joking aside, it's almost time to set off.",
-              "fr": "Trêve de plaisanterie, c'est bientôt l'heure du départ.",
+              "fr": "Trêve de plaisanterie : on part bientôt.",
               "es": "Bromas aparte, ya casi es hora de salir."
             },
             {
-              "en": "No joke: we set off right now.",
-              "fr": "Sans blague : on part tout de suite.",
-              "es": "Sin bromas: salimos ahora mismo."
+              "en": "No joke: we really are setting off right now.",
+              "fr": "Sans blague : on part vraiment, et tout de suite.",
+              "es": "Sin bromas: salimos de verdad, y ahora mismo."
             },
             {
               "en": "Let's tell jokes until it's time to set off.",
@@ -25529,7 +25529,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker plan to do about the price?",
-            "fr": "Que compte faire celui qui parle du prix ?",
+            "fr": "Que compte faire la personne qui parle du prix ?",
             "es": "¿Qué piensa hacer quien habla con el precio?"
           },
           "jp": "値段のことはさておき、まず味を見て、あとでゆっくり考えよう。",
@@ -25541,17 +25541,17 @@
           "choices": [
             {
               "en": "Leave it for now and think about it later.",
-              "fr": "Le laisser de côté pour l'instant et y réfléchir plus tard.",
+              "fr": "Le laisser pour l'instant et y penser plus tard.",
               "es": "Dejarlo por ahora y pensarlo más tarde."
             },
             {
-              "en": "Forget about it for good.",
-              "fr": "L'oublier pour de bon.",
+              "en": "Forget about it for good and never bring it up.",
+              "fr": "L'oublier pour de bon et ne plus jamais en parler.",
               "es": "Olvidarse de él para siempre."
             },
             {
-              "en": "Settle it before anything else.",
-              "fr": "Le régler avant toute chose.",
+              "en": "Settle it first, before tasting anything.",
+              "fr": "Le régler d'abord, avant de goûter quoi que ce soit.",
               "es": "Resolverlo antes que nada."
             }
           ],
@@ -25607,7 +25607,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker set aside, and what is praised?",
-            "fr": "Que met de côté celui qui parle, et qu'est-ce qui est vanté ?",
+            "fr": "Que met de côté la personne qui parle, et qu'est-ce qui est vanté ?",
             "es": "¿Qué deja de lado quien habla, y qué elogia?"
           },
           "jp": "あの旅館は、部屋のせまさはさておき、温泉がすばらしい。",
@@ -25635,7 +25635,7 @@
           ],
           "why": {
             "en": "The noun before はさておき is the one set aside (部屋のせまさ); the speaker's real subject comes after the comma (温泉). Nothing is said in praise of the rooms.",
-            "fr": "Le nom avant はさておき est celui qu'on met de côté (部屋のせまさ) ; le vrai sujet de l'auteur vient après la virgule (温泉). Rien n'est dit à la louange des chambres.",
+            "fr": "Le nom avant はさておき est celui qu'on met de côté (部屋のせまさ) ; le vrai sujet de la phrase vient après la virgule (温泉). Rien n'est dit à la louange des chambres.",
             "es": "El sustantivo ante はさておき es lo que se deja de lado (部屋のせまさ); el verdadero tema de quien habla viene tras la coma (温泉). No se dice nada en elogio de las habitaciones."
           }
         },
@@ -25770,9 +25770,9 @@
               "es": "Solo hice lo que debe hacer un empleado de estación."
             },
             {
-              "en": "I did what I should, up until now.",
-              "fr": "J'ai fait mon devoir jusqu'à maintenant.",
-              "es": "Hice lo que debía, hasta ahora."
+              "en": "I did what I should up until now, but no longer.",
+              "fr": "J'ai fait mon devoir jusqu'à maintenant, mais plus désormais.",
+              "es": "Hice lo que debía hasta ahora, pero ya no lo haré más."
             },
             {
               "en": "If I can't do what I should, it's all over.",
@@ -26012,7 +26012,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What is the speaker's attitude if the plan is rejected?",
-            "fr": "Quelle est l'attitude de celui qui parle si le projet est refusé ?",
+            "fr": "Quelle est l'attitude de la personne qui parle si le projet est refusé ?",
             "es": "¿Qué actitud tiene quien habla si rechazan el proyecto?"
           },
           "jp": "この企画が通らなければ、別の案を出すまでのことだ。",
@@ -26090,7 +26090,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How does the speaker feel about being refused?",
-            "fr": "Que ressent celui qui parle d'avoir été refusé ?",
+            "fr": "Que ressent la personne qui parle face à ce refus ?",
             "es": "¿Cómo se siente quien habla tras el rechazo?"
           },
           "jp": "彼女にさそいを断られたまでのことで、別に気にしていない。",
@@ -26154,8 +26154,8 @@
       {
         "kind": "careful",
         "en": "Written, for the speaker's own feeling. ずにはいられない is the plain version and takes a verb.",
-        "fr": "Écrit, pour le sentiment du locuteur lui-même. ずにはいられない est la version simple et prend un verbe.",
-        "es": "Escrito, para el sentimiento del propio hablante. ずにはいられない es la versión llana y lleva un verbo."
+        "fr": "Écrit, pour le propre sentiment de la personne qui parle. ずにはいられない est la version simple et prend un verbe.",
+        "es": "Escrito, para el sentimiento propio de quien habla. ずにはいられない es la versión llana y lleva un verbo."
       }
     ],
     "compare": [
@@ -26243,8 +26243,8 @@
           ],
           "why": {
             "en": "を禁じ得ない states the writer's own feeling, welling up in spite of them. Someone else's is described, not stated so.",
-            "fr": "を禁じ得ない dit le sentiment de qui écrit, qui monte malgré lui. Celui d'un autre se décrit, il ne se dit pas ainsi.",
-            "es": "を禁じ得ない dice el sentimiento propio de quien escribe, que brota a su pesar. El de otro se describe, no se dice así."
+            "fr": "を禁じ得ない dit le sentiment de qui écrit, qui monte sans qu'on le veuille. Celui d'autrui se décrit, il ne se dit pas ainsi.",
+            "es": "を禁じ得ない dice el sentimiento propio de quien escribe, que brota a su pesar. El de otra persona se describe, no se dice así."
           },
           "kind": "usage"
         },
@@ -26428,7 +26428,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What happened to the speaker when the news came?",
-            "fr": "Que s'est-il passé pour celui qui parle à l'annonce de la nouvelle ?",
+            "fr": "Que s'est-il passé pour la personne qui parle à l'annonce de la nouvelle ?",
             "es": "¿Qué le pasó a quien habla al recibir la noticia?"
           },
           "jp": "恩師が亡くなったと聞き、悲しみを禁じ得なかった。",
@@ -26440,17 +26440,17 @@
           "choices": [
             {
               "en": "The speaker could not hold back sadness.",
-              "fr": "Celui qui parle n'a pas pu retenir sa tristesse.",
+              "fr": "Elle n'a pas pu retenir sa tristesse.",
               "es": "Quien habla no pudo contener la tristeza."
             },
             {
               "en": "The speaker was forbidden to show sadness.",
-              "fr": "On a interdit à celui qui parle de montrer sa tristesse.",
+              "fr": "On lui a interdit de montrer sa tristesse.",
               "es": "A quien habla le prohibieron mostrar tristeza."
             },
             {
               "en": "The speaker felt no sadness at all.",
-              "fr": "Celui qui parle n'a ressenti aucune tristesse.",
+              "fr": "Elle n'a ressenti aucune tristesse.",
               "es": "Quien habla no sintió ninguna tristeza."
             }
           ],
@@ -26500,17 +26500,17 @@
           "choices": [
             {
               "en": "A good one: the speaker was deeply moved by her courage.",
-              "fr": "Un bon : l'auteur a été profondément ému par son courage.",
+              "fr": "Un bon : le courage de cette femme a profondément ému la personne qui parle.",
               "es": "Uno bueno: a quien habla le conmovió mucho su valor."
             },
             {
               "en": "A bad one: the speaker was angry at what she did.",
-              "fr": "Un mauvais : l'auteur était en colère contre ce qu'elle a fait.",
+              "fr": "Un mauvais : ce que cette femme a fait a mis en colère la personne qui parle.",
               "es": "Uno malo: quien habla se enojó por lo que hizo ella."
             },
             {
               "en": "None: the speaker had to hold the feeling back.",
-              "fr": "Aucun : l'auteur a dû retenir son émotion.",
+              "fr": "Aucun : la personne qui parle a dû retenir son émotion.",
               "es": "Ninguno: quien habla tuvo que contener lo que sentía."
             }
           ],
@@ -26687,14 +26687,14 @@
           },
           "choices": [
             {
-              "en": "Precisely because one is a professional, not even a small mistake is allowed.",
-              "fr": "C'est justement parce qu'on est un professionnel que même une petite erreur n'est pas permise.",
-              "es": "Precisamente por ser profesional, no se permite ni un pequeño error."
+              "en": "Because one is a pro, not even a small slip is allowed.",
+              "fr": "Justement parce qu'on est pro, aucune petite erreur n'est permise.",
+              "es": "Justo por ser profesional, no se permite ni un pequeño error."
             },
             {
-              "en": "Even professionals are allowed small mistakes.",
-              "fr": "Même les professionnels ont droit aux petites erreurs.",
-              "es": "Incluso a los profesionales se les permiten pequeños errores."
+              "en": "Even professionals are allowed a small mistake now and then.",
+              "fr": "Même les professionnels ont droit à une petite erreur de temps en temps.",
+              "es": "Incluso a los profesionales se les permite un pequeño error de vez en cuando."
             },
             {
               "en": "Once you become a professional, small mistakes will be allowed.",
@@ -27290,7 +27290,7 @@
           ],
           "why": {
             "en": "The が-subject of the first half, 私, is the one who may or may not apologise; the main clause says he won't forgive either way. It is a whether-or-not, not an « if ».",
-            "fr": "Le sujet en が de la première moitié, 私, est celui qui s'excuse ou non ; la principale dit que lui ne pardonnera dans aucun cas. C'est un « que… ou non », pas un « si ».",
+            "fr": "Le sujet en が de la première moitié, 私, est la personne qui s'excuse ou non ; la principale dit que lui ne pardonnera dans aucun cas. C'est un « que… ou non », pas un « si ».",
             "es": "El sujeto con が de la primera mitad, 私, es quien se disculpa o no; la principal dice que él no perdonará en ningún caso. Es un «tanto si… como si no», no un «si»."
           }
         },
@@ -27351,9 +27351,9 @@
           },
           "choices": [
             {
-              "en": "Nothing: it leaves both possibilities open, and my work is the same either way.",
-              "fr": "Rien : les deux possibilités restent ouvertes, et mon travail est le même dans les deux cas.",
-              "es": "Nada: deja abiertas las dos posibilidades, y mi trabajo es igual en ambos casos."
+              "en": "Nothing: both are left open, and my work is the same.",
+              "fr": "Rien : les deux restent possibles, et mon travail est le même.",
+              "es": "Nada: quedan abiertas las dos, y mi trabajo no cambia."
             },
             {
               "en": "That they will quit, and my work will not change after that.",
@@ -27634,8 +27634,8 @@
           },
           "choices": [
             "いいえ、数か月前は、ひらがなすら読めなかったんです。",
-            "いいえ、数か月前は、ひらがなしか読めなかったんです。",
-            "いいえ、数か月前は、ひらがなだけ読めなかったんです。"
+            "いいえ、数か月前は、ひらがなくらいしか読めなかったんです。",
+            "いいえ、数か月前は、ひらがなだけが読めなかったんです。"
           ],
           "why": {
             "en": "Not even the most basic thing: すら. しか would say hiragana was all you could read; だけ, that hiragana alone escaped you.",
@@ -27660,8 +27660,8 @@
           },
           "choices": [
             {
-              "en": "That he has probably stopped talking to them too: if not even his brother, then nobody.",
-              "fr": "Qu'il ne leur parle sans doute plus non plus : si même son frère est exclu, alors personne.",
+              "en": "That he has likely stopped talking to them too.",
+              "fr": "Qu'il ne leur parle sans doute plus non plus.",
               "es": "Que seguramente tampoco les habla: si ni a su hermano, a nadie."
             },
             {
@@ -27738,9 +27738,9 @@
           },
           "choices": [
             {
-              "en": "Nothing could move it: her parents' opposition was the strongest pressure, and even that failed.",
-              "fr": "Rien ne pouvait l'ébranler : l'opposition de ses parents était la pression la plus forte, et même elle a échoué.",
-              "es": "Nada podía cambiarla: la oposición de sus padres era la mayor presión, y ni eso bastó."
+              "en": "Nothing could move it: not even her parents' opposition.",
+              "fr": "Rien ne pouvait l'ébranler, pas même l'opposition de ses parents.",
+              "es": "Nada podía cambiarla, ni siquiera la oposición de sus padres."
             },
             {
               "en": "Other things could move it, but not her parents' opposition.",
@@ -28029,9 +28029,9 @@
           },
           "choices": [
             {
-              "en": "Very alike: the eyes and the speech are two telling signs of a likeness that runs deep.",
-              "fr": "Très semblable : le regard et la façon de parler sont deux signes parmi d'autres d'une ressemblance générale.",
-              "es": "Muy parecido: la mirada y el habla son dos señales de un parecido que lo abarca todo."
+              "en": "Very alike: those two traits show a likeness throughout.",
+              "fr": "Très semblable : ces deux traits montrent une ressemblance d'ensemble.",
+              "es": "Muy parecido: esos dos rasgos muestran un parecido general."
             },
             {
               "en": "Alike only in the eyes and the way of talking, and in nothing else.",
@@ -28149,9 +28149,9 @@
           },
           "choices": [
             {
-              "en": "It is good as a whole: the room and the breakfast are two points that make the speaker want to come back.",
-              "fr": "Il est bon dans l'ensemble : la chambre et le petit-déjeuner sont deux points qui donnent envie d'y revenir.",
-              "es": "Es bueno en conjunto: la habitación y el desayuno son dos puntos que le dan ganas de volver."
+              "en": "It is good overall: worth coming back to.",
+              "fr": "Il est bon dans l'ensemble : on veut y revenir.",
+              "es": "Es bueno en conjunto: dan ganas de volver."
             },
             {
               "en": "The room is good, but the breakfast is not.",
@@ -28469,9 +28469,9 @@
           },
           "choices": [
             {
-              "en": "The whole landscape: the mountains and the rivers are only two examples.",
-              "fr": "Tout le paysage : les montagnes et les rivières ne sont que deux exemples.",
-              "es": "Todo el paisaje: las montañas y los ríos son solo dos ejemplos."
+              "en": "Everything: mountains and rivers are just examples.",
+              "fr": "Tout : montagnes et rivières ne sont que des exemples.",
+              "es": "Todo el paisaje: montañas y ríos son solo dos ejemplos."
             },
             {
               "en": "Only the mountains and the rivers, and nothing else.",
@@ -29017,8 +29017,8 @@
       {
         "kind": "careful",
         "en": "Lukewarm: the speaker keeps their distance. ないことはない is the everyday twin.",
-        "fr": "Tiède : le locuteur garde ses distances. ないことはない est le jumeau courant.",
-        "es": "Tibio: el hablante guarda las distancias. ないことはない es su equivalente cotidiano."
+        "fr": "Tiède : la personne qui parle garde ses distances. ないことはない est le jumeau courant.",
+        "es": "Tibio: quien habla guarda las distancias. ないことはない es su equivalente cotidiano."
       }
     ],
     "compare": [
@@ -29635,9 +29635,9 @@
               "es": "Esa película no puede sino hacer llorar a quien la ve."
             },
             {
-              "en": "That film won't allow anyone to cry.",
-              "fr": "Ce film ne laisse personne pleurer.",
-              "es": "Esa película no deja llorar a nadie."
+              "en": "That film will not let anyone who sees it shed a tear.",
+              "fr": "Ce film ne laisse personne qui le voit verser une larme.",
+              "es": "Esa película no deja que nadie que la vea derrame una lágrima."
             },
             {
               "en": "Whoever sees that film has a duty to cry.",
@@ -30161,19 +30161,19 @@
           },
           "choices": [
             {
-              "en": "One is enough: either way, or another like it, will do.",
-              "fr": "Une seule suffit : l'une ou l'autre, ou une autre du même genre.",
+              "en": "Just one, or any similar way, will do.",
+              "fr": "Une seule, ou toute autre du même genre, suffit.",
               "es": "Basta con una: cualquiera de las dos, u otra parecida, sirve."
             },
             {
-              "en": "Both, one after the other.",
-              "fr": "Les deux, l'une après l'autre.",
-              "es": "Las dos, una tras otra."
+              "en": "Both of them, one after the other, in that order.",
+              "fr": "Les deux, l'une après l'autre, dans cet ordre.",
+              "es": "Las dos, una tras otra, en ese orden."
             },
             {
               "en": "Only these two, and nothing else is accepted.",
               "fr": "Seulement ces deux-là, rien d'autre n'est accepté.",
-              "es": "Solo estas dos, y no se acepta nada más."
+              "es": "Solo estas dos, y no se acepta ninguna otra manera."
             }
           ],
           "why": {
@@ -30221,14 +30221,14 @@
           },
           "choices": [
             {
-              "en": "Some kind of warning: a phone call, or anything similar.",
-              "fr": "Un avertissement quelconque : un appel, ou n'importe quoi de semblable.",
+              "en": "Some warning: a call, or anything like it.",
+              "fr": "Un avertissement : un appel, ou autre chose.",
               "es": "Algún tipo de aviso: una llamada, o algo parecido."
             },
             {
-              "en": "A phone call, and nothing else would do.",
-              "fr": "Un appel, et rien d'autre ne conviendrait.",
-              "es": "Una llamada, y nada más serviría."
+              "en": "A phone call, and no other kind of warning would do.",
+              "fr": "Un appel, et aucun autre avertissement ne conviendrait.",
+              "es": "Una llamada, y ningún otro aviso serviría."
             },
             {
               "en": "A phone call the moment the other person arrives.",
@@ -30257,7 +30257,7 @@
           "why": {
             "en": "なり…なり lists options and leaves the choice to the visitor: お好きなようにどうぞ. The line with どちらにしますか uses it to ask « which one? », which is the job of か…か, and ほうがいい recommends one way instead of offering both.",
             "fr": "なり…なり présente des options et laisse le choix à l'autre : お好きなようにどうぞ. La ligne avec どちらにしますか s'en sert pour demander « lequel ? », rôle de か…か, et ほうがいい recommande une seule voie au lieu d'offrir les deux.",
-            "es": "なり…なり enumera opciones y deja la elección al otro: お好きなようにどうぞ. La frase con どちらにしますか lo usa para preguntar «¿cuál?», tarea de か…か, y ほうがいい recomienda una vía en vez de ofrecer las dos."
+            "es": "なり…なり enumera opciones y deja la elección a quien escucha: お好きなようにどうぞ. La frase con どちらにしますか lo usa para preguntar «¿cuál?», tarea de か…か, y ほうがいい recomienda una vía en vez de ofrecer las dos."
           }
         },
         {
@@ -30277,23 +30277,23 @@
             {
               "en": "Indifferent: the listener may react however they like.",
               "fr": "Indifférence : l'autre peut réagir comme bon lui semble.",
-              "es": "Indiferencia: el otro puede reaccionar como quiera."
+              "es": "Indiferencia: quien escucha puede reaccionar como quiera."
             },
             {
               "en": "Insistent: the listener must do both.",
               "fr": "Insistance : l'autre doit faire les deux.",
-              "es": "Insistencia: el otro debe hacer las dos cosas."
+              "es": "Insistencia: quien escucha debe hacer las dos cosas."
             },
             {
               "en": "Anxious: the speaker wants to calm the listener down.",
               "fr": "Inquiétude : la personne veut calmer l'autre.",
-              "es": "Preocupación: quiere calmar al otro."
+              "es": "Preocupación: quiere calmar a quien escucha."
             }
           ],
           "why": {
             "en": "Two examples, then 好きにすればいい: なり…なり offers options without choosing between them, and the speaker leaves the choice, coldly, to the listener. Nothing asks for both, and nothing tries to calm the listener.",
             "fr": "Deux exemples, puis 好きにすればいい : なり…なり propose des options sans trancher, et la personne laisse le choix, froidement, à l'autre. Rien ne demande les deux, ni ne cherche à calmer l'autre.",
-            "es": "Dos ejemplos y luego 好きにすればいい: なり…なり ofrece opciones sin elegir entre ellas, y quien habla deja, con frialdad, la elección al otro. Nada pide las dos, ni intenta calmar al otro."
+            "es": "Dos ejemplos y luego 好きにすればいい: なり…なり ofrece opciones sin elegir entre ellas, y quien habla deja, con frialdad, la elección a quien escucha. Nada pide las dos, ni intenta calmar a nadie."
           }
         }
       ]
@@ -30546,9 +30546,9 @@
           },
           "choices": [
             {
-              "en": "It does not put your life at risk, but it is still worth seeing a doctor.",
-              "fr": "Elle ne met pas ta vie en danger, mais mieux vaut quand même voir un médecin.",
-              "es": "No pone tu vida en riesgo, pero conviene ver a un médico de todos modos."
+              "en": "It is not life-threatening, but see a doctor anyway.",
+              "fr": "Ta vie n'est pas en danger, mais va voir un médecin.",
+              "es": "Tu vida no corre peligro, pero ve al médico igual."
             },
             {
               "en": "It puts your life at risk: go to the hospital at once.",
@@ -30556,9 +30556,9 @@
               "es": "Pone tu vida en riesgo: ve al hospital ahora mismo."
             },
             {
-              "en": "It is nothing: there is no need for a doctor.",
-              "fr": "Ce n'est rien : pas besoin de médecin.",
-              "es": "No es nada: no hace falta médico."
+              "en": "It is nothing at all: there is no need to see a doctor.",
+              "fr": "Ce n'est rien du tout : pas besoin de voir un médecin.",
+              "es": "No es nada de nada: no hace falta ver a ningún médico."
             }
           ],
           "why": {
@@ -31387,7 +31387,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of him?",
-            "fr": "Que pense celui qui parle de cette personne ?",
+            "fr": "Que pense de lui la personne qui parle ?",
             "es": "¿Qué piensa de él quien habla?"
           },
           "jp": "彼の人柄は信頼に足るが、仕事の腕は評価するに足りない。",
@@ -31827,7 +31827,7 @@
               "es": "Más abundante que el invierno pasado."
             },
             {
-              "en": "Scarce, unlike last winter, which had plenty.",
+              "en": "Scarce this time, unlike last winter, which had plenty.",
               "fr": "Rare, contrairement à l'hiver dernier, qui en avait beaucoup.",
               "es": "Escasa, al contrario que el invierno pasado, que tuvo mucha."
             }
@@ -32153,7 +32153,7 @@
           ],
           "why": {
             "en": "赤面の至り is the height of embarrassment, and 今でも says it lasts. It is the speaker's own shame, never pride, and it is not something one laughs off.",
-            "fr": "赤面の至り est le comble de la gêne, et 今でも dit qu'elle dure. C'est la honte de celui qui parle, jamais de la fierté, et on n'en rit pas.",
+            "fr": "赤面の至り est le comble de la gêne, et 今でも dit qu'elle dure. C'est la honte de qui le dit, jamais de la fierté, et on n'en rit pas.",
             "es": "赤面の至り es el colmo de la vergüenza, y 今でも dice que dura. Es la vergüenza de quien habla, nunca orgullo, y no es algo de lo que uno se ría."
           }
         },
@@ -32185,7 +32185,7 @@
           "kind": "meaning",
           "ask": {
             "en": "Who is moved, and by what?",
-            "fr": "Qui est ému, et par quoi ?",
+            "fr": "Qui s'émeut, et de quoi ?",
             "es": "¿Quién se emociona, y por qué?"
           },
           "jp": "先生のお心づかいには、ただただ感激の至りです。",
@@ -32197,23 +32197,23 @@
           "choices": [
             {
               "en": "The speaker is moved by the teacher's kindness.",
-              "fr": "Celui qui parle est ému par la gentillesse du professeur.",
+              "fr": "La personne qui parle s'émeut de la gentillesse du professeur.",
               "es": "A quien habla le emociona la amabilidad del profesor."
             },
             {
               "en": "The teacher is moved by the speaker's kindness.",
-              "fr": "Le professeur est ému par la gentillesse de celui qui parle.",
+              "fr": "Le professeur s'émeut de la gentillesse de la personne qui parle.",
               "es": "Al profesor le emociona la amabilidad de quien habla."
             },
             {
               "en": "The speaker is moved by something the speaker did personally.",
-              "fr": "Celui qui parle est ému par quelque chose qu'il a fait lui-même.",
+              "fr": "La personne qui parle s'émeut d'une chose qu'elle a faite elle-même.",
               "es": "A quien habla le emociona algo que hizo personalmente."
             }
           ],
           "why": {
             "en": "の至り states the speaker's own feeling, in humble words, and the cause is what comes before には: the teacher's お心づかい, an honorific for the teacher's kindness.",
-            "fr": "の至り dit le sentiment de celui qui parle, en termes humbles, et la cause est ce qui précède には : お心づかい, terme honorifique pour la gentillesse du professeur.",
+            "fr": "の至り dit le sentiment de la personne qui parle, en termes humbles, et la cause est ce qui précède には : お心づかい, terme honorifique pour la gentillesse du professeur.",
             "es": "の至り expresa el sentimiento propio de quien habla, en términos humildes, y la causa es lo que precede a には: お心づかい, término honorífico para la amabilidad del profesor."
           }
         },
@@ -32379,7 +32379,7 @@
           },
           "ask": {
             "en": "言ってしまえばそれまでだが. What does the speaker mean?",
-            "fr": "言ってしまえばそれまでだが. Que veut dire celui qui parle ?",
+            "fr": "言ってしまえばそれまでだが. Que veut dire la personne qui parle ?",
             "es": "言ってしまえばそれまでだが. ¿Qué quiere decir quien habla?"
           },
           "choices": [
@@ -32401,7 +32401,7 @@
           ],
           "why": {
             "en": "〜と言ってしまえばそれまでだが: put that way, there would be nothing more to say, but the speaker will not stop there.",
-            "fr": "〜と言ってしまえばそれまでだが : dit ainsi, il n'y aurait plus rien à ajouter, mais celui qui parle ne s'en tient pas là.",
+            "fr": "〜と言ってしまえばそれまでだが : dit ainsi, il n'y aurait plus rien à ajouter, mais la personne qui parle ne s'en tient pas là.",
             "es": "〜と言ってしまえばそれまでだが: dicho así, no habría nada más que decir, pero quien habla no se queda ahí."
           },
           "kind": "usage"
@@ -32426,13 +32426,13 @@
           "choices": [
             {
               "en": "Calm resolve: if there's no train, I'll simply walk.",
-              "fr": "Une résolution tranquille : s'il n'y a pas de train, je marcherai, voilà tout.",
+              "fr": "Une résolution tranquille : pas de train, je marcherai.",
               "es": "Resolución serena: si no hay tren, iré a pie y ya."
             },
             {
-              "en": "Despair: no train, and it's all over.",
-              "fr": "Le désespoir : pas de train, et tout est fini.",
-              "es": "Desesperación: no hay tren, y se acabó todo."
+              "en": "Despair: if there's no train, then everything is lost.",
+              "fr": "Le désespoir : s'il n'y a pas de train, alors tout est perdu.",
+              "es": "Desesperación: si no hay tren, entonces todo está perdido."
             },
             {
               "en": "Waiting: I'll walk until a train comes.",
@@ -32595,7 +32595,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about a doctor's skill?",
-            "fr": "Que dit celui qui parle de l'habileté d'un médecin ?",
+            "fr": "Que dit la personne qui parle de l'habileté d'un médecin ?",
             "es": "¿Qué dice quien habla sobre la habilidad de un médico?"
           },
           "jp": "どんなに腕のいい医者でも、患者に信頼されなければそれまでだ。",
@@ -32889,7 +32889,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of him?",
-            "fr": "Que pense celui qui parle de cet homme ?",
+            "fr": "Que pense de cet homme la personne qui parle ?",
             "es": "¿Qué piensa de él quien habla?"
           },
           "jp": "彼は、お礼一つ言わないで帰ってしまった。",
@@ -33159,7 +33159,7 @@
           },
           "ask": {
             "en": "には及びません. What does the speaker say?",
-            "fr": "には及びません. Que dit celui qui parle ?",
+            "fr": "には及びません. Que dit la personne qui parle ?",
             "es": "には及びません. ¿Qué dice quien habla?"
           },
           "choices": [
@@ -33182,7 +33182,7 @@
           "why": {
             "en": "には及ばない politely waves away a trouble someone would take: no need for you to. までもない judges the act itself superfluous.",
             "fr": "には及ばない écarte poliment une peine que l'autre prendrait : inutile de vous déranger. までもない juge l'acte lui-même superflu.",
-            "es": "には及ばない rechaza con cortesía una molestia que el otro se tomaría: no hace falta que se moleste. までもない juzga superfluo el acto mismo."
+            "es": "には及ばない rechaza con cortesía una molestia que la otra persona se tomaría: no hace falta que se moleste. までもない juzga superfluo el acto mismo."
           },
           "kind": "usage"
         },
@@ -33317,7 +33317,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about going in person?",
-            "fr": "Que dit celui qui parle à propos d'y aller en personne ?",
+            "fr": "Que dit la phrase à propos d'y aller en personne ?",
             "es": "¿Qué dice quien habla sobre ir en persona?"
           },
           "jp": "電話すれば分かることだから、わざわざ会いに行くまでもない。",
@@ -33613,7 +33613,7 @@
           "choices": [
             {
               "en": "Regret with a reproach: if only you'd told me, I'd have come to meet you.",
-              "fr": "Un regret mêlé de reproche : si seulement tu me l'avais dit, je serais venu te chercher.",
+              "fr": "Un regret mêlé de reproche : si seulement tu me l'avais dit, j'aurais pu venir te chercher.",
               "es": "Pesar con reproche: si me lo hubieras dicho, habría ido a buscarte."
             },
             {
@@ -33700,13 +33700,13 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker feel?",
-            "fr": "Qu'éprouve celui qui parle ?",
+            "fr": "Qu'éprouve la personne qui parle ?",
             "es": "¿Qué siente quien habla?"
           },
           "jp": "わたしがもう少し気をつけていれば、防げたものを。",
           "tr": {
             "en": "If only I had been a little more careful, I could have prevented it.",
-            "fr": "Si seulement j'avais été un peu plus attentif, j'aurais pu l'éviter.",
+            "fr": "Si seulement j'avais fait un peu plus attention, j'aurais pu l'éviter.",
             "es": "Si hubiera tenido un poco más de cuidado, lo habría podido evitar."
           },
           "choices": [
@@ -33722,13 +33722,13 @@
             },
             {
               "en": "Relief: it was prevented thanks to the speaker's care.",
-              "fr": "Du soulagement : cela a été évité grâce à l'attention de celui qui parle.",
+              "fr": "Du soulagement : cela a été évité grâce à son attention.",
               "es": "Alivio: se evitó gracias al cuidado de quien habla."
             }
           ],
           "why": {
             "en": "…ばVたものを looks back at what could have been and was not: with わたしが, the one who blames is the speaker. 防げた is a possibility that did not come true, so there is no relief.",
-            "fr": "…ばVたものを regarde ce qui aurait pu être et n'a pas été : avec わたしが, celui qu'on blâme est celui qui parle. 防げた est une possibilité qui ne s'est pas réalisée, donc pas de soulagement.",
+            "fr": "…ばVたものを regarde ce qui aurait pu être et n'a pas été : avec わたしが, c'est soi-même qu'on blâme. 防げた est une possibilité qui ne s'est pas réalisée, donc pas de soulagement.",
             "es": "…ばVたものを mira a lo que pudo ser y no fue: con わたしが, quien carga con la culpa es quien habla. 防げた es una posibilidad que no se cumplió, así que no hay alivio."
           }
         },
@@ -33772,23 +33772,23 @@
           "choices": [
             {
               "en": "The speaker would have forgiven the child, but the child left without apologising.",
-              "fr": "Celui qui parle aurait pardonné à l'enfant, mais l'enfant est parti sans s'excuser.",
+              "fr": "La personne qui parle aurait pardonné à l'enfant, mais l'enfant est parti sans s'excuser.",
               "es": "Quien habla habría perdonado al niño, pero el niño se fue sin disculparse."
             },
             {
               "en": "The child apologised, and the speaker forgave them.",
-              "fr": "L'enfant a présenté ses excuses, et celui qui parle a pardonné.",
+              "fr": "L'enfant a présenté ses excuses, et la personne qui parle a pardonné.",
               "es": "El niño se disculpó, y quien habla lo perdonó."
             },
             {
               "en": "The child would have forgiven the speaker, but the speaker did not apologise.",
-              "fr": "L'enfant aurait pardonné à celui qui parle, mais celui-ci ne s'est pas excusé.",
+              "fr": "L'enfant aurait pardonné à la personne qui parle, mais celle-ci ne s'est pas excusée.",
               "es": "El niño habría perdonado a quien habla, pero quien habla no se disculpó."
             }
           ],
           "why": {
             "en": "ものを after 許した is a reproach: the speaker would have forgiven if the condition had been met, and it was not. The one who would forgive is the speaker; the child is the one who left without a word.",
-            "fr": "ものを après 許した est un reproche : celui qui parle aurait pardonné si la condition avait été remplie, et elle ne l'a pas été. Celui qui pardonnerait est celui qui parle ; l'enfant est celui qui est parti sans un mot.",
+            "fr": "ものを après 許した est un reproche : la personne qui parle aurait pardonné si la condition avait été remplie, ce qui n'a pas été le cas. C'est elle qui pardonnerait ; l'enfant est celui qui est parti sans un mot.",
             "es": "ものを tras 許した es un reproche: quien habla habría perdonado si se hubiera cumplido la condición, y no se cumplió. Quien perdonaría es quien habla; el niño es quien se fue sin decir nada."
           }
         },
@@ -34777,9 +34777,9 @@
               "es": "Pide con cortesía: si no es molestia, ¿me dice su nombre?"
             },
             {
-              "en": "It gives permission: you may give your name.",
-              "fr": "Il donne une permission : vous pouvez donner votre nom.",
-              "es": "Da permiso: puede usted dar su nombre."
+              "en": "It grants permission: you are free to give your name if you wish.",
+              "fr": "Il accorde une permission : vous êtes libre de donner votre nom si vous le souhaitez.",
+              "es": "Da permiso: usted es libre de dar su nombre, si así lo desea."
             },
             {
               "en": "It says there is a problem with the name.",
@@ -35091,13 +35091,13 @@
           "choices": [
             {
               "en": "A modest verdict: the bento is so-so, about that.",
-              "fr": "Un jugement modeste : le bento est passable, à peu près.",
+              "fr": "Un jugement modeste : le bento est passable.",
               "es": "Un juicio modesto: el bento está regular, sin más."
             },
             {
-              "en": "A complaint: the bento is dreadful.",
-              "fr": "Une plainte : le bento est infect.",
-              "es": "Una queja: el bento es malísimo."
+              "en": "A complaint: the bento is dreadful, barely edible.",
+              "fr": "Une plainte : le bento est infect, à peine mangeable.",
+              "es": "Una queja: el bento es malísimo, apenas se puede comer."
             },
             {
               "en": "A place: it is the spot where the bento is tasted.",
@@ -35275,7 +35275,7 @@
           ],
           "why": {
             "en": "といったところだ is a rough, modest estimate, here « about even ». It is not a count and not a minimum: the speaker does not promise better.",
-            "fr": "といったところだ est une estimation approximative et modeste, ici « à peu près à égalité ». Ce n'est ni un compte exact ni un minimum : le locuteur ne promet pas mieux.",
+            "fr": "といったところだ est une estimation approximative et modeste, ici « à peu près à égalité ». Ce n'est ni un compte exact ni un minimum : on ne promet pas mieux.",
             "es": "といったところだ es un cálculo aproximado y modesto, aquí «más o menos a la par». No es un recuento ni un mínimo: quien habla no promete más."
           }
         },
@@ -35301,7 +35301,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about the price of lunch here?",
-            "fr": "Que dit le locuteur du prix du déjeuner ici ?",
+            "fr": "Que dit la personne qui parle du prix du déjeuner ici ?",
             "es": "¿Qué dice quien habla del precio del almuerzo aquí?"
           },
           "jp": "ここのランチは、安くても八百円といったところです。",
@@ -35547,7 +35547,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of this shop's ramen?",
-            "fr": "Que pense le locuteur du ramen de ce restaurant ?",
+            "fr": "Que pense la personne qui parle du ramen de ce restaurant ?",
             "es": "¿Qué piensa quien habla del ramen de este local?"
           },
           "jp": "この店のラーメンは、日本一だといっても過言ではないと思う。",
@@ -35607,7 +35607,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker say about his role in the team?",
-            "fr": "Que dit le locuteur du rôle de cet homme dans l'équipe ?",
+            "fr": "Que dit la personne qui parle du rôle de cet homme dans l'équipe ?",
             "es": "¿Qué dice quien habla de su papel en el equipo?"
           },
           "jp": "彼なしでは、このチームの優勝は考えられなかったといっても過言ではない。",
@@ -35629,13 +35629,13 @@
             },
             {
               "en": "He is credited with the victory, but the speaker thinks that is overstated.",
-              "fr": "On lui attribue la victoire, mais le locuteur trouve que c'est exagéré.",
+              "fr": "On lui attribue la victoire, mais la personne qui parle trouve cela exagéré.",
               "es": "Le atribuyen la victoria, pero quien habla cree que se exagera."
             }
           ],
           "why": {
             "en": "The speaker makes a big claim and stands by it: the victory is unthinkable without him. The « overstated » reading is the opposite, since ではない denies any overstatement.",
-            "fr": "Le locuteur avance une grosse affirmation et l'assume : sans lui, pas de victoire. La lecture « c'est exagéré » est l'inverse, puisque ではない nie toute exagération.",
+            "fr": "La personne qui parle avance une grosse affirmation et l'assume : sans lui, pas de victoire. La lecture « c'est exagéré » est l'inverse, puisque ではない nie toute exagération.",
             "es": "Quien habla hace una afirmación rotunda y la sostiene: sin él, la victoria es impensable. La lectura «se exagera» es la contraria, porque ではない niega toda exageración."
           }
         },
@@ -35667,7 +35667,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How does the speaker report the heat of this summer?",
-            "fr": "Comment le locuteur décrit-il la chaleur de cet été ?",
+            "fr": "Comment la personne qui parle décrit-elle la chaleur de cet été ?",
             "es": "¿Cómo cuenta quien habla el calor de este verano?"
           },
           "jp": "今年の夏は、毎日が三十五度をこえたといっても過言ではない。",
@@ -35689,7 +35689,7 @@
             },
             {
               "en": "Only a few days did, and the speaker admits to exaggerating.",
-              "fr": "Seuls quelques jours l'ont fait, et le locuteur admet exagérer.",
+              "fr": "Seuls quelques jours l'ont fait, et la personne qui parle admet exagérer.",
               "es": "Solo algunos días, y quien habla admite que exagera."
             }
           ],
@@ -35802,9 +35802,9 @@
           },
           "choices": [
             {
-              "en": "« …I'd never have thought it »: surprise that the last train has already gone.",
-              "fr": "« …je ne l'aurais jamais cru » : la stupeur que le dernier train soit déjà parti.",
-              "es": "«…nunca lo habría pensado»: sorpresa de que el último tren ya se haya ido."
+              "en": "« …I'd never have thought it »: surprise.",
+              "fr": "« …je ne l'aurais jamais cru » : la stupeur.",
+              "es": "«…nunca lo habría pensado»: sorpresa."
             },
             {
               "en": "« …perhaps »: a doubt whether the last train has gone.",
@@ -36000,7 +36000,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker express?",
-            "fr": "Qu'exprime le locuteur ?",
+            "fr": "Qu'exprime la personne qui parle ?",
             "es": "¿Qué expresa quien habla?"
           },
           "jp": "あの静かな町に、こんなに大きなビルが建つとは。",
@@ -36011,8 +36011,8 @@
           },
           "choices": [
             {
-              "en": "Surprise: the speaker never expected a building that big there.",
-              "fr": "La surprise : un immeuble aussi grand là, c'était inattendu.",
+              "en": "Surprise: a building that big there was unexpected.",
+              "fr": "La surprise : un si grand immeuble là, c'était inattendu.",
               "es": "Sorpresa: nunca esperó allí un edificio tan grande."
             },
             {
@@ -36054,7 +36054,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker think of the price of this ekiben?",
-            "fr": "Que pense le locuteur du prix de cet ekiben ?",
+            "fr": "Que pense la personne qui parle du prix de cet ekiben ?",
             "es": "¿Qué piensa quien habla del precio de este ekiben?"
           },
           "jp": "この駅弁が、こんなに安いとは思わなかった。",
@@ -36218,8 +36218,8 @@
             },
             {
               "en": "Someone else's: riding where one is told to.",
-              "fr": "Celle d'un autre : on prend le train là où on vous dit d'aller.",
-              "es": "La de otro: ir en tren adonde te digan."
+              "fr": "Celle d'autrui : on prend le train là où on vous dit d'aller.",
+              "es": "La de otra persona: ir en tren adonde te digan."
             },
             {
               "en": "The timetable's: riding at fixed hours.",
@@ -36229,8 +36229,8 @@
           ],
           "why": {
             "en": "After 気の向く, 足の向く or 思う, ままに follows one's own impulse, freely. After a passive like 言われる, it follows someone else's word.",
-            "fr": "Après 気の向く, 足の向く ou 思う, ままに suit son propre élan, librement. Après un passif comme 言われる, il suit la parole d'un autre.",
-            "es": "Tras 気の向く, 足の向く o 思う, ままに sigue el propio impulso, con libertad. Tras un pasivo como 言われる, sigue la palabra de otro."
+            "fr": "Après 気の向く, 足の向く ou 思う, ままに suit son propre élan, librement. Après un passif comme 言われる, il suit la parole d'autrui.",
+            "es": "Tras 気の向く, 足の向く o 思う, ままに sigue el propio impulso, con libertad. Tras un pasivo como 言われる, sigue la palabra ajena."
           },
           "pair": [
             "言われるままに",
@@ -36770,7 +36770,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What was the speaker's guess, and what really happened?",
-            "fr": "Quelle était la supposition du locuteur, et que s'est-il vraiment passé ?",
+            "fr": "Quelle était la supposition de la personne qui parle, et que s'est-il vraiment passé ?",
             "es": "¿Qué suponía quien habla, y qué pasó en realidad?"
           },
           "jp": "きっと受かると思いきや、結果は不合格だった。",
@@ -36782,17 +36782,17 @@
           "choices": [
             {
               "en": "The speaker expected to pass, but failed.",
-              "fr": "Le locuteur pensait réussir, mais a échoué.",
+              "fr": "Elle pensait réussir, mais a échoué.",
               "es": "Creía que aprobaría, pero reprobó."
             },
             {
               "en": "The speaker expected to fail, but passed.",
-              "fr": "Le locuteur pensait échouer, mais a réussi.",
+              "fr": "Elle pensait échouer, mais a réussi.",
               "es": "Creía que reprobaría, pero sí aprobó."
             },
             {
               "en": "The speaker expected to fail, and did.",
-              "fr": "Le locuteur pensait échouer, et c'est ce qui est arrivé.",
+              "fr": "Elle pensait échouer, et c'est ce qui est arrivé.",
               "es": "Creía que reprobaría, y así fue."
             }
           ],
@@ -36842,17 +36842,17 @@
           "choices": [
             {
               "en": "A French one: the speaker had expected a Japanese one.",
-              "fr": "Un français : le locuteur s'attendait à un japonais.",
+              "fr": "Un français : on s'attendait à un japonais.",
               "es": "Uno francés: quien habla esperaba uno japonés."
             },
             {
               "en": "A Japanese one, as the speaker had expected.",
-              "fr": "Un japonais, comme le locuteur s'y attendait.",
+              "fr": "Un japonais, comme on s'y attendait.",
               "es": "Uno japonés, como esperaba quien habla."
             },
             {
               "en": "A Japanese one: the speaker had expected a French one.",
-              "fr": "Un japonais : le locuteur s'attendait à un français.",
+              "fr": "Un japonais : on s'attendait à un français.",
               "es": "Uno japonés: quien habla esperaba uno francés."
             }
           ],
@@ -36902,17 +36902,17 @@
           "choices": [
             {
               "en": "The teacher praised the speaker, who had expected a scolding.",
-              "fr": "Le professeur a félicité le locuteur, qui s'attendait à des reproches.",
+              "fr": "Le professeur a félicité la personne qui parle, qui s'attendait à des reproches.",
               "es": "El profesor elogió a quien habla, que esperaba un regaño."
             },
             {
               "en": "The teacher scolded the speaker, as expected.",
-              "fr": "Le professeur a grondé le locuteur, comme prévu.",
+              "fr": "Le professeur a grondé la personne qui parle, comme prévu.",
               "es": "El profesor regañó a quien habla, como era de esperar."
             },
             {
               "en": "The teacher scolded the speaker, who had expected praise.",
-              "fr": "Le professeur a grondé le locuteur, qui s'attendait à des compliments.",
+              "fr": "Le professeur a grondé la personne qui parle, qui s'attendait à des compliments.",
               "es": "El profesor regañó a quien habla, que esperaba elogios."
             }
           ],
@@ -37229,29 +37229,29 @@
           "jp": "試験の前の日は、寝ようにも緊張して寝られなかった。",
           "tr": {
             "en": "The night before the exam, I couldn't sleep even though I wanted to, I was so tense.",
-            "fr": "La veille de l'examen, je n'ai pas pu dormir, malgré mon envie, tant j'étais tendu.",
+            "fr": "La veille de l'examen, je n'ai pas pu dormir, malgré mon envie, tant la tension était forte.",
             "es": "La noche antes del examen, no pude dormir aunque quería, de los nervios."
           },
           "choices": [
             {
               "en": "The speaker wanted to sleep, but nerves would not allow it.",
-              "fr": "Le locuteur voulait dormir, mais la tension l'en empêchait.",
+              "fr": "On voulait dormir, mais la tension l'empêchait.",
               "es": "Quien habla quería dormir, pero los nervios se lo impedían."
             },
             {
               "en": "The speaker chose to stay up and study instead of sleeping.",
-              "fr": "Le locuteur a choisi de veiller pour réviser plutôt que de dormir.",
+              "fr": "On a choisi de veiller pour réviser plutôt que de dormir.",
               "es": "Quien habla prefirió quedarse estudiando en lugar de dormir."
             },
             {
               "en": "The speaker was not tired and did not try to sleep.",
-              "fr": "Le locuteur n'était pas fatigué et n'a pas essayé de dormir.",
+              "fr": "On n'avait pas sommeil et on n'a pas essayé de dormir.",
               "es": "Quien habla no tenía sueño y no intentó dormir."
             }
           ],
           "why": {
             "en": "寝ようにも寝られなかった: the speaker wanted to sleep and could not, and the nerves are the obstacle. The point never means choosing not to, and it is not about being untired.",
-            "fr": "寝ようにも寝られなかった : on voulait dormir sans y parvenir, et la tension est l'obstacle. Le point ne veut jamais dire choisir de ne pas dormir, ni ne pas être fatigué.",
+            "fr": "寝ようにも寝られなかった : on voulait dormir sans y parvenir, et la tension est l'obstacle. Le point ne veut jamais dire choisir de ne pas dormir, ni ne pas avoir sommeil.",
             "es": "寝ようにも寝られなかった: quería dormir y no pudo, y los nervios son el obstáculo. El punto nunca significa que eligiera no dormir, ni habla de no tener sueño."
           }
         },
@@ -37295,17 +37295,17 @@
           "choices": [
             {
               "en": "The speaker wanted to get up, but the body would not allow it.",
-              "fr": "Le locuteur voulait se lever, mais son corps ne suivait pas.",
+              "fr": "On voulait se lever, mais le corps ne suivait pas.",
               "es": "Quien habla quería levantarse, pero el cuerpo no se lo permitía."
             },
             {
               "en": "The speaker got up, but only with difficulty.",
-              "fr": "Le locuteur s'est levé, mais avec difficulté.",
+              "fr": "On a pu se lever, mais avec difficulté.",
               "es": "Quien habla se levantó, pero con dificultad."
             },
             {
               "en": "The speaker did not want to get up.",
-              "fr": "Le locuteur ne voulait pas se lever.",
+              "fr": "On ne voulait pas se lever.",
               "es": "Quien habla no quería levantarse."
             }
           ],
@@ -37646,13 +37646,13 @@
           },
           "choices": [
             {
-              "en": "Don't: anyone who does gets an immediate reaction from the staff.",
-              "fr": "Ne le fais pas : celui qui le fait provoque aussitôt l'intervention du personnel.",
+              "en": "Don't: the staff would react at once.",
+              "fr": "Ne le fais pas : le personnel réagirait aussitôt.",
               "es": "No lo hagas: a quien lo haga, el personal le responde al instante."
             },
             {
               "en": "Go ahead: a staff member will pick it up for you.",
-              "fr": "Vas-y : un employé le ramassera pour toi.",
+              "fr": "Vas-y : un employé viendra tout ramasser à ta place.",
               "es": "Adelante: alguien del personal te la recogerá."
             },
             {
@@ -37736,7 +37736,7 @@
         "jp": "人を助けるために命をかける。これが友情でなくてなんだろう。",
         "en": "Risking one's life to save another: if that isn't friendship, what is?",
         "fr": "Risquer sa vie pour sauver autrui : si ce n'est pas l'amitié, qu'est-ce ?",
-        "es": "Arriesgar la vida para salvar a otro: si eso no es amistad, ¿qué es?",
+        "es": "Arriesgar la vida para salvar a otra persona: si eso no es amistad, ¿qué es?",
         "register": "written",
         "contrast": true
       },
@@ -37769,14 +37769,14 @@
           },
           "choices": [
             {
-              "en": "As a flat statement: it is nothing other than the drivers' effort.",
-              "fr": "Comme une affirmation nette : ce n'est rien d'autre que l'effort des conducteurs.",
-              "es": "Como afirmación tajante: no es otra cosa que el esfuerzo de los maquinistas."
+              "en": "As a flat statement: it was the drivers' effort.",
+              "fr": "Comme une affirmation nette : c'est l'effort des conducteurs.",
+              "es": "Como afirmación tajante: fue el esfuerzo de los maquinistas."
             },
             {
-              "en": "As a real question: what was it, if not effort?",
-              "fr": "Comme une vraie question : qu'était-ce, sinon de l'effort ?",
-              "es": "Como pregunta de verdad: ¿qué fue, si no esfuerzo?"
+              "en": "As a real question: what was it, if not the drivers' effort?",
+              "fr": "Comme une vraie question : qu'était-ce, sinon l'effort des conducteurs ?",
+              "es": "Como pregunta de verdad: ¿qué fue, si no el esfuerzo de los maquinistas?"
             },
             {
               "en": "As a doubt: it was not really the drivers' effort.",
@@ -37899,7 +37899,7 @@
               "es": "Que no es felicidad."
             },
             {
-              "en": "The speaker asks what this feeling is, not knowing.",
+              "en": "The speaker asks what this feeling is, not knowing the answer.",
               "fr": "La personne demande ce qu'est ce sentiment, sans le savoir.",
               "es": "Quien habla pregunta qué es ese sentimiento, sin saberlo."
             }
@@ -38274,19 +38274,19 @@
           "jp": "小学生ではあるまいし、毎朝おこされないと起きられないの？",
           "tr": {
             "en": "You're not a primary-school kid; can't you get up without being woken every morning?",
-            "fr": "Tu n'es pas un écolier ; tu ne sais pas te lever sans qu'on te réveille chaque matin ?",
+            "fr": "Tu n'es pas en primaire ; tu ne sais pas te lever sans qu'on te réveille chaque matin ?",
             "es": "Ni que fueras de primaria: ¿no puedes levantarte sin que te despierten cada mañana?"
           },
           "choices": [
             {
-              "en": "Teasing: the listener is not a child, yet cannot wake up alone.",
-              "fr": "Elle taquine l'autre : ce n'est pas un enfant, et pourtant il ne sait pas se lever seul.",
-              "es": "Bromea: quien escucha no es un niño, pero no se despierta sin ayuda."
+              "en": "Teasing: past primary school, yet can't get up alone.",
+              "fr": "Elle taquine : plus en primaire, et pourtant incapable de se lever sans aide.",
+              "es": "Bromea: quien escucha ya no va a primaria, pero no se despierta sin ayuda."
             },
             {
               "en": "Asking whether the listener is a primary-school pupil.",
-              "fr": "Elle demande à l'autre s'il est écolier.",
-              "es": "Pregunta si quien escucha va a primaria."
+              "fr": "Elle demande, sans arrière-pensée, si l'autre va encore en primaire.",
+              "es": "Pregunta, sin segundas intenciones, si quien escucha va a primaria."
             },
             {
               "en": "Offering to wake the listener up every morning.",
@@ -38296,7 +38296,7 @@
           ],
           "why": {
             "en": "ではあるまいし names what the listener is not, and the second half draws the reproach: not a pupil, so the listener should wake alone. The final の？ is a rebuke, not a real question, and nothing offers help.",
-            "fr": "ではあるまいし nomme ce que l'autre n'est pas, et la seconde moitié en tire le reproche : pas un écolier, donc l'autre devrait se lever sans aide. Le の？ final est un reproche, pas une vraie question, et rien n'offre d'aider.",
+            "fr": "ではあるまいし nomme ce que l'autre n'est pas, et la seconde moitié en tire le reproche : plus en primaire, donc l'autre devrait se lever sans aide. Le の？ final est un reproche, pas une vraie question, et rien n'offre d'aider.",
             "es": "ではあるまいし nombra lo que quien escucha no es, y la segunda mitad saca el reproche: no va a primaria, así que debería despertarse sin ayuda. El の？ final es un reproche, no una pregunta real, y nadie ofrece ayuda."
           }
         },
@@ -38339,7 +38339,7 @@
             },
             {
               "en": "The listener, whom the speaker is scolding.",
-              "fr": "L'interlocuteur, que la personne réprimande.",
+              "fr": "La personne qui écoute, qu'on est en train de réprimander.",
               "es": "Quien escucha, a quien se está riñendo."
             },
             {
@@ -38426,7 +38426,7 @@
       {
         "kind": "rule",
         "en": "**verb て-form + からというもの** means « ever since (that change began), things have been different ». 日本に来てからというもの (ever since I came to Japan). The state has lasted, with feeling.",
-        "fr": "**verbe forme て + からというもの** signifie « depuis (ce changement), les choses sont différentes ». 日本に来てからというもの (depuis que je suis arrivé au Japon). L'état a duré, avec émotion.",
+        "fr": "**verbe forme て + からというもの** signifie « depuis (ce changement), les choses sont différentes ». 日本に来てからというもの (depuis mon arrivée au Japon). L'état a duré, avec émotion.",
         "es": "**verbo en forma て + からというもの** significa «desde que (empezó ese cambio), las cosas son distintas». 日本に来てからというもの (desde que vine a Japón). El estado perdura, y se expresa con emoción."
       },
       {
@@ -38597,12 +38597,12 @@
           "choices": [
             {
               "en": "Only after living in Japan did I see how handy trains are.",
-              "fr": "Ce n'est qu'en vivant au Japon que j'ai compris à quel point les trains sont pratiques.",
+              "fr": "Seule la vie au Japon m'a fait voir combien le train est pratique.",
               "es": "Hasta vivir en Japón no vi lo prácticos que son los trenes."
             },
             {
               "en": "Ever since I've lived in Japan, my life has been different.",
-              "fr": "Depuis que je vis au Japon, ma vie n'est plus la même.",
+              "fr": "Depuis que je vis au Japon, ma vie n'est plus du tout la même qu'avant.",
               "es": "Desde que vivo en Japón, mi vida ya no es la misma de antes."
             },
             {
@@ -39409,7 +39409,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What is the speaker doing?",
-            "fr": "Que fait celui qui parle ?",
+            "fr": "Que fait la personne qui parle ?",
             "es": "¿Qué hace quien habla?"
           },
           "jp": "最近の夏休みときたら、宿題が多すぎて、ちっとも休みにならない。",
@@ -39421,17 +39421,17 @@
           "choices": [
             {
               "en": "Grumbling about what summer vacations have become.",
-              "fr": "Il râle contre ce que sont devenues les vacances d'été.",
+              "fr": "Elle râle contre ce que sont devenues les vacances d'été.",
               "es": "Rezonga por cómo son ahora las vacaciones de verano."
             },
             {
               "en": "Saying what will happen when summer vacation arrives.",
-              "fr": "Il dit ce qui arrivera quand les vacances d'été commenceront.",
+              "fr": "Elle dit ce qui arrivera quand les vacances d'été commenceront.",
               "es": "Dice qué pasará cuando lleguen las vacaciones de verano."
             },
             {
               "en": "Wishing there will be less homework next summer.",
-              "fr": "Il souhaite qu'il y ait moins de devoirs l'été prochain.",
+              "fr": "Elle souhaite qu'il y ait moins de devoirs l'été prochain.",
               "es": "Desea que el próximo verano haya menos tarea."
             }
           ],
@@ -39481,23 +39481,23 @@
           "choices": [
             {
               "en": "The mother's: the speaker is fed up with her constant worrying.",
-              "fr": "Celle de la mère : celui qui parle en a assez qu'elle s'inquiète sans cesse.",
+              "fr": "Celle de la mère : la personne qui parle en a assez qu'elle s'inquiète sans cesse.",
               "es": "De la madre: quien habla ya no aguanta que se preocupe sin parar."
             },
             {
               "en": "The speaker's: the mother is fed up with what is said to her.",
-              "fr": "Celle de celui qui parle : la mère en a assez de ce qu'on lui dit.",
+              "fr": "Celle de la personne qui parle : la mère en a assez de ce qu'on lui dit.",
               "es": "De quien habla: la madre ya no aguanta lo que le dicen."
             },
             {
               "en": "Nobody's: the speaker is thanking the mother for worrying.",
-              "fr": "Celle de personne : celui qui parle remercie sa mère de s'inquiéter.",
+              "fr": "Celle de personne : la mère est remerciée de s'inquiéter.",
               "es": "De nadie: quien habla le agradece a su madre que se preocupe."
             }
           ],
           "why": {
             "en": "The noun before ときたら is the one complained about, not the one who complains. 母 is the target, and the speaker is the one tired of her worrying.",
-            "fr": "Le nom devant ときたら est celui dont on se plaint, pas celui qui se plaint. 母 est la cible, et celui qui parle est las de ses inquiétudes.",
+            "fr": "Le nom devant ときたら est celui dont on se plaint, pas celui qui se plaint. 母 est la cible, et la personne qui parle en a assez de ses inquiétudes.",
             "es": "El sustantivo ante ときたら es el blanco de la queja, no quien se queja. 母 es el blanco, y quien habla es quien ya no soporta sus preocupaciones."
           }
         },
@@ -39529,7 +39529,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the speaker do by saying わたしときたら?",
-            "fr": "Que fait celui qui parle en disant わたしときたら ?",
+            "fr": "Que fait la personne qui parle en disant わたしときたら ?",
             "es": "¿Qué hace quien habla al decir わたしときたら?"
           },
           "jp": "わたしときたら、また電車の中にかさを忘れてしまった。",
@@ -39541,23 +39541,23 @@
           "choices": [
             {
               "en": "Scolds themself for the slip.",
-              "fr": "Il se reproche sa distraction.",
+              "fr": "Elle se reproche sa distraction.",
               "es": "Se riñe por el despiste."
             },
             {
               "en": "Points out somebody else's fault.",
-              "fr": "Il relève la faute de quelqu'un d'autre.",
+              "fr": "Elle relève la faute de quelqu'un d'autre.",
               "es": "Señala un error de otra persona."
             },
             {
               "en": "Boasts about being careful.",
-              "fr": "Il se vante de toujours faire attention.",
+              "fr": "Elle se vante de toujours faire attention.",
               "es": "Presume de tener cuidado."
             }
           ],
           "why": {
             "en": "ときたら can turn on the speaker too: わたしときたら is an exasperated « me, honestly… », aimed at one's own slip. The complaint is about the same person who speaks.",
-            "fr": "ときたら peut aussi viser celui qui parle : わたしときたら est un « moi, franchement… » agacé, tourné vers sa propre étourderie. La plainte vise la personne même qui parle.",
+            "fr": "ときたら peut aussi se retourner contre soi : わたしときたら est un « moi, franchement… » agacé, tourné vers sa propre étourderie. La plainte vise la personne même qui parle.",
             "es": "ときたら también puede apuntar a quien habla: わたしときたら es un «yo, de verdad…» exasperado, dirigido al propio despiste. La queja es sobre la misma persona que habla."
           }
         }
@@ -39824,7 +39824,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What is the speaker doing?",
-            "fr": "Que fait celui qui parle ?",
+            "fr": "Que fait la personne qui parle ?",
             "es": "¿Qué hace quien habla?"
           },
           "jp": "あしたの運動会までに、この雨がやまないものか。",
@@ -39836,17 +39836,17 @@
           "choices": [
             {
               "en": "Wishing there were some way for the rain to stop in time.",
-              "fr": "Il souhaite qu'il y ait un moyen pour que la pluie s'arrête à temps.",
+              "fr": "Elle souhaite qu'il y ait un moyen pour que la pluie s'arrête à temps.",
               "es": "Desear que haya alguna forma de que la lluvia pare a tiempo."
             },
             {
               "en": "Asking someone whether the rain will stop in time.",
-              "fr": "Il demande à quelqu'un si la pluie s'arrêtera à temps.",
+              "fr": "Elle demande à quelqu'un si la pluie s'arrêtera à temps.",
               "es": "Preguntarle a alguien si la lluvia parará a tiempo."
             },
             {
               "en": "Saying firmly that the rain will not stop.",
-              "fr": "Il affirme avec force que la pluie ne s'arrêtera pas.",
+              "fr": "Elle affirme avec force que la pluie ne s'arrêtera pas.",
               "es": "Afirmar con firmeza que la lluvia no parará."
             }
           ],
@@ -39884,7 +39884,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What has the speaker been doing?",
-            "fr": "Qu'est-ce que celui qui parle n'a cessé de faire ?",
+            "fr": "Qu'est-ce que la personne qui parle n'a cessé de faire ?",
             "es": "¿Qué ha estado haciendo quien habla?"
           },
           "jp": "何とか気持ちを伝えられないものかと、一週間ずっと考えている。",
@@ -39912,7 +39912,7 @@
           ],
           "why": {
             "en": "ないものかと考える is the quiet form of the wish: « is there no way to…? ». The speaker is hunting for a way to tell, not giving up on it, and has not said anything yet.",
-            "fr": "ないものかと考える est la forme discrète du souhait : « n'y a-t-il pas moyen de… ? ». Celui qui parle cherche un moyen de le dire, il n'y renonce pas, et n'a encore rien dit.",
+            "fr": "ないものかと考える est la forme discrète du souhait : « n'y a-t-il pas moyen de… ? ». La personne qui parle cherche un moyen de le dire, n'y renonce pas, et n'a encore rien dit.",
             "es": "ないものかと考える es la forma callada del deseo: «¿no habrá forma de…?». Quien habla busca cómo decirlo, no renuncia, y aún no ha dicho nada."
           }
         }
@@ -40019,12 +40019,12 @@
           "choices": [
             {
               "en": "With gratitude: it made changing trains easy.",
-              "fr": "Avec reconnaissance : elle a rendu le changement de train facile.",
+              "fr": "Avec reconnaissance : elle a facilité la correspondance.",
               "es": "Con gratitud: facilitó el transbordo."
             },
             {
               "en": "With blame: someone took unfair advantage of it.",
-              "fr": "Avec reproche : quelqu'un en a abusé.",
+              "fr": "Avec reproche : quelqu'un en a profité de manière injuste.",
               "es": "Con reproche: alguien se aprovechó de ella."
             },
             {
@@ -40181,7 +40181,7 @@
           "why": {
             "en": "The one who exploits is the subject, and the opening is the other's kindness: 兄は、母が優しいのをいいことに. Reversed, the mother would be the one exploiting, and おかげで thanks the kindness instead of blaming it.",
             "fr": "Celui qui profite est le sujet, et la brèche est la gentillesse de l'autre : 兄は、母が優しいのをいいことに. Inversé, ce serait la mère qui profite, et おかげで remercie la gentillesse au lieu de la blâmer.",
-            "es": "Quien se aprovecha es el sujeto, y la ocasión es la bondad del otro: 兄は、母が優しいのをいいことに. Al revés, sería la madre quien se aprovecha, y おかげで agradece la bondad en vez de reprocharla."
+            "es": "Quien se aprovecha es el sujeto, y la ocasión es la bondad ajena: 兄は、母が優しいのをいいことに. Al revés, sería la madre quien se aprovecha, y おかげで agradece la bondad en vez de reprocharla."
           }
         },
         {
@@ -40520,7 +40520,7 @@
           },
           "choices": [
             {
-              "en": "Buying it would mean being unable to put it down and study.",
+              "en": "Once bought, it would keep the speaker from studying.",
               "fr": "L'acheter reviendrait à ne plus pouvoir le lâcher pour étudier.",
               "es": "Comprarlo supondría no poder soltarlo para estudiar."
             },
@@ -40723,13 +40723,13 @@
           "choices": [
             {
               "en": "With a junior there, I couldn't admit I was lost.",
-              "fr": "Devant un cadet, impossible d'avouer que je ne trouvais plus mon chemin.",
+              "fr": "Devant un cadet, impossible d'avouer que j'avais perdu mon chemin.",
               "es": "Ante un novato, no pude admitir que me había perdido."
             },
             {
-              "en": "Thanks to my junior, I didn't get lost.",
-              "fr": "Grâce à mon cadet, j'ai trouvé mon chemin.",
-              "es": "Gracias al novato, no me perdí."
+              "en": "Thanks to my junior, who knew the way, I didn't get lost.",
+              "fr": "Grâce à mon cadet, qui connaissait la route, j'ai trouvé mon chemin.",
+              "es": "Gracias a mi compañero novato, que conocía el camino, no me perdí."
             },
             {
               "en": "Just before reaching my junior, I got lost.",
@@ -40947,7 +40947,7 @@
           ],
           "why": {
             "en": "手前 is about how it would look to the people watching, not about a rule or a request: nobody ordered anything, the speaker simply cannot go first with them there.",
-            "fr": "手前 parle de l'image que l'on donne à ceux qui regardent, pas d'un règlement ni d'une demande : personne n'a rien ordonné, simplement on ne peut pas partir le premier sous leurs yeux.",
+            "fr": "手前 parle de l'image que l'on donne à ceux qui regardent, pas d'un règlement ni d'une demande : personne n'a rien ordonné, simplement on ne peut pas partir en premier sous leurs yeux.",
             "es": "手前 trata de cómo se vería ante quienes miran, no de una norma ni de una petición: nadie ordenó nada; simplemente no se puede salir antes con ellos delante."
           }
         },
@@ -41145,7 +41145,7 @@
           },
           "ask": {
             "en": "Is the speaker telling you that you must arrive early?",
-            "fr": "Celui qui parle t'ordonne-t-il d'arriver tôt ?",
+            "fr": "La personne qui parle t'ordonne-t-elle d'arriver tôt ?",
             "es": "¿Te dice quien habla que debes llegar temprano?"
           },
           "choices": [
@@ -41945,7 +41945,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer say about blaming the new recruit?",
-            "fr": "Que dit l'auteur du fait de blâmer la recrue ?",
+            "fr": "Que dit la personne qui écrit du fait de blâmer la recrue ?",
             "es": "¿Qué dice quien escribe sobre culpar al novato?"
           },
           "jp": "一度ミスをしたくらいで、新人を非難するにはあたらない。",
@@ -42065,7 +42065,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer think of praising the clerk?",
-            "fr": "Que pense l'auteur du fait de féliciter l'employé ?",
+            "fr": "Que pense la personne qui écrit du fait de féliciter l'employé ?",
             "es": "¿Qué opina quien escribe de elogiar al empleado?"
           },
           "jp": "店員が笑顔であいさつするのは仕事のうちで、ほめるにはあたらない。",
@@ -42093,7 +42093,7 @@
           ],
           "why": {
             "en": "The reason sits before the pattern: it is part of the job, so no praise is called for. The writer does not say the greeting was poor, only that it is the ordinary thing to do.",
-            "fr": "La raison se trouve avant le motif : cela fait partie du travail, donc pas de félicitations. L'auteur ne dit pas que le salut était mauvais, seulement que c'est normal.",
+            "fr": "La raison se trouve avant le motif : cela fait partie du travail, donc pas de félicitations. La phrase ne dit pas que le salut était mauvais, seulement que c'est normal.",
             "es": "La razón va antes de la estructura: es parte del trabajo, así que no hay por qué elogiar. Quien escribe no dice que el saludo fuera malo, solo que es lo normal."
           }
         }
@@ -42734,7 +42734,7 @@
           "choices": [
             "いや、ごめんなさいだけではすまないよ。",
             "いや、ごめんなさいと言わずにはすまないよ。",
-            "いや、ごめんなさいどころではないよ。"
+            "いや、今はごめんなさいどころではないよ。"
           ],
           "why": {
             "en": "An apology won't be the end of it: ではすまない. ずにはすまない names what must be done; どころではない says there's no time for it.",
@@ -43093,9 +43093,9 @@
           },
           "choices": [
             {
-              "en": "No: both mean « without doing »; ずに is the form still in everyday use.",
-              "fr": "Non : les deux veulent dire « sans faire » ; ずに est la forme encore courante.",
-              "es": "No: ambos significan «sin hacer»; ずに es la forma que sigue en uso a diario."
+              "en": "No: both mean « without doing ».",
+              "fr": "Non : les deux veulent dire « sans faire ».",
+              "es": "No: ambos significan «sin hacer»."
             },
             {
               "en": "Yes: ずに means « because he said nothing ».",
@@ -44070,14 +44070,14 @@
               "es": "Todavía duele, incluso después de veinte años."
             },
             {
-              "en": "It no longer hurts after twenty years.",
-              "fr": "Ça ne fait plus mal après vingt ans.",
+              "en": "It no longer hurts, now that twenty years have passed.",
+              "fr": "Ça ne fait plus mal, maintenant que vingt ans ont passé.",
               "es": "Tras veinte años, ya no duele."
             },
             {
               "en": "It hurts now, but it did not before.",
               "fr": "Ça fait mal maintenant, mais pas avant.",
-              "es": "Duele ahora, pero antes no."
+              "es": "Duele ahora, pero antes no dolía."
             }
           ],
           "why": {
@@ -44114,7 +44114,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What does the writer say about teachers?",
-            "fr": "Que dit l'auteur des professeurs ?",
+            "fr": "Que dit la personne qui écrit des professeurs ?",
             "es": "¿Qué dice quien escribe sobre los profesores?"
           },
           "jp": "先生は何でも知っていると思われがちだが、先生とて人間である。",
@@ -44284,7 +44284,7 @@
           "jp": "子どもではあるまいし、一人で電車に乗れるよ。",
           "tr": {
             "en": "I'm not a child, I can take the train by myself!",
-            "fr": "Je ne suis plus un enfant, je peux prendre le train sans personne !",
+            "fr": "Je n'ai plus cinq ans, je peux prendre le train sans personne !",
             "es": "¡Ni que tuviera cinco años! Puedo tomar el tren sin compañía."
           },
           "ask": {
@@ -44294,14 +44294,14 @@
           },
           "choices": [
             {
-              "en": "I'm not a child, so of course I can take the train alone.",
+              "en": "I'm not a child: of course I can take the train alone.",
               "fr": "Je n'ai plus cinq ans : je peux bien prendre le train sans personne.",
-              "es": "Ya no tengo edad de niños: claro que puedo tomar el tren sin compañía."
+              "es": "No tengo cinco años: claro que puedo ir en tren sin compañía."
             },
             {
-              "en": "Mightn't a child be able to take the train alone?",
-              "fr": "Un enfant ne pourrait-il pas prendre le train sans personne ?",
-              "es": "¿No podría un niño tomar el tren sin compañía?"
+              "en": "Mightn't a child, too, be able to take the train all alone?",
+              "fr": "Un enfant ne pourrait-il pas, lui aussi, prendre le train sans personne ?",
+              "es": "¿No será que un niño también puede tomar el tren sin compañía?"
             },
             {
               "en": "I'm still a child, so I can't take the train alone.",
@@ -44386,7 +44386,7 @@
           "kind": "meaning",
           "ask": {
             "en": "What is the writer doing in this sentence?",
-            "fr": "Que fait l'auteur dans cette phrase ?",
+            "fr": "Que fait, dans cette phrase, la personne qui écrit ?",
             "es": "¿Qué hace quien escribe en esta oración?"
           },
           "jp": "この制度は、もう時代おくれなのではあるまいか。",
@@ -44414,7 +44414,7 @@
           ],
           "why": {
             "en": "ではあるまいか looks like a question, but in writing it is a tentative claim: the author thinks the system is out of date and says so softly. The reader is not asked anything, and it is not a flat statement either.",
-            "fr": "ではあるまいか ressemble à une question, mais à l'écrit c'est un avis prudent : l'auteur pense que le système est dépassé et le dit avec douceur. On ne demande rien au lecteur, et ce n'est pas une affirmation nette.",
+            "fr": "ではあるまいか ressemble à une question, mais à l'écrit c'est un avis prudent : la personne qui écrit pense que le système est dépassé et le dit doucement. On ne demande rien au lecteur, et ce n'est pas une affirmation nette.",
             "es": "ではあるまいか parece una pregunta, pero por escrito es una afirmación prudente: quien escribe cree que el sistema está anticuado y lo dice con suavidad. No pregunta nada al lector, ni es una afirmación tajante."
           }
         },
@@ -44474,7 +44474,7 @@
           ],
           "why": {
             "en": "A ではあるまいか clause followed by と and a verb of thinking gives the thought itself: « might it not come? » is the fear in the speaker's mind. It is not an event, and not a question put to anyone.",
-            "fr": "Une proposition en ではあるまいか suivie de と et d'un verbe de pensée donne la pensée elle-même : « ne viendrait-il pas ? » est la crainte de celui qui parle. Ce n'est ni un événement, ni une question posée à quelqu'un.",
+            "fr": "Une proposition en ではあるまいか suivie de と et d'un verbe de pensée donne la pensée elle-même : « ne viendrait-il pas ? » est la crainte de la personne qui parle. Ce n'est ni un événement, ni une question posée à quelqu'un.",
             "es": "Una oración con ではあるまいか seguida de と y un verbo de pensar da el pensamiento mismo: «¿no vendrá?» es el miedo de quien habla. No es un hecho, ni una pregunta hecha a nadie."
           }
         },
@@ -44506,7 +44506,7 @@
           "kind": "meaning",
           "ask": {
             "en": "How sure is the writer that it was chance?",
-            "fr": "L'auteur est-il sûr que c'était le hasard ?",
+            "fr": "Quelle certitude la personne qui écrit a-t-elle que c'était le hasard ?",
             "es": "¿Qué grado de certeza tiene quien escribe de que fue casualidad?"
           },
           "jp": "あの店が急にはやりだしたのは、ただの偶然なのではあるまいか。",
@@ -44518,23 +44518,23 @@
           "choices": [
             {
               "en": "Not sure: it is a cautious suspicion.",
-              "fr": "Pas sûr : c'est un soupçon prudent.",
+              "fr": "Aucune : c'est un soupçon prudent.",
               "es": "No lo afirma: es una sospecha prudente."
             },
             {
               "en": "Completely sure it was chance.",
-              "fr": "Tout à fait sûr que c'était le hasard.",
+              "fr": "Une certitude totale : c'était le hasard.",
               "es": "Tiene la certeza de que fue casualidad."
             },
             {
               "en": "Sure it was not chance.",
-              "fr": "Sûr que ce n'était pas le hasard.",
+              "fr": "La certitude que ce n'était pas le hasard.",
               "es": "Tiene la certeza de que no fue casualidad."
             }
           ],
           "why": {
             "en": "ではあるまいか says « might it not be… »: the writer suspects chance without claiming it. The あるまい does not make it a denial (« surely not chance »), and the か keeps it short of certainty.",
-            "fr": "ではあるまいか dit « ne serait-ce pas… » : l'auteur soupçonne le hasard sans l'affirmer. あるまい ne fait pas un démenti (« sûrement pas le hasard »), et か le tient en deçà de la certitude.",
+            "fr": "ではあるまいか dit « ne serait-ce pas… » : la personne qui écrit soupçonne le hasard sans l'affirmer. あるまい ne fait pas un démenti (« sûrement pas le hasard »), et か le tient en deçà de la certitude.",
             "es": "ではあるまいか dice «¿no será…?»: quien escribe sospecha que fue casualidad sin afirmarlo. あるまい no lo convierte en negación («seguro que no fue casualidad»), y か lo deja por debajo de la certeza."
           }
         }
@@ -44683,14 +44683,14 @@
           },
           "choices": [
             {
-              "en": "Not only this station: every station is short of lifts.",
-              "fr": "Pas seulement cette gare : toutes les gares manquent d'ascenseurs.",
-              "es": "No solo esta estación: a todas les faltan ascensores."
+              "en": "Not only this one: every station lacks lifts.",
+              "fr": "Pas seulement cette gare : toutes en manquent.",
+              "es": "No solo esta: a todas les faltan ascensores."
             },
             {
-              "en": "Only this station is short of lifts.",
-              "fr": "Seule cette gare manque d'ascenseurs.",
-              "es": "Solo a esta estación le faltan ascensores."
+              "en": "Only this station is short of lifts: it is limited to this one.",
+              "fr": "Seule cette gare manque d'ascenseurs : c'est limité à elle.",
+              "es": "Solo a esta estación le faltan ascensores: se limita a ella."
             },
             {
               "en": "Apart from this station, every station has plenty of lifts.",
@@ -44891,18 +44891,18 @@
           },
           "choices": [
             {
-              "en": "Crowding is common elsewhere too, but this station is especially dangerous.",
-              "fr": "L'affluence existe ailleurs aussi, mais cette gare est particulièrement dangereuse.",
-              "es": "Hay aglomeraciones en otros sitios, pero esta estación es especialmente peligrosa."
+              "en": "It is crowded like others, but especially dangerous.",
+              "fr": "Bondée comme ailleurs, elle est particulièrement dangereuse.",
+              "es": "Se llena como otras, pero es especialmente peligrosa."
             },
             {
-              "en": "Only this station is crowded.",
-              "fr": "Seule cette gare est bondée.",
+              "en": "Only this station is crowded; the others are never full.",
+              "fr": "Seule cette gare est bondée ; ailleurs, c'est toujours le calme.",
               "es": "Solo esta estación está abarrotada."
             },
             {
-              "en": "It is no more dangerous than other stations.",
-              "fr": "Elle n'est pas plus dangereuse que les autres gares.",
+              "en": "It is no more dangerous than any of the other stations.",
+              "fr": "Elle n'est pas plus dangereuse que n'importe quelle autre gare.",
               "es": "No es más peligrosa que otras estaciones."
             }
           ],
@@ -45068,14 +45068,14 @@
           },
           "choices": [
             {
-              "en": "This station bento has a taste only this town could offer.",
-              "fr": "Ce bento de gare a un goût que seule cette ville peut offrir.",
-              "es": "Este bento de estación tiene un sabor que solo esta ciudad podría ofrecer."
+              "en": "Its taste is one only this town could offer.",
+              "fr": "Son goût, seule cette ville peut l'offrir.",
+              "es": "Su sabor solo podría ofrecerlo esta ciudad."
             },
             {
-              "en": "This station bento is the finest in town.",
-              "fr": "Ce bento de gare est le meilleur de la ville.",
-              "es": "Este bento de estación es el mejor de la ciudad."
+              "en": "This station bento is the finest in the whole town.",
+              "fr": "Ce bento de gare est le meilleur de toute la ville.",
+              "es": "Este bento de estación es el mejor de toda la ciudad."
             },
             {
               "en": "This station bento tastes like any town's.",
