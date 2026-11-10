@@ -979,6 +979,23 @@ screen, A on the lock screen, reminder 2, its Depart the gate.
   the ring are a share a line**, in the lines' order, as Today's dial is
   an arc a line (`lineShares` in `domain/lanes.js`): never a bar a lane,
   which cut the stripe into a dozen pieces of the same few pigments.
+- **On Android the board is settled and glass** (plan 318, the owner's
+  A in the colour 5 of the canvas "Tsuji — the home-screen widget,
+  again"). The head stands at the top and Depart at the foot, and the
+  room a tall launcher gives goes to the middle, where the count and
+  the word are centred: never an empty band over the gate. The stripe
+  sits under the count it splits, and **no line's bar is shorter than
+  two and a half times the stripe's height**, so a line of four cards
+  among three hundred is a short bar, never a dot. The word's hairline
+  is as tall as the middle, and its meaning is in the soft ink, under
+  the word rather than as loud as it. The ground is **sumi seen
+  through** (62%, ringed in the paper ink at 10%): a home-screen
+  widget cannot blur what is behind it, so it is glass, not frost,
+  and its soft ink is a step lighter than the panel's (`#cdc0a6`) to
+  hold over a bright wallpaper. The board is drawn at three heights:
+  as drawn from 190dp, set tighter where it only just holds Depart,
+  and without Depart below that (`TrainWidget.fit`). The iPhone's board
+  is still plan 293's.
 - **The lock screen is A's**: the count in a ring cut into the lines'
   shares, the word alone in the rectangle, the hour and the count on
   the inline line — in the lock screen's one ink.
@@ -991,7 +1008,7 @@ screen, A on the lock screen, reminder 2, its Depart the gate.
   its door is the gate's paces.
 - **The native copies follow the tokens.** A widget cannot read
   `index.css`, so its inks are the dark theme's copied by value
-  (`Ink` in `TsujiWidget.swift`, the `widget_*` drawables,
+  (`Ink` in `TsujiWidget.swift`, the `widget_*` drawables and layouts,
   `TrainWidget.lineColor`): a change to a pigment, the panel's inks or
   the gate's gold is a change there too.
 
