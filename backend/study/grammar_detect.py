@@ -6164,6 +6164,12 @@ def _kotoda_refused(tokens, s, e, _g) -> bool:
             if k >= 1 and (tokens[k - 1].lemma in _DEFINED_BY_KOTO or (tokens[k - 1].surface == "の" and tokens[k - 1].pos != "particle")
                            or (tokens[k - 1].surface == "の" and k >= 2 and tokens[k - 2].pos in ("auxiliary", "adjective"))):
                 return True
+            if (k >= 1 and tokens[k - 1].surface == "と" and tokens[k - 1].pos == "particle"
+                    and (k + 1 >= len(tokens) or tokens[k + 1].pos != "verb")):
+                # X とは、… ことだ defines X, as its tour says (plan 318):
+                # 「ゆずる」とは、席を人にあげることだ. The と + は of a
+                # quotation goes on to its verb (やめろとは言わないが…).
+                return True
     return False
 
 
@@ -7617,11 +7623,22 @@ def _spans_nothing(tokens, s, e) -> bool:
     return not (counted or ranged or prev.surface.startswith("半") or prev.lemma in _SPANS or prev.surface in _SPANS)
 
 
+def _kimatteiru_refused(tokens, s, _e, _g) -> bool:
+    """〜に決まっている (« surely ») after a count -- a time, a date, a
+    number of people -- is 決まる's own « set for »: 出発の時間は、九時に
+    決まっている, as the point's tour sets it apart (plan 318). A guess
+    stands after a predicate or a noun of what is guessed: 遅れるに
+    決まっている, うそに決まっている."""
+    k = next((i for i, t in enumerate(tokens) if t.start == s), None)
+    return k is not None and tokens[k].surface == "に" and _counted_before(tokens, k) is not None
+
+
 def _pattern_refusals():
     return {
         "意向形 〜(よ)う": _volitional_refused,
         "〜かける": _kakeru_refused,
         "〜ことだ": _kotoda_refused,
+        "〜に決まっている": _kimatteiru_refused,
         # 〜たところ is "when I did it, (it turned out)": 昨日行ったところは
         # よかった is "the place I went to" (plan 152)
         # (and where it ends what is said, 今着いたとこ。, it is 〜ところだ's
