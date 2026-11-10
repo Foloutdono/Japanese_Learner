@@ -2712,6 +2712,26 @@ line here says otherwise.
   and its translation a rung down with it (`useLineFit`). Measured, never
   guessed from the line's length; past the floor the page scrolls behind
   the dock, as a tall card does.
+  **Folded, the picture's room is the Passage as lyrics** (plan 314, the
+  owner's picks V2, C and D2 of the canvas "Tsuji analyser — the video
+  hidden, the lines as lyrics"). The video folds away on both widths --
+  the desk's fold on its bar, lit while it holds; on a phone a pull
+  hanging from the picture's foot, a tab of its sumi, the same button at
+  the top of the lyrics bringing it back -- and the player stays mounted,
+  playing out of sight: a destroyed one cannot report the clock. The room
+  holds every line (`components/analysis/Lyrics`), each over its
+  translation (the Affichage sheet's switch says whether), the one in
+  focus drawn as its subtitle at the heading size, its readings, rules,
+  grammar and sung sweep kept, the others in the panel's soft ink (a rung
+  down on a phone), each a press that plays the video from it, the lyrics
+  following on;
+  the list holds the line in focus a third of the way down its own box.
+  On a phone the sumi grows from the head to the dock, the stage the
+  screen's height; on the desk the lyrics take the route map's column
+  too, each line's time before it, and its search, filters and pins come
+  back with the picture. The reference's coloured ground was not taken (a
+  line's pigment is never a fill), nor a third ink for the lines sung:
+  the lines either side share the soft one.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its

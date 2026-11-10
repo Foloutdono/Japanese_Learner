@@ -1095,6 +1095,9 @@ const phraseAnalyzer = {
   playbackSpeed:       r => `Velocidad: ${r}×`,
   showVideo:           'Mostrar el video',
   hideVideo:           'Ocultar el video',
+  // The video folded away, the Passage as lyrics (plan 314).
+  lyricsLines:         n => (n === 1 ? 'La frase del pasaje' : `Las ${n} frases del pasaje`),
+  playFromLine:        'Reproducir desde esta línea',
   furiganaNow:         label => `Furigana: ${label}`,
   wordsInSentence:     'Las palabras de la frase',
   // The text desk: the words list folded to one line (plan 235).

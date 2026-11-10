@@ -1709,8 +1709,8 @@
 .anl-m__subs[data-fit="2"] .tok__furi { font-size: var(--fs-caption-xs); }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
-:is(.anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
-:is(.anl-subs, .anl-m__subs)[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
+:is(.anl-subs, .anl-m__subs, .anl-m__lyrics)[data-furigana="none"] .tok__furi { visibility: hidden; }
+:is(.anl-subs, .anl-m__subs, .anl-m__lyrics)[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
 /* ── The deck picker (canvas DeckPickerSheet) ── */
 .picker {
   display: flex;
@@ -29243,6 +29243,7 @@ button.brd-stn { cursor: pointer; }
 .anl-m__show--open { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 /* The video edge to edge: out of the column's gutter. */
 .anl-m__player {
+  position: relative;
   display: flex;
   flex-direction: column;
   margin-inline: calc(-1 * var(--sp-5));
@@ -29341,6 +29342,192 @@ button.brd-stn { cursor: pointer; }
   text-wrap: balance;
   color: var(--text-secondary);
 }
+/* ── 歌詞 — the picture folded away, the Passage as lyrics (plan 314) ──
+   The owner's picks V2 and C of the canvas "Tsuji analyser — the video
+   hidden, the lines as lyrics". The pull hangs from the picture's foot,
+   a tab of the picture's own sumi under its track; its target is a
+   thumb's, the tab its top half. Pressed, the picture folds away -- the
+   player kept, playing out of sight, since a destroyed one could not
+   report its clock -- and its sumi grows to the dock, holding the
+   Passage line under line with the pull at its top to bring the
+   picture back. The stage is then the screen's height and the lyrics
+   scroll inside it. Not the reference's coloured ground: a line's
+   pigment is never a fill. */
+.anl-m__pull {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  width: var(--sp-9);
+  height: var(--sp-8);
+  margin-inline: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-on-panel-soft);
+}
+.anl-m__tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--sp-6);
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--r-card) var(--r-card);
+}
+.anl-m__pull:hover,
+.anl-m__pull:focus-visible { color: var(--text-on-panel); }
+.anl-m--lyrics {
+  height: 100vh;
+  height: 100dvh;
+}
+.anl-m__player--folded {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.anl-m__player--folded .anl-m__video {
+  height: 0;
+  overflow: hidden;
+}
+.anl-m__player--folded .anl-m__pull {
+  position: static;
+  flex: none;
+}
+.anl-m__player--folded .anl-m__tab {
+  height: 100%;
+  background: transparent;
+}
+/* The lyrics (components/analysis/Lyrics), on either width: the line
+   in focus the subtitle it is, the others in the panel's quieter ink,
+   each over its translation. Two inks only: the lines sung and the
+   lines to come share the soft one, since a lower alpha is no dimmer
+   register (the contrast rule). */
+.anl-lyrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-5);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.anl-lyrics__line,
+.anl-lyrics__now {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  max-width: 100%;
+}
+.anl-lyrics__line {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  text-align: start;
+  color: var(--text-on-panel-soft);
+  cursor: pointer;
+}
+.anl-lyrics__line:hover,
+.anl-lyrics__line:focus-visible { color: var(--text-on-panel); }
+.anl-lyrics__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.anl-lyrics__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: var(--tr-term);
+}
+.anl-lyrics__tr {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-on-panel-soft);
+}
+.anl-lyrics__now .anl-lyrics__tr { color: var(--text-on-panel); }
+.anl-lyrics__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  color: var(--text-on-panel);
+}
+/* A line's time before it (the desk's), the one in focus in the first
+   ink: a column of its own, on the baseline of the Japanese beside it --
+   the line in focus's last one, its words', not its readings'. */
+.anl-lyrics--timed .anl-lyrics__line,
+.anl-lyrics--timed .anl-lyrics__now {
+  display: grid;
+  grid-template-columns: var(--sp-8) minmax(0, 1fr);
+  gap: var(--sp-1) var(--sp-4);
+}
+.anl-lyrics--timed .anl-lyrics__now { align-items: last baseline; }
+.anl-lyrics--timed .anl-lyrics__body { display: contents; }
+.anl-lyrics--timed .anl-lyrics__body > * { grid-column: 2; }
+.anl-lyrics__time {
+  grid-row: 1;
+  grid-column: 1;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+.anl-lyrics__now .anl-lyrics__time { color: var(--text-on-panel); }
+/* The line in focus on the sumi: the panel's inks, the state rules and
+   the grammar kept, its words from the line's start as the others'. */
+.anl-lyrics .anl-subs__body { justify-content: flex-start; }
+.anl-lyrics .anl-subs__line {
+  justify-content: flex-start;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.anl-lyrics .anl-subs__line .tok { color: var(--text-on-panel); }
+.anl-lyrics .anl-subs__line .tok--particle { color: var(--text-on-panel-soft); }
+/* The readings at the furigana dial's own weight (a reading hidden by
+   the dial is never a reading coloured after it). */
+.anl-lyrics .anl-subs__line .tok .tok__furi { color: var(--text-on-panel-soft); }
+.anl-lyrics .anl-subs__line .tok--mastered { --tok: var(--accent2); }
+.anl-lyrics .anl-subs__line .tok--unknown { --tok: var(--text-on-panel); }
+.anl-lyrics .anl-subs__line .tok--offdeck { border-bottom-color: var(--text-on-panel-soft); }
+.anl-lyrics .anl-subs__line .tok--on { background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
+.anl-lyrics .anl-subs__line .tok--lit { background: color-mix(in srgb, var(--line-grammar) 40%, transparent); }
+/* On a phone: the lines a rung under the one in focus, which keeps the
+   breakdown's heading size; a point on the stage's green wash, its
+   number on the wash's corner. */
+.anl-m__lyrics {
+  flex: 1 1 auto;
+  padding: 0 var(--sp-6) var(--sp-6);
+}
+.anl-m__lyrics .anl-subs__line { row-gap: var(--sp-3); }
+.anl-m__lyrics .anl-subs__line .tok { font-size: var(--fs-heading); }
+.anl-m__lyrics .anl-subs__line .tok .tok__furi { font-size: var(--fs-caption); }
+.anl-m__lyrics .anl-subs__pt {
+  padding: 0;
+  background: color-mix(in srgb, var(--line-grammar) 30%, transparent);
+  box-shadow: none;
+}
+.anl-m__lyrics .anl-subs__pt .tok--particle { color: var(--text-on-panel); }
+.anl-m__lyrics .anl-subs__n {
+  top: calc(-1 * var(--sp-2));
+  right: auto;
+  left: calc(-1 * var(--sp-2));
+  min-width: var(--sp-5);
+  height: var(--sp-5);
+  font-size: var(--fs-caption-xs);
+  color: var(--text-on-panel);
+}
+.anl-m__lyrics .anl-lyrics__now .anl-lyrics__tr { font-size: var(--fs-body); }
 /* The line stepped down where the stage would not hold it between the
    video and the dock (useLineFit, 2026-10-20): a rung down, then the
    floor, every breakdown's own size, its readings with it and the rows
@@ -29703,8 +29890,8 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 
 /* The rōmaji under each word, below the state's rule: the rule stays
    the word's own, and the line's rows open to make room. */
-.anl-m__subs[data-romaji] .tok { position: relative; }
-.anl-m__subs[data-romaji] .anl-subs__line {
+:is(.anl-m__subs, .anl-m__lyrics)[data-romaji] .tok { position: relative; }
+:is(.anl-m__subs, .anl-m__lyrics)[data-romaji] .anl-subs__line {
   row-gap: var(--sp-8);
   padding-bottom: var(--sp-6);
 }
@@ -29722,6 +29909,8 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   white-space: nowrap;
   color: var(--text-secondary);
 }
+/* On the lyrics' sumi (plan 314), in the panel's quieter ink. */
+.anl-m__lyrics .tok__ro { color: var(--text-on-panel-soft); }
 
 /* The Affichage sheet: a row a help, its name and its segment; low, so
    the line it changes is seen changing over it. */
@@ -41039,8 +41228,10 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     height: calc(100dvh - 2 * var(--sp-6));
     min-height: 0;
   }
-  /* A video of one line has no list: the picture takes its width. */
-  .anl-desk--video.anl-desk--one {
+  /* A video of one line has no list: the picture takes its width. Nor
+     does a video folded away (plan 314, the owner's pick D2): its lyrics
+     are the list, and take the list's column as well as the picture's. */
+  .anl-desk--video:is(.anl-desk--one, .anl-desk--lyrics) {
     grid-template:
       "head entry" auto
       "slab entry" minmax(0, 1fr)
@@ -41170,6 +41361,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     padding: var(--sp-3) var(--sp-6) var(--sp-4);
   }
   .anl-slab__screen + .anl-subs { margin-top: var(--sp-4); border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent); }
+  /* Folded (plan 314), nothing above the lyrics to part them from. */
+  .anl-slab--folded .anl-subs {
+    margin-top: 0;
+    border-top: 0;
+  }
   .anl-subs__head {
     display: flex;
     align-items: center;
@@ -41187,6 +41383,20 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   }
   .anl-desk--video .anl-subs > .anl-subs__head { margin-bottom: auto; }
   .anl-desk--video .anl-subs > :last-child { margin-bottom: auto; }
+  /* 歌詞 (plan 314, D2): the lyrics under the sumi's head, from the top
+     down, scrolling in their own box rather than the column; each line
+     a rung up from the phone's, at the breakdown's heading size, its
+     time before it. */
+  .anl-desk--video .anl-subs--lyrics { overflow: hidden; }
+  .anl-desk--video .anl-subs--lyrics > .anl-subs__head,
+  .anl-desk--video .anl-subs--lyrics > :last-child { margin-bottom: 0; }
+  .anl-desk__lyrics {
+    flex: 1 1 auto;
+    margin-top: var(--sp-4);
+    padding-bottom: var(--sp-6);
+  }
+  .anl-desk__lyrics .anl-lyrics__jp { font-size: var(--fs-heading); }
+  .anl-desk__lyrics .anl-lyrics__tr { font-size: var(--fs-body); }
   .anl-subs__count {
     font-family: var(--font-display);
     font-size: var(--fs-caption);
@@ -41636,6 +41846,12 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .anl-desk:not(.anl-desk--text) .anl-subs__tr {
     font-size: var(--fs-lead);
     font-weight: 400;
+  }
+  /* The line in focus in the lyrics (plan 314): its translation from the
+     line's start, in the panel's first ink, as the line over it. */
+  .anl-desk--lyrics .anl-desk__lyrics .anl-subs__tr {
+    color: var(--text-on-panel);
+    text-align: start;
   }
   /* Explain on the sumi, in the panel's inks, as the arrows beside it. */
   .anl-slab .anl-explainbtn {

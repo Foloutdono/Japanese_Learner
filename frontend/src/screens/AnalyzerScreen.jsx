@@ -18,6 +18,7 @@ import { KeepSheet } from '../components/analysis/KeepSheet'
 import { DisplaySheet } from '../components/analysis/DisplaySheet'
 import { FURIGANA, readDisplay, saveDisplay } from '../components/analysis/displayPrefs'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
+import { Lyrics } from '../components/analysis/Lyrics'
 import { PlayerBar, PlayerTrack } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
 import { passageTiming } from '../components/analysis/wordTimes'
@@ -332,7 +333,10 @@ export default function AnalyzerScreen({ session }) {
   const clearFocus = useCallback(() => { setLookup(null); setSide('card'); setTokenIndex(0); setExplainOpen(false); setWordsOpen(false) }, [])
   // The desk's transport (plan 134, components/analysis/PlayerBar): the
   // focused sentence on a loop, a stop at each sentence's end, the
-  // speed, and the video folded away to give the sentence the column.
+  // speed, and the video folded away. Folded, on either width, the room
+  // the picture leaves holds the Passage as lyrics (plan 314,
+  // components/analysis/Lyrics): the desk's fold on its bar, the phone's
+  // pull under the picture.
   const [loop, setLoop] = useState(false)
   const [pauseEach, setPauseEach] = useState(false)
   const [rate, setRate] = useState(1)
@@ -992,6 +996,22 @@ export default function AnalyzerScreen({ session }) {
     if (target?.cue_start != null && playerRef.current) seek(target.cue_start)
   }
 
+  // A line of the lyrics pressed (plan 314): the video plays from it,
+  // and the lyrics go on following the clock -- the press asked for the
+  // song from there, not for its words to hold still, which is what a
+  // stop picked on the route map or the transport asks (goToStop).
+  function playFromStop(index) {
+    analyzer.setFocusIndex(index)
+    if (wide) setLookup(null)
+    setFollowPlayback(true)
+    heldRef.current = null
+    clearHoldTimer()
+    const target = sentences[index]
+    if (target?.cue_start == null || !playerRef.current) return
+    seek(target.cue_start)
+    if (!playing) playerRef.current.play()
+  }
+
   // ── The filtered line ─────────────────────────────────────
   // Which stops the route map draws, as {s, i} pairs so a click on the
   // filtered line still selects by the Passage's OWN index -- the
@@ -1412,6 +1432,12 @@ export default function AnalyzerScreen({ session }) {
   // stage"), so the sentence, its translation and Explain have the
   // stage, and opened as the list in a sheet.
   const textDesk = !playerVideoId
+  // 歌詞 on the desk (plan 314, the owner's pick D2): the video folded,
+  // the lyrics take the route map's column as well as the picture's
+  // place -- the lines, their translations and their times are the
+  // Passage the route map listed. Its search, filters and pins come back
+  // with the picture.
+  const lyricsDesk = !textDesk && videoFolded
   const focusWord = pointAt === -1 && stageToken?.vocab_match ? stageToken : null
   const wordAction = textDesk && focusWord && (
     <MineButton
@@ -1490,7 +1516,7 @@ export default function AnalyzerScreen({ session }) {
   const deskResult = focused && (
     <div
       ref={resultsRef}
-      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${textDesk ? ' anl-desk--text' : ' anl-desk--video'}`}
+      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${textDesk ? ' anl-desk--text' : ' anl-desk--video'}${lyricsDesk ? ' anl-desk--lyrics' : ''}`}
       tabIndex={-1}
       role="region"
       aria-label={t.analysisResult}
@@ -1501,7 +1527,7 @@ export default function AnalyzerScreen({ session }) {
           {!several && wordsPanel}
           {pointsPanel}
         </div>
-      ) : railPanel}
+      ) : !lyricsDesk && railPanel}
 
       <div className="anl-desk__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
@@ -1537,7 +1563,7 @@ export default function AnalyzerScreen({ session }) {
             </div>
           </div>
         )}
-        <div className="anl-subs" data-furigana={furigana}>
+        <div className={`anl-subs${lyricsDesk ? ' anl-subs--lyrics' : ''}`} data-furigana={furigana}>
           <div className="anl-subs__head">
             <span className="anl-subs__count">
               {focusIndex + 1} / {sentences.length}
@@ -1562,6 +1588,20 @@ export default function AnalyzerScreen({ session }) {
               {(translation || translationDue) && trLine('anl-subs__tr')}
               {readable && explainButton}
             </div>
+          ) : lyricsDesk ? (
+            <Lyrics
+              className="anl-desk__lyrics"
+              sentences={sentences}
+              focusIndex={focusIndex}
+              translationOf={stopTranslation}
+              times
+              onPlay={playFromStop}
+              t={t}
+              lang={lang}
+            >
+              {subsBody}
+              {(translation || translationDue) && trLine('anl-subs__tr')}
+            </Lyrics>
           ) : (
             <>
               {subsBody}
@@ -1713,10 +1753,17 @@ export default function AnalyzerScreen({ session }) {
   // The line and its translation, stepped down a rung where the stage
   // would not hold them (useLineFit).
   const subsRef = useRef(null)
+  // 歌詞 on a phone (plan 314, the owner's picks V2 and C): the picture
+  // folded away by the pull under it, still playing out of sight -- a
+  // destroyed player could not report its clock -- and its sumi grown to
+  // the dock, holding the Passage line under line, each over its
+  // translation. The stage is then the screen's height, the lyrics
+  // scrolling inside it.
+  const lyrics = Boolean(playerVideoId) && videoFolded
   const mobileResult = focused && (
     <div
       ref={resultsRef}
-      className="anl-results anl-m"
+      className={`anl-results anl-m${lyrics ? ' anl-m--lyrics' : ''}`}
       tabIndex={-1}
       role="region"
       aria-label={t.analysisResult}
@@ -1745,7 +1792,7 @@ export default function AnalyzerScreen({ session }) {
       </div>
 
       {playerVideoId && (
-        <div className="anl-m__player">
+        <div className={`anl-m__player${lyrics ? ' anl-m__player--folded' : ''}`}>
           <div className="anl-m__video">
             <VideoPlayer
               ref={playerRef}
@@ -1759,34 +1806,87 @@ export default function AnalyzerScreen({ session }) {
             />
           </div>
           <PlayerTrack playhead={playhead} span={span} onSeek={seekFromTrack} />
+          {/* 歌詞 (plan 314, the owner's V2): the pull hanging from the
+              picture's foot folds it away, and at the top of the lyrics
+              brings it back -- one button, so the focus stays on it. */}
+          <button
+            type="button"
+            className="anl-m__pull"
+            aria-expanded={!lyrics}
+            aria-label={lyrics ? t.showVideo : t.hideVideo}
+            title={lyrics ? t.showVideo : t.hideVideo}
+            onClick={() => setVideoFolded(v => !v)}
+          >
+            <span className="anl-m__tab">
+              <ChevronIcon direction={lyrics ? 'down' : 'up'} size={16} />
+            </span>
+          </button>
+          {lyrics && (
+            <Lyrics
+              className="anl-m__lyrics"
+              sentences={sentences}
+              focusIndex={focusIndex}
+              translationOf={stopTranslation}
+              showTranslations={display.translation}
+              onPlay={playFromStop}
+              t={t}
+              lang={lang}
+              data-furigana={furigana}
+              data-romaji={display.romaji ? '' : undefined}
+            >
+              {focused.foreign ? (
+                <p className="anl-lyrics__note">
+                  <span lang="ja">{focused.text}</span>
+                  <span>{t.notJapaneseLine}</span>
+                </p>
+              ) : focused.available === false ? (
+                <p className="anl-lyrics__note">{t.sentenceAnalysisUnavailable}</p>
+              ) : (
+                <SubtitleLine
+                  analysis={focused}
+                  index={-1}
+                  setIndex={openTokenAt}
+                  lit={light.lit}
+                  t={t}
+                  playhead={playhead}
+                  playing={playing}
+                  timing={timing}
+                  romaji={display.romaji}
+                />
+              )}
+              {display.translation && (translation || translationDue) && trLine('anl-lyrics__tr')}
+            </Lyrics>
+          )}
         </div>
       )}
 
-      <section ref={subsRef} className="anl-m__subs" data-furigana={furigana} data-romaji={display.romaji ? '' : undefined} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
-        {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1), 'prev')}
-        {focused.foreign ? (
-          <p className="anl-m__note">
-            <span lang="ja">{focused.text}</span>
-            <span>{t.notJapaneseLine}</span>
-          </p>
-        ) : focused.available === false ? (
-          <p className="anl-m__note">{t.sentenceAnalysisUnavailable}</p>
-        ) : (
-          <SubtitleLine
-            analysis={focused}
-            index={-1}
-            setIndex={openTokenAt}
-            lit={light.lit}
-            t={t}
-            playhead={playerVideoId ? playhead : null}
-            playing={playing}
-            timing={timing}
-            romaji={display.romaji}
-          />
-        )}
-        {display.translation && (translation || translationDue) && trLine('anl-m__tr')}
-        {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1), 'next')}
-      </section>
+      {!lyrics && (
+        <section ref={subsRef} className="anl-m__subs" data-furigana={furigana} data-romaji={display.romaji ? '' : undefined} aria-label={t.stopNumber(focusIndex + 1, sentences.length)}>
+          {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1), 'prev')}
+          {focused.foreign ? (
+            <p className="anl-m__note">
+              <span lang="ja">{focused.text}</span>
+              <span>{t.notJapaneseLine}</span>
+            </p>
+          ) : focused.available === false ? (
+            <p className="anl-m__note">{t.sentenceAnalysisUnavailable}</p>
+          ) : (
+            <SubtitleLine
+              analysis={focused}
+              index={-1}
+              setIndex={openTokenAt}
+              lit={light.lit}
+              t={t}
+              playhead={playerVideoId ? playhead : null}
+              playing={playing}
+              timing={timing}
+              romaji={display.romaji}
+            />
+          )}
+          {display.translation && (translation || translationDue) && trLine('anl-m__tr')}
+          {sideLine(nextText, t.nextSentence, () => goToStop(focusIndex + 1), 'next')}
+        </section>
+      )}
 
       <div className="anl-m__dock">
         <div className="anl-m__tools">
@@ -1871,7 +1971,7 @@ export default function AnalyzerScreen({ session }) {
   useStageClaim(Boolean(showResult && focused && !wide))
   useLineFit(subsRef, [
     showResult && !wide, focusIndex, focused?.text, translation, translationDue,
-    display.translation, display.romaji, furigana,
+    display.translation, display.romaji, furigana, lyrics,
   ].join('\u0000'))
 
   return (

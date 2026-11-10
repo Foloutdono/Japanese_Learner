@@ -10,7 +10,8 @@ import {
 // play, the sentence after | the sentence again, on a loop, a stop at
 // each sentence's end | one plain track scaled to the Passage's window
 // (no step per sentence -- the owner's cut) and its clock | the speed,
-// the sound, the line following the clock, and the video folded away.
+// the sound, the line following the clock, and the video folded away,
+// its room given to the Passage as lyrics (plan 314).
 // The keys stay live and are not printed (owner-directed).
 //
 // The track and its clock are the video's own, 0 to its length (`span`,
@@ -126,9 +127,11 @@ export function PlayerBar({
       <button type="button" className={btn(follow ? ' anl-player__btn--on' : '')} onClick={onFollow} aria-pressed={follow} aria-label={t.followPlayback} title={t.followPlayback}>
         <FollowIcon size={16} />
       </button>
+      {/* Folded, lit as the bar's other switches are when on: the column
+          is the lyrics' while it is (plan 314). */}
       <button
         type="button"
-        className={btn(' anl-player__btn--bare')}
+        className={btn(folded ? ' anl-player__btn--on' : ' anl-player__btn--bare')}
         onClick={onFold}
         aria-expanded={!folded}
         aria-label={folded ? t.showVideo : t.hideVideo}

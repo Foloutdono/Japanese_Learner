@@ -1053,6 +1053,9 @@ const phraseAnalyzer = {
   playbackSpeed:       r => `Vitesse : ${String(r).replace('.', ',')}×`,
   showVideo:           'Afficher la vidéo',
   hideVideo:           'Masquer la vidéo',
+  // La vidéo masquée, le passage en paroles (plan 314).
+  lyricsLines:         n => (n === 1 ? 'La phrase du passage' : `Les ${n} phrases du passage`),
+  playFromLine:        'Lire à partir de cette ligne',
   furiganaNow:         label => `Furigana : ${label}`,
   wordsInSentence:     'Les mots de la phrase',
   // Le bureau du texte : la liste des mots repliée en une ligne (plan 235).
