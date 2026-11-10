@@ -63,7 +63,11 @@ describe('Settings › Main modes', () => {
     refreshToday.mockReset()
     apiFetch.mockImplementation(async () => ({ ok: true, json: async () => MODES }))
   })
-  afterEach(() => cleanup())
+  afterEach(async () => {
+    await cleanup()
+    // The lane's files share one origin: leave no language behind for the next.
+    localStorage.removeItem('lang')
+  })
 
   it('draws one slip a line, its main mode checked and its added modes lit', async () => {
     await mount()

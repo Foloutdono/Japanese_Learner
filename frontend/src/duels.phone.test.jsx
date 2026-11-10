@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
@@ -89,6 +89,10 @@ beforeEach(() => {
     localStorage.setItem('lang', 'fr')
     localStorage.removeItem('jp-duel-line-hidden')
   } catch { /* private mode */ }
+})
+// The lane's files share one origin: leave no language behind for the next.
+afterEach(() => {
+  try { localStorage.removeItem('lang') } catch { /* private mode */ }
 })
 
 // ── H3 — the hall ──

@@ -89,6 +89,11 @@ const PWA_REGISTER_ALIAS = {
   'virtual:pwa-register': fileURLToPath(new URL('./pwa.register-stub.js', import.meta.url)),
 };
 
+// Before every file: the device's own language, no choice saved. A lane's
+// files share one origin, and an English one that kept its choice turned
+// whichever French file ran next English (src/testing/laneSetup.js).
+const LANE_SETUP = fileURLToPath(new URL('./src/testing/laneSetup.js', import.meta.url));
+
 function browserProject(name, include, viewport, contextOptions) {
   return {
     optimizeDeps: BROWSER_OPTIMIZE,
@@ -97,6 +102,7 @@ function browserProject(name, include, viewport, contextOptions) {
       name,
       globals: false,
       include,
+      setupFiles: [LANE_SETUP],
       browser: {
         enabled: true,
         headless: true,

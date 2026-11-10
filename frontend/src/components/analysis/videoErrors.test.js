@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import en from '../../locales/en/index.js'
 import fr from '../../locales/fr/index.js'
+import es from '../../locales/es/index.js'
 import { ApiError } from '../../lib/api'
 import { videoErrorMessage } from './videoErrors'
 
@@ -20,6 +21,16 @@ const DOOR = {
   session_preparing: 'videoStillPreparing',
   not_utf8: 'subtitleNotUtf8',
   end_before_start: 'windowBackwards',
+  // 歌 (plan 317): /api/video/song's refusals, and the browser's own
+  // when it cannot decode the file.
+  song_unreadable: 'songUnreadable',
+  song_required: 'songUnreadable',
+  song_not_wav: 'songUnreadable',
+  song_too_long: 'songTooLong',
+  song_too_short: 'songTooShort',
+  song_allowance: 'songAllowance',
+  song_unavailable: 'songUnavailable',
+  song_busy: 'songBusy',
 }
 const WORKER = {
   no_japanese_subtitles: 'videoNoJapanese',
@@ -35,11 +46,15 @@ const WORKER = {
   parse_failed: 'subtitleParseFailed',
   transcript_failed: 'videoTranscriptFailed',
   stalled: 'videoStalled',
+  song_unheard: 'songUnheard',
+  song_not_japanese: 'songNotJapanese',
+  song_lyrics_unmatched: 'songLyricsUnmatched',
+  song_failed: 'songFailed',
 }
 
 describe('videoErrorMessage', () => {
   it('words a refusal at the door from its code', () => {
-    for (const t of [fr, en]) {
+    for (const t of [fr, en, es]) {
       for (const [code, key] of Object.entries(DOOR)) {
         const e = new ApiError(400, { detail: { code, message: 'English for the logs' } }, '/api/video/session')
         expect(t[key], key).toBeTruthy()
@@ -49,7 +64,7 @@ describe('videoErrorMessage', () => {
   })
 
   it('words a worker’s failure, off the poll’s body', () => {
-    for (const t of [fr, en]) {
+    for (const t of [fr, en, es]) {
       for (const [code, key] of Object.entries(WORKER)) {
         const e = new ApiError(503, { status: 'failed', code, error: 'English for the logs', isYoutube: true }, '/api/video/session/7')
         expect(t[key], key).toBeTruthy()

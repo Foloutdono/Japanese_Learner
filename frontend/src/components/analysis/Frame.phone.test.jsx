@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../../LangContext'
 import en from '../../locales/en'
@@ -77,6 +77,9 @@ async function sheet(line, props = {}) {
   const all = document.querySelectorAll('.anl-explainsheet')
   return { root: all[all.length - 1], onPoint, onExplain }
 }
+// The lane's files share one origin, so the English sheet() switches to
+// must not carry into a file that reads the French default after this one.
+afterEach(() => { localStorage.removeItem('lang') })
 
 const parts = root => [...root.querySelectorAll('.anl-frame__part')]
 
