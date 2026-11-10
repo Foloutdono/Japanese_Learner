@@ -4,7 +4,8 @@ import { useDesk } from '../../hooks/useDesk'
 import { useGridWalk } from '../../hooks/useGridWalk'
 import { relativeDate } from '../../lib/formatDate'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../chrome/Console'
-import { CrossIcon, TextLinesIcon, CameraIcon, VideoIcon } from '../ui/Icons'
+import { CrossIcon, TextLinesIcon, CameraIcon, VideoIcon, SongIcon } from '../ui/Icons'
+import { Dots } from '../ui/Loading'
 import { kindOf, lineOf, keptOf, shelfChips, shelfShows } from './passages'
 import { VideoStill } from './VideoStill'
 
@@ -26,12 +27,17 @@ import { VideoStill } from './VideoStill'
 // text or, by its `source`, a photo. Each has its ✕ and its Undo
 // (useAnalyzerSession's deleteHistoryEntry). The shelf holds the newest
 // thirty of them, kept sentences aside (backend core/history.py).
+//
+// `pending` is a song being transcribed (plan 315, the owner's board 1):
+// its file's name waits at the head of the shelf, a row or a card that
+// opens nothing, until the server lists the session it makes. The
+// screen's notice is what a reader hears; the row is quiet.
 
-const GLYPH = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon }
-const NAME = { text: 'sourceText', photo: 'sourcePhoto', video: 'sourceVideo' }
+const GLYPH = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon, song: SongIcon }
+const NAME = { text: 'sourceText', photo: 'sourcePhoto', video: 'sourceVideo', song: 'sourceSong' }
 const CARD_DOORS = ':scope > .anl-card > .anl-card__open'
 
-export function PassageShelf({ t, entries, onOpen, onDelete, lastDeleted, onUndo, onDismissUndo }) {
+export function PassageShelf({ t, entries, onOpen, onDelete, lastDeleted, onUndo, onDismissUndo, pending = null }) {
   const desk = useDesk()
   const { lang } = useLang()
   const [filter, setFilter] = useState('all')
@@ -66,6 +72,7 @@ export function PassageShelf({ t, entries, onOpen, onDelete, lastDeleted, onUndo
   )
 
   const when = h => (h.createdAt ? relativeDate(h.createdAt, lang, t) : null)
+  const waiting = pending && <span className="anl-wait">{t.songTranscribing}<Dots /></span>
   const count = h => (h.kind === 'session' && typeof h.sentenceCount === 'number' ? t.sessionSentenceCount(h.sentenceCount) : null)
   const del = (h, tab) => (
     <button type="button" className={desk ? 'anl-card__delete' : 'anl-row__delete'} onClick={() => onDelete(h)} aria-label={t.delete} title={desk ? t.delete : undefined} tabIndex={tab}>
@@ -91,10 +98,21 @@ export function PassageShelf({ t, entries, onOpen, onDelete, lastDeleted, onUndo
           </Console>
         )}
         {undo}
-        {entries.length === 0 && <p className="anl-shelf__empty">{t.shelfEmpty}</p>}
-        {entries.length > 0 && shown.length === 0 && <p className="hint">{t.shelfNoMatch}</p>}
-        {shown.length > 0 && (
+        {entries.length === 0 && !pending && <p className="anl-shelf__empty">{t.shelfEmpty}</p>}
+        {entries.length > 0 && shown.length === 0 && !pending && <p className="hint">{t.shelfNoMatch}</p>}
+        {(shown.length > 0 || pending) && (
           <div className="anl-shelf__grid" onKeyDown={onWalk} aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Home End">
+            {pending && (
+              <div className="anl-card anl-card--song anl-card--wait">
+                <div className="anl-card__open">
+                  <span className="anl-card__body">
+                    <span className="anl-card__src"><SongIcon size={14} />{t.sourceSong}</span>
+                    <span className="anl-card__jp">{pending}</span>
+                    <span className="anl-card__meta">{waiting}</span>
+                  </span>
+                </div>
+              </div>
+            )}
             {shown.map((h, i) => {
               const kind = kindOf(h)
               const Glyph = GLYPH[kind]
@@ -134,9 +152,22 @@ export function PassageShelf({ t, entries, onOpen, onDelete, lastDeleted, onUndo
     <section className="anl-shelf" aria-label={t.historyTitle}>
       {chipRow && <div className="anl-shelf__chips" role="group" aria-label={t.shelfFilter}>{chipRow}</div>}
       {undo}
-      {entries.length === 0 && <p className="hint">{t.shelfEmptyPhone}</p>}
-      {shown.length > 0 && (
+      {entries.length === 0 && !pending && <p className="hint">{t.shelfEmptyPhone}</p>}
+      {(shown.length > 0 || pending) && (
         <div className="anl-shelf__rows">
+          {pending && (
+            <div className="anl-row anl-row--wait">
+              <div className="anl-row__open">
+                <span className="anl-row__lead" role="img" aria-label={t.sourceSong}>
+                  <span className="anl-row__glyph"><SongIcon size={16} /></span>
+                </span>
+                <span className="anl-row__body">
+                  <span className="anl-row__jp">{pending}</span>
+                  <span className="anl-row__meta">{waiting}</span>
+                </span>
+              </div>
+            </div>
+          )}
           {shown.map(h => {
             const kind = kindOf(h)
             const Glyph = GLYPH[kind]

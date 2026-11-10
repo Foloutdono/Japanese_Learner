@@ -41,6 +41,19 @@ const NAMED = {
   transcript_failed: t => t.videoTranscriptFailed,
   // The poll: a worker lost on the way.
   stalled: t => t.videoStalled,
+  // 歌 (plan 315): a song, at the door, in the browser or in its worker.
+  song_unreadable: t => t.songUnreadable,
+  song_not_wav: t => t.songUnreadable,
+  song_required: t => t.songUnreadable,
+  song_too_long: t => t.songTooLong,
+  song_too_short: t => t.songTooShort,
+  song_allowance: t => t.songAllowance,
+  song_unavailable: t => t.songUnavailable,
+  song_busy: t => t.songBusy,
+  song_unheard: t => t.songUnheard,
+  song_not_japanese: t => t.songNotJapanese,
+  song_lyrics_unmatched: t => t.songLyricsUnmatched,
+  song_failed: t => t.songFailed,
 }
 
 /**

@@ -1076,6 +1076,94 @@
 .anl-vlink:focus-visible { color: var(--text-primary); filter: none; }
 .anl-vlink[aria-expanded="true"] { text-decoration-style: dotted; }
 
+/* 歌 — the song intake (plan 315, the owner's pick S1): the file, the
+   lyrics if the learner has them, Transcrire, and where the audio goes
+   on one quiet line under it. The ♪'s sheet on a phone, the desk's
+   fourth platform in its column. */
+.anl-uta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+/* The file's place: a dashed rule round the picker, the file once
+   picked and what the picker takes. One step from its ground, as a
+   field is (.field--page): the surface on the desk's page, the page's
+   own in a phone's sheet. */
+.anl-uta__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-5) var(--sp-4);
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+}
+.anl-sheet .anl-uta__drop { background: var(--bg-main); }
+.anl-uta__picked {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  max-width: 100%;
+  color: var(--text-primary);
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+.anl-uta__picked svg { flex: none; color: var(--text-secondary); }
+.anl-uta__file {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-uta__length {
+  flex: none;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.anl-uta__hint,
+.anl-uta__quiet,
+.anl-refile__note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+}
+.anl-uta__lyrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.anl-uta__label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.anl-uta__label small {
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.anl-uta__field { font-family: var(--font-jp); }
+.anl-uta__go,
+.anl-refile__go { width: 100%; }
+/* 歌 (plan 315): a song reopened on a device that has not got its file.
+   The lyrics stand, and where the transport would be, the one action
+   that brings the sound back and a line on why it is asked for. */
+.anl-refile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
 /* ── The 字幕取り walkthrough (GrabTutorial.jsx) ──
    Sheet chrome comes from .detail-sheet; this block only lays out
    the steps: a numbered roundel (the history rows' drawing), the
@@ -1489,6 +1577,16 @@
   background: transparent;
   color: var(--text-secondary);
 }
+/* 歌 (plan 315): a song being transcribed waits at the shelf's head, a
+   row (a card on the desk) that opens nothing, its word and the app's
+   three dots where a passage's count and date would be. */
+.anl-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.anl-row--wait .anl-row__open { cursor: default; }
+
 /* A still, in a row or on a card: the frame YouTube serves, cropped to
    its box. */
 .anl-card__img {
@@ -35301,6 +35399,13 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     gap: var(--sp-5);
     min-width: 0;
   }
+  /* Four platforms (plan 315) in the column's one width: at the
+     caption's tracking they asked 420px of its 358 in French (Chanson,
+     Canción), and the fourth was cut at the column's edge. The panel's
+     tight faces' treatment (.anl-desk__entry--tight .anl-faces): the
+     term's tracking, the padding a step in, the glyphs kept. */
+  .anl-sources .seg__opt { padding-inline: var(--sp-2); }
+  .anl-sources .seg__opt-latin { letter-spacing: var(--tr-term); text-indent: var(--tr-term); }
   /* A file carried over the page: the column it will land in says so,
      dashed in the station's pigment, its words over the intake. */
   .desk-intake__side { position: relative; }
@@ -35372,6 +35477,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     .anl-card__open { transition: none; }
     .anl-card__open:hover,
     .anl-card__open:focus-visible { transform: none; }
+  }
+  .anl-card--wait .anl-card__open { cursor: default; }
+  .anl-card--wait .anl-card__open:hover {
+    transform: none;
+    border-color: var(--surface-line);
   }
   .anl-card__still {
     position: relative;
@@ -41338,6 +41448,14 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     height: 0;
     overflow: hidden;
   }
+  /* A song's refile (plan 315) stands where its bar would, at the
+     slab's foot: the bar's hairline, its note in the panel's soft ink. */
+  .anl-slab .anl-refile {
+    flex: none;
+    padding: var(--sp-4);
+    border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent);
+  }
+  .anl-slab .anl-refile__note { color: var(--text-on-panel-soft); }
   .anl-slab__arrow {
     display: inline-flex;
     flex: none;

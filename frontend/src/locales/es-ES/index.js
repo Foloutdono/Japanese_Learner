@@ -16,7 +16,7 @@ export default {
   gateModeAdd: mode => `Añadir «${mode}» a Hoy`,
   deskKeyAddReading: 'añade una lectura',
   readingsAdd: 'añadir una lectura',
-  analyzerDoorSub: 'Texto, una foto, un vídeo',
+  analyzerDoorSub: 'Texto, una foto, un vídeo, una canción',
   settingsModesHint: 'Hoy enseña cada línea en su modo principal. Añade otros de sus modos junto al principal, aquí o desde Hoy.',
   sourceVideo: 'Vídeo',
   sourceVideoShort: 'De un vídeo',

@@ -183,8 +183,8 @@ describe('AnalyzerScreen structure', () => {
     const panels = screen.container.querySelectorAll('[id^="anl-panel-"]')
     expect(panels.length).toBe(1)
     expect(panels[0].id).toBe('anl-panel-text')
-    // And the three platforms are one control over the page.
-    expect(screen.container.querySelectorAll('.anl-sources .seg__opt').length).toBe(3)
+    // And the four platforms are one control over the page.
+    expect(screen.container.querySelectorAll('.anl-sources .seg__opt').length).toBe(4)
   })
 
   // ── Boarding another platform is a NEW JOB ──

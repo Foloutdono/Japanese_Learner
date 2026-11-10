@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **315**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **316**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -376,6 +376,25 @@ runtime purpose.
   library's page carries ··· in its corner (`PublicDeckPage`, report
   and block), a followed deck's unfollow sheet the second way out
   (`DeckDetailScreen`), and both ask first, since a block ends follows.
+- **A learner's song is heard once and forgotten (plan 315).** The
+  analyser's song is decoded on the device to a 16 kHz mono WAV
+  (`lib/songAudio.js`, cut at `MAX_SECONDS`, which
+  `study/song_transcribe.py` holds equal) and sent once to a model that
+  hears (`llm_shared.chat(audio=True)`, a provider's `audio_models`;
+  `hears_audio()` refuses the route up front where none does). A song
+  is megabytes where every other ingest is text, so the songs one
+  process holds, heard or waiting, are bounded (`song_transcribe.hold()`,
+  given back by the worker), and a full house is refused before the
+  body is read or the allowance counted. The server keeps the timed
+  lines it made and the file's name, never the audio, and the lyrics a
+  learner pasted only as the lines they become.
+  What plays is the learner's own file, kept on the device
+  (`lib/songStore.js`, the last five), so a song reopened elsewhere asks
+  for its file again, and anything new that plays a song plays it from
+  there. A song is a session whose `source` is `song`: a closed set of
+  sources (`phrase.KeepRequest`, `video._SOURCE_NAMES`,
+  `passages.kindOf`) takes it in the same change, or a line pinned from
+  a song is refused.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

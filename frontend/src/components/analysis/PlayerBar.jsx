@@ -128,17 +128,20 @@ export function PlayerBar({
         <FollowIcon size={16} />
       </button>
       {/* Folded, lit as the bar's other switches are when on: the column
-          is the lyrics' while it is (plan 314). */}
-      <button
-        type="button"
-        className={btn(folded ? ' anl-player__btn--on' : ' anl-player__btn--bare')}
-        onClick={onFold}
-        aria-expanded={!folded}
-        aria-label={folded ? t.showVideo : t.hideVideo}
-        title={folded ? t.showVideo : t.hideVideo}
-      >
-        <FoldVideoIcon size={16} />
-      </button>
+          is the lyrics' while it is (plan 314). A song has no picture to
+          fold, and no button for it (plan 315). */}
+      {onFold && (
+        <button
+          type="button"
+          className={btn(folded ? ' anl-player__btn--on' : ' anl-player__btn--bare')}
+          onClick={onFold}
+          aria-expanded={!folded}
+          aria-label={folded ? t.showVideo : t.hideVideo}
+          title={folded ? t.showVideo : t.hideVideo}
+        >
+          <FoldVideoIcon size={16} />
+        </button>
+      )}
     </div>
   )
 }

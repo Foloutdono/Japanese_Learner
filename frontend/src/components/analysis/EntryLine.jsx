@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { CameraIcon, SubtitleFileIcon, VideoIcon } from '../ui/Icons'
+import { CameraIcon, SongIcon, SubtitleFileIcon, VideoIcon } from '../ui/Icons'
 
 // ── The phone's way in (plan 136) ─────────────────────────
 // Under the desk the analyser opens on the learner's passages, so the
@@ -11,11 +11,13 @@ import { CameraIcon, SubtitleFileIcon, VideoIcon } from '../ui/Icons'
 // (AnalyzerScreen's editDraft), since a link is not text to analyse.
 // The video's button opens the same sheet with its field empty, so the
 // video intake (and the grab's walkthrough behind it) is one door away
-// for a learner who has no link to paste yet.
+// for a learner who has no link to paste yet. A song has its own door
+// beside it (plan 315, the owner's pick S1): the ♪ opens the song's
+// sheet, an audio file transcribed into the Passage.
 //
 // The field grows with its content, as the slip's does, and folds back
 // to one line when it is empty and left.
-export function EntryLine({ t, value, onChange, onAnalyze, busy, onPhoto, onVideo, onFile }) {
+export function EntryLine({ t, value, onChange, onAnalyze, busy, onPhoto, onVideo, onSong, onFile }) {
   const fieldRef = useRef(null)
   const fileRef = useRef(null)
   const [focused, setFocused] = useState(false)
@@ -49,6 +51,9 @@ export function EntryLine({ t, value, onChange, onAnalyze, busy, onPhoto, onVide
         </button>
         <button type="button" className="anl-entry__tool" onClick={onVideo} aria-label={t.sourceVideo} aria-haspopup="dialog">
           <VideoIcon size={20} />
+        </button>
+        <button type="button" className="anl-entry__tool" onClick={onSong} aria-label={t.sourceSong} aria-haspopup="dialog">
+          <SongIcon size={20} />
         </button>
         <button type="button" className="anl-entry__tool" onClick={() => fileRef.current?.click()} aria-label={t.chooseSubtitles}>
           <SubtitleFileIcon size={20} />

@@ -384,7 +384,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
                               "dictionary", "export", "level_fit", "conversation",
                               "comeback", "readings", "duels_key", "duels_board",
                               "duels_news"}),
-        "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
+        "action":  frozenset({"play", "text", "photo", "video", "song", "scan", "send",
                               "open", "search", "progress", "move", "stay", "hide"}),
     },
     "transfer_import": {"source": frozenset({"anki", "wanikani", "renshuu"})},
@@ -399,7 +399,8 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
                               "on", "off", "N5", "N4", "N3", "N2", "N1", "changed"}),
     },
     "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
-                                         "deep_analysis", "exam_paper", "line_translation"})},
+                                         "deep_analysis", "exam_paper", "line_translation",
+                                         "song_transcribe"})},
     # What a refused fare was for (core/credits.FARES): a review, or
     # since plan 279 a ranked duel's departure or a duel's corrections.
     "fare_blocked": {"kind": frozenset({"review", "duel", "duel_review"})},

@@ -2734,6 +2734,20 @@ line here says otherwise.
   back with the picture. The reference's coloured ground was not taken (a
   line's pigment is never a fill), nor a third ink for the lines sung:
   the lines either side share the soft one.
+  **A song is lyrics from the start** (plan 315, the owner's pick S1 of
+  the canvas "Tsuji analyser — a song from an audio file"). It comes in
+  through a door of its own -- the ♪ on the phone's entry line opening
+  its sheet; on the desk the fourth platform, and a song dropped on the
+  page -- as the file, the lyrics if the learner has them, and Transcrire,
+  with one quiet line under it saying where the audio goes. While it is
+  heard it waits at the head of the shelf, its file's name over the
+  word and the three dots, a row that opens nothing. It has no
+  picture, so its Passage is the lyrics on both widths, with nothing to
+  fold, and plays from the learner's own file. Reopened where that file
+  is not, the transport's place holds the one action that brings the
+  sound back, the file asked for again, and a line saying why; the lyrics
+  stand meanwhile. The desk's four platforms share the column's one width
+  at the term's tracking, as the panel's tight faces do.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its

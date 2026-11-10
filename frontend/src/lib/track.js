@@ -170,7 +170,7 @@ export const VALUES = {
   run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   feature_use: {
     feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback', 'readings', 'duels_key', 'duels_board', 'duels_news'],
-    action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide'],
+    action: ['play', 'text', 'photo', 'video', 'song', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide'],
   },
   transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
   transfer_offer: { choice: ['go', 'later'] },
@@ -178,7 +178,7 @@ export const VALUES = {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target', 'main_mode', 'today_mode'],
     value: ['light', 'dark', 'auto', 'fr', 'en', 'es', 'es-ES', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
-  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
+  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation', 'song_transcribe'] },
   fare_blocked: { kind: ['review', 'duel', 'duel_review'] },
   pvp_friend: { action: ['request', 'accept', 'refuse', 'withdraw', 'remove', 'block', 'unblock'] },
   pvp_report: { reason: ['name', 'cheat', 'spam', 'other'] },

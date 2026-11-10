@@ -84,6 +84,11 @@ GOOGLE_MODEL = os.environ.get("GOOGLE_MODEL", "gemini-3.1-flash-lite")
 # manga and novels, which are vertical (tategaki), and that is the one
 # axis every cheap model measured here has failed on.
 GOOGLE_VISION_MODEL = os.environ.get("GOOGLE_VISION_MODEL", "gemini-3.1-flash")
+# Hearing too (plan 315): a song's lines from its audio, through the same
+# compatibility layer's `input_audio` part. Flash by default, as vision
+# is, and for the same reason: sung Japanese over a band is the hard
+# case, and a lyric misheard is a lyric learnt wrong.
+GOOGLE_AUDIO_MODEL = os.environ.get("GOOGLE_AUDIO_MODEL", GOOGLE_VISION_MODEL)
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
@@ -128,6 +133,10 @@ class Provider:
     # the bounded-JSON tasks `models` exists for. Empty means this
     # provider is skipped entirely for vision work (see chat(vision=True)).
     vision_models: tuple[str, ...] = ()
+    # Models that hear an `input_audio` content part (plan 315), in
+    # preference order; empty skips the provider for audio work. Only
+    # Google's compatibility layer takes one among the providers here.
+    audio_models: tuple[str, ...] = ()
     # reasoning-flag -> extra top-level request-body keys.
     reasoning_body: object = field(default=None)
     # What this endpoint calls the completion cap. OpenAI renamed it to
@@ -154,6 +163,7 @@ _PROVIDER_CATALOG = {
         # "/chat/completions" for "/models") lands on the right URL too.
         models=(GOOGLE_MODEL,),
         vision_models=(GOOGLE_VISION_MODEL,),
+        audio_models=(GOOGLE_AUDIO_MODEL,),
         # No reasoning knob, on purpose. The two entries below carry one
         # because their thinking trace lands in `content` and breaks
         # every JSON parse (NVIDIA) or because the field is the
@@ -370,6 +380,13 @@ _DEFAULT_PROVIDER_ORDER = "google,openai,openrouter"
 # Names not in this tuple keep their relative position, after the ones
 # that are -- so adding a third provider needs no edit here.
 _VISION_PROVIDER_PREFERENCE = ("google", "openrouter", "nvidia")
+
+
+def hears_audio() -> bool:
+    """Whether any configured provider has a model that takes audio --
+    asked before a song is accepted, so a deployment with none refuses
+    the upload up front rather than failing it a minute later."""
+    return any(p.audio_models for p in PROVIDERS)
 
 
 def _providers_for(vision: bool) -> list[Provider]:
@@ -618,8 +635,8 @@ _RETRYABLE_STATUSES = (429, 500, 502, 503, 504)
 
 
 def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
-         reasoning: bool = True, *, vision: bool = False, task: str = "",
-         accept=None) -> str:
+         reasoning: bool = True, *, vision: bool = False, audio: bool = False,
+         task: str = "", accept=None) -> str:
     """Multi-provider, multi-model fallback chat completion.
 
     Walks PROVIDERS in order and, within each, its models in order:
@@ -651,6 +668,10 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
     only because a text model 400s on an image. A provider with no
     vision models is skipped; if NONE has any, this raises
     LLMUnavailable naming the probe script rather than failing per-model.
+
+    audio=True does the same with `audio_models`, for an `input_audio`
+    content part (plan 315, study/song_transcribe.py): only a provider
+    that hears is tried, and none hearing is LLMUnavailable.
 
     `task` names the feature this call serves ("comprehension",
     "phrase", "ocr", ...) and does nothing but appear in the accounting
@@ -697,9 +718,11 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
         (provider, model)
         for provider in _providers_for(vision)
         if provider.name not in _DEAD_PROVIDERS
-        for model in (provider.vision_models if vision else provider.models)
+        for model in (provider.audio_models if audio else provider.vision_models if vision else provider.models)
         if (provider.name, model) not in _DEAD_MODELS
     ]
+    if audio and not hears_audio():
+        raise LLMUnavailable("No configured provider has a model that hears audio.")
     if vision and not any(p.vision_models for p in PROVIDERS):
         raise LLMUnavailable(
             "No configured provider has a vision-capable model. "

@@ -39,6 +39,7 @@ import { useLineTranslations } from '../components/analysis/useLineTranslations'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
+import { IntakeSong } from '../components/analysis/IntakeSong'
 import { GrabTutorial, GrabTutorialDock } from '../components/analysis/GrabTutorial'
 import { useBookmarkletCopy, watchUrlFor } from '../components/analysis/useBookmarkletCopy'
 import { useLabelsFit } from '../hooks/useLabelsFit'
@@ -50,6 +51,9 @@ import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sourc
 import { parseVideoId } from '../lib/youtube'
 import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
+import { AudioPlayer } from '../components/video/AudioPlayer'
+import { keepSong, songFile } from '../lib/songStore'
+import { isSongFile, SONG_ACCEPT } from '../lib/songAudio'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 import { heldTooSoon } from '../lib/keyRepeat'
 import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon, SlidersIcon, SlotsIcon, BooksIcon } from '../components/ui/Icons'
@@ -57,7 +61,7 @@ import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/vide
 
 const KAISEKI = 'var(--line-kaiseki)'
 // The three platforms' glyphs, the dictionary door's (plan 136).
-const SOURCE_GLYPHS = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon }
+const SOURCE_GLYPHS = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon, song: SongIcon }
 // A link pasted where Japanese goes (plan 136): the whole field is one
 // YouTube URL. The video intake takes it, since a link is not text to
 // analyse.
@@ -259,6 +263,7 @@ export default function AnalyzerScreen({ session }) {
   // subtitles by the video intake, a picture by the photo one.
   const [dragging, setDragging] = useState(false)
   const [incomingImage, setIncomingImage] = useState(null)
+  const [incomingSong, setIncomingSong] = useState(null)
   // The video intake's own drop: it holds the window a file is cut to.
   const videoDropRef = useRef(null)
   const [grabFlag, setGrabFlag] = useState(readGrabUsed)
@@ -341,6 +346,12 @@ export default function AnalyzerScreen({ session }) {
   const [pauseEach, setPauseEach] = useState(false)
   const [rate, setRate] = useState(1)
   const [videoFolded, setVideoFolded] = useState(false)
+  // 歌 (plan 315): the song a song's Passage plays, as {sessionId, url}
+  // -- the object URL of the learner's own file, kept on this device by
+  // the session it made (lib/songStore.js), or url null where this
+  // device does not have it -- and the input that picks it again.
+  const [songMedia, setSongMedia] = useState(null)
+  const refileRef = useRef(null)
   // The previous poll, which tells playback (a small step) from a seek.
   const lastPollRef = useRef(0)
   // The sentence the stop at each sentence's end is holding at (its
@@ -432,11 +443,35 @@ export default function AnalyzerScreen({ session }) {
   // has typed right now, fall back to whatever the session was created
   // with. This is what makes a link pasted AFTER an upload work.
   const playerVideoId = parseVideoId(videoUrl) ?? passage?.videoId ?? null
+  // 歌 (plan 315): a song's Passage, its lines timed on a song heard
+  // from the learner's own file. `media` is a Passage with a clock -- a
+  // video's or a song's -- and `playable` one with a player to hear it
+  // on: a song reopened on a device that does not keep its file has the
+  // clock and no player until the file is picked again.
+  const isSong = !playerVideoId && passage?.source === 'song'
+  const songSessionId = isSong ? passage.sessionId : null
+  const songUrl = songMedia && songMedia.sessionId === songSessionId ? songMedia.url : null
+  const songLooked = songMedia != null && songMedia.sessionId === songSessionId
+  const media = Boolean(playerVideoId) || isSong
+  const playable = Boolean(playerVideoId) || Boolean(songUrl)
   // 歌詞 (plan 314): a video's picture folded away, its room the Passage
-  // as lyrics, on either width (components/analysis/Lyrics). While they
-  // are up, a line walked to -- pressed, skipped to, stepped to with
-  // ↑/↓ -- is the song from there, and the lyrics go on following it.
-  const lyrics = Boolean(playerVideoId) && videoFolded
+  // as lyrics, on either width (components/analysis/Lyrics); a song has
+  // no picture, and is lyrics from the start. While they are up, a line
+  // walked to -- pressed, skipped to, stepped to with ↑/↓ -- is the song
+  // from there, and the lyrics go on following it.
+  const lyrics = isSong || (Boolean(playerVideoId) && videoFolded)
+  // The song's file looked for on this device once its Passage is open
+  // (lib/songStore.js); a song just added is already in hand.
+  useEffect(() => {
+    if (songSessionId == null || songLooked) return undefined
+    let live = true
+    songFile(songSessionId).then(file => {
+      if (live) setSongMedia({ sessionId: songSessionId, url: file ? URL.createObjectURL(file) : null })
+    })
+    return () => { live = false }
+  }, [songSessionId, songLooked])
+  // A song's object URL is let go of when another takes its place.
+  useEffect(() => () => { if (songMedia?.url) URL.revokeObjectURL(songMedia.url) }, [songMedia])
   // 字幕の流れ: what the whole track says about when its words are said
   // (its pace, how early its subtitles come up), for the lines it did
   // not time word by word. Read once a Passage, not once a line.
@@ -561,7 +596,7 @@ export default function AnalyzerScreen({ session }) {
     setPlaying(false)
     setDuration(0)
     playhead.reset()
-  }, [playerVideoId, playhead])
+  }, [playerVideoId, songUrl, playhead])
 
   useEffect(() => {
     if (status !== 'ready') return
@@ -645,7 +680,7 @@ export default function AnalyzerScreen({ session }) {
           ? Math.min(sentences.length - 1, focusIndex + 1)
           : Math.max(0, focusIndex - 1)
         if (next !== focusIndex) goToStop(next, { follow: lyrics })
-      } else if (e.key === ' ' && playerVideoId) {
+      } else if (e.key === ' ' && playable) {
         e.preventDefault()
         // Through togglePassagePlayback, not a bare play(): Space is
         // the transport bar's key, and from before the Passage's
@@ -659,7 +694,7 @@ export default function AnalyzerScreen({ session }) {
     // closure re-binds on every dep change below, which covers every
     // value it reads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, playerVideoId, wide, lyrics])
+  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, playable, wide, lyrics])
 
   // Esc gives the dock back: the route map for a longer Passage, the
   // stage's own token for a one-sentence one. Not from a field, not
@@ -740,6 +775,9 @@ export default function AnalyzerScreen({ session }) {
     if (file.type.startsWith('image/')) {
       boardPlatform('photo')
       setIncomingImage(file)
+    } else if (isSongFile(file)) {
+      boardPlatform('song')
+      setIncomingSong(file)
     } else if (SUBTITLE_FILE.test(file.name) || file.type === 'text/vtt') {
       if (source === 'video' && videoDropRef.current) videoDropRef.current(file)
       else {
@@ -768,6 +806,23 @@ export default function AnalyzerScreen({ session }) {
     clearFocus()
     setSheet(null)
     analyzer.startVideoFromLink(url, opts)
+  }
+
+  // 歌 (plan 315): a song picked plays from the file in hand, the session
+  // it opens named once the server has it; a song picked again for a
+  // Passage this device did not keep is kept from now on.
+  function startSong(file, opts) {
+    if (!file) return
+    clearFocus()
+    setSheet(null)
+    analyzer.startSongFromFile(file, opts).then(sessionId => {
+      if (sessionId != null) setSongMedia({ sessionId, url: URL.createObjectURL(file) })
+    })
+  }
+  function refileSong(file) {
+    if (!file || songSessionId == null) return
+    keepSong(songSessionId, file)
+    setSongMedia({ sessionId: songSessionId, url: URL.createObjectURL(file) })
   }
 
   // Boarding a platform ALWAYS opens its intake, even when a result
@@ -801,6 +856,7 @@ export default function AnalyzerScreen({ session }) {
     setSource(key)
     setTutorial(false)
     setIncomingImage(null)
+    setIncomingSong(null)
     setIntakeOpen(true)
     // A fresh player mounts paused; the destroyed one can no longer
     // report its own state, so this is the one boolean reset by hand.
@@ -888,7 +944,7 @@ export default function AnalyzerScreen({ session }) {
   // each sentence's end own the line's end, so they keep the poll.
   const setFocusIndex = analyzer.setFocusIndex
   useEffect(() => {
-    if (!playing || !followPlayback || loop || pauseEach || !playerVideoId) return undefined
+    if (!playing || !followPlayback || loop || pauseEach || !playable) return undefined
     const timer = { id: 0 }
     const step = () => {
       clearTimeout(timer.id)
@@ -909,7 +965,7 @@ export default function AnalyzerScreen({ session }) {
       off()
       clearTimeout(timer.id)
     }
-  }, [playing, followPlayback, loop, pauseEach, playerVideoId, sentences, focusIndex, playhead, setFocusIndex, rate])
+  }, [playing, followPlayback, loop, pauseEach, playable, sentences, focusIndex, playhead, setFocusIndex, rate])
 
   // The Passage's window, the first cue to the last: where Play starts.
   const cued = sentences.filter(s => s.cue_end != null)
@@ -1057,7 +1113,7 @@ export default function AnalyzerScreen({ session }) {
     setLookup(target)
     // The video desk's panel opens it on its grammar face (plan 242); a
     // typed Passage's, whose grammar is in its left column, on its card.
-    setSide(playerVideoId ? 'grammar' : 'card')
+    setSide(media ? 'grammar' : 'card')
   }
 
   function openHistoryEntry(entry) {
@@ -1075,7 +1131,7 @@ export default function AnalyzerScreen({ session }) {
   // which platform it belongs to, so the learner does not have to know
   // that a photo passage means "board Photo first".
   function openHistoryFromRow(entry) {
-    boardPlatform(entry.kind === 'session' ? 'video' : entry.source === 'image' ? 'photo' : 'text')
+    boardPlatform(entry.kind === 'session' ? (entry.source === 'song' ? 'song' : 'video') : entry.source === 'image' ? 'photo' : 'text')
     openHistoryEntry(entry)
   }
 
@@ -1202,7 +1258,7 @@ export default function AnalyzerScreen({ session }) {
   // photo intakes as sheets (below).
   const intake = (
     <>
-      {/* ── The three platforms, on one control (canvas Analyzer) ──
+      {/* ── The four platforms, on one control (canvas Analyzer) ──
           Choosing another is a mode switch: the workbench clears
           (see boardPlatform), because a Passage typed on Text has
           no business waiting behind the Photo bench.
@@ -1251,6 +1307,7 @@ export default function AnalyzerScreen({ session }) {
             busy={busy}
           />
         )}
+        {source === 'song' && <IntakeSong t={t} busy={busy} onStart={startSong} incoming={incomingSong} />}
         {source === 'photo' && (
           <IntakePhoto
             t={t}
@@ -1272,6 +1329,7 @@ export default function AnalyzerScreen({ session }) {
     <PassageShelf
       t={t}
       entries={analyzer.history}
+      pending={analyzer.pendingSong}
       onOpen={openHistoryFromRow}
       onDelete={entry => analyzer.deleteHistoryEntry(entry)}
       lastDeleted={analyzer.lastDeleted}
@@ -1294,7 +1352,7 @@ export default function AnalyzerScreen({ session }) {
   //
   // On the video desk a grammar point's lesson opens in the grammar
   // face, its ✕ giving the list back; the card face keeps the word.
-  const pointEntry = playerVideoId && lookup?.category === 'grammar' ? lookup : null
+  const pointEntry = media && lookup?.category === 'grammar' ? lookup : null
   const deskEntry = (pointEntry ? null : lookup) ?? tokenLookup(stageToken)
   const explainShown = side === 'explain'
   const hasExplanation = Boolean(focused?.explanation)
@@ -1432,7 +1490,7 @@ export default function AnalyzerScreen({ session }) {
   // (the owner's pick C of the canvas "Tsuji analyser — text desk
   // stage"), so the sentence, its translation and Explain have the
   // stage, and opened as the list in a sheet.
-  const textDesk = !playerVideoId
+  const textDesk = !media
   // 歌詞 on the desk (plan 314, the owner's pick D2): the video folded,
   // the lyrics take the route map's column as well as the picture's
   // place -- the lines, their translations and their times are the
@@ -1473,6 +1531,42 @@ export default function AnalyzerScreen({ session }) {
   )
   // The sentence on the sumi: the video's subtitle, or on a text desk
   // the sentence in the video's place, stepped with its own arrows.
+  // 歌 (plan 315): the song's player -- the learner's own file, drawn
+  // nowhere, the transport its only control -- and, where this device
+  // does not keep the file, what the transport gives way to: picking it
+  // again (the owner's board 3).
+  const songPlayer = isSong && songUrl && (
+    <AudioPlayer
+      ref={playerRef}
+      src={songUrl}
+      name={passage?.sourceRef ?? ''}
+      volume={sound.volume}
+      muted={sound.muted}
+      rate={rate}
+      onTimeUpdate={handleTimeUpdate}
+      onPlayingChange={changePlaying}
+      onVolumeChange={changeSound}
+      onDurationChange={setDuration}
+    />
+  )
+  const refile = isSong && songLooked && !songUrl && (
+    <div className="anl-refile">
+      <button type="button" className="btn-primary anl-refile__go" onClick={() => refileRef.current?.click()}>
+        <SongIcon size={18} />
+        {t.songRefile}
+      </button>
+      <p className="anl-refile__note">{t.songRefileNote(passage?.sourceRef ?? '')}</p>
+      <input
+        ref={refileRef}
+        type="file"
+        accept={SONG_ACCEPT}
+        className="anl-drop__input"
+        tabIndex={-1}
+        aria-hidden="true"
+        onChange={e => { refileSong(e.target.files?.[0]); e.target.value = '' }}
+      />
+    </div>
+  )
   const subsBody = focused && (
     <div className="anl-subs__body">
       {textDesk && prevArrow}
@@ -1490,7 +1584,7 @@ export default function AnalyzerScreen({ session }) {
           setIndex={walkTo}
           lit={light.lit}
           t={t}
-          playhead={playerVideoId ? playhead : null}
+          playhead={playable ? playhead : null}
           playing={playing}
           timing={timing}
         />
@@ -1545,21 +1639,23 @@ export default function AnalyzerScreen({ session }) {
         </button>
       </div>
 
-      <div ref={textDesk ? undefined : slabRef} className={`anl-slab${videoFolded ? ' anl-slab--folded' : ''}${barTight ? ' anl-slab--tight' : ''}`}>
-        {playerVideoId && (
+      <div ref={textDesk ? undefined : slabRef} className={`anl-slab${videoFolded || isSong ? ' anl-slab--folded' : ''}${barTight ? ' anl-slab--tight' : ''}`}>
+        {media && (
           <div className="anl-slab__screen">
             <div className="anl-slab__video">
-              <VideoPlayer
-                ref={playerRef}
-                videoId={playerVideoId}
-                volume={sound.volume}
-                muted={sound.muted}
-                rate={rate}
-                onTimeUpdate={handleTimeUpdate}
-                onPlayingChange={changePlaying}
-                onVolumeChange={changeSound}
-                onDurationChange={setDuration}
-              />
+              {playerVideoId ? (
+                <VideoPlayer
+                  ref={playerRef}
+                  videoId={playerVideoId}
+                  volume={sound.volume}
+                  muted={sound.muted}
+                  rate={rate}
+                  onTimeUpdate={handleTimeUpdate}
+                  onPlayingChange={changePlaying}
+                  onVolumeChange={changeSound}
+                  onDurationChange={setDuration}
+                />
+              ) : songPlayer}
             </div>
           </div>
         )}
@@ -1609,7 +1705,8 @@ export default function AnalyzerScreen({ session }) {
             </>
           )}
         </div>
-        {playerVideoId && (
+        {media && !playable && refile}
+        {playable && (
           <PlayerBar
             t={t}
             playing={playing}
@@ -1634,7 +1731,8 @@ export default function AnalyzerScreen({ session }) {
             follow={followPlayback}
             onFollow={() => setFollowPlayback(f => !f)}
             folded={videoFolded}
-            onFold={() => setVideoFolded(v => !v)}
+            // A song has no picture to fold (plan 315).
+            onFold={isSong ? undefined : () => setVideoFolded(v => !v)}
           />
         )}
       </div>
@@ -1790,36 +1888,41 @@ export default function AnalyzerScreen({ session }) {
         </button>
       </div>
 
-      {playerVideoId && (
+      {media && (
         <div className={`anl-m__player${lyrics ? ' anl-m__player--folded' : ''}`}>
           <div className="anl-m__video">
-            <VideoPlayer
-              ref={playerRef}
-              videoId={playerVideoId}
-              volume={sound.volume}
-              muted={sound.muted}
-              onTimeUpdate={handleTimeUpdate}
-              onPlayingChange={changePlaying}
-              onVolumeChange={changeSound}
-              onDurationChange={setDuration}
-            />
+            {playerVideoId ? (
+              <VideoPlayer
+                ref={playerRef}
+                videoId={playerVideoId}
+                volume={sound.volume}
+                muted={sound.muted}
+                onTimeUpdate={handleTimeUpdate}
+                onPlayingChange={changePlaying}
+                onVolumeChange={changeSound}
+                onDurationChange={setDuration}
+              />
+            ) : songPlayer}
           </div>
           <PlayerTrack playhead={playhead} span={span} onSeek={seekFromTrack} />
           {/* 歌詞 (plan 314, the owner's V2): the pull hanging from the
               picture's foot folds it away, and at the top of the lyrics
-              brings it back -- one button, so the focus stays on it. */}
-          <button
-            type="button"
-            className="anl-m__pull"
-            aria-expanded={!lyrics}
-            aria-label={lyrics ? t.showVideo : t.hideVideo}
-            title={lyrics ? t.showVideo : t.hideVideo}
-            onClick={() => setVideoFolded(v => !v)}
-          >
-            <span className="anl-m__tab">
-              <ChevronIcon direction={lyrics ? 'down' : 'up'} size={16} />
-            </span>
-          </button>
+              brings it back -- one button, so the focus stays on it. A
+              song has no picture: no pull (plan 315). */}
+          {playerVideoId && (
+            <button
+              type="button"
+              className="anl-m__pull"
+              aria-expanded={!lyrics}
+              aria-label={lyrics ? t.showVideo : t.hideVideo}
+              title={lyrics ? t.showVideo : t.hideVideo}
+              onClick={() => setVideoFolded(v => !v)}
+            >
+              <span className="anl-m__tab">
+                <ChevronIcon direction={lyrics ? 'down' : 'up'} size={16} />
+              </span>
+            </button>
+          )}
           {lyrics && (
             <Lyrics
               className="anl-m__lyrics"
@@ -1876,7 +1979,7 @@ export default function AnalyzerScreen({ session }) {
               setIndex={openTokenAt}
               lit={light.lit}
               t={t}
-              playhead={playerVideoId ? playhead : null}
+              playhead={playable ? playhead : null}
               playing={playing}
               timing={timing}
               romaji={display.romaji}
@@ -1920,25 +2023,27 @@ export default function AnalyzerScreen({ session }) {
             <span>{isKept ? t.dockKept : t.dockKeep}</span>
           </button>
         </div>
-        <PlayerBar
-          stage
-          t={t}
-          playing={playing}
-          // Play takes the line back to the clock: the phone has no
-          // 追従 toggle, so a stop picked by hand lets go of it until
-          // the learner plays again. A typed Passage has no clock: its
-          // dock is the stops alone.
-          onToggle={() => { if (!playing) setFollowPlayback(true); togglePassagePlayback() }}
-          onPrev={() => goToStop(focusIndex - 1, { follow: lyrics })}
-          onNext={() => goToStop(focusIndex + 1, { follow: lyrics })}
-          canPrev={focusIndex > 0}
-          canNext={focusIndex < sentences.length - 1}
-          onReplay={replaySentence}
-          canReplay={Boolean(playerVideoId) && focused.cue_start != null}
-          loop={loop}
-          onLoop={() => setLoop(v => !v)}
-          video={Boolean(playerVideoId)}
-        />
+        {media && !playable ? refile : (
+          <PlayerBar
+            stage
+            t={t}
+            playing={playing}
+            // Play takes the line back to the clock: the phone has no
+            // 追従 toggle, so a stop picked by hand lets go of it until
+            // the learner plays again. A typed Passage has no clock: its
+            // dock is the stops alone.
+            onToggle={() => { if (!playing) setFollowPlayback(true); togglePassagePlayback() }}
+            onPrev={() => goToStop(focusIndex - 1, { follow: lyrics })}
+            onNext={() => goToStop(focusIndex + 1, { follow: lyrics })}
+            canPrev={focusIndex > 0}
+            canNext={focusIndex < sentences.length - 1}
+            onReplay={replaySentence}
+            canReplay={playable && focused.cue_start != null}
+            loop={loop}
+            onLoop={() => setLoop(v => !v)}
+            video={playable}
+          />
+        )}
       </div>
 
       {/* The line's two lists, each a sheet over the stage; a row pressed
@@ -2029,6 +2134,7 @@ export default function AnalyzerScreen({ session }) {
             busy={busy}
             onPhoto={() => openSheet('photo')}
             onVideo={() => openSheet('video')}
+            onSong={() => openSheet('song')}
             onFile={file => startVideoFromFile(file, { url: videoUrl })}
           />
         </>
@@ -2050,6 +2156,12 @@ export default function AnalyzerScreen({ session }) {
               station's pigment is set again on what it holds. */}
           <Sheet open={sheet === 'video'} onClose={closeSheet} title={t.sourceVideo} icon={VideoIcon} line={KAISEKI} className="anl-sheet">
             <div id="anl-panel-video" className="anl-panel" style={{ '--line-color': KAISEKI }}>{videoIntake}</div>
+          </Sheet>
+          {/* 歌 (plan 315, the owner's pick S1): the ♪'s own sheet. */}
+          <Sheet open={sheet === 'song'} onClose={closeSheet} title={t.sourceSong} icon={SongIcon} line={KAISEKI} className="anl-sheet">
+            <div id="anl-panel-song" className="anl-panel" style={{ '--line-color': KAISEKI }}>
+              <IntakeSong t={t} busy={busy} onStart={startSong} />
+            </div>
           </Sheet>
           <Sheet open={sheet === 'photo'} onClose={closeSheet} title={t.sourcePhoto} icon={CameraIcon} line={KAISEKI} className="anl-sheet">
             <div id="anl-panel-photo" className="anl-panel" style={{ '--line-color': KAISEKI }}>
