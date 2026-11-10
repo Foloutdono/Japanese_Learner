@@ -1712,6 +1712,7 @@ const dictionary = {
     polite: 'en style poli',
     full: 'avec では en entier',
     contracted: 'avec では contracté, comme à l’oral',
+    variant: 'sous son autre forme',
   })[register] ?? 'en style poli'}.`,
   mapAria: 'La ligne du point',
   mapTutorial: 'Tutoriel',
