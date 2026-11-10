@@ -44,7 +44,7 @@ WRITTEN: dict[str, tuple[str, ...]] = {
     # A grammar point's gloss and formation (meaning.{lang}, structure_{lang}).
     "grammar.gloss": ("es", "id"),
     # Its lesson: every step, neighbour's line and example's translation.
-    "grammar.lesson": ("es",),
+    "grammar.lesson": ("es", "id"),
     # Its tour and its own Choisir questions.
     "grammar.drills": ("es",),
     # A theme word, in the sense it has in its theme (meaning_{lang}).
