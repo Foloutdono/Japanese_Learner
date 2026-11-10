@@ -132,11 +132,17 @@ describe('the song on the desk', () => {
     }
     options[3].click()
     await vi.waitFor(() => expect($('.desk-intake__side #anl-panel-song .anl-uta')).not.toBeNull())
-    // On the page, the file's place steps up to the surface, as a
-    // field there does.
+    // The sheet the phone opens, in the column (plan 315b, L2): the one
+    // button that picks a song, and the lyrics once one is picked.
+    expect($('.anl-uta__pick').textContent).toBe('Choisir une chanson')
+    expect($('.anl-uta__field')).toBeNull()
+    choose($('#anl-panel-song input[type="file"]'), tone('ma-chanson.mp3'))
+    await vi.waitFor(() => expect($('.anl-uta__field')).not.toBeNull())
+    // On the page, the song's row steps up to the surface, as a field
+    // there does.
     const ground = el => getComputedStyle(el).backgroundColor
-    expect(ground($('.anl-uta__drop'))).toBe(ground($('.anl-uta__field')))
-    expect(ground($('.anl-uta__drop'))).not.toBe(ground(document.body))
+    expect(ground($('.anl-uta__file'))).toBe(ground($('.anl-uta__field')))
+    expect(ground($('.anl-uta__file'))).not.toBe(ground(document.body))
   })
 
   it('takes a song dropped on the page onto its platform, picked', async () => {
@@ -144,7 +150,7 @@ describe('the song on the desk', () => {
     const dt = new DataTransfer()
     dt.items.add(tone('dropped.wav'))
     $('.desk-intake').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }))
-    await vi.waitFor(() => expect($('#anl-panel-song .anl-uta__file')?.textContent).toBe('dropped.wav'))
+    await vi.waitFor(() => expect($('#anl-panel-song .anl-uta__name b')?.textContent).toBe('dropped.wav'))
     expect($('.anl-sources .seg__opt--on').textContent).toBe('Chanson')
     expect($('.anl-uta__go').disabled).toBe(false)
   })
@@ -187,6 +193,12 @@ describe('the song on the desk', () => {
     expect(keepSong).toHaveBeenCalledWith(9, file)
     expect($('.anl-desk--lyrics')).not.toBeNull()
     expect($('.anl-slab--folded')).not.toBeNull()
+    // Where the picture would be, the song's name (plan 315b, N1); the
+    // bar prints its clock, so the name's line does not.
+    const now = $('.anl-slab > .anl-now')
+    expect(now.querySelector('.anl-now__name').textContent).toBe('ma-chanson')
+    expect(now.querySelector('.anl-now__clock')).toBeNull()
+    expect(now.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.anl-desk__lyrics').getBoundingClientRect().top)
     expect($('.anl-slab__screen').getBoundingClientRect().height).toBe(0)
     expect($('.anl-desk__rail')).toBeNull()
     expect($('button[aria-label="Masquer la vidéo"]')).toBeNull()

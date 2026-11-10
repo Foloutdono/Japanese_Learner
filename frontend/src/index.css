@@ -1076,52 +1076,69 @@
 .anl-vlink:focus-visible { color: var(--text-primary); filter: none; }
 .anl-vlink[aria-expanded="true"] { text-decoration-style: dotted; }
 
-/* 歌 — the song intake (plan 315, the owner's pick S1): the file, the
-   lyrics if the learner has them, Transcrire, and where the audio goes
-   on one quiet line under it. The ♪'s sheet on a phone, the desk's
-   fourth platform in its column. */
+/* 歌 — the song intake (plan 315, the owner's pick S1), as plan 315b
+   drew it again (the owner's pick L2): before a song, the button that
+   picks it and what it takes; once picked, the song as one row, its
+   lyrics three lines tall, Transcrire, and on two quiet lines where the
+   audio goes and where the song stays. The ♪'s sheet on a phone, the
+   desk's fourth platform in its column. */
 .anl-uta {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
 }
-/* The file's place: a dashed rule round the picker, the file once
-   picked and what the picker takes. One step from its ground, as a
-   field is (.field--page): the surface on the desk's page, the page's
-   own in a phone's sheet. */
-.anl-uta__drop {
+.anl-uta__pick { width: 100%; }
+/* The song picked: its mark, its name over its length and kind, Changer
+   at its end. One step from its ground, as a field is (.field--page):
+   the surface on the desk's page, the page's own in a phone's sheet. */
+.anl-uta__file {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-5) var(--sp-4);
-  border: 1px dashed var(--surface-line);
-  border-radius: var(--r-panel);
+  gap: var(--sp-4);
+  min-width: 0;
+  padding: var(--sp-3) var(--sp-1) var(--sp-3) var(--sp-4);
   background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
 }
-.anl-sheet .anl-uta__drop { background: var(--bg-main); }
-.anl-uta__picked {
+.anl-sheet .anl-uta__file { background: var(--bg-main); }
+.anl-uta__mark {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-3);
-  max-width: 100%;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--text-secondary);
+}
+.anl-uta__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.anl-uta__name b {
+  overflow: hidden;
   color: var(--text-primary);
   font-size: var(--fs-body);
-  font-weight: 600;
-}
-.anl-uta__picked svg { flex: none; color: var(--text-secondary); }
-.anl-uta__file {
-  min-width: 0;
-  overflow: hidden;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.anl-uta__length {
-  flex: none;
+.anl-uta__name span {
   color: var(--text-secondary);
-  font-size: var(--fs-sm);
-  font-weight: 400;
+  font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
+}
+/* Changer, the quiet door of a link (.anl-vlink), at a thumb's height. */
+.anl-uta__change {
+  flex: none;
+  min-height: 44px;
+  padding-inline: var(--sp-3);
 }
 .anl-uta__hint,
 .anl-uta__quiet,
@@ -1133,6 +1150,7 @@
   text-align: center;
   text-wrap: balance;
 }
+.anl-uta__quiet span { display: block; }
 .anl-uta__lyrics {
   display: flex;
   flex-direction: column;
@@ -1140,8 +1158,8 @@
 }
 .anl-uta__label {
   display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
+  align-items: baseline;
+  gap: var(--sp-2);
   color: var(--text-primary);
   font-size: var(--fs-sm);
   font-weight: 700;
@@ -1150,9 +1168,14 @@
   color: var(--text-secondary);
   font-size: var(--fs-caption);
   font-weight: 400;
-  line-height: 1.5;
 }
-.anl-uta__field { font-family: var(--font-jp); }
+/* Three lines tall, as drawn, where the multi field starts taller; what
+   the lyrics are for is its placeholder, in the interface's face. */
+.anl-uta .anl-uta__field {
+  min-height: 0;
+  font-family: var(--font-jp);
+}
+.anl-uta__field::placeholder { font-family: var(--font-display); }
 .anl-uta__go,
 .anl-refile__go { width: 100%; }
 /* 歌 (plan 315): a song reopened on a device that has not got its file.
@@ -1597,9 +1620,10 @@
 }
 
 /* ── The phone's way in (plan 136) ──
-   One line over the passages: the field, the camera, a subtitle file.
-   Japanese in it (or the focus) opens it into the writing slip, the
-   count and Analyse under a hairline; empty and left, it folds back. */
+   One line over the passages: the field and, since plan 315b (the
+   owner's pick E3), the one ＋ that holds every other way in. Japanese
+   in it (or the focus) opens it into the writing slip, the count and
+   Analyse under a hairline; empty and left, it folds back. */
 .anl-entry {
   display: flex;
   flex-direction: column;
@@ -1617,7 +1641,7 @@
   min-height: 44px;
   max-height: 40vh;
   box-sizing: border-box;
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-4);
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -1632,21 +1656,74 @@
 .anl-entry__field::placeholder { color: var(--text-secondary); opacity: 1; font-family: var(--font-display); }
 .anl-entry:focus-within { border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line)); }
 .anl-entry--open .anl-entry__field { min-height: 120px; }
-.anl-entry__tool {
+/* The ＋: a round door inset from the line's edge, beside the field's
+   first line. */
+.anl-entry__add {
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 44px;
   height: 44px;
+  margin: var(--sp-1);
   padding: 0;
-  border: 0;
-  border-radius: var(--r-card);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
-.anl-entry__tool:hover,
-.anl-entry__tool:focus-visible { color: var(--text-primary); filter: none; }
+.anl-entry__add:hover,
+.anl-entry__add:focus-visible { border-color: var(--text-secondary); filter: none; }
+/* 足す — the ＋'s sheet (plan 315b, E3): a row per way in, the
+   platform's mark in the station's ring and its name over what it
+   takes, on hairlines. */
+.anl-ways {
+  display: flex;
+  flex-direction: column;
+}
+.anl-way {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-1);
+  border: 0;
+  border-bottom: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.anl-way:last-of-type { border-bottom: 0; }
+.anl-way:hover,
+.anl-way:focus-visible { background: var(--overlay-hover); filter: none; }
+.anl-way__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 2px solid var(--line-color);
+  border-radius: var(--r-pill);
+}
+.anl-way__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.anl-way__text b {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.anl-way__text span {
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+}
 .anl-entry__foot {
   display: flex;
   align-items: center;
@@ -29363,6 +29440,52 @@ button.brd-stn { cursor: pointer; }
   inset: calc(-1 * var(--sp-4)) 0;
 }
 .anl-ptrack .anl-pbar__knob { display: none; }
+/* 歌 (plan 315b, the owner's pick N1): a song has no picture, so where
+   the picture would be it says what plays -- the station's ring, the
+   song's name, its clock -- on the sumi, over the track. On a phone's
+   stage the line stands in as the lyrics do, and the track under it
+   stands in too, its ends round. */
+.anl-now {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.anl-now__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sp-7);
+  height: var(--sp-7);
+  box-sizing: border-box;
+  border: 2px solid var(--line-kaiseki);
+  border-radius: var(--r-pill);
+  color: var(--text-on-panel);
+}
+.anl-now__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-now__clock {
+  flex: none;
+  color: var(--text-on-panel-soft);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.anl-m__player--song .anl-now { padding: var(--sp-4) var(--sp-6) 0; }
+.anl-m__player--song .anl-ptrack {
+  margin: var(--sp-4) var(--sp-6) 0;
+  border-radius: var(--r-pill);
+}
 .anl-m__subs {
   display: flex;
   flex: 1 1 auto;
@@ -29607,6 +29730,9 @@ button.brd-stn { cursor: pointer; }
   flex: 1 1 auto;
   padding: 0 var(--sp-6) var(--sp-6);
 }
+/* A song's lyrics stand clear of its track (plan 315b, N1): there is
+   no pull between them to hold them apart, as a video's has. */
+.anl-m__player--song .anl-m__lyrics { padding-top: var(--sp-5); }
 .anl-m__lyrics .anl-subs__line { row-gap: var(--sp-3); }
 .anl-m__lyrics .anl-subs__line .tok { font-size: var(--fs-heading); }
 .anl-m__lyrics .anl-subs__line .tok .tok__furi { font-size: var(--fs-caption); }
@@ -41456,6 +41582,12 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent);
   }
   .anl-slab .anl-refile__note { color: var(--text-on-panel-soft); }
+  /* A song's name at the slab's head, where the picture would be
+     (plan 315b, N1); the bar under the lyrics prints its clock. */
+  .anl-slab .anl-now {
+    flex: none;
+    padding: var(--sp-4) var(--sp-6) 0;
+  }
   .anl-slab__arrow {
     display: inline-flex;
     flex: none;

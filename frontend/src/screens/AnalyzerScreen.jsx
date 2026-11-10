@@ -19,7 +19,7 @@ import { DisplaySheet } from '../components/analysis/DisplaySheet'
 import { FURIGANA, readDisplay, saveDisplay } from '../components/analysis/displayPrefs'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
 import { Lyrics } from '../components/analysis/Lyrics'
-import { PlayerBar, PlayerTrack } from '../components/analysis/PlayerBar'
+import { PlayerBar, PlayerTrack, SongNow } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
 import { passageTiming } from '../components/analysis/wordTimes'
 import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
@@ -53,10 +53,10 @@ import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { AudioPlayer } from '../components/video/AudioPlayer'
 import { keepSong, songFile } from '../lib/songStore'
-import { isSongFile, SONG_ACCEPT } from '../lib/songAudio'
+import { isSongFile, SONG_ACCEPT, songName } from '../lib/songAudio'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 import { heldTooSoon } from '../lib/keyRepeat'
-import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon, SlidersIcon, SlotsIcon, BooksIcon } from '../components/ui/Icons'
+import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon, SongIcon, SubtitleFileIcon, SlidersIcon, SlotsIcon, BooksIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
@@ -73,6 +73,17 @@ function videoLinkIn(text) {
 // page hands the video intake rather than the photo one. Anything else
 // dropped is refused quietly (the browser would open it over the page).
 const SUBTITLE_FILE = /\.(srt|vtt|ass|ssa)$/i
+// 足す (plan 315b, the owner's pick E3): a phone's ways in, the rows of
+// the entry line's ＋ -- each opens its platform's sheet, the subtitle
+// file its picker -- named with what each takes.
+const WAYS = [
+  { key: 'photo', glyph: CameraIcon, title: 'sourcePhoto', hint: 'sourcePhotoHint' },
+  { key: 'video', glyph: VideoIcon, title: 'sourceVideo', hint: 'sourceVideoHint' },
+  { key: 'song', glyph: SongIcon, title: 'sourceSong', hint: 'sourceSongHint' },
+  { key: 'subtitles', glyph: SubtitleFileIcon, title: 'entrySubtitles', hint: 'subtitleAccepted' },
+]
+// What the ways' subtitle file takes: the video intake's own list.
+const SUBTITLE_ACCEPT = '.srt,.vtt,.ass,.ssa,.lrc,.txt,text/vtt,text/plain,text/*,application/octet-stream'
 // The grab has been used on this browser (plan 136) -- a bookmark lives
 // in a browser, so the browser is what remembers it. The history says
 // so too, by the name the arrival gives its file (see the grab arrival).
@@ -352,6 +363,8 @@ export default function AnalyzerScreen({ session }) {
   // device does not have it -- and the input that picks it again.
   const [songMedia, setSongMedia] = useState(null)
   const refileRef = useRef(null)
+  // The subtitle file of a phone's ways in (plan 315b).
+  const subtitleRef = useRef(null)
   // The previous poll, which tells playback (a small step) from a seek.
   const lastPollRef = useRef(0)
   // The sentence the stop at each sentence's end is holding at (its
@@ -1640,6 +1653,9 @@ export default function AnalyzerScreen({ session }) {
       </div>
 
       <div ref={textDesk ? undefined : slabRef} className={`anl-slab${videoFolded || isSong ? ' anl-slab--folded' : ''}${barTight ? ' anl-slab--tight' : ''}`}>
+        {/* 歌 (plan 315b, N1): the song's name where the picture would
+            be; the bar under the lyrics prints its clock. */}
+        {isSong && <SongNow name={songName(passage?.sourceRef)} />}
         {media && (
           <div className="anl-slab__screen">
             <div className="anl-slab__video">
@@ -1889,7 +1905,7 @@ export default function AnalyzerScreen({ session }) {
       </div>
 
       {media && (
-        <div className={`anl-m__player${lyrics ? ' anl-m__player--folded' : ''}`}>
+        <div className={`anl-m__player${lyrics ? ' anl-m__player--folded' : ''}${isSong ? ' anl-m__player--song' : ''}`}>
           <div className="anl-m__video">
             {playerVideoId ? (
               <VideoPlayer
@@ -1904,6 +1920,9 @@ export default function AnalyzerScreen({ session }) {
               />
             ) : songPlayer}
           </div>
+          {/* 歌 (plan 315b, the owner's pick N1): what plays, where the
+              picture would be. */}
+          {isSong && <SongNow name={songName(passage?.sourceRef)} playhead={playable ? playhead : null} span={span} />}
           <PlayerTrack playhead={playhead} span={span} onSeek={seekFromTrack} />
           {/* 歌詞 (plan 314, the owner's V2): the pull hanging from the
               picture's foot folds it away, and at the top of the lyrics
@@ -2132,10 +2151,7 @@ export default function AnalyzerScreen({ session }) {
             onChange={editDraft}
             onAnalyze={analyzeDraft}
             busy={busy}
-            onPhoto={() => openSheet('photo')}
-            onVideo={() => openSheet('video')}
-            onSong={() => openSheet('song')}
-            onFile={file => startVideoFromFile(file, { url: videoUrl })}
+            onWays={() => setSheet('ways')}
           />
         </>
       ))}
@@ -2154,6 +2170,45 @@ export default function AnalyzerScreen({ session }) {
         <>
           {/* A sheet is portalled to the body, out of <main>: the
               station's pigment is set again on what it holds. */}
+          {/* 足す (plan 315b, the owner's pick E3): the ＋'s sheet, a row
+              per way in. A row opens its platform's sheet in this one's
+              place; the subtitle file goes straight to its picker, the
+              video's sheet keeping its own button for one. */}
+          <Sheet open={sheet === 'ways'} onClose={closeSheet} title={t.entryWaysTitle} className="anl-sheet">
+            <div className="anl-ways" style={{ '--line-color': KAISEKI }}>
+              {WAYS.map(way => {
+                const Glyph = way.glyph
+                return (
+                  <button
+                    key={way.key}
+                    type="button"
+                    className="anl-way"
+                    aria-haspopup={way.key === 'subtitles' ? undefined : 'dialog'}
+                    onClick={() => (way.key === 'subtitles' ? subtitleRef.current?.click() : openSheet(way.key))}
+                  >
+                    <span className="anl-way__mark" aria-hidden="true"><Glyph size={18} /></span>
+                    <span className="anl-way__text">
+                      <b>{t[way.title]}</b>
+                      <span>{t[way.hint]}</span>
+                    </span>
+                  </button>
+                )
+              })}
+              <input
+                ref={subtitleRef}
+                type="file"
+                accept={SUBTITLE_ACCEPT}
+                className="anl-drop__input"
+                tabIndex={-1}
+                aria-hidden="true"
+                onChange={e => {
+                  const file = e.target.files?.[0]
+                  e.target.value = ''
+                  if (file) startVideoFromFile(file, { url: videoUrl })
+                }}
+              />
+            </div>
+          </Sheet>
           <Sheet open={sheet === 'video'} onClose={closeSheet} title={t.sourceVideo} icon={VideoIcon} line={KAISEKI} className="anl-sheet">
             <div id="anl-panel-video" className="anl-panel" style={{ '--line-color': KAISEKI }}>{videoIntake}</div>
           </Sheet>

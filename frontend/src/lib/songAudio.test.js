@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { encodeWav, isSongFile, mixDown, MAX_SECONDS, RATE, SONG_ACCEPT } from './songAudio'
+import { encodeWav, isSongFile, mixDown, MAX_SECONDS, RATE, SONG_ACCEPT, songKind, songName } from './songAudio'
 
 // ── 歌 — the song as the server hears it (plan 315) ──────────────────
 // The browser writes a song as a 16-bit PCM WAV, one channel at 16 kHz,
@@ -75,6 +75,23 @@ describe('mixDown', () => {
 
   it('stops at the frames asked for: the cut', () => {
     expect([...mixDown(buffer([[1, 1, 1, 1]]), 2)]).toEqual([1, 1])
+  })
+})
+
+describe('songName and songKind (plan 315b)', () => {
+  it('names a song after its file, without the extension', () => {
+    expect(songName('ma-chanson.mp3')).toBe('ma-chanson')
+    expect(songName('夜に駆ける.m4a')).toBe('夜に駆ける')
+    expect(songName('v1.2 live.flac')).toBe('v1.2 live')
+    expect(songName('song')).toBe('song')
+    expect(songName(undefined)).toBe('')
+  })
+
+  it('says a file’s kind from its extension, in capitals', () => {
+    expect(songKind('ma-chanson.mp3')).toBe('MP3')
+    expect(songKind('voice.m4a')).toBe('M4A')
+    expect(songKind('song')).toBe('')
+    expect(songKind(null)).toBe('')
   })
 })
 

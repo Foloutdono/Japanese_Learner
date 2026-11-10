@@ -18,6 +18,18 @@ export const MAX_SECONDS = 7 * 60
 // picker matches on, the extensions what a desktop's does.
 export const SONG_ACCEPT = 'audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac,.webm'
 const SONG_FILE = /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac)$/i
+const EXTENSION = /\.([a-z0-9]{2,5})$/i
+
+/** What a song is called, as near as the device knows: its file's name
+ *  without the extension (ma-chanson.mp3 is "ma-chanson"). */
+export function songName(fileName) {
+  return (fileName || '').replace(EXTENSION, '')
+}
+
+/** The file's kind as its extension says it, in capitals (MP3), or ''. */
+export function songKind(fileName) {
+  return (fileName || '').match(EXTENSION)?.[1].toUpperCase() ?? ''
+}
 
 /** Whether a file dropped on the desk's page is a song: an audio type,
  *  or, where the system gave none, an audio file's name. */

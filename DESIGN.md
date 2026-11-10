@@ -2735,19 +2735,26 @@ line here says otherwise.
   line's pigment is never a fill), nor a third ink for the lines sung:
   the lines either side share the soft one.
   **A song is lyrics from the start** (plan 315, the owner's pick S1 of
-  the canvas "Tsuji analyser — a song from an audio file"). It comes in
-  through a door of its own -- the ♪ on the phone's entry line opening
-  its sheet; on the desk the fourth platform, and a song dropped on the
-  page -- as the file, the lyrics if the learner has them, and Transcrire,
-  with one quiet line under it saying where the audio goes. While it is
+  the canvas "Tsuji analyser — a song from an audio file", and plan
+  315b's picks L2, N1 and E3 of its later rows). It comes in through a
+  sheet of its own -- on a phone the ♪ row of the entry line's ＋; on the
+  desk the fourth platform, and a song dropped on the page: the one
+  button that picks a song and what it takes, then the song as one row
+  (its mark, its name over its length and kind, Changer), the lyrics if
+  the learner has them, three lines tall with what they are for as
+  their placeholder, and Transcrire, with two quiet lines under it
+  saying where the audio goes and where the song stays. While it is
   heard it waits at the head of the shelf, its file's name over the
   word and the three dots, a row that opens nothing. It has no
   picture, so its Passage is the lyrics on both widths, with nothing to
-  fold, and plays from the learner's own file. Reopened where that file
-  is not, the transport's place holds the one action that brings the
-  sound back, the file asked for again, and a line saying why; the lyrics
-  stand meanwhile. The desk's four platforms share the column's one width
-  at the term's tracking, as the panel's tight faces do.
+  fold, and plays from the learner's own file; where the picture would
+  be, the song's name in the station's ring and, on a phone, its clock,
+  over a track that stands in from the edges as the lyrics do (the
+  desk's bar prints the clock). Reopened where that file is not, the
+  transport's place holds the one action that brings the sound back,
+  the file asked for again, and a line saying why; the lyrics stand
+  meanwhile. The desk's four platforms share the column's one width at
+  the term's tracking, as the panel's tight faces do.
   A typed or photographed Passage has no video, and its sentence takes the
   video's place (plan 161, the owner's picks B and B′): the sumi object to
   the middle column's foot, the sentence at `--fs-display-fluid`, its
@@ -2760,12 +2767,16 @@ line here says otherwise.
   Before a Passage, the analyser is the learner's passages (plan 136, the
   owner's pick C of three drawn directions): the one console over a card
   each, and the intake the column beside them at a phone's width -- the
-  three sources on one control, the video's a column with one filled
+  four sources on one control, the video's a column with one filled
   action (the fetch where the server can, else the bookmark's setup until
   it has been used, else the video on YouTube). A file dropped anywhere
   on the page is taken by the intake that reads it. Under the desk it is
-  one line to paste into over a row per passage, the video and photo
-  intakes opening as sheets.
+  one line to paste into over a row per passage, and beside the field
+  one ＋ for every other way in (plan 315b, the owner's pick E3): its
+  sheet names each -- the photo, the video, the song, a subtitle file --
+  over what it takes, a row opening its intake's sheet in its place or,
+  for the subtitle file, the picker. The line's field keeps its own
+  words on one line, which four doors beside it no longer left room for.
   A deck's Browse and More open in the deck page's slot, a
   gate lesson's rival in the run's side, the grab's walkthrough in the
   intake's place, a kanji's readings in the entry's own place, the iOS install

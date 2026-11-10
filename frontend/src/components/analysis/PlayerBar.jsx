@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { formatTimecode } from '../../lib/timecode'
 import {
   FoldVideoIcon, FollowIcon, LoopIcon, PauseEachIcon, PauseIcon, PlayIcon, ReplayIcon,
-  SkipIcon, SpeakerIcon, SpeakerOffIcon,
+  SkipIcon, SongIcon, SpeakerIcon, SpeakerOffIcon,
 } from '../ui/Icons'
 
 // ── 操作 — the desk's transport bar (plan 134) ────────────────────
@@ -156,6 +156,25 @@ export function PlayerTrack({ playhead, span, onSeek }) {
     <div className="anl-pbar__track anl-ptrack" onClick={span > 0 ? onSeek : undefined} aria-hidden="true">
       <span className="anl-pbar__fill" style={{ width: `${pct}%` }} />
       <span className="anl-pbar__knob" style={{ left: `${pct}%` }} />
+    </div>
+  )
+}
+
+// 歌 — what is playing, where the picture would be (plan 315b, the
+// owner's pick N1): a song has no picture, so the place the video's
+// frame takes says what plays -- its ring, its name and, where the clock
+// is known and no bar beside it prints one, the clock -- over the track.
+// The clock reads the playhead's poll, as the bars do, so the poll
+// renders this line and not the screen around it.
+export function SongNow({ name, playhead = null, span = 0 }) {
+  const at = usePolled(playhead)
+  return (
+    <div className="anl-now">
+      <span className="anl-now__mark" aria-hidden="true"><SongIcon size={14} /></span>
+      <span className="anl-now__name">{name}</span>
+      {playhead && span > 0 && (
+        <span className="anl-now__clock">{`${formatTimecode(Math.min(at, span))} / ${formatTimecode(span)}`}</span>
+      )}
     </div>
   )
 }

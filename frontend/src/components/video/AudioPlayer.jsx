@@ -1,4 +1,5 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { songName } from '../../lib/songAudio'
 
 // ── 歌 — a song's player (plan 315) ──────────────────────────────────
 // The analyser plays a song from the learner's own file, kept on their
@@ -123,9 +124,7 @@ export const AudioPlayer = forwardRef(function AudioPlayer({
       return audioRef.current ? audioRef.current.currentTime : null
     },
     title() {
-      // The file's name without its extension: what the song is called,
-      // as near as the device knows (ma-chanson.mp3 is "ma-chanson").
-      return name.replace(/\.[a-z0-9]{2,5}$/i, '')
+      return songName(name)
     },
     channel() {
       return ''
