@@ -994,8 +994,11 @@ screen, A on the lock screen, reminder 2, its Depart the gate.
   and its soft ink is a step lighter than the panel's (`#cdc0a6`) to
   hold over a bright wallpaper. The board is drawn at three heights:
   as drawn from 190dp, set tighter where it only just holds Depart,
-  and without Depart below that (`TrainWidget.fit`). The iPhone's board
-  is still plan 293's.
+  and without Depart below that (`TrainWidget.fit`). **The iPhone's
+  board is the same layout on sumi**: iOS does not let a home-screen
+  widget be seen through to the wallpaper, so it keeps the opaque
+  ground and the panel's soft ink, and its small, one tap, has no
+  Depart (`TsujiWidget.swift`'s `Board`, `Figures`, `Stripe`).
 - **The lock screen is A's**: the count in a ring cut into the lines'
   shares, the word alone in the rectangle, the hour and the count on
   the inline line — in the lock screen's one ink.
