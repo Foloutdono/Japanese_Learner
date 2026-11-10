@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **319**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **320**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -94,6 +94,14 @@ runtime purpose.
   right reply drifts to the longest (the conversation bank's first draft
   won 42-75% on "pick the longest"), so across a bank the right one is
   the longest about as often as a blind pick (plan 217, `LENGTH_TELL`).
+  The tours are held to it too (plan 319: a twist's right reading was the
+  longer of the two 64-73% of the time): no right answer stands out by
+  its size (`STANDS_OUT`, half again as long as the longest wrong one
+  shown and ten characters longer), and across a level, per kind of
+  question and per language, the longest (of three, the shortest too)
+  wins as a blind pick does (`TOUR_LENGTH_TELL`): a wrong reading says its
+  belief as fully as the right one says its own, and the right one says
+  what the `why` does not.
   `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
   quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **A mock-exam choice is told apart by understanding, never by its look
@@ -153,8 +161,10 @@ runtime purpose.
   stem outside the hole (悲し＿＿＿ + み), and let an independent reviewer
   attack the batch before it ships. A rival the lesson calls the same in
   meaning (だろう beside でしょう, から beside ので) is marked `"same": true`
-  in the compare entry and is never offered (plan 318); a point whose
-  rivals take another stem (雨がふっ＿＿ offered ば) is asked from `choose`.
+  in the compare entry and is never offered (plan 319); a point whose
+  rivals take another stem (雨がふっ＿＿ offered ば), or are all the same
+  in meaning (につれて, whose fillers the eye told apart), is asked from
+  `choose`.
   Answered, the hole holds what the sentence has there (the payload's
   `fill`, `grammar_examples.span_parts`), never the pattern poured back
   in: a point is blanked on one piece of it (から of から〜まで, ます of
@@ -183,7 +193,7 @@ runtime purpose.
   politely (`grammar_ladder._word_kept`, plan 295): typed whole, the
   word was marked a kana off. A point's other spelling is right too
   (なきゃ for なくちゃ, によらず for にかかわらず, a う-verb's され for せられ:
-  `grammar_ladder._variants`, plan 318), and a twist or a scene line is
+  `grammar_ladder._variants`, plan 319), and a twist or a scene line is
   cut only where the detector reads the point: a tour sets the point
   against its rivals, and the stems' match cut the rival's sentence.
 - **Every part of a breakdown says what it is (plan 266).** A word row
@@ -557,7 +567,7 @@ runtime purpose.
   --kanji-db` (the teaching order); a new character carries its French in
   `kanji_meanings_fr.json` where KANJIDIC2 has none, and a French
   KANJIDIC2 has wrong (誠 given 誡's « avertir ») is corrected there too:
-  the file wins, as the Spanish one does (plan 318). Adding is free;
+  the file wins, as the Spanish one does (plan 319). Adding is free;
   moving a character between levels is a migration (`kanji_renames`).
 - **An example sentence is corrected in the layer, not in JMdict (plan
   227).** The deck's Tatoeba sentences are read through

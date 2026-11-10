@@ -222,7 +222,7 @@ MAX_TOUR_CHARS = 220
 # A tour's question is answered by understanding, and length is the eye's
 # first guess: written with care, the right answer drifts to the longest
 # (the conversation bank's LENGTH_TELL, plan 217). Measured over the tours
-# (plan 318), a twist's right reading was the longer of the two shown 64-73%
+# (plan 319), a twist's right reading was the longer of the two shown 64-73%
 # of the time and a meaning question's the longest of three up to half. So
 # no right answer stands out by its size -- half again as long as the
 # longest wrong one shown, and ten characters longer -- and across a level,
@@ -819,7 +819,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         out.append(f"{tag}: compare is not a list")
         compare = []
     rivals: list[str] = []
-    offered: list[str] = []     # the rivals Choisir may offer: not `same` (plan 318)
+    offered: list[str] = []     # the rivals Choisir may offer: not `same` (plan 319)
     for i, rival in enumerate(compare):
         if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", "es", "same"}:
             out.append(f"{tag}: compare {i} must be {{pattern, en, fr[, es][, same]}}")
@@ -885,7 +885,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
                 # wrong is left to offer: a bare particle is offered its named
                 # rivals alone, and anything else would be asked against
                 # fillers from the level, which the eye tells apart. Such a
-                # point is asked from `choose` (plan 318).
+                # point is asked from `choose` (plan 319).
                 out.append(f"{tag}: example {i} is a contrast example but every rival is the same in meaning "
                            "-- write `choose` instead")
             if not verifiable(pattern) and blank_span(jp, pattern, level) is None:
@@ -900,7 +900,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
             and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict))):
         # (a point whose rivals take another stem is asked from questions of
         # its own instead: 雨がふっ＿＿ offered ば asked which option makes a
-        # word, plan 318)
+        # word, plan 319)
         out.append(f"{tag}: compares {len(rivals)} rival(s) but marks no contrast example")
     # A bare particle or a class label (は, い形容詞／な形容詞) has letters
     # that point at nothing, so only the detector can blank it (plan 190),

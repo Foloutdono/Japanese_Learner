@@ -49,10 +49,10 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `structure_es` | the formation line in Spanish (plan 302), on every point, held to `structure_fr`'s rule: the English line's Japanese runs and joints, in order, no English word left. Its terms: "sustantivo", "verbo en forma て", "forma de diccionario", "forma llana", "forma cortés", "raíz ます", "adj. い／な", "oración", "contador". Every text of a point (its `meaning`, each step, `compare` line and example, every `tour` and `choose` text) carries its `es` beside `en` and `fr`, held as the other two are (`grammar_check`) and required (`tests/test_spanish.py`): a point is written in three languages. |
 | `meaning` | one line, both languages, no Japanese in it. |
 | `steps` | kinds `rule`, `use`, `careful`, each at most once, `rule` first. `**bold**` allowed; a bullet is a line starting `- `. |
-| `compare` | every `pattern` is a real point (any level), never the entry itself. A rival the lesson calls the same in meaning -- a register's twin (だろう beside でしょう, ずに beside ないで) or a synonym no sentence of the point tells apart (ので and から) -- carries `"same": true`: its line stays in the lesson, and Choisir never offers it as a wrong answer, named or drawn as a filler (plan 318). |
+| `compare` | every `pattern` is a real point (any level), never the entry itself. A rival the lesson calls the same in meaning -- a register's twin (だろう beside でしょう, ずに beside ないで) or a synonym no sentence of the point tells apart (ので and から) -- carries `"same": true`: its line stays in the lesson, and Choisir never offers it as a wrong answer, named or drawn as a filler (plan 319). |
 | `examples` | each passes `study/grammar_sentence_gen.check_sentence`: 8–60 characters, ends in 。！？, kanji within the level (the pattern's own kanji excepted), and visibly contains the pattern. Distinct sentences. |
 | `contrast` | marks a sentence in which the rivals in `compare` are **wrong** (the `same` ones apart); the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. A bare particle may mark one too (plan 190): see "What the matcher can and cannot see". A sentence where one rival is right too (まえに in 日本に行くとき、かばんを買いました) is not marked: write the wrong filling out before marking it. |
-| `choose` | optional, at least three questions: a point's own Choisir questions, for a point the contrast drill cannot be drawn on (plan 201) -- and for one whose rivals attach to another stem, which a blanked ending cannot show: 雨がふっ＿＿ offered ば asked which option makes a word, so 〜たら and 〜なら are asked from their own questions, the forms whole (ふったら, ふれば), and mark no contrast sentence (plan 318). See "Choisir's own questions". |
+| `choose` | optional, at least three questions: a point's own Choisir questions, for a point the contrast drill cannot be drawn on (plan 201) -- and for one whose rivals attach to another stem, which a blanked ending cannot show: 雨がふっ＿＿ offered ば asked which option makes a word, so 〜たら and 〜なら are asked from their own questions, the forms whole (ふったら, ふれば), and mark no contrast sentence (plan 319). See "Choisir's own questions". |
 
 ## The tour block (plan 187)
 
@@ -148,6 +148,20 @@ does it say?". Neither tests anything, and a learner said so. So:
   point invites; a `use`'s wrong lines are sentences someone could say, wrong for the
   reason the `why` gives. The right answer is the only right one: a
   rival the lesson calls a same-meaning form is never a wrong choice.
+- **The right answer does not stand out by its size** (plan 319). Written
+  with care, it drifts to the longest: it carries the explanation, the
+  wrong one a bare claim, and a twist's right reading was once the longer
+  of the two 64-73% of the time. A wrong reading says its belief as fully
+  as the right one says its own (« Yes: it is the « in advance » おく » beside
+  « No: it is the verb « put » »), and the right one says the reading, its
+  explanation left to the `why`; both keep one shape (« Yes: … »/« No: … »,
+  the same person). The gate refuses a right answer half again as long as
+  the longest wrong one shown and ten characters longer (`STANDS_OUT`), and
+  a level whose questions of one kind, in one language, are won by picking
+  the longest (of three, the shortest too) more or less often than a blind
+  pick (`TOUR_LENGTH_TELL`: a twist's two readings 40-60%, three answers
+  25-42%). Japanese answers count as they look: a scene's three replies,
+  a form's fillings, a use's lines.
 - **Which kind asks what.** `form` for what is built (a conjugation, an
   attachment, a particle's slot); `meaning` for a sense or a second use
   read in a sentence the learner has not seen; `use` for choosing between
@@ -211,8 +225,12 @@ piece) to find the point and a sentence in which every rival is wrong. A
 particle its rivals share every sentence with (は, も, と), a form whose
 letters are every verb's (ない形, 〜ば), a class label (い形容詞／な形容詞) or a
 cause the detector cannot tell from a sequence (〜て（理由）) has neither, and
-its Choisir steps used to fall back to the flashcard. Such a point carries a
-`choose` list instead, written like the tour's quiz it is modelled on:
+its Choisir steps used to fall back to the flashcard. So does a point whose
+every named rival the lesson marks `same` (plan 319: につれて beside
+にしたがって, とはいえ beside といえども): nothing certainly wrong is left to
+offer, and the fillers drawn from the level in their place are told apart by
+the eye. Such a point carries a `choose` list instead, its examples no
+`contrast` mark, written like the tour's quiz it is modelled on:
 
 ```jsonc
 "choose": [                                   // at least 3: one for each step of Choisir
@@ -282,7 +300,7 @@ plan 194 typed: a sentence of the point, an example, a twist with its
 `tr` or a scene's line, where the point is lit in one stretch or two; a
 twist or a scene line only where the detector reads the point, since a
 tour's lines set the point against its rivals and the stems' match cut
-the rival's sentence on the point's letters, plan 318)
+the rival's sentence on the point's letters, plan 319)
 and `write` (a point the detector is trusted on,
 `grammar_detect.can_find`) -- and
 `blank`, the points the matcher cannot check whose marked sentences the

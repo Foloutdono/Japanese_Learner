@@ -28,7 +28,7 @@ Inputs (datas/kanji/, the shipped KANJIDIC2 export):
                             characters (plan 215), tracked: it fills
                             meaning_fr where the export has none, and
                             corrects it where the export is wrong
-                            (plan 318)
+                            (plan 319)
     kanji_meanings_es.json  the same for the Spanish of 71 (plan 302),
                             over meaning_es
     ../../kanjivg/*.svg     which characters have a stroke diagram
@@ -294,7 +294,7 @@ def apply_french(conn: sqlite3.Connection, data_dir: str) -> int:
     (content/kanji_meanings.py). The file is the app's own French for
     them (plan 215), written from the character's senses rather than
     copied from a published list. Like the Spanish (apply_spanish), it
-    also wins where the export has a line (plan 318): KANJIDIC2's French
+    also wins where the export has a line (plan 319): KANJIDIC2's French
     gives some characters the senses of a lookalike -- 誠 « avertir »
     (誡's), 幣 « mauvaise habitude » (弊's), 抑 « pousser » (押's) --
     and the deck's corrected lines live in the file."""

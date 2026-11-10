@@ -136,7 +136,7 @@ def _sources(entry: dict) -> list[tuple[str, str, dict]]:
 MAX_GAPS = 2
 
 # A point the detector lights with the word it follows, whose hole holds
-# its own piece alone (plan 318): 〜も（強調） is lit on 三度も, and the
+# its own piece alone (plan 319): 〜も（強調） is lit on 三度も, and the
 # hole asked for the count too -- under « three whole times », 三回も
 # was refused. The count stays in the sentence; the hole holds も.
 _PIECE_ONLY = {"〜も（強調）": "も"}
@@ -190,7 +190,7 @@ def _word_kept(jp: str, spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
     a point's piece is often an ending (大き + く, 書き + 直す) -- but
     for the ん of ません, which the detector lights as a negative's
     piece (どこへも行きませ|ん|でした, 何も／誰も〜ない): the hole takes
-    its ませ, so it holds the word ません and no kana of it (plan 318)."""
+    its ませ, so it holds the word ません and no kana of it (plan 319)."""
     tokens = tokenize(jp) or []
     if not tokens:
         return spans
@@ -235,7 +235,7 @@ def _build_items(level: str, pattern: str) -> tuple:
     out = []
     for key, jp, tr in _sources(found[1]):
         # A twist or a scene line is cut only where the detector reads the
-        # point in it (plan 318). A tour's lines are written to set the
+        # point in it (plan 319). A tour's lines are written to set the
         # point against its rivals and its lookalikes, and where the
         # detector finds nothing the stems' first match cut the rival's
         # sentence on the point's letters: ないで in 話さないでください,
@@ -377,7 +377,7 @@ def _gap_verdict(typed: str, forms: list[tuple[str, str]]) -> tuple[str, int, st
     return "wrong", 0, heard
 
 
-# A point written two ways the translation cannot tell apart (plan 318):
+# A point written two ways the translation cannot tell apart (plan 319):
 # the hole holds the sentence's, and the other is as right -- なきゃ and
 # なくちゃ, the two contractions 〜なきゃ／〜なくちゃ teaches, and
 # によらず and にかかわらず, which 〜いかんによらず's rule gives both.
@@ -393,7 +393,7 @@ _A_ROW = frozenset("かがたなばまらわ")
 
 
 def _variants(jp: str, a: int, written: str, reading: str, pattern: str) -> list[tuple[str, str]]:
-    """The hole's other spellings of the same point (plan 318): a pair of
+    """The hole's other spellings of the same point (plan 319): a pair of
     _VARIANTS, and a う-verb's causative passive, as right short
     (習わされた, the usual one) as long (習わせられた), both ways."""
     out = []

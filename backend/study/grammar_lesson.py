@@ -76,7 +76,7 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
 @lru_cache(maxsize=None)
 def _same_family(pattern: str) -> frozenset[str]:
     """Every point the catalogue's `same` marks join to `pattern`, either
-    way and through one another (plan 318): なきゃ／なくちゃ is the twin of
+    way and through one another (plan 319): なきゃ／なくちゃ is the twin of
     なくてはいけない, which is the twin of ないといけない, so none of them
     is drawn as a filler in another's hole, where it would say the same."""
     edges: dict[str, set[str]] = {}
@@ -124,7 +124,7 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     draws a specimen from the marked sentence beside it (routes/station).
 
     Choices are the rivals the lesson names, first -- never one it marks
-    `same` in meaning (plan 318), which is as right in the hole; when fewer than
+    `same` in meaning (plan 319), which is as right in the hole; when fewer than
     CONTRAST_CHOICES - 1 of them exist, same-level verifiable patterns
     that do NOT also occur in the sentence fill the gap (the rule
     study/placement.py uses, so an item never has two right answers).
@@ -161,7 +161,7 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     blanked = blanked_payload(example, pattern, lang, level)
     fill = "".join(p["text"] for p in blanked.get("fill", []))
     lines = {r["pattern"]: r["en"] for r in entry.get("compare", [])}
-    # A rival the lesson calls the same in meaning (`same`, plan 318: だろう
+    # A rival the lesson calls the same in meaning (`same`, plan 319: だろう
     # beside でしょう, ずに beside ないで) stands in the point's hole as well
     # as the point, and no translation tells them apart: it is never a
     # wrong answer, named or drawn as a filler.

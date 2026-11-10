@@ -2564,7 +2564,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 47: plan 314 -- お願いします is one N5 card (the owner's call): both
 # spellings fold to it, and it is counted as itself, no longer as the
 # お, 願う and する it is made of.
-# 48: plan 318 -- 〜ことだ after a とは topic is a definition's こと and だ
+# 48: plan 319 -- 〜ことだ after a とは topic is a definition's こと and だ
 # (「ゆずる」とは、…あげることだ), no advice; 〜に決まっている after a count
 # is 決まる's « set for » (出発は九時に決まっている), no sure guess; and the
 # catalogue's corrected sentences, whose lessons the detector reads.

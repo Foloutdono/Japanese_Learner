@@ -67,7 +67,7 @@ def test_the_lesson_s_line_names_the_member_of_a_rival_series():
 def test_a_series_of_another_length_offers_the_member_that_opens_alike():
     # Read from the forms themselves: the drill no longer offers the
     # series beside てくださる, since its てくれる says the same there
-    # (`same`, plan 318).
+    # (`same`, plan 319).
     forms = choice_forms("〜てくださる／〜ていただく", "てくださ",
                          ["〜てくださる／〜ていただく", "〜てあげる／てくれる／てもらう"])
     assert forms["〜てくださる／〜ていただく"].text == "てくださる"

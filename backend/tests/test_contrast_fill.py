@@ -42,7 +42,7 @@ def test_every_contrast_sentence_reads_whole_once_answered():
 
 
 def test_a_rival_the_lesson_calls_the_same_is_never_offered():
-    # Plan 318: だろう in でしょう's hole, から in ので's, the potential in
+    # Plan 319: だろう in でしょう's hole, から in ので's, the potential in
     # ことができます's said the same as the answer, and no translation told
     # them apart. A compare entry marked `same` stays in the lesson and is
     # offered neither as a named rival nor as a filler, whatever the seed.

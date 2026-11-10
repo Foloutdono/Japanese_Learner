@@ -1745,7 +1745,7 @@ const dictionary = {
   bldWrong: 'No del todo.',
   // How the sentence says the hole when another form was taken as right:
   // its register (plan 241), では in full or contracted (plan 295), or the
-  // point's other spelling (plan 318: なきゃ for なくちゃ, され for せられ).
+  // point's other spelling (plan 319: なきゃ for なくちゃ, され for せられ).
   bldOther: (said, register) => `La frase dice ${said}: lo mismo, ${({
     plain: 'en registro llano',
     polite: 'en registro cortés',

@@ -6166,7 +6166,7 @@ def _kotoda_refused(tokens, s, e, _g) -> bool:
                 return True
             if (k >= 1 and tokens[k - 1].surface == "と" and tokens[k - 1].pos == "particle"
                     and (k + 1 >= len(tokens) or tokens[k + 1].pos != "verb")):
-                # X とは、… ことだ defines X, as its tour says (plan 318):
+                # X とは、… ことだ defines X, as its tour says (plan 319):
                 # 「ゆずる」とは、席を人にあげることだ. The と + は of a
                 # quotation goes on to its verb (やめろとは言わないが…).
                 return True
@@ -7626,7 +7626,7 @@ def _spans_nothing(tokens, s, e) -> bool:
 def _kimatteiru_refused(tokens, s, _e, _g) -> bool:
     """〜に決まっている (« surely ») after a count -- a time, a date, a
     number of people -- is 決まる's own « set for »: 出発の時間は、九時に
-    決まっている, as the point's tour sets it apart (plan 318). A guess
+    決まっている, as the point's tour sets it apart (plan 319). A guess
     stands after a predicate or a noun of what is guessed: 遅れるに
     決まっている, うそに決まっている."""
     k = next((i for i, t in enumerate(tokens) if t.start == s), None)
@@ -7676,7 +7676,7 @@ def _pattern_refusals():
         # (来たばかりだ), not the んばかり of 泣かんばかりの, and a ばかり
         # with no copula is the particle (plan 188)
         # (and its copula may be past, taken whole: 不安は増すばかりだった,
-        # plan 318 -- refused, the widest reading took its narrower ones
+        # plan 319 -- refused, the widest reading took its narrower ones
         # with it, and the point's own example read as no point)
         "〜ばかりだ": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None and (p.lemma == "た" or _n_ends(t, p)))
             or not ("".join(x.surface for x in t if s <= x.start < e).endswith(("だ", "です", "でし", "だっ", "だった", "でした"))

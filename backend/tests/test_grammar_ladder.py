@@ -426,7 +426,7 @@ def test_construire_takes_de_wa_in_full_and_contracted():
 
 
 def test_construire_takes_the_points_other_spelling():
-    # Plan 318: the translation says neither なきゃ nor なくちゃ, and the
+    # Plan 319: the translation says neither なきゃ nor なくちゃ, and the
     # holes of 〜なきゃ／〜なくちゃ held one or the other.
     level, entry, _ = _point("〜なきゃ／〜なくちゃ")
     key = _key(level, entry["pattern"], "そろそろ帰らなきゃ。")
@@ -449,7 +449,7 @@ def test_construire_takes_the_points_other_spelling():
 
 
 def test_a_tour_line_is_cut_only_where_the_detector_reads_the_point():
-    # Plan 318: where the detector found nothing, the stems' first match
+    # Plan 319: where the detector found nothing, the stems' first match
     # cut a twist or a scene line on the point's letters, in a rival's
     # sentence -- 話さ［ないで］ください under 〜ないで, あそ［この］電車
     # under この／その／あの／どの. The examples keep the stems' match.
@@ -465,7 +465,7 @@ def test_a_tour_line_is_cut_only_where_the_detector_reads_the_point():
 
 
 def test_a_counts_mo_holds_mo_alone():
-    # Plan 318: the hole of 〜も（強調） was lit on 三度も, and under « three
+    # Plan 319: the hole of 〜も（強調） was lit on 三度も, and under « three
     # whole times » 三回も was refused. The count stays in the sentence.
     level, entry, _ = _point("〜も（強調）")
     holes = [jp[a:b] for _k, jp, spans, *_ in grammar_ladder._build_items(level, entry["pattern"]) for a, b in spans]
@@ -474,7 +474,7 @@ def test_a_counts_mo_holds_mo_alone():
 
 
 def test_the_n_of_masen_is_never_a_hole_alone():
-    # Plan 318: the detector lights a negative's ん (どこへも行きませ|ん|
+    # Plan 319: the detector lights a negative's ん (どこへも行きませ|ん|
     # でした), and the hole held one kana of ません.
     level, entry, _ = _point("何も／誰も〜ない")
     assert _hole(level, entry["pattern"], "日よう日は、どこへも行きませんでした。") == ["どこへも", "ません"]
