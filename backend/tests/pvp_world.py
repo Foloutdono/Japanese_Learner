@@ -91,10 +91,18 @@ def set_profile(user_id: str, *, level: str | None = None, hidden: bool | None =
 
 
 class Clock:
-    """The duels' clock, moved by the tests."""
+    """The duels' clock, moved by the tests.
+
+    It starts at noon UTC on the real day, never at the real time: a test
+    plays its runs and reads the day's XP minutes apart on it, and one
+    begun just before midnight ended a run on one day and read it on the
+    next (test_duels' recording race and day's cap failed so in CI at
+    23:56 UTC). The learners' day is UTC (their profiles carry no offset),
+    and the duels read only this clock, so it may stand hours from the
+    real one."""
 
     def __init__(self):
-        self.at = datetime.now(timezone.utc)
+        self.at = datetime.now(timezone.utc).replace(hour=12, minute=0, second=0, microsecond=0)
 
     def __call__(self) -> datetime:
         return self.at
