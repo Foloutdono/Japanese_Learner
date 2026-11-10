@@ -2945,7 +2945,7 @@
           },
           "jp": "友だちは「すぐ行く」と言いました。",
           "tr": {
-            "en": "My friend said, \"I'll come right away.\"",
+            "en": "My friend said, « I'll come right away ».",
             "fr": "Mon ami a dit : « J'arrive tout de suite. »",
             "es": "Mi amigo dijo: «Voy enseguida»."
           },
@@ -8771,7 +8771,8 @@
         "pattern": "可能形 〜(ら)れる",
         "en": "ことができます is the long, formal way; the potential form (N4) is the short everyday one.",
         "fr": "ことができます est la tournure longue et formelle ; la forme potentielle (N4) est la tournure courte de tous les jours.",
-        "es": "ことができます es la forma larga y formal; la forma potencial (N4) es la corta y cotidiana."
+        "es": "ことができます es la forma larga y formal; la forma potencial (N4) es la corta y cotidiana.",
+        "same": true
       }
     ],
     "examples": [
@@ -9605,7 +9606,8 @@
         "pattern": "〜なくてはいけない",
         "en": "Same meaning; なくてはいけない (N4) is a little more spoken, なければなりません a little more formal.",
         "fr": "Même sens ; なくてはいけない (N4) est un peu plus parlé, なければなりません un peu plus formel.",
-        "es": "Mismo sentido; なくてはいけない (N4) es algo más hablado, なければなりません algo más formal."
+        "es": "Mismo sentido; なくてはいけない (N4) es algo más hablado, なければなりません algo más formal.",
+        "same": true
       }
     ],
     "examples": [
@@ -12217,7 +12219,8 @@
         "pattern": "〜ので",
         "en": "から presents the reason as your judgement; ので (N4) presents it as a plain fact, more politely.",
         "fr": "から présente la raison comme son jugement ; ので (N4) la présente comme un simple fait, plus poliment.",
-        "es": "から presenta la razón como tu juicio; ので (N4) la presenta como un simple hecho, con más cortesía."
+        "es": "から presenta la razón como tu juicio; ので (N4) la presenta como un simple hecho, con más cortesía.",
+        "same": true
       },
       {
         "pattern": "だから",
@@ -12890,7 +12893,7 @@
             "しませんでしたか"
           ],
           "why": {
-            "en": "する is irregular: its ます-stem is し, so しませんか. すませんか drops る as a る-verb would, and しませんでしたか is the past (\"didn't you play?\"), which does not fit an invitation for Sunday.",
+            "en": "する is irregular: its ます-stem is し, so しませんか. すませんか drops る as a る-verb would, and しませんでしたか is the past (« didn't you play? »), which does not fit an invitation for Sunday.",
             "fr": "する est irrégulier : son radical en ます est し, d'où しませんか. すませんか fait tomber le る comme pour un verbe en る, et しませんでしたか est le passé, qui ne convient pas pour inviter à dimanche.",
             "es": "する es irregular: su raíz ます es し, así que しませんか. すませんか quita る como un verbo en る, y しませんでしたか es el pasado («¿no jugaste?»), que no encaja en una invitación para el domingo."
           }
@@ -12926,7 +12929,7 @@
             }
           ],
           "why": {
-            "en": "With something to share, ませんか becomes an offer: \"won't you have some?\" It forbids nothing (that would be 食べないでください), and a question about the past would be 食べましたか.",
+            "en": "With something to share, ませんか becomes an offer: « won't you have some? » It forbids nothing (that would be 食べないでください), and a question about the past would be 食べましたか.",
             "fr": "Quand on a de quoi partager, ませんか devient une offre : « tu en veux ? ». Elle n'interdit rien (ce serait 食べないでください), et une question sur le passé serait 食べましたか.",
             "es": "Con algo que compartir, ませんか se vuelve una oferta: «¿no quieres un poco?». No prohíbe nada (eso sería 食べないでください), y una pregunta sobre el pasado sería 食べましたか."
           }
@@ -12950,7 +12953,7 @@
             "見ません"
           ],
           "why": {
-            "en": "見る is a る-verb: it drops る before ます, so 見ませんか. 見るませんか keeps the る, and 見ません without か is only a negative statement (\"we don't watch it\").",
+            "en": "見る is a る-verb: it drops る before ます, so 見ませんか. 見るませんか keeps the る, and 見ません without か is only a negative statement (« we don't watch it »).",
             "fr": "見る est un verbe en る : il perd son る devant ます, d'où 見ませんか. 見るませんか garde le る, et 見ません sans か n'est qu'une phrase négative (« on ne la regarde pas »).",
             "es": "見る es un verbo en る: pierde る ante ます, así que 見ませんか. 見るませんか conserva la る, y 見ません sin か es solo una afirmación negativa («no la vemos»)."
           }
@@ -13282,7 +13285,7 @@
             }
           ],
           "why": {
-            "en": "ましょう proposes something the speaker takes part in: \"let's clean\". Asking only the other to do it would be そうじしてください, and offering to do it for them would be ましょうか.",
+            "en": "ましょう proposes something the speaker takes part in: « let's clean ». Asking only the other to do it would be そうじしてください, and offering to do it for them would be ましょうか.",
             "fr": "ましょう propose une chose à laquelle celui qui parle participe : « nettoyons ». Demander seulement à l'autre de le faire, ce serait そうじしてください, et proposer de le faire pour lui, ましょうか.",
             "es": "ましょう propone algo en lo que participa quien habla: «limpiemos». Pedir que lo haga solo el otro sería そうじしてください, y ofrecerse a hacerlo por él sería ましょうか."
           }
@@ -13306,7 +13309,7 @@
             "来ません"
           ],
           "why": {
-            "en": "来る is irregular: its ます-stem is 来 (read き), so 来ましょう. こましょう borrows the ない-form stem こ, and 来ません is a negative statement: \"we won't come\".",
+            "en": "来る is irregular: its ます-stem is 来 (read き), so 来ましょう. こましょう borrows the ない-form stem こ, and 来ません is a negative statement: « we won't come ».",
             "fr": "来る est irrégulier : son radical en ます est 来 (qui se lit き), d'où 来ましょう. こましょう emprunte le radical こ de la forme en ない, et 来ません est une phrase négative : « nous ne viendrons pas ».",
             "es": "来る es irregular: su raíz ます es 来 (se lee き), así que 来ましょう. こましょう toma la raíz こ de la forma ない, y 来ません es una afirmación negativa: «no vendremos»."
           }
@@ -13342,7 +13345,7 @@
             }
           ],
           "why": {
-            "en": "Said to a group, ましょう rallies everyone, the speaker included: \"let's do our best\". Without か it is no question, and a test already taken would call for がんばりました.",
+            "en": "Said to a group, ましょう rallies everyone, the speaker included: « let's do our best ». Without か it is no question, and a test already taken would call for がんばりました.",
             "fr": "Dit à un groupe, ましょう motive tout le monde, celui qui parle compris : « faisons de notre mieux ». Sans か, ce n'est pas une question, et un contrôle déjà passé demanderait がんばりました.",
             "es": "Dicho a un grupo, ましょう anima a todos, también a quien habla: «demos lo mejor». Sin か no es una pregunta, y un examen ya hecho pediría がんばりました."
           }
@@ -13366,7 +13369,7 @@
             "食べてください"
           ],
           "why": {
-            "en": "食べる is a る-verb: it drops る, so 食べましょう. 食べりましょう treats it as an う-verb, and 食べてください asks only the listener to eat, when \"let's\" includes the speaker.",
+            "en": "食べる is a る-verb: it drops る, so 食べましょう. 食べりましょう treats it as an う-verb, and 食べてください asks only the listener to eat, when « let's » includes the speaker.",
             "fr": "食べる est un verbe en る : il perd son る, d'où 食べましょう. 食べりましょう le traite en verbe en う, et 食べてください demande seulement à l'autre de manger, alors que « mangeons » inclut celui qui parle.",
             "es": "食べる es un verbo en る: pierde る, así que 食べましょう. 食べりましょう lo trata como un verbo en う, y 食べてください solo le pide comer a quien escucha, cuando «comamos» incluye a quien habla."
           }
@@ -13666,7 +13669,7 @@
             "飲みましたか"
           ],
           "why": {
-            "en": "飲む is an う-verb: む becomes the い-row sound み, so 飲みましょうか. 飲まましょうか takes the ない-form stem, and 飲みましたか is a past question: \"did you drink?\"",
+            "en": "飲む is an う-verb: む becomes the い-row sound み, so 飲みましょうか. 飲まましょうか takes the ない-form stem, and 飲みましたか is a past question: « did you drink? »",
             "fr": "飲む est un verbe en う : む passe au son en い, み, d'où 飲みましょうか. 飲まましょうか prend le radical de la forme en ない, et 飲みましたか est une question au passé : « as-tu bu ? »",
             "es": "飲む es un verbo en う: む pasa al sonido de la fila い, み, así que 飲みましょうか. 飲まましょうか toma la raíz de la forma ない, y 飲みましたか es una pregunta en pasado: «¿bebiste?»."
           }
@@ -13702,7 +13705,7 @@
             }
           ],
           "why": {
-            "en": "ましょうか offers to do something for the other, who decides: \"shall I turn it on?\" A request to the other would be つけてください, and a fact already done would be つけました.",
+            "en": "ましょうか offers to do something for the other, who decides: « shall I turn it on? » A request to the other would be つけてください, and a fact already done would be つけました.",
             "fr": "ましょうか propose de faire quelque chose pour l'autre, qui décide : « je l'allume ? ». Une demande adressée à l'autre serait つけてください, et un fait accompli, つけました.",
             "es": "ましょうか ofrece hacer algo por el otro, que decide: «¿lo enciendo?». Pedírselo al otro sería つけてください, y un hecho ya consumado sería つけました."
           }
@@ -13740,7 +13743,7 @@
           },
           "jp": "「手つだいましょうか」と聞きましたが、友だちは「だいじょうぶです」と言いました。",
           "tr": {
-            "en": "I asked, \"Shall I help?\", but my friend said, \"I'm fine.\"",
+            "en": "I asked, « Shall I help? », but my friend said, « I'm fine ».",
             "fr": "J'ai demandé « Je t'aide ? », mais mon ami a répondu « Ça va. »",
             "es": "Pregunté «¿Te ayudo?», pero mi amigo dijo «Estoy bien»."
           },
@@ -13762,7 +13765,7 @@
             }
           ],
           "why": {
-            "en": "手つだいましょうか offers help, so だいじょうぶです turns it down: \"I'm fine, thanks\". To accept, the friend would say おねがいします.",
+            "en": "手つだいましょうか offers help, so だいじょうぶです turns it down: « I'm fine, thanks ». To accept, the friend would say おねがいします.",
             "fr": "手つだいましょうか propose de l'aide, donc だいじょうぶです la décline : « ça va, merci ». Pour accepter, l'ami dirait おねがいします.",
             "es": "手つだいましょうか ofrece ayuda, así que だいじょうぶです la rechaza: «estoy bien, gracias». Para aceptar, el amigo diría おねがいします."
           }
@@ -14401,7 +14404,7 @@
         "why": {
           "en": "ゆうめい ends in い but it is a な-adjective, like きれい: ゆうめいな店. い belongs to い-adjectives, and の links two nouns.",
           "fr": "ゆうめい finit par い mais c'est un adjectif en な, comme きれい : ゆうめいな店. い appartient aux adjectifs en い, et の relie deux noms.",
-          "es": "ゆうめい acaba en い pero es un adjetivo en な, como きれい: ゆうめいな店. い es de los adjetivo en い, y の une dos sustantivos."
+          "es": "ゆうめい acaba en い pero es un adjetivo en な, como きれい: ゆうめいな店. い es de los adjetivos en い, y の une dos sustantivos."
         }
       }
     ],
@@ -15239,7 +15242,7 @@
           "why": {
             "en": "The first adjective keeps the くて form, and only the last one takes the past: 多くて… うるさかったです. 多かったくて puts the past inside the joining form, and 多いで uses で, which belongs to な-adjectives and nouns.",
             "fr": "Le premier adjectif garde la forme くて, et seul le dernier prend le passé : 多くて… うるさかったです. 多かったくて met le passé dans la forme de liaison, et 多いで emploie で, qui est pour les adjectifs en な et les noms.",
-            "es": "El primer adjetivo queda en forma くて, y solo el último toma el pasado: 多くて… うるさかったです. 多かったくて mete el pasado en la forma de unión, y 多いで usa で, que es de los adjetivo en な y los sustantivos."
+            "es": "El primer adjetivo queda en forma くて, y solo el último toma el pasado: 多くて… うるさかったです. 多かったくて mete el pasado en la forma de unión, y 多いで usa で, que es de los adjetivos en な y los sustantivos."
           }
         }
       ]
@@ -18553,8 +18556,7 @@
         "en": "When I was going to Japan, I bought this book.",
         "fr": "En partant pour le Japon, j'ai acheté ce livre.",
         "es": "Cuando iba a viajar a Japón, compré este libro.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "ひまなとき、何をしますか。",
@@ -19305,7 +19307,7 @@
           "why": {
             "en": "好き is a な-adjective, so its negative is 好きではありません, not the い-adjective くない. 好きくないです applies the い-adjective rule, and 好きです says the opposite.",
             "fr": "好き est un adjectif en な : son négatif est 好きではありません, pas le くない des adjectifs en い. 好きくないです applique la règle des adjectifs en い, et 好きです dit le contraire.",
-            "es": "好き es un adjetivo en な, así que su negativo es 好きではありません, no el くない de los adjetivo en い. 好きくないです aplica la regla de los adjetivo en い, y 好きです dice lo contrario."
+            "es": "好き es un adjetivo en な, así que su negativo es 好きではありません, no el くない de los adjetivos en い. 好きくないです aplica la regla de los adjetivos en い, y 好きです dice lo contrario."
           }
         },
         {
@@ -19719,7 +19721,7 @@
           "why": {
             "en": "きらい is a な-adjective: its negative is きらいではありません, « I don't dislike it ». きらくないです applies the い-adjective rule, and すきではありません is another thing, « I don't like it ».",
             "fr": "きらい est un adjectif en な : son négatif est きらいではありません, « je ne déteste pas ». きらくないです applique la règle des adjectifs en い, et すきではありません est autre chose, « je n'aime pas ».",
-            "es": "きらい es un adjetivo en な: su negativo es きらいではありません, «no me disgusta». きらくないです aplica la regla de los adjetivo en い, y すきではありません es otra cosa, «no me gusta»."
+            "es": "きらい es un adjetivo en な: su negativo es きらいではありません, «no me disgusta». きらくないです aplica la regla de los adjetivos en い, y すきではありません es otra cosa, «no me gusta»."
           }
         },
         {
@@ -19822,8 +19824,7 @@
         "en": "I am poor at Japanese.",
         "fr": "Je ne suis pas doué en japonais.",
         "es": "Hablo mal el japonés.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "母はりょうりが上手です。",
@@ -20628,7 +20629,8 @@
         "pattern": "〜だろう",
         "en": "Same word: でしょう is polite, だろう (N4) is plain.",
         "fr": "Même mot : でしょう est poli, だろう (N4) est neutre.",
-        "es": "La misma palabra: でしょう es la forma cortés, だろう (N4) la llana."
+        "es": "La misma palabra: でしょう es la forma cortés, だろう (N4) la llana.",
+        "same": true
       }
     ],
     "examples": [
@@ -22108,7 +22110,8 @@
         "pattern": "〜くらい／〜ぐらい",
         "en": "ごろ: around a moment; くらい: around an amount.",
         "fr": "ごろ : vers un moment ; くらい : environ une quantité.",
-        "es": "ごろ: hacia un momento; くらい: alrededor de una cantidad."
+        "es": "ごろ: hacia un momento; くらい: alrededor de una cantidad.",
+        "same": true
       },
       {
         "pattern": "に",
@@ -24495,7 +24498,8 @@
         "pattern": "〜という",
         "en": "と言います is the verb « to say »; という (N4) is « called », joining a name to a noun.",
         "fr": "と言います est le verbe « dire » ; という (N4) signifie « appelé », reliant un nom à un autre.",
-        "es": "と言います es el verbo «decir»; という (N4) es «llamado», y une un nombre a un sustantivo."
+        "es": "と言います es el verbo «decir»; という (N4) es «llamado», y une un nombre a un sustantivo.",
+        "same": true
       }
     ],
     "examples": [
@@ -24582,7 +24586,7 @@
           },
           "jp": "この花は、日本語で「さくら」と言います。",
           "tr": {
-            "en": "In Japanese, this flower is called \"sakura\".",
+            "en": "In Japanese, this flower is called « sakura ».",
             "fr": "En japonais, cette fleur s'appelle « sakura ».",
             "es": "En japonés, esta flor se llama «sakura»."
           },
@@ -25276,7 +25280,8 @@
         "pattern": "〜ずに",
         "en": "Same meaning; ずに (N4) is the written form.",
         "fr": "Même sens ; ずに (N4) est la forme écrite.",
-        "es": "Mismo sentido; ずに (N4) es la forma escrita."
+        "es": "Mismo sentido; ずに (N4) es la forma escrita.",
+        "same": true
       }
     ],
     "examples": [
@@ -27730,7 +27735,8 @@
         "pattern": "それから",
         "en": "そして adds; それから orders in time (« after that »).",
         "fr": "そして ajoute ; それから ordonne dans le temps (« après cela »).",
-        "es": "そして agrega; それから ordena en el tiempo («después de eso»)."
+        "es": "そして agrega; それから ordena en el tiempo («después de eso»).",
+        "same": true
       },
       {
         "pattern": "しかし",
@@ -28111,7 +28117,8 @@
         "pattern": "そして",
         "en": "それから orders in time; そして just adds.",
         "fr": "それから ordonne dans le temps ; そして ajoute seulement.",
-        "es": "それから ordena en el tiempo; そして solo agrega."
+        "es": "それから ordena en el tiempo; そして solo agrega.",
+        "same": true
       },
       {
         "pattern": "〜てから",
@@ -29301,7 +29308,8 @@
         "pattern": "〜けど",
         "en": "が is neutral to polite; けど is casual.",
         "fr": "が est neutre à poli ; けど est familier.",
-        "es": "が va de neutro a cortés; けど es coloquial."
+        "es": "が va de neutro a cortés; けど es coloquial.",
+        "same": true
       },
       {
         "pattern": "〜のに",
@@ -30319,7 +30327,8 @@
         "pattern": "〜が（逆接）",
         "en": "けど is casual; が is neutral to polite.",
         "fr": "けど est familier ; が est neutre à poli.",
-        "es": "けど es coloquial; が va de neutro a cortés."
+        "es": "けど es coloquial; が va de neutro a cortés.",
+        "same": true
       },
       {
         "pattern": "しかし",
@@ -31536,8 +31545,7 @@
         "en": "I do not understand this story at all.",
         "fr": "Je ne comprends pas du tout cette histoire.",
         "es": "No entiendo nada de esta historia.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "このりょうりはぜんぜんからくないです。",
@@ -32816,7 +32824,7 @@
         "why": {
           "en": "A な-adjective describes a verb with に: かんたんに. な is for a noun that follows, and く is for い-adjectives.",
           "fr": "Un adjectif en な décrit un verbe avec に : かんたんに. な est pour un nom qui suit, et く est pour les adjectifs en い.",
-          "es": "Un adjetivo en な describe un verbo con に: かんたんに. な es para un sustantivo que sigue, y く es para los adjetivo en い."
+          "es": "Un adjetivo en な describe un verbo con に: かんたんに. な es para un sustantivo que sigue, y く es para los adjetivos en い."
         }
       }
     ],
@@ -33024,7 +33032,7 @@
           "why": {
             "en": "An い-adjective drops い and takes く before a verb: 長い → 長く. 長い stays for a noun (長い話), and 長に is the な-adjective ending, which 長い does not use.",
             "fr": "Un adjectif en い perd い et prend く devant un verbe : 長い → 長く. 長い reste pour un nom (長い話), et 長に est la terminaison des adjectifs en な, que 長い n'utilise pas.",
-            "es": "Un adjetivo en い pierde la い y toma く delante de un verbo: 長い → 長く. 長い se queda para un sustantivo (長い話), y 長に es la terminación de los adjetivo en な, que 長い no usa."
+            "es": "Un adjetivo en い pierde la い y toma く delante de un verbo: 長い → 長く. 長い se queda para un sustantivo (長い話), y 長に es la terminación de los adjetivos en な, que 長い no usa."
           }
         },
         {

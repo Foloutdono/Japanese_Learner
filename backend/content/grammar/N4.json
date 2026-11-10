@@ -56,24 +56,21 @@
         "en": "If it rains, I will stay at home.",
         "fr": "S'il pleut, je resterai à la maison.",
         "es": "Si llueve, me quedaré en casa.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "駅に着いたら、電話してください。",
         "en": "When you arrive at the station, please call me.",
         "fr": "Quand tu arrives à la gare, appelle-moi.",
         "es": "Cuando llegues a la estación, llámame, por favor.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "安かったら、二つ買います。",
         "en": "If it's cheap, I'll buy two.",
         "fr": "Si c'est bon marché, j'en achèterai deux.",
         "es": "Si es barato, compraré dos.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "まどを開けたら、ゆきがふっていました。",
@@ -424,7 +421,85 @@
           }
         }
       ]
-    }
+    },
+    "choose": [
+      {
+        "jp": "にもつを＿＿＿、少し休みましょう。",
+        "tr": {
+          "en": "Once we've carried the luggage, let's take a short break.",
+          "fr": "Une fois les bagages portés, faisons une petite pause.",
+          "es": "Cuando hayamos llevado el equipaje, descansemos un poco."
+        },
+        "choices": [
+          "運んだら",
+          "運べば",
+          "運ぶと"
+        ],
+        "why": {
+          "en": "A suggestion follows an action: たら takes it, once the luggage is moved. ば and と cannot: after an action, neither is followed by a suggestion such as ましょう.",
+          "fr": "Une proposition suit une action : たら l'accepte, une fois les bagages portés. ば et と, non : après une action, ni l'un ni l'autre n'est suivi d'une proposition comme ましょう.",
+          "es": "Una propuesta sigue a una acción: たら la admite, una vez llevado el equipaje. ば y と no: después de una acción, ninguno va seguido de una propuesta como ましょう."
+        }
+      },
+      {
+        "jp": "試験が＿＿＿、どうだったか教えてね。",
+        "tr": {
+          "en": "Once the exam is over, tell me how it went.",
+          "fr": "Une fois l'examen fini, dis-moi comment ça s'est passé.",
+          "es": "Cuando termine el examen, cuéntame cómo te fue."
+        },
+        "choices": [
+          "終わったら",
+          "終わるなら",
+          "終わると"
+        ],
+        "why": {
+          "en": "First the exam ends, then you can say how it went: たら waits for the event. 終わるなら would ask before it is over, and と cannot be followed by a request.",
+          "fr": "D'abord l'examen se termine, ensuite on peut dire comment ça s'est passé : たら attend l'événement. 終わるなら le demanderait avant la fin, et と ne peut pas être suivi d'une demande.",
+          "es": "Primero termina el examen y luego se puede contar cómo fue: たら espera a que pase. 終わるなら lo pediría antes de que termine, y と no puede ir seguido de una petición."
+        }
+      },
+      {
+        "jp": "かばんを＿＿＿、さいふがありませんでした。",
+        "tr": {
+          "en": "When I opened my bag, my wallet wasn't there.",
+          "fr": "Quand j'ai ouvert mon sac, mon portefeuille n'y était pas.",
+          "es": "Cuando abrí el bolso, la billetera no estaba."
+        },
+        "choices": [
+          "開けたら",
+          "開ければ",
+          "開けるなら"
+        ],
+        "why": {
+          "en": "With a past ending, たら tells what was found once something was done: the bag opened, the wallet gone. ば and なら only set a condition; neither can tell what was found.",
+          "fr": "Avec une fin au passé, たら dit ce qu'on a trouvé une fois l'action faite : le sac ouvert, plus de portefeuille. ば et なら ne font que poser une condition ; ni l'un ni l'autre ne raconte une découverte.",
+          "es": "Con un final en pasado, たら cuenta lo que se encontró al hacer algo: al abrir el bolso, la billetera no estaba. ば y なら solo ponen una condición; ninguno cuenta un descubrimiento."
+        }
+      },
+      {
+        "jp": "バスが＿＿＿、言ってください。",
+        "tr": {
+          "en": "When the bus comes, please tell me.",
+          "fr": "Quand le bus arrivera, dis-le-moi, s'il te plaît.",
+          "es": "Cuando venga el autobús, avísame, por favor."
+        },
+        "choices": [
+          "きたら",
+          "くたら",
+          "こたら"
+        ],
+        "why": {
+          "en": "来る is irregular: its た-form is きた, so its たら is きたら. くたら and こたら are built on the wrong stem.",
+          "fr": "来る est irrégulier : sa forme en た est きた, donc son たら est きたら. くたら et こたら partent du mauvais radical.",
+          "es": "来る es irregular: su forma た es きた, así que su たら es きたら. くたら y こたら parten de la raíz equivocada."
+        },
+        "slips": [
+          "くたら",
+          "こたら"
+        ]
+      }
+    ]
   },
   {
     "pattern": "〜ば",
@@ -1057,24 +1132,21 @@
         "en": "If you are going travelling, this book will be useful.",
         "fr": "Si tu pars en voyage, ce livre te sera utile.",
         "es": "Si vas a ir de viaje, este libro te será útil.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "犬がすきなら、うちに来てください。",
         "en": "If you like dogs, please come to my house.",
         "fr": "Si tu aimes les chiens, viens chez moi.",
         "es": "Si te gustan los perros, ven a mi casa.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "魚なら、駅前の店が安いですよ。",
         "en": "If it's fish you want, the shop by the station is cheap.",
         "fr": "Pour le poisson, le magasin devant la gare est bon marché.",
         "es": "Si lo que quieres es pescado, la tienda frente a la estación es barata.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "あなたが行くなら、わたしも行きます。",
@@ -1379,7 +1451,88 @@
           }
         }
       ]
-    }
+    },
+    "choose": [
+      {
+        "jp": "写真を＿＿＿、先に聞いてください。",
+        "tr": {
+          "en": "If you're going to take photos, please ask first.",
+          "fr": "Si vous comptez prendre des photos, demandez d'abord, s'il vous plaît.",
+          "es": "Si vas a tomar fotos, pregunta primero, por favor."
+        },
+        "choices": [
+          "とるなら",
+          "とったら",
+          "とると"
+        ],
+        "why": {
+          "en": "The asking comes before the photos: なら takes up the plan before it happens. とったら would mean once they are taken, too late to ask first, and と cannot be followed by a request.",
+          "fr": "La question vient avant les photos : なら reprend le projet avant qu'il se réalise. とったら voudrait dire une fois les photos prises, trop tard pour demander d'abord, et と ne peut pas être suivi d'une demande.",
+          "es": "La pregunta va antes de las fotos: なら retoma el plan antes de que ocurra. とったら significaría una vez tomadas, demasiado tarde para preguntar primero, y と no puede ir seguido de una petición."
+        }
+      },
+      {
+        "jp": "あしたは山に行くの？＿＿＿、今日は早くねたほうがいいよ。",
+        "tr": {
+          "en": "You're going to the mountains tomorrow? If you are, you'd better get to bed early tonight.",
+          "fr": "Tu vas à la montagne demain ? Si c'est le cas, tu ferais bien de te coucher tôt ce soir.",
+          "es": "¿Mañana vas a la montaña? Si vas, mejor acuéstate temprano hoy."
+        },
+        "choices": [
+          "行くなら",
+          "行ったら",
+          "行けば"
+        ],
+        "why": {
+          "en": "なら takes up the plan just mentioned, and the early night comes before the trip. 行ったら would put the trip first, and after an action ば cannot be followed by advice.",
+          "fr": "なら reprend le projet qu'on vient d'évoquer, et le coucher tôt vient avant le départ. 行ったら mettrait le voyage d'abord, et après une action ば ne peut pas être suivi d'un conseil.",
+          "es": "なら retoma el plan que se acaba de mencionar, y acostarse temprano va antes del viaje. 行ったら pondría el viaje primero, y después de una acción ば no puede ir seguido de un consejo."
+        }
+      },
+      {
+        "jp": "かさをわすれたんですか。＿＿＿、これを使ってください。",
+        "tr": {
+          "en": "You forgot your umbrella? If it's an umbrella you need, use this one.",
+          "fr": "Vous avez oublié votre parapluie ? Si c'est un parapluie qu'il vous faut, prenez celui-ci.",
+          "es": "¿Olvidaste tu paraguas? Si lo que necesitas es un paraguas, usa este."
+        },
+        "choices": [
+          "かさなら",
+          "かさだと",
+          "かさだなら"
+        ],
+        "why": {
+          "en": "なら takes up what was just said: an umbrella? Then use this one. と cannot be followed by a request, and a noun takes なら with no だ in between.",
+          "fr": "なら reprend ce qui vient d'être dit : un parapluie ? Alors prenez celui-ci. と ne peut pas être suivi d'une demande, et un nom prend なら sans だ entre les deux.",
+          "es": "なら retoma lo que se acaba de decir: ¿un paraguas? Entonces usa este. と no puede ir seguido de una petición, y un sustantivo toma なら sin だ en medio."
+        },
+        "slips": [
+          "かさだなら"
+        ]
+      },
+      {
+        "jp": "そんなに＿＿＿、手つだいましょうか。",
+        "tr": {
+          "en": "If it's that much trouble, shall I give you a hand?",
+          "fr": "Si c'est si difficile, je te donne un coup de main ?",
+          "es": "Si es tan difícil, ¿te echo una mano?"
+        },
+        "choices": [
+          "たいへんなら",
+          "たいへんななら",
+          "たいへんのなら"
+        ],
+        "why": {
+          "en": "A な-adjective goes straight before なら: たいへん + なら. It keeps neither its な nor an added の.",
+          "fr": "Un adjectif en な se place directement devant なら : たいへん + なら, sans son な ni un の ajouté.",
+          "es": "Un adjetivo な va directo antes de なら: たいへん + なら, sin su な ni un の añadido."
+        },
+        "slips": [
+          "たいへんななら",
+          "たいへんのなら"
+        ]
+      }
+    ]
   },
   {
     "pattern": "〜ので",
@@ -1417,7 +1570,8 @@
         "pattern": "〜から",
         "en": "ので presents the reason as a fact, politely; から presents it as your judgement.",
         "fr": "ので présente la raison comme un fait, poliment ; から la présente comme un jugement.",
-        "es": "ので presenta la razón como un hecho, con cortesía; から la presenta como tu juicio."
+        "es": "ので presenta la razón como un hecho, con cortesía; から la presenta como tu juicio.",
+        "same": true
       },
       {
         "pattern": "〜のに",
@@ -3181,7 +3335,8 @@
         "pattern": "〜みたいだ",
         "en": "Same meaning; ようです is polite or written, みたいだ is spoken.",
         "fr": "Même sens ; ようです est poli ou écrit, みたいだ est parlé.",
-        "es": "El mismo sentido; ようです es cortés o escrito, みたいだ es hablado."
+        "es": "El mismo sentido; ようです es cortés o escrito, みたいだ es hablado.",
+        "same": true
       },
       {
         "pattern": "〜らしい",
@@ -3202,16 +3357,14 @@
         "en": "It seems my father has got better.",
         "fr": "Il semble que mon père aille mieux.",
         "es": "Parece que mi padre ya está mejor.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "だれか来たようです。",
         "en": "It seems that someone has come.",
         "fr": "Il semble que quelqu'un soit venu.",
         "es": "Parece que vino alguien.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "この店は休みのようです。",
@@ -7942,7 +8095,7 @@
           "why": {
             "en": "Nouns and な-adjectives take かもしれません with no だ: 雨かもしれません, ひまかもしれません.",
             "fr": "Noms et adjectifs en な prennent かもしれません sans だ : 雨かもしれません, ひまかもしれません.",
-            "es": "Los sustantivos y los adjetivo en な toman かもしれません sin だ: 雨かもしれません, ひまかもしれません."
+            "es": "Los sustantivos y los adjetivos en な toman かもしれません sin だ: 雨かもしれません, ひまかもしれません."
           },
           "pair": [
             "雨だ",
@@ -8653,7 +8806,8 @@
         "pattern": "〜ことができます",
         "en": "The potential form is the everyday way; ことができます is the longer, formal one.",
         "fr": "La forme potentielle est la tournure courante ; ことができます, la tournure longue et formelle.",
-        "es": "La forma potencial es la manera habitual; ことができます es la más larga y formal."
+        "es": "La forma potencial es la manera habitual; ことができます es la más larga y formal.",
+        "same": true
       },
       {
         "pattern": "受身形 〜られる",
@@ -9548,7 +9702,7 @@
             "待ちよう"
           ],
           "why": {
-            "en": "待つ is a う-verb: its お-row sound is と, so 待つ → 待とう. 待って is the て-form, a request (\"wait here\"), and 待ちよう applies the る-verb rule (stem + よう) to a う-verb.",
+            "en": "待つ is a う-verb: its お-row sound is と, so 待つ → 待とう. 待って is the て-form, a request (« wait here »), and 待ちよう applies the る-verb rule (stem + よう) to a う-verb.",
             "fr": "待つ est un verbe en う : son son en お est と, d'où 待つ → 待とう. 待って est la forme en て, une demande (« attends ici »), et 待ちよう applique la règle des verbes en る (radical + よう) à un verbe en う.",
             "es": "待つ es un verbo en う: su sonido de la fila お es と, así que 待つ → 待とう. 待って es la forma て, una petición («espera aquí»), y 待ちよう aplica la regla de los verbos en る (raíz + よう) a un verbo en う."
           }
@@ -9584,7 +9738,7 @@
             }
           ],
           "why": {
-            "en": "読もう is the volitional of 読む: a decision or a proposal, \"I'll / let's read\". Telling what happened would be 読んだ, and a guess would be 読むだろう.",
+            "en": "読もう is the volitional of 読む: a decision or a proposal, « I'll / let's read ». Telling what happened would be 読んだ, and a guess would be 読むだろう.",
             "fr": "読もう est la forme volitive de 読む : une décision ou une proposition, « je lis / lisons ». Raconter ce qui s'est passé serait 読んだ, et une supposition serait 読むだろう.",
             "es": "読もう es el volitivo de 読む: una decisión o una propuesta, «voy a leer / leamos». Contar lo que pasó sería 読んだ, y una conjetura, 読むだろう."
           }
@@ -9644,7 +9798,7 @@
             }
           ],
           "why": {
-            "en": "会おうか is the volitional plus か, and with どこ it asks \"where shall we meet?\": a question put to the other person. 会うだろう would be the guess, and without か it would announce a decision.",
+            "en": "会おうか is the volitional plus か, and with どこ it asks « where shall we meet? »: a question put to the other person. 会うだろう would be the guess, and without か it would announce a decision.",
             "fr": "会おうか est la forme volitive plus か, et avec どこ elle demande « où se retrouve-t-on ? » : une question posée à l'autre. 会うだろう serait la supposition, et sans か ce serait l'annonce d'une décision.",
             "es": "会おうか es el volitivo más か, y con どこ pregunta «¿dónde nos vemos?»: una pregunta a la otra persona. 会うだろう sería la conjetura, y sin か anunciaría una decisión."
           }
@@ -10523,7 +10677,7 @@
             "いそがなかった"
           ],
           "why": {
-            "en": "The ない-form + と says \"if you don't\": いそぐ → いそがない. いそぐ + と would mean \"if you hurry\", the opposite, and と never follows a past form such as いそがなかった.",
+            "en": "The ない-form + と says « if you don't »: いそぐ → いそがない. いそぐ + と would mean « if you hurry », the opposite, and と never follows a past form such as いそがなかった.",
             "fr": "La forme en ない + と dit « si tu ne … pas » : いそぐ → いそがない. いそぐ + と voudrait dire « si tu te dépêches », le contraire, et と ne suit jamais une forme au passé comme いそがなかった.",
             "es": "La forma ない + と dice «si no…»: いそぐ → いそがない. いそぐ + と significaría «si te apresuras», lo contrario, y と nunca va tras una forma pasada como いそがなかった."
           }
@@ -10583,7 +10737,7 @@
             "見ない"
           ],
           "why": {
-            "en": "The verb before と stays in the dictionary form even when the sentence is in the past: 見ると、…ふっていました. 見た would put it in the past, which と does not allow, and 見ない would say \"if I didn't look\".",
+            "en": "The verb before と stays in the dictionary form even when the sentence is in the past: 見ると、…ふっていました. 見た would put it in the past, which と does not allow, and 見ない would say « if I didn't look ».",
             "fr": "Le verbe devant と reste à la forme du dictionnaire même quand la phrase est au passé : 見ると、…ふっていました. 見た le mettrait au passé, ce que と n'admet pas, et 見ない dirait « si je ne regardais pas ».",
             "es": "El verbo antes de と se queda en forma de diccionario aunque la oración esté en pasado: 見ると、…ふっていました. 見た lo pondría en pasado, que と no admite, y 見ない diría «si no mirara»."
           }
@@ -10619,7 +10773,7 @@
             }
           ],
           "why": {
-            "en": "A past ending after と does not always mean a single discovery: with a childhood setting it is a habit, \"whenever it rained, I read\". The verb before と stays in the dictionary form.",
+            "en": "A past ending after と does not always mean a single discovery: with a childhood setting it is a habit, « whenever it rained, I read ». The verb before と stays in the dictionary form.",
             "fr": "Une fin au passé après と n'est pas toujours une découverte ponctuelle : dans un cadre d'enfance, c'est une habitude, « chaque fois qu'il pleuvait, je lisais ». Le verbe devant と reste à la forme du dictionnaire.",
             "es": "Un final en pasado tras と no siempre es un descubrimiento único: en la infancia es un hábito, «cada vez que llovía, leía». El verbo antes de と se queda en forma de diccionario."
           }
@@ -12354,8 +12508,7 @@
         "en": "It started raining from three o'clock.",
         "fr": "Il a commencé à pleuvoir à partir de trois heures.",
         "es": "A partir de las tres empezó a llover.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "兄は一時間も歌いつづけました。",
@@ -13972,7 +14125,8 @@
         "pattern": "〜そうだ（伝聞）",
         "en": "らしい is what you gather, with some doubt; そうだ passes on exactly what was said.",
         "fr": "らしい est ce qu'on déduit, avec un doute ; そうだ transmet exactement ce qui a été dit.",
-        "es": "らしい es lo que deduces, con algo de duda; そうだ transmite exactamente lo que se dijo."
+        "es": "らしい es lo que deduces, con algo de duda; そうだ transmite exactamente lo que se dijo.",
+        "same": true
       },
       {
         "pattern": "〜ようです",
@@ -14392,7 +14546,8 @@
         "pattern": "〜ようです",
         "en": "Same meaning; みたいだ is spoken, ようです is polite or written.",
         "fr": "Même sens ; みたいだ est parlé, ようです poli ou écrit.",
-        "es": "El mismo sentido; みたいだ es hablado, ようです es cortés o escrito."
+        "es": "El mismo sentido; みたいだ es hablado, ようです es cortés o escrito.",
+        "same": true
       },
       {
         "pattern": "〜らしい",
@@ -14413,16 +14568,14 @@
         "en": "That person seems to be a teacher.",
         "fr": "On dirait que cette personne est professeur.",
         "es": "Esa persona parece docente.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "外はもうくらいみたいだ。",
         "en": "It seems it is already dark outside.",
         "fr": "On dirait qu'il fait déjà nuit dehors.",
         "es": "Parece que afuera ya está oscuro.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "今日は春みたいにあたたかいですね。",
@@ -19250,7 +19403,8 @@
         "pattern": "〜なければなりません",
         "en": "Same meaning; なくてはいけない is more spoken, なければなりません more formal.",
         "fr": "Même sens ; なくてはいけない est plus parlé, なければなりません plus formel.",
-        "es": "El mismo sentido; なくてはいけない es más hablado, なければなりません más formal."
+        "es": "El mismo sentido; なくてはいけない es más hablado, なければなりません más formal.",
+        "same": true
       },
       {
         "pattern": "〜なくてもいいです",
@@ -19262,7 +19416,8 @@
         "pattern": "〜ないといけない",
         "en": "Both are spoken « must »; ないといけない feels a shade more like « or else ».",
         "fr": "Tous deux sont le « il faut » de l'oral ; ないといけない a une nuance de « sinon » un peu plus forte.",
-        "es": "Los dos son el «tener que» hablado; ないといけない tiene un matiz algo más fuerte de «si no…»."
+        "es": "Los dos son el «tener que» hablado; ないといけない tiene un matiz algo más fuerte de «si no…».",
+        "same": true
       }
     ],
     "examples": [
@@ -19629,7 +19784,8 @@
         "pattern": "〜なくてはいけない",
         "en": "なくちゃ is なくてはいけない with the end dropped, among friends.",
         "fr": "なくちゃ, c'est なくてはいけない sans la fin, entre amis.",
-        "es": "なくちゃ es なくてはいけない sin el final, entre amigos."
+        "es": "なくちゃ es なくてはいけない sin el final, entre amigos.",
+        "same": true
       },
       {
         "pattern": "〜ちゃいけない／〜じゃいけない",
@@ -20049,13 +20205,15 @@
         "pattern": "〜なくてはいけない",
         "en": "Same spoken « must »; ないといけない is built on the と conditional.",
         "fr": "Même « il faut » de l'oral ; ないといけない est bâti sur le conditionnel と.",
-        "es": "El mismo «tener que» hablado; ないといけない se construye sobre el condicional と."
+        "es": "El mismo «tener que» hablado; ないといけない se construye sobre el condicional と.",
+        "same": true
       },
       {
         "pattern": "〜なければなりません",
         "en": "ないといけない for talk; なければなりません for formal or written use.",
         "fr": "ないといけない pour l'oral ; なければなりません pour le formel ou l'écrit.",
-        "es": "ないといけない para hablar; なければなりません para lo formal o lo escrito."
+        "es": "ないといけない para hablar; なければなりません para lo formal o lo escrito.",
+        "same": true
       }
     ],
     "examples": [
@@ -20938,7 +21096,8 @@
         "pattern": "〜でしょう",
         "en": "だろう is plain; でしょう is polite. Same word.",
         "fr": "だろう est neutre ; でしょう est poli. Même mot.",
-        "es": "だろう es llano; でしょう es cortés. Es la misma palabra."
+        "es": "だろう es llano; でしょう es cortés. Es la misma palabra.",
+        "same": true
       },
       {
         "pattern": "〜かもしれません",
@@ -21364,7 +21523,8 @@
         "pattern": "〜でしょうか",
         "en": "かな is the casual musing; でしょうか is the polite one.",
         "fr": "かな est la rêverie familière ; でしょうか, la version polie.",
-        "es": "かな es la duda coloquial; でしょうか es la cortés."
+        "es": "かな es la duda coloquial; でしょうか es la cortés.",
+        "same": true
       }
     ],
     "examples": [
@@ -21893,7 +22053,7 @@
             "なので"
           ],
           "why": {
-            "en": "A な-adjective keeps its な before のは: しずかなのは. Without it (しずかのは) the adjective cannot attach, and なので gives a reason (\"because it is quiet\"), not a spotlight.",
+            "en": "A な-adjective keeps its な before のは: しずかなのは. Without it (しずかのは) the adjective cannot attach, and なので gives a reason (« because it is quiet »), not a spotlight.",
             "fr": "Un adjectif en な garde son な devant のは : しずかなのは. Sans lui (しずかのは), l'adjectif ne s'accroche pas, et なので donne une cause (« parce que c'est calme »), pas une mise en relief.",
             "es": "Un adjetivo en な conserva su な ante のは: しずかなのは. Sin ella (しずかのは) el adjetivo no se engancha, y なので da una causa («porque es tranquilo»), no un foco."
           }
@@ -21929,7 +22089,7 @@
             }
           ],
           "why": {
-            "en": "After のは comes what is singled out: 読むことより書くこと, \"writing rather than reading\". より marks the one that falls behind, so reading, though named first, is not the hard part.",
+            "en": "After のは comes what is singled out: 読むことより書くこと, « writing rather than reading ». より marks the one that falls behind, so reading, though named first, is not the hard part.",
             "fr": "Après のは vient ce qui est mis en relief : 読むことより書くこと, « écrire plutôt que lire ». より marque ce qui passe derrière : lire, bien que nommé en premier, n'est pas le plus dur.",
             "es": "Tras のは viene lo destacado: 読むことより書くこと, «escribir más que leer». より marca lo que queda atrás: leer, aunque se nombre primero, no es lo difícil."
           }
@@ -21937,7 +22097,7 @@
         {
           "kind": "use",
           "ask": {
-            "en": "A coworker says: \"Yamada was late this morning, right?\" But it was Tanaka, not Yamada. How do you correct them?",
+            "en": "A coworker says: « Yamada was late this morning, right? » But it was Tanaka, not Yamada. How do you correct them?",
             "fr": "Un collègue te dit : « Yamada était en retard ce matin, non ? » Mais c'était Tanaka, pas Yamada. Comment le corriges-tu ?",
             "es": "Un compañero de trabajo dice: «Yamada llegó tarde esta mañana, ¿no?». Pero fue Tanaka, no Yamada. ¿Cómo lo corriges?"
           },
@@ -22066,16 +22226,14 @@
         "en": "Running is good for the body.",
         "fr": "Courir est bon pour le corps.",
         "es": "Correr es bueno para el cuerpo.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "外国語を習うことは楽しい。",
         "en": "Learning a foreign language is fun.",
         "fr": "Apprendre une langue étrangère est amusant.",
         "es": "Aprender un idioma extranjero es divertido.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "私のしゅみは音楽を聞くことです。",
@@ -22307,7 +22465,7 @@
             "もつです"
           ],
           "why": {
-            "en": "Before です at the end, only こと turns the verb into a noun: もつことです. もつのです would be the explaining の (\"the thing is, I will have…\"), and a bare もつです leaves です with no noun.",
+            "en": "Before です at the end, only こと turns the verb into a noun: もつことです. もつのです would be the explaining の (« the thing is, I will have… »), and a bare もつです leaves です with no noun.",
             "fr": "Devant です en fin de phrase, seul こと fait du verbe un nom : もつことです. もつのです serait le の qui explique (« c'est que j'aurai… »), et もつです laisse です sans nom.",
             "es": "Ante です al final, solo こと convierte el verbo en sustantivo: もつことです. もつのです sería el の que explica («es que tendré…»), y もつです a secas deja a です sin sustantivo."
           }
@@ -22361,7 +22519,7 @@
             "ピアノの習い方を考えています。"
           ],
           "why": {
-            "en": "Dictionary form + こと names the act as something still ahead: 習うことを考えています, \"I'm thinking of learning\". 習ったことを looks back at lessons already taken, and 習い方 is the way of learning, a method, not the idea of starting.",
+            "en": "Dictionary form + こと names the act as something still ahead: 習うことを考えています, « I'm thinking of learning ». 習ったことを looks back at lessons already taken, and 習い方 is the way of learning, a method, not the idea of starting.",
             "fr": "Forme du dictionnaire + こと nomme l'acte comme quelque chose à venir : 習うことを考えています, « je pense à m'y mettre ». 習ったことを regarde des cours déjà pris, et 習い方 est la façon d'apprendre, une méthode, pas l'idée de commencer.",
             "es": "Forma de diccionario + こと nombra el acto como algo por venir: 習うことを考えています, «pienso en aprender». 習ったことを mira clases ya tomadas, y 習い方 es la manera de aprender, un método, no la idea de empezar."
           }
@@ -22385,7 +22543,7 @@
             "話したこと"
           ],
           "why": {
-            "en": "こと attaches to the plain dictionary form, 話すこと, for a general statement. 話しますこと puts the polite form inside the noun, and 話したこと is \"what I said\" or \"having spoken\", something already past.",
+            "en": "こと attaches to the plain dictionary form, 話すこと, for a general statement. 話しますこと puts the polite form inside the noun, and 話したこと is « what I said » or « having spoken », something already past.",
             "fr": "こと se place derrière la forme neutre du dictionnaire, 話すこと, pour une généralité. 話しますこと met la forme polie dans le nom, et 話したこと est « ce que j'ai dit » ou « avoir parlé », quelque chose de passé.",
             "es": "こと va tras la forma de diccionario llana, 話すこと, para algo general. 話しますこと mete la forma cortés dentro del sustantivo, y 話したこと es «lo que dije» o «haber hablado», algo ya pasado."
           }
@@ -22421,7 +22579,7 @@
             }
           ],
           "why": {
-            "en": "食べないこと is \"not eating\", one noun, and the sentence says that noun is 体によくない. The two ない do not cancel out: the first is inside the noun, the second closes the sentence.",
+            "en": "食べないこと is « not eating », one noun, and the sentence says that noun is 体によくない. The two ない do not cancel out: the first is inside the noun, the second closes the sentence.",
             "fr": "食べないこと, c'est « ne pas manger », un seul nom, et la phrase dit que ce nom est 体によくない. Les deux ない ne s'annulent pas : le premier est dans le nom, le second ferme la phrase.",
             "es": "食べないこと es «no comer», un solo sustantivo, y la oración dice que ese sustantivo es 体によくない. Las dos ない no se anulan: la primera está dentro del sustantivo, la segunda cierra la oración."
           }
@@ -22788,7 +22946,7 @@
             "ひいたのが"
           ],
           "why": {
-            "en": "の attaches to the dictionary form, ひくの, and what is hard takes が: ひくのがむずかしい. ひきますの puts the polite form inside, and ひいたの is the past, \"the one I played\".",
+            "en": "の attaches to the dictionary form, ひくの, and what is hard takes が: ひくのがむずかしい. ひきますの puts the polite form inside, and ひいたの is the past, « the one I played ».",
             "fr": "の se place derrière la forme du dictionnaire, ひくの, et ce qui est difficile prend が : ひくのがむずかしい. ひきますの met la forme polie à l'intérieur, et ひいたの est le passé, « celui que j'ai joué ».",
             "es": "の va tras la forma de diccionario, ひくの, y lo que es difícil lleva が: ひくのがむずかしい. ひきますの mete la forma cortés dentro, y ひいたの es el pasado, «lo que toqué»."
           }
@@ -22884,7 +23042,7 @@
             }
           ],
           "why": {
-            "en": "Each の makes a noun of its verb: およぐの (swimming) is disliked, 水の中を見るの (looking underwater) is liked. The が (\"but\") sets the two against each other.",
+            "en": "Each の makes a noun of its verb: およぐの (swimming) is disliked, 水の中を見るの (looking underwater) is liked. The が (« but ») sets the two against each other.",
             "fr": "Chaque の fait un nom de son verbe : およぐの (nager) est détesté, 水の中を見るの (regarder sous l'eau) est aimé. Le が (« mais ») oppose les deux.",
             "es": "Cada の convierte su verbo en sustantivo: およぐの (nadar) no gusta, 水の中を見るの (mirar bajo el agua) sí. El が («pero») opone las dos."
           }
@@ -22908,7 +23066,7 @@
             "食べないのは"
           ],
           "why": {
-            "en": "For something general, の follows the plain present form: 食べるのは. 食べたのは looks back on one meal that is over, and 食べないのは would be \"not eating alone\", the opposite.",
+            "en": "For something general, の follows the plain present form: 食べるのは. 食べたのは looks back on one meal that is over, and 食べないのは would be « not eating alone », the opposite.",
             "fr": "Pour une généralité, の suit la forme neutre du présent : 食べるのは. 食べたのは regarde un repas précis qui est fini, et 食べないのは serait « ne pas manger seul », le contraire.",
             "es": "Para algo general, の sigue a la forma llana en presente: 食べるのは. 食べたのは mira una comida concreta ya terminada, y 食べないのは sería «no comer a solas», lo contrario."
           }
@@ -23212,7 +23370,7 @@
             "食べば"
           ],
           "why": {
-            "en": "A る-verb drops る and takes れば: 食べる → 食べれば, then よかった: \"I should have eaten\". 食べてよかった is the other pattern, \"glad I ate\", and 食べば skips the れ.",
+            "en": "A る-verb drops る and takes れば: 食べる → 食べれば, then よかった: « I should have eaten ». 食べてよかった is the other pattern, « glad I ate », and 食べば skips the れ.",
             "fr": "Un verbe en る perd る et prend れば : 食べる → 食べれば, puis よかった : « j'aurais dû manger ». 食べてよかった est l'autre tournure, « content d'avoir mangé », et 食べば saute le れ.",
             "es": "Un verbo en る pierde る y toma れば: 食べる → 食べれば, y luego よかった: «debería haber comido». 食べてよかった es la otra estructura, «menos mal que comí», y 食べば se salta la れ."
           }
@@ -23272,7 +23430,7 @@
             "行かなくて"
           ],
           "why": {
-            "en": "To regret having done it, put ない before ば: 行かなければよかった, \"I wish I hadn't gone\". 行けばよかった regrets not going, and 行かなくてよかった is \"glad I didn't go\".",
+            "en": "To regret having done it, put ない before ば: 行かなければよかった, « I wish I hadn't gone ». 行けばよかった regrets not going, and 行かなくてよかった is « glad I didn't go ».",
             "fr": "Pour regretter d'avoir fait, on met ない devant ば : 行かなければよかった, « j'aurais mieux fait de ne pas y aller ». 行けばよかった regrette de ne pas y aller, et 行かなくてよかった dit qu'on est soulagé de ne pas avoir fait le déplacement.",
             "es": "Para lamentar haberlo hecho, pon ない ante ば: 行かなければよかった, «ojalá no hubiera ido». 行けばよかった lamenta no haber ido, y 行かなくてよかった es «menos mal que no fui»."
           }
@@ -23314,7 +23472,7 @@
             "来るば"
           ],
           "why": {
-            "en": "来る is irregular: its ば-form is 来れば (くれば), so 来ればよかった is \"I should have come\". 来なければ wishes the opposite, not coming by bus at all, and 来るば leaves the dictionary form unchanged.",
+            "en": "来る is irregular: its ば-form is 来れば (くれば), so 来ればよかった is « I should have come ». 来なければ wishes the opposite, not coming by bus at all, and 来るば leaves the dictionary form unchanged.",
             "fr": "来る est irrégulier : sa forme en ば est 来れば (くれば), d'où 来ればよかった, « j'aurais dû venir ». 来なければ souhaite le contraire, ne pas venir en bus du tout, et 来るば laisse la forme du dictionnaire telle quelle.",
             "es": "来る es irregular: su forma ば es 来れば (くれば), así que 来ればよかった es «debería haber venido». 来なければ desea lo contrario, no venir en autobús, y 来るば deja intacta la forma de diccionario."
           }
@@ -23627,7 +23785,7 @@
             "読みたらどうですか"
           ],
           "why": {
-            "en": "読む ends in む, so its た-form is 読んだ and the suggestion is 読んだらどうですか. 読んでもいいですか asks permission (\"may I?\"), and 読みたら glues たら onto the stem.",
+            "en": "読む ends in む, so its た-form is 読んだ and the suggestion is 読んだらどうですか. 読んでもいいですか asks permission (« may I? »), and 読みたら glues たら onto the stem.",
             "fr": "読む finit par む, donc sa forme en た est 読んだ et la suggestion est 読んだらどうですか. 読んでもいいですか demande la permission (« puis-je ? »), et 読みたら colle たら sur le radical.",
             "es": "読む termina en む, así que su forma た es 読んだ y la sugerencia es 読んだらどうですか. 読んでもいいですか pide permiso («¿puedo?»), y 読みたら pega たら a la raíz."
           }
@@ -23663,7 +23821,7 @@
             }
           ],
           "why": {
-            "en": "た-form + らどうですか proposes an action to the listener: \"why not buy it elsewhere?\". It is neither a question about how a purchase went nor a report that one happened.",
+            "en": "た-form + らどうですか proposes an action to the listener: « why not buy it elsewhere? ». It is neither a question about how a purchase went nor a report that one happened.",
             "fr": "Forme en た + らどうですか propose une action à celui qui écoute : « pourquoi ne pas l'acheter ailleurs ? ». Ce n'est ni une question sur le déroulement d'un achat, ni le compte rendu d'un achat.",
             "es": "Forma た + らどうですか propone un acto a quien escucha: «¿por qué no lo compras en otro sitio?». No es una pregunta sobre cómo fue una compra ni el relato de una."
           }
@@ -23747,7 +23905,7 @@
             "出いたらどうですか"
           ],
           "why": {
-            "en": "出す ends in す, so its た-form is 出した and the suggestion is 出したらどうですか. 出さなかったら turns it into \"why not not hand it in?\", and 出いたら borrows the く-verb sound.",
+            "en": "出す ends in す, so its た-form is 出した and the suggestion is 出したらどうですか. 出さなかったら turns it into « why not not hand it in? », and 出いたら borrows the く-verb sound.",
             "fr": "出す finit par す, donc sa forme en た est 出した et la suggestion est 出したらどうですか. 出さなかったら en ferait « pourquoi ne pas ne pas les rendre ? », et 出いたら emprunte le son des verbes en く.",
             "es": "出す termina en す, así que su forma た es 出した y la sugerencia es 出したらどうですか. 出さなかったら lo convierte en «¿por qué no no entregarlos?», y 出いたら toma el sonido de los verbos en く."
           }
@@ -23791,7 +23949,8 @@
         "pattern": "〜ないで",
         "en": "Same meaning; ずに is written or formal, ないで is spoken.",
         "fr": "Même sens ; ずに est écrit ou formel, ないで est parlé.",
-        "es": "Mismo significado; ずに es escrito o formal, ないで es hablado."
+        "es": "Mismo significado; ずに es escrito o formal, ないで es hablado.",
+        "same": true
       },
       {
         "pattern": "〜なくて",
@@ -24209,7 +24368,8 @@
         "pattern": "〜うちに",
         "en": "あいだに is neutral « during »; うちに (N3) adds « before it ends ».",
         "fr": "あいだに est un « pendant » neutre ; うちに (N3) ajoute « avant que cela ne finisse ».",
-        "es": "あいだに es un «durante» neutro; うちに (N3) agrega «antes de que termine»."
+        "es": "あいだに es un «durante» neutro; うちに (N3) agrega «antes de que termine».",
+        "same": true
       },
       {
         "pattern": "〜ながら",
@@ -24525,7 +24685,7 @@
             "が"
           ],
           "why": {
-            "en": "After a noun, あいだに is linked by の: お正月のあいだに. な is the link of na-adjectives, and が would make お正月 a subject, not the span.",
+            "en": "After a noun, あいだに is linked by の: お正月のあいだに. な is the link of な-adjectives, and が would make お正月 a subject, not the span.",
             "fr": "Après un nom, あいだに se relie par の : お正月のあいだに. な est le lien des adjectifs en な, et が ferait de お正月 un sujet, pas la période.",
             "es": "Tras un sustantivo, あいだに se une con の: お正月のあいだに. な es el enlace de los adjetivos en な, y が haría de お正月 un sujeto, no el período."
           }
@@ -25062,8 +25222,7 @@
         "en": "I have just this moment finished eating.",
         "fr": "Je viens tout juste de finir de manger.",
         "es": "Acabo de terminar de comer ahora mismo.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "今、手紙を書いているところです。",
@@ -26075,7 +26234,7 @@
             }
           ],
           "why": {
-            "en": "る-verbs take させて (考えさせて), -u verbs the ない-stem + せて (行かせて, 休ませて), and する becomes させて.",
+            "en": "る-verbs take させて (考えさせて), う-verbs the ない-stem + せて (行かせて, 休ませて), and する becomes させて.",
             "fr": "Les verbes en る prennent させて (考えさせて), ceux en -u le radical en ない + せて (行かせて, 休ませて), et する devient させて.",
             "es": "Los verbos en る toman させて (考えさせて), los verbos en う la raíz ない + せて (行かせて, 休ませて), y する pasa a させて."
           },
@@ -28576,7 +28735,8 @@
         "pattern": "〜はじめる／〜おわる／〜つづける",
         "en": "出す: sudden; はじめる: a beginning, often intended.",
         "fr": "出す : soudain ; はじめる : un début, souvent voulu.",
-        "es": "出す: de repente; はじめる: un comienzo, a menudo intencionado."
+        "es": "出す: de repente; はじめる: un comienzo, a menudo intencionado.",
+        "same": true
       },
       {
         "pattern": "〜ていく／〜てくる",
@@ -29762,7 +29922,7 @@
             "もらえません"
           ],
           "why": {
-            "en": "The request is the potential もらえる in a negative question: もらえませんか, « could you ? ». もらえませんでしたか is the past, « were you unable to ? », and もらえません has no か: it is a statement, « I can't get you to ».",
+            "en": "The request is the potential もらえる in a negative question: もらえませんか, « could you? ». もらえませんでしたか is the past, « were you unable to? », and もらえません has no か: it is a statement, « I can't get you to ».",
             "fr": "La demande, c'est le potentiel もらえる en question négative : もらえませんか, « pourriez-vous ? ». もらえませんでしたか est le passé, « n'avez-vous pas pu ? », et もらえません, sans か, est une affirmation.",
             "es": "La petición es el potencial もらえる en pregunta negativa: もらえませんか, «¿podría?». もらえませんでしたか es el pasado, «¿no pudo?», y もらえません no tiene か: es una afirmación, «no consigo que lo haga»."
           }
@@ -30600,7 +30760,8 @@
         "pattern": "〜らしい",
         "en": "そうだ passes on words as heard; らしい adds your own doubt or inference.",
         "fr": "そうだ transmet les paroles telles qu'entendues ; らしい ajoute votre doute ou votre déduction.",
-        "es": "そうだ transmite las palabras tal como se oyeron; らしい agrega tu propia duda o deducción."
+        "es": "そうだ transmite las palabras tal como se oyeron; らしい agrega tu propia duda o deducción.",
+        "same": true
       },
       {
         "pattern": "〜ようです",
@@ -31021,7 +31182,8 @@
         "pattern": "〜とき",
         "en": "場合: if this situation arises; とき: when this happens, as a matter of time.",
         "fr": "場合 : si cette situation se présente ; とき : quand cela arrive, comme un moment.",
-        "es": "場合: si se da esta situación; とき: cuando pasa esto, como cuestión de tiempo."
+        "es": "場合: si se da esta situación; とき: cuando pasa esto, como cuestión de tiempo.",
+        "same": true
       }
     ],
     "examples": [
@@ -32704,7 +32866,7 @@
             {
               "en": "しずか is a な-adjective: those take にする, い-adjectives くする.",
               "fr": "しずか est un adjectif en な : ceux-là prennent にする, les adjectifs en い くする.",
-              "es": "しずか es un adjetivo en な: estos llevan にする, los adjetivo en い くする."
+              "es": "しずか es un adjetivo en な: estos llevan にする, los adjetivos en い くする."
             },
             {
               "en": "に marks the place where it must be quiet.",
@@ -34667,7 +34829,7 @@
           "tr": {
             "en": "I came by train today. (Said humbly, to a customer.)",
             "fr": "Aujourd'hui, j'ai pris le train pour venir. (Dit avec modestie, à un client.)",
-            "es": "Hoy he venido en tren. (Dicho con humildad, a un cliente.)"
+            "es": "Hoy vine en tren. (Dicho con humildad, a un cliente.)"
           },
           "choices": [
             "まいりました",
@@ -34833,7 +34995,8 @@
         "pattern": "〜てあげる／てくれる／てもらう",
         "en": "The plain trio; くださる (respectful) and いただく (humble) are the polite forms of くれる and もらう.",
         "fr": "Le trio ordinaire ; くださる (respectueux) et いただく (humble) sont les formes polies de くれる et もらう.",
-        "es": "El trío llano; くださる (respetuoso) e いただく (humilde) son las formas corteses de くれる y もらう."
+        "es": "El trío llano; くださる (respetuoso) e いただく (humilde) son las formas corteses de くれる y もらう.",
+        "same": true
       },
       {
         "pattern": "〜ていただけませんか",
@@ -35771,7 +35934,7 @@
           },
           "jp": "先生は「早くねなさい」と言いました。",
           "tr": {
-            "en": "The teacher said, \"Go to bed early.\"",
+            "en": "The teacher said, « Go to bed early ».",
             "fr": "Le professeur a dit : « Couche-toi tôt. »",
             "es": "El profesor dijo: «Vete a dormir temprano»."
           },
@@ -37586,7 +37749,7 @@
           },
           "jp": "道に大きく「止まれ」と書いてあります。",
           "tr": {
-            "en": "\"Stop\" is written in big letters on the road.",
+            "en": "« Stop » is written in big letters on the road.",
             "fr": "Il est écrit « Stop » en grandes lettres sur la route.",
             "es": "En la calzada está escrito «Alto» en letras grandes."
           },
@@ -38857,7 +39020,7 @@
           "why": {
             "en": "さ works on な-adjectives too: しずか, quiet, becomes しずかさ, the quiet itself.",
             "fr": "さ marche aussi avec les adjectifs en な : しずか, calme, devient しずかさ, le calme lui-même.",
-            "es": "さ funciona también con los adjetivo en な: しずか, tranquilo, pasa a しずかさ, la tranquilidad misma."
+            "es": "さ funciona también con los adjetivos en な: しずか, tranquilo, pasa a しずかさ, la tranquilidad misma."
           },
           "pair": [
             "しずかな町",
@@ -39526,7 +39689,7 @@
           },
           "jp": "へやのドアに、「使用中」と書いてありました。",
           "tr": {
-            "en": "On the door of the room, it said \"in use\".",
+            "en": "On the door of the room, it said « in use ».",
             "fr": "Sur la porte de la salle, il était écrit « occupé ».",
             "es": "En la puerta de la sala estaba escrito «en uso»."
           },
@@ -39613,8 +39776,7 @@
         "en": "The bus comes every ten minutes.",
         "fr": "Le bus passe toutes les dix minutes.",
         "es": "El autobús pasa cada diez minutos.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "一日おきに走っています。",
@@ -39629,8 +39791,7 @@
         "en": "Take this medicine every six hours.",
         "fr": "Prenez ce médicament toutes les six heures.",
         "es": "Tome esta medicina cada seis horas.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "道に五メートルおきに木があります。",
@@ -41827,7 +41988,8 @@
         "pattern": "〜かな",
         "en": "でしょうか is polite; かな is casual.",
         "fr": "でしょうか est poli ; かな est familier.",
-        "es": "でしょうか es cortés; かな es coloquial."
+        "es": "でしょうか es cortés; かな es coloquial.",
+        "same": true
       },
       {
         "pattern": "〜ませんか",
@@ -44366,8 +44528,7 @@
         "en": "I have never seen such a big dog.",
         "fr": "Je n'ai jamais vu un chien aussi grand.",
         "es": "Nunca he visto un perro tan grande.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "どんな音楽を聞きますか。",
@@ -44788,8 +44949,7 @@
         "en": "You don't have to hurry that much.",
         "fr": "Pas besoin de se presser autant.",
         "es": "No hay por qué tener tanta prisa.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "あんなにきれいな海ははじめて見ました。",
@@ -45480,7 +45640,7 @@
             "で"
           ],
           "why": {
-            "en": "After a noun, 予定 is joined with の: 三日間の予定です. な belongs to na-adjectives and で is the copula, so neither can link a noun to 予定.",
+            "en": "After a noun, 予定 is joined with の: 三日間の予定です. な belongs to な-adjectives and で is the copula, so neither can link a noun to 予定.",
             "fr": "Après un nom, 予定 se relie par の : 三日間の予定です. な appartient aux adjectifs en な et で est la copule : ni l'un ni l'autre ne relie un nom à 予定.",
             "es": "Tras un sustantivo, 予定 se une con の: 三日間の予定です. な es de los adjetivos en な y で es la cópula, así que ninguno puede unir un sustantivo a 予定."
           }
@@ -46134,8 +46294,7 @@
         "en": "At night I could hear the rain.",
         "fr": "La nuit, j'entendais la pluie.",
         "es": "Por la noche se oía la lluvia.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "となりのへやから歌が聞こえる。",

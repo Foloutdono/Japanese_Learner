@@ -779,9 +779,9 @@
             "だ"
           ],
           "why": {
-            "en": "A noun links to おかげで with の: 母のおかげで. な belongs to na-adjectives (しずかなおかげで), and だ cannot stand before おかげで.",
+            "en": "A noun links to おかげで with の: 母のおかげで. な belongs to な-adjectives (しずかなおかげで), and だ cannot stand before おかげで.",
             "fr": "Un nom se relie à おかげで par の : 母のおかげで. な appartient aux adjectifs en な (しずかなおかげで), et だ ne peut pas précéder おかげで.",
-            "es": "Un sustantivo se une a おかげで con の: 母のおかげで. な es de los adjetivo en な (しずかなおかげで), y だ no puede ir delante de おかげで."
+            "es": "Un sustantivo se une a おかげで con の: 母のおかげで. な es de los adjetivos en な (しずかなおかげで), y だ no puede ir delante de おかげで."
           }
         },
         {
@@ -1319,8 +1319,7 @@
         "en": "Having money does not necessarily mean you will be happy.",
         "fr": "Avoir de l'argent ne veut pas dire qu'on sera heureux.",
         "es": "Tener dinero no significa necesariamente que vayas a ser feliz.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "彼が悪いと言っているわけではない。",
@@ -1743,7 +1742,8 @@
         "pattern": "〜はずがない",
         "en": "わけがない: impossible, said with feeling; はずがない: impossible, from the facts.",
         "fr": "わけがない : impossible, avec émotion ; はずがない : impossible, d'après les faits.",
-        "es": "わけがない: imposible, dicho con emoción; はずがない: imposible, según los hechos."
+        "es": "わけがない: imposible, dicho con emoción; はずがない: imposible, según los hechos.",
+        "same": true
       },
       {
         "pattern": "〜わけではない",
@@ -2119,7 +2119,7 @@
             "安いの"
           ],
           "why": {
-            "en": "An い-adjective goes straight before わけがない in its plain form: 安いわけがない. な is for na-adjectives and の for nouns, so 安いな and 安いの add a particle that does not belong.",
+            "en": "An い-adjective goes straight before わけがない in its plain form: 安いわけがない. な is for な-adjectives and の for nouns, so 安いな and 安いの add a particle that does not belong.",
             "fr": "Un adjectif en い se place tel quel, à la forme neutre, devant わけがない : 安いわけがない. な est pour les adjectifs en な et の pour les noms : 安いな et 安いの ajoutent une particule qui n'a rien à faire là.",
             "es": "Un adjetivo en い va directo ante わけがない en forma llana: 安いわけがない. な es para adjetivo en な y の para sustantivos, así que 安いな y 安いの agregan una partícula que sobra."
           }
@@ -2165,7 +2165,8 @@
         "pattern": "〜はずです",
         "en": "に違いない is a conviction; はずだ is an expectation from a rule or a schedule.",
         "fr": "に違いない est une conviction ; はずだ, une attente fondée sur une règle ou un horaire.",
-        "es": "に違いない es una convicción; はずだ es una expectativa basada en una regla o un horario."
+        "es": "に違いない es una convicción; はずだ es una expectativa basada en una regla o un horario.",
+        "same": true
       },
       {
         "pattern": "〜かもしれません",
@@ -2177,7 +2178,8 @@
         "pattern": "〜に決まっている",
         "en": "Same certainty; に決まっている (N2) is more spoken and more emphatic.",
         "fr": "Même certitude ; に決まっている (N2) est plus parlé et plus appuyé.",
-        "es": "La misma certeza; に決まっている (N2) es más hablado y más enfático."
+        "es": "La misma certeza; に決まっている (N2) es más hablado y más enfático.",
+        "same": true
       }
     ],
     "examples": [
@@ -5521,7 +5523,8 @@
         "pattern": "〜ごとに",
         "en": "たびに: each time an event happens; ごとに: at each unit or interval.",
         "fr": "たびに : à chaque fois qu'un événement arrive ; ごとに : à chaque unité ou intervalle.",
-        "es": "たびに: cada vez que ocurre algo; ごとに: en cada unidad o intervalo."
+        "es": "たびに: cada vez que ocurre algo; ごとに: en cada unidad o intervalo.",
+        "same": true
       },
       {
         "pattern": "〜とき",
@@ -5542,8 +5545,7 @@
         "en": "Every time I hear this song, I remember my mother.",
         "fr": "Chaque fois que j'entends cette chanson, je pense à ma mère.",
         "es": "Cada vez que oigo esta canción, me acuerdo de mi madre.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "彼は会うたびに背が高くなっている。",
@@ -5914,7 +5916,8 @@
         "pattern": "〜ものの",
         "en": "一方で balances two facts; ものの concedes one and contradicts it.",
         "fr": "一方で équilibre deux faits ; ものの en concède un et le contredit.",
-        "es": "一方で equilibra dos hechos; ものの concede uno y lo contradice."
+        "es": "一方で equilibra dos hechos; ものの concede uno y lo contradice.",
+        "same": true
       }
     ],
     "examples": [
@@ -5931,16 +5934,14 @@
         "en": "This town is convenient, but on the other hand room prices are very high.",
         "fr": "Cette ville est pratique, mais d'un autre côté les loyers sont très élevés.",
         "es": "Esta ciudad es práctica, pero por otra parte las viviendas son muy caras.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "車は便利な一方で、お金がかかる。",
         "en": "Cars are convenient, but on the other hand they cost money.",
         "fr": "La voiture est pratique, mais d'un autre côté elle coûte cher.",
         "es": "El auto es práctico, pero por otra parte cuesta dinero.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "スマホは便利な一方で、目がつかれる。",
@@ -6279,7 +6280,7 @@
           "why": {
             "en": "A noun takes である before 一方で: 先生である一方で. な belongs to な-adjectives, and の links a noun to another noun; neither joins a noun to 一方で.",
             "fr": "Un nom prend である devant 一方で : 先生である一方で. な est pour les adjectifs en な, et の relie un nom à un autre nom ; ni l'un ni l'autre ne joint un nom à 一方で.",
-            "es": "Un sustantivo lleva である ante 一方で: 先生である一方で. な es de los adjetivo en な, y の une un sustantivo con otro; ninguno une un sustantivo con 一方で."
+            "es": "Un sustantivo lleva である ante 一方で: 先生である一方で. な es de los adjetivos en な, y の une un sustantivo con otro; ninguno une un sustantivo con 一方で."
           }
         }
       ]
@@ -8256,7 +8257,8 @@
         "pattern": "で",
         "en": "において is で in formal dress.",
         "fr": "において, c'est で en habit de cérémonie.",
-        "es": "において es で con traje de gala."
+        "es": "において es で con traje de gala.",
+        "same": true
       },
       {
         "pattern": "〜に関して",
@@ -8705,16 +8707,14 @@
         "en": "For children, play is as important as study.",
         "fr": "Pour les enfants, le jeu est aussi important que l'étude.",
         "es": "Para los niños, el juego es tan importante como el estudio.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "外国人にとって、けいごはとても難しい。",
         "en": "For foreigners, honorific language is very difficult.",
         "fr": "Pour les étrangers, le langage honorifique est très difficile.",
         "es": "Para los extranjeros, el lenguaje honorífico es muy difícil.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "私にとって、家族が一番大切です。",
@@ -9093,19 +9093,22 @@
         "pattern": "〜にしたがって",
         "en": "Same gradual change; にしたがって also means « following (instructions) », につれて does not.",
         "fr": "Même changement progressif ; にしたがって signifie aussi « en suivant (des consignes) », pas につれて.",
-        "es": "El mismo cambio gradual; にしたがって también significa «siguiendo (instrucciones)», につれて no."
+        "es": "El mismo cambio gradual; にしたがって también significa «siguiendo (instrucciones)», につれて no.",
+        "same": true
       },
       {
         "pattern": "〜とともに",
         "en": "につれて: only gradual change; とともに: also « together with » and « at the same time as ».",
         "fr": "につれて : changement progressif seulement ; とともに : aussi « avec » et « en même temps que ».",
-        "es": "につれて: solo un cambio gradual; とともに: también «junto con» y «al mismo tiempo que»."
+        "es": "につれて: solo un cambio gradual; とともに: también «junto con» y «al mismo tiempo que».",
+        "same": true
       },
       {
         "pattern": "〜に伴って",
         "en": "Same idea; に伴って (N2) is the formal, written version.",
         "fr": "Même idée ; に伴って (N2) est la version formelle et écrite.",
-        "es": "La misma idea; に伴って (N2) es la versión formal y escrita."
+        "es": "La misma idea; に伴って (N2) es la versión formal y escrita.",
+        "same": true
       }
     ],
     "examples": [
@@ -9522,7 +9525,8 @@
         "pattern": "〜通りに",
         "en": "にしたがって: following a guide; 通りに: copying it exactly.",
         "fr": "にしたがって : en suivant un guide ; 通りに : en le copiant exactement.",
-        "es": "にしたがって: siguiendo una guía; 通りに: copiándola exactamente."
+        "es": "にしたがって: siguiendo una guía; 通りに: copiándola exactamente.",
+        "same": true
       },
       {
         "pattern": "〜とともに",
@@ -9545,8 +9549,7 @@
         "en": "As time passed, the pain lessened.",
         "fr": "Avec le temps, la douleur a diminué.",
         "es": "A medida que pasaba el tiempo, el dolor fue disminuyendo.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "先生の説明にしたがって、実験を進めた。",
@@ -9862,7 +9865,8 @@
         "pattern": "と",
         "en": "とともに is the written と for company; と is the spoken one.",
         "fr": "とともに est le と écrit de la compagnie ; と, celui de l'oral.",
-        "es": "とともに es el と de compañía propio de la lengua escrita; と, el de la lengua hablada."
+        "es": "とともに es el と de compañía propio de la lengua escrita; と, el de la lengua hablada.",
+        "same": true
       },
       {
         "pattern": "〜と同時に",
@@ -9885,16 +9889,14 @@
         "en": "As the town grew, life changed along with it.",
         "fr": "À mesure que la ville grandissait, la vie a changé aussi.",
         "es": "A medida que la ciudad crecía, la vida también fue cambiando.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "彼は医者であるとともに、作家でもある。",
         "en": "He is a doctor and at the same time a writer.",
         "fr": "Il est médecin et en même temps écrivain.",
         "es": "Él es médico y, al mismo tiempo, escritor.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "春が来るとともに、花がさき始めた。",
@@ -10751,7 +10753,8 @@
         "pattern": "〜途中で",
         "en": "最中に: at the height of it; 途中で: partway along it.",
         "fr": "最中に : au plus fort ; 途中で : à mi-chemin.",
-        "es": "最中に: en su punto álgido; 途中で: a mitad de camino."
+        "es": "最中に: en su punto álgido; 途中で: a mitad de camino.",
+        "same": true
       },
       {
         "pattern": "〜ところだ",
@@ -11171,7 +11174,8 @@
         "pattern": "〜とき",
         "en": "際に is とき in formal dress, for occasions and procedures.",
         "fr": "際に, c'est とき en habit formel, pour les occasions et les démarches.",
-        "es": "際に es とき con traje formal, para ocasiones y trámites."
+        "es": "際に es とき con traje formal, para ocasiones y trámites.",
+        "same": true
       },
       {
         "pattern": "〜場合",
@@ -11200,16 +11204,14 @@
         "en": "This form is required when applying.",
         "fr": "Ce formulaire est nécessaire lors de l'inscription.",
         "es": "Este formulario es necesario al presentar la solicitud.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "ご来社の際に、受付にお声がけください。",
         "en": "When you visit our office, please let reception know.",
         "fr": "Lors de votre visite, veuillez vous adresser à l'accueil.",
         "es": "Cuando visite nuestra empresa, por favor, avise en la recepción.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "入国の際に、パスポートを見せなければならない。",
@@ -14026,19 +14028,22 @@
         "pattern": "〜も（強調）",
         "en": "さえ: even this extreme case; も: also, or a large amount.",
         "fr": "さえ : même ce cas extrême ; も : aussi, ou une grande quantité.",
-        "es": "さえ: incluso este caso extremo; も: también, o una gran cantidad."
+        "es": "さえ: incluso este caso extremo; も: también, o una gran cantidad.",
+        "same": true
       },
       {
         "pattern": "〜だって",
         "en": "さえ is written or emphatic; だって is the spoken « even ».",
         "fr": "さえ est écrit ou emphatique ; だって, le « même » de l'oral.",
-        "es": "さえ es escrito o enfático; だって es el «incluso» hablado."
+        "es": "さえ es escrito o enfático; だって es el «incluso» hablado.",
+        "same": true
       },
       {
         "pattern": "〜すら",
         "en": "Same « even »; すら (N1) is more literary.",
         "fr": "Même « même » ; すら (N1) est plus littéraire.",
-        "es": "El mismo «incluso»; すら (N1) es más literario."
+        "es": "El mismo «incluso»; すら (N1) es más literario.",
+        "same": true
       }
     ],
     "examples": [
@@ -16440,7 +16445,8 @@
         "pattern": "〜きる",
         "en": "ぬく: through hardship; きる: completely, to the last bit.",
         "fr": "ぬく : à travers l'épreuve ; きる : entièrement, jusqu'au dernier morceau.",
-        "es": "ぬく: pese a las dificultades; きる: por completo, hasta lo último."
+        "es": "ぬく: pese a las dificultades; きる: por completo, hasta lo último.",
+        "same": true
       },
       {
         "pattern": "〜通す",
@@ -16455,8 +16461,7 @@
         "en": "However hard it is, I run through to the very end.",
         "fr": "Même si c'est dur, je cours jusqu'au bout.",
         "es": "Por duro que sea, corro hasta el final.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "この問題は自分で考えぬく。",
@@ -16471,8 +16476,7 @@
         "en": "However tough it gets, I mean to see this job through.",
         "fr": "Aussi dur que ce soit, je compte mener ce travail à terme.",
         "es": "Por difícil que se ponga, pienso sacar adelante este trabajo hasta el final.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "どんな時代も生きぬく力が大切だ。",
@@ -16843,7 +16847,8 @@
         "pattern": "〜てしまう",
         "en": "きる: all of it; てしまう: over and done, often with regret.",
         "fr": "きる : la totalité ; てしまう : terminé, souvent avec regret.",
-        "es": "きる: todo entero; てしまう: terminado del todo, a menudo con pesar."
+        "es": "きる: todo entero; てしまう: terminado del todo, a menudo con pesar.",
+        "same": true
       }
     ],
     "examples": [
@@ -16860,8 +16865,7 @@
         "en": "I will read this book right through in a day.",
         "fr": "Je lirai ce livre en entier en une journée.",
         "es": "Este libro lo leeré entero en un día.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "料理が多すぎて、全部食べきることができなかった。",
@@ -17999,19 +18003,22 @@
         "pattern": "〜もので",
         "en": "Same excuse; もので is softer and a little more polite.",
         "fr": "Même excuse ; もので est plus doux et un peu plus poli.",
-        "es": "La misma excusa; もので es más suave y algo más cortés."
+        "es": "La misma excusa; もので es más suave y algo más cortés.",
+        "same": true
       },
       {
         "pattern": "〜ので",
         "en": "ものだから pleads; ので simply explains.",
         "fr": "ものだから plaide ; ので explique simplement.",
-        "es": "ものだから se justifica; ので simplemente explica."
+        "es": "ものだから se justifica; ので simplemente explica.",
+        "same": true
       },
       {
         "pattern": "〜せいで",
         "en": "ものだから excuses yourself; せいで blames a cause.",
         "fr": "ものだから vous excuse ; せいで accuse une cause.",
-        "es": "ものだから sirve para disculparse; せいで culpa a una causa."
+        "es": "ものだから sirve para disculparse; せいで culpa a una causa.",
+        "same": true
       }
     ],
     "examples": [
@@ -18459,13 +18466,15 @@
         "pattern": "〜ものだから",
         "en": "もので: softer, apologetic; ものだから: more insistent.",
         "fr": "もので : plus doux, contrit ; ものだから : plus insistant.",
-        "es": "もので: más suave, de disculpa; ものだから: más insistente."
+        "es": "もので: más suave, de disculpa; ものだから: más insistente.",
+        "same": true
       },
       {
         "pattern": "〜から",
         "en": "もので pleads a circumstance softly; から states a reason plainly and can lead to a request.",
         "fr": "もので plaide doucement une circonstance ; から énonce une raison et peut mener à une demande.",
-        "es": "もので alega una circunstancia con suavidad; から da una razón sin más y puede llevar a una petición."
+        "es": "もので alega una circunstancia con suavidad; から da una razón sin más y puede llevar a una petición.",
+        "same": true
       },
       {
         "pattern": "〜なくて",
@@ -18890,8 +18899,7 @@
         "en": "It is exactly because it was hard that today feels so good.",
         "fr": "C'est justement parce que ça a été dur que la joie est là aujourd'hui.",
         "es": "Precisamente porque fue duro, hoy la alegría es tan grande.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "子どもが好きだからこそ、きびしくするのだ。",
@@ -19234,13 +19242,15 @@
         "pattern": "〜からには",
         "en": "Same meaning; からには (N2) is a shade more emotional.",
         "fr": "Même sens ; からには (N2) est une nuance plus émotif.",
-        "es": "El mismo sentido; からには (N2) es un poco más emotivo."
+        "es": "El mismo sentido; からには (N2) es un poco más emotivo.",
+        "same": true
       },
       {
         "pattern": "〜上は",
         "en": "以上 and 上は (N2) both say « now that »; 上は is more formal.",
         "fr": "以上 et 上は (N2) disent tous deux « dès lors que » ; 上は est plus formel.",
-        "es": "以上 y 上は (N2) dicen ambos «ya que»; 上は es más formal."
+        "es": "以上 y 上は (N2) dicen ambos «ya que»; 上は es más formal.",
+        "same": true
       }
     ],
     "examples": [
@@ -19621,7 +19631,8 @@
         "pattern": "〜あとで",
         "en": "上で implies the first step was needed; あとで only orders in time.",
         "fr": "上で sous-entend que la première étape était nécessaire ; あとで ordonne seulement dans le temps.",
-        "es": "上で da a entender que el primer paso era necesario; あとで solo ordena en el tiempo."
+        "es": "上で da a entender que el primer paso era necesario; あとで solo ordena en el tiempo.",
+        "same": true
       }
     ],
     "examples": [
@@ -20412,7 +20423,8 @@
         "pattern": "〜わけがない",
         "en": "はずがない: impossible by reasoning; わけがない: impossible, with feeling.",
         "fr": "はずがない : impossible par raisonnement ; わけがない : impossible, avec émotion.",
-        "es": "はずがない: imposible según el razonamiento; わけがない: imposible, con emoción."
+        "es": "はずがない: imposible según el razonamiento; わけがない: imposible, con emoción.",
+        "same": true
       },
       {
         "pattern": "〜に違いない",
@@ -21166,13 +21178,15 @@
         "pattern": "〜てしかたがない",
         "en": "てたまらない: unbearable, physical; てしかたがない: can't help it, more general.",
         "fr": "てたまらない : insupportable, physique ; てしかたがない : on n'y peut rien, plus général.",
-        "es": "てたまらない: insoportable, físico; てしかたがない: no se puede evitar, más general."
+        "es": "てたまらない: insoportable, físico; てしかたがない: no se puede evitar, más general.",
+        "same": true
       },
       {
         "pattern": "〜てならない",
         "en": "てたまらない is raw; てならない (N2) is a feeling that wells up.",
         "fr": "てたまらない est brut ; てならない (N2), un sentiment qui monte.",
-        "es": "てたまらない es crudo; てならない (N2) es un sentimiento que brota."
+        "es": "てたまらない es crudo; てならない (N2) es un sentimiento que brota.",
+        "same": true
       },
       {
         "pattern": "〜すぎる",
@@ -21508,7 +21522,7 @@
           "why": {
             "en": "しびれる is a verb, so it simply takes て: しびれてたまらない. しびれくて wrongly uses the い-adjective pattern, and たまらなかった is the past, but the numbness is here いま.",
             "fr": "しびれる est un verbe : il prend simplement て, d'où しびれてたまらない. しびれくて applique à tort le modèle des adjectifs en い, et たまらなかった est le passé, alors que l'engourdissement est là いま.",
-            "es": "しびれる es un verbo, así que solo toma て: しびれてたまらない. しびれくて aplica por error el patrón de los adjetivo en い, y たまらなかった es el pasado, pero el hormigueo está aquí いま."
+            "es": "しびれる es un verbo, así que solo toma て: しびれてたまらない. しびれくて aplica por error el patrón de los adjetivos en い, y たまらなかった es el pasado, pero el hormigueo está aquí いま."
           }
         },
         {
@@ -21586,13 +21600,15 @@
         "pattern": "〜てたまらない",
         "en": "てしかたがない: can't help it; てたまらない: can't bear it.",
         "fr": "てしかたがない : on n'y peut rien ; てたまらない : on ne le supporte pas.",
-        "es": "てしかたがない: no lo puedo evitar; てたまらない: no lo soporto."
+        "es": "てしかたがない: no lo puedo evitar; てたまらない: no lo soporto.",
+        "same": true
       },
       {
         "pattern": "〜てならない",
         "en": "Same idea; てならない (N2) is more written and for feelings that rise unbidden.",
         "fr": "Même idée ; てならない (N2) est plus écrit, pour des sentiments qui montent d'eux-mêmes.",
-        "es": "La misma idea; てならない (N2) es más escrito, para sentimientos que surgen solos."
+        "es": "La misma idea; てならない (N2) es más escrito, para sentimientos que surgen solos.",
+        "same": true
       },
       {
         "pattern": "〜てはいられない",
@@ -22336,19 +22352,22 @@
         "pattern": "〜とすれば",
         "en": "Same hypothesis; とすれば sounds a little more formal.",
         "fr": "Même hypothèse ; とすれば sonne un peu plus formel.",
-        "es": "La misma hipótesis; とすれば suena algo más formal."
+        "es": "La misma hipótesis; とすれば suena algo más formal.",
+        "same": true
       },
       {
         "pattern": "〜なら",
         "en": "としたら reasons from an assumption; なら reacts to something said.",
         "fr": "としたら raisonne d'après une supposition ; なら réagit à une chose dite.",
-        "es": "としたら razona a partir de un supuesto; なら reacciona a algo que se acaba de decir."
+        "es": "としたら razona a partir de un supuesto; なら reacciona a algo que se acaba de decir.",
+        "same": true
       },
       {
         "pattern": "〜場合",
         "en": "としたら is a thought experiment; 場合 is a foreseen situation.",
         "fr": "としたら est une expérience de pensée ; 場合, une situation prévue.",
-        "es": "としたら es un experimento mental; 場合 es una situación prevista."
+        "es": "としたら es un experimento mental; 場合 es una situación prevista.",
+        "same": true
       }
     ],
     "examples": [
@@ -22778,13 +22797,15 @@
         "pattern": "〜としたら",
         "en": "Same hypothesis; としたら is more spoken.",
         "fr": "Même hypothèse ; としたら est plus parlé.",
-        "es": "La misma hipótesis; としたら es más hablada."
+        "es": "La misma hipótesis; としたら es más hablada.",
+        "same": true
       },
       {
         "pattern": "〜なら",
         "en": "とすれば sets an assumption; なら takes up a fact just mentioned.",
         "fr": "とすれば pose une supposition ; なら reprend un fait qu'on vient de citer.",
-        "es": "とすれば plantea un supuesto; なら retoma un hecho que se acaba de mencionar."
+        "es": "とすれば plantea un supuesto; なら retoma un hecho que se acaba de mencionar.",
+        "same": true
       }
     ],
     "examples": [
@@ -23636,13 +23657,15 @@
         "pattern": "〜としても",
         "en": "Same concession; としても (N2) is hypothetical (« even if it were »).",
         "fr": "Même concession ; としても (N2) est hypothétique (« même si c'était »).",
-        "es": "La misma concesión; としても (N2) es hipotética («aunque fuera»)."
+        "es": "La misma concesión; としても (N2) es hipotética («aunque fuera»).",
+        "same": true
       },
       {
         "pattern": "〜にしろ〜にしろ",
         "en": "にしても takes one premise; にしろ〜にしろ (N2) takes both alternatives at once.",
         "fr": "にしても prend une prémisse ; にしろ〜にしろ (N2) prend les deux alternatives à la fois.",
-        "es": "にしても toma una sola premisa; にしろ〜にしろ (N2) toma las dos alternativas a la vez."
+        "es": "にしても toma una sola premisa; にしろ〜にしろ (N2) toma las dos alternativas a la vez.",
+        "same": true
       }
     ],
     "examples": [
@@ -24087,13 +24110,15 @@
         "pattern": "〜だけでなく",
         "en": "Same meaning; だけでなく is the everyday form.",
         "fr": "Même sens ; だけでなく est la forme courante.",
-        "es": "El mismo significado; だけでなく es la forma cotidiana."
+        "es": "El mismo significado; だけでなく es la forma cotidiana.",
+        "same": true
       },
       {
         "pattern": "〜ばかりか",
         "en": "ばかりでなく adds calmly; ばかりか (N2) adds with surprise.",
         "fr": "ばかりでなく ajoute calmement ; ばかりか (N2) ajoute avec surprise.",
-        "es": "ばかりでなく agrega con calma; ばかりか (N2) agrega con sorpresa."
+        "es": "ばかりでなく agrega con calma; ばかりか (N2) agrega con sorpresa.",
+        "same": true
       },
       {
         "pattern": "〜はもちろん",
@@ -24122,8 +24147,7 @@
         "en": "This shop is not only cheap; the goods are good too.",
         "fr": "Ce magasin n'est pas seulement bon marché, les produits sont bons aussi.",
         "es": "Esta tienda no solo es barata: también tiene buenos productos.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "この公園は子どもばかりでなく、大人も楽しめる。",
@@ -26034,7 +26058,7 @@
           "why": {
             "en": "好き is a な-adjective, so before も it takes で: 好きでも. 好きくても is the い-adjective pattern, and 好きだったら says « if I like it », which is not « however much I like it ».",
             "fr": "好き est un adjectif en な : devant も il prend で, d'où 好きでも. 好きくても est le modèle des adjectifs en い, et 好きだったら dit « si j'aime », pas « même si j'adore ».",
-            "es": "好き es un adjetivo en な, así que ante も lleva で: 好きでも. 好きくても es el patrón de los adjetivo en い, y 好きだったら dice «si me gusta», no «por mucho que me guste»."
+            "es": "好き es un adjetivo en な, así que ante も lleva で: 好きでも. 好きくても es el patrón de los adjetivos en い, y 好きだったら dice «si me gusta», no «por mucho que me guste»."
           }
         }
       ]
@@ -26461,7 +26485,8 @@
         "pattern": "〜ばかりでなく",
         "en": "Same meaning; ばかりでなく is a shade more written.",
         "fr": "Même sens ; ばかりでなく est une nuance plus écrit.",
-        "es": "El mismo significado; ばかりでなく es algo más escrita."
+        "es": "El mismo significado; ばかりでなく es algo más escrita.",
+        "same": true
       },
       {
         "pattern": "〜はもちろん",
@@ -26490,8 +26515,7 @@
         "en": "This restaurant is not only cheap, the food is good too.",
         "fr": "Ce restaurant est non seulement bon marché, mais on y mange bien.",
         "es": "Este restaurante no solo es barato: además, la comida está buena.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "学生だけでなく、先生も参加した。",
@@ -27684,8 +27708,7 @@
         "en": "Each time we meet, he is livelier.",
         "fr": "À chaque rencontre, il est plus en forme.",
         "es": "Cada vez que nos vemos, él está más animado.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "駅ごとに電車が止まるので、時間がかかる。",
@@ -28061,8 +28084,7 @@
         "en": "The phone rang in the middle of the conversation.",
         "fr": "Le téléphone a sonné au milieu de la conversation.",
         "es": "El teléfono sonó en mitad de la conversación.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "帰る途中で、パンを買いました。",
@@ -29192,7 +29214,8 @@
         "pattern": "〜やすい／〜にくい",
         "en": "づらい: hard because it hurts or embarrasses; にくい: hard by nature.",
         "fr": "づらい : difficile parce que ça pèse ou gêne ; にくい : difficile par nature.",
-        "es": "づらい: difícil porque duele o da vergüenza; にくい: difícil por naturaleza."
+        "es": "づらい: difícil porque duele o da vergüenza; にくい: difícil por naturaleza.",
+        "same": true
       },
       {
         "pattern": "〜がたい",
@@ -30402,7 +30425,7 @@
           "why": {
             "en": "After a noun, hearsay そうだ needs だ: 中止だそうだ. 中止そうだ drops it, and 中止なそうだ borrows the な of な-adjectives, which a noun does not take here.",
             "fr": "Après un nom, le そうだ d'ouï-dire demande だ : 中止だそうだ. 中止そうだ l'oublie, et 中止なそうだ emprunte le な des adjectifs en な, que le nom ne prend pas ici.",
-            "es": "Tras un sustantivo, el そうだ de rumor necesita だ: 中止だそうだ. 中止そうだ lo omite, y 中止なそうだ toma prestado el な de los adjetivo en な, que aquí un sustantivo no lleva."
+            "es": "Tras un sustantivo, el そうだ de rumor necesita だ: 中止だそうだ. 中止そうだ lo omite, y 中止なそうだ toma prestado el な de los adjetivos en な, que aquí un sustantivo no lleva."
           }
         }
       ]
@@ -32124,7 +32147,8 @@
         "pattern": "は",
         "en": "は marks a topic; というのは marks a word being explained.",
         "fr": "は marque un thème ; というのは marque un mot qu'on explique.",
-        "es": "は marca un tema; というのは marca una palabra que se explica."
+        "es": "は marca un tema; というのは marca una palabra que se explica.",
+        "same": true
       }
     ],
     "examples": [
@@ -32170,7 +32194,7 @@
           },
           "jp": "「ホーム」って、電車に乗るところのことだよ。",
           "tr": {
-            "en": "A \"platform\" is where you get on the train.",
+            "en": "A « platform » is where you get on the train.",
             "fr": "Un « quai », c'est l'endroit où on monte dans le train.",
             "es": "Un «andén» es donde se sube al tren."
           },
@@ -32215,7 +32239,7 @@
           },
           "jp": "駅で待つというのは、ホームで待つということですか。",
           "tr": {
-            "en": "By \"wait at the station\", do you mean wait on the platform?",
+            "en": "By « wait at the station », do you mean wait on the platform?",
             "fr": "Attendre à la gare, ça veut dire attendre sur le quai ?",
             "es": "«Esperar en la estación», ¿significa esperar en el andén?"
           },
@@ -33732,7 +33756,7 @@
             }
           ],
           "why": {
-            "en": "In a question, つまり sums up what the other person said in your own words, to check it: « so, you mean… ? ».",
+            "en": "In a question, つまり sums up what the other person said in your own words, to check it: « so, you mean…? ».",
             "fr": "Dans une question, つまり reprend avec ses propres mots ce que l'autre a dit, pour le vérifier : « donc, tu veux dire… ? ».",
             "es": "En una pregunta, つまり resume con tus palabras lo que dijo el otro, para comprobarlo: «o sea, ¿quieres decir…?»."
           },
@@ -34742,7 +34766,7 @@
             "雨なのに"
           ],
           "why": {
-            "en": "A noun takes の before 上に: 雨の上に. 雨な上に borrows the な of na-adjectives, and 雨なのに says « although it rains », a contrast this sentence does not make.",
+            "en": "A noun takes の before 上に: 雨の上に. 雨な上に borrows the な of な-adjectives, and 雨なのに says « although it rains », a contrast this sentence does not make.",
             "fr": "Un nom prend の devant 上に : 雨の上に. 雨な上に emprunte le な des adjectifs en な, et 雨なのに dit « bien qu'il pleuve », un contraste que la phrase ne fait pas.",
             "es": "Un sustantivo lleva の antes de 上に: 雨の上に. 雨な上に toma el な de los adjetivos en な, y 雨なのに dice «aunque llueve», un contraste que esta oración no hace."
           }
@@ -34846,7 +34870,8 @@
         "pattern": "〜はもとより",
         "en": "Same meaning; はもとより (N2) is formal and written.",
         "fr": "Même sens ; はもとより (N2) est formel et écrit.",
-        "es": "El mismo significado; はもとより (N2) es formal y escrita."
+        "es": "El mismo significado; はもとより (N2) es formal y escrita.",
+        "same": true
       },
       {
         "pattern": "〜だけでなく",
@@ -35682,7 +35707,8 @@
         "pattern": "〜てもいいです",
         "en": "てもかまわない: I don't mind; てもいい: it's allowed.",
         "fr": "てもかまわない : cela ne me dérange pas ; てもいい : c'est permis.",
-        "es": "てもかまわない: no me importa; てもいい: está permitido."
+        "es": "てもかまわない: no me importa; てもいい: está permitido.",
+        "same": true
       },
       {
         "pattern": "〜なくてもいいです",
@@ -35808,7 +35834,7 @@
             }
           ],
           "why": {
-            "en": "As a question, てもかまいませんか asks « would you mind if I… ? ». Asking someone else to do it is てください.",
+            "en": "As a question, てもかまいませんか asks « would you mind if I…? ». Asking someone else to do it is てください.",
             "fr": "En question, てもかまいませんか demande « ça vous dérange si je… ? ». Demander à l'autre de le faire, c'est てください.",
             "es": "Como pregunta, てもかまいませんか pide «¿le importa si…?». Pedir al otro que lo haga es てください."
           },
@@ -36963,7 +36989,8 @@
         "pattern": "〜など",
         "en": "なんか／なんて: like that, with feeling; など: and so on, neutral.",
         "fr": "なんか／なんて : ce genre de chose, avec émotion ; など : etc., neutre.",
-        "es": "なんか／なんて: algo así, con sentimiento; など: etcétera, neutro."
+        "es": "なんか／なんて: algo así, con sentimiento; など: etcétera, neutro.",
+        "same": true
       },
       {
         "pattern": "〜とか",
@@ -36984,16 +37011,14 @@
         "en": "Stop watching TV and the like, and study.",
         "fr": "Arrête la télé et compagnie, et étudie.",
         "es": "Deja la tele y esas cosas, y ponte a estudiar.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "お金なんて、そんなに大切じゃない。",
         "en": "Money isn't all that important.",
         "fr": "L'argent, ce n'est pas si important.",
         "es": "Eso del dinero no es tan importante.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "私なんかには、とてもできません。",
@@ -37144,7 +37169,7 @@
           },
           "jp": "やめるなんて、言わないでください。",
           "tr": {
-            "en": "Please don't say things like \"I quit\".",
+            "en": "Please don't say things like « I quit ».",
             "fr": "Ne dites pas des choses comme « j'arrête », s'il vous plaît.",
             "es": "No diga cosas como «lo dejo», por favor."
           },
@@ -37432,19 +37457,22 @@
         "pattern": "〜さえ",
         "en": "だって: even, spoken; さえ: even, written or emphatic.",
         "fr": "だって : même, à l'oral ; さえ : même, à l'écrit ou avec insistance.",
-        "es": "だって: incluso, hablado; さえ: incluso, escrito o enfático."
+        "es": "だって: incluso, hablado; さえ: incluso, escrito o enfático.",
+        "same": true
       },
       {
         "pattern": "も",
         "en": "だって is も with feeling: « even me, me too ».",
         "fr": "だって, c'est も avec émotion : « même moi, moi aussi ».",
-        "es": "だって es も con sentimiento: «hasta yo, yo también»."
+        "es": "だって es も con sentimiento: «hasta yo, yo también».",
+        "same": true
       },
       {
         "pattern": "〜でも",
         "en": "だって is the casual twin of でも in the sense of « even ».",
         "fr": "だって est le jumeau familier de でも au sens de « même ».",
-        "es": "だって es el equivalente coloquial de でも en el sentido de «incluso»."
+        "es": "だって es el equivalente coloquial de でも en el sentido de «incluso».",
+        "same": true
       }
     ],
     "examples": [
@@ -37838,8 +37866,7 @@
         "en": "I read the book through in one night.",
         "fr": "Je lis le livre d'une traite en une nuit.",
         "es": "Leo el libro de principio a fin en una noche.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "最後まで自分の意見を言い通す。",
@@ -39232,8 +39259,7 @@
         "en": "What was his name again?",
         "fr": "Comment il s'appelait, déjà ?",
         "es": "¿Cómo se llamaba él?",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "明日は休みだっけ？",
@@ -40386,7 +40412,8 @@
         "pattern": "ぜんぜん〜ない",
         "en": "Same total denial; ちっとも is more spoken and more peeved.",
         "fr": "Même négation totale ; ちっとも est plus parlé et plus agacé.",
-        "es": "La misma negación total; ちっとも es más hablado y suena a más fastidio."
+        "es": "La misma negación total; ちっとも es más hablado y suena a más fastidio.",
+        "same": true
       },
       {
         "pattern": "あまり〜ない",
@@ -41579,19 +41606,22 @@
         "pattern": "〜でも",
         "en": "か何か adds « or something » after a noun; でも does it with one particle.",
         "fr": "か何か ajoute « ou quelque chose » après un nom ; でも le fait avec une seule particule.",
-        "es": "か何か agrega «o algo así» tras un sustantivo; でも lo hace con una sola partícula."
+        "es": "か何か agrega «o algo así» tras un sustantivo; でも lo hace con una sola partícula.",
+        "same": true
       },
       {
         "pattern": "〜とか",
         "en": "か何か offers one example; とか lists several.",
         "fr": "か何か propose un exemple ; とか en énumère plusieurs.",
-        "es": "か何か ofrece un ejemplo; とか enumera varios."
+        "es": "か何か ofrece un ejemplo; とか enumera varios.",
+        "same": true
       },
       {
         "pattern": "〜など",
         "en": "か何か keeps the choice open, spoken; など closes a list, written.",
         "fr": "か何か laisse le choix ouvert, à l'oral ; など ferme une liste, à l'écrit.",
-        "es": "か何か deja abierta la elección, al hablar; など cierra una lista, por escrito."
+        "es": "か何か deja abierta la elección, al hablar; など cierra una lista, por escrito.",
+        "same": true
       }
     ],
     "examples": [
@@ -43110,7 +43140,8 @@
         "pattern": "〜わけではない",
         "en": "とは限らない: not always true; わけではない: not what I mean.",
         "fr": "とは限らない : pas toujours vrai ; わけではない : pas ce que je veux dire.",
-        "es": "とは限らない: no siempre es verdad; わけではない: no es lo que quiero decir."
+        "es": "とは限らない: no siempre es verdad; わけではない: no es lo que quiero decir.",
+        "same": true
       },
       {
         "pattern": "〜ないことはない",

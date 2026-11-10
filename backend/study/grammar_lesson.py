@@ -11,8 +11,9 @@ choices.
 """
 import logging
 import random
+from functools import lru_cache
 
-from content.grammar_points_data import find, gloss, grammar_to_id, localise, texts
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, find, gloss, grammar_to_id, localise, texts
 from study.grammar_choose import choose_items, choose_payload
 from study.grammar_examples import (
     blank_span, blanked_payload, example_payload, pattern_furigana, structure_furigana,
@@ -70,6 +71,28 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
         "compare": compare,
         "examples": [example_payload(ex, pattern, lang) for ex in entry.get("examples", [])],
     }
+
+
+@lru_cache(maxsize=None)
+def _same_family(pattern: str) -> frozenset[str]:
+    """Every point the catalogue's `same` marks join to `pattern`, either
+    way and through one another (plan 318): なきゃ／なくちゃ is the twin of
+    なくてはいけない, which is the twin of ないといけない, so none of them
+    is drawn as a filler in another's hole, where it would say the same."""
+    edges: dict[str, set[str]] = {}
+    for entries in GRAMMAR_POINTS_BY_LEVEL.values():
+        for e in entries:
+            for r in e.get("compare", []):
+                if r.get("same"):
+                    edges.setdefault(e["pattern"], set()).add(r["pattern"])
+                    edges.setdefault(r["pattern"], set()).add(e["pattern"])
+    seen, todo = {pattern}, [pattern]
+    while todo:
+        for nxt in edges.get(todo.pop(), ()):
+            if nxt not in seen:
+                seen.add(nxt)
+                todo.append(nxt)
+    return frozenset(seen - {pattern})
 
 
 def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: str,
@@ -154,9 +177,10 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
         rivals.insert(0, offer)
     choices = list(dict.fromkeys(rivals))[: CONTRAST_CHOICES - 1]
     if checkable and len(choices) < CONTRAST_CHOICES - 1:
+        family = same | _same_family(pattern)
         fillers = [
             g["pattern"] for g in grammar_list
-            if g["pattern"] != pattern and g["pattern"] not in choices and g["pattern"] not in same
+            if g["pattern"] != pattern and g["pattern"] not in choices and g["pattern"] not in family
             and verifiable(g["pattern"]) and not contains_pattern(sentence, g["pattern"])
         ]
         # Drawn in a random order, each kept only where it prints as no

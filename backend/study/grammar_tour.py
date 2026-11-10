@@ -55,7 +55,13 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 28  # 28: plan 314's second pass -- あの方 かた, ふじさん 富士山, がゆえに,
+TOUR_REV = 29  # 29: plan 318 -- what translating the catalogue found in its
+#   source (plan 312's notes): whys that named a shuffled choice by its
+#   place, form questions that doubled a word once filled, whys and
+#   translations that taught a rival's sense, a 〜たら／〜なら asked from
+#   its own questions, and a rival the lesson calls the same never offered
+#   in a gap question
+# 28: plan 314's second pass -- あの方 かた, ふじさん 富士山, がゆえに,
 #   ですら／でさえ and っぱなしで lit whole, 言いたげに cut as 寂しげに (〜すら,
 #   〜さえ, 〜ゆえに, 〜っぱなし, 〜げ, 〜ものか, 〜つ〜つ, 〜にかたくない and
 #   others' furigana)

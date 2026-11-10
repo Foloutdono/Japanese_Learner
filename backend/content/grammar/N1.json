@@ -3175,16 +3175,14 @@
         "en": "The children were playing, covered in mud.",
         "fr": "Les enfants jouaient, couverts de boue.",
         "es": "Los niños jugaban cubiertos de barro.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "彼は油まみれの手で機械を直していた。",
         "en": "He was fixing the machine with oil-smeared hands.",
         "fr": "Il réparait la machine, les mains couvertes d'huile.",
         "es": "Reparaba la máquina con las manos embadurnadas de aceite.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "汗まみれになって、荷物を運んだ。",
@@ -9499,9 +9497,9 @@
             "に"
           ],
           "why": {
-            "en": "ずくめ is a noun suffix, so before another noun it takes の: ぜいたくずくめの暮らし. な is for na-adjectives, and に would turn it into an adverb.",
+            "en": "ずくめ is a noun suffix, so before another noun it takes の: ぜいたくずくめの暮らし. な is for な-adjectives, and に would turn it into an adverb.",
             "fr": "ずくめ est un suffixe de nom : devant un autre nom il prend の, ぜいたくずくめの暮らし. な est pour les adjectifs en な, et に en ferait un adverbe.",
-            "es": "ずくめ es un sufijo de sustantivo, así que delante de otro sustantivo lleva の: ぜいたくずくめの暮らし. な es para los adjetivo en な, y に lo convertiría en adverbio."
+            "es": "ずくめ es un sufijo de sustantivo, así que delante de otro sustantivo lleva の: ぜいたくずくめの暮らし. な es para los adjetivos en な, y に lo convertiría en adverbio."
           }
         },
         {
@@ -11488,13 +11486,15 @@
         "pattern": "〜はともかく",
         "en": "ならいざ知らず: X might be excused, this is not; はともかく: leaving X aside.",
         "fr": "ならいざ知らず : X pourrait être excusé, pas ceci ; はともかく : X mis à part.",
-        "es": "ならいざ知らず: X podría tener excusa, esto no; はともかく: dejando X aparte."
+        "es": "ならいざ知らず: X podría tener excusa, esto no; はともかく: dejando X aparte.",
+        "same": true
       },
       {
         "pattern": "〜ならまだしも",
         "en": "Near twins; ならまだしも is spoken and a shade milder.",
         "fr": "Quasi jumeaux ; ならまだしも est oral et un peu plus doux.",
-        "es": "Casi equivalentes; ならまだしも es oral y un poco más suave."
+        "es": "Casi equivalentes; ならまだしも es oral y un poco más suave.",
+        "same": true
       }
     ],
     "examples": [
@@ -11865,13 +11865,15 @@
         "pattern": "〜といっても",
         "en": "とはいえ: granted, but; といっても: I call it that, but it's really less.",
         "fr": "とはいえ : certes, mais ; といっても : je l'appelle ainsi, mais c'est moins.",
-        "es": "とはいえ: es cierto, pero; といっても: lo llamo así, pero en realidad es menos."
+        "es": "とはいえ: es cierto, pero; といっても: lo llamo así, pero en realidad es menos.",
+        "same": true
       },
       {
         "pattern": "〜といえども",
         "en": "とはいえ concedes a fact; といえども concedes a status, more solemnly.",
         "fr": "とはいえ concède un fait ; といえども concède un statut, plus solennellement.",
-        "es": "とはいえ concede un hecho; といえども concede un rango, con más solemnidad."
+        "es": "とはいえ concede un hecho; といえども concede un rango, con más solemnidad.",
+        "same": true
       }
     ],
     "examples": [
@@ -12067,7 +12069,7 @@
             "勉強しました"
           ],
           "why": {
-            "en": "とはいえ follows the plain form of the clause, here the past 勉強した. The te-form 勉強して cannot stand before it, and 勉強しました is polite: the clause before とはいえ stays plain.",
+            "en": "とはいえ follows the plain form of the clause, here the past 勉強した. The て-form 勉強して cannot stand before it, and 勉強しました is polite: the clause before とはいえ stays plain.",
             "fr": "とはいえ suit la forme neutre de la proposition, ici le passé 勉強した. La forme en て 勉強して ne peut pas le précéder, et 勉強しました est polie : devant とはいえ, la proposition reste neutre.",
             "es": "とはいえ va tras la forma llana de la oración, aquí el pasado 勉強した. La forma て 勉強して no puede ir delante, y 勉強しました es cortés: la oración ante とはいえ se queda en forma llana."
           }
@@ -12201,13 +12203,15 @@
         "pattern": "〜とはいえ",
         "en": "といえども concedes a status, solemnly; とはいえ concedes a fact, calmly.",
         "fr": "といえども concède un statut, solennellement ; とはいえ concède un fait, posément.",
-        "es": "といえども concede un rango, con solemnidad; とはいえ concede un hecho, con calma."
+        "es": "といえども concede un rango, con solemnidad; とはいえ concede un hecho, con calma.",
+        "same": true
       },
       {
         "pattern": "〜ても",
         "en": "ても (でも after a noun) is the everyday « even, even if »; といえども is its formal, written form.",
         "fr": "ても (でも après un nom) est le « même, même si » courant ; といえども en est la forme formelle et écrite.",
-        "es": "ても (でも tras un sustantivo) es el «incluso, aunque» cotidiano; といえども es su equivalente formal y escrito."
+        "es": "ても (でも tras un sustantivo) es el «incluso, aunque» cotidiano; といえども es su equivalente formal y escrito.",
+        "same": true
       }
     ],
     "examples": [
@@ -12216,16 +12220,14 @@
         "en": "Even a child should keep a promise.",
         "fr": "Même un enfant doit tenir ses promesses.",
         "es": "Incluso un niño debe cumplir sus promesas.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "専門家といえども、間違えることはある。",
         "en": "Even an expert can make mistakes.",
         "fr": "Même un expert peut se tromper.",
         "es": "Incluso un experto puede equivocarse.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "いかなる理由があるといえども、暴力は許されない。",
@@ -14536,8 +14538,7 @@
         "en": "To receive such a fine award is the greatest honour.",
         "fr": "Recevoir un prix aussi prestigieux est le plus grand des honneurs.",
         "es": "Recibir un premio tan prestigioso es el mayor de los honores.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "連日の残業で、疲労の極みに達した。",
@@ -18072,8 +18073,7 @@
         "en": "There is no way of knowing his true feelings.",
         "fr": "Impossible de connaître ses vrais sentiments.",
         "es": "No hay forma alguna de conocer sus verdaderos sentimientos.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "当時は、平和な生活など望むべくもなかった。",
@@ -21326,16 +21326,14 @@
         "en": "I dropped by the post office on my walk.",
         "fr": "Je suis passé à la poste au cours de ma promenade.",
         "es": "Aprovechando el paseo, pasé por la oficina de correos.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "報告かたがた、先生のお宅を訪ねた。",
         "en": "I visited my teacher's home to report, and to pay a call.",
         "fr": "J'ai rendu visite à mon professeur pour lui faire mon rapport.",
         "es": "Visité la casa de mi profesor para darle noticias y, a la vez, saludarlo.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "お見舞いかたがた、田舎の祖母に会いに行った。",
@@ -24036,13 +24034,15 @@
         "pattern": "〜に限らず",
         "en": "にとどまらず: spreads beyond that reach; に限らず: not only that category.",
         "fr": "にとどまらず : s'étend au-delà de cette portée ; に限らず : pas seulement cette catégorie.",
-        "es": "にとどまらず: se extiende más allá de ese alcance; に限らず: no solo esa categoría."
+        "es": "にとどまらず: se extiende más allá de ese alcance; に限らず: no solo esa categoría.",
+        "same": true
       },
       {
         "pattern": "〜だけでなく",
         "en": "にとどまらず is formal and about extent; だけでなく is the plain « not only ».",
         "fr": "にとどまらず est formel et concerne l'étendue ; だけでなく est le simple « non seulement ».",
-        "es": "にとどまらず es formal y habla de extensión; だけでなく es el «no solo» sencillo."
+        "es": "にとどまらず es formal y habla de extensión; だけでなく es el «no solo» sencillo.",
+        "same": true
       }
     ],
     "examples": [
@@ -27411,7 +27411,8 @@
         "pattern": "〜さえ",
         "en": "Same « even »; すら is written, さえ everyday and also conditional.",
         "fr": "Même « même » ; すら est écrit, さえ courant et aussi conditionnel.",
-        "es": "El mismo «incluso»; すら es escrito, さえ es cotidiano y también condicional."
+        "es": "El mismo «incluso»; すら es escrito, さえ es cotidiano y también condicional.",
+        "same": true
       },
       {
         "pattern": "〜だに",
@@ -28588,13 +28589,15 @@
         "pattern": "〜にしても",
         "en": "Same concession; にしたところで adds « and it would change nothing ».",
         "fr": "Même concession ; にしたところで ajoute « et ça ne changerait rien ».",
-        "es": "La misma concesión; にしたところで agrega «y no cambiaría nada»."
+        "es": "La misma concesión; にしたところで agrega «y no cambiaría nada».",
+        "same": true
       },
       {
         "pattern": "〜であれ",
         "en": "にしたところで: even X, and it would change nothing; であれ: whatever X is, the rule holds.",
         "fr": "にしたところで : même X, et ça ne changerait rien ; であれ : quel que soit X, la règle tient.",
-        "es": "にしたところで: incluso X, y no cambiaría nada; であれ: sea lo que sea X, la regla se mantiene."
+        "es": "にしたところで: incluso X, y no cambiaría nada; であれ: sea lo que sea X, la regla se mantiene.",
+        "same": true
       }
     ],
     "examples": [
@@ -29016,7 +29019,8 @@
         "pattern": "〜ないことはない",
         "en": "Same reluctant possibility; ないものでもない is a shade more formal.",
         "fr": "Même possibilité réticente ; ないものでもない est un peu plus formel.",
-        "es": "La misma posibilidad reticente; ないものでもない es algo más formal."
+        "es": "La misma posibilidad reticente; ないものでもない es algo más formal.",
+        "same": true
       },
       {
         "pattern": "〜かねない",
@@ -31907,8 +31911,7 @@
         "en": "To be praised by you is the greatest honour.",
         "fr": "Vos éloges sont pour moi le plus grand honneur.",
         "es": "Recibir sus elogios es para mí el mayor de los honores.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "あんな失敗をするとは、若気の至りだった。",
@@ -31923,8 +31926,7 @@
         "en": "Meeting you all, I am overcome with emotion.",
         "fr": "Vous rencontrer tous me remplit d'émotion.",
         "es": "Me llena de emoción poder encontrarme con todos ustedes.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "人前で間違えて、赤面の至りです。",
@@ -32689,7 +32691,8 @@
         "pattern": "〜すら",
         "en": "一つ〜ない counts the minimum; すら names an extreme example.",
         "fr": "一つ〜ない compte le minimum ; すら nomme un exemple extrême.",
-        "es": "一つ〜ない cuenta el mínimo; すら nombra un ejemplo extremo."
+        "es": "一つ〜ない cuenta el mínimo; すら nombra un ejemplo extremo.",
+        "same": true
       }
     ],
     "examples": [
@@ -33456,7 +33459,8 @@
         "pattern": "〜のに",
         "en": "ものを: if only, with reproach (literary); のに: although, and yet (everyday).",
         "fr": "ものを : si seulement, avec reproche (littéraire) ; のに : bien que, et pourtant (courant).",
-        "es": "ものを: si tan solo, con reproche (literario); のに: aunque, y sin embargo (cotidiano)."
+        "es": "ものを: si tan solo, con reproche (literario); のに: aunque, y sin embargo (cotidiano).",
+        "same": true
       },
       {
         "pattern": "〜ばよかった",
@@ -34651,13 +34655,15 @@
         "pattern": "〜てもいいです",
         "en": "Same permission; てもさしつかえない is formal, てもいい everyday.",
         "fr": "Même permission ; てもさしつかえない est formel, てもいい courant.",
-        "es": "El mismo permiso; てもさしつかえない es formal, てもいい cotidiano."
+        "es": "El mismo permiso; てもさしつかえない es formal, てもいい cotidiano.",
+        "same": true
       },
       {
         "pattern": "〜てもかまわない",
         "en": "てもかまわない: I don't mind; てもさしつかえない: there is no objection, officially.",
         "fr": "てもかまわない : ça ne me dérange pas ; てもさしつかえない : il n'y a pas d'objection, officiellement.",
-        "es": "てもかまわない: a mí no me importa; てもさしつかえない: no hay objeción, oficialmente."
+        "es": "てもかまわない: a mí no me importa; てもさしつかえない: no hay objeción, oficialmente.",
+        "same": true
       }
     ],
     "examples": [
@@ -35013,7 +35019,8 @@
         "pattern": "〜くらい／〜ぐらい",
         "en": "といったところだ: at most, about (an estimate, modest); くらい: about (plain).",
         "fr": "といったところだ : tout au plus, environ (estimation modeste) ; くらい : environ (simple).",
-        "es": "といったところだ: como mucho, más o menos (cálculo modesto); くらい: más o menos (simple)."
+        "es": "といったところだ: como mucho, más o menos (cálculo modesto); くらい: más o menos (simple).",
+        "same": true
       },
       {
         "pattern": "〜にすぎない",
@@ -35724,7 +35731,8 @@
         "pattern": "〜なんか／〜なんて",
         "en": "とは: to think that! (surprise, neutral); なんて: same surprise, casual and often scornful.",
         "fr": "とは : dire que ! (surprise, neutre) ; なんて : même surprise, familière et souvent méprisante.",
-        "es": "とは: ¡y pensar que! (sorpresa, neutro); なんて: la misma sorpresa, coloquial y a menudo despectiva."
+        "es": "とは: ¡y pensar que! (sorpresa, neutro); なんて: la misma sorpresa, coloquial y a menudo despectiva.",
+        "same": true
       },
       {
         "pattern": "〜というのは",
@@ -40660,8 +40668,7 @@
         "en": "Having promised, I can't refuse now.",
         "fr": "Ayant promis, je ne peux plus refuser maintenant.",
         "es": "Como lo prometí, ahora ya no puedo negarme.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "子どもの手前、親としてうそはつけない。",
@@ -42883,13 +42890,15 @@
         "pattern": "〜ずに",
         "en": "Same « without doing »; ずして is literary, ずに everyday-formal.",
         "fr": "Même « sans faire » ; ずして est littéraire, ずに courant-formel.",
-        "es": "El mismo «sin hacer»; ずして es literario, ずに corriente aunque algo formal."
+        "es": "El mismo «sin hacer»; ずして es literario, ずに corriente aunque algo formal.",
+        "same": true
       },
       {
         "pattern": "〜ないで",
         "en": "ないで is the plain spoken « without doing »; ずして belongs to proverbs.",
         "fr": "ないで est le « sans faire » oral et simple ; ずして appartient aux proverbes.",
-        "es": "ないで es el «sin hacer» llano y oral; ずして pertenece a los refranes."
+        "es": "ないで es el «sin hacer» llano y oral; ずして pertenece a los refranes.",
+        "same": true
       }
     ],
     "examples": [
@@ -43360,13 +43369,15 @@
         "pattern": "〜ならいざ知らず",
         "en": "Near twins; ならまだしも is spoken, ならいざ知らず more written.",
         "fr": "Quasi jumeaux ; ならまだしも est oral, ならいざ知らず plus écrit.",
-        "es": "Casi equivalentes; ならまだしも es oral, ならいざ知らず más escrito."
+        "es": "Casi equivalentes; ならまだしも es oral, ならいざ知らず más escrito.",
+        "same": true
       },
       {
         "pattern": "〜はともかく",
         "en": "ならまだしも: X would be tolerable, this is not; はともかく: X aside.",
         "fr": "ならまだしも : X serait tolérable, pas ceci ; はともかく : X mis à part.",
-        "es": "ならまだしも: X sería tolerable, esto no; はともかく: dejando X de lado."
+        "es": "ならまだしも: X sería tolerable, esto no; はともかく: dejando X de lado.",
+        "same": true
       }
     ],
     "examples": [
@@ -43733,13 +43744,15 @@
         "pattern": "〜だって",
         "en": "Same « even »; とて is written, だって casual.",
         "fr": "Même « même » ; とて est écrit, だって familier.",
-        "es": "El mismo «incluso»; とて es escrito, だって coloquial."
+        "es": "El mismo «incluso»; とて es escrito, だって coloquial.",
+        "same": true
       },
       {
         "pattern": "〜といえども",
         "en": "とて: even X (short, literary); といえども: even X (solemn, longer).",
         "fr": "とて : même X (bref, littéraire) ; といえども : même X (solennel, plus long).",
-        "es": "とて: incluso X (breve, literario); といえども: incluso X (solemne, más largo)."
+        "es": "とて: incluso X (breve, literario); といえども: incluso X (solemne, más largo).",
+        "same": true
       }
     ],
     "examples": [
@@ -44171,7 +44184,8 @@
         "pattern": "〜でしょうか",
         "en": "Same soft question; ではあるまいか is written and formal, でしょうか spoken.",
         "fr": "Même question douce ; ではあるまいか est écrit et formel, でしょうか oral.",
-        "es": "La misma pregunta suave; ではあるまいか es escrito y formal, でしょうか oral."
+        "es": "La misma pregunta suave; ではあるまいか es escrito y formal, でしょうか oral.",
+        "same": true
       }
     ],
     "examples": [
