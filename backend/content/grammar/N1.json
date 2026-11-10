@@ -11503,24 +11503,21 @@
         "en": "A child, maybe, but for an adult to say such a thing!",
         "fr": "Un enfant, passe encore, mais qu'un adulte dise cela !",
         "es": "Si fuera un niño, pase, pero ¡que un adulto diga algo así!",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "昔ならいざ知らず、今はそんなやり方は通じない。",
         "en": "In the old days perhaps, but that approach won't work today.",
         "fr": "Autrefois peut-être, mais aujourd'hui cette méthode ne passe plus.",
         "es": "Antes, quizá, pero hoy esa forma de hacer las cosas ya no funciona.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "初心者ならいざ知らず、君がこんな失敗をするとは。",
         "en": "A beginner, maybe, but you, making such a mistake!",
         "fr": "Un débutant, passe encore, mais toi, une erreur pareille !",
         "es": "Si fuera un principiante, pase, pero ¡que tú cometas un error así!",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "田舎ならいざ知らず、東京で車は必要ない。",
@@ -11528,6 +11525,62 @@
         "fr": "À la campagne peut-être, mais à Tokyo on n'a pas besoin de voiture.",
         "es": "En el campo, quizá, pero en Tokio no hace falta auto.",
         "register": "neutral"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "手紙＿＿＿、メールの返事に一週間もかかるとは。",
+        "tr": {
+          "en": "A letter, perhaps, but taking a week to answer an email!",
+          "fr": "Une lettre, passe encore, mais mettre une semaine à répondre à un e-mail !",
+          "es": "Una carta, se entiende; ¡pero tardar una semana en contestar un correo!"
+        },
+        "choices": [
+          "ならいざ知らず",
+          "にもかかわらず",
+          "だから"
+        ],
+        "why": {
+          "en": "ならいざ知らず excuses the slow case, a letter, to blame the real one, an email. にもかかわらず and だから would both say the reply was a letter, which the email rules out.",
+          "fr": "ならいざ知らず excuse le cas lent, une lettre, pour blâmer le cas réel, un e-mail. にもかかわらず et だから diraient tous deux que la réponse était une lettre, ce que l'e-mail exclut.",
+          "es": "ならいざ知らず excusa el caso lento, una carta, para reprochar el real, un correo. にもかかわらず y だから dirían que la respuesta era una carta, y el correo lo descarta."
+        }
+      },
+      {
+        "jp": "年末＿＿＿、六月にこんなに忙しいとは。",
+        "tr": {
+          "en": "At the end of the year, perhaps, but to be this busy in June!",
+          "fr": "En fin d'année, passe encore, mais avoir autant de travail en juin !",
+          "es": "A fin de año, se entiende; ¡pero tener tanto trabajo en junio!"
+        },
+        "choices": [
+          "ならいざ知らず",
+          "ということもあって",
+          "ならでは"
+        ],
+        "why": {
+          "en": "ならいざ知らず grants the end of the year as a busy time one could understand, but not June. ということもあって would say it is the end of the year, in June, and ならでは, « only X has » (年末ならではの忙しさ), excuses nothing.",
+          "fr": "ならいざ知らず admet la fin d'année comme une période chargée qu'on comprendrait, mais pas juin. ということもあって dirait qu'on est en fin d'année, en juin, et ならでは, « propre à X » (年末ならではの忙しさ), n'excuse rien.",
+          "es": "ならいざ知らず admite el fin de año como una época de trabajo que se entendería, pero no junio. ということもあって diría que es fin de año, en junio, y ならでは, «propio de X» (年末ならではの忙しさ), no excusa nada."
+        }
+      },
+      {
+        "jp": "一日や二日＿＿＿、一か月も会社を休むわけにはいかない。",
+        "tr": {
+          "en": "A day or two, perhaps, but I cannot take a whole month off work.",
+          "fr": "Un jour ou deux, passe encore, mais je ne peux pas m'absenter du travail un mois entier.",
+          "es": "Uno o dos días, se entiende; pero no puedo faltar al trabajo un mes entero."
+        },
+        "choices": [
+          "ならいざ知らず",
+          "であるからには",
+          "なのに"
+        ],
+        "why": {
+          "en": "ならいざ知らず grants a day or two as an absence that could pass, then refuses the month. であるからには and なのに would assert that it is a day or two, which the month contradicts.",
+          "fr": "ならいざ知らず admet un jour ou deux comme une absence acceptable, puis refuse le mois. であるからには et なのに affirmeraient qu'il s'agit d'un jour ou deux, ce que le mois contredit.",
+          "es": "ならいざ知らず admite uno o dos días como una ausencia aceptable y rechaza el mes. であるからには y なのに afirmarían que se trata de uno o dos días, y el mes lo contradice."
+        }
       }
     ],
     "tour": {
@@ -11882,24 +11935,21 @@
         "en": "Spring though it is, mornings and evenings are still cold.",
         "fr": "C'est le printemps, certes, mais matin et soir il fait encore froid.",
         "es": "Aunque sea primavera, por la mañana y por la noche todavía hace frío.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "休みとはいえ、やることが山ほどある。",
         "en": "It may be a day off, but I have a mountain of things to do.",
         "fr": "C'est un jour de congé, mais j'ai une montagne de choses à faire.",
         "es": "Será un día libre, pero tengo un montón de cosas que hacer.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "難しいとはいえ、やってみる価値はある。",
         "en": "Hard as it is, it's worth a try.",
         "fr": "Difficile, certes, mais ça vaut la peine d'essayer.",
         "es": "Por difícil que sea, vale la pena intentarlo.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "とはいえ、あきらめるわけにはいかない。",
@@ -11907,6 +11957,80 @@
         "fr": "Cela dit, renoncer n'est pas envisageable.",
         "es": "Aun así, rendirse no es una opción.",
         "register": "written"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "冬＿＿＿、今日は春のように暖かい。",
+        "tr": {
+          "en": "It may be winter, but today is as warm as spring.",
+          "fr": "C'est l'hiver, certes, mais aujourd'hui il fait aussi doux qu'au printemps.",
+          "es": "Es invierno, sí, pero hoy está tan templado como en primavera."
+        },
+        "choices": [
+          "とはいえ",
+          "とあって",
+          "ともなると"
+        ],
+        "why": {
+          "en": "とはいえ grants that it is winter and goes against what winter leads you to expect. とあって would make winter the reason for the warmth, and ともなると what winter naturally brings.",
+          "fr": "とはいえ admet que c'est l'hiver et va contre ce que l'hiver laisse attendre. とあって ferait de l'hiver la cause de la douceur, et ともなると ce que l'hiver amène naturellement.",
+          "es": "とはいえ admite que es invierno y va contra lo que el invierno hace esperar. とあって haría del invierno la causa del buen tiempo, y ともなると lo que el invierno trae de por sí."
+        }
+      },
+      {
+        "jp": "この町に十年住んでいる＿＿＿、まだ知らない道も多い。",
+        "tr": {
+          "en": "I may have lived in this town for ten years, but there are still many streets I don't know.",
+          "fr": "J'ai beau vivre dans cette ville depuis dix ans, il y a encore bien des rues que je ne connais pas.",
+          "es": "Aunque llevo diez años viviendo en esta ciudad, todavía hay muchas calles que no conozco."
+        },
+        "choices": [
+          "とはいえ",
+          "だけあって",
+          "からには"
+        ],
+        "why": {
+          "en": "とはいえ grants the ten years, then says what they have not given you. だけあって would make the unknown streets what ten years lead you to expect, and からには calls for a must or a will, not a fact.",
+          "fr": "とはいえ admet les dix ans, puis dit ce qu'ils n'ont pas apporté. だけあって ferait des rues inconnues le fruit attendu de dix ans, et からには appelle un devoir ou une volonté, pas un constat.",
+          "es": "とはいえ admite los diez años y luego dice lo que no han dado. だけあって haría de las calles desconocidas lo esperable de diez años, y からには pide un deber o una intención, no un hecho."
+        }
+      },
+      {
+        "jp": "彼は確かに頭がいい。＿＿＿、まだ経験が足りない。",
+        "tr": {
+          "en": "He is certainly clever. That said, he still lacks experience.",
+          "fr": "Il est intelligent, c'est certain. Cela dit, il manque encore d'expérience.",
+          "es": "Es inteligente, sin duda. Dicho esto, todavía le falta experiencia."
+        },
+        "choices": [
+          "とはいえ",
+          "だから",
+          "それなら"
+        ],
+        "why": {
+          "en": "At the head of the sentence, とはいえ grants what was just said and adds what it does not cover: clever, but inexperienced. だから and それなら would make the lack of experience follow from being clever.",
+          "fr": "En tête de phrase, とはいえ admet ce qui vient d'être dit et ajoute ce que cela ne couvre pas : intelligent, mais sans expérience. だから et それなら feraient découler le manque d'expérience de l'intelligence.",
+          "es": "Al inicio de la oración, とはいえ admite lo que se acaba de decir y añade lo que eso no cubre: inteligente, pero sin experiencia. だから y それなら harían que la falta de experiencia saliera de la inteligencia."
+        }
+      },
+      {
+        "jp": "手術は成功した＿＿＿、まだ痛みは残っている。",
+        "tr": {
+          "en": "The operation may have been a success, but the pain is still there.",
+          "fr": "L'opération a beau avoir réussi, la douleur est toujours là.",
+          "es": "Puede que la operación haya salido bien, pero el dolor sigue ahí."
+        },
+        "choices": [
+          "とはいえ",
+          "どころか",
+          "だけに"
+        ],
+        "why": {
+          "en": "とはいえ grants the success and says what it has not settled: the pain. どころか would deny that the operation succeeded, and だけに would make the success the reason the pain is still there.",
+          "fr": "とはいえ admet le succès et dit ce qu'il n'a pas réglé : la douleur. どころか nierait que l'opération ait réussi, et だけに ferait du succès la raison pour laquelle la douleur reste.",
+          "es": "とはいえ admite el éxito y dice lo que no ha resuelto: el dolor. どころか negaría que la operación saliera bien, y だけに haría del éxito la razón de que el dolor siga ahí."
+        }
       }
     ],
     "tour": {
@@ -12234,8 +12358,7 @@
         "en": "Whatever the reason, violence cannot be allowed.",
         "fr": "Quelle que soit la raison, la violence est inadmissible.",
         "es": "Sea cual sea el motivo, la violencia no se puede permitir.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "社長といえども、規則には従わなければならない。",
@@ -12243,6 +12366,62 @@
         "fr": "Même le président doit se plier au règlement.",
         "es": "Incluso el presidente de la empresa debe cumplir las normas.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "プロの選手＿＿＿、簡単なミスをすることがある。",
+        "tr": {
+          "en": "Even professional players sometimes make simple mistakes.",
+          "fr": "Même les joueurs professionnels font parfois des erreurs toutes simples.",
+          "es": "Incluso los jugadores profesionales cometen a veces errores sencillos."
+        },
+        "choices": [
+          "といえども",
+          "だけあって",
+          "とあって"
+        ],
+        "why": {
+          "en": "といえども grants the status, a pro, and says the slip comes all the same. だけあって would make simple mistakes what one expects of a pro, and とあって would give being a pro as their cause.",
+          "fr": "といえども admet le statut, un professionnel, et dit que l'erreur arrive quand même. だけあって ferait des erreurs simples ce qu'on attend d'un pro, et とあって en donnerait le statut de pro pour cause.",
+          "es": "といえども admite la categoría, un profesional, y dice que el error llega igual. だけあって haría de los errores sencillos lo esperable de un profesional, y とあって daría como su causa ser profesional."
+        }
+      },
+      {
+        "jp": "いくら社長の命令＿＿＿、法に反することはできない。",
+        "tr": {
+          "en": "Even on the company president's orders, I cannot break the law.",
+          "fr": "Même sur ordre du président, je ne peux pas enfreindre la loi.",
+          "es": "Aunque sea una orden del presidente de la empresa, no puedo violar la ley."
+        },
+        "choices": [
+          "といえども",
+          "とあれば",
+          "だからこそ"
+        ],
+        "why": {
+          "en": "いくら…といえども grants the order, whatever its weight, and the law still holds. とあれば would make the order a reason to do anything, and だからこそ a reason too; いくら takes neither.",
+          "fr": "いくら…といえども admet l'ordre, si important soit-il, et la loi tient quand même. とあれば ferait de l'ordre une raison de tout faire, et だからこそ aussi une raison ; いくら n'admet ni l'un ni l'autre.",
+          "es": "いくら…といえども admite la orden, por mucho peso que tenga, y la ley sigue en pie. とあれば haría de la orden un motivo para todo, y だからこそ también un motivo; いくら no admite ninguno."
+        }
+      },
+      {
+        "jp": "ベテランの運転手＿＿＿、雪の道では事故を起こすことがある。",
+        "tr": {
+          "en": "Even a veteran driver can have an accident on a snowy road.",
+          "fr": "Même un conducteur chevronné peut avoir un accident sur une route enneigée.",
+          "es": "Incluso un conductor veterano puede tener un accidente en un camino nevado."
+        },
+        "choices": [
+          "といえども",
+          "ならでは",
+          "であるからには"
+        ],
+        "why": {
+          "en": "といえども grants the experience and says the risk remains. ならでは is « only X could », for praise, and であるからには would make being a veteran a reason, which calls for a must, not a mishap.",
+          "fr": "といえども admet l'expérience et dit que le risque demeure. ならでは veut dire « seul X peut », pour un éloge, et であるからには ferait de l'expérience une raison, qui appelle un devoir, pas un accident.",
+          "es": "といえども admite la experiencia y dice que el riesgo sigue. ならでは es «solo X puede», para elogiar, y であるからには haría de ser veterano una razón, que pide un deber, no un accidente."
+        }
       }
     ],
     "tour": {
@@ -24051,24 +24230,21 @@
         "en": "The damage did not stop at one town but spread across the whole prefecture.",
         "fr": "Les dégâts ne se sont pas limités à une ville mais ont touché toute la préfecture.",
         "es": "Los daños no se limitaron a una ciudad, sino que se extendieron por toda la prefectura.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "彼の活動は国内にとどまらず、海外にも及ぶ。",
         "en": "His activities are not limited to Japan but reach abroad.",
         "fr": "Ses activités ne se limitent pas au Japon mais s'étendent à l'étranger.",
         "es": "Sus actividades no se limitan a Japón, sino que llegan también al extranjero.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "その歌は若者にとどまらず、幅広い世代に愛された。",
         "en": "The song was loved not just by the young but by every generation.",
         "fr": "La chanson a été aimée non seulement des jeunes, mais de toutes les générations.",
         "es": "La canción fue querida no solo por los jóvenes, sino por todas las generaciones.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "問題は一社にとどまらず、業界全体のものだ。",
@@ -24076,6 +24252,62 @@
         "fr": "Le problème dépasse une entreprise et concerne tout le secteur.",
         "es": "El problema no se limita a una empresa: afecta a todo el sector.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "この店の客は地元の人＿＿＿、遠くの町からも来る。",
+        "tr": {
+          "en": "This shop's customers are not just locals: they come from distant towns too.",
+          "fr": "Les clients de cette boutique ne sont pas que des gens du coin : ils viennent aussi de villes lointaines.",
+          "es": "Los clientes de esta tienda no son solo de la zona: también vienen de pueblos lejanos."
+        },
+        "choices": [
+          "にとどまらず",
+          "に限られていて",
+          "にとって"
+        ],
+        "why": {
+          "en": "にとどまらず says the customers go beyond the locals: they also come from far away. に限られていて would keep them to locals, and にとって is « for »: neither brings them from afar.",
+          "fr": "にとどまらず dit que la clientèle dépasse les gens du coin : elle vient aussi de loin. に限られていて la réserverait aux gens du coin, et にとって veut dire « pour » : aucun ne la fait venir de loin.",
+          "es": "にとどまらず dice que la clientela va más allá de la gente de la zona: también viene de lejos. に限られていて la limitaría a la zona, y にとって es «para»: ninguno la hace venir de lejos."
+        }
+      },
+      {
+        "jp": "彼の研究は日本＿＿＿、世界中の学者に影響を与えた。",
+        "tr": {
+          "en": "His research did not stay within Japan: it influenced scholars all over the world.",
+          "fr": "Ses recherches ne se sont pas limitées au Japon : elles ont influencé des chercheurs du monde entier.",
+          "es": "Su investigación no se quedó en Japón: influyó en investigadores de todo el mundo."
+        },
+        "choices": [
+          "にとどまらず",
+          "にとどまって",
+          "に対して"
+        ],
+        "why": {
+          "en": "にとどまらず says the research did not stop at Japan: its reach went further. にとどまって would keep it inside Japan, and に対して is « towards »: neither carries it out to the world.",
+          "fr": "にとどまらず dit que les recherches ne se sont pas arrêtées au Japon : leur portée est allée plus loin. にとどまって les garderait au Japon, et に対して veut dire « envers » : aucun ne les porte au monde.",
+          "es": "にとどまらず dice que la investigación no se detuvo en Japón: su alcance fue más allá. にとどまって la dejaría en Japón, y に対して es «hacia»: ninguno la lleva al mundo."
+        }
+      },
+      {
+        "jp": "この病気の影響は体＿＿＿、心にも及ぶ。",
+        "tr": {
+          "en": "The effects of this illness are not limited to the body: they reach the mind as well.",
+          "fr": "Les effets de cette maladie ne se limitent pas au corps : ils touchent aussi l'esprit.",
+          "es": "Los efectos de esta enfermedad no se limitan al cuerpo: también llegan a la mente."
+        },
+        "choices": [
+          "にとどまらず",
+          "にすぎず",
+          "にほかならず"
+        ],
+        "why": {
+          "en": "にとどまらず: the effects do not stop at the body, they reach the mind too. にすぎず says they are only the body's, and にほかならず that they are nothing else: both end in ず, but neither widens.",
+          "fr": "にとどまらず : les effets ne s'arrêtent pas au corps, ils touchent aussi l'esprit. にすぎず dit qu'ils ne sont que ceux du corps, et にほかならず qu'ils ne sont rien d'autre : tous deux finissent en ず, sans élargir.",
+          "es": "にとどまらず: los efectos no se quedan en el cuerpo, llegan también a la mente. にすぎず dice que son solo del cuerpo, y にほかならず que no son otra cosa: ambos acaban en ず, pero ninguno amplía."
+        }
       }
     ],
     "tour": {
@@ -28613,24 +28845,21 @@
         "en": "Even the teacher probably doesn't know the answer.",
         "fr": "Même le professeur ne connaît sans doute pas la réponse.",
         "es": "Ni siquiera el profesor sabrá la respuesta, probablemente.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "私たちにしたところで、できることは少ない。",
         "en": "Even for us, there's little we can do.",
         "fr": "Même nous, nous ne pouvons pas faire grand-chose.",
         "es": "Nosotros tampoco podemos hacer gran cosa.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "社長にしたところで、この問題は解決できない。",
         "en": "Even the president can't solve this problem.",
         "fr": "Même le président ne peut résoudre ce problème.",
         "es": "Ni siquiera el presidente de la empresa puede resolver este problema.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "急いだにしたところで、もう間に合わない。",
@@ -28638,6 +28867,62 @@
         "fr": "Même en nous pressant, il est déjà trop tard.",
         "es": "Aunque corramos, ya no llegaremos a tiempo.",
         "register": "neutral"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "警察＿＿＿、すべての事件を解決できるわけではない。",
+        "tr": {
+          "en": "Even the police cannot solve every case.",
+          "fr": "Même la police ne peut pas résoudre toutes les affaires.",
+          "es": "Ni siquiera la policía puede resolver todos los casos."
+        },
+        "choices": [
+          "にしたところで",
+          "をものともせず",
+          "にしたがって"
+        ],
+        "why": {
+          "en": "にしたところで names the ones you would expect to manage and adds that it changes nothing. にしたがって is « following the police », and をものともせず « undaunted by the police »: neither says « even ».",
+          "fr": "にしたところで nomme ceux dont on attendrait qu'ils y arrivent et ajoute que cela ne change rien. にしたがって veut dire « en suivant la police », et をものともせず « sans craindre la police » : aucun ne dit « même ».",
+          "es": "にしたところで nombra a quienes uno esperaría capaces y añade que eso no cambia nada. にしたがって es «siguiendo a la policía», y をものともせず «sin temer a la policía»: ninguno dice «incluso»."
+        }
+      },
+      {
+        "jp": "経験の長い彼＿＿＿、今回の失敗はさけられなかっただろう。",
+        "tr": {
+          "en": "Even he, with all his experience, could probably not have avoided this failure.",
+          "fr": "Même lui, avec toute son expérience, n'aurait sans doute pas pu éviter cet échec.",
+          "es": "Seguramente ni siquiera él, con toda su experiencia, habría podido evitar este fracaso."
+        },
+        "choices": [
+          "にしたところで",
+          "にかけては",
+          "をきっかけにして"
+        ],
+        "why": {
+          "en": "にしたところで puts even the most experienced in the same boat: he could not have avoided it either. にかけては is « when it comes to », for a skill, and をきっかけにして « set off by »: neither fits him.",
+          "fr": "にしたところで met même le plus expérimenté dans le même bateau : lui non plus n'aurait pu l'éviter. にかけては veut dire « en matière de », pour un savoir-faire, et をきっかけにして « à la suite de » : aucun ne lui va.",
+          "es": "にしたところで pone incluso al más experimentado en el mismo barco: él tampoco habría podido evitarlo. にかけては es «en cuanto a», para una habilidad, y をきっかけにして «a raíz de»: ninguno encaja."
+        }
+      },
+      {
+        "jp": "今さら事情を説明した＿＿＿、彼は許してくれないだろう。",
+        "tr": {
+          "en": "Even if I explained the circumstances now, he would probably not forgive me.",
+          "fr": "Même si j'expliquais la situation maintenant, il ne me pardonnerait sans doute pas.",
+          "es": "Aunque le explicara ahora las circunstancias, seguramente no me perdonaría."
+        },
+        "choices": [
+          "にしたところで",
+          "のをきっかけに",
+          "からには"
+        ],
+        "why": {
+          "en": "After a clause, にしたところで, like the lighter たところで, is « even if »: explaining would change nothing. のをきっかけに would make the explanation the start of something, and からには a done fact that brings the refusal on.",
+          "fr": "Après une proposition, にしたところで, comme たところで plus léger, veut dire « même si » : expliquer ne changerait rien. のをきっかけに ferait de l'explication un point de départ, et からには un fait accompli qui entraîne le refus.",
+          "es": "Tras una oración, にしたところで, como el más ligero たところで, es «aunque»: explicar no cambiaría nada. のをきっかけに haría de la explicación un punto de partida, y からには un hecho cumplido que trae el rechazo."
+        }
       }
     ],
     "tour": {
@@ -34679,24 +34964,21 @@
         "en": "This form may be filled in with pencil.",
         "fr": "Ce formulaire peut être rempli au crayon.",
         "es": "Este formulario se puede completar a lápiz.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "熱がなければ、外出してもさしつかえありません。",
         "en": "If you have no fever, there is no harm in going out.",
         "fr": "Sans fièvre, vous pouvez sortir sans problème.",
         "es": "Si no tiene fiebre, no hay inconveniente en que salga.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "会議は明日に延ばしてもさしつかえない。",
         "en": "There is no problem with postponing the meeting to tomorrow.",
         "fr": "Il n'y a pas d'inconvénient à reporter la réunion à demain.",
         "es": "No hay inconveniente en posponer la reunión para mañana.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "この薬は食後でなくてもさしつかえない。",
@@ -34704,6 +34986,62 @@
         "fr": "Ce médicament peut se prendre en dehors des repas.",
         "es": "No es necesario tomar este medicamento después de las comidas.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "この書類は、郵便で送って＿＿＿。",
+        "tr": {
+          "en": "This document may be sent by post.",
+          "fr": "Ce document peut être envoyé par la poste.",
+          "es": "Este documento se puede enviar por correo."
+        },
+        "choices": [
+          "もさしつかえありません",
+          "はいけないことになっています",
+          "もらえませんか"
+        ],
+        "why": {
+          "en": "もさしつかえありません is a formal permission: posting it is fine. はいけないことになっています is a rule against it, and もらえませんか asks someone to post it: a request, not a permission.",
+          "fr": "もさしつかえありません est une permission formelle : l'envoyer par la poste ne pose pas de problème. はいけないことになっています l'interdit par règlement, et もらえませんか demande à quelqu'un de l'envoyer : une demande, pas une permission.",
+          "es": "もさしつかえありません es un permiso formal: enviarlo por correo no es problema. はいけないことになっています lo prohíbe por norma, y もらえませんか pide a alguien que lo envíe: una petición, no un permiso."
+        }
+      },
+      {
+        "jp": "会員の方は、この用紙に住所を書か＿＿＿。",
+        "tr": {
+          "en": "Members need not write their address on this form.",
+          "fr": "Les membres n'ont pas besoin d'indiquer leur adresse sur ce formulaire.",
+          "es": "Los socios no necesitan escribir su dirección en este formulario."
+        },
+        "choices": [
+          "なくてもさしつかえありません",
+          "なければなりません",
+          "ないでください"
+        ],
+        "why": {
+          "en": "なくてもさしつかえありません is the formal « need not »: leaving it out is fine. なければなりません would make the address required, and ないでください would forbid writing it.",
+          "fr": "なくてもさしつかえありません est le « pas besoin de » formel : ne pas l'écrire ne pose pas de problème. なければなりません rendrait l'adresse obligatoire, et ないでください interdirait de l'écrire.",
+          "es": "なくてもさしつかえありません es el «no hace falta» formal: no escribirla no es problema. なければなりません haría la dirección obligatoria, y ないでください prohibiría escribirla."
+        }
+      },
+      {
+        "jp": "この薬は、水なしで飲んで＿＿＿。",
+        "tr": {
+          "en": "This medicine may be taken without water.",
+          "fr": "Ce médicament peut se prendre sans eau.",
+          "es": "Este medicamento se puede tomar sin agua."
+        },
+        "choices": [
+          "もさしつかえありません",
+          "はならないと言われました",
+          "もむだです"
+        ],
+        "why": {
+          "en": "もさしつかえありません allows it, formally: taking it without water is fine. はならないと言われました reports a ban, and もむだです says it would be useless: neither allows it.",
+          "fr": "もさしつかえありません le permet, de façon formelle : le prendre sans eau ne pose pas de problème. はならないと言われました rapporte une interdiction, et もむだです dit que ce serait inutile : aucun ne le permet.",
+          "es": "もさしつかえありません lo permite de manera formal: tomarlo sin agua no es problema. はならないと言われました cuenta una prohibición, y もむだです dice que sería inútil: ninguno lo permite."
+        }
       }
     ],
     "tour": {
@@ -42914,24 +43252,21 @@
         "en": "The best victory is one won without fighting.",
         "fr": "La meilleure victoire est celle qu'on remporte sans combattre.",
         "es": "La mejor victoria es la que se logra sin luchar.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "彼は努力せずして成功した。",
         "en": "He succeeded without effort.",
         "fr": "Il a réussi sans effort.",
         "es": "Él tuvo éxito sin esforzarse.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "労せずして、大金を手に入れた。",
         "en": "I came into a fortune without lifting a finger.",
         "fr": "J'ai obtenu une fortune sans lever le petit doigt.",
         "es": "Conseguí una fortuna sin mover un dedo.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "何も言わずして、彼女は部屋を出た。",
@@ -42939,6 +43274,65 @@
         "fr": "Sans un mot, elle a quitté la pièce.",
         "es": "Sin decir una palabra, ella salió de la habitación.",
         "register": "written"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "彼は誰の助けも借り＿＿＿、この会社を作り上げた。",
+        "tr": {
+          "en": "He built up this company without anyone's help.",
+          "fr": "Il a bâti cette entreprise sans l'aide de personne.",
+          "es": "Él levantó esta empresa sin la ayuda de nadie."
+        },
+        "choices": [
+          "ずして",
+          "ずしては",
+          "ねば"
+        ],
+        "why": {
+          "en": "ずして says how it was done: without help. ずしては sets a condition, « unless », with a negative after it, and ねば is « if not »: neither can lead to something that happened.",
+          "fr": "ずして dit comment cela s'est fait : sans aide. ずしては pose une condition, « à moins de », suivie d'une négation, et ねば veut dire « si l'on ne… pas » : aucun ne mène à un fait accompli.",
+          "es": "ずして dice cómo se hizo: sin ayuda. ずしては pone una condición, «a menos que», seguida de una negación, y ねば es «si no»: ninguno lleva a algo que ya ocurrió."
+        },
+        "slips": [
+          "ずしては"
+        ]
+      },
+      {
+        "jp": "その本は、難しい言葉を使わ＿＿＿、大切なことを伝えている。",
+        "tr": {
+          "en": "That book gets important things across without using difficult words.",
+          "fr": "Ce livre transmet des choses importantes sans employer de mots difficiles.",
+          "es": "Ese libro transmite cosas importantes sin usar palabras difíciles."
+        },
+        "choices": [
+          "ずして",
+          "せて",
+          "ざるを得ず"
+        ],
+        "why": {
+          "en": "ずして on 使わ is « without using »: plain words are the book's way. 使わせて would have the book make someone use them, and 使わざるを得ず would say it has no choice but to use them.",
+          "fr": "ずして sur 使わ, c'est « sans employer » : les mots simples sont la manière du livre. 使わせて ferait employer ces mots à quelqu'un, et 使わざるを得ず dirait que le livre ne peut faire autrement que de les employer.",
+          "es": "ずして sobre 使わ es «sin usar»: las palabras sencillas son la manera del libro. 使わせて haría que alguien las usara, y 使わざるを得ず diría que el libro no tiene más remedio que usarlas."
+        }
+      },
+      {
+        "jp": "彼はそれと知ら＿＿＿、歴史に残る発見をしていた。",
+        "tr": {
+          "en": "Without realising it, he had made a discovery that would go down in history.",
+          "fr": "Sans le savoir, il avait fait une découverte qui allait entrer dans l'histoire.",
+          "es": "Sin saberlo, él había hecho un descubrimiento que pasaría a la historia."
+        },
+        "choices": [
+          "ずして",
+          "れて",
+          "せて"
+        ],
+        "why": {
+          "en": "ずして on 知ら is « without knowing »: he did not know what he had found. 知られて would be « being known », and 知らせて « letting someone know »: neither says he was unaware.",
+          "fr": "ずして sur 知ら, c'est « sans savoir » : il ignorait ce qu'il avait trouvé. 知られて voudrait dire « étant connu », et 知らせて « en faisant savoir » : aucun ne dit qu'il l'ignorait.",
+          "es": "ずして sobre 知ら es «sin saber»: no sabía lo que había encontrado. 知られて sería «siendo conocido», y 知らせて «avisando a alguien»: ninguno dice que no lo sabía."
+        }
       }
     ],
     "tour": {
@@ -43393,24 +43787,21 @@
         "en": "Once would be one thing, but three times late!",
         "fr": "Une fois, passe encore, mais trois retards !",
         "es": "Una vez, pase, ¡pero llegar tarde tres veces!",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "子どもならまだしも、大人がそんなことをするのか。",
         "en": "A child, maybe, but an adult doing that?",
         "fr": "Un enfant, passe encore, mais un adulte qui fait ça ?",
         "es": "Un niño, pase, pero ¿un adulto haciendo eso?",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "少しならまだしも、全部食べてしまうなんて。",
         "en": "A little would be fine, but eating it all!",
         "fr": "Un peu, passe encore, mais tout manger !",
         "es": "Un poco, pase, ¡pero comérselo todo!",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "安いならまだしも、この値段でこの味はひどい。",
@@ -43418,6 +43809,62 @@
         "fr": "Si c'était bon marché, passe encore, mais à ce prix ce goût est affreux.",
         "es": "Si fuera barato, pase, pero a este precio este sabor es horrible.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "雨が降っている＿＿＿、こんないい天気の日に一日中家にいるなんて。",
+        "tr": {
+          "en": "If it were raining, fine, but staying in all day on such a lovely day!",
+          "fr": "S'il pleuvait, passe encore, mais rester toute la journée à la maison par un si beau temps !",
+          "es": "Si lloviera, pase, pero ¡quedarse en casa todo el día con un día tan lindo!"
+        },
+        "choices": [
+          "ならまだしも",
+          "のに",
+          "からといって"
+        ],
+        "why": {
+          "en": "ならまだしも sets up rain as the case that would excuse it, and the lovely day says it is not raining. のに and からといって both state that it is raining, which the lovely day denies.",
+          "fr": "ならまだしも pose la pluie comme le cas qui l'excuserait, et le beau temps dit qu'il ne pleut pas. のに et からといって affirment tous deux qu'il pleut, ce que le beau temps dément.",
+          "es": "ならまだしも plantea la lluvia como el caso que lo excusaría, y el buen día dice que no llueve. のに y からといって afirman que llueve, y el buen día lo desmiente."
+        }
+      },
+      {
+        "jp": "学生のころ＿＿＿、四十歳にもなって親にお金を借りるなんて。",
+        "tr": {
+          "en": "As a student, fine, but borrowing money from your parents at forty!",
+          "fr": "Du temps de tes études, passe encore, mais emprunter de l'argent à tes parents à quarante ans !",
+          "es": "Cuando eras estudiante, pase, pero ¡pedirles dinero prestado a tus padres a los cuarenta!"
+        },
+        "choices": [
+          "ならまだしも",
+          "にもかかわらず",
+          "に限らず"
+        ],
+        "why": {
+          "en": "ならまだしも names the student days as the case that would pass, and the reproach falls on forty. にもかかわらず would say it is the student days, which « at forty » rules out, and に限らず would blame them too.",
+          "fr": "ならまだしも présente les années d'études comme le cas qui passerait, et le reproche porte sur la quarantaine. にもかかわらず dirait qu'on est aux études, ce que « à quarante ans » exclut, et に限らず les blâmerait aussi.",
+          "es": "ならまだしも presenta los años de estudiante como el caso que pasaría, y el reproche cae sobre los cuarenta. にもかかわらず diría que es la época de estudiante, que «a los cuarenta» descarta, y に限らず también la reprocharía."
+        }
+      },
+      {
+        "jp": "外国人の観光客＿＿＿、地元の人が道に迷うなんて。",
+        "tr": {
+          "en": "A tourist from abroad, fine, but a local getting lost!",
+          "fr": "Un touriste étranger, passe encore, mais quelqu'un d'ici qui se perd !",
+          "es": "Un turista extranjero, pase, pero ¡que se pierda alguien de aquí!"
+        },
+        "choices": [
+          "ならまだしも",
+          "だというのに",
+          "として"
+        ],
+        "why": {
+          "en": "ならまだしも grants the tourist as the case one could excuse; the surprise falls on the local. だというのに would assert that someone is a tourist, and として is « in the role of »: neither excuses anyone.",
+          "fr": "ならまだしも admet le touriste comme le cas qu'on excuserait ; la surprise porte sur la personne d'ici. だというのに affirmerait qu'il s'agit d'un touriste, et として veut dire « en tant que » : aucun n'excuse personne.",
+          "es": "ならまだしも admite al turista como el caso que se excusaría; la sorpresa cae sobre la persona del lugar. だというのに afirmaría que se trata de un turista, y として es «en calidad de»: ninguno excusa a nadie."
+        }
       }
     ],
     "tour": {
@@ -43768,24 +44215,21 @@
         "en": "Even I make mistakes sometimes.",
         "fr": "Même moi, il m'arrive de me tromper.",
         "es": "Incluso yo me equivoco a veces.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "専門家とて、全部が分かるわけではない。",
         "en": "Even an expert doesn't understand everything.",
         "fr": "Même un expert ne comprend pas tout.",
         "es": "Ni siquiera un experto lo entiende todo.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "親とて、子どもの全てを知ることはできない。",
         "en": "Even a parent cannot know everything about a child.",
         "fr": "Même un parent ne peut tout savoir de son enfant.",
         "es": "Ni siquiera los padres pueden saberlo todo de sus hijos.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "一日とて、彼を忘れたことはない。",
@@ -43793,6 +44237,80 @@
         "fr": "Pas un seul jour je ne l'ai oublié.",
         "es": "Ni un solo día lo he olvidado.",
         "register": "written"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "この私＿＿＿、最初はひらがなも読めなかった。",
+        "tr": {
+          "en": "At first, even I could not read so much as hiragana.",
+          "fr": "Même moi, au début, je ne savais même pas lire les hiragana.",
+          "es": "Incluso yo, al principio, no sabía leer ni los hiragana."
+        },
+        "choices": [
+          "とて",
+          "として",
+          "だけ"
+        ],
+        "why": {
+          "en": "とて is the written « even X »: even I was no exception. この私として would mean « in my capacity », which says nothing here, and だけ would make me the only one who could not.",
+          "fr": "とて est le « même X » écrit : moi non plus, je n'y ai pas échappé. この私として voudrait dire « en ma qualité », ce qui ne dit rien ici, et だけ ferait de moi la seule personne à ne pas savoir.",
+          "es": "とて es el «incluso X» escrito: ni yo fui la excepción. この私として querría decir «en mi calidad de», lo que aquí no dice nada, y だけ me haría la única persona que no sabía."
+        }
+      },
+      {
+        "jp": "この十年、母は一度＿＿＿店を休まなかった。",
+        "tr": {
+          "en": "In the last ten years, my mother never once closed the shop.",
+          "fr": "En dix ans, ma mère n'a pas fermé la boutique une seule fois.",
+          "es": "En estos diez años, mi madre no cerró la tienda ni una sola vez."
+        },
+        "choices": [
+          "とて",
+          "しか",
+          "だけ"
+        ],
+        "why": {
+          "en": "一度とて with a negative is « not even once »: she never closed it. 一度しか would say she closed it only once, and 一度だけ that there was one time she did not.",
+          "fr": "一度とて suivi d'une négation, c'est « pas même une fois » : elle n'a jamais fermé. 一度しか dirait qu'elle a fermé une seule fois, et 一度だけ qu'une seule fois elle n'a pas fermé.",
+          "es": "一度とて con una negación es «ni una sola vez»: nunca cerró. 一度しか diría que cerró solo una vez, y 一度だけ que hubo una sola vez en que no cerró."
+        }
+      },
+      {
+        "jp": "天才＿＿＿、努力をしなければ何もできない。",
+        "tr": {
+          "en": "Even a genius can achieve nothing without effort.",
+          "fr": "Même un génie n'arrive à rien sans effort.",
+          "es": "Ni siquiera un genio logra nada sin esfuerzo."
+        },
+        "choices": [
+          "とて",
+          "だから",
+          "らしく"
+        ],
+        "why": {
+          "en": "とて names the case you would expect to be spared, then says the limit holds: even a genius. だから would make being a genius the cause, and らしく would call failing without effort typical of a genius.",
+          "fr": "とて nomme le cas qu'on croirait épargné, puis dit que la limite tient : même un génie. だから ferait du génie la cause, et らしく dirait qu'échouer sans effort est typique d'un génie.",
+          "es": "とて nombra el caso que uno creería a salvo y dice que el límite se mantiene: ni un genio. だから haría del genio la causa, y らしく diría que fracasar sin esfuerzo es típico de un genio."
+        }
+      },
+      {
+        "jp": "日曜日の今日＿＿＿、父はいつもと同じように五時に起きた。",
+        "tr": {
+          "en": "Even today, a Sunday, my father got up at five as always.",
+          "fr": "Même aujourd'hui, un dimanche, mon père s'est levé à cinq heures comme toujours.",
+          "es": "Incluso hoy, que es domingo, mi padre se levantó a las cinco como siempre."
+        },
+        "choices": [
+          "とて",
+          "だから",
+          "なら"
+        ],
+        "why": {
+          "en": "今日とて is « today too, no exception »: Sunday changes nothing. 今日だから would make Sunday the reason he rose at five, and 今日なら only takes today up, « if it's today », with no « even ».",
+          "fr": "今日とて, c'est « aujourd'hui aussi, sans exception » : le dimanche n'y change rien. 今日だから ferait du dimanche la cause de son lever à cinq heures, et 今日なら poserait juste le jour, « si c'est aujourd'hui », sans « même ».",
+          "es": "今日とて es «hoy también, sin excepción»: el domingo no cambia nada. 今日だから haría del domingo la razón de levantarse a las cinco, y 今日なら solo plantea el día, «si es hoy», sin el «incluso»."
+        }
       }
     ],
     "tour": {
