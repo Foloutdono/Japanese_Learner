@@ -1,13 +1,13 @@
 [
   {
     "pattern": "〜ばかり",
-    "structure": "verb た-form + ばかり",
-    "structure_fr": "verbe forme en た + ばかり",
-    "structure_es": "verbo en forma た + ばかり",
+    "structure": "verb た-form／noun／quantity + ばかり",
+    "structure_fr": "verbe forme en た／nom／quantité + ばかり",
+    "structure_es": "verbo en forma た／sustantivo／cantidad + ばかり",
     "meaning": {
-      "en": "just did, only just",
-      "fr": "venir tout juste de",
-      "es": "acabar de hacer, recién"
+      "en": "only just did; nothing but; about (an amount)",
+      "fr": "venir tout juste de ; rien que ; environ (une quantité)",
+      "es": "acabar de hacer; nada más que; más o menos (una cantidad)"
     },
     "register": "neutral",
     "steps": [
@@ -465,9 +465,9 @@
     "steps": [
       {
         "kind": "rule",
-        "en": "**plain form or noun + の + おかげで** credits a good result to its cause: 先生のおかげで (thanks to my teacher). At the end of a sentence: おかげさまで.",
-        "fr": "**forme neutre ou nom + の + おかげで** attribue un bon résultat à sa cause : 先生のおかげで (grâce à mon professeur). En fin de phrase : おかげさまで.",
-        "es": "**forma llana o sustantivo + の + おかげで** atribuye un buen resultado a su causa: 先生のおかげで (gracias a mi profesor). Al final de una frase: おかげさまで."
+        "en": "**plain form or noun + の + おかげで** credits a good result to its cause: 先生のおかげで (thanks to my teacher). As a set reply: おかげさまで.",
+        "fr": "**forme neutre ou nom + の + おかげで** attribue un bon résultat à sa cause : 先生のおかげで (grâce à mon professeur). En formule de réponse : おかげさまで.",
+        "es": "**forma llana o sustantivo + の + おかげで** atribuye un buen resultado a su causa: 先生のおかげで (gracias a mi profesor). Como fórmula de respuesta: おかげさまで."
       },
       {
         "kind": "use",
@@ -2721,9 +2721,9 @@
               "es": "La negación: no debería preguntar."
             },
             {
-              "en": "A different verb meaning « to like ».",
-              "fr": "Un autre verbe qui veut dire « aimer ».",
-              "es": "Otro verbo que significa «gustar»."
+              "en": "A different word, meaning « to like ».",
+              "fr": "Un autre mot, qui veut dire « aimer ».",
+              "es": "Otra palabra, que significa «gustar»."
             }
           ],
           "why": {
@@ -5095,10 +5095,10 @@
   {
     "pattern": "〜通りに",
     "reading": "〜とおりに",
-    "structure": "noun/verb dictionary form + 通りに",
-    "structure_reading": "noun/verb dictionary form + とおりに",
-    "structure_fr": "nom/verbe forme du dictionnaire + 通りに",
-    "structure_es": "sustantivo/verbo en forma de diccionario + 通りに",
+    "structure": "noun (+ の)／verb dictionary/た-form + 通りに",
+    "structure_reading": "noun (+ の)／verb dictionary/た-form + とおりに",
+    "structure_fr": "nom (+ の)／verbe forme du dictionnaire/forme en た + 通りに",
+    "structure_es": "sustantivo (+ の)／verbo en forma de diccionario/forma た + 通りに",
     "meaning": {
       "en": "as, according to, in line with",
       "fr": "comme, conformément à",
@@ -7168,9 +7168,9 @@
       },
       {
         "kind": "careful",
-        "en": "The person who forced you takes に. For う-verbs the short される is usual (待たされる); the long せられる is possible but rare. Not for verbs ending in す (話す→話させられる only).",
-        "fr": "La personne qui vous a forcé prend に. Pour les verbes en う, le court される est usuel (待たされる) ; le long せられる est possible mais rare. Pas pour les verbes en す (話す→話させられる seulement).",
-        "es": "Quien te obligó lleva に. En los verbos en う, lo habitual es la forma corta される (待たされる); la forma larga せられる es posible pero rara. No en los verbos que terminan en す (solo 話す→話させられる)."
+        "en": "The person who forced you takes に. For う-verbs the short される is usual (待たされる); the long せられる (習わせられる) is correct too, a little stiffer. Not for verbs ending in す (話す→話させられる only).",
+        "fr": "La personne qui vous a forcé prend に. Pour les verbes en う, le court される est usuel (待たされる) ; le long せられる (習わせられる) est correct aussi, un peu plus soutenu. Pas pour les verbes en す (話す→話させられる seulement).",
+        "es": "Quien te obligó lleva に. En los verbos en う, lo habitual es la forma corta される (待たされる); la forma larga せられる (習わせられる) también es correcta, algo más formal. No en los verbos que terminan en す (solo 話す→話させられる)."
       }
     ],
     "compare": [
@@ -7590,7 +7590,7 @@
             "fr": "Quelle forme complète la phrase ?",
             "es": "¿Qué forma completa la oración?"
           },
-          "jp": "その問題＿＿＿は、あした話しましょう。",
+          "jp": "その問題＿＿＿、あした話しましょう。",
           "tr": {
             "en": "As for that problem, let's talk about it tomorrow.",
             "fr": "Quant à ce problème, parlons-en demain.",
@@ -7723,10 +7723,10 @@
     ],
     "examples": [
       {
-        "jp": "この家は百年前に木によって作られた。",
-        "en": "This house was made of wood a hundred years ago.",
-        "fr": "Cette maison a été construite en bois il y a cent ans.",
-        "es": "Esta casa fue construida con madera hace cien años.",
+        "jp": "この家は百年前に祖父によって建てられた。",
+        "en": "This house was built by my grandfather a hundred years ago.",
+        "fr": "Cette maison a été construite par mon grand-père il y a cent ans.",
+        "es": "Esta casa fue construida por mi abuelo hace cien años.",
         "register": "casual",
         "contrast": true
       },
@@ -8734,9 +8734,9 @@
           },
           "jp": "わたしにとっての一番の思い出は、あの旅行です。",
           "tr": {
-            "en": "My best memory of all is that trip.",
-            "fr": "Mon meilleur souvenir, c'est ce voyage.",
-            "es": "Mi mejor recuerdo de todos es ese viaje."
+            "en": "For me, the best memory of all is that trip.",
+            "fr": "Pour moi, le meilleur souvenir, c'est ce voyage.",
+            "es": "Para mí, el mejor recuerdo de todos es ese viaje."
           },
           "ask": {
             "en": "にとっての, before a noun. What does it say?",
@@ -11065,9 +11065,9 @@
             "りょうりをしたあとで、友だちが来た。"
           ],
           "why": {
-            "en": "The activity you were in goes before 最中に, and the interruption comes after it. The second line turns it round (you cooked while the friend was there), and the third says the friend came after the cooking was done.",
-            "fr": "L'activité dans laquelle tu étais va devant 最中に, et l'interruption vient après. La deuxième phrase l'inverse (tu cuisinais pendant que l'ami était là), et la troisième dit que l'ami est venu après la cuisine.",
-            "es": "La actividad en la que estabas va antes de 最中に, y la interrupción viene después. La segunda frase lo invierte (cocinaste mientras el amigo estaba), y la tercera dice que llegó tras terminar de cocinar."
+            "en": "The activity you were in goes before 最中に, and the interruption comes after it. 友だちが来ている最中に turns it round (you cooked while the friend was there), and りょうりをしたあとで says the friend came after the cooking was done.",
+            "fr": "L'activité dans laquelle tu étais va devant 最中に, et l'interruption vient après. 友だちが来ている最中に l'inverse (tu cuisinais pendant que l'ami était là), et りょうりをしたあとで dit que l'ami est venu après la cuisine.",
+            "es": "La actividad en la que estabas va antes de 最中に, y la interrupción viene después. 友だちが来ている最中に lo invierte (cocinaste mientras el amigo estaba), y りょうりをしたあとで dice que llegó tras terminar de cocinar."
           }
         },
         {
@@ -11161,9 +11161,9 @@
       },
       {
         "kind": "careful",
-        "en": "Formal and used for planned occasions, never for everyday « when I was a child » (that is とき). In speech, とき replaces it.",
-        "fr": "Formel, pour des occasions prévues, jamais pour un « quand j'étais enfant » ordinaire (c'est とき). À l'oral, とき le remplace.",
-        "es": "Formal y para ocasiones previstas, nunca para un «cuando era niño» cotidiano (eso es とき). Al hablar, lo sustituye とき."
+        "en": "Formal and used for one occasion, never for a stretch of time such as « when I was a child » (that is とき). In speech, とき replaces it.",
+        "fr": "Formel, pour une occasion précise, jamais pour une période comme « quand j'étais enfant » (c'est とき). À l'oral, とき le remplace.",
+        "es": "Formal y para una ocasión concreta, nunca para un período como «cuando era niño» (eso es とき). Al hablar, lo sustituye とき."
       }
     ],
     "compare": [
@@ -11175,9 +11175,9 @@
       },
       {
         "pattern": "〜場合",
-        "en": "際に: on the occasion of something planned; 場合: in the case that something arises.",
-        "fr": "際に : à l'occasion d'une chose prévue ; 場合 : au cas où une chose se présente.",
-        "es": "際に: con ocasión de algo previsto; 場合: en caso de que algo surja."
+        "en": "際に: at the time of the occasion itself; 場合: in case it should arise.",
+        "fr": "際に : au moment même de l'occasion ; 場合 : au cas où cela arriverait.",
+        "es": "際に: en el momento mismo de la ocasión; 場合: en caso de que llegue a ocurrir."
       },
       {
         "pattern": "〜にあたって",
@@ -11301,9 +11301,9 @@
             }
           ],
           "why": {
-            "en": "際に marks a planned occasion (getting off, applying), never a period like childhood.",
-            "fr": "際に marque une occasion prévue (descendre, s'inscrire), jamais une période comme l'enfance.",
-            "es": "際に marca una ocasión prevista (bajar, solicitar), nunca un período como la infancia."
+            "en": "際に marks one occasion (getting off, applying, losing a ticket), never a period like childhood.",
+            "fr": "際に marque une occasion précise (descendre, s'inscrire, perdre un billet), jamais une période comme l'enfance.",
+            "es": "際に marca una ocasión concreta (bajar, solicitar, perder el boleto), nunca un período como la infancia."
           },
           "pair": [
             "申し込みの際に",
@@ -11603,9 +11603,9 @@
       },
       {
         "kind": "careful",
-        "en": "Always about another person, always disapproving: never about yourself, never to a superior. The neutral « although » is のに.",
-        "fr": "Toujours à propos d'un autre, toujours désapprobateur : jamais pour soi, jamais envers un supérieur. Le « bien que » neutre est のに.",
-        "es": "Siempre sobre otra persona, siempre con desaprobación: nunca sobre ti mismo, nunca dirigido a un superior. El «aunque» neutro es のに."
+        "en": "Always about another person, always disapproving: never about yourself, never to a superior. About yourself or a situation, « although » is のに.",
+        "fr": "Toujours à propos d'un autre, toujours désapprobateur : jamais pour soi, jamais envers un supérieur. Pour soi-même ou une situation, « bien que » se dit のに.",
+        "es": "Siempre sobre otra persona, siempre con desaprobación: nunca sobre ti mismo, nunca dirigido a un superior. Sobre uno mismo o una situación, «aunque» es のに."
       }
     ],
     "compare": [
@@ -11911,9 +11911,9 @@
             }
           ],
           "why": {
-            "en": "くせに always carries blame: bad at singing, and still singing loudly. It is neither admiring nor neutral. A plain, neutral « although » would be のに.",
-            "fr": "くせに porte toujours un reproche : il chante mal, et chante quand même fort. Ce n'est ni admiratif ni neutre. Un « bien que » simple et neutre serait のに.",
-            "es": "くせに siempre lleva reproche: canta mal y aun así canta fuerte. No es ni admirativo ni neutro. Un «aunque» simple y neutro sería のに."
+            "en": "くせに always carries blame: bad at singing, and still singing loudly. It is neither admiring nor neutral: two facts set side by side, with no feeling, would be joined by けど.",
+            "fr": "くせに porte toujours un reproche : il chante mal, et chante quand même fort. Ce n'est ni admiratif ni neutre : deux faits posés côte à côte, sans sentiment, seraient reliés par けど.",
+            "es": "くせに siempre lleva reproche: canta mal y aun así canta fuerte. No es ni admirativo ni neutro: dos hechos puestos uno junto al otro, sin sentimiento, irían unidos con けど."
           }
         },
         {
@@ -12439,7 +12439,7 @@
         "en": "The children came home covered in dirt.",
         "fr": "Les enfants sont rentrés couverts de terre.",
         "es": "Los niños volvieron a casa cubiertos de tierra.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -12455,7 +12455,7 @@
         "en": "I finally cleaned the room that was full of rubbish.",
         "fr": "J'ai enfin nettoyé la pièce pleine de déchets.",
         "es": "Por fin limpié la habitación llena de basura.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -12760,7 +12760,7 @@
             }
           ],
           "why": {
-            "en": "だらけ is not only for dirt: any unwelcome thing in quantity can follow it. Lies all through the story is why nobody believes it. A few lies would not be だらけ, and it does not mean « about lies ».",
+            "en": "だらけ is not only for dirt: any unwelcome thing in quantity can come before it. Lies all through the story is why nobody believes it. A few lies would not be だらけ, and it does not mean « about lies ».",
             "fr": "だらけ n'est pas réservé à la saleté : toute chose indésirable en nombre peut le précéder. Des mensonges partout, d'où la méfiance. Quelques mensonges ne feraient pas だらけ, et ce n'est pas « au sujet de ».",
             "es": "だらけ no es solo para la suciedad: cualquier cosa indeseada en cantidad puede ir delante. Mentiras por todo el relato: por eso nadie le cree. Unas pocas no serían だらけ, y no significa «sobre mentiras»."
           }
@@ -13898,9 +13898,9 @@
             }
           ],
           "why": {
-            "en": "The first half sets the amount, 近ければ近いほど, and the price follows it: closer means dearer. The last reading turns it round, as if price decided the distance.",
-            "fr": "La première moitié fixe le degré, 近ければ近いほど, et le prix la suit : plus près, plus cher. La dernière lecture inverse tout, comme si le prix décidait de la distance.",
-            "es": "La primera mitad fija la cantidad, 近ければ近いほど, y el precio la sigue: más cerca, más caro. La última lectura lo invierte, como si el precio decidiera la distancia."
+            "en": "The first half sets the amount, 近ければ近いほど, and the price follows it: closer means dearer. Putting the price first turns it round, as if price decided the distance.",
+            "fr": "La première moitié fixe le degré, 近ければ近いほど, et le prix la suit : plus près, plus cher. Mettre le prix en premier inverse tout, comme si le prix décidait de la distance.",
+            "es": "La primera mitad fija la cantidad, 近ければ近いほど, y el precio la sigue: más cerca, más caro. Poner el precio primero lo invierte, como si el precio decidiera la distancia."
           }
         },
         {
@@ -15357,9 +15357,9 @@
             }
           ],
           "why": {
-            "en": "I can't play: できない, the potential. No piano at all to play on: ひきようがない.",
-            "fr": "Je ne sais pas jouer : できない, le potentiel. Pas de piano du tout pour jouer : ひきようがない.",
-            "es": "No sé tocar: できない, el potencial. Ni un piano en el que tocar: ひきようがない."
+            "en": "I can't play: ひけない, the potential. No piano at all to play on: ひきようがない.",
+            "fr": "Je ne sais pas jouer : ひけない, le potentiel. Pas de piano du tout pour jouer : ひきようがない.",
+            "es": "No sé tocar: ひけない, el potencial. Ni un piano en el que tocar: ひきようがない."
           },
           "pair": [
             "ひけない",
@@ -15678,7 +15678,7 @@
         "en": "I went out and left the light on.",
         "fr": "Je suis sorti en laissant la lumière allumée.",
         "es": "Me fui de casa y dejé la luz encendida.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -15686,7 +15686,7 @@
         "en": "My legs ache from standing all day.",
         "fr": "J'ai mal aux jambes d'être resté debout toute la journée.",
         "es": "Me duelen las piernas de estar de pie todo el día.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -16759,9 +16759,9 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What does the sentence stress?",
-            "fr": "Qu'est-ce que la phrase souligne ?",
-            "es": "¿Qué destaca la oración?"
+            "en": "What does ぬく add to 走った here?",
+            "fr": "Qu'est-ce que ぬく ajoute ici à 走った ?",
+            "es": "¿Qué añade ぬく a 走った aquí?"
           },
           "jp": "どんなに雨がふっても、さいごまで走りぬいた。",
           "tr": {
@@ -16787,9 +16787,9 @@
             }
           ],
           "why": {
-            "en": "ぬく stresses getting through the hardship, here the rain. Covering every last bit of the distance would be 走りきった, and nothing here compares speeds.",
-            "fr": "ぬく souligne qu'on a traversé la difficulté, ici la pluie. Couvrir jusqu'au dernier mètre serait 走りきった, et rien ici ne compare les vitesses.",
-            "es": "ぬく destaca que se superó la dificultad, aquí la lluvia. Cubrir hasta el último metro sería 走りきった, y aquí nada compara velocidades."
+            "en": "ぬく adds getting through the hardship, here the rain. Reaching the end is already in さいごまで, and covering every last bit of the distance would be 走りきった; nothing here compares speeds.",
+            "fr": "ぬく ajoute qu'on a traversé la difficulté, ici la pluie. Arriver au bout, さいごまで le dit déjà, et couvrir jusqu'au dernier mètre serait 走りきった ; rien ici ne compare les vitesses.",
+            "es": "ぬく añade que se superó la dificultad, aquí la lluvia. Llegar al final ya lo dice さいごまで, y cubrir hasta el último metro sería 走りきった; aquí nada compara velocidades."
           }
         }
       ]
@@ -18044,7 +18044,7 @@
         "en": "It's my first time, you see, so I don't quite know how.",
         "fr": "C'est la première fois, voyez-vous, je ne sais pas trop comment faire.",
         "es": "Es que es la primera vez, y no sé muy bien cómo hacerlo.",
-        "register": "polite"
+        "register": "casual"
       }
     ],
     "tour": {
@@ -18449,9 +18449,9 @@
       },
       {
         "kind": "careful",
-        "en": "Like ものだから, it never leads into a request or a plan: 急いでいるもので、早くしてください is wrong (use ので). Politer than ものだから; casual: もんで.",
-        "fr": "Comme ものだから, il ne mène jamais à une demande ni à un projet : 急いでいるもので、早くしてください est faux (dites ので). Plus poli que ものだから ; familier : もんで.",
-        "es": "Como ものだから, nunca lleva a una petición ni a un plan: 急いでいるもので、早くしてください es incorrecto (usa ので). Más cortés que ものだから; coloquial: もんで."
+        "en": "Like ものだから, it never leads into a request: 急いでいるもので、早くしてください is wrong (use ので). Politer than ものだから; casual: もんで.",
+        "fr": "Comme ものだから, il ne mène jamais à une demande : 急いでいるもので、早くしてください est faux (dites ので). Plus poli que ものだから ; familier : もんで.",
+        "es": "Como ものだから, nunca lleva a una petición: 急いでいるもので、早くしてください es incorrecto (usa ので). Más cortés que ものだから; coloquial: もんで."
       }
     ],
     "compare": [
@@ -18500,10 +18500,10 @@
         "contrast": true
       },
       {
-        "jp": "日本語がまだ下手なもので、ゆっくり話していただけますか。",
-        "en": "My Japanese is still poor, so could you speak slowly?",
-        "fr": "Mon japonais est encore faible, pourriez-vous parler lentement ?",
-        "es": "Como mi japonés todavía no es muy bueno, ¿podría hablar despacio?",
+        "jp": "日本語がまだ下手なもので、うまく説明できません。",
+        "en": "My Japanese is still poor, so I can't explain it well.",
+        "fr": "Mon japonais est encore faible, je n'arrive pas à bien l'expliquer.",
+        "es": "Como mi japonés todavía no es muy bueno, no puedo explicarlo bien.",
         "register": "polite"
       }
     ],
@@ -18717,13 +18717,13 @@
           },
           "choices": [
             "早い",
-            "早いです",
+            "早かった",
             "早くて"
           ],
           "why": {
-            "en": "もので already carries the politeness, so what comes before it is plain: 早いもので. 早いですもので stacks a second polite form, and 早くてもので joins two connectors.",
-            "fr": "もので porte déjà la politesse : ce qui le précède reste neutre, 早いもので. 早いですもので empile une seconde forme polie, et 早くてもので accole deux liaisons.",
-            "es": "もので ya lleva la cortesía, así que lo que va delante es llano: 早いもので. 早いですもので apila una segunda forma cortés, y 早くてもので junta dos conectores."
+            "en": "The early start is still to come, tomorrow, and もので takes the plain form: 早いもので. 早かったもので puts it in the past, and 早くてもので joins two connectors.",
+            "fr": "Le départ matinal est encore à venir, demain, et もので prend la forme neutre : 早いもので. 早かったもので le met au passé, et 早くてもので accole deux liaisons.",
+            "es": "El madrugón aún está por llegar, mañana, y もので va tras la forma llana: 早いもので. 早かったもので lo pone en pasado, y 早くてもので junta dos conectores."
           }
         },
         {
@@ -19128,9 +19128,9 @@
             "とくいだからこそ、毎日話すれんしゅうをするんだ。"
           ],
           "why": {
-            "en": "The reason comes right before からこそ: にがてだからこそ, « precisely because it's my weak point ». The second line turns it round, and とくいだからこそ gives the opposite reason, being good at it.",
-            "fr": "La raison se place juste avant からこそ : にがてだからこそ, « justement parce que c'est mon point faible ». La deuxième phrase l'inverse, et とくいだからこそ donne la raison contraire, être doué.",
-            "es": "La razón va justo antes de からこそ: にがてだからこそ, «precisamente porque es mi punto débil». La segunda frase le da la vuelta, y とくいだからこそ da la razón opuesta, que es tu punto fuerte."
+            "en": "The reason comes right before からこそ: にがてだからこそ, « precisely because it's my weak point ». Putting the practice before からこそ turns it round, and とくいだからこそ gives the opposite reason, being good at it.",
+            "fr": "La raison se place juste avant からこそ : にがてだからこそ, « justement parce que c'est mon point faible ». Mettre l'entraînement devant からこそ l'inverse, et とくいだからこそ donne la raison contraire, être doué.",
+            "es": "La razón va justo antes de からこそ: にがてだからこそ, «precisamente porque es mi punto débil». Poner la práctica antes de からこそ le da la vuelta, y とくいだからこそ da la razón opuesta, que es tu punto fuerte."
           }
         },
         {
@@ -19262,8 +19262,8 @@
       },
       {
         "jp": "学生である以上、勉強が一番だ。",
-        "en": "As long as you are a student, study comes first.",
-        "fr": "Tant qu'on est étudiant, les études passent d'abord.",
+        "en": "Since you are a student, study comes first.",
+        "fr": "Dès lors qu'on est étudiant, les études passent d'abord.",
         "es": "Ya que eres estudiante, lo primero es estudiar.",
         "register": "casual",
         "contrast": true
@@ -19517,7 +19517,7 @@
           },
           "jp": "社会人＿＿＿以上、あいさつはきちんとしなければならない。",
           "tr": {
-            "en": "As long as you are a working adult, you must greet people properly.",
+            "en": "Since you are a working adult, you must greet people properly.",
             "fr": "Dès lors que tu es un adulte qui travaille, tu dois saluer correctement.",
             "es": "Siendo una persona adulta que trabaja, tienes que saludar como es debido."
           },
@@ -20308,9 +20308,9 @@
             "の"
           ],
           "why": {
-            "en": "Before 限り a な-adjective takes な: 元気な限り, « as long as I'm well ». 元気だ限り keeps だ, and 元気の限り is a different phrase, « with all my energy ».",
-            "fr": "Devant 限り, un adjectif en な prend な : 元気な限り, « tant que je vais bien ». 元気だ限り garde だ, et 元気の限り est une autre expression, « de toute mon énergie ».",
-            "es": "Ante 限り un adjetivo en な lleva な: 元気な限り, «mientras esté bien». 元気だ限り conserva el だ, y 元気の限り es otra expresión, «con todas mis fuerzas»."
+            "en": "Before 限り a な-adjective takes な: 元気な限り, « as long as I'm well ». 元気だ限り keeps だ, and の + 限り is « to the limit of », as in 力の限り, « with all one's might », not « as long as ».",
+            "fr": "Devant 限り, un adjectif en な prend な : 元気な限り, « tant que je vais bien ». 元気だ限り garde だ, et の + 限り veut dire « jusqu'au bout de », comme dans 力の限り, « de toutes ses forces », pas « tant que ».",
+            "es": "Ante 限り un adjetivo en な lleva な: 元気な限り, «mientras esté bien». 元気だ限り conserva el だ, y の + 限り es «hasta el límite de», como en 力の限り, «con todas sus fuerzas», no «mientras»."
           }
         },
         {
@@ -21086,9 +21086,9 @@
             "はいない"
           ],
           "why": {
-            "en": "座ってはいられない: the verb after はいられ- is いる, « to stay », and ない makes it « can't stay like this ». はいけない is a ban, and 座ってはいない only says you are not sitting.",
+            "en": "座ってはいられない: いられ- is the potential of いる, « to stay », and ない makes it « can't stay like this ». はいけない is a ban, and 座ってはいない only says you are not sitting.",
             "fr": "座ってはいられない : le verbe est いる, « rester », et ない donne « je ne peux pas rester ainsi ». はいけない est une interdiction, et 座ってはいない dit seulement qu'on n'est pas assis.",
-            "es": "座ってはいられない: el verbo tras はいられ- es いる, «quedarse», y ない lo hace «no puedo quedarme así». はいけない es una prohibición, y 座ってはいない solo niega que estés en el asiento."
+            "es": "座ってはいられない: いられ- es el potencial de いる, «quedarse», y ない lo hace «no puedo quedarme así». はいけない es una prohibición, y 座ってはいない solo niega que estés en el asiento."
           }
         },
         {
@@ -21187,7 +21187,7 @@
         "en": "I've eaten nothing since morning and I'm unbearably hungry.",
         "fr": "Je n'ai rien mangé depuis ce matin, j'ai une faim terrible.",
         "es": "No he comido nada desde la mañana y tengo un hambre insoportable.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -21195,7 +21195,7 @@
         "en": "I miss my family back home terribly.",
         "fr": "Ma famille au pays me manque terriblement.",
         "es": "Me muero de ganas de ver a mi familia, allá en mi país.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -21203,7 +21203,7 @@
         "en": "It's unbearably hot today.",
         "fr": "Il fait une chaleur insupportable aujourd'hui.",
         "es": "Hoy hace un calor insoportable.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -21612,9 +21612,9 @@
       },
       {
         "jp": "この部屋はうるさくてしかたがない。",
-        "en": "This room is unbearably noisy.",
-        "fr": "Cette pièce est insupportablement bruyante.",
-        "es": "Esta habitación es insoportablemente ruidosa.",
+        "en": "This room is so noisy, there's no helping it.",
+        "fr": "Cette pièce est tellement bruyante, on n'y peut rien.",
+        "es": "Esta habitación es ruidosa a más no poder.",
         "register": "casual",
         "contrast": true
       },
@@ -21628,9 +21628,9 @@
       },
       {
         "jp": "じゅぎょうがつまらなくてしかたがない。",
-        "en": "The class is so boring I can hardly stand it.",
+        "en": "The class is terribly boring.",
         "fr": "Le cours est d'un ennui mortel.",
-        "es": "La clase es tan aburrida que apenas la soporto.",
+        "es": "La clase es terriblemente aburrida.",
         "register": "casual"
       }
     ],
@@ -22482,7 +22482,7 @@
             "fr": "Face à なら",
             "es": "Frente a なら"
           },
-          "jp": "とうきょうに行くなら、しんかんせんが速いですよ。",
+          "jp": "とうきょうに行くなら、しんかんせんが速いよ。",
           "tr": {
             "en": "If you're going to Tokyo, the shinkansen is fast.",
             "fr": "Si tu vas à Tokyo, le shinkansen est rapide, tu sais.",
@@ -24031,21 +24031,21 @@
             "fr": "Quelle forme complète la phrase ?",
             "es": "¿Qué forma completa la oración?"
           },
-          "jp": "あしたが＿＿＿、試合はやるはずだ。",
+          "jp": "＿＿＿、毎日おくれるのはよくない。",
           "tr": {
-            "en": "Even if it rains tomorrow, the match should still be on.",
-            "fr": "Même s'il pleut demain, le match devrait quand même avoir lieu.",
-            "es": "Aunque llueva mañana, el partido debería jugarse igual."
+            "en": "Even if it's only a part-time job, being late every day is not good.",
+            "fr": "Même si ce n'est qu'un petit boulot, arriver en retard tous les jours, ce n'est pas bien.",
+            "es": "Aunque sea solo un trabajo de medio tiempo, llegar tarde todos los días no está bien."
           },
           "choices": [
-            "雨にしても",
-            "雨のにしても",
-            "雨にしては"
+            "アルバイトにしても",
+            "アルバイトのにしても",
+            "アルバイトにしては"
           ],
           "why": {
-            "en": "After a noun, にしても attaches directly: 雨にしても, with no の. 雨にしては would measure against a type, and cannot grant a possibility for tomorrow.",
-            "fr": "Après un nom, にしても se place directement : 雨にしても, sans の. 雨にしては mesurerait par rapport à un type, et ne peut pas accorder une possibilité pour demain.",
-            "es": "Tras un sustantivo, にしても va directo: 雨にしても, sin の. 雨にしては mediría frente a lo típico y no puede admitir una posibilidad para mañana."
+            "en": "After a noun, にしても attaches directly: アルバイトにしても, with no の. アルバイトにしては would measure against a type, « for a part-time job », and grants no premise.",
+            "fr": "Après un nom, にしても se place directement : アルバイトにしても, sans の. アルバイトにしては mesurerait par rapport à un type, « pour un petit boulot », et n'accorde aucune prémisse.",
+            "es": "Tras un sustantivo, にしても va directo: アルバイトにしても, sin の. アルバイトにしては mediría frente a lo típico, «para ser un trabajo de medio tiempo», y no concede ninguna premisa."
           }
         }
       ]
@@ -24444,9 +24444,9 @@
   },
   {
     "pattern": "〜とか",
-    "structure": "noun + とか + noun + とか",
-    "structure_fr": "nom + とか + nom + とか",
-    "structure_es": "sustantivo + とか + sustantivo + とか",
+    "structure": "noun／plain form + とか (+ noun／plain form + とか)",
+    "structure_fr": "nom／forme neutre + とか (+ nom／forme neutre + とか)",
+    "structure_es": "sustantivo／forma llana + とか (+ sustantivo／forma llana + とか)",
     "meaning": {
       "en": "such as, giving loose examples",
       "fr": "comme par exemple, des choses comme",
@@ -24950,7 +24950,7 @@
       },
       {
         "jp": "いいえ、こちらこそありがとうございました。",
-        "en": "No, thank you.",
+        "en": "No, it's I who should thank you.",
         "fr": "Non, c'est moi qui vous remercie.",
         "es": "No, gracias a usted.",
         "register": "polite"
@@ -25663,9 +25663,9 @@
   },
   {
     "pattern": "いくら〜ても／どんなに〜ても",
-    "structure": "いくら／どんなに + verb て-form + も（ても）",
-    "structure_fr": "いくら／どんなに + verbe forme en て + も（ても）",
-    "structure_es": "いくら／どんなに + verbo en forma て + も（ても）",
+    "structure": "いくら／どんなに + て-form of a verb, adjective or noun + も（ても・でも）",
+    "structure_fr": "いくら／どんなに + forme en て d'un verbe, d'un adjectif ou d'un nom + も（ても・でも）",
+    "structure_es": "いくら／どんなに + forma て de un verbo, adjetivo o sustantivo + も（ても・でも）",
     "meaning": {
       "en": "no matter how much…",
       "fr": "on a beau…, quel que soit…",
@@ -26042,9 +26042,9 @@
   },
   {
     "pattern": "たとえ〜ても",
-    "structure": "たとえ + verb て-form + も（ても）",
-    "structure_fr": "たとえ + verbe forme en て + も（ても）",
-    "structure_es": "たとえ + verbo en forma て + も（ても）",
+    "structure": "たとえ + て-form of a verb, adjective or noun + も（ても・でも）",
+    "structure_fr": "たとえ + forme en て d'un verbe, d'un adjectif ou d'un nom + も（ても・でも）",
+    "structure_es": "たとえ + forma て de un verbo, adjetivo o sustantivo + も（ても・でも）",
     "meaning": {
       "en": "even if (supposing that)",
       "fr": "même si (en supposant que)",
@@ -26564,9 +26564,9 @@
           },
           "jp": "この駅は、休みの日はもちろん、平日もこんでいる。",
           "tr": {
-            "en": "This station is crowded on weekdays, let alone on days off.",
+            "en": "This station is crowded on days off, of course, and on weekdays too.",
             "fr": "Cette gare est bondée les jours fériés, bien sûr, mais aussi en semaine.",
-            "es": "Esta estación está llena entre semana, y ni hablar de los días libres."
+            "es": "Esta estación está llena los días libres, claro, y también entre semana."
           },
           "ask": {
             "en": "Here it is はもちろん. What does it add to « not only »?",
@@ -26861,7 +26861,7 @@
         "en": "My brother does nothing but play games all day.",
         "fr": "Mon frère ne fait que jouer aux jeux vidéo toute la journée.",
         "es": "Mi hermano menor no hace más que jugar a videojuegos todo el día.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -26877,7 +26877,7 @@
         "en": "On my days off I do nothing but sleep.",
         "fr": "Les jours de congé, je ne fais que dormir.",
         "es": "Los días libres no hago más que dormir.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -27923,12 +27923,12 @@
           "choices": [
             "ごみは、二日ごとに出してください。",
             "ごみは、一日ごとに出してください。",
-            "ごみは、二日おきに出してください。"
+            "ごみは、二日後に出してください。"
           ],
           "why": {
-            "en": "ごとに counts every unit, so 二日ごとに is every two days, i.e. every other day. 一日ごとに is every day, and 二日おきに skips two days: every third day.",
-            "fr": "ごとに compte chaque unité : 二日ごとに, c'est tous les deux jours, donc un jour sur deux. 一日ごとに, c'est tous les jours, et 二日おきに saute deux jours : tous les trois jours.",
-            "es": "ごとに cuenta cada unidad, así que 二日ごとに es cada dos días, un día sí y otro no. 一日ごとに es cada día, y 二日おきに se salta dos días: cada tres días."
+            "en": "ごとに counts every unit, so 二日ごとに is every two days, i.e. every other day. 一日ごとに is every day, and 二日後に is only once, two days from now.",
+            "fr": "ごとに compte chaque unité : 二日ごとに, c'est tous les deux jours, donc un jour sur deux. 一日ごとに, c'est tous les jours, et 二日後に, une seule fois, dans deux jours.",
+            "es": "ごとに cuenta cada unidad, así que 二日ごとに es cada dos días, un día sí y otro no. 一日ごとに es cada día, y 二日後に es una sola vez, dentro de dos días."
           }
         },
         {
@@ -28367,7 +28367,7 @@
             "会社へ来てから、ゆうびん局に寄りました。"
           ],
           "why": {
-            "en": "Polite and « on the way »: 来る途中で…寄りました. The よ version is too casual for a boss, and 来てから says he stopped after arriving at work, not on the way.",
+            "en": "Polite and « on the way »: 来る途中で…寄りました. The よ version is too casual for a boss, and 来てから says you stopped after arriving at work, not on the way.",
             "fr": "Poli et « en chemin » : 来る途中で…寄りました. La version en よ est trop familière pour un chef, et 来てから dit qu'on s'est arrêté après l'arrivée au travail, pas en chemin.",
             "es": "Cortés y «de camino»: 来る途中で…寄りました. La versión con よ es demasiado coloquial para un jefe, y 来てから dice que pasaste después de llegar al trabajo, no de camino."
           }
@@ -28709,9 +28709,9 @@
             "そう"
           ],
           "why": {
-            "en": "ねぶそく気味 is a touch of it right now. がち is a tendency over time, and そう means « looks like » and does not attach to a noun like ねぶそく.",
-            "fr": "ねぶそく気味 est un léger manque, là, maintenant. がち est une tendance dans la durée, et そう veut dire « a l'air de » et ne se met pas derrière un nom comme ねぶそく.",
-            "es": "ねぶそく気味 es algo de eso ahora mismo. がち es una tendencia en el tiempo, y そう significa «parece» y no va tras un sustantivo como ねぶそく."
+            "en": "ねぶそく気味 is a touch of it, felt right now. がち is a tendency over time, and ねぶそくそう would say you look short of sleep: how it seems from outside, not what you feel.",
+            "fr": "ねぶそく気味 est un léger manque, ressenti là, maintenant. がち est une tendance dans la durée, et ねぶそくそう dirait qu'on a l'air de manquer de sommeil : vu de l'extérieur, pas ce qu'on ressent.",
+            "es": "ねぶそく気味 es algo de eso que notas ahora mismo. がち es una tendencia en el tiempo, y ねぶそくそう diría que se te ve con falta de sueño: visto desde fuera, no lo que sientes."
           }
         }
       ]
@@ -30059,8 +30059,8 @@
       },
       {
         "jp": "ある調べによると、若い人の半分がスマホで本を読む。",
-        "en": "According to the survey, half of young people read books on their phones.",
-        "fr": "D'après l'enquête, la moitié des jeunes lisent sur leur téléphone.",
+        "en": "According to one survey, half of young people read books on their phones.",
+        "fr": "D'après une enquête, la moitié des jeunes lisent sur leur téléphone.",
         "es": "Según una encuesta, la mitad de los jóvenes lee libros en el teléfono.",
         "register": "neutral",
         "contrast": true
@@ -30178,7 +30178,7 @@
               "es": "Según el tiempo que haga, los trenes a veces se retrasan."
             },
             {
-              "en": "According to the weather, trains are sometimes late.",
+              "en": "According to the weather forecast, trains are sometimes late.",
               "fr": "D'après la météo, les trains ont parfois du retard.",
               "es": "Según el pronóstico del tiempo, los trenes a veces se retrasan."
             },
@@ -31691,9 +31691,9 @@
       },
       {
         "kind": "careful",
-        "en": "The same word twice, on either side of ことは; the second copy carries the tense. Spoken: ことはけど.",
-        "fr": "Le même mot deux fois, de part et d'autre de ことは ; la seconde copie porte le temps. Oral : ことはけど.",
-        "es": "La misma palabra dos veces, a cada lado de ことは; la segunda lleva el tiempo verbal. Al hablar: ことはけど."
+        "en": "The same word twice, on either side of ことは; the second copy carries the tense. Spoken, けど replaces the final が: 話せることは話せるけど.",
+        "fr": "Le même mot deux fois, de part et d'autre de ことは ; la seconde copie porte le temps. À l'oral, けど remplace le が final : 話せることは話せるけど.",
+        "es": "La misma palabra dos veces, a cada lado de ことは; la segunda lleva el tiempo verbal. Al hablar, けど sustituye al が final: 話せることは話せるけど."
       }
     ],
     "compare": [
@@ -32242,7 +32242,7 @@
             }
           ],
           "why": {
-            "en": "というのは can take a whole statement, often someone's own words, to say or ask what it amounts to; ということ closes it.",
+            "en": "というのは can take a whole statement, often the other person's words, to say or ask what it amounts to; ということ closes it.",
             "fr": "というのは peut reprendre toute une phrase, souvent les mots de l'autre, pour dire ou demander ce qu'elle signifie ; ということ la referme.",
             "es": "というのは puede tomar una frase entera, a menudo las palabras del otro, para decir o preguntar qué significa; ということ la cierra."
           },
@@ -32542,8 +32542,8 @@
       },
       {
         "jp": "春から夏にかけて、この花が見られます。",
-        "en": "This flower blooms from spring into summer.",
-        "fr": "Cette fleur fleurit du printemps à l'été.",
+        "en": "You can see this flower from spring into summer.",
+        "fr": "On peut voir cette fleur du printemps à l'été.",
         "es": "Esta flor se puede ver de la primavera al verano.",
         "register": "polite",
         "contrast": true
@@ -34013,7 +34013,7 @@
         "en": "It's not that I won't go, but I don't really want to.",
         "fr": "Ce n'est pas que je n'irai pas, mais je n'en ai pas très envie.",
         "es": "No es que no vaya a ir, pero no tengo muchas ganas.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -34021,7 +34021,7 @@
         "en": "This dish isn't inedible, exactly.",
         "fr": "Ce plat n'est pas immangeable, à proprement parler.",
         "es": "No es que este plato sea incomible, exactamente.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -34029,7 +34029,7 @@
         "en": "It's not that I can't do it alone, but it takes time.",
         "fr": "Ce n'est pas que je ne puisse pas le faire seul, mais ça prend du temps.",
         "es": "No es que no pueda hacerlo sin ayuda, pero lleva tiempo.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -34517,9 +34517,9 @@
         },
         {
           "notion": {
-            "en": "Not « on top of » a thing",
-            "fr": "Pas « sur » un objet",
-            "es": "No «encima de» un objeto"
+            "en": "Against 上 of place",
+            "fr": "Face au 上 de lieu",
+            "es": "Frente al 上 de lugar"
           },
           "jp": "つくえの上に、きっぷをおきました。",
           "tr": {
@@ -34872,7 +34872,7 @@
       },
       {
         "jp": "週末はもちろん、平日も人が多い。",
-        "en": "There are many people on weekdays, let alone weekends.",
+        "en": "There are many people on weekdays too, not to mention weekends.",
         "fr": "Il y a du monde en semaine aussi, sans parler du week-end.",
         "es": "Entre semana también hay mucha gente, y qué decir de los fines de semana.",
         "register": "casual",
@@ -35996,13 +35996,13 @@
           },
           "choices": [
             "かまいませんか",
-            "かまわないか",
+            "かまいません",
             "かまいませんでしたか"
           ],
           "why": {
-            "en": "To a stranger, the polite form: かまいません, with か to ask. かまわないか is plain and abrupt, and かまいませんでしたか asks about something already past.",
-            "fr": "À un inconnu, la forme polie : かまいません, avec か pour demander. かまわないか est neutre et abrupt, et かまいませんでしたか interroge sur un fait déjà passé.",
-            "es": "A un desconocido, la forma cortés: かまいません, con か para preguntar. かまわないか es llana y brusca, y かまいませんでしたか pregunta por algo ya pasado."
+            "en": "You are asking, so the question: かまいませんか, with か. かまいません, with no か, would grant the seat rather than ask for it, and かまいませんでしたか asks about something already past.",
+            "fr": "Tu demandes, donc la question : かまいませんか, avec か. かまいません, sans か, accorderait la place au lieu de la demander, et かまいませんでしたか interroge sur un fait déjà passé.",
+            "es": "Estás preguntando, así que va la pregunta: かまいませんか, con か. かまいません, sin か, concedería el asiento en vez de pedirlo, y かまいませんでしたか pregunta por algo ya pasado."
           }
         },
         {
@@ -37453,7 +37453,7 @@
         "en": "Even a child understands that much.",
         "fr": "Même un enfant comprend ça.",
         "es": "Hasta un niño entiende eso.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -37461,7 +37461,7 @@
         "en": "I want to go too, you know.",
         "fr": "Moi aussi je veux y aller, tu sais.",
         "es": "Yo también quiero ir, ¿sabes?",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -37469,7 +37469,7 @@
         "en": "Even on days off, I get up at six.",
         "fr": "Même les jours de congé, je me lève à six heures.",
         "es": "Incluso los días libres me levanto a las seis.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -37843,9 +37843,9 @@
       },
       {
         "jp": "最後まで自分の意見を言い通す。",
-        "en": "Stick to your opinion to the end.",
-        "fr": "Maintiens ton avis jusqu'au bout.",
-        "es": "Mantén tu opinión hasta el final.",
+        "en": "I'll stick to my own opinion to the end.",
+        "fr": "Je maintiendrai mon avis jusqu'au bout.",
+        "es": "Mantendré mi opinión hasta el final.",
         "register": "casual",
         "contrast": true
       },
@@ -38003,9 +38003,9 @@
             "長かったから、とちゅうでやめたよ。"
           ],
           "why": {
-            "en": "From start to finish, unbroken, and done: 読み通した. つづけている says you are still reading, and the last says you gave up halfway.",
-            "fr": "Du début à la fin, sans coupure, et c'est fini : 読み通した. つづけている dit que tu lis encore, et la dernière que tu as abandonné en route.",
-            "es": "De principio a fin, sin cortes, y terminado: 読み通した. つづけている dice que aún lo estás leyendo, y la última, que lo dejaste a medias."
+            "en": "From start to finish, unbroken, and done: 読み通した. つづけている says you are still reading, and とちゅうでやめた says you gave up halfway.",
+            "fr": "Du début à la fin, sans coupure, et c'est fini : 読み通した. つづけている dit que tu lis encore, et とちゅうでやめた, que tu as abandonné en route.",
+            "es": "De principio a fin, sin cortes, y terminado: 読み通した. つづけている dice que aún lo estás leyendo, y とちゅうでやめた, que lo dejaste a medias."
           }
         }
       },
@@ -39224,7 +39224,7 @@
         "en": "What time did the exam start again?",
         "fr": "L'examen, c'était à quelle heure, déjà ?",
         "es": "¿A qué hora empezaba el examen?",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -39232,7 +39232,7 @@
         "en": "What was his name again?",
         "fr": "Comment il s'appelait, déjà ?",
         "es": "¿Cómo se llamaba él?",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -39240,7 +39240,7 @@
         "en": "Tomorrow's a day off, isn't it?",
         "fr": "Demain, c'est congé, non ?",
         "es": "Mañana era día libre, ¿no?",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -39615,9 +39615,9 @@
       },
       {
         "kind": "careful",
-        "en": "A noun or な-adjective takes な／の (雨のような気がする). Your own feeling only; someone else's is 気がしている. Not the same as 気にする (to mind) or 気になる (to be on one's mind).",
-        "fr": "Un nom ou un adjectif en な prend な／の (雨のような気がする). Votre propre sentiment seulement ; celui d'un autre, 気がしている. Différent de 気にする (se soucier) et 気になる (préoccuper).",
-        "es": "Un sustantivo o un adjetivo en な lleva な／の (雨のような気がする). Solo para tu propia sensación; la de otro es 気がしている. No es lo mismo que 気にする (preocuparse por algo) ni que 気になる (no quitárselo de la cabeza)."
+        "en": "A な-adjective takes な (変な気がする); a noun takes の, most often in のような (雨のような気がする). Your own feeling only; someone else's is 気がしている. Not the same as 気にする (to mind) or 気になる (to be on one's mind).",
+        "fr": "Un adjectif en な prend な (変な気がする) ; un nom prend の, le plus souvent dans のような (雨のような気がする). Votre propre sentiment seulement ; celui d'un autre, 気がしている. Différent de 気にする (se soucier) et 気になる (préoccuper).",
+        "es": "Un adjetivo en な lleva な (変な気がする); un sustantivo lleva の, casi siempre en のような (雨のような気がする). Solo para tu propia sensación; la de otro es 気がしている. No es lo mismo que 気にする (preocuparse por algo) ni que 気になる (no quitárselo de la cabeza)."
       }
     ],
     "compare": [
@@ -39646,7 +39646,7 @@
         "en": "I have the feeling I'm being watched.",
         "fr": "J'ai l'impression d'être observé.",
         "es": "Tengo la sensación de que alguien me está mirando.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -39654,7 +39654,7 @@
         "en": "I feel like I've been to this shop before.",
         "fr": "J'ai l'impression d'être déjà venu dans ce magasin.",
         "es": "Me parece que ya he estado antes en esta tienda.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -39662,7 +39662,7 @@
         "en": "I have a feeling this plan won't work.",
         "fr": "J'ai l'impression que ce plan ne marchera pas.",
         "es": "Tengo la sensación de que este plan no va a salir bien.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -40036,7 +40036,7 @@
         "en": "It's not that I'm in any particular hurry.",
         "fr": "Ce n'est pas que je sois particulièrement pressé.",
         "es": "No es que tenga especial prisa.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -40052,7 +40052,7 @@
         "en": "It's not that I don't want to go, but I'm tired today.",
         "fr": "Ce n'est pas que je n'aie pas envie d'y aller, mais je suis fatigué aujourd'hui.",
         "es": "No es que no quiera ir, pero hoy estoy cansado.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -40228,9 +40228,9 @@
             "おもしろかった"
           ],
           "why": {
-            "en": "別に goes with a negative, and the film is past: an い-adjective becomes くなかった. おもしろいない is the slip that glues ない onto the い form, and おもしろかった has no negative at all.",
-            "fr": "別に va avec un négatif, et le film est passé : un adjectif en い devient くなかった. おもしろいない est l'erreur qui colle ない à la forme en い, et おもしろかった n'a aucun négatif.",
-            "es": "別に va con una negación, y la película ya pasó: un adjetivo en い pasa a くなかった. おもしろいない es el error de pegar ない a la forma en い, y おもしろかった no tiene ninguna negación."
+            "en": "別に goes with a negative, and the film is past: an い-adjective becomes くなかった. おもしろいなかった is the slip that glues なかった onto the い form, and おもしろかった has no negative at all.",
+            "fr": "別に va avec un négatif, et le film est passé : un adjectif en い devient くなかった. おもしろいなかった est l'erreur qui colle なかった à la forme en い, et おもしろかった n'a aucun négatif.",
+            "es": "別に va con una negación, y la película ya pasó: un adjetivo en い pasa a くなかった. おもしろいなかった es el error de pegar なかった a la forma en い, y おもしろかった no tiene ninguna negación."
           }
         },
         {
@@ -40407,7 +40407,7 @@
         "en": "This story isn't the least bit interesting.",
         "fr": "Cette histoire n'est pas le moins du monde intéressante.",
         "es": "Esta historia no tiene ni pizca de interés.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -40415,7 +40415,7 @@
         "en": "He hasn't changed one bit.",
         "fr": "Il n'a pas changé d'un poil.",
         "es": "Él no ha cambiado nada de nada.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -40423,7 +40423,7 @@
         "en": "I practise every day, but I'm not getting one bit better.",
         "fr": "Je m'entraîne tous les jours, mais je ne progresse pas d'un pouce.",
         "es": "Aunque practico todos los días, no mejoro ni un poco.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -40647,9 +40647,9 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What does the speaker say about the wedding?",
-            "fr": "Que dit celui qui parle à propos du mariage ?",
-            "es": "¿Qué dice quien habla sobre la boda?"
+            "en": "Did the speaker know about the wedding?",
+            "fr": "Celui qui parle était-il au courant du mariage ?",
+            "es": "¿Sabía quien habla lo de la boda?"
           },
           "jp": "田中さんがけっこんしたことは、ちっとも知らなかった。",
           "tr": {
@@ -41387,9 +41387,9 @@
             "あいさつしてから、本を読もう。"
           ],
           "why": {
-            "en": "An act put on, on purpose: ふりをする. みたいだから says he does not seem to notice you, and the last one greets him.",
-            "fr": "Un jeu qu'on joue exprès : ふりをする. みたいだから dit que c'est lui qui n'a pas l'air de vous remarquer, et la dernière le salue.",
-            "es": "Un papel hecho a propósito: ふりをする. みたいだから dice que es él quien no parece haberse dado cuenta, y la última lo saluda."
+            "en": "An act put on, on purpose: ふりをする. みたいだから says he does not seem to notice you, and あいさつしてから greets him first.",
+            "fr": "Un jeu qu'on joue exprès : ふりをする. みたいだから dit que c'est lui qui n'a pas l'air de vous remarquer, et あいさつしてから le salue d'abord.",
+            "es": "Un papel hecho a propósito: ふりをする. みたいだから dice que es él quien no parece haberse dado cuenta, y あいさつしてから lo saluda primero."
           }
         }
       },
@@ -42594,9 +42594,9 @@
             "祖母といっしょに、わたしがあいさつをします。"
           ],
           "why": {
-            "en": "The person before に代わって is the one replaced (grandmother), and the speaker is the stand-in. The second line reverses the roles, and the third says she is speaking with you.",
-            "fr": "La personne devant に代わって est celle qu'on remplace (la grand-mère), et le locuteur est le remplaçant. La deuxième phrase inverse les rôles, et la troisième dit qu'elle parle avec toi.",
-            "es": "La persona ante に代わって es a quien se sustituye (la abuela), y quien habla ocupa su lugar. La segunda línea invierte los papeles, y la tercera dice que ella habla contigo."
+            "en": "The person before に代わって is the one replaced (grandmother), and the speaker is the stand-in. わたしに代わって reverses the roles, and 祖母といっしょに says she is speaking with you.",
+            "fr": "La personne devant に代わって est celle qu'on remplace (la grand-mère), et le locuteur est le remplaçant. わたしに代わって inverse les rôles, et 祖母といっしょに dit qu'elle parle avec toi.",
+            "es": "La persona ante に代わって es a quien se sustituye (la abuela), y quien habla ocupa su lugar. わたしに代わって invierte los papeles, y 祖母といっしょに dice que ella habla contigo."
           }
         },
         {
@@ -42648,9 +42648,9 @@
             "紙のメニューといっしょに、このタブレットを使ってください。"
           ],
           "why": {
-            "en": "The old thing comes before に代わって and the new one follows: the tablet takes the menu's place. The second line brings the paper menu back, and the third asks for both at once.",
-            "fr": "L'ancien objet précède に代わって et le nouveau suit : la tablette prend la place du menu. La deuxième phrase ramène le menu en papier, et la troisième demande d'utiliser les deux à la fois.",
-            "es": "Lo antiguo va antes de に代わって y lo nuevo después: la tableta ocupa el lugar del menú. La segunda línea recupera el menú de papel, y la tercera pide usar los dos a la vez."
+            "en": "The old thing comes before に代わって and the new one follows: the tablet takes the menu's place. このタブレットに代わって brings the paper menu back, and といっしょに asks for both at once.",
+            "fr": "L'ancien objet précède に代わって et le nouveau suit : la tablette prend la place du menu. このタブレットに代わって ramène le menu en papier, et といっしょに demande d'utiliser les deux à la fois.",
+            "es": "Lo antiguo va antes de に代わって y lo nuevo después: la tableta ocupa el lugar del menú. このタブレットに代わって recupera el menú de papel, y といっしょに pide usar los dos a la vez."
           }
         }
       ]
@@ -42713,7 +42713,7 @@
         "en": "Try reading this book.",
         "fr": "Essaie de lire ce livre.",
         "es": "Intenta leer este libro.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -42721,7 +42721,7 @@
         "en": "Give it another try.",
         "fr": "Essaie encore une fois.",
         "es": "Inténtalo otra vez.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -42729,7 +42729,7 @@
         "en": "Look at the sky, the moon is beautiful.",
         "fr": "Regarde le ciel, la lune est belle.",
         "es": "Mira el cielo, la luna está preciosa.",
-        "register": "polite",
+        "register": "casual",
         "contrast": true
       },
       {
@@ -43401,9 +43401,9 @@
             "むかしの人は、みんなまずしかったよ。"
           ],
           "why": {
-            "en": "The friend talks about the past, so the plain past goes before とは限らない: まずしかったとは限らない. まずしい is about people now, and the last line simply agrees with the friend instead of doubting.",
-            "fr": "L'ami parle du passé : la forme neutre au passé précède とは限らない : まずしかったとは限らない. まずしい parle des gens d'aujourd'hui, et la dernière phrase donne simplement raison à l'ami.",
-            "es": "Tu amigo habla del pasado, así que el pasado llano va antes de とは限らない: まずしかったとは限らない. まずしい habla de la gente de ahora, y la última línea le da la razón en vez de dudar."
+            "en": "The friend talks about the past, so the plain past goes before とは限らない: まずしかったとは限らない. まずしい is about people now, and みんなまずしかったよ simply agrees with the friend instead of doubting.",
+            "fr": "L'ami parle du passé : la forme neutre au passé précède とは限らない : まずしかったとは限らない. まずしい parle des gens d'aujourd'hui, et みんなまずしかったよ donne simplement raison à l'ami.",
+            "es": "Tu amigo habla del pasado, así que el pasado llano va antes de とは限らない: まずしかったとは限らない. まずしい habla de la gente de ahora, y みんなまずしかったよ le da la razón en vez de dudar."
           }
         },
         {
@@ -43695,9 +43695,9 @@
             "休みなら、もう帰ろう。"
           ],
           "why": {
-            "en": "The trip was worth something, so make use of it: せっかく…んだから. のに would make the search a letdown, and the last one gives up.",
-            "fr": "Le trajet a coûté, alors on en profite : せっかく…んだから. のに ferait de la recherche une déception, et la dernière abandonne.",
-            "es": "El viaje valió algo, así que aprovéchalo: せっかく…んだから. のに haría de la búsqueda una decepción, y la última se rinde."
+            "en": "The trip was worth something, so make use of it: せっかく…んだから. のに would make the search a letdown, and 休みなら、もう帰ろう gives up.",
+            "fr": "Le trajet a coûté, alors on en profite : せっかく…んだから. のに ferait de la recherche une déception, et 休みなら、もう帰ろう abandonne.",
+            "es": "El viaje valió algo, así que aprovéchalo: せっかく…んだから. のに haría de la búsqueda una decepción, y 休みなら、もう帰ろう se rinde."
           }
         }
       },
@@ -44202,9 +44202,9 @@
             "この部屋でも、写真をとってもいいですよ。"
           ],
           "why": {
-            "en": "この部屋以外は means « everywhere but this room », so what follows describes all the other places: photos are fine there. The second line bans them everywhere else, and the third allows them in this room.",
-            "fr": "この部屋以外は veut dire « partout sauf dans cette salle » : la suite décrit tous les autres endroits, où les photos sont permises. La deuxième phrase les interdit ailleurs, la troisième les autorise ici.",
-            "es": "この部屋以外は significa «en todas partes menos esta sala», así que lo que sigue describe los demás lugares: allí se permiten las fotos. La segunda las prohíbe en todos los demás sitios, y la tercera las permite en esta sala."
+            "en": "この部屋以外は means « everywhere but this room », so what follows describes all the other places: photos are fine there. とってはいけません bans them everywhere else, and この部屋でも allows them in this room.",
+            "fr": "この部屋以外は veut dire « partout sauf dans cette salle » : la suite décrit tous les autres endroits, où les photos sont permises. とってはいけません les interdit ailleurs, et この部屋でも les autorise ici.",
+            "es": "この部屋以外は significa «en todas partes menos esta sala», así que lo que sigue describe los demás lugares: allí se permiten las fotos. とってはいけません las prohíbe en todos los demás sitios, y この部屋でも las permite en esta sala."
           }
         }
       ]
