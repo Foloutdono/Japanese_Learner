@@ -6078,7 +6078,7 @@
       "en": "the plain past: did",
       "fr": "le passé neutre : j'ai fait",
       "es": "el pasado llano: hice, hizo",
-      "id": "bentuk biasa masa lampau: sudah melakukan"
+      "id": "bentuk biasa masa lampau: melakukan (di masa lalu)"
     },
     "register": "casual",
     "steps": [
@@ -20684,7 +20684,7 @@
       "en": "probably, I expect",
       "fr": "probablement, je suppose",
       "es": "probablemente, supongo",
-      "id": "barangkali, saya duga"
+      "id": "kemungkinan besar, saya duga"
     },
     "register": "polite",
     "steps": [
