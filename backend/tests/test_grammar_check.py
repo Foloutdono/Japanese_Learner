@@ -141,8 +141,12 @@ class GateRuleTests(unittest.TestCase):
         rival = {"pattern": "〜ないでください", "en": "abc", "fr": "def"}
         self.assertTrue(any("listed twice" in p for p in self._problems(compare=[rival, rival])))
         # a rival the lesson calls the same in meaning (plan 318): true or absent
-        self.assertEqual(self._problems(compare=[{**rival, "same": True}]), [])
+        same = {"pattern": "〜てもいいです", "en": "abc", "fr": "def", "same": True}
+        self.assertEqual(self._problems(compare=[rival, same]), [])
         self.assertTrue(any("same must be true" in p for p in self._problems(compare=[{**rival, "same": "yes"}])))
+        # and a marked sentence needs a rival it can offer: against `same`
+        # ones alone it would be asked against the level's fillers
+        self.assertTrue(any("write `choose` instead" in p for p in self._problems(compare=[{**rival, "same": True}])))
 
     def test_example_rules(self) -> None:
         good = _good()["examples"]
@@ -555,6 +559,49 @@ class QuizRuleTests(_TourCase):
         entry = _good(tour=_tour())
         self.assertTrue(any("tour has no quiz" in p for p in check_entry("N5", entry, _catalogue("N5", entry))))
 
+
+
+# ── The tour's answers say nothing by their size (plan 318) ──────────
+
+class LengthTellTests(_TourCase):
+    """A right answer is told by reading, never by its size: none stands
+    out among those shown, and across a level picking the longest (of
+    three, the shortest too) wins about as often as a blind pick."""
+
+    def test_a_right_reading_that_stands_out_is_refused(self) -> None:
+        long = {"en": "Not to smoke here: the ない-form before でください asks the other not to.",
+                "fr": "De ne pas fumer ici : la forme en ない avant でください demande de ne pas le faire."}
+        self._says("tour twist 0 (en): the right answer stands out by its length", **{"twists.0.choices.0": long})
+        self._says("tour twist 0 (fr): the right answer stands out by its length", **{"twists.0.choices.0": long})
+        # a twist shows two of its readings: the third is never weighed
+        self.assertEqual(self._problems(**{"twists.0.choices.2": long}), [])
+
+    def test_a_meaning_question_and_a_scene_are_weighed_too(self) -> None:
+        self._says("tour quiz 3 (en): the right answer stands out by its length", **{
+            "quiz.3.choices.0": {"en": "By the window, where the train can be seen.", "fr": "Près de la fenêtre."}})
+        self._says("tour scene (ja): the right answer stands out by its length", **{
+            "scene.ask.choices.0": "すみません、聞こえなかったので、もういちど言ってください。"})
+
+    def test_across_a_level_length_says_nothing(self) -> None:
+        from study.grammar_check import tour_length_tells
+
+        def twist(right: str, wrong: str) -> dict:
+            readings = [{lang: text for lang in ("en", "fr", "es")} for text in (right, wrong, "never shown")]
+            return {"tour": {"twists": [{"choices": readings}]}}
+
+        drift = [twist("the longer reading", "short") for _ in range(10)]
+        found = tour_length_tells("N5", drift)
+        self.assertTrue(any("twists (en): picking the longest answer wins 100%" in p for p in found), found)
+        even = drift[:5] + [twist("short", "the longer reading") for _ in range(5)]
+        self.assertEqual(tour_length_tells("N5", even), [])
+
+        def meaning(*sizes: int) -> dict:
+            choices = [{lang: "x" * n for lang in ("en", "fr", "es")} for n in sizes]
+            return {"tour": {"quiz": [{"kind": "meaning", "choices": choices}]}}
+
+        found = tour_length_tells("N5", [meaning(3, 5, 7) for _ in range(9)])
+        self.assertTrue(any("meaning questions (fr): picking the shortest answer wins 100%" in p for p in found), found)
+        self.assertEqual(tour_length_tells("N5", [meaning(7, 5, 3), meaning(3, 5, 7), meaning(5, 3, 7)] * 3), [])
 
 # ── structure_fr (plan 215) ──────────────────────────────────
 
