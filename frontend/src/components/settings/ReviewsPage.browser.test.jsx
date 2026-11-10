@@ -50,7 +50,11 @@ describe('Settings › Reviews', () => {
     refreshToday.mockReset()
     answer(PLAN)
   })
-  afterEach(() => cleanup())
+  afterEach(async () => {
+    await cleanup()
+    // The lane's files share one origin: leave no language behind for the next.
+    localStorage.removeItem('lang')
+  })
 
   it('sets a ceiling, redraws from the answer and warns when it sits under the load', async () => {
     await mount()
