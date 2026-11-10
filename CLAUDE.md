@@ -151,7 +151,10 @@ runtime purpose.
   commonest defect there: write every wrong filling out in the sentence, let
   the translation printed under it carry what the grammar does not, keep the
   stem outside the hole (悲し＿＿＿ + み), and let an independent reviewer
-  attack the batch before it ships.
+  attack the batch before it ships. A rival the lesson calls the same in
+  meaning (だろう beside でしょう, から beside ので) is marked `"same": true`
+  in the compare entry and is never offered (plan 318); a point whose
+  rivals take another stem (雨がふっ＿＿ offered ば) is asked from `choose`.
   Answered, the hole holds what the sentence has there (the payload's
   `fill`, `grammar_examples.span_parts`), never the pattern poured back
   in: a point is blanked on one piece of it (から of から〜まで, ます of
@@ -178,7 +181,11 @@ runtime purpose.
   word's ending begins (てしまい + ました), never inside the ending
   (せいで|す, が分かりま|せん) nor inside ありません, which is ない said
   politely (`grammar_ladder._word_kept`, plan 295): typed whole, the
-  word was marked a kana off.
+  word was marked a kana off. A point's other spelling is right too
+  (なきゃ for なくちゃ, によらず for にかかわらず, a う-verb's され for せられ:
+  `grammar_ladder._variants`, plan 318), and a twist or a scene line is
+  cut only where the detector reads the point: a tour sets the point
+  against its rivals, and the stems' match cut the rival's sentence.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's

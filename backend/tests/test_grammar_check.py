@@ -140,6 +140,9 @@ class GateRuleTests(unittest.TestCase):
             compare=[{"pattern": "〜nope", "en": "abc", "fr": "def"}])))
         rival = {"pattern": "〜ないでください", "en": "abc", "fr": "def"}
         self.assertTrue(any("listed twice" in p for p in self._problems(compare=[rival, rival])))
+        # a rival the lesson calls the same in meaning (plan 318): true or absent
+        self.assertEqual(self._problems(compare=[{**rival, "same": True}]), [])
+        self.assertTrue(any("same must be true" in p for p in self._problems(compare=[{**rival, "same": "yes"}])))
 
     def test_example_rules(self) -> None:
         good = _good()["examples"]
@@ -180,6 +183,10 @@ class GateRuleTests(unittest.TestCase):
                                      "fr": "Je mange du pain et je bois de l'eau.", "contrast": True}]
                  + wo["examples"][1:]}
         self.assertTrue(any("cannot be blanked" in p for p in check_entry("N5", twice)))
+        # a bare particle offered its named rivals alone, every one the same
+        # in meaning: nothing would be asked (plan 318)
+        same = {**once, "compare": [{**r, "same": True} for r in once["compare"]]}
+        self.assertTrue(any("every rival is the same in meaning" in p for p in check_entry("N5", same)))
 
     def test_the_rich_bar(self) -> None:
         # Force the bar on, whatever RICH_LEVELS says today.

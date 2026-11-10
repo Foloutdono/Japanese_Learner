@@ -721,11 +721,16 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         out.append(f"{tag}: compare is not a list")
         compare = []
     rivals: list[str] = []
+    offered: list[str] = []     # the rivals Choisir may offer: not `same` (plan 318)
     for i, rival in enumerate(compare):
-        if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", "es"}:
-            out.append(f"{tag}: compare {i} must be {{pattern, en, fr[, es]}}")
+        if not isinstance(rival, dict) or not {"pattern", "en", "fr"} <= set(rival) <= {"pattern", "en", "fr", "es", "same"}:
+            out.append(f"{tag}: compare {i} must be {{pattern, en, fr[, es][, same]}}")
             continue
+        if rival.get("same", True) is not True:
+            out.append(f"{tag}: compare {i} same must be true or absent")
         rp = rival["pattern"]
+        if not rival.get("same"):
+            offered.append(rp)
         if rp == pattern:
             out.append(f"{tag}: compares itself")
         elif find(rp) is None and not any(
@@ -777,6 +782,10 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
                 out.append(f"{tag}: example {i} contrast must be true or absent")
             if not rivals:
                 out.append(f"{tag}: example {i} is a contrast example but the point compares nothing")
+            elif not offered and not verifiable(pattern):
+                # (a bare particle is offered its named rivals alone, and a
+                # `same` one is as right in the hole: nothing would be asked)
+                out.append(f"{tag}: example {i} is a contrast example but every rival is the same in meaning")
             if not verifiable(pattern) and blank_span(jp, pattern, level) is None:
                 # A bare particle is blanked where the detector finds it
                 # (plan 190): once, on one piece, or not at all.
@@ -785,7 +794,11 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
             for rp in checkable_rivals:
                 if contains_pattern(jp, rp):
                     out.append(f"{tag}: example {i} also contains rival {rp!r}, so the drill would have two answers")
-    if rich and rivals and verifiable(pattern) and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict)):
+    if (rich and rivals and verifiable(pattern) and not entry.get("choose")
+            and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict))):
+        # (a point whose rivals take another stem is asked from questions of
+        # its own instead: 雨がふっ＿＿ offered ば asked which option makes a
+        # word, plan 318)
         out.append(f"{tag}: compares {len(rivals)} rival(s) but marks no contrast example")
     # A bare particle or a class label (は, い形容詞／な形容詞) has letters
     # that point at nothing, so only the detector can blank it (plan 190),
@@ -794,7 +807,7 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
     # its own instead (`choose`, plan 201): every point is asked in
     # Choisir, none is left to fall back to the flashcard.
     if (rich and not verifiable(pattern) and not entry.get("choose")
-            and not (rivals and any(ex.get("contrast") and blank_span(ex["jp"], pattern, level)
+            and not (offered and any(ex.get("contrast") and blank_span(ex["jp"], pattern, level)
                                     for ex in examples if isinstance(ex, dict) and isinstance(ex.get("jp"), str)))):
         out.append(f"{tag}: nothing asks it in Choisir -- mark a contrast sentence the detector can blank, "
                    "or write `choose` (plan 201)")

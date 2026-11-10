@@ -100,7 +100,8 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     patterns. `authored=False` leaves those out, for the one caller that
     draws a specimen from the marked sentence beside it (routes/station).
 
-    Choices are the rivals the lesson names, first; when fewer than
+    Choices are the rivals the lesson names, first -- never one it marks
+    `same` in meaning (plan 318), which is as right in the hole; when fewer than
     CONTRAST_CHOICES - 1 of them exist, same-level verifiable patterns
     that do NOT also occur in the sentence fill the gap (the rule
     study/placement.py uses, so an item never has two right answers).
@@ -137,10 +138,16 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     blanked = blanked_payload(example, pattern, lang, level)
     fill = "".join(p["text"] for p in blanked.get("fill", []))
     lines = {r["pattern"]: r["en"] for r in entry.get("compare", [])}
+    # A rival the lesson calls the same in meaning (`same`, plan 318: だろう
+    # beside でしょう, ずに beside ないで) stands in the point's hole as well
+    # as the point, and no translation tells them apart: it is never a
+    # wrong answer, named or drawn as a filler.
+    same = {r["pattern"] for r in entry.get("compare", []) if r.get("same")}
 
     rivals = [
         r["pattern"] for r in entry.get("compare", [])
-        if r["pattern"] != pattern and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
+        if r["pattern"] != pattern and r["pattern"] not in same
+        and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
     ]
     if offer in rivals:
         rivals.remove(offer)
@@ -149,7 +156,7 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     if checkable and len(choices) < CONTRAST_CHOICES - 1:
         fillers = [
             g["pattern"] for g in grammar_list
-            if g["pattern"] != pattern and g["pattern"] not in choices
+            if g["pattern"] != pattern and g["pattern"] not in choices and g["pattern"] not in same
             and verifiable(g["pattern"]) and not contains_pattern(sentence, g["pattern"])
         ]
         # Drawn in a random order, each kept only where it prints as no
