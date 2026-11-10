@@ -340,6 +340,16 @@ def test_construire_never_cuts_the_negative_off_its_word():
     assert _hole("N4", "〜ことがある", "その映画は見たことがありません。") == ["ことがありません"]
 
 
+def _kept(level, pattern, jp):
+    """The holes _word_kept makes of where the point is lit in `jp`,
+    whether or not the sentence is one Construire asks (a twist or a
+    scene line is asked only where the detector reads the point, plan
+    318: おくれることがあります, 何時ごろつきますか and 作りがいがない are
+    lit by the stems alone)."""
+    from study.grammar_tour import lit_spans
+    return [jp[a:b] for a, b in grammar_ladder._word_kept(jp, lit_spans(jp, pattern, level))]
+
+
 def test_construire_carries_a_hole_cut_inside_an_ending_to_the_words_end():
     # The stems lit a word to the middle of its ending: ことがあ|ります,
     # が分かりま|せん, せいで|す. The rest of the word goes in the hole...
@@ -351,7 +361,7 @@ def test_construire_carries_a_hole_cut_inside_an_ending_to_the_words_end():
             ("〜と思います", "母は、わたしがまだ子どもだと思っています。", ["と思っ"]),
             ("〜にします", "会うのは日よう日にしましょう。", ["にしましょう"])):
         level, _entry, _ = _point(pattern)
-        assert _hole(level, pattern, jp) == hole, jp
+        assert _kept(level, pattern, jp) == hole, jp
     # ...and the hole still stops where the word's ending begins, the
     # sentence's inflection outside it, as before.
     level, _entry, _ = _point("〜ことがある")
@@ -366,7 +376,7 @@ def test_construire_carries_a_hole_cut_inside_an_ending_to_the_words_end():
             ("〜まま", "電気をつけたままねてしまいました。", ["まま"]),
             ("〜がい", "せっかく作ったのに、だれも食べない。作りがいがないなあ。", ["がい"])):
         level, _entry, _ = _point(pattern)
-        assert _hole(level, pattern, jp) == hole, jp
+        assert _kept(level, pattern, jp) == hole, jp
     # A point's piece at the end of a word keeps its start: 大き + く.
     level, _entry, _ = _point("〜く／〜に（副詞形）")
     assert _hole(level, "〜く／〜に（副詞形）", "大きく書いてください。") == ["く"]
