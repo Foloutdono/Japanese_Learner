@@ -46,7 +46,7 @@ WRITTEN: dict[str, tuple[str, ...]] = {
     # Its lesson: every step, neighbour's line and example's translation.
     "grammar.lesson": ("es", "id"),
     # Its tour and its own Choisir questions.
-    "grammar.drills": ("es",),
+    "grammar.drills": ("es", "id"),
     # A theme word, in the sense it has in its theme (meaning_{lang}).
     "theme": ("es",),
     # The sentences a deck card shows: a correction, a sentence written for
