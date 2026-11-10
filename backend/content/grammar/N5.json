@@ -19389,9 +19389,9 @@
       },
       {
         "pattern": "〜たくないです",
-        "en": "きらい is a lasting dislike; たくない is not wanting to do it this time.",
-        "fr": "きらい est une aversion durable ; たくない, c'est ne pas vouloir le faire cette fois.",
-        "es": "きらい es una aversión duradera; たくない es no querer hacerlo esta vez."
+        "en": "きらい is a lasting dislike of the thing; たくない is not wanting to do it.",
+        "fr": "きらい est une aversion durable pour la chose ; たくない, c'est ne pas vouloir le faire.",
+        "es": "きらい es una aversión duradera a la cosa; たくない es no querer hacerlo."
       }
     ],
     "examples": [
@@ -19554,9 +19554,9 @@
             }
           ],
           "why": {
-            "en": "きらい is a lasting taste; たくない a wish of the moment.",
-            "fr": "きらい dit un goût qui dure ; たくない, une envie du moment.",
-            "es": "きらい es un gusto duradero; たくない, un deseo del momento."
+            "en": "きらい is a lasting taste; たくない is a wish, and 今日は makes it today's.",
+            "fr": "きらい dit un goût qui dure ; たくない, une envie, et 今日は en fait celle d'aujourd'hui.",
+            "es": "きらい es un gusto duradero; たくない, un deseo, y 今日は lo vuelve el de hoy."
           },
           "kind": "trap"
         }
@@ -26910,9 +26910,9 @@
       },
       {
         "pattern": "〜がきらいです",
-        "en": "たくない is about this occasion; きらい is a standing dislike.",
-        "fr": "たくない porte sur l'occasion présente ; きらい est une aversion durable.",
-        "es": "たくない habla de esta ocasión; きらい es una aversión duradera."
+        "en": "たくない is not wanting to do it; きらい is disliking the thing itself, for good.",
+        "fr": "たくない, c'est ne pas vouloir le faire ; きらい, c'est ne pas aimer la chose elle-même, durablement.",
+        "es": "たくない es no querer hacerlo; きらい es que la cosa en sí no guste, de forma duradera."
       }
     ],
     "examples": [
@@ -36250,8 +36250,7 @@
         "en": "I do not want to eat anything.",
         "fr": "Je ne veux rien manger.",
         "es": "No quiero comer nada.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "誰も来ませんでした。",

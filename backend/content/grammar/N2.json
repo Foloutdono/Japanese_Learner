@@ -17253,17 +17253,17 @@
     "structure_fr": "nom + をもって",
     "structure_es": "sustantivo + をもって",
     "meaning": {
-      "en": "by means of; also: as of a stated date",
-      "fr": "au moyen de ; à compter de",
-      "es": "por medio de; también: a partir de una fecha dada"
+      "en": "by means of; also: ending with a stated date",
+      "fr": "au moyen de ; avec (telle date) pour dernier jour",
+      "es": "por medio de; también: con una fecha dada como último día"
     },
     "register": "formal",
     "steps": [
       {
         "kind": "rule",
-        "en": "**noun + をもって** means « by means of, with » (実力をもって) or, after a date, « as of » (本日をもって, as of today). Very formal.",
-        "fr": "**nom + をもって** signifie « au moyen de, avec » (実力をもって) ou, après une date, « à compter de » (本日をもって, à compter d'aujourd'hui). Très formel.",
-        "es": "**sustantivo + をもって** significa «por medio de, con» (実力をもって) o, tras una fecha, «a partir de, con fecha de» (本日をもって, con fecha de hoy). Muy formal."
+        "en": "**noun + をもって** means « by means of, with » (実力をもって) or, after a date, « with that day as the last » (本日をもって, today being the last day). Very formal.",
+        "fr": "**nom + をもって** signifie « au moyen de, avec » (実力をもって) ou, après une date, « avec ce jour pour dernier » (本日をもって, aujourd'hui étant le dernier jour). Très formel.",
+        "es": "**sustantivo + をもって** significa «por medio de, con» (実力をもって) o, tras una fecha, «con ese día como el último» (本日をもって, siendo hoy el último día). Muy formal."
       },
       {
         "kind": "use",
@@ -17303,9 +17303,9 @@
     "examples": [
       {
         "jp": "本日をもって、この店は閉店いたします。",
-        "en": "As of today, this shop closes for good.",
-        "fr": "À compter d'aujourd'hui, ce magasin ferme définitivement.",
-        "es": "Con fecha de hoy, esta tienda cierra definitivamente.",
+        "en": "This shop closes for good at the end of today.",
+        "fr": "Ce magasin ferme définitivement à la fin de la journée.",
+        "es": "Esta tienda cierra definitivamente al terminar el día de hoy.",
         "register": "formal"
       },
       {
@@ -20591,8 +20591,7 @@
         "en": "In this rain, he surely will not come.",
         "fr": "Avec cette pluie, il ne viendra sûrement pas.",
         "es": "Con esta lluvia, seguro que él no viene.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "もう二度と、あの店には行くまい。",
@@ -22169,6 +22168,13 @@
         "en": "ものか: never!, with feeling; まい: I shall not, with resolve.",
         "fr": "ものか : jamais !, avec émotion ; まい : je ne ferai pas, avec résolution.",
         "es": "ものか: ¡nunca!, con emoción; まい: no lo haré, con determinación.",
+        "same": true
+      },
+      {
+        "pattern": "〜ことはない",
+        "en": "ものか: never!, as a cry; ことはない: there is no need to, or, calmly, never.",
+        "fr": "ものか : jamais !, comme un cri ; ことはない : inutile de, ou, posément, jamais.",
+        "es": "ものか: ¡jamás!, como un grito; ことはない: no hace falta, o, con calma, nunca.",
         "same": true
       }
     ],

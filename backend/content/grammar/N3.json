@@ -453,9 +453,9 @@
   },
   {
     "pattern": "〜おかげで",
-    "structure": "plain form + おかげで",
-    "structure_fr": "forme neutre + おかげで",
-    "structure_es": "forma llana + おかげで",
+    "structure": "plain form + おかげで ／ noun + の + おかげで",
+    "structure_fr": "forme neutre + おかげで ／ nom + の + おかげで",
+    "structure_es": "forma llana + おかげで ／ sustantivo + の + おかげで",
     "meaning": {
       "en": "thanks to",
       "fr": "grâce à",
@@ -5560,8 +5560,7 @@
         "en": "Every trip, I take lots of photos.",
         "fr": "À chaque voyage, je prends beaucoup de photos.",
         "es": "En cada viaje tomo muchas fotos.",
-        "register": "polite",
-        "contrast": true
+        "register": "polite"
       },
       {
         "jp": "試験のたびに、おなかが痛くなる。",
@@ -7158,7 +7157,7 @@
       {
         "kind": "rule",
         "en": "The **causative-passive** says you were made to do something against your will: う-verbs take the あ-row + される (書く→書かされる), る-verbs させられる (食べる→食べさせられる), する→させられる.",
-        "fr": "Le **causatif-passif** dit qu'on vous a forcé à faire une chose contre votre gré : les verbes en う prennent le son en あ + される (書く→書かされる), les verbes en る させられる (食べる→食べさせられる), する→させられる.",
+        "fr": "Le **causatif-passif** dit qu'on vous a fait faire une chose contre votre gré : les verbes en う prennent le son en あ + される (書く→書かされる), les verbes en る させられる (食べる→食べさせられる), する→させられる.",
         "es": "El **causativo-pasivo** dice que te obligaron a hacer algo contra tu voluntad: los verbos en う pasan a la fila あ + される (書く→書かされる), los verbos en る toman させられる (食べる→食べさせられる), する→させられる."
       },
       {
@@ -7170,7 +7169,7 @@
       {
         "kind": "careful",
         "en": "The person who forced you takes に. For う-verbs the short される is usual (待たされる); the long せられる (習わせられる) is correct too, a little stiffer. Not for verbs ending in す (話す→話させられる only).",
-        "fr": "La personne qui vous a forcé prend に. Pour les verbes en う, le court される est usuel (待たされる) ; le long せられる (習わせられる) est correct aussi, un peu plus soutenu. Pas pour les verbes en す (話す→話させられる seulement).",
+        "fr": "La personne qui vous l'impose prend に. Pour les verbes en う, le court される est usuel (待たされる) ; le long せられる (習わせられる) est correct aussi, un peu plus soutenu. Pas pour les verbes en す (話す→話させられる seulement).",
         "es": "Quien te obligó lleva に. En los verbos en う, lo habitual es la forma corta される (待たされる); la forma larga せられる (習わせられる) también es correcta, algo más formal. No en los verbos que terminan en す (solo 話す→話させられる)."
       }
     ],
@@ -7199,7 +7198,7 @@
       {
         "jp": "父にきらいな野さいを食べさせられました。",
         "en": "I was made by my father to eat vegetables I dislike.",
-        "fr": "Mon père m'a forcé à manger des légumes que je déteste.",
+        "fr": "Mon père m'a fait manger des légumes que je déteste.",
         "es": "Mi padre me obligó a comer verduras que no me gustan.",
         "register": "polite"
       },
@@ -9108,6 +9107,13 @@
         "en": "Same idea; に伴って (N2) is the formal, written version.",
         "fr": "Même idée ; に伴って (N2) est la version formelle et écrite.",
         "es": "La misma idea; に伴って (N2) es la versión formal y escrita.",
+        "same": true
+      },
+      {
+        "pattern": "〜うちに",
+        "en": "につれて: one change follows another; うちに: while something lasts, a change comes about.",
+        "fr": "につれて : un changement en suit un autre ; うちに : pendant que quelque chose dure, un changement survient.",
+        "es": "につれて: un cambio sigue a otro; うちに: mientras algo dura, sobreviene un cambio.",
         "same": true
       }
     ],
@@ -19251,6 +19257,13 @@
         "fr": "以上 et 上は (N2) disent tous deux « dès lors que » ; 上は est plus formel.",
         "es": "以上 y 上は (N2) dicen ambos «ya que»; 上は es más formal.",
         "same": true
+      },
+      {
+        "pattern": "〜限り",
+        "en": "以上: now that it is so, it follows; 限り: for as long as it stays so.",
+        "fr": "以上 : maintenant que c'est ainsi, il s'ensuit ; 限り : tant que cela dure.",
+        "es": "以上: ya que es así, se sigue; 限り: mientras siga así.",
+        "same": true
       }
     ],
     "examples": [
@@ -22367,6 +22380,20 @@
         "en": "としたら is a thought experiment; 場合 is a foreseen situation.",
         "fr": "としたら est une expérience de pensée ; 場合, une situation prévue.",
         "es": "としたら es un experimento mental; 場合 es una situación prevista.",
+        "same": true
+      },
+      {
+        "pattern": "〜ようなら",
+        "en": "としたら: a thought experiment; ようなら: if things turn out to look that way.",
+        "fr": "としたら : une hypothèse ; ようなら : si les choses semblent tourner ainsi.",
+        "es": "としたら: una hipótesis; ようなら: si las cosas parecen ir por ese camino.",
+        "same": true
+      },
+      {
+        "pattern": "〜限り",
+        "en": "としたら: supposing it were so; 限り: for as long as it is so.",
+        "fr": "としたら : à supposer que ce soit le cas ; 限り : tant que c'est le cas.",
+        "es": "としたら: suponiendo que fuera así; 限り: mientras sea así.",
         "same": true
       }
     ],
@@ -37857,7 +37884,8 @@
         "pattern": "〜はじめる／〜おわる／〜つづける",
         "en": "通す: through to the end; つづける: keep going, no end implied.",
         "fr": "通す : jusqu'au bout ; つづける : continuer, sans fin impliquée.",
-        "es": "通す: hasta el final; つづける: seguir, sin que se suponga un final."
+        "es": "通す: hasta el final; つづける: seguir, sin que se suponga un final.",
+        "same": true
       }
     ],
     "examples": [

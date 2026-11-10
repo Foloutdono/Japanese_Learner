@@ -21322,10 +21322,10 @@
         "contrast": true
       },
       {
-        "jp": "散歩かたがた、郵便局に寄ってきた。",
-        "en": "I dropped by the post office on my walk.",
-        "fr": "Je suis passé à la poste au cours de ma promenade.",
-        "es": "Aprovechando el paseo, pasé por la oficina de correos.",
+        "jp": "お祝いかたがた、新しい店を見に行った。",
+        "en": "I went to see the new shop, also to offer my congratulations.",
+        "fr": "J'ai rendu visite à la nouvelle boutique, aussi pour présenter mes félicitations.",
+        "es": "Fui a ver la tienda nueva, también para felicitar a los dueños.",
         "register": "neutral"
       },
       {
@@ -28597,6 +28597,13 @@
         "en": "にしたところで: even X, and it would change nothing; であれ: whatever X is, the rule holds.",
         "fr": "にしたところで : même X, et ça ne changerait rien ; であれ : quel que soit X, la règle tient.",
         "es": "にしたところで: incluso X, y no cambiaría nada; であれ: sea lo que sea X, la regla se mantiene.",
+        "same": true
+      },
+      {
+        "pattern": "〜とて",
+        "en": "Both concede « even X »; とて is written, にしたところで adds that nothing would change.",
+        "fr": "Les deux concèdent « même X » ; とて est écrit, にしたところで ajoute que rien n'y changerait.",
+        "es": "Ambos conceden «incluso X»; とて es escrito, にしたところで añade que nada cambiaría.",
         "same": true
       }
     ],

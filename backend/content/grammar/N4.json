@@ -3705,9 +3705,9 @@
   {
     "pattern": "使役形 〜させる",
     "reading": "しえきけい 〜させる",
-    "structure": "verb causative stem + させる",
-    "structure_fr": "radical verbal causatif + させる",
-    "structure_es": "raíz causativa del verbo + させる",
+    "structure": "う-verb ない-stem + せる ／ る-verb stem + させる",
+    "structure_fr": "verbe en う radical en ない + せる ／ verbe en る radical + させる",
+    "structure_es": "verbo en う raíz ない + せる ／ verbo en る raíz + させる",
     "meaning": {
       "en": "make or let someone do",
       "fr": "faire faire, laisser faire",
@@ -14132,13 +14132,15 @@
         "pattern": "〜ようです",
         "en": "らしい comes from others; ようです from your own observation.",
         "fr": "らしい vient des autres ; ようです de votre propre observation.",
-        "es": "らしい viene de otros; ようです, de tu propia observación."
+        "es": "らしい viene de otros; ようです, de tu propia observación.",
+        "same": true
       },
       {
         "pattern": "〜みたいだ",
         "en": "らしい is hearsay; みたいだ is your impression, in casual speech.",
         "fr": "らしい est un on-dit ; みたいだ, votre impression, en langue familière.",
-        "es": "らしい es algo que se dice; みたいだ es tu impresión, en el habla coloquial."
+        "es": "らしい es algo que se dice; みたいだ es tu impresión, en el habla coloquial.",
+        "same": true
       }
     ],
     "examples": [
@@ -42290,13 +42292,13 @@
           },
           "choices": [
             "いない",
-            "いません",
+            "いなかった",
             "いる"
           ],
           "why": {
-            "en": "Before でしょうか the verb stays plain, negative included: あいていない. あいていません puts the polite ending inside, and あいている would ask whether it is open, the opposite of the cue.",
-            "fr": "Devant でしょうか, le verbe reste neutre, négation comprise : あいていない. あいていません met la politesse à l'intérieur, et あいている demanderait s'il est ouvert, le contraire de ce qui est dit.",
-            "es": "Ante でしょうか el verbo queda en forma llana, negación incluida: あいていない. あいていません mete la cortesía dentro, y あいている preguntaría si está abierta, lo contrario de la frase."
+            "en": "Before でしょうか the verb stays plain, negative included: あいていない. あいていなかった would ask about a time already past, and あいている would ask whether it is open, the opposite of the cue.",
+            "fr": "Devant でしょうか, le verbe reste neutre, négation comprise : あいていない. あいていなかった porterait sur un moment déjà passé, et あいている demanderait s'il est ouvert, le contraire de ce qui est dit.",
+            "es": "Ante でしょうか el verbo queda en forma llana, negación incluida: あいていない. あいていなかった preguntaría por un momento ya pasado, y あいている preguntaría si está abierta, lo contrario de la frase."
           }
         },
         {
