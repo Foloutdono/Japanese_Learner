@@ -546,9 +546,10 @@ runtime purpose.
   leaves the list (`native.shells.test.js`'s `DECLARED`), since a store
   prints what a shell declares. Indonesian is in preview, and whole since
   plan 312b in the interface, the decks, the kanji and the grammar
-  points' glosses and formations, since 312c in their lessons (`WRITTEN`,
-  `locales.test.js`): a new screen string, deck card, kanji or point (its
-  gloss, formation and lesson) is written in `id` in the same change, in
+  points' glosses and formations, since 312c in their lessons, since 312d
+  in their tours and own Choisir questions (`WRITTEN`, `locales.test.js`):
+  a new screen string, deck card, kanji or point (its gloss, formation,
+  lesson, tour and Choisir questions) is written in `id` in the same change, in
   standard Indonesian (EYD, KBBI; never Malay), the learner `kamu`, with
   the app's words `locales/id`'s head names (an SRS review a
   *pengulangan*, a mock exam a *tryout*). An example's translation, in any
@@ -557,7 +558,12 @@ runtime purpose.
   what rules out each rival printed) and adds nothing the Japanese leaves
   out, which matters most in a language that marks no tense
   (`grammar_lesson.contrast_payload` and `grammar_ladder._build_items`
-  show the holes).
+  show the holes). A tour's question is answered by understanding in
+  every language (plan 312d): readings that differ by a tense or a number
+  say it, no ask or notion shares a word with the right reading alone
+  where the English does not, a why names a choice by what it says, never
+  by its place (every choice is shuffled), and the right reading is the
+  longest shown (a twist shows two) no more often than in English.
 - **The kanji deck is the course's and the gates'.** `datas/kanji/kanji_deck.json`
   is what each level teaches and what every kanji gate admits
   (`llm_shared.kanji_set_for_level`), so it holds the whole jōyō list
