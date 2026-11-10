@@ -1,4 +1,4 @@
-// ── 歌 — a song made small enough to be heard (plan 315) ─────────────
+// ── 歌 — a song made small enough to be heard (plan 317) ─────────────
 // The analyser's song is heard on the server by a model that takes
 // audio (backend study/song_transcribe.py), at 16 kHz on one channel.
 // So the browser decodes the learner's file -- whatever it can play:

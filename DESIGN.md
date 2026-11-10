@@ -2712,7 +2712,7 @@ line here says otherwise.
   and its translation a rung down with it (`useLineFit`). Measured, never
   guessed from the line's length; past the floor the page scrolls behind
   the dock, as a tall card does.
-  **Folded, the picture's room is the Passage as lyrics** (plan 314, the
+  **Folded, the picture's room is the Passage as lyrics** (plan 316, the
   owner's picks V2, C and D2 of the canvas "Tsuji analyser — the video
   hidden, the lines as lyrics"). The video folds away on both widths --
   the desk's fold on its bar, lit while it holds; on a phone a pull
@@ -2734,9 +2734,9 @@ line here says otherwise.
   back with the picture. The reference's coloured ground was not taken (a
   line's pigment is never a fill), nor a third ink for the lines sung:
   the lines either side share the soft one.
-  **A song is lyrics from the start** (plan 315, the owner's pick S1 of
+  **A song is lyrics from the start** (plan 317, the owner's pick S1 of
   the canvas "Tsuji analyser — a song from an audio file", and plan
-  315b's picks L2, N1 and E3 of its later rows). It comes in through a
+  317b's picks L2, N1 and E3 of its later rows). It comes in through a
   sheet of its own -- on a phone the ♪ row of the entry line's ＋; on the
   desk the fourth platform, and a song dropped on the page: the one
   button that picks a song and what it takes, then the song as one row
@@ -2772,7 +2772,7 @@ line here says otherwise.
   it has been used, else the video on YouTube). A file dropped anywhere
   on the page is taken by the intake that reads it. Under the desk it is
   one line to paste into over a row per passage, and beside the field
-  one ＋ for every other way in (plan 315b, the owner's pick E3): its
+  one ＋ for every other way in (plan 317b, the owner's pick E3): its
   sheet names each -- the photo, the video, the song, a subtitle file --
   over what it takes, a row opening its intake's sheet in its place or,
   for the subtitle file, the picker. The line's field keeps its own

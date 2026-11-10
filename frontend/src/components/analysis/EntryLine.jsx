@@ -11,7 +11,7 @@ import { PlusIcon } from '../ui/Icons'
 // sheet (AnalyzerScreen's editDraft), since a link is not text to
 // analyse.
 //
-// The ＋ is plan 315b's (the owner's pick E3 of the canvas "Tsuji
+// The ＋ is plan 317b's (the owner's pick E3 of the canvas "Tsuji
 // analyser — a song from an audio file"): with the song the line held
 // four doors -- the camera, the video, the ♪ and a subtitle file -- and
 // its field no longer held its own words on one line. One door now

@@ -11,7 +11,7 @@ import {
 // each sentence's end | one plain track scaled to the Passage's window
 // (no step per sentence -- the owner's cut) and its clock | the speed,
 // the sound, the line following the clock, and the video folded away,
-// its room given to the Passage as lyrics (plan 314).
+// its room given to the Passage as lyrics (plan 316).
 // The keys stay live and are not printed (owner-directed).
 //
 // The track and its clock are the video's own, 0 to its length (`span`,
@@ -128,8 +128,8 @@ export function PlayerBar({
         <FollowIcon size={16} />
       </button>
       {/* Folded, lit as the bar's other switches are when on: the column
-          is the lyrics' while it is (plan 314). A song has no picture to
-          fold, and no button for it (plan 315). */}
+          is the lyrics' while it is (plan 316). A song has no picture to
+          fold, and no button for it (plan 317). */}
       {onFold && (
         <button
           type="button"
@@ -160,7 +160,7 @@ export function PlayerTrack({ playhead, span, onSeek }) {
   )
 }
 
-// 歌 — what is playing, where the picture would be (plan 315b, the
+// 歌 — what is playing, where the picture would be (plan 317b, the
 // owner's pick N1): a song has no picture, so the place the video's
 // frame takes says what plays -- its ring, its name and, where the clock
 // is known and no bar beside it prints one, the clock -- over the track.

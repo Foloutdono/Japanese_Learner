@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 歌詞 on the desk (plan 314, the owner's pick D2) ─────────────────
+// ── 歌詞 on the desk (plan 316, the owner's pick D2) ─────────────────
 // The bar's fold, pressed: the picture folds away, the player kept
 // playing out of sight, and the lyrics take the route map's column as
 // well as the picture's place -- each line its time, its Japanese and

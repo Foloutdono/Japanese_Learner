@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import '../index.css'
 
-// ── 歌詞 on a phone (plan 314, the owner's picks V2 and C) ────────────
+// ── 歌詞 on a phone (plan 316, the owner's picks V2 and C) ────────────
 // The pull hanging from the picture's foot folds the video away, the
 // player kept and playing out of sight, and the video's sumi grows to
 // the dock with the Passage in it line under line: each line over its

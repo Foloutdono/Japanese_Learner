@@ -158,7 +158,7 @@ FEATURES = {
     ),
     "song_transcription": (
         4, 8000, 1800,
-        "A song heard (plan 315): a learner adds one as an audio file, "
+        "A song heard (plan 317): a learner adds one as an audio file, "
         "sent as a 16 kHz WAV of seven minutes at most to a model that "
         "takes audio (GOOGLE_AUDIO_MODEL). In: the audio at 32 tokens a "
         "second -- a four-minute song is 7,680 -- and a short prompt, or "

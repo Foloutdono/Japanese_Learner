@@ -1,4 +1,4 @@
-"""── 歌 — a song's lines from its audio (plan 315) ─────────────────────
+"""── 歌 — a song's lines from its audio (plan 317) ─────────────────────
 
 The analyser's song ingest, the owner's pick S1 of the canvas "Tsuji
 analyser — a song from an audio file". A learner adds a song as an

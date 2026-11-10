@@ -109,7 +109,7 @@ async function goToPlatform(screen, key) {
   const idx = { text: 0, photo: 1, video: 2 }[key]
   // The control is the desk's; under it the page is the passages and
   // the line over them (plan 136), whose ＋ holds the other ways in
-  // (plan 315b): startFromFile opens it for its subtitle file.
+  // (plan 317b): startFromFile opens it for its subtitle file.
   const opts = screen.container.querySelectorAll('.anl-sources .seg__opt')
   if (opts.length) opts[idx].click()
   await settle(30)
@@ -135,7 +135,7 @@ async function startFromFile(screen) {
     })
   await goToPlatform(screen, 'video')
   // Under the desk the subtitle file is a row of the line's ＋ (plan
-  // 315b), its input in the sheet the ＋ opens.
+  // 317b), its input in the sheet the ＋ opens.
   let input = screen.container.querySelector('input[type="file"]')
   if (!input) {
     screen.container.querySelector('.anl-entry__add').click()

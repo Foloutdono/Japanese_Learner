@@ -28,7 +28,7 @@ import { VideoStill } from './VideoStill'
 // (useAnalyzerSession's deleteHistoryEntry). The shelf holds the newest
 // thirty of them, kept sentences aside (backend core/history.py).
 //
-// `pending` is a song being transcribed (plan 315, the owner's board 1):
+// `pending` is a song being transcribed (plan 317, the owner's board 1):
 // its file's name waits at the head of the shelf, a row or a card that
 // opens nothing, until the server lists the session it makes. The
 // screen's notice is what a reader hears; the row is quiet.

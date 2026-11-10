@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { encodeWav, isSongFile, mixDown, MAX_SECONDS, RATE, SONG_ACCEPT, songKind, songName } from './songAudio'
 
-// ── 歌 — the song as the server hears it (plan 315) ──────────────────
+// ── 歌 — the song as the server hears it (plan 317) ──────────────────
 // The browser writes a song as a 16-bit PCM WAV, one channel at 16 kHz,
 // cut at MAX_SECONDS; the server reads exactly that and refuses the
 // rest (backend study/song_transcribe.wav_seconds). These pin the
@@ -78,7 +78,7 @@ describe('mixDown', () => {
   })
 })
 
-describe('songName and songKind (plan 315b)', () => {
+describe('songName and songKind (plan 317b)', () => {
   it('names a song after its file, without the extension', () => {
     expect(songName('ma-chanson.mp3')).toBe('ma-chanson')
     expect(songName('夜に駆ける.m4a')).toBe('夜に駆ける')

@@ -1,7 +1,7 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { songName } from '../../lib/songAudio'
 
-// ── 歌 — a song's player (plan 315) ──────────────────────────────────
+// ── 歌 — a song's player (plan 317) ──────────────────────────────────
 // The analyser plays a song from the learner's own file, kept on their
 // device (lib/songStore.js), the way it plays a video from YouTube: this
 // is VideoPlayer's contract over an <audio>, so the screen's clock (its

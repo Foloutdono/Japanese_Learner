@@ -1094,10 +1094,10 @@ const phraseAnalyzer = {
   playbackSpeed:       r => `Speed: ${r}×`,
   showVideo:           'Show the video',
   hideVideo:           'Hide the video',
-  // The video folded away, the Passage as lyrics (plan 314).
+  // The video folded away, the Passage as lyrics (plan 316).
   lyricsLines:         n => (n === 1 ? 'The passage\'s sentence' : `The passage's ${n} sentences`),
   playFromLine:        'Play from this line',
-  // 歌: a song, its audio transcribed (plan 315).
+  // 歌: a song, its audio transcribed (plan 317).
   songChoose:          'Choose a song',
   songChange:          'Change',
   songAccepted:        'MP3, M4A, WAV… · up to 7 min',
@@ -1330,7 +1330,7 @@ const video = {
   grabThenSay:         'Then tap your 字幕取り bookmark: the subtitles arrive here.',
   grabInstallLink:     'Set up the bookmark',
   chooseSubtitles:     'Choose a subtitle file',
-  // 足す (plan 315b, the owner's pick E3): the entry line's one ＋ and
+  // 足す (plan 317b, the owner's pick E3): the entry line's one ＋ and
   // the sheet of every way in it opens.
   entryWays:           'Add a photo, a video, a song or subtitles',
   entryWaysTitle:      'Add',

@@ -446,7 +446,7 @@ def _with_translations(cues: list[dict], translated: dict) -> list[dict]:
     return out
 
 
-# ── 歌 — the song's worker (plan 315) ─────────────────────────────
+# ── 歌 — the song's worker (plan 317) ─────────────────────────────
 def _song_worker(session_id: int, wav: bytes, lyrics: list[str]) -> None:
     """Runs off-request, as _video_worker does: the song heard as a
     Track (study/song_transcribe.py), then the same lines, analysis and
@@ -723,7 +723,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     )
 
 
-# ── 歌 — a song from its audio (plan 315) ──────────────────────────
+# ── 歌 — a song from its audio (plan 317) ──────────────────────────
 # A route of its own rather than a fourth branch of create_video_session:
 # a song's body is a WAV some megabytes long where every other ingest is
 # a megabyte of text at most, and it spends a model call the learner's

@@ -3,9 +3,9 @@ import { formatTimecode } from '../../lib/timecode'
 import { fileSeconds, MAX_SECONDS, SONG_ACCEPT, songKind } from '../../lib/songAudio'
 import { PlusIcon, SongIcon } from '../ui/Icons'
 
-// ── 歌 — the song intake (plan 315, the owner's pick S1) ────────────
+// ── 歌 — the song intake (plan 317, the owner's pick S1) ────────────
 // What the ♪ of the phone's ways in opens as a sheet, and the desk's
-// fourth platform in its column. Drawn again by plan 315b (the owner's
+// fourth platform in its column. Drawn again by plan 317b (the owner's
 // pick L2): before a song, the one button that picks it and what it
 // takes; once picked, the song as one row -- its mark, its name over its
 // length and kind, Changer at its end -- then the lyrics, if the learner

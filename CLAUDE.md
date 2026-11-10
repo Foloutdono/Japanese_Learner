@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **316**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **318**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -376,7 +376,7 @@ runtime purpose.
   library's page carries ··· in its corner (`PublicDeckPage`, report
   and block), a followed deck's unfollow sheet the second way out
   (`DeckDetailScreen`), and both ask first, since a block ends follows.
-- **A learner's song is heard once and forgotten (plan 315).** The
+- **A learner's song is heard once and forgotten (plan 317).** The
   analyser's song is decoded on the device to a 16 kHz mono WAV
   (`lib/songAudio.js`, cut at `MAX_SECONDS`, which
   `study/song_transcribe.py` holds equal) and sent once to a model that

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { formatTimecode } from '../../lib/timecode'
 
-// ── 歌詞 — the Passage read as lyrics, the picture folded away (plan 314) ──
+// ── 歌詞 — the Passage read as lyrics, the picture folded away (plan 316) ──
 // The owner's picks of the canvas "Tsuji analyser — the video hidden,
 // the lines as lyrics": with the picture folded away (the phone's pull
 // under it, V2; the desk's fold on its bar) the room it leaves holds the

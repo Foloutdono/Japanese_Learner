@@ -41,7 +41,7 @@ const NAMED = {
   transcript_failed: t => t.videoTranscriptFailed,
   // The poll: a worker lost on the way.
   stalled: t => t.videoStalled,
-  // 歌 (plan 315): a song, at the door, in the browser or in its worker.
+  // 歌 (plan 317): a song, at the door, in the browser or in its worker.
   song_unreadable: t => t.songUnreadable,
   song_not_wav: t => t.songUnreadable,
   song_required: t => t.songUnreadable,

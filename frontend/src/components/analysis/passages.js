@@ -1,7 +1,7 @@
 // ── 帳 — what the analyser's shelf reads off a history entry (plan 136) ──
 // Each entry carries `kind: 'passage' | 'session'` (useAnalyzerSession
 // merges two endpoints): a session is the video platform, or the song's
-// by its `source` (plan 315), a passage a text or, by its `source`, a
+// by its `source` (plan 317), a passage a text or, by its `source`, a
 // photo. Pure, so the node lane holds it.
 
 export const SHELF_KINDS = ['video', 'song', 'text', 'photo']

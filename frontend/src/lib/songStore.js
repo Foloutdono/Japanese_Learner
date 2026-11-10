@@ -1,4 +1,4 @@
-// ── 歌 — the songs this device keeps (plan 315) ──────────────────────
+// ── 歌 — the songs this device keeps (plan 317) ──────────────────────
 // A song's audio is heard once on the server and forgotten there
 // (backend study/song_transcribe.py), so the passage it made plays from
 // the learner's own file, and this is where the device keeps it: by the

@@ -1076,7 +1076,7 @@
 .anl-vlink:focus-visible { color: var(--text-primary); filter: none; }
 .anl-vlink[aria-expanded="true"] { text-decoration-style: dotted; }
 
-/* 歌 — the song intake (plan 315, the owner's pick S1), as plan 315b
+/* 歌 — the song intake (plan 317, the owner's pick S1), as plan 317b
    drew it again (the owner's pick L2): before a song, the button that
    picks it and what it takes; once picked, the song as one row, its
    lyrics three lines tall, Transcrire, and on two quiet lines where the
@@ -1178,7 +1178,7 @@
 .anl-uta__field::placeholder { font-family: var(--font-display); }
 .anl-uta__go,
 .anl-refile__go { width: 100%; }
-/* 歌 (plan 315): a song reopened on a device that has not got its file.
+/* 歌 (plan 317): a song reopened on a device that has not got its file.
    The lyrics stand, and where the transport would be, the one action
    that brings the sound back and a line on why it is asked for. */
 .anl-refile {
@@ -1600,7 +1600,7 @@
   background: transparent;
   color: var(--text-secondary);
 }
-/* 歌 (plan 315): a song being transcribed waits at the shelf's head, a
+/* 歌 (plan 317): a song being transcribed waits at the shelf's head, a
    row (a card on the desk) that opens nothing, its word and the app's
    three dots where a passage's count and date would be. */
 .anl-wait {
@@ -1620,7 +1620,7 @@
 }
 
 /* ── The phone's way in (plan 136) ──
-   One line over the passages: the field and, since plan 315b (the
+   One line over the passages: the field and, since plan 317b (the
    owner's pick E3), the one ＋ that holds every other way in. Japanese
    in it (or the focus) opens it into the writing slip, the count and
    Analyse under a hairline; empty and left, it folds back. */
@@ -1674,7 +1674,7 @@
 }
 .anl-entry__add:hover,
 .anl-entry__add:focus-visible { border-color: var(--text-secondary); filter: none; }
-/* 足す — the ＋'s sheet (plan 315b, E3): a row per way in, the
+/* 足す — the ＋'s sheet (plan 317b, E3): a row per way in, the
    platform's mark in the station's ring and its name over what it
    takes, on hairlines. */
 .anl-ways {
@@ -29440,7 +29440,7 @@ button.brd-stn { cursor: pointer; }
   inset: calc(-1 * var(--sp-4)) 0;
 }
 .anl-ptrack .anl-pbar__knob { display: none; }
-/* 歌 (plan 315b, the owner's pick N1): a song has no picture, so where
+/* 歌 (plan 317b, the owner's pick N1): a song has no picture, so where
    the picture would be it says what plays -- the station's ring, the
    song's name, its clock -- on the sumi, over the track. On a phone's
    stage the line stands in as the lyrics do, and the track under it
@@ -29563,7 +29563,7 @@ button.brd-stn { cursor: pointer; }
   text-wrap: balance;
   color: var(--text-secondary);
 }
-/* ── 歌詞 — the picture folded away, the Passage as lyrics (plan 314) ──
+/* ── 歌詞 — the picture folded away, the Passage as lyrics (plan 316) ──
    The owner's picks V2 and C of the canvas "Tsuji analyser — the video
    hidden, the lines as lyrics". The pull hangs from the picture's foot,
    a tab of the picture's own sumi under its track; its target is a
@@ -29730,7 +29730,7 @@ button.brd-stn { cursor: pointer; }
   flex: 1 1 auto;
   padding: 0 var(--sp-6) var(--sp-6);
 }
-/* A song's lyrics stand clear of its track (plan 315b, N1): there is
+/* A song's lyrics stand clear of its track (plan 317b, N1): there is
    no pull between them to hold them apart, as a video's has. */
 .anl-m__player--song .anl-m__lyrics { padding-top: var(--sp-5); }
 .anl-m__lyrics .anl-subs__line { row-gap: var(--sp-3); }
@@ -30133,7 +30133,7 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   white-space: nowrap;
   color: var(--text-secondary);
 }
-/* On the lyrics' sumi (plan 314), in the panel's quieter ink. */
+/* On the lyrics' sumi (plan 316), in the panel's quieter ink. */
 .anl-m__lyrics .tok__ro { color: var(--text-on-panel-soft); }
 
 /* The Affichage sheet: a row a help, its name and its segment; low, so
@@ -35525,7 +35525,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     gap: var(--sp-5);
     min-width: 0;
   }
-  /* Four platforms (plan 315) in the column's one width: at the
+  /* Four platforms (plan 317) in the column's one width: at the
      caption's tracking they asked 420px of its 358 in French (Chanson,
      Canción), and the fourth was cut at the column's edge. The panel's
      tight faces' treatment (.anl-desk__entry--tight .anl-faces): the
@@ -41465,7 +41465,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     min-height: 0;
   }
   /* A video of one line has no list: the picture takes its width. Nor
-     does a video folded away (plan 314, the owner's pick D2): its lyrics
+     does a video folded away (plan 316, the owner's pick D2): its lyrics
      are the list, and take the list's column as well as the picture's. */
   .anl-desk--video:is(.anl-desk--one, .anl-desk--lyrics) {
     grid-template:
@@ -41574,7 +41574,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     height: 0;
     overflow: hidden;
   }
-  /* A song's refile (plan 315) stands where its bar would, at the
+  /* A song's refile (plan 317) stands where its bar would, at the
      slab's foot: the bar's hairline, its note in the panel's soft ink. */
   .anl-slab .anl-refile {
     flex: none;
@@ -41583,7 +41583,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   }
   .anl-slab .anl-refile__note { color: var(--text-on-panel-soft); }
   /* A song's name at the slab's head, where the picture would be
-     (plan 315b, N1); the bar under the lyrics prints its clock. */
+     (plan 317b, N1); the bar under the lyrics prints its clock. */
   .anl-slab .anl-now {
     flex: none;
     padding: var(--sp-4) var(--sp-6) 0;
@@ -41611,7 +41611,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     padding: var(--sp-3) var(--sp-6) var(--sp-4);
   }
   .anl-slab__screen + .anl-subs { margin-top: var(--sp-4); border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent); }
-  /* Folded (plan 314), nothing above the lyrics to part them from. */
+  /* Folded (plan 316), nothing above the lyrics to part them from. */
   .anl-slab--folded .anl-subs {
     margin-top: 0;
     border-top: 0;
@@ -41633,7 +41633,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   }
   .anl-desk--video .anl-subs > .anl-subs__head { margin-bottom: auto; }
   .anl-desk--video .anl-subs > :last-child { margin-bottom: auto; }
-  /* 歌詞 (plan 314, D2): the lyrics under the sumi's head, from the top
+  /* 歌詞 (plan 316, D2): the lyrics under the sumi's head, from the top
      down, scrolling in their own box rather than the column; each line
      a rung up from the phone's, at the breakdown's heading size, its
      time before it. */
@@ -42097,7 +42097,7 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     font-size: var(--fs-lead);
     font-weight: 400;
   }
-  /* The line in focus in the lyrics (plan 314): its translation from the
+  /* The line in focus in the lyrics (plan 316): its translation from the
      line's start, in the panel's first ink, as the line over it. */
   .anl-desk--lyrics .anl-desk__lyrics .anl-subs__tr {
     color: var(--text-on-panel);

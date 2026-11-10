@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import { encodeWav, RATE } from './lib/songAudio'
 import './index.css'
 
-// ── 歌 — a song's audio on the desk (plan 315) ────────────────────────
+// ── 歌 — a song's audio on the desk (plan 317) ────────────────────────
 // The song is the desk's fourth platform, its intake in the column
 // beside the passages, and the page takes a dropped song as it takes a
 // dropped picture or subtitle file. Its Passage stands on the slab as
@@ -132,7 +132,7 @@ describe('the song on the desk', () => {
     }
     options[3].click()
     await vi.waitFor(() => expect($('.desk-intake__side #anl-panel-song .anl-uta')).not.toBeNull())
-    // The sheet the phone opens, in the column (plan 315b, L2): the one
+    // The sheet the phone opens, in the column (plan 317b, L2): the one
     // button that picks a song, and the lyrics once one is picked.
     expect($('.anl-uta__pick').textContent).toBe('Choisir une chanson')
     expect($('.anl-uta__field')).toBeNull()
@@ -193,7 +193,7 @@ describe('the song on the desk', () => {
     expect(keepSong).toHaveBeenCalledWith(9, file)
     expect($('.anl-desk--lyrics')).not.toBeNull()
     expect($('.anl-slab--folded')).not.toBeNull()
-    // Where the picture would be, the song's name (plan 315b, N1); the
+    // Where the picture would be, the song's name (plan 317b, N1); the
     // bar prints its clock, so the name's line does not.
     const now = $('.anl-slab > .anl-now')
     expect(now.querySelector('.anl-now__name').textContent).toBe('ma-chanson')

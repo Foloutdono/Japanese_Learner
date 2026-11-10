@@ -21,7 +21,7 @@ const DOOR = {
   session_preparing: 'videoStillPreparing',
   not_utf8: 'subtitleNotUtf8',
   end_before_start: 'windowBackwards',
-  // 歌 (plan 315): /api/video/song's refusals, and the browser's own
+  // 歌 (plan 317): /api/video/song's refusals, and the browser's own
   // when it cannot decode the file.
   song_unreadable: 'songUnreadable',
   song_required: 'songUnreadable',

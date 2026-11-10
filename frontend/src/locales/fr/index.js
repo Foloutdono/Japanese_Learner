@@ -1056,10 +1056,10 @@ const phraseAnalyzer = {
   playbackSpeed:       r => `Vitesse : ${String(r).replace('.', ',')}×`,
   showVideo:           'Afficher la vidéo',
   hideVideo:           'Masquer la vidéo',
-  // La vidéo masquée, le passage en paroles (plan 314).
+  // La vidéo masquée, le passage en paroles (plan 316).
   lyricsLines:         n => (n === 1 ? 'La phrase du passage' : `Les ${n} phrases du passage`),
   playFromLine:        'Lire à partir de cette ligne',
-  // 歌 : une chanson, son audio transcrit (plan 315).
+  // 歌 : une chanson, son audio transcrit (plan 317).
   songChoose:          'Choisir une chanson',
   songChange:          'Changer',
   songAccepted:        'MP3, M4A, WAV… · jusqu’à 7 min',
@@ -1289,7 +1289,7 @@ const video = {
   grabThenSay:         'Puis touche ton favori 字幕取り : les sous-titres arrivent ici.',
   grabInstallLink:     'Installer le favori',
   chooseSubtitles:     'Choisir un fichier de sous-titres',
-  // 足す (plan 315b, the owner's pick E3): the entry line's one ＋ and
+  // 足す (plan 317b, the owner's pick E3): the entry line's one ＋ and
   // the sheet of every way in it opens.
   entryWays:           'Ajouter une photo, une vidéo, une chanson ou des sous-titres',
   entryWaysTitle:      'Ajouter',

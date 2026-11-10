@@ -36,7 +36,7 @@ export const SOURCES = [
   { key: 'text',  no: 1, jp: '文字', kana: 'もじ',     label: 'sourceText',  hint: 'sourceTextHint',  lead: 'intakeTextLead',  busy: 'analyzingText',  history: true },
   { key: 'photo', no: 2, jp: '写真', kana: 'しゃしん', label: 'sourcePhoto', hint: 'sourcePhotoHint', lead: 'intakePhotoLead', busy: 'analyzingPhoto', history: true },
   { key: 'video', no: 3, jp: '動画', kana: 'どうが',   label: 'sourceVideo', hint: 'sourceVideoHint', lead: 'intakeVideoLead', busy: 'analyzingVideo', history: true },
-  // 歌 (plan 315): an audio file, its lines transcribed (IntakeSong).
+  // 歌 (plan 317): an audio file, its lines transcribed (IntakeSong).
   { key: 'song',  no: 4, jp: '歌',   kana: 'うた',     label: 'sourceSong',  hint: 'sourceSongHint',  lead: 'intakeSongLead',  busy: 'analyzingSong',  history: true },
 ]
 

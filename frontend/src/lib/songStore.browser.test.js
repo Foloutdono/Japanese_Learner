@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { keepSong, songFile } from './songStore'
 
-// ── 歌 — the songs this device keeps (plan 315) ──────────────────────
+// ── 歌 — the songs this device keeps (plan 317) ──────────────────────
 // A song's passage plays from the learner's own file, kept here by its
 // session's id: the five most recent, and nothing thrown when the
 // browser keeps nothing.

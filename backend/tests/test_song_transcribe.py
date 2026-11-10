@@ -1,4 +1,4 @@
-# ── 歌 — a song from its audio (plan 315) ─────────────────────────
+# ── 歌 — a song from its audio (plan 317) ─────────────────────────
 # study/song_transcribe.py hears a song as a Track, and routes/video.py's
 # /api/video/song turns it into an ordinary session. The model is never
 # called here: `chat` is replaced, and what it is handed is asserted.

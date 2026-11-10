@@ -84,7 +84,7 @@ GOOGLE_MODEL = os.environ.get("GOOGLE_MODEL", "gemini-3.1-flash-lite")
 # manga and novels, which are vertical (tategaki), and that is the one
 # axis every cheap model measured here has failed on.
 GOOGLE_VISION_MODEL = os.environ.get("GOOGLE_VISION_MODEL", "gemini-3.1-flash")
-# Hearing too (plan 315): a song's lines from its audio, through the same
+# Hearing too (plan 317): a song's lines from its audio, through the same
 # compatibility layer's `input_audio` part. Flash by default, as vision
 # is, and for the same reason: sung Japanese over a band is the hard
 # case, and a lyric misheard is a lyric learnt wrong.
@@ -133,7 +133,7 @@ class Provider:
     # the bounded-JSON tasks `models` exists for. Empty means this
     # provider is skipped entirely for vision work (see chat(vision=True)).
     vision_models: tuple[str, ...] = ()
-    # Models that hear an `input_audio` content part (plan 315), in
+    # Models that hear an `input_audio` content part (plan 317), in
     # preference order; empty skips the provider for audio work. Only
     # Google's compatibility layer takes one among the providers here.
     audio_models: tuple[str, ...] = ()
@@ -670,7 +670,7 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
     LLMUnavailable naming the probe script rather than failing per-model.
 
     audio=True does the same with `audio_models`, for an `input_audio`
-    content part (plan 315, study/song_transcribe.py): only a provider
+    content part (plan 317, study/song_transcribe.py): only a provider
     that hears is tried, and none hearing is LLMUnavailable.
 
     `task` names the feature this call serves ("comprehension",

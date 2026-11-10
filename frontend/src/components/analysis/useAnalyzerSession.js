@@ -77,7 +77,7 @@ export function useAnalyzerSession(session) {
   // The id of the video session currently being polled. Kept in state
   // (not a ref) because the poll effect is keyed on it.
   const [videoSessionId, setVideoSessionId] = useState(null)
-  // 歌 (plan 315): the name of the song being transcribed, for the
+  // 歌 (plan 317): the name of the song being transcribed, for the
   // shelf's waiting row -- the server lists a session once it is ready.
   const [pendingSong, setPendingSong] = useState(null)
 
@@ -370,7 +370,7 @@ export function useAnalyzerSession(session) {
     }
   }
 
-  // ── 歌 — a song (plan 315) ─────────────────────────────────
+  // ── 歌 — a song (plan 317) ─────────────────────────────────
   // The learner's audio file, decoded here into the small WAV the
   // server hears (lib/songAudio.js) and sent with the lyrics they
   // pasted, if any; the session it opens is polled as every other is.

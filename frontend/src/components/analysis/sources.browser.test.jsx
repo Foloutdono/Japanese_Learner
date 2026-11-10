@@ -134,7 +134,7 @@ describe('the source registry', () => {
     expect(screen.container.querySelector('.anl-sources')).toBeNull()
 
     // Every platform but the line's is a row of the ＋'s ways in (plan
-    // 315b), each opening its sheet: the registry's keys, all of them.
+    // 317b), each opening its sheet: the registry's keys, all of them.
     for (const s of SOURCES.filter(x => x.key !== 'text')) {
       screen.container.querySelector('.anl-entry__add').click()
       await settle(60)

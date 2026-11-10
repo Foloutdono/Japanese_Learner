@@ -7,8 +7,8 @@ import { encodeWav, RATE } from '../lib/songAudio'
 import fr from '../locales/fr/index.js'
 import '../index.css'
 
-// ── 歌 — a song's audio on a phone (plan 315, the owner's pick S1) ────
-// The entry line's ＋ (plan 315b, E3) opens the ways in, and the ♪'s
+// ── 歌 — a song's audio on a phone (plan 317, the owner's pick S1) ────
+// The entry line's ＋ (plan 317b, E3) opens the ways in, and the ♪'s
 // row the song's sheet: the button that picks it, then the song as one
 // row, the lyrics if the learner has them, Transcrire (L2). The browser
 // writes the song as the server hears it and keeps the learner's own
@@ -138,7 +138,7 @@ async function openSheet() {
   await settle()
 }
 
-describe('the entry line’s ＋ (plan 315b, the owner’s pick E3)', () => {
+describe('the entry line’s ＋ (plan 317b, the owner’s pick E3)', () => {
   it('is the line’s one door: its sheet names every way in with what it takes', async () => {
     await mount()
     const entry = $('.anl-entry')
