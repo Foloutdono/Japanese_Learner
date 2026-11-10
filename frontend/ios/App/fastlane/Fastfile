@@ -9,15 +9,22 @@ default_platform(:ios)
 platform :ios do
   desc "Archive the app and push it to TestFlight"
   lane :beta do
-    # The key secret is the .p8 file in base64. Pasted as the file's text,
-    # or left empty, it decodes to something that is no key, and OpenSSL
-    # answers "invalid curve name" (every tag up to v1.1.4 stopped there).
-    # Say what is wrong instead, before anything else runs.
-    unless ENV.fetch("APP_STORE_CONNECT_KEY_P8", "").unpack1("m").include?("BEGIN PRIVATE KEY")
-      UI.user_error!("APP_STORE_CONNECT_KEY_P8 is not the .p8 key in base64: " \
-                     "set the secret to the output of `base64 -w0 AuthKey_XXXX.p8` " \
-                     "(macOS: `base64 -i AuthKey_XXXX.p8`), see docs/release.md")
+    # The key secret is the .p8 file, pasted as it is or in base64; either
+    # is read back into the PEM OpenSSL wants, its body rewrapped, so a
+    # paste that lost its line breaks still reads. Anything else (empty,
+    # another file) stops here and names the secret, where it used to
+    # reach OpenSSL as "invalid curve name" (every tag up to v1.1.4).
+    key_secret = ENV.fetch("APP_STORE_CONNECT_KEY_P8", "").strip
+    key_text = key_secret.include?("BEGIN PRIVATE KEY") ? key_secret : key_secret.unpack1("m")
+    key_body = key_text[/-----BEGIN PRIVATE KEY-----(.+?)-----END PRIVATE KEY-----/m, 1]
+    unless key_body
+      UI.user_error!("APP_STORE_CONNECT_KEY_P8 is not the .p8 key: paste the whole " \
+                     "AuthKey_XXXX.p8 file, from -----BEGIN PRIVATE KEY----- to " \
+                     "-----END PRIVATE KEY-----, see docs/release.md")
     end
+    key_pem = "-----BEGIN PRIVATE KEY-----\n" \
+              "#{key_body.gsub(/\s+/, '').scan(/.{1,64}/).join("\n")}\n" \
+              "-----END PRIVATE KEY-----\n"
 
     # The version comes from the tag (v1.2.3 is 1.2.3), the build number
     # from the workflow run. Refused here when malformed rather than
@@ -32,8 +39,8 @@ platform :ios do
     api_key = app_store_connect_api_key(
       key_id: ENV.fetch("APP_STORE_CONNECT_KEY_ID"),
       issuer_id: ENV.fetch("APP_STORE_CONNECT_ISSUER_ID"),
-      key_content: ENV.fetch("APP_STORE_CONNECT_KEY_P8"),
-      is_key_content_base64: true,
+      key_content: key_pem,
+      is_key_content_base64: false,
       in_house: false
     )
 
