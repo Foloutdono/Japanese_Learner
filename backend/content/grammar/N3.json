@@ -1,41 +1,41 @@
 [
   {
     "pattern": "〜ばかり",
-    "structure": "verb た-form／noun／quantity + ばかり",
-    "structure_fr": "verbe forme en た／nom／quantité + ばかり",
-    "structure_es": "verbo en forma た／sustantivo／cantidad + ばかり",
+    "structure": "noun／quantity + ばかり",
+    "structure_fr": "nom／quantité + ばかり",
+    "structure_es": "sustantivo／cantidad + ばかり",
     "meaning": {
-      "en": "only just did; nothing but; about (an amount)",
-      "fr": "venir tout juste de ; rien que ; environ (une quantité)",
-      "es": "acabar de hacer; nada más que; más o menos (una cantidad)"
+      "en": "nothing but; about (an amount)",
+      "fr": "rien que ; environ (une quantité)",
+      "es": "nada más que; más o menos (una cantidad)"
     },
     "register": "neutral",
     "steps": [
       {
         "kind": "rule",
-        "en": "**ばかり** after a た-form means « only just did » (帰ったばかり); after a noun or a て-form it means « nothing but » (テレビばかり見ている, only ever watching TV).",
-        "fr": "**ばかり** après une forme en た signifie « venir tout juste de » (帰ったばかり) ; après un nom ou une forme en て, « rien que » (テレビばかり見ている, ne faire que regarder la télé).",
-        "es": "**ばかり** tras una forma た significa «acabar de» (帰ったばかり); tras un sustantivo o una forma て, «nada más que» (テレビばかり見ている, no hacer más que ver la tele)."
+        "en": "**noun + ばかり** means « nothing but », often as a complaint: テレビばかり見ている (watches nothing but TV). **quantity + ばかり** means « about »: 三日ばかり (about three days).",
+        "fr": "**nom + ばかり** signifie « rien que », souvent pour se plaindre : テレビばかり見ている (ne regarde que la télé). **quantité + ばかり** signifie « environ » : 三日ばかり (environ trois jours).",
+        "es": "**sustantivo + ばかり** significa «nada más que», a menudo como queja: テレビばかり見ている (no ve más que la tele). **cantidad + ばかり** significa «más o menos»: 三日ばかり (unos tres días)."
       },
       {
         "kind": "use",
-        "en": "- Freshness: 今、家に帰ったばかりです.\n- A one-sided diet or habit: 肉ばかり食べている.\n- An amount, « about »: 三日ばかり休んだ (a bit formal).",
-        "fr": "- La fraîcheur : 今、家に帰ったばかりです.\n- Une habitude exclusive : 肉ばかり食べている.\n- Une quantité, « environ » : 三日ばかり休んだ (un peu formel).",
-        "es": "- Lo reciente: 今、家に帰ったばかりです.\n- Una dieta o un hábito desequilibrado: 肉ばかり食べている.\n- Una cantidad, «unos»: 三日ばかり休んだ (algo formal)."
+        "en": "- A one-sided habit, with a complaint: 肉ばかり食べている.\n- A place full of one kind of people: 客は学生ばかりだった.\n- An amount, « about » (a little formal): 二時間ばかり歩いた.",
+        "fr": "- Une habitude exclusive, avec un reproche : 肉ばかり食べている.\n- Un lieu rempli d'une seule sorte de gens : 客は学生ばかりだった.\n- Une quantité, « environ » (un peu soutenu) : 二時間ばかり歩いた.",
+        "es": "- Un hábito desequilibrado, con una queja: 肉ばかり食べている.\n- Un lugar lleno de una sola clase de gente: 客は学生ばかりだった.\n- Una cantidad, «más o menos» (algo formal): 二時間ばかり歩いた."
       },
       {
         "kind": "careful",
-        "en": "After a noun, ばかり carries reproach (too much of one thing); だけ is the neutral « only ». After a た-form it is subjective recency: 先月開いたばかり is fine if it feels recent.",
-        "fr": "Après un nom, ばかり porte un reproche (trop d'une seule chose) ; だけ est le « seulement » neutre. Après une forme en た, c'est une fraîcheur subjective : 先月開いたばかり passe si cela paraît récent.",
-        "es": "Tras un sustantivo, ばかり lleva reproche (demasiado de una sola cosa); だけ es el «solo» neutro. Tras una forma た, la cercanía es subjetiva: 先月開いたばかり vale si se siente reciente."
+        "en": "ばかり exaggerates, often to complain: 雨ばかり allows a dry day or two, where だけ is the plain, strict « only ». After a た-form, ばかり is たばかり (N4), « only just did »: 来たばかり; after a て-form, it is てばかりいる.",
+        "fr": "ばかり exagère, souvent pour se plaindre : 雨ばかり admet un ou deux jours sans pluie, là où だけ est le « seulement » neutre et strict. Après une forme en た, ばかり est たばかり (N4), « venir tout juste de » : 来たばかり ; après une forme en て, c'est てばかりいる.",
+        "es": "ばかり exagera, a menudo para quejarse: 雨ばかり admite uno o dos días sin lluvia, mientras que だけ es el «solo» neutro y estricto. Tras una forma た, ばかり es たばかり (N4), «acabar de hacer»: 来たばかり; tras una forma て, es てばかりいる."
       }
     ],
     "compare": [
       {
-        "pattern": "〜ところだ",
-        "en": "たばかり: recently, as it feels; たところ: this very instant.",
-        "fr": "たばかり : récemment, au ressenti ; たところ : à l'instant même.",
-        "es": "たばかり: hace poco, según se siente; たところ: en este mismo instante."
+        "pattern": "〜たばかり",
+        "en": "たばかり: only just did, after a た-form; noun + ばかり: nothing but; quantity + ばかり: about.",
+        "fr": "たばかり : venir tout juste de, après une forme en た ; nom + ばかり : rien que ; quantité + ばかり : environ.",
+        "es": "たばかり: acabar de hacer, tras una forma た; sustantivo + ばかり: nada más que; cantidad + ばかり: más o menos."
       },
       {
         "pattern": "〜てばかりいる",
@@ -45,26 +45,26 @@
       },
       {
         "pattern": "〜だけ",
-        "en": "ばかり complains about the excess; だけ simply limits.",
-        "fr": "ばかり se plaint de l'excès ; だけ limite simplement.",
-        "es": "ばかり se queja del exceso; だけ simplemente limita."
+        "en": "ばかり complains about the excess, or says « about » after a quantity; だけ simply limits: that and nothing else.",
+        "fr": "ばかり se plaint de l'excès, ou dit « environ » après une quantité ; だけ limite simplement : cela et rien d'autre.",
+        "es": "ばかり se queja del exceso, o dice «más o menos» tras una cantidad; だけ simplemente limita: eso y nada más."
       }
     ],
     "examples": [
       {
-        "jp": "今、家に帰ったばかりです。",
-        "en": "I have just got home now.",
-        "fr": "Je viens tout juste de rentrer à la maison.",
-        "es": "Acabo de volver a casa ahora mismo.",
+        "jp": "夏休みは雨ばかりで、晴れた日は二日しかありませんでした。",
+        "en": "The summer holidays were nothing but rain: there were only two sunny days.",
+        "fr": "Pendant les vacances d'été, il n'a fait que pleuvoir : il n'y a eu que deux jours de soleil.",
+        "es": "En las vacaciones de verano no hizo más que llover: solo hubo dos días de sol.",
         "register": "polite",
         "contrast": true
       },
       {
-        "jp": "さっき昼ご飯を食べたばかりです。",
-        "en": "I ate lunch just a moment ago.",
-        "fr": "Je viens de déjeuner à l'instant.",
-        "es": "Almorcé hace apenas un momento.",
-        "register": "polite",
+        "jp": "来週から一週間ばかりお休みをいただきます。",
+        "en": "From next week, I'll be taking about a week off.",
+        "fr": "À partir de la semaine prochaine, je prendrai environ une semaine de congé.",
+        "es": "A partir de la próxima semana, me tomaré más o menos una semana libre.",
+        "register": "formal",
         "contrast": true
       },
       {
@@ -72,8 +72,7 @@
         "en": "My brother does nothing but play games every day.",
         "fr": "Mon frère ne fait que jouer aux jeux vidéo tous les jours.",
         "es": "Mi hermano menor no hace más que jugar a los videojuegos todos los días.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "うそばかり言う人は信用されない。",
@@ -87,9 +86,9 @@
       "twists": [
         {
           "notion": {
-            "en": "Nothing but",
-            "fr": "Rien que",
-            "es": "Nada más que"
+            "en": "After a noun",
+            "fr": "Après un nom",
+            "es": "Tras un sustantivo"
           },
           "jp": "弟はあまいものばかり食べている。",
           "tr": {
@@ -98,9 +97,9 @@
             "es": "Mi hermano menor no come más que dulces."
           },
           "ask": {
-            "en": "ばかり after a noun. What does it say?",
-            "fr": "ばかり après un nom. Que dit la phrase ?",
-            "es": "ばかり tras un sustantivo. ¿Qué dice la oración?"
+            "en": "What does it say about what he eats?",
+            "fr": "Que dit la phrase de ce qu'il mange ?",
+            "es": "¿Qué dice la oración sobre lo que come?"
           },
           "choices": [
             {
@@ -120,17 +119,17 @@
             }
           ],
           "why": {
-            "en": "After a noun, ばかり means « nothing but »: always that one thing. « Just did » needs a た-form before it.",
-            "fr": "Après un nom, ばかり veut dire « rien que » : toujours la même chose. « Venir de » demande une forme en た devant.",
-            "es": "Tras un sustantivo, ばかり significa «nada más que»: siempre esa misma cosa. «Acabar de» necesita una forma た delante."
+            "en": "After a noun, ばかり means « nothing but »: sweet things again and again, too many. It means « about » only after an amount, and « just did » only after a た-form (たばかり).",
+            "fr": "Après un nom, ばかり veut dire « rien que » : des sucreries, encore et encore, trop. Il ne veut dire « environ » qu'après une quantité, et « venir de » qu'après une forme en た (たばかり).",
+            "es": "Tras un sustantivo, ばかり significa «nada más que»: dulces una y otra vez, demasiados. Solo significa «más o menos» tras una cantidad, y «acabar de» tras una forma た (たばかり)."
           },
           "kind": "usage"
         },
         {
           "notion": {
-            "en": "ばかり complains, だけ limits",
-            "fr": "ばかり se plaint, だけ limite",
-            "es": "ばかり se queja, だけ limita"
+            "en": "Against だけ",
+            "fr": "Face à だけ",
+            "es": "Frente a だけ"
           },
           "jp": "妹はまんがばかり読んでいる。",
           "tr": {
@@ -173,9 +172,9 @@
         },
         {
           "notion": {
-            "en": "About, after an amount",
-            "fr": "Environ, après une quantité",
-            "es": "Más o menos, tras una cantidad"
+            "en": "After an amount",
+            "fr": "Après une quantité",
+            "es": "Tras una cantidad"
           },
           "jp": "ホームで三十分ばかり待ちました。",
           "tr": {
@@ -184,9 +183,9 @@
             "es": "Esperé unos treinta minutos en el andén."
           },
           "ask": {
-            "en": "ばかり after an amount. What does it say?",
-            "fr": "ばかり après une quantité. Que dit la phrase ?",
-            "es": "ばかり tras una cantidad. ¿Qué dice la oración?"
+            "en": "How long was the wait?",
+            "fr": "Combien de temps a duré l'attente ?",
+            "es": "¿Cuánto duró la espera?"
           },
           "choices": [
             {
@@ -211,7 +210,7 @@
             "es": "Tras un número, ばかり significa «unos, más o menos», algo formal; «solo» sería だけ."
           },
           "pair": [
-            "今来たばかり",
+            "三十分だけ",
             "三十分ばかり"
           ],
           "kind": "usage"
@@ -227,17 +226,17 @@
         "lines": [
           {
             "who": "them",
-            "jp": "あ、もう来てたの？",
-            "en": "Oh, you're already here?",
-            "fr": "Ah, tu es déjà là ?",
-            "es": "Ah, ¿ya estás aquí?"
+            "jp": "おつかれ。今日もいそがしかった？",
+            "en": "Hey there. Busy day again?",
+            "fr": "Salut. Encore une grosse journée ?",
+            "es": "Hola. ¿Otra vez un día de mucho trabajo?"
           },
           {
             "who": "me",
-            "jp": "うん、今着いたばかりだよ。",
-            "en": "Yeah, I only just got here.",
-            "fr": "Oui, je viens tout juste d'arriver.",
-            "es": "Sí, acabo de llegar."
+            "jp": "うん、朝から会議ばかりだったよ。",
+            "en": "Yeah, it's been nothing but meetings since this morning.",
+            "fr": "Oui, rien que des réunions depuis ce matin.",
+            "es": "Sí, desde la mañana no hubo más que reuniones."
           },
           {
             "who": "them",
@@ -262,9 +261,9 @@
           }
         ],
         "note": {
-          "en": "After a た-form, ばかり says it only just happened; after a noun, it complains of nothing but that one thing.",
-          "fr": "Après une forme en た, ばかり dit que ça vient tout juste d'arriver ; après un nom, il se plaint de cette seule chose, encore et toujours.",
-          "es": "Tras una forma た, ばかり dice que algo acaba de pasar; tras un sustantivo, se queja de que no hay más que esa cosa."
+          "en": "After a noun, ばかり complains of nothing but that one thing: 会議ばかり, おにぎりばかり. だけ would only state it.",
+          "fr": "Après un nom, ばかり se plaint de cette seule chose, encore et toujours : 会議ばかり, おにぎりばかり. だけ ne ferait que le constater.",
+          "es": "Tras un sustantivo, ばかり se queja de que no hay más que esa cosa: 会議ばかり, おにぎりばかり. だけ solo lo constataría."
         },
         "ask": {
           "cue": {
@@ -307,14 +306,14 @@
           },
           "choices": [
             {
-              "en": "Everyone is young.",
-              "fr": "Ils sont tous jeunes.",
-              "es": "Todos son jóvenes."
+              "en": "Nearly all of them are young.",
+              "fr": "Ils sont presque tous jeunes.",
+              "es": "Casi todos son jóvenes."
             },
             {
-              "en": "Some young people have just joined.",
-              "fr": "Des jeunes viennent d'arriver.",
-              "es": "Acaban de entrar algunos jóvenes."
+              "en": "Young and older people, about half and half.",
+              "fr": "Des jeunes et des moins jeunes, à peu près à parts égales.",
+              "es": "Jóvenes y mayores, más o menos mitad y mitad."
             },
             {
               "en": "Only a few of them are young.",
@@ -323,9 +322,9 @@
             }
           ],
           "why": {
-            "en": "After a noun, ばかり means « nothing but »: わかい人ばかり, only young people. « Have just joined » is ばかり after a た-form: 入ったばかり.",
-            "fr": "Après un nom, ばかり veut dire « rien que » : わかい人ばかり, que des jeunes. « Viennent d'arriver » est ばかり après une forme en た : 入ったばかり.",
-            "es": "Tras un sustantivo, ばかり significa «nada más que»: わかい人ばかり, solo gente joven. «Acaban de entrar» es ばかり tras una forma た: 入ったばかり."
+            "en": "After a noun, ばかり means « nothing but »: わかい人ばかり, young people wherever you look, not a mix and not a few.",
+            "fr": "Après un nom, ばかり veut dire « rien que » : わかい人ばかり, des jeunes partout où l'on regarde, ni un mélange ni quelques-uns.",
+            "es": "Tras un sustantivo, ばかり significa «nada más que»: わかい人ばかり, gente joven por todas partes, ni una mezcla ni unos pocos."
           }
         },
         {
@@ -343,13 +342,13 @@
           },
           "choices": [
             "ゲームばかりしている",
-            "ゲームをしたばかりなんだ",
+            "ゲームを一時間ばかりしている",
             "ゲームしかしている"
           ],
           "why": {
-            "en": "« Nothing but » puts ばかり right after the noun: ゲームばかり. ゲームをしたばかり means « has just played », and しか needs a negative (ゲームしかしない).",
-            "fr": "« Rien que » place ばかり juste après le nom : ゲームばかり. ゲームをしたばかり veut dire « vient de jouer », et しか demande une négation (ゲームしかしない).",
-            "es": "«Nada más que» pone ばかり justo tras el sustantivo: ゲームばかり. ゲームをしたばかり significa «acaba de jugar», y しか pide una negación (ゲームしかしない)."
+            "en": "« Nothing but » puts ばかり right after the noun: ゲームばかり. 一時間ばかり is « about an hour », and しか needs a negative (ゲームしかしない).",
+            "fr": "« Rien que » place ばかり juste après le nom : ゲームばかり. 一時間ばかり veut dire « environ une heure », et しか demande une négation (ゲームしかしない).",
+            "es": "«Nada más que» pone ばかり justo tras el sustantivo: ゲームばかり. 一時間ばかり significa «más o menos una hora», y しか pide una negación (ゲームしかしない)."
           }
         },
         {
@@ -372,9 +371,9 @@
               "es": "Que habla demasiado de sí misma: a quien habla ya le cansa."
             },
             {
-              "en": "That they have just finished talking about themselves.",
-              "fr": "Qu'elle vient de finir de parler d'elle-même.",
-              "es": "Que acaba de terminar de hablar de sí misma."
+              "en": "That they are open about themselves: the speaker likes it.",
+              "fr": "Qu'elle parle d'elle-même sans détour : on apprécie.",
+              "es": "Que habla de sí misma con franqueza: a quien habla le agrada."
             },
             {
               "en": "Nothing in particular: it is a neutral remark.",
@@ -383,9 +382,9 @@
             }
           ],
           "why": {
-            "en": "After a noun, ばかり carries a reproach: too much of one thing. A neutral « only » would be だけ, and « has just finished » would need 話したばかり.",
-            "fr": "Après un nom, ばかり porte un reproche : trop d'une seule chose. Un « seulement » neutre serait だけ, et « vient de finir » demanderait 話したばかり.",
-            "es": "Tras un sustantivo, ばかり lleva un reproche: demasiado de una sola cosa. Un «solo» neutro sería だけ, y «acaba de terminar» pediría 話したばかり."
+            "en": "After a noun, ばかり carries a reproach: too much of one thing, and it wears on the speaker. A neutral « only » would be だけ.",
+            "fr": "Après un nom, ばかり porte un reproche : trop d'une seule chose, et cela lasse. Un « seulement » neutre serait だけ.",
+            "es": "Tras un sustantivo, ばかり lleva un reproche: demasiado de una sola cosa, y eso cansa. Un «solo» neutro sería だけ."
           }
         },
         {

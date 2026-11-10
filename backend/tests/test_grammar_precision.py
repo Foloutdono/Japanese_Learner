@@ -1055,6 +1055,9 @@ BANK = [
     ("彼は頭を下げんばかりに謝った。", "〜ばかりに", False),
     ("今にも泣き出さんばかりの顔だった。", "〜んばかりに", True),
     ("今にも泣き出さんばかりの顔だった。", "〜ばかり", False),
+    # 〜ばかりだ in the plain past; after た it is still たばかり (plan 318)
+    ("待てば待つほど、不安は増すばかりだった。", "〜ばかりだ", True),
+    ("駅に着いたばかりだった。", "〜ばかりだ", False),
     ("田中さんばかりに頼む。", "〜んばかりに", False),
     ("一言多かったばかりに、話がこじれた。", "〜ばかりに", True),
     # words the tokenizer made whole, or read another way

@@ -7675,8 +7675,11 @@ def _pattern_refusals():
         # 〜ばかりだ is "keeps getting": not the たばかり of just done
         # (来たばかりだ), not the んばかり of 泣かんばかりの, and a ばかり
         # with no copula is the particle (plan 188)
+        # (and its copula may be past, taken whole: 不安は増すばかりだった,
+        # plan 318 -- refused, the widest reading took its narrower ones
+        # with it, and the point's own example read as no point)
         "〜ばかりだ": lambda t, s, e, g: ((p := _prev_word(t, s)) is not None and (p.lemma == "た" or _n_ends(t, p)))
-            or not ("".join(x.surface for x in t if s <= x.start < e).endswith(("だ", "です", "でし", "だっ"))
+            or not ("".join(x.surface for x in t if s <= x.start < e).endswith(("だ", "です", "でし", "だっ", "だった", "でした"))
                     or _followed_by_copula(t, e)),
         "〜のは〜だ": _noha_da_refused,
         # 〜もので is "because"; もので + は／も is the copula's negative of
