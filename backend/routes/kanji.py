@@ -2,7 +2,7 @@ import logging
 import random
 from fastapi import APIRouter, Depends, HTTPException, Query
 from content.kanji_data import KANJI_BY_LEVEL, LEVELS, kanji_to_id
-from core.auth import get_user_id, prefixed, unprefixed
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
@@ -23,14 +23,14 @@ from content.radical_data import (
     DECK_BY_RADICAL, deck_kanji_for, info_for,
 )
 import content.kanji_pool_data as kanji_db
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 class ReviewPayload(BaseModel):
-    card_id:    str
-    mode:       str
+    card_id:    str = Field(max_length=CARD_ID_MAX)
+    mode:       str = Field(max_length=MODE_MAX)
     quality:    int
     # The card's stage *before* this review, exactly as it was handed
     # back on the card payload (see _build_kanji_card's "stage" field
@@ -265,7 +265,7 @@ def _distractor_pool(rows: list[tuple[str, dict]], radical: int | None) -> list[
 def _select_cards(level: str | None, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
                   new_limit: int | None = None, radical: int | None = None):
     """
-    Shared by /api/kanji/card and /api/kanji/cards. Returns
+    Used by /api/kanji/cards. Returns
     (kanji_list, cards) — kanji_list is None for an unknown level or
     invalid mode (callers re-check which, to keep the exact original
     error messages). `radical` scopes the pool to one radical's family
@@ -339,27 +339,13 @@ def _select_cards(level: str | None, m: Mode, lang: str, count: int, exclude_ids
     return kanji_list, cards
 
 
-@router.get("/api/kanji/card")
-def get_kanji_card(level: str | None = None, lang: str = "fr", radical: int | None = None,
-                   m: Mode = Depends(require_mode(KANJI)),
-                   user_id: str = Depends(get_user_id)):
-    mode = m.key
-    kanji_list, cards = _select_cards(level, m, lang, count=1, exclude_ids=set(), user_id=user_id, radical=radical)
-    if kanji_list is None:
-        return {"error": "Unknown level"}
-    if not cards:
-        logger.warning("kanji study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)
-        return {"done": True}
-    return cards[0]
-
-
 @router.get("/api/kanji/cards")
 def get_kanji_cards(level: str | None = None, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
                     beyond_target: bool = Query(False), radical: int | None = None,
                     m: Mode = Depends(require_mode(KANJI)),
                     user_id: str = Depends(get_user_id)):
     """
-    Batch version of /api/kanji/card — returns up to `count` cards at
+    Returns up to `count` cards at
     once so the frontend can keep a session queue filled instead of
     fetching one card per answer. `exclude` is a comma-separated list
     of raw (unprefixed) card ids the client already has queued but
