@@ -396,3 +396,30 @@ def test_a_conversation_card_is_the_grade_s_first_scene(client):
 def test_an_unknown_practice_line_is_still_a_404(client):
     assert client.get("/api/station/listening/samples").status_code == 404
     assert client.get("/api/station/exams/samples").status_code == 404
+
+
+def test_a_contrast_without_a_blank_falls_to_the_next_point(monkeypatch):
+    # A payload with no blank part draws no card: _grammar_line tries the
+    # next point rather than raising out of its generator (a bare next()
+    # there was a StopIteration, which Python turns into a RuntimeError).
+    from routes import station
+
+    level = "N5"
+    points = GRAMMAR_POINTS_BY_LEVEL[level]
+    real = station.contrast_payload
+    # The point whose card the station draws today: the one to take away.
+    drawn = station._grammar_line("en")[level]["card"]
+    assert "blank" in drawn
+    first = drawn["jp"]
+    entry = next(p for p in points if p["pattern"] == first)
+
+    def no_blank_first(lvl, entry, *args, **kwargs):
+        payload = real(lvl, entry, *args, **kwargs)
+        if payload and entry["pattern"] == first:
+            payload = {**payload, "furigana": [p for p in payload["furigana"] if not p.get("blank")]}
+        return payload
+
+    monkeypatch.setattr(station, "contrast_payload", no_blank_first)
+    assert station._grammar_card(level, entry, points, "en") is None
+    card = station._grammar_line("en")[level]["card"]
+    assert "blank" in card and card["jp"] != first

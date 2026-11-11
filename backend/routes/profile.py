@@ -366,14 +366,20 @@ def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
     row = cur.fetchone()
     if not row or not _GENERATED_RE.match(row[0]):
         return None
+    # Every name a candidate could collide with, in one look: a candidate
+    # is the base cut to make room for at most three digits, so all of
+    # them start with its first USERNAME_MAX - 3 letters (ASCII letters
+    # and digits only, so nothing in the pattern needs escaping). There
+    # is no index on lower(username), so one scan here replaces one per
+    # candidate -- up to 999 for a name many learners share.
+    cur.execute(
+        "SELECT lower(username) FROM user_profiles"
+        " WHERE lower(username) LIKE lower(%s) || '%%' AND user_id <> %s",
+        (base[:USERNAME_MAX - 3], user_id),
+    )
+    taken = {row[0] for row in cur.fetchall()}
     for candidate in _handle_candidates(base):
-        if content_filter.refused(candidate, name=True):
-            continue
-        cur.execute(
-            "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
-            (candidate, user_id),
-        )
-        if cur.fetchone():
+        if candidate.lower() in taken or content_filter.refused(candidate, name=True):
             continue
         # A savepoint, so a refusal leaves the caller's transaction (the
         # migration's, with every handle it has moved) standing.
