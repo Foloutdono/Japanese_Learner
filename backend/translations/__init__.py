@@ -44,8 +44,3 @@ def get_meaning(entry: dict, lang: str, glosses: dict[str, dict]) -> str:
     if own:
         return fr_gloss(entry, own) or entry.get("meaning", "")
     return entry.get("meaning", "")
-
-
-def get_meanings(entries: list[dict], lang: str, glosses: dict[str, dict]) -> list[str]:
-    """Return list of meanings for MCQ choices."""
-    return [get_meaning(e, lang, glosses) for e in entries]
