@@ -6,8 +6,8 @@ import random
 from dataclasses import dataclass
 from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
-from pydantic import BaseModel
-from core.auth import get_user_id, prefixed, unprefixed
+from pydantic import BaseModel, Field
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import bell, content_filter, credits
 from core.db import db_conn
 from core.pace import new_card_limit, resolve_pace
@@ -883,8 +883,8 @@ MAX_BATCH = 500
 
 
 class ReviewPayload(BaseModel):
-    card_id:    str
-    mode:       str
+    card_id:    str = Field(max_length=CARD_ID_MAX)
+    mode:       str = Field(max_length=MODE_MAX)
     quality:    int
     # Mirrors kanji.py/vocab.py/grammar.py's ReviewPayload.prev_stage
     # — sent back by the client from the card payload it was handed,
