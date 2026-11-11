@@ -24,6 +24,8 @@ import logging
 import os
 import re
 import time
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from functools import lru_cache
 
@@ -48,6 +50,48 @@ class LLMUnavailable(RuntimeError):
     amount of retrying will fix. Live-diagnosed 2026-08: a dead primary
     model plus a swallowed provider failure turned one exam click into
     hundreds of doomed OpenRouter requests."""
+
+# ── The meter: was anything paid for? ────────────────────────────
+# A daily slot is given back when its call failed without any model
+# being paid (core/daily_limit.refund_unbilled): an outage must not
+# spend a learner's allowance, while a reply that came back and was
+# refused, or never arrived because it timed out mid-answer, was
+# billed and keeps its slot. LLMUnavailable alone cannot say which:
+# chat() raises it both when nobody answered and when every model's
+# 200 failed `accept`. So chat() marks the meter open around it at
+# every call that may have cost money, and the guard reads it.
+#
+# A ContextVar, not a global: two learners' requests run at once. A
+# meter is read in the thread that set it; chat() is never handed to
+# an executor under one (the exam and song workers open their own).
+@dataclass
+class Meter:
+    billed: bool = False
+    parent: "Meter | None" = None
+
+
+_METER: ContextVar["Meter | None"] = ContextVar("llm_meter", default=None)
+
+
+@contextmanager
+def metered():
+    """A Meter that says whether any chat() call made inside the block
+    may have been billed. Nested meters each see a call made inside
+    the innermost."""
+    meter = Meter(parent=_METER.get())
+    token = _METER.set(meter)
+    try:
+        yield meter
+    finally:
+        _METER.reset(token)
+
+
+def _billed() -> None:
+    meter = _METER.get()
+    while meter is not None:
+        meter.billed = True
+        meter = meter.parent
+
 
 # ── Providers ────────────────────────────────────────────────────
 # More than one, since 2026-08: OpenRouter started answering 402
@@ -774,10 +818,18 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                     timeout=timeout,
                 )
             except requests.RequestException as e:
+                # A read that timed out was a request the provider took
+                # and may have answered into the void: paid for. A
+                # connection never made (refused, DNS, connect timeout)
+                # was not.
+                if isinstance(e, requests.Timeout) and not isinstance(e, requests.ConnectionError):
+                    _billed()
                 logger.warning("%s network error: %s", label, e)
                 continue
 
             if response.ok:
+                # Tokens spent, whatever the body turns out to be.
+                _billed()
                 # Parsed once and kept: the same body carries the answer
                 # and the usage block, and a second .json() would parse
                 # it twice per call.

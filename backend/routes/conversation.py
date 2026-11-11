@@ -224,9 +224,11 @@ class ReviewPayload(BaseModel):
 
 
 def _claim(user_id: str, feature: str, limit: int, what: str) -> None:
-    """A slot of the day, claimed BEFORE the model is called: a failed
-    call costs one, since a client retrying a failure is what the
-    ceiling stops. Over it, a 429 saying when the allowance is back."""
+    """A slot of the day, claimed BEFORE the model is called, so two at
+    once cannot both pass the ceiling: a reply a model was paid for
+    costs one, and the caller gives back one no model could be reached
+    for (daily_limit.refund_unbilled). Over it, a 429 saying when the
+    allowance is back."""
     used = daily_limit.claim(user_id, feature, limit)
     if used > limit:
         raise HTTPException(
@@ -274,13 +276,14 @@ def post_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     _claim(user_id, REVIEW_FEATURE, CONVERSATION_REVIEW_DAILY_LIMIT, "conversation reviews")
 
     lang_name = reading.LANG_NAMES[reading.known_lang(payload.lang)]
-    content = reading._chat(
-        conversation.review_messages(payload.scenario, payload.turn, answer, lang_name),
-        # The shape is small: composition's, served in 1000.
-        max_tokens=1000,
-        task="conversation-review",
-        accept=tutor_review.acceptable_reply,
-    )
+    with daily_limit.refund_unbilled(user_id, REVIEW_FEATURE):
+        content = reading._chat(
+            conversation.review_messages(payload.scenario, payload.turn, answer, lang_name),
+            # The shape is small: composition's, served in 1000.
+            max_tokens=1000,
+            task="conversation-review",
+            accept=tutor_review.acceptable_reply,
+        )
     review = tutor_review.parse_review(content)
     if review is None:
         cleaned = tutor_review.usable_prose(content)
@@ -327,13 +330,14 @@ def post_talk(payload: TalkPayload, user_id: str = Depends(get_user_id)):
 
     lang_name = reading.LANG_NAMES[reading.known_lang(payload.lang)]
     history = [{"who": line.who, "jp": line.jp.strip()} for line in payload.lines]
-    content = reading._chat(
-        conversation.talk_messages(payload.scenario, history, answer, lang_name),
-        # Two short lines and the review's shape.
-        max_tokens=1200,
-        task="conversation-talk",
-        accept=conversation.acceptable_talk,
-    )
+    with daily_limit.refund_unbilled(user_id, TALK_FEATURE):
+        content = reading._chat(
+            conversation.talk_messages(payload.scenario, history, answer, lang_name),
+            # Two short lines and the review's shape.
+            max_tokens=1200,
+            task="conversation-talk",
+            accept=conversation.acceptable_talk,
+        )
     parsed = conversation.parse_talk(content)
     if parsed is None:
         logger.error("conversation talk had no line for the other person: %s", content[:300])

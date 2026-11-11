@@ -46,6 +46,9 @@ def model(monkeypatch):
             out = replies.pop(0) if len(replies) > 1 else replies[0]
             if isinstance(out, Exception):
                 raise out
+            # A reply came back: the model was paid for it (the meter
+            # core/daily_limit.refund_unbilled reads).
+            llm_shared._billed()
             return out
         monkeypatch.setattr(llm_shared, "llm_configured", lambda: True)
         monkeypatch.setattr(llm_shared, "chat", chat)
@@ -377,13 +380,27 @@ def test_the_days_ceiling_is_a_429_that_says_when(client, model, monkeypatch):
     assert "resets" in second.json()["detail"]
 
 
-def test_a_failed_or_declined_call_still_costs_a_slot(client, model, monkeypatch):
+def test_an_outage_gives_its_slot_back_and_a_declined_call_costs_one(client, model, monkeypatch):
+    # No provider answered: the 503 costs nothing, however often it is
+    # retried (core/daily_limit.refund_unbilled). A question declined
+    # as off topic was answered, and costs its slot.
     monkeypatch.setattr(ask, "ASK_DAILY_LIMIT", 2)
     model(llm_shared.LLMUnavailable("every provider failed"))
-    assert client.post("/api/ask", json=_payload()).status_code == 503
+    for _ in range(3):
+        assert client.post("/api/ask", json=_payload()).status_code == 503
     model("OFF_TOPIC")
     assert client.post("/api/ask", json=_payload()).status_code == 200
+    assert client.post("/api/ask", json=_payload()).status_code == 200
     assert client.post("/api/ask", json=_payload()).status_code == 429
+
+
+def test_an_answer_asked_again_then_lost_to_an_outage_still_costs_one(client, model, monkeypatch):
+    # The first answer, in the wrong language, was paid for; the second
+    # asking finding every provider down does not make it free.
+    monkeypatch.setattr(ask, "ASK_DAILY_LIMIT", 1)
+    model([ANSWER, llm_shared.LLMUnavailable("every provider failed")])
+    assert client.post("/api/ask", json=_payload(lang="fr")).status_code == 503
+    assert client.post("/api/ask", json=_payload(lang="fr")).status_code == 429
 
 
 def test_no_provider_is_a_503_before_any_slot_is_taken(client, monkeypatch):

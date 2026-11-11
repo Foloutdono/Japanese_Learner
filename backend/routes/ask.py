@@ -426,9 +426,11 @@ def post_ask(payload: AskPayload, user_id: str = Depends(get_user_id)):
 
     The order is composition's: the question is read, then a slot of
     the day is claimed, then the model is called. Claimed BEFORE the
-    call, so a failed or declined call costs one -- a client retrying is
-    exactly what the ceiling exists to stop. Over it, a 429 that says
-    when the allowance comes back; the run goes on without it.
+    call, so two at once cannot both pass the ceiling; a call a model
+    answered costs one, declined or not, and one no model could be
+    reached for is given back (daily_limit.refund_unbilled). Over it, a
+    429 that says when the allowance comes back; the run goes on
+    without it.
 
     An answer in another language than the learner's is asked for again
     inside the same slot (answer_question); a second is a 502, since an
@@ -452,7 +454,8 @@ def post_ask(payload: AskPayload, user_id: str = Depends(get_user_id)):
         )
 
     try:
-        answer = answer_question(payload, question)
+        with daily_limit.refund_unbilled(user_id, FEATURE):
+            answer = answer_question(payload, question)
     except llm_shared.LLMUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     except WrongLanguage as e:
