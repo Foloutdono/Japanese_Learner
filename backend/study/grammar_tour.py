@@ -55,7 +55,13 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 29  # 29: plan 319 -- what translating the catalogue found in its
+TOUR_REV = 30  # 30: plan 320 -- what the corrected source still said
+#   (plan 312's findings §9): asks that presupposed their answer and
+#   notions that named it made neutral, the French and Spanish given
+#   no sex the Japanese does not give, the Spanish readings evened as
+#   the English was, contrast marks and `same` decided on the point's
+#   own sentences, wrong whys and slips; the Indonesian with them.
+# 29: plan 319 -- what translating the catalogue found in its
 #   source (plan 312's notes): whys that named a shuffled choice by its
 #   place, form questions that doubled a word once filled, whys and
 #   translations that taught a rival's sense, a 〜たら／〜なら asked from

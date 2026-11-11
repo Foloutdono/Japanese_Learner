@@ -5277,8 +5277,7 @@
         "fr": "On écoute les gens jusqu'au bout, c'est comme ça.",
         "es": "Lo normal es escuchar a los demás hasta el final.",
         "id": "Kita mendengarkan perkataan orang sampai selesai; begitulah lazimnya.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "一度は世界一周をしてみたいものだ。",
@@ -8290,8 +8289,8 @@
           "kind": "use",
           "ask": {
             "en": "A friend who joined your club last week already wants to quit. You urge them, as someone who has joined, to see it through.",
-            "fr": "Un ami qui s'est inscrit à ton club la semaine dernière veut déjà arrêter. Tu l'encourages, puisqu'il s'est inscrit, à aller jusqu'au bout.",
-            "es": "Un amigo que entró en tu club la semana pasada ya quiere dejarlo. Lo animas a seguir hasta el final, ya que entró.",
+            "fr": "Quelqu'un de proche s'est inscrit à ton club la semaine dernière et veut déjà arrêter. Puisque l'inscription est faite, tu l'encourages à aller jusqu'au bout.",
+            "es": "Alguien cercano entró en tu club la semana pasada y ya quiere dejarlo. Como ya entró, le das ánimos para seguir hasta el final.",
             "id": "Temanmu yang masuk klubmu minggu lalu sudah ingin berhenti. Karena dia sudah bergabung, kamu mendorongnya untuk menjalaninya sampai tuntas."
           },
           "choices": [
@@ -11523,8 +11522,8 @@
           "kind": "use",
           "ask": {
             "en": "Your friend thinks the pool at the sports center is only for members. You say the general public can use it too.",
-            "fr": "Ton amie croit que la piscine du centre sportif est réservée aux membres. Tu lui dis que le grand public peut aussi s'en servir.",
-            "es": "Tu amiga cree que la piscina del centro deportivo es solo para los miembros. Le dices que el público general también puede usarla.",
+            "fr": "Quelqu'un de proche croit que la piscine du centre sportif est réservée aux membres. Tu lui dis que le grand public peut aussi s'en servir.",
+            "es": "Alguien cercano cree que la piscina del centro deportivo es solo para los miembros. Le dices que el público general también puede usarla.",
             "id": "Temanmu mengira kolam renang di pusat olahraga itu hanya untuk anggota. Kamu berkata bahwa masyarakat umum juga bisa memakainya."
           },
           "choices": [
@@ -13041,8 +13040,7 @@
         "fr": "Contre la volonté de ses parents, il a choisi la musique.",
         "es": "En contra de los deseos de sus padres, eligió el camino de la música.",
         "id": "Bertentangan dengan keinginan orang tuanya, dia memilih jalan musik.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "期待に反して、売り上げは伸びなかった。",
@@ -14677,8 +14675,8 @@
           "kind": "use",
           "ask": {
             "en": "You learned the manager's opinion because your coworker Yamada passed it on to you. You tell a friend how you came to know it.",
-            "fr": "Tu connais l'opinion du chef de service parce que ton collègue Yamada te l'a transmise. Tu dis à un ami comment tu l'as apprise.",
-            "es": "Conoces la opinión del jefe de departamento porque tu compañero Yamada te la transmitió. Le cuentas a un amigo cómo te enteraste.",
+            "fr": "Tu connais l'opinion du chef parce que ton collègue Yamada te l'a transmise. Tu dis à un ami comment tu l'as apprise.",
+            "es": "Conoces la opinión del jefe porque tu compañero Yamada te la transmitió. Le cuentas a un amigo cómo te enteraste.",
             "id": "Kamu tahu pendapat manajer karena rekan kerjamu, Yamada, menyampaikannya kepadamu. Kamu bercerita kepada seorang teman bagaimana kamu bisa tahu."
           },
           "choices": [
@@ -17907,10 +17905,10 @@
           },
           "jp": "部長、あしたの会議は中止になる＿＿＿。",
           "tr": {
-            "en": "Director, so tomorrow's meeting is cancelled, is that right?",
+            "en": "Manager, so tomorrow's meeting is cancelled, is that right?",
             "fr": "Chef, la réunion de demain est donc annulée, c'est bien cela ?",
-            "es": "Jefe, entonces la reunión de mañana se cancela, ¿no es así?",
-            "id": "Direktur, jadi rapat besok dibatalkan, begitu, ya?"
+            "es": "Entonces, la reunión de mañana se cancela, ¿no es así?",
+            "id": "Manajer, jadi rapat besok dibatalkan, begitu, ya?"
           },
           "choices": [
             "ということですね",
@@ -19969,19 +19967,19 @@
     "structure_es": "sustantivo + をもって",
     "structure_id": "kata benda + をもって",
     "meaning": {
-      "en": "by means of; also: ending with a stated date",
-      "fr": "au moyen de ; avec (telle date) pour dernier jour",
-      "es": "por medio de; también: con una fecha dada como último día",
-      "id": "dengan menggunakan; juga: berakhir pada tanggal tertentu"
+      "en": "by means of; also: effective on a stated date, or ending with it",
+      "fr": "au moyen de ; avec effet à (telle date), ou avec elle pour dernier jour",
+      "es": "por medio de; también: con efecto en una fecha dada, o con ella como último día",
+      "id": "dengan menggunakan; juga: berlaku pada tanggal tertentu, atau berakhir pada tanggal itu"
     },
     "register": "formal",
     "steps": [
       {
         "kind": "rule",
-        "en": "**noun + をもって** means « by means of, with » (実力をもって) or, after a date, « with that day as the last » (本日をもって, today being the last day). Very formal.",
-        "fr": "**nom + をもって** signifie « au moyen de, avec » (実力をもって) ou, après une date, « avec ce jour pour dernier » (本日をもって, aujourd'hui étant le dernier jour). Très formel.",
-        "es": "**sustantivo + をもって** significa «por medio de, con» (実力をもって) o, tras una fecha, «con ese día como el último» (本日をもって, siendo hoy el último día). Muy formal.",
-        "id": "**kata benda + をもって** berarti “dengan, dengan menggunakan” (実力をもって) atau, setelah tanggal, “dengan hari itu sebagai hari terakhir” (本日をもって, hari ini sebagai hari terakhir). Sangat resmi."
+        "en": "**noun + をもって** means « by means of, with » (実力をもって) or, after a date, « as of that day »: the day a change takes effect or, for an ending, the last day (本日をもって, today being the last day). Very formal.",
+        "fr": "**nom + をもって** signifie « au moyen de, avec » (実力をもって) ou, après une date, « à compter de ce jour » : le jour où un changement prend effet ou, pour une fin, le dernier jour (本日をもって, aujourd'hui étant le dernier jour). Très formel.",
+        "es": "**sustantivo + をもって** significa «por medio de, con» (実力をもって) o, tras una fecha, «a partir de ese día»: el día en que un cambio entra en vigor o, en un final, el último día (本日をもって, siendo hoy el último día). Muy formal.",
+        "id": "**kata benda + をもって** berarti “dengan, dengan menggunakan” (実力をもって) atau, setelah tanggal, “terhitung hari itu”: hari suatu perubahan mulai berlaku atau, untuk sesuatu yang berakhir, hari terakhirnya (本日をもって, hari ini sebagai hari terakhir). Sangat resmi."
       },
       {
         "kind": "use",
@@ -20102,10 +20100,10 @@
             }
           ],
           "why": {
-            "en": "After a date, をもって marks the end point: everything runs through that day, then stops.",
-            "fr": "Après une date, をもって marque le terme : tout continue jusqu'à ce jour inclus, puis s'arrête.",
-            "es": "Tras una fecha, をもって marca el punto final: todo sigue hasta ese día incluido, y luego se detiene.",
-            "id": "Setelah tanggal, をもって menandai titik akhir: semuanya berjalan sampai hari itu, lalu berhenti."
+            "en": "For a closure, をもって after a date marks the end point: everything runs through that day, then stops.",
+            "fr": "Pour une fermeture, をもって après une date marque le terme : tout continue jusqu'à ce jour inclus, puis s'arrête.",
+            "es": "En un cierre, をもって tras una fecha marca el punto final: todo sigue hasta ese día incluido, y luego se detiene.",
+            "id": "Untuk penutupan, をもって setelah tanggal menandai titik akhir: semuanya berjalan sampai hari itu, lalu berhenti."
           },
           "pair": [
             "本日をもって",
@@ -20136,14 +20134,14 @@
           "choices": [
             {
               "en": "It names the means: in writing.",
-              "fr": "Il désigne le moyen : on vous informera par écrit.",
-              "es": "Nombra el medio: le informarán por escrito.",
+              "fr": "Il désigne le moyen : par écrit.",
+              "es": "Nombra el medio: por escrito.",
               "id": "Menyebut sarana: secara tertulis."
             },
             {
               "en": "It names a date: as of the day of the letter.",
-              "fr": "Il désigne une date : à compter de la lettre.",
-              "es": "Nombra una fecha: a partir de la carta.",
+              "fr": "Il désigne une date : à compter du jour de la lettre.",
+              "es": "Nombra una fecha: a partir del día de la carta.",
               "id": "Menyebut tanggal: terhitung sejak surat itu dikirim."
             },
             {
@@ -20154,10 +20152,10 @@
             }
           ],
           "why": {
-            "en": "After a means, をもって is a formal で: in writing. After a date, it marks the last day: 本日をもって.",
-            "fr": "Après un moyen, をもって est un で soutenu : par écrit. Après une date, il marque le dernier jour : 本日をもって.",
-            "es": "Tras un medio, をもって es un で formal: por escrito. Tras una fecha, marca el último día: 本日をもって.",
-            "id": "Setelah sarana, をもって adalah で yang resmi: secara tertulis. Setelah tanggal, pola ini menandai hari terakhir: 本日をもって."
+            "en": "After a means, をもって is a formal で: in writing. After a date, it marks when something ends or changes: 本日をもって.",
+            "fr": "Après un moyen, をもって est un で soutenu : par écrit. Après une date, il marque le moment où une chose finit ou change : 本日をもって.",
+            "es": "Tras un medio, をもって es un で formal: por escrito. Tras una fecha, marca cuándo algo termina o cambia: 本日をもって.",
+            "id": "Setelah sarana, をもって adalah で yang resmi: secara tertulis. Setelah tanggal, pola ini menandai kapan sesuatu berakhir atau berubah: 本日をもって."
           },
           "pair": [
             "書面でお知らせします",
@@ -20748,13 +20746,13 @@
             "who": "them",
             "jp": "その方のもとで、もう長いんですか。",
             "en": "Have you been with that chef long?",
-            "fr": "Ça fait longtemps que vous êtes auprès de lui ?",
-            "es": "¿Lleva mucho tiempo con él?",
+            "fr": "Ça fait longtemps que vous êtes auprès de cette personne ?",
+            "es": "¿Lleva mucho tiempo con esa persona?",
             "id": "Sudah lama Anda belajar di bawah bimbingan beliau?"
           },
           "task": {
             "en": "Say yes: you've been learning under that chef for two years.",
-            "fr": "Dis que oui : tu apprends auprès de lui depuis deux ans.",
+            "fr": "Dis que oui : tu apprends sous sa direction depuis deux ans.",
             "es": "Di que sí: llevas dos años aprendiendo bajo su guía.",
             "id": "Jawab ya: kamu sudah dua tahun belajar di bawah bimbingan koki itu."
           },
@@ -20878,8 +20876,8 @@
           ],
           "why": {
             "en": "のもとで with a teacher means guidance: the teacher trained them. もと is the « under » of influence, not a floor below, and not the 元 of « source » (books they read from afar).",
-            "fr": "のもとで avec un professeur veut dire direction : c'est lui qui les a formés. もと est le « sous » de l'influence, pas un étage en dessous, ni le 元 de « source » (des livres lus de loin).",
-            "es": "のもとで con un profesor indica guía: él los formó. もと es el «bajo» de la influencia, no un piso de abajo, ni el 元 de «fuente» (libros leídos de lejos).",
+            "fr": "のもとで avec un professeur veut dire direction : c'est ce professeur qui les a formés. もと est le « sous » de l'influence, pas un étage en dessous, ni le 元 de « source » (des livres lus de loin).",
+            "es": "のもとで con un profesor indica guía: ese profesor los formó. もと es el «bajo» de la influencia, no un piso de abajo, ni el 元 de «fuente» (libros leídos de lejos).",
             "id": "のもとで dengan guru berarti bimbingan: guru itulah yang mendidik mereka. もと adalah “di bawah” dalam arti pengaruh, bukan lantai di bawah, dan bukan 元 dalam arti “sumber” (buku yang dibaca dari jauh)."
           }
         },
@@ -24317,14 +24315,14 @@
           "choices": [
             {
               "en": "There's no call to get so angry.",
-              "fr": "Tu en fais trop : pas la peine de te mettre dans cet état.",
-              "es": "Te pasas: no hay por qué enojarse tanto.",
+              "fr": "Pas la peine de te mettre dans cet état.",
+              "es": "No hay por qué enojarse tanto.",
               "id": "Tidak ada perlunya sampai semarah itu."
             },
             {
               "en": "You never get angry about anything, do you?",
               "fr": "Tu ne te mets jamais en colère, n'est-ce pas ?",
-              "es": "Tú nunca te enojas, ¿verdad?",
+              "es": "Tú nunca te enojas por nada, ¿verdad?",
               "id": "Kamu tidak pernah marah soal apa pun, kan?"
             },
             {
@@ -25418,7 +25416,7 @@
             {
               "en": "Accept it, unwillingly.",
               "fr": "L'accepter à contrecœur.",
-              "es": "Aceptarla a disgusto, porque negarse no es posible.",
+              "es": "Aceptarla a disgusto.",
               "id": "Menerimanya dengan berat hati."
             },
             {
@@ -25430,7 +25428,7 @@
             {
               "en": "Accept it gladly, as an honour.",
               "fr": "L'accepter avec plaisir, comme un honneur.",
-              "es": "Aceptarla con gusto.",
+              "es": "Aceptarla con gusto, como un honor.",
               "id": "Menerimanya dengan senang hati, sebagai kehormatan."
             }
           ],
@@ -26221,7 +26219,7 @@
       {
         "jp": "さすが医者だけあって、体のことにくわしい。",
         "en": "As you'd expect of a doctor, they know a lot about the body.",
-        "fr": "Comme on peut s'y attendre d'un médecin, il s'y connaît en anatomie.",
+        "fr": "Comme on peut s'y attendre d'un médecin, ses connaissances sur le corps sont vastes.",
         "es": "Como era de esperar de un médico, sabe mucho sobre el cuerpo.",
         "id": "Dia memang dokter, pantas saja dia paham betul soal tubuh.",
         "register": "neutral"
@@ -26305,7 +26303,7 @@
             {
               "en": "No: it makes the letdown all the greater.",
               "fr": "Non : la déception n'en est que plus grande.",
-              "es": "No: es aún más decepcionante, porque lo esperaba con ganas.",
+              "es": "No: hace aún mayor la decepción.",
               "id": "Bukan: kekecewaannya jadi makin besar."
             },
             {
@@ -26552,7 +26550,7 @@
           "jp": "＿＿＿プロの料理人だけあって、ほうちょうの使い方がうまい。",
           "tr": {
             "en": "As you would expect of a professional cook, they handle a knife well.",
-            "fr": "Comme on peut l'attendre d'un cuisinier professionnel, il manie bien le couteau.",
+            "fr": "Comme on peut l'attendre d'un cuisinier professionnel, son maniement du couteau est excellent.",
             "es": "Como era de esperar de un cocinero profesional, maneja bien el cuchillo.",
             "id": "Seperti yang diharapkan dari juru masak profesional, dia mahir memakai pisau."
           },
@@ -26651,7 +26649,7 @@
       {
         "jp": "有名な先生だけに、教え方がとてもうまい。",
         "en": "Being a famous teacher, they teach all the better.",
-        "fr": "Professeur réputé, il enseigne d'autant mieux.",
+        "fr": "Comme c'est un professeur réputé, ses cours n'en sont que meilleurs.",
         "es": "Al ser un profesor famoso, enseña aún mejor.",
         "id": "Karena dia guru terkenal, cara mengajarnya pun lebih bagus lagi.",
         "register": "neutral"
@@ -26677,7 +26675,7 @@
           "jp": "ベテランの運転手だけに、ブレーキがとてもなめらかだ。",
           "tr": {
             "en": "Being a veteran, the driver brakes very smoothly.",
-            "fr": "C'est un conducteur expérimenté, alors il freine tout en douceur.",
+            "fr": "Comme c'est un conducteur chevronné, le freinage est tout en douceur.",
             "es": "Como es un conductor veterano, frena con mucha suavidad.",
             "id": "Karena pengemudinya veteran, remnya terasa sangat halus."
           },
@@ -26690,14 +26688,14 @@
           "choices": [
             {
               "en": "No: experience makes it all the smoother.",
-              "fr": "Non : en conducteur chevronné, il freine d'autant plus en douceur.",
-              "es": "No: al ser un conductor experimentado, frena aún más suave.",
+              "fr": "Non : l'expérience rend le freinage d'autant plus doux.",
+              "es": "No: la experiencia hace que frene aún más suave.",
               "id": "Bukan: pengalamannya membuat remnya makin halus."
             },
             {
               "en": "Yes: seasoned drivers brake roughly, out of habit.",
-              "fr": "Oui : les conducteurs chevronnés freinent brusquement.",
-              "es": "Sí: los conductores experimentados frenan bruscamente.",
+              "fr": "Oui : les conducteurs chevronnés freinent brusquement, par habitude.",
+              "es": "Sí: los conductores experimentados frenan bruscamente, por costumbre.",
               "id": "Ya: pengemudi kawakan mengerem dengan kasar, karena kebiasaan."
             },
             {
@@ -26991,7 +26989,7 @@
             {
               "en": "For a pro, even small slips aren't forgiven.",
               "fr": "Pour un pro, même une petite faute ne passe pas.",
-              "es": "Como es profesional, se le exige más: ni los pequeños errores se le perdonan.",
+              "es": "A un profesional no se le perdona ni un desliz.",
               "id": "Bagi profesional, kesalahan kecil pun tak dimaafkan."
             },
             {
@@ -29299,13 +29297,13 @@
             {
               "en": "Not their child, but like one.",
               "fr": "Pas leur enfant, mais tout comme.",
-              "es": "No es su hijo, pero es como de la familia.",
+              "es": "No es su hijo, pero como si lo fuera.",
               "id": "Bukan anak mereka, tetapi seperti anak sendiri."
             },
             {
               "en": "Their own child, living with them.",
               "fr": "Leur propre enfant, qui vit chez eux.",
-              "es": "Su hijo.",
+              "es": "Su propio hijo, que vive con la familia.",
               "id": "Anak kandung mereka, yang tinggal bersama mereka."
             },
             {
@@ -30202,8 +30200,8 @@
           "kind": "use",
           "ask": {
             "en": "A friend plans to leave home five minutes before a Friday evening train. You are sure they will miss it, and you say so, as friends do.",
-            "fr": "Un ami compte partir de chez lui cinq minutes avant un train du vendredi soir. Tu ne doutes pas qu'il le ratera, et tu le lui dis, comme on le fait entre amis.",
-            "es": "Un amigo piensa salir de casa cinco minutos antes de un tren del viernes por la tarde. No te cabe duda de que lo perderá, y se lo dices, como se hace entre amigos.",
+            "fr": "Quelqu'un de proche compte partir de chez soi cinq minutes avant un train du vendredi soir. Pour toi, c'est sûr : ce train sera raté. Tu le lui dis, comme on le fait entre amis.",
+            "es": "Alguien cercano piensa salir de casa cinco minutos antes de un tren del viernes por la tarde. No te cabe duda de que lo perderá, y se lo dices, como se hace entre amigos.",
             "id": "Seorang teman berencana berangkat dari rumah lima menit sebelum kereta Jumat sore. Kamu yakin dia akan ketinggalan, dan kamu mengatakannya dengan gaya bicara antarteman."
           },
           "choices": [
@@ -32353,9 +32351,9 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "How does the speaker know the station is like a maze?",
-            "fr": "Comment la personne qui parle sait-elle que la gare est comme un labyrinthe ?",
-            "es": "¿Cómo sabe quien habla que la estación es como un laberinto?",
+            "en": "What makes the speaker say the station is like a maze?",
+            "fr": "Qu'est-ce qui fait dire à la personne qui parle que la gare est comme un labyrinthe ?",
+            "es": "¿Qué lleva a quien habla a decir que la estación es como un laberinto?",
             "id": "Atas dasar apa pembicara mengatakan bahwa stasiun ini seperti labirin?"
           },
           "jp": "日本に来たばかりの人からすると、この駅はまるでめいろのようだろう。",
@@ -34251,8 +34249,8 @@
           "kind": "use",
           "ask": {
             "en": "Your friend is worried about tomorrow's exam. You have seen how hard they studied and you are sure they will pass. How do you reassure them?",
-            "fr": "Ton ami s'inquiète pour l'examen de demain. Tu as vu combien il a travaillé et tu ne doutes pas qu'il va réussir. Comment le rassures-tu ?",
-            "es": "Un amigo está preocupado por el examen de mañana. Viste cuánto estudió y no dudas de que aprobará. ¿Cómo lo tranquilizas?",
+            "fr": "Quelqu'un de proche s'inquiète pour l'examen de demain. Tu as vu tout le travail fourni et tu ne doutes pas de sa réussite. Comment lui redonner confiance ?",
+            "es": "Alguien cercano está preocupado por el examen de mañana. Viste cuánto estudió y no dudas de que aprobará. ¿Cómo le das ánimos?",
             "id": "Temanmu cemas soal ujian besok. Kamu sudah melihat betapa kerasnya dia belajar dan kamu yakin dia akan lulus. Bagaimana kamu menenangkannya?"
           },
           "choices": [
@@ -40282,8 +40280,8 @@
           "kind": "use",
           "ask": {
             "en": "A friend worries that their child wants to study art, not business. Gently say how it looks from the child's side: doing what one likes is surely best.",
-            "fr": "Une amie s'inquiète : son enfant veut étudier l'art, pas le commerce. Dis-lui doucement ce que cela donne du côté de l'enfant : faire ce qu'on aime est sûrement le mieux.",
-            "es": "A una amiga le preocupa que su hijo o hija quiera estudiar arte y no empresariales. Dile con tacto cómo se ve desde el lado de quien estudia: hacer lo que le gusta es, sin duda, lo mejor.",
+            "fr": "Quelqu'un de proche s'inquiète : son enfant veut étudier l'art, pas le commerce. Dis-lui doucement ce que cela donne du côté de l'enfant : faire ce qu'on aime est sûrement le mieux.",
+            "es": "A alguien cercano le preocupa que su hijo o hija quiera estudiar arte y no empresariales. Dile con tacto cómo se ve desde el lado de quien estudia: hacer lo que le gusta es, sin duda, lo mejor.",
             "id": "Seorang teman khawatir anaknya ingin belajar seni, bukan bisnis. Katakan dengan lembut bagaimana hal itu tampak dari sisi si anak: melakukan apa yang disukai pasti yang terbaik."
           },
           "choices": [
@@ -40293,8 +40291,8 @@
           ],
           "why": {
             "en": "The noun before から見ると is whose side it is: 本人, the child in person. 親から見ると would give the parents' side, your friend's own, and 本人を見ると means looking at the child, not seeing from the child's place.",
-            "fr": "Le nom devant から見ると dit de quel côté on se place : 本人, l'enfant en personne. 親から見ると donnerait le côté des parents, celui de ton amie, et 本人を見ると veut dire regarder l'enfant, pas voir de sa place.",
-            "es": "El sustantivo ante から見ると dice de qué lado te pones: 本人, la propia persona. 親から見ると daría el lado de los padres, el de tu amiga, y 本人を見ると es mirar a esa persona, no ver desde su lugar.",
+            "fr": "Le nom devant から見ると dit de quel côté on se place : 本人, l'enfant en personne. 親から見ると donnerait le côté des parents, celui de la personne inquiète, et 本人を見ると veut dire regarder l'enfant, pas voir de sa place.",
+            "es": "El sustantivo ante から見ると dice de qué lado te pones: 本人, la propia persona. 親から見ると daría el lado de los padres, el de quien se preocupa, y 本人を見ると es mirar a esa persona, no ver desde su lugar.",
             "id": "Kata benda sebelum から見ると menunjukkan sisi siapa: 本人, si anak sendiri. 親から見ると akan memberi sisi orang tua, sisi temanmu sendiri, dan 本人を見ると berarti memandang si anak, bukan melihat dari posisinya."
           }
         },
@@ -40624,8 +40622,8 @@
         "place": "車内",
         "them": {
           "en": "A parent",
-          "fr": "Une mère",
-          "es": "Una madre",
+          "fr": "Un parent",
+          "es": "Uno de los padres",
           "id": "Orang tua si bayi"
         },
         "lines": [
@@ -42519,8 +42517,8 @@
         "place": "ホーム",
         "them": {
           "en": "An older passenger",
-          "fr": "Une vieille dame",
-          "es": "Una señora mayor",
+          "fr": "Une personne âgée",
+          "es": "Una persona mayor",
           "id": "Seorang penumpang lanjut usia"
         },
         "lines": [
@@ -44223,7 +44221,7 @@
           "kind": "use",
           "ask": {
             "en": "Your students all passed the exam and said thank you. You tell a friend how it felt, as their teacher. What do you say?",
-            "fr": "Tes élèves ont tous réussi l'examen et t'ont dit merci. Tu confies à un ami ce que tu as ressenti, comme leur professeur. Que dis-tu ?",
+            "fr": "Tes élèves ont tous réussi l'examen et t'ont dit merci. Tu confies à un ami ce que tu as ressenti à leur faire cours. Que dis-tu ?",
             "es": "Todos tus alumnos aprobaron el examen y te dieron las gracias. Le cuentas a un amigo lo que sentiste al enseñarles. ¿Qué dices?",
             "id": "Semua muridmu lulus ujian dan berterima kasih kepadamu. Kamu menceritakan perasaanmu sebagai guru mereka kepada seorang teman. Apa yang kamu katakan?"
           },
@@ -44377,7 +44375,7 @@
         "jp": "あの子のことだから、また忘れたのだろう。",
         "en": "Knowing that child, they've probably forgotten again.",
         "fr": "Connaissant l'enfant, c'est sûrement encore un oubli.",
-        "es": "Conociendo a esa niña, seguro que se le volvió a olvidar.",
+        "es": "Conociendo a ese niño, seguro que se le volvió a olvidar.",
         "id": "Aku kenal sifat anak itu, paling-paling dia lupa lagi.",
         "register": "casual",
         "contrast": true
@@ -47976,8 +47974,8 @@
           "kind": "use",
           "ask": {
             "en": "A friend says: « Once I live in Tokyo, my Japanese will get good by itself. » You think living there is no guarantee. What do you say?",
-            "fr": "Une amie dit : « Quand j'habiterai à Tokyo, mon japonais s'améliorera tout seul. » Tu penses que ça ne garantit rien. Que lui réponds-tu ?",
-            "es": "Una amiga dice: «Cuando viva en Tokio, mi japonés mejorará solo». Crees que vivir allí no garantiza nada. ¿Qué le dices?",
+            "fr": "Quelqu'un de proche dit : « Quand j'habiterai à Tokyo, mon japonais s'améliorera tout seul. » Tu penses que ça ne garantit rien. Que lui réponds-tu ?",
+            "es": "Alguien cercano dice: «Cuando viva en Tokio, mi japonés mejorará solo». Crees que vivir allí no garantiza nada. ¿Qué le dices?",
             "id": "Seorang teman berkata: “Kalau sudah tinggal di Tokyo, bahasa Jepangku akan bagus dengan sendirinya.” Menurutmu, tinggal di sana bukan jaminan. Apa yang kamu katakan?"
           },
           "choices": [
@@ -48377,8 +48375,8 @@
           "kind": "use",
           "ask": {
             "en": "You were afraid your teacher would scold you for being late, but the teacher said nothing. You tell a friend how it went.",
-            "fr": "Tu avais peur que ta professeure te gronde pour ton retard, mais elle n'a rien dit. Tu racontes à un ami comment ça s'est passé.",
-            "es": "Temías que tu profesora te regañara por llegar tarde, pero no dijo nada. Le cuentas a un amigo cómo te fue.",
+            "fr": "Tu avais peur de te faire gronder en classe pour ton retard, mais tu n'as eu droit à aucune remarque. Tu racontes à un ami comment ça s'est passé.",
+            "es": "Temías que te regañaran en clase por llegar tarde, pero no te dijeron nada. Le cuentas a un amigo cómo te fue.",
             "id": "Tadinya kamu takut dimarahi guru karena terlambat, tetapi guru itu diam saja. Kamu menceritakan hasilnya kepada temanmu."
           },
           "choices": [
@@ -48424,15 +48422,15 @@
           "kind": "meaning",
           "ask": {
             "en": "Who went to the teacher, and who did not have to?",
-            "fr": "Qui est allé voir la professeure, et qui n'a pas eu à y aller ?",
-            "es": "¿Quién fue a ver a la profesora y quién no tuvo que ir?",
+            "fr": "Qui est allé voir le professeur, et qui n'a pas eu à y aller ?",
+            "es": "¿Quién fue a ver al profesor y quién no tuvo que ir?",
             "id": "Siapa yang pergi menemui guru, dan siapa yang tidak perlu pergi?"
           },
           "jp": "さくらさんは、兄が代わりにあやまってくれたので、先生のところへ行かずに済んだ。",
           "tr": {
             "en": "Because her older brother apologised in her place, Sakura did not have to go to the teacher.",
-            "fr": "Comme son grand frère s'est excusé à sa place, Sakura n'a pas eu à aller voir la professeure.",
-            "es": "Como su hermano mayor se disculpó en su lugar, Sakura no tuvo que ir a ver a la profesora.",
+            "fr": "Comme son grand frère s'est excusé à sa place, Sakura n'a pas eu à aller voir le professeur.",
+            "es": "Como su hermano mayor se disculpó en su lugar, Sakura no tuvo que ir a ver al profesor.",
             "id": "Karena kakak laki-lakinya sudah meminta maaf menggantikannya, Sakura tidak perlu pergi menemui guru."
           },
           "choices": [
@@ -48712,7 +48710,7 @@
           },
           "task": {
             "en": "Thank the traveller, and say it's only by speaking every day that you improve.",
-            "fr": "Remercie-le et dis que ce n'est qu'en parlant tous les jours qu'on progresse.",
+            "fr": "Remercie cette personne et dis que ce n'est qu'en parlant tous les jours qu'on progresse.",
             "es": "Dale las gracias y dile que solo hablando cada día se mejora.",
             "id": "Ucapkan terima kasih kepada penumpang itu, lalu katakan bahwa hanya dengan berbicara setiap hari kita bisa menjadi mahir."
           },
@@ -50442,7 +50440,7 @@
           },
           "task": {
             "en": "Thank the vendor and hand over a letter you wrote with all your heart.",
-            "fr": "Remercie-la et donne-lui une lettre que tu as écrite de tout ton cœur.",
+            "fr": "Remercie la personne du kiosque et donne-lui une lettre que tu as écrite de tout ton cœur.",
             "es": "Dale las gracias y entrégale una carta que escribiste con todo tu corazón.",
             "id": "Ucapkan terima kasih kepada penjual dan berikan surat yang kamu tulis dengan sepenuh hati."
           },
@@ -52771,8 +52769,8 @@
           "kind": "use",
           "ask": {
             "en": "A friend says they will travel three hours to a distant shop to buy concert tickets. You think that is too much. What do you tell them?",
-            "fr": "Un ami dit qu'il va faire trois heures de route jusqu'à un magasin lointain pour acheter des places de concert. Pour toi, c'est trop. Que lui dis-tu ?",
-            "es": "Un amigo dice que viajará tres horas hasta una tienda lejana para comprar entradas de un concierto. Te parece demasiado. ¿Qué le dices?",
+            "fr": "Quelqu'un de proche dit vouloir faire trois heures de route jusqu'à un magasin lointain pour acheter des places de concert. Pour toi, c'est trop. Que lui dis-tu ?",
+            "es": "Alguien cercano dice que viajará tres horas hasta una tienda lejana para comprar entradas de un concierto. Te parece demasiado. ¿Qué le dices?",
             "id": "Seorang teman berkata akan menempuh perjalanan tiga jam ke toko yang jauh untuk membeli tiket konser. Menurutmu itu berlebihan. Apa yang kamu katakan kepadanya?"
           },
           "choices": [
