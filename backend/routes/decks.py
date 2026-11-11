@@ -111,10 +111,9 @@ MAX_BATCH = 25
 # The section builders take a resolved Mode now rather than a mode
 # string (see _build_kanji_card's docstring for why `format` went away).
 # A deck's session still arrives carrying whatever key get_deck_modes
-# advertised, so resolve it here against the source it belongs to —
-# which also means a legacy key keeps working through LEGACY_ALIASES
-# while the frontend catches up. Restructuring decks.py's own mode
-# handling is the deck-structures phase, not this one.
+# advertised, so resolve it here against the source it belongs to.
+# Restructuring decks.py's own mode handling is the deck-structures
+# phase, not this one.
 def _wrap_kana(raw_id, entry, level, level_list, mode, lang, stage, preview):
     m = resolve_for_source(MODE_KANA, mode)
     if m is None:
