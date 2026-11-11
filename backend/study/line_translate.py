@@ -30,6 +30,7 @@ import re
 
 from core import daily_limit
 from study.llm_shared import chat
+from study.romaji import spells_out
 from study.text_normalize import japanese_ratio
 
 logger = logging.getLogger(__name__)
@@ -143,11 +144,20 @@ def translate_block(user_id: str, lines: list[dict], index: int, lang_name: str,
     already holds is not asked again, and a line repeated in the block
     is asked once. A block with something to ask claims one of today's
     LINE_TRANSLATION_DAILY_LIMIT calls before the call is made (raises
-    OverLimit past it); raises LLMUnavailable as chat() does."""
+    OverLimit past it); raises LLMUnavailable as chat() does.
+
+    A translation that is only the line in the alphabet (romaji.
+    spells_out, plan 311: «Kanshin wa mada bokura») is none: never kept
+    from a reply, never shown, and one kept before is asked again."""
     start = index - index % BLOCK
     block = lines[start:start + BLOCK]
+
+    def usable(text: str, tr) -> bool:
+        return isinstance(tr, str) and bool(tr) and not spells_out(tr, text)
+
     wanted = list(dict.fromkeys(
-        s["text"] for s in block if not s.get("foreign") and s.get("text") and s["text"] not in known
+        s["text"] for s in block
+        if not s.get("foreign") and s.get("text") and not usable(s["text"], known.get(s["text"]))
     ))
     found = {}
     if wanted:
@@ -157,11 +167,15 @@ def translate_block(user_id: str, lines: list[dict], index: int, lang_name: str,
         end = start + len(block)
         before = [s.get("text") or "" for s in lines[max(0, start - CONTEXT):start]]
         after = [s.get("text") or "" for s in lines[end:end + CONTEXT]]
-        got = translate_lines(wanted, [b for b in before if b], [a for a in after if a],
-                              lang_name, title, channel, kind)
-        found = {text: tr for text, tr in zip(wanted, got) if tr}
+        with daily_limit.refund_unbilled(user_id, LINE_TRANSLATION_FEATURE):
+            got = translate_lines(wanted, [b for b in before if b], [a for a in after if a],
+                                  lang_name, title, channel, kind)
+        found = {text: tr for text, tr in zip(wanted, got) if usable(text, tr)}
     merged = {**known, **found}
-    return start, [None if s.get("foreign") else merged.get(s.get("text")) for s in block], found
+    return start, [
+        merged[s["text"]] if not s.get("foreign") and usable(s.get("text"), merged.get(s.get("text"))) else None
+        for s in block
+    ], found
 
 
 # ── The video's own translation (plan 242) ──────────────────────────
@@ -187,7 +201,7 @@ def translate_block(user_id: str, lines: list[dict], index: int, lang_name: str,
 
 # The languages a learner reads the app in: a video's track is looked
 # for in each, so a learner who switches finds theirs too.
-TRACK_LANGS = ("fr", "en")
+TRACK_LANGS = ("fr", "en", "es")
 
 # The share of a translated line's time that must fall inside one cue
 # for it to be that cue's.

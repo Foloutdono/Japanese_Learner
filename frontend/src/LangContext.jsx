@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import { track } from './lib/track'
 import { translations } from './i18n'
 import { getTranslations } from './lib/translationCache'
-import { pickInitialLang } from './lib/locale'
+import { pickInitialLang, contentLang, setInterfaceLocale } from './lib/locale'
 import { savedLang, rememberLang, subscribeLang } from './lib/langChoice'
 
 const LangContext = createContext()
@@ -13,13 +13,18 @@ export function LangProvider({ children }) {
     // that. The choice lives on the account too (lib/langChoice.js), so
     // a cleared browser or a second device reads it back. See
     // lib/locale.js for the rule.
-    const [lang, setLang]         = useState(() => pickInitialLang(savedLang(), navigator.language))
+    // The interface's locale (es-ES is Spain's Spanish, plan 303) and the
+    // content language it reads, which is what the server is asked for.
+    const [locale, setLocale]     = useState(() => pickInitialLang(savedLang(), navigator.language))
+    const lang = contentLang(locale)
+    // The figures follow the locale: set before the children render.
+    setInterfaceLocale(locale)
     const [contentMaps, setContentMaps] = useState({ kanji: {}, vocab: {} })
 
     // The account's answer arrives after the first paint (App.jsx's
     // boot calls syncLang): follow it.
     useEffect(() => subscribeLang(() => {
-        setLang(pickInitialLang(savedLang(), navigator.language))
+        setLocale(pickInitialLang(savedLang(), navigator.language))
     }), [])
 
     useEffect(() => {
@@ -37,8 +42,8 @@ export function LangProvider({ children }) {
     }, [lang])
 
     function switchLang(code) {
-        if (code !== lang) track('setting_change', { setting: 'lang', value: code })   // plan 218
-        setLang(code)
+        if (code !== locale) track('setting_change', { setting: 'lang', value: code })   // plan 218
+        setLocale(code)
         // Local at once, and up to the account when there is a session.
         rememberLang(code, import('./lib/session').then(m => m.currentSession()).catch(() => null))
     }
@@ -46,13 +51,13 @@ export function LangProvider({ children }) {
     // <html lang> drives which voice a screen reader uses. It has to
     // follow the UI language, not sit at the index.html default.
     useEffect(() => {
-        document.documentElement.lang = lang
-    }, [lang])
+        document.documentElement.lang = locale
+    }, [locale])
 
-    const t = translations[lang] ?? translations.fr
+    const t = translations[locale] ?? translations.fr
 
     return (
-    <LangContext.Provider value={{ lang, switchLang, t, contentMaps }}>
+    <LangContext.Provider value={{ lang, locale, switchLang, t, contentMaps }}>
         {children}
     </LangContext.Provider>
     )

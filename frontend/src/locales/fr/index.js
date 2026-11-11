@@ -15,6 +15,7 @@ const auth = {
   signOut:           'Déconnexion',
   usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, tiret bas).",
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
+  usernameRefused:   "Ce nom d'utilisateur n'est pas accepté.",
   // 改札 — les refus de la connexion, nommés par leur code
   // (lib/authErrors.js) plutôt que par la phrase anglaise de Supabase
   // (plan 215). Les refus partagés avec la carte invité (adresse déjà
@@ -801,7 +802,7 @@ const stats = {
   reference:          'Référence',
   // ── Dictionnaire et analyseur (plan 073) ──
   dictCollections:    'Collections',
-  analyzerDoorSub:    'Texte, photo, vidéo',
+  analyzerDoorSub:    'Texte, photo, vidéo, chanson',
   passagesCount: (n) => `${n} passage${n === 1 ? '' : 's'}`,
   sentencesCount: (n) => `${n} phrase${n === 1 ? '' : 's'}`,
   leaveAnalyzer:      'Analyseur',
@@ -908,6 +909,8 @@ const stats = {
   destMovesTo:        date => `glisse au ${date} au rythme actuel`,
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Toi · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Déjà lu',
   examPart: (n) => `Partie ${n}`,
   serviceName: {
     local:   'Omnibus',
@@ -974,6 +977,8 @@ const phraseAnalyzer = {
   sourceTextHint:      'Tape ou colle du japonais',
   sourcePhotoHint:     'Photographie ou importe une image',
   sourceVideoHint:     'Un lien YouTube et ses sous-titres',
+  sourceSong:          'Chanson',
+  sourceSongHint:      'Un fichier audio, transcrit en paroles',
   // 運行履歴 (plan 040) — le tampon et le compte pour une ligne de
   // session dans la liste d'historique fusionnée.
   sourceVideoShort:    'Depuis une vidéo',
@@ -991,6 +996,7 @@ const phraseAnalyzer = {
   intakeTextLead:      'Tape ou colle du japonais.',
   intakePhotoLead:     'Une page, un panneau, une capture — tout ce qui porte du japonais.',
   intakeVideoLead:     'Colle le lien, puis le favori 字幕取り rapporte les sous-titres — ou dépose un fichier.',
+  intakeSongLead:      'Choisis une chanson : ses paroles arrivent, chacune à son temps.',
   shootPhoto:          'Photographier',
   pickPhoto:           'Choisir',
   charCount:           n => `${n} caractère${n > 1 ? 's' : ''}`,
@@ -1050,6 +1056,33 @@ const phraseAnalyzer = {
   playbackSpeed:       r => `Vitesse : ${String(r).replace('.', ',')}×`,
   showVideo:           'Afficher la vidéo',
   hideVideo:           'Masquer la vidéo',
+  // La vidéo masquée, le passage en paroles (plan 316).
+  lyricsLines:         n => (n === 1 ? 'La phrase du passage' : `Les ${n} phrases du passage`),
+  playFromLine:        'Lire à partir de cette ligne',
+  // 歌 : une chanson, son audio transcrit (plan 317).
+  songChoose:          'Choisir une chanson',
+  songChange:          'Changer',
+  songAccepted:        'MP3, M4A, WAV… · jusqu’à 7 min',
+  songCut:             'Seules les 7 premières minutes seront transcrites.',
+  songLyrics:          'Paroles',
+  songLyricsOptional:  'facultatif',
+  songLyricsHint:      'Colle-les ici : ce seront les lignes étudiées, la chanson ne donnera que le temps.',
+  songTranscribe:      'Transcrire',
+  songTranscribing:    'Transcription',
+  songPrivacy:         'L’audio est transcrit par Google, puis oublié.',
+  songStays:           'La chanson reste sur cet appareil.',
+  songRefile:          'Choisir le fichier pour écouter',
+  songRefileNote:      name => `${name} est restée sur l’appareil où elle a été ajoutée.`,
+  songUnreadable:      'Ce fichier audio ne peut pas être lu sur cet appareil.',
+  songTooLong:         'Cette chanson est trop longue.',
+  songTooShort:        'Ce fichier est trop court pour une chanson.',
+  songAllowance:       'Tu as ajouté tes chansons du jour. Reviens demain.',
+  songUnavailable:     'Les chansons ne peuvent pas être transcrites pour le moment.',
+  songBusy:            'Trop de chansons sont en cours de transcription. Réessaie dans une minute.',
+  songUnheard:         'Aucune parole n’a été entendue dans cette chanson.',
+  songNotJapanese:     'Cette chanson n’a pas de paroles en japonais.',
+  songLyricsUnmatched: 'Les paroles collées ne correspondent pas à la chanson.',
+  songFailed:          'La chanson n’a pas pu être transcrite. Réessaie.',
   furiganaNow:         label => `Furigana : ${label}`,
   wordsInSentence:     'Les mots de la phrase',
   // Le bureau du texte : la liste des mots repliée en une ligne (plan 235).
@@ -1192,9 +1225,21 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',
+  // 骨組み (plan 311) : la charpente de la ligne -- ce que fait chaque
+  // partie, les rôles de study/frame.ROLES, et ce que la ligne tait.
+  frameLabel:          'Comment la ligne est construite',
+  frameRoles: {
+    topic: 'Thème', subject: 'Sujet', object: 'Objet', target: 'Cible',
+    time: 'Moment', place: 'Lieu', means: 'Moyen', reason: 'Cause',
+    condition: 'Condition', contrast: 'Opposition', purpose: 'But', quote: 'Citation',
+    modifier: 'Modificateur', predicate: 'Prédicat',
+  },
+  frameFrom:           { before: 'de la ligne précédente', after: 'de la ligne suivante' },
+  frameLeftOut:        word => `${word}, sous-entendu`,
   explaining:          'Explication en cours…',
   explainFailed:       'L\'explication n\'est pas arrivée. Réessaie.',
   explainUnavailable:  'Les explications sont indisponibles pour le moment. Réessaie dans un instant.',
+  explainLimitReached: "Tu as utilisé toutes les explications du jour. Elles reviennent demain.",
   passageTruncated:    n => (n === 1 ? 'Seule la première phrase a été analysée.' : `Seules les ${n} premières phrases ont été analysées.`),
   sentenceAnalysisUnavailable: 'Analyse temporairement indisponible pour cette phrase.',
   mineToDeck:          'Ajouter',
@@ -1245,6 +1290,11 @@ const video = {
   grabThenSay:         'Puis touche ton favori 字幕取り : les sous-titres arrivent ici.',
   grabInstallLink:     'Installer le favori',
   chooseSubtitles:     'Choisir un fichier de sous-titres',
+  // 足す (plan 317b, the owner's pick E3): the entry line's one ＋ and
+  // the sheet of every way in it opens.
+  entryWays:           'Ajouter une photo, une vidéo, une chanson ou des sous-titres',
+  entryWaysTitle:      'Ajouter',
+  entrySubtitles:      'Fichier de sous-titres',
   copyBookmarklet:     'Copier le favori 字幕取り',
   bookmarkletCopied:   'Copié ! Passe à l\'étape 2',
   downsubHint:         'Télécharge un fichier .vtt à choisir ici — utile quand le favori ne passe pas.',
@@ -1293,6 +1343,7 @@ const video = {
   analyzingText:       'Lecture de ton texte…',
   analyzingPhoto:      'Lecture du texte de la photo…',
   analyzingVideo:      'Analyse des sous-titres…',
+  analyzingSong:       'Transcription de la chanson — cela peut prendre une minute.',
   captionsUnavailable: "Impossible de récupérer les sous-titres de cette vidéo.",
   subtitleTooLarge:    'Ce fichier de sous-titres est trop volumineux.',
   transcriptTooLong:   'Cette transcription est trop longue. Colle-en une partie plus courte.',
@@ -1655,7 +1706,15 @@ const dictionary = {
   bldRight: 'Juste.',
   bldClose: 'Presque.',
   bldWrong: 'Pas tout à fait.',
-  bldOther: (said, register) => `La phrase dit ${said} : la même chose, en style ${register === 'plain' ? 'neutre' : 'poli'}.`,
+  // Comment la phrase dit le trou quand une autre forme est jugée juste :
+  // son registre (plan 241), ou では en entier ou contracté (plan 295).
+  bldOther: (said, register) => `La phrase dit ${said} : la même chose, ${({
+    plain: 'en style neutre',
+    polite: 'en style poli',
+    full: 'avec では en entier',
+    contracted: 'avec では contracté, comme à l’oral',
+    variant: 'sous son autre forme',
+  })[register] ?? 'en style poli'}.`,
   mapAria: 'La ligne du point',
   mapTutorial: 'Tutoriel',
   mapNow: 'maintenant',
@@ -2010,6 +2069,7 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Thème',
   language:          'Langue',
+  languageSample:    'Aujourd’hui · Dictionnaire',
   account:           'Compte',
   signOutDesc:       'Te déconnecter de ton compte sur cet appareil.',
   // Un invité n'a pas de clé : se déconnecter efface le trajet pour
@@ -2027,7 +2087,7 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'Non connecté',
   linkGoogleDesc:    'Ajoute Google à ce compte, et « Continuer avec Google » ouvrira celui-ci plutôt qu\'une nouvelle carte vide.',
-  // La même offre pour Apple, sur l'iPhone seulement (plan 295).
+  // La même offre pour Apple, sur l'iPhone seulement (plan 321).
   linkAppleLabel:    'Apple',
   linkAppleCap:      'Non connecté',
   linkAppleDesc:     'Ajoute Apple à ce compte, et « Continuer avec Apple » ouvrira celui-ci plutôt qu\'une nouvelle carte vide.',
@@ -2230,6 +2290,14 @@ const decks = {
   libraryPublish:        'Publier dans la bibliothèque',
   libraryPublishHint:    'Les autres pourront le trouver et le suivre.',
   libraryPublished:      'Ce deck est dans la bibliothèque.',
+  // Plan 310 : la bibliothèque lit un deck avant de l'accueillir. Le
+  // refus nomme le champ, jamais le mot.
+  libraryRefusedName:        'Le nom contient un mot que la bibliothèque refuse.',
+  libraryRefusedDescription: 'La description contient un mot que la bibliothèque refuse.',
+  libraryRefusedCard:        front => (front ? `Une carte contient un mot que la bibliothèque refuse : ${front}.` : 'Une carte contient un mot que la bibliothèque refuse.'),
+  libraryOpenCard:           'Ouvrir la carte',
+  libraryRename:             'Renommer et publier',
+  cardRefused:               'Cette carte contient un mot que la bibliothèque refuse.',
   libraryUnpublish:      'Retirer de la bibliothèque',
   libraryMakeMine:       'En faire ma copie',
   libraryMakeMineConfirm: 'Cela crée ta propre copie modifiable du deck, en gardant la progression déjà faite. Tu cesses de suivre l’original.',
@@ -2243,6 +2311,12 @@ const decks = {
     ? '1 apprenant suit ce deck. Le supprimer le retire aussi de son étagère — il sera prévenu et disposera d’un délai pour le copier.'
     : `${n} apprenants suivent ce deck. Le supprimer le retire aussi de leurs étagères — ils seront prévenus et disposeront d’un délai pour le copier.`),
   libraryReport:         'Signaler',
+  // Plan 310 : bloquer l'auteur d'un deck, depuis sa page (le choix C).
+  libraryReportDeck:     'Signaler le deck',
+  libraryBlockAuthor:    name => `Bloquer ${name}`,
+  libraryBlockHint:      name => `Tu ne verras plus ses decks, ni ${name} les tiens.`,
+  libraryBlockConfirm:   name => `Bloquer ${name} ? Tu ne verras plus ses decks, ni ${name} les tiens, et les abonnements entre vous prennent fin.`,
+  libraryUnfollowBlock:  name => `Ne plus suivre et bloquer ${name}`,
   libraryReported:       'Signalé',
   libraryReportNote:     'Cela signale le deck pour examen. Rien n’est masqué automatiquement.',
   libraryReasonSpam:      'Spam ou publicité',
@@ -2426,7 +2500,7 @@ const boarding = {
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
   continueWithGoogle: 'Continuer avec Google',
-  // Le titre qu'Apple donne à son bouton, dans ses mots (plan 295).
+  // Le titre qu'Apple donne à son bouton, dans ses mots (plan 321).
   continueWithApple: 'Continuer avec Apple',
   orWithEmail: 'ou avec une adresse e-mail',
   // 改札 — un aller-retour revenu refusé (lib/authRedirect.js). Les
@@ -3089,6 +3163,11 @@ const onboarding = {
   ratePlaceholder: 'Ce que tu changerais, s’il y a quelque chose.',
   rateTextLabel: 'Ce que tu changerais',
   rateLater: 'Plus tard',
+  // Google Play (plan 307) : la feuille de note, sur Android.
+  storeQ: 'Une note sur Google Play ?',
+  storeLead: 'Ta note aide d’autres apprenants à trouver Tsuji.',
+  storeGo: 'Noter sur Google Play',
+  storeWrite: 'Plutôt nous dire ce que tu changerais',
   cardReport: 'Signaler cette carte',
   cardReportReasons: 'Ce qui ne va pas',
   cardReason: { reading: 'Lecture', meaning: 'Sens', audio: 'Audio', example: 'Exemple', other: 'Autre' },
@@ -3613,6 +3692,8 @@ const pvp = {
   pvpRunning:      'Ton sprint est en cours',
   pvpResume:       'Reprendre',
   pvpNobodyYet:    'en attente d’un adversaire',
+  pvpWaitingCap:   'Sprint classé · en attente d’un adversaire',
+  pvpNowFriends:   'Vous êtes amis.',
   pvpClosedRow:    'fermé',
   pvpEnter:        'Entrer',
   pvpOpen:         'Ouvrir',
@@ -3665,6 +3746,7 @@ const pvp = {
   pvpErrTooMany:      'Trop de duels en cours. Termine-en un d’abord.',
   pvpErrClosed:       'Ce duel est fermé.',
   pvpErrDuelGone:     'Ce duel n’existe plus.',
+  pvpErrRunGone:      'Quelqu’un a pris ce sprint avant toi.',
   pvpErrRunning:      'Ton ami court ce duel en ce moment : tu pourras refuser une fois son sprint fini.',
   pvpErrPlayed:       'Tu as déjà couru ce duel.',
   pvpErrWaiting:      'Ton ami n’est pas encore entré.',

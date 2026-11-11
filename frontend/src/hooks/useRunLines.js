@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { apiFetch } from '../lib/api'
-import { explainSentence } from '../lib/explainSentence'
+import { explainSentence, explainErrorText } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { useDesk } from './useDesk'
 import { composing } from '../lib/keyGuards'
@@ -94,7 +94,7 @@ export function useRunLines(session, { held = false } = {}) {
     setExplainError(null)
     explainSentence(session, jp, lang)
       .then(d => patch(key, { analysis: d }))
-      .catch(e => setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed))
+      .catch(e => setExplainError(explainErrorText(e, t)))
       .finally(() => setExplaining(false))
   }, [opened, explaining, session, lang, patch, t])
 

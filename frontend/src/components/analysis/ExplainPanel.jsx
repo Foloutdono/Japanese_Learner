@@ -3,6 +3,7 @@ import { Sheet } from '../chrome/Sheet'
 import { AskPanel } from '../study/AskPanel'
 import { Dots } from '../ui/Loading'
 import { CloseIcon, OpenBookIcon } from '../ui/Icons'
+import { Frame, Named } from './Frame'
 import { grammarGloss } from './grammarGloss'
 import { coversToken, numberedPointsOf } from './grammarSpans'
 import { wordGloss } from './tokens'
@@ -27,20 +28,27 @@ import { wordGloss } from './tokens'
 // (routes/phrase.py), so "Explain again" is here too: a learner who
 // switched the interface's language gets it in the new one.
 //
+// Since plan 311 the prose is the line's frame (Frame.jsx, the owner's
+// pick C of the canvas "Tsuji — Explain, made clear"): under the
+// blocks, the parts in order, each named and said in a line, its
+// grammar a door to the point as the blocks' are. An answer bought
+// before the frame prints its prose, as it always did.
+//
 // Under an explanation, the asking (plan 220): the runs' own panel
 // (components/study/AskPanel.jsx, mode "analyser"), as on the phone's
 // sheet, a short question about the sentence answered from it.
 export function ExplainPanel({
-  explanation, explaining, error, onExplain, t, ask = null, askKey = '', askContext = null,
+  explanation, frame = null, explaining, error, onExplain, t, ask = null, askKey = '', askContext = null,
   analysis = null, onWord = null, onPoint = null,
 }) {
+  const explained = Boolean(frame?.length || explanation)
   return (
     <section className="anl-explainpanel" aria-label={t.explanationTitle} aria-busy={explaining || undefined}>
       {analysis && <Blocks analysis={analysis} onWord={onWord} onPoint={onPoint} />}
       <div className="anl-explainpanel__read">
-        {explanation ? (
+        {explained ? (
           <>
-            <p className="anl-explainpanel__body"><Named text={explanation} /></p>
+            <Construction frame={frame} explanation={explanation} analysis={analysis} onPoint={onPoint} t={t} />
             <button type="button" className="anl-explainpanel__again" onClick={onExplain} disabled={explaining}>
               {explaining ? t.explaining : t.explainAgain}
             </button>
@@ -52,11 +60,18 @@ export function ExplainPanel({
         )}
         {error && <p className="hint anl-explainpanel__error">{error}</p>}
       </div>
-      {explanation && ask && (
+      {explained && ask && (
         <AskPanel ask={ask} askKey={askKey} context={askContext} open hint={t.askHintSentence} />
       )}
     </section>
   )
+}
+
+// The construction as bought: the frame where there is one, else the
+// prose an answer from before plan 311 carries.
+function Construction({ frame, explanation, analysis, onPoint, t }) {
+  if (frame?.length) return <Frame frame={frame} analysis={analysis} onPoint={onPoint} t={t} />
+  return <p className="anl-explainpanel__body"><Named text={explanation} /></p>
 }
 
 // A mark is no block: a comma or a full stop stands between them.
@@ -109,36 +124,35 @@ function Blocks({ analysis, onWord, onPoint }) {
   return <div className="anl-blocks" role="group" aria-label={analysis.text}>{out}</div>
 }
 
-// The prose with the Japanese it names set in the line's face and
-// weight, so 夢をみてしまった is found on the blocks above at a glance.
-const JAPANESE = /([\u3040-\u30ff\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uff66-\uff9f々〆〜]+)/
-function Named({ text }) {
-  return text.split(JAPANESE).map((part, k) => (k % 2
-    ? <span key={k} className="anl-explainpanel__jp" lang="ja">{part}</span>
-    : part))
-}
-
 // On a phone (plan 220, the owner's drawing on "Video Analyser Rework")
 // the explanation is a bottom sheet like the line's other two, as tall
-// as it holds: its cap and the sentence at its head beside the round ✕;
-// then the state it is in -- the translation over the explanation once
-// bought, the wait while it is bought, or, when it could not be, a word
-// on why and a full-width way to try again -- and, under an explanation,
-// the asking (components/study/AskPanel.jsx, the runs' own, mode
-// "analyser"): a short question about the sentence, answered from it.
-// It was the dictionary's centred card until then (plan 134), drawn the
-// screen's full height for an error of two lines.
+// as it holds: its cap, the sentence and its translation at its head
+// beside the round ✕; then the state it is in -- the frame once bought
+// (plan 311, the owner's pick C, drawn as built on the canvas "Tsuji —
+// Explain, made clear"), the wait while it is bought, or, when it could
+// not be, a word on why and a full-width way to try again -- and, under
+// an explanation, "Explain again" a quiet word and the asking
+// (components/study/AskPanel.jsx, the runs' own, mode "analyser"): a
+// short question about the sentence, answered from it.
+//
+// The translation is the head's second line, the sheet's sub, whenever
+// the line has one: it says what the line means, the frame how it is
+// built. A point opened from the frame closes the sheet for its lesson,
+// as the grammar sheet's chips do (`onPoint`).
 export function ExplainSheet({
-  sentence, translation = '', onClose, ask = null, askKey = '', askContext = null, ...panel
+  sentence, translation = '', onClose, ask = null, askKey = '', askContext = null,
+  analysis = null, onPoint = null, ...panel
 }) {
-  const { explanation, explaining, error, onExplain, t } = panel
-  const failed = !explanation && !explaining && Boolean(error)
+  const { explanation, frame = null, explaining, error, onExplain, t } = panel
+  const explained = Boolean(frame?.length || explanation)
+  const failed = !explained && !explaining && Boolean(error)
   return (
     <Sheet open onClose={onClose} label={t.explanationTitle} className="anl-explainsheet">
       <header className="anl-explainsheet__head">
         <div className="anl-explainsheet__title">
           <span className="sheet__cap">{t.explainCap}</span>
           <p className="anl-explainsheet__jp" lang="ja">{sentence}</p>
+          {translation && <p className="anl-explainsheet__tr">{translation}</p>}
         </div>
         <button type="button" onClick={onClose} className="dict-plate__btn" aria-label={t.close} title={t.close}>
           <CloseIcon />
@@ -153,25 +167,24 @@ export function ExplainSheet({
         </section>
       ) : (
         <section className="anl-explainsheet__body" aria-label={t.explanationTitle} aria-busy={explaining || undefined}>
-          {explanation ? (
-            <>
-              {translation && <p className="anl-explainsheet__tr">« {translation} »</p>}
-              <p className="anl-explainpanel__body">{explanation}</p>
-            </>
+          {explained ? (
+            <Construction frame={frame} explanation={explanation} analysis={analysis} onPoint={onPoint} t={t} />
           ) : explaining ? (
             <p className="anl-explainpanel__wait">{t.explaining} <Dots /></p>
           ) : null}
-          {error && explanation && <p className="hint anl-explainpanel__error">{error}</p>}
-          {(explanation || !explaining) && (
+          {error && explained && <p className="hint anl-explainpanel__error">{error}</p>}
+          {explained ? (
+            <button type="button" className="anl-explainpanel__again" onClick={onExplain} disabled={explaining}>
+              {explaining ? t.explaining : t.explainAgain}
+            </button>
+          ) : !explaining && (
             <div className="anl-explainpanel__foot">
-              <button type="button" className="anl-ghost" onClick={onExplain} disabled={explaining}>
-                {explaining ? t.explaining : explanation ? t.explainAgain : t.explainSentence}
-              </button>
+              <button type="button" className="anl-ghost" onClick={onExplain}>{t.explainSentence}</button>
             </div>
           )}
         </section>
       )}
-      {explanation && ask && (
+      {explained && ask && (
         <AskPanel ask={ask} askKey={askKey} context={askContext} open page hint={t.askHintSentence} />
       )}
     </Sheet>

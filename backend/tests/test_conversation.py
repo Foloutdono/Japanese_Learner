@@ -12,7 +12,6 @@ import json
 import re
 
 import pytest
-from fastapi import HTTPException
 
 from core.auth import DEV_USER_ID
 from core.db import db_conn
@@ -197,7 +196,7 @@ def test_the_list_is_every_scenario_in_the_learners_language(client):
     konbini = next(s for s in body["scenarios"] if s["id"] == KONBINI)
     assert konbini["title"] == "Le déjeuner à la supérette"
     assert konbini["opener"] == "いらっしゃいませ。お弁当は温めますか。"
-    assert konbini["level"] == "N5" and konbini["turns"] == 5
+    assert konbini["level"] == "N5" and konbini["turns"] == 6
     # Nothing ridden yet: no record, not a zero.
     assert body["record"] == {}
 
@@ -347,13 +346,17 @@ def test_the_reviews_ceiling_is_a_429_and_the_measure_goes_on(client, tutor, mon
     assert client.post("/api/conversation/check", json={"scenario": KONBINI, "turn": 3, "answer": "kaado de"}).status_code == 200
 
 
-def test_a_failed_review_still_costs_a_slot(client, monkeypatch):
+def test_a_review_paid_for_and_refused_still_costs_a_slot(client, monkeypatch):
+    # Billed and unusable keeps the slot; an outage gives it back
+    # (tests/test_ai_refund.py).
+    from study import llm_shared
     monkeypatch.setattr(route, "llm_configured", lambda: True)
     monkeypatch.setattr(route, "CONVERSATION_REVIEW_DAILY_LIMIT", 1)
 
-    def down(*a, **kw):
-        raise HTTPException(503, detail="every provider failed")
-    monkeypatch.setattr(reading, "_chat", down)
+    def refused(*a, **kw):
+        llm_shared._billed()
+        raise llm_shared.LLMUnavailable("no model gave a usable reply")
+    monkeypatch.setattr(reading, "chat", refused)
     payload = {"scenario": KONBINI, "turn": 0, "answer": "hai", "lang": "en"}
     assert client.post("/api/conversation/review", json=payload).status_code == 503
     assert client.post("/api/conversation/review", json=payload).status_code == 429
@@ -504,7 +507,7 @@ def test_a_grade_needs_its_own_kind_and_a_real_turn(client):
     assert client.post("/api/conversation/result", json={**base, "mode": "translate", "correct": True}).status_code == 422
     assert client.post("/api/conversation/result", json={**base, "mode": "talk", "quality": 4}).status_code == 422
     assert client.post("/api/conversation/result", json={**base, "mode": "free", "quality": 6}).status_code == 422
-    assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "translate", "turn": 5, "quality": 4}).status_code == 400
+    assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "translate", "turn": 6, "quality": 4}).status_code == 400
     assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "free", "turn": 8, "quality": 4}).status_code == 400
     assert client.post("/api/conversation/result", json={"scenario": KONBINI, "mode": "free", "turn": 9, "quality": 4}).status_code == 422
     assert client.post("/api/conversation/result", json={"scenario": "nope", "mode": "free", "turn": 0, "quality": 4}).status_code == 404

@@ -266,6 +266,15 @@ def block(cur, after: list, me: str, other: str) -> None:
         "DELETE FROM pvp_requests WHERE (user_id = %s AND target_id = %s) OR (user_id = %s AND target_id = %s)",
         (me, other, other, me),
     )
+    # And the library's (plan 310): neither follows the other's decks
+    # any more, as the library no longer shows either the other's
+    # (routes/decks._APART). The follower's progress is kept, as an
+    # unfollow keeps it: unblocked, following again finds it.
+    cur.execute(
+        "DELETE FROM deck_subscriptions s USING decks d WHERE s.deck_id = d.id "
+        "AND ((s.user_id = %s AND d.user_id = %s) OR (s.user_id = %s AND d.user_id = %s))",
+        (me, other, other, me),
+    )
     _close_between(cur, after, me, other)
 
 

@@ -1,6 +1,6 @@
 """
 Study endpoints for thematic decks ("fruits", "jobs", "body parts", ...) —
-the theme counterpart to vocab.py's level-based /api/vocab/card|cards|stats,
+the theme counterpart to vocab.py's level-based /api/vocab/cards|stats,
 and structurally identical to it on purpose: same SRS plumbing
 (srs.get_due_cards / get_new_cards / preview_reviews_bulk),
 same MAX_BATCH, same review-preview/stage-promotion helpers. The only real
@@ -33,7 +33,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 from study.modes import VOCAB, Mode, eligible_for, require_mode
 from content import theme_data
 # reuse, don't duplicate -- a theme card and a level card are rendered by
@@ -43,7 +43,7 @@ from routes.vocab import _build_vocab_card, MAX_BATCH
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-FR_MAP = VOCAB_FR
+GLOSSES = VOCAB_GLOSSES
 
 # No ThemeReviewPayload / POST /api/vocab/theme/review here — reviews
 # are posted to vocab.py's existing POST /api/vocab/review instead.
@@ -58,16 +58,17 @@ FR_MAP = VOCAB_FR
 
 def _entry_meaning(entry: dict, lang: str) -> str:
     """The theme's own gloss: content/theme_lists.py writes every word's
-    meaning in the sense it has in the theme, in English and in French.
-    The French one matters most for a JMdict-pool word, which VOCAB_FR
-    (the course's table, keyed by written form) does not cover and which
-    used to fall back to JMdict's English. A row without a French gloss
+    meaning in the sense it has in the theme, in English, French and
+    Spanish (plan 302). The theme's own line
+    matters most for a JMdict-pool word, which VOCAB_FR and VOCAB_ES (the
+    course's tables, keyed by written form) do not cover and which used
+    to fall back to JMdict's English. A row without the learner's gloss
     keeps the old rule: the deck's translation for a deck word, the
     English otherwise."""
-    if lang == "fr" and entry.get("meaning_fr"):
-        return entry["meaning_fr"]
+    if lang in ("fr", "es") and entry.get(f"meaning_{lang}"):
+        return entry[f"meaning_{lang}"]
     if entry["domain"] == "vocab":
-        return get_meaning(entry, lang, FR_MAP)
+        return get_meaning(entry, lang, GLOSSES)
     return entry["meaning"]
 
 

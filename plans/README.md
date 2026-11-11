@@ -7354,4 +7354,99 @@ The owner: remove the reading ride's subscription plate, and take away the secon
 | 292 | **The Dictionary**: its cards below the fold not laid out until near (`content-visibility`, each standing in at its own height from its tokens), and a screenful drawn first, the rest a frame later as unseen places (`useScreenfulFirst`): first frame 492 → 311 ms | DONE |
 
 Open: the Dictionary's first frame is now mostly the page's own style and layout (the console, the chips, the Japanese fonts), not its cards.
-| 295 | **Sign in with Apple, on the iPhone** (guideline 4.8): Apple first beside Google wherever Google is offered in the iOS shell (`lib/oauth.js`'s `providersHere`: the Welcome, the boarding's account sheet, Settings › Account's guest offer and a link slip per missing identity), through the system's sheet (`TsujiAppleSignInPlugin.swift`, `lib/native.js`'s `signInWithApple`) and `signInWithIdToken` / `linkIdentity` with the token and a hashed nonce. The one-use code kept as a refresh token (`POST /api/account/apple`, `core/apple_signin.py`, `apple_grants`) and revoked by `DELETE /api/account` before the rows. Docs: `docs/oauth.md`, "Sign in with Apple" | DONE |
+
+## Plan 298 — 読解, sixty N4 and eighty N5 comprehension seeds (2026-11-02)
+
+The owner: write thirty new N4 texts and twenty new N5, every one coherent. Hand-written reading exercises in `content/comprehension/`, held to the same gates as before (`comprehension_seed_report`, `tests/test_comprehension_seed.py`).
+
+| Phase | What | Status |
+|---|---|---|
+| 298 | **The points shared out**: each of N4's ninety checkable points once over n4-31..60; at N5 the fifty-seven points the sixty shipped seeds used least, over n5-61..80. Each text drafted against the gates first (220-280 characters, the level's kanji, nothing filed above the level, each point found); titles in the level's kanji alone, a text's kanji above it only its own points' | DONE |
+| 298 | **Written and attacked**: eight writers; per batch a reviewer, a blind reader and a language editor per entry, a fixer, two rounds of fresh blind readers (every key matched), then a last blind sheet over all fifty (430 questions, no mismatch) and a native-speaker proofread, whose eight fixes were checked again | DONE |
+| 298 | **The figures**: 230/230 clean; the longest or the shortest option wins 21-25% at N4 and N5 in both languages; the carousel bank over 230 passages; the seed module's memory re-measured (20 MB parsed, a 343 KB index) | DONE |
+
+Open: the matcher reads some points narrowly, and the texts bent to it rather than it to them: 何でも is read as 何で (N3), 〜がする is found only plain, 〜くする needs くする written out, 何も／誰も need the kanji, 〜が分かります needs が just before it, and だろうと思いました is read as 〜ようと思う.
+
+## Plan 299 — 何でも, the level gate's 何で (2026-11-02)
+
+Found while writing plan 298's seeds: the level gate counted 何でも, "anything" (the N4 point 何でも／誰でも／いつでも／どこでも), as the N3 card 何で, "why", so every text that said it spent its one hard word in twenty on a word it did not say, and the breakdown graded 兄は何でも食べます N3. The owner: fix this bug.
+
+| Phase | What | Status |
+|---|---|---|
+| 299 | **The merge stops where で belongs to what follows** (`card_lookup._de_belongs_after`): the segments a sentence is graded on (`find_segments_in_text`, read by `level_mix`, `difficulty.estimate_level` and the breakdown's level) no longer merge a word across the で of でも or the copula's で. Diffed over the 8,472 sentences the app teaches: 10 move, all misreadings put right (eight 何でも, 何であれ, and 下りた所でございます, which read ところで, "by the way"); no "why" moves. `LOCAL_REV` 32 | DONE |
+| 299 | **One rule for 何で, both paths** (the owner: fix the gaps): `card_lookup._why` decides whether 何 + the particle で is なんで, "why", and the breakdown (`_what_word`) and the segments both ask it. A way of going said in the negative asks why (`_negated`: 何で来なかったの？, 何で連絡しなかったの？), where 何で来ましたか still asks "by what", now in the segments too; the segments read kana なんで as "why", not 何 "what". Diffed over the 8,472 sentences: one moves (なんで急に上がるわけ？'s segment; no level) | DONE |
+
+The second gap named here was not one: without a tokenizer the scan takes the longest word, and the deck's 何でも ("anything", N3) has always matched before 何で; a test now holds it. Open: the deck files the word 何でも at N3 and the catalogue teaches 何でも／誰でも at N4; the breakdown keeps the point in its pieces (plan 272), so no count reads that card.
+
+
+## Plan 300 — 正答率, retention counts answers (2026-11-02)
+
+The owner: fix the profile holder flake. `test_profile_holder`'s `test_profile_retention_is_a_share_or_absent` failed once in a full run: retention 1.0 with no review. The leak that fed it was `test_onboarding_profile`'s (its reset left the declared level's assumptions, 3f253eb), but what it showed is the product's: `get_retention` summed `card_modes`' counters, and every row the level rule seeds carries `KNOWN_STATE`'s virtual check, one of one.
+
+| Phase | What | Status |
+|---|---|---|
+| 300 | **Retention reads the answers** (`srs.get_retention`): good (3 or more) over all, from `review_log` and its rollup, as the review total beside it and the statistics screen's retention by week (`get_daily_quality`) are. A learner who boarded at N4 read 100% before answering once, and a check passed weighed twice. `test_level_rule.test_an_assumption_is_no_answer_to_the_retention` fails on the old reading (`1.0 is None`); `_wipe` there now calls `forget_history`. CLAUDE.md's plan-224 rule says a learner's total of answers never sums `card_modes`' counters | DONE |
+| 300 | **A card counts its answers** (the owner: fix the card accuracy too): `_state_row` serves `answers` and `correct_answers` beside `total_reviews`, the untouched assumption's virtual check left out (`SRSEngine._virtual_checks`, which `is_assumed` now reads), and `card_stats` and the statistics' deck grid (`routes/stats.py`) sum them; a check passed takes the virtual one's place in the row (`SRSEngine.review`), unless the pass grew no repetition and the row would read untouched again. The dictionary's record shows by the card's stage, so an assumption keeps its schedule and its door at 0/0 and —. `scripts/recount_known_checks.py` (report; `--yes`) sets the rows answered before to their log's count: exactly one check of one over a whole logged history, never a row folded into the rollup. Before: the N5 kanji deck of a learner boarded at N4 read 103 reviews at 100% | DONE |
+
+Open: a row whose history was folded into the rollup before the recount keeps its virtual check, if it had one; with 180 days kept, none of plan 224's checks had been folded when it shipped. The weakest cards (`get_weakest_by_source`) read `card_modes` directly and never list an untouched assumption (it was never missed); after the recount their figures are the rows' answers.
+
+
+## Plan 301 — 理解, a comprehension question answers on its text (2026-11-02)
+
+The owner: improve the comprehension mode and give it a promotion story; then point every question at the text, say in one line why on each miss, open a phone's results on the first miss as the computer does, and show the text rolling. Written as 298 and 298b on its branch; main took 298 first, so it was renumbered at the merge.
+
+| Phase | What | Status |
+|---|---|---|
+| 301 | **The review on the text**: a phone's opened question shows the line of the text it quotes (`.qrow__source`), as the desk's breakdown does; a text served again past the day's ceiling on new ones says so while it is read (`repeat`, `compReadBefore`) | DONE |
+| 301 | **The promo story**, "Read a whole text" (`promo.js`'s seventh, `app.js`'s comprehension run): a seed passage on its card under the run's clock, one of its own vocabulary or grammar questions, answered on the line it quotes, and the board. The bank carries each sentence's translation (`tr`) and the run's clock per level (`read`) | DONE |
+| 301b | **Every question points at its text**: `at` (the breakdown sentence(s) its right option rests on) and `why` (`{en, fr}`, one line quoting those sentences verbatim, never an option by its letter or place) on every seed question, 2,170 with plan 298's fifty passages, held by `test_every_question_points_at_its_sentence_and_says_why`. The generator is asked for both and keeps them only when well formed (`reading._clean_answer_line`), so a pool row without them still serves; `_POOL_VERSION` unmoved | DONE |
+| 301b | **The miss answered**: every question opens on its sentence(s) (`quotedFragments.answerSentences`: `at`, else the sentence its quote is from), a miss says why in one line, and a phone opens the results on the first miss | DONE |
+| 301b | **The roll shown**: the story's second frame rolls the same text a sentence a line at the stepper's own speeds, and the story plays whole as one clip (`clips.story`) | DONE |
+| 301b | **Six seed questions say only what their text says** (found while writing the whys): n2-01, n1-15, n3-11, n4-13, n4-01, n5-24 | DONE |
+
+
+## Plan 304 — 何, read by what follows it (2026-11-03)
+
+Found while looking into why the VOICEVOX engine says なに where the furigana says なん: in four catalogue lines the engine is right. UniDic read 何 なん in 何一つ, 何やら and 何はさておき, and read 何に as the なんに of なんにも ("(not) anything at all") in 何にもまして. `study/reading_context.correct_readings` now decides by what follows 何, never by a list of the lines.
+
+| Phase | What | Status |
+|---|---|---|
+| 304 | **なに before やら and は**: both join `_NANI_BEFORE` (何やら, 何はさておき, 何はともあれ); 何 stays なん before a t-, d- or n- sound and a counter (何です, 何の, 何でも, 何と, 何人) | DONE |
+| 304 | **なに before one** (`_ONE_HEADS`, `_ONE_DIGITS`): 何一つ, 何ひとつ, 何一人, 何1つ, "not a single one"; 何十, 何百 are one token and keep なん | DONE |
+| 304 | **何に + も**: なんにも stands only with a negative, so UniDic's 何に (なんに) reads なにに where まして or 増して takes the に as what it surpasses (`_SURPASSES`, since 304b `_MEASURED_AGAINST`, whatever follows: 何にもまして、遅れないことが大切だ), or where the sentence goes on to say something with no negative in it (`_affirmed_ahead`: 何にもなれる, 何にも代えがたい). 何にもない, 何にも知らない, 何にもすることがない and the bare answer 何にも。 keep なん | DONE |
+| 304 | **Pinned** in `tests/test_furigana_context.py`: each rule on hand-made tokens with its lookalikes, the lines through the tokenizer and through the breakdown (`analyze_local`); every new subtest on the fix's side fails on the old rules. Diffed over 108,802 Japanese strings in the content (every sentence the app teaches, the tours, the choose questions, the notes): 73 move, all 何 in the four shapes (32 何にもまして, 18 何一つ, 16 何は, 7 何やら), no token and no other furigana; over the 8,472 the breakdown gap report reads, 2 (何にもまして). `LOCAL_REV` 37; the carousel bank rebuilt (five rows' furigana and romaji); `TOUR_REV` unmoved, since a tour is cached in process only and the rev seeds its shuffles | DONE |
+| 304b | **何にも before what it is measured against** (the owner: fix 何にも代えられない too): a verb that sets its subject against the に (`_MEASURED_AGAINST`: まして, 増して, 勝る, 劣る, 負ける, 比べる; and 代える, 替える, 換える, which UniDic files under 変える and are told by their kanji, `_EXCHANGED_FOR`) takes 何にも as that に, "than anything", "for anything", negative or not, past an adverb (何にも決して負けない): 何にも代えられない, 何にも劣らない, 何にも負けない read なににも. 変える written 変 or in kana, "change", which takes を, keeps UniDic's reading, as do 何にも食べられない, 何にも知らない and 何にもならない (JMdict's なんにもならない). Pinned on both sides in `tests/test_furigana_context.py`; every new subtest on the fix's side fails on plan 304's rules. Over the same 108,802 strings, nothing moves (the content's one 何にも is 何にもまして, read since 304), so the carousel bank stands; `LOCAL_REV` 39 for the lines learners bring (38 went to 何かしら and 何気ない on main, #523) | DONE |
+
+Open: a passive's agent (何にも縛られない, 何にも邪魔されない) is read なんにも, UniDic's reading: UniDic gives the passive and the potential the same られる, and 何にも食べられない is なんにも.
+
+## Plan 319 — 原典, what translating the catalogue found in its source (2026-11-10)
+
+Main took plan 318 too (the home screen widget's board, #543), so this plan is 319; its first commits, up to the length gate's, still call it 318. Plan 312's Indonesian translators and reviewers noted the defects they met in the source (English, French, Spanish and the Japanese) and changed nothing: their findings went to the owner, who asked for them to be looked into, then for everything that was needed to be done. Every item was read against the file before it was changed; a few were not real and stay as they were.
+
+| Phase | What | Status |
+|---|---|---|
+| 319 | **Construire** (§8.1): a twist or a scene line is cut only where the detector reads the point (`grammar_tour.lit_spans(fallback=False)`): 114 tour holes go, 63 cut on a rival's sentence and 49 sound ones the stems' fallback also cut, no point losing its last sentence. The ん of ません is never a hole alone; 〜も（強調） holds も; a point's other spelling is right too (`grammar_ladder._variants`: なきゃ／なくちゃ, によらず／にかかわらず, a う-verb's される／せられる) | DONE |
+| 319 | **Detector**: a definition's ことだ (「ゆずる」とは、…ことだ) and a schedule's に決まっている (九時に決まっている) refused, as their own tours set them apart; 〜ばかりだ takes its past copula whole (不安は増すばかりだった). Pinned with counter-cases; over every taught sentence only the intended lines move. `LOCAL_REV` 48 | DONE |
+| 319 | **Choisir** (§1): a compare entry may carry `"same": true`, never offered as a wrong answer, named or drawn as a filler, nor its same-family twins (`grammar_lesson._same_family`). 181 entries marked (six of them new lines naming a twin the fillers drew) and 88 contrast marks taken off, each decided on the sentence filled with the rival's printed form; 〜たら and 〜なら asked from their own questions, the forms whole. contrast_ok 545 of 545 | DONE |
+| 319 | **The catalogue, level by level**: formation lines, steps and compare lines, translations that gave a rival's sense, register labels, odd Japanese, form questions that doubled a word, whys that taught something wrong or named a shuffled choice by its place (§2–§8.9); the English's slips by script | DONE |
+| 319 | **Twists that answered themselves** (§8.4, the owner: answered by understanding): 929 notions name the stop, not the reading; asks that denied the wrong reading or presupposed the answer are neutral; readings that stood out by their shape evened. **A sex the Japanese does not give** (§8.6): the English, and the French and Spanish where a pronoun or an agreement did it | DONE |
+| 319 | **N3 〜ばかり** is « nothing but » and « about » (after a noun, an amount); « only just did » is N4 〜たばかり's. **Kanji**: 秦 the Qin; 誠, 幣, 抑 lose their lookalikes' senses; `kanji_meanings_fr.json` now wins over KANJIDIC2, as the Spanish one does | DONE |
+| 319 | **Answers that say nothing by their size** (the owner: fix what was left open): a twist's right reading was the longer of the two shown 64-73% of the time, a meaning question's the longest of three up to half. The gate now refuses a right answer half again as long as the longest wrong one shown and ten characters longer (`STANDS_OUT`), and holds each level's twists, meaning questions, quiz Japanese answers and scenes, per language, to a blind pick (`TOUR_LENGTH_TELL`: 40-60% for two, 25-42% for three). 339 twists, 200 meaning questions, 22 quiz questions and 69 scenes evened, a wrong reading saying its belief as fully as the right one says its own (every Japanese change a wrong answer); after: twists 46-53%, three-answer questions 28-37% | DONE |
+| 319 | **A speaker with no sex**: « celui qui parle », « le locuteur », « l'auteur » and their agreements, and the Spanish « el hablante » and « el otro » for the other person, about 1,250 texts in all, now « la personne qui parle », « quien escucha » or a wording that names no one; role nouns the Japanese gives (店員, 社長) keep theirs | DONE |
+| 319 | **Choisir's own questions for the points whose every rival is `same`** (26: N4 〜ないといけない, 〜らしい; N3 8; N2 7; N1 9), which were asked against the level's fillers: 97 questions, each batch attacked by a second reader (two second right answers found and replaced, tricks used three times redone, three whys that taught a false rule corrected), their contrast marks taken off. The gate refuses a marked sentence whose every rival is the same | DONE |
+| 319 | **Main took plan 318 too** (the widget's board, #543): this plan's citations moved to 319, the next free number to 320 | DONE |
+
+Open: the first person still agrees in the French of some examples and translations (« je suis allé », « je me suis endormi », about 140 texts by a rough count; N1's pass neutralised a few): the learner's own lines never agree, but an example's « je » is not ruled on, which is the owner's call. Main has moved since this branch began (its detector, `LOCAL_REV` and CLAUDE.md), so the merge will meet conflicts there. The Indonesian (plan 312's branch) follows the source: `git diff ddfcfb07..claude/relaxed-cerf-p22722 -- backend/content/grammar/` lists every text it must take again.
+
+## Plan 321 — 林檎, Sign in with Apple beside Google on the iPhone (2026-11-11)
+
+App Review's guideline 4.8 refuses an iPhone app that offers Google sign-in without an equivalent that lets the learner keep their address private (the email account and the guest pass are not one). Drafted as plan 295 on its branch; that number was taken on main meanwhile, so it ships as 321.
+
+| Phase | What | Status |
+|---|---|---|
+| 321 | **Apple first beside Google, in the iOS shell only** (`lib/oauth.js`'s `providersHere`): the Welcome's sign-in, the boarding's account sheet (Apple writes no stash: its sheet never leaves the page), Settings › Account's guest offer and a link slip per identity a pass lacks; refusals name Apple (`authErrors`), `boarding_done.kept` gains `apple`; fr, en, es (and es-ES's añadir) | DONE |
+| 321 | **The system's sheet** (`TsujiAppleSignInPlugin.swift`, registered on the bridge, compiled into the App target, `com.apple.developer.applesignin`): a hashed nonce, the email alone asked; `signInWithIdToken` to sign in, `linkIdentity` with the token to keep a guest's pass | DONE |
+| 321 | **The grant revoked with the account**: the one-use code posted to `POST /api/account/apple`, exchanged for a refresh token kept in `apple_grants` (`core/apple_signin.py`, RLS closed, in the deletion PLAN), revoked by `DELETE /api/account` before the rows, never waiting on Apple. Needs `APPLE_TEAM_ID` / `APPLE_KEY_ID` / `APPLE_PRIVATE_KEY` on Render | DONE |
+| 321 | **Docs**: `docs/oauth.md` (the flow; Apple, Render and Supabase settings), `docs/release.md`, `privacy.html` and `delete-account.html` in three languages, a CLAUDE.md rule | DONE |
+
+Open: the Swift is compiled first by the next tag's `ios` job and tried first on a TestFlight build. Apple stays the iPhone's: an account made with it opens elsewhere only once it has another key (Google from Settings › Account, or an address; a private-relay address needs Supabase's sender registered with Apple, which needs a custom SMTP first).

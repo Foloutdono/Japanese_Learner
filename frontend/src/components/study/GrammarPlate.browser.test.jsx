@@ -13,8 +13,10 @@ import '../../index.css'
 // in the card's top-right corner, in the stage word's place, its group
 // named in plain words; the sentence and its hole on the front, its
 // translation under it; the answer turning the card once, to the
-// sentence echoed small with the answer in its hole, the point, and the
-// lesson's line on a rival taken; Choisir's forms as the mock exam's
+// sentence as the front set it with the right form in its hole (and,
+// for a miss, what was typed struck beside the verdict, plan 310), the
+// point under a hairline, and the lesson's line on a rival taken;
+// Choisir's forms as the mock exam's
 // answer tiles; Construire's entry under the card, as the practice runs
 // take theirs. The fixtures are the cards the backend builds for
 // 〜てください at Choisir 2 and Construire 2 (srs/ladder.py).
@@ -342,18 +344,89 @@ describe('Construire', () => {
     expect(root.querySelector('.gl-entry')).toBeNull()
   })
 
-  it('says almost, and in the echoed hole crosses out the one kana off with the right one over it', async () => {
+  // Plan 310, the owner's pick C: the hole holds the right form, the one
+  // kana off underlined in it, and what was typed stands beside the
+  // verdict with that kana struck.
+  it('says almost, puts what was typed beside it with the kana off struck, and underlines the right one in the hole', async () => {
     apiJson.mockResolvedValue(cards.checks.close)
     const screen = await mount(<Run card={card} onDone={() => {}} />)
     const root = screen.container
     await screen.getByLabelText('Your answer').fill(cards.checks.typed.close)
     root.querySelector('form.gl-entry .btn-primary').click()
     await settle()
-    expect(root.querySelector('.gl-back__head--no').textContent).toBe('Almost.')
+    const verdict = root.querySelector('.gl-back__verdict')
+    expect(verdict.querySelector('.gl-back__head--no').textContent).toBe('Almost.')
     expect(root.querySelector('.gl-ring__arc--miss')).toBeTruthy()
-    const fix = root.querySelector('.gl-echo .gl-gap--filled .gl-fix')
-    expect(fix.querySelector('s').textContent).toBe('で')
-    expect(fix.querySelector('ins').textContent).toBe('て')
+    const typed = verdict.querySelector('.gl-typed')
+    expect(typed.querySelector('.gl-typed__gap').textContent).toBe(cards.checks.typed.close)
+    expect([...typed.querySelectorAll('s')].map(s => s.textContent)).toEqual(['で'])
+    expect(typed.querySelector('.sr-only').textContent).toBe('Your answer')
+    const hole = root.querySelector('.gl-echo .gl-gap--filled')
+    expect(hole.textContent).toBe('てください')
+    expect(hole.querySelector('s, ins')).toBeNull()
+    expect([...hole.querySelectorAll('.gl-fixed')].map(n => n.textContent)).toEqual(['て'])
+  })
+
+  // Plan 310, the owner's screenshot: ふぁ typed for てはいけません. The
+  // seven right kana were written over the two struck ones at a
+  // caption's size, ran past them into the line's readings, and were the
+  // smallest text on the card. The hole now holds the right form at the
+  // sentence's own size, inside its line, and what was typed stands
+  // struck beside the verdict.
+  it('holds the right form in the hole at the sentence’s size when the answer missed whole, and strikes what was typed', async () => {
+    const forbidden = {
+      ...card,
+      card_id: 'grammar_N5_〜てはいけません',
+      raw_id: 'grammar_N5_〜てはいけません',
+      grammar: '〜てはいけません',
+      build: {
+        key: 'ex:3',
+        tr: 'You must not make phone calls during class.',
+        pieces: [
+          { furigana: [{ text: 'じゅぎょう' }, { text: '中', reading: 'ちゅう' }, { text: 'に' }, { text: '電話', reading: 'でんわ' }, { text: 'を' }, { text: 'し' }] },
+          { gap: 0, size: 7 },
+          { furigana: [{ text: '。' }] },
+        ],
+      },
+    }
+    // What the backend answers (study/grammar_ladder.check_build).
+    apiJson.mockResolvedValue({
+      verdict: 'wrong',
+      gaps: [{
+        verdict: 'wrong', answer: 'てはいけません', reading: 'てはいけません',
+        marks: [{ wrong: 'ふぁ', fix: 'てはいけません' }],
+      }],
+      jp: 'じゅぎょう中に電話をしてはいけません。',
+      tr: 'You must not make phone calls during class.',
+      furigana: [],
+    })
+    const screen = await mount(<div style={{ width: '390px' }}><Run card={forbidden} onDone={() => {}} /></div>)
+    const root = screen.container
+    const front = parseFloat(getComputedStyle(root.querySelector('.gl-sent')).fontSize)
+    await screen.getByLabelText('Your answer').fill('ふぁ')
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--no').textContent).toBe('Not quite.')
+    const typed = root.querySelector('.gl-back__verdict .gl-typed')
+    expect([...typed.querySelectorAll('s')].map(s => s.textContent)).toEqual(['ふぁ'])
+    const sent = root.querySelector('.gl-echo .gl-sent')
+    const hole = sent.querySelector('.gl-gap--filled')
+    // The right form, plain: underlined end to end it would say nothing.
+    expect(hole.textContent).toBe('てはいけません')
+    expect(hole.querySelector('s, ins, .gl-fixed')).toBeNull()
+    expect(sent.textContent).toBe('じゅぎょう中ちゅうに電話でんわをしてはいけません。')
+    // The sentence as the front set it, and the hole at its size: never
+    // a caption, never stacked over the line.
+    expect(parseFloat(getComputedStyle(sent).fontSize)).toBe(front)
+    expect(getComputedStyle(hole).fontSize).toBe(getComputedStyle(sent).fontSize)
+    const face = root.querySelector('.gl-card').getBoundingClientRect()
+    const box = hole.getBoundingClientRect()
+    expect(box.left).toBeGreaterThanOrEqual(face.left)
+    expect(box.right).toBeLessThanOrEqual(face.right)
+    // The point under its hairline, a step under the flashcard's size.
+    const point = root.querySelector('.gl-back > .grammar-answer')
+    expect(getComputedStyle(point).borderTopStyle).toBe('solid')
+    expect(point.querySelector('.grammar-rule').style.getPropertyValue('--rule-size')).toBe('26px')
   })
 
   // Plan 241: です in あしたはテストだ is right -- the translation does
@@ -387,6 +460,83 @@ describe('Construire', () => {
     expect(root.querySelector('.gl-echo .gl-gap--filled').textContent).toBe('です')
     expect(root.querySelector('.gl-back__why').textContent).toBe('The sentence says だ: the same, in plain speech.')
     expect(root.querySelector('.gl-ring__arc--miss')).toBeNull()
+  })
+
+  // Plan 295, the owner's screenshot: あり typed for ではありません. The
+  // kana left out were written over nothing, stood on no width and were
+  // never seen, and the card read これはわたしのかさありません.
+  it('writes a kana left out in the line, where it was missing', async () => {
+    const copula = {
+      ...card,
+      card_id: 'grammar_N5_です／だ',
+      raw_id: 'grammar_N5_です／だ',
+      grammar: 'です／だ',
+      build: {
+        key: 'ex:2',
+        tr: 'This is not my umbrella.',
+        pieces: [{ furigana: [{ text: 'これはわたしの' }, { text: 'かさ' }] }, { gap: 0, size: 7 }, { furigana: [{ text: '。' }] }],
+      },
+    }
+    // What the backend answers (study/grammar_ladder.check_build).
+    apiJson.mockResolvedValue({
+      verdict: 'wrong',
+      gaps: [{
+        verdict: 'wrong', answer: 'ではありません', reading: 'ではありません',
+        marks: [{ wrong: '', fix: 'では' }, { ok: 'あり' }, { wrong: '', fix: 'ません' }],
+      }],
+      jp: 'これはわたしのかさではありません。',
+      tr: 'This is not my umbrella.',
+      furigana: [],
+    })
+    const screen = await mount(<Run card={copula} onDone={() => {}} />)
+    const root = screen.container
+    await screen.getByLabelText('Your answer').fill('あり')
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--no').textContent).toBe('Not quite.')
+    // What was typed, beside the verdict: nothing in it was wrong, only
+    // short, so nothing is struck (plan 310).
+    const typed = root.querySelector('.gl-back__verdict .gl-typed')
+    expect(typed.querySelector('.gl-typed__gap').textContent).toBe('あり')
+    expect(typed.querySelector('s')).toBeNull()
+    const hole = root.querySelector('.gl-echo .gl-gap--filled')
+    // The hole reads the whole answer, in order, and nothing is struck.
+    expect(hole.textContent).toBe('ではありません')
+    expect(hole.querySelector('s')).toBeNull()
+    const added = [...hole.querySelectorAll('.gl-fixed')]
+    expect(added.map(n => n.textContent)).toEqual(['では', 'ません'])
+    // Written in the line, at the hole's own size, and seen: never
+    // stacked over nothing.
+    const line = hole.getBoundingClientRect()
+    for (const kana of added) {
+      const box = kana.getBoundingClientRect()
+      expect(getComputedStyle(kana).position).toBe('static')
+      expect(box.width).toBeGreaterThan(0)
+      expect(box.top).toBeGreaterThanOrEqual(line.top - 1)
+      expect(box.bottom).toBeLessThanOrEqual(line.bottom + 1)
+      expect(getComputedStyle(kana).fontSize).toBe(getComputedStyle(hole).fontSize)
+      expect(getComputedStyle(kana).textDecorationLine).toBe('underline')
+    }
+  })
+
+  // Plan 295: では typed where the sentence says じゃ is right, and the
+  // card says how the sentence says it.
+  it('takes では for the sentence’s じゃ, and says the sentence contracts it', async () => {
+    apiJson.mockResolvedValue({
+      verdict: 'right',
+      gaps: [{ verdict: 'right', answer: 'では', reading: 'じゃ', marks: [], said: 'じゃ', register: 'contracted' }],
+      jp: 'あの人は先生じゃありません。',
+      tr: 'That person is not a teacher.',
+      furigana: [],
+    })
+    const screen = await mount(<Run card={card} onDone={() => {}} />)
+    const root = screen.container
+    await screen.getByLabelText('Your answer').fill('dewa')
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--ok').textContent).toBe('Right.')
+    expect(root.querySelector('.gl-back__why').textContent)
+      .toBe('The sentence says じゃ: the same, with では contracted, as speech says it.')
   })
 
   it('says nothing more when the answer is the sentence’s own', async () => {

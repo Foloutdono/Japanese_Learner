@@ -481,7 +481,7 @@ function NamePlate({ value, onSave }) {
 // under the card keeps saying where the card lives. On the web Google
 // leaves the page, so `onLeaveForAuth` writes the answers down first; a
 // refusal comes back on the URL (lib/authRedirect.js) and is said here.
-// `onKept(by, email)`: 'google' or 'apple' (plan 295), or 'password'
+// `onKept(by, email)`: 'google' or 'apple' (plan 321), or 'password'
 // with the address.
 // `sent`: the address waiting on its confirmation, if one is.
 export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, onGuest = null, sent = null }) {
@@ -530,7 +530,7 @@ function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, onGuest, sent }) {
   return (
     <>
       <p className="brd-sheet__lede">{onGuest ? t.brdAccountAsk : t.brdAccountLede}</p>
-      {/* Apple's sheet (plan 295) never leaves the page, so it writes
+      {/* Apple's sheet (plan 321) never leaves the page, so it writes
           nothing down: a stash left behind would resume as Google's. */}
       {providersHere().map(p => (
         <ProviderButton key={p} provider={p} link className="auth-provider brd-provider" onBeforeRedirect={p === 'google' ? onLeaveForAuth : null} onDone={() => onKept(p)} onError={setError} />

@@ -6,11 +6,12 @@
 // the script only turns the demos and the footage on.
 import { readFileSync } from 'node:fs'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
+import { flagSvg } from '../src/components/ui/flags.js'
 import { RATING_SCALES } from '../src/domain/ratingScales.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
   SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, SIGNIN_ENTRY, STORES, CONTACT,
-  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey,
+  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey, LANG_NAMES,
 } from './config.mjs'
 import { LEVELS, EXAM_N5, arrivals, spanOf, kanjiStrokes } from './content.mjs'
 import { STRINGS, CARDS, TOKENS, EXAM_OPTIONS } from './strings.mjs'
@@ -96,6 +97,7 @@ const stopName = (t, key) => (key === 'way' ? t.terminus : t[key].kicker)
 const SPEAKER = '<svg class="top__sound-on" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18.2 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
   + '<svg class="top__sound-off" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
 
+const CHEVRON = '<svg class="lmenu__chev" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 const ONWARD = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 function stop(t, key) {
@@ -156,18 +158,30 @@ function crossroads(t) {
 
 // ── Sections ──
 
-function header(t, other) {
+// The languages, each beside its flag (plan 302): the desktop's switch
+// FR · EN · ES, and on a phone, where three do not fit beside the sign-in,
+// a menu of them by name. A <details>, so it opens without the script,
+// which only closes it on a tap outside or Escape.
+function langMenu(t) {
+  const items = Object.keys(PAGES).map(code => code === t.lang
+    ? `<li><a aria-current="page" lang="${code}">${flagSvg(code)}${esc(LANG_NAMES[code])}</a></li>`
+    : `<li><a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${flagSvg(code)}${esc(LANG_NAMES[code])}</a></li>`).join('')
+  return `<details class="lmenu" data-lmenu><summary aria-label="${esc(`${t.langLabel} · ${LANG_NAMES[t.lang]}`)}">`
+    + `${flagSvg(t.lang)}<span>${t.lang.toUpperCase()}</span>${CHEVRON}</summary><ul class="lmenu__list">${items}</ul></details>`
+}
+
+function header(t) {
   const nav = t.nav.map(([key, label]) => `<a href="#${t.ids[key]}" data-spy="${t.ids[key]}">${esc(typo(t.lang, label))}</a>`).join('')
-  const langs = ['fr', 'en'].map(code => code === t.lang
-    ? `<a aria-current="page" lang="${code}">${code.toUpperCase()}</a>`
-    : `<a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${code.toUpperCase()}</a>`).join('')
+  const langs = Object.keys(PAGES).map(code => code === t.lang
+    ? `<a aria-current="page" lang="${code}">${flagSvg(code)}${code.toUpperCase()}</a>`
+    : `<a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${flagSvg(code)}${code.toUpperCase()}</a>`).join('')
   return `<header class="top" data-top><span class="top__rail" aria-hidden="true"></span><div class="wrap top__in">`
     + `<a class="brand" href="${PAGES[t.lang].path}" aria-label="${esc(t.home)}">${mark(32)}<span class="brand__name">Tsuji</span></a>`
     + `<nav class="nav" aria-label="${esc(t.navLabel)}">${nav}</nav>`
     // The demos' sounds: drawn by the script alone, which alone plays them.
     + `<div class="top__end"><button type="button" class="top__sound" data-sound aria-pressed="true" aria-label="${esc(t.sound)}" title="${esc(t.sound)}" hidden>${SPEAKER}</button>`
     + `<nav class="seg langs" aria-label="${esc(t.langLabel)}">${langs}</nav>`
-    + `<a class="top__other" href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${other.toUpperCase()}</a>`
+    + langMenu(t)
     + `<a class="ghost top__signin" href="${SIGNIN_ENTRY}" data-board>${esc(t.signIn)}</a>`
     // The way in, kept in reach once the hero's gate has scrolled away.
     + `<a class="top__board" href="${BOARD_ENTRY}" data-board data-top-board tabindex="-1" aria-hidden="true">${esc(t.board)}</a></div>`
@@ -300,7 +314,7 @@ function method(t) {
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.method}-h">${esc(typo(t.lang, M.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, M.body))}</p>`
     + `<div class="card day"><div class="day__top"><span class="day__count"><span class="fig">${M.day.count}</span> ${esc(typo(t.lang, M.day.unit))}</span>`
-    + `<span class="seg seg--still" role="img" aria-label="${esc(M.day.lengthLabel)} : 50">${M.day.lengths.map(v => `<span${v === '50' ? ' class="on"' : ''}>${esc(v)}</span>`).join('')}</span></div>`
+    + `<span class="seg seg--still" role="img" aria-label="${esc(typo(t.lang, `${M.day.lengthLabel}${t.lang === 'fr' ? ' : ' : ': '}50`))}">${M.day.lengths.map(v => `<span${v === '50' ? ' class="on"' : ''}>${esc(v)}</span>`).join('')}</span></div>`
     + `<div class="day__bars" role="img" aria-label="${esc(M.day.sharesLabel)}">${lanes.map(([l, n]) => `<span class="bar" style="--c:${pigment(l)};flex-grow:${n}"></span>`).join('')}</div>`
     + `<div class="day__lanes"><ul>${lanes.map(([l, n]) => `<li style="--c:${pigment(l)}"><i></i><span>${esc(typo(t.lang, t.hero.stations[l]))}</span><b class="fig">${n}</b></li>`).join('')}</ul></div>`
     + `<div class="stamps"><div class="stamps__row" data-reveal role="img" aria-label="${esc(typo(t.lang, M.stampsLabel))}">${stamps}</div><span class="body body--small">${esc(typo(t.lang, M.stampsNote))}</span></div></div>`
@@ -623,12 +637,13 @@ function pass(t) {
     + `<div class="way__pass" data-reveal data-tilt>${card(t, 0.22)}</div>${form}</div></section>`
 }
 
-function footer(t, other) {
+function footer(t) {
   const F = t.footer
   const links = [
     `<a href="/privacy?lang=${t.lang}">${esc(F.privacy)}</a>`,
     CONTACT ? `<a href="mailto:${esc(CONTACT)}">${esc(F.contact)}</a>` : '',
-    `<a href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${esc(F.other)}</a>`,
+    ...Object.keys(PAGES).filter(code => code !== t.lang)
+      .map(code => `<a href="${PAGES[code].path}" hreflang="${code}" lang="${code}">${esc(LANG_NAMES[code])}</a>`),
   ].join('')
   return `<footer class="foot"><div class="wrap foot__in"><span class="foot__brand">${mark(28)}<span class="brand__name">Tsuji</span></span>`
     + `<div class="foot__end"><nav class="foot__links" aria-label="Tsuji">${links}</nav><p class="foot__credits">${esc(typo(t.lang, F.credits)).replace('KanjiVG', '<a href="https://kanjivg.tagaini.net" rel="noopener">KanjiVG</a>')}</p></div></div></footer>`
@@ -641,6 +656,7 @@ function clientData(t, facts, media) {
   const ty = s => typo(t.lang, s)
   return {
     lang: t.lang,
+    captions: PRESENTATION.captions.map(code => [code, LANG_NAMES[code]]),
     media,
     rhythm: DEFAULT_RHYTHM,
     at: Object.fromEntries(RHYTHMS.map(m => [m, ty(t.line.at(m))])),
@@ -674,7 +690,7 @@ function jsonLd(t, facts, media, live) {
     description: t.description,
     applicationCategory: t.appCategory,
     operatingSystem: ['Web', STORES.appStore && 'iOS', STORES.googlePlay && 'Android'].filter(Boolean).join(', '),
-    inLanguage: ['fr', 'en'],
+    inLanguage: Object.keys(PAGES),
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
     publisher: { '@id': org['@id'] },
     ...(stores.length ? { sameAs: stores } : {}),
@@ -744,6 +760,21 @@ const FORWARD_QUERY = ['code', 'token_hash', 'error', 'error_code', 'error_descr
 const FORWARD_HASH = ['access_token', 'error', 'error_code', 'error_description']
 const STAY = 'tsuji-landing'
 
+// 入口 (plan 313): the first arrival's ?src= and the HOST of the page
+// that sent the visitor, noted on the device before anything forwards
+// (src/lib/arrival.js reads it and sends only its class). Its own try:
+// a storage that refuses must not keep a sign-in's return from going on.
+export const ARRIVAL_KEY = 'tsuji.arrival'
+
+export function arrivalScript() {
+  return '(function(){try{if(localStorage.getItem(\'' + ARRIVAL_KEY + '\'))return;'
+    + 'var s=new URLSearchParams(location.search).get(\'src\'),r=null;'
+    + 'if(s)s=s.toLowerCase();if(s&&!/^[a-z0-9_-]{1,20}$/.test(s))s=null;'
+    + 'try{r=document.referrer?new URL(document.referrer).hostname:null}catch(e){}'
+    + 'if(r&&/(^|\\.)(tsuji\\.app|vercel\\.app|localhost)$/.test(r))r=null;'
+    + 'if(s||r)localStorage.setItem(\'' + ARRIVAL_KEY + '\',JSON.stringify({src:s,ref:r}))}catch(e){}})()'
+}
+
 export function forwardScript() {
   const any = (list, from) => `${JSON.stringify(list)}.some(function(k){return ${from}.has(k)})`
   return '(function(){try{var l=location,q=new URLSearchParams(l.search),h=new URLSearchParams(l.hash.slice(1));'
@@ -755,7 +786,6 @@ export function forwardScript() {
 
 export function renderPage(lang, facts, media) {
   const t = STRINGS[lang](facts)
-  const other = lang === 'fr' ? 'en' : 'fr'
   const page = PAGES[lang]
   const live = Boolean(PRESENTATION.uploadDate)
   const alternates = Object.values(PAGES).map(p => `<link rel="alternate" hreflang="${p.lang}" href="${url(p.path)}">`).join('')
@@ -779,7 +809,7 @@ ${alternates}
 <meta property="og:description" content="${esc(typo(lang, t.description))}">
 <meta property="og:url" content="${url(page.path)}">
 <meta property="og:locale" content="${page.ogLocale}">
-<meta property="og:locale:alternate" content="${PAGES[other].ogLocale}">
+${Object.values(PAGES).filter(p => p.lang !== lang).map(p => `<meta property="og:locale:alternate" content="${p.ogLocale}">`).join('\n')}
 <meta property="og:image" content="${url(page.ogImage)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -789,7 +819,7 @@ ${alternates}
 <link rel="icon" href="/pwa-64x64.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png">
 ${fonts}
-<script>${forwardScript()}</script>
+<script>${arrivalScript()}</script><script>${forwardScript()}</script>
 <script>${THEME}</script>
 <style>${faces}${styles()}</style>
 <script type="application/ld+json">${safeJson(jsonLd(t, facts, media, live))}</script>
@@ -797,7 +827,7 @@ ${fonts}
 </head>
 <body>
 <a class="skip" href="#main">${esc(t.skip)}</a>
-${header(t, other)}
+${header(t)}
 <main id="main">
 ${hero(t, live)}
 ${presentation(t, media, live)}
@@ -811,7 +841,7 @@ ${fare(t)}
 ${faq(t)}
 ${pass(t)}
 </main>
-${footer(t, other)}
+${footer(t)}
 <script type="application/json" id="landing-data">${safeJson(JSON.stringify(clientData(t, facts, media)))}</script>
 </body>
 </html>

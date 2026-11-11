@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { saveBlob } from '../lib/platform'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -23,9 +23,11 @@ import { ChoiceField, LongField, PairsField, ReadingOfField } from '../component
 import { pairRows } from '../components/decks/importCards'
 import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
+import { MoreRow } from '../components/decks/MoreRow'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
 import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PencilIcon, PlusIcon, SearchIcon, BooksIcon, FollowIcon } from '../components/ui/Icons'
 import { composing } from '../lib/keyGuards'
+import { errorKey } from '../domain/duel'
 
 // The name the export endpoint chose, out of its Content-Disposition.
 // Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
@@ -388,14 +390,39 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
 
   // ── The library, from the deck's own page ───────────────────
   const [busy, setBusy] = useState(false)
+  // The library reads a deck before it takes it in (plan 310, the
+  // owner's pick B of the three drawn): a refusal keeps the sheet open
+  // and says there which field it was -- the name, with its field to
+  // change it in, since no other screen renames a deck; the description;
+  // or a card, by its front, with the way to its editor, which says it
+  // again (`refusedCard`, C's line). Never the word itself.
+  const [refusal, setRefusal] = useState(null)
+  const [renameTo, setRenameTo] = useState('')
+  const [refusedCard, setRefusedCard] = useState(null)
+  const refusedDeckCard = refusal?.field === 'card'
+    ? cards.find(c => c.origin === 'custom' && c.id === refusal.card_id)
+    : null
 
   function publish(on) {
     if (busy) return
     setBusy(true)
     playUi('click-screen-selection')
+    send(on)
+  }
+
+  // The request itself, for publish() and for the rename that publishes.
+  function send(on) {
+    setRefusal(null)
     apiFetch(`/api/decks/${deck_id}/publish`, session, { method: on ? 'POST' : 'DELETE' })
-      .then(r => r.json())
-      .then(body => {
+      .then(async r => {
+        const body = await r.json().catch(() => null)
+        if (on && body?.detail?.code === 'content_refused') {
+          setRefusal(body.detail)
+          setRenameTo(deck?.name ?? '')
+          setBusy(false)
+          return
+        }
+        if (!r.ok) throw new Error(`publish ${r.status}`)
         track(on ? 'deck_publish' : 'deck_unpublish', on
           ? { structure: deck?.type, cards: cards.length }
           : { structure: deck?.type, followers: body?.followers ?? 0 })
@@ -406,6 +433,30 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       .catch(() => { setBusy(false); setMoreOpen(false) })
   }
 
+  function renameAndPublish() {
+    const name = renameTo.trim()
+    if (!name || busy) return
+    setBusy(true)
+    playUi('click-screen-selection')
+    apiFetch(`/api/decks/${deck_id}`, session, { method: 'PATCH', body: JSON.stringify({ name }) })
+      .then(r => (r.ok ? r.json() : Promise.reject(r)))
+      .then(renamed => {
+        setDeck(d => ({ ...d, name: renamed?.name ?? name }))
+        onChanged?.()
+        send(true)
+      })
+      .catch(() => setBusy(false))
+  }
+
+  function openRefusedCard() {
+    const card = refusedDeckCard
+    if (!card) return
+    playUi('click-screen-selection')
+    closeMore()
+    startEdit(card)
+    setRefusedCard(card.id)
+  }
+
   function unfollow() {
     if (busy) return
     setBusy(true)
@@ -413,6 +464,20 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     apiFetch(`/api/decks/${deck_id}/subscribe`, session, { method: 'DELETE' })
       .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
       .catch(() => { setBusy(false); setConfirmingUnfollow(false) })
+  }
+
+  // The unfollow's second way out (plan 310, the owner's pick): a
+  // follower meets the author here, not in the library, and a block ends
+  // the follow anyway (study/duel_friends.block), so it stands beside it.
+  const [blockFailed, setBlockFailed] = useState(null)
+  function unfollowAndBlock() {
+    if (busy || !deck?.author) return
+    setBusy(true)
+    setBlockFailed(null)
+    playUi('click-screen-selection')
+    apiJson('/api/pvp/blocks', session, { method: 'POST', body: JSON.stringify({ username: deck.author }) })
+      .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
+      .catch(e => { setBusy(false); setBlockFailed(errorKey(e)) })
   }
 
   function makeItMine() {
@@ -446,9 +511,12 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     /* eslint-disable react-hooks/set-state-in-effect -- this IS the route param's synchronisation; see the deck effect above. */
     setBusy(false)
     setMoreOpen(false)
+    setRefusal(null)
+    setRefusedCard(null)
     setConfirmingDeck(false)
     setConfirmingMine(false)
     setConfirmingUnfollow(false)
+    setBlockFailed(null)
     setConfirmingDelete(false)
     setConfirmingCard(false)
     setSelectMode(false)
@@ -484,7 +552,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const closeBrowse = useCallback(() => setShowBrowse(false), [])
   // The same for More, whose dock on the desk (DeskDock) keys its Esc
   // on it. Closing More also drops a deletion that was being asked.
-  const closeMore = useCallback(() => { setMoreOpen(false); setConfirmingDeck(false) }, [])
+  const closeMore = useCallback(() => { setMoreOpen(false); setConfirmingDeck(false); setRefusal(null) }, [])
 
   // Fetched rather than linked: the endpoint needs the bearer token, and
   // a bare <a href> to /api/... sends no Authorization header, so it
@@ -615,6 +683,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     if (desk && adding && !editing) { setAdding(false); return }
     if (!desk || editing || !formTyped()) resetForm()
     setEditing(null)
+    setRefusedCard(null)
     setAdding(true)
     if (desk) { setShowBrowse(false); closeMore() }
   }
@@ -659,6 +728,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     setForm(Object.fromEntries(Object.keys({ ...blank, ...fields }).map(k => [k, fields[k] ?? blank[k]])))
     setNotes(card.notes || '')
     setEditing(card.id)
+    setRefusedCard(null)
     setAdding(true)
     if (desk) { setShowBrowse(false); closeMore() }
   }
@@ -703,8 +773,16 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     setSaving(true)
     const body = JSON.stringify({ fields: form, notes })
     // A refused save (a 400 names what is missing) used to be read as
-    // the card itself and put in the list, as a row of nothing.
-    const ok = r => (r.ok ? r.json() : Promise.reject(r))
+    // the card itself and put in the list, as a row of nothing. A deck
+    // others read is read again on every save (plan 310): its refusal
+    // is said in the form, on the card.
+    const refusedAs = editing ?? 'new'
+    const ok = async r => {
+      if (r.ok) { setRefusedCard(null); return r.json() }
+      const said = r.status === 422 ? await r.json().catch(() => null) : null
+      if (said?.detail?.code === 'content_refused') setRefusedCard(refusedAs)
+      throw r
+    }
     if (editing) {
       apiFetch(`/api/decks/${deck_id}/cards/${editing}`, session, {
         method: 'PUT',
@@ -835,6 +913,9 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           {editing ? t.editCard : t.newCard}
         </span>
       )}
+      {refusedCard != null && refusedCard === (editing ?? 'new') && (
+        <p className="deckdetail-form__refused" role="alert">{t.cardRefused}</p>
+      )}
       <div className="deckdetail-form__fields">
         {/* One input per field the structure declares. A kanji card
             asks for four things and a standard card for two, from
@@ -933,21 +1014,39 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // cards in and out. One list of rows, each a glyph and its word, the
   // library's saying where the deck stands; the deletion a list of its
   // own at the end, in the danger's ink, arming the question that fills.
-  const moreRow = (key, icon, label, onClick, { hint, danger = false, disabled = false } = {}) => (
-    <button key={key} type="button" className={`more-row${danger ? ' more-row--danger' : ''}`}
-      onClick={onClick} disabled={disabled} aria-haspopup={danger ? 'dialog' : undefined}>
-      <span className="more-row__icon" aria-hidden="true">{icon}</span>
-      <span className="more-row__text">
-        <span className="more-row__label">{label}</span>
-        {hint && <span className="more-row__hint">{hint}</span>}
-      </span>
-    </button>
+  const moreRow = (key, icon, label, onClick, opts = {}) => (
+    <MoreRow key={key} icon={icon} label={label} onClick={onClick} {...opts} />
   )
   const libraryRow = cards.length > 0 && deck?.visibility !== 'public'
     ? moreRow('publish', <BooksIcon size={16} />, t.libraryPublish, () => publish(true), { hint: t.libraryPublishHint, disabled: busy })
     : deck?.visibility === 'public'
       ? moreRow('unpublish', <CrossIcon size={16} />, t.libraryUnpublish, () => publish(false), { hint: t.libraryPublished, disabled: busy })
       : null
+  // B (plan 310): under the row that was tapped, why the library said
+  // no, and the way to change it.
+  const refusalRows = refusal && (
+    refusal.field === 'name' ? (
+      <>
+        <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedName}</span>
+        <input value={renameTo} onChange={e => setRenameTo(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !composing(e) && renameAndPublish()}
+          placeholder={t.deckNamePlaceholder} aria-label={t.deckNamePlaceholder}
+          className="field" />
+        <button type="button" className="btn-primary" disabled={busy || !renameTo.trim()} onClick={renameAndPublish}>
+          {t.libraryRename}
+        </button>
+      </>
+    ) : refusal.field === 'card' ? (
+      <>
+        <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedCard(refusedDeckCard?.front)}</span>
+        {refusedDeckCard && (
+          <button type="button" className="btn-secondary" onClick={openRefusedCard}>{t.libraryOpenCard}</button>
+        )}
+      </>
+    ) : (
+      <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedDescription}</span>
+    )
+  )
   const moreRows = withCards => {
     const rows = [
       withCards && allowCustom && moreRow('import', <ImportIcon size={16} />, t.import, () => { setMoreOpen(false); setShowImport(true) }),
@@ -957,6 +1056,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     return (
       <>
         {rows.length > 0 && <div className="more-list">{rows}</div>}
+        {refusal && !confirmingDeck && refusalRows}
         {!confirmingDeck && (
           <div className="more-list">
             {moreRow('delete', <TrashIcon size={16} />, t.deleteDeck, () => { playUi('click-mode-selection'); setConfirmingDeck(true) }, { danger: true })}
@@ -1481,17 +1581,24 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         </button>
       </Sheet>
 
-      <Sheet open={confirmingUnfollow} onClose={() => setConfirmingUnfollow(false)}
+      <Sheet open={confirmingUnfollow} onClose={() => { setConfirmingUnfollow(false); setBlockFailed(null) }}
         title={withdrawn ? t.libraryRemove : t.libraryUnfollow} sub={deck?.name ?? t.deckFallbackTitle}
         icon={FollowIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">
           {withdrawn ? t.libraryRemoveConfirm : t.libraryUnfollowConfirm}
         </span>
+        {blockFailed && <span className="sheet__q sheet__q--danger" role="alert">{t[blockFailed]}</span>}
         <button type="button" className="btn-primary btn-primary--danger" disabled={busy}
           onClick={unfollow}>
           {withdrawn ? t.libraryRemove : t.libraryUnfollow}
         </button>
-        <button type="button" className="btn-secondary" onClick={() => setConfirmingUnfollow(false)}>
+        {!withdrawn && deck?.author && (
+          <button type="button" className="btn-secondary btn-secondary--danger" disabled={busy}
+            onClick={unfollowAndBlock}>
+            {t.libraryUnfollowBlock(deck.author)}
+          </button>
+        )}
+        <button type="button" className="btn-secondary" onClick={() => { setConfirmingUnfollow(false); setBlockFailed(null) }}>
           {t.cancel}
         </button>
       </Sheet>

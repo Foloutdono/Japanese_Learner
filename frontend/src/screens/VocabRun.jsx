@@ -104,7 +104,7 @@ export default function VocabRun({ session }) {
     const url = studyBy === 'level'
       ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : studyBy === 'theme'
-      ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      ? `/api/vocab/theme/${theme}/cards?level=${themeLevel}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
     const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
     return (data.cards ?? []).map(c => ({ ...c, lang }))
@@ -146,10 +146,15 @@ export default function VocabRun({ session }) {
       updateCurrent(cur => ({ ...cur, lang: targetLang }))
       return
     }
-    const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
-    const unique = [...new Set(words.filter(Boolean))]
-    Promise.all(unique.map(word =>
-      apiJson(`/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
+    // Each word with its kana: a written form several cards share (後 is
+    // あと and うしろ) is answered by the card itself, not the form's map.
+    const kanaOf = new Map()
+    for (const entry of [cardToTranslate, ...(cardToTranslate.hints?.indice_1 ?? [])]) {
+      const word = wordForm(entry)
+      if (word && !kanaOf.has(word)) kanaOf.set(word, entry.kana || '')
+    }
+    Promise.all([...kanaOf].map(([word, kana]) =>
+      apiJson(`/api/translation/vocab?word=${encodeURIComponent(word)}&kana=${encodeURIComponent(kana)}&lang=${targetLang}`, session)
         .then(data => [word, data.translation || ''])
     )).then(entries => {
       // The learner may have moved on while this was out: the card in

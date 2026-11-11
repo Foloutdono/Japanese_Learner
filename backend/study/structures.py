@@ -162,6 +162,10 @@ MAX_READINGS = 15
 # column of a thousand into one card is a mistake, not a lesson.
 MAX_ROWS = 20
 
+# The Kangxi radicals a 'radical' picker chooses from, numbered 1 to 214
+# (content/radical_data.RADICAL_BY_NUMBER).
+RADICALS = 214
+
 
 def structure_for(key: str) -> Structure:
     return STRUCTURES.get(key) or STRUCTURES["standard"]
@@ -255,10 +259,17 @@ def normalise(key: str, raw: dict) -> dict:
                     readings["on"] = readings["on"][:max(0, len(readings["on"]) - over)]
             out[f.key] = readings
         elif f.kind == "number":
+            # OverflowError too: JSON's 1e400 parses as infinity, which
+            # int() refuses with neither of the other two.
             try:
-                out[f.key] = int(value)
-            except (TypeError, ValueError):
-                out[f.key] = None
+                number = int(value)
+            except (TypeError, ValueError, OverflowError):
+                number = None
+            # A radical outside the Kangxi table names nothing the card
+            # could be studied by: missing, so the learner is told.
+            if f.picker == "radical" and number is not None and not 1 <= number <= RADICALS:
+                number = None
+            out[f.key] = number
         else:
             out[f.key] = str(value or "").strip()
     return out

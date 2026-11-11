@@ -17,7 +17,7 @@ from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits, events, learner_modes, review_plan
+from core import content_filter, credits, events, learner_modes, review_plan
 from core.lines import clean_lines
 from content.kana_data import KANA_SETS
 from srs.xp import level_progress, next_milestone
@@ -175,6 +175,12 @@ def _init_db() -> None:
                 # or shut. NULL is not asked yet; routes/feedback.py
                 # writes and reads it.
                 ("feedback_asked_at", "TIMESTAMPTZ"),
+                # Google Play (plan 307): when the Android shell's sheet
+                # asked for a rating on the store, answered (the store
+                # opened, the form sent) or shut. A question of its own,
+                # so a learner who answered the sheet above is asked it
+                # too. NULL is not asked yet; routes/feedback.py.
+                ("store_asked_at", "TIMESTAMPTZ"),
                 # 新しい (plan 287): when the learner was told the duels'
                 # key stands beside Today's gate -- the sheet that says
                 # so put away, or Today's guide ended with the key's stop
@@ -332,12 +338,16 @@ def _handle_candidates(base: str):
     """The name as it is, when it is long enough to be a username, then
     the name numbered 2, 3, ... 999 (a long name gives up letters to its
     number, within USERNAME_MAX). In order and without chance, so the
-    migration's report is what its run does."""
+    migration's report is what its run does. Every candidate is a
+    username USERNAME_RE accepts: a one-letter name skips J2 ... J9,
+    two characters, and starts at J10."""
     if len(base) >= 3:
         yield base
     for n in range(2, 1000):
         digits = str(n)
-        yield f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+        candidate = f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+        if len(candidate) >= 3:
+            yield candidate
 
 
 def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
@@ -348,13 +358,17 @@ def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
     taken). A name is taken whatever its case: "tifa" is not offered
     beside "Tifa"."""
     base = handle_from_name(card_name)
-    if not base:
+    # A name the filter refuses as a handle (plan 310) is printed on the
+    # learner's own card, and the drawn handle stays the public one.
+    if not base or content_filter.refused(base, name=True):
         return None
     cur.execute("SELECT username FROM user_profiles WHERE user_id = %s", (user_id,))
     row = cur.fetchone()
     if not row or not _GENERATED_RE.match(row[0]):
         return None
     for candidate in _handle_candidates(base):
+        if content_filter.refused(candidate, name=True):
+            continue
         cur.execute(
             "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
             (candidate, user_id),
@@ -611,7 +625,9 @@ DEFAULT_READING_PACE = "standard"
 
 
 # The interface languages (frontend/src/lib/locale.js SUPPORTED_LANGS).
-UI_LANGS = ("fr", "en")
+# The interface locales: es-ES is Spain's Spanish, an interface over the
+# Spanish content (plan 303).
+UI_LANGS = ("fr", "en", "es", "es-ES")
 
 
 class LearningPayload(BaseModel):
@@ -921,6 +937,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
         srs.get_rest_days(user_id, days=CALENDAR_DAYS),
     )
     week_from = (datetime.now(timezone.utc).date() - timedelta(days=6)).isoformat()
+    feedback_offer, store_offer = feedback_routes.offers_open(user_id, xp)
 
     return {
         "username": username,
@@ -968,8 +985,11 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # studied elsewhere (routes/transfer.offer_open).
         "transferOffer": transfer_routes.offer_open(user_id, tutorial_at),
         # Early access (plan 269): whether Today asks, once, how the
-        # learner finds the app (routes/feedback.offer_open).
-        "feedbackOffer": feedback_routes.offer_open(user_id, xp),
+        # learner finds the app; in the Android shell, for a rating on
+        # Google Play (plan 307). Both are sent, the client reads the
+        # one its platform asks (routes/feedback.offers_open).
+        "feedbackOffer": feedback_offer,
+        "storeOffer": store_offer,
         # 新しい (plan 287): whether Today tells the learner, once, that
         # the duels' key stands beside its gate (duels_news_open).
         "duelsNews": duels_news_open(user_id, guided),
@@ -1113,6 +1133,13 @@ def export_trail(user_id: str = Depends(get_user_id)):
 def update_profile(payload: ProfilePayload, user_id: str = Depends(get_user_id)):
     if payload.username is None and payload.cardName is None:
         raise HTTPException(status_code=422, detail="Nothing to update")
+    # The handle is public (the 番付, the duels, under every published
+    # deck), so it is held to the filter's names (plan 310). The card's
+    # name is printed on the learner's own card alone and is not.
+    if payload.username is not None and content_filter.refused(payload.username, name=True):
+        raise HTTPException(status_code=422, detail={
+            "code": content_filter.REFUSED, "message": content_filter.REFUSED, "field": "username",
+        })
     username = _get_or_create_username(user_id)  # ensure a row exists to update
     conn = db_conn()
     try:

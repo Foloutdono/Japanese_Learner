@@ -20,7 +20,7 @@ function GoogleMark({ size = 18 }) {
   )
 }
 
-// 林檎 (plan 295) — Apple's mark, drawn in the button's own colour:
+// 林檎 (plan 321) — Apple's mark, drawn in the button's own colour:
 // Apple's rule for a custom Sign in with Apple button is that the logo
 // and the title share one colour, black or white, and --text-primary is
 // the one or the other in each theme. Its shape is Apple's and is not
@@ -39,7 +39,7 @@ const MARKS = { google: GoogleMark, apple: AppleMark }
  * Sign in with Google — or, with `link`, put Google onto the account
  * already signed in, so a guest keeps everything they have earned.
  * `provider="apple"` is the same button for Apple, which only the
- * iPhone's shell offers (lib/oauth.js's providersHere, plan 295) and
+ * iPhone's shell offers (lib/oauth.js's providersHere, plan 321) and
  * which never leaves the page.
  *
  * On the web this button never "finishes": the page leaves for Google

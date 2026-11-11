@@ -35,7 +35,9 @@ function replay(node, cls) {
 // Each marked block arrives once, when a slice of it is on the screen;
 // a figure inside it counts up as it does. .motion tells the stylesheet
 // someone is watching, which retires its show-anyway fallback.
-const numbers = new Intl.NumberFormat(data.lang === 'fr' ? 'fr-FR' : 'en-GB')
+// The page's own: the language's locale, as strings.mjs writes the
+// figures the count ends on (es-419 is the Latin-American Spanish).
+const numbers = new Intl.NumberFormat({ fr: 'fr-FR', es: 'es-419' }[data.lang] || 'en-GB')
 
 function countUp(node) {
   const to = Number(node.dataset.count)
@@ -104,6 +106,25 @@ if (canWatch) {
 const top = $('[data-top]')
 const topBoard = $('[data-top-board]')
 let ticking = false
+
+// The phone's language menu (plan 302) opens as a <details> on its own;
+// a tap outside it, or Escape, closes it again.
+const langMenu = $('[data-lmenu]')
+if (langMenu) {
+  document.addEventListener('click', event => {
+    if (langMenu.open && !langMenu.contains(event.target)) langMenu.open = false
+  })
+  // Tabbing out of it closes it too, rather than leaving it over the page.
+  langMenu.addEventListener('focusout', event => {
+    if (langMenu.open && !langMenu.contains(event.relatedTarget)) langMenu.open = false
+  })
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !langMenu.open) return
+    const inside = langMenu.contains(document.activeElement)
+    langMenu.open = false
+    if (inside) langMenu.querySelector('summary').focus()
+  })
+}
 
 function onScroll() {
   if (ticking) return
@@ -816,11 +837,13 @@ function open(at) {
   if (!film) {
     film = el('video', null, null, { controls: '', playsinline: '', preload: 'metadata', poster: `${src}.jpg`, crossorigin: 'anonymous' })
     film.append(el('source', null, null, { src: `${src}.mp4`, type: 'video/mp4' }))
-    for (const lang of ['fr', 'en']) {
+    // The subtitles there are (config.mjs's PRESENTATION.captions), the
+    // page's own on, or the English where the page's has no file yet.
+    const shown = data.captions.some(([code]) => code === data.lang) ? data.lang : 'en'
+    for (const [lang, label] of data.captions) {
       film.append(el('track', null, null, {
-        kind: 'subtitles', srclang: lang, src: `${src}.${lang}.vtt`,
-        label: lang === 'fr' ? 'Français' : 'English',
-        ...(lang === data.lang ? { default: '' } : {}),
+        kind: 'subtitles', srclang: lang, src: `${src}.${lang}.vtt`, label,
+        ...(lang === shown ? { default: '' } : {}),
       }))
     }
     player.append(film)

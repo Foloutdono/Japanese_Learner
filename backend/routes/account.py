@@ -49,7 +49,7 @@ that window, make a request that lazily re-seeds a user_profiles row
 dead uuid, no personal data. The deleting device signs out at once, and
 the row is harmless; documented rather than engineered around.
 
--- Apple's grant (plan 295) ----------------------------------------
+-- Apple's grant (plan 321) ----------------------------------------
 A learner who signed in with Apple on the iPhone has a grant Apple asks
 us to revoke when the account goes (core/apple_signin.py). It is revoked
 first, while the token that does it is still in apple_grants, and never
@@ -109,15 +109,13 @@ PLAN = [
     ("reading_log",         "user_id = %(user)s",       "reading practice history"),
     ("comprehension_log",   "user_id = %(user)s",       "reading comprehension history"),
     ("comprehension_served", "user_id = %(user)s",      "which pooled exercises this learner has read"),
-    ("comprehension_usage", "user_id = %(user)s",        "the daily new-exercise counters"),
     ("translation_log",     "user_id = %(user)s",       "translation practice history"),
     ("dictation_log",       "user_id = %(user)s",       "dictation practice history"),
     ("composition_log",     "user_id = %(user)s",       "composition practice history"),
     ("conversation_log",    "user_id = %(user)s",       "conversation practice history (plan 217)"),
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
     ("frequency_overrides", "user_id = %(user)s",       "per-user frequency-tier tweaks"),
-    ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),
-    ("daily_usage",         "user_id = %(user)s",       "the daily counters, per feature (composition's reviews, the asking)"),
+    ("daily_usage",         "user_id = %(user)s",       "the daily counters, per feature (the asking, the OCR, new exercises...)"),
     ("dictionary_favorites", "user_id = %(user)s",      "the dictionary's shelf of kept entries"),
     ("agenda_blocks",       "user_id = %(user)s",       "the weekly agenda: study blocks and their reminders"),
     ("grammar_tours",       "user_id = %(user)s",       "how each grammar point's first tour went (plan 187)"),
@@ -129,7 +127,7 @@ PLAN = [
     ("banzuke_division",    "user_id = %(user)s",       "the board's division, this week and the last (plan 262)"),
     ("banzuke_rank",        "user_id = %(user)s",       "the board's place at the start of the day, for the moves"),
     ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
-    ("apple_grants",        "user_id = %(user)s",       "the Sign in with Apple grant, kept to revoke it here (plan 295)"),
+    ("apple_grants",        "user_id = %(user)s",       "the Sign in with Apple grant, kept to revoke it here (plan 321)"),
     # 対戦 (plan 279). A duel whose only real player is this learner goes
     # whole (the cascade takes its rows, a ghost's copy with them), read
     # off pvp_entries, so it comes first; a duel shared with another
@@ -260,7 +258,7 @@ class AppleGrant(BaseModel):
 @router.post("/api/account/apple")
 def keep_apple_grant(body: AppleGrant, user_id: str = Depends(get_user_id)):
     """The code a Sign in with Apple has just brought, exchanged and
-    kept so the account's deletion can revoke the grant (plan 295).
+    kept so the account's deletion can revoke the grant (plan 321).
     `kept` is false where there is no key to exchange it with: the
     sign-in stands either way, and the app does not wait on it."""
     return {"kept": apple_signin.keep(user_id, body.code)}

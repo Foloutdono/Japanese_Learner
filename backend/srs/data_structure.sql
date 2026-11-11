@@ -283,6 +283,9 @@ CREATE TABLE user_profiles (
     -- Early access (plan 269): when Today asked how the learner finds the
     -- app, once 400 XP were earned. routes/feedback.py.
     feedback_asked_at TIMESTAMPTZ,
+    -- Google Play (plan 307): when the Android shell's sheet asked for a
+    -- rating on the store, its own question. routes/feedback.py.
+    store_asked_at TIMESTAMPTZ,
     -- 新しい (plan 287): when the learner was told the duels' key stands
     -- beside Today's gate, by its sheet or Today's guide.
     -- routes/onboarding.py writes it, routes/profile.py reads it.
@@ -670,25 +673,6 @@ CREATE TABLE comprehension_served (
 );
 ALTER TABLE comprehension_served ENABLE ROW LEVEL SECURITY;
 
--- How many comprehension exercises this learner has had GENERATED for
--- them today, on their own day (user_profiles.tz_offset_min). Owned by
--- routes/reading.py. Only pool misses are counted: an exercise served
--- from comprehension_pool was already paid for, so reading twenty of
--- those costs nothing and is not metered. Past the ceiling the learner
--- is handed a text they have read before rather than refused.
---
--- Same shape as ocr_usage on purpose. The third counter this app needed
--- (作文's tutor review, plan 125) went into the shared daily_usage table
--- below instead; these two stay as they are until moving them is worth
--- a migration -- see core/daily_limit.py.
-CREATE TABLE comprehension_usage (
-    user_id TEXT NOT NULL,
-    day     DATE NOT NULL,
-    count   INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, day)
-);
-ALTER TABLE comprehension_usage ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE exam_papers (
     exam_id           TEXT NOT NULL,
     revision          INT NOT NULL DEFAULT 1,
@@ -1021,25 +1005,14 @@ ALTER TABLE conversation_log ENABLE ROW LEVEL SECURITY;
 CREATE INDEX idx_conversation_log_user
 ON conversation_log(user_id, created_at);
 
--- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
--- endpoint. Nothing here costs money (NVIDIA's vision models are on the
--- free tier), so this bounds draw on the SHARED free quota that the
--- analyzer's deep tier and exam generation also depend on: one client
--- in a retry loop would otherwise degrade those too.
-CREATE TABLE ocr_usage (
-    user_id  TEXT NOT NULL,
-    day      DATE NOT NULL,
-    count    INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, day)
-);
-ALTER TABLE ocr_usage ENABLE ROW LEVEL SECURITY;
-
 -- ── The daily counters, one table (plan 125) ────────────────────────
 -- Owned by core/daily_limit.py. One row per (learner, feature, local
--- day); `feature` names the ceiling -- "composition", the tutor's
--- reviews of a learner's own sentences, today. The third counter this
--- app needed and the first shared one: ocr_usage and comprehension_usage
--- above keep their own tables until moving them is worth a migration.
+-- day); `feature` names the ceiling (the routes' *_FEATURE constants:
+-- "composition", "ask", "ocr", "comprehension" ...). The third counter
+-- this app needed and the first shared one; plan 320 moved the two
+-- older ones in (ocr_usage, comprehension_usage, dropped by
+-- scripts/migrate_daily_usage.py). "comprehension" counts pool misses
+-- only: an exercise served from comprehension_pool was already paid for.
 CREATE TABLE daily_usage (
     user_id TEXT NOT NULL,
     feature TEXT NOT NULL,
@@ -1381,7 +1354,7 @@ ALTER TABLE pvp_ratings ENABLE ROW LEVEL SECURITY;
 CREATE INDEX pvp_ratings_rating ON pvp_ratings (rating DESC, user_id);
 
 -- ── 林檎 — the Sign in with Apple grant ─────────────────────────────
--- Owned by core/apple_signin.py (plan 295). The refresh token a sign-in's
+-- Owned by core/apple_signin.py (plan 321). The refresh token a sign-in's
 -- authorization code was exchanged for, kept for one purpose: revoking
 -- the learner's grant with Apple when the account is deleted, as Apple
 -- asks of an app that offers Sign in with Apple. Nothing else of Apple's

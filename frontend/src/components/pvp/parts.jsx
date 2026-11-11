@@ -1,4 +1,3 @@
-import { ChevronIcon } from '../ui/Icons'
 import { levelName } from '../../domain/duel'
 
 // ── 対戦 — the small parts every duels screen draws (plan 279) ──────
@@ -57,25 +56,6 @@ export function EloCurve({ trend, start, label }) {
       <polyline className="pvp-curve__line" points={line} />
       <line className="pvp-curve__dot" x1={x(trend.length - 1)} y1={y(trend[trend.length - 1])} x2={x(trend.length - 1)} y2={y(trend[trend.length - 1])} />
     </svg>
-  )
-}
-
-/** A door in the holder's shape: roundel, name, figure, chevron. */
-export function DoorRow({ glyph, name, sub, figure, onClick }) {
-  return (
-    <div className="records records--one">
-      <button type="button" className="record record--door" style={{ '--line-color': 'var(--pass-ink)' }} onClick={onClick}>
-        <span className="pf-line__id">
-          <span className="pf-line__roundel" aria-hidden="true" lang="ja">{glyph}</span>
-          <span className="pf-line__names">
-            <span className="pf-line__jp">{name}</span>
-            {sub && <span className="pvp-door__waiting">{sub}</span>}
-          </span>
-        </span>
-        {figure != null && <span className="record__value record__value--door">{figure}</span>}
-        <ChevronIcon direction="right" size={15} className="record__chev" />
-      </button>
-    </div>
   )
 }
 

@@ -26,17 +26,28 @@ WHERE name = 'ai_use' AND at >= now() - ({{days}} || ' days')::interval
 GROUP BY 1 ORDER BY 2 DESC;
 
 -- ==== question
+-- title: Appels remboursés (panne)
+-- display: table
+-- size: 12x6
+-- description: Les créneaux rendus par core/daily_limit.release parce qu'aucun modèle n'a été payé (panne des fournisseurs). Les appels réels du jour sont ai_use moins ai_refund.
+SELECT props->>'feature' AS "Fonction", count(*) AS "Remboursés", count(DISTINCT user_id) AS "Apprenants",
+       count(DISTINCT (at AT TIME ZONE 'Europe/Paris')::date) AS "Jours"
+FROM event_log
+WHERE name = 'ai_refund' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
 -- title: Compteurs quotidiens des 30 derniers jours
 -- display: table
 -- size: 12x7
--- description: Plafonds par défaut du code : ask 40, composition 30, translation_review 60, deep_analysis 150, exam_paper 5, conversation_talk 80 (répliques), conversation_review 60 (corrections), lyrics_sort 20 (chansons triées), OCR 20, compréhension générée 10 (variables d'env. sur Render).
+-- description: Plafonds par défaut du code : ask 40, composition 30, translation_review 60, deep_analysis 150, exam_paper 5, conversation_talk 80 (répliques), conversation_review 60 (corrections), lyrics_sort 20 (chansons triées), song_transcribe 5 (chansons écoutées), OCR 20, compréhension générée 10 (variables d'env. sur Render).
 WITH c AS (
   SELECT feature, user_id, day, count FROM daily_usage
-  UNION ALL SELECT 'ocr', user_id, day, count FROM ocr_usage
-  UNION ALL SELECT 'comprehension', user_id, day, count FROM comprehension_usage
 ), caps(feature, cap) AS (VALUES ('ask', 40), ('composition', 30), ('translation_review', 60),
                              ('deep_analysis', 150), ('exam_paper', 5),
                              ('conversation_talk', 80), ('conversation_review', 60), ('lyrics_sort', 20),
+                             ('song_transcribe', 5),
                              ('ocr', 20), ('comprehension', 10))
 SELECT c.feature AS "Fonction", sum(c.count) AS "Appels", count(DISTINCT c.user_id) AS "Apprenants",
        max(c.count) AS "Max par apprenant et par jour", caps.cap AS "Plafond",

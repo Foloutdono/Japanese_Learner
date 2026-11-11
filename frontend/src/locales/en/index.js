@@ -13,6 +13,7 @@ const auth = {
   signOut:           'Sign out',
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
+  usernameRefused:   'This username is not allowed.',
   // 改札 — sign-in refusals, named by their code (lib/authErrors.js)
   // rather than by Supabase's English sentence (plan 215). The ones the
   // guest claim shares (address taken, weak password, too many tries)
@@ -836,7 +837,7 @@ const stats = {
   reference:          'Reference',
   // ── Dictionary and the analyzer (plan 073) ──
   dictCollections:    'Collections',
-  analyzerDoorSub:    'Text, a photo, a video',
+  analyzerDoorSub:    'Text, a photo, a video, a song',
   passagesCount: (n) => `${n} ${n === 1 ? 'passage' : 'passages'}`,
   sentencesCount: (n) => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
   leaveAnalyzer:      'Analyzer',
@@ -947,6 +948,8 @@ const stats = {
   destMovesTo:        date => `moves to ${date} at today's pace`,
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
+  // A text handed back past the day's ceiling on new ones (plan 301).
+  compReadBefore: 'Read before',
   examPart: (n) => `Part ${n}`,
   serviceName: {
     local:   'Local',
@@ -1008,6 +1011,8 @@ const phraseAnalyzer = {
   sourceTextHint:      'Type or paste Japanese',
   sourcePhotoHint:     'Shoot or upload a picture',
   sourceVideoHint:     'A YouTube link and its subtitles',
+  sourceSong:          'Song',
+  sourceSongHint:      'An audio file, transcribed into lyrics',
   // 運行履歴 (plan 040) — the stamp and count for a session row in the
   // merged history list.
   sourceVideoShort:    'From a video',
@@ -1025,6 +1030,7 @@ const phraseAnalyzer = {
   intakeTextLead:      'Type or paste anything Japanese.',
   intakePhotoLead:     'A page, a sign, a screenshot — anything with Japanese on it.',
   intakeVideoLead:     'Paste the link, let the 字幕取り bookmark fetch the subtitles — or drop a file.',
+  intakeSongLead:      'Choose a song: its lyrics arrive, each line at its time.',
   shootPhoto:          'Shoot',
   pickPhoto:           'Choose',
   charCount:           n => `${n} character${n === 1 ? '' : 's'}`,
@@ -1088,6 +1094,33 @@ const phraseAnalyzer = {
   playbackSpeed:       r => `Speed: ${r}×`,
   showVideo:           'Show the video',
   hideVideo:           'Hide the video',
+  // The video folded away, the Passage as lyrics (plan 316).
+  lyricsLines:         n => (n === 1 ? 'The passage\'s sentence' : `The passage's ${n} sentences`),
+  playFromLine:        'Play from this line',
+  // 歌: a song, its audio transcribed (plan 317).
+  songChoose:          'Choose a song',
+  songChange:          'Change',
+  songAccepted:        'MP3, M4A, WAV… · up to 7 min',
+  songCut:             'Only the first 7 minutes will be transcribed.',
+  songLyrics:          'Lyrics',
+  songLyricsOptional:  'optional',
+  songLyricsHint:      'Paste them here: they become the lines you study, and the song only gives their timing.',
+  songTranscribe:      'Transcribe',
+  songTranscribing:    'Transcribing',
+  songPrivacy:         'Google transcribes the audio, then it’s forgotten.',
+  songStays:           'The song stays on this device.',
+  songRefile:          'Choose the file to listen',
+  songRefileNote:      name => `${name} stayed on the device it was added on.`,
+  songUnreadable:      'This audio file can’t be read on this device.',
+  songTooLong:         'This song is too long.',
+  songTooShort:        'This file is too short for a song.',
+  songAllowance:       'You’ve added today’s songs. Come back tomorrow.',
+  songUnavailable:     'Songs can’t be transcribed right now.',
+  songBusy:            'Too many songs are being transcribed right now. Try again in a minute.',
+  songUnheard:         'No sung lyrics were heard in this song.',
+  songNotJapanese:     'This song has no Japanese lyrics.',
+  songLyricsUnmatched: 'The lyrics pasted don’t match the song.',
+  songFailed:          'The song couldn’t be transcribed. Try again.',
   furiganaNow:         label => `Furigana: ${label}`,
   wordsInSentence:     'The words in the sentence',
   // The text desk: the words list folded to one line (plan 235).
@@ -1227,9 +1260,21 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',
+  // 骨組み (plan 311): the line's frame -- what each part does, the
+  // roles of study/frame.ROLES, and what the line leaves unsaid.
+  frameLabel:          'How the line is built',
+  frameRoles: {
+    topic: 'Topic', subject: 'Subject', object: 'Object', target: 'Target',
+    time: 'Time', place: 'Place', means: 'Means', reason: 'Reason',
+    condition: 'Condition', contrast: 'Contrast', purpose: 'Purpose', quote: 'Quote',
+    modifier: 'Modifier', predicate: 'Predicate',
+  },
+  frameFrom:           { before: 'from the line before', after: 'from the line after' },
+  frameLeftOut:        word => `${word}, left out`,
   explaining:          'Explaining…',
   explainFailed:       'The explanation did not come through. Try again.',
   explainUnavailable:  'Explanations are unavailable right now. Try again shortly.',
+  explainLimitReached: "That's every explanation for today. They're back tomorrow.",
   passageTruncated:    n => `Only the first ${n} ${n === 1 ? 'sentence was' : 'sentences were'} analyzed.`,
   sentenceAnalysisUnavailable: 'Analysis is temporarily unavailable for this sentence.',
   mineToDeck:          'Mine',
@@ -1286,6 +1331,11 @@ const video = {
   grabThenSay:         'Then tap your 字幕取り bookmark: the subtitles arrive here.',
   grabInstallLink:     'Set up the bookmark',
   chooseSubtitles:     'Choose a subtitle file',
+  // 足す (plan 317b, the owner's pick E3): the entry line's one ＋ and
+  // the sheet of every way in it opens.
+  entryWays:           'Add a photo, a video, a song or subtitles',
+  entryWaysTitle:      'Add',
+  entrySubtitles:      'Subtitle file',
   copyBookmarklet:     'Copy the 字幕取り bookmark',
   bookmarkletCopied:   'Copied! Now do step 2',
   downsubHint:         'Downloads a .vtt file to choose here — useful when the bookmark will not work.',
@@ -1337,6 +1387,7 @@ const video = {
   analyzingText:       'Reading what you wrote…',
   analyzingPhoto:      'Reading the text from your photo…',
   analyzingVideo:      'Analyzing the subtitles…',
+  analyzingSong:       'Transcribing the song — this can take a minute.',
   captionsUnavailable: "Couldn't get this video's captions.",
   subtitleTooLarge:    'This subtitle file is too large.',
   transcriptTooLong:   'This transcript is too long. Paste a shorter part of it.',
@@ -1689,7 +1740,16 @@ const dictionary = {
   bldRight: 'Right.',
   bldClose: 'Almost.',
   bldWrong: 'Not quite.',
-  bldOther: (said, register) => `The sentence says ${said}: the same, in ${register === 'plain' ? 'plain' : 'polite'} speech.`,
+  // How the sentence says the hole when another form was taken as right:
+  // its register (plan 241), では in full or contracted (plan 295), or the
+  // point's other spelling (plan 319: なきゃ for なくちゃ, され for せられ).
+  bldOther: (said, register) => `The sentence says ${said}: the same, ${({
+    plain: 'in plain speech',
+    polite: 'in polite speech',
+    full: 'with では in full',
+    contracted: 'with では contracted, as speech says it',
+    variant: 'in its other form',
+  })[register] ?? 'in polite speech'}.`,
   mapAria: "The point's line",
   mapTutorial: 'Tutorial',
   mapNow: 'now',
@@ -2059,6 +2119,10 @@ const settings = {
   ambiance:          'Ambiance',
   theme:             'Theme',
   language:          'Language',
+  // Each language's row in the picker shows a sample in that language, the
+  // words that tell it from its neighbours: the two Spanishes say add
+  // differently, so theirs is that word (plan 303).
+  languageSample:    'Today · Dictionary',
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
   // A guest holds no key: signing out ends the journey for good. The
@@ -2076,7 +2140,7 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'Not connected',
   linkGoogleDesc:    'Add Google to this account, and “Continue with Google” will open it rather than a new, empty one.',
-  // The same offer for Apple, on the iPhone alone (plan 295).
+  // The same offer for Apple, on the iPhone alone (plan 321).
   linkAppleLabel:    'Apple',
   linkAppleCap:      'Not connected',
   linkAppleDesc:     'Add Apple to this account, and “Continue with Apple” will open it rather than a new, empty one.',
@@ -2299,6 +2363,14 @@ const decks = {
   libraryPublish:        'Publish to the library',
   libraryPublishHint:    'Other learners can find and follow it.',
   libraryPublished:      'This deck is in the library.',
+  // Plan 310: the library reads a deck before it takes it in. The
+  // refusal names the field, never the word.
+  libraryRefusedName:        'The name has a word the library does not accept.',
+  libraryRefusedDescription: 'The description has a word the library does not accept.',
+  libraryRefusedCard:        front => (front ? `A card has a word the library does not accept: ${front}.` : 'A card has a word the library does not accept.'),
+  libraryOpenCard:           'Open the card',
+  libraryRename:             'Rename and publish',
+  cardRefused:               'This card has a word the library does not accept.',
   libraryUnpublish:      'Remove from the library',
   libraryMakeMine:       'Make it mine',
   libraryMakeMineConfirm: 'This makes your own editable copy of the deck, keeping the progress you have already made. You stop following the original.',
@@ -2312,6 +2384,12 @@ const decks = {
     ? '1 learner follows this deck. Deleting it takes it off their shelf too — they will be told, and given a while to copy it.'
     : `${n} learners follow this deck. Deleting it takes it off their shelves too — they will be told, and given a while to copy it.`),
   libraryReport:         'Report',
+  // Plan 310: blocking a deck's author, from its page (the pick C).
+  libraryReportDeck:     'Report the deck',
+  libraryBlockAuthor:    name => `Block ${name}`,
+  libraryBlockHint:      name => `You won't see their decks, and ${name} won't see yours.`,
+  libraryBlockConfirm:   name => `Block ${name}? You won't see their decks, ${name} won't see yours, and the follows between you end.`,
+  libraryUnfollowBlock:  name => `Unfollow and block ${name}`,
   libraryReported:       'Reported',
   libraryReportNote:     'This flags the deck for review. Nothing is hidden automatically.',
   libraryReasonSpam:      'Spam or advertising',
@@ -2491,7 +2569,7 @@ const boarding = {
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continue with Google',
-  // Apple's own title for its button, in its own words (plan 295).
+  // Apple's own title for its button, in its own words (plan 321).
   continueWithApple: 'Continue with Apple',
   orWithEmail: 'or with an email address',
   // 改札 — a round trip that came back refused (lib/authRedirect.js).
@@ -3150,6 +3228,11 @@ const onboarding = {
   ratePlaceholder: 'What you would change, if anything.',
   rateTextLabel: 'What you would change',
   rateLater: 'Not now',
+  // Google Play (plan 307): the rating sheet, on Android.
+  storeQ: 'A rating on Google Play?',
+  storeLead: 'Your rating helps other learners find Tsuji.',
+  storeGo: 'Rate on Google Play',
+  storeWrite: 'Tell us what you would change instead',
   cardReport: 'Report this card',
   cardReportReasons: 'What is wrong',
   cardReason: { reading: 'Reading', meaning: 'Meaning', audio: 'Audio', example: 'Example', other: 'Other' },
@@ -3657,6 +3740,8 @@ const pvp = {
   pvpRunning:      'Your sprint is still running',
   pvpResume:       'Resume',
   pvpNobodyYet:    'waiting for an opponent',
+  pvpWaitingCap:   'Ranked sprint · waiting for an opponent',
+  pvpNowFriends:   'You are friends now.',
   pvpClosedRow:    'closed',
   pvpEnter:        'Walk in',
   pvpOpen:         'Open',
@@ -3709,6 +3794,7 @@ const pvp = {
   pvpErrTooMany:      'Too many duels under way. Finish one first.',
   pvpErrClosed:       'This duel is closed.',
   pvpErrDuelGone:     'This duel is no longer there.',
+  pvpErrRunGone:      'Someone took this run first.',
   pvpErrRunning:      'Your friend is running this duel right now: you can decline once their sprint is over.',
   pvpErrPlayed:       'You have already run this duel.',
   pvpErrWaiting:      'Your friend has not walked in yet.',

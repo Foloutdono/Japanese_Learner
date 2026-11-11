@@ -52,6 +52,12 @@ def _clean_onboarding_state(user_id: str):
                     """,
                     (handle, user_id),
                 )
+                # A declared level seeded the levels below it known (plan
+                # 224): give the untouched assumptions back, as a move down
+                # does (forget_assumed), or the next file on this worker
+                # finds no new N5 card to serve (test_kanji_card_shares).
+                cur.execute(f"DELETE FROM card_modes WHERE card_id LIKE %s AND {srs._ASSUMED_SQL}",
+                            (f"{user_id}:%",))
             conn.commit()
         finally:
             conn.close()
@@ -298,8 +304,9 @@ def test_volumes_counts_items_not_cards(client):
     # #360: そして down from the N1 然して; plan 252: 私 わたくし retired;
     # plan 260: 22 down (the counters 枚, 冊, 匹, 歳, the suffix さん,
     # どんな, ひらがな, カタカナ, よろしく, また...); #360: もしもし and
-    # ただいま, which the course's N5 sentences say.
-    assert body["vocab"]["N5"] == 728
+    # ただいま, which the course's N5 sentences say; plan 314: お願いします,
+    # the N1 and N2 cards made one N5 card (the owner's call).
+    assert body["vocab"]["N5"] == 729
     # plan 226: the 93 jōyō characters the deck lacked at N1.
     assert body["kanji"]["N1"] == 1325
     # 238: the gojūon and the yōon of both scripts, and the fourteen
@@ -569,6 +576,20 @@ def test_a_name_too_short_for_a_handle_takes_a_number(client):
         done = _board(client, "Xi")
         assert done["username"] == "Xi2"
         assert profile_module.USERNAME_RE.match(done["username"])
+
+
+def test_a_one_letter_name_takes_a_number_long_enough_for_a_handle(client):
+    # J2 is two characters, which no username may be: the first is J10.
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = _board(client, "J")
+        assert done["username"] == "J10"
+        assert profile_module.USERNAME_RE.match(done["username"])
+
+
+@pytest.mark.parametrize("base", ["J", "Xi", "Camille", "x" * 20])
+def test_every_handle_offered_is_a_username(base):
+    for candidate in profile_module._handle_candidates(base):
+        assert profile_module.USERNAME_RE.match(candidate), candidate
 
 
 def test_a_long_name_keeps_the_handle_within_the_username_length(client, other_user):

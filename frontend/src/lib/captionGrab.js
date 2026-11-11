@@ -185,7 +185,7 @@ async function pipeBytes(bytes, TransformCtor, kind) {
 
 // The languages a video's own translation is taken in: those the app
 // is read in (backend/study/line_translate.TRACK_LANGS).
-export const TRANSLATION_LANGS = ['fr', 'en']
+export const TRANSLATION_LANGS = ['fr', 'en', 'es']
 
 // The payload is the tracks as JSON: {m: the hand-written track's XML
 // or null, a: the recognised one's or null, t: {lang: the video's own

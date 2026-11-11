@@ -49,7 +49,7 @@ vi.mock('../lib/api', () => ({
 // (lib/guest.js claimAccount, plan 270), and what it REFUSES with is the
 // point of one test below.
 const updateUser = vi.fn()
-// Apple's link (plan 295): the token put onto the guest's pass.
+// Apple's link (plan 321): the token put onto the guest's pass.
 const linkIdentity = vi.fn()
 vi.mock('../lib/supabase', () => ({
   supabase: {
@@ -61,7 +61,7 @@ vi.mock('../lib/supabase', () => ({
     },
   },
 }))
-// The iPhone's shell, where Apple's sheet answers (plan 295).
+// The iPhone's shell, where Apple's sheet answers (plan 321).
 const iphoneRef = { current: false }
 vi.mock('../lib/native', () => ({
   signInWithApple: async () => ({ identityToken: 'id.token', authorizationCode: 'c.1' }),
@@ -673,7 +673,7 @@ describe('BoardingFlow', () => {
     expect(done()[0]).toMatchObject({ kept: 'password' })
   })
 
-  // 林檎 (plan 295): on the iPhone Apple stands first, beside Google, and
+  // 林檎 (plan 321): on the iPhone Apple stands first, beside Google, and
   // keeps the guest's pass the way Google does -- linked, never a new
   // account -- without writing the boarding down, since its sheet never
   // leaves the page.

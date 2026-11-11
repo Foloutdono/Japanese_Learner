@@ -1076,6 +1076,117 @@
 .anl-vlink:focus-visible { color: var(--text-primary); filter: none; }
 .anl-vlink[aria-expanded="true"] { text-decoration-style: dotted; }
 
+/* 歌 — the song intake (plan 317, the owner's pick S1), as plan 317b
+   drew it again (the owner's pick L2): before a song, the button that
+   picks it and what it takes; once picked, the song as one row, its
+   lyrics three lines tall, Transcrire, and on two quiet lines where the
+   audio goes and where the song stays. The ♪'s sheet on a phone, the
+   desk's fourth platform in its column. */
+.anl-uta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.anl-uta__pick { width: 100%; }
+/* The song picked: its mark, its name over its length and kind, Changer
+   at its end. One step from its ground, as a field is (.field--page):
+   the surface on the desk's page, the page's own in a phone's sheet. */
+.anl-uta__file {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-width: 0;
+  padding: var(--sp-3) var(--sp-1) var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.anl-sheet .anl-uta__file { background: var(--bg-main); }
+.anl-uta__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--text-secondary);
+}
+.anl-uta__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.anl-uta__name b {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-uta__name span {
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+/* Changer, the quiet door of a link (.anl-vlink), at a thumb's height. */
+.anl-uta__change {
+  flex: none;
+  min-height: 44px;
+  padding-inline: var(--sp-3);
+}
+.anl-uta__hint,
+.anl-uta__quiet,
+.anl-refile__note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+}
+.anl-uta__quiet span { display: block; }
+.anl-uta__lyrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.anl-uta__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.anl-uta__label small {
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+}
+/* Three lines tall, as drawn, where the multi field starts taller; what
+   the lyrics are for is its placeholder, in the interface's face. */
+.anl-uta .anl-uta__field {
+  min-height: 0;
+  font-family: var(--font-jp);
+}
+.anl-uta__field::placeholder { font-family: var(--font-display); }
+.anl-uta__go,
+.anl-refile__go { width: 100%; }
+/* 歌 (plan 317): a song reopened on a device that has not got its file.
+   The lyrics stand, and where the transport would be, the one action
+   that brings the sound back and a line on why it is asked for. */
+.anl-refile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
 /* ── The 字幕取り walkthrough (GrabTutorial.jsx) ──
    Sheet chrome comes from .detail-sheet; this block only lays out
    the steps: a numbered roundel (the history rows' drawing), the
@@ -1489,6 +1600,16 @@
   background: transparent;
   color: var(--text-secondary);
 }
+/* 歌 (plan 317): a song being transcribed waits at the shelf's head, a
+   row (a card on the desk) that opens nothing, its word and the app's
+   three dots where a passage's count and date would be. */
+.anl-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.anl-row--wait .anl-row__open { cursor: default; }
+
 /* A still, in a row or on a card: the frame YouTube serves, cropped to
    its box. */
 .anl-card__img {
@@ -1499,9 +1620,10 @@
 }
 
 /* ── The phone's way in (plan 136) ──
-   One line over the passages: the field, the camera, a subtitle file.
-   Japanese in it (or the focus) opens it into the writing slip, the
-   count and Analyse under a hairline; empty and left, it folds back. */
+   One line over the passages: the field and, since plan 317b (the
+   owner's pick E3), the one ＋ that holds every other way in. Japanese
+   in it (or the focus) opens it into the writing slip, the count and
+   Analyse under a hairline; empty and left, it folds back. */
 .anl-entry {
   display: flex;
   flex-direction: column;
@@ -1519,7 +1641,7 @@
   min-height: 44px;
   max-height: 40vh;
   box-sizing: border-box;
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-4);
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -1534,21 +1656,74 @@
 .anl-entry__field::placeholder { color: var(--text-secondary); opacity: 1; font-family: var(--font-display); }
 .anl-entry:focus-within { border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line)); }
 .anl-entry--open .anl-entry__field { min-height: 120px; }
-.anl-entry__tool {
+/* The ＋: a round door inset from the line's edge, beside the field's
+   first line. */
+.anl-entry__add {
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 44px;
   height: 44px;
+  margin: var(--sp-1);
   padding: 0;
-  border: 0;
-  border-radius: var(--r-card);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
-.anl-entry__tool:hover,
-.anl-entry__tool:focus-visible { color: var(--text-primary); filter: none; }
+.anl-entry__add:hover,
+.anl-entry__add:focus-visible { border-color: var(--text-secondary); filter: none; }
+/* 足す — the ＋'s sheet (plan 317b, E3): a row per way in, the
+   platform's mark in the station's ring and its name over what it
+   takes, on hairlines. */
+.anl-ways {
+  display: flex;
+  flex-direction: column;
+}
+.anl-way {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-1);
+  border: 0;
+  border-bottom: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.anl-way:last-of-type { border-bottom: 0; }
+.anl-way:hover,
+.anl-way:focus-visible { background: var(--overlay-hover); filter: none; }
+.anl-way__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 2px solid var(--line-color);
+  border-radius: var(--r-pill);
+}
+.anl-way__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.anl-way__text b {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.anl-way__text span {
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+}
 .anl-entry__foot {
   display: flex;
   align-items: center;
@@ -1709,8 +1884,8 @@
 .anl-m__subs[data-fit="2"] .tok__furi { font-size: var(--fs-caption-xs); }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
-:is(.anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
-:is(.anl-subs, .anl-m__subs)[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
+:is(.anl-subs, .anl-m__subs, .anl-m__lyrics)[data-furigana="none"] .tok__furi { visibility: hidden; }
+:is(.anl-subs, .anl-m__subs, .anl-m__lyrics)[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
 /* ── The deck picker (canvas DeckPickerSheet) ── */
 .picker {
   display: flex;
@@ -7367,7 +7542,12 @@ textarea:focus-visible {
   padding: var(--sp-3) var(--sp-4);
   color: var(--text-secondary);
 }
-.console__well { flex: 1 1 0; }
+/* min-width: 0, or the well cannot shrink below its input's own width
+   -- twenty characters of whatever face is drawing it -- and a wide
+   fallback face, before the app's has arrived, pushed the keys out of
+   the row's end (14px at 390px under Inter). The input already gives
+   way (.field--search > input); the well has to let it. */
+.console__well { flex: 1 1 0; min-width: 0; }
 .console__well > .console__field { font-size: 1rem; }
 .console__clear {
   position: relative;
@@ -12607,27 +12787,19 @@ textarea:focus-visible {
    the word's width. */
 .deck-identity__study.btn-depart--gate { flex: 0 0 40%; margin: 0; }
 
-/* ── 通報 — the report, in the identity's corner ──
-   Reporting a deck is not one of this page's offers. As a labelled
-   pill under the cards it read as the third thing on the menu, after
-   Follow and the preview — a learner scanning the page met "Report"
-   at the end of it as if it were a way of using the deck. In the
-   card's top-right corner it is where a complaint belongs: attached
-   to the thing complained about, and out of the reading line. The
-   word goes with the move; the mark carries it, and `title` and the
-   accessible name carry the word for anyone who needs it.
-
-   Quiet at rest, --danger only under the cursor. The screen has ONE
-   action (DESIGN.md, "The primary button"), and a permanently red
-   mark two inches from the filled button argues with it. The hover
-   ink and ring are .chip--danger's own values, so this is the same
-   control family seen from closer in, not a second reading of the
-   pigment.
+/* ── More, in the identity's corner (plan 310, the owner's pick C) ──
+   What a learner does against another learner's deck is not one of
+   this page's offers, so it stands in the card's top-right corner,
+   attached to the thing it is about and out of the reading line: the
+   ··· of the deck's own page, opening the report and the author's
+   block. It was the report alone (通報), a warning mark quiet at rest
+   and in the danger's ink under the cursor; as More it is the chip
+   family's own, the danger kept for the block row inside.
 
    Square at --r-pill and glyph-only, the construction .console__toggle
    takes for the same reason: the button IS the target, so a border
    round a label's worth of empty pill would be drawn twice. */
-.deck-identity__report {
+.deck-identity__more {
   flex: none;
   /* The corner, not the middle: the row is as tall as the filled
      action beside it, and centred this would sit level with the
@@ -12637,21 +12809,6 @@ textarea:focus-visible {
   height: 34px;
   padding: 0;
   justify-content: center;
-}
-.deck-identity__report:hover,
-.deck-identity__report:focus-visible {
-  color: color-mix(in srgb, var(--danger) 35%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--danger) 70%, transparent);
-}
-/* Reported is spent, not forbidden, so it does not take the chip
-   family's 0.45: the state is the only thing the corner still has to
-   say, and it says it in the 50% mix 057 settled on for danger as
-   TEXT. Disabled because there is nothing left to press. */
-.deck-identity__report:disabled {
-  opacity: 1;
-  cursor: default;
-  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
 }
 
 /* ── The identity block on a phone ──
@@ -12685,14 +12842,14 @@ textarea:focus-visible {
   .deck-identity__meta { grid-column: 1 / -1; }
   .deck-identity__study { grid-column: 1 / -1; }
   /* The corner is a third track, and only where something stands in
-     it: the deck's own page carries no report, and an empty `auto`
+     it: the deck's own page carries no More here, and an empty `auto`
      column would still cost that card one gap of trailing air.
      Placed explicitly because the button is last in the DOM -- it is
      read after the action, and drawn beside the name. */
-  .deck-identity:has(.deck-identity__report) {
+  .deck-identity:has(.deck-identity__more) {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
-  .deck-identity__report { grid-row: 1; grid-column: 3; align-self: center; }
+  .deck-identity__more { grid-row: 1; grid-column: 3; align-self: center; }
 }
 
 .chip__dots { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; }
@@ -12990,6 +13147,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .btn-secondary--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
 .sheet__q { font-size: var(--fs-sm); color: var(--text-primary); }
+/* A sheet's sentence in the danger's ink (plan 310): the library's
+   refusal, said under the row that was tapped (the owner's pick B), or
+   a block that did not go through. */
+.sheet__q--danger { color: var(--danger); }
 
 /* Like a console's chips, the deck's chip row is a SET — everything
    the screen can do to the deck — so it takes the whole width rather
@@ -13553,6 +13714,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   gap: var(--sp-3);
   padding: 0 var(--sp-4) var(--sp-4);
+}
+/* The line of the text an opened question quotes (plan 301): the
+   sentence over its translation on the breakdown's open rail
+   (.bkd-passage__item--open), under the options it decides between. */
+.qrow__source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-left: var(--sp-3);
+  box-shadow: inset 3px 0 0 var(--line-color, var(--accent));
 }
 /* ── 解析 — the word-by-word breakdown, as rows (plan 084) ──
    One shape for every practice mode (SentenceBreakdown's 'rows'
@@ -18382,6 +18553,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   scroll-margin-top: calc(var(--safe-top) + var(--hud-h) + var(--sp-4));
 }
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
+/* C's line (plan 310): a card the library refuses, said on the card,
+   above its fields. The form's own gap spaces it. */
+.deckdetail-form__refused { margin: 0; font-size: var(--fs-sm); color: var(--danger); }
 /* DeckDetail.dc.html's `.field`: 12/16 and a 44px floor. It was
    `10px 14px` with no floor, which put the inputs at ~40px — two rungs
    off the scale and under the minimum on the one screen where a learner
@@ -25400,12 +25574,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 .theme-mini__line { height: var(--sp-1); margin: var(--sp-2) var(--sp-3) 0; border-radius: var(--r-pill); background: currentcolor; opacity: 0.2; }
 .theme-mini__line--short { width: 50%; }
-.lang-picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+/* The languages one per row (plan 302, the owner's pick B): the name,
+   then its own two words on the same line, so a third language never
+   stands alone under two and a phone never breaks the words in two. */
+.lang-picks { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); container-type: inline-size; }
 .lang-pick {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-1);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -25423,9 +25600,25 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   box-shadow: inset 0 0 0 1px var(--accent2);
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
-.lang-pick__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
-.lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); }
+.lang-pick__name { display: inline-flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; white-space: nowrap; }
+/* A language's flag (plan 302, the owner's choice): a country's own
+   colours, at the size of the name it stands before, and nowhere else
+   (DESIGN.md, "The language flags"). The ring keeps a white stripe
+   from melting into a light ground. */
+.lang-flag { flex: none; width: 1.5em; height: 1em; border-radius: var(--r-plate); box-shadow: 0 0 0 1px var(--surface-line); }
+.lang-pick__sample { min-width: 0; overflow: hidden; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .lang-pick--on .lang-pick__sample { color: var(--text-primary); }
+/* A row's sample is the words that tell its language from the others
+   (`languageSample`: Agregar beside Spain's Añadir, plan 303). The
+   widest row, Español (Latinoamérica) and Agregar, needs about 286px, as
+   measured here: a 360px phone's row (318) holds it, a 320px phone's
+   (278) does not. The words never break onto a second line (nowrap,
+   above); below 300, a few percent over the measure so that a font set
+   a little wider never cuts a word short, they go, since the name
+   already says the language, and the name keeps its one line. */
+@container (max-width: 299px) {
+  .lang-pick__sample { display: none; }
+}
 
 /* ── Notation: the three bars themselves (plan 139) ──
    Each scale is offered as the rating bar it is (RatingBar's specimen),
@@ -27522,7 +27715,12 @@ button.brd-stn { cursor: pointer; }
 .gl-sent rt { color: var(--text-secondary); }
 .gl-tr { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: balance; }
 .gl-tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-primary); }
-.gl-hold { white-space: nowrap; }
+/* A hole held to the word before it (GrammarPlate's holdGaps): one unit
+   wherever a line holds it, so the line breaks before the word rather
+   than between it and its hole; wrapped inside the card where it is
+   wider than a line, never past it. A nowrap here drew a sentence in
+   kana, its whole clause held, off both edges of the card. */
+.gl-hold { display: inline-block; }
 
 /* The hole: a sunk well with a dashed rule in the line's pigment; once
    answered, the well holds the answer and the rule goes. */
@@ -27550,17 +27748,58 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
 }
 
-/* The answer's sentence: the front echoed a size down, dimmed, the
-   answer in its hole in full ink. */
+/* The answer's sentence (plan 310, the owner's pick C of "Construire's
+   answer, readable"): the front as it stood, its size, its ink and its
+   translation's, now answered, the hole holding the right form in the
+   success ink. Echoed a size down and dimmed, its readings fell to 9px
+   and the translation to a grey 13px. */
 .gl-echo { width: 100%; }
 .gl-echo .gl-front { gap: var(--sp-1); padding-block: 0; }
-.gl-echo .gl-sent { font-size: var(--fs-lead); color: var(--text-secondary); }
-.gl-echo .gl-gap--filled { color: var(--text-primary); }
-.gl-echo .gl-tr { font-size: var(--fs-sm); font-weight: 400; color: var(--text-secondary); }
+.gl-echo .gl-gap--filled { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+/* A kana a partly right answer lacked or got wrong, underlined where it
+   stands in the right form (GrammarPlate's Answered). */
+.gl-fixed {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
 
-/* The answer: what happened, the sentence, the point, the lesson's line
-   on a rival. */
+/* The answer: what happened, and what was typed beside it; the
+   sentence; the point under a hairline; the lesson's line on a rival. */
+.gl-back__verdict {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-4);
+}
 .gl-back__head { margin: 0; font-size: var(--fs-lead); font-weight: 700; }
+/* What was typed, where Construire missed: a cross and the answer at the
+   verdict's size, each wrong kana struck in the miss's ink, the rest in
+   the quiet ink -- the right form is the sentence's. */
+.gl-typed {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.gl-typed__x { flex: none; color: var(--rating-wrong); }
+.gl-typed s { color: var(--rating-wrong); text-decoration-thickness: 2px; }
+/* The point a step under the sentence it answers (GrammarAnswer at 32,
+   not the flashcard's 40), on a hairline across the card. */
+.gl-back > .grammar-answer {
+  align-self: stretch;
+  margin-top: var(--sp-1);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.gl-back .grammar-structure { font-size: var(--fs-sm); }
+.gl-back .grammar-answer .meaning-display { margin-top: var(--sp-3); }
 .gl-back__head--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
 .gl-back__head--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
 /* keep-all: a form named in the line (ないでください) never breaks inside. */
@@ -27574,20 +27813,6 @@ button.brd-stn { cursor: pointer; }
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
-/* A wrong kana in the hole struck, the right one written over it. */
-.gl-fix { position: relative; display: inline-block; }
-.gl-fix s { color: var(--rating-wrong); text-decoration-thickness: 2px; }
-.gl-fix ins {
-  position: absolute;
-  inset: auto 0 100%;
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-  color: color-mix(in srgb, var(--success) 70%, var(--text-primary));
-}
-
 /* Choisir's forms as the mock exam's answer tiles (.exam-tile): docked
    under the thumb in sumi on a phone, where the rating bar comes up once
    one is taken. */
@@ -29193,6 +29418,7 @@ button.brd-stn { cursor: pointer; }
 .anl-m__show--open { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 /* The video edge to edge: out of the column's gutter. */
 .anl-m__player {
+  position: relative;
   display: flex;
   flex-direction: column;
   margin-inline: calc(-1 * var(--sp-5));
@@ -29214,6 +29440,52 @@ button.brd-stn { cursor: pointer; }
   inset: calc(-1 * var(--sp-4)) 0;
 }
 .anl-ptrack .anl-pbar__knob { display: none; }
+/* 歌 (plan 317b, the owner's pick N1): a song has no picture, so where
+   the picture would be it says what plays -- the station's ring, the
+   song's name, its clock -- on the sumi, over the track. On a phone's
+   stage the line stands in as the lyrics do, and the track under it
+   stands in too, its ends round. */
+.anl-now {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.anl-now__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sp-7);
+  height: var(--sp-7);
+  box-sizing: border-box;
+  border: 2px solid var(--line-kaiseki);
+  border-radius: var(--r-pill);
+  color: var(--text-on-panel);
+}
+.anl-now__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-now__clock {
+  flex: none;
+  color: var(--text-on-panel-soft);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.anl-m__player--song .anl-now { padding: var(--sp-4) var(--sp-6) 0; }
+.anl-m__player--song .anl-ptrack {
+  margin: var(--sp-4) var(--sp-6) 0;
+  border-radius: var(--r-pill);
+}
 .anl-m__subs {
   display: flex;
   flex: 1 1 auto;
@@ -29291,6 +29563,195 @@ button.brd-stn { cursor: pointer; }
   text-wrap: balance;
   color: var(--text-secondary);
 }
+/* ── 歌詞 — the picture folded away, the Passage as lyrics (plan 316) ──
+   The owner's picks V2 and C of the canvas "Tsuji analyser — the video
+   hidden, the lines as lyrics". The pull hangs from the picture's foot,
+   a tab of the picture's own sumi under its track; its target is a
+   thumb's, the tab its top half. Pressed, the picture folds away -- the
+   player kept, playing out of sight, since a destroyed one could not
+   report its clock -- and its sumi grows to the dock, holding the
+   Passage line under line with the pull at its top to bring the
+   picture back. The stage is then the screen's height and the lyrics
+   scroll inside it. Not the reference's coloured ground: a line's
+   pigment is never a fill. */
+.anl-m__pull {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  width: var(--sp-9);
+  height: var(--sp-8);
+  margin-inline: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-on-panel-soft);
+}
+.anl-m__tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--sp-6);
+  background: var(--bg-panel);
+  border-radius: 0 0 var(--r-card) var(--r-card);
+}
+.anl-m__pull:hover,
+.anl-m__pull:focus-visible { color: var(--text-on-panel); }
+.anl-m--lyrics {
+  height: 100vh;
+  height: 100dvh;
+}
+.anl-m__player--folded {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.anl-m__player--folded .anl-m__video {
+  height: 0;
+  overflow: hidden;
+}
+.anl-m__player--folded .anl-m__pull {
+  position: static;
+  flex: none;
+}
+.anl-m__player--folded .anl-m__tab {
+  height: 100%;
+  background: transparent;
+}
+/* The lyrics (components/analysis/Lyrics), on either width: the line
+   in focus the subtitle it is, the others in the panel's quieter ink,
+   each over its translation. Two inks only: the lines sung and the
+   lines to come share the soft one, since a lower alpha is no dimmer
+   register (the contrast rule). */
+.anl-lyrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-5);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.anl-lyrics__line,
+.anl-lyrics__now {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  max-width: 100%;
+}
+.anl-lyrics__line {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  text-align: start;
+  color: var(--text-on-panel-soft);
+  cursor: pointer;
+}
+.anl-lyrics__line:hover,
+.anl-lyrics__line:focus-visible { color: var(--text-on-panel); }
+.anl-lyrics__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.anl-lyrics__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: var(--tr-term);
+}
+.anl-lyrics__tr {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-on-panel-soft);
+}
+.anl-lyrics__now .anl-lyrics__tr { color: var(--text-on-panel); }
+.anl-lyrics__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  color: var(--text-on-panel);
+}
+/* A line's time before it (the desk's), the one in focus in the first
+   ink: a column of its own, on the baseline of the Japanese beside it --
+   the line in focus's last one, its words', not its readings'. */
+.anl-lyrics--timed .anl-lyrics__line,
+.anl-lyrics--timed .anl-lyrics__now {
+  display: grid;
+  grid-template-columns: var(--sp-8) minmax(0, 1fr);
+  gap: var(--sp-1) var(--sp-4);
+}
+.anl-lyrics--timed .anl-lyrics__now { align-items: last baseline; }
+.anl-lyrics--timed .anl-lyrics__body { display: contents; }
+.anl-lyrics--timed .anl-lyrics__body > * { grid-column: 2; }
+.anl-lyrics__time {
+  grid-row: 1;
+  grid-column: 1;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+.anl-lyrics__now .anl-lyrics__time { color: var(--text-on-panel); }
+/* The line in focus on the sumi: the panel's inks, the state rules and
+   the grammar kept, its words from the line's start as the others'. */
+.anl-lyrics .anl-subs__body { justify-content: flex-start; }
+.anl-lyrics .anl-subs__line {
+  justify-content: flex-start;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.anl-lyrics .anl-subs__line .tok { color: var(--text-on-panel); }
+.anl-lyrics .anl-subs__line .tok--particle { color: var(--text-on-panel-soft); }
+/* The readings at the furigana dial's own weight (a reading hidden by
+   the dial is never a reading coloured after it). */
+.anl-lyrics .anl-subs__line .tok .tok__furi { color: var(--text-on-panel-soft); }
+.anl-lyrics .anl-subs__line .tok--mastered { --tok: var(--accent2); }
+.anl-lyrics .anl-subs__line .tok--unknown { --tok: var(--text-on-panel); }
+.anl-lyrics .anl-subs__line .tok--offdeck { border-bottom-color: var(--text-on-panel-soft); }
+.anl-lyrics .anl-subs__line .tok--on { background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
+.anl-lyrics .anl-subs__line .tok--lit { background: color-mix(in srgb, var(--line-grammar) 40%, transparent); }
+/* On a phone: the lines a rung under the one in focus, which keeps the
+   breakdown's heading size; a point on the stage's green wash, its
+   number on the wash's corner. */
+.anl-m__lyrics {
+  flex: 1 1 auto;
+  padding: 0 var(--sp-6) var(--sp-6);
+}
+/* A song's lyrics stand clear of its track (plan 317b, N1): there is
+   no pull between them to hold them apart, as a video's has. */
+.anl-m__player--song .anl-m__lyrics { padding-top: var(--sp-5); }
+.anl-m__lyrics .anl-subs__line { row-gap: var(--sp-3); }
+.anl-m__lyrics .anl-subs__line .tok { font-size: var(--fs-heading); }
+.anl-m__lyrics .anl-subs__line .tok .tok__furi { font-size: var(--fs-caption); }
+.anl-m__lyrics .anl-subs__pt {
+  padding: 0;
+  background: color-mix(in srgb, var(--line-grammar) 30%, transparent);
+  box-shadow: none;
+}
+.anl-m__lyrics .anl-subs__pt .tok--particle { color: var(--text-on-panel); }
+.anl-m__lyrics .anl-subs__n {
+  top: calc(-1 * var(--sp-2));
+  right: auto;
+  left: calc(-1 * var(--sp-2));
+  min-width: var(--sp-5);
+  height: var(--sp-5);
+  font-size: var(--fs-caption-xs);
+  color: var(--text-on-panel);
+}
+.anl-m__lyrics .anl-lyrics__now .anl-lyrics__tr { font-size: var(--fs-body); }
 /* The line stepped down where the stage would not hold it between the
    video and the dock (useLineFit, 2026-10-20): a rung down, then the
    floor, every breakdown's own size, its readings with it and the rows
@@ -29467,10 +29928,11 @@ button.brd-stn { cursor: pointer; }
   background: repeating-linear-gradient(to right, var(--text-secondary) 0 6px, transparent 6px 10px);
 }
 /* 解説 — the explanation's sheet (plan 220): a bottom sheet like the
-   line's other two, as tall as it holds -- the cap and the sentence at
-   its head beside the round ✕, then the explanation under its
-   translation, or the wait, or why it is not there and the way to try
-   again; then the asking, under a rule. */
+   line's other two, as tall as it holds -- the cap, the sentence and
+   its translation at its head beside the round ✕, then the line's frame
+   (plan 311), or the wait, or why it is not there and the way to try
+   again; Explain again a quiet word under the frame, then the asking,
+   under a rule. */
 .anl-explainsheet__head {
   display: flex;
   align-items: flex-start;
@@ -29498,11 +29960,11 @@ button.brd-stn { cursor: pointer; }
   gap: var(--sp-4);
 }
 .anl-explainsheet__tr {
-  margin: 0;
-  font-size: var(--fs-lead);
-  font-style: italic;
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-body);
   line-height: 1.45;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  text-wrap: pretty;
 }
 .anl-explainsheet__fail {
   display: flex;
@@ -29538,6 +30000,112 @@ button.brd-stn { cursor: pointer; }
   align-self: stretch;
   margin-top: var(--sp-3);
 }
+/* Explain again, once there is an explanation: a quiet word under it,
+   never a second button beside the asking (plan 311). The desk's since
+   plan 242, the phone's since. */
+.anl-explainpanel__again {
+  align-self: flex-start;
+  min-height: 44px; /* a hit target, as .btn-secondary's */
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: var(--sp-1);
+  cursor: pointer;
+}
+.anl-explainpanel__again:hover,
+.anl-explainpanel__again:focus-visible { color: var(--text-primary); }
+.anl-explainpanel__again:disabled { cursor: default; text-decoration: none; }
+/* The Japanese an explanation names, in the line's face and weight. */
+.anl-named {
+  font-family: var(--font-jp);
+  font-weight: 700;
+}
+
+/* ── 骨組み — the line's frame (plan 311) ──
+   The owner's pick C of the canvas "Tsuji — Explain, made clear",
+   drawn as built on its board "C · as built" (components/analysis/
+   Frame.jsx): the line's parts in order, a row each under a hairline --
+   what the part does as the one caption, the part at the title's size,
+   one line on how it is built. The predicate's row is the core: its
+   caption in the primary ink, its words bold. A run a grammar point
+   covers is lit in the grammar's ink and underlined in it, a door to
+   the point; what the line does not say (a part carried from the line
+   before, a dropped だ) is a dashed outline, never ink of its own. The
+   phone's sheet, the desk's Construction face and the runs' breakdown
+   draw it alike. */
+.anl-frame {
+  display: flex;
+  align-self: stretch;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.anl-frame__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-block: var(--sp-4);
+}
+.anl-frame__part:first-child { padding-top: 0; }
+.anl-frame__part:last-child { padding-bottom: 0; }
+.anl-frame__part + .anl-frame__part { border-top: 1px solid var(--surface-line); }
+.anl-frame__role {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-frame__jp {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.anl-frame__pt {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--line-grammar) 70%, var(--text-primary));
+  text-decoration: underline;
+  text-decoration-color: var(--line-grammar);
+  text-decoration-thickness: 2px;
+  text-underline-offset: var(--sp-1);
+}
+/* Two points side by side (になる, んだ) are two doors, not one rule:
+   their underlines part. */
+.anl-frame__pt + .anl-frame__pt { margin-inline-start: var(--sp-1); }
+button.anl-frame__pt { cursor: pointer; }
+button.anl-frame__pt:hover,
+button.anl-frame__pt:focus-visible { color: var(--text-primary); }
+.anl-frame__gone {
+  display: inline-block;
+  padding: 0 var(--sp-2);
+  border: 1px dashed var(--text-secondary);
+  border-radius: var(--r-card);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.anl-frame__gone--word { margin-inline-start: var(--sp-1); }
+.anl-frame__say {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+.anl-frame__part--core .anl-frame__role { color: var(--text-primary); }
+.anl-frame__part--core .anl-frame__jp { font-weight: 700; }
 
 /* ── 表示 and 保存 on a phone (plan 263) ──
    The owner's picks of the canvas "Analyser stage — reading options":
@@ -29546,8 +30114,8 @@ button.brd-stn { cursor: pointer; }
 
 /* The rōmaji under each word, below the state's rule: the rule stays
    the word's own, and the line's rows open to make room. */
-.anl-m__subs[data-romaji] .tok { position: relative; }
-.anl-m__subs[data-romaji] .anl-subs__line {
+:is(.anl-m__subs, .anl-m__lyrics)[data-romaji] .tok { position: relative; }
+:is(.anl-m__subs, .anl-m__lyrics)[data-romaji] .anl-subs__line {
   row-gap: var(--sp-8);
   padding-bottom: var(--sp-6);
 }
@@ -29565,6 +30133,8 @@ button.brd-stn { cursor: pointer; }
   white-space: nowrap;
   color: var(--text-secondary);
 }
+/* On the lyrics' sumi (plan 316), in the panel's quieter ink. */
+.anl-m__lyrics .tok__ro { color: var(--text-on-panel-soft); }
 
 /* The Affichage sheet: a row a help, its name and its segment; low, so
    the line it changes is seen changing over it. */
@@ -33706,6 +34276,10 @@ button.brd-stn { cursor: pointer; }
 .fb-rate__star:hover,
 .fb-rate__star:focus-visible { color: var(--sel-ink); filter: none; }
 
+/* Google Play (plan 307): on Android the sheet asks for the store first,
+   its door the gold button; the stars and the words behind a link. */
+.fb-store__write { align-self: center; }
+
 /* Settings' page on the desk: the form at a card's width, the send at
    its own. */
 .fb-page { max-width: var(--card-w); }
@@ -33856,6 +34430,9 @@ button.brd-stn { cursor: pointer; }
 .pvp-console__door-fig { font-size: var(--fs-sm); color: var(--text-secondary); }
 .pvp-console__door-req { color: var(--sel-ink); }
 .pvp-console__none { margin: 0; padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--surface-line); font-size: var(--fs-sm); color: var(--text-secondary); }
+/* The head of the strangers' runs waiting for an opponent (plan 315),
+   under what waits on the learner. */
+.pvp-console__cap { margin: 0; padding: var(--sp-4) var(--sp-5) var(--sp-2); border-top: 1px solid var(--surface-line); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
 /* What a screen says when the server refused (an error's code, mapped). */
 .pvp-error { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
@@ -33939,6 +34516,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
 .pvp-card__legend { padding: var(--sp-3) var(--sp-5); }
 .pvp-card__reason { font-family: inherit; font-size: var(--fs-body); font-weight: 600; }
 .pvp-card__foot { gap: var(--sp-3); }
+/* The way between you (plan 315): ask, accept, or challenge a friend. */
+.pvp-card__way { display: flex; flex-direction: column; gap: var(--sp-3); }
+.pvp-card__way:empty { display: none; }
 
 /* L1 — the Elo, an insert in the holder: the door, the figure, the line. */
 .pvp-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -34951,6 +35531,13 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     gap: var(--sp-5);
     min-width: 0;
   }
+  /* Four platforms (plan 317) in the column's one width: at the
+     caption's tracking they asked 420px of its 358 in French (Chanson,
+     Canción), and the fourth was cut at the column's edge. The panel's
+     tight faces' treatment (.anl-desk__entry--tight .anl-faces): the
+     term's tracking, the padding a step in, the glyphs kept. */
+  .anl-sources .seg__opt { padding-inline: var(--sp-2); }
+  .anl-sources .seg__opt-latin { letter-spacing: var(--tr-term); text-indent: var(--tr-term); }
   /* A file carried over the page: the column it will land in says so,
      dashed in the station's pigment, its words over the intake. */
   .desk-intake__side { position: relative; }
@@ -35022,6 +35609,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     .anl-card__open { transition: none; }
     .anl-card__open:hover,
     .anl-card__open:focus-visible { transform: none; }
+  }
+  .anl-card--wait .anl-card__open { cursor: default; }
+  .anl-card--wait .anl-card__open:hover {
+    transform: none;
+    border-color: var(--surface-line);
   }
   .anl-card__still {
     position: relative;
@@ -36726,15 +37318,13 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .desk-settings__page--two .slip--ways > .slip__label { grid-column: 1 / -1; }
   .desk-settings__page--two .slip--ways > .slip__way { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* What a row's taller card lends the shorter (plan 145): the two
-     languages stand one over the other down the theme screens' height,
+     languages stand one over another down the theme screens' height,
      each an equal share of it, rather than two short cards at the top
      of a card twice their height. */
   .desk-settings__page--two .lang-picks {
     flex: 1;
-    grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: 1fr;
   }
-  .desk-settings__page--two .lang-pick { justify-content: center; }
   /* The mixer across the page (SoundPage, plan 145): its names in one
      column as wide as the longest, each on one line -- the phone's 132px
      broke VOLUME PRINCIPAL in two -- and every track starting where the
@@ -38752,10 +39342,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
      each other, and settles (520ms, easing out -- it is arriving);
      Back runs both the other way (--pull). Its answers follow it in, a
      beat apart, and the question rides the car. BoardingFlow keeps the
-     leaving car until all of that has landed (DESK_PULL_MS), so nothing
-     is cut short, and the same entrance plays for the first question --
-     arriving from the Welcome -- as for every other. (The car's own
-     animation is declared with its widths, above.) */
+     leaving car until all of that has landed, as these animations say on
+     their own clock (`landed`), so nothing is cut short, and the same
+     entrance plays for the first question -- arriving from the Welcome --
+     as for every other. (The car's own animation is declared with its
+     widths, above.) */
   @keyframes desk-brd-pull-in {
     from { opacity: 0; transform: translateX(calc(var(--pull) * var(--sp-9))); }
   }
@@ -40880,8 +41471,10 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     height: calc(100dvh - 2 * var(--sp-6));
     min-height: 0;
   }
-  /* A video of one line has no list: the picture takes its width. */
-  .anl-desk--video.anl-desk--one {
+  /* A video of one line has no list: the picture takes its width. Nor
+     does a video folded away (plan 316, the owner's pick D2): its lyrics
+     are the list, and take the list's column as well as the picture's. */
+  .anl-desk--video:is(.anl-desk--one, .anl-desk--lyrics) {
     grid-template:
       "head entry" auto
       "slab entry" minmax(0, 1fr)
@@ -40988,6 +41581,20 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     height: 0;
     overflow: hidden;
   }
+  /* A song's refile (plan 317) stands where its bar would, at the
+     slab's foot: the bar's hairline, its note in the panel's soft ink. */
+  .anl-slab .anl-refile {
+    flex: none;
+    padding: var(--sp-4);
+    border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent);
+  }
+  .anl-slab .anl-refile__note { color: var(--text-on-panel-soft); }
+  /* A song's name at the slab's head, where the picture would be
+     (plan 317b, N1); the bar under the lyrics prints its clock. */
+  .anl-slab .anl-now {
+    flex: none;
+    padding: var(--sp-4) var(--sp-6) 0;
+  }
   .anl-slab__arrow {
     display: inline-flex;
     flex: none;
@@ -41011,6 +41618,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     padding: var(--sp-3) var(--sp-6) var(--sp-4);
   }
   .anl-slab__screen + .anl-subs { margin-top: var(--sp-4); border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent); }
+  /* Folded (plan 316), nothing above the lyrics to part them from. */
+  .anl-slab--folded .anl-subs {
+    margin-top: 0;
+    border-top: 0;
+  }
   .anl-subs__head {
     display: flex;
     align-items: center;
@@ -41028,6 +41640,20 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   }
   .anl-desk--video .anl-subs > .anl-subs__head { margin-bottom: auto; }
   .anl-desk--video .anl-subs > :last-child { margin-bottom: auto; }
+  /* 歌詞 (plan 316, D2): the lyrics under the sumi's head, from the top
+     down, scrolling in their own box rather than the column; each line
+     a rung up from the phone's, at the breakdown's heading size, its
+     time before it. */
+  .anl-desk--video .anl-subs--lyrics { overflow: hidden; }
+  .anl-desk--video .anl-subs--lyrics > .anl-subs__head,
+  .anl-desk--video .anl-subs--lyrics > :last-child { margin-bottom: 0; }
+  .anl-desk__lyrics {
+    flex: 1 1 auto;
+    margin-top: var(--sp-4);
+    padding-bottom: var(--sp-6);
+  }
+  .anl-desk__lyrics .anl-lyrics__jp { font-size: var(--fs-heading); }
+  .anl-desk__lyrics .anl-lyrics__tr { font-size: var(--fs-body); }
   .anl-subs__count {
     font-family: var(--font-display);
     font-size: var(--fs-caption);
@@ -41233,9 +41859,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   /* ── 構造 — the construction face (plan 242, the owner's pick B of
      the canvas's "The Construction face"): the line laid out as its
      blocks at a heading's size, each named under it, a point's run
-     framed in the grammar's ink under its number; the prose under them,
-     the Japanese it names in the line's face and weight, Explain again a
-     quiet word under it, and the asking under that. */
+     framed in the grammar's ink under its number; the line's frame under
+     them (plan 311, .anl-frame), Explain again a quiet word under it,
+     and the asking under that. */
   .anl-blocks {
     display: flex;
     flex: none;
@@ -41314,24 +41940,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     align-items: flex-start;
     gap: var(--sp-4);
   }
-  .anl-explainpanel__jp {
-    font-family: var(--font-jp);
-    font-weight: 700;
-  }
-  .anl-explainpanel__again {
-    padding: 0;
-    background: none;
-    border: 0;
-    font: inherit;
-    font-size: var(--fs-caption);
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-decoration: underline;
-    cursor: pointer;
-  }
-  .anl-explainpanel__again:hover,
-  .anl-explainpanel__again:focus-visible { color: var(--text-primary); }
-  .anl-explainpanel__again:disabled { cursor: default; text-decoration: none; }
   .anl-desk__none {
     flex: none;
     margin: 0;
@@ -41495,6 +42103,12 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .anl-desk:not(.anl-desk--text) .anl-subs__tr {
     font-size: var(--fs-lead);
     font-weight: 400;
+  }
+  /* The line in focus in the lyrics (plan 316): its translation from the
+     line's start, in the panel's first ink, as the line over it. */
+  .anl-desk--lyrics .anl-desk__lyrics .anl-subs__tr {
+    color: var(--text-on-panel);
+    text-align: start;
   }
   /* Explain on the sumi, in the panel's inks, as the arrows beside it. */
   .anl-slab .anl-explainbtn {
@@ -42730,6 +43344,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
      crossed once answered; Construire's entry the practice runs' floor
      (form.stage__foot above); the walk's map in the card panel. */
   .gl-front, .gl-back { padding-block: var(--sp-4); }
+  /* The answer's sentence at the size it was drawn at (plan 310, 24px,
+     which --fs-sentence-fluid is at every desk width), a step under the
+     front's: the card's column is a phone's width, and at the front's
+     32px the sentence took a second line the run has no room for. */
+  .gl-echo .gl-sent { font-size: var(--fs-sentence-fluid); }
   .gl-dock {
     position: static;
     margin: 0;

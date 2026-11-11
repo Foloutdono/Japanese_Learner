@@ -132,6 +132,13 @@ def test_placement_partial_submission_is_legal(client):
     assert scored.json()["recommendedLevel"] == "N5"
 
 
+def test_placement_score_takes_one_answer_a_question_at_most(client):
+    # plan 211: the fixed test's answers are bounded by the paper's size.
+    answers = {f"q{i}": "1" for i in range(_EXPECTED_COUNT + 1)}
+    scored = client.post("/api/onboarding/placement/score", json={"seed": 1, "answers": answers})
+    assert scored.status_code == 422
+
+
 # ── The climb (plan 224) ──────────────────────────────────────────
 # Asked at N5 and going up while the learner clears each level: three
 # right in a row or four right clears it, a second miss does not, and

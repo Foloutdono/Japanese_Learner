@@ -75,11 +75,11 @@ logger = logging.getLogger(__name__)
 # paper it was dealt and the time that came with it, so a sprint-1 duel
 # still open when the two minutes came in is run, and raced, in one.
 SPRINT_MS_BY_REV = {"sprint-1": 60_000, "sprint-2": 120_000, "sprint-3": 120_000, "sprint-4": 120_000,
-                    "sprint-5": 120_000}
+                    "sprint-5": 120_000, "sprint-6": 120_000, "sprint-7": 120_000}
 SPRINT_MS = SPRINT_MS_BY_REV[duel_paper.PAPER_REV]
 # And so does the way an answer is scored (plan 285): sprint-2's runs
 # pay a streak and the last seconds more, sprint-1's pay speed alone.
-COMBO_REVS = frozenset({"sprint-2", "sprint-3", "sprint-4", "sprint-5"})
+COMBO_REVS = frozenset({"sprint-2", "sprint-3", "sprint-4", "sprint-5", "sprint-6", "sprint-7"})
 # (right answers in a row, the multiplier from there on)
 COMBO_TIERS = ((5, 1.5), (10, 2.0), (20, 3.0))
 RUSH_MS = 15_000
@@ -688,6 +688,35 @@ def _reach(window: int) -> int:
     return window // (2 * duel_paper.ELO_STEP)
 
 
+# The runs a ranked sprint may deal `me` (plan 315): another learner's,
+# played, on a paper of the current revision whose mix is near `me`'s,
+# by a player of an Elo near theirs, that nobody has met, never across a
+# block nor on a paper `me` has met. `_seek` takes the nearest of them,
+# the hall lists them (`waiting`) and `take` seats `me` in the one picked
+# there: one rule, so the hall offers only what the sprint would deal.
+_SEEKABLE = f"""
+    pvp_duels d
+      JOIN pvp_entries e ON e.duel_id = d.id
+      JOIN pvp_ratings r ON r.user_id = e.user_id
+     WHERE d.kind = 'ranked' AND d.mode = 'async' AND d.status = 'open' AND NOT d.ghost
+       AND d.paper_rev = %(rev)s
+       AND d.expires_at > %(soon)s AND ABS(d.mix - %(mix)s) <= %(reach)s
+       AND e.user_id <> %(me)s AND e.finished_at IS NOT NULL
+       AND (SELECT COUNT(*) FROM pvp_entries x WHERE x.duel_id = d.id) = 1
+       AND r.rating BETWEEN %(elo)s - %(window)s AND %(elo)s + %(window)s
+       AND {_APART.format(u="e.user_id")}
+       AND {_met_paper_sql("d")}
+"""
+_NEAREST = "ABS(d.mix - %(mix)s), ABS(r.rating - %(elo)s), d.created_at"
+
+
+def _seekable_args(me: str, elo: int, mix: int, window: int, now: datetime) -> dict:
+    # A seat is held HOLD before it must be started: a run closer than
+    # that to its deadline is not offered.
+    return {"me": me, "elo": elo, "mix": mix, "reach": _reach(window), "window": window,
+            "soon": now + HOLD, "rev": duel_paper.PAPER_REV}
+
+
 def _seek(cur, me: str, elo: int, mix: int, now: datetime) -> int | None:
     """A run another learner played that nobody has met, on a paper
     whose mix is near `me`'s and by a player of an Elo near theirs:
@@ -699,26 +728,13 @@ def _seek(cur, me: str, elo: int, mix: int, now: datetime) -> int | None:
         for _try in range(3):
             cur.execute(
                 f"""
-                SELECT d.id FROM pvp_duels d
-                  JOIN pvp_entries e ON e.duel_id = d.id
-                  JOIN pvp_ratings r ON r.user_id = e.user_id
-                 WHERE d.kind = 'ranked' AND d.mode = 'async' AND d.status = 'open' AND NOT d.ghost
-                   AND d.paper_rev = %(rev)s
-                   AND d.expires_at > %(soon)s AND ABS(d.mix - %(mix)s) <= %(reach)s
-                   AND e.user_id <> %(me)s AND e.finished_at IS NOT NULL
-                   AND (SELECT COUNT(*) FROM pvp_entries x WHERE x.duel_id = d.id) = 1
-                   AND r.rating BETWEEN %(elo)s - %(window)s AND %(elo)s + %(window)s
+                SELECT d.id FROM {_SEEKABLE}
                    AND d.id <> ALL(%(taken)s)
-                   AND {_APART.format(u="e.user_id")}
-                   AND {_met_paper_sql("d")}
-                 ORDER BY ABS(d.mix - %(mix)s), ABS(r.rating - %(elo)s), d.created_at
+                 ORDER BY {_NEAREST}
                  LIMIT 1
                  FOR UPDATE OF d SKIP LOCKED
                 """,
-                # A seat is held HOLD before it must be started: a run
-                # closer than that to its deadline is not offered.
-                {"me": me, "elo": elo, "mix": mix, "reach": _reach(window), "window": window,
-                 "soon": now + HOLD, "taken": taken, "rev": duel_paper.PAPER_REV},
+                {**_seekable_args(me, elo, mix, window, now), "taken": taken},
             )
             row = cur.fetchone()
             if row is None:
@@ -766,16 +782,19 @@ def _ghost_source(cur, me: str, elo: int, mix: int) -> dict | None:
     return None
 
 
-def ranked(cur, after: list, me: str) -> tuple[int, str]:
+def ranked(cur, after: list, me: str, pick: int | None = None) -> tuple[int, str]:
     """A ranked sprint for `me`, never waiting: (duel id, against). A
     second press while a seat waits unstarted finds that seat. A first
     one starts the learner's Elo, from their level, with no test asked
-    first (plan 282)."""
+    first (plan 282). With `pick`, the run the hall listed and the
+    learner picked there (plan 315, `take`)."""
     level = duel_level(cur, me)
     rating, started = duel_elo.start(cur, me, level)
     if started:
         events.record(me, "pvp_placed", {"level": rating["placed_level"]}, cur=cur)
     now = _now()
+    if pick is not None:
+        return take(cur, after, me, rating["rating"], pick, now), "seek"
     cur.execute(
         """
         SELECT d.id FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id
@@ -821,6 +840,92 @@ def ranked(cur, after: list, me: str) -> tuple[int, str]:
     duel_id = _insert_duel(cur, "ranked", "async", paper["level"], seed, paper, now, now + WAIT)
     _seat(cur, duel_id, me, "challenger", now)
     return duel_id, "open"
+
+
+def take(cur, after: list, me: str, elo: int, duel_id: int, now: datetime) -> int:
+    """Seat `me` in a run the hall listed (plan 315): one a ranked sprint
+    could deal them, still waiting, or refused `pvp_run_gone` -- another
+    learner sat first, or its time is nearly out. A second press finds
+    the seat the first one took. Any other seat `me` took and left
+    unstarted is given back first, as HOLD would: one learner keeps one
+    run from the others at a time. Nothing is paid here: the fare is
+    « Partir »'s, on the cover."""
+    cur.execute("SELECT 1 FROM pvp_entries WHERE duel_id = %s AND user_id = %s AND role <> 'ghost'",
+                (duel_id, me))
+    if cur.fetchone():
+        return duel_id
+    _room_for_one(cur, after, me, now)
+    cur.execute(
+        f"SELECT d.id FROM {_SEEKABLE} AND d.id = %(pick)s FOR UPDATE OF d",
+        {**_seekable_args(me, elo, duel_paper.mix_of(elo), WINDOWS[-1], now), "pick": duel_id},
+    )
+    if cur.fetchone() is None:
+        raise Refused(409, "pvp_run_gone")
+    # The statement's snapshot counted the seats before its lock was
+    # had: a seeker who sat while it waited is seen by a new one.
+    cur.execute("SELECT COUNT(*) FROM pvp_entries WHERE duel_id = %s", (duel_id,))
+    if cur.fetchone()[0] != 1:
+        raise Refused(409, "pvp_run_gone")
+    _leave_unstarted(cur, me, duel_id)
+    _seat(cur, duel_id, me, "opponent", now)
+    return duel_id
+
+
+def _leave_unstarted(cur, me: str, keep: int) -> None:
+    """Give back the ranked seats `me` took and has not started, but
+    `keep`'s, as settle() does once HOLD is past: a seat in another
+    learner's run is theirs again, a paper of `me`'s own nobody ran is
+    dropped. Nothing was paid for either."""
+    cur.execute(
+        """
+        SELECT d.id FROM pvp_entries e JOIN pvp_duels d ON d.id = e.duel_id
+         WHERE e.user_id = %s AND e.role <> 'ghost' AND d.kind = 'ranked' AND d.status = 'open'
+           AND e.started_at IS NULL AND d.id <> %s
+         ORDER BY d.id
+        """,
+        (me, keep),
+    )
+    for (duel_id,) in cur.fetchall():
+        duel = _duel(cur, duel_id, lock=True)
+        entries = _entries(cur, duel_id, lock=True)
+        mine = _mine(entries, me)
+        if duel is None or duel["status"] != "open" or mine is None or mine["started_at"] is not None:
+            continue
+        if any(o is not mine and o["role"] != "ghost" for o in entries):
+            cur.execute("DELETE FROM pvp_entries WHERE duel_id = %s AND user_id = %s AND role <> 'ghost'",
+                        (duel_id, me))
+        else:
+            cur.execute("DELETE FROM pvp_duels WHERE id = %s", (duel_id,))
+
+
+# What the hall lists of the runs waiting for an opponent.
+WAITING_SHOWN = 10
+
+
+def waiting(cur, me: str, now: datetime) -> list[dict]:
+    """The runs a ranked sprint could deal `me` now, nearest first
+    (plan 315): who played each (« Voyageur » for one off the 番付), their
+    Elo, what the paper asks and how long it waits. Never the score: a
+    ranked run's is the player's once their own has started
+    (_score_kept), and a run picked for its score would be the weak one."""
+    elo = _elo_of(cur, me)
+    cur.execute(
+        f"""
+        SELECT d.id, d.mix, d.expires_at, e.user_id, e.finished_at, r.rating, r.games
+          FROM {_SEEKABLE}
+         ORDER BY {_NEAREST}
+         LIMIT %(shown)s
+        """,
+        {**_seekable_args(me, elo, duel_paper.mix_of(elo), WINDOWS[-1], now), "shown": WAITING_SHOWN},
+    )
+    rows = cur.fetchall()
+    named = names(cur, me, sorted({uid for _i, _m, _x, uid, _f, _r, _g in rows}))
+    return [{
+        "id": duel_id, "kind": "ranked", "mode": "async", "against": "seek",
+        "who": named.get(uid), "elo": int(rating), "provisional": games < duel_elo.PROVISIONAL,
+        "mix": mix_line({"mix": mix}),
+        "expiresAt": _iso(expires), "since": _iso(finished),
+    } for duel_id, mix, expires, uid, finished, rating, games in rows]
 
 
 # ── The cover ───────────────────────────────────────────────────────
@@ -1394,8 +1499,9 @@ def departure(cur, me: str, mine: dict) -> dict:
 def hub(cur, after: list, me: str) -> dict:
     """GET /api/pvp: the duels' hall in one call -- the Elo (before a
     first ranked sprint, the one the learner's level starts them at),
-    the challenges to play, the live invitations, the duels waiting on
-    the other, the last results, the friends and requests."""
+    the challenges to play, the live invitations, the strangers' runs a
+    ranked sprint could deal (plan 315), the duels waiting on the other,
+    the last results, the friends and requests."""
     now = _now()
     _settle_mine(cur, after, me, now)
     active = _rows(cur, me, "d.status = ANY(%s)", (list(ACTIVE),), OPEN_MAX * 2)
@@ -1415,6 +1521,9 @@ def hub(cur, after: list, me: str) -> dict:
         "rating": mine,
         "ranked": departure(cur, me, mine),
         "toPlay": to_play,
+        # Strangers' runs waiting for an opponent (plan 315), apart from
+        # toPlay: what waits on the learner is what the doors count.
+        "waiting": waiting(cur, me, now),
         "live": live_rooms,
         "running": running,
         "done": done,
@@ -1451,23 +1560,42 @@ def _ranked_sql(scope: str) -> str:
     """
 
 
-def board_place(cur, me: str, mine: dict | None = None) -> dict:
-    """`me`'s place on the whole board and how many are on it, counted
-    in the base (the hall asks on every read): one ahead is rated
-    higher, or as high with a smaller id."""
-    mine = mine if mine is not None else duel_elo.rating_row(cur, me)
+def board_place(cur, me: str, mine: dict | None = None, who: str | None = None) -> dict:
+    """`who`'s place on the whole board as `me` reads it (`me`'s own by
+    default) and how many are on it, counted in the base (the hall asks
+    on every read): one ahead is rated higher, or as high with a smaller
+    id. `mine` is `who`'s rating row."""
+    who = who or me
+    mine = mine if mine is not None else duel_elo.rating_row(cur, who)
     on = mine is not None and mine["games"] > 0
     cur.execute(
         """
         SELECT COUNT(*),
-               COUNT(*) FILTER (WHERE r.rating > %(rating)s OR (r.rating = %(rating)s AND r.user_id < %(me)s))
+               COUNT(*) FILTER (WHERE r.rating > %(rating)s OR (r.rating = %(rating)s AND r.user_id < %(who)s))
           FROM pvp_ratings r JOIN user_profiles p ON p.user_id = r.user_id
          WHERE r.games > 0 AND (NOT COALESCE(p.board_hidden, FALSE) OR r.user_id = %(me)s)
         """,
-        {"me": me, "rating": mine["rating"] if on else 0},
+        {"me": me, "who": who, "rating": mine["rating"] if on else 0},
     )
     of, ahead = cur.fetchone()
     return {"rank": int(ahead) + 1 if on else None, "of": int(of)}
+
+
+def on_board(cur, me: str, who: str) -> dict | None:
+    """What the Elo board says of `who` as `me` reads it, for their card
+    (plan 315): their Elo, whether it is provisional and their place on
+    the whole board -- nothing the board does not print already. None
+    for a learner off it: no ranked duel yet, or keeping off the 番付."""
+    row = duel_elo.rating_row(cur, who)
+    if row is None or row["games"] == 0:
+        return None
+    if who != me:
+        cur.execute("SELECT COALESCE(board_hidden, FALSE) FROM user_profiles WHERE user_id = %s", (who,))
+        hidden = cur.fetchone()
+        if hidden is None or hidden[0]:
+            return None
+    place = board_place(cur, me, row, who)
+    return {"elo": row["rating"], "provisional": row["games"] < duel_elo.PROVISIONAL, **place}
 
 
 def board(cur, me: str, scope: str, offset: int, limit: int, around: int) -> dict:

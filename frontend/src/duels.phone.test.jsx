@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
@@ -16,9 +16,9 @@ import './index.css'
 // exact handle and is that handle alone until a request is accepted; a
 // friend's card holds the report, four closed reasons and never a word
 // typed. The departure (D2): the ranked sprint is paid on the button
-// that names its price and starts at once, a first one too. The Elo board (L2):
-// both scopes counted by the server, the learner between their
-// neighbours, the cut only where places are skipped. Today (plan 287):
+// that names its price and starts at once, a first one too. The Elo board (L2,
+// whole since plan 315): both scopes counted by the server, read a page at a
+// time, the learner off the page pinned to the foot, a name opening its card. Today (plan 287):
 // the key beside the gate (D1), what waits counted on its shoulder, the
 // hall behind it; on a day done the board's row (E), the first challenge
 // received -- a live room before it -- or the Elo and the way to the hall.
@@ -90,6 +90,10 @@ beforeEach(() => {
     localStorage.removeItem('jp-duel-line-hidden')
   } catch { /* private mode */ }
 })
+// The lane's files share one origin: leave no language behind for the next.
+afterEach(() => {
+  try { localStorage.removeItem('lang') } catch { /* private mode */ }
+})
 
 // ── H3 — the hall ──
 
@@ -130,6 +134,39 @@ describe('the hall (H3, G1)', () => {
     $$('.pvp-platform')[0].click()
     await settle()
     expect($('.where').textContent).toBe('/duel/new')
+  })
+
+  it('lists the strangers’ runs waiting for an opponent under the challenges, and takes the seat picked', async () => {
+    const run = { id: 61, kind: 'ranked', mode: 'async', against: 'seek', who: 'Mika', elo: 1230, provisional: false,
+      mix: [{ level: 'N4', share: 1 }], expiresAt: new Date(Date.now() + 40 * 3_600_000).toISOString(),
+      since: new Date().toISOString() }
+    duels = { data: { ...HALL, waiting: [run, { ...run, id: 62, who: null }] } }
+    answer = path => (path === '/api/pvp/duels' ? { id: 61, against: 'seek' } : null)
+    await mountHall()
+    expect($('.pvp-console .console__band-opt').textContent).toBe('À jouer · 3')
+    expect($('.pvp-console__cap').textContent).toBe('Sprint classé · en attente d’un adversaire')
+    const rows = $$('.pvp-console__row')
+    expect(rows.map(r => r.querySelector('.pvp-console__who').textContent)).toEqual(['Kenta', 'Mika', 'Voyageur'])
+    // Its Elo and its time, never its score.
+    expect(rows[1].querySelector('.pvp-console__what').textContent).toMatch(new RegExp(`^Elo ${(1230).toLocaleString('fr')} · reste (39|40) h$`))
+    rows[1].querySelector('.pvp-console__go').click()
+    await settle()
+    expect(sentBody('/api/pvp/duels')).toEqual({ ranked: true, duel: 61 })
+    // Its cover, the price before « Partir ».
+    expect($('.where').textContent).toBe('/duel/61')
+  })
+
+  it('says so when another learner took the run first', async () => {
+    const run = { id: 61, kind: 'ranked', mode: 'async', against: 'seek', who: 'Mika', elo: 1230, provisional: false,
+      mix: null, expiresAt: new Date(Date.now() + 40 * 3_600_000).toISOString() }
+    duels = { data: { ...HALL, toPlay: [], waiting: [run] } }
+    answer = () => { throw Object.assign(new Error('gone'), { code: 'pvp_run_gone' }) }
+    await mountHall()
+    expect($('.pvp-console__none')).toBeNull()
+    $('.pvp-console__row .pvp-console__go').click()
+    await settle()
+    expect($('.pvp-console .pvp-error').textContent).toBe('Quelqu’un a pris ce sprint avant toi.')
+    expect($('.where')).toBeNull()
   })
 
   it('offers the way back into a sprint left mid-minute', async () => {
@@ -363,66 +400,150 @@ describe('the departure (D2)', () => {
   })
 })
 
-// ── L2 — the Elo board ──
+// ── L2 — the Elo board, whole since plan 315 ──
 
 const place = (rank, extra = {}) => ({ rank, username: `L${rank}`, elo: 1500 - rank * 20, provisional: false, me: false, ...extra })
 
-function boardServer(path) {
-  const p = new URL(path, 'http://x').searchParams
-  if (p.get('scope') === 'friends') {
-    const entries = [place(1), place(2, { me: true, username: 'Lucas' }), place(3)]
-    return { scope: 'friends', offset: 0, of: 3, entries, near: entries,
-      me: { ...entries[1], gap: { elo: 21, username: 'L1', rank: 1 } } }
+/** A board of `of` places, the learner at `mine` (none: off it), read a
+ *  page at a time as routes/pvp.py answers it. */
+function boardOf(of, mine, scope) {
+  return params => {
+    const offset = Number(params.get('offset'))
+    const limit = Number(params.get('limit'))
+    const at = r => place(r, r === mine ? { me: true, username: 'Lucas' } : r === 2 ? { provisional: true } : {})
+    const entries = []
+    for (let r = offset + 1; r <= Math.min(of, offset + limit); r += 1) entries.push(at(r))
+    const me = mine
+      ? { ...at(mine), gap: mine > 1 ? { elo: 21, username: `L${mine - 1}`, rank: mine - 1 } : null }
+      : { rank: null, elo: 1200, provisional: true, gap: null, me: true }
+    return { scope, offset, of, entries, near: [], me }
   }
-  const me = place(8, { me: true, username: 'Lucas' })
-  return { scope: 'all', offset: 0, of: 10, entries: [1, 2, 3, 4, 5].map(r => place(r, r === 2 ? { provisional: true } : {})),
-    near: [place(7), me, place(9)], me: { ...me, gap: { elo: 21, username: 'L7', rank: 7 } } }
+}
+
+const CARDS = {
+  L3: { username: 'L3', relation: 'none', board: { elo: 1440, provisional: false, rank: 3, of: 120 } },
+  L1: { username: 'L1', relation: 'friend', elo: 1480, provisional: false, wins: 2, draws: 0, losses: 1,
+    board: { elo: 1480, provisional: false, rank: 1, of: 3 } },
+}
+
+function boardServer(path, init) {
+  if (path.startsWith('/api/pvp/learner/')) return CARDS[path.split('/').at(-1)]
+  if (path === '/api/pvp/requests' && init?.method === 'POST') return { status: 'sent' }
+  if (path === '/api/pvp/friends') {
+    return { friends: [{ username: 'L1', elo: 1480, provisional: false, wins: 2, draws: 0, losses: 1 }],
+      requests: [], sent: [], blocked: [], limits: { friends: 200 } }
+  }
+  const p = new URL(path, 'http://x').searchParams
+  return p.get('scope') === 'friends' ? boardOf(3, 2, 'friends')(p) : boardOf(120, 80, 'all')(p)
 }
 
 const mountBoard = () => mount('/profile/duels/board', '/profile/duels/board', <DuelBoardScreen session={SESSION} />)
+const ranks = () => $$('.banzuke .leaderboard-row__rank').map(r => Number(r.textContent))
+const boardAsks = () => asked('/api/pvp/board').map(c => new URL(c.path, 'http://x').searchParams)
 
-describe('the Elo board (L2)', () => {
-  it('counts both scopes from the server, and asks for the top and the learner’s neighbours', async () => {
+describe('the Elo board (L2, plan 315)', () => {
+  it('counts both scopes from the server, and reads each a page at a time from its top', async () => {
     answer = boardServer
     await mountBoard()
-    expect($$('.bz__seg .seg__opt').map(o => o.textContent)).toEqual(['Tous · 10', 'Amis · 3'])
-    const asks = asked('/api/pvp/board').map(c => new URL(c.path, 'http://x').searchParams)
+    expect($$('.bz__seg .seg__opt').map(o => o.textContent)).toEqual(['Tous · 120', 'Amis · 3'])
+    const asks = boardAsks()
     expect(asks.map(p => p.get('scope')).sort()).toEqual(['all', 'friends'])
-    expect(asks.every(p => p.get('limit') === '5' && p.get('around') === '1')).toBe(true)
+    expect(asks.every(p => p.get('offset') === '0' && p.get('limit') === '50')).toBe(true)
   })
 
-  it('draws the top, a cut, then the learner between their neighbours', async () => {
+  it('draws the whole page, the provisional marked and said, the learner off it pinned to the foot', async () => {
     answer = boardServer
     await mountBoard()
-    expect($$('.banzuke .leaderboard-row__rank').map(r => Number(r.textContent))).toEqual([1, 2, 3, 4, 5, 7, 8, 9])
-    expect($$('.banzuke .bz__cut')).toHaveLength(1)
-    const me = $('.leaderboard-row--me')
-    expect(me.querySelector('.leaderboard-row__name').textContent).toBe('Toi')
-    // A provisional Elo is marked; a settled one is not.
+    expect(ranks()).toEqual(Array.from({ length: 50 }, (_, i) => i + 1))
+    // A provisional Elo is marked, and what the mark means is said once.
     expect($$('.leaderboard-row')[1].querySelector('.pvp-board__prov')).toBeTruthy()
     expect($$('.leaderboard-row')[0].querySelector('.pvp-board__prov')).toBeNull()
-    expect($('.bz__gap-to').textContent).toBe('21 points d’Elo de la 7ᵉ place')
+    expect($$('.bzp__line').at(-1).textContent).toContain('Provisoire')
+    // The learner's place, 80th, rides the foot with the gap to the 79th.
+    expect($('.bzp__me .leaderboard-row__rank').textContent).toBe('80')
+    expect($('.bzp__me .leaderboard-row__name').textContent).toBe('Toi')
+    expect($('.bzp__me-gap').textContent).toContain('+21 → 79ᵉ')
   })
 
-  it('draws no cut where no place is skipped', async () => {
+  it('reads the next places from the foot of the list', async () => {
+    answer = boardServer
+    await mountBoard()
+    button('Places suivantes').click()
+    await settle()
+    expect(boardAsks().at(-1).get('offset')).toBe('50')
+    expect(ranks()).toEqual(Array.from({ length: 100 }, (_, i) => i + 1))
+  })
+
+  it('jumps to the learner’s place, the places before it a press away', async () => {
+    answer = boardServer
+    await mountBoard()
+    $('.bzp__jump').click()
+    await settle()
+    expect(boardAsks().at(-1).get('offset')).toBe('69')
+    expect(ranks()[0]).toBe(70)
+    expect($('.banzuke .leaderboard-row--me .leaderboard-row__name').textContent).toBe('Toi')
+    button('Places précédentes').click()
+    await settle()
+    expect(ranks()[0]).toBe(20)
+  })
+
+  it('draws a scope whose learner is on the list with its gap under it', async () => {
     answer = boardServer
     await mountBoard()
     $$('.bz__seg .seg__opt')[1].click()
     await settle(50)
-    expect($$('.banzuke .leaderboard-row__rank').map(r => Number(r.textContent))).toEqual([1, 2, 3])
-    expect($('.banzuke .bz__cut')).toBeNull()
+    expect(ranks()).toEqual([1, 2, 3])
+    expect($('.bzp__me')).toBeNull()
     expect($('.bz__gap-to').textContent).toBe('21 points d’Elo de la 1re place')
   })
 
   it('says a learner off the board is not ranked yet', async () => {
     answer = path => {
-      const scope = new URL(path, 'http://x').searchParams.get('scope')
-      return { scope, offset: 0, of: 4, entries: [1, 2, 3, 4].map(r => place(r)), near: [],
-        me: { rank: null, elo: 1200, provisional: true, gap: null, me: true } }
+      const p = new URL(path, 'http://x').searchParams
+      return boardOf(4, null, p.get('scope'))(p)
     }
     await mountBoard()
     expect($('.leaderboard-row--me')).toBeNull()
+    expect($('.bzp__me')).toBeNull()
     expect($('.bz__gap-to').textContent).toBe('pas encore classé')
+  })
+
+  it('opens a name’s card: what the board says of them, and the way to ask them as a friend', async () => {
+    answer = boardServer
+    await mountBoard()
+    $$('.banzuke .leaderboard-row')[2].querySelector('button.leaderboard-row__name').click()
+    await settle()
+    expect(asked('/api/pvp/learner/L3')).toHaveLength(1)
+    const figs = $$('.pvp-card__fig').map(f => f.textContent)
+    expect(figs).toEqual([`${(1440).toLocaleString('fr')}Elo`, '3ᵉsur 120'])
+    expect($('.pvp-card__facts .pvp-sheet__help')).toBeNull()
+    button('Demander en ami').click()
+    await settle()
+    expect(sentBody('/api/pvp/requests')).toEqual({ username: 'L3' })
+    expect($('.pvp-card__way').textContent).toBe('Demandé')
+  })
+
+  it('opens nothing from the learner’s own row', async () => {
+    answer = boardServer
+    await mountBoard()
+    $$('.bz__seg .seg__opt')[1].click()
+    await settle(50)
+    expect($('.banzuke .leaderboard-row--me button')).toBeNull()
+  })
+
+  it('challenges a friend from their card', async () => {
+    answer = boardServer
+    await mountBoard()
+    $$('.bz__seg .seg__opt')[1].click()
+    await settle(50)
+    $$('.banzuke .leaderboard-row')[0].querySelector('button.leaderboard-row__name').click()
+    await settle()
+    expect($$('.pvp-card__fig').map(f => f.textContent)).toContain('2–1entre vous')
+    button('Défier L1').click()
+    await settle()
+    // The friend's sheet opens on them.
+    expect(asked('/api/pvp/friends')).toHaveLength(1)
+    expect($('.pvp-pick__row--on .pvp-pick__name').textContent).toBe('L1')
   })
 })
 

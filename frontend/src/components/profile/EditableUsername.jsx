@@ -54,8 +54,14 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
     // the generic line.
     let refused = t.genericError
     apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ [field]: next }) })
-      .then(r => {
+      .then(async r => {
         if (r.status === 409) refused = t.usernameTaken
+        // A handle is public, and held to the server's filter (plan
+        // 310): its refusal is a code, never the server's words.
+        if (r.status === 422) {
+          const body = await r.json().catch(() => null)
+          if (body?.detail?.code === 'content_refused') refused = t.usernameRefused
+        }
         if (!r.ok) throw new Error(`profile ${r.status}`)
         return r.json()
       })

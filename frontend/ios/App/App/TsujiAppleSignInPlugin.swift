@@ -4,7 +4,7 @@ import CryptoKit
 import Foundation
 import UIKit
 
-// 林檎 — Sign in with Apple, on the system's own sheet (plan 295).
+// 林檎 — Sign in with Apple, on the system's own sheet (plan 321).
 //
 // Apple's guideline 4.8 asks an iPhone app that offers Google to offer
 // an equivalent beside it, and this is it. src/lib/native.js's

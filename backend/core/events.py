@@ -42,7 +42,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # boot_ms is why render.yaml carries `plan: starter`; it is the
     # before/after of that line.
     "app_open":       frozenset({"boot_ms", "cold", "platform", "standalone"}),
-    "boot_timeout":   frozenset({"waited_ms"}),
+    "boot_timeout":   frozenset({"waited_ms", "reason"}),
 
     # ── Where people go ──────────────────────────────────────────
     "screen_view":    frozenset({"route", "tab"}),
@@ -94,7 +94,7 @@ EVENTS: dict[str, frozenset[str]] = {
     "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms",
                                  "level_how", "placed",
                                  "edited_goal", "edited_rhythm", "edited_hour", "edited_lines",
-                                 "named", "kept"}),
+                                 "named", "kept", "source"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.
@@ -288,6 +288,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # in event_daily. `count` is the day's slots taken, this one
     # included; `over` whether it is past `limit`.
     "ai_use":         frozenset({"feature", "count", "limit", "over"}),
+    # The slot an ai_use took, given back by core/daily_limit.release
+    # because no model was paid for the call (a provider outage). The
+    # day's calls are ai_use less ai_refund.
+    "ai_refund":      frozenset({"feature"}),
 
     # ── Friction ─────────────────────────────────────────────────
     # An uncaught error or rejected promise, by screen. NO MESSAGE AND
@@ -338,12 +342,24 @@ EVENTS: dict[str, frozenset[str]] = {
 # run keys, a boarding step from BoardingFlow). Two keys are held to a
 # SHAPE instead, on every name, below: `route` and `path`.
 _RUN_DOORS = frozenset({"today", "learn", "practice", "deck", "ride", "exam", "other"})
+# Every feature core/daily_limit counts: the `feature` of ai_use and
+# ai_refund. A ration added there is added here, or its rows lose it.
+_AI_FEATURES = frozenset({"ask", "composition", "translation_review", "deep_analysis",
+                          "exam_paper", "line_translation", "song_transcribe",
+                          "conversation_talk", "conversation_review", "lyrics_sort",
+                          "ocr", "comprehension"})
+
 VALUES: dict[str, dict[str, frozenset[str]]] = {
+    # Why the gate's first request failed (plan 312): its 45 s ran out,
+    # the server answered 5xx (a restart answers 502), or no answer came.
+    "boot_timeout": {
+        "reason": frozenset({"timeout", "server", "network"}),
+    },
     "session_start": {
         "platform": frozenset({"web", "native"}),
         "vp":       frozenset({"phone", "tablet", "desk", "wide"}),
         "os":       frozenset({"ios", "android", "windows", "mac", "linux", "chromeos", "other"}),
-        "lang":     frozenset({"fr", "en"}),
+        "lang":     frozenset({"fr", "en", "es"}),
         "theme":    frozenset({"light", "dark", "auto"}),
         "input":    frozenset({"touch", "mouse"}),
     },
@@ -351,6 +367,10 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
         "kept":      frozenset({"google", "apple", "password", "link", "already", "none"}),
+        # The door the learner came in by (plan 313, lib/arrival.js): the
+        # link's ?src=, else the class of the page that sent them, else
+        # the store (the native app), else nothing known.
+        "source":    frozenset({"tiktok", "instagram", "youtube", "reddit", "search", "store", "other", "direct"}),
     },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},
@@ -375,7 +395,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
                               "dictionary", "export", "level_fit", "conversation",
                               "comeback", "readings", "duels_key", "duels_board",
                               "duels_news"}),
-        "action":  frozenset({"play", "text", "photo", "video", "scan", "send",
+        "action":  frozenset({"play", "text", "photo", "video", "song", "scan", "send",
                               "open", "search", "progress", "move", "stay", "hide"}),
     },
     "transfer_import": {"source": frozenset({"anki", "wanikani", "renshuu"})},
@@ -384,13 +404,13 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "setting": frozenset({"theme", "lang", "rating_scale", "reading_pace", "sound",
                               "notifications", "level", "lines", "daily_target",
                               "main_mode", "today_mode"}),
-        "value":   frozenset({"light", "dark", "auto", "fr", "en",
+        "value":   frozenset({"light", "dark", "auto", "fr", "en", "es", "es-ES",
                               "binary", "simple", "full",
                               "standard", "relaxed", "slow", "untimed",
                               "on", "off", "N5", "N4", "N3", "N2", "N1", "changed"}),
     },
-    "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
-                                         "deep_analysis", "exam_paper", "line_translation"})},
+    "ai_use":       {"feature": _AI_FEATURES},
+    "ai_refund":    {"feature": _AI_FEATURES},
     # What a refused fare was for (core/credits.FARES): a review, or
     # since plan 279 a ranked duel's departure or a duel's corrections.
     "fare_blocked": {"kind": frozenset({"review", "duel", "duel_review"})},

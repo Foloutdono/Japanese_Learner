@@ -4,30 +4,35 @@ One counter for every daily ceiling (plan 125).
 routes/ocr.py and routes/reading.py each grew a table of their own --
 ocr_usage, comprehension_usage, the same three columns -- and each said
 so: two counters is a coincidence, three is a pattern, and the third
-would be the moment to generalise. 作文's tutor review is the third. It
-counts here, in daily_usage keyed by (learner, feature, local day), and
-the two older tables stay where they are: moving them is a data
-migration with nothing to gain yet. The day a fourth feature or an
-operator report wants one table is the day they move -- a one-shot
-INSERT ... SELECT each, and one line in each route.
+would be the moment to generalise. 作文's tutor review was the third,
+and it counted here, in daily_usage keyed by (learner, feature, local
+day). Plan 320 moved the two older ones in ("ocr", "comprehension"):
+scripts/migrate_daily_usage.py folds their rows into this table and
+drops them. Every model call's ceiling counts here now.
 
 The rules are the two routes' own, kept:
 
   - the day is the LEARNER's (user_profiles.tz_offset_min through
     core.credits.local_today), so an allowance comes back at their
     midnight and the screen's "tomorrow" is true;
-  - the slot is claimed BEFORE the model call, so a failed call still
-    costs one -- a client retrying a failure is exactly what a cap
-    exists to stop;
+  - the slot is claimed BEFORE the model call, so two requests at once
+    cannot both slip under the ceiling, and a call a model was paid for
+    costs one even when its reply is then refused or unreadable;
+  - a call that failed with no model paid (llm_shared.LLMUnavailable
+    and nothing on the meter) gives its slot back (refund_unbilled,
+    the owner's rule of 2026-11-11): a provider outage must not spend a
+    learner's allowance. A retry in an outage then costs nothing,
+    because it reaches nothing;
   - a database failure fails OPEN (0, under any cap): comprehension's
     choice rather than OCR's, because a hiccup must not refuse a run
     that works without the model.
 
-claim() only counts. The route decides what over the cap means -- a 429
+claim() only counts, and release() only gives back. The route decides what over the cap means -- a 429
 naming core.credits.resets_at, or a repeat served from a pool -- and
 says it in its own words.
 """
 import logging
+from contextlib import contextmanager
 
 from core.credits import local_today
 from core.db import db_conn
@@ -117,3 +122,80 @@ def claim(user_id: str, feature: str, limit: int) -> int:
     })
     return count
 
+
+
+def release(user_id: str, feature: str) -> None:
+    """Give back one of today's `feature` slots for `user_id`: the one
+    claim() took for a call no model was paid for. Never below 0, and a
+    day with no row is left without one.
+
+    The day is the learner's today, as claim() reads it: a call that
+    straddled their midnight gives back today's slot rather than
+    yesterday's, which can only leave them one more, never one fewer.
+
+    Fails quietly, as claim() fails open: a refund that could not be
+    written costs the learner the slot, which is today's behaviour."""
+    try:
+        conn = db_conn()
+    except Exception:
+        logger.exception("daily_usage: no connection; %s slot not given back", feature)
+        return
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+            cur.execute(
+                """
+                UPDATE daily_usage SET count = count - 1
+                 WHERE user_id = %s AND feature = %s AND day = %s AND count > 0
+                RETURNING count
+                """,
+                (user_id, feature, local_today(row[0] if row else None)),
+            )
+            given = cur.fetchone()
+        conn.commit()
+    except Exception:
+        logger.exception("daily_usage: refund failed; %s slot not given back", feature)
+        return
+    finally:
+        conn.close()
+    if given is None:
+        return
+    # 足跡: ai_use counted the claim when it was taken; this says it was
+    # given back, so the dashboard's calls are the claims less these.
+    from core import events
+    events.record(user_id, "ai_refund", {"feature": feature})
+
+
+def _unavailable(exc: BaseException) -> bool:
+    """Whether `exc` is, or was raised while handling, an LLMUnavailable:
+    the routes turn it into an HTTPException(503) inside their except."""
+    from study.llm_shared import LLMUnavailable
+    seen = set()
+    while exc is not None and id(exc) not in seen:
+        if isinstance(exc, LLMUnavailable):
+            return True
+        seen.add(id(exc))
+        exc = exc.__cause__ or exc.__context__
+    return False
+
+
+@contextmanager
+def refund_unbilled(user_id: str, feature: str):
+    """Around the model calls a claimed slot pays for: the slot is given
+    back if the block fails with LLMUnavailable (raised, or the cause of
+    what was raised) and no call inside it was billed (llm_shared's
+    meter). A success, a billed reply refused or unreadable, a timeout
+    mid-answer or any other error keeps it. The exception goes on as it
+    was."""
+    from study.llm_shared import metered
+    with metered() as meter:
+        try:
+            yield
+        except BaseException as e:
+            if not meter.billed and _unavailable(e):
+                release(user_id, feature)
+            raise

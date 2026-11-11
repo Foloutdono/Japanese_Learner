@@ -155,6 +155,18 @@ def test_a_real_point_above_the_level_is_still_named():
         assert point in level_mix.level_mix(text, level)["grammar_over"], (level, text)
 
 
+def test_anything_is_no_why():
+    # 何でも, "anything" (the N4 point 何でも／誰でも／いつでも／どこでも),
+    # was counted as the N3 何で, "why" (plan 299): every text that said
+    # it spent its one hard word in twenty on a word it did not say.
+    for text in ("兄は何でも食べます。", "飲みものは何でもいいですよ。", "分からないことは、何でも聞いてください。"):
+        assert level_mix.level_mix(text, "N4")["vocab_over"] == [], text
+        assert level_mix.validate_vocab_mix(text, "N4") == [], text
+    # "Why" is still a word above N4.
+    over = level_mix.level_mix("何で泣いているの？", "N4")["vocab_over"]
+    assert [(e["word"], e["level"]) for e in over] == [("何で", "N3")]
+
+
 def test_messages_never_route_into_the_kanji_feedback_branch():
     """exam_reading_gen._as_feedback sends any message containing
     'outside' and 'allowed set' down its kanji path; these must pass

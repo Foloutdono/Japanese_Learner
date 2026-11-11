@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import en from '../locales/en/index.js'
 import fr from '../locales/fr/index.js'
+import es from '../locales/es/index.js'
 import { authErrorMessage } from './authErrors'
 
 // ── 改札 — the one table both refusal shapes read ────────────────
@@ -24,10 +25,10 @@ describe('authErrorMessage', () => {
     expect(en.oauthLinkingOff).toBeTruthy()
   })
 
-  // Plan 295: the same two refusals from the iPhone's Apple sheet name
+  // Plan 321: the same two refusals from the iPhone's Apple sheet name
   // Apple, not Google, in both languages.
   it('names Apple when Apple was refused', () => {
-    for (const t of [en, fr]) {
+    for (const t of [en, fr, es]) {
       expect(authErrorMessage({ code: 'identity_already_exists', provider: 'apple' }, t)).toBe(t.oauthAlreadyLinkedApple)
       expect(authErrorMessage({ code: 'manual_linking_disabled', provider: 'apple' }, t)).toBe(t.oauthLinkingOffApple)
       expect(t.oauthAlreadyLinkedApple).toMatch(/Apple/)

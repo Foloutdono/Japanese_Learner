@@ -234,7 +234,7 @@ it off, both report the refusal and change nothing — no progress is lost
 either way, but neither offer works, and the second one is the only remedy
 for a learner who already has a duplicate account.
 
-## 林檎 — Sign in with Apple, on the iPhone (plan 295)
+## 林檎 — Sign in with Apple, on the iPhone (plan 321)
 
 App Review's guideline 4.8: an app that signs people in with Google must
 offer, beside it, a login that collects only a name and an address, lets the

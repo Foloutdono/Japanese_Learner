@@ -252,7 +252,7 @@ describe('reading the identities a pass carries', () => {
   })
 })
 
-// ── 林檎 — Sign in with Apple, the iPhone's alone (plan 295) ─────────
+// ── 林檎 — Sign in with Apple, the iPhone's alone (plan 321) ─────────
 // Guideline 4.8: an iPhone app offering Google offers Apple beside it.
 // None of Google's round trip applies -- the system's sheet answers in
 // the page with an identity token -- so what is pinned is what Supabase

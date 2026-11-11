@@ -90,12 +90,18 @@ const PUNCT_ROMAJI = { '。': '.', '、': ',', '？': '?', '！': '!', '「': '�
 /** The sentence in romaji, word by word as the slides cut it. */
 export function lineRomaji(rows) {
   let out = ''
+  let held = false
   for (const row of rows) {
     if (row.k === 'punct') {
       const p = PUNCT_ROMAJI[row.t] ?? ''
       out += p === '“' ? ` ${p}` : p
+      held = false
     } else {
-      out += (out && !out.endsWith('“') ? ' ' : '') + row.ro
+      // A row that ends on っ is said into the next (二十 + さい nijus +
+      // sai, だっ + た dat + ta), so the line reads nijussai, datta.
+      out += (out && !out.endsWith('“') && !held ? ' ' : '') + row.ro
+      const said = row.fu?.length ? row.fu.at(-1)[1] || row.fu.at(-1)[0] : row.t
+      held = /[っッ]$/.test(said)
     }
   }
   // A capital at the start of the line and after each stop inside it.
@@ -135,9 +141,10 @@ export function readingMisses(row, kanji, known = []) {
     }
   })
   // Another reading of one of its kanji, in place of the one it takes here;
-  // never for a word that is one kanji alone, whose other reading is
-  // usually the same word read another way (店 みせ, てん: plan 229l).
-  for (const [text, r] of [...row.t].length > 1 ? row.fu || [] : []) {
+  // never for a word written with one kanji, whose other reading is
+  // usually the same word read another way (店 みせ, てん: plan 229l;
+  // 怒って いかって, okurigana or not: plan 248).
+  for (const [text, r] of [...row.t].filter(c => /[\u3400-\u9fff々]/.test(c)).length > 1 ? row.fu || [] : []) {
     if (!r || [...text].length !== 1 || !kanji?.[text]) continue
     const k = kanji[text]
     for (const other of [...k.on.map(toHira), ...k.kun.map(([stem]) => stem)]) {

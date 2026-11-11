@@ -30,7 +30,7 @@ import '../../index.css'
 // about to lose their way back to their own account.
 
 const auth = { signOut: vi.fn(), updateUser: vi.fn(), refreshSession: vi.fn(async () => ({})) }
-// The iPhone's shell, where Apple is offered beside Google (plan 295).
+// The iPhone's shell, where Apple is offered beside Google (plan 321).
 const iphone = { on: false }
 const connectProvider = vi.fn(async () => ({ ok: true }))
 vi.mock('../../lib/supabase', () => ({ supabase: { auth } }))
@@ -157,7 +157,7 @@ describe('connecting Google to an account that already has a key', () => {
   })
 })
 
-// ── 林檎 — Apple beside Google, on the iPhone (plan 295) ─────────────
+// ── 林檎 — Apple beside Google, on the iPhone (plan 321) ─────────────
 // Guideline 4.8: wherever the iPhone app offers Google, Apple is offered
 // too, and the same rules hold -- a guest's progress is LINKED, never
 // left behind, and a pass is offered only the identity it lacks.

@@ -35,7 +35,7 @@ export function nativePlatform() {
 }
 
 /** Sign in with Apple, on the system's own sheet: the iPhone's shell
- *  alone (plan 295). Apple's guideline 4.8 asks for it wherever Google
+ *  alone (plan 321). Apple's guideline 4.8 asks for it wherever Google
  *  is offered on iOS; the web and Android have no such sheet, and the
  *  web's redirect would need a secret renewed every six months. */
 export function canSignInWithApple() {
@@ -60,6 +60,23 @@ export async function openExternal(url) {
     return n.openExternal(url)
   }
   window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+// The app's page on Google Play (plan 307), the landing page's
+// STORES.googlePlay.
+export const PLAY_ID = 'app.tsuji'
+export const PLAY_URL = `https://play.google.com/store/apps/details?id=${PLAY_ID}`
+
+/** The store's page for the app. In the Android shell a market:// page
+ *  is a navigation the WebView hands to the OS (Capacitor's
+ *  Bridge.launchIntent, an ACTION_VIEW), and the Play Store app opens
+ *  on it rather than a browser tab; anywhere else, the page on the web. */
+export function openStore() {
+  if (nativePlatform() === 'android') {
+    window.location.href = `market://details?id=${PLAY_ID}`
+    return Promise.resolve()
+  }
+  return openExternal(PLAY_URL)
 }
 
 /** The web's download: an anchor with an object URL, revoked on the

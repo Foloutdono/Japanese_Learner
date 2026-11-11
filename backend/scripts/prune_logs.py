@@ -43,9 +43,10 @@ from a guess about what looks old:
                      `deleted_at` and erased a day later -- on the
                      learner's next write, or here for one who does not
                      come back.
-  ocr_usage          a per-(learner, day) counter, and routes/ocr.py
-                     only ever touches CURRENT_DATE's row. Past days
-                     are read by nothing.
+  daily_usage        a per-(learner, feature, day) counter, and
+                     core/daily_limit.py only ever touches the
+                     learner's today. Past days are read by nothing
+                     (ai_use in event_daily keeps the history).
   the two job tables claim locks, deleted on success -- so a row that
                      is still there long after its last update is from
                      a run that died. Neither is a lock any more.
@@ -95,8 +96,6 @@ PER_USER = [
 # (table, timestamp column, days, why). Row age, not a per-user count,
 # because there is nothing to rank -- these are keyed by day, or dead.
 BY_AGE = [
-    ("ocr_usage", "day", 30,
-     "routes/ocr.py only ever reads CURRENT_DATE's counter"),
     ("daily_usage", "day", 30,
      "core/daily_limit.py only ever reads today's counter"),
     ("exam_generation_jobs", "updated_at", 7,
@@ -145,7 +144,7 @@ def _unplayed_duels(cur, days: int, user_id: str | None, count_only: bool) -> in
 
 
 # The age policies a --user scope can narrow: the ones with a user_id.
-_USER_SCOPED = {"ocr_usage", "video_sessions"}
+_USER_SCOPED = {"daily_usage", "video_sessions"}
 
 
 def _user_clause(user_id: str | None, column: str = "user_id") -> tuple[str, dict]:

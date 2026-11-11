@@ -33,6 +33,8 @@ beforeEach(() => {
 afterEach(async () => {
   document.scrollingElement.scrollTop = 0
   await page.viewport(390, 667)
+  // The lane's files share one origin: leave no language behind for the next.
+  try { localStorage.removeItem('lang') } catch { /* private mode */ }
 })
 
 const top = sel => $(sel).getBoundingClientRect().top

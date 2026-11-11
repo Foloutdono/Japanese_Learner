@@ -31,11 +31,16 @@ import { registerSW } from 'virtual:pwa-register'
 import { swUpdate } from './stores/swUpdate'
 import { isNative } from './lib/platform'
 import { takeEntry } from './lib/frontEntry'
+import { noteArrival } from './lib/arrival'
 
 // The dead-bundle guard in index.html sets this before reloading; that
 // this module is running at all is the proof it worked, and clearing it
 // lets a later stale load in the same tab get its one retry too.
 try { sessionStorage.removeItem('jp-bundle-reload') } catch { /* private mode */ }
+
+// 入口 (plan 313): a link straight into the app notes where it came from,
+// as the landing page does for everyone it forwards (lib/arrival.js).
+noteArrival({ search: window.location.search, referrer: document.referrer })
 
 // ── The service worker (plan 065) ──
 // Web build only. vite-plugin-pwa is disabled for the native mode (a

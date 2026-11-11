@@ -11,8 +11,9 @@ choices.
 """
 import logging
 import random
+from functools import lru_cache
 
-from content.grammar_points_data import find, gloss, grammar_to_id, localise
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, find, gloss, grammar_to_id, localise, texts
 from study.grammar_choose import choose_items, choose_payload
 from study.grammar_examples import (
     blank_span, blanked_payload, example_payload, pattern_furigana, structure_furigana,
@@ -57,19 +58,41 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
             "raw_id": grammar_to_id(r_entry, r_level),
             "level": r_level,
             "meaning": gloss(r_entry, lang),
-            "text": localise({"en": rival["en"], "fr": rival["fr"]}, lang),
+            "text": localise(texts(rival), lang),
         })
     return {
         "pattern_furigana": pattern_furigana(pattern, entry.get("reading")),
         "structure_furigana": structure_furigana(entry, lang),
         "register": entry.get("register"),
         "steps": [
-            {"kind": step["kind"], "text": localise({"en": step["en"], "fr": step["fr"]}, lang)}
+            {"kind": step["kind"], "text": localise(texts(step), lang)}
             for step in entry.get("steps", [])
         ],
         "compare": compare,
         "examples": [example_payload(ex, pattern, lang) for ex in entry.get("examples", [])],
     }
+
+
+@lru_cache(maxsize=None)
+def _same_family(pattern: str) -> frozenset[str]:
+    """Every point the catalogue's `same` marks join to `pattern`, either
+    way and through one another (plan 319): なきゃ／なくちゃ is the twin of
+    なくてはいけない, which is the twin of ないといけない, so none of them
+    is drawn as a filler in another's hole, where it would say the same."""
+    edges: dict[str, set[str]] = {}
+    for entries in GRAMMAR_POINTS_BY_LEVEL.values():
+        for e in entries:
+            for r in e.get("compare", []):
+                if r.get("same"):
+                    edges.setdefault(e["pattern"], set()).add(r["pattern"])
+                    edges.setdefault(r["pattern"], set()).add(e["pattern"])
+    seen, todo = {pattern}, [pattern]
+    while todo:
+        for nxt in edges.get(todo.pop(), ()):
+            if nxt not in seen:
+                seen.add(nxt)
+                todo.append(nxt)
+    return frozenset(seen - {pattern})
 
 
 def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: str,
@@ -100,7 +123,8 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     patterns. `authored=False` leaves those out, for the one caller that
     draws a specimen from the marked sentence beside it (routes/station).
 
-    Choices are the rivals the lesson names, first; when fewer than
+    Choices are the rivals the lesson names, first -- never one it marks
+    `same` in meaning (plan 319), which is as right in the hole; when fewer than
     CONTRAST_CHOICES - 1 of them exist, same-level verifiable patterns
     that do NOT also occur in the sentence fill the gap (the rule
     study/placement.py uses, so an item never has two right answers).
@@ -137,26 +161,35 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     blanked = blanked_payload(example, pattern, lang, level)
     fill = "".join(p["text"] for p in blanked.get("fill", []))
     lines = {r["pattern"]: r["en"] for r in entry.get("compare", [])}
+    # A rival the lesson calls the same in meaning (`same`, plan 319: だろう
+    # beside でしょう, ずに beside ないで) stands in the point's hole as well
+    # as the point, and no translation tells them apart: it is never a
+    # wrong answer, named or drawn as a filler.
+    same = {r["pattern"] for r in entry.get("compare", []) if r.get("same")}
 
     rivals = [
         r["pattern"] for r in entry.get("compare", [])
-        if r["pattern"] != pattern and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
+        if r["pattern"] != pattern and r["pattern"] not in same
+        and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
     ]
     if offer in rivals:
         rivals.remove(offer)
         rivals.insert(0, offer)
     choices = list(dict.fromkeys(rivals))[: CONTRAST_CHOICES - 1]
     if checkable and len(choices) < CONTRAST_CHOICES - 1:
+        family = same | _same_family(pattern)
         fillers = [
             g["pattern"] for g in grammar_list
-            if g["pattern"] != pattern and g["pattern"] not in choices
+            if g["pattern"] != pattern and g["pattern"] not in choices and g["pattern"] not in family
             and verifiable(g["pattern"]) and not contains_pattern(sentence, g["pattern"])
         ]
         # Drawn in a random order, each kept only where it prints as no
         # option before it does (plan 254): もう〜ました is ました, which
-        # 〜ました／〜ませんでした already says beside 〜ています.
+        # 〜ました／〜ませんでした already says beside 〜ています. The order is
+        # `rng`'s, so a seeded caller (the tour's quiz) draws the same
+        # fillers in every process: `fillers` is in the catalogue's order.
         taken = {f.text for f in choice_forms(pattern, fill, [pattern] + choices, lines).values()}
-        for filler in pick_distractors(fillers, lambda p: p, pattern, len(fillers)):
+        for filler in pick_distractors(fillers, lambda p: p, pattern, len(fillers), rng=rng):
             if len(choices) == CONTRAST_CHOICES - 1:
                 break
             form = form_text(pattern, fill, filler)
@@ -175,7 +208,7 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     # What each named rival is not (plan 194): the lesson's own line on it,
     # said when that rival is the choice taken -- the trap explained.
     why = {
-        forms[r["pattern"]].text: localise({"en": r["en"], "fr": r["fr"]}, lang)
+        forms[r["pattern"]].text: localise(texts(r), lang)
         for r in entry.get("compare", []) if r["pattern"] != pattern and r["pattern"] in forms
     }
     return {

@@ -59,7 +59,7 @@ from pydantic import BaseModel, Field
 
 import psycopg2.extras
 
-from core.auth import get_user_id, prefixed, unprefixed
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import credits, events, learner_modes, review_plan
 from core.db import db_conn
 from core.lines import lines_or_all
@@ -82,8 +82,8 @@ MAX_BATCH = 25
 # daily queue must be indistinguishable from the same card met in its own
 # section, or the queue becomes a second, subtly different app.
 from routes.kana import _build_kana_card              # noqa: E402
-from routes.kanji import _build_kanji_card, FR_MAP as KANJI_FR_MAP     # noqa: E402
-from routes.vocab import _build_vocab_card, FR_MAP as VOCAB_FR_MAP     # noqa: E402
+from routes.kanji import _build_kanji_card, GLOSSES as KANJI_GLOSSES     # noqa: E402
+from routes.vocab import _build_vocab_card, GLOSSES as VOCAB_GLOSSES     # noqa: E402
 from translations import get_meaning                  # noqa: E402
 from routes.grammar import _build_grammar_card, ladder_positions, mark_tutorials   # noqa: E402
 from study.glyph_tour import mark_glyph_tours                  # noqa: E402
@@ -1024,12 +1024,12 @@ def _settled_word(source: str, raw_id: str, lang: str) -> dict | None:
         kanji = entry.get("kanji") or ""
         kana = (entry.get("kana") or "").split("/")[0].strip()
         jp, reading = (kanji, kana) if kanji else (kana, "")
-        meaning = get_meaning(entry, lang, VOCAB_FR_MAP)
+        meaning = get_meaning(entry, lang, VOCAB_GLOSSES)
     elif source == KANJI:
         jp = entry.get("kanji") or ""
         # "ド・ト・つち": the character's readings, the first three.
         reading = "・".join((entry.get("kana") or "").split("・")[:3])
-        meaning = get_meaning(entry, lang, KANJI_FR_MAP)
+        meaning = get_meaning(entry, lang, KANJI_GLOSSES)
     else:
         return None
     if not jp or not meaning:
@@ -1431,8 +1431,8 @@ def post_basics_skip(user_id: str = Depends(get_user_id)):
 
 
 class TodayReviewPayload(BaseModel):
-    card_id: str
-    mode: str
+    card_id: str = Field(max_length=CARD_ID_MAX)
+    mode: str = Field(max_length=MODE_MAX)
     quality: int
     prev_stage: str | None = None
 
@@ -1482,10 +1482,8 @@ MAX_STALE_CHECK = 200
 
 
 class SavedCard(BaseModel):
-    card_id: str
-    mode: str
-
-
+    card_id: str = Field(max_length=CARD_ID_MAX)
+    mode: str = Field(max_length=MODE_MAX)
 class StaleCheckPayload(BaseModel):
     cards: list[SavedCard] = Field(default_factory=list, max_length=MAX_STALE_CHECK)
 

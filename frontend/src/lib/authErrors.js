@@ -33,7 +33,7 @@
 // lib/supabase.js builds the client. Nothing here may gain an import
 // with a side effect, or that ordering breaks.
 const NAMED = {
-  // The provider round trip. Apple's refusals (plan 295) come back from
+  // The provider round trip. Apple's refusals (plan 321) come back from
   // lib/oauth.js with `provider: 'apple'`, and name Apple; a refusal on
   // the URL is always Google's, the one provider that leaves the page.
   identity_already_exists: (t, err) => (err.provider === 'apple' ? t.oauthAlreadyLinkedApple : t.oauthAlreadyLinked),

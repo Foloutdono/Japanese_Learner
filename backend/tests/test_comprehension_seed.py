@@ -7,6 +7,7 @@
 # The content half needs no model; the pool half needs the database,
 # like test_comprehension_pool.py.
 import json
+import re
 
 import pytest
 
@@ -100,6 +101,54 @@ def test_every_string_is_in_both_languages():
                 assert set(w["meaning"]) >= set(seed.LANGS), entry["id"]
 
 
+_QUOTE = re.compile(r"「([^」]+)」")
+_BY_LETTER = re.compile(
+    r"\b(option|answer|choice|réponse|choix|proposition)s?\s+[A-D1-4]\b|\([A-D]\)|\b[A-D]\)"
+    r"|\b(first|second|third|fourth|last) (option|answer|choice)"
+    r"|(premi[eè]re?|deuxi[eè]me|troisi[eè]me|quatri[eè]me|derni[eè]re?) (option|réponse|proposition)"
+    # A Spanish option's letter is a capital: «en respuesta a» is no option.
+    r"|\b(opci[oó]n|respuesta)(es)?\s+(?-i:[A-D1-4])\b"
+    r"|\b(primer[ao]?|segund[ao]|tercer[ao]?|cuart[ao]|[uú]ltim[ao]) (opci[oó]n|respuesta)",
+    re.I,
+)
+
+
+def _bare(s: str) -> str:
+    return re.sub(r"[\s　]", "", s).lstrip("〜~")
+
+
+@pytest.mark.parametrize("entry", seed.entries(), ids=lambda e: e["id"])
+def test_every_question_points_at_its_sentence_and_says_why(entry):
+    """Plan 301b: a missed question opens on the sentence(s) its right
+    option rests on (`at`) and one line on why (`why`), in every
+    language (Spanish since plan 302). The line quotes the text verbatim,
+    from those sentences, every language the same Japanese; it never names an option by
+    its letter or place, since the options are shuffled for every
+    learner; and a question that quotes the text points at where."""
+    text = _bare(entry["text"])
+    sentences = [_bare(p["jp"]) for p in entry["breakdown"]]
+    for n, q in enumerate(entry["questions"], 1):
+        at = q.get("at")
+        assert isinstance(at, list) and 1 <= len(at) <= 3 and len(set(at)) == len(at), f"Q{n} at {at!r}"
+        assert all(isinstance(i, int) and 0 <= i < len(sentences) for i in at), f"Q{n} at {at!r}"
+        span = "".join(sentences[i] for i in at)
+        why = q.get("why") or {}
+        quoted = {}
+        for lang in seed.LANGS:
+            line = why.get(lang, "")
+            assert line.strip() and "\n" not in line and len(line) <= 210, f"Q{n} why.{lang}"
+            assert not _BY_LETTER.search(line), f"Q{n} why.{lang} names an option by its place"
+            quoted[lang] = sorted(_bare(x) for x in _QUOTE.findall(line))
+            for frag in quoted[lang]:
+                assert frag in text, f"Q{n} why.{lang} quotes 「{frag}」, not in the text"
+                assert frag in span, f"Q{n} why.{lang} quotes 「{frag}」 outside its sentences {at}"
+        for lang in seed.LANGS[1:]:
+            assert quoted[lang] == quoted["en"], f"Q{n}: why.{lang} quotes other Japanese than the English"
+        if q["type"] in ("vocabulary", "grammar"):
+            frags = [f for f in (_bare(x) for x in _QUOTE.findall(q["question"]["en"])) if len(f) >= 2 and f in text]
+            assert not frags or any(f in span for f in frags), f"Q{n} quotes {frags} outside its sentences {at}"
+
+
 def test_every_level_has_its_floor_and_no_id_repeats():
     ids = [e["id"] for e in seed.entries()]
     assert len(ids) == len(set(ids))
@@ -122,11 +171,11 @@ def test_a_rendered_seed_has_the_generated_shape():
 
 
 def test_a_request_reads_the_index_and_nothing_keeps_the_seeds():
-    """Parsed, the seeds weigh some 86 KB each (15 MB at 180), which a
+    """Parsed, the seeds weigh some 85 KB each (20 MB at 230), which a
     process that kept them would carry for its whole life inside the
     backend's 512 MB. So entries() reads the files at each call, and a
     request reads index(): each seed's title, text and grammar, and the
-    questions of each level's first seed besides, 311 KB at 180 seeds.
+    questions of each level's first seed besides, 343 KB at 230 seeds.
     index() parses the files on its own, cutting each seed as it is
     read, so it is held to by_level(): the same seeds in the same order,
     and nothing else."""
@@ -164,11 +213,11 @@ def seeded():
     the table themselves -- start from the state they expect."""
     _sql("DELETE FROM comprehension_pool")
     _sql("DELETE FROM comprehension_served WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
-    _sql("DELETE FROM comprehension_usage WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
+    _sql("DELETE FROM daily_usage WHERE feature = 'comprehension' AND user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
     reading._seed_comprehension_pool()
     yield
     _sql("DELETE FROM comprehension_served WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
-    _sql("DELETE FROM comprehension_usage WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
+    _sql("DELETE FROM daily_usage WHERE feature = 'comprehension' AND user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
 
 
 def _count():

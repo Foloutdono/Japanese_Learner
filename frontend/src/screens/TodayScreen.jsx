@@ -24,6 +24,7 @@ import { InkFilters } from '../components/dayclear/kit'
 import { restWeek, utcToday } from '../domain/dayClear'
 import { startAmbiance, stopAmbiance } from '../lib/audio'
 import { warmGates } from '../lib/warm'
+import { nativePlatform } from '../lib/platform'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the fare gate, the day's lanes as the run's picker.
@@ -65,7 +66,10 @@ import { warmGates } from '../lib/warm'
 // asked how they find the app (RatingSheet), on the same terms as the
 // offer above and never beside it, while the profile says it is open
 // (`feedbackOffer`). The finish comes first: the question follows a day
-// cleared, never interrupts it.
+// cleared, never interrupts it. In the Android shell it asks for a rating
+// on Google Play first (plan 307), a question of its own the profile
+// opens apart (`storeOffer`), so it is asked there of every learner past
+// the XP, whatever they answered on the web.
 //
 // 新しい (plan 287): a learner who met Today before the duels' key stood
 // beside its gate is told of it once (DuelsNewsSheet), while the profile
@@ -161,7 +165,8 @@ export default function TodayScreen({ session }) {
   const showTransfer = Boolean(summary?.transferOffer) && !transferLeft && Boolean(today)
     && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
   const [rateLeft, setRateLeft] = useState(false)
-  const showRate = Boolean(summary?.feedbackOffer) && !rateLeft && Boolean(today)
+  const [storeRate] = useState(() => nativePlatform() === 'android')
+  const showRate = Boolean(storeRate ? summary?.storeOffer : summary?.feedbackOffer) && !rateLeft && Boolean(today)
     && (summary.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
     && !showTransfer
   const [newsLeft, setNewsLeft] = useState(false)
@@ -227,7 +232,7 @@ export default function TodayScreen({ session }) {
         <TransferSheet session={session} onClose={() => setTransferLeft(true)} />
       )}
       {showRate && (
-        <RatingSheet session={session} onClose={() => setRateLeft(true)} />
+        <RatingSheet session={session} store={storeRate} onClose={() => setRateLeft(true)} />
       )}
       {showNews && (
         <DuelsNewsSheet session={session} onClose={() => setNewsLeft(true)} />

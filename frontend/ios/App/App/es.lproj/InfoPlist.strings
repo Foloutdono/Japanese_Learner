@@ -1,0 +1,4 @@
+/* The two system prompts the analyzer's photo intake raises, in Spanish
+   (plan 302); en.lproj has the English, fr.lproj the French. */
+"NSCameraUsageDescription" = "Toma una foto de un texto japonés para que el analizador lo lea.";
+"NSPhotoLibraryUsageDescription" = "Elige la foto de un texto japonés para que el analizador la lea.";

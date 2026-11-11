@@ -105,6 +105,17 @@ class NormaliseTests(unittest.TestCase):
         self.assertIsNone(normalise("kanji", {"radical": "not a number"})["radical"])
         self.assertEqual(normalise("kanji", {"radical": "173"})["radical"], 173)
 
+    def test_a_number_too_big_for_an_int_becomes_none(self) -> None:
+        # json.loads reads 1e400 as infinity, which int() refuses with
+        # OverflowError: a 500 on save before.
+        self.assertIsNone(normalise("kanji", {"radical": float("inf")})["radical"])
+
+    def test_a_radical_outside_the_table_becomes_none(self) -> None:
+        for bad in (0, 215, -3):
+            self.assertIsNone(normalise("kanji", {"radical": bad})["radical"])
+        for good in (1, 214):
+            self.assertEqual(normalise("kanji", {"radical": good})["radical"], good)
+
     def test_an_unknown_structure_falls_back_to_standard(self) -> None:
         self.assertEqual(structure_for("nonsense").key, "standard")
 

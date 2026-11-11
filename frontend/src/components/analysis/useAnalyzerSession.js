@@ -3,6 +3,9 @@ import { countUse } from '../../lib/screenTrail'
 import { apiJson, apiUpload, apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { videoErrorMessage } from './videoErrors'
+import { songForHearing } from '../../lib/songAudio'
+import { keepSong } from '../../lib/songStore'
+import { explainErrorText } from '../../lib/explainSentence'
 
 // ── One Passage, three ways in ────────────────────────────
 // The seam that makes 解析 one screen instead of two (plan 027). A
@@ -75,6 +78,9 @@ export function useAnalyzerSession(session) {
   // The id of the video session currently being polled. Kept in state
   // (not a ref) because the poll effect is keyed on it.
   const [videoSessionId, setVideoSessionId] = useState(null)
+  // 歌 (plan 317): the name of the song being transcribed, for the
+  // shelf's waiting row -- the server lists a session once it is ready.
+  const [pendingSong, setPendingSong] = useState(null)
 
   // Survives unmount/replacement: every async continuation checks it
   // before writing, so a Passage that arrives after the learner has
@@ -148,6 +154,7 @@ export function useAnalyzerSession(session) {
     runIdRef.current += 1
     setStatus('working')
     setError(null)
+    setPendingSong(null)
     setExplaining({})
     setExplainError({})
     return runIdRef.current
@@ -364,6 +371,48 @@ export function useAnalyzerSession(session) {
     }
   }
 
+  // ── 歌 — a song (plan 317) ─────────────────────────────────
+  // The learner's audio file, decoded here into the small WAV the
+  // server hears (lib/songAudio.js) and sent with the lyrics they
+  // pasted, if any; the session it opens is polled as every other is.
+  // The file itself is kept on this device by the session it made
+  // (lib/songStore.js), which is where the passage plays it from.
+  // Resolves with the session's id once the server has it, else null.
+  async function startSongFromFile(file, { lyrics = '' } = {}) {
+    if (!file) return null
+    countUse('analyzer', 'song')
+    const run = beginRun()
+    setPendingSong(file.name)
+    let heard
+    try {
+      heard = await songForHearing(file)
+    } catch {
+      // This browser cannot decode the file: said before anything is
+      // sent or counted.
+      if (run !== runIdRef.current) return null
+      setError({ video: { code: 'song_unreadable' } })
+      setStatus('failed')
+      return null
+    }
+    if (run !== runIdRef.current) return null
+    try {
+      const formData = new FormData()
+      formData.append('audio', heard.wav, 'song.wav')
+      formData.append('name', file.name.slice(0, 120))
+      if (lyrics.trim()) formData.append('lyrics', lyrics.trim())
+      const data = await apiUpload('/api/video/song', session, formData)
+      if (run !== runIdRef.current) return null
+      await keepSong(data.sessionId, file)
+      setVideoSessionId(data.sessionId)
+      return data.sessionId
+    } catch (e) {
+      if (run !== runIdRef.current) return null
+      setError({ video: e })
+      setStatus('failed')
+      return null
+    }
+  }
+
   // ── The poll ──────────────────────────────────────────────
   // Keyed on the session id alone. Supabase hands the app a new session
   // object on every token refresh and every return to the tab -- the
@@ -490,11 +539,11 @@ export function useAnalyzerSession(session) {
       if (run !== runIdRef.current) return
       setExplainError(prev => ({
         ...prev,
-        // 503 is the provider being down, which is temporary and worth
-        // saying so. Anything else is a generic failure. Never the
+        // 429 is the day's explanations spent, 503 the provider down,
+        // anything else a generic failure (explainErrorText). Never the
         // server's own sentence: ApiError's message is never empty, so
         // the backend's English used to win every time (plan 215).
-        [index]: e?.status === 503 ? t.explainUnavailable : t.explainFailed,
+        [index]: explainErrorText(e, t),
       }))
     } finally {
       setExplaining(prev => ({ ...prev, [index]: false }))
@@ -611,6 +660,9 @@ export function useAnalyzerSession(session) {
     passage,
     sentences,
     status,
+    // Only while its run works: ready or failed, the shelf lists it or
+    // the notice says why.
+    pendingSong: status === 'working' ? pendingSong : null,
     // A video failure is kept as it was thrown and worded here, at
     // render, so the sentence follows the learner's language rather
     // than the one in force when it failed (./videoErrors.js).
@@ -628,6 +680,7 @@ export function useAnalyzerSession(session) {
     startVideoFromFile,
     startVideoFromLink,
     startVideoFromTranscript,
+    startSongFromFile,
     explain,
     loadHistoryEntry,
     openHistoryEntry,

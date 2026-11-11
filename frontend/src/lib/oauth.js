@@ -195,7 +195,7 @@ export async function connectProvider({ provider = 'google', link = false } = {}
   }
 }
 
-// ── 林檎 — Sign in with Apple (plan 295) ───────────────────────────
+// ── 林檎 — Sign in with Apple (plan 321) ───────────────────────────
 // Apple's guideline 4.8: an iPhone app that offers Google must offer an
 // equivalent beside it, one that lets the learner keep their address
 // private. So on the iPhone, wherever Google is offered, Apple is too

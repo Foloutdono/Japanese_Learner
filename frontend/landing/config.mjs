@@ -10,13 +10,18 @@ import { BOARD_PARAM, SIGNIN_PARAM } from '../src/lib/frontEntry.js'
 export const SITE_ORIGIN = 'https://tsuji.app'
 
 // Where each language's page is served: the French page is the site's
-// `/`, the English one `/en`. The files stay under public/landing/ and
-// vercel.json rewrites the two addresses to them, since a file named
-// public/index.html would stand in the app's way in `npm run dev`.
+// `/`, the English one `/en`, the Spanish one `/es` (plan 302). The files
+// stay under public/landing/ and vercel.json rewrites the addresses to
+// them, since a file named public/index.html would stand in the app's way
+// in `npm run dev`.
 export const PAGES = {
   fr: { lang: 'fr', path: '/', out: 'public/landing/index.html', ogLocale: 'fr_FR', ogImage: '/landing/og-fr.png' },
   en: { lang: 'en', path: '/en', out: 'public/landing/en/index.html', ogLocale: 'en_GB', ogImage: '/landing/og-en.png' },
+  es: { lang: 'es', path: '/es', out: 'public/landing/es/index.html', ogLocale: 'es_ES', ogImage: '/landing/og-es.png' },
 }
+// Each language by its own name, for the phone header's menu and the
+// footer's links to the others.
+export const LANG_NAMES = { fr: 'Français', en: 'English', es: 'Español' }
 export const DEFAULT_LANG = 'fr'
 
 // The app's front door, now that `/` is this page: Se connecter leads
@@ -80,6 +85,10 @@ export const PRESENTATION = {
   // The chapters' starts, in seconds, in the order of the strings'
   // `presentation.chapters`: the player's bar and Google's key moments.
   chapters: [0, 15, 30, 45, 60, 75],
+  // The subtitle files in the bucket (presentation.<lang>.vtt). A page
+  // whose language has none plays the English (plan 302: no Spanish file
+  // yet; add 'es' here once presentation.es.vtt is uploaded).
+  captions: ['fr', 'en'],
 }
 
 // The features, one by one: one clip slot each, named by its file.

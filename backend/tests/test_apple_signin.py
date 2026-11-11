@@ -1,4 +1,4 @@
-# ── Sign in with Apple: the server's half (plan 295) ────────────────
+# ── Sign in with Apple: the server's half (plan 321) ────────────────
 # core/apple_signin.py exchanges a sign-in's authorization code for the
 # refresh token that lets DELETE /api/account revoke the learner's grant.
 # Apple is never called: httpx.post is patched, and the client secret is

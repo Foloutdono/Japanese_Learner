@@ -106,7 +106,7 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
 
   const head = (
     <>
-      {/* Apple beside Google on the iPhone (plan 295). */}
+      {/* Apple beside Google on the iPhone (plan 321). */}
       {providersHere().map(p => <ProviderButton key={p} provider={p} onError={setError} />)}
       <p className="auth-or">{t.orWithEmail}</p>
       {seg && (

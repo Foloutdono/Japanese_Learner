@@ -97,7 +97,7 @@ function ClaimSlip() {
 // learner has real progress, and signing in as somebody else would
 // walk away from it silently.
 //
-// Apple's button on the iPhone (plan 295) opens a pass the same way, so
+// Apple's button on the iPhone (plan 321) opens a pass the same way, so
 // it is offered the same way, from its own slip. Its refusals never
 // come back on the URL: Apple's sheet does not leave the page.
 const LINK_SLIP = {

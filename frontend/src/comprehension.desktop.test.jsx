@@ -177,4 +177,41 @@ describe('comprehension on the desk', () => {
     expect($('[role="dialog"]')).toBeNull()
     expect($('.desk-run__side .desk-entry')).not.toBeNull()
   })
+
+  // Plan 301b: a question names the sentence its right option rests on
+  // (`at`) and a miss says why in one line, under the options.
+  it('opens a miss on the sentence it names, its why under the options', async () => {
+    const WHY = 'They met 「駅で」: at the station.'
+    const exercise = {
+      ...EXERCISE,
+      questions: [{ ...EXERCISE.questions[0], at: [0], why: WHY }, { ...EXERCISE.questions[1], why: 'Not shown: answered right.' }],
+    }
+    const result = {
+      score: 1, total: 2,
+      results: [
+        { ...RESULT.results[0], user_answer: 0, is_correct: false },
+        { ...RESULT.results[1], user_answer: 2, is_correct: true },
+      ],
+    }
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/reading/comprehension/result')) return ok(result)
+      if (u.startsWith('/api/reading/comprehension')) return ok(exercise)
+      return ok({})
+    })
+    await toQuestions()
+    press('a'); await settle(40); press('Enter'); await settle(40)
+    press('c'); await settle(40); press('Enter'); await settle(250)
+    // Q1 quotes nothing; its `at` opens the first sentence beside it.
+    expect($('.stage .prompt-card--ask').textContent).toContain('Where did they wait?')
+    expect($('.desk-run__side .bkd-passage__item--open').textContent).toContain('I waited for a friend at the station.')
+    const why = $('.stage .comp-why')
+    expect(why.textContent).toBe(WHY)
+    expect($('.stage .mcq-list').compareDocumentPosition(why) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // A right answer says no why.
+    $$('.desk-sentences__list button.desk-sentence')[1].click()
+    await settle()
+    expect($('.stage .comp-why')).toBeNull()
+    expect($('.desk-run__side .bkd-passage__item--open').textContent).toContain('The train was late.')
+  })
 })

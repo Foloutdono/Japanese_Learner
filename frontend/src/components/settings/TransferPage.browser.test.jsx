@@ -111,7 +111,11 @@ describe('Settings › Correspondance', () => {
     globalThis.fetch.mockClear()
     serve()
   })
-  afterEach(() => cleanup())
+  afterEach(async () => {
+    await cleanup()
+    // The lane's files share one origin: leave no language behind for the next.
+    localStorage.removeItem('lang')
+  })
 
   it('reads an Anki file, prints what the course finds and punches it', async () => {
     await mount()
@@ -216,6 +220,30 @@ describe('Settings › Correspondance', () => {
     const [path, , opts] = apiJson.mock.calls.at(-1)
     expect(path).toBe('/api/transfer/import')
     expect(JSON.parse(opts.body).notes.map(n => n.f[0])).toEqual(['食べる', '蜃気楼'])
+  })
+
+  it('does not punch a ticket the learner started again while it was written', async () => {
+    await mount()
+    pick(await ankiFile())
+    await vi.waitFor(() => expect($('[data-action="transfer-punch"]')).not.toBeNull(), { timeout: 5000 })
+
+    let release
+    const held = new Promise(r => { release = r })
+    apiJson.mockImplementation(async (path, _s, opts = {}) => {
+      if (path === '/api/transfer/import') { await held; return { ...PREVIEW, written: 2, waiting: 2 } }
+      if (opts.method !== 'DELETE') return { waiting: 0 }
+      throw new Error(path)
+    })
+    await userEvent.click($('[data-action="transfer-punch"]'))
+    await settle()
+    await userEvent.click($('[data-action="transfer-restart"]'))
+    release()
+    await settle(200)
+    // A blank ticket, and the written cards still offered back.
+    expect($('[data-figure="written"]')).toBeNull()
+    expect($('[data-action="transfer-choose"]')).not.toBeNull()
+    expect($('[data-action="transfer-undo"]')).not.toBeNull()
+    expect(refreshToday).toHaveBeenCalled()
   })
 
   it('drops a read the learner left for another source', async () => {

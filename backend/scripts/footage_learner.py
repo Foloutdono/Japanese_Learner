@@ -219,7 +219,7 @@ def seed(url: str) -> None:
             cur.execute("INSERT INTO credit_ledger (user_id, delta, reason, ref) VALUES (%s, %s, 'adjust', 'footage')",
                         (USER, core.credits.CAP - balance))
         cur.execute("""UPDATE user_profiles SET ui_lang = 'fr', feedback_asked_at = NOW(),
-                       transfer_offered_at = NOW() WHERE user_id = %s""", (USER,))
+                       store_asked_at = NOW(), transfer_offered_at = NOW() WHERE user_id = %s""", (USER,))
     forget()
     gate = ok(c.get("/api/today"))
     print(f"  today: {today} answered, {gate['total']} left {gate['by_source']}, "

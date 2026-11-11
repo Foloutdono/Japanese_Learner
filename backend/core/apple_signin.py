@@ -1,5 +1,5 @@
 """
-Sign in with Apple: the server's half (plan 295).
+Sign in with Apple: the server's half (plan 321).
 
 The iPhone signs in with Apple on the device (ios/App/App/
 TsujiAppleSignInPlugin.swift) and hands Supabase the identity token
